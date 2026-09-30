@@ -17,23 +17,8 @@
 .cw-tab-label { color: token(text-muted); }
 .cw-tab-label.selected { color: token(text-primary); }
 
-.cw-slot { display: block; position: absolute; left: 0; top: 0; }
-.cw-img, .cw-box { position: absolute; }
-.t-tl, .t-tr, .t-bl, .t-br { display: none; }
-.t-top, .t-bottom { height: 1px; margin-top: 6px; background-color: token(border-frame); }
-.t-left, .t-right { width: 1px; margin-left: 6px; background-color: token(border-frame); }
-.map { decorator: image(cw-map); }
-.gate-on { decorator: image(cw-gate-on); }
-.gate-off { decorator: image(cw-gate-off); }
-.statue-on { decorator: image(cw-statue-on); }
-.statue-off { decorator: image(cw-statue-off); }
-.line { height: 1px; margin-top: 10px; background-color: token(border-frame); }
-.money { decorator: image(cw-money); }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
-.cw-text.centred { text-align: center; }
-.cw-text.right { text-align: right; }
-.cw-text.bold { font-weight: bold; }
 
 .cw-btn {
 	display: block;
@@ -50,11 +35,11 @@
 .cw-label { left: 0; text-align: center; color: token(text-primary); }
 .cw-btn.locked .cw-label { color: token(text-muted); }
 
-.tax-btn {
 #tax_chaos_up   { top: 73px; }
 #tax_chaos_down { top: 86px; }
 #tax_npc_up     { top: 101px; }
 #tax_npc_down   { top: 114px; }
+.tax-btn {
 	position: absolute;
 	left: 158px;
 	width: 15px;
@@ -81,3 +66,130 @@
 .tooltip { display: none; top: 365px; }
 .tooltip-exit { left: -24px; }
 #btn_exit:hover ~ .tooltip-exit { display: block; }
+
+/* The window's own text. Each line is named, so the theme decides where it sits, what colour it
+   is and how it is aligned; only its width and font size stay bound for the counter-scale. */
+.cw-page, .cw-standing { position: static; }
+.cw-heading, .cw-line, .cw-note, .cw-rule { text-align: center; }
+.cw-heading { left: 15px; top: 13px; font-weight: bold; }
+.cw-line { left: 0; font-weight: bold; }
+.cw-note, .cw-rule { left: 15px; }
+.cw-rule { font-weight: bold; }
+.cw-stat { position: absolute; }
+.cw-tab-label { left: 0; text-align: center; }
+
+/* The gate and statue pages. */
+#map_title { top: 61px; }
+#improve_title { top: 294px; }
+#stat_hp { left: 20px; top: 246px; }
+#stat_defense { left: 20px; top: 259px; }
+#stat_recover { left: 20px; top: 272px; }
+#next_hp { left: 30px; top: 318px; }
+#next_defense { left: 30px; top: 341px; }
+#next_recover { left: 30px; top: 364px; }
+#btn_buy { left: 68px; top: 250px; }
+#btn_repair { left: 110px; top: 260px; }
+#btn_hp { left: 110px; top: 310px; }
+#btn_defense { left: 110px; top: 334px; }
+#btn_recover { left: 110px; top: 358px; }
+
+/* The tax page. */
+#tax_title { top: 61px; }
+#chaos_rate { top: 84px; }
+#store_rate { top: 109px; }
+#tax_note_1 { top: 162px; }
+#tax_note_2 { top: 175px; }
+#tax_note_3 { top: 188px; }
+#tax_rule_1 { top: 208px; }
+#tax_rule_2 { top: 220px; }
+#tax_rule_3 { top: 232px; }
+#tax_rule_4 { top: 244px; }
+#tax_rule_5 { top: 256px; }
+#tax_rule_6 { top: 268px; }
+#tax_footer_1 { top: 350px; }
+#tax_footer_2 { top: 362px; }
+#tax_footer_3 { top: 374px; }
+.cw-money-text { position: absolute; top: 303px; font-weight: bold; }
+#zen_label { left: 14px; }
+/* RT3_WRITE_RIGHT_TO_LEFT: the amount ends at x 170. */
+#castle_money { right: 20px; text-align: right; }
+#btn_apply { left: 120px; top: 133px; }
+#btn_withdraw { left: 120px; top: 322px; }
+
+/* A table's ten pieces, placed against its own origin; the instance says how tall it is. */
+.cw-table { position: absolute; left: 12px; width: 166px; }
+.cw-table > div { position: absolute; }
+.cw-table .t-tl { left: 0; top: 0; }
+.cw-table .t-tr { left: 152px; top: 0; }
+.cw-table .t-top { left: 13px; top: 0; width: 139px; }
+.cw-table .t-fill { left: 3px; top: 1px; width: 158px; height: 15px; }
+.cw-table .t-left { left: 0; top: 13px; }
+.cw-table .t-right { left: 152px; top: 13px; }
+.cw-table .t-bottom-inner { left: 3px; top: 7px; width: 158px; }
+.cw-table .t-bl { left: 0; }
+.cw-table .t-br { left: 152px; }
+.cw-table .t-bottom { left: 13px; width: 139px; }
+
+.table-map { top: 57px; }
+.table-map .t-left, .table-map .t-right { height: 165px; }
+.table-map .t-bl, .table-map .t-br, .table-map .t-bottom { top: 172px; }
+.table-improve { top: 290px; }
+.table-improve .t-left, .table-improve .t-right { height: 78px; }
+.table-improve .t-bl, .table-improve .t-br, .table-improve .t-bottom { top: 85px; }
+.table-tax { top: 57px; }
+.table-tax .t-left, .table-tax .t-right { height: 55px; }
+.table-tax .t-bl, .table-tax .t-br, .table-tax .t-bottom { top: 62px; }
+
+.cw-map { position: absolute; left: 15px; top: 73px; width: 160px; height: 165px; }
+.cw-separator { position: absolute; left: 1px; top: 278px; width: 188px; height: 21px; }
+.cw-money { position: absolute; left: 10px; top: 296px; width: 170px; height: 24px; }
+.tax-rate-back { position: absolute; left: 15px; width: 150px; height: 24px; }
+.tax-rate-chaos { top: 75px; }
+.tax-rate-store { top: 103px; }
+.tax-divider { position: absolute; left: 15px; top: 91px; width: 158px; }
+
+/* A gate or statue on the map: only its slot and its bars' lengths come from C++. */
+.cw-item { position: absolute; width: 24px; height: 24px; }
+.cw-bars { position: static; }
+.cw-icon { position: absolute; left: 0; top: 0; width: 24px; height: 24px; }
+.bar { position: absolute; left: 0; height: 3px; }
+.bar-gate-hp { top: -10px; }
+.bar-gate-def-track, .bar-gate-def { top: -5px; }
+.bar-gate-def-track { width: 24px; }
+.edge-gate-top { top: -10px; width: 24px; height: 1px; }
+.edge-gate-mid { top: -7px; width: 24px; height: 1px; }
+.edge-gate-left { top: -10px; width: 1px; }
+.edge-gate-right { left: 24px; top: -10px; width: 1px; }
+.bar-statue-hp { top: -15px; }
+.bar-statue-def { top: -10px; }
+.bar-statue-rec { top: -5px; }
+.bar-track.bar-statue-def, .bar-track.bar-statue-rec { width: 24px; }
+
+.cw-icon { decorator: image(cw-gate-off); }
+.cw-item.current .cw-icon { decorator: image(cw-gate-on); }
+.cw-item.statue .cw-icon { decorator: image(cw-statue-off); }
+.cw-item.statue.current .cw-icon { decorator: image(cw-statue-on); }
+.cw-map { decorator: image(cw-map); }
+
+.cw-heading, .cw-line { color: token(text-primary); }
+.cw-stat, #tax_title, #chaos_rate, #store_rate, .cw-note, .cw-money-text { color: token(text-primary); }
+.cw-rule { color: token(text-muted); }
+
+.cw-table .t-tl, .cw-table .t-tr, .cw-table .t-bl, .cw-table .t-br { display: none; }
+.cw-table .t-top, .cw-table .t-bottom, .cw-table .t-bottom-inner {
+	height: 1px;
+	margin-top: 6px;
+	background-color: token(border-frame);
+}
+.cw-table .t-left, .cw-table .t-right { width: 1px; margin-left: 6px; background-color: token(border-frame); }
+.cw-table .t-fill { background-color: token(surface-raised); }
+.tax-divider { height: 1px; margin-top: 6px; background-color: token(border-frame); }
+.cw-separator { height: 1px; margin-top: 10px; background-color: token(border-frame); }
+.cw-money { decorator: image(cw-money); }
+.tax-rate-back { background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+
+.bar-track { background-color: token(surface-recessed); }
+.bar-hp { background-color: token(semantic-danger); }
+.bar-defense { background-color: token(semantic-success); }
+.bar-recover { background-color: token(accent-gold); }
+.bar-edge { background-color: token(border-frame); }

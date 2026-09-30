@@ -230,10 +230,26 @@ bool CCastleWindow::BtnProcess()
 bool CCastleWindow::ButtonLocked(SENATUS_BUTTON button) const
 {
     // A locked CButton ignored clicks; the lock is the one the page was last drawn with.
-    const std::vector<CastleButtonEntry>& buttons = m_RmlBinder.GetModel().buttons;
-    const auto it = std::find_if(buttons.begin(), buttons.end(),
-                                 [button](const CastleButtonEntry& entry) { return entry.id == button; });
-    return it != buttons.end() && it->locked;
+    const CastleWindowRmlModel& model = m_RmlBinder.GetModel();
+    switch (button)
+    {
+    case SENATUS_BUTTON_BUY:
+        return model.buyButton.locked;
+    case SENATUS_BUTTON_REPAIR:
+        return model.repairButton.locked;
+    case SENATUS_BUTTON_UPGRADE_HP:
+        return model.hpButton.locked;
+    case SENATUS_BUTTON_UPGRADE_DEFENSE:
+        return model.defenseButton.locked;
+    case SENATUS_BUTTON_UPGRADE_RECOVER:
+        return model.recoverButton.locked;
+    case SENATUS_BUTTON_APPLY_TAX:
+        return model.applyButton.locked;
+    case SENATUS_BUTTON_WITHDRAW:
+        return model.withdrawButton.locked;
+    default:
+        return false;
+    }
 }
 
 void CCastleWindow::UpdateIconPick()
@@ -573,34 +589,65 @@ void CCastleWindow::BuildRmlUi()
             c.Bind("tab_label_top", &model.tabLabelTop);
             auto tab = c.RegisterStruct<CastleTabEntry>();
             tab.RegisterMember("label", &CastleTabEntry::label);
-            tab.RegisterMember("label_left", &CastleTabEntry::labelLeft);
             tab.RegisterMember("text_px", &CastleTabEntry::textPx);
             tab.RegisterMember("selected", &CastleTabEntry::selected);
             c.RegisterArray<std::vector<CastleTabEntry>>();
             c.Bind("tabs", &model.tabs);
-            auto piece = c.RegisterStruct<CastlePieceEntry>();
-            piece.RegisterMember("kind", &CastlePieceEntry::kind);
-            piece.RegisterMember("sprite", &CastlePieceEntry::sprite);
-            piece.RegisterMember("left", &CastlePieceEntry::left);
-            piece.RegisterMember("top", &CastlePieceEntry::top);
-            piece.RegisterMember("width", &CastlePieceEntry::width);
-            piece.RegisterMember("height", &CastlePieceEntry::height);
-            piece.RegisterMember("color", &CastlePieceEntry::color);
-            piece.RegisterMember("text", &CastlePieceEntry::text);
-            piece.RegisterMember("text_px", &CastlePieceEntry::textPx);
-            piece.RegisterMember("align", &CastlePieceEntry::align);
-            piece.RegisterMember("bold", &CastlePieceEntry::bold);
-            c.RegisterArray<std::vector<CastlePieceEntry>>();
-            c.Bind("pieces", &model.pieces);
-            auto button = c.RegisterStruct<CastleButtonEntry>();
-            button.RegisterMember("label", &CastleButtonEntry::label);
-            button.RegisterMember("id", &CastleButtonEntry::id);
-            button.RegisterMember("left", &CastleButtonEntry::left);
-            button.RegisterMember("top", &CastleButtonEntry::top);
-            button.RegisterMember("locked", &CastleButtonEntry::locked);
-            c.RegisterArray<std::vector<CastleButtonEntry>>();
-            c.Bind("buttons", &model.buttons);
-            c.Bind("tax_arrows", &model.taxArrows);
+            c.Bind("active_tab", &model.activeTab);
+            auto lineType = c.RegisterStruct<CastleLine>();
+            lineType.RegisterMember("text", &CastleLine::text);
+            lineType.RegisterMember("text_px", &CastleLine::textPx);
+            c.Bind("title", &model.title);
+            c.Bind("map_title", &model.mapTitle);
+            c.Bind("improve_title", &model.improveTitle);
+            c.Bind("stat_hp", &model.statHp);
+            c.Bind("stat_defense", &model.statDefense);
+            c.Bind("stat_recover", &model.statRecover);
+            c.Bind("next_hp", &model.nextHp);
+            c.Bind("next_defense", &model.nextDefense);
+            c.Bind("next_recover", &model.nextRecover);
+            c.Bind("tax_title", &model.taxTitle);
+            c.Bind("chaos_rate", &model.chaosRate);
+            c.Bind("store_rate", &model.storeRate);
+            c.Bind("note1", &model.note1);
+            c.Bind("note2", &model.note2);
+            c.Bind("note3", &model.note3);
+            c.Bind("rule1", &model.rule1);
+            c.Bind("rule2", &model.rule2);
+            c.Bind("rule3", &model.rule3);
+            c.Bind("rule4", &model.rule4);
+            c.Bind("rule5", &model.rule5);
+            c.Bind("rule6", &model.rule6);
+            c.Bind("zen_label", &model.zenLabel);
+            c.Bind("castle_money", &model.castleMoney);
+            c.Bind("footer1", &model.footer1);
+            c.Bind("footer2", &model.footer2);
+            c.Bind("footer3", &model.footer3);
+            auto actionButton = c.RegisterStruct<CastleActionButton>();
+            actionButton.RegisterMember("label", &CastleActionButton::label);
+            actionButton.RegisterMember("shown", &CastleActionButton::shown);
+            actionButton.RegisterMember("locked", &CastleActionButton::locked);
+            c.Bind("buy_button", &model.buyButton);
+            c.Bind("repair_button", &model.repairButton);
+            c.Bind("hp_button", &model.hpButton);
+            c.Bind("defense_button", &model.defenseButton);
+            c.Bind("recover_button", &model.recoverButton);
+            c.Bind("apply_button", &model.applyButton);
+            c.Bind("withdraw_button", &model.withdrawButton);
+            auto mapItem = c.RegisterStruct<CastleMapItem>();
+            mapItem.RegisterMember("left", &CastleMapItem::left);
+            mapItem.RegisterMember("top", &CastleMapItem::top);
+            mapItem.RegisterMember("statue", &CastleMapItem::statue);
+            mapItem.RegisterMember("live", &CastleMapItem::live);
+            mapItem.RegisterMember("current", &CastleMapItem::current);
+            mapItem.RegisterMember("hp_width", &CastleMapItem::hpWidth);
+            mapItem.RegisterMember("hp_fill_width", &CastleMapItem::hpFillWidth);
+            mapItem.RegisterMember("defense_width", &CastleMapItem::defenseWidth);
+            mapItem.RegisterMember("recover_width", &CastleMapItem::recoverWidth);
+            c.RegisterArray<std::vector<CastleMapItem>>();
+            c.Bind("map_items", &model.mapItems);
+            c.Bind("statue_page", &model.statuePage);
+            c.Bind("item_live", &model.itemLive);
             c.Bind("exit_tooltip", &model.exitTooltip);
             c.BindEventCallback("senatus_button",
                                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
@@ -647,132 +694,29 @@ void CCastleWindow::SyncRmlModel()
 void CCastleWindow::SyncContent()
 {
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    const float x0 = static_cast<float>(m_Pos.x);
-    const float y0 = static_cast<float>(m_Pos.y);
-    std::vector<CastlePieceEntry> pieces;
-    std::vector<CastleButtonEntry> buttons;
 
-    // RenderText(x, y, text, width, 0, sort) in window coordinates, in the font and colour the
-    // original had set at that point (its draws leak them from one call to the next).
-    bool bold = true;
-    DWORD color = RGBA(220, 220, 220, 255);
-    auto addText = [&](const wchar_t* text, float x, float y, float width, int align)
+    // One of the window's own lines: the document places it, so only what it says and the size the
+    // native renderer would have shrunk it to for its box travel through the model.
+    auto line = [&](const wchar_t* text, bool boldFont, float boxWidth) -> CastleLine
     {
         if (text == nullptr || text[0] == L'\0')
-            return;
-        g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
+            return {};
+        g_pRenderText->SetFont(boldFont ? g_hFontBold : g_hFont);
         const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-        const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
+        const auto role = boldFont ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
         const float px =
-            width > 0.f ? UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), width)
-                        : UI::Scaling::NativeTextPixelSize(role, transform);
-        CastlePieceEntry entry;
-        entry.kind = CastlePieceEntry::KIND_TEXT;
-        entry.left = x - x0;
-        entry.top = y - y0;
-        entry.width = width;
-        entry.color = UI::RmlBridge::RgbaToCss(color);
-        entry.text = StringUtils::WideToNarrow(text);
-        entry.textPx = px;
-        entry.align = align;
-        entry.bold = bold;
-        pieces.push_back(std::move(entry));
-    };
-    auto addImage = [&](const char* sprite, float x, float y, float width, float height)
-    {
-        CastlePieceEntry entry;
-        entry.kind = CastlePieceEntry::KIND_IMAGE;
-        entry.sprite = sprite;
-        entry.left = x - x0;
-        entry.top = y - y0;
-        entry.width = width;
-        entry.height = height;
-        pieces.push_back(std::move(entry));
-    };
-    // RenderColorQuadARGB(); a zero or negative size (an empty level bar) draws nothing.
-    auto addBox = [&](float x, float y, float width, float height, unsigned int argb)
-    {
-        if (!(width > 0.f) || !(height > 0.f))
-            return;
-        CastlePieceEntry entry;
-        entry.kind = CastlePieceEntry::KIND_BOX;
-        entry.left = x - x0;
-        entry.top = y - y0;
-        entry.width = width;
-        entry.height = height;
-        entry.color = ArgbToCss(argb);
-        pieces.push_back(std::move(entry));
-    };
-    auto addButton = [&](SENATUS_BUTTON id, const wchar_t* label, float x, float y, bool locked)
-    { buttons.push_back({StringUtils::WideToNarrow(label), id, x - x0, y - y0, locked}); };
-    // RenderOutlineUpper() / RenderOutlineLower(): a table's title bar and its frame.
-    auto outlineUpper = [&](float x, float y, float width)
-    {
-        addImage("t-tl", x + 12, y - 4, 14, 14);
-        addImage("t-tr", x + width + 4, y - 4, 14, 14);
-        addImage("t-top", x + 25, y - 4, width - 21, 14);
-        addBox(x + 15, y - 3, width - 2, 15, 0x4D000000u);
-    };
-    auto outlineLower = [&](float x, float y, float width, float height)
-    {
-        addImage("t-left", x + 12, y + 9, 14, height);
-        addImage("t-right", x + width + 4, y + 9, 14, height);
-        addImage("t-bottom", x + 15, y + 3, width - 2, 14);
-        addImage("t-bl", x + 12, y + height + 3, 14, 14);
-        addImage("t-br", x + width + 4, y + height + 3, 14, 14);
-        addImage("t-bottom", x + 25, y + height + 3, width - 21, 14);
-    };
-    // RenderCastleItem(): a gate or statue icon with its level bars when it stands.
-    auto castleItem = [&](float x, float y, LPPMSG_NPCDBLIST pInfo)
-    {
-        const int nHPBlockSize = 24 / (g_SenatusInfo.GetMaxHPLevel() + 1);
-        const int nDefenseBlockSize = 24 / (g_SenatusInfo.GetMaxDefenseLevel() + 1);
-        const int nRecoverBlockSize = 24 / (g_SenatusInfo.GetMaxRecoverLevel() + 1);
-        const float fHPRate = pInfo->iNpcMaxHp > 0 ? pInfo->iNpcHp / static_cast<float>(pInfo->iNpcMaxHp) : 0.f;
-
-        if (g_SenatusInfo.IsGate(pInfo))
-        {
-            if (pInfo->btNpcLive)
-            {
-                const int nHP = g_SenatusInfo.GetHPLevel(pInfo);
-                const int nDefense = g_SenatusInfo.GetDefenseLevel(pInfo);
-                addBox(x, y - 10, static_cast<float>(nHPBlockSize * (nHP + 1)), 3, 0xFFFFFFFFu);
-                addBox(x, y - 5, 24, 3, 0xFFFFFFFFu);
-                addBox(x, y - 10, (nHPBlockSize * (nHP + 1)) * fHPRate, 3, 0xFFFF0000u);
-                addBox(x, y - 10, 24, 1, 0xFF000000u);
-                addBox(x, y - 7, 24, 1, 0xFF000000u);
-                addBox(x, y - 10, 1, 3, 0xFF000000u);
-                addBox(x + 24, y - 10, 1, 3, 0xFF000000u);
-                addBox(x, y - 5, static_cast<float>(nDefenseBlockSize * (nDefense + 1)), 3, 0xFF00FF00u);
-            }
-            addImage(pInfo->iNpcIndex == g_SenatusInfo.GetCurrGate() + 1 ? "gate-on" : "gate-off", x, y, 24, 24);
-        }
-        if (g_SenatusInfo.IsStatue(pInfo))
-        {
-            if (pInfo->btNpcLive)
-            {
-                const int nHP = g_SenatusInfo.GetHPLevel(pInfo);
-                const int nDefense = g_SenatusInfo.GetDefenseLevel(pInfo);
-                const int nRecover = g_SenatusInfo.GetRecoverLevel(pInfo);
-                addBox(x, y - 15, static_cast<float>(nHPBlockSize * (nHP + 1)), 3, 0xFFFFFFFFu);
-                addBox(x, y - 10, 24, 3, 0xFFFFFFFFu);
-                addBox(x, y - 5, 24, 3, 0xFFFFFFFFu);
-                addBox(x, y - 15, (nHPBlockSize * (nHP + 1)) * fHPRate, 3, 0xFFFF0000u);
-                addBox(x, y - 10, static_cast<float>(nDefenseBlockSize * (nDefense + 1)), 3, 0xFF00FF00u);
-                addBox(x, y - 5, static_cast<float>(nRecoverBlockSize * (nRecover + 1)), 3, 0xFFFFFF00u);
-            }
-            addImage(pInfo->iNpcIndex == g_SenatusInfo.GetCurrStatue() + 1 ? "statue-on" : "statue-off", x, y, 24, 24);
-        }
+            boxWidth > 0.f
+                ? UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), boxWidth)
+                : UI::Scaling::NativeTextPixelSize(role, transform);
+        return {StringUtils::WideToNarrow(text), px};
     };
     wchar_t szTemp[256] = {};
 
-    // RenderFrame(): the title, bold (220, 220, 220).
-    addText(I18N::Game::SeniorNPC, x0 + 15, y0 + 13, 160, 1);
+    // RenderFrame(): the title, in the bold font.
+    CastleLine title = line(I18N::Game::SeniorNPC, true, 160.f);
 
-    // The tabs (labels in the normal font): a label wider than its tab starts left of it, from
-    // the whole-unit centre of its full width, shrunk towards the tab's 40 px down to the minimum
-    // font size, and runs over its neighbours ("Castle Gate", "Guardian Statue"), as in the
-    // original client.
+    // The tabs: a label wider than its tab is shrunk towards the tab's 40 px down to the minimum
+    // font size and overflows both its sides, as in the original client.
     const wchar_t* tabLabels[] = {I18N::Game::CastleGate, I18N::Game::GuardianStatue, I18N::Game::Tax,
                                   I18N::Game::Store1640};
     std::vector<CastleTabEntry> tabs;
@@ -780,198 +724,208 @@ void CCastleWindow::SyncContent()
     for (int i = 0; i < 4; ++i)
     {
         const SIZE size = g_pRenderText->MeasureText(tabLabels[i], static_cast<int>(wcslen(tabLabels[i])));
-        tabs.push_back({StringUtils::WideToNarrow(tabLabels[i]), static_cast<float>(40 / 2 - size.cx / 2),
+        tabs.push_back({StringUtils::WideToNarrow(tabLabels[i]),
                         UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
                                                               static_cast<float>(size.cx), 40.f),
                         i == m_iNumCurOpenTab});
     }
 
-    // The gate and statue pages share their layout (RenderGateManagingTab(),
-    // RenderStatueManagingTab()).
-    auto gateOrStatuePage = [&](bool statue)
+    std::vector<CastleMapItem> mapItems;
+    bool statuePage = false;
+    bool itemLive = false;
+    CastleLine mapTitle, improveTitle;
+    CastleLine statHp, statDefense, statRecover;
+    CastleLine nextHp, nextDefense, nextRecover;
+    CastleActionButton buyButton, repairButton, hpButton, defenseButton, recoverButton;
+    CastleLine taxTitle, chaosRate, storeRate;
+    CastleLine note1, note2, note3;
+    CastleLine rule1, rule2, rule3, rule4, rule5, rule6;
+    CastleLine zenLabel, castleMoney;
+    CastleLine footer1, footer2, footer3;
+    CastleActionButton applyButton, withdrawButton;
+
+    // RenderCastleItem(): a gate or statue's slot on the map art, and how far each of its bars
+    // has been filled. Their colours, heights and stacking are the theme's.
+    auto addItem = [&](float left, float top, LPPMSG_NPCDBLIST pInfo, bool statue)
     {
+        CastleMapItem item;
+        item.left = left;
+        item.top = top;
+        item.statue = statue;
+        item.live = pInfo->btNpcLive != 0;
+        item.current = pInfo->iNpcIndex ==
+                       (statue ? g_SenatusInfo.GetCurrStatue() : g_SenatusInfo.GetCurrGate()) + 1;
+        if (item.live)
+        {
+            const int nHPBlockSize = 24 / (g_SenatusInfo.GetMaxHPLevel() + 1);
+            const int nDefenseBlockSize = 24 / (g_SenatusInfo.GetMaxDefenseLevel() + 1);
+            const int nRecoverBlockSize = 24 / (g_SenatusInfo.GetMaxRecoverLevel() + 1);
+            const float fHPRate = pInfo->iNpcMaxHp > 0 ? pInfo->iNpcHp / static_cast<float>(pInfo->iNpcMaxHp) : 0.f;
+            item.hpWidth = static_cast<float>(nHPBlockSize * (g_SenatusInfo.GetHPLevel(pInfo) + 1));
+            item.hpFillWidth = item.hpWidth * fHPRate;
+            item.defenseWidth = static_cast<float>(nDefenseBlockSize * (g_SenatusInfo.GetDefenseLevel(pInfo) + 1));
+            if (statue)
+                item.recoverWidth =
+                    static_cast<float>(nRecoverBlockSize * (g_SenatusInfo.GetRecoverLevel(pInfo) + 1));
+        }
+        mapItems.push_back(item);
+    };
+
+    switch (m_iNumCurOpenTab)
+    {
+    case TAB_GATE_MANAGING:
+    case TAB_STATUE_MANAGING:
+    {
+        // RenderGateManagingTab() / RenderStatueManagingTab(): one layout, with a recovery row
+        // the gate has not.
+        const bool statue = m_iNumCurOpenTab == TAB_STATUE_MANAGING;
+        statuePage = statue;
         LPPMSG_NPCDBLIST pNPCInfo = statue ? &g_SenatusInfo.GetCurrStatueInfo() : &g_SenatusInfo.GetCurrGateInfo();
-        const float x = x0;
-        float y = y0 + 55 + 6;
 
-        outlineUpper(x, y, 160);
-        addText(I18N::Game::PurchaseAndRepair, x, y, 190, 1);
-        addImage("map", x + 15, y + 12, 160, 165);
-        outlineLower(x, y, 160, 165);
-
-        y += 12;
+        mapTitle = line(I18N::Game::PurchaseAndRepair, true, 190.f);
         if (statue)
         {
-            castleItem(x + 82, y + 20, &g_SenatusInfo.GetStatueInfo(0));
-            castleItem(x + 82, y + 65, &g_SenatusInfo.GetStatueInfo(1));
-            castleItem(x + 64, y + 110, &g_SenatusInfo.GetStatueInfo(2));
-            castleItem(x + 100, y + 110, &g_SenatusInfo.GetStatueInfo(3));
+            addItem(82, 93, &g_SenatusInfo.GetStatueInfo(0), true);
+            addItem(82, 138, &g_SenatusInfo.GetStatueInfo(1), true);
+            addItem(64, 183, &g_SenatusInfo.GetStatueInfo(2), true);
+            addItem(100, 183, &g_SenatusInfo.GetStatueInfo(3), true);
         }
         else
         {
-            castleItem(x + 82, y + 35, &g_SenatusInfo.GetGateInfo(0));
-            castleItem(x + 64, y + 83, &g_SenatusInfo.GetGateInfo(1));
-            castleItem(x + 100, y + 83, &g_SenatusInfo.GetGateInfo(2));
-            castleItem(x + 48, y + 135, &g_SenatusInfo.GetGateInfo(3));
-            castleItem(x + 82, y + 135, &g_SenatusInfo.GetGateInfo(4));
-            castleItem(x + 116, y + 135, &g_SenatusInfo.GetGateInfo(5));
+            addItem(82, 108, &g_SenatusInfo.GetGateInfo(0), false);
+            addItem(64, 156, &g_SenatusInfo.GetGateInfo(1), false);
+            addItem(100, 156, &g_SenatusInfo.GetGateInfo(2), false);
+            addItem(48, 208, &g_SenatusInfo.GetGateInfo(3), false);
+            addItem(82, 208, &g_SenatusInfo.GetGateInfo(4), false);
+            addItem(116, 208, &g_SenatusInfo.GetGateInfo(5), false);
         }
 
-        y += 173;
-        if (pNPCInfo->btNpcLive == 0)
+        itemLive = pNPCInfo->btNpcLive != 0;
+        if (!itemLive)
         {
-            addButton(SENATUS_BUTTON_BUY, I18N::Game::Buy1124, x0 + INVENTORY_WIDTH / 2 - 27, y0 + 250, false);
-            return;
+            buyButton = {StringUtils::WideToNarrow(I18N::Game::Buy1124), true, false};
+            break;
         }
 
         const bool repairable = statue ? g_SenatusInfo.IsStatueRepairable() : g_SenatusInfo.IsGateRepairable();
         const bool hpUpgradable = statue ? g_SenatusInfo.IsStatueHPUpgradable() : g_SenatusInfo.IsGateHPUpgradable();
         const bool defenseUpgradable =
             statue ? g_SenatusInfo.IsStatueDefeseUpgradable() : g_SenatusInfo.IsGateDefeseUpgradable();
-        addButton(SENATUS_BUTTON_REPAIR, I18N::Game::Repair, x0 + 110, y0 + 260, !repairable);
-        addButton(SENATUS_BUTTON_UPGRADE_HP, I18N::Game::Improve, x0 + 110, y0 + 310, !hpUpgradable);
-        addButton(SENATUS_BUTTON_UPGRADE_DEFENSE, I18N::Game::Improve, x0 + 110, y0 + 334, !defenseUpgradable);
+        repairButton = {StringUtils::WideToNarrow(I18N::Game::Repair), true, !repairable};
+        hpButton = {StringUtils::WideToNarrow(I18N::Game::Improve), true, !hpUpgradable};
+        defenseButton = {StringUtils::WideToNarrow(I18N::Game::Improve), true, !defenseUpgradable};
         if (statue)
-            addButton(SENATUS_BUTTON_UPGRADE_RECOVER, I18N::Game::Improve, x0 + 110, y0 + 358,
-                      !g_SenatusInfo.IsStatueRecoverUpgradable());
+            recoverButton = {StringUtils::WideToNarrow(I18N::Game::Improve), true,
+                             !g_SenatusInfo.IsStatueRecoverUpgradable()};
 
-        bold = false;
-        color = RGBA(255, 255, 255, 255);
         mu_swprintf(szTemp, I18N::Game::DURDD, pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp);
         InsertComma(szTemp, pNPCInfo->iNpcHp);
         InsertComma(szTemp, pNPCInfo->iNpcMaxHp);
-        addText(szTemp, x + 20, y, 0, 0);
-        y += 13;
+        statHp = line(szTemp, false, 0.f);
         mu_swprintf(szTemp, I18N::Game::DPD, g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
-        addText(szTemp, x + 20, y, 0, 0);
+        statDefense = line(szTemp, false, 0.f);
         if (statue)
         {
-            y += 13;
             mu_swprintf(szTemp, I18N::Game::RRD, g_SenatusInfo.GetRecover(pNPCInfo->iNpcNumber, pNPCInfo->iNpcRgLevel));
-            addText(szTemp, x + 20, y, 0, 0);
-            y += 22;
-        }
-        else
-        {
-            y += 35;
+            statRecover = line(szTemp, false, 0.f);
         }
 
-        outlineUpper(x, y, 160);
-        outlineLower(x, y, 160, 78);
-        bold = true;
-        addText(I18N::Game::Improve, x, y, 190, 1);
-        bold = false;
-
-        y += 24;
+        improveTitle = line(I18N::Game::Improve, true, 190.f);
         mu_swprintf(szTemp, I18N::Game::DURD, g_SenatusInfo.GetNextAddHP(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddHP(pNPCInfo));
-        addText(szTemp, x + 30, y, 0, 0);
-        y += 23;
+        nextHp = line(szTemp, false, 0.f);
         mu_swprintf(szTemp, I18N::Game::DPD1564, g_SenatusInfo.GetNextAddDefense(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddDefense(pNPCInfo));
-        addText(szTemp, x + 30, y, 0, 0);
+        nextDefense = line(szTemp, false, 0.f);
         if (statue)
         {
-            y += 23;
             mu_swprintf(szTemp, I18N::Game::RRD1565, g_SenatusInfo.GetNextAddRecover(pNPCInfo));
             InsertComma(szTemp, g_SenatusInfo.GetNextAddRecover(pNPCInfo));
-            addText(szTemp, x + 30, y, 0, 0);
+            nextRecover = line(szTemp, false, 0.f);
         }
-    };
-
-    switch (m_iNumCurOpenTab)
-    {
-    case TAB_GATE_MANAGING:
-        gateOrStatuePage(false);
         break;
-    case TAB_STATUE_MANAGING:
-        gateOrStatuePage(true);
-        break;
+    }
     case TAB_TAX_MANAGING:
     {
         // RenderTaxManagingTab().
-        const float x = x0;
-        float y = y0 + 55 + 6;
-        color = RGBA(255, 255, 255, 255);
-
-        addBox(x + 15, y + 14, 150, 24, 0x80666666u);
-        addBox(x + 15, y + 42, 150, 24, 0x80666666u);
-        outlineUpper(x, y, 160);
-        bold = true;
-        addText(I18N::Game::AdjustTaxRate, x, y, 190, 1);
-        outlineLower(x, y, 160, 55);
-        addImage("t-bottom", x + 15, y + 30, 160 - 2, 14);
-
-        y += 23;
-        bold = false;
+        taxTitle = line(I18N::Game::AdjustTaxRate, true, 190.f);
         mu_swprintf(szTemp, I18N::Game::ChaosCombinationGoblinDD, g_SenatusInfo.GetRealTaxRateChaos(),
                     g_SenatusInfo.GetChaosTaxRate());
-        addText(szTemp, x, y, 175, 1);
-        y += 25;
+        chaosRate = line(szTemp, false, 175.f);
         mu_swprintf(szTemp, I18N::Game::NPCDD, g_SenatusInfo.GetRealTaxRateStore(), g_SenatusInfo.GetNormalTaxRate());
-        addText(szTemp, x, y, 175, 1);
+        storeRate = line(szTemp, false, 175.f);
+        applyButton = {StringUtils::WideToNarrow(I18N::Game::Apply), true, false};
 
-        addButton(SENATUS_BUTTON_APPLY_TAX, I18N::Game::Apply, x0 + 120, y0 + 133, false);
+        note1 = line(I18N::Game::OnlyTheLordOfTheCastle, false, 160.f);
+        note2 = line(I18N::Game::CanAdjustTheTaxRate, false, 160.f);
+        note3 = line(I18N::Game::TaxAdjustmentAvailable, false, 160.f);
 
-        y += 53;
-        addText(I18N::Game::OnlyTheLordOfTheCastle, x + 15, y, 160, 1);
-        y += 13;
-        addText(I18N::Game::CanAdjustTheTaxRate, x + 15, y, 160, 1);
-        y += 13;
-        addText(I18N::Game::TaxAdjustmentAvailable, x + 15, y, 160, 1);
-
-        bold = true;
-        color = 0xFF947BBB;
-        y += 20;
         // Formats: "3%%" in some languages.
         mu_swprintf(szTemp, I18N::Game::DuringTrucePeriod);
-        addText(szTemp, x + 15, y, 160, 1);
-        y += 12;
+        rule1 = line(szTemp, true, 160.f);
         mu_swprintf(szTemp, I18N::Game::MaximumTaxRates3);
-        addText(szTemp, x + 15, y, 160, 1);
-        y += 12;
-        addText(I18N::Game::NPCsInclude, x + 15, y, 160, 1);
-        y += 12;
-        addText(I18N::Game::ElfLalaPotionGirl, x + 15, y, 160, 1);
-        y += 12;
-        addText(I18N::Game::WizardArenaGuard, x + 15, y, 160, 1);
-        y += 12;
-        addText(I18N::Game::AndEtc, x + 15, y, 160, 1);
-
-        y += 10;
-        addImage("line", x + 1, y, 188, 21);
+        rule2 = line(szTemp, true, 160.f);
+        rule3 = line(I18N::Game::NPCsInclude, true, 160.f);
+        rule4 = line(I18N::Game::ElfLalaPotionGirl, true, 160.f);
+        rule5 = line(I18N::Game::WizardArenaGuard, true, 160.f);
+        rule6 = line(I18N::Game::AndEtc, true, 160.f);
 
         // Still bold: the colour went back to white, the font did not.
-        color = RGBA(255, 255, 255, 255);
-        y += 18;
-        addImage("money", x + 10, y, 170, 24);
         mu_swprintf(szTemp, I18N::Game::Zen);
-        addText(szTemp, x + 14, y + 7, 0, 0);
+        zenLabel = line(szTemp, true, 0.f);
         // The original formatted "%I64d", which this platform reads as a 64-wide padded field
         // and drew the amount twice, the second copy past the strip; fixed.
         ConvertGold64(g_SenatusInfo.GetCastleMoney(), szTemp);
-        addText(szTemp, x + 90, y + 7, 80, 2);
+        castleMoney = line(szTemp, true, 80.f);
+        withdrawButton = {StringUtils::WideToNarrow(I18N::Game::Withdraw), true, false};
 
-        addButton(SENATUS_BUTTON_WITHDRAW, I18N::Game::Withdraw, x0 + 120, y0 + 322, false);
-
-        color = 0xFF947BBB;
-        y += 54;
-        addText(I18N::Game::TaxBelongsToTheCastle, x + 15, y, 160, 1);
-        y += 12;
-        addText(I18N::Game::AndCanBeUsed, x + 15, y, 160, 1);
-        y += 12;
-        addText(I18N::Game::ToOperateTheCastle, x + 15, y, 160, 1);
+        footer1 = line(I18N::Game::TaxBelongsToTheCastle, true, 160.f);
+        footer2 = line(I18N::Game::AndCanBeUsed, true, 160.f);
+        footer3 = line(I18N::Game::ToOperateTheCastle, true, 160.f);
         break;
     }
     default:
         break;
     }
 
-    CastleWindowRmlModel& model = m_RmlBinder.GetModel();
     SyncField(m_RmlBinder, &CastleWindowRmlModel::tabs, "tabs", std::move(tabs));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::pieces, "pieces", std::move(pieces));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::buttons, "buttons", std::move(buttons));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::taxArrows, "tax_arrows", m_iNumCurOpenTab == TAB_TAX_MANAGING);
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::activeTab, "active_tab", m_iNumCurOpenTab);
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::title, "title", std::move(title));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::statuePage, "statue_page", statuePage);
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::itemLive, "item_live", itemLive);
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::mapItems, "map_items", std::move(mapItems));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::mapTitle, "map_title", std::move(mapTitle));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::improveTitle, "improve_title", std::move(improveTitle));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::statHp, "stat_hp", std::move(statHp));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::statDefense, "stat_defense", std::move(statDefense));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::statRecover, "stat_recover", std::move(statRecover));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::nextHp, "next_hp", std::move(nextHp));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::nextDefense, "next_defense", std::move(nextDefense));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::nextRecover, "next_recover", std::move(nextRecover));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::buyButton, "buy_button", std::move(buyButton));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::repairButton, "repair_button", std::move(repairButton));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::hpButton, "hp_button", std::move(hpButton));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::defenseButton, "defense_button", std::move(defenseButton));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::recoverButton, "recover_button", std::move(recoverButton));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::taxTitle, "tax_title", std::move(taxTitle));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::chaosRate, "chaos_rate", std::move(chaosRate));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::storeRate, "store_rate", std::move(storeRate));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::note1, "note1", std::move(note1));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::note2, "note2", std::move(note2));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::note3, "note3", std::move(note3));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::rule1, "rule1", std::move(rule1));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::rule2, "rule2", std::move(rule2));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::rule3, "rule3", std::move(rule3));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::rule4, "rule4", std::move(rule4));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::rule5, "rule5", std::move(rule5));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::rule6, "rule6", std::move(rule6));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::zenLabel, "zen_label", std::move(zenLabel));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::castleMoney, "castle_money", std::move(castleMoney));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::footer1, "footer1", std::move(footer1));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::footer2, "footer2", std::move(footer2));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::footer3, "footer3", std::move(footer3));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::applyButton, "apply_button", std::move(applyButton));
+    SyncField(m_RmlBinder, &CastleWindowRmlModel::withdrawButton, "withdraw_button", std::move(withdrawButton));
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     SyncField(m_RmlBinder, &CastleWindowRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
     SyncField(m_RmlBinder, &CastleWindowRmlModel::buttonLabelTop, "button_label_top", static_cast<float>(23 / 2 - lineHeight / 2));

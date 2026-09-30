@@ -6,31 +6,44 @@
 
 namespace mu::ui::window
 {
-// One draw of the Senatus page, in the original's paint order: a sprite (the table edges, the
-// castle map, the gate and statue icons, the separator line, the money strip), a
-// RenderColorQuadARGB() box or a RenderText().
-struct CastlePieceEntry
+// One line of the Senatus's text: the document places it, so only what it says and the size the
+// native renderer shrank it to for its box travel through the model.
+struct CastleLine
 {
-    enum Kind
-    {
-        KIND_IMAGE = 0,
-        KIND_BOX = 1,
-        KIND_TEXT = 2,
-    };
-
-    int kind = KIND_IMAGE;
-    Rml::String sprite; // KIND_IMAGE: the rcss class naming the sprite
-    float left = 0.f;   // reference px in the panel
-    float top = 0.f;
-    float width = 0.f; // KIND_TEXT: 0 = no box
-    float height = 0.f;
-    Rml::String color; // KIND_BOX / KIND_TEXT
     Rml::String text;
     float textPx = 0.f;
-    int align = 0; // 0 left, 1 centred, 2 right edge at left + width
-    bool bold = false;
 
-    bool operator==(const CastlePieceEntry&) const = default;
+    bool operator==(const CastleLine&) const = default;
+};
+
+// One of the page's buttons (Buy, Repair, Improve, Apply, Withdraw). Where it sits and what a
+// locked one looks like are the theme's; whether it is there and whether it is locked are not.
+struct CastleActionButton
+{
+    Rml::String label;
+    bool shown = false;
+    bool locked = false;
+
+    bool operator==(const CastleActionButton&) const = default;
+};
+
+// One gate or statue standing on the castle map. `left`/`top` is its slot on the map art, which
+// only the art can decide; everything else is its state -- whether it stands, whether it is the
+// one picked, and how far each of its bars has been filled (RenderCastleItem()'s own widths, in
+// reference px out of the bar's 24). A gate has two bars, a statue three.
+struct CastleMapItem
+{
+    float left = 0.f;
+    float top = 0.f;
+    bool statue = false;
+    bool live = false;
+    bool current = false;
+    float hpWidth = 0.f;     // the HP level reached
+    float hpFillWidth = 0.f; // how much of that the NPC still has
+    float defenseWidth = 0.f;
+    float recoverWidth = 0.f;
+
+    bool operator==(const CastleMapItem&) const = default;
 };
 
 // One of the four newui_guild_tab04 radio tabs (the left 40 x 22 of the sprite): the selected
@@ -38,24 +51,10 @@ struct CastlePieceEntry
 struct CastleTabEntry
 {
     Rml::String label;
-    float labelLeft = 0.f; // CRadioButton::Render(): whole-unit centre in the tab
-    float textPx = 0.f;    // shrunk towards the tab's 40 px like the native RenderText()
+    float textPx = 0.f; // shrunk towards the tab's 40 px like the native RenderText()
     bool selected = false;
 
     bool operator==(const CastleTabEntry&) const = default;
-};
-
-// A 53 x 23 newui_btn_empty_very_small button (Buy, Repair, Improve, Apply, Withdraw): locked
-// ones tinted (100, 100, 100) with a grey label, never hovered.
-struct CastleButtonEntry
-{
-    Rml::String label;
-    int id = 0; // CCastleWindow::SENATUS_BUTTON
-    float left = 0.f;
-    float top = 0.f;
-    bool locked = false;
-
-    bool operator==(const CastleButtonEntry&) const = default;
 };
 
 struct CastleWindowRmlModel
@@ -67,10 +66,51 @@ struct CastleWindowRmlModel
     float buttonLabelTop = 0.f; // CButton::Render(): 23 / 2 - h / 2 whole units
     float tabLabelTop = 0.f;    // CRadioButton::Render(): 22 / 2 - h / 2 whole units
 
+    int activeTab = 0; // CCastleWindow::CURR_OPEN_TAB_BUTTON -- which page the document shows.
     std::vector<CastleTabEntry> tabs;
-    std::vector<CastlePieceEntry> pieces;
-    std::vector<CastleButtonEntry> buttons;
-    bool taxArrows = false; // the Tax tab's four newui_Bt_scroll_up / dn arrows
+    CastleLine title;
+
+    // The castle gate and guardian statue pages, which share one layout: the map with its items,
+    // the picked one's figures, and what the next upgrade would add. A statue has a recovery row
+    // the gate has not, and nothing below the map exists until the picked one stands.
+    bool statuePage = false;
+    bool itemLive = false;
+    std::vector<CastleMapItem> mapItems;
+    CastleLine mapTitle;
+    CastleLine improveTitle;
+    CastleLine statHp;
+    CastleLine statDefense;
+    CastleLine statRecover;
+    CastleLine nextHp;
+    CastleLine nextDefense;
+    CastleLine nextRecover;
+    CastleActionButton buyButton;
+    CastleActionButton repairButton;
+    CastleActionButton hpButton;
+    CastleActionButton defenseButton;
+    CastleActionButton recoverButton;
+
+    // The tax page: the two rates, the rules the lord has to work within, and the castle's purse.
+    CastleLine taxTitle;
+    CastleLine chaosRate;
+    CastleLine storeRate;
+    CastleLine note1;
+    CastleLine note2;
+    CastleLine note3;
+    CastleLine rule1;
+    CastleLine rule2;
+    CastleLine rule3;
+    CastleLine rule4;
+    CastleLine rule5;
+    CastleLine rule6;
+    CastleLine zenLabel;
+    CastleLine castleMoney;
+    CastleLine footer1;
+    CastleLine footer2;
+    CastleLine footer3;
+    CastleActionButton applyButton;
+    CastleActionButton withdrawButton;
+
     Rml::String exitTooltip;
 };
 } // namespace mu::ui::window
