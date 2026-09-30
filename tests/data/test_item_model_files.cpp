@@ -454,10 +454,10 @@ TEST_CASE("Shipped item models keep the glow of the old drawing code [data][item
     CHECK(glowOf(4, 15).levels == GlowLevels{0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31});
     // The Devil's Square items glow like half their square, the seventh
     // square like +13.
-    // The Devil's Square items glow like twice their level up to +6 and like
-    // +13 from +7, as in the original client (a frame-rate change of 2023 had
-    // turned the doubling into a halving).
-    CHECK(glowOf(14, 17).levels == GlowLevels{0, 2, 4, 6, 8, 10, 12, 13, 13, 13, 13, 13, 13, 13, 13, 13});
+    // The Devil's Square items glow like their level up to +6, so +1 and +2,
+    // +3 and +4, +5 and +6 look alike (the level glow changes at +3, +5 and
+    // +7), and like +13 from +7.
+    CHECK(glowOf(14, 17).levels == GlowLevels{0, 1, 2, 3, 4, 5, 6, 13, 13, 13, 13, 13, 13, 13, 13, 13});
     CHECK_FALSE(glowOf(12, 0).excellent);
     CHECK_FALSE(glowOf(13, 30).excellent);
 }
@@ -505,8 +505,8 @@ TEST_CASE("Models drawn for items glow like the old drawing code [data][items]")
 
     CHECK(GetLevel(MODEL_ARROWS, 0) == 0);
     CHECK(GetLevel(MODEL_ARROWS, 3) == 7);
-    CHECK(GetLevel(MODEL_DEVILS_EYE, 1) == 2);
-    CHECK(GetLevel(MODEL_DEVILS_EYE, 5) == 10);
+    CHECK(GetLevel(MODEL_DEVILS_EYE, 1) == 1);
+    CHECK(GetLevel(MODEL_DEVILS_EYE, 6) == 6);
     CHECK(GetLevel(MODEL_DEVILS_EYE, 7) == 13);
     // The Blood Bone and the Illusion Sorcerer Covenant glow by their level,
     // like the Scroll of Archangel and the Old Scroll.

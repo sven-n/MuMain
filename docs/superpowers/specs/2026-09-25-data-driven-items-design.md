@@ -605,21 +605,22 @@ server with original clients (after phases 6 and B).
        Covenant and the Cursed Castle water have a style already, the Jewel of
        Harmony and the Moonstone Pendant get `harmonyShine` (138 styles now).
        Fixes found while testing, which change the look: the Devil's Eye, Key
-       and Invitation glow like twice their level up to +6 again, as in the
-       original client (a frame-rate change of 2023 had turned `Level *= 2`
-       into `Level *= pow(2, …)`, and its fix into `Level /= 2`, so +1 to +5
-       looked the same); the Blood Bone and the Illusion Sorcerer Covenant
-       glow by their level like the Scroll of Archangel and the Old Scroll
-       (the Blood Bone's own drawing ended the drawing before the level glow;
-       it is the render style `bloodBone` now, which leaves 26 effects for 41
-       items and 139 styles; the Covenant glowed like level 0). The effects of
-       the event models of level variants stay in `RenderPartObjectEffect` (no
-       model entries yet). Which values the effects take (bones, colors,
-       sizes) comes with phase 13, when what the named looks are made of moves
-       into data (D25). MuEditor gets a read-only view of the looks above the
-       item table: for the selected item its model file, glow, render style
-       and effect, and for a look all items that use it (D26). It only reads
-       the model data, so it needs no change to the drawing code.
+       and Invitation glow like their level up to +6, so +1 and +2, +3 and +4,
+       +5 and +6 look alike, and like +13 from +7 (the original client doubled
+       the level, a frame-rate change of 2023 turned that into `Level *=
+       pow(2, …)` and its fix into `Level /= 2`, which gave +1 to +5 one
+       look); the Blood Bone and the Illusion Sorcerer Covenant glow by their
+       level like the Scroll of Archangel and the Old Scroll (the Blood Bone's
+       own drawing ended the drawing before the level glow; it is the render
+       style `bloodBone` now, which leaves 26 effects for 41 items and 139
+       styles; the Covenant glowed like level 0). The effects of the event
+       models of level variants stay in `RenderPartObjectEffect` (no model
+       entries yet). Which values the effects take (bones, colors, sizes)
+       comes with phase 13, when what the named looks are made of moves into
+       data (D25). MuEditor gets a read-only view of the looks above the item
+       table: for the selected item its model file, glow, render style and
+       effect, and for a look all items that use it (D26). It only reads the
+       model data, so it needs no change to the drawing code.
 
    Verified like phase 3: one-time comparisons of the old and the new code
    (which files and texture folders are loaded for each model; the
