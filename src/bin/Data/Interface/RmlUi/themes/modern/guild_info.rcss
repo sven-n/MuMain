@@ -18,17 +18,14 @@
 .line-mark { position: absolute; width: 8px; height: 8px; }
 .line-mark-cell { float: left; width: 1px; height: 1px; }
 
-.scroll { position: absolute; left: 0; width: 190px; height: 0; }
 .s-top, .s-bottom { display: none; }
 .s-mid { position: absolute; width: 3px; height: 15px; margin-left: 2px; background-color: token(surface-recessed); }
 .thumb { position: absolute; width: 9px; height: 30px; margin-left: 3px; background-color: token(accent-steel); border-radius: token(radius-sm)px; }
 
-.line-box { position: absolute; background-color: token(accent-steel); }
+/* A row's backdrop: the selected line, and a member holding an office. */
+.gi-row.selected .gi-row-back, .gi-row.officer .gi-row-back { background-color: token(accent-steel); }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
-.gi-text.centred { text-align: center; }
-.gi-text.right { text-align: right; }
-.gi-text.bold { font-weight: bold; }
 
 .gi-btn {
 	display: block;
@@ -59,3 +56,180 @@
 .tooltip { display: none; top: 365px; }
 .tooltip-exit { left: -24px; }
 #btn_exit:hover ~ .tooltip-exit { display: block; }
+
+/* Every piece below came out of a style attribute in the shared RML, which the inline-property
+   rule made un-overridable. The geometry is the original's own Render_*() walk. */
+.gi-page { position: static; }
+.gi-line, .gi-note, .gi-figure, .gi-header { position: absolute; }
+.gi-line { text-align: center; }
+
+#gi_hint_title { left: 0; top: 15px; font-weight: bold; }
+#gi_hint_1 { left: 25px; top: 46px; }
+#gi_hint_2 { left: 25px; top: 61px; }
+#gi_hint_3 { left: 25px; top: 76px; }
+
+#gi_title { left: 0; top: 12px; }
+#gi_name { left: 35px; top: 48px; }
+/* The three tab labels, one TAB_WIDTH apart from TAB_START_X + 1. */
+.gi-tab-label { top: 76px; }
+#gi_tab_info { left: 13px; }
+#gi_tab_members { left: 69px; }
+#gi_tab_union { left: 125px; }
+
+#gi_notice_label { left: 22px; top: 249px; }
+#gi_created { left: 22px; top: 169px; }
+#gi_score { left: 22px; top: 182px; }
+#gi_member_count { left: 22px; top: 195px; }
+#gi_rival { left: 22px; top: 208px; }
+
+#gi_hdr_name { left: 24px; top: 112px; }
+#gi_hdr_position { left: 89px; top: 112px; }
+#gi_hdr_server { left: 126px; top: 112px; }
+#gi_hdr_union_name { left: 34px; top: 115px; }
+#gi_hdr_union_members { left: 140px; top: 115px; }
+
+/* The guild mark's own table. */
+.mark-edge-top { left: 73px; top: 104px; width: 42px; }
+.mark-edge-bottom { left: 73px; top: 138px; width: 42px; }
+.mark-edge-left { left: 70px; top: 104px; height: 42px; }
+.mark-edge-right { left: 105px; top: 104px; height: 42px; }
+.mark-corner-tl { left: 70px; top: 104px; }
+.mark-corner-tr { left: 105px; top: 104px; }
+.mark-corner-bl { left: 70px; top: 138px; }
+.mark-corner-br { left: 105px; top: 138px; }
+
+/* The figures table, and the announcement box under it. */
+.figures-edge-top { left: 12px; top: 159px; width: 166px; }
+.figures-edge-bottom { left: 12px; top: 215px; width: 166px; }
+.figures-edge-left { left: 10px; top: 159px; height: 65px; }
+.figures-edge-right { left: 167px; top: 159px; height: 65px; }
+.figures-corner-tl { left: 10px; top: 159px; }
+.figures-corner-tr { left: 167px; top: 159px; }
+.figures-corner-bl { left: 10px; top: 215px; }
+.figures-corner-br { left: 167px; top: 215px; }
+.notice-fill { left: 11px; top: 260px; width: 165px; height: 84px; }
+.notice-edge-top { left: 12px; top: 260px; width: 165px; }
+.notice-edge-bottom { left: 12px; top: 334px; width: 165px; }
+.notice-edge-left { left: 10px; top: 260px; height: 82px; }
+.notice-edge-right { left: 167px; top: 260px; height: 82px; }
+.notice-corner-tr { left: 167px; top: 260px; }
+.notice-corner-bl { left: 10px; top: 334px; }
+.notice-corner-br { left: 167px; top: 334px; }
+
+/* The member list's table. */
+.members-fill { left: 12px; top: 125px; width: 165px; height: 232px; }
+.members-head-fill { left: 12px; top: 105px; width: 165px; height: 20px; }
+.members-edge-top { left: 12px; top: 105px; width: 165px; }
+.members-edge-bottom { left: 12px; top: 347px; width: 165px; }
+.members-edge-left { left: 8px; top: 105px; height: 251px; }
+.members-edge-right { left: 168px; top: 105px; height: 251px; }
+.members-corner-tl { left: 8px; top: 105px; }
+.members-corner-tr { left: 168px; top: 105px; }
+.members-corner-bl { left: 8px; top: 347px; }
+.members-corner-br { left: 168px; top: 347px; }
+
+/* The alliance list's table. */
+.union-fill { left: 12px; top: 125px; width: 165px; height: 85px; }
+.union-head-fill { left: 12px; top: 110px; width: 165px; height: 15px; }
+.union-edge-top { left: 12px; top: 109px; width: 166px; }
+.union-edge-bottom { left: 12px; top: 201px; width: 166px; }
+.union-edge-left { left: 10px; top: 109px; height: 100px; }
+.union-edge-right { left: 167px; top: 109px; height: 100px; }
+.union-corner-tl { left: 10px; top: 109px; }
+.union-corner-tr { left: 167px; top: 109px; }
+.union-corner-bl { left: 10px; top: 201px; }
+.union-corner-br { left: 167px; top: 201px; }
+
+/* Each tab's scroll track. Its own top was bound although both are constants; only the thumb's
+   offset inside it still is. */
+.gi-scroll { position: absolute; }
+.gi-scroll > div { position: absolute; }
+.scroll-notice { top: 262px; }
+.scroll-members { top: 125px; }
+.scroll-notice { left: 167px; }
+.scroll-notice .s-top { left: 0; top: 0; }
+.scroll-notice .s-mid:nth-child(2) { left: 0; top: 3px; }
+.scroll-notice .s-mid:nth-child(3) { left: 0; top: 13px; }
+.scroll-notice .s-mid:nth-child(4) { left: 0; top: 23px; }
+.scroll-notice .s-mid:nth-child(5) { left: 0; top: 33px; }
+.scroll-notice .s-mid:nth-child(6) { left: 0; top: 43px; }
+.scroll-notice .s-mid:nth-child(7) { left: 0; top: 53px; }
+.scroll-notice .s-mid:nth-child(8) { left: 0; top: 63px; }
+.scroll-notice .s-bottom { left: 0; top: 76px; }
+.scroll-notice .thumb { left: -4px; }
+.scroll-members { left: 170px; }
+.scroll-members .s-top { left: 0; top: 0; }
+.scroll-members .s-mid:nth-child(2) { left: 0; top: 3px; }
+.scroll-members .s-mid:nth-child(3) { left: 0; top: 13px; }
+.scroll-members .s-mid:nth-child(4) { left: 0; top: 23px; }
+.scroll-members .s-mid:nth-child(5) { left: 0; top: 33px; }
+.scroll-members .s-mid:nth-child(6) { left: 0; top: 43px; }
+.scroll-members .s-mid:nth-child(7) { left: 0; top: 53px; }
+.scroll-members .s-mid:nth-child(8) { left: 0; top: 63px; }
+.scroll-members .s-mid:nth-child(9) { left: 0; top: 73px; }
+.scroll-members .s-mid:nth-child(10) { left: 0; top: 83px; }
+.scroll-members .s-mid:nth-child(11) { left: 0; top: 93px; }
+.scroll-members .s-mid:nth-child(12) { left: 0; top: 103px; }
+.scroll-members .s-mid:nth-child(13) { left: 0; top: 113px; }
+.scroll-members .s-mid:nth-child(14) { left: 0; top: 123px; }
+.scroll-members .s-mid:nth-child(15) { left: 0; top: 133px; }
+.scroll-members .s-mid:nth-child(16) { left: 0; top: 143px; }
+.scroll-members .s-mid:nth-child(17) { left: 0; top: 153px; }
+.scroll-members .s-mid:nth-child(18) { left: 0; top: 163px; }
+.scroll-members .s-mid:nth-child(19) { left: 0; top: 173px; }
+.scroll-members .s-mid:nth-child(20) { left: 0; top: 183px; }
+.scroll-members .s-mid:nth-child(21) { left: 0; top: 193px; }
+.scroll-members .s-mid:nth-child(22) { left: 0; top: 203px; }
+.scroll-members .s-mid:nth-child(23) { left: 0; top: 213px; }
+.scroll-members .s-mid:nth-child(24) { left: 0; top: 223px; }
+.scroll-members .s-bottom { left: 0; top: 227px; }
+.scroll-members .thumb { left: -4px; }
+
+/* A list row. Its own top follows the native list box's scroll position; everything else about it
+   is placed here. A backgrounded element with children paints an unclosed box in this build, so
+   the backdrop is a childless leaf (engine-findings.md). */
+.gi-rows { position: static; }
+.gi-row { position: absolute; width: 148px; height: 13px; }
+.gi-row-back { position: absolute; left: 0; top: 0; width: 148px; height: 13px; }
+.gi-cell { position: absolute; top: 3px; }
+.gi-notice-rows .gi-row { left: 15px; }
+.gi-member-rows .gi-row { left: 13px; }
+.gi-union-rows .gi-row { left: 15px; }
+.cell-notice { left: 4px; }
+.cell-member-name { left: 8px; }
+.cell-member-role { left: 53px; text-align: center; }
+.cell-member-server { right: 18px; text-align: right; }
+.cell-union-name { left: 16px; }
+.cell-union-count { right: 6px; text-align: right; }
+.gi-union-rows .line-mark { position: absolute; left: 4px; top: 0; }
+
+/* The alliance explanation's own rows: the original advanced its y by 15, 25 or 20 per line. */
+.gi-alliance-note { position: static; }
+.gi-alliance-line { position: absolute; left: 25px; }
+.gi-alliance-line:nth-child(1) { top: 106px; }
+.gi-alliance-line:nth-child(2) { top: 121px; }
+.gi-alliance-line:nth-child(3) { top: 136px; }
+.gi-alliance-line:nth-child(4) { top: 151px; }
+.gi-alliance-line:nth-child(5) { top: 166px; }
+.gi-alliance-line:nth-child(6) { top: 191px; }
+.gi-alliance-line:nth-child(7) { top: 206px; }
+.gi-alliance-line:nth-child(8) { top: 221px; }
+.gi-alliance-line:nth-child(9) { top: 241px; }
+.gi-alliance-line:nth-child(10) { top: 256px; }
+.gi-alliance-line:nth-child(11) { top: 271px; }
+
+#btn_guild_out { left: 100px; top: 350px; }
+#btn_get_position { left: 3px; top: 360px; }
+#btn_free_position { left: 64px; top: 360px; }
+#btn_get_out { left: 125px; top: 360px; }
+#btn_union_create { left: 30px; top: 230px; }
+#btn_union_out { left: 100px; top: 230px; }
+
+.gi-line, .gi-note, .gi-figure, .gi-header, .gi-cell { color: token(text-primary); }
+#gi_name { color: token(semantic-success); }
+#gi_notice_label { color: token(accent-gold); }
+.gi-cell { color: token(text-secondary); }
+.cell-member-server { color: token(accent-gold); }
+.gi-row.selected .gi-cell { color: token(text-primary); }
+.notice-fill, .members-fill, .union-fill { background-color: token(surface-recessed); }
+.members-head-fill, .union-head-fill { background-color: token(surface-raised); }

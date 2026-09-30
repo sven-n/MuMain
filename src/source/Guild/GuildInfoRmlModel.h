@@ -6,45 +6,62 @@
 
 namespace mu::ui::window
 {
-// One RenderText() of the guild window: its box, alignment and colour, its size shrunk to the box
-// like the original's.
-struct GuildInfoTextEntry
+// One line of the guild window's own text. Where it sits, what colour it is and how it is aligned
+// are the theme's; only what it says and the size the native renderer shrank it to for its box
+// travel through the model.
+struct GuildLine
 {
     Rml::String text;
-    float left = 0.f; // reference px in the panel
-    float top = 0.f;
-    float width = 0.f; // 0 = no box (left-aligned, never shrunk)
     float textPx = 0.f;
-    int align = 0; // 0 left, 1 centred, 2 right edge at left + width
-    bool bold = false;
-    Rml::String color;
+
+    bool operator==(const GuildLine&) const = default;
 };
 
-// A list line's RenderColor() box (the selected line, and the master / assistant / battle master
-// lines of the member list): g_renderColor, white.
-struct GuildInfoBoxEntry
+// One line of the guild announcement. `top` follows the native list box's scroll position.
+struct GuildNoticeRow
 {
-    float left = 0.f;
+    Rml::String text;
     float top = 0.f;
-    float width = 0.f;
-    float height = 0.f;
+    bool selected = false;
+
+    bool operator==(const GuildNoticeRow&) const = default;
 };
 
-// An alliance guild's 8 x 8 mark beside its line.
-struct GuildInfoMarkEntry
+// One guild member: the name, the office they hold and which server they are on. A member holding
+// an office carries the row backdrop a selected line does, which is what `officer` says.
+struct GuildMemberRow
 {
-    float left = 0.f;
+    Rml::String name;
+    Rml::String role;
+    float roleTextPx = 0.f; // the office is centred on 70 units and shrunk to them
+    Rml::String server;
     float top = 0.f;
-    std::vector<Rml::String> cells; // 64 CSS colours, row by row
+    bool selected = false;
+    bool officer = false;
+
+    bool operator==(const GuildMemberRow&) const = default;
 };
 
-// A 64 x 29 newui_btn_empty_small button RmlUi reports with guild_info_button(index).
-struct GuildInfoButtonEntry
+// One allied guild: its mark, its name and how many members it has.
+struct GuildUnionRow
+{
+    Rml::String name;
+    Rml::String memberCount;
+    float countTextPx = 0.f; // ends at its box's right edge, shrunk to 60 units
+    std::vector<Rml::String> markCells; // 64 CSS colours, row by row
+    float top = 0.f;
+    bool selected = false;
+
+    bool operator==(const GuildUnionRow&) const = default;
+};
+
+// One of the window's buttons. Where it sits is the theme's; whether it is there is not.
+struct GuildActionButton
 {
     Rml::String label;
-    int index = 0;
-    float left = 0.f;
-    float top = 0.f;
+    bool shown = false;
+
+    bool operator==(const GuildActionButton&) const = default;
 };
 
 struct GuildInfoRmlModel
@@ -56,14 +73,49 @@ struct GuildInfoRmlModel
     bool noGuild = true;
     int tab = 1; // GuildConstants::GuildTab
     bool unionShown = false;
-    float scrollTop = 0.f;              // the page's scroll track top, reference px
-    float thumbTop = 0.f;               // the scroll thumb's top, reference px
+    float scrollOffset = 0.f;           // the thumb inside its track, reference px
     std::vector<Rml::String> markCells; // the hero's guild mark (Guild tab)
 
-    std::vector<GuildInfoTextEntry> texts;
-    std::vector<GuildInfoBoxEntry> boxes;
-    std::vector<GuildInfoMarkEntry> marks;
-    std::vector<GuildInfoButtonEntry> buttons;
+    // The no-guild hint.
+    GuildLine hintTitle;
+    GuildLine hintLine1;
+    GuildLine hintLine2;
+    GuildLine hintLine3;
+
+    // The header every tab shares.
+    GuildLine title;
+    GuildLine guildName;
+    GuildLine tabInfo;
+    GuildLine tabMembers;
+    GuildLine tabUnion;
+
+    // The Guild tab's own figures.
+    GuildLine noticeLabel;
+    GuildLine created;
+    GuildLine score;
+    GuildLine memberCount;
+    GuildLine rival;
+
+    // The Members and Alliance tabs' column headings.
+    GuildLine headerName;
+    GuildLine headerPosition;
+    GuildLine headerServer;
+    GuildLine headerUnionName;
+    GuildLine headerUnionMembers;
+
+    std::vector<GuildNoticeRow> noticeRows;
+    std::vector<GuildMemberRow> memberRows;
+    std::vector<GuildUnionRow> unionRows;
+    // Render_Guild_Info()'s explanation, shown while the hero is in no alliance.
+    std::vector<GuildLine> allianceLines;
+
+    GuildActionButton guildOutButton;
+    GuildActionButton getPositionButton;
+    GuildActionButton freePositionButton;
+    GuildActionButton getOutButton;
+    GuildActionButton unionCreateButton;
+    GuildActionButton unionOutButton;
+
     Rml::String exitTooltip;
     // CButton::Render(): 29 / 2 - h / 2 whole units down, the native line height in physical px.
     float labelTop = 0.f;

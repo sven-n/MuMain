@@ -90,37 +90,6 @@ std::vector<Rml::String> MarkCells(const BYTE* mark)
     return cells;
 }
 
-bool SameText(const GuildInfoTextEntry& a, const GuildInfoTextEntry& b)
-{
-    return a.text == b.text && a.left == b.left && a.top == b.top && a.width == b.width && a.textPx == b.textPx &&
-           a.align == b.align && a.bold == b.bold && a.color == b.color;
-}
-
-bool SameBox(const GuildInfoBoxEntry& a, const GuildInfoBoxEntry& b)
-{
-    return a.left == b.left && a.top == b.top && a.width == b.width && a.height == b.height;
-}
-
-bool SameMark(const GuildInfoMarkEntry& a, const GuildInfoMarkEntry& b)
-{
-    return a.left == b.left && a.top == b.top && a.cells == b.cells;
-}
-
-bool SameButton(const GuildInfoButtonEntry& a, const GuildInfoButtonEntry& b)
-{
-    return a.label == b.label && a.index == b.index && a.left == b.left && a.top == b.top;
-}
-
-template <typename T, typename Same>
-void SyncList(std::vector<T>& current, std::vector<T>&& updated, Same same, RmlModelBinder<GuildInfoRmlModel>& binder,
-              const char* name)
-{
-    if (current.size() == updated.size() && std::equal(current.begin(), current.end(), updated.begin(), same))
-        return;
-    current = std::move(updated);
-    binder.MarkDirty(name);
-}
-
 } // namespace
 
 int mu::ui::window::CGuildInfoWindow::GetGuildMemberIndex(wchar_t* szName)
@@ -586,46 +555,68 @@ void mu::ui::window::CGuildInfoWindow::BuildRmlUi()
             c.Bind("no_guild", &model.noGuild);
             c.Bind("tab", &model.tab);
             c.Bind("union_shown", &model.unionShown);
-            c.Bind("scroll_top", &model.scrollTop);
-            c.Bind("thumb_top", &model.thumbTop);
+            c.Bind("scroll_offset", &model.scrollOffset);
             c.RegisterArray<std::vector<Rml::String>>();
             c.Bind("mark_cells", &model.markCells);
 
-            auto text = c.RegisterStruct<GuildInfoTextEntry>();
-            text.RegisterMember("text", &GuildInfoTextEntry::text);
-            text.RegisterMember("left", &GuildInfoTextEntry::left);
-            text.RegisterMember("top", &GuildInfoTextEntry::top);
-            text.RegisterMember("width", &GuildInfoTextEntry::width);
-            text.RegisterMember("text_px", &GuildInfoTextEntry::textPx);
-            text.RegisterMember("align", &GuildInfoTextEntry::align);
-            text.RegisterMember("bold", &GuildInfoTextEntry::bold);
-            text.RegisterMember("color", &GuildInfoTextEntry::color);
-            c.RegisterArray<std::vector<GuildInfoTextEntry>>();
-            c.Bind("texts", &model.texts);
-
-            auto box = c.RegisterStruct<GuildInfoBoxEntry>();
-            box.RegisterMember("left", &GuildInfoBoxEntry::left);
-            box.RegisterMember("top", &GuildInfoBoxEntry::top);
-            box.RegisterMember("width", &GuildInfoBoxEntry::width);
-            box.RegisterMember("height", &GuildInfoBoxEntry::height);
-            c.RegisterArray<std::vector<GuildInfoBoxEntry>>();
-            c.Bind("boxes", &model.boxes);
-
-            auto mark = c.RegisterStruct<GuildInfoMarkEntry>();
-            mark.RegisterMember("left", &GuildInfoMarkEntry::left);
-            mark.RegisterMember("top", &GuildInfoMarkEntry::top);
-            mark.RegisterMember("cells", &GuildInfoMarkEntry::cells);
-            c.RegisterArray<std::vector<GuildInfoMarkEntry>>();
-            c.Bind("marks", &model.marks);
-
-            auto button = c.RegisterStruct<GuildInfoButtonEntry>();
-            button.RegisterMember("label", &GuildInfoButtonEntry::label);
-            button.RegisterMember("index", &GuildInfoButtonEntry::index);
-            button.RegisterMember("left", &GuildInfoButtonEntry::left);
-            button.RegisterMember("top", &GuildInfoButtonEntry::top);
-            c.RegisterArray<std::vector<GuildInfoButtonEntry>>();
-            c.Bind("buttons", &model.buttons);
-
+            auto lineType = c.RegisterStruct<GuildLine>();
+            lineType.RegisterMember("text", &GuildLine::text);
+            lineType.RegisterMember("text_px", &GuildLine::textPx);
+            c.Bind("hint_title", &model.hintTitle);
+            c.Bind("hint_line1", &model.hintLine1);
+            c.Bind("hint_line2", &model.hintLine2);
+            c.Bind("hint_line3", &model.hintLine3);
+            c.Bind("title", &model.title);
+            c.Bind("guild_name", &model.guildName);
+            c.Bind("tab_info", &model.tabInfo);
+            c.Bind("tab_members", &model.tabMembers);
+            c.Bind("tab_union", &model.tabUnion);
+            c.Bind("notice_label", &model.noticeLabel);
+            c.Bind("created", &model.created);
+            c.Bind("score", &model.score);
+            c.Bind("member_count", &model.memberCount);
+            c.Bind("rival", &model.rival);
+            c.Bind("header_name", &model.headerName);
+            c.Bind("header_position", &model.headerPosition);
+            c.Bind("header_server", &model.headerServer);
+            c.Bind("header_union_name", &model.headerUnionName);
+            c.Bind("header_union_members", &model.headerUnionMembers);
+            c.RegisterArray<std::vector<GuildLine>>();
+            c.Bind("alliance_lines", &model.allianceLines);
+            auto noticeRow = c.RegisterStruct<GuildNoticeRow>();
+            noticeRow.RegisterMember("text", &GuildNoticeRow::text);
+            noticeRow.RegisterMember("top", &GuildNoticeRow::top);
+            noticeRow.RegisterMember("selected", &GuildNoticeRow::selected);
+            c.RegisterArray<std::vector<GuildNoticeRow>>();
+            c.Bind("notice_rows", &model.noticeRows);
+            auto memberRow = c.RegisterStruct<GuildMemberRow>();
+            memberRow.RegisterMember("name", &GuildMemberRow::name);
+            memberRow.RegisterMember("role", &GuildMemberRow::role);
+            memberRow.RegisterMember("role_text_px", &GuildMemberRow::roleTextPx);
+            memberRow.RegisterMember("server", &GuildMemberRow::server);
+            memberRow.RegisterMember("top", &GuildMemberRow::top);
+            memberRow.RegisterMember("selected", &GuildMemberRow::selected);
+            memberRow.RegisterMember("officer", &GuildMemberRow::officer);
+            c.RegisterArray<std::vector<GuildMemberRow>>();
+            c.Bind("member_rows", &model.memberRows);
+            auto unionRow = c.RegisterStruct<GuildUnionRow>();
+            unionRow.RegisterMember("name", &GuildUnionRow::name);
+            unionRow.RegisterMember("member_count", &GuildUnionRow::memberCount);
+            unionRow.RegisterMember("count_text_px", &GuildUnionRow::countTextPx);
+            unionRow.RegisterMember("mark_cells", &GuildUnionRow::markCells);
+            unionRow.RegisterMember("top", &GuildUnionRow::top);
+            unionRow.RegisterMember("selected", &GuildUnionRow::selected);
+            c.RegisterArray<std::vector<GuildUnionRow>>();
+            c.Bind("union_rows", &model.unionRows);
+            auto actionButton = c.RegisterStruct<GuildActionButton>();
+            actionButton.RegisterMember("label", &GuildActionButton::label);
+            actionButton.RegisterMember("shown", &GuildActionButton::shown);
+            c.Bind("guild_out_button", &model.guildOutButton);
+            c.Bind("get_position_button", &model.getPositionButton);
+            c.Bind("free_position_button", &model.freePositionButton);
+            c.Bind("get_out_button", &model.getOutButton);
+            c.Bind("union_create_button", &model.unionCreateButton);
+            c.Bind("union_out_button", &model.unionOutButton);
             c.Bind("exit_tooltip", &model.exitTooltip);
             c.Bind("label_top", &model.labelTop);
             c.Bind("label_line_px", &model.labelLinePx);
@@ -674,91 +665,92 @@ void mu::ui::window::CGuildInfoWindow::SyncRmlModel()
 void mu::ui::window::CGuildInfoWindow::SyncContent()
 {
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    const DWORD white = 0xFFFFFFFF;
     const float x0 = static_cast<float>(m_Pos.x);
     const float y0 = static_cast<float>(m_Pos.y);
 
-    std::vector<GuildInfoTextEntry> texts;
-    std::vector<GuildInfoBoxEntry> boxes;
-    std::vector<GuildInfoMarkEntry> marks;
-    std::vector<GuildInfoButtonEntry> buttons;
-
-    // RenderText(x, y, text, width, 0, sort): positions in window coordinates; `width` 0 = no box.
-    auto addText = [&](const wchar_t* text, float x, float y, float width, int align, DWORD color, bool bold = false)
+    // One of the window's own lines: the document places it, so only what it says and the size the
+    // native renderer would have shrunk it to for its box travel through the model.
+    auto line = [&](const wchar_t* text, bool boldFont, float boxWidth) -> GuildLine
     {
         if (text == nullptr || text[0] == L'\0')
-            return;
-        g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
+            return {};
+        g_pRenderText->SetFont(boldFont ? g_hFontBold : g_hFont);
         const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-        const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
+        const auto role = boldFont ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
         const float px =
-            width > 0.f ? UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), width)
-                        : UI::Scaling::NativeTextPixelSize(role, transform);
-        texts.push_back(
-            {StringUtils::WideToNarrow(text), x - x0, y - y0, width, px, align, bold, UI::RmlBridge::RgbaToCss(color)});
+            boxWidth > 0.f
+                ? UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), boxWidth)
+                : UI::Scaling::NativeTextPixelSize(role, transform);
+        return {StringUtils::WideToNarrow(text), px};
     };
-    auto addButton = [&](int index, const wchar_t* label, float left, float top)
-    { buttons.push_back({StringUtils::WideToNarrow(label), index, left, top}); };
+    // A list cell's own shrink box, for the two cells that had one.
+    auto cellPx = [&](const wchar_t* text, float boxWidth)
+    {
+        g_pRenderText->SetFont(g_hFont);
+        const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
+        return UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
+                                                     static_cast<float>(measured), boxWidth);
+    };
 
     const bool noGuild = Hero->GuildStatus == G_NONE;
     std::vector<Rml::String> markCells;
+    std::vector<GuildNoticeRow> noticeRows;
+    std::vector<GuildMemberRow> memberRows;
+    std::vector<GuildUnionRow> unionRows;
+    std::vector<GuildLine> allianceLines;
+    GuildLine hintTitle, hintLine1, hintLine2, hintLine3;
+    GuildLine title, guildName, tabInfo, tabMembers, tabUnion;
+    GuildLine noticeLabel, created, score, memberCount, rival;
+    GuildLine headerName, headerPosition, headerServer, headerUnionName, headerUnionMembers;
+    GuildActionButton guildOutButton, getPositionButton, freePositionButton, getOutButton;
+    GuildActionButton unionCreateButton, unionOutButton;
     bool unionShown = false;
-    float scrollTop = 0.f;
     wchar_t Text[300] = {};
 
     if (noGuild)
     {
         // The original's RenderNoneGuild().
-        addText(I18N::Game::Guild, x0, y0 + 15, 190, 1, white, true);
-        addText(I18N::Game::TypeGuildInFrontOf, x0 + 25, y0 + 46, 0, 0, white);
-        addText(I18N::Game::TheGuildMasterYouWantToJoin, x0 + 25, y0 + 61, 0, 0, white);
-        addText(I18N::Game::AndYouCanJoinTheGuild, x0 + 25, y0 + 76, 0, 0, white);
+        hintTitle = line(I18N::Game::Guild, true, 190.f);
+        hintLine1 = line(I18N::Game::TypeGuildInFrontOf, false, 0.f);
+        hintLine2 = line(I18N::Game::TheGuildMasterYouWantToJoin, false, 0.f);
+        hintLine3 = line(I18N::Game::AndYouCanJoinTheGuild, false, 0.f);
     }
     else
     {
         // The original's Render_Text() and each tab's Render_*().
-        addText(I18N::Game::Guild, x0, y0 + 12, 190, 1, white);
+        const float tabWidth = static_cast<float>(GuildConstants::UILayout::TAB_WIDTH);
+        title = line(I18N::Game::Guild, false, 190.f);
         mu_swprintf(Text, L"%ls ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
-        addText(Text, x0 + 35, y0 + 48, 120, 1, RGBA(200, 255, 100, 255));
-        const int tabWidth = GuildConstants::UILayout::TAB_WIDTH;
-        addText(I18N::Game::Guild, x0 + 13 + static_cast<int>(GuildConstants::GuildTab::INFO) * tabWidth, y0 + 76,
-                tabWidth, 1, white);
-        addText(I18N::Game::Members, x0 + 13 + static_cast<int>(GuildConstants::GuildTab::MEMBERS) * tabWidth, y0 + 76,
-                tabWidth, 1, white);
-        addText(I18N::Game::Alliance, x0 + 13 + static_cast<int>(GuildConstants::GuildTab::UNION) * tabWidth, y0 + 76,
-                tabWidth, 1, white);
+        guildName = line(Text, false, 120.f);
+        tabInfo = line(I18N::Game::Guild, false, tabWidth);
+        tabMembers = line(I18N::Game::Members, false, tabWidth);
+        tabUnion = line(I18N::Game::Alliance, false, tabWidth);
 
         if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::INFO))
         {
             markCells = MarkCells(GuildMark[Hero->GuildMarkIndex].Mark);
-            scrollTop = 262.f - y0;
-            addButton(BUTTON_GUILD_OUT, Hero->GuildStatus == G_MASTER ? I18N::Game::Disband : I18N::Game::Leave, 100,
-                      350);
-
-            addText(I18N::Game::GuildAnnouncement, x0 + 22, y0 + 249, 40, 1, _ARGB(255, 255, 185, 1));
+            guildOutButton = {StringUtils::WideToNarrow(Hero->GuildStatus == G_MASTER ? I18N::Game::Disband
+                                                                                      : I18N::Game::Leave),
+                              true};
+            noticeLabel = line(I18N::Game::GuildAnnouncement, false, 40.f);
 
             m_GuildNotice.SetSize(GuildConstants::UILayout::NOTICE_BOX_WIDTH,
                                   GuildConstants::UILayout::NOTICE_BOX_HEIGHT);
             m_GuildNotice.SetPosition(m_Pos.x + 15, m_Pos.y + 264 + m_GuildNotice.GetHeight());
-            const float listX = static_cast<float>(m_GuildNotice.GetPosition_x());
-            const float lineWidth = static_cast<float>(m_GuildNotice.GetWidth() - 13 + 1);
             m_GuildNotice.ForEachRenderLine(
-                [&](int line, const GUILDLOG_TEXT& item, bool selected)
+                [&](int lineIndex, const GUILDLOG_TEXT& item, bool selected)
                 {
-                    const float y = static_cast<float>(m_GuildNotice.GetRenderLinePos_y(line));
-                    if (selected)
-                        boxes.push_back({listX - x0, y - 3 - y0, lineWidth, 13});
-                    addText(item.m_szContent, listX + 4, y, 0, 0,
-                            selected ? RGBA(0, 0, 0, 255) : RGBA(230, 220, 200, 255));
+                    GuildNoticeRow row;
+                    row.text = StringUtils::WideToNarrow(item.m_szContent);
+                    row.top = static_cast<float>(m_GuildNotice.GetRenderLinePos_y(lineIndex)) - 3.f - y0;
+                    row.selected = selected;
+                    noticeRows.push_back(std::move(row));
                 });
 
-            int Nm_Loc = m_Pos.y + 169;
             mu_swprintf(Text, L"%ls :", I18N::Game::GuildCreationDate);
-            addText(Text, x0 + 22, static_cast<float>(Nm_Loc), 40, 0, white);
-            Nm_Loc += 13;
+            created = line(Text, false, 40.f);
             mu_swprintf(Text, I18N::Game::GuildScoreD, GuildTotalScore);
-            addText(Text, x0 + 22, static_cast<float>(Nm_Loc), 80, 0, white);
-            Nm_Loc += 13;
+            score = line(Text, false, 80.f);
             if (Hero->GuildStatus == G_MASTER)
             {
                 const int Class = gCharacterManager.GetBaseClass(CharacterAttribute->Class);
@@ -778,32 +770,25 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
             {
                 mu_swprintf(Text, I18N::Game::GuildMemberD, g_nGuildMemberCount);
             }
-            addText(Text, x0 + 22, static_cast<float>(Nm_Loc), 80, 0, white);
-            Nm_Loc += 13;
+            memberCount = line(Text, false, 80.f);
             mu_swprintf(Text, L"%ls : %ls", I18N::Game::HostilityGuild,
                         m_RivalGuildName[0] ? m_RivalGuildName : I18N::Game::None);
-            addText(Text, x0 + 22, static_cast<float>(Nm_Loc), 0, 0, white);
+            rival = line(Text, false, 0.f);
         }
         else if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::MEMBERS))
         {
-            scrollTop = 125.f - y0;
-            addText(I18N::Game::Name, x0 + 24, y0 + 112, 40, 0, white);
-            addText(I18N::Game::Position, x0 + 89, y0 + 112, 40, 0, white);
-            addText(I18N::Game::Server, x0 + 126, y0 + 112, 40, 0, white);
+            headerName = line(I18N::Game::Name, false, 40.f);
+            headerPosition = line(I18N::Game::Position, false, 40.f);
+            headerServer = line(I18N::Game::Server, false, 40.f);
 
             m_GuildMember.SetSize(GuildConstants::UILayout::MEMBER_BOX_WIDTH,
                                   GuildConstants::UILayout::MEMBER_BOX_HEIGHT);
             m_GuildMember.SetPosition(m_Pos.x + 13, m_Pos.y + 123 + m_GuildMember.GetHeight());
-            const float listX = static_cast<float>(m_GuildMember.GetPosition_x());
-            const float listWidth = static_cast<float>(m_GuildMember.GetWidth());
-            const float lineWidth = listWidth - 13 + 1;
             // CUINewGuildMemberListBox::RenderDataLine(): the master, assistant and battle master
-            // lines and the selected line on a box (its colour: guild_info.rcss .line-box), the
-            // selected line's text black; the role centred on 70 units, the server number in (255, 196, 0).
+            // lines carry the same backdrop a selected line does.
             m_GuildMember.ForEachRenderLine(
-                [&](int line, const GUILDLIST_TEXT& item, bool selected)
+                [&](int lineIndex, const GUILDLIST_TEXT& item, bool selected)
                 {
-                    const float y = static_cast<float>(m_GuildMember.GetRenderLinePos_y(line));
                     const wchar_t* role = nullptr;
                     if (item.m_GuildStatus == G_MASTER)
                         role = I18N::Game::Master;
@@ -811,25 +796,30 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
                         role = I18N::Game::AssistM;
                     else if (item.m_GuildStatus == G_BATTLE_MASTER)
                         role = I18N::Game::BattleM;
-                    if (role != nullptr || selected)
-                        boxes.push_back({listX - x0, y - 3 - y0, lineWidth, 13});
-                    const DWORD color = selected ? RGBA(0, 0, 0, 255) : RGBA(230, 220, 200, 255);
-                    addText(item.m_szID, listX + 8, y, 0, 0, color);
+                    GuildMemberRow row;
+                    row.name = StringUtils::WideToNarrow(item.m_szID);
                     if (role != nullptr)
-                        addText(role, listX + 8 + 45, y, 70, 1, color);
+                    {
+                        row.role = StringUtils::WideToNarrow(role);
+                        row.roleTextPx = cellPx(role, 70.f);
+                    }
                     if (item.m_Server != 255)
                     {
                         wchar_t server[16] = {};
                         mu_swprintf(server, L"%d", item.m_Server + 1);
-                        addText(server, listX + listWidth - 30, y, 0, 0, RGBA(255, 196, 0, 255));
+                        row.server = StringUtils::WideToNarrow(server);
                     }
+                    row.top = static_cast<float>(m_GuildMember.GetRenderLinePos_y(lineIndex)) - 3.f - y0;
+                    row.selected = selected;
+                    row.officer = role != nullptr;
+                    memberRows.push_back(std::move(row));
                 });
 
             if (Hero->GuildStatus == G_MASTER)
             {
-                addButton(BUTTON_GET_POSITION, I18N::Game::Position, 3, 360);
-                addButton(BUTTON_FREE_POSITION, I18N::Game::Dissolve, 64, 360);
-                addButton(BUTTON_GET_OUT, I18N::Game::Release, 125, 360);
+                getPositionButton = {StringUtils::WideToNarrow(I18N::Game::Position), true};
+                freePositionButton = {StringUtils::WideToNarrow(I18N::Game::Dissolve), true};
+                getOutButton = {StringUtils::WideToNarrow(I18N::Game::Release), true};
             }
         }
         else if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::UNION))
@@ -837,55 +827,48 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
             unionShown = GuildMark[Hero->GuildMarkIndex].UnionName[0] != 0;
             if (unionShown)
             {
-                addText(I18N::Game::NAME, x0 + 34, y0 + 115, 40, 0, white);
-                addText(I18N::Game::Members, x0 + 140, y0 + 115, 40, 0, white);
+                headerUnionName = line(I18N::Game::NAME, false, 40.f);
+                headerUnionMembers = line(I18N::Game::Members, false, 40.f);
 
                 m_UnionListBox.SetSize(GuildConstants::UILayout::UNION_BOX_WIDTH,
                                        GuildConstants::UILayout::UNION_BOX_HEIGHT);
                 m_UnionListBox.SetPosition(m_Pos.x + 15, m_Pos.y + 210);
-                const float listX = static_cast<float>(m_UnionListBox.GetPosition_x());
-                const float lineWidth = static_cast<float>(m_UnionListBox.GetWidth() - 13 + 1);
                 m_UnionListBox.ForEachRenderLine(
-                    [&](int line, const UNIONGUILD_TEXT& item, bool selected)
+                    [&](int lineIndex, const UNIONGUILD_TEXT& item, bool selected)
                     {
-                        const float y = static_cast<float>(m_UnionListBox.GetRenderLinePos_y(line));
-                        if (selected)
-                            boxes.push_back({listX - x0, y - 3 - y0, lineWidth, 13});
-                        marks.push_back({listX + 4 - x0, y - y0, MarkCells(item.GuildMark)});
-                        const DWORD color = selected ? RGBA(0, 0, 0, 255) : RGBA(230, 220, 220, 255);
-                        addText(item.szName, listX + 4 + 12, y, 0, 0, color);
                         wchar_t count[16] = {};
                         mu_swprintf(count, L"%d", item.nMemberCount);
-                        // RT3_WRITE_RIGHT_TO_LEFT: the text ends at x.
-                        addText(count, listX + 4 + 138 - 60, y, 60, 2, color);
+                        GuildUnionRow row;
+                        row.name = StringUtils::WideToNarrow(item.szName);
+                        row.memberCount = StringUtils::WideToNarrow(count);
+                        row.countTextPx = cellPx(count, 60.f);
+                        row.markCells = MarkCells(item.GuildMark);
+                        row.top = static_cast<float>(m_UnionListBox.GetRenderLinePos_y(lineIndex)) - 3.f - y0;
+                        row.selected = selected;
+                        unionRows.push_back(std::move(row));
                     });
 
-                addButton(BUTTON_UNION_CREATE, I18N::Game::DisbandAlliance, 30, 230);
-                addButton(BUTTON_UNION_OUT, I18N::Game::DisbandGuildAlliance, 100, 230);
+                unionCreateButton = {StringUtils::WideToNarrow(I18N::Game::DisbandAlliance), true};
+                unionOutButton = {StringUtils::WideToNarrow(I18N::Game::DisbandGuildAlliance), true};
             }
             else
             {
                 // Render_Guild_Info()'s explanation.
-                float y = y0 + 106;
-                const float x = x0 + 25;
-                const std::pair<const wchar_t*, int> lines[] = {
-                    {I18N::Game::ToMakeTheAlliance, 15},
-                    {I18N::Game::FaceTheGuildMaster, 15},
-                    {I18N::Game::OfDesiredGuildForGuildAlliance, 15},
-                    {I18N::Game::EnterAllianceOrGuildAlliance, 15},
-                    {I18N::Game::ButtonInCommandWindow, 25},
-                    {I18N::Game::IfTheOppositeIsNotAGuild, 15},
-                    {I18N::Game::AllianceOppositeAllianceShould, 15},
-                    {I18N::Game::BeTheMainAllianceForCreating, 20},
-                    {I18N::Game::GuildAllianceRequestThe, 15},
-                    {I18N::Game::RegistrationToOppositeAlliance, 15},
-                    {I18N::Game::IfTheOppositeIsGuildAlliance, 0},
+                const wchar_t* lines[] = {
+                    I18N::Game::ToMakeTheAlliance,
+                    I18N::Game::FaceTheGuildMaster,
+                    I18N::Game::OfDesiredGuildForGuildAlliance,
+                    I18N::Game::EnterAllianceOrGuildAlliance,
+                    I18N::Game::ButtonInCommandWindow,
+                    I18N::Game::IfTheOppositeIsNotAGuild,
+                    I18N::Game::AllianceOppositeAllianceShould,
+                    I18N::Game::BeTheMainAllianceForCreating,
+                    I18N::Game::GuildAllianceRequestThe,
+                    I18N::Game::RegistrationToOppositeAlliance,
+                    I18N::Game::IfTheOppositeIsGuildAlliance,
                 };
-                for (const auto& [text, advance] : lines)
-                {
-                    addText(text, x, y, 0, 0, white);
-                    y += static_cast<float>(advance);
-                }
+                for (const wchar_t* text : lines)
+                    allianceLines.push_back(line(text, false, 0.f));
             }
         }
     }
@@ -894,15 +877,59 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
     SyncField(m_RmlBinder, &GuildInfoRmlModel::noGuild, "no_guild", noGuild);
     SyncField(m_RmlBinder, &GuildInfoRmlModel::tab, "tab", m_nCurrentTab);
     SyncField(m_RmlBinder, &GuildInfoRmlModel::unionShown, "union_shown", unionShown);
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::scrollTop, "scroll_top", scrollTop);
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::thumbTop, "thumb_top", scrollTop + static_cast<float>(m_Loc));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::scrollOffset, "scroll_offset", static_cast<float>(m_Loc));
     SyncField(m_RmlBinder, &GuildInfoRmlModel::markCells, "mark_cells", std::move(markCells));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::hintTitle, "hint_title", std::move(hintTitle));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::hintLine1, "hint_line1", std::move(hintLine1));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::hintLine2, "hint_line2", std::move(hintLine2));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::hintLine3, "hint_line3", std::move(hintLine3));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::title, "title", std::move(title));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::guildName, "guild_name", std::move(guildName));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::tabInfo, "tab_info", std::move(tabInfo));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::tabMembers, "tab_members", std::move(tabMembers));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::tabUnion, "tab_union", std::move(tabUnion));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::noticeLabel, "notice_label", std::move(noticeLabel));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::created, "created", std::move(created));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::score, "score", std::move(score));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::memberCount, "member_count", std::move(memberCount));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::rival, "rival", std::move(rival));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::headerName, "header_name", std::move(headerName));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::headerPosition, "header_position", std::move(headerPosition));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::headerServer, "header_server", std::move(headerServer));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::headerUnionName, "header_union_name", std::move(headerUnionName));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::headerUnionMembers, "header_union_members",
+              std::move(headerUnionMembers));
+    if (model.noticeRows != noticeRows)
+    {
+        model.noticeRows = std::move(noticeRows);
+        m_RmlBinder.MarkDirty("notice_rows");
+    }
+    if (model.memberRows != memberRows)
+    {
+        model.memberRows = std::move(memberRows);
+        m_RmlBinder.MarkDirty("member_rows");
+    }
+    if (model.unionRows != unionRows)
+    {
+        model.unionRows = std::move(unionRows);
+        m_RmlBinder.MarkDirty("union_rows");
+    }
+    if (model.allianceLines != allianceLines)
+    {
+        model.allianceLines = std::move(allianceLines);
+        m_RmlBinder.MarkDirty("alliance_lines");
+    }
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::guildOutButton, "guild_out_button", std::move(guildOutButton));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::getPositionButton, "get_position_button",
+              std::move(getPositionButton));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::freePositionButton, "free_position_button",
+              std::move(freePositionButton));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::getOutButton, "get_out_button", std::move(getOutButton));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::unionCreateButton, "union_create_button",
+              std::move(unionCreateButton));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::unionOutButton, "union_out_button", std::move(unionOutButton));
     SyncField(m_RmlBinder, &GuildInfoRmlModel::exitTooltip, "exit_tooltip",
               StringUtils::WideToNarrow(I18N::Game::Close388));
-    SyncList(model.texts, std::move(texts), SameText, m_RmlBinder, "texts");
-    SyncList(model.boxes, std::move(boxes), SameBox, m_RmlBinder, "boxes");
-    SyncList(model.marks, std::move(marks), SameMark, m_RmlBinder, "marks");
-    SyncList(model.buttons, std::move(buttons), SameButton, m_RmlBinder, "buttons");
 
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     const int labelTop = GuildConstants::UILayout::BUTTON_HEIGHT / 2 - lineHeight / 2;

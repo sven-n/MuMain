@@ -7,13 +7,13 @@
 </head>
 <body>
 	<!-- The guild window (CGuildInfoWindow), docked right: the no-guild hint, or the Guild, Members
-	     and Alliance tabs. The static art of each tab (tables, fills, scroll track) is here; the
-	     texts, the list lines and their white boxes, the marks and the buttons are bound from
-	     C++, which keeps the native list controls for their data, scrolling and line clicks. The
-	     tabs, the lines and the scroll thumb are hit-tested natively, so #panel leaves the
-	     pointer alone outside the buttons. root_x/root_y/root_scale come from the dock transform;
-	     everything inside is reference px; text is .sharp-text at the native size,
-	     counter-scaled out of the panel. A button click is queued with guild_info_button(n). -->
+	     and Alliance tabs. Every position and size below is the theme's; C++ keeps the native list
+	     controls for their data, scrolling and line clicks, so a list row's own top follows their
+	     scroll position and the scroll thumb its offset. The tabs, the lines and the thumb are
+	     hit-tested natively, so #panel leaves the pointer alone outside the buttons.
+	     root_x/root_y/root_scale come from the dock transform; a .sharp-text layer's own width and
+	     font size stay bound for the counter-scale (base.rcss). A button click is queued with
+	     guild_info_button(n). -->
 	<div id="panel" data-model="guild_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div class="frame-piece frame-top"></div>
@@ -26,118 +26,242 @@
 			<div id="tab_point" data-style-left="(12 + tab * 56) + 'px'"></div>
 		</div>
 
-		<div data-if="!no_guild &amp;&amp; tab == 0">
-			<div class="t-edge-top" style="left: 73px; top: 104px; width: 42px;"></div>
-			<div class="t-edge-bottom" style="left: 73px; top: 138px; width: 42px;"></div>
-			<div class="t-edge-left" style="left: 70px; top: 104px; height: 42px;"></div>
-			<div class="t-edge-right" style="left: 105px; top: 104px; height: 42px;"></div>
-			<div class="t-corner t-tl" style="left: 70px; top: 104px;"></div>
-			<div class="t-corner t-tr" style="left: 105px; top: 104px;"></div>
-			<div class="t-corner t-bl" style="left: 70px; top: 138px;"></div>
-			<div class="t-corner t-br" style="left: 105px; top: 138px;"></div>
+		<!-- RenderNoneGuild(). -->
+		<div class="gi-page" data-if="no_guild">
+		<span id="gi_hint_title" class="sharp-text gi-line" data-style-width="(190 * root_scale) + 'px'"
+		      data-style-font-size="hint_title.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{hint_title.text}}</span>
+		<span id="gi_hint_1" class="sharp-text gi-note"
+		      data-style-font-size="hint_line1.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{hint_line1.text}}</span>
+		<span id="gi_hint_2" class="sharp-text gi-note"
+		      data-style-font-size="hint_line2.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{hint_line2.text}}</span>
+		<span id="gi_hint_3" class="sharp-text gi-note"
+		      data-style-font-size="hint_line3.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{hint_line3.text}}</span>
+		</div>
+
+		<!-- The header every tab shares. -->
+		<div class="gi-page" data-if="!no_guild">
+		<span id="gi_title" class="sharp-text gi-line" data-style-width="(190 * root_scale) + 'px'"
+		      data-style-font-size="title.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title.text}}</span>
+		<span id="gi_name" class="sharp-text gi-line" data-style-width="(120 * root_scale) + 'px'"
+		      data-style-font-size="guild_name.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{guild_name.text}}</span>
+		<span id="gi_tab_info" class="sharp-text gi-line gi-tab-label" data-style-width="(56 * root_scale) + 'px'"
+		      data-style-font-size="tab_info.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{tab_info.text}}</span>
+		<span id="gi_tab_members" class="sharp-text gi-line gi-tab-label" data-style-width="(56 * root_scale) + 'px'"
+		      data-style-font-size="tab_members.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{tab_members.text}}</span>
+		<span id="gi_tab_union" class="sharp-text gi-line gi-tab-label" data-style-width="(56 * root_scale) + 'px'"
+		      data-style-font-size="tab_union.text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{tab_union.text}}</span>
+		</div>
+
+		<!-- The Guild tab. -->
+		<div class="gi-page" data-if="!no_guild &amp;&amp; tab == 0">
+			<div class="t-edge-top mark-edge-top"></div>
+			<div class="t-edge-bottom mark-edge-bottom"></div>
+			<div class="t-edge-left mark-edge-left"></div>
+			<div class="t-edge-right mark-edge-right"></div>
+			<div class="t-corner t-tl mark-corner-tl"></div>
+			<div class="t-corner t-tr mark-corner-tr"></div>
+			<div class="t-corner t-bl mark-corner-bl"></div>
+			<div class="t-corner t-br mark-corner-br"></div>
 			<div id="guild_mark"><div class="mark-cell" data-for="m : mark_cells" data-style-background-color="m"></div></div>
-			<div class="t-edge-top" style="left: 12px; top: 159px; width: 166px;"></div>
-			<div class="t-edge-bottom" style="left: 12px; top: 215px; width: 166px;"></div>
-			<div class="t-edge-left" style="left: 10px; top: 159px; height: 65px;"></div>
-			<div class="t-edge-right" style="left: 167px; top: 159px; height: 65px;"></div>
-			<div class="t-corner t-tl" style="left: 10px; top: 159px;"></div>
-			<div class="t-corner t-tr" style="left: 167px; top: 159px;"></div>
-			<div class="t-corner t-bl" style="left: 10px; top: 215px;"></div>
-			<div class="t-corner t-br" style="left: 167px; top: 215px;"></div>
-			<div class="fill" style="left: 11px; top: 260px; width: 165px; height: 84px; background-color: #000000;"></div>
-			<div class="t-edge-top" style="left: 12px; top: 260px; width: 165px;"></div>
-			<div class="t-edge-bottom" style="left: 12px; top: 334px; width: 165px;"></div>
-			<div class="t-edge-left" style="left: 10px; top: 260px; height: 82px;"></div>
-			<div class="t-edge-right" style="left: 167px; top: 260px; height: 82px;"></div>
-			<div class="t-corner t-tr" style="left: 167px; top: 260px;"></div>
-			<div class="t-corner t-bl" style="left: 10px; top: 334px;"></div>
-			<div class="t-corner t-br" style="left: 167px; top: 334px;"></div>
+			<div class="t-edge-top figures-edge-top"></div>
+			<div class="t-edge-bottom figures-edge-bottom"></div>
+			<div class="t-edge-left figures-edge-left"></div>
+			<div class="t-edge-right figures-edge-right"></div>
+			<div class="t-corner t-tl figures-corner-tl"></div>
+			<div class="t-corner t-tr figures-corner-tr"></div>
+			<div class="t-corner t-bl figures-corner-bl"></div>
+			<div class="t-corner t-br figures-corner-br"></div>
+			<div class="fill notice-fill"></div>
+			<div class="t-edge-top notice-edge-top"></div>
+			<div class="t-edge-bottom notice-edge-bottom"></div>
+			<div class="t-edge-left notice-edge-left"></div>
+			<div class="t-edge-right notice-edge-right"></div>
+			<div class="t-corner t-tr notice-corner-tr"></div>
+			<div class="t-corner t-bl notice-corner-bl"></div>
+			<div class="t-corner t-br notice-corner-br"></div>
 			<div id="tab_head"></div>
-			<div class="scroll" data-style-top="scroll_top + 'px'">
-				<div class="s-top" style="left: 167px; top: 0px;"></div>
-				<div class="s-mid" style="left: 167px; top: 3px;"></div>
-				<div class="s-mid" style="left: 167px; top: 13px;"></div>
-				<div class="s-mid" style="left: 167px; top: 23px;"></div>
-				<div class="s-mid" style="left: 167px; top: 33px;"></div>
-				<div class="s-mid" style="left: 167px; top: 43px;"></div>
-				<div class="s-mid" style="left: 167px; top: 53px;"></div>
-				<div class="s-mid" style="left: 167px; top: 63px;"></div>
-				<div class="s-bottom" style="left: 167px; top: 76px;"></div>
+			<div class="gi-scroll scroll-notice">
+				<div class="s-top"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-bottom"></div>
+				<div class="thumb" data-style-top="scroll_offset + 'px'"></div>
 			</div>
-			<div class="thumb" style="left: 163px;" data-style-top="thumb_top + 'px'"></div>
-		</div>
-
-		<div data-if="!no_guild &amp;&amp; tab == 1">
-			<div class="fill" style="left: 12px; top: 125px; width: 165px; height: 232px; background-color: rgba(21, 21, 21, 150);"></div>
-			<div class="fill" style="left: 12px; top: 105px; width: 165px; height: 20px; background-color: rgba(59, 59, 59, 150);"></div>
-			<div class="t-edge-top" style="left: 12px; top: 105px; width: 165px;"></div>
-			<div class="t-edge-bottom" style="left: 12px; top: 347px; width: 165px;"></div>
-			<div class="t-edge-left" style="left: 8px; top: 105px; height: 251px;"></div>
-			<div class="t-edge-right" style="left: 168px; top: 105px; height: 251px;"></div>
-			<div class="t-corner t-tl" style="left: 8px; top: 105px;"></div>
-			<div class="t-corner t-tr" style="left: 168px; top: 105px;"></div>
-			<div class="t-corner t-bl" style="left: 8px; top: 347px;"></div>
-			<div class="t-corner t-br" style="left: 168px; top: 347px;"></div>
-			<div class="scroll" data-style-top="scroll_top + 'px'">
-				<div class="s-top" style="left: 170px; top: 0px;"></div>
-				<div class="s-mid" style="left: 170px; top: 3px;"></div>
-				<div class="s-mid" style="left: 170px; top: 13px;"></div>
-				<div class="s-mid" style="left: 170px; top: 23px;"></div>
-				<div class="s-mid" style="left: 170px; top: 33px;"></div>
-				<div class="s-mid" style="left: 170px; top: 43px;"></div>
-				<div class="s-mid" style="left: 170px; top: 53px;"></div>
-				<div class="s-mid" style="left: 170px; top: 63px;"></div>
-				<div class="s-mid" style="left: 170px; top: 73px;"></div>
-				<div class="s-mid" style="left: 170px; top: 83px;"></div>
-				<div class="s-mid" style="left: 170px; top: 93px;"></div>
-				<div class="s-mid" style="left: 170px; top: 103px;"></div>
-				<div class="s-mid" style="left: 170px; top: 113px;"></div>
-				<div class="s-mid" style="left: 170px; top: 123px;"></div>
-				<div class="s-mid" style="left: 170px; top: 133px;"></div>
-				<div class="s-mid" style="left: 170px; top: 143px;"></div>
-				<div class="s-mid" style="left: 170px; top: 153px;"></div>
-				<div class="s-mid" style="left: 170px; top: 163px;"></div>
-				<div class="s-mid" style="left: 170px; top: 173px;"></div>
-				<div class="s-mid" style="left: 170px; top: 183px;"></div>
-				<div class="s-mid" style="left: 170px; top: 193px;"></div>
-				<div class="s-mid" style="left: 170px; top: 203px;"></div>
-				<div class="s-mid" style="left: 170px; top: 213px;"></div>
-				<div class="s-bottom" style="left: 170px; top: 227px;"></div>
+			<span id="gi_notice_label" class="sharp-text gi-line" data-style-width="(40 * root_scale) + 'px'"
+			      data-style-font-size="notice_label.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{notice_label.text}}</span>
+			<span id="gi_created" class="sharp-text gi-figure" data-style-width="(40 * root_scale) + 'px'"
+			      data-style-font-size="created.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{created.text}}</span>
+			<span id="gi_score" class="sharp-text gi-figure" data-style-width="(80 * root_scale) + 'px'"
+			      data-style-font-size="score.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{score.text}}</span>
+			<span id="gi_member_count" class="sharp-text gi-figure" data-style-width="(80 * root_scale) + 'px'"
+			      data-style-font-size="member_count.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{member_count.text}}</span>
+			<span id="gi_rival" class="sharp-text gi-figure"
+			      data-style-font-size="rival.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{rival.text}}</span>
+			<div class="gi-rows gi-notice-rows">
+				<div class="gi-row" data-for="r : notice_rows" data-class-selected="r.selected"
+				     data-style-top="r.top + 'px'">
+					<div class="gi-row-back"></div>
+					<span class="sharp-text gi-cell cell-notice" data-style-font-size="text_px + 'px'"
+					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.text}}</span>
+				</div>
 			</div>
-			<div class="thumb" style="left: 166px;" data-style-top="thumb_top + 'px'"></div>
+			<div id="btn_guild_out" class="gi-btn" data-if="guild_out_button.shown" data-event-click="guild_info_button(0)">
+				<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+				      data-style-line-height="label_line_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{guild_out_button.label}}</span></span>
+			</div>
 		</div>
 
-		<div data-if="!no_guild &amp;&amp; tab == 2 &amp;&amp; union_shown">
-			<div class="fill" style="left: 12px; top: 125px; width: 165px; height: 85px; background-color: rgba(21, 21, 21, 150);"></div>
-			<div class="fill" style="left: 12px; top: 110px; width: 165px; height: 15px; background-color: rgba(59, 59, 59, 150);"></div>
-			<div class="t-edge-top" style="left: 12px; top: 109px; width: 166px;"></div>
-			<div class="t-edge-bottom" style="left: 12px; top: 201px; width: 166px;"></div>
-			<div class="t-edge-left" style="left: 10px; top: 109px; height: 100px;"></div>
-			<div class="t-edge-right" style="left: 167px; top: 109px; height: 100px;"></div>
-			<div class="t-corner t-tl" style="left: 10px; top: 109px;"></div>
-			<div class="t-corner t-tr" style="left: 167px; top: 109px;"></div>
-			<div class="t-corner t-bl" style="left: 10px; top: 201px;"></div>
-			<div class="t-corner t-br" style="left: 167px; top: 201px;"></div>
+		<!-- The Members tab. -->
+		<div class="gi-page" data-if="!no_guild &amp;&amp; tab == 1">
+			<div class="fill members-fill"></div>
+			<div class="fill members-head-fill"></div>
+			<div class="t-edge-top members-edge-top"></div>
+			<div class="t-edge-bottom members-edge-bottom"></div>
+			<div class="t-edge-left members-edge-left"></div>
+			<div class="t-edge-right members-edge-right"></div>
+			<div class="t-corner t-tl members-corner-tl"></div>
+			<div class="t-corner t-tr members-corner-tr"></div>
+			<div class="t-corner t-bl members-corner-bl"></div>
+			<div class="t-corner t-br members-corner-br"></div>
+			<div class="gi-scroll scroll-members">
+				<div class="s-top"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-mid"></div>
+				<div class="s-bottom"></div>
+				<div class="thumb" data-style-top="scroll_offset + 'px'"></div>
+			</div>
+			<span id="gi_hdr_name" class="sharp-text gi-header" data-style-width="(40 * root_scale) + 'px'"
+			      data-style-font-size="header_name.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_name.text}}</span>
+			<span id="gi_hdr_position" class="sharp-text gi-header" data-style-width="(40 * root_scale) + 'px'"
+			      data-style-font-size="header_position.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_position.text}}</span>
+			<span id="gi_hdr_server" class="sharp-text gi-header" data-style-width="(40 * root_scale) + 'px'"
+			      data-style-font-size="header_server.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_server.text}}</span>
+			<div class="gi-rows gi-member-rows">
+				<div class="gi-row" data-for="r : member_rows" data-class-selected="r.selected"
+				     data-class-officer="r.officer" data-style-top="r.top + 'px'">
+					<div class="gi-row-back"></div>
+					<span class="sharp-text gi-cell cell-member-name" data-style-font-size="text_px + 'px'"
+					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.name}}</span>
+					<span class="sharp-text gi-cell cell-member-role" data-style-font-size="r.role_text_px + 'px'"
+					      data-style-width="(70 * root_scale) + 'px'"
+					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.role}}</span>
+					<span class="sharp-text sharp-right gi-cell cell-member-server" data-style-font-size="text_px + 'px'"
+					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.server}}</span>
+				</div>
+			</div>
+			<div id="btn_get_position" class="gi-btn" data-if="get_position_button.shown" data-event-click="guild_info_button(1)">
+				<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+				      data-style-line-height="label_line_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{get_position_button.label}}</span></span>
+			</div>
+			<div id="btn_free_position" class="gi-btn" data-if="free_position_button.shown" data-event-click="guild_info_button(2)">
+				<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+				      data-style-line-height="label_line_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{free_position_button.label}}</span></span>
+			</div>
+			<div id="btn_get_out" class="gi-btn" data-if="get_out_button.shown" data-event-click="guild_info_button(3)">
+				<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+				      data-style-line-height="label_line_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{get_out_button.label}}</span></span>
+			</div>
 		</div>
 
-		<div class="line-box" data-for="b : boxes" data-style-left="b.left + 'px'" data-style-top="b.top + 'px'"
-		     data-style-width="b.width + 'px'" data-style-height="b.height + 'px'"></div>
-		<div class="line-mark" data-for="mk : marks" data-style-left="mk.left + 'px'" data-style-top="mk.top + 'px'">
-			<div class="line-mark-cell" data-for="c : mk.cells" data-style-background-color="c"></div>
+		<!-- The Alliance tab, once the hero is in one. -->
+		<div class="gi-page" data-if="!no_guild &amp;&amp; tab == 2 &amp;&amp; union_shown">
+			<div class="fill union-fill"></div>
+			<div class="fill union-head-fill"></div>
+			<div class="t-edge-top union-edge-top"></div>
+			<div class="t-edge-bottom union-edge-bottom"></div>
+			<div class="t-edge-left union-edge-left"></div>
+			<div class="t-edge-right union-edge-right"></div>
+			<div class="t-corner t-tl union-corner-tl"></div>
+			<div class="t-corner t-tr union-corner-tr"></div>
+			<div class="t-corner t-bl union-corner-bl"></div>
+			<div class="t-corner t-br union-corner-br"></div>
+			<span id="gi_hdr_union_name" class="sharp-text gi-header" data-style-width="(40 * root_scale) + 'px'"
+			      data-style-font-size="header_union_name.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_union_name.text}}</span>
+			<span id="gi_hdr_union_members" class="sharp-text gi-header" data-style-width="(40 * root_scale) + 'px'"
+			      data-style-font-size="header_union_members.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_union_members.text}}</span>
+			<div class="gi-rows gi-union-rows">
+				<div class="gi-row" data-for="r : union_rows" data-class-selected="r.selected"
+				     data-style-top="r.top + 'px'">
+					<div class="gi-row-back"></div>
+					<div class="line-mark"><div class="line-mark-cell" data-for="c : r.mark_cells" data-style-background-color="c"></div></div>
+					<span class="sharp-text gi-cell cell-union-name" data-style-font-size="text_px + 'px'"
+					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.name}}</span>
+					<span class="sharp-text sharp-right gi-cell cell-union-count" data-style-font-size="r.count_text_px + 'px'"
+					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.member_count}}</span>
+				</div>
+			</div>
+			<div id="btn_union_create" class="gi-btn" data-if="union_create_button.shown" data-event-click="guild_info_button(4)">
+				<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+				      data-style-line-height="label_line_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{union_create_button.label}}</span></span>
+			</div>
+			<div id="btn_union_out" class="gi-btn" data-if="union_out_button.shown" data-event-click="guild_info_button(5)">
+				<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+				      data-style-line-height="label_line_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{union_out_button.label}}</span></span>
+			</div>
 		</div>
-		<span class="sharp-text gi-text" data-for="t : texts" data-class-bold="t.bold"
-		      data-class-centred="t.align == 1" data-class-right="t.align == 2"
-		      data-style-left="t.left + 'px'" data-style-top="t.top + 'px'" data-style-color="t.color"
-		      data-style-font-size="t.text_px + 'px'"
-		      data-style-width="t.width == 0 ? 'auto' : (t.width * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.text}}</span>
 
-		<div class="gi-btn" data-for="b : buttons" data-style-left="b.left + 'px'" data-style-top="b.top + 'px'"
-		     data-event-click="guild_info_button(b.index)">
-			<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
-			      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
-			      data-style-line-height="label_line_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{b.label}}</span></span>
+		<!-- Render_Guild_Info()'s explanation, while the hero is in no alliance. -->
+		<div class="gi-page gi-alliance-note" data-if="!no_guild &amp;&amp; tab == 2 &amp;&amp; !union_shown">
+			<span class="sharp-text gi-note gi-alliance-line" data-for="l : alliance_lines"
+			      data-style-font-size="l.text_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{l.text}}</span>
 		</div>
 
 		<div id="btn_exit" data-event-click="guild_info_button(6)"></div>
