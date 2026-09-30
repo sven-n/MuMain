@@ -106,11 +106,6 @@ namespace
         return {color, false};
     }
 
-    bool SameCell(const mu::ui::window::GuildMakeCellEntry& a, const mu::ui::window::GuildMakeCellEntry& b)
-    {
-        return a.color == b.color && a.empty == b.empty && a.left == b.left && a.top == b.top;
-    }
-
     // RenderText() shrinks a text wider than its box to fit it: the size it drew `text` at.
     float TextPxInBox(const UI::Scaling::Transform& transform, const wchar_t* text, float boxWidth)
     {
@@ -436,8 +431,6 @@ void CGuildMakeWindow::BuildRmlUi()
             auto cell = c.RegisterStruct<GuildMakeCellEntry>();
             cell.RegisterMember("color", &GuildMakeCellEntry::color);
             cell.RegisterMember("empty", &GuildMakeCellEntry::empty);
-            cell.RegisterMember("left", &GuildMakeCellEntry::left);
-            cell.RegisterMember("top", &GuildMakeCellEntry::top);
             c.RegisterArray<std::vector<GuildMakeCellEntry>>();
             c.Bind("cells", &model.cells);
             c.Bind("palette", &model.palette);
@@ -544,44 +537,27 @@ void CGuildMakeWindow::SyncContent()
     GuildMakeRmlModel& model = m_RmlBinder.GetModel();
     std::vector<GuildMakeCellEntry> cells;
     std::vector<Rml::String> markCells;
-    // RenderEditGuildMark(): the 8 x 8 grid of 15-unit cells from (50, 100), the palette's two
-    // rows of 20-unit cells from (15, 260), the selected colour at (15, 230).
+    // RenderEditGuildMark(): the grid's cells row by row, then the palette's; the theme lays both
+    // out, and the selected colour has its own swatch.
     for (int i = 0; i < Guild::MarkPalette::CellCount; ++i)
     {
-        GuildMakeCellEntry cell = EditorCell(GuildMark[MARK_EDIT].Mark[i]);
-        cell.left = static_cast<float>(50 + (i % 8) * 15);
-        cell.top = static_cast<float>(100 + (i / 8) * 15);
-        cells.push_back(std::move(cell));
+        cells.push_back(EditorCell(GuildMark[MARK_EDIT].Mark[i]));
         markCells.push_back(Guild::MarkPalette::CellColor(GuildMark[MARK_EDIT].Mark[i]));
     }
     std::vector<GuildMakeCellEntry> palette;
     for (int i = 0; i < Guild::MarkPalette::ColorCount; ++i)
-    {
-        GuildMakeCellEntry cell = EditorCell(i);
-        cell.left = static_cast<float>(15 + (i % 8) * 20);
-        cell.top = static_cast<float>(260 + (i / 8) * 20);
-        palette.push_back(std::move(cell));
-    }
-    GuildMakeCellEntry selected = EditorCell(SelectMarkColor);
-    selected.left = 15.f;
-    selected.top = 230.f;
+        palette.push_back(EditorCell(i));
 
-    if (model.cells.size() != cells.size() ||
-        !std::equal(model.cells.begin(), model.cells.end(), cells.begin(), SameCell))
+    if (model.cells != cells)
     {
         model.cells = std::move(cells);
         m_RmlBinder.MarkDirty("cells");
     }
-    if (model.palette.size() != palette.size() ||
-        !std::equal(model.palette.begin(), model.palette.end(), palette.begin(), SameCell))
+    if (model.palette != palette)
     {
         model.palette = std::move(palette);
         m_RmlBinder.MarkDirty("palette");
     }
-    if (!SameCell(model.selected, selected))
-    {
-        model.selected = selected;
-        m_RmlBinder.MarkDirty("selected");
-    }
+    SyncField(m_RmlBinder, &GuildMakeRmlModel::selected, "selected", EditorCell(SelectMarkColor));
     SyncField(m_RmlBinder, &GuildMakeRmlModel::markCells, "mark_cells", std::move(markCells));
 }

@@ -46,27 +46,33 @@
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{name_text}}</span>
 			<div id="name_back"></div>
 			<div class="gold-rect" id="mark_rect"><div class="gold-h"></div><div class="gold-h gold-h-end"></div><div class="gold-v"></div><div class="gold-v gold-v-end"></div></div>
-			<div class="gm-cell gm-cell-13" data-for="c : cells" data-style-left="c.left + 'px'" data-style-top="c.top + 'px'">
-				<div class="gm-fill" data-style-background-color="c.color">
-					<div class="gm-cross gm-cross-a" data-if="c.empty"></div>
-					<div class="gm-cross gm-cross-b" data-if="c.empty"></div>
+			<!-- The mark grid and the palette: each set has its own container so the theme can
+			     count its cells from the first one. -->
+			<div class="gm-grid">
+				<div class="gm-cell gm-cell-13" data-for="c : cells">
+					<div class="gm-fill" data-style-background-color="c.color">
+						<div class="gm-cross gm-cross-a" data-if="c.empty"></div>
+						<div class="gm-cross gm-cross-b" data-if="c.empty"></div>
+					</div>
 				</div>
 			</div>
-			<div class="gm-cell gm-cell-18" data-for="c : palette" data-style-left="c.left + 'px'" data-style-top="c.top + 'px'">
-				<div class="gm-fill" data-style-background-color="c.color">
-					<div class="gm-cross gm-cross-a" data-if="c.empty"></div>
-					<div class="gm-cross gm-cross-b" data-if="c.empty"></div>
+			<div class="gm-palette">
+				<div class="gm-cell gm-cell-18" data-for="c : palette">
+					<div class="gm-fill" data-style-background-color="c.color">
+						<div class="gm-cross gm-cross-a" data-if="c.empty"></div>
+						<div class="gm-cross gm-cross-b" data-if="c.empty"></div>
+					</div>
 				</div>
 			</div>
-			<div class="gm-cell gm-cell-23" data-style-left="selected.left + 'px'" data-style-top="selected.top + 'px'">
+			<div class="gm-cell gm-cell-23" id="selected_swatch">
 				<div class="gm-fill" data-style-background-color="selected.color">
 					<div class="gm-cross gm-cross-a" data-if="selected.empty"></div>
 					<div class="gm-cross gm-cross-b" data-if="selected.empty"></div>
 				</div>
 			</div>
-			<span class="sharp-text gm-hint" style="top: 230px;" data-style-font-size="text_px + 'px'"
+			<span class="sharp-text gm-hint gm-hint-1" data-style-font-size="text_px + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{palette_hint_1}}</span>
-			<span class="sharp-text gm-hint" style="top: 245px;" data-style-font-size="text_px + 'px'"
+			<span class="sharp-text gm-hint gm-hint-2" data-style-font-size="text_px + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{palette_hint_2}}</span>
 		</div>
 

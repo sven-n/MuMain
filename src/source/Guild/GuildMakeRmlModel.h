@@ -8,12 +8,15 @@ namespace mu::ui::window
 {
 // One cell of the guild mark editor (RenderGuildColor()): its palette colour, or the empty cell's
 // black box with a grey cross.
+// One cell of the mark editor: the colour a palette index stands for, or empty. A mark's pixels
+// are the guild's own data; which cell of the grid or palette this is comes from its place in the
+// list, and the theme lays both out (RenderEditGuildMark()'s 8 x 8 grid and 2 x 8 palette).
 struct GuildMakeCellEntry
 {
     Rml::String color; // "#rrggbbaa"
     bool empty = false;
-    float left = 0.f; // the cell's box (colour inset 1), reference px in the panel
-    float top = 0.f;
+
+    bool operator==(const GuildMakeCellEntry&) const = default;
 };
 
 struct GuildMakeRmlModel
