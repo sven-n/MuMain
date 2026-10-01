@@ -19,6 +19,11 @@ struct NodePosition
 
 // Column (0..2) of a tree node's group, its slot within its rank (0..3) and its rank (1..):
 // the top-left corner of the node's 50x38 box. The icon sits 8 right and 5 down of it.
+//
+// Each theme draws the grid itself, from the column/slot/rank the model carries, so this is not
+// what places a node any more: it is what the skill hint falls back to before the theme's own
+// layout can be read back (RefreshLogicalAnchorPosition). The two have to agree, the same way
+// a window's hit-box fallback has to agree with its drawn panel width.
 NodePosition NodeBoxPosition(int column, int slotInRank, int rank);
 
 // A node's slot within its rank, from its 1-based index in the tree data.

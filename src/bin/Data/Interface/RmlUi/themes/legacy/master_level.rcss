@@ -100,3 +100,24 @@
 #column_0 { left: 92px; }
 #column_1 { left: 302px; }
 #column_2 { left: 513px; }
+
+/* The tree's own grid, which the original computed per node: a group's column, 49 units a slot
+   across it, and 55 plus 41 units a rank down. A rank past the screen was off the tree natively
+   too, so the table stops where the 480-unit screen does. */
+.node.column-0 { left: 11px; }
+.node.column-1 { left: 221px; }
+.node.column-2 { left: 431px; }
+.node.slot-0 { margin-left: 0; }
+.node.slot-1 { margin-left: 49px; }
+.node.slot-2 { margin-left: 98px; }
+.node.slot-3 { margin-left: 147px; }
+.node.rank-1 { top: 55px; }
+.node.rank-2 { top: 96px; }
+.node.rank-3 { top: 137px; }
+.node.rank-4 { top: 178px; }
+.node.rank-5 { top: 219px; }
+.node.rank-6 { top: 260px; }
+.node.rank-7 { top: 301px; }
+.node.rank-8 { top: 342px; }
+.node.rank-9 { top: 383px; }
+.node.rank-10 { top: 424px; }

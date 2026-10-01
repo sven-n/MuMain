@@ -23,8 +23,10 @@
 		<div id="back_left"></div>
 		<div id="back_right"></div>
 
-		<div class="node" data-for="node : nodes" data-class-locked="!node.usable"
-		     data-style-left="node.left + 'px'" data-style-top="node.top + 'px'">
+		<!-- Each node where it is in the tree: its group's column, its slot in its rank, and the
+		     rank. The theme turns that into a position; the id is what the hint reads back. -->
+		<div data-for="node : nodes" data-attr-id="'node_' + node.id"
+		     data-attr-class="'node column-' + node.column + ' slot-' + node.slot + ' rank-' + node.rank + (node.usable ? '' : ' locked')">
 			<div class="node-box"></div>
 			<!-- The icon is the hit area, as native's 20x28 CheckMouseIn(). A press acts on
 			     mousedown, native's IsPress(). -->

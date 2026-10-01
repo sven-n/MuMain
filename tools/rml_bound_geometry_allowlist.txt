@@ -58,7 +58,6 @@ login_scene.rml: per-frame data -- scene sprites scale on their own 800x600 form
 lucky_coin_exchange.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
 lucky_coin_registration.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
 map_name.rml: per-frame data -- the name slides in; its offset is per frame
-master_level.rml: display-list port
 message_box_view.rml: every line is centred by measurement (centre - MeasureText().cx / 2) and stacked by measured height, so its geometry genuinely varies per frame; most buttons come from the box's own CMessageBoxButton, and its list mirrors the native list's scrollbar. Residue: one box class (CGuildAppointMsgBox) has four literal button positions, which cannot move to RCSS while every box class shares this one document -- splitting it per class is the prerequisite
 mini_map.rml: per-frame data -- marker and cursor positions, per frame
 move_command.rml: per-frame data -- panel height follows the row count

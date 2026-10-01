@@ -21,6 +21,7 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include <RmlUi/Core/ElementDocument.h>
 
@@ -535,8 +536,9 @@ void mu::ui::window::CMasterLevel::BuildRmlUi()
 
             auto node = c.RegisterStruct<MasterLevelNodeEntry>();
             node.RegisterMember("id", &MasterLevelNodeEntry::id);
-            node.RegisterMember("left", &MasterLevelNodeEntry::left);
-            node.RegisterMember("top", &MasterLevelNodeEntry::top);
+            node.RegisterMember("column", &MasterLevelNodeEntry::column);
+            node.RegisterMember("slot", &MasterLevelNodeEntry::slot);
+            node.RegisterMember("rank", &MasterLevelNodeEntry::rank);
             node.RegisterMember("icon", &MasterLevelNodeEntry::icon);
             node.RegisterMember("usable", &MasterLevelNodeEntry::usable);
             node.RegisterMember("arrow", &MasterLevelNodeEntry::arrow);
@@ -719,14 +721,13 @@ void mu::ui::window::CMasterLevel::RebuildNodeModel()
             continue;
 
         const SKILL_ATTRIBUTE& skillAttribute = SkillAttribute[skillData.Skill];
-        const auto position = UI::Skills::MasterTree::NodeBoxPosition(
-            skillData.Group, UI::Skills::MasterTree::SlotInRank(skillData.Index), skillAttribute.SkillRank);
         const bool usable = IsNodeUsable(skillData);
 
         MasterLevelNodeEntry entry;
         entry.id = treeIndex;
-        entry.left = static_cast<float>(position.left);
-        entry.top = static_cast<float>(position.top);
+        entry.column = skillData.Group;
+        entry.slot = UI::Skills::MasterTree::SlotInRank(skillData.Index);
+        entry.rank = skillAttribute.SkillRank;
         entry.icon = "image(" + UI::Skills::MasterTree::IconSpriteName(skillAttribute.Magic_Icon, usable) + ")";
         entry.usable = usable;
         entry.arrow = skillData.ArrowDirection;
@@ -740,7 +741,8 @@ void mu::ui::window::CMasterLevel::RebuildNodeModel()
                          !std::equal(nodes.begin(), nodes.end(), model.nodes.begin(),
                                      [](const MasterLevelNodeEntry& a, const MasterLevelNodeEntry& b)
                                      {
-                                         return a.id == b.id && a.left == b.left && a.top == b.top &&
+                                         return a.id == b.id && a.column == b.column && a.slot == b.slot &&
+                                                a.rank == b.rank &&
                                                 a.icon == b.icon && a.usable == b.usable && a.arrow == b.arrow &&
                                                 a.levelText == b.levelText;
                                      });
@@ -837,16 +839,23 @@ bool mu::ui::window::CMasterLevel::ShowNodeHint(int nodeId)
 
     const int lineCount = this->BuildNodeHintLines(it->second, tooltip->second);
 
+    // The theme places the node, so the hint reads the hovered one's own box back; the grid the
+    // original drew it on is the first-frame fallback, the same convention as the panel sizes.
     const auto position =
         UI::Skills::MasterTree::NodeBoxPosition(it->second.Group, UI::Skills::MasterTree::SlotInRank(it->second.Index),
                                                 SkillAttribute[it->second.Skill].SkillRank);
+    float nodeLeft = static_cast<float>(position.left);
+    float nodeTop = static_cast<float>(position.top);
+    const std::string nodeElementId = "node_" + std::to_string(nodeId);
+    UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "panel", nodeElementId.c_str(), POINT{0, 0}, nodeLeft,
+                                                nodeTop);
     const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
     UI::RmlBridge::Tooltip::Config config;
     config.lines = BuildTooltipLinesFromTextList(lineCount);
-    config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(position.left + kIconOffsetX));
-    config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(position.top + kNodeHintBelowIcon));
+    config.anchorX = UI::Scaling::PositionX(activeTransform, nodeLeft + kIconOffsetX);
+    config.anchorY = UI::Scaling::PositionY(activeTransform, nodeTop + kNodeHintBelowIcon);
     config.centerHorizontally = true; // RenderTipTextList()'s own sx - fWidth/2 centering.
-    config.anchor = (position.top > kNodeHintFlipTop)
+    config.anchor = (nodeTop > kNodeHintFlipTop)
                         ? UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft
                         : UI::RmlBridge::Tooltip::AnchorPoint::BelowLeft; // matches the old STRP_BOTTOMCENTER flip near
                                                                           // the bottom of the screen.
