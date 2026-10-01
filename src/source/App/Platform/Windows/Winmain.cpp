@@ -49,6 +49,7 @@
 #include "Audio/DSPlaySound.h"
 
 #include "Core/Platform/Imm.h"
+#include "Core/Platform/ProcessLocale.h"
 #include "Core/Platform/ServerPort.h"
 #include "Core/Platform/sdl3/SDLWindowFlags.h"
 #include "Core/Platform/BundledFonts.h"
@@ -2347,7 +2348,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_ErrorReport.WriteFontInfo();
     g_ErrorReport.AddSeparator();
 
-    setlocale(LC_ALL, "");
+    Core::Platform::ApplyProcessLocale();
 
     CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
 
