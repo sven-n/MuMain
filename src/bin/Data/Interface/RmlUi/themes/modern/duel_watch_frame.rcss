@@ -60,3 +60,7 @@ body { pointer-events: none; }
 	pointer-events: auto;
 }
 #exit:active { decorator: image(dwf-exit-down); }
+
+/* Each fighter's name on its own side, centred on 55 units as RenderText() centred it. */
+#name_hero { left: 240px; }
+#name_enemy { left: 345px; }

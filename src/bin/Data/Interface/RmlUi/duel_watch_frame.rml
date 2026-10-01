@@ -22,9 +22,12 @@
 			     data-class-mirrored="g.mirrored" data-style-left="g.left + 'px'" data-style-top="g.top + 'px'"
 			     data-style-width="g.width + 'px'" data-style-height="g.height + 'px'"/>
 			<div class="score" data-for="left : score_marks" data-style-left="left + 'px'"></div>
-			<span class="name" data-for="n : names" data-style-left="n.left + 'px'"
-			      data-style-font-size="n.text_px + 'px'" data-style-width="(55 * scale_x) + 'px'"
-			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{n.text}}</span>
+			<span class="name" id="name_hero" data-style-font-size="hero_name.text_px + 'px'"
+			      data-style-width="(55 * scale_x) + 'px'"
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{hero_name.text}}</span>
+			<span class="name" id="name_enemy" data-style-font-size="enemy_name.text_px + 'px'"
+			      data-style-width="(55 * scale_x) + 'px'"
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{enemy_name.text}}</span>
 		</div>
 		<div id="exit" data-event-click="duel_watch_exit"></div>
 	</div>

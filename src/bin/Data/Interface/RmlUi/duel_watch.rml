@@ -26,11 +26,13 @@
 		      data-style-width="(190 * root_scale) + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{subtitle}}</span>
 
-		<div class="line" style="top: 130px;"></div>
-		<div class="line" style="top: 220px;"></div>
-		<div class="line" style="top: 310px;"></div>
+		<div class="lines"><div class="line"></div><div class="line"></div><div class="line"></div></div>
 
-		<div class="room" data-for="room : rooms" data-style-top="(room.index * 90) + 'px'">
+		<!-- One block per colosseum, always all four; the theme puts each on its own row, counting
+		     them inside their own container. The index stays because it is what the join request
+		     names, not where the row sits. -->
+		<div class="rooms">
+			<div class="room" data-for="room : rooms">
 			<span class="sharp-text room-heading" data-style-font-size="bold_text_px + 'px'"
 			      data-style-width="(190 * root_scale) + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{room.heading}}</span>
@@ -52,6 +54,7 @@
 				      data-style-line-height="label_line_px + 'px'"
 				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{watch_text}}</span>
 			</div>
+		</div>
 		</div>
 	</div>
 </body>

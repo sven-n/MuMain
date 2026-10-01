@@ -234,10 +234,9 @@ void CDuelWatchMainFrameWindow::BuildRmlUi()
             c.Bind("watching", &model.watching);
             auto name = c.RegisterStruct<DuelWatchNameEntry>();
             name.RegisterMember("text", &DuelWatchNameEntry::text);
-            name.RegisterMember("left", &DuelWatchNameEntry::left);
             name.RegisterMember("text_px", &DuelWatchNameEntry::textPx);
-            c.RegisterArray<std::vector<DuelWatchNameEntry>>();
-            c.Bind("names", &model.names);
+            c.Bind("hero_name", &model.heroName);
+            c.Bind("enemy_name", &model.enemyName);
             c.RegisterArray<std::vector<float>>();
             c.Bind("score_marks", &model.scoreMarks);
             auto gauge = c.RegisterStruct<DuelWatchGaugeEntry>();
@@ -346,27 +345,19 @@ void CDuelWatchMainFrameWindow::SyncView()
     if (!watching)
         return;
 
-    // The fighters' names, bold, centred on 55 units from x 240 and 345 at y 465.
-    std::vector<DuelWatchNameEntry> names;
+    // The fighters' names, bold, each shrunk to its own 55-unit box; the themes place them.
     g_pRenderText->SetFont(g_hFontBold);
-    for (const auto& [player, left] : {std::pair{DUEL_HERO, 320.f - 80.f}, std::pair{DUEL_ENEMY, 320.f + 25.f}})
+    const auto name = [&](int player)
     {
         const wchar_t* text = g_DuelMgr.GetDuelPlayerID(player);
         const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-        names.push_back({StringUtils::WideToNarrow(text), left,
-                         UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Bold, transform,
-                                                               static_cast<float>(width), 55.f)});
-    }
+        return DuelWatchNameEntry{StringUtils::WideToNarrow(text),
+                                  UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Bold, transform,
+                                                                        static_cast<float>(width), 55.f)};
+    };
+    SyncField(m_RmlBinder, &DuelWatchFrameRmlModel::heroName, "hero_name", name(DUEL_HERO));
+    SyncField(m_RmlBinder, &DuelWatchFrameRmlModel::enemyName, "enemy_name", name(DUEL_ENEMY));
     DuelWatchFrameRmlModel& model = m_RmlBinder.GetModel();
-    const bool sameNames = model.names.size() == names.size() &&
-                           std::equal(model.names.begin(), model.names.end(), names.begin(),
-                                      [](const DuelWatchNameEntry& a, const DuelWatchNameEntry& b)
-                                      { return a.text == b.text && a.left == b.left && a.textPx == b.textPx; });
-    if (!sameNames)
-    {
-        model.names = std::move(names);
-        m_RmlBinder.MarkDirty("names");
-    }
 
     // A mark per point: the left fighter's from x 57 rightwards, the right one's from x 566 leftwards.
     std::vector<float> scoreMarks;

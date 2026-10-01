@@ -35,3 +35,13 @@
 .watch-btn.enabled:hover { border-color: token(accent-steel-hover); }
 .watch-label { left: 0; color: token(text-muted); }
 .watch-btn.enabled .watch-label { color: token(text-primary); }
+
+/* The three separators and the four colosseum blocks, 90 units apart as the original drew them. */
+.lines, .rooms { position: static; }
+.lines .line:nth-child(1) { top: 130px; }
+.lines .line:nth-child(2) { top: 220px; }
+.lines .line:nth-child(3) { top: 310px; }
+.room:nth-child(1) { top: 0; }
+.room:nth-child(2) { top: 90px; }
+.room:nth-child(3) { top: 180px; }
+.room:nth-child(4) { top: 270px; }

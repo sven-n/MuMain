@@ -18,12 +18,14 @@ struct DuelWatchGaugeEntry
     bool mirrored = false;
 };
 
-// One fighter's name under the gauges: centred on 55 units, bold, shrunk to them.
+// One fighter's name under the gauges: centred on 55 units, bold, shrunk to them. Each theme puts
+// it on its own side.
 struct DuelWatchNameEntry
 {
     Rml::String text;
-    float left = 0.f; // reference px
     float textPx = 0.f;
+
+    bool operator==(const DuelWatchNameEntry&) const = default;
 };
 
 // The spectator frame (CDuelWatchMainFrameWindow).
@@ -35,7 +37,7 @@ struct DuelWatchFrameRmlModel
 
     // A watched channel: the names, score marks and gauges; the frame and the exit button always.
     bool watching = false;
-    std::vector<DuelWatchNameEntry> names;
+    DuelWatchNameEntry heroName, enemyName;
     std::vector<float> scoreMarks; // the marks' left edges, reference px
     std::vector<DuelWatchGaugeEntry> gauges;
 };
