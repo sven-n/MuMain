@@ -1,5 +1,6 @@
 #include "doctest.h"
 
+#include <ostream>   // doctest's string_view stringifier needs it complete
 #include <string_view>
 
 #include "GameLogic/Items/GoldAmountTier.h"
