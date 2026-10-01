@@ -194,9 +194,9 @@ template <typename List> void FriendWindowRmlBuilder::ListScrollBar(List& list)
     const auto width = static_cast<float>(list.GetWidth());
 
     const bool upPressed =
-        MouseLButtonPush && ::CheckMouseIn(static_cast<int>(x + width - 12), static_cast<int>(top - 1), 13, 13) == TRUE;
+        MouseLButtonPush && mu::ui::window::CheckMouseIn(static_cast<int>(x + width - 12), static_cast<int>(top - 1), 13, 13) == TRUE;
     Sprite(upPressed ? "scroll-up pressed" : "scroll-up", x + width - 12, top - 1, 13, 13);
-    const bool downPressed = MouseLButtonPush && ::CheckMouseIn(static_cast<int>(x + width - 12),
+    const bool downPressed = MouseLButtonPush && mu::ui::window::CheckMouseIn(static_cast<int>(x + width - 12),
                                                                 static_cast<int>(bottom - 12), 13, 13) == TRUE;
     Sprite(downPressed ? "scroll-down pressed" : "scroll-down", x + width - 12, bottom - 12, 13, 13);
 

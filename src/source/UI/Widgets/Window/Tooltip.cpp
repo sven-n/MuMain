@@ -8,6 +8,8 @@
 #include "Core/Utilities/StringUtils.h"
 #include "I18N/All.h"
 
+using mu::ui::window::CheckMouseIn;   // WindowCommon.h
+
 mu::ui::window::CTooltip::~CTooltip()
 {
     if (m_localeObserverRegistered)

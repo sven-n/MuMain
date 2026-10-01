@@ -21,6 +21,8 @@
 #include "UI/Scaling/UITransform.h"
 #include "Render/Text/CUIRenderText.h"
 
+using mu::ui::window::CheckMouseIn;   // WindowCommon.h
+
 #include <RmlUi/Core/ElementDocument.h>
 
 namespace UI::Reconnect

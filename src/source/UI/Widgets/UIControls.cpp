@@ -145,7 +145,14 @@ DWORD g_dwTopWindow = 0;
 DWORD g_dwKeyFocusUIID = 0;
 DWORD g_dwCurrentPressedButtonID = 0;
 
-BOOL CheckMouseIn(int iPos_x, int iPos_y, int iWidth, int iHeight, int CoordType)
+// mu::ui::window::CheckMouseIn (WindowCommon.h) is this function's left-top branch and is what
+// the rest of the client uses. Only this toolkit ever asks for left-down origins, so the
+// coordinate-type form stays private to it.
+const int COORDINATE_TYPE_LEFT_TOP = 1;
+const int COORDINATE_TYPE_LEFT_DOWN = 2;
+
+static BOOL CheckMouseIn(int iPos_x, int iPos_y, int iWidth, int iHeight,
+                         int CoordType = COORDINATE_TYPE_LEFT_TOP)
 {
     if (CoordType == COORDINATE_TYPE_LEFT_DOWN)
     {

@@ -275,9 +275,9 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::SyncView()
     view.top = listTop - pos.y;
     view.width = listWidth;
     view.height = listHeight;
-    view.upPressed = MouseLButtonPush && ::CheckMouseIn(static_cast<int>(listX + listWidth - 12),
+    view.upPressed = MouseLButtonPush && mu::ui::window::CheckMouseIn(static_cast<int>(listX + listWidth - 12),
                                                         static_cast<int>(listTop - 1), 13, 13) == TRUE;
-    view.downPressed = MouseLButtonPush && ::CheckMouseIn(static_cast<int>(listX + listWidth - 12),
+    view.downPressed = MouseLButtonPush && mu::ui::window::CheckMouseIn(static_cast<int>(listX + listWidth - 12),
                                                           static_cast<int>(listBottom - 12), 13, 13) == TRUE;
     view.trackTop = bar.rangeTop - listTop;
     view.trackHeight = bar.rangeBottom - bar.rangeTop;

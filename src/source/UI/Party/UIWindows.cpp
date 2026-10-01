@@ -30,6 +30,8 @@
 #include "UI/Party/UIWindows.h"
 #include "Render/Text/CUIRenderText.h"
 
+using mu::ui::window::CheckMouseIn;   // WindowCommon.h
+
 
 extern int	 g_iChatInputType;
 extern DWORD g_dwActiveUIID;

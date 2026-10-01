@@ -28,11 +28,6 @@ void CutText4(const wchar_t* pszSource, wchar_t* pszResult1, wchar_t* pszResult2
 
 void RenderCheckBox(int iPos_x, int iPos_y, BOOL bFlag);
 
-const int COORDINATE_TYPE_LEFT_TOP = 1;
-const int COORDINATE_TYPE_LEFT_DOWN = 2;
-
-BOOL CheckMouseIn(int iPos_x, int iPos_y, int iWidth, int iHeight, int CoordType = COORDINATE_TYPE_LEFT_TOP);
-
 #define ID_UICEDIT 0x0001
 
 enum UISTATES

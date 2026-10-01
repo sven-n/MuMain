@@ -163,7 +163,7 @@ bool CheckName()
 
 BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
 {
-    if (CheckMouseIn((REFERENCE_WIDTH - 120) / 2, 30 + iOptionPos_y, 120, 22) && MouseLButtonPush)
+    if (mu::ui::window::CheckMouseIn((REFERENCE_WIDTH - 120) / 2, 30 + iOptionPos_y, 120, 22) && MouseLButtonPush)
     {
         MouseLButtonPush = false;
         MouseUpdateTime = 0;
