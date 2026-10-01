@@ -23,6 +23,7 @@
 #include <RmlUi/Core/ElementDocument.h>
 
 #include <algorithm>
+#include <cstring>
 #include <string>
 
 namespace
@@ -514,8 +515,7 @@ void mu::ui::window::CKanturu2ndEnterNpc::BuildRmlUi()
             line.RegisterMember("text", &KanturuEnterLineEntry::text);
             line.RegisterMember("top", &KanturuEnterLineEntry::top);
             line.RegisterMember("text_px", &KanturuEnterLineEntry::textPx);
-            line.RegisterMember("bold", &KanturuEnterLineEntry::bold);
-            line.RegisterMember("tone", &KanturuEnterLineEntry::tone);
+            line.RegisterMember("kind", &KanturuEnterLineEntry::kind);
             c.RegisterArray<std::vector<KanturuEnterLineEntry>>();
             c.Bind("lines", &model.lines);
             c.Bind("refresh_text", &model.refreshText);
@@ -587,18 +587,20 @@ void mu::ui::window::CKanturu2ndEnterNpc::SyncContent()
     // apart from y 30; 20 units below it the state texts, the first in green, the others bright
     // yellow, 15 units between two texts.
     updated.lines.clear();
-    auto addLine = [&](const wchar_t* text, float top, bool bold, int tone)
+    auto addLine = [&](const wchar_t* text, float top, const char* kind)
     {
-        const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
+        // The subject is the one the original drew bold, so it is the one measured in that font.
+        const auto role = std::strcmp(kind, "subject") == 0 ? UI::Scaling::FontRole::Bold
+                                                            : UI::Scaling::FontRole::Normal;
         updated.lines.push_back({StringUtils::WideToNarrow(text), top,
-                                 KanturuTextPxInBox(role, transform, text, KANTURU2ND_ENTER_WINDOW_WIDTH), bold, tone});
+                                 KanturuTextPxInBox(role, transform, text, KANTURU2ND_ENTER_WINDOW_WIDTH), kind});
     };
     float textY = 30.f;
     wchar_t separated[3][52] = {};
     int lineCount = SeparateTextIntoLines(m_strSubject, separated[0], 3, 52);
     for (int i = 0; i < lineCount; i++)
     {
-        addLine(separated[i], textY, true, 0);
+        addLine(separated[i], textY, "subject");
         textY += 12.f;
     }
     textY += 20.f;
@@ -608,7 +610,7 @@ void mu::ui::window::CKanturu2ndEnterNpc::SyncContent()
         lineCount = SeparateTextIntoLines(m_strStateText[i], separated[0], 3, 52);
         for (int j = 0; j < lineCount; j++)
         {
-            addLine(separated[j], textY, false, i == 0 ? 1 : 2);
+            addLine(separated[j], textY, i == 0 ? "state" : "note");
             textY += 12.f;
         }
         textY += 15.f;
@@ -622,13 +624,7 @@ void mu::ui::window::CKanturu2ndEnterNpc::SyncContent()
     SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::closeText, "close_text", updated);
     SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::refreshLocked, "refresh_locked", updated);
     SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::enterLocked, "enter_locked", updated);
-    const bool sameLines = model.lines.size() == updated.lines.size() &&
-                           std::equal(model.lines.begin(), model.lines.end(), updated.lines.begin(),
-                                      [](const KanturuEnterLineEntry& a, const KanturuEnterLineEntry& b)
-                                      {
-                                          return a.text == b.text && a.top == b.top && a.textPx == b.textPx &&
-                                                 a.bold == b.bold && a.tone == b.tone;
-                                      });
+    const bool sameLines = model.lines == updated.lines;
     if (!sameLines)
     {
         model.lines = std::move(updated.lines);

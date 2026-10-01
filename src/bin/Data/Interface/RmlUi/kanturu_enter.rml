@@ -15,20 +15,13 @@
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div id="back"></div>
 		<div id="frame_top"></div>
-		<div class="frame-middle" style="top: 67px;"></div>
-		<div class="frame-middle" style="top: 82px;"></div>
-		<div class="frame-middle" style="top: 97px;"></div>
-		<div class="frame-middle" style="top: 112px;"></div>
-		<div class="frame-middle" style="top: 127px;"></div>
-		<div class="frame-middle" style="top: 142px;"></div>
-		<div class="frame-middle" style="top: 157px;"></div>
-		<div class="frame-middle" style="top: 172px;"></div>
-		<div class="frame-middle" style="top: 187px;"></div>
-		<div class="frame-middle" style="top: 202px;"></div>
+		<div class="frame-middles"><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div></div>
 		<div id="frame_bottom"></div>
 
-		<span class="sharp-text kanturu-line" data-for="line : lines" data-class-bold="line.bold"
-		      data-class-tone-state="line.tone == 1" data-class-tone-note="line.tone == 2"
+		<!-- The lines sit where the wrapping put them; what each one is, the theme styles. -->
+		<span class="sharp-text kanturu-line" data-for="line : lines"
+		      data-class-tone-subject="line.kind == 'subject'" data-class-tone-state="line.kind == 'state'"
+		      data-class-tone-note="line.kind == 'note'"
 		      data-style-top="line.top + 'px'" data-style-font-size="line.text_px + 'px'"
 		      data-style-width="(230 * root_scale) + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line.text}}</span>

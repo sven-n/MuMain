@@ -52,8 +52,8 @@ guild_info.rml: display-list port, and mirrors the native list's scrollbar geome
 guild_make.rml: counter-scale bridge -- the button labels' top from the live line height
 item_endurance.rml: per-frame data -- placed against the hovered item
 item_explanation.rml: per-frame data -- placed against the hovered item
-kanturu_enter.rml: display-list port
-kanturu_info.rml: display-list port
+kanturu_enter.rml: the subject's and state texts' lines sit where SeparateTextIntoLines() put them -- each group starts under however many lines the one before it wrapped to, so the stacking is derived from the text, not a table the theme could hold; plus the button labels' top from the live line height
+kanturu_info.rml: per-frame data -- RenderNumber() centres each digit run on its x, so a digit's left depends on how many digits the minute or second has
 login_scene.rml: per-frame data -- scene sprites scale on their own 800x600 formula, not dp
 lucky_coin_exchange.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
 lucky_coin_registration.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)

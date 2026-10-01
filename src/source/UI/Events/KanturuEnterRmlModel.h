@@ -7,14 +7,19 @@
 namespace mu::ui::window
 {
 // One drawn line of Kanturu's entry window: RenderText(x, top, text, 230, 0, RT3_SORT_CENTER) after
-// SeparateTextIntoLines(), its size shrunk to the 230-unit box like the original's.
+// SeparateTextIntoLines(), its size shrunk to the 230-unit box like the original's. Its `top` is
+// where the wrapping put it: the subject's lines, then the state texts', each group starting
+// under however many lines the one before it took.
 struct KanturuEnterLineEntry
 {
     Rml::String text;
     float top = 0.f;    // reference px in the panel
     float textPx = 0.f; // physical px
-    bool bold = false;  // the subject
-    int tone = 0;       // 0 subject (255, 176, 73), 1 first state text (145, 241, 97), 2 bright yellow
+    // What the line is: "subject", "state" for the first state text, "note" for the rest. Each
+    // theme gives it a weight and a colour; the original drew the subject bold.
+    Rml::String kind;
+
+    bool operator==(const KanturuEnterLineEntry&) const = default;
 };
 
 struct KanturuEnterRmlModel

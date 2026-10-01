@@ -34,7 +34,7 @@
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
 .kanturu-line { left: 0; color: #ffb049; }
-.kanturu-line.bold { font-weight: bold; }
+.kanturu-line.tone-subject { font-weight: bold; }
 .kanturu-line.tone-state { color: #91f161; }
 .kanturu-line.tone-note { color: #ffeec1; }
 
@@ -55,3 +55,16 @@
 #btn_close { left: 157px; }
 .kanturu-label { left: 0; color: #ffffff; }
 .kanturu-btn.locked .kanturu-label { color: #646464; }
+
+/* The frame tiles are a container so each one can be counted; it takes no space itself. */
+.frame-middles { position: static; }
+.frame-middles .frame-middle:nth-child(1) { top: 67px; }
+.frame-middles .frame-middle:nth-child(2) { top: 82px; }
+.frame-middles .frame-middle:nth-child(3) { top: 97px; }
+.frame-middles .frame-middle:nth-child(4) { top: 112px; }
+.frame-middles .frame-middle:nth-child(5) { top: 127px; }
+.frame-middles .frame-middle:nth-child(6) { top: 142px; }
+.frame-middles .frame-middle:nth-child(7) { top: 157px; }
+.frame-middles .frame-middle:nth-child(8) { top: 172px; }
+.frame-middles .frame-middle:nth-child(9) { top: 187px; }
+.frame-middles .frame-middle:nth-child(10) { top: 202px; }
