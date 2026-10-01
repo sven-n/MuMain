@@ -18,7 +18,6 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlSyncField.h"
-#include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
@@ -213,12 +212,6 @@ bool SameSprites(const std::vector<CryWolfSpriteEntry>& a, const std::vector<Cry
                       { return l.left == r.left && l.top == r.top && l.src == r.src && l.rect == r.rect; });
 }
 
-bool SameNotices(const std::vector<CryWolfNoticeEntry>& a, const std::vector<CryWolfNoticeEntry>& b)
-{
-    return a.size() == b.size() &&
-           std::equal(a.begin(), a.end(), b.begin(), [](const CryWolfNoticeEntry& l, const CryWolfNoticeEntry& r)
-                      { return l.top == r.top && l.text == r.text && l.color == r.color; });
-}
 } // namespace
 
 void mu::ui::window::CCryWolf::BuildRmlUi()
@@ -235,10 +228,14 @@ void mu::ui::window::CCryWolf::BuildRmlUi()
                                                      sprite.RegisterMember("src", &CryWolfSpriteEntry::src);
                                                      sprite.RegisterMember("rect", &CryWolfSpriteEntry::rect);
                                                      c.RegisterArray<std::vector<CryWolfSpriteEntry>>();
+                                                     auto image = c.RegisterStruct<CryWolfImageEntry>();
+                                                     image.RegisterMember("shown", &CryWolfImageEntry::shown);
+                                                     image.RegisterMember("src", &CryWolfImageEntry::src);
+                                                     image.RegisterMember("rect", &CryWolfImageEntry::rect);
+                                                     c.RegisterArray<std::vector<CryWolfImageEntry>>();
                                                      auto notice = c.RegisterStruct<CryWolfNoticeEntry>();
-                                                     notice.RegisterMember("top", &CryWolfNoticeEntry::top);
                                                      notice.RegisterMember("text", &CryWolfNoticeEntry::text);
-                                                     notice.RegisterMember("color", &CryWolfNoticeEntry::color);
+                                                     notice.RegisterMember("heading", &CryWolfNoticeEntry::heading);
                                                      c.RegisterArray<std::vector<CryWolfNoticeEntry>>();
 
                                                      c.Bind("scale_x", &model.scaleX);
@@ -265,7 +262,7 @@ void mu::ui::window::CCryWolf::BuildRmlUi()
                                                      c.Bind("balgass_bar_width", &model.balgassBarWidth);
                                                      c.Bind("balgass_bar_rect", &model.balgassBarRect);
                                                      c.Bind("timer_digits", &model.timerDigits);
-                                                     c.Bind("timer_color", &model.timerColor);
+                                                     c.Bind("timer_urgent", &model.timerUrgent);
                                                      c.Bind("statue_bar_left", &model.statueBarLeft);
                                                      c.Bind("statue_bar_width", &model.statueBarWidth);
                                                      c.Bind("statue_bar_rect", &model.statueBarRect);
@@ -403,8 +400,7 @@ void mu::ui::window::CCryWolf::SyncResult(CryWolfRmlModel& updated)
     for (int i = 0; i < 9; i++)
     {
         const Rml::String file = "icon_Rank_" + std::to_string(Exp_val[i]) + ".tga";
-        updated.expDigits.push_back({static_cast<float>(250 + 10 + 29 + 15 * i), 235.f, InterfaceImage(file.c_str()),
-                                     TexelRect(0.f, 0.f, 15.f, 19.f)});
+        updated.expDigits.push_back({true, InterfaceImage(file.c_str()), TexelRect(0.f, 0.f, 15.f, 19.f)});
     }
 }
 
@@ -416,8 +412,8 @@ void mu::ui::window::CCryWolf::SyncHud(CryWolfRmlModel& updated)
 
     updated.hudVisible = true;
 
-    static const float AltarPos[5][2] = {
-        {565.f, 280.f}, {582.f, 282.f}, {598.f, 286.f}, {613.f, 294.f}, {625.f, 306.f}};
+    // All five altars travel, shown or not, so each stays on its own place in the theme's row
+    // whatever the others are doing.
     for (int ia = 0; ia < 5; ia++)
     {
         const BYTE Use = (m_AltarState[ia] & 0xf0) >> 4;
@@ -431,9 +427,8 @@ void mu::ui::window::CCryWolf::SyncHud(CryWolfRmlModel& updated)
             file = "in_main_number1.tga";
         else if (State == 2)
             file = "in_main_number2.tga";
-        if (file != nullptr)
-            updated.altars.push_back(
-                {AltarPos[ia][0], AltarPos[ia][1], InterfaceImage(file), TexelRect(0.f, 0.f, 12.f, 12.f)});
+        updated.altars.push_back({file != nullptr, file != nullptr ? InterfaceImage(file) : Rml::String(),
+                                  TexelRect(0.f, 0.f, 12.f, 12.f)});
     }
 
     updated.darkElfIconSrc = InterfaceImage(Dark_elf_Num == 0 ? "in_main_icon_dl2.tga" : "in_main_icon_dl1.tga");
@@ -464,7 +459,7 @@ void mu::ui::window::CCryWolf::SyncHud(CryWolfRmlModel& updated)
 
     if (m_bTimeStart == true && m_CrywolfState == CRYWOLF_STATE_START)
     {
-        updated.timerColor = UI::RmlBridge::RgbaToCss(View_Bal ? RGBA(255, 77, 77, 255) : RGBA(255, 255, 255, 255));
+        updated.timerUrgent = View_Bal;
         m_iSecond = m_iSecond - static_cast<int>(GetTickCount() - m_dwSyncTime);
         m_dwSyncTime = GetTickCount();
 
@@ -487,7 +482,7 @@ void mu::ui::window::CCryWolf::SyncHud(CryWolfRmlModel& updated)
     }
     else
     {
-        updated.timerColor = UI::RmlBridge::RgbaToCss(RGBA(255, 255, 255, 255));
+        updated.timerUrgent = false;
         AddTimerDigits(updated.timerDigits, {570.f, 402.f}, 0);
         AddTimerDigits(updated.timerDigits, {580.f, 402.f}, 0);
         AddTimerDigits(updated.timerDigits, {597.f, 402.f}, 0);
@@ -507,9 +502,7 @@ void mu::ui::window::CCryWolf::SyncHud(CryWolfRmlModel& updated)
     {
         for (int i = 0; i < 4; i++)
         {
-            updated.notices.push_back(
-                {static_cast<float>(63 + i * 13), StringUtils::WideToNarrow(texts[i].c_str()),
-                 UI::RmlBridge::RgbaToCss(i == 0 ? RGBA(100, 200, 255, 255) : RGBA(100, 150, 255, 255))});
+            updated.notices.push_back({StringUtils::WideToNarrow(texts[i].c_str()), i == 0});
         }
     }
 }
@@ -566,7 +559,7 @@ void mu::ui::window::CCryWolf::SyncView()
     SyncFieldFrom(m_RmlBinder, &CryWolfRmlModel::balgassText, "balgass_text", updated);
     SyncFieldFrom(m_RmlBinder, &CryWolfRmlModel::balgassBarWidth, "balgass_bar_width", updated);
     SyncFieldFrom(m_RmlBinder, &CryWolfRmlModel::balgassBarRect, "balgass_bar_rect", updated);
-    SyncFieldFrom(m_RmlBinder, &CryWolfRmlModel::timerColor, "timer_color", updated);
+    SyncFieldFrom(m_RmlBinder, &CryWolfRmlModel::timerUrgent, "timer_urgent", updated);
     SyncFieldFrom(m_RmlBinder, &CryWolfRmlModel::statueBarLeft, "statue_bar_left", updated);
     SyncFieldFrom(m_RmlBinder, &CryWolfRmlModel::statueBarWidth, "statue_bar_width", updated);
     SyncFieldFrom(m_RmlBinder, &CryWolfRmlModel::statueBarRect, "statue_bar_rect", updated);
@@ -577,10 +570,17 @@ void mu::ui::window::CCryWolf::SyncView()
         model.*field = std::move(updated.*field);
         m_RmlBinder.MarkDirty(name);
     };
-    syncSprites(&CryWolfRmlModel::expDigits, "exp_digits");
-    syncSprites(&CryWolfRmlModel::altars, "altars");
     syncSprites(&CryWolfRmlModel::timerDigits, "timer_digits");
-    if (!SameNotices(model.notices, updated.notices))
+    auto syncImages = [&](std::vector<CryWolfImageEntry> CryWolfRmlModel::* field, const char* name)
+    {
+        if (model.*field == updated.*field)
+            return;
+        model.*field = std::move(updated.*field);
+        m_RmlBinder.MarkDirty(name);
+    };
+    syncImages(&CryWolfRmlModel::expDigits, "exp_digits");
+    syncImages(&CryWolfRmlModel::altars, "altars");
+    if (model.notices != updated.notices)
     {
         model.notices = std::move(updated.notices);
         m_RmlBinder.MarkDirty("notices");

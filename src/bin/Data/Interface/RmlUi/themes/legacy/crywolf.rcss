@@ -60,3 +60,36 @@ img { position: absolute; }
 	font-weight: bold;
 	background-color: rgba(0, 0, 0, 170);
 }
+
+/* The repeated sets, each counted inside its own container; the containers take no space. */
+.exp-digits, .altars, .notices { position: static; }
+
+/* RenderRank()'s nine experience digits, 15 units apart from x 289 at y 235. */
+.exp-digit:nth-child(1) { left: 289px; top: 235px; }
+.exp-digit:nth-child(2) { left: 304px; top: 235px; }
+.exp-digit:nth-child(3) { left: 319px; top: 235px; }
+.exp-digit:nth-child(4) { left: 334px; top: 235px; }
+.exp-digit:nth-child(5) { left: 349px; top: 235px; }
+.exp-digit:nth-child(6) { left: 364px; top: 235px; }
+.exp-digit:nth-child(7) { left: 379px; top: 235px; }
+.exp-digit:nth-child(8) { left: 394px; top: 235px; }
+.exp-digit:nth-child(9) { left: 409px; top: 235px; }
+
+/* The five altars, on the places the original's own table put them along the hill. */
+.altar:nth-child(1) { left: 565px; top: 280px; }
+.altar:nth-child(2) { left: 582px; top: 282px; }
+.altar:nth-child(3) { left: 598px; top: 286px; }
+.altar:nth-child(4) { left: 613px; top: 294px; }
+.altar:nth-child(5) { left: 625px; top: 306px; }
+
+/* The advance notice's four lines, 13 units apart from y 63, the first one its heading. */
+.notice:nth-child(1) { top: 63px; }
+.notice:nth-child(2) { top: 76px; }
+.notice:nth-child(3) { top: 89px; }
+.notice:nth-child(4) { top: 102px; }
+.notice { color: rgb(100, 150, 255); }
+.notice.heading { color: rgb(100, 200, 255); }
+
+/* The clock reddens while Balgass is on the field. */
+.timer-digit { image-color: #ffffff; }
+.timer-digit.urgent { image-color: rgb(255, 77, 77); }

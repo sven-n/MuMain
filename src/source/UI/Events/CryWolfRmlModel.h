@@ -6,8 +6,9 @@
 
 namespace mu::ui::window
 {
-// One image of the Crywolf HUD whose file or cell changes: `src` relative to crywolf.rml,
-// `rect` its texel cell, `left`/`top` reference px on the 640x480 screen.
+// One image of the Crywolf HUD the window has to place itself: a timer digit, whose run
+// RenderNumber() centres on its own x so the left depends on how many digits the value has.
+// `src` is relative to crywolf.rml and `rect` its texel cell.
 struct CryWolfSpriteEntry
 {
     float left = 0.f;
@@ -16,12 +17,26 @@ struct CryWolfSpriteEntry
     Rml::String rect;
 };
 
-// One line of the ready-state notice, drawn in the bold font on a translucent black box.
+// One image of the HUD that sits where the theme puts it: an altar of the five, or one of the
+// nine experience digits. An altar with no contract state shows nothing, and the five are always
+// all five so a theme can count them.
+struct CryWolfImageEntry
+{
+    bool shown = true;
+    Rml::String src;
+    Rml::String rect;
+
+    bool operator==(const CryWolfImageEntry&) const = default;
+};
+
+// One line of the ready-state notice, drawn in the bold font on a translucent black box. The
+// first line is the heading, which the original coloured apart; the theme places all four.
 struct CryWolfNoticeEntry
 {
-    float top = 0.f; // reference px
     Rml::String text;
-    Rml::String color;
+    bool heading = false;
+
+    bool operator==(const CryWolfNoticeEntry&) const = default;
 };
 
 struct CryWolfRmlModel
@@ -43,11 +58,11 @@ struct CryWolfRmlModel
     float rankLabelLeft = 0.f;
     bool rankDetailsVisible = false;
     Rml::String rankLetterSrc; // empty for a rank the original had no letter for
-    std::vector<CryWolfSpriteEntry> expDigits;
+    std::vector<CryWolfImageEntry> expDigits;
 
     // The battle HUD (ready and start states).
     bool hudVisible = false;
-    std::vector<CryWolfSpriteEntry> altars;
+    std::vector<CryWolfImageEntry> altars;
     Rml::String darkElfIconSrc;
     Rml::String darkElfText;
     bool balgassVisible = false;
@@ -55,7 +70,8 @@ struct CryWolfRmlModel
     float balgassBarWidth = 0.f;
     Rml::String balgassBarRect;
     std::vector<CryWolfSpriteEntry> timerDigits;
-    Rml::String timerColor;
+    // Balgass on the field, which the original reddened the clock for.
+    bool timerUrgent = false;
     float statueBarLeft = 0.f;
     float statueBarWidth = 0.f;
     Rml::String statueBarRect;

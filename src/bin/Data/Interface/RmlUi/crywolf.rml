@@ -22,14 +22,17 @@
 			<div data-if="rank_details_visible">
 				<img id="rank_letter" data-if="rank_letter_src != ''" data-attr-src="rank_letter_src" data-attr-rect="'0 0 29 27'"/>
 				<img id="exp_label" src="../../../icon_Rank_exp.tga" rect="0 0 60 19"/>
-				<img class="exp-digit" data-for="d : exp_digits" data-attr-src="d.src" data-attr-rect="d.rect"
-				     data-style-left="d.left + 'px'" data-style-top="d.top + 'px'"/>
+				<!-- The nine experience digits, counted in their own container. -->
+				<div class="exp-digits"><img class="exp-digit" data-for="d : exp_digits" data-attr-src="d.src"
+				     data-attr-rect="d.rect"/></div>
 			</div>
 		</div>
 		<div id="hud" data-if="hud_visible">
 			<img id="main" src="../../../in_main-New.tga" rect="0 0 120 118"/>
-			<img class="altar" data-for="a : altars" data-attr-src="a.src" data-attr-rect="a.rect"
-			     data-style-left="a.left + 'px'" data-style-top="a.top + 'px'"/>
+			<!-- All five altars, each on its own place; one with no contract state shows nothing,
+			     and still holds its place so the others do not shift. -->
+			<div class="altars"><img class="altar" data-for="a : altars" data-class-hidden="!a.shown"
+			     data-attr-src="a.src" data-attr-rect="a.rect"/></div>
 			<img id="dark_elf_icon" data-attr-src="dark_elf_icon_src" data-attr-rect="'0 0 14 14'"/>
 			<img id="plate" src="../../../t_main-New.tga" rect="0 0 104 36"/>
 			<span class="hud-text" id="dark_elf_text" data-style-font-size="normal_text_px + 'px'"
@@ -44,13 +47,17 @@
 				     data-style-width="balgass_bar_width + 'px'"/>
 			</div>
 			<img class="timer-digit" data-for="d : timer_digits" data-attr-src="d.src" data-attr-rect="d.rect"
-			     data-style-left="d.left + 'px'" data-style-top="d.top + 'px'" data-style-image-color="timer_color"/>
+			     data-style-left="d.left + 'px'" data-style-top="d.top + 'px'"
+			     data-class-urgent="timer_urgent"/>
 			<img id="statue_bar" data-if="statue_bar_width > 0" src="../../../in_main2-New.tga"
 			     data-attr-rect="statue_bar_rect" data-style-left="statue_bar_left + 'px'"
 			     data-style-width="statue_bar_width + 'px'"/>
-			<span class="notice" data-for="n : notices" data-style-top="n.top + 'px'" data-style-color="n.color"
-			      data-style-font-size="bold_text_px + 'px'" data-style-line-height="bold_line_px + 'px'"
-			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{n.text}}</span>
+			<!-- The notice's four lines, the first its heading; the theme places and colours them. -->
+			<div class="notices">
+				<span class="notice" data-for="n : notices" data-class-heading="n.heading"
+				      data-style-font-size="bold_text_px + 'px'" data-style-line-height="bold_line_px + 'px'"
+				      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{n.text}}</span>
+			</div>
 		</div>
 	</div>
 </body>

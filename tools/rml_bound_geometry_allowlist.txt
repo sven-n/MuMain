@@ -26,7 +26,7 @@ chat_command.rml: per-frame data -- the window grows with how many commands are 
 chat_input.rml: per-frame data -- tooltip offset follows the hovered button
 chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
 command_window.rml: per-frame data -- target marker follows the selected command
-crywolf.rml: display-list port
+crywolf.rml: per-frame data -- the success/failure banner and the rank label slide in and out, Balgass's health and the statue's shield are gauge lengths (the shield shortens from its left, so its left moves with it), and the clock's digit runs are centred on their own x so a digit's left depends on how many digits the value has
 cursed_temple_enter.rml: the Enter and Close labels' top and the hero band's height, both from the live line height
 cursed_temple_result.rml: the Close label's top and the hero row's height from the live line height, and the victory/defeat banner's slide-in
 cursed_temple_system.rml: per-frame data -- the mini map's projected markers, the digit runs (packed by how many digits the value has) and the three native buttons, whose box comes off the live CButton that hit-tests them
