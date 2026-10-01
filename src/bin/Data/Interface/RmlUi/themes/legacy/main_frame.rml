@@ -127,7 +127,6 @@
 		</div>
 		<div id="pet_skill_row" data-class-hidden="!skill_grid_open">
 			<div class="skill-cell" data-for="cell : pet_skill_cells"
-			     data-style-left="cell.left + 'px'" data-style-top="cell.top + 'px'"
 			     data-class-selected="cell.is_current"
 			     data-event-click="skill_pet_click(cell.skill_index)"
 			     data-event-mouseover="skill_pet_hover(cell.skill_index)"

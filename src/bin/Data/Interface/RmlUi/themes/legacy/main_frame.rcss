@@ -349,3 +349,10 @@
 	top: -52px;
 	left: 280px;
 }
+
+/* The pet's four commands, in the row the original drew them in. */
+#pet_skill_row .skill-cell { top: 352px; }
+#pet_skill_row .skill-cell:nth-child(1) { left: 353px; }
+#pet_skill_row .skill-cell:nth-child(2) { left: 385px; }
+#pet_skill_row .skill-cell:nth-child(3) { left: 417px; }
+#pet_skill_row .skill-cell:nth-child(4) { left: 449px; }

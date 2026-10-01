@@ -2149,12 +2149,11 @@ void mu::ui::window::CSkillList::RebuildGridSnapshot()
 
     if (Hero->m_pPet != NULL)
     {
-        float px = 353.f, py = 352.f;
+        // The four commands are always all four, so the theme puts each on its own cell; only the
+        // zig-zag grid above needs a computed position.
         for (int i = AT_PET_COMMAND_DEFAULT; i < AT_PET_COMMAND_END; ++i)
         {
             SkillCellEntry entry;
-            entry.left = px;
-            entry.top = py;
             entry.skillIndex = i;
             entry.isPet = true;
             entry.isCurrent = (i == Hero->CurrentSkill);
@@ -2162,7 +2161,6 @@ void mu::ui::window::CSkillList::RebuildGridSnapshot()
             entry.icon = GetSkillIconDecorator(i);
             entry.hotkey = HotKeyText(GetSkillHotKeyNumber(i));
             m_PetSnapshot.push_back(entry);
-            px += width;
         }
     }
 }

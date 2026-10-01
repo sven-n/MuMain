@@ -63,7 +63,7 @@ mini_map.rml: per-frame data -- marker and cursor positions, per frame
 move_command.rml: per-frame data -- panel height follows the row count
 mu_helper_detail.rml: counter-scale bridge -- gauge fills; the gauge port is a tracked deferral
 mu_helper_skill_picker.rml: per-frame data -- fan-out is data-driven; recorded as the per-frame carve-out at port time
-notices.rml: display-list port
+notices.rml: a screen-converted document: it carries no root transform, and every position is physical px put through the transform the native text used, which UI::Notices::Render() takes ambiently rather than inside a known layout scope. Each row is deliberately sized 2 * PositionX(320) wide from x 0 so its centre lands on the original's centre whatever the transform's offset is, and the text centres in it. Moving the 300 + 13-a-line table into RCSS means giving this document a reference-px space and a stretch, which is a coordinate-space change on an unverified transform, not this rollout's edit
 npc_quest.rml: counter-scale bridge -- message/answer tops -- its own tracked deferral, see tracked-deferrals.md
 party_info.rml: counter-scale bridge -- counter-scaled member rows
 party_list.rml: per-frame data -- cards are placed per frame as members join and leave
@@ -78,7 +78,7 @@ themes/legacy/chat_log.rml: per-frame data -- panel and well heights follow the 
 themes/legacy/help_window.rml: per-frame data -- native renderer geometry for the page it still measures
 themes/legacy/lucky_item.rml: counter-scale bridge -- counter-scaled text layers
 themes/legacy/lucky_item_bg.rml: counter-scale bridge -- counter-scaled text layers
-themes/legacy/main_frame.rml: per-frame data -- HUD gauges and their anchors, per frame
+themes/legacy/main_frame.rml: per-frame data -- the health/mana/SD/AG gauges and every cooldown wipe are fractions, and the expanded skill grid's cells come from RebuildGridSnapshot()'s zig-zag, whose position is computed from a cell's ordinal among the skills actually learned (the same accepted computed fan-out as MuHelperSkillPicker's). #bars carries the bottom-HUD anchor, which is this document's root-placement bridge under its own name
 themes/legacy/mix_inventory.rml: display-list port, and mirrors the native list's scrollbar geometry
 themes/legacy/system_log.rml: per-frame data -- native renderer geometry for the lines it still measures
 themes/legacy/tooltip.rml: per-frame data -- tooltip is placed against the pointer
@@ -88,7 +88,7 @@ themes/modern/command_window.rml: per-frame data -- target marker follows the se
 themes/modern/generic_confirm_dialog.rml: per-frame data -- native 3D item anchor, and a panel sized to its content
 themes/modern/lucky_item.rml: counter-scale bridge -- counter-scaled text layers
 themes/modern/lucky_item_bg.rml: counter-scale bridge -- counter-scaled text layers
-themes/modern/main_frame.rml: per-frame data -- HUD gauges and their anchors, per frame
+themes/modern/main_frame.rml: per-frame data -- the health/mana/SD/AG gauges and every cooldown wipe are fractions, and the expanded skill grid's cells come from RebuildGridSnapshot()'s zig-zag, whose position is computed from a cell's ordinal among the skills actually learned (the same accepted computed fan-out as MuHelperSkillPicker's). #bars carries the bottom-HUD anchor, which is this document's root-placement bridge under its own name
 themes/modern/main_frame_bg.rml: per-frame data -- HUD chrome follows the same anchors, per frame
 themes/modern/mix_inventory.rml: display-list port, and mirrors the native list's scrollbar geometry
 themes/modern/mu_helper_detail.rml: counter-scale bridge -- gauge fills; the gauge port is a tracked deferral
