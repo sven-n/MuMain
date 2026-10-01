@@ -818,6 +818,8 @@ void mu::ui::window::CItemEnduranceInfo::BuildRmlUi()
                                                      c.Bind("left_scale_x", &model.leftScaleX);
                                                      c.Bind("left_scale_y", &model.leftScaleY);
                                                      c.Bind("right_x", &model.rightX);
+                                                     c.Bind("icons_left", &model.iconsLeft);
+                                                     c.Bind("icons_top", &model.iconsTop);
                                                      c.Bind("right_y", &model.rightY);
                                                      c.Bind("right_scale_x", &model.rightScaleX);
                                                      c.Bind("right_scale_y", &model.rightScaleY);
@@ -839,11 +841,9 @@ void mu::ui::window::CItemEnduranceInfo::BuildRmlUi()
                                                      c.Bind("pets", &model.pets);
 
                                                      auto icon = c.RegisterStruct<DurabilityIconEntry>();
-                                                     icon.RegisterMember("left", &DurabilityIconEntry::left);
-                                                     icon.RegisterMember("top", &DurabilityIconEntry::top);
+                                                     icon.RegisterMember("cell", &DurabilityIconEntry::cell);
                                                      icon.RegisterMember("image", &DurabilityIconEntry::image);
-                                                     icon.RegisterMember("tint_left", &DurabilityIconEntry::tintLeft);
-                                                     icon.RegisterMember("tint_width", &DurabilityIconEntry::tintWidth);
+                                                     icon.RegisterMember("tint_half", &DurabilityIconEntry::tintHalf);
                                                      icon.RegisterMember("band", &DurabilityIconEntry::band);
                                                      c.RegisterArray<std::vector<DurabilityIconEntry>>();
                                                      c.Bind("icons", &model.icons);
@@ -972,7 +972,12 @@ void mu::ui::window::CItemEnduranceInfo::SyncIcons()
     std::vector<DurabilityIconEntry> icons;
     if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE))
     {
-        auto ItemDurPos = POINT(m_ItemDurUIStartPos);
+        // The column is right-anchored to the live screen width, so where it starts is the
+        // window's; the theme packs the cells inside it.
+        SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::iconsLeft, "icons_left",
+                               static_cast<float>(m_ItemDurUIStartPos.x));
+        SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::iconsTop, "icons_top",
+                               static_cast<float>(m_ItemDurUIStartPos.y));
         int icntItemDurIcon = 0;
         bool bRenderRingWarning = false;
 
@@ -1006,8 +1011,7 @@ void mu::ui::window::CItemEnduranceInfo::SyncIcons()
                 continue;
 
             DurabilityIconEntry icon;
-            icon.left = static_cast<float>(ItemDurPos.x);
-            icon.top = static_cast<float>(ItemDurPos.y);
+            icon.cell = icntItemDurIcon;
             icon.band = DurabilityBand(pItem->Durability, iMaxDurability);
             if (i != EQUIPMENT_RING_LEFT || bRenderRingWarning != true)
             {
@@ -1048,34 +1052,22 @@ void mu::ui::window::CItemEnduranceInfo::SyncIcons()
                 }
             }
 
+            // Both rings warning at once share one icon, each tinting its own half of it.
             if (i == EQUIPMENT_RING_RIGHT)
             {
                 bRenderRingWarning = true;
-                icon.tintWidth = static_cast<float>(ITEM_DUR_WIDTH / 2);
+                icon.tintHalf = "left";
             }
             else if (i == EQUIPMENT_RING_LEFT)
             {
-                icon.tintLeft = static_cast<float>(ITEM_DUR_WIDTH / 2);
-                icon.tintWidth = static_cast<float>(ITEM_DUR_WIDTH / 2);
+                icon.tintHalf = "right";
                 bRenderRingWarning = false;
-            }
-            else
-            {
-                icon.tintWidth = static_cast<float>(ITEM_DUR_WIDTH);
             }
             icons.push_back(std::move(icon));
 
+            // A shared ring icon stays in the cell the right ring took; everything else moves on.
             if (bRenderRingWarning == false)
-            {
                 icntItemDurIcon++;
-                ItemDurPos.y += (static_cast<int>(ITEM_DUR_HEIGHT) + UI_INTERVAL_WIDTH);
-
-                if (icntItemDurIcon % 2 == 0)
-                {
-                    ItemDurPos.y = m_ItemDurUIStartPos.y;
-                    ItemDurPos.x -= (static_cast<int>(ITEM_DUR_WIDTH) + UI_INTERVAL_WIDTH);
-                }
-            }
         }
     }
     SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::icons, "icons", std::move(icons));

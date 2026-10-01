@@ -23,22 +23,20 @@ struct PetFrameEntry
     }
 };
 
-// One durability warning of the right-hand icons, reference px (the dock transform): the icon (an
-// empty image for the left ring when the right ring already drew the shared ring icon) and its
-// tint, whole or one half for the rings.
+// One durability warning of the right-hand icons: which cell of the column it occupies (two per
+// column, filling downwards then leftwards, which the theme lays out), the icon (an empty image
+// for the left ring when the right ring already drew the shared ring icon) and which part of it
+// the tint covers -- the whole icon, or one half each when both rings warn at once.
 struct DurabilityIconEntry
 {
-    float left = 0.f;
-    float top = 0.f;
-    Rml::String image; // "boots", "cap", ... ; empty = tint only
-    float tintLeft = 0.f;
-    float tintWidth = 0.f;
-    Rml::String band; // "half", "third", "fifth", "zero": at most 50 / 30 / 20 %, or worn out
+    int cell = 0;
+    Rml::String image;    // "boots", "cap", ... ; empty = tint only
+    Rml::String tintHalf; // "", "left", "right"
+    Rml::String band;     // "half", "third", "fifth", "zero": at most 50 / 30 / 20 %, or worn out
 
     bool operator==(const DurabilityIconEntry& other) const
     {
-        return left == other.left && top == other.top && image == other.image && tintLeft == other.tintLeft &&
-               tintWidth == other.tintWidth && band == other.band;
+        return cell == other.cell && image == other.image && tintHalf == other.tintHalf && band == other.band;
     }
 };
 
@@ -52,6 +50,10 @@ struct ItemEnduranceRmlModel
     // Right-hand durability icons: the dock-right transform, reference px inside.
     float rightX = 0.f;
     float rightY = 0.f;
+    // Where the icon column starts: right-anchored to the live screen width, so it is the window's
+    // to decide; the pack inside it is the theme's.
+    float iconsLeft = 0.f;
+    float iconsTop = 0.f;
     float rightScaleX = 1.f;
     float rightScaleY = 1.f;
 

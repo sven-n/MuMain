@@ -64,3 +64,24 @@ body {
 .tooltip--third { color: rgb(255, 168, 0); }
 .tooltip--fifth { color: rgb(255, 83, 0); }
 .tooltip--zero { color: rgb(255, 0, 0); }
+
+/* The icon column: two cells per column, filling downwards then leftwards, as the original's own
+   counter stepped them. Its start is bound -- the column is right-anchored to the screen. */
+#icon_column { position: absolute; }
+.icon.cell-0 { left: 0px; top: 0px; }
+.icon.cell-1 { left: 0px; top: 25px; }
+.icon.cell-2 { left: -25px; top: 0px; }
+.icon.cell-3 { left: -25px; top: 25px; }
+.icon.cell-4 { left: -50px; top: 0px; }
+.icon.cell-5 { left: -50px; top: 25px; }
+.icon.cell-6 { left: -75px; top: 0px; }
+.icon.cell-7 { left: -75px; top: 25px; }
+.icon.cell-8 { left: -100px; top: 0px; }
+.icon.cell-9 { left: -100px; top: 25px; }
+.icon.cell-10 { left: -125px; top: 0px; }
+.icon.cell-11 { left: -125px; top: 25px; }
+
+/* Whole icon, or one half each when both rings warn at once (the original halved 23 to 11). */
+.icon-tint { left: 0; width: 23px; }
+.icon-tint.half-left { left: 0; width: 11px; }
+.icon-tint.half-right { left: 11px; width: 11px; }
