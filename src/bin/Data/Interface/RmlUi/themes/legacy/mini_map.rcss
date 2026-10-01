@@ -121,3 +121,32 @@ body { pointer-events: none; }
 	text-align: center;
 	white-space: nowrap;
 }
+
+/* The top and bottom edge tiling: 25 tiles of 35 units each, the decoration the original stepped
+   across the map's own width. The containers take no space. */
+.edges { position: static; }
+.edges .edge-top:nth-child(1), .edges .edge-bottom:nth-child(1) { left: 0px; }
+.edges .edge-top:nth-child(2), .edges .edge-bottom:nth-child(2) { left: 35px; }
+.edges .edge-top:nth-child(3), .edges .edge-bottom:nth-child(3) { left: 70px; }
+.edges .edge-top:nth-child(4), .edges .edge-bottom:nth-child(4) { left: 105px; }
+.edges .edge-top:nth-child(5), .edges .edge-bottom:nth-child(5) { left: 140px; }
+.edges .edge-top:nth-child(6), .edges .edge-bottom:nth-child(6) { left: 175px; }
+.edges .edge-top:nth-child(7), .edges .edge-bottom:nth-child(7) { left: 210px; }
+.edges .edge-top:nth-child(8), .edges .edge-bottom:nth-child(8) { left: 245px; }
+.edges .edge-top:nth-child(9), .edges .edge-bottom:nth-child(9) { left: 280px; }
+.edges .edge-top:nth-child(10), .edges .edge-bottom:nth-child(10) { left: 315px; }
+.edges .edge-top:nth-child(11), .edges .edge-bottom:nth-child(11) { left: 350px; }
+.edges .edge-top:nth-child(12), .edges .edge-bottom:nth-child(12) { left: 385px; }
+.edges .edge-top:nth-child(13), .edges .edge-bottom:nth-child(13) { left: 420px; }
+.edges .edge-top:nth-child(14), .edges .edge-bottom:nth-child(14) { left: 455px; }
+.edges .edge-top:nth-child(15), .edges .edge-bottom:nth-child(15) { left: 490px; }
+.edges .edge-top:nth-child(16), .edges .edge-bottom:nth-child(16) { left: 525px; }
+.edges .edge-top:nth-child(17), .edges .edge-bottom:nth-child(17) { left: 560px; }
+.edges .edge-top:nth-child(18), .edges .edge-bottom:nth-child(18) { left: 595px; }
+.edges .edge-top:nth-child(19), .edges .edge-bottom:nth-child(19) { left: 630px; }
+.edges .edge-top:nth-child(20), .edges .edge-bottom:nth-child(20) { left: 665px; }
+.edges .edge-top:nth-child(21), .edges .edge-bottom:nth-child(21) { left: 700px; }
+.edges .edge-top:nth-child(22), .edges .edge-bottom:nth-child(22) { left: 735px; }
+.edges .edge-top:nth-child(23), .edges .edge-bottom:nth-child(23) { left: 770px; }
+.edges .edge-top:nth-child(24), .edges .edge-bottom:nth-child(24) { left: 805px; }
+.edges .edge-top:nth-child(25), .edges .edge-bottom:nth-child(25) { left: 840px; }

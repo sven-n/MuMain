@@ -36,7 +36,6 @@ struct MiniMapRmlModel
     Rml::String mapTransform; // CSS matrix() placing the 800x800 map element
     std::vector<MiniMapMarkerEntry> markers;
     std::vector<Rml::String> sideLines; // CSS matrix() of each left/right border tile
-    std::vector<float> edgeTiles;       // left of each top/bottom border tile, reference px
 
     // The hovered marker's name (CMiniMap::Check_Btn()), physical px.
     bool hintVisible = false;

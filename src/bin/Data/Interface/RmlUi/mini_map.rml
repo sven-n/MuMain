@@ -27,8 +27,10 @@
 			     data-style-transform="marker.transform"></div>
 			<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
 				<div class="hero"></div>
-				<div class="edge-top" data-for="left : edge_tiles" data-style-left="left + 'px'"></div>
-				<div class="edge-bottom" data-for="left : edge_tiles" data-style-left="left + 'px'"></div>
+				<!-- The top and bottom edge tiling: 25 fixed 35-unit tiles each, which the theme
+				     lays out. -->
+				<div class="edges edges-top"><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div><div class="edge-top"></div></div>
+				<div class="edges edges-bottom"><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div><div class="edge-bottom"></div></div>
 			</div>
 			<div class="edge-side" data-for="line : side_lines" data-style-transform="line"></div>
 			<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">

@@ -47,7 +47,6 @@ constexpr float kPortalSize = 30.f;
 constexpr float kTileWidth = 35.f;
 constexpr float kTileHeight = 6.f;
 constexpr int kSideTiles = 20;
-constexpr int kEdgeTiles = 25;
 // .edge-side's element size in mini_map.rcss (the tile's texel rectangle).
 constexpr float kSideElementWidth = 41.7f;
 constexpr float kSideElementHeight = 8.f;
@@ -322,7 +321,6 @@ void mu::ui::window::CMiniMap::BuildRmlUi()
             c.RegisterArray<std::vector<Rml::String>>();
             c.Bind("side_lines", &model.sideLines);
             c.RegisterArray<std::vector<float>>();
-            c.Bind("edge_tiles", &model.edgeTiles);
 
             c.Bind("hint_visible", &model.hintVisible);
             c.Bind("hint_text", &model.hintText);
@@ -336,15 +334,8 @@ void mu::ui::window::CMiniMap::BuildRmlUi()
         });
 
     if (modelCreated)
-    {
-        MiniMapRmlModel& model = m_RmlBinder.GetModel();
-        model.edgeTiles.clear();
-        for (int i = 0; i < kEdgeTiles; ++i)
-            model.edgeTiles.push_back(static_cast<float>(i) * kTileWidth);
-
         m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
                                                       "Data/Interface/RmlUi/mini_map.rml");
-    }
 }
 
 void mu::ui::window::CMiniMap::ReloadRmlTheme()
