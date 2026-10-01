@@ -8,17 +8,48 @@
 	<!-- The Illusion Temple HUD (CCursedTempleSystem): the time, the mini map with its markers and
 	     transparency button, the skill panel, the score effect and the tutorial step. A
 	     LayoutMode::Hud window drawn at fixed 640x480 reference positions, so .screen is that screen
-	     stretched W/640 x H/480 like the original; C++ lists the images in the original's drawing
-	     order. Text does not stretch: it takes the native size and cancels the stretch. In the
+	     stretched W/640 x H/480 like the original. The frames, the score banners and every row's
+	     place are the theme's; C++ lists only what it has to place itself -- the projected mini-map
+	     markers, the digit runs and the native buttons -- in the original's drawing order, under the
+	     frames. Text does not stretch: it takes the native size and cancels the stretch. In the
 	     background context, behind its other documents (the original drew it under nearly every
 	     panel). Takes no pointer events: the buttons' input stays native. -->
 	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+		<!-- The panel chrome, hidden together when every window the original checked is open. -->
+		<div class="panels" data-if="panels_shown">
+			<div id="game_time_frame"></div>
+			<div id="game_time_dot"></div>
+			<div id="skill_frame"></div>
+			<div id="mini_map"></div>
+			<div id="mini_map_frame"></div>
+			<img id="skill_icon" data-attr-src="skill_icon_src" data-attr-rect="skill_icon_rect"/>
+		</div>
+
+		<!-- The score effect: each team's points in big digits between their banners. A team past
+		     nine points shows a tens digit and its ones digit moves out of the centre. -->
+		<div class="score" data-if="score_shown">
+			<img id="score_allied_tens" data-if="allied_two_digits" data-attr-src="allied_tens_src"/>
+			<img id="score_allied_ones" data-class-wide="allied_two_digits" data-attr-src="allied_ones_src"/>
+			<div id="score_colon"></div>
+			<img id="score_illusion_tens" data-if="illusion_two_digits" data-attr-src="illusion_tens_src"/>
+			<img id="score_illusion_ones" data-class-wide="illusion_two_digits" data-attr-src="illusion_ones_src"/>
+			<div id="score_allied_badge"></div>
+			<div id="score_vs"></div>
+			<div id="score_illusion_badge"></div>
+			<div id="score_left_banner"></div>
+			<div id="score_right_banner"></div>
+		</div>
+
 		<img class="sprite" data-for="s : sprites" data-attr-src="s.src" data-attr-rect="s.rect"
 		     data-style-left="s.left + 'px'" data-style-top="s.top + 'px'"
-		     data-style-width="s.width + 'px'" data-style-height="s.height + 'px'" data-style-image-color="s.color"/>
-		<span class="tutorial-line" data-for="l : tutorial_lines" data-style-top="l.top + 'px'" data-style-color="l.color"
-		      data-style-font-size="l.text_px + 'px'"
-		      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{l.text}}</span>
+		     data-style-width="s.width + 'px'" data-style-height="s.height + 'px'"
+		     data-style-opacity="s.opacity"/>
+
+		<div class="tutorial">
+			<span class="tutorial-line" data-for="l : tutorial_lines" data-class-title="l.title"
+			      data-style-font-size="l.text_px + 'px'"
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{l.text}}</span>
+		</div>
 	</div>
 </body>
 </rml>

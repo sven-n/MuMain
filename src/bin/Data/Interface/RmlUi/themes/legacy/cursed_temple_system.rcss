@@ -1,6 +1,7 @@
 /* Legacy theme for CCursedTempleSystem, reproducing its Render() at the 640x480 reference positions
-   under .screen's W/640 x H/480 stretch: every image's file, cell and box come from C++ in the
-   original's order; the tutorial step's lines at x 140 in the normal font. */
+   under .screen's W/640 x H/480 stretch: the frames, the score effect's banners and digits and the
+   tutorial step's rows are here; C++ still places the projected mini-map markers, the digit runs
+   and the native buttons, which it lists in the original's order. */
 
 body { pointer-events: none; }
 
@@ -24,3 +25,75 @@ body { pointer-events: none; }
 	transform-origin: left top;
 	white-space: nowrap;
 }
+
+/* The HUD's own frames, in the original's places. */
+@spritesheet ct-hud-sheet
+{
+	src: "../../../newui_ctgametimeframe.tga";
+	ct-game-time-frame: 0px 0px 134px 37px;
+}
+@spritesheet ct-dot-sheet { src: "../../../dot.tga"; ct-dot: 0px 0px 3px 9px; }
+@spritesheet ct-skill-frame-sheet { src: "../../../newui_ctskillframe.tga"; ct-skill-frame: 0px 0px 128px 53px; }
+@spritesheet ct-minmap-sheet { src: "../../../newui_ctminmap.jpg"; ct-minmap: 0px 0px 128px 128px; }
+@spritesheet ct-minmap-frame-sheet { src: "../../../newui_ctminmapframe.tga"; ct-minmap-frame: 0px 0px 128px 165px; }
+
+.panels, .score, .tutorial { position: static; }
+
+#game_time_frame { position: absolute; left: 506px; top: 393px; width: 134px; height: 37px;
+                   decorator: image(ct-game-time-frame); }
+#game_time_dot { position: absolute; left: 574.5px; top: 407.5px; width: 3px; height: 9px; decorator: image(ct-dot); }
+#skill_frame { position: absolute; left: 512px; top: 179px; width: 128px; height: 53px;
+               decorator: image(ct-skill-frame); }
+#mini_map { position: absolute; left: 512px; top: 263px; width: 128px; height: 128px; decorator: image(ct-minmap); }
+#mini_map_frame { position: absolute; left: 512px; top: 232px; width: 128px; height: 165px;
+                  decorator: image(ct-minmap-frame); }
+#skill_icon { position: absolute; left: 539px; top: 200px; width: 20px; height: 28px; }
+
+/* The score effect's banners and digits. */
+@spritesheet ct-score-colon-sheet { src: "../../../newui_ctscorevs1.tga"; ct-score-colon: 0px 0px 20px 45px; }
+@spritesheet ct-score-vs-sheet { src: "../../../newui_ctscorevs0.tga"; ct-score-vs: 0px 0px 49px 27px; }
+@spritesheet ct-score-allied-sheet
+{
+	src: "../../../newui_ctscorealliedgaail.tga";
+	ct-score-allied-badge: 0px 0px 40px 36px;
+}
+@spritesheet ct-score-illusion-sheet
+{
+	src: "../../../newui_ctscoreillsiongaail.tga";
+	ct-score-illusion-badge: 0px 0px 40px 36px;
+}
+@spritesheet ct-score-left-sheet { src: "../../../newui_ctscoreleft.tga"; ct-score-left: 0px 0px 67px 125px; }
+@spritesheet ct-score-right-sheet { src: "../../../newui_ctscoreright.tga"; ct-score-right: 0px 0px 67px 125px; }
+
+#score_allied_tens, #score_allied_ones, #score_illusion_tens, #score_illusion_ones {
+	position: absolute;
+	top: 160px;
+	width: 56px;
+	height: 66px;
+}
+#score_allied_tens { left: 196px; }
+#score_allied_ones { left: 224px; }
+#score_allied_ones.wide { left: 253px; }
+#score_illusion_tens { left: 331px; }
+#score_illusion_ones { left: 358px; }
+#score_illusion_ones.wide { left: 388px; }
+#score_colon { position: absolute; left: 310px; top: 168px; width: 20px; height: 45px;
+               decorator: image(ct-score-colon); }
+#score_allied_badge { position: absolute; left: 232px; top: 115px; width: 40px; height: 36px;
+                      decorator: image(ct-score-allied-badge); }
+#score_vs { position: absolute; left: 292px; top: 123px; width: 49px; height: 27px; decorator: image(ct-score-vs); }
+#score_illusion_badge { position: absolute; left: 367px; top: 115px; width: 40px; height: 36px;
+                        decorator: image(ct-score-illusion-badge); }
+#score_left_banner { position: absolute; left: 133px; top: 115px; width: 67px; height: 125px;
+                     decorator: image(ct-score-left); }
+#score_right_banner { position: absolute; left: 445px; top: 115px; width: 67px; height: 125px;
+                      decorator: image(ct-score-right); }
+
+/* RenderTutorialStep()'s own rows: the step's title at y 50 and its three lines 14 units apart,
+   with the second row left empty as the original left it. */
+.tutorial-line { color: #ffffff; }
+.tutorial-line.title { color: #ffb049; }
+.tutorial-line:nth-child(1) { top: 50px; }
+.tutorial-line:nth-child(2) { top: 78px; }
+.tutorial-line:nth-child(3) { top: 92px; }
+.tutorial-line:nth-child(4) { top: 106px; }

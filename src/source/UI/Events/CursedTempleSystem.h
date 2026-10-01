@@ -108,7 +108,7 @@ private:
     void SyncGameTime(std::vector<CursedTempleSpriteEntry>& sprites);
     void SyncMiniMap(std::vector<CursedTempleSpriteEntry>& sprites);
     void SyncSkill(std::vector<CursedTempleSpriteEntry>& sprites);
-    void SyncScore(std::vector<CursedTempleSpriteEntry>& sprites);
+    void SyncScore();
     void SyncTutorialStep(std::vector<CursedTempleTextEntry>& lines);
 
 public:

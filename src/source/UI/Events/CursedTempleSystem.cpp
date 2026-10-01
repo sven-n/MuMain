@@ -28,7 +28,6 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlSyncField.h"
-#include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
@@ -787,12 +786,10 @@ Rml::String TexelRect(float x, float y, float width, float height)
     return Rml::CreateString("%g %g %g %g", x, y, width, height);
 }
 
-const Rml::String White = "rgba(255, 255, 255, 255)";
-
 void AddSprite(std::vector<CursedTempleSpriteEntry>& sprites, const Rml::Vector4f& box, const std::string& file,
-               const Rml::String& rect, const Rml::String& color = White)
+               const Rml::String& rect, float opacity = 1.f)
 {
-    sprites.push_back({box.x, box.y, box.z, box.w, InterfaceImage(file), rect, color});
+    sprites.push_back({box.x, box.y, box.z, box.w, InterfaceImage(file), rect, opacity});
 }
 
 // RenderNumber(x, y, number, scale): newui_number1's 12 x 14 texel digits, 12 x 16 units times
@@ -840,13 +837,12 @@ void AddButton(std::vector<CursedTempleSpriteEntry>& sprites, CButton& button, c
         frame = 1;
     else if (button.GetBTState() == BUTTON_STATE_DOWN)
         frame = 2;
-    const BYTE a = static_cast<BYTE>(255.f * alpha);
     AddSprite(
         sprites,
         {static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(size.x), static_cast<float>(size.y)},
         file,
         TexelRect(0.f, static_cast<float>(frame * size.y), static_cast<float>(size.x), static_cast<float>(size.y)),
-        UI::RmlBridge::RgbaToCss(RGBA(255, 255, 255, a)));
+        alpha);
 }
 } // namespace
 
@@ -865,19 +861,28 @@ void mu::ui::window::CCursedTempleSystem::BuildRmlUi()
                                                      sprite.RegisterMember("height", &CursedTempleSpriteEntry::height);
                                                      sprite.RegisterMember("src", &CursedTempleSpriteEntry::src);
                                                      sprite.RegisterMember("rect", &CursedTempleSpriteEntry::rect);
-                                                     sprite.RegisterMember("color", &CursedTempleSpriteEntry::color);
+                                                     sprite.RegisterMember("opacity", &CursedTempleSpriteEntry::opacity);
                                                      c.RegisterArray<std::vector<CursedTempleSpriteEntry>>();
                                                      auto line = c.RegisterStruct<CursedTempleTextEntry>();
-                                                     line.RegisterMember("top", &CursedTempleTextEntry::top);
                                                      line.RegisterMember("text", &CursedTempleTextEntry::text);
-                                                     line.RegisterMember("color", &CursedTempleTextEntry::color);
                                                      line.RegisterMember("text_px", &CursedTempleTextEntry::textPx);
+                                                     line.RegisterMember("title", &CursedTempleTextEntry::title);
                                                      c.RegisterArray<std::vector<CursedTempleTextEntry>>();
 
                                                      c.Bind("scale_x", &model.scaleX);
                                                      c.Bind("scale_y", &model.scaleY);
                                                      c.Bind("inverse_scale_x", &model.inverseScaleX);
                                                      c.Bind("inverse_scale_y", &model.inverseScaleY);
+                                                     c.Bind("panels_shown", &model.panelsShown);
+                                                     c.Bind("score_shown", &model.scoreShown);
+                                                     c.Bind("skill_icon_src", &model.skillIconSrc);
+                                                     c.Bind("skill_icon_rect", &model.skillIconRect);
+                                                     c.Bind("allied_tens_src", &model.alliedTensSrc);
+                                                     c.Bind("allied_ones_src", &model.alliedOnesSrc);
+                                                     c.Bind("illusion_tens_src", &model.illusionTensSrc);
+                                                     c.Bind("illusion_ones_src", &model.illusionOnesSrc);
+                                                     c.Bind("allied_two_digits", &model.alliedTwoDigits);
+                                                     c.Bind("illusion_two_digits", &model.illusionTwoDigits);
                                                      c.Bind("sprites", &model.sprites);
                                                      c.Bind("tutorial_lines", &model.tutorialLines);
                                                  });
@@ -907,7 +912,11 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
 
     float x = 512.f + 27.f;
     float y = 258.f - 58.f;
-    AddSprite(sprites, {x, y, 20.f, 28.f}, m_SkillPoint >= MaxKillCount ? "newui_skill2.jpg" : "newui_non_skill2.jpg",
+    // The icon's own place is the theme's; which sheet and cell it shows is the current skill and
+    // whether the hero has the kill points for it.
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::skillIconSrc, "skill_icon_src",
+              InterfaceImage(m_SkillPoint >= MaxKillCount ? "newui_skill2.jpg" : "newui_non_skill2.jpg"));
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::skillIconRect, "skill_icon_rect",
               TexelRect(static_cast<float>((8 + (CursedTempleCurSkillType - 210)) * 20), 0.f, 20.f, 28.f));
     AddNumber<100>(sprites, {x + 55.f, y + 8.f}, MaxKillCount);
     AddNumber<100>(sprites, {x + 77.f, y + 8.f}, m_SkillPoint);
@@ -995,9 +1004,6 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
 // The original RenderGameTime(): the frame, the colon dot, the minutes and the seconds.
 void mu::ui::window::CCursedTempleSystem::SyncGameTime(std::vector<CursedTempleSpriteEntry>& sprites)
 {
-    AddSprite(sprites, {506.f, 393.f, 134.f, 37.f}, "newui_ctgametimeframe.tga", TexelRect(0.f, 0.f, 134.f, 37.f));
-    AddSprite(sprites, {507.5f + (134.f / 2), 407.5f, 3.f, 9.f}, "dot.tga", TexelRect(0.f, 0.f, 3.f, 9.f));
-
     const int minute = static_cast<int>(m_EventMapTime / 60);
     const int second = static_cast<int>(m_EventMapTime % 60);
     const float x = 507.5f + (134.f / 2);
@@ -1015,10 +1021,6 @@ void mu::ui::window::CCursedTempleSystem::SyncGameTime(std::vector<CursedTempleS
 void mu::ui::window::CCursedTempleSystem::SyncMiniMap(std::vector<CursedTempleSpriteEntry>& sprites)
 {
     m_Scale = 1.56f;
-
-    AddSprite(sprites, {512.f, 232.f - 53.f, 128.f, 53.f}, "newui_ctskillframe.tga", TexelRect(0.f, 0.f, 128.f, 53.f));
-    AddSprite(sprites, {512.f, 263.f, 128.f, 128.f}, "newui_ctminmap.jpg", TexelRect(0.f, 0.f, 128.f, 128.f));
-    AddSprite(sprites, {512.f, 232.f, 128.f, 165.f}, "newui_ctminmapframe.tga", TexelRect(0.f, 0.f, 128.f, 165.f));
 
     const auto marker = [&](float tileX, float tileY, const Rml::Vector2f& size, const char* file)
     {
@@ -1074,52 +1076,29 @@ void mu::ui::window::CCursedTempleSystem::SyncMiniMap(std::vector<CursedTempleSp
 }
 
 // The original RenderScore(): the two teams' points in big digits between their banners, shown for
-// a while after a team scores.
-void mu::ui::window::CCursedTempleSystem::SyncScore(std::vector<CursedTempleSpriteEntry>& sprites)
+// a while after a team scores. Each theme places the digits and the banners; which digit image a
+// team shows is its points.
+void mu::ui::window::CCursedTempleSystem::SyncScore()
 {
-    if (!m_IsScoreEffect)
-        return;
+    const auto digit = [](const char* team, int value)
+    { return InterfaceImage(std::string("newui_ctscore") + team + "num" + std::to_string(value) + ".tga"); };
 
-    const Rml::String digitRect = TexelRect(0.f, 0.f, 56.f, 66.f);
-    const auto digit = [&](const char* team, int value, float left)
-    {
-        AddSprite(sprites, {left, 160.f, 56.f, 66.f},
-                  std::string("newui_ctscore") + team + "num" + std::to_string(value) + ".tga", digitRect);
-    };
-
-    if (m_AlliedPoint / 10 != 0)
-    {
-        digit("allied", m_AlliedPoint / 10 % 10, 196.f);
-        digit("allied", m_AlliedPoint % 10, 253.f);
-    }
-    else
-    {
-        digit("allied", m_AlliedPoint % 10, 224.f);
-    }
-
-    // The colon. The original picked the image after newui_ctscorevs1 by the illusion team's tens
-    // (a banner from ten points on); the colon is always drawn here.
-    AddSprite(sprites, {310.f, 168.f, 20.f, 45.f}, "newui_ctscorevs1.tga", TexelRect(0.f, 0.f, 20.f, 45.f));
-
-    if (m_IllusionPoint / 10 != 0)
-    {
-        digit("illusion", m_IllusionPoint / 10 % 10, 331.f);
-        digit("illusion", m_IllusionPoint % 10, 388.f);
-    }
-    else
-    {
-        digit("illusion", m_IllusionPoint % 10, 358.f);
-    }
-
-    AddSprite(sprites, {232.f, 115.f, 40.f, 36.f}, "newui_ctscorealliedgaail.tga", TexelRect(0.f, 0.f, 40.f, 36.f));
-    AddSprite(sprites, {292.f, 123.f, 49.f, 27.f}, "newui_ctscorevs0.tga", TexelRect(0.f, 0.f, 49.f, 27.f));
-    AddSprite(sprites, {367.f, 115.f, 40.f, 36.f}, "newui_ctscoreillsiongaail.tga", TexelRect(0.f, 0.f, 40.f, 36.f));
-    AddSprite(sprites, {133.f, 115.f, 67.f, 125.f}, "newui_ctscoreleft.tga", TexelRect(0.f, 0.f, 67.f, 125.f));
-    AddSprite(sprites, {445.f, 115.f, 67.f, 125.f}, "newui_ctscoreright.tga", TexelRect(0.f, 0.f, 67.f, 125.f));
+    const bool alliedTwo = m_AlliedPoint / 10 != 0;
+    const bool illusionTwo = m_IllusionPoint / 10 != 0;
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::alliedTwoDigits, "allied_two_digits", alliedTwo);
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::illusionTwoDigits, "illusion_two_digits", illusionTwo);
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::alliedTensSrc, "allied_tens_src",
+              digit("allied", m_AlliedPoint / 10 % 10));
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::alliedOnesSrc, "allied_ones_src",
+              digit("allied", m_AlliedPoint % 10));
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::illusionTensSrc, "illusion_tens_src",
+              digit("illusion", m_IllusionPoint / 10 % 10));
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::illusionOnesSrc, "illusion_ones_src",
+              digit("illusion", m_IllusionPoint % 10));
 }
 
-// The original RenderTutorialStep(): the step's title and three lines at (140, 50), 14 px apart,
-// each in a 300 px box.
+// The original RenderTutorialStep(): the step's title and three lines from (140, 50), 14 px apart
+// with the second row left empty, each in a 300 px box. The theme places and colours them.
 void mu::ui::window::CCursedTempleSystem::SyncTutorialStep(std::vector<CursedTempleTextEntry>& lines)
 {
     if (!m_IsTutorialStep)
@@ -1156,10 +1135,10 @@ void mu::ui::window::CCursedTempleSystem::SyncTutorialStep(std::vector<CursedTem
             continue;
         const std::wstring text = texts[j];
         const int width = g_pRenderText->MeasureText(text.c_str(), static_cast<int>(text.size())).cx;
-        lines.push_back({static_cast<float>(50 + (j * 14)), StringUtils::WideToNarrow(text.c_str()),
-                         UI::RmlBridge::RgbaToCss(j == 0 ? 0xFF49B0FF : 0xFFffffff),
+        lines.push_back({StringUtils::WideToNarrow(text.c_str()),
                          UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
-                                                               static_cast<float>(width), 300.f)});
+                                                               static_cast<float>(width), 300.f),
+                         j == 0});
     }
 }
 
@@ -1180,14 +1159,19 @@ void mu::ui::window::CCursedTempleSystem::SyncView()
 
     std::vector<CursedTempleSpriteEntry> sprites;
     // The original's condition: drawn unless every one of these windows is open.
-    if (!g_pCharacterInfoWindow->IsVisible() || !g_pMyInventory->IsVisible() || !g_pGuildInfoWindow->IsVisible() ||
-        !g_pWindowMgr->IsVisible() || !g_pPartyInfoWindow->IsVisible() || !g_pMyQuestInfoWindow->IsVisible())
+    const bool panelsShown = !g_pCharacterInfoWindow->IsVisible() || !g_pMyInventory->IsVisible() ||
+                             !g_pGuildInfoWindow->IsVisible() || !g_pWindowMgr->IsVisible() ||
+                             !g_pPartyInfoWindow->IsVisible() || !g_pMyQuestInfoWindow->IsVisible();
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::panelsShown, "panels_shown", panelsShown);
+    if (panelsShown)
     {
         SyncGameTime(sprites);
         SyncMiniMap(sprites);
         SyncSkill(sprites);
     }
-    SyncScore(sprites);
+    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::scoreShown, "score_shown", m_IsScoreEffect);
+    if (m_IsScoreEffect)
+        SyncScore();
     std::vector<CursedTempleTextEntry> lines;
     SyncTutorialStep(lines);
 

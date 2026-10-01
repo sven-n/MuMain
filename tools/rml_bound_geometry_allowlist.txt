@@ -30,7 +30,7 @@ command_window.rml: per-frame data -- target marker follows the selected command
 crywolf.rml: display-list port
 cursed_temple_enter.rml: counter-scale bridge -- the .sharp-text layers' own widths, and the hero band's height from the live line height
 cursed_temple_result.rml: counter-scale bridge -- the .sharp-text layers' own widths, the hero row's height from the live line height, and the victory/defeat banner's slide-in
-cursed_temple_system.rml: display-list port
+cursed_temple_system.rml: per-frame data -- the mini map's projected markers, the digit runs (packed by how many digits the value has) and the three native buttons, whose box comes off the live CButton that hit-tests them
 devil_square_enter.rml: display-list port
 doppelganger_enter.rml: display-list port
 doppelganger_frame.rml: per-frame data -- boss-bar marker positions, per frame
