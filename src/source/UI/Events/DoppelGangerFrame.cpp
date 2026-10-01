@@ -8,7 +8,6 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlSyncField.h"
-#include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
@@ -149,12 +148,11 @@ void CDoppelGangerFrame::BuildRmlUi()
                                c.Bind("panel_y", &model.panelY);
                                auto text = c.RegisterStruct<DoppelGangerFrameTextEntry>();
                                text.RegisterMember("text", &DoppelGangerFrameTextEntry::text);
-                               text.RegisterMember("top", &DoppelGangerFrameTextEntry::top);
                                text.RegisterMember("text_px", &DoppelGangerFrameTextEntry::textPx);
-                               text.RegisterMember("big", &DoppelGangerFrameTextEntry::big);
-                               text.RegisterMember("color", &DoppelGangerFrameTextEntry::color);
-                               c.RegisterArray<std::vector<DoppelGangerFrameTextEntry>>();
-                               c.Bind("texts", &model.texts);
+                               c.Bind("passed_line", &model.passedLine);
+                               c.Bind("passed_state", &model.passedState);
+                               c.Bind("time_label", &model.timeLabel);
+                               c.Bind("time_line", &model.timeLine);
                                auto bar = c.RegisterStruct<DoppelGangerFrameBarEntry>();
                                bar.RegisterMember("src", &DoppelGangerFrameBarEntry::src);
                                bar.RegisterMember("rect", &DoppelGangerFrameBarEntry::rect);
@@ -222,45 +220,33 @@ void CDoppelGangerFrame::SyncView()
     SyncField(m_RmlBinder, &DoppelGangerFrameRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
 
     // The original's texts: the monsters that passed (orange, red-orange after one, red after two),
-    // "Time left" and the time, both orange, each centred on 110 units and shrunk to them.
-    auto textEntry = [&](const wchar_t* text, float top, bool big, unsigned long color)
+    // "Time left" and the time, each centred on 110 units and shrunk to them; the themes place
+    // and colour them.
+    auto textEntry = [&](const wchar_t* text, bool big)
     {
         const auto role = big ? UI::Scaling::FontRole::Big : UI::Scaling::FontRole::Normal;
         g_pRenderText->SetFont(big ? g_hFontBig : g_hFont);
         const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
         return DoppelGangerFrameTextEntry{
-            StringUtils::WideToNarrow(text), top,
-            UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), 110.f), big,
-            UI::RmlBridge::RgbaToCss(color)};
+            StringUtils::WideToNarrow(text),
+            UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), 110.f)};
     };
-    const unsigned long orange = RGBA(255, 150, 0, 255);
-    unsigned long passedColor = orange;
+    const char* passedState = "none";
     if (m_iEnteredMonsters == 1)
-        passedColor = RGBA(255, 70, 0, 255);
+        passedState = "one";
     else if (m_iEnteredMonsters >= 2)
-        passedColor = RGBA(255, 0, 0, 255);
+        passedState = "several";
     wchar_t szText[256] = {};
-    std::vector<DoppelGangerFrameTextEntry> texts;
     mu_swprintf(szText, I18N::Game::MonstersPassedDD, m_iEnteredMonsters, m_iMaxMonsters);
-    texts.push_back(textEntry(szText, 13.f, false, passedColor));
-    texts.push_back(textEntry(I18N::Game::TimeLeft, 38.f, false, orange));
+    SyncField(m_RmlBinder, &DoppelGangerFrameRmlModel::passedLine, "passed_line", textEntry(szText, false));
+    SyncField(m_RmlBinder, &DoppelGangerFrameRmlModel::passedState, "passed_state", Rml::String(passedState));
+    SyncField(m_RmlBinder, &DoppelGangerFrameRmlModel::timeLabel, "time_label",
+              textEntry(I18N::Game::TimeLeft, false));
     const int iMinute = m_iTime / 60;
     const int iSecond = m_bStopTimer == TRUE ? 0 : 99 - static_cast<int>(WorldTime) % 100;
     mu_swprintf(szText, L"%.2d:%.2d:%.2d", iMinute, m_iTime % 60, iSecond);
-    texts.push_back(textEntry(szText, 50.f, true, orange));
+    SyncField(m_RmlBinder, &DoppelGangerFrameRmlModel::timeLine, "time_line", textEntry(szText, true));
     DoppelGangerFrameRmlModel& model = m_RmlBinder.GetModel();
-    const bool sameTexts = model.texts.size() == texts.size() &&
-                           std::equal(model.texts.begin(), model.texts.end(), texts.begin(),
-                                      [](const DoppelGangerFrameTextEntry& a, const DoppelGangerFrameTextEntry& b)
-                                      {
-                                          return a.text == b.text && a.top == b.top && a.textPx == b.textPx &&
-                                                 a.big == b.big && a.color == b.color;
-                                      });
-    if (!sameTexts)
-    {
-        model.texts = std::move(texts);
-        m_RmlBinder.MarkDirty("texts");
-    }
 
     // The gauge: yellow up to the first monster, then yellow under orange, then orange under red.
     const char* yellow = "../../../Double_bar(Y).jpg";

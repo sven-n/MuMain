@@ -15,10 +15,18 @@
 	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
 		<div id="panel" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
 			<div id="back"></div>
-			<span class="frame-text" data-for="t : texts" data-class-big="t.big" data-style-top="t.top + 'px'"
-			      data-style-color="t.color" data-style-font-size="t.text_px + 'px'"
+			<!-- The three lines, each placed and coloured by the theme; the monsters-passed line
+			     says how many got through. -->
+			<span class="frame-text" id="dg_passed" data-class-passed-one="passed_state == 'one'"
+			      data-class-passed-several="passed_state == 'several'"
+			      data-style-font-size="passed_line.text_px + 'px'" data-style-width="(110 * scale_x) + 'px'"
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{passed_line.text}}</span>
+			<span class="frame-text" id="dg_time_label" data-style-font-size="time_label.text_px + 'px'"
 			      data-style-width="(110 * scale_x) + 'px'"
-			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{t.text}}</span>
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{time_label.text}}</span>
+			<span class="frame-text big" id="dg_time" data-style-font-size="time_line.text_px + 'px'"
+			      data-style-width="(110 * scale_x) + 'px'"
+			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{time_line.text}}</span>
 			<img class="bar" data-for="b : bars" data-attr-src="b.src" data-attr-rect="b.rect"
 			     data-style-left="b.left + 'px'" data-style-width="b.width + 'px'"/>
 			<img id="icewalker" src="../../../Double_Micon01.tga" data-if="ice_walker_visible"

@@ -38,3 +38,11 @@ body { pointer-events: none; }
 #icewalker { position: absolute; top: 77px; width: 13px; height: 7px; }
 .marker { position: absolute; top: 79px; width: 9px; height: 8px; decorator: image(frame-member); }
 .marker.hero { decorator: image(frame-hero); }
+
+/* RenderText()'s own rows, and how pressing the monsters-passed line is. */
+#dg_passed { top: 13px; }
+#dg_time_label { top: 38px; }
+#dg_time { top: 50px; }
+.frame-text { color: rgb(255, 150, 0); }
+#dg_passed.passed-one { color: rgb(255, 70, 0); }
+#dg_passed.passed-several { color: rgb(255, 0, 0); }

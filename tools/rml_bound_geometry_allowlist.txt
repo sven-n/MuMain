@@ -33,7 +33,7 @@ cursed_temple_result.rml: the Close label's top and the hero row's height from t
 cursed_temple_system.rml: per-frame data -- the mini map's projected markers, the digit runs (packed by how many digits the value has) and the three native buttons, whose box comes off the live CButton that hit-tests them
 devil_square_enter.rml: counter-scale bridge -- the button labels' top from the live line height
 doppelganger_enter.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
-doppelganger_frame.rml: per-frame data -- boss-bar marker positions, per frame
+doppelganger_frame.rml: per-frame data -- the monsters' gauge is a length from m_fMonsterGauge, stacked in pieces as monsters get through; the Ice Walker's and each party member's marker is their own position along the path (59 + 167 * position)
 duel_watch.rml: counter-scale bridge -- the Watch labels' top from the live line height, which inside a .sharp-text block layout height and rendered height disagree on
 duel_watch_frame.rml: the health and shield gauges are lengths from the fighters' rates, and the left fighter's bars are right-aligned so their left moves with the rate too (the plan's gauge carve-out); a score mark is one per point, stepping from each side's own origin, and the score arrives from the server as a byte with no client-side cap, so no :nth-child table can cover it
 duel_watch_spectators.rml: the spectator boxes stack upwards from the frame, and the list is an unbounded std::vector filled from the server, so no :nth-child or :nth-last-child table can cover it; plus the name's top in its 17-unit box from the live font height
