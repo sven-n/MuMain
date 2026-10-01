@@ -4,8 +4,8 @@
 #include "Engine/Object/ZzzInfomation.h"     // CharacterAttribute
 #include "UI/Core/WindowSystem.h"            // g_pSystemLogBox
 #include "UI/HUD/ChatLogWindow.h" // mu::ui::window::TYPE_SYSTEM_MESSAGE
-#include "UI/Widgets/UIControls.h"            // g_pRenderText
 #include "I18N/All.h"
+#include "Render/Text/CUIRenderText.h"
 
 namespace
 {

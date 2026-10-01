@@ -8,7 +8,6 @@
 #include "GameLogic/Items/CSItemOption.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzCharacter.h"
-#include "UI/Widgets/UIControls.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Scenes/SceneCore.h"
 #include "Engine/Object/ZzzInventory.h"

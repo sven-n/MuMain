@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "UI/Combat/SiegeWarObserver.h"
 
-#include "UI/Widgets/UIControls.h"
 
 #include "Engine/Object/ZzzCharacter.h"
 

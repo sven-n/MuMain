@@ -14,7 +14,6 @@
 
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Events/CSChaosCastle.h"
-#include "UI/Widgets/UIControls.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Character/CharacterManager.h"
 #include "UI/Core/WindowSystem.h"
@@ -28,6 +27,7 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "Render/Text/CUIRenderText.h"
 
 #include <RmlUi/Core/ElementDocument.h>
 

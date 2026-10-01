@@ -33,6 +33,7 @@
 #include "Character/CharacterManager.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Party/UIWindows.h"
+#include "Render/Text/CUIRenderText.h"
 
 bool bCheckNPC = false;
 extern  int  g_iMessageTextStart;

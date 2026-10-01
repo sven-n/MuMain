@@ -16,7 +16,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Audio/DSPlaySound.h"
-#include "UI/Widgets/UIControls.h"
+#include "Render/Text/CUIRenderText.h"
 
 namespace
 {

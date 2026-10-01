@@ -10,6 +10,7 @@
 #include "UI/Party/FriendWindow.h"
 #include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"
+#include "Render/Text/CUIRenderText.h"
 
 #include <algorithm>
 

@@ -41,7 +41,6 @@
 #include "GameLogic/Events/Event.h"
 #include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "UI/Widgets/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
@@ -49,6 +48,7 @@
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "Core/Text/WideString.h"
+#include "Render/Text/CUIRenderText.h"
 
 namespace UI::Chat
 {

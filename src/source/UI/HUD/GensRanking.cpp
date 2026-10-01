@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "I18N/All.h"
+#include "Render/Text/CUIRenderText.h"
 
 #ifdef PBG_ADD_GENSRANKING
 #include "UI/HUD/GensRanking.h"

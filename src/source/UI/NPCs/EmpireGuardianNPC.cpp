@@ -9,6 +9,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Widgets/UIControls.h"
+#include "Render/Text/CUIRenderText.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

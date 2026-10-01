@@ -5,7 +5,6 @@
 
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Dialogs/CommonMessageBox.h"
-#include "UI/Widgets/UIControls.h"
 #include "UI/Dialogs/MessageBoxView.h"
 
 namespace mu::ui::window

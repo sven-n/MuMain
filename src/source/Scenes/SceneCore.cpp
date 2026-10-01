@@ -16,7 +16,6 @@
 #include "Engine/Physics/PhysicsManager.h"
 
 #include "GameLogic/Quests/CSQuest.h"
-#include "UI/Widgets/UIControls.h"
 #include "UI/HUD/UIMapName.h"	// rozy
 #include "Core/Time/Timer.h"
 #include "LoadingScene.h"

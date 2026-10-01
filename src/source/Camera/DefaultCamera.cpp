@@ -28,6 +28,7 @@
 #include "UI/Core/UIManager.h"
 #include "CameraDebugLog.h"
 #include "UI/Party/UIWindows.h"
+#include "Render/Text/CUIRenderText.h"
 
 // External variable declarations
 extern short g_shCameraLevel;

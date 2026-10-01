@@ -3,6 +3,7 @@
 #include "I18N/All.h"
 
 #include "Engine/Object/ZzzCharacter.h"
+#include "Render/Text/CUIRenderText.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSSendGift.h"
 #include "Audio/DSPlaySound.h"

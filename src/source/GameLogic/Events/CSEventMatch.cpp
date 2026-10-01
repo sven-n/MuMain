@@ -13,6 +13,7 @@
 
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Core/WindowSystem.h"
+#include "Render/Text/CUIRenderText.h"
 
 #include <algorithm>
 #include <chrono>

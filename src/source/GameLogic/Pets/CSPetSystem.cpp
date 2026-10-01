@@ -28,6 +28,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Party/UIWindows.h"
+#include "Render/Text/CUIRenderText.h"
 
 namespace
 {

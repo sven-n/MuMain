@@ -13,7 +13,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 #include "App/Platform/Windows/Winmain.h" // g_hFont
-#include "UI/Widgets/UIControls.h"        // g_pRenderText
+#include "Render/Text/CUIRenderText.h"
 
 #include <RmlUi/Core/ElementDocument.h>
 

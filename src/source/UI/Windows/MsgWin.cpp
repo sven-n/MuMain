@@ -22,7 +22,6 @@
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
 
-#include "UI/Widgets/UIControls.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Scenes/SceneCommon.h"
 #include "Core/Utilities/Log/ErrorReport.h"
@@ -31,6 +30,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Network/Server/WSclient.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 

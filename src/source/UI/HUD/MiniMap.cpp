@@ -20,6 +20,7 @@
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
+#include "Render/Text/CUIRenderText.h"
 
 #include <RmlUi/Core/ElementDocument.h>
 

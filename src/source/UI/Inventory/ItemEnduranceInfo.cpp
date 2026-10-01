@@ -10,6 +10,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "Render/Text/CUIRenderText.h"
 
 #include <RmlUi/Core/ElementDocument.h>
 

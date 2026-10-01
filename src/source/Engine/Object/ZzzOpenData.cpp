@@ -1,5 +1,4 @@
 ﻿#include "stdafx.h"
-#include "UI/Widgets/UIControls.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -34,6 +33,7 @@
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Network/Server/SocketSystem.h"
+#include "Render/Text/CUIRenderText.h"
 
 ///////////////////////////////////////////
 extern BOOL g_bUseChatListBox;

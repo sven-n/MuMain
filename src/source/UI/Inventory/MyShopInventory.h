@@ -8,7 +8,6 @@
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/UIControls.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
 namespace Rml { class ElementDocument; }

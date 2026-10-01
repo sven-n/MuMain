@@ -16,6 +16,7 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "I18N/All.h"
+#include "Render/Text/CUIRenderText.h"
 
 #include <algorithm>
 #include <array>

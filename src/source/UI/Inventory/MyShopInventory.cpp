@@ -16,6 +16,7 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Render/Text/CUIRenderText.h"
 #include <RmlUi/Core/ElementDocument.h>
 
 const int iMAX_SHOPTITLE_MULTI = 26;

@@ -9,6 +9,7 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Render/Text/CUIRenderText.h"
 
 #include <algorithm>
 

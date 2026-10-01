@@ -40,7 +40,6 @@
 #include "GameLogic/Events/Event.h"
 #include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "UI/Widgets/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"

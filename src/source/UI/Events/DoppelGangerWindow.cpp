@@ -15,6 +15,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include "Audio/DSPlaySound.h"
+#include "Render/Text/CUIRenderText.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

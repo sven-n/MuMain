@@ -15,10 +15,10 @@
 #include "App/Platform/Windows/Local.h"
 #include "Core/Platform/PathResolve.h"
 
-#include "UI/Widgets/UIControls.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Network/Server/WSclient.h"
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>

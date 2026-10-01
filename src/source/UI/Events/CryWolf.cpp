@@ -8,7 +8,6 @@
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Guild/GuildTypes.h"
-#include "UI/Widgets/UIControls.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "I18N/All.h"

@@ -4,7 +4,6 @@
 #include "Guild/GuildMakeWindow.h"
 #include "Guild/GuildInfoWindow.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/UIControls.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Guild/GuildTypes.h"
@@ -24,6 +23,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "I18N/All.h"
 #include "Core/Text/TextLineWrap.h"
+#include "Render/Text/CUIRenderText.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

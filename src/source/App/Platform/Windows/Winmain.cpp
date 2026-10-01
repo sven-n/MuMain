@@ -149,6 +149,7 @@ BOOL g_bUseFullscreenMode = FALSE;
 bool g_bDisableAnimationTaskPool = true;
 
 #include "Audio/AudioPlayer.h"
+#include "Render/Text/CUIRenderText.h"
 
 extern int LogIn;
 extern wchar_t LogInID[];

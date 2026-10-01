@@ -12,6 +12,7 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/PlatformInfo.h"
+#include "Render/Text/CUIRenderText.h"
 
 //=============================================================================
 // Frame Timing State Implementation

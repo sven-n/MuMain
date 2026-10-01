@@ -7,7 +7,6 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
-#include "UI/Widgets/UIControls.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Events/MatchEvent.h"
@@ -18,6 +17,7 @@
 #include "World/GameMaps/GMBattleCastle.h"
 #include "World/GameMaps/GMHellas.h"
 #include "World/GameMaps/GM_Kanturu_3rd.h"
+#include "Render/Text/CUIRenderText.h"
 
 // DevEditor forward declarations (must be at global scope)
 #ifdef _EDITOR

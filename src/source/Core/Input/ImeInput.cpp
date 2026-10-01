@@ -3,8 +3,8 @@
 
 #include "Core/Platform/Imm.h"
 #include "App/Platform/Windows/Winmain.h"   // g_hWnd, WindowWidth/Height
-#include "UI/Widgets/UIControls.h"       // g_pRenderText
 #include "Engine/Object/ZzzInterface.h" // LockInputStatus
+#include "Render/Text/CUIRenderText.h"
 
 // Defined in Winmain.cpp; declared per-TU across the codebase (no header).
 extern int g_iChatInputType;

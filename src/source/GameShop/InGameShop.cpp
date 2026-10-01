@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "I18N/All.h"
+#include "Render/Text/CUIRenderText.h"
 
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 #include "App/Platform/Windows/iexplorer.h"

@@ -2,7 +2,6 @@
 #include "Core/Text/TextLineWrap.h"
 #include "UI/HUD/Notices.h"
 
-#include "UI/Widgets/UIControls.h"        // g_pRenderText, RT3_WRITE_CENTER
 #include "App/Platform/Windows/Winmain.h"    // g_hFontBold
 #include "Render/Textures/ZzzOpenglUtil.h" // EnableAlphaTest
 #include "UI/Core/WindowSystem.h"        // g_pNewUISystem
@@ -16,6 +15,7 @@
 #include "UI/RmlBridge/RmlModelBinder.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
+#include "Render/Text/CUIRenderText.h"
 
 #include <RmlUi/Core/ElementDocument.h>
 

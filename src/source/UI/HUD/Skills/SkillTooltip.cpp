@@ -9,6 +9,7 @@
 #include "UI/Widgets/UIControls.h"         // g_pRenderText macro
 
 #include "Core/Utilities/StringUtils.h"
+#include "Render/Text/CUIRenderText.h"
 
 namespace UI::Skills::Tooltip
 {

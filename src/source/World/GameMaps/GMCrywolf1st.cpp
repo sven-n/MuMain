@@ -19,6 +19,7 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "I18N/All.h"
 #include "UI/Scaling/UITransform.h"
+#include "Render/Text/CUIRenderText.h"
 
 extern void MonsterMoveSandSmoke(OBJECT* o);
 extern void MonsterDieSandSmoke(OBJECT* o);
@@ -27,7 +28,6 @@ extern bool LogOut;
 
 BYTE m_AltarState[5] = { 2,2,2,2,2 };
 
-#include "UI/Widgets/UIControls.h"
 
 
 bool	View_Bal = false;

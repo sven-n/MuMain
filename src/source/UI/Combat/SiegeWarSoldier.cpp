@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "UI/Combat/SiegeWarSoldier.h"
 
-#include "UI/Widgets/UIControls.h"
 
 #include "Engine/Object/ZzzCharacter.h"
 

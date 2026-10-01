@@ -19,6 +19,7 @@
 #include "Network/Server/WSclient.h"    // QUEST_REQUEST_ITEM / QUEST_REWARD_ITEM
 #include "Core/Utilities/StringUtils.h"
 #include "Core/Utilities/UsefulDef.h"
+#include "Render/Text/CUIRenderText.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>

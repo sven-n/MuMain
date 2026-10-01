@@ -6,6 +6,7 @@
 #include "I18N/All.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/Scaling/UITransform.h"
+#include "Render/Text/CUIRenderText.h"
 
 #include <cmath>
 

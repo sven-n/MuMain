@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include "UI/Party/UIWindows.h"
+#include "Render/Text/CUIRenderText.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

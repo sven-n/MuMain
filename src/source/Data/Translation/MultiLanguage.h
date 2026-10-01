@@ -36,3 +36,5 @@ public:
         return ms_Singleton;
     };
 };
+
+#define g_pMultiLanguage CMultiLanguage::GetSingletonPtr()

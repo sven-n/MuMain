@@ -6,9 +6,9 @@
 #include "UI/Widgets/Window/RenderNumber.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
-#include "UI/Widgets/UIControls.h"  // g_pRenderText
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Text/CUIRenderText.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"

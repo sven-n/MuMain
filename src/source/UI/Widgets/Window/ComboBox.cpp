@@ -9,6 +9,7 @@
 #include "Render/Renderer/RenderUtils.h"
 
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Text/CUIRenderText.h"
 
 extern unsigned int WindowWidth, WindowHeight;
 extern int MouseWheel;

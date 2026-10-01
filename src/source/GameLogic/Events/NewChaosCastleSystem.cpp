@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "I18N/All.h"
+#include "Render/Text/CUIRenderText.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

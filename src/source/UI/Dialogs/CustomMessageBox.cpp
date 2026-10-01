@@ -22,6 +22,7 @@
 #include "MUHelper/MuHelper.h"
 #include "Core/Text/TextLineWrap.h"
 #include "UI/Scaling/UITransform.h"
+#include "Render/Text/CUIRenderText.h"
 
 extern int DeleteIndex;
 extern int AppointStatus;

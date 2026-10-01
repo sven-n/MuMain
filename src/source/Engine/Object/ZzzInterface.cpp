@@ -65,6 +65,7 @@
 
 #include "Camera/CameraProjection.h"
 #include "Scenes/SceneCommon.h"
+#include "Render/Text/CUIRenderText.h"
 
 extern int g_iChatInputType;
 extern BOOL g_bUseChatListBox;

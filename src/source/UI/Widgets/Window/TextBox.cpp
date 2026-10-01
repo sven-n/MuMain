@@ -3,8 +3,8 @@
 //=============================================================================
 #include "stdafx.h"
 #include "UI/Widgets/Window/TextBox.h"
-#include "UI/Widgets/UIControls.h"
 #include "Core/Utilities/UsefulDef.h"
+#include "Render/Text/CUIRenderText.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

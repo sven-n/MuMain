@@ -25,7 +25,6 @@
 #include "Core/Utilities/Log/muConsoleDebug.h"
 #include "I18N/All.h"
 #include "Engine/Object/ZzzCharacter.h"
-#include "UI/Widgets/UIControls.h"
 #include "SceneCommon.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -33,6 +32,7 @@
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Scaling/UITransform.h"
 #include "LoginSceneOverlay.h"
+#include "Render/Text/CUIRenderText.h"
 
 // External declarations
 extern int DeleteGuildIndex;

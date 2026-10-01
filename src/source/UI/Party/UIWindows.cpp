@@ -28,6 +28,7 @@
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "I18N/All.h"
 #include "UI/Party/UIWindows.h"
+#include "Render/Text/CUIRenderText.h"
 
 
 extern int	 g_iChatInputType;

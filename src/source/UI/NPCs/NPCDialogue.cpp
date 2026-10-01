@@ -16,6 +16,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Render/Text/CUIRenderText.h"
 
 #include <RmlUi/Core/ComputedValues.h>
 #include <RmlUi/Core/DataModelHandle.h>

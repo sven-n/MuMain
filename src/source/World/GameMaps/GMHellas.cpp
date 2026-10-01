@@ -22,6 +22,7 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "Camera/CameraProjection.h"
 #include "I18N/All.h"
+#include "Render/Text/CUIRenderText.h"
 
 extern  int  WaterTextureNumber;
 extern	wchar_t TextList[50][100];

@@ -11,6 +11,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "Camera/CameraProjection.h"
 #include "UI/Party/UIWindows.h"
+#include "Render/Text/CUIRenderText.h"
 
 namespace
 {

@@ -9,6 +9,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "I18N/All.h"
+#include "Render/Text/CUIRenderText.h"
 #include <vector>
 
 //////////////////////////////////////////////////////////////////////
