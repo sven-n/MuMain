@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <memory>
 #include "Render/Sprites/TextureScript.h"
 
 extern const float (*g_pActiveBoneTransform)[3][4];
@@ -218,9 +219,13 @@ public:
     char				iBillType;
 
     bool				m_bCompletedAlloc;
-    // The loaded data (meshes, bones, actions, textures) is another slot's
-    // (ShareFrom); Release() only lets go of it.
+    // The loaded data (meshes, bones, actions, textures) was opened by
+    // another slot (ShareFrom), which also loaded its textures.
     bool m_bSharedData = false;
+    // Set on every slot that uses loaded data shared with other slots (the
+    // one that opened it and those that share it): the last of them to let go
+    // frees the data. Empty while the data is this slot's alone.
+    std::shared_ptr<const void> m_sharedDataUsers;
 
     float (*m_pCurrentBoneTransform)[3][4]; // Active bone matrix palette stored during Transform()
     bool m_LastTranslate;       // Set by Transform(): true=Translate mode (BodyOrigin/BodyScale shift world pos),
@@ -271,11 +276,11 @@ public:
     bool Save2(wchar_t* DirName, wchar_t* FileName);
     void Release();
     // Uses the loaded data of the model in another slot, for items that share
-    // one model file (opened once). That slot keeps owning the data and must
-    // stay loaded while this one uses it. The data must not be changed
-    // through this slot: the owner and every other slot that shares it would
-    // change as well.
-    void ShareFrom(const BMD& owner);
+    // one model file (opened once). The data stays loaded until the last slot
+    // that uses it lets go (Release, or opening another file), whichever slot
+    // that is. The data must not be changed through one of them: every other
+    // slot that shares it would change as well.
+    void ShareFrom(BMD& owner);
     bool SharesData() const
     {
         return m_bSharedData;

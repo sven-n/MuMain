@@ -2,14 +2,15 @@
 
 #include "Core/Globals/_enum.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 
 namespace Render::Items
 {
-// The item model entry of a model slot (MODEL_ITEM + item type), or nullptr
+// The item model entry of an item's model slot (ToModelSlot), or nullptr
 // for slots that are not item models.
 inline const Data::Items::ItemModelDefinition* FindItemModel(int modelType)
 {
-    return g_ItemModelDatabase.Find(modelType - MODEL_ITEM);
+    return g_ItemModelDatabase.Find(Data::Items::ToItemType(modelType));
 }
 
 // The item a model slot is drawn like: its own item type, or for the second
@@ -23,7 +24,7 @@ inline int GetItemTypeOfModel(int modelType)
     {
         return ITEM_SACRED_GLOVE + (modelType - MODEL_SWORD_32_LEFT) / 2;
     }
-    const int itemType = modelType - MODEL_ITEM;
+    const int itemType = Data::Items::ToItemType(modelType);
     return Data::Items::IsValidItemType(itemType) ? itemType : -1;
 }
 } // namespace Render::Items

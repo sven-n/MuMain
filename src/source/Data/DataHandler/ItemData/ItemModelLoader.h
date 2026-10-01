@@ -4,8 +4,8 @@
 #include <string_view>
 
 // Opens the item models of the item model database (Data/Items/Models) into
-// the model slots MODEL_ITEM + item type, and loads their textures. The model
-// data must be loaded first (CItemDataHandler::LoadModels).
+// the model slots of their items (ToModelSlot), and loads their textures. The
+// model data must be loaded first (CItemDataHandler::LoadModels).
 namespace Data::Items::ModelLoader
 {
 // Whether a look of this name exists.

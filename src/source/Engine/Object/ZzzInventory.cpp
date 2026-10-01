@@ -37,6 +37,7 @@
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Render/Items/ItemDisplay.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "GameLogic/Items/ShopRestrictions.h"
 #include "GameLogic/Items/TradeRestrictions.h"
 #include "GameLogic/Items/MixMgr.h"
@@ -4733,7 +4734,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         RequireClass(p);
     }
 
-    if (ip->Type >= MODEL_BOOTS - MODEL_ITEM && ip->Type < MODEL_BOOTS + MAX_ITEM_INDEX - MODEL_ITEM)
+    if (ip->Type >= ITEM_BOOTS && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
     {
         if (Level >= 5)
         {
@@ -4743,7 +4744,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         }
     }
 
-    if (ip->Type >= MODEL_GLOVES - MODEL_ITEM && ip->Type < MODEL_GLOVES + MAX_ITEM_INDEX - MODEL_ITEM)
+    if (ip->Type >= ITEM_GLOVES && ip->Type < ITEM_GLOVES + MAX_ITEM_INDEX)
     {
         if (Level >= 5)
         {
@@ -4753,13 +4754,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
         }
     }
-    if ((ip->Type >= MODEL_STAFF - MODEL_ITEM && ip->Type < MODEL_STAFF + MAX_ITEM_INDEX - MODEL_ITEM)
-        || (ip->Type == (static_cast<int>(MODEL_RUNE_BLADE) - MODEL_ITEM))
-        || (ip->Type == (static_cast<int>(MODEL_EXPLOSION_BLADE) - MODEL_ITEM))
-        || (ip->Type == (static_cast<int>(MODEL_SWORD_DANCER) - MODEL_ITEM))
-        || (ip->Type == (static_cast<int>(MODEL_DARK_REIGN_BLADE) - MODEL_ITEM))
-        || (ip->Type == (static_cast<int>(MODEL_IMPERIAL_SWORD) - MODEL_ITEM))
-        )
+    if ((ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX) || (ip->Type == ITEM_RUNE_BLADE) ||
+        (ip->Type == ITEM_EXPLOSION_BLADE) || (ip->Type == ITEM_SWORD_DANCER) || (ip->Type == ITEM_DARK_REIGN_BLADE) ||
+        (ip->Type == ITEM_IMPERIAL_SWORD))
     {
         mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
@@ -5967,19 +5964,21 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
 
     // Use the item name by default, only when o->Type is in MODEL_ITEM range
     // Items with special types (e.g. MODEL_EVENT + N) are handled by overrides below
-    if (o->Type >= MODEL_ITEM && o->Type < MODEL_ITEM + MAX_ITEM)
+    if (Data::Items::IsItemModelSlot(o->Type))
     {
         if (o->Type == MODEL_ZEN) // Zen
         {
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %d", ItemAttribute[Data::Items::ToItemType(o->Type)].Name,
+                                      ItemLevel);
         }
         else if (ItemLevel == 0)
         {
-            CopyGroundItemLabelText(descriptor.Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+            CopyGroundItemLabelText(descriptor.Name, ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
         }
         else
         {
-            FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+            FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", ItemAttribute[Data::Items::ToItemType(o->Type)].Name,
+                                      ItemLevel);
         }
     }
 
@@ -6014,11 +6013,11 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     }
     else if (o->Type == MODEL_COMPILED_CELE)
     {
-        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[static_cast<int>(MODEL_JEWEL_OF_BLESS) - MODEL_ITEM].Name);
+        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[ITEM_JEWEL_OF_BLESS].Name);
     }
     else if (o->Type == MODEL_COMPILED_SOUL)
     {
-        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[static_cast<int>(MODEL_JEWEL_OF_SOUL) - MODEL_ITEM].Name);
+        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[ITEM_JEWEL_OF_SOUL].Name);
     }
     else if (o->Type == MODEL_BOX_OF_LUCK && ItemLevel == 7)
     {
@@ -6037,19 +6036,40 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     {
         switch (ItemLevel)
         {
-        case 0: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::ENG, ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 1: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STA, ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 2: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::AGI, ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 3: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STR, ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 4: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::Command, ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 0:
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::ENG,
+                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
+            break;
+        case 1:
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STA,
+                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
+            break;
+        case 2:
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::AGI,
+                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
+            break;
+        case 3:
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STR,
+                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
+            break;
+        case 4:
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::Command,
+                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
+            break;
         }
     }
     else if (o->Type == MODEL_SPIRIT)
     {
         switch (ItemLevel)
         {
-        case 0: FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, I18N::Game::DarkHorse); break;
-        case 1: FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, I18N::Game::DarkRaven); break;
+        case 0:
+            FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls",
+                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name, I18N::Game::DarkHorse);
+            break;
+        case 1:
+            FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls",
+                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name, I18N::Game::DarkRaven);
+            break;
         }
     }
     else if (o->Type == MODEL_EVENT + 16)
@@ -6246,7 +6266,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     else if (GameLogic::Items::IsSocketSeedOrSphereModel(o->Type))
     {
         SetDescriptorTextColor(descriptor, 0.7f, 0.4f, 1.0f);
-        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
     }
     else if (o->Type == MODEL_INVITATION_TO_SANTA_VILLAGE)
     {
@@ -6256,10 +6276,9 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     {
         SetDescriptorOrangeTextColor(descriptor);
     }
-    else if (o->Type >= MODEL_ITEM && o->Type < MODEL_ITEM + MAX_ITEM
-        && (whiteTextItems.count(o->Type) > 0
-            || yellowTextItems.count(o->Type) > 0
-            || orangeTextItems.count(o->Type) > 0))
+    else if (Data::Items::IsItemModelSlot(o->Type) &&
+             (whiteTextItems.count(o->Type) > 0 || yellowTextItems.count(o->Type) > 0 ||
+              orangeTextItems.count(o->Type) > 0))
     {
         // Color was already set by Block 1 (white/yellow/orange). No override needed.
     }
@@ -6306,7 +6325,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         }
 
         wchar_t SetName[64]{};
-        if (g_csItemOption.GetSetItemName(SetName, o->Type - MODEL_ITEM, ip->AncientDiscriminator))
+        if (g_csItemOption.GetSetItemName(SetName, Data::Items::ToItemType(o->Type), ip->AncientDiscriminator))
         {
             SetDescriptorTextColor(descriptor, 0.f, 1.f, 0.f);
             descriptor.Font = g_hFontBold;
@@ -6839,10 +6858,12 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
             RenderObjectScreen(MODEL_EVENT + 11, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
             break;
         case 3:
-            RenderObjectScreen(Type + MODEL_ITEM, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
+            RenderObjectScreen(Data::Items::ToModelSlot(Type), Level, excellentFlags, ancientDiscriminator, Position,
+                               Success, PickUp);
             break;
         default:
-            RenderObjectScreen(Type + MODEL_ITEM, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
+            RenderObjectScreen(Data::Items::ToModelSlot(Type), Level, excellentFlags, ancientDiscriminator, Position,
+                               Success, PickUp);
             break;
         }
     }
@@ -6918,7 +6939,8 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
         switch (Level)
         {
         case 0:
-            RenderObjectScreen(Type + MODEL_ITEM, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
+            RenderObjectScreen(Data::Items::ToModelSlot(Type), Level, excellentFlags, ancientDiscriminator, Position,
+                               Success, PickUp);
             break;
         case 1:
             RenderObjectScreen(MODEL_EVENT + 12, -1, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
@@ -6930,7 +6952,8 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
         switch (Level)
         {
         case 0:
-            RenderObjectScreen(Type + MODEL_ITEM, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
+            RenderObjectScreen(Data::Items::ToModelSlot(Type), Level, excellentFlags, ancientDiscriminator, Position,
+                               Success, PickUp);
             break;
         case 1:
             RenderObjectScreen(MODEL_EVENT + 13, -1, excellentFlags, ancientDiscriminator, Position, Success, PickUp);

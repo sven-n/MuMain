@@ -63,6 +63,34 @@ numbers, as the code does, and the model loader checks that they exist.
 The look editor shows numbers and names together and picks bones by
 clicking them.
 
+## Models
+
+The item models that several items use are named shared models in
+`Data/Items/Models/SharedModels.json` (items phase 4d1): the file, its
+texture folders and none-blend meshes, opened once. Items name them and
+keep their own display, glow, render style and item effect. The file may
+get more:
+
+- **Level variants** (items phase 12): the event models drawn for level
+  variants (the Box of Luck levels, the Devil's Square items, …) become
+  models of items and are shared by several of them.
+- **Display defaults**: inventory and ground values on the shared model
+  that each item can override. For 18 of the 34 shared models all items
+  have the same values.
+- **Bone labels**: readable names for the bones that looks use (see
+  Bones), which belong to the model file, not to an item.
+
+**Open, to decide when the design of monsters and NPCs (MN) is written:**
+monsters, NPCs, skills and map objects also load `.bmd` files with texture
+folders and values per model (the animation speeds of monsters are set in
+code, each model has its own sounds). Either one list of models for all
+areas (a folder of its own, e.g. `Data/Models/`), or shared models per
+area (items, monsters, skills; map objects per map, as each map loads its
+own object files). Models are already used across areas: player-shaped
+NPCs wear item models and some monsters hold item weapons, so per area
+lists need references into the lists of other areas. Until then the item
+models stay in `Data/Items/Models`.
+
 ## Areas and order
 
 | Area | Name | Design document | Depends on | What moves into data | Editor |
@@ -74,7 +102,7 @@ clicking them.
 | SK2 | Skill looks | not yet | SK1, FX1, items 13 | How a skill looks when cast, flying and hitting (effects, particles, sounds, character animations), as looks (D25), mostly on the caster's bones. | Look editor, with a preview of the skill cast by a test character. |
 | MN | Monsters and NPCs | not yet | FX1, items 13, SK1 | The monster and NPC setup (model, size, the equipment of player-shaped NPCs), their looks (glow, render styles and effects as in D25; the plate of the helper NPCs, `helperNpcPlate`, moves from the items to them; the player transformations) and their skills. | Monster and NPC editors with preview; the look editor. |
 | FX2 | Effect behavior as data | not yet | FX1 | How effects and particles move, fade, spawn and draw, as building blocks, one effect family at a time (continuing the handlers of the registry). New effects without code. | Effect editor with a live preview. |
-| later | Map objects, buffs, pets, sounds | not yet | FX1 | To decide: the objects of the maps with their effects (most of `World/GameMaps`), buff visuals, pets, sound names. | – |
+| later | Map objects, buffs, pets, sounds | not yet | FX1 | To decide: the objects of the maps with their effects (most of `World/GameMaps`), buff visuals, pets and mounts (about 97 places choose animations, skills, ride height, camera and the spawned model by the mount; see "Item-specific code that is left" in the items design), sound names. | – |
 
 - **The effect catalogue comes first.** Its names are what the looks of
   items (items 13), skills (SK2) and monsters (MN) reference. It moves no

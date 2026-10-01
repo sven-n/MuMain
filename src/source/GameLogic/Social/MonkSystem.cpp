@@ -16,6 +16,7 @@
 #include "Network/Server/WSclient.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -186,15 +187,15 @@ int CMonkSystem::OrginalTypeCommonItemMonk(int _ModifyType)
 
         int OrgItemType = (nItemType == 10) ? nItemType + 1 : nItemType;
         int OrgItemSubType = (nItemSubType >= 7) ? nItemSubType + 1 : nItemSubType;
-        _ModifyType = OrgItemType * MAX_ITEM_INDEX + OrgItemSubType + MODEL_ITEM;
+        _ModifyType = Data::Items::ToModelSlot(OrgItemType * MAX_ITEM_INDEX + OrgItemSubType);
     }
     return _ModifyType;
 }
 
 int CMonkSystem::ModifyTypeCommonItemMonk(int _OrginalType)
 {
-    int nItemType = (_OrginalType - MODEL_ITEM) / MAX_ITEM_INDEX;
-    int nItemSubType = (_OrginalType - MODEL_ITEM) % MAX_ITEM_INDEX;
+    int nItemType = Data::Items::ToItemType(_OrginalType) / MAX_ITEM_INDEX;
+    int nItemSubType = Data::Items::ToItemType(_OrginalType) % MAX_ITEM_INDEX;
     int nCommonItem[MODEL_ITEM_COMMONCNT_RAGEFIGHTER] = { 5, 6, 8, 9 };
 
     if (nItemType >= 7 && nItemType <= 11)
@@ -314,7 +315,7 @@ void CMonkSystem::SetSwordformGlovesItemType()
             return;
 
         _ItemType = (CItemEqualType)iter->second;
-        m_listGloveformSword.push_back(_ItemType.GetModelType() % MODEL_ITEM);
+        m_listGloveformSword.push_back(Data::Items::ToItemType(_ItemType.GetModelType()));
     }
 }
 

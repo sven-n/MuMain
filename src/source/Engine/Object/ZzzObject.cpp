@@ -48,6 +48,7 @@
 #include "Render/Items/ItemGlow.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -5437,7 +5438,7 @@ void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool
 
     OBJECT* o = &ip->Object;
     o->Live = true;
-    o->Type = MODEL_ITEM + Type;
+    o->Type = Data::Items::ToModelSlot(Type);
     o->SubType = 1;
     if (Type == (int)(ITEM_BOX_OF_LUCK))
     {
@@ -5475,7 +5476,7 @@ void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool
     }
     if (Type >= ITEM_JACK_OLANTERN_BLESSINGS && Type <= ITEM_JACK_OLANTERN_CRY)
     {
-        o->Type = MODEL_ITEM + Type;
+        o->Type = Data::Items::ToModelSlot(Type);
     }
     if (GameLogic::Items::IsChocolateBoxType(Type))
     {
@@ -5632,7 +5633,7 @@ void CreateMoneyDrop(ITEM_t* ip, int amount, vec3_t position, bool isFreshDrop)
 
     OBJECT* o = &ip->Object;
     o->Live = true;
-    o->Type = MODEL_ITEM + Type;
+    o->Type = Data::Items::ToModelSlot(Type);
     o->SubType = 1;
     
     ItemObjectAttribute(o);

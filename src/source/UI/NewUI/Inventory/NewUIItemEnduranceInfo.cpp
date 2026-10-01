@@ -8,6 +8,7 @@
 #include "I18N/All.h"
 
 #include "Character/CharacterManager.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "GameLogic/Items/ItemCategories.h"
 
 #ifdef PJH_FIX_SPRIT
@@ -399,7 +400,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
         break;
         case MODEL_IMP:
         {
-            ITEM_ATTRIBUTE* p = &ItemAttribute[Hero->Helper.Type - MODEL_SWORD];
+            ITEM_ATTRIBUTE* p = &ItemAttribute[Data::Items::ToItemType(Hero->Helper.Type)];
             mu_swprintf(szText, p->Name);
         }
         break;

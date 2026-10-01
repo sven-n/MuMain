@@ -23,7 +23,7 @@
 #include "Camera/CameraProjection.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "I18N/All.h"
-
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 
 extern int	 g_iChatInputType;
 extern DWORD g_dwActiveUIID;
@@ -2151,9 +2151,8 @@ BOOL CompareItemEqual(const PART_t* item1, const ITEM* item2, int iDefaultValue)
     }
     else
     {
-        return (item1->Type == item2->Type + MODEL_ITEM &&
-            item1->Level == item2->Level &&
-            item1->ExcellentFlags == item2->ExcellentFlags);
+        return (item1->Type == Data::Items::ToModelSlot(item2->Type) && item1->Level == item2->Level &&
+                item1->ExcellentFlags == item2->ExcellentFlags);
     }
 }
 
@@ -2167,7 +2166,7 @@ void SetItemToPhoto(PART_t* itemDest, const ITEM* itemSrc, int iDefaultValue)
     }
     else
     {
-        itemDest->Type = itemSrc->Type + MODEL_ITEM;
+        itemDest->Type = Data::Items::ToModelSlot(itemSrc->Type);
         itemDest->Level = itemSrc->Level;
         itemDest->ExcellentFlags = itemSrc->ExcellentFlags;
     }
@@ -2325,7 +2324,7 @@ void CUIPhotoViewer::CopyPlayer()
     if (bChangeHelper == TRUE || bChangeWeapon == TRUE)
     {
         m_PhotoHelper.Live = false;
-        switch (m_PhotoChar.Helper.Type - MODEL_HELPER)
+        switch (Data::Items::ToItemType(m_PhotoChar.Helper.Type) - ITEM_HELPER)
         {
         case 0:CreateMountSub(MODEL_HELPER, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;
         case 2:CreateMountSub(MODEL_UNICON, m_PhotoChar.Object.Position, &m_PhotoChar.Object, &m_PhotoHelper); break;

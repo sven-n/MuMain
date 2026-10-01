@@ -9,6 +9,7 @@
 #include "UI/Legacy/UIControls.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 
 using namespace SEASON4A;
 
@@ -34,7 +35,7 @@ BOOL CSocketItemMgr::IsSocketItem(const ITEM* pItem)
 
 BOOL CSocketItemMgr::IsSocketItem(const OBJECT* pObject)
 {
-    return IsSocketItem(pObject->Type - MODEL_SWORD);
+    return IsSocketItem(Data::Items::ToItemType(pObject->Type));
 }
 
 BOOL CSocketItemMgr::IsSocketItem(int iItemType)

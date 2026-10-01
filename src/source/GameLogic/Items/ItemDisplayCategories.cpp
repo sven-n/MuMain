@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 
 // Item lists that are only used for drawing items and for tooltips. They stay
 // hardcoded until the model data (phase 4) and the tooltip data (phase 8)
@@ -42,7 +43,7 @@ bool IsClothWing(const ITEM* pItem)
 
 bool IsClothWingModel(int modelType)
 {
-    return IsClothWingType(modelType - MODEL_ITEM);
+    return IsClothWingType(Data::Items::ToItemType(modelType));
 }
 
 bool IsWingMixCharmType(int itemType)
@@ -57,7 +58,7 @@ bool IsWingMixCharm(const ITEM* pItem)
 
 bool IsWingMixCharmModel(int modelType)
 {
-    return IsWingMixCharmType(modelType - MODEL_ITEM);
+    return IsWingMixCharmType(Data::Items::ToItemType(modelType));
 }
 
 bool IsSealType(int itemType)
@@ -145,6 +146,6 @@ bool IsSecromiconQuestItem(const ITEM* pItem)
 
 bool IsSummonerStickModel(int modelType)
 {
-    return IsSummonerStickType(modelType - MODEL_ITEM);
+    return IsSummonerStickType(Data::Items::ToItemType(modelType));
 }
 } // namespace GameLogic::Items
