@@ -195,6 +195,21 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   first item rather than on whatever else shares the parent. Worked example:
   `blood_castle_enter.rcss` / `devil_square_enter.rcss`, where two windows share one document shape
   and differ only by their own row tables.
+- **`:nth-last-child(N)` is implemented too**, registered in `StyleSheetFactory.cpp` and matched in
+  `StyleSheetSelector.cpp` alongside `Nth_Child`. It is what places a list that grows *away* from
+  its anchor -- an upward stack whose first row moves as rows are added -- because counting from the
+  end makes each row's offset independent of the count. Unused so far: the one window that wanted it
+  (`duel_watch_spectators`) is filled from an unbounded server-side list, and no table of either
+  kind can cover a count the client does not bound. Not yet proved at runtime.
+- **`data-attr-id` on a `data-for` clone gives each row a real id, and `GetElementById()` finds it
+  -- confirmed at runtime.** `data-attr-id="'node_' + node.id"` writes the `id` attribute per clone,
+  so C++ can read one repeated row's live geometry back
+  (`UI::RmlBridge::RefreshLogicalAnchorPosition`) instead of keeping the position that produced it.
+  This is what let `master_level.rml` stop binding geometry entirely: the themes own the node grid,
+  and the skill hint anchors on the hovered node's own box, with the old
+  `MasterTree::NodeBoxPosition()` kept only as the first-frame fallback. Use it whenever a repeated
+  row's position is needed by a native companion (tooltip anchor, hit box) -- that need is otherwise
+  the usual reason a row's `left`/`top` stays in the model.
 - **`box-shadow` now genuinely renders on this engine, including blur — this entry is corrected
   from an earlier, now-stale finding that it parsed but didn't render.** As of the vendored SDL_GPU
   renderer's PR-989 integration, `RenderManager::PushLayer`/`CompositeLayers`/`CompileFilter`/
