@@ -28,8 +28,8 @@ chat_input.rml: per-frame data -- tooltip offset follows the hovered button
 chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
 command_window.rml: per-frame data -- target marker follows the selected command
 crywolf.rml: display-list port
-cursed_temple_enter.rml: display-list port
-cursed_temple_result.rml: display-list port
+cursed_temple_enter.rml: counter-scale bridge -- the .sharp-text layers' own widths, and the hero band's height from the live line height
+cursed_temple_result.rml: counter-scale bridge -- the .sharp-text layers' own widths, the hero row's height from the live line height, and the victory/defeat banner's slide-in
 cursed_temple_system.rml: display-list port
 devil_square_enter.rml: display-list port
 doppelganger_enter.rml: display-list port

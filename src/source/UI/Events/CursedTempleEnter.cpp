@@ -29,7 +29,6 @@
 
 #include <RmlUi/Core/ElementDocument.h>
 
-#include <algorithm>
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -265,16 +264,19 @@ void mu::ui::window::CCursedTempleEnter::BuildRmlUi()
             c.Bind("bold_text_px", &model.boldTextPx);
             c.Bind("line_height_px", &model.lineHeightPx);
             c.Bind("title", &model.title);
-            auto line = c.RegisterStruct<CursedTempleEnterLineEntry>();
-            line.RegisterMember("text", &CursedTempleEnterLineEntry::text);
-            line.RegisterMember("top", &CursedTempleEnterLineEntry::top);
-            line.RegisterMember("left", &CursedTempleEnterLineEntry::left);
-            line.RegisterMember("width", &CursedTempleEnterLineEntry::width);
-            line.RegisterMember("text_px", &CursedTempleEnterLineEntry::textPx);
-            line.RegisterMember("highlighted", &CursedTempleEnterLineEntry::highlighted);
-            line.RegisterMember("red", &CursedTempleEnterLineEntry::red);
-            c.RegisterArray<std::vector<CursedTempleEnterLineEntry>>();
-            c.Bind("lines", &model.lines);
+            c.Bind("eligible", &model.eligible);
+            auto line = c.RegisterStruct<CursedTempleEnterLine>();
+            line.RegisterMember("text", &CursedTempleEnterLine::text);
+            line.RegisterMember("text_px", &CursedTempleEnterLine::textPx);
+            c.Bind("temple_line", &model.templeLine);
+            c.Bind("members_line", &model.membersLine);
+            c.Bind("notice", &model.notice);
+            auto band = c.RegisterStruct<CursedTempleEnterBand>();
+            band.RegisterMember("text", &CursedTempleEnterBand::text);
+            band.RegisterMember("text_px", &CursedTempleEnterBand::textPx);
+            band.RegisterMember("hero", &CursedTempleEnterBand::hero);
+            c.RegisterArray<std::vector<CursedTempleEnterBand>>();
+            c.Bind("bands", &model.bands);
             c.Bind("enter_text", &model.enterText);
             c.Bind("close_text", &model.closeText);
             c.Bind("label_top", &model.labelTop);
@@ -334,19 +336,22 @@ void mu::ui::window::CCursedTempleEnter::SyncLines()
     updated.closeText = StringUtils::WideToNarrow(I18N::Game::Close388);
 
     // The original's RenderText(): with a level band, the temple, the six bands (the hero's on a
-    // red text box) and the members; else the minimum-level notice.
-    auto addLine = [&](const wchar_t* text, float left, float top, float width, bool highlighted, bool red)
+    // red text box) and the members; else the minimum-level notice. The window's box is 220 units
+    // wide, 230 for the notice, which is what each line was shrunk to fit.
+    auto makeLine = [&](const wchar_t* text, float boxWidth) -> CursedTempleEnterLine
     {
-        updated.lines.push_back({StringUtils::WideToNarrow(text), top, left, width,
-                                 TextPxInBox(UI::Scaling::FontRole::Normal, transform, text, width), highlighted, red});
+        return {StringUtils::WideToNarrow(text),
+                TextPxInBox(UI::Scaling::FontRole::Normal, transform, text, boxWidth)};
     };
-    updated.lines.clear();
+    const float lineBox = CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10;
+    updated.bands.clear();
     wchar_t Text[100] = {};
     int enterlevel = -1;
-    if (CheckEnterLevel(enterlevel))
+    updated.eligible = CheckEnterLevel(enterlevel);
+    if (updated.eligible)
     {
         mu_swprintf(Text, I18N::Game::TheDIllusionTemple, enterlevel);
-        addLine(Text, 3.f, 42.f, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false, false);
+        updated.templeLine = makeLine(Text, lineBox);
         for (int i = 0; i < EnterLevelCount + 1; ++i)
         {
             wchar_t band[100] = {};
@@ -356,17 +361,16 @@ void mu::ui::window::CCursedTempleEnter::SyncLines()
                 mu_swprintf(band, I18N::Game::LevelDD, EnterMinLevel[i], EnterMaxLevel[i]);
             const bool heroBand = enterlevel == i + 1;
             mu_swprintf(Text, L"%ls %ls", band, heroBand ? I18N::Game::EntranceEnabled : I18N::Game::EntranceDisabled);
-            addLine(Text, 3.f, 67.f + static_cast<float>(i * 15), CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, heroBand,
-                    false);
+            const CursedTempleEnterLine line = makeLine(Text, lineBox);
+            updated.bands.push_back({line.text, line.textPx, heroBand});
         }
         mu_swprintf(Text, I18N::Game::CurrentMembersD, m_EnterCount);
-        addLine(Text, 3.f, 70.f + static_cast<float>((EnterLevelCount + 1) * 15), CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10,
-                false, true);
+        updated.membersLine = makeLine(Text, lineBox);
     }
     else
     {
-        addLine(I18N::Game::YouMustBeOfTheMinimumLevel220ToEnterTheZone, 0.f, 52.f, CURSEDTEMPLE_ENTER_WINDOW_WIDTH,
-                false, true);
+        updated.notice = makeLine(I18N::Game::YouMustBeOfTheMinimumLevel220ToEnterTheZone,
+                                  CURSEDTEMPLE_ENTER_WINDOW_WIDTH);
     }
 
     CursedTempleEnterRmlModel& model = m_RmlBinder.GetModel();
@@ -377,17 +381,13 @@ void mu::ui::window::CCursedTempleEnter::SyncLines()
     SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::title, "title", updated);
     SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::enterText, "enter_text", updated);
     SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::closeText, "close_text", updated);
-    const bool sameLines = model.lines.size() == updated.lines.size() &&
-                           std::equal(model.lines.begin(), model.lines.end(), updated.lines.begin(),
-                                      [](const CursedTempleEnterLineEntry& a, const CursedTempleEnterLineEntry& b)
-                                      {
-                                          return a.text == b.text && a.top == b.top && a.left == b.left &&
-                                                 a.width == b.width && a.textPx == b.textPx &&
-                                                 a.highlighted == b.highlighted && a.red == b.red;
-                                      });
-    if (!sameLines)
+    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::eligible, "eligible", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::templeLine, "temple_line", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::membersLine, "members_line", updated);
+    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::notice, "notice", updated);
+    if (model.bands != updated.bands)
     {
-        model.lines = std::move(updated.lines);
-        m_RmlBinder.MarkDirty("lines");
+        model.bands = std::move(updated.bands);
+        m_RmlBinder.MarkDirty("bands");
     }
 }

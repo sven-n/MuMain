@@ -37,7 +37,34 @@
 #title { left: 0; top: 13px; font-weight: bold; color: #ffb049; }
 .temple-line { color: #ffffff; }
 .temple-line.red { color: #ff0000; }
-.temple-highlight { position: absolute; background-color: #ff0000; pointer-events: none; }
+/* The frame tiles and the level bands are containers so each piece can be counted; the containers
+   themselves take no space. */
+.frame-middles, .temple-bands { position: static; }
+.frame-middles .frame-middle:nth-child(1) { top: 67px; }
+.frame-middles .frame-middle:nth-child(2) { top: 82px; }
+.frame-middles .frame-middle:nth-child(3) { top: 97px; }
+.frame-middles .frame-middle:nth-child(4) { top: 112px; }
+.frame-middles .frame-middle:nth-child(5) { top: 127px; }
+.frame-middles .frame-middle:nth-child(6) { top: 142px; }
+.frame-middles .frame-middle:nth-child(7) { top: 157px; }
+.frame-middles .frame-middle:nth-child(8) { top: 172px; }
+.frame-middles .frame-middle:nth-child(9) { top: 187px; }
+
+/* RenderText()'s own rows: the temple at y 42, the six bands 15 units apart from y 67, the members
+   count under them, and -- without a level band -- the minimum-level notice on its own. */
+#ct_temple { left: 3px; top: 42px; }
+#ct_members { left: 3px; top: 160px; }
+#ct_notice { left: 0; top: 52px; }
+.temple-band { position: absolute; left: 3px; width: 220px; height: 15px; margin-top: 67px; }
+.temple-band:nth-child(1) { top: 0px; }
+.temple-band:nth-child(2) { top: 15px; }
+.temple-band:nth-child(3) { top: 30px; }
+.temple-band:nth-child(4) { top: 45px; }
+.temple-band:nth-child(5) { top: 60px; }
+.temple-band:nth-child(6) { top: 75px; }
+.temple-band .temple-line { left: 0; top: 0; }
+.band-hero { position: absolute; left: 0; top: 0; width: 220px; background-color: #ff0000;
+             pointer-events: none; }
 
 .temple-btn {
 	display: block;

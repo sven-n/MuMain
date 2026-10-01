@@ -7,23 +7,16 @@
 <body>
 	<!-- The Illusion Temple entry window (CCursedTempleEnter): a message-box frame with the
 	     question, the hero's temple, the six level bands (the hero's on a red text box), the
-	     current members and the Enter / Close buttons. Dialog layout: root_x/root_y/root_scale
-	     come from the Dialog transform; everything inside is reference px; text is .sharp-text at
-	     the native size, counter-scaled out of the panel. C++ keeps the level check, Escape and
-	     the entry request; a click is queued with temple_enter / temple_close. -->
+	     current members and the Enter / Close buttons. Without a level band none of that is shown,
+	     only the minimum-level notice. Dialog layout: root_x/root_y/root_scale come from the Dialog
+	     transform; everything inside is reference px; text is .sharp-text at the native size,
+	     counter-scaled out of the panel. C++ keeps the level check, Escape and the entry request;
+	     a click is queued with temple_enter / temple_close. -->
 	<div id="panel" data-model="cursed_temple_enter" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div id="back"></div>
 		<div id="frame_top"></div>
-		<div class="frame-middle" style="top: 67px;"></div>
-		<div class="frame-middle" style="top: 82px;"></div>
-		<div class="frame-middle" style="top: 97px;"></div>
-		<div class="frame-middle" style="top: 112px;"></div>
-		<div class="frame-middle" style="top: 127px;"></div>
-		<div class="frame-middle" style="top: 142px;"></div>
-		<div class="frame-middle" style="top: 157px;"></div>
-		<div class="frame-middle" style="top: 172px;"></div>
-		<div class="frame-middle" style="top: 187px;"></div>
+		<div class="frame-middles"><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div></div>
 		<div id="frame_bottom"></div>
 		<div id="line"></div>
 
@@ -31,13 +24,27 @@
 		      data-style-width="(230 * root_scale) + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title}}</span>
 
-		<div class="temple-highlight" data-for="line : lines" data-if="line.highlighted"
-		     data-style-left="line.left + 'px'" data-style-top="line.top + 'px'"
-		     data-style-width="line.width + 'px'" data-style-height="(line_height_px / root_scale) + 'px'"></div>
-		<span class="sharp-text temple-line" data-for="line : lines" data-class-red="line.red"
-		      data-style-left="line.left + 'px'" data-style-top="line.top + 'px'"
-		      data-style-font-size="line.text_px + 'px'" data-style-width="(line.width * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line.text}}</span>
+		<span id="ct_temple" class="sharp-text temple-line" data-if="eligible"
+		      data-style-font-size="temple_line.text_px + 'px'" data-style-width="(220 * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{temple_line.text}}</span>
+
+		<!-- The level bands, 15 units apart; the theme puts each on its own row and marks the
+		     hero's. -->
+		<div class="temple-bands" data-if="eligible">
+			<div class="temple-band" data-for="b : bands">
+				<div class="band-hero" data-if="b.hero" data-style-height="(line_height_px / root_scale) + 'px'"></div>
+				<span class="sharp-text temple-line" data-style-font-size="b.text_px + 'px'"
+				      data-style-width="(220 * root_scale) + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.text}}</span>
+			</div>
+		</div>
+
+		<span id="ct_members" class="sharp-text temple-line red" data-if="eligible"
+		      data-style-font-size="members_line.text_px + 'px'" data-style-width="(220 * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{members_line.text}}</span>
+		<span id="ct_notice" class="sharp-text temple-line red" data-if="!eligible"
+		      data-style-font-size="notice.text_px + 'px'" data-style-width="(230 * root_scale) + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{notice.text}}</span>
 
 		<div class="temple-btn" id="btn_enter" data-event-click="temple_enter">
 			<span class="sharp-text temple-label" data-style-font-size="text_px + 'px'"
