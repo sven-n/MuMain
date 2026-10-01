@@ -15,7 +15,7 @@
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
-#include "Guild/UIGuildInfo.h"
+#include "Guild/GuildTypes.h"
 #include "UI/Events/UIGuardsMan.h"
 
 #include "Core/Utilities/StringUtils.h"
@@ -31,6 +31,7 @@
 #include <RmlUi/Core/ElementDocument.h>
 
 #include <algorithm>
+#include "UI/Party/UIWindows.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

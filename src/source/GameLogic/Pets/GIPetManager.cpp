@@ -32,6 +32,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/Party/UIWindows.h"
 
 extern  bool    SkillEnable;
 extern	wchar_t TextList[50][100];

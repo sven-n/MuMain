@@ -1,15 +1,12 @@
 #pragma once
 
-#include "Guild/UIGuildInfo.h"
-#include "Guild/UIGuildMaster.h"
+#include "Guild/GuildTypes.h"
 #include "UI/Combat/UISenatus.h"
 #include "UI/NPCs/UIGateKeeper.h"
-#include "UI/Dialogs/UIPopup.h"
 #include "UI/Inventory/UIJewelHarmony.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 
 extern CUIGateKeeper* g_pUIGateKeeper;
-extern CUIPopup* g_pUIPopup;
 extern JewelHarmonyInfo* g_pUIJewelHarmonyinfo;
 extern ItemAddOptioninfo* g_pItemAddOptioninfo;
 class CUIManager;

@@ -68,7 +68,6 @@ namespace mu::ui::window
         int						m_BackUp;
         int						m_CurrentListPos;
         int						m_Tot_Notice;
-        DWORD					m_dwPopupID;
 
         RmlModelBinder<GuildInfoRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;

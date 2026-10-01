@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Guild/GuildTypes.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Platform/Imm.h"
 #include "UI/Core/UIManager.h"
@@ -3414,6 +3415,47 @@ void MoveHero()
     HeroTile = TerrainMappingLayer1[Index];
 }
 
+
+// The battle master's guild skill: Shift swaps it in for the current skill while the kill
+// count allows it, and releasing Shift restores what was selected before. Lived in
+// UIGuildInfo.cpp until that widget was retired; its only caller is just below.
+static void UseBattleMasterSkill(void)
+{
+    if (!(Hero->EtcPart == PARTS_ATTACK_TEAM_MARK
+        || Hero->EtcPart == PARTS_ATTACK_TEAM_MARK2
+        || Hero->EtcPart == PARTS_ATTACK_TEAM_MARK3
+        || Hero->EtcPart == PARTS_DEFENSE_TEAM_MARK))
+    {
+        return;
+    }
+
+    if (Hero->GuildStatus == G_PERSON)
+    {
+        return;
+    }
+
+    int MaxKillCount = SkillAttribute[Hero->GuildSkill].KillCount;
+
+    if (Hero->GuildMasterKillCount >= MaxKillCount)
+    {
+        if (Core::Input::IsKeyDown(VK_SHIFT))
+        {
+            if (Hero->BackupCurrentSkill == 255)
+            {
+                Hero->BackupCurrentSkill = Hero->CurrentSkill;
+            }
+            Hero->CurrentSkill = FindHotKey(Hero->GuildSkill);
+        }
+        else
+        {
+            if (Hero->BackupCurrentSkill != 255)
+            {
+                Hero->CurrentSkill = Hero->BackupCurrentSkill;
+                Hero->BackupCurrentSkill = 255;
+            }
+        }
+    }
+}
 
 int FindHotKey(int Skill)
 {

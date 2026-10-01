@@ -27,6 +27,7 @@
 #include "Camera/CameraProjection.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "I18N/All.h"
+#include "UI/Party/UIWindows.h"
 
 
 extern int	 g_iChatInputType;

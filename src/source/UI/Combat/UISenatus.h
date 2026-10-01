@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "Network/Server/WSclient.h"   // PMSG_NPCDBLIST
+
 class CSenatusInfo
 {
 private:

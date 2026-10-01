@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 
-#include "Guild/UIGuildInfo.h"
+#include "Guild/GuildTypes.h"
 #include "UIGuardsMan.h"
 #include "UI/Inventory/MyInventory.h"
 #include "UI/Core/WindowSystem.h"

@@ -20,7 +20,7 @@ extern bool SelectFlag;
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "GameLogic/Quests/CSQuest.h"
-#include "Guild/UIGuildInfo.h"
+#include "Guild/GuildTypes.h"
 #include "UI/Core/UIManager.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "World/MapInfra/MapManager.h"
@@ -50,6 +50,7 @@ extern bool SelectFlag;
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 #include <cmath>
+#include "UI/Party/UIWindows.h"
 
 namespace
 {

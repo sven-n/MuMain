@@ -7,9 +7,8 @@
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Audio/DSPlaySound.h"
-#include "UIGuildInfo.h"
+#include "GuildTypes.h"
 #include "UI/Widgets/UIControls.h"
-#include "UI/Dialogs/UIPopup.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -36,7 +35,6 @@ int	DeleteIndex = 0;
 int AppointStatus = 0;
 wchar_t DeleteID[100];
 
-extern CUIPopup* g_pUIPopup;
 extern MARK_t GuildMark[MAX_MARKS];
 
 using namespace SEASON3B;
@@ -114,7 +112,6 @@ mu::ui::window::CGuildInfoWindow::CGuildInfoWindow()
     m_CurrentListPos = 0;
     m_Loc_Bk = 0;
     m_Tot_Notice = 0;
-    m_dwPopupID = 0;
 
     m_bRequestUnionList = false;
 }

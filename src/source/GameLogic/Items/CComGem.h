@@ -1,4 +1,5 @@
 #include "UI/Core/UIManager.h"
+#include "UI/Widgets/UIControls.h"   // CUIUnmixgemList
 
 typedef std::pair<int, BYTE> INTBYTEPAIR;
 

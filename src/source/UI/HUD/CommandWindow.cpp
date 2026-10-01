@@ -11,7 +11,7 @@
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
-#include "Guild/UIGuildInfo.h"
+#include "Guild/GuildTypes.h"
 #include "Engine/AI/ZzzAI.h"
 #include "World/MapInfra/MapManager.h"
 
@@ -24,6 +24,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include <RmlUi/Core/ElementDocument.h>
+#include "UI/Party/UIWindows.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

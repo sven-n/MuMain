@@ -24,7 +24,6 @@ extern DWORD g_dwMouseUseUIID;
 CUIGateKeeper* g_pUIGateKeeper = NULL;
 JewelHarmonyInfo* g_pUIJewelHarmonyinfo = NULL;
 ItemAddOptioninfo* g_pItemAddOptioninfo = NULL;
-CUIPopup* g_pUIPopup = NULL;
 
 extern int g_iCancelSkillTarget;
 extern int TextNum;
@@ -61,7 +60,6 @@ bool g_bServerDivisionEnable = false;
 CUIManager::CUIManager()
 {
     g_pUIGateKeeper = new CUIGateKeeper;
-    g_pUIPopup = new CUIPopup;
     g_pUIJewelHarmonyinfo = JewelHarmonyInfo::MakeInfo();
     g_pItemAddOptioninfo = ItemAddOptioninfo::MakeInfo();
 
@@ -73,12 +71,10 @@ CUIManager::~CUIManager()
     SAFE_DELETE(g_pItemAddOptioninfo);
     SAFE_DELETE(g_pUIJewelHarmonyinfo);
     SAFE_DELETE(g_pUIGateKeeper);
-    SAFE_DELETE(g_pUIPopup);
 }
 
 void CUIManager::Init()
 {
-    g_pUIPopup->Init();
     giPetManager::InitPetManager();
     ClearPersonalShop();
 }
@@ -166,7 +162,6 @@ void CUIManager::CloseAll()
         }
     }
 
-    g_pUIPopup->CancelPopup();
 }
 
 bool CUIManager::CloseInterface(std::list<DWORD>& dwInterfaceFlag, DWORD dwExtraData)

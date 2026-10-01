@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Core/Text/TextLineWrap.h"
-#include "Guild/UIGuildInfo.h"
+#include "Guild/GuildTypes.h"
 #include "PersonalShopTitleImp.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -10,6 +10,7 @@
 #include "UI/Core/UIManager.h"
 #include "UI/Core/WindowSystem.h"
 #include "Camera/CameraProjection.h"
+#include "UI/Party/UIWindows.h"
 
 namespace
 {

@@ -201,7 +201,7 @@ namespace mu::ui::window
         bool m_bActive = false;
     };
 
-    // Convenience global, same convention as g_pGenericConfirmDialog/g_pUIPopup. Set once, in
+    // Convenience global, same convention as g_pGenericConfirmDialog. Set once, in
     // CSystem::Create() (WindowSystem.cpp); never null after that point during normal play.
     extern CGenericMenuDialog* g_pGenericMenuDialog;
 }

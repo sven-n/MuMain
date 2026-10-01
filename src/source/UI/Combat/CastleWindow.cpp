@@ -33,6 +33,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include "UI/Party/UIWindows.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

@@ -342,7 +342,8 @@ namespace mu::ui::window
     };
 
     // Convenience global for the scattered native call sites this primitive replaces (guild/quest
-    // UI code, network packet handlers) -- same convention as g_pUIPopup. Set once, in
+    // UI code, network packet handlers) -- the house convention for a single-instance dialog.
+    // Set once, in
     // CSystem::Create() (WindowSystem.cpp); never null after that point during normal play.
     extern CGenericConfirmDialog* g_pGenericConfirmDialog;
 }

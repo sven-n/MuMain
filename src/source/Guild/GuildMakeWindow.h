@@ -5,7 +5,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UIGuildMaster.h"
+#include "UI/Widgets/UIControls.h"   // UISTATES
 #include "Guild/GuildMakeRmlModel.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/RmlBridge/RmlModelBinder.h"

@@ -7,7 +7,7 @@
 #include "UI/Widgets/UIControls.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"
-#include "Guild/UIGuildInfo.h"
+#include "Guild/GuildTypes.h"
 #include "UI/Core/UIManager.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Items/CComGem.h"

@@ -13,7 +13,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "Guild/UIGuildInfo.h"
+#include "Guild/GuildTypes.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Network/Server/ServerListManager.h"

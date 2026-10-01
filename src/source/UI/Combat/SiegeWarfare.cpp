@@ -6,7 +6,7 @@
 #include "UI/Combat/SiegeWarSoldier.h"
 #include "UI/Combat/SiegeWarObserver.h"
 #include "Engine/Object/ZzzInventory.h"
-#include "Guild/UIGuildInfo.h"
+#include "Guild/GuildTypes.h"
 #include "World/MapInfra/MapManager.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
