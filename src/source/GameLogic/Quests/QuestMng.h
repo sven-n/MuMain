@@ -80,7 +80,7 @@ struct SRequestRewardText
 {
     HFONT m_hFont;
     REQUEST_REWARD_TEXT_KIND m_eKind;
-    DWORD m_dwColor; // m_eKind's color for the native CUIQuestContentsListBox
+    DWORD m_dwColor; // m_eKind's color, as the native quest-contents list drew it
     wchar_t m_szText[QM_MAX_REQUEST_REWARD_TEXT_LEN];
     REQUEST_REWARD_CLASSIFY m_eRequestReward; //
     DWORD m_dwType;

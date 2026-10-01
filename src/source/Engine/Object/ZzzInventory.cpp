@@ -60,7 +60,6 @@
 #include "Camera/CameraProjection.h"
 
 extern int g_iChatInputType;
-extern CUIGuildListBox* g_pGuildListBox;
 
 int			g_nTaxRate = 0;
 int			g_nChaosTaxRate = 0;

@@ -10,7 +10,7 @@ typedef struct tagITEM ITEM;
 // Shared reward-row builder for RmlUi-bound quest windows -- CMyQuestInfoWindow's own reward panel
 // and CQuestProgress/CQuestProgressByEtc's own reward list all resolve the exact same
 // GetRequestRewardText() requirements/general/random 3-section shape; extracted here so porting the
-// latter two off CUIQuestContentsListBox doesn't triple this loop.
+// latter two off the retired native quest-contents list doesn't triple this loop.
 namespace UI::Quests::RewardModel
 {
 // What a row shows; each theme's .rcss styles it (.row-<StyleKey()>).

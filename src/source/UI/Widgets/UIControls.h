@@ -122,17 +122,6 @@ typedef struct
     BYTE bySeqNum;
 } BCDECLAREGUILD_TEXT;
 
-typedef struct tagMOVECOMMAND_TEXT
-{
-    BOOL m_bIsSelected;
-    BOOL m_bCanMove;
-    wchar_t szMainMapName[32]; //. Main map name
-    wchar_t szSubMapName[32];  //. Substitute map name
-    int iReqLevel;             //. required level
-    int iReqZen;               //. required zen
-    int iGateNum;              //. Gate number
-} MOVECOMMAND_TEXT;
-
 typedef struct
 {
     BOOL m_bIsSelected;
@@ -464,27 +453,6 @@ protected:
     BOOL m_bNewTypeScrollBar;
 
     BOOL m_bUseNewUIScrollBar;
-};
-
-class CUIGuildListBox : public CUITextListBox<GUILDLIST_TEXT>
-{
-public:
-    CUIGuildListBox();
-    virtual ~CUIGuildListBox() {}
-
-    virtual void AddText(const wchar_t* pszID, BYTE Number, BYTE Server);
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber)
-    {
-        return TRUE;
-    }
-    virtual BOOL DoSubMouseAction();
-
-protected:
-    BOOL m_bIsGuildMaster;
 };
 
 class CUISimpleChatListBox : public CUITextListBox<WHISPER_TEXT>
@@ -842,93 +810,6 @@ protected:
     virtual BOOL DoLineMouseAction(int iLineNumber);
 };
 
-class CUIMoveCommandListBox : public CUITextListBox<MOVECOMMAND_TEXT>
-{
-public:
-    CUIMoveCommandListBox();
-    virtual ~CUIMoveCommandListBox() {}
-
-    virtual void AddText(int iIndex, const wchar_t* szMapName, const wchar_t* szSubMapName, int iReqLevel, int iReqZen,
-                         int iGateNum);
-    // virtual void DeleteText(DWORD dwGuildIndex);
-    virtual void SetNumRenderLine(int iLine);
-    MOVECOMMAND_TEXT* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-    // void Sort();
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber);
-    virtual int GetRenderLinePos_y(int iLineNumber);
-};
-
-struct SCurQuestItem
-{
-    BOOL m_bIsSelected;
-    DWORD m_dwIndex;
-    wchar_t m_szText[64];
-};
-
-class CUICurQuestListBox : public CUITextListBox<SCurQuestItem>
-{
-public:
-    CUICurQuestListBox();
-    virtual ~CUICurQuestListBox() {}
-
-    virtual void AddText(DWORD dwQuestIndex, const wchar_t* pszText);
-    virtual void DeleteText(DWORD dwQuestIndex);
-    virtual void SetNumRenderLine(int nLine);
-    SCurQuestItem* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int nLine);
-    virtual BOOL DoLineMouseAction(int nLine);
-    virtual int GetRenderLinePos_y(int nLine);
-};
-
-struct SQuestContents
-{
-    BOOL m_bIsSelected;
-    HFONT m_hFont;
-    DWORD m_dwColor;
-    int m_nSort;
-    wchar_t m_szText[64];
-    REQUEST_REWARD_CLASSIFY m_eRequestReward;
-    DWORD m_dwType;
-    WORD m_wIndex;
-    ITEM* m_pItem;
-};
-
-struct SRequestRewardText;
-
-class CUIQuestContentsListBox : public CUITextListBox<SQuestContents>
-{
-public:
-    CUIQuestContentsListBox();
-    virtual ~CUIQuestContentsListBox() {}
-
-    virtual void AddText(HFONT hFont, DWORD dwColor, int nSort, const wchar_t* pszText);
-    virtual void AddText(SRequestRewardText* pRequestRewardText, int nSort);
-    /*	virtual void DeleteText(DWORD dwQuestIndex);
-        virtual void SetNumRenderLine(int nLine);
-        SQuestContents* GetSelectedText()
-        { return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine())); }
-    */
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int nLine);
-    virtual void RenderCoveredInterface();
-    virtual void DoActionSub(BOOL bMessageOnly);
-    virtual BOOL DoLineMouseAction(int nLine);
-    virtual int GetRenderLinePos_y(int nLine);
-};
 
 struct TEXTCOLOR_DATA
 {
@@ -1293,65 +1174,6 @@ protected:
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
-
-class CUIChatInputBox
-{
-public:
-    CUIChatInputBox() {}
-    virtual ~CUIChatInputBox()
-    {
-        RemoveHistory(TRUE);
-    }
-
-    virtual void Init(HWND hWnd);
-    void Reset();
-    void Render();
-    void TabMove(int iBoxNumber);
-    void GetTexts(wchar_t* pText, wchar_t* pBuddyText);
-    void ClearTexts();
-    void SetText(BOOL bSetText, const wchar_t* pText, BOOL bSetBuddyText, const wchar_t* pBuddyText);
-    void SetState(int iState);
-    int GetState()
-    {
-        return m_TextInputBox.GetState();
-    }
-    void SetFont(HFONT hFont);
-    void SetTextPosition(int iPos_x, int iPos_y)
-    {
-        m_TextInputBox.SetPosition(iPos_x, iPos_y);
-    }
-    void SetBuddyPosition(int iPos_x, int iPos_y)
-    {
-        m_BuddyInputBox.SetPosition(iPos_x, iPos_y);
-    }
-    BOOL HaveFocus()
-    {
-        return (m_TextInputBox.HaveFocus() || m_BuddyInputBox.HaveFocus());
-    }
-    BOOL DoMouseAction();
-    void RestoreFocus()
-    {
-        m_bFocusLose = TRUE;
-    }
-
-protected:
-    CUITextInputBox m_TextInputBox;
-    CUITextInputBox m_BuddyInputBox;
-    BOOL m_bFocusLose;
-    int m_iBackupFocus;
-
-public:
-    virtual void AddHistory(const wchar_t* pszText);
-    virtual void MoveHistory(int iDegree);
-
-private:
-    void RemoveHistory(BOOL bClear);
-    BOOL m_bHistoryMode;
-    wchar_t m_szTempText[MAX_TEXT_LENGTH + 1];
-    std::deque<wchar_t*> m_HistoryList;
-    std::deque<wchar_t*>::iterator m_CurrentHistoryLine;
-    std::deque<wchar_t*>::iterator m_HistoryListIter;
-};
 
 
 #define SLIDE_LEVEL_MAX 5

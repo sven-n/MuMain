@@ -101,14 +101,15 @@ namespace mu::ui::window
         void UnloadImages();
         void BuildRmlUi();
 
-        // One quest-list row; mirrors SCurQuestItem (UIControls.h) minus legacy scroll/render bookkeeping.
+        // One quest-list row. The native list's row carried scroll/render bookkeeping beside
+        // the data; this carries only the data.
         struct QuestEntry
         {
             Rml::String text;
             int index = 0; // real DWORD quest index (LOWORD=questNumber, HIWORD=questGroup), narrowed to int
             bool selected = false;
         };
-        // One quest-contents/reward row -- mirrors SQuestContents (UIControls.h).
+        // One quest-contents/reward row.
         struct ContentEntry
         {
             Rml::String text;
