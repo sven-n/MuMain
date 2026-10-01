@@ -71,7 +71,7 @@ reconnect_dialog.rml: per-frame data -- the progress bar's fill is the reconnect
 server_msg.rml: per-frame data -- the window's sides grow with the message as it is typed out (kSideStepHeight * m_nBgSideNow), and the centre and bottom pieces follow that height
 server_select.rml: per-frame data -- gauge width is the server load
 set_item_explanation.rml: per-frame data -- placed against the hovered item
-siege_warfare.rml: per-frame data -- hero/target/dot positions on the map, per frame
+siege_warfare.rml: the hero, the other characters' dots and each command's icon sit at their projected map points; the pointer's chosen command follows the mouse; the team and command buttons' boxes come off the live CButtons that hit-test them, and the command buttons are repositioned every frame to the chosen team's row -- native is authoritative for their layout and their hit test, so this runs in the accepted direction, as the friends family does
 themes/legacy/buff_strip.rml: per-frame data -- strip offset follows the HUD anchor
 themes/legacy/chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
 themes/legacy/help_window.rml: per-frame data -- native renderer geometry for the page it still measures

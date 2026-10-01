@@ -22,7 +22,10 @@ struct SiegeWarCommandEntry
     float left = 0.f, top = 0.f; // the command's map point
     int command = 0;             // 0 attack, 1 defence, 2 wait
     Rml::String team;            // "1".."7"
-    Rml::String color;           // RCSS colour of the icon and the number
+    // The pulse a new command fades through, 1 + sin(lifetime * 0.2) as an rgb(): the red is the
+    // theme's but the ramp is per-frame, and RCSS cannot mix a bound fraction into a colour, so
+    // the two stay welded here. The geometry guard deliberately does not cover `color`.
+    Rml::String color;
 
     bool operator==(const SiegeWarCommandEntry&) const = default;
 };
@@ -62,7 +65,8 @@ struct SiegeWarfareRmlModel
     // The battle-skill frame (guild master / sub master / battle master during a siege).
     bool skillVisible = false;
     Rml::String skillRect; // the skill's cell in newui_skill2, texture px "x y w h"
-    Rml::String skillColor;
+    // Whether the hero has the kills the skill needs: the original reddened the icon until then.
+    bool skillAffordable = false;
     Rml::String killsNeeded, kills;
     int scrollUpFrame = 0, scrollDownFrame = 0;
 

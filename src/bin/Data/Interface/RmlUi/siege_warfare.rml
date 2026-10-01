@@ -63,7 +63,9 @@
 		<div id="skill" data-if="skill_visible" data-style-left="(frame_x + 26) + 'px'" data-style-top="(frame_y - 53) + 'px'"
 		     data-style-opacity="alpha">
 			<div id="skill_frame"></div>
-			<img id="skill_icon" src="../../../newui_skill2.jpg" data-attr-rect="skill_rect" data-style-image-color="skill_color"/>
+			<!-- The icon reddens until the hero has the kills the skill needs; the theme owns both. -->
+			<img id="skill_icon" src="../../../newui_skill2.jpg" data-attr-rect="skill_rect"
+			     data-class-unaffordable="!skill_affordable"/>
 			<span class="text big kills kills-needed" data-style-font-size="big_text_px + 'px'"
 			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{kills_needed}}</span>
 			<span class="text big kills kills-now" data-style-font-size="big_text_px + 'px'"

@@ -213,7 +213,7 @@ void mu::ui::window::CSiegeWarfare::BuildRmlUi()
 
                                                      c.Bind("skill_visible", &model.skillVisible);
                                                      c.Bind("skill_rect", &model.skillRect);
-                                                     c.Bind("skill_color", &model.skillColor);
+                                                     c.Bind("skill_affordable", &model.skillAffordable);
                                                      c.Bind("kills_needed", &model.killsNeeded);
                                                      c.Bind("kills", &model.kills);
                                                      c.Bind("scroll_up_frame", &model.scrollUpFrame);
@@ -298,7 +298,7 @@ void mu::ui::window::CSiegeWarfare::ApplyRmlModel(const SiegeWarfareRmlModel& ne
     SyncField(m_RmlBinder, &SiegeWarfareRmlModel::commands, "commands", next.commands);
     SyncField(m_RmlBinder, &SiegeWarfareRmlModel::skillVisible, "skill_visible", next.skillVisible);
     SyncField(m_RmlBinder, &SiegeWarfareRmlModel::skillRect, "skill_rect", next.skillRect);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::skillColor, "skill_color", next.skillColor);
+    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::skillAffordable, "skill_affordable", next.skillAffordable);
     SyncField(m_RmlBinder, &SiegeWarfareRmlModel::killsNeeded, "kills_needed", next.killsNeeded);
     SyncField(m_RmlBinder, &SiegeWarfareRmlModel::kills, "kills", next.kills);
     SyncField(m_RmlBinder, &SiegeWarfareRmlModel::scrollUpFrame, "scroll_up_frame", next.scrollUpFrame);

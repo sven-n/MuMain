@@ -122,3 +122,7 @@ body { pointer-events: none; }
 #alpha_button { position: absolute; width: 38px; height: 23px; decorator: image(sw-alpha-up); }
 #alpha_button.over { decorator: image(sw-alpha-over); }
 #alpha_button.down { decorator: image(sw-alpha-down); }
+
+/* The battle skill's icon: reddened until the hero has the kills it needs. */
+#skill_icon { image-color: #ffffff; }
+#skill_icon.unaffordable { image-color: rgb(255, 127, 127); }
