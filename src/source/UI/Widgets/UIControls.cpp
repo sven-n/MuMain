@@ -26,6 +26,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "Render/Text/CUIRenderText.h"
+#include "Render/Text/TextWrap.h"
 #include <vector>
 
 extern BYTE m_CrywolfState;
@@ -38,94 +39,6 @@ extern int g_iChatInputType;
 extern BOOL g_bUseWindowMode;
 
 #define ARRAY_SIZE(pArray) (sizeof(pArray)/sizeof(pArray[0]))
-
-int CutStr(const wchar_t* pszSrcText, wchar_t* pTextOut, const int iTargetPixelWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab /* = 0 */)
-{
-    if (iFirstLineTab < 0)
-    {
-      return 0;
-    }
-
-    if (pszSrcText == nullptr)
-    {
-        assert(!"CutStr Error");
-        return 0;
-    }
-
-    auto tempString = std::wstring(pszSrcText);
-    int iCharIndex = 0, iLineIndex = 0;
-    constexpr int TextWrapPadding = 5;
-    const int iTargetWidth = iTargetPixelWidth - TextWrapPadding;
-
-    const int totalCharacters = tempString.length();
-    int processedSourceCharacters = 0;
-    while (!tempString.empty() && iLineIndex < iMaxOutLine)
-    {
-        SIZE iSize = g_pRenderText->MeasureText(tempString.c_str(), static_cast<int>(tempString.length()));
-
-        if (iLineIndex == 0)
-            iSize.cx += iFirstLineTab;
-
-        const auto isTooWideInPixels = iSize.cx >= iTargetWidth;
-        const auto isTooLongInCharacters = (int)tempString.length() >= iOutStrLength - 1;
-        if (isTooWideInPixels || isTooLongInCharacters)
-        {
-          // then remove the last word/token from the string and try next loop iteration again ...
-          const auto iPosLastSpace = tempString.find_last_of(L' ');
-          iCharIndex = (iPosLastSpace == std::wstring::npos) ? tempString.length() - 1 : iPosLastSpace;
-          tempString = tempString.substr(0, iCharIndex);
-        }
-        else
-        {
-            // we can copy that to the destination
-            tempString.copy(pTextOut, tempString.length(), 0);
-            iLineIndex++;
-            processedSourceCharacters += tempString.length();
-
-            pTextOut += iOutStrLength; // move destination pointer to the next line
-            if (processedSourceCharacters < totalCharacters)
-            {
-              tempString = std::wstring(pszSrcText + processedSourceCharacters);
-            }
-            else
-            {
-              tempString = L"";
-              break;
-            }
-        }
-    }
-
-
-    return iLineIndex;
-}
-
-int CutText3(const wchar_t* pszText, wchar_t* pTextOut, const int TargetWidth, const int iMaxOutLine, const int iOutStrLength, const int iFirstLineTab, const BOOL bReverseWrite)
-{
-    return CutStr(pszText, pTextOut, TargetWidth, iMaxOutLine, iOutStrLength, iFirstLineTab);
-}
-
-void CutText4(const wchar_t* pszSource, wchar_t* pszResult1, wchar_t* pszResult2, int iCutCount)
-{
-    if (pszSource == nullptr || pszSource[0] == '\0') return;
-    auto sourceString = std::wstring(pszSource);
-    int iLength = sourceString.length();
-    int iMove = 2; // might be 4, too
-    int iTextSize = 0;
-    for (int i = 0; i < iLength; )
-    {
-        if (i + iMove > iCutCount) break;
-        else i += iMove;
-
-        iTextSize = i;
-    }
-    wcsncpy(pszResult1, pszSource, iTextSize);
-    pszResult1[iTextSize] = '\0';
-    if (pszResult2 != nullptr)
-    {
-        wcsncpy(pszResult2, pszSource + iTextSize, iLength - iTextSize);
-        pszResult2[iLength - iTextSize] = '\0';
-    }
-}
 
 BOOL g_bUseChatListBox = TRUE;
 
@@ -2321,75 +2234,6 @@ void CUISocketListBox::DeleteText(int iSocketIndex)
     }
     if (SLGetSelectLineNum() != 1) SLSelectNextLine();
     m_TextList.erase(m_TextListIter);
-}
-
-DWORD g_dwBKConv = IME_CMODE_ALPHANUMERIC;
-DWORD g_dwBKSent = IME_SMODE_NONE;
-BOOL g_bForceIMEConv = FALSE;
-BOOL g_bForceIMESent = FALSE;
-BOOL g_bBKOpenState = TRUE;
-BOOL g_bIMEBlock = FALSE;
-
-void SaveIMEStatus()
-{
-    HIMC hIMC = ImmGetContext(g_hWnd);
-    ImmGetConversionStatus(hIMC, &g_dwBKConv, &g_dwBKSent);
-    ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
-    ImmReleaseContext(g_hWnd, hIMC);
-}
-
-void RestoreIMEStatus()
-{
-    HIMC hIMC = ImmGetContext(g_hWnd);
-    ImmSetConversionStatus(hIMC, g_dwBKConv, g_dwBKSent);
-    ImmReleaseContext(g_hWnd, hIMC);
-}
-
-void CheckTextInputBoxIME(int iMode)
-{
-    if (g_bIMEBlock == FALSE) return;
-    if (iMode & IME_CONVERSIONMODE)
-    {
-        if (/*InputEnable == false && */g_bForceIMEConv == TRUE)
-        {
-            g_bForceIMEConv = FALSE;
-            return;
-        }
-
-        HIMC hIMC = ImmGetContext(g_hWnd);
-
-        DWORD dwConv, dwSent;
-        ImmGetConversionStatus(hIMC, &dwConv, &dwSent);
-        if (dwConv != IME_CMODE_ALPHANUMERIC)
-        {
-            g_dwBKConv = dwConv;
-            g_bForceIMEConv = TRUE;
-            ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
-        }
-
-        ImmReleaseContext(g_hWnd, hIMC);
-        //		g_bForceIMEConv = FALSE;
-    }
-    if (iMode & IME_SENTENCEMODE)
-    {
-        if (/*InputEnable == false && */g_bForceIMESent == TRUE)
-        {
-            g_bForceIMESent = FALSE;
-            return;
-        }
-
-        HIMC hIMC = ImmGetContext(g_hWnd);
-        DWORD dwConv, dwSent;
-        ImmGetConversionStatus(hIMC, &dwConv, &dwSent);
-        if (dwSent != IME_SMODE_NONE)
-        {
-            g_dwBKSent = dwSent;
-            g_bForceIMESent = TRUE;
-            ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
-        }
-        ImmReleaseContext(g_hWnd, hIMC);
-        //		g_bForceIMESent = FALSE;
-    }
 }
 
 CUITextInputBox* CUITextInputBox::s_pFocusedPortable = nullptr;

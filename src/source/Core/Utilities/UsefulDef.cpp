@@ -10,6 +10,7 @@
 #include "Core/Utilities/UsefulDef.h"
 #include "UI/Widgets/UIControls.h"
 #include "Render/Text/CUIRenderText.h"
+#include "Render/Text/TextWrap.h"
 
 
 

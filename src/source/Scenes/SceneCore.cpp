@@ -27,6 +27,7 @@
 
 #include "Camera/CameraUtility.h"
 #include "Scenes/SceneManager.h"
+#include "Core/Input/ImeInput.h"
 
 extern int g_iChatInputType;
 extern BOOL g_bUseChatListBox;
@@ -92,9 +93,6 @@ extern wchar_t m_ExeVersion[11];
 
 BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring &lpszString);
 
-extern DWORD g_dwBKConv;
-extern DWORD g_dwBKSent;
-extern BOOL g_bIMEBlock;
 
 bool MoveMainCamera();
 

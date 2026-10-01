@@ -29,6 +29,8 @@
 #include "I18N/All.h"
 #include "UI/Party/UIWindows.h"
 #include "Render/Text/CUIRenderText.h"
+#include "Render/Text/TextWrap.h"
+#include "Core/Input/ImeInput.h"
 
 using mu::ui::window::CheckMouseIn;   // WindowCommon.h
 

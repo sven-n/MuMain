@@ -11,24 +11,16 @@
 #include <memory>
 #include <vector>
 
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#define UIMAX_TEXT_LINE 150
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-
 inline DWORD _ARGB(BYTE a, BYTE r, BYTE g, BYTE b)
 {
     return (a << 24) + (b << 16) + (g << 8) + (r);
 }
 
-int CutStr(const wchar_t* pszText, wchar_t* pTextOut, const int iTargetPixelWidth, const int iMaxOutLine,
-           const int iOutStrLength, const int iFirstLineTab = 0);
-int CutText3(const wchar_t* pszText, wchar_t* pTextOut, const int TargetWidth, const int iMaxOutLine,
-             const int iOutStrLength, const int iFirstLineTab = 0, const BOOL bReverseWrite = FALSE);
-void CutText4(const wchar_t* pszSource, wchar_t* pszResult1, wchar_t* pszResult2, int iCutCount);
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+#define UIMAX_TEXT_LINE 150
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 void RenderCheckBox(int iPos_x, int iPos_y, BOOL bFlag);
-
-#define ID_UICEDIT 0x0001
 
 enum UISTATES
 {
@@ -805,10 +797,6 @@ protected:
     virtual BOOL DoLineMouseAction(int iLineNumber);
 };
 
-
-void SaveIMEStatus();
-void RestoreIMEStatus();
-void CheckTextInputBoxIME(int iMode);
 
 struct InputBoxConfig
 {

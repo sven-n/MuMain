@@ -37,6 +37,7 @@
 #include "LoginScene.h"
 #include "Camera/CameraProjection.h"
 #include "UI/Scaling/UITransform.h"
+#include "Core/Input/ImeInput.h"
 #ifdef _EDITOR
 #include "Camera/CameraMode.h"
 #include "Camera/FrustumRenderer.h"
@@ -49,9 +50,6 @@ extern CHARACTER CharacterView;
 extern int SelectedCharacter;
 extern int g_iKeyPadEnable;
 extern int g_iChatInputType;
-extern BOOL g_bIMEBlock;
-extern DWORD g_dwBKConv;
-extern DWORD g_dwBKSent;
 extern HWND g_hWnd;
 extern CErrorReport g_ErrorReport;
 extern double WorldTime;

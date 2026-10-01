@@ -104,7 +104,6 @@
 CUITextInputBox* g_pSingleTextInputBox = nullptr;
 CUITextInputBox* g_pSinglePasswdInputBox = nullptr;
 int g_iChatInputType = 1;
-extern BOOL g_bIMEBlock;
 
 CMultiLanguage* pMultiLanguage = nullptr;
 
@@ -150,6 +149,7 @@ bool g_bDisableAnimationTaskPool = true;
 
 #include "Audio/AudioPlayer.h"
 #include "Render/Text/CUIRenderText.h"
+#include "Core/Input/ImeInput.h"
 
 extern int LogIn;
 extern wchar_t LogInID[];

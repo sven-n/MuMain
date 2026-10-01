@@ -126,3 +126,77 @@ namespace Input::IME
         g_pRenderText->RenderText(100, 130, Text);
     }
 }
+
+// The legacy text-input boxes keep their own conversion-mode backup, separate from the
+// Input::IME stack above: the two save and restore independently, so they are not
+// interchangeable. CharacterScene.cpp reads g_dwBKConv/g_dwBKSent directly instead of
+// calling SaveIMEStatus().
+
+DWORD g_dwBKConv = IME_CMODE_ALPHANUMERIC;
+DWORD g_dwBKSent = IME_SMODE_NONE;
+BOOL g_bForceIMEConv = FALSE;
+BOOL g_bForceIMESent = FALSE;
+BOOL g_bBKOpenState = TRUE;
+BOOL g_bIMEBlock = FALSE;
+
+void SaveIMEStatus()
+{
+    HIMC hIMC = ImmGetContext(g_hWnd);
+    ImmGetConversionStatus(hIMC, &g_dwBKConv, &g_dwBKSent);
+    ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
+    ImmReleaseContext(g_hWnd, hIMC);
+}
+
+void RestoreIMEStatus()
+{
+    HIMC hIMC = ImmGetContext(g_hWnd);
+    ImmSetConversionStatus(hIMC, g_dwBKConv, g_dwBKSent);
+    ImmReleaseContext(g_hWnd, hIMC);
+}
+
+void CheckTextInputBoxIME(int iMode)
+{
+    if (g_bIMEBlock == FALSE) return;
+    if (iMode & IME_CONVERSIONMODE)
+    {
+        if (/*InputEnable == false && */g_bForceIMEConv == TRUE)
+        {
+            g_bForceIMEConv = FALSE;
+            return;
+        }
+
+        HIMC hIMC = ImmGetContext(g_hWnd);
+
+        DWORD dwConv, dwSent;
+        ImmGetConversionStatus(hIMC, &dwConv, &dwSent);
+        if (dwConv != IME_CMODE_ALPHANUMERIC)
+        {
+            g_dwBKConv = dwConv;
+            g_bForceIMEConv = TRUE;
+            ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
+        }
+
+        ImmReleaseContext(g_hWnd, hIMC);
+        //		g_bForceIMEConv = FALSE;
+    }
+    if (iMode & IME_SENTENCEMODE)
+    {
+        if (/*InputEnable == false && */g_bForceIMESent == TRUE)
+        {
+            g_bForceIMESent = FALSE;
+            return;
+        }
+
+        HIMC hIMC = ImmGetContext(g_hWnd);
+        DWORD dwConv, dwSent;
+        ImmGetConversionStatus(hIMC, &dwConv, &dwSent);
+        if (dwSent != IME_SMODE_NONE)
+        {
+            g_dwBKSent = dwSent;
+            g_bForceIMESent = TRUE;
+            ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
+        }
+        ImmReleaseContext(g_hWnd, hIMC);
+        //		g_bForceIMESent = FALSE;
+    }
+}
