@@ -99,6 +99,7 @@ exempt in principle, they simply have no such conversion to get wrong.
 | `CDoppelGangerWindow` | docked | the enter button, corner × |
 | `CGoldBowmanWindow` | docked | the serial field's focus + typing, Register, corner × |
 | `CGoldBowmanLena` | docked | Register, corner × |
+| `CMasterLevel` | HUD | **hover a skill node: its hint must sit on that node.** The only `RefreshLogicalAnchorPosition()` caller that reads back a `data-for` row rather than a fixed anchor — the node's id comes from `data-attr-id`, and the themes now own the column/slot/rank grid, so a wrong read puts the hint on a different skill. It fails *silently*: the fallback is `MasterTree::NodeBoxPosition()`, which is what the hint used before, so a broken read looks right until the themes' grid and that fallback disagree. Check the right-hand column and a bottom-row node, where the hint flips above |
 
 The nine rows above joined this table when they stopped hit-testing against their own
 `INVENTORY_WIDTH = 190` literal and started reading `#panel`'s live size like the inventory family
@@ -126,3 +127,4 @@ Fill in per run. An empty cell is "not checked," which is not the same as passin
 |---|---|---|---|---|---|
 | 2026-09-27 | `RelWithDebInfo` | several (not the full 50/200 ladder) | both | `CMoveCommandWindow` only | Pass — rows click, close bar clicks, panel blocks world clicks. **One window, not the table.** Every other row remains unchecked. |
 | 2026-09-27 | `RelWithDebInfo` | several | both | `CMuHelperConfigWindow`, `CMuHelperDetailWindow` | Pass. |
+| 2026-10-01 | `RelWithDebInfo` | default only | both | `CMasterLevel` | Pass — a hovered node's hint sits on that node, so the `data-attr-id` readback resolves. **Default scale only**, so the conversion this row exists to catch is not yet covered for this window. |

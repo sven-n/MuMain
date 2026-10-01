@@ -131,3 +131,7 @@
 	transform-origin: center top;
 	color: rgb(255, 255, 255);
 }
+
+/* The leftover part of a row at the end of the list, so it scrolls in whole rows; its height is
+   what the list's own height leaves over. */
+.list-tail { display: block; }

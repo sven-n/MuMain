@@ -267,18 +267,85 @@ resolution.
 ## Tracked deferral: the C++ ↔ RML/RCSS ownership boundary
 
 Audited 2026-09-30, across the migrated set (the ledger's 109 `Done` rows, 166 RML documents).
-Analysis only; nothing was changed. The prescriptive half — what a *new* window must do — is in
-[`building-new-ui.md`](building-new-ui.md)'s "Ownership" section and should be read first; this
-entry is the remediation backlog for what already shipped.
+**Remediated 2026-10-01**; this entry now records what landed, what is implemented but unseen, and
+what is accepted as it stands. The prescriptive half — what a *new* window must do — is in
+[`building-new-ui.md`](building-new-ui.md)'s "Ownership" section and should be read first.
 
-**The conclusion, so the backlog is read in proportion.** Game behaviour has not leaked into RML
-and needs no work: every type reaching a data model is a purpose-built view struct (~98 of them,
-no gameplay/renderer/protocol object among them), and the action callbacks that take a
-markup-supplied index re-validate the rule in C++ before acting. Presentation and layout have
-leaked out of RCSS at scale: 87 of 166 documents bind at least one non-root-transform
-`left`/`top`/`width`/`height` from C++, and 32 of the ~77 binder-owning translation units register
-presentation members (`left`, `top`, `px`, `color`, `bold`, `align`) on their model structs — 175
-such registrations.
+### Where it ended up
+
+| | Audited | Now |
+|---|---|---|
+| Documents binding non-root geometry | 87 of 166 | **83** |
+| Presentation-member registrations | 175 | **97** |
+| Translation units registering any | 32 | 32 |
+| Allowlist entries reading only `display-list port` | 32 | **0** |
+
+The last row is the one that matters, and the third row is the one that misleads. No entry is
+labelled by the pattern any more: each names the geometry its document kept and why, which is
+checkable with `python tools/check_rml_bound_geometry.py --review` and was checked that way. The
+translation-unit count did not move because conversion leaves most files holding a small, stated
+residue rather than emptying them.
+
+**The registration metric over-counts, and did so when the audit ran too.** It matches by member
+name, so `RmlTooltip.cpp`'s nine `color_*` members score nine hits although they are *booleans
+naming a line's kind*, with every colour in the themes — the shape this deferral asks for.
+`ServerSelWin.cpp`'s two are the same. Read 97 as an upper bound on residue, not a defect count.
+
+### What is implemented but not seen
+
+Converted, built and linked, with no client-reachable state to validate against. Each is a real
+risk, not a formality: a wrong position here surfaces only during the event.
+
+- **`CryWolf`** — its render gates on `M34CryWolf1st::IsCyrWolf1st()`, so `$win crywolf` opens the
+  window and nothing draws. The exp digits, the five altars, the notice's four lines and the
+  clock's state all moved unseen. It also carried a real bug: altars were pushed only when they
+  had something to show, so a contracted altar shifted every altar after it along the hill.
+- **`SiegeWarfare`** — renders only inside Battle Castle during a siege.
+- **The Illusion Temple result and HUD**, the three event timers, the Doppelganger frame, the duel
+  spectator frame and Battle Soccer's score rows. Of these the Temple HUD is the weakest: its
+  chrome left the sprite list, and the draw order rests on the argument that the regrouped pieces
+  do not overlap on screen rather than on having been looked at.
+
+Everything else in the rollout was verified in game by the user, both themes, including the scale
+sweep: see the rollout task's own verification section for the per-batch record.
+
+### Accepted as it stands, with its trigger
+
+- **`FriendWindowView`** and **`SiegeWarfare`'s team/command buttons** — geometry read off live
+  native controls that also hit-test it. Trigger: porting those families off `CUIBaseWindow` /
+  retiring the native `CButton`s.
+- **`MessageBoxView`** — measured centring and stacking; residue is one box class's four literal
+  button positions. Trigger: splitting the shared document per box class.
+- **`Notices`** — physical px with no root transform, its transform taken ambiently. Trigger: that
+  HUD gaining a reference-px space.
+- **`MiniMap`** — no reference-px space exists: the art is turned 45° in physical px.
+- **Unbounded server-driven counts** — the duel spectator list, siege score marks. No `:nth-child`
+  or `:nth-last-child` table can cover a count the client does not bound.
+- **Computed fan-outs** — `MainFrameWindow`'s zig-zag skill grid and `MuHelperSkillPicker`'s, both
+  positioned from an ordinal among what the player actually has.
+- **A new siege command's pulse** — `rgb(255, pulse, pulse)` welds the theme's red to a per-frame
+  sine. RCSS cannot mix a bound fraction into a colour, so this needs a mechanism that does not
+  exist rather than a tidier binding. The guard deliberately does not cover `color`.
+
+### Still open, and small
+
+- **A residual `bold` flag beside an existing semantic field.** `MyQuestInfoWindow`,
+  `QuestProgress`, `QuestProgressByEtc`, `GenericConfirmDialog` and `GenericMenuDialog` each carry
+  a `style` (semantic) *and* a `bold` (presentation) on the same entry. The weight should follow
+  the style in RCSS. Five files, one uniform edit, no runtime risk — the cheapest thing left.
+- **`PanelColumnX()`**, and the three spellings of the root-placement bridge: `root_x`/`root_y`,
+  `panel_x`/`panel_y` and `main_frame`'s `bars_left`/`bars_top`. One spelling should win. The guard
+  exempts all of them, so nothing fails; it is a naming debt, not a leak.
+- **`CGenericConfirmDialog`'s 150x18 anchor constants**, duplicated into both themes.
+
+### The original finding, kept for why any of this was done
+
+**Game behaviour had not leaked into RML and needed no work**: every type reaching a data model is
+a purpose-built view struct (~98 of them, no gameplay/renderer/protocol object among them), and the
+action callbacks that take a markup-supplied index re-validate the rule in C++ before acting.
+Presentation and layout had leaked out of RCSS at scale: 87 of 166 documents bound at least one
+non-root-transform `left`/`top`/`width`/`height` from C++, across 175 presentation-member
+registrations in 32 translation units.
 
 **What makes it structural rather than untidy.** A `data-style-*` binding is an inline property,
 and this build resolves inline properties ahead of every stylesheet rule with no `!important`
@@ -289,9 +356,18 @@ override at all**, silently.
 missed the same defect written directly in the markup: a `style="left: 16px"` attribute is the
 same inline property. Twelve documents carried 158 of them, six of which are not named below at
 all (`char_make`, `duel_watch`, `gate_switch`, `move_command`, `quick_command`, `window_menu`).
-`gens_ranking`, `char_make` and `quick_command` are converted;
-`Tools/check_rml_bound_geometry.py` now checks both forms, so the rest are frozen behind the same
-allowlist as the bindings rather than able to grow.
+**No document carries an inline `style=` attribute of any kind any more** — not one of the 166,
+checkable in a line: `grep -rl 'style="' src/bin/Data/Interface/RmlUi --include=*.rml`. They went
+in this order: `gens_ranking`, `char_make` and `quick_command`, then `duel_watch`, `gate_switch`,
+`window_menu`, `catapult` and `move_command`. Two are worth remembering. `catapult`'s eight
+table-frame pieces survived its own conversion and were caught only by checking the allowlist's
+reasons against what each document actually binds. `move_command`'s last one was
+`style="display: block"` — not geometry, so the guard never covered it; the sweep found it, not the
+build.
+
+`tools/check_rml_bound_geometry.py` checks bindings and `style=` geometry both, so neither can grow
+back unlisted. It does not check non-geometry inline properties: with the population at zero, a
+guard clause for those would now be cheap to add and would hold the line.
 
 ### The root pattern, which most of the rest follow from
 
@@ -306,24 +382,23 @@ says so in its own comment. The native controls are retained for **hit-testing a
 rendering, so §2's native-geometry exception does not apply, and the flow runs the wrong way
 (C++ constant → RmlUi position) for the whole window.
 
-**Converted so far: `GuardWindow`, `GatemanWindow`, `CastleWindow`.** `GuardTextEntry`,
-`GuardBoxEntry`, `GuardButtonEntry`, `GatemanTextEntry`, `GatemanButtonEntry`, `CastlePieceEntry`
-and `CastleButtonEntry` are gone; each window's lines, buttons, table frames and list columns are
-named elements its themes place. `GatemanWindow` no longer registers a presentation member at all.
-The two that remain do so for a stated reason: a Guard list row's `top` follows the native list
-box's scroll position, and a Senatus map item's `left`/`top` is its slot on the map art. Guard's
-guild lists keep their native data, scrolling and selection — no client-reachable siege state
-renders either list, so retiring them has no way to be validated.
+**Every window the scan named has been through.** The draw-list types are gone — `GuardTextEntry`,
+`GuardBoxEntry`, `GuardButtonEntry`, `GatemanTextEntry`, `GatemanButtonEntry`, `CastlePieceEntry`,
+`CastleButtonEntry`, `CursedTempleResultTextEntry`, `CursedTempleEnterLineEntry` and the rest — and
+each window's lines, rows, buttons, table frames and list columns are named elements its themes
+place. `GatemanWindow` registers no presentation member at all.
 
-Still affected, by the presentation-member scan: `SiegeWarfare`,
-`GuildInfoWindow`, `GuildMakeWindow`, `GensRanking`, `MessageBoxView`,
-`ChatCommandWindow`, `ReconnectDialog`, `CatapultWindow`, `CryWolf`, `CursedTempleEnter`/`Result`/
-`System`, `DoppelGangerFrame`, `EventEntryView`, `EventItemEntryView`, `EventTimerView`,
-`KanturuEvent`, `DuelWatch{MainFrame,UserList}Window`, `MasterLevel`, `Notices`,
-`InventoryExtension`, `ItemEnduranceInfo`, `MixInventory`, `TipTextListView`,
-`UnitedMarketPlaceWindow`, `FriendWindowView`, `MiniMap`, `MainFrameWindow`, `MuHelperSkillPicker`.
-Not every member in those files is a leak — `MiniMap`'s markers and `WorldLabelLayer`'s projected
-labels are genuine per-frame data; the leak is the static chrome riding in the same structs.
+The retrospective worth keeping is how often the target was not the defect. Re-validating before
+converting reclassified **eight** of them: `MessageBoxView`, `FriendWindowView` and
+`TipTextListView` in the first pass, then `Notices`, the duel spectator list and siege score marks,
+`KanturuEvent`'s wrapped stacking, `MainFrameWindow`'s zig-zag and `MiniMap`'s rotated space. Each
+kept its geometry with a stated reason instead of being forced into a rewrite. Set against that,
+`MasterLevel` went the other way: it read as per-node data and was a pure column/slot/rank grid,
+which came fully clean once the skill hint could read a node's box back by id.
+
+So the audit's population was a list of *candidates*, as it said, and roughly a quarter of it was
+geometry that genuinely belongs in C++. The lesson for the next audit of this kind is to carry
+that expectation from the start rather than discover it per window.
 
 `FriendWindowView::PlaceField()` skips the model and writes `left`/`top`/`width`/`height`/
 `font-size`/`color` straight onto the element, sourced from a native `CUITextInputBox`'s
