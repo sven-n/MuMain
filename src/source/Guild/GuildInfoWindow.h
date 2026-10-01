@@ -48,7 +48,6 @@ namespace mu::ui::window
         enum EVENT_STATE
         {
             EVENT_NONE = 0,
-            EVENT_SCROLL_BTN_DOWN,
         };
         enum BUTTON_EVENT
         {
@@ -66,10 +65,6 @@ namespace mu::ui::window
         CManager* m_pNewUIMng;
         POINT					m_Pos;
         int						m_nCurrentTab;
-        int						m_Loc;
-        int						m_Loc_Bk;
-        int						m_BackUp;
-        int						m_CurrentListPos;
         int						m_Tot_Notice;
 
         RmlModelBinder<GuildInfoRmlModel> m_RmlBinder;
@@ -79,7 +74,17 @@ namespace mu::ui::window
         // The announcement, one wrapped line per entry, oldest first. guild_info.rml reverses
         // it for display and RmlUi owns the scrolling.
         std::vector<std::wstring>   m_NoticeLines;
-        CUINewGuildMemberListBox	m_GuildMember;
+        // One guild member as the window holds it. Selection is kept by name, not by row index,
+        // so it survives the list being rebuilt when the server resends it.
+        struct MemberEntry
+        {
+            std::wstring name;
+            BYTE number = 0;
+            BYTE server = 255;
+            BYTE guildStatus = 0;
+        };
+        std::vector<MemberEntry>    m_Members;
+        std::wstring                m_SelectedMember;
         CUIUnionGuildListBox		m_UnionListBox;
         ServerMessageInfo		    m_MessageInfo;
 
@@ -96,6 +101,9 @@ namespace mu::ui::window
 
         void SetPos(int x, int y);
 
+        // The highlighted member, or nullptr when the selection no longer names a live row.
+        const MemberEntry* SelectedMember() const;
+
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();
@@ -111,6 +119,8 @@ namespace mu::ui::window
         void AddGuildNotice(wchar_t* szText);
         void SetRivalGuildName(wchar_t* szName);
         void AddGuildMember(GUILD_LIST_t* pInfo);
+        // guild_info.rml's member rows, in display order (newest first, as the native box drew).
+        void SelectMember(int displayIndex);
         void GuildClear();
         void NoticeClear();
         void UnionGuildClear();
@@ -130,9 +140,8 @@ namespace mu::ui::window
     private:
         bool Check_Mouse(int mx, int my);
         bool Check_Btn(int button);
-        void UpdateScrollThumb();
 
-        int GetGuildMemberIndex(wchar_t* szName);
+        int GetGuildMemberIndex(const wchar_t* szName);
 
         void BuildRmlUi();
         void SyncRmlModel();

@@ -74,7 +74,6 @@ struct GuildInfoRmlModel
     bool noGuild = true;
     int tab = 1; // GuildConstants::GuildTab
     bool unionShown = false;
-    float scrollOffset = 0.f;           // the thumb inside its track, reference px
     std::vector<Rml::String> markCells; // the hero's guild mark (Guild tab)
 
     // The no-guild hint.

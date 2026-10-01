@@ -141,33 +141,6 @@
 			<div class="t-corner t-tr members-corner-tr"></div>
 			<div class="t-corner t-bl members-corner-bl"></div>
 			<div class="t-corner t-br members-corner-br"></div>
-			<div class="gi-scroll scroll-members">
-				<div class="s-top"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-bottom"></div>
-				<div class="thumb" data-style-top="scroll_offset + 'px'"></div>
 			</div>
 			<span id="gi_hdr_name" class="sharp-text gi-header" data-style-width="(40 * root_scale) + 'px'"
 			      data-style-font-size="header_name.text_px + 'px'"
@@ -178,17 +151,24 @@
 			<span id="gi_hdr_server" class="sharp-text gi-header" data-style-width="(40 * root_scale) + 'px'"
 			      data-style-font-size="header_server.text_px + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_server.text}}</span>
-			<div class="gi-rows gi-member-rows">
-				<div class="gi-row" data-for="r : member_rows" data-class-selected="r.selected"
-				     data-class-officer="r.officer" data-style-top="r.top + 'px'">
-					<div class="gi-row-back"></div>
-					<span class="sharp-text gi-cell cell-member-name" data-style-font-size="text_px + 'px'"
-					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.name}}</span>
-					<span class="sharp-text gi-cell cell-member-role" data-style-font-size="r.role_text_px + 'px'"
-					      data-style-width="(70 * root_scale) + 'px'"
-					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.role}}</span>
-					<span class="sharp-text sharp-right gi-cell cell-member-server" data-style-font-size="text_px + 'px'"
-					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.server}}</span>
+			<!-- 18 rows of 13 units, the native box's own m_iNumRenderLine x line step. -->
+			<div id="gi_member_list" class="scroll-pane gi-pane"
+			     data-style-font-size="text_px + 'px'"
+			     data-style-width="(160 * root_scale) + 'px'"
+			     data-style-height="(234 * root_scale) + 'px'"
+			     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+				<div class="gi-pane-row gi-member-row" data-for="r : member_rows"
+				     data-class-selected="r.selected" data-class-officer="r.officer"
+				     data-style-width="(148 * root_scale) + 'px'"
+				     data-style-height="(13 * root_scale) + 'px'"
+				     data-event-click="guild_info_select_member(it_index)">
+					<!-- A backgrounded element with children paints an unclosed box in this
+					     build, so the row backdrop is a childless leaf (engine-findings.md). -->
+					<div class="gi-pane-row-back"></div>
+					<span class="gi-pane-cell cell-member-name">{{r.name}}</span>
+					<span class="gi-pane-cell cell-member-role"
+					      data-style-font-size="r.role_text_px + 'px'">{{r.role}}</span>
+					<span class="gi-pane-cell cell-member-server">{{r.server}}</span>
 				</div>
 			</div>
 			<div id="btn_get_position" class="gi-btn" data-if="get_position_button.shown" data-event-click="guild_info_button(1)">

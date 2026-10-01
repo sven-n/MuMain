@@ -634,32 +634,6 @@ protected:
     virtual BOOL DoLineMouseAction(int iLineNumber);
 };
 
-class CUINewGuildMemberListBox : public CUITextListBox<GUILDLIST_TEXT>
-{
-public:
-    CUINewGuildMemberListBox();
-    virtual ~CUINewGuildMemberListBox() {}
-
-    virtual void AddText(const wchar_t* pszID, BYTE Number, BYTE Server, BYTE GuildStatus);
-    virtual void DeleteText(DWORD dwUIID);
-    virtual void SetNumRenderLine(int iLine);
-    GUILDLIST_TEXT* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-
-    // The y (reference px) Render() draws line `iLineNumber` at.
-    virtual int GetRenderLinePos_y(int iLineNumber);
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber);
-
-protected:
-    BOOL m_bIsGuildMaster;
-};
-
 class CUIUnionGuildListBox : public CUITextListBox<UNIONGUILD_TEXT>
 
 {

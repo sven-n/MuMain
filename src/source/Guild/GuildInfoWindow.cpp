@@ -92,7 +92,7 @@ std::vector<Rml::String> MarkCells(const BYTE* mark)
 
 } // namespace
 
-int mu::ui::window::CGuildInfoWindow::GetGuildMemberIndex(wchar_t* szName)
+int mu::ui::window::CGuildInfoWindow::GetGuildMemberIndex(const wchar_t* szName)
 {
     for (int i = 0; i < g_nGuildMemberCount; ++i)
     {
@@ -109,10 +109,6 @@ mu::ui::window::CGuildInfoWindow::CGuildInfoWindow()
     m_Pos.x = m_Pos.y = 0;
     m_nCurrentTab = static_cast<int>(GuildConstants::GuildTab::MEMBERS);
     m_EventState = EVENT_NONE;
-    m_Loc = 0;
-    m_BackUp = 0;
-    m_CurrentListPos = 0;
-    m_Loc_Bk = 0;
     m_Tot_Notice = 0;
 
     m_bRequestUnionList = false;
@@ -183,19 +179,6 @@ bool mu::ui::window::CGuildInfoWindow::UpdateMouseEvent()
         }
     }
 
-    if (m_EventState == EVENT_SCROLL_BTN_DOWN)
-    {
-        if (mu::ui::window::IsRepeat(VK_LBUTTON))
-        {
-            return false;
-        }
-        if (mu::ui::window::IsRelease(VK_LBUTTON))
-        {
-            m_EventState = EVENT_NONE;
-            return true;
-        }
-    }
-
     // Top-right corner close "X" (shared frame): hides + swallows the click. The buttons are
     // RmlUi's (see Update()).
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GUILDINFO))
@@ -204,11 +187,7 @@ bool mu::ui::window::CGuildInfoWindow::UpdateMouseEvent()
         return false;
     }
 
-    if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::MEMBERS))
-    {
-        m_GuildMember.DoAction();
-    }
-    else if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::UNION))
+    if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::UNION))
     {
         m_UnionListBox.DoAction();
     }
@@ -275,13 +254,12 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn(int button)
         {
             if (Hero->GuildStatus == G_MASTER)
             {
-                if (GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText())
+                if (const MemberEntry* pText = SelectedMember())
                 {
-                    if (pText->m_GuildStatus != G_MASTER)
+                    if (pText->guildStatus != G_MASTER)
                     {
-                        if (GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText())
                         {
-                            DeleteIndex = GetGuildMemberIndex(pText->m_szID);
+                            DeleteIndex = GetGuildMemberIndex(pText->name.c_str());
                             wchar_t szNameText[300];
                             mu_swprintf(szNameText, I18N::Game::CharacterS, GuildList[DeleteIndex].Name);
                             mu::ui::window::GenericDialogConfig cfg;
@@ -302,16 +280,15 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn(int button)
         }
         else if (button == BUTTON_GET_POSITION)
         {
-            if (GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText())
+            if (const MemberEntry* pText = SelectedMember())
             {
                 if (Hero->GuildStatus == G_MASTER)
                 {
-                    if (pText->m_GuildStatus != G_MASTER)
+                    if (pText->guildStatus != G_MASTER)
                     {
-                        if (GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText())
                         {
-                            AppointStatus = (GUILD_STATUS)pText->m_GuildStatus;
-                            DeleteIndex = GetGuildMemberIndex(pText->m_szID);
+                            AppointStatus = (GUILD_STATUS)pText->guildStatus;
+                            DeleteIndex = GetGuildMemberIndex(pText->name.c_str());
                             mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGuild_ToPerson_PositionLayout));
                         }
                     }
@@ -320,16 +297,15 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn(int button)
         }
         else if (button == BUTTON_FREE_POSITION)
         {
-            if (GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText())
+            if (const MemberEntry* pText = SelectedMember())
             {
-                if (pText->m_GuildStatus == G_SUB_MASTER || pText->m_GuildStatus == G_BATTLE_MASTER)
+                if (pText->guildStatus == G_SUB_MASTER || pText->guildStatus == G_BATTLE_MASTER)
                 {
-                    if (GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText())
                     {
-                        AppointStatus = (GUILD_STATUS)pText->m_GuildStatus;
-                        DeleteIndex = GetGuildMemberIndex(pText->m_szID);
+                        AppointStatus = (GUILD_STATUS)pText->guildStatus;
+                        DeleteIndex = GetGuildMemberIndex(pText->name.c_str());
                         wchar_t strText[256];
-                        mu_swprintf(strText, I18N::Game::CharacterS, pText->m_szID);
+                        mu_swprintf(strText, I18N::Game::CharacterS, pText->name.c_str());
                         mu::ui::window::GenericDialogConfig cfg;
                         cfg.showCancel = true;
                         cfg.lines = {
@@ -401,12 +377,6 @@ bool mu::ui::window::CGuildInfoWindow::Check_Mouse(int mx, int my)
             int Tab_Pos = i * 56;
             if (mx > (m_Pos.x + 12 + Tab_Pos) && mx < (m_Pos.x + 12 + Tab_Pos + 56) && my > m_Pos.y && my < (m_Pos.y + 90))
             {
-                if (m_nCurrentTab != i)
-                {
-                    m_BackUp = 0;
-                    m_Loc = 0;
-                    m_CurrentListPos = 0;
-                }
                 m_nCurrentTab = i;
                 switch (m_nCurrentTab)
                 {
@@ -432,18 +402,7 @@ bool mu::ui::window::CGuildInfoWindow::Check_Mouse(int mx, int my)
             }
         }
     }
-    // The announcement's own thumb was here; its pane scrolls itself now. The member list's
-    // thumb is still native.
-    if (m_nCurrentTab == 1)
-    {
-        if ((MouseX > m_Pos.x + 166 && MouseX < (m_Pos.x + 181) && MouseY > m_Pos.y + 125 + m_Loc && MouseY < (m_Pos.y + 175 + m_Loc)) && m_EventState == EVENT_NONE)
-        {
-            m_EventState = EVENT_SCROLL_BTN_DOWN;
-            if (m_BackUp == 0)
-                m_BackUp = (125 + (MouseY - 125));
-            return false;
-        }
-    }
+    // Both lists are RmlUi scroll panes now and own their own thumbs.
     return true;
 }
 
@@ -472,44 +431,8 @@ bool mu::ui::window::CGuildInfoWindow::Update()
         Check_Btn(button);
     }
 
-    if (IsVisible() && Hero->GuildStatus != G_NONE)
-        UpdateScrollThumb();
-
     SyncRmlModel();
     return true;
-}
-
-// The original did this in RenderScrollBar() / Render_Guild_History(): while the thumb is held,
-// it follows the pointer and scrolls the list by the same fraction.
-void mu::ui::window::CGuildInfoWindow::UpdateScrollThumb()
-{
-    // The announcement is an RmlUi scroll pane now and scrolls itself; only the member list still
-    // has a native thumb.
-    if (m_nCurrentTab != static_cast<int>(GuildConstants::GuildTab::MEMBERS))
-        return;
-
-    const int range = GuildConstants::UILayout::SCROLL_RANGE_MEMBERS;
-    int Line = 0;
-    if (m_EventState == EVENT_SCROLL_BTN_DOWN && m_BackUp > 0)
-    {
-        m_Loc = (MouseY - m_BackUp);
-        if (m_Loc < 0)
-            m_Loc = 0;
-        else if (m_Loc > range)
-            m_Loc = range;
-
-        if (m_Loc != m_Loc_Bk)
-        {
-            const int lines = g_nGuildMemberCount - m_GuildMember.GetBoxSize();
-            const int Loc_Scroll =
-                static_cast<int>(static_cast<float>(lines) / static_cast<float>(range) * static_cast<float>(m_Loc));
-            Line = Loc_Scroll - m_CurrentListPos;
-            m_CurrentListPos += Line;
-            m_Loc_Bk = m_Loc;
-        }
-    }
-
-    m_GuildMember.Scrolling(Line);
 }
 
 bool mu::ui::window::CGuildInfoWindow::Render()
@@ -535,7 +458,6 @@ void mu::ui::window::CGuildInfoWindow::BuildRmlUi()
             c.Bind("no_guild", &model.noGuild);
             c.Bind("tab", &model.tab);
             c.Bind("union_shown", &model.unionShown);
-            c.Bind("scroll_offset", &model.scrollOffset);
             c.RegisterArray<std::vector<Rml::String>>();
             c.Bind("mark_cells", &model.markCells);
 
@@ -603,6 +525,12 @@ void mu::ui::window::CGuildInfoWindow::BuildRmlUi()
                                 {
                                     if (arguments.size() == 1)
                                         m_PendingButton = arguments[0].Get<int>(-1);
+                                });
+            c.BindEventCallback("guild_info_select_member",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        SelectMember(arguments[0].Get<int>(-1));
                                 });
         });
     if (!modelCreated)
@@ -753,39 +681,36 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
             headerPosition = line(I18N::Game::Position, false, 40.f);
             headerServer = line(I18N::Game::Server, false, 40.f);
 
-            m_GuildMember.SetSize(GuildConstants::UILayout::MEMBER_BOX_WIDTH,
-                                  GuildConstants::UILayout::MEMBER_BOX_HEIGHT);
-            m_GuildMember.SetPosition(m_Pos.x + 13, m_Pos.y + 123 + m_GuildMember.GetHeight());
-            // CUINewGuildMemberListBox::RenderDataLine(): the master, assistant and battle master
-            // lines carry the same backdrop a selected line does.
-            m_GuildMember.ForEachRenderLine(
-                [&](int lineIndex, const GUILDLIST_TEXT& item, bool selected)
+            // Newest first, as the native box drew it: line 0 sat at the bottom of the area and
+            // each later line above it. The master, assistant and battle master rows carry the
+            // same backdrop a selected row does, as the native member box drew them.
+            memberRows.reserve(m_Members.size());
+            for (auto it = m_Members.rbegin(); it != m_Members.rend(); ++it)
+            {
+                const wchar_t* role = nullptr;
+                if (it->guildStatus == G_MASTER)
+                    role = I18N::Game::Master;
+                else if (it->guildStatus == G_SUB_MASTER)
+                    role = I18N::Game::AssistM;
+                else if (it->guildStatus == G_BATTLE_MASTER)
+                    role = I18N::Game::BattleM;
+                GuildMemberRow row;
+                row.name = StringUtils::WideToNarrow(it->name.c_str());
+                if (role != nullptr)
                 {
-                    const wchar_t* role = nullptr;
-                    if (item.m_GuildStatus == G_MASTER)
-                        role = I18N::Game::Master;
-                    else if (item.m_GuildStatus == G_SUB_MASTER)
-                        role = I18N::Game::AssistM;
-                    else if (item.m_GuildStatus == G_BATTLE_MASTER)
-                        role = I18N::Game::BattleM;
-                    GuildMemberRow row;
-                    row.name = StringUtils::WideToNarrow(item.m_szID);
-                    if (role != nullptr)
-                    {
-                        row.role = StringUtils::WideToNarrow(role);
-                        row.roleTextPx = cellPx(role, 70.f);
-                    }
-                    if (item.m_Server != 255)
-                    {
-                        wchar_t server[16] = {};
-                        mu_swprintf(server, L"%d", item.m_Server + 1);
-                        row.server = StringUtils::WideToNarrow(server);
-                    }
-                    row.top = static_cast<float>(m_GuildMember.GetRenderLinePos_y(lineIndex)) - 3.f - y0;
-                    row.selected = selected;
-                    row.officer = role != nullptr;
-                    memberRows.push_back(std::move(row));
-                });
+                    row.role = StringUtils::WideToNarrow(role);
+                    row.roleTextPx = cellPx(role, 70.f);
+                }
+                if (it->server != 255)
+                {
+                    wchar_t server[16] = {};
+                    mu_swprintf(server, L"%d", it->server + 1);
+                    row.server = StringUtils::WideToNarrow(server);
+                }
+                row.selected = !m_SelectedMember.empty() && it->name == m_SelectedMember;
+                row.officer = role != nullptr;
+                memberRows.push_back(std::move(row));
+            }
 
             if (Hero->GuildStatus == G_MASTER)
             {
@@ -849,7 +774,6 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
     SyncField(m_RmlBinder, &GuildInfoRmlModel::noGuild, "no_guild", noGuild);
     SyncField(m_RmlBinder, &GuildInfoRmlModel::tab, "tab", m_nCurrentTab);
     SyncField(m_RmlBinder, &GuildInfoRmlModel::unionShown, "union_shown", unionShown);
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::scrollOffset, "scroll_offset", static_cast<float>(m_Loc));
     SyncField(m_RmlBinder, &GuildInfoRmlModel::markCells, "mark_cells", std::move(markCells));
     SyncField(m_RmlBinder, &GuildInfoRmlModel::hintTitle, "hint_title", std::move(hintTitle));
     SyncField(m_RmlBinder, &GuildInfoRmlModel::hintLine1, "hint_line1", std::move(hintLine1));
@@ -932,13 +856,41 @@ void mu::ui::window::CGuildInfoWindow::AddGuildNotice(wchar_t* szText)
 
 void mu::ui::window::CGuildInfoWindow::AddGuildMember(GUILD_LIST_t* pInfo)
 {
-    m_GuildMember.AddText(pInfo->Name, pInfo->Number, pInfo->Server, pInfo->GuildStatus);
-    m_GuildMember.Scrolling(-m_GuildMember.GetBoxSize());
+    MemberEntry entry;
+    entry.name = pInfo->Name;
+    entry.number = pInfo->Number;
+    entry.server = pInfo->Server;
+    entry.guildStatus = pInfo->GuildStatus;
+    m_Members.push_back(std::move(entry));
 }
 
 void mu::ui::window::CGuildInfoWindow::GuildClear()
 {
-    m_GuildMember.Clear();
+    m_Members.clear();
+    m_SelectedMember.clear();
+}
+
+const mu::ui::window::CGuildInfoWindow::MemberEntry* mu::ui::window::CGuildInfoWindow::SelectedMember() const
+{
+    if (m_SelectedMember.empty())
+        return nullptr;
+    for (const MemberEntry& entry : m_Members)
+    {
+        if (entry.name == m_SelectedMember)
+            return &entry;
+    }
+    return nullptr;
+}
+
+void mu::ui::window::CGuildInfoWindow::SelectMember(int displayIndex)
+{
+    // Display order is the reverse of arrival order (see the member row sync).
+    const int count = static_cast<int>(m_Members.size());
+    if (displayIndex < 0 || displayIndex >= count)
+        return;
+    const std::wstring& name = m_Members[count - 1 - displayIndex].name;
+    m_SelectedMember = (m_SelectedMember == name) ? std::wstring() : name;
+    m_RmlBinder.MarkDirty("member_rows");
 }
 
 void mu::ui::window::CGuildInfoWindow::UnionGuildClear()
