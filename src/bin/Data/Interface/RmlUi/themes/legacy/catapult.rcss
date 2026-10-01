@@ -79,3 +79,13 @@
 .cp-areas.defense .cp-area:nth-child(1) { left: 18px; top: 125px; }
 .cp-areas.defense .cp-area:nth-child(2) { left: 97px; top: 125px; }
 .cp-areas.defense .cp-area:nth-child(3) { left: 56px; top: 179px; }
+
+/* The target table's frame, the shape the original drew it as. */
+.t-tl { left: 12px; top: 116px; }
+.t-tr { left: 166px; top: 116px; }
+.t-edge-top { left: 25px; top: 116px; width: 141px; }
+.t-edge-left { left: 12px; top: 129px; height: 100px; }
+.t-edge-right { left: 166px; top: 129px; height: 100px; }
+.t-bl { left: 12px; top: 223px; }
+.t-br { left: 166px; top: 223px; }
+.t-edge-bottom { left: 25px; top: 223px; width: 141px; }

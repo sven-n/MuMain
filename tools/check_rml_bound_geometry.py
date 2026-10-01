@@ -32,9 +32,10 @@ therefore cannot quietly join the second population, and the list is a reviewed
 inventory rather than an implicit one.
 
 Deliberately allowed everywhere, unlisted: expressions that reference only the root
-transform (`root_x`, `root_y`, `root_scale`). That pair *is* the scaling bridge -- the
-panel's own placement and the `.sharp-text` counter-scale -- and is not something a
-theme should be overriding. Everything else needs a line in the allowlist.
+transform (`root_x`, `root_y`, `root_scale`, and the older `panel_x`/`panel_y` spelling
+of the same `m_Pos` placement). That pair *is* the scaling bridge -- the panel's own
+placement and the `.sharp-text` counter-scale -- and is not something a theme should be
+overriding. Everything else needs a line in the allowlist.
 
 Also deliberately narrow: this checks the four box offsets and the two sizes only. A
 bound `color`, `decorator` or `font-size` has the same override problem, but those are
@@ -66,7 +67,9 @@ IDENTIFIER_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_.]*")
 STRING_LITERAL_RE = re.compile(r"'[^']*'|\"[^\"]*\"")
 
 # The scaling bridge: a document may place and counter-scale itself without being listed.
-ROOT_TRANSFORM_FIELDS = {"root_x", "root_y", "root_scale"}
+# panel_x/panel_y are the same m_Pos placement under an older name, used by the windows that
+# place themselves without a root scale; one spelling should win, which is a separate tidy-up.
+ROOT_TRANSFORM_FIELDS = {"root_x", "root_y", "root_scale", "panel_x", "panel_y"}
 
 
 def bound_fields(expression):
@@ -114,6 +117,14 @@ def main():
     parser.add_argument(
         "--allowlist", default=str(pathlib.Path(__file__).with_name("rml_bound_geometry_allowlist.txt"))
     )
+    parser.add_argument(
+        "--review",
+        action="store_true",
+        help="print every listed document with the fields it actually binds, beside its reason, "
+        "and exit 0. An entry whose reason does not describe those fields has gone stale: the "
+        "document can keep needing its entry while the reason stops being true, which the "
+        "unneeded-entry report cannot catch.",
+    )
     args = parser.parse_args()
 
     asset_root = pathlib.Path(args.asset_root)
@@ -125,18 +136,25 @@ def main():
     documents = sorted(asset_root.rglob("*.rml"))
 
     unlisted = []
-    listed_and_binding = set()
+    listed_and_binding = {}
     for document in documents:
         relative = document.relative_to(asset_root).as_posix()
         fields = offending_fields(document.read_text(encoding="utf-8", errors="replace"))
         if not fields:
             continue
         if relative in allowlist:
-            listed_and_binding.add(relative)
+            listed_and_binding[relative] = sorted(fields)
         else:
             unlisted.append((relative, sorted(fields)))
 
-    stale = sorted(set(allowlist) - listed_and_binding)
+    if args.review:
+        for relative, fields in sorted(listed_and_binding.items()):
+            print("%s\n  binds:  %s\n  reason: %s\n" % (relative, ", ".join(fields), allowlist[relative]))
+        for relative, fields in unlisted:
+            print("%s\n  binds:  %s\n  reason: -- NOT LISTED --\n" % (relative, ", ".join(fields)))
+        return 0
+
+    stale = sorted(set(allowlist) - set(listed_and_binding))
     if stale:
         # Good news, not a failure: these documents stopped binding geometry. Printed every
         # build so the inventory shrinks as work lands instead of quietly over-covering.

@@ -17,48 +17,46 @@
 # needed on every build.
 
 battle_soccer_score.rml: display-list port
-blood_castle_enter.rml: display-list port
-blood_castle_time.rml: display-list port
-castle_window.rml: display-list port
-catapult.rml: display-list port
-chaos_castle_time.rml: display-list port
+blood_castle_enter.rml: counter-scale bridge -- the button labels' top from the live line height
+blood_castle_time.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
+castle_window.rml: the tab and button labels' top from the live line height, which inside a .sharp-text block layout height and rendered height disagree on; a map item's slot on the map art and its bars' lengths, which are RenderCastleItem()'s own gauge widths. Residue: the tab strip's `12 + i * 41` is index arithmetic in the markup, so the themes cannot space the tabs
+catapult.rml: the area and fire labels' top from the live line height. Residue: the line list's `50 + i * 15` is index arithmetic in the markup -- the :nth-child row table every other converted list uses would move it
+chaos_castle_time.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
 char_info_balloon.rml: per-frame data -- world-projected balloon positions, per frame
-chat_command.rml: display-list port
+chat_command.rml: per-frame data -- the window grows with how many commands are listed, and the rows below the list follow that height; plus the labels' top from the live line height
 chat_input.rml: per-frame data -- tooltip offset follows the hovered button
 chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
 command_window.rml: per-frame data -- target marker follows the selected command
 crywolf.rml: display-list port
-cursed_temple_enter.rml: counter-scale bridge -- the .sharp-text layers' own widths, and the hero band's height from the live line height
-cursed_temple_result.rml: counter-scale bridge -- the .sharp-text layers' own widths, the hero row's height from the live line height, and the victory/defeat banner's slide-in
+cursed_temple_enter.rml: the Enter and Close labels' top and the hero band's height, both from the live line height
+cursed_temple_result.rml: the Close label's top and the hero row's height from the live line height, and the victory/defeat banner's slide-in
 cursed_temple_system.rml: per-frame data -- the mini map's projected markers, the digit runs (packed by how many digits the value has) and the three native buttons, whose box comes off the live CButton that hit-tests them
-devil_square_enter.rml: display-list port
-doppelganger_enter.rml: display-list port
+devil_square_enter.rml: counter-scale bridge -- the button labels' top from the live line height
+doppelganger_enter.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
 doppelganger_frame.rml: per-frame data -- boss-bar marker positions, per frame
 duel_watch.rml: display-list port
 duel_watch_frame.rml: display-list port
 duel_watch_spectators.rml: display-list port
-duel_window.rml: display-list port
-empire_guardian_enter.rml: display-list port
-empire_guardian_timer.rml: display-list port
+empire_guardian_enter.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
+empire_guardian_timer.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
 friend_window.rml: the family is still a native CUIBaseWindow subsystem, and FriendWindowRmlBuilder transcribes it -- every box, button and field's geometry is read off a live CUITextInputBox / CUIButton (GetPosition_x(), GetWidth(), GetTextColor()) each frame, so the native controls are authoritative for layout and hit-testing and this is §2's native-geometry direction, not a C++ constant leaking out of RCSS. FriendWindowView::PlaceField() writes straight onto the element for the same reason. The prerequisite is porting that family off CUIBaseWindow; moving literals cannot resolve it
 gate_switch.rml: display-list port
-gateman.rml: display-list port
+gateman.rml: counter-scale bridge -- the button labels' top from the live line height, which inside a .sharp-text block layout height and rendered height disagree on
 generic_confirm_dialog.rml: per-frame data -- native 3D item anchor, and a panel sized to its content
 generic_menu_dialog.rml: per-frame data -- native companion geometry for the menu it still measures
 gens_ranking.rml: display-list port, and mirrors the native list's scrollbar geometry
-gold_bowman.rml: display-list port
-gold_bowman_lena.rml: display-list port
-guard_window.rml: display-list port
+gold_bowman.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
+gold_bowman_lena.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
+guard_window.rml: the guild list rows, scroll track and thumb mirror the native CUITextListBox's scroll position, which still owns the lists' data, wheel/PgUp/PgDn and selection -- no client-reachable siege state renders either list, so retiring them cannot be validated; plus the tab and button labels' top from the live line height. Residue: the tab strip's `12 + i * 57` is index arithmetic in the markup
 guild_info.rml: display-list port, and mirrors the native list's scrollbar geometry
-guild_make.rml: display-list port
-help_window.rml: per-frame data -- native renderer geometry for the page it still measures
+guild_make.rml: counter-scale bridge -- the button labels' top from the live line height
 item_endurance.rml: per-frame data -- placed against the hovered item
 item_explanation.rml: per-frame data -- placed against the hovered item
 kanturu_enter.rml: display-list port
 kanturu_info.rml: display-list port
 login_scene.rml: per-frame data -- scene sprites scale on their own 800x600 formula, not dp
-lucky_coin_exchange.rml: display-list port
-lucky_coin_registration.rml: display-list port
+lucky_coin_exchange.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
+lucky_coin_registration.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
 map_name.rml: per-frame data -- the name slides in; its offset is per frame
 master_level.rml: display-list port
 message_box_view.rml: every line is centred by measurement (centre - MeasureText().cx / 2) and stacked by measured height, so its geometry genuinely varies per frame; most buttons come from the box's own CMessageBoxButton, and its list mirrors the native list's scrollbar. Residue: one box class (CGuildAppointMsgBox) has four literal button positions, which cannot move to RCSS while every box class shares this one document -- splitting it per class is the prerequisite
@@ -71,7 +69,7 @@ npc_quest.rml: counter-scale bridge -- message/answer tops -- its own tracked de
 party_info.rml: counter-scale bridge -- counter-scaled member rows
 party_list.rml: per-frame data -- cards are placed per frame as members join and leave
 pet_info.rml: counter-scale bridge -- counter-scaled rows and gauge fills
-reconnect_dialog.rml: display-list port
+reconnect_dialog.rml: per-frame data -- the progress bar's fill is the reconnect's own progress fraction
 server_msg.rml: display-list port
 server_select.rml: per-frame data -- gauge width is the server load
 set_item_explanation.rml: per-frame data -- placed against the hovered item

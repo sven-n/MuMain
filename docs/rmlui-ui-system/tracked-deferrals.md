@@ -453,11 +453,33 @@ needed so the inventory shrinks as work lands. Expressions that reference only `
 `root_scale` are allowed everywhere unlisted -- that pair *is* the scaling bridge, not something a
 theme should override.
 
-**89 documents are listed**, each with a reason in one of three buckets: `per-frame data` (marker
+**85 documents are listed**, each with a reason in one of three buckets: `per-frame data` (marker
 and tooltip positions, resize-driven heights), `counter-scale bridge` (`.sharp-text` layers), and
 `display-list port` -- the population the audit named, where the window's native `Render()` was
-transcribed into its model. The reasons are a first pass; sharpen one when you next touch its
-document.
+transcribed into its model. Only twelve still say `display-list port`, and each of those is a
+document still waiting its turn; every converted one names what it kept and why, so the bucket is
+a live inventory rather than a label applied once.
+
+`--review` prints each listed document beside the fields it actually binds, which is how a reason
+is checked rather than trusted. It exists because the unneeded-entry report cannot catch the
+failure that matters here: a document can go on needing its entry while the reason stops being
+true. Three things that sweep turned up, none of which the build was failing on.
+
+`panel_x`/`panel_y` is the same `m_Pos` placement as `root_x`/`root_y`, spelled differently by the
+eleven windows that place themselves without a root scale; the guard exempts both now, which
+brought `duel_window` and `help_window` fully clean. One spelling should win -- that rename is a
+separate tidy-up, not scheduled.
+
+`catapult.rml` had kept eight `style=` attributes for its target table's frame after its own
+conversion had landed. Reasons written from what a conversion *intended* were wrong in eight
+places, most often by naming a `(width * root_scale)` the guard exempts anyway, or by omitting
+what was really there.
+
+**Index arithmetic in the markup is a sub-class of its own**, and a small one: `battle_soccer_score`
+binds nothing but `i`, and `castle_window`, `guard_window`, `catapult`, `gens_ranking` and
+`server_msg` bind it alongside their real carve-outs. A `top="(33 + i * 22) + 'px'"` is as
+unreachable as any other inline property and the `:nth-child` row table already in use replaces
+it directly, so these are the cheapest entries left to shrink.
 
 What this does and does not do: it does not shrink the set -- retrofitting a transcribed window is a
 re-port, not a cleanup (§26). It makes the set **reviewed rather than implicit**, and it closes the

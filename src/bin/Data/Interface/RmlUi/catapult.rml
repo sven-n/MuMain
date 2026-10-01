@@ -25,14 +25,15 @@
 		      data-style-font-size="l.text_px + 'px'" data-style-width="(190 * root_scale) + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{l.text}}</span>
 
-		<div class="t-corner t-tl" style="left: 12px; top: 116px;"></div>
-		<div class="t-corner t-tr" style="left: 166px; top: 116px;"></div>
-		<div class="t-edge-top" style="left: 25px; top: 116px; width: 141px;"></div>
-		<div class="t-edge-left" style="left: 12px; top: 129px; height: 100px;"></div>
-		<div class="t-edge-right" style="left: 166px; top: 129px; height: 100px;"></div>
-		<div class="t-corner t-bl" style="left: 12px; top: 223px;"></div>
-		<div class="t-corner t-br" style="left: 166px; top: 223px;"></div>
-		<div class="t-edge-bottom" style="left: 25px; top: 223px; width: 141px;"></div>
+		<!-- The target table's frame: one shape, each theme placing its own edges. -->
+		<div class="t-corner t-tl"></div>
+		<div class="t-corner t-tr"></div>
+		<div class="t-edge-top"></div>
+		<div class="t-edge-left"></div>
+		<div class="t-edge-right"></div>
+		<div class="t-corner t-bl"></div>
+		<div class="t-corner t-br"></div>
+		<div class="t-edge-bottom"></div>
 
 		<!-- The target areas. Which set is on screen depends on the mode, and the theme places
 		     each one; a label is centred on its own button. -->

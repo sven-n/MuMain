@@ -8,6 +8,7 @@
 .cp-title { left: 0; top: 13px; font-weight: bold; color: token(text-warm); }
 .cp-line { left: 0; font-weight: bold; color: token(text-primary); }
 
+/* The target table draws no frame here; the panel surface is the table. */
 .t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { display: none; }
 
 .cp-area, #btn_fire {
