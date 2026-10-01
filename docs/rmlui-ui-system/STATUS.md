@@ -312,8 +312,9 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   bars, the Kalima object labels, the login scene's logo and bottom lines, and the loading
   screen's art (its RmlUi document drew white quads). The tournament countdown stays native
   (OpenMU never sends its packets). Left native on purpose: the mouse cursor, live 3D content,
-  `CInGameShop`, developer overlays (`migration-ledger.md`'s "Native surfaces outside the window
-  classes"). Legacy matches the original at the eight sizes (suites where they exist, hand probes
+  developer overlays (`migration-ledger.md`'s "Native surfaces outside the window
+  classes"). `CInGameShop` is also still native but is *not* in that bucket — it is unscheduled, not
+  permanent; see its ledger row. Legacy matches the original at the eight sizes (suites where they exist, hand probes
   over injected packets otherwise). Worth carrying to the next port:
 
   - **World-anchored or shared legacy drawing** (party HP bars, Kanturu banner, siege lines, Kalima
