@@ -78,3 +78,16 @@
 .arrow-left { left: 16px; decorator: image(wmenu-arrow-left); }
 .arrow-right { left: 90px; decorator: image(wmenu-arrow-right); }
 .menu-row:hover .arrow { display: block; }
+
+/* The frame tiles and the row separators, in the places the original drew them. The containers
+   take no space themselves. */
+.frame-middles, .lines { position: static; }
+.frame-middles .frame-middle:nth-child(1) { top: 45px; }
+.frame-middles .frame-middle:nth-child(2) { top: 60px; }
+.frame-middles .frame-middle:nth-child(3) { top: 75px; }
+.frame-middles .frame-middle:nth-child(4) { top: 90px; }
+.lines .line:nth-child(1) { top: 33px; }
+.lines .line:nth-child(2) { top: 53px; }
+.lines .line:nth-child(3) { top: 73px; }
+.lines .line:nth-child(4) { top: 93px; }
+.lines .line:nth-child(5) { top: 113px; }

@@ -14,14 +14,18 @@
 	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
 		<div id="panel" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
 			<div id="back"></div>
-			<div class="team" data-for="team, i : teams" data-class-red="team.red" data-style-top="(33 + i * 22) + 'px'">
-				<span class="team-text team-score" data-style-font-size="bold_text_px + 'px'"
-				      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{team.score}}</span>
-				<div class="mark" data-if="team.mark.size > 0">
-					<div class="mark-cell" data-for="cell : team.mark" data-style-background-color="cell"></div>
+			<!-- Our guild's war or a spectated match: two teams, or none at all. The theme puts
+			     each on its own row. -->
+			<div class="teams">
+				<div class="team" data-for="team : teams" data-class-red="team.red">
+					<span class="team-text team-score" data-style-font-size="bold_text_px + 'px'"
+					      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{team.score}}</span>
+					<div class="mark" data-if="team.mark.size > 0">
+						<div class="mark-cell" data-for="cell : team.mark" data-style-background-color="cell"></div>
+					</div>
+					<span class="team-text team-name" data-style-font-size="bold_text_px + 'px'"
+					      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{team.name}}</span>
 				</div>
-				<span class="team-text team-name" data-style-font-size="bold_text_px + 'px'"
-				      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{team.name}}</span>
 			</div>
 		</div>
 	</div>

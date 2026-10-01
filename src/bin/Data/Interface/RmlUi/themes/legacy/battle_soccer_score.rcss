@@ -38,3 +38,8 @@ body { pointer-events: none; }
 
 .mark { position: absolute; left: 21px; top: 0; width: 8px; height: 8px; }
 .mark-cell { display: block; float: left; width: 1px; height: 1px; }
+
+/* RenderContents()'s own two rows. The container takes no space. */
+.teams { position: static; }
+.team:nth-child(1) { top: 33px; }
+.team:nth-child(2) { top: 55px; }

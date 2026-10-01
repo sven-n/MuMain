@@ -56,3 +56,16 @@
 #btn_exit { top: 391px; }
 .tooltip { display: none; bottom: 38px; } /* 429 - 391 */
 #btn_exit:hover ~ .tooltip-exit { display: block; }
+
+/* The question's three lines and the table's frame, in the places the original drew them. */
+#gs_line_1 { top: 50px; }
+#gs_line_2 { top: 67px; }
+#gs_line_3 { top: 84px; }
+.t-tl { left: 12px; top: 116px; }
+.t-tr { left: 166px; top: 116px; }
+.t-edge-top { left: 25px; top: 116px; width: 141px; }
+.t-edge-left { left: 12px; top: 129px; height: 159px; }
+.t-edge-right { left: 166px; top: 129px; height: 159px; }
+.t-bl { left: 12px; top: 282px; }
+.t-br { left: 166px; top: 282px; }
+.t-edge-bottom { left: 25px; top: 282px; width: 141px; }

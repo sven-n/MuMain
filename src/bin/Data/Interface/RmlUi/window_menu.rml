@@ -21,16 +21,9 @@
 		<div id="panel">
 			<div id="back"></div>
 			<div id="frame_up"></div>
-			<div class="frame-middle" style="top: 45px;"></div>
-			<div class="frame-middle" style="top: 60px;"></div>
-			<div class="frame-middle" style="top: 75px;"></div>
-			<div class="frame-middle" style="top: 90px;"></div>
+			<div class="frame-middles"><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div></div>
 			<div id="frame_down"></div>
-			<div class="line" style="top: 33px;"></div>
-			<div class="line" style="top: 53px;"></div>
-			<div class="line" style="top: 73px;"></div>
-			<div class="line" style="top: 93px;"></div>
-			<div class="line" style="top: 113px;"></div>
+			<div class="lines"><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div></div>
 
 			<div id="rows">
 				<div class="menu-row" data-for="row : rows" data-event-click="windowmenu_select(row.index)">
