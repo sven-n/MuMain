@@ -89,18 +89,6 @@
 			<div class="t-corner t-bl notice-corner-bl"></div>
 			<div class="t-corner t-br notice-corner-br"></div>
 			<div id="tab_head"></div>
-			<div class="gi-scroll scroll-notice">
-				<div class="s-top"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-mid"></div>
-				<div class="s-bottom"></div>
-				<div class="thumb" data-style-top="scroll_offset + 'px'"></div>
-			</div>
 			<span id="gi_notice_label" class="sharp-text gi-line" data-style-width="(40 * root_scale) + 'px'"
 			      data-style-font-size="notice_label.text_px + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{notice_label.text}}</span>
@@ -116,12 +104,21 @@
 			<span id="gi_rival" class="sharp-text gi-figure"
 			      data-style-font-size="rival.text_px + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{rival.text}}</span>
-			<div class="gi-rows gi-notice-rows">
-				<div class="gi-row" data-for="r : notice_rows" data-class-selected="r.selected"
-				     data-style-top="r.top + 'px'">
-					<div class="gi-row-back"></div>
-					<span class="sharp-text gi-cell cell-notice" data-style-font-size="text_px + 'px'"
-					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.text}}</span>
+			<!-- base.rcss's .scroll-pane: RmlUi owns the scroll position, the wheel and the
+			     scrollbar, replacing the thumb/track tile stack and the C++ line window this
+			     list used to carry. Counter-scaled out of #panel's transform so the announcement
+			     stays at the native text size in a dense box (component-catalog.md). -->
+			<div id="gi_notice_list" class="scroll-pane gi-pane"
+			     data-style-font-size="text_px + 'px'"
+			     data-style-width="(160 * root_scale) + 'px'"
+			     data-style-height="(80 * root_scale) + 'px'"
+			     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+				<!-- Explicitly sized, not 100%: a percentage would shrink the moment the
+				     scrollbar appears, and a full-width row sits under the handle. -->
+				<div class="gi-pane-row" data-for="r : notice_rows"
+				     data-style-width="(148 * root_scale) + 'px'"
+				     data-style-height="(13 * root_scale) + 'px'">
+					<span class="gi-pane-cell">{{r.text}}</span>
 				</div>
 			</div>
 			<div id="btn_guild_out" class="gi-btn" data-if="guild_out_button.shown" data-event-click="guild_info_button(0)">

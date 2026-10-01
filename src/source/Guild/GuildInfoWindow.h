@@ -12,6 +12,9 @@
 #include "GuildConstants.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
+#include <string>
+#include <vector>
+
 namespace Rml
 {
 class ElementDocument;
@@ -73,7 +76,9 @@ namespace mu::ui::window
         Rml::ElementDocument* m_pRmlDoc = nullptr;
         int m_PendingButton = -1; // a BUTTON_EVENT, or BUTTON_EXIT
 
-        CUIGuildNoticeListBox		m_GuildNotice;
+        // The announcement, one wrapped line per entry, oldest first. guild_info.rml reverses
+        // it for display and RmlUi owns the scrolling.
+        std::vector<std::wstring>   m_NoticeLines;
         CUINewGuildMemberListBox	m_GuildMember;
         CUIUnionGuildListBox		m_UnionListBox;
         ServerMessageInfo		    m_MessageInfo;

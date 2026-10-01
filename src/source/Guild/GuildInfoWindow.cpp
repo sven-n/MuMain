@@ -204,11 +204,7 @@ bool mu::ui::window::CGuildInfoWindow::UpdateMouseEvent()
         return false;
     }
 
-    if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::INFO))
-    {
-        m_GuildNotice.DoAction();
-    }
-    else if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::MEMBERS))
+    if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::MEMBERS))
     {
         m_GuildMember.DoAction();
     }
@@ -436,19 +432,9 @@ bool mu::ui::window::CGuildInfoWindow::Check_Mouse(int mx, int my)
             }
         }
     }
-    if (m_nCurrentTab == 0)
-    {
-        if (mu::ui::window::CheckMouseIn(m_Pos.x + 163, m_Pos.y + 262 + m_Loc, 18, 33 + m_Loc) == true && m_EventState == EVENT_NONE)
-        {
-            m_EventState = EVENT_SCROLL_BTN_DOWN;
-            if (m_BackUp == 0)
-            {
-                m_BackUp = (262 + (MouseY - 262));
-            }
-            return false;
-        }
-    }
-    else if (m_nCurrentTab == 1)
+    // The announcement's own thumb was here; its pane scrolls itself now. The member list's
+    // thumb is still native.
+    if (m_nCurrentTab == 1)
     {
         if ((MouseX > m_Pos.x + 166 && MouseX < (m_Pos.x + 181) && MouseY > m_Pos.y + 125 + m_Loc && MouseY < (m_Pos.y + 175 + m_Loc)) && m_EventState == EVENT_NONE)
         {
@@ -497,13 +483,12 @@ bool mu::ui::window::CGuildInfoWindow::Update()
 // it follows the pointer and scrolls the list by the same fraction.
 void mu::ui::window::CGuildInfoWindow::UpdateScrollThumb()
 {
-    const bool notice = m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::INFO);
-    const bool members = m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::MEMBERS);
-    if (!notice && !members)
+    // The announcement is an RmlUi scroll pane now and scrolls itself; only the member list still
+    // has a native thumb.
+    if (m_nCurrentTab != static_cast<int>(GuildConstants::GuildTab::MEMBERS))
         return;
 
-    const int range =
-        notice ? GuildConstants::UILayout::SCROLL_RANGE_NOTICE : GuildConstants::UILayout::SCROLL_RANGE_MEMBERS;
+    const int range = GuildConstants::UILayout::SCROLL_RANGE_MEMBERS;
     int Line = 0;
     if (m_EventState == EVENT_SCROLL_BTN_DOWN && m_BackUp > 0)
     {
@@ -515,8 +500,7 @@ void mu::ui::window::CGuildInfoWindow::UpdateScrollThumb()
 
         if (m_Loc != m_Loc_Bk)
         {
-            const int lines =
-                notice ? m_Tot_Notice - m_GuildNotice.GetBoxSize() : g_nGuildMemberCount - m_GuildMember.GetBoxSize();
+            const int lines = g_nGuildMemberCount - m_GuildMember.GetBoxSize();
             const int Loc_Scroll =
                 static_cast<int>(static_cast<float>(lines) / static_cast<float>(range) * static_cast<float>(m_Loc));
             Line = Loc_Scroll - m_CurrentListPos;
@@ -525,10 +509,7 @@ void mu::ui::window::CGuildInfoWindow::UpdateScrollThumb()
         }
     }
 
-    if (notice)
-        m_GuildNotice.Scrolling(Line);
-    else
-        m_GuildMember.Scrolling(Line);
+    m_GuildMember.Scrolling(Line);
 }
 
 bool mu::ui::window::CGuildInfoWindow::Render()
@@ -584,8 +565,6 @@ void mu::ui::window::CGuildInfoWindow::BuildRmlUi()
             c.Bind("alliance_lines", &model.allianceLines);
             auto noticeRow = c.RegisterStruct<GuildNoticeRow>();
             noticeRow.RegisterMember("text", &GuildNoticeRow::text);
-            noticeRow.RegisterMember("top", &GuildNoticeRow::top);
-            noticeRow.RegisterMember("selected", &GuildNoticeRow::selected);
             c.RegisterArray<std::vector<GuildNoticeRow>>();
             c.Bind("notice_rows", &model.noticeRows);
             auto memberRow = c.RegisterStruct<GuildMemberRow>();
@@ -733,18 +712,12 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
                               true};
             noticeLabel = line(I18N::Game::GuildAnnouncement, false, 40.f);
 
-            m_GuildNotice.SetSize(GuildConstants::UILayout::NOTICE_BOX_WIDTH,
-                                  GuildConstants::UILayout::NOTICE_BOX_HEIGHT);
-            m_GuildNotice.SetPosition(m_Pos.x + 15, m_Pos.y + 264 + m_GuildNotice.GetHeight());
-            m_GuildNotice.ForEachRenderLine(
-                [&](int lineIndex, const GUILDLOG_TEXT& item, bool selected)
-                {
-                    GuildNoticeRow row;
-                    row.text = StringUtils::WideToNarrow(item.m_szContent);
-                    row.top = static_cast<float>(m_GuildNotice.GetRenderLinePos_y(lineIndex)) - 3.f - y0;
-                    row.selected = selected;
-                    noticeRows.push_back(std::move(row));
-                });
+            // Newest first: the native box drew its line 0 at the bottom of the area and each
+            // later line above it, so its reading order from the top was the reverse of the
+            // order lines arrived in.
+            noticeRows.reserve(m_NoticeLines.size());
+            for (auto it = m_NoticeLines.rbegin(); it != m_NoticeLines.rend(); ++it)
+                noticeRows.push_back({StringUtils::WideToNarrow(it->c_str())});
 
             mu_swprintf(Text, L"%ls :", I18N::Game::GuildCreationDate);
             created = line(Text, false, 40.f);
@@ -951,11 +924,10 @@ void mu::ui::window::CGuildInfoWindow::AddGuildNotice(wchar_t* szText)
     {
         if (szTemp[i][0])
         {
-            m_GuildNotice.AddText(szTemp[i]);
+            m_NoticeLines.emplace_back(szTemp[i]);
             m_Tot_Notice++;
         }
     }
-    m_GuildNotice.Scrolling(m_GuildNotice.GetLineNum() - m_GuildNotice.GetBoxSize());
 }
 
 void mu::ui::window::CGuildInfoWindow::AddGuildMember(GUILD_LIST_t* pInfo)
@@ -976,7 +948,8 @@ void mu::ui::window::CGuildInfoWindow::UnionGuildClear()
 
 void mu::ui::window::CGuildInfoWindow::NoticeClear()
 {
-    m_GuildNotice.Clear();
+    m_NoticeLines.clear();
+    m_Tot_Notice = 0;
 }
 
 void mu::ui::window::CGuildInfoWindow::SetRivalGuildName(wchar_t* szName)

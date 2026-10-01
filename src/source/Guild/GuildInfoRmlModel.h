@@ -17,12 +17,13 @@ struct GuildLine
     bool operator==(const GuildLine&) const = default;
 };
 
-// One line of the guild announcement. `top` follows the native list box's scroll position.
+// One line of the guild announcement. The rows arrive newest-first, which is the order the
+// native box drew them in: it placed line 0 at the bottom of its area and each later line above,
+// so read top to bottom its newest line came first. RmlUi lays them out in flow and owns the
+// scrolling, so nothing here carries a position.
 struct GuildNoticeRow
 {
     Rml::String text;
-    float top = 0.f;
-    bool selected = false;
 
     bool operator==(const GuildNoticeRow&) const = default;
 };

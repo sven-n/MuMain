@@ -168,19 +168,7 @@
    offset inside it still is. */
 .gi-scroll { position: absolute; }
 .gi-scroll > div { position: absolute; }
-.scroll-notice { top: 262px; }
 .scroll-members { top: 125px; }
-.scroll-notice { left: 167px; }
-.scroll-notice .s-top { left: 0; top: 0; }
-.scroll-notice .s-mid:nth-child(2) { left: 0; top: 3px; }
-.scroll-notice .s-mid:nth-child(3) { left: 0; top: 13px; }
-.scroll-notice .s-mid:nth-child(4) { left: 0; top: 23px; }
-.scroll-notice .s-mid:nth-child(5) { left: 0; top: 33px; }
-.scroll-notice .s-mid:nth-child(6) { left: 0; top: 43px; }
-.scroll-notice .s-mid:nth-child(7) { left: 0; top: 53px; }
-.scroll-notice .s-mid:nth-child(8) { left: 0; top: 63px; }
-.scroll-notice .s-bottom { left: 0; top: 76px; }
-.scroll-notice .thumb { left: -4px; }
 .scroll-members { left: 170px; }
 .scroll-members .s-top { left: 0; top: 0; }
 .scroll-members .s-mid:nth-child(2) { left: 0; top: 3px; }
@@ -216,10 +204,8 @@
 .gi-row { position: absolute; width: 148px; height: 13px; }
 .gi-row-back { position: absolute; left: 0; top: 0; width: 148px; height: 13px; }
 .gi-cell { position: absolute; top: 3px; }
-.gi-notice-rows .gi-row { left: 15px; }
 .gi-member-rows .gi-row { left: 13px; }
 .gi-union-rows .gi-row { left: 15px; }
-.cell-notice { left: 4px; }
 .cell-member-name { left: 8px; }
 .cell-member-role { left: 53px; text-align: center; }
 .cell-member-server { right: 18px; text-align: right; }
@@ -259,3 +245,21 @@
 .notice-fill { background-color: #000000; }
 .members-fill, .union-fill { background-color: rgba(21, 21, 21, 150); }
 .members-head-fill, .union-head-fill { background-color: rgba(59, 59, 59, 150); }
+
+/* The announcement list: base.rcss's .scroll-pane, counter-scaled out of #panel's transform so
+   its net render transform is identity and the text inside stays at the native renderer's own
+   physical size. The scrollbar therefore keeps .scroll-pane's dp width rather than a
+   reference-px one, same as every other pane consumer (component-catalog.md). */
+#gi_notice_list {
+	position: absolute;
+	left: 15px;
+	top: 264px;
+	transform-origin: left top;
+	/* Native drew the announcement's track at every list length, also when every line fits. */
+	overflow: hidden scroll;
+}
+
+/* display: block is explicit, not incidental: a data-for <div> is inline without it in this
+   build and every row then lands on the same line. */
+.gi-pane-row { position: relative; display: block; }
+.gi-pane-cell { position: absolute; left: 2.7%; top: 0; }

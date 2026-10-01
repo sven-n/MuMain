@@ -90,11 +90,6 @@ typedef struct
 typedef struct
 {
     BOOL m_bIsSelected;
-    wchar_t m_szContent[60];
-} GUILDLOG_TEXT;
-typedef struct
-{
-    BOOL m_bIsSelected;
     BYTE GuildMark[64];
     wchar_t szName[MAX_GUILDNAME + 1];
     int nMemberCount;
@@ -626,29 +621,6 @@ public:
     virtual void DeleteText(int iSocketIndex);
     virtual void SetNumRenderLine(int iLine);
     SOCKETLIST_TEXT* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-
-    // The y (reference px) Render() draws line `iLineNumber` at.
-    virtual int GetRenderLinePos_y(int iLineNumber);
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber);
-};
-
-class CUIGuildNoticeListBox : public CUITextListBox<GUILDLOG_TEXT>
-{
-public:
-    CUIGuildNoticeListBox();
-    virtual ~CUIGuildNoticeListBox() {}
-
-    virtual void AddText(const wchar_t* szContent);
-    virtual void DeleteText(DWORD dwIndex);
-    virtual void SetNumRenderLine(int nLine);
-    GUILDLOG_TEXT* GetSelectedText()
     {
         return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
     }
