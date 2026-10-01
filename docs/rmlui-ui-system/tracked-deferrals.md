@@ -327,6 +327,49 @@ sweep: see the rollout task's own verification section for the per-batch record.
   sine. RCSS cannot mix a bound fraction into a colour, so this needs a mechanism that does not
   exist rather than a tidier binding. The guard deliberately does not cover `color`.
 
+### The counter-scale block, and a way out that was prototyped and not taken
+
+**29 of the 83 allowlist entries have one cause, not 29.** A `.sharp-text` layer cancels `#panel`'s
+scale so glyphs rasterise sharp, which means its layout width must arrive *pre-multiplied* —
+`data-style-width="(220 * root_scale) + 'px'"`. No theme can express that, because **RmlUi can do
+arithmetic only in the data-binding evaluator** (`Source/Core/DataExpression.cpp`, where `'*'` is a
+real operator) and never in a stylesheet. The data model is the only thing in the engine that can
+multiply, so the width has to travel through it — and that is precisely the inline-property leak
+the guard flags. Those 29 entries are the correct use of the only tool available, not sloppy ports.
+
+**The way out, measured rather than guessed (2026-10-02).** Upstream
+[PR #983](https://github.com/mikke89/RmlUi/pull/983) adds CSS math expressions: `calc()`, `min()`,
+`max()`, and `var()` *inside* them — `calc(var(--w) / 2)` and multiplication by a unitless value are
+both in its 3,173 lines of unit tests, which is exactly the shape needed. So
+`width: calc(220px * var(--root-scale))` would move the whole class into RCSS, with C++ setting
+`--root-scale` as a custom property instead of a model field.
+
+What was actually verified:
+
+- It **merges into the fork's `integration/sdl-gpu-parity` with zero conflicts** (`git merge-tree`),
+  sitting 3 commits ahead of the pin. It touches property parsers and the stylesheet; the fork's
+  own work is renderer backends, so they do not meet.
+- A **full rebuild succeeded** — 408 targets including `rmlui.lib` from scratch — and MuClient
+  linked against it at exit 0 with all three asset checkers green.
+- The merge is on the fork as `nitoygo/RmlUi` `integration/sdl-gpu-parity` (`0f8b5dcb`).
+
+**Not adopted, deliberately.** The submodule pin stays at `22282190` and `.gitmodules` keeps
+pointing at `mikke89/RmlUi`. Adopting it would mean the project builds against an unmerged upstream
+PR carried on a personal fork, which is a bigger commitment than the allowlist saving justifies on
+its own. The MuMain-side change that would switch it on — the `.gitmodules` repoint plus its README
+and sync-log notes — is preserved unmerged on the local branch **`spike/rmlui-calc-via-fork`**.
+
+**The open question nobody has answered**, and the thing to settle before revisiting: whether C++
+can set a custom property on `#panel` at runtime and have every `calc()` depending on it recompute.
+The PR's tests cover invalidation for font-size changes behind `var()`, so the machinery exists, but
+an arbitrary custom property set from code is the actual integration point and was never tried. The
+per-frame cost is the second unknown — `--root-scale` changes on a UI-scale change, not every
+frame, but if setting it dirties every dependent property that wants measuring (RelWithDebInfo
+only; the PR ships `Tests/Source/Benchmarks/Calculation.cpp` to borrow from).
+
+**Revisit when** upstream merges #983, which removes the fork objection entirely — or when the
+29 entries start costing something concrete, rather than being an inventory number.
+
 ### Still open, and small
 
 - **A residual `bold` flag beside an existing semantic field.** `MyQuestInfoWindow`,
