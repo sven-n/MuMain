@@ -485,8 +485,6 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     bool renderEffects = !g_bDisableEffectsDebug;
     bool renderDroppedItems = true;
 #endif
-    const bool renderWeatherEffects = ShouldRenderWeatherEffects();
-
     if (IsWaterTerrain() == false && renderTerrain)
     {
         if (gMapManager.WorldActive == WD_39KANTURU_3RD)
@@ -526,8 +524,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     RenderFishs();
     RenderMount();
 
-    if (renderWeatherEffects)
-        RenderLeaves();
+    RenderLeaves();
 
     if (!gMapManager.InChaosCastle())
         ThePetProcess().RenderPets();

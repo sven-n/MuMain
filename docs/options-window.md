@@ -52,6 +52,8 @@ window writes to these sections:
   effects**. Checked (the default) keeps rain, snow, mist, and the map haze
   overlays. Unchecked turns those off on every map and writes the key
   immediately, the same way the volume sliders save. Wind is unchanged.
+  Map fire stays on: braziers and torches, and the floating embers on
+  Battle Castle, the login scene, Balgas' Refuge, Vulcanus, and Doppelganger.
 - `[Audio]` - volumes.
 - `[Login]` - language, and the remembered-credential keys (`RememberMe`,
   `SavePassword`, `EncryptedUsername`, `EncryptedPassword`); see

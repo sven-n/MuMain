@@ -437,35 +437,67 @@ static int WeatherLeafSlots()
 #endif
 }
 
+static bool IsMapFireLeaf(const PARTICLE* particle)
+{
+    return particle->Type == BITMAP_FIRE_SNUFF;
+}
+
+static bool HasLiveMapFireLeaf()
+{
+    const int slots = WeatherLeafSlots();
+    for (int i = 0; i < slots; ++i)
+    {
+        if (Leaves[i].Live && IsMapFireLeaf(&Leaves[i]))
+            return true;
+    }
+    return false;
+}
+
+static bool CreateMapFireLeaf(PARTICLE* particle)
+{
+    Vector(1.f, 1.f, 1.f, particle->Light);
+    particle->Live = true;
+    if (battleCastle::CreateFireSnuff(particle))
+        return true;
+    if (SEASON3A::CGM3rdChangeUp::Instance().CreateFireSnuff(particle))
+        return true;
+    if (g_PKField.CreateFireSpark(particle))
+        return true;
+    if (g_DoppelGanger2.CreateFireSpark(particle))
+        return true;
+
+    particle->Live = false;
+    return false;
+}
+
 static void StopWeatherParticles()
 {
     RainTarget = 0.f;
     RainCurrent = 0.f;
     const int slots = WeatherLeafSlots();
     for (int i = 0; i < slots; ++i)
-        Leaves[i].Live = false;
+    {
+        if (!IsMapFireLeaf(&Leaves[i]))
+            Leaves[i].Live = false;
+    }
 }
 
 bool MoveLeaves()
 {
-    if (!ShouldRenderWeatherEffects())
-    {
-        StopWeatherParticles();
-        return false;
-    }
-
     if (!g_pOption->GetRenderAllEffects())
-    {
         return false;
-    }
+
+    const bool renderWeather = ShouldRenderWeatherEffects();
+    if (!renderWeather)
+        StopWeatherParticles();
 
     int iMaxLeaves = (gMapManager.InDevilSquare() == true) ? MAX_LEAVES : 80;
 
-    if (gMapManager.WorldActive == WD_10HEAVEN)
+    if (renderWeather && gMapManager.WorldActive == WD_10HEAVEN)
     {
         RainTarget = MAX_LEAVES / 2;
     }
-    else if (gMapManager.InChaosCastle() == true)
+    else if (renderWeather && gMapManager.InChaosCastle() == true)
     {
         RainTarget = MAX_LEAVES / 2;
         iMaxLeaves = 80;
@@ -478,7 +510,7 @@ bool MoveLeaves()
     {
         iMaxLeaves = 80;
     }
-    else if (M34CryWolf1st::IsCyrWolf1st())
+    else if (renderWeather && M34CryWolf1st::IsCyrWolf1st())
     {
         if (weather == 1)
             iMaxLeaves = 60;
@@ -486,21 +518,31 @@ bool MoveLeaves()
             if (weather == 2)
                 iMaxLeaves = 50;
     }
-    if (RainCurrent > RainTarget)
-        RainCurrent -= FPS_ANIMATION_FACTOR;
-    else if (RainCurrent < RainTarget)
-        RainCurrent += FPS_ANIMATION_FACTOR;
 
-    RainSpeed = ((int)sinf(WorldTime * 0.001f) * 10 + 30) * FPS_ANIMATION_FACTOR;
-    RainAngle = (int)sinf(WorldTime * 0.0005f + 50.f) * 20 * FPS_ANIMATION_FACTOR;
-    RainPosition += 20 * FPS_ANIMATION_FACTOR;
-    RainPosition %= 2000;
+    if (renderWeather)
+    {
+        if (RainCurrent > RainTarget)
+            RainCurrent -= FPS_ANIMATION_FACTOR;
+        else if (RainCurrent < RainTarget)
+            RainCurrent += FPS_ANIMATION_FACTOR;
+
+        RainSpeed = ((int)sinf(WorldTime * 0.001f) * 10 + 30) * FPS_ANIMATION_FACTOR;
+        RainAngle = (int)sinf(WorldTime * 0.0005f + 50.f) * 20 * FPS_ANIMATION_FACTOR;
+        RainPosition += 20 * FPS_ANIMATION_FACTOR;
+        RainPosition %= 2000;
+    }
 
     for (int i = 0; i < iMaxLeaves; i++)
     {
         PARTICLE* o = &Leaves[i];
         if (!o->Live)
         {
+            if (!renderWeather)
+            {
+                CreateMapFireLeaf(o);
+                continue;
+            }
+
             Vector(1.f, 1.f, 1.f, o->Light);
             o->Live = true;
 
@@ -527,6 +569,12 @@ bool MoveLeaves()
         }
         else
         {
+            if (!renderWeather && !IsMapFireLeaf(o))
+            {
+                o->Live = false;
+                continue;
+            }
+
             if (MoveDevilSquareRain(o)) continue;
             if (MoveChaosCastleRain(o)) continue;
             if (MoveHeavenRain(o))      continue;
@@ -539,7 +587,11 @@ bool MoveLeaves()
 
 void RenderLeaves()
 {
-    if (!ShouldRenderWeatherEffects() || !g_pOption->GetRenderAllEffects())
+    if (!g_pOption->GetRenderAllEffects())
+        return;
+
+    const bool renderWeather = ShouldRenderWeatherEffects();
+    if (!renderWeather && !HasLiveMapFireLeaf())
         return;
 
 
@@ -582,6 +634,7 @@ void RenderLeaves()
         PARTICLE* o = &Leaves[i];
         if (o->Live
             && Bitmaps.FindTexture(o->Type)
+            && (renderWeather || IsMapFireLeaf(o))
             )
         {
             BindTexture(o->Type);
