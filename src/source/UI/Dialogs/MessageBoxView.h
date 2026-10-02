@@ -43,29 +43,7 @@ public:
         bool okArt = false; // newui_button_ok's lettered art instead of a labelled newui_btn_empty_small
     };
 
-    // A text list inside the box (CUIUnmixgemList), in the box's reference px: rows' tops are
-    // their 13 px boxes, the scroll parts as CUITextListBox's old-style scroll bar lays them out.
-    struct List
-    {
-        struct Row
-        {
-            std::wstring text;
-            float top = 0.f;
-            bool selected = false;
-        };
-        float left = 0.f;
-        float top = 0.f;
-        float width = 0.f;
-        float height = 0.f;
-        std::vector<Row> rows;
-        bool upPressed = false;
-        bool downPressed = false;
-        float trackTop = 0.f;
-        float trackHeight = 0.f;
-        float thumbTop = 0.f;
-        float thumbHeight = 0.f;
-        float thumbBottomTop = 0.f; // the thumb's 1 px bottom cap
-    };
+    using List = std::vector<MessageBoxViewListRowEntry>;
 
     MessageBoxView() = default;
     ~MessageBoxView();
@@ -95,11 +73,14 @@ public:
     }
 
     int TakePressedButton();
+    int TakePressedListRow();
 
 private:
+    void BindList(Rml::DataModelConstructor& constructor, MessageBoxViewRmlModel& model);
     std::string m_ModelName;
     RmlModelBinder<MessageBoxViewRmlModel> m_RmlBinder;
     Rml::ElementDocument* m_pRmlDoc = nullptr;
     int m_PressedButton = -1;
+    int m_PressedListRow = -1;
 };
 } // namespace mu::ui::window

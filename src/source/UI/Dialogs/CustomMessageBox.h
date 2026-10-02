@@ -6,12 +6,11 @@
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/MessageBoxView.h"
+#include "GameLogic/Items/JewelUnmixSelection.h"
 
 namespace mu::ui::window
 {
-// The jewel dismantling box (Lahap's Dismantle Jewel): MessageBoxView draws it and its list
-// (COMGEM::m_UnmixTarList, a CUIUnmixgemList); the list keeps its native hit tests, selection
-// and scrolling (COMGEM::MoveUnMixList()). Native drawing only without the RmlUi document.
+// Lahap jewel dismantling, with RmlUi row selection and scrolling.
 class CGemIntegrationDisjointMsgBox : public CMessageBoxBase
 {
 public:
@@ -37,15 +36,13 @@ private:
     void ChangeMiddleFrameSmall();
     void ChangeMiddleFrameBig();
 
-    void RenderFrame();
-    void RenderTexts();
-    void RenderGemList();
-    void RenderButtons();
-    // RenderFrame() .. RenderGemList() as the view's frame, lines, buttons and list.
     void SyncView();
+    void SyncGemList();
 
     int m_iMiddleFrameCount;
     MessageBoxView m_View;
+    std::vector<GameLogic::Items::JewelUnmixSelection::Entry> m_DisplayedItems;
+    MessageBoxView::List m_ListRows;
 
     // texts
     type_vector_msgdata m_MsgDataList;

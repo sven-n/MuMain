@@ -33,12 +33,13 @@ struct MessageBoxViewButtonEntry
     bool okArt = false; // newui_button_ok's lettered art, no label
 };
 
-// A line of a list inside the box (CUIUnmixgemList): its 13 px row box, filled when selected.
+// A selectable jewel bundle in the message box.
 struct MessageBoxViewListRowEntry
 {
     Rml::String text;
-    float top = 0.f; // reference px in the box
+    int index = -1;
     bool selected = false;
+    bool operator==(const MessageBoxViewListRowEntry&) const = default;
 };
 
 // One strip of the message box's frame: "middle" or "divider".
@@ -68,13 +69,7 @@ struct MessageBoxViewRmlModel
     float progressWidth = 0.f;
     std::vector<MessageBoxViewButtonEntry> buttons;
 
-    // CGemIntegrationDisjointMsgBox's list (CUIUnmixgemList): its box, rows and old-style
-    // (win_scrollbar) scroll bar, reference px in the box, drawn over everything else.
     bool listShown = false;
-    float listLeft = 0.f, listTop = 0.f, listWidth = 0.f, listHeight = 0.f;
     std::vector<MessageBoxViewListRowEntry> listRows;
-    bool listUpPressed = false, listDownPressed = false;
-    float listTrackTop = 0.f, listTrackHeight = 0.f;
-    float listThumbTop = 0.f, listThumbHeight = 0.f, listThumbBottomTop = 0.f;
 };
 } // namespace mu::ui::window

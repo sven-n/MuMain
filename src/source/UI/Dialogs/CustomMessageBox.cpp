@@ -21,6 +21,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "MUHelper/MuHelper.h"
 #include "Core/Text/TextLineWrap.h"
+#include "Core/Utilities/StringUtils.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/Text/CUIRenderText.h"
 
@@ -169,6 +170,7 @@ bool mu::ui::window::CGemIntegrationDisjointMsgBox::Create(float fPriority)
     AddMsg(I18N::Game::SelectAJewelToDissolve, CLRDW_YELLOW, MSGBOX_FONT_BOLD);
 
     m_View.Create(m_iMiddleFrameCount, static_cast<float>(GetSize().cy) - MSGBOX_BACK_BLANK_HEIGHT);
+    SyncView();
 
     return true;
 }
@@ -188,46 +190,21 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::Release()
 
 bool mu::ui::window::CGemIntegrationDisjointMsgBox::Update()
 {
-    if (m_View.IsShown())
+    COMGEM::RefreshWantedList();
+    const int row = m_View.TakePressedListRow();
+    if (row >= 0 && row < static_cast<int>(m_DisplayedItems.size()))
+        COMGEM::SelectWantedItem(m_DisplayedItems[row]);
+    m_BtnDisjoint.SetEnable(COMGEM::GetWantedList().Selected().has_value());
+
+    const int pressed = m_View.TakePressedButton();
+    if (pressed == 0 || (pressed == 1 && m_BtnDisjoint.IsEnabled()))
     {
-        // A button RmlUi reported (the original's LButtonUp() checks, which skip a disabled
-        // button), sent as the box's event.
-        CMessageBoxButton* const buttons[] = {&m_BtnCancel, &m_BtnDisjoint};
-        static constexpr DWORD kButtonEvents[] = {MSGBOX_EVENT_USER_COMMON_CANCEL,
-                                                  MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_DISJOINT};
-        const int pressed = m_View.TakePressedButton();
-        if (pressed >= 0 && pressed < static_cast<int>(std::size(buttons)) && buttons[pressed]->IsEnabled())
-        {
-            g_MessageBox->SendEvent(this, kButtonEvents[pressed]);
-            return true;
-        }
+        const DWORD event = pressed == 0 ? MSGBOX_EVENT_USER_COMMON_CANCEL :
+                                          MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_DISJOINT;
+        g_MessageBox->SendEvent(this, event);
+        return true;
     }
-
-    m_BtnCancel.Update();
-
-    if (true)
-    {
-        if (m_View.IsShown())
-        {
-            // RenderGemList() placed the list before the next frame's MoveUnMixList(); without
-            // the native render it is placed here, at the same point.
-            const int x = GetPos().x + (GetSize().cx / 2) - (COMGEM::m_UnmixTarList.GetWidth() / 2);
-            const int y = GetPos().y + 80;
-            COMGEM::m_UnmixTarList.SetPosition(x, y + 40 + COMGEM::m_UnmixTarList.GetHeight() / 2.0f);
-        }
-        COMGEM::MoveUnMixList();
-
-        UNMIX_TEXT* pUT = COMGEM::m_UnmixTarList.GetSelectedText();
-        if (pUT)
-        {
-            m_BtnDisjoint.SetEnable(true);
-            m_BtnDisjoint.Update();
-        }
-    }
-
-    if (m_View.IsShown())
-        SyncView();
-
+    SyncView();
     return true;
 }
 
@@ -260,60 +237,34 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::SyncView()
                                                          button(m_BtnDisjoint, I18N::Game::Disband)};
     m_View.Sync(pos, lines, buttons);
 
-    // CUIUnmixgemList::Render(): its box, scroll bar and the shown lines' 13 px rows from
-    // GetRenderLinePos_y() - 3, the arrows drawn pressed while held.
-    CUIUnmixgemList& list = COMGEM::m_UnmixTarList;
-    const TextListScrollBarGeometry bar = list.ComputeLegacyScrollBar();
-    const auto listX = static_cast<float>(list.GetPosition_x());
-    const auto listBottom = static_cast<float>(list.GetPosition_y());
-    const auto listWidth = static_cast<float>(list.GetWidth());
-    const auto listHeight = static_cast<float>(list.GetHeight());
-    const float listTop = listBottom - listHeight;
+    SyncGemList();
+}
 
-    MessageBoxView::List view;
-    view.left = listX - pos.x;
-    view.top = listTop - pos.y;
-    view.width = listWidth;
-    view.height = listHeight;
-    view.upPressed = MouseLButtonPush && mu::ui::window::CheckMouseIn(static_cast<int>(listX + listWidth - 12),
-                                                        static_cast<int>(listTop - 1), 13, 13) == TRUE;
-    view.downPressed = MouseLButtonPush && mu::ui::window::CheckMouseIn(static_cast<int>(listX + listWidth - 12),
-                                                          static_cast<int>(listBottom - 12), 13, 13) == TRUE;
-    view.trackTop = bar.rangeTop - listTop;
-    view.trackHeight = bar.rangeBottom - bar.rangeTop;
-    if (list.GetLineNum() >= list.GetBoxSize())
+void mu::ui::window::CGemIntegrationDisjointMsgBox::SyncGemList()
+{
+    const auto& state = COMGEM::GetWantedList();
+    const auto entries = state.Entries();
+    if (!std::equal(m_DisplayedItems.begin(), m_DisplayedItems.end(), entries.begin(), entries.end()))
     {
-        view.thumbTop = bar.thumbTop - listTop;
-        view.thumbHeight = bar.thumbHeight;
-    }
-    else
-    {
-        // The original filled the whole track and closed it at the thumb's height (not the track's).
-        view.thumbTop = view.trackTop;
-        view.thumbHeight = view.trackHeight;
-    }
-    view.thumbBottomTop = view.thumbTop + bar.thumbHeight - 1;
-    list.ForEachRenderLine(
-        [&](int line, const UNMIX_TEXT& item, bool selected)
+        m_DisplayedItems.assign(entries.begin(), entries.end());
+        m_ListRows.clear();
+        static constexpr int kJewelsPerBundleLevel = 10;
+        for (const auto& entry : m_DisplayedItems)
         {
-            view.rows.push_back(
-                {list.GetLineText(item), static_cast<float>(list.GetRenderLinePos_y(line)) - 3.f - listTop, selected});
-        });
-    m_View.SyncList(&view);
+            wchar_t text[MAX_GLOBAL_TEXT_STRING] = {};
+            const int jewel = COMGEM::Check_Jewel(entry.type);
+            mu_swprintf(text, L"%ls,  %d", I18N::Game::Lookup(COMGEM::GetJewelIndex(jewel, COMGEM::eGEM_NAME)),
+                        (entry.level + 1) * kJewelsPerBundleLevel);
+            m_ListRows.push_back({StringUtils::WideToNarrow(text), static_cast<int>(m_ListRows.size()), false});
+        }
+    }
+    for (auto& row : m_ListRows)
+        row.selected = state.Selected() && *state.Selected() == m_DisplayedItems[row.index];
+    m_View.SyncList(&m_ListRows);
 }
 
 bool mu::ui::window::CGemIntegrationDisjointMsgBox::Render()
 {
-    // MessageBoxView draws the box (SyncView()); natively only without its document.
-    if (m_View.IsShown())
-        return true;
-
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    RenderGemList();
-    DisableAlphaBlend();
     return true;
 }
 
@@ -407,7 +358,7 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::BlessingBtnDown(c
     COMGEM::ResetWantedList();
     COMGEM::FindWantedList();
 
-    if (COMGEM::m_UnmixTarList.IsEmpty() == true)
+    if (COMGEM::GetWantedList().Entries().empty())
     {
         g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, mu::ui::window::TYPE_ERROR_MESSAGE);
         COMGEM::GetBack();
@@ -434,7 +385,7 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::SoulBtnDown(class
     COMGEM::ResetWantedList();
     COMGEM::FindWantedList();
 
-    if (COMGEM::m_UnmixTarList.IsEmpty() == true)
+    if (COMGEM::GetWantedList().Entries().empty())
     {
         g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, mu::ui::window::TYPE_ERROR_MESSAGE);
         COMGEM::GetBack();
@@ -450,36 +401,26 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::SoulBtnDown(class
 
 CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    UNMIX_TEXT* pUT = COMGEM::m_UnmixTarList.GetSelectedText();
-    if (pUT)
+    if (!COMGEM::PrepareUnmix())
+        return CALLBACK_BREAK;
+
+    const int iGemLevel = COMGEM::GetUnMixGemLevel() + 1;
+    const int nIdx = COMGEM::m_cGemType;
+
+    wchar_t strText[256] = { 0, };
+    mu_swprintf(strText, I18N::Game::AreYouSureToDisbandSD, I18N::Game::Lookup(COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)), iGemLevel);
+    mu::ui::window::GenericDialogConfig cfg;
+    cfg.showCancel = true;
+    cfg.lines.push_back({ strText, true });
+    mu_swprintf(strText, I18N::Game::DissolvingCostDZen, COMGEM::m_iValue);
+    cfg.lines.push_back({ strText, true });
+    cfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
+    cfg.onSecondary = []
     {
-        const ITEM* pItem = FindInventoryItemBySlot(pUT->m_iInvenIdx);
-        if (pItem == nullptr)
-        {
-            return CALLBACK_BREAK;
-        }
-
-        COMGEM::SelectFromList(pUT->m_iInvenIdx, pUT->m_cLevel);
-
-        int	iGemLevel = COMGEM::GetUnMixGemLevel() + 1;
-        int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
-        COMGEM::SetGem(nIdx);
-
-        wchar_t strText[256] = { 0, };
-        mu_swprintf(strText, I18N::Game::AreYouSureToDisbandSD, I18N::Game::Lookup(COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)), iGemLevel);
-        mu::ui::window::GenericDialogConfig cfg;
-        cfg.showCancel = true;
-        cfg.lines.push_back({ strText, true });
-        mu_swprintf(strText, I18N::Game::DissolvingCostDZen, COMGEM::m_iValue);
-        cfg.lines.push_back({ strText, true });
-        cfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
-        cfg.onSecondary = []
-        {
-            COMGEM::GetBack();
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationDisjointMsgBoxLayout));
-        };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-    }
+        COMGEM::GetBack();
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationDisjointMsgBoxLayout));
+    };
+    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -519,82 +460,6 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::SetButtonInfo()
     m_BtnDisjoint.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnDisjoint.SetText(I18N::Game::Disband);
     m_BtnDisjoint.SetEnable(false);
-}
-
-void mu::ui::window::CGemIntegrationDisjointMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < m_iMiddleFrameCount; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CGemIntegrationDisjointMsgBox::RenderTexts()
-{
-    
-    
-
-    float x, y;
-
-    x = GetPos().x; y = GetPos().y + (MSGBOX_TEXT_TOP_BLANK / 2);
-    auto vi = m_MsgDataList.begin();
-    for (; vi != m_MsgDataList.end(); vi++)
-    {
-        g_pRenderText->SetTextColor((*vi)->dwColor);
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        switch ((*vi)->byFontType)
-        {
-        case MSGBOX_FONT_NORMAL:
-            g_pRenderText->SetFont(g_hFont);
-            break;
-        case MSGBOX_FONT_BOLD:
-            g_pRenderText->SetFont(g_hFontBold);
-            break;
-        }
-
-        const SIZE TextSize = g_pRenderText->MeasureText(
-            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
-        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
-        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
-
-        x = GetPos().x + (GetSize().cx / 2) - (TextExtentWidth / 2);
-        g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
-        y += (TextExtentHeight + 4);
-    }
-}
-
-void mu::ui::window::CGemIntegrationDisjointMsgBox::RenderGemList()
-{
-    
-    
-
-    int x, y;
-    y = GetPos().y + 80;
-
-    m_BtnDisjoint.Render();
-
-    x = GetPos().x + (GetSize().cx / 2) - (COMGEM::m_UnmixTarList.GetWidth() / 2);
-
-    COMGEM::m_UnmixTarList.SetPosition(x, y + 40 + COMGEM::m_UnmixTarList.GetHeight() / 2.0f);
-    COMGEM::RenderUnMixList();
-}
-
-void mu::ui::window::CGemIntegrationDisjointMsgBox::RenderButtons()
-{
-    m_BtnCancel.Render();
 }
 
 //////////////////////////////////////////////////////////////////////////

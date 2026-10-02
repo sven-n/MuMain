@@ -26,11 +26,6 @@ bool SameLine(const MessageBoxViewLineEntry& a, const MessageBoxViewLineEntry& b
            a.textPx == b.textPx;
 }
 
-bool SameListRow(const MessageBoxViewListRowEntry& a, const MessageBoxViewListRowEntry& b)
-{
-    return a.text == b.text && a.top == b.top && a.selected == b.selected;
-}
-
 bool SameButton(const MessageBoxViewButtonEntry& a, const MessageBoxViewButtonEntry& b)
 {
     return a.label == b.label && a.index == b.index && a.left == b.left && a.top == b.top && a.width == b.width &&
@@ -98,24 +93,7 @@ void mu::ui::window::MessageBoxView::Create(int middleCount, float backHeight)
             c.RegisterArray<std::vector<MessageBoxViewButtonEntry>>();
             c.Bind("buttons", &model.buttons);
 
-            c.Bind("list_shown", &model.listShown);
-            c.Bind("list_left", &model.listLeft);
-            c.Bind("list_top", &model.listTop);
-            c.Bind("list_width", &model.listWidth);
-            c.Bind("list_height", &model.listHeight);
-            auto row = c.RegisterStruct<MessageBoxViewListRowEntry>();
-            row.RegisterMember("text", &MessageBoxViewListRowEntry::text);
-            row.RegisterMember("top", &MessageBoxViewListRowEntry::top);
-            row.RegisterMember("selected", &MessageBoxViewListRowEntry::selected);
-            c.RegisterArray<std::vector<MessageBoxViewListRowEntry>>();
-            c.Bind("list_rows", &model.listRows);
-            c.Bind("list_up_pressed", &model.listUpPressed);
-            c.Bind("list_down_pressed", &model.listDownPressed);
-            c.Bind("list_track_top", &model.listTrackTop);
-            c.Bind("list_track_height", &model.listTrackHeight);
-            c.Bind("list_thumb_top", &model.listThumbTop);
-            c.Bind("list_thumb_height", &model.listThumbHeight);
-            c.Bind("list_thumb_bottom_top", &model.listThumbBottomTop);
+            BindList(c, model);
 
             c.BindEventCallback("message_box_button",
                                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
@@ -201,6 +179,8 @@ void mu::ui::window::MessageBoxView::SetProgress(float top, float fraction)
 
 void mu::ui::window::MessageBoxView::Destroy()
 {
+    m_PressedButton = -1;
+    m_PressedListRow = -1;
     if (m_ModelName.empty())
         return;
     if (RmlUiRuntime::Instance().IsCreated())
@@ -266,38 +246,42 @@ void mu::ui::window::MessageBoxView::Sync(const POINT& pos, const std::vector<Li
     }
 }
 
+void mu::ui::window::MessageBoxView::BindList(Rml::DataModelConstructor& constructor, MessageBoxViewRmlModel& model)
+{
+    constructor.Bind("list_shown", &model.listShown);
+    if (auto row = constructor.RegisterStruct<MessageBoxViewListRowEntry>())
+    {
+        row.RegisterMember("text", &MessageBoxViewListRowEntry::text);
+        row.RegisterMember("index", &MessageBoxViewListRowEntry::index);
+        row.RegisterMember("selected", &MessageBoxViewListRowEntry::selected);
+    }
+    constructor.RegisterArray<std::vector<MessageBoxViewListRowEntry>>();
+    constructor.Bind("list_rows", &model.listRows);
+    constructor.BindEventCallback("message_box_list_row",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+        {
+            if (arguments.size() == 1)
+                m_PressedListRow = arguments[0].Get<int>(-1);
+        });
+}
+
 void mu::ui::window::MessageBoxView::SyncList(const List* list)
 {
     if (!m_pRmlDoc)
         return;
-
-    MessageBoxViewRmlModel& model = m_RmlBinder.GetModel();
-
     SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listShown, "list_shown", list != nullptr);
-    if (!list)
-        return;
-
-    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listLeft, "list_left", list->left);
-    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listTop, "list_top", list->top);
-    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listWidth, "list_width", list->width);
-    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listHeight, "list_height", list->height);
-    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listUpPressed, "list_up_pressed", list->upPressed);
-    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listDownPressed, "list_down_pressed", list->downPressed);
-    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listTrackTop, "list_track_top", list->trackTop);
-    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listTrackHeight, "list_track_height", list->trackHeight);
-    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listThumbTop, "list_thumb_top", list->thumbTop);
-    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listThumbHeight, "list_thumb_height", list->thumbHeight);
-    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listThumbBottomTop, "list_thumb_bottom_top", list->thumbBottomTop);
-
-    std::vector<MessageBoxViewListRowEntry> rows;
-    for (const List::Row& row : list->rows)
-        rows.push_back({StringUtils::WideToNarrow(row.text.c_str()), row.top, row.selected});
-    if (model.listRows.size() != rows.size() ||
-        !std::equal(model.listRows.begin(), model.listRows.end(), rows.begin(), SameListRow))
+    if (list && m_RmlBinder.GetModel().listRows != *list)
     {
-        model.listRows = std::move(rows);
+        m_RmlBinder.GetModel().listRows = *list;
         m_RmlBinder.MarkDirty("list_rows");
     }
+}
+
+int mu::ui::window::MessageBoxView::TakePressedListRow()
+{
+    const int pressed = m_PressedListRow;
+    m_PressedListRow = -1;
+    return pressed;
 }
 
 int mu::ui::window::MessageBoxView::TakePressedButton()

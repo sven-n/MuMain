@@ -10,9 +10,7 @@
 	     message_box_button(n). root_x/root_y/root_scale come from the message box manager's
 	     layout; everything inside is reference px; text is .sharp-text at the native size,
 	     counter-scaled out of the panel. -->
-	<!-- With a list the box lets the pointer through outside its buttons (list-shown), so the
-	     list's native hit tests and the message box manager get the clicks, as in the original. -->
-	<div id="panel" data-model="message_box_view" data-class-list-shown="list_shown"
+	<div id="panel" data-model="message_box_view"
 	     data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div id="back" data-style-height="back_height + 'px'"></div>
@@ -42,28 +40,17 @@
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
 		</div>
 
-		<!-- A list inside the box (CUIUnmixgemList), drawn after everything else as the original
-		     did. Hit-tested natively: it takes no pointer input here. -->
-		<div id="list" data-if="list_shown" data-style-left="list_left + 'px'" data-style-top="list_top + 'px'"
-		     data-style-width="list_width + 'px'" data-style-height="list_height + 'px'">
-			<div id="list_box" data-style-width="(list_width + 1) + 'px'" data-style-height="(list_height + 2) + 'px'"></div>
-			<div class="list-scroll-up" data-class-pressed="list_up_pressed" data-style-left="(list_width - 12) + 'px'"></div>
-			<div class="list-scroll-down" data-class-pressed="list_down_pressed" data-style-left="(list_width - 12) + 'px'"
-			     data-style-top="(list_height - 12) + 'px'"></div>
-			<div class="list-track" data-style-left="(list_width - 12) + 'px'" data-style-top="list_track_top + 'px'"
-			     data-style-height="list_track_height + 'px'"></div>
-			<div class="list-track" data-style-left="list_width + 'px'" data-style-top="list_track_top + 'px'"
-			     data-style-height="list_track_height + 'px'"></div>
-			<div class="list-thumb" data-style-left="(list_width - 11) + 'px'" data-style-top="list_thumb_top + 'px'"
-			     data-style-height="list_thumb_height + 'px'"></div>
-			<div class="list-thumb-top" data-style-left="(list_width - 11) + 'px'" data-style-top="list_thumb_top + 'px'"></div>
-			<div class="list-thumb-bottom" data-style-left="(list_width - 11) + 'px'" data-style-top="list_thumb_bottom_top + 'px'"></div>
-			<div class="list-row" data-for="r : list_rows" data-class-selected="r.selected"
-			     data-style-top="r.top + 'px'" data-style-width="(list_width - 12) + 'px'">
-				<span class="sharp-text list-row-text" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.text}}</span>
-			</div>
-		</div>
+        <div id="list_box" data-if="list_shown"></div>
+        <div id="list" class="scroll-pane" data-if="list_shown"
+             data-style-width="180 * root_scale + 'px'" data-style-height="109 * root_scale + 'px'"
+             data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">
+            <div class="list-row" data-for="r : list_rows" data-class-selected="r.selected"
+                 data-style-width="168 * root_scale + 'px'" data-style-height="13 * root_scale + 'px'"
+                 data-event-click="message_box_list_row(r.index)">
+                <div class="list-row-back"></div>
+                <span class="list-row-text">{{r.text}}</span>
+            </div>
+        </div>
 	</div>
 </body>
 </rml>
