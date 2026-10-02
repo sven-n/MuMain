@@ -74,7 +74,13 @@ offsetX = (windowWidth - 640 * hudScale) / 2
 Pinning the bands to opposite screen edges opened a hole between the hotkeys,
 the gauges, and the menu. That reads as a split HUD on 16:9 and ultrawide
 (about 320px per side at 1920x1080, about 640px per side at 2560x1440). The
-side margins are world space. The scale cap stays at 2.0 so the bar does not
+side margins are world space. Map haze — Tarkan and Karutan sand, and the
+smoke on Swamp of Quiet, Crywolf, Raklion, Empire Guardian, and Battle Castle —
+covers the full window, including those margins. Stopping it at the HUD top
+left a darker rectangle beside the bar, because the haze brightens everything
+above the HUD and the gutters kept the raw ground. The HUD is drawn afterwards
+and stays opaque, so the extra haze under the bar is hidden. Dialog dimming
+still stops above the HUD. The scale cap stays at 2.0 so the bar does not
 grow to 3x–4x just to touch both edges.
 
 At 1024x768 the scale is 1.6 and the bar fills the window. At 1280x720 the
