@@ -103,6 +103,14 @@ namespace UI::Scaling
     // height. Inventory, equipment, HUD hotkey, and dialog slots use a capped
     // UI scale, so previews are scaled by uiScaleY / (windowHeight / 480).
     float ItemPreviewScaleFactor(float uiScaleY, int windowHeight);
+    // Extra shrink for inventory and equipment previews (DockRight). 0.8f is
+    // 20% smaller than the height-corrected size. HUD and dialog previews do
+    // not use it. Tune this if a rebuilt client still looks too large or small.
+    inline constexpr float kItemPreviewExtraScale = 0.8f;
+    // ItemPreviewScaleFactor, then kItemPreviewExtraScale when `active` is the
+    // DockRight transform for this window. Model scale and slot offsets share
+    // the returned factor.
+    float ItemPreviewScale(const Transform& active, int windowWidth, int windowHeight);
     float GetWindowContentScale();
     void SetWindowContentScale(float contentScale);
     Transform GetActiveTransform();

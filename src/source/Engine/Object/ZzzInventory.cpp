@@ -6713,11 +6713,12 @@ constexpr float SelectedItemTurnSpeed = 0.45f;
 
 // The item camera maps world units to pixels by the full window height, while the
 // slot is drawn with the active UI scale. Scale the model and its slot offset
-// together so the preview stays centred in the slot.
+// together so the preview stays centred in the slot. DockRight (inventory and
+// equipment) also applies kItemPreviewExtraScale; HUD and dialogs do not.
 void ApplyItemPreviewScale(vec3_t position, const std::array<float, 3>& offset, float& scale)
 {
-    const float previewScale =
-        UI::Scaling::ItemPreviewScaleFactor(UI::Scaling::GetActiveTransform().scaleY, static_cast<int>(WindowHeight));
+    const float previewScale = UI::Scaling::ItemPreviewScale(
+        UI::Scaling::GetActiveTransform(), static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     position[0] += offset[0] * previewScale;
     position[1] += offset[1] * previewScale;
     position[2] += offset[2] * previewScale;
