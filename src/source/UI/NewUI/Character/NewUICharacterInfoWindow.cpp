@@ -1326,14 +1326,10 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
             iMagicDamageMax += nTemp / 4 * fTemp;
         }
 
-        if ((pWeaponRight->Type >= MODEL_STAFF - MODEL_ITEM
-            && pWeaponRight->Type < (MODEL_STAFF + MAX_ITEM_INDEX - MODEL_ITEM))
-            || pWeaponRight->Type == (static_cast<int>(MODEL_RUNE_BLADE) - MODEL_ITEM)
-            || pWeaponRight->Type == (static_cast<int>(MODEL_EXPLOSION_BLADE) - MODEL_ITEM)
-            || pWeaponRight->Type == (static_cast<int>(MODEL_SWORD_DANCER) - MODEL_ITEM)
-            || pWeaponRight->Type == (static_cast<int>(MODEL_DARK_REIGN_BLADE) - MODEL_ITEM)
-            || pWeaponRight->Type == (static_cast<int>(MODEL_IMPERIAL_SWORD) - MODEL_ITEM)
-            )
+        if ((pWeaponRight->Type >= ITEM_STAFF && pWeaponRight->Type < (ITEM_STAFF + MAX_ITEM_INDEX)) ||
+            pWeaponRight->Type == ITEM_RUNE_BLADE || pWeaponRight->Type == ITEM_EXPLOSION_BLADE ||
+            pWeaponRight->Type == ITEM_SWORD_DANCER || pWeaponRight->Type == ITEM_DARK_REIGN_BLADE ||
+            pWeaponRight->Type == ITEM_IMPERIAL_SWORD)
         {
             float magicPercent = (float)(pWeaponRight->MagicPower) / 100;
 

@@ -5,6 +5,7 @@
 
 #include "Core/Globals/_enum.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
 #include <algorithm>
@@ -187,7 +188,7 @@ int GetInventoryModel(int itemType)
             return entry.modelType;
         }
     }
-    return MODEL_ITEM + itemType;
+    return Data::Items::ToModelSlot(itemType);
 }
 
 std::optional<int> GetItemOfInventoryModel(int modelType)
@@ -209,7 +210,7 @@ InventoryDisplay GetInventoryDisplay(int modelType)
 {
     if (const ArmorInventoryModel* armor = FindArmorInventoryModel(modelType))
     {
-        modelType = MODEL_ITEM + armor->itemType;
+        modelType = Data::Items::ToModelSlot(armor->itemType);
     }
     if (const ItemModelDefinition* model = FindItemModel(modelType))
     {

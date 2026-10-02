@@ -10,6 +10,7 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelGlowJson.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
@@ -77,7 +78,7 @@ void AddProblem(ItemModelProblem problem)
 
 void MarkNoneBlendMeshes(int itemType, const ItemModelDefinition& model)
 {
-    BMD& bmd = Models[MODEL_ITEM + itemType];
+    BMD& bmd = Models[ToModelSlot(itemType)];
     for (const int mesh : model.noneBlendMeshes)
     {
         if (mesh >= bmd.NumMeshs)
@@ -94,7 +95,7 @@ void MarkNoneBlendMeshes(int itemType, const ItemModelDefinition& model)
 
 void CheckGlowMeshes(int itemType, const ItemModelDefinition& model)
 {
-    const int meshCount = Models[MODEL_ITEM + itemType].NumMeshs;
+    const int meshCount = Models[ToModelSlot(itemType)].NumMeshs;
     GlowJson::ForEachMesh(model.glow,
                           [&](const std::string& field, int mesh)
                           {
@@ -139,7 +140,7 @@ bool OpenModel(int itemType, const ItemModelDefinition& model, const LookNames& 
     const std::wstring folder = path.substr(0, nameStart);
     const std::wstring name = path.substr(nameStart, path.size() - nameStart - ModelFileExtension.size());
 
-    if (!gLoadData.AccessModel(MODEL_ITEM + itemType, folder.c_str(), name.c_str()))
+    if (!gLoadData.AccessModel(ToModelSlot(itemType), folder.c_str(), name.c_str()))
     {
         AddProblem(MakeProblem(ItemModelProblemType::ModelFileMissing, model));
         return false;
@@ -171,7 +172,7 @@ void OpenSharedModel(int itemType, const ItemModelDefinition& model, const LookN
         AddProblem(MakeProblem(ItemModelProblemType::ModelFileMissing, model));
         return;
     }
-    gLoadData.ShareModel(MODEL_ITEM + itemType, MODEL_ITEM + opened->second);
+    gLoadData.ShareModel(ToModelSlot(itemType), ToModelSlot(opened->second));
     CheckModel(itemType, model, lookNames);
 }
 
@@ -205,7 +206,7 @@ void OpenModelTextures(int itemType, const ItemModelDefinition& model)
     }
 
     std::vector<TextureProblem> textureProblems;
-    gLoadData.OpenTexture(MODEL_ITEM + itemType, folders, textureProblems);
+    gLoadData.OpenTexture(ToModelSlot(itemType), folders, textureProblems);
     for (const TextureProblem& textureProblem : textureProblems)
     {
         AddTextureProblem(model, textureProblem);
@@ -249,7 +250,7 @@ void OpenTextures()
         [](int itemType, const ItemModelDefinition& model)
         {
             // The textures of a shared model are loaded with the slot that opened it.
-            if (!Models[MODEL_ITEM + itemType].SharesData())
+            if (!Models[ToModelSlot(itemType)].SharesData())
             {
                 OpenModelTextures(itemType, model);
             }

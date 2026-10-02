@@ -55,7 +55,7 @@ share with items) is planned in the
 | D18 | Repairing the legacy data | The bmd import recovers names that ran past the 30-byte name field and takes the fields they overwrote from a language whose name did not reach them (defaults when none has them). Names that are not UTF-8 are read as Windows-1252. The changes are listed in the phase 2 PR and in `docs/item-data.md`. |
 | D19 | Editor sync | Every item editor change goes into the database right away (phase 2), so the editor and the database never differ. Moving the editor fully onto the database stays in phase 6. |
 | D22 | Model data files | Model and display data (model file, textures, inventory and ground display, cloth, effects) lives in separate files, `Data/Items/Models/GroupNN_*.json`, one per item group, items by `number`. It is client-only: the item files keep what client and server share, and only those take part in the OpenMU exchange. Separate files also keep the item files small and let the model editor and the stats editor change different files. |
-| D23 | Model slots | Two steps. **Own model slots (phase 4a–4c):** every item keeps its own model slot, `MODEL_ITEM + item type`, as today; the data only says which file is loaded into it, so the ~100 places that compute `+ MODEL_ITEM` / `- MODEL_ITEM` stay unchanged. **Shared models (phase 4d, right after them):** models become entries of their own, and items reference them by name, so several items can share one model (loaded once; 4d1, done). The code then asks the item database for an item's model slot, and objects keep their item type instead of computing it back from the model (4d2). Phase 12 (level variants as items of their own) then shares models without loading them twice. |
+| D23 | Model slots | Two steps. **Own model slots (phase 4a–4c):** every item keeps its own model slot, `MODEL_ITEM + item type`, as today; the data only says which file is loaded into it, so the ~100 places that compute `+ MODEL_ITEM` / `- MODEL_ITEM` stay unchanged. **Shared models (phase 4d, right after them):** models become entries of their own, and items reference them by name, so several items can share one model (loaded once; 4d1, done). Every item keeps a slot of its own, and the conversions between item types and model slots go through one place, `ToModelSlot` / `ToItemType` (4d2), so a moved item can keep its slot (phase 12) and the named slots of items (`MODEL_KRIS`, …) stay valid. One slot per shared model, with objects keeping item types, is not planned: about 240 places identify items by their model slot (see "Item-specific code that is left"), and none of them gains anything while each item has its own slot. Phase 12 (level variants as items of their own) shares models without loading them twice. |
 | D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and an item effect (the item branches of `RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. The named looks are code for now; D25 moves what they are made of into data. |
 | D25 | Looks in data | Items keep naming their looks; what a named look is made of moves from code into data (phase 13). Skills, monsters and NPCs use the same look format, so the decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
 | D26 | Shared definitions | Defined once with a name and referenced by it; editors show where a definition is used and warn with that list before a shared definition changes. The decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
@@ -401,9 +401,10 @@ in both repos (as separate PRs, one per repo).
 | 1 | Item database | Client | MuMain | 0 | `ItemDefinition` model and flat in-memory table, built from the loaded `Item_<lang>.bmd` data; English names for logs; log-name helper; load-time log. No behavior change. |
 | 2 | Data file format and names | Client | MuMain | 1 | JSON per group becomes the only item source and the database becomes the source for `ItemAttribute[]`; translated names in the UI locale; loading, writing and validation rules; automated data test; bmd import (with repair) and export in MuEditor; editor edits go into the database right away. |
 | 3 | Rules and categories into data | Client | MuMain | 2 | Flags and tags replace the hardcoded lists; client ↔ OpenMU rule mapping (input for A). |
+| 3b | Remaining item lists | Client | MuMain | 3 | The lists of item ids outside the phase 3 files that repeat data that exists or need one new tag (see "Item-specific code that is left"), checked like phase 3. |
 | A | Server rule fields and checks | Server | OpenMU | 3 (mapping) | New `ItemDefinition` fields or tables, migration, Season 6 values, update plug-in, enforcement in player actions. |
 | 4 | Models into data | Client | MuMain | 2 | Model files per item group (D22), model slots stay `MODEL_ITEM + type` (D23, own model slots). One PR per part: **4a** model files and textures (`OpenItems()` / `OpenItemTextures()`), **4b** inventory and ground display, **4c** render effects (D24) in three parts: **4c1** glow, **4c2** render styles, **4c3** item effects. |
-| 4d | Shared models | Client | MuMain | 4 | Models as entries of their own that items reference by name, so items can share a model (D23, shared models). Two PRs: **4d1** shared model entries, each file opened once; **4d2** objects keep their item type. |
+| 4d | Shared models | Client | MuMain | 4 | Models as entries of their own that items reference by name, so items can share a model (D23, shared models). Two PRs: **4d1** shared model entries, each file opened once; **4d2** the conversions between item types and model slots in one place, and shared model data freed by its last user. |
 | 4e | Clear model loading errors | Client | MuMain | 4 | One message for missing model files and textures of item models that names the item, the model entry, the texture and the searched folders. |
 | 5 | Translation tooling | Client | MuMain | 2, 6 | Translations editor (items × languages), missing-translation warnings. The names themselves moved to phase 2 (D17). |
 | 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. |
@@ -653,22 +654,47 @@ server with original clients (after phases 6 and B).
      first, which used up numbers). A test checks that every file several
      items use is a shared model. The Looks view of MuEditor shows the
      shared model and lists its items.
-   - **4d2 Objects keep their item type:** the code asks the item database
-     for an item's model slot, and objects (`Weapon[]`, `BodyPart[]`,
-     `Wing`, `Helper`, dropped items) keep their item type instead of
-     computing it back with `- MODEL_ITEM`. Comes before phase 12, so the
-     level variants can share models. Also from the review of 4d1: the
-     slots that share a model hold the raw pointers of the slot that
-     opened it, which nothing tracks, so releasing or reopening that slot
-     (e.g. reloading models from the editor) would leave them pointing at
-     freed memory; the shared data gets a use count or shared ownership,
-     or each shared model gets one slot once the code asks for an item's
-     model slot. The loaded data becomes read-only for the item slots, so
-     a write through one of them cannot change all items of the model. A
-     test of the loader opens items of one shared model into the model
-     slots: the first opens the file and loads the textures, the others
-     share it, and a first item whose file is missing makes the others
-     report the missing file too.
+   - **4d2 Model slots in one place:** every conversion between an item
+     type and its model slot goes through `Data::Items::ToModelSlot`,
+     `ToItemType` and `IsItemModelSlot` (`ItemModelSlots.h`) instead of
+     `+ MODEL_ITEM` / `- MODEL_ITEM` in about 120 lines. They return what
+     the code computed before, so nothing changes now (checked by comparing
+     the compiled code of every changed file); phase 12 can give a moved
+     item its old slot there. Two conversions in `ZzzEffect.cpp`
+     (`RenderWheelWeapon`, `RenderFuryStrike`) wait until that file passes
+     the static analysis of the CI: cppcheck finds an out-of-bounds write in
+     `CreateEffect` (`arv3PosProcess`) there. So does the spear check in
+     `MoveHandlers.cpp`, which compares the item type of the owner's weapon
+     with `MODEL_SPEAR - MODEL_SWORD` (cppcheck finds an uninitialized
+     variable in that file). Objects keep their model slots, and
+     the places that compare them with named slots stay as they are (one
+     slot per shared model was dropped, see D23). The data of a shared
+     model is freed by the last slot that uses it, whichever slot that is,
+     so releasing or reopening the slot that opened it (e.g. reloading
+     models from the editor) no longer leaves the others with freed
+     memory. Writing to the shared data through one slot would change all
+     items of the model; that stays a documented rule (`BMD::ShareFrom`),
+     because making the data read-only would change every user of the
+     model data. A test opens the items of a shared model into the model
+     slots: the first opens the file, the others share it, and a missing
+     file is reported for each item. Follow-ups from the review of 4d2:
+     - `OpenPlayers` clears the model slots with `ZeroMemory` after they are
+       constructed, which also clears the use count (a `std::shared_ptr`).
+       No count exists at that point, so it does no harm, but it is
+       undefined behavior: the constructor should set what the clearing
+       sets, and the clearing go.
+     - The loaded data (meshes, bones, actions, textures, texture indices
+       and their counts) in one struct held by a `std::shared_ptr`, whose
+       destructor frees it and unloads the textures, would make sharing a
+       pointer copy and `Release` a `reset()` (CODING_RULES rule 8).
+     - Some callers convert slots that are no item's: `DeletePet` with an
+       empty helper (-1), the helper switch of the photo viewer,
+       `RenderCharacter` and `ModifyTypeCommonItemMonk` with class models,
+       `MoveCharacter` without a weapon. When `ToItemType` becomes a lookup
+       (phase 12), they need `IsItemModelSlot` or a defined result for
+       other slots.
+     - No test covers the texture references a sharing slot gives back
+       when it lets go last (it needs loaded textures).
 
    **4e Clear model loading errors:** a missing model file or texture of an
    item model shows one message after loading instead of one popup per
@@ -756,8 +782,10 @@ server with original clients (after phases 6 and B).
     - Cost: every hardcoded item id has to follow a move (client `ITEM_*`
       constants and ranges, about 113 group/number checks in OpenMU), and
       the model ids (`MODEL_ITEM + type`) must not depend on the item type.
-      That is why this comes after phases 3 and 4 and OpenMU PR A, which
-      remove most of these dependencies.
+      That is why this comes after phases 3 and 4 and OpenMU PR A. Phases 3
+      and 4 moved the rule lists and the looks, and 4d2 put the model slots
+      in one place (`ToModelSlot`), but about 330 places in code still name
+      items (see "Item-specific code that is left").
 
     **D (OpenMU):**
     - legacy group and number on `ItemDefinition` (optional), filled by the
@@ -832,8 +860,87 @@ server with original clients (after phases 6 and B).
       drop then). Left for last because it only shows in the inventory and
       is easiest to check once everything else is in data.
     - Whatever later areas still need from this document moves to the
-      roadmap, so it is not lost.
+      roadmap, so it is not lost; "Item-specific code that is left" is the
+      list of it until then.
     - Remove this document.
+
+## Item-specific code that is left
+
+An inventory of the code that still names specific items, made after 4d1
+(2026-10-01): about 3,000 source lines (`ITEM_*` and item `MODEL_*` names,
+raw ids such as `ITEM_POTION + 100`, ranges of ids) in about 500 places. Of
+the 492 places with item logic, 294 hold lists of items (data, by section
+4), 152 are one item's own behavior or value, and 46 convert between item
+types and model slots (4d2). 239 identify an item by its model slot
+(`o->Type == MODEL_…`); they stay valid because every item keeps its slot
+(D23).
+
+| Kind | Places | Moved by | Not moved yet |
+|---|---:|---|---|
+| Character animation by item | 67 | SK2 (cast animations) | Stances by weapon, normal attacks, conditions on the mount |
+| UI and tooltips | 65 | 8, 12 | Ground label colours, the repair info, bonuses shown in the character window |
+| Item use | 58 | 12 (level variants), 11 (pet) | `TryConsumeItem`, `ItemValue`, stack sizes, hotkeys, requirement exceptions |
+| Item lists | 42 | 3 (the data exists), 8, 9 | Call sites outside the phase 3 files (3b) |
+| Mounts, pets, helpers | 41 | 11 (`pet.bmd`) | The spawned model, ride height, camera, HUD |
+| Item ↔ model slot | 41 | 4d2, 12 | Class models (`MODEL_HELM2`, `MODEL_*_MONK`; kept in code by 4a) |
+| Drawing held and worn items | 39 | 13, 12, MN | Effects of held items in `RenderLinkObject`, swing trails, full-set auras, `ItemObjectAttribute` |
+| Map and event rules | 33 | MN, 12 | Entry items, mount bans per map, Chaos Castle weapons |
+| Skills | 29 | SK1 (items that give a skill), SK2, FX1 | Projectile per bow, skill bonuses of mounts |
+| Wings, cloth, capes | 13 | 9 (wing options); 4b kept the cloth in code | Cloth setups, flap speeds |
+| Position on the character | 12 | – | Shield angles, poses on the back, link bones |
+| Mixes | 11 | 11 (Mix, SocketItem) | Mix values, packed jewels (`COMGEM`) |
+| Sounds | 7 | roadmap, "later: sounds" | All |
+| Monster and NPC setup | 1 switch, 272 cases | MN | – |
+
+**Not planned yet**, with what could hold it:
+
+- **Mounts** (about 97 places): animations and skills chosen by the mount,
+  the model a horn spawns, ride height, camera. A `mountKind` on mount items
+  would turn about 50 chains into one value; the roadmap's "later: pets"
+  should cover mounts.
+- **Phase 3b** (about 35 places): lists that repeat data that exists
+  (tags, `slot`, `wingTier`, `storable`, the files below) or need one new
+  tag (bow, crossbow, scepter, …).
+- **Held and worn items** (about 34 places): their position on the
+  character (per hand, on the back, link bone) and their looks while held
+  (an item effect that runs while the item is held, swing trails). An
+  extension of 4b and 4c3/13.
+- **Item use** (about 23 places): `maxStack`, a `useAction` that names a
+  code handler, `hotkeyGroup`. Section 3 already names usable/consumable,
+  ticket and event as target fields.
+- **Bonuses computed in code** (about 20 places): the Demon's +40 %, the
+  Panda's +50 defense, charms. A `powerUps` field mapped to OpenMU (phase
+  7) and the pets (phase 11).
+- **Map and event rules** (about 19 places): items required or banned per
+  map, for a maps area.
+- **Prices, requirements, durability** (about 16 places): fixed prices
+  into `buyPrice`, price per durability, how requirements grow.
+- **Smaller kinds:** weapon kind for stances (10), ground height and light
+  (8, extends 4b), names and colours outside `RenderItemInfo` (8, widens
+  phase 8), ground label colours (7), transformation ring rules (6; their
+  looks go to MN), mix values and packed jewels (6, phase 11), ids that
+  encode a value such as the socket element (5), effects whose mesh is an
+  item's model slot (4, FX1).
+
+**Data that exists but is not used:**
+
+- `Data/Local/<lang>/JewelOfHarmonySmelt_<lang>.bmd` lists the 85 items
+  that cannot be smelted below +4. The client never loads it; `MixMgr.cpp`
+  has the same list in code.
+- `BuffEffect_<lang>.bmd` links buffs to items and is loaded; the elixir
+  code lists the same link again.
+- The item field `skill` is empty for all scrolls and parchments;
+  `GetSkillByBook` maps them in code (SK1).
+
+**Dead code** to delete instead of moving: `PrintItem`
+(`ZzzInfomation.cpp`), `CChangeRingManager::CheckRepair`, the macro
+`NOTSMELTING_DATA_FILE`.
+
+**Bugs found on the way**, filed upstream: the durability warning of
+rings at +2 (sven-n/MuMain#667), the walk of the Dragon Lance (#668),
+weapons hidden on the Illusion Temple team skins (#669), the Dark Raven's
+height over a Dark Horse (#670) and the trade warning for every item from
+(13,30) up (#671).
 
 ## Beyond items
 

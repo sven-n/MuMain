@@ -104,8 +104,8 @@ struct ItemGlowColors
 
 // The model of one item: which .bmd file is opened for it, where its
 // textures are and how it is drawn. One entry of the model files
-// (Data/Items/Models). Each item keeps its own model slot, MODEL_ITEM + item
-// type; items that share a model (SharedItemModel) share its loaded data.
+// (Data/Items/Models). Each item keeps its own model slot (ToModelSlot);
+// items that share a model (SharedItemModel) share its loaded data.
 struct ItemModelDefinition
 {
     int group = 0;

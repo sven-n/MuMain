@@ -2919,9 +2919,18 @@ void BMD::RenderBone(float(*BoneMatrix)[3][4])
     mu::GetRenderer().SetDepthFunc(GL_LEQUAL);
 }
 
-void BMD::ShareFrom(const BMD& owner)
+void BMD::ShareFrom(BMD& owner)
 {
+    if (&owner == this || owner.Meshs == nullptr)
+    {
+        return;
+    }
     Release();
+    if (!owner.m_sharedDataUsers)
+    {
+        owner.m_sharedDataUsers = std::make_shared<char>();
+    }
+    m_sharedDataUsers = owner.m_sharedDataUsers;
     // What Open2 reads from the file; the rest is this slot's own.
     memcpy(Name, owner.Name, sizeof(Name));
     Version = owner.Version;
@@ -2941,11 +2950,22 @@ void BMD::ShareFrom(const BMD& owner)
     m_bCompletedAlloc = true;
 }
 
+long BMD::GetDataUserCount() const
+{
+    if (m_sharedDataUsers)
+    {
+        return m_sharedDataUsers.use_count();
+    }
+    return Meshs != nullptr ? 1 : 0;
+}
+
 void BMD::Release()
 {
-    if (m_bSharedData)
+    const bool othersUseTheData = m_sharedDataUsers && m_sharedDataUsers.use_count() > 1;
+    m_sharedDataUsers.reset();
+    if (othersUseTheData)
     {
-        // The data is the owner's.
+        // The last slot that uses the data frees it.
         Meshs = nullptr;
         Bones = nullptr;
         Actions = nullptr;
@@ -3042,10 +3062,8 @@ void BMD::Release()
     NumBones = 0;
     NumActions = 0;
     NumMeshs = 0;
-
-#ifdef LDS_FIX_SETNULLALLOCVALUE_WHEN_BMDRELEASE
+    m_bSharedData = false;
     m_bCompletedAlloc = false;
-#endif
 }
 
 void BMD::FindNearTriangle()

@@ -2,6 +2,7 @@
 #include "GameLogic/Items/ItemCategories.h"
 
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 
 // The categories come from the item data (tags, slot and wing tier in
 // Data/Items/*.json); see docs/item-data.md. The lists that are only used for
@@ -24,11 +25,6 @@ bool HasTag(const ITEM* pItem, ItemTag tag)
 }
 
 constexpr Data::Items::ItemTagSet SocketItemTags{ItemTag::SocketSeed, ItemTag::SocketSphere, ItemTag::SocketSeedSphere};
-
-int ToItemType(int modelType)
-{
-    return modelType - MODEL_ITEM;
-}
 
 bool HasWingTier(const ITEM* pItem, WingTier tier)
 {
@@ -67,12 +63,12 @@ namespace GameLogic::Items
 
     bool IsRideableMountModel(int modelType)
     {
-        return HasTag(ToItemType(modelType), ItemTag::Mount);
+        return HasTag(Data::Items::ToItemType(modelType), ItemTag::Mount);
     }
 
     bool IsHornMountModel(int modelType)
     {
-        return HasTag(ToItemType(modelType), ItemTag::HornMount);
+        return HasTag(Data::Items::ToItemType(modelType), ItemTag::HornMount);
     }
 
     bool IsFlyingMount(const ITEM* pItem)
@@ -111,7 +107,7 @@ namespace GameLogic::Items
 
     bool IsDemonOrSpiritOfGuardianModel(int modelType)
     {
-        return HasTag(ToItemType(modelType), ItemTag::GuardianPet);
+        return HasTag(Data::Items::ToItemType(modelType), ItemTag::GuardianPet);
     }
 
     bool IsPandaOrSkeletonItem(const ITEM* pItem)
@@ -141,7 +137,7 @@ namespace GameLogic::Items
 
     bool IsSocketSeedOrSphereModel(int modelType)
     {
-        return IsSocketSeedOrSphereType(ToItemType(modelType));
+        return IsSocketSeedOrSphereType(Data::Items::ToItemType(modelType));
     }
 
     bool IsSocketSeed(const ITEM* pItem)
@@ -156,7 +152,7 @@ namespace GameLogic::Items
 
     bool IsSocketSphereModel(int modelType)
     {
-        return HasTag(ToItemType(modelType), ItemTag::SocketSphere);
+        return HasTag(Data::Items::ToItemType(modelType), ItemTag::SocketSphere);
     }
 
     bool IsSocketSeedSphere(const ITEM* pItem)
@@ -246,7 +242,7 @@ namespace GameLogic::Items
 
     bool IsAmmunitionModel(int modelType)
     {
-        return HasTag(ToItemType(modelType), ItemTag::Ammunition);
+        return HasTag(Data::Items::ToItemType(modelType), ItemTag::Ammunition);
     }
 
     bool IsLuckyItemTicket(const ITEM* pItem)
@@ -256,7 +252,7 @@ namespace GameLogic::Items
 
     bool IsLuckyItemTicketModel(int modelType)
     {
-        return HasTag(ToItemType(modelType), ItemTag::LuckyItemTicket);
+        return HasTag(Data::Items::ToItemType(modelType), ItemTag::LuckyItemTicket);
     }
 
     bool IsGemJewelry(const ITEM* pItem)
@@ -276,7 +272,7 @@ namespace GameLogic::Items
 
     bool IsGambleItemModel(int modelType)
     {
-        return HasTag(ToItemType(modelType), ItemTag::GambleItem);
+        return HasTag(Data::Items::ToItemType(modelType), ItemTag::GambleItem);
     }
 
     bool IsBloodCastleTicketPart(const ITEM* pItem)
@@ -291,7 +287,7 @@ namespace GameLogic::Items
 
     bool IsBloodCastleTicketPartModel(int modelType)
     {
-        return HasTag(ToItemType(modelType), ItemTag::BloodCastleTicketPart);
+        return HasTag(Data::Items::ToItemType(modelType), ItemTag::BloodCastleTicketPart);
     }
 
     bool IsSecondClassQuestItem(const ITEM* pItem)
@@ -321,7 +317,7 @@ namespace GameLogic::Items
 
     bool IsDivineArchangelWeaponModel(int modelType)
     {
-        return HasTag(ToItemType(modelType), ItemTag::DivineArchangelWeapon);
+        return HasTag(Data::Items::ToItemType(modelType), ItemTag::DivineArchangelWeapon);
     }
 
     bool IsSummonerBook(const ITEM* pItem)
@@ -336,7 +332,7 @@ namespace GameLogic::Items
 
     bool IsSummonerBookModel(int modelType)
     {
-        return HasTag(ToItemType(modelType), ItemTag::SummonerBook);
+        return HasTag(Data::Items::ToItemType(modelType), ItemTag::SummonerBook);
     }
 
     bool IsHighValueItem(const ITEM* pItem)

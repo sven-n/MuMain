@@ -5,12 +5,14 @@
 #include "TestFiles.h"
 
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
+#include "Data/DataHandler/ItemData/ItemModelLoader.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelGlowJson.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ZzzObject.h"
@@ -279,8 +281,8 @@ TEST_CASE("The shared model file is found in any case, and item errors name thei
     CHECK(parchment->file == "Data/Item/rollofpaper.bmd");
 }
 
-// Items of a shared model use the data of the slot that opened it; letting
-// go of it leaves that slot's data alone.
+// Items of a shared model use the data of the slot that opened it; a slot
+// that lets go of it leaves the data to the others.
 TEST_CASE("A model slot can share the loaded data of another one [data][items]")
 {
     const ItemModelDefinition* parchment = FindModel(ShippedModels().models, 15, 19);
@@ -318,6 +320,150 @@ TEST_CASE("A model slot can share the loaded data of another one [data][items]")
     REQUIRE(owner->Meshs != nullptr);
     CHECK(owner->NumMeshs > 0);
     CHECK(owner->Meshs[0].NumVertices > 0);
+}
+
+// The slot that opened the data can let go first (or open another file); the
+// data stays for the slots that share it, and the last of them frees it.
+TEST_CASE("Shared model data stays loaded until the last slot lets go [data][items]")
+{
+    const ItemModelDefinition* parchment = FindModel(ShippedModels().models, 15, 19);
+    REQUIRE(parchment != nullptr);
+    const std::unique_ptr<BMD> owner = OpenModelFile(*parchment);
+    const short meshCount = owner->NumMeshs;
+    BMD first;
+    BMD second;
+    CHECK(owner->GetDataUserCount() == 1);
+    first.ShareFrom(*owner);
+    second.ShareFrom(*owner);
+    CHECK(owner->GetDataUserCount() == 3);
+
+    owner->Release();
+    CHECK(owner->Meshs == nullptr);
+    CHECK(owner->GetDataUserCount() == 0);
+    CHECK(first.GetDataUserCount() == 2);
+    REQUIRE(first.Meshs != nullptr);
+    CHECK(first.NumMeshs == meshCount);
+    CHECK(first.Meshs[0].NumVertices > 0);
+
+    // Opening the file again gives the slot data of its own.
+    const std::filesystem::path file = ClientDirectory / parchment->file;
+    const std::wstring folder = file.parent_path().wstring() + L"/";
+    REQUIRE(owner->Open2(folder.c_str(), file.filename().wstring().c_str()));
+    CHECK(owner->Meshs != first.Meshs);
+    CHECK_FALSE(owner->SharesData());
+    CHECK(owner->GetDataUserCount() == 1);
+
+    first.Release();
+    CHECK(second.GetDataUserCount() == 1);
+    REQUIRE(second.Meshs != nullptr);
+    CHECK(second.Meshs[0].NumVertices > 0);
+    // The last user frees the data and no longer counts as sharing.
+    second.Release();
+    CHECK(second.Meshs == nullptr);
+    CHECK_FALSE(second.SharesData());
+    CHECK(second.GetDataUserCount() == 0);
+}
+
+// Sharing needs data, and a slot cannot share with itself.
+TEST_CASE("A model slot does not share missing data or its own [data][items]")
+{
+    const ItemModelDefinition* parchment = FindModel(ShippedModels().models, 15, 19);
+    REQUIRE(parchment != nullptr);
+    const std::unique_ptr<BMD> owner = OpenModelFile(*parchment);
+    owner->ShareFrom(*owner);
+    CHECK_FALSE(owner->SharesData());
+    CHECK(owner->GetDataUserCount() == 1);
+    REQUIRE(owner->Meshs != nullptr);
+
+    BMD empty;
+    BMD user;
+    user.ShareFrom(empty);
+    CHECK_FALSE(user.SharesData());
+    CHECK(user.GetDataUserCount() == 0);
+    CHECK(empty.GetDataUserCount() == 0);
+}
+
+namespace
+{
+// The game's model slots for a test: Models points to slots of the test
+// until the end of the test, and the item model database is emptied again.
+class TestModelSlots
+{
+public:
+    TestModelSlots() : m_slots(new BMD[MAX_MODELS]), m_previous(Models)
+    {
+        Models = m_slots.get();
+    }
+
+    ~TestModelSlots()
+    {
+        Models = m_previous;
+        g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+        // Problems a failed check left behind do not reach the next test.
+        ModelLoader::TakeProblemMessage();
+    }
+
+    TestModelSlots(const TestModelSlots&) = delete;
+    TestModelSlots& operator=(const TestModelSlots&) = delete;
+
+private:
+    std::unique_ptr<BMD[]> m_slots;
+    BMD* m_previous;
+};
+
+// An item of a shared model, with the file filled in like the loading does.
+// The path is absolute, so the test does not depend on the working folder.
+ItemModelDefinition MakeSharedModelItem(int number, const std::string& model, const std::string& file)
+{
+    ItemModelDefinition item;
+    item.group = 15;
+    item.number = number;
+    item.model = model;
+    item.file = (ClientDirectory / file).generic_string();
+    item.textureFolders = {"Item"};
+    return item;
+}
+} // namespace
+
+TEST_CASE("The first item of a shared model opens its file and the others share it [data][items]")
+{
+    TestModelSlots slots;
+    const std::vector<ItemModelDefinition> models{
+        MakeSharedModelItem(19, "skillParchment", "Data/Item/rollofpaper.bmd"),
+        MakeSharedModelItem(20, "skillParchment", "Data/Item/rollofpaper.bmd"),
+        MakeSharedModelItem(21, "missingModel", "Data/Item/NoSuchModel.bmd"),
+        MakeSharedModelItem(22, "missingModel", "Data/Item/NoSuchModel.bmd"),
+    };
+    g_ItemModelDatabase.Build(models, Data::Effects::GlowColorList{});
+
+    ModelLoader::OpenModels({});
+
+    const BMD& opener = Models[ToModelSlot(MakeItemType(15, 19))];
+    const BMD& sharer = Models[ToModelSlot(MakeItemType(15, 20))];
+    REQUIRE(opener.NumMeshs > 0);
+    CHECK_FALSE(opener.SharesData());
+    CHECK(sharer.SharesData());
+    CHECK(sharer.Meshs == opener.Meshs);
+    CHECK(sharer.NumMeshs == opener.NumMeshs);
+    // A shared model whose file is missing is reported for each of its items.
+    CHECK(Models[ToModelSlot(MakeItemType(15, 22))].NumMeshs == 0);
+    const std::string message = ModelLoader::TakeProblemMessage();
+    CHECK(message.find("(15,21)") != std::string::npos);
+    CHECK(message.find("(15,22)") != std::string::npos);
+    CHECK(message.find("(15,19)") == std::string::npos);
+    CHECK(message.find("(15,20)") == std::string::npos);
+}
+
+TEST_CASE("Item types and model slots convert both ways [data][items]")
+{
+    CHECK(ToModelSlot(ITEM_KRIS) == MODEL_KRIS);
+    CHECK(ToModelSlot(ITEM_SMALL_CAPE_OF_LORD) == MODEL_SMALL_CAPE_OF_LORD);
+    CHECK(ToItemType(MODEL_SMALL_CAPE_OF_LORD) == ITEM_SMALL_CAPE_OF_LORD);
+    CHECK(ToItemType(ToModelSlot(MakeItemType(15, 19))) == MakeItemType(15, 19));
+    CHECK(IsItemModelSlot(MODEL_KRIS));
+    CHECK(IsItemModelSlot(ToModelSlot(MAX_ITEM - 1)));
+    CHECK_FALSE(IsItemModelSlot(ToModelSlot(MAX_ITEM)));
+    CHECK_FALSE(IsItemModelSlot(MODEL_PLAYER));
 }
 
 // The paths have the case of the files, so they also load on file systems

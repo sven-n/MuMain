@@ -15,6 +15,7 @@
 #include "Network/Server/WSclient.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Core/Utilities/Random.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 
 #include <cmath>
 #include "Render/Renderer/MuRenderer.h"
@@ -198,9 +199,9 @@ void CreateArrow(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex, WORD Skil
         Right = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
         Left = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
         if (Right != -1)
-            Right += MODEL_ITEM;
+            Right = Data::Items::ToModelSlot(Right);
         if (Left != -1)
-            Left += MODEL_ITEM;
+            Left = Data::Items::ToModelSlot(Left);
     }
 
     if (SKKey == AT_SKILL_PENETRATION || SKKey == AT_SKILL_PENETRATION_STR)
