@@ -29,7 +29,10 @@ CInGameShopSystem::CInGameShopSystem()
     m_bIsShopOpenLock = true; //louis
     m_bIsBanner = false;
     m_bIsRequestEventPackage = false;
-    m_plistSelectPackage = NULL;
+    // Initalize() points this at the normal package list, but GetTotalPages() runs from
+    // RenderTexts() on every frame the shop is visible, which does not require Initalize() to
+    // have run. Start it where Initalize() leaves it so size() reads an empty list, not null.
+    m_plistSelectPackage = &m_listNormalPackage;
     m_bFirstScriptDownloaded = false;
     m_bFirstBannerDownloaded = false;
 }
