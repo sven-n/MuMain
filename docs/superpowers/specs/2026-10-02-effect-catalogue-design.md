@@ -2,8 +2,9 @@
 
 > **Draft, 2026-10-02.** Area FX1 of the
 > [data-driven content roadmap](2026-09-29-data-driven-content-roadmap-design.md).
-> Written from the code of MuMain `upstream/main` @ `b9362c5a` (with items
-> phase 4d2). The owner decided D27–D42 on 2026-10-02.
+> Written from the code of MuMain `upstream/main` @ `99b73b27` (the merge of
+> sven-n/MuMain#672, items phase 4d2). Line numbers are those of that code
+> with the fixes of this document. The owner decided D27–D42 on 2026-10-02.
 >
 > The counts come from scripts that parse the code (comments and switched-off
 > blocks removed, case groups and call arguments read), not from a compiler.
@@ -73,7 +74,7 @@ for data.
   type in two or more kinds, with different code in each; 4 are a type in
   all four (`BITMAP_LIGHT`, `BITMAP_SPARK+1`, `BITMAP_FLARE`,
   `BITMAP_PIN_LIGHT`). Code also passes an effect's own number on to
-  `CreateParticle` or `CreateSprite` (`ZzzEffect.cpp:1288`, 9303), so it
+  `CreateParticle` or `CreateSprite` (`ZzzEffect.cpp:1290`, 9274), so it
   relies on the numbers being equal across kinds.
 - **Names.** Most numbers have a descriptive enum name. 36 have none and
   are written as `BASE+n` (`MODEL_SKILL_FURY_STRIKE+1..+8`,
@@ -84,7 +85,7 @@ for data.
   `BITMAP_FIRE`) and once among the sprites.
 - **Computed numbers and ranges.** About 140 call sites compute the type
   (`MODEL_STONE1 + rand() % 2`), and code depends on ranges: the default
-  drawing only for 225–642 (`ZzzEffect.cpp:9643`), the model animation only
+  drawing only for 225–642 (`ZzzEffect.cpp:9614`), the model animation only
   from `MODEL_BIRD01`. So the numbers must stay as they are.
 
 ### The registry
@@ -94,18 +95,19 @@ The registry of sven-n/MuMain#493 (`Render/Effects/EffectRegistry.cpp`,
 values (`CreateParams`), a creation hook, a move handler and a render
 handler. A stage that has an entry replaces that stage's case in the old
 switch; a creation entry returns before the switch
-(`ZzzEffect.cpp:392-399`).
+(`ZzzEffect.cpp:394-401`).
 
 - 308 types have an entry: 32 with `CreateParams`, 2 with a creation hook,
   302 with a move handler (287 copied out of the old switch into 202
   functions in `Behaviors/MoveHandlers.cpp`, 15 written by hand), 1 with a
-  render handler.
+  render handler. FX1.0 adds one handler, `Move_BITMAP_JOINT_FORCE` (see
+  "Fixed with this document").
 - `CreateParams` has lifeTime, scale, velocity, gravity, hiddenMesh,
   blendMesh, blendMeshLight, alpha, light and copyLightToDirection. The 32
-  rows use lifeTime (32), scale (15), blendMesh (8), alpha (6), light (2),
-  velocity (2), blendMeshLight (1) and copyLightToDirection (1).
+  types (22 rows) use lifeTime (32), scale (15), blendMesh (8), alpha (6),
+  light (2), velocity (2), blendMeshLight (1) and copyLightToDirection (1).
 - The rows are C++ (`EffectRegistry.cpp:39`). The table is an array of
-  32,448 pointers indexed by type (the largest type is `BITMAP_DAMAGE1`),
+  32,470 pointers indexed by type (the largest type is `BITMAP_DAMAGE1`),
   built on first use. A lookup is a guard, a bounds check and one array
   read; it runs once per creation, once per live effect per frame and once
   per drawn effect per drawing pass.
@@ -116,7 +118,7 @@ switch; a creation entry returns before the switch
 
 - **Common setup.** `CreateEffect` takes the first free slot (and calls
   `IsSkillEffect` for every slot it tries), then sets 28 values
-  (`ZzzEffect.cpp:345-389`). It does not reset LifeTime, Gravity,
+  (`ZzzEffect.cpp:347-387`). It does not reset LifeTime, Gravity,
   StartPosition, HeadAngle, Distance, Timer, Weapon and others, so these
   keep the values of the slot's previous effect unless the case sets them.
   Particles do not reset Alpha and TurningForce; joints do not reset Scale,
@@ -125,9 +127,9 @@ switch; a creation entry returns before the switch
 
 | Cases / types | What they do | Example |
 |---|---|---|
-| 7 / 8 | Only values that today's `CreateParams` holds | `MODEL_KENTAUROS_ARROW`, `ZzzEffect.cpp:532` |
-| 26 / 26 | Only values, but more fields | `MODEL_DRAGON` (`:403`): CollisionRange, Kind, Timer, Distance, an angle, a position offset, Direction, StartPosition from Position |
-| 44 / 47 | Only values, chosen by SubType | `MODEL_MAGIC_CIRCLE1` (`:1477`) |
+| 7 / 8 | Only values that today's `CreateParams` holds | `MODEL_KENTAUROS_ARROW`, `ZzzEffect.cpp:534` |
+| 26 / 26 | Only values, but more fields | `MODEL_DRAGON` (`:405`): CollisionRange, Kind, Timer, Distance, an angle, a position offset, Direction, StartPosition from Position |
+| 44 / 47 | Only values, chosen by SubType | `MODEL_MAGIC_CIRCLE1` (`:1479`) |
 | 167 / 336 | Logic: spawning other effects (50 cases), global state (39), owner or skill values (17), only random values (47 cases, 172 types, mostly debris), other math (14) | `MODEL_GAION`, about 700 lines |
 
 - **Other inputs.** Effect creation calls `rand()` 471 times in 88 cases;
@@ -170,8 +172,11 @@ joint types are created with more than one SubType.
 ### Data files
 
 One file per kind in `src/bin/Data/Effects/` (D32), sorted by name, with
-default values left out. `code` is the enum symbol (D28); only the bare
-Hellas number is written as `"9"`.
+default values left out. `code` is the enum symbol (D28), with an offset
+where the code has no name (`MODEL_SKILL_FURY_STRIKE+1`). The one bare
+number, `CreateEffect(9, …)` in `GMHellas.cpp`, gets the name
+`MODEL_KALIMA_FALLING_STONE` in FX1.1 (world object slot 9, where the
+Kalima maps load the rock `Object25\Object10.bmd`).
 
 ```json
 {
@@ -208,7 +213,7 @@ Hellas number is written as `"9"`.
   turns the symbols into numbers. It only depends on the enum headers.
 - Loaded in `OpenBasicData` with the item model data. The load time is
   logged.
-- For effects, the registry's array of descriptors (32,448 entries) is
+- For effects, the registry's array of descriptors (32,470 entries) is
   built once after loading. Lookups stay a bounds check and one array read;
   names are only used while loading, for error messages and in the editor.
 - Creating an effect before the catalogue is loaded is logged as an error,
@@ -251,7 +256,7 @@ One PR each, small enough to check against the old code.
 | FX1.0 | Design document | items 4c | This document; the roadmap links it and gets the new counts. |
 | FX1.P | cppcheck fixes | – | Done with FX1.0: the findings of cppcheck in `ZzzEffect.cpp` and `MoveHandlers.cpp` are fixed, so later PRs can change these files. |
 | FX1.1 | Names for all types | FX1.0 | The compiled symbol lists, the four catalogue files with `name` and `code`, loader, validation, writer, `docs/effect-data.md`. No game code reads the catalogue yet. |
-| FX1.2 | Registry rows from data | FX1.1 | The 32 `CreateParams` of `EffectRegistry.cpp` move into `EffectTypes.json`; the registry table is built from the catalogue at loading. Handlers stay C++. |
+| FX1.2 | Registry rows from data | FX1.1 | The `CreateParams` of `EffectRegistry.cpp` (22 rows, 32 types) move into `EffectTypes.json`; the registry table is built from the catalogue at loading. Handlers stay C++. |
 | FX1.3 | The 8 types that fit `CreateParams` | FX1.2 | Their cases move into data and are deleted. Sets up the recorder. |
 | FX1.4 | More creation fields | FX1.3 | The fields the 26 value-only cases need; those cases move into data. |
 | FX1.5 | Variants by SubType | FX1.4 | `variants` in effect rows; the 47 types that choose values by SubType move. |
@@ -300,7 +305,18 @@ to FX2 all need it:
 - **Slots:** every pool slot filled with pattern A, then pattern B, so the
   types that read old values of a slot show up.
 - **Cases:** every moved type with each SubType its case handles, every
-  SubType callers pass, and one that no case handles.
+  SubType callers pass, and one that no case handles; also the types whose
+  case falls through into a moved case.
+- **Fallthrough:** a deleted case can be where a case above it without
+  `break` goes on. sven-n/MuMain#493 broke three this way
+  (`BITMAP_JOINT_FORCE`, the stone and bone debris, and
+  `MODEL_SUMMONER_EQUIP_HEAD_LAGUL`). Compiling `ZzzEffect.cpp` with clang
+  and `-Wimplicit-fallthrough` lists these places: 6 today, 5 in
+  `CreateEffect` (the bones, the big stones and the stones into
+  `MODEL_ICE_SMALL`, and one in the SubType switch of the Kundun parts) and
+  1 in `MoveEffect` (the stones and snow into the bones), all into cases
+  that stay code in FX1. Each one must land on the same code after a
+  deletion: a case that fell into a moved case calls its handler.
 - **Recorded:** the whole created slot, all pools (effects, skill effects,
   particles, joints, sprites), a `rand()` and a `Random::` sentinel, and
   the global state some cases change.
@@ -355,24 +371,53 @@ PR (D41). Each fix changes only what was broken:
   started to fall through into `MODEL_EFFECT_SAPITRES_ATTACK_1` instead,
   which pushed the Battle Castle effect away by 40 times its direction
   every frame and spawned that monster's attack effects, and left the Aida
-  effect without its fade. It runs the sword force handler again, as before
-  #493.
+  effect without its fade. Its move code is a registry handler now
+  (`Move_BITMAP_JOINT_FORCE`), which ends with the sword force handler, as
+  before #493.
+- **Stone, bone and snow debris** (`MODEL_STONE1`/`2`, `MODEL_SNOW2`/`3`,
+  `MODEL_BONE1`/`2`, `MODEL_BIG_STONE1`/`2`; 61 creation calls, 55 of them
+  with a SubType that reaches this code: the bones of dying skeletons, the
+  stones of Stone Golems, Crywolf, Kanturu, Hellas and more): their move
+  code fell through into the move code of `MODEL_ICE_SMALL` in the original
+  client (every SubType except 5, and for stones and snow also except 11, 13
+  and 14), so the debris of SubTypes 0, 10 and 12 flew out, slowed down,
+  fell and bounced (stones of SubTypes 0 and 12 threw fire sparks), and
+  that of SubTypes 1 and 2 rose (SubType 2 spinning). When
+  sven-n/MuMain#493 moved that code into a handler, the cases started to
+  fall through into `MODEL_EFFECT_BROKEN_ICE0` instead: SubType 0 moved by
+  the slot's old `HeadAngle` with an undamped drift, SubType 1 hung in the
+  air (or burst into ice when created below the ground), SubType 2 fell and
+  turned into a new SubType 0 stone, and SubTypes 10 and 12 slid on in a
+  straight line without gravity. They run the `MODEL_ICE_SMALL` handler
+  again, as before #493.
+- **`MODEL_SUMMONER_EQUIP_HEAD_LAGUL`** (the head that circles a summoner
+  with the Book of Lagle): its move code fell through into the move code of
+  the summoner casting effects and ran only their `BlendMeshLight` ramp.
+  Since sven-n/MuMain#493 it ran a block after their `break` and scrolled
+  `BlendMeshTexCoordV` too. It calls the casting effect handler now, as
+  before #493. Nothing changes in the game: the head has no blend mesh.
 - **The particle `BITMAP_SPARK + 1`, SubType 7** (`ZzzEffectParticle.cpp`):
   the position jitter was written to y, z and past the end of the position
   (`Position[3]`, which is `Angle[0]` of the particle). Now it goes to x, y
   and z; the three random draws stay the same.
-- **The blend-mesh passes** (`RenderEffects`, `RenderAfterEffects`): on water
-  maps they read `Models[o->Type]` for effects with a texture number
-  (`BITMAP_*`), far past the end of the model array. Effects without a model
-  skip that check now.
+- **The blend-mesh pass of `RenderEffects`** (only on water maps, where it
+  is called with `true`): it read `Models[o->Type]` for effects with a
+  texture number (`BITMAP_*`), far past the end of the model array. Effects
+  without a model skip that check now. `RenderAfterEffects` had the same
+  check in a branch that never ran (its only call passes no argument); the
+  branch and the parameter are gone, which changes nothing in the game.
 - **cppcheck findings** (FX1.P): four path points kept in an array of three
   (`arv3PosProcess` in the creation of the Gaion swords, an out-of-bounds
-  write, also MSVC warning C4789), an unused variable and a statement
-  without effect, and a macro call without its semicolon in `ZzzEffect.cpp`;
-  in `MoveHandlers.cpp` a distance read before it was set (now the distance
-  to the target, as the first move step would measure it), a
-  self-assignment, and a null check after the pointer was used
-  (`MODEL_ALICE_DRAIN_LIFE`). None of these changes a value in the game.
+  write, also MSVC warning C4789; in Release builds MSVC kept the points in
+  registers and the code is the same with the fix, Debug builds stopped
+  with a run-time check failure when Gaion's attack spawned the swords), an
+  unused variable and a statement without effect, and a macro call without
+  its semicolon in `ZzzEffect.cpp`; in `MoveHandlers.cpp` a distance read
+  before it was set (it only decided a block that wrote a local position
+  nothing reads, so the block and the distance are gone:
+  `MODEL_DEATH_SPI_SKILL`, `MODEL_PIER_PART`), a self-assignment, and a
+  null check after the pointer was used (`MODEL_ALICE_DRAIN_LIFE`). None of
+  these changes a value in the game.
 - With the files passing cppcheck, the last conversions of items phase 4d2
   follow: `RenderWheelWeapon` and `RenderFuryStrike` use `ToModelSlot`, and
   the spear check of the move handlers uses `ITEM_SPEAR`.
@@ -381,6 +426,14 @@ Still to check and file upstream: the owner is used without a null check in
 27 creation cases; 21 effect, 6 particle and 2 joint types have code but are
 never created (a script check; computed types may reach some), and 9 effect
 types are created but have no code (`MODEL_EX01_SHADOW_MASTER_*`).
+`MODEL_DEATH_SPI_SKILL` creates its ground circles at an uninitialized
+position (the first of a frame; the further ones of that frame at its
+rotated direction, a point near the map origin; `Move_MODEL_DEATH_SPI_SKILL`,
+also in the original client; the fix adds a visible effect, so the look
+needs a decision). 63 creation cases
+multiply one-time values (spawn offsets, start angles) by
+`FPS_ANIMATION_FACTOR`, so effects start in other places above 25 fps
+(from upstream's 2023 frame rate work; D34 keeps them as a flag).
 
 ## Open questions
 

@@ -913,16 +913,59 @@ types and model slots (4d2). 239 identify an item by its model slot
   map, for a maps area.
 - **Prices, requirements, durability** (about 16 places): fixed prices
   into `buyPrice`, price per durability, how requirements grow.
-- **Item stats by level** (phase 3c, D43): `ItemConvert` and its `Calc*`
-  functions (`ZzzInfomation.cpp`) compute what the item level adds. Damage
-  and magic power get +3 per level up to +9 and `level - 6` above; defense
-  gets 2, 3 or 4 per level up to +9 depending on the item, then `level - 5`
-  or `level - 6`; strength and agility requirements grow as
-  `20 + base * (drop level + 3 * level) * 3 / 100`; excellent items add
-  `damage * 25 / level + 5` (three chaos weapons have fixed values,
-  `GetExcellentAddValue`) and ancient items `5 + drop level / 40`. OpenMU
-  keeps the same as data (`ItemLevelBonusTable` per stat), so these become
-  named tables that a designer can change, shared in the item exchange.
+- **Item stats by level** (phase 3c, D43): `SetItemAttributes` and its
+  `Calc*` functions (`ZzzInfomation.cpp`; `ItemConvert` there is an empty
+  stub) compute what the item level adds. Here level is the item level
+  (`ip->Level`, 0 to 15), drop level the kind's `Level` (`p->Level`,
+  OpenMU's `DropLevel`) and base the kind's value; "above +9" adds
+  `level - 6` once, so +4 at +10 up to +9 at +15.
+  - Damage gets `3 * min(9, level)` and `level - 6` above +9. Magic power
+    gets the same, then the sum with the excellent and ancient bonuses is
+    halved and items that are not sceptres add `2 * level`.
+  - Defense gets 2, 3 or 4 times `min(9, level)` (2 for second tier wings
+    and the Capes of Lord and Fighter, 4 for third tier wings) and
+    `level - 5` (third tier wings) or `level - 6` above +9; shields get
+    only `+ level` and their ancient bonus.
+  - Blocking and magic defense add `3 * min(9, drop level)` and
+    `drop level - 6` when the drop level is above 9: they use `p->Level`
+    where damage uses `ip->Level`, so they never grow with the item level (a
+    kind with drop level 10 or more gets `drop level + 21` at every level).
+    This came with 815b8828; the client before used the item level there.
+  - Excellent items add `base * 25 / drop level + 5` to damage, magic power
+    and blocking (three chaos weapons have fixed values for damage and
+    magic power, `GetExcellentAddValue`) and
+    `base * 12 / drop level + 4 + drop level / 5` to defense, not to
+    shields. Excellent here means any excellent flag, so since 815b8828
+    wings and capes with a wing option (stored in those flags) get the
+    defense bonus and the + 25 drop level of the requirements too; the
+    client before left wings out and counted ancient items as excellent.
+  - Ancient items use `d = drop level + 30` (`GetDropLevel`): damage
+    `+ 5 + d / 40`, magic power `+ 2 + d / 60`, defense
+    `+ base + defense * 3 / d + 2 + d / 30` (the `+ base` also came with
+    815b8828; the client before added only `defense * 3 / d + 2 + d / 30`)
+    and shields `+ defense * 20 / d + 2`, with defense the value so far.
+  - Strength, agility and vitality requirements are
+    `20 + base * (drop level + 3 * level) * 3 / 100` and energy the same
+    with `* 4 / 100` (summoner books `+ level` instead of `+ 3 * level` and
+    `* 3 / 100`; group 15 kinds with a level requirement use
+    `20 + base * required level * 4 / 100` and the Orb of Summoning a fixed
+    value per level, 30 to 500), where drop level is + 25 for excellent and
+    otherwise + 30 for ancient items; command stays the base value.
+  - The level requirement grows by `4 * level` (5 for second tier wings)
+    only for first and second tier wings, the Cape of Fighter and items
+    from group 13 on except the Horn of Fenrir. Group 12 kinds from the
+    Wing of Dimension (12/43) on, except the Cape of Fighter, get none at
+    all: since 815b8828 the range `ITEM_WING_OF_DIMENSION` to
+    `ITEM_CAPE_OF_EMPEROR` is empty (before it ran to `ITEM_HELPER`), so the
+    Wing of Dimension and the Cape of Overrule lose their level 400. Most
+    excellent items that are not wings need 20 levels more.
+  - Wing options grow too (`CalcWingOptions`): max HP and max mana
+    `50 + 5 * level` for second tier wings and the capes, command
+    `10 + 5 * level` for the Cape of Lord.
+
+  OpenMU keeps the same as data (`ItemLevelBonusTable` per stat), so these
+  become named tables that a designer can change, shared in the item
+  exchange.
 - **Smaller kinds:** weapon kind for stances (10), ground height and light
   (8, extends 4b), names and colours outside `RenderItemInfo` (8, widens
   phase 8), ground label colours (7), transformation ring rules (6; their
