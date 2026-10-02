@@ -104,6 +104,7 @@ struct DebugWindowName
 
 constexpr DebugWindowName kDebugWindows[] = {
     {L"guard", mu::ui::window::INTERFACE_GUARDSMAN},
+    {L"ingameshop", mu::ui::window::INTERFACE_INGAMESHOP},
     {L"senatus", mu::ui::window::INTERFACE_SENATUS},
     {L"gateman", mu::ui::window::INTERFACE_GATEKEEPER},
     {L"gateswitch", mu::ui::window::INTERFACE_GATESWITCH},
