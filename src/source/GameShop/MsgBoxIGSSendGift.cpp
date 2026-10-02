@@ -79,7 +79,7 @@ void CMsgBoxIGSSendGift::InitInputBox()
     m_IDInputBox.GiveFocus();
 }
 
-void CMsgBoxIGSSendGift::Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, wchar_t* pszName, wchar_t* pszPrice, wchar_t* pszPeriod)
+void CMsgBoxIGSSendGift::Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, const wchar_t* pszName, const wchar_t* pszPrice, const wchar_t* pszPeriod)
 {
     m_iPackageSeq = iPackageSeq;
     m_iDisplaySeq = iDisplaySeq;

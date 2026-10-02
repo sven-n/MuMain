@@ -13,6 +13,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME buy_option_selection_tests
+    SOURCES
+        test_buy_option_selection.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameShop/BuyOptionSelection.cpp
+)
+
+mu_add_test(
     NAME storage_item_selection_tests
     SOURCES
         test_storage_item_selection.cpp

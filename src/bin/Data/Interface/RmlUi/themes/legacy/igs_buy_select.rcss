@@ -1,0 +1,46 @@
+/* The option list in the cash shop's package dialog: one row per price/period choice, with a
+   radio indicator. The pane counter-scales out of the dialog's root transform so its text stays
+   at the native renderer's physical size. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 215px;
+	height: 346px;
+	pointer-events: none;
+}
+
+/* Native placed the box at (17, 277) in left-down coordinates, 180 x 100 -- so its top edge is
+   277 - 100. The height here is the 3 rows it actually drew. */
+#igs_option_list {
+	position: absolute;
+	left: 17px;
+	top: 177px;
+	transform-origin: left top;
+	overflow: hidden scroll;
+	pointer-events: auto;
+}
+
+/* display: block is explicit: a data-for <div> is inline without it in this build. */
+.igs-option { position: relative; display: block; pointer-events: auto; }
+
+/* RenderDataLine() put the indicator at the row's left + 1 and the bold label at + 20. */
+.igs-option-radio {
+	position: absolute;
+	left: 1px;
+	top: 7px;
+	width: 13px;
+	height: 13px;
+	border: 1px rgb(120, 110, 96);
+	background-color: rgb(32, 30, 26);
+}
+.igs-option.selected .igs-option-radio { background-color: rgb(255, 196, 0); }
+
+.igs-option-label {
+	position: absolute;
+	left: 20px;
+	top: 5px;
+	white-space: nowrap;
+	font-weight: bold;
+	color: rgb(255, 230, 210);
+}

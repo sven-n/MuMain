@@ -121,6 +121,7 @@ constexpr DocumentPlacement Placements[] = {
     {"in_game_shop_bg.rml", 10.08f, MainScene},
     // The shop's own buy dialog, above the shop it opens from.
     {"igs_buy_package.rml", 10.09f, MainScene},
+    {"igs_buy_select.rml", 10.09f, MainScene},
     {"kanturu_enter.rml", 10.1f, MainScene},
     {"master_level.rml", 10.1f, MainScene},
     {"master_level_bg.rml", 10.1f, MainScene},
