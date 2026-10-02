@@ -898,6 +898,23 @@ static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
     if (msg->message == WM_CLOSE)
         return true;
 
+    // Let SDL own IME. If these reach WndProc/DefWindowProc, the default IME
+    // handling posts WM_IME_CHAR, so SDL emits a SECOND TEXT_INPUT (the commit is
+    // duplicated, e.g. "凱文" -> "凱文凱文"), and the native composition bypasses
+    // SDL's TEXT_EDITING preview (so 注音 composition/candidate UI never shows).
+    // Skipping WndProc here leaves SDL to handle these exclusively: one TEXT_INPUT
+    // on commit and TEXT_EDITING while composing.
+    switch (msg->message)
+    {
+    case WM_IME_STARTCOMPOSITION:
+    case WM_IME_COMPOSITION:
+    case WM_IME_ENDCOMPOSITION:
+    case WM_IME_CHAR:
+        return true;
+    default:
+        break;
+    }
+
     WndProc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
     return true;
 }
@@ -2052,6 +2069,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_ErrorReport.Write(L"> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
 
     g_hInst = hInstance;
+
+    // App renders the IME composition itself (see MuPlatform::Initialize); set before
+    // the first SDL init so SDL emits SDL_EVENT_TEXT_EDITING for 注音 composition.
+    SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "composition");
 
     // SDL owns the window; SDL_gpu owns the rendering device.
     if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
