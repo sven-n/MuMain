@@ -119,47 +119,31 @@ four independent pieces still keeping this file alive:
      `CharSelMainWin.cpp:324`'s unqualified call resolves to the member
      `CCharSelMainWin::DeleteCharacter()`, and `CMsgWin::RequestDeleteCharacter()` is the live path.
      Suspected dead, not verified to the standard `CWin`/`::CButton`/`CSlider` got before deletion.
-2. **`CUITextListBox<T>`** (~18 subclasses in `UIControls.h`) — no rule named this class before
-   2026-09-13 (only `CUIButton` was named), which is exactly why it kept gaining consumers even on
-   windows already on `mu::ui::window::CObject`. Confirmed live consumers found this session:
-   - `CGuildInfoWindow` (`Guild/GuildInfoWindow.h`) — `CUINewGuildMemberListBox`
-   - `CMixInventory` (`UI/Inventory/MixInventory.h`) — `CUISocketListBox`, `CUIUnmixgemList`
-   - `CInGameShop` (`GameShop/InGameShop.h`) — `CUIInGameShopListBox`, `CUIBuyingListBox`,
-     `CUIPackCheckBuyingListBox`
-   - ~~`QuestProgress.h`/`QuestProgressByEtc.h` — `CUIQuestContentsListBox`~~ **Done** (this
-     session): both windows ported to RmlUi wholesale (not just the list), sharing a
-     `UI::Quests::RewardModel` reward-row builder with `CMyQuestInfoWindow`'s own port off the same
-     class — see `migration-ledger.md`'s own rows for the full story.
-   - Guild/chat/letter/socket variants (`CUIGuildListBox`, `CUISimpleChatListBox`,
-     `CUIChatPalListBox`, `CUIWindowListBox`, `CUILetterListBox`/`CUILetterTextListBox`,
-     `CUIGuildNoticeListBox`, `CUIUnionGuildListBox`,
-     `CUIBCDeclareGuildListBox`/`CUIBCGuildListBox`, `CUIMoveCommandListBox`) — not yet traced to
-     live call sites individually; treat as live until checked, same discipline as the confirmed
-     ones above.
+2. **`CUITextListBox<T>`** ? eight subclasses remain: five Friend/Mail/Chat-room lists
+   (`CUISimpleChatListBox`, `CUILetterTextListBox`, `CUIChatPalListBox`, `CUIWindowListBox`,
+   `CUILetterListBox`) and three cash-shop lists (`CUIInGameShopListBox`, `CUIBuyingListBox`,
+   `CUIPackCheckBuyingListBox`). Rendering a list with RmlUi alone does not retire its native
+   input, scrolling, or storage.
 
-   The replacement pattern is proven, not speculative: RmlUi's `data-for` binding, already used by
-   `CBuffStrip` and by `CMyQuestInfoWindow`'s own port off two of these classes. Each remaining
-   subclass is an independent, same-shape port — see `ui-target-architecture.md` item 8b / Rule 11.
-3. **`CUIButton`** — down to one known live cluster now. `CUIPopup` (`g_pUIPopup`, `UI/Dialogs/
-   UIPopup.h`) had its `POPUP_OK`/`POPUP_YESNO` call sites (the ones duplicating
-   `CGenericConfirmDialog`'s job) ported off it 2026-09-13 (see "Tracked deferral:
-   `CommonMessageBox`/`CustomMessageBox`" below) — but `CUIPopup` itself is **not** retired: one
-   live `POPUP_CUSTOM` call site remains (`UIGuildInfo.cpp`'s "Appoint" sub-guild-master/
-   battle-master picker, a bespoke multi-option menu out of `CGenericConfirmDialog`'s scope), so
-   its 4 `CUIButton` members (`m_OkButton`/`m_CancelButton`/`m_YesButton`/`m_NoButton`) are now
-   unreachable dead weight but the class itself stays. The other cluster,
-   `CUIGuildInfo`/`CUIGuildMaster` (`Guild/UIGuildInfo.h`/`UIGuildMaster.h`), is suspected dead —
-   see below (note: `CUIGuildMaster`'s dead `ReceiveGuildRelationShip`/`CloseMyPopup`/two popup-id
-   members were already deleted 2026-09-13 as part of the `CUIPopup` port, superseded by
-   `CGuildInfoWindow`'s own port earlier — the rest of the "suspected dead" verification below
-   still applies to what's left of both classes).
-4. **`CUIGuildInfo`/`CUIGuildMaster`** (`CUIControl`-rooted standalone windows, distinct from the
-   live `CGuildInfoWindow`/`CGuildMakeWindow` pair on `mu::ui::window::CObject`) — a full-codebase
-   grep found **zero instantiations of either class anywhere** (no `new`, no member declaration in
-   any other type). Strong circumstantial evidence of dead code superseded by
-   `CGuildInfoWindow`/`CGuildMakeWindow`, same shape as `CWin`/`::CButton`/`CSlider` before they
-   were deleted — but not yet given that same exhaustive verification pass. Do that verification
-   before deleting anything.
+   GuildInfo, MixInventory socket selection, Lahap jewel dismantling, and Guard guild lists now
+   use plain data and RmlUi row selection/scrolling in both themes. Their old widget classes are
+   removed. Runtime acceptance remains pending, including the siege-only Guard states.
+   Lahap belongs to `GameLogic/Items/CComGem`, with its presentation in `CustomMessageBox`;
+   it was incorrectly listed as a MixInventory-owned control in the original inventory.
+   The unused quest, move-command, and older guild-list classes have also been removed.
+
+   Remaining live hosts must migrate their state and input along with presentation. The
+   `data-for` and shared scrolling-pane patterns are documented in `component-catalog.md`.
+3. **`CUIButton`** ? still used by the Friend/Mail/Chat-room subsystem. Its rows, prompts,
+   text fields, photo viewer, window lifecycle, and focus routing need a coordinated host port.
+4. **Verified dead branches** ? `CUIGuildInfo`, `CUIGuildMaster`, `CUIPopup`, and the unused
+   legacy chat-input wrapper have been removed. These are distinct from the live
+   `CGuildInfoWindow` and `CGuildMakeWindow`.
+
+Slide-help widgets and global legacy text-input/focus routing also remain live. Their removal,
+plus the shop and Friend/Mail ports, is required before `UIControls.h/.cpp` can be deleted.
+Shared text rendering, text wrapping, and IME state have been extracted; this does not imply that
+all legacy input consumers or either IME integration stack has been retired.
 
 **Related finding, same investigation**: `CUIManager`/`g_pUIManager` (`UI/Core/UIManager.h/.cpp`)
 looks like a live top-level manager parallel to `mu::ui::window::CManager` — it isn't. Its

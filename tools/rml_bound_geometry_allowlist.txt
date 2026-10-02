@@ -46,8 +46,8 @@ generic_menu_dialog.rml: per-frame data -- native companion geometry for the men
 gens_ranking.rml: display-list port, and mirrors the native list's scrollbar geometry
 gold_bowman.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
 gold_bowman_lena.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
-guard_window.rml: the guild list rows, scroll track and thumb mirror the native CUITextListBox's scroll position, which still owns the lists' data, wheel/PgUp/PgDn and selection -- no client-reachable siege state renders either list, so retiring them cannot be validated; plus the tab and button labels' top from the live line height. Residue: the tab strip's `12 + i * 57` is index arithmetic in the markup
-guild_info.rml: display-list port, and mirrors the native list's scrollbar geometry
+guard_window.rml: native text metrics require counter-scaled list panes and tab/button label offsets; RmlUi owns list scrolling and selection. Residue: tab strip index arithmetic in the markup
+guild_info.rml: counter-scale bridge -- native text metrics; all three lists use RmlUi scrolling
 guild_make.rml: counter-scale bridge -- the button labels' top from the live line height
 item_endurance.rml: per-frame data -- the hovered item's tooltip follows the mouse (clamped to the screen edge); the pet bars are lengths from their health; the left column is a flow whose rows depend on whether the elf's arrow line is shown and which frames exist, and its names are screen-converted physical px; the icon column's start is right-anchored to the live screen width, which is the window's to decide -- the pack inside it is the theme's
 item_explanation.rml: per-frame data -- placed against the hovered item
@@ -57,7 +57,7 @@ login_scene.rml: per-frame data -- scene sprites scale on their own 800x600 form
 lucky_coin_exchange.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
 lucky_coin_registration.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
 map_name.rml: per-frame data -- the name slides in; its offset is per frame
-message_box_view.rml: every line is centred by measurement (centre - MeasureText().cx / 2) and stacked by measured height, so its geometry genuinely varies per frame; most buttons come from the box's own CMessageBoxButton, and its list mirrors the native list's scrollbar. Residue: one box class (CGuildAppointMsgBox) has four literal button positions, which cannot move to RCSS while every box class shares this one document -- splitting it per class is the prerequisite
+message_box_view.rml: every line is centred by measurement (centre - MeasureText().cx / 2) and stacked by measured height, so its geometry genuinely varies per frame; most buttons come from the box's own CMessageBoxButton, and its jewel list preserves native text metrics in a counter-scaled RmlUi scroll pane. Residue: one box class (CGuildAppointMsgBox) has four literal button positions, which cannot move to RCSS while every box class shares this one document -- splitting it per class is the prerequisite
 mini_map.rml: per-frame data -- each .clip is a region of the window the map may paint in, carved around the native bottom HUD's band from the live window size, with .world offsetting its copy of the picture back to window coordinates; a marker's size and turned quad are its own; the location hint is sized to its measured text and placed where the pointer is. The map's own art is turned 45 degrees in physical px (MiniMapLayout.h), which is why this document has no reference-px space for a theme to work in
 move_command.rml: per-frame data -- panel height follows the row count
 mu_helper_detail.rml: counter-scale bridge -- gauge fills; the gauge port is a tracked deferral
@@ -78,7 +78,7 @@ themes/legacy/help_window.rml: per-frame data -- native renderer geometry for th
 themes/legacy/lucky_item.rml: counter-scale bridge -- counter-scaled text layers
 themes/legacy/lucky_item_bg.rml: counter-scale bridge -- counter-scaled text layers
 themes/legacy/main_frame.rml: per-frame data -- the health/mana/SD/AG gauges and every cooldown wipe are fractions, and the expanded skill grid's cells come from RebuildGridSnapshot()'s zig-zag, whose position is computed from a cell's ordinal among the skills actually learned (the same accepted computed fan-out as MuHelperSkillPicker's). #bars carries the bottom-HUD anchor, which is this document's root-placement bridge under its own name
-themes/legacy/mix_inventory.rml: display-list port, and mirrors the native list's scrollbar geometry
+themes/legacy/mix_inventory.rml: counter-scale bridge -- recipe line spacing and text size; socket list uses RmlUi scrolling
 themes/legacy/system_log.rml: per-frame data -- native renderer geometry for the lines it still measures
 themes/legacy/tooltip.rml: per-frame data -- tooltip is placed against the pointer
 themes/legacy/trade.rml: counter-scale bridge -- counter-scaled text layers
@@ -89,7 +89,6 @@ themes/modern/lucky_item.rml: counter-scale bridge -- counter-scaled text layers
 themes/modern/lucky_item_bg.rml: counter-scale bridge -- counter-scaled text layers
 themes/modern/main_frame.rml: per-frame data -- the health/mana/SD/AG gauges and every cooldown wipe are fractions, and the expanded skill grid's cells come from RebuildGridSnapshot()'s zig-zag, whose position is computed from a cell's ordinal among the skills actually learned (the same accepted computed fan-out as MuHelperSkillPicker's). #bars carries the bottom-HUD anchor, which is this document's root-placement bridge under its own name
 themes/modern/main_frame_bg.rml: per-frame data -- HUD chrome follows the same anchors, per frame
-themes/modern/mix_inventory.rml: display-list port, and mirrors the native list's scrollbar geometry
 themes/modern/mu_helper_detail.rml: counter-scale bridge -- gauge fills; the gauge port is a tracked deferral
 themes/modern/npc_quest.rml: counter-scale bridge -- message/answer tops -- its own tracked deferral, see tracked-deferrals.md
 themes/modern/party_info.rml: counter-scale bridge -- counter-scaled member rows

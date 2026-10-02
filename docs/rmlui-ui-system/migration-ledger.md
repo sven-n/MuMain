@@ -94,7 +94,7 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 | `CPartyInfoWindow` | `CObject`-tier | Done (2026-09-19) | RmlUi-only 2D | No live-3D content, same shape as `CCharacterInfoWindow`. Looser docking than `CPetInfoWindow`: opens standalone (just closes Character/Inventory first via `HideAllGroupA()`), no forced pairing — `WindowSystem.cpp` needed zero changes. Member rows (`RenderMemberStatue`'s `iIndex * 71` pixel math) ported to a `data-for` list stacked via normal block flow (`height: 71px` per row) instead of computed offsets — first repeated-row list in this codebase built directly against a live global array (`Party[]`/`PartyNumber`) each frame rather than a cached snapshot, since the row count is small (`MAX_PARTYS` = 5). `IMAGE_LIST` enum and `LoadImages()`/`UnloadImages()` kept despite the window no longer rendering through the legacy bitmap-atlas system, same reason `CCharacterInfoWindow` kept its own — `CPartyListWindow` aliases two of this window's texture slot IDs. Frame/shell now shared with `CCharacterInfoWindow`/`CMyQuestInfoWindow`/`CPetInfoWindow` via `docked_panel_frame.rcss` (both themes) — see `STATUS.md`'s dock-neighbor gap note for why this exists. |
 | `CFriendWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D; `CUIPhotoViewer` native 3D | `friend_window.rml` + both themes, one document and data model per open window of `CUIWindowMgr` (`UI/Party/FriendWindowView`). A window type opts in with `HasRmlView()`; `CollectRmlView()` updates its parts (frame, title bar, tabs, lists, scroll bars, buttons, check boxes) every frame from the native geometry, in place (an unchanged frame formats nothing); hit tests, drags, resizing and messages stay native. Ported: the main window with its friends list, letter box and window list tabs; `CUITextInputWindow` (add friend), `CUIQuestionWindow`, `CUILetterWriteWindow`, `CUILetterReadWindow`, `CUIChatWindow`. Text fields are RmlUi `<input>` / `<textarea>` elements of the window's document (`GetRmlTextField()`); the native `CUITextInputBox` keeps the value, focus requests and Enter / Tab. The letter windows' photo viewer is drawn natively after the window (`RenderOver()`), over an underlay document in the background context |
 | `CGuildMakeWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `guild_make.rml` + both themes. |
-| `CGuildInfoWindow` | `CObject`-tier | Done (2026-09-28) | RmlUi-only 2D | `guild_info.rml` + both themes with its list widgets; the alliance-master notice stays `CGenericConfirmDialog`. |
+| `CGuildInfoWindow` | `CObject`-tier | Implemented; runtime pending | RmlUi-only 2D | All three lists use RmlUi scrolling and plain data; the alliance-master notice remains `CGenericConfirmDialog`. |
 
 ### Quests
 
@@ -197,7 +197,7 @@ been individually ported. What's left, by current grep of the two headers:
 | Component | Status | Target primitive | Detail pointer |
 |---|---|---|---|
 | `CGuild_ToPerson_Position` | Done (2026-09-28) | RmlUi (shared `UI/Dialogs/MessageBoxView`) | `component-catalog.md`'s Dialog section |
-| `CGemIntegrationDisjointMsgBox` | Done (2026-09-28) | RmlUi (shared `MessageBoxView` with a list part for its `CUIUnmixgemList`) | The list keeps its native hit tests, selection and scrolling |
+| `CGemIntegrationDisjointMsgBox` | Implemented; runtime pending | RmlUi (`MessageBoxView` with a scrolling jewel list) | Plain item selection; stale items rejected again at confirmation |
 | `CQuestCountLimitMsgBoxLayout` (`CCommonMessageBox`) | Compiled out | — | Its only creator, `ReceiveQuestLimitResult()`, is under `ASG_ADD_TIME_LIMIT_QUEST`, which this build does not define |
 | `CBloodCastleResultMsgBoxLayout` | Done (2026-09-28) | RmlUi (`MessageBoxView`) | Texts from the match object's `CollectMatchResult()`, which the native drawing uses too |
 | `CDevilSquareRankMsgBoxLayout` | Done (2026-09-28) | RmlUi (`MessageBoxView`) | As above |
@@ -214,27 +214,28 @@ live-3D item content; its only user is the cash shop's `MsgBoxIGSStorageItemInfo
 ## `CUIControl` list family (`UI/Widgets/UIControls.h`)
 
 The `data-for` binding pattern is proven (`component-catalog.md`'s "List / repeated rows"); the list
-widgets retire with their host windows. As of 2026-09-28 only the three cash shop lists that stay
-with `CInGameShop` still draw natively.
+widgets retire with their host windows. Eight list widgets remain: five in Friend/Mail/Chat-room
+and three in the cash shop. Earlier Done entries describe rendering ports; only Removed entries
+mean the native widget is gone. New list migrations still require runtime acceptance.
 
 | Component | Row type | Status | Detail pointer |
 |---|---|---|---|
-| `CUICurQuestListBox` | `SCurQuestItem` | Done | `component-catalog.md` — `CMyQuestInfoWindow`'s quest list |
-| `CUIQuestContentsListBox` | `SQuestContents` | Done | `component-catalog.md` — same window |
-| `CUIGuildListBox` | `GUILDLIST_TEXT` | Unused | Only an `extern` declaration in `ZzzInventory.cpp` is left; no window draws it |
+| `CUICurQuestListBox` | `SCurQuestItem` | Removed | Quest hosts use RmlUi |
+| `CUIQuestContentsListBox` | `SQuestContents` | Removed | Quest hosts use RmlUi |
+| `CUIGuildListBox` | `GUILDLIST_TEXT` | Removed | No live consumer; shared record remains for Friends |
 | `CUISimpleChatListBox` | `WHISPER_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Party/FriendWindowRmlParts.cpp`) |
 | `CUILetterTextListBox` | `LETTER_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Party/FriendWindowRmlParts.cpp`) |
 | `CUIChatPalListBox` | `GUILDLIST_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Party/FriendWindowRmlParts.cpp`) |
 | `CUIWindowListBox` | `WINDOWLIST_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Party/FriendWindowRmlParts.cpp`) |
 | `CUILetterListBox` | `LETTERLIST_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Party/FriendWindowRmlParts.cpp`) |
-| `CUISocketListBox` | `SOCKETLIST_TEXT` | Done (2026-09-28) | `mix_inventory.rml` (`SyncSocketListModel()`); hit tests, selection and scrolling stay native |
-| `CUIGuildNoticeListBox` | `GUILDLOG_TEXT` | Done (2026-09-28) | `CGuildInfoWindow` port (`guild_info.rml`) |
-| `CUINewGuildMemberListBox` | `GUILDLIST_TEXT` | Done (2026-09-28) | `CGuildInfoWindow` port (`guild_info.rml`) |
-| `CUIUnionGuildListBox` | `UNIONGUILD_TEXT` | Done (2026-09-28) | `CGuildInfoWindow` port (`guild_info.rml`) |
+| `CUISocketListBox` | `SOCKETLIST_TEXT` | Removed; runtime pending | `mix_inventory.rml`; plain socket state, RmlUi scrolling and selection |
+| `CUIGuildNoticeListBox` | `GUILDLOG_TEXT` | Removed; runtime pending | `guild_info.rml`; announcement flow pane |
+| `CUINewGuildMemberListBox` | `GUILDLIST_TEXT` | Removed; runtime pending | `guild_info.rml`; selection by member name; shared record remains for Friends |
+| `CUIUnionGuildListBox` | `UNIONGUILD_TEXT` | Removed; runtime pending | `guild_info.rml`; selection by allied guild name |
 | `CUIExtraItemListBox` | `FILTERLIST_TEXT` | Deleted | Its only user, the MU Helper config window, now binds a `data-for` list in a `.scroll-pane` |
-| `CUIUnmixgemList` | `UNMIX_TEXT` | Done (2026-09-28) | The list part of `CGemIntegrationDisjointMsgBox`'s `MessageBoxView`; hit tests, selection and scrolling stay native |
-| `CUIBCDeclareGuildListBox` | `BCDECLAREGUILD_TEXT` | Done (2026-09-28) | `CGuardWindow` port (`guard_window.rml`) |
-| `CUIBCGuildListBox` | `BCGUILD_TEXT` | Done (2026-09-28) | `CGuardWindow` port (`guard_window.rml`) |
+| `CUIUnmixgemList` | `UNMIX_TEXT` | Removed; runtime pending | Lahap uses plain item identity and a RmlUi scrolling list in `MessageBoxView` |
+| `CUIBCDeclareGuildListBox` | `BCDECLAREGUILD_TEXT` | Removed; runtime pending | Guard declaration rows; RmlUi selection and scrolling |
+| `CUIBCGuildListBox` | `BCGUILD_TEXT` | Removed; runtime pending | Guard siege rows and score footer; RmlUi selection and scrolling |
 | `CUIMoveCommandListBox` | `MOVECOMMAND_TEXT` | Unused | No user left; `CMoveCommandWindow` binds its own `data-for` list |
 | `CUIInGameShopListBox` | `IGS_StorageItem` | Not started | `tracked-deferrals.md` |
 | `CUIBuyingListBox` | `IGS_BuyList` | Not started | `tracked-deferrals.md` |

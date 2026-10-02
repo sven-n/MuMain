@@ -1,4 +1,25 @@
 mu_add_test(
+    NAME guard_guild_lists_tests
+    SOURCES
+        test_guard_guild_lists.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Combat/GuardGuildLists.cpp
+)
+
+mu_add_test(
+    NAME jewel_unmix_selection_tests
+    SOURCES
+        test_jewel_unmix_selection.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Items/JewelUnmixSelection.cpp
+)
+
+mu_add_test(
+    NAME socket_list_selection_tests
+    SOURCES
+        test_socket_list_selection.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Inventory/SocketListSelection.cpp
+)
+
+mu_add_test(
     NAME input_box_config_tests
     SOURCES test_input_box_config.cpp
     LINK_LIBS MuClient

@@ -87,47 +87,13 @@ typedef struct
     wchar_t m_szText[MAX_LETTERTEXT_LENGTH + 1];
 } LETTER_TEXT;
 
-typedef struct
-{
-    BOOL m_bIsSelected;
-    BYTE GuildMark[64];
-    wchar_t szName[MAX_GUILDNAME + 1];
-    int nMemberCount;
-} UNIONGUILD_TEXT;
 
-typedef struct
-{
-    BOOL m_bIsSelected;
-    wchar_t szName[MAX_GUILDNAME + 1];
-    int nCount;
-    BYTE byIsGiveUp;
-    BYTE bySeqNum;
-} BCDECLAREGUILD_TEXT;
 
-typedef struct
-{
-    BOOL m_bIsSelected;
-    wchar_t szName[MAX_GUILDNAME + 1];
-    BYTE byJoinSide;
-    BYTE byGuildInvolved;
-    int iGuildScore;
-} BCGUILD_TEXT;
 
-typedef struct _UNMIX_TEXT
-{
-    BOOL m_bIsSelected;
-    int m_iInvenIdx;
-    char m_cLevel;
 
-    _UNMIX_TEXT() : m_bIsSelected(false), m_iInvenIdx(-1), m_cLevel(-1) {}
-} UNMIX_TEXT;
 
-typedef struct _SOCKETLIST_TEXT
-{
-    BOOL m_bIsSelected;
-    int m_iSocketIndex;
-    wchar_t m_szText[64 + 1];
-} SOCKETLIST_TEXT;
+
+
 
 enum UI_MESSAGE_ENUM
 {
@@ -610,139 +576,6 @@ protected:
     int m_iColumnWidth[4];
     BOOL m_bForceEditList;
 };
-
-class CUISocketListBox : public CUITextListBox<SOCKETLIST_TEXT>
-{
-public:
-    CUISocketListBox();
-    virtual ~CUISocketListBox() {}
-
-    virtual void AddText(int iSocketIndex, const wchar_t* pszText);
-    virtual void DeleteText(int iSocketIndex);
-    virtual void SetNumRenderLine(int iLine);
-    SOCKETLIST_TEXT* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-
-    // The y (reference px) Render() draws line `iLineNumber` at.
-    virtual int GetRenderLinePos_y(int iLineNumber);
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber);
-};
-
-class CUIUnionGuildListBox : public CUITextListBox<UNIONGUILD_TEXT>
-
-{
-public:
-    CUIUnionGuildListBox();
-    virtual ~CUIUnionGuildListBox() {}
-
-    virtual void AddText(BYTE* pGuildMark, const wchar_t* szGuildName, int nMemberCount);
-    virtual void DeleteText(DWORD dwGuildIndex);
-    virtual int GetTextCount();
-    virtual void SetNumRenderLine(int iLine);
-    UNIONGUILD_TEXT* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-
-    // The y (reference px) Render() draws line `iLineNumber` at.
-    virtual int GetRenderLinePos_y(int iLineNumber);
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber);
-};
-class CUIUnmixgemList : public CUITextListBox<UNMIX_TEXT>
-{
-public:
-    CUIUnmixgemList();
-    virtual ~CUIUnmixgemList() {}
-    virtual void SetNumRenderLine(int iLine);
-    UNMIX_TEXT* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-    virtual void AddText(int iIndex, BYTE cComType);
-    void Sort();
-
-    // The text RenderDataLine() draws for `line`: the jewel's name and its bundle size.
-    std::wstring GetLineText(const UNMIX_TEXT& line) const;
-    // The y (reference px) Render() draws line `iLineNumber` at.
-    virtual int GetRenderLinePos_y(int iLineNumber);
-
-    inline bool IsNotified()
-    {
-        return m_bNotify;
-    }
-    inline bool IsEmpty()
-    {
-        return m_TextList.empty();
-    }
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber);
-
-    bool m_bNotify;
-};
-
-class CUIBCDeclareGuildListBox : public CUITextListBox<BCDECLAREGUILD_TEXT>
-
-{
-public:
-    CUIBCDeclareGuildListBox();
-    virtual ~CUIBCDeclareGuildListBox() {}
-
-    virtual void AddText(const wchar_t* szGuildName, int nMarkCount, BYTE byIsGiveUp, BYTE bySeqNum);
-    virtual void DeleteText(DWORD dwGuildIndex);
-    virtual void SetNumRenderLine(int iLine);
-    BCDECLAREGUILD_TEXT* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-    void Sort();
-
-    // The y (reference px) Render() draws line `iLineNumber` at.
-    virtual int GetRenderLinePos_y(int iLineNumber);
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber);
-};
-
-class CUIBCGuildListBox : public CUITextListBox<BCGUILD_TEXT>
-
-{
-public:
-    int Select_Guild;
-    CUIBCGuildListBox();
-    virtual ~CUIBCGuildListBox() {}
-
-    virtual void AddText(const wchar_t* szGuildName, BYTE byJoinSide, BYTE byGuildInvolved, int iGuildScore);
-    virtual void DeleteText(DWORD dwGuildIndex);
-    virtual void SetNumRenderLine(int iLine);
-    BCGUILD_TEXT* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-
-    // The y (reference px) Render() draws line `iLineNumber` at.
-    virtual int GetRenderLinePos_y(int iLineNumber);
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber);
-};
-
 
 struct InputBoxConfig
 {
