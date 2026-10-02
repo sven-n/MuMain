@@ -44,8 +44,8 @@ namespace mu::ui::window
     // so that in-place swap becomes "close this menu, open a different one" via the same
     // reentrant-Show()-during-click chaining ShowTrainerMenuDialog()/ShowTrainerRecoverDialog()
     // already prove. COMGEM (GameLogic/Items/CComGem.h) is the shared state the 3 phases read/write.
-    // CGemIntegrationDisjointMsgBox stays native (embedded live inventory list-selection widget,
-    // a different problem chaining doesn't solve).
+    // CGemIntegrationDisjointMsgBox draws through MessageBoxView; its jewel choice is
+    // GameLogic::Items::JewelUnmixSelection, not an embedded native list widget.
     void ShowGemIntegrationMenuDialog();  // entry selector: Unity / Disjoint / Cancel
     void ShowGemIntegrationJewelDialog(); // Unity phase 1: pick a jewel type
     void ShowGemIntegrationMixDialog();   // Unity phase 2: pick a mix-amount tier
