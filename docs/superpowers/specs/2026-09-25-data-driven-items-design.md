@@ -402,6 +402,7 @@ in both repos (as separate PRs, one per repo).
 | 2 | Data file format and names | Client | MuMain | 1 | JSON per group becomes the only item source and the database becomes the source for `ItemAttribute[]`; translated names in the UI locale; loading, writing and validation rules; automated data test; bmd import (with repair) and export in MuEditor; editor edits go into the database right away. |
 | 3 | Rules and categories into data | Client | MuMain | 2 | Flags and tags replace the hardcoded lists; client ↔ OpenMU rule mapping (input for A). |
 | 3b | Remaining item lists | Client | MuMain | 3 | The lists of item ids outside the phase 3 files that repeat data that exists or need one new tag (see "Item-specific code that is left"), checked like phase 3. |
+| 3c | Item stats by level | Both | MuMain (+ mapping for A) | 3 | How damage, defense, magic power, blocking and requirements change with the item level, and the bonus of excellent and ancient items, become named level bonus tables and formula parameters in data (D43), matching OpenMU's `ItemLevelBonusTable`; checked against the old formulas for every item and level. |
 | A | Server rule fields and checks | Server | OpenMU | 3 (mapping) | New `ItemDefinition` fields or tables, migration, Season 6 values, update plug-in, enforcement in player actions. |
 | 4 | Models into data | Client | MuMain | 2 | Model files per item group (D22), model slots stay `MODEL_ITEM + type` (D23, own model slots). One PR per part: **4a** model files and textures (`OpenItems()` / `OpenItemTextures()`), **4b** inventory and ground display, **4c** render effects (D24) in three parts: **4c1** glow, **4c2** render styles, **4c3** item effects. |
 | 4d | Shared models | Client | MuMain | 4 | Models as entries of their own that items reference by name, so items can share a model (D23, shared models). Two PRs: **4d1** shared model entries, each file opened once; **4d2** the conversions between item types and model slots in one place, and shared model data freed by its last user. |
@@ -912,6 +913,16 @@ types and model slots (4d2). 239 identify an item by its model slot
   map, for a maps area.
 - **Prices, requirements, durability** (about 16 places): fixed prices
   into `buyPrice`, price per durability, how requirements grow.
+- **Item stats by level** (phase 3c, D43): `ItemConvert` and its `Calc*`
+  functions (`ZzzInfomation.cpp`) compute what the item level adds. Damage
+  and magic power get +3 per level up to +9 and `level - 6` above; defense
+  gets 2, 3 or 4 per level up to +9 depending on the item, then `level - 5`
+  or `level - 6`; strength and agility requirements grow as
+  `20 + base * (drop level + 3 * level) * 3 / 100`; excellent items add
+  `damage * 25 / level + 5` (three chaos weapons have fixed values,
+  `GetExcellentAddValue`) and ancient items `5 + drop level / 40`. OpenMU
+  keeps the same as data (`ItemLevelBonusTable` per stat), so these become
+  named tables that a designer can change, shared in the item exchange.
 - **Smaller kinds:** weapon kind for stances (10), ground height and light
   (8, extends 4b), names and colours outside `RenderItemInfo` (8, widens
   phase 8), ground label colours (7), transformation ring rules (6; their

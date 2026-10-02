@@ -35,13 +35,15 @@ in `ZzzCharacter.cpp`.
 
 ## Shared decisions
 
-These decisions were made in the items design; they keep their numbers,
-so the references there stay valid.
+These decisions were made in the items design (D25, D26) and the effect
+catalogue design (D43); they keep their numbers, so the references there
+stay valid.
 
 | # | Topic | Decision |
 |---|---|---|
 | D25 | Looks in data | Items, skills, monsters and NPCs reference their looks by name (for items: the render style and the item effect; the glow colors already are names in data). What a named look is made of moves from code into data files in `Data/Effects/`: a list of building blocks, namely draw passes (mesh or body, flags, texture, color, alpha, texture scrolling), things placed on bones (sprites, particles, lightning between two bones, effects), animated object values (glow mesh brightness, hidden mesh, texture scrolling), timing (pulses, random chances per frame) and conditions (item level, doppelganger, ...). The drawing code runs these lists; data that names looks stays valid when their definitions move. One look format and one look editor for all areas: a look made for an item can be used by a monster. Effect and particle types are referenced by the names of the effect catalogue (FX1) and become data themselves later (FX2). |
 | D26 | Shared definitions | Anything that several things use is defined once, with a name, in a data file, and its users reference that name: glow colors, looks, effect types, skills. Editors show where a definition is used (items, skills, monsters, NPCs, other effects). Saving a change to a definition that others use first shows the list of those users; a copy makes a variant for one user; renaming updates all references; a definition that is still used cannot be deleted (the list shows why). Unknown names are reported when loading. Names are resolved when loading, so drawing and game logic never look names up. Every move from code into data is compared with the old code (recorder) before the old code goes. |
+| D43 | Logic as data where it is meaningful | Not only values and lists: functions and logic can become configurable data too, wherever changing them is meaningful, that is, something a designer wants to adjust and can understand: how an item's stats change with its level, the bonus of excellent and ancient items, how requirements grow, which items a rule applies to, how an effect moves and fades (FX2). It is written as named tables and building blocks with parameters, not as code transcribed statement by statement. Each move says who would change it and why, stays checkable against the old code, and is resolved when loading. Logic without a meaningful knob (the exact order of random draws in an effect's creation, protocol decoding) stays code. Decided with the effect catalogue design (2026-10-02). |
 
 ## Bones
 

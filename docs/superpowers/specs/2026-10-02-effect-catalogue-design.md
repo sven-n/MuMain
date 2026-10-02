@@ -3,8 +3,7 @@
 > **Draft, 2026-10-02.** Area FX1 of the
 > [data-driven content roadmap](2026-09-29-data-driven-content-roadmap-design.md).
 > Written from the code of MuMain `upstream/main` @ `b9362c5a` (with items
-> phase 4d2). The owner decided D27–D42 on 2026-10-02, except D36, which is
-> marked *(to decide)*.
+> phase 4d2). The owner decided D27–D42 on 2026-10-02.
 >
 > The counts come from scripts that parse the code (comments and switched-off
 > blocks removed, case groups and call arguments read), not from a compiler.
@@ -18,7 +17,8 @@ gets a name, and the creation values of effects move into data in
 `src/bin/Data/Effects/`. Items, skills and monsters then name effect types
 in their data instead of using type numbers in code (items phase 13, SK2,
 MN). Behavior stays code: how effects move, spawn and draw moves into data
-later, in FX2.
+later, in FX2, as building blocks wherever adjusting them is meaningful
+(D43 of the roadmap).
 
 As for the items: nothing changes in game, nothing gets slower in game
 (names are resolved when loading), and every move from code into data is
@@ -40,7 +40,7 @@ decision can move to the roadmap without being renumbered.
 | D33 | Loading and lookup | The catalogue is loaded once on the loading screen, next to the item model data, before the first effect is created. The registry table is built from it: the same array indexed by type, not changed after loading. A lookup stays a bounds check and one array read. No names, strings or allocations after loading. |
 | D34 | Creation values | A registry row replaces the whole legacy case, so a type moves only when every statement of its case can be written as data. `CreateParams` gets exactly the fields the moved cases need. Values are applied in one fixed order (values, then offsets, then copies). An unset field keeps what the common setup chose, or the slot's old value where the common setup sets nothing. Values the old code multiplies by `FPS_ANIMATION_FACTOR` keep that as a flag. |
 | D35 | Variants by SubType | A row can hold `variants` keyed by SubType that override its values (44 cases, 47 types choose only values by SubType). |
-| D36 | Random and logic creation *(to decide)* | Cases with `rand()` and the cases with logic stay code in FX1 (167 of 244 cases). Data with random values would have to draw `rand()` in exactly the same order and number. |
+| D36 | Random and logic creation | Cases with `rand()` and the cases with logic stay code in FX1 (167 of 244 cases). Data with random values would have to draw `rand()` in exactly the same order and number, and values like "a random yaw, then the launch vector turned by it" are small programs. They become data in FX2, as building blocks with parameters where adjusting them is meaningful (D43). |
 | D37 | Particles and joints | Names only in FX1; their creation values wait for FX2. They have no registry, their structs differ from effects, and their creation is mostly random formulas. |
 | D38 | Sprites | Sprite entries are names for the textures sprites draw, without values: `CreateSprite` has no values per type, and the blend is chosen per call. |
 | D39 | What stays code | The per-type lists (`IsSkillEffect`, the shadow list, `DrawCaseOverridesBlend`, …), the range rules, all move and render handlers, the creation hooks, loading assets into slots, and the code call sites, which keep their enum constants. |
@@ -384,9 +384,6 @@ types are created but have no code (`MODEL_EX01_SHADOW_MASTER_*`).
 
 ## Open questions
 
-- **Random creation (D36).** Random and logic creation stays code in FX1,
-  or random ranges in data for the simple cases (with a defined draw
-  order, proved by the recorder)?
 - **Sprite list.** 44 textures at literal call sites, or 54 with the
   computed ones; settled in FX1.1.
 - **Browser, later.** A generated index of the code call sites for "used
