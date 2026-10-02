@@ -349,6 +349,16 @@ float UI::Scaling::FontScaleForBounds(FontRole role, const Transform& transform,
     return std::clamp(scale, minimumScale, 1.0f);
 }
 
+
+float UI::Scaling::ItemPreviewScaleFactor(float uiScaleY, int windowHeight)
+{
+    const float heightScale =
+        static_cast<float>(std::max(windowHeight, 1)) / static_cast<float>(kReferenceHeight);
+    if (!std::isfinite(uiScaleY) || uiScaleY <= 0.0f || !(heightScale > 0.0f))
+        return 1.0f;
+    return uiScaleY / heightScale;
+}
+
 float UI::Scaling::ContentScaleFromMetrics(float displayScale, float pixelDensity)
 {
     if (!std::isfinite(displayScale) || !std::isfinite(pixelDensity) || displayScale <= 0.0f || pixelDensity <= 0.0f)

@@ -1,4 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -37,7 +37,7 @@
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Render/Items/ItemDisplay.h"
-#include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "UI/Scaling/UITransform.h"
 #include "GameLogic/Items/ShopRestrictions.h"
 #include "GameLogic/Items/TradeRestrictions.h"
 #include "GameLogic/Items/MixMgr.h"
@@ -144,7 +144,7 @@ BYTE BuyItem[4];
 
 static  int iStateNum = 4;
 
-	// ※
+	// ?
 
 #ifdef _PVP_ADD_MOVE_SCROLL
 extern CMurdererMove g_MurdererMove;
@@ -1289,16 +1289,16 @@ int GuildListStartY;
 int SommonTable[] = { 2,7,14,8,9,41 };
 
 wchar_t ChaosEventName[][100] = {
-    L"히돼?고향 여행권",
-    L"펜티엄4 컴퓨터",
-    L"디지탈카메라",
-    L"로지텍 무선 마우스+키보드 세트",
-    L"256M 램",
-    L"6개?잡지 구독권",
-    L"문화상품권(만원)",
-    L"뮤 머그컵",
-    L"뮤 T셔츠",
-    L"뮤 10시간 무료이용권"
+    L"????? ???",
+    L"???4 ???",
+    L"??????",
+    L"??? ?? ???+??? ??",
+    L"256M ?",
+    L"6???? ???",
+    L"?????(??)",
+    L"? ???",
+    L"? T??",
+    L"? 10?? ?????"
 };
 
 WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
@@ -4030,23 +4030,23 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     else if (ip->Type == ITEM_POTION + 160)
     {
-        // 연장의 보석
+        // ??? ??
         mu_swprintf(TextList[TextNum], I18N::Game::JewelUsedForRepairingALuckyItem);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if (ip->Type == ITEM_POTION + 161)
     {
-        // 상승의 보석
+        // ??? ??
         mu_swprintf(TextList[TextNum], I18N::Game::JewelForItemReinforcement);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
-    else if (GameLogic::Items::IsSecondTierWingExceptCape(ip)) //날개
+    else if (GameLogic::Items::IsSecondTierWingExceptCape(ip)) //??
     {
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDOfDamage, 32 + Level);  //  데미지 몇%증가.
+        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDOfDamage, 32 + Level);  //  ??? ?%??.
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, 25 + Level * 2);  //  데미지 몇%흡수.
+        mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, 25 + Level * 2);  //  ??? ?%??.
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseSpeed);             //  이동 속도 향상.
+        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseSpeed);             //  ?? ?? ??.
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
     else if (GameLogic::Items::IsThirdTierWing(ip))
@@ -4287,11 +4287,11 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     else if (ip->Type == ITEM_CAPE_OF_FIGHTER || ip->Type == ITEM_CAPE_OF_LORD)
     {
-        // 망토 관련 옵션변경
-        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDOfDamage, 20 + Level * 2);  //  데미지 몇%증가
+        // ?? ?? ????
+        mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDOfDamage, 20 + Level * 2);  //  ??? ?%??
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         int _iDamage = (ip->Type == ITEM_CAPE_OF_FIGHTER) ? 10 + Level * 2 : 10 + Level;
-        mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, _iDamage);  //  데미지 몇%흡수
+        mu_swprintf(TextList[TextNum], I18N::Game::AbsorbDOfDamage, _iDamage);  //  ??? ?%??
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
 
@@ -4656,7 +4656,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         }
     }
 
-    if (ip->RequireVitality && bRequireStat) //  요구체력.
+    if (ip->RequireVitality && bRequireStat) //  ????.
     {
         mu_swprintf(TextList[TextNum], I18N::Game::StaminaRequirementD, ip->RequireVitality);
 
@@ -4734,7 +4734,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         RequireClass(p);
     }
 
-    if (ip->Type >= ITEM_BOOTS && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
+    if (ip->Type >= MODEL_BOOTS - MODEL_ITEM && ip->Type < MODEL_BOOTS + MAX_ITEM_INDEX - MODEL_ITEM)
     {
         if (Level >= 5)
         {
@@ -4744,7 +4744,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         }
     }
 
-    if (ip->Type >= ITEM_GLOVES && ip->Type < ITEM_GLOVES + MAX_ITEM_INDEX)
+    if (ip->Type >= MODEL_GLOVES - MODEL_ITEM && ip->Type < MODEL_GLOVES + MAX_ITEM_INDEX - MODEL_ITEM)
     {
         if (Level >= 5)
         {
@@ -4754,9 +4754,13 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
         }
     }
-    if ((ip->Type >= ITEM_STAFF && ip->Type < ITEM_STAFF + MAX_ITEM_INDEX) || (ip->Type == ITEM_RUNE_BLADE) ||
-        (ip->Type == ITEM_EXPLOSION_BLADE) || (ip->Type == ITEM_SWORD_DANCER) || (ip->Type == ITEM_DARK_REIGN_BLADE) ||
-        (ip->Type == ITEM_IMPERIAL_SWORD))
+    if ((ip->Type >= MODEL_STAFF - MODEL_ITEM && ip->Type < MODEL_STAFF + MAX_ITEM_INDEX - MODEL_ITEM)
+        || (ip->Type == (static_cast<int>(MODEL_RUNE_BLADE) - MODEL_ITEM))
+        || (ip->Type == (static_cast<int>(MODEL_EXPLOSION_BLADE) - MODEL_ITEM))
+        || (ip->Type == (static_cast<int>(MODEL_SWORD_DANCER) - MODEL_ITEM))
+        || (ip->Type == (static_cast<int>(MODEL_DARK_REIGN_BLADE) - MODEL_ITEM))
+        || (ip->Type == (static_cast<int>(MODEL_IMPERIAL_SWORD) - MODEL_ITEM))
+        )
     {
         mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
@@ -5272,7 +5276,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             TextBold[TextNum] = false;
             TextNum++;
             break;
-        case ITEM_HELPER + 133:	// 골든메이플참
+        case ITEM_HELPER + 133:	// ??????
             mu_swprintf(TextList[TextNum], I18N::Game::MaximumMPIncreaseD, 150);
             TextListColor[TextNum] = TEXT_COLOR_BLUE;
             TextBold[TextNum] = false;
@@ -5962,23 +5966,21 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     descriptor.TextColor = MakeRgba(255, 255, 255, 255);
     descriptor.BgColor = MakeRgba(0, 0, 0, 255);
 
-    // Use the item name by default, only when o->Type is an item's model slot
+    // Use the item name by default, only when o->Type is in MODEL_ITEM range
     // Items with special types (e.g. MODEL_EVENT + N) are handled by overrides below
-    const wchar_t* itemName = nullptr;
-    if (Data::Items::IsItemModelSlot(o->Type))
+    if (o->Type >= MODEL_ITEM && o->Type < MODEL_ITEM + MAX_ITEM)
     {
-        itemName = ItemAttribute[Data::Items::ToItemType(o->Type)].Name;
         if (o->Type == MODEL_ZEN) // Zen
         {
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %d", itemName, ItemLevel);
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
         }
         else if (ItemLevel == 0)
         {
-            CopyGroundItemLabelText(descriptor.Name, itemName);
+            CopyGroundItemLabelText(descriptor.Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
         }
         else
         {
-            FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", itemName, ItemLevel);
+            FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
         }
     }
 
@@ -6013,11 +6015,11 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     }
     else if (o->Type == MODEL_COMPILED_CELE)
     {
-        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[ITEM_JEWEL_OF_BLESS].Name);
+        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[static_cast<int>(MODEL_JEWEL_OF_BLESS) - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_COMPILED_SOUL)
     {
-        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[ITEM_JEWEL_OF_SOUL].Name);
+        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[static_cast<int>(MODEL_JEWEL_OF_SOUL) - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_BOX_OF_LUCK && ItemLevel == 7)
     {
@@ -6036,33 +6038,19 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     {
         switch (ItemLevel)
         {
-        case 0:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::ENG, itemName);
-            break;
-        case 1:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STA, itemName);
-            break;
-        case 2:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::AGI, itemName);
-            break;
-        case 3:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STR, itemName);
-            break;
-        case 4:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::Command, itemName);
-            break;
+        case 0: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::ENG, ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 1: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STA, ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 2: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::AGI, ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 3: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STR, ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 4: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::Command, ItemAttribute[o->Type - MODEL_ITEM].Name); break;
         }
     }
     else if (o->Type == MODEL_SPIRIT)
     {
         switch (ItemLevel)
         {
-        case 0:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls", itemName, I18N::Game::DarkHorse);
-            break;
-        case 1:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls", itemName, I18N::Game::DarkRaven);
-            break;
+        case 0: FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, I18N::Game::DarkHorse); break;
+        case 1: FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, I18N::Game::DarkRaven); break;
         }
     }
     else if (o->Type == MODEL_EVENT + 16)
@@ -6259,7 +6247,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     else if (GameLogic::Items::IsSocketSeedOrSphereModel(o->Type))
     {
         SetDescriptorTextColor(descriptor, 0.7f, 0.4f, 1.0f);
-        CopyGroundItemLabelText(descriptor.Name, itemName);
+        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_INVITATION_TO_SANTA_VILLAGE)
     {
@@ -6269,9 +6257,10 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     {
         SetDescriptorOrangeTextColor(descriptor);
     }
-    else if (Data::Items::IsItemModelSlot(o->Type) &&
-             (whiteTextItems.count(o->Type) > 0 || yellowTextItems.count(o->Type) > 0 ||
-              orangeTextItems.count(o->Type) > 0))
+    else if (o->Type >= MODEL_ITEM && o->Type < MODEL_ITEM + MAX_ITEM
+        && (whiteTextItems.count(o->Type) > 0
+            || yellowTextItems.count(o->Type) > 0
+            || orangeTextItems.count(o->Type) > 0))
     {
         // Color was already set by Block 1 (white/yellow/orange). No override needed.
     }
@@ -6318,7 +6307,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         }
 
         wchar_t SetName[64]{};
-        if (g_csItemOption.GetSetItemName(SetName, Data::Items::ToItemType(o->Type), ip->AncientDiscriminator))
+        if (g_csItemOption.GetSetItemName(SetName, o->Type - MODEL_ITEM, ip->AncientDiscriminator))
         {
             SetDescriptorTextColor(descriptor, 0.f, 1.f, 0.f);
             descriptor.Font = g_hFontBold;
@@ -6771,6 +6760,8 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
     CameraProjection::WorldToScreen(g_Camera, Position, &ScreenPos_X, &ScreenPos_Y);
 #endif //PBG_ADD_ITEMRESIZE
 
+    // Match capped dock/panel UI scale to perspective that still uses WindowHeight.
+    Scale *= UI::Scaling::ItemPreviewScaleFactor(UI::Scaling::GetActiveTransform().scaleY, WindowHeight);
     o->Scale = Scale;
 
     VectorCopy(Position, o->Position);
@@ -6800,7 +6791,7 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
     vec3_t Position;
     CameraProjection::ScreenToWorldRay(g_Camera, (int)(sx), (int)(sy), Position, false);
     //RenderObjectScreen(Type+MODEL_ITEM,Level,Option1,Position,Success,PickUp);
-    if (Type == ITEM_BOX_OF_LUCK && Level == 1)	// 성탄의별
+    if (Type == ITEM_BOX_OF_LUCK && Level == 1)	// ????
     {
         RenderObjectScreen(MODEL_EVENT + 4, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
     }
@@ -6851,12 +6842,10 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
             RenderObjectScreen(MODEL_EVENT + 11, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
             break;
         case 3:
-            RenderObjectScreen(Data::Items::ToModelSlot(Type), Level, excellentFlags, ancientDiscriminator, Position,
-                               Success, PickUp);
+            RenderObjectScreen(Type + MODEL_ITEM, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
             break;
         default:
-            RenderObjectScreen(Data::Items::ToModelSlot(Type), Level, excellentFlags, ancientDiscriminator, Position,
-                               Success, PickUp);
+            RenderObjectScreen(Type + MODEL_ITEM, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
             break;
         }
     }
@@ -6932,8 +6921,7 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
         switch (Level)
         {
         case 0:
-            RenderObjectScreen(Data::Items::ToModelSlot(Type), Level, excellentFlags, ancientDiscriminator, Position,
-                               Success, PickUp);
+            RenderObjectScreen(Type + MODEL_ITEM, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
             break;
         case 1:
             RenderObjectScreen(MODEL_EVENT + 12, -1, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
@@ -6945,8 +6933,7 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
         switch (Level)
         {
         case 0:
-            RenderObjectScreen(Data::Items::ToModelSlot(Type), Level, excellentFlags, ancientDiscriminator, Position,
-                               Success, PickUp);
+            RenderObjectScreen(Type + MODEL_ITEM, Level, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
             break;
         case 1:
             RenderObjectScreen(MODEL_EVENT + 13, -1, excellentFlags, ancientDiscriminator, Position, Success, PickUp);
@@ -7618,37 +7605,37 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
             break;
         case 4:
             MarkColor[i] = (255u << 24) + (0 << 16) + (0 << 8) + (255);
-            break; // 빨
+            break; // ?
         case 5:
             MarkColor[i] = (255u << 24) + (0 << 16) + (128 << 8) + (255);
             break; //
         case 6:
             MarkColor[i] = (255u << 24) + (0 << 16) + (255 << 8) + (255);
-            break; // 노
+            break; // ?
         case 7:
             MarkColor[i] = (255u << 24) + (0 << 16) + (255 << 8) + (128);
             break; //
         case 8:
             MarkColor[i] = (255u << 24) + (0 << 16) + (255 << 8) + (0);
-            break; // 초
+            break; // ?
         case 9:
             MarkColor[i] = (255u << 24) + (128 << 16) + (255 << 8) + (0);
             break; //
         case 10:
             MarkColor[i] = (255u << 24) + (255 << 16) + (255 << 8) + (0);
-            break; // 청
+            break; // ?
         case 11:
             MarkColor[i] = (255u << 24) + (255 << 16) + (128 << 8) + (0);
             break; //
         case 12:
             MarkColor[i] = (255u << 24) + (255 << 16) + (0 << 8) + (0);
-            break; // 파
+            break; // ?
         case 13:
             MarkColor[i] = (255u << 24) + (255 << 16) + (0 << 8) + (128);
             break; //
         case 14:
             MarkColor[i] = (255u << 24) + (255 << 16) + (0 << 8) + (255);
-            break; // 보
+            break; // ?
         case 15:
             MarkColor[i] = (255u << 24) + (128 << 16) + (0 << 8) + (255);
             break; //

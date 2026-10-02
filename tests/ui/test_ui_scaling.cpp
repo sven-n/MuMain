@@ -193,6 +193,26 @@ TEST_CASE("docks use a moderate large-screen cap without changing dialogs [ui][s
     CHECK(fourKDialog.scaleY == doctest::Approx(2.0f));
 }
 
+TEST_CASE("3D item preview scale tracks capped UI vs window height [ui][scaling]")
+{
+    // Dock at 1080p: uiScale == height/480 -> factor 1 (current good size).
+    const auto dock1080 = UI::Scaling::DockRightTransform(1920, 1080);
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(dock1080.scaleY, 1080) == doctest::Approx(1.0f));
+
+    // Same dock cap at 1440p must shrink so models stay slot-sized.
+    const auto dock1440 = UI::Scaling::DockRightTransform(2560, 1440);
+    CHECK(dock1440.scaleY == doctest::Approx(2.25f));
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(dock1440.scaleY, 1440) == doctest::Approx(0.75f));
+
+    // Uncapped 720p: uiScale equals height scale -> factor 1.
+    const auto dock720 = UI::Scaling::DockRightTransform(1280, 720);
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(dock720.scaleY, 720) == doctest::Approx(1.0f));
+
+    // Hud overlay scaleY is windowHeight/480 -> always factor 1.
+    const auto hud1440 = UI::Scaling::ScreenOverlayTransform(2560, 1440);
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(hud1440.scaleY, 1440) == doctest::Approx(1.0f));
+}
+
 TEST_CASE("inventory drag keeps the clicked point anchored to the item [ui][inventory]")
 {
     const POINT offset = UI::Items::Drag::PickupOffset(180, 260, 40, 60, 183, 317, true);
