@@ -7,6 +7,9 @@
 #include "UI/Options/OptionWindow.h"
 #include "UI/Core/WindowSystem.h"
 
+// Defined in UIWindows.cpp; declared per translation unit across the UI, with no header.
+void SetLineColor(int iType, float fAlphaRate = 1.0f);
+
 namespace UI::HUD
 {
 SlideLane::SlideLane()
@@ -98,6 +101,12 @@ void SlideLane::Render(BOOL bForceFadeOut)
     }
 
     EnableAlphaTest();
+
+    // The band never set its own colour: it drew in whatever SetRenderColor state the last widget
+    // to render had left, which happened to be dark while the CUIControl list boxes were still
+    // drawing. Retiring them left it at the default and the band came out opaque white. It states
+    // its own colour now, black at the lane's current alpha so it fades with the text it carries.
+    SetLineColor(7, m_iAlphaRate / 255.f);
 
     RenderColor(0, m_iPos_y - 3, WindowWidth, 1);
     RenderColor(0, m_iPos_y + m_iFontHeight + 2, WindowWidth, 1);
