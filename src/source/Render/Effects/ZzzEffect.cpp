@@ -12,6 +12,8 @@
 #include "Engine/AI/ZzzAI.h"
 #include "ZzzEffect.h"
 #include "Render/Effects/EffectRegistry.h"
+#include "Render/Effects/Behaviors/MoveHandlers.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Legacy/UIManager.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
@@ -764,7 +766,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             case MODEL_SUMMONER_CASTING_EFFECT222:
             {
                 o->LifeTime = 40;
-                if (o->SubType = 0)
+                if (o->SubType == 0)
                     o->Scale = 1.0f;
                 o->Alpha = 1.0f;
                 Vector(0.f, 0.f, 0.f, o->Direction);
@@ -1074,7 +1076,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 AngleMatrix(o->Angle, Matrix);
                 Vector(0.f, -60.f, 0.f, p1);
                 VectorRotate(p1, Matrix, p2);
-                VectorAddScaled(o->Position, p2, o->Position, FPS_ANIMATION_FACTOR)
+                VectorAddScaled(o->Position, p2, o->Position, FPS_ANIMATION_FACTOR);
                 o->Position[2] += (130.f) * FPS_ANIMATION_FACTOR;
                 break;
             case BITMAP_FLAME:
@@ -5042,7 +5044,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 {
                     const int	TOTAL_LIFETIME = 60;
                     vec3_t		v3PosStart, v3PosTarget;
-                    vec3_t		arv3PosProcess[3];
+                    vec3_t arv3PosProcess[4];
 
                     o->ExtState = TOTAL_LIFETIME;
                     o->LifeTime = TOTAL_LIFETIME;
@@ -5061,7 +5063,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     vec3_t		v3DirDistAD;
                     vec3_t		v3PosStartModify, v3PosTargetModify;
                     const int	iLimitArea1 = 200;
-                    float		fDistAD, fDistAB, fDistCD;
+                    float fDistAD, fDistAB;
                     float		fHeightTerrainTarget = RequestTerrainHeight(v3PosTarget[0], v3PosTarget[1]);
                     int			iOffsetDist = 100;
                     VectorCopy(v3PosStart, v3PosStartModify);
@@ -5070,7 +5072,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     fDistAD = VectorDistance3D_DirDist(v3PosStartModify, v3PosTargetModify, v3DirDistAD);
 
                     fDistAB = 900.0f + (rand() % iOffsetDist - (iOffsetDist / 2));
-                    fDistCD;
                     VectorCopy(v3PosStart, arv3PosProcess[0]);
                     arv3PosProcess[1][0] = arv3PosProcess[0][0] + (float)(rand() % iLimitArea1 - (iLimitArea1 / 2));
                     arv3PosProcess[1][1] = arv3PosProcess[0][1] + (float)(rand() % iLimitArea1 - (iLimitArea1 / 2));
@@ -6724,13 +6725,10 @@ void MoveEffect(OBJECT* o, int iIndex)
             CreateParticleFpsChecked(BITMAP_CLUD64, o->Position, o->Angle, vLight, 10, 1.f, pObject);
         }
     }
-    {
-        if (o->LifeTime < 20) o->BlendMeshLight -= 0.03f;
-        else if (o->BlendMeshLight < 0.5f) o->BlendMeshLight += 0.05f;
-
-        o->BlendMeshTexCoordV += (0.05f) * FPS_ANIMATION_FACTOR;
-    }
-    break;
+        // The original code went on with the move code of the summoner casting effects; it is a
+        // handler of the registry now.
+        Render::Effects::Behaviors::Move_MODEL_SUMMONER_CASTING_EFFECT1(o, iIndex, Luminosity);
+        break;
 
     case BITMAP_FIRE + 1:
         Vector(1.f, 1.f, 1.f, Light);
@@ -7314,6 +7312,10 @@ void MoveEffect(OBJECT* o, int iIndex)
             VectorAddScaled(o->Owner->Position, o->StartPosition, o->Position, FPS_ANIMATION_FACTOR);
             break;
         }
+        // The original code went on with the move code of MODEL_ICE_SMALL; it is a handler of
+        // the registry now.
+        Render::Effects::Behaviors::Move_MODEL_ICE_SMALL(o, iIndex, Luminosity);
+        break;
     case MODEL_EFFECT_BROKEN_ICE0:
     case MODEL_EFFECT_BROKEN_ICE1:
     case MODEL_EFFECT_BROKEN_ICE2:
@@ -8097,38 +8099,6 @@ void MoveEffect(OBJECT* o, int iIndex)
 
 
 
-    case BITMAP_JOINT_FORCE:
-        if (o->SubType == 0)
-        {
-            if (o->LifeTime < 11 && (int)o->LifeTime % 2 == 0)
-            {
-                Vector(90.f, 0.f, 0.f, o->Angle);
-                o->HeadAngle[2] += (72.f) * FPS_ANIMATION_FACTOR;
-                AngleMatrix(o->HeadAngle, Matrix);
-                VectorRotate(o->Direction, Matrix, Position);
-                VectorAdd(o->StartPosition, Position, Position);
-
-                Position[2] += rand() % 400 + 700.f;
-                CreateJointFpsChecked(BITMAP_FLASH, Position, Position, o->Angle, 5, o, 110.f);
-            }
-        }
-        else if (o->SubType == 1)
-        {
-            if (o->LifeTime < 11 && (int)o->LifeTime % 2 == 0)
-            {
-                Vector(90.f, 0.f, 0.f, o->Angle);
-                o->HeadAngle[2] += (72.f) * FPS_ANIMATION_FACTOR;
-                AngleMatrix(o->HeadAngle, Matrix);
-                VectorRotate(o->Direction, Matrix, Position);
-                VectorAdd(o->StartPosition, Position, Position);
-
-                Position[2] += 100.f;
-                CreateJointFpsChecked(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 6, o, 80.f);
-                CreateJointFpsChecked(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 6, o, 80.f);
-            }
-        }
-
-
     case MODEL_EFFECT_SAPITRES_ATTACK_1:
     {
         if (o->SubType == 0)
@@ -8626,7 +8596,7 @@ void RenderWheelWeapon(OBJECT* o)
 
     float Alpha = o->Alpha;
 
-    int Type = o->Owner->Weapon + MODEL_SWORD;
+    int Type = Data::Items::ToModelSlot(o->Owner->Weapon);
     BMD* b = &Models[Type];
     b->CurrentAction = 0;
     b->Skin = gCharacterManager.GetBaseClass(Hero->Class);
@@ -8656,7 +8626,7 @@ void RenderFuryStrike(OBJECT* o)
 
         Vector(0.f, 100.f, 0.f, p);
 
-        int Type = o->Owner->Weapon + MODEL_SWORD;
+        int Type = Data::Items::ToModelSlot(o->Owner->Weapon);
         BMD* b = &Models[Type];
         b->CurrentAction = 0;
         b->Skin = gCharacterManager.GetBaseClass(Hero->Class);
@@ -8726,8 +8696,9 @@ void RenderEffects(bool bRenderBlendMesh)
                 if (bRenderBlendMesh)
                 {
                     if (o->BlendMesh == -1 || o->BlendMesh < -2) continue;
-                    const BMD& b = Models[o->Type];
-                    if (b.NumMeshs < o->BlendMesh) continue;
+                    // Effects with a texture number (BITMAP_*) have no model.
+                    if (o->Type < MAX_MODELS && Models[o->Type].NumMeshs < o->BlendMesh)
+                        continue;
                     //if ( (o->Position[2]+o->BoundingBoxMax[2])<350.f ) continue;
                 }
 
@@ -9651,7 +9622,7 @@ void RenderEffects(bool bRenderBlendMesh)
     }
 }
 
-void RenderAfterEffects(bool bRenderBlendMesh)
+void RenderAfterEffects()
 {
     if (!g_Direction.m_CKanturu.IsMayaScene())
         return;
@@ -9678,13 +9649,6 @@ void RenderAfterEffects(bool bRenderBlendMesh)
 
             if (o->Visible)
             {
-                if (bRenderBlendMesh)
-                {
-                    if (o->BlendMesh == -1 || o->BlendMesh < -2) continue;
-                    const BMD& b = Models[o->Type];
-                    if (b.NumMeshs < o->BlendMesh) continue;
-                }
-
                 switch (o->Type)
                 {
                 case MODEL_STORM3:

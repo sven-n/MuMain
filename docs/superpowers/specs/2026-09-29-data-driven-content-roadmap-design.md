@@ -20,27 +20,30 @@ Nothing gets slower in game: names and values are resolved when loading.
 
 ## Why these areas belong together
 
-Items are not the only users of the effect code. About 3,950 calls create
-effects, particles, lightning and sprites: about 1,600 for the maps and
-their monsters (`World/GameMaps`), 1,100 for characters, objects and items
-(`Engine`), 760 inside the effects themselves, 290 for skills, combat,
-pets and events (`GameLogic`) and 140 for skill results from the server
-(`Network`). The effect code knows about 440 effect types, 100 particle
-types and 30 lightning types; `Render/Effects/EffectRegistry` has started
-to describe them as a table instead of three large switches. Skills are
+Items are not the only users of the effect code. About 4,250 calls create
+effects, particles, lightning and sprites: about 1,540 for monsters and
+NPCs, 590 for the maps, 420 for items, 390 for skills, 970 inside the
+effects themselves, and the rest for events, pets and the server's skill
+results (counted for the
+[effect catalogue design](2026-10-02-effect-catalogue-design.md)). The
+effect code knows 464 effect types, 98 particle types, 31 lightning types
+(joints) and about 50 sprite textures; `Render/Effects/EffectRegistry` has
+started to describe them as a table instead of three large switches. Skills are
 still read from `Skill.bmd` (with a table editor, as items had before
 their phase 2), and monsters and NPCs are set up in a switch of 403 cases
 in `ZzzCharacter.cpp`.
 
 ## Shared decisions
 
-These decisions were made in the items design; they keep their numbers,
-so the references there stay valid.
+These decisions were made in the items design (D25, D26) and the effect
+catalogue design (D43); they keep their numbers, so the references there
+stay valid.
 
 | # | Topic | Decision |
 |---|---|---|
 | D25 | Looks in data | Items, skills, monsters and NPCs reference their looks by name (for items: the render style and the item effect; the glow colors already are names in data). What a named look is made of moves from code into data files in `Data/Effects/`: a list of building blocks, namely draw passes (mesh or body, flags, texture, color, alpha, texture scrolling), things placed on bones (sprites, particles, lightning between two bones, effects), animated object values (glow mesh brightness, hidden mesh, texture scrolling), timing (pulses, random chances per frame) and conditions (item level, doppelganger, ...). The drawing code runs these lists; data that names looks stays valid when their definitions move. One look format and one look editor for all areas: a look made for an item can be used by a monster. Effect and particle types are referenced by the names of the effect catalogue (FX1) and become data themselves later (FX2). |
 | D26 | Shared definitions | Anything that several things use is defined once, with a name, in a data file, and its users reference that name: glow colors, looks, effect types, skills. Editors show where a definition is used (items, skills, monsters, NPCs, other effects). Saving a change to a definition that others use first shows the list of those users; a copy makes a variant for one user; renaming updates all references; a definition that is still used cannot be deleted (the list shows why). Unknown names are reported when loading. Names are resolved when loading, so drawing and game logic never look names up. Every move from code into data is compared with the old code (recorder) before the old code goes. |
+| D43 | Logic as data where it is meaningful | Not only values and lists: functions and logic can become configurable data too, wherever changing them is meaningful, that is, something a designer wants to adjust and can understand: how an item's stats change with its level, the bonus of excellent and ancient items, how requirements grow, which items a rule applies to, how an effect moves and fades (FX2). It is written as named tables and building blocks with parameters, not as code transcribed statement by statement. Each move says who would change it and why, stays checkable against the old code, and is resolved when loading. Logic without a meaningful knob (the exact order of random draws in an effect's creation, protocol decoding) stays code. Decided with the effect catalogue design (2026-10-02). |
 
 ## Bones
 
@@ -96,7 +99,7 @@ models stay in `Data/Items/Models`.
 | Area | Name | Design document | Depends on | What moves into data | Editor |
 |---|---|---|---|---|---|
 | Items | Items | [items design](2026-09-25-data-driven-items-design.md), phases 0–14 | – | Item data, rules and categories, models, glow, render styles and effects (as names). | The item tools of section 9 there. |
-| FX1 | Effect catalogue | not yet | items 4c | Every effect, particle, lightning and sprite type gets a name and its creation values (the `CreateParams` of the registry) in `Data/Effects/`: the effect types (`effectTypes` in the data). Behavior stays code. Items, skills and monsters then name effect types instead of using type numbers; an item effect (`itemEffect`, what an item does every frame before it is drawn) creates instances of effect types. | Effect browser: each effect with a preview, its values, and where it is used. |
+| FX1 | Effect catalogue | [effect catalogue design](2026-10-02-effect-catalogue-design.md) (draft) | items 4c | Every effect, particle, lightning and sprite type gets a name and its creation values (the `CreateParams` of the registry) in `Data/Effects/`: the effect types (`effectTypes` in the data). Behavior stays code. Items, skills and monsters then name effect types instead of using type numbers; an item effect (`itemEffect`, what an item does every frame before it is drawn) creates instances of effect types. | Effect browser: each effect with a preview, its values, and where it is used. |
 | Items 13 | Looks in data (items) | items design, phase 13 | FX1, items 6 | What the item looks are made of (D25). | Look editor. |
 | SK1 | Skills as data | not yet | items 2 (the same format rules) | `Skill.bmd` into JSON, like the items in their phase 2: names, requirements, rules; later synced with OpenMU like the items. | Focused skill editors, like the item tools; "used by" (classes, items that give a skill, monsters). |
 | SK2 | Skill looks | not yet | SK1, FX1, items 13 | How a skill looks when cast, flying and hitting (effects, particles, sounds, character animations), as looks (D25), mostly on the caster's bones. | Look editor, with a preview of the skill cast by a test character. |
