@@ -110,13 +110,13 @@
 			     stays at the native text size in a dense box (component-catalog.md). -->
 			<div id="gi_notice_list" class="scroll-pane gi-pane"
 			     data-style-font-size="text_px + 'px'"
-			     data-style-width="(152 * root_scale) + 'px'"
+			     data-style-width="(161 * root_scale) + 'px'"
 			     data-style-height="(80 * root_scale) + 'px'"
 			     data-style-transform="'scale(' + (1 / root_scale) + ')'">
 				<!-- Explicitly sized, not 100%: a percentage would shrink the moment the
 				     scrollbar appears, and a full-width row sits under the handle. -->
 				<div class="gi-pane-row" data-for="r : notice_rows"
-				     data-style-width="(137 * root_scale) + 'px'"
+				     data-style-width="(146 * root_scale) + 'px'"
 				     data-style-height="(13 * root_scale) + 'px'">
 					<span class="gi-pane-cell">{{r.text}}</span>
 				</div>
@@ -153,12 +153,12 @@
 			<!-- 18 rows of 13 units, the native box's own m_iNumRenderLine x line step. -->
 			<div id="gi_member_list" class="scroll-pane gi-pane"
 			     data-style-font-size="text_px + 'px'"
-			     data-style-width="(155 * root_scale) + 'px'"
+			     data-style-width="(164 * root_scale) + 'px'"
 			     data-style-height="(234 * root_scale) + 'px'"
 			     data-style-transform="'scale(' + (1 / root_scale) + ')'">
 				<div class="gi-pane-row gi-member-row" data-for="r : member_rows"
 				     data-class-selected="r.selected" data-class-officer="r.officer"
-				     data-style-width="(140 * root_scale) + 'px'"
+				     data-style-width="(149 * root_scale) + 'px'"
 				     data-style-height="(13 * root_scale) + 'px'"
 				     data-event-click="guild_info_select_member(it_index)">
 					<!-- A backgrounded element with children paints an unclosed box in this
@@ -211,12 +211,12 @@
 			<!-- 6 rows of 13 units, the native box's own m_iNumRenderLine x line step. -->
 			<div id="gi_union_list" class="scroll-pane gi-pane"
 			     data-style-font-size="text_px + 'px'"
-			     data-style-width="(152 * root_scale) + 'px'"
+			     data-style-width="(162 * root_scale) + 'px'"
 			     data-style-height="(78 * root_scale) + 'px'"
 			     data-style-transform="'scale(' + (1 / root_scale) + ')'">
 				<div class="gi-pane-row gi-union-row" data-for="r : union_rows"
 				     data-class-selected="r.selected"
-				     data-style-width="(137 * root_scale) + 'px'"
+				     data-style-width="(147 * root_scale) + 'px'"
 				     data-style-height="(13 * root_scale) + 'px'"
 				     data-event-click="guild_info_select_union(it_index)">
 					<div class="gi-pane-row-back"></div>

@@ -200,7 +200,7 @@
 /* display: block is explicit, not incidental: a data-for <div> is inline without it in this
    build and every row then lands on the same line. */
 .gi-pane-row { position: relative; display: block; }
-.gi-pane-cell { position: absolute; left: 2.920%; top: 0; white-space: nowrap; }
+.gi-pane-cell { position: absolute; left: 2.740%; top: 0; white-space: nowrap; }
 
 /* The member list, same .scroll-pane recipe as the announcement: 18 rows of 13 units, which is
    the native box's own m_iNumRenderLine times its line step. Cell positions are percentages of
@@ -219,9 +219,9 @@
 .gi-member-row.officer .gi-pane-row-back { background-color: rgb(106, 97, 88); }
 .gi-member-row.selected .gi-pane-cell { color: #000000; }
 
-.cell-member-name { left: 5.714%; }
-.cell-member-role { left: 62.857%; transform: translateX(-50%); }
-.cell-member-server { right: 7.143%; text-align: right; }
+.cell-member-name { left: 5.369%; }
+.cell-member-role { left: 59.060%; transform: translateX(-50%); }
+.cell-member-server { right: 12.752%; text-align: right; }
 
 /* The alliance list: 6 rows of 13 units, the native box's own m_iNumRenderLine times its line
    step. Its mark is art rather than text, so the cells are eighths of a bound 8-unit box and
@@ -238,8 +238,8 @@
 .gi-union-row.selected .gi-pane-row-back { background-color: rgb(106, 97, 88); }
 .gi-union-row.selected .gi-pane-cell { color: #000000; }
 
-.gi-union-row .line-mark { position: absolute; left: 2.920%; top: 0; }
+.gi-union-row .line-mark { position: absolute; left: 2.721%; top: 0; }
 .gi-union-row .line-mark-cell { float: left; width: 12.5%; height: 12.5%; }
 
-.cell-union-name { left: 11.679%; }
-.cell-union-count { right: 0; text-align: right; }
+.cell-union-name { left: 10.884%; }
+.cell-union-count { right: 3.401%; text-align: right; }
