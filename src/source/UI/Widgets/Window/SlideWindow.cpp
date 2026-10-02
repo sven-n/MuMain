@@ -3,6 +3,17 @@
 
 #include "UI/Widgets/Window/SlideWindow.h"
 #include "UI/Core/WindowManager.h"
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlSyncField.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Scaling/UITransform.h"
+#include <RmlUi/Core/Context.h>
+#include <RmlUi/Core/ElementDocument.h>
+
+#include <cstdio>
 
 mu::ui::window::CSlideWindow::CSlideWindow()
 {
@@ -25,12 +36,86 @@ bool mu::ui::window::CSlideWindow::Create(CManager* pNewUIMng)
     m_pSlideMgr = new UI::HUD::SlideTicker;
     std::wstring strFileName = L"Data\\Local\\" + g_strSelectedML + L"\\Slide_" + g_strSelectedML + L".bmd";
     m_pSlideMgr->OpenSlideTextFile(strFileName.c_str());
+    BuildRmlUi();
 
     return true;
 }
 
+void mu::ui::window::CSlideWindow::BuildRmlUi()
+{
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    const bool created = m_RmlBinder.Create(context, "slide_notice",
+        [](Rml::DataModelConstructor& c, SlideNoticeRmlModel& model)
+        {
+            c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
+            c.Bind("shown", &model.shown);
+            c.Bind("text_x", &model.textX);
+            c.Bind("text_top", &model.textTop);
+            c.Bind("band_top", &model.bandTop);
+            c.Bind("band_height", &model.bandHeight);
+            c.Bind("alpha", &model.alpha);
+            c.Bind("text_color", &model.textColor);
+            c.Bind("text", &model.text);
+        });
+    if (created)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(context, "Data/Interface/RmlUi/slide_notice.rml");
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+}
+
+void mu::ui::window::CSlideWindow::DestroyRmlUi()
+{
+    UI::RmlBridge::UnregisterForThemeReload(this);
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+}
+
+void mu::ui::window::CSlideWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    DestroyRmlUi();
+    BuildRmlUi();
+}
+
+void mu::ui::window::CSlideWindow::SyncRmlModel()
+{
+    if (!m_pRmlDoc || !m_pSlideMgr)
+        return;
+
+    const UI::HUD::SlideDisplay d = m_pSlideMgr->Display();
+    auto& model = m_RmlBinder.GetModel();
+
+    const auto transform = UI::Scaling::GetActiveTransform();
+    SyncField(m_RmlBinder, &SlideNoticeRmlModel::rootScale, "root_scale", transform.scaleY);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+
+    SyncField(m_RmlBinder, &SlideNoticeRmlModel::shown, "shown", d.shown);
+    if (d.shown)
+    {
+        SyncField(m_RmlBinder, &SlideNoticeRmlModel::textX, "text_x", d.x);
+        SyncField(m_RmlBinder, &SlideNoticeRmlModel::textTop, "text_top", static_cast<float>(d.y));
+        SyncField(m_RmlBinder, &SlideNoticeRmlModel::bandTop, "band_top", static_cast<float>(d.y - 3));
+        SyncField(m_RmlBinder, &SlideNoticeRmlModel::bandHeight, "band_height", static_cast<float>(d.bandHeight));
+        SyncField(m_RmlBinder, &SlideNoticeRmlModel::alpha, "alpha", d.alpha / 255.f);
+        char rgb[32] = {};
+        std::snprintf(rgb, sizeof(rgb), "rgb(%u,%u,%u)", d.colorRgb & 0xFF,
+                      (d.colorRgb >> 8) & 0xFF, (d.colorRgb >> 16) & 0xFF);
+        SyncField(m_RmlBinder, &SlideNoticeRmlModel::textColor, "text_color", Rml::String(rgb));
+        SyncField(m_RmlBinder, &SlideNoticeRmlModel::text, "text",
+                  StringUtils::WideToNarrow(d.text ? d.text : L""));
+    }
+
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, true);
+}
+
 void mu::ui::window::CSlideWindow::Release()
 {
+    DestroyRmlUi();
     SAFE_DELETE(m_pSlideMgr);
 
     if (m_pNewUIMng)
@@ -51,13 +136,13 @@ bool mu::ui::window::CSlideWindow::UpdateKeyEvent()
 bool mu::ui::window::CSlideWindow::Update()
 {
     m_pSlideMgr->ManageSlide();
+    SyncRmlModel();
 
     return true;
 }
 bool mu::ui::window::CSlideWindow::Render()
 {
-    m_pSlideMgr->Render();
-
+    // slide_notice.rml draws the band and the text; Display() in Update() advanced them.
     return true;
 }
 

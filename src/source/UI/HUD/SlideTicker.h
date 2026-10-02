@@ -12,6 +12,19 @@
 
 namespace UI::HUD
 {
+// What the ticker wants drawn this frame. The band is one strip: the two 1-unit rules and the
+// fill Render() drew are contiguous, so they are a single box from y - 3 of height height + 6.
+struct SlideDisplay
+{
+    const wchar_t* text = nullptr;
+    float x = 0.f;        // reference px; the scroll position
+    int y = 0;            // reference px, the text baseline row
+    int bandHeight = 0;   // reference px
+    unsigned colorRgb = 0;
+    unsigned char alpha = 0;
+    bool shown = false;
+};
+
 #define SLIDE_LEVEL_MAX 5
 #define SLIDE_TEXT_LENGTH 1024
 
@@ -68,6 +81,10 @@ public:
     SLIDE_QUEUE::iterator m_SlideQueueIter;
     std::list<DWORD> m_RemoveQueueList;
 
+    // What Render() would draw, without drawing it.
+    SlideDisplay Display(BOOL bForceFadeOut = FALSE) const;
+    void Advance(BOOL bForceFadeOut = FALSE);
+
     void SetPosition(int x, int y) { m_iPos_x = x; m_iPos_y = y; }
     int GetPosition_x() const { return m_iPos_x; }
     int GetPosition_y() const { return m_iPos_y; }
@@ -105,6 +122,7 @@ public:
 
     void Init();
     void Render();
+    SlideDisplay Display();
 
     void CreateSlideText();
     void OpenSlideTextFile(const wchar_t* szFileName);

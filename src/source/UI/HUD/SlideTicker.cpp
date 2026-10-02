@@ -153,6 +153,72 @@ void SlideLane::Render(BOOL bForceFadeOut)
     ++g_iNoticeInverse;
 }
 
+// Render()'s state half: the alpha ramp, the scroll step and the wrap, with nothing drawn.
+void SlideLane::Advance(BOOL bForceFadeOut)
+{
+    if (g_pOption->IsSlideHelp() == false)
+        return;
+
+    const BOOL bFadeOut = (m_pszSlideText[0] == '\0' || (int)wcslen(m_pszSlideText) < m_iCutLength
+                           || bForceFadeOut == TRUE);
+
+    if (bFadeOut == FALSE)
+    {
+        m_iAlphaRate += 30.f * FPS_ANIMATION_FACTOR;
+        m_iAlphaRate = std::min<float>(m_iAlphaRate, 205.f);
+    }
+    else
+    {
+        m_iAlphaRate -= 30 * FPS_ANIMATION_FACTOR;
+        m_iAlphaRate = std::max<float>(m_iAlphaRate, 0.f);
+    }
+
+    if (m_iAlphaRate <= 0)
+        return;
+    if (bFadeOut == TRUE && bForceFadeOut == FALSE)
+        return;
+
+    g_pRenderText->SetFont(m_hFont);
+    SlideMove();
+
+    if (m_iFontHeight == 0)
+    {
+        m_iFontHeight = g_pRenderText->MeasureText(L"Z", 1).cy;
+        if (GetPosition_y() >= m_iFontHeight)
+            SetPosition(GetPosition_x(), GetPosition_y() - m_iFontHeight);
+    }
+
+    ComputeSpeed();
+}
+
+// Render()'s presentation half: the colour and the blink-halved alpha it computed per frame.
+SlideDisplay SlideLane::Display(BOOL bForceFadeOut) const
+{
+    SlideDisplay out;
+    if (g_pOption->IsSlideHelp() == false || m_iAlphaRate <= 0)
+        return out;
+
+    const BOOL bFadeOut = (m_pszSlideText[0] == '\0' || (int)wcslen(m_pszSlideText) < m_iCutLength
+                           || bForceFadeOut == TRUE);
+    if (bFadeOut == TRUE && bForceFadeOut == FALSE)
+        return out;
+
+    BYTE byAlpha = m_dwSlideTextColor >> 24;
+    byAlpha = static_cast<float>(byAlpha)
+              * ((m_iAlphaRate > 180 ? m_iAlphaRate : (m_iAlphaRate - 25 < 0 ? 0 : m_iAlphaRate - 25)) + 50) / 255.0f;
+    if (const auto frac = WorldTime - static_cast<long>(WorldTime); m_bBlink == TRUE && frac < 0.5)
+        byAlpha /= 2;
+
+    out.text = m_pszSlideText;
+    out.x = m_fMovePosition;
+    out.y = m_iPos_y;
+    out.bandHeight = m_iFontHeight + 6;
+    out.colorRgb = m_dwSlideTextColor & 0x00FFFFFF;
+    out.alpha = byAlpha;
+    out.shown = true;
+    return out;
+}
+
 void SlideLane::SlideMove()
 {
     if (m_iCutSize == 0)
@@ -345,6 +411,32 @@ void SlideTicker::Init()
         SLIDEHELP_TIMER, m_iCreateDelay * 1000,
         [this] { if (g_bWndActive) CreateSlideText(); });
     CreateSlideText();
+}
+
+// The lane precedence Render() applies: the help lane force-fades while the notice lane holds
+// text, and the notice lane only shows once the help lane has faded out, so at most one is
+// visible at a time.
+SlideDisplay SlideTicker::Display()
+{
+    if (m_NoticeSlide.HaveText() == FALSE)
+    {
+        m_HelpSlide.Advance(TRUE);
+        return m_HelpSlide.Display(TRUE);
+    }
+
+    if (m_NoticeSlide.GetAlphaRate() <= 0)
+    {
+        m_HelpSlide.Advance();
+        return m_HelpSlide.Display();
+    }
+
+    if (m_HelpSlide.GetAlphaRate() <= 0)
+    {
+        m_NoticeSlide.Advance();
+        return m_NoticeSlide.Display();
+    }
+
+    return {};
 }
 
 void SlideTicker::Render()

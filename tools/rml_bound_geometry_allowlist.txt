@@ -1,21 +1,20 @@
-# Documents allowed to bind left/top/right/bottom/width/height from a C++ model.
 #
-# Read Tools/check_rml_bound_geometry.py's docstring first: a bound geometry property is an
-# inline property, and in this build inline beats every stylesheet rule with no !important, so
-# each line below is a document whose layout a theme cannot change. The list exists to FREEZE
-# that set, not to bless it -- a document binding geometry without a line here fails the build,
-# so new work cannot quietly join it.
 #
-# Format: <path relative to the RmlUi asset root>: <why>
 #
-# The reasons are a first pass, from the 2026-09-30 ownership audit
-# (docs/rmlui-ui-system/tracked-deferrals.md). "display-list port" means the window's native
-# Render() was transcribed into its model, so the whole layout arrives as coordinates -- that is
-# the population the audit named, and retrofitting it is a re-port rather than a cleanup
 # (architecture-principles.md §26). Sharpen a reason when you next touch its document, and delete
-# the line when the document stops binding geometry; the checker prints entries that are no longer
+# (docs/rmlui-ui-system/tracked-deferrals.md). "display-list port" means the window's native
+# Documents allowed to bind left/top/right/bottom/width/height from a C++ model.
+# Format: <path relative to the RmlUi asset root>: <why>
+# Read Tools/check_rml_bound_geometry.py's docstring first: a bound geometry property is an
+# Render() was transcribed into its model, so the whole layout arrives as coordinates -- that is
+# The reasons are a first pass, from the 2026-09-30 ownership audit
+# each line below is a document whose layout a theme cannot change. The list exists to FREEZE
+# inline property, and in this build inline beats every stylesheet rule with no !important, so
 # needed on every build.
-
+# so new work cannot quietly join it.
+# that set, not to bless it -- a document binding geometry without a line here fails the build,
+# the line when the document stops binding geometry; the checker prints entries that are no longer
+# the population the audit named, and retrofitting it is a re-port rather than a cleanup
 blood_castle_enter.rml: counter-scale bridge -- the button labels' top from the live line height
 blood_castle_time.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
 castle_window.rml: the tab and button labels' top from the live line height, which inside a .sharp-text block layout height and rendered height disagree on; a map item's slot on the map art and its bars' lengths, which are RenderCastleItem()'s own gauge widths. Residue: the tab strip's `12 + i * 41` is index arithmetic in the markup, so the themes cannot space the tabs
@@ -72,6 +71,7 @@ server_msg.rml: per-frame data -- the window's sides grow with the message as it
 server_select.rml: per-frame data -- gauge width is the server load
 set_item_explanation.rml: per-frame data -- placed against the hovered item
 siege_warfare.rml: the hero, the other characters' dots and each command's icon sit at their projected map points; the pointer's chosen command follows the mouse; the team and command buttons' boxes come off the live CButtons that hit-test them, and the command buttons are repositioned every frame to the chosen team's row -- native is authoritative for their layout and their hit test, so this runs in the accepted direction, as the friends family does
+slide_notice.rml: per-frame data -- the ticker scrolls right to left every frame, so the text's left and the band's fading height are its state, not a layout a theme could own
 themes/legacy/buff_strip.rml: per-frame data -- strip offset follows the HUD anchor
 themes/legacy/chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
 themes/legacy/help_window.rml: per-frame data -- native renderer geometry for the page it still measures

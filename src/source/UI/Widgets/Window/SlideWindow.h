@@ -2,6 +2,14 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/HUD/SlideTicker.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+#include <RmlUi/Core/Types.h>
+
+namespace Rml
+{
+class ElementDocument;
+}
 
 namespace mu::ui::window
 {
@@ -33,6 +41,27 @@ namespace mu::ui::window
         }
 
     private:
+        struct SlideNoticeRmlModel
+        {
+            float rootScale = 1.f;
+            float textPx = 0.f;
+            bool shown = false;
+            float textX = 0.f;
+            float textTop = 0.f;
+            float bandTop = 0.f;
+            float bandHeight = 0.f;
+            float alpha = 0.f;
+            Rml::String textColor;
+            Rml::String text;
+        };
+        RmlModelBinder<SlideNoticeRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+        void BuildRmlUi();
+        void DestroyRmlUi();
+        void SyncRmlModel();
+        void ReloadRmlTheme();
+
         UI::HUD::SlideTicker* m_pSlideMgr;
     };
 }

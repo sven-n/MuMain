@@ -1,0 +1,23 @@
+<rml>
+<head>
+	<title>Slide Notice</title>
+	<link type="text/rcss" href="theme://base.rcss"/>
+	<link type="text/rcss" href="theme://slide_notice.rcss"/>
+</head>
+<body data-model="slide_notice">
+	<!-- The scrolling notice ticker across the top of the screen: the help line from the local
+	     Slide_<lang>.bmd, or a server notice. One lane shows at a time -- they hand over on alpha
+	     rather than overlapping, which C++ resolves before this is bound. -->
+	<div id="band" data-if="shown"
+	     data-style-top="(band_top * root_scale) + 'px'"
+	     data-style-height="(band_height * root_scale) + 'px'"
+	     data-style-background-color="'rgba(0,0,0,' + alpha + ')'"></div>
+	<!-- The scroll position is this element's whole reason to move: it travels right to left every
+	     frame, so its left is bound rather than themed. -->
+	<div id="slide_text" data-if="shown"
+	     data-style-left="(text_x * root_scale) + 'px'"
+	     data-style-top="(text_top * root_scale) + 'px'"
+	     data-style-font-size="text_px + 'px'"
+	     data-style-color="text_color">{{text}}</div>
+</body>
+</rml>

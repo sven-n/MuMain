@@ -1,0 +1,22 @@
+/* The notice ticker. Screen-space across the full width at the top, like the native band it
+   replaces -- CSlideHelpMgr positioned both lanes at (0, 0). The band's own colour and the text's
+   are bound: the alpha follows the lane's fade and the text colour can come from the server with
+   the message. */
+
+body {
+	width: 100%;
+	height: 100%;
+}
+
+#band {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	pointer-events: none;
+}
+
+#slide_text {
+	position: absolute;
+	white-space: nowrap;
+	pointer-events: none;
+}
