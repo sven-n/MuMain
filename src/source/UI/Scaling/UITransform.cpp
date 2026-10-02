@@ -49,10 +49,27 @@ FontPointRange GetFontPointRange(UI::Scaling::FontRole role)
     return {kNormalFontPointSize, kMaximumNormalFontPointSize};
 }
 
-UI::Scaling::Transform BottomHudTransform(int windowWidth, int windowHeight, float offsetX)
+// Wide windows used to pin the three HUD bands to opposite edges. The artwork
+// is one 640-wide bar, so that opened a hole between the hotkeys, gauges, and
+// menu. Extra width stays as world on both sides; the bar stays contiguous.
+float BottomHudOffsetX(int windowWidth, int windowHeight)
 {
     const float scale = UI::Scaling::BottomHudScale(windowWidth, windowHeight);
-    return {scale, scale, offsetX, static_cast<float>(windowHeight) - kReferenceHeight * scale, scale};
+    const float barWidth = static_cast<float>(kReferenceWidth) * scale;
+    return (static_cast<float>(windowWidth) - barWidth) * 0.5f;
+}
+
+UI::Scaling::Transform BottomHudTransform(int windowWidth, int windowHeight)
+{
+    const float scale = UI::Scaling::BottomHudScale(windowWidth, windowHeight);
+    return {scale, scale, BottomHudOffsetX(windowWidth, windowHeight),
+            static_cast<float>(windowHeight) - static_cast<float>(kReferenceHeight) * scale, scale};
+}
+
+float BottomHudFrameRight(int windowWidth, int windowHeight)
+{
+    const float scale = UI::Scaling::BottomHudScale(windowWidth, windowHeight);
+    return BottomHudOffsetX(windowWidth, windowHeight) + static_cast<float>(kReferenceWidth) * scale;
 }
 
 bool ContainsLogicalRect(const UI::Scaling::Transform& transform, float windowX, float windowY, float left,
@@ -135,41 +152,36 @@ float UI::Scaling::BottomHudScale(int windowWidth, int windowHeight)
 
 UI::Scaling::Transform UI::Scaling::BottomHudLeftTransform(int windowWidth, int windowHeight)
 {
-    return BottomHudTransform(windowWidth, windowHeight, 0.0f);
+    return BottomHudTransform(windowWidth, windowHeight);
 }
 
 UI::Scaling::Transform UI::Scaling::BottomHudCenterTransform(int windowWidth, int windowHeight)
 {
-    const float scale = BottomHudScale(windowWidth, windowHeight);
-    return BottomHudTransform(windowWidth, windowHeight,
-                              static_cast<float>(windowWidth) * 0.5f - 320.0f * scale);
+    return BottomHudTransform(windowWidth, windowHeight);
 }
 
 UI::Scaling::Transform UI::Scaling::BottomHudRightTransform(int windowWidth, int windowHeight)
 {
-    const float scale = BottomHudScale(windowWidth, windowHeight);
-    return BottomHudTransform(windowWidth, windowHeight,
-                              static_cast<float>(windowWidth) - kReferenceWidth * scale);
+    return BottomHudTransform(windowWidth, windowHeight);
 }
 
 UI::Scaling::Transform UI::Scaling::BottomHudExperienceTransform(int windowWidth, int windowHeight)
 {
-    Transform transform = BottomHudLeftTransform(windowWidth, windowHeight);
-    transform.scaleX = static_cast<float>(windowWidth) / kReferenceWidth;
-    return transform;
+    return BottomHudTransform(windowWidth, windowHeight);
 }
 
 UI::Scaling::Transform UI::Scaling::DockLeftTransform(int windowWidth, int windowHeight)
 {
     Transform transform = DockTransform(windowWidth, windowHeight);
-    transform.offsetX = 0.0f;
+    transform.offsetX = BottomHudOffsetX(windowWidth, windowHeight);
     return transform;
 }
 
 UI::Scaling::Transform UI::Scaling::DockRightTransform(int windowWidth, int windowHeight)
 {
     Transform transform = DockTransform(windowWidth, windowHeight);
-    transform.offsetX = static_cast<float>(windowWidth) - kReferenceWidth * transform.scaleX;
+    transform.offsetX = BottomHudFrameRight(windowWidth, windowHeight)
+                        - static_cast<float>(kReferenceWidth) * transform.scaleX;
     return transform;
 }
 
