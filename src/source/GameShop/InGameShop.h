@@ -15,6 +15,12 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Sprites/Sprite.h"
 #include "InGameShopSystem.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml
+{
+class ElementDocument;
+}
 
 namespace mu::ui::window
 {
@@ -286,6 +292,22 @@ private:
     bool m_bRequestCurrentPage;
 
     CUIInGameShopListBox m_StorageItemListBox;
+
+    // The window's flat backdrop must render behind the 3x3 package grid's live 3D item renders,
+    // but RmlUi's main context always renders last -- so it goes through RmlUiRuntime's background
+    // context, painted by CManager::Render()'s RenderBackgroundLayer() before every window's own
+    // Render(). This window is screen-space at the full reference area, so its root is {0,0}.
+    struct InGameShopBgRmlModel
+    {
+        float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+    };
+    RmlModelBinder<InGameShopBgRmlModel> m_BgRmlBinder;
+    Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+
+    void BuildRmlUi();
+    void ReloadRmlTheme();
+    void SyncRmlModel();
+    void DestroyRmlUi();
 };
 } // namespace mu::ui::window
 

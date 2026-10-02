@@ -1,0 +1,15 @@
+<rml>
+<head>
+	<title>In Game Shop Background</title>
+	<link type="text/rcss" href="in_game_shop_bg.rcss"/>
+</head>
+<body data-model="in_game_shop_bg">
+	<!-- Background-context document -- sits behind the 3x3 package grid's live 3D item renders
+	     (CInGameShop::RenderDisplayItems). Never interactive. The window is screen-space at the
+	     full 640x429 reference area, not a docked panel, so root_x/root_y are its own {0,0}. -->
+	<div id="bg_root" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="bg-back"></div>
+	</div>
+</body>
+</rml>

@@ -17,6 +17,12 @@
 #include "Camera/CameraProjection.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "UI/Core/WindowCommon.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include <RmlUi/Core/Context.h>
+#include <RmlUi/Core/ElementDocument.h>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -47,6 +53,9 @@ void CInGameShop::Init()
 
 void CInGameShop::Release()
 {
+    UI::RmlBridge::UnregisterForThemeReload(this);
+    DestroyRmlUi();
+
     UnloadImages();
 
     ReleaseBanner();
@@ -71,9 +80,61 @@ bool CInGameShop::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
     LoadImages();
     SetBtnInfo();
+    BuildRmlUi();
     Show(false);	//visible()을 flase로
 
     return true;
+}
+
+void CInGameShop::ReloadRmlTheme()
+{
+    if (!m_pRmlBgDoc)
+        return; // never built -- BuildRmlUi() picks up whatever theme is current when it runs
+    DestroyRmlUi();
+    BuildRmlUi();
+    // The next Update()/SyncRmlModel() restores position and visibility.
+}
+
+void CInGameShop::BuildRmlUi()
+{
+    if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+    {
+        const bool created = m_BgRmlBinder.Create(bgContext, "in_game_shop_bg",
+            [](Rml::DataModelConstructor& c, InGameShopBgRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+            });
+        if (created)
+        {
+            // Starts hidden; SyncRmlModel() is what shows and hides it.
+            m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/in_game_shop_bg.rml");
+        }
+    }
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+}
+
+void CInGameShop::DestroyRmlUi()
+{
+    if (!m_pRmlBgDoc)
+        return;
+    if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+    {
+        m_BgRmlBinder.Destroy(bgContext);
+        bgContext->UnloadDocument(m_pRmlBgDoc);
+    }
+    m_pRmlBgDoc = nullptr;
+}
+
+void CInGameShop::SyncRmlModel()
+{
+    if (!m_pRmlBgDoc)
+        return;
+    UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
+    // RenderBackgroundLayer() paints whatever is shown in the shared background context whoever
+    // asked for it, so this is what keeps the backdrop off screen while the shop is closed.
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, IsVisible());
 }
 
 void CInGameShop::SetPos(int x, int y)
@@ -97,7 +158,8 @@ bool CInGameShop::Render()
 
 void CInGameShop::RenderFrame()
 {
-    RenderImage(IMAGE_IGS_BACK, m_Pos.x, m_Pos.y, IMAGE_IGS_BACK_WIDTH, IMAGE_IGS_BACK_HEIGHT);
+    // The flat backdrop is in_game_shop_bg.rml, painted by RenderBackgroundLayer()
+    // before this runs so the 3D package items stay above it.
 
     int iSizeCategory = g_InGameShopSystem->GetSizeCategoriesAsSelectedZone();
 
@@ -555,6 +617,8 @@ void CInGameShop::SetBtnInfo()
 
 bool CInGameShop::Update()
 {
+    SyncRmlModel();
+
     if (IsVisible() == false)
         return true;
 

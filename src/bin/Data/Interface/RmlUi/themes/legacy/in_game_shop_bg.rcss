@@ -1,0 +1,24 @@
+/* Background layer for the cash shop, rendered behind the still-native 3x3 package grid's live 3D
+   item renders. Flat art only, no interactive elements -- the one piece
+   CInGameShop::RenderFrame() drew unconditionally. Everything else that function draws depends on
+   script data and stays native for now. */
+
+@spritesheet igs-bg-back-sheet { src: "../../../InGameShop/Ingame_shopback.jpg"; igs-bg-back: 0px 0px 640px 429px; }
+
+#bg_root {
+	position: absolute;
+	transform-origin: left top;
+	width: 640px;
+	height: 429px;
+	pointer-events: none;
+}
+
+.bg-back {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 429px;
+	pointer-events: none;
+	decorator: image(igs-bg-back);
+}
