@@ -8,7 +8,7 @@ for a long time, surfacing only as unrelated-looking runtime symptoms in
 whichever windows happen to load it. This script catches what the real parser
 won't tell you about, ahead of time:
 
-- RML: unterminated/nested `<!-- -->` comments.
+- RML: unterminated/nested `<!-- -->` comments, and balanced element nesting.
 - RCSS: balanced `{`/`}`, and unterminated/nested `/* */` comments.
 
 Both comment syntaxes share the same trap: they don't nest. `/* ... "/* x */"
@@ -19,18 +19,27 @@ silent misbehavior. A comment written this way in a shared base.rcss once
 broke every window that linked it in one shot (see STATUS.md's Findings
 section).
 
-Deliberately not a full RML/RCSS grammar validator (no XML well-formedness
+Element nesting is checked because an unbalanced `</div>` fails the same silent
+way: RmlUi closes whatever is open and carries on, so a stray closer ends an
+ancestor early and every following sibling escapes the container it was written
+in. A `data-if` gate one level up stops applying, and absolutely-positioned
+children resolve against a different box -- which reads as "the wrong panel is
+visible" and "a panel is drawn off the window", not as a markup error. One
+leftover closing tag from a removed wrapper did exactly that to guild_info.rml.
+
+Still deliberately not a full RML/RCSS grammar validator (no XML well-formedness
 check, no property/tag validation) -- this codebase's RML comments routinely
 contain a literal `--` for prose (technically invalid per the XML spec, but
 RmlUi's actual parser tolerates it fine), so a strict validator would flag
 most files for a non-issue. This only catches the one structural failure
-mode that's actually gone unnoticed here before.
+modes that have actually gone unnoticed here before.
 
 Usage: python3 check_rml_rcss_syntax.py [--asset-root DIR]
 Exit code 0 = clean, 1 = violation(s) found (printed to stderr).
 """
 import argparse
 import pathlib
+import re
 import sys
 
 
@@ -69,6 +78,76 @@ def check_rml(path: pathlib.Path) -> list[str]:
         i += 1
     if in_comment:
         errors.append(f"{path}: unterminated comment opened at line {comment_start_line}")
+    errors.extend(check_rml_nesting(path, text))
+    return errors
+
+
+# RmlUi accepts these without a closing tag; everything else must be closed or self-closed.
+VOID_ELEMENTS = frozenset(
+    {"br", "img", "input", "meta", "link", "hr", "source", "track", "area", "base", "col",
+     "embed", "param", "wbr"}
+)
+
+TAG_RE = re.compile(r"""<(/?)([a-zA-Z][\w-]*)((?:[^>"']|"[^"]*"|'[^']*')*?)(/?)>""", re.S)
+
+
+def _line_indent(text: str, pos: int) -> str | None:
+    """The whitespace before `pos` on its own line, or None if something else precedes it."""
+    start = text.rfind("\n", 0, pos) + 1
+    prefix = text[start:pos]
+    return prefix if prefix.strip() == "" else None
+
+
+def check_rml_nesting(path: pathlib.Path, text: str) -> list[str]:
+    # Blank the comments but keep line numbering, so a tag inside a comment is not counted.
+    stripped = re.sub(r"<!--.*?-->", lambda m: "\n" * m.group(0).count("\n"), text, flags=re.S)
+    errors: list[str] = []
+    stack: list[tuple[str, int, str | None]] = []
+    # Closers whose indentation disagrees with the element they closed. On their own these are
+    # only a formatting smell, so they are reported only when the file is also unbalanced --
+    # where they are the best available pointer at which closer is the extra one, since a stray
+    # </div> among same-named tags pops the innermost match and only shows up at EOF.
+    suspects: list[str] = []
+    for match in TAG_RE.finditer(stripped):
+        closing, tag, _attrs, selfclose = match.groups()
+        if tag.lower() in VOID_ELEMENTS or selfclose:
+            continue
+        line = stripped.count("\n", 0, match.start()) + 1
+        indent = _line_indent(stripped, match.start())
+        if not closing:
+            stack.append((tag, line, indent))
+            continue
+        if stack and stack[-1][0] == tag:
+            open_tag, open_line, open_indent = stack.pop()
+            if (
+                open_line != line
+                and indent is not None
+                and open_indent is not None
+                and indent != open_indent
+            ):
+                suspects.append(
+                    f"{path}:{line}: '</{tag}>' is indented differently from the "
+                    f"'<{open_tag}>' it closes (line {open_line}) -- likely the extra closer"
+                )
+            continue
+        if stack:
+            open_tag, open_line, _ = stack[-1]
+            errors.append(
+                f"{path}:{line}: stray '</{tag}>' -- the innermost open element is "
+                f"'<{open_tag}>' from line {open_line}. RmlUi closes that one here instead, "
+                "so every following sibling leaves the container it was written in: a "
+                "data-if above stops gating them, and absolute positions resolve against "
+                "another box"
+            )
+        else:
+            errors.append(
+                f"{path}:{line}: stray '</{tag}>' with nothing open -- it closes the "
+                "document body early"
+            )
+    for tag, line, _ in stack:
+        errors.append(f"{path}:{line}: '<{tag}>' is never closed")
+    if errors:
+        errors.extend(suspects)
     return errors
 
 

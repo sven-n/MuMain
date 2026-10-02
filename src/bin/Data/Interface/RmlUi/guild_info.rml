@@ -141,7 +141,6 @@
 			<div class="t-corner t-tr members-corner-tr"></div>
 			<div class="t-corner t-bl members-corner-bl"></div>
 			<div class="t-corner t-br members-corner-br"></div>
-			</div>
 			<span id="gi_hdr_name" class="sharp-text gi-header" data-style-width="(40 * root_scale) + 'px'"
 			      data-style-font-size="header_name.text_px + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_name.text}}</span>
