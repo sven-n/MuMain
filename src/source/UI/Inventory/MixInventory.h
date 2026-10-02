@@ -4,7 +4,7 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/UIControls.h"
+#include "UI/Inventory/SocketListSelection.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 #include <span>
 #include <vector>
@@ -40,19 +40,14 @@ namespace mu::ui::window
         float m_fInventoryColor[3];
         float m_fInventoryWarningColor[3];
 
-        CUISocketListBox m_SocketListBox;
+        UI::Inventory::SocketListSelection m_SocketSelection;
+        std::vector<DWORD> m_SocketItemKeys;
+        bool m_SocketTextDirty = true;
 
-        // Window frame/title/Mix button/recipe-result content and the socket list box's drawing
-        // are all RmlUi now. Only the inventory grid stays fully native -- same reasoning as
-        // CStorageInventoryExt for the grid; the socket list keeps its native hit tests,
-        // selection and scrolling (m_SocketListBox.DoAction()).
-        //
-        // A line CUISocketListBox::RenderDataLine() draws: its 13 px row box (filled when
-        // selected) at `top`, reference px from the window's top.
         struct SocketListLine
         {
             Rml::String text;
-            float top = 0.f;
+            int index = 0;
             bool selected = false;
             bool operator==(const SocketListLine&) const = default;
         };
@@ -115,13 +110,8 @@ namespace mu::ui::window
             bool showSocketPrompt = false;
             Rml::String socketPromptText;
 
-            // CUISocketListBox::Render() (attach / detach socket mixes): the list's box and its
-            // new-style scroll bar (track and thumb tops, reference px from the window's corner).
             bool showSocketList = false;
-            float socketListLeft = 0.f, socketListTop = 0.f, socketListWidth = 0.f, socketListHeight = 0.f;
             std::vector<SocketListLine> socketLines;
-            float socketScrollTop = 0.f, socketScrollHeight = 0.f, socketThumbTop = 0.f;
-            bool socketThumbDragged = false;
         };
         RmlModelBinder<MixInventoryRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
@@ -177,8 +167,6 @@ namespace mu::ui::window
         static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 
     private:
-        void LoadImages();
-        void UnloadImages();
 
         bool InventoryProcess();
         bool BtnProcess();
@@ -189,10 +177,13 @@ namespace mu::ui::window
         // Former RenderFrame()/RenderMixDescriptions() native text -- see its own comment
         // (MixInventory.cpp) for the full per-field translation.
         void SyncMixContentModel();
-        // Former CUISocketListBox::Render() of m_SocketListBox, as the model's socket_* fields.
         void SyncSocketListModel();
+        bool RefreshSocketOptions();
+        void SelectSocket(int index);
+    bool PrepareSocketMix();
+    void ConfirmMix(int mixType, int mixId, int socketIndex, const std::vector<DWORD>& itemKeys);
 
-        void CheckMixInventory();
+        bool CheckMixInventory();
         bool Mix();
         void RenderMixEffect();
 

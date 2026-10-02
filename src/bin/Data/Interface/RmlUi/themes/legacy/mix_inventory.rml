@@ -64,26 +64,19 @@
 		<div class="sharp-text mix-socket-prompt" data-class-hidden="!show_recipe || !show_socket_prompt"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'">{{socket_prompt_text}}</div>
 
-		<!-- The socket list of the attach / detach socket mixes (CUISocketListBox::Render()): its box,
-		     a 13 px row per shown line (filled when selected), the new-style scroll bar at its right
-		     edge. The lines and the thumb are hit-tested natively. -->
-		<div data-if="show_socket_list">
-			<div class="socket-list-box" data-style-left="(socket_list_left - 1) + 'px'" data-style-top="(socket_list_top - 1) + 'px'"
-			     data-style-width="(socket_list_width + 1) + 'px'" data-style-height="(socket_list_height + 2) + 'px'"></div>
-			<div class="socket-line" data-for="l : socket_lines" data-class-selected="l.selected"
-			     data-style-left="socket_list_left + 'px'" data-style-top="l.top + 'px'"
-			     data-style-width="(socket_list_width - 12) + 'px'">
-				<span class="sharp-text socket-line-text" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{l.text}}</span>
+		<div class="socket-list-box" data-if="show_socket_list"></div>
+		<div id="socket_list" class="scroll-pane" data-if="show_socket_list"
+		     data-style-width="(160 * root_scale) + 'px'"
+		     data-style-height="(65 * root_scale) + 'px'"
+		     data-style-font-size="text_px + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+			<div class="socket-row" data-for="l : socket_lines" data-class-selected="l.selected"
+			     data-style-width="(148 * root_scale) + 'px'"
+			     data-style-height="(13 * root_scale) + 'px'"
+			     data-event-click="mix_inventory_select_socket(l.index)">
+				<div class="socket-row-back"></div>
+				<span class="socket-line-text">{{l.text}}</span>
 			</div>
-			<div class="socket-scroll-top" data-style-left="(socket_list_left + socket_list_width - 8) + 'px'"
-			     data-style-top="socket_scroll_top + 'px'"></div>
-			<div class="socket-scroll-mid" data-style-left="(socket_list_left + socket_list_width - 8) + 'px'"
-			     data-style-top="(socket_scroll_top + 3) + 'px'" data-style-height="(socket_scroll_height - 6) + 'px'"></div>
-			<div class="socket-scroll-bottom" data-style-left="(socket_list_left + socket_list_width - 8) + 'px'"
-			     data-style-top="(socket_scroll_top + socket_scroll_height - 3) + 'px'"></div>
-			<div class="socket-thumb" data-class-dragged="socket_thumb_dragged"
-			     data-style-left="(socket_list_left + socket_list_width - 12) + 'px'" data-style-top="socket_thumb_top + 'px'"></div>
 		</div>
 
 		<div id="btn_mix" class="mix-btn" data-class-hidden="!mix_visible" data-class-locked="mix_locked"

@@ -42,18 +42,19 @@
 			<div class="mix-line mix-socket-prompt" data-class-hidden="!show_socket_prompt">{{socket_prompt_text}}</div>
 		</div>
 
-		<!-- The socket list of the attach / detach socket mixes (SyncSocketListModel(),
-		     MixInventory.cpp): legacy geometry, modern tokens. Hit-tested natively. -->
-		<div data-if="show_socket_list">
-			<div class="socket-list-box" data-style-left="(socket_list_left - 1) + 'px'" data-style-top="(socket_list_top - 1) + 'px'"
-			     data-style-width="(socket_list_width + 1) + 'px'" data-style-height="(socket_list_height + 2) + 'px'"></div>
-			<div class="socket-line" data-for="l : socket_lines" data-class-selected="l.selected"
-			     data-style-left="socket_list_left + 'px'" data-style-top="l.top + 'px'"
-			     data-style-width="(socket_list_width - 12) + 'px'">{{l.text}}</div>
-			<div class="socket-scroll-track" data-style-left="(socket_list_left + socket_list_width - 6) + 'px'"
-			     data-style-top="socket_scroll_top + 'px'" data-style-height="socket_scroll_height + 'px'"></div>
-			<div class="socket-thumb" data-class-dragged="socket_thumb_dragged"
-			     data-style-left="(socket_list_left + socket_list_width - 9) + 'px'" data-style-top="socket_thumb_top + 'px'"></div>
+		<div class="socket-list-box" data-if="show_socket_list"></div>
+		<div id="socket_list" class="scroll-pane" data-if="show_socket_list"
+		     data-style-width="(160 * root_scale) + 'px'"
+		     data-style-height="(65 * root_scale) + 'px'"
+		     data-style-font-size="11 * root_scale + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+			<div class="socket-row" data-for="l : socket_lines" data-class-selected="l.selected"
+			     data-style-width="(148 * root_scale) + 'px'"
+			     data-style-height="(13 * root_scale) + 'px'"
+			     data-event-click="mix_inventory_select_socket(l.index)">
+				<div class="socket-row-back"></div>
+				<span class="socket-line-text">{{l.text}}</span>
+			</div>
 		</div>
 
 		<div id="btn_mix" class="modern-icon-btn-px mix-btn-mix" data-class-hidden="!mix_visible"

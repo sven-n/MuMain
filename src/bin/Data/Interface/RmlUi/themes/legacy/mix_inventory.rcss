@@ -117,36 +117,14 @@
 	font-size: 1em;
 }
 .mix-socket-prompt.hidden { display: none; }
-/* CUISocketListBox::Render(): the box and the selected row black at 40 % (SetLineColor(7, 0.4f),
-   the colour RenderInterface() leaves set for RenderDataLine()), the lines in the normal font at
-   8, 3 in their row, (230, 220, 200) or black when selected; the scroll track
-   (newui_scrollbar_up / m / down) and the newui_scroll_on thumb, tinted (200, 200, 200) while
-   dragged. Hit-tested natively (m_SocketListBox.DoAction()). */
-@spritesheet mix-scroll-top-sheet { src: "../../../newui_scrollbar_up.tga"; mix-scroll-top: 0px 0px 7px 3px; }
-@spritesheet mix-scroll-mid-sheet { src: "../../../newui_scrollbar_m.tga"; mix-scroll-mid: 0px 0px 7px 15px; }
-@spritesheet mix-scroll-bottom-sheet { src: "../../../newui_scrollbar_down.tga"; mix-scroll-bottom: 0px 0px 7px 3px; }
-@spritesheet mix-thumb-sheet { src: "../../../newui_scroll_on.tga"; mix-thumb: 0px 0px 15px 30px; }
-.socket-list-box, .socket-line, .socket-scroll-top, .socket-scroll-mid, .socket-scroll-bottom, .socket-thumb {
-	position: absolute;
-	pointer-events: none;
-}
-.socket-list-box { background-color: rgba(0, 0, 0, 102); }
-.socket-line { height: 13px; }
-.socket-line.selected { background-color: rgba(0, 0, 0, 102); }
-.socket-line-text {
-	position: absolute;
-	left: 8px;
-	top: 3px;
-	white-space: nowrap;
-	color: #e6dcc8;
-}
-.socket-line.selected .socket-line-text { color: #000000; }
-.socket-scroll-top, .socket-scroll-mid, .socket-scroll-bottom { width: 7px; }
-.socket-scroll-top { height: 3px; decorator: image(mix-scroll-top); }
-.socket-scroll-mid { decorator: image(mix-scroll-mid); }
-.socket-scroll-bottom { height: 3px; decorator: image(mix-scroll-bottom); }
-.socket-thumb { width: 15px; height: 30px; decorator: image(mix-thumb); }
-.socket-thumb.dragged { image-color: #c8c8c8; }
+/* The socket pane counter-scales so scrollbar input uses physical pixels. */
+.socket-list-box { position: absolute; left: 14px; top: 294px; width: 161px; height: 67px; background-color: rgba(0, 0, 0, 102); }
+#socket_list { position: absolute; left: 15px; top: 295px; transform-origin: left top; overflow: hidden scroll; }
+.socket-row { position: relative; display: block; pointer-events: auto; }
+.socket-row-back { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.socket-row.selected .socket-row-back { background-color: rgba(0, 0, 0, 102); }
+.socket-line-text { position: absolute; left: 5.4%; top: 0; white-space: nowrap; color: #e6dcc8; }
+.socket-row.selected .socket-line-text { color: #000000; }
 
 /* 44x35 crop of the top-left ("up") frame of the native 2-frame vertical button sheet
    (CMixInventory::Create()'s former ChangeButtonInfo(..., 44.f, 35.f)) -- hover uses a CSS
