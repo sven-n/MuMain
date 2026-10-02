@@ -2747,6 +2747,68 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate, 
     RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
 }
 
+// Tarkan dust vents (objects 60, 70, 76, 83). The meshes are hidden and the
+// visible layer is BITMAP_SMOKE. That layer is map weather, same as the
+// screen-space sand in RenderOutSides. Falling stones on object 83 stay.
+static bool EmitTarkanSandDust(OBJECT* o)
+{
+    const bool renderWeather = ShouldRenderWeatherEffects();
+
+    switch (o->Type)
+    {
+    case 60:
+        if (o->HiddenMesh != -2 && renderWeather)
+        {
+            for (int i = 0; i < 20; ++i)
+            {
+                CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 6, o->Scale);
+            }
+        }
+        o->HiddenMesh = -2;
+        return true;
+
+    case 70:
+        o->HiddenMesh = -2;
+        if (renderWeather && rand_fps_check(5))
+            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 7, o->Scale);
+        return true;
+
+    case 76:
+        o->HiddenMesh = -2;
+        if (renderWeather && ((int)WorldTime % 5000) > 4500)
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 4, o->Scale);
+        return true;
+
+    case 83:
+        o->HiddenMesh = -2;
+        {
+            const int inter = (int)o->Angle[2] * 10;
+            const int timing = (int)WorldTime % 10000;
+            if (timing > 3500 + inter && timing < 4000 + inter)
+            {
+                if (renderWeather)
+                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 8, o->Scale);
+                if (rand_fps_check(3))
+                {
+                    if (renderWeather)
+                    {
+                        vec3_t Position;
+                        Position[0] = o->Position[0] + (rand() % 128 - 64);
+                        Position[1] = o->Position[1] + (rand() % 128 - 64);
+                        Position[2] = o->Position[2];
+                        CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, o->Light, 4, o->Scale * 0.5f);
+                    }
+                    CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                }
+            }
+        }
+        return true;
+
+    default:
+        return false;
+    }
+}
+
 void RenderObjectVisual(OBJECT* o)
 {
     BMD* b = &Models[o->Type];
@@ -2966,19 +3028,10 @@ void RenderObjectVisual(OBJECT* o)
         }
         break;
     case WD_8TARKAN:
+        if (EmitTarkanSandDust(o))
+            break;
         switch (o->Type)
         {
-        case 60:
-            if (o->HiddenMesh != -2)
-            {
-                for (int i = 0; i < 20; ++i)
-                {
-                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 6, o->Scale);
-                }
-            }
-            o->HiddenMesh = -2;
-            break;
-
         case 63:
             Luminosity = (float)sinf((WorldTime + (o->Angle[2] * 5)) * 0.002f) * 0.3f + 0.7f;
 
@@ -2995,47 +3048,6 @@ void RenderObjectVisual(OBJECT* o)
             Vector(Luminosity, Luminosity * 0.32f, Luminosity * 0.32f, Light);
             b->TransformPosition(BoneTransform[2], p, Position);
             CreateSprite(BITMAP_IMPACT, Position, Scale, Light, o);
-            break;
-
-        case 70:
-            o->HiddenMesh = -2;
-            if (rand_fps_check(5))
-                CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 7, o->Scale);
-            break;
-
-        case 76:
-            o->HiddenMesh = -2;
-            {
-                bool Smoke = false;
-
-                if (((int)WorldTime % 5000) > 4500) Smoke = true;
-                if (Smoke)
-                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 4, o->Scale);
-            }
-            break;
-        case 83:
-            o->HiddenMesh = -2;
-            {
-                bool Smoke = false;
-                int  inter = (int)o->Angle[2] * 10;
-                int  timing = (int)WorldTime % 10000;
-
-                if (timing > 3500 + inter && timing < 4000 + inter) Smoke = true;
-                if (Smoke)
-                {
-                    Vector(1.f, 1.f, 1.f, Light);
-
-                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 8, o->Scale);
-                    if (rand_fps_check(3))
-                    {
-                        Position[0] = o->Position[0] + (rand() % 128 - 64);
-                        Position[1] = o->Position[1] + (rand() % 128 - 64);
-                        Position[2] = o->Position[2];
-                        CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, o->Light, 4, o->Scale * 0.5f);
-                        CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
-                    }
-                }
-            }
             break;
         }
         break;

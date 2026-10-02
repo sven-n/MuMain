@@ -1424,6 +1424,15 @@
   <data name="Render full effects" xml:space="preserve">
     <value>完整特效</value>
   </data>
+  <data name="Weather effects" xml:space="preserve">
+    <value>天氣效果</value>
+  </data>
+  <data name="Show FPS" xml:space="preserve">
+    <value>顯示 FPS</value>
+  </data>
+  <data name="VSync" xml:space="preserve">
+    <value>VSync</value>
+  </data>
   <data name="Resolution" xml:space="preserve">
     <value>解析度</value>
   </data>

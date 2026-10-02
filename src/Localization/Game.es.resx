@@ -1424,6 +1424,15 @@
   <data name="Render full effects" xml:space="preserve">
     <value>Renderizar todos los efectos</value>
   </data>
+  <data name="Weather effects" xml:space="preserve">
+    <value>Efectos del clima</value>
+  </data>
+  <data name="Show FPS" xml:space="preserve">
+    <value>Mostrar FPS</value>
+  </data>
+  <data name="VSync" xml:space="preserve">
+    <value>VSync</value>
+  </data>
   <data name="Resolution" xml:space="preserve">
     <value>Resolución</value>
   </data>

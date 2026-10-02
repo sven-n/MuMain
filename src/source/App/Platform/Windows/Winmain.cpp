@@ -2172,6 +2172,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     InitVSync();
     ApplyVSyncPreferenceNow(GameConfig::GetInstance().GetVSyncEnabled());
+    SetShowFpsCounter(GameConfig::GetInstance().GetShowFps());
 
     // Make the bundled ./fonts faces resolvable by GDI before the first CreateFont,
     // so a chosen curated font works even without a system-wide install.

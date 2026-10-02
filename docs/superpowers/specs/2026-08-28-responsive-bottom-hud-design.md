@@ -3,15 +3,15 @@
 ## Goal
 
 Keep the legacy bottom HUD readable without stretching it across large or wide
-windows. Preserve the familiar small-resolution layout while reorganizing the
-HUD into three responsive zones:
+windows, and without pulling it apart. The bar stays one continuous 640-wide
+piece:
 
 - left: Q/W/E/R item shortcuts;
 - center: HP, SD, skill slots, current skill, AG, and mana;
 - right: character, inventory, friend, and menu buttons.
 
-The experience rail remains full-width. No new textures or dependencies are
-required.
+The experience rail is the bottom strip of that same bar. No new textures or
+dependencies are required.
 
 ## Root Cause
 
@@ -45,9 +45,9 @@ bands from the current control positions:
 | Right menu | `[488, 640]` | menu background and four buttons |
 
 These bands exactly cover the original 640-pixel HUD without changing control
-coordinates. At 640x480 they join into the original layout. At wider aspect
-ratios, the utility band stays left, the combat band stays centered, and the
-menu band stays right.
+coordinates. They always share one transform, so the artwork meets at every
+resolution. At 640x480 and at other 4:3 sizes the bar fills the window width.
+On wider windows it stays centered and the 3D view shows in the side margins.
 
 The center order is:
 
@@ -63,20 +63,37 @@ Use one uniform scale for all three fixed-content regions:
 hudScale = clamp(min(windowWidth / 640, windowHeight / 480), 1.0, 2.0)
 ```
 
-All regions map logical `y=480` to the physical window bottom. Their horizontal
-anchors are:
+All regions, including the experience strip, share one transform. Logical
+`y=480` maps to the physical window bottom. Logical `x=0..640` maps to a bar
+of width `640 * hudScale`, centered in the window:
 
-- left transform: logical `x=0` maps to physical `x=0`;
-- center transform: logical `x=320` maps to the window center;
-- right transform: logical `x=640` maps to the physical right edge.
+```text
+offsetX = (windowWidth - 640 * hudScale) / 2
+```
 
-At 1024x768 the scale is 1.6 and the regions reconstruct the original full
-width. At 1280x720 the scale remains 1.5, preserving the current vertical size.
-At 1920x1200 the scale stops at 2.0 instead of growing to 2.5-3.0.
+Pinning the bands to opposite screen edges opened a hole between the hotkeys,
+the gauges, and the menu. That reads as a split HUD on 16:9 and ultrawide
+(about 320px per side at 1920x1080, about 640px per side at 2560x1440). The
+side margins are world space. Map haze — Tarkan and Karutan sand, and the
+smoke on Swamp of Quiet, Crywolf, Raklion, Empire Guardian, and Battle Castle —
+covers the full window, including those margins. Stopping it at the HUD top
+left a darker rectangle beside the bar, because the haze brightens everything
+above the HUD and the gutters kept the raw ground. The HUD is drawn afterwards
+and stays opaque, so the extra haze under the bar is hidden. Dialog dimming
+still stops above the HUD. The scale cap stays at 2.0 so the bar does not
+grow to 3x–4x just to touch both edges.
 
-The experience rail uses the same vertical scale and bottom anchor, but maps
-logical `x=0..640` across the complete physical window width. Only this flat,
-repeatable rail may stretch horizontally.
+At 1024x768 the scale is 1.6 and the bar fills the window. At 1280x720 the
+scale remains 1.5 and the bar is centered. At 1920x1080 and 2560x1440 the
+scale stops at 2.0; the gauge midpoint stays on the screen center.
+
+Chat, the chat input, the window menu, and the bottom event timers use this
+same frame so they stay on the bar instead of stretching to the screen edges.
+
+Docked panels keep their own scale cap (2.25). The left dock's logical `x=0`
+sits on the bar's left edge. The right dock's logical `x=640` sits on the
+bar's right edge, so inventory and character windows stay on the bar the way
+they do at 4:3.
 
 ## Texture Rendering
 
@@ -89,8 +106,8 @@ remains owned by `RenderImageStretch`; callers provide source pixels, not raw UV
 fractions.
 
 At 640x480, the sliced render must be pixel-equivalent to the current three
-whole-image draws. At larger widths, only the gaps between the three regions
-change.
+whole-image draws. At larger widths the slices stay joined; only the margins
+outside the bar change.
 
 ## Rendering Ownership
 
@@ -103,7 +120,7 @@ full-window transform.
 - left: frame slice, `CNewUIItemHotKey` items and counts;
 - center: frame slices, life/mana, SD/AG, current/hot skills;
 - right: frame slice and menu buttons;
-- stretch: experience background and progress rail.
+- experience: background and progress rail, on the same transform as the bar.
 
 `CNewUISkillList` uses the center transform for rendering, tooltips, expanded
 skill lists, and mouse input. `CNewUIHotKey` remains a keyboard-command owner;
@@ -123,8 +140,8 @@ it. Derive regional logical mouse coordinates from `g_fWindowMouseX` and
 - Character/inventory/friend/menu buttons use the right transform.
 - Gauge and experience tooltips use their rendering transform.
 
-Clicks in the gaps between regions fall through to the world. The three visible
-region bounds block world input.
+Clicks in the side margins fall through to the world. The continuous bar
+blocks world input.
 
 ## World Viewport and Docked Panels
 
@@ -146,24 +163,24 @@ pixel.
 
 Extend `tests/ui/test_ui_scaling.cpp` with literal expectations for:
 
-- 640x480: three regions reconstruct the original layout;
-- 1024x768: 1.6x regions meet without gaps;
-- 1280x720: 1.5x height is preserved and horizontal gaps are symmetric;
-- 1920x1200: scale caps at 2.0, center midpoint is screen center, side regions
-  touch their respective edges;
+- 640x480 and 1024x768: the bar fills the width and the regions meet;
+- 1280x720: 1.5x height is preserved and the bar is centered with no internal gaps;
+- 1920x1200, 1920x1080, and 2560x1440: scale caps at 2.0, the midpoint is the
+  screen center, and the right dock's logical `x=640` meets the bar's right edge;
 - regional position/inverse-position round trips;
-- experience transform spans the complete window width;
-- HUD top matches the world viewport and dock bottom;
-- general HUD/world-overlay transforms remain unchanged.
+- the experience strip uses the bar's uniform scale;
+- HUD top matches the dock bottom;
+- general screen-overlay and world-overlay transforms remain unchanged.
 
 Add focused source-level or unit coverage for the selected interface-to-region
 policy. Run the complete CTest suite, native executable link, and `git diff
 --check`.
 
 Native screenshots must cover at least one 4:3 or 5:4 resolution and one wide
-resolution with inventory plus character panels open. Verify texture seams,
-gauge centering, button hitboxes, tooltips, world clicks in gaps, dock/HUD
-alignment, and absence of black terrain gaps before claiming visual completion.
+resolution (1920x1080 and 2560x1440) with inventory plus character panels open.
+Verify the bar is one piece, gauge centering, button hitboxes, tooltips, world
+clicks in the side margins, dock/HUD alignment, and absence of black terrain
+gaps before claiming visual completion.
 
 ## Non-Goals
 
@@ -171,4 +188,5 @@ alignment, and absence of black terrain gaps before claiming visual completion.
 - No new HUD artwork.
 - No changes to inventory/dialog scaling.
 - No broad cleanup of the legacy main-frame implementation.
-- No redesign of chat, minimap, event timers, or other independent HUD widgets.
+- No redesign of chat, minimap, or event-timer contents. Chat and the bottom
+  timers only change which frame they follow.

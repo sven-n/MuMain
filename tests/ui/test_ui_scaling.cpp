@@ -244,6 +244,36 @@ TEST_CASE("VSync preference defaults on and remains mutable [config][render]")
     config.SetVSyncEnabled(previous);
 }
 
+TEST_CASE("weather effects preference defaults on and remains mutable [config][render]")
+{
+    CHECK(CfgDefaults::CfgDefaultWeatherEffects);
+
+    auto& config = GameConfig::GetInstance();
+    const bool previous = config.GetWeatherEffects();
+
+    config.SetWeatherEffects(false);
+    CHECK_FALSE(config.GetWeatherEffects());
+    config.SetWeatherEffects(true);
+    CHECK(config.GetWeatherEffects());
+
+    config.SetWeatherEffects(previous);
+}
+
+TEST_CASE("show-FPS preference defaults off and remains mutable [config][render]")
+{
+    CHECK_FALSE(CfgDefaults::CfgDefaultShowFps);
+
+    auto& config = GameConfig::GetInstance();
+    const bool previous = config.GetShowFps();
+
+    config.SetShowFps(true);
+    CHECK(config.GetShowFps());
+    config.SetShowFps(false);
+    CHECK_FALSE(config.GetShowFps());
+
+    config.SetShowFps(previous);
+}
+
 TEST_CASE("inventory drag centers items without a grid pickup anchor [ui][inventory]")
 {
     const POINT offset = UI::Items::Drag::PickupOffset(0, 0, 40, 60, 183, 317, false);
@@ -327,12 +357,14 @@ TEST_CASE("store window consumes passive hover before world selection [ui][store
     MouseY = previousMouseY;
 }
 
-TEST_CASE("right dock anchors existing panel columns to the viewport edge [ui][scaling]")
+TEST_CASE("right dock anchors existing panel columns to the unified HUD frame [ui][scaling]")
 {
     const auto dock = UI::Scaling::DockRightTransform(1920, 1080);
-    CHECK(UI::Scaling::PositionX(dock, 450.0f) == doctest::Approx(1492.5f));
-    CHECK(UI::Scaling::PositionX(dock, 640.0f) == doctest::Approx(1920.0f));
-    CHECK(UI::Scaling::LogicalX(dock, 1492.5f) == doctest::Approx(450.0f));
+    const auto hud = UI::Scaling::BottomHudRightTransform(1920, 1080);
+    CHECK(UI::Scaling::PositionX(dock, 450.0f) == doctest::Approx(1172.5f));
+    CHECK(UI::Scaling::PositionX(dock, 640.0f) == doctest::Approx(1600.0f));
+    CHECK(UI::Scaling::PositionX(dock, 640.0f) == doctest::Approx(UI::Scaling::PositionX(hud, 640.0f)));
+    CHECK(UI::Scaling::LogicalX(dock, 1172.5f) == doctest::Approx(450.0f));
 }
 
 TEST_CASE("right-side status overlays stay adjacent to right-docked panels [ui][scaling]")
@@ -580,28 +612,64 @@ TEST_CASE("bottom HUD regions reconstruct at 640x480 and 1024x768 [ui][scaling]"
     CHECK(UI::Scaling::PositionX(center, 152.0f) == doctest::Approx(243.2f));
     CHECK(UI::Scaling::PositionX(center, 488.0f) == doctest::Approx(780.8f));
     CHECK(UI::Scaling::PositionX(right, 488.0f) == doctest::Approx(780.8f));
+
+    const auto dock = UI::Scaling::DockRightTransform(1024, 768);
+    CHECK(dock.offsetX == doctest::Approx(0.0f));
+    CHECK(UI::Scaling::PositionX(dock, 640.0f) == doctest::Approx(1024.0f));
 }
 
-TEST_CASE("bottom HUD uses symmetric wide gaps and caps at 2x [ui][scaling]")
+TEST_CASE("bottom HUD stays one centered bar and caps at 2x [ui][scaling]")
 {
     const auto hdLeft = UI::Scaling::BottomHudLeftTransform(1280, 720);
     const auto hdCenter = UI::Scaling::BottomHudCenterTransform(1280, 720);
     const auto hdRight = UI::Scaling::BottomHudRightTransform(1280, 720);
     CHECK(hdCenter.scaleX == doctest::Approx(1.5f));
-    CHECK(UI::Scaling::PositionX(hdLeft, 152.0f) == doctest::Approx(228.0f));
+    CHECK(hdCenter.scaleY == doctest::Approx(hdCenter.scaleX));
+    CHECK(UI::Scaling::PositionX(hdLeft, 0.0f) == doctest::Approx(160.0f));
+    CHECK(UI::Scaling::PositionX(hdLeft, 152.0f) == doctest::Approx(388.0f));
     CHECK(UI::Scaling::PositionX(hdCenter, 152.0f) == doctest::Approx(388.0f));
     CHECK(UI::Scaling::PositionX(hdCenter, 320.0f) == doctest::Approx(640.0f));
     CHECK(UI::Scaling::PositionX(hdCenter, 488.0f) == doctest::Approx(892.0f));
-    CHECK(UI::Scaling::PositionX(hdRight, 488.0f) == doctest::Approx(1052.0f));
+    CHECK(UI::Scaling::PositionX(hdRight, 488.0f) == doctest::Approx(892.0f));
+    CHECK(UI::Scaling::PositionX(hdRight, 640.0f) == doctest::Approx(1120.0f));
 
     const auto wideLeft = UI::Scaling::BottomHudLeftTransform(1920, 1200);
     const auto wideCenter = UI::Scaling::BottomHudCenterTransform(1920, 1200);
     const auto wideRight = UI::Scaling::BottomHudRightTransform(1920, 1200);
     CHECK(wideCenter.scaleX == doctest::Approx(2.0f));
-    CHECK(UI::Scaling::PositionX(wideLeft, 0.0f) == doctest::Approx(0.0f));
+    CHECK(UI::Scaling::PositionX(wideLeft, 0.0f) == doctest::Approx(320.0f));
     CHECK(UI::Scaling::PositionX(wideCenter, 320.0f) == doctest::Approx(960.0f));
-    CHECK(UI::Scaling::PositionX(wideRight, 640.0f) == doctest::Approx(1920.0f));
+    CHECK(UI::Scaling::PositionX(wideRight, 640.0f) == doctest::Approx(1600.0f));
     CHECK(UI::Scaling::PositionY(wideCenter, 429.0f) == doctest::Approx(1098.0f));
+}
+
+TEST_CASE("bottom HUD and docks stay joined at 1080p and 1440p [ui][scaling]")
+{
+    for (const auto [width, height] : {std::pair{1920, 1080}, std::pair{2560, 1440}})
+    {
+        const auto left = UI::Scaling::BottomHudLeftTransform(width, height);
+        const auto center = UI::Scaling::BottomHudCenterTransform(width, height);
+        const auto right = UI::Scaling::BottomHudRightTransform(width, height);
+        const auto experience = UI::Scaling::BottomHudExperienceTransform(width, height);
+
+        CHECK(left.scaleX == doctest::Approx(2.0f));
+        CHECK(left.scaleY == doctest::Approx(left.scaleX));
+        CHECK(center.offsetX == doctest::Approx(left.offsetX));
+        CHECK(right.offsetX == doctest::Approx(left.offsetX));
+        CHECK(experience.scaleX == doctest::Approx(left.scaleX));
+        CHECK(experience.offsetX == doctest::Approx(left.offsetX));
+        CHECK(UI::Scaling::PositionX(left, 152.0f) == doctest::Approx(UI::Scaling::PositionX(center, 152.0f)));
+        CHECK(UI::Scaling::PositionX(center, 488.0f) == doctest::Approx(UI::Scaling::PositionX(right, 488.0f)));
+        CHECK(UI::Scaling::PositionX(center, 320.0f) == doctest::Approx(static_cast<float>(width) * 0.5f));
+        CHECK(UI::Scaling::PositionY(left, 480.0f) == doctest::Approx(static_cast<float>(height)));
+
+        const auto dockRight = UI::Scaling::DockRightTransform(width, height);
+        const auto dockLeft = UI::Scaling::DockLeftTransform(width, height);
+        CHECK(UI::Scaling::PositionX(dockRight, 640.0f) == doctest::Approx(UI::Scaling::PositionX(right, 640.0f)));
+        CHECK(dockLeft.offsetX == doctest::Approx(left.offsetX));
+        CHECK(UI::Scaling::PositionY(dockRight, static_cast<float>(UI::Scaling::DockLogicalBottom))
+              == doctest::Approx(UI::Scaling::PositionY(left, 429.0f)));
+    }
 }
 
 TEST_CASE("bottom HUD regional transforms round trip window positions [ui][scaling]")
@@ -615,13 +683,15 @@ TEST_CASE("bottom HUD regional transforms round trip window positions [ui][scali
     CHECK(UI::Scaling::LogicalY(center, UI::Scaling::PositionY(center, 450.0f)) == doctest::Approx(450.0f));
 }
 
-TEST_CASE("experience transform spans the window with HUD vertical scale [ui][scaling]")
+TEST_CASE("experience transform stays on the unified HUD bar [ui][scaling]")
 {
     const auto experience = UI::Scaling::BottomHudExperienceTransform(1920, 1200);
-    CHECK(experience.scaleX == doctest::Approx(3.0f));
+    const auto hud = UI::Scaling::BottomHudLeftTransform(1920, 1200);
+    CHECK(experience.scaleX == doctest::Approx(2.0f));
     CHECK(experience.scaleY == doctest::Approx(2.0f));
-    CHECK(UI::Scaling::PositionX(experience, 0.0f) == doctest::Approx(0.0f));
-    CHECK(UI::Scaling::PositionX(experience, 640.0f) == doctest::Approx(1920.0f));
+    CHECK(experience.offsetX == doctest::Approx(hud.offsetX));
+    CHECK(UI::Scaling::PositionX(experience, 0.0f) == doctest::Approx(320.0f));
+    CHECK(UI::Scaling::PositionX(experience, 640.0f) == doctest::Approx(1600.0f));
     CHECK(UI::Scaling::PositionY(experience, 480.0f) == doctest::Approx(1200.0f));
 }
 
@@ -668,27 +738,26 @@ TEST_CASE("world viewport clamps zero and tiny dimensions before deriving aspect
     CHECK(UI::Scaling::WorldViewportAspect(640, 1, true) == doctest::Approx(640.0f));
 }
 
-TEST_CASE("bottom HUD hit-region edges block controls and preserve wide gaps [ui][scaling]")
+TEST_CASE("bottom HUD hit region is one bar and ignores the side margins [ui][scaling]")
 {
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 100.0f, 643.49f));
-    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 100.0f, 643.5f));
+    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 200.0f, 643.49f));
+    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 200.0f, 643.5f));
 
-    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 227.99f, 660.0f));
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 228.0f, 660.0f));
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 300.0f, 660.0f));
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 387.99f, 660.0f));
+    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 159.99f, 660.0f));
+    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 160.0f, 660.0f));
+    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 387.99f, 660.0f));
     CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 388.0f, 660.0f));
     CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 891.99f, 660.0f));
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 892.0f, 660.0f));
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 980.0f, 660.0f));
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 1051.99f, 660.0f));
-    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 1052.0f, 660.0f));
+    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 892.0f, 660.0f));
+    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 1119.99f, 660.0f));
+    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 1120.0f, 660.0f));
 
-    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 0.0f, 705.0f));
+    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 0.0f, 705.0f));
+    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 160.0f, 705.0f));
     CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 300.0f, 710.0f));
     CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 980.0f, 710.0f));
-    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 1279.99f, 719.99f));
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 1280.0f, 710.0f));
+    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 1119.99f, 719.99f));
+    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 1120.0f, 710.0f));
     CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 640.0f, 720.0f));
 }
 
@@ -709,6 +778,11 @@ TEST_CASE("interface policy selects viewport dock and dialog layouts [ui][scalin
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MAINFRAME) == LayoutMode::Hud);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_SKILL_LIST) == LayoutMode::HudCenter);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_HOTKEY) == LayoutMode::Hud);
+    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_CHATLOGWINDOW) == LayoutMode::HudLeft);
+    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_CHATINPUTBOX) == LayoutMode::HudLeft);
+    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_WINDOW_MENU) == LayoutMode::HudLeft);
+    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_BLOODCASTLE_TIME) == LayoutMode::HudLeft);
+    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_DUELWATCH_MAINFRAME) == LayoutMode::HudLeft);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_ITEM_ENDURANCE_INFO) == LayoutMode::DockRight);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_PARTY_INFO_WINDOW) == LayoutMode::DockRight);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_INVENTORY) == LayoutMode::DockRight);
@@ -901,7 +975,7 @@ TEST_CASE("window cursor centers detached content in the active layout [ui][scal
 
     const auto dock = UI::Scaling::DockRightTransform(1920, 1080);
     const auto dockPosition = UI::Scaling::CenteredLogicalPosition(dock, 1200.0f, 540.0f, 40.0f, 60.0f);
-    CHECK(dockPosition.x == doctest::Approx(300.0f));
+    CHECK(dockPosition.x == doctest::Approx(442.222222f));
     CHECK(UI::Scaling::PositionX(dock, dockPosition.x + 20.0f) == doctest::Approx(1200.0f));
     CHECK(UI::Scaling::PositionY(dock, dockPosition.y + 30.0f) == doctest::Approx(540.0f));
 }
