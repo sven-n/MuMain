@@ -442,12 +442,27 @@ static bool IsMapFireLeaf(const PARTICLE* particle)
     return particle->Type == BITMAP_FIRE_SNUFF;
 }
 
-static bool HasLiveMapFireLeaf()
+// Rain, snow, and map leaves only. Fire embers and every other bitmap that
+// shares this pool (equipment and skin sparkles included) stay.
+static bool IsWeatherLeaf(const PARTICLE* particle)
+{
+    switch (particle->Type)
+    {
+    case BITMAP_RAIN:
+    case BITMAP_LEAF1:
+    case BITMAP_LEAF2:
+        return true;
+    default:
+        return false;
+    }
+}
+
+static bool HasLiveKeptLeaf()
 {
     const int slots = WeatherLeafSlots();
     for (int i = 0; i < slots; ++i)
     {
-        if (Leaves[i].Live && IsMapFireLeaf(&Leaves[i]))
+        if (Leaves[i].Live && !IsWeatherLeaf(&Leaves[i]))
             return true;
     }
     return false;
@@ -477,7 +492,7 @@ static void StopWeatherParticles()
     const int slots = WeatherLeafSlots();
     for (int i = 0; i < slots; ++i)
     {
-        if (!IsMapFireLeaf(&Leaves[i]))
+        if (IsWeatherLeaf(&Leaves[i]))
             Leaves[i].Live = false;
     }
 }
@@ -569,7 +584,7 @@ bool MoveLeaves()
         }
         else
         {
-            if (!renderWeather && !IsMapFireLeaf(o))
+            if (!renderWeather && IsWeatherLeaf(o))
             {
                 o->Live = false;
                 continue;
@@ -591,7 +606,7 @@ void RenderLeaves()
         return;
 
     const bool renderWeather = ShouldRenderWeatherEffects();
-    if (!renderWeather && !HasLiveMapFireLeaf())
+    if (!renderWeather && !HasLiveKeptLeaf())
         return;
 
 
@@ -634,7 +649,7 @@ void RenderLeaves()
         PARTICLE* o = &Leaves[i];
         if (o->Live
             && Bitmaps.FindTexture(o->Type)
-            && (renderWeather || IsMapFireLeaf(o))
+            && (renderWeather || !IsWeatherLeaf(o))
             )
         {
             BindTexture(o->Type);

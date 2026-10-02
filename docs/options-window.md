@@ -50,10 +50,12 @@ window writes to these sections:
   update it; startup and fullscreen/resolution changes reapply it before the
   next frame begins. Also `WeatherEffects`: the options checkbox **Weather
   effects**. Checked (the default) keeps rain, snow, mist, and the map haze
-  overlays. Unchecked turns those off on every map and writes the key
-  immediately, the same way the volume sliders save. Wind is unchanged.
-  Map fire stays on: braziers and torches, and the floating embers on
-  Battle Castle, the login scene, Balgas' Refuge, Vulcanus, and Doppelganger.
+  overlays, including the Tarkan sandstorm and its dust vents. Unchecked
+  turns those off on every map and writes the key immediately, the same way
+  the volume sliders save. Wind is unchanged. Equipment, skin, and item
+  sparkles stay on, and so does map fire: braziers and torches, and the
+  floating embers on Battle Castle, the login scene, Balgas' Refuge,
+  Vulcanus, and Doppelganger.
 - `[Audio]` - volumes.
 - `[Login]` - language, and the remembered-credential keys (`RememberMe`,
   `SavePassword`, `EncryptedUsername`, `EncryptedPassword`); see
