@@ -28,3 +28,18 @@ mu_add_test(
 target_compile_definitions(test_item_database_files PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
+
+# The effect catalogue (Data/Effects): the format, the compiled symbol lists
+# and the shipped files. The registry check pulls in the effect code, which
+# needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME test_effect_types
+    SOURCES
+        test_effect_types.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(test_effect_types PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)

@@ -5,6 +5,7 @@
 #include "Core/Globals/_define.h"
 #include "Core/Text/Utf8.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "Data/DataHandler/DataIssueReport.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
@@ -30,51 +31,13 @@ using namespace Data::Items;
 
 namespace
 {
-// How many errors the player sees; all of them go to the log.
-constexpr size_t MaxErrorsInMessage = 10;
+constexpr std::string_view ItemDataLabel = "Item data";
+constexpr std::string_view ItemDataName = "item data";
 
 double MillisecondsSince(std::chrono::steady_clock::time_point start)
 {
     const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - start;
     return elapsed.count();
-}
-
-void LogIssues(const std::vector<ItemDataIssue>& issues)
-{
-    const auto logger = mu::log::Get("data");
-    for (const ItemDataIssue& issue : issues)
-    {
-        if (issue.severity == ItemDataIssueSeverity::Error)
-        {
-            MU_LOG_ERROR(logger, "Item data {}", issue.ToString());
-        }
-        else
-        {
-            MU_LOG_WARN(logger, "Item data {}", issue.ToString());
-        }
-    }
-}
-
-std::string DescribeErrors(const std::filesystem::path& directory, const std::vector<ItemDataIssue>& issues)
-{
-    std::string message = "The item data in " + directory.string() + " has errors:\n";
-    size_t errorCount = 0;
-    for (const ItemDataIssue& issue : issues)
-    {
-        if (issue.severity != ItemDataIssueSeverity::Error)
-        {
-            continue;
-        }
-        if (++errorCount <= MaxErrorsInMessage)
-        {
-            message += "\n" + issue.ToString();
-        }
-    }
-    if (errorCount > MaxErrorsInMessage)
-    {
-        message += "\n... and " + std::to_string(errorCount - MaxErrorsInMessage) + " more";
-    }
-    return message + "\n\nAll problems are listed in MuError.log.";
 }
 
 // ITEM_ATTRIBUTE records with the item names of `locale`.
@@ -131,10 +94,10 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 {
     const auto loadStart = std::chrono::steady_clock::now();
     ItemDataLoadResult result = LoadItemDataDirectory(GetItemDataDirectory());
-    LogIssues(result.issues);
+    Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasErrors(result.issues))
     {
-        errorMessage = DescribeErrors(GetItemDataDirectory(), result.issues);
+        errorMessage = Data::DescribeDataErrors(ItemDataName, GetItemDataDirectory(), result.issues);
         return false;
     }
     const double loadMilliseconds = MillisecondsSince(loadStart);
@@ -161,10 +124,10 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
     {
         ValidateItemModelGlowColors(result.models, colors.colors, result.issues);
     }
-    LogIssues(result.issues);
+    Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasErrors(result.issues))
     {
-        errorMessage = DescribeErrors(GetItemModelDataDirectory(), result.issues);
+        errorMessage = Data::DescribeDataErrors(ItemDataName, GetItemModelDataDirectory(), result.issues);
         return false;
     }
 

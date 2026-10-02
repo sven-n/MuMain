@@ -350,7 +350,7 @@ bool MoveHellasObjectSetting(int& objCount, int object)
         {
             vec3_t Angle = { 0.f, 0.f, 0.f };
             Position[2] = Hero->Object.Position[2] + 800.f;
-            CreateEffect(9, Position, Angle, Light);
+            CreateEffect(MODEL_KALIMA_FALLING_STONE, Position, Angle, Light);
 
             PlayBuffer(SOUND_KALIMA_FALLING_STONE);
         }
@@ -1668,7 +1668,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                         Position[0] = o->Position[0] + sinf(fAngle) * fDistance;
                         Position[1] = o->Position[1] + cosf(fAngle) * fDistance;
                         Position[2] = o->Position[2] + 800.f;
-                        CreateEffectFpsChecked(9, Position, Angle, Light);
+                        CreateEffectFpsChecked(MODEL_KALIMA_FALLING_STONE, Position, Angle, Light);
                     }
                 }
             }

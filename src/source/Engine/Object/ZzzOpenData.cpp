@@ -31,6 +31,7 @@
 #include "GameLogic/Social/MonkSystem.h"
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
 
+#include "Data/DataHandler/EffectData/EffectDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
 #include "Render/Items/ItemEffects.h"
@@ -367,13 +368,28 @@ void OpenPlayerTextures()
     }
 }
 
-// The game cannot run with broken item data: shows the errors and quits.
-static void StopOnItemDataError(const std::string& errorMessage)
+// The game cannot run with broken item or effect data: shows the errors and quits.
+static void StopOnDataError(const char* title, const std::string& errorMessage)
 {
     const std::wstring message = Core::Text::FromUtf8(errorMessage);
     g_ErrorReport.Write(L"%ls\r\n", message.c_str());
-    Core::Platform::ErrorDialog::Show("Item data error", errorMessage, false);
+    Core::Platform::ErrorDialog::Show(title, errorMessage, false);
     SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+}
+
+static void StopOnItemDataError(const std::string& errorMessage)
+{
+    StopOnDataError("Item data error", errorMessage);
+}
+
+// Loads the names of the effect types (Data/Effects); errors stop the game.
+static void OpenEffectTypeData()
+{
+    std::string errorMessage;
+    if (!Data::Effects::LoadEffectTypes(errorMessage))
+    {
+        StopOnDataError("Effect data error", errorMessage);
+    }
 }
 
 // Loads the item models (Data/Items/Models); without them no item could be
@@ -4356,6 +4372,7 @@ void OpenBasicData(HDC hDC)
     rUIMng.RenderTitleSceneUI(hDC, 3, 11);
 
     OpenItems();
+    OpenEffectTypeData();
     rUIMng.RenderTitleSceneUI(hDC, 4, 11);
 
     OpenItemTextures();
