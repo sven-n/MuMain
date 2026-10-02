@@ -962,9 +962,9 @@ struct InputBoxConfig
     DWORD options = UIOPTION_NULL;
     bool password = false;
     BYTE textAlpha = 255;
-    BYTE textR = 0;
-    BYTE textG = 0;
-    BYTE textB = 0;
+    BYTE textR = 255;
+    BYTE textG = 255;
+    BYTE textB = 255;
     BYTE backAlpha = 0;
     BYTE backR = 0;
     BYTE backG = 0;
