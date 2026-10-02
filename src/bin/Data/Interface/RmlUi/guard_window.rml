@@ -100,16 +100,6 @@
 			<div class="gd-foot-back-value" data-if="list_kind == 2"></div>
 		</div>
 
-		<div data-if="scroll_shown">
-			<div class="s-top" data-style-top="scroll_top + 'px'"></div>
-			<div class="s-mid" data-style-top="(scroll_top + 3) + 'px'" data-style-height="(scroll_height - 6) + 'px'"></div>
-			<div class="s-bottom" data-style-top="(scroll_top + scroll_height - 3) + 'px'"></div>
-			<div class="thumb" data-class-dragged="thumb_dragged" data-style-top="thumb_top + 'px'"></div>
-		</div>
-
-		<!-- The guilds that declared for the siege. The native list box still owns the rows' data,
-		     scrolling and selection, so each row's `top` follows its scroll position; everything
-		     else about a row is the theme's. -->
 		<div class="gd-list gd-list-declare" data-if="list_kind == 1">
 			<span class="sharp-text gd-header hdr-name" data-style-font-size="text_px + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_name}}</span>
@@ -119,18 +109,19 @@
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_state}}</span>
 			<span class="sharp-text gd-header hdr-order" data-style-font-size="text_px + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_order}}</span>
-			<div class="gd-row" data-for="r : declare_rows" data-class-selected="r.selected"
-			     data-style-top="r.top + 'px'">
-				<div class="gd-row-back"></div>
-				<span class="sharp-text gd-cell cell-name" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.name}}</span>
-				<span class="sharp-text sharp-right gd-cell cell-mark-count" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.mark_count}}</span>
-				<span class="sharp-text sharp-right gd-cell cell-state" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.state}}</span>
-				<span class="sharp-text sharp-right gd-cell cell-order" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.order}}</span>
-			</div>
+            <div id="guard_declare_list" class="scroll-pane gd-scroll-pane"
+                 data-style-width="160 * root_scale + 'px'" data-style-height="235 * root_scale + 'px'"
+                 data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">
+                <div class="gd-row" data-for="r : declare_rows" data-class-selected="r.selected"
+                     data-style-width="148 * root_scale + 'px'" data-style-height="13 * root_scale + 'px'"
+                     data-event-click="guard_declare_select(r.name)">
+                    <div class="gd-row-back"></div>
+                    <span class="gd-cell cell-name">{{r.name}}</span>
+                    <span class="gd-cell cell-mark-count">{{r.mark_count}}</span>
+                    <span class="gd-cell cell-state">{{r.state}}</span>
+                    <span class="gd-cell cell-order">{{r.order}}</span>
+                </div>
+            </div>
 		</div>
 
 		<!-- The guilds taking part in the siege, and the summary row for the selected one. -->
@@ -141,16 +132,18 @@
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_side}}</span>
 			<span class="sharp-text gd-header hdr-involvement" data-style-font-size="text_px + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_involvement}}</span>
-			<div class="gd-row" data-for="r : siege_rows" data-class-selected="r.selected"
-			     data-class-defending="r.defending" data-style-top="r.top + 'px'">
-				<div class="gd-row-back"></div>
-				<span class="sharp-text gd-cell cell-name" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.name}}</span>
-				<span class="sharp-text sharp-right gd-cell cell-side" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.side}}</span>
-				<span class="sharp-text sharp-right gd-cell cell-involvement" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.involvement}}</span>
-			</div>
+            <div id="guard_siege_list" class="scroll-pane gd-scroll-pane"
+                 data-style-width="160 * root_scale + 'px'" data-style-height="195 * root_scale + 'px'"
+                 data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">
+                <div class="gd-row" data-for="r : siege_rows" data-class-selected="r.selected" data-class-defending="r.defending"
+                     data-style-width="148 * root_scale + 'px'" data-style-height="13 * root_scale + 'px'"
+                     data-event-click="guard_siege_select(r.name)">
+                    <div class="gd-row-back"></div>
+                    <span class="gd-cell cell-name">{{r.name}}</span>
+                    <span class="gd-cell cell-side">{{r.side}}</span>
+                    <span class="gd-cell cell-involvement">{{r.involvement}}</span>
+                </div>
+            </div>
 			<span class="sharp-text gd-header score-label" data-style-font-size="text_px + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{score_label}}</span>
 			<span class="sharp-text gd-cell score-value" data-style-font-size="text_px + 'px'"

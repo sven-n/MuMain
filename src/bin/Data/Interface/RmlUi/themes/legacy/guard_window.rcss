@@ -24,13 +24,9 @@
 @spritesheet gd-edge-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; gd-edge-bottom: 0px 0px 1px 14px; }
 @spritesheet gd-edge-left-sheet { src: "../../../newui_item_table03(L).tga"; gd-edge-left: 0px 0px 14px 1px; }
 @spritesheet gd-edge-right-sheet { src: "../../../newui_item_table03(R).tga"; gd-edge-right: 0px 0px 14px 1px; }
-@spritesheet gd-scroll-top-sheet { src: "../../../newui_scrollbar_up.tga"; gd-scroll-top: 0px 0px 7px 3px; }
-@spritesheet gd-scroll-mid-sheet { src: "../../../newui_scrollbar_m.tga"; gd-scroll-mid: 0px 0px 7px 15px; }
-@spritesheet gd-scroll-bottom-sheet { src: "../../../newui_scrollbar_down.tga"; gd-scroll-bottom: 0px 0px 7px 3px; }
-@spritesheet gd-thumb-sheet { src: "../../../newui_scroll_on.tga"; gd-thumb: 0px 0px 15px 30px; }
 
 .frame-top { decorator: image(docked-bg-top-b); }
-/* The tabs, the list lines and the scroll thumb are hit-tested natively. */
+/* The tab radio group still supplies its native hit areas. */
 #panel { pointer-events: none; }
 
 .gd-tab { position: absolute; top: 84px; width: 56px; height: 22px; decorator: image(gd-tab-up); }
@@ -44,12 +40,6 @@
 .t-edge-left { width: 14px; decorator: image(gd-edge-left); }
 .t-edge-right { width: 14px; decorator: image(gd-edge-right); }
 
-.s-top, .s-mid, .s-bottom { position: absolute; left: 167px; width: 7px; }
-.s-top { height: 3px; decorator: image(gd-scroll-top); }
-.s-mid { decorator: image(gd-scroll-mid); }
-.s-bottom { height: 3px; decorator: image(gd-scroll-bottom); }
-.thumb { position: absolute; left: 163px; width: 15px; height: 30px; decorator: image(gd-thumb); }
-.thumb.dragged { image-color: #c8c8c8; }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
 
@@ -109,8 +99,7 @@
 .gd-foot-edge-top    { left: 14px;  top: 345px; }
 .gd-foot-edge-bottom { left: 14px;  top: 362px; }
 
-/* The two guild lists. The native list boxes still own the rows' data, scrolling and selection --
-   only a row's `top` still comes from C++, following their scroll position. */
+/* Guild rows flow inside counter-scaled scroll panes. */
 .gd-list { position: static; }
 .gd-header, .gd-cell { position: absolute; }
 .gd-header { top: 117px; font-weight: bold; }
@@ -121,17 +110,16 @@
 .hdr-side { left: 95px; }
 .hdr-involvement { left: 135px; }
 
-.gd-row { position: absolute; left: 15px; width: 148px; height: 13px; }
-/* A backgrounded element with children paints an unclosed box in this build, so the
-   row's own backdrop is a childless leaf under it (engine-findings.md). */
-.gd-row-back { position: absolute; left: 0; top: 0; width: 148px; height: 13px; }
-.gd-cell { top: 3px; }
-.cell-name { left: 6px; }
-.cell-mark-count { right: 74px; text-align: right; }
-.cell-state { right: 24px; text-align: right; }
-.cell-order { right: 4px; text-align: right; }
-.cell-side { right: 44px; text-align: right; }
-.cell-involvement { right: 7px; text-align: right; }
+.gd-scroll-pane { position: absolute; left: 15px; top: 129px; transform-origin: left top; overflow: hidden scroll; }
+.gd-row { display: block; position: relative; pointer-events: auto; }
+.gd-row-back { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.gd-row .gd-cell { position: absolute; top: 23.0769%; white-space: nowrap; pointer-events: none; }
+.cell-name { left: 4.0541%; }
+.cell-mark-count { right: 50%; text-align: right; }
+.cell-state { right: 16.2162%; text-align: right; }
+.cell-order { right: 2.7027%; text-align: right; }
+.cell-side { right: 29.7297%; text-align: right; }
+.cell-involvement { right: 4.7297%; text-align: right; }
 
 .score-label { left: 33px; top: 354px; }
 .score-value { left: 75px; top: 354px; }

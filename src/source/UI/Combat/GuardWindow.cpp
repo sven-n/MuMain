@@ -37,7 +37,6 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-extern DWORD g_dwActiveUIID;
 
 CGuardWindow::CGuardWindow()
 {
@@ -79,6 +78,14 @@ bool CGuardWindow::Create(CManager* pNewUIMng, int x, int y)
 void CGuardWindow::Release()
 {
     UI::RmlBridge::UnregisterForThemeReload(this);
+    if (RmlUiRuntime::Instance().IsCreated())
+    {
+        auto* context = RmlUiRuntime::Instance().GetContext();
+        if (m_pRmlDoc)
+            context->UnloadDocument(m_pRmlDoc);
+        m_RmlBinder.Destroy(context);
+    }
+    m_pRmlDoc = nullptr;
     UnloadScrollBarImages();
 
     if (m_pNewUIMng)
@@ -104,8 +111,7 @@ void CGuardWindow::SetCurOpenTab(int iTab)
 
 bool CGuardWindow::UpdateMouseEvent()
 {
-    // The guild lists keep their native scrolling and line clicks; the buttons are RmlUi's (see
-    // Update()).
+    // Page keys use the active pane's theme-defined height.
     if (m_iNumCurOpenTab == TAB_REGISTER_INFO)
         UpdateRegisterInfoLists();
 
@@ -198,8 +204,8 @@ void CGuardWindow::OpeningProcess()
 
 void CGuardWindow::ClosingProcess()
 {
-    m_DeclareGuildListBox.Clear();
-    m_GuildListBox.Clear();
+    m_GuildLists.ClearDeclarations();
+    m_GuildLists.ClearSiegeGuilds();
 
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
@@ -281,22 +287,18 @@ void CGuardWindow::UpdateRegisterTab(GUARD_BUTTON button)
 
 void CGuardWindow::UpdateRegisterInfoLists()
 {
-    if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK)
-    {
-        m_DeclareGuildListBox.DoAction();
-        if (PressKey(VK_PRIOR))
-            m_DeclareGuildListBox.Scrolling(-1 * m_DeclareGuildListBox.GetBoxSize());
-        if (PressKey(VK_NEXT))
-            m_DeclareGuildListBox.Scrolling(m_DeclareGuildListBox.GetBoxSize());
-    }
-    else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY || m_eTimeType == CASTLESIEGE_STATE_READYSIEGE)
-    {
-        m_GuildListBox.DoAction();
-        if (PressKey(VK_PRIOR))
-            m_GuildListBox.Scrolling(-1 * m_GuildListBox.GetBoxSize());
-        if (PressKey(VK_NEXT))
-            m_GuildListBox.Scrolling(m_GuildListBox.GetBoxSize());
-    }
+    if (!m_pRmlDoc)
+        return;
+    const int kind = m_RmlBinder.GetModel().listKind;
+    if (kind == 0)
+        return;
+    auto* pane = m_pRmlDoc->GetElementById(kind == 1 ? "guard_declare_list" : "guard_siege_list");
+    if (!pane)
+        return;
+    if (PressKey(VK_PRIOR))
+        pane->SetScrollTop(pane->GetScrollTop() - pane->GetClientHeight());
+    if (PressKey(VK_NEXT))
+        pane->SetScrollTop(pane->GetScrollTop() + pane->GetClientHeight());
 }
 
 void CGuardWindow::UpdateRegisterInfoTab(GUARD_BUTTON button)
@@ -347,27 +349,33 @@ void CGuardWindow::SetData(LPPMSG_ANS_CASTLESIEGESTATE Info)
 
 void CGuardWindow::AddDeclareGuildList(wchar_t* szGuildName, int nMarkCount, BYTE byIsGiveUP, BYTE bySeqNum)
 {
-    m_DeclareGuildListBox.AddText(szGuildName, nMarkCount, byIsGiveUP, bySeqNum);
+    if (szGuildName == nullptr || szGuildName[0] == L'\0')
+        return;
+    m_GuildLists.AddDeclaration({std::wstring(szGuildName, wcsnlen(szGuildName, MAX_GUILDNAME)),
+                                nMarkCount, byIsGiveUP != 0, bySeqNum});
 }
 
 void CGuardWindow::ClearDeclareGuildList()
 {
-    m_DeclareGuildListBox.Clear();
+    m_GuildLists.ClearDeclarations();
 }
 
 void CGuardWindow::SortDeclareGuildList()
 {
-    m_DeclareGuildListBox.Sort();
+    m_GuildLists.SortDeclarations();
 }
 
 void CGuardWindow::AddGuildList(wchar_t* szGuildName, BYTE byCsJoinSide, BYTE byGuildInvolved, int iGuildScore)
 {
-    m_GuildListBox.AddText(szGuildName, byCsJoinSide, byGuildInvolved, iGuildScore);
+    if (szGuildName == nullptr || szGuildName[0] == L'\0')
+        return;
+    m_GuildLists.AddSiegeGuild({std::wstring(szGuildName, wcsnlen(szGuildName, MAX_GUILDNAME)),
+                              byCsJoinSide, byGuildInvolved, iGuildScore});
 }
 
 void CGuardWindow::ClearGuildList()
 {
-    m_GuildListBox.Clear();
+    m_GuildLists.ClearSiegeGuilds();
 }
 
 void CGuardWindow::RenderScrollBarFrame(int iPos_x, int iPos_y, int iHeight)
@@ -452,7 +460,6 @@ void CGuardWindow::BuildRmlUi()
             declareRow.RegisterMember("mark_count", &GuardDeclareRow::markCount);
             declareRow.RegisterMember("state", &GuardDeclareRow::state);
             declareRow.RegisterMember("order", &GuardDeclareRow::order);
-            declareRow.RegisterMember("top", &GuardDeclareRow::top);
             declareRow.RegisterMember("selected", &GuardDeclareRow::selected);
             c.RegisterArray<std::vector<GuardDeclareRow>>();
             c.Bind("declare_rows", &model.declareRows);
@@ -460,7 +467,6 @@ void CGuardWindow::BuildRmlUi()
             siegeRow.RegisterMember("name", &GuardSiegeRow::name);
             siegeRow.RegisterMember("side", &GuardSiegeRow::side);
             siegeRow.RegisterMember("involvement", &GuardSiegeRow::involvement);
-            siegeRow.RegisterMember("top", &GuardSiegeRow::top);
             siegeRow.RegisterMember("selected", &GuardSiegeRow::selected);
             siegeRow.RegisterMember("defending", &GuardSiegeRow::defending);
             c.RegisterArray<std::vector<GuardSiegeRow>>();
@@ -473,11 +479,18 @@ void CGuardWindow::BuildRmlUi()
             c.Bind("header_involvement", &model.headerInvolvement);
             c.Bind("score_label", &model.scoreLabel);
             c.Bind("score_value", &model.scoreValue);
-            c.Bind("scroll_shown", &model.scrollShown);
-            c.Bind("scroll_top", &model.scrollTop);
-            c.Bind("scroll_height", &model.scrollHeight);
-            c.Bind("thumb_top", &model.thumbTop);
-            c.Bind("thumb_dragged", &model.thumbDragged);
+            c.BindEventCallback("guard_declare_select",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                {
+                    if (args.size() == 1)
+                        SelectListGuild(true, args[0].Get<Rml::String>());
+                });
+            c.BindEventCallback("guard_siege_select",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                {
+                    if (args.size() == 1)
+                        SelectListGuild(false, args[0].Get<Rml::String>());
+                });
             c.Bind("exit_tooltip", &model.exitTooltip);
             c.BindEventCallback("guard_button",
                                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
@@ -495,6 +508,7 @@ void CGuardWindow::BuildRmlUi()
 
 void CGuardWindow::ReloadRmlTheme()
 {
+    m_ListsDirty = true;
     if (!m_pRmlDoc)
         return;
     Rml::Context* context = RmlUiRuntime::Instance().GetContext();
@@ -574,11 +588,6 @@ void CGuardWindow::SyncContent()
     GuardActionButton proclaimButton, registerButton, giveUpButton;
 
     int listKind = 0;
-    std::vector<GuardDeclareRow> declareRows;
-    std::vector<GuardSiegeRow> siegeRows;
-    Rml::String scoreValue;
-    TextListScrollBarGeometry scroll{};
-    bool scrollShown = false;
     switch (m_iNumCurOpenTab)
     {
     case TAB_SIEGE_INFO:
@@ -707,69 +716,10 @@ void CGuardWindow::SyncContent()
     }
     case TAB_REGISTER_INFO:
     {
-        // RenderRegisterInfoTab() and the lists' RenderInterface()/RenderDataLine(). The native
-        // list boxes still hold the rows, their scrolling and their selection, so a row's own
-        // `top` follows their scroll position -- everything else about a row is the theme's.
         if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK)
-        {
             listKind = 1;
-            CUIBCDeclareGuildListBox& list = m_DeclareGuildListBox;
-            scroll = list.GetScrollBarGeometry();
-            scrollShown = true;
-            list.ForEachRenderLine(
-                [&](int line, const BCDECLAREGUILD_TEXT& item, bool selected)
-                {
-                    // Only the hero's own guild or alliance is listed.
-                    if (wcscmp(GuildMark[Hero->GuildMarkIndex].UnionName, item.szName) != 0 &&
-                        wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, item.szName) != 0)
-                        return false;
-                    wchar_t cell[64] = {};
-                    GuardDeclareRow row;
-                    row.name = StringUtils::WideToNarrow(item.szName);
-                    mu_swprintf(cell, L"%d", item.nCount);
-                    row.markCount = StringUtils::WideToNarrow(cell);
-                    row.state = StringUtils::WideToNarrow(item.byIsGiveUp ? I18N::Game::Failed
-                                                                          : I18N::Game::Processing);
-                    mu_swprintf(cell, L"%u", item.bySeqNum);
-                    row.order = StringUtils::WideToNarrow(cell);
-                    row.top = static_cast<float>(list.GetRenderLinePos_y(line)) - 3.f - y0;
-                    row.selected = selected;
-                    declareRows.push_back(std::move(row));
-                    return true;
-                });
-        }
         else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY || m_eTimeType == CASTLESIEGE_STATE_READYSIEGE)
-        {
             listKind = 2;
-            CUIBCGuildListBox& list = m_GuildListBox;
-            scroll = list.GetScrollBarGeometry();
-            scrollShown = true;
-            list.ForEachRenderLine(
-                [&](int line, const BCGUILD_TEXT& item, bool selected)
-                {
-                    GuardSiegeRow row;
-                    row.name = StringUtils::WideToNarrow(item.szName);
-                    row.side = StringUtils::WideToNarrow(item.byJoinSide == 1 ? I18N::Game::DefendingTeam
-                                                                             : I18N::Game::InvadingTeam);
-                    row.involvement = StringUtils::WideToNarrow(
-                        item.byGuildInvolved == 1 ? I18N::Game::Maintain : I18N::Game::Assist);
-                    row.top = static_cast<float>(list.GetRenderLinePos_y(line)) - 3.f - y0;
-                    row.selected = selected;
-                    row.defending = item.byJoinSide == 1;
-                    siegeRows.push_back(std::move(row));
-                    // The summary row shows the guild the list has picked out, not the selected
-                    // line: a defending guild has no score to show.
-                    if (list.Select_Guild == line)
-                    {
-                        wchar_t info[300] = {};
-                        if (item.byJoinSide == 1)
-                            mu_swprintf(info, L"--");
-                        else
-                            mu_swprintf(info, L"%ls :     %d", item.szName, item.iGuildScore);
-                        scoreValue = StringUtils::WideToNarrow(info);
-                    }
-                });
-        }
         else if (m_eTimeType == CASTLESIEGE_STATE_ENDSIEGE)
         {
             listMessage = pageLine(I18N::Game::TrucePeriod, true);
@@ -794,16 +744,8 @@ void CGuardWindow::SyncContent()
         model.tabs = std::move(tabs);
         m_RmlBinder.MarkDirty("tabs");
     }
-    if (model.declareRows != declareRows)
-    {
-        model.declareRows = std::move(declareRows);
-        m_RmlBinder.MarkDirty("declare_rows");
-    }
-    if (model.siegeRows != siegeRows)
-    {
-        model.siegeRows = std::move(siegeRows);
-        m_RmlBinder.MarkDirty("siege_rows");
-    }
+
+
     SyncField(m_RmlBinder, &GuardWindowRmlModel::activeTab, "active_tab", m_iNumCurOpenTab);
     SyncField(m_RmlBinder, &GuardWindowRmlModel::title, "title", std::move(title));
     SyncField(m_RmlBinder, &GuardWindowRmlModel::ownerMaster, "owner_master", std::move(ownerMaster));
@@ -841,16 +783,75 @@ void CGuardWindow::SyncContent()
               StringUtils::WideToNarrow(I18N::Game::Maintain));
     SyncField(m_RmlBinder, &GuardWindowRmlModel::scoreLabel, "score_label",
               StringUtils::WideToNarrow(I18N::Game::Score));
-    SyncField(m_RmlBinder, &GuardWindowRmlModel::scoreValue, "score_value", std::move(scoreValue));
-    // RenderScrollBarFrame() at the list's right edge - 8 over the track, the thumb at - 12.
-    SyncField(m_RmlBinder, &GuardWindowRmlModel::scrollShown, "scroll_shown", scrollShown);
-    SyncField(m_RmlBinder, &GuardWindowRmlModel::scrollTop, "scroll_top", scroll.rangeTop - y0);
-    SyncField(m_RmlBinder, &GuardWindowRmlModel::scrollHeight, "scroll_height", scroll.rangeBottom - scroll.rangeTop);
-    SyncField(m_RmlBinder, &GuardWindowRmlModel::thumbTop, "thumb_top", scroll.thumbTop - y0);
-    SyncField(m_RmlBinder, &GuardWindowRmlModel::thumbDragged, "thumb_dragged", scroll.dragged && MouseLButtonPush);
+    SyncGuildLists();
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     SyncField(m_RmlBinder, &GuardWindowRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
     SyncField(m_RmlBinder, &GuardWindowRmlModel::buttonLabelTop, "button_label_top", static_cast<float>(23 / 2 - lineHeight / 2));
     SyncField(m_RmlBinder, &GuardWindowRmlModel::tabLabelTop, "tab_label_top", static_cast<float>(22 / 2 - lineHeight / 2));
     SyncField(m_RmlBinder, &GuardWindowRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
+}
+
+void CGuardWindow::SelectListGuild(bool declaration, const Rml::String& name)
+{
+    if (!IsVisible() || m_iNumCurOpenTab != TAB_REGISTER_INFO)
+        return;
+    const auto selectedName = StringUtils::NarrowToWide(name);
+    const int kind = m_RmlBinder.GetModel().listKind;
+    if (declaration && kind == 1 && (selectedName == m_ListGuild || selectedName == m_ListAlliance))
+        m_GuildLists.SelectDeclaration(selectedName);
+    else if (!declaration && kind == 2)
+        m_GuildLists.SelectSiegeGuild(selectedName);
+}
+
+std::vector<GuardDeclareRow> CGuardWindow::BuildDeclareRows() const
+{
+    std::vector<GuardDeclareRow> rows;
+    for (const auto& entry : m_GuildLists.Declarations())
+    {
+        if (!UI::Combat::GuardGuildLists::IsOwnDeclaration(entry, m_ListGuild, m_ListAlliance))
+            continue;
+        rows.push_back({StringUtils::WideToNarrow(entry.name.c_str()), std::to_string(entry.markCount),
+                       StringUtils::WideToNarrow(entry.gaveUp ? I18N::Game::Failed : I18N::Game::Processing),
+                       std::to_string(entry.order), entry.name == m_GuildLists.SelectedDeclaration()});
+    }
+    return rows;
+}
+
+std::vector<GuardSiegeRow> CGuardWindow::BuildSiegeRows() const
+{
+    std::vector<GuardSiegeRow> rows;
+    for (const auto& entry : m_GuildLists.SiegeGuilds())
+    {
+        rows.push_back({StringUtils::WideToNarrow(entry.name.c_str()),
+                       StringUtils::WideToNarrow(entry.joinSide == 1 ? I18N::Game::DefendingTeam : I18N::Game::InvadingTeam),
+                       StringUtils::WideToNarrow(entry.involvement == 1 ? I18N::Game::Maintain : I18N::Game::Assist),
+                       entry.name == m_GuildLists.SelectedSiegeGuild(), entry.joinSide == 1});
+    }
+    return rows;
+}
+
+void CGuardWindow::SyncGuildLists()
+{
+    const int markIndex = Hero->GuildMarkIndex;
+    const bool hasGuild = markIndex >= 0 && markIndex < MAX_MARKS;
+    const std::wstring_view guild = hasGuild ? GuildMark[markIndex].GuildName : L"";
+    const std::wstring_view alliance = hasGuild ? GuildMark[markIndex].UnionName : L"";
+    if (!m_ListsDirty && m_ListRevision == m_GuildLists.Revision() &&
+        m_ListGuild == guild && m_ListAlliance == alliance)
+        return;
+    m_ListRevision = m_GuildLists.Revision();
+    m_ListsDirty = false;
+    m_ListGuild = guild;
+    m_ListAlliance = alliance;
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::declareRows, "declare_rows", BuildDeclareRows());
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::siegeRows, "siege_rows", BuildSiegeRows());
+    Rml::String score;
+    if (const auto* entry = m_GuildLists.ScoreGuild())
+    {
+        if (entry->joinSide == 1)
+            score = "--";
+        else
+            score = StringUtils::WideToNarrow(entry->name.c_str()) + " :     " + std::to_string(entry->score);
+    }
+    SyncField(m_RmlBinder, &GuardWindowRmlModel::scoreValue, "score_value", std::move(score));
 }

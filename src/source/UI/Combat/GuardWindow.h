@@ -6,6 +6,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Combat/GuardWindowRmlModel.h"
+#include "UI/Combat/GuardGuildLists.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 #include "UI/Widgets/Window/Button.h"
 #include "UI/Dialogs/MessageBox.h"
@@ -22,9 +23,7 @@ class ElementDocument;
 namespace mu::ui::window
 {
 // The castle guardsman, docked right: the Status, Register / Announce and List tabs.
-// guard_window.rml draws it; the tab radio group and the two guild lists stay native controls
-// for their hit tests, data, scrolling and line clicks (their drawing is the document's); C++
-// keeps every request.
+// RmlUi owns guild lists and actions; C++ keeps their state and server requests.
 class CGuardWindow : public CObject
 {
 public:
@@ -76,13 +75,12 @@ private:
     GUARD_BUTTON m_PendingButton = GUARD_BUTTON_NONE;
 
     // ������ ��� ����Ʈ
-    CUIBCDeclareGuildListBox m_DeclareGuildListBox;
-    // Ȯ���� ��� ����Ʈ
-    CUIBCGuildListBox m_GuildListBox;
+    UI::Combat::GuardGuildLists m_GuildLists;
+    unsigned m_ListRevision = 0;
+    bool m_ListsDirty = true;
+    std::wstring m_ListGuild;
+    std::wstring m_ListAlliance;
 
-    // UI ��� ��
-    // SetData() is the only writer and it needs the server's reply, which OpeningProcess() has
-    // only just asked for -- so every one of these is read for the first frames the window is up.
     CASTLESIEGE_STATE m_eTimeType = CASTLESIEGE_STATE_NONE;
 
     wchar_t m_szOwnerGuild[8 + 1] = {};
@@ -152,6 +150,10 @@ private:
     void BuildRmlUi();
     void SyncRmlModel();
     void SyncContent();
+    void SyncGuildLists();
+    std::vector<GuardDeclareRow> BuildDeclareRows() const;
+    std::vector<GuardSiegeRow> BuildSiegeRows() const;
+    void SelectListGuild(bool declaration, const Rml::String& name);
 };
 }
 

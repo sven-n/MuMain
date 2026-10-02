@@ -12,10 +12,6 @@
 .t-edge-top, .t-edge-bottom { position: absolute; width: 161px; height: 1px; margin-top: 6px; background-color: token(border-frame); }
 .t-edge-left, .t-edge-right { position: absolute; width: 1px; margin-left: 6px; background-color: token(border-frame); }
 
-.s-top, .s-bottom { display: none; }
-.s-mid { position: absolute; left: 169px; width: 3px; background-color: token(surface-recessed); }
-.thumb { position: absolute; left: 166px; width: 9px; height: 30px; background-color: token(accent-steel); border-radius: token(radius-sm)px; }
-.thumb.dragged { background-color: token(accent-steel-hover); }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
 
@@ -96,8 +92,7 @@
 .gd-foot-edge-top    { left: 14px;  top: 345px; }
 .gd-foot-edge-bottom { left: 14px;  top: 362px; }
 
-/* The two guild lists. The native list boxes still own the rows' data, scrolling and selection --
-   only a row's `top` still comes from C++, following their scroll position. */
+/* Guild rows flow inside counter-scaled scroll panes. */
 .gd-list { position: static; }
 .gd-header, .gd-cell { position: absolute; }
 .gd-header { top: 117px; font-weight: bold; }
@@ -108,17 +103,16 @@
 .hdr-side { left: 95px; }
 .hdr-involvement { left: 135px; }
 
-.gd-row { position: absolute; left: 15px; width: 148px; height: 13px; }
-/* A backgrounded element with children paints an unclosed box in this build, so the
-   row's own backdrop is a childless leaf under it (engine-findings.md). */
-.gd-row-back { position: absolute; left: 0; top: 0; width: 148px; height: 13px; }
-.gd-cell { top: 3px; }
-.cell-name { left: 6px; }
-.cell-mark-count { right: 74px; text-align: right; }
-.cell-state { right: 24px; text-align: right; }
-.cell-order { right: 4px; text-align: right; }
-.cell-side { right: 44px; text-align: right; }
-.cell-involvement { right: 7px; text-align: right; }
+.gd-scroll-pane { position: absolute; left: 15px; top: 129px; transform-origin: left top; overflow: hidden scroll; }
+.gd-row { display: block; position: relative; pointer-events: auto; }
+.gd-row-back { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.gd-row .gd-cell { position: absolute; top: 23.0769%; white-space: nowrap; pointer-events: none; }
+.cell-name { left: 4.0541%; }
+.cell-mark-count { right: 50%; text-align: right; }
+.cell-state { right: 16.2162%; text-align: right; }
+.cell-order { right: 2.7027%; text-align: right; }
+.cell-side { right: 29.7297%; text-align: right; }
+.cell-involvement { right: 4.7297%; text-align: right; }
 
 .score-label { left: 33px; top: 354px; }
 .score-value { left: 75px; top: 354px; }

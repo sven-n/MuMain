@@ -6,16 +6,13 @@
 
 namespace mu::ui::window
 {
-// One guild that declared for the siege. `top` is the native list box's own scroll position for
-// this line, in reference px; which column each cell lands in and what a selected row looks like
-// are the theme's.
+// A guild declaration and its registration state.
 struct GuardDeclareRow
 {
     Rml::String name;
     Rml::String markCount;
     Rml::String state; // acquired the sign, or gave up
     Rml::String order; // the order it registered in
-    float top = 0.f;
     bool selected = false;
 
     bool operator==(const GuardDeclareRow&) const = default;
@@ -28,7 +25,6 @@ struct GuardSiegeRow
     Rml::String name;
     Rml::String side;
     Rml::String involvement;
-    float top = 0.f;
     bool selected = false;
     bool defending = false;
 
@@ -120,11 +116,6 @@ struct GuardWindowRmlModel
     Rml::String scoreLabel;
     Rml::String scoreValue;
 
-    bool scrollShown = false;
-    float scrollTop = 0.f; // the track, reference px
-    float scrollHeight = 0.f;
-    float thumbTop = 0.f;
-    bool thumbDragged = false;
     Rml::String exitTooltip;
 };
 } // namespace mu::ui::window
