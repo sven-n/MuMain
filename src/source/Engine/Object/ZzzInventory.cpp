@@ -5962,23 +5962,23 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     descriptor.TextColor = MakeRgba(255, 255, 255, 255);
     descriptor.BgColor = MakeRgba(0, 0, 0, 255);
 
-    // Use the item name by default, only when o->Type is in MODEL_ITEM range
+    // Use the item name by default, only when o->Type is an item's model slot
     // Items with special types (e.g. MODEL_EVENT + N) are handled by overrides below
+    const wchar_t* itemName = nullptr;
     if (Data::Items::IsItemModelSlot(o->Type))
     {
+        itemName = ItemAttribute[Data::Items::ToItemType(o->Type)].Name;
         if (o->Type == MODEL_ZEN) // Zen
         {
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %d", ItemAttribute[Data::Items::ToItemType(o->Type)].Name,
-                                      ItemLevel);
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %d", itemName, ItemLevel);
         }
         else if (ItemLevel == 0)
         {
-            CopyGroundItemLabelText(descriptor.Name, ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
+            CopyGroundItemLabelText(descriptor.Name, itemName);
         }
         else
         {
-            FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", ItemAttribute[Data::Items::ToItemType(o->Type)].Name,
-                                      ItemLevel);
+            FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", itemName, ItemLevel);
         }
     }
 
@@ -6037,24 +6037,19 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         switch (ItemLevel)
         {
         case 0:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::ENG,
-                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::ENG, itemName);
             break;
         case 1:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STA,
-                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STA, itemName);
             break;
         case 2:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::AGI,
-                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::AGI, itemName);
             break;
         case 3:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STR,
-                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::STR, itemName);
             break;
         case 4:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::Command,
-                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", I18N::Game::Command, itemName);
             break;
         }
     }
@@ -6063,12 +6058,10 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         switch (ItemLevel)
         {
         case 0:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls",
-                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name, I18N::Game::DarkHorse);
+            FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls", itemName, I18N::Game::DarkHorse);
             break;
         case 1:
-            FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls",
-                                      ItemAttribute[Data::Items::ToItemType(o->Type)].Name, I18N::Game::DarkRaven);
+            FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls", itemName, I18N::Game::DarkRaven);
             break;
         }
     }
@@ -6266,7 +6259,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     else if (GameLogic::Items::IsSocketSeedOrSphereModel(o->Type))
     {
         SetDescriptorTextColor(descriptor, 0.7f, 0.4f, 1.0f);
-        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[Data::Items::ToItemType(o->Type)].Name);
+        CopyGroundItemLabelText(descriptor.Name, itemName);
     }
     else if (o->Type == MODEL_INVITATION_TO_SANTA_VILLAGE)
     {

@@ -332,11 +332,15 @@ TEST_CASE("Shared model data stays loaded until the last slot lets go [data][ite
     const short meshCount = owner->NumMeshs;
     BMD first;
     BMD second;
+    CHECK(owner->GetDataUserCount() == 1);
     first.ShareFrom(*owner);
     second.ShareFrom(*owner);
+    CHECK(owner->GetDataUserCount() == 3);
 
     owner->Release();
     CHECK(owner->Meshs == nullptr);
+    CHECK(owner->GetDataUserCount() == 0);
+    CHECK(first.GetDataUserCount() == 2);
     REQUIRE(first.Meshs != nullptr);
     CHECK(first.NumMeshs == meshCount);
     CHECK(first.Meshs[0].NumVertices > 0);
@@ -347,14 +351,36 @@ TEST_CASE("Shared model data stays loaded until the last slot lets go [data][ite
     REQUIRE(owner->Open2(folder.c_str(), file.filename().wstring().c_str()));
     CHECK(owner->Meshs != first.Meshs);
     CHECK_FALSE(owner->SharesData());
+    CHECK(owner->GetDataUserCount() == 1);
 
     first.Release();
+    CHECK(second.GetDataUserCount() == 1);
     REQUIRE(second.Meshs != nullptr);
     CHECK(second.Meshs[0].NumVertices > 0);
     // The last user frees the data and no longer counts as sharing.
     second.Release();
     CHECK(second.Meshs == nullptr);
     CHECK_FALSE(second.SharesData());
+    CHECK(second.GetDataUserCount() == 0);
+}
+
+// Sharing needs data, and a slot cannot share with itself.
+TEST_CASE("A model slot does not share missing data or its own [data][items]")
+{
+    const ItemModelDefinition* parchment = FindModel(ShippedModels().models, 15, 19);
+    REQUIRE(parchment != nullptr);
+    const std::unique_ptr<BMD> owner = OpenModelFile(*parchment);
+    owner->ShareFrom(*owner);
+    CHECK_FALSE(owner->SharesData());
+    CHECK(owner->GetDataUserCount() == 1);
+    REQUIRE(owner->Meshs != nullptr);
+
+    BMD empty;
+    BMD user;
+    user.ShareFrom(empty);
+    CHECK_FALSE(user.SharesData());
+    CHECK(user.GetDataUserCount() == 0);
+    CHECK(empty.GetDataUserCount() == 0);
 }
 
 namespace
@@ -373,6 +399,8 @@ public:
     {
         Models = m_previous;
         g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+        // Problems a failed check left behind do not reach the next test.
+        ModelLoader::TakeProblemMessage();
     }
 
     TestModelSlots(const TestModelSlots&) = delete;

@@ -2921,6 +2921,10 @@ void BMD::RenderBone(float(*BoneMatrix)[3][4])
 
 void BMD::ShareFrom(BMD& owner)
 {
+    if (&owner == this || owner.Meshs == nullptr)
+    {
+        return;
+    }
     Release();
     if (!owner.m_sharedDataUsers)
     {
@@ -2944,6 +2948,15 @@ void BMD::ShareFrom(BMD& owner)
     BoneHead = -1;
     StreamMesh = -1;
     m_bCompletedAlloc = true;
+}
+
+long BMD::GetDataUserCount() const
+{
+    if (m_sharedDataUsers)
+    {
+        return m_sharedDataUsers.use_count();
+    }
+    return Meshs != nullptr ? 1 : 0;
 }
 
 void BMD::Release()
@@ -3050,10 +3063,7 @@ void BMD::Release()
     NumActions = 0;
     NumMeshs = 0;
     m_bSharedData = false;
-
-#ifdef LDS_FIX_SETNULLALLOCVALUE_WHEN_BMDRELEASE
     m_bCompletedAlloc = false;
-#endif
 }
 
 void BMD::FindNearTriangle()

@@ -279,12 +279,18 @@ public:
     // one model file (opened once). The data stays loaded until the last slot
     // that uses it lets go (Release, or opening another file), whichever slot
     // that is. The data must not be changed through one of them: every other
-    // slot that shares it would change as well.
+    // slot that shares it would change as well. Opening the file again in one
+    // slot leaves the others on the old data; a shared model is reloaded
+    // through ModelLoader::OpenModels. Does nothing when `owner` has no data
+    // or is this slot.
     void ShareFrom(BMD& owner);
     bool SharesData() const
     {
         return m_bSharedData;
     }
+    // How many slots use the loaded data of this slot, this one included: 1
+    // while the data is its own alone, 0 without data.
+    long GetDataUserCount() const;
     void CreateBoundingBox();
 
     bool PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsigned short* PriorAction, float Speed, vec3_t Origin, vec3_t Angle);

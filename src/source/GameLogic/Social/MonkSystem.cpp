@@ -17,6 +17,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/ItemData/ItemType.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -187,15 +188,15 @@ int CMonkSystem::OrginalTypeCommonItemMonk(int _ModifyType)
 
         int OrgItemType = (nItemType == 10) ? nItemType + 1 : nItemType;
         int OrgItemSubType = (nItemSubType >= 7) ? nItemSubType + 1 : nItemSubType;
-        _ModifyType = Data::Items::ToModelSlot(OrgItemType * MAX_ITEM_INDEX + OrgItemSubType);
+        _ModifyType = Data::Items::ToModelSlot(Data::Items::MakeItemType(OrgItemType, OrgItemSubType));
     }
     return _ModifyType;
 }
 
 int CMonkSystem::ModifyTypeCommonItemMonk(int _OrginalType)
 {
-    int nItemType = Data::Items::ToItemType(_OrginalType) / MAX_ITEM_INDEX;
-    int nItemSubType = Data::Items::ToItemType(_OrginalType) % MAX_ITEM_INDEX;
+    int nItemType = Data::Items::GetItemGroup(Data::Items::ToItemType(_OrginalType));
+    int nItemSubType = Data::Items::GetItemNumber(Data::Items::ToItemType(_OrginalType));
     int nCommonItem[MODEL_ITEM_COMMONCNT_RAGEFIGHTER] = { 5, 6, 8, 9 };
 
     if (nItemType >= 7 && nItemType <= 11)

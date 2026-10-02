@@ -663,7 +663,10 @@ server with original clients (after phases 6 and B).
      item its old slot there. Two conversions in `ZzzEffect.cpp`
      (`RenderWheelWeapon`, `RenderFuryStrike`) wait until that file passes
      the static analysis of the CI: cppcheck finds an out-of-bounds write in
-     `CreateEffect` (`arv3PosProcess`) there. Objects keep their model slots, and
+     `CreateEffect` (`arv3PosProcess`) there. So does the spear check in
+     `MoveHandlers.cpp`, which compares the item type of the owner's weapon
+     with `MODEL_SPEAR - MODEL_SWORD` (cppcheck finds an uninitialized
+     variable in that file). Objects keep their model slots, and
      the places that compare them with named slots stay as they are (one
      slot per shared model was dropped, see D23). The data of a shared
      model is freed by the last slot that uses it, whichever slot that is,
@@ -674,7 +677,24 @@ server with original clients (after phases 6 and B).
      because making the data read-only would change every user of the
      model data. A test opens the items of a shared model into the model
      slots: the first opens the file, the others share it, and a missing
-     file is reported for each item.
+     file is reported for each item. Follow-ups from the review of 4d2:
+     - `OpenPlayers` clears the model slots with `ZeroMemory` after they are
+       constructed, which also clears the use count (a `std::shared_ptr`).
+       No count exists at that point, so it does no harm, but it is
+       undefined behavior: the constructor should set what the clearing
+       sets, and the clearing go.
+     - The loaded data (meshes, bones, actions, textures, texture indices
+       and their counts) in one struct held by a `std::shared_ptr`, whose
+       destructor frees it and unloads the textures, would make sharing a
+       pointer copy and `Release` a `reset()` (CODING_RULES rule 8).
+     - Some callers convert slots that are no item's: `DeletePet` with an
+       empty helper (-1), the helper switch of the photo viewer,
+       `RenderCharacter` and `ModifyTypeCommonItemMonk` with class models,
+       `MoveCharacter` without a weapon. When `ToItemType` becomes a lookup
+       (phase 12), they need `IsItemModelSlot` or a defined result for
+       other slots.
+     - No test covers the texture references a sharing slot gives back
+       when it lets go last (it needs loaded textures).
 
    **4e Clear model loading errors:** a missing model file or texture of an
    item model shows one message after loading instead of one popup per

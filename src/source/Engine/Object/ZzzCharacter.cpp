@@ -47,6 +47,7 @@
 #include "Engine/Object/CullingConstants.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/ItemData/ItemType.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -5420,7 +5421,7 @@ bool CheckFullSet(CHARACTER* c)
 
         if (Success)
         {
-            int Type = CharacterMachine->Equipment[EQUIPMENT_BOOTS].Type % MAX_ITEM_INDEX;
+            int Type = Data::Items::GetItemNumber(CharacterMachine->Equipment[EQUIPMENT_BOOTS].Type);
             tmpLevel = CharacterMachine->Equipment[EQUIPMENT_BOOTS].Level;
             for (int i = start; i >= end; i--)
             {
@@ -5433,7 +5434,7 @@ bool CheckFullSet(CHARACTER* c)
                     Success = false;
                     break;
                 }
-                if (Type != (CharacterMachine->Equipment[i].Type % MAX_ITEM_INDEX))
+                if (Type != Data::Items::GetItemNumber(CharacterMachine->Equipment[i].Type))
                 {
                     EquipmentLevelSet = 0;
                     Success = false;
@@ -5478,7 +5479,7 @@ bool CheckFullSet(CHARACTER* c)
 
         if (Success)
         {
-            int Type = Data::Items::ToItemType(c->BodyPart[5].Type) % MAX_ITEM_INDEX;
+            int Type = Data::Items::GetItemNumber(Data::Items::ToItemType(c->BodyPart[5].Type));
             tmpLevel = c->BodyPart[5].Level & 0xf;
 
             for (int i = 5; i >= end; i--)
@@ -5490,7 +5491,7 @@ bool CheckFullSet(CHARACTER* c)
                     Success = false;
                     break;
                 }
-                if (Type != Data::Items::ToItemType(c->BodyPart[i].Type) % MAX_ITEM_INDEX)
+                if (Type != Data::Items::GetItemNumber(Data::Items::ToItemType(c->BodyPart[i].Type)))
                 {
                     EquipmentLevelSet = 0;
                     Success = false;
@@ -9578,8 +9579,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
                     if (CLASS_SUMMONER == gCharacterManager.GetBaseClass(c->Class))
                     {
-                        int nItemType = Data::Items::ToItemType(Type) / MAX_ITEM_INDEX;
-                        int nItemSubType = Data::Items::ToItemType(Type) % MAX_ITEM_INDEX;
+                        int nItemType = Data::Items::GetItemGroup(Data::Items::ToItemType(Type));
+                        int nItemSubType = Data::Items::GetItemNumber(Data::Items::ToItemType(Type));
 
                         if (nItemType >= 7 && nItemType <= 11
                             && (nItemSubType == 10 || nItemSubType == 11))
@@ -12471,6 +12472,45 @@ void MakeElfHelper(CHARACTER* c)
     o->BoundingBoxMax[2] += 70.f;
 }
 
+// The model slot of a player's wings in the viewport data: the tier in
+// Equipment[4], the wings of that tier in Equipment[8] (the small wings in
+// Equipment[16]). -1 for no wings.
+static int GetViewportWingModel(const BYTE* Equipment)
+{
+    const int code = Equipment[8] & 0x07;
+    switch ((Equipment[4] >> 2) & 3)
+    {
+    case 1: // first wings
+        return code == 4 ? MODEL_WING_OF_CURSE : Data::Items::ToModelSlot(ITEM_WINGS_OF_ELF - 1 + code);
+    case 2: // second wings and capes
+        switch (code)
+        {
+        case 5:
+            return MODEL_CAPE_OF_LORD;
+        case 6:
+            return MODEL_WINGS_OF_DESPAIR;
+        case 7:
+            return MODEL_CAPE_OF_FIGHTER;
+        default:
+            return Data::Items::ToModelSlot(ITEM_WINGS_OF_SPIRITS - 1 + code);
+        }
+    case 3: // third wings and capes, and the small wings
+        switch (code)
+        {
+        case 0:
+            return Data::Items::ToModelSlot(ITEM_SMALL_CAPE_OF_LORD - 1 + (Equipment[16] >> 5));
+        case 6:
+            return MODEL_WING_OF_DIMENSION;
+        case 7:
+            return MODEL_CAPE_OF_OVERRULE;
+        default:
+            return Data::Items::ToModelSlot(ITEM_WING_OF_STORM - 1 + code);
+        }
+    default:
+        return -1;
+    }
+}
+
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT* pHelper)
 {
     CHARACTER* c;
@@ -12538,56 +12578,9 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
         c->Weapon[1].AncientDiscriminator = (Equipment[10] & 2) / 2;
     }
 
-    Type = (Equipment[4] >> 2) & 3;
-
-    //신규캐릭터 추가로 인한 날개 인덱스 확장 구조변경
-    if (Type == 1)			//1차 날개
+    c->Wing.Type = GetViewportWingModel(Equipment);
+    if (c->Wing.Type == -1)
     {
-        Type = Equipment[8] & 0x07;
-        switch (Type)
-        {
-        case 4:
-            c->Wing.Type = MODEL_WING_OF_CURSE;
-            break;
-        default:
-            c->Wing.Type = Data::Items::ToModelSlot(ITEM_WING + Type - 1);
-            break;
-        }
-    }
-    else if (Type == 2)		//2차 날개
-    {
-        Type = Equipment[8] & 0x07;
-        switch (Type)
-        {
-        case 5:		c->Wing.Type = MODEL_CAPE_OF_LORD; break;
-        case 6:		c->Wing.Type = MODEL_WINGS_OF_DESPAIR; break;
-        case 7:		c->Wing.Type = MODEL_CAPE_OF_FIGHTER; break;
-        default:
-            c->Wing.Type = Data::Items::ToModelSlot(ITEM_WINGS_OF_SATAN + Type);
-            break;
-        }
-    }
-    else if (Type == 3)		//3차 날개
-    {
-        Type = Equipment[8] & 0x07;
-        switch (Type)
-        {
-        case 0:				//작은날개
-        {
-            Type = (Equipment[16] >> 5);
-            c->Wing.Type = Data::Items::ToModelSlot(ITEM_SMALL_CAPE_OF_LORD - 1 + Type);
-        }
-        break;
-        case 6:		c->Wing.Type = MODEL_WING_OF_DIMENSION; break;
-        case 7:		c->Wing.Type = MODEL_CAPE_OF_OVERRULE; break;
-        default:
-            c->Wing.Type = Data::Items::ToModelSlot(ITEM_WING_OF_STORM - 1 + Type);
-            break;
-        }
-    }
-    else
-    {
-        c->Wing.Type = -1;
         c->Wing.ExcellentFlags = 0;
         c->Wing.AncientDiscriminator = 0;
     }
@@ -12864,8 +12857,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
             }
             else
             {
-                auto modelOffset = group * MAX_ITEM_INDEX + number;
-                c->Weapon[i].Type = Data::Items::ToModelSlot(modelOffset);
+                c->Weapon[i].Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, number));
                 c->Weapon[i].Level = LevelConvert(glowLevel);
                 c->Weapon[i].ExcellentFlags = isExcellent;
                 c->Weapon[i].AncientDiscriminator = isAncient;
@@ -12904,8 +12896,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
             }
             else
             {
-                auto modelOffset = group * MAX_ITEM_INDEX + number;
-                c->BodyPart[i].Type = Data::Items::ToModelSlot(modelOffset);
+                c->BodyPart[i].Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, number));
                 c->BodyPart[i].Level = LevelConvert(glowLevel);
                 c->BodyPart[i].ExcellentFlags = isExcellent;
                 c->BodyPart[i].AncientDiscriminator = isAncient;
@@ -12930,8 +12921,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
             }
             else
             {
-                auto modelOffset = group * MAX_ITEM_INDEX + number;
-                c->Wing.Type = Data::Items::ToModelSlot(modelOffset);
+                c->Wing.Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, number));
             }
         }
 
@@ -12950,8 +12940,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
             short itemNumber = number & (MAX_ITEM_INDEX-1);
             HelperVariant = (Equipment[offset] & 0xE) >> 1;
             BYTE group = (Equipment[offset] & 0xF0) >> 4;
-            auto modelOffset = group * MAX_ITEM_INDEX + itemNumber;
-            c->Helper.Type = Data::Items::ToModelSlot(modelOffset);
+            c->Helper.Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, itemNumber));
         }
 
         // offset += 2;
