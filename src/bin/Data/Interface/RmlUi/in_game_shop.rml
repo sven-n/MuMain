@@ -1,0 +1,33 @@
+<rml>
+<head>
+	<title>In Game Shop</title>
+	<link type="text/rcss" href="theme://base.rcss"/>
+	<link type="text/rcss" href="theme://in_game_shop.rcss"/>
+</head>
+<body data-model="in_game_shop">
+	<!-- Only the storage/gift list lives here. The shop's frame is in_game_shop_bg.rml (background
+	     context, behind the live 3D package items), and its buttons and radio columns are still
+	     mu::ui::window widgets, which are a different retirement boundary from this toolkit. -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<!-- 9 rows of 13 units, the native box's own m_iNumRenderLine times its line step. -->
+		<div id="igs_storage_list" class="scroll-pane igs-pane"
+		     data-style-font-size="text_px + 'px'"
+		     data-style-width="(146 * root_scale) + 'px'"
+		     data-style-height="(117 * root_scale) + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+			<div class="igs-row" data-for="r : storage_rows"
+			     data-class-selected="r.selected"
+			     data-style-width="(131 * root_scale) + 'px'"
+			     data-style-height="(13 * root_scale) + 'px'"
+			     data-event-click="igs_select_storage(it_index)">
+				<!-- A backgrounded element with children paints an unclosed box in this build,
+				     so the selected-row backdrop is a childless leaf (engine-findings.md). -->
+				<div class="igs-row-back"></div>
+				<span class="igs-cell igs-cell-name">{{r.name}}</span>
+				<span class="igs-cell igs-cell-period">{{r.period}}</span>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

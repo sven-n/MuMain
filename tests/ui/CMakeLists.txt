@@ -13,6 +13,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME storage_item_selection_tests
+    SOURCES
+        test_storage_item_selection.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/GameShop/StorageItemSelection.cpp
+)
+
+mu_add_test(
     NAME socket_list_selection_tests
     SOURCES
         test_socket_list_selection.cpp

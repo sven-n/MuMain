@@ -16,6 +16,11 @@
 #include "Render/Sprites/Sprite.h"
 #include "InGameShopSystem.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
+#include "GameShop/StorageItemSelection.h"
+
+#include <RmlUi/Core/Types.h>
+
+#include <vector>
 
 namespace Rml
 {
@@ -291,7 +296,7 @@ private:
     int m_iStorageCurrentPageReceiveItemCnt;
     bool m_bRequestCurrentPage;
 
-    CUIInGameShopListBox m_StorageItemListBox;
+    GameShop::StorageItemSelection m_StorageItems;
 
     // The window's flat backdrop must render behind the 3x3 package grid's live 3D item renders,
     // but RmlUi's main context always renders last -- so it goes through RmlUiRuntime's background
@@ -304,9 +309,30 @@ private:
     RmlModelBinder<InGameShopBgRmlModel> m_BgRmlBinder;
     Rml::ElementDocument* m_pRmlBgDoc = nullptr;
 
+    // One row of the storage / gift list. Where it sits is the theme's; only what it says and
+    // whether it is the picked row travel through the model.
+    struct StorageRow
+    {
+        Rml::String name;
+        Rml::String period;
+        bool selected = false;
+
+        bool operator==(const StorageRow&) const = default;
+    };
+    struct InGameShopRmlModel
+    {
+        float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+        float textPx = 0.f;
+        std::vector<StorageRow> storageRows;
+    };
+    RmlModelBinder<InGameShopRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    bool m_StorageRowsDirty = true;
+
     void BuildRmlUi();
     void ReloadRmlTheme();
     void SyncRmlModel();
+    void SyncStorageRows();
     void DestroyRmlUi();
 };
 } // namespace mu::ui::window

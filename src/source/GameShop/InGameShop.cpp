@@ -18,11 +18,17 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "UI/Core/WindowCommon.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "Core/Utilities/StringUtils.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ElementDocument.h>
+
+static_assert(GameShop::kStorageTextLength == MAX_TEXT_LENGTH);
+static_assert(GameShop::kStorageUserNameSize == MAX_USERNAME_SIZE);
+static_assert(GameShop::kStorageMessageSize == MAX_GIFT_MESSAGE_SIZE);
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -112,11 +118,43 @@ void CInGameShop::BuildRmlUi()
             m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/in_game_shop_bg.rml");
         }
     }
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    const bool created = m_RmlBinder.Create(context, "in_game_shop",
+        [this](Rml::DataModelConstructor& c, InGameShopRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
+            auto row = c.RegisterStruct<StorageRow>();
+            row.RegisterMember("name", &StorageRow::name);
+            row.RegisterMember("period", &StorageRow::period);
+            row.RegisterMember("selected", &StorageRow::selected);
+            c.RegisterArray<std::vector<StorageRow>>();
+            c.Bind("storage_rows", &model.storageRows);
+            c.BindEventCallback("igs_select_storage",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                                {
+                                    if (args.size() == 1 && m_StorageItems.SelectRow(args[0].Get<int>(-1)))
+                                        m_StorageRowsDirty = true;
+                                });
+        });
+    if (created)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(context, "Data/Interface/RmlUi/in_game_shop.rml");
+
     UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 }
 
 void CInGameShop::DestroyRmlUi()
 {
+    if (m_pRmlDoc)
+    {
+        Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+        m_RmlBinder.Destroy(context);
+        context->UnloadDocument(m_pRmlDoc);
+        m_pRmlDoc = nullptr;
+    }
     if (!m_pRmlBgDoc)
         return;
     if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
@@ -135,6 +173,41 @@ void CInGameShop::SyncRmlModel()
     // RenderBackgroundLayer() paints whatever is shown in the shared background context whoever
     // asked for it, so this is what keeps the backdrop off screen while the shop is closed.
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, IsVisible());
+
+    if (!m_pRmlDoc)
+        return;
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    SyncStorageRows();
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+}
+
+void CInGameShop::SyncStorageRows()
+{
+    if (!m_StorageRowsDirty)
+        return;
+    m_StorageRowsDirty = false;
+
+    std::vector<StorageRow> rows;
+    rows.reserve(m_StorageItems.Items().size());
+    const int selected = m_StorageItems.SelectedRow();
+    int index = 0;
+    for (const GameShop::StorageItem& item : m_StorageItems.Items())
+    {
+        StorageRow row;
+        // RenderDataLine() appended the count to the name when there was more than one.
+        wchar_t name[MAX_TEXT_LENGTH] = {};
+        if (item.m_iNum > 1)
+            mu_swprintf(name, L"%ls(%d)", item.m_szName, item.m_iNum);
+        else
+            wcsncpy_s(name, item.m_szName, _TRUNCATE);
+        row.name = StringUtils::WideToNarrow(name);
+        row.period = StringUtils::WideToNarrow(item.m_szPeriod);
+        row.selected = (index == selected);
+        rows.push_back(std::move(row));
+        ++index;
+    }
+    SyncField(m_RmlBinder, &InGameShopRmlModel::storageRows, "storage_rows", std::move(rows));
 }
 
 void CInGameShop::SetPos(int x, int y)
@@ -297,7 +370,7 @@ void CInGameShop::RenderButtons()
 
 void CInGameShop::RenderListBox()
 {
-    m_StorageItemListBox.Render();
+    // in_game_shop.rml draws the storage rows.
 }
 
 bool CInGameShop::IsInGameShopRect(float _x, float _y)
@@ -486,7 +559,7 @@ bool CInGameShop::BtnProcess()
 
     if (m_UseButton.UpdateMouseEvent() == true)
     {
-        if (m_StorageItemListBox.GetLineNum() <= 0)
+        if (m_StorageItems.Empty())
         {
             CreateOkMessageBoxWithTitle(I18N::Game::Error, I18N::Game::ThereIsNoUsableItem);
             return true;
@@ -494,7 +567,7 @@ bool CInGameShop::BtnProcess()
 
         int iStorageIndex = m_ListBoxTabButton.GetCurButtonIndex();
 
-        IGS_StorageItem* pSelectItem = m_StorageItemListBox.GetSelectedText();
+        const GameShop::StorageItem* pSelectItem = m_StorageItems.Selected();
 
         if (iStorageIndex == IGS_SAFEKEEPING_LISTBOX)					// 보관함
         {
@@ -638,7 +711,6 @@ bool CInGameShop::UpdateMouseEvent()
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, IMAGE_IGS_BACK_WIDTH, IMAGE_IGS_BACK_HEIGHT).Contains(MouseX, MouseY))
     {
-        m_StorageItemListBox.DoAction();
 
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {
@@ -814,9 +886,8 @@ void CInGameShop::AddStorageItem(int iStorageSeq, int iStorageItemSeq, int iStor
 {
     int iValue = -1;
     wchar_t szText[MAX_TEXT_LENGTH] = { '\0', };
-    IGS_StorageItem Item;
+    GameShop::StorageItem Item;
 
-    Item.m_bIsSelected = FALSE;
     Item.m_iStorageSeq = iStorageSeq;
     Item.m_iStorageItemSeq = iStorageItemSeq;
     Item.m_iStorageGroupCode = iStorageGroupCode;
@@ -933,17 +1004,24 @@ void CInGameShop::AddStorageItem(int iStorageSeq, int iStorageItemSeq, int iStor
 
     m_iStorageCurrentPageReceiveItemCnt++;
 
-    m_StorageItemListBox.AddText(Item);
+    m_StorageItems.Add(Item);
+    m_StorageRowsDirty = true;
+    // The native list box selected each row as it arrived; the pair of SLSetSelectLine calls
+    // below then settled on the remembered one once the page was complete.
+    m_StorageItems.SelectLast();
+    m_StorageRowsDirty = true;
 
     if (m_iStorageCurrentPageReceiveItemCnt >= m_iStorageCurrentPageItemCnt)
     {
         if (m_iSelectedStorageItemIndex > m_iStorageCurrentPageItemCnt)
         {
-            m_StorageItemListBox.SLSetSelectLine(m_iStorageCurrentPageItemCnt);
+            m_StorageItems.SelectRow(m_iStorageCurrentPageItemCnt - 1);
+            m_StorageRowsDirty = true;
         }
         else
         {
-            m_StorageItemListBox.SLSetSelectLine(m_iSelectedStorageItemIndex);
+            m_StorageItems.SelectRow(m_iSelectedStorageItemIndex - 1);
+            m_StorageRowsDirty = true;
         }
     }
 }
@@ -955,7 +1033,8 @@ void CInGameShop::ClearAllStorageItem()
     m_iStorageTotalPage = 0;
     m_iStorageCurrentPage = 0;
     m_iStorageCurrentPageReceiveItemCnt = 0;
-    m_StorageItemListBox.Clear();
+    m_StorageItems.Clear();
+    m_StorageRowsDirty = true;
 }
 
 void CInGameShop::InitStorage(int iTotalItemCnt, int iCurrentPageItemCnt, int iTotalPage, int iCurrentPage)
@@ -1026,7 +1105,8 @@ void CInGameShop::StorageNextPage()
 void CInGameShop::UpdateStorageItemList()
 {
     char szCode = GetCurrentStorageCode();
-    int iSelectLineIndex = m_StorageItemListBox.SLGetSelectLineNum();
+    // SLGetSelectLineNum() was 1-based, and the arithmetic below still reads that way.
+    const int iSelectLineIndex = m_StorageItems.SelectedRow() + 1;
     m_bRequestCurrentPage = true;
 
     if ((m_iStorageCurrentPageItemCnt == 1) && (m_iStorageTotalPage > 1))

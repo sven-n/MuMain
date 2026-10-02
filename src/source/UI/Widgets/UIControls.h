@@ -976,56 +976,7 @@ extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;
 
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
-typedef struct
-{
-    BOOL m_bIsSelected;
-
-    int m_iStorageSeq;
-    int m_iStorageItemSeq;
-    int m_iStorageGroupCode;
-    int m_iProductSeq;
-    int m_iPriceSeq;
-    int m_iCashPoint;
-    int m_iNum;
-    WORD m_wItemCode;
-
-    wchar_t m_szName[MAX_TEXT_LENGTH];
-    wchar_t m_szNum[MAX_TEXT_LENGTH];
-    wchar_t m_szPeriod[MAX_TEXT_LENGTH];
-    wchar_t m_szSendUserName[MAX_USERNAME_SIZE + 1];
-    wchar_t m_szMessage[MAX_GIFT_MESSAGE_SIZE];
-    wchar_t m_szType;
-} IGS_StorageItem;
-
-class CUIInGameShopListBox : public CUITextListBox<IGS_StorageItem>
-{
-    enum IMAGE_LISTBOX_SIZE
-    {
-        LISTBOX_WIDTH = 146,
-        LISTBOX_HEIGHT = 115,
-    };
-
-public:
-    CUIInGameShopListBox();
-    virtual ~CUIInGameShopListBox() {}
-
-    virtual void AddText(IGS_StorageItem& _StorageItem);
-    virtual void SetNumRenderLine(int nLine);
-    IGS_StorageItem* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int nLine);
-    virtual BOOL DoLineMouseAction(int nLine);
-    virtual int GetRenderLinePos_y(int nLine);
-};
-
 #define LINE_TEXTMAX 64
-#define INFO_LINEMAX 10
-#define INFO_LINE_CNTMAX 50
 
 struct IGS_BuyList
 {

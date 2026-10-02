@@ -1,0 +1,35 @@
+/* The cash shop's storage / gift list. The window is screen-space at the full reference area, so
+   #panel carries no offset of its own; the pane counter-scales out of the root transform the way
+   every other dense list does, so its text stays at the native renderer's physical size. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 640px;
+	height: 429px;
+	pointer-events: none;
+}
+
+/* Native put the box at (490, 360) in left-down coordinates, 146 x 115 -- so its top edge is
+   360 - 115. The height here is the 9 rows it actually drew. */
+#igs_storage_list {
+	position: absolute;
+	left: 490px;
+	top: 245px;
+	transform-origin: left top;
+	/* Native drew the track at every list length. */
+	overflow: hidden scroll;
+}
+
+/* display: block is explicit: a data-for <div> is inline without it in this build and every row
+   lands on the same line. */
+.igs-row { position: relative; display: block; pointer-events: auto; }
+.igs-row-back { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.igs-row.selected .igs-row-back { background-color: rgb(106, 97, 88); }
+
+.igs-cell { position: absolute; top: 0; white-space: nowrap; }
+/* CUIInGameShopListBox::RenderDataLine(): the name in 98 units from the row's left, the period
+   right-aligned at +102 across 33. As fractions of the row's own bound width they need no
+   binding and hold at every scale. */
+.igs-cell-name   { left: 0; width: 74.809%; }
+.igs-cell-period { right: 0; width: 25.191%; text-align: right; }

@@ -116,6 +116,9 @@ constexpr DocumentPlacement Placements[] = {
     {"help_window.rml", 8.3f, MainScene},
     {"move_command.rml", 8.3f, MainScene},
     {"crywolf.rml", 10.0f, MainScene},
+    // CInGameShop::GetLayerDepth(): the shop sits above crywolf and below kanturu_enter.
+    {"in_game_shop.rml", 10.08f, MainScene},
+    {"in_game_shop_bg.rml", 10.08f, MainScene},
     {"kanturu_enter.rml", 10.1f, MainScene},
     {"master_level.rml", 10.1f, MainScene},
     {"master_level_bg.rml", 10.1f, MainScene},
