@@ -976,47 +976,6 @@ extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;
 
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
-#define LINE_TEXTMAX 64
-
-struct IGS_BuyList
-{
-    BOOL m_bIsSelected;
-    wchar_t m_pszItemExplanation[LINE_TEXTMAX];
-};
-
-class CUIBuyingListBox : public CUITextListBox<IGS_BuyList>
-{
-    enum IMAGE_LISTBOX_SIZE
-    {
-        LISTBOX_WIDTH = 175,
-        LISTBOX_HEIGHT = 95,
-    };
-
-public:
-    CUIBuyingListBox();
-    virtual ~CUIBuyingListBox() {}
-
-    virtual void AddText(const wchar_t* pszExplanationText);
-    virtual void SetNumRenderLine(int nLine);
-    IGS_BuyList* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-
-    void SetLineColorRender(const bool _LineColor = true);
-    const bool& GetLineColorRender() const
-    {
-        return m_bRenderLineColor;
-    }
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int nLine);
-    virtual BOOL DoLineMouseAction(int nLine);
-    virtual int GetRenderLinePos_y(int nLine);
-    bool m_bRenderLineColor;
-};
-
 class CRadioButton
 {
     enum IMAGE_RADIOBUTTON

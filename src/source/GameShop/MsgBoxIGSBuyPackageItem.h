@@ -15,6 +15,18 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+#include <RmlUi/Core/Types.h>
+
+#include <string>
+#include <vector>
+
+namespace Rml
+{
+class ElementDocument;
+}
+
 class CMsgBoxIGSBuyPackageItem : public CMessageBoxBase, public I3DRenderObj
 {
 public:
@@ -99,7 +111,28 @@ private:
     CMessageBoxButton m_BtnBuy;
     CMessageBoxButton m_BtnPresent;
     CMessageBoxButton m_BtnCancel;
-    CUIBuyingListBox m_PackageInfo;
+    // The description, one wrapped line per entry, in arrival order. igs_buy_package.rml
+    // draws them and RmlUi owns the scrolling.
+    std::vector<std::wstring> m_DescriptionLines;
+
+    struct DescriptionLine
+    {
+        Rml::String text;
+        bool operator==(const DescriptionLine&) const = default;
+    };
+    struct BuyPackageRmlModel
+    {
+        float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+        float textPx = 0.f;
+        std::vector<DescriptionLine> descriptionLines;
+    };
+    RmlModelBinder<BuyPackageRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+    void BuildRmlUi();
+    void DestroyRmlUi();
+    void SyncRmlModel();
+    void ReloadRmlTheme();
 
     int m_iPackageSeq;
     int m_iDisplaySeq;

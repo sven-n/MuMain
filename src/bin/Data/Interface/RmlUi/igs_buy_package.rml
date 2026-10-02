@@ -1,0 +1,25 @@
+<rml>
+<head>
+	<title>IGS Buy Package</title>
+	<link type="text/rcss" href="theme://base.rcss"/>
+	<link type="text/rcss" href="theme://igs_buy_package.rcss"/>
+</head>
+<body data-model="igs_buy_package">
+	<!-- Only the package description lives here. The dialog's own frame, texts and buttons are
+	     still native: its frame is the shop's own art, not the newui_msgbox family MessageBoxView
+	     draws, and its buttons are mu::ui::window widgets. -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<!-- 7 rows of 13 units, the native box's own m_iNumRenderLine times its line step. -->
+		<div id="igs_package_info" class="scroll-pane igs-pane"
+		     data-style-font-size="text_px + 'px'"
+		     data-style-width="(175 * root_scale) + 'px'"
+		     data-style-height="(91 * root_scale) + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+			<div class="igs-line" data-for="l : description_lines"
+			     data-style-width="(160 * root_scale) + 'px'"
+			     data-style-height="(13 * root_scale) + 'px'">{{l.text}}</div>
+		</div>
+	</div>
+</body>
+</rml>
