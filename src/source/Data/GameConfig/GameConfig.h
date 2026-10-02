@@ -93,6 +93,8 @@ public:
     void SetVSyncEnabled(bool enabled);
     bool GetWeatherEffects() const { return m_weatherEffects; }
     void SetWeatherEffects(bool enabled);
+    bool GetShowFps() const { return m_showFps; }
+    void SetShowFps(bool enabled);
 
     // Helpers
     static std::wstring BinaryToHex(const BYTE* data, DWORD size);
@@ -134,6 +136,7 @@ private:
     bool m_sortParticleDraws;
     bool m_vsyncEnabled;
     bool m_weatherEffects;
+    bool m_showFps;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue);
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);

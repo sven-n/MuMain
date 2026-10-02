@@ -19,6 +19,10 @@ namespace UI::Options
 {
 using DisplayResolution = std::pair<int, int>;
 
+// Closed options frame in reference pixels (640x480 canvas). Two columns of the
+// original 190-wide stack, so the extra checkboxes fit without a new frame style.
+constexpr int kOptionWindowWidth = 380;
+
 std::vector<DisplayResolution> NormalizeDisplayResolutions(std::vector<DisplayResolution> resolutions);
 int FindExactDisplayResolutionIndex(const std::vector<DisplayResolution>& resolutions, int width, int height);
 int FindClosestDisplayResolutionIndex(const std::vector<DisplayResolution>& resolutions, int width, int height);
@@ -83,6 +87,10 @@ namespace SEASON3B
         bool GetRenderAllEffects();
         void SetWeatherEffects(bool enabled);
         bool IsWeatherEffects() const;
+        void SetShowFps(bool enabled);
+        bool IsShowFps() const;
+        void SetVSyncEnabled(bool enabled);
+        bool IsVSyncEnabled() const;
 
     private:
         void LoadImages();
@@ -93,6 +101,10 @@ namespace SEASON3B
         void RenderFrame();
         void RenderContents();
         void RenderButtons();
+        void RenderOptionCheck(int xLocal, int yLocal, bool checked);
+        void RenderOptionPoint(int columnX, int labelY);
+        void RenderOptionLine(int columnX, int yLocal);
+        void RenderOptionLabel(int columnX, int labelY, const wchar_t* text);
 
         // UpdateMouseEvent helpers
         void HandleCheckboxInputs();
@@ -115,6 +127,8 @@ namespace SEASON3B
         int m_iRenderLevel;
         bool m_bRenderAllEffects;
         bool m_bWeatherEffects;
+        bool m_bShowFps;
+        bool m_bVSync;
         int m_iResolutionIndex;
         bool m_bWindowedMode;
         int m_iLanguageIndex;

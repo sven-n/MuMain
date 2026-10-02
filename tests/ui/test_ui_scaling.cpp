@@ -259,6 +259,21 @@ TEST_CASE("weather effects preference defaults on and remains mutable [config][r
     config.SetWeatherEffects(previous);
 }
 
+TEST_CASE("show-FPS preference defaults off and remains mutable [config][render]")
+{
+    CHECK_FALSE(CfgDefaults::CfgDefaultShowFps);
+
+    auto& config = GameConfig::GetInstance();
+    const bool previous = config.GetShowFps();
+
+    config.SetShowFps(true);
+    CHECK(config.GetShowFps());
+    config.SetShowFps(false);
+    CHECK_FALSE(config.GetShowFps());
+
+    config.SetShowFps(previous);
+}
+
 TEST_CASE("inventory drag centers items without a grid pickup anchor [ui][inventory]")
 {
     const POINT offset = UI::Items::Drag::PickupOffset(0, 0, 40, 60, 183, 317, false);
