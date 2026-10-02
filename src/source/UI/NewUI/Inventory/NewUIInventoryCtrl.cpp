@@ -220,7 +220,19 @@ bool SEASON3B::CNewUIPickedItem::IsVisible() const
 
 CNewUIObj* SEASON3B::CNewUIPickedItem::GetLayoutOwner() const
 {
-    return m_pSrcInventory ? m_pSrcInventory->GetOwner() : nullptr;
+    if (m_pSrcInventory)
+    {
+        return m_pSrcInventory->GetOwner();
+    }
+
+    // Equipment is picked up with no source grid. Those slots belong to the
+    // inventory window, whose DockRight layout keeps the drag the same size.
+    if (m_pPickedItem && m_pPickedItem->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
+    {
+        return g_pMyInventory;
+    }
+
+    return nullptr;
 }
 
 void SEASON3B::CNewUIPickedItem::ShowPickedItem()

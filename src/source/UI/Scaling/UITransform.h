@@ -99,8 +99,9 @@ namespace UI::Scaling
     float FontScaleForBounds(FontRole role, const Transform& transform, float measuredWidth, float measuredHeight,
                              float boxWidth, float boxHeight);
     float ContentScaleFromMetrics(float displayScale, float pixelDensity);
-    // Keeps inventory/equipment 3D previews slot-proportional when UI scale is
-    // capped but item gluPerspective2 still maps world size by full window height.
+    // gluPerspective2 maps a 3D item preview's world size by the full window
+    // height. Inventory, equipment, HUD hotkey, and dialog slots use a capped
+    // UI scale, so previews are scaled by uiScaleY / (windowHeight / 480).
     float ItemPreviewScaleFactor(float uiScaleY, int windowHeight);
     float GetWindowContentScale();
     void SetWindowContentScale(float contentScale);

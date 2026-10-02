@@ -208,9 +208,28 @@ TEST_CASE("3D item preview scale tracks capped UI vs window height [ui][scaling]
     const auto dock720 = UI::Scaling::DockRightTransform(1280, 720);
     CHECK(UI::Scaling::ItemPreviewScaleFactor(dock720.scaleY, 720) == doctest::Approx(1.0f));
 
-    // Hud overlay scaleY is windowHeight/480 -> always factor 1.
-    const auto hud1440 = UI::Scaling::ScreenOverlayTransform(2560, 1440);
-    CHECK(UI::Scaling::ItemPreviewScaleFactor(hud1440.scaleY, 1440) == doctest::Approx(1.0f));
+    // 4K dock stays at the 2.25 cap, so the preview is half the window-height scale.
+    const auto dock4k = UI::Scaling::DockRightTransform(3840, 2160);
+    CHECK(dock4k.scaleY == doctest::Approx(2.25f));
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(dock4k.scaleY, 2160) == doctest::Approx(0.5f));
+
+    // HUD hotkey items render under BottomHudLeftTransform, capped at 2.
+    const auto hud1080 = UI::Scaling::BottomHudLeftTransform(1920, 1080);
+    CHECK(hud1080.scaleY == doctest::Approx(2.0f));
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(hud1080.scaleY, 1080) == doctest::Approx(2.0f / 2.25f));
+
+    const auto hud1440 = UI::Scaling::BottomHudLeftTransform(2560, 1440);
+    CHECK(hud1440.scaleY == doctest::Approx(2.0f));
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(hud1440.scaleY, 1440) == doctest::Approx(2.0f / 3.0f));
+
+    // Dialog item previews use PanelTransform, also capped at 2.
+    const auto dialog1080 = UI::Scaling::PanelTransform(1920, 1080);
+    CHECK(dialog1080.scaleY == doctest::Approx(2.0f));
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(dialog1080.scaleY, 1080) == doctest::Approx(2.0f / 2.25f));
+
+    const auto dialog1440 = UI::Scaling::PanelTransform(2560, 1440);
+    CHECK(dialog1440.scaleY == doctest::Approx(2.0f));
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(dialog1440.scaleY, 1440) == doctest::Approx(2.0f / 3.0f));
 }
 
 TEST_CASE("inventory drag keeps the clicked point anchored to the item [ui][inventory]")
