@@ -287,8 +287,10 @@ The four files have 646 names; the rules are in
 number and one with a texture number get the same name, the model one gets
 `Model` at the end (`fireModel`, 6 times), because texture numbers are types
 in several kinds and keep one name in all of them; names start with a
-letter; 11 names are chosen by hand (collisions the rules do not settle, file
-names that say nothing like `cra_04`, the Hellas number `9`). Loading the
+letter; 10 names are chosen by hand (collisions the rules do not settle, file
+names that say nothing like `cra_04`). The bare Hellas number got an enum
+name, `MODEL_KALIMA_FALLING_STONE` (`kalimaFallingStone`), so no file holds
+a raw number (D28). Loading the
 four files takes about 17 ms on the loading screen (Release, editor build).
 
 **FX1.2 Registry rows from data.** The 22 rows (32 types) of `CreateParams`

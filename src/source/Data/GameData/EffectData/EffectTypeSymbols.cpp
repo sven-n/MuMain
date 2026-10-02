@@ -15,7 +15,7 @@ namespace
 {
 // clang-format off
 constexpr EffectTypeSymbol EffectSymbols[] = {
-    {"9", 9},
+    {"MODEL_KALIMA_FALLING_STONE", MODEL_KALIMA_FALLING_STONE},
     {"BATTLE_CASTLE_WALL1", BATTLE_CASTLE_WALL1},
     {"BATTLE_CASTLE_WALL2", BATTLE_CASTLE_WALL2},
     {"BATTLE_CASTLE_WALL3", BATTLE_CASTLE_WALL3},

@@ -13,6 +13,7 @@
 #include "Render/Effects/EffectRegistry.h"
 
 #include <algorithm>
+#include <cctype>
 #include <filesystem>
 #include <set>
 #include <string>
@@ -164,7 +165,8 @@ TEST_CASE("Effect type files are written sorted by name with a fixed field order
     CHECK(result.types.size() == 2);
 }
 
-TEST_CASE("Each kind lists every type number once, sorted [data][effects]")
+// Every code is an enum symbol, so the data holds no raw numbers (D28).
+TEST_CASE("Each kind lists every type number once, sorted, by its symbol [data][effects]")
 {
     for (const EffectKind kind : EffectKinds)
     {
@@ -174,6 +176,8 @@ TEST_CASE("Each kind lists every type number once, sorted [data][effects]")
         std::set<std::string_view> codes;
         for (size_t i = 0; i < symbols.size(); ++i)
         {
+            INFO(symbols[i].code);
+            CHECK(std::isupper(static_cast<unsigned char>(symbols[i].code.front())) != 0);
             CHECK(codes.insert(symbols[i].code).second);
             if (i > 0)
             {
@@ -224,6 +228,7 @@ TEST_CASE("The effect type catalogue finds types by name and names by number [da
     CHECK_FALSE(catalogue.FindType(EffectKind::Joint, "smoke2").has_value());
     CHECK(catalogue.GetName(EffectKind::Sprite, BITMAP_SHINY + 1) == "shiny2");
     CHECK(catalogue.GetName(EffectKind::Effect, MODEL_CUNDUN_GHOST) == "kundunGhost");
+    CHECK(catalogue.FindType(EffectKind::Effect, "kalimaFallingStone") == MODEL_KALIMA_FALLING_STONE);
     CHECK(catalogue.GetName(EffectKind::Particle, MODEL_CUNDUN_GHOST).empty());
 }
 

@@ -48,10 +48,10 @@ names: `fire` is a particle and also an effect, and the two are unrelated.
 
 - `name`: letters and digits, starting with a letter, unique in its kind.
   This is what other data uses.
-- `code`: the type as the code writes it: the enum name, an enum name with
-  an offset (`BITMAP_SMOKE+1`, no spaces) or, once, a plain number (`"9"`).
-  The client turns it into the number with a list compiled into the game,
-  so the files hold no raw numbers.
+- `code`: the type as the code writes it: the enum name or an enum name
+  with an offset (`BITMAP_SMOKE+1`, no spaces). The client turns it into the
+  number with a list compiled into the game, so the files hold no raw
+  numbers.
 - Every type that the code of a kind uses has exactly one entry. A type
   without a name, an unknown code, a code with two names, two types with
   the same name, a wrong `kind` or a newer `formatVersion` are errors: the
@@ -77,8 +77,8 @@ names: `fire` is a particle and also an effect, and the two are unrelated.
   `fireModel`, `BITMAP_FIRE` → `fire`), because texture numbers are types
   in several kinds and keep one name in all of them.
 - A few names are chosen by hand where the rules give nothing useful, for
-  example `kalimaFallingStone` for effect `9`, which draws a stone of the
-  Kalima map objects.
+  example `glitter` for `BITMAP_LIGHT+2`, whose file `cra_04.jpg` says
+  nothing.
 
 A name is meant to stay: once other data uses it, a rename has to update
 every user.

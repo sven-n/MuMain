@@ -7,9 +7,8 @@
 
 namespace Data::Effects
 {
-// A type as the code writes it, and its number: an enum name ("MODEL_ARROW"),
-// an enum name with an offset ("BITMAP_SMOKE+1", without spaces) or a number
-// ("9").
+// A type as the code writes it, and its number: an enum name ("MODEL_ARROW")
+// or an enum name with an offset ("BITMAP_SMOKE+1", without spaces).
 struct EffectTypeSymbol
 {
     std::string_view code;

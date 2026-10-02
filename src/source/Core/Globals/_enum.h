@@ -751,6 +751,9 @@ enum
 {
     // nature
     MODEL_WORLD_OBJECT = 0,
+    // The Kalima maps load a rock (Data\Object25\Object10.bmd) into world object slot 9;
+    // GMHellas.cpp drops it as a falling stone effect.
+    MODEL_KALIMA_FALLING_STONE = MODEL_WORLD_OBJECT + 9,
     MODEL_TREE01 = 0,
     MODEL_GRASS01 = 20,
     MODEL_STONE01 = 30,

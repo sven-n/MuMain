@@ -856,7 +856,7 @@
     },
     {
       "name": "kalimaFallingStone",
-      "code": "9"
+      "code": "MODEL_KALIMA_FALLING_STONE"
     },
     {
       "name": "kentaurosArrow",
