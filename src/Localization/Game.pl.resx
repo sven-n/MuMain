@@ -1424,6 +1424,9 @@
   <data name="Render full effects" xml:space="preserve">
     <value>Renderuj pełne efekty</value>
   </data>
+  <data name="Weather effects" xml:space="preserve">
+    <value>Efekty pogodowe</value>
+  </data>
   <data name="Resolution" xml:space="preserve">
     <value>Rozdzielczość</value>
   </data>

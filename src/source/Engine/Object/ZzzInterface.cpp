@@ -3630,6 +3630,9 @@ void RenderInterface(bool Render)
 
 void RenderOutSides()
 {
+    if (!ShouldRenderWeatherEffects())
+        return;
+
     if (gMapManager.WorldActive == WD_8TARKAN)
     {
         EnableAlphaTest();

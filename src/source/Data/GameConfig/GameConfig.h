@@ -91,6 +91,8 @@ public:
     bool GetSortParticleDraws() const { return m_sortParticleDraws; }
     bool GetVSyncEnabled() const { return m_vsyncEnabled; }
     void SetVSyncEnabled(bool enabled);
+    bool GetWeatherEffects() const { return m_weatherEffects; }
+    void SetWeatherEffects(bool enabled);
 
     // Helpers
     static std::wstring BinaryToHex(const BYTE* data, DWORD size);
@@ -131,6 +133,7 @@ private:
     int m_zoom;
     bool m_sortParticleDraws;
     bool m_vsyncEnabled;
+    bool m_weatherEffects;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue);
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);

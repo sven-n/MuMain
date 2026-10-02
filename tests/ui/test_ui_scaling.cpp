@@ -244,6 +244,21 @@ TEST_CASE("VSync preference defaults on and remains mutable [config][render]")
     config.SetVSyncEnabled(previous);
 }
 
+TEST_CASE("weather effects preference defaults on and remains mutable [config][render]")
+{
+    CHECK(CfgDefaults::CfgDefaultWeatherEffects);
+
+    auto& config = GameConfig::GetInstance();
+    const bool previous = config.GetWeatherEffects();
+
+    config.SetWeatherEffects(false);
+    CHECK_FALSE(config.GetWeatherEffects());
+    config.SetWeatherEffects(true);
+    CHECK(config.GetWeatherEffects());
+
+    config.SetWeatherEffects(previous);
+}
+
 TEST_CASE("inventory drag centers items without a grid pickup anchor [ui][inventory]")
 {
     const POINT offset = UI::Items::Drag::PickupOffset(0, 0, 40, 60, 183, 317, false);

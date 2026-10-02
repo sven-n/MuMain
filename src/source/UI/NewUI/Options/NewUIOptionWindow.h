@@ -81,6 +81,8 @@ namespace SEASON3B
         int GetRenderLevel();
         void SetRenderAllEffects(bool bRenderAllEffects);
         bool GetRenderAllEffects();
+        void SetWeatherEffects(bool enabled);
+        bool IsWeatherEffects() const;
 
     private:
         void LoadImages();
@@ -112,6 +114,7 @@ namespace SEASON3B
         int m_iMusicLevel;      // Music volume (0=off, 10=max)
         int m_iRenderLevel;
         bool m_bRenderAllEffects;
+        bool m_bWeatherEffects;
         int m_iResolutionIndex;
         bool m_bWindowedMode;
         int m_iLanguageIndex;

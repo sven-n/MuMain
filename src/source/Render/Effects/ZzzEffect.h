@@ -43,6 +43,7 @@ bool DeleteParticle(int iType);
 
 void RenderLeaves();
 bool MoveLeaves();
+bool ShouldRenderWeatherEffects();
 void CreatePoint(vec3_t Position, int Value, vec3_t Color, float scale = 15.f, bool bMove = true,
                  bool bRepeatedly = false);
 void RenderPoints(BYTE byRenderOneMore = 0);

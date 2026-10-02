@@ -83,6 +83,7 @@ void GameConfig::Load()
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
     m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
     m_vsyncEnabled = ReadBool(CfgSectionRender, CfgKeyVSync, CfgDefaultVSync);
+    m_weatherEffects = ReadBool(CfgSectionRender, CfgKeyWeatherEffects, CfgDefaultWeatherEffects);
 
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
@@ -127,6 +128,7 @@ void GameConfig::Save()
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
     WriteBool(CfgSectionRender, CfgKeyVSync, m_vsyncEnabled);
+    WriteBool(CfgSectionRender, CfgKeyWeatherEffects, m_weatherEffects);
 }
 
 std::vector<std::wstring> GameConfig::ReadStringList(const wchar_t* section, const wchar_t* keyPrefix)
@@ -191,6 +193,11 @@ void GameConfig::SetMusicVolume(int level)
 void GameConfig::SetVSyncEnabled(bool enabled)
 {
     m_vsyncEnabled = enabled;
+}
+
+void GameConfig::SetWeatherEffects(bool enabled)
+{
+    m_weatherEffects = enabled;
 }
 
 void GameConfig::SetRememberMe(bool remember)

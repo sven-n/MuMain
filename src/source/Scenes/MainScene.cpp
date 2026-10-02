@@ -53,7 +53,6 @@ extern "C" bool DevEditor_ShouldRenderEffects();
 extern "C" bool DevEditor_ShouldRenderDroppedItems();
 extern "C" bool DevEditor_ShouldRenderItemLabels();
 extern "C" bool DevEditor_ShouldRenderEquippedItems();
-extern "C" bool DevEditor_ShouldRenderWeatherEffects();
 extern "C" bool DevEditor_ShouldRenderUI();
 extern "C" bool DevEditor_IsCameraFogOverrideEnabled(const char* cameraName);
 extern "C" bool DevEditor_GetCameraFogOverrideValue(const char* cameraName);
@@ -480,14 +479,13 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     bool renderStatic = DevEditor_ShouldRenderStaticObjects();
     bool renderEffects = DevEditor_ShouldRenderEffects() && !g_bDisableEffectsDebug;
     bool renderDroppedItems = DevEditor_ShouldRenderDroppedItems();
-    bool renderWeatherEffects = DevEditor_ShouldRenderWeatherEffects();
 #else
     bool renderTerrain = true;
     bool renderStatic = true;
     bool renderEffects = !g_bDisableEffectsDebug;
     bool renderDroppedItems = true;
-    bool renderWeatherEffects = true;
 #endif
+    const bool renderWeatherEffects = ShouldRenderWeatherEffects();
 
     if (IsWaterTerrain() == false && renderTerrain)
     {
@@ -580,7 +578,8 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         CheckSprites();
         BeginSprite();
 
-        if (gMapManager.WorldActive == WD_2DEVIAS && HeroTile != 3 && HeroTile < 10)
+        if (ShouldRenderWeatherEffects()
+            && gMapManager.WorldActive == WD_2DEVIAS && HeroTile != 3 && HeroTile < 10)
             RenderLeaves();
 
         { FRAME_PROFILE(Sprites); RenderSprites(byWaterMap); }

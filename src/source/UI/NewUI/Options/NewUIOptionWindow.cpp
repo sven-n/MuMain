@@ -173,28 +173,40 @@ namespace
 
     // Resolution combo box placement (relative to m_Pos)
     constexpr int RES_COMBO_X_LOCAL = 22;
-    constexpr int RES_COMBO_Y_LOCAL = 335;
+    constexpr int RES_LABEL_Y_LOCAL = 350;
+    constexpr int RES_COMBO_Y_LOCAL = 363;
     constexpr int RES_COMBO_WIDTH   = 148;  // spans the old left-to-right arrow area
     constexpr int RES_COMBO_HEIGHT  = 16;
     constexpr int RES_COMBO_MAX_VISIBLE = 4;  // scrollbar appears when list > this
 
     // Language combo box placement (relative to m_Pos).
-    constexpr int LANG_LABEL_Y_LOCAL = 283;
+    constexpr int LANG_LABEL_Y_LOCAL = 311;
     constexpr int LANG_COMBO_X_LOCAL = 22;
-    constexpr int LANG_COMBO_Y_LOCAL = 296;
+    constexpr int LANG_COMBO_Y_LOCAL = 324;
     constexpr int LANG_COMBO_WIDTH   = 148;
     constexpr int LANG_COMBO_HEIGHT  = 16;
     constexpr int LANG_COMBO_MAX_VISIBLE = 5;
 
-    // Font combo box placement (relative to m_Pos). Row order below the effect
-    // rows is: Font, Language, Resolution, Windowed mode (combos grouped at the
-    // top so an open dropdown never overlaps the Close button).
-    constexpr int FONT_LABEL_Y_LOCAL = 244;
+    // Font combo box placement (relative to m_Pos). Row order below weather is:
+    // Font, Language, Resolution, Windowed mode (combos grouped so an open
+    // dropdown never overlaps the Close button).
+    constexpr int FONT_LABEL_Y_LOCAL = 272;
     constexpr int FONT_COMBO_X_LOCAL = 22;
-    constexpr int FONT_COMBO_Y_LOCAL = 257;
+    constexpr int FONT_COMBO_Y_LOCAL = 285;
     constexpr int FONT_COMBO_WIDTH   = 148;
     constexpr int FONT_COMBO_HEIGHT  = 16;
     constexpr int FONT_COMBO_MAX_VISIBLE = 5;
+
+    // Checkbox rows. The effects hit box used to sit below the drawn sprite and
+    // stole clicks from the weather row, so both use the sprite's Y.
+    constexpr int EFFECTS_CHECK_Y_LOCAL = 217;
+    constexpr int WEATHER_CHECK_Y_LOCAL = 240;
+    constexpr int WEATHER_LABEL_Y_LOCAL = 245;
+    constexpr int WINDOWED_CHECK_Y_LOCAL = 384;
+    constexpr int WINDOWED_LABEL_Y_LOCAL = 389;
+    constexpr int CLOSE_BUTTON_Y_LOCAL = 416;
+    constexpr int OPTION_WINDOW_HIT_HEIGHT = 447;
+    constexpr int OPTION_FRAME_SLAT_COUNT = 34;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -214,6 +226,7 @@ SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
     m_iMusicLevel = GameConfig::GetInstance().GetMusicVolume();
     m_iRenderLevel = 4;
     m_bRenderAllEffects = true;
+    m_bWeatherEffects = GameConfig::GetInstance().GetWeatherEffects();
     m_iResolutionIndex = 0;
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
     m_iLanguageIndex = FindCurrentLanguageIndex();
@@ -309,7 +322,7 @@ void SEASON3B::CNewUIOptionWindow::SetButtonInfo()
 {
     m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnClose.ChangeButtonImgState(true, IMAGE_OPTION_BTN_CLOSE, true);
-    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + 388, 54, 30);
+    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + CLOSE_BUTTON_Y_LOCAL, 54, 30);
     m_BtnClose.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
@@ -403,10 +416,17 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
     }
 
     bool oldWindowedMode = m_bWindowedMode;
+    const bool oldWeatherEffects = m_bWeatherEffects;
     HandleCheckboxInputs();
 
     if (m_bWindowedMode != oldWindowedMode)
         ApplyWindowModeToggle();
+
+    if (m_bWeatherEffects != oldWeatherEffects)
+    {
+        GameConfig::GetInstance().SetWeatherEffects(m_bWeatherEffects);
+        GameConfig::GetInstance().Save();
+    }
 
     if (HandleVolumeSlider(m_iVolumeLevel, 104))
         OnSoundVolumeChanged();
@@ -418,7 +438,7 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
 
     // Combo box already processed at the top. Just consume clicks inside the
     // option window itself so they don't fall through to the world.
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 419))
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, OPTION_WINDOW_HIT_HEIGHT))
         return false;
 
     return true;
@@ -431,8 +451,9 @@ void SEASON3B::CNewUIOptionWindow::HandleCheckboxInputs()
         {  43, &m_bAutoAttack        },
         {  65, &m_bWhisperSound      },
         { 155, &m_bSlideHelp         },
-        { 238, &m_bRenderAllEffects  },
-        { 356, &m_bWindowedMode      },
+        { EFFECTS_CHECK_Y_LOCAL, &m_bRenderAllEffects },
+        { WEATHER_CHECK_Y_LOCAL, &m_bWeatherEffects   },
+        { WINDOWED_CHECK_Y_LOCAL, &m_bWindowedMode    },
     };
 
     constexpr int CHECKBOX_X_LOCAL = 150;
@@ -577,6 +598,7 @@ void SEASON3B::CNewUIOptionWindow::OpenningProcess()
     m_FontCombo.SetSelectedIndex(m_iFontIndex);
     m_FontCombo.Close();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
+    m_bWeatherEffects = GameConfig::GetInstance().GetWeatherEffects();
 }
 
 void SEASON3B::CNewUIOptionWindow::ClosingProcess()
@@ -626,9 +648,9 @@ void SEASON3B::CNewUIOptionWindow::RenderFrame()
     x = m_Pos.x;
     y = m_Pos.y;
     // Frame is composed of: 64px top + N*10px middle slats + 45px bottom. The
-    // slat count is tuned so the frame reaches the Close button (Y 388) plus the
-    // bottom border, after the Font/Language/Resolution/Windowed rows.
-    constexpr int SLAT_COUNT = 30;
+    // slat count is tuned so the frame reaches the Close button plus the
+    // bottom border, after the weather row and the Font/Language/Resolution rows.
+    constexpr int SLAT_COUNT = OPTION_FRAME_SLAT_COUNT;
     constexpr float FRAME_HEIGHT = 64.f + SLAT_COUNT * 10.f + 45.f;
     RenderImage(IMAGE_OPTION_FRAME_BACK, x, y, 190.f, FRAME_HEIGHT);
     RenderImage(IMAGE_OPTION_FRAME_UP, x, y, 190.f, 64.f);
@@ -657,6 +679,9 @@ void SEASON3B::CNewUIOptionWindow::RenderFrame()
 
     y += 25.f;
     RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after render full effects
+
+    y += 28.f;
+    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after weather
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderContents()
@@ -690,7 +715,11 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 182, I18N::Game::EffectLimitation);
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 221, I18N::Game::RenderFullEffects);
 
-    y += 25.f;
+    y += 22.f;
+    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Weather
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + WEATHER_LABEL_Y_LOCAL, I18N::Game::WeatherEffects);
+
+    y += 31.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Font
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + FONT_LABEL_Y_LOCAL, I18N::Game::Font);
 
@@ -700,11 +729,11 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
 
     y += 39.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Resolution
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 322, I18N::Game::Resolution);
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + RES_LABEL_Y_LOCAL, I18N::Game::Resolution);
 
     y += 39.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Windowed Mode
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 361, I18N::Game::WindowedMode);
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + WINDOWED_LABEL_Y_LOCAL, I18N::Game::WindowedMode);
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderButtons()
@@ -764,23 +793,12 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
                            0.f, 0.f, (float)EFFECT_BAR_SRC_WIDTH * fill, (float)EFFECT_BAR_SRC_HEIGHT);
     }
 
-    if (m_bRenderAllEffects)
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 217, 15, 15, 0, 0);
-    }
-    else
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 217, 15, 15, 0, 15.f);
-    }
-
-    if (m_bWindowedMode)
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 356, 15, 15, 0, 0);
-    }
-    else
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 356, 15, 15, 0, 15.f);
-    }
+    RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + EFFECTS_CHECK_Y_LOCAL, 15, 15, 0,
+                m_bRenderAllEffects ? 0.f : 15.f);
+    RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + WEATHER_CHECK_Y_LOCAL, 15, 15, 0,
+                m_bWeatherEffects ? 0.f : 15.f);
+    RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + WINDOWED_CHECK_Y_LOCAL, 15, 15, 0,
+                m_bWindowedMode ? 0.f : 15.f);
 
     // Combo boxes drawn last so their expanded dropdowns sit on top of
     // anything else in the window. Within the combo pair, render the
@@ -851,6 +869,17 @@ void SEASON3B::CNewUIOptionWindow::SetRenderAllEffects(bool bRenderAllEffects)
 bool SEASON3B::CNewUIOptionWindow::GetRenderAllEffects()
 {
     return m_bRenderAllEffects;
+}
+
+void SEASON3B::CNewUIOptionWindow::SetWeatherEffects(bool enabled)
+{
+    m_bWeatherEffects = enabled;
+    GameConfig::GetInstance().SetWeatherEffects(enabled);
+}
+
+bool SEASON3B::CNewUIOptionWindow::IsWeatherEffects() const
+{
+    return m_bWeatherEffects;
 }
 
 int SEASON3B::CNewUIOptionWindow::FindCurrentResolutionIndex()

@@ -46,6 +46,7 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
     inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
     inline constexpr wchar_t CfgKeyVSync[] = L"VSync";
+    inline constexpr wchar_t CfgKeyWeatherEffects[] = L"WeatherEffects";
 }
 
 namespace CfgDefaults
@@ -82,4 +83,6 @@ namespace CfgDefaults
     // Opt-in until real effects have been visually checked on target hardware.
     inline constexpr bool CfgDefaultSortParticleDraws = false;
     inline constexpr bool CfgDefaultVSync = true;
+    // Rain, snow, mist, and map weather overlays. On until the player turns them off.
+    inline constexpr bool CfgDefaultWeatherEffects = true;
 }

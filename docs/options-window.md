@@ -48,7 +48,10 @@ window writes to these sections:
 - `[Window]` - width, height, windowed flag.
 - `[Render]` - the persisted `VSync` preference. `$vsync on` and `$vsync off`
   update it; startup and fullscreen/resolution changes reapply it before the
-  next frame begins.
+  next frame begins. Also `WeatherEffects`: the options checkbox **Weather
+  effects**. Checked (the default) keeps rain, snow, mist, and the map haze
+  overlays. Unchecked turns those off on every map and writes the key
+  immediately, the same way the volume sliders save. Wind is unchanged.
 - `[Audio]` - volumes.
 - `[Login]` - language, and the remembered-credential keys (`RememberMe`,
   `SavePassword`, `EncryptedUsername`, `EncryptedPassword`); see

@@ -1424,6 +1424,9 @@
   <data name="Render full effects" xml:space="preserve">
     <value>Усі ефекти</value>
   </data>
+  <data name="Weather effects" xml:space="preserve">
+    <value>Погодні ефекти</value>
+  </data>
   <data name="Resolution" xml:space="preserve">
     <value>Роздільна здатність</value>
   </data>

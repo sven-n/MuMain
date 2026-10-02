@@ -21,6 +21,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "Core/Utilities/Random.h"
 
 #include <cmath>
@@ -418,8 +419,41 @@ void MoveEtcLeaf(PARTICLE* o)
     }
 }
 
+bool ShouldRenderWeatherEffects()
+{
+#ifdef _EDITOR
+    if (!DevEditor_ShouldRenderWeatherEffects())
+        return false;
+#endif
+    return GameConfig::GetInstance().GetWeatherEffects();
+}
+
+static int WeatherLeafSlots()
+{
+#ifdef DEVIAS_XMAS_EVENT
+    return MAX_LEAVES_DOUBLE;
+#else
+    return MAX_LEAVES;
+#endif
+}
+
+static void StopWeatherParticles()
+{
+    RainTarget = 0.f;
+    RainCurrent = 0.f;
+    const int slots = WeatherLeafSlots();
+    for (int i = 0; i < slots; ++i)
+        Leaves[i].Live = false;
+}
+
 bool MoveLeaves()
 {
+    if (!ShouldRenderWeatherEffects())
+    {
+        StopWeatherParticles();
+        return false;
+    }
+
     if (!g_pOption->GetRenderAllEffects())
     {
         return false;
@@ -462,20 +496,11 @@ bool MoveLeaves()
     RainPosition += 20 * FPS_ANIMATION_FACTOR;
     RainPosition %= 2000;
 
-    // DevEditor weather effects toggle
-#ifdef _EDITOR
-    bool renderWeather = DevEditor_ShouldRenderWeatherEffects();
-#else
-    bool renderWeather = true;
-#endif
-
     for (int i = 0; i < iMaxLeaves; i++)
     {
         PARTICLE* o = &Leaves[i];
         if (!o->Live)
         {
-            if (!renderWeather) continue;  // Skip creating new weather particles
-
             Vector(1.f, 1.f, 1.f, o->Light);
             o->Live = true;
 
@@ -502,8 +527,6 @@ bool MoveLeaves()
         }
         else
         {
-            if (!renderWeather) { o->Live = false; continue; }  // Kill existing particles
-
             if (MoveDevilSquareRain(o)) continue;
             if (MoveChaosCastleRain(o)) continue;
             if (MoveHeavenRain(o))      continue;
@@ -516,10 +539,9 @@ bool MoveLeaves()
 
 void RenderLeaves()
 {
-    if (!g_pOption->GetRenderAllEffects())
-    {
+    if (!ShouldRenderWeatherEffects() || !g_pOption->GetRenderAllEffects())
         return;
-    }
+
 
     if (gMapManager.WorldActive == WD_2DEVIAS || gMapManager.WorldActive == WD_7ATLANSE || gMapManager.WorldActive == WD_10HEAVEN
         || IsIceCity()
