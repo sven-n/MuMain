@@ -770,6 +770,12 @@ void CInGameShopSystem::InitZoneInfo()
     m_mapZoneSeqIndex.clear();
     m_listZoneName.clear();
 
+    // Null until a shop script arrives from the server, and NULL again after Release(). Every
+    // other reader reaches this pointer only through the zone map this fills, so this is the one
+    // place that has to check it.
+    if (m_pCategoryList == NULL)
+        return;
+
     m_pCategoryList->SetFirst();
     CShopCategory Zone;
 
