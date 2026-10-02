@@ -1,0 +1,130 @@
+{
+  "formatVersion": 1,
+  "kind": "joint",
+  "types": [
+    {
+      "name": "drainLifeGhost",
+      "code": "BITMAP_DRAIN_LIFE_GHOST"
+    },
+    {
+      "name": "fenrirSkillThunder",
+      "code": "MODEL_FENRIR_SKILL_THUNDER"
+    },
+    {
+      "name": "flare",
+      "code": "BITMAP_FLARE"
+    },
+    {
+      "name": "flare2",
+      "code": "BITMAP_FLARE+1"
+    },
+    {
+      "name": "flareBlue",
+      "code": "BITMAP_FLARE_BLUE"
+    },
+    {
+      "name": "flareForce",
+      "code": "BITMAP_FLARE_FORCE"
+    },
+    {
+      "name": "flash",
+      "code": "BITMAP_FLASH"
+    },
+    {
+      "name": "forcePillar",
+      "code": "BITMAP_FORCEPILLAR"
+    },
+    {
+      "name": "groundWind",
+      "code": "BITMAP_GROUND_WIND"
+    },
+    {
+      "name": "jointEnergy",
+      "code": "BITMAP_JOINT_ENERGY"
+    },
+    {
+      "name": "jointFire",
+      "code": "BITMAP_JOINT_FIRE"
+    },
+    {
+      "name": "jointForce",
+      "code": "BITMAP_JOINT_FORCE"
+    },
+    {
+      "name": "jointHealing",
+      "code": "BITMAP_JOINT_HEALING"
+    },
+    {
+      "name": "jointLaser",
+      "code": "BITMAP_JOINT_LASER"
+    },
+    {
+      "name": "jointLaser2",
+      "code": "BITMAP_JOINT_LASER+1"
+    },
+    {
+      "name": "jointSpark",
+      "code": "BITMAP_JOINT_SPARK"
+    },
+    {
+      "name": "jointSpirit",
+      "code": "BITMAP_JOINT_SPIRIT"
+    },
+    {
+      "name": "jointSpirit2",
+      "code": "BITMAP_JOINT_SPIRIT2"
+    },
+    {
+      "name": "jointThunder",
+      "code": "BITMAP_JOINT_THUNDER"
+    },
+    {
+      "name": "jointThunder2",
+      "code": "BITMAP_JOINT_THUNDER+1"
+    },
+    {
+      "name": "lava",
+      "code": "BITMAP_LAVA"
+    },
+    {
+      "name": "light",
+      "code": "BITMAP_LIGHT"
+    },
+    {
+      "name": "motionBlur",
+      "code": "BITMAP_BLUR+1"
+    },
+    {
+      "name": "piercing",
+      "code": "BITMAP_PIERCING"
+    },
+    {
+      "name": "pinLight",
+      "code": "BITMAP_PIN_LIGHT"
+    },
+    {
+      "name": "scorpionTail",
+      "code": "BITMAP_SCOLPION_TAIL"
+    },
+    {
+      "name": "smoke",
+      "code": "BITMAP_SMOKE"
+    },
+    {
+      "name": "spark3",
+      "code": "BITMAP_SPARK+1"
+    },
+    {
+      "name": "spearSkill",
+      "code": "MODEL_SPEARSKILL"
+    },
+    {
+      "name": "swordEffect",
+      "code": "BITMAP_SWORDEFF"
+    },
+    {
+      "name": "twoLineGhost",
+      "code": "BITMAP_2LINE_GHOST"
+    }
+  ]
+}

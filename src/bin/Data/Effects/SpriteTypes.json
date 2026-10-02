@@ -1,0 +1,218 @@
+{
+  "formatVersion": 1,
+  "kind": "sprite",
+  "types": [
+    {
+      "name": "blur",
+      "code": "BITMAP_BLUR"
+    },
+    {
+      "name": "cloud64",
+      "code": "BITMAP_CLUD64"
+    },
+    {
+      "name": "cloudLight",
+      "code": "BITMAP_CLOUD+1"
+    },
+    {
+      "name": "dsEffect",
+      "code": "BITMAP_DS_EFFECT"
+    },
+    {
+      "name": "dsShock",
+      "code": "BITMAP_DS_SHOCK"
+    },
+    {
+      "name": "energy",
+      "code": "BITMAP_ENERGY"
+    },
+    {
+      "name": "eventCloud",
+      "code": "BITMAP_EVENT_CLOUD"
+    },
+    {
+      "name": "eye1",
+      "code": "BITMAP_SHINY+3"
+    },
+    {
+      "name": "fire2",
+      "code": "BITMAP_FIRE+1"
+    },
+    {
+      "name": "firecracker1",
+      "code": "BITMAP_FIRECRACKER0001"
+    },
+    {
+      "name": "firecracker2",
+      "code": "BITMAP_FIRECRACKER0002"
+    },
+    {
+      "name": "firecracker3",
+      "code": "BITMAP_FIRECRACKER0003"
+    },
+    {
+      "name": "firecracker4",
+      "code": "BITMAP_FIRECRACKER0004"
+    },
+    {
+      "name": "firecracker5",
+      "code": "BITMAP_FIRECRACKER0005"
+    },
+    {
+      "name": "firecracker6",
+      "code": "BITMAP_FIRECRACKER0006"
+    },
+    {
+      "name": "firecracker7",
+      "code": "BITMAP_FIRECRACKER0007"
+    },
+    {
+      "name": "flame",
+      "code": "BITMAP_FLAME"
+    },
+    {
+      "name": "flare",
+      "code": "BITMAP_FLARE"
+    },
+    {
+      "name": "flare2",
+      "code": "BITMAP_FLARE+1"
+    },
+    {
+      "name": "flareBlue",
+      "code": "BITMAP_FLARE_BLUE"
+    },
+    {
+      "name": "flareRed",
+      "code": "BITMAP_FLARE_RED"
+    },
+    {
+      "name": "hole",
+      "code": "BITMAP_HOLE"
+    },
+    {
+      "name": "impact",
+      "code": "BITMAP_IMPACT"
+    },
+    {
+      "name": "impact1",
+      "code": "BITMAP_LIGHT+3"
+    },
+    {
+      "name": "impact3",
+      "code": "BITMAP_LIGHT+1"
+    },
+    {
+      "name": "kanturu2ndEffect1",
+      "code": "BITMAP_KANTURU_2ND_EFFECT1"
+    },
+    {
+      "name": "light",
+      "code": "BITMAP_LIGHT"
+    },
+    {
+      "name": "lightMarks",
+      "code": "BITMAP_LIGHT_MARKS"
+    },
+    {
+      "name": "lightMarks2",
+      "code": "BITMAP_LIGHTMARKS"
+    },
+    {
+      "name": "lightMarksForeign",
+      "code": "BITMAP_LIGHTMARKS_FOREIGN"
+    },
+    {
+      "name": "lightRed",
+      "code": "BITMAP_LIGHT_RED"
+    },
+    {
+      "name": "lightning2",
+      "code": "BITMAP_LIGHTNING+1"
+    },
+    {
+      "name": "lightningMega1",
+      "code": "BITMAP_LIGHTNING_MEGA1"
+    },
+    {
+      "name": "lightningMega2",
+      "code": "BITMAP_LIGHTNING_MEGA2"
+    },
+    {
+      "name": "lightningMega3",
+      "code": "BITMAP_LIGHTNING_MEGA3"
+    },
+    {
+      "name": "magic",
+      "code": "BITMAP_MAGIC"
+    },
+    {
+      "name": "magicGround2",
+      "code": "BITMAP_MAGIC+1"
+    },
+    {
+      "name": "orora",
+      "code": "BITMAP_ORORA"
+    },
+    {
+      "name": "pinLight",
+      "code": "BITMAP_PIN_LIGHT"
+    },
+    {
+      "name": "poundingBall",
+      "code": "BITMAP_POUNDING_BALL"
+    },
+    {
+      "name": "shiny",
+      "code": "BITMAP_SHINY"
+    },
+    {
+      "name": "shiny2",
+      "code": "BITMAP_SHINY+1"
+    },
+    {
+      "name": "shiny3",
+      "code": "BITMAP_SHINY+2"
+    },
+    {
+      "name": "shiny4",
+      "code": "BITMAP_SHINY+5"
+    },
+    {
+      "name": "shiny5",
+      "code": "BITMAP_SHINY+6"
+    },
+    {
+      "name": "shockWave",
+      "code": "BITMAP_SHOCK_WAVE"
+    },
+    {
+      "name": "skull",
+      "code": "BITMAP_SKULL"
+    },
+    {
+      "name": "smoke",
+      "code": "BITMAP_SMOKE"
+    },
+    {
+      "name": "spark",
+      "code": "BITMAP_SPARK"
+    },
+    {
+      "name": "spark3",
+      "code": "BITMAP_SPARK+1"
+    },
+    {
+      "name": "swordEffectMono",
+      "code": "BITMAP_SWORD_EFFECT_MONO"
+    },
+    {
+      "name": "waterfall2",
+      "code": "BITMAP_WATERFALL_2"
+    },
+    {
+      "name": "waterfall4",
+      "code": "BITMAP_WATERFALL_4"
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemJsonStorage.h"
+#include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
@@ -9,7 +10,6 @@
 #include <array>
 #include <cctype>
 #include <fstream>
-#include <iterator>
 #include <optional>
 
 namespace Data::Items
@@ -18,7 +18,6 @@ namespace
 {
 constexpr const char* JsonExtension = ".json";
 constexpr const char* TemporaryExtension = ".tmp";
-constexpr std::string_view Utf8ByteOrderMark = "\xEF\xBB\xBF";
 
 // Same order as the ITEM_GROUP_* constants.
 constexpr std::array<const char*, MAX_ITEM_TYPE> GroupFileNames = {
@@ -33,22 +32,6 @@ bool IsSharedItemModelsFile(std::string_view fileName)
     return std::equal(
         fileName.begin(), fileName.end(), expected.begin(), expected.end(), [](char left, char right)
         { return std::tolower(static_cast<unsigned char>(left)) == std::tolower(static_cast<unsigned char>(right)); });
-}
-
-std::optional<std::string> ReadTextFile(const std::filesystem::path& path)
-{
-    std::ifstream file(path, std::ios::binary);
-    if (!file)
-    {
-        return std::nullopt;
-    }
-
-    std::string text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    if (text.starts_with(Utf8ByteOrderMark))
-    {
-        text.erase(0, Utf8ByteOrderMark.size());
-    }
-    return text;
 }
 
 std::vector<std::filesystem::path> FindJsonFiles(const std::filesystem::path& directory)
