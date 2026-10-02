@@ -20,14 +20,15 @@ Nothing gets slower in game: names and values are resolved when loading.
 
 ## Why these areas belong together
 
-Items are not the only users of the effect code. About 3,950 calls create
-effects, particles, lightning and sprites: about 1,600 for the maps and
-their monsters (`World/GameMaps`), 1,100 for characters, objects and items
-(`Engine`), 760 inside the effects themselves, 290 for skills, combat,
-pets and events (`GameLogic`) and 140 for skill results from the server
-(`Network`). The effect code knows about 440 effect types, 100 particle
-types and 30 lightning types; `Render/Effects/EffectRegistry` has started
-to describe them as a table instead of three large switches. Skills are
+Items are not the only users of the effect code. About 4,250 calls create
+effects, particles, lightning and sprites: about 1,540 for monsters and
+NPCs, 590 for the maps, 420 for items, 390 for skills, 970 inside the
+effects themselves, and the rest for events, pets and the server's skill
+results (counted for the
+[effect catalogue design](2026-10-02-effect-catalogue-design.md)). The
+effect code knows 464 effect types, 98 particle types, 31 lightning types
+(joints) and about 50 sprite textures; `Render/Effects/EffectRegistry` has
+started to describe them as a table instead of three large switches. Skills are
 still read from `Skill.bmd` (with a table editor, as items had before
 their phase 2), and monsters and NPCs are set up in a switch of 403 cases
 in `ZzzCharacter.cpp`.
@@ -96,7 +97,7 @@ models stay in `Data/Items/Models`.
 | Area | Name | Design document | Depends on | What moves into data | Editor |
 |---|---|---|---|---|---|
 | Items | Items | [items design](2026-09-25-data-driven-items-design.md), phases 0–14 | – | Item data, rules and categories, models, glow, render styles and effects (as names). | The item tools of section 9 there. |
-| FX1 | Effect catalogue | not yet | items 4c | Every effect, particle, lightning and sprite type gets a name and its creation values (the `CreateParams` of the registry) in `Data/Effects/`: the effect types (`effectTypes` in the data). Behavior stays code. Items, skills and monsters then name effect types instead of using type numbers; an item effect (`itemEffect`, what an item does every frame before it is drawn) creates instances of effect types. | Effect browser: each effect with a preview, its values, and where it is used. |
+| FX1 | Effect catalogue | [effect catalogue design](2026-10-02-effect-catalogue-design.md) (draft) | items 4c | Every effect, particle, lightning and sprite type gets a name and its creation values (the `CreateParams` of the registry) in `Data/Effects/`: the effect types (`effectTypes` in the data). Behavior stays code. Items, skills and monsters then name effect types instead of using type numbers; an item effect (`itemEffect`, what an item does every frame before it is drawn) creates instances of effect types. | Effect browser: each effect with a preview, its values, and where it is used. |
 | Items 13 | Looks in data (items) | items design, phase 13 | FX1, items 6 | What the item looks are made of (D25). | Look editor. |
 | SK1 | Skills as data | not yet | items 2 (the same format rules) | `Skill.bmd` into JSON, like the items in their phase 2: names, requirements, rules; later synced with OpenMU like the items. | Focused skill editors, like the item tools; "used by" (classes, items that give a skill, monsters). |
 | SK2 | Skill looks | not yet | SK1, FX1, items 13 | How a skill looks when cast, flying and hitting (effects, particles, sounds, character animations), as looks (D25), mostly on the caster's bones. | Look editor, with a preview of the skill cast by a test character. |
