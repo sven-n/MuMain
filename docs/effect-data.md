@@ -85,10 +85,11 @@ every user.
 
 ## When the code changes
 
-A new type, or a type that code no longer uses, changes the compiled list.
-`tools/effect-catalogue` has the script that scans the code, generates the
-list (`Data/GameData/EffectData/EffectTypeSymbols.cpp`) and adds generated
-names for new types to the files; names already in the files are kept. See
-its [README](../tools/effect-catalogue/README.md). The tests of
-`test_effect_types` check that every type of the list has exactly one name
-and that the files are in the written format.
+A new type in the code gets a line in the list of its kind in
+`Data/GameData/EffectData/EffectTypeSymbols.cpp` (at the place of its
+number) and a name in its catalogue file, chosen by the rules above. A type
+that the code no longer uses is removed from both. The tests of
+`test_effect_types` check that every type of the list has exactly one name,
+that each kind lists every number once and in order, and that the files are
+in the written format. A type that the code uses but the list misses has no
+name: data that names it fails to load with an error.

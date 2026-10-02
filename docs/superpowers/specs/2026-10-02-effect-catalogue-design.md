@@ -265,7 +265,7 @@ One PR each, small enough to check against the old code.
 | FX1.7 | Preview | FX1.6 | Creating the selected type in the world in editor builds. |
 
 **FX1.1 Names for all types.** The compiled list of symbols per kind (about
-640 lines), generated once by a script that stays in `tools/`. The four
+640 lines), generated once by a script and kept by hand afterwards. The four
 files with `name` and `code`, the `Data::Effects` loader with validation and
 a writer, and the arrays from number to name for logs. Loaded on the loading
 screen; nothing under `Render/Effects` changes, so the frame time cannot
@@ -275,10 +275,13 @@ by a one-time comparison of the compiled lists with the case labels,
 registry entries and call sites of the four systems, and by the logged load
 time.
 
-*Done:* `tools/effect-catalogue/effect_types.py` collects the types (case
-labels, registry rows, call sites; computed types expanded), a compiled probe
-gives their numbers, and expressions with the same number are one type (36
-effect and 5 particle numbers have two spellings; the plain enum name wins).
+*Done:* a one-time script collected the types (case labels, registry rows,
+call sites; computed types expanded), a compiled probe gave their numbers,
+and expressions with the same number are one type (36 effect and 5 particle
+numbers have two spellings; the plain enum name wins). The script is not
+kept: new types in code are rare, as new content comes as data, and one is
+added with a line in the list and a name in its file, which the tests check
+against each other.
 The four files have 646 names; the rules are in
 [effect-data.md](../../effect-data.md). Beyond D31: when an effect with a model
 number and one with a texture number get the same name, the model one gets
@@ -439,7 +442,7 @@ PR (D41). Each fix changes only what was broken:
 Still to check and file upstream: the owner is used without a null check in
 27 creation cases; 25 effect (5 of them only with a registry row), 6 particle
 and 2 joint types are handled but never created (checked in FX1.1, also
-against computed types; `effect_types.py unused` lists them), and 9 effect
+against computed types; listed in the FX1.1 PR), and 9 effect
 types are created but have no code (`MODEL_EX01_SHADOW_MASTER_*`).
 `MODEL_DEATH_SPI_SKILL` creates its ground circles at an uninitialized
 position (the first of a frame; the further ones of that frame at its
