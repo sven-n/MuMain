@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/UIControls.h"
+#include "UI/HUD/SlideTicker.h"
 
 namespace mu::ui::window
 {
@@ -33,7 +33,7 @@ namespace mu::ui::window
         }
 
     private:
-        CSlideHelpMgr* m_pSlideMgr;
+        UI::HUD::SlideTicker* m_pSlideMgr;
     };
 }
 

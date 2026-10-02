@@ -22,7 +22,7 @@ bool mu::ui::window::CSlideWindow::Create(CManager* pNewUIMng)
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_SLIDEWINDOW, this);
-    m_pSlideMgr = new CSlideHelpMgr;
+    m_pSlideMgr = new UI::HUD::SlideTicker;
     std::wstring strFileName = L"Data\\Local\\" + g_strSelectedML + L"\\Slide_" + g_strSelectedML + L".bmd";
     m_pSlideMgr->OpenSlideTextFile(strFileName.c_str());
 
