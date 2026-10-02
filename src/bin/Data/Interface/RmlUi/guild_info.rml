@@ -209,15 +209,26 @@
 			<span id="gi_hdr_union_members" class="sharp-text gi-header" data-style-width="(40 * root_scale) + 'px'"
 			      data-style-font-size="header_union_members.text_px + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_union_members.text}}</span>
-			<div class="gi-rows gi-union-rows">
-				<div class="gi-row" data-for="r : union_rows" data-class-selected="r.selected"
-				     data-style-top="r.top + 'px'">
-					<div class="gi-row-back"></div>
-					<div class="line-mark"><div class="line-mark-cell" data-for="c : r.mark_cells" data-style-background-color="c"></div></div>
-					<span class="sharp-text gi-cell cell-union-name" data-style-font-size="text_px + 'px'"
-					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.name}}</span>
-					<span class="sharp-text sharp-right gi-cell cell-union-count" data-style-font-size="r.count_text_px + 'px'"
-					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.member_count}}</span>
+			<!-- 6 rows of 13 units, the native box's own m_iNumRenderLine x line step. -->
+			<div id="gi_union_list" class="scroll-pane gi-pane"
+			     data-style-font-size="text_px + 'px'"
+			     data-style-width="(160 * root_scale) + 'px'"
+			     data-style-height="(78 * root_scale) + 'px'"
+			     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+				<div class="gi-pane-row gi-union-row" data-for="r : union_rows"
+				     data-class-selected="r.selected"
+				     data-style-width="(148 * root_scale) + 'px'"
+				     data-style-height="(13 * root_scale) + 'px'"
+				     data-event-click="guild_info_select_union(it_index)">
+					<div class="gi-pane-row-back"></div>
+					<!-- The mark is art, not text, so unlike its row's glyphs it keeps growing
+					     with the panel: its box is bound and the 64 cells are eighths of it. -->
+					<div class="line-mark" data-style-width="(8 * root_scale) + 'px'"
+					     data-style-height="(8 * root_scale) + 'px'"><div class="line-mark-cell"
+					     data-for="c : r.mark_cells" data-style-background-color="c"></div></div>
+					<span class="gi-pane-cell cell-union-name">{{r.name}}</span>
+					<span class="gi-pane-cell cell-union-count"
+					      data-style-font-size="r.count_text_px + 'px'">{{r.member_count}}</span>
 				</div>
 			</div>
 			<div id="btn_union_create" class="gi-btn" data-if="union_create_button.shown" data-event-click="guild_info_button(4)">

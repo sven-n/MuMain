@@ -17,10 +17,7 @@ struct GuildLine
     bool operator==(const GuildLine&) const = default;
 };
 
-// One line of the guild announcement. The rows arrive newest-first, which is the order the
-// native box drew them in: it placed line 0 at the bottom of its area and each later line above,
-// so read top to bottom its newest line came first. RmlUi lays them out in flow and owns the
-// scrolling, so nothing here carries a position.
+// Announcement lines in reading order.
 struct GuildNoticeRow
 {
     Rml::String text;
@@ -36,7 +33,6 @@ struct GuildMemberRow
     Rml::String role;
     float roleTextPx = 0.f; // the office is centred on 70 units and shrunk to them
     Rml::String server;
-    float top = 0.f;
     bool selected = false;
     bool officer = false;
 
@@ -50,7 +46,6 @@ struct GuildUnionRow
     Rml::String memberCount;
     float countTextPx = 0.f; // ends at its box's right edge, shrunk to 60 units
     std::vector<Rml::String> markCells; // 64 CSS colours, row by row
-    float top = 0.f;
     bool selected = false;
 
     bool operator==(const GuildUnionRow&) const = default;

@@ -8,7 +8,6 @@
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Audio/DSPlaySound.h"
 #include "GuildTypes.h"
-#include "UI/Widgets/UIControls.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -187,11 +186,6 @@ bool mu::ui::window::CGuildInfoWindow::UpdateMouseEvent()
         return false;
     }
 
-    if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::UNION))
-    {
-        m_UnionListBox.DoAction();
-    }
-
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, GUILDINFO_WIDTH, GUILDINFO_HEIGHT).Contains(MouseX, MouseY))
     {
         return false;
@@ -328,11 +322,11 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn(int button)
         {
             if (Hero->GuildStatus == G_MASTER)
             {
-                if (UNIONGUILD_TEXT* pText = m_UnionListBox.GetSelectedText())
+                if (const UnionEntry* pText = SelectedUnion())
                 {
-                    if (wcscmp(pText->szName, GuildMark[Hero->GuildMarkIndex].GuildName))
+                    if (wcscmp(pText->name.c_str(), GuildMark[Hero->GuildMarkIndex].GuildName))
                     {
-                        wcscpy(DeleteID, pText->szName);
+                        wcscpy(DeleteID, pText->name.c_str());
                         wchar_t szAllianceText[256];
                         mu_swprintf(szAllianceText, I18N::Game::SGuildFromTheAlliance, DeleteID);
                         mu::ui::window::GenericDialogConfig cfg;
@@ -494,7 +488,6 @@ void mu::ui::window::CGuildInfoWindow::BuildRmlUi()
             memberRow.RegisterMember("role", &GuildMemberRow::role);
             memberRow.RegisterMember("role_text_px", &GuildMemberRow::roleTextPx);
             memberRow.RegisterMember("server", &GuildMemberRow::server);
-            memberRow.RegisterMember("top", &GuildMemberRow::top);
             memberRow.RegisterMember("selected", &GuildMemberRow::selected);
             memberRow.RegisterMember("officer", &GuildMemberRow::officer);
             c.RegisterArray<std::vector<GuildMemberRow>>();
@@ -504,7 +497,6 @@ void mu::ui::window::CGuildInfoWindow::BuildRmlUi()
             unionRow.RegisterMember("member_count", &GuildUnionRow::memberCount);
             unionRow.RegisterMember("count_text_px", &GuildUnionRow::countTextPx);
             unionRow.RegisterMember("mark_cells", &GuildUnionRow::markCells);
-            unionRow.RegisterMember("top", &GuildUnionRow::top);
             unionRow.RegisterMember("selected", &GuildUnionRow::selected);
             c.RegisterArray<std::vector<GuildUnionRow>>();
             c.Bind("union_rows", &model.unionRows);
@@ -526,6 +518,12 @@ void mu::ui::window::CGuildInfoWindow::BuildRmlUi()
                                     if (arguments.size() == 1)
                                         m_PendingButton = arguments[0].Get<int>(-1);
                                 });
+            c.BindEventCallback("guild_info_select_union",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                                {
+                                    if (arguments.size() == 1)
+                                        SelectUnion(arguments[0].Get<int>(-1));
+                                });
             c.BindEventCallback("guild_info_select_member",
                                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
                                 {
@@ -542,6 +540,7 @@ void mu::ui::window::CGuildInfoWindow::BuildRmlUi()
 
 void mu::ui::window::CGuildInfoWindow::ReloadRmlTheme()
 {
+    m_ListsDirty = true;
     if (!m_pRmlDoc)
         return;
     Rml::Context* context = RmlUiRuntime::Instance().GetContext();
@@ -589,20 +588,8 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
                 : UI::Scaling::NativeTextPixelSize(role, transform);
         return {StringUtils::WideToNarrow(text), px};
     };
-    // A list cell's own shrink box, for the two cells that had one.
-    auto cellPx = [&](const wchar_t* text, float boxWidth)
-    {
-        g_pRenderText->SetFont(g_hFont);
-        const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-        return UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
-                                                     static_cast<float>(measured), boxWidth);
-    };
-
     const bool noGuild = Hero->GuildStatus == G_NONE;
     std::vector<Rml::String> markCells;
-    std::vector<GuildNoticeRow> noticeRows;
-    std::vector<GuildMemberRow> memberRows;
-    std::vector<GuildUnionRow> unionRows;
     std::vector<GuildLine> allianceLines;
     GuildLine hintTitle, hintLine1, hintLine2, hintLine3;
     GuildLine title, guildName, tabInfo, tabMembers, tabUnion;
@@ -640,13 +627,6 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
                               true};
             noticeLabel = line(I18N::Game::GuildAnnouncement, false, 40.f);
 
-            // Newest first: the native box drew its line 0 at the bottom of the area and each
-            // later line above it, so its reading order from the top was the reverse of the
-            // order lines arrived in.
-            noticeRows.reserve(m_NoticeLines.size());
-            for (auto it = m_NoticeLines.rbegin(); it != m_NoticeLines.rend(); ++it)
-                noticeRows.push_back({StringUtils::WideToNarrow(it->c_str())});
-
             mu_swprintf(Text, L"%ls :", I18N::Game::GuildCreationDate);
             created = line(Text, false, 40.f);
             mu_swprintf(Text, I18N::Game::GuildScoreD, GuildTotalScore);
@@ -681,37 +661,6 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
             headerPosition = line(I18N::Game::Position, false, 40.f);
             headerServer = line(I18N::Game::Server, false, 40.f);
 
-            // Newest first, as the native box drew it: line 0 sat at the bottom of the area and
-            // each later line above it. The master, assistant and battle master rows carry the
-            // same backdrop a selected row does, as the native member box drew them.
-            memberRows.reserve(m_Members.size());
-            for (auto it = m_Members.rbegin(); it != m_Members.rend(); ++it)
-            {
-                const wchar_t* role = nullptr;
-                if (it->guildStatus == G_MASTER)
-                    role = I18N::Game::Master;
-                else if (it->guildStatus == G_SUB_MASTER)
-                    role = I18N::Game::AssistM;
-                else if (it->guildStatus == G_BATTLE_MASTER)
-                    role = I18N::Game::BattleM;
-                GuildMemberRow row;
-                row.name = StringUtils::WideToNarrow(it->name.c_str());
-                if (role != nullptr)
-                {
-                    row.role = StringUtils::WideToNarrow(role);
-                    row.roleTextPx = cellPx(role, 70.f);
-                }
-                if (it->server != 255)
-                {
-                    wchar_t server[16] = {};
-                    mu_swprintf(server, L"%d", it->server + 1);
-                    row.server = StringUtils::WideToNarrow(server);
-                }
-                row.selected = !m_SelectedMember.empty() && it->name == m_SelectedMember;
-                row.officer = role != nullptr;
-                memberRows.push_back(std::move(row));
-            }
-
             if (Hero->GuildStatus == G_MASTER)
             {
                 getPositionButton = {StringUtils::WideToNarrow(I18N::Game::Position), true};
@@ -727,23 +676,6 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
                 headerUnionName = line(I18N::Game::NAME, false, 40.f);
                 headerUnionMembers = line(I18N::Game::Members, false, 40.f);
 
-                m_UnionListBox.SetSize(GuildConstants::UILayout::UNION_BOX_WIDTH,
-                                       GuildConstants::UILayout::UNION_BOX_HEIGHT);
-                m_UnionListBox.SetPosition(m_Pos.x + 15, m_Pos.y + 210);
-                m_UnionListBox.ForEachRenderLine(
-                    [&](int lineIndex, const UNIONGUILD_TEXT& item, bool selected)
-                    {
-                        wchar_t count[16] = {};
-                        mu_swprintf(count, L"%d", item.nMemberCount);
-                        GuildUnionRow row;
-                        row.name = StringUtils::WideToNarrow(item.szName);
-                        row.memberCount = StringUtils::WideToNarrow(count);
-                        row.countTextPx = cellPx(count, 60.f);
-                        row.markCells = MarkCells(item.GuildMark);
-                        row.top = static_cast<float>(m_UnionListBox.GetRenderLinePos_y(lineIndex)) - 3.f - y0;
-                        row.selected = selected;
-                        unionRows.push_back(std::move(row));
-                    });
 
                 unionCreateButton = {StringUtils::WideToNarrow(I18N::Game::DisbandAlliance), true};
                 unionOutButton = {StringUtils::WideToNarrow(I18N::Game::DisbandGuildAlliance), true};
@@ -795,21 +727,7 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
     SyncField(m_RmlBinder, &GuildInfoRmlModel::headerUnionName, "header_union_name", std::move(headerUnionName));
     SyncField(m_RmlBinder, &GuildInfoRmlModel::headerUnionMembers, "header_union_members",
               std::move(headerUnionMembers));
-    if (model.noticeRows != noticeRows)
-    {
-        model.noticeRows = std::move(noticeRows);
-        m_RmlBinder.MarkDirty("notice_rows");
-    }
-    if (model.memberRows != memberRows)
-    {
-        model.memberRows = std::move(memberRows);
-        m_RmlBinder.MarkDirty("member_rows");
-    }
-    if (model.unionRows != unionRows)
-    {
-        model.unionRows = std::move(unionRows);
-        m_RmlBinder.MarkDirty("union_rows");
-    }
+    SyncListContent();
     if (model.allianceLines != allianceLines)
     {
         model.allianceLines = std::move(allianceLines);
@@ -834,13 +752,102 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
               static_cast<float>(lineHeight) * transform.scaleY);
 }
 
+void mu::ui::window::CGuildInfoWindow::SyncListContent()
+{
+    const auto& model = m_RmlBinder.GetModel();
+    if (model.rootScale != m_ListScale || model.textPx != m_ListTextPx)
+        m_ListsDirty = true;
+    if (!m_ListsDirty)
+        return;
+    m_ListScale = model.rootScale;
+    m_ListTextPx = model.textPx;
+    m_ListsDirty = false;
+
+    std::vector<GuildNoticeRow> noticeRows;
+    noticeRows.reserve(m_NoticeLines.size());
+    for (const auto& text : m_NoticeLines)
+        noticeRows.push_back({StringUtils::WideToNarrow(text.c_str())});
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::noticeRows, "notice_rows", std::move(noticeRows));
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::memberRows, "member_rows", BuildMemberRows());
+    SyncField(m_RmlBinder, &GuildInfoRmlModel::unionRows, "union_rows", BuildUnionRows());
+}
+
+std::vector<mu::ui::window::GuildMemberRow> mu::ui::window::CGuildInfoWindow::BuildMemberRows() const
+{
+    const auto transform = UI::Scaling::GetActiveTransform();
+    // A list cell's own shrink box, for the two cells that had one.
+    auto cellPx = [&](const wchar_t* text, float boxWidth)
+    {
+        g_pRenderText->SetFont(g_hFont);
+        const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
+        return UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
+                                                     static_cast<float>(measured), boxWidth);
+    };
+
+    std::vector<GuildMemberRow> memberRows;
+    // Officers share the selected-row backdrop.
+    memberRows.reserve(m_Members.size());
+    for (auto it = m_Members.begin(); it != m_Members.end(); ++it)
+    {
+        const wchar_t* role = nullptr;
+        if (it->guildStatus == G_MASTER)
+            role = I18N::Game::Master;
+        else if (it->guildStatus == G_SUB_MASTER)
+            role = I18N::Game::AssistM;
+        else if (it->guildStatus == G_BATTLE_MASTER)
+            role = I18N::Game::BattleM;
+        GuildMemberRow row;
+        row.name = StringUtils::WideToNarrow(it->name.c_str());
+        if (role != nullptr)
+        {
+            row.role = StringUtils::WideToNarrow(role);
+            row.roleTextPx = cellPx(role, 70.f);
+        }
+        if (it->server != 255)
+        {
+            wchar_t server[16] = {};
+            mu_swprintf(server, L"%d", it->server + 1);
+            row.server = StringUtils::WideToNarrow(server);
+        }
+        row.selected = !m_SelectedMember.empty() && it->name == m_SelectedMember;
+        row.officer = role != nullptr;
+        memberRows.push_back(std::move(row));
+    }
+
+    return memberRows;
+}
+
 float mu::ui::window::CGuildInfoWindow::GetLayerDepth()
 {
     return 4.5f;
 }
 
+std::vector<mu::ui::window::GuildUnionRow> mu::ui::window::CGuildInfoWindow::BuildUnionRows() const
+{
+    constexpr float kMemberCountBoxWidth = 60.f;
+    const auto transform = UI::Scaling::GetActiveTransform();
+    std::vector<GuildUnionRow> rows;
+    rows.reserve(m_Unions.size());
+    g_pRenderText->SetFont(g_hFont);
+    for (const UnionEntry& entry : m_Unions)
+    {
+        const std::wstring count = std::to_wstring(entry.memberCount);
+        const int measured = g_pRenderText->MeasureText(count.c_str(), static_cast<int>(count.size())).cx;
+        GuildUnionRow row;
+        row.name = StringUtils::WideToNarrow(entry.name.c_str());
+        row.memberCount = StringUtils::WideToNarrow(count.c_str());
+        row.countTextPx = UI::Scaling::NativeTextPixelSizeInBox(
+            UI::Scaling::FontRole::Normal, transform, static_cast<float>(measured), kMemberCountBoxWidth);
+        row.markCells = MarkCells(entry.mark);
+        row.selected = entry.name == m_SelectedUnion;
+        rows.push_back(std::move(row));
+    }
+    return rows;
+}
+
 void mu::ui::window::CGuildInfoWindow::AddGuildNotice(wchar_t* szText)
 {
+    m_ListsDirty = true;
     wchar_t szTemp[GuildConstants::UILayout::TEXT_MAX_LINES][MAX_TEXT_LENGTH + 1] = { {0}, {0}, {0}, {0}, {0} };
     CutText3(szText, szTemp[0], GuildConstants::UILayout::TEXT_SPLIT_WIDTH, GuildConstants::UILayout::TEXT_MAX_LINES, MAX_TEXT_LENGTH + 1);
 
@@ -856,16 +863,21 @@ void mu::ui::window::CGuildInfoWindow::AddGuildNotice(wchar_t* szText)
 
 void mu::ui::window::CGuildInfoWindow::AddGuildMember(GUILD_LIST_t* pInfo)
 {
+    m_ListsDirty = true;
+    if (pInfo == nullptr || pInfo->Name[0] == L'\0')
+        return;
     MemberEntry entry;
     entry.name = pInfo->Name;
     entry.number = pInfo->Number;
     entry.server = pInfo->Server;
     entry.guildStatus = pInfo->GuildStatus;
     m_Members.push_back(std::move(entry));
+    m_SelectedMember = m_Members.front().name;
 }
 
 void mu::ui::window::CGuildInfoWindow::GuildClear()
 {
+    m_ListsDirty = true;
     m_Members.clear();
     m_SelectedMember.clear();
 }
@@ -884,22 +896,50 @@ const mu::ui::window::CGuildInfoWindow::MemberEntry* mu::ui::window::CGuildInfoW
 
 void mu::ui::window::CGuildInfoWindow::SelectMember(int displayIndex)
 {
-    // Display order is the reverse of arrival order (see the member row sync).
-    const int count = static_cast<int>(m_Members.size());
-    if (displayIndex < 0 || displayIndex >= count)
+    m_ListsDirty = true;
+    const auto& rows = m_RmlBinder.GetModel().memberRows;
+    if (displayIndex < 0 || displayIndex >= static_cast<int>(rows.size()))
         return;
-    const std::wstring& name = m_Members[count - 1 - displayIndex].name;
-    m_SelectedMember = (m_SelectedMember == name) ? std::wstring() : name;
+    m_SelectedMember = StringUtils::NarrowToWide(rows[displayIndex].name);
+    if (SelectedMember() == nullptr)
+        m_SelectedMember.clear();
     m_RmlBinder.MarkDirty("member_rows");
 }
 
 void mu::ui::window::CGuildInfoWindow::UnionGuildClear()
 {
-    m_UnionListBox.Clear();
+    m_ListsDirty = true;
+    m_Unions.clear();
+    m_SelectedUnion.clear();
+}
+
+const mu::ui::window::CGuildInfoWindow::UnionEntry* mu::ui::window::CGuildInfoWindow::SelectedUnion() const
+{
+    if (m_SelectedUnion.empty())
+        return nullptr;
+    for (const UnionEntry& entry : m_Unions)
+    {
+        if (entry.name == m_SelectedUnion)
+            return &entry;
+    }
+    return nullptr;
+}
+
+void mu::ui::window::CGuildInfoWindow::SelectUnion(int displayIndex)
+{
+    m_ListsDirty = true;
+    const auto& rows = m_RmlBinder.GetModel().unionRows;
+    if (displayIndex < 0 || displayIndex >= static_cast<int>(rows.size()))
+        return;
+    m_SelectedUnion = StringUtils::NarrowToWide(rows[displayIndex].name);
+    if (SelectedUnion() == nullptr)
+        m_SelectedUnion.clear();
+    m_RmlBinder.MarkDirty("union_rows");
 }
 
 void mu::ui::window::CGuildInfoWindow::NoticeClear()
 {
+    m_ListsDirty = true;
     m_NoticeLines.clear();
     m_Tot_Notice = 0;
 }
@@ -912,13 +952,23 @@ void mu::ui::window::CGuildInfoWindow::SetRivalGuildName(wchar_t* szName)
 
 void mu::ui::window::CGuildInfoWindow::AddUnionList(BYTE* pGuildMark, wchar_t* szGuildName, int nMemberCount)
 {
-    m_UnionListBox.AddText(pGuildMark, szGuildName, nMemberCount);
+    m_ListsDirty = true;
+    if (szGuildName == nullptr || szGuildName[0] == L'\0')
+        return;
+
+    UnionEntry entry;
+    entry.name.assign(szGuildName, wcsnlen(szGuildName, MAX_GUILDNAME));
+    entry.memberCount = nMemberCount;
+    if (pGuildMark != nullptr)
+        memcpy(entry.mark, pGuildMark, sizeof(entry.mark));
+    m_Unions.push_back(std::move(entry));
+    m_SelectedUnion = m_Unions.front().name;
     m_bRequestUnionList = false;
 }
 
 int mu::ui::window::CGuildInfoWindow::GetUnionCount()
 {
-    return m_UnionListBox.GetTextCount();
+    return static_cast<int>(m_Unions.size());
 }
 
 void mu::ui::window::CGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType,

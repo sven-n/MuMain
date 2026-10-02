@@ -176,10 +176,6 @@
 .gi-row { position: absolute; width: 148px; height: 13px; }
 .gi-row-back { position: absolute; left: 0; top: 0; width: 148px; height: 13px; }
 .gi-cell { position: absolute; top: 3px; }
-.gi-union-rows .gi-row { left: 15px; }
-.cell-union-name { left: 16px; }
-.cell-union-count { right: 6px; text-align: right; }
-.gi-union-rows .line-mark { position: absolute; left: 4px; top: 0; }
 
 /* The alliance explanation's own rows: the original advanced its y by 15, 25 or 20 per line. */
 .gi-alliance-note { position: static; }
@@ -252,3 +248,24 @@
 .cell-member-name { left: 5.4%; }
 .cell-member-role { left: 35.8%; text-align: center; }
 .cell-member-server { right: 12.2%; text-align: right; }
+
+/* The alliance list: 6 rows of 13 units, the native box's own m_iNumRenderLine times its line
+   step. Its mark is art rather than text, so the cells are eighths of a bound 8-unit box and
+   keep scaling with the panel, unlike the glyphs beside them. */
+#gi_union_list {
+	position: absolute;
+	left: 15px;
+	top: 130px;
+	transform-origin: left top;
+	overflow: hidden scroll;
+}
+
+.gi-union-row { pointer-events: auto; }
+.gi-union-row.selected .gi-pane-row-back { background-color: rgb(106, 97, 88); }
+.gi-union-row.selected .gi-pane-cell { color: #000000; }
+
+.gi-union-row .line-mark { position: absolute; left: 2.7%; top: 0; }
+.gi-union-row .line-mark-cell { float: left; width: 12.5%; height: 12.5%; }
+
+.cell-union-name { left: 10.8%; }
+.cell-union-count { right: 4.1%; text-align: right; }
