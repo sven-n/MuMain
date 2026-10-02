@@ -1,8 +1,8 @@
 <rml>
 <head>
 	<title>IGS Buy Package</title>
-	<link type="text/rcss" href="theme://base.rcss"/>
-	<link type="text/rcss" href="theme://igs_buy_package.rcss"/>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="igs_buy_package.rcss"/>
 </head>
 <body data-model="igs_buy_package">
 	<!-- Only the package description lives here. The dialog's own frame, texts and buttons are

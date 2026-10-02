@@ -1,8 +1,8 @@
 <rml>
 <head>
 	<title>IGS Buy Select</title>
-	<link type="text/rcss" href="theme://base.rcss"/>
-	<link type="text/rcss" href="theme://igs_buy_select.rcss"/>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="igs_buy_select.rcss"/>
 </head>
 <body data-model="igs_buy_select">
 	<!-- Only the option list lives here. The dialog's frame, texts and buttons are still native:

@@ -19,4 +19,7 @@ body {
 	position: absolute;
 	white-space: nowrap;
 	pointer-events: none;
+	/* base.rcss leaves body without a font-family, and RmlUi silently draws no text at all
+	   without one -- every other document names it per element for the same reason. */
+	font-family: "token(font-body)";
 }

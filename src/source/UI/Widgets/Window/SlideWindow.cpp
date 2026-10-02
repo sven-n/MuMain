@@ -54,7 +54,7 @@ void mu::ui::window::CSlideWindow::BuildRmlUi()
             c.Bind("text_top", &model.textTop);
             c.Bind("band_top", &model.bandTop);
             c.Bind("band_height", &model.bandHeight);
-            c.Bind("alpha", &model.alpha);
+            c.Bind("band_color", &model.bandColor);
             c.Bind("text_color", &model.textColor);
             c.Bind("text", &model.text);
         });
@@ -101,10 +101,16 @@ void mu::ui::window::CSlideWindow::SyncRmlModel()
         SyncField(m_RmlBinder, &SlideNoticeRmlModel::textTop, "text_top", static_cast<float>(d.y));
         SyncField(m_RmlBinder, &SlideNoticeRmlModel::bandTop, "band_top", static_cast<float>(d.y - 3));
         SyncField(m_RmlBinder, &SlideNoticeRmlModel::bandHeight, "band_height", static_cast<float>(d.bandHeight));
-        SyncField(m_RmlBinder, &SlideNoticeRmlModel::alpha, "alpha", d.alpha / 255.f);
-        char rgb[32] = {};
-        std::snprintf(rgb, sizeof(rgb), "rgb(%u,%u,%u)", d.colorRgb & 0xFF,
-                      (d.colorRgb >> 8) & 0xFF, (d.colorRgb >> 16) & 0xFF);
+        // RmlUi's rgba() alpha is 0-255, not 0-1, so both colours are built whole here rather
+        // than assembled in the document.
+        char band[40] = {};
+        std::snprintf(band, sizeof(band), "rgba(0,0,0,%u)", static_cast<unsigned>(d.alpha));
+        SyncField(m_RmlBinder, &SlideNoticeRmlModel::bandColor, "band_color", Rml::String(band));
+
+        char rgb[48] = {};
+        std::snprintf(rgb, sizeof(rgb), "rgba(%u,%u,%u,%u)", d.colorRgb & 0xFF,
+                      (d.colorRgb >> 8) & 0xFF, (d.colorRgb >> 16) & 0xFF,
+                      static_cast<unsigned>(d.alpha));
         SyncField(m_RmlBinder, &SlideNoticeRmlModel::textColor, "text_color", Rml::String(rgb));
         SyncField(m_RmlBinder, &SlideNoticeRmlModel::text, "text",
                   StringUtils::WideToNarrow(d.text ? d.text : L""));

@@ -1,8 +1,8 @@
 <rml>
 <head>
 	<title>In Game Shop</title>
-	<link type="text/rcss" href="theme://base.rcss"/>
-	<link type="text/rcss" href="theme://in_game_shop.rcss"/>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="in_game_shop.rcss"/>
 </head>
 <body data-model="in_game_shop">
 	<!-- Only the storage/gift list lives here. The shop's frame is in_game_shop_bg.rml (background

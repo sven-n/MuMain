@@ -50,7 +50,7 @@ namespace mu::ui::window
             float textTop = 0.f;
             float bandTop = 0.f;
             float bandHeight = 0.f;
-            float alpha = 0.f;
+            Rml::String bandColor;
             Rml::String textColor;
             Rml::String text;
         };
