@@ -112,23 +112,40 @@
     },
     {
       "name": "balgasSkill",
-      "code": "MODEL_BALGAS_SKILL"
+      "code": "MODEL_BALGAS_SKILL",
+      "create": {
+        "lifeTime": 20,
+        "scale": 1,
+        "blendMesh": 0
+      }
     },
     {
       "name": "battleCastleWall1",
-      "code": "BATTLE_CASTLE_WALL1"
+      "code": "BATTLE_CASTLE_WALL1",
+      "create": {
+        "lifeTime": 2
+      }
     },
     {
       "name": "battleCastleWall2",
-      "code": "BATTLE_CASTLE_WALL2"
+      "code": "BATTLE_CASTLE_WALL2",
+      "create": {
+        "lifeTime": 2
+      }
     },
     {
       "name": "battleCastleWall3",
-      "code": "BATTLE_CASTLE_WALL3"
+      "code": "BATTLE_CASTLE_WALL3",
+      "create": {
+        "lifeTime": 2
+      }
     },
     {
       "name": "battleCastleWall4",
-      "code": "BATTLE_CASTLE_WALL4"
+      "code": "BATTLE_CASTLE_WALL4",
+      "create": {
+        "lifeTime": 2
+      }
     },
     {
       "name": "battleGuard2",
@@ -176,7 +193,11 @@
     },
     {
       "name": "blood",
-      "code": "MODEL_BLOOD"
+      "code": "MODEL_BLOOD",
+      "create": {
+        "lifeTime": 10,
+        "blendMesh": 0
+      }
     },
     {
       "name": "blowOfDestruction",
@@ -320,15 +341,24 @@
     },
     {
       "name": "cursedTempleHolyItem",
-      "code": "MODEL_CURSEDTEMPLE_HOLYITEM"
+      "code": "MODEL_CURSEDTEMPLE_HOLYITEM",
+      "create": {
+        "lifeTime": 9999999
+      }
     },
     {
       "name": "cursedTempleProtectionSkill",
-      "code": "MODEL_CURSEDTEMPLE_PRODECTION_SKILL"
+      "code": "MODEL_CURSEDTEMPLE_PRODECTION_SKILL",
+      "create": {
+        "lifeTime": 9999999
+      }
     },
     {
       "name": "cursedTempleRestraintSkill",
-      "code": "MODEL_CURSEDTEMPLE_RESTRAINT_SKILL"
+      "code": "MODEL_CURSEDTEMPLE_RESTRAINT_SKILL",
+      "create": {
+        "lifeTime": 9999999
+      }
     },
     {
       "name": "cursedTempleStatuePart1",
@@ -372,7 +402,11 @@
     },
     {
       "name": "desair",
-      "code": "MODEL_DESAIR"
+      "code": "MODEL_DESAIR",
+      "create": {
+        "lifeTime": 52,
+        "scale": 1.4
+      }
     },
     {
       "name": "doorCrushEffect",
@@ -636,7 +670,10 @@
     },
     {
       "name": "fire",
-      "code": "BITMAP_FIRE"
+      "code": "BITMAP_FIRE",
+      "create": {
+        "lifeTime": 1000
+      }
     },
     {
       "name": "fire2",
@@ -656,7 +693,10 @@
     },
     {
       "name": "fireRed",
-      "code": "BITMAP_FIRE_RED"
+      "code": "BITMAP_FIRE_RED",
+      "create": {
+        "lifeTime": 40
+      }
     },
     {
       "name": "firecracker",
@@ -680,11 +720,19 @@
     },
     {
       "name": "fissure",
-      "code": "MODEL_FISSURE"
+      "code": "MODEL_FISSURE",
+      "create": {
+        "lifeTime": 120,
+        "scale": 0.8
+      }
     },
     {
       "name": "fissureLight",
-      "code": "MODEL_FISSURE_LIGHT"
+      "code": "MODEL_FISSURE_LIGHT",
+      "create": {
+        "lifeTime": 120,
+        "scale": 0.8
+      }
     },
     {
       "name": "flame",
@@ -816,7 +864,12 @@
     },
     {
       "name": "impact",
-      "code": "BITMAP_IMPACT"
+      "code": "BITMAP_IMPACT",
+      "create": {
+        "lifeTime": 80,
+        "scale": 0,
+        "blendMesh": -2
+      }
     },
     {
       "name": "infinityArrow",
@@ -836,7 +889,13 @@
     },
     {
       "name": "infinityArrow4",
-      "code": "MODEL_INFINITY_ARROW4"
+      "code": "MODEL_INFINITY_ARROW4",
+      "create": {
+        "lifeTime": 15,
+        "scale": 1,
+        "light": [1, 0.5, 0.3],
+        "copyLightToDirection": true
+      }
     },
     {
       "name": "ironRiderArrow",
@@ -876,7 +935,14 @@
     },
     {
       "name": "kundunGhost",
-      "code": "MODEL_CUNDUN_GHOST"
+      "code": "MODEL_CUNDUN_GHOST",
+      "create": {
+        "lifeTime": 200,
+        "scale": 1.8,
+        "velocity": 0.08,
+        "blendMesh": -2,
+        "light": [0.5, 0.5, 0.5]
+      }
     },
     {
       "name": "kundunPart1",
@@ -944,7 +1010,10 @@
     },
     {
       "name": "lightMarks",
-      "code": "BITMAP_LIGHT_MARKS"
+      "code": "BITMAP_LIGHT_MARKS",
+      "create": {
+        "lifeTime": 65
+      }
     },
     {
       "name": "lightRed",
@@ -952,7 +1021,10 @@
     },
     {
       "name": "lightSpear",
-      "code": "MODEL_SPEAR"
+      "code": "MODEL_SPEAR",
+      "create": {
+        "lifeTime": 10
+      }
     },
     {
       "name": "lightning2",
@@ -972,7 +1044,11 @@
     },
     {
       "name": "magic1",
-      "code": "MODEL_MAGIC1"
+      "code": "MODEL_MAGIC1",
+      "create": {
+        "lifeTime": 20,
+        "blendMesh": 0
+      }
     },
     {
       "name": "magic2",
@@ -980,7 +1056,12 @@
     },
     {
       "name": "magicCapsule2",
-      "code": "MODEL_MAGIC_CAPSULE2"
+      "code": "MODEL_MAGIC_CAPSULE2",
+      "create": {
+        "lifeTime": 20,
+        "blendMesh": 0,
+        "blendMeshLight": 1
+      }
     },
     {
       "name": "magicCircle1",
@@ -1008,7 +1089,11 @@
     },
     {
       "name": "mayaStar",
-      "code": "MODEL_MAYASTAR"
+      "code": "MODEL_MAYASTAR",
+      "create": {
+        "lifeTime": 50,
+        "scale": 50
+      }
     },
     {
       "name": "mayaStone1",
@@ -1240,7 +1325,12 @@
     },
     {
       "name": "poison",
-      "code": "MODEL_POISON"
+      "code": "MODEL_POISON",
+      "create": {
+        "lifeTime": 40,
+        "scale": 1,
+        "blendMesh": 1
+      }
     },
     {
       "name": "projectile",
@@ -1248,7 +1338,12 @@
     },
     {
       "name": "protect",
-      "code": "MODEL_PROTECT"
+      "code": "MODEL_PROTECT",
+      "create": {
+        "lifeTime": 10000,
+        "velocity": 0.3,
+        "blendMesh": 0
+      }
     },
     {
       "name": "protectGuild",
@@ -1432,7 +1527,10 @@
     },
     {
       "name": "skillFissure",
-      "code": "MODEL_SKILL_FISSURE"
+      "code": "MODEL_SKILL_FISSURE",
+      "create": {
+        "lifeTime": 20
+      }
     },
     {
       "name": "skillFuryStrike",
@@ -1616,27 +1714,57 @@
     },
     {
       "name": "summonerSummonNeilGround1",
-      "code": "MODEL_SUMMONER_SUMMON_NEIL_GROUND1"
+      "code": "MODEL_SUMMONER_SUMMON_NEIL_GROUND1",
+      "create": {
+        "lifeTime": 50,
+        "scale": 1,
+        "alpha": 0
+      }
     },
     {
       "name": "summonerSummonNeilGround2",
-      "code": "MODEL_SUMMONER_SUMMON_NEIL_GROUND2"
+      "code": "MODEL_SUMMONER_SUMMON_NEIL_GROUND2",
+      "create": {
+        "lifeTime": 50,
+        "scale": 1,
+        "alpha": 0
+      }
     },
     {
       "name": "summonerSummonNeilGround3",
-      "code": "MODEL_SUMMONER_SUMMON_NEIL_GROUND3"
+      "code": "MODEL_SUMMONER_SUMMON_NEIL_GROUND3",
+      "create": {
+        "lifeTime": 50,
+        "scale": 1,
+        "alpha": 0
+      }
     },
     {
       "name": "summonerSummonNeilKnife1",
-      "code": "MODEL_SUMMONER_SUMMON_NEIL_NIFE1"
+      "code": "MODEL_SUMMONER_SUMMON_NEIL_NIFE1",
+      "create": {
+        "lifeTime": 50,
+        "scale": 1,
+        "alpha": 1
+      }
     },
     {
       "name": "summonerSummonNeilKnife2",
-      "code": "MODEL_SUMMONER_SUMMON_NEIL_NIFE2"
+      "code": "MODEL_SUMMONER_SUMMON_NEIL_NIFE2",
+      "create": {
+        "lifeTime": 50,
+        "scale": 1,
+        "alpha": 1
+      }
     },
     {
       "name": "summonerSummonNeilKnife3",
-      "code": "MODEL_SUMMONER_SUMMON_NEIL_NIFE3"
+      "code": "MODEL_SUMMONER_SUMMON_NEIL_NIFE3",
+      "create": {
+        "lifeTime": 50,
+        "scale": 1,
+        "alpha": 1
+      }
     },
     {
       "name": "summonerSummonSahamutt",
@@ -1656,7 +1784,10 @@
     },
     {
       "name": "swordEffect",
-      "code": "BITMAP_SWORDEFF"
+      "code": "BITMAP_SWORDEFF",
+      "create": {
+        "lifeTime": 200
+      }
     },
     {
       "name": "swordEffectMono",

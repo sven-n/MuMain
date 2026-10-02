@@ -1,14 +1,23 @@
 #pragma once
 
 #include "EffectDef.h"
+#include "Data/GameData/EffectData/EffectCreateParams.h"
+
+#include <span>
 
 // Registry mapping an effect type (a MODEL_* / BITMAP_* enum value) to its
-// data-driven EffectDescriptor. The table is built once on first use and looked
-// up by CreateEffect / MoveEffect / RenderEffects. Types with no entry fall back
-// to the legacy switch statements, so migration can proceed effect by effect.
+// data-driven EffectDescriptor, looked up by CreateEffect / MoveEffect /
+// RenderEffects. Types with no entry fall back to the legacy switch statements,
+// so migration can proceed effect by effect.
 namespace Render::Effects
 {
-    // Returns the descriptor for an effect type, or nullptr if the type has not
-    // been migrated to the registry yet. Lookup is O(1) (type-indexed table).
-    const EffectDescriptor* Lookup(int type);
-}
+// Builds the table from the creation values of the effect catalogue and the
+// handlers of the code. Called once on the loading screen, after the
+// catalogue is loaded (OpenBasicData); until then Lookup finds nothing.
+// Descriptors returned by Lookup stay valid until the next build.
+void BuildRegistry(std::span<const Data::Effects::EffectTypeCreateParams> createParams);
+
+// Returns the descriptor for an effect type, or nullptr if the type has not
+// been migrated to the registry yet. A bounds check and one array read.
+const EffectDescriptor* Lookup(int type);
+} // namespace Render::Effects

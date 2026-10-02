@@ -24,13 +24,26 @@ void EffectTypeCatalogue::Build(EffectKind kind, std::span<const EffectTypeEntry
     }
 
     std::vector<NamedType> named;
+    std::vector<EffectTypeCreateParams> createParams;
     for (const EffectTypeEntry& entry : types)
     {
         const auto found = typeOfCode.find(entry.code);
-        if (found != typeOfCode.end())
+        if (found == typeOfCode.end())
         {
-            named.push_back({entry.name, found->second});
+            continue;
         }
+        named.push_back({entry.name, found->second});
+        if (kind == EffectKind::Effect && entry.create)
+        {
+            createParams.push_back({found->second, *entry.create});
+        }
+    }
+    if (kind == EffectKind::Effect)
+    {
+        std::sort(createParams.begin(), createParams.end(),
+                  [](const EffectTypeCreateParams& left, const EffectTypeCreateParams& right)
+                  { return left.type < right.type; });
+        m_createParams = std::move(createParams);
     }
 
     std::vector<NamedType>& byName = m_byName[ToIndex(kind)];
@@ -71,5 +84,10 @@ std::string_view EffectTypeCatalogue::GetName(EffectKind kind, int type) const
 size_t EffectTypeCatalogue::GetTypeCount(EffectKind kind) const
 {
     return m_byName[ToIndex(kind)].size();
+}
+
+std::span<const EffectTypeCreateParams> EffectTypeCatalogue::GetCreateParams() const
+{
+    return m_createParams;
 }
 } // namespace Data::Effects

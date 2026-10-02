@@ -1,0 +1,123 @@
+#include "stdafx.h"
+
+#include "EffectCreateParamsJson.h"
+
+#include "Data/GameData/ItemData/ItemModelValueReader.h"
+
+#include <cmath>
+#include <limits>
+
+namespace Data::Effects
+{
+namespace
+{
+using Items::Json::OrderedJson;
+using Items::ModelJson::ItemModelValueReader;
+
+namespace Keys
+{
+constexpr const char* LifeTime = "lifeTime";
+constexpr const char* Scale = "scale";
+constexpr const char* Velocity = "velocity";
+constexpr const char* Gravity = "gravity";
+constexpr const char* HiddenMesh = "hiddenMesh";
+constexpr const char* BlendMesh = "blendMesh";
+constexpr const char* BlendMeshLight = "blendMeshLight";
+constexpr const char* Alpha = "alpha";
+constexpr const char* CopyLightToDirection = "copyLightToDirection";
+} // namespace Keys
+
+// hiddenMesh is a mesh number and blendMesh the texture number of meshes,
+// both shorts in the model; -1 is none, a hiddenMesh of -2 hides the whole
+// model and a blendMesh of -2 means every mesh.
+constexpr int SmallestMeshNumber = -2;
+constexpr int LargestMeshNumber = std::numeric_limits<short>::max();
+
+void ReadValue(ItemModelValueReader& reader, const char* key, std::optional<double>& value)
+{
+    double number = 0.0;
+    if (reader.ReadNumber(key, number, false))
+    {
+        value = number;
+    }
+}
+
+void ReadMeshNumber(ItemModelValueReader& reader, const char* key, std::optional<int>& value)
+{
+    double number = 0.0;
+    if (!reader.ReadNumber(key, number, false))
+    {
+        return;
+    }
+    if (number != std::floor(number) || number < SmallestMeshNumber || number > LargestMeshNumber)
+    {
+        reader.Error(key, "must be a whole number from " + std::to_string(SmallestMeshNumber) + " to " +
+                              std::to_string(LargestMeshNumber));
+        return;
+    }
+    value = static_cast<int>(number);
+}
+
+void WriteValue(OrderedJson& json, const char* key, const std::optional<double>& value)
+{
+    if (value)
+    {
+        json[key] = Items::ModelJson::WriteNumber(*value);
+    }
+}
+
+void WriteMeshNumber(OrderedJson& json, const char* key, const std::optional<int>& value)
+{
+    if (value)
+    {
+        json[key] = *value;
+    }
+}
+} // namespace
+
+EffectCreateParams ReadEffectCreateParams(const OrderedJson& json, const std::string& objectKey,
+                                          const Items::ModelJson::ReportIssue& report)
+{
+    ItemModelValueReader reader(json, objectKey, report);
+    EffectCreateParams params;
+    ReadValue(reader, Keys::LifeTime, params.lifeTime);
+    ReadValue(reader, Keys::Scale, params.scale);
+    ReadValue(reader, Keys::Velocity, params.velocity);
+    ReadValue(reader, Keys::Gravity, params.gravity);
+    ReadMeshNumber(reader, Keys::HiddenMesh, params.hiddenMesh);
+    ReadMeshNumber(reader, Keys::BlendMesh, params.blendMesh);
+    ReadValue(reader, Keys::BlendMeshLight, params.blendMeshLight);
+    ReadValue(reader, Keys::Alpha, params.alpha);
+
+    std::array<double, 3> light{};
+    if (reader.ReadNumbers(CreateLightKey, light, light.size()))
+    {
+        params.light = light;
+    }
+    reader.ReadBool(Keys::CopyLightToDirection, params.copyLightToDirection);
+    reader.WarnAboutUnknownKeys();
+    return params;
+}
+
+OrderedJson WriteEffectCreateParams(const EffectCreateParams& params)
+{
+    OrderedJson json = OrderedJson::object();
+    WriteValue(json, Keys::LifeTime, params.lifeTime);
+    WriteValue(json, Keys::Scale, params.scale);
+    WriteValue(json, Keys::Velocity, params.velocity);
+    WriteValue(json, Keys::Gravity, params.gravity);
+    WriteMeshNumber(json, Keys::HiddenMesh, params.hiddenMesh);
+    WriteMeshNumber(json, Keys::BlendMesh, params.blendMesh);
+    WriteValue(json, Keys::BlendMeshLight, params.blendMeshLight);
+    WriteValue(json, Keys::Alpha, params.alpha);
+    if (params.light)
+    {
+        json[CreateLightKey] = Items::ModelJson::WriteNumbers(*params.light);
+    }
+    if (params.copyLightToDirection)
+    {
+        json[Keys::CopyLightToDirection] = true;
+    }
+    return json;
+}
+} // namespace Data::Effects

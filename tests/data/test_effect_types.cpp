@@ -10,9 +10,12 @@
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Data/GameData/EffectData/EffectTypeSymbols.h"
 #include "Data/GameData/EffectData/EffectTypesJson.h"
+#include "Engine/Object/ZzzObject.h"
+#include "Render/Effects/Behaviors/EffectBehaviors.h"
 #include "Render/Effects/EffectRegistry.h"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <filesystem>
 #include <set>
@@ -83,6 +86,22 @@ bool IsEffectSymbol(int type)
     const auto symbols = GetEffectTypeSymbols(EffectKind::Effect);
     return std::any_of(symbols.begin(), symbols.end(),
                        [&](const EffectTypeSymbol& symbol) { return symbol.type == type; });
+}
+
+// The effect registry as the game builds it on the loading screen.
+void BuildShippedRegistry()
+{
+    EffectTypeCatalogue catalogue;
+    catalogue.Build(EffectKind::Effect, ShippedTypes().types[ToIndex(EffectKind::Effect)]);
+    Render::Effects::BuildRegistry(catalogue.GetCreateParams());
+}
+
+const Render::Effects::CreateParams& RequireCreateParams(int type)
+{
+    const Render::Effects::EffectDescriptor* descriptor = Render::Effects::Lookup(type);
+    REQUIRE(descriptor != nullptr);
+    REQUIRE(descriptor->create.has_value());
+    return *descriptor->create;
 }
 } // namespace
 
@@ -165,6 +184,114 @@ TEST_CASE("Effect type files are written sorted by name with a fixed field order
     CHECK(result.types.size() == 2);
 }
 
+TEST_CASE("Effect entries are read with their creation values [data][effects]")
+{
+    const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
+        {"name": "ghost", "code": "MODEL_CUNDUN_GHOST", "create": {"lifeTime": 200, "scale": 1.8, "velocity": 0.08,
+         "gravity": -2, "hiddenMesh": 1, "blendMesh": -2, "blendMeshLight": 0.5, "alpha": 0,
+         "light": [0.5, 1, 0.25], "copyLightToDirection": true}},
+        {"name": "dragon", "code": "MODEL_DRAGON"}]})",
+                                   EffectKind::Effect);
+    CHECK(result.issues.empty());
+    REQUIRE(result.types.size() == 2);
+    REQUIRE(result.types[0].create.has_value());
+    const EffectCreateParams& params = *result.types[0].create;
+    CHECK(params.lifeTime == 200.0);
+    CHECK(params.scale == 1.8);
+    CHECK(params.velocity == 0.08);
+    CHECK(params.gravity == -2.0);
+    CHECK(params.hiddenMesh == 1);
+    CHECK(params.blendMesh == -2);
+    CHECK(params.blendMeshLight == 0.5);
+    CHECK(params.alpha == 0.0);
+    CHECK(params.light == std::array<double, 3>{0.5, 1.0, 0.25});
+    CHECK(params.copyLightToDirection);
+    CHECK_FALSE(result.types[1].create.has_value());
+}
+
+TEST_CASE("Wrong creation values are errors, unknown ones warnings, and only effects have them [data][effects]")
+{
+    const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
+        {"name": "dragon", "code": "MODEL_DRAGON", "create": 5},
+        {"name": "ghost", "code": "MODEL_CUNDUN_GHOST", "create": {"lifeTime": "long", "blendMesh": 1.5,
+         "hiddenMesh": -3, "light": [1, 1], "copyLightToDirection": 1, "size": 2}}]})",
+                                   EffectKind::Effect);
+    CHECK(HasError(result.issues, "types[0].create"));
+    CHECK(HasError(result.issues, "types[1].create.lifeTime"));
+    CHECK(HasError(result.issues, "types[1].create.blendMesh"));
+    CHECK(HasError(result.issues, "types[1].create.hiddenMesh"));
+    CHECK(HasError(result.issues, "types[1].create.light"));
+    CHECK(HasError(result.issues, "types[1].create.copyLightToDirection"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[1].create.size"));
+    REQUIRE(result.types.size() == 2);
+    CHECK_FALSE(result.types[0].create.has_value());
+    CHECK(result.types[1].create == EffectCreateParams{});
+
+    const ReadResult particles = Read(R"({"formatVersion": 1, "kind": "particle", "types": [
+        {"name": "smoke", "code": "BITMAP_SMOKE", "create": {"lifeTime": 2}}]})");
+    CHECK(HasIssue(particles.issues, ItemDataIssueSeverity::Warning, "types[0].create"));
+    REQUIRE(particles.types.size() == 1);
+    CHECK_FALSE(particles.types[0].create.has_value());
+}
+
+TEST_CASE("Creation values are written in a fixed order, unset ones left out [data][effects]")
+{
+    EffectTypeEntry ghost{"ghost", "MODEL_CUNDUN_GHOST"};
+    ghost.create = EffectCreateParams{
+        .lifeTime = 200, .scale = 1.8, .blendMesh = -2, .light = std::array<double, 3>{0.5, 0.5, 0.5}};
+    EffectTypeEntry arrow{"arrow", "MODEL_INFINITY_ARROW4"};
+    arrow.create = EffectCreateParams{.lifeTime = 15,
+                                      .scale = 1,
+                                      .velocity = 0.3,
+                                      .gravity = 2,
+                                      .hiddenMesh = 1,
+                                      .blendMesh = 0,
+                                      .blendMeshLight = 0.5,
+                                      .alpha = 0,
+                                      .light = std::array<double, 3>{1, 0.5, 0.3},
+                                      .copyLightToDirection = true};
+    const std::vector<EffectTypeEntry> types = {ghost, arrow};
+
+    const std::string text = WriteEffectTypesJson(EffectKind::Effect, types);
+    CHECK(text == "{\n"
+                  "  \"formatVersion\": 1,\n"
+                  "  \"kind\": \"effect\",\n"
+                  "  \"types\": [\n"
+                  "    {\n"
+                  "      \"name\": \"arrow\",\n"
+                  "      \"code\": \"MODEL_INFINITY_ARROW4\",\n"
+                  "      \"create\": {\n"
+                  "        \"lifeTime\": 15,\n"
+                  "        \"scale\": 1,\n"
+                  "        \"velocity\": 0.3,\n"
+                  "        \"gravity\": 2,\n"
+                  "        \"hiddenMesh\": 1,\n"
+                  "        \"blendMesh\": 0,\n"
+                  "        \"blendMeshLight\": 0.5,\n"
+                  "        \"alpha\": 0,\n"
+                  "        \"light\": [1, 0.5, 0.3],\n"
+                  "        \"copyLightToDirection\": true\n"
+                  "      }\n"
+                  "    },\n"
+                  "    {\n"
+                  "      \"name\": \"ghost\",\n"
+                  "      \"code\": \"MODEL_CUNDUN_GHOST\",\n"
+                  "      \"create\": {\n"
+                  "        \"lifeTime\": 200,\n"
+                  "        \"scale\": 1.8,\n"
+                  "        \"blendMesh\": -2,\n"
+                  "        \"light\": [0.5, 0.5, 0.5]\n"
+                  "      }\n"
+                  "    }\n"
+                  "  ]\n"
+                  "}\n");
+    const ReadResult result = Read(text, EffectKind::Effect);
+    CHECK(result.issues.empty());
+    REQUIRE(result.types.size() == 2);
+    CHECK(result.types[0] == arrow);
+    CHECK(result.types[1] == ghost);
+}
+
 // Every code is an enum symbol, so the data holds no raw numbers (D28).
 TEST_CASE("Each kind lists every type number once, sorted, by its symbol [data][effects]")
 {
@@ -232,10 +359,93 @@ TEST_CASE("The effect type catalogue finds types by name and names by number [da
     CHECK(catalogue.GetName(EffectKind::Particle, MODEL_CUNDUN_GHOST).empty());
 }
 
+// The creation values that EffectRegistry.cpp held as C++ rows until FX1.2.
+TEST_CASE("The effect type catalogue keeps the creation values of effects, sorted by number [data][effects]")
+{
+    const std::vector<EffectTypeEntry>& effects = ShippedTypes().types[ToIndex(EffectKind::Effect)];
+    const auto withCreateParams = static_cast<size_t>(std::count_if(
+        effects.begin(), effects.end(), [](const EffectTypeEntry& entry) { return entry.create.has_value(); }));
+    CHECK(withCreateParams > 0);
+
+    EffectTypeCatalogue catalogue;
+    catalogue.Build(EffectKind::Effect, effects);
+    const auto createParams = catalogue.GetCreateParams();
+    CHECK(createParams.size() == withCreateParams);
+    CHECK(std::is_sorted(createParams.begin(), createParams.end(),
+                         [](const EffectTypeCreateParams& left, const EffectTypeCreateParams& right)
+                         { return left.type < right.type; }));
+
+    // Building another kind keeps them.
+    catalogue.Build(EffectKind::Particle, ShippedTypes().types[ToIndex(EffectKind::Particle)]);
+    CHECK(catalogue.GetCreateParams().size() == withCreateParams);
+}
+
+TEST_CASE("The effect registry takes creation values from the catalogue, handlers from the code [data][effects]")
+{
+    BuildShippedRegistry();
+
+    // The values as the old C++ rows wrote them.
+    const Render::Effects::CreateParams& ghost = RequireCreateParams(MODEL_CUNDUN_GHOST);
+    CHECK(ghost.lifeTime == 200.f);
+    CHECK(ghost.scale == 1.80f);
+    CHECK(ghost.velocity == 0.08f);
+    CHECK(ghost.blendMesh == -2);
+    CHECK(ghost.light == std::array<float, 3>{0.5f, 0.5f, 0.5f});
+    CHECK_FALSE(ghost.copyLightToDirection);
+
+    const Render::Effects::CreateParams& arrow = RequireCreateParams(MODEL_INFINITY_ARROW4);
+    CHECK(arrow.light == std::array<float, 3>{1.f, 0.5f, 0.3f});
+    CHECK(arrow.copyLightToDirection);
+    CHECK(Render::Effects::Lookup(MODEL_INFINITY_ARROW4)->move == &Render::Effects::Behaviors::MoveInfinityArrow4);
+
+    // Creation values only.
+    const Render::Effects::EffectDescriptor* blood = Render::Effects::Lookup(MODEL_BLOOD);
+    REQUIRE(blood != nullptr);
+    CHECK(blood->create.has_value());
+    CHECK(blood->onCreate == nullptr);
+    CHECK(blood->move == nullptr);
+    CHECK(blood->render == nullptr);
+
+    // A creation hook and a move handler, no creation values.
+    const Render::Effects::EffectDescriptor* mayaStone = Render::Effects::Lookup(MODEL_MAYASTONE4);
+    REQUIRE(mayaStone != nullptr);
+    CHECK_FALSE(mayaStone->create.has_value());
+    CHECK(mayaStone->onCreate == &Render::Effects::Behaviors::CreateMayaStone45);
+    CHECK(mayaStone->move != nullptr);
+
+    CHECK(Render::Effects::Lookup(MODEL_KALIMA_FALLING_STONE) == nullptr);
+    CHECK(Render::Effects::Lookup(-1) == nullptr);
+    CHECK(Render::Effects::Lookup(TypeNumberLimit) == nullptr);
+}
+
+TEST_CASE("Creation values from the catalogue are applied to new effects [data][effects]")
+{
+    BuildShippedRegistry();
+
+    OBJECT ghost;
+    ghost.Alpha = 0.25f;
+    Render::Effects::ApplyCreateParams(&ghost, RequireCreateParams(MODEL_CUNDUN_GHOST));
+    CHECK(ghost.LifeTime == 200.f);
+    CHECK(ghost.Scale == 1.80f);
+    CHECK(ghost.Velocity == 0.08f);
+    CHECK(ghost.BlendMesh == -2);
+    CHECK(ghost.Light[0] == 0.5f);
+    CHECK(ghost.Light[2] == 0.5f);
+    CHECK(ghost.Alpha == 0.25f);
+
+    OBJECT arrow;
+    Render::Effects::ApplyCreateParams(&arrow, RequireCreateParams(MODEL_INFINITY_ARROW4));
+    CHECK(arrow.Light[1] == 0.5f);
+    CHECK(arrow.Direction[0] == 1.f);
+    CHECK(arrow.Direction[1] == 0.5f);
+    CHECK(arrow.Direction[2] == 0.3f);
+}
+
 // The registry of #493 describes effect types by number; each of them must
 // have a name, or its data could not reference it.
 TEST_CASE("Every effect type of the registry is in the catalogue [data][effects]")
 {
+    BuildShippedRegistry();
     for (int type = 0; type < TypeNumberLimit; ++type)
     {
         if (Render::Effects::Lookup(type) != nullptr)

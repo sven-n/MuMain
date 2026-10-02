@@ -184,7 +184,7 @@ Kalima maps load the rock `Object25\Object10.bmd`).
   "formatVersion": 1,
   "kind": "effect",
   "types": [
-    { "name": "cundunGhost", "code": "MODEL_CUNDUN_GHOST",
+    { "name": "kundunGhost", "code": "MODEL_CUNDUN_GHOST",
       "create": { "lifeTime": 200, "scale": 1.8, "velocity": 0.08, "blendMesh": -2, "light": [0.5, 0.5, 0.5] } },
     { "name": "earthQuake1", "code": "MODEL_SKILL_FURY_STRIKE+1" },
     { "name": "kentaurosArrow", "code": "MODEL_KENTAUROS_ARROW",
@@ -300,6 +300,23 @@ built from the catalogue, without the guard of today's static table. Only
 one-time test that `Lookup` gives the same values and handlers as the old
 rows for every number, by the recorder for the 32 types, and by a Release
 benchmark of creation and lookup (old against new).
+
+*Done:* the creation values of the 32 types are `create` objects in
+`EffectTypes.json` (format in [effect-data.md](../../effect-data.md)); the
+C++ rows of `EffectRegistry.cpp` keep only the handlers. Besides the
+registry, the catalogue reads and writes `create` (`EffectCreateParamsJson`)
+and keeps the values sorted by number for `BuildRegistry`, which
+builds the table on the loading screen right after the catalogue
+(`OpenBasicData`) and converts the values to `CreateParams` once, so
+creating an effect only copies them, as before. Before the build `Lookup`
+finds nothing and logs that once; nothing creates or moves an effect that
+early. A one-time test compared the old rows with the built registry for
+every number: all 309 descriptors are equal (32 with creation values), and
+applying the values to a slot gives the same fields. The recorder comes with
+FX1.3, the first phase that deletes cases; FX1.2 deletes none and applies
+the values with the unchanged `ApplyCreateParams`. Release timing: a lookup
+takes 1.13 ns instead of 1.70 ns (no static guard any more), applying the
+values 2.4 ns as before.
 
 **FX1.3–FX1.5** move effect cases into data in growing steps: first the 8
 types whose cases only set fields `CreateParams` has, then the 26 that need

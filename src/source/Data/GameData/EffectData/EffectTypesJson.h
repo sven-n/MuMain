@@ -1,8 +1,10 @@
 #pragma once
 
+#include "Data/GameData/EffectData/EffectCreateParams.h"
 #include "Data/GameData/EffectData/EffectKind.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -16,12 +18,14 @@
 //
 // `code` is the type as the code writes it (EffectTypeSymbols.h). Names have
 // letters and digits, start with a letter and are unique in their kind.
+// Entries of effects can have creation values ("create", EffectCreateParams.h).
 namespace Data::Effects
 {
 struct EffectTypeEntry
 {
     std::string name;
     std::string code;
+    std::optional<EffectCreateParams> create;
 
     bool operator==(const EffectTypeEntry&) const = default;
 };
@@ -41,6 +45,6 @@ void ValidateEffectTypes(EffectKind kind, std::span<const EffectTypeEntry> types
                          std::vector<Items::ItemDataIssue>& issues);
 
 // The text of the catalogue file of `kind`: sorted by name, fields in a fixed
-// order.
+// order, unset creation values left out.
 std::string WriteEffectTypesJson(EffectKind kind, std::span<const EffectTypeEntry> types);
 } // namespace Data::Effects
