@@ -3,7 +3,8 @@
 > **Draft, 2026-10-02.** Area FX1 of the
 > [data-driven content roadmap](2026-09-29-data-driven-content-roadmap-design.md).
 > Written from the code of MuMain `upstream/main` @ `b9362c5a` (with items
-> phase 4d2). Decisions marked *(to decide)* wait for the owner.
+> phase 4d2). The owner decided D27–D42 on 2026-10-02, except D36, which is
+> marked *(to decide)*.
 >
 > The counts come from scripts that parse the code (comments and switched-off
 > blocks removed, case groups and call arguments read), not from a compiler.
@@ -30,22 +31,22 @@ decision can move to the roadmap without being renumbered.
 
 | # | Topic | Decision |
 |---|---|---|
-| D27 | Scope *(to decide)* | FX1 names the types of the four creation systems: effects (`Effects[]`), particles, joints and sprites. Creation values move into data only for effects, which have the registry and its `CreateParams`. Trails (`CreateBlur`), damage numbers, ground decals, weather and the `CreateFire` recipes are not in FX1. |
-| D28 | Identity *(to decide)* | The type number stays the key at runtime. Each data entry has a `name` and a `code` field with the enum symbol it stands for (`"code": "MODEL_KENTAUROS_ARROW"`). A compiled list of the symbols per kind turns them into numbers once, when loading. The data never stores raw numbers, because they move with the `#ifdef` blocks of the enum headers. |
+| D27 | Scope | FX1 names the types of the four creation systems: effects (`Effects[]`), particles, joints and sprites. Creation values move into data only for effects, which have the registry and its `CreateParams`. Trails (`CreateBlur`) come with the swing trails of items phase 13; damage numbers, ground decals, weather and the `CreateFire` recipes are not in FX1. |
+| D28 | Identity | The type number stays the key at runtime. Each data entry has a `name` and a `code` field with the enum symbol it stands for (`"code": "MODEL_KENTAUROS_ARROW"`). A compiled list of the symbols per kind turns them into numbers once, when loading. The data never stores raw numbers, because they move with the `#ifdef` blocks of the enum headers. |
 | D29 | One namespace per kind | A name is unique within its kind: effect, particle, joint, sprite. Data that references a type gives the kind in the field name (`"particle": "smoke"`). The editor shows joints as "Lightning and trails". |
-| D30 | Names for types *(to decide)* | FX1 names (kind, type). The SubType stays a number in references (`{"joint": "jointThunder", "subType": 14}`), because it is not always a variant: it is also runtime state, a random value, a model number and the sprite blend mode. |
-| D31 | How names are chosen *(to decide)* | From the enum name in camelCase without `MODEL_`/`BITMAP_`, with collisions and marker names fixed by hand, misspellings corrected (`explotion` → `explosion`), and the types without an enum name named after the file loaded into their slot (`MODEL_SKILL_FURY_STRIKE+1` loads `EarthQuake01` → `earthQuake1`). |
+| D30 | Names for types | FX1 names (kind, type). The SubType stays a number in references (`{"joint": "jointThunder", "subType": 14}`), because it is not always a variant: it is also runtime state, a random value, a model number and the sprite blend mode. |
+| D31 | How names are chosen | From the enum name in camelCase without `MODEL_`/`BITMAP_`, with collisions and marker names fixed by hand, misspellings corrected (`explotion` → `explosion`), and the types without an enum name named after the file loaded into their slot (`MODEL_SKILL_FURY_STRIKE+1` loads `EarthQuake01` → `earthQuake1`). The full list is proposed in the FX1.1 PR and reviewed there. Types that are never created get entries too; the dead ones are listed in an upstream issue. |
 | D32 | Files and house rules | One file per kind: `EffectTypes.json`, `ParticleTypes.json`, `JointTypes.json`, `SpriteTypes.json`. The rules of the item and model files: `formatVersion`, sorted by name, fixed field order, defaults left out, a writer and a test that the shipped files are in its format, names of letters and digits, errors stop the start, warnings go to the log. Documented in `docs/effect-data.md`. |
 | D33 | Loading and lookup | The catalogue is loaded once on the loading screen, next to the item model data, before the first effect is created. The registry table is built from it: the same array indexed by type, not changed after loading. A lookup stays a bounds check and one array read. No names, strings or allocations after loading. |
 | D34 | Creation values | A registry row replaces the whole legacy case, so a type moves only when every statement of its case can be written as data. `CreateParams` gets exactly the fields the moved cases need. Values are applied in one fixed order (values, then offsets, then copies). An unset field keeps what the common setup chose, or the slot's old value where the common setup sets nothing. Values the old code multiplies by `FPS_ANIMATION_FACTOR` keep that as a flag. |
-| D35 | Variants by SubType *(to decide)* | A row can hold `variants` keyed by SubType that override its values (44 cases, 47 types choose only values by SubType). |
+| D35 | Variants by SubType | A row can hold `variants` keyed by SubType that override its values (44 cases, 47 types choose only values by SubType). |
 | D36 | Random and logic creation *(to decide)* | Cases with `rand()` and the cases with logic stay code in FX1 (167 of 244 cases). Data with random values would have to draw `rand()` in exactly the same order and number. |
-| D37 | Particles and joints *(to decide)* | Names only in FX1; their creation values wait for FX2. They have no registry, their structs differ from effects, and their creation is mostly random formulas. |
-| D38 | Sprites *(to decide)* | Sprite entries are names for the textures sprites draw, without values: `CreateSprite` has no values per type, and the blend is chosen per call. |
+| D37 | Particles and joints | Names only in FX1; their creation values wait for FX2. They have no registry, their structs differ from effects, and their creation is mostly random formulas. |
+| D38 | Sprites | Sprite entries are names for the textures sprites draw, without values: `CreateSprite` has no values per type, and the blend is chosen per call. |
 | D39 | What stays code | The per-type lists (`IsSkillEffect`, the shadow list, `DrawCaseOverridesBlend`, …), the range rules, all move and render handlers, the creation hooks, loading assets into slots, and the code call sites, which keep their enum constants. |
-| D40 | Verification | A recorder in the test binary compares the old and the new creation for every moved type (see Verification). |
-| D41 | Fixes are separate | The data reproduces the old behavior with its quirks. Bugs found on the way are filed on sven-n/MuMain and fixed in their own PRs. |
-| D42 | Effect browser *(to decide)* | Read only in FX1: lists per kind, details, "used by" from data, and a preview in the world in editor builds. Values are edited in the FX2 effect editor. |
+| D40 | Verification | A recorder in the test binary compares the old and the new creation for every moved type (see Verification). It is committed as a test tool, with a seed function for `Random::`, because FX1.3 to FX2 all need it. |
+| D41 | Fixes | The data reproduces the old behavior with its quirks. The bugs found while writing this document are fixed in its PR (the owner's choice, see "Fixed with this document"); bugs found later are filed on sven-n/MuMain and fixed in their own PRs. |
+| D42 | Effect browser | Read only in FX1: lists per kind, details, "used by" from data, and a preview in the world in editor builds. Values are edited in the FX2 effect editor. |
 
 ## Current state
 
@@ -158,10 +159,11 @@ joint types are created with more than one SubType.
   `test_aura_joint_lifecycle`; none for the registry. `tests/data` links the
   whole client, so a test can call `CreateEffect`, but `Hero` is not set
   there and `IsSkillEffect` reads it.
-- CI: cppcheck checks every changed file in full. It fails on
-  `ZzzEffect.cpp` (an out-of-bounds write: `arv3PosProcess[3]` written at
-  index 3) and on `MoveHandlers.cpp` (an uninitialized `Distance`), so a PR
-  that changes these files needs those fixed first (FX1.P).
+- CI: cppcheck checks every changed file in full. It failed on
+  `ZzzEffect.cpp` (an out-of-bounds write, an unused variable, a macro call
+  without its semicolon) and on `MoveHandlers.cpp` (an uninitialized
+  variable, a self-assignment, a null check after a dereference); these are
+  fixed with this document (FX1.P), so later PRs can change the files.
 
 ## Target design
 
@@ -247,12 +249,12 @@ One PR each, small enough to check against the old code.
 | Phase | Name | Depends on | Summary |
 |---|---|---|---|
 | FX1.0 | Design document | items 4c | This document; the roadmap links it and gets the new counts. |
-| FX1.P | cppcheck fixes | – | Fix the out-of-bounds write in `ZzzEffect.cpp` and the uninitialized variable in `MoveHandlers.cpp`, so later PRs can change these files. A fix PR of its own, not an FX1 PR. |
+| FX1.P | cppcheck fixes | – | Done with FX1.0: the findings of cppcheck in `ZzzEffect.cpp` and `MoveHandlers.cpp` are fixed, so later PRs can change these files. |
 | FX1.1 | Names for all types | FX1.0 | The compiled symbol lists, the four catalogue files with `name` and `code`, loader, validation, writer, `docs/effect-data.md`. No game code reads the catalogue yet. |
 | FX1.2 | Registry rows from data | FX1.1 | The 32 `CreateParams` of `EffectRegistry.cpp` move into `EffectTypes.json`; the registry table is built from the catalogue at loading. Handlers stay C++. |
-| FX1.3 | The 8 types that fit `CreateParams` | FX1.2, FX1.P | Their cases move into data and are deleted. Sets up the recorder. |
+| FX1.3 | The 8 types that fit `CreateParams` | FX1.2 | Their cases move into data and are deleted. Sets up the recorder. |
 | FX1.4 | More creation fields | FX1.3 | The fields the 26 value-only cases need; those cases move into data. |
-| FX1.5 | Variants by SubType | FX1.4, D35 | `variants` in effect rows; the 47 types that choose values by SubType move. |
+| FX1.5 | Variants by SubType | FX1.4 | `variants` in effect rows; the 47 types that choose values by SubType move. |
 | FX1.6 | Effect browser | FX1.1 | Read-only tool in MuEditor; values from FX1.2 on. |
 | FX1.7 | Preview | FX1.6 | Creating the selected type in the world in editor builds. |
 
@@ -289,7 +291,7 @@ change no game code outside editor builds.
 
 Every PR that moves values is checked with a recorder in the test binary
 (D40), as the items phases did, but committed as a test tool, because FX1.3
-to FX2 all need it *(to decide)*:
+to FX2 all need it:
 
 - **Fixed inputs:** a fixed `srand` seed, a seed for `Random::` (today
   seeded from `random_device`, without a way to set it), the frame factor
@@ -334,44 +336,58 @@ to FX2 all need it *(to decide)*:
 - **Names last.** Once looks reference them, renames go through D26, so
   poor generated names are fixed in FX1.1.
 
-## Found on the way
+## Fixed with this document
 
-To check and file on sven-n/MuMain, fixed in their own PRs (D41):
+The owner chose to fix the bugs found while writing this document in its
+PR (D41). Each fix changes only what was broken:
 
-- `if (o->SubType = 0)` (an assignment) in effect creation,
-  `ZzzEffect.cpp:767`.
-- The move case of the effect `BITMAP_JOINT_FORCE` falls through into the
-  case of `MODEL_EFFECT_SAPITRES_ATTACK_1` (`ZzzEffect.cpp:8100`).
-- A particle writes `o->Position[3]`, past the end of the position
-  (`ZzzEffectParticle.cpp:2171`).
-- The owner is used without a null check in 27 creation cases.
-- `Models[]` is read with a `BITMAP_*` number in the water pass
-  (`ZzzEffect.cpp:8729`), an out-of-bounds read when such an effect has a
-  blend mesh.
-- 21 effect, 6 particle and 2 joint types have code but are never created
-  (a script check; computed types may reach some), and 9 effect types are
-  created but have no code (`MODEL_EX01_SHADOW_MASTER_*`).
+- **Summoner casting effects** (`ZzzEffect.cpp`, `MODEL_SUMMONER_CASTING_EFFECT1`
+  and its five siblings): `if (o->SubType = 0)` assigned instead of
+  comparing, so every casting effect lost its SubType and the scale of
+  SubType 0 was never set. Now SubType 0 gets the scale 1.0 the code meant
+  (the summon skills' casting circles, 0.9 before); the casts with SubType 1
+  keep their scale 0.6. The move and draw code does not read their SubType.
+- **The effect `BITMAP_JOINT_FORCE`** (Battle Castle, Aida): its move code
+  fell through into the move code of `MODEL_SWORD_FORCE` in the original
+  client: in Battle Castle (SubType 0) the effect grew, spawned sword force
+  effects, sparks and fire and lit the ground; in Aida (SubType 1) it faded
+  out. When sven-n/MuMain#493 moved that code into a handler, the case
+  started to fall through into `MODEL_EFFECT_SAPITRES_ATTACK_1` instead,
+  which pushed the Battle Castle effect away by 40 times its direction
+  every frame and spawned that monster's attack effects, and left the Aida
+  effect without its fade. It runs the sword force handler again, as before
+  #493.
+- **The particle `BITMAP_SPARK + 1`, SubType 7** (`ZzzEffectParticle.cpp`):
+  the position jitter was written to y, z and past the end of the position
+  (`Position[3]`, which is `Angle[0]` of the particle). Now it goes to x, y
+  and z; the three random draws stay the same.
+- **The blend-mesh passes** (`RenderEffects`, `RenderAfterEffects`): on water
+  maps they read `Models[o->Type]` for effects with a texture number
+  (`BITMAP_*`), far past the end of the model array. Effects without a model
+  skip that check now.
+- **cppcheck findings** (FX1.P): four path points kept in an array of three
+  (`arv3PosProcess` in the creation of the Gaion swords, an out-of-bounds
+  write, also MSVC warning C4789), an unused variable and a statement
+  without effect, and a macro call without its semicolon in `ZzzEffect.cpp`;
+  in `MoveHandlers.cpp` a distance read before it was set (now the distance
+  to the target, as the first move step would measure it), a
+  self-assignment, and a null check after the pointer was used
+  (`MODEL_ALICE_DRAIN_LIFE`). None of these changes a value in the game.
+- With the files passing cppcheck, the last conversions of items phase 4d2
+  follow: `RenderWheelWeapon` and `RenderFuryStrike` use `ToModelSlot`, and
+  the spear check of the move handlers uses `ITEM_SPEAR`.
+
+Still to check and file upstream: the owner is used without a null check in
+27 creation cases; 21 effect, 6 particle and 2 joint types have code but are
+never created (a script check; computed types may reach some), and 9 effect
+types are created but have no code (`MODEL_EX01_SHADOW_MASTER_*`).
 
 ## Open questions
 
-- **Scope (D27, D35–D38).** Base values only, as the roadmap row says, or
-  also SubType variants for effects (47 types), random ranges, and creation
-  values for particles and joints? Trail styles (blur types 0–13) in FX1,
-  or with the swing trails of items phase 13?
-- **Identity (D28).** The code symbol in the data with a compiled list, or
-  names only in code (like the item effects)? With the symbol in the data a
-  rename needs no code change.
-- **Names (D30, D31).** SubType as a number until the looks or FX2, or
-  names for (type, SubType) pairs (up to about 1,350)? Correct the
-  misspellings of the enum names, or keep them? Who names the 36 types
-  without an enum name and the 9 marker names?
-- **Unused types.** Entries for the types that are never created (and the 9
-  created ones without code)? Proposed: entries for all, the dead ones
-  listed here and in an upstream issue, no `unused` flag in the data.
-- **Sprites (D38).** Texture names without values, sprite types with a
-  default blend, or no sprite entries? The exact list (44 or 54) is settled
-  in FX1.1.
-- **Recorder.** A permanent seed function for `Random::` for tests, and the
-  effect recorder committed as a test tool?
-- **Browser (D42).** "Used by" only from data, or also from a generated
-  index of the code call sites?
+- **Random creation (D36).** Random and logic creation stays code in FX1,
+  or random ranges in data for the simple cases (with a defined draw
+  order, proved by the recorder)?
+- **Sprite list.** 44 textures at literal call sites, or 54 with the
+  computed ones; settled in FX1.1.
+- **Browser, later.** A generated index of the code call sites for "used
+  by", besides the data users.

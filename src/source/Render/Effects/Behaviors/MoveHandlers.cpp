@@ -395,8 +395,6 @@ namespace Render::Effects::Behaviors
                         break;
                     }
 
-                    if (Ran < 0)
-                        Ran = Ran;
                     for (int i = 0; i < 3; i++)
                     {
                         VectorCopy(o->Position, p);
@@ -2073,15 +2071,14 @@ namespace Render::Effects::Behaviors
         Vector(0.0f, 0.0f, 0.0f, vRelativePos);
 
         OBJECT* pSourceObj = o->Owner;
-        OBJECT* pTargetObj = pSourceObj->Owner;
-        BMD* pSourceModel = &Models[pSourceObj->Type];
-        BMD* pTargetModel = &Models[pTargetObj->Type];
-
+        OBJECT* pTargetObj = pSourceObj != NULL ? pSourceObj->Owner : NULL;
         if (pSourceObj == NULL || pTargetObj == NULL ||
             pSourceObj->Live == false || pTargetObj->Live == false)
         {
             return true;
         }
+        BMD* pSourceModel = &Models[pSourceObj->Type];
+        BMD* pTargetModel = &Models[pTargetObj->Type];
 
         int iRandom = rand() % 10;
         int iCnt = 0;
@@ -2793,7 +2790,7 @@ namespace Render::Effects::Behaviors
         case 3:o->Alpha = 0.4f; break;
         case 4:o->Alpha = 0.3f; break;
         }
-        if (o->Owner->Weapon >= MODEL_SPEAR - MODEL_SWORD && o->Owner->Weapon < MODEL_SPEAR - MODEL_SWORD + MAX_ITEM_INDEX)
+        if (o->Owner->Weapon >= ITEM_SPEAR && o->Owner->Weapon < ITEM_SPEAR + MAX_ITEM_INDEX)
         {
             Vector(0.f, -180.f, 0.f, p);
         }
@@ -5548,7 +5545,10 @@ namespace Render::Effects::Behaviors
                 VectorCopy(o->Owner->Position, p);
                 VectorAdd(p, o->StartPosition, p);
 
-                float Distance;
+                // The distance to the target, also when the loop makes no step this frame.
+                vec3_t range;
+                VectorSubtract(o->Position, p, range);
+                float Distance = VectorLength(range);
                 for (int i = 1; i < o->Gravity; ++i)
                 {
                     if (rand_fps_check(2))
@@ -5608,7 +5608,10 @@ namespace Render::Effects::Behaviors
                 VectorCopy(o->Owner->Position, p);
                 VectorAdd(p, o->StartPosition, p);
 
-                float Distance;
+                // The distance to the target, also when the loop makes no step this frame.
+                vec3_t range;
+                VectorSubtract(o->Position, p, range);
+                float Distance = VectorLength(range);
                 for (int i = 1; i < o->Gravity; ++i)
                 {
                     if (rand_fps_check(2))

@@ -661,12 +661,9 @@ server with original clients (after phases 6 and B).
      the code computed before, so nothing changes now (checked by comparing
      the compiled code of every changed file); phase 12 can give a moved
      item its old slot there. Two conversions in `ZzzEffect.cpp`
-     (`RenderWheelWeapon`, `RenderFuryStrike`) wait until that file passes
-     the static analysis of the CI: cppcheck finds an out-of-bounds write in
-     `CreateEffect` (`arv3PosProcess`) there. So does the spear check in
-     `MoveHandlers.cpp`, which compares the item type of the owner's weapon
-     with `MODEL_SPEAR - MODEL_SWORD` (cppcheck finds an uninitialized
-     variable in that file). Objects keep their model slots, and
+     (`RenderWheelWeapon`, `RenderFuryStrike`) and the spear check in
+     `MoveHandlers.cpp` followed with the effect catalogue design (FX1.0),
+     which fixed the findings of cppcheck in those files. Objects keep their model slots, and
      the places that compare them with named slots stay as they are (one
      slot per shared model was dropped, see D23). The data of a shared
      model is freed by the last slot that uses it, whichever slot that is,

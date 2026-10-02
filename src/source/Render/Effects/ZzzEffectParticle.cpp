@@ -2166,9 +2166,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     break;
                 case 7:
                     o->Alpha = 1.0f;
+                    o->Position[0] += (-30.0f + (float)(rand() % 60)) * FPS_ANIMATION_FACTOR;
                     o->Position[1] += (-30.0f + (float)(rand() % 60)) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (-30.0f + (float)(rand() % 60)) * FPS_ANIMATION_FACTOR;
-                    o->Position[3] += (-30.0f + (float)(rand() % 60)) * FPS_ANIMATION_FACTOR;
                     o->LifeTime = 30;
                     o->Gravity = 1.3f;
                     o->Scale = (float)(rand() % 5) / 10.0f + 1.0f;
