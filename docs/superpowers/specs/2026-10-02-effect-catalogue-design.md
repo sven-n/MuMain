@@ -458,19 +458,27 @@ PR (D41). Each fix changes only what was broken:
   follow: `RenderWheelWeapon` and `RenderFuryStrike` use `ToModelSlot`, and
   the spear check of the move handlers uses `ITEM_SPEAR`.
 
+Filed upstream (2026-10-03):
+
+- sven-n/MuMain#680: `MODEL_DEATH_SPI_SKILL` creates its ground circles at
+  an uninitialized position (the first of a frame; the further ones of that
+  frame at its rotated direction, a point near the map origin), also in the
+  original client; the fix adds a visible effect, so the look needs a
+  decision.
+- sven-n/MuMain#681: 63 creation cases multiply one-time values (spawn
+  offsets, start angles) by `FPS_ANIMATION_FACTOR`, so effects start in
+  other places above 25 fps (from upstream's 2023 frame rate work; D34
+  keeps them as a flag until then).
+- sven-n/MuMain#682: 25 effect (5 of them only with a registry row), 6
+  particle and 2 joint types are handled but never created (checked in
+  FX1.1, also against computed types).
+- sven-n/MuMain#683: three item stat changes of 815b8828 found for the items
+  design (blocking and magic defense, the level requirement of the late
+  wings, wing options counted as excellent).
+
 Still to check and file upstream: the owner is used without a null check in
-27 creation cases; 25 effect (5 of them only with a registry row), 6 particle
-and 2 joint types are handled but never created (checked in FX1.1, also
-against computed types; listed in the FX1.1 PR), and 9 effect
-types are created but have no code (`MODEL_EX01_SHADOW_MASTER_*`).
-`MODEL_DEATH_SPI_SKILL` creates its ground circles at an uninitialized
-position (the first of a frame; the further ones of that frame at its
-rotated direction, a point near the map origin; `Move_MODEL_DEATH_SPI_SKILL`,
-also in the original client; the fix adds a visible effect, so the look
-needs a decision). 63 creation cases
-multiply one-time values (spawn offsets, start angles) by
-`FPS_ANIMATION_FACTOR`, so effects start in other places above 25 fps
-(from upstream's 2023 frame rate work; D34 keeps them as a flag).
+27 creation cases, and 9 effect types are created but have no code
+(`MODEL_EX01_SHADOW_MASTER_*`).
 
 ## Open questions
 
