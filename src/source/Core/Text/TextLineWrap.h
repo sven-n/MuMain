@@ -39,6 +39,21 @@ using MeasureTextWidth = std::function<int(const wchar_t* text, size_t length)>;
 std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int maxWidth, const MeasureTextWidth& measureWidth);
 
 /**
+ * @brief Wraps text made of paragraphs, as the legacy UI stores it, into lines.
+ *
+ * The paragraphs are separated by paragraphSeparator; empty ones are skipped.
+ * Each paragraph is wrapped with WrapTextToWidth, so text without spaces (CJK)
+ * is broken where it doesn't fit. With indentParagraphs, the first line of a
+ * paragraph starts with a space when it still fits. Lines longer than
+ * maxCharactersPerLine are split further.
+ *
+ * @return The lines, in order. Empty when there is nothing to draw.
+ */
+std::vector<std::wstring> WrapParagraphsToWidth(const std::wstring& text, wchar_t paragraphSeparator, int maxWidth,
+                                                size_t maxCharactersPerLine, bool indentParagraphs,
+                                                const MeasureTextWidth& measureWidth);
+
+/**
  * @brief Splits Text into two parts near its midpoint at a space.
  * @param Text       Source string.
  * @param Text1      Receives the first part (up to maxLength, truncated).
