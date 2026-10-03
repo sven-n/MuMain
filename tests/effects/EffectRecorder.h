@@ -43,8 +43,9 @@ enum class SlotPattern
     B,
 };
 
-// One CreateEffect call. The defaults are uneven values, so a case that copies
-// one of them into another field shows which one it copied.
+// One CreateEffect call. Position, angle and light default to uneven values,
+// so a case that copies one of them into another field shows which one it
+// copied; the other arguments default to the game's default arguments.
 struct EffectCall
 {
     int type = 0;
@@ -70,7 +71,10 @@ struct Conditions
 // The frame factors 1.0 and 0.5, each with pattern A and B.
 std::span<const Conditions> AllConditions();
 
-// Each sub type with each owner (none, the hero, a monster).
+// Each sub type with each owner (none, the hero, a monster), once with the
+// game's default arguments and once with uneven values for the scale, the PK
+// key, the skill values and the target index (so a case that keeps the
+// caller's scale differs from one that sets the default scale).
 std::vector<EffectCall> CallsFor(int type, std::initializer_list<int> subTypes);
 
 struct RecordedValue

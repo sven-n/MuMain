@@ -189,6 +189,7 @@ TEST_CASE("The 8 types of FX1.3 create from the catalogue what their cases set [
           {"Effects[0].Velocity", "70"},
           {"Effects[0].Alpha", "0"},
           {"Effects[0].Light[0]", "1"},
+          {"Effects[0].Light[1]", "1"},
           {"Effects[0].Light[2]", "1"}}},
         {MODEL_WARP3,
          {{"Effects[0].LifeTime", "16777215"}, {"Effects[0].Scale", "0.600000024"}, {"Effects[0].BlendMesh", "-2"}}},
@@ -218,5 +219,26 @@ TEST_CASE("The 8 types of FX1.3 create from the catalogue what their cases set [
                 CHECK(Find(record, value.path) == value.value);
             }
         }
+    }
+
+    // With a scale from the caller: the types whose cases set a scale keep
+    // theirs, the others keep the caller's.
+    const std::vector<RecordedValue> scaleFromCaller = {
+        {"MODEL_KENTAUROS_ARROW", "0.699999988"},
+        {"MODEL_WARP3", "0.600000024"},
+        {"MODEL_WARP6", "0.600000024"},
+        {"BITMAP_SPARK+1", "2.5"},
+        {"BITMAP_SPARK+2", "2.5"},
+        {"MODEL_1_STREAMBREATHFIRE", "2.5"},
+        {"MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2", "0.899999976"},
+        {"MODEL_EFFECT_SD_AURA", "1"},
+    };
+    REQUIRE(scaleFromCaller.size() == CatalogueCreatedTypes.size());
+    for (size_t i = 0; i < CatalogueCreatedTypes.size(); ++i)
+    {
+        EffectCall call = CallOf(CatalogueCreatedTypes[i]);
+        call.scale = 2.5f;
+        INFO(scaleFromCaller[i].path);
+        CHECK(Find(RecordCall(call, {}), "Effects[0].Scale") == scaleFromCaller[i].value);
     }
 }

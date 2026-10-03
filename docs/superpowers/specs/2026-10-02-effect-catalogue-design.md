@@ -356,8 +356,8 @@ Every PR that moves values is checked with a recorder in the test binary
 (D40), as the items phases did, but committed as a test tool, because FX1.3
 to FX2 all need it:
 
-- **Fixed inputs:** a fixed `srand` seed, a seed for `Random::` (today
-  seeded from `random_device`, without a way to set it), the frame factor
+- **Fixed inputs:** a fixed `srand` seed, a seed for `Random::`
+  (`Random::Seed`, since FX1.3), the frame factor
   pinned to 1.0 and 0.5, a fixed `WorldTime`, and the hero and owners set
   up with the game's own setup functions.
 - **Slots:** every pool slot filled with pattern A, then pattern B, so the
@@ -375,9 +375,18 @@ to FX2 all need it:
   1 in `MoveEffect` (the stones and snow into the bones), all into cases
   that stay code in FX1. Each one must land on the same code after a
   deletion: a case that fell into a moved case calls its handler.
-- **Recorded:** the whole created slot, all pools (effects, skill effects,
-  particles, joints, sprites), a `rand()` and a `Random::` sentinel, and
-  the global state some cases change.
+- **Recorded:** every changed field of every slot of the five pools
+  (effects, skill effects, particles, joints, sprites), of the hero and the
+  monster owner, and of the call's position, angle and light, plus how many
+  values `rand()` and `Random::` gave. Each call runs with the game's
+  default arguments and with uneven ones (scale, PK key, skill values,
+  target index). Not recorded yet: other global state (terrain light, the
+  play speed of models, object blurs, sounds) and the owner's fields outside
+  its object; not varied yet: live slots, terrain height, `timeGetTime`. The
+  test binary has no option window and no models, so cases that reach
+  `CreateParticle`, `CreateSprite` or `Models` cannot be recorded yet, and
+  the monster owner is not a real monster. The phase that first moves such
+  cases adds them; FX1.3 moved only cases that write the created slot.
 - **Tool:** `tests/effects/EffectRecorder` (since FX1.3): `RecordCall`
   records one call under given conditions, `Compare` lists the differing
   fields by name, and `BuildShippedRegistry` builds the registry without

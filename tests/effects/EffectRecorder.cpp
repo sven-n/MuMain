@@ -2,6 +2,8 @@
 
 #include "EffectRecorder.h"
 
+#include "doctest.h"
+
 #include "Core/Utilities/Random.h"
 #include "Data/DataHandler/EffectData/EffectTypeStorage.h"
 #include "Data/GameData/EffectData/EffectKind.h"
@@ -36,6 +38,14 @@ constexpr int PinnedWorld = 0; // Lorencia
 constexpr unsigned char HeroTileX = 102;
 constexpr unsigned char HeroTileY = 98;
 constexpr int MonsterModel = MODEL_PLAYER + 3; // any model number other than the player
+
+// The second set of call arguments: uneven values that no case or default uses.
+constexpr float UnevenScale = 1.75f;
+constexpr short UnevenPkKey = 37;
+constexpr std::uint16_t UnevenSkillIndex = 41;
+constexpr std::uint16_t UnevenSkill = 43;
+constexpr std::uint16_t UnevenSkillSerialNum = 47; // CreateEffect keeps it as a BYTE
+constexpr short UnevenTargetIndex = 53;
 
 // ---------------------------------------------------------------------------
 // The named fields of the pool elements. Keep in step with OBJECT
@@ -636,8 +646,11 @@ void CompareArray(Record& record, const char* name, const vec3_t after, const st
 }
 
 // How many values a generator gave since it was seeded: the next two values
-// after the call are searched for in the seeded sequence. Counts are the same
-// on every platform; "more than N" when the call drew more than the limit.
+// after the call are searched for in the seeded sequence; "more than N" when
+// the call drew more than the limit. The same draws give the same count on
+// every platform, but rand() and the distributions give other values per
+// standard library, so a case whose number of draws depends on a drawn value
+// can count differently elsewhere.
 constexpr int DrawLimit = 100000;
 
 template <typename Reseed, typename Draw> std::string CountDraws(Reseed reseed, Draw draw)
@@ -699,6 +712,14 @@ std::vector<EffectCall> CallsFor(int type, std::initializer_list<int> subTypes)
             call.type = type;
             call.subType = subType;
             call.owner = owner;
+            calls.push_back(call);
+
+            call.scale = UnevenScale;
+            call.pkKey = UnevenPkKey;
+            call.skillIndex = UnevenSkillIndex;
+            call.skill = UnevenSkill;
+            call.skillSerialNum = UnevenSkillSerialNum;
+            call.targetIndex = UnevenTargetIndex;
             calls.push_back(call);
         }
     }
@@ -767,8 +788,10 @@ std::optional<std::string> Find(const Record& record, std::string_view path)
 std::string Describe(const EffectCall& call, const Conditions& conditions)
 {
     return "type " + std::to_string(call.type) + " subType " + std::to_string(call.subType) + " owner " +
-           OwnerName(call.owner) + " frameFactor " + Format(conditions.frameFactor) + " pattern " +
-           (conditions.pattern == SlotPattern::A ? "A" : "B");
+           OwnerName(call.owner) + " scale " + Format(call.scale) + " pkKey " + std::to_string(call.pkKey) + " skill " +
+           std::to_string(call.skillIndex) + "/" + std::to_string(call.skill) + "/" +
+           std::to_string(call.skillSerialNum) + " target " + std::to_string(call.targetIndex) + " frameFactor " +
+           Format(conditions.frameFactor) + " pattern " + (conditions.pattern == SlotPattern::A ? "A" : "B");
 }
 
 std::string ToText(const Record& record)
@@ -794,12 +817,22 @@ void BuildShippedRegistry(std::span<const int> withoutCreationValuesOf,
     catalogue.Build(Data::Effects::EffectKind::Effect,
                     ShippedTypes().types[Data::Effects::ToIndex(Data::Effects::EffectKind::Effect)]);
     std::vector<Data::Effects::EffectTypeCreateParams> rows;
+    std::vector<int> left;
     for (const Data::Effects::EffectTypeCreateParams& row : catalogue.GetCreateParams())
     {
         const bool excluded = std::find(withoutCreationValuesOf.begin(), withoutCreationValuesOf.end(), row.type) !=
                               withoutCreationValuesOf.end();
-        if (!excluded)
+        if (excluded)
+            left.push_back(row.type);
+        else
             rows.push_back(row);
+    }
+    // A type without a row would run its legacy case on both sides of a
+    // comparison, which then proves nothing.
+    for (const int type : withoutCreationValuesOf)
+    {
+        const bool hadRow = std::find(left.begin(), left.end(), type) != left.end();
+        REQUIRE_MESSAGE(hadRow, "type " << type << " has no creation values in the catalogue");
     }
     rows.insert(rows.end(), extraRows.begin(), extraRows.end());
     Render::Effects::BuildRegistry(rows);
