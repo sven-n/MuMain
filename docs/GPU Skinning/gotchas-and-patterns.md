@@ -52,8 +52,16 @@
 ## Batching and profiling
 
 - Do not reorder blended terrain by texture pair. Base and overlay layers are
-  separate downstream draws, and overlays may render with depth testing off.
-  Only adjacent compatible commands may merge.
+  separate downstream draws, and each overlay blends over the base drawn just
+  before it. Only adjacent compatible commands may merge.
+- Terrain overlays render depth-tested with depth writes off. That selects the
+  read-only pipeline, whose `LESS_OR_EQUAL` compare lets an overlay pass over
+  its coplanar base while nearer terrain still hides it. The original client
+  drew overlays with depth writes on under `GL_LEQUAL`; depth-writing 3D
+  pipelines here compare with strict `LESS`, which would reject the overlay at
+  its base's depth. Turning the depth test off instead lets overlays of hidden
+  terrain paint over nearer ground wherever terrain overlaps itself on screen,
+  such as far slopes near the top of the view.
 - A merge key must include pipeline, texture, sampler, MVP, fog, and contiguous
   vertex storage. Omitting captured state can replay earlier geometry with a
   later draw's settings.
