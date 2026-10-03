@@ -440,7 +440,6 @@ void CUIWindowMgr::HideAllWindow(BOOL bHide, BOOL bMainClose)
     {
         SetWindowsEnable(FALSE);
         SetFocus(g_hWnd);
-        CUITextInputBox::ReleaseFocus();
     }
 }
 
@@ -501,16 +500,14 @@ void CUIWindowMgr::HandleMessage()
                     SaveIMEStatus();
 
                 SetFocus(g_hWnd);
-                CUITextInputBox::ReleaseFocus();
-            }
+                    }
             if (GetWindow(m_WorkMessage.m_iParam1)->GetState() == UISTATE_HIDE)
                 ShowHideWindow(m_WorkMessage.m_iParam1, TRUE);
 
             m_WindowArrangeListIter = m_WindowArrangeList.end();
             --m_WindowArrangeListIter;
 
-            const bool inputOwnsSelection = CUITextInputBox::IsFocusedForParent(m_WorkMessage.m_iParam1) ||
-                                            RmlFieldHasFocus(m_WorkMessage.m_iParam1);
+            const bool inputOwnsSelection = RmlFieldHasFocus(m_WorkMessage.m_iParam1);
             if ((int)(*m_WindowArrangeListIter) != m_WorkMessage.m_iParam1
                 || (GetFocus() == g_hWnd && !inputOwnsSelection))
             {
@@ -548,16 +545,14 @@ void CUIWindowMgr::HandleMessage()
                     {
                         g_pWindowMgr->SetWindowsEnable(FALSE);
                         SetFocus(g_hWnd);
-                        CUITextInputBox::ReleaseFocus();
-                    }
+                                    }
                 }
             }
             else
             {
                 g_pWindowMgr->SetWindowsEnable(FALSE);
                 SetFocus(g_hWnd);
-                CUITextInputBox::ReleaseFocus();
-            }
+                    }
         }
         break;
     case UI_MESSAGE_MAXIMIZE:
@@ -594,16 +589,14 @@ void CUIWindowMgr::HandleMessage()
                     {
                         g_pWindowMgr->SetWindowsEnable(FALSE);
                         SetFocus(g_hWnd);
-                        CUITextInputBox::ReleaseFocus();
-                    }
+                                    }
                 }
             }
             else
             {
                 g_pWindowMgr->SetWindowsEnable(FALSE);
                 SetFocus(g_hWnd);
-                CUITextInputBox::ReleaseFocus();
-            }
+                    }
         }
         break;
     case UI_MESSAGE_BOTTOM:

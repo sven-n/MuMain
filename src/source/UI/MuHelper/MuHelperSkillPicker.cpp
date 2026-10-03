@@ -79,7 +79,6 @@ bool CMuHelperSkillPicker::UpdateKeyEvent()
     {
         g_pNewUISystem->Hide(INTERFACE_MUHELPER_SKILL_LIST);
         SetFocus(g_hWnd);
-        CUITextInputBox::ReleaseFocus();
         return false;
     }
     return true;

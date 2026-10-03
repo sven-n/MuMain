@@ -412,11 +412,9 @@ bool mu::ui::window::CHotKey::CanUpdateKeyEventRelatedMyInventory()
 
 bool mu::ui::window::CHotKey::CanUpdateKeyEvent()
 {
-    // Two independent "is a text field currently editing" signals -- the legacy native
-    // CUITextInputBox companion (Login/CharMake/GenericConfirmDialog::Mode::Text) and a focused
-    // RmlUi <input> on any migrated consumer. Neither flag observes the other, so hotkeys must be
-    // suppressed on either being true.
-    if (CUITextInputBox::IsAnyInputBoxFocused() || RmlUiRuntime::Instance().IsTextInputActive())
+    // A focused RmlUi <input> is the only "a text field is currently editing" signal left; the
+    // native companion it used to be paired with has no instances any more.
+    if (RmlUiRuntime::Instance().IsTextInputActive())
     {
         return false;
     }

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/UILayoutPolicy.h"
-#include "UI/Widgets/UIControls.h"  // CUITextInputBox::GetFocusedPortable
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/Window3DRenderMng.h" // INFORMATION_CAMERA_Z_ORDER, see Render()'s own comment
@@ -171,16 +170,10 @@ bool mu::ui::window::CManager::UpdateKeyEvent()
     // equal), so every window whose GetRelatedWnd() doesn't match -- i.e. every window, since
     // nothing registers this fake identity as its own -- gets skipped below, suspending hotkeys/
     // window-level key handling globally while typing. A focused RmlUi <input> needs the exact
-    // same treatment: it never takes Win32 focus either, and
-    // CUITextInputBox::GetFocusedPortable() knows nothing about it, so without
-    // this it would fall through to GetFocus() (== g_hWnd) and every window would run normally
-    // while the user is typing into an RmlUi field -- reusing RmlUiRuntime::Instance()'s own
-    // stable address as an equally "orphan" identity, same trick, same guarantee.
-    CUITextInputBox* pFocusedField = CUITextInputBox::GetFocusedPortable();
+    // same treatment: it never takes Win32 focus either, so it reuses RmlUiRuntime::Instance()'s
+    // own stable address as an equally "orphan" identity -- same trick, same guarantee.
     HWND hFocus;
-    if (pFocusedField)
-        hFocus = reinterpret_cast<HWND>(pFocusedField);
-    else if (RmlUiRuntime::Instance().IsTextInputActive())
+    if (RmlUiRuntime::Instance().IsTextInputActive())
         hFocus = reinterpret_cast<HWND>(&RmlUiRuntime::Instance());
     else
         hFocus = GetFocus();

@@ -34,12 +34,6 @@ mu_add_test(
 )
 
 mu_add_test(
-    NAME input_box_config_tests
-    SOURCES test_input_box_config.cpp
-    LINK_LIBS MuClient
-)
-
-mu_add_test(
     NAME experience_text_tests
     SOURCES test_experience_text.cpp
     LINK_LIBS MuClient

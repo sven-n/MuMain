@@ -762,18 +762,6 @@ TEST_CASE("letter preview viewport includes active layout offsets [ui][scaling]"
     CHECK(viewport.height == 317);
 }
 
-TEST_CASE("focused letter input owns its parent window selection [ui][input]")
-{
-    CUITextInputBox input;
-    input.SetParentUIID(42);
-    input.GiveFocus(FALSE);
-
-    CHECK(CUITextInputBox::IsFocusedForParent(42));
-    CHECK_FALSE(CUITextInputBox::IsFocusedForParent(41));
-
-    CUITextInputBox::ReleaseFocus();
-}
-
 TEST_CASE("screen overlays fill the window [ui][scaling]")
 {
     const auto transform = UI::Scaling::ScreenOverlayTransform(1280, 720);

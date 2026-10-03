@@ -1136,35 +1136,6 @@ void HandleFocusChange(bool active)
     }
 }
 
-// --- Portable text field input routing (issue #447) -------------------
-// Map the SDL keys a single-line text field reacts to onto the Win32 VK
-// codes the field already understands. Returns 0 for keys it ignores.
-int MapScancodeToEditVk(SDL_Scancode sc)
-{
-    switch (sc)
-    {
-    case SDL_SCANCODE_LEFT:
-        return VK_LEFT;
-    case SDL_SCANCODE_RIGHT:
-        return VK_RIGHT;
-    case SDL_SCANCODE_HOME:
-        return VK_HOME;
-    case SDL_SCANCODE_END:
-        return VK_END;
-    case SDL_SCANCODE_BACKSPACE:
-        return VK_BACK;
-    case SDL_SCANCODE_DELETE:
-        return VK_DELETE;
-    case SDL_SCANCODE_RETURN:
-    case SDL_SCANCODE_KP_ENTER:
-        return VK_RETURN;
-    case SDL_SCANCODE_TAB:
-        return VK_TAB;
-    default:
-        return 0;
-    }
-}
-
 // UTF-8 <-> UTF-16 conversions sized to the input, so text of any length
 // (typed, copied or pasted) round-trips without truncation (issue #447).
 std::wstring Utf8ToWide(const char* utf8)
@@ -1191,76 +1162,6 @@ std::string WideToUtf8(const std::wstring& wide)
     return utf8;
 }
 
-void FeedPortableTextInput(const char* utf8)
-{
-    auto* box = CUITextInputBox::GetFocusedPortable();
-    if (box == nullptr || utf8 == nullptr)
-        return;
-
-    const std::wstring wide = Utf8ToWide(utf8);
-    if (!wide.empty())
-        box->OnTextInput(wide.c_str());
-}
-
-// Handle a key for the focused portable field. Returns true if consumed.
-bool FeedPortableKey(const SDL_KeyboardEvent& key)
-{
-    auto* box = CUITextInputBox::GetFocusedPortable();
-    if (box == nullptr)
-        return false;
-
-    const bool ctrl = (key.mod & SDL_KMOD_CTRL) != 0;
-    const bool shift = (key.mod & SDL_KMOD_SHIFT) != 0;
-
-    // Clipboard lives in SDL on this side of the boundary, keeping the text
-    // field itself free of SDL; the field only exposes selection helpers.
-    if (ctrl)
-    {
-        switch (key.scancode)
-        {
-        case SDL_SCANCODE_A:
-            box->SelectAll();
-            return true;
-        case SDL_SCANCODE_C:
-        case SDL_SCANCODE_X:
-        {
-            const std::wstring selection = box->GetSelectedText();
-            if (!selection.empty())
-            {
-                const std::string utf8 = WideToUtf8(selection);
-                if (!utf8.empty())
-                {
-                    SDL_SetClipboardText(utf8.c_str());
-                    if (key.scancode == SDL_SCANCODE_X)
-                        box->DeleteSelection();
-                }
-            }
-            return true;
-        }
-        case SDL_SCANCODE_V:
-        {
-            char* clip = SDL_GetClipboardText();
-            if (clip != nullptr)
-            {
-                const std::wstring wide = Utf8ToWide(clip);
-                if (!wide.empty())
-                    box->OnTextInput(wide.c_str());
-                SDL_free(clip);
-            }
-            return true;
-        }
-        default:
-            break;
-        }
-    }
-
-    const int vk = MapScancodeToEditVk(key.scancode);
-    if (vk == 0)
-        return false;
-
-    box->OnEditKey(vk, ctrl, shift);
-    return true;
-}
 } // namespace
 
 std::vector<std::pair<int, int>> MuGetSupportedDisplayResolutions()
@@ -1407,8 +1308,6 @@ bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
         return true;
     case SDL_EVENT_TEXT_INPUT:
         propagates = Core::Input::RouteToUi(event, g_sdlWindow);
-        if (propagates)
-            FeedPortableTextInput(event.text.text);
         return true;
     case SDL_EVENT_KEY_UP:
         // RmlUi needs the release even though legacy has no key-up reader.
@@ -1431,9 +1330,6 @@ bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
         if (synthetic && event.key.scancode == SDL_SCANCODE_F10 && !event.key.repeat)
             CameraManager::Instance().ToggleZoomLock();
 #endif
-        if (!propagates)
-            return true;
-        FeedPortableKey(event.key);
         return true;
     default:
         return false;
@@ -1529,15 +1425,10 @@ MSG MainLoop()
                 break;
             }
             case SDL_EVENT_TEXT_EDITING:
-                // RmlUi first (whenever an RmlUi <input> is focused -- IsTextInputActive() is
-                // driven by RmlUiSystemInterface::ActivateKeyboard/DeactivateKeyboard, which
-                // WidgetTextInput's own Focus/Blur handling already calls), CUITextInputBox
-                // fallback otherwise -- same precedence SDL_EVENT_TEXT_INPUT already uses via
-                // RouteActionInput()'s Core::Input::RouteToUi()-then-FeedPortableTextInput() order.
+                // IsTextInputActive() is driven by RmlUiSystemInterface::ActivateKeyboard/
+                // DeactivateKeyboard, which WidgetTextInput's own Focus/Blur handling calls.
                 if (RmlUiRuntime::Instance().IsTextInputActive())
                     RmlUiRuntime::Instance().ProcessTextEditing(event);
-                else if (auto* box = CUITextInputBox::GetFocusedPortable())
-                    box->OnTextEditing(Utf8ToWide(event.edit.text).c_str());
                 break;
             default:
                 break;
@@ -1547,60 +1438,6 @@ MSG MainLoop()
             if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
             {
                 break;
-            }
-        }
-
-        // Start/stop SDL text input as a portable text field gains or loses
-        // focus, so SDL only emits SDL_EVENT_TEXT_INPUT while one is active (#447).
-        //
-        // RmlUi owns SDL's text-input state itself whenever an RmlUi <input> is focused (see
-        // RmlUiSystemInterface::ActivateKeyboard/DeactivateKeyboard) -- this block must not also
-        // call SDL_StartTextInput/StopTextInput in that case, or the two would race the same
-        // frame's transition (RmlUi's own Focus/Blur handling already ran earlier this frame,
-        // inside the SDL_PollEvent loop above). wantTextInput below is false whenever RmlUi
-        // currently owns it, so the Start branch never double-starts; the Stop branch is further
-        // guarded so it never undoes a Start that RmlUi itself just issued this same frame.
-        {
-            static bool s_textInputActive = false;
-            auto* focusedField = CUITextInputBox::GetFocusedPortable();
-            const bool rmlOwnsTextInput = RmlUiRuntime::Instance().IsTextInputActive();
-            const bool wantTextInput = !rmlOwnsTextInput && focusedField != nullptr;
-            if (wantTextInput != s_textInputActive && g_sdlWindow != nullptr)
-            {
-                if (wantTextInput)
-                    SDL_StartTextInput(g_sdlWindow);
-                else if (!rmlOwnsTextInput)
-                    SDL_StopTextInput(g_sdlWindow);
-                s_textInputActive = wantTextInput;
-            }
-
-            // Anchor the IME candidate window at the caret (reference px -> window
-            // px) so composition UI appears next to the text being typed (#447).
-            int cx, cy, cw, ch;
-            if (wantTextInput && g_sdlWindow != nullptr && focusedField->GetCaretArea(cx, cy, cw, ch))
-            {
-                auto transform = UI::Scaling::PanelTransform(WindowWidth, WindowHeight);
-                mu::ui::window::CManager* manager =
-                    g_pNewUISystem != nullptr ? g_pNewUISystem->GetNewUIManager() : nullptr;
-                mu::ui::window::CObject* owner =
-                    manager != nullptr ? manager->FindUIObjByRelatedWnd(reinterpret_cast<HWND>(focusedField)) : nullptr;
-                if (owner != nullptr)
-                {
-                    transform = UI::Scaling::TransformForLayout(owner->GetLayoutMode(), WindowWidth, WindowHeight);
-                }
-                const SDL_Rect area = {static_cast<int>(UI::Scaling::PositionX(transform, static_cast<float>(cx))),
-                                       static_cast<int>(UI::Scaling::PositionY(transform, static_cast<float>(cy))),
-                                       static_cast<int>(UI::Scaling::SizeX(transform, static_cast<float>(cw))),
-                                       static_cast<int>(UI::Scaling::SizeY(transform, static_cast<float>(ch)))};
-                // Only push when the caret rect actually moves; resending every
-                // frame is wasteful and can flicker the candidate window.
-                static SDL_Rect s_lastArea = {0, 0, 0, 0};
-                if (area.x != s_lastArea.x || area.y != s_lastArea.y || area.w != s_lastArea.w ||
-                    area.h != s_lastArea.h)
-                {
-                    SDL_SetTextInputArea(g_sdlWindow, &area, 0);
-                    s_lastArea = area;
-                }
             }
         }
 
