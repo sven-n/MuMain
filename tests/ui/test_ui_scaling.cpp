@@ -193,6 +193,63 @@ TEST_CASE("docks use a moderate large-screen cap without changing dialogs [ui][s
     CHECK(fourKDialog.scaleY == doctest::Approx(2.0f));
 }
 
+TEST_CASE("3D item preview scale tracks capped UI vs window height [ui][scaling]")
+{
+    CHECK(UI::Scaling::kItemPreviewExtraScale == doctest::Approx(0.8f));
+
+    // Dock at 1080p: uiScale == height/480 -> height factor 1, then the extra shrink.
+    const auto dock1080 = UI::Scaling::DockRightTransform(1920, 1080);
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(dock1080.scaleY, 1080) == doctest::Approx(1.0f));
+    CHECK(UI::Scaling::ItemPreviewScale(dock1080, 1920, 1080) == doctest::Approx(1.0f * 0.8f));
+
+    // Same dock cap at 1440p must shrink so models stay slot-sized.
+    const auto dock1440 = UI::Scaling::DockRightTransform(2560, 1440);
+    CHECK(dock1440.scaleY == doctest::Approx(2.25f));
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(dock1440.scaleY, 1440) == doctest::Approx(0.75f));
+    CHECK(UI::Scaling::ItemPreviewScale(dock1440, 2560, 1440) == doctest::Approx(0.75f * 0.8f));
+
+    // Uncapped 720p: uiScale equals height scale -> height factor 1, then the extra shrink.
+    const auto dock720 = UI::Scaling::DockRightTransform(1280, 720);
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(dock720.scaleY, 720) == doctest::Approx(1.0f));
+    CHECK(UI::Scaling::ItemPreviewScale(dock720, 1280, 720) == doctest::Approx(1.0f * 0.8f));
+
+    // 4K dock stays at the 2.25 cap, so the height factor is half the window-height scale.
+    const auto dock4k = UI::Scaling::DockRightTransform(3840, 2160);
+    CHECK(dock4k.scaleY == doctest::Approx(2.25f));
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(dock4k.scaleY, 2160) == doctest::Approx(0.5f));
+    CHECK(UI::Scaling::ItemPreviewScale(dock4k, 3840, 2160) == doctest::Approx(0.5f * 0.8f));
+
+    // HUD hotkey items render under BottomHudLeftTransform, capped at 2. No extra shrink.
+    const auto hud1080 = UI::Scaling::BottomHudLeftTransform(1920, 1080);
+    CHECK(hud1080.scaleY == doctest::Approx(2.0f));
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(hud1080.scaleY, 1080) == doctest::Approx(2.0f / 2.25f));
+    CHECK(UI::Scaling::ItemPreviewScale(hud1080, 1920, 1080) == doctest::Approx(2.0f / 2.25f));
+
+    const auto hud1440 = UI::Scaling::BottomHudLeftTransform(2560, 1440);
+    CHECK(hud1440.scaleY == doctest::Approx(2.0f));
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(hud1440.scaleY, 1440) == doctest::Approx(2.0f / 3.0f));
+    CHECK(UI::Scaling::ItemPreviewScale(hud1440, 2560, 1440) == doctest::Approx(2.0f / 3.0f));
+
+    // Dialog item previews use PanelTransform, also capped at 2. No extra shrink.
+    const auto dialog1080 = UI::Scaling::PanelTransform(1920, 1080);
+    CHECK(dialog1080.scaleY == doctest::Approx(2.0f));
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(dialog1080.scaleY, 1080) == doctest::Approx(2.0f / 2.25f));
+    CHECK(UI::Scaling::ItemPreviewScale(dialog1080, 1920, 1080) == doctest::Approx(2.0f / 2.25f));
+
+    const auto dialog1440 = UI::Scaling::PanelTransform(2560, 1440);
+    CHECK(dialog1440.scaleY == doctest::Approx(2.0f));
+    CHECK(UI::Scaling::ItemPreviewScaleFactor(dialog1440.scaleY, 1440) == doctest::Approx(2.0f / 3.0f));
+    CHECK(UI::Scaling::ItemPreviewScale(dialog1440, 2560, 1440) == doctest::Approx(2.0f / 3.0f));
+
+    // 720p shares one scale across dock, HUD, and dialog. Only DockRight gets the extra shrink.
+    const auto hud720 = UI::Scaling::BottomHudLeftTransform(1280, 720);
+    const auto dialog720 = UI::Scaling::PanelTransform(1280, 720);
+    const auto dockLeft720 = UI::Scaling::DockLeftTransform(1280, 720);
+    CHECK(UI::Scaling::ItemPreviewScale(hud720, 1280, 720) == doctest::Approx(1.0f));
+    CHECK(UI::Scaling::ItemPreviewScale(dialog720, 1280, 720) == doctest::Approx(1.0f));
+    CHECK(UI::Scaling::ItemPreviewScale(dockLeft720, 1280, 720) == doctest::Approx(1.0f));
+}
+
 TEST_CASE("inventory drag keeps the clicked point anchored to the item [ui][inventory]")
 {
     const POINT offset = UI::Items::Drag::PickupOffset(180, 260, 40, 60, 183, 317, true);

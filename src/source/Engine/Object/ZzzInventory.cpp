@@ -38,6 +38,7 @@
 #include "GameLogic/Items/ItemCategories.h"
 #include "Render/Items/ItemDisplay.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "UI/Scaling/UITransform.h"
 #include "GameLogic/Items/ShopRestrictions.h"
 #include "GameLogic/Items/TradeRestrictions.h"
 #include "GameLogic/Items/MixMgr.h"
@@ -6709,6 +6710,20 @@ namespace
 // Degrees per millisecond of WorldTime.
 constexpr float GambleItemTurnSpeed = 0.2f;
 constexpr float SelectedItemTurnSpeed = 0.45f;
+
+// The item camera maps world units to pixels by the full window height, while the
+// slot is drawn with the active UI scale. Scale the model and its slot offset
+// together so the preview stays centred in the slot. DockRight (inventory and
+// equipment) also applies kItemPreviewExtraScale; HUD and dialogs do not.
+void ApplyItemPreviewScale(vec3_t position, const std::array<float, 3>& offset, float& scale)
+{
+    const float previewScale = UI::Scaling::ItemPreviewScale(
+        UI::Scaling::GetActiveTransform(), static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+    position[0] += offset[0] * previewScale;
+    position[1] += offset[1] * previewScale;
+    position[2] += offset[2] * previewScale;
+    scale *= previewScale;
+}
 } // namespace
 
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target,
@@ -6726,9 +6741,6 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
     Type = Render::Items::Display::GetDrawnModel(Type, Level);
 
     const Render::Items::Display::InventoryDisplay display = Render::Items::Display::GetInventoryDisplay(Type);
-    Position[0] += display.offset[0];
-    Position[1] += display.offset[1];
-    Position[2] += display.offset[2];
     Vector(display.rotation[0], display.rotation[1], display.rotation[2], ObjectSelect.Angle);
 
     // Gamble items turn slowly, and every item turns while the mouse is on it.
@@ -6756,6 +6768,8 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
         Scale = *smallScale;
         ItemLevel = 0;
     }
+
+    ApplyItemPreviewScale(Position, display.offset, Scale);
 
     b->Animation(BoneTransform, ObjectSelect.AnimationFrame, ObjectSelect.PriorAnimationFrame, ObjectSelect.PriorAction, ObjectSelect.Angle, ObjectSelect.HeadAngle, false, false);
 

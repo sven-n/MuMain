@@ -63,6 +63,12 @@ bool ContainsLogicalRect(const UI::Scaling::Transform& transform, float windowX,
     return x >= left && x < right && y >= top && y < bottom;
 }
 
+bool IsSameTransform(const UI::Scaling::Transform& left, const UI::Scaling::Transform& right)
+{
+    return left.scaleX == right.scaleX && left.scaleY == right.scaleY && left.offsetX == right.offsetX &&
+           left.offsetY == right.offsetY && left.typographyScale == right.typographyScale;
+}
+
 int RoundedBottomHudTop(int windowWidth, int windowHeight)
 {
     const float hudTop =
@@ -347,6 +353,24 @@ float UI::Scaling::FontScaleForBounds(FontRole role, const Transform& transform,
         scale = std::min(scale, boxHeight / measuredHeight);
 
     return std::clamp(scale, minimumScale, 1.0f);
+}
+
+float UI::Scaling::ItemPreviewScaleFactor(float uiScaleY, int windowHeight)
+{
+    const float heightScale = static_cast<float>(std::max(windowHeight, 1)) / static_cast<float>(kReferenceHeight);
+    if (!std::isfinite(uiScaleY) || uiScaleY <= 0.0f)
+        return 1.0f;
+    return uiScaleY / heightScale;
+}
+
+float UI::Scaling::ItemPreviewScale(const Transform& active, int windowWidth, int windowHeight)
+{
+    const float factor = ItemPreviewScaleFactor(active.scaleY, windowHeight);
+    // Inventory and equipment draw under DockRight. The active transform is that
+    // layout stored as-is, so an exact match is the owning layout, not a nearby scale.
+    if (!IsSameTransform(active, DockRightTransform(windowWidth, windowHeight)))
+        return factor;
+    return factor * kItemPreviewExtraScale;
 }
 
 float UI::Scaling::ContentScaleFromMetrics(float displayScale, float pixelDensity)
