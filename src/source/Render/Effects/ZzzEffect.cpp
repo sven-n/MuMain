@@ -7082,7 +7082,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             {
                 o->Position[2] = Height;
                 o->Live = false;
-                EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
+                SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 8) * 0.1f);
                 for (int j = 0; j < 5; j++)
                 {
                     if (rand_fps_check(1))
@@ -7106,7 +7106,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         if (o->LifeTime > 15 && ((int)o->LifeTime % 3) == 0)
         {
-            EarthQuake = (float)(rand() % 8 - 4) * 0.1f;
+            SetEarthQuakeAt(o->Position, (float)(rand() % 8 - 4) * 0.1f);
         }
         break;
     case MODEL_SKILL_FURY_STRIKE + 3:
@@ -7749,7 +7749,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                     if (o->Position[2] < Height)
                     {
                         success = true;
-                        EarthQuake = (float)(rand() % 4 - 4) * 0.1f;
+                        SetEarthQuakeAt(o->Position, (float)(rand() % 4 - 4) * 0.1f);
 
                         for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
                         {
