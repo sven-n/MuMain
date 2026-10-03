@@ -377,20 +377,28 @@ to FX2 all need it:
   deletion: a case that fell into a moved case calls its handler.
 - **Recorded:** every changed field of every slot of the five pools
   (effects, skill effects, particles, joints, sprites), of the hero and the
-  monster owner, and of the call's position, angle and light, plus how many
-  values `rand()` and `Random::` gave. Each call runs with the game's
-  default arguments and with uneven ones (scale, PK key, skill values,
-  target index). Not recorded yet: other global state (terrain light, the
-  play speed of models, object blurs, sounds) and the owner's fields outside
-  its object; not varied yet: live slots, terrain height, `timeGetTime`. The
-  test binary has no option window and no models, so cases that reach
-  `CreateParticle`, `CreateSprite` or `Models` cannot be recorded yet, and
-  the monster owner is not a real monster. The phase that first moves such
-  cases adds them; FX1.3 moved only cases that write the created slot.
+  monster owner, and of the call's position, angle and light; the trails
+  (blurs and object blurs, some of them live in pattern B), the lit cells of
+  the terrain light, and the sounds started and stopped (a recording audio
+  backend); how many values `rand()` and `Random::` gave. Pointers are named
+  (hero, monster, pool slots, character slots) or written as an address.
+  Bytes that change outside the field lists show up for particles and
+  joints, and the 64-bit Windows build stops when one of the structs changes
+  size. Each call runs with the game's default arguments and with uneven
+  ones (scale, PK key, skill values, target index). Not recorded yet: the
+  play speed of models and the owner's fields outside its object; not varied
+  yet: live slots, terrain height, `timeGetTime`. The test binary has no
+  option window and no models, so cases that reach `CreateParticle`,
+  `CreateSprite` or `Models` cannot be recorded yet, and the monster owner
+  is not a real monster. The phase that first moves such cases adds them.
 - **Tool:** `tests/effects/EffectRecorder` (since FX1.3): `RecordCall`
   records one call under given conditions, `Compare` lists the differing
-  fields by name, and `BuildShippedRegistry` builds the registry without
-  the rows being checked, so the old cases run in the same build.
+  fields by name, and `EffectTestData::BuildShippedRegistry` builds the
+  registry without the rows being checked, so the old cases run in the same
+  build. The digests of the whole records of the moved types, taken with
+  their old cases, are committed (`tests/effects/recordings`), so later
+  changes are checked against the old cases again;
+  `MU_EFFECT_RECORDER_WRITE=1` writes them anew.
 - **Baseline:** the old case stays reachable in the PR's working commits
   and is deleted after the comparison; spot checks stay as tests.
 - **Speed:** a Release benchmark of creation and lookup, old against new,

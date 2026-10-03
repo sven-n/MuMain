@@ -30,6 +30,9 @@ std::mt19937& GetThreadEngine()
 
 } // anonymous namespace
 
+// The distributions are made per call: they are cheap and keep no state, so
+// the engine alone decides the sequence and Seed repeats it.
+
 std::int32_t RangeInt(std::int32_t minInclusive, std::int32_t maxInclusive)
 {
     if (minInclusive >= maxInclusive)
@@ -37,9 +40,8 @@ std::int32_t RangeInt(std::int32_t minInclusive, std::int32_t maxInclusive)
         return minInclusive;
     }
 
-    thread_local static std::uniform_int_distribution<std::int32_t> dist;
-    using param_type = std::uniform_int_distribution<std::int32_t>::param_type;
-    return dist(GetThreadEngine(), param_type(minInclusive, maxInclusive));
+    std::uniform_int_distribution<std::int32_t> dist(minInclusive, maxInclusive);
+    return dist(GetThreadEngine());
 }
 
 float RangeFloat(float minInclusive, float maxInclusive)
@@ -49,20 +51,19 @@ float RangeFloat(float minInclusive, float maxInclusive)
         return minInclusive;
     }
 
-    thread_local static std::uniform_real_distribution<float> dist;
-    using param_type = std::uniform_real_distribution<float>::param_type;
-    return dist(GetThreadEngine(), param_type(minInclusive, maxInclusive));
+    std::uniform_real_distribution<float> dist(minInclusive, maxInclusive);
+    return dist(GetThreadEngine());
 }
 
 float Unit()
 {
-    thread_local static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
     return dist(GetThreadEngine());
 }
 
 double UnitDouble()
 {
-    thread_local static std::uniform_real_distribution<double> dist(0.0, 1.0);
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
     return dist(GetThreadEngine());
 }
 

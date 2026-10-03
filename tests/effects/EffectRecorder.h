@@ -25,9 +25,9 @@
 // slot shows up.
 //
 // A phase that moves cases records them with the old cases still in the code
-// (BuildShippedRegistry without the new rows) and with the rows of the
-// catalogue, in the same build, and compares the records; then it deletes the
-// cases.
+// (EffectTestData::BuildShippedRegistry without the new rows) and with the
+// rows of the catalogue, in the same build, and compares the records; then it
+// deletes the cases.
 namespace EffectRecorder
 {
 enum class Owner
@@ -100,14 +100,11 @@ Record RecordCall(const EffectCall& call, const Conditions& conditions);
 std::vector<Difference> Compare(const Record& expected, const Record& actual);
 std::optional<std::string> Find(const Record& record, std::string_view path);
 
+// A hash of the whole record, the same on every platform for the same record.
+std::uint64_t Digest(const Record& record);
+
 std::string Describe(const EffectCall& call, const Conditions& conditions);
 std::string ToText(const Record& record);
 std::string ToText(const std::vector<Difference>& differences);
 
-// The registry as the game builds it from the shipped catalogue, without the
-// creation values of `withoutCreationValuesOf` (so their legacy cases run
-// while they are still in ZzzEffect.cpp) and with `extraRows`, which replace
-// the rows of the same types.
-void BuildShippedRegistry(std::span<const int> withoutCreationValuesOf = {},
-                          std::span<const Data::Effects::EffectTypeCreateParams> extraRows = {});
 } // namespace EffectRecorder

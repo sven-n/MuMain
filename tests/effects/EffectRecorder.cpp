@@ -2,17 +2,14 @@
 
 #include "EffectRecorder.h"
 
-#include "doctest.h"
-
+#include "Core/Platform/IPlatformAudio.h"
 #include "Core/Utilities/Random.h"
-#include "Data/DataHandler/EffectData/EffectTypeStorage.h"
-#include "Data/GameData/EffectData/EffectKind.h"
-#include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
 #include "GameLogic/Skills/SkillEffectMgr.h"
-#include "Render/Effects/EffectRegistry.h"
+#include "Render/Effects/EffectBlurs.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
 #include "World/MapInfra/MapManager.h"
 
@@ -21,7 +18,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <filesystem>
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -37,6 +34,7 @@ constexpr double PinnedWorldTime = 1234567.25;
 constexpr int PinnedWorld = 0; // Lorencia
 constexpr unsigned char HeroTileX = 102;
 constexpr unsigned char HeroTileY = 98;
+constexpr float OwnerAngle = 45.f;
 constexpr int MonsterModel = MODEL_PLAYER + 3; // any model number other than the player
 
 // The second set of call arguments: uneven values that no case or default uses.
@@ -79,6 +77,16 @@ constexpr short UnevenTargetIndex = 53;
     F(TargetIndex) F(m_bySkillSerialNum) F(m_iChaIndex) F(m_sTargetIndex) F(m_bCreateTails) F(NumTails)              \
     F(MaxTails) F(Tails)
 // clang-format on
+
+// A field added to one of the structs changes its size, so the build stops
+// until the field lists above have it too. The sizes are those of the 64-bit
+// Windows build without iterator debugging (OBJECT holds a std::map and
+// std::vectors, whose size depends on it).
+#if defined(_MSC_VER) && defined(_WIN64) && defined(_ITERATOR_DEBUG_LEVEL) && _ITERATOR_DEBUG_LEVEL == 0
+static_assert(sizeof(OBJECT) == 680, "OBJECT changed: update RECORDER_OBJECT_FIELDS");
+static_assert(sizeof(PARTICLE) == 136, "PARTICLE changed: update RECORDER_PARTICLE_FIELDS");
+static_assert(sizeof(JOINT) == 9792, "JOINT changed: update RECORDER_JOINT_FIELDS");
+#endif
 
 // Calls visitor(name, field of `target`, same field of `reference`) for every field.
 template <typename Visitor> void VisitFields(OBJECT& target, const OBJECT& reference, Visitor&& visitor)
@@ -148,7 +156,7 @@ void FillBones(Bones& bones, float base)
 // bones with fixed values.
 void SetUpCharacter(CHARACTER* character, int model, unsigned char tileX, Bones& bones, float boneBase)
 {
-    CreateCharacterPointer(character, model, tileX, HeroTileY, 45.f);
+    CreateCharacterPointer(character, model, tileX, HeroTileY, OwnerAngle);
     delete[] character->Object.BoneTransform;
     FillBones(bones, boneBase);
     character->Object.BoneTransform = bones.get();
@@ -175,14 +183,30 @@ World& GetWorld()
     return world;
 }
 
-struct PoolRange
+// The index of `pointer` in the array [first, first + size), or -1. std::less
+// gives an order for pointers into different arrays, which < does not.
+template <typename Element> int IndexIn(const void* pointer, const Element* first, int size)
 {
-    const char* name;
-    const OBJECT* objects = nullptr;
-    const PARTICLE* particles = nullptr;
-    const JOINT* joints = nullptr;
-    int size = 0;
-};
+    const auto* element = static_cast<const Element*>(pointer);
+    const std::less<const Element*> before;
+    if (before(element, first) || !before(element, first + size))
+        return -1;
+    return static_cast<int>(element - first);
+}
+
+std::string Indexed(const char* name, int index)
+{
+    return std::string(name) + "[" + std::to_string(index) + "]";
+}
+
+// The address, for memory outside the named arrays: pointers to different
+// objects then still differ in a record.
+std::string Address(const void* pointer)
+{
+    char text[32];
+    std::snprintf(text, sizeof(text), "%p", pointer);
+    return std::string("address ") + text;
+}
 
 std::string NameOfPointer(const void* pointer)
 {
@@ -201,18 +225,32 @@ std::string NameOfPointer(const void* pointer)
         return "heroBones";
     if (pointer == world.monsterBones.get())
         return "monsterBones";
-    const PoolRange pools[] = {
-        {"Effects", Effects, nullptr, nullptr, MAX_EFFECTS},
-        {"SkillEffects", g_SkillEffects.GetEffect(0), nullptr, nullptr, MAX_SKILL_EFFECTS},
-        {"Sprites", Sprites, nullptr, nullptr, MAX_SPRITES},
-    };
-    for (const PoolRange& pool : pools)
+    for (int i = 0; i <= MAX_CHARACTERS_CLIENT; ++i)
     {
-        const auto* object = static_cast<const OBJECT*>(pointer);
-        if (object >= pool.objects && object < pool.objects + pool.size)
-            return std::string(pool.name) + "[" + std::to_string(object - pool.objects) + "]";
+        if (pointer == &world.characters[i].Object)
+            return Indexed("characters", i) + ".Object";
     }
-    return "unknown";
+    if (const int index = IndexIn(pointer, Effects, MAX_EFFECTS); index >= 0)
+        return Indexed("Effects", index);
+    if (const int index = IndexIn(pointer, g_SkillEffects.GetEffect(0), MAX_SKILL_EFFECTS); index >= 0)
+        return Indexed("SkillEffects", index);
+    if (const int index = IndexIn(pointer, Sprites, MAX_SPRITES); index >= 0)
+        return Indexed("Sprites", index);
+    return Address(pointer);
+}
+
+std::string NameOfCharacter(const CHARACTER* character)
+{
+    if (character == nullptr)
+        return "null";
+    World& world = GetWorld();
+    if (character == world.Hero())
+        return "hero character";
+    if (character == world.Monster())
+        return "monster character";
+    if (const int index = IndexIn(character, world.characters.get(), MAX_CHARACTERS_CLIENT + 1); index >= 0)
+        return Indexed("characters", index);
+    return Address(character);
 }
 
 // ---------------------------------------------------------------------------
@@ -362,6 +400,10 @@ std::string Format(const OBJECT* value)
 {
     return NameOfPointer(value);
 }
+std::string Format(const CHARACTER* value)
+{
+    return NameOfCharacter(value);
+}
 std::string Format(const vec34_t* value)
 {
     return NameOfPointer(value);
@@ -506,6 +548,20 @@ void CompareSlot(Record& record, const char* slotName, int slotIndex, Element& a
     VisitFields(after, before, comparer);
 }
 
+// For the plain structs (PARTICLE, JOINT): bytes that changed outside the
+// listed fields show up too.
+template <typename Element>
+void CompareBytesAndFields(Record& record, const char* slotName, int slotIndex, Element& after, const Element& before)
+{
+    static_assert(std::is_trivially_copyable_v<Element>);
+    if (std::memcmp(&after, &before, sizeof(Element)) == 0)
+        return;
+    const size_t recorded = record.size();
+    CompareSlot(record, slotName, slotIndex, after, before);
+    if (record.size() == recorded)
+        record.push_back({Indexed(slotName, slotIndex) + ".<bytes outside the field list>", "changed"});
+}
+
 // ---------------------------------------------------------------------------
 // The pools before a call: filled once per pattern, copied back before each call.
 // ---------------------------------------------------------------------------
@@ -560,14 +616,232 @@ void ComparePools(Record& record, const PoolImage& image)
     for (int i = 0; i < MAX_SPRITES; ++i)
         CompareSlot(record, "Sprites", i, Sprites[i], image.sprites[i]);
     for (int i = 0; i < MAX_PARTICLES; ++i)
-    {
-        if (std::memcmp(&Particles[i], &image.particles[i], sizeof(PARTICLE)) != 0)
-            CompareSlot(record, "Particles", i, Particles[i], image.particles[i]);
-    }
+        CompareBytesAndFields(record, "Particles", i, Particles[i], image.particles[i]);
     for (int i = 0; i < MAX_JOINTS; ++i)
+        CompareBytesAndFields(record, "Joints", i, Joints[i], image.joints[i]);
+}
+
+// ---------------------------------------------------------------------------
+// What creation changes outside the pools: sounds, terrain light, trails.
+// ---------------------------------------------------------------------------
+
+// An audio backend that only notes the sounds started and stopped.
+class RecordingAudio final : public mu::IPlatformAudio
+{
+public:
+    std::vector<std::string> events;
+
+    bool Initialize() override
     {
-        if (std::memcmp(&Joints[i], &image.joints[i], sizeof(JOINT)) != 0)
-            CompareSlot(record, "Joints", i, Joints[i], image.joints[i]);
+        return true;
+    }
+    void Shutdown() override {}
+    void LoadSound(ESound, const wchar_t*, int, bool) override {}
+    bool PlaySound(ESound buffer, const void* pObject, bool looped) override
+    {
+        events.push_back("play " + std::to_string(static_cast<int>(buffer)) + " at " + NameOfPointer(pObject) +
+                         (looped ? " looped" : ""));
+        return true;
+    }
+    void StopSound(ESound buffer, bool resetPosition) override
+    {
+        events.push_back("stop " + std::to_string(static_cast<int>(buffer)) + (resetPosition ? " reset" : ""));
+    }
+    void AllStopSound() override
+    {
+        events.push_back("stop all");
+    }
+    void ReleaseSound(ESound) override {}
+    void Set3DSoundPosition() override {}
+    void SetVolume(ESound, long) override {}
+    void SetMasterVolume(long) override {}
+    void PlayMusic(const char* name, bool) override
+    {
+        events.push_back(std::string("music ") + name);
+    }
+    void StopMusic(const char* name, bool) override
+    {
+        events.push_back(std::string("stop music ") + (name != nullptr ? name : ""));
+    }
+    bool IsEndMusic() override
+    {
+        return true;
+    }
+    int GetMusicPosition() override
+    {
+        return 0;
+    }
+    void SetBGMVolume(float) override {}
+    void SetSFXVolume(float) override {}
+    float GetBGMVolume() const override
+    {
+        return 0.f;
+    }
+    float GetSFXVolume() const override
+    {
+        return 0.f;
+    }
+};
+
+RecordingAudio& GetAudio()
+{
+    static RecordingAudio audio;
+    return audio;
+}
+
+// The terrain light starts dark before every call; the record says how many
+// cells a call lit and a hash of the light.
+constexpr int TerrainCells = TERRAIN_SIZE * TERRAIN_SIZE;
+
+void ClearTerrainLight()
+{
+    std::memset(PrimaryTerrainLight, 0, sizeof(vec3_t) * TerrainCells);
+}
+
+void RecordTerrainLight(Record& record)
+{
+    int lit = 0;
+    for (int i = 0; i < TerrainCells; ++i)
+    {
+        if (PrimaryTerrainLight[i][0] != 0.f || PrimaryTerrainLight[i][1] != 0.f || PrimaryTerrainLight[i][2] != 0.f)
+            ++lit;
+    }
+    if (lit == 0)
+        return;
+    std::uint64_t hash = 1469598103934665603ull;
+    const auto* bytes = reinterpret_cast<const unsigned char*>(PrimaryTerrainLight);
+    for (size_t i = 0; i < sizeof(vec3_t) * TerrainCells; ++i)
+        hash = (hash ^ bytes[i]) * 1099511628211ull;
+    record.push_back({"terrainLight", std::to_string(lit) + " cells, hash " + std::to_string(hash)});
+}
+
+// The trails: in pattern B the first blurs of each kind are live, owned by
+// the hero, the monster and the pattern object, so a case that removes or
+// changes them shows up; their sub types are from the range the trails of the
+// Gaion swords use (113 to 155), which RemoveObjectBlurs takes by sub type.
+// New trails go into the first free slots. Only the first slots are restored
+// and compared in full, the Live flags of all.
+constexpr int RecordedBlurs = 8;
+constexpr int LiveBlursInPatternB = 3;
+constexpr int FirstPatternBlurSubType = 113;
+
+template <typename BlurType> std::uint64_t HashTails(const BlurType& blur)
+{
+    std::uint64_t hash = 1469598103934665603ull;
+    for (const auto* tails : {&blur.P1, &blur.P2})
+    {
+        const auto* bytes = reinterpret_cast<const unsigned char*>(tails->data());
+        for (size_t i = 0; i < sizeof(*tails); ++i)
+            hash = (hash ^ bytes[i]) * 1099511628211ull;
+    }
+    return hash;
+}
+
+template <typename BlurType, typename OwnerName>
+void CompareBlur(Record& record, const char* name, int index, const BlurType& after, const BlurType& before,
+                 OwnerName ownerName)
+{
+    const std::string path = Indexed(name, index) + ".";
+    auto add = [&](const char* field, const std::string& value) { record.push_back({path + field, value}); };
+    if (after.Live != before.Live)
+        add("Live", Format(after.Live));
+    if (after.Type != before.Type)
+        add("Type", Format(after.Type));
+    if (after.LifeTime != before.LifeTime)
+        add("LifeTime", Format(after.LifeTime));
+    if (after.Owner != before.Owner)
+        add("Owner", ownerName(after.Owner));
+    if (after.Number != before.Number)
+        add("Number", Format(after.Number));
+    for (int i = 0; i < 3; ++i)
+    {
+        if (!Same(after.Light[i], before.Light[i]))
+            add(("Light[" + std::to_string(i) + "]").c_str(), Format(after.Light[i]));
+    }
+    if (after.SubType != before.SubType)
+        add("SubType", Format(after.SubType));
+    if (HashTails(after) != HashTails(before))
+        add("tails", "hash " + std::to_string(HashTails(after)));
+}
+
+struct BlurImage
+{
+    std::vector<Render::Effects::Blur> blurs;
+    std::vector<Render::Effects::ObjectBlur> objectBlurs;
+};
+
+std::unique_ptr<BlurImage> MakeBlurImage(SlotPattern pattern)
+{
+    auto image = std::make_unique<BlurImage>();
+    image->blurs.resize(RecordedBlurs);
+    image->objectBlurs.resize(RecordedBlurs);
+    if (pattern == SlotPattern::A)
+        return image;
+
+    World& world = GetWorld();
+    CHARACTER* const characters[LiveBlursInPatternB] = {world.Hero(), world.Monster(), &world.characters[2]};
+    OBJECT* const objects[LiveBlursInPatternB] = {&world.Hero()->Object, &world.Monster()->Object,
+                                                  &world.patternObject};
+    for (int i = 0; i < LiveBlursInPatternB; ++i)
+    {
+        Render::Effects::Blur& blur = image->blurs[i];
+        blur.Live = true;
+        blur.Type = 10 + i;
+        blur.LifeTime = 20 + i;
+        blur.Owner = characters[i];
+        blur.Number = 5;
+        blur.SubType = FirstPatternBlurSubType + i;
+        Render::Effects::ObjectBlur& objectBlur = image->objectBlurs[i];
+        objectBlur.Live = true;
+        objectBlur.Type = 40 + i;
+        objectBlur.LifeTime = 50 + i;
+        objectBlur.Owner = objects[i];
+        objectBlur.Number = 5;
+        objectBlur.LimitLifeTime = 60 + i;
+        objectBlur.SubType = FirstPatternBlurSubType + i;
+    }
+    return image;
+}
+
+const BlurImage& GetBlurImage(SlotPattern pattern)
+{
+    static const std::unique_ptr<BlurImage> a = MakeBlurImage(SlotPattern::A);
+    static const std::unique_ptr<BlurImage> b = MakeBlurImage(SlotPattern::B);
+    return pattern == SlotPattern::A ? *a : *b;
+}
+
+void RestoreBlurs(const BlurImage& image)
+{
+    for (auto& blur : Render::Effects::g_blurs)
+        blur.Live = false;
+    for (auto& blur : Render::Effects::g_objectBlurs)
+        blur.Live = false;
+    std::copy(image.blurs.begin(), image.blurs.end(), Render::Effects::g_blurs.begin());
+    std::copy(image.objectBlurs.begin(), image.objectBlurs.end(), Render::Effects::g_objectBlurs.begin());
+}
+
+void CompareBlurs(Record& record, const BlurImage& image)
+{
+    for (int i = 0; i < Render::Effects::MAX_BLURS; ++i)
+    {
+        const Render::Effects::Blur& after = Render::Effects::g_blurs[i];
+        if (i < RecordedBlurs)
+            CompareBlur(record, "blurs", i, after, image.blurs[i], NameOfCharacter);
+        else if (after.Live)
+            record.push_back({Indexed("blurs", i) + ".Live", "true"});
+    }
+    for (int i = 0; i < Render::Effects::MAX_OBJECT_BLURS; ++i)
+    {
+        const Render::Effects::ObjectBlur& after = Render::Effects::g_objectBlurs[i];
+        if (i < RecordedBlurs)
+        {
+            CompareBlur(record, "objectBlurs", i, after, image.objectBlurs[i],
+                        [](const OBJECT* owner) { return NameOfPointer(owner); });
+            if (after.LimitLifeTime != image.objectBlurs[i].LimitLifeTime)
+                record.push_back({Indexed("objectBlurs", i) + ".LimitLifeTime", Format(after.LimitLifeTime)});
+        }
+        else if (after.Live)
+            record.push_back({Indexed("objectBlurs", i) + ".Live", "true"});
     }
 }
 
@@ -577,9 +851,11 @@ class PinnedGlobals
 public:
     explicit PinnedGlobals(float frameFactor)
         : m_frameFactor(FPS_ANIMATION_FACTOR), m_worldTime(WorldTime), m_scene(SceneFlag),
-          m_world(gMapManager.WorldActive), m_hero(Hero), m_characters(CharactersClient)
+          m_world(gMapManager.WorldActive), m_hero(Hero), m_characters(CharactersClient), m_audio(g_platformAudio)
     {
         World& world = GetWorld();
+        GetAudio().events.clear();
+        g_platformAudio = &GetAudio();
         FPS_ANIMATION_FACTOR = frameFactor;
         WorldTime = PinnedWorldTime;
         SceneFlag = MAIN_SCENE;
@@ -595,6 +871,7 @@ public:
         gMapManager.WorldActive = m_world;
         Hero = m_hero;
         CharactersClient = m_characters;
+        g_platformAudio = m_audio;
     }
     PinnedGlobals(const PinnedGlobals&) = delete;
     PinnedGlobals& operator=(const PinnedGlobals&) = delete;
@@ -606,6 +883,7 @@ private:
     int m_world;
     CHARACTER* m_hero;
     CHARACTER* m_characters;
+    mu::IPlatformAudio* m_audio;
 };
 
 OBJECT* OwnerObject(Owner owner)
@@ -682,12 +960,6 @@ std::string CountRandomDraws()
     return CountDraws([] { Random::Seed(RecordSeed); }, [] { return Random::RangeInt(0, INT32_MAX); });
 }
 
-const Data::Effects::EffectTypesLoadResult& ShippedTypes()
-{
-    static const Data::Effects::EffectTypesLoadResult result =
-        Data::Effects::LoadEffectTypeFiles(std::filesystem::path(MU_TEST_DATA_DIR) / "Effects");
-    return result;
-}
 } // namespace
 
 std::span<const Conditions> AllConditions()
@@ -731,7 +1003,10 @@ Record RecordCall(const EffectCall& call, const Conditions& conditions)
     PinnedGlobals pinned(conditions.frameFactor);
     World& world = GetWorld();
     const PoolImage& image = GetImage(conditions.pattern);
+    const BlurImage& blurImage = GetBlurImage(conditions.pattern);
     RestorePools(image);
+    RestoreBlurs(blurImage);
+    ClearTerrainLight();
     world.Hero()->Object = world.heroBefore;
     world.Monster()->Object = world.monsterBefore;
 
@@ -752,6 +1027,11 @@ Record RecordCall(const EffectCall& call, const Conditions& conditions)
     ComparePools(record, image);
     CompareSlot(record, "hero", -1, world.Hero()->Object, world.heroBefore);
     CompareSlot(record, "monster", -1, world.Monster()->Object, world.monsterBefore);
+    CompareBlurs(record, blurImage);
+    RecordTerrainLight(record);
+    const std::vector<std::string>& sounds = GetAudio().events;
+    for (size_t i = 0; i < sounds.size(); ++i)
+        record.push_back({Indexed("sounds", static_cast<int>(i)), sounds[i]});
     return record;
 }
 
@@ -785,6 +1065,14 @@ std::optional<std::string> Find(const Record& record, std::string_view path)
     return std::nullopt;
 }
 
+std::uint64_t Digest(const Record& record)
+{
+    std::uint64_t hash = 1469598103934665603ull;
+    for (const char character : ToText(record))
+        hash = (hash ^ static_cast<unsigned char>(character)) * 1099511628211ull;
+    return hash;
+}
+
 std::string Describe(const EffectCall& call, const Conditions& conditions)
 {
     return "type " + std::to_string(call.type) + " subType " + std::to_string(call.subType) + " owner " +
@@ -810,31 +1098,4 @@ std::string ToText(const std::vector<Difference>& differences)
     return text;
 }
 
-void BuildShippedRegistry(std::span<const int> withoutCreationValuesOf,
-                          std::span<const Data::Effects::EffectTypeCreateParams> extraRows)
-{
-    Data::Effects::EffectTypeCatalogue catalogue;
-    catalogue.Build(Data::Effects::EffectKind::Effect,
-                    ShippedTypes().types[Data::Effects::ToIndex(Data::Effects::EffectKind::Effect)]);
-    std::vector<Data::Effects::EffectTypeCreateParams> rows;
-    std::vector<int> left;
-    for (const Data::Effects::EffectTypeCreateParams& row : catalogue.GetCreateParams())
-    {
-        const bool excluded = std::find(withoutCreationValuesOf.begin(), withoutCreationValuesOf.end(), row.type) !=
-                              withoutCreationValuesOf.end();
-        if (excluded)
-            left.push_back(row.type);
-        else
-            rows.push_back(row);
-    }
-    // A type without a row would run its legacy case on both sides of a
-    // comparison, which then proves nothing.
-    for (const int type : withoutCreationValuesOf)
-    {
-        const bool hadRow = std::find(left.begin(), left.end(), type) != left.end();
-        REQUIRE_MESSAGE(hadRow, "type " << type << " has no creation values in the catalogue");
-    }
-    rows.insert(rows.end(), extraRows.begin(), extraRows.end());
-    Render::Effects::BuildRegistry(rows);
-}
 } // namespace EffectRecorder

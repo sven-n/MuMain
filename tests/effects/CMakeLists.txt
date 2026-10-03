@@ -13,6 +13,7 @@ mu_add_test(
     NAME test_effect_creation
     SOURCES
         EffectRecorder.cpp
+        EffectTestData.cpp
         test_effect_creation.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
@@ -20,4 +21,5 @@ mu_add_test(
 )
 target_compile_definitions(test_effect_creation PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_EFFECT_RECORDINGS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/recordings"
 )

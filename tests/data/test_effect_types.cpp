@@ -2,6 +2,7 @@
 
 #include "doctest.h"
 
+#include "EffectTestData.h"
 #include "TestFiles.h"
 
 #include "Core/Globals/_TextureIndex.h"
@@ -25,10 +26,11 @@
 using namespace Data::Effects;
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
+using EffectTestData::BuildShippedRegistry;
+using EffectTestData::ShippedTypes;
 
 namespace
 {
-const std::filesystem::path EffectDirectory = std::filesystem::path(MU_TEST_DATA_DIR) / "Effects";
 const std::string Source = "ParticleTypes.json";
 // Larger than every MODEL_* and BITMAP_* number.
 constexpr int TypeNumberLimit = 40000;
@@ -75,25 +77,11 @@ std::vector<ItemDataIssue> Validate(const std::vector<EffectTypeEntry>& types)
     return issues;
 }
 
-const EffectTypesLoadResult& ShippedTypes()
-{
-    static const EffectTypesLoadResult result = LoadEffectTypeFiles(EffectDirectory);
-    return result;
-}
-
 bool IsEffectSymbol(int type)
 {
     const auto symbols = GetEffectTypeSymbols(EffectKind::Effect);
     return std::any_of(symbols.begin(), symbols.end(),
                        [&](const EffectTypeSymbol& symbol) { return symbol.type == type; });
-}
-
-// The effect registry as the game builds it on the loading screen.
-void BuildShippedRegistry()
-{
-    EffectTypeCatalogue catalogue;
-    catalogue.Build(EffectKind::Effect, ShippedTypes().types[ToIndex(EffectKind::Effect)]);
-    Render::Effects::BuildRegistry(catalogue.GetCreateParams());
 }
 
 const Render::Effects::CreateParams& RequireCreateParams(int type)
@@ -365,7 +353,7 @@ TEST_CASE("Shipped effect type files are in the written format [data][effects]")
         const std::string fileName(GetEffectTypesFileName(kind));
         INFO(fileName);
         CHECK(WriteEffectTypesJson(kind, ShippedTypes().types[ToIndex(kind)]) ==
-              TestFiles::ReadWholeFile(EffectDirectory / fileName));
+              TestFiles::ReadWholeFile(EffectTestData::ShippedEffectDirectory() / fileName));
     }
 }
 

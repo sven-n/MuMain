@@ -3,11 +3,17 @@
 #include "doctest.h"
 
 #include "EffectRecorder.h"
+#include "EffectTestData.h"
 
+#include "Audio/DSPlaySound.h"
 #include "Core/Globals/_TextureIndex.h"
 #include "Core/Globals/_enum.h"
 
 #include <array>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -15,6 +21,7 @@
 using namespace EffectRecorder;
 using Data::Effects::EffectCreateParams;
 using Data::Effects::EffectTypeCreateParams;
+using EffectTestData::BuildShippedRegistry;
 
 namespace
 {
@@ -146,6 +153,27 @@ TEST_CASE("A skill effect of the hero goes into the skill effect pool [effects][
     CHECK(Find(monster, "Effects[0].Owner") == "monster");
 }
 
+TEST_CASE("Sounds, terrain light and trails a creation changes show in the record [effects][recorder]")
+{
+    BuildShippedRegistry();
+    // BITMAP_BLIZZARD plays a sound.
+    const Record blizzard = RecordCall(CallOf(BITMAP_BLIZZARD), {});
+    CHECK(Find(blizzard, "sounds[0]") == "play " + std::to_string(static_cast<int>(SOUND_METEORITE01)) + " at null");
+
+    // BITMAP_LIGHT_RED with sub type 3 lights the terrain.
+    EffectCall light = CallOf(BITMAP_LIGHT_RED);
+    light.subType = 3;
+    CHECK(Find(RecordCall(light, {}), "terrainLight").has_value());
+    CHECK_FALSE(Find(blizzard, "terrainLight").has_value());
+
+    // The Gaion swords take away the trails of the hero (sub types 113 to 155).
+    const Record free = RecordCall(CallOf(MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE), {1.f, SlotPattern::A});
+    CHECK_FALSE(Find(free, "objectBlurs[0].Live").has_value());
+    const Record live = RecordCall(CallOf(MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE), {1.f, SlotPattern::B});
+    CHECK(Find(live, "objectBlurs[0].Live") == "false");
+    CHECK_FALSE(Find(live, "objectBlurs[1].Live").has_value());
+}
+
 TEST_CASE("A creation row that differs from the old one is caught [effects][recorder]")
 {
     BuildShippedRegistry();
@@ -240,5 +268,65 @@ TEST_CASE("The 8 types of FX1.3 create from the catalogue what their cases set [
         call.scale = 2.5f;
         INFO(scaleFromCaller[i].path);
         CHECK(Find(RecordCall(call, {}), "Effects[0].Scale") == scaleFromCaller[i].value);
+    }
+}
+
+namespace
+{
+// The digests of the records of the 8 FX1.3 types for every call RecordAll
+// makes, taken with their old cases (the commit before the one that deleted
+// them). Set MU_EFFECT_RECORDER_WRITE=1 to write the file anew from the
+// current code.
+const std::filesystem::path CatalogueCreatedRecords =
+    std::filesystem::path(MU_EFFECT_RECORDINGS_DIR) / "CatalogueCreatedTypes.txt";
+
+std::map<std::string, std::string> ReadDigests(const std::filesystem::path& file)
+{
+    std::map<std::string, std::string> digests;
+    std::ifstream in(file);
+    std::string line;
+    while (std::getline(in, line))
+    {
+        const size_t tab = line.rfind('\t');
+        if (line.empty() || line[0] == '#' || tab == std::string::npos)
+        {
+            continue;
+        }
+        digests[line.substr(0, tab)] = line.substr(tab + 1);
+    }
+    return digests;
+}
+} // namespace
+
+// The whole record of every call, not only the values the spot checks name:
+// a change anywhere (another field, another slot, a sound, a trail) fails.
+TEST_CASE("The 8 types of FX1.3 give the records of their old cases [effects][recorder]")
+{
+    BuildShippedRegistry();
+    const std::vector<Recorded> records = RecordAll(CatalogueCreatedTypes);
+
+    if (std::getenv("MU_EFFECT_RECORDER_WRITE") != nullptr)
+    {
+        std::ofstream out(CatalogueCreatedRecords, std::ios::binary);
+        out << "# The digests of the records of the 8 types FX1.3 moved into the catalogue, one\n"
+               "# line per call (tests/effects/test_effect_creation.cpp). Taken with their old\n"
+               "# cases; written with MU_EFFECT_RECORDER_WRITE=1.\n";
+        for (const Recorded& recorded : records)
+        {
+            out << recorded.description << '\t' << Digest(recorded.record) << '\n';
+        }
+        MESSAGE("wrote " << CatalogueCreatedRecords.string());
+        return;
+    }
+
+    const std::map<std::string, std::string> expected = ReadDigests(CatalogueCreatedRecords);
+    REQUIRE(expected.size() == records.size());
+    for (const Recorded& recorded : records)
+    {
+        INFO(recorded.description);
+        const auto digest = expected.find(recorded.description);
+        REQUIRE(digest != expected.end());
+        INFO(ToText(recorded.record));
+        CHECK(digest->second == std::to_string(Digest(recorded.record)));
     }
 }
