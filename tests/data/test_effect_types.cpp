@@ -393,8 +393,9 @@ TEST_CASE("The effect type catalogue keeps the creation values of effects, sorte
     const std::vector<EffectTypeEntry>& effects = ShippedTypes().types[ToIndex(EffectKind::Effect)];
     const auto withCreateParams = static_cast<size_t>(std::count_if(
         effects.begin(), effects.end(), [](const EffectTypeEntry& entry) { return entry.create.has_value(); }));
-    // The 32 types of the 22 rows that EffectRegistry.cpp held as C++ until FX1.2.
-    CHECK(withCreateParams == 32);
+    // The 32 types of the 22 rows that EffectRegistry.cpp held as C++ until
+    // FX1.2, and the 8 types whose creation cases FX1.3 moved.
+    CHECK(withCreateParams == 40);
 
     EffectTypeCatalogue catalogue;
     catalogue.Build(EffectKind::Effect, effects);
