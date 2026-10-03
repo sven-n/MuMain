@@ -9,7 +9,7 @@
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Widgets/Window/SlideWindow.h"
 #include "Guild/GuildMakeWindow.h"
-#include "UI/Party/FriendWindow.h"
+#include "UI/Social/FriendWindow.h"
 #include "UI/HUD/MainFrameWindow.h"
 #include "UI/Widgets/Window/ChatInputBox.h"
 #include "UI/Inventory/ItemMng.h"

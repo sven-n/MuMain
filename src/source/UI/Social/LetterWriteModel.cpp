@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "UI/Party/LetterWriteModel.h"
+#include "UI/Social/LetterWriteModel.h"
 
-namespace UI::Party
+namespace UI::Social
 {
 void LetterWriteModel::Bind(Rml::DataModelConstructor& c)
 {
@@ -24,4 +24,4 @@ void LetterWriteModel::Bind(Rml::DataModelConstructor& c)
     c.Bind("maximized", &maximized);
     c.Bind("sending", &sending);
 }
-} // namespace UI::Party
+} // namespace UI::Social

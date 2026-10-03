@@ -1,8 +1,8 @@
 #pragma once
 
 #include "UI/RmlBridge/RmlModelBinder.h"
-#include "UI/Party/PhotoViewerControl.h"
-#include "UI/Party/LetterWriteModel.h"
+#include "UI/Social/PhotoViewerControl.h"
+#include "UI/Social/LetterWriteModel.h"
 #include <RmlUi/Core/EventListener.h>
 #include <array>
 #include <string>
@@ -10,7 +10,7 @@
 
 class CUILetterWriteWindow;
 
-namespace UI::Party
+namespace UI::Social
 {
 // A letter being written. Two documents for the same reason the read window has two: this window
 // shows the player's own character as live 3D, which renders between the two RmlUi passes, so the
@@ -80,4 +80,4 @@ private:
     float m_Left = 0, m_Top = 0, m_Width = 0, m_Height = 0;
     std::array<float, 4> m_RestoreRect{};
 };
-} // namespace UI::Party
+} // namespace UI::Social

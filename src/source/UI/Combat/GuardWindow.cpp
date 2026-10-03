@@ -31,7 +31,6 @@
 #include <RmlUi/Core/ElementDocument.h>
 
 #include <algorithm>
-#include "UI/Party/UIWindows.h"
 #include "Render/Text/CUIRenderText.h"
 
 using namespace SEASON3B;

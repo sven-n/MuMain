@@ -1,12 +1,12 @@
 #include "stdafx.h"
-#include "UI/Party/PhotoViewerControl.h"
+#include "UI/Social/PhotoViewerControl.h"
 
-#include "UI/Party/UIWindows.h"
+#include "UI/Social/UIWindows.h"
 #include "UI/Scaling/UITransform.h"
 
 #include <RmlUi/Core.h>
 
-namespace UI::Party
+namespace UI::Social
 {
 namespace
 {
@@ -110,4 +110,4 @@ void PhotoViewerControl::ProcessEvent(Rml::Event& event)
         return;
     }
 }
-} // namespace UI::Party
+} // namespace UI::Social

@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-namespace UI::Party
+namespace UI::Social
 {
 class FriendDialogs
 {

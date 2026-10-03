@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#include "UI/Party/FriendWindow.h"
+#include "UI/Social/FriendWindow.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"
 #include "Audio/DSPlaySound.h"
@@ -79,8 +79,6 @@ bool mu::ui::window::CFriendWindow::Render()
     if (m_pFriendWindowMgr)
     {
         m_pFriendWindowMgr->Render();
-        // GetFriendMenu()->Render();
-        // GetFriendMenu()->RenderFriendButton();
     }
     return true;
 }

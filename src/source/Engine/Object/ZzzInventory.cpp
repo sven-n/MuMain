@@ -58,7 +58,6 @@
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Camera/CameraProjection.h"
-#include "UI/Party/UIWindows.h"
 #include "Render/Text/CUIRenderText.h"
 
 extern int g_iChatInputType;

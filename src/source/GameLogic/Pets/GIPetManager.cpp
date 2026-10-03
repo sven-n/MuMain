@@ -32,7 +32,6 @@
 #include "Core/Utilities/StringUtils.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/Scaling/UITransform.h"
-#include "UI/Party/UIWindows.h"
 #include "Render/Text/CUIRenderText.h"
 
 extern  bool    SkillEnable;

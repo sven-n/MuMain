@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "UI/Party/FriendShell.h"
+#include "UI/Social/FriendShell.h"
 
-#include "UI/Party/FriendWindow.h"
+#include "UI/Social/FriendWindow.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlDraggable.h"
@@ -17,7 +17,7 @@
 
 extern void ReceiveLetterText(std::span<const BYTE> packet, bool cached);
 
-namespace UI::Party
+namespace UI::Social
 {
 namespace
 {

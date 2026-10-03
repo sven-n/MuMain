@@ -3,7 +3,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "UI/Party/UIWindows.h"
 #include "UI/Core/UIManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Render/Textures/ZzzOpenglUtil.h"

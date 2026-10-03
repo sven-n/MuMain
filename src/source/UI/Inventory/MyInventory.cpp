@@ -50,7 +50,6 @@ extern bool SelectFlag;
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 #include <cmath>
-#include "UI/Party/UIWindows.h"
 
 namespace
 {

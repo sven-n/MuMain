@@ -1,14 +1,14 @@
 #pragma once
 
 #include "UI/RmlBridge/RmlModelBinder.h"
-#include "UI/Party/ChatRoomModel.h"
+#include "UI/Social/ChatRoomModel.h"
 #include <RmlUi/Core/EventListener.h>
 #include <string>
 #include <vector>
 
 class CUIChatWindow;
 
-namespace UI::Party
+namespace UI::Social
 {
 // One room, one document, one data model. The window-identity spike settled this: the vendored
 // data-for keys DOM state by array index, so rooms sharing a repeater would hand a focused field
@@ -16,9 +16,7 @@ namespace UI::Party
 // carries the window id for the same reason.
 //
 // Chrome, dragging, resizing and maximize come from the shared window_shell template, as the
-// friend shell's do. The geometry bookkeeping here is deliberately a near-copy of FriendShell's:
-// once the letter windows make a third consumer, lift the common half into one host rather than
-// generalising from two.
+// friend shell's do. Geometry is mirrored into the manager's native reference coordinates.
 class ChatRoomView : public Rml::EventListener
 {
 public:
@@ -35,7 +33,7 @@ public:
     void RemovePal(const wchar_t* name);
     int PalCount() const;
     // The room's other member when it is a pair; nullptr with nobody or a crowd (piResult 2).
-    const wchar_t* ChatFriend(int* result) const;
+    const wchar_t* ChatFriend(int* result);
     void MakeTitleText(wchar_t* out, size_t capacity) const;
 
     // byIndex is the server's participant index; 255 is a system line with no speaker.
@@ -50,7 +48,7 @@ public:
     float InviteColumnWidth() const;
     bool InviteShown() const;
     void RefreshInviteList();
-    const wchar_t* SelectedInvite() const;
+    const wchar_t* SelectedInvite();
     void FocusField();
 
     void RestoreLayout(float x, float y, float width, float height, bool resize = false);
@@ -105,4 +103,4 @@ private:
     float m_Left = 0, m_Top = 0, m_Width = 0, m_Height = 0;
     std::array<float, 4> m_RestoreRect{};
 };
-} // namespace UI::Party
+} // namespace UI::Social

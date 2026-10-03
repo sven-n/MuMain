@@ -55,7 +55,7 @@ cameras. Downstream retains one validation marker in each active path:
 - `GameShop/InGameShop.cpp`;
 - `UI/Events/GoldBowmanLena.cpp`;
 - `UI/Events/RegistrationLuckyCoin.cpp`;
-- `UI/Party/UIWindows.cpp`.
+- `UI/Social/UIWindows.cpp`.
 
 The upstream audit counted 17 occurrences across nine files before the SDL GPU
 port. The downstream count is six occurrences across six files because the

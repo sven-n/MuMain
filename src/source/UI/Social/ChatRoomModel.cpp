@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "UI/Party/ChatRoomModel.h"
+#include "UI/Social/ChatRoomModel.h"
 
-namespace UI::Party
+namespace UI::Social
 {
 void ChatRoomModel::Bind(Rml::DataModelConstructor& c)
 {
@@ -34,4 +34,4 @@ void ChatRoomModel::Bind(Rml::DataModelConstructor& c)
     c.Bind("positioned", &positioned);
     c.Bind("maximized", &maximized);
 }
-} // namespace UI::Party
+} // namespace UI::Social

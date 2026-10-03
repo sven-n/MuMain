@@ -7,7 +7,7 @@ class CUIPhotoViewer;
 
 namespace Rml { class ElementDocument; }
 
-namespace UI::Party
+namespace UI::Social
 {
 // Drag to turn, right-click to reset, and the "?" help, for a native CUIPhotoViewer standing in an
 // RmlUi slot -- driven from the document instead of from the viewer's own native mouse handling.
@@ -38,4 +38,4 @@ private:
     bool m_Turning = false;
     float m_LastX = 0;
 };
-} // namespace UI::Party
+} // namespace UI::Social

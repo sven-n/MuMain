@@ -1,8 +1,8 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Party/UIWindows.h"
-#include "UI/Party/FriendDialogs.h"
+#include "UI/Social/UIWindows.h"
+#include "UI/Social/FriendDialogs.h"
 
 namespace mu::ui::window
 {
@@ -12,7 +12,7 @@ namespace mu::ui::window
     {
         CManager* m_pNewUIMng;
         CUIWindowMgr* m_pFriendWindowMgr;
-        UI::Party::FriendDialogs m_Dialogs;
+        UI::Social::FriendDialogs m_Dialogs;
 
     public:
         CFriendWindow();
@@ -29,7 +29,7 @@ namespace mu::ui::window
         float GetLayerDepth();		// 6.f
 
         void Reset();
-        UI::Party::FriendDialogs& Dialogs() { return m_Dialogs; }
+        UI::Social::FriendDialogs& Dialogs() { return m_Dialogs; }
 
         void SendUIMessage(int iMessage, int iParam1, int iParam2) { m_pFriendWindowMgr->SendUIMessage(iMessage, iParam1, iParam2); }
         void SendUIMessageToWindow(DWORD dwUIID, int iMessage, int iParam1, int iParam2)
@@ -44,7 +44,6 @@ namespace mu::ui::window
         {
             return m_pFriendWindowMgr->AddWindow(iType, x, y, strTitle, dwParentID, iOption);
         }
-        void AddWindowFinder(CUIBaseWindow* pWindow) { m_pFriendWindowMgr->AddWindowFinder(pWindow); }
         BOOL IsWindow(DWORD dwUIID) { return m_pFriendWindowMgr->IsWindow(dwUIID); }
         CUIBaseWindow* GetWindow(DWORD dwUIID) { return m_pFriendWindowMgr->GetWindow(dwUIID); }
         void SetWindowsEnable(DWORD bEnable) { m_pFriendWindowMgr->SetWindowsEnable(bEnable); }

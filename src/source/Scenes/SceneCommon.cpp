@@ -52,7 +52,6 @@ bool& EnableMainRender = g_sceneInit.LegacyRefEnableMainRender();
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Items/CComGem.h"
 #include "UI/Core/SceneUICoordinator.h"
-#include "UI/Party/UIWindows.h"
 
 // External variable declarations (defined in ZzzScene.cpp or other files)
 extern wchar_t AbuseFilter[][20];

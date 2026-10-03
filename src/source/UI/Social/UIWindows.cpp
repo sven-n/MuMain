@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "UIWindows.h"
-#include "UI/Party/FriendWindowView.h"
+#include "UI/Social/FriendWindowView.h"
 #include "Core/Time/FrameTimerScheduler.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -27,7 +27,6 @@
 #include "Camera/CameraProjection.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "I18N/All.h"
-#include "UI/Party/UIWindows.h"
 #include "Render/Text/CUIRenderText.h"
 #include "Render/Text/TextWrap.h"
 #include "Core/Input/ImeInput.h"
@@ -76,7 +75,6 @@ CUIWindowMgr::~CUIWindowMgr()
 void CUIWindowMgr::Reset()
 {
     m_dwMainWindowUIID = 0;
-    m_WindowFindMap.clear();
     for (m_WindowMapIter = m_WindowMap.begin(); m_WindowMapIter != m_WindowMap.end(); ++m_WindowMapIter)
     {
         if (m_WindowMapIter->second != NULL)
@@ -249,7 +247,6 @@ void CUIWindowMgr::RemoveWindow(DWORD dwUIID)
             pWindow->GetBackPosition(&m_bIsMainWindowMaximize, &m_iMainWindowBackPos_y, &m_iMainWindowBackHeight);
             m_iLastFriendWindowTabIndex = static_cast<CUIFriendWindow*>(pWindow)->GetTabIndex();
         }
-        m_WindowFindMap.clear();
         m_dwMainWindowUIID = 0;
     }
 
@@ -466,55 +463,18 @@ DWORD CUIWindowMgr::GetTopNotMainWindowUIID()
     return dwResult;
 }
 
-void CUIWindowMgr::AddWindowFinder(CUIBaseWindow* pWindow)
-{
-    if (pWindow == NULL) return;
-    DWORD dwUIID = pWindow->GetUIID();
-    m_WindowFindMap.insert(std::pair<DWORD, CUIBaseWindow*>(dwUIID, pWindow));
-}
-
-void CUIWindowMgr::RemoveWindowFinder(DWORD dwUIID)
-{
-    m_WindowMapIter = m_WindowFindMap.find(dwUIID);
-    m_WindowFindMap.erase(m_WindowMapIter);
-}
-
 CUIBaseWindow* CUIWindowMgr::GetWindow(DWORD dwUIID)
 {
     m_WindowMapIter = m_WindowMap.find(dwUIID);
     if (m_WindowMapIter == m_WindowMap.end())
-    {
-        m_WindowMapIter = m_WindowFindMap.find(dwUIID);
-        if (m_WindowMapIter == m_WindowFindMap.end())
-        {
-            return NULL;
-        }
-        else
-        {
-            return m_WindowMapIter->second;
-        }
-    }
-    else
-        return m_WindowMapIter->second;
+        return nullptr;
+    return m_WindowMapIter->second;
 }
 
 BOOL CUIWindowMgr::IsWindow(DWORD dwUIID)
 {
     m_WindowMapIter = m_WindowMap.find(dwUIID);
-    if (m_WindowMapIter == m_WindowMap.end())
-    {
-        m_WindowMapIter = m_WindowFindMap.find(dwUIID);
-        if (m_WindowMapIter == m_WindowFindMap.end())
-        {
-            return FALSE;
-        }
-        else
-        {
-            return TRUE;
-        }
-    }
-    else
-        return TRUE;
+    return m_WindowMapIter != m_WindowMap.end();
 }
 
 void CUIWindowMgr::SendUIMessageToWindow(DWORD dwUIID, int iMessage, LONG_PTR iParam1, LONG_PTR iParam2)
@@ -2173,7 +2133,7 @@ BOOL CUIPhotoViewer::DoMouseAction()
     if (CheckOption(UIPHOTOVIEWER_CANCONTROL))
     {
         // Only the wheel is still read here. Every press-driven control -- turning, the reset and
-        // the "?" toggle -- moved to UI::Party::PhotoViewerControl, because a press over the
+        // the "?" toggle -- moved to UI::Social::PhotoViewerControl, because a press over the
         // letter's own document never sets MouseLButtonPush at all; see that header.
         if (CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight) == TRUE)
         {

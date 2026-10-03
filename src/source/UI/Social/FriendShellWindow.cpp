@@ -1,13 +1,13 @@
 #include "stdafx.h"
-#include "UI/Party/FriendWindow.h"
-#include "UI/Party/FriendShell.h"
+#include "UI/Social/FriendWindow.h"
+#include "UI/Social/FriendShell.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include <RmlUi/Core/Context.h>
 
-CUIFriendWindow::CUIFriendWindow() : m_Shell(std::make_unique<UI::Party::FriendShell>(*this)) {}
+CUIFriendWindow::CUIFriendWindow() : m_Shell(std::make_unique<UI::Social::FriendShell>(*this)) {}
 CUIFriendWindow::~CUIFriendWindow() = default;
 
 void CUIFriendWindow::Init(const wchar_t* title, DWORD parent)

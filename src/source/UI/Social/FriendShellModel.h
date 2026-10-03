@@ -4,7 +4,7 @@
 #include <RmlUi/Core/Types.h>
 #include <vector>
 
-namespace UI::Party
+namespace UI::Social
 {
 struct FriendShellModel
 {

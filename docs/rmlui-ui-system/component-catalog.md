@@ -452,7 +452,7 @@ it does not generalize to a draggable, stackable window.
 
 ## Native 3D viewer input
 
-`UI::Party::PhotoViewerControl` (`UI/Party/PhotoViewerControl.h`/`.cpp`) — drag-to-turn,
+`UI::Social::PhotoViewerControl` (`UI/Social/PhotoViewerControl.h`/`.cpp`) — drag-to-turn,
 right-click-to-reset and the "?" help toggle for a `CUIPhotoViewer` standing in an RmlUi slot,
 driven from the document rather than from the viewer's own native mouse handling.
 

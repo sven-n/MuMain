@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "UI/Party/LetterWrite.h"
+#include "UI/Social/LetterWrite.h"
 
-#include "UI/Party/UIWindows.h"
+#include "UI/Social/UIWindows.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlDraggable.h"
@@ -13,7 +13,7 @@
 #include <RmlUi/Core.h>
 #include <algorithm>
 
-namespace UI::Party
+namespace UI::Social
 {
 namespace
 {
@@ -308,8 +308,7 @@ void LetterWriteView::ActionRequested(const Action& a)
 }
 
 // ---------------------------------------------------------------------------------------------
-// Geometry -- see LetterRead.cpp's own copy; all four views get lifted into one host once the
-// transcription layer goes.
+// Geometry in RmlUi dp, mirrored into the manager's native reference coordinates.
 
 Rml::Element* LetterWriteView::Panel() const
 {
@@ -447,4 +446,4 @@ void LetterWriteView::SyncDraggedPosition()
     PublishPosition();
 }
 
-} // namespace UI::Party
+} // namespace UI::Social

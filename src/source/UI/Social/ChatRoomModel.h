@@ -4,7 +4,7 @@
 #include <RmlUi/Core/Types.h>
 #include <vector>
 
-namespace UI::Party
+namespace UI::Social
 {
 struct ChatRoomModel
 {
@@ -35,4 +35,4 @@ struct ChatRoomModel
 
     void Bind(Rml::DataModelConstructor& constructor);
 };
-} // namespace UI::Party
+} // namespace UI::Social

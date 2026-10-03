@@ -1,13 +1,12 @@
 #include "stdafx.h"
-#include "UI/Party/UIWindows.h"
-#include "UI/Party/LetterWrite.h"
-#include "UI/Party/LetterWriteModel.h"
+#include "UI/Social/UIWindows.h"
+#include "UI/Social/LetterWrite.h"
+#include "UI/Social/LetterWriteModel.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"
 
-// What is left of CUILetterWriteWindow once the draft is two documents of its own: the send, its
-// validation, the player's portrait and the close check. UI::Party::LetterWriteView owns the rest.
+// Owns send validation, the player's portrait, and the close check. LetterWriteView owns its RmlUi document.
 
 namespace
 {
@@ -36,7 +35,7 @@ std::wstring NormaliseBody(const std::wstring& typed)
 } // namespace
 
 CUILetterWriteWindow::CUILetterWriteWindow()
-    : m_bIsSend(FALSE), m_View(std::make_unique<UI::Party::LetterWriteView>(*this))
+    : m_bIsSend(FALSE), m_View(std::make_unique<UI::Social::LetterWriteView>(*this))
 {
 }
 

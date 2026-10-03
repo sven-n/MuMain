@@ -1,14 +1,14 @@
 #pragma once
 
 #include "UI/RmlBridge/RmlModelBinder.h"
-#include "UI/Party/FriendShellModel.h"
+#include "UI/Social/FriendShellModel.h"
 #include <RmlUi/Core/EventListener.h>
 #include <array>
 #include <vector>
 
 class CUIFriendWindow;
 
-namespace UI::Party
+namespace UI::Social
 {
 class FriendShell : public Rml::EventListener
 {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "UI/RmlBridge/RmlModelBinder.h"
-#include "UI/Party/PhotoViewerControl.h"
-#include "UI/Party/LetterReadModel.h"
+#include "UI/Social/PhotoViewerControl.h"
+#include "UI/Social/LetterReadModel.h"
 #include <RmlUi/Core/EventListener.h>
 #include <array>
 #include <string>
@@ -10,7 +10,7 @@
 
 class CUILetterReadWindow;
 
-namespace UI::Party
+namespace UI::Social
 {
 // A letter being read: two documents, because this window shows the sender's character as live 3D.
 //
@@ -73,4 +73,4 @@ private:
     float m_Left = 0, m_Top = 0, m_Width = 0, m_Height = 0;
     std::array<float, 4> m_RestoreRect{};
 };
-} // namespace UI::Party
+} // namespace UI::Social

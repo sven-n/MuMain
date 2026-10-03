@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "UI/Party/LetterRead.h"
+#include "UI/Social/LetterRead.h"
 
-#include "UI/Party/UIWindows.h"
+#include "UI/Social/UIWindows.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlDraggable.h"
@@ -13,7 +13,7 @@
 #include <RmlUi/Core.h>
 #include <algorithm>
 
-namespace UI::Party
+namespace UI::Social
 {
 namespace
 {
@@ -245,8 +245,7 @@ void LetterReadView::ActionRequested(const Action& a)
 }
 
 // ---------------------------------------------------------------------------------------------
-// Geometry -- the same bookkeeping FriendShell and ChatRoomView do; all four get lifted into one
-// host once the transcription layer goes.
+// Geometry in RmlUi dp, mirrored into the manager's native reference coordinates.
 
 Rml::Element* LetterReadView::Panel() const
 {
@@ -385,4 +384,4 @@ void LetterReadView::SyncDraggedPosition()
     PublishPosition();
 }
 
-} // namespace UI::Party
+} // namespace UI::Social

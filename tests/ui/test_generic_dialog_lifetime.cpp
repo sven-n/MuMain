@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
-#include "UI/Party/FriendDialogs.h"
+#include "UI/Social/FriendDialogs.h"
 
 extern int g_iChatInputType;
 
@@ -62,7 +62,7 @@ TEST_CASE("Friend session reset dismisses only its own dialogs [ui][dialog-lifet
     mu::ui::window::g_pGenericConfirmDialog = &dialog;
     g_iChatInputType = 1;
     {
-        UI::Party::FriendDialogs friends;
+        UI::Social::FriendDialogs friends;
         friends.Notice(L"Friend notice");
         friends.FriendRequest(L"Incoming request", L"Friend");
         const auto unrelated = dialog.Show({});

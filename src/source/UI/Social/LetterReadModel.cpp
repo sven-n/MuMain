@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "UI/Party/LetterReadModel.h"
+#include "UI/Social/LetterReadModel.h"
 
-namespace UI::Party
+namespace UI::Social
 {
 void LetterReadModel::Bind(Rml::DataModelConstructor& c)
 {
@@ -24,4 +24,4 @@ void LetterReadModel::Bind(Rml::DataModelConstructor& c)
     c.Bind("positioned", &positioned);
     c.Bind("maximized", &maximized);
 }
-} // namespace UI::Party
+} // namespace UI::Social

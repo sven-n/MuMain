@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "UI/Party/UIWindows.h"
-#include "UI/Party/LetterRead.h"
+#include "UI/Social/UIWindows.h"
+#include "UI/Social/LetterRead.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowSystem.h"
 #include "Render/Text/TextWrap.h"
@@ -9,10 +9,9 @@
 extern void ReceiveLetterText(std::span<const BYTE> packet, bool cached);
 extern int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
 
-// What is left of CUILetterReadWindow once the letter is two documents of its own: the letter it
-// holds, the sender's portrait, and the actions. UI::Party::LetterReadView owns the presentation.
+// Owns the letter, sender's portrait, and actions. LetterReadView owns its RmlUi document.
 
-CUILetterReadWindow::CUILetterReadWindow() : m_View(std::make_unique<UI::Party::LetterReadView>(*this))
+CUILetterReadWindow::CUILetterReadWindow() : m_View(std::make_unique<UI::Social::LetterReadView>(*this))
 {
 }
 

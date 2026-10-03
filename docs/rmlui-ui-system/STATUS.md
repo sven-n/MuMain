@@ -263,7 +263,7 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
     hovered -- and Winmain only calls `HandleMouseButton()` when RmlUi lets the event propagate, so
     `MouseLButtonPush` is never set for a click over a panel. The wheel is not routed through RmlUi
     at all. That asymmetry is the tell: if a ported window's wheel controls work and its click
-    controls silently do nothing, this is why. `UI::Party::PhotoViewerControl` is the fix shape --
+    controls silently do nothing, this is why. `UI::Social::PhotoViewerControl` is the fix shape --
     drive the gesture from the document (`component-catalog.md`).
   - **Native 3D can be drawn above RmlUi**, through `UI::RmlBridge::OverlayRender` wrapping
     `SetPostRmlUiCallback` -- but above the *whole* main context, not at one window's depth, and

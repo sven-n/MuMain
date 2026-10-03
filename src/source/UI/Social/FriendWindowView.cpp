@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "UI/Party/FriendWindowView.h"
+#include "UI/Social/FriendWindowView.h"
 
-#include "UI/Party/UIWindows.h"
+#include "UI/Social/UIWindows.h"
 
 #include <algorithm>
 

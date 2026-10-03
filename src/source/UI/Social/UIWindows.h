@@ -52,7 +52,7 @@ const int UIPHOTOVIEWER_CANCONTROL = 1;
 
 class FriendWindowViews;
 class CUIPhotoViewer;
-namespace UI::Party { class FriendShell; class ChatRoomView; class LetterReadView; class LetterWriteView; }
+namespace UI::Social { class FriendShell; class ChatRoomView; class LetterReadView; class LetterWriteView; }
 
 class CUIBaseWindow : public CUIControl
 {
@@ -249,7 +249,7 @@ private:
     void RefreshRoomTitle();
 
     DWORD m_dwRoomNumber;
-    std::unique_ptr<UI::Party::ChatRoomView> m_View;
+    std::unique_ptr<UI::Social::ChatRoomView> m_View;
 };
 
 class CUIPhotoViewer : public CUIControl
@@ -302,7 +302,7 @@ public:
     virtual BOOL DoMouseAction();
     virtual void Render();
 
-    // Driven by UI::Party::PhotoViewerControl, which owns these gestures while the viewer stands
+    // Driven by UI::Social::PhotoViewerControl, which owns these gestures while the viewer stands
     // behind an RmlUi document and the native press never arrives. See its header.
     void TurnBy(float degrees);
     void ResetView();
@@ -375,7 +375,7 @@ public:
 
 private:
     LETTERLIST_TEXT m_LetterHead;
-    std::unique_ptr<UI::Party::LetterReadView> m_View;
+    std::unique_ptr<UI::Social::LetterReadView> m_View;
 };
 
 class CUILetterWriteWindow : public CUIBaseWindow
@@ -418,7 +418,7 @@ public:
 
 private:
     BOOL m_bIsSend;
-    std::unique_ptr<UI::Party::LetterWriteView> m_View;
+    std::unique_ptr<UI::Social::LetterWriteView> m_View;
 };
 
 class CFriendList
@@ -527,7 +527,7 @@ protected:
 private:
     float SemanticScaleRatio() const;
 
-    std::unique_ptr<UI::Party::FriendShell> m_Shell;
+    std::unique_ptr<UI::Social::FriendShell> m_Shell;
 };
 
 typedef std::map<DWORD, CUIBaseWindow*, std::less<DWORD>> WndMap;
@@ -578,8 +578,6 @@ public:
     }
     DWORD GetTopNotMainWindowUIID();
 
-    void AddWindowFinder(CUIBaseWindow* pWindow);
-    void RemoveWindowFinder(DWORD dwUIID);
     void SendUIMessageToWindow(DWORD dwUIID, int iMessage, LONG_PTR iParam1, LONG_PTR iParam2);
 
     void OpenMainWnd(int iPos_x, int iPos_y);
@@ -640,8 +638,6 @@ protected:
     BOOL m_bWindowsEnable;
     DWORD m_dwMainWindowUIID;
     WndMap m_WindowMap;
-    WndMap m_WindowFindMap;
-    WndMap m_WindowReadyMap;
     WndMap::iterator m_WindowMapIter;
     std::list<DWORD> m_WindowArrangeList;
     std::list<DWORD>::iterator m_WindowArrangeListIter;

@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "UI/Party/ChatRoom.h"
+#include "UI/Social/ChatRoom.h"
 
-#include "UI/Party/UIWindows.h"
+#include "UI/Social/UIWindows.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlDraggable.h"
@@ -14,7 +14,7 @@
 #include <RmlUi/Core.h>
 #include <algorithm>
 
-namespace UI::Party
+namespace UI::Social
 {
 namespace
 {
@@ -210,7 +210,7 @@ void ChatRoomView::SyncPalVisibility()
     m_Binder.MarkDirty("show_pals");
 }
 
-const wchar_t* ChatRoomView::ChatFriend(int* result) const
+const wchar_t* ChatRoomView::ChatFriend(int* result)
 {
     const auto& m = m_Binder.GetModel();
     if (m.pals.size() > 2)
@@ -224,7 +224,7 @@ const wchar_t* ChatRoomView::ChatFriend(int* result) const
     {
         if (pal.name == self)
             continue;
-        const_cast<ChatRoomView*>(this)->m_NameLookup = StringUtils::NarrowToWide(pal.name);
+        m_NameLookup = StringUtils::NarrowToWide(pal.name);
         return m_NameLookup.c_str();
     }
     return nullptr;
@@ -343,12 +343,12 @@ void ChatRoomView::RefreshInviteList()
     m_Binder.MarkDirty("selected_invite");
 }
 
-const wchar_t* ChatRoomView::SelectedInvite() const
+const wchar_t* ChatRoomView::SelectedInvite()
 {
     const auto& selected = m_Binder.GetModel().selectedInvite;
     if (selected.empty())
         return nullptr;
-    const_cast<ChatRoomView*>(this)->m_SelectedInvite = StringUtils::NarrowToWide(selected);
+    m_SelectedInvite = StringUtils::NarrowToWide(selected);
     return m_SelectedInvite.c_str();
 }
 
@@ -644,4 +644,4 @@ void ChatRoomView::SyncDraggedPosition()
     PublishPosition();
 }
 
-} // namespace UI::Party
+} // namespace UI::Social

@@ -1,13 +1,13 @@
 #include "stdafx.h"
-#include "UI/Party/FriendDialogs.h"
+#include "UI/Social/FriendDialogs.h"
 
-#include "UI/Party/FriendWindow.h"
+#include "UI/Social/FriendWindow.h"
 #include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"
 
 extern int g_iChatInputType;
 
-namespace UI::Party
+namespace UI::Social
 {
 using mu::ui::window::GenericDialogConfig;
 using mu::ui::window::g_pGenericConfirmDialog;

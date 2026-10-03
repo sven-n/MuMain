@@ -5,7 +5,7 @@
 #include "stdafx.h"
 
 #include "Core/Utilities/Random.h"
-#include "UI/Party/UIWindows.h"
+#include "UI/Social/UIWindows.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"

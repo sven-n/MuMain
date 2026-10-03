@@ -370,7 +370,7 @@ useful detail; full history in git log):
       RmlUi" bucket). `RememberPasswordPrompt` (`UI/Windows/RememberPasswordPrompt.h`) is the
       variant to copy instead for a window with no reusable state worth a class — a free-function
       module in `namespace UI::Login`.
-    - **Native-only UI** — `CFriendWindow` (`UI/Party/FriendWindow.h`), already called out in
+    - **Native-only UI** — `CFriendWindow` (`UI/Social/FriendWindow.h`), already called out in
       `building-new-ui.md` as the template for wrapping a live legacy subsystem
       (`CUIWindowMgr`/friend/mail/chat-room) behind a thin `mu::ui::window::CObject` adapter whose
       methods forward one-to-one. Picked over a plain not-yet-touched `CObject` window because it's

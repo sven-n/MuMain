@@ -1,15 +1,15 @@
 #include "stdafx.h"
-#include "UI/Party/UIWindows.h"
-#include "UI/Party/ChatRoom.h"
+#include "UI/Social/UIWindows.h"
+#include "UI/Social/ChatRoom.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"
 
 // What is left of CUIChatWindow once the room is an RmlUi document of its own: the chat-server
 // connection, the room's identity, and forwarding. Presentation, participants, the draft line and
-// the invitation panel all live in UI::Party::ChatRoomView.
+// the invitation panel all live in UI::Social::ChatRoomView.
 
-CUIChatWindow::CUIChatWindow() : m_dwRoomNumber(0), m_View(std::make_unique<UI::Party::ChatRoomView>(*this))
+CUIChatWindow::CUIChatWindow() : m_dwRoomNumber(0), m_View(std::make_unique<UI::Social::ChatRoomView>(*this))
 {
 }
 

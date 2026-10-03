@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "UI/Party/FriendShellModel.h"
+#include "UI/Social/FriendShellModel.h"
 
-namespace UI::Party
+namespace UI::Social
 {
 void FriendShellModel::Bind(Rml::DataModelConstructor& c)
 {

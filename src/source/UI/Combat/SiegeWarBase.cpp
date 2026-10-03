@@ -7,13 +7,13 @@ using namespace mu::ui::window;
 #include "UI/Combat/SiegeWarBase.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Guild/GuildTypes.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "UI/HUD/Skills/SkillTooltip.h"
 #include "UI/Scaling/UITransform.h"
 #include "Core/Utilities/StringUtils.h"
-#include "UI/Party/UIWindows.h"
 
 namespace
 {

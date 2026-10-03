@@ -79,7 +79,7 @@ file-organization question now, not a naming one.
 Not a permanent third toolkit alongside RmlUi and `mu::ui::window` — a fully enumerable, closeable
 checklist (`ui-target-architecture.md` item 17's "concrete instance"). Found and scoped
 2026-09-13 while investigating whether porting Friend/Mail would let this family retire. It
-wouldn't — Friend/Mail (`CUIWindowMgr`/`CUIBaseWindow`, `UI/Party/UIWindows.cpp`) is only one of
+wouldn't — Friend/Mail (`CUIWindowMgr`/`CUIBaseWindow`, `UI/Social/UIWindows.cpp`) is only one of
 four independent pieces still keeping this file alive:
 
 1. **`CUITextInputBox`** — **transitional now, not permanent.** The old framing ("permanent until

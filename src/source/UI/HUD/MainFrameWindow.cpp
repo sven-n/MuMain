@@ -40,7 +40,7 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 #include "GameLogic/Quests/QuestMng.h"
-#include "UI/Party/FriendWindow.h"
+#include "UI/Social/FriendWindow.h"
 
 namespace
 {

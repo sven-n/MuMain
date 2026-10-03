@@ -4,7 +4,7 @@
 #include <RmlUi/Core/Types.h>
 #include <vector>
 
-namespace UI::Party
+namespace UI::Social
 {
 struct LetterWriteModel
 {
@@ -21,4 +21,4 @@ struct LetterWriteModel
 
     void Bind(Rml::DataModelConstructor& constructor);
 };
-} // namespace UI::Party
+} // namespace UI::Social
