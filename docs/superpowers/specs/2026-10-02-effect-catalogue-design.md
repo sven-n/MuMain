@@ -184,7 +184,7 @@ Kalima maps load the rock `Object25\Object10.bmd`).
   "formatVersion": 1,
   "kind": "effect",
   "types": [
-    { "name": "cundunGhost", "code": "MODEL_CUNDUN_GHOST",
+    { "name": "kundunGhost", "code": "MODEL_CUNDUN_GHOST",
       "create": { "lifeTime": 200, "scale": 1.8, "velocity": 0.08, "blendMesh": -2, "light": [0.5, 0.5, 0.5] } },
     { "name": "earthQuake1", "code": "MODEL_SKILL_FURY_STRIKE+1" },
     { "name": "kentaurosArrow", "code": "MODEL_KENTAUROS_ARROW",
@@ -218,7 +218,8 @@ Kalima maps load the rock `Object25\Object10.bmd`).
   built once after loading. Lookups stay a bounds check and one array read;
   names are only used while loading, for error messages and in the editor.
 - Creating an effect before the catalogue is loaded is logged as an error,
-  because moved types no longer have their old case.
+  because moved types no longer have their old case. The handlers are code
+  and work before that; only the values from the data are missing.
 
 ### How other data references types
 
@@ -300,6 +301,24 @@ built from the catalogue, without the guard of today's static table. Only
 one-time test that `Lookup` gives the same values and handlers as the old
 rows for every number, by the recorder for the 32 types, and by a Release
 benchmark of creation and lookup (old against new).
+
+*Done:* the creation values of the 32 types are `create` objects in
+`EffectTypes.json` (format in [effect-data.md](../../effect-data.md)); the
+C++ rows of `EffectRegistry.cpp` keep only the handlers. Besides the
+registry, the catalogue reads and writes `create` (`EffectCreateParamsJson`)
+and keeps the values sorted by number for `BuildRegistry`, which builds the
+table on the loading screen right after the catalogue (`OpenBasicData`) and
+converts the values to `CreateParams` once, so creating an effect only
+copies them, as before. A lookup before the build (a test or a tool without
+the data) builds the handlers alone, which are code, and logs an error that
+the creation values are missing; in the game nothing creates or moves an
+effect that early. A one-time test compared the old rows with the built
+registry for every number: all 309 descriptors are equal (32 with creation
+values), and applying the values to a slot gives the same fields. The
+recorder comes with FX1.3, the first phase that deletes cases; FX1.2 deletes
+none and applies the values with the unchanged `ApplyCreateParams`. Release
+timing: a lookup takes 1.13 ns instead of 1.70 ns (no static guard any
+more), applying the values 2.4 ns as before.
 
 **FX1.3–FX1.5** move effect cases into data in growing steps: first the 8
 types whose cases only set fields `CreateParams` has, then the 26 that need
@@ -441,19 +460,27 @@ PR (D41). Each fix changes only what was broken:
   follow: `RenderWheelWeapon` and `RenderFuryStrike` use `ToModelSlot`, and
   the spear check of the move handlers uses `ITEM_SPEAR`.
 
+Filed upstream (2026-10-03):
+
+- sven-n/MuMain#680: `MODEL_DEATH_SPI_SKILL` creates its ground circles at
+  an uninitialized position (the first of a frame; the further ones of that
+  frame at its rotated direction, a point near the map origin), also in the
+  original client; the fix adds a visible effect, so the look needs a
+  decision.
+- sven-n/MuMain#681: 63 creation cases multiply one-time values (spawn
+  offsets, start angles) by `FPS_ANIMATION_FACTOR`, so effects start in
+  other places above 25 fps (from upstream's 2023 frame rate work; D34
+  keeps them as a flag until then).
+- sven-n/MuMain#682: 25 effect (5 of them only with a registry row), 6
+  particle and 2 joint types are handled but never created (checked in
+  FX1.1, also against computed types).
+- sven-n/MuMain#683: three item stat changes of 815b8828 found for the items
+  design (blocking and magic defense, the level requirement of the late
+  wings, wing options counted as excellent).
+
 Still to check and file upstream: the owner is used without a null check in
-27 creation cases; 25 effect (5 of them only with a registry row), 6 particle
-and 2 joint types are handled but never created (checked in FX1.1, also
-against computed types; listed in the FX1.1 PR), and 9 effect
-types are created but have no code (`MODEL_EX01_SHADOW_MASTER_*`).
-`MODEL_DEATH_SPI_SKILL` creates its ground circles at an uninitialized
-position (the first of a frame; the further ones of that frame at its
-rotated direction, a point near the map origin; `Move_MODEL_DEATH_SPI_SKILL`,
-also in the original client; the fix adds a visible effect, so the look
-needs a decision). 63 creation cases
-multiply one-time values (spawn offsets, start angles) by
-`FPS_ANIMATION_FACTOR`, so effects start in other places above 25 fps
-(from upstream's 2023 frame rate work; D34 keeps them as a flag).
+27 creation cases, and 9 effect types are created but have no code
+(`MODEL_EX01_SHADOW_MASTER_*`).
 
 ## Open questions
 

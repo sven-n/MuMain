@@ -11,14 +11,19 @@ namespace
 {
 using Json::OrderedJson;
 
-std::optional<int> ToIndex(const OrderedJson& value, int maxValue)
+std::optional<int> ToInteger(const OrderedJson& value, int minValue, int maxValue)
 {
     long long number = 0;
-    if (!Json::ReadWholeNumber(value, number) || number < 0 || number > maxValue)
+    if (!Json::ReadWholeNumber(value, number) || number < minValue || number > maxValue)
     {
         return std::nullopt;
     }
     return static_cast<int>(number);
+}
+
+std::optional<int> ToIndex(const OrderedJson& value, int maxValue)
+{
+    return ToInteger(value, 0, maxValue);
 }
 } // namespace
 
@@ -93,18 +98,23 @@ bool ItemModelValueReader::ReadNumbers(const char* key, std::span<double> values
 
 bool ItemModelValueReader::ReadIndex(const char* key, int& value, int maxValue)
 {
+    return ReadInteger(key, value, 0, maxValue);
+}
+
+bool ItemModelValueReader::ReadInteger(const char* key, int& value, int minValue, int maxValue)
+{
     const OrderedJson* field = Find(key);
     if (field == nullptr)
     {
         return false;
     }
-    const std::optional<int> index = ToIndex(*field, maxValue);
-    if (!index)
+    const std::optional<int> number = ToInteger(*field, minValue, maxValue);
+    if (!number)
     {
-        Error(key, "must be a whole number from 0 to " + std::to_string(maxValue));
+        Error(key, "must be a whole number from " + std::to_string(minValue) + " to " + std::to_string(maxValue));
         return false;
     }
-    value = *index;
+    value = *number;
     return true;
 }
 

@@ -2,6 +2,7 @@
 
 #include "EffectTypesJson.h"
 
+#include "Data/GameData/EffectData/EffectCreateParamsJson.h"
 #include "Data/GameData/EffectData/EffectTypeSymbols.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 
@@ -58,9 +59,36 @@ bool ReadText(const OrderedJson& json, const char* key, std::string& text)
     return true;
 }
 
-// Reads entry `index` of "types"; false when it has no name or code.
-bool ReadEntry(const OrderedJson& json, size_t index, const std::string& source, EffectTypeEntry& entry,
-               std::vector<ItemDataIssue>& issues)
+// Reads the creation values of an effect entry, if it has them.
+void ReadCreateParams(const OrderedJson& json, const std::string& field, const std::string& source,
+                      EffectTypeEntry& entry, std::vector<ItemDataIssue>& issues)
+{
+    const auto create = json.find(CreateKey);
+    if (create == json.end())
+    {
+        return;
+    }
+    const std::string createField = field + "." + CreateKey;
+    if (!create->is_object())
+    {
+        AddError(issues, source, createField, "must be an object with the creation values");
+        return;
+    }
+    const Items::ModelJson::ReportIssue report =
+        [&](ItemDataIssueSeverity severity, const std::string& issueField, const std::string& message)
+    { AddIssue(issues, severity, source, issueField, message); };
+    entry.create = ReadEffectCreateParams(*create, createField, report);
+    if (*entry.create == EffectCreateParams{})
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, source, createField,
+                 "sets no value; the creation code of the type is skipped all the same");
+    }
+}
+
+// Reads entry `index` of "types"; false when it has no name or code. Only
+// effects have creation values.
+bool ReadEntry(const OrderedJson& json, size_t index, const std::string& source, EffectKind kind,
+               EffectTypeEntry& entry, std::vector<ItemDataIssue>& issues)
 {
     const std::string field = std::string(Keys::Types) + "[" + std::to_string(index) + "]";
     if (!json.is_object())
@@ -79,9 +107,14 @@ bool ReadEntry(const OrderedJson& json, size_t index, const std::string& source,
     };
     const bool hasName = readText(Keys::Name, entry.name);
     const bool hasCode = readText(Keys::Code, entry.code);
+    const bool kindHasCreateParams = kind == EffectKind::Effect;
+    if (kindHasCreateParams)
+    {
+        ReadCreateParams(json, field, source, entry, issues);
+    }
     for (const auto& [key, value] : json.items())
     {
-        if (key != Keys::Name && key != Keys::Code)
+        if (key != Keys::Name && key != Keys::Code && !(kindHasCreateParams && key == CreateKey))
         {
             AddIssue(issues, ItemDataIssueSeverity::Warning, source, field + "." + key, UnknownField);
         }
@@ -137,7 +170,7 @@ void ReadEffectTypesJson(std::string_view text, const std::string& source, Effec
     for (size_t index = 0; index < list->size(); ++index)
     {
         EffectTypeEntry entry;
-        if (ReadEntry((*list)[index], index, source, entry, issues))
+        if (ReadEntry((*list)[index], index, source, kind, entry, issues))
         {
             types.push_back(std::move(entry));
         }
@@ -207,8 +240,13 @@ std::string WriteEffectTypesJson(EffectKind kind, std::span<const EffectTypeEntr
         OrderedJson json;
         json[Keys::Name] = entry->name;
         json[Keys::Code] = entry->code;
+        if (entry->create && kind == EffectKind::Effect)
+        {
+            json[CreateKey] = WriteEffectCreateParams(*entry->create);
+        }
         root[Keys::Types].push_back(std::move(json));
     }
-    return root.dump(Items::Json::Indent, ' ', false, OrderedJson::error_handler_t::replace) + "\n";
+    const std::string text = root.dump(Items::Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
+    return Items::Json::PutListsOnOneLine(text, CreateLightKey) + "\n";
 }
 } // namespace Data::Effects

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Data/GameData/EffectData/EffectCreateParams.h"
 #include "Data/GameData/EffectData/EffectKind.h"
 #include "Data/GameData/EffectData/EffectTypesJson.h"
 
@@ -15,7 +16,8 @@ namespace Data::Effects
 // The names of the effect types of all kinds, built once on the loading
 // screen from the catalogue files. Data that names types looks them up while
 // loading; logs and the editor show names for numbers. The effect code keeps
-// using the numbers.
+// using the numbers. The creation values of the effects go into the effect
+// registry (Render::Effects::BuildRegistry).
 class EffectTypeCatalogue
 {
 public:
@@ -33,6 +35,9 @@ public:
 
     size_t GetTypeCount(EffectKind kind) const;
 
+    // The effect types with creation values, sorted by number.
+    std::span<const EffectTypeCreateParams> GetCreateParams() const;
+
 private:
     struct NamedType
     {
@@ -42,6 +47,7 @@ private:
 
     std::array<std::vector<NamedType>, EffectKindCount> m_byName;
     std::array<std::vector<NamedType>, EffectKindCount> m_byType;
+    std::vector<EffectTypeCreateParams> m_createParams;
 };
 } // namespace Data::Effects
 

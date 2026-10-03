@@ -1,10 +1,10 @@
 # Effect data
 
 The effect catalogue gives every effect, particle, lightning and sprite
-type of the client a name. It lives in `src/bin/Data/Effects/`, next to the
-glow colors of the item models (`GlowColors.json`), and is loaded once on
-the loading screen. Other data names effect types with these names instead
-of numbers; until then nothing in the game reads them, and the effect code
+type of the client a name, and some effects their creation values. It
+lives in `src/bin/Data/Effects/`, next to the glow colors of the item models
+(`GlowColors.json`), and is loaded once on the loading screen. Other data
+will name effect types with these names instead of numbers; the effect code
 keeps using the numbers.
 
 Design and plans: [effect catalogue design](superpowers/specs/2026-10-02-effect-catalogue-design.md).
@@ -59,6 +59,54 @@ names: `fire` is a particle and also an effect, and the two are unrelated.
   `MuError.log`.
 - Types are sorted by name and the fields always come in the same order;
   files are UTF-8 with LF line endings.
+
+## Creation values
+
+An effect entry can have a `create` object: the values the effect starts
+with when the game creates it. Particles, lightning and sprites have none
+(a `create` there is ignored with a warning).
+
+```json
+{
+  "name": "kundunGhost",
+  "code": "MODEL_CUNDUN_GHOST",
+  "create": {
+    "lifeTime": 200,
+    "scale": 1.8,
+    "velocity": 0.08,
+    "blendMesh": -2,
+    "light": [0.5, 0.5, 0.5]
+  }
+}
+```
+
+| Field | What it sets |
+|---|---|
+| `lifeTime` | How long the effect lives, in frames at 25 frames per second (200 is 8 seconds). |
+| `scale` | Its size; replaces the size the creating code passes (0.9 when it passes none). |
+| `velocity` | Its speed; what it does depends on the effect's move code. |
+| `gravity` | Its gravity; what it does depends on the effect's move code. |
+| `hiddenMesh` | The mesh of the model that is not drawn, by its number in the model; `-1` none, `-2` the whole model. |
+| `blendMesh` | The meshes drawn bright and see-through (added light), by the texture number of the model's meshes; `-1` none, `-2` all. |
+| `blendMeshLight` | How bright the `blendMesh` meshes are. |
+| `alpha` | How opaque the effect is, from 0 (invisible) to 1. |
+| `light` | The color it is drawn with, `[red, green, blue]`; replaces the color the creating code passes. |
+| `copyLightToDirection` | `true`: the move code of the effect gets the color too (some effects fade it back in from there). |
+
+- A field that is left out keeps what the game sets for every new effect,
+  or what the creating code passes. `lifeTime` and `gravity` are not set for
+  every new effect: left out, they keep the value of the effect that used
+  the slot before, as in the original client.
+- An effect with `create` starts with these values **instead of its
+  creation code**. Only effects whose creation code set nothing but these
+  values have one; adding `create` to another effect drops what its code
+  did (for example the effects it spawns) and changes how it looks.
+- A value that is not a number, or too large for the game (which keeps
+  the values as float), is an error; so are mesh fields that are not whole
+  numbers from -2 to 32767, an `alpha` outside 0 to 1, a
+  `copyLightToDirection` that is not `true`/`false` and a `light` that is
+  not three numbers. An unknown field is a warning, and so is a `create`
+  that sets no value (it still replaces the creation code).
 
 ## How the names were chosen
 

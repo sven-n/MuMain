@@ -21,6 +21,8 @@ public:
     bool ReadNumbers(const char* key, std::span<double> values, size_t minCount);
     // Reads a whole number from 0 to maxValue.
     bool ReadIndex(const char* key, int& value, int maxValue);
+    // Reads a whole number from minValue to maxValue.
+    bool ReadInteger(const char* key, int& value, int minValue, int maxValue);
     // Reads a list of at least one whole number from 0 to maxValue.
     bool ReadIndexes(const char* key, std::vector<int>& values, int maxValue);
     bool ReadBool(const char* key, bool& value);

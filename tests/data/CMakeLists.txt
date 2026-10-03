@@ -43,3 +43,14 @@ mu_add_test(
 target_compile_definitions(test_effect_types PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
+
+# The effect registry before the effect catalogue is loaded: a binary of its
+# own, so no other test has built the registry yet.
+mu_add_test(
+    NAME test_effect_registry_before_load
+    SOURCES
+        test_effect_registry_before_load.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
