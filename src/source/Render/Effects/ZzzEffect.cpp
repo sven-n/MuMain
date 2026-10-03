@@ -531,33 +531,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 }
             }
             break;
-            case MODEL_KENTAUROS_ARROW:
-            {
-                o->LifeTime = 34;
-                o->Scale = 0.7f;
-                o->Velocity = 70.f;
-                o->Alpha = 0.f;
-                Vector(1.0f, 1.0f, 1.0f, o->Light);
-                /*
-                                    vec3_t vDir;
-                                    vec34_t vMat;
-                                    Vector(0.f, -1.f, 0.f, vDir);
-                                    AngleMatrix(o->Angle, vMat);
-                                    VectorRotate(vDir, vMat, o->Direction);
-                                    CreateJoint ( BITMAP_FLARE+1, o->Position, o->Position, o->Angle, 17, o, 15.f, 40 );
-                                    */
-                                    //					CreateJoint ( BITMAP_JOINT_FORCE, o->Position, o->Position, o->Angle, 7, o, 150.f, 40 );
-                                    //					CreateJoint ( BITMAP_FLARE+1, o->Position, o->Position, o->Angle, 14, o, 50.f, 40 );
-                                    //					CreateJoint(BITMAP_JOINT_ENERGY,o->Position,o->Position,o->Angle,5,o,100.f);
-                                    //					CreateJoint(BITMAP_JOINT_HEALING, o->Position, o->Position, o->Angle, 14, o, 30.f);
-            }
-            break;
-            case MODEL_WARP3:
-            case MODEL_WARP6:
-                o->LifeTime = 0xffffff;
-                o->BlendMesh = -2;
-                o->Scale = 0.6f;
-                break;
             case MODEL_WARP2:
             case MODEL_WARP:
             case MODEL_WARP5:
@@ -972,11 +945,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             }
             break;
 
-            case BITMAP_SPARK + 1:
-                o->LifeTime = 10;
-                //Vector(0.f,0.f,60.f,o->Direction);
-                //o->Position[2] += 100.f;
-                break;
             case BITMAP_BOSS_LASER:
             case BITMAP_BOSS_LASER + 1:
             case BITMAP_BOSS_LASER + 2:
@@ -1288,10 +1256,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 case 3:	o->LifeTime = 25;	break;
                 }
                 CreateParticle(o->Type, o->Position, o->Angle, o->Light, o->SubType, 1.0f, o->Owner);
-                break;
-
-            case BITMAP_SPARK + 2:
-                o->LifeTime = 100;
                 break;
 
             case BITMAP_GATHERING:
@@ -4901,11 +4865,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     CreateParticle(BITMAP_RAKLION_CLOUDS, v3ResultPos, v3ResultAngle, o->Light, 0, fResultScale);
                 }
             }break;
-            case MODEL_1_STREAMBREATHFIRE:
-            {
-                o->LifeTime = 30;
-            }
-            break;
             case MODEL_LAVAGIANT_FOOTPRINT_R:
             case MODEL_LAVAGIANT_FOOTPRINT_V:
             {
@@ -5806,17 +5765,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
 
                 o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 100.f;
             }break;
-            case MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2:
-            {
-                o->LifeTime = 20;
-                o->Scale = 0.9f;
-            }break;
-            case MODEL_EFFECT_SD_AURA:
-            {
-                o->LifeTime = 1000;
-                o->Scale = 1.0f;
-            }
-            break;
             case BITMAP_WATERFALL_4:
             {
                 o->LifeTime = 80;

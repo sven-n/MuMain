@@ -171,19 +171,52 @@ TEST_CASE("A creation row that differs from the old one is caught [effects][reco
     CHECK(differences[1].actual == "35");
 }
 
-// The comparison of FX1.3: the old cases (still in ZzzEffect.cpp in this
-// commit) against the rows of the catalogue, for every sub type, owner, frame
-// factor and slot pattern. It goes with the cases.
-TEST_CASE("FX1.3: the 8 types create from the catalogue what their cases created [effects][recorder]")
+// FX1.3 moved the creation of these types from code into the catalogue; the
+// commit before the one that deleted their cases compared both for every sub
+// type, owner, frame factor and slot pattern. These are the values the cases
+// set (floats as the recorder writes them).
+TEST_CASE("The 8 types of FX1.3 create from the catalogue what their cases set [effects][recorder]")
 {
-    BuildShippedRegistry(CatalogueCreatedTypes);
-    const std::vector<Recorded> cases = RecordAll(CatalogueCreatedTypes);
-    BuildShippedRegistry();
-    const std::vector<Recorded> catalogue = RecordAll(CatalogueCreatedTypes);
+    struct Expected
+    {
+        int type;
+        std::vector<RecordedValue> values;
+    };
+    const std::vector<Expected> expected = {
+        {MODEL_KENTAUROS_ARROW,
+         {{"Effects[0].LifeTime", "34"},
+          {"Effects[0].Scale", "0.699999988"},
+          {"Effects[0].Velocity", "70"},
+          {"Effects[0].Alpha", "0"},
+          {"Effects[0].Light[0]", "1"},
+          {"Effects[0].Light[2]", "1"}}},
+        {MODEL_WARP3,
+         {{"Effects[0].LifeTime", "16777215"}, {"Effects[0].Scale", "0.600000024"}, {"Effects[0].BlendMesh", "-2"}}},
+        {MODEL_WARP6,
+         {{"Effects[0].LifeTime", "16777215"}, {"Effects[0].Scale", "0.600000024"}, {"Effects[0].BlendMesh", "-2"}}},
+        {BITMAP_SPARK + 1, {{"Effects[0].LifeTime", "10"}}},
+        {BITMAP_SPARK + 2, {{"Effects[0].LifeTime", "100"}}},
+        {MODEL_1_STREAMBREATHFIRE, {{"Effects[0].LifeTime", "30"}}},
+        {MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2,
+         {{"Effects[0].LifeTime", "20"}, {"Effects[0].Scale", "0.899999976"}}},
+        {MODEL_EFFECT_SD_AURA, {{"Effects[0].LifeTime", "1000"}, {"Effects[0].Scale", "1"}}},
+    };
+    REQUIRE(expected.size() == CatalogueCreatedTypes.size());
 
-    std::ostringstream log;
-    const int differing = CompareAll(cases, catalogue, log);
-    INFO(log.str());
-    CHECK(differing == 0);
-    MESSAGE("compared " << cases.size() << " calls");
+    BuildShippedRegistry();
+    for (const Expected& type : expected)
+    {
+        for (const Conditions& conditions : AllConditions())
+        {
+            const EffectCall call = CallOf(type.type);
+            INFO(Describe(call, conditions));
+            const Record record = RecordCall(call, conditions);
+            CHECK(Find(record, "Effects[0].Live") == "true");
+            for (const RecordedValue& value : type.values)
+            {
+                INFO(value.path);
+                CHECK(Find(record, value.path) == value.value);
+            }
+        }
+    }
 }

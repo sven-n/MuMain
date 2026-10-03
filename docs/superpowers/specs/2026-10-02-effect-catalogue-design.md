@@ -327,6 +327,26 @@ Position, Kind, Timer, Distance, CollisionRange, …), then the 47 that
 choose values by SubType. Each step deletes the moved cases and is checked
 with the recorder.
 
+*FX1.3 done:* the creation values of `MODEL_KENTAUROS_ARROW`, `MODEL_WARP3`,
+`MODEL_WARP6`, `BITMAP_SPARK+1`, `BITMAP_SPARK+2`,
+`MODEL_1_STREAMBREATHFIRE`, `MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2` and
+`MODEL_EFFECT_SD_AURA` are `create` objects of `EffectTypes.json`, and their
+7 cases are deleted from `CreateEffect` (`CreateEffect` runs nothing after
+its switch, so a row replaces a case completely). The recorder is
+`tests/effects/EffectRecorder`, with `Random::Seed` as the only change to
+game code (no game code calls it). The PR's first commit records the old
+cases against the rows in one build, for the sub types 0 to 3 and 99, each
+owner (none, the hero, a monster), both frame factors and both slot
+patterns: all 480 calls are equal. The second commit deletes the cases and
+keeps spot checks of the values they set. g++ finds the same 6 fallthroughs
+in `ZzzEffect.cpp` before and after (with `-Wimplicit-fallthrough` in a real
+compile; it does not warn with `-fsyntax-only`). Close to fitting, for
+FX1.4: four cases whose other statements only repeat the common setup
+(`MODEL_SUMMONER_WRISTRING_EFFECT`, `MODEL_SUMMONER_CASTING_EFFECT4`,
+`BITMAP_FIRECRACKER0001`, and `MODEL_SHIELD_CRASH2`, whose `Gravity =
+Velocity` is always 0.3 there), the empty case of `MODEL_PHOENIX_SHOT`, and
+four cases that set `Scale = Scale` (the call's scale even when it is 0).
+
 **FX1.6–FX1.7** add the effect browser and its preview to MuEditor. They
 change no game code outside editor builds.
 
@@ -358,6 +378,10 @@ to FX2 all need it:
 - **Recorded:** the whole created slot, all pools (effects, skill effects,
   particles, joints, sprites), a `rand()` and a `Random::` sentinel, and
   the global state some cases change.
+- **Tool:** `tests/effects/EffectRecorder` (since FX1.3): `RecordCall`
+  records one call under given conditions, `Compare` lists the differing
+  fields by name, and `BuildShippedRegistry` builds the registry without
+  the rows being checked, so the old cases run in the same build.
 - **Baseline:** the old case stays reachable in the PR's working commits
   and is deleted after the comparison; spot checks stay as tests.
 - **Speed:** a Release benchmark of creation and lookup, old against new,
