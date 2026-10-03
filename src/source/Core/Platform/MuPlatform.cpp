@@ -22,6 +22,12 @@ static bool s_bInitialized = false;
 
 bool MuPlatform::Initialize()
 {
+    // Tell SDL the app renders the IME composition text itself (CUITextInputBox draws
+    // m_composition). Without this, SDL uses the native IME UI, which does not emit
+    // SDL_EVENT_TEXT_EDITING and is invisible in fullscreen / under our custom message
+    // hook — so 注音 composition never shows. Must be set before SDL initializes.
+    SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "composition");
+
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
         mu::log::Get("platform")->error("MU_ERR_SDL_INIT_FAILED: SDL3 initialization failed: {}", SDL_GetError());
