@@ -1,7 +1,7 @@
 /* Legacy theme for a chat room. Same shared window_shell chrome as the friend shell, re-sliced the
    same way so it survives a window the player resizes, and the same win_* art for the window
    buttons, the grip and the action buttons. RmlUi owns layout and scrolling; only the usable
-   viewport height and the native photo masks are bound. */
+   viewport height is bound. */
 
 /* window_shell.rcss draws its caps with image(), correct at the 230dp the dialogs are locked to
    and distorting the border art at any other width. Same assets, stretch-safe inner rects, drawn

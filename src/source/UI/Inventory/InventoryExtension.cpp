@@ -251,11 +251,6 @@ bool CInventoryExtension::InventoryProcess()
 
 bool CInventoryExtension::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(INTERFACE_INVENTORY_EXT) == false)
-    {
-        return true;
-    }
-
     return true;
 }
 

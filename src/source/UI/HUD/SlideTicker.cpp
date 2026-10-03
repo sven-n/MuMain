@@ -365,8 +365,12 @@ void SlideLane::ManageSlide()
         if (m_SlideQueueIter->first > m_dwCurrentSecond) break;
         else
         {
-            if (m_SlideQueueIter->second.m_iType == -1 && m_SlideQueueIter->first + 60 < m_dwCurrentSecond);
-            else if (AddSlideText(m_SlideQueueIter->second.m_pszText, m_SlideQueueIter->second.m_dwTextColor) == FALSE) break;
+            constexpr DWORD ExpiredNoticeAgeSeconds = 60;
+            const bool expiredNotice = m_SlideQueueIter->second.m_iType == -1 &&
+                m_SlideQueueIter->first + ExpiredNoticeAgeSeconds < m_dwCurrentSecond;
+            if (!expiredNotice &&
+                AddSlideText(m_SlideQueueIter->second.m_pszText, m_SlideQueueIter->second.m_dwTextColor) == FALSE)
+                break;
 
             SetScrollSpeed(m_SlideQueueIter->second.m_fSpeed);
             if (m_SlideQueueIter->second.m_bLastData == TRUE)

@@ -13,7 +13,6 @@
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "imgui.h"
-#include "../MuEditor/Core/MuEditorCore.h"
 #endif
 
 extern int MouseX, MouseY;
@@ -259,7 +258,7 @@ bool mu::ui::window::CNewKeyInput::IsNone(int iVirtKey)
     if (!g_bWndActive)
         return false;
 #endif // ASG_FIX_ACTIVATE_APP_INPUT
-    return (m_pInputInfo[iVirtKey].byKeyState == KEY_NONE) ? true : false;
+    return m_pInputInfo[iVirtKey].byKeyState == KEY_NONE;
 }
 
 bool mu::ui::window::CNewKeyInput::IsRelease(int iVirtKey)
@@ -268,7 +267,7 @@ bool mu::ui::window::CNewKeyInput::IsRelease(int iVirtKey)
     if (!g_bWndActive)
         return false;
 #endif // ASG_FIX_ACTIVATE_APP_INPUT
-    return (m_pInputInfo[iVirtKey].byKeyState == KEY_RELEASE) ? true : false;
+    return m_pInputInfo[iVirtKey].byKeyState == KEY_RELEASE;
 }
 
 bool mu::ui::window::CNewKeyInput::IsPress(int iVirtKey)
@@ -277,7 +276,7 @@ bool mu::ui::window::CNewKeyInput::IsPress(int iVirtKey)
     if (!g_bWndActive)
         return false;
 #endif // ASG_FIX_ACTIVATE_APP_INPUT
-    return (m_pInputInfo[iVirtKey].byKeyState == KEY_PRESS) ? true : false;
+    return m_pInputInfo[iVirtKey].byKeyState == KEY_PRESS;
 }
 
 bool mu::ui::window::CNewKeyInput::IsRepeat(int iVirtKey)
@@ -286,7 +285,7 @@ bool mu::ui::window::CNewKeyInput::IsRepeat(int iVirtKey)
     if (!g_bWndActive)
         return false;
 #endif // ASG_FIX_ACTIVATE_APP_INPUT
-    return (m_pInputInfo[iVirtKey].byKeyState == KEY_REPEAT) ? true : false;
+    return m_pInputInfo[iVirtKey].byKeyState == KEY_REPEAT;
 }
 
 void mu::ui::window::CNewKeyInput::SetKeyState(int iVirtKey, KEY_STATE KeyState)

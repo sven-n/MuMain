@@ -24,14 +24,7 @@ bool CUIGuardsMan::IsSufficentDeclareLevel()
     if (Hero->GuildStatus != G_MASTER)
         return false;
 
-    if (CharacterAttribute->Level >= BC_REQ_LEVEL)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return CharacterAttribute->Level >= BC_REQ_LEVEL;
 }
 
 DWORD CUIGuardsMan::GetMyMarkCount()

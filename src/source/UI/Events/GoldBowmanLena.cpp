@@ -111,30 +111,15 @@ bool CGoldBowmanLena::UpdateMouseEvent()
     float panelHeight = INVENTORY_HEIGHT;
     m_View.RefreshPanelSize(panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
-                                      static_cast<int>(panelHeight))
-            .Contains(MouseX, MouseY))
+                                      static_cast<int>(panelHeight)).Contains(MouseX, MouseY) &&
+        mu::ui::window::IsPress(VK_RBUTTON))
     {
-        if (mu::ui::window::IsPress(VK_RBUTTON)) {
-            MouseRButton = false;
-            MouseRButtonPop = false;
-            MouseRButtonPush = false;
-            return false;
-        }
-
-        if (mu::ui::window::IsNone(VK_LBUTTON) == false) {
-            return false;
-        }
-        return false;
-    }
-    else
-    {
-        if (mu::ui::window::IsNone(VK_LBUTTON) == false) {
-            return false;
-        }
-        return false;
+        MouseRButton = false;
+        MouseRButtonPop = false;
+        MouseRButtonPush = false;
     }
 
-    return true;
+    return false;
 }
 
 bool CGoldBowmanLena::UpdateKeyEvent()

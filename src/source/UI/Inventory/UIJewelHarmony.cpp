@@ -4,55 +4,7 @@
 #include "UI/Core/UIManager.h"
 #include "UIJewelHarmony.h"
 #include "Core/Utilities/Log/MuLogger.h"
-
-#define HARMONYJEWELOPTION_DATA_FILE                                                                                   \
-    std::wstring(L"Data\\Local\\" + g_strSelectedML + L"\\JewelOfHarmonyOption_" + g_strSelectedML + L".bmd").c_str()
-#define NOTSMELTING_DATA_FILE                                                                                          \
-    std::wstring(L"Data\\Local\\" + g_strSelectedML + "L\\JewelOfHarmonySmelt_" + g_strSelectedML + L".bmd").c_str()
-
-namespace
-{
-int GetTextLines(const wchar_t* inText, wchar_t* outText, int maxLine, int lineSize)
-{
-    int iLine = 0;
-    const wchar_t* lpLineStart = inText;
-    wchar_t* lpDst = outText;
-    const wchar_t* lpSpace = NULL;
-    int iMbclen = 0;
-    for (const wchar_t* lpSeek = inText; *lpSeek; lpSeek += iMbclen, lpDst += iMbclen)
-    {
-        // cppcheck-suppress dangerousTypeCast
-        iMbclen = _mbclen((unsigned char*)lpSeek);
-        if (iMbclen + (int)(lpSeek - lpLineStart) >= lineSize)
-        {
-            if (lpSpace && (int)(lpSeek - lpSpace) < std::min<int>(10, lineSize / 2))
-            {
-                lpDst -= (lpSeek - lpSpace - 1);
-                lpSeek = lpSpace + 1;
-            }
-
-            lpLineStart = lpSeek;
-            *lpDst = '\0';
-            if (iLine >= maxLine - 1)
-            {
-                break;
-            }
-            ++iLine;
-            lpDst = outText + iLine * lineSize;
-            lpSpace = NULL;
-        }
-
-        memcpy(lpDst, lpSeek, iMbclen);
-        if (*lpSeek == ' ')
-        {
-            lpSpace = lpSeek;
-        }
-    }
-    *lpDst = '\0';
-
-    return (iLine + 1);
-}
-} // namespace
+#include "Core/Utilities/StringUtils.h"
 
 JewelHarmonyInfo* JewelHarmonyInfo::MakeInfo()
 {
@@ -62,20 +14,15 @@ JewelHarmonyInfo* JewelHarmonyInfo::MakeInfo()
 
 JewelHarmonyInfo::JewelHarmonyInfo()
 {
-    bool Result = true;
-    if (!OpenJewelHarmonyInfoFile(HARMONYJEWELOPTION_DATA_FILE))
-    {
-        Result = false;
-    }
+    const std::wstring filename =
+        L"Data\\Local\\" + g_strSelectedML + L"\\JewelOfHarmonyOption_" + g_strSelectedML + L".bmd";
+    if (OpenJewelHarmonyInfoFile(filename))
+        return;
 
-    if (!Result)
-    {
-        mu::log::Get("ui")->error("JewelOfHarmonyOption.bmd && JewelOfHarmonySmelt.bmd file not found.");
-        wchar_t szMessage[256];
-        ::mu_swprintf(szMessage, L"%ls file not found.\r\n", L"JewelOfHarmonyOption.bmd && JewelOfHarmonySmelt.bmd");
-        ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
-        ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
-    }
+    mu::log::Get("ui")->error("{} file not found.", StringUtils::WideToNarrow(filename.c_str()));
+    const std::wstring message = filename + L" file not found.\r\n";
+    ::MessageBox(g_hWnd, message.c_str(), NULL, MB_OK);
+    ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
 }
 
 JewelHarmonyInfo::~JewelHarmonyInfo() {}

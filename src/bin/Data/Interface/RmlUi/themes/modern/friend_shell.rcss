@@ -2,7 +2,7 @@
    come from the shared window_shell template, which is pure CSS here and already stretches to any
    size -- no sprite re-slicing is needed, unlike legacy. This file supplies the shell's own parts:
    a flat tab strip, token-coloured list rows and compact action buttons. RmlUi owns layout and
-   scrolling; only the usable viewport height and the native photo masks are bound. */
+   scrolling; only the usable viewport height is bound. */
 
 /* window_shell's body carries base.rcss's .center-both, whose transform:translate(-50%,-50%) the
    template cancels through a .window-shell-positioned class toggle. Two single-class selectors

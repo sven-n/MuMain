@@ -25,6 +25,17 @@ UI::Quests::RewardModel::RowStyle ToRowStyle(REQUEST_REWARD_TEXT_KIND kind)
     }
     return RowStyle::Requirement;
 }
+void AppendRows(std::vector<UI::Quests::RewardModel::RowData>& rows,
+                const SRequestRewardText* text, int& nextRow, int count)
+{
+    const int endRow = nextRow + count;
+    for (; nextRow < endRow; ++nextRow)
+    {
+        const auto& row = text[nextRow];
+        rows.push_back({StringUtils::WideToNarrow(row.m_szText), ToRowStyle(row.m_eKind),
+                        row.m_dwType, row.m_pItem});
+    }
+}
 } // namespace
 
 namespace UI::Quests::RewardModel
@@ -41,38 +52,20 @@ namespace UI::Quests::RewardModel
         if (nullptr == pQuestRequestReward)
             return rows;
 
-        SRequestRewardText aRequestRewardText[13];
-        outRequestComplete = g_QuestMng.GetRequestRewardText(aRequestRewardText, 13, dwQuestIndex);
+        constexpr int RequestRewardTextCapacity = 13;
+        SRequestRewardText text[RequestRewardTextCapacity];
+        outRequestComplete = g_QuestMng.GetRequestRewardText(text, RequestRewardTextCapacity, dwQuestIndex);
 
-        int i = 0;
-        for (int j = 0; j < 3; ++j)
+        // The producer always emits a requirements heading, even with no requirements.
+        int nextRow = 0;
+        AppendRows(rows, text, nextRow, 1 + pQuestRequestReward->m_byRequestCount);
+        for (const int rewardCount : {pQuestRequestReward->m_byGeneralRewardCount,
+                                      pQuestRequestReward->m_byRandRewardCount})
         {
-            int nLoop;
-            if (0 == j)
-            {
-                nLoop = 1 + pQuestRequestReward->m_byRequestCount;
-            }
-            else if (1 == j && pQuestRequestReward->m_byGeneralRewardCount)
-            {
-                rows.push_back({BlankRowText, RowStyle::Plain, 0, nullptr});
-                nLoop = 1 + pQuestRequestReward->m_byGeneralRewardCount + i;
-            }
-            else if (2 == j && pQuestRequestReward->m_byRandRewardCount)
-            {
-                rows.push_back({BlankRowText, RowStyle::Plain, 0, nullptr});
-                nLoop = 1 + pQuestRequestReward->m_byRandRewardCount + i;
-            }
-            else
-            {
-                nLoop = 0;
-            }
-
-            for (; i < nLoop; ++i)
-            {
-                rows.push_back({StringUtils::WideToNarrow(aRequestRewardText[i].m_szText),
-                                ToRowStyle(aRequestRewardText[i].m_eKind), aRequestRewardText[i].m_dwType,
-                                aRequestRewardText[i].m_pItem});
-            }
+            if (rewardCount == 0)
+                continue;
+            rows.push_back({BlankRowText, RowStyle::Plain, 0, nullptr});
+            AppendRows(rows, text, nextRow, 1 + rewardCount);
         }
 
         return rows;

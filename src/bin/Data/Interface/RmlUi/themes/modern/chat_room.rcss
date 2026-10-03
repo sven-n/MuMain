@@ -1,7 +1,7 @@
 /* Modern theme for a chat room. The forged-iron frame, header rail and drag anchor come from the
    shared window_shell template, which is pure CSS here and already stretches to any size -- no
    sprite re-slicing, unlike legacy. RmlUi owns layout and scrolling; only the usable viewport
-   height and the native photo masks are bound. */
+   height are bound. */
 
 /* An id beats .center-both's own transform, which window_shell cancels through a class toggle that
    two single-class selectors decide by link order. A surviving transform moves where the panel

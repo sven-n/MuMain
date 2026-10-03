@@ -299,12 +299,7 @@ bool mu::ui::window::CMessageBoxMng::UpdateKeyEvent()
         SendEvent(pCurMsgBox, MSGBOX_EVENT_PRESSKEY_RETURN);
     }
 
-    if (!IsEmpty())
-    {
-        return false;
-    }
-
-    return true;
+    return IsEmpty();
 }
 
 bool mu::ui::window::CMessageBoxMng::Update()

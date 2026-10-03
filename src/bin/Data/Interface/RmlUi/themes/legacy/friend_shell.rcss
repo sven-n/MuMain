@@ -2,7 +2,7 @@
    from the shared window_shell template; this file re-slices that chrome so it survives a window
    the player resizes, then dresses the shell's own parts in the win_* art the original window used
    (win_size, win_resize, win_button, win_check, win_mail). RmlUi owns layout and scrolling; only
-   the usable viewport height and the native photo masks are bound. */
+   the usable viewport height is bound. */
 
 /* window_shell.rcss draws its caps with image(), which is correct at the 230dp the dialogs are
    locked to and distorts the left/right border art at any other width. Same assets, re-declared

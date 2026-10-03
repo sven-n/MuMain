@@ -8,11 +8,7 @@
 
 namespace
 {
-    // Real wall-clock time, independent of game pause/tick state -- matches this codebase's own
-    // established pattern for render-frequency timing (std::chrono::steady_clock, same as the
-    // FPS_ANIMATION_FACTOR handling elsewhere) rather than
-    // reusing a game-simulation time global like WorldTime, which RmlUi's own animations/
-    // transitions/double-click detection should not be coupled to.
+    // RmlUi animation and double-click timing must advance independently of game pause/ticks.
     const std::chrono::steady_clock::time_point g_StartTime = std::chrono::steady_clock::now();
 }
 
@@ -58,13 +54,7 @@ void RmlUiSystemInterface::GetClipboardText(Rml::String& text)
 
 void RmlUiSystemInterface::ActivateKeyboard(Rml::Vector2f caret_position, float line_height)
 {
-    // Same call shape as the vendored sample's SystemInterface_SDL::ActivateKeyboard
-    // (RmlUi_Platform_SDL.cpp) -- caret_position/line_height already arrive in real window-pixel
-    // space (WidgetTextInput::SetKeyboardActive() derives them from GetAbsoluteOffset(), and this
-    // engine's RmlUi context is created directly from real window pixel dimensions, see
-    // RmlUiRuntime::Create()'s own ApplyUIScale comment), so no coordinate transform is needed
-    // here -- unlike CUITextInputBox::GetCaretArea(), which is in the legacy reference-resolution
-    // space and needs Winmain.cpp's own UI::Scaling::TransformForLayout() call.
+    // RmlUi supplies the caret rectangle in window pixels, as SDL_SetTextInputArea requires.
     m_TextInputActive = true;
     if (!m_Window) return;
     const SDL_Rect rect = {static_cast<int>(caret_position.x), static_cast<int>(caret_position.y), 1, static_cast<int>(line_height)};

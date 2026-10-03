@@ -6,7 +6,7 @@
 #include "Core/Time/FrameTimerScheduler.h"
 #include "GameLogic/Items/CComGem.h"
 #include "UIControls.h"
-#include "UI/Party/UIWindows.h"
+#include "UI/Social/UIWindows.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -37,8 +37,6 @@ int g_iWidthEx = 5;
 extern int g_iChatInputType;
 
 extern BOOL g_bUseWindowMode;
-
-#define ARRAY_SIZE(pArray) (sizeof(pArray)/sizeof(pArray[0]))
 
 BOOL g_bUseChatListBox = TRUE;
 

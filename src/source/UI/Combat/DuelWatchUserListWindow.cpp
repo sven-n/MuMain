@@ -103,10 +103,6 @@ float CDuelWatchUserListWindow::GetLayerDepth()
     return 5.0f;
 }
 
-namespace
-{
-} // namespace
-
 void CDuelWatchUserListWindow::BuildRmlUi()
 {
     if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
