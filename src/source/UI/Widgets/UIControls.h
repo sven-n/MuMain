@@ -47,28 +47,10 @@ typedef struct
 {
     BOOL m_bIsSelected;
     wchar_t m_szID[MAX_USERNAME_SIZE + 1];
-    wchar_t m_szText[MAX_TEXT_LENGTH + 1];
-    int m_iType;
-    int m_iColor;
-    UINT m_uiEmptyLines;
-} WHISPER_TEXT;
-
-typedef struct
-{
-    BOOL m_bIsSelected;
-    wchar_t m_szID[MAX_USERNAME_SIZE + 1];
     BYTE m_Number;
     BYTE m_Server;
     BYTE m_GuildStatus;
 } GUILDLIST_TEXT;
-
-typedef struct
-{
-    BOOL m_bIsSelected;
-    DWORD m_dwUIID;
-    wchar_t m_szTitle[64];
-    int m_iStatus;
-} WINDOWLIST_TEXT;
 
 typedef struct
 {
@@ -80,12 +62,6 @@ typedef struct
     wchar_t m_szTime[16];
     BOOL m_bIsRead;
 } LETTERLIST_TEXT;
-
-typedef struct
-{
-    BOOL m_bIsSelected;
-    wchar_t m_szText[MAX_LETTERTEXT_LENGTH + 1];
-} LETTER_TEXT;
 
 
 
@@ -222,33 +198,6 @@ protected:
     int m_iRelativePos_x, m_iRelativePos_y;
     int m_iRelativeWidth, m_iRelativeHeight;
     int m_iCoordType;
-};
-
-class CUIButton : public CUIControl
-{
-public:
-    CUIButton();
-    virtual ~CUIButton();
-
-    virtual void Init(DWORD dwButtonID, const wchar_t* pszCaption);
-    virtual void SetCaption(const wchar_t* pszCaption);
-    virtual BOOL DoMouseAction();
-    virtual void Render();
-
-    // What Render() draws: the caption, and the pressed look (m_bMouseState).
-    const wchar_t* GetCaption() const
-    {
-        return m_pszCaption;
-    }
-    bool IsPressedLook() const
-    {
-        return m_bMouseState == TRUE;
-    }
-
-protected:
-    DWORD m_dwButtonID;
-    wchar_t* m_pszCaption;
-    BOOL m_bMouseState;
 };
 
 enum UILISTBOX_SCROLL_TYPE
@@ -401,180 +350,6 @@ protected:
     BOOL m_bNewTypeScrollBar;
 
     BOOL m_bUseNewUIScrollBar;
-};
-
-class CUISimpleChatListBox : public CUITextListBox<WHISPER_TEXT>
-{
-public:
-    CUISimpleChatListBox();
-    virtual ~CUISimpleChatListBox() {}
-
-    virtual void Render();
-    virtual void AddText(const wchar_t* pszID, const wchar_t* pszText, int iType, int iColor);
-
-protected:
-    virtual void AddTextToRenderList(const wchar_t* pszID, const wchar_t* pszText, int iType, int iColor);
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber)
-    {
-        return TRUE;
-    }
-    void CalcLineNum();
-};
-
-class CUILetterTextListBox : public CUITextListBox<LETTER_TEXT>
-{
-public:
-    CUILetterTextListBox();
-    virtual ~CUILetterTextListBox() {}
-
-    virtual void Render();
-    virtual void AddText(const wchar_t* pszText);
-
-protected:
-    virtual void AddTextToRenderList(const wchar_t* pszText);
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber)
-    {
-        return TRUE;
-    }
-    void CalcLineNum();
-
-public:
-    virtual int GetRenderLinePos_y(int iLineNumber);
-};
-
-class CUIChatPalListBox : public CUITextListBox<GUILDLIST_TEXT>
-{
-public:
-    CUIChatPalListBox();
-    virtual ~CUIChatPalListBox() {}
-
-    virtual void AddText(const wchar_t* pszID, BYTE Number, BYTE Server);
-    virtual void DeleteText(const wchar_t* pszID);
-    virtual void SetNumRenderLine(int iLine);
-    GUILDLIST_TEXT* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-    std::deque<GUILDLIST_TEXT>& GetFriendList()
-    {
-        m_bForceEditList = TRUE;
-        return m_TextList;
-    }
-    void SetLayout(int iType)
-    {
-        m_iLayoutType = iType;
-    }
-    const wchar_t* GetNameByNumber(BYTE byNumber);
-    void SetColumnWidth(UINT uiColumnNum, int iWidth)
-    {
-        if (uiColumnNum < 4)
-            m_iColumnWidth[uiColumnNum] = iWidth;
-    }
-    int GetColumnWidth(UINT uiColumnNum)
-    {
-        return (uiColumnNum < 4 ? m_iColumnWidth[uiColumnNum] : 0);
-    }
-    int GetColumnPos_x(UINT uiColumnNum)
-    {
-        int iResult = 0;
-
-        for (unsigned int i = 0; i < uiColumnNum; ++i)
-        {
-            iResult += m_iColumnWidth[i];
-        }
-        return iResult;
-    }
-    void MakeTitleText(wchar_t* pszTitleText);
-    int GetLayout() const
-    {
-        return m_iLayoutType;
-    }
-    virtual int GetRenderLinePos_y(int iLineNumber);
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber);
-
-protected:
-    int m_iLayoutType;
-    int m_iColumnWidth[4];
-    BOOL m_bForceEditList;
-};
-
-class CUIWindowListBox : public CUITextListBox<WINDOWLIST_TEXT>
-{
-public:
-    CUIWindowListBox();
-    virtual ~CUIWindowListBox() {}
-
-    virtual void AddText(DWORD dwUIID, const wchar_t* pszTitle, int iStatus = 0);
-    virtual void DeleteText(DWORD dwUIID);
-    virtual void SetNumRenderLine(int iLine);
-    WINDOWLIST_TEXT* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-    virtual int GetRenderLinePos_y(int iLineNumber);
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber);
-};
-
-class CUILetterListBox : public CUITextListBox<LETTERLIST_TEXT>
-{
-public:
-    CUILetterListBox();
-    virtual ~CUILetterListBox() {}
-
-    virtual void AddText(const wchar_t* pszID, const wchar_t* pszText, const wchar_t* pszDate, const wchar_t* pszTime,
-                         BOOL bIsRead);
-    virtual void DeleteText(DWORD dwLetterID);
-    virtual void SetNumRenderLine(int iLine);
-    LETTERLIST_TEXT* GetSelectedText()
-    {
-        return (SLGetSelectLine() == m_TextList.end() ? NULL : &(*SLGetSelectLine()));
-    }
-    std::deque<LETTERLIST_TEXT>& GetLetterList()
-    {
-        m_bForceEditList = TRUE;
-        return m_TextList;
-    }
-
-    void SetColumnWidth(UINT uiColumnNum, int iWidth)
-    {
-        if (uiColumnNum < 4)
-            m_iColumnWidth[uiColumnNum] = iWidth;
-    }
-    int GetColumnWidth(UINT uiColumnNum)
-    {
-        return (uiColumnNum < 4 ? m_iColumnWidth[uiColumnNum] : 0);
-    }
-    int GetColumnPos_x(UINT uiColumnNum)
-    {
-        int iResult = 0;
-        for (unsigned int i = 0; i < uiColumnNum; ++i)
-        {
-            iResult += m_iColumnWidth[i];
-        }
-        return iResult;
-    }
-    virtual int GetRenderLinePos_y(int iLineNumber);
-
-protected:
-    virtual void RenderInterface();
-    virtual BOOL RenderDataLine(int iLineNumber);
-    virtual BOOL DoLineMouseAction(int iLineNumber);
-
-protected:
-    int m_iColumnWidth[4];
-    BOOL m_bForceEditList;
 };
 
 struct InputBoxConfig
@@ -854,8 +629,6 @@ protected:
 #endif // PBG_ADD_INGAMESHOPMSGBOX
 };
 
-extern CUITextInputBox* g_pSingleTextInputBox;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
 
 
 extern DWORD g_dwActiveUIID;

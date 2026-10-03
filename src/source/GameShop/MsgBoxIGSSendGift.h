@@ -1,9 +1,17 @@
 
 #pragma once
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#include "UI/Widgets/UIControls.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+
+#include <RmlUi/Core/Types.h>
+
+namespace Rml
+{
+class ElementDocument;
+}
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -103,8 +111,23 @@ private:
     CMessageBoxButton m_BtnOk;
     CMessageBoxButton m_BtnCancel;
 
-    CUITextInputBox m_IDInputBox;
-    CUITextInputBox m_MessageInputBox;
+    // The recipient and the message, as RmlUi fields of igs_send_gift.rml. The dialog's frame,
+    // texts and buttons are still native, the same split igs_buy_select.rml's list uses.
+    struct SendGiftRmlModel
+    {
+        float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+        float textPx = 0.f;
+        Rml::String recipient;
+        Rml::String message;
+    };
+    RmlModelBinder<SendGiftRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+    void BuildRmlUi();
+    void DestroyRmlUi();
+    void SyncRmlModel();
+    void ReloadRmlTheme();
+    bool FieldHasFocus(const char* id) const;
 
     int m_iPackageSeq;
     int m_iDisplaySeq;

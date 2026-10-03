@@ -1,0 +1,388 @@
+#include "stdafx.h"
+#include "UI/Party/LetterRead.h"
+
+#include "UI/Party/UIWindows.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlDraggable.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Scaling/UITransform.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Core/Utilities/StringUtils.h"
+#include "I18N/All.h"
+#include <RmlUi/Core.h>
+#include <algorithm>
+
+namespace UI::Party
+{
+namespace
+{
+constexpr const char* DocumentPath = "Data/Interface/RmlUi/letter_read.rml";
+constexpr const char* ModelPlaceholder = "data-model=\"letter_read\"";
+
+Rml::String Text(const wchar_t* text)
+{
+    return StringUtils::WideToNarrow(text);
+}
+} // namespace
+
+LetterReadView::LetterReadView(CUILetterReadWindow& owner) : m_Owner(owner)
+{
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadTheme(); });
+}
+
+LetterReadView::~LetterReadView()
+{
+    UI::RmlBridge::UnregisterForThemeReload(this);
+    Unload();
+}
+
+void LetterReadView::RegisterModel(Rml::DataModelConstructor& c, Model& m)
+{
+    m.Bind(c);
+    c.BindEventCallback("letter_action",
+                        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+                        {
+                            if (args.empty())
+                                return;
+                            event.StopPropagation();
+                            m_Actions.push_back({args[0].Get<Rml::String>()});
+                        });
+}
+
+void LetterReadView::Build()
+{
+    if (m_Document || !RmlUiRuntime::Instance().IsCreated())
+        return;
+    auto* context = RmlUiRuntime::Instance().GetContext();
+    if (m_ModelName.empty())
+        m_ModelName = "letter_read_" + Rml::ToString(static_cast<int>(m_Owner.GetUIID()));
+    if (!m_Binder.Create(context, m_ModelName, [this](auto& c, auto& m) { RegisterModel(c, m); }))
+        return;
+    m_Document = UI::RmlBridge::LoadThemedDocument(context, DocumentPath, ModelPlaceholder,
+                                                   "data-model=\"" + m_ModelName + "\"");
+    if (!m_Document)
+        return;
+    m_Document->AddEventListener(Rml::EventId::Mousedown, this);
+    m_Document->AddEventListener(Rml::EventId::Handledrag, this);
+    // A strip of its own rather than window_shell's rail: the rail's 67dp is the banner art's
+    // height and reaches down over the rows, so a press on a label would drag the window.
+    auto* grip = m_Document->GetElementById("drag_strip");
+    if (!grip)
+        grip = m_Document->GetElementById("window_shell_header");
+    if (grip)
+        UI::RmlBridge::MakeDraggable(grip, m_Document, nullptr, [this] { SyncDraggedPosition(); });
+
+    auto& model = m_Binder.GetModel();
+    model.replyLabel = Text(I18N::Game::Reply);
+    model.deleteLabel = Text(I18N::Game::Delete);
+    model.closeLabel = Text(I18N::Game::Close388);
+    model.prevLabel = Text(I18N::Game::Previous);
+    model.nextLabel = Text(I18N::Game::Next);
+    for (const char* key : {"reply_label", "delete_label", "close_label", "prev_label", "next_label"})
+        m_Binder.MarkDirty(key);
+
+    SyncWorkspace();
+    m_Document->UpdateDocument();
+    SyncGeometry();
+}
+
+void LetterReadView::Unload()
+{
+    m_PhotoControl.Detach();
+    auto* context = RmlUiRuntime::Instance().GetContext();
+    if (!m_Document)
+    {
+        if (context)
+            m_Binder.Destroy(context);
+        return;
+    }
+    if (auto* focused = context->GetFocusElement(); focused && focused->GetOwnerDocument() == m_Document)
+        focused->Blur();
+    m_Document->RemoveEventListener(Rml::EventId::Mousedown, this);
+    m_Document->RemoveEventListener(Rml::EventId::Handledrag, this);
+    context->UnloadDocument(m_Document);
+    m_Document = nullptr;
+    m_Placed = false;
+    m_Binder.Destroy(context);
+}
+
+void LetterReadView::ReloadTheme()
+{
+    if (!m_Document)
+        return;
+    Model model = m_Binder.GetModel();
+    Unload();
+    m_Binder.GetModel() = std::move(model);
+    Build();
+}
+
+void LetterReadView::SetLetter(const wchar_t* sender, const wchar_t* date, const wchar_t* time,
+                               const wchar_t* body)
+{
+    auto& m = m_Binder.GetModel();
+    wchar_t header[256] = {0};
+    mu_swprintf(header, I18N::Game::SenderSSS, sender, date, time);
+    m.header = Text(header);
+    m.lines.clear();
+    // Split on newlines exactly as SetLetter() fed the native box line by line; the wrapping the
+    // box did with CutText3 is RmlUi's job now.
+    std::wstring text(body ? body : L"");
+    size_t start = 0;
+    while (start <= text.size())
+    {
+        const size_t end = text.find(L'\n', start);
+        const std::wstring line = text.substr(start, end == std::wstring::npos ? std::wstring::npos : end - start);
+        m.lines.push_back({Text(line.c_str())});
+        if (end == std::wstring::npos)
+            break;
+        start = end + 1;
+    }
+    m_Binder.MarkDirty("header");
+    m_Binder.MarkDirty("lines");
+}
+
+bool LetterReadView::Sync(bool shown)
+{
+    if (!shown)
+    {
+        UI::RmlBridge::SyncDocumentVisibility(m_Document, false);
+        return false;
+    }
+    Build();
+    if (!m_Document)
+        return false;
+    auto& model = m_Binder.GetModel();
+    if (m_Title != m_Owner.GetTitle())
+    {
+        m_Title = m_Owner.GetTitle();
+        model.title = Text(m_Title.c_str());
+        m_Binder.MarkDirty("title");
+    }
+    const bool wasVisible = m_Document->IsVisible();
+    UI::RmlBridge::SyncDocumentVisibility(m_Document, true);
+    SyncWorkspace();
+    SyncGeometry();
+    if (!m_Placed && m_Width > 0 && m_Height > 0)
+    {
+        m_Placed = true;
+        if (!m_CustomPosition)
+            PlaceAtRest();
+        ApplyLayout();
+        m_Document->UpdateDocument();
+        SyncGeometry();
+    }
+    SyncPhoto();
+    return !wasVisible;
+}
+
+
+
+
+// RCSS owns where the portrait sits; the native viewer is told to follow that box.
+void LetterReadView::SyncPhoto()
+{
+    auto* slot = m_Document->GetElementById("photo_slot");
+    if (!slot)
+        return;
+    m_PhotoControl.Attach(m_Document, m_Owner.m_Photo);
+    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
+    const auto native = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight);
+    if (scale <= 0 || native.scaleX <= 0)
+        return;
+    const float ratio = scale / native.scaleX;
+    const auto size = slot->GetBox().GetSize(Rml::BoxArea::Border);
+    m_Owner.m_Photo.SetPosition(static_cast<int>(slot->GetAbsoluteLeft() / scale * ratio),
+                                static_cast<int>(slot->GetAbsoluteTop() / scale * ratio));
+    m_Owner.m_Photo.SetSize(static_cast<int>(size.x / scale * ratio), static_cast<int>(size.y / scale * ratio));
+}
+
+void LetterReadView::PullToFront()
+{
+    if (m_Document)
+        m_Document->PullToFront();
+}
+
+void LetterReadView::ProcessEvent(Rml::Event& event)
+{
+    if (event.GetId() == Rml::EventId::Mousedown)
+        g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, m_Owner.GetUIID(), 0);
+    else if (event.GetId() == Rml::EventId::Handledrag)
+    {
+        m_CustomSize = true;
+        m_Maximized = false;
+        m_Binder.GetModel().maximized = false;
+        m_Binder.MarkDirty("maximized");
+    }
+}
+
+void LetterReadView::ProcessActions()
+{
+    if (m_Actions.empty())
+        return;
+    std::vector<Action> actions;
+    actions.swap(m_Actions);
+    for (const auto& action : actions)
+        ActionRequested(action);
+}
+
+void LetterReadView::ActionRequested(const Action& a)
+{
+    if (a.name == "reply")
+        m_Owner.Reply();
+    else if (a.name == "delete")
+        m_Owner.AskDelete();
+    else if (a.name == "close")
+        g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, m_Owner.GetUIID(), 0);
+    else if (a.name == "prev")
+        m_Owner.StepLetter(-1);
+    else if (a.name == "next")
+        m_Owner.StepLetter(1);
+    else if (a.name == "minimize")
+        g_pWindowMgr->SendUIMessage(UI_MESSAGE_HIDE, m_Owner.GetUIID(), 0);
+    else if (a.name == "maximize")
+        Maximize();
+}
+
+// ---------------------------------------------------------------------------------------------
+// Geometry -- the same bookkeeping FriendShell and ChatRoomView do; all four get lifted into one
+// host once the transcription layer goes.
+
+Rml::Element* LetterReadView::Panel() const
+{
+    return m_Document;
+}
+
+void LetterReadView::SyncGeometry()
+{
+    auto* panel = Panel();
+    if (!panel)
+        return;
+    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
+    const auto size = panel->GetBox().GetSize(Rml::BoxArea::Border);
+    if (scale <= 0 || size.x <= 0 || size.y <= 0)
+        return;
+    m_Left = panel->GetAbsoluteLeft() / scale;
+    m_Top = panel->GetAbsoluteTop() / scale;
+    m_Width = size.x / scale;
+    m_Height = size.y / scale;
+    const auto native = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight);
+    const float ratio = scale / native.scaleX;
+    m_Owner.SetPosition(static_cast<int>(m_Left * ratio), static_cast<int>(m_Top * ratio));
+    m_Owner.SetSize(static_cast<int>(m_Width * ratio), static_cast<int>(m_Height * ratio));
+}
+
+void LetterReadView::SyncWorkspace()
+{
+    auto* context = m_Document->GetContext();
+    const auto viewport = context->GetDimensions();
+    const float scale = context->GetDensityIndependentPixelRatio();
+    const float height = UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight) *
+                         UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight).scaleY;
+    auto& model = m_Binder.GetModel();
+    if (model.workspaceHeight == height && m_Viewport == viewport && m_DpRatio == scale)
+        return;
+    model.workspaceHeight = height;
+    m_Binder.MarkDirty("workspace_height");
+    m_Viewport = viewport;
+    m_DpRatio = scale;
+    if (m_CustomPosition)
+        ApplyLayout();
+    m_Document->UpdateDocument();
+}
+
+void LetterReadView::PublishPosition()
+{
+    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
+    auto& model = m_Binder.GetModel();
+    model.rootX = m_Left * scale;
+    model.rootY = m_Top * scale;
+    m_Binder.MarkDirty("root_x");
+    m_Binder.MarkDirty("root_y");
+}
+
+void LetterReadView::ClampToWorkspace()
+{
+    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
+    if (scale <= 0)
+        return;
+    const float maxLeft = WindowWidth / scale - m_Width;
+    const float maxTop = m_Binder.GetModel().workspaceHeight / scale - m_Height;
+    if (maxLeft > 0)
+        m_Left = std::clamp(m_Left, 0.f, maxLeft);
+    if (maxTop > 0)
+        m_Top = std::clamp(m_Top, 0.f, maxTop);
+}
+
+void LetterReadView::ApplyLayout()
+{
+    auto* panel = Panel();
+    if (!panel)
+        return;
+    ClampToWorkspace();
+    PublishPosition();
+    if (m_CustomSize)
+    {
+        panel->SetProperty("width", Rml::ToString(m_Width) + "dp");
+        panel->SetProperty("height", Rml::ToString(m_Height) + "dp");
+    }
+}
+
+void LetterReadView::RestoreLayout(float x, float y, float width, float height, bool resize)
+{
+    m_CustomSize |= resize;
+    m_Width = width;
+    m_Height = height;
+    m_Left = x;
+    m_Top = y;
+    m_CustomPosition = true;
+    if (!m_Document)
+        return;
+    ClampToWorkspace();
+    ApplyLayout();
+}
+
+// Where the manager cascaded it, in the same reference pixels that placement used.
+void LetterReadView::PlaceAtRest()
+{
+    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
+    if (scale <= 0)
+        return;
+    const float ratio = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight).scaleX / scale;
+    m_Left = m_Owner.GetPosition_x() * ratio;
+    m_Top = m_Owner.GetPosition_y() * ratio;
+}
+
+void LetterReadView::Maximize()
+{
+    if (!m_Document)
+        return;
+    if (!m_Maximized)
+    {
+        m_RestoreRect = {m_Left, m_Top, m_Width, m_Height};
+        m_CustomSize = true;
+        RestoreLayout(m_Left, 0, m_Width,
+                      m_Binder.GetModel().workspaceHeight /
+                          m_Document->GetContext()->GetDensityIndependentPixelRatio());
+    }
+    else
+        RestoreLayout(m_RestoreRect[0], m_RestoreRect[1], m_RestoreRect[2], m_RestoreRect[3]);
+    m_Maximized = !m_Maximized;
+    m_Binder.GetModel().maximized = m_Maximized;
+    m_Binder.MarkDirty("maximized");
+    m_Document->UpdateDocument();
+    SyncGeometry();
+}
+
+void LetterReadView::SyncDraggedPosition()
+{
+    if (!m_Document)
+        return;
+    m_Document->UpdateDocument();
+    SyncGeometry();
+    ClampToWorkspace();
+    m_CustomPosition = true;
+    PublishPosition();
+}
+
+} // namespace UI::Party

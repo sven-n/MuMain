@@ -1,0 +1,37 @@
+/* The recipient and message fields in the cash shop's gift dialog. The frame, texts and buttons
+   around them are still native -- only the two CUITextInputBox controls moved. Each field
+   counter-scales out of the dialog's root transform so its text stays at the native renderer's
+   physical size, the same way igs_buy_select.rcss's list pane does. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 210px;
+	height: 267px;
+	pointer-events: none;
+}
+
+.igs-field {
+	position: absolute;
+	transform-origin: left top;
+	pointer-events: auto;
+	box-sizing: border-box;
+	color: rgb(0, 0, 0);
+}
+
+/* Native's own IGS_ID_INPUT_TEXT_POS_X / _POS_Y, over the ID box art at (118, 82). */
+#igs_gift_id {
+	left: 120px;
+	top: 87px;
+	background-color: rgb(255, 255, 255);
+	border: 1px rgb(120, 110, 96);
+}
+
+/* IGS_MESSAGE_INPUT_TEXT_POS_X / _POS_Y. Native drew no background here; the frame art behind it
+   is the message area. */
+#igs_gift_message {
+	left: 22px;
+	top: 126px;
+	background-color: transparent;
+	color: rgb(255, 230, 210);
+}

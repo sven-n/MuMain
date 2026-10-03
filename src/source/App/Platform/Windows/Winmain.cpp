@@ -83,6 +83,7 @@
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/LoginWin.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/RmlBridge/RmlOverlayRender.h"
 
 #include "World/MapInfra/w_MapHeaders.h"
 
@@ -101,8 +102,6 @@
 #include "../MuEditor/Config/MuEditorConfig.h"
 #endif
 
-CUITextInputBox* g_pSingleTextInputBox = nullptr;
-CUITextInputBox* g_pSinglePasswdInputBox = nullptr;
 int g_iChatInputType = 1;
 
 CMultiLanguage* pMultiLanguage = nullptr;
@@ -572,8 +571,6 @@ void DestroyWindow()
     DeleteAllFrustrum();
 #endif // DYNAMIC_FRUSTRUM
 
-    SAFE_DELETE(g_pSingleTextInputBox);
-    SAFE_DELETE(g_pSinglePasswdInputBox);
 
     SAFE_DELETE(g_pUIMapName); // rozy
     SAFE_DELETE(g_pTimer);
@@ -2275,6 +2272,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
             if (g_pNewUISystem)
                 g_pNewUISystem->SyncMainSceneHudVisibility();
 
+            // Native 3D that belongs on top of its own RmlUi panel rather than under every
+            // panel in the frame. Before the cursor, which stays above everything.
+            UI::RmlBridge::OverlayRender::RenderAll();
+
             if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE || SceneFlag == MAIN_SCENE)
             {
                 BeginBitmap();
@@ -2410,12 +2411,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     CharacterMachine->Init();
     Hero = &CharactersClient[0];
 
-    if (g_iChatInputType == 1)
-    {
-        g_pSingleTextInputBox = new CUITextInputBox;
-        g_pSinglePasswdInputBox = new CUITextInputBox;
-    }
-
     g_pUIManager = new CUIManager;
     g_pUIMapName = new CUIMapName; // rozy
 
@@ -2430,14 +2425,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     if (g_iChatInputType == 1)
     {
-        g_pSingleTextInputBox->Init(g_hWnd, 200, 20);
-        g_pSinglePasswdInputBox->Init(g_hWnd, 200, 20, 9, TRUE);
-        g_pSingleTextInputBox->SetState(UISTATE_HIDE);
-        g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
-
-        g_pSingleTextInputBox->SetFont(g_hFont);
-        g_pSinglePasswdInputBox->SetFont(g_hFont);
-
         g_bIMEBlock = FALSE;
         HIMC hIMC = ImmGetContext(g_hWnd);
         ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);

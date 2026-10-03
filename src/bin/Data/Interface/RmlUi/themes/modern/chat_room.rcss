@@ -1,0 +1,79 @@
+/* Modern theme for a chat room. The forged-iron frame, header rail and drag anchor come from the
+   shared window_shell template, which is pure CSS here and already stretches to any size -- no
+   sprite re-slicing, unlike legacy. RmlUi owns layout and scrolling; only the usable viewport
+   height and the native photo masks are bound. */
+
+/* An id beats .center-both's own transform, which window_shell cancels through a class toggle that
+   two single-class selectors decide by link order. A surviving transform moves where the panel
+   draws without moving the boxes its children hit-test against. */
+#panel { transform: none; }
+/* Roomier than legacy by this theme's character, held near the same proportions. This theme's
+   window_shell body carries no `native-text` class and its sibling dialogs size in dp, so text
+   stays dp here -- the rem rule legacy follows does not apply. */
+#panel { width: 340dp; height: 240dp; min-width: 300dp; min-height: 200dp; max-width: 100%; max-height: 100%; font-family: "token(font-body)"; font-size: 10dp; color: token(text-primary); }
+
+/* pointer-events back to none: base.rcss gives `body` none and window_shell makes this well the one
+   `auto` region, but a well covering the whole panel sits on top of the header rail and eats the
+   drag. Each interactive part opts back in. */
+.window-shell-content, .window-shell-content.has-title
+{
+	left: 12dp;
+	right: 12dp;
+	top: 0;
+	bottom: 14dp;
+	padding: 0;
+	display: block;
+	pointer-events: none;
+}
+
+div { display: block; }
+button { font-family: "token(font-body)"; font-size: 10dp; color: token(text-secondary); cursor: pointer; pointer-events: auto; }
+
+/* Centred in the rail, which this theme puts at top 7dp with a height of 38dp. */
+#window_controls { position: absolute; right: -2dp; top: 17dp; z-index: 10; pointer-events: auto; }
+#window_controls button { display: inline-block; box-sizing: border-box; width: 16dp; height: 16dp; margin-left: 4dp; padding: 0; line-height: 14dp; text-align: center; font-size: 12dp; color: token(text-muted); background-color: token(surface-control); border: 1dp token(border-inner); }
+#window_controls button:hover { color: token(text-primary); border-color: token(border-hover); }
+#btn_minimize:before { content: "-"; }
+#btn_maximize:before { content: "+"; }
+#btn_maximize.restore:before { content: "="; }
+#btn_close:before { content: "x"; }
+#btn_close:hover { color: token(accent-crimson-hover); border-color: token(accent-crimson); }
+
+/* base.rcss's .btn is the absolute 108x30 hero button; a compact in-flow one is restated here
+   while the palette stays this theme's own. border-box because this engine is content-box by
+   default, where a percentage width plus padding overflows the row. */
+.btn { position: relative; display: inline-block; box-sizing: border-box; width: auto; height: 18dp; padding: 0 3dp; line-height: 16dp; vertical-align: top; text-align: center; overflow: hidden; pointer-events: auto; background-color: token(surface-raised); border: 1dp token(border-inner); decorator: none; }
+.btn:hover { background-color: token(surface-control); border-color: token(border-hover); color: token(text-primary); }
+.hidden { display: none; }
+
+/* The log gives up an 80dp column to the participants, and another to the invite list, exactly as
+   CUIChatWindow's own SetResizeType(3, -80, ...) / (3, -80 - 80, ...) did. */
+.scroll-pane { position: absolute; top: 42dp; bottom: 24dp; overflow: hidden scroll; background-color: token(surface-recessed); border: 1dp token(border-recessed); pointer-events: auto; }
+#chat_log { left: 0; right: 0; }
+#chat_log.with-pals { right: 86dp; }
+#chat_log.with-invite { right: 172dp; }
+#pal_pane { width: 80dp; right: 0; }
+#pal_pane.with-invite { right: 86dp; }
+#invite_pane { width: 80dp; right: 0; }
+
+.line { padding: 1dp 5dp; }
+.speaker { display: inline-block; color: token(accent-gold); }
+.speaker:after { content: ": "; }
+.say { display: inline-block; color: token(text-primary); }
+/* The same six roles CUISimpleChatListBox::RenderDataLine() coloured, in this theme's palette. */
+.say.t0 { color: token(accent-gold-hover); }
+.say.t1 { color: token(accent-steel-hover); }
+.say.t2 { color: token(accent-crimson-hover); }
+.say.t4 { color: token(text-warm); }
+.say.t5 { color: token(accent-steel); }
+
+.pal { height: 16dp; line-height: 16dp; padding: 0 4dp; white-space: nowrap; overflow: hidden; cursor: pointer; }
+.pal:hover { background-color: token(surface-control); }
+.pal.selected { background-color: token(surface-raised); color: token(accent-gold); }
+
+#footer { position: absolute; left: 0; right: 0; bottom: 0; height: 20dp; white-space: nowrap; }
+#chat_field { display: inline-block; box-sizing: border-box; width: 58%; height: 20dp; margin-right: 1%; vertical-align: top; pointer-events: auto; }
+#footer .btn { width: 20%; margin-left: 1%; height: 20dp; line-height: 18dp; }
+
+#resize { display: block; position: absolute; right: -2dp; bottom: -8dp; width: 10dp; height: 10dp; z-index: 10; pointer-events: auto; box-sizing: border-box; background-color: token(surface-control); border-right: 2dp token(accent-steel); border-bottom: 2dp token(accent-steel); cursor: resize; }
+#resize:hover { border-right-color: token(accent-steel-hover); border-bottom-color: token(accent-steel-hover); }

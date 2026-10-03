@@ -1,0 +1,83 @@
+/* The foreground of a letter being written: its own chrome, content and buttons, all in the main
+   context like every other window of this family.
+
+   Text stays dp: this theme's window_shell body carries no `native-text` class and its sibling
+   dialogs size the same way. */
+
+/* An id beats .center-both's own transform, which window_shell cancels through a class toggle that
+   two single-class selectors decide by link order. */
+#panel { transform: none; }
+#panel { width: 400dp; height: 292dp; min-width: 350dp; min-height: 240dp; max-width: 100%; max-height: 100%; background-color: transparent; decorator: none; border-width: 0; font-family: "token(font-body)"; font-size: 10dp; color: token(text-primary); }
+
+/* .modern-frame paints the body itself, which window_shell's own rules leave transparent here, so
+   the panel's fill is a div of its own. The inset edge and groove are off; #frame_fill carries the
+   edge instead. */
+.modern-shell-edge, .modern-groove, .modern-joint, .modern-header-accent { display: none; }
+#frame_fill
+{
+	position: absolute;
+	left: -12dp;
+	top: 0;
+	right: -12dp;
+	bottom: -16dp;
+	background-color: rgba(17, 19, 15, 196);
+	decorator: linear-gradient(to bottom, rgba(32, 34, 29, 196) 0%, rgba(17, 19, 15, 196) 45%, rgba(8, 10, 8, 196) 100%);
+	border-width: 2dp;
+	border-top-color: rgba(92, 96, 88, 160);
+	border-left-color: rgba(92, 96, 88, 160);
+	border-bottom-color: rgba(0, 0, 0, 190);
+	border-right-color: rgba(0, 0, 0, 190);
+}
+/* Only this strip drags. The rail reaches down over the content, so a press on a label would
+   otherwise drag the window from there. */
+#drag_strip { position: absolute; left: -12dp; right: -12dp; top: 0; height: 38dp; pointer-events: auto; }
+
+.window-shell-content, .window-shell-content.has-title
+{
+	left: 12dp;
+	right: 12dp;
+	top: 0;
+	bottom: 14dp;
+	padding: 0;
+	display: block;
+	pointer-events: none;
+	background-color: transparent;
+	decorator: none;
+	border-width: 0;
+}
+
+div { display: block; }
+button { font-family: "token(font-body)"; font-size: 10dp; color: token(text-secondary); cursor: pointer; pointer-events: auto; }
+
+#window_controls { position: absolute; right: -2dp; top: 17dp; z-index: 10; pointer-events: auto; }
+#window_controls button { display: inline-block; box-sizing: border-box; width: 16dp; height: 16dp; margin-left: 4dp; padding: 0; line-height: 14dp; text-align: center; font-size: 12dp; color: token(text-muted); background-color: token(surface-control); border: 1dp token(border-inner); }
+#window_controls button:hover { color: token(text-primary); border-color: token(border-hover); }
+#btn_minimize:before { content: "-"; }
+#btn_close_x:before { content: "x"; }
+#btn_close_x:hover { color: token(accent-crimson-hover); border-color: token(accent-crimson); }
+
+.btn { position: relative; display: inline-block; box-sizing: border-box; width: auto; height: 18dp; padding: 0 3dp; line-height: 16dp; vertical-align: top; text-align: center; overflow: hidden; pointer-events: auto; background-color: token(surface-raised); border: 1dp token(border-inner); decorator: none; }
+.btn:hover { background-color: token(surface-control); border-color: token(border-hover); color: token(text-primary); }
+.btn.disabled { pointer-events: none; color: token(text-disabled); border-color: token(border-recessed); }
+
+/* Receiver and title, a label column then the field, as InitControls() measured and placed them. */
+#rows { position: absolute; left: 0; right: 128dp; top: 46dp; pointer-events: auto; }
+.row { display: flex; height: 18dp; margin-bottom: 3dp; white-space: nowrap; }
+.row .label { flex: 0 0 56dp; height: 18dp; line-height: 18dp; overflow: hidden; color: token(text-muted); }
+.row .text-field { flex: 1 1 auto; box-sizing: border-box; width: auto; height: 18dp; pointer-events: auto; }
+
+/* The field fills a positioned box rather than being positioned itself: a textarea takes its own
+   width from cols/rows, so left/right offsets alone leave it at its intrinsic size. */
+#body_wrap { position: absolute; left: 0; right: 128dp; top: 92dp; bottom: 22dp; }
+#body_field { width: 100%; height: 100%; box-sizing: border-box; pointer-events: auto; }
+
+/* Reserved for the native CUIPhotoViewer; C++ reads this box and moves the viewer onto it. */
+#photo_slot { position: absolute; right: 0; width: 122dp; top: 46dp; bottom: 22dp; background-color: token(surface-recessed); border: 1dp token(border-recessed); pointer-events: auto; cursor: move; }
+/* The hit area for the "?" the native viewer draws at its own bottom-left corner -- it owns
+   the pixels, this owns the click. See PhotoViewerControl.h. */
+#photo_help { position: absolute; left: 1dp; bottom: 1dp; width: 16dp; height: 16dp; pointer-events: auto; cursor: pointer; }
+
+#footer { position: absolute; left: 0; right: 0; bottom: 0; height: 20dp; white-space: nowrap; }
+#footer .btn { width: 20%; margin-right: 1%; font-size: 9dp; }
+#footer .btn.pose { width: 28%; }
+

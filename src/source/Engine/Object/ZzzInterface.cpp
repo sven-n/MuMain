@@ -1,4 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -253,17 +253,6 @@ void ClearInput(BOOL bClearWhisperTarget)
         InputTextHide[i] = 0;
     }
 
-    if (g_iChatInputType == 1)
-    {
-        if (g_pSingleTextInputBox != nullptr)
-        {
-            g_pSingleTextInputBox->SetText(nullptr);
-        }
-        if (g_pSinglePasswdInputBox != nullptr)
-        {
-            g_pSinglePasswdInputBox->SetText(nullptr);
-        }
-    }
 }
 
 void RenderInputText(int x, int y, int Index, int Gold)
@@ -2907,6 +2896,19 @@ namespace
     }
 }
 
+namespace
+{
+void FillAddFriendName()
+{
+    if (MouseRButtonPush && !::IsStrifeMap(gMapManager.WorldActive) &&
+        SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
+    {
+        g_pWindowMgr->Dialogs().SetAddFriendName(CharactersClient[SelectedCharacter].ID);
+    }
+
+}
+}
+
 void MoveHero()
 {
     CHARACTER* c = Hero;
@@ -2961,20 +2963,7 @@ void MoveHero()
         return;
     }
 
-    if (g_pWindowMgr->GetAddFriendWindow() > 0)
-    {
-        if (MouseRButtonPush)
-        {
-            if (!::IsStrifeMap(gMapManager.WorldActive))
-            {
-                auto* pWindow = (CUITextInputWindow*)g_pWindowMgr->GetWindow(g_pWindowMgr->GetAddFriendWindow());
-                if (pWindow != NULL)
-                {
-                    pWindow->SetText(CharactersClient[SelectedCharacter].ID);
-                }
-            }
-        }
-    }
+    FillAddFriendName();
 
     int HeroX = GetScreenWidth() / 2;
     int HeroY = 180;

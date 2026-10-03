@@ -76,6 +76,7 @@ CUIWindowMgr::~CUIWindowMgr()
 void CUIWindowMgr::Reset()
 {
     m_dwMainWindowUIID = 0;
+    m_WindowFindMap.clear();
     for (m_WindowMapIter = m_WindowMap.begin(); m_WindowMapIter != m_WindowMap.end(); ++m_WindowMapIter)
     {
         if (m_WindowMapIter->second != NULL)
@@ -94,7 +95,6 @@ void CUIWindowMgr::Reset()
     m_iLastFriendWindowTabIndex = 0;
     m_bServerEnable = TRUE;
     m_iFriendMainWindowTitleNumber = 990;
-    m_dwAddWindowUIID = 0;
     SetChatReject(FALSE);
     if (GetFriendMainWindow() != NULL)
     {
@@ -148,40 +148,6 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         }
         else return 0;
         break;
-    case UIWNDTYPE_TEXTINPUT:
-        if (g_dwTopWindow != 0) return 0;
-        pbw = new CUITextInputWindow;
-        {
-            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
-            if (pMainWnd != NULL)
-                pMainWnd->AddWindow(pbw->GetUIID(), pszTitle);
-        }
-        g_dwTopWindow = pbw->GetUIID();
-        break;
-    case UIWNDTYPE_QUESTION:
-    case UIWNDTYPE_QUESTION_FORCE:
-        pbw = new CUIQuestionWindow(0);
-        {
-            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
-
-            if (pMainWnd != NULL)
-                pMainWnd->AddWindow(pbw->GetUIID(), I18N::Game::Question);
-        }
-        if (iWindowType == UIWNDTYPE_QUESTION) g_dwTopWindow = pbw->GetUIID();
-        else AddForceTopWindowList(pbw->GetUIID());
-        break;
-    case UIWNDTYPE_OK:
-        if (g_dwTopWindow != 0) return 0;
-    case UIWNDTYPE_OK_FORCE:
-        pbw = new CUIQuestionWindow(1);
-        {
-            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
-            if (pMainWnd != NULL)
-                pMainWnd->AddWindow(pbw->GetUIID(), I18N::Game::OK);
-        }
-        if (iWindowType == UIWNDTYPE_OK) g_dwTopWindow = pbw->GetUIID();
-        else AddForceTopWindowList(pbw->GetUIID());
-        break;
     case UIWNDTYPE_READLETTER:
         pbw = new CUILetterReadWindow;
         if (m_dwMainWindowUIID != 0)
@@ -212,7 +178,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
 
     pbw->Init(pszTitle, dwParentID);
 
-    if (!(iOption & UIADDWND_FORCEPOSITION))
+    if (iWindowType != UIWNDTYPE_FRIENDMAIN && !(iOption & UIADDWND_FORCEPOSITION))
     {
         const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
         for (m_WindowMapIter = m_WindowMap.begin(); m_WindowMapIter != m_WindowMap.end(); ++m_WindowMapIter)
@@ -244,7 +210,8 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         if (iPos_y + pbw->GetHeight() > contentHeight)
             iPos_y = std::max(contentHeight - pbw->GetHeight(), 0);
     }
-    pbw->SetPosition(iPos_x, iPos_y);
+    if (iWindowType != UIWNDTYPE_FRIENDMAIN)
+        pbw->SetPosition(iPos_x, iPos_y);
 
     DWORD dwUIID = pbw->GetUIID();
 
@@ -282,12 +249,8 @@ void CUIWindowMgr::RemoveWindow(DWORD dwUIID)
             pWindow->GetBackPosition(&m_bIsMainWindowMaximize, &m_iMainWindowBackPos_y, &m_iMainWindowBackHeight);
             m_iLastFriendWindowTabIndex = static_cast<CUIFriendWindow*>(pWindow)->GetTabIndex();
         }
+        m_WindowFindMap.clear();
         m_dwMainWindowUIID = 0;
-    }
-
-    if (GetAddFriendWindow() == dwUIID)
-    {
-        SetAddFriendWindow(0);
     }
 
     m_WindowMapIter = m_WindowMap.find(dwUIID);
@@ -335,14 +298,40 @@ void CUIWindowMgr::Render()
             CUIBaseWindow* window = m_WindowMapIter->second;
             if (window->GetState() != UISTATE_HIDE && window->GetState() != UISTATE_READY)
             {
-                if (!window->HasRmlView())
-                    window->Render();
-                else
-                    window->RenderRmlOverlay();
+                // Every window of this family draws itself through its own document now; the
+                // manager is left with the native 3D each one renders over it.
+                window->RenderRmlOverlay();
             }
         }
     }
     m_bRenderFrame = TRUE;
+}
+
+// Runs from the post-RmlUi seam (UI::RmlBridge::OverlayRender), so a portrait stands on its own
+// panel instead of under every panel in the frame.
+//
+// Only the window in focus draws one. That seam sits above the whole main context rather than at
+// any one window's depth, so a portrait drawn for a window that is not in front would stand over
+// the very windows covering it. The front window has nothing of this family above it, which is
+// the one case where "above everything" and "at this window's depth" agree. The others show their
+// empty well until they are brought forward -- GetTopWindowUIID()'s own notion of front, the same
+// one the original title bar used to decide which window looked active.
+void CUIWindowMgr::RenderOverlay3D()
+{
+    CUIBaseWindow* focused = nullptr;
+    for (const DWORD uiid : m_WindowArrangeList)
+    {
+        const auto found = m_WindowMap.find(uiid);
+        if (found == m_WindowMap.end())
+            continue;
+        CUIBaseWindow* window = found->second;
+        // Not GetTopWindowUIID() itself: that answers with the arrange list's back even when it
+        // is hidden, which would suppress the portrait of the window actually in front.
+        if (window->GetState() != UISTATE_HIDE && window->GetState() != UISTATE_READY)
+            focused = window;
+    }
+    if (focused != nullptr)
+        focused->RenderAboveRmlUi();
 }
 
 void CUIWindowMgr::DoAction()
@@ -548,8 +537,7 @@ void CUIWindowMgr::HandleMessage()
         {
             if (GetWindow(m_WorkMessage.m_iParam1)->HaveTextBox() == FALSE)
             {
-                if ((GetWindow(GetTopWindowUIID()) != NULL && GetWindow(GetTopWindowUIID())->HaveTextBox() == TRUE)
-                    || g_pSingleTextInputBox->HaveFocus() == TRUE)
+                if (GetWindow(GetTopWindowUIID()) != NULL && GetWindow(GetTopWindowUIID())->HaveTextBox() == TRUE)
                     SaveIMEStatus();
 
                 SetFocus(g_hWnd);
@@ -720,8 +708,10 @@ void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
         CUIBaseWindow* pWindow = GetWindow(m_dwMainWindowUIID);
         if (pWindow != NULL)
         {
-            pWindow->SetSize(m_iMainWindowWidth, m_iMainWindowHeight);
+            static_cast<CUIFriendWindow*>(pWindow)->RestoreSemanticLayout(
+                m_iMainWindowPos_x, m_iMainWindowPos_y, m_iMainWindowWidth, m_iMainWindowHeight);
             pWindow->SetBackPosition(m_bIsMainWindowMaximize, m_iMainWindowBackPos_y, m_iMainWindowBackHeight);
+            static_cast<CUIFriendWindow*>(pWindow)->RestoreSemanticMaximized();
             // 윈도우 목록 복구
             RefreshMainWndChatRoomList();
             pWindow->Refresh();
@@ -1088,6 +1078,7 @@ void CUIBaseWindow::Render()
     RenderOver();
 }
 
+
 void CUIBaseWindow::RenderRmlOverlay()
 {
     EnableAlphaTest();
@@ -1310,115 +1301,172 @@ void CUIBaseWindow::Maximize()
     }
 }
 
-CUIChatWindow::CUIChatWindow()
-    : m_iShowType(1),
-    m_dwRoomNumber(0)
-{}
-
-CUIChatWindow::~CUIChatWindow()
+void ReceiveChatRoomConnectResult(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
 {
-    DisconnectToChatServer();
+    auto Data = (LPFS_CHAT_JOIN_RESULT)ReceiveBuffer;
+    switch (Data->Result)
+    {
+    case 0x00:
+        g_pWindowMgr->Dialogs().Notice(I18N::Game::ChatRoomIsFull);
+        break;
+    case 0x01:
+        break;
+    default:
+        break;
+    };
 }
 
-void CUIChatWindow::InitControls()
+void ReceiveChatRoomUserStateChange(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
 {
-    m_TextInputBox.Init(g_hWnd, 238, 14, 50);
-    m_TextInputBox.SetSize(180, 14);
-    m_TextInputBox.SetParentUIID(m_dwUIID);
-    m_TextInputBox.SetFont(g_hFont);
-
-    m_TextInputBox.SetOption(UIOPTION_ENTERIMECHKOFF);
-    m_TextInputBox.SetBackColor(0, 0, 0, 0);
-
-    m_TextInputBox.SetParentUIID(GetUIID());
-    m_TextInputBox.SetArrangeType(2, 2, 12);
-    m_TextInputBox.SetState(UISTATE_NORMAL);
-    m_TextInputBox.SetTextLimit(MAX_CHATROOM_TEXT_LENGTH - 1);
-
-    m_InviteButton.Init(1, I18N::Game::Invite);
-    m_InviteButton.SetParentUIID(GetUIID());
-    m_InviteButton.SetSize(53, 13);
-    m_InviteButton.SetArrangeType(3, 54, 14);
-
-    m_CloseInviteButton.Init(2, I18N::Game::Invite);
-    m_CloseInviteButton.SetParentUIID(GetUIID());
-    m_CloseInviteButton.SetSize(73, 13);
-    m_CloseInviteButton.SetArrangeType(3, 74, 14);
-    Refresh();
+    auto Data = (LPFS_CHAT_CHANGE_STATE)ReceiveBuffer;
+    auto* pChatWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID);
+    if (pChatWindow == NULL) return;
+    wchar_t szName[MAX_USERNAME_SIZE + 1] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_USERNAME_SIZE);
+    szName[MAX_USERNAME_SIZE] = '\0';
+    wchar_t szText[MAX_TEXT_LENGTH + 1] = { 0 };
+    CMultiLanguage::ConvertFromUtf8(szText, Data->Name, MAX_USERNAME_SIZE);
+    szText[MAX_USERNAME_SIZE] = '\0';
+    switch (Data->Type)
+    {
+    case 0x00:
+        if (pChatWindow->AddChatPal(szName, Data->Index, 0) >= 3)
+        {
+            wcscat(szText, I18N::Game::HasEntered);
+            pChatWindow->AddChatText(255, szText, 1, 0);
+        }
+        break;
+    case 0x01:
+        if (pChatWindow->GetUserCount() >= 3)
+        {
+            wcscat(szText, I18N::Game::HasLeft);
+            pChatWindow->AddChatText(255, szText, 1, 0);
+        }
+        pChatWindow->RemoveChatPal(szName);
+        break;
+    default:
+        return;
+        break;
+    };
+    if (pChatWindow->GetShowType() == 2)
+        pChatWindow->UpdateInvitePalList();
 }
 
-void CUIChatWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
+void ReceiveChatRoomUserList(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
 {
-    memset(m_szLastText, 0, MAX_CHATROOM_TEXT_LENGTH);
+    // The only handler here that used the window without checking it, and it looked it up once
+    // per name rather than once.
+    auto* pChatWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID);
+    if (pChatWindow == NULL) return;
 
-    SetTitle(pszTitle);
-    SetParentUIID(dwParentID);
-
-    SetPosition(50, 50);
-    SetSize(250, 170);
-    SetLimitSize(250, 150);
-
-    m_ChatListBox.SetParentUIID(GetUIID());
-    m_ChatListBox.SetArrangeType(2, 0, 16);
-    m_ChatListBox.SetResizeType(3, 0, -16);
-
-    m_PalListBox.SetParentUIID(GetUIID());
-    m_PalListBox.SetArrangeType(3, 75, 16);
-    m_PalListBox.SetResizeType(2, 75, -16);
-
-    //	m_PalListBox.AddText(L"이름네자", 1, 1);
-    //	m_PalListBox.AddText(L"이름넉자", 1, 1);
-    //	m_PalListBox.AddText(L"이름수넷", 1, 1);
-    //	m_PalListBox.AddText(L"이름1자", 1, 1);
-    //	m_PalListBox.AddText(L"이름2자", 1, 1);
-    //	m_PalListBox.AddText(L"이름3넷", 1, 1);
-    //	m_PalListBox.AddText(L"이름4자", 1, 1);
-    //	m_PalListBox.AddText(L"이름5자", 1, 1);
-    //	m_PalListBox.AddText(L"이름6넷", 1, 1);
-    //	m_PalListBox.AddText(L"이름7넷", 1, 1);
-    //	m_PalListBox.AddText(L"이름8넷", 1, 1);
-    //	m_PalListBox.AddText(L"이름9넷", 1, 1);
-
-    
-
-    m_InvitePalListBox.SetParentUIID(GetUIID());
-    m_InvitePalListBox.SetArrangeType(3, 75, 16);
-    m_InvitePalListBox.SetResizeType(2, 75, -16);
-
-    m_iPrevWidth = 0;
+    auto Header = (LPFS_CHAT_USERLIST_HEADER)ReceiveBuffer;
+    int iMoveOffset = sizeof(FS_CHAT_USERLIST_HEADER);
+    wchar_t szName[MAX_USERNAME_SIZE + 1] = { 0 };
+    for (int i = 0; i < Header->Count; ++i)
+    {
+        auto Data = (LPFS_CHAT_USERLIST_DATA)(ReceiveBuffer + iMoveOffset);
+        CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_USERNAME_SIZE);
+        szName[MAX_USERNAME_SIZE] = '\0';
+        pChatWindow->AddChatPal(szName, Data->Index, 0);
+        iMoveOffset += sizeof(FS_CHAT_USERLIST_DATA);
+    }
 }
 
-void CUIChatWindow::Refresh()
+void ReceiveChatRoomChatText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
 {
-    m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_InviteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_CloseInviteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_TextInputBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
+    auto Data = (LPFS_CHAT_TEXT)ReceiveBuffer;
+    auto* pChatWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID);
+    if (pChatWindow == NULL) return;
 
-    m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_PalListBox.SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
-    m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
+    char temp[MAX_CHATROOM_TEXT_LENGTH] = { };
+    if (Data->MsgSize >= MAX_CHATROOM_TEXT_LENGTH) return;
 
-    m_bHaveTextBox = TRUE;
-    g_dwKeyFocusUIID = m_PalListBox.GetUIID();
+    memcpy(temp, Data->Msg, Data->MsgSize);
+    BuxConvert((LPBYTE)temp, Data->MsgSize);
+
+    wchar_t chatMessage[MAX_CHATROOM_TEXT_LENGTH] = { };
+    CMultiLanguage::ConvertFromUtf8(chatMessage, temp, MAX_CHATROOM_TEXT_LENGTH);
+
+    if (pChatWindow->GetState() == UISTATE_READY)
+    {
+        g_pFriendMenu->SetNewChatAlert(dwWindowUIID);
+        g_pSystemLogBox->AddText(I18N::Game::NewMessageHasArrived, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        pChatWindow->SetState(UISTATE_HIDE);
+        if (g_pWindowMgr->GetFriendMainWindow() != NULL)
+        {
+            g_pWindowMgr->GetFriendMainWindow()->AddWindow(dwWindowUIID, g_pWindowMgr->GetWindow(dwWindowUIID)->GetTitle());
+        }
+    }
+    else if (pChatWindow->GetState() == UISTATE_HIDE || g_pWindowMgr->GetTopWindowUIID() != dwWindowUIID)
+    {
+        g_pFriendMenu->SetNewChatAlert(dwWindowUIID);
+    }
+    pChatWindow->AddChatText(Data->Index, chatMessage, 3, 0);
 }
 
+void ReceiveChatRoomNoticeText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
+{
+    auto Data = (LPFS_CHAT_TEXT)ReceiveBuffer;
+    Data->Msg[99] = '\0';
+    if (Data->Msg[0] == '\0')
+    {
+        return;
+    }
 
-void TranslateChattingProtocol(DWORD dwWindowUIID, const BYTE* ReceiveBuffer, int Size);
+    wchar_t message[sizeof Data->Msg]{};
+    CMultiLanguage::ConvertFromUtf8(message, Data->Msg, sizeof Data->Msg);
+    g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+}
+
+void TranslateChattingProtocol(DWORD dwWindowUIID, const BYTE* ReceiveBuffer, int Size)
+{
+    if (Size < 4)
+    {
+        return;
+    }
+
+    int HeadCode;
+    BOOL bIsC1C3 = ReceiveBuffer[0] % 2 == 1;
+    if (bIsC1C3) // C1 and C3
+    {
+        HeadCode = ReceiveBuffer[2];
+    }
+    else
+    {
+        HeadCode = ReceiveBuffer[3];
+    }
+
+    switch (HeadCode)
+    {
+    case 0x00:
+        ReceiveChatRoomConnectResult(dwWindowUIID, ReceiveBuffer);
+        break;
+    case 0x01:
+        ReceiveChatRoomUserStateChange(dwWindowUIID, ReceiveBuffer);
+        break;
+    case 0x02:
+        ReceiveChatRoomUserList(dwWindowUIID, ReceiveBuffer);
+        break;
+    case 0x04:
+        ReceiveChatRoomChatText(dwWindowUIID, ReceiveBuffer);
+        break;
+    case 0x0D:
+        ReceiveChatRoomNoticeText(dwWindowUIID, ReceiveBuffer);
+        break;
+    default:
+        break;
+    }
+}
 
 void CUIChatWindow::HandlePacketS(int32_t handle, const BYTE* ReceiveBuffer, int32_t Size)
 {
-    if (const auto uuid = ConnectionHandleToWindowUuid.find(handle)->second)
-    {
-        TranslateChattingProtocol(uuid, ReceiveBuffer, Size);
-    }
+    // find() was dereferenced unguarded. The Connection registers this callback from its own
+    // constructor, before ConnectToChatServer() below records the handle, so a packet arriving in
+    // that window read end() -- and so did one arriving for a room already closed.
+    const auto found = ConnectionHandleToWindowUuid.find(handle);
+    if (found == ConnectionHandleToWindowUuid.end() || found->second == 0)
+        return;
+    TranslateChattingProtocol(found->second, ReceiveBuffer, Size);
 }
 
 void CUIChatWindow::ConnectToChatServer(const wchar_t* pszIP, DWORD dwRoomNumber, DWORD dwTicket)
@@ -1447,348 +1495,15 @@ void CUIChatWindow::DisconnectToChatServer()
             _connection->Close();
         }
 
+        // Before the connection goes: this entry used to outlive the window, so a late packet on
+        // the handle still resolved to the UIID of a window that no longer exists.
+        ConnectionHandleToWindowUuid.erase(_connection->GetHandle());
+
         delete _connection;
         _connection = nullptr;
     }
 }
 
-int CUIChatWindow::AddChatPal(const wchar_t* pszID, BYTE Number, BYTE Server)
-{
-    BOOL bFind = FALSE;
-    for (std::deque<GUILDLIST_TEXT>::iterator iter = m_PalListBox.GetFriendList().begin(); iter != m_PalListBox.GetFriendList().end(); ++iter)
-    {
-        wchar_t* n = iter->m_szID;
-
-        if (wcscmp(iter->m_szID, pszID) == 0)
-        {
-            iter->m_Number = Number;
-            iter->m_Server = Server;
-            bFind = TRUE;
-            break;
-        }
-    }
-    if (bFind == FALSE)
-        m_PalListBox.AddText(pszID, Number, Server);
-
-    wchar_t szTitle[128] = { 0 };
-    wcsncpy(szTitle, I18N::Game::Talking, wcslen(I18N::Game::Talking));
-    m_PalListBox.MakeTitleText(szTitle);
-    SetTitle(szTitle);
-    g_pWindowMgr->RefreshMainWndChatRoomList();
-
-    if (m_PalListBox.GetLineNum() >= 2)
-    {
-        Lock(FALSE);
-    }
-
-    if (m_PalListBox.GetLineNum() > 2)
-    {
-        if (m_iShowType >= 2)
-            m_ChatListBox.SetResizeType(3, -80 - 80, -16);
-        else m_ChatListBox.SetResizeType(3, -80, -16);
-        m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    }
-
-    return m_PalListBox.GetLineNum();
-}
-
-void CUIChatWindow::RemoveChatPal(const wchar_t* pszID)
-{
-    if (m_PalListBox.GetLineNum() > 2)
-    {
-        m_PalListBox.DeleteText(pszID);
-
-        wchar_t szTitle[128] = { 0 };
-        wcsncpy(szTitle, I18N::Game::Talking, wcslen(I18N::Game::Talking));
-        m_PalListBox.MakeTitleText(szTitle);
-        SetTitle(szTitle);
-        g_pWindowMgr->RefreshMainWndChatRoomList();
-    }
-
-    if (m_PalListBox.GetLineNum() <= 2)
-    {
-        if (m_iShowType >= 2)
-            m_ChatListBox.SetResizeType(3, -80 - 80, -16);
-        else m_ChatListBox.SetResizeType(3, 0, -16);
-        m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    }
-}
-
-void CUIChatWindow::AddChatText(BYTE byIndex, const wchar_t* pszText, int iType, int iColor)
-{
-    const wchar_t* pszID = m_PalListBox.GetNameByNumber(byIndex);
-    m_ChatListBox.AddText((pszID != NULL ? pszID : L""), pszText, iType, iColor);
-}
-
-void CUIChatWindow::RenderSub()
-{
-    EnableAlphaTest();
-    if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE)
-    {
-        m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_InviteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_CloseInviteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_TextInputBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
-        if (GetState() == UISTATE_RESIZE)
-        {
-            m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-            m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-            m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-        }
-    }
-
-    m_ChatListBox.Render();
-    if (m_PalListBox.GetLineNum() > 2 || m_iShowType >= 2)
-    {
-        m_PalListBox.Render();
-    }
-    if (m_iShowType >= 2)
-    {
-        m_InvitePalListBox.Render();
-        EnableAlphaTest();
-        RenderWindowVLine((float)(RPos_x(0) + RWidth() - 160), (float)RPos_y(0), (float)RHeight() - 16);
-    }
-    if (m_PalListBox.GetLineNum() > 2 || m_iShowType >= 2)
-    {
-        RenderWindowVLine((float)(RPos_x(0) + RWidth() - 80), (float)RPos_y(0), (float)RHeight() - 16);
-    }
-
-    EnableAlphaTest();
-    SetLineColor(2);
-    RenderColor((float)RPos_x(0), (float)RPos_y(0) + RHeight() - 16, (float)RWidth(), 1.0f);
-    SetLineColor(7);
-    RenderColor((float)RPos_x(0), (float)RPos_y(0) + RHeight() - 15, (float)RWidth(), 15);
-    EndRenderColor();
-
-    m_InviteButton.Render();
-    m_TextInputBox.Render();
-    if (m_iShowType >= 2) m_CloseInviteButton.Render();
-    DisableAlphaBlend();
-}
-
-void CUIChatWindow::UpdateInvitePalList()
-{
-    g_pFriendList->UpdateFriendList(m_InvitePalListBox.GetFriendList(), NULL);
-
-    std::deque<GUILDLIST_TEXT>::iterator iter;
-
-    for (iter = m_PalListBox.GetFriendList().begin(); iter != m_PalListBox.GetFriendList().end(); ++iter)
-    {
-        if (wcscmp(iter->m_szID, Hero->ID) != 0)
-            m_InvitePalListBox.DeleteText(iter->m_szID);
-    }
-
-    for (iter = m_InvitePalListBox.GetFriendList().begin(); iter != m_InvitePalListBox.GetFriendList().end();)
-    {
-        if (iter->m_Server >= 253)
-        {
-            m_InvitePalListBox.DeleteText(iter->m_szID);
-            iter = m_InvitePalListBox.GetFriendList().begin();
-        }
-        else
-        {
-            ++iter;
-        }
-    }
-    m_InvitePalListBox.Scrolling(0);
-}
-
-BOOL CUIChatWindow::HandleMessage()
-{
-    if (m_WorkMessage.m_iMessage == UI_MESSAGE_LISTDBLCLICK)
-    {
-        if (m_WorkMessage.m_iParam1 == (int)(m_InvitePalListBox.GetUIID()))
-        {
-            PlayBuffer(SOUND_CLICK01);
-            m_WorkMessage.m_iMessage = UI_MESSAGE_BTNLCLICK;
-            m_WorkMessage.m_iParam1 = 2;
-        }
-    }
-    switch (m_WorkMessage.m_iMessage)
-    {
-    case UI_MESSAGE_SELECTED:
-        m_TextInputBox.GiveFocus();
-        g_dwKeyFocusUIID = m_PalListBox.GetUIID();
-        break;
-    case UI_MESSAGE_TEXTINPUT:
-    {
-        wchar_t	pszText[MAX_CHATROOM_TEXT_LENGTH] = { };
-
-        m_TextInputBox.GetText(pszText, MAX_CHATROOM_TEXT_LENGTH);
-        //if (CheckAbuseFilter(pszText, false))
-        //{
-        //    wcsncpy(pszText, I18N::Game::PwnedByTheFilter, sizeof pszText);
-        //}
-
-        if (wcsncmp(m_szLastText, pszText, MAX_CHATROOM_TEXT_LENGTH) != 0)
-        {
-            wcsncpy(m_szLastText, pszText, MAX_CHATROOM_TEXT_LENGTH);
-
-            if (pszText[0] != L'\0')
-            {
-                int iSize = wcslen(pszText);
-                if (_connection != nullptr)
-                {
-                    _connection->ToChatServer()->SendChatMessageExt(0, pszText);
-                }
-            }
-        }
-
-        m_TextInputBox.SetText(NULL);
-        if (m_PalListBox.GetLineNum() < 2)
-        {
-            Lock(TRUE);
-        }
-    }
-    break;
-    case UI_MESSAGE_BTNLCLICK:
-    {
-        if (g_dwTopWindow != 0) break;
-        DWORD dwUIID = 0;
-        switch (m_WorkMessage.m_iParam1)
-        {
-        case 1:
-            if (m_iShowType == 1)
-            {
-                m_iShowType = 2;
-                SetSize(GetWidth() + 80, GetHeight());
-                SetLimitSize(250 + 80, 150, 540 / g_fScreenRate_x + 80);
-                m_ChatListBox.SetResizeType(3, -80 - 80, -16);
-                m_PalListBox.SetArrangeType(3, 75 + 80, 16);
-                m_InviteButton.SetArrangeType(3, 54 + 80, 14);
-                m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-                m_CloseInviteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-                m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-                m_InviteButton.SetCaption(I18N::Game::CloseInvitation);
-
-                UpdateInvitePalList();
-
-                const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
-                if (m_iPos_x + m_iWidth > bounds.width)
-                    m_iPos_x = bounds.width - m_iWidth;
-                Refresh();
-            }
-            else if (m_iShowType >= 2)
-            {
-                m_iShowType = 1;
-                SetSize(GetWidth() - 80, GetHeight());
-                SetLimitSize(250, 150, 540 / g_fScreenRate_x);
-                if (m_PalListBox.GetLineNum() > 2) m_ChatListBox.SetResizeType(3, -80, -16);
-                else m_ChatListBox.SetResizeType(3, 0, -16);
-                m_PalListBox.SetArrangeType(3, 75, 16);
-                m_InviteButton.SetArrangeType(3, 54, 14);
-                m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-                m_CloseInviteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-                m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-                m_InviteButton.SetCaption(I18N::Game::Invite);
-            }
-            break;
-        case 2:
-            if (m_TextInputBox.IsLocked() == FALSE && m_InvitePalListBox.GetSelectedText() != NULL)
-            {
-                if (m_PalListBox.GetLineNum() <= 1);
-                else if (m_PalListBox.GetLineNum() >= 30)
-                {
-                    AddChatText(255, I18N::Game::YouHaveReachedTheMaximumNumberOfFriendsYouCanList, 1, 0);
-                }
-                else
-                {
-                    SocketClient->ToGameServer()->SendChatRoomInvitationRequest(
-                        MU_C16(m_InvitePalListBox.GetSelectedText()->m_szID),
-                        m_dwRoomNumber,
-                        GetUIID());
-                }
-            }
-            break;
-        default:
-            break;
-        }
-    }
-    break;
-    default:
-        break;
-    }
-    return FALSE;
-}
-
-void CUIChatWindow::DoActionSub(BOOL bMessageOnly)
-{
-    if (m_iPrevWidth != 0 && m_iPrevWidth != m_iWidth)
-    {
-        int iNewWidth = RWidth() - m_InviteButton.GetWidth() - 7;
-        if (m_iShowType == 2)
-            iNewWidth -= m_CloseInviteButton.GetWidth() + 7;
-        m_TextInputBox.SetSize(iNewWidth, 14);
-    }
-    m_iPrevWidth = m_iWidth;
-
-    m_InviteButton.DoAction(bMessageOnly);
-    m_ChatListBox.DoAction(bMessageOnly);
-    m_PalListBox.DoAction(bMessageOnly);
-    m_InvitePalListBox.DoAction(bMessageOnly);
-    m_TextInputBox.DoAction(bMessageOnly);
-    m_CloseInviteButton.DoAction(bMessageOnly);
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void CUIChatWindow::DoMouseActionSub()
-{
-    //	if (g_dwMouseUseUIID == GetUIID() && MouseLButton == true)
-    //	{
-    //		m_TextInputBox.GiveFocus();
-    //	}
-}
-
-const wchar_t* CUIChatWindow::GetChatFriend(int* piResult)
-{
-    if (m_PalListBox.GetFriendList().size() > 2)
-    {
-        if (piResult != NULL) *piResult = 2;
-        return NULL;
-    }
-    else
-    {
-        std::deque<GUILDLIST_TEXT>& pPalList = m_PalListBox.GetFriendList();
-        for (std::deque<GUILDLIST_TEXT>::iterator PalListIter = pPalList.begin(); PalListIter != pPalList.end(); ++PalListIter)
-        {
-            if (wcsncmp(PalListIter->m_szID, Hero->ID, MAX_USERNAME_SIZE) != 0)
-            {
-                if (piResult != NULL) *piResult = 1;
-                return PalListIter->m_szID;
-            }
-        }
-        if (piResult != NULL) *piResult = 0;
-        return NULL;
-    }
-}
-
-void CUIChatWindow::Lock(BOOL bFlag)
-{
-    if (bFlag == TRUE)
-    {
-        m_TextInputBox.Lock(TRUE);
-        wchar_t szTitle[128] = { 0 };
-        if (wcsncmp(GetTitle(), I18N::Game::Offline, wcslen(I18N::Game::Offline)) != 0)
-        {
-            wcsncpy(szTitle, I18N::Game::Offline, wcslen(I18N::Game::Offline));
-        }
-        wcsncat(szTitle, GetTitle(), 128);
-        SetTitle(szTitle);
-    }
-    else
-    {
-        m_TextInputBox.Lock(FALSE);
-        if (wcsncmp(GetTitle(), I18N::Game::Offline, wcslen(I18N::Game::Offline)) == 0)
-        {
-            wchar_t szTitle[128] = { 0 };
-            wcsncpy(szTitle, GetTitle() + wcslen(I18N::Game::Offline), 128);
-            SetTitle(szTitle);
-        }
-    }
-}
 
 extern int gix, giy;
 extern void MoveCharacter(CHARACTER* c, OBJECT* o);
@@ -1842,9 +1557,6 @@ static void PhotoMakeTranslation(float x, float y, float z, float* out)
 
 void CUIPhotoViewer::RenderPhotoCharacter()
 {
-    float fPos_x = m_iPos_x * 1.2f + m_iWidth / 2 - 50;
-    float fPos_y = m_iPos_y * 1.2f + m_iHeight * 1.2f - 62;
-
     CHARACTER* c = &m_PhotoChar;
     OBJECT* o = &c->Object;
     int WorldBackup = gMapManager.WorldActive;
@@ -1857,8 +1569,10 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();
+    // The whole well, not native's fixed 141 inside it: the slot RCSS reserves is this viewer's
+    // own size, so the character is framed by the box it stands in at whatever height that is.
     const auto viewport = UI::Scaling::ViewportForLogicalRect(
-        UI::Scaling::GetActiveTransform(), m_iPos_x, m_iPos_y, m_iWidth, 141.0f);
+        UI::Scaling::GetActiveTransform(), m_iPos_x, m_iPos_y, m_iWidth, static_cast<float>(m_iHeight));
     SetRenderViewport(viewport.x, viewport.y, viewport.width, viewport.height);
     gluPerspective2(1.f, static_cast<float>(viewport.width) / static_cast<float>(viewport.height), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
     mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
@@ -2134,7 +1848,6 @@ CUIPhotoViewer::CUIPhotoViewer()
 
 CUIPhotoViewer::~CUIPhotoViewer()
 {
-    UI::RmlBridge::Tooltip::Hide(this);
     g_SummonSystem.RemoveEquipEffects(&m_PhotoChar);
     DeleteCloth(&m_PhotoChar, &m_PhotoChar.Object);
 }
@@ -2459,57 +2172,19 @@ BOOL CUIPhotoViewer::DoMouseAction()
 
     if (CheckOption(UIPHOTOVIEWER_CANCONTROL))
     {
-        if (GetState() == UISTATE_NORMAL && CheckMouseIn(m_iPos_x + 1, m_iPos_y + m_iHeight - 17, 16, 16) == TRUE)
+        // Only the wheel is still read here. Every press-driven control -- turning, the reset and
+        // the "?" toggle -- moved to UI::Party::PhotoViewerControl, because a press over the
+        // letter's own document never sets MouseLButtonPush at all; see that header.
+        if (CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight) == TRUE)
         {
             MouseOnWindow = true;
-            if (MouseLButtonPush)
-            {
-                m_bHelpEnable = (m_bHelpEnable + 1) % 2;
-                MouseLButtonPush = FALSE;
-                MouseLButton = FALSE;
-            }
-        }
-        else if (CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight) == TRUE)
-        {
-            MouseOnWindow = true;
-            if (MouseLButtonPush)
-            {
-                m_bHelpEnable = FALSE;
-                if (GetState() == UISTATE_NORMAL && g_dwActiveUIID == 0)
-                {
-                    g_dwActiveUIID = GetUIID();
-                    SetState(UISTATE_SCROLL);
-                    m_fRotateClickPos_x = MouseX;
-                    SetFocus(g_hWnd);
-                }
-            }
-            else if (MouseRButtonPush)
-            {
-                m_bHelpEnable = FALSE;
-                m_fCurrentAngle = m_fSettingAngle;
-                m_fCurrentZoom = m_fSettingZoom;
-            }
-            else if (MouseWheel != 0)
+            if (MouseWheel != 0)
             {
                 m_bHelpEnable = FALSE;
                 m_fCurrentZoom += MouseWheel / 50.0f;
                 if (m_fCurrentZoom > 1.1f) m_fCurrentZoom = 1.1f;
                 else if (m_fCurrentZoom < 0.8f) m_fCurrentZoom = 0.8f;
                 MouseWheel = 0;
-            }
-        }
-        if (GetState() == UISTATE_SCROLL)
-        {
-            if (MouseLButtonPush)
-            {
-                MouseOnWindow = true;
-                m_fCurrentAngle += (MouseX - m_fRotateClickPos_x);
-                m_fRotateClickPos_x = MouseX;
-            }
-            else
-            {
-                SetState(UISTATE_NORMAL);
-                if (g_dwActiveUIID == GetUIID()) g_dwActiveUIID = 0;
             }
         }
     }
@@ -2528,6 +2203,24 @@ BOOL CUIPhotoViewer::DoMouseAction()
     return TRUE;
 }
 
+void CUIPhotoViewer::TurnBy(float degrees)
+{
+    m_bHelpEnable = FALSE;
+    m_fCurrentAngle += degrees;
+}
+
+void CUIPhotoViewer::ResetView()
+{
+    m_bHelpEnable = FALSE;
+    m_fCurrentAngle = m_fSettingAngle;
+    m_fCurrentZoom = m_fSettingZoom;
+}
+
+void CUIPhotoViewer::ToggleHelp()
+{
+    m_bHelpEnable = (m_bHelpEnable + 1) % 2;
+}
+
 extern int TextNum;
 extern wchar_t TextList[50][100];
 extern int  TextListColor[50];
@@ -2537,7 +2230,12 @@ extern SIZE Size[50];
 // The help the "?" icon toggles: three white lines left-aligned in a box centred on the viewer,
 // its bottom lines ending at the viewer's bottom (RenderTipTextList(..., RT3_SORT_LEFT)), on the
 // shared RmlUi tooltip; natively only without RmlUi.
-void CUIPhotoViewer::RenderHelpText()
+// Drawn natively, not on the shared RmlUi tooltip, and from Render() so it lands in the same
+// post-RmlUi seam as the character. That seam is the only layer above the character: RmlUi's main
+// context composites before it, so a tooltip document would be painted over by the very portrait
+// it describes. Native text here puts the help back on top of the character, where the original
+// drew it.
+void CUIPhotoViewer::ShowHelpText()
 {
     const wchar_t* const help[] = {I18N::Game::WheelButtonZoomInOut, I18N::Game::LeftClickRotation,
                                    I18N::Game::RightClickDefault};
@@ -2545,24 +2243,6 @@ void CUIPhotoViewer::RenderHelpText()
     const SIZE TextSize = g_pRenderText->MeasureText(L"Z", 1);
     const int sx = m_iPos_x + m_iWidth / 2;
     const int sy = m_iPos_y + m_iHeight - static_cast<int>(std::size(help)) * (TextSize.cy + 2);
-
-    if (RmlUiRuntime::Instance().IsCreated())
-    {
-        const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-        UI::RmlBridge::Tooltip::Config config;
-        for (const wchar_t* text : help)
-        {
-            UI::RmlBridge::Tooltip::Line line;
-            line.text = StringUtils::WideToNarrow(text);
-            config.lines.push_back(std::move(line));
-        }
-        config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(sx));
-        config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(sy));
-        config.centerHorizontally = true; // RenderTipTextList() centres the box on sx.
-        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Left; // RT3_SORT_LEFT
-        UI::RmlBridge::Tooltip::Show(config, this);
-        return;
-    }
 
     TextNum = 0;
     for (const wchar_t* text : help)
@@ -2618,715 +2298,13 @@ void CUIPhotoViewer::Render()
     {
         DisableAlphaBlend();
         if (m_bHelpEnable == FALSE)
-        {
             RenderBitmap(BITMAP_INTERFACE_EX + 20, m_iPos_x + 1, m_iPos_y + m_iHeight - 17, 16.0f, 16.0f, 0.f, 0.f, 16.f / 16.f, 16.f / 16.f);
-            UI::RmlBridge::Tooltip::Hide(this);
-        }
         else
         {
             RenderBitmap(BITMAP_INTERFACE_EX + 20, m_iPos_x + 2, m_iPos_y + m_iHeight - 16, 15.0f, 15.0f, 0.f, 0.f, 15.f / 16.f, 15.f / 16.f);
-            RenderHelpText();
+            ShowHelpText();
         }
     }
-}
-
-void CUILetterWriteWindow::InitControls()
-{
-    g_pRenderText->SetFont(g_hFont);
-    const SIZE size = g_pRenderText->MeasureText(I18N::Game::Receiver, wcslen(I18N::Game::Receiver));
-
-    m_MailtoInputBox.Init(g_hWnd, 238, 14, 50);
-    m_MailtoInputBox.SetParentUIID(m_dwUIID);
-    m_MailtoInputBox.SetFont(g_hFont);
-    m_MailtoInputBox.SetOption(UIOPTION_NULL);
-    m_MailtoInputBox.SetBackColor(0, 0, 0, 0);
-    m_MailtoInputBox.SetTextLimit(MAX_USERNAME_SIZE);
-    m_MailtoInputBox.SetParentUIID(GetUIID());
-    m_MailtoInputBox.SetArrangeType(0, size.cx, 3);
-    m_MailtoInputBox.SetState(UISTATE_NORMAL);
-
-    m_TitleInputBox.Init(g_hWnd, 238, 14, 50);
-    m_TitleInputBox.SetParentUIID(m_dwUIID);
-    m_TitleInputBox.SetFont(g_hFont);
-    m_TitleInputBox.SetOption(UIOPTION_NULL);
-    m_TitleInputBox.SetBackColor(0, 0, 0, 0);
-    m_TitleInputBox.SetTextLimit(MAX_LETTER_TITLE_LENGTH - 1);
-    m_TitleInputBox.SetParentUIID(GetUIID());
-    m_TitleInputBox.SetArrangeType(0, size.cx, 18);
-    m_TitleInputBox.SetState(UISTATE_NORMAL);
-
-    m_TextInputBox.SetMultiline(TRUE);
-    m_TextInputBox.Init(g_hWnd, 238, 135, 50);
-    m_TextInputBox.SetTextLimit(MAX_LETTERTEXT_LENGTH - 1);
-    m_TextInputBox.SetParentUIID(m_dwUIID);
-    m_TextInputBox.SetFont(g_hFont);
-    m_TextInputBox.SetOption(UIOPTION_NULL);
-    m_TextInputBox.SetBackColor(0, 0, 0, 0);
-    m_TextInputBox.SetParentUIID(GetUIID());
-    m_TextInputBox.SetArrangeType(0, 5, 33);
-    m_TextInputBox.SetState(UISTATE_NORMAL);
-
-    m_MailtoInputBox.SetTabTarget(&m_TitleInputBox);
-    m_TitleInputBox.SetTabTarget(&m_TextInputBox);
-    m_TextInputBox.SetTabTarget(&m_MailtoInputBox);
-
-    m_SendButton.Init(1, I18N::Game::Send);
-    m_SendButton.SetParentUIID(GetUIID());
-    m_SendButton.SetArrangeType(2, 12, 16);
-    m_SendButton.SetSize(50, 14);
-
-    m_CloseButton.Init(2, I18N::Game::Close388);
-    m_CloseButton.SetParentUIID(GetUIID());
-    m_CloseButton.SetArrangeType(2, 63, 16);
-    m_CloseButton.SetSize(50, 14);
-
-    //	m_PhotoShowButton.Init(3, I18N::Game::EitherTheReceiverDoesNotExistOrThereIsNoMailBox);
-    //	m_PhotoShowButton.SetParentUIID(GetUIID());
-    //	m_PhotoShowButton.SetArrangeType(2, 114, 16);
-    //	m_PhotoShowButton.SetSize(50, 14);
-
-    m_PrevPoseButton.Init(4, I18N::Game::PrevAction);
-    m_PrevPoseButton.SetParentUIID(GetUIID());
-    m_PrevPoseButton.SetArrangeType(2, 250, 16);
-    m_PrevPoseButton.SetSize(50, 14);
-
-    m_NextPoseButton.Init(5, I18N::Game::NextAction);
-    m_NextPoseButton.SetParentUIID(GetUIID());
-    m_NextPoseButton.SetArrangeType(2, 301, 16);
-    m_NextPoseButton.SetSize(50, 14);
-
-    m_MailtoInputBox.GiveFocus();
-    m_iLastTabIndex = 0;
-    m_bHaveTextBox = TRUE;
-
-    m_Photo.Init(0);
-    m_Photo.SetOption(UIPHOTOVIEWER_CANCONTROL);
-    m_Photo.SetParentUIID(GetUIID());
-    m_Photo.SetArrangeType(1, 119, 30);
-    m_Photo.SetSize(119, RHeight() - 49);
-    m_Photo.CopyPlayer();
-    m_Photo.SetAutoupdatePlayer(TRUE);
-    m_Photo.SetAnimation(AT_STAND1);
-    m_Photo.SetAngle(90);
-    Refresh();
-}
-
-void CUILetterWriteWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
-{
-    SetTitle(pszTitle);
-    SetParentUIID(dwParentID);
-
-    SetPosition(50, 50);
-    SetSize(250, 216);
-    SetLimitSize(250, 150);
-    SetOption(UIWINDOWSTYLE_TITLEBAR | UIWINDOWSTYLE_FRAME | UIWINDOWSTYLE_MOVEABLE | UIWINDOWSTYLE_MINBUTTON);
-
-    m_iShowType = 1;
-    SetSize(GetWidth() + 120, GetHeight());
-    SetLimitSize(250 + 120, 150);
-}
-
-void CUILetterWriteWindow::Refresh()
-{
-    m_MailtoInputBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_TitleInputBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_TextInputBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_SendButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_CloseButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    //m_PhotoShowButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_PrevPoseButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_NextPoseButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_Photo.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-}
-
-void CUILetterWriteWindow::SetMailtoText(const wchar_t* pszText)
-{
-    m_MailtoInputBox.SetText(pszText);
-    m_TitleInputBox.GiveFocus();
-    m_iLastTabIndex = 1;
-}
-
-void CUILetterWriteWindow::SetMainTitleText(const wchar_t* pszText)
-{
-    m_TitleInputBox.SetText(pszText);
-    m_TextInputBox.GiveFocus();
-    m_iLastTabIndex = 2;
-}
-
-void CUILetterWriteWindow::SetMailContextText(const wchar_t* pszText)
-{
-    m_TextInputBox.SetText(pszText);
-}
-
-void CUILetterWriteWindow::RenderSub()
-{
-    EnableAlphaTest();
-    if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE)
-    {
-        m_SendButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_CloseButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_MailtoInputBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_TitleInputBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_TextInputBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        //m_PhotoShowButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_PrevPoseButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_NextPoseButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_Photo.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
-        //		if (GetState() == UISTATE_RESIZE)
-        //		{
-        //			m_TextInputBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-        //		}
-    }
-
-    SetLineColor(7);
-    RenderColor((float)RPos_x(0), (float)RPos_y(0), (float)RWidth(), 29.0f);
-    SetLineColor(2);
-    RenderColor((float)RPos_x(0), (float)RPos_y(14), (float)RWidth(), 1.0f);
-    RenderColor((float)RPos_x(0), (float)RPos_y(29), (float)RWidth(), 1.0f);
-
-    SetLineColor(7);
-    RenderColor((float)RPos_x(0), (float)RPos_y(0) + RHeight() - 19, (float)RWidth(), 19.0f);
-    SetLineColor(2);
-    RenderColor((float)RPos_x(0), (float)RPos_y(0) + RHeight() - 19, (float)RWidth(), 1.0f);
-    EndRenderColor();
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(230, 220, 200, 255);
-    const SIZE size = g_pRenderText->MeasureText(I18N::Game::Receiver, wcslen(I18N::Game::Receiver));
-    g_pRenderText->RenderText(RPos_x(3), RPos_y(3), I18N::Game::Receiver, size.cx, 0, RT3_SORT_RIGHT);
-    g_pRenderText->RenderText(RPos_x(3), RPos_y(18), I18N::Game::Title, size.cx, 0, RT3_SORT_RIGHT);
-
-    m_MailtoInputBox.Render();
-    m_TitleInputBox.Render();
-    m_TextInputBox.Render();
-    DisableAlphaBlend();
-
-    m_SendButton.Render();
-    m_CloseButton.Render();
-    //m_PhotoShowButton.Render();
-    if (m_iShowType == 1)
-    {
-        m_PrevPoseButton.Render();
-        m_NextPoseButton.Render();
-    }
-}
-
-void CUILetterWriteWindow::RenderOver()
-{
-    if (m_iShowType == 1)
-    {
-        m_Photo.Render();
-    }
-}
-
-BOOL CUILetterWriteWindow::HandleMessage()
-{
-    switch (m_WorkMessage.m_iMessage)
-    {
-    case UI_MESSAGE_SELECTED:
-        switch (m_iLastTabIndex)
-        {
-        case 0:
-            m_MailtoInputBox.GiveFocus();
-            break;
-        case 1:
-            m_TitleInputBox.GiveFocus();
-            m_iLastTabIndex = 0;
-            break;
-        case 2:
-            m_TextInputBox.GiveFocus();
-            m_iLastTabIndex = 0;
-            break;
-        default:
-            break;
-        }
-        break;
-    case UI_MESSAGE_BTNLCLICK:
-    {
-        if (g_dwTopWindow != 0) break;
-
-        DWORD dwUIID = 0;
-
-        switch (m_WorkMessage.m_iParam1)
-        {
-        case 1:
-            if (m_bIsSend == FALSE)
-            {
-                wchar_t	szMailto[MAX_USERNAME_SIZE + 1] = { '\0' };
-                wchar_t	szTitle[MAX_LETTER_TITLE_LENGTH] = { '\0' };
-                wchar_t	szTempText[MAX_LETTERTEXT_LENGTH] = { '\0' };
-
-                //std::wstring	strTitle = "", strText = "";
-                std::wstring	wstrTitle = L"", wstrText = L"";
-                int k = 0;
-
-                m_MailtoInputBox.GetText(szMailto, MAX_USERNAME_SIZE + 1);
-                m_TitleInputBox.GetText(szTitle, MAX_LETTER_TITLE_LENGTH);
-                m_TextInputBox.GetText(szTempText, MAX_LETTERTEXT_LENGTH);
-
-                //for (k = 0; k < MAX_LETTER_TITLE_LENGTH_UTF16 + 1; k++)
-                //    szTitleUTF16[k] = g_pMultiLanguage->ConvertFulltoHalfWidthChar(szTitleUTF16[k]);
-                //for (k = 0; k < MAX_LETTER_TEXT_LENGTH_UTF16 + 1; k++)
-                //    szTextUTF16[k] = g_pMultiLanguage->ConvertFulltoHalfWidthChar(szTextUTF16[k]);
-
-                //wstrTitle = szTitleUTF16;
-                //wstrText = szTextUTF16;
-
-                // delete memory
-                //delete[] szTitleUTF16;	delete[] szTextUTF16;
-
-                //g_pMultiLanguage->ConvertWideCharToStr(strTitle, wstrTitle.c_str(), g_pMultiLanguage->GetCodePage());
-                //g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), g_pMultiLanguage->GetCodePage());
-                //wcsncpy(szTitle, strTitle.c_str(), sizeof szTitle);
-                //wcsncpy(szTempText, strText.c_str(), sizeof szTempText);
-
-                //if (CheckAbuseFilter(wstrTitle, false))
-                //    g_pMultiLanguage->ConvertCharToWideStr(wstrTitle, I18N::Game::PwnedByTheFilter);
-                //if (CheckAbuseFilter(wstrText, false))
-                //    g_pMultiLanguage->ConvertCharToWideStr(wstrText, I18N::Game::PwnedByTheFilter);
-
-                //g_pMultiLanguage->ConvertWideCharToStr(strTitle, wstrTitle.c_str(), CP_UTF8);
-                //g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), CP_UTF8);
-                /*wcsncpy(szTitle, strTitle.c_str(), sizeof szTitle);
-                wcsncpy(szTempText, strText.c_str(), sizeof szTempText);*/
-
-                if (szMailto[0] == '\0' || wcslen(szMailto) == 0)
-                {
-                    g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::EnterTheNameOfTheReceiver);
-                    m_MailtoInputBox.GiveFocus();
-                    m_iLastTabIndex = 0;
-                    break;
-                }
-
-                if (szTitle[0] == '\0' || wcslen(szTitle) == 0)
-                {
-                    g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::EnterTheTitle);
-                    m_TitleInputBox.GiveFocus();
-                    m_iLastTabIndex = 1;
-                    break;
-                }
-
-                if (szTempText[0] == '\0' || wcslen(szTempText) == 0)
-                {
-                    g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::EnterYourMessage);
-                    m_TextInputBox.GiveFocus();
-                    m_iLastTabIndex = 2;
-                    break;
-                }
-
-                wchar_t szText[1024] = { 0 };
-
-                for (int i = 0, j = 0; i <= (int)wcslen(szTempText); ++i, ++j)
-                {
-                    if (j > MAX_LETTERTEXT_LENGTH || i > MAX_LETTERTEXT_LENGTH) break;
-
-                    if (szTempText[i] == '\r')
-                    {
-                        szText[j] = '\n';
-                        if (szTempText[i + 1] == '\n' && szTempText[i + 2] == '\r' && szTempText[i + 3] == '\n')
-                        {
-                            szText[++j] = ' ';
-                        }
-                        ++i;
-                    }
-                    else
-                    {
-                        szText[j] = szTempText[i];
-                    }
-                }
-
-                szText[MAX_LETTERTEXT_LENGTH] = '\0';
-                WORD len = std::min<int>(MAX_LETTERTEXT_LENGTH, wcslen(szText));
-                m_bIsSend = TRUE;
-                int iAngle = m_Photo.GetCurrentAngle() / 6;
-                int iZoom = (m_Photo.GetCurrentZoom() * 100.0f - 80 + 5) / 10;
-                BYTE Data1 = (iZoom << 6) & 0xC0 | iAngle & 0x3F;
-                BYTE Data2 = m_Photo.GetCurrentAction() - AT_ATTACK1;
-                SocketClient->ToGameServer()->SendLetterSendRequest(GetUIID(), MU_C16(szMailto), MU_C16(szTitle), Data1, Data2, len, MU_C16(szText));
-            }
-            break;
-        case 2:
-            if (CloseCheck() == TRUE)
-                g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
-            break;
-        case 3:
-            break;
-        case 4:
-            m_Photo.ChangeAnimation(-1);
-            break;
-        case 5:
-            m_Photo.ChangeAnimation(1);
-            break;
-        default:
-            break;
-        }
-    }
-    break;
-    case UI_MESSAGE_YNRETURN:
-        if (m_WorkMessage.m_iParam2 == 1)
-        {
-            g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
-        }
-        break;
-    default:
-        break;
-    }
-    return FALSE;
-}
-
-void CUILetterWriteWindow::DoActionSub(BOOL bMessageOnly)
-{
-    m_MailtoInputBox.DoAction(bMessageOnly);
-    m_TitleInputBox.DoAction(bMessageOnly);
-    m_TextInputBox.DoAction(bMessageOnly);
-    m_SendButton.DoAction(bMessageOnly);
-    m_CloseButton.DoAction(bMessageOnly);
-    //m_PhotoShowButton.DoAction(bMessageOnly);
-    if (m_iShowType == 1)
-    {
-        m_PrevPoseButton.DoAction(bMessageOnly);
-        m_NextPoseButton.DoAction(bMessageOnly);
-        m_Photo.SetShowType(m_iShowType);
-        m_Photo.DoAction(bMessageOnly);
-    }
-}
-
-void CUILetterWriteWindow::DoMouseActionSub()
-{
-}
-
-BOOL CUILetterWriteWindow::CloseCheck()
-{
-    wchar_t szTest[16] = { 0 };
-    m_TitleInputBox.GetText(szTest, 15);
-    int iTextSize = (szTest[0] == '\0' ? 0 : wcslen(szTest));
-    m_TextInputBox.GetText(szTest, 15);
-    iTextSize += (szTest[0] == '\0' ? 0 : wcslen(szTest));
-    if (iTextSize == 0)
-    {
-        return TRUE;
-    }
-    else
-    {
-        g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::DoYouWishToQuitWritingThisLetter, GetUIID());
-        return FALSE;
-    }
-}
-
-CUILetterReadWindow::~CUILetterReadWindow()
-{
-    g_pWindowMgr->CloseLetterRead(m_LetterHead.m_dwLetterID);
-}
-
-void CUILetterReadWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
-{
-    SetTitle(pszTitle);
-    SetParentUIID(dwParentID);
-
-    SetPosition(50, 50);
-    //SetSize(213, 170);
-    SetSize(250, 182);
-    SetLimitSize(250, 182);
-    SetOption(UIWINDOWSTYLE_TITLEBAR | UIWINDOWSTYLE_FRAME | UIWINDOWSTYLE_MOVEABLE | UIWINDOWSTYLE_MINBUTTON);
-
-    m_LetterTextBox.SetParentUIID(GetUIID());
-    m_LetterTextBox.SetArrangeType(2, 0, 20);
-    m_LetterTextBox.SetResizeType(3, 0, -36);
-
-    m_ReplyButton.Init(1, I18N::Game::Reply);
-    m_ReplyButton.SetParentUIID(GetUIID());
-    m_ReplyButton.SetArrangeType(2, 2, 16);
-    m_ReplyButton.SetSize(50, 14);
-
-    m_DeleteButton.Init(2, I18N::Game::Delete);
-    m_DeleteButton.SetParentUIID(GetUIID());
-    m_DeleteButton.SetArrangeType(2, 53, 16);
-    m_DeleteButton.SetSize(50, 14);
-
-    m_CloseButton.Init(3, I18N::Game::Close388);
-    m_CloseButton.SetParentUIID(GetUIID());
-    m_CloseButton.SetArrangeType(2, 186, 16);
-    m_CloseButton.SetSize(50, 14);
-
-    //	m_PhotoButton.Init(4, L">>");
-    //	m_PhotoButton.SetParentUIID(GetUIID());
-    //	m_PhotoButton.SetArrangeType(2, 186, 16);
-    //	m_PhotoButton.SetSize(50, 14);
-
-    m_PrevButton.Init(5, I18N::Game::Previous);
-    m_PrevButton.SetParentUIID(GetUIID());
-    m_PrevButton.SetArrangeType(2, 104, 16);
-    m_PrevButton.SetSize(40, 14);
-
-    m_NextButton.Init(6, I18N::Game::Next);
-    m_NextButton.SetParentUIID(GetUIID());
-    m_NextButton.SetArrangeType(2, 145, 16);
-    m_NextButton.SetSize(40, 14);
-
-    m_Photo.Init(0);
-    m_Photo.SetOption(UIPHOTOVIEWER_CANCONTROL);
-    m_Photo.SetParentUIID(GetUIID());
-    m_Photo.SetArrangeType(1, 119, 15);
-    m_Photo.SetResizeType(2, 119, -15);
-
-    m_LetterTextBox.SetResizeType(3, 0 - 120, -36);
-    SetSize(GetWidth() + 120, GetHeight());
-    SetLimitSize(250 + 120, 182);
-}
-
-void CUILetterReadWindow::Refresh()
-{
-    m_LetterTextBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_ReplyButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_DeleteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_CloseButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    //m_PhotoButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_PrevButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_NextButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_Photo.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
-    m_LetterTextBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_LetterTextBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_Photo.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-}
-
-void CUILetterReadWindow::SetLetter(LETTERLIST_TEXT* pLetterHead, const wchar_t* pLetterText)
-{
-    memcpy(&m_LetterHead, pLetterHead, sizeof(LETTERLIST_TEXT));
-
-    wchar_t* temp = new wchar_t[wcslen(pLetterText) + 20];
-    wcsncpy(temp, pLetterText, wcslen(pLetterText) + 1);
-    wchar_t* context = nullptr;
-    wchar_t* token = wcstok_s(temp, L"\n", &context);
-    while (token != NULL)
-    {
-        m_LetterTextBox.AddText(token);
-        token = wcstok_s(NULL, L"\n", &context);
-    }
-    m_LetterTextBox.SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
-    delete[] temp;
-}
-
-void CUILetterReadWindow::RenderSub()
-{
-    EnableAlphaTest();
-    if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE)
-    {
-        m_LetterTextBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_ReplyButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_DeleteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_CloseButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_PrevButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_NextButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_Photo.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
-        if (GetState() == UISTATE_RESIZE)
-        {
-            m_LetterTextBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-            m_Photo.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-        }
-    }
-
-    m_LetterTextBox.Render();
-
-    if (m_iShowType >= 2)
-    {
-        SetLineColor(2);
-        RenderColor((float)(RPos_x(0) + RWidth() - 120), (float)RPos_y(0) + RHeight() - 19, 1, 19);
-        RenderColor((float)RPos_x(0), (float)RPos_y(0) + RHeight() - 20, (float)RWidth() - 120, 1.0f);
-        SetLineColor(7);
-        RenderColor((float)RPos_x(0), (float)RPos_y(0) + RHeight() - 19, (float)RWidth() - 120, 18.0f);
-    }
-    else
-    {
-        SetLineColor(2);
-        RenderColor((float)RPos_x(0), (float)RPos_y(0) + RHeight() - 20, (float)RWidth(), 1.0f);
-        SetLineColor(7);
-        RenderColor((float)RPos_x(0), (float)RPos_y(0) + RHeight() - 19, (float)RWidth(), 18.0f);
-    }
-
-    SetLineColor(2);
-    RenderColor((float)RPos_x(0), (float)RPos_y(14), (float)RWidth(), 1.0f);
-    SetLineColor(7);
-    RenderColor((float)RPos_x(0), (float)RPos_y(0), (float)RWidth(), 14.0f);
-    EndRenderColor();
-
-    wchar_t szMailFrom[256] = { 0 };
-    mu_swprintf(szMailFrom, I18N::Game::SenderSSS, m_LetterHead.m_szID, m_LetterHead.m_szDate, m_LetterHead.m_szTime);
-    g_pRenderText->RenderText(RPos_x(3), RPos_y(3), szMailFrom);
-
-    m_ReplyButton.Render();
-    m_DeleteButton.Render();
-    m_CloseButton.Render();
-    m_PrevButton.Render();
-    m_NextButton.Render();
-
-    DisableAlphaBlend();
-}
-
-void CUILetterReadWindow::RenderOver()
-{
-    if (m_iShowType >= 2)
-    {
-        m_Photo.Render();
-    }
-}
-
-BOOL CUILetterReadWindow::HandleMessage()
-{
-    switch (m_WorkMessage.m_iMessage)
-    {
-    case UI_MESSAGE_SELECTED:
-        break;
-    case UI_MESSAGE_BTNLCLICK:
-    {
-        if (g_dwTopWindow != 0) break;
-        DWORD dwUIID = 0;
-        switch (m_WorkMessage.m_iParam1)
-        {
-        case 1:
-        {
-            wchar_t temp[MAX_TEXT_LENGTH + 1];
-            mu_swprintf(temp, I18N::Game::WriteLetterCostDZen, g_cdwLetterCost);
-
-            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);
-            if (dwUIID == 0) break;
-            ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMailtoText(m_LetterHead.m_szID);
-            wchar_t szMailTitle[MAX_TEXT_LENGTH + 1] = { 0 };
-            mu_swprintf(szMailTitle, I18N::Game::ReS, m_LetterHead.m_szText);
-            wchar_t szMailTitleResult[32 + 1] = { 0 };
-            CutText4(szMailTitle, szMailTitleResult, NULL, 32);
-            ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMainTitleText(szMailTitleResult);
-        }
-        break;
-        case 2:
-        {
-            wchar_t tempTxt[MAX_TEXT_LENGTH + 1] = { 0 };
-            wcscat(tempTxt, I18N::Game::AreYouSureYouWantToDeleteTheLetter);
-            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, tempTxt, GetUIID());
-        }
-        break;
-        case 3:
-            g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
-            break;
-        case 4:
-            break;
-        case 5:
-        {
-            DWORD dwPrevID = g_pLetterList->GetPrevLetterID(m_LetterHead.m_dwLetterID);
-            if (dwPrevID != 0)
-            {
-                if (g_pWindowMgr->GetFriendMainWindow() != NULL)
-                {
-                    g_pWindowMgr->GetFriendMainWindow()->PrevNextCursorMove(g_pLetterList->GetLineNum(dwPrevID));
-                }
-                g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
-                g_pWindowMgr->CloseLetterRead(m_LetterHead.m_dwLetterID);
-                g_iLetterReadNextPos_x = GetPosition_x();
-                g_iLetterReadNextPos_y = GetPosition_y();
-                if (g_pWindowMgr->LetterReadCheck(dwPrevID) == FALSE)
-                {
-                    if (g_pLetterList->GetLetterText(dwPrevID) == NULL)
-                    {
-                        SocketClient->ToGameServer()->SendLetterReadRequest(dwPrevID);
-                    }
-                    else
-                    {
-                        auto data = reinterpret_cast<const BYTE*>(g_pLetterList->GetLetterText(dwPrevID));
-                        ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)), true);
-                    }
-                }
-                else
-                {
-                    DWORD dwFindUIID = g_pWindowMgr->GetLetterReadWindow(dwPrevID);
-                    if (dwFindUIID != 0)
-                        g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, dwFindUIID, 0);
-                }
-            }
-            else
-            {
-                if (g_pWindowMgr->GetFriendMainWindow() != NULL)
-                {
-                    g_pWindowMgr->GetFriendMainWindow()->PrevNextCursorMove(g_pLetterList->GetLineNum(m_LetterHead.m_dwLetterID));
-                }
-            }
-        }
-        break;
-        case 6:
-        {
-            DWORD dwNextID = g_pLetterList->GetNextLetterID(m_LetterHead.m_dwLetterID);
-            if (dwNextID != 0)
-            {
-                if (g_pWindowMgr->GetFriendMainWindow() != NULL)
-                {
-                    g_pWindowMgr->GetFriendMainWindow()->PrevNextCursorMove(g_pLetterList->GetLineNum(dwNextID));
-                }
-                g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
-                g_pWindowMgr->CloseLetterRead(m_LetterHead.m_dwLetterID);
-                g_iLetterReadNextPos_x = GetPosition_x();
-                g_iLetterReadNextPos_y = GetPosition_y();
-                if (g_pWindowMgr->LetterReadCheck(dwNextID) == FALSE)
-                {
-                    if (g_pLetterList->GetLetterText(dwNextID) == NULL)
-                    {
-                        SocketClient->ToGameServer()->SendLetterReadRequest(dwNextID);
-                    }
-                    else
-                    {
-                        auto data = reinterpret_cast<const BYTE*>(g_pLetterList->GetLetterText(dwNextID));
-                        ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)), true);
-                    }
-                }
-                else
-                {
-                    DWORD dwFindUIID = g_pWindowMgr->GetLetterReadWindow(dwNextID);
-                    if (dwFindUIID != 0)
-                        g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, dwFindUIID, 0);
-                }
-            }
-            else
-            {
-                if (g_pWindowMgr->GetFriendMainWindow() != NULL)
-                {
-                    g_pWindowMgr->GetFriendMainWindow()->PrevNextCursorMove(g_pLetterList->GetLineNum(m_LetterHead.m_dwLetterID));
-                }
-            }
-        }
-        break;
-        default:
-            break;
-        }
-    }
-    break;
-    case UI_MESSAGE_YNRETURN:
-        if (m_WorkMessage.m_iParam2 == 1)
-        {
-            SocketClient->ToGameServer()->SendLetterDeleteRequest(m_LetterHead.m_dwLetterID);
-            g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
-        }
-        break;
-    default:
-        break;
-    }
-    return FALSE;
-}
-
-void CUILetterReadWindow::DoActionSub(BOOL bMessageOnly)
-{
-    m_LetterTextBox.DoAction(bMessageOnly);
-    m_ReplyButton.DoAction(bMessageOnly);
-    m_DeleteButton.DoAction(bMessageOnly);
-    m_CloseButton.DoAction(bMessageOnly);
-    //m_PhotoButton.DoAction(bMessageOnly);
-    m_PrevButton.DoAction(bMessageOnly);
-    m_NextButton.DoAction(bMessageOnly);
-    m_Photo.SetShowType(m_iShowType);
-    m_Photo.DoAction(bMessageOnly);
-}
-
-void CUILetterReadWindow::DoMouseActionSub()
-{
 }
 
 void CFriendList::AddFriend(const wchar_t* pszID, BYTE Number, BYTE Server)
@@ -3431,734 +2409,6 @@ void CFriendList::Sort(int iType)
         return;
         break;
     }
-}
-
-void CUIFriendListTabWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
-{
-    SetTitle(pszTitle);
-    SetParentUIID(dwParentID);
-    SetOption(UIWINDOWSTYLE_NULL);
-
-    SetPosition(50, 50);
-    SetSize(250, 170);
-    SetLimitSize(250, 150);
-
-    RefreshPalList();
-
-    m_PalListBox.SetParentUIID(GetUIID());
-    m_PalListBox.SetArrangeType(2, 0, 22);
-    m_PalListBox.SetResizeType(3, 0, -39);
-    m_PalListBox.SetLayout(1);
-
-    m_AddFriendButton.Init(1, I18N::Game::AddFriend);
-    m_AddFriendButton.SetParentUIID(GetUIID());
-    m_AddFriendButton.SetArrangeType(2, 2, 17);
-    m_AddFriendButton.SetSize(50, 14);
-
-    m_DelFriendButton.Init(2, I18N::Game::DeleteFriend);
-    m_DelFriendButton.SetParentUIID(GetUIID());
-    m_DelFriendButton.SetArrangeType(2, 53, 17);
-    m_DelFriendButton.SetSize(50, 14);
-
-    m_TalkButton.Init(3, I18N::Game::Chat);
-    m_TalkButton.SetParentUIID(GetUIID());
-    m_TalkButton.SetArrangeType(2, 104, 17);
-    m_TalkButton.SetSize(50, 14);
-
-    m_LetterButton.Init(4, I18N::Game::Write);
-    m_LetterButton.SetParentUIID(GetUIID());
-    m_LetterButton.SetArrangeType(2, 155, 17);
-    m_LetterButton.SetSize(50, 14);
-}
-
-void CUIFriendListTabWindow::Refresh()
-{
-    m_AddFriendButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_DelFriendButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_TalkButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_LetterButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
-    m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_PalListBox.SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
-}
-
-const wchar_t* CUIFriendListTabWindow::GetCurrentSelectedFriend(BYTE* pNumber, BYTE* pServer)
-{
-    if (m_PalListBox.GetSelectedText() == NULL) return NULL;
-    else
-    {
-        if (pNumber != NULL) *pNumber = m_PalListBox.GetSelectedText()->m_Number;
-        if (pServer != NULL) *pServer = m_PalListBox.GetSelectedText()->m_Server;
-        return m_PalListBox.GetSelectedText()->m_szID;
-    }
-}
-
-void CUIFriendListTabWindow::SyncControlLayout()
-{
-    if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE)
-    {
-        m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
-        m_AddFriendButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_DelFriendButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_TalkButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_LetterButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
-        if (GetState() == UISTATE_RESIZE)
-        {
-            m_PalListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-        }
-    }
-}
-
-void CUIFriendListTabWindow::RenderSub()
-{
-    SyncControlLayout();
-
-    EnableAlphaTest();
-    SetLineColor(7);
-    RenderColor((float)RPos_x(0), (float)RPos_y(18 + m_PalListBox.GetHeight()),
-        (float)RWidth(), (float)RHeight() - m_PalListBox.GetHeight() - 18);
-    EndRenderColor();
-    DisableAlphaBlend();
-
-    m_PalListBox.Render();
-
-    m_AddFriendButton.Render();
-    m_DelFriendButton.Render();
-    m_TalkButton.Render();
-    m_LetterButton.Render();
-
-    EnableAlphaTest();
-    SetLineColor(2);
-    RenderColor((float)RPos_x(0), (float)RPos_y(16), (float)RWidth(), 1.0f);
-    SetLineColor(5);
-    RenderColor((float)RPos_x(0), (float)RPos_y(0), (float)RWidth(), 16);
-    SetLineColor(2);
-    RenderColor((float)RPos_x(0), (float)RPos_y(17 + m_PalListBox.GetHeight()), (float)RWidth(), 1.0f);
-    RenderColor((float)RPos_x(0) + m_PalListBox.GetColumnPos_x(1), (float)RPos_y(17), 1.0f, (float)RHeight() - 22 - 17);
-    SetLineColor(14);
-    RenderColor((float)RPos_x(0) + m_PalListBox.GetColumnPos_x(1), (float)RPos_y(3), 1.0f, 10);
-    EndRenderColor();
-
-    g_pRenderText->SetBgColor(0);
-
-    if (CheckMouseIn(RPos_x(0) + m_PalListBox.GetColumnPos_x(0), RPos_y(0), m_PalListBox.GetColumnWidth(0), 19) == TRUE || g_pFriendList->GetCurrentSortType() == 0)
-    {
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(RPos_x(4) + m_PalListBox.GetColumnPos_x(0), RPos_y(3), I18N::Game::FriendSName);
-        g_pRenderText->SetTextColor(230, 220, 200, 255);
-    }
-    else
-        g_pRenderText->RenderText(RPos_x(4) + m_PalListBox.GetColumnPos_x(0), RPos_y(3), I18N::Game::FriendSName);
-
-    if (CheckMouseIn(RPos_x(0) + m_PalListBox.GetColumnPos_x(1), RPos_y(0), m_PalListBox.GetColumnWidth(1), 19) == TRUE || g_pFriendList->GetCurrentSortType() == 1)
-    {
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(RPos_x(4) + m_PalListBox.GetColumnPos_x(1), RPos_y(3), I18N::Game::Server);
-        g_pRenderText->SetTextColor(230, 220, 200, 255);
-    }
-    else
-        g_pRenderText->RenderText(RPos_x(4) + m_PalListBox.GetColumnPos_x(1), RPos_y(3), I18N::Game::Server);
-
-    DisableAlphaBlend();
-}
-
-BOOL CUIFriendListTabWindow::HandleMessage()
-{
-    if (m_WorkMessage.m_iMessage == UI_MESSAGE_LISTDBLCLICK)
-    {
-        PlayBuffer(SOUND_CLICK01);
-        m_WorkMessage.m_iMessage = UI_MESSAGE_BTNLCLICK;
-        m_WorkMessage.m_iParam1 = 3;
-    }
-
-    switch (m_WorkMessage.m_iMessage)
-    {
-    case UI_MESSAGE_SELECTED:
-        break;
-    case UI_MESSAGE_BTNLCLICK:
-    {
-        if (g_dwTopWindow != 0) break;
-        DWORD dwUIID = 0;
-        switch (m_WorkMessage.m_iParam1)
-        {
-        case 1:
-            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_TEXTINPUT, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::EnterTheIDOfTheFriendYouDLikeToAdd, GetUIID());
-            g_pWindowMgr->SetAddFriendWindow(dwUIID);
-            break;
-        case 2:
-        {
-            if (GetCurrentSelectedFriend() == NULL) break;
-            wchar_t tempTxt[MAX_TEXT_LENGTH + 1] = { 0 };
-            mu_swprintf(tempTxt, L"%ls %ls", I18N::Game::DoYouReallyWishToDeleteThisFriend, GetCurrentSelectedFriend()); // "Do you really wish to delete this friend?"
-            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, tempTxt, GetUIID());
-        }
-        break;
-        case 3:
-        {
-            if (GetCurrentSelectedFriend() == NULL) break;
-            wchar_t pszName[MAX_USERNAME_SIZE] = { 0 };
-            BYTE Server;
-            wcsncpy(pszName, GetCurrentSelectedFriend(NULL, &Server), MAX_USERNAME_SIZE);
-            if (Server <= 0xFC)
-            {
-                DWORD dwDuplicationCheck = g_pFriendMenu->CheckChatRoomDuplication(pszName);
-                if (dwDuplicationCheck == 0)
-                {
-                    if (g_pWindowMgr->GetChatReject() == FALSE && g_pFriendMenu->IsRequestWindow(pszName) == FALSE)
-                    {
-                        g_pFriendMenu->AddRequestWindow(pszName);
-                        SocketClient->ToGameServer()->SendChatRoomCreateRequest(MU_C16(pszName));
-                    }
-                }
-                else if (dwDuplicationCheck == -1);
-                else
-                {
-                    g_pWindowMgr->GetWindow(dwDuplicationCheck)->SetState(UISTATE_HIDE);
-                    g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, dwDuplicationCheck, 0);
-                }
-            }
-        }
-        break;
-        case 4:		// 편지쓰기
-        {
-            wchar_t temp[MAX_TEXT_LENGTH + 1];
-            mu_swprintf(temp, I18N::Game::WriteLetterCostDZen, g_cdwLetterCost);
-            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);	// "편지쓰기"
-            if (dwUIID == 0) break;
-            if (GetCurrentSelectedFriend() != NULL)
-                ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMailtoText((const wchar_t*)GetCurrentSelectedFriend());
-        }
-        break;
-        default:
-            break;
-        }
-        if (dwUIID != 0)
-        {
-            CUIBaseWindow* pWindow = g_pWindowMgr->GetWindow(dwUIID);
-            if (pWindow != NULL)
-            {
-                pWindow->SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-                pWindow->SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-            }
-        }
-    }
-    break;
-    case UI_MESSAGE_TXTRETURN:
-        {
-            std::wstring text = TakeReturnText();
-            if (text.empty())
-            {
-                break;
-            }
-            SocketClient->ToGameServer()->SendFriendAddRequest(MU_C16(text.c_str()));
-        }
-        break;
-    case UI_MESSAGE_YNRETURN:
-        if (m_WorkMessage.m_iParam2 == 1)
-        {
-            if (GetCurrentSelectedFriend() == NULL) break;
-            SocketClient->ToGameServer()->SendFriendDelete(MU_C16(GetCurrentSelectedFriend()));
-        }
-        break;
-    default:
-        break;
-    }
-    return FALSE;
-}
-
-void CUIFriendListTabWindow::DoActionSub(BOOL bMessageOnly)
-{
-    m_PalListBox.DoAction(bMessageOnly);
-
-    m_AddFriendButton.DoAction(bMessageOnly);
-    m_DelFriendButton.DoAction(bMessageOnly);
-    m_TalkButton.DoAction(bMessageOnly);
-    m_LetterButton.DoAction(bMessageOnly);
-}
-
-void CUIFriendListTabWindow::DoMouseActionSub()
-{
-    if (MouseLButton)
-    {
-        if (CheckMouseIn(RPos_x(0) + m_PalListBox.GetColumnPos_x(0), RPos_y(0), m_PalListBox.GetColumnWidth(0), 19) == TRUE)
-        {
-            if (g_pFriendList->GetCurrentSortType() != 0)
-            {
-                PlayBuffer(SOUND_CLICK01);
-                g_pFriendList->Sort(0);
-                RefreshPalList();
-            }
-            MouseLButton = FALSE;
-        }
-        else if (CheckMouseIn(RPos_x(0) + m_PalListBox.GetColumnPos_x(1), RPos_y(0), m_PalListBox.GetColumnWidth(1), 19) == TRUE)
-        {
-            if (g_pFriendList->GetCurrentSortType() != 1)
-            {
-                PlayBuffer(SOUND_CLICK01);
-                g_pFriendList->Sort(0);
-                g_pFriendList->Sort(1);
-                RefreshPalList();
-            }
-            MouseLButton = FALSE;
-        }
-    }
-}
-
-void CUIFriendListTabWindow::RefreshPalList()
-{
-    wchar_t szID[MAX_USERNAME_SIZE + 1] = { 0 };
-    if (m_PalListBox.SLGetSelectLineNum() > 0)
-        wcsncpy(szID, m_PalListBox.SLGetSelectLine()->m_szID, MAX_USERNAME_SIZE);
-    int iSelectNum = g_pFriendList->UpdateFriendList(m_PalListBox.GetFriendList(), (wchar_t*)&szID);
-    m_PalListBox.SLSetSelectLine(iSelectNum);
-    m_PalListBox.Scrolling(0);
-}
-
-/*
-BOOL CChatRoomSocketList::AddChatRoomSocket(DWORD dwRoomID, DWORD dwWindowUIID, const std::wstring pszIP, void(*packetHandler)(int32_t Handle, const BYTE*, int32_t))
-{
-    int32_t usPort = 55980;
-
-    DWORD dwSocketID = CreateChatRoomSocketID(dwRoomID);
-    if (dwSocketID == -1) return FALSE;
-
-    CHATROOM_SOCKET * pCRSocket;
-    pCRSocket = new CHATROOM_SOCKET;
-    pCRSocket->m_dwRoomID = dwRoomID;
-    pCRSocket->m_dwWindowUIID = dwWindowUIID;
-    pCRSocket->m_WSClient = new Connection(pszIP, usPort, packetHandler);
-
-    if (!pCRSocket->m_WSClient->IsConnected())
-    {
-        assert(!"RemoveChatRoomSocket Connect!!!");
-        return FALSE;
-    }
-
-    m_ChatRoomSocketMap.insert(std::pair<DWORD, CHATROOM_SOCKET *>(dwRoomID, pCRSocket));
-
-    return TRUE;
-}
-
-void CChatRoomSocketList::RemoveChatRoomSocket(DWORD dwRoomID)
-{
-    m_ChatRoomSocketMapIter = m_ChatRoomSocketMap.find(dwRoomID);
-    if (m_ChatRoomSocketMapIter == m_ChatRoomSocketMap.end())
-    {
-        assert(!"RemoveChatRoomSocket!!!");
-        return;
-    }
-    m_ChatRoomSocketMapIter->second->m_WSClient.Close();
-    delete m_ChatRoomSocketMapIter->second;
-    m_ChatRoomSocketMapIter->second = NULL;
-    m_ChatRoomSocketMap.erase(m_ChatRoomSocketMapIter);
-
-    BOOL bFind = FALSE;
-    for (m_ChatRoomSocketStatusMapIter = m_ChatRoomSocketStatusMap.begin(); m_ChatRoomSocketStatusMapIter != m_ChatRoomSocketStatusMap.end(); ++m_ChatRoomSocketStatusMapIter)
-    {
-        if (m_ChatRoomSocketStatusMapIter->second == dwRoomID)
-        {
-            bFind = TRUE;
-            break;
-        }
-    }
-    if (bFind == FALSE)
-    {
-        assert(!"RemoveChatRoomSocket bFind!!!");
-        return;
-    }
-    m_bChatRoomSocketStatus[m_ChatRoomSocketStatusMapIter->first] = FALSE;
-    m_ChatRoomSocketStatusMap.erase(m_ChatRoomSocketStatusMapIter);
-}
-
-void CChatRoomSocketList::ClearChatRoomSocketList()
-{
-    for (m_ChatRoomSocketMapIter = m_ChatRoomSocketMap.begin(); m_ChatRoomSocketMapIter != m_ChatRoomSocketMap.end(); ++m_ChatRoomSocketMapIter)
-    {
-        delete m_ChatRoomSocketMapIter->second;
-        m_ChatRoomSocketMapIter->second = NULL;
-    }
-    m_ChatRoomSocketMap.clear();
-
-    memset(m_bChatRoomSocketStatus, 0, 256 * sizeof(BYTE));
-    m_ChatRoomSocketStatusMap.clear();
-    m_bCurrectCreateID = 0;
-}
-
-DWORD CChatRoomSocketList::CreateChatRoomSocketID(DWORD dwRoomID)
-{
-//	++m_bCurrectCreateID;
-
-    int iWhileCount = 0;
-    while (m_bChatRoomSocketStatus[m_bCurrectCreateID] == TRUE)
-    {
-        ++iWhileCount;
-        if (m_bCurrectCreateID == 255) m_bCurrectCreateID = 0;
-        else ++m_bCurrectCreateID;
-
-        if (iWhileCount > 256)
-        {
-            return MCI_SEQ_MAPPER;
-        }
-    };
-    m_bChatRoomSocketStatus[m_bCurrectCreateID] = TRUE;
-    m_ChatRoomSocketStatusMap.insert(std::pair < DWORD, DWORD > (m_bCurrectCreateID, dwRoomID));
-    return m_bCurrectCreateID;
-}
-
-DWORD CChatRoomSocketList::GetChatRoomSocketID(DWORD dwSocketID)
-{
-    m_ChatRoomSocketStatusMapIter = m_ChatRoomSocketStatusMap.find(dwSocketID);
-    if (m_ChatRoomSocketStatusMapIter == m_ChatRoomSocketStatusMap.end())
-    {
-        return MCI_SEQ_MAPPER;
-    }
-    else return m_ChatRoomSocketStatusMapIter->second;
-}
-
-CHATROOM_SOCKET * CChatRoomSocketList::GetChatRoomSocketData(DWORD dwRoomID)
-{
-    m_ChatRoomSocketMapIter = m_ChatRoomSocketMap.find(dwRoomID);
-    if (m_ChatRoomSocketMapIter == m_ChatRoomSocketMap.end())
-    {
-        return NULL;
-    }
-    return m_ChatRoomSocketMapIter->second;
-}*/
-
-void ReceiveChatRoomConnectResult(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
-{
-    auto Data = (LPFS_CHAT_JOIN_RESULT)ReceiveBuffer;
-    switch (Data->Result)
-    {
-    case 0x00:
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::ChatRoomIsFull);
-        break;
-    case 0x01:
-        break;
-    default:
-        break;
-    };
-}
-
-void ReceiveChatRoomUserStateChange(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
-{
-    auto Data = (LPFS_CHAT_CHANGE_STATE)ReceiveBuffer;
-    auto* pChatWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID);
-    if (pChatWindow == NULL) return;
-    wchar_t szName[MAX_USERNAME_SIZE + 1] = { 0 };
-    CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_USERNAME_SIZE);
-    szName[MAX_USERNAME_SIZE] = '\0';
-    wchar_t szText[MAX_TEXT_LENGTH + 1] = { 0 };
-    CMultiLanguage::ConvertFromUtf8(szText, Data->Name, MAX_USERNAME_SIZE);
-    szText[MAX_USERNAME_SIZE] = '\0';
-    switch (Data->Type)
-    {
-    case 0x00:
-        if (pChatWindow->AddChatPal(szName, Data->Index, 0) >= 3)
-        {
-            wcscat(szText, I18N::Game::HasEntered);
-            pChatWindow->AddChatText(255, szText, 1, 0);
-        }
-        break;
-    case 0x01:
-        if (pChatWindow->GetUserCount() >= 3)
-        {
-            wcscat(szText, I18N::Game::HasLeft);
-            pChatWindow->AddChatText(255, szText, 1, 0);
-        }
-        pChatWindow->RemoveChatPal(szName);
-        break;
-    default:
-        return;
-        break;
-    };
-    if (pChatWindow->GetShowType() == 2)
-        pChatWindow->UpdateInvitePalList();
-}
-
-void ReceiveChatRoomUserList(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
-{
-    auto Header = (LPFS_CHAT_USERLIST_HEADER)ReceiveBuffer;
-    int iMoveOffset = sizeof(FS_CHAT_USERLIST_HEADER);
-    wchar_t szName[MAX_USERNAME_SIZE + 1] = { 0 };
-    for (int i = 0; i < Header->Count; ++i)
-    {
-        auto Data = (LPFS_CHAT_USERLIST_DATA)(ReceiveBuffer + iMoveOffset);
-        CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_USERNAME_SIZE);
-        szName[MAX_USERNAME_SIZE] = '\0';
-        ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID))->AddChatPal(szName, Data->Index, 0);
-        iMoveOffset += sizeof(FS_CHAT_USERLIST_DATA);
-    }
-}
-
-void ReceiveChatRoomChatText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
-{
-    auto Data = (LPFS_CHAT_TEXT)ReceiveBuffer;
-    auto* pChatWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(dwWindowUIID);
-    if (pChatWindow == NULL) return;
-
-    char temp[MAX_CHATROOM_TEXT_LENGTH] = { };
-    if (Data->MsgSize >= MAX_CHATROOM_TEXT_LENGTH) return;
-
-    memcpy(temp, Data->Msg, Data->MsgSize);
-    BuxConvert((LPBYTE)temp, Data->MsgSize);
-
-    wchar_t chatMessage[MAX_CHATROOM_TEXT_LENGTH] = { };
-    CMultiLanguage::ConvertFromUtf8(chatMessage, temp, MAX_CHATROOM_TEXT_LENGTH);
-
-    if (pChatWindow->GetState() == UISTATE_READY)
-    {
-        g_pFriendMenu->SetNewChatAlert(dwWindowUIID);
-        g_pSystemLogBox->AddText(I18N::Game::NewMessageHasArrived, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-        pChatWindow->SetState(UISTATE_HIDE);
-        if (g_pWindowMgr->GetFriendMainWindow() != NULL)
-        {
-            g_pWindowMgr->GetFriendMainWindow()->AddWindow(dwWindowUIID, g_pWindowMgr->GetWindow(dwWindowUIID)->GetTitle());
-        }
-    }
-    else if (pChatWindow->GetState() == UISTATE_HIDE || g_pWindowMgr->GetTopWindowUIID() != dwWindowUIID)
-    {
-        g_pFriendMenu->SetNewChatAlert(dwWindowUIID);
-    }
-    pChatWindow->AddChatText(Data->Index, chatMessage, 3, 0);
-}
-
-void ReceiveChatRoomNoticeText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
-{
-    auto Data = (LPFS_CHAT_TEXT)ReceiveBuffer;
-    Data->Msg[99] = '\0';
-    if (Data->Msg[0] == '\0')
-    {
-        return;
-    }
-
-    wchar_t message[sizeof Data->Msg]{};
-    CMultiLanguage::ConvertFromUtf8(message, Data->Msg, sizeof Data->Msg);
-    g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-}
-
-void TranslateChattingProtocol(DWORD dwWindowUIID, const BYTE* ReceiveBuffer, int Size)
-{
-    if (Size < 4)
-    {
-        return;
-    }
-
-    int HeadCode;
-    BOOL bIsC1C3 = ReceiveBuffer[0] % 2 == 1;
-    if (bIsC1C3) // C1 and C3
-    {
-        HeadCode = ReceiveBuffer[2];
-    }
-    else
-    {
-        HeadCode = ReceiveBuffer[3];
-    }
-
-    switch (HeadCode)
-    {
-    case 0x00:
-        ReceiveChatRoomConnectResult(dwWindowUIID, ReceiveBuffer);
-        break;
-    case 0x01:
-        ReceiveChatRoomUserStateChange(dwWindowUIID, ReceiveBuffer);
-        break;
-    case 0x02:
-        ReceiveChatRoomUserList(dwWindowUIID, ReceiveBuffer);
-        break;
-    case 0x04:
-        ReceiveChatRoomChatText(dwWindowUIID, ReceiveBuffer);
-        break;
-    case 0x0D:
-        ReceiveChatRoomNoticeText(dwWindowUIID, ReceiveBuffer);
-        break;
-    default:
-        break;
-    }
-}
-
-/*
-void CChatRoomSocketList::ProcessSocketMessage(DWORD dwSocketID, WORD wMessage)
-{
-    CHATROOM_SOCKET * pChatroomSocket = GetChatRoomSocketData(GetChatRoomSocketID(dwSocketID));
-    if (pChatroomSocket == NULL) return;
-    Connection* pSocketClient = &pChatroomSocket->m_WSClient;
-
-    if (pSocketClient == NULL)
-    {
-        return;
-    }
-    switch(wMessage)
-    {
-    case FD_CONNECT:
-        break;
-    case FD_READ :
-        // pSocketClient->nRecv();
-        break;
-    case FD_WRITE :
-        // pSocketClient->FDWriteSend();
-        break;
-    case FD_CLOSE :
-        CUIChatWindow * pWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(pChatroomSocket->m_dwWindowUIID);
-        if (pWindow != NULL)
-            pWindow->AddChatText(255, I18N::Game::YouAreDisconnectedFromTheServer, 1, 0);
-        pSocketClient->Close();
-        break;
-    }
-}
-
-//void CChatRoomSocketList::ProtocolCompile()
-//{
-//	// TODO: Change that
-//	for (m_ChatRoomSocketMapIter = m_ChatRoomSocketMap.begin(); m_ChatRoomSocketMapIter != m_ChatRoomSocketMap.end(); ++m_ChatRoomSocketMapIter)
-//	{
-//		ProtocolCompiler(&m_ChatRoomSocketMapIter->second->m_WSClient, 1, m_ChatRoomSocketMapIter->second->m_dwWindowUIID);
-//	}
-//}
-*/
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void CUIChatRoomListTabWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
-{
-    SetTitle(pszTitle);
-    SetParentUIID(dwParentID);
-    SetOption(UIWINDOWSTYLE_NULL);
-
-    SetPosition(50, 50);
-    //SetSize(213, 170);
-    SetSize(250, 170);
-    SetLimitSize(250, 150);
-
-    m_WindowListBox.SetParentUIID(GetUIID());
-    m_WindowListBox.SetArrangeType(2, 0, 22);
-    m_WindowListBox.SetResizeType(3, 0, -39);
-
-    m_HideAllButton.Init(1, I18N::Game::HideAll);
-    m_HideAllButton.SetParentUIID(GetUIID());
-    m_HideAllButton.SetArrangeType(2, 2, 17);
-    m_HideAllButton.SetSize(50, 14);
-}
-
-void CUIChatRoomListTabWindow::Refresh()
-{
-    m_HideAllButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_WindowListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_WindowListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_WindowListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_WindowListBox.SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
-}
-
-void CUIChatRoomListTabWindow::AddWindow(DWORD dwUIID, const wchar_t* pszTitle)
-{
-    m_WindowListBox.AddText(dwUIID, pszTitle);
-}
-
-void CUIChatRoomListTabWindow::RemoveWindow(DWORD dwUIID)
-{
-    m_WindowListBox.DeleteText(dwUIID);
-    m_WindowListBox.Scrolling(0);
-}
-
-DWORD CUIChatRoomListTabWindow::GetCurrentSelectedWindow()
-{
-    if (m_WindowListBox.GetSelectedText() == nullptr) return 0;
-    else return m_WindowListBox.GetSelectedText()->m_dwUIID;
-}
-
-void CUIChatRoomListTabWindow::SyncControlLayout()
-{
-    if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE)
-    {
-        m_WindowListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_HideAllButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
-        if (GetState() == UISTATE_RESIZE)
-        {
-            m_WindowListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-        }
-    }
-}
-
-void CUIChatRoomListTabWindow::RenderSub()
-{
-    SyncControlLayout();
-
-    EnableAlphaTest();
-    SetLineColor(7);
-    RenderColor((float)RPos_x(0), (float)RPos_y(18 + m_WindowListBox.GetHeight()),
-        (float)RWidth(), (float)RHeight() - m_WindowListBox.GetHeight() - 18);
-    EndRenderColor();
-
-    m_WindowListBox.Render();
-    m_HideAllButton.Render();
-
-    EnableAlphaTest();
-    SetLineColor(2);
-    RenderColor((float)RPos_x(0), (float)RPos_y(0) + 16, (float)RWidth(), 1.0f);
-    SetLineColor(5);
-    RenderColor((float)RPos_x(0), (float)RPos_y(0), (float)RWidth(), 16);
-    SetLineColor(2);
-    RenderColor((float)RPos_x(0), (float)RPos_y(17 + m_WindowListBox.GetHeight()), (float)RWidth(), 1.0f);
-    EndRenderColor();
-
-    EnableAlphaTest();
-
-    g_pRenderText->SetTextColor(230, 220, 200, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->RenderText(RPos_x(8), RPos_y(3), I18N::Game::WindowTitle);
-    DisableAlphaBlend();
-}
-
-BOOL CUIChatRoomListTabWindow::HandleMessage()
-{
-    switch (m_WorkMessage.m_iMessage)
-    {
-    case UI_MESSAGE_SELECTED:
-        break;
-    case UI_MESSAGE_LISTDBLCLICK:
-        if (g_pWindowMgr->GetWindow(GetCurrentSelectedWindow())->GetState() == UISTATE_HIDE ||
-            g_pWindowMgr->GetTopNotMainWindowUIID() != GetCurrentSelectedWindow())
-        {
-            PlayBuffer(SOUND_CLICK01);
-            g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, GetCurrentSelectedWindow(), 0);
-            g_pWindowMgr->HideAllWindowClear();
-            MouseLButton = false;
-        }
-        else
-        {
-            g_pWindowMgr->SendUIMessage(UI_MESSAGE_HIDE, GetCurrentSelectedWindow(), 0);
-        }
-        break;
-    case UI_MESSAGE_BTNLCLICK:
-    {
-        if (g_dwTopWindow != 0) break;
-        switch (m_WorkMessage.m_iParam1)
-        {
-        case 1:
-            g_pWindowMgr->HideAllWindow(TRUE);
-            break;
-        default:
-            break;
-        }
-    }
-    default:
-        break;
-    }
-    return FALSE;
-}
-
-void CUIChatRoomListTabWindow::DoActionSub(BOOL bMessageOnly)
-{
-    m_WindowListBox.DoAction(bMessageOnly);
-    m_HideAllButton.DoAction(bMessageOnly);
-}
-
-void CUIChatRoomListTabWindow::DoMouseActionSub()
-{
 }
 
 void CLetterList::AddLetter(DWORD dwLetterID, const wchar_t* pszID, const wchar_t* pszText, const wchar_t* pszDate, const wchar_t* pszTime, BOOL bIsRead)
@@ -4353,984 +2603,6 @@ int CLetterList::GetLineNum(DWORD dwLetterID)
     return 0;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void CUILetterBoxTabWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
-{
-    SetTitle(pszTitle);
-    SetParentUIID(dwParentID);
-    SetOption(UIWINDOWSTYLE_NULL);
-
-    SetPosition(50, 50);
-    //SetSize(213, 170);
-    SetSize(250, 170);
-    SetLimitSize(250, 150);
-
-    RefreshLetterList();
-
-    m_LetterListBox.SetParentUIID(GetUIID());
-    m_LetterListBox.SetArrangeType(2, 0, 22);
-    m_LetterListBox.SetResizeType(3, 0, -39);
-
-    m_WriteButton.Init(1, I18N::Game::Write);
-    m_WriteButton.SetParentUIID(GetUIID());
-    m_WriteButton.SetArrangeType(2, 2, 17);
-    m_WriteButton.SetSize(50, 14);
-
-    m_ReadButton.Init(2, I18N::Game::Read);
-    m_ReadButton.SetParentUIID(GetUIID());
-    m_ReadButton.SetArrangeType(2, 53, 17);
-    m_ReadButton.SetSize(50, 14);
-
-    m_ReplyButton.Init(3, I18N::Game::Reply);
-    m_ReplyButton.SetParentUIID(GetUIID());
-    m_ReplyButton.SetArrangeType(2, 104, 17);
-    m_ReplyButton.SetSize(50, 14);
-
-    m_DeleteButton.Init(4, I18N::Game::Delete);
-    m_DeleteButton.SetParentUIID(GetUIID());
-    m_DeleteButton.SetArrangeType(2, 155, 17);
-    m_DeleteButton.SetSize(50, 14);
-}
-
-void CUILetterBoxTabWindow::Refresh()
-{
-    m_WriteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_ReadButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_ReplyButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_DeleteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_LetterListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_LetterListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_LetterListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_LetterListBox.SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
-}
-
-LETTERLIST_TEXT* CUILetterBoxTabWindow::GetCurrentSelectedLetter()
-{
-    if (m_LetterListBox.GetSelectedText() == NULL) return NULL;
-    else return m_LetterListBox.GetSelectedText();
-}
-
-void CUILetterBoxTabWindow::RefreshLetterList()
-{
-    int iSelectNum = g_pLetterList->UpdateLetterList(m_LetterListBox.GetLetterList(),
-        (m_LetterListBox.SLGetSelectLineNum() > 0 ? m_LetterListBox.SLGetSelectLine()->m_dwLetterID : -1));
-    m_LetterListBox.SLSetSelectLine(iSelectNum);
-    m_LetterListBox.Scrolling(0);
-    CheckAll(FALSE);
-}
-
-void CUILetterBoxTabWindow::CheckAll(BOOL bCheck)
-{
-    m_LetterListBox.ResetCheckedLine(bCheck);
-    g_pLetterList->ResetLetterSelect(bCheck);
-    m_bCheckAllState = bCheck;
-}
-
-void CUILetterBoxTabWindow::PrevNextCursorMove(int iMove)
-{
-    m_LetterListBox.SLSetSelectLine(iMove);
-}
-
-void CUILetterBoxTabWindow::SyncControlLayout()
-{
-    if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE)
-    {
-        m_LetterListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
-        m_WriteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_ReadButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_ReplyButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_DeleteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        //		m_DeliveryButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
-        if (GetState() == UISTATE_RESIZE)
-        {
-            m_LetterListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-        }
-    }
-}
-
-void CUILetterBoxTabWindow::RenderSub()
-{
-    SyncControlLayout();
-
-    EnableAlphaTest();
-    SetLineColor(7);
-    RenderColor((float)RPos_x(0), (float)RPos_y(18 + m_LetterListBox.GetHeight()), (float)RWidth(), (float)RHeight() - m_LetterListBox.GetHeight() - 18);
-    EndRenderColor();
-    DisableAlphaBlend();
-
-    m_LetterListBox.Render();
-
-    EnableAlphaTest();
-    SetLineColor(2);
-    RenderColor((float)RPos_x(0), (float)RPos_y(16), (float)RWidth(), 1.0f);
-    SetLineColor(5);
-    RenderColor((float)RPos_x(0), (float)RPos_y(0), (float)RWidth(), 16);
-    SetLineColor(2);
-    RenderColor((float)RPos_x(0), (float)RPos_y(17 + m_LetterListBox.GetHeight()), (float)RWidth(), 1.0f);
-
-    RenderColor((float)RPos_x(0) + m_LetterListBox.GetColumnPos_x(1), (float)RPos_y(17), 1.0f, (float)RHeight() - 22 - 17);
-    RenderColor((float)RPos_x(0) + m_LetterListBox.GetColumnPos_x(2), (float)RPos_y(17), 1.0f, (float)RHeight() - 22 - 17);
-    RenderColor((float)RPos_x(0) + m_LetterListBox.GetColumnPos_x(3), (float)RPos_y(17), 1.0f, (float)RHeight() - 22 - 17);
-    SetLineColor(14);
-    RenderColor((float)RPos_x(0) + m_LetterListBox.GetColumnPos_x(1), (float)RPos_y(3), 1.0f, 10);
-    RenderColor((float)RPos_x(0) + m_LetterListBox.GetColumnPos_x(2), (float)RPos_y(3), 1.0f, 10);
-    RenderColor((float)RPos_x(0) + m_LetterListBox.GetColumnPos_x(3), (float)RPos_y(3), 1.0f, 10);
-    EndRenderColor();
-
-    g_pRenderText->SetTextColor(230, 220, 200, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    RenderCheckBox(RPos_x(1), RPos_y(3), m_bCheckAllState);
-    RenderBitmap(BITMAP_INTERFACE_EX + 14, RPos_x(1 + 10), RPos_y(3), 13.0f, 9.0f, 0.f, 0.f, 13.f / 16.f, 9.f / 32.f);
-
-    if (CheckMouseIn(RPos_x(0) + m_LetterListBox.GetColumnPos_x(1), RPos_y(0), m_LetterListBox.GetColumnWidth(1), 19) == TRUE || g_pLetterList->GetCurrentSortType() == 1)
-    {
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(1), RPos_y(3), I18N::Game::Sender);
-        g_pRenderText->SetTextColor(230, 220, 200, 255);
-    }
-    else
-    {
-        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(1), RPos_y(3), I18N::Game::Sender);
-    }
-
-    if (CheckMouseIn(RPos_x(0) + m_LetterListBox.GetColumnPos_x(2), RPos_y(0), m_LetterListBox.GetColumnWidth(2), 19) == TRUE || g_pLetterList->GetCurrentSortType() == 2)
-    {
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(2), RPos_y(3), I18N::Game::DateRcvd);
-        g_pRenderText->SetTextColor(230, 220, 200, 255);
-    }
-    else
-    {
-        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(2), RPos_y(3), I18N::Game::DateRcvd);
-    }
-
-    if (CheckMouseIn(RPos_x(0) + m_LetterListBox.GetColumnPos_x(3), RPos_y(0), m_LetterListBox.GetColumnWidth(3), 19) == TRUE || g_pLetterList->GetCurrentSortType() == 3)
-    {
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(3), RPos_y(3), I18N::Game::Title1030);
-        g_pRenderText->SetTextColor(230, 220, 200, 255);
-    }
-    else
-    {
-        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(3), RPos_y(3), I18N::Game::Title1030);
-    }
-
-    DisableAlphaBlend();
-
-    m_WriteButton.Render();
-    m_ReadButton.Render();
-    m_ReplyButton.Render();
-    m_DeleteButton.Render();
-    //	m_DeliveryButton.Render();
-}
-
-BOOL CUILetterBoxTabWindow::HandleMessage()
-{
-    if (m_WorkMessage.m_iMessage == UI_MESSAGE_LISTDBLCLICK)
-    {
-        PlayBuffer(SOUND_CLICK01);
-        m_WorkMessage.m_iMessage = UI_MESSAGE_BTNLCLICK;
-        m_WorkMessage.m_iParam1 = 2;
-    }
-    switch (m_WorkMessage.m_iMessage)
-    {
-    case UI_MESSAGE_SELECTED:
-        break;
-    case UI_MESSAGE_BTNLCLICK:
-    {
-        if (g_dwTopWindow != 0) break;
-        DWORD dwUIID = 0;
-        switch (m_WorkMessage.m_iParam1)
-        {
-        case 1:
-        {
-            wchar_t temp[MAX_TEXT_LENGTH + 1];
-            mu_swprintf(temp, I18N::Game::WriteLetterCostDZen, g_cdwLetterCost);
-            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);
-        }
-        break;
-        case 2:
-        {
-            if (GetCurrentSelectedLetter() == NULL) break;
-            DWORD dwLetterID = GetCurrentSelectedLetter()->m_dwLetterID;
-            if (g_pWindowMgr->LetterReadCheck(dwLetterID) == FALSE)
-            {
-                // 캐시
-                if (g_pLetterList->GetLetterText(dwLetterID) == NULL)
-                {
-                    SocketClient->ToGameServer()->SendLetterReadRequest(dwLetterID);
-                }
-                else
-                {
-                    auto data = reinterpret_cast<const BYTE*>(g_pLetterList->GetLetterText(dwLetterID));
-                    ReceiveLetterText(std::span(data, sizeof(FS_LETTER_TEXT)), true);
-                }
-            }
-            else
-            {
-                DWORD dwFindUIID = g_pWindowMgr->GetLetterReadWindow(dwLetterID);
-                if (dwFindUIID != 0)
-                    g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, dwFindUIID, 0);
-            }
-        }
-        break;
-        case 3:
-        {
-            if (GetCurrentSelectedLetter() == NULL) break;
-            wchar_t temp[MAX_TEXT_LENGTH + 1];
-            mu_swprintf(temp, I18N::Game::WriteLetterCostDZen, g_cdwLetterCost);
-            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);
-            if (dwUIID == 0) break;
-            ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMailtoText(GetCurrentSelectedLetter()->m_szID);
-            wchar_t szMailTitle[MAX_TEXT_LENGTH + 1] = { 0 };
-            mu_swprintf(szMailTitle, I18N::Game::ReS, GetCurrentSelectedLetter()->m_szText);
-            wchar_t szMailTitleResult[32 + 1] = { 0 };
-            CutText4(szMailTitle, szMailTitleResult, NULL, 32);
-            ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMainTitleText(szMailTitleResult);
-        }
-        break;
-        case 4:
-        {
-            if (m_LetterListBox.HaveCheckedLine() == FALSE)
-            {
-                dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::SelectTheLetterYouDLikeToDelete);
-                break;
-            }
-            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::AreYouSureYouWantToDeleteTheLetter, GetUIID());
-        }
-        break;
-        case 5:
-        {
-            SocketClient->ToGameServer()->SendLetterListRequest();
-        }
-        break;
-        default:
-            break;
-        }
-        if (dwUIID != 0)
-        {
-            CUIBaseWindow* pWindow = g_pWindowMgr->GetWindow(dwUIID);
-            if (pWindow != NULL)
-            {
-                pWindow->SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-                pWindow->SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-            }
-        }
-    }
-    break;
-    case UI_MESSAGE_YNRETURN:
-        if (m_WorkMessage.m_iParam2 == 1)
-        {
-            if (m_LetterListBox.HaveCheckedLine() == TRUE)
-            {
-                static std::deque<LETTERLIST_TEXT*> letterlist;
-                letterlist.clear();
-                if (m_LetterListBox.GetCheckedLines(&letterlist) == 0) break;
-                for (std::deque<LETTERLIST_TEXT*>::iterator iter = letterlist.begin(); iter != letterlist.end(); ++iter)
-                {
-                    SocketClient->ToGameServer()->SendLetterDeleteRequest((*iter)->m_dwLetterID);
-                }
-                //m_LetterListBox.Scrolling(0);
-            }
-        }
-        break;
-    default:
-        break;
-    }
-    return FALSE;
-}
-
-void CUILetterBoxTabWindow::DoActionSub(BOOL bMessageOnly)
-{
-    m_LetterListBox.DoAction(bMessageOnly);
-
-    m_WriteButton.DoAction(bMessageOnly);
-    m_ReadButton.DoAction(bMessageOnly);
-    m_ReplyButton.DoAction(bMessageOnly);
-    m_DeleteButton.DoAction(bMessageOnly);
-    //	m_DeliveryButton.DoAction(bMessageOnly);
-}
-
-void CUILetterBoxTabWindow::DoMouseActionSub()
-{
-    if (MouseLButton)
-    {
-        if (CheckMouseIn(RPos_x(0), RPos_y(0), 10, 19) == TRUE)
-        {
-            if (g_dwTopWindow != 0);
-            else if (m_bCheckAllState == FALSE)
-            {
-                PlayBuffer(SOUND_CLICK01);
-                CheckAll(TRUE);
-            }
-            else
-            {
-                PlayBuffer(SOUND_CLICK01);
-                CheckAll(FALSE);
-            }
-            MouseLButton = FALSE;
-        }
-        else if (CheckMouseIn(RPos_x(0) + 10, RPos_y(0), m_LetterListBox.GetColumnWidth(0) - 10, 19) == TRUE)
-        {
-            if (g_pLetterList->GetCurrentSortType() != 0)
-            {
-                PlayBuffer(SOUND_CLICK01);
-                g_pLetterList->Sort(0);
-                RefreshLetterList();
-            }
-            MouseLButton = FALSE;
-        }
-        else if (CheckMouseIn(RPos_x(0) + m_LetterListBox.GetColumnPos_x(1), RPos_y(0), m_LetterListBox.GetColumnWidth(1), 19) == TRUE)
-        {
-            if (g_pLetterList->GetCurrentSortType() != 1)
-            {
-                PlayBuffer(SOUND_CLICK01);
-                g_pLetterList->Sort(1);
-                RefreshLetterList();
-            }
-            MouseLButton = FALSE;
-        }
-        else if (CheckMouseIn(RPos_x(0) + m_LetterListBox.GetColumnPos_x(2), RPos_y(0), m_LetterListBox.GetColumnWidth(2), 19) == TRUE)
-        {
-            if (g_pLetterList->GetCurrentSortType() != 2)
-            {
-                PlayBuffer(SOUND_CLICK01);
-                g_pLetterList->Sort(2);
-                RefreshLetterList();
-            }
-            MouseLButton = FALSE;
-        }
-        else if (CheckMouseIn(RPos_x(0) + m_LetterListBox.GetColumnPos_x(3), RPos_y(0), m_LetterListBox.GetColumnWidth(3), 19) == TRUE)
-        {
-            if (g_pLetterList->GetCurrentSortType() != 3)
-            {
-                PlayBuffer(SOUND_CLICK01);
-                g_pLetterList->Sort(3);
-                RefreshLetterList();
-            }
-            MouseLButton = FALSE;
-        }
-    }
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void CUIFriendWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
-{
-    SetTitle(pszTitle);
-    SetParentUIID(dwParentID);
-
-    SetPosition(50, 50);
-    //SetSize(213, 170);
-    SetSize(250, 170);
-    SetLimitSize(250, 150);
-
-    m_FriendListWnd.Init(I18N::Game::FriendsList, GetUIID());
-    m_ChatRoomListWnd.Init(I18N::Game::WindowList, GetUIID());
-    m_LetterBoxWnd.Init(I18N::Game::LetterBox, GetUIID());
-
-    g_pWindowMgr->AddWindowFinder(&m_FriendListWnd);
-    g_pWindowMgr->AddWindowFinder(&m_ChatRoomListWnd);
-    g_pWindowMgr->AddWindowFinder(&m_LetterBoxWnd);
-
-    m_FriendListWnd.SetArrangeType(0, 0, 21);
-    m_FriendListWnd.SetResizeType(3, 0, -19);
-
-    m_ChatRoomListWnd.SetArrangeType(0, 0, 21);
-    m_ChatRoomListWnd.SetResizeType(3, 0, -19);
-
-    m_LetterBoxWnd.SetArrangeType(0, 0, 21);
-    m_LetterBoxWnd.SetResizeType(3, 0, -19);
-}
-
-void CUIFriendWindow::Reset()
-{
-    SetTabIndex(0);
-}
-
-void CUIFriendWindow::Close()
-{
-    if (g_pWindowMgr->GetWindow(GetUIID())->GetState() == UISTATE_NORMAL)
-        g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
-}
-
-void CUIFriendWindow::Refresh()
-{
-    m_FriendListWnd.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_ChatRoomListWnd.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_LetterBoxWnd.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
-    m_FriendListWnd.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_ChatRoomListWnd.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-    m_LetterBoxWnd.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-
-    m_FriendListWnd.Refresh();
-    m_ChatRoomListWnd.Refresh();
-    m_LetterBoxWnd.Refresh();
-
-    g_dwKeyFocusUIID = m_FriendListWnd.GetKeyMoveListUIID();
-}
-
-void RenderTabLine(int iPos_x, int iPos_y, int iTabWidth, int iTabHeight, int iTabNum, int iSelectNum)
-{
-    for (int i = 0; i < iTabNum; ++i)
-    {
-        SetLineColor(2);
-        auto fRPos_x = float(iPos_x + i * iTabWidth);
-        if (i == iSelectNum)
-        {
-            RenderColor((float)fRPos_x, (float)iPos_y, (float)iTabWidth, (float)1);
-            RenderColor((float)fRPos_x - 1, (float)iPos_y, (float)1, (float)iTabHeight);
-            RenderColor((float)fRPos_x + iTabWidth - 1, (float)iPos_y, (float)1, (float)iTabHeight);
-            SetLineColor(5);
-            RenderColor((float)fRPos_x, (float)iPos_y + 1, (float)iTabWidth - 1, (float)iTabHeight - 1);
-        }
-        else
-        {
-            RenderColor((float)fRPos_x, (float)iPos_y + 1, (float)iTabWidth, (float)1);
-            RenderColor((float)fRPos_x + iTabWidth - 1, (float)iPos_y + 1, (float)1, (float)iTabHeight - 1);
-            RenderColor((float)fRPos_x, (float)iPos_y + iTabHeight - 1, (float)iTabWidth, (float)1);
-            SetLineColor(6);
-            RenderColor((float)fRPos_x, (float)iPos_y + 2, (float)iTabWidth - 1, (float)iTabHeight - 3);
-        }
-    }
-}
-
-void CUIFriendWindow::RenderSub()
-{
-    SyncTabLayout();
-
-    switch (m_iTabIndex)
-    {
-    case 0:
-        m_FriendListWnd.Render();
-        break;
-    case 1:
-        m_LetterBoxWnd.Render();
-        break;
-    case 2:
-        m_ChatRoomListWnd.Render();
-        break;
-    default:
-        break;
-    }
-
-    RenderTabStrip();
-}
-
-void CUIFriendWindow::SyncTabLayout()
-{
-    if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE)
-    {
-        m_FriendListWnd.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_ChatRoomListWnd.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_LetterBoxWnd.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_FriendListWnd.SetState(UISTATE_MOVE);
-        m_ChatRoomListWnd.SetState(UISTATE_MOVE);
-        m_LetterBoxWnd.SetState(UISTATE_MOVE);
-
-        if (GetState() == UISTATE_RESIZE)
-        {
-            m_FriendListWnd.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-            m_ChatRoomListWnd.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-            m_LetterBoxWnd.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
-            m_FriendListWnd.SetState(UISTATE_RESIZE);
-            m_ChatRoomListWnd.SetState(UISTATE_RESIZE);
-            m_LetterBoxWnd.SetState(UISTATE_RESIZE);
-        }
-    }
-}
-
-void CUIFriendWindow::RenderTabStrip()
-{
-    EnableAlphaTest();
-
-    SetLineColor(7);
-    RenderColor((float)RPos_x(0), (float)RPos_y(0), (float)RWidth(), (float)20);
-    RenderTabLine(RPos_x(0), RPos_y(2), 53, 19, 3, m_iTabIndex);
-    SetLineColor(2);
-    RenderColor(float(RPos_x(53 * 3)), float(RPos_y(2) + 19 - 1), float(RWidth() - 53 * 3), (float)1);
-    EndRenderColor();
-
-    SIZE TextSize;
-    int TextLen;
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetBgColor(0);
-
-    if (m_FriendListWnd.GetTitle() != NULL)
-    {
-        if (m_iTabIndex == 0 || m_iTabMouseOverIndex == 0)
-        {
-            g_pRenderText->SetTextColor(255, 255, 255, 255);
-        }
-        else
-        {
-            g_pRenderText->SetTextColor(230, 220, 200, 255);
-        }
-
-        TextLen = lstrlen(m_FriendListWnd.GetTitle());
-
-        TextSize = g_pRenderText->MeasureText(m_FriendListWnd.GetTitle(), TextLen);
-        g_pRenderText->RenderText(RPos_x(0) + (52 - static_cast<float>(TextSize.cx) + 0.5f) / 2,
-            RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2, m_FriendListWnd.GetTitle());
-    }
-    if (m_LetterBoxWnd.GetTitle() != NULL)
-    {
-        if (m_iTabIndex == 1 || m_iTabMouseOverIndex == 1)
-        {
-            g_pRenderText->SetTextColor(255, 255, 255, 255);
-        }
-        else
-        {
-            g_pRenderText->SetTextColor(230, 220, 200, 255);
-        }
-        TextLen = lstrlen(m_LetterBoxWnd.GetTitle());
-
-        TextSize = g_pRenderText->MeasureText(m_LetterBoxWnd.GetTitle(), TextLen);
-        g_pRenderText->RenderText(RPos_x(54) + (52 - static_cast<float>(TextSize.cx) + 0.5f) / 2,
-            RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2, m_LetterBoxWnd.GetTitle());
-    }
-    if (m_ChatRoomListWnd.GetTitle() != NULL)
-    {
-        if (m_iTabIndex == 2 || m_iTabMouseOverIndex == 2)
-        {
-            g_pRenderText->SetTextColor(255, 255, 255, 255);
-        }
-        else
-        {
-            g_pRenderText->SetTextColor(230, 220, 200, 255);
-        }
-        TextLen = lstrlen(m_ChatRoomListWnd.GetTitle());
-
-        TextSize = g_pRenderText->MeasureText(m_ChatRoomListWnd.GetTitle(), TextLen);
-        g_pRenderText->RenderText(RPos_x(107) + (52 - static_cast<float>(TextSize.cx) + 0.5f) / 2,
-            RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2, m_ChatRoomListWnd.GetTitle());
-    }
-
-    g_pRenderText->SetTextColor(230, 220, 200, 255);
-    TextSize = g_pRenderText->MeasureText(I18N::Game::RefuseChat, wcslen(I18N::Game::RefuseChat));
-    g_pRenderText->RenderText(RPos_x(0) + RWidth() - static_cast<float>(TextSize.cx) - 2,
-        RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2, I18N::Game::RefuseChat);
-
-    float fCheckBoxPos_x = RPos_x(0) + RWidth() - static_cast<float>(TextSize.cx) - 2 - 14;
-    float fCheckBoxPos_y = RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2;
-
-    RenderCheckBox(fCheckBoxPos_x - 1, fCheckBoxPos_y - 1, g_pWindowMgr->GetChatReject());
-}
-
-BOOL CUIFriendWindow::HandleMessage()
-{
-    switch (m_WorkMessage.m_iMessage)
-    {
-    case UI_MESSAGE_SELECTED:
-        switch (m_iTabIndex)
-        {
-        case 0:
-            g_dwKeyFocusUIID = m_FriendListWnd.GetKeyMoveListUIID();
-            break;
-        case 1:
-            g_dwKeyFocusUIID = m_LetterBoxWnd.GetKeyMoveListUIID();
-            break;
-        case 2:
-            g_dwKeyFocusUIID = m_ChatRoomListWnd.GetKeyMoveListUIID();
-            break;
-        default:
-            break;
-        }
-        break;
-    case UI_MESSAGE_YNRETURN:
-        if (m_WorkMessage.m_iParam2 == 1)
-        {
-            if (g_pWindowMgr->GetChatReject() == FALSE)
-            {
-                SocketClient->ToGameServer()->SendSetFriendOnlineState(0);
-                g_pWindowMgr->SetChatReject(TRUE);
-                g_pFriendMenu->CloseAllChatWindow();
-            }
-        }
-        break;
-    default:
-        break;
-    }
-
-    return FALSE;
-}
-
-void CUIFriendWindow::DoActionSub(BOOL bMessageOnly)
-{
-    if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE);
-    else
-    {
-        switch (m_iTabIndex)
-        {
-        case 0:
-            m_FriendListWnd.DoAction(bMessageOnly);
-            break;
-        case 1:
-            m_LetterBoxWnd.DoAction(bMessageOnly);
-            break;
-        case 2:
-            m_ChatRoomListWnd.DoAction(bMessageOnly);
-            break;
-        default:
-            break;
-        }
-    }
-}
-
-void CUIFriendWindow::DoMouseActionSub()
-{
-    if (GetState() == UISTATE_RESIZE) return;
-
-    BOOL bChangeTab = FALSE;
-    if (CheckMouseIn(RPos_x(0), RPos_y(2), 53, 19) == TRUE)
-    {
-        m_iTabMouseOverIndex = 0;
-        if (MouseLButton)
-        {
-            if (m_iTabIndex != 0)
-            {
-                bChangeTab = TRUE;
-                PlayBuffer(SOUND_CLICK01);
-            }
-            m_iTabIndex = 0;
-            g_dwKeyFocusUIID = m_FriendListWnd.GetKeyMoveListUIID();
-            MouseLButton = FALSE;
-            Refresh();
-        }
-    }
-    else if (CheckMouseIn(RPos_x(53), RPos_y(2), 53, 19) == TRUE)
-    {
-        m_iTabMouseOverIndex = 1;
-        if (MouseLButton)
-        {
-            if (m_iTabIndex != 1)
-            {
-                bChangeTab = TRUE;
-                PlayBuffer(SOUND_CLICK01);
-            }
-            m_iTabIndex = 1;
-            g_dwKeyFocusUIID = m_LetterBoxWnd.GetKeyMoveListUIID();
-            MouseLButton = FALSE;
-            Refresh();
-        }
-    }
-    else if (CheckMouseIn(RPos_x(106), RPos_y(2), 53, 19) == TRUE)
-    {
-        m_iTabMouseOverIndex = 2;
-        if (MouseLButton)
-        {
-            if (m_iTabIndex != 2)
-            {
-                bChangeTab = TRUE;
-                PlayBuffer(SOUND_CLICK01);
-            }
-            m_iTabIndex = 2;
-            g_dwKeyFocusUIID = m_ChatRoomListWnd.GetKeyMoveListUIID();
-            MouseLButton = FALSE;
-            Refresh();
-        }
-    }
-    else
-    {
-        m_iTabMouseOverIndex = m_iTabIndex;
-        g_pRenderText->SetFont(g_hFont);
-        const SIZE TextSize = g_pRenderText->MeasureText(
-            I18N::Game::RefuseChat, wcslen(I18N::Game::RefuseChat));
-
-        if (CheckMouseIn(RPos_x(0) + RWidth() - TextSize.cx - 2 - 14,
-            RPos_y(4), TextSize.cx + 2 + 14, 20) == TRUE)
-        {
-            if (MouseLButtonPop)
-            {
-                PlayBuffer(SOUND_CLICK01);
-                if (g_pWindowMgr->GetChatReject() == TRUE)
-                {
-                    SocketClient->ToGameServer()->SendSetFriendOnlineState(1);
-                    g_pWindowMgr->SetChatReject(FALSE);
-                }
-                else
-                {
-                    g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::IfYouRefuseChatAllChatWindowsWillClose, GetUIID());
-                }
-                MouseLButtonPop = FALSE;
-            }
-        }
-    }
-
-    if (bChangeTab == TRUE)
-    {
-        m_FriendListWnd.Refresh();
-        m_ChatRoomListWnd.Refresh();
-        m_LetterBoxWnd.Refresh();
-    }
-}
-
-void CUITextInputWindow::InitControls()
-{
-    m_TextInputBox.Init(g_hWnd, 80, 14, 10);
-    m_TextInputBox.SetParentUIID(m_dwUIID);
-    m_TextInputBox.SetFont(g_hFont);
-    m_TextInputBox.SetOption(UIOPTION_PAINTBACK);
-    m_TextInputBox.SetBackColor(0, 0, 0, 0);
-    m_TextInputBox.SetParentUIID(GetUIID());
-    m_TextInputBox.SetArrangeType(0, 30, 14);
-    m_TextInputBox.SetState(UISTATE_NORMAL);
-
-    m_AddButton.Init(1, I18N::Game::OK);
-    m_AddButton.SetParentUIID(GetUIID());
-    m_AddButton.SetArrangeType(0, 18, 40);
-    m_AddButton.SetSize(50, 20);
-
-    m_CancelButton.Init(2, I18N::Game::Cancel);
-    m_CancelButton.SetParentUIID(GetUIID());
-    m_CancelButton.SetArrangeType(0, 73, 40);
-    m_CancelButton.SetSize(50, 20);
-    Refresh();
-}
-
-
-void CUITextInputWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
-{
-    SetTitle(pszTitle);
-    SetParentUIID(0);
-    m_dwReturnWindowUIID = dwParentID;
-
-    SetPosition(50, 50);
-    //SetSize(213, 170);
-    SetSize(150, 100);
-    SetLimitSize(150, 100);
-    SetOption(UIWINDOWSTYLE_FIXED);
-}
-
-void CUITextInputWindow::Refresh()
-{
-    m_AddButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_CancelButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_TextInputBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
-    m_TextInputBox.GiveFocus();
-    m_bHaveTextBox = TRUE;
-}
-
-void CUITextInputWindow::RenderSub()
-{
-    if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE)
-    {
-        m_AddButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_CancelButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_TextInputBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    }
-
-    m_AddButton.Render();
-    m_CancelButton.Render();
-    EnableAlphaTest();
-    m_TextInputBox.Render();
-    DisableAlphaBlend();
-}
-
-void CUITextInputWindow::ReturnText()
-{
-    wchar_t returnText[MAX_TEXT_LENGTH + 1] = { 0 };
-    m_TextInputBox.GetText(returnText, MAX_TEXT_LENGTH + 1);
-    m_TextInputBox.SetText(NULL);
-    if (returnText[0] == L'\0')
-    {
-        return;
-    }
-
-    CUIBaseWindow* returnWindow = g_pWindowMgr->GetWindow(m_dwReturnWindowUIID);
-    if (returnWindow == NULL)
-    {
-        return;
-    }
-
-    returnWindow->SetReturnText(returnText);
-    g_pWindowMgr->SendUIMessageToWindow(m_dwReturnWindowUIID, UI_MESSAGE_TXTRETURN, GetUIID(), 0);
-    g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
-}
-
-BOOL CUITextInputWindow::HandleMessage()
-{
-    switch (m_WorkMessage.m_iMessage)
-    {
-    case UI_MESSAGE_SELECTED:
-        m_TextInputBox.GiveFocus();
-        break;
-    case UI_MESSAGE_TEXTINPUT:
-    {
-        ReturnText();
-    }
-    break;
-    case UI_MESSAGE_BTNLCLICK:
-    {
-        switch (m_WorkMessage.m_iParam1)
-        {
-        case 1:
-            ReturnText();
-            break;
-        case 2:
-            g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
-            break;
-        default:
-            break;
-        }
-    }
-    break;
-    default:
-        break;
-    }
-    return FALSE;
-}
-
-void CUITextInputWindow::DoActionSub(BOOL bMessageOnly)
-{
-    m_AddButton.DoAction(bMessageOnly);
-    m_CancelButton.DoAction(bMessageOnly);
-    m_TextInputBox.DoAction(bMessageOnly);
-}
-
-void CUITextInputWindow::DoMouseActionSub()
-{
-    //	if (g_dwMouseUseUIID == GetUIID() && MouseLButton == true)
-    //	{
-    //		m_TextInputBox.GiveFocus();
-    //	}
-}
-
-void CUIQuestionWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
-{
-    if (m_iDialogType == 0) SetTitle(I18N::Game::Question);
-    else if (m_iDialogType == 1) SetTitle(I18N::Game::OK);
-    SetParentUIID(0);
-    m_dwReturnWindowUIID = dwParentID;
-    memset(m_szCaption, 0, sizeof(m_szCaption));
-    memset(m_szSaveID, 0, sizeof(m_szSaveID));
-    CutText3(pszTitle, m_szCaption[0], 125, 2, 256);
-
-    SetPosition(50, 50);
-    //SetSize(213, 170);
-    SetSize(150, 100);
-    SetLimitSize(150, 100);
-    SetOption(UIWINDOWSTYLE_FIXED);
-
-    if (m_iDialogType == 0)
-    {
-        m_AddButton.Init(1, I18N::Game::Yes);
-        m_AddButton.SetParentUIID(GetUIID());
-        m_AddButton.SetArrangeType(0, 18, 40);
-        m_AddButton.SetSize(50, 20);
-
-        m_CancelButton.Init(2, I18N::Game::No);
-        m_CancelButton.SetParentUIID(GetUIID());
-        m_CancelButton.SetArrangeType(0, 73, 40);
-        m_CancelButton.SetSize(50, 20);
-    }
-    else if (m_iDialogType == 1)
-    {
-        m_AddButton.Init(1, I18N::Game::OK);
-        m_AddButton.SetParentUIID(GetUIID());
-        m_AddButton.SetArrangeType(0, 45, 40);
-        m_AddButton.SetSize(50, 20);
-    }
-}
-extern int KeyState[256];
-
-void CUIQuestionWindow::Refresh()
-{
-    m_AddButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    m_CancelButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-
-    KeyState[VK_RETURN] = true;
-}
-
-void CUIQuestionWindow::RenderSub()
-{
-    if (GetState() == UISTATE_MOVE || GetState() == UISTATE_RESIZE)
-    {
-        m_AddButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-        m_CancelButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-    }
-
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0);
-
-    SIZE TextSize;
-    g_pRenderText->RenderText(RPos_x(5), RPos_y(8), m_szCaption[0], 0, 0, RT3_SORT_LEFT, &TextSize);
-    if (m_szCaption[1][0] != '\0')
-        g_pRenderText->RenderText(RPos_x(5), RPos_y(8 + TextSize.cy), m_szCaption[1]);
-
-    m_AddButton.Render();
-    if (m_iDialogType == 0) m_CancelButton.Render();
-}
-
-BOOL CUIQuestionWindow::HandleMessage()
-{
-    switch (m_WorkMessage.m_iMessage)
-    {
-    case UI_MESSAGE_SELECTED:
-        break;
-    case UI_MESSAGE_BTNLCLICK:
-    {
-        switch (m_WorkMessage.m_iParam1)
-        {
-        case 1:
-            if (m_dwReturnWindowUIID == -1)
-            {
-                SocketClient->ToGameServer()->SendFriendAddResponse(0x01, MU_C16(m_szSaveID));
-            }
-            else if (m_dwReturnWindowUIID != 0)
-            {
-                g_pWindowMgr->SendUIMessageToWindow(m_dwReturnWindowUIID, UI_MESSAGE_YNRETURN, GetUIID(), 1);
-            }
-            g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
-            break;
-        case 2:
-            if (m_iDialogType != 0) break;
-            if (m_dwReturnWindowUIID == -1)
-            {
-                SocketClient->ToGameServer()->SendFriendAddResponse(0x00, MU_C16(m_szSaveID));
-            }
-            else if (m_dwReturnWindowUIID != 0)
-            {
-                g_pWindowMgr->SendUIMessageToWindow(m_dwReturnWindowUIID, UI_MESSAGE_YNRETURN, GetUIID(), 0);
-            }
-            g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
-            break;
-        default:
-            break;
-        }
-    }
-    break;
-    default:
-        break;
-    }
-    return FALSE;
-}
-
-void CUIQuestionWindow::DoActionSub(BOOL bMessageOnly)
-{
-    if (g_pWindowMgr->GetTopWindowUIID() == GetUIID() && PressKey(VK_RETURN))
-    {
-        SendUIMessage(UI_MESSAGE_BTNLCLICK, 1, 0);
-    }
-
-    m_AddButton.DoAction(bMessageOnly);
-    m_CancelButton.DoAction(bMessageOnly);
-}
-
-void CUIQuestionWindow::SaveID(const wchar_t* pszText)
-{
-    if (pszText[0] != '\0')
-    {
-        wcsncpy(m_szSaveID, pszText, MAX_USERNAME_SIZE);
-        m_szSaveID[MAX_USERNAME_SIZE] = '\0';
-    }
-    else
-        m_szSaveID[0] = '\0';
-}
 
 void CUIFriendMenu::Reset()
 {

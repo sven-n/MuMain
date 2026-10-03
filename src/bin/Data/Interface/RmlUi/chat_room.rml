@@ -1,0 +1,41 @@
+<rml>
+<head>
+    <title>Chat Room</title>
+    <link type="text/rcss" href="base.rcss"/>
+    <link type="text/rcss" href="chat_room.rcss"/>
+    <link type="text/template" href="window_shell.rml"/>
+</head>
+<!-- One document per open room: LoadThemedDocument()'s per-window overload rewrites the
+     data-model name below to this window's own, so two rooms never share a model. The spike that
+     settled this is in the CUI-05 task notes -- data-for keys DOM state by array index, so rooms
+     sharing a repeater would hand a focused field to a different room when an earlier one closed.
+
+     Handlers are data-event-*, never on*: on* is RmlUi's inline script event and this build has no
+     script interpreter, so those bind to nothing at all and fail silently.
+
+     Frame, header rail, title and drag anchor come from the shared window_shell template; the
+     markup below is spliced into its #content, so a position here is relative to the content well
+     and the window buttons reach back out with negative offsets each theme supplies. -->
+<body template="window_shell" data-model="chat_room">
+    <div id="window_controls">
+        <button id="btn_minimize" data-event-click="room_action('minimize')"></button>
+        <button id="btn_maximize" data-class-restore="maximized" data-event-click="room_action('maximize')"></button>
+        <button id="btn_close" data-event-click="room_action('close')"></button>
+    </div>
+    <div id="chat_log" class="scroll-pane" data-class-with-pals="show_pals" data-class-with-invite="show_invite">
+        <div class="line" data-for="line : lines">
+            <span class="speaker" data-class-hidden="line.speaker == ''">{{line.speaker}}</span><span class="say" data-class-t0="line.type == 0" data-class-t1="line.type == 1" data-class-t2="line.type == 2" data-class-t4="line.type == 4" data-class-t5="line.type == 5">{{line.text}}</span>
+        </div>
+    </div>
+    <div id="pal_pane" class="scroll-pane" data-class-hidden="!show_pals" data-class-with-invite="show_invite">
+        <div class="pal" data-for="pal : pals">{{pal.name}}</div>
+    </div>
+    <div id="invite_pane" class="scroll-pane" data-class-hidden="!show_invite">
+        <div class="pal" data-for="pal : invite_pals" data-class-selected="pal.name == selected_invite" data-event-click="room_action('invite_select', pal.name)" data-event-dblclick="room_action('invite_send_clicked')">{{pal.name}}</div>
+    </div>
+    <div id="footer">
+        <input id="chat_field" type="text" class="text-field" data-value="draft" data-attrif-disabled="locked"/><button id="btn_invite_send" class="btn" data-class-hidden="!show_invite" data-event-click="room_action('invite_send')">{{invite_label}}</button><button id="btn_invite" class="btn" data-event-click="room_action('invite_toggle')">{{invite_button_label}}</button>
+    </div>
+    <handle id="resize" size_target="#document" edge_margin="0px"/>
+</body>
+</rml>

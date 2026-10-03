@@ -11,6 +11,7 @@
 #include <RmlUi/Core/Types.h>
 
 #include <deque>
+#include <cstdint>
 #include <functional>
 #include <optional>
 #include <string>
@@ -117,6 +118,7 @@ namespace mu::ui::window
         std::function<void()> onPrimary;   // OK / Enter / progress-timer-elapsed
         std::function<void()> onSecondary; // fires only if secondaryLabel is set; never Esc-bound
         std::function<void()> onCancel;    // fires on the cancel button AND on Esc
+        std::function<bool()> isValid;     // expired requests are dismissed without callbacks
     };
 
     // Reusable RmlUi confirm dialog -- one document/model, one instance, shown with different
@@ -151,7 +153,12 @@ namespace mu::ui::window
         void Release();
 
         // Shows now if idle, otherwise queues (see class comment).
-        void Show(GenericDialogConfig cfg);
+        using DialogId = std::uint64_t;
+        DialogId Show(GenericDialogConfig cfg);
+        bool IsPending(DialogId id) const;
+        bool IsActive(DialogId id) const { return id != 0 && m_bActive && id == m_ActiveId; }
+        void Cancel(DialogId id);
+        void SetInputText(DialogId id, const std::wstring& text);
 
         // Only meaningful while an `input` field is configured and active; reads the live typed
         // value out of the RmlUi model (Mode::Text) or the on-screen keypad buffer
@@ -199,6 +206,8 @@ namespace mu::ui::window
         void BuildRmlUi();
         void SyncRmlModel();
         void ShowNext();            // pops m_Queue (if non-empty) and opens the document
+        void Activate(GenericDialogConfig cfg, DialogId id);
+        void DismissActive();
         // Which button resolved the dialog -- dispatches to cfg.onPrimary/onSecondary/onCancel.
         enum class ClickResult { Primary, Secondary, Cancel };
         void Resolve(ClickResult which); // hides the document, invokes the chosen callback, then ShowNext()
@@ -331,7 +340,14 @@ namespace mu::ui::window
         DWORD m_dwProgressStartTime = 0;
         DWORD m_dwProgressEndTime = 0;
 
-        std::deque<GenericDialogConfig> m_Queue;
+        struct PendingDialog
+        {
+            DialogId id;
+            GenericDialogConfig config;
+        };
+        std::deque<PendingDialog> m_Queue;
+        DialogId m_NextId = 1;
+        DialogId m_ActiveId = 0;
         GenericDialogConfig m_Active;
         bool m_bActive = false;
 

@@ -38,13 +38,8 @@ enum UIWINDOWSTYPE
     UIWNDTYPE_CHAT,
     UIWNDTYPE_CHAT_READY,
     UIWNDTYPE_FRIENDMAIN,
-    UIWNDTYPE_TEXTINPUT,
-    UIWNDTYPE_QUESTION,
     UIWNDTYPE_READLETTER,
     UIWNDTYPE_WRITELETTER,
-    UIWNDTYPE_OK,
-    UIWNDTYPE_QUESTION_FORCE,
-    UIWNDTYPE_OK_FORCE
 };
 
 enum UIADDWINDOWOPTION
@@ -55,9 +50,9 @@ enum UIADDWINDOWOPTION
 
 const int UIPHOTOVIEWER_CANCONTROL = 1;
 
-class FriendWindowRmlBuilder;
 class FriendWindowViews;
 class CUIPhotoViewer;
+namespace UI::Party { class FriendShell; class ChatRoomView; class LetterReadView; class LetterWriteView; }
 
 class CUIBaseWindow : public CUIControl
 {
@@ -123,40 +118,35 @@ public:
         return TRUE;
     }
 
-    // RmlUi presentation (UI/Party/FriendWindowView.h): a window type whose HasRmlView() is true
-    // is not drawn by CUIWindowMgr::Render(); its document is built every frame from
-    // CollectRmlView() -- Render()'s frame and title bar around CollectRmlContent() -- instead.
-    virtual bool HasRmlView() const
+
+    // CUIWindowMgr::Render() for a window with an RmlUi view: RenderOver() only.
+    void RenderRmlOverlay();
+    // Native 3D this window owns, drawn after RmlUi's main context has composited rather than
+    // before it -- otherwise every panel in the frame paints over it. Reached through
+    // CUIWindowMgr::RenderOverlay3D(), and only while this window is the one in front: see there
+    // for why the others draw nothing.
+    virtual void RenderAboveRmlUi() {}
+    // A window of this family that owns an RmlUi document of its own. FriendWindowViews::Sync()
+    // drives these; nothing else of the family is drawn by the manager any more.
+    virtual bool HasSemanticView() const
     {
         return false;
     }
-    void CollectRmlView(FriendWindowRmlBuilder& view);
-    // The text field the RmlUi view shows in the given field slot (FriendWindowFieldLayout), or
-    // nullptr; the native field keeps the value, the focus requests and the Enter / Tab handling.
-    virtual CUITextInputBox* GetRmlTextField(int slot)
+    // True while one of this window's own RmlUi fields holds the keyboard, so selecting it does
+    // not steal the caret -- what the native CUITextInputBox's focus used to say.
+    virtual bool SemanticFieldHasFocus() const
     {
-        (void)slot;
-        return nullptr;
+        return false;
     }
-    // The native 3D content drawn over the RmlUi view (the letter windows' CUIPhotoViewer, their
-    // RenderOver()), or nullptr: the view leaves its box to an underlay under the native pass.
-    virtual CUIPhotoViewer* GetRmlPhoto()
+    virtual bool SyncSemanticView(bool shown)
     {
-        return nullptr;
+        (void)shown;
+        return false;
     }
-    // The photo viewer's box clipped to the window's back (reference px), which the view leaves
-    // to its underlay; false without a photo viewer or window background.
-    bool GetRmlUnderlayRect(float& left, float& top, float& right, float& bottom);
-    // CUIWindowMgr::Render() for a window with an RmlUi view: RenderOver() only.
-    void RenderRmlOverlay();
+    virtual void PullSemanticViewToFront() {}
 
 protected:
     BOOL DoMouseAction();
-    virtual void CollectRmlContent(FriendWindowRmlBuilder& view)
-    {
-        (void)view;
-    }
-
     virtual void InitControls() = 0;
 
     virtual void RenderSub() {}
@@ -218,12 +208,11 @@ public:
     CUIChatWindow();
     virtual ~CUIChatWindow();
 
-    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
-    virtual void Refresh();
-    void FocusReset()
-    {
-        m_TextInputBox.GiveFocus();
-    }
+    void Init(const wchar_t* pszTitle, DWORD dwParentID = 0) override;
+    void Refresh() override;
+    BOOL DoAction(BOOL messageOnly = FALSE) override;
+    void Maximize() override;
+    void FocusReset();
     int AddChatPal(const wchar_t* pszID, BYTE Number, BYTE Server);
     void RemoveChatPal(const wchar_t* pszID);
     void AddChatText(BYTE byIndex, const wchar_t* pszText, int iType, int iColor);
@@ -233,53 +222,34 @@ public:
     {
         return _connection;
     }
-    GUILDLIST_TEXT* GetCurrentInvitePal()
-    {
-        return m_InvitePalListBox.GetSelectedText();
-    }
+    // The invitation list's pick, by name; nullptr with nothing picked.
+    const wchar_t* GetCurrentInvitePal();
     void UpdateInvitePalList();
-    int GetShowType()
-    {
-        return m_iShowType;
-    }
+    int GetShowType();
     const wchar_t* GetChatFriend(int* piResult = NULL);
-    int GetUserCount()
-    {
-        return m_PalListBox.GetLineNum();
-    }
+    int GetUserCount();
     DWORD GetRoomNumber()
     {
         return m_dwRoomNumber;
     }
     void Lock(BOOL bFlag);
-    bool HasRmlView() const override
+    bool HasSemanticView() const override
     {
         return true;
     }
-    CUITextInputBox* GetRmlTextField(int slot) override
-    {
-        return slot == 0 ? &m_TextInputBox : nullptr;
-    }
+    bool SyncSemanticView(bool shown) override;
+    bool SemanticFieldHasFocus() const override;
+    void PullSemanticViewToFront() override;
 
 protected:
-    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
-    virtual void RenderSub();
-    virtual BOOL HandleMessage();
-    virtual void DoActionSub(BOOL bMessageOnly);
-    virtual void DoMouseActionSub();
-    void InitControls() override;
+    void InitControls() override {}
+    BOOL HandleMessage() override;
 
-protected:
-    int m_iShowType;
-    CUITextInputBox m_TextInputBox;
-    CUISimpleChatListBox m_ChatListBox;
-    CUIChatPalListBox m_PalListBox;
-    CUIButton m_InviteButton;
-    CUIChatPalListBox m_InvitePalListBox;
-    CUIButton m_CloseInviteButton;
+private:
+    void RefreshRoomTitle();
+
     DWORD m_dwRoomNumber;
-    int m_iPrevWidth;
-    wchar_t m_szLastText[MAX_CHATROOM_TEXT_LENGTH]{};
+    std::unique_ptr<UI::Party::ChatRoomView> m_View;
 };
 
 class CUIPhotoViewer : public CUIControl
@@ -332,9 +302,15 @@ public:
     virtual BOOL DoMouseAction();
     virtual void Render();
 
+    // Driven by UI::Party::PhotoViewerControl, which owns these gestures while the viewer stands
+    // behind an RmlUi document and the native press never arrives. See its header.
+    void TurnBy(float degrees);
+    void ResetView();
+    void ToggleHelp();
+
 protected:
     void RenderPhotoCharacter();
-    void RenderHelpText();
+    void ShowHelpText();
     int SetPhotoPose(int iCurrentAni, int iMoveDir = 0);
 
 protected:
@@ -366,137 +342,83 @@ public:
 class CUILetterReadWindow : public CUIBaseWindow
 {
 public:
-    CUILetterReadWindow() : m_iShowType(2) {}
-    virtual ~CUILetterReadWindow();
+    CUILetterReadWindow();
+    ~CUILetterReadWindow() override;
 
-    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
-    virtual void InitControls() {}
-    virtual void Refresh();
+    void Init(const wchar_t* pszTitle, DWORD dwParentID = 0) override;
+    void Refresh() override;
+    BOOL DoAction(BOOL messageOnly = FALSE) override;
+    void Maximize() override;
     void SetLetter(LETTERLIST_TEXT* pLetterHead, const wchar_t* pLetterText);
-    bool HasRmlView() const override
+    // The three button actions the view hands back.
+    void Reply();
+    void AskDelete();
+    // -1 for the previous letter, +1 for the next; native had two copies of these twenty lines.
+    void StepLetter(int direction);
+    bool HasSemanticView() const override
     {
         return true;
     }
-    CUIPhotoViewer* GetRmlPhoto() override
-    {
-        return m_iShowType >= 2 ? &m_Photo : nullptr;
-    }
+    bool SyncSemanticView(bool shown) override;
+    void PullSemanticViewToFront() override;
+
+
+    // Drawn in the post-RmlUi seam, not RenderOver(): the panel would cover it otherwise.
+    void RenderAboveRmlUi() override;
 
 protected:
-    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
-    virtual void RenderSub();
-    virtual void RenderOver();
-    virtual BOOL HandleMessage();
-    virtual void DoActionSub(BOOL bMessageOnly);
-    virtual void DoMouseActionSub();
+    void InitControls() override {}
+    BOOL HandleMessage() override;
 
 public:
     CUIPhotoViewer m_Photo;
 
-protected:
-    int m_iShowType;
+private:
     LETTERLIST_TEXT m_LetterHead;
-
-    CUILetterTextListBox m_LetterTextBox;
-    CUIButton m_ReplyButton;
-    CUIButton m_DeleteButton;
-    CUIButton m_CloseButton;
-    CUIButton m_PrevButton;
-    CUIButton m_NextButton;
+    std::unique_ptr<UI::Party::LetterReadView> m_View;
 };
 
 class CUILetterWriteWindow : public CUIBaseWindow
 {
 public:
-    // cppcheck-suppress uninitMemberVar
-    CUILetterWriteWindow() : m_iShowType(0), m_bIsSend(FALSE) {}
-    virtual ~CUILetterWriteWindow() {}
+    CUILetterWriteWindow();
+    ~CUILetterWriteWindow() override;
 
-    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
-
-    virtual void Refresh();
+    void Init(const wchar_t* pszTitle, DWORD dwParentID = 0) override;
+    void Refresh() override;
+    BOOL DoAction(BOOL messageOnly = FALSE) override;
+    void Maximize() override;
     void SetMailtoText(const wchar_t* pszText);
     void SetMainTitleText(const wchar_t* pszText);
     void SetMailContextText(const wchar_t* pszText);
+    void SetSendState(BOOL bFlag);
+    // The two button actions the view hands back.
+    void Send();
+    void RequestClose();
 
-    void SetSendState(BOOL bFlag)
-    {
-        m_bIsSend = bFlag;
-    }
-
-    virtual BOOL CloseCheck();
-    bool HasRmlView() const override
+    BOOL CloseCheck() override;
+    bool HasSemanticView() const override
     {
         return true;
     }
-    CUITextInputBox* GetRmlTextField(int slot) override
-    {
-        switch (slot)
-        {
-        case 0:
-            return &m_MailtoInputBox;
-        case 1:
-            return &m_TitleInputBox;
-        case 2:
-            return &m_TextInputBox;
-        default:
-            return nullptr;
-        }
-    }
-    CUIPhotoViewer* GetRmlPhoto() override
-    {
-        return m_iShowType == 1 ? &m_Photo : nullptr;
-    }
+    bool SyncSemanticView(bool shown) override;
+    bool SemanticFieldHasFocus() const override;
+    void PullSemanticViewToFront() override;
+
+
+    // Drawn in the post-RmlUi seam, not RenderOver(): the panel would cover it otherwise.
+    void RenderAboveRmlUi() override;
 
 protected:
-    void InitControls() override;
-    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
-    virtual void RenderSub();
-    virtual void RenderOver();
-    virtual BOOL HandleMessage();
-    virtual void DoActionSub(BOOL bMessageOnly);
-    virtual void DoMouseActionSub();
+    void InitControls() override {}
+    BOOL HandleMessage() override;
 
-protected:
-    int m_iShowType;
-    CUIPhotoViewer m_Photo;
-    BOOL m_bIsSend;
-    int m_iLastTabIndex;
-
-    CUITextInputBox m_MailtoInputBox;
-    CUITextInputBox m_TitleInputBox;
-    CUITextInputBox m_TextInputBox;
-    CUIButton m_SendButton;
-    CUIButton m_CloseButton;
-    CUIButton m_PrevPoseButton;
-    CUIButton m_NextPoseButton;
-};
-
-class CUITabWindow : public CUIBaseWindow
-{
 public:
-    CUITabWindow() {}
-    virtual ~CUITabWindow() {}
+    CUIPhotoViewer m_Photo;
 
-    virtual int RPos_x(int iPos_x)
-    {
-        return iPos_x + (m_iPos_x);
-    }
-    virtual int RPos_y(int iPos_y)
-    {
-        return iPos_y + (m_iPos_y);
-    }
-    virtual int RWidth()
-    {
-        return m_iWidth;
-    }
-    virtual int RHeight()
-    {
-        return m_iHeight;
-    }
-
-protected:
-    virtual void InitControls() {}
+private:
+    BOOL m_bIsSend;
+    std::unique_ptr<UI::Party::LetterWriteView> m_View;
 };
 
 class CFriendList
@@ -524,72 +446,6 @@ private:
     int m_iCurrentSortType;
     std::deque<GUILDLIST_TEXT> m_FriendList;
     std::deque<GUILDLIST_TEXT>::iterator m_FriendListIter;
-};
-
-class CUIFriendListTabWindow : public CUITabWindow
-{
-public:
-    CUIFriendListTabWindow() {}
-    virtual ~CUIFriendListTabWindow() {}
-
-    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
-    virtual void Refresh();
-    const wchar_t* GetCurrentSelectedFriend(BYTE* pNumber = NULL, BYTE* pServer = NULL);
-    DWORD GetKeyMoveListUIID()
-    {
-        return m_PalListBox.GetUIID();
-    }
-    void RefreshPalList();
-
-protected:
-    virtual void RenderSub();
-    virtual BOOL HandleMessage();
-    virtual void DoActionSub(BOOL bMessageOnly);
-    virtual void DoMouseActionSub();
-    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
-    void SyncControlLayout();
-
-protected:
-    CUIChatPalListBox m_PalListBox;
-    CUIButton m_AddFriendButton;
-    CUIButton m_DelFriendButton;
-    CUIButton m_TalkButton;
-    CUIButton m_LetterButton;
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class CUIChatRoomListTabWindow : public CUITabWindow
-{
-public:
-    CUIChatRoomListTabWindow() {}
-    virtual ~CUIChatRoomListTabWindow() {}
-
-    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
-    virtual void Refresh();
-    void AddWindow(DWORD dwUIID, const wchar_t* pszTitle);
-    void RemoveWindow(DWORD dwUIID);
-    DWORD GetCurrentSelectedWindow();
-    DWORD GetKeyMoveListUIID()
-    {
-        return m_WindowListBox.GetUIID();
-    }
-    void Reset()
-    {
-        m_WindowListBox.Clear();
-    }
-
-protected:
-    virtual void RenderSub();
-    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
-    void SyncControlLayout();
-    virtual BOOL HandleMessage();
-    virtual void DoActionSub(BOOL bMessageOnly);
-    virtual void DoMouseActionSub();
-
-public:
-    CUIWindowListBox m_WindowListBox;
-    CUIButton m_HideAllButton;
 };
 
 class CLetterList
@@ -637,190 +493,41 @@ private:
     std::map<DWORD, FS_LETTER_TEXT, std::less<DWORD>>::iterator m_LetterCacheIter;
 };
 
-class CUILetterBoxTabWindow : public CUITabWindow
-{
-public:
-    CUILetterBoxTabWindow() : m_bCheckAllState(FALSE) {}
-    virtual ~CUILetterBoxTabWindow() {}
-
-    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
-    virtual void Refresh();
-    LETTERLIST_TEXT* GetCurrentSelectedLetter();
-    DWORD GetKeyMoveListUIID()
-    {
-        return m_LetterListBox.GetUIID();
-    }
-    void RefreshLetterList();
-    void CheckAll(BOOL bCheck);
-    void PrevNextCursorMove(int iMove);
-
-protected:
-    virtual void RenderSub();
-    virtual BOOL HandleMessage();
-    virtual void DoActionSub(BOOL bMessageOnly);
-    virtual void DoMouseActionSub();
-    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
-    void SyncControlLayout();
-
-protected:
-    CUILetterListBox m_LetterListBox;
-    CUIButton m_WriteButton;
-    CUIButton m_ReadButton;
-    CUIButton m_ReplyButton;
-    CUIButton m_DeleteButton;
-    BOOL m_bCheckAllState;
-};
-
 class CUIFriendWindow : public CUIBaseWindow
 {
 public:
-    CUIFriendWindow() : m_iTabIndex(0), m_iTabMouseOverIndex(0) {}
-    virtual ~CUIFriendWindow() {}
-
-    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
-    virtual void Refresh();
+    CUIFriendWindow();
+    ~CUIFriendWindow() override;
+    void Init(const wchar_t* title, DWORD parent = 0) override;
+    void Refresh() override;
+    BOOL DoAction(BOOL messageOnly = FALSE) override;
+    void Maximize() override;
     void Reset();
     void Close();
-    void RefreshPalList()
-    {
-        m_FriendListWnd.RefreshPalList();
-    }
-
-    void AddWindow(DWORD dwUIID, const wchar_t* pszTitle)
-    {
-        m_ChatRoomListWnd.AddWindow(dwUIID, pszTitle);
-    }
-    void RemoveWindow(DWORD dwUIID)
-    {
-        m_ChatRoomListWnd.RemoveWindow(dwUIID);
-    }
-    DWORD GetCurrentSelectedWindow()
-    {
-        return m_ChatRoomListWnd.GetCurrentSelectedWindow();
-    }
-    void ResetWindow()
-    {
-        m_ChatRoomListWnd.Reset();
-    }
-
-    void RefreshLetterList()
-    {
-        m_LetterBoxWnd.RefreshLetterList();
-    }
-    LETTERLIST_TEXT* GetCurrentSelectedLetter()
-    {
-        return m_LetterBoxWnd.GetCurrentSelectedLetter();
-    }
-    void PrevNextCursorMove(int iMove)
-    {
-        m_LetterBoxWnd.PrevNextCursorMove(iMove);
-    }
-
-    void SetTabIndex(int iIndex)
-    {
-        m_iTabIndex = iIndex;
-    }
-    int GetTabIndex()
-    {
-        return m_iTabIndex;
-    }
-    bool HasRmlView() const override
-    {
-        return true;
-    }
+    void RefreshPalList();
+    void RefreshLetterList();
+    void AddWindow(DWORD id, const wchar_t* title);
+    void RemoveWindow(DWORD id);
+    void ResetWindow();
+    DWORD GetCurrentSelectedWindow();
+    LETTERLIST_TEXT* GetCurrentSelectedLetter();
+    void PrevNextCursorMove(int line);
+    void SetTabIndex(int tab);
+    int GetTabIndex();
+    bool HasSemanticView() const override { return true; }
+    bool SyncSemanticView(bool shown) override;
+    void PullSemanticViewToFront() override;
+    void RestoreSemanticLayout(int x, int y, int width, int height);
+    void RestoreSemanticMaximized();
 
 protected:
-    virtual void InitControls() {}
-    virtual void RenderSub();
-    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
-    void SyncTabLayout();
-    void RenderTabStrip();
-    virtual BOOL HandleMessage();
-    virtual void DoActionSub(BOOL bMessageOnly);
-    virtual void DoMouseActionSub();
+    void InitControls() override {}
+    BOOL HandleMessage() override;
 
-protected:
-    int m_iTabIndex;
-    int m_iTabMouseOverIndex;
-    CUIFriendListTabWindow m_FriendListWnd;
-    CUIChatRoomListTabWindow m_ChatRoomListWnd;
-    CUILetterBoxTabWindow m_LetterBoxWnd;
-};
+private:
+    float SemanticScaleRatio() const;
 
-class CUITextInputWindow : public CUIBaseWindow
-{
-public:
-    CUITextInputWindow() : m_dwReturnWindowUIID(0) {}
-    virtual ~CUITextInputWindow() {}
-
-    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
-    virtual void Refresh();
-    void SetText(const wchar_t* pszText)
-    {
-        m_TextInputBox.SetText(pszText);
-        m_TextInputBox.GiveFocus(TRUE);
-    }
-    bool HasRmlView() const override
-    {
-        return true;
-    }
-    CUITextInputBox* GetRmlTextField(int slot) override
-    {
-        return slot == 0 ? &m_TextInputBox : nullptr;
-    }
-
-protected:
-    void InitControls() override;
-    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
-    virtual void RenderSub();
-    virtual BOOL HandleMessage();
-    virtual void DoActionSub(BOOL bMessageOnly);
-    virtual void DoMouseActionSub();
-
-    void ReturnText();
-
-protected:
-    DWORD m_dwReturnWindowUIID;
-    CUITextInputBox m_TextInputBox;
-    CUIButton m_AddButton;
-    CUIButton m_CancelButton;
-};
-
-class CUIQuestionWindow : public CUIBaseWindow
-{
-public:
-    // cppcheck-suppress uninitMemberVar
-    CUIQuestionWindow(int iDialogType = 0) : m_dwReturnWindowUIID(0), m_iDialogType(iDialogType) {}
-    virtual ~CUIQuestionWindow() {}
-
-    virtual void Init(const wchar_t* pszTitle, DWORD dwParentID = 0);
-    virtual void Refresh();
-
-    void SaveID(const wchar_t* pszText);
-    bool HasRmlView() const override
-    {
-        return true;
-    }
-    // The window the answer goes to (Init()'s dwParentID; the question itself has no parent).
-    DWORD GetReturnWindowUIID() const
-    {
-        return m_dwReturnWindowUIID;
-    }
-
-protected:
-    virtual void InitControls() {}
-    void CollectRmlContent(FriendWindowRmlBuilder& view) override;
-    virtual void RenderSub();
-    virtual BOOL HandleMessage();
-    virtual void DoActionSub(BOOL bMessageOnly);
-
-protected:
-    DWORD m_dwReturnWindowUIID;
-    int m_iDialogType; // 0: Y/N, 1: OK
-    wchar_t m_szCaption[2][MAX_TEXT_LENGTH + 1];
-    wchar_t m_szSaveID[MAX_USERNAME_SIZE + 1];
-    CUIButton m_AddButton;
-    CUIButton m_CancelButton;
+    std::unique_ptr<UI::Party::FriendShell> m_Shell;
 };
 
 typedef std::map<DWORD, CUIBaseWindow*, std::less<DWORD>> WndMap;
@@ -836,17 +543,21 @@ public:
                     int iOption = UIADDWND_NULL);
     void RemoveWindow(DWORD dwUIID);
     void Render();
-    // Builds the RmlUi documents of the windows with an RmlUi view (CUIBaseWindow::HasRmlView())
-    // and shows them in the draw order Render() uses; hides them all when !familyShown.
+    // The family's native 3D, drawn after RmlUi has composited -- for the front window only.
+    void RenderOverlay3D();
+    // Shows the family's documents in the draw order Render() uses; hides them all when
+    // !familyShown.
     void SyncRmlViews(bool familyShown);
-    // True while an RmlUi input of the window holds the keyboard: the native field handed its
-    // focus to the input (FriendWindowView::SyncFields()), so CUITextInputBox no longer reports it.
+    // True while an RmlUi input of the window holds the keyboard, so selecting it leaves the caret
+    // where it is.
     bool RmlFieldHasFocus(DWORD dwUIID) const;
     void DoAction();
     void ShowHideWindow(DWORD dwUIID, BOOL bShowWindow);
     void HideAllWindow(BOOL bHide, BOOL bMainClose = FALSE);
     void HideAllWindowClear();
     CUIBaseWindow* GetWindow(DWORD dwUIID);
+    // The window of this family whose own RmlUi field holds the keyboard, or nullptr.
+    CUIBaseWindow* GetFieldFocusWindow() const;
     BOOL IsWindow(DWORD dwUIID);
     CUIFriendWindow* GetFriendMainWindow()
     {
@@ -905,15 +616,6 @@ public:
         return m_bServerEnable;
     }
 
-    void SetAddFriendWindow(DWORD dwAddWindowUIID)
-    {
-        m_dwAddWindowUIID = dwAddWindowUIID;
-    }
-    DWORD GetAddFriendWindow()
-    {
-        return m_dwAddWindowUIID;
-    }
-
     void AddForceTopWindowList(DWORD dwWindowUIID);
     void RemoveForceTopWindowList(DWORD dwWindowUIID);
     BOOL IsForceTopWindow(DWORD dwWindowUIID);
@@ -959,7 +661,6 @@ protected:
 
     BOOL m_bServerEnable;
     int m_iFriendMainWindowTitleNumber;
-    DWORD m_dwAddWindowUIID;
 };
 
 class CUIFriendMenu : public CUIBaseWindow

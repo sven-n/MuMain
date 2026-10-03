@@ -1,0 +1,107 @@
+/* Modern theme for the friends shell. The forged-iron frame, the header rail and the drag anchor
+   come from the shared window_shell template, which is pure CSS here and already stretches to any
+   size -- no sprite re-slicing is needed, unlike legacy. This file supplies the shell's own parts:
+   a flat tab strip, token-coloured list rows and compact action buttons. RmlUi owns layout and
+   scrolling; only the usable viewport height and the native photo masks are bound. */
+
+/* window_shell's body carries base.rcss's .center-both, whose transform:translate(-50%,-50%) the
+   template cancels through a .window-shell-positioned class toggle. Two single-class selectors
+   decide that by link order, which is too fragile to leave a whole window resting on: a leftover
+   transform moves where the panel is drawn without moving the boxes its children hit-test
+   against, so everything without a stacking context of its own stops taking clicks. An id beats
+   both classes outright. */
+#panel { transform: none; }
+/* Roomier than legacy by this theme's character, but held near the same proportions: legacy is
+   sized from CUIFriendWindow::Init()'s own 250x170. This theme's window_shell body carries no
+   `native-text` class and its sibling dialogs size in dp, so text stays dp here -- the rem rule
+   legacy follows does not apply. */
+#panel { width: 340dp; height: 240dp; min-width: 300dp; min-height: 200dp; max-width: 100%; max-height: 100%; font-family: "token(font-body)"; font-size: 10dp; color: token(text-primary); }
+
+/* Full-bleed the content well horizontally so a five-column mail row has room, and drop the
+   template's own has-title padding: top:0 makes every child's own top panel-relative, which the
+   header-rail clearance below is measured in.
+
+   pointer-events must go back to none here. base.rcss gives `body` none and window_shell.rcss
+   makes this well the one `auto` region, which is right for a dialog whose well sits below the
+   rail -- but this well now covers the whole panel, so leaving it `auto` puts it on top of the
+   header rail and the window stops being draggable. Each interactive part opts back in instead. */
+.window-shell-content, .window-shell-content.has-title
+{
+	left: 12dp;
+	right: 12dp;
+	top: 0;
+	bottom: 14dp;
+	padding: 0;
+	display: block;
+	pointer-events: none;
+}
+
+div { display: block; }
+button { font-family: "token(font-body)"; font-size: 10dp; color: token(text-secondary); cursor: pointer; pointer-events: auto; }
+
+/* Reaches back out over the rail to the panel's own top-right corner. Glyph buttons rather than
+   the legacy theme's sprite set -- this theme draws no window art of its own. z-index because the
+   rail behind it is a drag handle that claims pointer events of its own. */
+/* Centred in the rail, which this theme puts at top 7dp with a height of 38dp. */
+#window_controls { position: absolute; right: -2dp; top: 17dp; z-index: 10; pointer-events: auto; }
+#window_controls button { display: inline-block; box-sizing: border-box; width: 16dp; height: 16dp; margin-left: 4dp; padding: 0; line-height: 14dp; text-align: center; font-size: 12dp; color: token(text-muted); background-color: token(surface-control); border: 1dp token(border-inner); }
+#window_controls button:hover { color: token(text-primary); border-color: token(border-hover); }
+#btn_minimize:before { content: "-"; }
+#btn_maximize:before { content: "+"; }
+#btn_maximize.restore:before { content: "="; }
+#btn_close:before { content: "x"; }
+#btn_close:hover { color: token(accent-crimson-hover); border-color: token(accent-crimson); }
+
+/* Clear of the header rail (top 7dp, 38dp tall). */
+#tabs { position: absolute; left: 0; right: 0; top: 42dp; white-space: nowrap; }
+#tabs .btn { width: 24%; margin-right: 1%; }
+/* On the tab row, right-aligned, where RenderTabStrip() drew it. */
+#reject { position: absolute; right: 0; top: 42dp; height: 18dp; line-height: 18dp; padding: 0; background-color: transparent; border: 0; font-size: 9dp; }
+
+/* base.rcss's .btn is the absolute 108x30 hero button; a list window's rows need a compact
+   in-flow one, so the box is restated here while the palette stays this theme's own. border-box
+   because this engine is content-box by default, where a percentage width plus padding and border
+   overflows the row and drops the last button out of the window. */
+.btn { position: relative; display: inline-block; box-sizing: border-box; width: auto; height: 18dp; padding: 0 3dp; line-height: 16dp; vertical-align: top; text-align: center; overflow: hidden; pointer-events: auto; background-color: token(surface-raised); border: 1dp token(border-inner); decorator: none; }
+.btn:hover { background-color: token(surface-control); border-color: token(border-hover); color: token(text-primary); }
+#tabs .btn.selected { color: token(accent-gold); border-bottom-color: token(border-selected); }
+.headers .sorted { color: token(accent-gold); }
+
+.check { display: inline-block; box-sizing: border-box; width: 8dp; height: 8dp; margin-right: 4dp; margin-top: 5dp; background-color: token(surface-recessed); border: 1dp token(border-inner); }
+.checked .check { background-color: token(accent-gold); border-color: token(border-selected); }
+
+.page { position: absolute; left: 0; right: 0; top: 66dp; bottom: 0; }
+.headers { position: absolute; left: 0; right: 0; top: 0; height: 18dp; line-height: 18dp; white-space: nowrap; border-bottom: 1dp token(border-rail); }
+.headers button { display: inline-block; box-sizing: border-box; height: 17dp; padding: 0 3dp; line-height: 17dp; text-align: left; overflow: hidden; background-color: transparent; border: 0; font-size: 9dp; color: token(text-muted); }
+.headers button:hover { color: token(text-secondary); }
+.scroll-pane { position: absolute; left: 0; right: 0; top: 19dp; bottom: 24dp; overflow: hidden scroll; background-color: token(surface-recessed); border: 1dp token(border-recessed); pointer-events: auto; }
+
+.row { height: 16dp; line-height: 16dp; white-space: nowrap; overflow: hidden; cursor: pointer; }
+.row:hover { background-color: token(surface-control); }
+.row.selected { background-color: token(surface-raised); color: token(accent-gold); }
+.row span { display: inline-block; vertical-align: top; overflow: hidden; }
+.row .check { margin-top: 4dp; }
+.unread { color: token(text-primary); }
+/* A dot, not the native mail sprite: this theme draws no legacy window art. */
+.row .read_state { width: 6dp; height: 6dp; margin-top: 5dp; margin-left: 4dp; background-color: token(accent-gold); }
+.row .read_state.read { background-color: token(text-disabled); }
+
+.friend_columns .name { width: 62%; }
+.friend_columns .server { width: 38%; color: token(text-muted); }
+.mail_columns .check_column { display: inline-block; box-sizing: border-box; width: 7%; height: 16dp; padding: 0; vertical-align: top; background-color: transparent; border: 0; }
+.mail_columns .sender { width: 24%; }
+.mail_columns .date { width: 24%; color: token(text-muted); }
+.mail_columns .subject { width: 34%; }
+.mail_columns .read_state { width: 11%; }
+
+.actions { position: absolute; left: 0; right: 0; bottom: 0; height: 22dp; white-space: nowrap; }
+/* Four across, deliberately short of 100%: an inline row that totals exactly the container width
+   wraps its last button out of sight. The .rml also keeps these tags adjacent, since collapsed
+   whitespace between inline-blocks counts toward the line too. */
+.actions .btn { width: 23%; margin-right: 1%; font-size: 9dp; }
+.actions .btn.wide { width: 47%; }
+
+/* Reaches back out to the panel's own bottom-right corner. */
+#resize { display: block; position: absolute; right: -2dp; bottom: -8dp; width: 10dp; height: 10dp; z-index: 10; pointer-events: auto; box-sizing: border-box; background-color: token(surface-control); border-right: 2dp token(accent-steel); border-bottom: 2dp token(accent-steel); cursor: resize; }
+#resize:hover { border-right-color: token(accent-steel-hover); border-bottom-color: token(accent-steel-hover); }
+

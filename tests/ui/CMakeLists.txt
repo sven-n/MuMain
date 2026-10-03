@@ -199,6 +199,20 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME rml_friend_window_identity_tests
+    SOURCES test_rml_friend_window_identity.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME generic_dialog_lifetime_tests
+    SOURCES
+        test_generic_dialog_lifetime.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
     NAME rml_document_scene_tests
     SOURCES
         test_rml_document_scene.cpp

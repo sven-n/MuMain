@@ -1,0 +1,43 @@
+<rml>
+<head>
+    <title>Write Letter</title>
+    <link type="text/rcss" href="base.rcss"/>
+    <link type="text/rcss" href="letter_write.rcss"/>
+    <link type="text/template" href="window_shell.rml"/>
+</head>
+<!-- The whole window is drawn here, in the main context, like every other window of this family.
+     The panel paints its full width: the portrait composites after this context, through the seam
+     MuRenderer::SetPostRmlUiCallback opens (UI::RmlBridge::OverlayRender), so it stands on the
+     panel rather than under it and needs no opening cut for it.
+
+     That seam is above the whole context, not at this window's own depth, so only the window in
+     front draws its character -- CUIWindowMgr::RenderOverlay3D() picks it. Behind, #photo_slot
+     shows its empty well until the window is brought forward again.
+
+     #photo_slot reserves and paints the well: RCSS decides where the portrait sits and C++ tells
+     the native CUIPhotoViewer to follow that box. It also carries the viewer's input, since a
+     press over a document never reaches the legacy mouse globals -- see PhotoViewerControl.h.
+     #photo_help is the hit area for the "?" the viewer itself draws. #frame_fill is the panel's own
+     fill; each theme decides whether it needs it. #drag_strip is the title strip, since
+     window_shell's rail is the banner art's full height and reaches over the content.
+
+     Handlers are data-event-*, never on*: on* is RmlUi's inline script event and this build has no
+     script interpreter, so those bind to nothing at all and fail silently. -->
+<body template="window_shell" data-model="letter_write">
+    <div id="frame_fill"></div>
+    <div id="drag_strip"></div>
+    <div id="window_controls">
+        <button id="btn_minimize" data-event-click="letter_action('minimize')"></button>
+        <button id="btn_close_x" data-event-click="letter_action('close')"></button>
+    </div>
+    <div id="rows">
+        <div class="row"><span class="label">{{receiver_label}}</span><input id="mailto_field" type="text" class="text-field" data-value="mailto" maxlength="10"/></div>
+        <div class="row"><span class="label">{{subject_label}}</span><input id="subject_field" type="text" class="text-field" data-value="subject" maxlength="60"/></div>
+    </div>
+    <div id="body_wrap"><textarea id="body_field" class="text-field" data-value="body"></textarea></div>
+    <div id="photo_slot"><div id="photo_help"></div></div>
+    <div id="footer">
+        <button class="btn" data-class-disabled="sending" data-event-click="letter_action('send')">{{send_label}}</button><button class="btn" data-event-click="letter_action('close')">{{close_label}}</button><button class="btn pose" data-event-click="letter_action('prev_pose')">{{prev_pose_label}}</button><button class="btn pose" data-event-click="letter_action('next_pose')">{{next_pose_label}}</button>
+    </div>
+</body>
+</rml>

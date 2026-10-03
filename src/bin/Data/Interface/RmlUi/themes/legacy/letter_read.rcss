@@ -1,0 +1,75 @@
+/* The foreground of a letter being read: its own chrome, content and buttons, all in the main
+   context like every other window of this family.
+
+   font-size: 1rem, never dp -- this theme declares NativeTextSize and window_shell's body carries
+   `native-text`, so the root size is already the original's text size. */
+
+@spritesheet lr-size-sheet { src: "../../../win_size.jpg"; lr-minimize: 0px 0px 9px 9px; lr-close: 0px 9px 9px 9px; }
+@spritesheet lr-button-sheet { src: "../../../win_button.tga"; lr-button: 0px 0px 49px 16px; lr-button-inner: 6px 4px 37px 8px; }
+
+/* An id beats .center-both's own transform, which window_shell cancels through a class toggle that
+   two single-class selectors decide by link order. */
+#panel { transform: none; }
+#panel { width: 370dp; height: 250dp; min-width: 330dp; min-height: 210dp; max-width: 100%; max-height: 100%; font-family: "token(font-body)"; font-size: 1rem; color: token(text-primary); }
+
+/* window_shell.rcss draws its caps with image(), correct at the 230dp the dialogs are locked to
+   and distorting the border art at any other width. Same assets, stretch-safe inner rects, drawn
+   as ninepatches. Scoped to this document. */
+@spritesheet lx-cap-top-sheet    { src: "../../../newui_msgbox_top.tga";    lx-cap-top:    0px 0px 230px 67px; lx-cap-top-inner:    12px 12px 206px 43px; }
+@spritesheet lx-cap-middle-sheet { src: "../../../newui_msgbox_middle.tga"; lx-cap-middle: 0px 0px 230px 15px; lx-cap-middle-inner: 12px  4px 206px  7px; }
+@spritesheet lx-cap-bottom-sheet { src: "../../../newui_msgbox_bottom.tga"; lx-cap-bottom: 0px 0px 230px 50px; lx-cap-bottom-inner: 12px 12px 206px 26px; }
+@spritesheet lx-back-sheet       { src: "../../../newui_msgbox_back.jpg";   lx-back:       0px 0px 222px 250px; lx-back-inner:       8px  8px 206px 234px; }
+@spritesheet lx-banner-sheet     { src: "../../../newui_Message_03.tga";    lx-banner:     0px 0px 230px 67px; lx-banner-inner:     20px 12px 190px 43px; }
+
+.window-shell-sprite-top    { height: 46dp; decorator: ninepatch(lx-cap-top, lx-cap-top-inner); }
+.window-shell-sprite-bottom { height: 40dp; decorator: ninepatch(lx-cap-bottom, lx-cap-bottom-inner); }
+.window-shell-header-rail   { height: 46dp; decorator: ninepatch(lx-banner, lx-banner-inner); }
+/* Full width: the portrait composites after the main context now, so the panel no longer has to
+   leave its column open for it. */
+.window-shell-sprite-back   { decorator: ninepatch(lx-back, lx-back-inner); }
+.window-shell-sprite-middle { top: 46dp; bottom: 40dp; decorator: ninepatch(lx-cap-middle, lx-cap-middle-inner); }
+/* This theme needs no extra fill: the layers above are the panel. */
+#frame_fill { display: none; }
+/* Only this strip drags. The rail's own 67dp is the banner art's height and reaches down over the
+   content, so a press on a label would otherwise drag the window from there. */
+#drag_strip { position: absolute; left: -12dp; right: -12dp; top: 0; height: 28dp; pointer-events: auto; }
+
+.window-shell-content, .window-shell-content.has-title
+{
+	left: 12dp;
+	right: 12dp;
+	top: 0;
+	bottom: 22dp;
+	padding: 0;
+	display: block;
+	pointer-events: none;
+}
+
+div { display: block; }
+button { font-family: "token(font-body)"; font-size: 1rem; color: token(text-primary); cursor: pointer; pointer-events: auto; }
+
+#window_controls { position: absolute; right: -4dp; top: 8dp; z-index: 10; pointer-events: auto; }
+#window_controls button { display: inline-block; width: 9dp; height: 9dp; margin-left: 5dp; padding: 0; box-sizing: border-box; }
+#btn_minimize { decorator: image(lr-minimize); }
+#btn_close_x { decorator: image(lr-close); }
+
+.btn { position: relative; display: inline-block; box-sizing: border-box; width: auto; height: 16dp; padding: 0 3dp; line-height: 16dp; vertical-align: top; text-align: center; overflow: hidden; pointer-events: auto; decorator: ninepatch(lr-button, lr-button-inner); }
+.btn:hover { image-color: rgba(255, 255, 255, 220); }
+
+/* "Sender: name  date time", the line RenderSub() drew across the top of the body. */
+#header { position: absolute; left: 0; right: 0; top: 48dp; height: 14dp; line-height: 14dp; padding: 0 3dp; white-space: nowrap; overflow: hidden; pointer-events: auto; background-color: rgb(106, 97, 88); }
+
+#body_pane { position: absolute; left: 0; right: 124dp; top: 64dp; bottom: 22dp; overflow: hidden scroll; background-color: rgba(0, 0, 0, 179); pointer-events: auto; }
+.line { padding: 0 4dp; min-height: 13dp; line-height: 13dp; }
+
+/* Reserved for the native CUIPhotoViewer; C++ reads this box and moves the viewer onto it.
+   Between the 67dp top cap and the 50dp bottom one, so neither paints over it. */
+#photo_slot { position: absolute; right: 0; width: 119dp; top: 48dp; bottom: 22dp; background-color: rgba(0, 0, 0, 179); pointer-events: auto; cursor: move; }
+/* The hit area for the "?" the native viewer draws at its own bottom-left corner -- it owns
+   the pixels, this owns the click. See PhotoViewerControl.h. */
+#photo_help { position: absolute; left: 1dp; bottom: 1dp; width: 16dp; height: 16dp; pointer-events: auto; cursor: pointer; }
+
+#footer { position: absolute; left: 0; right: 0; bottom: 0; height: 18dp; white-space: nowrap; }
+#footer .btn { width: 21%; margin-right: 1%; }
+#footer .btn.narrow { width: 15%; }
+

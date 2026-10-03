@@ -242,10 +242,7 @@ void CGenericConfirmDialog::Release()
     if (g_pNewUI3DRenderMng)
         g_pNewUI3DRenderMng->Remove3DRenderObj(this);
 
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
-    HideChrome();
-    m_bActive = false;
+    DismissActive();
     m_Queue.clear();
 }
 
@@ -263,17 +260,26 @@ namespace
 
 }
 
-void CGenericConfirmDialog::Show(GenericDialogConfig cfg)
+CGenericConfirmDialog::DialogId CGenericConfirmDialog::Show(GenericDialogConfig cfg)
 {
-    // Protects a pending dialog from being silently overwritten -- e.g. a network-pushed guild
-    // invite arriving while a quest-giveup confirm is already open (see class comment).
+    if (cfg.isValid && !cfg.isValid())
+        return 0;
+
+    const DialogId id = m_NextId++;
     if (m_bActive)
     {
-        m_Queue.push_back(std::move(cfg));
-        return;
+        m_Queue.push_back({id, std::move(cfg)});
+        return id;
     }
 
+    Activate(std::move(cfg), id);
+    return id;
+}
+
+void CGenericConfirmDialog::Activate(GenericDialogConfig cfg, DialogId id)
+{
     m_Active = std::move(cfg);
+    m_ActiveId = id;
     m_bActive = true;
     m_bPrimaryClicked = false;
     m_bSecondaryClicked = false;
@@ -304,42 +310,69 @@ void CGenericConfirmDialog::Show(GenericDialogConfig cfg)
 
 void CGenericConfirmDialog::ShowNext()
 {
-    if (m_Queue.empty())
+    while (!m_Queue.empty())
     {
-        m_bActive = false;
+        PendingDialog next = std::move(m_Queue.front());
+        m_Queue.pop_front();
+        if (next.config.isValid && !next.config.isValid())
+            continue;
+        Activate(std::move(next.config), next.id);
         return;
     }
+    m_bActive = false;
+    m_ActiveId = 0;
+}
 
-    m_Active = std::move(m_Queue.front());
-    m_Queue.pop_front();
-    m_bPrimaryClicked = false;
-    m_bSecondaryClicked = false;
-    m_bCancelClicked = false;
-    m_KeypadBuffer.clear();
-    m_KeypadMapping.clear();
-    m_bItem3DDebugLogged = false;
-
-    if (m_Active.input && m_Active.input->mode == GenericDialogConfig::InputField::Mode::NumericKeypad)
-        m_KeypadMapping = ShuffledDigits();
-
-    if (m_Active.progress)
-    {
-        m_dwProgressStartTime = timeGetTime();
-        m_dwProgressEndTime = m_dwProgressStartTime + m_Active.progress->elapseMs;
-    }
-
-    ShowChrome();
+void CGenericConfirmDialog::DismissActive()
+{
     if (m_pRmlDoc)
     {
-        SyncRmlModel();
-        m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
-        m_pRmlDoc->PullToFront();
-        ApplyInputFieldConfig(InitialInputText());
+        if (auto* field = m_pRmlDoc->GetElementById("gcd_input"))
+            field->Blur();
+        m_pRmlDoc->Hide();
     }
+    HideChrome();
+    m_RmlBinder.GetModel().inputValue.clear();
+    m_RmlBinder.MarkDirty("input_value");
+    m_Active = {};
+    m_ActiveId = 0;
+    m_bActive = false;
+}
+
+bool CGenericConfirmDialog::IsPending(DialogId id) const
+{
+    return IsActive(id) || std::any_of(m_Queue.begin(), m_Queue.end(),
+        [id](const PendingDialog& entry) { return entry.id == id; });
+}
+
+void CGenericConfirmDialog::Cancel(DialogId id)
+{
+    if (id == 0)
+        return;
+    std::erase_if(m_Queue, [id](const PendingDialog& entry) { return entry.id == id; });
+    if (IsActive(id))
+    {
+        DismissActive();
+        ShowNext();
+    }
+}
+
+void CGenericConfirmDialog::SetInputText(DialogId id, const std::wstring& text)
+{
+    if (!IsActive(id) || !m_Active.input ||
+        m_Active.input->mode != GenericDialogConfig::InputField::Mode::Text)
+        return;
+    const auto value = text.substr(0, static_cast<size_t>(std::max(m_Active.input->maxLength, 0)));
+    ApplyInputFieldConfig(StringUtils::WideToNarrow(value.c_str()));
 }
 
 void CGenericConfirmDialog::Resolve(ClickResult which)
 {
+    if (m_Active.isValid && !m_Active.isValid())
+    {
+        Cancel(m_ActiveId);
+        return;
+    }
     m_bKeepOpenRequested = false;
 
     // Move out before invoking -- the callback may itself call Show() (e.g. chaining a follow-up
@@ -361,19 +394,7 @@ void CGenericConfirmDialog::Resolve(ClickResult which)
         return;
     }
 
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
-    HideChrome();
-
-    // Clear the field so a later dialog never inherits this one's typed value. No shared native
-    // widget/IME state to release any more -- #gcd_input is this document's own element, and
-    // m_pRmlDoc->Hide() above already dropped its focus (Context::UnfocusDocument()).
-    if (cfg.input && cfg.input->mode == GenericDialogConfig::InputField::Mode::Text)
-    {
-        m_RmlBinder.GetModel().inputValue.clear();
-        m_RmlBinder.MarkDirty("input_value");
-    }
-
+    DismissActive();
     ShowNext();
 }
 
@@ -478,6 +499,12 @@ bool CGenericConfirmDialog::Update()
 {
     if (!m_bActive)
         return true;
+
+    if (m_Active.isValid && !m_Active.isValid())
+    {
+        Cancel(m_ActiveId);
+        return true;
+    }
 
     SyncCanvasTop();
     SyncBackgroundPanel();

@@ -7,6 +7,8 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/Widgets/UIControls.h"
 #include "UI/Scaling/UITransform.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlOverlayRender.h"
 
 using mu::ui::window::CheckMouseIn;   // WindowCommon.h
 
@@ -32,6 +34,15 @@ bool mu::ui::window::CFriendWindow::Create(CManager* pNewUIMng)
     m_pFriendWindowMgr = new CUIWindowMgr;
     m_pFriendWindowMgr->Reset();
 
+    // The letters' portraits composite after RmlUi, so a letter's own panel no longer covers
+    // them. One entry for the family: the manager walks its own arrange order inside it.
+    UI::RmlBridge::OverlayRender::Register(this,
+                                           [this]
+                                           {
+                                               if (m_pFriendWindowMgr && IsVisible())
+                                                   m_pFriendWindowMgr->RenderOverlay3D();
+                                           });
+
     GetFriendList()->ClearFriendList();
     GetLetterList()->ClearLetterList();
     GetFriendMenu()->Reset();
@@ -43,6 +54,7 @@ bool mu::ui::window::CFriendWindow::Create(CManager* pNewUIMng)
 
 void mu::ui::window::CFriendWindow::Reset()
 {
+    m_Dialogs.Reset();
     m_pFriendWindowMgr->Reset();
 
     GetFriendList()->ClearFriendList();
@@ -52,6 +64,8 @@ void mu::ui::window::CFriendWindow::Reset()
 
 void mu::ui::window::CFriendWindow::Release()
 {
+    UI::RmlBridge::OverlayRender::Unregister(this);
+    m_Dialogs.Reset();
     SAFE_DELETE(m_pFriendWindowMgr);
     if (m_pNewUIMng)
     {
@@ -80,19 +94,6 @@ bool mu::ui::window::CFriendWindow::UpdateMouseEvent()
         CUIFriendWindow* pMainWnd = m_pFriendWindowMgr->GetFriendMainWindow();
         if (pMainWnd)
         {
-            const int maxY = std::max(static_cast<int>(UI::Scaling::FloatingWorkspaceContentHeight(
-                                          WindowWidth, WindowHeight))
-                                          - pMainWnd->GetHeight(),
-                                      0);
-            if (pMainWnd->GetPosition_y() < 0)
-            {
-                pMainWnd->SetPosition(pMainWnd->GetPosition_x(), 0);
-            }
-            if (pMainWnd->GetPosition_y() > maxY)
-            {
-                pMainWnd->SetPosition(pMainWnd->GetPosition_x(), maxY);
-            }
-
             if (CheckMouseIn(pMainWnd->GetPosition_x(), pMainWnd->GetPosition_y(), pMainWnd->GetWidth(),
                              pMainWnd->GetHeight()) == true)
             {
@@ -110,16 +111,26 @@ bool mu::ui::window::CFriendWindow::UpdateMouseEvent()
 
 bool mu::ui::window::CFriendWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_FRIEND) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_FRIEND) == false)
+        return true;
+    if (mu::ui::window::IsPress(VK_ESCAPE) == false)
+        return true;
+
+    // Escape closes the window being typed in, and the whole family otherwise. CChatInputBox sets
+    // the same precedent for the main chat line: the window owning the focused field takes the key
+    // rather than letting it fall through to something larger.
+    if (m_pFriendWindowMgr != nullptr)
     {
-        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
+        if (auto* typing = m_pFriendWindowMgr->GetFieldFocusWindow())
         {
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_FRIEND);
+            m_pFriendWindowMgr->SendUIMessage(UI_MESSAGE_HIDE, typing->GetUIID(), 0);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
     }
-    return true;
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_FRIEND);
+    PlayBuffer(SOUND_CLICK01);
+    return false;
 }
 
 bool mu::ui::window::CFriendWindow::Update()
@@ -127,6 +138,23 @@ bool mu::ui::window::CFriendWindow::Update()
     // The windows' RmlUi documents (FriendWindowView.h), also while the family is hidden.
     if (m_pFriendWindowMgr)
         m_pFriendWindowMgr->SyncRmlViews(IsVisible());
+
+    // CManager::UpdateKeyEvent() hands keys only to the window whose GetRelatedWnd() matches the
+    // focused handle, and it reports a focused RmlUi <input> as RmlUiRuntime's own address.
+    // Claiming that address while one of this family's fields has the keyboard is what lets
+    // Escape arrive at all while the player is typing -- the same move CChatInputBox makes for
+    // the main chat line. Without it the key is simply swallowed.
+    const HWND hRmlFocus = reinterpret_cast<HWND>(&RmlUiRuntime::Instance());
+    const bool typing = m_pFriendWindowMgr != nullptr && m_pFriendWindowMgr->GetFieldFocusWindow() != nullptr;
+    if (typing)
+    {
+        if (GetRelatedWnd() != hRmlFocus)
+            SetRelatedWnd(hRmlFocus);
+    }
+    else if (GetRelatedWnd() != g_hWnd)
+    {
+        SetRelatedWnd(g_hWnd);
+    }
     return true;
 }
 

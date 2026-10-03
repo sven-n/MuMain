@@ -106,7 +106,10 @@ constexpr DocumentPlacement Placements[] = {
     {"character_info.rml", 5.1f, MainScene},
     {"mu_helper_skill_picker.rml", 5.2f, MainScene},
     {"party_list.rml", 5.4f, MainScene},
-    {"friend_window.rml", 6.0f, MainScene}, // every friends window: CNewUIFriendWindow drew them all
+    {"friend_shell.rml", 6.0f, MainScene},
+    {"chat_room.rml", 6.0f, MainScene},
+    {"letter_read.rml", 6.0f, MainScene},
+    {"letter_write.rml", 6.0f, MainScene},
     {"system_log.rml", 6.05f, MainScene},
     {"chat_log.rml", 6.1f, MainScene},
     {"chat_input.rml", 6.2f, MainScene},
@@ -124,6 +127,7 @@ constexpr DocumentPlacement Placements[] = {
     // The shop's own buy dialog, above the shop it opens from.
     {"igs_buy_package.rml", 10.09f, MainScene},
     {"igs_buy_select.rml", 10.09f, MainScene},
+    {"igs_send_gift.rml", 10.09f, MainScene},
     {"kanturu_enter.rml", 10.1f, MainScene},
     {"master_level.rml", 10.1f, MainScene},
     {"master_level_bg.rml", 10.1f, MainScene},

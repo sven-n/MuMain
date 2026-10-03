@@ -1,0 +1,29 @@
+<rml>
+<head>
+	<title>IGS Send Gift</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="igs_send_gift.rcss"/>
+</head>
+<body data-model="igs_send_gift">
+	<!-- Only the two fields live here. The dialog's frame, texts and buttons are still native: the
+	     frame is the shop's own art, not the newui_msgbox family MessageBoxView draws. Same shape
+	     as igs_buy_select.rml, which moved that dialog's list and left the rest alone.
+
+	     Both counter-scale out of the dialog's root transform so their text stays at the native
+	     renderer's physical size, and both are sized in the dialog's own reference units. -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<input id="igs_gift_id" type="text" class="text-field igs-field" data-value="recipient"
+		       maxlength="10"
+		       data-style-font-size="text_px + 'px'"
+		       data-style-width="(200 * root_scale) + 'px'"
+		       data-style-height="(14 * root_scale) + 'px'"
+		       data-style-transform="'scale(' + (1 / root_scale) + ')'"/>
+		<textarea id="igs_gift_message" class="text-field igs-field igs-field-multiline" data-value="message"
+		          data-style-font-size="text_px + 'px'"
+		          data-style-width="(170 * root_scale) + 'px'"
+		          data-style-height="(65 * root_scale) + 'px'"
+		          data-style-transform="'scale(' + (1 / root_scale) + ')'"></textarea>
+	</div>
+</body>
+</rml>

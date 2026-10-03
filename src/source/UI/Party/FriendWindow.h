@@ -2,6 +2,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Party/UIWindows.h"
+#include "UI/Party/FriendDialogs.h"
 
 namespace mu::ui::window
 {
@@ -11,6 +12,7 @@ namespace mu::ui::window
     {
         CManager* m_pNewUIMng;
         CUIWindowMgr* m_pFriendWindowMgr;
+        UI::Party::FriendDialogs m_Dialogs;
 
     public:
         CFriendWindow();
@@ -27,6 +29,7 @@ namespace mu::ui::window
         float GetLayerDepth();		// 6.f
 
         void Reset();
+        UI::Party::FriendDialogs& Dialogs() { return m_Dialogs; }
 
         void SendUIMessage(int iMessage, int iParam1, int iParam2) { m_pFriendWindowMgr->SendUIMessage(iMessage, iParam1, iParam2); }
         void SendUIMessageToWindow(DWORD dwUIID, int iMessage, int iParam1, int iParam2)
@@ -56,9 +59,6 @@ namespace mu::ui::window
         void RefreshMainWndPalList() { m_pFriendWindowMgr->RefreshMainWndPalList(); }
 
         CUIFriendWindow* GetFriendMainWindow() { return m_pFriendWindowMgr->GetFriendMainWindow(); }
-        void SetAddFriendWindow(DWORD dwAddWindowUIID) { m_pFriendWindowMgr->SetAddFriendWindow(dwAddWindowUIID); }
-        DWORD GetAddFriendWindow() { return m_pFriendWindowMgr->GetAddFriendWindow(); }
-
         void RefreshMainWndChatRoomList() { m_pFriendWindowMgr->RefreshMainWndChatRoomList(); }
         void SetChatReject(BOOL bChatReject) { m_pFriendWindowMgr->SetChatReject(bChatReject); }
         BOOL GetChatReject() { return m_pFriendWindowMgr->GetChatReject(); }

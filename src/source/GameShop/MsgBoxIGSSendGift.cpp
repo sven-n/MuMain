@@ -10,6 +10,11 @@
 
 #include "MsgBoxIGSSendGiftConfirm.h"
 #include "UI/Core/WindowCommon.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core.h>
 
 CMsgBoxIGSSendGift::CMsgBoxIGSSendGift()
 {
@@ -58,25 +63,12 @@ bool CMsgBoxIGSSendGift::Create(float fPriority)
 
 void CMsgBoxIGSSendGift::InitInputBox()
 {
-    m_IDInputBox.Init(g_hWnd, IGS_ID_INPUT_TEXT_WIDTH, IGS_ID_INPUT_TEXT_HEIGHT, MAX_USERNAME_SIZE);
-    m_IDInputBox.SetPosition(GetPos().x + IGS_ID_INPUT_TEXT_POS_X, GetPos().y + IGS_ID_INPUT_TEXT_POS_Y);
-    m_IDInputBox.SetTextColor(255, 0, 0, 0);
-    m_IDInputBox.SetBackColor(255, 255, 255, 255);
-    m_IDInputBox.SetFont(g_hFont);
-    m_IDInputBox.SetTextLimit(MAX_USERNAME_SIZE);
-    m_IDInputBox.SetState(UISTATE_NORMAL);
-
-    m_MessageInputBox.SetMultiline(TRUE);
-    m_MessageInputBox.Init(g_hWnd, IGS_MESSAGE_INPUT_TEXT_WIDTH, IGS_MESSAGE_INPUT_TEXT_HEIGHT, IGS_MESSAGE_INPUT_TEXT_LINE_HEIGHT);
-    m_MessageInputBox.SetPosition(GetPos().x + IGS_MESSAGE_INPUT_TEXT_POS_X, GetPos().y + IGS_MESSAGE_INPUT_TEXT_POS_Y);
-    m_MessageInputBox.SetUseScrollbar(FALSE);
-    m_MessageInputBox.SetTextLimit(MAX_GIFT_MESSAGE_SIZE);
-    m_MessageInputBox.SetFont(g_hFont);
-    m_MessageInputBox.SetBackColor(0, 0, 0, 0);
-    m_MessageInputBox.SetState(UISTATE_NORMAL);
-    m_MessageInputBox.SetTextColor(255, 0, 0, 0);
-
-    m_IDInputBox.GiveFocus();
+    BuildRmlUi();
+    if (m_pRmlDoc)
+    {
+        if (auto* field = m_pRmlDoc->GetElementById("igs_gift_id"))
+            field->Focus();
+    }
 }
 
 void CMsgBoxIGSSendGift::Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, const wchar_t* pszName, const wchar_t* pszPrice, const wchar_t* pszPeriod)
@@ -96,6 +88,7 @@ void CMsgBoxIGSSendGift::Initialize(int iPackageSeq, int iDisplaySeq, int iPrice
 
 void CMsgBoxIGSSendGift::Release()
 {
+    DestroyRmlUi();
     CMessageBoxBase::Release();
     UnloadImages();
 }
@@ -105,14 +98,13 @@ bool CMsgBoxIGSSendGift::Update()
     m_BtnOk.Update();
     m_BtnCancel.Update();
 
-    m_IDInputBox.DoAction();
-    m_MessageInputBox.DoAction();
-
-    if (m_IDInputBox.HaveFocus() == TRUE)
-        m_IDInputBox.GetText(m_szID, MAX_USERNAME_SIZE + 1);
-
-    if (m_MessageInputBox.HaveFocus() == TRUE)
-        m_MessageInputBox.GetText(m_szMessage, MAX_GIFT_MESSAGE_SIZE);
+    // The fields are two-way bound, so the model is what the player typed.
+    const auto& model = m_RmlBinder.GetModel();
+    wcsncpy(m_szID, StringUtils::NarrowToWide(model.recipient).c_str(), MAX_USERNAME_SIZE);
+    m_szID[MAX_USERNAME_SIZE] = L'\0';
+    wcsncpy(m_szMessage, StringUtils::NarrowToWide(model.message).c_str(), MAX_GIFT_MESSAGE_SIZE - 1);
+    m_szMessage[MAX_GIFT_MESSAGE_SIZE - 1] = L'\0';
+    SyncRmlModel();
 
     if (mu::ui::window::IsPress(VK_TAB) == true)
     {
@@ -131,9 +123,6 @@ bool CMsgBoxIGSSendGift::Render()
     RenderFrame();
     RenderTexts();
     RenderButtons();
-
-    m_IDInputBox.Render();
-    m_MessageInputBox.Render();
 
     DisableAlphaBlend();
     return true;
@@ -263,20 +252,74 @@ void CMsgBoxIGSSendGift::RenderButtons()
     m_BtnCancel.Render();
 }
 
+// Tab walks the two fields, as it did when they were native boxes.
 void CMsgBoxIGSSendGift::ChangeInputBoxFocus()
 {
-    if (m_IDInputBox.HaveFocus() == TRUE)
-    {
-        m_MessageInputBox.GiveFocus();
-    }
-    else if (m_MessageInputBox.HaveFocus() == TRUE)
-    {
-        m_IDInputBox.GiveFocus();
-    }
-    else
-    {
-        m_IDInputBox.GiveFocus();
-    }
+    if (!m_pRmlDoc)
+        return;
+    const char* next = FieldHasFocus("igs_gift_id") ? "igs_gift_message" : "igs_gift_id";
+    if (auto* field = m_pRmlDoc->GetElementById(next))
+        field->Focus();
+}
+
+bool CMsgBoxIGSSendGift::FieldHasFocus(const char* id) const
+{
+    auto* field = m_pRmlDoc ? m_pRmlDoc->GetElementById(id) : nullptr;
+    return field != nullptr && field->IsPseudoClassSet("focus");
+}
+
+void CMsgBoxIGSSendGift::BuildRmlUi()
+{
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    const bool created = m_RmlBinder.Create(context, "igs_send_gift",
+        [](Rml::DataModelConstructor& c, SendGiftRmlModel& model)
+        {
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+            c.Bind("root_scale", &model.rootScale);
+            c.Bind("text_px", &model.textPx);
+            c.Bind("recipient", &model.recipient);
+            c.Bind("message", &model.message);
+        });
+    if (created)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(context, "Data/Interface/RmlUi/igs_send_gift.rml");
+    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+}
+
+void CMsgBoxIGSSendGift::DestroyRmlUi()
+{
+    UI::RmlBridge::UnregisterForThemeReload(this);
+    if (!m_pRmlDoc)
+        return;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    // A hidden document whose field still holds focus leaves the client believing text input is
+    // active, and every hotkey dies with it.
+    if (auto* focused = context->GetFocusElement(); focused && focused->GetOwnerDocument() == m_pRmlDoc)
+        focused->Blur();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+}
+
+void CMsgBoxIGSSendGift::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc)
+        return;
+    const SendGiftRmlModel kept = m_RmlBinder.GetModel();
+    DestroyRmlUi();
+    BuildRmlUi();
+    m_RmlBinder.GetModel() = kept;
+    m_RmlBinder.MarkDirty("recipient");
+    m_RmlBinder.MarkDirty("message");
+}
+
+void CMsgBoxIGSSendGift::SyncRmlModel()
+{
+    if (!m_pRmlDoc)
+        return;
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, GetPos());
+    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, true);
 }
 
 void CMsgBoxIGSSendGift::LoadImages()

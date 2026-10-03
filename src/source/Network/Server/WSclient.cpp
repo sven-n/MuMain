@@ -9936,7 +9936,7 @@ void ReceiveAddFriendResult(const BYTE* ReceiveBuffer)
     {
     case 0x00:
         wcscat(szText, I18N::Game::IDDoesNotExist);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
+        g_pWindowMgr->Dialogs().Notice(szText);
         break;
     case 0x01:
     {
@@ -9949,19 +9949,19 @@ void ReceiveAddFriendResult(const BYTE* ReceiveBuffer)
     break;
     case 0x03:
         wcscpy(szText, I18N::Game::YouCannotAddMorePleaseDeleteToAdd);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
+        g_pWindowMgr->Dialogs().Notice(szText);
         break;
     case 0x04:
         wcscat(szText, I18N::Game::IsAlreadyRegistered);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
+        g_pWindowMgr->Dialogs().Notice(szText);
         break;
     case 0x05:
         wcscpy(szText, I18N::Game::YouCannotRegisterYourOwnID);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
+        g_pWindowMgr->Dialogs().Notice(szText);
         break;
     case 0x06:
         wcscpy(szText, I18N::Game::TheOtherCharacterMustBeOverLevel6);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
+        g_pWindowMgr->Dialogs().Notice(szText);
         break;
     default:
         break;
@@ -9988,11 +9988,7 @@ void ReceiveRequestAcceptAddFriend(const BYTE* ReceiveBuffer)
         g_pNewUISystem->Show(mu::ui::window::INTERFACE_FRIEND);
     }
 
-    DWORD dwWindowID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText, -1);
-    if (dwWindowID != 0)
-    {
-        ((CUIQuestionWindow*)g_pWindowMgr->GetWindow(dwWindowID))->SaveID(szName);
-    }
+    g_pWindowMgr->Dialogs().FriendRequest(szText, szName);
     PlayBuffer(SOUND_FRIEND_LOGIN_ALERT);
 }
 
@@ -10007,7 +10003,7 @@ void ReceiveDeleteFriendResult(const BYTE* ReceiveBuffer)
     switch (Data->Result)
     {
     case 0x00:
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::CouldnTDelete);
+        g_pWindowMgr->Dialogs().Notice(I18N::Game::CouldnTDelete);
         break;
     case 0x01:
         g_pFriendList->RemoveFriend(szName);
@@ -10065,8 +10061,7 @@ void ReceiveLetterSendResult(const BYTE* ReceiveBuffer)
     case 0x00:
         if (Data->WindowGuid != 0)
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT,
-                                I18N::Game::TheLetterCouldNotBeSentPleaseTryAgain);
+        g_pWindowMgr->Dialogs().Notice(I18N::Game::TheLetterCouldNotBeSentPleaseTryAgain);
         break;
     case 0x01:
     {
@@ -10080,31 +10075,27 @@ void ReceiveLetterSendResult(const BYTE* ReceiveBuffer)
     case 0x02:
         if (Data->WindowGuid != 0)
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT,
-                                I18N::Game::TheLetterCanTBeSentBecauseTheReceiverSMailBoxIsFull);
+        g_pWindowMgr->Dialogs().Notice(I18N::Game::TheLetterCanTBeSentBecauseTheReceiverSMailBoxIsFull);
         break;
     case 0x03:
         if (Data->WindowGuid != 0)
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT,
-                                I18N::Game::EitherTheReceiverDoesNotExistOrThereIsNoMailBox);
+        g_pWindowMgr->Dialogs().Notice(I18N::Game::EitherTheReceiverDoesNotExistOrThereIsNoMailBox);
         break;
     case 0x04:
         if (Data->WindowGuid != 0)
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT,
-                                I18N::Game::YouCannotSendALetterToYourself);
+        g_pWindowMgr->Dialogs().Notice(I18N::Game::YouCannotSendALetterToYourself);
         break;
     case 0x06:
         if (Data->WindowGuid != 0)
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT,
-                                I18N::Game::TheOtherCharacterMustBeOverLevel6);
+        g_pWindowMgr->Dialogs().Notice(I18N::Game::TheOtherCharacterMustBeOverLevel6);
         break;
     case 0x07:
         if (Data->WindowGuid != 0)
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::YouAreShortOfZen);
+        g_pWindowMgr->Dialogs().Notice(I18N::Game::YouAreShortOfZen);
         break;
     default:
         break;
@@ -10230,7 +10221,7 @@ void ReceiveLetterDeleteResult(const BYTE* ReceiveBuffer)
     switch (Data->Result)
     {
     case 0x00:
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::CouldnTDeleteLetter);
+        g_pWindowMgr->Dialogs().Notice(I18N::Game::CouldnTDeleteLetter);
         break;
     case 0x01:
         g_pLetterList->RemoveLetter(Data->Index);
@@ -10257,8 +10248,7 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
     {
     case 0x00:
         g_pFriendMenu->RemoveRequestWindow(szName);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT,
-                                I18N::Game::TheConversationCannotContinue);
+        g_pWindowMgr->Dialogs().Notice(I18N::Game::TheConversationCannotContinue);
         break;
     case 0x01:
         g_pFriendMenu->RemoveRequestWindow(szName);
@@ -10302,8 +10292,7 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
         break;
     case 0x02:
         g_pFriendMenu->RemoveRequestWindow(szName);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT,
-                                I18N::Game::TheChatServerIsNowUnavailable);
+        g_pWindowMgr->Dialogs().Notice(I18N::Game::TheChatServerIsNowUnavailable);
         break;
     default:
         break;
@@ -10326,7 +10315,7 @@ void ReceiveChatRoomInviteResult(const BYTE* ReceiveBuffer)
         if (pChatWindow->GetCurrentInvitePal() != nullptr)
         {
             wchar_t szText[MAX_TEXT_LENGTH + 1] = {0};
-            wcsncpy(szText, pChatWindow->GetCurrentInvitePal()->m_szID, MAX_USERNAME_SIZE);
+            wcsncpy(szText, pChatWindow->GetCurrentInvitePal(), MAX_USERNAME_SIZE);
             szText[MAX_USERNAME_SIZE] = '\0';
             wcscat(szText, I18N::Game::HasBeenInvited);
             pChatWindow->AddChatText(255, szText, 1, 0);

@@ -58,7 +58,8 @@ TEST_CASE("every document the client loads has a scene [ui][stacking]")
 TEST_CASE("only the main scene's windows are suspended outside it [ui][stacking]")
 {
     // CNewUIManager's windows, the HUD, the world labels and their tooltip and message boxes.
-    for (const char* name : {"my_inventory.rml", "my_inventory_bg.rml", "move_command.rml", "friend_window.rml",
+    for (const char* name : {"my_inventory.rml", "my_inventory_bg.rml", "move_command.rml", "friend_shell.rml",
+                             "chat_room.rml", "letter_read.rml", "letter_write.rml",
                              "blood_castle_enter.rml", "duel_window.rml", "siege_warfare.rml", "main_frame.rml",
                              "world_labels.rml", "map_name.rml", "tooltip.rml", "message_box_view.rml",
                              "generic_confirm_dialog.rml"})
@@ -73,11 +74,17 @@ TEST_CASE("only the main scene's windows are suspended outside it [ui][stacking]
 
 TEST_CASE("documents stack as the original's windows did [ui][stacking]")
 {
-    // The original's order: the logs over the friends windows; friends over character and inventory.
-    CHECK(Depth("chat_log.rml") > Depth("friend_window.rml"));
-    CHECK(Depth("system_log.rml") > Depth("friend_window.rml"));
-    CHECK(Depth("friend_window.rml") > Depth("character_info.rml"));
-    CHECK(Depth("friend_window.rml") > Depth("my_inventory.rml"));
+    // The original's order: the logs over the friends windows; friends over character and
+    // inventory. The family is one document per window now -- the shell, each chat room, and each
+    // letter -- where friend_window.rml used to transcribe all of them at one depth.
+    for (const char* name : {"friend_shell.rml", "chat_room.rml", "letter_read.rml", "letter_write.rml"})
+    {
+        CHECK_MESSAGE(Depth("chat_log.rml") > Depth(name), name);
+        CHECK_MESSAGE(Depth("system_log.rml") > Depth(name), name);
+        CHECK_MESSAGE(Depth(name) > Depth("character_info.rml"), name);
+        CHECK_MESSAGE(Depth(name) > Depth("my_inventory.rml"), name);
+    }
+    // A letter's chrome sits with the letter it frames; it is only in another context.
     // TODO 34: chat over the pet window and the quest journal.
     CHECK(Depth("chat_log.rml") > Depth("pet_info.rml"));
     CHECK(Depth("chat_log.rml") > Depth("my_quest_info.rml"));

@@ -24,6 +24,7 @@ char_info_balloon.rml: per-frame data -- world-projected balloon positions, per 
 chat_command.rml: per-frame data -- the window grows with how many commands are listed, and the rows below the list follow that height; plus the labels' top from the live line height
 chat_input.rml: per-frame data -- tooltip offset follows the hovered button
 chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
+chat_room.rml: per-frame data -- masks cover the native letter photos drawn in front of this room while the letter windows are still native. Panel layout and row geometry are RCSS-owned.
 command_window.rml: per-frame data -- target marker follows the selected command
 crywolf.rml: per-frame data -- the success/failure banner and the rank label slide in and out, Balgass's health and the statue's shield are gauge lengths (the shield shortens from its left, so its left moves with it), and the clock's digit runs are centred on their own x so a digit's left depends on how many digits the value has
 cursed_temple_enter.rml: the Enter and Close labels' top and the hero band's height, both from the live line height
@@ -37,7 +38,7 @@ duel_watch_frame.rml: the health and shield gauges are lengths from the fighters
 duel_watch_spectators.rml: the spectator boxes stack upwards from the frame, and the list is an unbounded std::vector filled from the server, so no :nth-child or :nth-last-child table can cover it; plus the name's top in its 17-unit box from the live font height
 empire_guardian_enter.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
 empire_guardian_timer.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
-friend_window.rml: the family is still a native CUIBaseWindow subsystem, and FriendWindowRmlBuilder transcribes it -- every box, button and field's geometry is read off a live CUITextInputBox / CUIButton (GetPosition_x(), GetWidth(), GetTextColor()) each frame, so the native controls are authoritative for layout and hit-testing and this is §2's native-geometry direction, not a C++ constant leaking out of RCSS. FriendWindowView::PlaceField() writes straight onto the element for the same reason. The prerequisite is porting that family off CUIBaseWindow; moving literals cannot resolve it
+friend_shell.rml: per-frame data -- usable viewport height from the shared HUD boundary; masks cover native letter photos in front of the shell during the remaining child-window migration. Shell layout and row geometry are RCSS-owned.
 gate_switch.rml: counter-scale bridge -- the button labels' top from the live line height, which inside a .sharp-text block layout height and rendered height disagree on
 gateman.rml: counter-scale bridge -- the button labels' top from the live line height, which inside a .sharp-text block layout height and rendered height disagree on
 generic_confirm_dialog.rml: per-frame data -- native 3D item anchor, and a panel sized to its content
@@ -52,6 +53,8 @@ item_endurance.rml: per-frame data -- the hovered item's tooltip follows the mou
 item_explanation.rml: per-frame data -- placed against the hovered item
 kanturu_enter.rml: the subject's and state texts' lines sit where SeparateTextIntoLines() put them -- each group starts under however many lines the one before it wrapped to, so the stacking is derived from the text, not a table the theme could hold; plus the button labels' top from the live line height
 kanturu_info.rml: per-frame data -- RenderNumber() centres each digit run on its x, so a digit's left depends on how many digits the minute or second has
+letter_read.rml: per-frame data -- masks cover the native portraits drawn in front of this letter by other windows of this family. Panel layout, the body pane and the portrait's own slot are RCSS-owned.
+letter_write.rml: per-frame data -- masks cover the native portraits drawn in front of this draft by other windows of this family. Panel layout, the fields and the portrait's own slot are RCSS-owned.
 login_scene.rml: per-frame data -- scene sprites scale on their own 800x600 formula, not dp
 lucky_coin_exchange.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
 lucky_coin_registration.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
