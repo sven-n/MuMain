@@ -101,9 +101,12 @@ with when the game creates it. Particles, lightning and sprites have none
   creation code**. Only effects whose creation code set nothing but these
   values have one; adding `create` to another effect drops what its code
   did (for example the effects it spawns) and changes how it looks.
-- A value that is not a number (or not a whole number from -2 to 32767 for the mesh fields,
-  not `true`/`false` for `copyLightToDirection`, not three numbers for
-  `light`) is an error; an unknown field is a warning.
+- A value that is not a number, or too large for the game (which keeps
+  the values as float), is an error; so are mesh fields that are not whole
+  numbers from -2 to 32767, an `alpha` outside 0 to 1, a
+  `copyLightToDirection` that is not `true`/`false` and a `light` that is
+  not three numbers. An unknown field is a warning, and so is a `create`
+  that sets no value (it still replaces the creation code).
 
 ## How the names were chosen
 

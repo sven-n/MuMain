@@ -218,7 +218,8 @@ Kalima maps load the rock `Object25\Object10.bmd`).
   built once after loading. Lookups stay a bounds check and one array read;
   names are only used while loading, for error messages and in the editor.
 - Creating an effect before the catalogue is loaded is logged as an error,
-  because moved types no longer have their old case.
+  because moved types no longer have their old case. The handlers are code
+  and work before that; only the values from the data are missing.
 
 ### How other data references types
 
@@ -305,18 +306,19 @@ benchmark of creation and lookup (old against new).
 `EffectTypes.json` (format in [effect-data.md](../../effect-data.md)); the
 C++ rows of `EffectRegistry.cpp` keep only the handlers. Besides the
 registry, the catalogue reads and writes `create` (`EffectCreateParamsJson`)
-and keeps the values sorted by number for `BuildRegistry`, which
-builds the table on the loading screen right after the catalogue
-(`OpenBasicData`) and converts the values to `CreateParams` once, so
-creating an effect only copies them, as before. Before the build `Lookup`
-finds nothing and logs that once; nothing creates or moves an effect that
-early. A one-time test compared the old rows with the built registry for
-every number: all 309 descriptors are equal (32 with creation values), and
-applying the values to a slot gives the same fields. The recorder comes with
-FX1.3, the first phase that deletes cases; FX1.2 deletes none and applies
-the values with the unchanged `ApplyCreateParams`. Release timing: a lookup
-takes 1.13 ns instead of 1.70 ns (no static guard any more), applying the
-values 2.4 ns as before.
+and keeps the values sorted by number for `BuildRegistry`, which builds the
+table on the loading screen right after the catalogue (`OpenBasicData`) and
+converts the values to `CreateParams` once, so creating an effect only
+copies them, as before. A lookup before the build (a test or a tool without
+the data) builds the handlers alone, which are code, and logs an error that
+the creation values are missing; in the game nothing creates or moves an
+effect that early. A one-time test compared the old rows with the built
+registry for every number: all 309 descriptors are equal (32 with creation
+values), and applying the values to a slot gives the same fields. The
+recorder comes with FX1.3, the first phase that deletes cases; FX1.2 deletes
+none and applies the values with the unchanged `ApplyCreateParams`. Release
+timing: a lookup takes 1.13 ns instead of 1.70 ns (no static guard any
+more), applying the values 2.4 ns as before.
 
 **FX1.3–FX1.5** move effect cases into data in growing steps: first the 8
 types whose cases only set fields `CreateParams` has, then the 26 that need

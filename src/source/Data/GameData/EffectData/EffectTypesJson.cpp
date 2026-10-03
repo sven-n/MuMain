@@ -78,6 +78,11 @@ void ReadCreateParams(const OrderedJson& json, const std::string& field, const s
         [&](ItemDataIssueSeverity severity, const std::string& issueField, const std::string& message)
     { AddIssue(issues, severity, source, issueField, message); };
     entry.create = ReadEffectCreateParams(*create, createField, report);
+    if (*entry.create == EffectCreateParams{})
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, source, createField,
+                 "sets no value; the creation code of the type is skipped all the same");
+    }
 }
 
 // Reads entry `index` of "types"; false when it has no name or code. Only
@@ -102,14 +107,14 @@ bool ReadEntry(const OrderedJson& json, size_t index, const std::string& source,
     };
     const bool hasName = readText(Keys::Name, entry.name);
     const bool hasCode = readText(Keys::Code, entry.code);
-    const bool hasCreateParams = kind == EffectKind::Effect;
-    if (hasCreateParams)
+    const bool kindHasCreateParams = kind == EffectKind::Effect;
+    if (kindHasCreateParams)
     {
         ReadCreateParams(json, field, source, entry, issues);
     }
     for (const auto& [key, value] : json.items())
     {
-        if (key != Keys::Name && key != Keys::Code && !(hasCreateParams && key == CreateKey))
+        if (key != Keys::Name && key != Keys::Code && !(kindHasCreateParams && key == CreateKey))
         {
             AddIssue(issues, ItemDataIssueSeverity::Warning, source, field + "." + key, UnknownField);
         }
@@ -235,7 +240,7 @@ std::string WriteEffectTypesJson(EffectKind kind, std::span<const EffectTypeEntr
         OrderedJson json;
         json[Keys::Name] = entry->name;
         json[Keys::Code] = entry->code;
-        if (entry->create)
+        if (entry->create && kind == EffectKind::Effect)
         {
             json[CreateKey] = WriteEffectCreateParams(*entry->create);
         }

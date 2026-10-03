@@ -45,6 +45,6 @@ void ValidateEffectTypes(EffectKind kind, std::span<const EffectTypeEntry> types
                          std::vector<Items::ItemDataIssue>& issues);
 
 // The text of the catalogue file of `kind`: sorted by name, fields in a fixed
-// order, unset creation values left out.
+// order; creation values only for effects, unset ones left out.
 std::string WriteEffectTypesJson(EffectKind kind, std::span<const EffectTypeEntry> types);
 } // namespace Data::Effects

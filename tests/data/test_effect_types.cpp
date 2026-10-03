@@ -227,6 +227,28 @@ TEST_CASE("Wrong creation values are errors, unknown ones warnings, and only eff
     CHECK_FALSE(result.types[0].create.has_value());
     CHECK(result.types[1].create == EffectCreateParams{});
 
+    // The game keeps the values as float; alpha goes from 0 to 1; mesh numbers are whole numbers.
+    const ReadResult ranges = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
+        {"name": "fire", "code": "BITMAP_FIRE", "create": {"lifeTime": 2, "scale": 1e39, "alpha": 5,
+         "light": [1, 1e39, 0], "blendMesh": 0.0}}]})",
+                                   EffectKind::Effect);
+    CHECK(HasError(ranges.issues, "types[0].create.scale"));
+    CHECK(HasError(ranges.issues, "types[0].create.alpha"));
+    CHECK(HasError(ranges.issues, "types[0].create.light"));
+    CHECK(HasError(ranges.issues, "types[0].create.blendMesh"));
+    REQUIRE(ranges.types.size() == 1);
+    CHECK(ranges.types[0].create == EffectCreateParams{.lifeTime = 2});
+
+    // A create that sets nothing still skips the creation code of the type.
+    const ReadResult empty = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
+        {"name": "dragon", "code": "MODEL_DRAGON", "create": {}},
+        {"name": "ghost", "code": "MODEL_CUNDUN_GHOST", "create": {"lifetime": 2}}]})",
+                                  EffectKind::Effect);
+    CHECK(HasIssue(empty.issues, ItemDataIssueSeverity::Warning, "types[0].create"));
+    CHECK(HasIssue(empty.issues, ItemDataIssueSeverity::Warning, "types[1].create"));
+    CHECK(HasIssue(empty.issues, ItemDataIssueSeverity::Warning, "types[1].create.lifetime"));
+    CHECK_FALSE(Data::Items::HasErrors(empty.issues));
+
     const ReadResult particles = Read(R"({"formatVersion": 1, "kind": "particle", "types": [
         {"name": "smoke", "code": "BITMAP_SMOKE", "create": {"lifeTime": 2}}]})");
     CHECK(HasIssue(particles.issues, ItemDataIssueSeverity::Warning, "types[0].create"));
@@ -290,6 +312,12 @@ TEST_CASE("Creation values are written in a fixed order, unset ones left out [da
     REQUIRE(result.types.size() == 2);
     CHECK(result.types[0] == arrow);
     CHECK(result.types[1] == ghost);
+
+    // Only effects have creation values, so other kinds leave them out.
+    EffectTypeEntry smoke{"smoke", "BITMAP_SMOKE"};
+    smoke.create = EffectCreateParams{.lifeTime = 2};
+    const std::vector<EffectTypeEntry> particles = {smoke};
+    CHECK(WriteEffectTypesJson(EffectKind::Particle, particles).find("create") == std::string::npos);
 }
 
 // Every code is an enum symbol, so the data holds no raw numbers (D28).
@@ -365,7 +393,8 @@ TEST_CASE("The effect type catalogue keeps the creation values of effects, sorte
     const std::vector<EffectTypeEntry>& effects = ShippedTypes().types[ToIndex(EffectKind::Effect)];
     const auto withCreateParams = static_cast<size_t>(std::count_if(
         effects.begin(), effects.end(), [](const EffectTypeEntry& entry) { return entry.create.has_value(); }));
-    CHECK(withCreateParams > 0);
+    // The 32 types of the 22 rows that EffectRegistry.cpp held as C++ until FX1.2.
+    CHECK(withCreateParams == 32);
 
     EffectTypeCatalogue catalogue;
     catalogue.Build(EffectKind::Effect, effects);
@@ -416,6 +445,60 @@ TEST_CASE("The effect registry takes creation values from the catalogue, handler
     CHECK(Render::Effects::Lookup(MODEL_KALIMA_FALLING_STONE) == nullptr);
     CHECK(Render::Effects::Lookup(-1) == nullptr);
     CHECK(Render::Effects::Lookup(TypeNumberLimit) == nullptr);
+}
+
+// One made-up row with every field set to a different value, so a value that
+// lands in the wrong field shows up.
+TEST_CASE("The effect registry converts and applies every creation value [data][effects]")
+{
+    const EffectTypeCreateParams row{MODEL_BLOOD, EffectCreateParams{.lifeTime = 11,
+                                                                     .scale = 12,
+                                                                     .velocity = 13,
+                                                                     .gravity = 14,
+                                                                     .hiddenMesh = 15,
+                                                                     .blendMesh = 16,
+                                                                     .blendMeshLight = 17,
+                                                                     .alpha = 0.5,
+                                                                     .light = std::array<double, 3>{0.1, 0.2, 0.3},
+                                                                     .copyLightToDirection = true}};
+    Render::Effects::BuildRegistry(std::span<const EffectTypeCreateParams>(&row, 1));
+
+    const Render::Effects::CreateParams& params = RequireCreateParams(MODEL_BLOOD);
+    CHECK(params.lifeTime == 11.f);
+    CHECK(params.scale == 12.f);
+    CHECK(params.velocity == 13.f);
+    CHECK(params.gravity == 14.f);
+    CHECK(params.hiddenMesh == 15);
+    CHECK(params.blendMesh == 16);
+    CHECK(params.blendMeshLight == 17.f);
+    CHECK(params.alpha == 0.5f);
+    CHECK(params.light == std::array<float, 3>{0.1f, 0.2f, 0.3f});
+    CHECK(params.copyLightToDirection);
+
+    OBJECT blood;
+    Render::Effects::ApplyCreateParams(&blood, params);
+    CHECK(blood.LifeTime == 11.f);
+    CHECK(blood.Scale == 12.f);
+    CHECK(blood.Velocity == 13.f);
+    CHECK(blood.Gravity == 14.f);
+    CHECK(blood.HiddenMesh == 15);
+    CHECK(blood.BlendMesh == 16);
+    CHECK(blood.BlendMeshLight == 17.f);
+    CHECK(blood.Alpha == 0.5f);
+    CHECK(blood.Light[0] == 0.1f);
+    CHECK(blood.Light[1] == 0.2f);
+    CHECK(blood.Light[2] == 0.3f);
+    CHECK(blood.Direction[0] == 0.1f);
+    CHECK(blood.Direction[1] == 0.2f);
+    CHECK(blood.Direction[2] == 0.3f);
+
+    // The handlers are code: they are there without any creation values.
+    Render::Effects::BuildRegistry({});
+    CHECK(Render::Effects::Lookup(MODEL_BLOOD) == nullptr);
+    REQUIRE(Render::Effects::Lookup(MODEL_DESAIR) != nullptr);
+    CHECK(Render::Effects::Lookup(MODEL_DESAIR)->move == &Render::Effects::Behaviors::MoveDesair);
+
+    BuildShippedRegistry();
 }
 
 TEST_CASE("Creation values from the catalogue are applied to new effects [data][effects]")

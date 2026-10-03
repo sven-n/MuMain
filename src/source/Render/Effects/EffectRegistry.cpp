@@ -77,8 +77,8 @@ struct Entry
     EffectDescriptor descriptor;
 };
 
-// Built by BuildRegistry: the descriptors, and the table indexed by
-// type that points into them.
+// Built by BuildTable (from BuildRegistry, or from the first lookup before
+// it): the descriptors, and the table indexed by type that points into them.
 std::vector<Entry> builtEntries;
 std::vector<const EffectDescriptor*> table;
 
@@ -101,7 +101,15 @@ std::vector<Entry> HandlerEntries()
     auto add = [&e](std::initializer_list<int> types, const EffectDescriptor& d)
     {
         for (int type : types)
-            e.push_back({type, d});
+        {
+            EffectDescriptor& descriptor = FindOrAdd(e, type).descriptor;
+            if (d.onCreate)
+                descriptor.onCreate = d.onCreate;
+            if (d.move)
+                descriptor.move = d.move;
+            if (d.render)
+                descriptor.render = d.render;
+        }
     };
 
     // MODEL_DESAIR: rides a joint and sheds feathers (see
@@ -136,24 +144,7 @@ std::vector<Entry> HandlerEntries()
     return e;
 }
 
-// Kept out of Lookup, so that a lookup stays a bounds check and one
-// array read.
-EFFECT_REGISTRY_NOINLINE const EffectDescriptor* ReportLookupBeforeBuild(int type)
-{
-    static bool reported = false;
-    if (!reported)
-    {
-        reported = true;
-        MU_LOG_ERROR(mu::log::Get("render"),
-                     "Effect type {} was used before the effect catalogue was loaded; its creation values "
-                     "and handlers are missing",
-                     type);
-    }
-    return nullptr;
-}
-} // namespace
-
-void BuildRegistry(std::span<const Data::Effects::EffectTypeCreateParams> createParams)
+void BuildTable(std::span<const Data::Effects::EffectTypeCreateParams> createParams)
 {
     std::vector<Entry> entries = HandlerEntries();
     for (const Data::Effects::EffectTypeCreateParams& row : createParams)
@@ -169,10 +160,31 @@ void BuildRegistry(std::span<const Data::Effects::EffectTypeCreateParams> create
         table[entry.type] = &entry.descriptor;
 }
 
+// The handlers are code, so they work without the catalogue (tests, tools);
+// only its creation values are missing until BuildRegistry. Kept out of
+// Lookup, so that a lookup stays a bounds check and one array read.
+EFFECT_REGISTRY_NOINLINE const EffectDescriptor* LookupBeforeBuild(int type)
+{
+    BuildTable({});
+    MU_LOG_ERROR(mu::log::Get("render"),
+                 "Effect type {} was used before the effect catalogue was loaded; the effects run without the "
+                 "creation values of the catalogue until it is loaded",
+                 type);
+    if (type < 0 || type >= static_cast<int>(table.size()))
+        return nullptr;
+    return table[type];
+}
+} // namespace
+
+void BuildRegistry(std::span<const Data::Effects::EffectTypeCreateParams> createParams)
+{
+    BuildTable(createParams);
+}
+
 const EffectDescriptor* Lookup(int type)
 {
     if (type < 0 || type >= static_cast<int>(table.size()))
-        return table.empty() ? ReportLookupBeforeBuild(type) : nullptr;
+        return table.empty() ? LookupBeforeBuild(type) : nullptr;
     return table[type];
 }
 } // namespace Render::Effects

@@ -4,6 +4,7 @@
 
 #include "Data/GameData/ItemData/ItemModelValueReader.h"
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 
@@ -33,29 +34,67 @@ constexpr const char* CopyLightToDirection = "copyLightToDirection";
 constexpr int SmallestMeshNumber = -2;
 constexpr int LargestMeshNumber = std::numeric_limits<short>::max();
 
-void ReadValue(ItemModelValueReader& reader, const char* key, std::optional<double>& value)
+// The game keeps the values as float.
+constexpr double LargestValue = std::numeric_limits<float>::max();
+constexpr const char* TooLarge = "is too large for the game";
+
+bool FitsFloat(double value)
 {
-    double number = 0.0;
-    if (reader.ReadNumber(key, number, false))
-    {
-        value = number;
-    }
+    return std::abs(value) <= LargestValue;
 }
 
-void ReadMeshNumber(ItemModelValueReader& reader, const char* key, std::optional<int>& value)
+void ReadValue(ItemModelValueReader& reader, const char* key, std::optional<double>& value)
 {
     double number = 0.0;
     if (!reader.ReadNumber(key, number, false))
     {
         return;
     }
-    if (number != std::floor(number) || number < SmallestMeshNumber || number > LargestMeshNumber)
+    if (!FitsFloat(number))
     {
-        reader.Error(key, "must be a whole number from " + std::to_string(SmallestMeshNumber) + " to " +
-                              std::to_string(LargestMeshNumber));
+        reader.Error(key, TooLarge);
         return;
     }
-    value = static_cast<int>(number);
+    value = number;
+}
+
+void ReadAlpha(ItemModelValueReader& reader, std::optional<double>& value)
+{
+    double alpha = 0.0;
+    if (!reader.ReadNumber(Keys::Alpha, alpha, false))
+    {
+        return;
+    }
+    if (alpha < 0.0 || alpha > 1.0)
+    {
+        reader.Error(Keys::Alpha, "must be from 0 to 1");
+        return;
+    }
+    value = alpha;
+}
+
+void ReadLight(ItemModelValueReader& reader, std::optional<std::array<double, 3>>& value)
+{
+    std::array<double, 3> light{};
+    if (!reader.ReadNumbers(CreateLightKey, light, light.size()))
+    {
+        return;
+    }
+    if (!std::all_of(light.begin(), light.end(), FitsFloat))
+    {
+        reader.Error(CreateLightKey, TooLarge);
+        return;
+    }
+    value = light;
+}
+
+void ReadMeshNumber(ItemModelValueReader& reader, const char* key, std::optional<int>& value)
+{
+    int number = 0;
+    if (reader.ReadInteger(key, number, SmallestMeshNumber, LargestMeshNumber))
+    {
+        value = number;
+    }
 }
 
 void WriteValue(OrderedJson& json, const char* key, const std::optional<double>& value)
@@ -87,13 +126,8 @@ EffectCreateParams ReadEffectCreateParams(const OrderedJson& json, const std::st
     ReadMeshNumber(reader, Keys::HiddenMesh, params.hiddenMesh);
     ReadMeshNumber(reader, Keys::BlendMesh, params.blendMesh);
     ReadValue(reader, Keys::BlendMeshLight, params.blendMeshLight);
-    ReadValue(reader, Keys::Alpha, params.alpha);
-
-    std::array<double, 3> light{};
-    if (reader.ReadNumbers(CreateLightKey, light, light.size()))
-    {
-        params.light = light;
-    }
+    ReadAlpha(reader, params.alpha);
+    ReadLight(reader, params.light);
     reader.ReadBool(Keys::CopyLightToDirection, params.copyLightToDirection);
     reader.WarnAboutUnknownKeys();
     return params;

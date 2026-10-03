@@ -13,7 +13,9 @@ namespace Render::Effects
 {
 // Builds the table from the creation values of the effect catalogue and the
 // handlers of the code. Called once on the loading screen, after the
-// catalogue is loaded (OpenBasicData); until then Lookup finds nothing.
+// catalogue is loaded (OpenBasicData). A lookup before that builds the
+// handlers alone, which are code, and logs that the creation values are
+// missing.
 // Descriptors returned by Lookup stay valid until the next build.
 void BuildRegistry(std::span<const Data::Effects::EffectTypeCreateParams> createParams);
 
