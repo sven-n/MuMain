@@ -418,6 +418,57 @@ paired with a new generic persistence mechanism (`GameConfig::GetWindowPosition`
 reuse with one call each way — see `STATUS.md`'s "Known gaps" entry for the full mechanism and
 what's still unaudited (behavior across a resolution/UI-scale/theme change post-drag).
 
+## Native content above RmlUi
+
+`UI::RmlBridge::OverlayRender` (`UI/RmlBridge/RmlOverlayRender.h`/`.cpp`) — a registry of native
+draw callbacks drained once per frame from `Winmain.cpp`'s `SetPostRmlUiCallback`, which opens its
+own `LOAD_OP_LOAD` render pass after RmlUi's main context has closed. That pass is the **only**
+layer above RmlUi: the main context composites from `SetPreSubmitCallback` and is otherwise the
+frame's last UI pass, so anything a window draws from its own `Render()` lands under every panel.
+
+Use it for live 3D (or any native drawing) that must sit *on* its own panel rather than beneath it.
+`Register(owner, draw)` / `Unregister(owner)`, drawing in registration order; a family owning
+several registers one entry and walks its own z-order inside it, as `CUIWindowMgr::RenderOverlay3D()`
+does for the letter portraits.
+
+Two things to know before reaching for it:
+
+- **It is above the whole context, not at your window's depth.** There is no way to interleave one
+  window's native content between two RmlUi documents — three fixed layers, N windows. Content
+  drawn here stands over every panel, including ones that should cover it. The Friend/Mail family
+  mitigates this by drawing only for the window in front; see `tracked-deferrals.md` for the
+  general shape and why render-to-texture is the real answer.
+- **Nothing RmlUi can reach will paint over it.** A tooltip, a mask, any document content is below.
+  `CUIPhotoViewer`'s help text is native `RenderTipTextList()` for exactly this reason. 2D native
+  text and quads are proven in this seam (`RenderCursor`, the login text overlay); skinned 3D works
+  too, since the renderer re-stages bone data for this pass.
+
+Historical note: an earlier `SetPostRmlUiCallback` attempt for `CGenericConfirmDialog`'s item3D
+crashed twice and was abandoned for a third-context document split (`GetDialogBackgroundContext()`).
+The likely cause — the post-UI pass staging only vertex data, not bone rows — was fixed in the
+renderer afterwards (`MuRendererSDLGpu.cpp`), and the seam has carried a skinned character since
+2026-10-04. The context-split alternative only works for always-on-top content such as a modal, so
+it does not generalize to a draggable, stackable window.
+
+## Native 3D viewer input
+
+`UI::Party::PhotoViewerControl` (`UI/Party/PhotoViewerControl.h`/`.cpp`) — drag-to-turn,
+right-click-to-reset and the "?" help toggle for a `CUIPhotoViewer` standing in an RmlUi slot,
+driven from the document rather than from the viewer's own native mouse handling.
+
+The reason it has to exist is worth knowing generally: **a native window behind an RmlUi document
+never sees a mouse press.** `Context::ProcessMouseButtonDown` returns `!IsMouseInteracting()`, false
+whenever anything at all is hovered, and Winmain's event pump only calls `HandleMouseButton()` when
+RmlUi lets the event propagate — so `MouseLButtonPush` is never set for a click over a panel. The
+wheel is not routed through RmlUi at all, which is why wheel-driven controls keep working natively
+and press-driven ones silently do not. If a ported window still relies on native press handling for
+anything, it is already broken; check it.
+
+The slot takes `pointer-events: auto`, mousedown starts the gesture, and mousemove/mouseup are
+listened for on the **document** so a drag leaving the slot keeps tracking. Deltas convert RmlUi px
+to native reference px through `FloatingWorkspaceTransform().scaleX`, the same ratio that places the
+viewer, so the feel holds at any UI scale.
+
 ## Tooltip
 
 `UI::RmlBridge::Tooltip` (`UI/RmlBridge/RmlTooltip.h`/`.cpp`, `tooltip.rml` +

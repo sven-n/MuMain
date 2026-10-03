@@ -100,6 +100,10 @@ exempt in principle, they simply have no such conversion to get wrong.
 | `CGoldBowmanWindow` | docked | the serial field's focus + typing, Register, corner × |
 | `CGoldBowmanLena` | docked | Register, corner × |
 | `CMasterLevel` | HUD | **hover a skill node: its hint must sit on that node.** The only `RefreshLogicalAnchorPosition()` caller that reads back a `data-for` row rather than a fixed anchor — the node's id comes from `data-attr-id`, and the themes now own the column/slot/rank grid, so a wrong read puts the hint on a different skill. It fails *silently*: the fallback is `MasterTree::NodeBoxPosition()`, which is what the hint used before, so a broken read looks right until the themes' grid and that fallback disagree. Check the right-hand column and a bottom-row node, where the hint flips above |
+| `CUIFriendWindow` | friends | tabs, the action rows, the refuse-chat box, drag by the title rail, the resize grip, maximize. Its `#panel` box is pushed back to the native window each frame (`FriendShell.cpp`'s `SetSize`), so the whole family is in scope |
+| `CUIChatWindow` | friends | the chat field's focus + typing, Enter, the button row, the pal list rows |
+| `CUILetterReadWindow` | friends | the button row, **and the portrait**: drag-to-turn, right-click reset, wheel zoom and the "?" box in its bottom-left corner. The portrait's own hit area is an RmlUi element (`#photo_slot`) whose box C++ converts to native reference px to place the viewer, so a scale mismatch moves the character away from the well it is drawn in — the sharpest check in this family |
+| `CUILetterWriteWindow` | friends | both form fields' focus + typing, the multiline body, the button row, and the same portrait checks as above |
 
 The nine rows above joined this table when they stopped hit-testing against their own
 `INVENTORY_WIDTH = 190` literal and started reading `#panel`'s live size like the inventory family

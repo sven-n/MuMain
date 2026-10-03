@@ -249,25 +249,30 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   depth (the hit targets already did). The skill textures stay loaded for `CUIMuHelper`.
 - **Guild and social windows** — **done, both themes (2026-09-28)**: `CServerMsgWin`,
   `CGuildMakeWindow`, `CGuildInfoWindow` with its lists, `CGuild_ToPerson_Position`, `CGensRanking`,
-  `CItemExplanationWindow`, `CSetItemExplanation`. The friends family (`CFriendWindow`, 2026-09-28): the
-  main window with its three tabs, the add-friend and question dialogs, the letter read / write
-  windows and the chat rooms are RmlUi; the letters' photo viewer stays native 3D. Worth carrying
-  to the next port:
+  `CItemExplanationWindow`, `CSetItemExplanation`. The friends family (`CFriendWindow`, finished
+  2026-10-04): the shell with its three tabs, the add-friend and question dialogs, the letter read /
+  write windows and the chat rooms are each a semantic RmlUi document; only the letters' sender
+  portrait stays native 3D. The intermediate transcription layer this family was first ported
+  through -- a `CollectRmlView()` twin per window emitting native geometry as named parts -- is
+  **deleted**, along with `FriendWindowRmlBuilder`, `FriendWindowView` and `friend_window.rml`. It
+  was scaffolding for porting a toolkit of draggable windows incrementally; do not revive it for a
+  window that can be written semantically from the start. Worth carrying to the next port:
 
-  - **A toolkit of draggable native windows** (`CUIWindowMgr`) ports window by window without
-    touching its logic: each window's `Render()` gets a `CollectRmlView()` twin that emits the same
-    geometry as named parts into a per-window document, synced from `Update()`; code that lived in
-    the render functions (child layout messages, scroll bar computation, `InitControls()`) moves to
-    functions both paths call. Native text keeps its spaces (`white-space: pre`).
-  - **A native text field can stay the field's model** while an RmlUi `<input>` shows it and takes
-    the keyboard (`FriendWindowView::SyncFields()`): a native `GiveFocus()` moves the focus to the
-    input with the native caret and selection -- only once the input is laid out, RmlUi drops the
-    focus of an element nobody can see --, typed text goes back to the native field, a value the
-    window sets goes to the input, and Enter / Tab pressed in the input run the native field's key
-    handling. The window's code is unchanged.
-  - **Native 3D inside an RmlUi window** (the letters' photo viewer) is still drawn after the
-    window; the document leaves the 3D box open and an underlay document in the background context
-    paints the window's back under it.
+  - **A native window behind an RmlUi document never sees a mouse press.**
+    `Context::ProcessMouseButtonDown` returns `!IsMouseInteracting()` -- false whenever anything is
+    hovered -- and Winmain only calls `HandleMouseButton()` when RmlUi lets the event propagate, so
+    `MouseLButtonPush` is never set for a click over a panel. The wheel is not routed through RmlUi
+    at all. That asymmetry is the tell: if a ported window's wheel controls work and its click
+    controls silently do nothing, this is why. `UI::Party::PhotoViewerControl` is the fix shape --
+    drive the gesture from the document (`component-catalog.md`).
+  - **Native 3D can be drawn above RmlUi**, through `UI::RmlBridge::OverlayRender` wrapping
+    `SetPostRmlUiCallback` -- but above the *whole* main context, not at one window's depth, and
+    nothing RmlUi draws can paint over it. The Friend/Mail family draws the portrait only for the
+    window in front, and its help text is native for the same reason. See `component-catalog.md`
+    for the mechanism and `tracked-deferrals.md` for why render-to-texture is the real answer.
+  - **One document and data model per instance** (chat rooms, letters) through
+    `LoadThemedDocument()`'s placeholder overload, so a closing window cannot take another's focus
+    or scroll position with it.
 
   - **A block-scope `extern` inside `mu::ui::window`** declares a namespace member, not the global:
     UIManager.cpp defines same-named references there (`ItemHelp`, `TextList`, ...), so such an

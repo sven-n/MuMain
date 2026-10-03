@@ -12,6 +12,14 @@ found — see the note near the end of this file) C++ architecture surrounding R
 Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adapter.md`'s own
 "Proven by CBuffStrip" section in full detail; summarized here for visibility.
 
+- **`data-for` preserves DOM nodes by array index, not by an item ID.** Appending an entry
+  preserves existing inputs and scroll containers. Erasing an earlier entry from a compact
+  array leaves the focused element at its original index, now bound to a different item;
+  that element's scroll offset follows it. Use stable document identities for independently
+  editable windows. Separate-document tests preserve field selection and scroll state while
+  siblings open/close and document order changes. Verified against `DataViewFor::Update()` in
+  `DataViewDefault.cpp` by `tests/ui/test_rml_friend_window_identity.cpp`.
+
 - **This RmlUi build silently fails to inherit `font-family` into most subtrees** — a descendant
   needs its own explicit `font-family` declaration; relying on inheritance from an ancestor
   (`#panel`, `body`, a shared class) renders that element's text invisible with no error. Not
