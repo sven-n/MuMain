@@ -30,7 +30,6 @@
 
 extern BYTE m_CrywolfState;
 
-int g_iWidthEx = 5;
 
 extern int g_iChatInputType;
 
@@ -279,22 +278,4 @@ void CUIControl::DefaultHandleMessage()
 #ifndef KJH_ADD_INGAMESHOP_UI_SYSTEM
 const int UIMAX_TEXT_LINE = 150;
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-
-void RenderGoldRect(float fPos_x, float fPos_y, float fWidth, float fHeight, int iFillType = 0)
-{
-    switch (iFillType)
-    {
-    case 1:
-        RenderColor(fPos_x, fPos_y, fWidth, fHeight);
-        EndRenderColor();
-        break;
-    default:
-        break;
-    };
-
-    RenderBitmap(BITMAP_INVENTORY + 19, fPos_x, fPos_y, fWidth, 2, 10 / 256.f, 5 / 16.f, 170.f / 256.f, 2.f / 16.f);
-    RenderBitmap(BITMAP_INVENTORY + 19, fPos_x, fPos_y + fHeight, fWidth + 1, 2, 10 / 256.f, 5 / 16.f, 170.f / 256.f, 2.f / 16.f);
-    RenderBitmap(BITMAP_INVENTORY, fPos_x, fPos_y, 2, fHeight, 1.f / 256.f, 5 / 16.f, 2.f / 256.f, 125.f / 256.f);
-    RenderBitmap(BITMAP_INVENTORY, fPos_x + fWidth, fPos_y, 2, fHeight, 1.f / 256.f, 5 / 16.f, 2.f / 256.f, 125.f / 256.f);
-}
 

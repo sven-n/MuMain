@@ -20,8 +20,6 @@ inline DWORD _ARGB(BYTE a, BYTE r, BYTE g, BYTE b)
 #define UIMAX_TEXT_LINE 150
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-void RenderCheckBox(int iPos_x, int iPos_y, BOOL bFlag);
-
 enum UISTATES
 {
     UISTATE_NORMAL = 0,
@@ -31,16 +29,6 @@ enum UISTATES
     UISTATE_MOVE,
     UISTATE_READY,
     UISTATE_DISABLE
-};
-
-enum UIOPTIONS
-{
-    UIOPTION_NULL = 0,
-    UIOPTION_NUMBERONLY = 1,
-    UIOPTION_SERIALNUMBER = 2,
-    UIOPTION_ENTERIMECHKOFF = 4,
-    UIOPTION_PAINTBACK = 8,
-    UIOPTION_NOLOCALIZEDCHARACTERS = 16
 };
 
 typedef struct
@@ -191,14 +179,6 @@ protected:
     int m_iRelativeWidth, m_iRelativeHeight;
     int m_iCoordType;
 };
-
-enum UILISTBOX_SCROLL_TYPE
-{
-    UILISTBOX_SCROLL_DOWNUP = 0,
-    UILISTBOX_SCROLL_UPDOWN
-};
-
-// A list box's scroll bar in reference px: its track and its thumb's top.
 
 extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;

@@ -213,21 +213,29 @@ live-3D item content; its only user is the cash shop's `MsgBoxIGSStorageItemInfo
 
 ## `CUIControl` list family (`UI/Widgets/UIControls.h`)
 
-The `data-for` binding pattern is proven (`component-catalog.md`'s "List / repeated rows"); the list
-widgets retire with their host windows. Eight list widgets remain: five in Friend/Mail/Chat-room
-and three in the cash shop. Earlier Done entries describe rendering ports; only Removed entries
-mean the native widget is gone. New list migrations still require runtime acceptance.
+**The family is retired (2026-10-04).** `CUITextListBox<T>` -- the template every row in this table
+was an instantiation of -- is deleted, along with `CUITextInputBox`, `InputBoxConfig`,
+`TextListScrollBarGeometry` and the dead `UIOPTIONS`/`UILISTBOX_SCROLL_TYPE` enums.
+`UIControls.h` went 1,488 -> 186 lines and `.cpp` 5,498 -> 281, and what is left is `CUIControl`
+and its message plumbing, still the base of `CUIBaseWindow` and `CUIPhotoViewer` (see
+`tracked-deferrals.md`).
+
+The three cash-shop rows below were never ported: they are `Not started` because the shop's own
+port is unscheduled, and the template under them went anyway once their *lists* had been replaced
+by `data-for` bindings. Earlier `Done` entries describe rendering ports; `Removed` means the native
+widget was gone before this pass. The `data-for` pattern that replaced them is in
+`component-catalog.md`'s "List / repeated rows".
 
 | Component | Row type | Status | Detail pointer |
 |---|---|---|---|
 | `CUICurQuestListBox` | `SCurQuestItem` | Removed | Quest hosts use RmlUi |
 | `CUIQuestContentsListBox` | `SQuestContents` | Removed | Quest hosts use RmlUi |
 | `CUIGuildListBox` | `GUILDLIST_TEXT` | Removed | No live consumer; shared record remains for Friends |
-| `CUISimpleChatListBox` | `WHISPER_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Social/FriendWindowRmlParts.cpp`) |
-| `CUILetterTextListBox` | `LETTER_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Social/FriendWindowRmlParts.cpp`) |
-| `CUIChatPalListBox` | `GUILDLIST_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Social/FriendWindowRmlParts.cpp`) |
-| `CUIWindowListBox` | `WINDOWLIST_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Social/FriendWindowRmlParts.cpp`) |
-| `CUILetterListBox` | `LETTERLIST_TEXT` | Done (2026-09-28) | `CFriendWindow` port (`UI/Social/FriendWindowRmlParts.cpp`) |
+| `CUISimpleChatListBox` | `WHISPER_TEXT` | Done (2026-09-28) | `CFriendWindow` port; the transcription layer that replaced it is itself deleted |
+| `CUILetterTextListBox` | `LETTER_TEXT` | Done (2026-09-28) | `CFriendWindow` port; the transcription layer that replaced it is itself deleted |
+| `CUIChatPalListBox` | `GUILDLIST_TEXT` | Done (2026-09-28) | `CFriendWindow` port; the transcription layer that replaced it is itself deleted |
+| `CUIWindowListBox` | `WINDOWLIST_TEXT` | Done (2026-09-28) | `CFriendWindow` port; the transcription layer that replaced it is itself deleted |
+| `CUILetterListBox` | `LETTERLIST_TEXT` | Done (2026-09-28) | `CFriendWindow` port; the transcription layer that replaced it is itself deleted |
 | `CUISocketListBox` | `SOCKETLIST_TEXT` | Removed; runtime pending | `mix_inventory.rml`; plain socket state, RmlUi scrolling and selection |
 | `CUIGuildNoticeListBox` | `GUILDLOG_TEXT` | Removed; runtime pending | `guild_info.rml`; announcement flow pane |
 | `CUINewGuildMemberListBox` | `GUILDLIST_TEXT` | Removed; runtime pending | `guild_info.rml`; selection by member name; shared record remains for Friends |
@@ -237,9 +245,9 @@ mean the native widget is gone. New list migrations still require runtime accept
 | `CUIBCDeclareGuildListBox` | `BCDECLAREGUILD_TEXT` | Removed; runtime pending | Guard declaration rows; RmlUi selection and scrolling |
 | `CUIBCGuildListBox` | `BCGUILD_TEXT` | Removed; runtime pending | Guard siege rows and score footer; RmlUi selection and scrolling |
 | `CUIMoveCommandListBox` | `MOVECOMMAND_TEXT` | Unused | No user left; `CMoveCommandWindow` binds its own `data-for` list |
-| `CUIInGameShopListBox` | `IGS_StorageItem` | Not started | `tracked-deferrals.md` |
-| `CUIBuyingListBox` | `IGS_BuyList` | Not started | `tracked-deferrals.md` |
-| `CUIPackCheckBuyingListBox` | `IGS_SelectBuyItem` | Not started | `tracked-deferrals.md` |
+| `CUIInGameShopListBox` | `IGS_StorageItem` | Removed; runtime pending | `in_game_shop.rml`; the storage/gift list -- the list is a `data-for` binding; the window's frame, buttons and texts stay native, which is not this rollout's scope |
+| `CUIBuyingListBox` | `IGS_BuyList` | Removed; runtime pending | `igs_buy_package.rml` -- the list is a `data-for` binding; the window's frame, buttons and texts stay native, which is not this rollout's scope |
+| `CUIPackCheckBuyingListBox` | `IGS_SelectBuyItem` | Removed; runtime pending | `igs_buy_select.rml` -- the list is a `data-for` binding; the window's frame, buttons and texts stay native, which is not this rollout's scope |
 
 ## Native surfaces outside the window classes
 

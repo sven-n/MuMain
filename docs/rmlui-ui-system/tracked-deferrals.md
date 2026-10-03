@@ -76,77 +76,59 @@ file-organization question now, not a naming one.
 
 ## Tracked deferral: `CUIControl` family (`UIControls.h`) full retirement
 
-Not a permanent third toolkit alongside RmlUi and `mu::ui::window` — a fully enumerable, closeable
-checklist (`ui-target-architecture.md` item 17's "concrete instance"). Found and scoped
-2026-09-13 while investigating whether porting Friend/Mail would let this family retire. It
-wouldn't — Friend/Mail (`CUIWindowMgr`/`CUIBaseWindow`, `UI/Social/UIWindows.cpp`) is only one of
-four independent pieces still keeping this file alive:
+**Closed 2026-10-04**, except for one item that was never part of it. Not a permanent third
+toolkit alongside RmlUi and `mu::ui::window` -- a fully enumerable, closeable checklist
+(`ui-target-architecture.md` item 17's "concrete instance"), found and scoped 2026-09-13 while
+investigating whether porting Friend/Mail would let this family retire. It did not on its own;
+there were four independent pieces, and all four are now gone:
 
-1. **`CUITextInputBox`** — **transitional now, not permanent.** The old framing ("permanent until
-   RmlUi gets native `<input>`") was wrong on both halves: the vendored RmlUi already ships
-   `<input>`, and the IME question is answered — `RmlUiRuntime` installs the vendored
-   `TextInputMethodEditor_SDL` and `RmlUiSystemInterface::ActivateKeyboard()` drives
-   `SDL_SetTextInputArea`/`SDL_StartTextInput`, so composition and candidate placement are handled
-   centrally. `CMyShopInventory` is migrated (stock `<input>` + shared `.text-field`, see
-   `component-catalog.md`). **Not globally retired** — remaining consumers, each with its own extra
-   requirement beyond My Shop's:
-   - ~~`CGenericConfirmDialog::Mode::Text`~~ — **migrated.** Per-`Show()` configuration lands via
-     `ApplyInputFieldConfig()`; `type` must be set before the value, since changing it rebuilds the
-     element's `InputType` and drops what it held. Its **`Mode::NumericKeypad` remains a separate
-     interaction, not text input** — the shuffled on-screen keypad is deliberate anti-keylogger
-     behaviour and must not become `<input type="number">`.
-   - ~~`CLoginWin`~~ and ~~`CCharMakeWin`~~ — **both migrated.** Login's Tab order needed no code
-     at all (`ElementDocument` handles `KI_TAB` and `WidgetTextInput` lets it bubble, so the
-     reciprocal `SetTabTarget()` pair just went away); select-all-on-error-recovery maps to
-     `ElementFormControlInput::Select()`, reached through `CLoginWin::FocusUsername()`/
-     `FocusPassword()` which replaced the widget-pointer accessors external code used to call.
-   - ~~`CMsgWin`~~ — **migrated.** Its resident-password prompt (`MESSAGE_DELETE_CHARACTER_RESIDENT`)
-     is `#msgwin_input`, a stock `<input type="password">` inside the existing `#input_frame`, so the
-     layout is unchanged. Deliberately *not* folded into `CGenericConfirmDialog` even though that
-     dialog can express the same content (two lines + masked field + OK/Cancel): `CMsgWin`'s panel is
-     352x113dp with its own art against the dialog's 230x160dp, so consolidating would visibly
-     restyle this one prompt and leave it inconsistent with every other message box. Worth revisiting
-     as a deliberate UX decision, not as a port.
-   - ~~`WindowMuHelper`~~ — **migrated** with its host windows: every field is a stock `<input>`, the numeric
-     ones filtered by `UI::RmlBridge::AttachNumericInputFilter`.
-   - Chat (`CUIChatInputBox`), `CGuildMakeWindow`, `CGoldBowmanWindow`,
-     `MsgBoxIGSSendGift`, `UIWindows`' friend/mail, `UIGuildMaster` — **migrate each when its own
-     host screen moves to RmlUi, not before.** These are all still-native screens; porting just
-     their text field would mean positioning an RmlUi `<input>` against native sprite coordinates,
-     which is the coupling this whole effort removes. `CUITextInputBox` retires when the last one
-     is gone, and not by a dedicated retirement pass.
+1. **`CUITextInputBox`** -- **gone.** Every consumer migrated to a stock RmlUi `<input>` with the
+   shared `.text-field` (`CMyShopInventory`, `CGenericConfirmDialog::Mode::Text`, `CLoginWin`,
+   `CCharMakeWin`, `CMsgWin`, the MU Helper windows, `CGuildMakeWindow`, `CGoldBowmanWindow`,
+   `MsgBoxIGSSendGift`, and the friend/mail family last). The old framing -- "permanent until RmlUi
+   gets native `<input>`" -- was wrong on both halves: the vendored RmlUi already shipped `<input>`,
+   and IME is handled centrally by `RmlUiRuntime`'s vendored `TextInputMethodEditor_SDL` plus
+   `RmlUiSystemInterface::ActivateKeyboard()`, which drives `SDL_SetTextInputArea`/
+   `SDL_StartTextInput`.
 
-     `LoginScene.cpp`'s free `DeleteCharacter()` reads the value through
-     `CMsgWin::GetResidentPasswordInput()` now, but appears to have **no callers** —
-     `CharSelMainWin.cpp:324`'s unqualified call resolves to the member
-     `CCharSelMainWin::DeleteCharacter()`, and `CMsgWin::RequestDeleteCharacter()` is the live path.
-     Suspected dead, not verified to the standard `CWin`/`::CButton`/`CSlider` got before deletion.
-2. **`CUITextListBox<T>`** ? **gone.** Every subclass was retired with the host that used it:
-   the cash-shop lists, `CUIWindowListBox`/`CUILetterListBox` with the friend shell,
-   `CUISimpleChatListBox`/`CUIChatPalListBox` with the chat room, and `CUILetterTextListBox` with
-   the letter windows. The template itself went with them.
+   With no instances left, the static focus API was permanently negative and every caller reduced
+   to its RmlUi-only half -- `GetFocusedPortable()` to `nullptr`, `IsAnyInputBoxFocused()` and
+   `IsFocusedForParent()` to `false`, `ReleaseFocus()` to a no-op. That took the whole legacy
+   portable-input path in `Winmain.cpp` with it: `FeedPortableTextInput`, `FeedPortableKey`,
+   `MapScancodeToEditVk`, the `SDL_EVENT_TEXT_EDITING` fallback, and the per-frame
+   `SDL_StartTextInput`/`StopTextInput`/`SetTextInputArea` block, which had already been written to
+   stand down whenever RmlUi held the keyboard.
 
-   GuildInfo, MixInventory socket selection, Lahap jewel dismantling, and Guard guild lists now
-   use plain data and RmlUi row selection/scrolling in both themes. Their old widget classes are
-   removed. Runtime acceptance remains pending, including the siege-only Guard states.
-   Lahap belongs to `GameLogic/Items/CComGem`, with its presentation in `CustomMessageBox`;
-   it was incorrectly listed as a MixInventory-owned control in the original inventory.
-   The unused quest, move-command, and older guild-list classes have also been removed.
+   `CGenericConfirmDialog`'s **`Mode::NumericKeypad` is not text input** and did not migrate: the
+   shuffled on-screen keypad is deliberate anti-keylogger behaviour and must not become
+   `<input type="number">`.
 
-   Remaining live hosts must migrate their state and input along with presentation. The
-   `data-for` and shared scrolling-pane patterns are documented in `component-catalog.md`.
-3. **`CUIButton`** ? **gone**, with the letter windows that held the last of them. The whole
-   Friend/Mail/Chat-room family is now RmlUi documents: the shell, each chat room and each letter
-   own one, and the transcription layer that faked them from native widget geometry is deleted.
-   `CUIBaseWindow` and `CUIPhotoViewer` still derive from `CUIControl`, which is the next item.
-4. **Verified dead branches** ? `CUIGuildInfo`, `CUIGuildMaster`, `CUIPopup`, and the unused
-   legacy chat-input wrapper have been removed. These are distinct from the live
-   `CGuildInfoWindow` and `CGuildMakeWindow`.
+2. **`CUITextListBox<T>`** -- **gone**, template and all. Every subclass retired with its host, and
+   the template, its explicit `GUILDLIST_TEXT` instantiation and `TextListScrollBarGeometry` went
+   once the last one did. `GUILDLIST_TEXT` and `LETTERLIST_TEXT` survive as plain data records that
+   `FriendShell` and `ChatRoom` still use. Several hosts' runtime acceptance is still pending --
+   GuildInfo, MixInventory socket selection, Lahap jewel dismantling, the Guard guild lists
+   (siege-only states), and the three cash-shop lists -- which is a *verification* gap, not a
+   consumer one.
 
-Slide-help widgets and global legacy text-input/focus routing also remain live. Their removal,
-plus the shop and Friend/Mail ports, is required before `UIControls.h/.cpp` can be deleted.
-Shared text rendering, text wrapping, and IME state have been extracted; this does not imply that
-all legacy input consumers or either IME integration stack has been retired.
+3. **`CUIButton`** -- **gone**, with the letter windows that held the last of them.
+
+4. **Verified dead branches** -- `CUIGuildInfo`, `CUIGuildMaster`, `CUIPopup` and the unused legacy
+   chat-input wrapper are removed. Distinct from the live `CGuildInfoWindow`/`CGuildMakeWindow`.
+
+Slide help went separately (`CUISlideHelp`/`CSlideHelpMgr` are now `UI::HUD::SlideLane`/
+`SlideTicker`); its server-pushed notice lane remains unverified.
+
+**What is left, and why the header still exists.** `UIControls.h` is 186 lines: `CUIControl`, its
+`CUIMessage` plumbing, the `UISTATES`/`UI_MESSAGE_ENUM` enums, `g_dwActiveUIID`/`g_dwMouseUseUIID`,
+and the two row records. `CUIBaseWindow` and `CUIPhotoViewer` (`UI/Social/UIWindows.h`) still derive
+from `CUIControl` for what it carries -- position, size, state, parent id and the UI-message queue
+the friend family's window manager runs on. **Deleting the header needs those two off that base,
+which is its own piece of work and was never part of this checklist.** It is also the natural
+companion to splitting `UIWindows.h` itself, a grab-bag header whose name no longer says what it
+holds. A few dead enumerators remain inside otherwise-live enums (`UISTATE_SCROLL`,
+`UISTATE_DISABLE`, `UI_MESSAGE_NULL`, `UI_MESSAGE_TEXTINPUT`, the four list-message values);
+pruning them is cosmetic and was left alone.
 
 **Related finding, same investigation**: `CUIManager`/`g_pUIManager` (`UI/Core/UIManager.h/.cpp`)
 looks like a live top-level manager parallel to `mu::ui::window::CManager` — it isn't. Its

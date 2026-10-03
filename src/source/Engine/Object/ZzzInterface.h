@@ -71,7 +71,6 @@ void RenderInputText(int x, int y, int Index, int Hide = 0);
 void RenderDebugWindow();
 void RenderTipText(int sx, int sy, const wchar_t* Text);
 
-extern int g_iWidthEx;
 
 void RenderInterface(bool);
 void MoveInterface();
