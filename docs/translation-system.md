@@ -258,6 +258,37 @@ If your new string contains placeholders, prefer `{0}`/`{1}` and `I18N::Format`
 for narrow groups. For wide groups, `%s` / `%ls` via the bounds-checked
 `mu_swprintf_s` is the existing pattern.
 
+When translating a string with `printf`-style specifiers, keep them exactly
+as in English: the same specifiers in the same order, `%ls` stays `%ls`, and
+`%%` stays `%%` (a single `%` followed by text is read as a specifier). Chat
+commands such as `/warp`, `/trade` or `/party` are compared against the typed
+text, so they stay untranslated.
+
+### German terminology
+
+The German texts use the same terms as the German resources of the OpenMU
+server (`src/**/Properties/*.de.resx` in
+[MUnique/OpenMU](https://github.com/MUnique/OpenMU)), so players see the same
+words in the client and in server messages. The player is addressed formally
+("Sie"); NPC dialogues (`Dialog.de.resx`) keep their old-fashioned "Ihr/Euch".
+Some fixed terms:
+
+| English | German |
+|---|---|
+| Item | Gegenstand (Artikel only in the item shop) |
+| Party | Party |
+| Skill | Fähigkeit |
+| Vault / Storage | Tresor / Lager |
+| Socket | Sockel |
+| Command (stat) | Führung |
+| Elf, Muse Elf, High Elf | Elfe, Musenelfe, Hochelfe |
+| Lord Emperor | Lord-Imperator |
+| Blood Castle | Blutburg |
+| Devil Square, Chaos Castle, Castle Siege | not translated |
+| Illusion Temple | Illusionstempel |
+| Fortress of Empire Guardians | Festung der Kaiserlichen Wächter |
+| Refinery Tower | Raffinerieturm |
+
 ## Adding a new locale
 
 1. Create `src/Localization/<Group>.<newLocale>.resx` for every group you want
