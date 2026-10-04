@@ -163,6 +163,8 @@ storage-to-inventory auto-move success/failure was not specified individually.
 
 Siege pass (2026-10-05): `UI/Combat/SiegeUpdates` now owns castle minimap and commander presentation, guardsman status and guild lists, hunt-zone gatekeeper, catapult, and crown notices. `WSclient.cpp` decodes packet values before calling the feature operations; `CGuardWindow` takes decoded status and names. A full RelWithDebInfo build passed. In-game spot checks remain pending with the consolidated RB-03 checklist.
 
+Doppelganger pass (2026-10-05): `UI/Events/DoppelgangerUpdates` owns entry, progress, party positions, match-frame lifetime, and result-state presentation. `WSclient.cpp` keeps named protocol outcomes and passes decoded values. A full RelWithDebInfo build passed. In-game spot checks remain pending with the consolidated RB-03 checklist.
+
 ### RB-04 — Theme command ownership
 
 - Keep `$theme` command recognition in the console, but move theme validation, activation, config

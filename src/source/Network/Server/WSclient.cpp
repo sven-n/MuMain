@@ -4,6 +4,7 @@
 #include "UI/Chat/Chat.h"
 #include "UI/Chat/ChatMessages.h"
 #include "UI/Combat/SiegeUpdates.h"
+#include "UI/Events/DoppelgangerUpdates.h"
 #include "UI/Core/WindowAccess.h"
 #include "UI/Social/SocialUpdates.h"
 #include <memory>
@@ -6481,9 +6482,8 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     break;
     case 0x23:
     {
-        UI::Windows::Show(mu::ui::window::INTERFACE_DOPPELGANGER_NPC);
         BYTE* pbtRemainTime = (&Data->Value) + 1;
-        g_pDoppelGangerWindow->SetRemainTime(*pbtRemainTime);
+        UI::Doppelganger::OpenEntry(*pbtRemainTime);
     }
     break;
     case 0x24:
@@ -12382,6 +12382,36 @@ bool ReceiveRequestExChangeLuckyCoin(const BYTE* ReceiveBuffer)
     return true;
 }
 
+enum class DoppelEntryResult : std::uint8_t
+{
+    NoChange = 0,
+    Entered = 1,
+    AlreadyStarted = 2,
+    Outlaw = 3,
+    Unlocked = 4,
+};
+
+enum class DoppelMatchState : std::uint8_t
+{
+    Waiting = 0,
+    Ready = 1,
+    Playing = 2,
+    Ended = 3,
+};
+
+enum class DoppelIcewalkerState : std::uint8_t
+{
+    Present = 0,
+    Gone = 1,
+};
+
+enum class DoppelResult : std::uint8_t
+{
+    Succeeded = 0,
+    Failed = 1,
+    MonstersEscaped = 2,
+};
+
 bool ReceiveEnterDoppelGangerEvent(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_RESULT_ENTER_DOPPELGANGER)ReceiveBuffer;
@@ -12390,25 +12420,25 @@ bool ReceiveEnterDoppelGangerEvent(const BYTE* ReceiveBuffer)
         0,
     };
 
-    switch (Data->btResult)
+    switch (static_cast<DoppelEntryResult>(Data->btResult))
     {
-    case 0:
+    case DoppelEntryResult::NoChange:
         break;
-    case 1:
-        g_pDoppelGangerWindow->LockEnterButton(TRUE);
+    case DoppelEntryResult::Entered:
+        UI::Doppelganger::SetEntryLocked(true);
         break;
-    case 2:
+    case DoppelEntryResult::AlreadyStarted:
         mu_swprintf(szText, I18N::Game::BattleHasAlreadyCommencedYouCannotEnter);
         UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
-        g_pDoppelGangerWindow->LockEnterButton(TRUE);
+        UI::Doppelganger::SetEntryLocked(true);
         break;
-    case 3:
+    case DoppelEntryResult::Outlaw:
         mu_swprintf(szText, I18N::Game::YouCannotEnterIfYouAreA1stStageOutlaw);
         UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
-        g_pDoppelGangerWindow->LockEnterButton(TRUE);
+        UI::Doppelganger::SetEntryLocked(true);
         break;
-    case 4:
-        g_pDoppelGangerWindow->LockEnterButton(FALSE);
+    case DoppelEntryResult::Unlocked:
+        UI::Doppelganger::SetEntryLocked(false);
         break;
     default:
         return false;
@@ -12420,7 +12450,7 @@ bool ReceiveEnterDoppelGangerEvent(const BYTE* ReceiveBuffer)
 bool ReceiveDoppelGangerMonsterPosition(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_DOPPELGANGER_MONSTER_POSITION)ReceiveBuffer;
-    g_pDoppelGangerFrame->SetMonsterGauge((float)Data->btPosIndex / 22.0f);
+    UI::Doppelganger::SetMonsterPosition(Data->btPosIndex);
     return true;
 }
 
@@ -12428,15 +12458,15 @@ bool ReceiveDoppelGangerState(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_DOPPELGANGER_STATE)ReceiveBuffer;
 
-    switch (Data->btDoppelgangerState)
+    switch (static_cast<DoppelMatchState>(Data->btDoppelgangerState))
     {
-    case 0:
+    case DoppelMatchState::Waiting:
         break;
-    case 1: // wait->ready
+    case DoppelMatchState::Ready: // wait->ready
         break;
-    case 2: // ready->play
+    case DoppelMatchState::Playing: // ready->play
     {
-        UI::Windows::Show(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
+        UI::Doppelganger::ShowMatchFrame();
 
         UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = {
@@ -12449,7 +12479,7 @@ bool ReceiveDoppelGangerState(const BYTE* ReceiveBuffer)
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
-    case 3: // play->end
+    case DoppelMatchState::Ended: // play->end
         break;
     }
 
@@ -12460,13 +12490,13 @@ bool ReceiveDoppelGangerIcewalkerState(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_DOPPELGANGER_ICEWORKER_STATE)ReceiveBuffer;
 
-    switch (Data->btIceworkerState)
+    switch (static_cast<DoppelIcewalkerState>(Data->btIceworkerState))
     {
-    case 0:
-        g_pDoppelGangerFrame->SetIceWalkerMap(TRUE, (float)(22 - Data->btPosIndex) / 22.0f);
+    case DoppelIcewalkerState::Present:
+        UI::Doppelganger::SetIcewalkerPosition(true, Data->btPosIndex);
         break;
-    case 1:
-        g_pDoppelGangerFrame->SetIceWalkerMap(FALSE, 0);
+    case DoppelIcewalkerState::Gone:
+        UI::Doppelganger::SetIcewalkerPosition(false, Data->btPosIndex);
         break;
     }
 
@@ -12477,13 +12507,11 @@ bool ReceiveDoppelGangerTimePartyState(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_DOPPELGANGER_PLAY_INFO)ReceiveBuffer;
 
-    g_pDoppelGangerFrame->SetRemainTime(Data->wRemainSec);
-    g_pDoppelGangerFrame->SetPartyMemberRcvd();
+    std::vector<UI::Doppelganger::PartyMemberPosition> members;
     auto pUserPos = (LPPMSG_DOPPELGANGER_USER_POS)&Data->UserPosData;
     for (int i = 0; i < Data->btUserCount; ++i)
-    {
-        g_pDoppelGangerFrame->SetPartyMemberInfo(pUserPos[i].wUserIndex, (float)(22 - pUserPos[i].btPosIndex) / 22.0f);
-    }
+        members.push_back({pUserPos[i].wUserIndex, pUserPos[i].btPosIndex});
+    UI::Doppelganger::UpdateParty(Data->wRemainSec, members);
 
     return true;
 }
@@ -12494,15 +12522,12 @@ bool ReceiveDoppelGangerResult(const BYTE* ReceiveBuffer)
 
     PlayBuffer(SOUND_CHAOS_END);
 
-    g_pDoppelGangerFrame->StopTimer(TRUE);
-    g_pDoppelGangerFrame->EnabledDoppelGangerEvent(FALSE);
+    UI::Doppelganger::FinishMatch(static_cast<DoppelResult>(Data->btResult) == DoppelResult::Succeeded);
 
-    switch (Data->btResult)
+    switch (static_cast<DoppelResult>(Data->btResult))
     {
-    case 0:
+    case DoppelResult::Succeeded:
     {
-        g_pDoppelGangerFrame->SetRemainTime(0);
-
         UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = {
             { I18N::Game::Congratulations, false },
@@ -12512,14 +12537,14 @@ bool ReceiveDoppelGangerResult(const BYTE* ReceiveBuffer)
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
-    case 1:
+    case DoppelResult::Failed:
     {
         UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::DoppelgangerDefenseFailed, false });
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
-    case 2:
+    case DoppelResult::MonstersEscaped:
     {
         UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = {
@@ -12539,8 +12564,7 @@ bool ReceiveDoppelGangerMonsterGoal(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_DOPPELGANGER_MONSTER_GOAL)ReceiveBuffer;
 
-    g_pDoppelGangerFrame->SetMaxMonsters(Data->btMaxGoalCnt);
-    g_pDoppelGangerFrame->SetEnteredMonsters(Data->btGoalCnt);
+    UI::Doppelganger::SetMonsterGoal(Data->btMaxGoalCnt, Data->btGoalCnt);
 
     return true;
 }
