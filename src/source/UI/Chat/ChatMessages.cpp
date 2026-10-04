@@ -16,4 +16,14 @@ void PostChat(std::wstring_view sender, std::wstring_view text,
 {
     g_pChatListBox->AddText(std::wstring(sender), std::wstring(text), kind, errorKind);
 }
+
+bool IsWhisperBlocked()
+{
+    return g_pChatInputBox->IsBlockWhisper();
+}
+
+void ResetLogFilter()
+{
+    g_pChatListBox->ResetFilter();
+}
 }

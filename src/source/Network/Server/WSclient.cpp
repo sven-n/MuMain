@@ -12,6 +12,8 @@
 #include "UI/Events/CursedTempleUpdates.h"
 #include "UI/NPCs/NpcDialogueUpdates.h"
 #include "UI/Quests/QuestUpdates.h"
+#include "UI/Options/OptionUpdates.h"
+#include "UI/MuHelper/MuHelperUpdates.h"
 #include "UI/Core/WindowAccess.h"
 #include "UI/Social/SocialUpdates.h"
 #include <memory>
@@ -139,8 +141,6 @@ extern int g_iKeyPadEnable;
 
 extern BOOL g_bWhileMovingZone;
 extern DWORD g_dwLatestZoneMoving;
-
-extern CUIMapName* g_pUIMapName;
 
 extern bool g_PetEnableDuel;
 
@@ -923,8 +923,7 @@ void InitGame()
     SelectedItem = -1;
 
     Attacking = -1;
-    g_pOption->SetAutoAttack(true);
-    g_pOption->SetWhisperSound(false);
+    UI::Options::ResetForNewGame();
 
     CheckInventory = nullptr;
 
@@ -964,8 +963,7 @@ void InitGame()
     g_DuelMgr.Reset();
     UI::Windows::Hide(mu::ui::window::INTERFACE_DUEL_WINDOW);
 
-    if (g_pUIManager)
-        g_pUIManager->Init();
+    UI::Windows::ResetLegacyPanels();
 
     UI::Siege::ResetMiniMap();
 
@@ -975,9 +973,9 @@ void InitGame()
     RemoveAllPerosnalItemPrice(PSHOPWNDTYPE_SALE);
     RemoveAllPerosnalItemPrice(PSHOPWNDTYPE_PURCHASE);
 
-    g_pNewUIHotKey->SetStateGameOver(false);
+    UI::Hud::SetGameOver(false);
     UI::Shop::ResetOwnShopTitle();
-    g_pChatListBox->ResetFilter();
+    UI::Chat::ResetLogFilter();
 
     UI::Guild::ClearNotices();
 }
@@ -1243,7 +1241,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
         StopBuffer(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, true);
     }
 
-    g_pUIMapName->ShowMapName();
+    UI::Hud::ShowMapName();
 
     CreateMyGensInfluenceGroundEffect();
 
@@ -1444,7 +1442,7 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
     SummonLife = 0;
     GuildTeam(c);
 
-    g_pUIMapName->ShowMapName();
+    UI::Hud::ShowMapName();
 
     CreateMyGensInfluenceGroundEffect();
 
@@ -1600,7 +1598,7 @@ void ReceiveMuHelperConfigurationData(std::span<const BYTE> ReceiveBuffer)
 
     MUHelper::ConfigData config;
     MUHelper::ConfigDataSerDe::Deserialize(*pMuHelperData, config);
-    g_pMuHelperConfig->LoadSavedConfig(config);
+    UI::MuHelper::LoadSavedConfig(config);
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0xAE [ReceiveMuHelperConfigurationData]");
 }
@@ -1925,7 +1923,7 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
 
 void ReceiveChatWhisper(const BYTE* ReceiveBuffer)
 {
-    if (g_pChatInputBox->IsBlockWhisper() == true)
+    if (UI::Chat::IsWhisperBlocked())
     {
         return;
     }
@@ -1943,7 +1941,7 @@ void ReceiveChatWhisper(const BYTE* ReceiveBuffer)
 
     UI::Chat::Whisper::Register(10, ID);
 
-    if (g_pOption->IsWhisperSound())
+    if (UI::Options::IsWhisperSoundOn())
     {
         PlayBuffer(SOUND_WHISPER);
     }
@@ -2026,8 +2024,8 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
     {
         if (Data->Notice != nullptr && Data->Notice[0] != '\0')
         {
-            g_pSlideHelpMgr->AddSlide(Data->Count, Data->Delay, Text, Data->Result - 10, Data->Speed / 10.0f,
-                                      Data->Color);
+            UI::Hud::AddSlideNotice(Data->Count, Data->Delay, Text, Data->Result - 10, Data->Speed / 10.0f,
+                                    Data->Color);
         }
     }
 
@@ -2304,7 +2302,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     SetPlayerStop(Hero);
 
     if (Data->Flag)
-        g_pUIMapName->ShowMapName(); // rozy
+        UI::Hud::ShowMapName();
 
     CreateMyGensInfluenceGroundEffect();
 
@@ -5733,8 +5731,7 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
     {
-        g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
-        g_pMainFrame->SetGetExp_Wide(Exp);
+        UI::Hud::ShowExperienceGain(Master_Level_Data.lMasterLevel_Experince, Exp, true);
 
         const auto lowerBound = GetMasterLowerBound(Master_Level_Data.nMLevel);
         const auto upperBound = Master_Level_Data.lNext_MasterLevel_Experince;
@@ -5746,8 +5743,7 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     }
     else
     {
-        g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
-        g_pMainFrame->SetGetExp(Exp);
+        UI::Hud::ShowExperienceGain(CharacterAttribute->Experience, Exp, false);
 
         const auto lowerBound = GetNormalLowerBound(CharacterAttribute->Level);
         const auto upperBound = CharacterAttribute->NextExperience;
@@ -5834,8 +5830,7 @@ BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     if (experienceType == eExperienceType_Master)
     {
-        g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
-        g_pMainFrame->SetGetExp_Wide(addedExperience);
+        UI::Hud::ShowExperienceGain(Master_Level_Data.lMasterLevel_Experince, addedExperience, true);
 
         const auto lowerBound = GetMasterLowerBound(Master_Level_Data.nMLevel);
         const auto upperBound = Master_Level_Data.lNext_MasterLevel_Experince;
@@ -5847,8 +5842,7 @@ BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     }
     else
     {
-        g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
-        g_pMainFrame->SetGetExp(addedExperience);
+        UI::Hud::ShowExperienceGain(CharacterAttribute->Experience, addedExperience, false);
 
         const auto lowerBound = GetNormalLowerBound(CharacterAttribute->Level);
         const auto upperBound = CharacterAttribute->NextExperience;
@@ -6377,7 +6371,7 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         break;
 
     case 5:
-        g_pUIManager->Open(::MUTEX_SERVERDIVISION);
+        UI::Windows::OpenServerDivision();
         break;
 
     case 6:
@@ -7603,10 +7597,6 @@ void ReceiveGuildLeave(const BYTE* ReceiveBuffer)
         Hero->GuildStatus = G_NONE;
         Hero->GuildRelationShip = GR_NONE;
         UI::Windows::Hide(mu::ui::window::INTERFACE_GUILDINFO);
-
-#ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-        g_pMoveCommandWindow->SetCastleOwner(false);
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW
     }
     else if (Data->Value == 5)
     {
@@ -7902,10 +7892,6 @@ void ReceiveGuildIDViewport(const BYTE* ReceiveBuffer)
         c->GuildStatus = Data2->GuildStatus;
         c->GuildType = Data2->GuildType;
         c->GuildRelationShip = Data2->GuildRelationShip;
-
-#ifdef CSK_MOD_MOVE_COMMAND_WINDOW
-        g_pMoveCommandWindow->SetCastleOwner((bool)Data2->btCastleOwner);
-#endif // CSK_MOD_MOVE_COMMAND_WINDOW
 
         if (g_GuildCache.IsExistGuildMark(GuildKey))
             c->GuildMarkIndex = g_GuildCache.GetGuildMarkIndex(GuildKey);
@@ -9048,7 +9034,7 @@ void ReceiveMatchGameCommand(const BYTE* ReceiveBuffer)
 
 void ReceiveDuelRequest(const BYTE* ReceiveBuffer)
 {
-    if (g_MessageBox->IsEmpty() == false)
+    if (UI::Dialogs::IsMessageBoxOpen())
     {
         return;
     }
@@ -9062,7 +9048,7 @@ void ReceiveDuelRequest(const BYTE* ReceiveBuffer)
 
     g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, enemyKey, playerName);
 
-    if (g_pNewUISystem->IsImpossibleDuelInterface() == true)
+    if (UI::Dialogs::IsDuelRequestBlocked())
     {
         g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, FALSE);
         return;
@@ -10070,7 +10056,7 @@ void ReceiveOption(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_OPTION)ReceiveBuffer;
 
-    g_pMainFrame->ResetSkillHotKey();
+    UI::Hud::ClearSkillHotkeys();
 
     int iHotKey;
     for (int i = 0; i < 10; ++i)
@@ -10084,39 +10070,16 @@ void ReceiveOption(const BYTE* ReceiveBuffer)
             {
                 if (iHotKey == CharacterAttribute->Skill[j])
                 {
-                    g_pMainFrame->SetSkillHotKey(i, j);
+                    UI::Hud::SetSkillHotkey(i, j);
                     break;
                 }
             }
         }
     }
 
-    if ((Data->GameOption & AUTOATTACK_ON) == AUTOATTACK_ON)
-    {
-        g_pOption->SetAutoAttack(true);
-    }
-    else
-    {
-        g_pOption->SetAutoAttack(false);
-    }
-
-    if ((Data->GameOption & WHISPER_SOUND_ON) == WHISPER_SOUND_ON)
-    {
-        g_pOption->SetWhisperSound(true);
-    }
-    else
-    {
-        g_pOption->SetWhisperSound(false);
-    }
-
-    if ((Data->GameOption & SLIDE_HELP_OFF) == SLIDE_HELP_OFF)
-    {
-        g_pOption->SetSlideHelp(false);
-    }
-    else
-    {
-        g_pOption->SetSlideHelp(true);
-    }
+    UI::Options::ApplySaved((Data->GameOption & AUTOATTACK_ON) == AUTOATTACK_ON,
+                            (Data->GameOption & WHISPER_SOUND_ON) == WHISPER_SOUND_ON,
+                            (Data->GameOption & SLIDE_HELP_OFF) != SLIDE_HELP_OFF);
 
     BYTE byQLevel, byWLevel, byELevel, byRLevel;
     byQLevel = (Data->QWERLevel & 0xFF000000) >> 24;
@@ -10124,14 +10087,14 @@ void ReceiveOption(const BYTE* ReceiveBuffer)
     byELevel = (Data->QWERLevel & 0x0000FF00) >> 8;
     byRLevel = Data->QWERLevel & 0x000000FF;
 
-    g_pMainFrame->SetItemHotKey(mu::ui::window::HOTKEY_Q, Data->KeyQWE[0] + ITEM_POTION, byQLevel);
-    g_pMainFrame->SetItemHotKey(mu::ui::window::HOTKEY_W, Data->KeyQWE[1] + ITEM_POTION, byWLevel);
-    g_pMainFrame->SetItemHotKey(mu::ui::window::HOTKEY_E, Data->KeyQWE[2] + ITEM_POTION, byELevel);
+    UI::Hud::SetItemHotkey(UI::Hud::ItemHotkey::Q, Data->KeyQWE[0] + ITEM_POTION, byQLevel);
+    UI::Hud::SetItemHotkey(UI::Hud::ItemHotkey::W, Data->KeyQWE[1] + ITEM_POTION, byWLevel);
+    UI::Hud::SetItemHotkey(UI::Hud::ItemHotkey::E, Data->KeyQWE[2] + ITEM_POTION, byELevel);
 
     BYTE wChatListBoxSize = (Data->ChatLogBox >> 4) * 3;
     BYTE wChatListBoxBackAlpha = Data->ChatLogBox & 0x0F;
 
-    g_pMainFrame->SetItemHotKey(mu::ui::window::HOTKEY_R, Data->KeyR + ITEM_POTION, byRLevel);
+    UI::Hud::SetItemHotkey(UI::Hud::ItemHotkey::R, Data->KeyR + ITEM_POTION, byRLevel);
 }
 
 void ReceiveEventChipInfomation(const BYTE* ReceiveBuffer)
@@ -12625,7 +12588,7 @@ bool ReceiveMoveMapChecksum(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_MAPMOVE_CHECKSUM)ReceiveBuffer;
 
-    g_pMoveCommandWindow->SetMoveCommandKey(Data->dwKeyValue);
+    UI::Hud::SetMoveCommandKey(Data->dwKeyValue);
 
     return true;
 }
@@ -13216,9 +13179,6 @@ bool ReceiveFatigueTime(const BYTE* pReceiveBuffer)
     if (g_FatigueTimeSystem->SetFatiguePercentage(Data->btFatiguePercentage))
     {
         g_FatigueTimeSystem->SetIsFatigueSystem(true);
-#ifdef PBG_MOD_STAMINA_UI
-        g_pNewUIStamina->SetCaution(Data->btFatiguePercentage);
-#endif // PBG_MOD_STAMINA_UI
         return true;
     }
     else

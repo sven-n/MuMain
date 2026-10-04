@@ -2,6 +2,7 @@
 
 #include "UI/Core/WindowAccess.h"
 
+#include "UI/Core/UIManager.h"
 #include "UI/Core/WindowSystem.h"
 
 namespace UI::Windows
@@ -24,5 +25,16 @@ bool IsVisible(WindowId id)
 void HideAll()
 {
     g_pNewUISystem->HideAll();
+}
+
+void ResetLegacyPanels()
+{
+    if (g_pUIManager)
+        g_pUIManager->Init();
+}
+
+void OpenServerDivision()
+{
+    g_pUIManager->Open(::MUTEX_SERVERDIVISION);
 }
 }

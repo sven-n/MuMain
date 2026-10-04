@@ -2,7 +2,9 @@
 
 #include "UI/Dialogs/ConfirmRequest.h"
 
+#include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/Dialogs/MessageBox.h"
 
 namespace UI::Dialogs
 {
@@ -24,5 +26,15 @@ void ShowConfirm(ConfirmRequest request)
     cfg.onPrimary = std::move(request.onAccept);
     cfg.onCancel = std::move(request.onCancel);
     mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+}
+
+bool IsMessageBoxOpen()
+{
+    return !g_MessageBox->IsEmpty();
+}
+
+bool IsDuelRequestBlocked()
+{
+    return g_pNewUISystem->IsImpossibleDuelInterface();
 }
 }

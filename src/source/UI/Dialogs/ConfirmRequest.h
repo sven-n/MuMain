@@ -31,4 +31,8 @@ struct ConfirmRequest
 };
 
 void ShowConfirm(ConfirmRequest request);
+
+bool IsMessageBoxOpen();
+// A window that a duel request must not interrupt is open.
+bool IsDuelRequestBlocked();
 }

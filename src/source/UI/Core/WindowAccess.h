@@ -11,4 +11,8 @@ void Show(WindowId id);
 void Hide(WindowId id);
 bool IsVisible(WindowId id);
 void HideAll();
+
+// The older panel manager behind a few NPC windows.
+void ResetLegacyPanels();
+void OpenServerDivision();
 }

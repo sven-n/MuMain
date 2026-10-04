@@ -175,6 +175,8 @@ Cursed Temple pass (2026-10-05): `UI/Events/CursedTempleUpdates` owns the entry 
 
 NPC and quest pass (2026-10-05): `UI/NPCs/NpcDialogueUpdates` owns the dialogue-open check, opening the dialogue, the quest list, and the Gens join/leave/reward answers; the dialogue takes named `GensJoinResult`/`GensLeaveResult`/`GensRewardResult` values and `WSclient.cpp` maps the protocol codes (unknown codes are dropped, as the old switches ignored them). `UI/Quests/QuestUpdates` owns disabling Complete on the open progress window, the quest-log reward refresh, and the (compiled-out) quest-count-limit box. A full RelWithDebInfo build passed. In-game spot checks remain pending with the consolidated RB-03 checklist.
 
+HUD and main-frame pass (2026-10-05): `UI::Hud` now also owns the map-name banner, kill-experience display, skill/item hotkeys (named `ItemHotkey` Q/W/E/R), slide notices, the death-screen hotkey state, and the map-move key. New `UI/Options/OptionUpdates` applies saved options and new-game defaults; `UI/MuHelper/MuHelperUpdates` loads the saved helper config; `UI::Chat` gains `IsWhisperBlocked`/`ResetLogFilter`; `UI::Dialogs` gains `IsMessageBoxOpen`/`IsDuelRequestBlocked`; `UI::Windows` gains `ResetLegacyPanels`/`OpenServerDivision` for `CUIManager`. Three compiled-out blocks calling methods that no longer exist (move-command castle owner, stamina caution) were deleted. A full RelWithDebInfo build passed. In-game spot checks remain pending with the consolidated RB-03 checklist.
+
 ### RB-04 — Theme command ownership
 
 - Keep `$theme` command recognition in the console, but move theme validation, activation, config
