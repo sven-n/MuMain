@@ -62,7 +62,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
-#include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/Dialogs/ConfirmRequest.h"
 #include "UI/Core/WindowCommon.h" // ShowTrainerMenuDialog/ShowSeedMasterMenuDialog/etc.
 #include "UI/Inventory/InventoryCtrl.h"
 #include "GameLogic/Events/w_CursedTemple.h"
@@ -6424,18 +6424,18 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     break;
     case 0x12:
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = {
             {I18N::Game::Warning2223, true, RGBA(255, 0, 0, 255)},
             {L" ", false},
             {I18N::Game::RefineryHasStartedRefineryIsA, true, RGBA(223, 191, 103, 255)},
         };
-        cfg.onPrimary = []
+        cfg.onAccept = []
         {
             g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_OSBOURNE);
             UI::Windows::Show(mu::ui::window::INTERFACE_MIXINVENTORY);
         };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
         // 			BYTE *pbyChaosRate = ( &Data->Value) + 1;
         // 			g_pUIJewelHarmony->SetMixSuccessRate(pbyChaosRate);
     }
@@ -7292,15 +7292,15 @@ void ReceiveParty(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT_KEY)ReceiveBuffer;
     PartyKey = ((int)(Data->KeyH) << 8) + Data->KeyL;
 
-    mu::ui::window::GenericDialogConfig cfg;
-    cfg.showCancel = true;
+    UI::Dialogs::ConfirmRequest cfg;
+    cfg.cancellable = true;
     cfg.lines = {
         { CharactersClient[FindCharacterIndex(PartyKey)].ID, false },
         { I18N::Game::SomeoneRequestsYouToJoinTheirAParty, false },
     };
-    cfg.onPrimary = [] { SocketClient->ToGameServer()->SendPartyInviteResponse(true, PartyKey); };
+    cfg.onAccept = [] { SocketClient->ToGameServer()->SendPartyInviteResponse(true, PartyKey); };
     cfg.onCancel = [] { SocketClient->ToGameServer()->SendPartyInviteResponse(false, PartyKey); };
-    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+    UI::Dialogs::ShowConfirm(std::move(cfg));
 }
 
 void ReceivePartyResult(const BYTE* ReceiveBuffer)
@@ -7466,20 +7466,16 @@ void ReceiveGuild(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT_KEY)ReceiveBuffer;
     GuildPlayerKey = ((int)(Data->KeyH) << 8) + Data->KeyL;
 
-    // Third proof case for CGenericConfirmDialog (see UI/Dialogs/GenericConfirmDialog.h) -- was
-    // CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGuildRequestMsgBoxLayout)) + two AddMsg() calls
-    // (the "shell, caller fills in body lines after construction" pattern), triggered from a
-    // network packet handler rather than a UI click -- the harder invocation shape. Captures
-    // GuildPlayerKey by value rather than reading the mutable global again at click time, since a
-    // second guild-related packet could otherwise change it before the player responds.
+    // Captures GuildPlayerKey by value rather than reading the mutable global again at click time,
+    // since a second guild-related packet could otherwise change it before the player responds.
     const int guildPlayerKey = GuildPlayerKey;
-    mu::ui::window::GenericDialogConfig cfg;
-    cfg.showCancel = true;
+    UI::Dialogs::ConfirmRequest cfg;
+    cfg.cancellable = true;
     cfg.lines.push_back({ CharactersClient[FindCharacterIndex(guildPlayerKey)].ID, false });
     cfg.lines.push_back({ I18N::Game::YouHaveReceivedAnOfferToJoinAGuild, false });
-    cfg.onPrimary = [guildPlayerKey]() { SocketClient->ToGameServer()->SendGuildJoinResponse(true, guildPlayerKey); };
+    cfg.onAccept = [guildPlayerKey]() { SocketClient->ToGameServer()->SendGuildJoinResponse(true, guildPlayerKey); };
     cfg.onCancel = [guildPlayerKey]() { SocketClient->ToGameServer()->SendGuildJoinResponse(false, guildPlayerKey); };
-    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+    UI::Dialogs::ShowConfirm(std::move(cfg));
 }
 
 void ReceiveGuildResult(const BYTE* ReceiveBuffer)
@@ -7684,15 +7680,15 @@ void ReceiveDeclareWar(const BYTE* ReceiveBuffer)
     wchar_t szChallengeText[128];
     mu_swprintf(szChallengeText, I18N::Game::SGuildChallengesYou, GuildWarName);
 
-    mu::ui::window::GenericDialogConfig cfg;
-    cfg.showCancel = true;
+    UI::Dialogs::ConfirmRequest cfg;
+    cfg.cancellable = true;
     if (Data->Type == 1)
     {
         cfg.lines = {
             { szChallengeText, false },
             { I18N::Game::YouHaveBeenChallengedToBattleSoccer, false },
         };
-        cfg.onPrimary = [] { SocketClient->ToGameServer()->SendGuildWarResponse(true); };
+        cfg.onAccept = [] { SocketClient->ToGameServer()->SendGuildWarResponse(true); };
         cfg.onCancel = [] { SocketClient->ToGameServer()->SendGuildWarResponse(false); InitGuildWar(); };
     }
     else
@@ -7701,10 +7697,10 @@ void ReceiveDeclareWar(const BYTE* ReceiveBuffer)
             { szChallengeText, false },
             { I18N::Game::ToAGuildWar, false },
         };
-        cfg.onPrimary = [] { SocketClient->ToGameServer()->SendGuildWarResponse(true); };
+        cfg.onAccept = [] { SocketClient->ToGameServer()->SendGuildWarResponse(true); };
         cfg.onCancel = [] { SocketClient->ToGameServer()->SendGuildWarResponse(false); InitGuildWar(); };
     }
-    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+    UI::Dialogs::ShowConfirm(std::move(cfg));
 }
 
 void ReceiveDeclareWarResult(const BYTE* ReceiveBuffer)
@@ -8394,10 +8390,10 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         break;
     case 5:
     {
-        mu::ui::window::GenericDialogConfig cfg;
-        cfg.primaryLabel = I18N::Game::ConversationIsOver;
+        UI::Dialogs::ConfirmRequest cfg;
+        cfg.acceptLabel = I18N::Game::ConversationIsOver;
         cfg.lines = { { I18N::Dialog::Lookup(Data->Cmd2), false } };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
 
@@ -8413,11 +8409,11 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         {
         case 0:
         {
-            mu::ui::window::GenericDialogConfig cfg;
-            cfg.showCancel = true;
+            UI::Dialogs::ConfirmRequest cfg;
+            cfg.cancellable = true;
             cfg.lines.push_back({ I18N::Game::WouldYouLikeToReceiveTheItem, false });
-            cfg.onPrimary = [] { SocketClient->ToGameServer()->SendWhiteAngelItemRequest(); };
-            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+            cfg.onAccept = [] { SocketClient->ToGameServer()->SendWhiteAngelItemRequest(); };
+            UI::Dialogs::ShowConfirm(std::move(cfg));
             break;
         }
 
@@ -8452,11 +8448,11 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
             break;
         case 1:
         {
-            mu::ui::window::GenericDialogConfig cfg;
-            cfg.showCancel = true;
+            UI::Dialogs::ConfirmRequest cfg;
+            cfg.cancellable = true;
             cfg.lines.push_back({ I18N::Game::WouldYouLikeToReceiveTheItem, false });
-            cfg.onPrimary = [] { SocketClient->ToGameServer()->SendLeoHelperItemRequest(); };
-            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+            cfg.onAccept = [] { SocketClient->ToGameServer()->SendLeoHelperItemRequest(); };
+            UI::Dialogs::ShowConfirm(std::move(cfg));
             break;
         }
         case 2:
@@ -8471,20 +8467,20 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         {
         case 0:
         {
-            mu::ui::window::GenericDialogConfig cfg;
-            cfg.showCancel = true;
+            UI::Dialogs::ConfirmRequest cfg;
+            cfg.cancellable = true;
             cfg.lines.push_back({ I18N::Game::WelcomeToSantaSVillageHere, false });
-            cfg.onPrimary = [] { SocketClient->ToGameServer()->SendSantaClausItemRequest(); };
-            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+            cfg.onAccept = [] { SocketClient->ToGameServer()->SendSantaClausItemRequest(); };
+            UI::Dialogs::ShowConfirm(std::move(cfg));
             break;
         }
         case 1:
         {
-            mu::ui::window::GenericDialogConfig cfg;
-            cfg.showCancel = true;
+            UI::Dialogs::ConfirmRequest cfg;
+            cfg.cancellable = true;
             cfg.lines.push_back({ I18N::Game::WelcomeToSantaSVillagePleaseComeClaimYourGift, false });
-            cfg.onPrimary = [] { SocketClient->ToGameServer()->SendSantaClausItemRequest(); };
-            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+            cfg.onAccept = [] { SocketClient->ToGameServer()->SendSantaClausItemRequest(); };
+            UI::Dialogs::ShowConfirm(std::move(cfg));
             break;
         }
         case 2:
@@ -8498,11 +8494,11 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
     break;
     case 17:
     {
-        mu::ui::window::GenericDialogConfig cfg;
-        cfg.showCancel = true;
+        UI::Dialogs::ConfirmRequest cfg;
+        cfg.cancellable = true;
         cfg.lines.push_back({ I18N::Game::WouldYouLikeToReturnToDevias, false });
-        cfg.onPrimary = [] { SocketClient->ToGameServer()->SendMoveToDeviasBySnowmanRequest(); };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        cfg.onAccept = [] { SocketClient->ToGameServer()->SendMoveToDeviasBySnowmanRequest(); };
+        UI::Dialogs::ShowConfirm(std::move(cfg));
         break;
     }
     case 47:
@@ -8593,10 +8589,10 @@ void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
     {
         wchar_t szUnityResultText[256] = { 0, };
         mu_swprintf(szUnityResultText, L"%ls%ls %ls", I18N::Game::JewelCombination, I18N::Game::To1816, I18N::Game::CongratulationsYouHaveSuccessfully);
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ szUnityResultText, true });
-        cfg.onPrimary = [] { COMGEM::Exit(); };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        cfg.onAccept = [] { COMGEM::Exit(); };
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     case 4:
@@ -8635,10 +8631,10 @@ void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
     {
         wchar_t szDisjointResultText[256] = { 0, };
         mu_swprintf(szDisjointResultText, L"%ls%ls %ls", I18N::Game::DismantleJewel, I18N::Game::To1816, I18N::Game::CongratulationsYouHaveSuccessfully);
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ szDisjointResultText, true });
-        cfg.onPrimary = [] { COMGEM::Exit(); };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        cfg.onAccept = [] { COMGEM::Exit(); };
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     case 2:
@@ -8868,13 +8864,13 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             mu_swprintf(szOpenTime1, I18N::Game::YouCanEnterSNow, I18N::Game::ChaosCastle);
             mu_swprintf(szOpenTime2, I18N::Game::InSCurrentlyDDEntered, I18N::Game::ChaosCastle, Data->KeyM, 100);
 
-            mu::ui::window::GenericDialogConfig cfg;
-            cfg.showCancel = true;
+            UI::Dialogs::ConfirmRequest cfg;
+            cfg.cancellable = true;
             cfg.lines = {
                 { szOpenTime1, false },
                 { szOpenTime2, false },
             };
-            cfg.onPrimary = []
+            cfg.onAccept = []
             {
                 if (ITEM* pItem = g_pMyInventory->GetStandbyItem())
                 {
@@ -8882,7 +8878,7 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
                     SocketClient->ToGameServer()->SendChaosCastleEnterRequest(pItem->Level, iSrcIndex);
                 }
             };
-            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+            UI::Dialogs::ShowConfirm(std::move(cfg));
         }
         else
         {
@@ -8898,10 +8894,10 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             mu_swprintf(Text, I18N::Game::AfterDMinutesYouMayEnterS, Mini, I18N::Game::ChaosCastle);
             wcscat(szOpenTime, Text);
 
-            mu::ui::window::GenericDialogConfig cfg;
-            cfg.showCancel = true;
+            UI::Dialogs::ConfirmRequest cfg;
+            cfg.cancellable = true;
             cfg.lines.push_back({ szOpenTime, false });
-            cfg.onPrimary = []
+            cfg.onAccept = []
             {
                 if (ITEM* pItem = g_pMyInventory->GetStandbyItem())
                 {
@@ -8909,7 +8905,7 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
                     SocketClient->ToGameServer()->SendChaosCastleEnterRequest(pItem->Level, iSrcIndex);
                 }
             };
-            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+            UI::Dialogs::ShowConfirm(std::move(cfg));
         }
     }
     else if (Data->Value == 5)
@@ -9064,21 +9060,17 @@ void ReceiveDuelRequest(const BYTE* ReceiveBuffer)
         return;
     }
 
-    // Was CDuelMsgBoxLayout (CustomMessageBox.h) -- ported to CGenericConfirmDialog's own
-    // portrait2D field (2026-09-14), reproducing native's fixed IMAGE_MSGBOX_DUEL_BACK sprite with
-    // the enemy's bracketed name overlaid on it, same as RenderTexts()'s own L"[%ls]" format.
-    mu::ui::window::GenericDialogConfig cfg;
-    cfg.showCancel = true;
-    cfg.portrait2D = mu::ui::window::GenericDialogConfig::Portrait2D{
-        std::wstring(L"[") + g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY) + L"]" };
-    cfg.tallPanel = true; // portrait + 2 lines doesn't comfortably fit the default panel height
+    // The duel art with the challenger's bracketed name over it, as the original's L"[%ls]".
+    UI::Dialogs::ConfirmRequest cfg;
+    cfg.cancellable = true;
+    cfg.duelCaption = std::wstring(L"[") + g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY) + L"]";
     cfg.lines = {
         { I18N::Game::YouAreChallengedToADuel, false },
         { I18N::Game::WouldYouLikeToAcceptTheChallenge, false },
     };
-    cfg.onPrimary = [] { g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, TRUE); };
+    cfg.onAccept = [] { g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, TRUE); };
     cfg.onCancel = [] { g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, FALSE); };
-    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+    UI::Dialogs::ShowConfirm(std::move(cfg));
     PlayBuffer(SOUND_OPEN_DUELWINDOW);
 }
 
@@ -9107,12 +9099,12 @@ void ReceiveDuelStart(const BYTE* ReceiveBuffer)
     }
     else if (Data->nResult == 16)
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = {
             { I18N::Game::ColosseumIsOccupied, false },
             { I18N::Game::TryItAgainLater, false },
         };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     else if (Data->nResult == 28)
     {
@@ -9220,21 +9212,21 @@ void ReceiveDuelWatchRequestReply(const BYTE* ReceiveBuffer)
     }
     else if (Data->nResult == 16)
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = {
             { I18N::Game::ColosseumIsOccupied, false },
             { I18N::Game::TryItAgainLater, false },
         };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     else if (Data->nResult == 27)
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = {
             { I18N::Game::NotAvailable, true },
             { I18N::Game::TooManyPeopleInTheColossum, false },
         };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     else
     {
@@ -9291,12 +9283,8 @@ void ReceiveDuelResult(const BYTE* ReceiveBuffer)
     mu_swprintf(szMessage, I18N::Game::DuelFinishedYouWillBeWarpedBackToTheViallageInDSeconds, 10);
     UI::Chat::PostSystem(szMessage, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
-    // Was CDuelResultMsgBoxLayout (CustomMessageBox.h) -- ported to CGenericConfirmDialog's own
-    // portrait2D field (2026-09-14), same sprite as the invite dialog above but with "Duel
-    // Finished" as the overlaid bold line (native's own RenderTexts() draws that in the same slot
-    // the invite box uses for the enemy's name) and the winner/loser lines rendered as ordinary
-    // body lines below it. onPrimary is left unset -- native's own OkBtnDown has no live logic
-    // beyond closing the box (its one real statement, SendRequestDuelOk(...), is commented out).
+    // The duel art as in the invitation, with "Duel Finished" over it where the original put the
+    // challenger's name. No accept action: the original's OK only closed the box.
     wchar_t winnerName[MAX_USERNAME_SIZE + 1]{};
     wchar_t loserName[MAX_USERNAME_SIZE + 1]{};
     CMultiLanguage::ConvertFromUtf8(winnerName, Data->szWinner, MAX_USERNAME_SIZE);
@@ -9307,15 +9295,14 @@ void ReceiveDuelResult(const BYTE* ReceiveBuffer)
     wchar_t strLine2[256];
     mu_swprintf(strLine2, I18N::Game::TheDuelWithS, loserName);
 
-    mu::ui::window::GenericDialogConfig cfg;
-    cfg.portrait2D = mu::ui::window::GenericDialogConfig::Portrait2D{ I18N::Game::DuelFinished };
-    cfg.tallPanel = true; // portrait + 3 lines doesn't comfortably fit the default panel height
+    UI::Dialogs::ConfirmRequest cfg;
+    cfg.duelCaption = I18N::Game::DuelFinished;
     cfg.lines = {
         { strLine1, false },
         { strLine2, false },
         { I18N::Game::Lookup(2697), false },
     };
-    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+    UI::Dialogs::ShowConfirm(std::move(cfg));
     PlayBuffer(SOUND_OPEN_DUELWINDOW);
 }
 
@@ -10250,9 +10237,9 @@ void ReceiveServerImmigration(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::ThePasswordYouHaveEnteredIsIncorrect, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
         break;
     }
     case 1:
@@ -11284,9 +11271,9 @@ void ReceiveHuntZoneEnter(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = { { I18N::Game::UnfortunatelyYouHaveFailed, false } };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
 
@@ -11296,9 +11283,9 @@ void ReceiveHuntZoneEnter(const BYTE* ReceiveBuffer)
 
     case 2:
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = { { I18N::Game::NoAuthorization, false } };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     }
@@ -11800,9 +11787,9 @@ void ReceiveCastleHuntZoneInfo(const BYTE* ReceiveBuffer)
 
     if (pData->m_byResult == 0)
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::UnfortunatelyYouHaveFailed, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     else
     {
@@ -11818,9 +11805,9 @@ void ReceiveCastleHuntZoneResult(const BYTE* ReceiveBuffer)
 
     if (pData->m_byResult == 0)
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::UnfortunatelyYouHaveFailed, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
 }
 
@@ -12055,21 +12042,21 @@ void ReceiveCrywolfAltarContract(const BYTE* ReceiveBuffer)
         int level = CharacterAttribute->Level;
         if (level < 260)
         {
-            mu::ui::window::GenericDialogConfig cfg;
+            UI::Dialogs::ConfirmRequest cfg;
             cfg.lines = {
                 { I18N::Game::DisqualifiedForTheContractRequirement, false },
                 { I18N::Game::OnlyLevelAbove350IsAllowedToMakeAContract, false },
             };
-            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+            UI::Dialogs::ShowConfirm(std::move(cfg));
             //			M34CryWolf1st::Set_Message_Box(54,0,0);
             //			M34CryWolf1st::Set_Message_Box(55,1,0);
         }
         else
         {
             //			M34CryWolf1st::Set_Message_Box(58,0,0);
-            mu::ui::window::GenericDialogConfig cfg;
+            UI::Dialogs::ConfirmRequest cfg;
             cfg.lines.push_back({ I18N::Game::PleaseTryAgainInAWhile, false });
-            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+            UI::Dialogs::ShowConfirm(std::move(cfg));
         }
     }
     else if (pData->bResult == 1)
@@ -12081,20 +12068,20 @@ void ReceiveCrywolfAltarContract(const BYTE* ReceiveBuffer)
             extern int BackUp_Key;
             BackUp_Key = CharactersClient[TargetNpc].Key;
 
-            mu::ui::window::GenericDialogConfig cfg;
+            UI::Dialogs::ConfirmRequest cfg;
             cfg.lines = {
                 { I18N::Game::YouHaveBeenRegisteredToBeAGuardianToProtectTheWolf, false },
                 { I18N::Game::YourRoleAsAGuardianWillBeCancelledWhenYouWarp, false },
             };
             // Matches the original's own wiring: this dialog's OK button was registered to
             // CCry_Wolf_Get_Temple::OkBtnDown, not its own handler -- preserved here verbatim.
-            cfg.onPrimary = []
+            cfg.onAccept = []
             {
                 if (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
                 {
-                    mu::ui::window::GenericDialogConfig dontCfg;
+                    UI::Dialogs::ConfirmRequest dontCfg;
                     dontCfg.lines.push_back({ I18N::Game::ContractCanTBeMadeWhenYouAreOnAMount, false });
-                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(dontCfg));
+                    UI::Dialogs::ShowConfirm(std::move(dontCfg));
                 }
                 else
                 {
@@ -12102,7 +12089,7 @@ void ReceiveCrywolfAltarContract(const BYTE* ReceiveBuffer)
                     SocketClient->ToGameServer()->SendCrywolfContractRequest(BackUp_Key);
                 }
             };
-            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+            UI::Dialogs::ShowConfirm(std::move(cfg));
         }
 
         M34CryWolf1st::Check_AltarState(Key - 316, pData->btAltarState);
@@ -12396,9 +12383,9 @@ bool ReceiveRegistLuckyCoin(const BYTE* ReceiveBuffer)
     {
         wchar_t szText[100] = { 0, };
         mu_swprintf(szText, I18N::Game::YouAreLackOfSItems, I18N::Game::Register);
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ szText, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     case 1:
@@ -12408,9 +12395,9 @@ bool ReceiveRegistLuckyCoin(const BYTE* ReceiveBuffer)
     break;
     case 100:
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::YouCanOnlyApplyOncePerYourAccount, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     default:
@@ -12432,9 +12419,9 @@ bool ReceiveRequestExChangeLuckyCoin(const BYTE* ReceiveBuffer)
     {
         wchar_t szText[100] = { 0, };
         mu_swprintf(szText, I18N::Game::YouAreLackOfSItems, I18N::Game::Exchange1940);
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ szText, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     case 1:
@@ -12445,9 +12432,9 @@ bool ReceiveRequestExChangeLuckyCoin(const BYTE* ReceiveBuffer)
     break;
     case 2:
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::MoreThan2X4SpaceInInventoryIsNeeded, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     default:
@@ -12513,7 +12500,7 @@ bool ReceiveDoppelGangerState(const BYTE* ReceiveBuffer)
     {
         UI::Windows::Show(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
 
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = {
             { I18N::Game::_3MonstersReachingTheMagicCircle, false },
             { L" ", false },
@@ -12521,7 +12508,7 @@ bool ReceiveDoppelGangerState(const BYTE* ReceiveBuffer)
             { L" ", false },
             { I18N::Game::WillResultInDoppelgangerDefenseFailure, false },
         };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     case 3: // play->end
@@ -12578,31 +12565,31 @@ bool ReceiveDoppelGangerResult(const BYTE* ReceiveBuffer)
     {
         g_pDoppelGangerFrame->SetRemainTime(0);
 
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = {
             { I18N::Game::Congratulations, false },
             { L" ", false },
             { I18N::Game::YouVeSuccessfullyDefendedDoppelganger, false },
         };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     case 1:
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::DoppelgangerDefenseFailed, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     case 2:
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = {
             { I18N::Game::YouFailedToFendOffMonstersAnd, false },
             { L" ", false },
             { I18N::Game::AllowedThemToReachThePointLine, false },
         };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     }
@@ -12675,41 +12662,41 @@ bool ReceiveEnterEmpireGuardianEvent(const BYTE* ReceiveBuffer)
     {
         wchar_t szText[256] = {};
         mu_swprintf(szText, I18N::Game::EnterAfterDMinutes, (Data->RemainTick / 60000));
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = {
             { I18N::Game::EntryTime2798, false },
             { L" ", false },
             { szText, false },
         };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     case 2:
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::QuestItemMissing, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     case 3:
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::CapacityExceeded, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     case 4:
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::ThereIsStillTimeRemainingInThisZone, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     case 5:
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::YouCanOnlyEnterAsAMemberOfAParty, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
 
@@ -12744,12 +12731,12 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = {
             { I18N::Game::YouHaveFailedToConquerThe, false },
             { I18N::Game::FortressOfEmpireGuardians, false },
         };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     case 1:
@@ -12757,25 +12744,25 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
         int day = g_pEmpireGuardianTimer->GetDay();
         int zone = g_pEmpireGuardianTimer->GetZone();
         wchar_t szText[256] = {};
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         mu_swprintf(szText, I18N::Game::FortressOfEmpireGuardiansRoundD, day);
         cfg.lines.push_back({ szText, false });
         mu_swprintf(szText, L"%d%ls", zone, I18N::Game::ZoneCleared);
         cfg.lines.push_back({ szText, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     case 2:
     {
         int day = g_pEmpireGuardianTimer->GetDay();
         wchar_t szText[256] = {};
-        mu::ui::window::GenericDialogConfig cfg;
+        UI::Dialogs::ConfirmRequest cfg;
         mu_swprintf(szText, I18N::Game::FortressOfEmpireGuardiansRoundD, day);
         cfg.lines.push_back({ szText, false });
         cfg.lines.push_back({ I18N::Game::HasBeenCleared, false });
         mu_swprintf(szText, I18N::Game::RewardedExpD, Data->Exp);
         cfg.lines.push_back({ szText, false });
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
     }
