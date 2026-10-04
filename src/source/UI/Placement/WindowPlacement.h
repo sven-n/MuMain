@@ -12,8 +12,13 @@ namespace UI::Placement
 using SetPosition = std::function<void(int x, int y)>;
 
 // `slotName` is the slot's data-window value. A window with no slot in the workspace keeps the
-// position it was created at.
+// position it was created at. A window registered without `setPosition` can only be named in
+// data-closes.
 void RegisterWindow(std::uint32_t windowId, std::string_view slotName, SetPosition setPosition);
+
+// Before a window opens: closes the open windows its slot lists in data-closes, the ones the
+// theme gives no room beside it.
+void CloseForOpening(std::uint32_t windowId);
 
 // Re-places every open window that has a slot. Call after a window opens or closes.
 void Arrange();

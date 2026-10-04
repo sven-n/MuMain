@@ -1,6 +1,6 @@
 # Window placement (design proposal)
 
-**Status: approved 2026-10-05. Phases 0–2 implemented; phases 1 and 2 await in-game checks.**
+**Status: approved 2026-10-05. Phases 0–3 implemented; phases 1–3 await in-game checks.**
 Supersedes the "dock spacing" item in [tracked-deferrals.md](tracked-deferrals.md).
 
 ## Goal
@@ -161,8 +161,11 @@ Every rule in `CSystem::Show()`/`Hide()` falls into one of three kinds (full lis
 [Phase 0: rule classification](#phase-0-rule-classification)):
 
 - **Placement**: where an open window goes. Moves to the workspace layout.
-- **Space exclusion**: a window closes only because there is no room. Moves to the theme, as
-  exclusive groups on slots or a region's maximum open count.
+- **Space exclusion**: a window closes only because there is no room. Moves to the theme: a
+  slot's `data-closes` lists the windows that close when its window opens. Closes run through the
+  normal `CSystem::Hide()`, as if the player closed the window. Names in `data-closes` are slot
+  names; a window without a slot can be registered by name only (Gens ranking, the MU Helper skill
+  picker).
 - **Game rule**: windows that cannot coexist for gameplay or server reasons, and companion windows
   that only work together. Stays in C++; the theme still decides where companions go.
 
@@ -197,7 +200,6 @@ slots.
 
 - One workspace document or one per region; which RmlUi context it lives in. Background-context
   documents (inventory family) already follow their window through `root_*` bindings.
-- Exclusion vocabulary: named groups, region capacity, or both.
 - How z-order and focus interact with regions.
 
 ## Plan
@@ -210,7 +212,7 @@ UI scale with the [validation matrix](validation-matrix.md).
 | 0 | Done: rules classified below; fill-capability list in section 5. |
 | 1 | Done, in-game checks pending: placement service and both themes' workspaces place the right-docked windows (content fit). The `PanelColumnX`/`SetPos` juggling in `Show()`/`Hide()` is gone; Gens ranking (stretched HUD space, not the dock) keeps its own. Differences from before: with character info, inventory and its extension open, the extension now sits beside the inventory (columns 3 and 2 swapped); windows that used to overlap in column 1 now sit side by side. |
 | 2 | Done, in-game checks pending: HUD reserve from the HUD strip; uncovered world edge replaces `GetScreenWidth()`'s table. |
-| 3 | Space exclusions move to the theme. |
+| 3 | Done, in-game checks pending: column-1/column-2 conflicts and the three-column limit are `data-closes` in both workspaces; `HideGroupBeforeOpenInterface()` is gone. `HideAllGroupA()` stays in C++ (it ends trades and NPC sessions, which a theme must not control). The MU Helper bar rule and the help-panel exclusions stay until their windows have slots. Change: windows closed by these rules now run their closing process; for the Gold Bowman windows that tells the server the event-chip dialog ended, which the old silent hide skipped. |
 | 4 | Fill support: hover hit-testing, `RenderTarget` for native content per window; character info first. |
 | 5 | Remaining families: NPC windows, move map, friends, centred dialogs. |
 
@@ -262,6 +264,7 @@ From `CSystem::Show()`/`Hide()`, `HideAllGroupA/B()`, `HideGroupBeforeOpenInterf
 | Cash shop, Kanturu | `HideAll()` / `HideAllGroupB()` |
 | Checks | `IsImpossible*Interface()` |
 
-`HideAllGroupA()` is kept whole in phase 1. Its non-NPC members (party, commands, guild info,
-master level, Gens ranking, MU Helper) probably close NPC windows for lack of room rather than for
-a server reason; phase 3 decides each one before moving any to the theme.
+`HideAllGroupA()` stays whole in C++. Its non-NPC members (party, commands, guild info, master
+level, Gens ranking, MU Helper) may close NPC windows for lack of room, but closing them ends
+trades and NPC sessions (through `Hide(INVENTORY)` and its companions), so the effect is gameplay
+either way.

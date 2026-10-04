@@ -622,6 +622,9 @@ bool CSystem::LoadMainSceneInterface()
     slot(INTERFACE_LUCKYCOIN_REGISTRATION, "lucky_coin_registration", m_pNewLuckyCoinRegistration);
     slot(INTERFACE_EXCHANGE_LUCKYCOIN, "lucky_coin_exchange", m_pNewExchangeLuckyCoinWindow);
     slot(INTERFACE_LUCKYITEMWND, "lucky_item", m_pNewUILuckyItemWnd);
+    // Named only in data-closes.
+    UI::Placement::RegisterWindow(INTERFACE_GENSRANKING, "gens_ranking", nullptr);
+    UI::Placement::RegisterWindow(INTERFACE_MUHELPER_SKILL_LIST, "mu_helper_skill_list", nullptr);
 
     return true;
 }
@@ -744,7 +747,7 @@ void CSystem::Show(DWORD dwKey)
         return;
     }
 
-    // TODO: fixed priority order per window, and a max open-window count based on resolution.
+    UI::Placement::CloseForOpening(dwKey);
 
     if (dwKey == INTERFACE_FRIEND)
     {
@@ -757,23 +760,11 @@ void CSystem::Show(DWORD dwKey)
     }
     else if (dwKey == INTERFACE_INVENTORY)
     {
-        HideGroupBeforeOpenInterface();
-
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
-
-        if (IsVisible(INTERFACE_MYQUEST))
-        {
-            Hide(INTERFACE_MYQUEST);
-        }
         g_pMyInventory->OpenningProcess();
     }
     else if (dwKey == INTERFACE_INVENTORY_EXT)
     {
-        if (IsVisible(INTERFACE_STORAGE_EXT))
-        {
-            Hide(INTERFACE_STORAGE_EXT);
-        }
-
         if (IsVisible(INTERFACE_STORAGE))
         {
             Hide(INTERFACE_MU_HELPER_BAR);
@@ -782,23 +773,6 @@ void CSystem::Show(DWORD dwKey)
         if (IsVisible(INTERFACE_MYSHOP_INVENTORY))
         {
             Hide(INTERFACE_MU_HELPER_BAR);
-            if (IsVisible(INTERFACE_MYQUEST))
-            {
-                Hide(INTERFACE_MYQUEST);
-            }
-
-            if (IsVisible(INTERFACE_CHARACTER))
-            {
-                Hide(INTERFACE_CHARACTER);
-            }
-        }
-        if (IsVisible(INTERFACE_MYQUEST))
-        {
-            Hide(INTERFACE_MYQUEST);
-        }
-        if (IsVisible(INTERFACE_CHARACTER))
-        {
-            Hide(INTERFACE_CHARACTER);
         }
         if (IsVisible(INTERFACE_NPCSHOP))
         {
@@ -815,8 +789,6 @@ void CSystem::Show(DWORD dwKey)
     }
     else if (dwKey == INTERFACE_CHARACTER)
     {
-        HideGroupBeforeOpenInterface();
-
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_CHAINFO, true);
 
         if (IsVisible(INTERFACE_INVENTORY) && IsVisible(INTERFACE_INVENTORY_EXT))
@@ -827,33 +799,12 @@ void CSystem::Show(DWORD dwKey)
     }
     else if (dwKey == INTERFACE_PET)
     {
-        if (IsVisible(INTERFACE_INVENTORY))
-        {
-            Hide(INTERFACE_INVENTORY);
-        }
-        if (IsVisible(INTERFACE_MYQUEST))
-        {
-            Hide(INTERFACE_MYQUEST);
-        }
-
-        HideGroupBeforeOpenInterface();
-
         m_pNewUIMng->ShowInterface(INTERFACE_CHARACTER);
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_CHAINFO, true);
         m_pNewPetInfoWindow->OpenningProcess();
     }
     else if (dwKey == INTERFACE_MYQUEST)
     {
-        HideGroupBeforeOpenInterface();
-
-        if (IsVisible(INTERFACE_INVENTORY))
-        {
-            Hide(INTERFACE_INVENTORY);
-        }
-        if (IsVisible(INTERFACE_PET))
-        {
-            Hide(INTERFACE_PET);
-        }
         g_pMyQuestInfoWindow->OpenningProcess();
     }
     else if (dwKey == INTERFACE_MIXINVENTORY)
@@ -1146,10 +1097,6 @@ void CSystem::Show(DWORD dwKey)
     }
     else if (dwKey == INTERFACE_QUEST_PROGRESS_ETC)
     {
-        if (IsVisible(INTERFACE_INVENTORY))
-            Hide(INTERFACE_INVENTORY);
-        if (IsVisible(INTERFACE_MYQUEST))
-            Hide(INTERFACE_MYQUEST);
         g_pQuestProgressByEtc->ProcessOpening();
     }
     else if (dwKey == INTERFACE_EMPIREGUARDIAN_NPC)
@@ -1711,30 +1658,6 @@ void CSystem::HideAllGroupB()
         for (int i = 0; dwGroupB[i] != 0; i++)
         {
             m_pNewUIMng->ShowInterface(dwGroupB[i], false);
-        }
-    }
-}
-void CSystem::HideGroupBeforeOpenInterface()
-{
-    DWORD dwGroupC[] = {
-        INTERFACE_PARTY,
-        INTERFACE_COMMAND,
-        INTERFACE_COMMAND_LIST,
-        INTERFACE_GUILDINFO,
-        INTERFACE_GOLD_BOWMAN,
-        INTERFACE_GOLD_BOWMAN_LENA,
-        INTERFACE_GENSRANKING,
-        INTERFACE_MUHELPER,
-        INTERFACE_MUHELPER_EXT,
-        INTERFACE_MUHELPER_SKILL_LIST,
-        0,
-    };
-
-    if (m_pNewUIMng)
-    {
-        for (int i = 0; dwGroupC[i] != 0; i++)
-        {
-            m_pNewUIMng->ShowInterface(dwGroupC[i], false);
         }
     }
 }

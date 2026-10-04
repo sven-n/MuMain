@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 
@@ -141,6 +142,31 @@ void RegisterWindow(std::uint32_t windowId, std::string_view slotName, SetPositi
     g_windows[std::string(slotName)] = {windowId, std::move(setPosition)};
 }
 
+void CloseForOpening(std::uint32_t windowId)
+{
+    Rml::ElementDocument* workspace = Workspace();
+    if (workspace == nullptr || g_pNewUISystem == nullptr)
+        return;
+
+    Rml::ElementList slots;
+    workspace->QuerySelectorAll(slots, ".slot");
+    for (Rml::Element* slot : slots)
+    {
+        const Entry* opening = EntryFor(slot);
+        if (opening == nullptr || opening->windowId != windowId)
+            continue;
+
+        std::istringstream names(slot->GetAttribute<Rml::String>("data-closes", ""));
+        for (std::string name; names >> name;)
+        {
+            const auto it = g_windows.find(name);
+            if (it != g_windows.end() && g_pNewUISystem->IsVisible(it->second.windowId))
+                g_pNewUISystem->Hide(it->second.windowId);
+        }
+        return;
+    }
+}
+
 void Arrange()
 {
     Rml::ElementDocument* workspace = Workspace();
@@ -220,7 +246,8 @@ void Arrange()
             continue;
         entry->placed = true;
         entry->lastPosition = position;
-        entry->setPosition(position.x, position.y);
+        if (entry->setPosition)
+            entry->setPosition(position.x, position.y);
     }
 }
 

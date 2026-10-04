@@ -10,13 +10,14 @@
 
 	     Set by the game: #safe_area's top and bottom (the screen edge the HUD strip sits on), each
 	     content slot's size (the window's own size), and a region's height from data-ref-height,
-	     given in the docked windows' units. Open slots in a data-covers-world region narrow the world
+	     given in the docked windows' units. data-closes lists the windows that close when a slot's
+	     window opens, because the theme gives them no room beside it. Open slots in a data-covers-world region narrow the world
 	     area HUD widgets centre in. data-saved-position names a window's saved drag position, used
 	     while it is the first open window of its region. -->
 	<div id="safe_area">
 		<!-- Fills from the right edge in document order. -->
 		<div class="region dock-right" data-ref-height="432" data-covers-world>
-			<div class="slot" data-window="character"></div>
+			<div class="slot" data-window="character" data-closes="party guild_info command command_list gold_bowman gold_bowman_lena gens_ranking mu_helper mu_helper_detail mu_helper_skill_list"></div>
 			<div class="slot" data-window="mu_helper"></div>
 			<div class="slot" data-window="mu_helper_detail"></div>
 			<div class="slot" data-window="party"></div>
@@ -40,11 +41,12 @@
 			<div class="slot" data-window="doppelganger_entry"></div>
 			<div class="slot" data-window="empire_guardian_entry"></div>
 			<div class="slot" data-window="united_marketplace"></div>
-			<div class="slot" data-window="my_quest"></div>
-			<div class="slot" data-window="pet"></div>
-			<div class="slot" data-window="quest_progress_etc"></div>
-			<div class="slot" data-window="inventory" data-saved-position="my_inventory"></div>
-			<div class="slot" data-window="inventory_extension"></div>
+			<div class="slot" data-window="my_quest" data-closes="party guild_info command command_list gold_bowman gold_bowman_lena gens_ranking mu_helper mu_helper_detail mu_helper_skill_list inventory pet"></div>
+			<div class="slot" data-window="pet" data-closes="inventory my_quest party guild_info command command_list gold_bowman gold_bowman_lena gens_ranking mu_helper mu_helper_detail mu_helper_skill_list"></div>
+			<div class="slot" data-window="quest_progress_etc" data-closes="inventory my_quest"></div>
+			<div class="slot" data-window="inventory" data-saved-position="my_inventory"
+			     data-closes="party guild_info command command_list gold_bowman gold_bowman_lena gens_ranking mu_helper mu_helper_detail mu_helper_skill_list my_quest"></div>
+			<div class="slot" data-window="inventory_extension" data-closes="storage_extension my_quest character"></div>
 			<div class="slot" data-window="storage"></div>
 			<div class="slot" data-window="storage_extension"></div>
 			<div class="slot" data-window="npc_shop"></div>

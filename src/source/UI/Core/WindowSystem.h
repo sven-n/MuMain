@@ -146,7 +146,6 @@ namespace mu::ui::window
 
         void HideAllGroupA();
         void HideAllGroupB();
-        void HideGroupBeforeOpenInterface();
         void UpdateMuHelperBarVisibilityForLayoutChange(DWORD dwKey);
         void SyncMuHelperBarVisibility();
         bool ShouldHideMuHelperBar();
