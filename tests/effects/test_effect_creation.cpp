@@ -8,6 +8,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Core/Globals/_TextureIndex.h"
 #include "Core/Globals/_enum.h"
+#include "Render/Effects/EffectRegistry.h"
 
 #include <array>
 #include <cstdlib>
@@ -103,7 +104,6 @@ const std::array<int, 29> Fx14Types = {MODEL_DRAGON,
                                        MODEL_STATUE_CRUSH_EFFECT_PIECE04,
                                        MODEL_DOOR_CRUSH_EFFECT_PIECE10,
                                        MODEL_PHOENIX_SHOT};
-const std::span<const int> Fx14RowTypes(Fx14Types.data(), Fx14Types.size() - 1);
 
 // Sub types the callers pass (0 to 3) and one no case handles.
 constexpr std::initializer_list<int> RecordedSubTypes = {0, 1, 2, 3, 99};
@@ -116,15 +116,14 @@ struct Recorded
 
 using CallList = std::vector<EffectCall> (*)(int type, std::initializer_list<int> subTypes);
 
-std::vector<Recorded> RecordAll(std::span<const int> types, CallList calls = CallsFor,
-                                std::span<const Conditions> allConditions = AllConditions())
+std::vector<Recorded> RecordAll(std::span<const int> types, CallList calls = CallsFor)
 {
     std::vector<Recorded> all;
     for (const int type : types)
     {
         for (const EffectCall& call : calls(type, RecordedSubTypes))
         {
-            for (const Conditions& conditions : allConditions)
+            for (const Conditions& conditions : AllConditions())
             {
                 all.push_back({Describe(call, conditions), RecordCall(call, conditions)});
             }
@@ -441,46 +440,99 @@ TEST_CASE("The 8 types of FX1.3 give the records of their old cases [effects][re
                  "# cases; written with MU_EFFECT_RECORDER_WRITE=1.\n");
 }
 
-namespace
-{
-constexpr const char* Fx14Header = "# The digests of the records of the 29 types of FX1.4, one line per call\n"
-                                   "# (tests/effects/test_effect_creation.cpp), with a second position, angle and\n"
-                                   "# light. Taken with their old cases; written with MU_EFFECT_RECORDER_WRITE=1.\n";
-} // namespace
-
 TEST_CASE("The 29 types of FX1.4 give the records of their old cases [effects][recorder]")
 {
     BuildShippedRegistry();
-    CheckDigests(RecordAll(Fx14Types, SecondGeometryCallsFor), "FX1.4", Fx14Header);
+    CheckDigests(RecordAll(Fx14Types, SecondGeometryCallsFor), "FX1.4",
+                 "# The digests of the records of the 29 types of FX1.4, one line per call\n"
+                 "# (tests/effects/test_effect_creation.cpp), with a second position, angle and\n"
+                 "# light. Taken with their old cases; written with MU_EFFECT_RECORDER_WRITE=1.\n");
 }
 
-// TEMPORARY: the next commit deletes the cases and this test. With
-// MU_EFFECT_RECORDER_WRITE=1 it writes the digests of FX1.4 from the cases.
-TEST_CASE("TEMP: the rows of FX1.4 give the records of their cases [effects][recorder]")
+namespace
 {
-    // At 60 frames per second the frame factor is 25/60, where a product with
-    // it is rounded, unlike at 1 and 0.5.
-    const Conditions frameRate[] = {{25.f / 60.f, SlotPattern::A}, {25.f / 60.f, SlotPattern::B}};
+float RecordedFloat(const Record& record, std::string_view path)
+{
+    const std::optional<std::string> value = Find(record, path);
+    REQUIRE(value.has_value());
+    return std::stof(*value);
+}
+} // namespace
 
-    BuildShippedRegistry(Fx14RowTypes);
-    const std::vector<Recorded> cases = RecordAll(Fx14Types, SecondGeometryCallsFor);
-    const std::vector<Recorded> casesAtFrameRate = RecordAll(Fx14Types, SecondGeometryCallsFor, frameRate);
-    if (std::getenv("MU_EFFECT_RECORDER_WRITE") != nullptr)
-    {
-        CheckDigests(cases, "FX1.4", Fx14Header);
-    }
-
+// FX1.4 moved the creation of these types from code into the catalogue; the
+// commit before the one that deleted their cases compared both for every sub
+// type, owner, argument set, both positions, angles and lights, slot pattern
+// and the frame factors 1, 0.5 and 25/60. These are values the cases set
+// that the new fields hold (the call's position is 13120.25, 12480.5,
+// 140.75, its angle 11, 22, 33 and its light 0.9, 0.8, 0.7).
+TEST_CASE("The types of FX1.4 create from the catalogue what their cases set [effects][recorder]")
+{
     BuildShippedRegistry();
-    const std::vector<Recorded> rows = RecordAll(Fx14Types, SecondGeometryCallsFor);
-    const std::vector<Recorded> rowsAtFrameRate = RecordAll(Fx14Types, SecondGeometryCallsFor, frameRate);
 
-    std::ostringstream log;
-    const int differing = CompareAll(cases, rows, log);
-    const int differingAtFrameRate = CompareAll(casesAtFrameRate, rowsAtFrameRate, log);
-    INFO(log.str());
-    CHECK(differing == 0);
-    CHECK(differingAtFrameRate == 0);
-    MESSAGE("FX1.4 cases against the rows: " << cases.size() << " calls, " << differing
-                                             << " differ; at 25/60: " << casesAtFrameRate.size() << " calls, "
-                                             << differingAtFrameRate << " differ");
+    // Raised by 3400, then copied into the start position; one angle component.
+    const Record dragon = RecordCall(CallOf(MODEL_DRAGON), {});
+    CHECK(Find(dragon, "Effects[0].Position[2]") == "3540.75");
+    CHECK(Find(dragon, "Effects[0].StartPosition[0]") == "13120.25");
+    CHECK(Find(dragon, "Effects[0].StartPosition[2]") == "3540.75");
+    CHECK(Find(dragon, "Effects[0].Angle[0]") == "11");
+    CHECK(Find(dragon, "Effects[0].Angle[1]") == "0");
+    CHECK(Find(dragon, "Effects[0].Direction[1]") == "-35");
+    CHECK(Find(dragon, "Effects[0].Kind") == "0");
+    CHECK(Find(dragon, "Effects[0].Timer") == "0");
+    CHECK(Find(dragon, "Effects[0].Distance") == "1");
+    CHECK(Find(dragon, "Effects[0].CollisionRange") == "1");
+
+    // Copied, then the copy raised by 800.
+    const Record thunder = RecordCall(CallOf(BITMAP_JOINT_THUNDER), {});
+    CHECK(Find(thunder, "Effects[0].StartPosition[2]") == "940.75");
+    CHECK(Find(thunder, "Effects[0].Position[2]") == "140.75");
+
+    // The light of the call (the summoner passes the target there), then its own light.
+    const Record neil = RecordCall(CallOf(MODEL_SUMMONER_SUMMON_NEIL), {});
+    CHECK(Find(neil, "Effects[0].HeadTargetAngle[0]") == "0.899999976");
+    CHECK(Find(neil, "Effects[0].HeadTargetAngle[2]") == "0.699999988");
+    CHECK(Find(neil, "Effects[0].Light[0]") == "1");
+    CHECK(Find(neil, "Effects[0].Skill") == "0");
+
+    const Record rise = RecordCall(CallOf(BITMAP_FIRECRACKERRISE), {});
+    CHECK(Find(rise, "Effects[0].Position[2]") == "100");
+    CHECK(Find(rise, "Effects[0].Angle[0]") == "0");
+    CHECK(Find(rise, "Effects[0].Angle[2]") == "0");
+
+    // The call's scale, also when it passes none.
+    EffectCall shiny = CallOf(BITMAP_SHINY + 4);
+    CHECK(Find(RecordCall(shiny, {}), "Effects[0].Scale") == "0");
+    shiny.scale = 1.75f;
+    CHECK(Find(RecordCall(shiny, {}), "Effects[0].Scale") == "1.75");
+    CHECK(Find(RecordCall(CallOf(MODEL_STATUE_CRUSH_EFFECT_PIECE04), {}), "Effects[0].PKKey") == "-1");
+
+    // Offsets times the frame factor, at 25/60 where the products round; the
+    // expected values are computed in the form of the old cases. volatile
+    // keeps the compiler from computing them while compiling, in another way.
+    volatile float frameFactor = 25.f / 60.f;
+    const Conditions frameRate{frameFactor, SlotPattern::A};
+    const Record staff = RecordCall(CallOf(MODEL_STAFF_OF_DESTRUCTION), frameRate);
+    float z = 140.75f;
+    z += (280.f) * frameFactor;
+    float pitch = 11.f;
+    pitch += (20.f) * frameFactor;
+    CHECK(RecordedFloat(staff, "Effects[0].Position[2]") == z);
+    CHECK(RecordedFloat(staff, "Effects[0].Angle[0]") == pitch);
+
+    const Record cloud = RecordCall(CallOf(MODEL_CLOUD), frameRate);
+    float y = 12480.5f;
+    y += (200.f) * frameFactor;
+    z = 140.75f;
+    z -= (190.f) * frameFactor;
+    CHECK(RecordedFloat(cloud, "Effects[0].Position[1]") == y);
+    CHECK(RecordedFloat(cloud, "Effects[0].Position[2]") == z);
+    // The flags of pattern A are false already.
+    CHECK(Find(RecordCall(CallOf(MODEL_CLOUD), {1.f, SlotPattern::B}), "Effects[0].LightEnable") == "false");
+
+    // Its case set nothing, so it has no row and creates with the common setup.
+    const Render::Effects::EffectDescriptor* phoenix = Render::Effects::Lookup(MODEL_PHOENIX_SHOT);
+    CHECK((phoenix == nullptr || !phoenix->create.has_value()));
+    const Record shot = RecordCall(CallOf(MODEL_PHOENIX_SHOT), {});
+    CHECK(Find(shot, "Effects[0].Live") == "true");
+    CHECK_FALSE(Find(shot, "Effects[0].LifeTime").has_value());
 }

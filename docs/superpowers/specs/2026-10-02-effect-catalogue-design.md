@@ -349,6 +349,41 @@ FX1.4: four cases whose other statements only repeat the common setup
 Velocity` is always 0.3 there), the empty case of `MODEL_PHOENIX_SHOT`, and
 four cases that set `Scale = Scale` (the call's scale even when it is 0).
 
+*FX1.4 done:* `create` has the fields lightEnable, alphaEnable, kind, skill,
+pkKey, timer, distance and collisionRange, the vectors position, angle and
+direction (a list of three or an object of the components that change), the
+group `offset` (position, angle, startPosition; components can be multiplied
+by the frame factor) and the group `copy` (direction from light, which
+replaces copyLightToDirection, startPosition from position, headTargetAngle
+from the call's light, scale from the call's scale). The creation cases of
+28 types are rows now: the 21 that only set values (`MODEL_DRAGON`,
+`MODEL_SHIELD_CRASH2`, `MODEL_TREE_ATTACK`, `MODEL__SPEAR`,
+`MODEL_SUMMONER_WRISTRING_EFFECT`, `MODEL_SUMMONER_CASTING_EFFECT4`,
+`MODEL_SUMMONER_SUMMON_NEIL`, `MODEL_ALICE_BUFFSKILL_EFFECT2`,
+`BITMAP_JOINT_THUNDER`, `MODEL_STAFF_OF_DESTRUCTION`, `MODEL_WAVE`,
+`MODEL_TAIL`, `MODEL_BOSS_ATTACK`, `MODEL_DARK_ELF_SKILL`,
+`MODEL_WATER_WAVE`, `BITMAP_FIRECRACKERRISE`, `BITMAP_FIRECRACKER0001`,
+`MODEL_CLOUD`, `MODEL_TOWER_GATE_PLANE`, `MODEL_KNIGHT_PLANCRACK_B`,
+`MODEL_PROJECTILE`) and the 7 types of 6 cases that keep the call's scale
+(`BITMAP_SHINY+4`, `MODEL_WINDFOCE_MIRROR`, `BITMAP_SWORD_EFFECT_MONO`,
+`MODEL_TARGETMON_EFFECT`, `BITMAP_EVENT_CLOUD`,
+`MODEL_STATUE_CRUSH_EFFECT_PIECE04` and `MODEL_DOOR_CRUSH_EFFECT_PIECE10`).
+The empty case of `MODEL_PHOENIX_SHOT` is deleted without a row. Two cases
+needed more than "values, offsets, copies": `BITMAP_JOINT_THUNDER` adds to
+the start position after copying it (an offset of a field a copy writes adds
+to the copy), and `MODEL_SUMMONER_SUMMON_NEIL` copies the call's light
+before setting its own (a copy from the call's argument); statements that
+only repeat the common setup are left out. The PR's second commit compared
+the old cases with the rows in one build: all 4,640 calls equal at the frame
+factors 1 and 0.5, with a second position, angle and light per call, and all
+2,320 at 25/60. The third deletes the 28 case groups; g++ finds the same 6
+fallthroughs. `CreateParams` keeps which groups of fields a row sets, so
+rows without the new fields cost what they did; a benchmark of
+`CreateEffect` gave 14.4 ns per creation of the 28 types with their cases
+and 15.7 ns with their rows. The `Scale = PKKey / 100.f` cases
+(`MODEL_SKILL_FURY_STRIKE+3/+4/+6/+7`, `MODEL_AURORA`, `MODEL_WAVE_FORCE`)
+compute a value from a skill argument and stay code (D36).
+
 **FX1.6–FX1.7** add the effect browser and its preview to MuEditor. They
 change no game code outside editor builds.
 
@@ -387,7 +422,11 @@ to FX2 all need it:
   Bytes that change outside the field lists show up for particles and
   joints, and the 64-bit Windows build stops when one of the structs changes
   size. Each call runs with the game's default arguments and with uneven
-  ones (scale, PK key, skill values, target index). Not recorded yet: the
+  ones (scale, PK key, skill values, target index); since FX1.4 also with a
+  second position, angle and light, so a copy differs from a constant, and
+  the comparison of a phase adds the frame factor 25/60, where products
+  with it round (its digests are not committed: a compiler may fuse a
+  multiply-add on one platform and not on another). Not recorded yet: the
   play speed of models and the owner's fields outside its object; not varied
   yet: live slots, terrain height, `timeGetTime`. The test binary has no
   option window and no models, so cases that reach `CreateParticle`,
@@ -398,8 +437,9 @@ to FX2 all need it:
   fields by name, and `EffectTestData::BuildShippedRegistry` builds the
   registry without the rows being checked, so the old cases run in the same
   build. The digests of the whole records of the moved types, taken with
-  their old cases, are committed (`tests/effects/recordings`), so later
-  changes are checked against the old cases again;
+  their old cases, are committed (`tests/effects/recordings`, one file per
+  phase; the FX1.2 rows were recorded before FX1.4 changed how rows are
+  applied), so later changes are checked against the old cases again;
   `MU_EFFECT_RECORDER_WRITE=1` writes them anew.
 - **Baseline:** the old case stays reachable in the PR's working commits
   and is deleted after the comparison; spot checks stay as tests.
