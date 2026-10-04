@@ -24,8 +24,11 @@
 #bar_ag   { left: 420px; top: 431px; width: 16px; height: 39px; }
 #bar_mp   { left: 437px; top: 432px; width: 45px; height: 39px; }
 
-/* Fills bottom-up (height = filled fraction); sprites sample only the top 39px of each source
-   texture, matching the legacy UV math. */
+/* Fills bottom-up (height = filled fraction), revealing the bottom of the art at its fixed size
+   while the level drops -- the original moved its quad's top and its texture rows down together.
+   `cover` crops through texture coordinates instead of stretching the art into the box, and lands
+   it at exactly the box's 45/16px width whatever the dp ratio, which `scale-none` would multiply
+   in under #bars's own transform. */
 @spritesheet mainframe-gauge-hp-sheet { src: "../../../newui_menu_red.jpg";   mainframe-gauge-hp:   0px 0px 45px 39px; }
 @spritesheet mainframe-gauge-hpp-sheet { src: "../../../newui_menu_green.jpg"; mainframe-gauge-hp-poisoned: 0px 0px 45px 39px; }
 @spritesheet mainframe-gauge-mp-sheet { src: "../../../newui_menu_blue.jpg";  mainframe-gauge-mp:   0px 0px 45px 39px; }
@@ -39,11 +42,11 @@
 	width: 100%;
 }
 .gauge-fill-horizontal { display: none; }
-.gauge-fill-hp { decorator: image(mainframe-gauge-hp); }
-.gauge-fill-hp.poisoned { decorator: image(mainframe-gauge-hp-poisoned); }
-.gauge-fill-mp { decorator: image(mainframe-gauge-mp); }
-.gauge-fill-ag { decorator: image(mainframe-gauge-ag); }
-.gauge-fill-sd { decorator: image(mainframe-gauge-sd); }
+.gauge-fill-hp { decorator: image(mainframe-gauge-hp cover left bottom); }
+.gauge-fill-hp.poisoned { decorator: image(mainframe-gauge-hp-poisoned cover left bottom); }
+.gauge-fill-mp { decorator: image(mainframe-gauge-mp cover left bottom); }
+.gauge-fill-ag { decorator: image(mainframe-gauge-ag cover left bottom); }
+.gauge-fill-sd { decorator: image(mainframe-gauge-sd cover left bottom); }
 
 .gauge-num {
 	position: absolute;
