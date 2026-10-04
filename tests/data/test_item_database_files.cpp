@@ -384,6 +384,30 @@ TEST_CASE("Item editor changes go into the item database [data][items][editor]")
     }
 }
 
+// The names of a language whose item.bmd is missing stay as they are, like
+// the names of the languages that have none (German).
+TEST_CASE("A bmd import keeps the names of a language whose item.bmd is missing [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    REQUIRE(std::filesystem::remove(folder.LegacyItemFilePath(L"Spn")));
+
+    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+    REQUIRE_FALSE(HasErrors(result.issues));
+    CHECK(result.importedLocales == std::vector<std::string>{"en", "pt"});
+    const ItemDefinition* shortSword = g_ItemDatabase.Find(0, 1);
+    REQUIRE(shortSword != nullptr);
+    CHECK(shortSword->names.Get("es") == "Espada Corta");
+    CHECK(shortSword->names.Get("de") == "Kurzschwert");
+    CHECK(shortSword->names.Get("pt") == "Espada curta");
+}
+
 TEST_CASE("Exporting the items as bmd and importing them again gives the same data [data][items][editor]")
 {
     TemporaryClientFolder folder;

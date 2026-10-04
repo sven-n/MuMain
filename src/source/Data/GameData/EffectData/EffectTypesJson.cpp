@@ -59,6 +59,29 @@ bool ReadText(const OrderedJson& json, const char* key, std::string& text)
     return true;
 }
 
+// "dark" is a flag of the model renderer and "alphaBlendMinus" a render type
+// of the textures; the game keeps both in the same number, which means
+// something else for the other kind of effect. Textures are the BITMAP_ types.
+void WarnAboutRenderTypeOfOtherKind(const EffectCreateParams& params, const std::string& code, const std::string& field,
+                                    const std::string& source, std::vector<ItemDataIssue>& issues)
+{
+    if (!params.renderType)
+    {
+        return;
+    }
+    const bool texture = code.rfind("BITMAP_", 0) == 0;
+    if (*params.renderType == EffectRenderType::Dark && texture)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, source, field + ".renderType",
+                 "\"dark\" is for models; this type is a texture");
+    }
+    if (*params.renderType == EffectRenderType::AlphaBlendMinus && !texture)
+    {
+        AddIssue(issues, ItemDataIssueSeverity::Warning, source, field + ".renderType",
+                 "\"alphaBlendMinus\" is for textures; this type is a model");
+    }
+}
+
 // Reads the creation values of an effect entry, if it has them.
 void ReadCreateParams(const OrderedJson& json, const std::string& field, const std::string& source,
                       EffectTypeEntry& entry, std::vector<ItemDataIssue>& issues)
@@ -82,6 +105,12 @@ void ReadCreateParams(const OrderedJson& json, const std::string& field, const s
     {
         AddIssue(issues, ItemDataIssueSeverity::Warning, source, createField,
                  "sets no value; the creation code of the type is skipped all the same");
+    }
+    WarnAboutRenderTypeOfOtherKind(*entry.create, entry.code, createField, source, issues);
+    for (size_t i = 0; i < entry.create->variants.size(); ++i)
+    {
+        WarnAboutRenderTypeOfOtherKind(entry.create->variants[i].params, entry.code,
+                                       createField + ".variants[" + std::to_string(i) + "]", source, issues);
     }
 }
 
@@ -252,6 +281,7 @@ std::string WriteEffectTypesJson(EffectKind kind, std::span<const EffectTypeEntr
     {
         text = Items::Json::PutObjectsOnOneLine(Items::Json::PutListsOnOneLine(text, key), key);
     }
+    text = Items::Json::PutObjectsOnOneLine(text, CreateLifeTimeKey);
     return text + "\n";
 }
 } // namespace Data::Effects

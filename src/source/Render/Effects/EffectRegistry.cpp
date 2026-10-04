@@ -4,6 +4,7 @@
 #include "Behaviors/EffectBehaviors.h"
 #include "Behaviors/MoveHandlers.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <algorithm>
@@ -81,6 +82,10 @@ void ApplyFlags(OBJECT* o, const CreateParams& params)
         o->Kind = *params.kind;
     if (params.skill)
         o->Skill = *params.skill;
+    if (params.renderType)
+        o->RenderType = *params.renderType;
+    if (params.animation)
+        o->m_iAnimation = *params.animation;
 }
 
 void ApplyNumbers(OBJECT* o, const CreateParams& params)
@@ -93,6 +98,8 @@ void ApplyNumbers(OBJECT* o, const CreateParams& params)
         o->Distance = *params.distance;
     if (params.collisionRange)
         o->CollisionRange = *params.collisionRange;
+    if (params.alphaTarget)
+        o->AlphaTarget = *params.alphaTarget;
 }
 
 void ApplyVectors(OBJECT* o, const CreateParams& params)
@@ -100,44 +107,81 @@ void ApplyVectors(OBJECT* o, const CreateParams& params)
     SetComponents(o->Position, params.position);
     SetComponents(o->Angle, params.angle);
     SetComponents(o->Direction, params.direction);
+    SetComponents(o->StartPosition, params.startPosition);
+}
+
+void ApplyOffsets(OBJECT* o, const CreateParams& params)
+{
+    if (params.lifeTimeOffset)
+    {
+        // In the form of the old cases, as AddComponents.
+        if (params.lifeTimeOffset->timesFrameFactor)
+            o->LifeTime += params.lifeTimeOffset->value * FPS_ANIMATION_FACTOR;
+        else
+            o->LifeTime += params.lifeTimeOffset->value;
+    }
+    AddComponents(o->Position, params.positionOffset);
+    AddComponents(o->Angle, params.angleOffset);
 }
 
 void ApplyCopies(OBJECT* o, const CreateParams& params, const CreateCall& call)
 {
     if (params.copyLightToDirection)
         VectorCopy(o->Light, o->Direction);
+    if (params.copyCallAngleToDirection)
+        VectorCopy(call.angle.data(), o->Direction);
     if (params.copyPositionToStartPosition)
         VectorCopy(o->Position, o->StartPosition);
+    if (params.copyLightToStartPosition)
+        VectorCopy(o->Light, o->StartPosition);
+    if (params.copyCallPositionToStartPosition)
+        VectorCopy(call.position.data(), o->StartPosition);
     if (params.copyCallLightToHeadTargetAngle)
         VectorCopy(call.light.data(), o->HeadTargetAngle);
+    if (params.copyLightToEyeRight)
+        VectorCopy(o->Light, o->EyeRight);
+    if (params.copyCallAngleToDeadPosition)
+        VectorCopy(call.angle.data(), o->m_vDeadPosition);
     if (params.copyCallScaleToScale)
         o->Scale = call.scale;
 }
-// One name per field of CreateParams: this stops compiling when the struct
-// gets a field, so GroupsOf below gives it a group and ApplyCreateParams
-// applies it.
+// One name per field of CreateParams: the binding stops compiling when the
+// struct gets a field, and the count when it has another number of fields than
+// the catalogue's values, so GroupsOf below gives the field a group and
+// ApplyCreateParams applies it.
+#define CREATE_PARAMS_FIELD_NAMES                                                                                      \
+    lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha, light, groups, lightEnable,      \
+        alphaEnable, kind, skill, renderType, animation, pkKey, timer, distance, collisionRange, alphaTarget,          \
+        position, angle, direction, startPosition, lifeTimeOffset, positionOffset, angleOffset, startPositionOffset,   \
+        copyLightToDirection, copyCallAngleToDirection, copyPositionToStartPosition, copyLightToStartPosition,         \
+        copyCallPositionToStartPosition, copyCallLightToHeadTargetAngle, copyLightToEyeRight,                          \
+        copyCallAngleToDeadPosition, copyCallScaleToScale
 [[maybe_unused]] void NameEveryField(const CreateParams& params)
 {
-    [[maybe_unused]] const auto& [lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha,
-                                  light, groups, lightEnable, alphaEnable, kind, skill, pkKey, timer, distance,
-                                  collisionRange, position, angle, direction, positionOffset, angleOffset,
-                                  startPositionOffset, copyLightToDirection, copyPositionToStartPosition,
-                                  copyCallLightToHeadTargetAngle, copyCallScaleToScale] = params;
+    [[maybe_unused]] const auto& [CREATE_PARAMS_FIELD_NAMES] = params;
+    static_assert(decltype(Data::Effects::CountNames(CREATE_PARAMS_FIELD_NAMES))::value ==
+                  Data::Effects::EffectCreateFieldCount);
 }
+#undef CREATE_PARAMS_FIELD_NAMES
 } // namespace
 
 std::uint8_t GroupsOf(const CreateParams& params)
 {
     std::uint8_t groups = 0;
-    if (params.lightEnable || params.alphaEnable || params.kind || params.skill)
+    if (params.lightEnable || params.alphaEnable || params.kind || params.skill || params.renderType ||
+        params.animation)
         groups |= CreateParams::Flags;
-    if (params.pkKey || params.timer || params.distance || params.collisionRange)
+    if (params.pkKey || params.timer || params.distance || params.collisionRange || params.alphaTarget)
         groups |= CreateParams::Numbers;
-    if (params.position.components || params.angle.components || params.direction.components)
+    if (params.position.components || params.angle.components || params.direction.components ||
+        params.startPosition.components)
         groups |= CreateParams::Vectors;
-    if (params.positionOffset.components || params.angleOffset.components || params.startPositionOffset.components)
+    if (params.lifeTimeOffset || params.positionOffset.components || params.angleOffset.components ||
+        params.startPositionOffset.components)
         groups |= CreateParams::Offsets;
-    if (params.copyLightToDirection || params.copyPositionToStartPosition || params.copyCallLightToHeadTargetAngle ||
+    if (params.copyLightToDirection || params.copyCallAngleToDirection || params.copyPositionToStartPosition ||
+        params.copyLightToStartPosition || params.copyCallPositionToStartPosition ||
+        params.copyCallLightToHeadTargetAngle || params.copyLightToEyeRight || params.copyCallAngleToDeadPosition ||
         params.copyCallScaleToScale)
         groups |= CreateParams::Copies;
     return groups;
@@ -158,10 +202,7 @@ void ApplyCreateParams(OBJECT* o, const CreateParams& params, const CreateCall& 
     if (groups & CreateParams::Vectors)
         ApplyVectors(o, params);
     if (groups & CreateParams::Offsets)
-    {
-        AddComponents(o->Position, params.positionOffset);
-        AddComponents(o->Angle, params.angleOffset);
-    }
+        ApplyOffsets(o, params);
     if (groups & CreateParams::Copies)
         ApplyCopies(o, params, call);
     if (groups & CreateParams::Offsets)
@@ -192,6 +233,21 @@ CreateVector ToCreateVector(const Data::Effects::EffectCreateVector& vector)
     return converted;
 }
 
+// The render types of the catalogue as the game's numbers.
+std::optional<int> ToRenderType(const std::optional<Data::Effects::EffectRenderType>& type)
+{
+    if (!type)
+        return std::nullopt;
+    switch (*type)
+    {
+    case Data::Effects::EffectRenderType::Dark:
+        return RENDER_DARK;
+    case Data::Effects::EffectRenderType::AlphaBlendMinus:
+        return RENDER_TYPE_ALPHA_BLEND_MINUS;
+    }
+    return std::nullopt;
+}
+
 template <typename T> std::optional<T> ToInteger(const std::optional<int>& value)
 {
     if (!value)
@@ -199,16 +255,23 @@ template <typename T> std::optional<T> ToInteger(const std::optional<int>& value
     return static_cast<T>(*value);
 }
 
-// One name per field of the catalogue's values: this stops compiling when
-// they get a field, so ToCreateParams below converts it too.
+// One name per field of the catalogue's values: the binding stops compiling
+// when they get a field, and the count when the name is added without changing
+// EffectCreateFieldCount, so ToCreateParams below converts it too.
+#define EFFECT_CREATE_FIELD_NAMES                                                                                      \
+    lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha, light, lightEnable, alphaEnable, \
+        kind, skill, pkKey, timer, distance, collisionRange, alphaTarget, renderType, animation, position, angle,      \
+        direction, startPosition, lifeTimeOffset, positionOffset, angleOffset, startPositionOffset,                    \
+        copyLightToDirection, copyCallAngleToDirection, copyPositionToStartPosition, copyLightToStartPosition,         \
+        copyCallPositionToStartPosition, copyCallLightToHeadTargetAngle, copyLightToEyeRight,                          \
+        copyCallAngleToDeadPosition, copyCallScaleToScale, variants
 [[maybe_unused]] void NameEveryField(const Data::Effects::EffectCreateParams& values)
 {
-    [[maybe_unused]] const auto& [lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha,
-                                  light, lightEnable, alphaEnable, kind, skill, pkKey, timer, distance, collisionRange,
-                                  position, angle, direction, positionOffset, angleOffset, startPositionOffset,
-                                  copyLightToDirection, copyPositionToStartPosition, copyCallLightToHeadTargetAngle,
-                                  copyCallScaleToScale, variants] = values;
+    [[maybe_unused]] const auto& [EFFECT_CREATE_FIELD_NAMES] = values;
+    static_assert(decltype(Data::Effects::CountNames(EFFECT_CREATE_FIELD_NAMES))::value ==
+                  Data::Effects::EffectCreateFieldCount);
 }
+#undef EFFECT_CREATE_FIELD_NAMES
 
 // The values of the catalogue as the effects use them.
 CreateParams ToCreateParams(const Data::Effects::EffectCreateParams& values)
@@ -237,15 +300,27 @@ CreateParams ToCreateParams(const Data::Effects::EffectCreateParams& values)
     params.timer = ToFloat(values.timer);
     params.distance = ToFloat(values.distance);
     params.collisionRange = ToFloat(values.collisionRange);
+    params.alphaTarget = ToFloat(values.alphaTarget);
+    params.renderType = ToRenderType(values.renderType);
+    params.animation = values.animation;
     params.position = ToCreateVector(values.position);
     params.angle = ToCreateVector(values.angle);
     params.direction = ToCreateVector(values.direction);
+    params.startPosition = ToCreateVector(values.startPosition);
+    if (values.lifeTimeOffset)
+        params.lifeTimeOffset =
+            CreateNumber{static_cast<float>(values.lifeTimeOffset->value), values.lifeTimeOffset->timesFrameFactor};
     params.positionOffset = ToCreateVector(values.positionOffset);
     params.angleOffset = ToCreateVector(values.angleOffset);
     params.startPositionOffset = ToCreateVector(values.startPositionOffset);
     params.copyLightToDirection = values.copyLightToDirection;
+    params.copyCallAngleToDirection = values.copyCallAngleToDirection;
     params.copyPositionToStartPosition = values.copyPositionToStartPosition;
+    params.copyLightToStartPosition = values.copyLightToStartPosition;
+    params.copyCallPositionToStartPosition = values.copyCallPositionToStartPosition;
     params.copyCallLightToHeadTargetAngle = values.copyCallLightToHeadTargetAngle;
+    params.copyLightToEyeRight = values.copyLightToEyeRight;
+    params.copyCallAngleToDeadPosition = values.copyCallAngleToDeadPosition;
     params.copyCallScaleToScale = values.copyCallScaleToScale;
     params.groups = GroupsOf(params);
     return params;

@@ -14,6 +14,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Render/Effects/Behaviors/EffectBehaviors.h"
 #include "Render/Effects/EffectRegistry.h"
+#include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <algorithm>
@@ -364,6 +365,91 @@ TEST_CASE("Variants are read and merged over the row field by field [data][effec
     CHECK(second.copyPositionToStartPosition);
 }
 
+// The fields of FX1.5b: render type by name, alphaTarget, the animation, the
+// start position, the lifeTime offset and copies with more than one source.
+TEST_CASE(
+    "Render type, alphaTarget, animation, start position, lifeTime offset and more copies are read [data][effects]")
+{
+    const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
+        {"name": "skull", "code": "BITMAP_SKULL", "create": {"lifeTime": 1000, "alphaTarget": 0.75,
+         "renderType": "alphaBlendMinus", "animation": 0, "startPosition": {"x": 4.5, "y": 4.5},
+         "offset": {"lifeTime": {"value": -60, "timesFrameFactor": true}, "startPosition": {"x": 1}},
+         "copy": {"direction": "callAngle", "eyeRight": "light", "deadPosition": "callAngle"}}},
+        {"name": "piercing2", "code": "MODEL_PIERCING2", "create": {"renderType": "dark",
+         "copy": {"startPosition": "callPosition"}}}]})",
+                                   EffectKind::Effect);
+    CHECK(result.issues.empty());
+    REQUIRE(result.types.size() == 2);
+    REQUIRE(result.types[0].create.has_value());
+    const EffectCreateParams& skull = *result.types[0].create;
+    CHECK(skull.alphaTarget == 0.75);
+    CHECK(skull.renderType == Data::Effects::EffectRenderType::AlphaBlendMinus);
+    CHECK(skull.animation == 0);
+    CHECK(skull.startPosition == EffectCreateVector{{4.5, 4.5, std::nullopt}});
+    CHECK(skull.lifeTimeOffset == EffectCreateNumber{-60.0, true});
+    // An offset of a component of the start position the row sets is no warning.
+    CHECK(skull.startPositionOffset == EffectCreateVector{{1.0, std::nullopt, std::nullopt}});
+    CHECK(skull.copyCallAngleToDirection);
+    CHECK(skull.copyLightToEyeRight);
+    CHECK(skull.copyCallAngleToDeadPosition);
+    REQUIRE(result.types[1].create.has_value());
+    CHECK(result.types[1].create->renderType == Data::Effects::EffectRenderType::Dark);
+    CHECK(result.types[1].create->copyCallPositionToStartPosition);
+
+    // A copy of a variant replaces the row's copies into the same field.
+    EffectCreateParams row{.copyPositionToStartPosition = true};
+    const EffectCreateParams fromLight = ResolveVariant(row, EffectCreateParams{.copyLightToStartPosition = true});
+    CHECK_FALSE(fromLight.copyPositionToStartPosition);
+    CHECK(fromLight.copyLightToStartPosition);
+    const EffectCreateParams values =
+        ResolveVariant(row, EffectCreateParams{.startPosition = EffectCreateVector{{1.0, 2.0, 3.0}}});
+    CHECK_FALSE(values.copyPositionToStartPosition);
+    CHECK(values.startPosition == EffectCreateVector{{1.0, 2.0, 3.0}});
+
+    const ReadResult wrong = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
+        {"name": "skull", "code": "BITMAP_SKULL", "create": {"lifeTime": 1, "alphaTarget": 2, "renderType": "bright",
+         "animation": -1, "offset": {"lifeTime": "long"}, "copy": {"startPosition": "angle", "eyeRight": "callLight"}}},
+        {"name": "crater", "code": "BITMAP_CRATER", "create": {"startPosition": [1, 2, 3],
+         "copy": {"startPosition": "light"}}},
+        {"name": "piercing2", "code": "MODEL_PIERCING2", "create": {"lifeTime": 2, "copy": {"startPosition": "position"},
+         "variants": [{"subType": 1, "startPosition": {"x": 1}}]}},
+        {"name": "crater", "code": "BITMAP_CRATER", "create": {"startPosition": {"x": 1}, "offset": {
+         "startPosition": {"z": 1}, "lifeTime": 5}}}]})",
+                                  EffectKind::Effect);
+    for (const char* field :
+         {"alphaTarget", "renderType", "animation", "offset.lifeTime", "copy.startPosition", "copy.eyeRight"})
+    {
+        INFO(std::string(field));
+        CHECK(HasError(wrong.issues, std::string("types[0].create.") + field));
+    }
+    CHECK(HasError(wrong.issues, "types[1].create.copy.startPosition"));
+    CHECK(HasError(wrong.issues, "types[2].create.variants[0].startPosition"));
+    // Offsets of a component of the start position or of the lifeTime that
+    // nothing sets add to what the slot held before.
+    CHECK(HasIssue(wrong.issues, ItemDataIssueSeverity::Warning, "types[3].create.offset.startPosition"));
+    CHECK(HasIssue(wrong.issues, ItemDataIssueSeverity::Warning, "types[3].create.offset.lifeTime"));
+    REQUIRE(wrong.types.size() == 4);
+    CHECK(wrong.types[0].create == EffectCreateParams{.lifeTime = 1});
+}
+
+// "dark" is a flag of the models and "alphaBlendMinus" a render type of the
+// textures; both are the same number in the game, which means something else
+// for the other kind.
+TEST_CASE("A render type of the other kind of effect is a warning [data][effects]")
+{
+    const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
+        {"name": "skull", "code": "BITMAP_SKULL", "create": {"renderType": "dark"}},
+        {"name": "circleLight", "code": "MODEL_CIRCLE_LIGHT", "create": {"lifeTime": 1,
+         "variants": [{"subType": 1, "renderType": "alphaBlendMinus"}]}},
+        {"name": "shiny5", "code": "BITMAP_SHINY+6", "create": {"renderType": "alphaBlendMinus"}},
+        {"name": "dragon", "code": "MODEL_DRAGON", "create": {"renderType": "dark"}}]})",
+                                   EffectKind::Effect);
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[0].create.renderType"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[1].create.variants[0].renderType"));
+    CHECK_FALSE(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[2].create.renderType"));
+    CHECK_FALSE(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[3].create.renderType"));
+}
+
 TEST_CASE("Wrong variants are errors, empty ones warnings [data][effects]")
 {
     const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
@@ -535,6 +621,52 @@ TEST_CASE("Vectors, offsets and copies are written in a fixed order, vectors on 
     CHECK(result.types[0] == dragon);
 }
 
+TEST_CASE("Render type, start position, the lifeTime offset and more copies are written [data][effects]")
+{
+    EffectTypeEntry skull{"skull", "BITMAP_SKULL"};
+    skull.create = EffectCreateParams{.lifeTime = 1000,
+                                      .alphaTarget = 0.75,
+                                      .renderType = Data::Effects::EffectRenderType::AlphaBlendMinus,
+                                      .animation = 0,
+                                      .startPosition = EffectCreateVector{{4.5, 4.5, std::nullopt}},
+                                      .lifeTimeOffset = EffectCreateNumber{-60.0, true},
+                                      .copyCallAngleToDirection = true,
+                                      .copyLightToEyeRight = true,
+                                      .copyCallAngleToDeadPosition = true};
+    const std::vector<EffectTypeEntry> types = {skull};
+
+    const std::string text = WriteEffectTypesJson(EffectKind::Effect, types);
+    CHECK(text == "{\n"
+                  "  \"formatVersion\": 1,\n"
+                  "  \"kind\": \"effect\",\n"
+                  "  \"types\": [\n"
+                  "    {\n"
+                  "      \"name\": \"skull\",\n"
+                  "      \"code\": \"BITMAP_SKULL\",\n"
+                  "      \"create\": {\n"
+                  "        \"lifeTime\": 1000,\n"
+                  "        \"alphaTarget\": 0.75,\n"
+                  "        \"renderType\": \"alphaBlendMinus\",\n"
+                  "        \"animation\": 0,\n"
+                  "        \"startPosition\": {\"x\": 4.5, \"y\": 4.5},\n"
+                  "        \"offset\": {\n"
+                  "          \"lifeTime\": {\"value\": -60, \"timesFrameFactor\": true}\n"
+                  "        },\n"
+                  "        \"copy\": {\n"
+                  "          \"direction\": \"callAngle\",\n"
+                  "          \"eyeRight\": \"light\",\n"
+                  "          \"deadPosition\": \"callAngle\"\n"
+                  "        }\n"
+                  "      }\n"
+                  "    }\n"
+                  "  ]\n"
+                  "}\n");
+    const ReadResult result = Read(text, EffectKind::Effect);
+    CHECK(result.issues.empty());
+    REQUIRE(result.types.size() == 1);
+    CHECK(result.types[0] == skull);
+}
+
 // Variants come last, sorted by their SubTypes; one SubType is written as
 // "subType", several as a list on one line.
 TEST_CASE("Variants are written last, sorted by their SubTypes [data][effects]")
@@ -655,9 +787,9 @@ TEST_CASE("The effect type catalogue keeps the creation values of effects, sorte
     const auto withCreateParams = static_cast<size_t>(std::count_if(
         effects.begin(), effects.end(), [](const EffectTypeEntry& entry) { return entry.create.has_value(); }));
     // The 32 types of the 22 rows that EffectRegistry.cpp held as C++ until
-    // FX1.2, the 8 types whose creation cases FX1.3 moved, the 28 of FX1.4 and
-    // the 41 of FX1.5.
-    CHECK(withCreateParams == 109);
+    // FX1.2, the 8 types whose creation cases FX1.3 moved, the 28 of FX1.4, the
+    // 41 of FX1.5 and the 12 of FX1.5b.
+    CHECK(withCreateParams == 121);
 
     EffectTypeCatalogue catalogue;
     catalogue.Build(EffectKind::Effect, effects);
@@ -848,7 +980,8 @@ TEST_CASE("The effect registry converts and applies vectors, offsets and copies 
 // applied when it is the only one of its group a row sets; a field missing
 // from ResolveVariant would never reach the SubTypes of a variant. Each field
 // alone, in the row and in a variant of an empty row, against an effect whose
-// fields all differ from the values. Keep in step with EffectCreateParams.
+// fields all differ from the values; the list stops compiling when it misses a
+// field (EffectCreateFieldCount).
 TEST_CASE("Every creation field is applied when it is the only one a row or a variant sets [data][effects]")
 {
     struct Field
@@ -905,7 +1038,31 @@ TEST_CASE("Every creation field is applied when it is the only one a row or a va
          [](const OBJECT& o) { return o.HeadTargetAngle[1] == 0.75f; }},
         {"copy.scale", [](EffectCreateParams& p) { p.copyCallScaleToScale = true; },
          [](const OBJECT& o) { return o.Scale == 2.5f; }},
+        {"alphaTarget", [](EffectCreateParams& p) { p.alphaTarget = 0.75; },
+         [](const OBJECT& o) { return o.AlphaTarget == 0.75f; }},
+        {"renderType", [](EffectCreateParams& p) { p.renderType = Data::Effects::EffectRenderType::Dark; },
+         [](const OBJECT& o) { return o.RenderType == RENDER_DARK; }},
+        {"animation", [](EffectCreateParams& p) { p.animation = 3; },
+         [](const OBJECT& o) { return o.m_iAnimation == 3; }},
+        {"startPosition", [](EffectCreateParams& p) { p.startPosition.components[0] = 4.5; },
+         [](const OBJECT& o) { return o.StartPosition[0] == 4.5f && o.StartPosition[1] == -2.f; }},
+        {"offset.lifeTime", [](EffectCreateParams& p) { p.lifeTimeOffset = EffectCreateNumber{5.0, false}; },
+         [](const OBJECT& o) { return o.LifeTime == 6.f; }},
+        {"copy.direction from callAngle", [](EffectCreateParams& p) { p.copyCallAngleToDirection = true; },
+         [](const OBJECT& o) { return o.Direction[0] == 4.f && o.Direction[2] == 6.f; }},
+        {"copy.startPosition from light", [](EffectCreateParams& p) { p.copyLightToStartPosition = true; },
+         [](const OBJECT& o) { return o.StartPosition[1] == 0.2f; }},
+        {"copy.startPosition from callPosition",
+         [](EffectCreateParams& p) { p.copyCallPositionToStartPosition = true; },
+         [](const OBJECT& o) { return o.StartPosition[0] == 7.f && o.StartPosition[2] == 9.f; }},
+        {"copy.eyeRight", [](EffectCreateParams& p) { p.copyLightToEyeRight = true; },
+         [](const OBJECT& o) { return o.EyeRight[2] == 0.3f; }},
+        {"copy.deadPosition", [](EffectCreateParams& p) { p.copyCallAngleToDeadPosition = true; },
+         [](const OBJECT& o) { return o.m_vDeadPosition[1] == 5.f; }},
     };
+
+    // Every field but the variants has an entry.
+    static_assert(std::size(fields) + 1 == Data::Effects::EffectCreateFieldCount);
 
     const auto applyTo = [](const Render::Effects::CreateParams& params)
     {
@@ -932,7 +1089,12 @@ TEST_CASE("Every creation field is applied when it is the only one a row or a va
         Vector(0.f, 0.f, 0.f, o.Direction);
         Vector(-1.f, -2.f, -3.f, o.StartPosition);
         Vector(0.f, 0.f, 0.f, o.HeadTargetAngle);
-        Render::Effects::ApplyCreateParams(&o, params, {{0.25f, 0.75f, 0.5f}, 2.5f});
+        o.AlphaTarget = 0.f;
+        o.RenderType = 0;
+        o.m_iAnimation = 1;
+        Vector(0.f, 0.f, 0.f, o.EyeRight);
+        Vector(0.f, 0.f, 0.f, o.m_vDeadPosition);
+        Render::Effects::ApplyCreateParams(&o, params, {{0.25f, 0.75f, 0.5f}, 2.5f, {7.f, 8.f, 9.f}, {4.f, 5.f, 6.f}});
         return o;
     };
 

@@ -1,7 +1,10 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <optional>
+#include <string_view>
+#include <type_traits>
 #include <vector>
 
 namespace Data::Effects
@@ -23,6 +26,24 @@ struct EffectCreateVector
     bool operator==(const EffectCreateVector&) const = default;
 };
 
+// A number of an offset; the effect multiplies it by the frame factor
+// (FPS_ANIMATION_FACTOR) when timesFrameFactor is set.
+struct EffectCreateNumber
+{
+    double value = 0.0;
+    bool timesFrameFactor = false;
+
+    bool operator==(const EffectCreateNumber&) const = default;
+};
+
+// The render types the creation cases set, by name: RENDER_DARK of the models
+// and RENDER_TYPE_ALPHA_BLEND_MINUS of the textures.
+enum class EffectRenderType
+{
+    Dark,
+    AlphaBlendMinus,
+};
+
 struct EffectCreateVariant;
 
 // The creation values of an effect type: the "create" object of its entry in
@@ -37,9 +58,11 @@ struct EffectCreateVariant;
 //
 // A new field goes into the reader and the writer (EffectCreateParamsJson.cpp),
 // ResolveVariant, the game's CreateParams with ToCreateParams, GroupsOf and
-// ApplyCreateParams, and the test that applies each field alone.
-// ResolveVariant, ToCreateParams and GroupsOf name every field, so they stop
-// compiling until they get it.
+// ApplyCreateParams, and the test that applies each field alone. The name lists
+// next to ResolveVariant, ToCreateParams and GroupsOf and the list of the test
+// check one count, EffectCreateFieldCount, so a new field fails the build until
+// each list has it; the test then fails until the functions apply it. The
+// reader and the writer are not checked.
 struct EffectCreateParams
 {
     std::optional<double> lifeTime;
@@ -62,11 +85,16 @@ struct EffectCreateParams
     std::optional<double> timer;
     std::optional<double> distance;
     std::optional<double> collisionRange;
+    std::optional<double> alphaTarget;
+    std::optional<EffectRenderType> renderType;
+    std::optional<int> animation;
     EffectCreateVector position;
     EffectCreateVector angle;
     EffectCreateVector direction;
+    EffectCreateVector startPosition;
 
     // Added to the field after the values.
+    std::optional<EffectCreateNumber> lifeTimeOffset;
     EffectCreateVector positionOffset;
     EffectCreateVector angleOffset;
     EffectCreateVector startPositionOffset;
@@ -74,8 +102,13 @@ struct EffectCreateParams
     // Copies of other fields, or of the arguments of the CreateEffect call,
     // after the offsets.
     bool copyLightToDirection = false;
+    bool copyCallAngleToDirection = false;
     bool copyPositionToStartPosition = false;
+    bool copyLightToStartPosition = false;
+    bool copyCallPositionToStartPosition = false;
     bool copyCallLightToHeadTargetAngle = false;
+    bool copyLightToEyeRight = false;
+    bool copyCallAngleToDeadPosition = false;
     bool copyCallScaleToScale = false;
 
     // Values for some SubTypes on top of the ones above (D35); a SubType
@@ -85,6 +118,98 @@ struct EffectCreateParams
 
     bool operator==(const EffectCreateParams&) const = default;
 };
+
+// The number of fields of EffectCreateParams, variants included (C++ cannot
+// count the fields of a struct). The game's CreateParams has as many, with its
+// groups in place of the variants.
+inline constexpr std::size_t EffectCreateFieldCount = 38;
+
+// The number of its arguments; only for counting names at compile time, in
+// decltype.
+template <typename... T> std::integral_constant<std::size_t, sizeof...(T)> CountNames(const T&...);
+
+// The values of the fields a copy can write that have one (a copy replaces
+// them, and they replace a copy).
+struct EffectCopyTargetValue
+{
+    bool (*isSet)(const EffectCreateParams& params) = nullptr;
+    void (*clear)(EffectCreateParams& params) = nullptr;
+};
+inline bool ScaleIsSet(const EffectCreateParams& params)
+{
+    return params.scale.has_value();
+}
+inline void ClearScale(EffectCreateParams& params)
+{
+    params.scale.reset();
+}
+inline bool DirectionIsSet(const EffectCreateParams& params)
+{
+    return params.direction.IsSet();
+}
+inline void ClearDirection(EffectCreateParams& params)
+{
+    params.direction = {};
+}
+inline bool StartPositionIsSet(const EffectCreateParams& params)
+{
+    return params.startPosition.IsSet();
+}
+inline void ClearStartPosition(EffectCreateParams& params)
+{
+    params.startPosition = {};
+}
+inline constexpr EffectCopyTargetValue NoValue{};
+inline constexpr EffectCopyTargetValue ScaleValue{&ScaleIsSet, &ClearScale};
+inline constexpr EffectCopyTargetValue DirectionValue{&DirectionIsSet, &ClearDirection};
+inline constexpr EffectCopyTargetValue StartPositionValue{&StartPositionIsSet, &ClearStartPosition};
+
+// One copy of "copy": { "<target>": "<source>" }; the sources starting with
+// "call" are arguments of the CreateEffect call. In the order they are
+// written; the copies of a target are listed together and name the same value
+// of it (checked below).
+struct EffectCopyField
+{
+    const char* target;
+    const char* source;
+    bool EffectCreateParams::* copy;
+    EffectCopyTargetValue value;
+};
+inline constexpr std::array<EffectCopyField, 9> EffectCopyFields = {{
+    {"direction", "light", &EffectCreateParams::copyLightToDirection, DirectionValue},
+    {"direction", "callAngle", &EffectCreateParams::copyCallAngleToDirection, DirectionValue},
+    {"startPosition", "position", &EffectCreateParams::copyPositionToStartPosition, StartPositionValue},
+    {"startPosition", "light", &EffectCreateParams::copyLightToStartPosition, StartPositionValue},
+    {"startPosition", "callPosition", &EffectCreateParams::copyCallPositionToStartPosition, StartPositionValue},
+    {"headTargetAngle", "callLight", &EffectCreateParams::copyCallLightToHeadTargetAngle, NoValue},
+    {"eyeRight", "light", &EffectCreateParams::copyLightToEyeRight, NoValue},
+    {"deadPosition", "callAngle", &EffectCreateParams::copyCallAngleToDeadPosition, NoValue},
+    {"scale", "callScale", &EffectCreateParams::copyCallScaleToScale, ScaleValue},
+}};
+
+constexpr bool CopiesOfEachTargetAreTogether()
+{
+    for (size_t i = 1; i < EffectCopyFields.size(); ++i)
+    {
+        const std::string_view target = EffectCopyFields[i].target;
+        const bool sameAsBefore = target == EffectCopyFields[i - 1].target;
+        for (size_t j = 0; j + 1 < i && !sameAsBefore; ++j)
+        {
+            if (target == EffectCopyFields[j].target)
+                return false; // the target came before, but not right before
+        }
+        if (sameAsBefore && (EffectCopyFields[i].value.isSet != EffectCopyFields[i - 1].value.isSet ||
+                             EffectCopyFields[i].value.clear != EffectCopyFields[i - 1].value.clear))
+            return false;
+    }
+    return true;
+}
+static_assert(CopiesOfEachTargetAreTogether(), "the copies of a target are listed together, with the same value");
+
+// Whether `params` copies into `target`, and whether it sets the value of that
+// field (EffectCopyField::value).
+bool CopiesInto(const EffectCreateParams& params, std::string_view target);
+bool SetsValueOf(const EffectCreateParams& params, std::string_view target);
 
 // The values the SubTypes in `subTypes` get on top of the ones of the row.
 struct EffectCreateVariant

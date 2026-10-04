@@ -164,7 +164,33 @@
     },
     {
       "name": "arrowTankerHit",
-      "code": "MODEL_ARROW_TANKER_HIT"
+      "code": "MODEL_ARROW_TANKER_HIT",
+      "create": {
+        "lifeTime": 100,
+        "scale": 1,
+        "light": [1, 1, 1],
+        "copy": {
+          "startPosition": "position",
+          "deadPosition": "callAngle"
+        },
+        "variants": [
+          {
+            "subType": 0,
+            "angle": [40, 0, 90],
+            "direction": [0, -80, 0]
+          },
+          {
+            "subType": 1,
+            "angle": [40, 0, -90],
+            "direction": [0, -80, 0]
+          },
+          {
+            "subType": 2,
+            "angle": [40, 0, 0],
+            "direction": [0, -80, 0]
+          }
+        ]
+      }
     },
     {
       "name": "arrowThunder",
@@ -409,7 +435,16 @@
     },
     {
       "name": "chromeEnergy2",
-      "code": "BITMAP_CHROME_ENERGY2"
+      "code": "BITMAP_CHROME_ENERGY2",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 30,
+            "startPosition": {"x": 1.5, "y": 1.5}
+          }
+        ]
+      }
     },
     {
       "name": "circle",
@@ -417,7 +452,31 @@
     },
     {
       "name": "circleLight",
-      "code": "MODEL_CIRCLE_LIGHT"
+      "code": "MODEL_CIRCLE_LIGHT",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "variants": [
+          {
+            "subType": 1,
+            "renderType": "dark"
+          },
+          {
+            "subType": 2,
+            "scale": 1
+          },
+          {
+            "subType": 3,
+            "lifeTime": 250,
+            "scale": 1
+          },
+          {
+            "subType": 4,
+            "lifeTime": 20,
+            "scale": 1
+          }
+        ]
+      }
     },
     {
       "name": "cloud",
@@ -506,7 +565,27 @@
     },
     {
       "name": "crater",
-      "code": "BITMAP_CRATER"
+      "code": "BITMAP_CRATER",
+      "create": {
+        "light": [1, 1, 1],
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 60,
+            "startPosition": {"x": 4.5, "y": 4.5}
+          },
+          {
+            "subType": 1,
+            "lifeTime": 30,
+            "startPosition": {"x": 2.5, "y": 2.5}
+          },
+          {
+            "subType": 2,
+            "lifeTime": 40,
+            "startPosition": {"x": 3, "y": 3}
+          }
+        ]
+      }
     },
     {
       "name": "cursedTempleHolyItem",
@@ -846,7 +925,17 @@
     },
     {
       "name": "enemyInfluenceGround",
-      "code": "BITMAP_ENEMY_INFLUENCE_GROUND"
+      "code": "BITMAP_ENEMY_INFLUENCE_GROUND",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 50,
+            "scale": 0.6,
+            "alphaTarget": 0.75
+          }
+        ]
+      }
     },
     {
       "name": "energy",
@@ -1559,7 +1648,18 @@
     },
     {
       "name": "mayaHandSkill",
-      "code": "MODEL_MAYAHANDSKILL"
+      "code": "MODEL_MAYAHANDSKILL",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 1],
+            "lifeTime": 20,
+            "copy": {
+              "startPosition": "light"
+            }
+          }
+        ]
+      }
     },
     {
       "name": "mayaStar",
@@ -1607,7 +1707,29 @@
     },
     {
       "name": "moonHarvestMoon",
-      "code": "MODEL_MOONHARVEST_MOON"
+      "code": "MODEL_MOONHARVEST_MOON",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 70,
+            "alpha": 0.6,
+            "animation": 0
+          },
+          {
+            "subType": 1,
+            "lifeTime": 50,
+            "angle": [0, 0, 0],
+            "copy": {
+              "direction": "callAngle"
+            }
+          },
+          {
+            "subType": 2,
+            "lifeTime": 1
+          }
+        ]
+      }
     },
     {
       "name": "moonHarvestSongpuen1",
@@ -1751,7 +1873,17 @@
     },
     {
       "name": "ourInfluenceGround",
-      "code": "BITMAP_OUR_INFLUENCE_GROUND"
+      "code": "BITMAP_OUR_INFLUENCE_GROUND",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 50,
+            "scale": 0.6,
+            "alphaTarget": 0.75
+          }
+        ]
+      }
     },
     {
       "name": "panda",
@@ -1771,7 +1903,29 @@
     },
     {
       "name": "piercing2",
-      "code": "MODEL_PIERCING2"
+      "code": "MODEL_PIERCING2",
+      "create": {
+        "lifeTime": 10,
+        "scale": 2,
+        "blendMesh": -2,
+        "direction": [0, -60, 0],
+        "offset": {
+          "position": {"z": {"value": 130, "timesFrameFactor": true}}
+        },
+        "copy": {
+          "startPosition": "callPosition"
+        },
+        "variants": [
+          {
+            "subType": 1,
+            "lifeTime": 6
+          },
+          {
+            "subType": 2,
+            "scale": 3
+          }
+        ]
+      }
     },
     {
       "name": "piercingFire",
@@ -2011,7 +2165,24 @@
     },
     {
       "name": "shiny5",
-      "code": "BITMAP_SHINY+6"
+      "code": "BITMAP_SHINY+6",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 24
+          },
+          {
+            "subTypes": [1, 2],
+            "lifeTime": 100
+          },
+          {
+            "subType": 3,
+            "lifeTime": 24,
+            "renderType": "alphaBlendMinus"
+          }
+        ]
+      }
     },
     {
       "name": "shockWave",
@@ -2090,7 +2261,31 @@
     },
     {
       "name": "skull",
-      "code": "BITMAP_SKULL"
+      "code": "BITMAP_SKULL",
+      "create": {
+        "lifeTime": 1000,
+        "variants": [
+          {
+            "subType": 1,
+            "offset": {
+              "lifeTime": {"value": -60, "timesFrameFactor": true}
+            }
+          },
+          {
+            "subType": 2,
+            "lifeTime": 8,
+            "offset": {
+              "position": {"z": {"value": 150, "timesFrameFactor": true}}
+            }
+          },
+          {
+            "subType": 4,
+            "lifeTime": 20,
+            "velocity": 2,
+            "direction": [0, -10, 0]
+          }
+        ]
+      }
     },
     {
       "name": "skullModel",
@@ -2632,7 +2827,25 @@
     },
     {
       "name": "twlight",
-      "code": "BITMAP_TWLIGHT"
+      "code": "BITMAP_TWLIGHT",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 1, 2],
+            "lifeTime": 80,
+            "scale": 8
+          },
+          {
+            "subType": 3,
+            "lifeTime": 30,
+            "alpha": 0,
+            "pkKey": 0,
+            "copy": {
+              "eyeRight": "light"
+            }
+          }
+        ]
+      }
     },
     {
       "name": "volcanoOfMonk",

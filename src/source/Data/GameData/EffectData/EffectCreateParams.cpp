@@ -2,6 +2,8 @@
 
 #include "EffectCreateParams.h"
 
+#include <algorithm>
+
 namespace Data::Effects
 {
 namespace
@@ -25,16 +27,55 @@ void OverrideComponents(EffectCreateVector& vector, const EffectCreateVector& va
         }
     }
 }
-// One name per field of EffectCreateParams: this stops compiling when the
-// struct gets a field, so ResolveVariant below is given it too.
+
+// The value of `target`, which a copy replaces.
+const EffectCopyTargetValue& ValueOf(std::string_view target)
+{
+    for (const EffectCopyField& field : EffectCopyFields)
+    {
+        if (field.target == target)
+        {
+            return field.value;
+        }
+    }
+    return NoValue;
+}
+
+void ClearValueOf(EffectCreateParams& params, std::string_view target)
+{
+    if (const EffectCopyTargetValue& value = ValueOf(target); value.clear != nullptr)
+    {
+        value.clear(params);
+    }
+}
+
+void ClearCopiesInto(EffectCreateParams& params, std::string_view target)
+{
+    for (const EffectCopyField& field : EffectCopyFields)
+    {
+        if (field.target == target)
+        {
+            params.*field.copy = false;
+        }
+    }
+}
+
+// One name per field of EffectCreateParams: the binding stops compiling when
+// the struct gets a field, and the count when the name is added without
+// changing EffectCreateFieldCount, so ResolveVariant below is given it too.
+#define EFFECT_CREATE_FIELD_NAMES                                                                                      \
+    lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha, light, lightEnable, alphaEnable, \
+        kind, skill, pkKey, timer, distance, collisionRange, alphaTarget, renderType, animation, position, angle,      \
+        direction, startPosition, lifeTimeOffset, positionOffset, angleOffset, startPositionOffset,                    \
+        copyLightToDirection, copyCallAngleToDirection, copyPositionToStartPosition, copyLightToStartPosition,         \
+        copyCallPositionToStartPosition, copyCallLightToHeadTargetAngle, copyLightToEyeRight,                          \
+        copyCallAngleToDeadPosition, copyCallScaleToScale, variants
 [[maybe_unused]] void NameEveryField(const EffectCreateParams& params)
 {
-    [[maybe_unused]] const auto& [lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha,
-                                  light, lightEnable, alphaEnable, kind, skill, pkKey, timer, distance, collisionRange,
-                                  position, angle, direction, positionOffset, angleOffset, startPositionOffset,
-                                  copyLightToDirection, copyPositionToStartPosition, copyCallLightToHeadTargetAngle,
-                                  copyCallScaleToScale, variants] = params;
+    [[maybe_unused]] const auto& [EFFECT_CREATE_FIELD_NAMES] = params;
+    static_assert(decltype(CountNames(EFFECT_CREATE_FIELD_NAMES))::value == EffectCreateFieldCount);
 }
+#undef EFFECT_CREATE_FIELD_NAMES
 } // namespace
 
 EffectCreateParams ResolveVariant(const EffectCreateParams& row, const EffectCreateParams& variant)
@@ -58,37 +99,50 @@ EffectCreateParams ResolveVariant(const EffectCreateParams& row, const EffectCre
     Override(params.timer, variant.timer);
     Override(params.distance, variant.distance);
     Override(params.collisionRange, variant.collisionRange);
+    Override(params.alphaTarget, variant.alphaTarget);
+    Override(params.renderType, variant.renderType);
+    Override(params.animation, variant.animation);
     OverrideComponents(params.position, variant.position);
     OverrideComponents(params.angle, variant.angle);
     OverrideComponents(params.direction, variant.direction);
+    OverrideComponents(params.startPosition, variant.startPosition);
+    Override(params.lifeTimeOffset, variant.lifeTimeOffset);
     OverrideComponents(params.positionOffset, variant.positionOffset);
     OverrideComponents(params.angleOffset, variant.angleOffset);
     OverrideComponents(params.startPositionOffset, variant.startPositionOffset);
 
-    // A field gets a value or a copy: the variant's replaces the row's. The
-    // reader makes sure a variant that sets direction while the row copies
-    // the light into it sets all three components.
-    if (variant.scale)
+    // A field gets a value or a copy: the variant's replaces the row's, and a
+    // copy of the variant replaces the row's copies into the same field. The
+    // reader makes sure a variant that sets a vector the row copies into sets
+    // all three components.
+    for (const EffectCopyField& field : EffectCopyFields)
     {
-        params.copyCallScaleToScale = false;
+        if (CopiesInto(variant, field.target))
+        {
+            ClearCopiesInto(params, field.target);
+            ClearValueOf(params, field.target);
+        }
+        else if (SetsValueOf(variant, field.target))
+        {
+            ClearCopiesInto(params, field.target);
+        }
     }
-    if (variant.copyCallScaleToScale)
+    for (const EffectCopyField& field : EffectCopyFields)
     {
-        params.scale.reset();
-        params.copyCallScaleToScale = true;
+        params.*field.copy = params.*field.copy || variant.*field.copy;
     }
-    if (variant.direction.IsSet())
-    {
-        params.copyLightToDirection = false;
-    }
-    if (variant.copyLightToDirection)
-    {
-        params.direction = {};
-        params.copyLightToDirection = true;
-    }
-    params.copyPositionToStartPosition = params.copyPositionToStartPosition || variant.copyPositionToStartPosition;
-    params.copyCallLightToHeadTargetAngle =
-        params.copyCallLightToHeadTargetAngle || variant.copyCallLightToHeadTargetAngle;
     return params;
+}
+
+bool CopiesInto(const EffectCreateParams& params, std::string_view target)
+{
+    return std::any_of(EffectCopyFields.begin(), EffectCopyFields.end(),
+                       [&](const EffectCopyField& field) { return field.target == target && params.*field.copy; });
+}
+
+bool SetsValueOf(const EffectCreateParams& params, std::string_view target)
+{
+    const EffectCopyTargetValue& value = ValueOf(target);
+    return value.isSet != nullptr && value.isSet(params);
 }
 } // namespace Data::Effects

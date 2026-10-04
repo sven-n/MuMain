@@ -46,6 +46,8 @@ constexpr std::array<int, 5> RecordedSubTypes = {0, 1, 2, 3, 99};
 // More SubTypes for the types whose old case handled them or whose callers
 // pass them, so the creation baseline holds what the old case did for them.
 const std::map<int, std::vector<int>> MoreRecordedSubTypes = {
+    {BITMAP_SKULL, {4, 5}},              // a branch for 4; callers pass 5
+    {MODEL_CIRCLE_LIGHT, {4}},           // a branch for 4
     {BITMAP_FIRE_CURSEDLICH, {4, 12}},   // a branch for 12; callers pass 4 and 12
     {MODEL_ALICE_BUFFSKILL_EFFECT, {4}}, // a branch for 4
     {MODEL_CHANGE_UP_NASA, {4}},         // the end of its range of SubTypes 1 to 3
@@ -596,4 +598,44 @@ TEST_CASE("The types of FX1.5 create from the catalogue what their cases chose b
     CHECK(Find(record(MODEL_WINDFOCE, 5), "Effects[0].LifeTime") == "50");
     CHECK(Find(record(MODEL_WINDFOCE, 5), "Effects[0].Scale") == "0");
     CHECK(Find(record(MODEL_WINDFOCE, 1), "Effects[0].LifeTime") == "999");
+}
+
+// FX1.5b moved the creation of these types from code into the catalogue with
+// the fields it added; the commit before the one that deleted their cases
+// compared both for every SubType a caller passes or a branch handles, one no
+// branch handles, every owner, argument set, slot pattern, both geometries
+// and the frame factors 1, 0.5 and 25/60. These are values the cases set with
+// those fields (the call's position is 13120.25, 12480.5, 140.75, its angle
+// 11, 22, 33 and its light 0.9, 0.8, 0.7).
+TEST_CASE("The types of FX1.5b create from the catalogue what their cases set [effects][recorder]")
+{
+    BuildShippedRegistry();
+    const auto record = [](int type, int subType, float frameFactor = 1.f)
+    {
+        EffectCall call = CallOf(type);
+        call.subType = subType;
+        return RecordCall(call, {frameFactor, SlotPattern::A});
+    };
+
+    // 1000 minus 60 times the frame factor.
+    CHECK(Find(record(BITMAP_SKULL, 1, 0.5f), "Effects[0].LifeTime") == "970");
+    CHECK(Find(record(BITMAP_SKULL, 5), "Effects[0].LifeTime") == "1000");
+
+    CHECK(Find(record(BITMAP_OUR_INFLUENCE_GROUND, 0), "Effects[0].AlphaTarget") == "0.75");
+    CHECK(Find(record(BITMAP_SHINY + 6, 3), "Effects[0].RenderType") == std::to_string(RENDER_TYPE_ALPHA_BLEND_MINUS));
+    CHECK(Find(record(MODEL_CIRCLE_LIGHT, 1), "Effects[0].RenderType") == "128");
+    CHECK(Find(record(MODEL_MOONHARVEST_MOON, 0), "Effects[0].m_iAnimation") == "0");
+    CHECK(Find(record(BITMAP_CRATER, 0), "Effects[0].StartPosition[0]") == "4.5");
+
+    // The copies: the light, the call's position before the offset, the call's
+    // angle before the variant zeroes it.
+    CHECK(Find(record(MODEL_MAYAHANDSKILL, 1), "Effects[0].StartPosition[1]") == "0.800000012");
+    CHECK(Find(record(BITMAP_TWLIGHT, 3), "Effects[0].EyeRight[2]") == "0.699999988");
+    const Record piercing = record(MODEL_PIERCING2, 0);
+    CHECK(Find(piercing, "Effects[0].StartPosition[2]") == "140.75");
+    CHECK(Find(piercing, "Effects[0].Position[2]") == "270.75");
+    const Record moon = record(MODEL_MOONHARVEST_MOON, 1);
+    CHECK(Find(moon, "Effects[0].Direction[1]") == "22");
+    CHECK(Find(moon, "Effects[0].Angle[1]") == "0");
+    CHECK(Find(record(MODEL_ARROW_TANKER_HIT, 2), "Effects[0].m_vDeadPosition[2]") == "33");
 }

@@ -40,7 +40,7 @@ decision can move to the roadmap without being renumbered.
 | D31 | How names are chosen | From the enum name in camelCase without `MODEL_`/`BITMAP_`, with collisions and marker names fixed by hand, misspellings corrected (`explotion` → `explosion`), and the types without an enum name named after the file loaded into their slot (`MODEL_SKILL_FURY_STRIKE+1` loads `EarthQuake01` → `earthQuake1`). The full list is proposed in the FX1.1 PR and reviewed there. Types that are never created get entries too; the dead ones are listed in an upstream issue. |
 | D32 | Files and house rules | One file per kind: `EffectTypes.json`, `ParticleTypes.json`, `JointTypes.json`, `SpriteTypes.json`. The rules of the item and model files: `formatVersion`, sorted by name, fixed field order, defaults left out, a writer and a test that the shipped files are in its format, names of letters and digits, errors stop the start, warnings go to the log. Documented in `docs/effect-data.md`. |
 | D33 | Loading and lookup | The catalogue is loaded once on the loading screen, next to the item model data, before the first effect is created. The registry table is built from it: the same array indexed by type, not changed after loading. A lookup stays a bounds check and one array read. No names, strings or allocations after loading. |
-| D34 | Creation values | A registry row replaces the whole legacy case, so a type moves only when every statement of its case can be written as data. `CreateParams` gets exactly the fields the moved cases need. Values are applied in one fixed order (values, then offsets, then copies); an offset of a field a copy writes adds to the copy, and a copy reads its source as it is then, or the call's argument (`callLight`, `callScale`). An unset field keeps what the common setup chose, or the slot's old value where the common setup sets nothing. Values the old code multiplies by `FPS_ANIMATION_FACTOR` keep that as a flag. |
+| D34 | Creation values | A registry row replaces the whole legacy case, so a type moves only when every statement of its case can be written as data. `CreateParams` gets exactly the fields the moved cases need. Values are applied in one fixed order (values, then offsets, then copies); an offset of a field a copy writes adds to the copy, and a copy reads its source as it is then, or the call's argument (`callLight`, `callScale`, `callPosition`, `callAngle`). An unset field keeps what the common setup chose, or the slot's old value where the common setup sets nothing. Values the old code multiplies by `FPS_ANIMATION_FACTOR` keep that as a flag. |
 | D35 | Variants by SubType | A row can hold `variants` keyed by SubType that override its values (44 cases, 47 types choose only values by SubType). A variant names one or more SubTypes and holds the fields of a row; a SubType of a variant gets the row's values with the variant's on top (a value or a copy replaces the value and the copy of its field, vectors and offsets per component), the other SubTypes the row's. The registry resolves them per SubType when it is built. |
 | D36 | Random and logic creation | Cases with `rand()` and the cases with logic stay code in FX1 (167 of 244 cases). Data with random values would have to draw `rand()` in exactly the same order and number, and values like "a random yaw, then the launch vector turned by it" are small programs. They become data in FX2, as building blocks with parameters where adjusting them is meaningful (D43). |
 | D37 | Particles and joints | Names only in FX1; their creation values wait for FX2. They have no registry, their structs differ from effects, and their creation is mostly random formulas. |
@@ -266,7 +266,7 @@ One PR each, small enough to check against the old code.
 | FX1.3 | The 8 types that fit `CreateParams` | FX1.2 | Their cases move into data and are deleted. Sets up the recorder. |
 | FX1.4 | More creation fields | FX1.3 | The fields the 26 value-only cases need; those cases move into data. |
 | FX1.5 | Variants by SubType | FX1.4 | `variants` in effect rows; the 47 types that choose values by SubType move (done: 41 types, see the FX1.5 note). |
-| FX1.5b | Fields for the rest | FX1.5 | The fields the other 12 types that choose values by SubType need (render type, alphaTarget, a lifeTime offset, start position values, the animation, copies from the light, the call's position and the call's angle); those cases move into data. |
+| FX1.5b | Fields for the rest | FX1.5 | The fields the other 12 types that choose values by SubType need (render type, alphaTarget, a lifeTime offset, start position values, the animation, copies from the light, the call's position and the call's angle); those cases move into data. Done, see the FX1.5b note. |
 | FX1.6 | Effect browser | FX1.1 | Read-only tool in MuEditor; values from FX1.2 on. |
 | FX1.7 | Preview | FX1.6 | Creating the selected type in the world in editor builds. |
 
@@ -423,6 +423,35 @@ call's position and the call's angle) and move in FX1.5b; `BITMAP_MAGIC`,
 `MODEL_MAYASTONEFIRE` and `BITMAP_SWORD_FORCE` compute values from the
 call's scale or angle, and `MODEL_WARCRAFT` (never created) needs blend mesh
 numbers below -2, so they stay code.
+
+*FX1.5b done:* `create` has `alphaTarget`, `renderType` by name (`"dark"`
+for `RENDER_DARK` of the models, `"alphaBlendMinus"` for
+`RENDER_TYPE_ALPHA_BLEND_MINUS` of the textures), `animation`, the vector
+`startPosition` and the offset `lifeTime`. Copies can have more than one
+source: direction from light or the call's angle, startPosition from
+position, light or the call's position, eyeRight from light, deadPosition
+from the call's angle; one table of the copies drives the reader, the writer
+and the merge of variants. The creation cases of the 12 types (11 cases)
+that needed them are rows now: `BITMAP_SKULL`,
+`BITMAP_OUR_INFLUENCE_GROUND`, `BITMAP_ENEMY_INFLUENCE_GROUND`,
+`BITMAP_SHINY+6`, `MODEL_MAYAHANDSKILL`, `MODEL_CIRCLE_LIGHT`,
+`MODEL_PIERCING2`, `BITMAP_TWLIGHT`, `MODEL_MOONHARVEST_MOON`,
+`MODEL_ARROW_TANKER_HIT`, `BITMAP_CRATER` and `BITMAP_CHROME_ENERGY2`. Three
+needed a copy of the call's argument because the case copies before a value
+or an offset changes the field: the start position of `MODEL_PIERCING2`
+before its position is raised, the direction of `MODEL_MOONHARVEST_MOON`
+before its angle is zeroed, and the dead position of
+`MODEL_ARROW_TANKER_HIT` before a variant sets its angle. The PR's second
+commit compared the old cases with the rows: all 2,016 calls equal at the
+frame factors 1 and 0.5, and all 1,008 at 25/60. The third deletes the 11
+cases; g++ finds the same 6 fallthroughs. The name lists next to
+`ResolveVariant`, `ToCreateParams` and `GroupsOf` and the list of the field
+test check one count, `EffectCreateFieldCount`, so a new field fails the
+build until each list has it; the field test then fails until the functions
+apply it (the reader and the writer are not checked). All creation cases
+that only choose values by SubType are data now, except `BITMAP_MAGIC`,
+`MODEL_MAYASTONEFIRE` and `BITMAP_SWORD_FORCE`, which compute values from
+the call's scale or angle, and `MODEL_WARCRAFT`, which is never created.
 
 **FX1.6–FX1.7** add the effect browser and its preview to MuEditor. They
 change no game code outside editor builds.
