@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Guild/GuildTypes.h"
-#include "UI/Combat/UISenatus.h"
 #include "UI/NPCs/UIGateKeeper.h"
 #include "UI/Inventory/UIJewelHarmony.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"

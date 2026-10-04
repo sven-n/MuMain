@@ -16,7 +16,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "Guild/GuildTypes.h"
-#include "UI/Events/UIGuardsMan.h"
+#include "GameLogic/Events/SiegeRegistration.h"
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -35,6 +35,40 @@
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+namespace
+{
+bool IsGuildMark(const ITEM* item)
+{
+    return item->Type == ITEM_POTION + 21 && item->Level == 3;
+}
+
+// Guild marks in the hero's main inventory.
+DWORD CountGuildMarks()
+{
+    DWORD count = 0;
+    CInventoryCtrl* inventory = g_pMyInventory->GetInventoryCtrl();
+    for (int i = 0; i < (int)inventory->GetNumberOfItems(); ++i)
+    {
+        ITEM* item = inventory->GetItem(i);
+        if (IsGuildMark(item))
+            count += item->Durability;
+    }
+    return count;
+}
+
+int FindGuildMarkSlot()
+{
+    CInventoryCtrl* inventory = g_pMyInventory->GetInventoryCtrl();
+    for (int i = 0; i < (int)inventory->GetNumberOfItems(); ++i)
+    {
+        ITEM* item = inventory->GetItem(i);
+        if (IsGuildMark(item))
+            return item->y * COLUMN_INVENTORY + item->x;
+    }
+    return -1;
+}
+} // namespace
 
 
 CGuardWindow::CGuardWindow()
@@ -232,10 +266,10 @@ void CGuardWindow::UpdateRegisterTab(GUARD_BUTTON button)
     {
     case CASTLESIEGE_STATE_REGSIEGE:
         // The button exists (and is unlocked) only for a guild master not yet registered.
-        if (button == GUARD_BUTTON_PROCLAIM && Hero->GuildStatus == G_MASTER && !g_GuardsMan.HasRegistered() &&
+        if (button == GUARD_BUTTON_PROCLAIM && Hero->GuildStatus == G_MASTER && !g_SiegeRegistration.HasRegistered() &&
             !ProclaimLocked())
         {
-            if (g_GuardsMan.IsSufficentDeclareLevel())
+            if (g_SiegeRegistration.IsSufficientDeclareLevel())
             {
                 SocketClient->ToGameServer()->SendCastleSiegeRegistrationRequest();
             }
@@ -251,9 +285,9 @@ void CGuardWindow::UpdateRegisterTab(GUARD_BUTTON button)
         }
         break;
     case CASTLESIEGE_STATE_REGMARK:
-        if (button == GUARD_BUTTON_REGISTER && g_GuardsMan.HasRegistered() && g_GuardsMan.GetMyMarkCount() > 0)
+        if (button == GUARD_BUTTON_REGISTER && g_SiegeRegistration.HasRegistered() && CountGuildMarks() > 0)
         {
-            int nMarkSlot = g_GuardsMan.GetMyMarkSlotIndex();
+            int nMarkSlot = FindGuildMarkSlot();
             if (nMarkSlot != -1)
             {
                 SocketClient->ToGameServer()->SendCastleSiegeMarkRegistration(nMarkSlot);
@@ -281,7 +315,7 @@ void CGuardWindow::UpdateRegisterInfoLists()
 
 void CGuardWindow::UpdateRegisterInfoTab(GUARD_BUTTON button)
 {
-    if (button == GUARD_BUTTON_GIVE_UP && g_GuardsMan.HasRegistered() && CASTLESIEGE_STATE_REGSIEGE <= m_eTimeType &&
+    if (button == GUARD_BUTTON_GIVE_UP && g_SiegeRegistration.HasRegistered() && CASTLESIEGE_STATE_REGSIEGE <= m_eTimeType &&
         m_eTimeType <= CASTLESIEGE_STATE_REGMARK && Hero->GuildStatus == G_MASTER)
     {
         mu::ui::window::GenericDialogConfig cfg;
@@ -603,7 +637,7 @@ void CGuardWindow::SyncContent()
         case CASTLESIEGE_STATE_REGSIEGE:
             if (Hero->GuildStatus == G_MASTER)
             {
-                if (!g_GuardsMan.HasRegistered())
+                if (!g_SiegeRegistration.HasRegistered())
                     proclaimButton = {StringUtils::WideToNarrow(I18N::Game::Announce), true, ProclaimLocked()};
                 else
                     registerMessage = pageLine(I18N::Game::Announced);
@@ -617,13 +651,13 @@ void CGuardWindow::SyncContent()
             registerMessage = pageLine(I18N::Game::StandbyPeriodForSignRegistration);
             break;
         case CASTLESIEGE_STATE_REGMARK:
-            if (g_GuardsMan.HasRegistered())
+            if (g_SiegeRegistration.HasRegistered())
             {
                 registerMessage = pageLine(I18N::Game::RegisterTheAcquiredSign);
-                const int nMarkCount = g_GuardsMan.GetMyMarkCount();
+                const int nMarkCount = CountGuildMarks();
                 mu_swprintf(szText, I18N::Game::AcquiredNoOfSignU, nMarkCount);
                 registerAcquired = pageLine(szText);
-                mu_swprintf(szText, I18N::Game::RegisteredNoOfSignU, g_GuardsMan.GetRegMarkCount());
+                mu_swprintf(szText, I18N::Game::RegisteredNoOfSignU, g_SiegeRegistration.GetRegMarkCount());
                 registerRegistered = pageLine(szText);
                 registerButton = {StringUtils::WideToNarrow(I18N::Game::Register), true, nMarkCount <= 0};
             }
@@ -667,7 +701,7 @@ void CGuardWindow::SyncContent()
             listMessage = pageLine(I18N::Game::TrucePeriod, true);
         }
 
-        if (g_GuardsMan.HasRegistered() && CASTLESIEGE_STATE_REGSIEGE <= m_eTimeType &&
+        if (g_SiegeRegistration.HasRegistered() && CASTLESIEGE_STATE_REGSIEGE <= m_eTimeType &&
             m_eTimeType <= CASTLESIEGE_STATE_REGMARK && Hero->GuildStatus == G_MASTER)
             giveUpButton = {StringUtils::WideToNarrow(I18N::Game::AbandonCastleSiege), true, false};
         break;

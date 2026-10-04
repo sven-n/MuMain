@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 

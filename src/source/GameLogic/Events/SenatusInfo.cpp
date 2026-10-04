@@ -1,22 +1,6 @@
-//////////////////////////////////////////////////////////////////////////
-//  UIGuardsMan.cpp
-//////////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
-#include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Textures/ZzzTexture.h"
-#include "UI/Core/UIManager.h"
-#include "UI/Events/UIGuardsMan.h"
 
-
-#include "GameLogic/Items/MixMgr.h"
-
-extern DWORD		g_dwActiveUIID;
-
-
-
-extern int   ShopInventoryStartX;
-extern int   ShopInventoryStartY;
+#include "GameLogic/Events/SenatusInfo.h"
 
 CSenatusInfo g_SenatusInfo;
 

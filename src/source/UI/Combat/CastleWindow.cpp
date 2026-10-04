@@ -17,7 +17,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "GameLogic/Items/MixMgr.h"
-#include "UI/Combat/UISenatus.h"
+#include "GameLogic/Events/SenatusInfo.h"
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"

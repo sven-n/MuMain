@@ -1,4 +1,5 @@
-#include "UI/Core/UIManager.h"
+#pragma once
+
 #include "GameLogic/Items/JewelUnmixSelection.h"
 
 

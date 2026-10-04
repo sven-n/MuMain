@@ -584,7 +584,8 @@ decoded values only, and strings or spans are borrowed for the call. Current hea
 MixUpdates,ShopUpdates}.h`, `Guild/GuildUpdates.h`, `UI/HUD/HudUpdates.h`, `UI/Combat/SiegeUpdates.h`,
 `UI/Events/{Doppelganger,EmpireGuardian,CryWolf,LuckyCoin,Kanturu,CursedTemple}Updates.h`,
 `UI/NPCs/NpcDialogueUpdates.h`, `UI/Quests/QuestUpdates.h`, `UI/Options/OptionUpdates.h`,
-`UI/MuHelper/MuHelperUpdates.h`, `UI/Windows/LoginSceneUpdates.h`. Plain OK message boxes and the
+`UI/MuHelper/MuHelperUpdates.h`, `UI/Windows/LoginSceneUpdates.h`, and the older
+`UI/Chat/Whisper.h` and `UI/HUD/Notices.h`, which already had this shape. Plain OK message boxes and the
 NPC menu dialogs are already free functions in `UI/Core/WindowCommon.h` (reached through the
 precompiled header; it includes nothing). `Network/Server/WSclient.cpp` includes only these headers
 from the UI, and its compiler include tree reaches no RmlUi header; keep it that way. Add an

@@ -19,6 +19,7 @@
 #include "UI/Social/SocialUpdates.h"
 #include <memory>
 #include "Guild/GuildCache.h"
+#include "Guild/GuildTypes.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -61,7 +62,8 @@
 #include "GameLogic/Events/Event.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "World/MapInfra/MapManager.h"
-#include "UI/Events/UIGuardsMan.h"
+#include "GameLogic/Events/SenatusInfo.h"
+#include "GameLogic/Events/SiegeRegistration.h"
 #include "UI/Dialogs/ConfirmRequest.h"
 #include "UI/Inventory/TradeUpdates.h"
 #include "UI/Inventory/StorageUpdates.h"
@@ -10898,7 +10900,7 @@ void ReceiveBCReg(const BYTE* ReceiveBuffer)
         UI::Chat::PostSystem(I18N::Game::FailedToRegisterForCastleSiege, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
-        g_GuardsMan.SetRegStatus(1);
+        g_SiegeRegistration.SetRegistered(true);
         UI::Chat::PostSystem(I18N::Game::CastleSiegeRegistrationIsSuccessful, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x02:
@@ -10940,7 +10942,7 @@ void ReceiveBCGiveUp(const BYTE* ReceiveBuffer)
     case 0x01:
         SocketClient->ToGameServer()->SendCastleSiegeRegistrationStateRequest();
         SocketClient->ToGameServer()->SendCastleSiegeRegisteredGuildsListRequest();
-        g_GuardsMan.SetRegStatus(0);
+        g_SiegeRegistration.SetRegistered(false);
         UI::Chat::PostSystem(I18N::Game::SurrenderingCastleSiegeIsSuccessful, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x02:
@@ -10962,22 +10964,22 @@ void ReceiveBCRegInfo(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0x00:
-        g_GuardsMan.SetRegStatus(0);
+        g_SiegeRegistration.SetRegistered(false);
         break;
     case 0x01:
     {
-        g_GuardsMan.SetRegStatus(!Data->btIsGiveUp);
+        g_SiegeRegistration.SetRegistered(!Data->btIsGiveUp);
         DWORD dwMarkCount;
         auto* pMarkCount = (BYTE*)&dwMarkCount;
         *pMarkCount++ = Data->btGuildMark4;
         *pMarkCount++ = Data->btGuildMark3;
         *pMarkCount++ = Data->btGuildMark2;
         *pMarkCount++ = Data->btGuildMark1;
-        g_GuardsMan.SetMarkCount(dwMarkCount);
+        g_SiegeRegistration.SetMarkCount(dwMarkCount);
     }
     break;
     case 0x02:
-        g_GuardsMan.SetRegStatus(0);
+        g_SiegeRegistration.SetRegistered(false);
         break;
     }
 }
@@ -10999,7 +11001,7 @@ void ReceiveBCRegMark(const BYTE* ReceiveBuffer)
         *pMarkCount++ = Data->btGuildMark3;
         *pMarkCount++ = Data->btGuildMark2;
         *pMarkCount++ = Data->btGuildMark1;
-        g_GuardsMan.SetMarkCount(dwMarkCount);
+        g_SiegeRegistration.SetMarkCount(dwMarkCount);
     }
     break;
     case 0x02:

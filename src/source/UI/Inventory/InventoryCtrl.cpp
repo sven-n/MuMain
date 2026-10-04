@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "UI/Core/UIManager.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Inventory/ItemMng.h"
 #include "UI/Core/WindowSystem.h"

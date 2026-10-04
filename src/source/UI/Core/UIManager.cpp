@@ -5,6 +5,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Network/Server/WSclient.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInterface.h"

@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Network/Server/WSclient.h"
 #include "I18N/All.h"
 
 #include <algorithm>

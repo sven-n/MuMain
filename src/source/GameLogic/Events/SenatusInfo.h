@@ -1,6 +1,5 @@
-//////////////////////////////////////////////////////////////////////////
-//  UISenatus.h
-//////////////////////////////////////////////////////////////////////////
+// The castle senate's gate and statue NPCs, tax rates and castle money, as the server reported them,
+// plus the requests that change them.
 
 #if !defined(AFX_UISENATUS_H__05379221_4D2C_472A_9048_8E9AB0A4367B__INCLUDED_)
 #define AFX_UISENATUS_H__05379221_4D2C_472A_9048_8E9AB0A4367B__INCLUDED_
