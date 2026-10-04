@@ -15,6 +15,7 @@
 #include "GameLogic/Automation/Pickup.h"
 #include "GameLogic/Automation/Skill.h"
 #include "GameLogic/Items/InventoryUtils.h"
+#include "UI/Inventory/InventoryContents.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
@@ -969,7 +970,7 @@ std::string UseItem(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`use` needs an inventory slot");
     }
 
-    const ITEM* item = FindInventoryItemBySlot(slot);
+    const ITEM* item = UI::Inventory::FindPlayerItem(slot);
     // `-1` is the client's empty marker; type 0 is a real item.
     if (item == nullptr || item->Type < 0)
     {
@@ -1010,7 +1011,7 @@ std::string EquipItem(const Request& request, std::unique_ptr<Act>&)
                            "`equip` needs an inventory slot and a target slot");
     }
 
-    const ITEM* item = FindInventoryItemBySlot(fromSlot);
+    const ITEM* item = UI::Inventory::FindPlayerItem(fromSlot);
     if (item == nullptr || item->Type < 0)
     {
         return EncodeError(request.EncodedId(), ErrorCode::EmptySlot,

@@ -8,7 +8,7 @@
 #include <array>
 #include <cstdint>
 
-#include "GameLogic/Items/InventoryUtils.h"
+#include "UI/Inventory/InventoryContents.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Core/WindowSystem.h"
@@ -105,7 +105,7 @@ bool COMGEM::RefreshWantedList()
     {
         for (int slot = MAX_EQUIPMENT_INDEX; slot < MAX_MY_INVENTORY_EX_INDEX; ++slot)
         {
-            const ITEM* item = FindInventoryItemBySlot(slot);
+            const ITEM* item = UI::Inventory::FindPlayerItem(slot);
             if (item && isCompiledGem(item) && item->Level != NOCOM)
                 entries[count++] = {slot, item->Key, item->Type, item->Level};
         }
@@ -184,7 +184,7 @@ bool COMGEM::CheckMyInvValid()
 
         for (int slot = MAX_EQUIPMENT_INDEX; slot < MAX_MY_INVENTORY_EX_INDEX; ++slot)
         {
-            const ITEM* pItem = FindInventoryItemBySlot(slot);
+            const ITEM* pItem = UI::Inventory::FindPlayerItem(slot);
             if (!pItem)
             {
                 continue;
@@ -216,7 +216,7 @@ bool COMGEM::CheckMyInvValid()
             return false;
         }
 
-        const ITEM* pItem = FindInventoryItemBySlot(iUnMixIndex);
+        const ITEM* pItem = UI::Inventory::FindPlayerItem(iUnMixIndex);
         if (MatchesSelectedUnmixItem(pItem))
         {
             ++m_cCount;

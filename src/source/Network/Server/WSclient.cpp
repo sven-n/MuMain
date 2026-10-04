@@ -39,6 +39,7 @@
 #include "GameLogic/NPCs/npcGateSwitch.h"
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/InventoryUtils.h"
+#include "UI/Inventory/InventoryContents.h"
 #include "UI/HUD/UIMapName.h" // rozy
 #include "GameLogic/Commands/ChatCommandCatalog.h"
 #include "UI/Core/SceneUICoordinator.h"
@@ -1627,25 +1628,7 @@ void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT_SUBCODE)ReceiveBuffer;
     if (Data->SubCode != 0xff)
-    {
-        int itemindex = Data->SubCode;
-        if (itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
-        {
-            g_pMyInventory->UnequipItem(itemindex);
-        }
-        else if (IsMainInventorySlot(itemindex))
-        {
-            g_pMyInventory->DeleteItem(itemindex);
-        }
-        else if (IsInventoryExtensionSlot(itemindex))
-        {
-            g_pMyInventoryExt->DeleteItem(itemindex);
-        }
-        else if (IsMyShopSlot(itemindex))
-        {
-            g_pMyShopInventory->DeleteItem(itemindex);
-        }
-    }
+        UI::Inventory::RemoveItem(Data->SubCode);
 
     if (Data->Value)
     {
@@ -1698,10 +1681,7 @@ BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         i.ExcellentFlags = 0;
     }
 
-    g_pMyInventory->UnequipAllItems();
-    g_pMyInventory->DeleteAllItems();
-    g_pMyInventoryExt->DeleteAllItems();
-    g_pMyShopInventory->DeleteAllItems();
+    UI::Inventory::ClearAllItems();
 
     auto Data = safe_cast<PHEADER_DEFAULT_SUBCODE_WORD>(ReceiveBuffer);
     if (Data == nullptr)
@@ -1725,7 +1705,7 @@ BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
             return false;
         }
 
-        mu::ui::window::CInventoryCtrl::DeletePickedItem();
+        UI::Inventory::DiscardPickedItem();
         int itemindex = itemStartData->Index;
         Offset++;
 
@@ -1733,22 +1713,7 @@ BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         int length = CalcItemLength(itemData);
         itemData = itemData.subspan(0, length);
 
-        if (itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
-        {
-            g_pMyInventory->EquipItem(itemindex, itemData);
-        }
-        else if (IsMainInventorySlot(itemindex))
-        {
-            g_pMyInventory->InsertItem(itemindex, itemData);
-        }
-        else if (IsInventoryExtensionSlot(itemindex))
-        {
-            g_pMyInventoryExt->InsertItem(itemindex, itemData);
-        }
-        else if (IsMyShopSlot(itemindex))
-        {
-            g_pMyShopInventory->InsertItem(itemindex, itemData);
-        }
+        UI::Inventory::InsertItem(itemindex, itemData);
 
         Offset += length;
     }
@@ -6432,24 +6397,12 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     }
 
     int itemindex = Data->Index;
-    if (IsMainInventorySlot(itemindex) && g_pMyInventory->FindItem(itemindex))
-    {
-        g_pMyInventory->DeleteItem(itemindex);
-    }
-    else if (IsInventoryExtensionSlot(itemindex) && g_pMyInventoryExt->FindItem(itemindex))
-    {
-        g_pMyInventoryExt->DeleteItem(itemindex);
-    }
+    if (IsPlayerInventorySlot(itemindex) && UI::Inventory::FindPlayerItem(itemindex))
+        UI::Inventory::RemoveItem(itemindex);
 
     bool shouldResyncInventory = false;
-    if (IsMainInventorySlot(itemindex))
-    {
-        shouldResyncInventory = !g_pMyInventory->InsertItem(itemindex, itemData);
-    }
-    else if (IsInventoryExtensionSlot(itemindex))
-    {
-        shouldResyncInventory = !g_pMyInventoryExt->InsertItem(itemindex, itemData);
-    }
+    if (IsPlayerInventorySlot(itemindex))
+        shouldResyncInventory = !UI::Inventory::InsertItem(itemindex, itemData);
 
     if (shouldResyncInventory)
     {
@@ -6716,14 +6669,8 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
     }
     else
     {
-        if (IsMainInventorySlot(Data->Index))
-        {
-            g_pMyInventory->InsertItem(Data->Index, itemData);
-        }
-        else if (IsInventoryExtensionSlot(Data->Index))
-        {
-            g_pMyInventoryExt->InsertItem(Data->Index, itemData);
-        }
+        if (IsPlayerInventorySlot(Data->Index))
+            UI::Inventory::InsertItem(Data->Index, itemData);
 
         PlayBuffer(SOUND_GET_ITEM01);
     }

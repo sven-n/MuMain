@@ -10,7 +10,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Core/Utilities/_GlobalFunctions.h"
-#include "GameLogic/Items/InventoryUtils.h"
+#include "UI/Inventory/InventoryContents.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
 #include "World/MapInfra/MapManager.h"
@@ -83,7 +83,7 @@ json InventoryArray()
     json inventory = json::array();
     for (int slot = MAX_EQUIPMENT_INDEX; slot < MAX_MY_INVENTORY_EX_INDEX; ++slot)
     {
-        const ITEM* item = FindInventoryItemBySlot(slot);
+        const ITEM* item = UI::Inventory::FindPlayerItem(slot);
         if (item == nullptr || item->Type < 0)
         {
             continue;
