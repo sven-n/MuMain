@@ -394,7 +394,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             if (const Render::Effects::EffectDescriptor* desc = Render::Effects::Lookup(Type); desc && (desc->create || desc->onCreate))
             {
                 if (desc->create)
-                    Render::Effects::ApplyCreateParams(o, *desc->create, {Light, Scale});
+                    Render::Effects::ApplyCreateParams(o, *desc->create, {{Light[0], Light[1], Light[2]}, Scale});
                 if (desc->onCreate)
                     desc->onCreate(o);
                 return;

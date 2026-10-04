@@ -47,9 +47,8 @@ void AddComponents(vec3_t target, const CreateVector& vector)
             target[i] += vector.values[i];
     }
 }
-} // namespace
 
-void ApplyCreateParams(OBJECT* o, const CreateParams& params, const CreateCall& call)
+void ApplyValues(OBJECT* o, const CreateParams& params)
 {
     if (params.lifeTime)
         o->LifeTime = *params.lifeTime;
@@ -69,55 +68,91 @@ void ApplyCreateParams(OBJECT* o, const CreateParams& params, const CreateCall& 
         o->Alpha = *params.alpha;
     if (params.light)
         VectorCopy(params.light->data(), o->Light);
-    if (params.groups == 0)
-        return;
+}
 
-    if (params.groups & CreateParams::Flags)
-    {
-        if (params.lightEnable)
-            o->LightEnable = *params.lightEnable;
-        if (params.alphaEnable)
-            o->AlphaEnable = *params.alphaEnable;
-        if (params.kind)
-            o->Kind = *params.kind;
-        if (params.skill)
-            o->Skill = *params.skill;
-    }
-    if (params.groups & CreateParams::Numbers)
-    {
-        if (params.pkKey)
-            o->PKKey = *params.pkKey;
-        if (params.timer)
-            o->Timer = *params.timer;
-        if (params.distance)
-            o->Distance = *params.distance;
-        if (params.collisionRange)
-            o->CollisionRange = *params.collisionRange;
-    }
-    if (params.groups & CreateParams::Vectors)
-    {
-        SetComponents(o->Position, params.position);
-        SetComponents(o->Angle, params.angle);
-        SetComponents(o->Direction, params.direction);
-    }
-    if (params.groups & CreateParams::Offsets)
+void ApplyFlags(OBJECT* o, const CreateParams& params)
+{
+    if (params.lightEnable)
+        o->LightEnable = *params.lightEnable;
+    if (params.alphaEnable)
+        o->AlphaEnable = *params.alphaEnable;
+    if (params.kind)
+        o->Kind = *params.kind;
+    if (params.skill)
+        o->Skill = *params.skill;
+}
+
+void ApplyNumbers(OBJECT* o, const CreateParams& params)
+{
+    if (params.pkKey)
+        o->PKKey = *params.pkKey;
+    if (params.timer)
+        o->Timer = *params.timer;
+    if (params.distance)
+        o->Distance = *params.distance;
+    if (params.collisionRange)
+        o->CollisionRange = *params.collisionRange;
+}
+
+void ApplyVectors(OBJECT* o, const CreateParams& params)
+{
+    SetComponents(o->Position, params.position);
+    SetComponents(o->Angle, params.angle);
+    SetComponents(o->Direction, params.direction);
+}
+
+void ApplyCopies(OBJECT* o, const CreateParams& params, const CreateCall& call)
+{
+    if (params.copyLightToDirection)
+        VectorCopy(o->Light, o->Direction);
+    if (params.copyPositionToStartPosition)
+        VectorCopy(o->Position, o->StartPosition);
+    if (params.copyCallLightToHeadTargetAngle)
+        VectorCopy(call.light.data(), o->HeadTargetAngle);
+    if (params.copyCallScaleToScale)
+        o->Scale = call.scale;
+}
+} // namespace
+
+std::uint8_t GroupsOf(const CreateParams& params)
+{
+    std::uint8_t groups = 0;
+    if (params.lightEnable || params.alphaEnable || params.kind || params.skill)
+        groups |= CreateParams::Flags;
+    if (params.pkKey || params.timer || params.distance || params.collisionRange)
+        groups |= CreateParams::Numbers;
+    if (params.position.components || params.angle.components || params.direction.components)
+        groups |= CreateParams::Vectors;
+    if (params.positionOffset.components || params.angleOffset.components || params.startPositionOffset.components)
+        groups |= CreateParams::Offsets;
+    if (params.copyLightToDirection || params.copyPositionToStartPosition || params.copyCallLightToHeadTargetAngle ||
+        params.copyCallScaleToScale)
+        groups |= CreateParams::Copies;
+    return groups;
+}
+
+// Values, then offsets, then copies; an offset of a field a copy writes adds
+// to the copy.
+void ApplyCreateParams(OBJECT* o, const CreateParams& params, const CreateCall& call)
+{
+    ApplyValues(o, params);
+    const std::uint8_t groups = params.groups;
+    if (groups == 0)
+        return;
+    if (groups & CreateParams::Flags)
+        ApplyFlags(o, params);
+    if (groups & CreateParams::Numbers)
+        ApplyNumbers(o, params);
+    if (groups & CreateParams::Vectors)
+        ApplyVectors(o, params);
+    if (groups & CreateParams::Offsets)
     {
         AddComponents(o->Position, params.positionOffset);
         AddComponents(o->Angle, params.angleOffset);
     }
-    if (params.groups & CreateParams::Copies)
-    {
-        if (params.copyLightToDirection)
-            VectorCopy(o->Light, o->Direction);
-        if (params.copyPositionToStartPosition)
-            VectorCopy(o->Position, o->StartPosition);
-        if (params.copyCallLightToHeadTargetAngle)
-            VectorCopy(call.light, o->HeadTargetAngle);
-        if (params.copyCallScaleToScale)
-            o->Scale = call.scale;
-    }
-    // After the copy into it.
-    if (params.groups & CreateParams::Offsets)
+    if (groups & CreateParams::Copies)
+        ApplyCopies(o, params, call);
+    if (groups & CreateParams::Offsets)
         AddComponents(o->StartPosition, params.startPositionOffset);
 }
 
@@ -179,30 +214,17 @@ CreateParams ToCreateParams(const Data::Effects::EffectCreateParams& values)
     params.timer = ToFloat(values.timer);
     params.distance = ToFloat(values.distance);
     params.collisionRange = ToFloat(values.collisionRange);
-    if (params.lightEnable || params.alphaEnable || params.kind || params.skill)
-        params.groups |= CreateParams::Flags;
-    if (params.pkKey || params.timer || params.distance || params.collisionRange)
-        params.groups |= CreateParams::Numbers;
-
     params.position = ToCreateVector(values.position);
     params.angle = ToCreateVector(values.angle);
     params.direction = ToCreateVector(values.direction);
-    if (params.position.components || params.angle.components || params.direction.components)
-        params.groups |= CreateParams::Vectors;
-
     params.positionOffset = ToCreateVector(values.positionOffset);
     params.angleOffset = ToCreateVector(values.angleOffset);
     params.startPositionOffset = ToCreateVector(values.startPositionOffset);
-    if (params.positionOffset.components || params.angleOffset.components || params.startPositionOffset.components)
-        params.groups |= CreateParams::Offsets;
-
     params.copyLightToDirection = values.copyLightToDirection;
     params.copyPositionToStartPosition = values.copyPositionToStartPosition;
     params.copyCallLightToHeadTargetAngle = values.copyCallLightToHeadTargetAngle;
     params.copyCallScaleToScale = values.copyCallScaleToScale;
-    if (params.copyLightToDirection || params.copyPositionToStartPosition || params.copyCallLightToHeadTargetAngle ||
-        params.copyCallScaleToScale)
-        params.groups |= CreateParams::Copies;
+    params.groups = GroupsOf(params);
     return params;
 }
 

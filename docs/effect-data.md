@@ -136,15 +136,18 @@ with when the game creates it. Particles, lightning and sprites have none
   creation code**. Only effects whose creation code set nothing but these
   values have one; adding `create` to another effect drops what its code
   did (for example the effects it spawns) and changes how it looks.
-- A value that is not a number, or too large for the game (which keeps
-  the values as float), is an error; so are mesh fields that are not whole
+- A value that is not a number, or too large for the game (which keeps the
+  values as float), is an error; so are mesh fields that are not whole
   numbers from -2 to 32767, `kind` and `skill` outside their ranges, an
   `alpha` outside 0 to 1, flags that are not `true`/`false`, vectors that
   are not three numbers or an object of `x`, `y` and `z`, the frame factor
-  outside an offset, a copy from another source than the one listed, and a
-  field with both a value and a copy. An unknown field is a warning, and so
-  is a `create` (or `offset`, `copy`, vector) that sets no value; a
-  `create` without values still replaces the creation code.
+  outside an offset, a copy from another source than the one listed, a field
+  with both a value and a copy, and the old field `copyLightToDirection`
+  (now `"copy": {"direction": "light"}`). An unknown field is a warning, and
+  so is a `create` (or `offset`, `copy`, vector) that sets no value; a
+  `create` without values still replaces the creation code. An offset of
+  `startPosition` without `"copy": {"startPosition": "position"}` is a
+  warning: it adds to the start position the slot's previous effect left.
 - `kind` in `create` is a value of the effect, not the `kind` of the file.
 
 ## How the names were chosen

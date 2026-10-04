@@ -68,11 +68,11 @@ bool IsName(std::string_view text);
 
 // The JSON writer puts every list entry on its own line. Short lists of
 // words or numbers are easier to read on one line: "tags": ["jewel", "valuable"].
-// Puts every list of `key` on one line; text in quotes (e.g. a folder name
-// with spaces) is kept as it is.
+// Puts every list of `key`, with the lists and objects in it, on one line;
+// text in quotes (e.g. a folder name with spaces) is kept as it is.
 std::string PutListsOnOneLine(const std::string& text, std::string_view key);
 
-// Puts every object of `key`, with the objects in it, on one line:
+// Puts every object of `key`, with the lists and objects in it, on one line:
 // "angle": {"y": 0}. A space stays after each comma and colon.
 std::string PutObjectsOnOneLine(const std::string& text, std::string_view key);
 } // namespace Data::Items::Json

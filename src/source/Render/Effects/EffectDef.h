@@ -30,7 +30,7 @@ struct CreateVector
 // The arguments of the CreateEffect call that creation values can copy.
 struct CreateCall
 {
-    const float* light = nullptr;
+    std::array<float, 3> light{};
     float scale = 0.f;
 };
 
@@ -63,9 +63,9 @@ struct CreateParams
     // When set, overrides o->Light (the colour the effect renders with).
     std::optional<std::array<float, 3>> light;
 
-    // The groups below that a row sets. ApplyCreateParams tests only those,
-    // so the rows that set only the values above cost what they did before
-    // these fields came.
+    // The groups below that a row sets (GroupsOf). ApplyCreateParams tests
+    // only those, so the rows that set only the values above cost what they
+    // did before these fields came.
     enum Group : std::uint8_t
     {
         Flags = 1 << 0,
@@ -133,6 +133,11 @@ struct EffectDescriptor
     MoveHandler move = nullptr;
     RenderHandler render = nullptr;
 };
+
+// The groups of fields `params` sets, for CreateParams::groups. Whatever
+// makes or changes CreateParams sets groups with it, so ApplyCreateParams
+// skips no field that is set.
+std::uint8_t GroupsOf(const CreateParams& params);
 
 // Applies the optional parameters to an already common-initialised effect.
 void ApplyCreateParams(OBJECT* o, const CreateParams& params, const CreateCall& call);

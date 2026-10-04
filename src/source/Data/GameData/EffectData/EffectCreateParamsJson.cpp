@@ -42,6 +42,7 @@ constexpr const char* StartPosition = "startPosition";
 constexpr const char* HeadTargetAngle = "headTargetAngle";
 constexpr const char* Offset = "offset";
 constexpr const char* Copy = "copy";
+constexpr const char* CopyLightToDirection = "copyLightToDirection";
 constexpr const char* Value = "value";
 constexpr const char* TimesFrameFactor = "timesFrameFactor";
 constexpr std::array<const char*, 3> Components = {"x", "y", "z"};
@@ -413,6 +414,20 @@ EffectCreateParams ReadEffectCreateParams(const OrderedJson& json, const std::st
     ReadVector(reader, objectKey, Keys::Direction, false, report, params.direction);
     ReadOffsets(reader, objectKey, report, params);
     ReadCopies(reader, objectKey, report, params);
+
+    // Until FX1.4 the copy of the light was a field of its own; a file that
+    // still has it would lose the copy with only a warning.
+    if (reader.ReadJson(Keys::CopyLightToDirection) != nullptr)
+    {
+        reader.Error(Keys::CopyLightToDirection, "was replaced by \"copy\": {\"direction\": \"light\"}");
+    }
+    // CreateEffect does not set the start position, so without the copy the
+    // offset adds to what the slot's previous effect left there.
+    if (params.startPositionOffset.IsSet() && !params.copyPositionToStartPosition)
+    {
+        report(ItemDataIssueSeverity::Warning, objectKey + "." + Keys::Offset + "." + Keys::StartPosition,
+               "adds to the start position the slot's previous effect left; copy the position into it first");
+    }
     reader.WarnAboutUnknownKeys();
     return params;
 }

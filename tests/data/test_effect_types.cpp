@@ -14,6 +14,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Render/Effects/Behaviors/EffectBehaviors.h"
 #include "Render/Effects/EffectRegistry.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <algorithm>
 #include <array>
@@ -244,13 +245,15 @@ TEST_CASE("Wrong vectors, offsets and copies are errors, unknown parts warnings 
          "copy": {"startPosition": "angle", "headTargetAngle": 1, "light": "direction"}}},
         {"name": "ghost", "code": "MODEL_CUNDUN_GHOST", "create": {"offset": 5, "copy": []}},
         {"name": "blood", "code": "MODEL_BLOOD", "create": {"scale": 1, "direction": [0, 1, 0], "offset": {},
-         "copy": {"scale": "callScale", "direction": "light"}}}]})",
+         "copy": {"scale": "callScale", "direction": "light"}}},
+        {"name": "fire", "code": "BITMAP_FIRE", "create": {"lifeTime": 2, "offset": {"startPosition": {"z": 800}},
+         "copyLightToDirection": true}}]})",
                                    EffectKind::Effect);
     for (const char* field : {"lightEnable", "kind", "skill", "timer", "position", "angle", "direction.y",
                               "offset.position.x.value", "offset.position.y.value", "offset.position.z",
                               "offset.startPosition.y.timesFrameFactor", "copy.startPosition", "copy.headTargetAngle"})
     {
-        INFO(field);
+        INFO(std::string(field));
         CHECK(HasError(result.issues, std::string("types[0].create.") + field));
     }
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[0].create.direction.w"));
@@ -263,11 +266,19 @@ TEST_CASE("Wrong vectors, offsets and copies are errors, unknown parts warnings 
     CHECK(HasError(result.issues, "types[2].create.copy.scale"));
     CHECK(HasError(result.issues, "types[2].create.copy.direction"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[2].create.offset"));
+    // The old field of the light copy is an error, so an old file is not
+    // changed without one; an offset of the start position without the copy
+    // into it adds to what the slot held before.
+    CHECK(HasError(result.issues, "types[3].create.copyLightToDirection"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[3].create.offset.startPosition"));
 
-    REQUIRE(result.types.size() == 3);
+    REQUIRE(result.types.size() == 4);
     CHECK(result.types[0].create == EffectCreateParams{.lifeTime = 2});
     CHECK(result.types[1].create == EffectCreateParams{});
     CHECK(result.types[2].create == EffectCreateParams{.scale = 1, .direction = EffectCreateVector{{0.0, 1.0, 0.0}}});
+    CHECK(result.types[3].create ==
+          EffectCreateParams{.lifeTime = 2,
+                             .startPositionOffset = EffectCreateVector{{std::nullopt, std::nullopt, 800.0}}});
 }
 
 TEST_CASE("Wrong creation values are errors, unknown ones warnings, and only effects have them [data][effects]")
@@ -672,7 +683,6 @@ TEST_CASE("The effect registry converts and applies vectors, offsets and copies 
     CHECK(params.positionOffset.values == std::array<float, 3>{10.f, 0.f, 3400.f});
     CHECK(params.positionOffset.timesFrameFactor == 0b100);
 
-    extern float FPS_ANIMATION_FACTOR;
     const float frameFactor = FPS_ANIMATION_FACTOR;
     FPS_ANIMATION_FACTOR = 0.5f;
     OBJECT blood;
@@ -682,8 +692,7 @@ TEST_CASE("The effect registry converts and applies vectors, offsets and copies 
     Vector(11.f, 22.f, 33.f, blood.Angle);
     Vector(-1.f, -2.f, -3.f, blood.StartPosition);
     blood.Scale = 0.9f;
-    const vec3_t callLight = {0.25f, 0.5f, 0.75f};
-    Render::Effects::ApplyCreateParams(&blood, params, {callLight, 0.f});
+    Render::Effects::ApplyCreateParams(&blood, params, {{0.25f, 0.5f, 0.75f}, 0.f});
     FPS_ANIMATION_FACTOR = frameFactor;
 
     CHECK_FALSE(blood.LightEnable);
@@ -711,6 +720,106 @@ TEST_CASE("The effect registry converts and applies vectors, offsets and copies 
     CHECK(blood.HeadTargetAngle[2] == 0.75f);
     // The call's scale as it was passed, also 0.
     CHECK(blood.Scale == 0.f);
+
+    BuildShippedRegistry();
+}
+
+// ApplyCreateParams skips the groups of fields a row does not set
+// (CreateParams::groups), so a field missing from GroupsOf would never be
+// applied when it is the only one of its group a row sets. Each field alone,
+// against an effect whose fields all differ from the values. Keep in step with
+// EffectCreateParams.
+TEST_CASE("Every creation field is applied when it is the only one a row sets [data][effects]")
+{
+    struct Field
+    {
+        const char* name;
+        void (*set)(EffectCreateParams& params);
+        bool (*applied)(const OBJECT& o);
+    };
+    const Field fields[] = {
+        {"lifeTime", [](EffectCreateParams& p) { p.lifeTime = 11; },
+         [](const OBJECT& o) { return o.LifeTime == 11.f; }},
+        {"scale", [](EffectCreateParams& p) { p.scale = 12; }, [](const OBJECT& o) { return o.Scale == 12.f; }},
+        {"velocity", [](EffectCreateParams& p) { p.velocity = 13; },
+         [](const OBJECT& o) { return o.Velocity == 13.f; }},
+        {"gravity", [](EffectCreateParams& p) { p.gravity = 14; }, [](const OBJECT& o) { return o.Gravity == 14.f; }},
+        {"hiddenMesh", [](EffectCreateParams& p) { p.hiddenMesh = 15; },
+         [](const OBJECT& o) { return o.HiddenMesh == 15; }},
+        {"blendMesh", [](EffectCreateParams& p) { p.blendMesh = 16; },
+         [](const OBJECT& o) { return o.BlendMesh == 16; }},
+        {"blendMeshLight", [](EffectCreateParams& p) { p.blendMeshLight = 17; },
+         [](const OBJECT& o) { return o.BlendMeshLight == 17.f; }},
+        {"alpha", [](EffectCreateParams& p) { p.alpha = 0.5; }, [](const OBJECT& o) { return o.Alpha == 0.5f; }},
+        {"light", [](EffectCreateParams& p) { p.light = std::array<double, 3>{0.4, 0.5, 0.6}; },
+         [](const OBJECT& o) { return o.Light[1] == 0.5f; }},
+        {"lightEnable", [](EffectCreateParams& p) { p.lightEnable = false; },
+         [](const OBJECT& o) { return !o.LightEnable; }},
+        {"alphaEnable", [](EffectCreateParams& p) { p.alphaEnable = true; },
+         [](const OBJECT& o) { return o.AlphaEnable; }},
+        {"kind", [](EffectCreateParams& p) { p.kind = 21; }, [](const OBJECT& o) { return o.Kind == 21; }},
+        {"skill", [](EffectCreateParams& p) { p.skill = 22; }, [](const OBJECT& o) { return o.Skill == 22; }},
+        {"pkKey", [](EffectCreateParams& p) { p.pkKey = -23; }, [](const OBJECT& o) { return o.PKKey == -23.f; }},
+        {"timer", [](EffectCreateParams& p) { p.timer = 24; }, [](const OBJECT& o) { return o.Timer == 24.f; }},
+        {"distance", [](EffectCreateParams& p) { p.distance = 25; },
+         [](const OBJECT& o) { return o.Distance == 25.f; }},
+        {"collisionRange", [](EffectCreateParams& p) { p.collisionRange = 26; },
+         [](const OBJECT& o) { return o.CollisionRange == 26.f; }},
+        {"position", [](EffectCreateParams& p) { p.position.components[1] = 5.0; },
+         [](const OBJECT& o) { return o.Position[1] == 5.f && o.Position[0] == 1000.f; }},
+        {"angle", [](EffectCreateParams& p) { p.angle.components[2] = 45.0; },
+         [](const OBJECT& o) { return o.Angle[2] == 45.f && o.Angle[0] == 10.f; }},
+        {"direction", [](EffectCreateParams& p) { p.direction.components[0] = 7.0; },
+         [](const OBJECT& o) { return o.Direction[0] == 7.f && o.Direction[1] == 0.f; }},
+        {"offset.position", [](EffectCreateParams& p) { p.positionOffset.components[2] = 5.0; },
+         [](const OBJECT& o) { return o.Position[2] == 3005.f; }},
+        {"offset.angle", [](EffectCreateParams& p) { p.angleOffset.components[0] = 5.0; },
+         [](const OBJECT& o) { return o.Angle[0] == 15.f; }},
+        {"offset.startPosition", [](EffectCreateParams& p) { p.startPositionOffset.components[1] = 5.0; },
+         [](const OBJECT& o) { return o.StartPosition[1] == 3.f; }},
+        {"copy.direction", [](EffectCreateParams& p) { p.copyLightToDirection = true; },
+         [](const OBJECT& o) { return o.Direction[0] == 0.1f && o.Direction[2] == 0.3f; }},
+        {"copy.startPosition", [](EffectCreateParams& p) { p.copyPositionToStartPosition = true; },
+         [](const OBJECT& o) { return o.StartPosition[2] == 3000.f; }},
+        {"copy.headTargetAngle", [](EffectCreateParams& p) { p.copyCallLightToHeadTargetAngle = true; },
+         [](const OBJECT& o) { return o.HeadTargetAngle[1] == 0.75f; }},
+        {"copy.scale", [](EffectCreateParams& p) { p.copyCallScaleToScale = true; },
+         [](const OBJECT& o) { return o.Scale == 2.5f; }},
+    };
+
+    for (const Field& field : fields)
+    {
+        INFO(std::string(field.name));
+        EffectTypeCreateParams row{MODEL_BLOOD, {}};
+        field.set(row.params);
+        Render::Effects::BuildRegistry(std::span<const EffectTypeCreateParams>(&row, 1));
+
+        OBJECT o;
+        o.LifeTime = 1.f;
+        o.Scale = 1.f;
+        o.Velocity = 1.f;
+        o.Gravity = 1.f;
+        o.HiddenMesh = 0;
+        o.BlendMesh = 0;
+        o.BlendMeshLight = 1.f;
+        o.Alpha = 1.f;
+        Vector(0.1f, 0.2f, 0.3f, o.Light);
+        o.LightEnable = true;
+        o.AlphaEnable = false;
+        o.Kind = 1;
+        o.Skill = 1;
+        o.PKKey = 1.f;
+        o.Timer = 1.f;
+        o.Distance = 1.f;
+        o.CollisionRange = 0.f;
+        Vector(1000.f, 2000.f, 3000.f, o.Position);
+        Vector(10.f, 20.f, 30.f, o.Angle);
+        Vector(0.f, 0.f, 0.f, o.Direction);
+        Vector(-1.f, -2.f, -3.f, o.StartPosition);
+        Vector(0.f, 0.f, 0.f, o.HeadTargetAngle);
+        Render::Effects::ApplyCreateParams(&o, RequireCreateParams(MODEL_BLOOD), {{0.25f, 0.75f, 0.5f}, 2.5f});
+        CHECK(field.applied(o));
+    }
 
     BuildShippedRegistry();
 }
