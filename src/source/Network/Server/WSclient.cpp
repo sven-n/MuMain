@@ -66,6 +66,7 @@
 #include "UI/Inventory/TradeUpdates.h"
 #include "UI/Inventory/StorageUpdates.h"
 #include "UI/Inventory/MixUpdates.h"
+#include "UI/Inventory/ShopUpdates.h"
 #include "UI/Core/WindowCommon.h" // ShowTrainerMenuDialog/ShowSeedMasterMenuDialog/etc.
 #include "UI/Inventory/InventoryCtrl.h"
 #include "GameLogic/Events/w_CursedTemple.h"
@@ -965,7 +966,7 @@ void InitGame()
     RemoveAllPerosnalItemPrice(PSHOPWNDTYPE_PURCHASE);
 
     g_pNewUIHotKey->SetStateGameOver(false);
-    g_pMyShopInventory->ResetSubject();
+    UI::Shop::ResetOwnShopTitle();
     g_pChatListBox->ResetFilter();
 
     g_pGuildInfoWindow->NoticeClear();
@@ -3155,7 +3156,7 @@ void ReceiveDeleteCharacterViewport(const BYTE* ReceiveBuffer)
 
         Key &= 0x7FFF;
 
-        int iIndex = g_pPurchaseShopInventory->GetShopCharacterIndex();
+        int iIndex = UI::Shop::BrowsedShopCharacterIndex();
         if (iIndex >= 0 && iIndex < MAX_CHARACTERS_CLIENT)
         {
             CHARACTER* pCha = &CharactersClient[iIndex];
@@ -6800,7 +6801,7 @@ void ReceiveSell(const BYTE* ReceiveBuffer)
 
             PlayBuffer(SOUND_GET_ITEM01);
 
-            g_pNPCShop->SetSellingItem(false);
+            UI::Shop::NpcSaleFinished();
         }
     }
     else
@@ -6808,7 +6809,7 @@ void ReceiveSell(const BYTE* ReceiveBuffer)
         UI::Inventory::RestorePickedItem();
     }
 
-    g_pNPCShop->SetSellingItem(false);
+    UI::Shop::NpcSaleFinished();
 }
 
 void ReceiveRepair(const BYTE* ReceiveBuffer)
@@ -9353,8 +9354,7 @@ void ReceiveCreateShopTitleViewport(const BYTE* ReceiveBuffer)
             if (pPlayer == Hero)
             {
                 wcscpy(g_szPersonalShopTitle, szShopTitle);
-                g_pMyShopInventory->SetTitle(szShopTitle);
-                g_pMyShopInventory->ChangePersonal(true);
+                UI::Shop::ShowOwnShopTitle(szShopTitle);
             }
 
             AddShopTitle(key, pPlayer, szShopTitle);
@@ -9394,7 +9394,7 @@ void ReceiveSetPriceResult(const BYTE* ReceiveBuffer)
             UI::Inventory::DiscardPickedItem();
         }
 
-        RemovePersonalItemPrice(g_pMyShopInventory->GetTargetIndex(), PSHOPWNDTYPE_SALE);
+        RemovePersonalItemPrice(UI::Shop::OwnShopPriceTargetIndex(), PSHOPWNDTYPE_SALE);
 
         SocketClient->ToGameServer()->SendInventoryRequest();
 
@@ -9407,7 +9407,7 @@ void ReceiveCreatePersonalShop(const BYTE* ReceiveBuffer)
     auto Header = (LPCREATEPSHOP_RESULSTINFO)ReceiveBuffer;
     if (Header->byResult == 0x01)
     {
-        g_pMyShopInventory->ChangePersonal(true);
+        UI::Shop::SetOwnShopOpen(true);
         AddShopTitle(Hero->Key, Hero, g_szPersonalShopTitle);
     }
     else
@@ -9428,7 +9428,7 @@ void ReceiveDestroyPersonalShop(const BYTE* ReceiveBuffer)
             CHARACTER* pPlayer = &CharactersClient[index];
             if (pPlayer == Hero)
             {
-                g_pMyShopInventory->ChangePersonal(false);
+                UI::Shop::SetOwnShopOpen(false);
             }
             RemoveShopTitle(pPlayer);
         }
@@ -9450,27 +9450,11 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
 
     if (Header->byResult == Success)
     {
-        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_STORAGE))
-        {
-            UI::Windows::Hide(mu::ui::window::INTERFACE_STORAGE);
-            UI::Windows::Hide(mu::ui::window::INTERFACE_STORAGE_EXT);
-        }
-
-        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_INVENTORY))
-        {
-            UI::Windows::Hide(mu::ui::window::INTERFACE_INVENTORY);
-        }
-
         g_PersonalShopSeller.Initialize();
 
         wchar_t shopName[MAX_SHOPTITLE + 1]{};
         CMultiLanguage::ConvertFromUtf8(shopName, Header->szShopTitle, MAX_SHOPTITLE);
-        g_pPurchaseShopInventory->ChangeTitleText(shopName);
-        g_pPurchaseShopInventory->GetInventoryCtrl()->RemoveAllItems();
-
-        UI::Windows::Show(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
-        UI::Windows::Show(mu::ui::window::INTERFACE_INVENTORY);
-        g_pMyInventory->ChangeMyShopButtonStateOpen();
+        UI::Shop::OpenBrowsedShop(shopName);
 
         RemoveAllPerosnalItemPrice(PSHOPWNDTYPE_PURCHASE); //. clear item price table
         int Offset = sizeof(GETPSHOPITEMLIST_HEADERINFO);
@@ -9491,7 +9475,7 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
             // todo: use item prices as well when the UI is ready
             if (pShopItem->MoneyPrice > 0)
             {
-                g_pPurchaseShopInventory->InsertItem(pShopItem->ItemSlot, itemData);
+                UI::Shop::AddBrowsedShopItem({ pShopItem->ItemSlot, itemData });
                 AddPersonalItemPrice(pShopItem->ItemSlot, pShopItem->MoneyPrice, PSHOPWNDTYPE_PURCHASE);
             }
             else
@@ -9516,7 +9500,7 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
         int key = MAKEWORD(Header->byIndexL, Header->byIndexH);
         int index = FindCharacterIndex(key);
 
-        g_pPurchaseShopInventory->ChangeShopCharacterIndex(index);
+        UI::Shop::SetBrowsedShopCharacterIndex(index);
     }
     else
     {
@@ -9549,7 +9533,7 @@ void ReceiveRefreshItemList(std::span<const BYTE> ReceiveBuffer)
     int key = MAKEWORD(Header->byIndexL, Header->byIndexH);
     if (Header->byResult == Success && Hero->Key == key)
     {
-        g_pMyShopInventory->GetInventoryCtrl()->RemoveAllItems();
+        std::vector<UI::Shop::ShopItem> items;
         for (int i = 0; i < Header->ItemCount; i++)
         {
             auto pShopItem = safe_cast<GETPSHOPITEM_DATAINFO>(ReceiveBuffer.subspan(Offset));
@@ -9564,23 +9548,22 @@ void ReceiveRefreshItemList(std::span<const BYTE> ReceiveBuffer)
             int length = CalcItemLength(itemData);
             itemData = itemData.subspan(0, length);
 
-            g_pMyShopInventory->InsertItem(pShopItem->ItemSlot, itemData);
+            items.push_back({ pShopItem->ItemSlot, itemData });
             AddPersonalItemPrice(pShopItem->ItemSlot, pShopItem->MoneyPrice, PSHOPWNDTYPE_SALE);
 
             Offset += length;
         }
 
-        g_pMyShopInventory->ChangePersonal(true);
         g_bEnablePersonalShop = true;
         wchar_t shopName[MAX_SHOPTITLE + 1]{};
         CMultiLanguage::ConvertFromUtf8(shopName, Header->szShopTitle, MAX_SHOPTITLE);
         wcscpy(g_szPersonalShopTitle, shopName);
         AddShopTitle(key, Hero, shopName);
-        g_pMyShopInventory->ChangeTitle(shopName);
+        UI::Shop::ReplaceOwnShopItems(items, shopName);
     }
     else if (Header->byResult == Success && g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE)
     {
-        g_pPurchaseShopInventory->GetInventoryCtrl()->RemoveAllItems();
+        std::vector<UI::Shop::ShopItem> items;
 
         for (int i = 0; i < Header->ItemCount; i++)
         {
@@ -9596,19 +9579,18 @@ void ReceiveRefreshItemList(std::span<const BYTE> ReceiveBuffer)
             int length = CalcItemLength(itemData);
             itemData = itemData.subspan(0, length);
 
-            g_pPurchaseShopInventory->InsertItem(pShopItem->ItemSlot, itemData);
+            items.push_back({ pShopItem->ItemSlot, itemData });
             AddPersonalItemPrice(pShopItem->ItemSlot, pShopItem->MoneyPrice, PSHOPWNDTYPE_PURCHASE);
 
             Offset += length;
         }
+        UI::Shop::ReplaceBrowsedShopItems(items);
     }
     else
     {
         if (Header->byResult == 0x01)
         {
-            auto pCurrentInvenCtrl = g_pPurchaseShopInventory->GetInventoryCtrl();
-
-            size_t uiCntInvenCtrl = pCurrentInvenCtrl->GetNumberOfItems();
+            const int uiCntInvenCtrl = UI::Shop::BrowsedShopItemCount();
             g_ErrorReport.Write(L"@ [Notice] ReceiveRefreshItemList (InventoryCtrl Count Items(%d))\n", uiCntInvenCtrl);
         }
         else
@@ -9631,8 +9613,9 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
     {
         if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY))
         {
-            RemovePersonalItemPrice(g_pPurchaseShopInventory->GetSourceIndex(), PSHOPWNDTYPE_PURCHASE);
-            g_pPurchaseShopInventory->DeleteItem(g_pPurchaseShopInventory->GetSourceIndex());
+            const int purchaseIndex = UI::Shop::BrowsedShopPurchaseIndex();
+            RemovePersonalItemPrice(purchaseIndex, PSHOPWNDTYPE_PURCHASE);
+            UI::Shop::RemoveBrowsedShopItem(purchaseIndex);
         }
         else
         {
@@ -11261,7 +11244,7 @@ void ReceiveTaxInfo(const BYTE* ReceiveBuffer)
     }
     else if (Data->btTaxType == 2)
     {
-        g_pNPCShop->SetTaxRate(Data->btTaxRate);
+        UI::Shop::SetNpcTaxRate(Data->btTaxRate);
         g_nTaxRate = Data->btTaxRate;
     }
     else
@@ -12809,7 +12792,7 @@ bool ReceiveIGS_ShopOpenResult(const BYTE* pReceiveBuffer)
     }
 
     SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
-    char szCode = g_pInGameShop->GetCurrentStorageCode();
+    char szCode = UI::Shop::CashShopStorageCode();
     SocketClient->ToGameServer()->SendCashShopStorageListRequest(1, szCode);
 
     UI::Windows::Show(mu::ui::window::INTERFACE_INGAMESHOP);
@@ -12840,7 +12823,7 @@ bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
 
         SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
 
-        char szCode = g_pInGameShop->GetCurrentStorageCode();
+        char szCode = UI::Shop::CashShopStorageCode();
         SocketClient->ToGameServer()->SendCashShopStorageListRequest(1, szCode);
     }
     break;
@@ -12996,8 +12979,8 @@ bool ReceiveIGS_SendItemGift(const BYTE* pReceiveBuffer)
 bool ReceiveIGS_StorageItemListCount(const BYTE* pReceiveBuffer)
 {
     auto Data = (LPPMSG_CASHSHOP_STORAGECOUNT)pReceiveBuffer;
-    g_pInGameShop->InitStorage((int)Data->wTotalItemCount, (int)Data->wCurrentItemCount, (int)Data->wTotalPage,
-                               (int)Data->wPageIndex);
+    UI::Shop::SetCashShopStoragePage((int)Data->wTotalItemCount, (int)Data->wCurrentItemCount, (int)Data->wTotalPage,
+                                     (int)Data->wPageIndex);
     return true;
 }
 
@@ -13011,9 +12994,9 @@ bool ReceiveIGS_StorageItemList(const BYTE* pReceiveBuffer)
         return false;
 #endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 
-    g_pInGameShop->AddStorageItem((int)Data->lStorageIndex, (int)Data->lItemSeq, (int)Data->lStorageGroupCode,
-                                  (int)Data->lProductSeq, (int)Data->lPriceSeq, (int)Data->dCashPoint,
-                                  (char)Data->chItemType);
+    UI::Shop::AddCashShopStorageItem({ (int)Data->lStorageIndex, (int)Data->lItemSeq, (int)Data->lStorageGroupCode,
+                                       (int)Data->lProductSeq, (int)Data->lPriceSeq, (int)Data->dCashPoint,
+                                       (char)Data->chItemType });
     return true;
 }
 
@@ -13032,9 +13015,9 @@ bool ReceiveIGS_StorageGiftItemList(const BYTE* pReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(szID, Data->chSendUserName, MAX_USERNAME_SIZE);
     CMultiLanguage::ConvertFromUtf8(szMessage, Data->chMessage, MAX_GIFT_MESSAGE_SIZE);
 
-    g_pInGameShop->AddStorageItem((int)Data->lStorageIndex, (int)Data->lItemSeq, (int)Data->lStorageGroupCode,
-                                  (int)Data->lProductSeq, (int)Data->lPriceSeq, (int)Data->dCashPoint,
-                                  (char)Data->chItemType, szID, szMessage);
+    UI::Shop::AddCashShopStorageItem({ (int)Data->lStorageIndex, (int)Data->lItemSeq, (int)Data->lStorageGroupCode,
+                                       (int)Data->lProductSeq, (int)Data->lPriceSeq, (int)Data->dCashPoint,
+                                       (char)Data->chItemType, true, szID, szMessage });
     return true;
 }
 
@@ -13082,7 +13065,7 @@ bool ReceiveIGS_UseStorageItem(const BYTE* pReceiveBuffer)
     {
         mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::ItemUsed, I18N::Game::TheItemHasBeenUsed);
 
-        g_pInGameShop->UpdateStorageItemList();
+        UI::Shop::RefreshCashShopStorage();
     }
     break;
     case 1:
@@ -13156,7 +13139,7 @@ bool ReceiveIGS_UpdateScript(const BYTE* pReceiveBuffer)
     }
 
     g_InGameShopSystem->Initalize();
-    g_pInGameShop->InitZoneBtn();
+    UI::Shop::ReloadCashShopZones();
 #endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 
     return true;
@@ -13204,7 +13187,7 @@ bool ReceiveIGS_UpdateBanner(const BYTE* pReceiveBuffer)
         return false;
     }
 
-    g_pInGameShop->InitBanner(g_InGameShopSystem->GetBannerFileName(), g_InGameShopSystem->GetBannerURL());
+    UI::Shop::SetCashShopBanner(g_InGameShopSystem->GetBannerFileName(), g_InGameShopSystem->GetBannerURL());
 #endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 
     return true;
