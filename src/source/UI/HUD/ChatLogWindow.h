@@ -4,6 +4,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
+#include "UI/Chat/MessageType.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/HUD/ChatInputBox.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
@@ -20,23 +21,6 @@ namespace Rml
 namespace mu::ui::window
 {
     class CManager;
-
-    enum MESSAGE_TYPE
-    {
-        TYPE_ALL_MESSAGE = 0,
-        TYPE_CHAT_MESSAGE,
-        TYPE_WHISPER_MESSAGE,
-        TYPE_SYSTEM_MESSAGE,
-        TYPE_ERROR_MESSAGE,
-        TYPE_PARTY_MESSAGE,
-        TYPE_GUILD_MESSAGE,
-        TYPE_UNION_MESSAGE,
-        TYPE_GENS_MESSAGE,
-        TYPE_GM_MESSAGE,
-
-        NUMBER_OF_TYPES,
-        TYPE_UNKNOWN = 0xFFFFFFFF
-    };
 
     template <class T>
     class TMessageText

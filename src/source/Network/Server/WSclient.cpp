@@ -2,6 +2,7 @@
 #include "App/Control/ControlTaps.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Chat/Chat.h"
+#include "UI/Chat/ChatMessages.h"
 #include <memory>
 #include "UI/Core/UIManager.h"
 #include "Guild/GuildCache.h"
@@ -551,7 +552,7 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer)
 
     wchar_t Text[100];
     mu_swprintf(Text, I18N::Game::YouAreConnectedToTheServer, IP, Data->Port);
-    g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 }
 
 void ReceiveServerConnectBusy(const BYTE* ReceiveBuffer)
@@ -1241,7 +1242,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
         wchar_t Text[256];
         mu_swprintf(Text, I18N::Game::WelcomeTo, gMapManager.GetMapName(gMapManager.WorldActive));
 
-        g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 
     if (gMapManager.WorldActive == WD_30BATTLECASTLE)
@@ -1617,7 +1618,7 @@ void ReceiveMuHelperStatusUpdate(std::span<const BYTE> ReceiveBuffer)
 
             wchar_t Text[100];
             mu_swprintf(Text, I18N::Game::DZenSHaveBeenSpentInImplementingOfficialMUHelper, iTotalCost);
-            g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         }
     }
 
@@ -1743,7 +1744,7 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
     }
     else if (Data->SubCode == 5)
     {
-        g_pSystemLogBox->AddText(I18N::Game::ResurrectionFailed, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ResurrectionFailed, mu::ui::window::TYPE_ERROR_MESSAGE);
         PlayBuffer(SOUND_MIX01);
         PlayBuffer(SOUND_BREAK01);
         g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
@@ -1841,25 +1842,25 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
         {
             for (int i = 0; i < messageSize - 1; i++)
                 Text[i] = Text[i + 1];
-            g_pChatListBox->AddText(ID, Text, mu::ui::window::TYPE_PARTY_MESSAGE);
+            UI::Chat::PostChat(ID, Text, mu::ui::window::TYPE_PARTY_MESSAGE);
         }
         else if (Text[0] == L'@' && Text[1] == L'@')
         {
             for (int i = 0; i < messageSize - 2; i++)
                 Text[i] = Text[i + 2];
-            g_pChatListBox->AddText(ID, Text, mu::ui::window::TYPE_UNION_MESSAGE);
+            UI::Chat::PostChat(ID, Text, mu::ui::window::TYPE_UNION_MESSAGE);
         }
         else if (Text[0] == L'@')
         {
             for (int i = 0; i < messageSize - 1; i++)
                 Text[i] = Text[i + 1];
-            g_pChatListBox->AddText(ID, Text, mu::ui::window::TYPE_GUILD_MESSAGE);
+            UI::Chat::PostChat(ID, Text, mu::ui::window::TYPE_GUILD_MESSAGE);
         }
         else if (Text[0] == L'$')
         {
             for (int i = 0; i < messageSize - 1; i++)
                 Text[i] = Text[i + 2];
-            g_pChatListBox->AddText(ID, Text, mu::ui::window::TYPE_GENS_MESSAGE);
+            UI::Chat::PostChat(ID, Text, mu::ui::window::TYPE_GENS_MESSAGE);
         }
         else if (Text[0] == L'#')
         {
@@ -1886,7 +1887,7 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
             if (pFindGm)
             {
                 UI::Chat::AssignChat(ID, Text);
-                g_pChatListBox->AddText(ID, Text, mu::ui::window::TYPE_GM_MESSAGE);
+                UI::Chat::PostChat(ID, Text, mu::ui::window::TYPE_GM_MESSAGE);
             }
             else
             {
@@ -1913,12 +1914,12 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
             if (pFindGm)
             {
                 UI::Chat::AssignChat(ID, Text);
-                g_pChatListBox->AddText(ID, Text, mu::ui::window::TYPE_GM_MESSAGE);
+                UI::Chat::PostChat(ID, Text, mu::ui::window::TYPE_GM_MESSAGE);
             }
             else
             {
                 UI::Chat::AssignChat(ID, Text);
-                g_pChatListBox->AddText(ID, Text, mu::ui::window::TYPE_CHAT_MESSAGE);
+                UI::Chat::PostChat(ID, Text, mu::ui::window::TYPE_CHAT_MESSAGE);
             }
         }
 
@@ -1951,7 +1952,7 @@ void ReceiveChatWhisper(const BYTE* ReceiveBuffer)
         PlayBuffer(SOUND_WHISPER);
     }
 
-    g_pChatListBox->AddText(ID, Text, mu::ui::window::TYPE_WHISPER_MESSAGE);
+    UI::Chat::PostChat(ID, Text, mu::ui::window::TYPE_WHISPER_MESSAGE);
 
     App::Control::Events::RecordChatLine(ID, Text, "whisper");
 }
@@ -1963,7 +1964,7 @@ void ReceiveChatWhisperResult(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        g_pChatListBox->AddText(ChatWhisperID, I18N::Game::NoUsers, mu::ui::window::TYPE_ERROR_MESSAGE,
+        UI::Chat::PostChat(ChatWhisperID, I18N::Game::NoUsers, mu::ui::window::TYPE_ERROR_MESSAGE,
                                 mu::ui::window::TYPE_WHISPER_MESSAGE);
     }
     }
@@ -2009,7 +2010,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
     {
         if (CHARACTER_SCENE != SceneFlag)
         {
-            g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             EnableUse = 0;
         }
         else
@@ -2262,7 +2263,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
                 wchar_t Text[256];
                 mu_swprintf(Text, I18N::Game::WelcomeTo, gMapManager.GetMapName(gMapManager.WorldActive));
 
-                g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+                UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
         }
 
@@ -4160,7 +4161,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         {
             if (SourceKey == HeroKey)
             {
-                g_pSystemLogBox->AddText(I18N::Game::StongerEffectHasTakenPlace, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+                UI::Chat::PostSystem(I18N::Game::StongerEffectHasTakenPlace, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
             return FALSE;
         }
@@ -5770,7 +5771,7 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         }
         else
             mu_swprintf(Text, I18N::Game::ObtainedDExp, Exp);
-        g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 
 #ifdef CONSOLE_DEBUG
@@ -5818,15 +5819,15 @@ BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     {
     case eExperienceType_MaxLevelReached:
         // TODO: show message "You already reached maximum Level."
-        g_pSystemLogBox->AddText(L"You already reached maximum Level.", mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(L"You already reached maximum Level.", mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return TRUE;
     case eExperienceType_MaxMasterLevelReached:
         // TODO: show message "You already reached maximum master Level."
-        g_pSystemLogBox->AddText(L"You already reached maximum master Level.", mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(L"You already reached maximum master Level.", mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return TRUE;
     case eExperienceType_MonsterLevelTooLowForMasterExperience:
         // TODO: You need to kill stronger monsters to gain master experience.
-        g_pSystemLogBox->AddText(L"You need to kill stronger monsters to gain master experience.",
+        UI::Chat::PostSystem(L"You need to kill stronger monsters to gain master experience.",
                                  mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return TRUE;
     }
@@ -5875,7 +5876,7 @@ BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             mu_swprintf(Text, I18N::Game::ObtainedDExp, addedExperience);
         }
 
-        g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 
     return TRUE;
@@ -6147,7 +6148,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
             if (getGold > 0)
             {
                 mu_swprintf(szMessage, L"%d %ls %ls", getGold, I18N::Game::Zen, I18N::Game::Obtained);
-                g_pSystemLogBox->AddText(szMessage, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+                UI::Chat::PostSystem(szMessage, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
         }
         else
@@ -6194,7 +6195,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
 
             wchar_t szMessage[128];
             mu_swprintf(szMessage, L"%ls %ls", szItem, I18N::Game::Obtained);
-            g_pSystemLogBox->AddText(szMessage, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            UI::Chat::PostSystem(szMessage, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
             int Type = pickedItem->Type;
             if (Type == ITEM_JEWEL_OF_BLESS || Type == ITEM_JEWEL_OF_SOUL || Type == ITEM_JEWEL_OF_LIFE ||
@@ -6572,7 +6573,7 @@ void ReceiveBuy(const BYTE* ReceiveBuffer)
     {
         g_pNewUISystem->HideAll();
 
-        g_pChatListBox->AddText(Hero->ID, I18N::Game::CannotBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostChat(Hero->ID, I18N::Game::CannotBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     BuyCost = 0;
 
@@ -6602,7 +6603,7 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
     if (Data->Index == BUY_FAILED)
     {
         g_pNewUISystem->HideAll();
-        g_pChatListBox->AddText(Hero->ID, I18N::Game::CannotBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostChat(Hero->ID, I18N::Game::CannotBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     else if (Data->Index == BUY_FAILED_SILENT)
     {
@@ -6674,31 +6675,31 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
         case SEASON3A::MIXTYPE_EXTRACT_SEED:
         case SEASON3A::MIXTYPE_SEED_SPHERE:
             mu_swprintf(szText, I18N::Game::ChaosCombinationHasFailed);
-            g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
+            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
             break;
             // 			case SEASON3A::MIXTYPE_TRAINER:
             // 				wprintf(szText, I18N::Game::ResurrectionFailed);	// 부활 실패
-            // 				g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
+            // 				UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
             // 				break;
         case SEASON3A::MIXTYPE_OSBOURNE:
             mu_swprintf(szText, I18N::Game::SHasFailed, I18N::Game::Refine);
-            g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
+            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_JERRIDON:
             mu_swprintf(szText, I18N::Game::SHasFailed, I18N::Game::Restore);
-            g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
+            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_ELPIS:
             mu_swprintf(szText, I18N::Game::SHasFailed2112, I18N::Game::Refine);
-            g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
+            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_CHAOS_CARD:
             mu_swprintf(szText, I18N::Game::SHasFailed2112, I18N::Game::ChaosCardCombination);
-            g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
+            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
             mu_swprintf(szText, I18N::Game::SHasFailed2112, I18N::Game::CherryBlossomsBranchesAssembly);
-            g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
+            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
             break;
         }
     }
@@ -6722,31 +6723,31 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
         case SEASON3A::MIXTYPE_EXTRACT_SEED:
         case SEASON3A::MIXTYPE_SEED_SPHERE:
             mu_swprintf(szText, I18N::Game::ChaosCombinationHasSucceeded);
-            g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             break;
             // 			case SEASON3A::MIXTYPE_TRAINER:
             // 				wprintf(szText, I18N::Game::ResurrectionSuccessful);
-            // 				g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            // 				UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             // 				break;
         case SEASON3A::MIXTYPE_OSBOURNE:
             mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::Refine);
-            g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_JERRIDON:
             mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::Restore);
-            g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_ELPIS:
             mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::Refine);
-            g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_CHAOS_CARD:
             mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::ChaosCardCombination);
-            g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
             mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::CherryBlossomsBranchesAssembly);
-            g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             break;
         }
 
@@ -6761,7 +6762,7 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
     case 0x0B:
     {
         g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_READY);
-        g_pSystemLogBox->AddText(I18N::Game::NotEnoughZenToCombineItems, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NotEnoughZenToCombineItems, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     break;
     case 4:
@@ -6807,13 +6808,13 @@ void ReceiveSell(const BYTE* ReceiveBuffer)
         {
             mu::ui::window::CInventoryCtrl::BackupPickedItem();
 
-            g_pChatListBox->AddText(Hero->ID, I18N::Game::CannotBeSold, mu::ui::window::TYPE_ERROR_MESSAGE);
+            UI::Chat::PostChat(Hero->ID, I18N::Game::CannotBeSold, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
         else if (Data->Flag == 0xfe)
         {
             g_pNewUISystem->HideAll();
 
-            g_pChatListBox->AddText(Hero->ID, I18N::Game::CannotBeSold, mu::ui::window::TYPE_ERROR_MESSAGE);
+            UI::Chat::PostChat(Hero->ID, I18N::Game::CannotBeSold, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
         else
         {
@@ -7073,19 +7074,19 @@ void ReceivePK(const BYTE* ReceiveBuffer)
     case 2:
     {
         wcscat(message, I18N::Game::Hero);
-        g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(message, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
     break;
     case 3:
     {
         wcscat(message, I18N::Game::Commoner);
-        g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(message, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     break;
     case 4:
     {
         wcscat(message, I18N::Game::OutlawWarning);
-        g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(message, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
     break;
     case 5:
@@ -7093,7 +7094,7 @@ void ReceivePK(const BYTE* ReceiveBuffer)
         wchar_t szTemp[100];
         mu_swprintf(szTemp, L"%ls %d%ls", I18N::Game::_1stStageOutlaw, 1, I18N::Game::_2ndStageOutlaw);
         wcscat(message, szTemp);
-        g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(message, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     break;
     case 6:
@@ -7101,7 +7102,7 @@ void ReceivePK(const BYTE* ReceiveBuffer)
         wchar_t szTemp[100];
         mu_swprintf(szTemp, L"%ls %d%ls", I18N::Game::_1stStageOutlaw, 2, I18N::Game::_2ndStageOutlaw);
         wcscat(message, szTemp);
-        g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(message, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     break;
     }
@@ -7310,32 +7311,32 @@ void ReceivePartyResult(const BYTE* ReceiveBuffer)
     switch (Data->Value)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::CreatingAPartyHasFailed, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::CreatingAPartyHasFailed, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 1:
-        g_pSystemLogBox->AddText(I18N::Game::YourRequestHasBeenDenied, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YourRequestHasBeenDenied, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::PartyIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::PartyIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 3:
-        g_pSystemLogBox->AddText(I18N::Game::TheUserHasLeftTheGame, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheUserHasLeftTheGame, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 4:
-        g_pSystemLogBox->AddText(I18N::Game::TheUserIsAlreadyInAnotherParty, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheUserIsAlreadyInAnotherParty, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 5:
-        g_pSystemLogBox->AddText(I18N::Game::YouHaveJustLeftTheParty, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YouHaveJustLeftTheParty, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 6:
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotFormAPartyWithAMemberOfTheOpposingGens,
+        UI::Chat::PostSystem(I18N::Game::YouCannotFormAPartyWithAMemberOfTheOpposingGens,
                                  mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 7:
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotFormAPartyWithinABattleZone, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YouCannotFormAPartyWithinABattleZone, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 8:
-        g_pSystemLogBox->AddText(I18N::Game::PartiesAreNotActivatedWithinABattleZone, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::PartiesAreNotActivatedWithinABattleZone, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     }
 }
@@ -7402,7 +7403,7 @@ void ReceivePartyLeave(const BYTE* ReceiveBuffer)
     {
         Party[i].index = -1;
     }
-    g_pSystemLogBox->AddText(I18N::Game::YouHaveJustLeftTheParty, mu::ui::window::TYPE_ERROR_MESSAGE);
+    UI::Chat::PostSystem(I18N::Game::YouHaveJustLeftTheParty, mu::ui::window::TYPE_ERROR_MESSAGE);
 
     if (g_iFollowCharacter >= 0)
     {
@@ -7457,7 +7458,7 @@ void ReceivePartyGetItem(const BYTE* ReceiveBuffer)
 
     mu_swprintf(Text, L"%ls : %ls %ls", c->ID, itemName, I18N::Game::Obtained);
 
-    g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 }
 
 extern int ErrorMessage;
@@ -7489,39 +7490,39 @@ void ReceiveGuildResult(const BYTE* ReceiveBuffer)
     switch (Data->Value)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::GuildMasterHasRefusedYourRequestToJoinTheGuild,
+        UI::Chat::PostSystem(I18N::Game::GuildMasterHasRefusedYourRequestToJoinTheGuild,
                                  mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 1:
-        g_pSystemLogBox->AddText(I18N::Game::YouHaveJustJoinedTheGuild, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YouHaveJustJoinedTheGuild, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::TheGuildIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheGuildIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 3:
-        g_pSystemLogBox->AddText(I18N::Game::TheUserHasLeftTheGame, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheUserHasLeftTheGame, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 4:
-        g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheUserIsNotAGuildMaster, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 5:
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotJoinMoreThanOneGuild, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YouCannotJoinMoreThanOneGuild, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 6:
-        g_pSystemLogBox->AddText(I18N::Game::TheGuildMasterIsTooBusyToApproveYourRequestToJoinTheGuild,
+        UI::Chat::PostSystem(I18N::Game::TheGuildMasterIsTooBusyToApproveYourRequestToJoinTheGuild,
                                  mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 7:
-        g_pSystemLogBox->AddText(I18N::Game::ChractersOverLevel6CanJoinAGuild, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ChractersOverLevel6CanJoinAGuild, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 0xA1:
-        g_pSystemLogBox->AddText(I18N::Game::TheGuildMasterHasNotJoinedTheGens, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheGuildMasterHasNotJoinedTheGens, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 0xA2:
-        g_pSystemLogBox->AddText(I18N::Game::TheGuildMasterIsWithADifferentGens, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheGuildMasterIsWithADifferentGens, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 0xA3:
-        g_pSystemLogBox->AddText(I18N::Game::YouMustBelongToTheSame, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YouMustBelongToTheSame, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     }
 }
@@ -7559,22 +7560,22 @@ void ReceiveGuildLeave(const BYTE* ReceiveBuffer)
     switch (Data->Value)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::ThePasswordYouHaveEnteredIsIncorrect, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ThePasswordYouHaveEnteredIsIncorrect, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 1:
-        g_pSystemLogBox->AddText(I18N::Game::YouHaveLeftTheGuild, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YouHaveLeftTheGuild, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::OnlyAGuildMasterCanDisbandAGuild, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::OnlyAGuildMasterCanDisbandAGuild, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 3:
-        g_pSystemLogBox->AddText(I18N::Game::YouHaveFailedFromTheGuild, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YouHaveFailedFromTheGuild, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 4:
-        g_pSystemLogBox->AddText(I18N::Game::TheGuildHasBeenDissolved, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheGuildHasBeenDissolved, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 5:
-        g_pSystemLogBox->AddText(I18N::Game::GuildMemberHasBeenWithdrawn, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::GuildMemberHasBeenWithdrawn, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     }
     if (Data->Value == 1 || Data->Value == 4)
@@ -7635,22 +7636,22 @@ void ReceiveCreateGuildResult(const BYTE* ReceiveBuffer)
     switch (Data->Value)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::TheGuildNameAlreadyExists, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheGuildNameAlreadyExists, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::GuildNameMustBeAtLeast4Characters, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::GuildNameMustBeAtLeast4Characters, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 3:
-        g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild518, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YouAreAlreadyInAGuild518, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 4:
-        g_pSystemLogBox->AddText(I18N::Game::NoSpaceAllowedInGuildNames, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NoSpaceAllowedInGuildNames, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 5:
-        g_pSystemLogBox->AddText(I18N::Game::NoSymbolsAllowedInGuildNames, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NoSymbolsAllowedInGuildNames, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 6:
-        g_pSystemLogBox->AddText(I18N::Game::ReservedName, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ReservedName, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 1:
         memset(InputText[0], 0, MAX_USERNAME_SIZE);
@@ -7714,25 +7715,25 @@ void ReceiveDeclareWarResult(const BYTE* ReceiveBuffer)
     switch (Data->Value)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::ThatGuildDoesNotExist, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ThatGuildDoesNotExist, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 1:
-        g_pSystemLogBox->AddText(I18N::Game::YouHaveDeclaredAGuildWar, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YouHaveDeclaredAGuildWar, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::TheOpposingGuildMasterIsNotInTheGame, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheOpposingGuildMasterIsNotInTheGame, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 3:
-        g_pSystemLogBox->AddText(I18N::Game::ThatGuildDoesNotExist, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ThatGuildDoesNotExist, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 4:
-        g_pSystemLogBox->AddText(I18N::Game::YouCanNotDeclareAGuildWarNow, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YouCanNotDeclareAGuildWarNow, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 5:
-        g_pSystemLogBox->AddText(I18N::Game::OnlyGuildMastersCanDeclareAGuildWar, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::OnlyGuildMastersCanDeclareAGuildWar, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 6:
-        g_pSystemLogBox->AddText(I18N::Game::YourRequestForAGuildWarIsRefused, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YourRequestForAGuildWarIsRefused, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     }
     if (Data->Value != 1 && !EnableGuildWar)
@@ -7974,7 +7975,7 @@ void ReceiveGuildAssign(const BYTE* ReceiveBuffer)
             break;
         }
     }
-    g_pSystemLogBox->AddText(szTemp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    UI::Chat::PostSystem(szTemp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 }
 
 void ReceiveGuildRelationShip(const BYTE* ReceiveBuffer)
@@ -8077,7 +8078,7 @@ void ReceiveGuildRelationShipResult(const BYTE* ReceiveBuffer)
             break;
         }
     }
-    g_pSystemLogBox->AddText(szTemp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    UI::Chat::PostSystem(szTemp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
     int nCharKey = MAKEWORD(pData->byTargetUserIndexL, pData->byTargetUserIndexH);
     if (nCharKey == HeroKey && pData->byResult == 0x01 && pData->byRelationShipType == 0x01 &&
@@ -8098,7 +8099,7 @@ void ReceiveBanUnionGuildResult(const BYTE* ReceiveBuffer)
     }
     else if (pData->byResult == 0)
     {
-        g_pSystemLogBox->AddText(I18N::Game::Failed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::Failed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 }
 
@@ -8193,7 +8194,7 @@ void ReceiveSoccerGoal(const BYTE* ReceiveBuffer)
         mu_swprintf(Text, I18N::Game::SGuildWinsAPoint, GuildMark[Hero->GuildMarkIndex].GuildName);
     else
         mu_swprintf(Text, I18N::Game::SGuildWinsAPoint, GuildWarName);
-    g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 }
 
 void Receive_Master_LevelUp(const BYTE* ReceiveBuffer, int Size)
@@ -8226,7 +8227,7 @@ void Receive_Master_LevelUp(const BYTE* ReceiveBuffer, int Size)
     if (iExp > 0)
     {
         mu_swprintf(szText, I18N::Game::MasterEXPAchievementD, iExp);
-        g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 
     CharacterMachine->CalulateMasterLevelNextExperience();
@@ -8586,7 +8587,7 @@ void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
     {
         mu_swprintf(sBuf, L"%ls%ls %ls", I18N::Game::JewelCombination, I18N::Game::To1816,
                     I18N::Game::EntranceIsAllowedForDTimes);
-        g_pSystemLogBox->AddText(sBuf, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(sBuf, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
@@ -8602,13 +8603,13 @@ void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
     break;
     case 4:
     {
-        g_pSystemLogBox->AddText(I18N::Game::ItemsForCombinationSystemIsLacking, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ItemsForCombinationSystemIsLacking, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
     case 5:
     {
-        g_pSystemLogBox->AddText(I18N::Game::ZenIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ZenIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
@@ -8628,7 +8629,7 @@ void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
     {
         mu_swprintf(sBuf, L"%ls%ls %ls", I18N::Game::DismantleJewel, I18N::Game::To1816,
                     I18N::Game::EntranceIsAllowedForDTimes);
-        g_pSystemLogBox->AddText(sBuf, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(sBuf, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
@@ -8647,19 +8648,19 @@ void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
     case 4:
     case 6:
     {
-        g_pSystemLogBox->AddText(I18N::Game::CorrespondingItemIsInappropriate, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::CorrespondingItemIsInappropriate, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
     case 7:
     {
-        g_pSystemLogBox->AddText(I18N::Game::InventorySpaceIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::InventorySpaceIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
     case 8:
     {
-        g_pSystemLogBox->AddText(I18N::Game::ZenIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ZenIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
@@ -9095,7 +9096,7 @@ void ReceiveDuelStart(const BYTE* ReceiveBuffer)
         g_DuelMgr.SetHeroAsDuelPlayer(DUEL_HERO);
         g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
         mu_swprintf(szMessage, I18N::Game::SHasAcceptedYourChallenge, g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
-        g_pSystemLogBox->AddText(szMessage, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(szMessage, mu::ui::window::TYPE_ERROR_MESSAGE);
 
         g_pNewUISystem->Show(mu::ui::window::INTERFACE_DUEL_WINDOW);
         PlayBuffer(SOUND_START_DUEL);
@@ -9104,7 +9105,7 @@ void ReceiveDuelStart(const BYTE* ReceiveBuffer)
     {
         g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
         mu_swprintf(szMessage, I18N::Game::SHasDeclinedYourChallenge, g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
-        g_pSystemLogBox->AddText(szMessage, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(szMessage, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     else if (Data->nResult == 16)
     {
@@ -9119,13 +9120,13 @@ void ReceiveDuelStart(const BYTE* ReceiveBuffer)
     {
         g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
         mu_swprintf(szMessage, I18N::Game::OpenOnlyForLevelDOrHigher, 30);
-        g_pSystemLogBox->AddText(szMessage, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(szMessage, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     else if (Data->nResult == 30)
     {
         g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
         mu_swprintf(szMessage, I18N::Game::ZenIsInsufficient);
-        g_pSystemLogBox->AddText(szMessage, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(szMessage, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
 }
 
@@ -9141,7 +9142,7 @@ void ReceiveDuelEnd(const BYTE* ReceiveBuffer)
         g_DuelMgr.EnableDuel(FALSE);
         g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
 
-        g_pSystemLogBox->AddText(I18N::Game::TheDuelHasBeenCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheDuelHasBeenCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
 
         if (g_wtMatchTimeLeft.m_Type == 2)
             g_wtMatchTimeLeft.m_Time = 0;
@@ -9290,7 +9291,7 @@ void ReceiveDuelResult(const BYTE* ReceiveBuffer)
 
     wchar_t szMessage[256];
     mu_swprintf(szMessage, I18N::Game::DuelFinishedYouWillBeWarpedBackToTheViallageInDSeconds, 10);
-    g_pSystemLogBox->AddText(szMessage, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    UI::Chat::PostSystem(szMessage, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
     // Was CDuelResultMsgBoxLayout (CustomMessageBox.h) -- ported to CGenericConfirmDialog's own
     // portrait2D field (2026-09-14), same sprite as the invite dialog above but with "Duel
@@ -9527,7 +9528,7 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
         {
         case Fail1:
         {
-            g_pSystemLogBox->AddText(I18N::Game::StoreIsNotOpenAtTheMoment, mu::ui::window::TYPE_ERROR_MESSAGE);
+            UI::Chat::PostSystem(I18N::Game::StoreIsNotOpenAtTheMoment, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
         break;
         case Fail2:
@@ -9657,7 +9658,7 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
     }
     else if (Header->Result == PURCHASEITEM_RESULTINFO::NameMismatchOrPriceMissing)
     {
-        g_pSystemLogBox->AddText(I18N::Game::FailedToPurchasePleaseTryAgain, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::FailedToPurchasePleaseTryAgain, mu::ui::window::TYPE_ERROR_MESSAGE);
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
     }
@@ -9667,12 +9668,12 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
         {
         case PURCHASEITEM_RESULTINFO::LackOfMoney:
         {
-            g_pSystemLogBox->AddText(I18N::Game::YouAreShortOfZen, mu::ui::window::TYPE_ERROR_MESSAGE);
+            UI::Chat::PostSystem(I18N::Game::YouAreShortOfZen, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
         break;
         case PURCHASEITEM_RESULTINFO::MoneyOverflowOrNotEnoughSpace:
         {
-            g_pSystemLogBox->AddText(I18N::Game::InventoryIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
+            UI::Chat::PostSystem(I18N::Game::InventoryIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
         break;
         case PURCHASEITEM_RESULTINFO::ItemBlock:
@@ -9691,7 +9692,7 @@ void NotifySoldItem(const BYTE* ReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(szId, Header->szId, MAX_USERNAME_SIZE);
     wchar_t Text[100];
     mu_swprintf(Text, I18N::Game::ItemWasSoldToS, szId);
-    g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    UI::Chat::PostSystem(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 }
 
 void NotifyClosePersonalShop(const BYTE* ReceiveBuffer)
@@ -9701,7 +9702,7 @@ void NotifyClosePersonalShop(const BYTE* ReceiveBuffer)
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
 
-        g_pSystemLogBox->AddText(I18N::Game::TheOtherCharacterHasClosedTheStore, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheOtherCharacterHasClosedTheStore, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
 }
 
@@ -9804,7 +9805,7 @@ void ReceiveFriendList(const BYTE* ReceiveBuffer)
     {
         wchar_t temp[MAX_TEXT_LENGTH + 1];
         mu_swprintf(temp, I18N::Game::DLettersAreSavedInYourMailboxMaxD, Header->MemoCount, Header->MaxMemo);
-        g_pSystemLogBox->AddText(temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 }
 
@@ -9828,7 +9829,7 @@ void ReceiveAddFriendResult(const BYTE* ReceiveBuffer)
         break;
     case 0x01:
     {
-        g_pSystemLogBox->AddText(I18N::Game::TheFriendSStatusWillBe, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheFriendSStatusWillBe, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         g_pFriendList->AddFriend(szName, 0, Data->Server);
         g_pFriendList->Sort();
         g_pWindowMgr->RefreshMainWndPalList();
@@ -9957,7 +9958,7 @@ void ReceiveLetterSendResult(const BYTE* ReceiveBuffer)
             g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, Data->WindowGuid, 0);
         wchar_t temp[MAX_TEXT_LENGTH + 1];
         mu_swprintf(temp, I18N::Game::LetterHasBeenSentCostDZen, g_cdwLetterCost);
-        g_pSystemLogBox->AddText(temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
     break;
     case 0x02:
@@ -10013,7 +10014,7 @@ void ReceiveLetter(const BYTE* ReceiveBuffer)
     case 0x02:
         PlayBuffer(SOUND_FRIEND_MAIL_ALERT);
         g_pFriendMenu->SetNewMailAlert(TRUE);
-        g_pSystemLogBox->AddText(I18N::Game::NewMailHasArrived, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NewMailHasArrived, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         g_pLetterList->AddLetter(Data->Index, szName, szSubject, szDate, szTime, 0x00);
         g_pLetterList->Sort();
         break;
@@ -10030,7 +10031,7 @@ void ReceiveLetter(const BYTE* ReceiveBuffer)
 
     if (g_pLetterList->GetLetterCount() >= g_iMaxLetterCount)
     {
-        g_pSystemLogBox->AddText(I18N::Game::YourMailboxIsFullYouMustDeleteLettersToReceiveNewOnes,
+        UI::Chat::PostSystem(I18N::Game::YourMailboxIsFullYouMustDeleteLettersToReceiveNewOnes,
                                  mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 }
@@ -10351,7 +10352,7 @@ void ReceiveBuffState(const BYTE* ReceiveBuffer)
 
         if (bufftype == eBuff_HelpNpc)
         {
-            g_pSystemLogBox->AddText(I18N::Game::DamageAndDefenseIncreasedWithABlessing, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            UI::Chat::PostSystem(I18N::Game::DamageAndDefenseIncreasedWithABlessing, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         }
     }
     else
@@ -10699,7 +10700,7 @@ void ReceiveQuestCompleteResult(const BYTE* ReceiveBuffer)
             g_pQuestProgress->EnableCompleteBtn(false);
         else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
             g_pQuestProgressByEtc->EnableCompleteBtn(false);
-        g_pSystemLogBox->AddText(I18N::Game::YouHaveReachedYourZenLimit, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YouHaveReachedYourZenLimit, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
 
     case 3:
@@ -10707,8 +10708,8 @@ void ReceiveQuestCompleteResult(const BYTE* ReceiveBuffer)
             g_pQuestProgress->EnableCompleteBtn(false);
         else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
             g_pQuestProgressByEtc->EnableCompleteBtn(false);
-        g_pSystemLogBox->AddText(I18N::Game::InventoryIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
-        g_pSystemLogBox->AddText(I18N::Game::TheSameItemThatYouWantToTrade, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::InventoryIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::TheSameItemThatYouWantToTrade, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     }
 }
@@ -11095,7 +11096,7 @@ void ReceiveBCStatus(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0x00:
-        g_pSystemLogBox->AddText(I18N::Game::CastleInformationFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::CastleInformationFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
     case 0x02:
@@ -11103,10 +11104,10 @@ void ReceiveBCStatus(const BYTE* ReceiveBuffer)
         g_pGuardWindow->SetData(Data);
         break;
     case 0x03:
-        g_pSystemLogBox->AddText(I18N::Game::UnusualCastleInformation, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::UnusualCastleInformation, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x04:
-        g_pSystemLogBox->AddText(I18N::Game::CastleGuildIsDisappeared, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::CastleGuildIsDisappeared, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -11118,32 +11119,32 @@ void ReceiveBCReg(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0x00:
-        g_pSystemLogBox->AddText(I18N::Game::FailedToRegisterForCastleSiege, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::FailedToRegisterForCastleSiege, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
         g_GuardsMan.SetRegStatus(1);
-        g_pSystemLogBox->AddText(I18N::Game::CastleSiegeRegistrationIsSuccessful, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::CastleSiegeRegistrationIsSuccessful, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x02:
-        g_pSystemLogBox->AddText(I18N::Game::AlreadyRegisteredInCastleSiege, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::AlreadyRegisteredInCastleSiege, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x03:
-        g_pSystemLogBox->AddText(I18N::Game::YouBelongToTheGuildOfTheDefendingTeam, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::YouBelongToTheGuildOfTheDefendingTeam, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x04:
-        g_pSystemLogBox->AddText(I18N::Game::IncorrectGuild, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::IncorrectGuild, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x05:
-        g_pSystemLogBox->AddText(I18N::Game::GuildMasterSLevelIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::GuildMasterSLevelIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x06:
-        g_pSystemLogBox->AddText(I18N::Game::NoAffiliatedGuild, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NoAffiliatedGuild, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x07:
-        g_pSystemLogBox->AddText(I18N::Game::ItSNotARegistrationPeriodForCastleSiege, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ItSNotARegistrationPeriodForCastleSiege, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x08:
-        g_pSystemLogBox->AddText(I18N::Game::NumberOfGuildMembersIsLacking, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NumberOfGuildMembersIsLacking, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     default:
         assert(!"ReceiveBCReg(0xB2, 0x01)");
@@ -11158,19 +11159,19 @@ void ReceiveBCGiveUp(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0x00:
-        g_pSystemLogBox->AddText(I18N::Game::SurrenderingCastleSiegeHasFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::SurrenderingCastleSiegeHasFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
         SocketClient->ToGameServer()->SendCastleSiegeRegistrationStateRequest();
         SocketClient->ToGameServer()->SendCastleSiegeRegisteredGuildsListRequest();
         g_GuardsMan.SetRegStatus(0);
-        g_pSystemLogBox->AddText(I18N::Game::SurrenderingCastleSiegeIsSuccessful, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::SurrenderingCastleSiegeIsSuccessful, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x02:
-        g_pSystemLogBox->AddText(I18N::Game::ThisGuildIsNotRegisteredInCastleSiege, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ThisGuildIsNotRegisteredInCastleSiege, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x03:
-        g_pSystemLogBox->AddText(I18N::Game::ItSNotASurrenderingPeriodForCastleSiege, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ItSNotASurrenderingPeriodForCastleSiege, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     default:
         assert(!"ReceiveBCGiveUp(0xB2,0x02)");
@@ -11212,7 +11213,7 @@ void ReceiveBCRegMark(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0x00:
-        g_pSystemLogBox->AddText(I18N::Game::RegistrationOfSignHasFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::RegistrationOfSignHasFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
     {
@@ -11226,10 +11227,10 @@ void ReceiveBCRegMark(const BYTE* ReceiveBuffer)
     }
     break;
     case 0x02:
-        g_pSystemLogBox->AddText(I18N::Game::ThisGuildHasNotParticipatedInCastleSiege, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ThisGuildHasNotParticipatedInCastleSiege, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x03:
-        g_pSystemLogBox->AddText(I18N::Game::IncorrectItemWasRegistered, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::IncorrectItemWasRegistered, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -11240,19 +11241,19 @@ void ReceiveBCNPCBuy(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::FailedToPurchase, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::FailedToPurchase, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
         g_SenatusInfo.BuyNewNPC(Data->iNpcNumber, Data->iNpcIndex);
         break;
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 3:
-        g_pSystemLogBox->AddText(I18N::Game::PurchasingCostIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::PurchasingCostIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 4:
-        g_pSystemLogBox->AddText(I18N::Game::AlreadyExists, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::AlreadyExists, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -11264,7 +11265,7 @@ void ReceiveBCNPCRepair(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        g_pSystemLogBox->AddText(I18N::Game::FailedToPurchase, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::FailedToPurchase, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 
     break;
@@ -11277,10 +11278,10 @@ void ReceiveBCNPCRepair(const BYTE* ReceiveBuffer)
     }
     break;
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 3:
-        g_pSystemLogBox->AddText(I18N::Game::PurchasingCostIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::PurchasingCostIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -11291,7 +11292,7 @@ void ReceiveBCNPCUpgrade(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::FailedToPurchase, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::FailedToPurchase, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -11306,22 +11307,22 @@ void ReceiveBCNPCUpgrade(const BYTE* ReceiveBuffer)
     }
     break;
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 3:
-        g_pSystemLogBox->AddText(I18N::Game::PurchasingCostIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::PurchasingCostIsInsufficient, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 4:
-        g_pSystemLogBox->AddText(I18N::Game::JewelIsLacking, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::JewelIsLacking, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 5:
-        g_pSystemLogBox->AddText(I18N::Game::IncorrectType, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::IncorrectType, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 6:
-        g_pSystemLogBox->AddText(I18N::Game::IncorrectRequestedValue, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::IncorrectRequestedValue, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 7:
-        g_pSystemLogBox->AddText(I18N::Game::NPCDoesNotExist, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NPCDoesNotExist, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -11332,13 +11333,13 @@ void ReceiveBCGetTaxInfo(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::AcquiringTaxRateInformationHasFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::AcquiringTaxRateInformationHasFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
         g_SenatusInfo.SetTaxInfo(Data);
         break;
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -11349,7 +11350,7 @@ void ReceiveBCChangeTaxRate(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::ChangingTaxRateInformationHasFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ChangingTaxRateInformationHasFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
         if (Data->btTaxType == 3)
@@ -11363,7 +11364,7 @@ void ReceiveBCChangeTaxRate(const BYTE* ReceiveBuffer)
         }
         break;
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -11374,13 +11375,13 @@ void ReceiveBCWithdraw(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::WithdrawalFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::WithdrawalFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
         g_SenatusInfo.ChangeCastleMoney(Data);
         break;
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -11440,7 +11441,7 @@ void ReceiveBCNPCList(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::UnfortunatelyYouHaveFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::UnfortunatelyYouHaveFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -11453,7 +11454,7 @@ void ReceiveBCNPCList(const BYTE* ReceiveBuffer)
     }
     break;
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::NoAuthorization, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -11466,7 +11467,7 @@ void ReceiveBCDeclareGuildList(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::UnfortunatelyYouHaveFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::UnfortunatelyYouHaveFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -11503,7 +11504,7 @@ void ReceiveBCGuildList(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::UnfortunatelyYouHaveFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::UnfortunatelyYouHaveFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -11521,10 +11522,10 @@ void ReceiveBCGuildList(const BYTE* ReceiveBuffer)
     }
     break;
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::HasNotBeenConfirmedYet, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::HasNotBeenConfirmedYet, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 3:
-        g_pSystemLogBox->AddText(I18N::Game::HasNotBeenConfirmedYet, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::HasNotBeenConfirmedYet, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -11965,7 +11966,7 @@ void ReceiveCatapultState(const BYTE* ReceiveBuffer)
     }
     else if (pData->m_byResult == 0)
     {
-        g_pSystemLogBox->AddText(L"ReceiveCatapultState", mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(L"ReceiveCatapultState", mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 }
 
@@ -11982,7 +11983,7 @@ void ReceiveCatapultFire(const BYTE* ReceiveBuffer)
     }
     else if (pData->m_byResult == 0)
     {
-        g_pSystemLogBox->AddText(L"ReceiveCatapultFire", mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(L"ReceiveCatapultFire", mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 }
 
@@ -12568,7 +12569,7 @@ bool ReceiveRequestExChangeLuckyCoin(const BYTE* ReceiveBuffer)
     case 1:
     {
         // g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN);
-        g_pSystemLogBox->AddText(I18N::Game::ExchangeHasBeenMade, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::ExchangeHasBeenMade, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
     break;
     case 2:
@@ -12602,12 +12603,12 @@ bool ReceiveEnterDoppelGangerEvent(const BYTE* ReceiveBuffer)
         break;
     case 2:
         mu_swprintf(szText, I18N::Game::BattleHasAlreadyCommencedYouCannotEnter);
-        g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
         g_pDoppelGangerWindow->LockEnterButton(TRUE);
         break;
     case 3:
         mu_swprintf(szText, I18N::Game::YouCannotEnterIfYouAreA1stStageOutlaw);
-        g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
+        UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
         g_pDoppelGangerWindow->LockEnterButton(TRUE);
         break;
     case 4:
@@ -15299,7 +15300,7 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
 
             if (buff == eBuff_BlessingOfXmax)
             {
-                g_pSystemLogBox->AddText(I18N::Game::TheAttackAndDefensePowerHaveIncreased,
+                UI::Chat::PostSystem(I18N::Game::TheAttackAndDefensePowerHaveIncreased,
                                          mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 CharacterMachine->CalculateDamage();
                 CharacterMachine->CalculateDefense();
@@ -15307,36 +15308,36 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
             else if (buff == eBuff_StrengthOfSanta)
             {
                 mu_swprintf(_Temp, I18N::Game::AttackPowerHasIncreasedOfD, 30);
-                g_pSystemLogBox->AddText(_Temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+                UI::Chat::PostSystem(_Temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
                 CharacterMachine->CalculateDamage();
             }
             else if (buff == eBuff_DefenseOfSanta)
             {
                 mu_swprintf(_Temp, I18N::Game::DefenseHasIncreasedOfD, 100);
-                g_pSystemLogBox->AddText(_Temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+                UI::Chat::PostSystem(_Temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
                 CharacterMachine->CalculateDefense();
             }
             else if (buff == eBuff_QuickOfSanta)
             {
                 mu_swprintf(_Temp, I18N::Game::AttackSpeedHasIncreasedOfD, 15);
-                g_pSystemLogBox->AddText(_Temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+                UI::Chat::PostSystem(_Temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
             else if (buff == eBuff_LuckOfSanta)
             {
                 mu_swprintf(_Temp, I18N::Game::AGRecoverySpeedHasIncreasedOfD, 10);
-                g_pSystemLogBox->AddText(_Temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+                UI::Chat::PostSystem(_Temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
             else if (buff == eBuff_CureOfSanta)
             {
                 mu_swprintf(_Temp, I18N::Game::MaximumLifeHasBeenIncreasedOfD, 500);
-                g_pSystemLogBox->AddText(_Temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+                UI::Chat::PostSystem(_Temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
             else if (buff == eBuff_SafeGuardOfSanta)
             {
                 mu_swprintf(_Temp, I18N::Game::MaximumManaHasIncreasedOfD, 500);
-                g_pSystemLogBox->AddText(_Temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+                UI::Chat::PostSystem(_Temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
         }
         break;
