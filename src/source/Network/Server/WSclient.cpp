@@ -4,6 +4,7 @@
 #include "UI/Chat/Chat.h"
 #include "UI/Chat/ChatMessages.h"
 #include "UI/Core/WindowAccess.h"
+#include "UI/Social/SocialUpdates.h"
 #include <memory>
 #include "UI/Core/UIManager.h"
 #include "Guild/GuildCache.h"
@@ -1032,9 +1033,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         break;
     }
 
-    g_pWindowMgr->Reset();
-    g_pFriendList->ClearFriendList();
-    g_pLetterList->ClearLetterList();
+    UI::Social::Reset();
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x02 [ReceiveServerList(%d)]", Data->Value);
 
@@ -1081,9 +1080,7 @@ void ResetClientToLoginScene()
     g_csMapServer.Init();
     InitGame();
 
-    g_pWindowMgr->Reset();
-    g_pFriendList->ClearFriendList();
-    g_pLetterList->ClearLetterList();
+    UI::Social::Reset();
 }
 
 int HeroIndex;
@@ -9777,24 +9774,27 @@ int g_iMaxLetterCount = 0;
 
 void ReceiveFriendList(const BYTE* ReceiveBuffer)
 {
-    g_pWindowMgr->Reset();
     auto Header = (LPFS_FRIEND_LIST_HEADER)ReceiveBuffer;
     int iMoveOffset = sizeof(FS_FRIEND_LIST_HEADER);
+    std::vector<std::wstring> names;
+    std::vector<UI::Social::FriendEntry> friends;
+    names.reserve(Header->Count);
+    friends.reserve(Header->Count);
     wchar_t szName[MAX_USERNAME_SIZE + 1] = {0};
     for (int i = 0; i < Header->Count; ++i)
     {
         auto Data = (LPFS_FRIEND_LIST_DATA)(ReceiveBuffer + iMoveOffset);
         CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_USERNAME_SIZE);
         szName[MAX_USERNAME_SIZE] = '\0';
-        g_pFriendList->AddFriend(szName, 0, Data->Server);
+        names.emplace_back(szName);
+        friends.push_back({ {}, Data->Server });
         iMoveOffset += sizeof(FS_FRIEND_LIST_DATA);
     }
-    g_pFriendList->Sort(0);
-    g_pFriendList->Sort(1);
-    g_pWindowMgr->RefreshMainWndPalList();
+    for (size_t i = 0; i < friends.size(); ++i)
+        friends[i].name = names[i];
+    // The friend server is up, so sending is enabled again.
+    UI::Social::ReplaceFriendList(friends);
 
-    // 채팅 서버 살아남
-    g_pWindowMgr->SetServerEnable(TRUE);
     if (g_iChatInputType == 0)
     {
         SocketClient->ToGameServer()->SendSetFriendOnlineState(2);
@@ -9826,32 +9826,29 @@ void ReceiveAddFriendResult(const BYTE* ReceiveBuffer)
     {
     case 0x00:
         wcscat(szText, I18N::Game::IDDoesNotExist);
-        g_pWindowMgr->Dialogs().Notice(szText);
+        UI::Social::ShowNotice(szText);
         break;
     case 0x01:
     {
         UI::Chat::PostSystem(I18N::Game::TheFriendSStatusWillBe, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-        g_pFriendList->AddFriend(szName, 0, Data->Server);
-        g_pFriendList->Sort();
-        g_pWindowMgr->RefreshMainWndPalList();
-        g_pFriendMenu->UpdateAllChatWindowInviteList();
+        UI::Social::FriendAdded(szName, Data->Server);
     }
     break;
     case 0x03:
         wcscpy(szText, I18N::Game::YouCannotAddMorePleaseDeleteToAdd);
-        g_pWindowMgr->Dialogs().Notice(szText);
+        UI::Social::ShowNotice(szText);
         break;
     case 0x04:
         wcscat(szText, I18N::Game::IsAlreadyRegistered);
-        g_pWindowMgr->Dialogs().Notice(szText);
+        UI::Social::ShowNotice(szText);
         break;
     case 0x05:
         wcscpy(szText, I18N::Game::YouCannotRegisterYourOwnID);
-        g_pWindowMgr->Dialogs().Notice(szText);
+        UI::Social::ShowNotice(szText);
         break;
     case 0x06:
         wcscpy(szText, I18N::Game::TheOtherCharacterMustBeOverLevel6);
-        g_pWindowMgr->Dialogs().Notice(szText);
+        UI::Social::ShowNotice(szText);
         break;
     default:
         break;
@@ -9873,12 +9870,7 @@ void ReceiveRequestAcceptAddFriend(const BYTE* ReceiveBuffer)
     mu_swprintf(szText, L"%ls %ls", szText,
                 I18N::Game::HasRequestedToListYouAsAFriend); // " has requested to list you as a friend."
 
-    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_FRIEND) == false)
-    {
-        UI::Windows::Show(mu::ui::window::INTERFACE_FRIEND);
-    }
-
-    g_pWindowMgr->Dialogs().FriendRequest(szText, szName);
+    UI::Social::ShowFriendRequest(szText, szName);
     PlayBuffer(SOUND_FRIEND_LOGIN_ALERT);
 }
 
@@ -9893,11 +9885,10 @@ void ReceiveDeleteFriendResult(const BYTE* ReceiveBuffer)
     switch (Data->Result)
     {
     case 0x00:
-        g_pWindowMgr->Dialogs().Notice(I18N::Game::CouldnTDelete);
+        UI::Social::ShowNotice(I18N::Game::CouldnTDelete);
         break;
     case 0x01:
-        g_pFriendList->RemoveFriend(szName);
-        g_pWindowMgr->RefreshMainWndPalList();
+        UI::Social::FriendRemoved(szName);
         break;
     default:
         break;
@@ -9912,35 +9903,13 @@ void ReceiveFriendStateChange(const BYTE* ReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(szName, Data->Name, MAX_USERNAME_SIZE);
     szName[MAX_USERNAME_SIZE] = '\0';
 
+    // 0xFC: the friend server itself is gone; 0xFD and up: this friend is offline.
     if (Data->Server == 0xFC)
     {
-        g_pFriendList->UpdateAllFriendState(0, Data->Server);
-        g_pFriendList->Sort();
-        g_pWindowMgr->RefreshMainWndPalList();
-        g_pFriendMenu->LockAllChatWindow();
-        g_pWindowMgr->SetServerEnable(FALSE);
+        UI::Social::FriendServerLost(Data->Server);
         return;
     }
-    g_pFriendList->UpdateFriendState(szName, 0, Data->Server);
-    g_pFriendList->Sort();
-    g_pWindowMgr->RefreshMainWndPalList();
-    g_pFriendMenu->UpdateAllChatWindowInviteList();
-
-    DWORD dwChatRoomUIID = g_pFriendMenu->CheckChatRoomDuplication(szName);
-    if (dwChatRoomUIID > 0)
-    {
-        auto* pWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(dwChatRoomUIID);
-        if (pWindow == nullptr)
-            ;
-        else if (Data->Server >= 0xFD /* || Data->Server == 0xFB*/)
-        {
-            pWindow->Lock(TRUE);
-        }
-        else
-        {
-            pWindow->Lock(FALSE);
-        }
-    }
+    UI::Social::FriendStateChanged(szName, Data->Server, Data->Server >= 0xFD);
 }
 
 void ReceiveLetterSendResult(const BYTE* ReceiveBuffer)
