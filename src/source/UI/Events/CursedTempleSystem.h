@@ -7,7 +7,7 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Widgets/Window/Button.h"
-#include "Network/Server/WSclient.h"
+#include "UI/Events/CursedTempleUpdates.h"
 #include "UI/HUD/MainFrameWindow.h"
 #include "UI/Events/CursedTempleSystemRmlModel.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
@@ -126,11 +126,10 @@ public:
 
 public:
     void SetCursedTempleSkill(CHARACTER* c, OBJECT* o, DWORD selectcharacterindex);
-    void ReceiveCursedTempRegisterSkill(const BYTE* ReceiveBuffer);
-    void ReceiveCursedTempUnRegisterSkill(const BYTE* ReceiveBuffer);
-    void ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer);
-    void ReceiveCursedTempSkillPoint(const BYTE* ReceiveBuffer);
-    void ReceiveCursedTempleHolyItemRelics(const BYTE* ReceiveBuffer);
+    void ResolveSkill(const UI::CursedTemple::SkillResult& result);
+    void EndSkill(std::uint16_t skill, std::uint16_t targetKey);
+    void SetMatchStatus(const UI::CursedTemple::MatchStatus& status);
+    void SetSkillPoints(std::uint8_t points);
 
 private:
     void Initialize();
@@ -156,7 +155,7 @@ private:
     WORD m_IllusionPoint; // Illusion Cult score
 
     WORD m_CursedTempleMyTeamCount;
-    PMSG_CURSED_TAMPLE_PARTY_POS m_CursedTempleMyTeam[MAX_PARTYS];
+    UI::CursedTemple::PartyPosition m_CursedTempleMyTeam[MAX_PARTYS];
     // Team
     SEASON3A::eCursedTempleTeam m_MyTeam;
     // skillpoint

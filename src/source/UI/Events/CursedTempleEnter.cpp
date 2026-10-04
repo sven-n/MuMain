@@ -227,25 +227,17 @@ bool mu::ui::window::CCursedTempleEnter::Render()
 
 
 //ServerMessage
-void mu::ui::window::CCursedTempleEnter::SetCursedTempleEnterInfo(const BYTE* cursedtempleinfo)
+void mu::ui::window::CCursedTempleEnter::SetEntryOffer(std::uint8_t remainingTime, std::uint8_t entryCount)
 {
-    m_EnterTime = static_cast<int>(cursedtempleinfo[0]);
-    m_EnterCount = static_cast<int>(cursedtempleinfo[1]);
+    m_EnterTime = remainingTime;
+    m_EnterCount = entryCount;
 }
 
-void mu::ui::window::CCursedTempleEnter::ReceiveCursedTempleEnterInfo(const BYTE* ReceiveBuffer)
+void mu::ui::window::CCursedTempleEnter::SetEntryCounts(std::span<const std::uint8_t, 6> counts)
 {
-    auto data = (LPPMSG_CURSED_TEMPLE_USER_COUNT)ReceiveBuffer;
-
     int enterlevel = -1;
-
-    if (CheckEnterLevel(enterlevel))
-    {
-        if (enterlevel > 0)
-        {
-            m_EnterCount = data->btUserCount[enterlevel - 1];
-        }
-    }
+    if (CheckEnterLevel(enterlevel) && enterlevel > 0)
+        m_EnterCount = counts[enterlevel - 1];
 }
 
 void mu::ui::window::CCursedTempleEnter::BuildRmlUi()

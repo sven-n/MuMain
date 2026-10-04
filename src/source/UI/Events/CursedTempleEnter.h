@@ -9,6 +9,7 @@
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Widgets/Window/Button.h"
 #include "UI/Events/CursedTempleEnterRmlModel.h"
+#include "UI/Events/CursedTempleUpdates.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
 namespace Rml
@@ -67,8 +68,8 @@ public:
     float GetLayerDepth(); //. 5.0f
 
 public:
-    void SetCursedTempleEnterInfo(const BYTE* cursedtempleinfo);
-    void ReceiveCursedTempleEnterInfo(const BYTE* cursedtempleinfo);
+    void SetEntryOffer(std::uint8_t remainingTime, std::uint8_t entryCount);
+    void SetEntryCounts(std::span<const std::uint8_t, 6> counts);
 
 private:
     void Initialize();

@@ -9,6 +9,7 @@
 #include "UI/Events/CryWolfUpdates.h"
 #include "UI/Events/LuckyCoinUpdates.h"
 #include "UI/Events/KanturuUpdates.h"
+#include "UI/Events/CursedTempleUpdates.h"
 #include "UI/Core/WindowAccess.h"
 #include "UI/Social/SocialUpdates.h"
 #include <memory>
@@ -6435,10 +6436,8 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     break;
     case 0x14:
     {
-        UI::Windows::Show(mu::ui::window::INTERFACE_CURSEDTEMPLE_NPC);
-
-        BYTE* cursedtempleenterinfo = (&Data->Value) + 1;
-        g_pCursedTempleEnterWindow->SetCursedTempleEnterInfo(cursedtempleenterinfo);
+        const BYTE* cursedtempleenterinfo = (&Data->Value) + 1;
+        UI::CursedTemple::OpenEntryOffer(cursedtempleenterinfo[0], cursedtempleenterinfo[1]);
     }
     break;
     case 0x15:
@@ -12171,7 +12170,7 @@ void ReceiveCursedTempleEnterInfo(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_CURSED_TEMPLE_USER_COUNT)ReceiveBuffer;
 
-    g_pCursedTempleEnterWindow->ReceiveCursedTempleEnterInfo(ReceiveBuffer);
+    UI::CursedTemple::UpdateEntryCounts(std::span<const std::uint8_t, 6>(data->btUserCount));
 }
 
 void ReceiveCursedTempleEnterResult(const BYTE* ReceiveBuffer)
@@ -12187,47 +12186,67 @@ void ReceiveCursedTempleEnterResult(const BYTE* ReceiveBuffer)
 
 void ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer)
 {
-    g_pCursedTempleWindow->ReceiveCursedTempleInfo(ReceiveBuffer);
+    auto data = (LPPMSG_CURSED_TAMPLE_STATE)ReceiveBuffer;
+
+    std::vector<UI::CursedTemple::PartyPosition> party;
+    party.reserve(data->btPartyCount);
+    int Offset = sizeof(PMSG_CURSED_TAMPLE_STATE);
+    for (int i = 0; i < data->btPartyCount; ++i)
+    {
+        auto member = (LPPMSG_CURSED_TAMPLE_PARTY_POS)(ReceiveBuffer + Offset);
+        party.push_back({ member->wPartyUserIndex, member->byMapNumber, member->btX, member->btY });
+        Offset += sizeof(PMSG_CURSED_TAMPLE_PARTY_POS);
+    }
+
+    UI::CursedTemple::UpdateMatchStatus({ data->wRemainSec, data->btUserIndex, data->btX, data->btY,
+                                          data->btAlliedPoint, data->btIllusionPoint,
+                                          static_cast<SEASON3A::eCursedTempleTeam>(data->btMyTeam), party });
     g_CursedTemple->ReceiveCursedTempleInfo(ReceiveBuffer);
 }
 
 void ReceiveCursedTempMagicResult(const BYTE* ReceiveBuffer)
 {
-    g_pCursedTempleWindow->ReceiveCursedTempRegisterSkill(ReceiveBuffer);
+    auto data = (LPPMSG_CURSED_TEMPLE_USE_MAGIC_RESULT)ReceiveBuffer;
+    const WORD skill = (static_cast<WORD>(data->MagicH) << 8) + data->MagicL;
+    UI::CursedTemple::ResolveSkill({ skill, data->wSourceObjIndex, data->wTargetObjIndex, data->MagicResult != 0 });
 }
 
 void ReceiveCursedTempSkillEnd(const BYTE* ReceiveBuffer)
 {
-    g_pCursedTempleWindow->ReceiveCursedTempUnRegisterSkill(ReceiveBuffer);
+    auto data = (LPPMSG_CURSED_TEMPLE_SKILL_END)ReceiveBuffer;
+    const WORD skill = (static_cast<WORD>(data->MagicH) << 8) + data->MagicL;
+    UI::CursedTemple::EndSkill(skill, data->wObjIndex);
 }
 
 void ReceiveCursedTempSkillPoint(const BYTE* ReceiveBuffer)
 {
-    g_pCursedTempleWindow->ReceiveCursedTempSkillPoint(ReceiveBuffer);
+    auto data = (LPPMSG_CURSED_TEMPLE_SKILL_POINT)ReceiveBuffer;
+    UI::CursedTemple::SetSkillPoints(data->btSkillPoint);
 }
 
 void ReceiveCursedTempleHolyItemRelics(const BYTE* ReceiveBuffer)
 {
-    g_pCursedTempleWindow->ReceiveCursedTempleHolyItemRelics(ReceiveBuffer);
 }
 
 void ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer)
 {
-    UI::Windows::HideAll();
+    auto data = (LPPMSG_CURSED_TEMPLE_RESULT)ReceiveBuffer;
 
-    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM))
+    std::vector<UI::CursedTemple::PlayerResult> players;
+    players.reserve(data->btUserCount);
+    int Offset = sizeof(PMSG_CURSED_TEMPLE_RESULT);
+    for (int i = 0; i < data->btUserCount; ++i)
     {
-        g_pCursedTempleResultWindow->ResetGameResultInfo();
-        g_pCursedTempleResultWindow->SetMyTeam(g_pCursedTempleWindow->GetMyTeam());
-
-        UI::Windows::Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
+        auto player = (LPPMSG_CURSED_TEMPLE_USER_ADD_EXP)(ReceiveBuffer + Offset);
+        wchar_t name[MAX_USERNAME_SIZE + 1]{};
+        CMultiLanguage::ConvertFromUtf8(name, player->GameId, MAX_USERNAME_SIZE);
+        players.push_back({ name, player->byMapNumber, static_cast<SEASON3A::eCursedTempleTeam>(player->btTeam),
+                            gCharacterManager.ChangeServerClassTypeToClientClassType(player->btClass),
+                            player->nAddExp });
+        Offset += sizeof(PMSG_CURSED_TEMPLE_USER_ADD_EXP);
     }
 
-    PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM5);
-
-    UI::Windows::Show(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT);
-
-    g_pCursedTempleResultWindow->ReceiveCursedTempleGameResult(ReceiveBuffer);
+    UI::CursedTemple::ShowMatchResult({ data->btAlliedPoint, data->btIllusionPoint, players });
 }
 
 void ReceiveCursedTempleState(const BYTE* ReceiveBuffer)
@@ -12239,14 +12258,7 @@ void ReceiveCursedTempleState(const BYTE* ReceiveBuffer)
 
     if (cursedtemple == SEASON3A::eCursedTempleState_Ready)
     {
-        UI::Windows::HideAll();
-
-        g_pCursedTempleWindow->ResetCursedTempleSystemInfo();
-        g_pCursedTempleWindow->StartTutorialStep();
-
-        PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM1);
-
-        UI::Windows::Show(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
+        UI::CursedTemple::BeginReadyPhase();
     }
 
     g_CursedTemple->ReceiveCursedTempleState(cursedtemple);

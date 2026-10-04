@@ -171,6 +171,8 @@ Lucky Coin and CryWolf pass (2026-10-05): feature operations now own the registr
 
 Kanturu pass (2026-10-05): `UI/Events/KanturuUpdates` owns entry-window updates and battle-info visibility/timer. The entry window takes named stage, detail, and result types; `WSclient.cpp` decodes the packet values before calling it. A full RelWithDebInfo build passed. In-game spot checks remain pending with the consolidated RB-03 checklist.
 
+Cursed Temple pass (2026-10-05): `UI/Events/CursedTempleUpdates` owns the entry offer and per-level counts, match status, skill use/end, kill points, the result screen, and the ready-phase window switch. `WSclient.cpp` decodes every packet (party positions, result rows with converted names and client classes) and the three windows no longer read packet buffers or include `WSclient.h`; the window keeps its own copy of the party positions, clamped to `MAX_PARTYS`. The relic-holder handler stays an empty no-op, as it was. A full RelWithDebInfo build passed. In-game spot checks remain pending with the consolidated RB-03 checklist.
+
 ### RB-04 — Theme command ownership
 
 - Keep `$theme` command recognition in the console, but move theme validation, activation, config

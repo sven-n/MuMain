@@ -172,13 +172,10 @@ bool mu::ui::window::CCursedTempleResult::Render()
     return true;
 }
 
-void mu::ui::window::CCursedTempleResult::ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer)
+void mu::ui::window::CCursedTempleResult::SetResult(const UI::CursedTemple::MatchResult& result)
 {
-    auto data = (LPPMSG_CURSED_TEMPLE_RESULT)ReceiveBuffer;
-
-    int	alliedPoint = data->btAlliedPoint;
-    int	illusionPoint = data->btIllusionPoint;
-    int userCount = data->btUserCount;
+    const int alliedPoint = result.alliedPoints;
+    const int illusionPoint = result.illusionPoints;
 
     if (m_MyTeam == SEASON3A::eTeam_Allied)
     {
@@ -199,33 +196,26 @@ void mu::ui::window::CCursedTempleResult::ReceiveCursedTempleGameResult(const BY
         if (2 > illusionPoint) m_WinState = 2;
     }
 
-    int Offset = sizeof(PMSG_CURSED_TEMPLE_RESULT);
-
-    for (int i = 0; i < userCount; i++)
+    for (const UI::CursedTemple::PlayerResult& player : result.players)
     {
-        auto data2 = (LPPMSG_CURSED_TEMPLE_USER_ADD_EXP)(ReceiveBuffer + Offset);
+        CursedTempleGameResult row{};
+        std::copy_n(player.name.begin(),
+                    std::min(player.name.size(), std::size(row.s_characterId) - 1), row.s_characterId);
+        row.s_mapnumber = player.mapNumber;
+        row.s_team = player.team;
+        row.s_class = player.playerClass;
+        row.s_addexp = player.addedExperience;
 
-        CursedTempleGameResult TempData{};
-        CMultiLanguage::ConvertFromUtf8(TempData.s_characterId, data2->GameId, MAX_USERNAME_SIZE);
-
-        TempData.s_mapnumber = (short)data2->byMapNumber;
-
-        TempData.s_team = static_cast<SEASON3A::eCursedTempleTeam>(data2->btTeam);
-        TempData.s_class = gCharacterManager.ChangeServerClassTypeToClientClassType(data2->btClass);
-        TempData.s_addexp = data2->nAddExp;
-
-        if (TempData.s_team == SEASON3A::eTeam_Allied)
+        if (row.s_team == SEASON3A::eTeam_Allied)
         {
-            TempData.s_point = alliedPoint;
-            m_AlliedTeamGameResult.push_back(TempData);
+            row.s_point = alliedPoint;
+            m_AlliedTeamGameResult.push_back(row);
         }
         else
         {
-            TempData.s_point = illusionPoint;
-            m_IllusionTeamGameResult.push_back(TempData);
+            row.s_point = illusionPoint;
+            m_IllusionTeamGameResult.push_back(row);
         }
-
-        Offset += sizeof(PMSG_CURSED_TEMPLE_USER_ADD_EXP);
     }
 }
 

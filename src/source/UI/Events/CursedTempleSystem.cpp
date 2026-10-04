@@ -432,10 +432,10 @@ void mu::ui::window::CCursedTempleSystem::ResetCursedTempleSystemInfo()
 
     for (int i = 0; i < MAX_PARTYS; ++i)
     {
-        m_CursedTempleMyTeam[i].wPartyUserIndex = 0xffff;
-        m_CursedTempleMyTeam[i].btX = 0;
-        m_CursedTempleMyTeam[i].btY = 0;
-        m_CursedTempleMyTeam[i].byMapNumber = 0xff;
+        m_CursedTempleMyTeam[i].userIndex = 0xffff;
+        m_CursedTempleMyTeam[i].x = 0;
+        m_CursedTempleMyTeam[i].y = 0;
+        m_CursedTempleMyTeam[i].mapNumber = 0xff;
     }
 }
 
@@ -1036,15 +1036,15 @@ void mu::ui::window::CCursedTempleSystem::SyncMiniMap(std::vector<CursedTempleSp
 
     for (int k = 0; k < m_CursedTempleMyTeamCount; ++k)
     {
-        const PMSG_CURSED_TAMPLE_PARTY_POS* p = &m_CursedTempleMyTeam[k];
+        const UI::CursedTemple::PartyPosition* p = &m_CursedTempleMyTeam[k];
 
-        if (p->wPartyUserIndex == 0xffff)
+        if (p->userIndex == 0xffff)
             continue;
 
-        if (p->wPartyUserIndex != Hero->Key && p->wPartyUserIndex != m_HolyItemPlayerIndex)
+        if (p->userIndex != Hero->Key && p->userIndex != m_HolyItemPlayerIndex)
         {
-            const float pcX = MiniMapPos(p->btX, p->btY, m_Scale, AXIS_X);
-            const float pcY = MiniMapPos(p->btX, p->btY, m_Scale, AXIS_Y);
+            const float pcX = MiniMapPos(p->x, p->y, m_Scale, AXIS_X);
+            const float pcY = MiniMapPos(p->x, p->y, m_Scale, AXIS_Y);
             AddSprite(sprites, {pcX - 3.f, pcY - 3.f, 7.f, 7.f},
                       m_MyTeam == SEASON3A::eTeam_Allied ? "newui_ctminmap_TeamB_member.tga"
                                                          : "newui_ctminmap_TeamA_member.tga",
@@ -1241,7 +1241,7 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
         {
             for (int i = 0; i < m_CursedTempleMyTeamCount; ++i)
             {
-                if (m_CursedTempleMyTeam[i].wPartyUserIndex == CharactersClient[selectcharacterindex].Key)
+                if (m_CursedTempleMyTeam[i].userIndex == CharactersClient[selectcharacterindex].Key)
                 {
                     MouseRButtonPush = false;
                     return;
@@ -1295,14 +1295,11 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
     }
 }
 
-void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempRegisterSkill(const BYTE* ReceiveBuffer)
+void mu::ui::window::CCursedTempleSystem::ResolveSkill(const UI::CursedTemple::SkillResult& result)
 {
-    auto data = (LPPMSG_CURSED_TEMPLE_USE_MAGIC_RESULT)ReceiveBuffer;
-
-    WORD magNumber = ((WORD)(data->MagicH) << 8) + data->MagicL;
-
-    WORD sourceobjkey = data->wSourceObjIndex;
-    WORD targetobjkey = data->wTargetObjIndex;
+    WORD magNumber = result.skill;
+    WORD sourceobjkey = result.sourceKey;
+    WORD targetobjkey = result.targetKey;
 
     WORD sourceobjindex = FindCharacterIndex(sourceobjkey);
     WORD targetobjindex = FindCharacterIndex(targetobjkey);
@@ -1316,7 +1313,7 @@ void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempRegisterSkill(const B
     CHARACTER* tc = &CharactersClient[targetobjindex];
     OBJECT* tco = &tc->Object;
 
-    if (data->MagicResult == 0)
+    if (!result.succeeded)
     {
         if (sc == Hero) Hero->m_CursedTempleCurSkillPacket = false;
         return;
@@ -1381,13 +1378,10 @@ void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempRegisterSkill(const B
     }
 }
 
-void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempUnRegisterSkill(const BYTE* ReceiveBuffer)
+void mu::ui::window::CCursedTempleSystem::EndSkill(std::uint16_t skill, std::uint16_t targetKey)
 {
-    auto data = (LPPMSG_CURSED_TEMPLE_SKILL_END)ReceiveBuffer;
-
-    WORD magNumber = ((WORD)(data->MagicH) << 8) + data->MagicL;
-
-    WORD targetobjkey = data->wObjIndex;
+    WORD magNumber = skill;
+    WORD targetobjkey = targetKey;
     WORD targetobjindex = FindCharacterIndex(targetobjkey);
 
     if (targetobjindex == MAX_CHARACTERS_CLIENT)
@@ -1421,34 +1415,32 @@ void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempUnRegisterSkill(const
     }
 }
 
-void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer)
+void mu::ui::window::CCursedTempleSystem::SetMatchStatus(const UI::CursedTemple::MatchStatus& status)
 {
-    auto data = (LPPMSG_CURSED_TAMPLE_STATE)ReceiveBuffer;
+    m_EventMapTime = status.remainingSeconds;
 
-    m_EventMapTime = data->wRemainSec;
-
-    if (data->btUserIndex == 0xffff)
+    if (status.relicHolderIndex == 0xffff)
     {
         memset(&m_HolyItemPlayerName, 0, sizeof(char));
     }
 
-    m_HolyItemPlayerIndex = data->btUserIndex;
-    m_HolyItemPlayerPosX = data->btX;
-    m_HolyItemPlayerPosY = data->btY;
-    m_MyTeam = static_cast<SEASON3A::eCursedTempleTeam>(data->btMyTeam);
+    m_HolyItemPlayerIndex = status.relicHolderIndex;
+    m_HolyItemPlayerPosX = status.relicX;
+    m_HolyItemPlayerPosY = status.relicY;
+    m_MyTeam = status.localTeam;
 
     wchar_t message[200];
     memset(&message, 0, sizeof(char));
 
     if (m_MyTeam == SEASON3A::eTeam_Allied)
     {
-        if (m_AlliedPoint != data->btAlliedPoint)
+        if (m_AlliedPoint != status.alliedPoints)
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
             g_pSystemLogBox->AddText(I18N::Game::TheAlliesAreAdvancingOnWeAreNotFarFromTheVictoryChargeOn, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
-        else if (m_IllusionPoint != data->btIllusionPoint)
+        else if (m_IllusionPoint != status.illusionPoints)
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
@@ -1457,13 +1449,13 @@ void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Re
     }
     else
     {
-        if (m_IllusionPoint != data->btIllusionPoint)
+        if (m_IllusionPoint != status.illusionPoints)
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
             g_pSystemLogBox->AddText(I18N::Game::HoorayForTheIllusionSorceryWe, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
-        else if (m_AlliedPoint != data->btAlliedPoint)
+        else if (m_AlliedPoint != status.alliedPoints)
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
@@ -1471,47 +1463,27 @@ void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Re
         }
     }
 
-    m_AlliedPoint = data->btAlliedPoint;
-    m_IllusionPoint = data->btIllusionPoint;
+    m_AlliedPoint = status.alliedPoints;
+    m_IllusionPoint = status.illusionPoints;
 
-    m_CursedTempleMyTeamCount = data->btPartyCount;
-
-    int Offset = sizeof(PMSG_CURSED_TAMPLE_STATE);
-
-    for (int i = 0; i < m_CursedTempleMyTeamCount; i++)
+    m_CursedTempleMyTeamCount = static_cast<WORD>(std::min(status.party.size(), std::size(m_CursedTempleMyTeam)));
+    for (int i = 0; i < m_CursedTempleMyTeamCount; ++i)
     {
-        auto data2 = (LPPMSG_CURSED_TAMPLE_PARTY_POS)(ReceiveBuffer + Offset);
-
-        if (data2->wPartyUserIndex != 0xffff)
-        {
-            PMSG_CURSED_TAMPLE_PARTY_POS* p = &m_CursedTempleMyTeam[i];
-
-            p->wPartyUserIndex = data2->wPartyUserIndex;
-            p->byMapNumber = data2->byMapNumber;
-            p->btX = data2->btX;
-            p->btY = data2->btY;
-        }
-
-        Offset += sizeof(PMSG_CURSED_TAMPLE_PARTY_POS);
+        if (status.party[i].userIndex != 0xffff)
+            m_CursedTempleMyTeam[i] = status.party[i];
     }
 }
 
-void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE* ReceiveBuffer)
+void mu::ui::window::CCursedTempleSystem::SetSkillPoints(std::uint8_t points)
 {
-    auto data = (LPPMSG_CURSED_TEMPLE_SKILL_POINT)ReceiveBuffer;
-
-    if (m_SkillPoint < data->btSkillPoint)
+    if (m_SkillPoint < points)
     {
         wchar_t message[100];
         memset(&message, 0, sizeof(char));
-        mu_swprintf(message, I18N::Game::KillPointDAchieved, data->btSkillPoint - m_SkillPoint);
+        mu_swprintf(message, I18N::Game::KillPointDAchieved, points - m_SkillPoint);
         g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 
-    m_SkillPoint = data->btSkillPoint;
+    m_SkillPoint = points;
 }
 
-void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempleHolyItemRelics(const BYTE* ReceiveBuffer)
-{
-    auto data = (LPPMSG_RELICS_GET_USER)ReceiveBuffer;
-}

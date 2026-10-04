@@ -8,6 +8,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Events/CursedTempleResultRmlModel.h"
+#include "UI/Events/CursedTempleUpdates.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
 namespace Rml
@@ -18,7 +19,7 @@ class ElementDocument;
 namespace mu::ui::window
 {
 // The Illusion Temple result window. cursed_temple_result.rml draws it (frame, victory /
-// defeat banner, the two teams' rows, the notice and Close); C++ keeps the result packet,
+// defeat banner, the two teams' rows, the notice and Close); C++ keeps the result state,
 // Escape and the reward request on closing.
 class CCursedTempleResult : public CObject
 {
@@ -79,7 +80,7 @@ public:
     void SetMyTeam(SEASON3A::eCursedTempleTeam myteam);
 
 public:
-    void ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer);
+    void SetResult(const UI::CursedTemple::MatchResult& result);
     void ResetGameResultInfo();
 
 private:
