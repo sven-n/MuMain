@@ -903,7 +903,8 @@ for "the full architecture is in place":
 
 Moved to [`tracked-deferrals.md`](tracked-deferrals.md) (2026-09-16) -- the "Pilots to revisit"
 table plus the three short tracked-deferral punch-lists (`mu::ui::window::CObject`-tier adapter
-naming, `CMainFrameWindow`'s class-rename/file-split, `CUIControl` family retirement). The fourth,
+naming, `CMainFrameWindow`'s class-rename/file-split, and the `CUIControl` family retirement --
+which closed 2026-10-04, leaving only its two remaining derived classes). The fourth,
 much larger tracked deferral this section used to include -- `CommonMessageBox`/`CustomMessageBox`
 -- is now just [`migration-ledger.md`](migration-ledger.md)'s Dialog family table (2026-09-19): the
 per-class worklist this used to point at is done for all but a handful of classes, so a dedicated

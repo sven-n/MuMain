@@ -13,9 +13,8 @@ detail.
 
 ## Why this exists
 
-The client's game UI is spread across three legacy widget frameworks — the `CWin`/`CButton`
-widget set, the `CUIControl`/`CUIBaseWindow` toolkit (`SocialWindowCore.h`), and the `mu::ui::window::CObject` tier,
-all living directly under `UI/` in topic folders (`UI/Widgets/`, `UI/HUD/`, `UI/Inventory/`, etc.)
+The client's game UI is spread across two legacy widget frameworks — the `CWin`/`CButton` widget
+set and the `mu::ui::window::CObject` tier — all living directly under `UI/` in topic folders (`UI/Widgets/`, `UI/HUD/`, `UI/Inventory/`, etc.)
 — with no layout engine, retained scene graph, or data-binding layer between them. RmlUi is being
 adopted as the long-term replacement per
 [`architecture-principles.md`](architecture-principles.md), migrated window by window, old and
@@ -23,10 +22,10 @@ new systems coexisting rather than a big-bang rewrite. See [`STATUS.md`](STATUS.
 migrated so far. `COptionWin` was ported but confirmed unreachable in live play, then deleted
 outright as confirmed-dead code — see [Coexistence patterns](#coexistence-patterns) below.
 
-See also: **[Building New UI](building-new-ui.md)** — which of the three overlapping C++ widget
-toolkits (sprite widgets, `CUIControl`, `mu::ui::window::CObject`) to use for a new window, dialog, HUD panel,
-or widget, the folder-by-domain convention, the known near-identical-name collisions to avoid
-(`CButton`/`CUIButton`/`mu::ui::window::CButton`, `CRadioButton`/`mu::ui::window::CRadioButton`), and its
+See also: **[Building New UI](building-new-ui.md)** — which C++ widget toolkit (sprite widgets or
+`mu::ui::window::CObject`) to use for a new window, dialog, HUD panel, or widget, the
+folder-by-domain convention, the known near-identical-name collisions to avoid
+(`CButton`/`mu::ui::window::CButton`, `CRadioButton`/`mu::ui::window::CRadioButton`), and its
 **Reference screens** table — one named, already-verified example window per shape: the 3 permanent
 end-state shapes (RmlUi-only 2D, hybrid RmlUi/native-3D, world-overlay) plus native-only as a
 transitional stopgap for legacy subsystems not yet ported, not a 4th permanent destination — to
@@ -50,7 +49,8 @@ here before inventing a new one-off mechanism. **[Engine Findings](engine-findin
 empirical, engine-specific RmlUi build gotchas found while porting (split out of `STATUS.md`,
 2026-09-16) — check before assuming a new bug is novel. **[Tracked Deferrals](tracked-deferrals.md)**
 — forward-looking punch-lists for what's known-incomplete (the `mu::ui::window::CObject`-tier
-adapter naming, `CMainFrameWindow`'s file split, `CUIControl` family retirement) plus the "Pilots
+adapter naming, `CMainFrameWindow`'s file split, the last two classes still on `CUIControl`)
+plus the "Pilots
 to revisit" table (also split out of `STATUS.md`, 2026-09-16). **[Migration Ledger](migration-ledger.md)**
 — a flat, per-class table of every legacy window/dialog/list-widget component and its migration
 status (2026-09-16) — check here for "is `X` done?" instead of grepping the tree, including what's
@@ -113,8 +113,8 @@ it:
 - **`SetPostRmlUiCallback`** — fires after RmlUi's own pass, for content that must render even
   later than RmlUi itself (the game cursor; historically also the login/char-make input-box text,
   until those fields became stock RmlUi `<input>`s and their `RenderTextOnTop()` overrides went
-  away — the seam itself is still load-bearing for the cursor and for any remaining
-  `CUITextInputBox` consumer). By the
+  away — the seam itself is still load-bearing for the cursor, and now for the letter windows'
+  live-3D portrait via `UI::RmlBridge::OverlayRender`). By the
   time RmlUi's pass is recorded its render pass is already closed, so drawing more content after
   it needs its own seam: a fresh render pass targeting the same swapchain texture with
   `LOAD_OP_LOAD` (preserve what's already there), plus re-staging any newly queued vertex data.

@@ -127,8 +127,8 @@ the pattern `char_sel_main` retired first (see the worked example below) — is 
 `login_main`, `sys_menu`, and `remember_password_prompt` too. RCSS anchor classes + fixed `dp`
 sizes own every element's layout; C++'s only remaining roles are: a window's own genuine screen
 placement (still legitimately C++-computed — `#panel`'s `left`/`top`, not its internal layout),
-keeping a real non-RmlUi companion object (a `CButton` kept for click-detection redundancy, a
-`CUITextInputBox` for real text entry) in sync with what RCSS decided by scaling the same fixed
+keeping a real non-RmlUi companion object (a `CButton` kept for click-detection redundancy) in
+sync with what RCSS decided by scaling the same fixed
 offsets by the same combined ratio RmlUi's own `dp` ratio uses (`GameConfig::GetUIScalePercent() ×
 UI::Scaling::ViewportFitScale()`) — `UI::Scaling::CompanionRatio(windowWidth, windowHeight)`
 (`UITransform.cpp`) is the single shared implementation of this, extracted after
@@ -141,8 +141,8 @@ one of those copies before this existed. `LoginWin.cpp` still keeps its own thin
 its two call sites' convenience, but it just forwards to `UI::Scaling::CompanionRatio()` now —
 `CharSelMainWin.cpp`/`LoginMainWin.cpp` call the shared function directly. The formula itself
 lives in exactly one place either way. See also `char_make`'s deliberate `#panel` exception in the
-table above. If a window with a real Type-2 companion (a functional `CUITextInputBox`, not just a redundant
-click-detection `CButton`) is ever made draggable, `UI::RmlBridge::MakeDraggable()`'s existing
+table above. If a window with a real Type-2 companion is ever made draggable (there are none left -- the
+category's only example, `CUITextInputBox`, is deleted), `UI::RmlBridge::MakeDraggable()`'s existing
 `OnPanelMoved` callback (`RmlDraggable.h` — zero live callers today) is the right hook for this,
 but whatever gets wired into it will need to include the same combined-ratio scaling this section
 describes, not just a raw position sync — `RmlDraggable.h`'s own gap note doesn't mention this yet
@@ -207,8 +207,8 @@ bug — and its three callers were corrected with it.
 
 - A formal multi-resolution automated visual-regression test matrix — see `tracked-deferrals.md`
   for the current status; keep doing manual spot-checks per window until one exists.
-- Whether `CButton`/`CUIButton`/`mu::ui::window::CButton` (three separate C++ classes, one per
-  legacy era) should eventually merge into one. **Not a naming-collision question** — that part is
+- Whether `CButton` and `mu::ui::window::CButton` (one per legacy era; `CUIButton`, the third,
+  is deleted) should eventually merge into one. **Not a naming-collision question** — that part is
   already resolved, each lives in its own namespace (`building-new-ui.md`'s "Resolved name
   collisions" section) and the compiler never confuses them. What's still open is purely whether
   consolidating their *behavior* is worth it; migrating a window to RmlUi already retires whichever

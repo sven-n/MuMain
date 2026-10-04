@@ -574,8 +574,9 @@ history; this is the durable half of what it used to say in full.
   or vice versa) — fix by never doing the divide-now/multiply-later dance at all: store real pixels
   directly, and wrap the consuming `Render()` call in the same explicit `ScopedActiveTransform` the
   write used, so both sides agree unconditionally regardless of which context triggered the write.
-  Any window driving a `CUIControl`-family widget (`CUITextInputBox` and siblings) needs this
-  "identity at both ends" treatment.
+  The concrete case is gone -- `CUITextInputBox` was deleted 2026-10-04 -- but the finding is about
+  the contract, not that class: any native widget that reads the ambient transform at render time
+  rather than at position-set time needs the same "identity at both ends" treatment.
 - **`g_pTimer`'s `GetTimeElapsed()` is total process uptime, never reset anywhere in this
   codebase** (`ResetTimer()` has zero callers) — the existing `dDeltaTick =
   MIN(g_pTimer->GetTimeElapsed(), 200.0 * FPS_ANIMATION_FACTOR)` only behaves like a per-frame delta

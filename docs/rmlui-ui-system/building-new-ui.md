@@ -1,9 +1,9 @@
 # Building New UI: Windows, Dialogs, HUD Panels, and Widgets
 
 A decision guide for "which base class / widget class / folder do I use when adding something
-new under `UI/`?" The codebase has three widget toolkits that accumulated over three different
-eras and, on the surface, look interchangeable — several classes even share almost the same name
-across toolkits. They aren't interchangeable, and this doc exists so a new window doesn't
+new under `UI/`?" The codebase has two widget toolkits left -- a third, the `CUIControl` family,
+was retired in 2026-10 -- and on the surface they look interchangeable; several classes even share
+almost the same name across them. They aren't interchangeable, and this doc exists so a new window doesn't
 accidentally reach for a closed, historical one. Read `architecture-principles.md` first for the
 overall philosophy this follows; this doc is the concrete "what do I actually type" answer for the
 C++ object layer specifically (`component-catalog.md` covers the parallel RmlUi/RCSS layer).
@@ -14,8 +14,8 @@ option alongside the three toolkits here. The `mu::ui::window` tier's own widget
 (`Widgets/Window/*.h`, the cheat sheet below) is a **transitional bridge for content that must stay
 native** — live 3D-camera-viewport content (e.g. `CCharMakeWin`'s character-preview panel),
 world-anchored overlays, or a documented Type-1/Type-2 RmlUi-companion pattern (a redundant
-click-detector behind a real RmlUi button, or a real widget RmlUi can't host yet like
-`CUITextInputBox`) — not a permanent alternative to RmlUi for ordinary 2D chrome. See
+click-detector behind a real RmlUi button; the Type-2 "real widget RmlUi can't host" category has
+no instances left) — not a permanent alternative to RmlUi for ordinary 2D chrome. See
 [`ui-target-architecture.md`](ui-target-architecture.md) for the full reasoning and the
 cross-check against `architecture-principles.md` that established this. **This doc's base-class
 guidance below is unchanged** (`mu::ui::window::CObject`, always) — what changed is which widgets a
@@ -58,7 +58,8 @@ See `ui-target-architecture.md` Section H item 15 for the full reasoning behind 
    etc. for the pattern, or `newui-tier-adapter.md`'s "adapter shape" section for the full method
    contract (`Render()`/`Update()`/`UpdateMouseEvent()`/`UpdateKeyEvent()`/`GetLayerDepth()`).
 3. **Widgets:** see the cheat sheet below. Default to the `mu::ui::window` widget family; for text
-   entry use a stock RmlUi `<input>` with the shared `.text-field` class, not `CUITextInputBox`.
+   entry use a stock RmlUi `<input>` with the shared `.text-field` class -- there is no native
+   text-entry widget any more.
 4. **Folder: by feature domain, not by toolkit.** `UI/Combat/`, `UI/Inventory/`, `UI/Events/`,
    `UI/HUD/`, `UI/NPCs/`, `UI/Party/`, `UI/Social/`, `UI/Quests/`, `UI/Character/`, `UI/Options/`. `UI/Widgets/`
    is for genuinely generic, feature-agnostic controls only (not a catch-all). `UI/Dialogs/` is for
@@ -146,16 +147,16 @@ instead.
 
 | Need | Use | Header | Don't confuse with |
 |---|---|---|---|
-| Button | `mu::ui::window::CButton` | `UI/Widgets/Window/Button.h` | `::CButton` (sprite toolkit, closed), `CUIButton` (`CUIControl` family) — three unrelated classes, same bare name, disambiguated only by namespace |
-| Radio button | `mu::ui::window::CRadioButton` (+ `CRadioGroupButton` to coordinate a set) | `UI/Widgets/Window/Button.h` | `::CRadioButton` (`SocialWindowCore.h`, no base, unrelated) — same situation as `CButton` |
+| Button | `mu::ui::window::CButton` | `UI/Widgets/Window/Button.h` | `::CButton` (sprite toolkit, closed) — two unrelated classes, same bare name, disambiguated by namespace. A third, `CUIButton`, is deleted |
+| Radio button | `mu::ui::window::CRadioButton` (+ `CRadioGroupButton` to coordinate a set) | `UI/Widgets/Window/Button.h` | `::CRadioButton` (sprite toolkit, no base, unrelated) — same situation as `CButton` |
 | Checkbox | `mu::ui::window::CCheckBox` | `UI/Widgets/Window/Button.h` | — |
 | Dropdown | `mu::ui::window::CComboBox` | `UI/Widgets/Window/ComboBox.h` | Deliberately base-less by design (see its own header comment) — don't force it onto `CObject` |
 | Scroll bar | `mu::ui::window::CScrollBar` | `UI/Widgets/Window/ScrollBar.h` | — |
 | Multi-line read-only text | `mu::ui::window::CTextBox` | `UI/Widgets/Window/TextBox.h` | — |
-| Chat input | `mu::ui::window::CChatInputBox` | `UI/Widgets/Window/ChatInputBox.h` | Internally still uses `CUITextInputBox` for the actual entry field — that's expected, not a bug |
+| Chat input | `mu::ui::window::CChatInputBox` | `UI/Widgets/Window/ChatInputBox.h` | Its entry field is a stock RmlUi `<input>` now; it claims RmlUi's keyboard identity while focused |
 | Single-line text entry | **stock RmlUi `<input>`** + shared `.text-field` | `themes/*/base.rcss`, `themes/*/my_shop.rml` | The convention for new UI — bind with `data-value`, style with `.text-field`, keep `maxlength`/validation in C++. See `component-catalog.md`'s "Text field". `CUITextInputBox` is the fallback for **unmigrated** windows only, not a choice for new ones |
 | Progress/gauge bar | *(none yet as a reusable wrapper — `CGaugeBar` is sprite-toolkit-only, closed)* | — | RmlUi's own built-in `<progress>` element (`RmlUi/Core/Elements/ElementProgress.h`, registered by `Factory.cpp` with no extra setup) is a real, proven option now — `title_scene.rml`'s loading bar uses it, with `SetValue()`/`SetMax()` called directly from C++. `main_frame.rcss`/`server_select.rcss`'s own gauges predate that and still use a plain div + `data-style-width`, not retrofitted — check `component-catalog.md`'s "doesn't exist yet" list before inventing a third pattern |
-| Scrollable list of rows | *(no native-tier wrapper — don't build one)* | — | `CUITextListBox<T>` (`UI/Social/SocialWindowCore.h`, `CUIControl` family) is the legacy answer and is closed to new consumers (`ui-target-architecture.md` Rule 11) — including from a window already on `mu::ui::window::CObject`, which doesn't exempt it. The real answer is RmlUi's `data-for` binding: `CBuffStrip`'s buff-icon strip and `CMyQuestInfoWindow`'s quest list (ported off `CUICurQuestListBox`/`CUIQuestContentsListBox`) are the two proven references |
+| Scrollable list of rows | *(no native-tier wrapper — don't build one)* | — | RmlUi's `data-for` binding in a `.scroll-pane` is the answer; see `component-catalog.md`'s "List / repeated rows". The native family that used to serve this, `CUITextListBox<T>`, is deleted |
 | MU Helper configuration windows | `CMuHelperConfigWindow`, `CMuHelperDetailWindow`, `CMuHelperSkillPicker` | `UI/MuHelper/` | Named for what each window is; none can be mistaken for `MUHelper::CMuHelper`, the bot-logic engine they configure |
 
 ## Resolved name collisions
@@ -170,9 +171,9 @@ extends existing convention rather than inventing a new one), leaving the sprite
 `CRadioButton`s in different namespaces need no awkward compound name at all once they're
 qualified — the namespace itself disambiguates:
 
-- **`::CButton`** (sprite toolkit, `CSprite`-derived, closed) vs. **`CUIButton`** (`CUIControl`
-  family) vs. **`mu::ui::window::CButton`** (the one to use for new work).
-- **`::CRadioButton`** (`SocialWindowCore.h`, no base) vs. **`mu::ui::window::CRadioButton`** (the one to
+- **`::CButton`** (sprite toolkit, `CSprite`-derived, closed) vs. **`mu::ui::window::CButton`**
+  (the one to use for new work). A third, `CUIButton`, is deleted.
+- **`::CRadioButton`** (sprite toolkit, no base) vs. **`mu::ui::window::CRadioButton`** (the one to
   use for new work).
 - **`MUHelper::CMuHelper`** (the actual bot-logic engine) vs. its configuration window, now
   `CMuHelperConfigWindow`: a descriptive name rather than a stripped one, so a bare `CMuHelper`

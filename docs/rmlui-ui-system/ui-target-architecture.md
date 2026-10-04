@@ -132,7 +132,7 @@ thing since it only ever drives RmlUi-owned elements.
 | Geometry / hit-testing                         | Hand-rolled per window (`CWin`'s own, `CUIControl`'s own, ~88 independent rect checks)                                                                                                                                                                | **New opt-in `WindowGeometry` (Section C)**                                                                                                                                                                                                                                                                                                                                                            | No existing implementation is reusable as-is; all are per-family, not per-concern                                                                                                                                                                                           |
 | Coordinate transforms                          | `UI::Scaling::UITransform`/`UILayoutPolicy`                                                                                                                                                                                                           | **Unchanged — already canonical**                                                                                                                                                                                                                                                                                                                                                                      | 100% dispatch coverage confirmed in `WindowManager.cpp`; the strongest existing primitive in the codebase                                                                                                                                                                   |
 | Buttons                                        | 4 implementations, split further into native/RmlUi contexts                                                                                                                                                                                           | **`base.rcss`'s `.btn` + a documented variant convention, going forward.** The evolved `mu::ui::window::CButton` (after replacing its `RenderImage()` rendering path and hand-rolled `CheckMouseIn(m_Pos.x, ...)` hit-tests with `CSprite`/`WindowGeometry`, and removing its macro-forked behavior) is a **transitional bridge for the still-native population only**, not a coequal permanent family | No hybrid window found actually needs a _primary_ native button — every documented case (`CMsgWin`, `CSysMenuWin`) is a redundant click-detector already being retired; the native family should shrink toward zero, not stand alongside RmlUi as a second permanent target |
-| Text input                                     | stock RmlUi `<input>` + shared `.text-field`                                                                                                                                                                                                          | **Superseded** — `CUITextInputBox` is transitional, not canonical                                                                                                                                                                                                                                                                                                                                      | RmlUi's own `<input>` owns buffer/caret/selection/IME (SDL IME wired centrally in `RmlUiRuntime`); `CMyShopInventory` is the migrated proving case. `CUITextInputBox` stays only for still-unmigrated consumers — see `tracked-deferrals.md`                                |
+| Text input                                     | stock RmlUi `<input>` + shared `.text-field`                                                                                                                                                                                                          | **Canonical**                                                                                                                                                                                                                                                                                                                                      | RmlUi's own `<input>` owns buffer/caret/selection/IME (SDL IME wired centrally in `RmlUiRuntime`); `CMyShopInventory` was the proving case; every other field followed, and `CUITextInputBox` is deleted                                |
 | Tooltips                                       | 4 mechanisms                                                                                                                                                                                                                                          | **New standalone `mu::ui::window::CTooltip` primitive** (native, transitional — namespaced with the rest of that tier, not `UI::Tooltip` as this document originally said) + **`base.rcss`'s `.tooltip` convention** (RmlUi, the long-term target)                                                                                                                                                     | Same transitional-vs-permanent split as buttons; extract from `mu::ui::window::CButton`'s existing anchor/position logic rather than inventing new math                                                                                                                     |
 | Window chrome                                  | None — every window reimplements                                                                                                                                                                                                                      | **Not unified natively.** For RmlUi-reachable windows, chrome is a theme/RCSS concern (already true). For native-only windows, not worth building — see Section F                                                                                                                                                                                                                                      | Building a generic native chrome abstraction for a shrinking population (windows not yet, and possibly never, ported) is negative-value work                                                                                                                                |
 | Layout/scaling                                 | `UILayoutPolicy`                                                                                                                                                                                                                                      | **Unchanged — already canonical**                                                                                                                                                                                                                                                                                                                                                                      | Same as above                                                                                                                                                                                                                                                               |
@@ -187,8 +187,8 @@ RmlUi owns (eventually all of this):     Native C++ owns permanently:
 ```
 
 A ported window keeps exactly one native companion pattern, not native widgets generally: a
-**Type-2 companion object** (a real interactive widget like `CUITextInputBox` that RmlUi can't
-yet host) or a **Type-1 redundant click-detector** (a `CButton` doing pure bounding-box
+**Type-2 companion object** (a real interactive widget RmlUi cannot host — a category with no
+instances left, its only example `CUITextInputBox` having turned out to be hostable after all) or a **Type-1 redundant click-detector** (a `CButton` doing pure bounding-box
 click-consumption behind RmlUi's real click handling, kept only because the legacy activation
 gate was unreliable — already documented and already being retired as windows get their own
 direct `RmlClickX()` handlers). Neither is "native UI persisting because RmlUi migration
@@ -251,20 +251,20 @@ window. So the path is:
         ↓
 5. Wire the slider's live value / tab switch via data-model bindings and
    RmlUi event listeners (the AddEventListener idiom already used by
-   CLoginMainWin) -- no CButton/CUIControl involved at all.
+   CLoginMainWin) -- no native widget involved at all.
         ↓
 6. Register with mu::ui::window::CManager via AddUIObj(), give it an
    INTERFACE_* key, add its LayoutMode::Dialog (or whatever fits) case
    to UILayoutPolicy::ForInterface().
         ↓
-7. Done. No CWin, no CUIControl, no legacy CButton, no CNewKeyInput poll.
+7. Done. No CWin, no legacy CButton, no CNewKeyInput poll.
 ```
 
 **If** the window had a live 3D-camera-viewport element (it doesn't, but for contrast — e.g. an equipment
 preview panel), only _that_ element stays native: a `CSprite`/3D-camera-rendered sub-view
 composited via the background-layer flush mechanism (Section E), while every other control on the
 same window still goes through the RmlUi path above. The developer never has to choose between
-"the CWin way" and "the CUIControl way" and "the mu::ui::window::CButton way" — those three only
+"the CWin way" and "the mu::ui::window::CButton way" — those only
 remain relevant for windows that predate this model and haven't been touched yet, and the rule
 for touching them is in Section H.
 
@@ -292,8 +292,7 @@ useful detail; full history in git log):
    (see `component-catalog.md`'s "Tooltip" section for the current, non-stale state and what's
    deliberately still out of scope).
 5. `WindowGeometry` (Section C) built and adopted — 73 `mu::ui::window::CheckMouseIn()` call sites
-   across 57 files switched to it. Deliberately untouched: the legacy `CUIControl`/`CWin` family's
-   differently-shaped `::CheckMouseIn(x, y, w, h, CoordType)`, and inline per-tab/per-row/per-icon
+   across 57 files switched to it. Deliberately untouched: the legacy `CWin` family's own checks, and inline per-tab/per-row/per-icon
    sub-rect checks inside a window body — `WindowGeometry` only covers a widget's own top-level rect.
 6. `mu::ui::window::CButton`/`CRadioButton`/`CCheckBox`'s `RenderImage()` path retired in favor of
    `CSprite`, hand-rolled `CheckMouseIn()` calls retired in favor of `WindowGeometry` — one
@@ -309,24 +308,10 @@ useful detail; full history in git log):
 
 7. Implement new RmlUi-representable UI screens on the RmlUi path (Section G) by default.
    Migrate existing native-only screens to RmlUi opportunistically when they are being substantially modified for another reason, rather than performing a blanket rewrite. Every such migration must follow the per-UI migration requirements in [`architecture-principles.md`](rmlui-ui-system/architecture-principles.md), especially §§2–6 and §27: first establish the existing UI's layout intent, distinguish that intent from legacy implementation artifacts, identify its component/layout hierarchy and responsive behavior, then express the result declaratively through RML/RCSS. Do not mechanically translate legacy coordinates or rendering calls into RmlUi.
-8. Deprecate and eventually remove `::CButton : CSprite`, `CUIButton : CUIControl`, and the
-   global `::CRadioButton` once grep shows zero remaining callers. The evolved
-   `mu::ui::window::CButton` family itself is next once its own remaining callers (the
-   not-yet-ported window population) reach zero — it is not exempt from this same trajectory.
-8b. **Newly found, 2026-09-13: port `CUITextListBox<T>` consumers to RmlUi `data-for`.** Unlike
-    `CUIButton`, no rule anywhere named this class before now — and it shows: `CGuildInfoWindow`
-    (`CUINewGuildMemberListBox`), `CMixInventory` (`CUISocketListBox`/`CUIUnmixgemList`), and
-    `CInGameShop` (`CUIInGameShopListBox`/`CUIBuyingListBox`/`CUIPackCheckBuyingListBox`) are all
-    already on `mu::ui::window::CObject` yet still reach into this legacy family for their list
-    content, because nothing told them not to. `CMyQuestInfoWindow`'s `data-for` port off
-    `CUICurQuestListBox`/`CUIQuestContentsListBox` is the proven reference (same pattern
-    `CBuffStrip` established for a simpler array). ~18 `CUITextListBox<T>` subclasses remain
-    (`UI/Social/SocialWindowCore.h`) spanning guild/chat/letter/socket/in-game-shop/move-command lists —
-    see `tracked-deferrals.md`'s entry for the full list. Also found while investigating this:
-    `CUIPopup`/`CUIButton`'s remaining live path (`WSclient.cpp`'s generic server-error popups)
-    duplicates `CCommonMessageBox`'s job — moving those call sites there retires `CUIPopup`, and
-    with it `CUIButton`'s only other confirmed-live consumer besides the suspected-dead
-    `CUIGuildInfo`/`CUIGuildMaster` (see `building-new-ui.md`).
+8. `::CButton : CSprite`, `CUIButton : CUIControl`, `::CRadioButton` and the whole
+   `CUITextListBox<T>`/`CUITextInputBox` family are **removed** (2026-10-04). The evolved
+   `mu::ui::window::CButton` family is next on the same trajectory once its own remaining callers
+   -- the not-yet-ported window population -- reach zero; it is not exempt.
 
 **Should never be done:**
 
@@ -405,18 +390,14 @@ useful detail; full history in git log):
     and developers can discover the correct component without historical
     knowledge of the codebase.
 
-    **Concrete instance, 2026-09-13**: `SocialWindowCore.h`'s `CUIControl` family is not a permanent
-    third toolkit — it's a fully enumerable, closeable checklist. It reaches zero consumers and
-    can be deleted outright (the same treatment `CWin`/`::CButton`/`CGaugeBar`/`CSlider` already
-    got) once: (a) `CUITextInputBox`'s callers move to RmlUi's own native `<input>`/`<textarea>`
-    (a separate, unscheduled design effort — IME composition through RmlUi's DOM is the open
-    question, per `building-new-ui.md`); (b) every `CUITextListBox<T>` subclass ports to `data-for`
-    (item 8b above); (c) `CUIButton`'s remaining consumers (`CUIPopup`, and the suspected-dead
-    `CUIGuildInfo`/`CUIGuildMaster`) are retired or deleted; (d) `CUIWindowMgr`/`CUIBaseWindow`
-    (friend/mail/chat-room) either gets a real RmlUi port or is explicitly re-affirmed as staying
-    native indefinitely. None of these are blocked on anything else — they're independent, and
-    (a) has no target date by design. "Is `CUIControl` necessary" should be answered against this
-    list, not treated as an open architectural question.
+    **Concrete instance, closed 2026-10-04**: the `CUIControl` family was never a permanent third
+    toolkit but a closeable checklist, and it closed. Every widget that made it one -- `CUIButton`,
+    `CUITextListBox<T>` and its ~20 subclasses, `CUITextInputBox`, `CUIChatInputBox`, the slide-help
+    pair, `CUIPopup`/`CUIGuildInfo`/`CUIGuildMaster` -- is deleted, and the friend/mail/chat windows
+    that kept the file alive are RmlUi documents. What survives is `CUIControl` itself and its
+    message queue, now `UI/Social/SocialWindowCore.h`, beside the only two classes that derive from
+    it (`CUIBaseWindow`, `CUIPhotoViewer`). Taking those off that base is the one step left, and is
+    its own work -- see `tracked-deferrals.md`.
 
 ## I. Architectural Rules (for repo dev instructions)
 
@@ -428,8 +409,8 @@ useful detail; full history in git log):
    `CManager`'s.
 3. **For the still-native population, one transitional button/checkbox/radio family:
    `mu::ui::window::CButton`/`CCheckBox`/`CRadioButton`.** Do not add a new native button
-   implementation, and do not reach for `::CButton : CSprite` or `CUIButton : CUIControl` in new
-   code. Treat this family itself as something to migrate away from as its windows port to RmlUi
+   implementation, and do not revive `::CButton : CSprite` or `CUIButton : CUIControl`,
+   both since deleted. Treat this family itself as something to migrate away from as its windows port to RmlUi
    (Rule 1), not as a permanent second component system.
 4. **For anything with an RmlUi presentation, controls are RmlUi + `base.rcss`'s shared classes
    (`.btn`, `.checkbox-box`, `.tooltip`).** Do not hand-roll a new native widget for a window that
@@ -456,11 +437,9 @@ useful detail; full history in git log):
 10. **Domain logic (item drag-drop, inventory-panel mutual exclusion, skill-tooltip content
     rules) stays out of the UI kit's own types.** A UI component may call into it; it must never
     be reimplemented inside a generic UI abstraction.
-11. **For scrollable list/row content, use RmlUi's `data-for` binding, not `CUITextListBox<T>`.**
-    `CBuffStrip`'s buff-icon strip and `CMyQuestInfoWindow`'s quest list are the proven references.
-    Do not derive a new `CUITextListBox<T>` subclass and do not add a new consumer to an existing
-    one, even from a window already on `mu::ui::window::CObject` — that base class alone doesn't
-    make a window RmlUi-native, and reaching into this family for list content is exactly how
-    `CGuildInfoWindow`/`CMixInventory`/`CInGameShop` ended up depending on it despite being on the
-    modern base class otherwise. See `tracked-deferrals.md`'s entry for the full remaining
-    consumer list.
+11. **For scrollable list/row content, use RmlUi's `data-for` binding** inside `base.rcss`'s
+    shared `.scroll-pane`. `CBuffStrip`'s buff-icon strip and `CMyQuestInfoWindow`'s quest list are
+    the proven references. The native list family this rule was first written against is gone, so
+    there is nothing left to reach for by accident; it stays a rule because windows already on
+    `mu::ui::window::CObject` had still reached into that family for list content — that base class
+    alone does not make a window RmlUi-native.

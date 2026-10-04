@@ -221,12 +221,12 @@ ways, and only the first is self-announcing:
   a porting *method*. The two items left unscanned here were both closed by that pass: presentation
   classes standing in for form-control semantics turned up nothing beyond the whisper field already
   fixed in `b7584681`, and no C++ branch anywhere gates on a theme name (§30 is clean).
-- **New ports mirror the native list's scrollbar geometry into their models**
-  (`GuardWindow`, `MixInventory`, `MessageBoxView`: `thumb_top`, `scroll_top`, `thumb_dragged`, read
-  from `CUITextListBox::GetScrollBarGeometry()`). Not hand-rolled scroll maths -- the native list is
-  still the one tracked below -- but it recreates the "RmlUi draws, native decides" split that
-  `CMoveCommandWindow` retired by adopting `.scroll-pane`, so it widens that deferral instead of
-  narrowing it.
+- **A port can mirror a native scrollbar's geometry into its model** rather than letting RCSS own
+  it. The native list this was first written about (`CUITextListBox::GetScrollBarGeometry()`) is
+  deleted, and with it most instances; `CGensRanking` still does it, reading `thumb_top` off its
+  own `CScrollBar`. Not hand-rolled scroll maths, but it is the "RmlUi draws, native decides" split
+  that `CMoveCommandWindow` retired by adopting `.scroll-pane` -- the remaining case should follow
+  it when that window is next touched.
 - **`COptionWindow`'s volume slider is a gold-thumb slider**; native drew the same fill gauge
   (`newui_option_volume01/02`) the MU Helper's detail window now draws in both themes. The gauge
   pieces are in `mu_helper_common.rcss` if the options window is revisited.
@@ -419,15 +419,10 @@ So the audit's population was a list of *candidates*, as it said, and roughly a 
 geometry that genuinely belongs in C++. The lesson for the next audit of this kind is to carry
 that expectation from the start rather than discover it per window.
 
-`FriendWindowView::PlaceField()` skips the model and writes `left`/`top`/`width`/`height`/
-`font-size`/`color` straight onto the element, sourced from a native `CUITextInputBox`'s
-`GetPosition_x()`/`GetTextColor()`. **Re-examined: this is not the same defect as the rest.** The
-friends family is still a native `CUIBaseWindow` subsystem, and `FriendWindowRmlBuilder`
-transcribes it -- every box, button and field's geometry is read off a live control each frame, so
-the native side is authoritative for layout *and* hit-testing and the flow runs in §2's accepted
-direction. Porting that family off `CUIBaseWindow` is the prerequisite; moving its literals cannot
-resolve it, and neither can routing them through the model, since they would still arrive as
-inline properties.
+`FriendWindowView::PlaceField()` used to be the odd one out here -- it wrote geometry straight
+onto elements, read off a live native control each frame. **Resolved 2026-10-04**: the friends
+family is RmlUi documents now, the transcription layer that did this is deleted, and those four
+documents bind no geometry at all, so none of them is allowlisted.
 
 ### The rest, in remediation order
 

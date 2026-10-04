@@ -73,8 +73,8 @@ not copy-paste a fifth version — check its current window list before assuming
 Real shared contract across both themes already — `.btn`/`.btn-ok`/`.btn-cancel`/`.btn.disabled`,
 same class names, same state model, each theme's own `base.rcss`. `.btn-ok` gets each theme's
 "primary/hero" treatment (see `modern-theme-visual-direction.md`'s Accent colors section); plain
-`.btn` stays neutral. This is the RCSS-layer contract only — the C++ side has three unrelated
-button classes of its own (`CButton`, `CUIButton`, `mu::ui::window::CButton`); see
+`.btn` stays neutral. This is the RCSS-layer contract only — the C++ side has two unrelated
+button classes of its own (`CButton`, `mu::ui::window::CButton`; a third, `CUIButton`, is deleted); see
 `docs/rmlui-ui-system/building-new-ui.md` for which one to use and why they aren't duplicates of
 each other.
 
@@ -167,11 +167,6 @@ included, so Esc and Enter never reach the window you're typing in. A window tha
 on Esc from inside its field calls `UI::RmlBridge::ClaimKeyboardWhileTyping(*this, doc)` from
 `Update()` (`RmlKeyboardFocus.h`); `CChatInputBox` hand-rolls the same claim and could adopt it.
 Blur the focused field on every hide path as well, or hotkeys stay suspended after the window closes.
-
-`CUITextInputBox` remains **transitional infrastructure for unmigrated consumers only**
-(`CLoginWin`, `CCharMakeWin`, `CGenericConfirmDialog::Mode::Text`, chat). It is not a permanent
-RmlUi companion primitive and is not globally retired — see `tracked-deferrals.md` for what each
-remaining consumer still needs.
 
 ## Scrolling pane
 
@@ -345,17 +340,14 @@ opening a dialog afresh should still clear it.
 ## List / repeated rows
 
 RmlUi's `data-for` binding against a `std::vector<T>` model field — the proven pattern for any
-"N rows of the same shape" content, and the sanctioned replacement for `CUITextListBox<T>`
-(`UI/Social/SocialWindowCore.h`, `CUIControl` family): `ui-target-architecture.md` Rule 11 says not to
-reach for that legacy class in new code, this is what to reach for instead. Two proven references:
+"N rows of the same shape" content, and what replaced the native list family
+the client used to carry (`CUITextListBox<T>`, deleted 2026-10-04 once its last subclass went).
+Two proven references:
 `CBuffStrip`'s buff-icon strip (a simple array) and `CMyQuestInfoWindow`'s quest list
 (`my_quest_info.rml`/`.rcss`, ported off `CUICurQuestListBox`/`CUIQuestContentsListBox` — also
 proves `server_select.rml`'s click-a-row-to-select-it pattern on top of the same binding). No
 generic "ListBox" C++ wrapper exists (and none is needed) — each window binds its own row-shaped
-struct directly, the same way `RmlModelBinder<T>` is used everywhere else. See
-`tracked-deferrals.md`'s "Tracked deferral: `CUIControl` family... full retirement" entry for the
-~18 `CUITextListBox<T>` subclasses still waiting on this port, one per window, same pattern each
-time.
+struct directly, the same way `RmlModelBinder<T>` is used everywhere else.
 
 ## Dialog
 
