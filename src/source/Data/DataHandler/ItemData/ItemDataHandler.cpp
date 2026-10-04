@@ -14,6 +14,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 
+#include <algorithm>
 #include <chrono>
 #include <memory>
 
@@ -257,11 +258,24 @@ int CItemDataHandler::KeepCurrentEnglishNames(std::vector<ItemDefinition>& items
 
 void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items)
 {
+    const auto hasBmd = [](std::string_view locale)
+    {
+        const auto languages = GetItemBmdLanguages();
+        return std::any_of(languages.begin(), languages.end(),
+                           [&](const ItemBmdLanguage& language) { return language.locale == locale; });
+    };
     for (ItemDefinition& item : items)
     {
         if (const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number))
         {
             CopyFieldsNotInItemAttribute(*current, item);
+            for (const auto& [locale, text] : current->names.GetTranslations())
+            {
+                if (!hasBmd(locale))
+                {
+                    item.names.Set(locale, text);
+                }
+            }
         }
     }
 }

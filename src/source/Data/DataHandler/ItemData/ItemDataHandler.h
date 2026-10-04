@@ -78,7 +78,8 @@ private:
     // Returns how many names were kept.
     static int KeepCurrentEnglishNames(std::vector<Data::Items::ItemDefinition>& items);
     // Gives imported items the current values of the fields item.bmd does
-    // not have (tags, wing tier, rule flags).
+    // not have (tags, wing tier, rule flags) and their current names in the
+    // languages that have no item.bmd (e.g. German).
     static void KeepFieldsNotInBmd(std::vector<Data::Items::ItemDefinition>& items);
 #endif
 
