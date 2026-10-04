@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <optional>
 
 class OBJECT;
@@ -16,10 +17,29 @@ class OBJECT;
 // genuine per-frame behaviour carry a handler function.
 namespace Render::Effects
 {
+// A vector of creation values: the components in `components` (bit 0 x, bit 1
+// y, bit 2 z) get `values`. An offset multiplies the components in
+// `timesFrameFactor` by FPS_ANIMATION_FACTOR, as the old creation code did.
+struct CreateVector
+{
+    std::array<float, 3> values{};
+    std::uint8_t components = 0;
+    std::uint8_t timesFrameFactor = 0;
+};
+
+// The arguments of the CreateEffect call that creation values can copy.
+struct CreateCall
+{
+    const float* light = nullptr;
+    float scale = 0.f;
+};
+
 // Creation parameters applied on top of the common initialisation that
-// CreateEffect performs for every effect. Every field is optional: an unset
-// field keeps what the common initialisation chose, or, for lifeTime and
-// gravity, which it does not set, the value the slot's previous effect left
+// CreateEffect performs for every effect: first the values, then the offsets,
+// then the copies; an offset of a field a copy writes adds to the copy. Every
+// field is optional: an unset field keeps what the common initialisation
+// chose, or, for the fields it does not set (lifeTime, gravity, timer,
+// distance, startPosition, ...), the value the slot's previous effect left
 // (D34), so a catalogue entry only states what differs for that effect.
 // BuildRegistry converts them once from the values of the catalogue
 // (Data::Effects::EffectCreateParams), so creating an effect only copies.
@@ -43,9 +63,47 @@ struct CreateParams
     // When set, overrides o->Light (the colour the effect renders with).
     std::optional<std::array<float, 3>> light;
 
-    // Many legacy cases finish with `VectorCopy(o->Light, o->Direction)`,
-    // stashing the colour so MoveEffect can fade it back in. Opt in here.
+    // The groups below that a row sets. ApplyCreateParams tests only those,
+    // so the rows that set only the values above cost what they did before
+    // these fields came.
+    enum Group : std::uint8_t
+    {
+        Flags = 1 << 0,
+        Numbers = 1 << 1,
+        Vectors = 1 << 2,
+        Offsets = 1 << 3,
+        Copies = 1 << 4,
+    };
+    std::uint8_t groups = 0;
+
+    // Flags
+    std::optional<bool> lightEnable;
+    std::optional<bool> alphaEnable;
+    std::optional<std::uint8_t> kind;
+    std::optional<std::uint16_t> skill;
+
+    // Numbers
+    std::optional<float> pkKey;
+    std::optional<float> timer;
+    std::optional<float> distance;
+    std::optional<float> collisionRange;
+
+    // Vectors
+    CreateVector position;
+    CreateVector angle;
+    CreateVector direction;
+
+    // Offsets
+    CreateVector positionOffset;
+    CreateVector angleOffset;
+    CreateVector startPositionOffset;
+
+    // Copies. Many legacy cases finish with `VectorCopy(o->Light,
+    // o->Direction)`, stashing the colour so MoveEffect can fade it back in.
     bool copyLightToDirection = false;
+    bool copyPositionToStartPosition = false;
+    bool copyCallLightToHeadTargetAngle = false;
+    bool copyCallScaleToScale = false;
 };
 
 // Spawns sub-effects / joints or runs other one-shot setup that can't be
@@ -77,5 +135,5 @@ struct EffectDescriptor
 };
 
 // Applies the optional parameters to an already common-initialised effect.
-void ApplyCreateParams(OBJECT* o, const CreateParams& params);
+void ApplyCreateParams(OBJECT* o, const CreateParams& params, const CreateCall& call);
 } // namespace Render::Effects

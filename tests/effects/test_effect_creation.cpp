@@ -71,6 +71,40 @@ const std::array<int, 8> Fx13Types = {MODEL_KENTAUROS_ARROW,
                                       MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2,
                                       MODEL_EFFECT_SD_AURA};
 
+// The 28 types whose creation cases FX1.4 moved into the catalogue with the
+// fields it added (vectors, offsets, copies and more values), and
+// MODEL_PHOENIX_SHOT, whose case set nothing, last.
+const std::array<int, 29> Fx14Types = {MODEL_DRAGON,
+                                       MODEL_SHIELD_CRASH2,
+                                       MODEL_TREE_ATTACK,
+                                       MODEL__SPEAR,
+                                       MODEL_SUMMONER_WRISTRING_EFFECT,
+                                       MODEL_SUMMONER_CASTING_EFFECT4,
+                                       MODEL_SUMMONER_SUMMON_NEIL,
+                                       MODEL_ALICE_BUFFSKILL_EFFECT2,
+                                       BITMAP_JOINT_THUNDER,
+                                       MODEL_STAFF_OF_DESTRUCTION,
+                                       MODEL_WAVE,
+                                       MODEL_TAIL,
+                                       MODEL_BOSS_ATTACK,
+                                       MODEL_DARK_ELF_SKILL,
+                                       MODEL_WATER_WAVE,
+                                       BITMAP_FIRECRACKERRISE,
+                                       BITMAP_FIRECRACKER0001,
+                                       MODEL_CLOUD,
+                                       MODEL_TOWER_GATE_PLANE,
+                                       MODEL_KNIGHT_PLANCRACK_B,
+                                       MODEL_PROJECTILE,
+                                       BITMAP_SHINY + 4,
+                                       MODEL_WINDFOCE_MIRROR,
+                                       BITMAP_SWORD_EFFECT_MONO,
+                                       MODEL_TARGETMON_EFFECT,
+                                       BITMAP_EVENT_CLOUD,
+                                       MODEL_STATUE_CRUSH_EFFECT_PIECE04,
+                                       MODEL_DOOR_CRUSH_EFFECT_PIECE10,
+                                       MODEL_PHOENIX_SHOT};
+const std::span<const int> Fx14RowTypes(Fx14Types.data(), Fx14Types.size() - 1);
+
 // Sub types the callers pass (0 to 3) and one no case handles.
 constexpr std::initializer_list<int> RecordedSubTypes = {0, 1, 2, 3, 99};
 
@@ -82,14 +116,15 @@ struct Recorded
 
 using CallList = std::vector<EffectCall> (*)(int type, std::initializer_list<int> subTypes);
 
-std::vector<Recorded> RecordAll(std::span<const int> types, CallList calls = CallsFor)
+std::vector<Recorded> RecordAll(std::span<const int> types, CallList calls = CallsFor,
+                                std::span<const Conditions> allConditions = AllConditions())
 {
     std::vector<Recorded> all;
     for (const int type : types)
     {
         for (const EffectCall& call : calls(type, RecordedSubTypes))
         {
-            for (const Conditions& conditions : AllConditions())
+            for (const Conditions& conditions : allConditions)
             {
                 all.push_back({Describe(call, conditions), RecordCall(call, conditions)});
             }
@@ -404,4 +439,48 @@ TEST_CASE("The 8 types of FX1.3 give the records of their old cases [effects][re
                  "# The digests of the records of the 8 types FX1.3 moved into the catalogue, one\n"
                  "# line per call (tests/effects/test_effect_creation.cpp). Taken with their old\n"
                  "# cases; written with MU_EFFECT_RECORDER_WRITE=1.\n");
+}
+
+namespace
+{
+constexpr const char* Fx14Header = "# The digests of the records of the 29 types of FX1.4, one line per call\n"
+                                   "# (tests/effects/test_effect_creation.cpp), with a second position, angle and\n"
+                                   "# light. Taken with their old cases; written with MU_EFFECT_RECORDER_WRITE=1.\n";
+} // namespace
+
+TEST_CASE("The 29 types of FX1.4 give the records of their old cases [effects][recorder]")
+{
+    BuildShippedRegistry();
+    CheckDigests(RecordAll(Fx14Types, SecondGeometryCallsFor), "FX1.4", Fx14Header);
+}
+
+// TEMPORARY: the next commit deletes the cases and this test. With
+// MU_EFFECT_RECORDER_WRITE=1 it writes the digests of FX1.4 from the cases.
+TEST_CASE("TEMP: the rows of FX1.4 give the records of their cases [effects][recorder]")
+{
+    // At 60 frames per second the frame factor is 25/60, where a product with
+    // it is rounded, unlike at 1 and 0.5.
+    const Conditions frameRate[] = {{25.f / 60.f, SlotPattern::A}, {25.f / 60.f, SlotPattern::B}};
+
+    BuildShippedRegistry(Fx14RowTypes);
+    const std::vector<Recorded> cases = RecordAll(Fx14Types, SecondGeometryCallsFor);
+    const std::vector<Recorded> casesAtFrameRate = RecordAll(Fx14Types, SecondGeometryCallsFor, frameRate);
+    if (std::getenv("MU_EFFECT_RECORDER_WRITE") != nullptr)
+    {
+        CheckDigests(cases, "FX1.4", Fx14Header);
+    }
+
+    BuildShippedRegistry();
+    const std::vector<Recorded> rows = RecordAll(Fx14Types, SecondGeometryCallsFor);
+    const std::vector<Recorded> rowsAtFrameRate = RecordAll(Fx14Types, SecondGeometryCallsFor, frameRate);
+
+    std::ostringstream log;
+    const int differing = CompareAll(cases, rows, log);
+    const int differingAtFrameRate = CompareAll(casesAtFrameRate, rowsAtFrameRate, log);
+    INFO(log.str());
+    CHECK(differing == 0);
+    CHECK(differingAtFrameRate == 0);
+    MESSAGE("FX1.4 cases against the rows: " << cases.size() << " calls, " << differing
+                                             << " differ; at 25/60: " << casesAtFrameRate.size() << " calls, "
+                                             << differingAtFrameRate << " differ");
 }

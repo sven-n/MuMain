@@ -39,6 +39,11 @@ const OrderedJson* ItemModelValueReader::Find(const char* key)
     return field != m_json.end() ? &*field : nullptr;
 }
 
+const OrderedJson* ItemModelValueReader::ReadJson(const char* key)
+{
+    return Find(key);
+}
+
 bool ItemModelValueReader::Has(const char* key) const
 {
     return m_json.contains(key);

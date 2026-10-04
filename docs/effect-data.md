@@ -91,22 +91,61 @@ with when the game creates it. Particles, lightning and sprites have none
 | `blendMeshLight` | How bright the `blendMesh` meshes are. |
 | `alpha` | How opaque the effect is, from 0 (invisible) to 1. |
 | `light` | The color it is drawn with, `[red, green, blue]`; replaces the color the creating code passes. |
-| `copyLightToDirection` | `true`: the move code of the effect gets the color too (some effects fade it back in from there). |
+| `lightEnable`, `alphaEnable` | Flags (`true`/`false`) the move and draw code of the effect use; what they do depends on it. |
+| `kind`, `skill`, `pkKey`, `timer`, `distance`, `collisionRange` | Values the move code of the effect uses; what they do depends on it. `kind` (0 to 255) and `skill` (0 to 65535) replace the skill values the creating code passes, `pkKey` its PK key. |
+| `position` | Where it starts; replaces the position the creating code passes. |
+| `angle` | How it is turned, in degrees; replaces the angle the creating code passes. |
+| `direction` | A vector its move code uses, often the way it moves. |
+| `offset` | Values added after the ones above: to `position`, `angle` or `startPosition`. |
+| `copy` | Fields that get the value of another field, after the offsets (see below). |
 
+```json
+"create": {
+  "lifeTime": 1000,
+  "angle": {"y": 0},
+  "direction": [0, -35, 0],
+  "offset": {
+    "position": {"z": 3400}
+  },
+  "copy": {
+    "startPosition": "position"
+  }
+}
+```
+
+- `position`, `angle`, `direction` and the offsets are vectors: a list of
+  three numbers (x, y, z), or an object with only the components that
+  change (`{"y": 0}`); the others keep their value.
+- An offset component can be multiplied by the frame factor, as some of the
+  original creation code did: `{"value": 280, "timesFrameFactor": true}`.
+  The frame factor is 1 at 25 frames per second and smaller above, so such
+  effects start at other places at higher frame rates (sven-n/MuMain#681).
+- `copy` lists `"field": "source"`. `"direction": "light"`: the move code
+  gets the color too (some effects fade it back in from there).
+  `"startPosition": "position"`: the start position is the position after
+  the offsets. `"headTargetAngle": "callLight"` and `"scale": "callScale"`:
+  the light and the scale the creating code passes, the scale also when it
+  passes none (0). A field gets a value or a copy, not both; an offset of
+  `startPosition` adds to the copy.
 - A field that is left out keeps what the game sets for every new effect,
-  or what the creating code passes. `lifeTime` and `gravity` are not set for
-  every new effect: left out, they keep the value of the effect that used
-  the slot before, as in the original client.
+  or what the creating code passes. `lifeTime`, `gravity`, `timer`,
+  `distance`, `startPosition` and `headTargetAngle` are not set for every
+  new effect: left out, they keep the value of the effect that used the
+  slot before, as in the original client.
 - An effect with `create` starts with these values **instead of its
   creation code**. Only effects whose creation code set nothing but these
   values have one; adding `create` to another effect drops what its code
   did (for example the effects it spawns) and changes how it looks.
 - A value that is not a number, or too large for the game (which keeps
   the values as float), is an error; so are mesh fields that are not whole
-  numbers from -2 to 32767, an `alpha` outside 0 to 1, a
-  `copyLightToDirection` that is not `true`/`false` and a `light` that is
-  not three numbers. An unknown field is a warning, and so is a `create`
-  that sets no value (it still replaces the creation code).
+  numbers from -2 to 32767, `kind` and `skill` outside their ranges, an
+  `alpha` outside 0 to 1, flags that are not `true`/`false`, vectors that
+  are not three numbers or an object of `x`, `y` and `z`, the frame factor
+  outside an offset, a copy from another source than the one listed, and a
+  field with both a value and a copy. An unknown field is a warning, and so
+  is a `create` (or `offset`, `copy`, vector) that sets no value; a
+  `create` without values still replaces the creation code.
+- `kind` in `create` is a value of the effect, not the `kind` of the file.
 
 ## How the names were chosen
 

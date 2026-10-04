@@ -30,6 +30,9 @@ public:
     bool ReadName(const char* key, std::string& value);
 
     bool IsNumber(const char* key) const;
+    // Marks the key as read and returns its value, or null when the object
+    // does not have it; for values the Read functions above do not cover.
+    const Json::OrderedJson* ReadJson(const char* key);
 
     bool Has(const char* key) const;
     void Error(const char* key, const std::string& message);

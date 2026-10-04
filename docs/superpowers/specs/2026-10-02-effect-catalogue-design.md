@@ -40,7 +40,7 @@ decision can move to the roadmap without being renumbered.
 | D31 | How names are chosen | From the enum name in camelCase without `MODEL_`/`BITMAP_`, with collisions and marker names fixed by hand, misspellings corrected (`explotion` → `explosion`), and the types without an enum name named after the file loaded into their slot (`MODEL_SKILL_FURY_STRIKE+1` loads `EarthQuake01` → `earthQuake1`). The full list is proposed in the FX1.1 PR and reviewed there. Types that are never created get entries too; the dead ones are listed in an upstream issue. |
 | D32 | Files and house rules | One file per kind: `EffectTypes.json`, `ParticleTypes.json`, `JointTypes.json`, `SpriteTypes.json`. The rules of the item and model files: `formatVersion`, sorted by name, fixed field order, defaults left out, a writer and a test that the shipped files are in its format, names of letters and digits, errors stop the start, warnings go to the log. Documented in `docs/effect-data.md`. |
 | D33 | Loading and lookup | The catalogue is loaded once on the loading screen, next to the item model data, before the first effect is created. The registry table is built from it: the same array indexed by type, not changed after loading. A lookup stays a bounds check and one array read. No names, strings or allocations after loading. |
-| D34 | Creation values | A registry row replaces the whole legacy case, so a type moves only when every statement of its case can be written as data. `CreateParams` gets exactly the fields the moved cases need. Values are applied in one fixed order (values, then offsets, then copies). An unset field keeps what the common setup chose, or the slot's old value where the common setup sets nothing. Values the old code multiplies by `FPS_ANIMATION_FACTOR` keep that as a flag. |
+| D34 | Creation values | A registry row replaces the whole legacy case, so a type moves only when every statement of its case can be written as data. `CreateParams` gets exactly the fields the moved cases need. Values are applied in one fixed order (values, then offsets, then copies); an offset of a field a copy writes adds to the copy, and a copy reads its source as it is then, or the call's argument (`callLight`, `callScale`). An unset field keeps what the common setup chose, or the slot's old value where the common setup sets nothing. Values the old code multiplies by `FPS_ANIMATION_FACTOR` keep that as a flag. |
 | D35 | Variants by SubType | A row can hold `variants` keyed by SubType that override its values (44 cases, 47 types choose only values by SubType). |
 | D36 | Random and logic creation | Cases with `rand()` and the cases with logic stay code in FX1 (167 of 244 cases). Data with random values would have to draw `rand()` in exactly the same order and number, and values like "a random yaw, then the launch vector turned by it" are small programs. They become data in FX2, as building blocks with parameters where adjusting them is meaningful (D43). |
 | D37 | Particles and joints | Names only in FX1; their creation values wait for FX2. They have no registry, their structs differ from effects, and their creation is mostly random formulas. |
@@ -202,9 +202,11 @@ Kalima maps load the rock `Object25\Object10.bmd`).
   kind is named exactly once.
 - An unset `create` field keeps the common setup, or the slot's old value
   where the common setup sets nothing (D34). There are no new defaults.
-- A vector field can set single components (`"angle": { "y": 0 }`); a value
+- A vector field can set single components (`"angle": {"y": 0}`); an offset
   the old code multiplies by the frame factor is written
-  `{ "value": -100, "timesFrameFactor": true }`.
+  `{"value": -100, "timesFrameFactor": true}`. Offsets and copies are
+  groups: `"offset": {"position": {"z": 3400}}`,
+  `"copy": {"startPosition": "position"}` (since FX1.4).
 - Unknown fields are warnings. Unknown symbols, duplicate names and a newer
   `formatVersion` are errors that stop the start.
 

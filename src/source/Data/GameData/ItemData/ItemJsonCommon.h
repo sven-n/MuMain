@@ -71,4 +71,8 @@ bool IsName(std::string_view text);
 // Puts every list of `key` on one line; text in quotes (e.g. a folder name
 // with spaces) is kept as it is.
 std::string PutListsOnOneLine(const std::string& text, std::string_view key);
+
+// Puts every object of `key`, with the objects in it, on one line:
+// "angle": {"y": 0}. A space stays after each comma and colon.
+std::string PutObjectsOnOneLine(const std::string& text, std::string_view key);
 } // namespace Data::Items::Json
