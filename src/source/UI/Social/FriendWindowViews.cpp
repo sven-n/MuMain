@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "UI/Social/FriendWindowView.h"
+#include "UI/Social/FriendWindowViews.h"
 
 #include "UI/Social/SocialWindowManager.h"
 

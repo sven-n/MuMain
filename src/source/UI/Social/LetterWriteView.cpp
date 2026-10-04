@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "UI/Social/LetterWrite.h"
+#include "UI/Social/LetterWriteView.h"
 
 #include "UI/Social/SocialWindowManager.h"
 #include "UI/Core/WindowSystem.h"

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "UI/Social/LetterReadWindow.h"
-#include "UI/Social/LetterRead.h"
+#include "UI/Social/LetterReadView.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowSystem.h"
 #include "Render/Text/TextWrap.h"

@@ -5,7 +5,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "UI/Widgets/Window/ChatInputBox.h"
+#include "UI/HUD/ChatInputBox.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
 #pragma warning(disable : 4786)

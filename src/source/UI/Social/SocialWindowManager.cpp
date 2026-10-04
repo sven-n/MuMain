@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/Social/SocialWindowManager.h"
-#include "UI/Social/FriendWindowView.h"
+#include "UI/Social/FriendWindowViews.h"
 #include "Core/Time/FrameTimerScheduler.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"

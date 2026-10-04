@@ -1,6 +1,6 @@
 ﻿#include "stdafx.h"
 #include "UI/Chat/ChatInput.h"
-#include "UI/Widgets/Window/ChatInputBox.h"
+#include "UI/HUD/ChatInputBox.h"
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"

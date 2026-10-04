@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "UI/Social/ChatRoomWindow.h"
-#include "UI/Social/ChatRoom.h"
+#include "UI/Social/ChatRoomView.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"

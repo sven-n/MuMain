@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#include "UI/Widgets/Window/SlideWindow.h"
+#include "UI/HUD/SlideWindow.h"
 #include "UI/Core/WindowManager.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
