@@ -26,8 +26,8 @@ using EffectTestData::BuildShippedRegistry;
 
 namespace
 {
-// The 32 types whose creation values FX1.2 moved into the catalogue (it
-// compared them with their cases then).
+// The 32 types whose creation values FX1.2 moved from C++ rows of the
+// registry into the catalogue (it compared them with those rows then).
 const std::array<int, 32> Fx12Types = {MODEL_BALGAS_SKILL,
                                        BATTLE_CASTLE_WALL1,
                                        BATTLE_CASTLE_WALL2,
@@ -461,16 +461,20 @@ float RecordedFloat(const Record& record, std::string_view path)
 
 // FX1.4 moved the creation of these types from code into the catalogue; the
 // commit before the one that deleted their cases compared both for every sub
-// type, owner, argument set, both positions, angles and lights, slot pattern
-// and the frame factors 1, 0.5 and 25/60. These are values the cases set
-// that the new fields hold (the call's position is 13120.25, 12480.5,
-// 140.75, its angle 11, 22, 33 and its light 0.9, 0.8, 0.7).
+// type, owner, argument set, slot pattern and the frame factors 1, 0.5 and
+// 25/60, and without an owner also with a second position, angle and light.
+// These are values the cases set that the new fields hold (the call's
+// position is 13120.25, 12480.5, 140.75, its angle 11, 22, 33 and its light
+// 0.9, 0.8, 0.7). The skill values and the PK key of the calls differ from
+// the ones the rows set, which the common setup would copy otherwise.
 TEST_CASE("The types of FX1.4 create from the catalogue what their cases set [effects][recorder]")
 {
     BuildShippedRegistry();
 
     // Raised by 3400, then copied into the start position; one angle component.
-    const Record dragon = RecordCall(CallOf(MODEL_DRAGON), {});
+    EffectCall dragonCall = CallOf(MODEL_DRAGON);
+    dragonCall.skill = 43;
+    const Record dragon = RecordCall(dragonCall, {});
     CHECK(Find(dragon, "Effects[0].Position[2]") == "3540.75");
     CHECK(Find(dragon, "Effects[0].StartPosition[0]") == "13120.25");
     CHECK(Find(dragon, "Effects[0].StartPosition[2]") == "3540.75");
@@ -488,7 +492,9 @@ TEST_CASE("The types of FX1.4 create from the catalogue what their cases set [ef
     CHECK(Find(thunder, "Effects[0].Position[2]") == "140.75");
 
     // The light of the call (the summoner passes the target there), then its own light.
-    const Record neil = RecordCall(CallOf(MODEL_SUMMONER_SUMMON_NEIL), {});
+    EffectCall neilCall = CallOf(MODEL_SUMMONER_SUMMON_NEIL);
+    neilCall.skillIndex = 41;
+    const Record neil = RecordCall(neilCall, {});
     CHECK(Find(neil, "Effects[0].HeadTargetAngle[0]") == "0.899999976");
     CHECK(Find(neil, "Effects[0].HeadTargetAngle[2]") == "0.699999988");
     CHECK(Find(neil, "Effects[0].Light[0]") == "1");
@@ -504,7 +510,9 @@ TEST_CASE("The types of FX1.4 create from the catalogue what their cases set [ef
     CHECK(Find(RecordCall(shiny, {}), "Effects[0].Scale") == "0");
     shiny.scale = 1.75f;
     CHECK(Find(RecordCall(shiny, {}), "Effects[0].Scale") == "1.75");
-    CHECK(Find(RecordCall(CallOf(MODEL_STATUE_CRUSH_EFFECT_PIECE04), {}), "Effects[0].PKKey") == "-1");
+    EffectCall piece = CallOf(MODEL_STATUE_CRUSH_EFFECT_PIECE04);
+    piece.pkKey = 37;
+    CHECK(Find(RecordCall(piece, {}), "Effects[0].PKKey") == "-1");
 
     // Offsets times the frame factor, at 25/60 where the products round; the
     // expected values are computed in the form of the old cases. volatile

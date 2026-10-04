@@ -239,15 +239,16 @@ TEST_CASE("Wrong vectors, offsets and copies are errors, unknown parts warnings 
          "skill": -1, "timer": 1e39, "position": [1, 2], "angle": 5,
          "direction": {"y": {"value": 1, "timesFrameFactor": true}, "w": 1},
          "offset": {"position": {"x": {"timesFrameFactor": true}, "y": {"value": "far"}, "z": "up"},
-                    "angle": {}, "scale": {"x": 1}},
+                    "angle": {}, "startPosition": {"y": {"value": 1, "timesFrameFactor": "yes"}},
+                    "scale": {"x": 1}},
          "copy": {"startPosition": "angle", "headTargetAngle": 1, "light": "direction"}}},
         {"name": "ghost", "code": "MODEL_CUNDUN_GHOST", "create": {"offset": 5, "copy": []}},
         {"name": "blood", "code": "MODEL_BLOOD", "create": {"scale": 1, "direction": [0, 1, 0], "offset": {},
          "copy": {"scale": "callScale", "direction": "light"}}}]})",
                                    EffectKind::Effect);
-    for (const char* field :
-         {"lightEnable", "kind", "skill", "timer", "position", "angle", "direction.y", "offset.position.x.value",
-          "offset.position.y.value", "offset.position.z", "copy.startPosition", "copy.headTargetAngle"})
+    for (const char* field : {"lightEnable", "kind", "skill", "timer", "position", "angle", "direction.y",
+                              "offset.position.x.value", "offset.position.y.value", "offset.position.z",
+                              "offset.startPosition.y.timesFrameFactor", "copy.startPosition", "copy.headTargetAngle"})
     {
         INFO(field);
         CHECK(HasError(result.issues, std::string("types[0].create.") + field));

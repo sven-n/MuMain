@@ -375,12 +375,12 @@ to the copy), and `MODEL_SUMMONER_SUMMON_NEIL` copies the call's light
 before setting its own (a copy from the call's argument); statements that
 only repeat the common setup are left out. The PR's second commit compared
 the old cases with the rows in one build: all 4,640 calls equal at the frame
-factors 1 and 0.5, with a second position, angle and light per call, and all
-2,320 at 25/60. The third deletes the 28 case groups; g++ finds the same 6
-fallthroughs. `CreateParams` keeps which groups of fields a row sets, so
-rows without the new fields cost what they did; a benchmark of
-`CreateEffect` gave 14.4 ns per creation of the 28 types with their cases
-and 15.7 ns with their rows. The `Scale = PKKey / 100.f` cases
+factors 1 and 0.5, the calls without an owner also with a second position,
+angle and light, and all 2,320 at 25/60. The third deletes the 28 case
+groups; g++ finds the same 6 fallthroughs. `CreateParams` keeps which groups
+of fields a row sets, so rows without the new fields cost what they did; a
+benchmark of `CreateEffect` gave 14.4 ns per creation of the 28 types with
+their cases and 15.7 ns with their rows. The `Scale = PKKey / 100.f` cases
 (`MODEL_SKILL_FURY_STRIKE+3/+4/+6/+7`, `MODEL_AURORA`, `MODEL_WAVE_FORCE`)
 compute a value from a skill argument and stay code (D36).
 
@@ -422,16 +422,17 @@ to FX2 all need it:
   Bytes that change outside the field lists show up for particles and
   joints, and the 64-bit Windows build stops when one of the structs changes
   size. Each call runs with the game's default arguments and with uneven
-  ones (scale, PK key, skill values, target index); since FX1.4 also with a
-  second position, angle and light, so a copy differs from a constant, and
-  the comparison of a phase adds the frame factor 25/60, where products
-  with it round (its digests are not committed: a compiler may fuse a
-  multiply-add on one platform and not on another). Not recorded yet: the
-  play speed of models and the owner's fields outside its object; not varied
-  yet: live slots, terrain height, `timeGetTime`. The test binary has no
-  option window and no models, so cases that reach `CreateParticle`,
-  `CreateSprite` or `Models` cannot be recorded yet, and the monster owner
-  is not a real monster. The phase that first moves such cases adds them.
+  ones (scale, PK key, skill values, target index); since FX1.4 the calls
+  without an owner also with a second position, angle and light, so a copy
+  differs from a constant, and the comparison of a phase adds the frame
+  factor 25/60, where products with it round (its digests are not committed:
+  a compiler may fuse a multiply-add on one platform and not on another).
+  Not recorded yet: the play speed of models and the owner's fields outside
+  its object; not varied yet: live slots, terrain height, `timeGetTime`. The
+  test binary has no option window and no models, so cases that reach
+  `CreateParticle`, `CreateSprite` or `Models` cannot be recorded yet, and
+  the monster owner is not a real monster. The phase that first moves such
+  cases adds them.
 - **Tool:** `tests/effects/EffectRecorder` (since FX1.3): `RecordCall`
   records one call under given conditions, `Compare` lists the differing
   fields by name, and `EffectTestData::BuildShippedRegistry` builds the

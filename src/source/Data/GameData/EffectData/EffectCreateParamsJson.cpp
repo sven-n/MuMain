@@ -225,9 +225,10 @@ void ReadComponent(ItemModelValueReader& reader, const std::string& objectKey, s
     std::optional<double> value;
     ReadValue(number, Keys::Value, value);
     bool timesFrameFactor = false;
-    number.ReadBool(Keys::TimesFrameFactor, timesFrameFactor);
+    const bool flagRead =
+        !number.Has(Keys::TimesFrameFactor) || number.ReadBool(Keys::TimesFrameFactor, timesFrameFactor);
     number.WarnAboutUnknownKeys();
-    if (value)
+    if (value && flagRead)
     {
         vector.components[index] = value;
         vector.timesFrameFactor[index] = timesFrameFactor;

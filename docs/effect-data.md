@@ -129,9 +129,9 @@ with when the game creates it. Particles, lightning and sprites have none
   `startPosition` adds to the copy.
 - A field that is left out keeps what the game sets for every new effect,
   or what the creating code passes. `lifeTime`, `gravity`, `timer`,
-  `distance`, `startPosition` and `headTargetAngle` are not set for every
-  new effect: left out, they keep the value of the effect that used the
-  slot before, as in the original client.
+  `distance`, `collisionRange`, `startPosition` and `headTargetAngle` are
+  not set for every new effect: left out, they keep the value of the effect
+  that used the slot before, as in the original client.
 - An effect with `create` starts with these values **instead of its
   creation code**. Only effects whose creation code set nothing but these
   values have one; adding `create` to another effect drops what its code
