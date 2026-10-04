@@ -31,11 +31,15 @@ target_compile_definitions(test_item_database_files PRIVATE
 
 # The effect catalogue (Data/Effects): the format, the compiled symbol lists
 # and the shipped files. The registry check pulls in the effect code, which
-# needs the client globals of Winmain.cpp.
+# needs the client globals of Winmain.cpp. The effect browser test reads the
+# switches of ZzzEffect.cpp (MU_TEST_SOURCE_DIR) and, in editor builds, checks
+# the browser's model.
 mu_add_test(
     NAME test_effect_types
     SOURCES
         test_effect_types.cpp
+        test_effect_browser.cpp
+        ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCases.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectTestData.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
@@ -43,6 +47,7 @@ mu_add_test(
 )
 target_compile_definitions(test_effect_types PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_TEST_SOURCE_DIR="${CMAKE_SOURCE_DIR}/src/source"
 )
 target_include_directories(test_effect_types PRIVATE ${CMAKE_SOURCE_DIR}/tests/effects)
 
