@@ -161,6 +161,8 @@ compile boundary is still open. The user later reported that the requested in-ga
 were OK. Coverage of normal pickup, full-inventory pickup, successful and rejected drop, and
 storage-to-inventory auto-move success/failure was not specified individually.
 
+Siege pass (2026-10-05): `UI/Combat/SiegeUpdates` now owns castle minimap and commander presentation, guardsman status and guild lists, hunt-zone gatekeeper, catapult, and crown notices. `WSclient.cpp` decodes packet values before calling the feature operations; `CGuardWindow` takes decoded status and names. A full RelWithDebInfo build passed. In-game spot checks remain pending with the consolidated RB-03 checklist.
+
 ### RB-04 — Theme command ownership
 
 - Keep `$theme` command recognition in the console, but move theme validation, activation, config

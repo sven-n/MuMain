@@ -3,6 +3,7 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Chat/Chat.h"
 #include "UI/Chat/ChatMessages.h"
+#include "UI/Combat/SiegeUpdates.h"
 #include "UI/Core/WindowAccess.h"
 #include "UI/Social/SocialUpdates.h"
 #include <memory>
@@ -958,8 +959,7 @@ void InitGame()
     if (g_pUIManager)
         g_pUIManager->Init();
 
-    if (g_pSiegeWarfare)
-        g_pSiegeWarfare->InitMiniMapUI();
+    UI::Siege::ResetMiniMap();
 
     g_Direction.Init();
     g_Direction.DeleteMonster();
@@ -1251,8 +1251,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
 
     if (gMapManager.WorldActive == WD_30BATTLECASTLE)
     {
-        if (g_pSiegeWarfare)
-            g_pSiegeWarfare->CreateMiniMapUI();
+        UI::Siege::ShowMiniMap();
     }
 
     if (gMapManager.WorldActive < WD_65DOPPLEGANGER1 || gMapManager.WorldActive > WD_68DOPPLEGANGER4)
@@ -2694,7 +2693,6 @@ void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
 
         if (gMapManager.InBattleCastle() && battleCastle::IsBattleCastleStart())
         {
-            // g_pSiegeWarfare->InitSkillUI();
         }
     }
 
@@ -7916,15 +7914,7 @@ void ReceiveGuildIDViewport(const BYTE* ReceiveBuffer)
 
         if (gMapManager.WorldActive == WD_30BATTLECASTLE)
         {
-            if (g_pSiegeWarfare)
-            {
-                if (g_pSiegeWarfare->IsCreated() == false)
-                {
-                    g_pSiegeWarfare->InitMiniMapUI();
-                    g_pSiegeWarfare->SetGuildData(Hero);
-                    g_pSiegeWarfare->CreateMiniMapUI();
-                }
-            }
+            UI::Siege::EnsureLocalPlayerMiniMap();
         }
 
         Offset += sizeof(PRECEIVE_GUILD_ID);
@@ -10947,9 +10937,24 @@ void ReceiveBCStatus(const BYTE* ReceiveBuffer)
         break;
     case 0x01:
     case 0x02:
-        UI::Windows::Show(mu::ui::window::INTERFACE_GUARDSMAN);
-        g_pGuardWindow->SetData(Data);
-        break;
+    {
+        wchar_t ownerGuild[MAX_GUILDNAME + 1]{};
+        wchar_t ownerGuildMaster[MAX_USERNAME_SIZE + 1]{};
+        CMultiLanguage::ConvertFromUtf8(ownerGuild, Data->cOwnerGuild, MAX_GUILDNAME);
+        CMultiLanguage::ConvertFromUtf8(ownerGuildMaster, Data->cOwnerGuildMaster, MAX_USERNAME_SIZE);
+        UI::Siege::GuardStatus status{
+            static_cast<CASTLESIEGE_STATE>(Data->cCastleSiegeState), ownerGuild, ownerGuildMaster,
+            {MAKEWORD(Data->btStartYearL, Data->btStartYearH), Data->btStartMonth,
+             Data->btStartDay, Data->btStartHour, Data->btStartMinute},
+            {MAKEWORD(Data->btEndYearL, Data->btEndYearH), Data->btEndMonth,
+             Data->btEndDay, Data->btEndHour, Data->btEndMinute},
+            {MAKEWORD(Data->btSiegeStartYearL, Data->btSiegeStartYearH), Data->btSiegeStartMonth,
+             Data->btSiegeStartDay, Data->btSiegeStartHour, Data->btSiegeStartMinute},
+            MAKELONG(MAKEWORD(Data->btStateLeftSec4, Data->btStateLeftSec3),
+                     MAKEWORD(Data->btStateLeftSec2, Data->btStateLeftSec1))};
+        UI::Siege::ShowGuardStatus(status);
+    }
+    break;
     case 0x03:
         UI::Chat::PostSystem(I18N::Game::UnusualCastleInformation, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
@@ -11202,8 +11207,8 @@ void ReceiveBCChangeTaxRate(const BYTE* ReceiveBuffer)
     case 1:
         if (Data->btTaxType == 3)
         {
-            g_pUIGateKeeper->SetEntranceFee((Data->btTaxRate1 << 24) | (Data->btTaxRate2 << 16) |
-                                            (Data->btTaxRate3 << 8) | (Data->btTaxRate4));
+            UI::Siege::SetHuntZoneEntranceFee((Data->btTaxRate1 << 24) | (Data->btTaxRate2 << 16) |
+                                         (Data->btTaxRate3 << 8) | (Data->btTaxRate4));
         }
         else
         {
@@ -11267,7 +11272,7 @@ void ReceiveHuntZoneEnter(const BYTE* ReceiveBuffer)
     break;
 
     case 1:
-        g_pUIGateKeeper->SetPublic(pData->m_byHuntZoneEnter);
+        UI::Siege::SetHuntZonePublic(pData->m_byHuntZoneEnter);
         break;
 
     case 2:
@@ -11318,7 +11323,7 @@ void ReceiveBCDeclareGuildList(const BYTE* ReceiveBuffer)
         break;
     case 1:
     {
-        g_pGuardWindow->ClearDeclareGuildList();
+        std::vector<UI::Siege::DeclarationGuild> guilds;
         for (int i = 0; i < Data->iCount; ++i)
         {
             auto pData2 = (LPPMSG_CSREGGUILDLIST)(ReceiveBuffer + Offset);
@@ -11333,11 +11338,12 @@ void ReceiveBCDeclareGuildList(const BYTE* ReceiveBuffer)
 
             wchar_t guildName[MAX_GUILDNAME + 1]{};
             CMultiLanguage::ConvertFromUtf8(guildName, pData2->szGuildName, MAX_GUILDNAME);
-            g_pGuardWindow->AddDeclareGuildList(guildName, dwMarkCount, pData2->btIsGiveUp, pData2->btSeqNum);
+            guilds.push_back({guildName, static_cast<int>(dwMarkCount),
+                              pData2->btIsGiveUp != 0, pData2->btSeqNum});
 
             Offset += sizeof(PMSG_CSREGGUILDLIST);
         }
-        g_pGuardWindow->SortDeclareGuildList();
+        UI::Siege::ReplaceDeclarations(guilds);
     }
     break;
     }
@@ -11355,17 +11361,19 @@ void ReceiveBCGuildList(const BYTE* ReceiveBuffer)
         break;
     case 1:
     {
-        g_pGuardWindow->ClearGuildList();
+        std::vector<UI::Siege::AttackingGuild> guilds;
         for (int i = 0; i < Data->iCount; ++i)
         {
             auto pData2 = (LPPMSG_CSATTKGUILDLIST)(ReceiveBuffer + Offset);
             wchar_t guildName[MAX_GUILDNAME + 1]{};
             CMultiLanguage::ConvertFromUtf8(guildName, pData2->szGuildName, MAX_GUILDNAME);
 
-            g_pGuardWindow->AddGuildList(guildName, pData2->btCsJoinSide, pData2->btGuildInvolved, pData2->iGuildScore);
+            guilds.push_back({guildName, pData2->btCsJoinSide,
+                              pData2->btGuildInvolved, pData2->iGuildScore});
 
             Offset += sizeof(PMSG_CSATTKGUILDLIST);
         }
+        UI::Siege::ReplaceAttackingGuilds(guilds);
     }
     break;
     case 2:
@@ -11434,6 +11442,29 @@ void ReceiveGateCurrentState(const BYTE* ReceiveBuffer)
     }
 }
 
+enum class CrownSwitchState : std::uint8_t
+{
+    Released = 0,
+    Activated = 1,
+    ActivatedByOther = 2,
+};
+
+enum class CrownRegistrationState : std::uint8_t
+{
+    Started = 0,
+    Succeeded = 1,
+    Failed = 2,
+    OtherPlayer = 3,
+    OtherCamp = 4,
+};
+
+enum class CrownDefenseState : std::uint8_t
+{
+    Removed = 0,
+    Activated = 1,
+    RegistrationSucceeded = 2,
+};
+
 void ReceiveCrownSwitchState(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPRECEIVE_SWITCH_PROC)ReceiveBuffer;
@@ -11444,62 +11475,36 @@ void ReceiveCrownSwitchState(const BYTE* ReceiveBuffer)
     CHARACTER* CrownSwitch = &CharactersClient[iIndex];
 
     if (CrownSwitch == nullptr)
-    {
         return;
-    }
     if (CrownSwitch->ID == nullptr)
-    {
         return;
-    }
 
-    switch (pData->m_byState)
+    switch (static_cast<CrownSwitchState>(pData->m_byState))
     {
-    case 0:
+    case CrownSwitchState::Released:
     {
         int iSwitchIndex = ((int)(pData->m_byIndexH) << 8) + pData->m_byIndexL;
         if (iSwitchIndex == FIRST_CROWN_SWITCH_NUMBER)
-        {
             Switch_Info[0].Reset();
-        }
         else
-        {
             Switch_Info[1].Reset();
-        }
 
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCrownSwitchPopLayout));
-    }
-    break;
-
-    case 1:
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCrownSwitchPushLayout));
+        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::SwitchReleased);
         break;
-
-    case 2:
-    {
-        int iKey = ((int)(pData->m_byKeyH) << 8) + pData->m_byKeyL;
-        int iIndex = FindCharacterIndex(iKey);
-        CHARACTER* pCha = &CharactersClient[iIndex];
-        wchar_t strText[256];
-
-        mu::ui::window::CProgressMsgBox* pMsgBox = nullptr;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCrownSwitchOtherPushLayout), &pMsgBox);
-        if (pMsgBox)
-        {
-            if (pCha != nullptr && pCha->ID != nullptr)
-            {
-                mu_swprintf(strText, I18N::Game::CharacterSIs, pCha->ID);
-            }
-            else
-            {
-                mu_swprintf(strText, I18N::Game::CharacterIs);
-            }
-            pMsgBox->AddMsg(strText);
-
-            mu_swprintf(strText, I18N::Game::AlreadyPressingS, CrownSwitch->ID);
-            pMsgBox->AddMsg(strText);
-        }
     }
-    break;
+    case CrownSwitchState::Activated:
+        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::SwitchActivated);
+        break;
+    case CrownSwitchState::ActivatedByOther:
+    {
+        int otherKey = ((int)(pData->m_byKeyH) << 8) + pData->m_byKeyL;
+        int otherIndex = FindCharacterIndex(otherKey);
+        CHARACTER* other = &CharactersClient[otherIndex];
+        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::SwitchActivatedByOther,
+                                    other != nullptr && other->ID != nullptr ? other->ID : L"",
+                                    CrownSwitch->ID);
+        break;
+    }
     }
 }
 
@@ -11507,56 +11512,26 @@ void ReceiveCrownRegist(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPRECEIVE_CROWN_STATE)ReceiveBuffer;
 
-    g_MessageBox->PopAllMessageBoxes();
+    UI::Siege::ClearCrownNotices();
 
-    switch (pData->m_byCrownState)
+    switch (static_cast<CrownRegistrationState>(pData->m_byCrownState))
     {
-    case 0:
-    {
-        mu::ui::window::CProgressMsgBox* pMsgBox = nullptr;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSealRegisterStartLayout), &pMsgBox);
-        if (pMsgBox)
-        {
-            wchar_t strText[256];
-            int iTime = (pData->m_dwCrownAccessTime / 1000);
-            if (iTime >= 59)
-                iTime = 59;
-            mu_swprintf(strText, I18N::Game::SAccumulatedHourDseconds, I18N::Game::OfficialSealRegistrationWillStart,
-                        iTime);
-            pMsgBox->AddMsg(strText);
-            pMsgBox->SetElapseTime(60000 - pData->m_dwCrownAccessTime);
-        }
-    }
-    break;
-
-    case 1:
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSealRegisterSuccessLayout));
+    case CrownRegistrationState::Started:
+        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::RegistrationStarted,
+                                    {}, {}, pData->m_dwCrownAccessTime);
         break;
-
-    case 2:
-    {
-        mu::ui::window::CProgressMsgBox* pMsgBox = nullptr;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSealRegisterFailLayout), &pMsgBox);
-        if (pMsgBox)
-        {
-            wchar_t strText[256];
-            int iTime = (pData->m_dwCrownAccessTime / 1000);
-            if (iTime >= 59)
-                iTime = 59;
-            mu_swprintf(strText, I18N::Game::SAccumulatedHourDseconds, I18N::Game::OfficialSealRegistrationIsFailed,
-                        iTime);
-            pMsgBox->AddMsg(strText);
-        }
-    }
-    break;
-
-    case 3:
-    {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSealRegisterOtherLayout));
-    }
-    break;
-    case 4:
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSealRegisterOtherCampLayout));
+    case CrownRegistrationState::Succeeded:
+        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::RegistrationSucceeded);
+        break;
+    case CrownRegistrationState::Failed:
+        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::RegistrationFailed,
+                                    {}, {}, pData->m_dwCrownAccessTime);
+        break;
+    case CrownRegistrationState::OtherPlayer:
+        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::RegistrationByOther);
+        break;
+    case CrownRegistrationState::OtherCamp:
+        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::RegistrationByOtherCamp);
         break;
     }
 }
@@ -11565,35 +11540,26 @@ void ReceiveCrownState(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPRECEIVE_CROWN_STATE)ReceiveBuffer;
 
-    switch (pData->m_byCrownState)
+    switch (static_cast<CrownDefenseState>(pData->m_byCrownState))
     {
-    case 0:
+    case CrownDefenseState::Removed:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCrownDefenseRemoveLayout));
-
+        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::DefenseRemoved);
         int Index = FindCharacterIndexByMonsterIndex(216);
-
         OBJECT* o = &CharactersClient[Index].Object;
-
         g_CharacterRegisterBuff(o, eBuff_CastleCrown);
+        break;
     }
-    break;
-
-    case 1:
+    case CrownDefenseState::Activated:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCrownDefenseCreateLayout));
-
+        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::DefenseActivated);
         int Index = FindCharacterIndexByMonsterIndex(216);
-
         OBJECT* o = &CharactersClient[Index].Object;
-
         g_CharacterClearBuff(o);
+        break;
     }
-    break;
-
-    case 2:
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSealRegisterSuccessLayout));
-
+    case CrownDefenseState::RegistrationSucceeded:
+        UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::RegistrationSucceeded);
         break;
     }
 }
@@ -11687,14 +11653,7 @@ void ReceiveBattleCastleStart(const BYTE* ReceiveBuffer)
 
     battleCastle::SetBattleCastleStart(bStartBattleCastle);
 
-    if (bStartBattleCastle)
-    {
-        g_pSiegeWarfare->InitSkillUI();
-    }
-    else
-    {
-        g_pSiegeWarfare->ReleaseSkillUI();
-    }
+    UI::Siege::SetBattleSkillsActive(bStartBattleCastle);
 }
 
 void ReceiveBattleCastleProcess(const BYTE* ReceiveBuffer)
@@ -11782,9 +11741,8 @@ void ReceiveCastleHuntZoneInfo(const BYTE* ReceiveBuffer)
     }
     else
     {
-        g_pUIGateKeeper->SetInfo(pData->m_byResult, (bool)pData->m_byEnable, pData->m_iCurrPrice, pData->m_iUnitPrice,
-                                 pData->m_iMaxPrice);
-        UI::Windows::Show(mu::ui::window::INTERFACE_GATEKEEPER);
+        UI::Siege::OpenHuntZone(pData->m_byResult, pData->m_byEnable != 0, pData->m_iCurrPrice,
+                                pData->m_iUnitPrice, pData->m_iMaxPrice);
     }
 }
 
@@ -11808,8 +11766,7 @@ void ReceiveCatapultState(const BYTE* ReceiveBuffer)
     {
         int Key = ((int)(pData->m_byKeyH) << 8) + pData->m_byKeyL;
 
-        UI::Windows::Show(mu::ui::window::INTERFACE_CATAPULT);
-        g_pCatapultWindow->Init(Key, pData->m_byWeaponType);
+        UI::Siege::OpenCatapult(Key, pData->m_byWeaponType);
     }
     else if (pData->m_byResult == 0)
     {
@@ -11825,8 +11782,8 @@ void ReceiveCatapultFire(const BYTE* ReceiveBuffer)
     {
         int Key = ((int)(pData->m_byKeyH) << 8) + pData->m_byKeyL;
 
-        g_pCatapultWindow->DoFire(Key, pData->m_byResult, pData->m_byWeaponType, pData->m_byTargetX,
-                                  pData->m_byTargetY);
+        UI::Siege::CatapultFired(Key, pData->m_byResult, pData->m_byWeaponType, pData->m_byTargetX,
+                                 pData->m_byTargetY);
     }
     else if (pData->m_byResult == 0)
     {
@@ -11838,7 +11795,7 @@ void ReceiveCatapultFireToMe(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPRECEIVE_BOMBING_ALERT)ReceiveBuffer;
 
-    g_pCatapultWindow->DoFireFixStartPosition(pData->m_byWeaponType, pData->m_byTargetX, pData->m_byTargetY);
+    UI::Siege::CatapultFiredAtPlayer(pData->m_byWeaponType, pData->m_byTargetX, pData->m_byTargetY);
 }
 
 void ReceivePreviewPort(std::span<const BYTE> ReceiveBuffer)
@@ -11950,56 +11907,48 @@ void ReceiveMapInfoResult(const BYTE* ReceiveBuffer)
 void ReceiveGuildCommand(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPRECEIVE_GUILD_COMMAND)ReceiveBuffer;
-    GuildCommander GCmd = {pData->m_byTeam, pData->m_byX, pData->m_byY, pData->m_byCmd};
-
-    if (g_pSiegeWarfare)
-    {
-        g_pSiegeWarfare->SetMapInfo(GCmd);
-    }
+    UI::Siege::SetCommanderMapInfo(pData->m_byTeam, pData->m_byX, pData->m_byY, pData->m_byCmd);
 }
 
 void ReceiveGuildMemberLocation(const BYTE* ReceiveBuffer)
 {
-    if (g_pSiegeWarfare->GetCurSiegeWarType() != TYPE_GUILD_COMMANDER)
-        return;
-
-    g_pSiegeWarfare->ClearGuildMemberLocation();
-
     auto pData = (LPPWHEADER_DEFAULT_WORD2)ReceiveBuffer;
     int Offset = sizeof(PWHEADER_DEFAULT_WORD2);
+    std::vector<UI::Siege::MapLocation> locations;
+    locations.reserve(pData->Value);
 
     for (int i = 0; i < pData->Value; i++)
     {
         auto pData2 = (LPPRECEIVE_MEMBER_LOCATION)(ReceiveBuffer + Offset);
-
-        g_pSiegeWarfare->SetGuildMemberLocation(0, pData2->m_byX, pData2->m_byY);
-
+        locations.push_back({0, pData2->m_byX, pData2->m_byY});
         Offset += sizeof(PRECEIVE_MEMBER_LOCATION);
     }
+
+    UI::Siege::ReplaceMemberLocations(locations);
 }
 
 void ReceiveGuildNpcLocation(const BYTE* ReceiveBuffer)
 {
-    if (g_pSiegeWarfare->GetCurSiegeWarType() != TYPE_GUILD_COMMANDER)
-        return;
-
     auto pData = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
     int Offset = sizeof(PWHEADER_DEFAULT_WORD);
+    std::vector<UI::Siege::MapLocation> locations;
+    locations.reserve(pData->Value);
 
     for (int i = 0; i < pData->Value; i++)
     {
         auto pData2 = (LPPRECEIVE_NPC_LOCATION)(ReceiveBuffer + Offset);
-        g_pSiegeWarfare->SetGuildMemberLocation(pData2->m_byType + 1, pData2->m_byX, pData2->m_byY);
-
+        locations.push_back({pData2->m_byType, pData2->m_byX, pData2->m_byY});
         Offset += sizeof(PRECEIVE_NPC_LOCATION);
     }
+
+    UI::Siege::AddNpcLocations(locations);
 }
 
 void ReceiveMatchTimer(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPRECEIVE_MATCH_TIMER)ReceiveBuffer;
 
-    g_pSiegeWarfare->SetTime(pData->m_byHour, pData->m_byMinute);
+    UI::Siege::SetMatchTime(pData->m_byHour, pData->m_byMinute);
 }
 
 void ReceiveCrywolfInfo(const BYTE* ReceiveBuffer)

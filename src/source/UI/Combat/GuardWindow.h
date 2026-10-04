@@ -5,6 +5,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
+#include "UI/Combat/SiegeUpdates.h"
 #include "UI/Combat/GuardWindowRmlModel.h"
 #include "UI/Combat/GuardGuildLists.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
@@ -113,12 +114,12 @@ public:
 
     float GetLayerDepth(); //. 5.0f
 
-    void SetData(LPPMSG_ANS_CASTLESIEGESTATE Info); // �������� �޾� ȭ�� ǥ�� ����
+    void SetData(const UI::Siege::GuardStatus& status);
 
-    void AddDeclareGuildList(wchar_t* szGuildName, int nMarkCount, BYTE byIsGiveUP, BYTE bySeqNum);
+    void AddDeclareGuildList(std::wstring_view name, int markCount, bool gaveUp, BYTE sequence);
     void ClearDeclareGuildList();
     void SortDeclareGuildList();
-    void AddGuildList(wchar_t* szGuildName, BYTE byCsJoinSide, BYTE byGuildInvolved, int iGuildScore);
+    void AddGuildList(std::wstring_view name, BYTE side, BYTE involvement, int score);
     void ClearGuildList();
 
     void ReloadRmlTheme();

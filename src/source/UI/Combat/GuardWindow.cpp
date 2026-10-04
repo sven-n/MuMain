@@ -292,45 +292,39 @@ void CGuardWindow::UpdateRegisterInfoTab(GUARD_BUTTON button)
     }
 }
 
-void CGuardWindow::SetData(LPPMSG_ANS_CASTLESIEGESTATE Info)
+void CGuardWindow::SetData(const UI::Siege::GuardStatus& status)
 {
-    if (!Info)	return;
+    std::fill(std::begin(m_szOwnerGuild), std::end(m_szOwnerGuild), L'\0');
+    std::fill(std::begin(m_szOwnerGuildMaster), std::end(m_szOwnerGuildMaster), L'\0');
+    std::copy_n(status.ownerGuild.begin(),
+                std::min(status.ownerGuild.size(), std::size(m_szOwnerGuild) - 1), m_szOwnerGuild);
+    std::copy_n(status.ownerGuildMaster.begin(),
+                std::min(status.ownerGuildMaster.size(), std::size(m_szOwnerGuildMaster) - 1), m_szOwnerGuildMaster);
 
-    // Whole buffers: the original cleared 9 and 11 bytes of these wchar_t arrays, so a name
-    // converted without room for its terminator kept stack garbage after it (the original lost
-    // the "Official seal of king" line to a ten-character guild master).
-    memset(m_szOwnerGuild, 0, sizeof(m_szOwnerGuild));
-    memset(m_szOwnerGuildMaster, 0, sizeof(m_szOwnerGuildMaster));
-
-    m_eTimeType = (CASTLESIEGE_STATE)Info->cCastleSiegeState;
-    CMultiLanguage::ConvertFromUtf8(m_szOwnerGuild, Info->cOwnerGuild, MAX_GUILDNAME);
-    CMultiLanguage::ConvertFromUtf8(m_szOwnerGuildMaster, Info->cOwnerGuildMaster, MAX_USERNAME_SIZE);
-
-    m_wStartYear = MAKEWORD(Info->btStartYearL, Info->btStartYearH);
-    m_byStartMonth = Info->btStartMonth;
-    m_byStartDay = Info->btStartDay;
-    m_byStartHour = Info->btStartHour;
-    m_byStartMinute = Info->btStartMinute;
-    m_wEndYear = MAKEWORD(Info->btEndYearL, Info->btEndYearH);
-    m_byEndMonth = Info->btEndMonth;
-    m_byEndDay = Info->btEndDay;
-    m_byEndHour = Info->btEndHour;
-    m_byEndMinute = Info->btEndMinute;
-    m_wSiegeStartYear = MAKEWORD(Info->btSiegeStartYearL, Info->btSiegeStartYearH);
-    m_bySiegeStartMonth = Info->btSiegeStartMonth;
-    m_bySiegeStartDay = Info->btSiegeStartDay;
-    m_bySiegeStartHour = Info->btSiegeStartHour;
-    m_bySiegeStartMinute = Info->btSiegeStartMinute;
-    m_dwStateLeftSec = MAKELONG(MAKEWORD(Info->btStateLeftSec4, Info->btStateLeftSec3), MAKEWORD(Info->btStateLeftSec2, Info->btStateLeftSec1));
-    //m_dwStateLeftSec = Info->btStateLeftSec1<<24 | Info->btStateLeftSec2<<16 | Info->btStateLeftSec3<<8 | Info->btStateLeftSec4;
+    m_eTimeType = status.phase;
+    m_wStartYear = status.registrationStart.year;
+    m_byStartMonth = status.registrationStart.month;
+    m_byStartDay = status.registrationStart.day;
+    m_byStartHour = status.registrationStart.hour;
+    m_byStartMinute = status.registrationStart.minute;
+    m_wEndYear = status.registrationEnd.year;
+    m_byEndMonth = status.registrationEnd.month;
+    m_byEndDay = status.registrationEnd.day;
+    m_byEndHour = status.registrationEnd.hour;
+    m_byEndMinute = status.registrationEnd.minute;
+    m_wSiegeStartYear = status.battleStart.year;
+    m_bySiegeStartMonth = status.battleStart.month;
+    m_bySiegeStartDay = status.battleStart.day;
+    m_bySiegeStartHour = status.battleStart.hour;
+    m_bySiegeStartMinute = status.battleStart.minute;
+    m_dwStateLeftSec = status.secondsRemaining;
 }
 
-void CGuardWindow::AddDeclareGuildList(wchar_t* szGuildName, int nMarkCount, BYTE byIsGiveUP, BYTE bySeqNum)
+void CGuardWindow::AddDeclareGuildList(std::wstring_view name, int markCount, bool gaveUp, BYTE sequence)
 {
-    if (szGuildName == nullptr || szGuildName[0] == L'\0')
+    if (name.empty())
         return;
-    m_GuildLists.AddDeclaration({std::wstring(szGuildName, wcsnlen(szGuildName, MAX_GUILDNAME)),
-                                nMarkCount, byIsGiveUP != 0, bySeqNum});
+    m_GuildLists.AddDeclaration({std::wstring(name.substr(0, MAX_GUILDNAME)), markCount, gaveUp, sequence});
 }
 
 void CGuardWindow::ClearDeclareGuildList()
@@ -343,12 +337,11 @@ void CGuardWindow::SortDeclareGuildList()
     m_GuildLists.SortDeclarations();
 }
 
-void CGuardWindow::AddGuildList(wchar_t* szGuildName, BYTE byCsJoinSide, BYTE byGuildInvolved, int iGuildScore)
+void CGuardWindow::AddGuildList(std::wstring_view name, BYTE side, BYTE involvement, int score)
 {
-    if (szGuildName == nullptr || szGuildName[0] == L'\0')
+    if (name.empty())
         return;
-    m_GuildLists.AddSiegeGuild({std::wstring(szGuildName, wcsnlen(szGuildName, MAX_GUILDNAME)),
-                              byCsJoinSide, byGuildInvolved, iGuildScore});
+    m_GuildLists.AddSiegeGuild({std::wstring(name.substr(0, MAX_GUILDNAME)), side, involvement, score});
 }
 
 void CGuardWindow::ClearGuildList()
