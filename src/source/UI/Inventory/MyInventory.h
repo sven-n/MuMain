@@ -167,10 +167,6 @@ namespace mu::ui::window
         void SetPos(int x, int y);
         const POINT& GetPos() const;
 
-        // Restores the user's dragged position (GameConfig::GetWindowPosition()) if one was saved,
-        // instead of resetting to (defaultX, defaultY).
-        void RestoreDefaultOrUserPosition(int defaultX, int defaultY);
-
         void SetRepairMode(bool bRepair);
 
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY

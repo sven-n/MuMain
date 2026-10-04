@@ -1,0 +1,39 @@
+/* Window placement for the legacy theme. The game reads where each open slot lands; nothing here is drawn. */
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	visibility: hidden;
+	pointer-events: none;
+}
+
+#safe_area {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+}
+
+.region {
+	position: absolute;
+}
+
+/* The original's docked columns: open windows pack from the right edge, sitting on the HUD. */
+.dock-right {
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: flex-start;
+}
+
+.slot {
+	display: none;
+	flex: 0 0 auto;
+}
+
+.slot.open {
+	display: block;
+}

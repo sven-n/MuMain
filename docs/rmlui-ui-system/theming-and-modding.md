@@ -295,6 +295,10 @@ coordinate into `dp`.
 
 - **Layout of elements *within* the panel** — fully expressed in RCSS, exactly what a theme
   controls.
+- **Where a docked window goes** — the theme's `workspace.rml`/`workspace.rcss`: regions and one
+  slot per window, laid out in RCSS; the game places each open window on its slot
+  ([window-placement.md](window-placement.md)). Move a slot to another region or reorder slots to
+  change the arrangement. Windows without a slot keep the rule below.
 - **The panel's own position on screen** — for a hybrid `CWin` + RmlUi window, this is driven by
   the legacy window's own `SetPosition()`/centering math in C++, pushed into the panel's
   `left`/`top` RCSS properties every frame/resize. A theme's RCSS receives this position; it

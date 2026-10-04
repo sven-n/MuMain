@@ -1,6 +1,6 @@
 # Window placement (design proposal)
 
-**Status: approved 2026-10-05; phase 0 (rule classification) done, implementation not started.**
+**Status: approved 2026-10-05. Phases 0 and 1 implemented; phase 1 awaits in-game checks.**
 Supersedes the "dock spacing" item in [tracked-deferrals.md](tracked-deferrals.md).
 
 ## Goal
@@ -89,14 +89,20 @@ On a change (open, close, resize, UI scale, theme switch, HUD move), not every f
 3. read each visible slot's resolved rectangle;
 4. give each window its rectangle.
 
-A window receives its rectangle as its layout transform: a new `LayoutMode::Slot` whose transform
-is the region's scale with the slot's top-left as offset, and `m_Pos` becomes `(0, 0)`. Everything
-built on the transform keeps working unchanged: `CManager` hit-testing, grids at fixed offsets, 3D
-icons, and `SyncRootTransform()`'s `root_x`/`root_y`/`root_scale`. Migrating a docked window means
-deleting its `PanelColumnX`/`SetPos` lines, not rewriting it.
+A content-fit window receives its slot's top-left as a position in its own layout space, through
+its existing `SetPos()`. Everything built on that keeps working unchanged: `CManager` hit-testing,
+grids at fixed offsets, 3D icons, and `SyncRootTransform()`'s `root_x`/`root_y`/`root_scale`.
+Migrating a docked window means registering it and deleting its `PanelColumnX`/`SetPos` lines, not
+rewriting it. A fill window also needs its size, so fill brings a `LayoutMode::Slot` whose
+transform maps the window onto its slot (phase 4).
 
-The service runs before a newly shown window's first update and render, so it never draws a frame
-at a stale position.
+The service runs synchronously after every `CSystem::Show()`/`Hide()` and when the screen size or
+UI scale changes, so a newly shown window never draws a frame at a stale position. The workspace
+document is never shown: it is never drawn or hit, and the service lays it out itself.
+
+Implemented in `UI/Placement/WindowPlacement.{h,cpp}`; the window registry is at the end of
+`CSystem::LoadMainSceneInterface()`. Inputs the game sets on the workspace: `#safe_area`'s
+`bottom`, content slot sizes, and region heights from `data-ref-height`.
 
 **Reading geometry back.** The main-frame rollout's rule was that C++ never reads RCSS geometry to
 draw or place chrome. That rule stays for chrome. This design adds one narrow, named exception
@@ -153,10 +159,15 @@ The legacy theme declares exactly today's behaviour; other themes may relax spac
 
 ### 7. User placement and saved positions
 
-A slot marked `data-draggable` lets the player drag its window out of the slot. The window leaves
-the region's flow (neighbours repack) and is saved per theme as an anchor plus offset relative to
-its region (principles §10–11), not raw pixels. Precedence: theme default, then user override.
-A reset returns it to its slot. The inventory's existing saved position migrates to this.
+Target: a slot marked `data-draggable` lets the player drag its window out of the slot. The window
+leaves the region's flow (neighbours repack) and is saved per theme as an anchor plus offset
+relative to its region (principles §10–11), not raw pixels. Precedence: theme default, then user
+override. A reset returns it to its slot.
+
+Phase 1 keeps today's inventory behaviour instead: `data-saved-position` names the saved drag
+position, which is used while the window is the first open window of its region. Behind another
+window (character info open) it takes its slot, and its slot still occupies the region either
+way, so the shops sit beside it as before.
 
 ### 8. Scale
 
@@ -186,7 +197,7 @@ UI scale with the [validation matrix](validation-matrix.md).
 | Phase | Work |
 |---|---|
 | 0 | Done: rules classified below; fill-capability list in section 5. |
-| 1 | Placement service, `LayoutMode::Slot`, and both themes' workspaces reproducing today's docked family exactly (content fit, right dock, column behaviour). Delete the `PanelColumnX`/`SetPos` juggling for those windows. Inventory drag keeps working. |
+| 1 | Done, in-game checks pending: placement service and both themes' workspaces place the right-docked windows (content fit). The `PanelColumnX`/`SetPos` juggling in `Show()`/`Hide()` is gone; Gens ranking (stretched HUD space, not the dock) keeps its own. Differences from before: with character info, inventory and its extension open, the extension now sits beside the inventory (columns 3 and 2 swapped); windows that used to overlap in column 1 now sit side by side. |
 | 2 | HUD reserve insets; HUD-dodging widgets become slots. |
 | 3 | Space exclusions move to the theme. |
 | 4 | Fill support: hover hit-testing, `RenderTarget` for native content per window; character info first. |

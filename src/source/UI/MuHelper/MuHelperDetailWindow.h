@@ -68,6 +68,7 @@ namespace mu::ui::window
         ~CMuHelperDetailWindow() override;
 
         bool Create(CManager* pNewUIMng, int x, int y);
+        void SetPos(int x, int y) { m_Pos = {x, y}; }
         void Release();
 
         bool UpdateMouseEvent() override;

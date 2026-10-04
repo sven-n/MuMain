@@ -7,6 +7,7 @@
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "World/MapInfra/MapManager.h"
 #include "Scenes/SceneCore.h"
+#include "UI/Placement/WindowPlacement.h"
 
 // Defined in Winmain.cpp; only ever declared at file scope (see MainScene.cpp).
 extern int LoadingWorld;
@@ -181,6 +182,7 @@ void CSystem::Release()
     }
 
     UnloadMainSceneInterface();
+    UI::Placement::Release();
     g_MessageBox->Release();
 
     SAFE_DELETE(m_pNewSlideWindow);
@@ -570,6 +572,57 @@ bool CSystem::LoadMainSceneInterface()
     if (m_pMuHelperSkillPicker->Create(m_pNewUIMng) == false)
         return false;
 
+    // Windows the theme's workspace places. The members are re-created per main scene, so each
+    // setter reads the member when it runs.
+    const auto slot = [](DWORD windowId, const char* slotName, auto*& window)
+    {
+        UI::Placement::RegisterWindow(windowId, slotName,
+                                      [&window](int x, int y)
+                                      {
+                                          if (window != nullptr)
+                                              window->SetPos(x, y);
+                                      });
+    };
+    slot(INTERFACE_CHARACTER, "character", m_pNewCharacterInfoWindow);
+    slot(INTERFACE_MUHELPER, "mu_helper", m_pMuHelperConfig);
+    slot(INTERFACE_MUHELPER_EXT, "mu_helper_detail", m_pMuHelperDetail);
+    slot(INTERFACE_PARTY, "party", m_pNewPartyInfoWindow);
+    slot(INTERFACE_GUILDINFO, "guild_info", m_pNewGuildInfoWindow);
+    slot(INTERFACE_COMMAND, "command", m_pNewCommandWindow);
+    slot(INTERFACE_COMMAND_LIST, "command_list", m_pNewChatCommandWindow);
+    slot(INTERFACE_GOLD_BOWMAN, "gold_bowman", m_pNewGoldBowman);
+    slot(INTERFACE_GOLD_BOWMAN_LENA, "gold_bowman_lena", m_pNewGoldBowmanLena);
+    slot(INTERFACE_NPC_DIALOGUE, "npc_dialogue", m_pNewNPCDialogue);
+    slot(INTERFACE_QUEST_PROGRESS, "quest_progress", m_pNewQuestProgress);
+    slot(INTERFACE_NPCQUEST, "npc_quest", m_pNewNPCQuest);
+    slot(INTERFACE_BLOODCASTLE, "blood_castle_entry", m_pNewEnterBloodCastle);
+    slot(INTERFACE_DEVILSQUARE, "devil_square_entry", m_pNewEnterDevilSquare);
+    slot(INTERFACE_SENATUS, "castle", m_pNewCastleWindow);
+    slot(INTERFACE_GUARDSMAN, "guard", m_pNewGuardWindow);
+    slot(INTERFACE_GATEKEEPER, "gatekeeper", m_pNewGatemanWindow);
+    slot(INTERFACE_GATESWITCH, "gate_switch", m_pNewGateSwitchWindow);
+    slot(INTERFACE_NPCGUILDMASTER, "guild_make", m_pNewGuildMakeWindow);
+    slot(INTERFACE_CATAPULT, "catapult", m_pNewCatapultWindow);
+    slot(INTERFACE_DUELWATCH, "duel_watch", m_pNewDuelWatchWindow);
+    slot(INTERFACE_DOPPELGANGER_NPC, "doppelganger_entry", m_pNewDoppelGangerWindow);
+    slot(INTERFACE_EMPIREGUARDIAN_NPC, "empire_guardian_entry", m_pNewEmpireGuardianNPC);
+    slot(INTERFACE_UNITEDMARKETPLACE_NPC_JULIA, "united_marketplace", m_pNewUnitedMarketPlaceWindow);
+    slot(INTERFACE_MYQUEST, "my_quest", m_pNewMyQuestInfoWindow);
+    slot(INTERFACE_PET, "pet", m_pNewPetInfoWindow);
+    slot(INTERFACE_QUEST_PROGRESS_ETC, "quest_progress_etc", m_pNewQuestProgressByEtc);
+    slot(INTERFACE_INVENTORY, "inventory", m_pNewMyInventory);
+    slot(INTERFACE_INVENTORY_EXT, "inventory_extension", m_pNewMyInventoryExt);
+    slot(INTERFACE_STORAGE, "storage", m_pNewStorageInventory);
+    slot(INTERFACE_STORAGE_EXT, "storage_extension", m_pNewStorageInventoryExt);
+    slot(INTERFACE_NPCSHOP, "npc_shop", m_pNewNPCShop);
+    slot(INTERFACE_MIXINVENTORY, "mix", m_pNewMixInventory);
+    slot(INTERFACE_TRADE, "trade", m_pNewTrade);
+    slot(INTERFACE_MYSHOP_INVENTORY, "my_shop", m_pNewMyShopInventory);
+    slot(INTERFACE_PURCHASESHOP_INVENTORY, "purchase_shop", m_pNewPurchaseShopInventory);
+    slot(INTERFACE_LUCKYCOIN_REGISTRATION, "lucky_coin_registration", m_pNewLuckyCoinRegistration);
+    slot(INTERFACE_EXCHANGE_LUCKYCOIN, "lucky_coin_exchange", m_pNewExchangeLuckyCoinWindow);
+    slot(INTERFACE_LUCKYITEMWND, "lucky_item", m_pNewUILuckyItemWnd);
+
     return true;
 }
 
@@ -708,10 +761,6 @@ void CSystem::Show(DWORD dwKey)
 
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
 
-        if (IsVisible(INTERFACE_CHARACTER))
-        {
-            g_pMyInventory->SetPos(PanelColumnX(2), 0);
-        }
         if (IsVisible(INTERFACE_MYQUEST))
         {
             Hide(INTERFACE_MYQUEST);
@@ -727,13 +776,11 @@ void CSystem::Show(DWORD dwKey)
 
         if (IsVisible(INTERFACE_STORAGE))
         {
-            g_pStorageInventory->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_MU_HELPER_BAR);
         }
 
         if (IsVisible(INTERFACE_MYSHOP_INVENTORY))
         {
-            g_pMyShopInventory->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_MU_HELPER_BAR);
             if (IsVisible(INTERFACE_MYQUEST))
             {
@@ -755,17 +802,14 @@ void CSystem::Show(DWORD dwKey)
         }
         if (IsVisible(INTERFACE_NPCSHOP))
         {
-            g_pNPCShop->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_MU_HELPER_BAR);
         }
         if (IsVisible(INTERFACE_MIXINVENTORY))
         {
-            g_pMixInventory->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_MU_HELPER_BAR);
         }
         if (IsVisible(INTERFACE_TRADE))
         {
-            g_pTrade->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_MU_HELPER_BAR);
         }
     }
@@ -775,18 +819,9 @@ void CSystem::Show(DWORD dwKey)
 
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_CHAINFO, true);
 
-        if (IsVisible(INTERFACE_INVENTORY))
+        if (IsVisible(INTERFACE_INVENTORY) && IsVisible(INTERFACE_INVENTORY_EXT))
         {
-            g_pMyInventory->SetPos(PanelColumnX(2), 0);
-            if (IsVisible(INTERFACE_INVENTORY_EXT))
-            {
-                g_pMyInventory->SetPos(PanelColumnX(3), 0);
-                Hide(INTERFACE_MU_HELPER_BAR);
-            }
-        }
-        else if (IsVisible(INTERFACE_MYQUEST))
-        {
-            g_pMyQuestInfoWindow->SetPos(PanelColumnX(2), 0);
+            Hide(INTERFACE_MU_HELPER_BAR);
         }
         g_pCharacterInfoWindow->OpenningProcess();
     }
@@ -811,10 +846,6 @@ void CSystem::Show(DWORD dwKey)
     {
         HideGroupBeforeOpenInterface();
 
-        if (IsVisible(INTERFACE_CHARACTER))
-        {
-            g_pMyQuestInfoWindow->SetPos(PanelColumnX(2), 0);
-        }
         if (IsVisible(INTERFACE_INVENTORY))
         {
             Hide(INTERFACE_INVENTORY);
@@ -837,7 +868,6 @@ void CSystem::Show(DWORD dwKey)
         HideAllGroupA();
         g_pNPCShop->OpenningProcess();
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY);
-        g_pNPCShop->SetPos(PanelColumnX(2), 0);
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
     }
     else if (dwKey == INTERFACE_STORAGE)
@@ -848,12 +878,10 @@ void CSystem::Show(DWORD dwKey)
         if (isExtendedInventoryOpen)
         {
             Show(INTERFACE_INVENTORY_EXT);
-            g_pStorageInventory->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_MU_HELPER_BAR);
         }
         else
         {
-            g_pStorageInventory->SetPos(PanelColumnX(2), 0);
             Show(INTERFACE_MU_HELPER_BAR);
         }
 
@@ -867,8 +895,6 @@ void CSystem::Show(DWORD dwKey)
         }
 
         Hide(INTERFACE_MU_HELPER_BAR);
-        g_pStorageInventory->SetPos(PanelColumnX(2), 0);
-        g_pStorageInventoryExt->SetPos(PanelColumnX(3), 0);
 
         m_pNewUIMng->ShowInterface(INTERFACE_STORAGE_EXT);
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
@@ -881,12 +907,10 @@ void CSystem::Show(DWORD dwKey)
         if (isExtendedInventoryOpen)
         {
             Show(INTERFACE_INVENTORY_EXT);
-            g_pMyShopInventory->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_MU_HELPER_BAR);
         }
         else
         {
-            g_pMyShopInventory->SetPos(PanelColumnX(2), 0);
             Show(INTERFACE_MU_HELPER_BAR);
         }
 
@@ -1125,12 +1149,7 @@ void CSystem::Show(DWORD dwKey)
         if (IsVisible(INTERFACE_INVENTORY))
             Hide(INTERFACE_INVENTORY);
         if (IsVisible(INTERFACE_MYQUEST))
-        {
             Hide(INTERFACE_MYQUEST);
-            g_pQuestProgressByEtc->SetPos(PanelColumnX(1), 0);
-        }
-        if (IsVisible(INTERFACE_CHARACTER))
-            g_pQuestProgressByEtc->SetPos(PanelColumnX(2), 0);
         g_pQuestProgressByEtc->ProcessOpening();
     }
     else if (dwKey == INTERFACE_EMPIREGUARDIAN_NPC)
@@ -1167,6 +1186,7 @@ void CSystem::Show(DWORD dwKey)
     }
 
     m_pNewUIMng->ShowInterface(dwKey);
+    UI::Placement::Arrange();
 
     UpdateMuHelperBarVisibilityForLayoutChange(dwKey);
 
@@ -1191,51 +1211,13 @@ void CSystem::Hide(DWORD dwKey)
     else if (dwKey == INTERFACE_CHARACTER)
     {
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_CHAINFO, false);
-        if (IsVisible(INTERFACE_MYQUEST))
-        {
-            g_pMyQuestInfoWindow->SetPos(PanelColumnX(1), 0);
-        }
-        if (IsVisible((INTERFACE_INVENTORY)))
-        {
-            g_pMyInventory->RestoreDefaultOrUserPosition(PanelColumnX(1), 0);
-        }
         if (IsVisible((INTERFACE_PET)))
         {
             Hide(INTERFACE_PET);
         }
-        if (IsVisible((INTERFACE_QUEST_PROGRESS_ETC)))
-        {
-            g_pQuestProgressByEtc->SetPos(PanelColumnX(1), 0);
-        }
     }
     else if (dwKey == INTERFACE_INVENTORY_EXT)
     {
-        constexpr auto secondColumnX = PanelColumnX(2);
-        if (IsVisible(INTERFACE_MYSHOP_INVENTORY))
-        {
-            g_pMyShopInventory->SetPos(secondColumnX, 0);
-        }
-
-        if (IsVisible(INTERFACE_TRADE))
-        {
-            g_pTrade->SetPos(secondColumnX, 0);
-        }
-
-        if (IsVisible(INTERFACE_STORAGE))
-        {
-            g_pStorageInventory->SetPos(secondColumnX, 0);
-        }
-
-        if (IsVisible(INTERFACE_NPCSHOP))
-        {
-            g_pNPCShop->SetPos(secondColumnX, 0);
-        }
-
-        if (IsVisible(INTERFACE_MIXINVENTORY))
-        {
-            g_pMixInventory->SetPos(secondColumnX, 0);
-        }
-
         Show(INTERFACE_MU_HELPER_BAR);
     }
     else if (dwKey == INTERFACE_INVENTORY)
@@ -1305,7 +1287,6 @@ void CSystem::Hide(DWORD dwKey)
             m_pNewUIMng->ShowInterface(mu::ui::window::INTERFACE_LUCKYITEMWND, false);
         }
 
-        g_pMyInventory->RestoreDefaultOrUserPosition(PanelColumnX(1), 0);
         g_pMyInventory->ClosingProcess();
     }
     else if (dwKey == INTERFACE_MIXINVENTORY)
@@ -1339,7 +1320,6 @@ void CSystem::Hide(DWORD dwKey)
         {
             g_pPurchaseShopInventory->ClosingProcess();
         }
-        g_pMyInventory->RestoreDefaultOrUserPosition(PanelColumnX(1), 0);
         Show(INTERFACE_MU_HELPER_BAR);
     }
     else if (dwKey == INTERFACE_STORAGE)
@@ -1370,8 +1350,6 @@ void CSystem::Hide(DWORD dwKey)
     else if (dwKey == INTERFACE_MYQUEST)
     {
         m_pNewMyQuestInfoWindow->ClosingProcess();
-
-        m_pNewMyQuestInfoWindow->SetPos(PanelColumnX(1), 0);
     }
     else if (dwKey == INTERFACE_SENATUS)
     {
@@ -1599,6 +1577,7 @@ void CSystem::Hide(DWORD dwKey)
     }
 
     m_pNewUIMng->ShowInterface(dwKey, false);
+    UI::Placement::Arrange();
 
     UpdateMuHelperBarVisibilityForLayoutChange(dwKey);
 
@@ -1887,6 +1866,7 @@ bool CSystem::Update()
 {
     // Before any window syncs its document: see ResumeMainSceneDocuments().
     UI::RmlBridge::ResumeMainSceneDocuments();
+    UI::Placement::Update();
 
     if (m_pNewItemMng)
     {

@@ -619,14 +619,6 @@ void CMyInventory::SetPos(int x, int y)
     m_pNewInventoryCtrl->SetPos(x + 15, y + 200);
 }
 
-void CMyInventory::RestoreDefaultOrUserPosition(int defaultX, int defaultY)
-{
-    int x = defaultX;
-    int y = defaultY;
-    GameConfig::GetInstance().GetWindowPosition(L"my_inventory", x, y); // no-op (x/y stay at the defaults) if nothing was ever saved
-    SetPos(x, y);
-}
-
 const POINT& CMyInventory::GetPos() const
 {
     return m_Pos;

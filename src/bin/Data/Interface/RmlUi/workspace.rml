@@ -1,0 +1,60 @@
+<rml>
+<head>
+	<title>Workspace</title>
+	<link type="text/rcss" href="workspace.rcss"/>
+</head>
+<body>
+	<!-- Where windows go. Each .slot names its window in data-window; an open window's slot is
+	     shown (class "open") and the window is placed on it. A theme arranges regions and slots in
+	     its workspace.rcss, or forks this file to move slots between regions.
+
+	     Set by the game: #safe_area's bottom (the space the HUD takes), each content slot's size
+	     (the window's own size), and a region's height from data-ref-height, given in the docked
+	     windows' units. data-saved-position names a window's saved drag position, used while it is
+	     the first open window of its region. -->
+	<div id="safe_area">
+		<!-- Fills from the right edge in document order. -->
+		<div class="region dock-right" data-ref-height="432">
+			<div class="slot" data-window="character"></div>
+			<div class="slot" data-window="mu_helper"></div>
+			<div class="slot" data-window="mu_helper_detail"></div>
+			<div class="slot" data-window="party"></div>
+			<div class="slot" data-window="guild_info"></div>
+			<div class="slot" data-window="command"></div>
+			<div class="slot" data-window="command_list"></div>
+			<div class="slot" data-window="gold_bowman"></div>
+			<div class="slot" data-window="gold_bowman_lena"></div>
+			<div class="slot" data-window="npc_dialogue"></div>
+			<div class="slot" data-window="quest_progress"></div>
+			<div class="slot" data-window="npc_quest"></div>
+			<div class="slot" data-window="blood_castle_entry"></div>
+			<div class="slot" data-window="devil_square_entry"></div>
+			<div class="slot" data-window="castle"></div>
+			<div class="slot" data-window="guard"></div>
+			<div class="slot" data-window="gatekeeper"></div>
+			<div class="slot" data-window="gate_switch"></div>
+			<div class="slot" data-window="guild_make"></div>
+			<div class="slot" data-window="catapult"></div>
+			<div class="slot" data-window="duel_watch"></div>
+			<div class="slot" data-window="doppelganger_entry"></div>
+			<div class="slot" data-window="empire_guardian_entry"></div>
+			<div class="slot" data-window="united_marketplace"></div>
+			<div class="slot" data-window="my_quest"></div>
+			<div class="slot" data-window="pet"></div>
+			<div class="slot" data-window="quest_progress_etc"></div>
+			<div class="slot" data-window="inventory" data-saved-position="my_inventory"></div>
+			<div class="slot" data-window="inventory_extension"></div>
+			<div class="slot" data-window="storage"></div>
+			<div class="slot" data-window="storage_extension"></div>
+			<div class="slot" data-window="npc_shop"></div>
+			<div class="slot" data-window="mix"></div>
+			<div class="slot" data-window="trade"></div>
+			<div class="slot" data-window="my_shop"></div>
+			<div class="slot" data-window="purchase_shop"></div>
+			<div class="slot" data-window="lucky_coin_registration"></div>
+			<div class="slot" data-window="lucky_coin_exchange"></div>
+			<div class="slot" data-window="lucky_item"></div>
+		</div>
+	</div>
+</body>
+</rml>
