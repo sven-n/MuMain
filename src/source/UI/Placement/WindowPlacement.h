@@ -17,7 +17,10 @@ void RegisterWindow(std::uint32_t windowId, std::string_view slotName, SetPositi
 
 // Re-places every open window that has a slot. Call after a window opens or closes.
 void Arrange();
-// Once a frame: re-places windows when the screen size or UI scale changed.
+// Once a frame: re-places windows when the screen size, UI scale or HUD position changed.
 void Update();
+// Right edge, in screen pixels, of the world the open windows leave uncovered: the leftmost open
+// slot in a region marked data-covers-world, or the screen width.
+float UncoveredWorldRight();
 void Release();
 }

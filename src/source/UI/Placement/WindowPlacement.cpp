@@ -13,6 +13,7 @@
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ElementDocument.h>
 
+#include <algorithm>
 #include <cmath>
 #include <string>
 #include <unordered_map>
@@ -36,9 +37,17 @@ struct Entry
 
 std::unordered_map<std::string, Entry> g_windows;
 Rml::ElementDocument* g_workspace = nullptr;
+struct Reserve
+{
+    float top = 0.f;
+    float bottom = 0.f;
+};
+
 UI::Scaling::Transform g_lastDock{};
+Reserve g_lastReserve{};
 unsigned int g_lastWidth = 0;
 unsigned int g_lastHeight = 0;
+float g_uncoveredRight = 0.f;
 const int g_themeReloadToken = 0;
 
 void ReloadWorkspace()
@@ -104,6 +113,27 @@ void SetLength(Rml::Element* element, Rml::PropertyId property, float px)
 {
     element->SetProperty(property, Rml::Property(px, Rml::Unit::PX));
 }
+
+// The screen edge the HUD strip sits on is kept free, so docks follow a theme that moves the HUD.
+Reserve HudReserve(const UI::Scaling::Transform& dock)
+{
+    const float height = static_cast<float>(WindowHeight);
+    float left = 0.f, top = 0.f, right = 0.f, bottom = 0.f;
+    if (g_pMainFrame != nullptr && g_pMainFrame->GetStripRect(left, top, right, bottom))
+    {
+        if (bottom >= height - 2.f)
+            return {0.f, height - top};
+        if (top <= 2.f)
+            return {bottom, 0.f};
+    }
+    // HUD not on screen: keep the original strip's place, as before.
+    return {0.f, height - (dock.offsetY + UI::Scaling::DockLogicalBottom * dock.scaleY)};
+}
+
+bool SameReserve(const Reserve& a, const Reserve& b)
+{
+    return a.top == b.top && a.bottom == b.bottom;
+}
 }
 
 void RegisterWindow(std::uint32_t windowId, std::string_view slotName, SetPosition setPosition)
@@ -118,15 +148,17 @@ void Arrange()
         return;
 
     const auto dock = UI::Scaling::DockRightTransform(WindowWidth, WindowHeight);
+    const Reserve reserve = HudReserve(dock);
     g_lastDock = dock;
+    g_lastReserve = reserve;
     g_lastWidth = WindowWidth;
     g_lastHeight = WindowHeight;
 
-    // The area above the HUD, and region lengths authored in the docked windows' units.
+    // The area the HUD leaves, and region lengths authored in the docked windows' units.
     if (Rml::Element* safeArea = workspace->GetElementById("safe_area"))
     {
-        const float hudTop = dock.offsetY + UI::Scaling::DockLogicalBottom * dock.scaleY;
-        SetLength(safeArea, Rml::PropertyId::Bottom, static_cast<float>(WindowHeight) - hudTop);
+        SetLength(safeArea, Rml::PropertyId::Top, reserve.top);
+        SetLength(safeArea, Rml::PropertyId::Bottom, reserve.bottom);
     }
     Rml::ElementList regions;
     workspace->QuerySelectorAll(regions, ".region");
@@ -152,6 +184,14 @@ void Arrange()
     }
 
     workspace->UpdateDocument();
+
+    g_uncoveredRight = static_cast<float>(WindowWidth);
+    for (Rml::Element* slot : slots)
+    {
+        Rml::Element* region = slot->GetParentNode();
+        if (slot->IsClassSet("open") && region != nullptr && region->HasAttribute("data-covers-world"))
+            g_uncoveredRight = std::min(g_uncoveredRight, slot->GetAbsoluteOffset(Rml::BoxArea::Border).x);
+    }
 
     for (Rml::Element* slot : slots)
     {
@@ -188,8 +228,13 @@ void Update()
 {
     const auto dock = UI::Scaling::DockRightTransform(WindowWidth, WindowHeight);
     if (WindowWidth != g_lastWidth || WindowHeight != g_lastHeight || dock.scaleX != g_lastDock.scaleX ||
-        dock.offsetY != g_lastDock.offsetY)
+        dock.offsetY != g_lastDock.offsetY || !SameReserve(HudReserve(dock), g_lastReserve))
         Arrange();
+}
+
+float UncoveredWorldRight()
+{
+    return g_workspace != nullptr ? g_uncoveredRight : static_cast<float>(WindowWidth);
 }
 
 void Release()

@@ -1,6 +1,6 @@
 # Window placement (design proposal)
 
-**Status: approved 2026-10-05. Phases 0 and 1 implemented; phase 1 awaits in-game checks.**
+**Status: approved 2026-10-05. Phases 0–2 implemented; phases 1 and 2 await in-game checks.**
 Supersedes the "dock spacing" item in [tracked-deferrals.md](tracked-deferrals.md).
 
 ## Goal
@@ -112,11 +112,11 @@ and native code. C++ still never computes a layout itself.
 
 ### 4. HUD reserve
 
-The workspace root is padded by insets derived from the HUD parts' resolved rectangles: the edges
-the HUD covers become reserved, so docks follow a HUD a theme moves to the top or a side. This
-replaces `RoundedBottomHudTop()`/the 51-unit constant for placed windows. The HUD widgets that
-dodge open windows today (buff strip, item endurance, party list) become slots too, and move by
-flex layout instead of `SetPos(screenWidth)`.
+`#safe_area` keeps free the screen edge the HUD strip sits on, read from the main frame's
+resolved strip (`CMainFrameWindow::GetStripRect()`): its top for a bottom HUD, its bottom for a top
+HUD. Docks therefore follow a theme that moves the HUD. While the HUD is not on screen the
+original strip's place is kept. Both themes' strips end 51 dp above the bottom today, which is
+the original's height, so nothing moves yet.
 
 ### 4a. Uncovered world area
 
@@ -124,9 +124,20 @@ flex layout instead of `SetPos(screenWidth)`.
 of which window combinations cover one, two or three 190-wide columns. Gameplay presentation
 reads it: the hero's screen centre for facing the mouse (`HeroX` in `ZzzInterface.cpp`), pet HP
 bars, personal-shop titles, the macro cooldown bar, endurance tooltips, and the terrain viewport
-outside the main scene. The placement service publishes the uncovered world rectangle instead:
-the viewport minus regions the theme marks as covering the world (`data-covers-world`). A theme
-can mark a full-screen overlay region as not covering, so the hero does not shift under it.
+outside the main scene. `GetScreenWidth()` now returns the placement service's uncovered right
+edge (`UI::Placement::UncoveredWorldRight()`): the leftmost open slot in a region marked
+`data-covers-world`, converted to the 640-wide HUD space. Gens ranking and the two legacy panels
+without slots still count as one column each. A theme can leave a full-screen overlay region
+unmarked, so nothing shifts under it.
+
+At 4:3 this equals the old table. At wider screens it follows the docks' real edge, where the old
+table assumed 190 stretched units per column, so the buff strip, item endurance, party list, pet
+bars and shop titles now line up with the docks. The HUD widgets keep their own `SetPos()`; they
+need no slots while the uncovered edge positions them.
+
+`HeroX` (the point the hero's head turns from) still uses it. The world viewport no longer
+shrinks for open windows, so the hero stays at the screen centre; that mismatch predates this
+work and is left for a gameplay pass.
 
 ### 5. What a window must support for each fit
 
@@ -198,7 +209,7 @@ UI scale with the [validation matrix](validation-matrix.md).
 |---|---|
 | 0 | Done: rules classified below; fill-capability list in section 5. |
 | 1 | Done, in-game checks pending: placement service and both themes' workspaces place the right-docked windows (content fit). The `PanelColumnX`/`SetPos` juggling in `Show()`/`Hide()` is gone; Gens ranking (stretched HUD space, not the dock) keeps its own. Differences from before: with character info, inventory and its extension open, the extension now sits beside the inventory (columns 3 and 2 swapped); windows that used to overlap in column 1 now sit side by side. |
-| 2 | HUD reserve insets; HUD-dodging widgets become slots. |
+| 2 | Done, in-game checks pending: HUD reserve from the HUD strip; uncovered world edge replaces `GetScreenWidth()`'s table. |
 | 3 | Space exclusions move to the theme. |
 | 4 | Fill support: hover hit-testing, `RenderTarget` for native content per window; character info first. |
 | 5 | Remaining families: NPC windows, move map, friends, centred dialogs. |

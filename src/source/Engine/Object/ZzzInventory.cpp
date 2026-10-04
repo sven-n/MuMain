@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "UI/Placement/WindowPlacement.h"
 #include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -6728,83 +6729,19 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
 
 int GetScreenWidth()
 {
-    int iWidth = 0;
+    if (WindowWidth == 0)
+        return REFERENCE_WIDTH;
 
-    // TODO: Refactor this. Wouldn't it be easier to just count how many windows are open? ;)
+    // Right edge of the world the open docked windows leave uncovered, in the 640-wide HUD space.
+    int iWidth = static_cast<int>(
+        std::lround(UI::Placement::UncoveredWorldRight() * REFERENCE_WIDTH / static_cast<float>(WindowWidth)));
 
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY)
-        && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY_EXT)
-        && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYSHOP_INVENTORY))
+    // Docked windows the workspace does not place yet, each one column wide.
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GENSRANKING)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_REFINERY)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_SERVERDIVISION))
     {
-        iWidth = REFERENCE_WIDTH - (190 * 3);
-    }
-    else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY)
-        && (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHARACTER)
-            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP)
-            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE)
-            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE_EXT)
-            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY)
-            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE)
-            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYSHOP_INVENTORY)
-            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY_EXT)
-            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY)
-            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION)
-            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND)
-            ))
-    {
-        iWidth = REFERENCE_WIDTH - (190 * 2);
-    }
-    else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHARACTER)
-        && (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYQUEST)
-            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
-        )
-    {
-        iWidth = REFERENCE_WIDTH - (190 * 2);
-    }
-    else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHARACTER)
-        && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PET)
-        )
-    {
-        iWidth = REFERENCE_WIDTH - (190 * 2);
-    }
-    else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_REFINERY))
-    {
-        iWidth = REFERENCE_WIDTH - (190 * 2);
-    }
-    else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHARACTER)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PARTY)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCGUILDMASTER)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUILDINFO)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUARDSMAN)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_SENATUS)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GATEKEEPER)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYQUEST)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_SERVERDIVISION)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCQUEST)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GATESWITCH)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CATAPULT)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_DEVILSQUARE)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_BLOODCASTLE)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GOLD_BOWMAN)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_DUELWATCH)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_DOPPELGANGER_NPC)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GENSRANKING)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MUHELPER)
-        )
-    {
-        iWidth = REFERENCE_WIDTH - 190;
-    }
-    else
-    {
-        iWidth = REFERENCE_WIDTH;
+        iWidth = std::min(iWidth, REFERENCE_WIDTH - 190);
     }
 
     return iWidth;

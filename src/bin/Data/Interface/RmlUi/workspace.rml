@@ -8,13 +8,14 @@
 	     shown (class "open") and the window is placed on it. A theme arranges regions and slots in
 	     its workspace.rcss, or forks this file to move slots between regions.
 
-	     Set by the game: #safe_area's bottom (the space the HUD takes), each content slot's size
-	     (the window's own size), and a region's height from data-ref-height, given in the docked
-	     windows' units. data-saved-position names a window's saved drag position, used while it is
-	     the first open window of its region. -->
+	     Set by the game: #safe_area's top and bottom (the screen edge the HUD strip sits on), each
+	     content slot's size (the window's own size), and a region's height from data-ref-height,
+	     given in the docked windows' units. Open slots in a data-covers-world region narrow the world
+	     area HUD widgets centre in. data-saved-position names a window's saved drag position, used
+	     while it is the first open window of its region. -->
 	<div id="safe_area">
 		<!-- Fills from the right edge in document order. -->
-		<div class="region dock-right" data-ref-height="432">
+		<div class="region dock-right" data-ref-height="432" data-covers-world>
 			<div class="slot" data-window="character"></div>
 			<div class="slot" data-window="mu_helper"></div>
 			<div class="slot" data-window="mu_helper_detail"></div>
