@@ -40,7 +40,7 @@ decision can move to the roadmap without being renumbered.
 | D31 | How names are chosen | From the enum name in camelCase without `MODEL_`/`BITMAP_`, with collisions and marker names fixed by hand, misspellings corrected (`explotion` → `explosion`), and the types without an enum name named after the file loaded into their slot (`MODEL_SKILL_FURY_STRIKE+1` loads `EarthQuake01` → `earthQuake1`). The full list is proposed in the FX1.1 PR and reviewed there. Types that are never created get entries too; the dead ones are listed in an upstream issue. |
 | D32 | Files and house rules | One file per kind: `EffectTypes.json`, `ParticleTypes.json`, `JointTypes.json`, `SpriteTypes.json`. The rules of the item and model files: `formatVersion`, sorted by name, fixed field order, defaults left out, a writer and a test that the shipped files are in its format, names of letters and digits, errors stop the start, warnings go to the log. Documented in `docs/effect-data.md`. |
 | D33 | Loading and lookup | The catalogue is loaded once on the loading screen, next to the item model data, before the first effect is created. The registry table is built from it: the same array indexed by type, not changed after loading. A lookup stays a bounds check and one array read. No names, strings or allocations after loading. |
-| D34 | Creation values | A registry row replaces the whole legacy case, so a type moves only when every statement of its case can be written as data. `CreateParams` gets exactly the fields the moved cases need. Values are applied in one fixed order (values, then offsets, then copies). An unset field keeps what the common setup chose, or the slot's old value where the common setup sets nothing. Values the old code multiplies by `FPS_ANIMATION_FACTOR` keep that as a flag. |
+| D34 | Creation values | A registry row replaces the whole legacy case, so a type moves only when every statement of its case can be written as data. `CreateParams` gets exactly the fields the moved cases need. Values are applied in one fixed order (values, then offsets, then copies); an offset of a field a copy writes adds to the copy, and a copy reads its source as it is then, or the call's argument (`callLight`, `callScale`). An unset field keeps what the common setup chose, or the slot's old value where the common setup sets nothing. Values the old code multiplies by `FPS_ANIMATION_FACTOR` keep that as a flag. |
 | D35 | Variants by SubType | A row can hold `variants` keyed by SubType that override its values (44 cases, 47 types choose only values by SubType). |
 | D36 | Random and logic creation | Cases with `rand()` and the cases with logic stay code in FX1 (167 of 244 cases). Data with random values would have to draw `rand()` in exactly the same order and number, and values like "a random yaw, then the launch vector turned by it" are small programs. They become data in FX2, as building blocks with parameters where adjusting them is meaningful (D43). |
 | D37 | Particles and joints | Names only in FX1; their creation values wait for FX2. They have no registry, their structs differ from effects, and their creation is mostly random formulas. |
@@ -202,9 +202,11 @@ Kalima maps load the rock `Object25\Object10.bmd`).
   kind is named exactly once.
 - An unset `create` field keeps the common setup, or the slot's old value
   where the common setup sets nothing (D34). There are no new defaults.
-- A vector field can set single components (`"angle": { "y": 0 }`); a value
+- A vector field can set single components (`"angle": {"y": 0}`); an offset
   the old code multiplies by the frame factor is written
-  `{ "value": -100, "timesFrameFactor": true }`.
+  `{"value": -100, "timesFrameFactor": true}`. Offsets and copies are
+  groups: `"offset": {"position": {"z": 3400}}`,
+  `"copy": {"startPosition": "position"}` (since FX1.4).
 - Unknown fields are warnings. Unknown symbols, duplicate names and a newer
   `formatVersion` are errors that stop the start.
 
@@ -347,6 +349,41 @@ FX1.4: four cases whose other statements only repeat the common setup
 Velocity` is always 0.3 there), the empty case of `MODEL_PHOENIX_SHOT`, and
 four cases that set `Scale = Scale` (the call's scale even when it is 0).
 
+*FX1.4 done:* `create` has the fields lightEnable, alphaEnable, kind, skill,
+pkKey, timer, distance and collisionRange, the vectors position, angle and
+direction (a list of three or an object of the components that change), the
+group `offset` (position, angle, startPosition; components can be multiplied
+by the frame factor) and the group `copy` (direction from light, which
+replaces copyLightToDirection, startPosition from position, headTargetAngle
+from the call's light, scale from the call's scale). The creation cases of
+28 types are rows now: the 21 that only set values (`MODEL_DRAGON`,
+`MODEL_SHIELD_CRASH2`, `MODEL_TREE_ATTACK`, `MODEL__SPEAR`,
+`MODEL_SUMMONER_WRISTRING_EFFECT`, `MODEL_SUMMONER_CASTING_EFFECT4`,
+`MODEL_SUMMONER_SUMMON_NEIL`, `MODEL_ALICE_BUFFSKILL_EFFECT2`,
+`BITMAP_JOINT_THUNDER`, `MODEL_STAFF_OF_DESTRUCTION`, `MODEL_WAVE`,
+`MODEL_TAIL`, `MODEL_BOSS_ATTACK`, `MODEL_DARK_ELF_SKILL`,
+`MODEL_WATER_WAVE`, `BITMAP_FIRECRACKERRISE`, `BITMAP_FIRECRACKER0001`,
+`MODEL_CLOUD`, `MODEL_TOWER_GATE_PLANE`, `MODEL_KNIGHT_PLANCRACK_B`,
+`MODEL_PROJECTILE`) and the 7 types of 6 cases that keep the call's scale
+(`BITMAP_SHINY+4`, `MODEL_WINDFOCE_MIRROR`, `BITMAP_SWORD_EFFECT_MONO`,
+`MODEL_TARGETMON_EFFECT`, `BITMAP_EVENT_CLOUD`,
+`MODEL_STATUE_CRUSH_EFFECT_PIECE04` and `MODEL_DOOR_CRUSH_EFFECT_PIECE10`).
+The empty case of `MODEL_PHOENIX_SHOT` is deleted without a row. Two cases
+needed more than "values, offsets, copies": `BITMAP_JOINT_THUNDER` adds to
+the start position after copying it (an offset of a field a copy writes adds
+to the copy), and `MODEL_SUMMONER_SUMMON_NEIL` copies the call's light
+before setting its own (a copy from the call's argument); statements that
+only repeat the common setup are left out. The PR's second commit compared
+the old cases with the rows in one build: all 4,640 calls equal at the frame
+factors 1 and 0.5, the calls without an owner also with a second position,
+angle and light, and all 2,320 at 25/60. The third deletes the 28 case
+groups; g++ finds the same 6 fallthroughs. `CreateParams` keeps which groups
+of fields a row sets, so rows without the new fields cost what they did; a
+benchmark of `CreateEffect` gave 14.4 ns per creation of the 28 types with
+their cases and 15.7 ns with their rows. The `Scale = PKKey / 100.f` cases
+(`MODEL_SKILL_FURY_STRIKE+3/+4/+6/+7`, `MODEL_AURORA`, `MODEL_WAVE_FORCE`)
+compute a value from a skill argument and stay code (D36).
+
 **FX1.6–FX1.7** add the effect browser and its preview to MuEditor. They
 change no game code outside editor builds.
 
@@ -385,22 +422,43 @@ to FX2 all need it:
   Bytes that change outside the field lists show up for particles and
   joints, and the 64-bit Windows build stops when one of the structs changes
   size. Each call runs with the game's default arguments and with uneven
-  ones (scale, PK key, skill values, target index). Not recorded yet: the
-  play speed of models and the owner's fields outside its object; not varied
-  yet: live slots, terrain height, `timeGetTime`. The test binary has no
-  option window and no models, so cases that reach `CreateParticle`,
-  `CreateSprite` or `Models` cannot be recorded yet, and the monster owner
-  is not a real monster. The phase that first moves such cases adds them.
+  ones (scale, PK key, skill values, target index); since FX1.4 the calls
+  without an owner also with a second position, angle and light, so a copy
+  differs from a constant, and the comparison of a phase adds the frame
+  factor 25/60, where products with it round (its digests are not committed:
+  a compiler may fuse a multiply-add on one platform and not on another).
+  Not recorded yet: the play speed of models and the owner's fields outside
+  its object; not varied yet: live slots, terrain height, `timeGetTime`. The
+  test binary has no option window and no models, so cases that reach
+  `CreateParticle`, `CreateSprite` or `Models` cannot be recorded yet, and
+  the monster owner is not a real monster. The phase that first moves such
+  cases adds them.
 - **Tool:** `tests/effects/EffectRecorder` (since FX1.3): `RecordCall`
   records one call under given conditions, `Compare` lists the differing
   fields by name, and `EffectTestData::BuildShippedRegistry` builds the
   registry without the rows being checked, so the old cases run in the same
-  build. The digests of the whole records of the moved types, taken with
-  their old cases, are committed (`tests/effects/recordings`), so later
-  changes are checked against the old cases again;
-  `MU_EFFECT_RECORDER_WRITE=1` writes them anew.
-- **Baseline:** the old case stays reachable in the PR's working commits
-  and is deleted after the comparison; spot checks stay as tests.
+  build.
+- **Creation baseline:** `tests/effects/baseline/EffectCreation.txt` holds
+  the digests of the whole records of every type whose creation moved into
+  the catalogue, one line per recorded call, starting with the name of the
+  type and sorted by it, so later changes are checked against the old code
+  again. A phase writes the lines of the types it moves while their old code
+  is still there and its comparison shows the rows equal to it. The lines of
+  the FX1.2 types come from their rows, which FX1.2 compared with the old
+  C++ rows; their lines with the second position, angle and light were added
+  in FX1.4, and so were those of the FX1.3 types, which FX1.4 compared with
+  the FX1.3 cases put back. The test fails when a type with a row has no
+  lines or the other way round. A deliberate change to a type's creation (a
+  fix, a look correction) rewrites its lines with
+  `MU_EFFECT_RECORDER_WRITE=1` and says why in its PR. The file is a
+  baseline only while the shipped data has to behave like the old code: once
+  the data is edited on purpose (the effect editor of FX2), every edit would
+  rewrite it, so the file and its test go; the data files and their history
+  then show what changed. The recorder stays for the cases that FX2 turns
+  into building blocks, and the tests with made-up rows
+  (`tests/data/test_effect_types.cpp`) keep checking how rows are applied.
+- **Old code:** the old case stays reachable in the PR's working commits and
+  is deleted after the comparison; spot checks stay as tests.
 - **Speed:** a Release benchmark of creation and lookup, old against new,
   and the frame profile of the effect rows in a busy scene.
 

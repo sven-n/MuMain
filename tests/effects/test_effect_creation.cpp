@@ -8,7 +8,11 @@
 #include "Audio/DSPlaySound.h"
 #include "Core/Globals/_TextureIndex.h"
 #include "Core/Globals/_enum.h"
+#include "Data/GameData/EffectData/EffectKind.h"
+#include "Data/GameData/EffectData/EffectTypeCatalogue.h"
+#include "Render/Effects/EffectRegistry.h"
 
+#include <algorithm>
 #include <array>
 #include <cstdlib>
 #include <filesystem>
@@ -27,14 +31,14 @@ namespace
 {
 // The 8 types whose creation cases only set fields of CreateParams; FX1.3
 // moved them into the catalogue.
-const std::array<int, 8> CatalogueCreatedTypes = {MODEL_KENTAUROS_ARROW,
-                                                  MODEL_WARP3,
-                                                  MODEL_WARP6,
-                                                  BITMAP_SPARK + 1,
-                                                  BITMAP_SPARK + 2,
-                                                  MODEL_1_STREAMBREATHFIRE,
-                                                  MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2,
-                                                  MODEL_EFFECT_SD_AURA};
+const std::array<int, 8> Fx13Types = {MODEL_KENTAUROS_ARROW,
+                                      MODEL_WARP3,
+                                      MODEL_WARP6,
+                                      BITMAP_SPARK + 1,
+                                      BITMAP_SPARK + 2,
+                                      MODEL_1_STREAMBREATHFIRE,
+                                      MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2,
+                                      MODEL_EFFECT_SD_AURA};
 
 // Sub types the callers pass (0 to 3) and one no case handles.
 constexpr std::initializer_list<int> RecordedSubTypes = {0, 1, 2, 3, 99};
@@ -174,6 +178,28 @@ TEST_CASE("Sounds, terrain light and trails a creation changes show in the recor
     CHECK_FALSE(Find(live, "objectBlurs[1].Live").has_value());
 }
 
+TEST_CASE("The second geometry of a call shows what a row copies [effects][recorder]")
+{
+    BuildShippedRegistry();
+    // MODEL_INFINITY_ARROW4 sets its light and copies it into the direction;
+    // the light of the call stays as it was.
+    const std::vector<EffectCall> calls = SecondGeometryCallsFor(MODEL_INFINITY_ARROW4, {0});
+    REQUIRE(calls.size() == 8);
+    const EffectCall& second = calls.back();
+    CHECK(second.owner == Owner::None);
+    CHECK(second.position != calls.front().position);
+    CHECK(second.angle != calls.front().angle);
+    CHECK(second.light != calls.front().light);
+    CHECK(Describe(second, {}).find(" position 12345.5/13579.25/260.5 angle -17/101/271 light ") != std::string::npos);
+    CHECK(Describe(calls.front(), {}).find(" position ") == std::string::npos);
+
+    const Record record = RecordCall(second, {});
+    CHECK(Find(record, "Effects[0].Position[0]") == "12345.5");
+    CHECK(Find(record, "Effects[0].Angle[1]") == "101");
+    CHECK(Find(record, "Effects[0].Light[0]") == "1");
+    CHECK(Find(record, "Effects[0].Direction[1]") == "0.5");
+}
+
 TEST_CASE("A creation row that differs from the old one is caught [effects][recorder]")
 {
     BuildShippedRegistry();
@@ -230,7 +256,7 @@ TEST_CASE("The 8 types of FX1.3 create from the catalogue what their cases set [
          {{"Effects[0].LifeTime", "20"}, {"Effects[0].Scale", "0.899999976"}}},
         {MODEL_EFFECT_SD_AURA, {{"Effects[0].LifeTime", "1000"}, {"Effects[0].Scale", "1"}}},
     };
-    REQUIRE(expected.size() == CatalogueCreatedTypes.size());
+    REQUIRE(expected.size() == Fx13Types.size());
 
     BuildShippedRegistry();
     for (const Expected& type : expected)
@@ -261,10 +287,10 @@ TEST_CASE("The 8 types of FX1.3 create from the catalogue what their cases set [
         {"MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2", "0.899999976"},
         {"MODEL_EFFECT_SD_AURA", "1"},
     };
-    REQUIRE(scaleFromCaller.size() == CatalogueCreatedTypes.size());
-    for (size_t i = 0; i < CatalogueCreatedTypes.size(); ++i)
+    REQUIRE(scaleFromCaller.size() == Fx13Types.size());
+    for (size_t i = 0; i < Fx13Types.size(); ++i)
     {
-        EffectCall call = CallOf(CatalogueCreatedTypes[i]);
+        EffectCall call = CallOf(Fx13Types[i]);
         call.scale = 2.5f;
         INFO(scaleFromCaller[i].path);
         CHECK(Find(RecordCall(call, {}), "Effects[0].Scale") == scaleFromCaller[i].value);
@@ -273,12 +299,51 @@ TEST_CASE("The 8 types of FX1.3 create from the catalogue what their cases set [
 
 namespace
 {
-// The digests of the records of the 8 FX1.3 types for every call RecordAll
-// makes, taken with their old cases (the commit before the one that deleted
-// them). Set MU_EFFECT_RECORDER_WRITE=1 to write the file anew from the
-// current code.
-const std::filesystem::path CatalogueCreatedRecords =
-    std::filesystem::path(MU_EFFECT_RECORDINGS_DIR) / "CatalogueCreatedTypes.txt";
+// The creation baseline (tests/effects/baseline/EffectCreation.txt): what
+// CreateEffect does for every effect type whose creation moved from code into
+// the catalogue, as their old code did it. One line per recorded call: the
+// name of the type, the call, and the digest of its whole record.
+const std::filesystem::path CreationBaseline = MU_EFFECT_CREATION_BASELINE;
+
+constexpr const char* CreationBaselineHeader =
+    "# What CreateEffect does for the effect types whose creation moved from code into\n"
+    "# the effect catalogue: one line per recorded call, the name of the type and the\n"
+    "# call, then a digest of its whole record (what tests/effects/EffectRecorder.h\n"
+    "# records). Equal to their old code: their rows were compared with it before the\n"
+    "# code was deleted. A deliberate change to a type's creation rewrites its lines\n"
+    "# (MU_EFFECT_RECORDER_WRITE=1); the file and its test are removed once the\n"
+    "# catalogue is edited on purpose (docs/effect-data.md).\n";
+
+// Types whose creation code set nothing and was deleted without a row.
+const std::array<int, 1> CreatedWithoutRow = {MODEL_PHOENIX_SHOT};
+
+struct BaselineType
+{
+    std::string name;
+    int type;
+};
+
+// The types with creation values in the catalogue and the types created
+// without a row, sorted by name.
+std::vector<BaselineType> BaselineTypes()
+{
+    using Data::Effects::EffectKind;
+    Data::Effects::EffectTypeCatalogue catalogue;
+    catalogue.Build(EffectKind::Effect,
+                    EffectTestData::ShippedTypes().types[Data::Effects::ToIndex(EffectKind::Effect)]);
+    std::vector<BaselineType> types;
+    for (const EffectTypeCreateParams& row : catalogue.GetCreateParams())
+    {
+        types.push_back({std::string(catalogue.GetName(EffectKind::Effect, row.type)), row.type});
+    }
+    for (const int type : CreatedWithoutRow)
+    {
+        types.push_back({std::string(catalogue.GetName(EffectKind::Effect, type)), type});
+    }
+    std::sort(types.begin(), types.end(),
+              [](const BaselineType& left, const BaselineType& right) { return left.name < right.name; });
+    return types;
+}
 
 std::map<std::string, std::string> ReadDigests(const std::filesystem::path& file)
 {
@@ -298,28 +363,41 @@ std::map<std::string, std::string> ReadDigests(const std::filesystem::path& file
 }
 } // namespace
 
-// The whole record of every call, not only the values the spot checks name:
-// a change anywhere (another field, another slot, a sound, a trail) fails.
-TEST_CASE("The 8 types of FX1.3 give the records of their old cases [effects][recorder]")
+// The whole record of every call, not only the values the spot checks name: a
+// change anywhere (a row, how rows are applied, the common setup, another
+// field, another slot, a sound, a trail) fails, and so does a type that gains
+// or loses its row. MU_EFFECT_RECORDER_WRITE=1 writes the file anew from the
+// current code.
+TEST_CASE("The effect types in the catalogue create what their old code created [effects][recorder]")
 {
     BuildShippedRegistry();
-    const std::vector<Recorded> records = RecordAll(CatalogueCreatedTypes);
+    std::vector<Recorded> records;
+    for (const BaselineType& type : BaselineTypes())
+    {
+        for (const EffectCall& call : SecondGeometryCallsFor(type.type, RecordedSubTypes))
+        {
+            for (const Conditions& conditions : AllConditions())
+            {
+                records.push_back(
+                    {type.name + " " + DescribeArguments(call, conditions), RecordCall(call, conditions)});
+            }
+        }
+    }
 
     if (std::getenv("MU_EFFECT_RECORDER_WRITE") != nullptr)
     {
-        std::ofstream out(CatalogueCreatedRecords, std::ios::binary);
-        out << "# The digests of the records of the 8 types FX1.3 moved into the catalogue, one\n"
-               "# line per call (tests/effects/test_effect_creation.cpp). Taken with their old\n"
-               "# cases; written with MU_EFFECT_RECORDER_WRITE=1.\n";
+        std::filesystem::create_directories(CreationBaseline.parent_path());
+        std::ofstream out(CreationBaseline, std::ios::binary);
+        out << CreationBaselineHeader;
         for (const Recorded& recorded : records)
         {
             out << recorded.description << '\t' << Digest(recorded.record) << '\n';
         }
-        MESSAGE("wrote " << CatalogueCreatedRecords.string());
+        MESSAGE("wrote " << CreationBaseline.string());
         return;
     }
 
-    const std::map<std::string, std::string> expected = ReadDigests(CatalogueCreatedRecords);
+    const std::map<std::string, std::string> expected = ReadDigests(CreationBaseline);
     REQUIRE(expected.size() == records.size());
     for (const Recorded& recorded : records)
     {
@@ -329,4 +407,100 @@ TEST_CASE("The 8 types of FX1.3 give the records of their old cases [effects][re
         INFO(ToText(recorded.record));
         CHECK(digest->second == std::to_string(Digest(recorded.record)));
     }
+}
+
+namespace
+{
+float RecordedFloat(const Record& record, std::string_view path)
+{
+    const std::optional<std::string> value = Find(record, path);
+    REQUIRE(value.has_value());
+    return std::stof(*value);
+}
+} // namespace
+
+// FX1.4 moved the creation of these types from code into the catalogue; the
+// commit before the one that deleted their cases compared both for every sub
+// type, owner, argument set, slot pattern and the frame factors 1, 0.5 and
+// 25/60, and without an owner also with a second position, angle and light.
+// These are values the cases set that the new fields hold (the call's
+// position is 13120.25, 12480.5, 140.75, its angle 11, 22, 33 and its light
+// 0.9, 0.8, 0.7). The skill values and the PK key of the calls differ from
+// the ones the rows set, which the common setup would copy otherwise.
+TEST_CASE("The types of FX1.4 create from the catalogue what their cases set [effects][recorder]")
+{
+    BuildShippedRegistry();
+
+    // Raised by 3400, then copied into the start position; one angle component.
+    EffectCall dragonCall = CallOf(MODEL_DRAGON);
+    dragonCall.skill = 43;
+    const Record dragon = RecordCall(dragonCall, {});
+    CHECK(Find(dragon, "Effects[0].Position[2]") == "3540.75");
+    CHECK(Find(dragon, "Effects[0].StartPosition[0]") == "13120.25");
+    CHECK(Find(dragon, "Effects[0].StartPosition[2]") == "3540.75");
+    CHECK(Find(dragon, "Effects[0].Angle[0]") == "11");
+    CHECK(Find(dragon, "Effects[0].Angle[1]") == "0");
+    CHECK(Find(dragon, "Effects[0].Direction[1]") == "-35");
+    CHECK(Find(dragon, "Effects[0].Kind") == "0");
+    CHECK(Find(dragon, "Effects[0].Timer") == "0");
+    CHECK(Find(dragon, "Effects[0].Distance") == "1");
+    CHECK(Find(dragon, "Effects[0].CollisionRange") == "1");
+
+    // Copied, then the copy raised by 800.
+    const Record thunder = RecordCall(CallOf(BITMAP_JOINT_THUNDER), {});
+    CHECK(Find(thunder, "Effects[0].StartPosition[2]") == "940.75");
+    CHECK(Find(thunder, "Effects[0].Position[2]") == "140.75");
+
+    // The light of the call (the summoner passes the target there), then its own light.
+    EffectCall neilCall = CallOf(MODEL_SUMMONER_SUMMON_NEIL);
+    neilCall.skillIndex = 41;
+    const Record neil = RecordCall(neilCall, {});
+    CHECK(Find(neil, "Effects[0].HeadTargetAngle[0]") == "0.899999976");
+    CHECK(Find(neil, "Effects[0].HeadTargetAngle[2]") == "0.699999988");
+    CHECK(Find(neil, "Effects[0].Light[0]") == "1");
+    CHECK(Find(neil, "Effects[0].Skill") == "0");
+
+    const Record rise = RecordCall(CallOf(BITMAP_FIRECRACKERRISE), {});
+    CHECK(Find(rise, "Effects[0].Position[2]") == "100");
+    CHECK(Find(rise, "Effects[0].Angle[0]") == "0");
+    CHECK(Find(rise, "Effects[0].Angle[2]") == "0");
+
+    // The call's scale, also when it passes none.
+    EffectCall shiny = CallOf(BITMAP_SHINY + 4);
+    CHECK(Find(RecordCall(shiny, {}), "Effects[0].Scale") == "0");
+    shiny.scale = 1.75f;
+    CHECK(Find(RecordCall(shiny, {}), "Effects[0].Scale") == "1.75");
+    EffectCall piece = CallOf(MODEL_STATUE_CRUSH_EFFECT_PIECE04);
+    piece.pkKey = 37;
+    CHECK(Find(RecordCall(piece, {}), "Effects[0].PKKey") == "-1");
+
+    // Offsets times the frame factor, at 25/60 where the products round; the
+    // expected values are computed in the form of the old cases. volatile
+    // keeps the compiler from computing them while compiling, in another way.
+    volatile float frameFactor = 25.f / 60.f;
+    const Conditions frameRate{frameFactor, SlotPattern::A};
+    const Record staff = RecordCall(CallOf(MODEL_STAFF_OF_DESTRUCTION), frameRate);
+    float z = 140.75f;
+    z += (280.f) * frameFactor;
+    float pitch = 11.f;
+    pitch += (20.f) * frameFactor;
+    CHECK(RecordedFloat(staff, "Effects[0].Position[2]") == z);
+    CHECK(RecordedFloat(staff, "Effects[0].Angle[0]") == pitch);
+
+    const Record cloud = RecordCall(CallOf(MODEL_CLOUD), frameRate);
+    float y = 12480.5f;
+    y += (200.f) * frameFactor;
+    z = 140.75f;
+    z -= (190.f) * frameFactor;
+    CHECK(RecordedFloat(cloud, "Effects[0].Position[1]") == y);
+    CHECK(RecordedFloat(cloud, "Effects[0].Position[2]") == z);
+    // The flags of pattern A are false already.
+    CHECK(Find(RecordCall(CallOf(MODEL_CLOUD), {1.f, SlotPattern::B}), "Effects[0].LightEnable") == "false");
+
+    // Its case set nothing, so it has no row and creates with the common setup.
+    const Render::Effects::EffectDescriptor* phoenix = Render::Effects::Lookup(MODEL_PHOENIX_SHOT);
+    CHECK((phoenix == nullptr || !phoenix->create.has_value()));
+    const Record shot = RecordCall(CallOf(MODEL_PHOENIX_SHOT), {});
+    CHECK(Find(shot, "Effects[0].Live") == "true");
+    CHECK_FALSE(Find(shot, "Effects[0].LifeTime").has_value());
 }

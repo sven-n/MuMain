@@ -4,6 +4,7 @@
 #include "Behaviors/EffectBehaviors.h"
 #include "Behaviors/MoveHandlers.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <initializer_list>
 #include <vector>
@@ -16,7 +17,39 @@
 
 namespace Render::Effects
 {
-void ApplyCreateParams(OBJECT* o, const CreateParams& params)
+namespace
+{
+void SetComponents(vec3_t target, const CreateVector& vector)
+{
+    if (vector.components == 0)
+        return;
+    for (int i = 0; i < 3; ++i)
+    {
+        if (vector.components & (1 << i))
+            target[i] = vector.values[i];
+    }
+}
+
+// One statement per component, in the form the old cases had (`x += v *
+// FPS_ANIMATION_FACTOR`), so a compiler that contracts it into a fused
+// multiply-add does so for both.
+void AddComponents(vec3_t target, const CreateVector& vector)
+{
+    if (vector.components == 0)
+        return;
+    for (int i = 0; i < 3; ++i)
+    {
+        if (!(vector.components & (1 << i)))
+            continue;
+        if (vector.timesFrameFactor & (1 << i))
+            target[i] += vector.values[i] * FPS_ANIMATION_FACTOR;
+        else
+            target[i] += vector.values[i];
+    }
+}
+} // namespace
+
+void ApplyCreateParams(OBJECT* o, const CreateParams& params, const CreateCall& call)
 {
     if (params.lifeTime)
         o->LifeTime = *params.lifeTime;
@@ -36,8 +69,56 @@ void ApplyCreateParams(OBJECT* o, const CreateParams& params)
         o->Alpha = *params.alpha;
     if (params.light)
         VectorCopy(params.light->data(), o->Light);
-    if (params.copyLightToDirection)
-        VectorCopy(o->Light, o->Direction);
+    if (params.groups == 0)
+        return;
+
+    if (params.groups & CreateParams::Flags)
+    {
+        if (params.lightEnable)
+            o->LightEnable = *params.lightEnable;
+        if (params.alphaEnable)
+            o->AlphaEnable = *params.alphaEnable;
+        if (params.kind)
+            o->Kind = *params.kind;
+        if (params.skill)
+            o->Skill = *params.skill;
+    }
+    if (params.groups & CreateParams::Numbers)
+    {
+        if (params.pkKey)
+            o->PKKey = *params.pkKey;
+        if (params.timer)
+            o->Timer = *params.timer;
+        if (params.distance)
+            o->Distance = *params.distance;
+        if (params.collisionRange)
+            o->CollisionRange = *params.collisionRange;
+    }
+    if (params.groups & CreateParams::Vectors)
+    {
+        SetComponents(o->Position, params.position);
+        SetComponents(o->Angle, params.angle);
+        SetComponents(o->Direction, params.direction);
+    }
+    if (params.groups & CreateParams::Offsets)
+    {
+        AddComponents(o->Position, params.positionOffset);
+        AddComponents(o->Angle, params.angleOffset);
+    }
+    if (params.groups & CreateParams::Copies)
+    {
+        if (params.copyLightToDirection)
+            VectorCopy(o->Light, o->Direction);
+        if (params.copyPositionToStartPosition)
+            VectorCopy(o->Position, o->StartPosition);
+        if (params.copyCallLightToHeadTargetAngle)
+            VectorCopy(call.light, o->HeadTargetAngle);
+        if (params.copyCallScaleToScale)
+            o->Scale = call.scale;
+    }
+    // After the copy into it.
+    if (params.groups & CreateParams::Offsets)
+        AddComponents(o->StartPosition, params.startPositionOffset);
 }
 
 namespace
@@ -47,6 +128,28 @@ std::optional<float> ToFloat(const std::optional<double>& value)
     if (!value)
         return std::nullopt;
     return static_cast<float>(*value);
+}
+
+CreateVector ToCreateVector(const Data::Effects::EffectCreateVector& vector)
+{
+    CreateVector converted;
+    for (int i = 0; i < 3; ++i)
+    {
+        if (!vector.components[i])
+            continue;
+        converted.values[i] = static_cast<float>(*vector.components[i]);
+        converted.components |= static_cast<std::uint8_t>(1 << i);
+        if (vector.timesFrameFactor[i])
+            converted.timesFrameFactor |= static_cast<std::uint8_t>(1 << i);
+    }
+    return converted;
+}
+
+template <typename T> std::optional<T> ToInteger(const std::optional<int>& value)
+{
+    if (!value)
+        return std::nullopt;
+    return static_cast<T>(*value);
 }
 
 // The values of the catalogue as the effects use them.
@@ -67,7 +170,39 @@ CreateParams ToCreateParams(const Data::Effects::EffectCreateParams& values)
         params.light = std::array<float, 3>{static_cast<float>(light[0]), static_cast<float>(light[1]),
                                             static_cast<float>(light[2])};
     }
+
+    params.lightEnable = values.lightEnable;
+    params.alphaEnable = values.alphaEnable;
+    params.kind = ToInteger<std::uint8_t>(values.kind);
+    params.skill = ToInteger<std::uint16_t>(values.skill);
+    params.pkKey = ToFloat(values.pkKey);
+    params.timer = ToFloat(values.timer);
+    params.distance = ToFloat(values.distance);
+    params.collisionRange = ToFloat(values.collisionRange);
+    if (params.lightEnable || params.alphaEnable || params.kind || params.skill)
+        params.groups |= CreateParams::Flags;
+    if (params.pkKey || params.timer || params.distance || params.collisionRange)
+        params.groups |= CreateParams::Numbers;
+
+    params.position = ToCreateVector(values.position);
+    params.angle = ToCreateVector(values.angle);
+    params.direction = ToCreateVector(values.direction);
+    if (params.position.components || params.angle.components || params.direction.components)
+        params.groups |= CreateParams::Vectors;
+
+    params.positionOffset = ToCreateVector(values.positionOffset);
+    params.angleOffset = ToCreateVector(values.angleOffset);
+    params.startPositionOffset = ToCreateVector(values.startPositionOffset);
+    if (params.positionOffset.components || params.angleOffset.components || params.startPositionOffset.components)
+        params.groups |= CreateParams::Offsets;
+
     params.copyLightToDirection = values.copyLightToDirection;
+    params.copyPositionToStartPosition = values.copyPositionToStartPosition;
+    params.copyCallLightToHeadTargetAngle = values.copyCallLightToHeadTargetAngle;
+    params.copyCallScaleToScale = values.copyCallScaleToScale;
+    if (params.copyLightToDirection || params.copyPositionToStartPosition || params.copyCallLightToHeadTargetAngle ||
+        params.copyCallScaleToScale)
+        params.groups |= CreateParams::Copies;
     return params;
 }
 

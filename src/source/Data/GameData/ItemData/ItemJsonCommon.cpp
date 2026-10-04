@@ -108,6 +108,52 @@ size_t AppendListOnOneLine(const std::string& text, size_t position, std::string
     result += ']';
     return position + 1;
 }
+
+// Appends the members of the object that starts at `position`, the objects in
+// it and its closing '}' to `result`, without the newlines and indentation
+// (the space after each comma and colon stays). Returns the position after
+// the '}', or the end of the text when there is none.
+size_t AppendObjectOnOneLine(const std::string& text, size_t position, std::string& result)
+{
+    bool inText = false;
+    int depth = 0;
+    for (; position < text.size(); ++position)
+    {
+        const char character = text[position];
+        if (inText)
+        {
+            result += character;
+            if (character == '\\' && position + 1 < text.size())
+            {
+                result += text[++position];
+            }
+            else if (character == '"')
+            {
+                inText = false;
+            }
+            continue;
+        }
+
+        if (character == '}' && depth == 0)
+        {
+            break;
+        }
+        depth += character == '{' ? 1 : character == '}' ? -1 : 0;
+        inText = character == '"';
+        const bool afterSeparator = !result.empty() && (result.back() == ',' || result.back() == ':');
+        if (character != '\n' && (character != ' ' || afterSeparator))
+        {
+            result += character;
+        }
+    }
+    if (position == text.size())
+    {
+        // No closing '}' (the JSON writer always closes its objects).
+        return position;
+    }
+    result += '}';
+    return position + 1;
+}
 } // namespace
 
 bool ReadWholeNumber(const OrderedJson& json, long long& number)
@@ -179,6 +225,25 @@ std::string PutListsOnOneLine(const std::string& text, std::string_view key)
 
         result.append(text, position, start + listStart.size() - position);
         position = AppendListOnOneLine(text, start + listStart.size(), result);
+    }
+}
+
+std::string PutObjectsOnOneLine(const std::string& text, std::string_view key)
+{
+    const std::string objectStart = "\"" + std::string(key) + "\": {";
+    std::string result;
+    size_t position = 0;
+    while (true)
+    {
+        const size_t start = text.find(objectStart, position);
+        if (start == std::string::npos)
+        {
+            result.append(text, position, std::string::npos);
+            return result;
+        }
+
+        result.append(text, position, start + objectStart.size() - position);
+        position = AppendObjectOnOneLine(text, start + objectStart.size(), result);
     }
 }
 } // namespace Data::Items::Json

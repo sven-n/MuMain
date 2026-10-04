@@ -177,7 +177,7 @@ TEST_CASE("Effect entries are read with their creation values [data][effects]")
     const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
         {"name": "ghost", "code": "MODEL_CUNDUN_GHOST", "create": {"lifeTime": 200, "scale": 1.8, "velocity": 0.08,
          "gravity": -2, "hiddenMesh": 1, "blendMesh": -2, "blendMeshLight": 0.5, "alpha": 0,
-         "light": [0.5, 1, 0.25], "copyLightToDirection": true}},
+         "light": [0.5, 1, 0.25], "copy": {"direction": "light"}}},
         {"name": "dragon", "code": "MODEL_DRAGON"}]})",
                                    EffectKind::Effect);
     CHECK(result.issues.empty());
@@ -197,19 +197,92 @@ TEST_CASE("Effect entries are read with their creation values [data][effects]")
     CHECK_FALSE(result.types[1].create.has_value());
 }
 
+// The fields FX1.4 added for the cases that set values beyond the first ones.
+TEST_CASE("Effect entries are read with vectors, offsets and copies [data][effects]")
+{
+    const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
+        {"name": "dragon", "code": "MODEL_DRAGON", "create": {"lightEnable": false, "alphaEnable": true,
+         "kind": 255, "skill": 65535, "pkKey": -1, "timer": 0.5, "distance": 2, "collisionRange": 1,
+         "position": {"z": 100}, "angle": [0, 0, 45], "direction": {"x": 1, "y": -35},
+         "offset": {"position": {"y": {"value": 200, "timesFrameFactor": true}, "z": 3400},
+                    "angle": {"x": {"value": 20, "timesFrameFactor": false}}, "startPosition": [1, 2, 3]},
+         "copy": {"startPosition": "position", "headTargetAngle": "callLight", "scale": "callScale"}}}]})",
+                                   EffectKind::Effect);
+    CHECK(result.issues.empty());
+    REQUIRE(result.types.size() == 1);
+    REQUIRE(result.types[0].create.has_value());
+    const EffectCreateParams& params = *result.types[0].create;
+    CHECK(params.lightEnable == false);
+    CHECK(params.alphaEnable == true);
+    CHECK(params.kind == 255);
+    CHECK(params.skill == 65535);
+    CHECK(params.pkKey == -1.0);
+    CHECK(params.timer == 0.5);
+    CHECK(params.distance == 2.0);
+    CHECK(params.collisionRange == 1.0);
+    CHECK(params.position == EffectCreateVector{{std::nullopt, std::nullopt, 100.0}});
+    CHECK(params.angle == EffectCreateVector{{0.0, 0.0, 45.0}});
+    CHECK(params.direction == EffectCreateVector{{1.0, -35.0, std::nullopt}});
+    CHECK(params.positionOffset == EffectCreateVector{{std::nullopt, 200.0, 3400.0}, {false, true, false}});
+    CHECK(params.angleOffset == EffectCreateVector{{20.0, std::nullopt, std::nullopt}});
+    CHECK(params.startPositionOffset == EffectCreateVector{{1.0, 2.0, 3.0}});
+    CHECK_FALSE(params.copyLightToDirection);
+    CHECK(params.copyPositionToStartPosition);
+    CHECK(params.copyCallLightToHeadTargetAngle);
+    CHECK(params.copyCallScaleToScale);
+}
+
+TEST_CASE("Wrong vectors, offsets and copies are errors, unknown parts warnings [data][effects]")
+{
+    const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
+        {"name": "dragon", "code": "MODEL_DRAGON", "create": {"lifeTime": 2, "lightEnable": 1, "kind": 256,
+         "skill": -1, "timer": 1e39, "position": [1, 2], "angle": 5,
+         "direction": {"y": {"value": 1, "timesFrameFactor": true}, "w": 1},
+         "offset": {"position": {"x": {"timesFrameFactor": true}, "y": {"value": "far"}, "z": "up"},
+                    "angle": {}, "startPosition": {"y": {"value": 1, "timesFrameFactor": "yes"}},
+                    "scale": {"x": 1}},
+         "copy": {"startPosition": "angle", "headTargetAngle": 1, "light": "direction"}}},
+        {"name": "ghost", "code": "MODEL_CUNDUN_GHOST", "create": {"offset": 5, "copy": []}},
+        {"name": "blood", "code": "MODEL_BLOOD", "create": {"scale": 1, "direction": [0, 1, 0], "offset": {},
+         "copy": {"scale": "callScale", "direction": "light"}}}]})",
+                                   EffectKind::Effect);
+    for (const char* field : {"lightEnable", "kind", "skill", "timer", "position", "angle", "direction.y",
+                              "offset.position.x.value", "offset.position.y.value", "offset.position.z",
+                              "offset.startPosition.y.timesFrameFactor", "copy.startPosition", "copy.headTargetAngle"})
+    {
+        INFO(field);
+        CHECK(HasError(result.issues, std::string("types[0].create.") + field));
+    }
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[0].create.direction.w"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[0].create.offset.angle"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[0].create.offset.scale"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[0].create.copy.light"));
+    CHECK(HasError(result.issues, "types[1].create.offset"));
+    CHECK(HasError(result.issues, "types[1].create.copy"));
+    // A field gets one value or one copy.
+    CHECK(HasError(result.issues, "types[2].create.copy.scale"));
+    CHECK(HasError(result.issues, "types[2].create.copy.direction"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[2].create.offset"));
+
+    REQUIRE(result.types.size() == 3);
+    CHECK(result.types[0].create == EffectCreateParams{.lifeTime = 2});
+    CHECK(result.types[1].create == EffectCreateParams{});
+    CHECK(result.types[2].create == EffectCreateParams{.scale = 1, .direction = EffectCreateVector{{0.0, 1.0, 0.0}}});
+}
+
 TEST_CASE("Wrong creation values are errors, unknown ones warnings, and only effects have them [data][effects]")
 {
     const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
         {"name": "dragon", "code": "MODEL_DRAGON", "create": 5},
         {"name": "ghost", "code": "MODEL_CUNDUN_GHOST", "create": {"lifeTime": "long", "blendMesh": 1.5,
-         "hiddenMesh": -3, "light": [1, 1], "copyLightToDirection": 1, "size": 2}}]})",
+         "hiddenMesh": -3, "light": [1, 1], "copy": {"direction": 1}, "size": 2}}]})",
                                    EffectKind::Effect);
     CHECK(HasError(result.issues, "types[0].create"));
     CHECK(HasError(result.issues, "types[1].create.lifeTime"));
     CHECK(HasError(result.issues, "types[1].create.blendMesh"));
     CHECK(HasError(result.issues, "types[1].create.hiddenMesh"));
     CHECK(HasError(result.issues, "types[1].create.light"));
-    CHECK(HasError(result.issues, "types[1].create.copyLightToDirection"));
+    CHECK(HasError(result.issues, "types[1].create.copy.direction"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[1].create.size"));
     REQUIRE(result.types.size() == 2);
     CHECK_FALSE(result.types[0].create.has_value());
@@ -280,7 +353,9 @@ TEST_CASE("Creation values are written in a fixed order, unset ones left out [da
                   "        \"blendMeshLight\": 0.5,\n"
                   "        \"alpha\": 0,\n"
                   "        \"light\": [1, 0.5, 0.3],\n"
-                  "        \"copyLightToDirection\": true\n"
+                  "        \"copy\": {\n"
+                  "          \"direction\": \"light\"\n"
+                  "        }\n"
                   "      }\n"
                   "    },\n"
                   "    {\n"
@@ -306,6 +381,76 @@ TEST_CASE("Creation values are written in a fixed order, unset ones left out [da
     smoke.create = EffectCreateParams{.lifeTime = 2};
     const std::vector<EffectTypeEntry> particles = {smoke};
     CHECK(WriteEffectTypesJson(EffectKind::Particle, particles).find("create") == std::string::npos);
+}
+
+// A vector is a list when all its components are set and none is multiplied
+// by the frame factor, else an object of the components; both on one line.
+TEST_CASE("Vectors, offsets and copies are written in a fixed order, vectors on one line [data][effects]")
+{
+    EffectTypeEntry dragon{"dragon", "MODEL_DRAGON"};
+    dragon.create =
+        EffectCreateParams{.lifeTime = 1000,
+                           .light = std::array<double, 3>{1, 1, 1},
+                           .lightEnable = false,
+                           .alphaEnable = true,
+                           .kind = 0,
+                           .skill = 3,
+                           .pkKey = -1,
+                           .timer = 0,
+                           .distance = 1,
+                           .collisionRange = 1,
+                           .position = EffectCreateVector{{std::nullopt, std::nullopt, 100.0}},
+                           .angle = EffectCreateVector{{0.0, std::nullopt, std::nullopt}},
+                           .direction = EffectCreateVector{{0.0, -35.0, 0.5}},
+                           .positionOffset = EffectCreateVector{{std::nullopt, 200.0, 3400.0}, {false, true, false}},
+                           .angleOffset = EffectCreateVector{{20.0, 0.0, 0.0}, {true, true, true}},
+                           .startPositionOffset = EffectCreateVector{{std::nullopt, std::nullopt, 800.0}},
+                           .copyPositionToStartPosition = true,
+                           .copyCallLightToHeadTargetAngle = true,
+                           .copyCallScaleToScale = true};
+    const std::vector<EffectTypeEntry> types = {dragon};
+
+    const std::string text = WriteEffectTypesJson(EffectKind::Effect, types);
+    CHECK(text == "{\n"
+                  "  \"formatVersion\": 1,\n"
+                  "  \"kind\": \"effect\",\n"
+                  "  \"types\": [\n"
+                  "    {\n"
+                  "      \"name\": \"dragon\",\n"
+                  "      \"code\": \"MODEL_DRAGON\",\n"
+                  "      \"create\": {\n"
+                  "        \"lifeTime\": 1000,\n"
+                  "        \"light\": [1, 1, 1],\n"
+                  "        \"lightEnable\": false,\n"
+                  "        \"alphaEnable\": true,\n"
+                  "        \"kind\": 0,\n"
+                  "        \"skill\": 3,\n"
+                  "        \"pkKey\": -1,\n"
+                  "        \"timer\": 0,\n"
+                  "        \"distance\": 1,\n"
+                  "        \"collisionRange\": 1,\n"
+                  "        \"position\": {\"z\": 100},\n"
+                  "        \"angle\": {\"x\": 0},\n"
+                  "        \"direction\": [0, -35, 0.5],\n"
+                  "        \"offset\": {\n"
+                  "          \"position\": {\"y\": {\"value\": 200, \"timesFrameFactor\": true}, \"z\": 3400},\n"
+                  "          \"angle\": {\"x\": {\"value\": 20, \"timesFrameFactor\": true}, \"y\": {\"value\": 0, "
+                  "\"timesFrameFactor\": true}, \"z\": {\"value\": 0, \"timesFrameFactor\": true}},\n"
+                  "          \"startPosition\": {\"z\": 800}\n"
+                  "        },\n"
+                  "        \"copy\": {\n"
+                  "          \"startPosition\": \"position\",\n"
+                  "          \"headTargetAngle\": \"callLight\",\n"
+                  "          \"scale\": \"callScale\"\n"
+                  "        }\n"
+                  "      }\n"
+                  "    }\n"
+                  "  ]\n"
+                  "}\n");
+    const ReadResult result = Read(text, EffectKind::Effect);
+    CHECK(result.issues.empty());
+    REQUIRE(result.types.size() == 1);
+    CHECK(result.types[0] == dragon);
 }
 
 // Every code is an enum symbol, so the data holds no raw numbers (D28).
@@ -382,8 +527,8 @@ TEST_CASE("The effect type catalogue keeps the creation values of effects, sorte
     const auto withCreateParams = static_cast<size_t>(std::count_if(
         effects.begin(), effects.end(), [](const EffectTypeEntry& entry) { return entry.create.has_value(); }));
     // The 32 types of the 22 rows that EffectRegistry.cpp held as C++ until
-    // FX1.2, and the 8 types whose creation cases FX1.3 moved.
-    CHECK(withCreateParams == 40);
+    // FX1.2, the 8 types whose creation cases FX1.3 moved and the 28 of FX1.4.
+    CHECK(withCreateParams == 68);
 
     EffectTypeCatalogue catalogue;
     catalogue.Build(EffectKind::Effect, effects);
@@ -464,8 +609,10 @@ TEST_CASE("The effect registry converts and applies every creation value [data][
     CHECK(params.light == std::array<float, 3>{0.1f, 0.2f, 0.3f});
     CHECK(params.copyLightToDirection);
 
+    CHECK(params.groups == Render::Effects::CreateParams::Copies);
+
     OBJECT blood;
-    Render::Effects::ApplyCreateParams(&blood, params);
+    Render::Effects::ApplyCreateParams(&blood, params, {});
     CHECK(blood.LifeTime == 11.f);
     CHECK(blood.Scale == 12.f);
     CHECK(blood.Velocity == 13.f);
@@ -490,13 +637,91 @@ TEST_CASE("The effect registry converts and applies every creation value [data][
     BuildShippedRegistry();
 }
 
+// The values first, then the offsets, then the copies; an offset of a field a
+// copy writes adds to the copy. The values differ from each other and from
+// what the effect holds, so a value in the wrong field or step shows up.
+TEST_CASE("The effect registry converts and applies vectors, offsets and copies in order [data][effects]")
+{
+    const EffectTypeCreateParams row{
+        MODEL_BLOOD,
+        EffectCreateParams{.lightEnable = false,
+                           .alphaEnable = true,
+                           .kind = 21,
+                           .skill = 22,
+                           .pkKey = -23,
+                           .timer = 24,
+                           .distance = 25,
+                           .collisionRange = 26,
+                           .position = EffectCreateVector{{std::nullopt, std::nullopt, 100.0}},
+                           .angle = EffectCreateVector{{std::nullopt, 0.0, std::nullopt}},
+                           .direction = EffectCreateVector{{1.0, 2.0, 3.0}},
+                           .positionOffset = EffectCreateVector{{10.0, std::nullopt, 3400.0}, {false, false, true}},
+                           .angleOffset = EffectCreateVector{{std::nullopt, std::nullopt, 90.0}},
+                           .startPositionOffset = EffectCreateVector{{std::nullopt, 800.0, std::nullopt}},
+                           .copyPositionToStartPosition = true,
+                           .copyCallLightToHeadTargetAngle = true,
+                           .copyCallScaleToScale = true}};
+    Render::Effects::BuildRegistry(std::span<const EffectTypeCreateParams>(&row, 1));
+
+    const Render::Effects::CreateParams& params = RequireCreateParams(MODEL_BLOOD);
+    using Group = Render::Effects::CreateParams::Group;
+    CHECK(params.groups == (Group::Flags | Group::Numbers | Group::Vectors | Group::Offsets | Group::Copies));
+    CHECK(params.kind == 21);
+    CHECK(params.skill == 22);
+    CHECK(params.position.components == 0b100);
+    CHECK(params.positionOffset.values == std::array<float, 3>{10.f, 0.f, 3400.f});
+    CHECK(params.positionOffset.timesFrameFactor == 0b100);
+
+    extern float FPS_ANIMATION_FACTOR;
+    const float frameFactor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 0.5f;
+    OBJECT blood;
+    blood.LightEnable = true;
+    blood.AlphaEnable = false;
+    Vector(1000.f, 2000.f, 3000.f, blood.Position);
+    Vector(11.f, 22.f, 33.f, blood.Angle);
+    Vector(-1.f, -2.f, -3.f, blood.StartPosition);
+    blood.Scale = 0.9f;
+    const vec3_t callLight = {0.25f, 0.5f, 0.75f};
+    Render::Effects::ApplyCreateParams(&blood, params, {callLight, 0.f});
+    FPS_ANIMATION_FACTOR = frameFactor;
+
+    CHECK_FALSE(blood.LightEnable);
+    CHECK(blood.AlphaEnable);
+    CHECK(blood.Kind == 21);
+    CHECK(blood.Skill == 22);
+    CHECK(blood.PKKey == -23.f);
+    CHECK(blood.Timer == 24.f);
+    CHECK(blood.Distance == 25.f);
+    CHECK(blood.CollisionRange == 26.f);
+    // Position: z set to 100, then 3400 times the frame factor added; x offset.
+    CHECK(blood.Position[0] == 1010.f);
+    CHECK(blood.Position[1] == 2000.f);
+    CHECK(blood.Position[2] == 1800.f);
+    CHECK(blood.Angle[0] == 11.f);
+    CHECK(blood.Angle[1] == 0.f);
+    CHECK(blood.Angle[2] == 123.f);
+    CHECK(blood.Direction[0] == 1.f);
+    CHECK(blood.Direction[2] == 3.f);
+    // The start position is the position after its offsets, plus its own offset.
+    CHECK(blood.StartPosition[0] == 1010.f);
+    CHECK(blood.StartPosition[1] == 2800.f);
+    CHECK(blood.StartPosition[2] == 1800.f);
+    CHECK(blood.HeadTargetAngle[0] == 0.25f);
+    CHECK(blood.HeadTargetAngle[2] == 0.75f);
+    // The call's scale as it was passed, also 0.
+    CHECK(blood.Scale == 0.f);
+
+    BuildShippedRegistry();
+}
+
 TEST_CASE("Creation values from the catalogue are applied to new effects [data][effects]")
 {
     BuildShippedRegistry();
 
     OBJECT ghost;
     ghost.Alpha = 0.25f;
-    Render::Effects::ApplyCreateParams(&ghost, RequireCreateParams(MODEL_CUNDUN_GHOST));
+    Render::Effects::ApplyCreateParams(&ghost, RequireCreateParams(MODEL_CUNDUN_GHOST), {});
     CHECK(ghost.LifeTime == 200.f);
     CHECK(ghost.Scale == 1.80f);
     CHECK(ghost.Velocity == 0.08f);
@@ -506,7 +731,7 @@ TEST_CASE("Creation values from the catalogue are applied to new effects [data][
     CHECK(ghost.Alpha == 0.25f);
 
     OBJECT arrow;
-    Render::Effects::ApplyCreateParams(&arrow, RequireCreateParams(MODEL_INFINITY_ARROW4));
+    Render::Effects::ApplyCreateParams(&arrow, RequireCreateParams(MODEL_INFINITY_ARROW4), {});
     CHECK(arrow.Light[1] == 0.5f);
     CHECK(arrow.Direction[0] == 1.f);
     CHECK(arrow.Direction[1] == 0.5f);
