@@ -39,12 +39,6 @@ namespace
     // Reference-space size of the 3D-item preview slot -- matches C3DItemCommonMsgBox's own
     // MSGBOX_3DITEM_WIDTH/HEIGHT (CommonMessageBox.h) exactly.
     constexpr float kItem3DSize = 40.0f;
-
-    // Real screen-pixel size of the Mode::Text native input widget -- matches the field's own
-    // .gcd-input-anchor box in generic_confirm_dialog.rcss (both themes). InputBoxConfig::size
-    // needs real pixels, not a value read back from RmlUi (the anchor only supplies position).
-    constexpr int kInputFieldWidth = 150;
-    constexpr int kInputFieldHeight = 18;
 }
 
 void CGenericConfirmDialog::Create(CManager* pMng)
