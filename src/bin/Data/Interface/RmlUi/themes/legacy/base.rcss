@@ -337,9 +337,8 @@ body {
 }
 
 /* Invisible marker read by C++ via Element::GetAbsoluteOffset(), letting RCSS express a
-   real-screen anchor for still-legacy-rendered content (main_frame.rml's
-   #item_hotkey_anchor/#skill_list_anchor). visibility:hidden, not display:none, so it still gets
-   a layout pass. */
+   real-screen anchor for natively drawn content. visibility:hidden, not display:none, so it still
+   gets a layout pass. */
 .layout-anchor {
 	position: absolute;
 	visibility: hidden;

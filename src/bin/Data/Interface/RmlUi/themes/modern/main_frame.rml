@@ -13,10 +13,6 @@
 	     themes/legacy/main_frame.rml except #buttons/#buttons_top. #bars gets left/top/scale
 	     live from C++; #exp nests inside it to inherit that transform. -->
 	<div id="bars" data-style-left="bars_left + 'px'" data-style-top="bars_top + 'px'" data-style-transform="'scale(' + bars_scale + ')'">
-		<!-- Read-only-from-C++ anchors marking where the legacy item-hotkey/skill-hotkey bands
-		     go, so each theme controls the anchor without C++ knowing which theme is active. -->
-		<div id="item_hotkey_anchor" class="layout-anchor"></div>
-		<div id="skill_list_anchor" class="layout-anchor"></div>
 		<!-- #gauge_frame is declared AFTER the fill divs -- same-stacking-level siblings paint in
 		     DOM order, so declaring it first would let the fills' solid backgrounds paint over
 		     its thin top border. -->

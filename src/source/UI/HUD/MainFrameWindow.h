@@ -246,39 +246,18 @@ namespace mu::ui::window
         int m_iHoveredGridSkillIndex = -1;
     };
 
-    // This file welds three classes: this one (frame chrome + HP/MP/AG/SD/EXP bars + 5 corner
-    // buttons, RmlUi), CSkillList (hotkey row/grid/pet commands, RmlUi), and CItemHotKey
-    // (QWER item slots, permanently native 3D icon render -- only #item_slots' hover/stack-count
-    // chrome moved to RmlUi).
+    // This file welds three classes: this one (frame chrome, HP/MP/AG/SD/EXP bars, corner
+    // buttons), CSkillList (hotkey row, grid, pet commands) and CItemHotKey (Q/W/E/R slots, whose
+    // native 3D icons are drawn into render targets). All of it is drawn by main_frame.rml.
     //
-    // Render() is a thin passthrough, not a full no-op: RmlUi always paints last in the frame, so
-    // the center-band background chrome stays under the RmlUi skill icons and the native 3D
-    // potions. Render() still calls RenderLeftFrame()/RenderCenterFrame() (chrome for regions
-    // with native content); the chrome/parts for fully-RmlUi regions (right frame, exp
-    // background, buttons, gauges) are gone.
+    // UpdateMouseEvent() always reports "not consumed": RmlUi hit-tests the HUD. UpdateKeyEvent()
+    // still handles the Q/W/E/R item hotkeys.
     //
-    // UpdateMouseEvent() drops BtnProcess() (RmlUi now hit-tests the corner buttons) and always
-    // reports "not consumed". UpdateKeyEvent() is unchanged -- still gates legacy CItemHotKey
-    // Q/W/E/R handling.
-    //
-    // Known simplifications: no "gained EXP" flash overlay; HP/MP/AG/SD/EXP readouts use plain
-    // RCSS text instead of a digit-sprite atlas; gauge fill is a flat color, not the legacy
-    // texture (a stretched `image()` decorator would visibly distort it, and clipped-oversized-
-    // image doesn't work in this RmlUi build -- see CBuffStrip); corner buttons only reproduce
-    // "normal"/"panel-open" frames, with hover done via a CSS brightness filter.
+    // Known simplifications: no "gained EXP" flash overlay; readouts are plain text instead of the
+    // digit-sprite atlas.
     class CMainFrameWindow : public CObject
     {
     public:
-        enum IMAGE_LIST
-        {
-            // Gauge/button textures are loaded by RmlUi directly (see main_frame.rcss's
-            // @spritesheet blocks), not here.
-            IMAGE_MENU_1 = BITMAP_INTERFACE_NEW_MAINFRAME_BEGIN,	// newui_menu01.jpg
-            IMAGE_MENU_2,		// newui_menu02.jpg
-            IMAGE_MENU_3,		// newui_menu03.jpg
-            IMAGE_MENU_2_1,
-        };
-
         CMainFrameWindow();
         virtual ~CMainFrameWindow();
 
@@ -324,19 +303,7 @@ namespace mu::ui::window
         void RmlClickFriend() { m_bRmlFriendClicked = true; }
         void RmlClickWindow() { m_bRmlWindowClicked = true; }
 
-        // Pixel X offset read from main_frame.rml's #item_hotkey_anchor/#skill_list_anchor
-        // markers, so the still-legacy item-hotkey/skill-hotkey bands follow wherever the active
-        // theme's RCSS positions them. CSkillList reads GetSkillListOffsetX() via g_pMainFrame.
-        float GetItemHotkeyOffsetX() const { return m_fItemHotkeyOffsetX; }
-        float GetSkillListOffsetX() const { return m_fSkillListOffsetX; }
-
     private:
-        void LoadImages();
-        void UnloadImages();
-
-        void RenderLeftFrame();
-        void RenderCenterFrame();
-
         void SyncRmlModel();
         void BuildRmlUi();
 
@@ -355,18 +322,13 @@ namespace mu::ui::window
         __int64 m_dwPreExp;
         __int64 m_dwGetExp;
 
-        // See GetItemHotkeyOffsetX()/GetSkillListOffsetX() above. Recomputed every frame in
-        // SyncRmlModel(); 0.f until the RmlUi doc exists.
-        float m_fItemHotkeyOffsetX = 0.f;
-        float m_fSkillListOffsetX = 0.f;
-
         bool m_bButtonBlink;
 
         struct MainFrameRmlModel
         {
             // #bars/#buttons/#exp share one transform group, bound every frame from
             // UI::Scaling::BottomHudCenterTransform() (clamped 1x-2x scale, folds in
-            // GetUIScalePercent()) so it tracks the still-legacy center-band chrome exactly.
+            // GetUIScalePercent()).
             // Buttons and exp are nested inside #bars in main_frame.rml to inherit this transform
             // rather than each needing their own binding. Lengths in main_frame.rcss stay `px`
             // (not `dp`) so they scale via bars_scale only, not a second time via RmlUi's
@@ -428,8 +390,8 @@ namespace mu::ui::window
             // see that method's comment). Gates #skill_grid/#pet_skill_row visibility; cell arrays
             // are rebuilt each frame while open, left stale (harmless, hidden) while closed.
             bool skillGridOpen = false;
-            // CSkillList::IsSkillListUp(): the compact row shows its upper set. A theme drawing
-            // its own chrome highlights the band for it, as RenderCenterFrame()'s quad did.
+            // CSkillList::IsSkillListUp(): the compact row shows its upper set, which the theme
+            // highlights (#skill_list_highlight).
             bool skillListUp = false;
             std::vector<SkillCellEntry> skillGridCells;
             std::vector<SkillCellEntry> petSkillCells;

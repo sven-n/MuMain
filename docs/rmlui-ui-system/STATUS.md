@@ -617,14 +617,9 @@ for "the full architecture is in place":
   precomputed alternatives" pattern, e.g. `main_frame`'s `hp_text` vs `hp_current_text`, as false
   drift).
 - ~~Two C++ call sites branch on theme *name*, violating `architecture-principles.md` §30.~~
-  **Fixed 2026-09-04.** `MainFrameWindow.cpp`'s background-fill-behind-legacy-icons and
-  selected-skill-slot-highlight logic (4 call sites total, not 2 — see `tracked-deferrals.md`'s
-  "Pilots to revisit" table) now branch on `UI::RmlBridge::ThemeProvidesOwnIconChrome()`, a declared capability
-  read from an optional `themes/<name>/theme.ini` (`[Capabilities] ProvidesOwnIconChrome=1`) —
-  missing file/key defaults to false, so only `modern` (the one theme with non-default behavior)
-  needed a new file. The underlying paint-order constraint itself is unchanged (see the next
-  entry) — this fix is the capability flag the entry below already anticipated, not a removal of
-  the conditional.
+  **Fixed 2026-09-04** with a declared capability, `ProvidesOwnIconChrome` in `theme.ini`, and
+  later removed outright: once the legacy main-frame chrome became RCSS decorators, no C++ was
+  left to switch off for the modern theme.
 - ~~RmlUi rendering strictly last in the frame — a real, systemic constraint, not one HUD
   window's quirk.~~ **Phase 1 (the primitive + one proven caller) built 2026-09-04.** Two
   directions:

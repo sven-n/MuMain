@@ -15,10 +15,7 @@
 	width: 640px;
 	height: 39px;
 }
-/* HP/SD stack far left, MP/AG stack far right, potions+skills centered between -- offsets below
-   must match #item_slots/#skill_slots exactly (kept in sync by hand). */
-#item_hotkey_anchor { left: 140px; top: 0px; }
-#skill_list_anchor  { left: 78px;  top: 0px; }
+/* HP/SD stack far left, MP/AG stack far right, potions and skills centred between. */
 
 .slot-frame {
 	border: 1px token(border-frame);
@@ -76,7 +73,7 @@
 	border-radius: 0 3px 3px 0;
 	pointer-events: none;
 }
-/* The item band starts at #item_hotkey_anchor; the skill band 214px past #skill_list_anchor --
+/* The item band sits under #item_slots; the skill band 214px past #skill_slots' origin --
    214 to 424 pads the skill icons' 222-416 by 8px a side, as the item band pads the potions, so
    the segments meet flush. The highlight is the original RenderCenterFrame() quad,
    RenderColorQuadARGB(222, kHudTop, 160, 40, 0x40FFFFFF), shown while the hotkey row is on its
@@ -200,9 +197,8 @@
 	left: 240px;
 }
 
-/* Decorative item-hotkey (potion) / skill-icon slot outlines, with no border or fill of their own.
-   Wrapper offsets must match #item_hotkey_anchor/#skill_list_anchor exactly (kept in sync by
-   hand). */
+/* Item-hotkey (potion) and skill-icon slots, with no border or fill of their own: the bands
+   above back them, so keep the band offsets in step with these wrappers. */
 #item_slots { position: absolute; left: 140px; top: 0; }
 #skill_slots { position: absolute; left: 78px; top: 0; }
 

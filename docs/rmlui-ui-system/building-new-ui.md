@@ -125,7 +125,7 @@ set its own container and let the theme address them with `:nth-child` (`engine-
    and a boolean; let RCSS own the colour. Composing them into one CSS string hands the theme's
    share to C++ permanently.
 10. **Branch on a declared theme capability, never a theme name** (§30) — `theme.ini`'s
-    `[Capabilities]`, read via `ThemeProvidesOwnIconChrome()`/`ThemeUsesNativeTextSize()`. Better
+    `[Capabilities]`, read via `ThemeUsesNativeTextSize()`. Better
     still, check for the content itself (`ThemeProvidesDocument()`) when that can answer.
 11. **Expose a purpose-built view model, never a game object.** Currently true of all ~98
     registered structs — don't be the first exception.

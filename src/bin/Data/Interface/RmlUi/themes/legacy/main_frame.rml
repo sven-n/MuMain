@@ -13,10 +13,12 @@
 	     #buttons_top. #bars gets left/top/scale live from C++; #buttons/#exp nest inside it to
 	     inherit that transform. -->
 	<div id="bars" data-style-left="bars_left + 'px'" data-style-top="bars_top + 'px'" data-style-transform="'scale(' + bars_scale + ')'">
-		<!-- Read-only-from-C++ anchors marking where the legacy item-hotkey/skill-hotkey bands
-		     go, so each theme controls the anchor without C++ knowing which theme is active. -->
-		<div id="item_hotkey_anchor" class="layout-anchor"></div>
-		<div id="skill_list_anchor" class="layout-anchor"></div>
+		<!-- The original menu art behind the slots and gauges, and the skill row's upper-set
+		     highlight. -->
+		<div id="frame_left" class="frame-art"></div>
+		<div id="frame_middle" class="frame-art"></div>
+		<div id="frame_right" class="frame-art"></div>
+		<div id="skill_list_highlight" data-class-hidden="!skill_list_up"></div>
 		<div id="gauge_bg_left" class="slot-frame slot-fill"></div>
 		<div id="gauge_bg_right" class="slot-frame slot-fill"></div>
 		<div id="bar_hp" class="gauge-slot slot-frame slot-fill">

@@ -12,7 +12,15 @@
 	width: 640px;
 	height: 39px;
 }
-#item_hotkey_anchor, #skill_list_anchor { left: 0px; top: 0px; }
+/* The original menu art: newui_menu01's first 256px, newui_menu02, then newui_menu03's first
+   104px up to the buttons; the highlight is newui_menu02-03 over the hotkey row while it shows its
+   upper set. Each sheet's lower 10px is the EXP frame (#exp). */
+.frame-art, #skill_list_highlight { position: absolute; top: 429px; height: 41px; pointer-events: none; }
+#frame_left   { left: 0px;   width: 256px; decorator: image(mainframe-frame-left); }
+#frame_middle { left: 256px; width: 128px; decorator: image(mainframe-frame-middle); }
+#frame_right  { left: 384px; width: 104px; decorator: image(mainframe-frame-right); }
+@spritesheet mainframe-highlight-sheet { src: "../../../newui_menu02-03.jpg"; mainframe-skill-list-highlight: 0px 0px 160px 40px; }
+#skill_list_highlight { left: 222px; width: 160px; height: 40px; decorator: image(mainframe-skill-list-highlight); }
 /* pointer-events:auto required -- otherwise these inherit body's none (base.rcss), and
    #bar_hp:hover ~ .tooltip-hp etc. below could never fire. */
 .gauge-slot {
@@ -312,9 +320,9 @@
 	pointer-events: auto;
 }
 /* Original menu artwork's bottom strip, independent of the progress fill. */
-@spritesheet mainframe-exp-left-sheet { src: "../../../newui_menu01.jpg"; mainframe-exp-left: 0px 41px 256px 10px; }
-@spritesheet mainframe-exp-middle-sheet { src: "../../../newui_menu02.jpg"; mainframe-exp-middle: 0px 41px 128px 10px; }
-@spritesheet mainframe-exp-right-sheet { src: "../../../partCharge1/newui_menu03.jpg"; mainframe-exp-right: 0px 41px 256px 10px; }
+@spritesheet mainframe-menu01-sheet { src: "../../../newui_menu01.jpg"; mainframe-frame-left: 0px 0px 256px 41px; mainframe-exp-left: 0px 41px 256px 10px; }
+@spritesheet mainframe-menu02-sheet { src: "../../../newui_menu02.jpg"; mainframe-frame-middle: 0px 0px 128px 41px; mainframe-exp-middle: 0px 41px 128px 10px; }
+@spritesheet mainframe-menu03-sheet { src: "../../../partCharge1/newui_menu03.jpg"; mainframe-frame-right: 0px 0px 104px 41px; mainframe-exp-right: 0px 41px 256px 10px; }
 .exp-frame { position: absolute; top: 0px; height: 10px; pointer-events: none; }
 #exp_frame_left { left: 0px; width: 256px; decorator: image(mainframe-exp-left); }
 #exp_frame_middle { left: 256px; width: 128px; decorator: image(mainframe-exp-middle); }

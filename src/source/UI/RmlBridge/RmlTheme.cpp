@@ -103,8 +103,7 @@ namespace UI::RmlBridge
         // RML's <head> (a document typically links two: base.rcss, then its own <name>.rcss) and
         // substitutes each stylesheet independently, in place, preserving order.
         //
-        // Content-driven, not theme-name-driven (same reasoning as ThemeProvidesOwnIconChrome()
-        // above): a stylesheet with no token(...) marker leaves
+        // Content-driven, not theme-name-driven: a stylesheet with no token(...) marker leaves
         // its own <link> untouched, so `legacy` never enters the substitution branch at all.
         std::string InlineTokenizedStylesheet(const std::string& rmlText, const std::string& resolvedRmlPath)
         {
@@ -154,12 +153,6 @@ namespace UI::RmlBridge
             return name;
         }
 
-        bool ComputeProvidesOwnIconChrome(const std::string& themeName)
-        {
-            const std::string iniPath = "Data/Interface/RmlUi/themes/" + themeName + "/theme.ini";
-            return GetPrivateProfileIntW(L"Capabilities", L"ProvidesOwnIconChrome", 0, WidenAscii(iniPath).c_str()) != 0;
-        }
-
         bool ComputeUsesNativeTextSize(const std::string& themeName)
         {
             const std::string iniPath = "Data/Interface/RmlUi/themes/" + themeName + "/theme.ini";
@@ -172,21 +165,11 @@ namespace UI::RmlBridge
             return usesNativeTextSize;
         }
 
-        bool& ProvidesOwnIconChromeStorage()
-        {
-            static bool providesOwnIconChrome = ComputeProvidesOwnIconChrome(ActiveThemeNameStorage());
-            return providesOwnIconChrome;
-        }
     }
 
     const std::string& GetActiveThemeName()
     {
         return ActiveThemeNameStorage();
-    }
-
-    bool ThemeProvidesOwnIconChrome()
-    {
-        return ProvidesOwnIconChromeStorage();
     }
 
     bool ThemeUsesNativeTextSize()
@@ -197,7 +180,6 @@ namespace UI::RmlBridge
     void SetActiveThemeName(const std::string& themeName)
     {
         ActiveThemeNameStorage() = ToLower(themeName);
-        ProvidesOwnIconChromeStorage() = ComputeProvidesOwnIconChrome(ActiveThemeNameStorage());
         UsesNativeTextSizeStorage() = ComputeUsesNativeTextSize(ActiveThemeNameStorage());
 
         // Both themes deliberately reuse the same <template name="..."> for a shared concept

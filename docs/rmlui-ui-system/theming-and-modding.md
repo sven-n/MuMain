@@ -336,12 +336,11 @@ coordinate into `dp`.
   the theme-reload registry (previous section), so `$theme` covers every themed window that exists
   today. Extending a new window to support theming is the same established pattern for both
   halves, not new design work.
-- **Theme identity must never drive C++ branching** — `architecture-principles.md` §30. Fixed
-  2026-09-04: `MainFrameWindow.cpp`'s background-fill and skill-highlight logic used to key
-  on `GetActiveThemeName() == "modern"`; both now key on `UI::RmlBridge::ThemeProvidesOwnIconChrome()`,
-  a declared capability (`themes/modern/theme.ini`) — see `STATUS.md` for the real render-ordering
-  constraint that makes the conditional itself legitimate (only the name-check was the violation),
-  and the next bullet for whether that constraint is actually permanent.
+- **Theme identity must never drive C++ branching** — `architecture-principles.md` §30. Where a
+  theme must change C++ behaviour, it declares a capability in `theme.ini` (`NativeTextSize` is the
+  one in use). Prefer removing the need: the main frame's `ProvidesOwnIconChrome` existed only so
+  C++ could skip drawing legacy chrome for the modern theme, and went away once that chrome was
+  RCSS in the legacy theme's own stylesheet.
 - **RmlUi rendering strictly last in the frame is an integration choice, not a proven RmlUi
   requirement.** `RmlUiRuntime::Render()` fires from one fixed pre-submit callback, always after
   every legacy 2D/3D draw call for the frame — which is *why* the conditional above exists (an

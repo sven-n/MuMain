@@ -44,20 +44,6 @@
 #include "GameLogic/Quests/QuestMng.h"
 #include "UI/Social/FriendWindow.h"
 
-namespace
-{
-    // Still used by RenderLeftFrame()/RenderCenterFrame(), the two chrome regions that still host legacy content.
-    constexpr float kHudTop = 429.0f;
-    constexpr float kHudContentHeight = 41.0f;
-    constexpr float kLeftBandWidth = 152.0f;
-    constexpr float kCenterBandStart = 152.0f;
-    constexpr float kMenu1CenterWidth = 104.0f;
-    constexpr float kMenu2Start = 256.0f;
-    constexpr float kMenu2Width = 128.0f;
-    constexpr float kMenu3Start = 384.0f;
-    constexpr float kMenu3CenterWidth = 104.0f;
-}
-
 mu::ui::window::CMainFrameWindow::CMainFrameWindow()
 {
     m_bExpEffect = false;
@@ -72,22 +58,6 @@ mu::ui::window::CMainFrameWindow::~CMainFrameWindow()
     Release();
 }
 
-void mu::ui::window::CMainFrameWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_menu01.jpg", IMAGE_MENU_1, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_menu02.jpg", IMAGE_MENU_2, GL_LINEAR);
-    LoadBitmap(L"Interface\\partCharge1\\newui_menu03.jpg", IMAGE_MENU_3, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_menu02-03.jpg", IMAGE_MENU_2_1, GL_LINEAR);
-}
-
-void mu::ui::window::CMainFrameWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_MENU_1);
-    DeleteBitmap(IMAGE_MENU_2);
-    DeleteBitmap(IMAGE_MENU_3);
-    DeleteBitmap(IMAGE_MENU_2_1);
-}
-
 bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
@@ -95,8 +65,6 @@ bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng)
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MAINFRAME, this);
-
-    LoadImages();
 
     // Guarded so the doc/model are created once, even though Create() re-runs on resolution change.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
@@ -122,8 +90,7 @@ struct SlotBox
 
 // A hotkey-row element's box in #bars's local reference px. GetAbsoluteOffset() ignores
 // #bars's CSS scale, so the difference to #bars's own offset is already unscaled (the same
-// convention as GetSkillListOffsetX()); it follows each theme's RCSS instead of C++ copies of
-// the slot positions.
+// it follows each theme's RCSS instead of C++ copies of the slot positions.
 SlotBox SlotBoxInBars(Rml::Element* element)
 {
     SlotBox box;
@@ -339,7 +306,6 @@ void mu::ui::window::CMainFrameWindow::ReloadRmlTheme()
 
 void mu::ui::window::CMainFrameWindow::Release()
 {
-    UnloadImages();
     m_ItemHotKey.SetSlotIconsShown(false);
 
     if (m_pNewUIMng)
@@ -356,74 +322,15 @@ void mu::ui::window::CMainFrameWindow::Release()
         m_pRmlTopDoc->Hide();
 }
 
+// Everything this window shows is in main_frame.rml; SyncRmlModel() feeds it from Update().
 bool mu::ui::window::CMainFrameWindow::Render()
 {
-    // Thin passthrough, not a full no-op: only the two chrome bands under native or RmlUi icons
-    // (item hotkeys, skill list) still draw here; the rest moved to RmlUi and is synced by
-    // SyncRmlModel().
-    //
-    // leftTransform/centerTransform each add their own theme-provided offset
-    // (GetItemHotkeyOffsetX()/GetSkillListOffsetX()) on top of the shared BottomHudCenterTransform,
-    // so a theme can reposition the item-hotkey/skill-hotkey bands independently via RCSS.
-    //
-    // `* baseTransform.scaleX` is required: GetAbsoluteOffset() ignores CSS `transform: scale()`,
-    // so the offsets above are unscaled reference-pixel deltas, not real screen pixels -- adding
-    // them raw would under-shift the icons relative to the correctly-scaled RmlUi outline boxes.
-    EnableAlphaTest();
-
-    const auto baseTransform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
-
-    auto leftTransform = baseTransform;
-    leftTransform.offsetX += GetItemHotkeyOffsetX() * baseTransform.scaleX;
-
-    auto centerTransform = baseTransform;
-    centerTransform.offsetX += GetSkillListOffsetX() * baseTransform.scaleX;
-
-    {
-        UI::Scaling::ScopedActiveTransform layout(leftTransform);
-        RenderLeftFrame();
-    }
-    {
-        UI::Scaling::ScopedActiveTransform layout(centerTransform);
-        RenderCenterFrame();
-    }
-
-    DisableAlphaBlend();
-
     return true;
 }
 
 bool mu::ui::window::CMainFrameWindow::IsVisible() const
 {
     return CObject::IsVisible();
-}
-
-// A theme that provides its own icon chrome draws the strip's backing in main_frame.rml itself
-// (#item_band_fill, #skill_band_fill); only the legacy art is drawn here.
-void mu::ui::window::CMainFrameWindow::RenderLeftFrame()
-{
-    if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
-        return;
-
-    RenderImageStretch(IMAGE_MENU_1, 0.0f, kHudTop, kLeftBandWidth, kHudContentHeight,
-                       0.0f, 0.0f, kLeftBandWidth, kHudContentHeight);
-}
-
-void mu::ui::window::CMainFrameWindow::RenderCenterFrame()
-{
-    // See RenderLeftFrame(): such a theme draws this band and its skill-list highlight itself.
-    if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
-        return;
-
-    RenderImageStretch(IMAGE_MENU_1, kCenterBandStart, kHudTop, kMenu1CenterWidth, kHudContentHeight,
-                       kCenterBandStart, 0.0f, kMenu1CenterWidth, kHudContentHeight);
-    RenderImageStretch(IMAGE_MENU_2, kMenu2Start, kHudTop, kMenu2Width, kHudContentHeight,
-                       0.0f, 0.0f, kMenu2Width, kHudContentHeight);
-    RenderImageStretch(IMAGE_MENU_3, kMenu3Start, kHudTop, kMenu3CenterWidth, kHudContentHeight,
-                       0.0f, 0.0f, kMenu3CenterWidth, kHudContentHeight);
-
-    if (g_pSkillList->IsSkillListUp())
-        RenderImage(IMAGE_MENU_2_1, 222.0f, kHudTop, 160.0f, 40.0f);
 }
 
 // RenderRightFrame()/RenderExperienceBackground()/RenderLifeMana()/RenderGuageAG()/RenderGuageSD()/
@@ -585,8 +492,7 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
         syncText(field, boundName, StringUtils::WideToNarrow(text));
     };
 
-    // Shared #bars/#buttons/#exp transform, tracking the legacy center-band chrome's scale (see
-    // MainFrameRmlModel::barsLeft). Maps static reference-pixel coordinates onto real window
+    // Shared #bars/#buttons/#exp transform (see MainFrameRmlModel::barsLeft). Maps static reference-pixel coordinates onto real window
     // pixels: screenPos = refPos * scale + offset.
     {
         const auto centerTransform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
@@ -595,15 +501,6 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
         syncFloat(&MainFrameRmlModel::barsScale, "bars_scale", centerTransform.scaleX);
         syncFloat(&MainFrameRmlModel::hintPx, "hint_px",
                   UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, centerTransform));
-
-        // Item-hotkey/skill-hotkey band offsets, read from #item_hotkey_anchor/#skill_list_anchor's
-        // real screen position and turned into a delta from centerTransform's offsetX, so Render()
-        // draws the legacy chrome under the bands this theme placed. One frame of lag is possible
-        // (harmless -- these markers only move on theme change).
-        if (Rml::Element* pAnchor = m_pRmlDoc->GetElementById("item_hotkey_anchor"))
-            m_fItemHotkeyOffsetX = pAnchor->GetAbsoluteOffset().x - centerTransform.offsetX;
-        if (Rml::Element* pAnchor = m_pRmlDoc->GetElementById("skill_list_anchor"))
-            m_fSkillListOffsetX = pAnchor->GetAbsoluteOffset().x - centerTransform.offsetX;
 
         m_ItemHotKey.SyncSlotIcons(m_pRmlDoc, centerTransform.scaleX);
     }

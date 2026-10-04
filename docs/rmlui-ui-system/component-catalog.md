@@ -291,7 +291,7 @@ reading them as RGB swaps red and blue.
 
 `UI::RmlBridge` (`RmlTheme.h`): `LoadThemedDocument()` (the one entry point every migrated window
 uses instead of `Context::LoadDocument` directly — makes "add a theme" a drop-a-folder operation),
-`GetActiveThemeName()`, `ThemeProvidesOwnIconChrome()` (a declared theme capability,
+`GetActiveThemeName()`, `ThemeUsesNativeTextSize()` (a declared theme capability,
 `architecture-principles.md` §30 — see `theming-and-modding.md` for the pattern to follow for any
 future capability flag). See `theming-and-modding.md`'s "Forking a theme's RML" section for the
 per-theme RML/RCSS override mechanism itself, not a separate component but part of this same

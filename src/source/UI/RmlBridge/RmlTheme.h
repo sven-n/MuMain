@@ -36,7 +36,7 @@ namespace UI::RmlBridge
     // writes to, not necessarily GameConfig's current value.
     const std::string& GetActiveThemeName();
 
-    // Overwrites the live active-theme cache GetActiveThemeName()/ThemeProvidesOwnIconChrome() read
+    // Overwrites the live active-theme cache GetActiveThemeName() reads
     // from (lowercased, same normalization GetActiveThemeName() has always applied). Does not touch
     // GameConfig and does not rebuild any window's document by itself -- see this file's top comment.
     // Does clear RmlUi's own template cache (Rml::Factory::ClearTemplateCache()), since two themes'
@@ -64,18 +64,10 @@ namespace UI::RmlBridge
     // modder-supplied theme with no theme.ini at all.
     std::string GetThemeDisplayName(const std::string& themeName);
 
-    // A declared theme capability (C++ must never branch on a theme's NAME -- a theme wanting
-    // non-default behavior states that want itself, via an optional themes/<name>/theme.ini,
-    // [Capabilities] section, key "ProvidesOwnIconChrome").
-    // True means the active theme supplies its own RmlUi border/fill/highlight treatment for the
-    // still-legacy-2D-rendered skill/potion icon chrome (MainFrameWindow.cpp), so C++ should
-    // skip drawing the legacy sprite fill/highlight there. Missing file or missing key both
-    // default to false (draw the real legacy sprite) -- the safe default for any theme that
-    // hasn't declared an opinion, including a future modder-supplied one.
-    bool ThemeProvidesOwnIconChrome();
-
+    // Declared theme capabilities: an optional themes/<name>/theme.ini [Capabilities] section,
+    // missing keys false. C++ never branches on a theme's name.
     // Whether the active theme sizes opted-in documents' text like the original client's
-    // (theme.ini [Capabilities] NativeTextSize=1) -- see RmlNativeText.h.
+    // (NativeTextSize=1) -- see RmlNativeText.h.
     bool ThemeUsesNativeTextSize();
 
     // Builds the virtual source URL a themed document should be loaded against, e.g.
