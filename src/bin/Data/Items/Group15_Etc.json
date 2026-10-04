@@ -6,6 +6,7 @@
       "number": 0,
       "name": {
         "en": "Scroll of Poison",
+        "de": "Schriftrolle: Poison",
         "es": "Rollo de Veneno",
         "pt": "Pergaminho de veneno"
       },
@@ -28,6 +29,7 @@
       "number": 1,
       "name": {
         "en": "Scroll of Meteorite",
+        "de": "Schriftrolle: Meteorite",
         "es": "Rollo de Meteorito",
         "pt": "Pergaminho de meteorito"
       },
@@ -51,6 +53,7 @@
       "number": 2,
       "name": {
         "en": "Scroll of Lighting",
+        "de": "Schriftrolle: Lightning",
         "es": "Rollo de Relámpago",
         "pt": "Pergaminho de relâmpago"
       },
@@ -73,6 +76,7 @@
       "number": 3,
       "name": {
         "en": "Scroll of Fire Ball",
+        "de": "Schriftrolle: Fire Ball",
         "es": "Rollo de Bola de Fuego",
         "pt": "Pergaminho de bola de fogo"
       },
@@ -96,6 +100,7 @@
       "number": 4,
       "name": {
         "en": "Scroll of Flame",
+        "de": "Schriftrolle: Flame",
         "es": "Rollo de Llama",
         "pt": "Pergaminho de chama"
       },
@@ -118,6 +123,7 @@
       "number": 5,
       "name": {
         "en": "Scroll of Teleport",
+        "de": "Schriftrolle: Teleport",
         "es": "Rollo de Telepuerto",
         "pt": "Pergaminho de teletransporte"
       },
@@ -139,6 +145,7 @@
       "number": 6,
       "name": {
         "en": "Scroll of Ice",
+        "de": "Schriftrolle: Ice",
         "es": "Rollo de Hielo",
         "pt": "Pergaminho de gelo"
       },
@@ -162,6 +169,7 @@
       "number": 7,
       "name": {
         "en": "Scroll of Twister",
+        "de": "Schriftrolle: Twister",
         "es": "Rollo de Tornado",
         "pt": "Pergaminho de ciclone"
       },
@@ -184,6 +192,7 @@
       "number": 8,
       "name": {
         "en": "Scroll of Evil Spirit",
+        "de": "Schriftrolle: Evil Spirit",
         "es": "Rollo de Espíritu Maligno",
         "pt": "Pergaminho Espírito Diabólico"
       },
@@ -206,6 +215,7 @@
       "number": 9,
       "name": {
         "en": "Scroll of Hellfire",
+        "de": "Schriftrolle: Hellfire",
         "es": "Rollo de Fuego Infernal",
         "pt": "Pergaminho de fogo infernal"
       },
@@ -228,6 +238,7 @@
       "number": 10,
       "name": {
         "en": "Scroll of Power Wave",
+        "de": "Schriftrolle: Power Wave",
         "es": "Rollo de Onda de Poder",
         "pt": "Pergaminho de onda poderosa"
       },
@@ -251,6 +262,7 @@
       "number": 11,
       "name": {
         "en": "Scroll of Aqua Beam",
+        "de": "Schriftrolle: Aqua Beam",
         "es": "Rollo de Columna de Agua",
         "pt": "Pergaminho de raio de água"
       },
@@ -273,6 +285,7 @@
       "number": 12,
       "name": {
         "en": "Scroll of Cometfall",
+        "de": "Schriftrolle: Cometfall",
         "es": "Rollo de Caída de Cometa",
         "pt": "Pergaminho de queda de cometa"
       },
@@ -295,6 +308,7 @@
       "number": 13,
       "name": {
         "en": "Scroll of Inferno",
+        "de": "Schriftrolle: Inferno",
         "es": "Rollo del Infierno",
         "pt": "Pergaminho de inferno"
       },
@@ -317,6 +331,7 @@
       "number": 14,
       "name": {
         "en": "Scroll of Teleport Ally",
+        "de": "Schriftrolle: Teleport Ally",
         "es": "Rollo de Telepuerto Aliado",
         "pt": "Pergaminho Teletr. De Aliado"
       },
@@ -338,6 +353,7 @@
       "number": 15,
       "name": {
         "en": "Scroll of Soul Barrier",
+        "de": "Schriftrolle: Soul Barrier",
         "es": "Rollo de Barrera de Almas",
         "pt": "Pergaminho Barr. da Alma"
       },
@@ -359,6 +375,7 @@
       "number": 16,
       "name": {
         "en": "Scroll of Decay",
+        "de": "Schriftrolle: Decay",
         "es": "Rollo de Decadencia",
         "pt": "Pergaminho de apodrecimento"
       },
@@ -380,6 +397,7 @@
       "number": 17,
       "name": {
         "en": "Scroll of Ice Storm",
+        "de": "Schriftrolle: Ice Storm",
         "es": "Rollo de Tormenta de Hielo",
         "pt": "Pergaminho Tempestade de Gelo"
       },
@@ -401,6 +419,7 @@
       "number": 18,
       "name": {
         "en": "Scroll of Nova",
+        "de": "Schriftrolle: Nova",
         "es": "Rollo de Nova",
         "pt": "Pergaminho de nova"
       },
@@ -422,6 +441,7 @@
       "number": 19,
       "name": {
         "en": "Chain Lightning Parchment",
+        "de": "Pergament: Chain Lightning",
         "es": "Pergamino Cadena Relámpagos",
         "pt": "Pergaminho de raio em cadeia"
       },
@@ -443,6 +463,7 @@
       "number": 20,
       "name": {
         "en": "Drain Life Parchment",
+        "de": "Pergament: Drain Life",
         "es": "Pergamino de Drenaje de Vida",
         "pt": "Pergaminho de drenar vida"
       },
@@ -464,6 +485,7 @@
       "number": 21,
       "name": {
         "en": "Lightning Shock Parchment",
+        "de": "Pergament: Lightning Shock",
         "es": "Pergamino Descarga Relámpago",
         "pt": "Pergaminho Choque Relâmpago"
       },
@@ -485,6 +507,7 @@
       "number": 22,
       "name": {
         "en": "Damage Reflection Parchment",
+        "de": "Pergament: Damage Reflection",
         "es": "Pergamino Reflejo de Daños",
         "pt": "Pergaminho Reflexo de Dano"
       },
@@ -506,6 +529,7 @@
       "number": 23,
       "name": {
         "en": "Berserker Parchment",
+        "de": "Pergament: Berserker",
         "es": "Pergamino de Energúmeno",
         "pt": "Pergaminho de berserker"
       },
@@ -527,6 +551,7 @@
       "number": 24,
       "name": {
         "en": "Sleep Parchment",
+        "de": "Pergament: Sleep",
         "es": "Pergamino de Sueño",
         "pt": "Pergaminho de dormir"
       },
@@ -548,6 +573,7 @@
       "number": 26,
       "name": {
         "en": "Weakness Parchment",
+        "de": "Pergament: Weakness",
         "es": "Pergamino de Debilidad",
         "pt": "Pergaminho de fraqueza"
       },
@@ -569,6 +595,7 @@
       "number": 27,
       "name": {
         "en": "Innovation Parchment",
+        "de": "Pergament: Innovation",
         "es": "Pergamino de Innovación",
         "pt": "Pergaminho de inovação"
       },
@@ -590,6 +617,7 @@
       "number": 28,
       "name": {
         "en": "Scroll of Wizardry Enhance",
+        "de": "Schriftrolle: Wizardry Enhance",
         "es": "Rollo de Mejora de Magia",
         "pt": "Perg. Aum. Poder de Magia"
       },
@@ -612,6 +640,7 @@
       "number": 29,
       "name": {
         "en": "Scroll of Gigantic Storm",
+        "de": "Schriftrolle: Gigantic Storm",
         "es": "Rollo de Tormenta Gigantesca",
         "pt": "Perg. Tempestade Gigante"
       },
@@ -634,6 +663,7 @@
       "number": 30,
       "name": {
         "en": "Chain Drive Parchment",
+        "de": "Pergament: Chain Drive",
         "es": "Pergamino Acción por Cadena",
         "pt": "Pergaminho de Correia"
       },
@@ -655,6 +685,7 @@
       "number": 31,
       "name": {
         "en": "Dark Side Parchment",
+        "de": "Pergament: Dark Side",
         "es": "Pergamino Lado Oscuro",
         "pt": "Pergaminho do Lado Negro"
       },
@@ -676,6 +707,7 @@
       "number": 32,
       "name": {
         "en": "Dragon Roar Parchment",
+        "de": "Pergament: Dragon Roar",
         "es": "Pergamino Rugido de Dragón",
         "pt": "Pergaminho do Rugido do Dragão"
       },
@@ -697,6 +729,7 @@
       "number": 33,
       "name": {
         "en": "Dragon Slasher Parchment",
+        "de": "Pergament: Dragon Slasher",
         "es": "Pergamino Aniquilador de Dragón",
         "pt": "Pergaminho Retalhador de Dragões"
       },
@@ -718,6 +751,7 @@
       "number": 34,
       "name": {
         "en": "Ignore Defense Parchment",
+        "de": "Pergament: Ignore Defense",
         "es": "Pergamino ignorar Defensa",
         "pt": "Pergaminho de Ignorar Defesa"
       },
@@ -740,6 +774,7 @@
       "number": 35,
       "name": {
         "en": "Increase Health Parchment",
+        "de": "Pergament: Increase Health",
         "es": "Pergamino aumento de Salud",
         "pt": "Pergaminho de Aumento de Vida"
       },
@@ -762,6 +797,7 @@
       "number": 36,
       "name": {
         "en": "Increase Block Parchment",
+        "de": "Pergament: Increase Block",
         "es": "Pergamino aumento de Bloqueo",
         "pt": "Pergaminho de Aumento de Bloqueio"
       },

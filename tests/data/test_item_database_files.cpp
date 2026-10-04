@@ -209,9 +209,10 @@ TEST_CASE("Loading item data fills ItemAttribute in the UI locale [data][items]"
     CHECK(client.Name(BladeType) == L"Lâmina");
     CHECK(g_ItemDatabase.GetLogName(BladeType) == "Blade (0,5)");
 
-    // No German item names: English is shown.
     I18N::SetLocale("de");
-    CHECK(client.Name(BladeType) == L"Blade");
+    CHECK(client.Name(BladeType) == L"Klinge");
+    // No German name: English is shown.
+    CHECK(client.Name(KrisType) == L"Kris");
 }
 
 TEST_CASE("Item data errors stop loading [data][items]")

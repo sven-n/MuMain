@@ -6,6 +6,7 @@
       "number": 0,
       "name": {
         "en": "Bronze Pants",
+        "de": "Bronzehose",
         "es": "Pantalones de Bronce",
         "pt": "Calças de bronze"
       },
@@ -30,6 +31,7 @@
       "number": 1,
       "name": {
         "en": "Dragon Pants",
+        "de": "Drachenhose",
         "es": "Pantalones Dragón",
         "pt": "Calças do dragão"
       },
@@ -53,6 +55,7 @@
       "number": 2,
       "name": {
         "en": "Pad Pants",
+        "de": "Polsterhose",
         "es": "Pantalones Rellenos",
         "pt": "Calças acolchoadas"
       },
@@ -75,6 +78,7 @@
       "number": 3,
       "name": {
         "en": "Legendary Pants",
+        "de": "Legendäre Hose",
         "es": "Pantalones Legendarios",
         "pt": "Calças lendárias"
       },
@@ -97,6 +101,7 @@
       "number": 4,
       "name": {
         "en": "Bone Pants",
+        "de": "Knochenhose",
         "es": "Pantalones de Hueso",
         "pt": "Calças de osso"
       },
@@ -119,6 +124,7 @@
       "number": 5,
       "name": {
         "en": "Leather Pants",
+        "de": "Lederhose",
         "es": "Pantalones de Cuero",
         "pt": "Calças de couro"
       },
@@ -143,6 +149,7 @@
       "number": 6,
       "name": {
         "en": "Scale Pants",
+        "de": "Schuppenhose",
         "es": "Pantalones de Escamas",
         "pt": "Calças de escamas"
       },
@@ -167,6 +174,7 @@
       "number": 7,
       "name": {
         "en": "Sphinx Pants",
+        "de": "Sphinxhose",
         "es": "Pantalones Esfinge",
         "pt": "Calças da esfinge"
       },
@@ -189,6 +197,7 @@
       "number": 8,
       "name": {
         "en": "Brass Pants",
+        "de": "Messinghose",
         "es": "Pantalones de Metal",
         "pt": "Calças de latão"
       },
@@ -213,6 +222,7 @@
       "number": 9,
       "name": {
         "en": "Plate Pants",
+        "de": "Plattenhose",
         "es": "Pantalones de Plata",
         "pt": "Calças de placa"
       },
@@ -236,6 +246,7 @@
       "number": 10,
       "name": {
         "en": "Vine Pants",
+        "de": "Rankenhose",
         "es": "Pantalones Vid",
         "pt": "Calças da vinha"
       },
@@ -258,6 +269,7 @@
       "number": 11,
       "name": {
         "en": "Silk Pants",
+        "de": "Seidenhose",
         "es": "Pantalones de Seda",
         "pt": "Calças de seda"
       },
@@ -280,6 +292,7 @@
       "number": 12,
       "name": {
         "en": "Wind Pants",
+        "de": "Windhose",
         "es": "Pantalones Viento",
         "pt": "Calças do vento"
       },
@@ -302,6 +315,7 @@
       "number": 13,
       "name": {
         "en": "Spirit Pants",
+        "de": "Geisterhose",
         "es": "Pantalones Espíritu",
         "pt": "Calças do espírito"
       },
@@ -324,6 +338,7 @@
       "number": 14,
       "name": {
         "en": "Guardian Pants",
+        "de": "Wächterhose",
         "es": "Pantalones Guardián",
         "pt": "Calças do guardião"
       },
@@ -346,6 +361,7 @@
       "number": 15,
       "name": {
         "en": "Storm Crow Pants",
+        "de": "Sturmkrähenhose",
         "es": "Pantalones Cuervo de Tormenta",
         "pt": "Calças do corvo da tempestade"
       },
@@ -368,6 +384,7 @@
       "number": 16,
       "name": {
         "en": "Black Dragon Pants",
+        "de": "Schwarzdrachenhose",
         "es": "Pantalones Dragón Negro",
         "pt": "Calças do dragão negro"
       },
@@ -390,6 +407,7 @@
       "number": 17,
       "name": {
         "en": "Dark Phoenix Pants",
+        "de": "Dunkelphönixhose",
         "es": "Pantalones Fénix Oscuro",
         "pt": "Calças da fênix negra"
       },
@@ -412,6 +430,7 @@
       "number": 18,
       "name": {
         "en": "Grand Soul Pants",
+        "de": "Großseelenhose",
         "es": "Pantalones Gran Alma",
         "pt": "Calças da grande alma"
       },
@@ -434,6 +453,7 @@
       "number": 19,
       "name": {
         "en": "Divine Pants",
+        "de": "Göttliche Hose",
         "es": "Pantalones Divinos",
         "pt": "Calças divinas"
       },
@@ -456,6 +476,7 @@
       "number": 20,
       "name": {
         "en": "Thunder Hawk Pants",
+        "de": "Donnerfalkenhose",
         "es": "Pantalones Halcón de Trueno",
         "pt": "Calças de Thunder Hawk"
       },
@@ -478,6 +499,7 @@
       "number": 21,
       "name": {
         "en": "Great Dragon Pants",
+        "de": "Großartige Drachenhose",
         "es": "Pantalones Gran Dragón",
         "pt": "Calças do grande dragão"
       },
@@ -500,6 +522,7 @@
       "number": 22,
       "name": {
         "en": "Dark Soul Pants",
+        "de": "Dunkelseelenhose",
         "es": "Pantalones Alma Oscura",
         "pt": "Calças da alma negra"
       },
@@ -522,6 +545,7 @@
       "number": 23,
       "name": {
         "en": "Hurricane Pants",
+        "de": "Orkanhose",
         "es": "Pantalones Huracán",
         "pt": "Calças do furacão"
       },
@@ -544,6 +568,7 @@
       "number": 24,
       "name": {
         "en": "Red Spirit Pants",
+        "de": "Rotgeisterhose",
         "es": "Pantalones Espíritu Rojo",
         "pt": "Calças do espírito vermelho"
       },
@@ -566,6 +591,7 @@
       "number": 25,
       "name": {
         "en": "Light Plate Pants",
+        "de": "Leichtplattenhose",
         "es": "Pantalones Plata de Luz",
         "pt": "Calças de placa Leve"
       },
@@ -588,6 +614,7 @@
       "number": 26,
       "name": {
         "en": "Adamantine Pants",
+        "de": "Adamanthose",
         "es": "Pantalones Adamantinos",
         "pt": "Calças de adamantina"
       },
@@ -610,6 +637,7 @@
       "number": 27,
       "name": {
         "en": "Dark Steel Pants",
+        "de": "Dunkelstahlhose",
         "es": "Pantalones Acero Oscuro",
         "pt": "Calças de aço negro"
       },
@@ -632,6 +660,7 @@
       "number": 28,
       "name": {
         "en": "Dark Master Pants",
+        "de": "Dunkelmeisterhose",
         "es": "Pantalones Amo Oscuro",
         "pt": "Calças do Mestre negro"
       },
@@ -654,6 +683,7 @@
       "number": 29,
       "name": {
         "en": "Dragon Knight Pants",
+        "de": "Drachenritterhose",
         "es": "Pantalones Caballero Dragón",
         "pt": "Calças do cavaleiro dragão"
       },
@@ -676,6 +706,7 @@
       "number": 30,
       "name": {
         "en": "Venom Mist Pants",
+        "de": "Giftnebelhose",
         "es": "Pantalones Bruma de Veneno",
         "pt": "Calças da névoa de veneno"
       },
@@ -698,6 +729,7 @@
       "number": 31,
       "name": {
         "en": "Sylphid Ray Pants",
+        "de": "Sylphenstrahlhose",
         "es": "Pantalones Rayo de Sílfide",
         "pt": "Calças do raio silfídico"
       },
@@ -720,6 +752,7 @@
       "number": 32,
       "name": {
         "en": "Volcano Pants",
+        "de": "Vulkanhose",
         "es": "Pantalones Volcán",
         "pt": "Calças do vulcão"
       },
@@ -742,6 +775,7 @@
       "number": 33,
       "name": {
         "en": "Sunlight Pants",
+        "de": "Sonnenlichthose",
         "es": "Pantalones Luz Solar",
         "pt": "Calças da luz do sol"
       },
@@ -764,6 +798,7 @@
       "number": 34,
       "name": {
         "en": "Ashcrow Pants",
+        "de": "Aschkrähenhose",
         "es": "Pantalones Cuervo Ceniza",
         "pt": "Calças de Ashcrow"
       },
@@ -785,6 +820,7 @@
       "number": 35,
       "name": {
         "en": "Eclipse Pants",
+        "de": "Finsternishose",
         "es": "Pantalones Eclipse",
         "pt": "Calças do eclipse"
       },
@@ -806,6 +842,7 @@
       "number": 36,
       "name": {
         "en": "Iris Pants",
+        "de": "Iris-Hose",
         "es": "Pantalones Iris",
         "pt": "Calças de Iris"
       },
@@ -827,6 +864,7 @@
       "number": 37,
       "name": {
         "en": "Valiant Pants",
+        "de": "Kühne Hose",
         "es": "Pantalones Valientes",
         "pt": "Calças do valor"
       },
@@ -848,6 +886,7 @@
       "number": 38,
       "name": {
         "en": "Glorious Pants",
+        "de": "Glorreiche Hose",
         "es": "Pantalones Gloriosos",
         "pt": "Calças gloriosas"
       },
@@ -869,6 +908,7 @@
       "number": 39,
       "name": {
         "en": "Violent Wind Pants",
+        "de": "Sturmwindhose",
         "es": "Pantalones Viento Violento",
         "pt": "Calças do vento violento"
       },
@@ -890,6 +930,7 @@
       "number": 40,
       "name": {
         "en": "Red Wing Pants",
+        "de": "Rotschwingenhose",
         "es": "Pantalones Ala Roja",
         "pt": "Calças da asa vermelha"
       },
@@ -912,6 +953,7 @@
       "number": 41,
       "name": {
         "en": "Ancient Pants",
+        "de": "Uralte Hose",
         "es": "Pantalones Antiguo",
         "pt": "Calças antigas"
       },
@@ -934,6 +976,7 @@
       "number": 42,
       "name": {
         "en": "Demonic Pants",
+        "de": "Dämonische Hose",
         "es": "Pantalones Demoníacos",
         "pt": "Calças demoníacas"
       },
@@ -955,6 +998,7 @@
       "number": 43,
       "name": {
         "en": "Storm Blitz Pants",
+        "de": "Sturmblitzhose",
         "es": "Pantalones Ráfaga Tormentosa",
         "pt": "Calças Relâmpago de Tempest."
       },
@@ -977,6 +1021,7 @@
       "number": 44,
       "name": {
         "en": "Eternal Wing Pants",
+        "de": "Ewigschwingenhose",
         "es": "Pantalones Ala Eterna",
         "pt": "Calças da asa eterna"
       },
@@ -1000,6 +1045,7 @@
       "number": 45,
       "name": {
         "en": "Titan  Pants",
+        "de": "Titanenhose",
         "es": "Pantalones Titán",
         "pt": "Calças do titã"
       },
@@ -1022,6 +1068,7 @@
       "number": 46,
       "name": {
         "en": "Brave Pants",
+        "de": "Tapfere Hose",
         "es": "Pantalones Valerosos",
         "pt": "Calças da coragem"
       },
@@ -1044,6 +1091,7 @@
       "number": 47,
       "name": {
         "en": "Phantom  Pants",
+        "de": "Phantom-Hose",
         "es": "Pantalones Fantasma",
         "pt": "Calças do fantasma"
       },
@@ -1066,6 +1114,7 @@
       "number": 48,
       "name": {
         "en": "Destroy Pants",
+        "de": "Zerstörerhose",
         "es": "Pantalones Destructores",
         "pt": "Calças da destruição"
       },
@@ -1089,6 +1138,7 @@
       "number": 49,
       "name": {
         "en": "Seraphim Pants",
+        "de": "Seraphim-Hose",
         "es": "Pantalones Serafín",
         "pt": "Calças do serafim"
       },
@@ -1111,6 +1161,7 @@
       "number": 50,
       "name": {
         "en": "Divine Pants",
+        "de": "Glaubenshose",
         "es": "Pantalones Divinos",
         "pt": "Calças divinas"
       },
@@ -1134,6 +1185,7 @@
       "number": 51,
       "name": {
         "en": "Royal Pants",
+        "de": "Königliche Hose",
         "es": "Pantalones Reales",
         "pt": "Calças reais"
       },
@@ -1156,6 +1208,7 @@
       "number": 52,
       "name": {
         "en": "Hades Pants",
+        "de": "Hades-Hose",
         "es": "Pantalones Hades",
         "pt": "Calças de Hades"
       },
@@ -1179,6 +1232,7 @@
       "number": 59,
       "name": {
         "en": "Sacred Fire Pants",
+        "de": "Heiligfeuerhose",
         "es": "Pantalones de Fuego Sagrado",
         "pt": "Calças de Fogo Sagrado"
       },
@@ -1201,6 +1255,7 @@
       "number": 60,
       "name": {
         "en": "Storm Jahad Pants",
+        "de": "Sturm-Jahad-Hose",
         "es": "Pantalones de Tormenta Zahard",
         "pt": "Calças de  Tempestade Zahard"
       },
@@ -1222,6 +1277,7 @@
       "number": 61,
       "name": {
         "en": "Piercing Groove Pants",
+        "de": "Durchbohrerhose",
         "es": "Pantalones de Tallo Perforador",
         "pt": "Calças de Entalhe Perfurante"
       },
@@ -1243,6 +1299,7 @@
       "number": 62,
       "name": {
         "en": "Scale Pants",
+        "de": "Schuppenhose",
         "es": "Pantalones de Escamas",
         "pt": "Calças de escamas"
       },
@@ -1272,6 +1329,7 @@
       "number": 63,
       "name": {
         "en": "Silk Pants",
+        "de": "Seidenhose",
         "es": "Pantalones de Seda",
         "pt": "Calças de seda"
       },
@@ -1298,6 +1356,7 @@
       "number": 64,
       "name": {
         "en": "Sphinx Pants",
+        "de": "Sphinxhose",
         "es": "Pantalones Esfinge",
         "pt": "Calças de Esfinge"
       },
@@ -1325,6 +1384,7 @@
       "number": 65,
       "name": {
         "en": "Violent Wind Pants",
+        "de": "Sturmwindhose",
         "es": "Pantalones Viento Violento",
         "pt": "Calças do vento violento"
       },
@@ -1351,6 +1411,7 @@
       "number": 66,
       "name": {
         "en": "Dark Soul Pants",
+        "de": "Dunkelseelenhose",
         "es": "Pantalones Adamantinos",
         "pt": "Calças de adamantina"
       },
@@ -1377,6 +1438,7 @@
       "number": 67,
       "name": {
         "en": "Dragon Pants",
+        "de": "Drachenhose",
         "es": "Pantalones Dragón",
         "pt": "Calças de Dragão"
       },
@@ -1404,6 +1466,7 @@
       "number": 68,
       "name": {
         "en": "Guardian Pants",
+        "de": "Wächterhose",
         "es": "Pantalones Guardián",
         "pt": "Calças de Guardião"
       },
@@ -1430,6 +1493,7 @@
       "number": 69,
       "name": {
         "en": "Legendary Pants",
+        "de": "Legendäre Hose",
         "es": "Pantalones Legendarios",
         "pt": "Calças Lendárias"
       },
@@ -1457,6 +1521,7 @@
       "number": 70,
       "name": {
         "en": "Red Wing Pants",
+        "de": "Rotschwingenhose",
         "es": "Pantalones Ala Roja",
         "pt": "Calças da asa vermelha"
       },
@@ -1483,6 +1548,7 @@
       "number": 71,
       "name": {
         "en": "Atlans Pants",
+        "de": "Atlans-Hose",
         "es": "Pantalones Cuervo de Tormenta",
         "pt": "Calças do corvo da tempestade"
       },
@@ -1509,6 +1575,7 @@
       "number": 72,
       "name": {
         "en": "Storm Jahad Pants",
+        "de": "Sturm-Jahad-Hose",
         "es": "Pantalones de Tormenta Zahard",
         "pt": "Calças de  Tempestade Zahard"
       },
@@ -1535,6 +1602,7 @@
       "number": 73,
       "name": {
         "en": "Phoenix Soul Pants",
+        "de": "Phönixseelenhose",
         "es": "Pantalones de Alma de Fénix",
         "pt": "Calças de Alma de Fogo"
       },
@@ -1557,6 +1625,7 @@
       "number": 78,
       "name": {
         "en": "Dragon Pants-J",
+        "de": "Drachenhose-J",
         "es": "Pantalones Dragón-J",
         "pt": "Calças do dragão-J"
       },
@@ -1580,6 +1649,7 @@
       "number": 79,
       "name": {
         "en": "Legendary Pants-J",
+        "de": "Legendäre Hose-J",
         "es": "Pantalones Legendario-J",
         "pt": "Calças lendário-J"
       },
@@ -1602,6 +1672,7 @@
       "number": 80,
       "name": {
         "en": "Guardian Pants-J",
+        "de": "Wächterhose-J",
         "es": "Pantalones Guardián-J",
         "pt": "Calças do guardião-J"
       },
@@ -1624,6 +1695,7 @@
       "number": 81,
       "name": {
         "en": "Light Plate Pants-J",
+        "de": "Leichtplattenhose-J",
         "es": "Pantalones Plata de Luz-J",
         "pt": "Calças de placa leve-J"
       },
@@ -1646,6 +1718,7 @@
       "number": 82,
       "name": {
         "en": "Red Wing Pants-J",
+        "de": "Rotschwingenhose-J",
         "es": "Pantalones Ala Roja-J",
         "pt": "Calças da asa vermelha-J"
       },
@@ -1668,6 +1741,7 @@
       "number": 83,
       "name": {
         "en": "Sacred Fire Pants-J",
+        "de": "Heiligfeuerhose-J",
         "es": "Pantalones de Fuego Sagrado-J",
         "pt": "Calças de Fogo Sagrado-J"
       },

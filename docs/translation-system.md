@@ -258,6 +258,52 @@ If your new string contains placeholders, prefer `{0}`/`{1}` and `I18N::Format`
 for narrow groups. For wide groups, `%s` / `%ls` via the bounds-checked
 `mu_swprintf_s` is the existing pattern.
 
+When translating a string with `printf`-style specifiers, keep them exactly
+as in English: the same specifiers in the same order, `%ls` stays `%ls`, and
+`%%` stays `%%` (a single `%` followed by text is read as a specifier). Chat
+commands such as `/warp`, `/trade` or `/party` are compared against the typed
+text, so they stay untranslated.
+
+### German terminology
+
+The German texts use the same terms as the German resources of the OpenMU
+server (`src/**/Properties/*.de.resx` in
+[MUnique/OpenMU](https://github.com/MUnique/OpenMU)), so players see the same
+words in the client and in server messages. The player is addressed formally
+("Sie"); NPC dialogues (`Dialog.de.resx`) keep their old-fashioned "Ihr/Euch".
+Some fixed terms:
+
+| English | German |
+|---|---|
+| Item | Gegenstand (Artikel only in the item shop) |
+| Party | Party |
+| Skill | Fähigkeit |
+| Vault / Storage | Tresor / Lager |
+| Socket | Sockel |
+| Command (stat) | Führung |
+| Elf, Muse Elf, High Elf | Elfe, Musenelfe, Hochelfe |
+| Lord Emperor | Lord-Imperator |
+| Blood Castle | Blutburg |
+| Devil Square, Chaos Castle, Castle Siege | not translated |
+| Illusion Temple | Illusionstempel |
+| Fortress of Empire Guardians | Festung der Kaiserlichen Wächter |
+| Refinery Tower | Raffinerieturm |
+| Jewel of Bless, Jewel of Soul, … | Juwel des Segens, Juwel der Seele, … |
+| Helm, Armor, Pants, Gloves, Boots, Mask | Helm, Rüstung, Hose, Handschuhe, Stiefel, Maske |
+| Great (in item names) | Großartig (*Großartiger Drachenhelm*) |
+| Seed, Sphere, Seed Sphere | Samen, Sphäre, Samensphäre |
+| Refining Stone | Verfeinerungsstein |
+| Transformation Ring | Verwandlungsring |
+
+The German item names (the `"de"` names in `src/bin/Data/Items/*.json`) are the
+same as the German item names of the OpenMU server (`ItemNames.de.resx`). Texts
+that mention an item use its German name. Armor set names are joined with the
+piece (*Drachenhelm*), proper names get a hyphen (*Hades-Helm*), and adjectives
+are declined (*Legendärer Helm*, *Legendäre Rüstung*). Skill, monster and event
+names stay English; items that teach a skill name it after a colon
+(*Schriftrolle: Evil Spirit*, *Pergament: Chain Lightning*,
+*Kugel: Twisting Slash*).
+
 ## Adding a new locale
 
 1. Create `src/Localization/<Group>.<newLocale>.resx` for every group you want
@@ -289,13 +335,14 @@ Each item's `name` lists its names by language code:
 ```json
 "name": {
   "en": "Blade",
+  "de": "Klinge",
   "es": "Espada",
   "pt": "Lâmina"
 },
 ```
 
 - **Change a name:** edit the text.
-- **Add a translation:** add a line `"<code>": "<name>"`, e.g. `"de": "Klinge"`.
+- **Add a translation:** add a line `"<code>": "<name>"`, e.g. `"pl": "Ostrze"`.
 - **Remove a translation:** delete its line; the game then shows the English
   name for that language.
 - `en` is required and must stay. A translation that is the same as the
@@ -328,10 +375,10 @@ language:
 ### Translating items into a language the game already has
 
 The game's UI languages are `en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`,
-`tl`, `uk` and `zh-TW`. Items currently have Portuguese (`pt`) and Spanish
-(`es`) names. To translate items into another of these languages, add names
-with that code (by hand or in the item editor); nothing else is needed. The
-names show as soon as a player picks that language.
+`tl`, `uk` and `zh-TW`. Items currently have German (`de`), Portuguese (`pt`)
+and Spanish (`es`) names. To translate items into another of these languages,
+add names with that code (by hand or in the item editor); nothing else is
+needed. The names show as soon as a player picks that language.
 
 ### Adding a new language
 

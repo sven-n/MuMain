@@ -20,7 +20,7 @@
     <value>Zweihändig</value>
   </data>
   <data name="Level" xml:space="preserve">
-    <value>Stufe</value>
+    <value>Level</value>
   </data>
   <data name="Slot" xml:space="preserve">
     <value>Slot</value>
@@ -35,10 +35,10 @@
     <value>Höhe</value>
   </data>
   <data name="Min Damage" xml:space="preserve">
-    <value>Min Schaden</value>
+    <value>Min. Schaden</value>
   </data>
   <data name="Max Damage" xml:space="preserve">
-    <value>Max Schaden</value>
+    <value>Max. Schaden</value>
   </data>
   <data name="Block Rate" xml:space="preserve">
     <value>Blockrate</value>
@@ -68,7 +68,7 @@
     <value>Benötigte Stärke</value>
   </data>
   <data name="Req Dexterity" xml:space="preserve">
-    <value>Benötigte Geschicklichkeit</value>
+    <value>Benötigte Beweglichkeit</value>
   </data>
   <data name="Req Energy" xml:space="preserve">
     <value>Benötigte Energie</value>
@@ -80,7 +80,7 @@
     <value>Benötigte Führung</value>
   </data>
   <data name="Req Level" xml:space="preserve">
-    <value>Benötigte Stufe</value>
+    <value>Benötigtes Level</value>
   </data>
   <data name="Sell Value" xml:space="preserve">
     <value>Verkaufswert</value>
@@ -143,7 +143,7 @@
     <value>Mana</value>
   </data>
   <data name="AG Cost" xml:space="preserve">
-    <value>AG Kosten</value>
+    <value>AG-Kosten</value>
   </data>
   <data name="Range" xml:space="preserve">
     <value>Reichweite</value>
@@ -161,7 +161,7 @@
     <value>Marke</value>
   </data>
   <data name="Kill Count" xml:space="preserve">
-    <value>Killanzahl</value>
+    <value>Kill-Anzahl</value>
   </data>
   <data name="Rank" xml:space="preserve">
     <value>Rang</value>

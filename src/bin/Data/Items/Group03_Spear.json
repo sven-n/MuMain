@@ -6,6 +6,7 @@
       "number": 0,
       "name": {
         "en": "Light Spear",
+        "de": "Leichter Speer",
         "es": "Jabalina de Luz",
         "pt": "Lança de luz"
       },
@@ -34,6 +35,7 @@
       "number": 1,
       "name": {
         "en": "Spear",
+        "de": "Speer",
         "es": "Jabalina",
         "pt": "Lança"
       },
@@ -61,6 +63,7 @@
       "number": 2,
       "name": {
         "en": "Dragon Lance",
+        "de": "Drachenlanze",
         "es": "Lanza Dragón",
         "pt": "Lança do dragão"
       },
@@ -88,6 +91,7 @@
       "number": 3,
       "name": {
         "en": "Giant Trident",
+        "de": "Riesendreizack",
         "es": "Tridente Gigante",
         "pt": "Tridente gigante"
       },
@@ -115,6 +119,7 @@
       "number": 4,
       "name": {
         "en": "Serpent Spear",
+        "de": "Schlangenspeer",
         "es": "Jabalina Serpiente",
         "pt": "Lança da serpente"
       },
@@ -143,6 +148,7 @@
       "number": 5,
       "name": {
         "en": "Double Poleaxe",
+        "de": "Doppelstangenaxt",
         "es": "Hacha Doble de Mástil",
         "pt": "Gadanha dupla"
       },
@@ -170,6 +176,7 @@
       "number": 6,
       "name": {
         "en": "Halberd",
+        "de": "Hellebarde",
         "es": "Alabarda",
         "pt": "Alabarda"
       },
@@ -197,6 +204,7 @@
       "number": 7,
       "name": {
         "en": "Berdysh",
+        "de": "Berdysch",
         "es": "Berdiche"
       },
       "width": 2,
@@ -224,6 +232,7 @@
       "number": 8,
       "name": {
         "en": "Great Scythe",
+        "de": "Großartige Sense",
         "es": "Gran Guadaña",
         "pt": "Grande foice"
       },
@@ -252,6 +261,7 @@
       "number": 9,
       "name": {
         "en": "Bill of Balrog",
+        "de": "Hippe des Balrog",
         "es": "Pico de Balrog",
         "pt": "Gancho de Balrog"
       },
@@ -280,6 +290,7 @@
       "number": 10,
       "name": {
         "en": "Dragon Spear",
+        "de": "Drachenspeer",
         "es": "Jabalina Dragón",
         "pt": "Lança do dragão"
       },

@@ -14,28 +14,28 @@
   </resheader>
 
   <data name="Save Items" xml:space="preserve">
-    <value>Gegenstände Speichern</value>
+    <value>Gegenstände speichern</value>
   </data>
   <data name="Save Skills" xml:space="preserve">
-    <value>Fähigkeiten Speichern</value>
+    <value>Fähigkeiten speichern</value>
   </data>
   <data name="Export as S6E3" xml:space="preserve">
-    <value>Als S6E3 Exportieren</value>
+    <value>Als S6E3 exportieren</value>
   </data>
   <data name="Export as CSV" xml:space="preserve">
-    <value>Als CSV Exportieren</value>
+    <value>Als CSV exportieren</value>
   </data>
   <data name="Export Skills as CSV" xml:space="preserve">
-    <value>Fähigkeiten Als CSV Exportieren</value>
+    <value>Fähigkeiten als CSV exportieren</value>
   </data>
   <data name="Columns" xml:space="preserve">
     <value>Spalten</value>
   </data>
   <data name="Select All" xml:space="preserve">
-    <value>Alle Auswählen</value>
+    <value>Alle auswählen</value>
   </data>
   <data name="Unselect All" xml:space="preserve">
-    <value>Auswahl Aufheben</value>
+    <value>Auswahl aufheben</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
@@ -53,13 +53,13 @@
     <value>Fehler beim Speichern der Fähigkeiten!</value>
   </data>
   <data name="S6E3 export completed successfully!" xml:space="preserve">
-    <value>S6E3 Export erfolgreich abgeschlossen!</value>
+    <value>S6E3-Export erfolgreich abgeschlossen!</value>
   </data>
   <data name="Failed to export as S6E3 format!" xml:space="preserve">
-    <value>Fehler beim Exportieren in das S6E3 Format!</value>
+    <value>Fehler beim Exportieren in das S6E3-Format!</value>
   </data>
   <data name="CSV export completed successfully!" xml:space="preserve">
-    <value>CSV Export erfolgreich abgeschlossen!</value>
+    <value>CSV-Export erfolgreich abgeschlossen!</value>
   </data>
   <data name="Failed to export as CSV!" xml:space="preserve">
     <value>Fehler beim Exportieren als CSV!</value>
@@ -83,7 +83,7 @@
     <value>Suchen:</value>
   </data>
   <data name="Freeze Index/Name" xml:space="preserve">
-    <value>Index/Name Fixieren</value>
+    <value>Index/Name fixieren</value>
   </data>
   <data name="No columns selected. Click 'Columns' to show columns." xml:space="preserve">
     <value>Keine Spalten ausgewählt. Klicken Sie auf 'Spalten', um Spalten anzuzeigen.</value>
@@ -92,7 +92,7 @@
     <value>Index</value>
   </data>
   <data name="Toggle Column Visibility:" xml:space="preserve">
-    <value>Spaltensichtbarkeit Umschalten:</value>
+    <value>Spaltensichtbarkeit umschalten:</value>
   </data>
   <data name="Items saved successfully!" xml:space="preserve">
     <value>Gegenstände erfolgreich gespeichert!</value>
@@ -116,7 +116,7 @@
     <value>Fähigkeiten-Editor</value>
   </data>
   <data name="Search Skills:" xml:space="preserve">
-    <value>Fähigkeiten Suchen:</value>
+    <value>Fähigkeiten suchen:</value>
   </data>
   <data name="Item Editor" xml:space="preserve">
     <value>Gegenstands-Editor</value>
@@ -206,7 +206,7 @@
     <value>Distanzen zurücksetzen</value>
   </data>
   <data name="Switch to (or spectate) Default or Orbital to edit overrides." xml:space="preserve">
-    <value>Wechsle zu (oder beobachte) Default oder Orbital, um Overrides zu bearbeiten.</value>
+    <value>Wechseln Sie zu Default oder Orbital (oder beobachten Sie sie), um Overrides zu bearbeiten.</value>
   </data>
   <data name="Override Default Camera Config" xml:space="preserve">
     <value>Default-Kamera-Konfig überschreiben</value>
@@ -290,16 +290,16 @@
     <value>Charakter-Auswahlboxen</value>
   </data>
   <data name="Item Pick Boxes" xml:space="preserve">
-    <value>Gegenstand-Auswahlboxen</value>
+    <value>Gegenstands-Auswahlboxen</value>
   </data>
   <data name="Item Cull Sphere" xml:space="preserve">
-    <value>Gegenstand-Cull-Kugel</value>
+    <value>Gegenstands-Cull-Kugel</value>
   </data>
   <data name="Tile Grid" xml:space="preserve">
     <value>Kachelgitter</value>
   </data>
   <data name="Item Cull Radius" xml:space="preserve">
-    <value>Gegenstand-Cull-Radius</value>
+    <value>Gegenstands-Cull-Radius</value>
   </data>
   <data name="Rendering:" xml:space="preserve">
     <value>Rendering:</value>
@@ -335,7 +335,7 @@
     <value>Shader</value>
   </data>
   <data name="Skill Effects" xml:space="preserve">
-    <value>Fähigkeit-Effekte</value>
+    <value>Fähigkeitseffekte</value>
   </data>
   <data name="Equipped Items" xml:space="preserve">
     <value>Ausgerüstete Gegenstände</value>
@@ -438,5 +438,56 @@
   </data>
   <data name="Debug info copied to clipboard" xml:space="preserve">
     <value>Debug-Info in Zwischenablage kopiert</value>
+  </data>
+  <data name="Import from bmd" xml:space="preserve">
+    <value>Aus bmd importieren</value>
+  </data>
+  <data name="Export as bmd" xml:space="preserve">
+    <value>Als bmd exportieren</value>
+  </data>
+  <data name="Items imported from bmd" xml:space="preserve">
+    <value>Gegenstände aus den bmd-Dateien importiert. Prüfen Sie die Konsole und speichern Sie dann.</value>
+  </data>
+  <data name="Failed to import items from bmd" xml:space="preserve">
+    <value>Die Gegenstände konnten nicht aus den bmd-Dateien importiert werden. Siehe Konsole.</value>
+  </data>
+  <data name="Items exported as bmd" xml:space="preserve">
+    <value>Gegenstände als bmd-Dateien exportiert.</value>
+  </data>
+  <data name="Failed to export items as bmd" xml:space="preserve">
+    <value>Die Gegenstände konnten nicht als bmd-Dateien exportiert werden.</value>
+  </data>
+  <data name="Item data has errors" xml:space="preserve">
+    <value>Die Gegenstandsdaten enthalten Fehler und wurden nicht gespeichert. Siehe Konsole.</value>
+  </data>
+  <data name="Item data could not be written" xml:space="preserve">
+    <value>Die Gegenstandsdateien konnten nicht geschrieben werden. Siehe Konsole.</value>
+  </data>
+  <data name="Looks" xml:space="preserve">
+    <value>Aussehen</value>
+  </data>
+  <data name="Model file" xml:space="preserve">
+    <value>Modelldatei</value>
+  </data>
+  <data name="Shared model" xml:space="preserve">
+    <value>Gemeinsames Modell</value>
+  </data>
+  <data name="Glow" xml:space="preserve">
+    <value>Leuchten</value>
+  </data>
+  <data name="Render style" xml:space="preserve">
+    <value>Darstellungsstil</value>
+  </data>
+  <data name="Item effect" xml:space="preserve">
+    <value>Gegenstandseffekt</value>
+  </data>
+  <data name="Used by" xml:space="preserve">
+    <value>verwendet von</value>
+  </data>
+  <data name="Select an item" xml:space="preserve">
+    <value>Wählen Sie einen Gegenstand in der Tabelle aus, um sein Aussehen zu sehen.</value>
+  </data>
+  <data name="No model" xml:space="preserve">
+    <value>Der ausgewählte Gegenstand hat kein Modell.</value>
   </data>
 </root>

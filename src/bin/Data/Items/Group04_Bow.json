@@ -6,6 +6,7 @@
       "number": 0,
       "name": {
         "en": "Short Bow",
+        "de": "Kurzbogen",
         "es": "Arco Corto",
         "pt": "Arco curto"
       },
@@ -32,6 +33,7 @@
       "number": 1,
       "name": {
         "en": "Bow",
+        "de": "Bogen",
         "es": "Arco",
         "pt": "Arco"
       },
@@ -58,6 +60,7 @@
       "number": 2,
       "name": {
         "en": "Elven Bow",
+        "de": "Elfenbogen",
         "es": "Arco de los Elfos",
         "pt": "Arco élfico"
       },
@@ -84,6 +87,7 @@
       "number": 3,
       "name": {
         "en": "Battle Bow",
+        "de": "Kampfbogen",
         "es": "Arco de Batalla",
         "pt": "Arco de batalha"
       },
@@ -110,6 +114,7 @@
       "number": 4,
       "name": {
         "en": "Tiger Bow",
+        "de": "Tigerbogen",
         "es": "Arco Tigre",
         "pt": "Arco do tigre"
       },
@@ -136,6 +141,7 @@
       "number": 5,
       "name": {
         "en": "Silver Bow",
+        "de": "Silberbogen",
         "es": "Arco Plateado",
         "pt": "Arco de prata"
       },
@@ -162,6 +168,7 @@
       "number": 6,
       "name": {
         "en": "Chaos Nature Bow",
+        "de": "Chaos-Naturbogen",
         "es": "Arco Naturaleza del Caos",
         "pt": "Arco da natureza do caos"
       },
@@ -187,6 +194,7 @@
       "number": 7,
       "name": {
         "en": "Bolt",
+        "de": "Bolzen",
         "es": "Rayo",
         "pt": "Dardo"
       },
@@ -204,6 +212,7 @@
       "number": 8,
       "name": {
         "en": "Crossbow",
+        "de": "Armbrust",
         "es": "Ballesta",
         "pt": "Besta"
       },
@@ -230,6 +239,7 @@
       "number": 9,
       "name": {
         "en": "Golden Crossbow",
+        "de": "Goldene Armbrust",
         "es": "Ballesta Dorada",
         "pt": "Besta dourada"
       },
@@ -256,6 +266,7 @@
       "number": 10,
       "name": {
         "en": "Arquebus",
+        "de": "Arkebuse",
         "es": "Arcabuz"
       },
       "width": 2,
@@ -281,6 +292,7 @@
       "number": 11,
       "name": {
         "en": "Light Crossbow",
+        "de": "Leichte Armbrust",
         "es": "Ballesta de Luz",
         "pt": "Besta leve"
       },
@@ -307,6 +319,7 @@
       "number": 12,
       "name": {
         "en": "Serpent Crossbow",
+        "de": "Schlangenarmbrust",
         "es": "Ballesta Serpiente",
         "pt": "Besta da serpente"
       },
@@ -333,6 +346,7 @@
       "number": 13,
       "name": {
         "en": "Bluewing Crossbow",
+        "de": "Blauschwingen-Armbrust",
         "es": "Ballesta Ala Azul",
         "pt": "Besta Bluewing"
       },
@@ -359,6 +373,7 @@
       "number": 14,
       "name": {
         "en": "Aquagold Crossbow",
+        "de": "Aquagold-Armbrust",
         "es": "Ballesta Acuadorada",
         "pt": "Besta Aquagold"
       },
@@ -385,6 +400,7 @@
       "number": 15,
       "name": {
         "en": "Arrow",
+        "de": "Pfeil",
         "es": "Flecha",
         "pt": "Flecha"
       },
@@ -402,6 +418,7 @@
       "number": 16,
       "name": {
         "en": "Saint Crossbow",
+        "de": "Heilige Armbrust",
         "es": "Ballesta de Santo",
         "pt": "Besta do santo"
       },
@@ -428,6 +445,7 @@
       "number": 17,
       "name": {
         "en": "Celestial Bow",
+        "de": "Himmlischer Bogen",
         "es": "Arco Celestial",
         "pt": "Arco celestial"
       },
@@ -454,6 +472,7 @@
       "number": 18,
       "name": {
         "en": "Divine Crossbow of Archangel",
+        "de": "Göttliche Armbrust des Erzengels",
         "es": "Ballesta Divina de Arcángel",
         "pt": "Besta divina do arcanjo"
       },
@@ -480,6 +499,7 @@
       "number": 19,
       "name": {
         "en": "Great Reign Crossbow",
+        "de": "Großartige Herrschaftsarmbrust",
         "es": "Ballesta del Gran Reino",
         "pt": "Grande besta do Império"
       },
@@ -506,6 +526,7 @@
       "number": 20,
       "name": {
         "en": "Arrow Viper Bow",
+        "de": "Pfeilvipernbogen",
         "es": "Arco Flecha Víbora",
         "pt": "Arco víbora de flecha"
       },
@@ -532,6 +553,7 @@
       "number": 21,
       "name": {
         "en": "Sylph Wind Bow",
+        "de": "Sylphenwindbogen",
         "es": "Arco Viento Sílfide",
         "pt": "Arco vento da silfe"
       },
@@ -558,6 +580,7 @@
       "number": 22,
       "name": {
         "en": "Albatross Bow",
+        "de": "Albatrosbogen",
         "es": "Arco Albatros",
         "pt": "Arco do albatroz"
       },
@@ -583,6 +606,7 @@
       "number": 23,
       "name": {
         "en": "Dark Stinger",
+        "de": "Dunkler Stachel",
         "es": "Punzón Oscuro",
         "pt": "Golpeador negro"
       },
@@ -610,6 +634,7 @@
       "number": 24,
       "name": {
         "en": "Aileen Bowr",
+        "de": "Aileen-Bogen",
         "es": "Arco Aileen",
         "pt": "Arco do Aileen"
       },
@@ -635,6 +660,7 @@
       "number": 27,
       "name": {
         "en": "Silver Bow-J",
+        "de": "Silberbogen-J",
         "es": "Arco Plateado-J",
         "pt": "Arco de prata-J"
       },

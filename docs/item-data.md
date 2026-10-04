@@ -28,6 +28,7 @@ The file name is only a convention; the group comes from the file content.
       "number": 5,
       "name": {
         "en": "Blade",
+        "de": "Klinge",
         "es": "Espada",
         "pt": "Lâmina"
       },

@@ -34,6 +34,7 @@
       "number": 1,
       "name": {
         "en": "Short Sword",
+        "de": "Kurzschwert",
         "es": "Espada Corta",
         "pt": "Espada curta"
       },
@@ -116,6 +117,7 @@
       "number": 4,
       "name": {
         "en": "Sword of Assassin",
+        "de": "Schwert des Assassinen",
         "es": "Espada de Asesino",
         "pt": "Espada do assassino"
       },
@@ -143,6 +145,7 @@
       "number": 5,
       "name": {
         "en": "Blade",
+        "de": "Klinge",
         "es": "Espada",
         "pt": "Lâmina"
       },
@@ -223,6 +226,7 @@
       "number": 8,
       "name": {
         "en": "Serpent Sword",
+        "de": "Schlangenschwert",
         "es": "Espada Serpiente",
         "pt": "Espada da serpente"
       },
@@ -249,6 +253,7 @@
       "number": 9,
       "name": {
         "en": "Sword of Salamander",
+        "de": "Salamanderschwert",
         "es": "Espada de Salamandra",
         "pt": "Espada da salamandra"
       },
@@ -275,6 +280,7 @@
       "number": 10,
       "name": {
         "en": "Light Saber",
+        "de": "Lichtschwert",
         "es": "Sable de Luz",
         "pt": "Sabre de luz"
       },
@@ -303,6 +309,7 @@
       "number": 11,
       "name": {
         "en": "Legendary Sword",
+        "de": "Legendäres Schwert",
         "es": "Espada Legendaria",
         "pt": "Espada lendária"
       },
@@ -329,6 +336,7 @@
       "number": 12,
       "name": {
         "en": "Heliacal Sword",
+        "de": "Sonnenschwert",
         "es": "Espada Helíaca",
         "pt": "Espada helíaca"
       },
@@ -355,6 +363,7 @@
       "number": 13,
       "name": {
         "en": "Double Blade",
+        "de": "Doppelklinge",
         "es": "Doble Hoja",
         "pt": "Lâmina dupla"
       },
@@ -382,6 +391,7 @@
       "number": 14,
       "name": {
         "en": "Lighting Sword",
+        "de": "Blitzschwert",
         "es": "Espada Lumínica",
         "pt": "Espada de luz"
       },
@@ -409,6 +419,7 @@
       "number": 15,
       "name": {
         "en": "Giant Sword",
+        "de": "Riesenschwert",
         "es": "Espada Gigante",
         "pt": "Espada gigante"
       },
@@ -435,6 +446,7 @@
       "number": 16,
       "name": {
         "en": "Sword of Destruction",
+        "de": "Schwert der Zerstörung",
         "es": "Espada de Destrucción",
         "pt": "Espada da destruição"
       },
@@ -461,6 +473,7 @@
       "number": 17,
       "name": {
         "en": "Dark Breaker",
+        "de": "Dunkler Brecher",
         "es": "Quebrantador Oscuro",
         "pt": "Destruidora Negra"
       },
@@ -487,6 +500,7 @@
       "number": 18,
       "name": {
         "en": "Thunder Blade",
+        "de": "Donnerklinge",
         "es": "Espada del Trueno",
         "pt": "Lâmina do trovão"
       },
@@ -513,6 +527,7 @@
       "number": 19,
       "name": {
         "en": "Divine Sword of Archangel",
+        "de": "Göttliches Schwert des Erzengels",
         "es": "Espada Divina de Arcángel",
         "pt": "Espada divina do arcanjo"
       },
@@ -540,6 +555,7 @@
       "number": 20,
       "name": {
         "en": "Knight Blade",
+        "de": "Ritterklinge",
         "es": "Espada de Caballero",
         "pt": "Lâmina do cavaleiro"
       },
@@ -565,6 +581,7 @@
       "number": 21,
       "name": {
         "en": "Dark Reign Blade",
+        "de": "Klinge der Dunklen Herrschaft",
         "es": "Espada del Reino Oscuro",
         "pt": "Lâmina do Império negro"
       },
@@ -593,6 +610,7 @@
       "number": 22,
       "name": {
         "en": "Bone Blade",
+        "de": "Knochenklinge",
         "es": "Espada de Hueso",
         "pt": "Lâmina de osso"
       },
@@ -618,6 +636,7 @@
       "number": 23,
       "name": {
         "en": "Explosion Blade",
+        "de": "Explosionsklinge",
         "es": "Espada Explosiva",
         "pt": "Lâmina da explosão"
       },
@@ -646,6 +665,7 @@
       "number": 24,
       "name": {
         "en": "Daybreak",
+        "de": "Tagesanbruch",
         "es": "Albor",
         "pt": "Aurora"
       },
@@ -671,6 +691,7 @@
       "number": 25,
       "name": {
         "en": "Sword Dancer",
+        "de": "Schwerttänzer",
         "es": "Oscilador de Espadas",
         "pt": "Dançarino da espada"
       },
@@ -697,7 +718,8 @@
     {
       "number": 26,
       "name": {
-        "en": "Flameberge"
+        "en": "Flameberge",
+        "de": "Flamberge"
       },
       "width": 1,
       "height": 4,
@@ -721,6 +743,7 @@
       "number": 27,
       "name": {
         "en": "Sword Breaker",
+        "de": "Schwertbrecher",
         "es": "Quebrantador de Espadas",
         "pt": "Destruidora de Espadas"
       },
@@ -746,6 +769,7 @@
       "number": 28,
       "name": {
         "en": "Rune Bastard Sword",
+        "de": "Runen-Bastardschwert",
         "es": "Espada Runa Bastarda",
         "pt": "Espada bastarda das runas"
       },
@@ -773,6 +797,7 @@
       "number": 31,
       "name": {
         "en": "Rune Blade",
+        "de": "Runenklinge",
         "es": "Espada Runa",
         "pt": "Lâmina das runas"
       },
@@ -801,6 +826,7 @@
       "number": 32,
       "name": {
         "en": "Sacred Glove",
+        "de": "Heiliger Handschuh",
         "es": "Guantes Sagrados",
         "pt": "Luvas Sagradas"
       },
@@ -826,6 +852,7 @@
       "number": 33,
       "name": {
         "en": "Holy Storm Claw",
+        "de": "Heilige Sturmklaue",
         "es": "Garra de Tormenta Sagrada",
         "pt": "Garra de Tempestade Sagrada"
       },
@@ -850,6 +877,7 @@
       "number": 34,
       "name": {
         "en": "Piercing Blade Glove",
+        "de": "Durchbohrerklingen-Handschuh",
         "es": "Guantes de Cuchillas Perforadoras",
         "pt": "Luvas de Lâmina Perfurante"
       },
@@ -874,6 +902,7 @@
       "number": 35,
       "name": {
         "en": "Phoenix Soul Star",
+        "de": "Phönixseelenstern",
         "es": "Estrella de Alma de Fénix",
         "pt": "Estrela de Alma de Fênix"
       },
@@ -899,6 +928,7 @@
       "number": 39,
       "name": {
         "en": "Lighting Sword-J",
+        "de": "Blitzschwert-J",
         "es": "Espada Lumínica-J",
         "pt": "Espada de luz-J"
       },
@@ -926,6 +956,7 @@
       "number": 40,
       "name": {
         "en": "Sacred Glove-J",
+        "de": "Heiliger Handschuh-J",
         "es": "Guantes Sagrados-J",
         "pt": "Luvas Sagradas-J"
       },

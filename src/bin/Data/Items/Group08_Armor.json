@@ -6,6 +6,7 @@
       "number": 0,
       "name": {
         "en": "Bronze Armor",
+        "de": "Bronzerüstung",
         "es": "Armadura de Bronce",
         "pt": "Armadura de bronze"
       },
@@ -30,6 +31,7 @@
       "number": 1,
       "name": {
         "en": "Dragon Armor",
+        "de": "Drachenrüstung",
         "es": "Armadura Dragón",
         "pt": "Armadura do dragão"
       },
@@ -53,6 +55,7 @@
       "number": 2,
       "name": {
         "en": "Pad Armor",
+        "de": "Polsterrüstung",
         "es": "Armadura Rellena",
         "pt": "Armadura acolchoada"
       },
@@ -75,6 +78,7 @@
       "number": 3,
       "name": {
         "en": "Legendary Armor",
+        "de": "Legendäre Rüstung",
         "es": "Armadura Legendaria",
         "pt": "Armadura lendária"
       },
@@ -97,6 +101,7 @@
       "number": 4,
       "name": {
         "en": "Bone Armor",
+        "de": "Knochenrüstung",
         "es": "Armadura de Hueso",
         "pt": "Armadura de osso"
       },
@@ -119,6 +124,7 @@
       "number": 5,
       "name": {
         "en": "Leather Armor",
+        "de": "Lederrüstung",
         "es": "Armadura de Cuero",
         "pt": "Armadura de couro"
       },
@@ -143,6 +149,7 @@
       "number": 6,
       "name": {
         "en": "Scale Armor",
+        "de": "Schuppenrüstung",
         "es": "Armadura de Escamas",
         "pt": "Armadura de escamas"
       },
@@ -167,6 +174,7 @@
       "number": 7,
       "name": {
         "en": "Sphinx Armor",
+        "de": "Sphinxrüstung",
         "es": "Armadura Esfinge",
         "pt": "Armadura da esfinge"
       },
@@ -189,6 +197,7 @@
       "number": 8,
       "name": {
         "en": "Brass Armor",
+        "de": "Messingrüstung",
         "es": "Armadura de Metal",
         "pt": "Armadura de latão"
       },
@@ -213,6 +222,7 @@
       "number": 9,
       "name": {
         "en": "Plate Armor",
+        "de": "Plattenrüstung",
         "es": "Armadura de Plata",
         "pt": "Armadura de placa"
       },
@@ -236,6 +246,7 @@
       "number": 10,
       "name": {
         "en": "Vine Armor",
+        "de": "Rankenrüstung",
         "es": "Armadura Vid",
         "pt": "Armadura da vinha"
       },
@@ -258,6 +269,7 @@
       "number": 11,
       "name": {
         "en": "Silk Armor",
+        "de": "Seidenrüstung",
         "es": "Armadura de Seda",
         "pt": "Armadura de seda"
       },
@@ -280,6 +292,7 @@
       "number": 12,
       "name": {
         "en": "Wind Armor",
+        "de": "Windrüstung",
         "es": "Armadura Viento",
         "pt": "Armadura do vento"
       },
@@ -302,6 +315,7 @@
       "number": 13,
       "name": {
         "en": "Spirit Armor",
+        "de": "Geisterrüstung",
         "es": "Armadura Espíritu",
         "pt": "Armadura do espírito"
       },
@@ -324,6 +338,7 @@
       "number": 14,
       "name": {
         "en": "Guardian Armor",
+        "de": "Wächterrüstung",
         "es": "Armadura Guardián",
         "pt": "Armadura do guardião"
       },
@@ -346,6 +361,7 @@
       "number": 15,
       "name": {
         "en": "Storm Crow Armor",
+        "de": "Sturmkrähenrüstung",
         "es": "Armadura Cuervo de Tormenta",
         "pt": "Arm. do Corvo da Tempestade"
       },
@@ -368,6 +384,7 @@
       "number": 16,
       "name": {
         "en": "Black Dragon Armor",
+        "de": "Schwarzdrachenrüstung",
         "es": "Armadura Dragón Negro",
         "pt": "Armadura do dragão negro"
       },
@@ -390,6 +407,7 @@
       "number": 17,
       "name": {
         "en": "Dark Phoenix Armor",
+        "de": "Dunkelphönixrüstung",
         "es": "Armadura Fénix Oscuro",
         "pt": "Armadura da fênix negra"
       },
@@ -412,6 +430,7 @@
       "number": 18,
       "name": {
         "en": "Grand Soul Armor",
+        "de": "Großseelenrüstung",
         "es": "Armadura Gran Alma",
         "pt": "Armadura da grande alma"
       },
@@ -434,6 +453,7 @@
       "number": 19,
       "name": {
         "en": "Divine Armor",
+        "de": "Göttliche Rüstung",
         "es": "Armadura Divina",
         "pt": "Armadura divina"
       },
@@ -456,6 +476,7 @@
       "number": 20,
       "name": {
         "en": "Thunder Hawk Armor",
+        "de": "Donnerfalkenrüstung",
         "es": "Armadura Halcón de Trueno",
         "pt": "Armadura de Thunder Hawk"
       },
@@ -478,6 +499,7 @@
       "number": 21,
       "name": {
         "en": "Great Dragon Armor",
+        "de": "Großartige Drachenrüstung",
         "es": "Armadura Gran Dragón",
         "pt": "Armadura do grande dragão"
       },
@@ -500,6 +522,7 @@
       "number": 22,
       "name": {
         "en": "Dark Soul Armor",
+        "de": "Dunkelseelenrüstung",
         "es": "Armadura Gran Oscura",
         "pt": "Armadura da alma negra"
       },
@@ -522,6 +545,7 @@
       "number": 23,
       "name": {
         "en": "Hurricane Armor",
+        "de": "Orkanrüstung",
         "es": "Armadura Huracán",
         "pt": "Armadura do furacão"
       },
@@ -544,6 +568,7 @@
       "number": 24,
       "name": {
         "en": "Red Sprit Armor",
+        "de": "Rotgeisterrüstung",
         "es": "Armadura Espíritu Rojo",
         "pt": "Armadura do espírito vermelho"
       },
@@ -566,6 +591,7 @@
       "number": 25,
       "name": {
         "en": "Light Plate Armor",
+        "de": "Leichtplattenrüstung",
         "es": "Armadura Plata de Luz",
         "pt": "Armadura de placa leve"
       },
@@ -588,6 +614,7 @@
       "number": 26,
       "name": {
         "en": "Adamantine Armor",
+        "de": "Adamantrüstung",
         "es": "Armadura Adamantina",
         "pt": "Armadura de adamantina"
       },
@@ -610,6 +637,7 @@
       "number": 27,
       "name": {
         "en": "Dark Steel Armor",
+        "de": "Dunkelstahlrüstung",
         "es": "Armadura Acero Oscuro",
         "pt": "Armadura de aço negro"
       },
@@ -632,6 +660,7 @@
       "number": 28,
       "name": {
         "en": "Dark Master Armor",
+        "de": "Dunkelmeisterrüstung",
         "es": "Armadura Amo Oscuro",
         "pt": "Armadura do Mestre negro"
       },
@@ -654,6 +683,7 @@
       "number": 29,
       "name": {
         "en": "Dragon Knight Armor",
+        "de": "Drachenritterrüstung",
         "es": "Armadura Caballero Dragón",
         "pt": "Armadura do cavaleiro dragão"
       },
@@ -676,6 +706,7 @@
       "number": 30,
       "name": {
         "en": "Venom Mist Armor",
+        "de": "Giftnebelrüstung",
         "es": "Armadura Bruma de Veneno",
         "pt": "Armadura da névoa de veneno"
       },
@@ -698,6 +729,7 @@
       "number": 31,
       "name": {
         "en": "Sylphid Ray Armor",
+        "de": "Sylphenstrahlrüstung",
         "es": "Armadura Rayo de Sílfide",
         "pt": "Armadura do raio silfídico"
       },
@@ -720,6 +752,7 @@
       "number": 32,
       "name": {
         "en": "Volcano Armor",
+        "de": "Vulkanrüstung",
         "es": "Armadura Volcán",
         "pt": "Armadura do vulcão"
       },
@@ -742,6 +775,7 @@
       "number": 33,
       "name": {
         "en": "Sunlight Armor",
+        "de": "Sonnenlichtrüstung",
         "es": "Armadura Luz Solar",
         "pt": "Armadura da luz do sol"
       },
@@ -764,6 +798,7 @@
       "number": 34,
       "name": {
         "en": "Ashcrow Armor",
+        "de": "Aschkrähenrüstung",
         "es": "Armadura Cuervo Ceniza",
         "pt": "Armadura de Ashcrow"
       },
@@ -785,6 +820,7 @@
       "number": 35,
       "name": {
         "en": "Eclipse Armor",
+        "de": "Finsternisrüstung",
         "es": "Armadura Eclipse",
         "pt": "Armadura do eclipse"
       },
@@ -806,6 +842,7 @@
       "number": 36,
       "name": {
         "en": "Iris Armor",
+        "de": "Iris-Rüstung",
         "es": "Armadura Iris",
         "pt": "Armadura de Iris"
       },
@@ -827,6 +864,7 @@
       "number": 37,
       "name": {
         "en": "Valiant Armor",
+        "de": "Kühne Rüstung",
         "es": "Armadura Valiente",
         "pt": "Armadura do valor"
       },
@@ -848,6 +886,7 @@
       "number": 38,
       "name": {
         "en": "Glorious Armor",
+        "de": "Glorreiche Rüstung",
         "es": "Armadura Gloriosa",
         "pt": "Armadura gloriosa"
       },
@@ -869,6 +908,7 @@
       "number": 39,
       "name": {
         "en": "Violent Wind Armor",
+        "de": "Sturmwindrüstung",
         "es": "Armadura Viento Violento",
         "pt": "Armadura do vento violento"
       },
@@ -890,6 +930,7 @@
       "number": 40,
       "name": {
         "en": "Red Wing Armor",
+        "de": "Rotschwingenrüstung",
         "es": "Armadura Ala Roja",
         "pt": "Armadura da asa vermelha"
       },
@@ -912,6 +953,7 @@
       "number": 41,
       "name": {
         "en": "Ancient Armor",
+        "de": "Uralte Rüstung",
         "es": "Armadura Antigua",
         "pt": "Armadura antiga"
       },
@@ -934,6 +976,7 @@
       "number": 42,
       "name": {
         "en": "Demonic Armor",
+        "de": "Dämonische Rüstung",
         "es": "Armadura Demoníaca",
         "pt": "Armadura demoníaca"
       },
@@ -955,6 +998,7 @@
       "number": 43,
       "name": {
         "en": "Storm Blitz Armor",
+        "de": "Sturmblitzrüstung",
         "es": "Armadura Ráfaga Tormentosa",
         "pt": "Arm. Relâmpago de Tempestade"
       },
@@ -977,6 +1021,7 @@
       "number": 44,
       "name": {
         "en": "Eternal Wing Armor",
+        "de": "Ewigschwingenrüstung",
         "es": "Armadura Ala Eterna",
         "pt": "Armadura da asa eterna"
       },
@@ -1000,6 +1045,7 @@
       "number": 45,
       "name": {
         "en": "Titan  Armor",
+        "de": "Titanenrüstung",
         "es": "Armadura Titán",
         "pt": "Armadura do titã"
       },
@@ -1022,6 +1068,7 @@
       "number": 46,
       "name": {
         "en": "Brave Armor",
+        "de": "Tapfere Rüstung",
         "es": "Armadura Valerosa",
         "pt": "Armadura da coragem"
       },
@@ -1044,6 +1091,7 @@
       "number": 47,
       "name": {
         "en": "Phantom  Armor",
+        "de": "Phantom-Rüstung",
         "es": "Armadura Fantasma",
         "pt": "Armadura do fantasma"
       },
@@ -1066,6 +1114,7 @@
       "number": 48,
       "name": {
         "en": "Destroy Armor",
+        "de": "Zerstörerrüstung",
         "es": "Armadura Destructora",
         "pt": "Armadura da destruição"
       },
@@ -1089,6 +1138,7 @@
       "number": 49,
       "name": {
         "en": "Seraphim Armor",
+        "de": "Seraphim-Rüstung",
         "es": "Armadura Serafín",
         "pt": "Armadura do serafim"
       },
@@ -1111,6 +1161,7 @@
       "number": 50,
       "name": {
         "en": "Divine Armor",
+        "de": "Glaubensrüstung",
         "es": "Armadura Divina",
         "pt": "Armadura divina"
       },
@@ -1134,6 +1185,7 @@
       "number": 51,
       "name": {
         "en": "Royal Armor",
+        "de": "Königliche Rüstung",
         "es": "Armadura Real",
         "pt": "Armadura real"
       },
@@ -1156,6 +1208,7 @@
       "number": 52,
       "name": {
         "en": "Hades Armor",
+        "de": "Hades-Rüstung",
         "es": "Armadura Hades",
         "pt": "Armadura de Hades"
       },
@@ -1179,6 +1232,7 @@
       "number": 59,
       "name": {
         "en": "Sacred Fire Armor",
+        "de": "Heiligfeuerrüstung",
         "es": "Armadura de Fuego Sagrado",
         "pt": "Armadura de Fogo Sagrado"
       },
@@ -1201,6 +1255,7 @@
       "number": 60,
       "name": {
         "en": "Storm Jahad Armor",
+        "de": "Sturm-Jahad-Rüstung",
         "es": "Armadura de Tormenta Zahard",
         "pt": "Armadura de Tempestade Zahard"
       },
@@ -1222,6 +1277,7 @@
       "number": 61,
       "name": {
         "en": "Piercing Groove Armor",
+        "de": "Durchbohrerrüstung",
         "es": "Armadura de Tallo Perforador",
         "pt": "Armadura de Entalhe Perfurante"
       },
@@ -1243,6 +1299,7 @@
       "number": 62,
       "name": {
         "en": "Scale Armor",
+        "de": "Schuppenrüstung",
         "es": "Armadura de Escamas",
         "pt": "Armadura de escama"
       },
@@ -1272,6 +1329,7 @@
       "number": 63,
       "name": {
         "en": "Silk Armor",
+        "de": "Seidenrüstung",
         "es": "Armadura de Seda",
         "pt": "Armadura de seda"
       },
@@ -1298,6 +1356,7 @@
       "number": 64,
       "name": {
         "en": "Sphinx Armor",
+        "de": "Sphinxrüstung",
         "es": "Armadura Esfinge",
         "pt": "Armadura de Esfinge"
       },
@@ -1325,6 +1384,7 @@
       "number": 65,
       "name": {
         "en": "Violent Wind Armor",
+        "de": "Sturmwindrüstung",
         "es": "Armadura Viento Violento",
         "pt": "Armadura do vento violento"
       },
@@ -1351,6 +1411,7 @@
       "number": 66,
       "name": {
         "en": "Dark Soul Armor",
+        "de": "Dunkelseelenrüstung",
         "es": "Armadura Adamantina",
         "pt": "Armadura de adamantina"
       },
@@ -1377,6 +1438,7 @@
       "number": 67,
       "name": {
         "en": "Dragon Armor",
+        "de": "Drachenrüstung",
         "es": "Armadura Dragón",
         "pt": "Armadura de Dragão"
       },
@@ -1404,6 +1466,7 @@
       "number": 68,
       "name": {
         "en": "Guardian Armor",
+        "de": "Wächterrüstung",
         "es": "Armadura Guardián",
         "pt": "Armadura de Guardião"
       },
@@ -1430,6 +1493,7 @@
       "number": 69,
       "name": {
         "en": "Legendary Armor",
+        "de": "Legendäre Rüstung",
         "es": "Armadura Legendaria",
         "pt": "Armadura Lendária"
       },
@@ -1457,6 +1521,7 @@
       "number": 70,
       "name": {
         "en": "Red Wing Armor",
+        "de": "Rotschwingenrüstung",
         "es": "Armadura Ala Roja",
         "pt": "Armadura da asa vermelha"
       },
@@ -1483,6 +1548,7 @@
       "number": 71,
       "name": {
         "en": "Atlans Armor",
+        "de": "Atlans-Rüstung",
         "es": "Armadura Cuervo de Tormenta",
         "pt": "Armadura do corvo da tempestade"
       },
@@ -1509,6 +1575,7 @@
       "number": 72,
       "name": {
         "en": "Storm Jahad Armor",
+        "de": "Sturm-Jahad-Rüstung",
         "es": "Armadura de Tormenta Zahard",
         "pt": "Armadura de Tempestade Zahard"
       },
@@ -1535,6 +1602,7 @@
       "number": 73,
       "name": {
         "en": "Phoenix Soul Armor",
+        "de": "Phönixseelenrüstung",
         "es": "Armadura de Alma de Fénix",
         "pt": "Armadura de Alma de Fênix"
       },
@@ -1557,6 +1625,7 @@
       "number": 78,
       "name": {
         "en": "Dragon Armor-J",
+        "de": "Drachenrüstung-J",
         "es": "Armadura Dragón-J",
         "pt": "Armadura do dragão-J"
       },
@@ -1580,6 +1649,7 @@
       "number": 79,
       "name": {
         "en": "Legendary Armor-J",
+        "de": "Legendäre Rüstung-J",
         "es": "Armadura Legendario-J",
         "pt": "Armadura lendário-J"
       },
@@ -1602,6 +1672,7 @@
       "number": 80,
       "name": {
         "en": "Guardian Armor-J",
+        "de": "Wächterrüstung-J",
         "es": "Armadura Guardián-J",
         "pt": "Armadura do guardião-J"
       },
@@ -1624,6 +1695,7 @@
       "number": 81,
       "name": {
         "en": "Light Plate Armor-J",
+        "de": "Leichtplattenrüstung-J",
         "es": "Armadura Plata de Luz-J",
         "pt": "Armadura de placa leve-J"
       },
@@ -1646,6 +1718,7 @@
       "number": 82,
       "name": {
         "en": "Red Wing Armor-J",
+        "de": "Rotschwingenrüstung-J",
         "es": "Armadura Ala Roja-J",
         "pt": "Armadura da asa vermelha-J"
       },
@@ -1668,6 +1741,7 @@
       "number": 83,
       "name": {
         "en": "Sacred Fire Armor-J",
+        "de": "Heiligfeuerrüstung-J",
         "es": "Armadura de Fuego Sagrado-J",
         "pt": "Armadura de Fogo Sagrado-J"
       },
