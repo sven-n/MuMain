@@ -600,61 +600,42 @@ TEST_CASE("The types of FX1.5 create from the catalogue what their cases chose b
     CHECK(Find(record(MODEL_WINDFOCE, 1), "Effects[0].LifeTime") == "999");
 }
 
-// TEMPORARY: the next commit deletes the cases and this test. With
-// MU_EFFECT_RECORDER_WRITE=1 it writes the creation baseline with the old
-// cases of these types.
-TEST_CASE("TEMP: the rows of FX1.5b give the records of their cases [effects][recorder]")
+// FX1.5b moved the creation of these types from code into the catalogue with
+// the fields it added; the commit before the one that deleted their cases
+// compared both for every SubType a caller passes or a branch handles, one no
+// branch handles, every owner, argument set, slot pattern, both geometries
+// and the frame factors 1, 0.5 and 25/60. These are values the cases set with
+// those fields (the call's position is 13120.25, 12480.5, 140.75, its angle
+// 11, 22, 33 and its light 0.9, 0.8, 0.7).
+TEST_CASE("The types of FX1.5b create from the catalogue what their cases set [effects][recorder]")
 {
-    const std::array<int, 12> types = {BITMAP_SKULL,
-                                       BITMAP_OUR_INFLUENCE_GROUND,
-                                       BITMAP_ENEMY_INFLUENCE_GROUND,
-                                       BITMAP_SHINY + 6,
-                                       MODEL_MAYAHANDSKILL,
-                                       MODEL_CIRCLE_LIGHT,
-                                       MODEL_PIERCING2,
-                                       BITMAP_TWLIGHT,
-                                       MODEL_MOONHARVEST_MOON,
-                                       MODEL_ARROW_TANKER_HIT,
-                                       BITMAP_CRATER,
-                                       BITMAP_CHROME_ENERGY2};
-    // At 60 frames per second the frame factor is 25/60, where a product with
-    // it is rounded, unlike at 1 and 0.5.
-    const Conditions frameRate[] = {{25.f / 60.f, SlotPattern::A}, {25.f / 60.f, SlotPattern::B}};
-    const auto record = [&](std::span<const Conditions> allConditions)
+    BuildShippedRegistry();
+    const auto record = [](int type, int subType, float frameFactor = 1.f)
     {
-        std::vector<Recorded> all;
-        for (const int type : types)
-        {
-            for (const EffectCall& call : SecondGeometryCallsFor(type, RecordedSubTypesOf(type)))
-            {
-                for (const Conditions& conditions : allConditions)
-                {
-                    all.push_back({Describe(call, conditions), RecordCall(call, conditions)});
-                }
-            }
-        }
-        return all;
+        EffectCall call = CallOf(type);
+        call.subType = subType;
+        return RecordCall(call, {frameFactor, SlotPattern::A});
     };
 
-    BuildShippedRegistry(types);
-    const std::vector<Recorded> cases = record(AllConditions());
-    const std::vector<Recorded> casesAtFrameRate = record(frameRate);
-    if (std::getenv("MU_EFFECT_RECORDER_WRITE") != nullptr)
-    {
-        WriteBaseline(RecordBaseline());
-    }
+    // 1000 minus 60 times the frame factor.
+    CHECK(Find(record(BITMAP_SKULL, 1, 0.5f), "Effects[0].LifeTime") == "970");
+    CHECK(Find(record(BITMAP_SKULL, 5), "Effects[0].LifeTime") == "1000");
 
-    BuildShippedRegistry();
-    const std::vector<Recorded> rows = record(AllConditions());
-    const std::vector<Recorded> rowsAtFrameRate = record(frameRate);
+    CHECK(Find(record(BITMAP_OUR_INFLUENCE_GROUND, 0), "Effects[0].AlphaTarget") == "0.75");
+    CHECK(Find(record(BITMAP_SHINY + 6, 3), "Effects[0].RenderType") == std::to_string(RENDER_TYPE_ALPHA_BLEND_MINUS));
+    CHECK(Find(record(MODEL_CIRCLE_LIGHT, 1), "Effects[0].RenderType") == "128");
+    CHECK(Find(record(MODEL_MOONHARVEST_MOON, 0), "Effects[0].m_iAnimation") == "0");
+    CHECK(Find(record(BITMAP_CRATER, 0), "Effects[0].StartPosition[0]") == "4.5");
 
-    std::ostringstream log;
-    const int differing = CompareAll(cases, rows, log);
-    const int differingAtFrameRate = CompareAll(casesAtFrameRate, rowsAtFrameRate, log);
-    INFO(log.str());
-    CHECK(differing == 0);
-    CHECK(differingAtFrameRate == 0);
-    MESSAGE("FX1.5b cases against the rows: " << cases.size() << " calls, " << differing
-                                              << " differ; at 25/60: " << casesAtFrameRate.size() << " calls, "
-                                              << differingAtFrameRate << " differ");
+    // The copies: the light, the call's position before the offset, the call's
+    // angle before the variant zeroes it.
+    CHECK(Find(record(MODEL_MAYAHANDSKILL, 1), "Effects[0].StartPosition[1]") == "0.800000012");
+    CHECK(Find(record(BITMAP_TWLIGHT, 3), "Effects[0].EyeRight[2]") == "0.699999988");
+    const Record piercing = record(MODEL_PIERCING2, 0);
+    CHECK(Find(piercing, "Effects[0].StartPosition[2]") == "140.75");
+    CHECK(Find(piercing, "Effects[0].Position[2]") == "270.75");
+    const Record moon = record(MODEL_MOONHARVEST_MOON, 1);
+    CHECK(Find(moon, "Effects[0].Direction[1]") == "22");
+    CHECK(Find(moon, "Effects[0].Angle[1]") == "0");
+    CHECK(Find(record(MODEL_ARROW_TANKER_HIT, 2), "Effects[0].m_vDeadPosition[2]") == "33");
 }
