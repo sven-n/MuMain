@@ -14,6 +14,7 @@
 #include "../MuEditor/UI/SkillEditor/MuSkillEditorUI.h"
 #include "../MuEditor/UI/DevEditor/DevEditorUI.h"
 #include "../MuEditor/UI/MapEditor/MapEditorUI.h"
+#include "../MuEditor/UI/EffectBrowser/MuEffectBrowserUI.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
@@ -120,6 +121,7 @@ CMuEditorCore::CMuEditorCore()
     , m_bShowSkillEditor(false)
     , m_bShowDevEditor(false)
     , m_bShowMapEditor(false)
+    , m_bShowEffectBrowser(false)
     , m_bShowConsole(true)
     , m_bHoveringUI(false)
     , m_bPreviousFrameHoveringUI(false)
@@ -560,7 +562,8 @@ void CMuEditorCore::Render()
     m_bHoveringUI = false;
 
     // Render toolbar (handles both open and closed states)
-    g_MuEditorUI.RenderToolbar(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor, m_bShowDevEditor, m_bShowMapEditor, m_bShowConsole);
+    g_MuEditorUI.RenderToolbar(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor, m_bShowDevEditor, m_bShowMapEditor,
+                               m_bShowEffectBrowser, m_bShowConsole);
 
     if (m_bEditorMode)
     {
@@ -571,6 +574,11 @@ void CMuEditorCore::Render()
         if (m_bShowDevEditor)
         {
             g_DevEditorUI.Render(&m_bShowDevEditor);
+        }
+
+        if (m_bShowEffectBrowser)
+        {
+            g_MuEffectBrowserUI.Render(&m_bShowEffectBrowser);
         }
 
         // Render Map Editor. Called every frame (not gated on the show flag) so
