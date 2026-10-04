@@ -5,7 +5,7 @@
 
    .slot-frame (shared border/radius) and .slot-fill (translucent dark backing) give every
    slot-like element one consistent look. #item_slots/#skill_slots take .slot-frame only: the
-   band behind them (main_frame_bg.rml) already backs them. */
+   strip's own segments (#item_band_fill, #skill_band_fill) already back them. */
 
 #bars {
 	position: absolute;
@@ -54,8 +54,8 @@
 	pointer-events: none;
 }
 
-/* Left/right fill zones -- border lives on #gauge_frame instead. Rounded only on the outer
-   corner; the inner corner stays square, fading into the unfilled middle band. */
+/* The strip's backing, four segments end to end under #gauge_frame's border: the gauge zones at
+   each end, the item and skill bands between. Rounded only on the strip's outer corners. */
 #gauge_fill_left {
 	position: absolute;
 	left: 0px;
@@ -76,6 +76,15 @@
 	border-radius: 0 3px 3px 0;
 	pointer-events: none;
 }
+/* The item band starts at #item_hotkey_anchor; the skill band 214px past #skill_list_anchor --
+   214 to 424 pads the skill icons' 222-416 by 8px a side, as the item band pads the potions, so
+   the segments meet flush. The highlight is the original RenderCenterFrame() quad,
+   RenderColorQuadARGB(222, kHudTop, 160, 40, 0x40FFFFFF), shown while the hotkey row is on its
+   upper set. */
+#item_band_fill, #skill_band_fill, #skill_list_highlight { position: absolute; top: 429px; }
+#item_band_fill  { left: 140px; width: 152px; height: 41px; }
+#skill_band_fill { left: 292px; width: 210px; height: 41px; }
+#skill_list_highlight { left: 300px; width: 160px; height: 40px; background-color: rgba(255, 255, 255, 64); }
 
 .gauge-fill-vertical { display: none; }
 .gauge-fill-horizontal {

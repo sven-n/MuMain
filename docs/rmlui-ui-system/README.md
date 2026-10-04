@@ -137,10 +137,10 @@ Phase 1 built) with a second, independent `Rml::Context` —
 (flush pending draws via the new `IMuRenderer::FlushRenderCommands()`, then `Update()`+`Render()`
 on that context) instead of through the single-slot `SetPreSubmitCallback` the "main" context
 uses. It never receives input — no `IUiInputConsumer` registration; every document loaded into it
-is `pointer-events: none`. Proven end-to-end in `MainFrameWindow.cpp`'s
-`CMainFrameWindow::RenderLeftFrame()`/`RenderCenterFrame()`: the modern theme's background panel
-behind the still-legacy, 3D-composited potion/skill icons is now a real RmlUi document
-(`main_frame_bg.rml`) instead of a hand-matched-color legacy quad. **Since generalized (Phase 2,
+is `pointer-events: none`. Its consumers are window frames that must paint behind native 3D content,
+such as `my_inventory_bg.rml`. The main frame was the first
+and has left it: its potions became render targets inside `main_frame.rml`, so nothing native sits
+between its fills and its slots any more. **Since generalized (Phase 2,
 2026-09-13)** — the call is centralized in `mu::ui::window::CManager::Render()`'s own z-sorted loop
 (`WindowManager.cpp`), gated on `CManager::SetDrivesBackgroundLayer(true)` so only `CSystem`'s
 app-lifetime manager fires it, never `CSceneUICoordinator`'s scene-scoped one. **A new window that

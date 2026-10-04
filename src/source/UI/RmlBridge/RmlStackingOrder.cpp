@@ -136,7 +136,6 @@ constexpr DocumentPlacement Placements[] = {
     {"window_menu.rml", 10.4f, MainScene},
     {"option_window.rml", 10.5f, MainScene},
     {"main_frame.rml", 10.6f, MainScene},
-    {"main_frame_bg.rml", 10.6f, MainScene},
     {"command_window.rml", 10.65f, MainScene}, // UI::Layout::ForegroundPanelLayerDepth
     {"chat_command.rml", 10.65f, MainScene},
     // The original drew each tooltip at its owner's depth (item tooltips at 5.5), where the

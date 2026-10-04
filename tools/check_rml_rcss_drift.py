@@ -65,10 +65,10 @@ def find_document_windows(source_root: pathlib.Path) -> dict[str, set[str]]:
     """Maps each RML document name (e.g. "login") to the union of ids/bound field
     names/event-callback names its owning .cpp file(s) reference.
 
-    A .cpp file may own more than one themed document (e.g. MainFrameWindow.cpp's
-    "main_frame" and its background-layer companion "main_frame_bg", 2026-09-04) --
+    A .cpp file may own more than one themed document (e.g. MyInventory.cpp's
+    "my_inventory" and its background-layer companion "my_inventory_bg") --
     .Bind()/.BindEventCallback() calls are scoped to whichever RmlModelBinder::Create()
-    call's model-name string ("main_frame", "main_frame_bg", ...) textually precedes them
+    call's model-name string ("my_inventory", "my_inventory_bg", ...) textually precedes them
     in the file (each one's registration lambda is a single contiguous block, never
     interleaved with another's), not pooled file-wide. GetElementById() calls aren't
     inside a Create() lambda at all -- scoped instead by which document pointer they're

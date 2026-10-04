@@ -368,9 +368,8 @@ gets the same treatment, not just login's. `login_main.rcss`/`char_sel_main.rcss
 
 The reference visual study's HP/MP circular glass-orb with wrapping SD/AG arc gauges was
 **deliberately not built in this pass** — it's a structural rebuild of the combat HUD (new markup,
-new `CMainFrameWindow` C++ binding shape, new tooltip anchor positions, interaction with
-`main_frame_bg.rcss`'s paint-order mechanism and the `BottomHudScale()`/`UIScalePercent` scaling
-path), not a retint, and touches real, currently-shipped combat UI. This generation's migration
+new `CMainFrameWindow` C++ binding shape, new tooltip anchor positions, interaction with the
+`BottomHudScale()`/`UIScalePercent` scaling path), not a retint, and touches real, currently-shipped combat UI. This generation's migration
 retinted the existing rectangular HP/MP/AG/SD bars to the new `resource-*` tokens and left their
 layout untouched. See the engine-constraint table above for the two RmlUi-native techniques already
 verified as viable for this (`<progress direction="clockwise">` for the arcs, layered

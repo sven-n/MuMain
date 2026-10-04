@@ -232,6 +232,7 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
                 c.RegisterArray<std::vector<SkillCellEntry>>();
 
                 c.Bind("skill_grid_open", &model.skillGridOpen);
+                c.Bind("skill_list_up", &model.skillListUp);
                 c.Bind("skill_grid_cells", &model.skillGridCells);
                 c.Bind("pet_skill_cells", &model.petSkillCells);
 
@@ -313,32 +314,6 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
                                                                  "Data/Interface/RmlUi/main_frame_top.rml");
         }
 
-        // Gated on ThemeProvidesOwnIconChrome() (see m_BgRmlBinder's header comment) -- themes
-        // without that capability don't ship main_frame_bg.rml.
-        if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
-        {
-            if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-            {
-                const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "main_frame_bg",
-                    [](Rml::DataModelConstructor& c, MainFrameBgRmlModel& model)
-                    {
-                        c.Bind("root_x", &model.rootX);
-                        c.Bind("root_y", &model.rootY);
-                        c.Bind("root_scale", &model.rootScale);
-                        c.Bind("left_offset_x", &model.leftOffsetX);
-                        c.Bind("center_offset_x", &model.centerOffsetX);
-                        c.Bind("skill_list_open", &model.skillListOpen);
-                    });
-                if (bgModelCreated)
-                {
-                    m_pRmlBgDoc = UI::RmlBridge::LoadThemedDocument(bgContext, "Data/Interface/RmlUi/main_frame_bg.rml");
-                    // Not Show()n here -- CManager::Render()'s centralized RenderBackgroundLayer()
-                    // call runs every frame regardless of this window's own visibility, so
-                    // SyncDocVisibility() now gates m_pRmlBgDoc the same way it gates m_pRmlDoc.
-                }
-            }
-        }
-
         // Not Show()n here -- Create() runs before SceneFlag reaches MAIN_SCENE; an eager Show()
         // here let the HUD flash once before the first scene gate check. Left hidden;
         // SyncDocVisibility() shows it once the gate allows it.
@@ -356,16 +331,6 @@ void mu::ui::window::CMainFrameWindow::ReloadRmlTheme()
     {
         context->UnloadDocument(m_pRmlTopDoc);
         m_pRmlTopDoc = nullptr;
-    }
-
-    if (m_pRmlBgDoc)
-    {
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-        {
-            m_BgRmlBinder.Destroy(bgContext);
-            bgContext->UnloadDocument(m_pRmlBgDoc);
-        }
-        m_pRmlBgDoc = nullptr;
     }
 
     BuildRmlUi();
@@ -389,10 +354,6 @@ void mu::ui::window::CMainFrameWindow::Release()
         m_pRmlDoc->Hide();
     if (m_pRmlTopDoc)
         m_pRmlTopDoc->Hide();
-
-    // Not load-bearing like m_pRmlDoc's Hide() above -- unreachable once RemoveUIObj() takes effect. Hidden anyway, defensively.
-    if (m_pRmlBgDoc)
-        m_pRmlBgDoc->Hide();
 }
 
 bool mu::ui::window::CMainFrameWindow::Render()
@@ -437,19 +398,12 @@ bool mu::ui::window::CMainFrameWindow::IsVisible() const
     return CObject::IsVisible();
 }
 
-// Theme-aware background fill behind the item/skill slots, painted from the background context by
-// CManager::Render()'s centralized RenderBackgroundLayer() call, before any window's Render() this
-// frame.
-//
-// main_frame_bg.rcss's colors match main_frame.rcss's .slot-fill/.slot-frame tokens exactly so the
-// RmlUi-drawn panel and the RmlUi-drawn gauges/buttons on top of it read as one surface.
+// A theme that provides its own icon chrome draws the strip's backing in main_frame.rml itself
+// (#item_band_fill, #skill_band_fill); only the legacy art is drawn here.
 void mu::ui::window::CMainFrameWindow::RenderLeftFrame()
 {
     if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
-    {
-        // #bg_left is already painted by this point -- see the function comment above.
         return;
-    }
 
     RenderImageStretch(IMAGE_MENU_1, 0.0f, kHudTop, kLeftBandWidth, kHudContentHeight,
                        0.0f, 0.0f, kLeftBandWidth, kHudContentHeight);
@@ -457,18 +411,9 @@ void mu::ui::window::CMainFrameWindow::RenderLeftFrame()
 
 void mu::ui::window::CMainFrameWindow::RenderCenterFrame()
 {
+    // See RenderLeftFrame(): such a theme draws this band and its skill-list highlight itself.
     if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
-    {
-        // Panel spans 214-424 (skill icons' 222-416 footprint padded 8px each side, matching
-        // RenderLeftFrame()'s potion padding) so the two chrome panels meet flush with no gap.
-        // The fill itself lives in main_frame_bg.rml's #bg_center, painted by CManager::Render()'s
-        // centralized RenderBackgroundLayer() call (see RenderLeftFrame()'s comment). The
-        // skill-list-open highlight that used to draw here as a native quad is also in that same
-        // background document now (#skill_list_highlight, MainFrameBgRmlModel::skillListOpen) --
-        // same paint-order reasoning, and nothing about it depended on the icon atlas, so it moved
-        // as a plain background-context fix, not part of the still-deferred icon-atlas port.
         return;
-    }
 
     RenderImageStretch(IMAGE_MENU_1, kCenterBandStart, kHudTop, kMenu1CenterWidth, kHudContentHeight,
                        kCenterBandStart, 0.0f, kMenu1CenterWidth, kHudContentHeight);
@@ -652,40 +597,15 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
                   UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, centerTransform));
 
         // Item-hotkey/skill-hotkey band offsets, read from #item_hotkey_anchor/#skill_list_anchor's
-        // real screen position and turned into a delta from centerTransform's offsetX; the legacy
-        // chrome and CSkillList apply this to keep render and hit-testing in sync. One frame of lag is
-        // possible (harmless -- these markers only move on theme change).
+        // real screen position and turned into a delta from centerTransform's offsetX, so Render()
+        // draws the legacy chrome under the bands this theme placed. One frame of lag is possible
+        // (harmless -- these markers only move on theme change).
         if (Rml::Element* pAnchor = m_pRmlDoc->GetElementById("item_hotkey_anchor"))
             m_fItemHotkeyOffsetX = pAnchor->GetAbsoluteOffset().x - centerTransform.offsetX;
         if (Rml::Element* pAnchor = m_pRmlDoc->GetElementById("skill_list_anchor"))
             m_fSkillListOffsetX = pAnchor->GetAbsoluteOffset().x - centerTransform.offsetX;
 
         m_ItemHotKey.SyncSlotIcons(m_pRmlDoc, centerTransform.scaleX);
-
-        // Background-layer panel tracks the same bars_left/top/scale plus the two anchor deltas,
-        // so it matches the legacy chrome.
-        if (m_pRmlBgDoc)
-        {
-            auto& bg = m_BgRmlBinder.GetModel();
-            bg.rootX = centerTransform.offsetX;
-            bg.rootY = centerTransform.offsetY;
-            bg.rootScale = centerTransform.scaleX;
-            bg.leftOffsetX = m_fItemHotkeyOffsetX;
-            bg.centerOffsetX = m_fSkillListOffsetX;
-            m_BgRmlBinder.MarkDirty("root_x");
-            m_BgRmlBinder.MarkDirty("root_y");
-            m_BgRmlBinder.MarkDirty("root_scale");
-            m_BgRmlBinder.MarkDirty("left_offset_x");
-            m_BgRmlBinder.MarkDirty("center_offset_x");
-
-            // Former RenderCenterFrame() highlight quad -- see MainFrameBgRmlModel::skillListOpen.
-            const bool skillListOpen = g_pSkillList->IsSkillListUp();
-            if (bg.skillListOpen != skillListOpen)
-            {
-                bg.skillListOpen = skillListOpen;
-                m_BgRmlBinder.MarkDirty("skill_list_open");
-            }
-        }
     }
 
     // HP/MP -- legacy RenderLifeMana(). fLife/fMana there are the EMPTY fraction; store filled.
@@ -928,6 +848,7 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
     syncFloat(&MainFrameRmlModel::currentSkillCooldown, "current_skill_cooldown", g_pSkillList->GetCurrentSkillCooldownFraction());
 
     syncBool(&MainFrameRmlModel::skillGridOpen, "skill_grid_open", g_pSkillList->IsSkillGridOpen());
+    syncBool(&MainFrameRmlModel::skillListUp, "skill_list_up", g_pSkillList->IsSkillListUp());
 
     // Dynamic-count lists, copied unconditionally every frame while the grid is open (cooldown
     // fractions change every frame anyway, so a change-check would rarely help).
@@ -2477,9 +2398,4 @@ void mu::ui::window::CMainFrameWindow::SyncDocVisibility(bool sceneAllowsShow)
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, show);
     m_ItemHotKey.SetSlotIconsShown(show);
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlTopDoc, show);
-
-    // m_pRmlBgDoc needs the same gate: CManager::Render()'s centralized RenderBackgroundLayer()
-    // call replays whatever's Show()n in the shared background context every frame, regardless of
-    // whether this window itself is visible.
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, show);
 }

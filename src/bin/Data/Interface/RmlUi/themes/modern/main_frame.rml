@@ -22,6 +22,9 @@
 		     its thin top border. -->
 		<div id="gauge_fill_left"></div>
 		<div id="gauge_fill_right"></div>
+		<div id="item_band_fill" class="slot-fill"></div>
+		<div id="skill_band_fill" class="slot-fill"></div>
+		<div id="skill_list_highlight" data-class-hidden="!skill_list_up"></div>
 		<div id="gauge_frame"></div>
 		<div id="bar_hp" class="gauge-slot slot-frame slot-fill">
 			<div id="bar_hp_fill" class="gauge-fill gauge-fill-hp gauge-fill-vertical" data-class-poisoned="poisoned" data-style-height="hp_fraction * 100 + '%'"></div>

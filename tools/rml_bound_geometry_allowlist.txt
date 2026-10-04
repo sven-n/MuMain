@@ -87,7 +87,6 @@ themes/modern/generic_confirm_dialog.rml: per-frame data -- native 3D item ancho
 themes/modern/lucky_item.rml: counter-scale bridge -- counter-scaled text layers
 themes/modern/lucky_item_bg.rml: counter-scale bridge -- counter-scaled text layers
 themes/modern/main_frame.rml: per-frame data -- the health/mana/SD/AG gauges and every cooldown wipe are fractions, and the expanded skill grid's cells come from RebuildGridSnapshot()'s zig-zag, whose position is computed from a cell's ordinal among the skills actually learned (the same accepted computed fan-out as MuHelperSkillPicker's). #bars carries the bottom-HUD anchor, which is this document's root-placement bridge under its own name
-themes/modern/main_frame_bg.rml: per-frame data -- HUD chrome follows the same anchors, per frame
 themes/modern/mu_helper_detail.rml: counter-scale bridge -- gauge fills; the gauge port is a tracked deferral
 themes/modern/npc_quest.rml: counter-scale bridge -- message/answer tops -- its own tracked deferral, see tracked-deferrals.md
 themes/modern/party_info.rml: counter-scale bridge -- counter-scaled member rows

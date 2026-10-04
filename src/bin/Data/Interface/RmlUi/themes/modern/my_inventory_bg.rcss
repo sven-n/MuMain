@@ -1,6 +1,6 @@
 /* Background-layer companion to my_inventory.rcss -- loaded into a separate RmlUi context that
    renders behind the still-native 3D-composited equipment/grid icons. Does NOT link base.rcss --
-   no *_bg.rml in this theme does (see main_frame_bg.rcss), to keep this context independent of the
+   no *_bg.rml in this theme does, to keep this context independent of the
    foreground document. So the forged-dialog shell (outer iron edge + inner groove + real
    box-shadow depth) that Login/SysMenu get from base.rcss's .modern-shell-edge/.modern-groove is
    duplicated here as .inv-shell-edge/.inv-groove -- keep in sync by inspection if those change. */

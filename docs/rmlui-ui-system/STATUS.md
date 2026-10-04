@@ -668,6 +668,8 @@ for "the full architecture is in place":
       stays a legacy quad — never blocked by this constraint, no reason to move it. **Verified
       visually against a real server, modern theme, 2026-09-04**: potions and skill icons still
       render and animate correctly on top of the now-RmlUi-authored background, no regression.
+      Since retired: once the potions were render targets inside `main_frame.rml`, the fills and
+      the highlight moved into that document and `main_frame_bg.rml` was deleted.
   - **Phase 2 done (2026-09-13)**: the trigger condition below fired nine times over (the whole
     inventory-family port), so the call is now centralized in
     `mu::ui::window::CManager::Render()`'s own z-sorted loop (`WindowManager.cpp`) instead of each
@@ -714,7 +716,7 @@ for "the full architecture is in place":
   - Also caught and fixed while writing `check_rml_rcss_drift.py`'s test against this change: the
     checker pooled every `.Bind()`/`.BindEventCallback()`/`GetElementById()` call in a `.cpp` file
     into *every* document that file loads — silently correct as long as no file owned more than
-    one themed document. `MainFrameWindow.cpp` now owns two (`main_frame`,
+    one themed document. `MainFrameWindow.cpp` then owned two (`main_frame`,
     `main_frame_bg`); fixed by scoping each call to whichever `RmlModelBinder::Create()`/document
     pointer it's textually associated with, not the whole file.
 - **No Custom/Test theme, and none is wanted.** §25/§28 want a Custom/Test theme that looks

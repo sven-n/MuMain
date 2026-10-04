@@ -428,6 +428,9 @@ namespace mu::ui::window
             // see that method's comment). Gates #skill_grid/#pet_skill_row visibility; cell arrays
             // are rebuilt each frame while open, left stale (harmless, hidden) while closed.
             bool skillGridOpen = false;
+            // CSkillList::IsSkillListUp(): the compact row shows its upper set. A theme drawing
+            // its own chrome highlights the band for it, as RenderCenterFrame()'s quad did.
+            bool skillListUp = false;
             std::vector<SkillCellEntry> skillGridCells;
             std::vector<SkillCellEntry> petSkillCells;
 
@@ -442,29 +445,6 @@ namespace mu::ui::window
         // model: a document of its own so it stacks under the windows docked over that corner
         // while the bars stay over them (RmlStackingOrder.cpp).
         Rml::ElementDocument* m_pRmlTopDoc = nullptr;
-
-        // The left/center HUD-strip background: a separate RmlUiRuntime::GetBackgroundContext()
-        // document/model, painted by CManager::Render()'s centralized RenderBackgroundLayer() call.
-        struct MainFrameBgRmlModel
-        {
-            // Mirrors MainFrameRmlModel::barsLeft/barsTop/barsScale (#bg_root uses the same
-            // data-style-left/top/scale convention as #bars).
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-
-            // Same offsets as GetItemHotkeyOffsetX()/GetSkillListOffsetX(), added on top of rootX
-            // in main_frame_bg.rml so the two panels track their real anchors.
-            float leftOffsetX = 0.f, centerOffsetX = 0.f;
-
-            // Former RenderCenterFrame()'s modern-only translucent skill-list-open highlight
-            // (RenderColorQuadARGB(222, kHudTop, 160, 40, 0x40FFFFFFu)) -- same paint-order
-            // reasoning as bg_left/bg_center above (must sit behind the still-legacy icons), so it
-            // moves here instead of staying a native quad. Legacy theme has no background document
-            // at all (ThemeProvidesOwnIconChrome() gates its creation), so this is modern-only by
-            // construction, same as the rest of this struct.
-            bool skillListOpen = false;
-        };
-        RmlModelBinder<MainFrameBgRmlModel> m_BgRmlBinder;
-        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
 
         bool m_bRmlCShopClicked = false;
         bool m_bRmlChaInfoClicked = false;
