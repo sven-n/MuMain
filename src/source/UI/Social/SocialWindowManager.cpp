@@ -324,8 +324,13 @@ void CUIWindowMgr::RenderOverlay3D()
         if (window->GetState() != UISTATE_HIDE && window->GetState() != UISTATE_READY)
             focused = window;
     }
-    if (focused != nullptr)
-        focused->RenderAboveRmlUi();
+    if (focused == nullptr)
+        return;
+    // This seam runs outside CManager, which is what otherwise puts this family's transform in
+    // effect, so the portrait's rect would be mapped with whatever the last drawer left active.
+    const UI::Scaling::ScopedActiveTransform workspace(
+        UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight));
+    focused->RenderAboveRmlUi();
 }
 
 void CUIWindowMgr::DoAction()

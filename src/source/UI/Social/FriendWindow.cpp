@@ -16,7 +16,12 @@ using mu::ui::window::CheckMouseIn;   // WindowCommon.h
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CFriendWindow::CFriendWindow() : m_pNewUIMng(NULL), m_pFriendWindowMgr(NULL) {}
+mu::ui::window::CFriendWindow::CFriendWindow() : m_pNewUIMng(NULL), m_pFriendWindowMgr(NULL)
+{
+    // Every coordinate this family publishes is in floating-workspace units, not the centred
+    // panel space a CObject defaults to -- CUIWindowMgr clamps against FloatingWorkspaceBounds.
+    SetLayoutMode(UI::Scaling::LayoutMode::FloatingWorkspace);
+}
 
 mu::ui::window::CFriendWindow::~CFriendWindow()
 {
