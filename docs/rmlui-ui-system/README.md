@@ -34,7 +34,9 @@ anything new under `UI/`. **[Theming & Modding](theming-and-modding.md)** — th
 step-by-step guide for adding a theme, and the modding constraints (image format, scaling,
 positioning ownership). **[Layout, Anchoring & Scaling](layout-and-scaling.md)** — the global
 UI-scale (`dp`) mechanism, the anchor/stretch/center utility classes every new window should use,
-and a worked example of retrofitting an already-migrated window. **[NewUI-Tier Adapter
+and a worked example of retrofitting an already-migrated window. **[Window Placement](window-placement.md)**
+— proposed design for theme-owned window placement (docks, regions, full-screen windows), not yet
+implemented. **[NewUI-Tier Adapter
 Pattern](newui-tier-adapter.md)** — the `mu::ui::window::CObject`/`mu::ui::window::CManager` tier (in-game HUD, distinct
 from `CWin`/`CSceneUICoordinator`): the adapter shape, the `MAIN_SCENE` input-gating prerequisites, and what's
 still unproven there. **[Legacy Theme Modernization Policy](legacy-theme-modernization.md)** —

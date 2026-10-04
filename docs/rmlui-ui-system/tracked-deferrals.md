@@ -6,7 +6,7 @@ results belong in [validation-matrix.md](validation-matrix.md).
 
 ## Priorities
 
-1. Design theme-driven dock spacing together with first-layout and saved-position rules.
+1. Theme-owned window placement: approved design in [window-placement.md](window-placement.md).
 2. Address remaining native interactions and presentation bindings one screen at a time.
 
 Run targeted scale/theme/interaction validation alongside each change. The CObject
@@ -242,12 +242,9 @@ counter-scale bindings start costing something concrete, rather than being an in
   (`engine-findings.md`) -- so what remains is applying it to the documents that
   still bind a `top` per row, keeping in mind that counter-scaled layers cannot be
   stacked by flow. Rule on it before the next port rather than retrofitting later.
-- **Dock spacing:** `WindowSystem.cpp`'s `PanelColumnX()` fixes columns at 190 while
-  RCSS owns drawn panel width. Placement is seeded during creation, before document
-  layout. Design first-layout placement, theme resize/reflow and saved-position
-  precedence together; reading a panel width alone does not solve this. Docked
-  windows also sit on the HUD's original top edge (`DockTransform()` via
-  `RoundedBottomHudTop()`), which does not follow the HUD strip if a theme moves it.
+- **Dock spacing:** docked columns, the HUD's fixed top edge, `GetScreenWidth()`'s coverage table
+  and the open/close rearrangement in `CSystem::Show()`/`Hide()` are all C++. Approved design and
+  rule classification: [window-placement.md](window-placement.md).
 - **Static index arithmetic:** Castle and Guard tab positions, Catapult lines and
   GensRanking description rows still bind positions derived from row indices.
   Move bounded layout into RCSS while preserving required counter-scale metrics.
