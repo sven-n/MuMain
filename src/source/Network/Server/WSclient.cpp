@@ -6,6 +6,8 @@
 #include "UI/Combat/SiegeUpdates.h"
 #include "UI/Events/DoppelgangerUpdates.h"
 #include "UI/Events/EmpireGuardianUpdates.h"
+#include "UI/Events/CryWolfUpdates.h"
+#include "UI/Events/LuckyCoinUpdates.h"
 #include "UI/Core/WindowAccess.h"
 #include "UI/Social/SocialUpdates.h"
 #include <memory>
@@ -12045,7 +12047,7 @@ void ReceiveCrywolfLifeTime(const BYTE* ReceiveBuffer)
     auto pData = (LPPPMSG_ANS_CRYWOLF_LEFTTIME)ReceiveBuffer;
 
     M34CryWolf1st::SetTime(pData->btHour, pData->btMinute);
-    g_pCryWolfInterface->SetTime((int)(pData->btHour), (int)(pData->btMinute));
+    UI::CryWolf::SetCountdown(pData->btHour, pData->btMinute);
 }
 
 void ReceiveCrywolfTankerHit(const BYTE* ReceiveBuffer)
@@ -12298,13 +12300,27 @@ void ReceiveCheckSumRequest(const BYTE* ReceiveBuffer)
 
 extern int TimeRemain;
 
+enum class LuckyCoinRegistrationResult : std::uint8_t
+{
+    InsufficientItems = 0,
+    Registered = 1,
+    AlreadyApplied = 100,
+};
+
+enum class LuckyCoinExchangeResult : std::uint8_t
+{
+    InsufficientItems = 0,
+    Exchanged = 1,
+    InventorySpaceNeeded = 2,
+};
+
 bool ReceiveRegistedLuckyCoin(const BYTE* ReceiveBuffer)
 {
     auto _pData = (LPPMSG_ANS_GET_COIN_COUNT)ReceiveBuffer;
 
     if (_pData->nCoinCnt >= 0)
     {
-        g_pLuckyCoinRegistration->SetRegistCount(_pData->nCoinCnt);
+        UI::LuckyCoin::SetRegistrationCount(_pData->nCoinCnt);
         return true;
     }
     return false;
@@ -12314,11 +12330,11 @@ bool ReceiveRegistLuckyCoin(const BYTE* ReceiveBuffer)
 {
     auto _pData = (LPPMSG_ANS_REGEIST_COIN)ReceiveBuffer;
 
-    g_pLuckyCoinRegistration->UnLockLuckyCoinRegBtn();
+    UI::LuckyCoin::UnlockRegistration();
 
-    switch (_pData->btResult)
+    switch (static_cast<LuckyCoinRegistrationResult>(_pData->btResult))
     {
-    case 0:
+    case LuckyCoinRegistrationResult::InsufficientItems:
     {
         wchar_t szText[100] = { 0, };
         mu_swprintf(szText, I18N::Game::YouAreLackOfSItems, I18N::Game::Register);
@@ -12327,12 +12343,12 @@ bool ReceiveRegistLuckyCoin(const BYTE* ReceiveBuffer)
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
-    case 1:
+    case LuckyCoinRegistrationResult::Registered:
     {
-        g_pLuckyCoinRegistration->SetRegistCount(_pData->nCurCoinCnt);
+        UI::LuckyCoin::SetRegistrationCount(_pData->nCurCoinCnt);
     }
     break;
-    case 100:
+    case LuckyCoinRegistrationResult::AlreadyApplied:
     {
         UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::YouCanOnlyApplyOncePerYourAccount, false });
@@ -12350,11 +12366,11 @@ bool ReceiveRequestExChangeLuckyCoin(const BYTE* ReceiveBuffer)
 {
     auto _pData = (LPPMSG_ANS_TREADE_COIN)ReceiveBuffer;
 
-    g_pExchangeLuckyCoinWindow->UnLockExchangeBtn();
+    UI::LuckyCoin::UnlockExchange();
 
-    switch (_pData->btResult)
+    switch (static_cast<LuckyCoinExchangeResult>(_pData->btResult))
     {
-    case 0:
+    case LuckyCoinExchangeResult::InsufficientItems:
     {
         wchar_t szText[100] = { 0, };
         mu_swprintf(szText, I18N::Game::YouAreLackOfSItems, I18N::Game::Exchange1940);
@@ -12363,13 +12379,13 @@ bool ReceiveRequestExChangeLuckyCoin(const BYTE* ReceiveBuffer)
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
-    case 1:
+    case LuckyCoinExchangeResult::Exchanged:
     {
         // UI::Windows::Hide(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN);
         UI::Chat::PostSystem(I18N::Game::ExchangeHasBeenMade, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
     break;
-    case 2:
+    case LuckyCoinExchangeResult::InventorySpaceNeeded:
     {
         UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::MoreThan2X4SpaceInInventoryIsNeeded, false });
