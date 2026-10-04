@@ -89,35 +89,22 @@ struct SlotBox
     float left = 0.f, top = 0.f, width = 0.f, height = 0.f;
 };
 
-// The frame the skill row's C++-computed coordinates live in (grid cells, tooltip anchors):
-// reference units from #bars's origin, scaled by the dp ratio main_frame.rcss is sized in.
-UI::Scaling::Transform BarsTransform(Rml::ElementDocument* document)
+// The skill tooltips' frame: the screen in the original's reference units, i.e. scaled by the dp
+// ratio main_frame.rcss is sized in, so the original's offsets (10 above a box, ...) keep their size.
+UI::Scaling::Transform HudReferenceTransform(Rml::ElementDocument* document)
 {
-    UI::Scaling::Transform transform{1.f, 1.f, 0.f, 0.f, 1.f};
-    if (document == nullptr)
-        return transform;
-    if (Rml::Context* context = document->GetContext())
-    {
-        const float ratio = context->GetDensityIndependentPixelRatio();
-        transform = {ratio, ratio, 0.f, 0.f, ratio};
-    }
-    if (Rml::Element* bars = document->GetElementById("bars"))
-    {
-        const Rml::Vector2f origin = bars->GetAbsoluteOffset(Rml::BoxArea::Border);
-        transform.offsetX = origin.x;
-        transform.offsetY = origin.y;
-    }
-    return transform;
+    const Rml::Context* context = document ? document->GetContext() : nullptr;
+    const float ratio = context ? context->GetDensityIndependentPixelRatio() : 1.f;
+    return {ratio, ratio, 0.f, 0.f, ratio};
 }
 
-// A hotkey-row element's box in BarsTransform()'s reference units; it follows each theme's RCSS
-// instead of C++ copies of the slot positions.
-SlotBox SlotBoxInBars(Rml::Element* element)
+// A hovered slot or cell's box in HudReferenceTransform()'s units, wherever the theme put it.
+SlotBox SlotBoxInReference(Rml::Element* element)
 {
     SlotBox box;
     if (element == nullptr)
         return box;
-    const UI::Scaling::Transform bars = BarsTransform(element->GetOwnerDocument());
+    const UI::Scaling::Transform bars = HudReferenceTransform(element->GetOwnerDocument());
     const Rml::Vector2f offset = element->GetAbsoluteOffset(Rml::BoxArea::Border);
     const Rml::Vector2f size = element->GetBox().GetSize(Rml::BoxArea::Border);
     box.left = UI::Scaling::LogicalX(bars, offset.x);
@@ -226,7 +213,7 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
                 c.BindEventCallback("skill_hotkey_hover",
                                     [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
                                     {
-                                        const SlotBox slot = SlotBoxInBars(event.GetCurrentElement());
+                                        const SlotBox slot = SlotBoxInReference(event.GetCurrentElement());
                                         g_pSkillList->OnHotkeySlotHover(args.empty() ? 0 : args[0].Get<int>(),
                                                                         slot.left, slot.top);
                                     });
@@ -236,7 +223,7 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
                                     [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
                                     {
                                         // The slot box is the icon plus the theme's even inset.
-                                        const SlotBox slot = SlotBoxInBars(event.GetCurrentElement());
+                                        const SlotBox slot = SlotBoxInReference(event.GetCurrentElement());
                                         g_pSkillList->OnCurrentSkillHover(
                                             slot.left + (slot.width - kSkillIconWidth) / 2.f,
                                             slot.top + (slot.height - kSkillIconHeight) / 2.f);
@@ -244,11 +231,21 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
                 c.BindEventCallback("skill_grid_click",
                     [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnGridCellClick(args.empty() ? -1 : args[0].Get<int>()); });
                 c.BindEventCallback("skill_grid_hover",
-                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnGridCellHover(args.empty() ? -1 : args[0].Get<int>()); });
+                                    [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+                                    {
+                                        const SlotBox cell = SlotBoxInReference(event.GetCurrentElement());
+                                        g_pSkillList->OnGridCellHover(args.empty() ? -1 : args[0].Get<int>(),
+                                                                      cell.left, cell.top);
+                                    });
                 c.BindEventCallback("skill_pet_click",
                     [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnPetCellClick(args.empty() ? -1 : args[0].Get<int>()); });
                 c.BindEventCallback("skill_pet_hover",
-                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnPetCellHover(args.empty() ? -1 : args[0].Get<int>()); });
+                                    [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+                                    {
+                                        const SlotBox cell = SlotBoxInReference(event.GetCurrentElement());
+                                        g_pSkillList->OnPetCellHover(args.empty() ? -1 : args[0].Get<int>(),
+                                                                     cell.left, cell.top);
+                                    });
                 c.BindEventCallback("skill_unhover",
                     [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pSkillList->OnUnhover(); });
 
@@ -346,6 +343,38 @@ bool mu::ui::window::CMainFrameWindow::Render()
 bool mu::ui::window::CMainFrameWindow::IsVisible() const
 {
     return CObject::IsVisible();
+}
+
+bool mu::ui::window::CMainFrameWindow::IsMouseOverHud() const
+{
+    if (m_pRmlDoc == nullptr || !m_pRmlDoc->IsVisible())
+        return false;
+    Rml::Context* context = m_pRmlDoc->GetContext();
+    Rml::Element* hover = context ? context->GetHoverElement() : nullptr;
+    return hover != nullptr && hover != m_pRmlDoc && hover->GetOwnerDocument() == m_pRmlDoc;
+}
+
+bool mu::ui::window::CMainFrameWindow::GetStripRect(float& left, float& top, float& right, float& bottom) const
+{
+    if (m_pRmlDoc == nullptr || !m_pRmlDoc->IsVisible())
+        return false;
+    bool found = false;
+    for (const char* id : {"hud_strip", "exp"})
+    {
+        Rml::Element* part = m_pRmlDoc->GetElementById(id);
+        if (part == nullptr || !part->IsVisible())
+            continue;
+        const Rml::Vector2f offset = part->GetAbsoluteOffset(Rml::BoxArea::Border);
+        const Rml::Vector2f size = part->GetBox().GetSize(Rml::BoxArea::Border);
+        if (size.x <= 0.f || size.y <= 0.f)
+            continue;
+        left = found ? std::min(left, offset.x) : offset.x;
+        top = found ? std::min(top, offset.y) : offset.y;
+        right = found ? std::max(right, offset.x + size.x) : offset.x + size.x;
+        bottom = found ? std::max(bottom, offset.y + size.y) : offset.y + size.y;
+        found = true;
+    }
+    return found;
 }
 
 // RenderRightFrame()/RenderExperienceBackground()/RenderLifeMana()/RenderGuageAG()/RenderGuageSD()/
@@ -509,7 +538,7 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
 
     {
         syncFloat(&MainFrameRmlModel::hintPx, "hint_px",
-                  UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, BarsTransform(m_pRmlDoc)));
+                  UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, HudReferenceTransform(m_pRmlDoc)));
 
         m_ItemHotKey.SyncSlotIcons(m_pRmlDoc);
     }
@@ -778,10 +807,10 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
         {
             UI::RmlBridge::Tooltip::Config config;
             config.lines = UI::Skills::Tooltip::ToRmlBridgeLines(tooltipModel);
-            // GetTooltipAnchorX/Y() are in BarsTransform()'s reference units (as are
-            // skill_grid_cells' cell.left/top) -- NOT the ambient UI::Scaling::GetActiveTransform(),
-            // which during this window's Update() is LayoutMode::Hud (ScreenOverlayTransform).
-            const auto skillTooltipTransform = BarsTransform(m_pRmlDoc);
+            // GetTooltipAnchorX/Y() are in HudReferenceTransform()'s units -- NOT the ambient
+            // UI::Scaling::GetActiveTransform(), which during this window's Update() is
+            // LayoutMode::Hud (ScreenOverlayTransform).
+            const auto skillTooltipTransform = HudReferenceTransform(m_pRmlDoc);
             // The native box ends below its anchor (G2); measured with the native text renderer
             // under the tooltip's own transform.
             float bottomBelowAnchor = 0.f;
@@ -1965,9 +1994,11 @@ void mu::ui::window::CSkillList::RebuildGridSnapshot()
     if (CharacterAttribute->SkillNumber == 0)
         return;
 
-    float x = 385.f, y = 390.f;
+    // The original's zig-zag around its first cell at 385/390, as offsets from that cell: the
+    // theme places #skill_list where the first cell goes.
+    float x = 0.f, y = 0.f;
     constexpr float width = 32.f, height = 38.f;
-    const float fOrigX = 385.f;
+    const float fOrigX = 0.f;
     int iSkillCount = 0;
 
     for (int i = 0; i < MAX_MAGIC; ++i)
@@ -2157,17 +2188,10 @@ void mu::ui::window::CSkillList::OnGridCellClick(int iSkillIndex)
     PlayBuffer(SOUND_CLICK01);
 }
 
-void mu::ui::window::CSkillList::OnGridCellHover(int iSkillIndex)
+void mu::ui::window::CSkillList::OnGridCellHover(int iSkillIndex, float cellLeft, float cellTop)
 {
     m_iHoveredGridSkillIndex = iSkillIndex;
-    for (const SkillCellEntry& entry : m_GridSnapshot)
-    {
-        if (entry.skillIndex == iSkillIndex)
-        {
-            QueueTooltip(iSkillIndex, entry.left + kGridTooltipOffsetX, entry.top - kTooltipGapAbove);
-            break;
-        }
-    }
+    QueueTooltip(iSkillIndex, cellLeft + kGridTooltipOffsetX, cellTop - kTooltipGapAbove);
 }
 
 void mu::ui::window::CSkillList::OnPetCellClick(int iSkillIndex)
@@ -2178,18 +2202,11 @@ void mu::ui::window::CSkillList::OnPetCellClick(int iSkillIndex)
     PlayBuffer(SOUND_CLICK01);
 }
 
-void mu::ui::window::CSkillList::OnPetCellHover(int iSkillIndex)
+void mu::ui::window::CSkillList::OnPetCellHover(int iSkillIndex, float cellLeft, float cellTop)
 {
     // Pet-row entries arm Ctrl+digit assignment the same way grid entries do (legacy behavior, preserved).
     m_iHoveredGridSkillIndex = iSkillIndex;
-    for (const SkillCellEntry& entry : m_PetSnapshot)
-    {
-        if (entry.skillIndex == iSkillIndex)
-        {
-            QueueTooltip(iSkillIndex, entry.left + kGridTooltipOffsetX, entry.top - kTooltipGapAbove);
-            break;
-        }
-    }
+    QueueTooltip(iSkillIndex, cellLeft + kGridTooltipOffsetX, cellTop - kTooltipGapAbove);
 }
 
 void mu::ui::window::CSkillList::OnUnhover()

@@ -51,8 +51,10 @@ quadratic damping of that ramp existed briefly; it was removed because it broke 
 every intermediate resolution — 1.25× instead of 1.5× at 1280×720 — and the user dial below is
 the right lever for "too big at my resolution".) It drives still-legacy
 `CWin`/`mu::ui::window::CObject` rendering/hit-testing. The main frame HUD is sized in `dp` like
-every other window; `BottomHudScale()` is the same number, still used by the native hit tests that
-ask whether the cursor is over the HUD. Two axes exist, and both systems now respect both:
+every other window; `BottomHudScale()` is the same number, still used to seat docked windows on
+the HUD's top edge. Whether the cursor is over the HUD is asked of the HUD itself
+(`CMainFrameWindow::IsMouseOverHud()`: the hovered element belongs to `main_frame.rml`), so it
+follows wherever a theme places the parts. Two axes exist, and both systems now respect both:
 
 - **`UIScalePercent`** — the user's own config-driven preference (`config.ini`'s `[UI]
   UIScalePercent`). Both RmlUi's `dp` ratio and `UI::Scaling`'s functions respect this.

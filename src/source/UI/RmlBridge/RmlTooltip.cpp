@@ -207,7 +207,7 @@ namespace UI::RmlBridge::Tooltip
         // config.anchorX/Y are already real screen pixels -- see RmlTooltip.h's own comment for why
         // this document doesn't convert them itself (it used to, via the ambient
         // UI::Scaling::GetActiveTransform(), which broke the skill-hotkey tooltip: its anchor is
-        // meaningful only relative to MainFrameWindow's own #bars reference frame,
+        // meaningful only relative to MainFrameWindow's own reference frame,
         // not whatever transform happens to be ambient during MainFrameWindow::Update()).
         const float screenAnchorX = config.anchorX;
         const float screenAnchorY = config.anchorY;

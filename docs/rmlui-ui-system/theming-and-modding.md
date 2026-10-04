@@ -78,7 +78,11 @@ theme uses, and each theme's `main_frame.rcss` hides the others (`display: none`
 themes bind different values to the same spot, the markup carries both variants and each theme
 shows one: a gauge's readout as `.value-current` or `.value-full`, its hint as `.native-hint`
 (native text size, counter-scaled through bound inline styles a theme's RCSS cannot override) or
-`.scaled-hint`. An early attempt at CSS-only hiding was abandoned because the old row "leaked"
+`.scaled-hint`. The document is also split into parts (`.hud-part`: the strip backing, each
+gauge group, EXP, buttons, item hotkeys, skill row, skill list), each placed by its own rule in
+the theme's `main_frame.rcss` with its contents laid out from its own corner, so a theme moves
+or hides a part without touching the others. The skill list's grid fans out from its part's box,
+the first cell's position, so it docks wherever the theme puts that box. An early attempt at CSS-only hiding was abandoned because the old row "leaked"
 through, but the record of it describes the whole stylesheet intermittently failing to apply, not
 `display: none` failing.
 

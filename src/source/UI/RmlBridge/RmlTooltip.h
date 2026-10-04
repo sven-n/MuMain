@@ -89,7 +89,7 @@ namespace UI::RmlBridge::Tooltip
         // to, via the ambient UI::Scaling::GetActiveTransform(), but that's wrong for a caller whose
         // anchor is meaningful only through a DIFFERENT transform than whatever's ambient in its own
         // scope (e.g. the skill-hotkey tooltip: its anchor is relative to MainFrameWindow's own
-        // reference frame (#bars's origin and the dp ratio), but
+        // reference frame (the screen scaled by the dp ratio), but
         // MainFrameWindow's own ambient GetLayoutMode() resolves to a completely different formula --
         // see MainFrameWindow.cpp's own comment). Pushing the conversion out to each caller means
         // every caller picks the transform that's actually correct for its own anchor, instead of
@@ -132,7 +132,7 @@ namespace UI::RmlBridge::Tooltip
         Box box = Box::TipTextList;
 
         // The transform the caller converted its anchor with, when it is not the ambient
-        // UI::Scaling::GetActiveTransform() (the skill-hotkey tooltip's BottomHudCenterTransform).
+        // UI::Scaling::GetActiveTransform() (the skill-hotkey tooltip's dp-ratio reference frame).
         // Show() takes the native text size and row metrics from it.
         std::optional<UI::Scaling::Transform> transform;
     };

@@ -2612,8 +2612,7 @@ bool SkillKeyPush(int Skill)
 
 void Attack(CHARACTER* c)
 {
-    const bool mouseOnHud = UI::Scaling::BottomHudContainsWindowPoint(
-        WindowWidth, WindowHeight, g_fWindowMouseX, g_fWindowMouseY);
+    const bool mouseOnHud = g_pMainFrame != nullptr && g_pMainFrame->IsMouseOverHud();
     // Core::Input::IsMouseOverUI() added as a 4th gate here too -- same rationale as
     // the duplicate check in Input/Selection.cpp's SelectObjects(), kept in sync with it.
     if ((MouseOnWindow || mouseOnHud || Core::Input::IsMouseOverUI()) && MouseLButtonPush)

@@ -673,8 +673,7 @@ bool CMyInventory::UpdateMouseEvent()
 
     CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
     if (pPickedItem && IsPress(VK_LBUTTON)
-        && !UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,
-                                                       g_fWindowMouseX, g_fWindowMouseY))
+        && !(g_pMainFrame != nullptr && g_pMainFrame->IsMouseOverHud()))
     {
         if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) == true
             || g_pNewUISystem->IsVisible(INTERFACE_TRADE) == true

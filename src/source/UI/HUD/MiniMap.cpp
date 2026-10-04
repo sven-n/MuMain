@@ -51,8 +51,6 @@ constexpr int kSideTiles = 20;
 // .edge-side's element size in mini_map.rcss (the tile's texel rectangle).
 constexpr float kSideElementWidth = 41.7f;
 constexpr float kSideElementHeight = 8.f;
-// The bottom HUD band the native HUD art covers, in BottomHudCenterTransform reference units.
-constexpr float kHudBandTop = 429.f;
 
 template <typename Model, typename T>
 void Sync(RmlModelBinder<Model>& binder, T Model::* field, const char* name, T value)
@@ -406,15 +404,16 @@ void mu::ui::window::CMiniMap::SyncScreen()
 
 void mu::ui::window::CMiniMap::SyncClips()
 {
-    // The native bottom HUD art (CMainFrameWindow's left and centre bands, drawn before this
-    // context) covers [0, 640] x [429, 480] under BottomHudCenterTransform; the original drew it over
-    // the map, so the map paints only outside that band.
-    const auto hud = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
+    // The original drew the bottom HUD strip over the map, so the map paints only outside it:
+    // above the strip, and beside it down to the screen's bottom edge.
     const float width = static_cast<float>(WindowWidth);
     const float height = static_cast<float>(WindowHeight);
-    const float bandTop = std::clamp(hud.offsetY + kHudBandTop * hud.scaleY, 0.f, height);
-    const float bandLeft = std::clamp(hud.offsetX, 0.f, width);
-    const float bandRight = std::clamp(hud.offsetX + REFERENCE_WIDTH * hud.scaleX, 0.f, width);
+    float stripLeft = 0.f, stripTop = height, stripRight = 0.f, stripBottom = height;
+    if (g_pMainFrame == nullptr || !g_pMainFrame->GetStripRect(stripLeft, stripTop, stripRight, stripBottom))
+        stripTop = height;
+    const float bandTop = std::clamp(stripTop, 0.f, height);
+    const float bandLeft = std::clamp(stripLeft, 0.f, width);
+    const float bandRight = std::clamp(stripRight, 0.f, width);
 
     std::vector<MiniMapClipEntry> clips;
     clips.push_back({0.f, 0.f, width, bandTop, 0.f, 0.f});

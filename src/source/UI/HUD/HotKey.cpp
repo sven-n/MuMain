@@ -476,8 +476,7 @@ bool mu::ui::window::CHotKey::AutoGetItem()
         CInventoryCtrl::GetPickedItem() == NULL
         && mu::ui::window::IsPress(VK_SPACE)
         && g_pChatInputBox->HaveFocus() == false
-        && !UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,
-                                                       g_fWindowMouseX, g_fWindowMouseY)
+        && !(g_pMainFrame != nullptr && g_pMainFrame->IsMouseOverHud())
         )
     {
         for (int i = 0; i < MAX_ITEMS; ++i)

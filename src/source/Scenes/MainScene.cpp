@@ -225,8 +225,7 @@ static void UpdateUIAndInput()
     if (g_Camera.TopViewEnable || LoadingWorld >= 30)
         return;
 
-    if (UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,
-                                                  g_fWindowMouseX, g_fWindowMouseY))
+    if (g_pMainFrame != nullptr && g_pMainFrame->IsMouseOverHud())
         MouseOnWindow = true;
 
     g_pPartyManager->Update();

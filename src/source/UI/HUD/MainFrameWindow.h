@@ -185,14 +185,15 @@ namespace mu::ui::window
         // UseHotKey() (so pet-check/auto-attack-cancel rules don't apply here either -- preserved
         // faithfully).
         void OnHotkeySlotClick(int iSlotIndex);
-        // slotLeft/slotTop and iconLeft/iconTop: the hovered slot or icon in #bars's local space.
+        // Positions: the hovered slot, icon or cell on screen, in the original's reference units
+        // (scaled by the dp ratio), wherever the theme placed it.
         void OnHotkeySlotHover(int iSlotIndex, float slotLeft, float slotTop);
         void OnCurrentSkillClick();
         void OnCurrentSkillHover(float iconLeft, float iconTop);
         void OnGridCellClick(int iSkillIndex);
-        void OnGridCellHover(int iSkillIndex);
+        void OnGridCellHover(int iSkillIndex, float cellLeft, float cellTop);
         void OnPetCellClick(int iSkillIndex);
-        void OnPetCellHover(int iSkillIndex);
+        void OnPetCellHover(int iSkillIndex, float cellLeft, float cellTop);
         void OnUnhover();
 
         // Grid/pet overlay snapshots, rebuilt by Update() while the grid is open; copied into the
@@ -270,6 +271,12 @@ namespace mu::ui::window
         bool Render();
 
         bool IsVisible() const;
+
+        // Whether the cursor is on a part of the HUD that takes the pointer, wherever the theme
+        // placed it -- so world clicks there don't go through.
+        bool IsMouseOverHud() const;
+        // The screen rectangle the strip and EXP bar cover, false while they aren't shown.
+        bool GetStripRect(float& left, float& top, float& right, float& bottom) const;
 
         void ReloadRmlTheme();
 

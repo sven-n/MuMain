@@ -11,12 +11,6 @@ namespace
 constexpr int kReferenceWidth = 640;
 constexpr int kReferenceHeight = 480;
 constexpr float kHudFrameHeight = 51.0f;
-constexpr float kHudContentTop = 429.0f;
-constexpr float kExperienceTop = 470.0f;
-constexpr float kLeftBandEnd = 152.0f;
-constexpr float kCenterBandStart = 152.0f;
-constexpr float kCenterBandEnd = 488.0f;
-constexpr float kRightBandStart = 488.0f;
 // ponytail: 2x HUD ceiling; raise only if native screenshots show unreadable controls.
 constexpr float kMaximumHudScale = 2.0f;
 // ponytail: 2x ceiling; raise only if native screenshots still show unreadable UI. Public copy of
@@ -65,14 +59,6 @@ UI::Scaling::Transform BottomHudTransform(int windowWidth, int windowHeight, flo
 {
     const float scale = UI::Scaling::BottomHudScale(windowWidth, windowHeight);
     return {scale, scale, offsetX, static_cast<float>(windowHeight) - kReferenceHeight * scale, scale};
-}
-
-bool ContainsLogicalRect(const UI::Scaling::Transform& transform, float windowX, float windowY, float left,
-                         float top, float right, float bottom)
-{
-    const float x = UI::Scaling::LogicalX(transform, windowX);
-    const float y = UI::Scaling::LogicalY(transform, windowY);
-    return x >= left && x < right && y >= top && y < bottom;
 }
 
 int RoundedBottomHudTop(int windowWidth, int windowHeight)
@@ -264,28 +250,6 @@ float UI::Scaling::WorldViewportAspect(int windowWidth, int windowHeight, bool t
 {
     const Viewport viewport = WorldViewport(windowWidth, windowHeight, topViewEnabled);
     return static_cast<float>(viewport.width) / viewport.height;
-}
-
-bool UI::Scaling::BottomHudContainsWindowPoint(int windowWidth, int windowHeight, float windowX, float windowY)
-{
-    const Transform experience = BottomHudExperienceTransform(windowWidth, windowHeight);
-    if (ContainsLogicalRect(experience, windowX, windowY, 0.0f, kExperienceTop,
-                            static_cast<float>(kReferenceWidth), static_cast<float>(kReferenceHeight)))
-        return true;
-
-    const Transform left = BottomHudLeftTransform(windowWidth, windowHeight);
-    if (ContainsLogicalRect(left, windowX, windowY, 0.0f, kHudContentTop, kLeftBandEnd,
-                            static_cast<float>(kReferenceHeight)))
-        return true;
-
-    const Transform center = BottomHudCenterTransform(windowWidth, windowHeight);
-    if (ContainsLogicalRect(center, windowX, windowY, kCenterBandStart, kHudContentTop, kCenterBandEnd,
-                            static_cast<float>(kReferenceHeight)))
-        return true;
-
-    const Transform right = BottomHudRightTransform(windowWidth, windowHeight);
-    return ContainsLogicalRect(right, windowX, windowY, kRightBandStart, kHudContentTop,
-                               static_cast<float>(kReferenceWidth), static_cast<float>(kReferenceHeight));
 }
 
 UI::Scaling::Transform UI::Scaling::TransformForLayout(LayoutMode mode, int windowWidth, int windowHeight)

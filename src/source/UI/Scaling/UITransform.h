@@ -103,7 +103,6 @@ namespace UI::Scaling
     float FloatingWorkspaceContentHeight(int windowWidth, int windowHeight);
     Viewport WorldViewport(int windowWidth, int windowHeight, bool topViewEnabled);
     float WorldViewportAspect(int windowWidth, int windowHeight, bool topViewEnabled);
-    bool BottomHudContainsWindowPoint(int windowWidth, int windowHeight, float windowX, float windowY);
     Transform TransformForLayout(LayoutMode mode, int windowWidth, int windowHeight);
     float PositionX(const Transform& transform, float x);
     float PositionY(const Transform& transform, float y);

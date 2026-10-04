@@ -11,19 +11,26 @@
 	display: none;
 }
 
-/* The original's 640x480 reference frame, bottom-centred and sized in dp like every other
-   window, so the HUD follows the UI scale; every part below is placed in it. */
-#bars {
+/* Every .hud-part places itself (main_frame.rml). This theme docks them all at the bottom centre
+   where the original drew them: margin-left is the part's x in the original's 640x480 frame
+   minus 320, bottom is 480 minus its lower edge. Move a part by changing its rule alone; its
+   contents are laid out from its own corner. */
+.hud-part {
 	position: absolute;
 	left: 50%;
-	bottom: 0dp;
-	margin-left: -320dp;
 	font-family: "token(font-body)";
 	font-size: 9dp;
-	width: 640dp;
-	height: 480dp;
 }
 /* HP/SD stack far left, MP/AG stack far right, potions and skills centred between. */
+#hud_strip    { margin-left: -320dp; bottom: 10dp; width: 640dp; height: 41dp; }
+#gauges_left  { margin-left: -312dp; bottom: 17dp; width: 124dp; height: 26dp; }
+#gauges_right { margin-left: 190dp;  bottom: 17dp; width: 122dp; height: 26dp; }
+#exp          { margin-left: -320dp; bottom: 4dp;  width: 640dp; height: 6dp; }
+#item_slots   { margin-left: -174dp; bottom: 11dp; width: 146dp; height: 38dp; }
+#skill_slots  { margin-left: -20dp;  bottom: 10dp; width: 194dp; height: 41dp; }
+#skill_list   { margin-left: 143dp;  bottom: 52dp; width: 32dp;  height: 38dp; }
+/* The strip and EXP take the pointer so clicks on the HUD don't reach the world. */
+#hud_strip { pointer-events: auto; }
 
 .slot-frame {
 	border: 1dp token(border-frame);
@@ -40,10 +47,10 @@
 	position: absolute;
 	pointer-events: auto;
 }
-#bar_hp { left: 8dp;   top: 437dp; width: 124dp; height: 16dp; }
-#bar_sd { left: 8dp;   top: 455dp; width: 124dp; height: 8dp;  }
-#bar_mp { left: 510dp; top: 437dp; width: 122dp; height: 16dp; }
-#bar_ag { left: 510dp; top: 455dp; width: 122dp; height: 8dp;  }
+#bar_hp { left: 0dp; top: 0dp;  width: 124dp; height: 16dp; }
+#bar_sd { left: 0dp; top: 18dp; width: 124dp; height: 8dp;  }
+#bar_mp { left: 0dp; top: 0dp;  width: 122dp; height: 16dp; }
+#bar_ag { left: 0dp; top: 18dp; width: 122dp; height: 8dp;  }
 
 /* One continuous top edge spanning the full row instead of three separately-outlined pieces --
    no fill of its own: RmlUi paints after the still-legacy potion/skill icons in the middle, so a
@@ -52,7 +59,7 @@
 #gauge_frame {
 	position: absolute;
 	left: 0dp;
-	top: 429dp;
+	top: 0dp;
 	width: 640dp;
 	height: 41dp;
 	border-top: 1dp token(border-frame);
@@ -64,7 +71,7 @@
 #gauge_fill_left {
 	position: absolute;
 	left: 0dp;
-	top: 429dp;
+	top: 0dp;
 	width: 140dp;
 	height: 41dp;
 	background-color: rgba(10, 10, 10, 150);
@@ -74,22 +81,23 @@
 #gauge_fill_right {
 	position: absolute;
 	left: 502dp;
-	top: 429dp;
+	top: 0dp;
 	width: 138dp;
 	height: 41dp;
 	background-color: rgba(10, 10, 10, 150);
 	border-radius: 0 3dp 3dp 0;
 	pointer-events: none;
 }
-/* The item band sits under #item_slots; the skill band 214px past #skill_slots' origin --
-   214 to 424 pads the skill icons' 222-416 by 8px a side, as the item band pads the potions, so
-   the segments meet flush. The highlight is the original RenderCenterFrame() quad,
-   RenderColorQuadARGB(222, kHudTop, 160, 40, 0x40FFFFFF), shown while the hotkey row is on its
-   upper set. */
-#item_band_fill, #skill_band_fill, #skill_list_highlight { position: absolute; top: 429dp; }
+/* The item band backs #item_slots, the skill band #skill_slots (292-502 pads the skill icons'
+   300-494 by 8px a side, as the item band pads the potions), so the segments meet flush. Keep them
+   in step with those parts' rules above. */
+#item_band_fill, #skill_band_fill { position: absolute; top: 0dp; }
 #item_band_fill  { left: 140dp; width: 152dp; height: 41dp; }
 #skill_band_fill { left: 292dp; width: 210dp; height: 41dp; }
-#skill_list_highlight { left: 300dp; width: 160dp; height: 40dp; background-color: rgba(255, 255, 255, 64); }
+/* The original RenderCenterFrame() quad, RenderColorQuadARGB(222, kHudTop, 160, 40, 0x40FFFFFF),
+   shown while the hotkey row is on its upper set; one pixel lower so it leaves the strip's top
+   border alone. */
+#skill_list_highlight { position: absolute; left: 0dp; top: 1dp; width: 160dp; height: 39dp; background-color: rgba(255, 255, 255, 64); pointer-events: none; }
 
 .gauge-fill-vertical { display: none; }
 .gauge-fill-horizontal {
@@ -123,8 +131,8 @@
 }
 #bar_ag .gauge-num, #bar_sd .gauge-num { font-size: 7dp; }
 
-/* Tooltips are siblings of their trigger, not nested descendants, so their containing block is
-   the wide #bars group -- this build's shrink-to-fit width hard-clamps to the containing block.
+/* Tooltips sit in their part's .hint-layer, not inside their trigger, so their containing block
+   is wide -- this build's shrink-to-fit width hard-clamps to the containing block.
    Explicit width given (shrink-to-fit alone still isn't reliable). `transform: translateX(-50%)`
    is avoided for centering: per TransformUtilities.cpp, `%` in a transform resolves against the
    element's own border-box, which for a `display:none`-until-:hover element isn't reliably known
@@ -146,31 +154,26 @@
 }
 /* left = original anchor (bar center) minus half the fixed 160px width, replacing
    translateX(-50%) -- see the comment above for why. */
-#bars .tooltip-hp, #bars .tooltip-sd { left: -10dp; top: 410dp; bottom: auto; } /* anchor 70px */
-#bars .tooltip-mp, #bars .tooltip-ag { left: 491dp; top: 410dp; bottom: auto; } /* anchor 571px */
-#bar_hp:hover ~ .tooltip-hp.scaled-hint,
-#bar_sd:hover ~ .tooltip-sd.scaled-hint,
-#bar_ag:hover ~ .tooltip-ag.scaled-hint,
-#bar_mp:hover ~ .tooltip-mp.scaled-hint,
+/* Room for the hints: an auto-width box can't grow past its containing block. */
+.hint-layer { position: absolute; left: 0dp; top: 0dp; width: 640dp; height: 0dp; pointer-events: none; }
+.hint-layer .tooltip-hp, .hint-layer .tooltip-sd { left: -18dp; top: -27dp; bottom: auto; } /* anchor 70px */
+.hint-layer .tooltip-mp, .hint-layer .tooltip-ag { left: -19dp; top: -27dp; bottom: auto; } /* anchor 571px */
+#bar_hp:hover ~ .hint-layer .tooltip-hp.scaled-hint,
+#bar_sd:hover ~ .hint-layer .tooltip-sd.scaled-hint,
+#bar_ag:hover ~ .hint-layer .tooltip-ag.scaled-hint,
+#bar_mp:hover ~ .hint-layer .tooltip-mp.scaled-hint,
 #exp:hover .scaled-hint {
 	display: block;
 	z-index: 1;
 }
-/* Do NOT add a `#bars .tooltip { bottom: ... }` rule here -- same specificity as the
+/* Do NOT add a `.hint-layer .tooltip { bottom: ... }` rule here -- same specificity as the
    .tooltip-hp/-sd/-mp/-ag rules above, so declared after them it wins the tie and overrides their
    `bottom: auto`, leaving a top+bottom-constrained box with no height set (handled ungracefully
    by this engine). */
 
-/* EXP: nested inside #bars, same reference span as legacy (x=0-640). pointer-events:auto is
-   required so #exp:hover .tooltip below can fire. */
-#exp {
-	position: absolute;
-	left: 0dp;
-	top: 470dp;
-	width: 640dp;
-	height: 6dp;
-	pointer-events: auto;
-}
+/* EXP across the whole strip. pointer-events:auto is required so #exp:hover .tooltip below can
+   fire. */
+#exp { pointer-events: auto; }
 #exp_track {
 	position: absolute;
 	left: 2dp;
@@ -205,10 +208,8 @@
 	left: 240dp;
 }
 
-/* Item-hotkey (potion) and skill-icon slots, with no border or fill of their own: the bands
-   above back them, so keep the band offsets in step with these wrappers. */
-#item_slots { position: absolute; left: 140dp; top: 0; }
-#skill_slots { position: absolute; left: 78dp; top: 0; }
+/* Item-hotkey (potion) and skill-icon slots, with no border or fill of their own: the strip's
+   bands back them. */
 
 #item_slot_0, #item_slot_1, #item_slot_2, #item_slot_3,
 #skill_slot_0, #skill_slot_1, #skill_slot_2, #skill_slot_3, #skill_slot_4,
@@ -229,10 +230,10 @@
    band; left offsets use their own pitch. The frame is padded around the icon, which keeps the
    original's 20x20 at the spot it always had inside it -- drawn at whatever size it is shown, so
    this theme can move or resize it here alone. */
-#item_slot_0 { position: absolute; left: 6dp;   top: 431dp; width: 32dp; height: 38dp; }
-#item_slot_1 { position: absolute; left: 44dp;  top: 431dp; width: 32dp; height: 38dp; }
-#item_slot_2 { position: absolute; left: 82dp;  top: 431dp; width: 32dp; height: 38dp; }
-#item_slot_3 { position: absolute; left: 120dp; top: 431dp; width: 32dp; height: 38dp; }
+#item_slot_0 { position: absolute; left: 0dp;   top: 0dp; width: 32dp; height: 38dp; }
+#item_slot_1 { position: absolute; left: 38dp;  top: 0dp; width: 32dp; height: 38dp; }
+#item_slot_2 { position: absolute; left: 76dp;  top: 0dp; width: 32dp; height: 38dp; }
+#item_slot_3 { position: absolute; left: 114dp; top: 0dp; width: 32dp; height: 38dp; }
 .item-icon { position: absolute; left: 4dp; top: 12dp; width: 20dp; height: 20dp; pointer-events: none; }
 
 /* Upper-left corner of the slot box. */
@@ -285,11 +286,11 @@
 /* Skill slots are contiguous (pitch == width, no gap). border-radius only matters for the
    .selected highlight -- square off touching inner edges so only the strip's outer corners
    round. Only this file places them: C++ reads the hovered slot's box back for the hint anchor. */
-#skill_slot_0 { position: absolute; left: 222dp; top: 431dp; width: 32dp; height: 38dp; }
-#skill_slot_1 { position: absolute; left: 254dp; top: 431dp; width: 32dp; height: 38dp; }
-#skill_slot_2 { position: absolute; left: 286dp; top: 431dp; width: 32dp; height: 38dp; }
-#skill_slot_3 { position: absolute; left: 318dp; top: 431dp; width: 32dp; height: 38dp; }
-#skill_slot_4 { position: absolute; left: 350dp; top: 431dp; width: 32dp; height: 38dp; }
+#skill_slot_0 { position: absolute; left: 0dp;   top: 2dp; width: 32dp; height: 38dp; }
+#skill_slot_1 { position: absolute; left: 32dp;  top: 2dp; width: 32dp; height: 38dp; }
+#skill_slot_2 { position: absolute; left: 64dp;  top: 2dp; width: 32dp; height: 38dp; }
+#skill_slot_3 { position: absolute; left: 96dp;  top: 2dp; width: 32dp; height: 38dp; }
+#skill_slot_4 { position: absolute; left: 128dp; top: 2dp; width: 32dp; height: 38dp; }
 #skill_slot_0 { border-radius: 3dp 0 0 3dp; }
 #skill_slot_1, #skill_slot_2, #skill_slot_3 { border-radius: 0; }
 #skill_slot_4 { border-radius: 0 3dp 3dp 0; }
@@ -299,7 +300,7 @@
 	background-color: rgba(180, 138, 50, 25); /* border-selected's rgb @ 25 alpha */
 }
 /* The current-skill frame, padded 4px around its 20x28 icon. */
-#current_skill_slot { position: absolute; left: 388dp; top: 433dp; width: 28dp; height: 36dp; }
+#current_skill_slot { position: absolute; left: 166dp; top: 4dp; width: 28dp; height: 36dp; }
 
 /* A 20x28 skill icon centred in its slot (32x38 row/grid boxes, the 28x36 current-skill frame);
    the sprite comes from C++ (data-style-decorator). Absolute children sit inside the border, so
@@ -315,12 +316,12 @@
 #skill_slots .selected .skill-icon, .skill-cell .skill-icon { left: 5dp; top: 5dp; }
 #current_skill_slot .skill-icon { left: 4dp; top: 4dp; }
 
-/* Expanded grid + pet-command row. Same 78px local-origin shift as #skill_slots above -- cell
-   left/top values are the original's reference-space positions (CSkillList::RebuildGridSnapshot()).
-   Containers stay non-interactive; only .skill-cell opts back in. */
+/* Expanded grid + pet-command row, from #skill_list's corner (the first cell's box); grid cell
+   offsets come from CSkillList::RebuildGridSnapshot(). Containers stay non-interactive; only
+   .skill-cell opts back in. */
 #skill_grid, #pet_skill_row {
 	position: absolute;
-	left: 78dp;
+	left: 0;
 	top: 0;
 	pointer-events: none;
 }
@@ -353,8 +354,8 @@
 }
 
 /* The pet's four commands, in the row the original drew them in. */
-#pet_skill_row .skill-cell { top: 352dp; }
-#pet_skill_row .skill-cell:nth-child(1) { left: 353dp; }
-#pet_skill_row .skill-cell:nth-child(2) { left: 385dp; }
-#pet_skill_row .skill-cell:nth-child(3) { left: 417dp; }
-#pet_skill_row .skill-cell:nth-child(4) { left: 449dp; }
+#pet_skill_row .skill-cell { top: -38dp; }
+#pet_skill_row .skill-cell:nth-child(1) { left: -32dp; }
+#pet_skill_row .skill-cell:nth-child(2) { left: 0dp; }
+#pet_skill_row .skill-cell:nth-child(3) { left: 32dp; }
+#pet_skill_row .skill-cell:nth-child(4) { left: 64dp; }
