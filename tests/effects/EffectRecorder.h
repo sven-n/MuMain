@@ -111,7 +111,10 @@ std::optional<std::string> Find(const Record& record, std::string_view path);
 // A hash of the whole record, the same on every platform for the same record.
 std::uint64_t Digest(const Record& record);
 
+// "type <number> " and the call's arguments and conditions.
 std::string Describe(const EffectCall& call, const Conditions& conditions);
+// The call's arguments and conditions, without the type.
+std::string DescribeArguments(const EffectCall& call, const Conditions& conditions);
 std::string ToText(const Record& record);
 std::string ToText(const std::vector<Difference>& differences);
 

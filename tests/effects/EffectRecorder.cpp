@@ -1110,10 +1110,14 @@ std::string FormatVector(const std::array<float, 3>& values)
 }
 } // namespace
 
-// The position, angle and light are named only when they are not the default
-// ones, so the descriptions of the calls the digests of FX1.3 name stay as
-// they were.
 std::string Describe(const EffectCall& call, const Conditions& conditions)
+{
+    return "type " + std::to_string(call.type) + " " + DescribeArguments(call, conditions);
+}
+
+// The position, angle and light are named only when they are not the default
+// ones, which keeps the lines of the creation baseline short.
+std::string DescribeArguments(const EffectCall& call, const Conditions& conditions)
 {
     const EffectCall defaults;
     std::string geometry;
@@ -1122,11 +1126,11 @@ std::string Describe(const EffectCall& call, const Conditions& conditions)
         geometry = " position " + FormatVector(call.position) + " angle " + FormatVector(call.angle) + " light " +
                    FormatVector(call.light);
     }
-    return "type " + std::to_string(call.type) + " subType " + std::to_string(call.subType) + " owner " +
-           OwnerName(call.owner) + geometry + " scale " + Format(call.scale) + " pkKey " + std::to_string(call.pkKey) +
-           " skill " + std::to_string(call.skillIndex) + "/" + std::to_string(call.skill) + "/" +
-           std::to_string(call.skillSerialNum) + " target " + std::to_string(call.targetIndex) + " frameFactor " +
-           Format(conditions.frameFactor) + " pattern " + (conditions.pattern == SlotPattern::A ? "A" : "B");
+    return "subType " + std::to_string(call.subType) + " owner " + OwnerName(call.owner) + geometry + " scale " +
+           Format(call.scale) + " pkKey " + std::to_string(call.pkKey) + " skill " + std::to_string(call.skillIndex) +
+           "/" + std::to_string(call.skill) + "/" + std::to_string(call.skillSerialNum) + " target " +
+           std::to_string(call.targetIndex) + " frameFactor " + Format(conditions.frameFactor) + " pattern " +
+           (conditions.pattern == SlotPattern::A ? "A" : "B");
 }
 
 std::string ToText(const Record& record)

@@ -8,8 +8,11 @@
 #include "Audio/DSPlaySound.h"
 #include "Core/Globals/_TextureIndex.h"
 #include "Core/Globals/_enum.h"
+#include "Data/GameData/EffectData/EffectKind.h"
+#include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Render/Effects/EffectRegistry.h"
 
+#include <algorithm>
 #include <array>
 #include <cstdlib>
 #include <filesystem>
@@ -26,41 +29,6 @@ using EffectTestData::BuildShippedRegistry;
 
 namespace
 {
-// The 32 types whose creation values FX1.2 moved from C++ rows of the
-// registry into the catalogue (it compared them with those rows then).
-const std::array<int, 32> Fx12Types = {MODEL_BALGAS_SKILL,
-                                       BATTLE_CASTLE_WALL1,
-                                       BATTLE_CASTLE_WALL2,
-                                       BATTLE_CASTLE_WALL3,
-                                       BATTLE_CASTLE_WALL4,
-                                       MODEL_BLOOD,
-                                       MODEL_CURSEDTEMPLE_HOLYITEM,
-                                       MODEL_CURSEDTEMPLE_PRODECTION_SKILL,
-                                       MODEL_CURSEDTEMPLE_RESTRAINT_SKILL,
-                                       MODEL_DESAIR,
-                                       BITMAP_FIRE,
-                                       BITMAP_FIRE_RED,
-                                       MODEL_FISSURE,
-                                       MODEL_FISSURE_LIGHT,
-                                       BITMAP_IMPACT,
-                                       MODEL_INFINITY_ARROW4,
-                                       MODEL_CUNDUN_GHOST,
-                                       BITMAP_LIGHT_MARKS,
-                                       MODEL_SPEAR,
-                                       MODEL_MAGIC1,
-                                       MODEL_MAGIC_CAPSULE2,
-                                       MODEL_MAYASTAR,
-                                       MODEL_POISON,
-                                       MODEL_PROTECT,
-                                       MODEL_SKILL_FISSURE,
-                                       MODEL_SUMMONER_SUMMON_NEIL_GROUND1,
-                                       MODEL_SUMMONER_SUMMON_NEIL_GROUND2,
-                                       MODEL_SUMMONER_SUMMON_NEIL_GROUND3,
-                                       MODEL_SUMMONER_SUMMON_NEIL_NIFE1,
-                                       MODEL_SUMMONER_SUMMON_NEIL_NIFE2,
-                                       MODEL_SUMMONER_SUMMON_NEIL_NIFE3,
-                                       BITMAP_SWORDEFF};
-
 // The 8 types whose creation cases only set fields of CreateParams; FX1.3
 // moved them into the catalogue.
 const std::array<int, 8> Fx13Types = {MODEL_KENTAUROS_ARROW,
@@ -72,39 +40,6 @@ const std::array<int, 8> Fx13Types = {MODEL_KENTAUROS_ARROW,
                                       MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2,
                                       MODEL_EFFECT_SD_AURA};
 
-// The 28 types whose creation cases FX1.4 moved into the catalogue with the
-// fields it added (vectors, offsets, copies and more values), and
-// MODEL_PHOENIX_SHOT, whose case set nothing, last.
-const std::array<int, 29> Fx14Types = {MODEL_DRAGON,
-                                       MODEL_SHIELD_CRASH2,
-                                       MODEL_TREE_ATTACK,
-                                       MODEL__SPEAR,
-                                       MODEL_SUMMONER_WRISTRING_EFFECT,
-                                       MODEL_SUMMONER_CASTING_EFFECT4,
-                                       MODEL_SUMMONER_SUMMON_NEIL,
-                                       MODEL_ALICE_BUFFSKILL_EFFECT2,
-                                       BITMAP_JOINT_THUNDER,
-                                       MODEL_STAFF_OF_DESTRUCTION,
-                                       MODEL_WAVE,
-                                       MODEL_TAIL,
-                                       MODEL_BOSS_ATTACK,
-                                       MODEL_DARK_ELF_SKILL,
-                                       MODEL_WATER_WAVE,
-                                       BITMAP_FIRECRACKERRISE,
-                                       BITMAP_FIRECRACKER0001,
-                                       MODEL_CLOUD,
-                                       MODEL_TOWER_GATE_PLANE,
-                                       MODEL_KNIGHT_PLANCRACK_B,
-                                       MODEL_PROJECTILE,
-                                       BITMAP_SHINY + 4,
-                                       MODEL_WINDFOCE_MIRROR,
-                                       BITMAP_SWORD_EFFECT_MONO,
-                                       MODEL_TARGETMON_EFFECT,
-                                       BITMAP_EVENT_CLOUD,
-                                       MODEL_STATUE_CRUSH_EFFECT_PIECE04,
-                                       MODEL_DOOR_CRUSH_EFFECT_PIECE10,
-                                       MODEL_PHOENIX_SHOT};
-
 // Sub types the callers pass (0 to 3) and one no case handles.
 constexpr std::initializer_list<int> RecordedSubTypes = {0, 1, 2, 3, 99};
 
@@ -114,14 +49,12 @@ struct Recorded
     Record record;
 };
 
-using CallList = std::vector<EffectCall> (*)(int type, std::initializer_list<int> subTypes);
-
-std::vector<Recorded> RecordAll(std::span<const int> types, CallList calls = CallsFor)
+std::vector<Recorded> RecordAll(std::span<const int> types)
 {
     std::vector<Recorded> all;
     for (const int type : types)
     {
-        for (const EffectCall& call : calls(type, RecordedSubTypes))
+        for (const EffectCall& call : CallsFor(type, RecordedSubTypes))
         {
             for (const Conditions& conditions : AllConditions())
             {
@@ -366,11 +299,50 @@ TEST_CASE("The 8 types of FX1.3 create from the catalogue what their cases set [
 
 namespace
 {
-// The digests of the records of the types a phase moved, one file per phase.
-// Set MU_EFFECT_RECORDER_WRITE=1 to write the files anew from the current code.
-std::filesystem::path RecordingsOf(const char* phase)
+// The creation baseline (tests/effects/baseline/EffectCreation.txt): what
+// CreateEffect does for every effect type whose creation moved from code into
+// the catalogue, as their old code did it. One line per recorded call: the
+// name of the type, the call, and the digest of its whole record.
+const std::filesystem::path CreationBaseline = MU_EFFECT_CREATION_BASELINE;
+
+constexpr const char* CreationBaselineHeader =
+    "# What CreateEffect does for the effect types whose creation moved from code into\n"
+    "# the effect catalogue: one line per recorded call, the name of the type and the\n"
+    "# call, then a digest of its whole record (what tests/effects/EffectRecorder.h\n"
+    "# records). Equal to their old code: their rows were compared with it before the\n"
+    "# code was deleted. A deliberate change to a type's creation rewrites its lines\n"
+    "# (MU_EFFECT_RECORDER_WRITE=1); the file and its test are removed once the\n"
+    "# catalogue is edited on purpose (docs/effect-data.md).\n";
+
+// Types whose creation code set nothing and was deleted without a row.
+const std::array<int, 1> CreatedWithoutRow = {MODEL_PHOENIX_SHOT};
+
+struct BaselineType
 {
-    return std::filesystem::path(MU_EFFECT_RECORDINGS_DIR) / (std::string(phase) + ".txt");
+    std::string name;
+    int type;
+};
+
+// The types with creation values in the catalogue and the types created
+// without a row, sorted by name.
+std::vector<BaselineType> BaselineTypes()
+{
+    using Data::Effects::EffectKind;
+    Data::Effects::EffectTypeCatalogue catalogue;
+    catalogue.Build(EffectKind::Effect,
+                    EffectTestData::ShippedTypes().types[Data::Effects::ToIndex(EffectKind::Effect)]);
+    std::vector<BaselineType> types;
+    for (const EffectTypeCreateParams& row : catalogue.GetCreateParams())
+    {
+        types.push_back({std::string(catalogue.GetName(EffectKind::Effect, row.type)), row.type});
+    }
+    for (const int type : CreatedWithoutRow)
+    {
+        types.push_back({std::string(catalogue.GetName(EffectKind::Effect, type)), type});
+    }
+    std::sort(types.begin(), types.end(),
+              [](const BaselineType& left, const BaselineType& right) { return left.name < right.name; });
+    return types;
 }
 
 std::map<std::string, std::string> ReadDigests(const std::filesystem::path& file)
@@ -389,25 +361,43 @@ std::map<std::string, std::string> ReadDigests(const std::filesystem::path& file
     }
     return digests;
 }
+} // namespace
 
-// Checks the digests of `records` against the file of `phase`, or writes them
-// there with MU_EFFECT_RECORDER_WRITE=1, below the comment `header`.
-void CheckDigests(const std::vector<Recorded>& records, const char* phase, const char* header)
+// The whole record of every call, not only the values the spot checks name: a
+// change anywhere (a row, how rows are applied, the common setup, another
+// field, another slot, a sound, a trail) fails, and so does a type that gains
+// or loses its row. MU_EFFECT_RECORDER_WRITE=1 writes the file anew from the
+// current code.
+TEST_CASE("The effect types in the catalogue create what their old code created [effects][recorder]")
 {
-    const std::filesystem::path file = RecordingsOf(phase);
+    BuildShippedRegistry();
+    std::vector<Recorded> records;
+    for (const BaselineType& type : BaselineTypes())
+    {
+        for (const EffectCall& call : SecondGeometryCallsFor(type.type, RecordedSubTypes))
+        {
+            for (const Conditions& conditions : AllConditions())
+            {
+                records.push_back(
+                    {type.name + " " + DescribeArguments(call, conditions), RecordCall(call, conditions)});
+            }
+        }
+    }
+
     if (std::getenv("MU_EFFECT_RECORDER_WRITE") != nullptr)
     {
-        std::ofstream out(file, std::ios::binary);
-        out << header;
+        std::filesystem::create_directories(CreationBaseline.parent_path());
+        std::ofstream out(CreationBaseline, std::ios::binary);
+        out << CreationBaselineHeader;
         for (const Recorded& recorded : records)
         {
             out << recorded.description << '\t' << Digest(recorded.record) << '\n';
         }
-        MESSAGE("wrote " << file.string());
+        MESSAGE("wrote " << CreationBaseline.string());
         return;
     }
 
-    const std::map<std::string, std::string> expected = ReadDigests(file);
+    const std::map<std::string, std::string> expected = ReadDigests(CreationBaseline);
     REQUIRE(expected.size() == records.size());
     for (const Recorded& recorded : records)
     {
@@ -417,36 +407,6 @@ void CheckDigests(const std::vector<Recorded>& records, const char* phase, const
         INFO(ToText(recorded.record));
         CHECK(digest->second == std::to_string(Digest(recorded.record)));
     }
-}
-} // namespace
-
-// The whole record of every call, not only the values the spot checks name:
-// a change anywhere (another field, another slot, a sound, a trail) fails.
-TEST_CASE("The 32 types of FX1.2 give the records of their rows [effects][recorder]")
-{
-    BuildShippedRegistry();
-    CheckDigests(RecordAll(Fx12Types), "FX1.2",
-                 "# The digests of the records of the 32 types FX1.2 moved into the catalogue, one\n"
-                 "# line per call (tests/effects/test_effect_creation.cpp). Taken with their rows\n"
-                 "# before FX1.4 added creation fields; written with MU_EFFECT_RECORDER_WRITE=1.\n");
-}
-
-TEST_CASE("The 8 types of FX1.3 give the records of their old cases [effects][recorder]")
-{
-    BuildShippedRegistry();
-    CheckDigests(RecordAll(Fx13Types), "FX1.3",
-                 "# The digests of the records of the 8 types FX1.3 moved into the catalogue, one\n"
-                 "# line per call (tests/effects/test_effect_creation.cpp). Taken with their old\n"
-                 "# cases; written with MU_EFFECT_RECORDER_WRITE=1.\n");
-}
-
-TEST_CASE("The 29 types of FX1.4 give the records of their old cases [effects][recorder]")
-{
-    BuildShippedRegistry();
-    CheckDigests(RecordAll(Fx14Types, SecondGeometryCallsFor), "FX1.4",
-                 "# The digests of the records of the 29 types of FX1.4, one line per call\n"
-                 "# (tests/effects/test_effect_creation.cpp), with a second position, angle and\n"
-                 "# light. Taken with their old cases; written with MU_EFFECT_RECORDER_WRITE=1.\n");
 }
 
 namespace

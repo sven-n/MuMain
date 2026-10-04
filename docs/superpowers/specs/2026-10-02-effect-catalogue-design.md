@@ -437,22 +437,28 @@ to FX2 all need it:
   records one call under given conditions, `Compare` lists the differing
   fields by name, and `EffectTestData::BuildShippedRegistry` builds the
   registry without the rows being checked, so the old cases run in the same
-  build. The digests of the whole records of the moved types, taken with
-  their old cases, are committed (`tests/effects/recordings`, one file per
-  phase; the FX1.2 rows were recorded before FX1.4 changed how rows are
-  applied), so later changes are checked against the old cases again;
-  `MU_EFFECT_RECORDER_WRITE=1` writes them anew.
-- **Digests:** a baseline only while the shipped data has to behave like the
-  old code. A deliberate change to a type's creation (a fix, a look
-  correction) rewrites its lines with `MU_EFFECT_RECORDER_WRITE=1` and says
-  why in its PR. Once the shipped data is edited on purpose (the effect
-  editor of FX2), every edit would fail them, so they go: all at once, or
-  the lines of a type on its first deliberate edit; the data files and their
-  history then show what changed. The recorder stays for the cases that FX2
-  turns into building blocks, and the tests with made-up rows
+  build.
+- **Creation baseline:** `tests/effects/baseline/EffectCreation.txt` holds
+  the digests of the whole records of every type whose creation moved into
+  the catalogue, one line per recorded call, starting with the name of the
+  type and sorted by it, so later changes are checked against the old code
+  again. A phase writes the lines of the types it moves while their old code
+  is still there and its comparison shows the rows equal to it. The lines of
+  the FX1.2 types come from their rows, which FX1.2 compared with the old
+  C++ rows; their lines with the second position, angle and light were added
+  in FX1.4, and so were those of the FX1.3 types, which FX1.4 compared with
+  the FX1.3 cases put back. The test fails when a type with a row has no
+  lines or the other way round. A deliberate change to a type's creation (a
+  fix, a look correction) rewrites its lines with
+  `MU_EFFECT_RECORDER_WRITE=1` and says why in its PR. The file is a
+  baseline only while the shipped data has to behave like the old code: once
+  the data is edited on purpose (the effect editor of FX2), every edit would
+  rewrite it, so the file and its test go; the data files and their history
+  then show what changed. The recorder stays for the cases that FX2 turns
+  into building blocks, and the tests with made-up rows
   (`tests/data/test_effect_types.cpp`) keep checking how rows are applied.
-- **Baseline:** the old case stays reachable in the PR's working commits
-  and is deleted after the comparison; spot checks stay as tests.
+- **Old code:** the old case stays reachable in the PR's working commits and
+  is deleted after the comparison; spot checks stay as tests.
 - **Speed:** a Release benchmark of creation and lookup, old against new,
   and the frame profile of the effect rows in a busy scene.
 

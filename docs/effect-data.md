@@ -181,9 +181,10 @@ that each kind lists every number once and in order, and that the files are
 in the written format. A type that the code uses but the list misses has no
 name: data that names it fails to load with an error.
 
-The tests of `test_effect_creation` hold digests of what the effects whose
-creation moved into the catalogue create (`tests/effects/recordings`, taken
-with their old code). A `create` value changed on purpose fails them: write
-them anew with `MU_EFFECT_RECORDER_WRITE=1` set and say in the PR why the
-effect changes. They are removed once the catalogue is edited on purpose
-(see Verification in the design).
+`tests/effects/baseline/EffectCreation.txt` holds what the effects whose
+creation moved into the catalogue create, as their old code did, one line
+per recorded call starting with the name of the type; the test
+`test_effect_creation` compares it on every run. A `create` value changed on
+purpose fails it: write it anew with `MU_EFFECT_RECORDER_WRITE=1` set and
+say in the PR why the effect changes. The file and its test are removed once
+the catalogue is edited on purpose (see Verification in the design).
