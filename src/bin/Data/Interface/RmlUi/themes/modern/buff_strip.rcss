@@ -1,8 +1,13 @@
 /* Modern theme for the active-buff icon strip -- same icon atlas as legacy, only the per-icon
    border/radius and tooltip box styling differ. */
 
+/* Centred on the screen whatever the docks leave free: fixed ignores #strip_slot. */
+#strip_slot { pointer-events: none; }
 /* 8 slots per row: 8 x 20dp + 7 x 5dp fits 200dp, a 9th does not. See the legacy copy. */
 #panel {
+	position: fixed;
+	left: 50%;
+	transform: translateX(-50%);
 	top: 15dp;
 	width: 200dp;
 	display: flex;
@@ -240,6 +245,6 @@
 	font-size: 11dp;
 	pointer-events: none;
 }
-.buff-slot:hover .tooltip {
+.buff-slot:hover .tooltip-plain {
 	display: block;
 }

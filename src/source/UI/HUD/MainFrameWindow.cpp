@@ -288,7 +288,7 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
         if (modelCreated)
         {
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/main_frame.rml");
-            if (m_pRmlDoc && UI::RmlBridge::ThemeProvidesDocument("main_frame_top.rml"))
+            if (m_pRmlDoc)
                 m_pRmlTopDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
                                                                  "Data/Interface/RmlUi/main_frame_top.rml");
         }

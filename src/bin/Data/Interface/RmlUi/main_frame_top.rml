@@ -5,10 +5,10 @@
 	<link type="text/rcss" href="main_frame_top.rcss"/>
 </head>
 <body data-model="main_frame">
-	<!-- Top-right system-button panel, moved here from the bottom HUD to echo mu_helper_bar's
-	     styling. A document of its own, bound to main_frame.rml's model, so it can stack under
-	     the windows docked over the top-right corner while the bars stay over them (see
-	     RmlStackingOrder.cpp). Uses flex;justify-content:flex-end instead of
+	<!-- The corner buttons as a top-right panel, for a theme that wants them there instead of
+	     main_frame.rml's bottom #buttons row (each theme hides the one it doesn't use). A document
+	     of its own, bound to main_frame.rml's model, so it can stack under the windows docked over
+	     the top-right corner while the bars stay over them (see RmlStackingOrder.cpp). Uses flex;justify-content:flex-end instead of
 	     `.anchor-top-right`'s `right:0` -- `right:0` was confirmed not to render this element at
 	     all here (root cause unknown), flex sidesteps it. -->
 	<div id="top_right_row" class="anchor-top-left">

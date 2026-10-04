@@ -191,11 +191,13 @@
 	atlas2-89: 180px 224px 20px 28px;
 }
 
-/* The left edge is native's (strip_left, buff_strip.rml): no .center-x centring transform. */
+/* The strip starts at the original's left edge: the left of #strip_slot (buff_strip.rml). */
+#strip_slot { position: absolute; top: 0dp; height: 0dp; pointer-events: none; }
 /* 8 slots per row, as native's own counters produced: 8 x 20dp + 7 x 5dp fits 200dp, a 9th does
    not. Row pitch is the slot height plus the same gap. */
 #panel {
-	transform: none;
+	position: absolute;
+	left: 0dp;
 	top: 15dp;
 	width: 200dp;
 	display: flex;
@@ -252,6 +254,6 @@
 .tooltip-body { color: #ffffff; }
 .tooltip-duration { color: #ff1aff; }
 .tooltip-duration.hidden { display: none; }
-.buff-slot:hover .tooltip {
+.buff-slot:hover .tooltip-rich {
 	display: block;
 }

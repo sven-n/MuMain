@@ -243,7 +243,8 @@ void CBuffStrip::BuildRmlUi()
             c.RegisterArray<std::vector<BuffEntry>>();
 
             c.Bind("buffs", &model.buffs);
-            c.Bind("strip_left", &model.stripLeft);
+            c.Bind("strip_slot_left", &model.stripSlotLeft);
+            c.Bind("strip_slot_width", &model.stripSlotWidth);
             c.Bind("tooltip_line_px", &model.tooltipLinePx);
         });
 
@@ -333,7 +334,7 @@ void CBuffStrip::SyncRmlModel()
     }
 
     m_RmlBinder.MarkDirty("buffs");
-    SyncStripLeft();
+    SyncStripSlot();
     SyncTooltipLineHeight();
 }
 
@@ -355,7 +356,7 @@ void CBuffStrip::SyncTooltipLineHeight()
     m_RmlBinder.MarkDirty("tooltip_line_px");
 }
 
-void CBuffStrip::SyncStripLeft()
+void CBuffStrip::SyncStripSlot()
 {
     // Native CNewUIBuffWindow::SetPos(): the strip starts at (free - 200) / 2 of the free width
     // (640, 450, 373 or 260 units the docked panels leave, x 220/125/86/30), in its own stretched
@@ -363,12 +364,15 @@ void CBuffStrip::SyncStripLeft()
     constexpr float kNativeRowWidth = 200.0f;
     const auto hud = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight);
     const float left = UI::Scaling::PositionX(hud, (static_cast<float>(m_iFreeScreenWidth) - kNativeRowWidth) * 0.5f);
+    const float width = kNativeRowWidth * hud.scaleX;
 
     auto& model = m_RmlBinder.GetModel();
-    if (model.stripLeft == left)
+    if (model.stripSlotLeft == left && model.stripSlotWidth == width)
         return;
-    model.stripLeft = left;
-    m_RmlBinder.MarkDirty("strip_left");
+    model.stripSlotLeft = left;
+    model.stripSlotWidth = width;
+    m_RmlBinder.MarkDirty("strip_slot_left");
+    m_RmlBinder.MarkDirty("strip_slot_width");
 }
 
 float CBuffStrip::GetLayerDepth()

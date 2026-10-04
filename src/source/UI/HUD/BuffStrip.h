@@ -28,7 +28,7 @@ namespace mu::ui::window
         void SetPos(int x, int y) {}
         // The original places the strip by the screen width its docked panels leave free
         // (GetScreenWidth(), reference units); this keeps that width so the model can expose the
-        // strip's native left edge (strip_left) for a theme that follows it.
+        // original's strip box (strip_slot_left/width) for a theme that follows it.
         void SetPos(int iScreenWidth)
         {
             m_iFreeScreenWidth = iScreenWidth;
@@ -74,9 +74,10 @@ namespace mu::ui::window
         struct BuffStripRmlModel
         {
             std::vector<BuffEntry> buffs;
-            // Real-pixel x of native's strip left edge: 200-unit rows centred on the free width,
-            // in the strip's own stretched HUD space.
-            float stripLeft = 0.0f;
+            // The original's strip box in real pixels: 200-unit rows centred on the free width, in
+            // the strip's own stretched HUD space. Data a theme may follow, not a placement.
+            float stripSlotLeft = 0.0f;
+            float stripSlotWidth = 0.0f;
             // Native tooltip row advance in real pixels: RenderTipTextList() steps 1.1 text
             // heights of the native renderer per line.
             float tooltipLinePx = 0.0f;
@@ -87,7 +88,7 @@ namespace mu::ui::window
         CManager* m_pNewUIMng = nullptr;
 
         void SyncRmlModel();
-        void SyncStripLeft();
+        void SyncStripSlot();
         void SyncTooltipLineHeight();
 
         int m_iFreeScreenWidth = REFERENCE_WIDTH;

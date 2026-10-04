@@ -5,11 +5,26 @@
 	<link type="text/rcss" href="buff_strip.rcss"/>
 </head>
 <body class="native-text" data-model="buff_strip">
-	<!-- Buff icon strip, centered; #panel wraps the slots into rows (buff_strip.rcss). -->
-	<div id="panel" class="center-x">
-		<div class="buff-slot" data-for="buff : buffs">
-			<div class="buff-icon-art" data-style-decorator="buff.decorator"></div>
-			<span class="tooltip">{{buff.tooltip}}</span>
+	<!-- Buff icon strip; #panel wraps the slots into rows (buff_strip.rcss). #strip_slot is the box
+	     the original gave the strip: centred in the screen width the docked panels leave free, in
+	     its stretched HUD space, so it moves as docks open. A theme places #panel in it, or ignores
+	     it with position: fixed. -->
+	<div id="strip_slot" data-style-left="strip_slot_left + 'px'" data-style-width="strip_slot_width + 'px'">
+		<div id="panel">
+			<div class="buff-slot" data-for="buff : buffs">
+				<div class="buff-icon-art" data-style-decorator="buff.decorator"></div>
+				<!-- The hover hint twice: one plain text block (.tooltip-plain), or the original's
+				     RenderTipTextList() split, name, description and remaining duration each in its own
+				     colour (.tooltip-rich). A theme shows one. -->
+				<span class="tooltip tooltip-plain">{{buff.tooltip}}</span>
+				<div class="tooltip tooltip-rich">
+					<div class="tooltip-box" data-style-line-height="tooltip_line_px + 'px'">
+						<div class="tooltip-title">{{buff.tooltip_title}}</div>
+						<div class="tooltip-body">{{buff.tooltip_body}}</div>
+						<div class="tooltip-duration" data-class-hidden="buff.tooltip_duration == ''">{{buff.tooltip_duration}}</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </body>
