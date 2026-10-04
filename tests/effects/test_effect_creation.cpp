@@ -25,16 +25,51 @@ using EffectTestData::BuildShippedRegistry;
 
 namespace
 {
+// The 32 types whose creation values FX1.2 moved into the catalogue (it
+// compared them with their cases then).
+const std::array<int, 32> Fx12Types = {MODEL_BALGAS_SKILL,
+                                       BATTLE_CASTLE_WALL1,
+                                       BATTLE_CASTLE_WALL2,
+                                       BATTLE_CASTLE_WALL3,
+                                       BATTLE_CASTLE_WALL4,
+                                       MODEL_BLOOD,
+                                       MODEL_CURSEDTEMPLE_HOLYITEM,
+                                       MODEL_CURSEDTEMPLE_PRODECTION_SKILL,
+                                       MODEL_CURSEDTEMPLE_RESTRAINT_SKILL,
+                                       MODEL_DESAIR,
+                                       BITMAP_FIRE,
+                                       BITMAP_FIRE_RED,
+                                       MODEL_FISSURE,
+                                       MODEL_FISSURE_LIGHT,
+                                       BITMAP_IMPACT,
+                                       MODEL_INFINITY_ARROW4,
+                                       MODEL_CUNDUN_GHOST,
+                                       BITMAP_LIGHT_MARKS,
+                                       MODEL_SPEAR,
+                                       MODEL_MAGIC1,
+                                       MODEL_MAGIC_CAPSULE2,
+                                       MODEL_MAYASTAR,
+                                       MODEL_POISON,
+                                       MODEL_PROTECT,
+                                       MODEL_SKILL_FISSURE,
+                                       MODEL_SUMMONER_SUMMON_NEIL_GROUND1,
+                                       MODEL_SUMMONER_SUMMON_NEIL_GROUND2,
+                                       MODEL_SUMMONER_SUMMON_NEIL_GROUND3,
+                                       MODEL_SUMMONER_SUMMON_NEIL_NIFE1,
+                                       MODEL_SUMMONER_SUMMON_NEIL_NIFE2,
+                                       MODEL_SUMMONER_SUMMON_NEIL_NIFE3,
+                                       BITMAP_SWORDEFF};
+
 // The 8 types whose creation cases only set fields of CreateParams; FX1.3
 // moved them into the catalogue.
-const std::array<int, 8> CatalogueCreatedTypes = {MODEL_KENTAUROS_ARROW,
-                                                  MODEL_WARP3,
-                                                  MODEL_WARP6,
-                                                  BITMAP_SPARK + 1,
-                                                  BITMAP_SPARK + 2,
-                                                  MODEL_1_STREAMBREATHFIRE,
-                                                  MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2,
-                                                  MODEL_EFFECT_SD_AURA};
+const std::array<int, 8> Fx13Types = {MODEL_KENTAUROS_ARROW,
+                                      MODEL_WARP3,
+                                      MODEL_WARP6,
+                                      BITMAP_SPARK + 1,
+                                      BITMAP_SPARK + 2,
+                                      MODEL_1_STREAMBREATHFIRE,
+                                      MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2,
+                                      MODEL_EFFECT_SD_AURA};
 
 // Sub types the callers pass (0 to 3) and one no case handles.
 constexpr std::initializer_list<int> RecordedSubTypes = {0, 1, 2, 3, 99};
@@ -45,12 +80,14 @@ struct Recorded
     Record record;
 };
 
-std::vector<Recorded> RecordAll(std::span<const int> types)
+using CallList = std::vector<EffectCall> (*)(int type, std::initializer_list<int> subTypes);
+
+std::vector<Recorded> RecordAll(std::span<const int> types, CallList calls = CallsFor)
 {
     std::vector<Recorded> all;
     for (const int type : types)
     {
-        for (const EffectCall& call : CallsFor(type, RecordedSubTypes))
+        for (const EffectCall& call : calls(type, RecordedSubTypes))
         {
             for (const Conditions& conditions : AllConditions())
             {
@@ -174,6 +211,28 @@ TEST_CASE("Sounds, terrain light and trails a creation changes show in the recor
     CHECK_FALSE(Find(live, "objectBlurs[1].Live").has_value());
 }
 
+TEST_CASE("The second geometry of a call shows what a row copies [effects][recorder]")
+{
+    BuildShippedRegistry();
+    // MODEL_INFINITY_ARROW4 sets its light and copies it into the direction;
+    // the light of the call stays as it was.
+    const std::vector<EffectCall> calls = SecondGeometryCallsFor(MODEL_INFINITY_ARROW4, {0});
+    REQUIRE(calls.size() == 8);
+    const EffectCall& second = calls.back();
+    CHECK(second.owner == Owner::None);
+    CHECK(second.position != calls.front().position);
+    CHECK(second.angle != calls.front().angle);
+    CHECK(second.light != calls.front().light);
+    CHECK(Describe(second, {}).find(" position 12345.5/13579.25/260.5 angle -17/101/271 light ") != std::string::npos);
+    CHECK(Describe(calls.front(), {}).find(" position ") == std::string::npos);
+
+    const Record record = RecordCall(second, {});
+    CHECK(Find(record, "Effects[0].Position[0]") == "12345.5");
+    CHECK(Find(record, "Effects[0].Angle[1]") == "101");
+    CHECK(Find(record, "Effects[0].Light[0]") == "1");
+    CHECK(Find(record, "Effects[0].Direction[1]") == "0.5");
+}
+
 TEST_CASE("A creation row that differs from the old one is caught [effects][recorder]")
 {
     BuildShippedRegistry();
@@ -230,7 +289,7 @@ TEST_CASE("The 8 types of FX1.3 create from the catalogue what their cases set [
          {{"Effects[0].LifeTime", "20"}, {"Effects[0].Scale", "0.899999976"}}},
         {MODEL_EFFECT_SD_AURA, {{"Effects[0].LifeTime", "1000"}, {"Effects[0].Scale", "1"}}},
     };
-    REQUIRE(expected.size() == CatalogueCreatedTypes.size());
+    REQUIRE(expected.size() == Fx13Types.size());
 
     BuildShippedRegistry();
     for (const Expected& type : expected)
@@ -261,10 +320,10 @@ TEST_CASE("The 8 types of FX1.3 create from the catalogue what their cases set [
         {"MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2", "0.899999976"},
         {"MODEL_EFFECT_SD_AURA", "1"},
     };
-    REQUIRE(scaleFromCaller.size() == CatalogueCreatedTypes.size());
-    for (size_t i = 0; i < CatalogueCreatedTypes.size(); ++i)
+    REQUIRE(scaleFromCaller.size() == Fx13Types.size());
+    for (size_t i = 0; i < Fx13Types.size(); ++i)
     {
-        EffectCall call = CallOf(CatalogueCreatedTypes[i]);
+        EffectCall call = CallOf(Fx13Types[i]);
         call.scale = 2.5f;
         INFO(scaleFromCaller[i].path);
         CHECK(Find(RecordCall(call, {}), "Effects[0].Scale") == scaleFromCaller[i].value);
@@ -273,12 +332,12 @@ TEST_CASE("The 8 types of FX1.3 create from the catalogue what their cases set [
 
 namespace
 {
-// The digests of the records of the 8 FX1.3 types for every call RecordAll
-// makes, taken with their old cases (the commit before the one that deleted
-// them). Set MU_EFFECT_RECORDER_WRITE=1 to write the file anew from the
-// current code.
-const std::filesystem::path CatalogueCreatedRecords =
-    std::filesystem::path(MU_EFFECT_RECORDINGS_DIR) / "CatalogueCreatedTypes.txt";
+// The digests of the records of the types a phase moved, one file per phase.
+// Set MU_EFFECT_RECORDER_WRITE=1 to write the files anew from the current code.
+std::filesystem::path RecordingsOf(const char* phase)
+{
+    return std::filesystem::path(MU_EFFECT_RECORDINGS_DIR) / (std::string(phase) + ".txt");
+}
 
 std::map<std::string, std::string> ReadDigests(const std::filesystem::path& file)
 {
@@ -296,30 +355,25 @@ std::map<std::string, std::string> ReadDigests(const std::filesystem::path& file
     }
     return digests;
 }
-} // namespace
 
-// The whole record of every call, not only the values the spot checks name:
-// a change anywhere (another field, another slot, a sound, a trail) fails.
-TEST_CASE("The 8 types of FX1.3 give the records of their old cases [effects][recorder]")
+// Checks the digests of `records` against the file of `phase`, or writes them
+// there with MU_EFFECT_RECORDER_WRITE=1, below the comment `header`.
+void CheckDigests(const std::vector<Recorded>& records, const char* phase, const char* header)
 {
-    BuildShippedRegistry();
-    const std::vector<Recorded> records = RecordAll(CatalogueCreatedTypes);
-
+    const std::filesystem::path file = RecordingsOf(phase);
     if (std::getenv("MU_EFFECT_RECORDER_WRITE") != nullptr)
     {
-        std::ofstream out(CatalogueCreatedRecords, std::ios::binary);
-        out << "# The digests of the records of the 8 types FX1.3 moved into the catalogue, one\n"
-               "# line per call (tests/effects/test_effect_creation.cpp). Taken with their old\n"
-               "# cases; written with MU_EFFECT_RECORDER_WRITE=1.\n";
+        std::ofstream out(file, std::ios::binary);
+        out << header;
         for (const Recorded& recorded : records)
         {
             out << recorded.description << '\t' << Digest(recorded.record) << '\n';
         }
-        MESSAGE("wrote " << CatalogueCreatedRecords.string());
+        MESSAGE("wrote " << file.string());
         return;
     }
 
-    const std::map<std::string, std::string> expected = ReadDigests(CatalogueCreatedRecords);
+    const std::map<std::string, std::string> expected = ReadDigests(file);
     REQUIRE(expected.size() == records.size());
     for (const Recorded& recorded : records)
     {
@@ -329,4 +383,25 @@ TEST_CASE("The 8 types of FX1.3 give the records of their old cases [effects][re
         INFO(ToText(recorded.record));
         CHECK(digest->second == std::to_string(Digest(recorded.record)));
     }
+}
+} // namespace
+
+// The whole record of every call, not only the values the spot checks name:
+// a change anywhere (another field, another slot, a sound, a trail) fails.
+TEST_CASE("The 32 types of FX1.2 give the records of their rows [effects][recorder]")
+{
+    BuildShippedRegistry();
+    CheckDigests(RecordAll(Fx12Types), "FX1.2",
+                 "# The digests of the records of the 32 types FX1.2 moved into the catalogue, one\n"
+                 "# line per call (tests/effects/test_effect_creation.cpp). Taken with their rows\n"
+                 "# before FX1.4 added creation fields; written with MU_EFFECT_RECORDER_WRITE=1.\n");
+}
+
+TEST_CASE("The 8 types of FX1.3 give the records of their old cases [effects][recorder]")
+{
+    BuildShippedRegistry();
+    CheckDigests(RecordAll(Fx13Types), "FX1.3",
+                 "# The digests of the records of the 8 types FX1.3 moved into the catalogue, one\n"
+                 "# line per call (tests/effects/test_effect_creation.cpp). Taken with their old\n"
+                 "# cases; written with MU_EFFECT_RECORDER_WRITE=1.\n");
 }

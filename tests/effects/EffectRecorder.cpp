@@ -45,6 +45,11 @@ constexpr std::uint16_t UnevenSkill = 43;
 constexpr std::uint16_t UnevenSkillSerialNum = 47; // CreateEffect keeps it as a BYTE
 constexpr short UnevenTargetIndex = 53;
 
+// The second position, angle and light of a call.
+constexpr std::array<float, 3> SecondPosition{12345.5f, 13579.25f, 260.5f};
+constexpr std::array<float, 3> SecondAngle{-17.f, 101.f, 271.f};
+constexpr std::array<float, 3> SecondLight{0.35f, 0.55f, 0.65f};
+
 // ---------------------------------------------------------------------------
 // The named fields of the pool elements. Keep in step with OBJECT
 // (w_ObjectInfo.h), PARTICLE and JOINT (_struct.h).
@@ -973,6 +978,22 @@ std::span<const Conditions> AllConditions()
     return all;
 }
 
+namespace
+{
+void AddBothArgumentSets(EffectCall call, std::vector<EffectCall>& calls)
+{
+    calls.push_back(call);
+
+    call.scale = UnevenScale;
+    call.pkKey = UnevenPkKey;
+    call.skillIndex = UnevenSkillIndex;
+    call.skill = UnevenSkill;
+    call.skillSerialNum = UnevenSkillSerialNum;
+    call.targetIndex = UnevenTargetIndex;
+    calls.push_back(call);
+}
+} // namespace
+
 std::vector<EffectCall> CallsFor(int type, std::initializer_list<int> subTypes)
 {
     std::vector<EffectCall> calls;
@@ -984,16 +1005,24 @@ std::vector<EffectCall> CallsFor(int type, std::initializer_list<int> subTypes)
             call.type = type;
             call.subType = subType;
             call.owner = owner;
-            calls.push_back(call);
-
-            call.scale = UnevenScale;
-            call.pkKey = UnevenPkKey;
-            call.skillIndex = UnevenSkillIndex;
-            call.skill = UnevenSkill;
-            call.skillSerialNum = UnevenSkillSerialNum;
-            call.targetIndex = UnevenTargetIndex;
-            calls.push_back(call);
+            AddBothArgumentSets(call, calls);
         }
+    }
+    return calls;
+}
+
+std::vector<EffectCall> SecondGeometryCallsFor(int type, std::initializer_list<int> subTypes)
+{
+    std::vector<EffectCall> calls = CallsFor(type, subTypes);
+    for (int subType : subTypes)
+    {
+        EffectCall call;
+        call.type = type;
+        call.subType = subType;
+        call.position = SecondPosition;
+        call.angle = SecondAngle;
+        call.light = SecondLight;
+        AddBothArgumentSets(call, calls);
     }
     return calls;
 }
@@ -1073,11 +1102,29 @@ std::uint64_t Digest(const Record& record)
     return hash;
 }
 
+namespace
+{
+std::string FormatVector(const std::array<float, 3>& values)
+{
+    return Format(values[0]) + "/" + Format(values[1]) + "/" + Format(values[2]);
+}
+} // namespace
+
+// The position, angle and light are named only when they are not the default
+// ones, so the descriptions of the calls the digests of FX1.3 name stay as
+// they were.
 std::string Describe(const EffectCall& call, const Conditions& conditions)
 {
+    const EffectCall defaults;
+    std::string geometry;
+    if (call.position != defaults.position || call.angle != defaults.angle || call.light != defaults.light)
+    {
+        geometry = " position " + FormatVector(call.position) + " angle " + FormatVector(call.angle) + " light " +
+                   FormatVector(call.light);
+    }
     return "type " + std::to_string(call.type) + " subType " + std::to_string(call.subType) + " owner " +
-           OwnerName(call.owner) + " scale " + Format(call.scale) + " pkKey " + std::to_string(call.pkKey) + " skill " +
-           std::to_string(call.skillIndex) + "/" + std::to_string(call.skill) + "/" +
+           OwnerName(call.owner) + geometry + " scale " + Format(call.scale) + " pkKey " + std::to_string(call.pkKey) +
+           " skill " + std::to_string(call.skillIndex) + "/" + std::to_string(call.skill) + "/" +
            std::to_string(call.skillSerialNum) + " target " + std::to_string(call.targetIndex) + " frameFactor " +
            Format(conditions.frameFactor) + " pattern " + (conditions.pattern == SlotPattern::A ? "A" : "B");
 }

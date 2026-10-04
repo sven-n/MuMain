@@ -77,6 +77,14 @@ std::span<const Conditions> AllConditions();
 // caller's scale differs from one that sets the default scale).
 std::vector<EffectCall> CallsFor(int type, std::initializer_list<int> subTypes);
 
+// The calls of CallsFor, plus, for each sub type without an owner, both
+// argument sets with a second position, angle and light. Every component
+// differs from the first set and from the values the cases set, so a row that
+// copies one of them differs from a row that sets the copied value as a
+// constant, and a row that sets single components from one that sets the
+// whole vector.
+std::vector<EffectCall> SecondGeometryCallsFor(int type, std::initializer_list<int> subTypes);
+
 struct RecordedValue
 {
     std::string path;
