@@ -267,7 +267,7 @@ One PR each, small enough to check against the old code.
 | FX1.4 | More creation fields | FX1.3 | The fields the 26 value-only cases need; those cases move into data. |
 | FX1.5 | Variants by SubType | FX1.4 | `variants` in effect rows; the 47 types that choose values by SubType move (done: 41 types, see the FX1.5 note). |
 | FX1.5b | Fields for the rest | FX1.5 | The fields the other 12 types that choose values by SubType need (render type, alphaTarget, a lifeTime offset, start position values, the animation, copies from the light, the call's position and the call's angle); those cases move into data. Done, see the FX1.5b note. |
-| FX1.6 | Effect browser | FX1.1 | Read-only tool in MuEditor; values from FX1.2 on. |
+| FX1.6 | Effect browser | FX1.1 | Read-only tool in MuEditor; values from FX1.2 on. Done, see the FX1.6 note. |
 | FX1.7 | Preview | FX1.6 | Creating the selected type in the world in editor builds. |
 
 **FX1.1 Names for all types.** The compiled list of symbols per kind (about
@@ -455,6 +455,25 @@ the call's scale or angle, and `MODEL_WARCRAFT`, which is never created.
 
 **FX1.6–FX1.7** add the effect browser and its preview to MuEditor. They
 change no game code outside editor builds.
+
+*FX1.6 done:* MuEditor has the effect browser (docs/effect-data.md): a tab
+per kind with search and filters (asset loaded now; for effects, the stage
+of creation, move and drawing), and the details of a type: code, number and
+file, the types of other kinds with that number, what its slot holds, its
+stages with the effects that share its handler or hook, its creation values
+with a column per variant, and the data that names it. Its model needs no
+ImGui and is tested against the shipped catalogue. The runtime cannot tell a
+case in a switch from no code at all (14 effects are created with only the
+common setup, 27 move with only the shared code), so a compiled list of the
+cases (398 types: 327 creation, 134 move, 218 drawing cases) tells them
+apart; a test reads the three switches of `ZzzEffect.cpp` and checks it in
+editor builds, and in every build that no case is left for a stage the
+registry handles and that every case names a type of the symbol list. The
+slots are read without loading anything: a model's meshes with the file
+`CLoadData` remembers, or the texture of the number. Outside the editor only
+`CLoadData::GetModelFile` changed, from private to public; no behavior
+changed. "Used by" shows the creation values for now; the call sites of the
+code stay an open question.
 
 ## Verification
 
