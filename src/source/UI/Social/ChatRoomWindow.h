@@ -3,6 +3,8 @@
 #include "UI/Social/SocialWindowBase.h"
 #include "Dotnet/Connection.h"
 #include <map>
+#include <string>
+#include <vector>
 
 class CUIChatWindow : public CUIBaseWindow
 {
@@ -22,6 +24,8 @@ public:
     int AddChatPal(const wchar_t* pszID, BYTE Number, BYTE Server);
     void RemoveChatPal(const wchar_t* pszID);
     void AddChatText(BYTE byIndex, const wchar_t* pszText, int iType, int iColor);
+    void InviteSelected(const std::wstring& name);
+    void SubmitLine(const std::wstring& line);
     void ConnectToChatServer(const wchar_t* pszIP, DWORD dwRoomNumber, DWORD dwTicket);
     void DisconnectToChatServer();
     Connection* GetCurrentSocket()
@@ -52,8 +56,17 @@ protected:
     BOOL HandleMessage() override;
 
 private:
+    struct Participant
+    {
+        std::wstring name;
+        BYTE number = 0;
+    };
+
     void RefreshRoomTitle();
 
     DWORD m_dwRoomNumber;
+    std::vector<Participant> m_Participants;
+    std::wstring m_LastSent;
+    bool m_Locked = false;
     std::unique_ptr<UI::Social::ChatRoomView> m_View;
 };

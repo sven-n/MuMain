@@ -23,7 +23,6 @@ constexpr const char* DocumentPath = "Data/Interface/RmlUi/chat_room.rml";
 // data model of its own rather than every room sharing one.
 constexpr const char* ModelPlaceholder = "data-model=\"chat_room\"";
 constexpr int SystemSpeaker = 255;
-
 Rml::String Text(const wchar_t* text)
 {
     return StringUtils::WideToNarrow(text);
@@ -176,7 +175,7 @@ void ChatRoomView::PublishTitle()
 // ---------------------------------------------------------------------------------------------
 // Participants
 
-int ChatRoomView::AddPal(const wchar_t* name, BYTE number)
+void ChatRoomView::AddPal(const wchar_t* name, BYTE number)
 {
     auto& m = m_Binder.GetModel();
     const auto narrow = Text(name);
@@ -188,7 +187,6 @@ int ChatRoomView::AddPal(const wchar_t* name, BYTE number)
         m.pals.push_back({narrow, number});
     m_Binder.MarkDirty("pals");
     SyncPalVisibility();
-    return static_cast<int>(m.pals.size());
 }
 
 void ChatRoomView::RemovePal(const wchar_t* name)
@@ -200,11 +198,6 @@ void ChatRoomView::RemovePal(const wchar_t* name)
     SyncPalVisibility();
 }
 
-int ChatRoomView::PalCount() const
-{
-    return static_cast<int>(m_Binder.GetModel().pals.size());
-}
-
 // Native only showed the column once the room was more than a pair, or while inviting.
 void ChatRoomView::SyncPalVisibility()
 {
@@ -214,54 +207,6 @@ void ChatRoomView::SyncPalVisibility()
         return;
     m.showPals = show;
     m_Binder.MarkDirty("show_pals");
-}
-
-const wchar_t* ChatRoomView::ChatFriend(int* result)
-{
-    const auto& m = m_Binder.GetModel();
-    if (m.pals.size() > 2)
-    {
-        if (result)
-            *result = 2;
-        return nullptr;
-    }
-    const auto self = Text(Hero->ID);
-    for (const auto& pal : m.pals)
-    {
-        if (pal.name == self)
-            continue;
-        m_NameLookup = StringUtils::NarrowToWide(pal.name);
-        return m_NameLookup.c_str();
-    }
-    return nullptr;
-}
-
-// CUIChatPalListBox::MakeTitleText: up to three names other than the player's, then an ellipsis.
-// Its own separator was ", L" -- a stray literal prefix left in the original, corrected here.
-void ChatRoomView::MakeTitleText(wchar_t* out, size_t capacity) const
-{
-    if (!out || capacity == 0)
-        return;
-    const auto self = Text(Hero->ID);
-    std::wstring built;
-    int named = 0;
-    for (const auto& pal : m_Binder.GetModel().pals)
-    {
-        if (pal.name == self)
-            continue;
-        if (named > 0)
-            built += L", ";
-        built += StringUtils::NarrowToWide(pal.name);
-        if (++named >= 3)
-        {
-            built += L"...";
-            break;
-        }
-    }
-    const size_t used = wcslen(out);
-    if (used + 1 >= capacity)
-        return;
-    wcsncat(out, built.c_str(), capacity - used - 1);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -388,23 +333,6 @@ void ChatRoomView::ToggleInvite()
     SyncGeometry();
 }
 
-void ChatRoomView::InviteSelected()
-{
-    const auto& m = m_Binder.GetModel();
-    if (m.locked || m.selectedInvite.empty())
-        return;
-    if (m.pals.size() <= 1)
-        return;
-    if (m.pals.size() >= 30)
-    {
-        AddLine(SystemSpeaker, I18N::Game::YouHaveReachedTheMaximumNumberOfFriendsYouCanList, 1);
-        return;
-    }
-    const auto name = StringUtils::NarrowToWide(m.selectedInvite);
-    SocketClient->ToGameServer()->SendChatRoomInvitationRequest(MU_C16(name.c_str()), m_Owner.GetRoomNumber(),
-                                                               m_Owner.GetUIID());
-}
-
 // ---------------------------------------------------------------------------------------------
 // Input
 
@@ -414,25 +342,13 @@ bool ChatRoomView::FieldHasFocus() const
     return field != nullptr && field->IsPseudoClassSet("focus");
 }
 
-// The native path, kept whole: the same line twice running is dropped rather than sent again
-// (m_szLastText), the field clears either way, and a room left alone locks itself.
 void ChatRoomView::SubmitDraft()
 {
     auto& m = m_Binder.GetModel();
     const auto line = StringUtils::NarrowToWide(m.draft);
-    if (line != m_LastSent)
-    {
-        m_LastSent = line;
-        if (!m.locked && !line.empty())
-        {
-            if (auto* connection = m_Owner.GetCurrentSocket())
-                connection->ToChatServer()->SendChatMessageExt(0, line.c_str());
-        }
-    }
+    m_Owner.SubmitLine(line);
     m.draft.clear();
     m_Binder.MarkDirty("draft");
-    if (m.pals.size() < 2)
-        m_Owner.Lock(TRUE);
 }
 
 float ChatRoomView::InviteColumnWidth() const
@@ -476,12 +392,12 @@ void ChatRoomView::ActionRequested(const Action& a)
     if (a.name == "invite_send_clicked")
     {
         PlayBuffer(SOUND_CLICK01);
-        InviteSelected();
+        m_Owner.InviteSelected(StringUtils::NarrowToWide(m.selectedInvite));
     }
     else if (a.name == "invite_toggle")
         ToggleInvite();
     else if (a.name == "invite_send")
-        InviteSelected();
+        m_Owner.InviteSelected(StringUtils::NarrowToWide(m.selectedInvite));
     else if (a.name == "invite_select")
     {
         const auto name = a.value.Get<Rml::String>();

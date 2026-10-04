@@ -4,10 +4,14 @@
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"
+#include <algorithm>
 
-// What is left of CUIChatWindow once the room is an RmlUi document of its own: the chat-server
-// connection, the room's identity, and forwarding. Presentation, participants, the draft line and
-// the invitation panel all live in UI::Social::ChatRoomView.
+namespace
+{
+constexpr BYTE SystemSpeaker = 255;
+constexpr size_t RoomTitleCapacity = 128;
+constexpr size_t MaximumRoomParticipants = 30;
+}
 
 CUIChatWindow::CUIChatWindow() : m_dwRoomNumber(0), m_View(std::make_unique<UI::Social::ChatRoomView>(*this))
 {
@@ -68,8 +72,15 @@ void CUIChatWindow::FocusReset()
 int CUIChatWindow::AddChatPal(const wchar_t* pszID, BYTE Number, BYTE Server)
 {
     (void)Server;
-    const int count = m_View->AddPal(pszID, Number);
+    const auto it = std::find_if(m_Participants.begin(), m_Participants.end(),
+                                 [pszID](const Participant& pal) { return pal.name == pszID; });
+    if (it != m_Participants.end())
+        it->number = Number;
+    else
+        m_Participants.push_back({pszID, Number});
+    m_View->AddPal(pszID, Number);
     RefreshRoomTitle();
+    const int count = GetUserCount();
     if (count >= 2)
         Lock(FALSE);
     return count;
@@ -77,21 +88,33 @@ int CUIChatWindow::AddChatPal(const wchar_t* pszID, BYTE Number, BYTE Server)
 
 void CUIChatWindow::RemoveChatPal(const wchar_t* pszID)
 {
-    if (m_View->PalCount() > 2)
-    {
-        m_View->RemovePal(pszID);
+    const bool refreshTitle = m_Participants.size() > 2;
+    std::erase_if(m_Participants, [pszID](const Participant& pal) { return pal.name == pszID; });
+    m_View->RemovePal(pszID);
+    if (refreshTitle)
         RefreshRoomTitle();
-    }
-    else
-        m_View->RemovePal(pszID);
 }
 
 // CUIChatPalListBox::MakeTitleText fed the window title from the room's members.
 void CUIChatWindow::RefreshRoomTitle()
 {
-    wchar_t szTitle[128] = {0};
-    wcsncpy(szTitle, I18N::Game::Talking, 127);
-    m_View->MakeTitleText(szTitle, 128);
+    wchar_t szTitle[RoomTitleCapacity] = {0};
+    wcsncpy(szTitle, I18N::Game::Talking, RoomTitleCapacity - 1);
+    int named = 0;
+    for (const auto& pal : m_Participants)
+    {
+        if (pal.name == Hero->ID)
+            continue;
+        std::wstring suffix = named > 0 ? L", " : L"";
+        suffix += pal.name;
+        if (++named >= 3)
+            suffix += L"...";
+        const size_t used = wcslen(szTitle);
+        if (used + 1 < RoomTitleCapacity)
+            wcsncat(szTitle, suffix.c_str(), RoomTitleCapacity - used - 1);
+        if (named >= 3)
+            break;
+    }
     SetTitle(szTitle);
     g_pWindowMgr->RefreshMainWndChatRoomList();
 }
@@ -104,7 +127,7 @@ void CUIChatWindow::AddChatText(BYTE byIndex, const wchar_t* pszText, int iType,
 
 int CUIChatWindow::GetUserCount()
 {
-    return m_View->PalCount();
+    return static_cast<int>(m_Participants.size());
 }
 
 int CUIChatWindow::GetShowType()
@@ -124,12 +147,58 @@ const wchar_t* CUIChatWindow::GetCurrentInvitePal()
 
 const wchar_t* CUIChatWindow::GetChatFriend(int* piResult)
 {
-    return m_View->ChatFriend(piResult);
+    if (piResult)
+        *piResult = 0;
+    if (m_Participants.size() > 2)
+    {
+        if (piResult)
+            *piResult = 2;
+        return nullptr;
+    }
+    for (const auto& pal : m_Participants)
+    {
+        if (pal.name != Hero->ID)
+        {
+            if (piResult)
+                *piResult = 1;
+            return pal.name.c_str();
+        }
+    }
+    return nullptr;
+}
+
+void CUIChatWindow::InviteSelected(const std::wstring& name)
+{
+    if (m_Locked || name.empty() || m_Participants.size() <= 1)
+        return;
+    if (m_Participants.size() >= MaximumRoomParticipants)
+    {
+        AddChatText(SystemSpeaker, I18N::Game::YouHaveReachedTheMaximumNumberOfFriendsYouCanList, 1, 0);
+        return;
+    }
+    SocketClient->ToGameServer()->SendChatRoomInvitationRequest(MU_C16(name.c_str()), GetRoomNumber(), GetUIID());
+}
+
+void CUIChatWindow::SubmitLine(const std::wstring& line)
+{
+    // The chat server should not receive the same line twice in succession.
+    if (line != m_LastSent)
+    {
+        m_LastSent = line;
+        if (!m_Locked && !line.empty())
+        {
+            if (auto* connection = GetCurrentSocket())
+                connection->ToChatServer()->SendChatMessageExt(0, line.c_str());
+        }
+    }
+    if (m_Participants.size() < 2)
+        Lock(TRUE);
 }
 
 // Native prefixed the title while the room had nobody to talk to, and locked the line.
 void CUIChatWindow::Lock(BOOL bFlag)
 {
+    m_Locked = bFlag != FALSE;
     m_View->SetLocked(bFlag != FALSE);
     const size_t offlineLength = wcslen(I18N::Game::Offline);
     if (bFlag == TRUE)

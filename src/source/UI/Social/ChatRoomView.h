@@ -28,13 +28,9 @@ public:
     void PullToFront();
     void ProcessActions();
 
-    // Participants. AddPal returns the new count, as CUIChatWindow::AddChatPal did.
-    int AddPal(const wchar_t* name, BYTE number);
+    // Mirror room-owned participants into the presentation model.
+    void AddPal(const wchar_t* name, BYTE number);
     void RemovePal(const wchar_t* name);
-    int PalCount() const;
-    // The room's other member when it is a pair; nullptr with nobody or a crowd (piResult 2).
-    const wchar_t* ChatFriend(int* result);
-    void MakeTitleText(wchar_t* out, size_t capacity) const;
 
     // byIndex is the server's participant index; 255 is a system line with no speaker.
     void AddLine(BYTE byIndex, const wchar_t* text, int type);
@@ -71,7 +67,6 @@ private:
     void ActionRequested(const Action& action);
 
     void ToggleInvite();
-    void InviteSelected();
     void SyncPalVisibility();
     void PublishTitle();
     void SyncDraggedPosition();
@@ -92,8 +87,6 @@ private:
     float m_DpRatio = 0;
     std::wstring m_Title;
     std::wstring m_SelectedInvite;
-    std::wstring m_LastSent;
-    std::wstring m_NameLookup;
     bool m_Placed = false;
     // Placed AND the context has applied that position: before this, the panel is still centred.
     bool m_Settled = false;
