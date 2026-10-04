@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 #include <optional>
+#include <vector>
 
 class OBJECT;
 
@@ -30,7 +31,7 @@ struct CreateVector
 // The arguments of the CreateEffect call that creation values can copy.
 struct CreateCall
 {
-    const float* light = nullptr;
+    std::array<float, 3> light{};
     float scale = 0.f;
 };
 
@@ -63,9 +64,9 @@ struct CreateParams
     // When set, overrides o->Light (the colour the effect renders with).
     std::optional<std::array<float, 3>> light;
 
-    // The groups below that a row sets. ApplyCreateParams tests only those,
-    // so the rows that set only the values above cost what they did before
-    // these fields came.
+    // The groups below that a row sets (GroupsOf). ApplyCreateParams tests
+    // only those, so the rows that set only the values above cost what they
+    // did before these fields came.
     enum Group : std::uint8_t
     {
         Flags = 1 << 0,
@@ -121,6 +122,14 @@ using MoveHandler = bool (*)(OBJECT* o, int index, float luminosity);
 // Per-frame draw. Defaults to RenderObject() when left null.
 using RenderHandler = void (*)(OBJECT* o);
 
+// The creation parameters of one SubType that has a variant (D35): the row's
+// with the variant's on top, resolved when the registry is built.
+struct SubTypeCreateParams
+{
+    int subType = 0;
+    CreateParams params;
+};
+
 // A descriptor migrates each lifecycle stage independently: a type can have
 // its rendering driven by the registry while its creation still runs through
 // the legacy switch, or vice versa. CreateEffect treats creation as migrated
@@ -129,10 +138,32 @@ using RenderHandler = void (*)(OBJECT* o);
 struct EffectDescriptor
 {
     std::optional<CreateParams> create;
+    // Sorted by SubType; empty for most types.
+    std::vector<SubTypeCreateParams> createBySubType;
     CreateHook onCreate = nullptr;
     MoveHandler move = nullptr;
     RenderHandler render = nullptr;
+
+    // The creation parameters of `subType`, or null when the type has none.
+    // The few SubTypes of a row are searched in order, which costs less than a
+    // table indexed by SubType (SubTypes can be model numbers).
+    const CreateParams* CreateParamsFor(int subType) const
+    {
+        if (!create)
+            return nullptr;
+        for (const SubTypeCreateParams& variant : createBySubType)
+        {
+            if (variant.subType == subType)
+                return &variant.params;
+        }
+        return &*create;
+    }
 };
+
+// The groups of fields `params` sets, for CreateParams::groups. Whatever
+// makes or changes CreateParams sets groups with it, so ApplyCreateParams
+// skips no field that is set.
+std::uint8_t GroupsOf(const CreateParams& params);
 
 // Applies the optional parameters to an already common-initialised effect.
 void ApplyCreateParams(OBJECT* o, const CreateParams& params, const CreateCall& call);

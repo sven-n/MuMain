@@ -247,7 +247,7 @@ std::string WriteEffectTypesJson(EffectKind kind, std::span<const EffectTypeEntr
         root[Keys::Types].push_back(std::move(json));
     }
     std::string text = root.dump(Items::Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
-    text = Items::Json::PutListsOnOneLine(text, CreateLightKey);
+    text = Items::Json::PutListsOnOneLine(Items::Json::PutListsOnOneLine(text, CreateLightKey), CreateSubTypesKey);
     for (const char* key : CreateVectorKeys)
     {
         text = Items::Json::PutObjectsOnOneLine(Items::Json::PutListsOnOneLine(text, key), key);

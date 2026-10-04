@@ -17,7 +17,13 @@
 //     },
 //     "copy": {
 //       "startPosition": "position"
-//     }
+//     },
+//     "variants": [
+//       {
+//         "subType": 1,
+//         "lifeTime": 30
+//       }
+//     ]
 //   }
 namespace Data::Effects
 {
@@ -27,6 +33,7 @@ constexpr const char* CreateKey = "create";
 // that go on one line.
 constexpr const char* CreateLightKey = "light";
 constexpr std::array<const char*, 4> CreateVectorKeys = {"position", "angle", "direction", "startPosition"};
+constexpr const char* CreateSubTypesKey = "subTypes";
 
 // Reads the "create" object `json`; the issues name the fields as
 // "<objectKey>.<field>". Values with errors stay unset.

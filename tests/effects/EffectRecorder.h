@@ -4,7 +4,6 @@
 
 #include <array>
 #include <cstdint>
-#include <initializer_list>
 #include <optional>
 #include <span>
 #include <string>
@@ -75,7 +74,7 @@ std::span<const Conditions> AllConditions();
 // game's default arguments and once with uneven values for the scale, the PK
 // key, the skill values and the target index (so a case that keeps the
 // caller's scale differs from one that sets the default scale).
-std::vector<EffectCall> CallsFor(int type, std::initializer_list<int> subTypes);
+std::vector<EffectCall> CallsFor(int type, std::span<const int> subTypes);
 
 // The calls of CallsFor, plus, for each sub type without an owner, both
 // argument sets with a second position, angle and light. Every component
@@ -83,7 +82,7 @@ std::vector<EffectCall> CallsFor(int type, std::initializer_list<int> subTypes);
 // copies one of them differs from a row that sets the copied value as a
 // constant, and a row that sets single components from one that sets the
 // whole vector.
-std::vector<EffectCall> SecondGeometryCallsFor(int type, std::initializer_list<int> subTypes);
+std::vector<EffectCall> SecondGeometryCallsFor(int type, std::span<const int> subTypes);
 
 struct RecordedValue
 {

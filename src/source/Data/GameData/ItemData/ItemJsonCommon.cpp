@@ -65,55 +65,13 @@ bool ReadGroup(const OrderedJson& root, const std::string& source, int& group, s
     return true;
 }
 
-// Appends the list entries that start at `position` and its closing ']' to
+// Appends the entries of the list or object that starts at `position` (after
+// its `open` bracket), the lists and objects in it and its `close` bracket to
 // `result`, without the newlines and indentation between the entries (the
-// space after each comma stays). Text in quotes is kept as it is. Returns
-// the position after the ']', or the end of the text when there is none.
-size_t AppendListOnOneLine(const std::string& text, size_t position, std::string& result)
-{
-    bool inText = false;
-    for (; position < text.size(); ++position)
-    {
-        const char character = text[position];
-        if (inText)
-        {
-            result += character;
-            if (character == '\\' && position + 1 < text.size())
-            {
-                result += text[++position];
-            }
-            else if (character == '"')
-            {
-                inText = false;
-            }
-            continue;
-        }
-
-        if (character == ']')
-        {
-            break;
-        }
-        inText = character == '"';
-        const bool afterComma = !result.empty() && result.back() == ',';
-        if (character != '\n' && (character != ' ' || afterComma))
-        {
-            result += character;
-        }
-    }
-    if (position == text.size())
-    {
-        // No closing ']' (the JSON writer always closes its lists).
-        return position;
-    }
-    result += ']';
-    return position + 1;
-}
-
-// Appends the members of the object that starts at `position`, the objects in
-// it and its closing '}' to `result`, without the newlines and indentation
-// (the space after each comma and colon stays). Returns the position after
-// the '}', or the end of the text when there is none.
-size_t AppendObjectOnOneLine(const std::string& text, size_t position, std::string& result)
+// space after each comma and colon stays). Text in quotes is kept as it is.
+// Returns the position after the closing bracket, or the end of the text when
+// there is none.
+size_t AppendOnOneLine(const std::string& text, size_t position, char open, char close, std::string& result)
 {
     bool inText = false;
     int depth = 0;
@@ -134,11 +92,11 @@ size_t AppendObjectOnOneLine(const std::string& text, size_t position, std::stri
             continue;
         }
 
-        if (character == '}' && depth == 0)
+        if (character == close && depth == 0)
         {
             break;
         }
-        depth += character == '{' ? 1 : character == '}' ? -1 : 0;
+        depth += character == open ? 1 : character == close ? -1 : 0;
         inText = character == '"';
         const bool afterSeparator = !result.empty() && (result.back() == ',' || result.back() == ':');
         if (character != '\n' && (character != ' ' || afterSeparator))
@@ -148,11 +106,31 @@ size_t AppendObjectOnOneLine(const std::string& text, size_t position, std::stri
     }
     if (position == text.size())
     {
-        // No closing '}' (the JSON writer always closes its objects).
+        // No closing bracket (the JSON writer always closes them).
         return position;
     }
-    result += '}';
+    result += close;
     return position + 1;
+}
+
+// Puts every value of `key` that starts with `open` on one line.
+std::string PutValuesOnOneLine(const std::string& text, std::string_view key, char open, char close)
+{
+    const std::string valueStart = "\"" + std::string(key) + "\": " + open;
+    std::string result;
+    size_t position = 0;
+    while (true)
+    {
+        const size_t start = text.find(valueStart, position);
+        if (start == std::string::npos)
+        {
+            result.append(text, position, std::string::npos);
+            return result;
+        }
+
+        result.append(text, position, start + valueStart.size() - position);
+        position = AppendOnOneLine(text, start + valueStart.size(), open, close, result);
+    }
 }
 } // namespace
 
@@ -211,39 +189,11 @@ bool ReadFileHeader(std::string_view text, const std::string& source, int maxFor
 
 std::string PutListsOnOneLine(const std::string& text, std::string_view key)
 {
-    const std::string listStart = "\"" + std::string(key) + "\": [";
-    std::string result;
-    size_t position = 0;
-    while (true)
-    {
-        const size_t start = text.find(listStart, position);
-        if (start == std::string::npos)
-        {
-            result.append(text, position, std::string::npos);
-            return result;
-        }
-
-        result.append(text, position, start + listStart.size() - position);
-        position = AppendListOnOneLine(text, start + listStart.size(), result);
-    }
+    return PutValuesOnOneLine(text, key, '[', ']');
 }
 
 std::string PutObjectsOnOneLine(const std::string& text, std::string_view key)
 {
-    const std::string objectStart = "\"" + std::string(key) + "\": {";
-    std::string result;
-    size_t position = 0;
-    while (true)
-    {
-        const size_t start = text.find(objectStart, position);
-        if (start == std::string::npos)
-        {
-            result.append(text, position, std::string::npos);
-            return result;
-        }
-
-        result.append(text, position, start + objectStart.size() - position);
-        position = AppendObjectOnOneLine(text, start + objectStart.size(), result);
-    }
+    return PutValuesOnOneLine(text, key, '{', '}');
 }
 } // namespace Data::Items::Json

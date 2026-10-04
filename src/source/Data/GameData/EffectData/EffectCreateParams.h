@@ -2,6 +2,7 @@
 
 #include <array>
 #include <optional>
+#include <vector>
 
 namespace Data::Effects
 {
@@ -22,6 +23,8 @@ struct EffectCreateVector
     bool operator==(const EffectCreateVector&) const = default;
 };
 
+struct EffectCreateVariant;
+
 // The creation values of an effect type: the "create" object of its entry in
 // EffectTypes.json (docs/effect-data.md). CreateEffect applies them on top of
 // the setup it does for every effect: first the values, then the offsets, then
@@ -31,6 +34,12 @@ struct EffectCreateVector
 // slot's previous effect left, so an entry only states what differs (D34).
 // The values are kept as read, so a written file shows them as they were
 // written.
+//
+// A new field goes into the reader and the writer (EffectCreateParamsJson.cpp),
+// ResolveVariant, the game's CreateParams with ToCreateParams, GroupsOf and
+// ApplyCreateParams, and the test that applies each field alone.
+// ResolveVariant, ToCreateParams and GroupsOf name every field, so they stop
+// compiling until they get it.
 struct EffectCreateParams
 {
     std::optional<double> lifeTime;
@@ -69,8 +78,29 @@ struct EffectCreateParams
     bool copyCallLightToHeadTargetAngle = false;
     bool copyCallScaleToScale = false;
 
+    // Values for some SubTypes on top of the ones above (D35); a SubType
+    // without a variant gets the ones above. Only the "create" object has
+    // variants, a variant has none.
+    std::vector<EffectCreateVariant> variants;
+
     bool operator==(const EffectCreateParams&) const = default;
 };
+
+// The values the SubTypes in `subTypes` get on top of the ones of the row.
+struct EffectCreateVariant
+{
+    std::vector<int> subTypes;
+    EffectCreateParams params;
+
+    bool operator==(const EffectCreateVariant&) const = default;
+};
+
+// The creation values a SubType of a variant gets: the row's values with the
+// variant's on top. A value replaces the row's value of its field and the
+// row's copy into it; a copy replaces the row's value and copy of its field;
+// vectors and offsets are replaced component by component. The result has no
+// variants.
+EffectCreateParams ResolveVariant(const EffectCreateParams& row, const EffectCreateParams& variant);
 
 // The creation values of one effect type number.
 struct EffectTypeCreateParams

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <set>
 
 namespace Data::Effects
 {
@@ -42,6 +43,9 @@ constexpr const char* StartPosition = "startPosition";
 constexpr const char* HeadTargetAngle = "headTargetAngle";
 constexpr const char* Offset = "offset";
 constexpr const char* Copy = "copy";
+constexpr const char* CopyLightToDirection = "copyLightToDirection";
+constexpr const char* Variants = "variants";
+constexpr const char* SubType = "subType";
 constexpr const char* Value = "value";
 constexpr const char* TimesFrameFactor = "timesFrameFactor";
 constexpr std::array<const char*, 3> Components = {"x", "y", "z"};
@@ -386,11 +390,12 @@ void WriteVector(OrderedJson& json, const char* key, const EffectCreateVector& v
 }
 } // namespace
 
-EffectCreateParams ReadEffectCreateParams(const OrderedJson& json, const std::string& objectKey,
-                                          const ReportIssue& report)
+namespace
 {
-    ItemModelValueReader reader(json, objectKey, report);
-    EffectCreateParams params;
+// The fields of a "create" object or of one of its variants.
+void ReadFields(ItemModelValueReader& reader, const std::string& objectKey, const ReportIssue& report,
+                EffectCreateParams& params)
+{
     ReadValue(reader, Keys::LifeTime, params.lifeTime);
     ReadValue(reader, Keys::Scale, params.scale);
     ReadValue(reader, Keys::Velocity, params.velocity);
@@ -413,6 +418,195 @@ EffectCreateParams ReadEffectCreateParams(const OrderedJson& json, const std::st
     ReadVector(reader, objectKey, Keys::Direction, false, report, params.direction);
     ReadOffsets(reader, objectKey, report, params);
     ReadCopies(reader, objectKey, report, params);
+
+    // Until FX1.4 the copy of the light was a field of its own; a file that
+    // still has it would lose the copy with only a warning.
+    if (reader.ReadJson(Keys::CopyLightToDirection) != nullptr)
+    {
+        reader.Error(Keys::CopyLightToDirection, "was replaced by \"copy\": {\"direction\": \"light\"}");
+    }
+}
+
+// CreateEffect does not set the start position, so without the copy the
+// offset adds to what the slot's previous effect left there.
+void WarnAboutStartPositionOffset(const EffectCreateParams& params, const std::string& objectKey,
+                                  const ReportIssue& report)
+{
+    if (params.startPositionOffset.IsSet() && !params.copyPositionToStartPosition)
+    {
+        report(ItemDataIssueSeverity::Warning, objectKey + "." + Keys::Offset + "." + Keys::StartPosition,
+               "adds to the start position the slot's previous effect left; copy the position into it first");
+    }
+}
+
+// "subType": n, or "subTypes": [n, ...] for two or more.
+bool ReadSubTypes(ItemModelValueReader& reader, std::vector<int>& subTypes)
+{
+    constexpr int LargestSubType = std::numeric_limits<int>::max();
+    const bool hasOne = reader.Has(Keys::SubType);
+    const bool hasList = reader.Has(CreateSubTypesKey);
+    if (hasOne == hasList)
+    {
+        reader.Error(Keys::SubType, hasOne ? "and subTypes are both set; set one of them"
+                                           : "missing; a variant needs subType or subTypes");
+        reader.ReadJson(Keys::SubType);
+        reader.ReadJson(CreateSubTypesKey);
+        return false;
+    }
+    if (hasOne)
+    {
+        int subType = 0;
+        if (!reader.ReadInteger(Keys::SubType, subType, 0, LargestSubType))
+        {
+            return false;
+        }
+        subTypes = {subType};
+        return true;
+    }
+    std::vector<int> list;
+    if (!reader.ReadIndexes(CreateSubTypesKey, list, LargestSubType))
+    {
+        return false;
+    }
+    std::sort(list.begin(), list.end());
+    if (std::adjacent_find(list.begin(), list.end()) != list.end())
+    {
+        reader.Error(CreateSubTypesKey, "lists a SubType twice");
+        return false;
+    }
+    subTypes = std::move(list);
+    return true;
+}
+
+// A variant that sets part of direction while the row copies the light into
+// it would mean "copy, then change one component", which the order of the
+// steps cannot express.
+bool SetsPartOfCopiedDirection(const EffectCreateParams& row, const EffectCreateParams& variant)
+{
+    const auto& components = variant.direction.components;
+    return row.copyLightToDirection && variant.direction.IsSet() && !(components[0] && components[1] && components[2]);
+}
+
+// Reads variant `entry` of `row`; false when it has errors that drop it. Its
+// SubTypes go into `taken` only when it is kept, so a dropped variant does not
+// report the later ones as duplicates.
+bool ReadVariant(const OrderedJson& entry, const std::string& variantKey, const ReportIssue& report,
+                 const EffectCreateParams& row, std::set<int>& taken, EffectCreateVariant& variant)
+{
+    if (!entry.is_object())
+    {
+        report(ItemDataIssueSeverity::Error, variantKey, "must be an object with subType or subTypes and values");
+        return false;
+    }
+    ItemModelValueReader reader(entry, variantKey, report);
+    bool valid = ReadSubTypes(reader, variant.subTypes);
+    ReadFields(reader, variantKey, report, variant.params);
+    if (reader.ReadJson(Keys::Variants) != nullptr)
+    {
+        reader.Error(Keys::Variants, "a variant cannot have variants");
+        valid = false;
+    }
+    reader.WarnAboutUnknownKeys();
+    for (const int subType : variant.subTypes)
+    {
+        if (taken.contains(subType))
+        {
+            report(ItemDataIssueSeverity::Error, variantKey,
+                   "SubType " + std::to_string(subType) + " is in another variant too");
+            valid = false;
+        }
+    }
+    if (SetsPartOfCopiedDirection(row, variant.params))
+    {
+        reader.Error(Keys::Direction, "sets part of direction, which the row copies from the light; set all three "
+                                      "components");
+        valid = false;
+    }
+    if (variant.params == EffectCreateParams{})
+    {
+        report(ItemDataIssueSeverity::Warning, variantKey, SetsNoValue);
+    }
+    if (variant.params.startPositionOffset.IsSet())
+    {
+        WarnAboutStartPositionOffset(ResolveVariant(row, variant.params), variantKey, report);
+    }
+    if (valid)
+    {
+        taken.insert(variant.subTypes.begin(), variant.subTypes.end());
+    }
+    return valid;
+}
+
+void ReadVariants(ItemModelValueReader& reader, const std::string& objectKey, const ReportIssue& report,
+                  EffectCreateParams& params)
+{
+    const OrderedJson* list = reader.ReadJson(Keys::Variants);
+    if (list == nullptr)
+    {
+        return;
+    }
+    const std::string listKey = objectKey + "." + Keys::Variants;
+    if (!list->is_array())
+    {
+        reader.Error(Keys::Variants, "must be a list of variants");
+        return;
+    }
+    if (list->empty())
+    {
+        report(ItemDataIssueSeverity::Warning, listKey, "has no variants");
+    }
+    std::set<int> taken;
+    for (size_t i = 0; i < list->size(); ++i)
+    {
+        EffectCreateVariant variant;
+        if (ReadVariant((*list)[i], listKey + "[" + std::to_string(i) + "]", report, params, taken, variant))
+        {
+            params.variants.push_back(std::move(variant));
+        }
+    }
+}
+
+// The variants, sorted by their SubTypes; one SubType is written as "subType".
+OrderedJson WriteVariants(const std::vector<EffectCreateVariant>& variants)
+{
+    std::vector<const EffectCreateVariant*> sorted;
+    for (const EffectCreateVariant& variant : variants)
+    {
+        sorted.push_back(&variant);
+    }
+    std::sort(sorted.begin(), sorted.end(), [](const EffectCreateVariant* left, const EffectCreateVariant* right)
+              { return left->subTypes < right->subTypes; });
+    OrderedJson json = OrderedJson::array();
+    for (const EffectCreateVariant* variant : sorted)
+    {
+        OrderedJson entry = OrderedJson::object();
+        if (variant->subTypes.size() == 1)
+        {
+            entry[Keys::SubType] = variant->subTypes.front();
+        }
+        else
+        {
+            entry[CreateSubTypesKey] = variant->subTypes;
+        }
+        const OrderedJson fields = WriteEffectCreateParams(variant->params);
+        for (const auto& [key, value] : fields.items())
+        {
+            entry[key] = value;
+        }
+        json.push_back(std::move(entry));
+    }
+    return json;
+}
+} // namespace
+
+EffectCreateParams ReadEffectCreateParams(const OrderedJson& json, const std::string& objectKey,
+                                          const ReportIssue& report)
+{
+    ItemModelValueReader reader(json, objectKey, report);
+    EffectCreateParams params;
+    ReadFields(reader, objectKey, report, params);
+    WarnAboutStartPositionOffset(params, objectKey, report);
+    ReadVariants(reader, objectKey, report, params);
     reader.WarnAboutUnknownKeys();
     return params;
 }
@@ -465,6 +659,11 @@ OrderedJson WriteEffectCreateParams(const EffectCreateParams& params)
     if (!copies.empty())
     {
         json[Keys::Copy] = std::move(copies);
+    }
+
+    if (!params.variants.empty())
+    {
+        json[Keys::Variants] = WriteVariants(params.variants);
     }
     return json;
 }

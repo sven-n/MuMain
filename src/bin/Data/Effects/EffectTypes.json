@@ -4,11 +4,51 @@
   "types": [
     {
       "name": "airForce",
-      "code": "MODEL_AIR_FORCE"
+      "code": "MODEL_AIR_FORCE",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 15,
+            "scale": 0.6
+          },
+          {
+            "subType": 1,
+            "lifeTime": 20,
+            "scale": 1.2
+          }
+        ]
+      }
     },
     {
       "name": "aliceBuffSkillEffect",
-      "code": "MODEL_ALICE_BUFFSKILL_EFFECT"
+      "code": "MODEL_ALICE_BUFFSKILL_EFFECT",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 1, 2],
+            "lifeTime": 34,
+            "scale": 0.1,
+            "blendMeshLight": 0,
+            "alpha": 0,
+            "alphaEnable": true,
+            "angle": {"z": 0},
+            "offset": {
+              "position": {"z": {"value": 100, "timesFrameFactor": true}}
+            }
+          },
+          {
+            "subType": 3,
+            "lifeTime": 100,
+            "scale": 1.5
+          },
+          {
+            "subType": 4,
+            "lifeTime": 100,
+            "scale": 1
+          }
+        ]
+      }
     },
     {
       "name": "aliceBuffSkillEffect2",
@@ -27,7 +67,15 @@
     },
     {
       "name": "aliceDrainLife",
-      "code": "MODEL_ALICE_DRAIN_LIFE"
+      "code": "MODEL_ALICE_DRAIN_LIFE",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 70
+          }
+        ]
+      }
     },
     {
       "name": "arrow",
@@ -35,7 +83,24 @@
     },
     {
       "name": "arrowAutoLoad",
-      "code": "MODEL_ARROW_AUTOLOAD"
+      "code": "MODEL_ARROW_AUTOLOAD",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 40
+          },
+          {
+            "subType": 1,
+            "lifeTime": 40,
+            "scale": 1.2,
+            "light": [1, 0.8, 0.2],
+            "copy": {
+              "direction": "light"
+            }
+          }
+        ]
+      }
     },
     {
       "name": "arrowBestCrossbow",
@@ -115,7 +180,19 @@
     },
     {
       "name": "arrowsre6",
-      "code": "MODEL_ARROWSRE06"
+      "code": "MODEL_ARROWSRE06",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 2],
+            "lifeTime": 30
+          },
+          {
+            "subType": 1,
+            "lifeTime": 40
+          }
+        ]
+      }
     },
     {
       "name": "aurora",
@@ -192,7 +269,18 @@
     },
     {
       "name": "bladeSkill",
-      "code": "MODEL_BLADE_SKILL"
+      "code": "MODEL_BLADE_SKILL",
+      "create": {
+        "lifeTime": 10,
+        "scale": 1.5,
+        "variants": [
+          {
+            "subType": 1,
+            "lifeTime": 14,
+            "scale": 1
+          }
+        ]
+      }
     },
     {
       "name": "blizzard",
@@ -253,19 +341,71 @@
     },
     {
       "name": "chainLightning",
-      "code": "MODEL_CHAIN_LIGHTNING"
+      "code": "MODEL_CHAIN_LIGHTNING",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 1, 2],
+            "lifeTime": 20
+          }
+        ]
+      }
     },
     {
       "name": "changeUpCylinder",
-      "code": "MODEL_CHANGE_UP_CYLINDER"
+      "code": "MODEL_CHANGE_UP_CYLINDER",
+      "create": {
+        "lifeTime": 100,
+        "scale": 0.9,
+        "blendMesh": -2,
+        "direction": [0, 0, 1],
+        "variants": [
+          {
+            "subType": 1,
+            "lifeTime": 10,
+            "scale": 0.1,
+            "light": [0, 0, 0]
+          }
+        ]
+      }
     },
     {
       "name": "changeUpEffect",
-      "code": "MODEL_CHANGE_UP_EFF"
+      "code": "MODEL_CHANGE_UP_EFF",
+      "create": {
+        "lifeTime": 100,
+        "scale": 0.7,
+        "blendMesh": -2,
+        "offset": {
+          "position": {"z": 22}
+        },
+        "variants": [
+          {
+            "subType": 1,
+            "lifeTime": 10,
+            "scale": 0.4,
+            "blendMeshLight": 0.7
+          }
+        ]
+      }
     },
     {
       "name": "changeUpNasa",
-      "code": "MODEL_CHANGE_UP_NASA"
+      "code": "MODEL_CHANGE_UP_NASA",
+      "create": {
+        "lifeTime": 100,
+        "scale": 0.9,
+        "blendMesh": -2,
+        "offset": {
+          "position": {"z": 12}
+        },
+        "variants": [
+          {
+            "subTypes": [1, 2, 3],
+            "lifeTime": 80
+          }
+        ]
+      }
     },
     {
       "name": "chromeEnergy2",
@@ -399,7 +539,23 @@
     },
     {
       "name": "damage01Mono",
-      "code": "BITMAP_DAMAGE_01_MONO"
+      "code": "BITMAP_DAMAGE_01_MONO",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 20,
+            "copy": {
+              "scale": "callScale"
+            }
+          },
+          {
+            "subType": 1,
+            "lifeTime": 10,
+            "scale": 0.1
+          }
+        ]
+      }
     },
     {
       "name": "damage1",
@@ -638,11 +794,27 @@
     },
     {
       "name": "effectSkuraItem",
-      "code": "MODEL_EFFECT_SKURA_ITEM"
+      "code": "MODEL_EFFECT_SKURA_ITEM",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 1],
+            "lifeTime": 52
+          }
+        ]
+      }
     },
     {
       "name": "effectThunderNapinAttack1",
-      "code": "MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1"
+      "code": "MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 1],
+            "lifeTime": 30
+          }
+        ]
+      }
     },
     {
       "name": "effectTrace",
@@ -650,7 +822,15 @@
     },
     {
       "name": "effectUmbrellaDie",
-      "code": "MODEL_EFFECT_UMBRELLA_DIE"
+      "code": "MODEL_EFFECT_UMBRELLA_DIE",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 30
+          }
+        ]
+      }
     },
     {
       "name": "effectUmbrellaGold",
@@ -670,7 +850,19 @@
     },
     {
       "name": "energy",
-      "code": "BITMAP_ENERGY"
+      "code": "BITMAP_ENERGY",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 20,
+            "direction": [0, -60, 0],
+            "offset": {
+              "position": {"z": {"value": 100, "timesFrameFactor": true}}
+            }
+          }
+        ]
+      }
     },
     {
       "name": "eventCloud",
@@ -755,11 +947,46 @@
     },
     {
       "name": "fireCursedLich",
-      "code": "BITMAP_FIRE_CURSEDLICH"
+      "code": "BITMAP_FIRE_CURSEDLICH",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 10,
+            "scale": 0.7,
+            "blendMesh": -2
+          },
+          {
+            "subType": 1,
+            "lifeTime": 50
+          },
+          {
+            "subTypes": [2, 12],
+            "lifeTime": 20
+          },
+          {
+            "subType": 3,
+            "lifeTime": 10
+          }
+        ]
+      }
     },
     {
       "name": "fireHik2Mono",
-      "code": "BITMAP_FIRE_HIK2_MONO"
+      "code": "BITMAP_FIRE_HIK2_MONO",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 60
+          },
+          {
+            "subType": 1,
+            "lifeTime": 20,
+            "angle": [0, 0, 0]
+          }
+        ]
+      }
     },
     {
       "name": "fireModel",
@@ -822,7 +1049,16 @@
     },
     {
       "name": "flare",
-      "code": "BITMAP_FLARE"
+      "code": "BITMAP_FLARE",
+      "create": {
+        "lifeTime": 30,
+        "variants": [
+          {
+            "subType": 3,
+            "lifeTime": 60
+          }
+        ]
+      }
     },
     {
       "name": "flareForce",
@@ -959,15 +1195,57 @@
     },
     {
       "name": "infinityArrow1",
-      "code": "MODEL_INFINITY_ARROW1"
+      "code": "MODEL_INFINITY_ARROW1",
+      "create": {
+        "lifeTime": 40,
+        "scale": 1,
+        "light": [1, 1, 1],
+        "copy": {
+          "direction": "light"
+        },
+        "variants": [
+          {
+            "subTypes": [1, 2, 3],
+            "lifeTime": 60
+          }
+        ]
+      }
     },
     {
       "name": "infinityArrow2",
-      "code": "MODEL_INFINITY_ARROW2"
+      "code": "MODEL_INFINITY_ARROW2",
+      "create": {
+        "lifeTime": 40,
+        "scale": 1,
+        "light": [1, 1, 1],
+        "copy": {
+          "direction": "light"
+        },
+        "variants": [
+          {
+            "subTypes": [1, 2, 3],
+            "lifeTime": 60
+          }
+        ]
+      }
     },
     {
       "name": "infinityArrow3",
-      "code": "MODEL_INFINITY_ARROW3"
+      "code": "MODEL_INFINITY_ARROW3",
+      "create": {
+        "lifeTime": 40,
+        "scale": 1,
+        "light": [1, 1, 1],
+        "copy": {
+          "direction": "light"
+        },
+        "variants": [
+          {
+            "subTypes": [1, 2, 3],
+            "lifeTime": 60
+          }
+        ]
+      }
     },
     {
       "name": "infinityArrow4",
@@ -1135,11 +1413,41 @@
     },
     {
       "name": "lightning2",
-      "code": "BITMAP_LIGHTNING+1"
+      "code": "BITMAP_LIGHTNING+1",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 10,
+            "scale": 1.5
+          },
+          {
+            "subType": 1,
+            "lifeTime": 50,
+            "alpha": 0.01
+          }
+        ]
+      }
     },
     {
       "name": "lightningOrb",
-      "code": "MODEL_LIGHTNING_ORB"
+      "code": "MODEL_LIGHTNING_ORB",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 20,
+            "direction": [0, -60, 0],
+            "offset": {
+              "position": {"z": {"value": 100, "timesFrameFactor": true}}
+            }
+          },
+          {
+            "subType": 1,
+            "lifeTime": 18
+          }
+        ]
+      }
     },
     {
       "name": "lightningShock",
@@ -1176,7 +1484,25 @@
     },
     {
       "name": "magicCircle1Model",
-      "code": "MODEL_MAGIC_CIRCLE1"
+      "code": "MODEL_MAGIC_CIRCLE1",
+      "create": {
+        "lifeTime": 30,
+        "scale": 0.7,
+        "velocity": 0.1,
+        "blendMesh": -2,
+        "variants": [
+          {
+            "subType": 1,
+            "lifeTime": 20,
+            "hiddenMesh": 0
+          },
+          {
+            "subType": 2,
+            "lifeTime": 15,
+            "velocity": 0.3
+          }
+        ]
+      }
     },
     {
       "name": "magicGround2",
@@ -1184,11 +1510,52 @@
     },
     {
       "name": "magicZin",
-      "code": "BITMAP_MAGIC_ZIN"
+      "code": "BITMAP_MAGIC_ZIN",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 50
+          },
+          {
+            "subType": 1,
+            "lifeTime": 40,
+            "alpha": 0
+          },
+          {
+            "subType": 2,
+            "lifeTime": 30
+          }
+        ]
+      }
     },
     {
       "name": "manaRune",
-      "code": "MODEL_MANA_RUNE"
+      "code": "MODEL_MANA_RUNE",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 50,
+            "scale": 0,
+            "gravity": 0.1,
+            "hiddenMesh": 0,
+            "alpha": 0.3,
+            "angle": [0, 0, 45],
+            "offset": {
+              "position": {"z": 300}
+            }
+          },
+          {
+            "subType": 1,
+            "lifeTime": 10,
+            "scale": 1.1,
+            "gravity": 0.1,
+            "blendMesh": -2,
+            "blendMeshLight": 0.4
+          }
+        ]
+      }
     },
     {
       "name": "mayaHandSkill",
@@ -1470,7 +1837,18 @@
     },
     {
       "name": "raklionBossMagic",
-      "code": "MODEL_RAKLION_BOSS_MAGIC"
+      "code": "MODEL_RAKLION_BOSS_MAGIC",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 35,
+            "copy": {
+              "scale": "callScale"
+            }
+          }
+        ]
+      }
     },
     {
       "name": "ring",
@@ -1484,7 +1862,15 @@
     },
     {
       "name": "ringOfGradation",
-      "code": "BITMAP_RING_OF_GRADATION"
+      "code": "BITMAP_RING_OF_GRADATION",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 20
+          }
+        ]
+      }
     },
     {
       "name": "saw",
@@ -1641,7 +2027,23 @@
     },
     {
       "name": "shockWaveGround1",
-      "code": "MODEL_SHOCKWAVE_GROUND01"
+      "code": "MODEL_SHOCKWAVE_GROUND01",
+      "create": {
+        "lifeTime": 50,
+        "copy": {
+          "scale": "callScale"
+        },
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 20
+          },
+          {
+            "subType": 2,
+            "lifeTime": 10
+          }
+        ]
+      }
     },
     {
       "name": "shockWaveSpin1",
@@ -1826,27 +2228,93 @@
     },
     {
       "name": "summonerCastingEffect1",
-      "code": "MODEL_SUMMONER_CASTING_EFFECT1"
+      "code": "MODEL_SUMMONER_CASTING_EFFECT1",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "blendMeshLight": 0,
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 1
+          }
+        ]
+      }
     },
     {
       "name": "summonerCastingEffect11",
-      "code": "MODEL_SUMMONER_CASTING_EFFECT11"
+      "code": "MODEL_SUMMONER_CASTING_EFFECT11",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "blendMeshLight": 0,
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 1
+          }
+        ]
+      }
     },
     {
       "name": "summonerCastingEffect111",
-      "code": "MODEL_SUMMONER_CASTING_EFFECT111"
+      "code": "MODEL_SUMMONER_CASTING_EFFECT111",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "blendMeshLight": 0,
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 1
+          }
+        ]
+      }
     },
     {
       "name": "summonerCastingEffect2",
-      "code": "MODEL_SUMMONER_CASTING_EFFECT2"
+      "code": "MODEL_SUMMONER_CASTING_EFFECT2",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "blendMeshLight": 0,
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 1
+          }
+        ]
+      }
     },
     {
       "name": "summonerCastingEffect22",
-      "code": "MODEL_SUMMONER_CASTING_EFFECT22"
+      "code": "MODEL_SUMMONER_CASTING_EFFECT22",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "blendMeshLight": 0,
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 1
+          }
+        ]
+      }
     },
     {
       "name": "summonerCastingEffect222",
-      "code": "MODEL_SUMMONER_CASTING_EFFECT222"
+      "code": "MODEL_SUMMONER_CASTING_EFFECT222",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "blendMeshLight": 0,
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 1
+          }
+        ]
+      }
     },
     {
       "name": "summonerCastingEffect4",
@@ -1948,7 +2416,30 @@
     },
     {
       "name": "summonerSummonSahamutt",
-      "code": "MODEL_SUMMONER_SUMMON_SAHAMUTT"
+      "code": "MODEL_SUMMONER_SUMMON_SAHAMUTT",
+      "create": {
+        "lifeTime": 80,
+        "velocity": 0.5,
+        "alpha": 0,
+        "light": [1, 1, 1],
+        "copy": {
+          "headTargetAngle": "callLight"
+        },
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 0.35
+          },
+          {
+            "subType": 1,
+            "scale": 0.5
+          },
+          {
+            "subType": 2,
+            "scale": 0.7
+          }
+        ]
+      }
     },
     {
       "name": "summonerWristRingEffect",
@@ -1961,7 +2452,15 @@
     },
     {
       "name": "swellOfMagicPower",
-      "code": "MODEL_SWELL_OF_MAGICPOWER"
+      "code": "MODEL_SWELL_OF_MAGICPOWER",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 45
+          }
+        ]
+      }
     },
     {
       "name": "swellOfMagicPowerBuffEffect",
@@ -1990,7 +2489,27 @@
     },
     {
       "name": "swordForceModel",
-      "code": "MODEL_SWORD_FORCE"
+      "code": "MODEL_SWORD_FORCE",
+      "create": {
+        "velocity": 0.25,
+        "blendMesh": 0,
+        "variants": [
+          {
+            "subTypes": [0, 2],
+            "lifeTime": 15,
+            "scale": 0,
+            "direction": [0, -10, 0],
+            "offset": {
+              "position": {"z": {"value": 100, "timesFrameFactor": true}}
+            }
+          },
+          {
+            "subTypes": [1, 3],
+            "lifeTime": 5,
+            "scale": 3.5
+          }
+        ]
+      }
     },
     {
       "name": "swordLeft01EmpireGuardianBossGaion",
@@ -2036,11 +2555,29 @@
     },
     {
       "name": "targetPositionEffect1",
-      "code": "BITMAP_TARGET_POSITION_EFFECT1"
+      "code": "BITMAP_TARGET_POSITION_EFFECT1",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 20,
+            "scale": 1.2
+          }
+        ]
+      }
     },
     {
       "name": "targetPositionEffect2",
-      "code": "BITMAP_TARGET_POSITION_EFFECT2"
+      "code": "BITMAP_TARGET_POSITION_EFFECT2",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 30,
+            "scale": 1.8
+          }
+        ]
+      }
     },
     {
       "name": "totemGolemPart1",
@@ -2196,7 +2733,23 @@
     },
     {
       "name": "windForce",
-      "code": "MODEL_WINDFOCE"
+      "code": "MODEL_WINDFOCE",
+      "create": {
+        "lifeTime": 50,
+        "copy": {
+          "scale": "callScale"
+        },
+        "variants": [
+          {
+            "subType": 1,
+            "lifeTime": 999
+          },
+          {
+            "subTypes": [2, 3],
+            "lifeTime": 70
+          }
+        ]
+      }
     },
     {
       "name": "windForceMirror",

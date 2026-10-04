@@ -136,16 +136,67 @@ with when the game creates it. Particles, lightning and sprites have none
   creation code**. Only effects whose creation code set nothing but these
   values have one; adding `create` to another effect drops what its code
   did (for example the effects it spawns) and changes how it looks.
-- A value that is not a number, or too large for the game (which keeps
-  the values as float), is an error; so are mesh fields that are not whole
+- A value that is not a number, or too large for the game (which keeps the
+  values as float), is an error; so are mesh fields that are not whole
   numbers from -2 to 32767, `kind` and `skill` outside their ranges, an
   `alpha` outside 0 to 1, flags that are not `true`/`false`, vectors that
   are not three numbers or an object of `x`, `y` and `z`, the frame factor
-  outside an offset, a copy from another source than the one listed, and a
-  field with both a value and a copy. An unknown field is a warning, and so
-  is a `create` (or `offset`, `copy`, vector) that sets no value; a
-  `create` without values still replaces the creation code.
+  outside an offset, a copy from another source than the one listed, a field
+  with both a value and a copy, and the old field `copyLightToDirection`
+  (now `"copy": {"direction": "light"}`). An unknown field is a warning, and
+  so is a `create` (or `offset`, `copy`, vector) that sets no value; a
+  `create` without values still replaces the creation code. An offset of
+  `startPosition` without `"copy": {"startPosition": "position"}` is a
+  warning: it adds to the start position the slot's previous effect left.
 - `kind` in `create` is a value of the effect, not the `kind` of the file.
+
+### Variants by SubType
+
+The code that creates an effect also passes a SubType, a number whose meaning
+depends on the effect (a level, a direction, a step of a skill). A `create`
+can give some SubTypes other values:
+
+```json
+"create": {
+  "lifeTime": 30,
+  "scale": 0.7,
+  "velocity": 0.1,
+  "blendMesh": -2,
+  "variants": [
+    {
+      "subType": 1,
+      "lifeTime": 20,
+      "hiddenMesh": 0
+    },
+    {
+      "subTypes": [2, 3],
+      "lifeTime": 15,
+      "velocity": 0.3
+    }
+  ]
+}
+```
+
+- A variant names its SubTypes with `subType` (one) or `subTypes` (a list;
+  the writer writes a list of one as `subType`) and holds the fields of
+  `create`, except `variants`.
+- A SubType of a variant starts with the values of `create` and the
+  variant's on top: a value replaces the value of its field and a copy into
+  it, a copy replaces the value and the copy of its field, and vectors and
+  offsets are replaced component by component. A SubType without a variant
+  gets the values of `create` alone.
+- A variant only adds or replaces: it cannot leave a field to the common
+  setup when `create` sets it, or drop a copy into `startPosition` or
+  `headTargetAngle` that `create` makes. Such cases need a `create` with
+  only variants.
+- A `create` can hold only variants. The SubTypes without a variant then
+  start with what the game sets for every new effect, and with the old
+  values of the slot for the fields it does not set, as the original code
+  did.
+- A SubType in two variants or twice in one list, a variant without SubTypes
+  or with a negative one, a variant with variants, and a variant that sets
+  part of `direction` while `create` copies the light into it are errors. A
+  variant without values and an empty `variants` list are warnings.
 
 ## How the names were chosen
 

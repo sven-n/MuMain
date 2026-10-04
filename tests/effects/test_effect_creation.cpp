@@ -41,7 +41,26 @@ const std::array<int, 8> Fx13Types = {MODEL_KENTAUROS_ARROW,
                                       MODEL_EFFECT_SD_AURA};
 
 // Sub types the callers pass (0 to 3) and one no case handles.
-constexpr std::initializer_list<int> RecordedSubTypes = {0, 1, 2, 3, 99};
+constexpr std::array<int, 5> RecordedSubTypes = {0, 1, 2, 3, 99};
+
+// More SubTypes for the types whose old case handled them or whose callers
+// pass them, so the creation baseline holds what the old case did for them.
+const std::map<int, std::vector<int>> MoreRecordedSubTypes = {
+    {BITMAP_FIRE_CURSEDLICH, {4, 12}},   // a branch for 12; callers pass 4 and 12
+    {MODEL_ALICE_BUFFSKILL_EFFECT, {4}}, // a branch for 4
+    {MODEL_CHANGE_UP_NASA, {4}},         // the end of its range of SubTypes 1 to 3
+    {MODEL_WINDFOCE, {4, 5}},            // callers pass them
+};
+
+std::vector<int> RecordedSubTypesOf(int type)
+{
+    std::vector<int> subTypes(RecordedSubTypes.begin(), RecordedSubTypes.end());
+    if (const auto more = MoreRecordedSubTypes.find(type); more != MoreRecordedSubTypes.end())
+    {
+        subTypes.insert(subTypes.end(), more->second.begin(), more->second.end());
+    }
+    return subTypes;
+}
 
 struct Recorded
 {
@@ -183,7 +202,7 @@ TEST_CASE("The second geometry of a call shows what a row copies [effects][recor
     BuildShippedRegistry();
     // MODEL_INFINITY_ARROW4 sets its light and copies it into the direction;
     // the light of the call stays as it was.
-    const std::vector<EffectCall> calls = SecondGeometryCallsFor(MODEL_INFINITY_ARROW4, {0});
+    const std::vector<EffectCall> calls = SecondGeometryCallsFor(MODEL_INFINITY_ARROW4, std::array{0});
     REQUIRE(calls.size() == 8);
     const EffectCall& second = calls.back();
     CHECK(second.owner == Owner::None);
@@ -321,6 +340,7 @@ struct BaselineType
 {
     std::string name;
     int type;
+    std::vector<int> variantSubTypes;
 };
 
 // The types with creation values in the catalogue and the types created
@@ -334,7 +354,12 @@ std::vector<BaselineType> BaselineTypes()
     std::vector<BaselineType> types;
     for (const EffectTypeCreateParams& row : catalogue.GetCreateParams())
     {
-        types.push_back({std::string(catalogue.GetName(EffectKind::Effect, row.type)), row.type});
+        BaselineType& type = types.emplace_back(
+            BaselineType{std::string(catalogue.GetName(EffectKind::Effect, row.type)), row.type, {}});
+        for (const Data::Effects::EffectCreateVariant& variant : row.params.variants)
+        {
+            type.variantSubTypes.insert(type.variantSubTypes.end(), variant.subTypes.begin(), variant.subTypes.end());
+        }
     }
     for (const int type : CreatedWithoutRow)
     {
@@ -361,6 +386,43 @@ std::map<std::string, std::string> ReadDigests(const std::filesystem::path& file
     }
     return digests;
 }
+
+// The records of the creation baseline, with the registry as it is built.
+std::vector<Recorded> RecordBaseline()
+{
+    std::vector<Recorded> records;
+    for (const BaselineType& type : BaselineTypes())
+    {
+        // Every SubType a variant names is recorded.
+        const std::vector<int> subTypes = RecordedSubTypesOf(type.type);
+        for (const int subType : type.variantSubTypes)
+        {
+            INFO(type.name << " subType " << subType);
+            CHECK(std::find(subTypes.begin(), subTypes.end(), subType) != subTypes.end());
+        }
+        for (const EffectCall& call : SecondGeometryCallsFor(type.type, subTypes))
+        {
+            for (const Conditions& conditions : AllConditions())
+            {
+                records.push_back(
+                    {type.name + " " + DescribeArguments(call, conditions), RecordCall(call, conditions)});
+            }
+        }
+    }
+    return records;
+}
+
+void WriteBaseline(const std::vector<Recorded>& records)
+{
+    std::filesystem::create_directories(CreationBaseline.parent_path());
+    std::ofstream out(CreationBaseline, std::ios::binary);
+    out << CreationBaselineHeader;
+    for (const Recorded& recorded : records)
+    {
+        out << recorded.description << '\t' << Digest(recorded.record) << '\n';
+    }
+    MESSAGE("wrote " << CreationBaseline.string());
+}
 } // namespace
 
 // The whole record of every call, not only the values the spot checks name: a
@@ -371,29 +433,10 @@ std::map<std::string, std::string> ReadDigests(const std::filesystem::path& file
 TEST_CASE("The effect types in the catalogue create what their old code created [effects][recorder]")
 {
     BuildShippedRegistry();
-    std::vector<Recorded> records;
-    for (const BaselineType& type : BaselineTypes())
-    {
-        for (const EffectCall& call : SecondGeometryCallsFor(type.type, RecordedSubTypes))
-        {
-            for (const Conditions& conditions : AllConditions())
-            {
-                records.push_back(
-                    {type.name + " " + DescribeArguments(call, conditions), RecordCall(call, conditions)});
-            }
-        }
-    }
-
+    const std::vector<Recorded> records = RecordBaseline();
     if (std::getenv("MU_EFFECT_RECORDER_WRITE") != nullptr)
     {
-        std::filesystem::create_directories(CreationBaseline.parent_path());
-        std::ofstream out(CreationBaseline, std::ios::binary);
-        out << CreationBaselineHeader;
-        for (const Recorded& recorded : records)
-        {
-            out << recorded.description << '\t' << Digest(recorded.record) << '\n';
-        }
-        MESSAGE("wrote " << CreationBaseline.string());
+        WriteBaseline(records);
         return;
     }
 
@@ -503,4 +546,54 @@ TEST_CASE("The types of FX1.4 create from the catalogue what their cases set [ef
     const Record shot = RecordCall(CallOf(MODEL_PHOENIX_SHOT), {});
     CHECK(Find(shot, "Effects[0].Live") == "true");
     CHECK_FALSE(Find(shot, "Effects[0].LifeTime").has_value());
+}
+
+// FX1.5 moved the creation of these types from code into the catalogue, with
+// variants by SubType; the commit before the one that deleted their cases
+// compared both for every SubType a caller passes or a branch handles, one no
+// branch handles, every owner, argument set, slot pattern, both geometries
+// and the frame factors 1, 0.5 and 25/60. These are values the cases chose by
+// SubType.
+TEST_CASE("The types of FX1.5 create from the catalogue what their cases chose by SubType [effects][recorder]")
+{
+    BuildShippedRegistry();
+    const auto record = [](int type, int subType)
+    {
+        EffectCall call = CallOf(type);
+        call.subType = subType;
+        return RecordCall(call, {});
+    };
+
+    // The else branch is the row's value; the variants replace some of them.
+    CHECK(Find(record(MODEL_MAGIC_CIRCLE1, 0), "Effects[0].Velocity") == "0.100000001");
+    CHECK(Find(record(MODEL_MAGIC_CIRCLE1, 0), "Effects[0].LifeTime") == "30");
+    CHECK(Find(record(MODEL_MAGIC_CIRCLE1, 1), "Effects[0].LifeTime") == "20");
+    CHECK(Find(record(MODEL_MAGIC_CIRCLE1, 1), "Effects[0].HiddenMesh") == "0");
+    CHECK(Find(record(MODEL_MAGIC_CIRCLE1, 2), "Effects[0].LifeTime") == "15");
+    CHECK(Find(record(MODEL_MAGIC_CIRCLE1, 99), "Effects[0].LifeTime") == "30");
+
+    // A row with only variants: a SubType without one keeps the slot's old
+    // lifeTime, as the case did (callers pass 4).
+    CHECK(Find(record(BITMAP_FIRE_CURSEDLICH, 12), "Effects[0].LifeTime") == "20");
+    CHECK(Find(record(BITMAP_FIRE_CURSEDLICH, 0), "Effects[0].BlendMesh") == "-2");
+    CHECK_FALSE(Find(record(BITMAP_FIRE_CURSEDLICH, 4), "Effects[0].LifeTime").has_value());
+    CHECK_FALSE(Find(record(MODEL_CHAIN_LIGHTNING, 3), "Effects[0].LifeTime").has_value());
+
+    // A variant with an offset times the frame factor (at 0.5, so the factor
+    // shows), one with other values.
+    EffectCall swordForceCall = CallOf(MODEL_SWORD_FORCE);
+    swordForceCall.subType = 2;
+    const Record swordForce = RecordCall(swordForceCall, {0.5f, SlotPattern::A});
+    CHECK(Find(swordForce, "Effects[0].Scale") == "0");
+    CHECK(Find(swordForce, "Effects[0].Position[2]") == "190.75");
+    CHECK(Find(swordForce, "Effects[0].Velocity") == "0.25");
+    CHECK(Find(record(MODEL_SWORD_FORCE, 3), "Effects[0].Scale") == "3.5");
+
+    // A variant with a copy of the light it sets (blue 0.2; the call's is 0.7).
+    CHECK(Find(record(MODEL_ARROW_AUTOLOAD, 1), "Effects[0].Direction[2]") == "0.200000003");
+
+    // The row copies the call's scale; SubType 5 gets the row's values.
+    CHECK(Find(record(MODEL_WINDFOCE, 5), "Effects[0].LifeTime") == "50");
+    CHECK(Find(record(MODEL_WINDFOCE, 5), "Effects[0].Scale") == "0");
+    CHECK(Find(record(MODEL_WINDFOCE, 1), "Effects[0].LifeTime") == "999");
 }

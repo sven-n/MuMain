@@ -41,7 +41,7 @@ decision can move to the roadmap without being renumbered.
 | D32 | Files and house rules | One file per kind: `EffectTypes.json`, `ParticleTypes.json`, `JointTypes.json`, `SpriteTypes.json`. The rules of the item and model files: `formatVersion`, sorted by name, fixed field order, defaults left out, a writer and a test that the shipped files are in its format, names of letters and digits, errors stop the start, warnings go to the log. Documented in `docs/effect-data.md`. |
 | D33 | Loading and lookup | The catalogue is loaded once on the loading screen, next to the item model data, before the first effect is created. The registry table is built from it: the same array indexed by type, not changed after loading. A lookup stays a bounds check and one array read. No names, strings or allocations after loading. |
 | D34 | Creation values | A registry row replaces the whole legacy case, so a type moves only when every statement of its case can be written as data. `CreateParams` gets exactly the fields the moved cases need. Values are applied in one fixed order (values, then offsets, then copies); an offset of a field a copy writes adds to the copy, and a copy reads its source as it is then, or the call's argument (`callLight`, `callScale`). An unset field keeps what the common setup chose, or the slot's old value where the common setup sets nothing. Values the old code multiplies by `FPS_ANIMATION_FACTOR` keep that as a flag. |
-| D35 | Variants by SubType | A row can hold `variants` keyed by SubType that override its values (44 cases, 47 types choose only values by SubType). |
+| D35 | Variants by SubType | A row can hold `variants` keyed by SubType that override its values (44 cases, 47 types choose only values by SubType). A variant names one or more SubTypes and holds the fields of a row; a SubType of a variant gets the row's values with the variant's on top (a value or a copy replaces the value and the copy of its field, vectors and offsets per component), the other SubTypes the row's. The registry resolves them per SubType when it is built. |
 | D36 | Random and logic creation | Cases with `rand()` and the cases with logic stay code in FX1 (167 of 244 cases). Data with random values would have to draw `rand()` in exactly the same order and number, and values like "a random yaw, then the launch vector turned by it" are small programs. They become data in FX2, as building blocks with parameters where adjusting them is meaningful (D43). |
 | D37 | Particles and joints | Names only in FX1; their creation values wait for FX2. They have no registry, their structs differ from effects, and their creation is mostly random formulas. |
 | D38 | Sprites | Sprite entries are names for the textures sprites draw, without values: `CreateSprite` has no values per type, and the blend is chosen per call. |
@@ -206,7 +206,9 @@ Kalima maps load the rock `Object25\Object10.bmd`).
   the old code multiplies by the frame factor is written
   `{"value": -100, "timesFrameFactor": true}`. Offsets and copies are
   groups: `"offset": {"position": {"z": 3400}}`,
-  `"copy": {"startPosition": "position"}` (since FX1.4).
+  `"copy": {"startPosition": "position"}` (since FX1.4). Variants list the
+  SubTypes they are for: `"variants": [{"subType": 1, "lifeTime": 20},
+  {"subTypes": [2, 3], "lifeTime": 15}]` (since FX1.5).
 - Unknown fields are warnings. Unknown symbols, duplicate names and a newer
   `formatVersion` are errors that stop the start.
 
@@ -263,7 +265,8 @@ One PR each, small enough to check against the old code.
 | FX1.2 | Registry rows from data | FX1.1 | The `CreateParams` of `EffectRegistry.cpp` (22 rows, 32 types) move into `EffectTypes.json`; the registry table is built from the catalogue at loading. Handlers stay C++. |
 | FX1.3 | The 8 types that fit `CreateParams` | FX1.2 | Their cases move into data and are deleted. Sets up the recorder. |
 | FX1.4 | More creation fields | FX1.3 | The fields the 26 value-only cases need; those cases move into data. |
-| FX1.5 | Variants by SubType | FX1.4 | `variants` in effect rows; the 47 types that choose values by SubType move. |
+| FX1.5 | Variants by SubType | FX1.4 | `variants` in effect rows; the 47 types that choose values by SubType move (done: 41 types, see the FX1.5 note). |
+| FX1.5b | Fields for the rest | FX1.5 | The fields the other 12 types that choose values by SubType need (render type, alphaTarget, a lifeTime offset, start position values, the animation, copies from the light, the call's position and the call's angle); those cases move into data. |
 | FX1.6 | Effect browser | FX1.1 | Read-only tool in MuEditor; values from FX1.2 on. |
 | FX1.7 | Preview | FX1.6 | Creating the selected type in the world in editor builds. |
 
@@ -383,6 +386,43 @@ benchmark of `CreateEffect` gave 14.4 ns per creation of the 28 types with
 their cases and 15.7 ns with their rows. The `Scale = PKKey / 100.f` cases
 (`MODEL_SKILL_FURY_STRIKE+3/+4/+6/+7`, `MODEL_AURORA`, `MODEL_WAVE_FORCE`)
 compute a value from a skill argument and stay code (D36).
+
+*FX1.5 done:* a `create` object can hold `variants` (D35), each for one or
+more SubTypes, with the fields of a row; the registry resolves them per
+SubType when it is built, and `CreateEffect` takes the values of its SubType
+(a search over the few SubTypes of a row). The creation cases of 41 types
+(34 cases) that only choose values by SubType are rows now:
+`MODEL_ARROW_AUTOLOAD`, `MODEL_INFINITY_ARROW1-3`, `MODEL_BLADE_SKILL`,
+`BITMAP_FIRE_CURSEDLICH`, `MODEL_SWELL_OF_MAGICPOWER`, `MODEL_ARROWSRE06`,
+`MODEL_SUMMONER_CASTING_EFFECT1/11/111/2/22/222`,
+`MODEL_SUMMONER_SUMMON_SAHAMUTT`, `BITMAP_ENERGY`, `MODEL_LIGHTNING_ORB`,
+`MODEL_CHAIN_LIGHTNING`, `MODEL_ALICE_DRAIN_LIFE`,
+`MODEL_ALICE_BUFFSKILL_EFFECT`, `BITMAP_LIGHTNING+1`,
+`MODEL_RAKLION_BOSS_MAGIC`, `BITMAP_FIRE_HIK2_MONO`, `BITMAP_MAGIC_ZIN`,
+`MODEL_MAGIC_CIRCLE1`, `MODEL_CHANGE_UP_EFF/NASA/CYLINDER`,
+`MODEL_AIR_FORCE`, `BITMAP_DAMAGE_01_MONO`, `BITMAP_FLARE`,
+`MODEL_MANA_RUNE`, `MODEL_SWORD_FORCE`, `BITMAP_TARGET_POSITION_EFFECT1/2`,
+`MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1`, `MODEL_EFFECT_SKURA_ITEM`,
+`BITMAP_RING_OF_GRADATION`, `MODEL_EFFECT_UMBRELLA_DIE`, `MODEL_WINDFOCE`
+and `MODEL_SHOCKWAVE_GROUND01`. An else branch becomes the row's values; a
+case without unconditional values becomes a row with only variants, so the
+SubTypes without a branch keep what the common setup and the slot give, as
+before (callers pass such SubTypes, for example 4 to
+`BITMAP_FIRE_CURSEDLICH`). The PR's second commit compared the old cases
+with the rows in one build for every SubType a caller passes or a branch
+handles (the recorder records extra SubTypes per type for that) and one no
+branch handles: all 6,752 calls equal at the frame factors 1 and 0.5, and
+all 3,376 at 25/60. The third deletes the 34 case groups; g++ finds the same
+6 fallthroughs. A benchmark of `CreateEffect` gave 14.6 ns per creation of
+the 41 types with their cases and 15.7 ns with their rows. The count differs
+from D35's 44 cases / 47 types: the scout of FX1.5 found 49 groups (57
+types) that only choose values by SubType today; 12 types (11 cases) need
+fields the format does not have yet (render type, alphaTarget, a lifeTime
+offset, start position values, the animation, copies from the light, the
+call's position and the call's angle) and move in FX1.5b; `BITMAP_MAGIC`,
+`MODEL_MAYASTONEFIRE` and `BITMAP_SWORD_FORCE` compute values from the
+call's scale or angle, and `MODEL_WARCRAFT` (never created) needs blend mesh
+numbers below -2, so they stay code.
 
 **FX1.6–FX1.7** add the effect browser and its preview to MuEditor. They
 change no game code outside editor builds.
