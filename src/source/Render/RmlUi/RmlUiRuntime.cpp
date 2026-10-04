@@ -24,8 +24,8 @@ namespace
     // responds to. Two multipliers, composed the same way
     // UI::Scaling's own legacy transforms compose them (UITransform.cpp):
     //   - GameConfig::GetUIScalePercent() -- the user's own preference dial.
-    //   - UI::Scaling::ViewportFitScale() -- auto-fit-to-window-size (the same formula the still-
-    //     legacy HUD band's bars_scale uses via BottomHudScale/BottomHudCenterTransform), which
+    //   - UI::Scaling::ViewportFitScale() -- auto-fit-to-window-size (the same formula
+    //     BottomHudScale uses for the native HUD hit tests), which
     //     already folds in UI::Scaling::GetWindowContentScale() (OS display-scale/pixel-density)
     //     internally -- do NOT also multiply GetWindowContentScale() here, it would double-count.
     //

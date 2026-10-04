@@ -60,8 +60,8 @@ namespace mu::ui::window
 
         // Each icon is a render target its slot's .item-icon shows, so RCSS places it like the rest
         // of the slot. Once a frame from SyncRmlModel(): sizes each target to its icon's on-screen
-        // box -- the layout size times `scale`, #bars's own transform -- and points the icon at it.
-        void SyncSlotIcons(Rml::ElementDocument* document, float scale);
+        // box and points the icon at it.
+        void SyncSlotIcons(Rml::ElementDocument* document);
         // From SyncDocVisibility(), which runs whether or not this window updates.
         void SetSlotIconsShown(bool shown);
 
@@ -326,16 +326,9 @@ namespace mu::ui::window
 
         struct MainFrameRmlModel
         {
-            // #bars/#buttons/#exp share one transform group, bound every frame from
-            // UI::Scaling::BottomHudCenterTransform() (clamped 1x-2x scale, folds in
-            // GetUIScalePercent()).
-            // Buttons and exp are nested inside #bars in main_frame.rml to inherit this transform
-            // rather than each needing their own binding. Lengths in main_frame.rcss stay `px`
-            // (not `dp`) so they scale via bars_scale only, not a second time via RmlUi's
-            // density-independent-pixel ratio.
-            float barsLeft = 0.f, barsTop = 0.f, barsScale = 1.f;
             // The original's gauge and button hint text size in real pixels: RenderTipText() under
-            // the bottom HUD's transform (capped at 2x), which grows about half as fast as the bars.
+            // the HUD's scale, which grows about half as fast as the bars. The HUD itself is sized
+            // in dp by main_frame.rcss.
             float hintPx = 0.f;
 
             float hpFraction = 0.f, mpFraction = 0.f, agFraction = 0.f, sdFraction = 0.f;

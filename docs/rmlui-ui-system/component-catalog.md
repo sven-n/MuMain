@@ -531,7 +531,7 @@ RmlUi's own FreeType metrics round to whole pixels, which accumulates over many 
 `Show()` reads the row height from the native text renderer
 (`CUIRenderTextSDLTtf::LineHeight()`), without selecting a font on the shared renderer.
 It measures under `Config::transform` when a caller anchors with a non-ambient transform (the
-skill-hotkey tooltip's `BottomHudCenterTransform`), otherwise under the ambient transform.
+skill-hotkey tooltip's `#bars` reference frame), otherwise under the ambient transform.
 `Config::fixedWidth` keeps a fixed text width where the original had one (the inventory Set and
 Socket option tooltips). The anchor places the inner (padding) box; the frame sits outside it.
 

@@ -50,10 +50,9 @@ resolution, which is what makes screenshot comparison against the original meani
 quadratic damping of that ramp existed briefly; it was removed because it broke that parity at
 every intermediate resolution — 1.25× instead of 1.5× at 1280×720 — and the user dial below is
 the right lever for "too big at my resolution".) It drives still-legacy
-`CWin`/`mu::ui::window::CObject` rendering/hit-testing, and — via `bars_scale` — `main_frame.rcss`'s HUD bars too
-(`MainFrameWindow.h`'s `MainFrameRmlModel::barsLeft` comment has the full reasoning for why
-that one window uses this system instead of `dp`). Two axes exist, and both systems now respect
-both:
+`CWin`/`mu::ui::window::CObject` rendering/hit-testing. The main frame HUD is sized in `dp` like
+every other window; `BottomHudScale()` is the same number, still used by the native hit tests that
+ask whether the cursor is over the HUD. Two axes exist, and both systems now respect both:
 
 - **`UIScalePercent`** — the user's own config-driven preference (`config.ini`'s `[UI]
   UIScalePercent`). Both RmlUi's `dp` ratio and `UI::Scaling`'s functions respect this.

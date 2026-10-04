@@ -89,7 +89,7 @@ namespace UI::RmlBridge::Tooltip
         // to, via the ambient UI::Scaling::GetActiveTransform(), but that's wrong for a caller whose
         // anchor is meaningful only through a DIFFERENT transform than whatever's ambient in its own
         // scope (e.g. the skill-hotkey tooltip: its anchor is relative to MainFrameWindow's own
-        // hand-rolled BottomHudCenterTransform, matching #bars's CSS scale/offset, but
+        // reference frame (#bars's origin and the dp ratio), but
         // MainFrameWindow's own ambient GetLayoutMode() resolves to a completely different formula --
         // see MainFrameWindow.cpp's own comment). Pushing the conversion out to each caller means
         // every caller picks the transform that's actually correct for its own anchor, instead of

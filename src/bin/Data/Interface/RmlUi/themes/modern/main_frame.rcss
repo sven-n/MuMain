@@ -11,19 +11,23 @@
 	display: none;
 }
 
+/* The original's 640x480 reference frame, bottom-centred and sized in dp like every other
+   window, so the HUD follows the UI scale; every part below is placed in it. */
 #bars {
 	position: absolute;
-	transform-origin: left top;
+	left: 50%;
+	bottom: 0dp;
+	margin-left: -320dp;
 	font-family: "token(font-body)";
-	font-size: 9px;
-	width: 640px;
-	height: 39px;
+	font-size: 9dp;
+	width: 640dp;
+	height: 480dp;
 }
 /* HP/SD stack far left, MP/AG stack far right, potions and skills centred between. */
 
 .slot-frame {
-	border: 1px token(border-frame);
-	border-radius: token(radius-sm)px;
+	border: 1dp token(border-frame);
+	border-radius: token(radius-sm)dp;
 }
 .slot-fill {
 	background-color: rgba(10, 10, 10, 150);
@@ -36,10 +40,10 @@
 	position: absolute;
 	pointer-events: auto;
 }
-#bar_hp { left: 8px;   top: 437px; width: 124px; height: 16px; }
-#bar_sd { left: 8px;   top: 455px; width: 124px; height: 8px;  }
-#bar_mp { left: 510px; top: 437px; width: 122px; height: 16px; }
-#bar_ag { left: 510px; top: 455px; width: 122px; height: 8px;  }
+#bar_hp { left: 8dp;   top: 437dp; width: 124dp; height: 16dp; }
+#bar_sd { left: 8dp;   top: 455dp; width: 124dp; height: 8dp;  }
+#bar_mp { left: 510dp; top: 437dp; width: 122dp; height: 16dp; }
+#bar_ag { left: 510dp; top: 455dp; width: 122dp; height: 8dp;  }
 
 /* One continuous top edge spanning the full row instead of three separately-outlined pieces --
    no fill of its own: RmlUi paints after the still-legacy potion/skill icons in the middle, so a
@@ -47,11 +51,11 @@
    the icon-free zones. */
 #gauge_frame {
 	position: absolute;
-	left: 0px;
-	top: 429px;
-	width: 640px;
-	height: 41px;
-	border-top: 1px token(border-frame);
+	left: 0dp;
+	top: 429dp;
+	width: 640dp;
+	height: 41dp;
+	border-top: 1dp token(border-frame);
 	pointer-events: none;
 }
 
@@ -59,22 +63,22 @@
    each end, the item and skill bands between. Rounded only on the strip's outer corners. */
 #gauge_fill_left {
 	position: absolute;
-	left: 0px;
-	top: 429px;
-	width: 140px;
-	height: 41px;
+	left: 0dp;
+	top: 429dp;
+	width: 140dp;
+	height: 41dp;
 	background-color: rgba(10, 10, 10, 150);
-	border-radius: 3px 0 0 3px;
+	border-radius: 3dp 0 0 3dp;
 	pointer-events: none;
 }
 #gauge_fill_right {
 	position: absolute;
-	left: 502px;
-	top: 429px;
-	width: 138px;
-	height: 41px;
+	left: 502dp;
+	top: 429dp;
+	width: 138dp;
+	height: 41dp;
 	background-color: rgba(10, 10, 10, 150);
-	border-radius: 0 3px 3px 0;
+	border-radius: 0 3dp 3dp 0;
 	pointer-events: none;
 }
 /* The item band sits under #item_slots; the skill band 214px past #skill_slots' origin --
@@ -82,10 +86,10 @@
    the segments meet flush. The highlight is the original RenderCenterFrame() quad,
    RenderColorQuadARGB(222, kHudTop, 160, 40, 0x40FFFFFF), shown while the hotkey row is on its
    upper set. */
-#item_band_fill, #skill_band_fill, #skill_list_highlight { position: absolute; top: 429px; }
-#item_band_fill  { left: 140px; width: 152px; height: 41px; }
-#skill_band_fill { left: 292px; width: 210px; height: 41px; }
-#skill_list_highlight { left: 300px; width: 160px; height: 40px; background-color: rgba(255, 255, 255, 64); }
+#item_band_fill, #skill_band_fill, #skill_list_highlight { position: absolute; top: 429dp; }
+#item_band_fill  { left: 140dp; width: 152dp; height: 41dp; }
+#skill_band_fill { left: 292dp; width: 210dp; height: 41dp; }
+#skill_list_highlight { left: 300dp; width: 160dp; height: 40dp; background-color: rgba(255, 255, 255, 64); }
 
 .gauge-fill-vertical { display: none; }
 .gauge-fill-horizontal {
@@ -93,7 +97,7 @@
 	left: 0;
 	top: 0;
 	height: 100%;
-	border-radius: 3px;
+	border-radius: 3dp;
 }
 /* background-color is the reliable base color; a live-resized gradient decorator alone has
    rendered solid white once, so it's layered on top as an enhancement, not relied on alone. */
@@ -117,7 +121,7 @@
 	white-space: nowrap;
 	pointer-events: none;
 }
-#bar_ag .gauge-num, #bar_sd .gauge-num { font-size: 7px; }
+#bar_ag .gauge-num, #bar_sd .gauge-num { font-size: 7dp; }
 
 /* Tooltips are siblings of their trigger, not nested descendants, so their containing block is
    the wide #bars group -- this build's shrink-to-fit width hard-clamps to the containing block.
@@ -129,21 +133,21 @@
 .tooltip {
 	display: none;
 	position: absolute;
-	width: 160px;
+	width: 160dp;
 	white-space: nowrap;
 	background-color: token(surface-tooltip);
-	border: 1px token(border-frame);
+	border: 1dp token(border-frame);
 	color: #ffffff;
-	padding: 2px 4px;
-	border-radius: token(radius-sm)px;
+	padding: 2dp 4dp;
+	border-radius: token(radius-sm)dp;
 	font-family: "token(font-body)";
-	font-size: 11px;
+	font-size: 11dp;
 	pointer-events: none;
 }
 /* left = original anchor (bar center) minus half the fixed 160px width, replacing
    translateX(-50%) -- see the comment above for why. */
-#bars .tooltip-hp, #bars .tooltip-sd { left: -10px; top: 410px; bottom: auto; } /* anchor 70px */
-#bars .tooltip-mp, #bars .tooltip-ag { left: 491px; top: 410px; bottom: auto; } /* anchor 571px */
+#bars .tooltip-hp, #bars .tooltip-sd { left: -10dp; top: 410dp; bottom: auto; } /* anchor 70px */
+#bars .tooltip-mp, #bars .tooltip-ag { left: 491dp; top: 410dp; bottom: auto; } /* anchor 571px */
 #bar_hp:hover ~ .tooltip-hp.scaled-hint,
 #bar_sd:hover ~ .tooltip-sd.scaled-hint,
 #bar_ag:hover ~ .tooltip-ag.scaled-hint,
@@ -161,16 +165,16 @@
    required so #exp:hover .tooltip below can fire. */
 #exp {
 	position: absolute;
-	left: 0px;
-	top: 470px;
-	width: 640px;
-	height: 6px;
+	left: 0dp;
+	top: 470dp;
+	width: 640dp;
+	height: 6dp;
 	pointer-events: auto;
 }
 #exp_track {
 	position: absolute;
-	left: 2px;
-	right: 1px;
+	left: 2dp;
+	right: 1dp;
 	top: 0;
 	bottom: 0;
 }
@@ -180,31 +184,31 @@
 	top: 0;
 	height: 100%;
 	background-color: #d6a83c;
-	border-top: 1px rgba(255, 255, 255, 120);
+	border-top: 1dp rgba(255, 255, 255, 120);
 }
 #exp_digit {
 	position: absolute;
-	right: 4px;
+	right: 4dp;
 	top: 50%;
 	transform: translateY(-50%);
 	color: #ffffff;
 	font-weight: bold;
 	font-effect: outline(1px #000000);
 	font-family: "token(font-body)";
-	font-size: 7px;
+	font-size: 7dp;
 	pointer-events: none;
 }
 /* left is a precomputed centered value, not left:50%+translateX(-50%) -- same reason as the
    .tooltip-hp etc. rules above. */
 .exp-tooltip {
-	bottom: 12px;
-	left: 240px;
+	bottom: 12dp;
+	left: 240dp;
 }
 
 /* Item-hotkey (potion) and skill-icon slots, with no border or fill of their own: the bands
    above back them, so keep the band offsets in step with these wrappers. */
-#item_slots { position: absolute; left: 140px; top: 0; }
-#skill_slots { position: absolute; left: 78px; top: 0; }
+#item_slots { position: absolute; left: 140dp; top: 0; }
+#skill_slots { position: absolute; left: 78dp; top: 0; }
 
 #item_slot_0, #item_slot_1, #item_slot_2, #item_slot_3,
 #skill_slot_0, #skill_slot_1, #skill_slot_2, #skill_slot_3, #skill_slot_4,
@@ -225,23 +229,23 @@
    band; left offsets use their own pitch. The frame is padded around the icon, which keeps the
    original's 20x20 at the spot it always had inside it -- drawn at whatever size it is shown, so
    this theme can move or resize it here alone. */
-#item_slot_0 { position: absolute; left: 6px;   top: 431px; width: 32px; height: 38px; }
-#item_slot_1 { position: absolute; left: 44px;  top: 431px; width: 32px; height: 38px; }
-#item_slot_2 { position: absolute; left: 82px;  top: 431px; width: 32px; height: 38px; }
-#item_slot_3 { position: absolute; left: 120px; top: 431px; width: 32px; height: 38px; }
-.item-icon { position: absolute; left: 4px; top: 12px; width: 20px; height: 20px; pointer-events: none; }
+#item_slot_0 { position: absolute; left: 6dp;   top: 431dp; width: 32dp; height: 38dp; }
+#item_slot_1 { position: absolute; left: 44dp;  top: 431dp; width: 32dp; height: 38dp; }
+#item_slot_2 { position: absolute; left: 82dp;  top: 431dp; width: 32dp; height: 38dp; }
+#item_slot_3 { position: absolute; left: 120dp; top: 431dp; width: 32dp; height: 38dp; }
+.item-icon { position: absolute; left: 4dp; top: 12dp; width: 20dp; height: 20dp; pointer-events: none; }
 
 /* Upper-left corner of the slot box. */
 .slot-hotkey-label {
 	position: absolute;
-	left: 2px;
-	top: 2px;
+	left: 2dp;
+	top: 2dp;
 	color: #ffffff;
 	font-weight: bold;
 	font-family: "token(font-body)";
 	font-effect: outline(1px #000000);
-	font-size: 8px;
-	line-height: 8px;
+	font-size: 8dp;
+	line-height: 8dp;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -250,14 +254,14 @@
    nothing. */
 .item-stack-label {
 	position: absolute;
-	right: 2px;
-	bottom: 2px;
+	right: 2dp;
+	bottom: 2dp;
 	color: #ffffff;
 	font-weight: bold;
 	font-family: "token(font-body)";
 	font-effect: outline(1px #000000);
-	font-size: 8px;
-	line-height: 8px;
+	font-size: 8dp;
+	line-height: 8dp;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -266,14 +270,14 @@
    independent control over this one vs. the potion Q/W/E/R labels. */
 .skill-hotkey-label {
 	position: absolute;
-	left: 2px;
-	top: 2px;
+	left: 2dp;
+	top: 2dp;
 	color: #ffffff;
 	font-weight: bold;
 	font-family: "token(font-body)";
 	font-effect: outline(1px #000000);
-	font-size: 8px;
-	line-height: 8px;
+	font-size: 8dp;
+	line-height: 8dp;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -281,42 +285,42 @@
 /* Skill slots are contiguous (pitch == width, no gap). border-radius only matters for the
    .selected highlight -- square off touching inner edges so only the strip's outer corners
    round. Only this file places them: C++ reads the hovered slot's box back for the hint anchor. */
-#skill_slot_0 { position: absolute; left: 222px; top: 431px; width: 32px; height: 38px; }
-#skill_slot_1 { position: absolute; left: 254px; top: 431px; width: 32px; height: 38px; }
-#skill_slot_2 { position: absolute; left: 286px; top: 431px; width: 32px; height: 38px; }
-#skill_slot_3 { position: absolute; left: 318px; top: 431px; width: 32px; height: 38px; }
-#skill_slot_4 { position: absolute; left: 350px; top: 431px; width: 32px; height: 38px; }
-#skill_slot_0 { border-radius: 3px 0 0 3px; }
+#skill_slot_0 { position: absolute; left: 222dp; top: 431dp; width: 32dp; height: 38dp; }
+#skill_slot_1 { position: absolute; left: 254dp; top: 431dp; width: 32dp; height: 38dp; }
+#skill_slot_2 { position: absolute; left: 286dp; top: 431dp; width: 32dp; height: 38dp; }
+#skill_slot_3 { position: absolute; left: 318dp; top: 431dp; width: 32dp; height: 38dp; }
+#skill_slot_4 { position: absolute; left: 350dp; top: 431dp; width: 32dp; height: 38dp; }
+#skill_slot_0 { border-radius: 3dp 0 0 3dp; }
 #skill_slot_1, #skill_slot_2, #skill_slot_3 { border-radius: 0; }
-#skill_slot_4 { border-radius: 0 3px 3px 0; }
+#skill_slot_4 { border-radius: 0 3dp 3dp 0; }
 /* Same hover-highlight look for either slot family -- one rule, not duplicated per group. */
 #item_slots .selected, #skill_slots .selected {
-	border: 1px token(accent-gold-hover);
+	border: 1dp token(accent-gold-hover);
 	background-color: rgba(180, 138, 50, 25); /* border-selected's rgb @ 25 alpha */
 }
 /* The current-skill frame, padded 4px around its 20x28 icon. */
-#current_skill_slot { position: absolute; left: 388px; top: 433px; width: 28px; height: 36px; }
+#current_skill_slot { position: absolute; left: 388dp; top: 433dp; width: 28dp; height: 36dp; }
 
 /* A 20x28 skill icon centred in its slot (32x38 row/grid boxes, the 28x36 current-skill frame);
    the sprite comes from C++ (data-style-decorator). Absolute children sit inside the border, so
    bordered boxes (grid cells, a selected slot) inset by one pixel less. */
 .skill-icon {
 	position: absolute;
-	left: 6px;
-	top: 6px;
-	width: 20px;
-	height: 28px;
+	left: 6dp;
+	top: 6dp;
+	width: 20dp;
+	height: 28dp;
 	pointer-events: none;
 }
-#skill_slots .selected .skill-icon, .skill-cell .skill-icon { left: 5px; top: 5px; }
-#current_skill_slot .skill-icon { left: 4px; top: 4px; }
+#skill_slots .selected .skill-icon, .skill-cell .skill-icon { left: 5dp; top: 5dp; }
+#current_skill_slot .skill-icon { left: 4dp; top: 4dp; }
 
 /* Expanded grid + pet-command row. Same 78px local-origin shift as #skill_slots above -- cell
    left/top values are the original's reference-space positions (CSkillList::RebuildGridSnapshot()).
    Containers stay non-interactive; only .skill-cell opts back in. */
 #skill_grid, #pet_skill_row {
 	position: absolute;
-	left: 78px;
+	left: 78dp;
 	top: 0;
 	pointer-events: none;
 }
@@ -325,15 +329,15 @@
    original's IMAGE_SKILLBOX sprite instead). */
 .skill-cell {
 	position: absolute;
-	width: 32px;
-	height: 38px;
+	width: 32dp;
+	height: 38dp;
 	pointer-events: auto;
 	cursor: pointer;
-	border: 1px token(border-frame);
-	border-radius: token(radius-sm)px;
+	border: 1dp token(border-frame);
+	border-radius: token(radius-sm)dp;
 }
 .skill-cell.selected {
-	border: 1px token(accent-gold-hover);
+	border: 1dp token(accent-gold-hover);
 	background-color: rgba(180, 138, 50, 25); /* border-selected's rgb @ 25 alpha */
 }
 
@@ -349,8 +353,8 @@
 }
 
 /* The pet's four commands, in the row the original drew them in. */
-#pet_skill_row .skill-cell { top: 352px; }
-#pet_skill_row .skill-cell:nth-child(1) { left: 353px; }
-#pet_skill_row .skill-cell:nth-child(2) { left: 385px; }
-#pet_skill_row .skill-cell:nth-child(3) { left: 417px; }
-#pet_skill_row .skill-cell:nth-child(4) { left: 449px; }
+#pet_skill_row .skill-cell { top: 352dp; }
+#pet_skill_row .skill-cell:nth-child(1) { left: 353dp; }
+#pet_skill_row .skill-cell:nth-child(2) { left: 385dp; }
+#pet_skill_row .skill-cell:nth-child(3) { left: 417dp; }
+#pet_skill_row .skill-cell:nth-child(4) { left: 449dp; }

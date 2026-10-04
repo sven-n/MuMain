@@ -39,6 +39,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 #include "GameLogic/Quests/QuestMng.h"
@@ -88,24 +89,41 @@ struct SlotBox
     float left = 0.f, top = 0.f, width = 0.f, height = 0.f;
 };
 
-// A hotkey-row element's box in #bars's local reference px. GetAbsoluteOffset() ignores
-// #bars's CSS scale, so the difference to #bars's own offset is already unscaled (the same
-// it follows each theme's RCSS instead of C++ copies of the slot positions.
+// The frame the skill row's C++-computed coordinates live in (grid cells, tooltip anchors):
+// reference units from #bars's origin, scaled by the dp ratio main_frame.rcss is sized in.
+UI::Scaling::Transform BarsTransform(Rml::ElementDocument* document)
+{
+    UI::Scaling::Transform transform{1.f, 1.f, 0.f, 0.f, 1.f};
+    if (document == nullptr)
+        return transform;
+    if (Rml::Context* context = document->GetContext())
+    {
+        const float ratio = context->GetDensityIndependentPixelRatio();
+        transform = {ratio, ratio, 0.f, 0.f, ratio};
+    }
+    if (Rml::Element* bars = document->GetElementById("bars"))
+    {
+        const Rml::Vector2f origin = bars->GetAbsoluteOffset(Rml::BoxArea::Border);
+        transform.offsetX = origin.x;
+        transform.offsetY = origin.y;
+    }
+    return transform;
+}
+
+// A hotkey-row element's box in BarsTransform()'s reference units; it follows each theme's RCSS
+// instead of C++ copies of the slot positions.
 SlotBox SlotBoxInBars(Rml::Element* element)
 {
     SlotBox box;
     if (element == nullptr)
         return box;
-    Rml::Element* bars = element;
-    while (bars != nullptr && bars->GetId() != "bars")
-        bars = bars->GetParentNode();
-    const Rml::Vector2f offset = element->GetAbsoluteOffset(Rml::BoxArea::Border) -
-                                 (bars ? bars->GetAbsoluteOffset(Rml::BoxArea::Border) : Rml::Vector2f(0.f, 0.f));
+    const UI::Scaling::Transform bars = BarsTransform(element->GetOwnerDocument());
+    const Rml::Vector2f offset = element->GetAbsoluteOffset(Rml::BoxArea::Border);
     const Rml::Vector2f size = element->GetBox().GetSize(Rml::BoxArea::Border);
-    box.left = offset.x;
-    box.top = offset.y;
-    box.width = size.x;
-    box.height = size.y;
+    box.left = UI::Scaling::LogicalX(bars, offset.x);
+    box.top = UI::Scaling::LogicalY(bars, offset.y);
+    box.width = size.x / bars.scaleX;
+    box.height = size.y / bars.scaleY;
     return box;
 }
 } // namespace
@@ -115,9 +133,6 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
     const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "main_frame",
             [this](Rml::DataModelConstructor& c, MainFrameRmlModel& model)
             {
-                c.Bind("bars_left", &model.barsLeft);
-                c.Bind("bars_top", &model.barsTop);
-                c.Bind("bars_scale", &model.barsScale);
                 c.Bind("hint_px", &model.hintPx);
 
                 c.Bind("hp_fraction", &model.hpFraction);
@@ -492,17 +507,11 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
         syncText(field, boundName, StringUtils::WideToNarrow(text));
     };
 
-    // Shared #bars/#buttons/#exp transform (see MainFrameRmlModel::barsLeft). Maps static reference-pixel coordinates onto real window
-    // pixels: screenPos = refPos * scale + offset.
     {
-        const auto centerTransform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
-        syncFloat(&MainFrameRmlModel::barsLeft, "bars_left", centerTransform.offsetX);
-        syncFloat(&MainFrameRmlModel::barsTop, "bars_top", centerTransform.offsetY);
-        syncFloat(&MainFrameRmlModel::barsScale, "bars_scale", centerTransform.scaleX);
         syncFloat(&MainFrameRmlModel::hintPx, "hint_px",
-                  UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, centerTransform));
+                  UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, BarsTransform(m_pRmlDoc)));
 
-        m_ItemHotKey.SyncSlotIcons(m_pRmlDoc, centerTransform.scaleX);
+        m_ItemHotKey.SyncSlotIcons(m_pRmlDoc);
     }
 
     // HP/MP -- legacy RenderLifeMana(). fLife/fMana there are the EMPTY fraction; store filled.
@@ -769,15 +778,10 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
         {
             UI::RmlBridge::Tooltip::Config config;
             config.lines = UI::Skills::Tooltip::ToRmlBridgeLines(tooltipModel);
-            // GetTooltipAnchorX/Y() are #bars-relative reference-pixel coordinates (same convention
-            // as skill_grid_cells' cell.left/top), meaningful only through BottomHudCenterTransform
-            // (same one #bars's own scale/offset above uses) -- NOT through the ambient
-            // UI::Scaling::GetActiveTransform(), which during this window's own Update() is
-            // LayoutMode::Hud (ScreenOverlayTransform, per UILayoutPolicy.cpp's INTERFACE_MAINFRAME
-            // entry -- CManager::AddUIObj() overrides whatever CObject's own constructor set).
-            // Tooltip::Show() used to apply that ambient conversion itself; see RmlTooltip.h's own
-            // comment for why it no longer does.
-            const auto skillTooltipTransform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
+            // GetTooltipAnchorX/Y() are in BarsTransform()'s reference units (as are
+            // skill_grid_cells' cell.left/top) -- NOT the ambient UI::Scaling::GetActiveTransform(),
+            // which during this window's Update() is LayoutMode::Hud (ScreenOverlayTransform).
+            const auto skillTooltipTransform = BarsTransform(m_pRmlDoc);
             // The native box ends below its anchor (G2); measured with the native text renderer
             // under the tooltip's own transform.
             float bottomBelowAnchor = 0.f;
@@ -1160,7 +1164,7 @@ ITEM* mu::ui::window::CItemHotKey::GetSlotItem(int iSlotIndex)
     return iIndex != -1 ? g_pMyInventory->FindItem(iIndex) : nullptr;
 }
 
-void mu::ui::window::CItemHotKey::SyncSlotIcons(Rml::ElementDocument* document, float scale)
+void mu::ui::window::CItemHotKey::SyncSlotIcons(Rml::ElementDocument* document)
 {
     if (document == nullptr)
         return;
@@ -1174,11 +1178,10 @@ void mu::ui::window::CItemHotKey::SyncSlotIcons(Rml::ElementDocument* document, 
         target.SetEnabled(m_bSlotIconsShown && filled);
         if (filled)
         {
-            // Layout pixels are #bars's own, before its transform: the item is drawn at the size it
-            // is actually shown, never upscaled.
+            // The box is in screen pixels: the item is drawn at the size it is shown, never upscaled.
             const auto size = icon->GetBox().GetSize(Rml::BoxArea::Content);
-            target.Resize(static_cast<std::uint32_t>(std::lround(size.x * scale)),
-                          static_cast<std::uint32_t>(std::lround(size.y * scale)));
+            target.Resize(static_cast<std::uint32_t>(std::lround(size.x)),
+                          static_cast<std::uint32_t>(std::lround(size.y)));
         }
         const Rml::String source = filled ? target.Source() : Rml::String();
         if (icon->GetAttribute<Rml::String>("src", "") != source)

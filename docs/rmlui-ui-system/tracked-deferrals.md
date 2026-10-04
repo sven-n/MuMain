@@ -263,8 +263,8 @@ counter-scale bindings start costing something concrete, rather than being an in
   text metrics remain a constraint, not automatically removable layout constants.
 - **Event button style:** review the presentation-sized `wide` value alongside the
   semantic `exit` value when next touching those button structs.
-- **Root-placement names:** `root_x`/`root_y`, `panel_x`/`panel_y`, and
-  `bars_left`/`bars_top` name similar placement bridges. Consolidation is low-priority
+- **Root-placement names:** `root_x`/`root_y` and `panel_x`/`panel_y` name similar placement
+  bridges. Consolidation is low-priority
   naming work, separate from changing who owns dock spacing.
 
 ### Deliberately not on this list
