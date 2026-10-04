@@ -725,7 +725,7 @@ void CTrade::GetYourID(wchar_t* pszYourID)
     ::wcscpy(pszYourID, m_szYourID);
 }
 
-void CTrade::ProcessToReceiveTradeRequest(char* pbyYourID)
+void CTrade::ProcessToReceiveTradeRequest(const wchar_t* pszYourID)
 {
     if (g_pNewUISystem->IsImpossibleTradeInterface())
     {
@@ -733,7 +733,8 @@ void CTrade::ProcessToReceiveTradeRequest(char* pbyYourID)
         return;
     }
 
-    CMultiLanguage::ConvertFromUtf8(m_szYourID, pbyYourID);
+    wcsncpy(m_szYourID, pszYourID, MAX_USERNAME_SIZE);
+    m_szYourID[MAX_USERNAME_SIZE] = L'\0';
 
     mu::ui::window::GenericDialogConfig cfg;
     cfg.showCancel = true;
@@ -748,19 +749,19 @@ void CTrade::ProcessToReceiveTradeRequest(char* pbyYourID)
     mu::ui::window::CInventoryCtrl::BackupPickedItem();
 }
 
-void CTrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
+void CTrade::ProcessToReceiveTradeResult(UI::Trade::RequestReply reply, const UI::Trade::Partner& partner)
 {
-    switch (pTradeData->SubCode)
+    switch (reply)
     {
-    case 0:
+    case UI::Trade::RequestReply::Declined:
         g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
 
-    case 2:
+    case UI::Trade::RequestReply::Unavailable:
         g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
 
-    case 1:
+    case UI::Trade::RequestReply::Accepted:
         g_pNewUISystem->Show(mu::ui::window::INTERFACE_TRADE);
 
         InitTradeInfo();
@@ -769,15 +770,15 @@ void CTrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
         SetCursorPos(x * WindowWidth / REFERENCE_WIDTH, MouseY * WindowHeight / REFERENCE_HEIGHT);
 
         wchar_t szTempID[MAX_USERNAME_SIZE + 1]{ };
-        CMultiLanguage::ConvertFromUtf8(szTempID, pTradeData->ID, MAX_USERNAME_SIZE);
+        wcsncpy(szTempID, std::wstring(partner.name).c_str(), MAX_USERNAME_SIZE);
 
         if (!m_bTradeAlert && ::wcscmp(m_szYourID, szTempID))
             InitYourInvenBackUp();
 
         m_bTradeAlert = false;
-        m_nYourGuildType = pTradeData->GuildKey;
+        m_nYourGuildType = partner.guildKey;
         wcsncpy(m_szYourID, szTempID, MAX_USERNAME_SIZE);
-        m_nYourLevel = pTradeData->Level;   //  상대방 레벨.
+        m_nYourLevel = partner.level;   //  상대방 레벨.
         break;
     }
 }
@@ -913,33 +914,33 @@ void CTrade::ProcessToReceiveMyTradeGold(BYTE bySuccess)
     m_nMyTradeGold = bySuccess ? m_nTempMyTradeGold : 0;
 }
 
-void CTrade::ProcessToReceiveYourConfirm(BYTE byState)
+void CTrade::ProcessToReceiveYourConfirm(UI::Trade::PartnerConfirm state)
 {
-    switch (byState)
+    switch (state)
     {
-    case 0:
+    case UI::Trade::PartnerConfirm::Cleared:
         m_bYourConfirm = false;
         break;
-    case 1:
+    case UI::Trade::PartnerConfirm::Confirmed:
         m_bYourConfirm = true;
         break;
-    case 2:
+    case UI::Trade::PartnerConfirm::BothReset:
         m_bMyConfirm = false;
         m_bYourConfirm = false;
         m_nMyTradeWait = 150;
         break;
-    case 3:
+    case UI::Trade::PartnerConfirm::Unchanged:
         break;
     }
 
     PlayBuffer(SOUND_CLICK01);
 }
 
-void CTrade::ProcessToReceiveTradeExit(BYTE byState)
+void CTrade::ProcessToReceiveTradeExit(UI::Trade::CloseReason reason)
 {
-    switch (byState)
+    switch (reason)
     {
-    case 0:
+    case UI::Trade::CloseReason::Cancelled:
     {
         g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
 
@@ -951,16 +952,19 @@ void CTrade::ProcessToReceiveTradeExit(BYTE byState)
     }
     break;
 
-    case 2:
+    case UI::Trade::CloseReason::InventoryFull:
         g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceledBecauseYourInventoryIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
 
-    case 3:
+    case UI::Trade::CloseReason::RequestCancelled:
         g_pSystemLogBox->AddText(I18N::Game::TradeRequestIsCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
 
-    case 4:
+    case UI::Trade::CloseReason::ReinforcedItem:
         g_pSystemLogBox->AddText(I18N::Game::ReinforcedItemCanTBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
+        break;
+
+    case UI::Trade::CloseReason::Completed:
         break;
     }
 

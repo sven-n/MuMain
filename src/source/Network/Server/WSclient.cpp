@@ -63,6 +63,7 @@
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/ConfirmRequest.h"
+#include "UI/Inventory/TradeUpdates.h"
 #include "UI/Core/WindowCommon.h" // ShowTrainerMenuDialog/ShowSeedMasterMenuDialog/etc.
 #include "UI/Inventory/InventoryCtrl.h"
 #include "GameLogic/Events/w_CursedTemple.h"
@@ -6274,7 +6275,7 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
         }
         else if (storageType == STORAGE_TYPE::TRADE)
         {
-            g_pTrade->ProcessToReceiveTradeItems(Data->Index, itemData);
+            UI::Trade::OwnItemPlaced(Data->Index, itemData);
         }
         else if (storageType == STORAGE_TYPE::VAULT)
         {
@@ -6634,7 +6635,7 @@ void ReceiveTradeYourInventoryExtended(std::span<const BYTE> ReceiveBuffer)
     int length = CalcItemLength(itemData);
     itemData = itemData.subspan(0, length);
 
-    g_pTrade->ProcessToReceiveYourItemAdd(Data->Index, itemData);
+    UI::Trade::PartnerItemAdded(Data->Index, itemData);
 }
 
 void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
@@ -7199,7 +7200,9 @@ void ReceiveSummonLife(const BYTE* ReceiveBuffer)
 BOOL ReceiveTrade(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
     auto Data = (LPPCHATING)ReceiveBuffer;
-    g_pTrade->ProcessToReceiveTradeRequest(Data->ID);
+    wchar_t requester[MAX_USERNAME_SIZE + 1]{};
+    CMultiLanguage::ConvertFromUtf8(requester, Data->ID);
+    UI::Trade::RequestReceived(requester);
 
     return (TRUE);
 }
@@ -7207,38 +7210,53 @@ BOOL ReceiveTrade(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 void ReceiveTradeResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPTRADE)ReceiveBuffer;
-    g_pTrade->ProcessToReceiveTradeResult(Data);
+    wchar_t partnerName[MAX_USERNAME_SIZE + 1]{};
+    CMultiLanguage::ConvertFromUtf8(partnerName, Data->ID, MAX_USERNAME_SIZE);
+    const UI::Trade::Partner partner{ partnerName, Data->Level, Data->GuildKey };
+    switch (Data->SubCode)
+    {
+    case 0: UI::Trade::RequestAnswered(UI::Trade::RequestReply::Declined, partner); break;
+    case 1: UI::Trade::RequestAnswered(UI::Trade::RequestReply::Accepted, partner); break;
+    case 2: UI::Trade::RequestAnswered(UI::Trade::RequestReply::Unavailable, partner); break;
+    default: break;
+    }
 }
 
 void ReceiveTradeYourInventoryDelete(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
-    g_pTrade->ProcessToReceiveYourItemDelete(Data->Value);
+    UI::Trade::PartnerItemRemoved(Data->Value);
 }
 
 /*
 void ReceiveTradeYourInventory(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT_ITEM)ReceiveBuffer;
-    g_pTrade->ProcessToReceiveYourItemAdd(Data->Index, Data->Item, Old);
+    UI::Trade::PartnerItemAdded(Data->Index, Data->Item, Old);
 }*/
 
 void ReceiveTradeMyGold(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
-    g_pTrade->ProcessToReceiveMyTradeGold(Data->Value);
+    UI::Trade::OwnGoldAnswered(Data->Value != 0);
 }
 
 void ReceiveTradeYourGold(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT_DWORD)ReceiveBuffer;
-    g_pTrade->SetYourTradeGold(int(Data->Value));
+    UI::Trade::PartnerGoldChanged(int(Data->Value));
 }
 
 void ReceiveTradeYourResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
-    g_pTrade->ProcessToReceiveYourConfirm(Data->Value);
+    switch (Data->Value)
+    {
+    case 0: UI::Trade::PartnerConfirmChanged(UI::Trade::PartnerConfirm::Cleared); break;
+    case 1: UI::Trade::PartnerConfirmChanged(UI::Trade::PartnerConfirm::Confirmed); break;
+    case 2: UI::Trade::PartnerConfirmChanged(UI::Trade::PartnerConfirm::BothReset); break;
+    default: UI::Trade::PartnerConfirmChanged(UI::Trade::PartnerConfirm::Unchanged); break;
+    }
 }
 
 void ReceiveTradeExit(const BYTE* ReceiveBuffer)
@@ -7254,7 +7272,14 @@ void ReceiveTradeExit(const BYTE* ReceiveBuffer)
     }
 
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
-    g_pTrade->ProcessToReceiveTradeExit(Data->Value);
+    switch (Data->Value)
+    {
+    case 0: UI::Trade::Closed(UI::Trade::CloseReason::Cancelled); break;
+    case 2: UI::Trade::Closed(UI::Trade::CloseReason::InventoryFull); break;
+    case 3: UI::Trade::Closed(UI::Trade::CloseReason::RequestCancelled); break;
+    case 4: UI::Trade::Closed(UI::Trade::CloseReason::ReinforcedItem); break;
+    default: UI::Trade::Closed(UI::Trade::CloseReason::Completed); break;
+    }
 }
 
 void ReceivePing(const BYTE* ReceiveBuffer)

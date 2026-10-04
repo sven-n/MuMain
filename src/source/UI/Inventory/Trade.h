@@ -9,6 +9,7 @@
 #include "UI/Quests/MyQuestInfoWindow.h"
 #include "UI/Inventory/StorageInventory.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/Inventory/TradeUpdates.h"
 
 #include <vector>
 
@@ -170,13 +171,13 @@ namespace mu::ui::window
         void SendRequestItemToMyInven(ITEM* pItemObj,
             int nTradeIndex, int nInvenIndex);
 
-        void ProcessToReceiveTradeRequest(char* pbyYourID);
-        void ProcessToReceiveTradeResult(LPPTRADE pTradeData);
+        void ProcessToReceiveTradeRequest(const wchar_t* pszYourID);
+        void ProcessToReceiveTradeResult(UI::Trade::RequestReply reply, const UI::Trade::Partner& partner);
         void ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex);
         void ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const BYTE> pbyItemPacket);
         void ProcessToReceiveMyTradeGold(BYTE bySuccess);
-        void ProcessToReceiveYourConfirm(BYTE byState);
-        void ProcessToReceiveTradeExit(BYTE byState);
+        void ProcessToReceiveYourConfirm(UI::Trade::PartnerConfirm state);
+        void ProcessToReceiveTradeExit(UI::Trade::CloseReason reason);
         void ProcessToReceiveTradeItems(int nIndex, std::span<const BYTE> pbyItemPacket);
 
         void AlertTrade();
