@@ -994,7 +994,7 @@ void AddBothArgumentSets(EffectCall call, std::vector<EffectCall>& calls)
 }
 } // namespace
 
-std::vector<EffectCall> CallsFor(int type, std::initializer_list<int> subTypes)
+std::vector<EffectCall> CallsFor(int type, std::span<const int> subTypes)
 {
     std::vector<EffectCall> calls;
     for (int subType : subTypes)
@@ -1011,7 +1011,7 @@ std::vector<EffectCall> CallsFor(int type, std::initializer_list<int> subTypes)
     return calls;
 }
 
-std::vector<EffectCall> SecondGeometryCallsFor(int type, std::initializer_list<int> subTypes)
+std::vector<EffectCall> SecondGeometryCallsFor(int type, std::span<const int> subTypes)
 {
     std::vector<EffectCall> calls = CallsFor(type, subTypes);
     for (int subType : subTypes)

@@ -6,6 +6,7 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
+#include <algorithm>
 #include <initializer_list>
 #include <vector>
 
@@ -305,7 +306,20 @@ void BuildTable(std::span<const Data::Effects::EffectTypeCreateParams> createPar
 {
     std::vector<Entry> entries = HandlerEntries();
     for (const Data::Effects::EffectTypeCreateParams& row : createParams)
-        FindOrAdd(entries, row.type).descriptor.create = ToCreateParams(row.params);
+    {
+        EffectDescriptor& descriptor = FindOrAdd(entries, row.type).descriptor;
+        descriptor.create = ToCreateParams(row.params);
+        descriptor.createBySubType.clear();
+        for (const Data::Effects::EffectCreateVariant& variant : row.params.variants)
+        {
+            const CreateParams params = ToCreateParams(Data::Effects::ResolveVariant(row.params, variant.params));
+            for (const int subType : variant.subTypes)
+                descriptor.createBySubType.push_back({subType, params});
+        }
+        std::sort(descriptor.createBySubType.begin(), descriptor.createBySubType.end(),
+                  [](const SubTypeCreateParams& left, const SubTypeCreateParams& right)
+                  { return left.subType < right.subType; });
+    }
 
     int maxType = -1;
     for (const Entry& entry : entries)

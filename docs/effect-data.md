@@ -150,6 +150,49 @@ with when the game creates it. Particles, lightning and sprites have none
   warning: it adds to the start position the slot's previous effect left.
 - `kind` in `create` is a value of the effect, not the `kind` of the file.
 
+### Variants by SubType
+
+The code that creates an effect also passes a SubType, a number whose meaning
+depends on the effect (a level, a direction, a step of a skill). A `create`
+can give some SubTypes other values:
+
+```json
+"create": {
+  "lifeTime": 30,
+  "scale": 0.7,
+  "velocity": 0.1,
+  "blendMesh": -2,
+  "variants": [
+    {
+      "subType": 1,
+      "lifeTime": 20,
+      "hiddenMesh": 0
+    },
+    {
+      "subTypes": [2, 3],
+      "lifeTime": 15,
+      "velocity": 0.3
+    }
+  ]
+}
+```
+
+- A variant names its SubTypes with `subType` (one) or `subTypes` (a list of
+  two or more) and holds the fields of `create`, except `variants`.
+- A SubType of a variant starts with the values of `create` and the
+  variant's on top: a value replaces the value of its field and a copy into
+  it, a copy replaces the value and the copy of its field, and vectors and
+  offsets are replaced component by component. A SubType without a variant
+  gets the values of `create` alone.
+- A `create` can hold only variants. The SubTypes without a variant then
+  start with what the game sets for every new effect, and with the old
+  values of the slot for the fields it does not set, as the original code
+  did.
+- A SubType in two variants or twice in one list, a variant without SubTypes
+  or with a negative one, a variant with variants, and a variant that sets
+  part of `direction` while `create` copies the light into it are errors. A
+  variant without values and an empty `variants` list are warnings.
+
 ## How the names were chosen
 
 - The enum name in camelCase without `MODEL_`/`BITMAP_`:

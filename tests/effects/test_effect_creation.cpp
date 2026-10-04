@@ -41,7 +41,26 @@ const std::array<int, 8> Fx13Types = {MODEL_KENTAUROS_ARROW,
                                       MODEL_EFFECT_SD_AURA};
 
 // Sub types the callers pass (0 to 3) and one no case handles.
-constexpr std::initializer_list<int> RecordedSubTypes = {0, 1, 2, 3, 99};
+constexpr std::array<int, 5> RecordedSubTypes = {0, 1, 2, 3, 99};
+
+// More SubTypes for the types whose old case handled them or whose callers
+// pass them, so the creation baseline holds what the old case did for them.
+const std::map<int, std::vector<int>> MoreRecordedSubTypes = {
+    {BITMAP_FIRE_CURSEDLICH, {4, 12}},   // a branch for 12; callers pass 4 and 12
+    {MODEL_ALICE_BUFFSKILL_EFFECT, {4}}, // a branch for 4
+    {MODEL_CHANGE_UP_NASA, {4}},         // the end of its range of SubTypes 1 to 3
+    {MODEL_WINDFOCE, {4, 5}},            // callers pass them
+};
+
+std::vector<int> RecordedSubTypesOf(int type)
+{
+    std::vector<int> subTypes(RecordedSubTypes.begin(), RecordedSubTypes.end());
+    if (const auto more = MoreRecordedSubTypes.find(type); more != MoreRecordedSubTypes.end())
+    {
+        subTypes.insert(subTypes.end(), more->second.begin(), more->second.end());
+    }
+    return subTypes;
+}
 
 struct Recorded
 {
@@ -183,7 +202,7 @@ TEST_CASE("The second geometry of a call shows what a row copies [effects][recor
     BuildShippedRegistry();
     // MODEL_INFINITY_ARROW4 sets its light and copies it into the direction;
     // the light of the call stays as it was.
-    const std::vector<EffectCall> calls = SecondGeometryCallsFor(MODEL_INFINITY_ARROW4, {0});
+    const std::vector<EffectCall> calls = SecondGeometryCallsFor(MODEL_INFINITY_ARROW4, std::array{0});
     REQUIRE(calls.size() == 8);
     const EffectCall& second = calls.back();
     CHECK(second.owner == Owner::None);
@@ -321,6 +340,7 @@ struct BaselineType
 {
     std::string name;
     int type;
+    std::vector<int> variantSubTypes;
 };
 
 // The types with creation values in the catalogue and the types created
@@ -334,7 +354,12 @@ std::vector<BaselineType> BaselineTypes()
     std::vector<BaselineType> types;
     for (const EffectTypeCreateParams& row : catalogue.GetCreateParams())
     {
-        types.push_back({std::string(catalogue.GetName(EffectKind::Effect, row.type)), row.type});
+        BaselineType& type = types.emplace_back(
+            BaselineType{std::string(catalogue.GetName(EffectKind::Effect, row.type)), row.type, {}});
+        for (const Data::Effects::EffectCreateVariant& variant : row.params.variants)
+        {
+            type.variantSubTypes.insert(type.variantSubTypes.end(), variant.subTypes.begin(), variant.subTypes.end());
+        }
     }
     for (const int type : CreatedWithoutRow)
     {
@@ -361,6 +386,43 @@ std::map<std::string, std::string> ReadDigests(const std::filesystem::path& file
     }
     return digests;
 }
+
+// The records of the creation baseline, with the registry as it is built.
+std::vector<Recorded> RecordBaseline()
+{
+    std::vector<Recorded> records;
+    for (const BaselineType& type : BaselineTypes())
+    {
+        // Every SubType a variant names is recorded.
+        const std::vector<int> subTypes = RecordedSubTypesOf(type.type);
+        for (const int subType : type.variantSubTypes)
+        {
+            INFO(type.name << " subType " << subType);
+            CHECK(std::find(subTypes.begin(), subTypes.end(), subType) != subTypes.end());
+        }
+        for (const EffectCall& call : SecondGeometryCallsFor(type.type, subTypes))
+        {
+            for (const Conditions& conditions : AllConditions())
+            {
+                records.push_back(
+                    {type.name + " " + DescribeArguments(call, conditions), RecordCall(call, conditions)});
+            }
+        }
+    }
+    return records;
+}
+
+void WriteBaseline(const std::vector<Recorded>& records)
+{
+    std::filesystem::create_directories(CreationBaseline.parent_path());
+    std::ofstream out(CreationBaseline, std::ios::binary);
+    out << CreationBaselineHeader;
+    for (const Recorded& recorded : records)
+    {
+        out << recorded.description << '\t' << Digest(recorded.record) << '\n';
+    }
+    MESSAGE("wrote " << CreationBaseline.string());
+}
 } // namespace
 
 // The whole record of every call, not only the values the spot checks name: a
@@ -371,29 +433,10 @@ std::map<std::string, std::string> ReadDigests(const std::filesystem::path& file
 TEST_CASE("The effect types in the catalogue create what their old code created [effects][recorder]")
 {
     BuildShippedRegistry();
-    std::vector<Recorded> records;
-    for (const BaselineType& type : BaselineTypes())
-    {
-        for (const EffectCall& call : SecondGeometryCallsFor(type.type, RecordedSubTypes))
-        {
-            for (const Conditions& conditions : AllConditions())
-            {
-                records.push_back(
-                    {type.name + " " + DescribeArguments(call, conditions), RecordCall(call, conditions)});
-            }
-        }
-    }
-
+    const std::vector<Recorded> records = RecordBaseline();
     if (std::getenv("MU_EFFECT_RECORDER_WRITE") != nullptr)
     {
-        std::filesystem::create_directories(CreationBaseline.parent_path());
-        std::ofstream out(CreationBaseline, std::ios::binary);
-        out << CreationBaselineHeader;
-        for (const Recorded& recorded : records)
-        {
-            out << recorded.description << '\t' << Digest(recorded.record) << '\n';
-        }
-        MESSAGE("wrote " << CreationBaseline.string());
+        WriteBaseline(records);
         return;
     }
 
@@ -503,4 +546,92 @@ TEST_CASE("The types of FX1.4 create from the catalogue what their cases set [ef
     const Record shot = RecordCall(CallOf(MODEL_PHOENIX_SHOT), {});
     CHECK(Find(shot, "Effects[0].Live") == "true");
     CHECK_FALSE(Find(shot, "Effects[0].LifeTime").has_value());
+}
+
+// TEMPORARY: the next commit deletes the cases and this test. With
+// MU_EFFECT_RECORDER_WRITE=1 it writes the creation baseline with the old
+// cases of these types.
+TEST_CASE("TEMP: the rows of FX1.5 give the records of their cases [effects][recorder]")
+{
+    const std::array<int, 41> types = {MODEL_ARROW_AUTOLOAD,
+                                       MODEL_INFINITY_ARROW1,
+                                       MODEL_INFINITY_ARROW2,
+                                       MODEL_INFINITY_ARROW3,
+                                       MODEL_BLADE_SKILL,
+                                       BITMAP_FIRE_CURSEDLICH,
+                                       MODEL_SWELL_OF_MAGICPOWER,
+                                       MODEL_ARROWSRE06,
+                                       MODEL_SUMMONER_CASTING_EFFECT1,
+                                       MODEL_SUMMONER_CASTING_EFFECT11,
+                                       MODEL_SUMMONER_CASTING_EFFECT111,
+                                       MODEL_SUMMONER_CASTING_EFFECT2,
+                                       MODEL_SUMMONER_CASTING_EFFECT22,
+                                       MODEL_SUMMONER_CASTING_EFFECT222,
+                                       MODEL_SUMMONER_SUMMON_SAHAMUTT,
+                                       BITMAP_ENERGY,
+                                       MODEL_LIGHTNING_ORB,
+                                       MODEL_CHAIN_LIGHTNING,
+                                       MODEL_ALICE_DRAIN_LIFE,
+                                       MODEL_ALICE_BUFFSKILL_EFFECT,
+                                       BITMAP_LIGHTNING + 1,
+                                       MODEL_RAKLION_BOSS_MAGIC,
+                                       BITMAP_FIRE_HIK2_MONO,
+                                       BITMAP_MAGIC_ZIN,
+                                       MODEL_MAGIC_CIRCLE1,
+                                       MODEL_CHANGE_UP_EFF,
+                                       MODEL_CHANGE_UP_NASA,
+                                       MODEL_CHANGE_UP_CYLINDER,
+                                       MODEL_AIR_FORCE,
+                                       BITMAP_DAMAGE_01_MONO,
+                                       BITMAP_FLARE,
+                                       MODEL_MANA_RUNE,
+                                       MODEL_SWORD_FORCE,
+                                       BITMAP_TARGET_POSITION_EFFECT1,
+                                       BITMAP_TARGET_POSITION_EFFECT2,
+                                       MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1,
+                                       MODEL_EFFECT_SKURA_ITEM,
+                                       BITMAP_RING_OF_GRADATION,
+                                       MODEL_EFFECT_UMBRELLA_DIE,
+                                       MODEL_WINDFOCE,
+                                       MODEL_SHOCKWAVE_GROUND01};
+    // At 60 frames per second the frame factor is 25/60, where a product with
+    // it is rounded, unlike at 1 and 0.5.
+    const Conditions frameRate[] = {{25.f / 60.f, SlotPattern::A}, {25.f / 60.f, SlotPattern::B}};
+    const auto record = [&](std::span<const Conditions> allConditions)
+    {
+        std::vector<Recorded> all;
+        for (const int type : types)
+        {
+            for (const EffectCall& call : SecondGeometryCallsFor(type, RecordedSubTypesOf(type)))
+            {
+                for (const Conditions& conditions : allConditions)
+                {
+                    all.push_back({Describe(call, conditions), RecordCall(call, conditions)});
+                }
+            }
+        }
+        return all;
+    };
+
+    BuildShippedRegistry(types);
+    const std::vector<Recorded> cases = record(AllConditions());
+    const std::vector<Recorded> casesAtFrameRate = record(frameRate);
+    if (std::getenv("MU_EFFECT_RECORDER_WRITE") != nullptr)
+    {
+        WriteBaseline(RecordBaseline());
+    }
+
+    BuildShippedRegistry();
+    const std::vector<Recorded> rows = record(AllConditions());
+    const std::vector<Recorded> rowsAtFrameRate = record(frameRate);
+
+    std::ostringstream log;
+    const int differing = CompareAll(cases, rows, log);
+    const int differingAtFrameRate = CompareAll(casesAtFrameRate, rowsAtFrameRate, log);
+    INFO(log.str());
+    CHECK(differing == 0);
+    CHECK(differingAtFrameRate == 0);
+    MESSAGE("FX1.5 cases against the rows: " << cases.size() << " calls, " << differing
+                                             << " differ; at 25/60: " << casesAtFrameRate.size() << " calls, "
+                                             << differingAtFrameRate << " differ");
 }

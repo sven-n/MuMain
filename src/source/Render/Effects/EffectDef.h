@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 #include <optional>
+#include <vector>
 
 class OBJECT;
 
@@ -126,12 +127,35 @@ using RenderHandler = void (*)(OBJECT* o);
 // the legacy switch, or vice versa. CreateEffect treats creation as migrated
 // only when `create` or `onCreate` is set; MoveEffect / RenderEffects gate on
 // their respective handlers. An unset stage falls back to the legacy switch.
+// The creation parameters of one SubType that has a variant (D35): the row's
+// with the variant's on top, resolved when the registry is built.
+struct SubTypeCreateParams
+{
+    int subType = 0;
+    CreateParams params;
+};
+
 struct EffectDescriptor
 {
     std::optional<CreateParams> create;
+    // Sorted by SubType; empty for most types.
+    std::vector<SubTypeCreateParams> createBySubType;
     CreateHook onCreate = nullptr;
     MoveHandler move = nullptr;
     RenderHandler render = nullptr;
+
+    // The creation parameters of `subType`; only when `create` is set. The
+    // few SubTypes of a row are searched in order, which costs less than a
+    // table indexed by SubType (SubTypes can be model numbers).
+    const CreateParams& CreateParamsFor(int subType) const
+    {
+        for (const SubTypeCreateParams& variant : createBySubType)
+        {
+            if (variant.subType == subType)
+                return variant.params;
+        }
+        return *create;
+    }
 };
 
 // The groups of fields `params` sets, for CreateParams::groups. Whatever

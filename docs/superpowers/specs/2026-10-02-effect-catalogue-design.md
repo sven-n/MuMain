@@ -41,7 +41,7 @@ decision can move to the roadmap without being renumbered.
 | D32 | Files and house rules | One file per kind: `EffectTypes.json`, `ParticleTypes.json`, `JointTypes.json`, `SpriteTypes.json`. The rules of the item and model files: `formatVersion`, sorted by name, fixed field order, defaults left out, a writer and a test that the shipped files are in its format, names of letters and digits, errors stop the start, warnings go to the log. Documented in `docs/effect-data.md`. |
 | D33 | Loading and lookup | The catalogue is loaded once on the loading screen, next to the item model data, before the first effect is created. The registry table is built from it: the same array indexed by type, not changed after loading. A lookup stays a bounds check and one array read. No names, strings or allocations after loading. |
 | D34 | Creation values | A registry row replaces the whole legacy case, so a type moves only when every statement of its case can be written as data. `CreateParams` gets exactly the fields the moved cases need. Values are applied in one fixed order (values, then offsets, then copies); an offset of a field a copy writes adds to the copy, and a copy reads its source as it is then, or the call's argument (`callLight`, `callScale`). An unset field keeps what the common setup chose, or the slot's old value where the common setup sets nothing. Values the old code multiplies by `FPS_ANIMATION_FACTOR` keep that as a flag. |
-| D35 | Variants by SubType | A row can hold `variants` keyed by SubType that override its values (44 cases, 47 types choose only values by SubType). |
+| D35 | Variants by SubType | A row can hold `variants` keyed by SubType that override its values (44 cases, 47 types choose only values by SubType). A variant names one or more SubTypes and holds the fields of a row; a SubType of a variant gets the row's values with the variant's on top (a value or a copy replaces the value and the copy of its field, vectors and offsets per component), the other SubTypes the row's. The registry resolves them per SubType when it is built. |
 | D36 | Random and logic creation | Cases with `rand()` and the cases with logic stay code in FX1 (167 of 244 cases). Data with random values would have to draw `rand()` in exactly the same order and number, and values like "a random yaw, then the launch vector turned by it" are small programs. They become data in FX2, as building blocks with parameters where adjusting them is meaningful (D43). |
 | D37 | Particles and joints | Names only in FX1; their creation values wait for FX2. They have no registry, their structs differ from effects, and their creation is mostly random formulas. |
 | D38 | Sprites | Sprite entries are names for the textures sprites draw, without values: `CreateSprite` has no values per type, and the blend is chosen per call. |
@@ -206,7 +206,9 @@ Kalima maps load the rock `Object25\Object10.bmd`).
   the old code multiplies by the frame factor is written
   `{"value": -100, "timesFrameFactor": true}`. Offsets and copies are
   groups: `"offset": {"position": {"z": 3400}}`,
-  `"copy": {"startPosition": "position"}` (since FX1.4).
+  `"copy": {"startPosition": "position"}` (since FX1.4). Variants list the
+  SubTypes they are for: `"variants": [{"subType": 1, "lifeTime": 20},
+  {"subTypes": [2, 3], "lifeTime": 15}]` (since FX1.5).
 - Unknown fields are warnings. Unknown symbols, duplicate names and a newer
   `formatVersion` are errors that stop the start.
 

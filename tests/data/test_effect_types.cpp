@@ -328,6 +328,68 @@ TEST_CASE("Wrong creation values are errors, unknown ones warnings, and only eff
     CHECK_FALSE(particles.types[0].create.has_value());
 }
 
+TEST_CASE("Variants are read and merged over the row field by field [data][effects]")
+{
+    const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
+        {"name": "flare", "code": "BITMAP_FLARE", "create": {"lifeTime": 30, "scale": 1, "angle": [1, 2, 3],
+         "copy": {"direction": "light"}, "variants": [
+           {"subTypes": [3, 1], "lifeTime": 60, "angle": {"y": 5},
+            "offset": {"position": {"z": {"value": 100, "timesFrameFactor": true}}}},
+           {"subType": 2, "direction": [4, 5, 6], "copy": {"scale": "callScale", "startPosition": "position"}}]}}]})",
+                                   EffectKind::Effect);
+    CHECK(result.issues.empty());
+    REQUIRE(result.types.size() == 1);
+    REQUIRE(result.types[0].create.has_value());
+    const EffectCreateParams& row = *result.types[0].create;
+    REQUIRE(row.variants.size() == 2);
+    CHECK(row.variants[0].subTypes == std::vector<int>{1, 3});
+    CHECK(row.variants[0].params.lifeTime == 60.0);
+    CHECK(row.variants[1].subTypes == std::vector<int>{2});
+
+    const EffectCreateParams first = ResolveVariant(row, row.variants[0].params);
+    CHECK(first.lifeTime == 60.0);
+    CHECK(first.scale == 1.0);
+    CHECK(first.angle == EffectCreateVector{{1.0, 5.0, 3.0}});
+    CHECK(first.positionOffset == EffectCreateVector{{std::nullopt, std::nullopt, 100.0}, {false, false, true}});
+    CHECK(first.copyLightToDirection);
+    CHECK(first.variants.empty());
+
+    // A value replaces the row's copy, a copy the row's value; copies add up.
+    const EffectCreateParams second = ResolveVariant(row, row.variants[1].params);
+    CHECK(second.lifeTime == 30.0);
+    CHECK_FALSE(second.scale.has_value());
+    CHECK(second.copyCallScaleToScale);
+    CHECK(second.direction == EffectCreateVector{{4.0, 5.0, 6.0}});
+    CHECK_FALSE(second.copyLightToDirection);
+    CHECK(second.copyPositionToStartPosition);
+}
+
+TEST_CASE("Wrong variants are errors, empty ones warnings [data][effects]")
+{
+    const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
+        {"name": "dragon", "code": "MODEL_DRAGON", "create": {"lifeTime": 1, "variants": 5}},
+        {"name": "ghost", "code": "MODEL_CUNDUN_GHOST", "create": {"lifeTime": 2, "variants": [3, {"lifeTime": 1},
+         {"subType": 1, "subTypes": [2, 3], "lifeTime": 1}, {"subType": -1, "lifeTime": 1},
+         {"subTypes": [4, 4], "lifeTime": 1}, {"subType": 5}, {"subTypes": [5, 6], "lifeTime": 3},
+         {"subType": 7, "lifeTime": 1, "variants": []}]}},
+        {"name": "blood", "code": "MODEL_BLOOD", "create": {"lifeTime": 3, "copy": {"direction": "light"}, "variants": [
+         {"subType": 1, "direction": {"x": 1}}, {"subType": 2, "offset": {"startPosition": {"z": 1}}}]}},
+        {"name": "fire", "code": "BITMAP_FIRE", "create": {"lifeTime": 4, "variants": []}}]})",
+                                   EffectKind::Effect);
+    CHECK(HasError(result.issues, "types[0].create.variants"));
+    for (const char* field : {"variants[0]", "variants[1].subType", "variants[2].subType", "variants[3].subType",
+                              "variants[4].subTypes", "variants[6]", "variants[7].variants"})
+    {
+        INFO(std::string(field));
+        CHECK(HasError(result.issues, std::string("types[1].create.") + field));
+    }
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[1].create.variants[5]"));
+    // Part of a direction the row copies the light into.
+    CHECK(HasError(result.issues, "types[2].create.variants[0].direction"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[2].create.variants[1].offset.startPosition"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[3].create.variants"));
+}
+
 TEST_CASE("Creation values are written in a fixed order, unset ones left out [data][effects]")
 {
     EffectTypeEntry ghost{"ghost", "MODEL_CUNDUN_GHOST"};
@@ -465,6 +527,52 @@ TEST_CASE("Vectors, offsets and copies are written in a fixed order, vectors on 
 }
 
 // Every code is an enum symbol, so the data holds no raw numbers (D28).
+// Variants come last, sorted by their SubTypes; one SubType is written as
+// "subType", several as a list on one line.
+TEST_CASE("Variants are written last, sorted by their SubTypes [data][effects]")
+{
+    EffectTypeEntry flare{"flare", "BITMAP_FLARE"};
+    flare.create = EffectCreateParams{.lifeTime = 30};
+    flare.create->variants.push_back({{2}, EffectCreateParams{.scale = 2}});
+    flare.create->variants.push_back({{1, 3}, EffectCreateParams{.lifeTime = 60, .copyCallScaleToScale = true}});
+    const std::vector<EffectTypeEntry> types = {flare};
+
+    const std::string text = WriteEffectTypesJson(EffectKind::Effect, types);
+    CHECK(text == "{\n"
+                  "  \"formatVersion\": 1,\n"
+                  "  \"kind\": \"effect\",\n"
+                  "  \"types\": [\n"
+                  "    {\n"
+                  "      \"name\": \"flare\",\n"
+                  "      \"code\": \"BITMAP_FLARE\",\n"
+                  "      \"create\": {\n"
+                  "        \"lifeTime\": 30,\n"
+                  "        \"variants\": [\n"
+                  "          {\n"
+                  "            \"subTypes\": [1, 3],\n"
+                  "            \"lifeTime\": 60,\n"
+                  "            \"copy\": {\n"
+                  "              \"scale\": \"callScale\"\n"
+                  "            }\n"
+                  "          },\n"
+                  "          {\n"
+                  "            \"subType\": 2,\n"
+                  "            \"scale\": 2\n"
+                  "          }\n"
+                  "        ]\n"
+                  "      }\n"
+                  "    }\n"
+                  "  ]\n"
+                  "}\n");
+    const ReadResult result = Read(text, EffectKind::Effect);
+    CHECK(result.issues.empty());
+    REQUIRE(result.types.size() == 1);
+    REQUIRE(result.types[0].create.has_value());
+    REQUIRE(result.types[0].create->variants.size() == 2);
+    CHECK(result.types[0].create->variants[0] == flare.create->variants[1]);
+    CHECK(result.types[0].create->variants[1] == flare.create->variants[0]);
+}
+
 TEST_CASE("Each kind lists every type number once, sorted, by its symbol [data][effects]")
 {
     for (const EffectKind kind : EffectKinds)
@@ -538,8 +646,9 @@ TEST_CASE("The effect type catalogue keeps the creation values of effects, sorte
     const auto withCreateParams = static_cast<size_t>(std::count_if(
         effects.begin(), effects.end(), [](const EffectTypeEntry& entry) { return entry.create.has_value(); }));
     // The 32 types of the 22 rows that EffectRegistry.cpp held as C++ until
-    // FX1.2, the 8 types whose creation cases FX1.3 moved and the 28 of FX1.4.
-    CHECK(withCreateParams == 68);
+    // FX1.2, the 8 types whose creation cases FX1.3 moved, the 28 of FX1.4 and
+    // the 41 of FX1.5.
+    CHECK(withCreateParams == 109);
 
     EffectTypeCatalogue catalogue;
     catalogue.Build(EffectKind::Effect, effects);
@@ -726,10 +835,11 @@ TEST_CASE("The effect registry converts and applies vectors, offsets and copies 
 
 // ApplyCreateParams skips the groups of fields a row does not set
 // (CreateParams::groups), so a field missing from GroupsOf would never be
-// applied when it is the only one of its group a row sets. Each field alone,
-// against an effect whose fields all differ from the values. Keep in step with
-// EffectCreateParams.
-TEST_CASE("Every creation field is applied when it is the only one a row sets [data][effects]")
+// applied when it is the only one of its group a row sets; a field missing
+// from ResolveVariant would never reach the SubTypes of a variant. Each field
+// alone, in the row and in a variant of an empty row, against an effect whose
+// fields all differ from the values. Keep in step with EffectCreateParams.
+TEST_CASE("Every creation field is applied when it is the only one a row or a variant sets [data][effects]")
 {
     struct Field
     {
@@ -787,13 +897,8 @@ TEST_CASE("Every creation field is applied when it is the only one a row sets [d
          [](const OBJECT& o) { return o.Scale == 2.5f; }},
     };
 
-    for (const Field& field : fields)
+    const auto applyTo = [](const Render::Effects::CreateParams& params)
     {
-        INFO(std::string(field.name));
-        EffectTypeCreateParams row{MODEL_BLOOD, {}};
-        field.set(row.params);
-        Render::Effects::BuildRegistry(std::span<const EffectTypeCreateParams>(&row, 1));
-
         OBJECT o;
         o.LifeTime = 1.f;
         o.Scale = 1.f;
@@ -817,9 +922,65 @@ TEST_CASE("Every creation field is applied when it is the only one a row sets [d
         Vector(0.f, 0.f, 0.f, o.Direction);
         Vector(-1.f, -2.f, -3.f, o.StartPosition);
         Vector(0.f, 0.f, 0.f, o.HeadTargetAngle);
-        Render::Effects::ApplyCreateParams(&o, RequireCreateParams(MODEL_BLOOD), {{0.25f, 0.75f, 0.5f}, 2.5f});
-        CHECK(field.applied(o));
+        Render::Effects::ApplyCreateParams(&o, params, {{0.25f, 0.75f, 0.5f}, 2.5f});
+        return o;
+    };
+
+    constexpr int VariantSubType = 7;
+    for (const Field& field : fields)
+    {
+        INFO(std::string(field.name));
+        EffectTypeCreateParams row{MODEL_BLOOD, {}};
+        field.set(row.params);
+        Render::Effects::BuildRegistry(std::span<const EffectTypeCreateParams>(&row, 1));
+        CHECK(field.applied(applyTo(RequireCreateParams(MODEL_BLOOD))));
+
+        EffectTypeCreateParams variantRow{MODEL_BLOOD, {}};
+        Data::Effects::EffectCreateVariant variant{{VariantSubType}, {}};
+        field.set(variant.params);
+        variantRow.params.variants.push_back(variant);
+        Render::Effects::BuildRegistry(std::span<const EffectTypeCreateParams>(&variantRow, 1));
+        const Render::Effects::EffectDescriptor* descriptor = Render::Effects::Lookup(MODEL_BLOOD);
+        REQUIRE(descriptor != nullptr);
+        CHECK(field.applied(applyTo(descriptor->CreateParamsFor(VariantSubType))));
+        CHECK_FALSE(field.applied(applyTo(descriptor->CreateParamsFor(0))));
     }
+
+    BuildShippedRegistry();
+}
+
+// A SubType with a variant gets the row's values with the variant's on top;
+// the other SubTypes get the row's.
+TEST_CASE("The effect registry resolves the variants of a row for their SubTypes [data][effects]")
+{
+    EffectTypeCreateParams row{MODEL_BLOOD, EffectCreateParams{.lifeTime = 30, .scale = 1}};
+    row.params.variants.push_back({{3, 1}, EffectCreateParams{.lifeTime = 60}});
+    row.params.variants.push_back({{2}, EffectCreateParams{.copyCallScaleToScale = true}});
+    Render::Effects::BuildRegistry(std::span<const EffectTypeCreateParams>(&row, 1));
+
+    const Render::Effects::EffectDescriptor* descriptor = Render::Effects::Lookup(MODEL_BLOOD);
+    REQUIRE(descriptor != nullptr);
+    REQUIRE(descriptor->createBySubType.size() == 3);
+    CHECK(descriptor->createBySubType[0].subType == 1);
+    CHECK(descriptor->createBySubType[1].subType == 2);
+    CHECK(descriptor->createBySubType[2].subType == 3);
+
+    const Render::Effects::CreateParams& other = descriptor->CreateParamsFor(0);
+    CHECK(other.lifeTime == 30.f);
+    CHECK(other.scale == 1.f);
+    CHECK(other.groups == 0);
+    for (const int subType : {1, 3})
+    {
+        const Render::Effects::CreateParams& params = descriptor->CreateParamsFor(subType);
+        CHECK(params.lifeTime == 60.f);
+        CHECK(params.scale == 1.f);
+    }
+    // The variant's copy of the scale replaces the row's value.
+    const Render::Effects::CreateParams& copied = descriptor->CreateParamsFor(2);
+    CHECK(copied.lifeTime == 30.f);
+    CHECK_FALSE(copied.scale.has_value());
+    CHECK(copied.copyCallScaleToScale);
+    CHECK(copied.groups == Render::Effects::CreateParams::Copies);
 
     BuildShippedRegistry();
 }
