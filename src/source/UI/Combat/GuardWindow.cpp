@@ -59,8 +59,6 @@ bool CGuardWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadScrollBarImages();
-
     // The tabs stay a native radio group for their hit tests; guard_window.rml draws them.
     m_TabBtn.CreateRadioGroup(3, BITMAP_GUILDINFO_BEGIN);
     m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 12.f, m_Pos.y + 84.f, 56, 22);
@@ -85,7 +83,6 @@ void CGuardWindow::Release()
         m_RmlBinder.Destroy(context);
     }
     m_pRmlDoc = nullptr;
-    UnloadScrollBarImages();
 
     if (m_pNewUIMng)
     {
@@ -212,24 +209,6 @@ void CGuardWindow::ClosingProcess()
 float CGuardWindow::GetLayerDepth()
 {
     return 5.0f;
-}
-
-void CGuardWindow::LoadScrollBarImages()
-{
-    LoadBitmap(L"Interface\\newui_scrollbar_up.tga", IMAGE_GUARDWINDOW_SCROLL_TOP);
-    LoadBitmap(L"Interface\\newui_scrollbar_m.tga", IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
-    LoadBitmap(L"Interface\\newui_scrollbar_down.tga", IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
-    LoadBitmap(L"Interface\\newui_scroll_on.tga", IMAGE_GUARDWINDOW_SCROLLBAR_ON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_scroll_off.tga", IMAGE_GUARDWINDOW_SCROLLBAR_OFF, GL_LINEAR);
-}
-
-void CGuardWindow::UnloadScrollBarImages()
-{
-    DeleteBitmap(IMAGE_GUARDWINDOW_SCROLL_TOP);
-    DeleteBitmap(IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
-    DeleteBitmap(IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
-    DeleteBitmap(IMAGE_GUARDWINDOW_SCROLLBAR_ON);
-    DeleteBitmap(IMAGE_GUARDWINDOW_SCROLLBAR_OFF);
 }
 
 bool CGuardWindow::BtnProcess()

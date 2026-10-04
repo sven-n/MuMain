@@ -27,16 +27,6 @@ namespace mu::ui::window
 class CGuardWindow : public CObject
 {
 public:
-    // The scroll bar images, shared with the still-native windows that draw the same bar.
-    enum IMAGE_LIST
-    {
-        IMAGE_GUARDWINDOW_SCROLL_TOP = CChatLogWindow::IMAGE_SCROLL_TOP,
-        IMAGE_GUARDWINDOW_SCROLL_MIDDLE = CChatLogWindow::IMAGE_SCROLL_MIDDLE,
-        IMAGE_GUARDWINDOW_SCROLL_BOTTOM = CChatLogWindow::IMAGE_SCROLL_BOTTOM,
-        IMAGE_GUARDWINDOW_SCROLLBAR_ON = CChatLogWindow::IMAGE_SCROLLBAR_ON,
-        IMAGE_GUARDWINDOW_SCROLLBAR_OFF = CChatLogWindow::IMAGE_SCROLLBAR_OFF,
-    };
-
     // The buttons RmlUi reports (guard_button(n)).
     enum GUARD_BUTTON
     {
@@ -134,13 +124,6 @@ public:
     void ReloadRmlTheme();
 
 private:
-    // KNOWN ISSUE, not this pass's to fix: these slots alias CChatLogWindow's, which CScrollBar
-    // (UI/Widgets/Window/ScrollBar.cpp) loads and renders from. Nothing in this window draws them
-    // any more -- the two renderers that did went with the native list boxes -- so the load is
-    // redundant and the unload on hide deletes textures CScrollBar still expects. Needs runtime
-    // checking of who owns these slots, not a blind deletion.
-    void LoadScrollBarImages();
-    void UnloadScrollBarImages();
     bool BtnProcess();
 
     void UpdateRegisterTab(GUARD_BUTTON button);

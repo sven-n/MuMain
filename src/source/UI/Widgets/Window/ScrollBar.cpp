@@ -59,6 +59,11 @@ float CScrollBar::GetLayerDepth()
     return 4.4f;
 }
 
+// The only loader of these slots. CGlobalBitmap::LoadImage() reference-counts by index and
+// returns early when the slot already holds the same file -- without applying the new filter, so
+// the first loader's filter is the one that sticks. CGuardWindow used to load the same five under
+// its own alias and ask for the default filter on newui_scrollbar_m.tga where this wants
+// GL_LINEAR, and it ran first; it no longer loads them at all, since nothing there draws them.
 void CScrollBar::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_scrollbar_up.tga", IMAGE_SCROLL_TOP);
