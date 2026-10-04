@@ -503,11 +503,17 @@ bool RenderCrossShield(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
     return true;
 }
 
+// The light of a blended mesh that pulses slowly between 0.4 and 1.
+float BlendMeshPulse()
+{
+    return sinf(WorldTime * 0.002f) * 0.3f + 0.7f;
+}
+
 bool RenderOldScroll(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
-    float sine = float(sinf(WorldTime * 0.002f) * 0.3f) + 0.7f;
     b->RenderBody(RenderType, 0.7f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1);
-    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, 4, sine, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 0);
+    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, 4, BlendMeshPulse(), o->BlendMeshTexCoordU,
+                  o->BlendMeshTexCoordV, 0);
     return true;
 }
 
@@ -521,9 +527,9 @@ bool RenderIllusionSorcererCovenant(BMD* b, OBJECT* o, int Type, float Alpha, in
 
 bool RenderScrollOfBlood(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
-    float sine = float(sinf(WorldTime * 0.002f) * 0.3f) + 0.7f;
     b->RenderBody(RenderType, 0.7f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 0);
-    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, 0, sine, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1);
+    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, 0, BlendMeshPulse(), o->BlendMeshTexCoordU,
+                  o->BlendMeshTexCoordV, 1);
     return true;
 }
 
@@ -1710,16 +1716,28 @@ bool RenderBloodBone(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
     return true;
 }
 
-// The cloak see-through in the light of its level (a little darker), its
-// first mesh pulsing; the level glow comes on top as for other items.
+// The cloak is see-through: it is added to what is behind it, so a darker
+// light would make it fade. Its brightest color is always this bright.
+constexpr float InvisibilityCloakBrightness = 0.8f;
+
+// The cloak in the color of its level, as visible at every level and on any
+// ground, its first mesh pulsing; the level glow comes on top as for other
+// items.
 bool RenderInvisibilityCloak(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
     vec3_t light;
     VectorCopy(b->BodyLight, light);
-    Vector(light[0] * 0.8f, light[1] * 0.8f, light[2] * 0.8f, b->BodyLight);
-    float sine = float(sinf(WorldTime * 0.002f) * 0.3f) + 0.7f;
-    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, 0, sine, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                  o->HiddenMesh);
+    const float brightest = std::max({light[0], light[1], light[2]});
+    if (brightest > 0.f)
+    {
+        VectorScale(light, InvisibilityCloakBrightness / brightest, b->BodyLight);
+    }
+    else
+    {
+        Vector(InvisibilityCloakBrightness, InvisibilityCloakBrightness, InvisibilityCloakBrightness, b->BodyLight);
+    }
+    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, 0, BlendMeshPulse(), o->BlendMeshTexCoordU,
+                  o->BlendMeshTexCoordV, o->HiddenMesh);
     VectorCopy(light, b->BodyLight);
     return true;
 }

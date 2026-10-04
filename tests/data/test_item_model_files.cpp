@@ -801,8 +801,6 @@ TEST_CASE("Models drawn for items glow like the old drawing code [data][items]")
     // like the Scroll of Archangel and the Old Scroll.
     CHECK(GetLevel(MODEL_ITEM + MakeItemType(13, 17), 5) == 5);
     CHECK(GetLevel(MODEL_ITEM + MakeItemType(13, 50), 5) == 5);
-    // So does the Invisibility Cloak.
-    CHECK(GetLevel(MODEL_ITEM + MakeItemType(13, 18), 5) == 5);
     // The event models of level variants stay in code.
     CHECK(GetLevel(MODEL_EVENT + 14, 2) == 9);
     CHECK(GetLevel(MODEL_ITEM + MakeItemType(14, 13), 0) == 8);
@@ -1100,6 +1098,11 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     // Some effects draw the model themselves.
     level = 2;
     CHECK(apply(MakeItemType(14, 27), level) == Result::Drawn);
+    // The Invisibility Cloak does not draw itself before the level glow; its
+    // render style draws it, at its level.
+    level = 5;
+    CHECK(apply(MakeItemType(13, 18), level) == Result::None);
+    CHECK(level == 5);
     // Items without an effect, and models that are not items.
     CHECK(apply(ITEM_KRIS, level) == Result::None);
     object.Type = MODEL_PLAYER;
