@@ -40,9 +40,8 @@
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Inventory/InventoryCtrl.h"
-#include "UI/RmlBridge/RmlTooltip.h"
+#include "UI/Tooltip/LegacyTextListTooltip.h"
 #include "UI/Scaling/UITransform.h"
-#include "Core/Utilities/StringUtils.h"
 #include "UI/Inventory/MyShopInventory.h" // ShowPersonalShopItemValueDialog
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/SocketSystem.h"
@@ -413,57 +412,6 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
     }
 
     DisableAlphaBlend();
-}
-
-// Declared in ZzzInventory.h -- shared by every other hover-tooltip call site still building its
-// content the legacy TextList way (MasterLevel.cpp, CursedTempleSystem.cpp), not just this file's
-// own RenderItemInfo()/RenderRepairInfo(). RenderHelpLine()/RenderHelpCategory() (this file, above)
-// also draw through RenderTipTextList() but build a persistent multi-cell table, not a single hover
-// tooltip -- they don't go through this conversion and keep calling RenderTipTextList() directly.
-std::vector<UI::RmlBridge::Tooltip::Line> BuildTooltipLinesFromTextList(int textNum)
-{
-    std::vector<UI::RmlBridge::Tooltip::Line> lines;
-    lines.reserve(static_cast<size_t>(textNum));
-
-    for (int i = 0; i < textNum; ++i)
-    {
-        if (TextList[i][0] == L'\0')
-            break;
-
-        UI::RmlBridge::Tooltip::Line line;
-        if (TextList[i][0] == L'\n')
-        {
-            line.kind = UI::RmlBridge::Tooltip::Line::Kind::HalfSpacer;
-        }
-        else if (TextList[i][0] == L' ' && TextList[i][1] == L'\0')
-        {
-            line.kind = UI::RmlBridge::Tooltip::Line::Kind::FullSpacer;
-        }
-        else
-        {
-            line.text = StringUtils::WideToNarrow(TextList[i]);
-            line.bold = (TextBold[i] != 0);
-            switch (TextListColor[i])
-            {
-            case TEXT_COLOR_BLUE: line.color = UI::RmlBridge::Tooltip::LineColor::Blue; break;
-            case TEXT_COLOR_GRAY: line.color = UI::RmlBridge::Tooltip::LineColor::Gray; break;
-            case TEXT_COLOR_RED: line.color = UI::RmlBridge::Tooltip::LineColor::Red; break;
-            case TEXT_COLOR_YELLOW: line.color = UI::RmlBridge::Tooltip::LineColor::Yellow; break;
-            case TEXT_COLOR_GREEN: line.color = UI::RmlBridge::Tooltip::LineColor::Green; break;
-            case TEXT_COLOR_PURPLE: line.color = UI::RmlBridge::Tooltip::LineColor::Purple; break;
-            case TEXT_COLOR_REDPURPLE: line.color = UI::RmlBridge::Tooltip::LineColor::RedPurple; break;
-            case TEXT_COLOR_VIOLET: line.color = UI::RmlBridge::Tooltip::LineColor::Violet; break;
-            case TEXT_COLOR_ORANGE: line.color = UI::RmlBridge::Tooltip::LineColor::Orange; break;
-            case TEXT_COLOR_DARKRED: line.color = UI::RmlBridge::Tooltip::LineColor::DarkRedHighlight; break;
-            case TEXT_COLOR_DARKBLUE: line.color = UI::RmlBridge::Tooltip::LineColor::DarkBlueHighlight; break;
-            case TEXT_COLOR_DARKYELLOW: line.color = UI::RmlBridge::Tooltip::LineColor::DarkYellowHighlight; break;
-            case TEXT_COLOR_GREEN_BLUE: line.color = UI::RmlBridge::Tooltip::LineColor::GreenBlueHighlight; break;
-            case TEXT_COLOR_WHITE: default: line.color = UI::RmlBridge::Tooltip::LineColor::White; break;
-            }
-        }
-        lines.push_back(std::move(line));
-    }
-    return lines;
 }
 
 void SendRequestUse(int Index, int Target, bool addPoints)
@@ -2111,7 +2059,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     // frame draws nothing" under the old per-frame native draw -- already equivalent to "hidden"
     // for that item. The shared tooltip document is persistent, so this replicates that; the real
     // Show() call near the end of this function makes it visible again once actually reached.
-    UI::RmlBridge::Tooltip::Hide();
+    UI::Tooltip::HideLegacyTextList();
 
     if (ip->Type == -1)
         return;
@@ -5655,18 +5603,14 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         // sx/sy are reference-pixel, in the same space as this window's own m_Pos-based root_x/root_y
         // conversion (CharacterInfoWindow.cpp etc.) -- convert through the ambient transform here,
-        // at the call site, rather than inside Tooltip::Show() (see RmlTooltip.h's own comment for
+        // at the call site, rather than inside the shared tooltip (see RmlTooltip.h's comment for
         // why: a shared primitive can't safely guess which transform applies to a given caller).
         const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-        UI::RmlBridge::Tooltip::Config config;
-        config.lines = BuildTooltipLinesFromTextList(TextNum);
-        config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(sx));
-        config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(sy));
-        config.centerHorizontally = true; // RenderTipTextList() always centered on sx, unconditionally.
-        config.anchor = bItemTextListBoxUse ? UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft
-                                             : UI::RmlBridge::Tooltip::AnchorPoint::BelowLeft;
-        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RenderTipTextList()'s own default (RT3_SORT_CENTER).
-        UI::RmlBridge::Tooltip::Show(config);
+        UI::Tooltip::ShowLegacyTextList(
+            TextNum,
+            UI::Scaling::PositionX(activeTransform, static_cast<float>(sx)),
+            UI::Scaling::PositionY(activeTransform, static_cast<float>(sy)),
+            bItemTextListBoxUse ? UI::Tooltip::Placement::Above : UI::Tooltip::Placement::Below);
     }
 }
 
@@ -5678,7 +5622,7 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
     // at the very end of this function (reached only when none of the guards below fire) makes it
     // visible again for an allowed item, same net effect as before, one frame earlier than a stale
     // previous item's tooltip would otherwise have lingered.
-    UI::RmlBridge::Tooltip::Hide();
+    UI::Tooltip::HideLegacyTextList();
 
     if (IsRepairBan(ip) == true)
     {
@@ -5970,13 +5914,10 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
         sy += p->Height * INVENTORY_SCALE;
 
     const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-    UI::RmlBridge::Tooltip::Config config;
-    config.lines = BuildTooltipLinesFromTextList(TextNum);
-    config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(sx));
-    config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(sy));
-    config.centerHorizontally = true; // RenderTipTextList() always centered on sx, unconditionally.
-    config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RenderTipTextList()'s own default (RT3_SORT_CENTER).
-    UI::RmlBridge::Tooltip::Show(config);
+    UI::Tooltip::ShowLegacyTextList(
+        TextNum,
+        UI::Scaling::PositionX(activeTransform, static_cast<float>(sx)),
+        UI::Scaling::PositionY(activeTransform, static_cast<float>(sy)));
 }
 
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)

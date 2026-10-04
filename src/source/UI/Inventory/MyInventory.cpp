@@ -996,10 +996,9 @@ void CMyInventory::SyncRmlModel()
             UI::RmlBridge::Tooltip::Line line;
             // BuildSetOptionTooltipModel()/BuildSocketOptionTooltipModel() reuse the old native
             // TextList convention of sniffing a leading '\n' (half-height spacer) or a lone ' '
-            // (full-height spacer) rather than an explicit field -- same detection as
-            // ZzzInventory.cpp's own BuildTooltipLinesFromTextList(). Left as literal text here
-            // once (before this was noticed) rendered as a raw embedded newline character inside a
-            // `white-space: nowrap` .tt-line, which broke RmlUi's own text layout for the whole
+            // (full-height spacer) rather than an explicit field -- the same detection as the
+            // shared legacy TextList tooltip conversion. A raw newline inside a
+            // `white-space: nowrap` .tt-line broke RmlUi's own text layout for the whole
             // panel badly enough that nothing in it rendered.
             if (src.text[0] == L'\n')
             {

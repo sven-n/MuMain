@@ -29,8 +29,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "Core/Utilities/StringUtils.h"
-#include "UI/RmlBridge/RmlTooltip.h"
+#include "UI/Tooltip/LegacyTextListTooltip.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/Text/CUIRenderText.h"
 
@@ -163,57 +162,6 @@ namespace
         MouseRButtonPush = false;
         MouseRButton = false;
         MouseRButtonPress = 0;
-    }
-
-    // Same TextList/TextListColor/TextBold -> UI::RmlBridge::Tooltip::Line conversion as
-    // ZzzInventory.cpp's own BuildTooltipLinesFromTextList() (RenderItemInfo()/RenderRepairInfo()) --
-    // duplicated locally since that one has internal linkage there. Keeps RenderPetItemInfo()'s
-    // existing per-line text/color logic untouched; only what happens with the finished buffer
-    // changes, from a direct RenderTipTextList() native draw to the shared RmlUi tooltip.
-    std::vector<UI::RmlBridge::Tooltip::Line> BuildPetTooltipLinesFromTextList(int textNum)
-    {
-        std::vector<UI::RmlBridge::Tooltip::Line> lines;
-        lines.reserve(static_cast<size_t>(textNum));
-
-        for (int i = 0; i < textNum; ++i)
-        {
-            if (TextList[i][0] == L'\0')
-                break;
-
-            UI::RmlBridge::Tooltip::Line line;
-            if (TextList[i][0] == L'\n')
-            {
-                line.kind = UI::RmlBridge::Tooltip::Line::Kind::HalfSpacer;
-            }
-            else if (TextList[i][0] == L' ' && TextList[i][1] == L'\0')
-            {
-                line.kind = UI::RmlBridge::Tooltip::Line::Kind::FullSpacer;
-            }
-            else
-            {
-                line.text = StringUtils::WideToNarrow(TextList[i]);
-                line.bold = (TextBold[i] != 0);
-                switch (TextListColor[i])
-                {
-                case TEXT_COLOR_BLUE: line.color = UI::RmlBridge::Tooltip::LineColor::Blue; break;
-                case TEXT_COLOR_GRAY: line.color = UI::RmlBridge::Tooltip::LineColor::Gray; break;
-                case TEXT_COLOR_RED: line.color = UI::RmlBridge::Tooltip::LineColor::Red; break;
-                case TEXT_COLOR_YELLOW: line.color = UI::RmlBridge::Tooltip::LineColor::Yellow; break;
-                case TEXT_COLOR_GREEN: line.color = UI::RmlBridge::Tooltip::LineColor::Green; break;
-                case TEXT_COLOR_PURPLE: line.color = UI::RmlBridge::Tooltip::LineColor::Purple; break;
-                case TEXT_COLOR_REDPURPLE: line.color = UI::RmlBridge::Tooltip::LineColor::RedPurple; break;
-                case TEXT_COLOR_VIOLET: line.color = UI::RmlBridge::Tooltip::LineColor::Violet; break;
-                case TEXT_COLOR_ORANGE: line.color = UI::RmlBridge::Tooltip::LineColor::Orange; break;
-                case TEXT_COLOR_DARKRED: line.color = UI::RmlBridge::Tooltip::LineColor::DarkRedHighlight; break;
-                case TEXT_COLOR_DARKBLUE: line.color = UI::RmlBridge::Tooltip::LineColor::DarkBlueHighlight; break;
-                case TEXT_COLOR_DARKYELLOW: line.color = UI::RmlBridge::Tooltip::LineColor::DarkYellowHighlight; break;
-                case TEXT_COLOR_GREEN_BLUE: line.color = UI::RmlBridge::Tooltip::LineColor::GreenBlueHighlight; break;
-                case TEXT_COLOR_WHITE: default: line.color = UI::RmlBridge::Tooltip::LineColor::White; break;
-                }
-            }
-            lines.push_back(std::move(line));
-        }
-        return lines;
     }
 }
 
@@ -863,13 +811,10 @@ static std::uint8_t g_tabBar = 0;
         }
 
         const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-        UI::RmlBridge::Tooltip::Config config;
-        config.lines = BuildPetTooltipLinesFromTextList(TextNum);
-        config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(sx));
-        config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(sy));
-        config.centerHorizontally = true; // RenderTipTextList() always centered on sx, unconditionally.
-        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RenderTipTextList()'s own default (RT3_SORT_CENTER).
-        UI::RmlBridge::Tooltip::Show(config);
+        UI::Tooltip::ShowLegacyTextList(
+            TextNum,
+            UI::Scaling::PositionX(activeTransform, static_cast<float>(sx)),
+            UI::Scaling::PositionY(activeTransform, static_cast<float>(sy)));
         return true;
     }
 }

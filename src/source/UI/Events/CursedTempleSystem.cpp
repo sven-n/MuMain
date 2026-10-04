@@ -24,6 +24,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/Tooltip/LegacyTextListTooltip.h"
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -756,13 +757,11 @@ namespace
     void ShowSkillHoverTooltip(float sx, float sy, int textNum)
     {
         const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-        UI::RmlBridge::Tooltip::Config config;
-        config.lines = BuildTooltipLinesFromTextList(textNum);
-        config.anchorX = UI::Scaling::PositionX(activeTransform, sx);
-        config.anchorY = UI::Scaling::PositionY(activeTransform, sy);
-        config.centerHorizontally = true; // RenderTipTextList()'s own sx - fWidth/2 centering.
-        config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RT3_SORT_CENTER, RenderTipTextList()'s own default.
-        UI::RmlBridge::Tooltip::Show(config, &kSkillHoverTooltipOwner);
+        UI::Tooltip::ShowLegacyTextList(
+            textNum,
+            UI::Scaling::PositionX(activeTransform, sx),
+            UI::Scaling::PositionY(activeTransform, sy),
+            UI::Tooltip::Placement::Below, &kSkillHoverTooltipOwner);
     }
 }
 
@@ -998,7 +997,7 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
 
     if (!anyTooltipHovered)
     {
-        UI::RmlBridge::Tooltip::Hide(&kSkillHoverTooltipOwner);
+        UI::Tooltip::HideLegacyTextList(&kSkillHoverTooltipOwner);
     }
 }
 

@@ -23,6 +23,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlTooltip.h"
+#include "UI/Tooltip/LegacyTextListTooltip.h"
 #include <RmlUi/Core/ElementDocument.h>
 
 namespace
@@ -803,13 +804,11 @@ void mu::ui::window::CMasterLevel::ShowExperienceHint()
                 Master_Level_Data.lNext_MasterLevel_Experince);
 
     const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-    UI::RmlBridge::Tooltip::Config config;
-    config.lines = BuildTooltipLinesFromTextList(1);
-    config.anchorX = UI::Scaling::PositionX(activeTransform, kExperienceHintX);
-    config.anchorY = UI::Scaling::PositionY(activeTransform, kExperienceHintY);
-    config.centerHorizontally = true; // RenderTipTextList()'s own sx - fWidth/2 centering.
-    config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RT3_SORT_CENTER (iSort=3).
-    UI::RmlBridge::Tooltip::Show(config, &kExperienceHintOwner);
+    UI::Tooltip::ShowLegacyTextList(
+        1,
+        UI::Scaling::PositionX(activeTransform, kExperienceHintX),
+        UI::Scaling::PositionY(activeTransform, kExperienceHintY),
+        UI::Tooltip::Placement::Below, &kExperienceHintOwner);
 }
 
 void mu::ui::window::CMasterLevel::ShowCloseHint()
@@ -850,17 +849,12 @@ bool mu::ui::window::CMasterLevel::ShowNodeHint(int nodeId)
     UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "panel", nodeElementId.c_str(), POINT{0, 0}, nodeLeft,
                                                 nodeTop);
     const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-    UI::RmlBridge::Tooltip::Config config;
-    config.lines = BuildTooltipLinesFromTextList(lineCount);
-    config.anchorX = UI::Scaling::PositionX(activeTransform, nodeLeft + kIconOffsetX);
-    config.anchorY = UI::Scaling::PositionY(activeTransform, nodeTop + kNodeHintBelowIcon);
-    config.centerHorizontally = true; // RenderTipTextList()'s own sx - fWidth/2 centering.
-    config.anchor = (nodeTop > kNodeHintFlipTop)
-                        ? UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft
-                        : UI::RmlBridge::Tooltip::AnchorPoint::BelowLeft; // matches the old STRP_BOTTOMCENTER flip near
-                                                                          // the bottom of the screen.
-    config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RT3_SORT_CENTER (iSort=3).
-    UI::RmlBridge::Tooltip::Show(config, &kNodeHintOwner);
+    UI::Tooltip::ShowLegacyTextList(
+        lineCount,
+        UI::Scaling::PositionX(activeTransform, nodeLeft + kIconOffsetX),
+        UI::Scaling::PositionY(activeTransform, nodeTop + kNodeHintBelowIcon),
+        nodeTop > kNodeHintFlipTop ? UI::Tooltip::Placement::Above : UI::Tooltip::Placement::Below,
+        &kNodeHintOwner);
     return true;
 }
 
