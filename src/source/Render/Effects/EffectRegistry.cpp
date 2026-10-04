@@ -113,17 +113,22 @@ void ApplyCopies(OBJECT* o, const CreateParams& params, const CreateCall& call)
     if (params.copyCallScaleToScale)
         o->Scale = call.scale;
 }
-// One name per field of CreateParams: this stops compiling when the struct
-// gets a field, so GroupsOf below gives it a group and ApplyCreateParams
-// applies it.
+// One name per field of CreateParams: the binding stops compiling when the
+// struct gets a field, and the count when it has another number of fields than
+// the catalogue's values, so GroupsOf below gives the field a group and
+// ApplyCreateParams applies it.
+#define CREATE_PARAMS_FIELD_NAMES                                                                                      \
+    lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha, light, groups, lightEnable,      \
+        alphaEnable, kind, skill, pkKey, timer, distance, collisionRange, position, angle, direction, positionOffset,  \
+        angleOffset, startPositionOffset, copyLightToDirection, copyPositionToStartPosition,                           \
+        copyCallLightToHeadTargetAngle, copyCallScaleToScale
 [[maybe_unused]] void NameEveryField(const CreateParams& params)
 {
-    [[maybe_unused]] const auto& [lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha,
-                                  light, groups, lightEnable, alphaEnable, kind, skill, pkKey, timer, distance,
-                                  collisionRange, position, angle, direction, positionOffset, angleOffset,
-                                  startPositionOffset, copyLightToDirection, copyPositionToStartPosition,
-                                  copyCallLightToHeadTargetAngle, copyCallScaleToScale] = params;
+    [[maybe_unused]] const auto& [CREATE_PARAMS_FIELD_NAMES] = params;
+    static_assert(decltype(Data::Effects::CountNames(CREATE_PARAMS_FIELD_NAMES))::value ==
+                  Data::Effects::EffectCreateFieldCount);
 }
+#undef CREATE_PARAMS_FIELD_NAMES
 } // namespace
 
 std::uint8_t GroupsOf(const CreateParams& params)
@@ -199,16 +204,21 @@ template <typename T> std::optional<T> ToInteger(const std::optional<int>& value
     return static_cast<T>(*value);
 }
 
-// One name per field of the catalogue's values: this stops compiling when
-// they get a field, so ToCreateParams below converts it too.
+// One name per field of the catalogue's values: the binding stops compiling
+// when they get a field, and the count when the name is added without changing
+// EffectCreateFieldCount, so ToCreateParams below converts it too.
+#define EFFECT_CREATE_FIELD_NAMES                                                                                      \
+    lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha, light, lightEnable, alphaEnable, \
+        kind, skill, pkKey, timer, distance, collisionRange, position, angle, direction, positionOffset, angleOffset,  \
+        startPositionOffset, copyLightToDirection, copyPositionToStartPosition, copyCallLightToHeadTargetAngle,        \
+        copyCallScaleToScale, variants
 [[maybe_unused]] void NameEveryField(const Data::Effects::EffectCreateParams& values)
 {
-    [[maybe_unused]] const auto& [lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha,
-                                  light, lightEnable, alphaEnable, kind, skill, pkKey, timer, distance, collisionRange,
-                                  position, angle, direction, positionOffset, angleOffset, startPositionOffset,
-                                  copyLightToDirection, copyPositionToStartPosition, copyCallLightToHeadTargetAngle,
-                                  copyCallScaleToScale, variants] = values;
+    [[maybe_unused]] const auto& [EFFECT_CREATE_FIELD_NAMES] = values;
+    static_assert(decltype(Data::Effects::CountNames(EFFECT_CREATE_FIELD_NAMES))::value ==
+                  Data::Effects::EffectCreateFieldCount);
 }
+#undef EFFECT_CREATE_FIELD_NAMES
 
 // The values of the catalogue as the effects use them.
 CreateParams ToCreateParams(const Data::Effects::EffectCreateParams& values)

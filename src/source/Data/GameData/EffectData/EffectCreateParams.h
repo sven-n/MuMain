@@ -1,7 +1,9 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <optional>
+#include <type_traits>
 #include <vector>
 
 namespace Data::Effects
@@ -37,9 +39,10 @@ struct EffectCreateVariant;
 //
 // A new field goes into the reader and the writer (EffectCreateParamsJson.cpp),
 // ResolveVariant, the game's CreateParams with ToCreateParams, GroupsOf and
-// ApplyCreateParams, and the test that applies each field alone.
-// ResolveVariant, ToCreateParams and GroupsOf name every field, so they stop
-// compiling until they get it.
+// ApplyCreateParams, and the test that applies each field alone. The functions
+// next to ResolveVariant, ToCreateParams and GroupsOf name every field and
+// check their count against EffectCreateFieldCount, and the test checks its
+// list against it, so all of them stop compiling until they get the field.
 struct EffectCreateParams
 {
     std::optional<double> lifeTime;
@@ -85,6 +88,15 @@ struct EffectCreateParams
 
     bool operator==(const EffectCreateParams&) const = default;
 };
+
+// The number of fields of EffectCreateParams, variants included (C++ cannot
+// count the fields of a struct). The game's CreateParams has as many, with its
+// groups in place of the variants.
+inline constexpr std::size_t EffectCreateFieldCount = 28;
+
+// The number of its arguments; only for counting names at compile time, in
+// decltype.
+template <typename... T> std::integral_constant<std::size_t, sizeof...(T)> CountNames(const T&...);
 
 // The values the SubTypes in `subTypes` get on top of the ones of the row.
 struct EffectCreateVariant

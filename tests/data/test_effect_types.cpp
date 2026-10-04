@@ -848,7 +848,8 @@ TEST_CASE("The effect registry converts and applies vectors, offsets and copies 
 // applied when it is the only one of its group a row sets; a field missing
 // from ResolveVariant would never reach the SubTypes of a variant. Each field
 // alone, in the row and in a variant of an empty row, against an effect whose
-// fields all differ from the values. Keep in step with EffectCreateParams.
+// fields all differ from the values; the list stops compiling when it misses a
+// field (EffectCreateFieldCount).
 TEST_CASE("Every creation field is applied when it is the only one a row or a variant sets [data][effects]")
 {
     struct Field
@@ -906,6 +907,9 @@ TEST_CASE("Every creation field is applied when it is the only one a row or a va
         {"copy.scale", [](EffectCreateParams& p) { p.copyCallScaleToScale = true; },
          [](const OBJECT& o) { return o.Scale == 2.5f; }},
     };
+
+    // Every field but the variants has an entry.
+    static_assert(std::size(fields) + 1 == Data::Effects::EffectCreateFieldCount);
 
     const auto applyTo = [](const Render::Effects::CreateParams& params)
     {
