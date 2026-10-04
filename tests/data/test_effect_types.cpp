@@ -526,7 +526,6 @@ TEST_CASE("Vectors, offsets and copies are written in a fixed order, vectors on 
     CHECK(result.types[0] == dragon);
 }
 
-// Every code is an enum symbol, so the data holds no raw numbers (D28).
 // Variants come last, sorted by their SubTypes; one SubType is written as
 // "subType", several as a list on one line.
 TEST_CASE("Variants are written last, sorted by their SubTypes [data][effects]")
@@ -573,6 +572,7 @@ TEST_CASE("Variants are written last, sorted by their SubTypes [data][effects]")
     CHECK(result.types[0].create->variants[1] == flare.create->variants[0]);
 }
 
+// Every code is an enum symbol, so the data holds no raw numbers (D28).
 TEST_CASE("Each kind lists every type number once, sorted, by its symbol [data][effects]")
 {
     for (const EffectKind kind : EffectKinds)

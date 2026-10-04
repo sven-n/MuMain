@@ -579,15 +579,18 @@ TEST_CASE("The types of FX1.5 create from the catalogue what their cases chose b
     CHECK_FALSE(Find(record(BITMAP_FIRE_CURSEDLICH, 4), "Effects[0].LifeTime").has_value());
     CHECK_FALSE(Find(record(MODEL_CHAIN_LIGHTNING, 3), "Effects[0].LifeTime").has_value());
 
-    // A variant with an offset times the frame factor, one with other values.
-    const Record swordForce = record(MODEL_SWORD_FORCE, 2);
+    // A variant with an offset times the frame factor (at 0.5, so the factor
+    // shows), one with other values.
+    EffectCall swordForceCall = CallOf(MODEL_SWORD_FORCE);
+    swordForceCall.subType = 2;
+    const Record swordForce = RecordCall(swordForceCall, {0.5f, SlotPattern::A});
     CHECK(Find(swordForce, "Effects[0].Scale") == "0");
-    CHECK(Find(swordForce, "Effects[0].Position[2]") == "240.75");
+    CHECK(Find(swordForce, "Effects[0].Position[2]") == "190.75");
     CHECK(Find(swordForce, "Effects[0].Velocity") == "0.25");
     CHECK(Find(record(MODEL_SWORD_FORCE, 3), "Effects[0].Scale") == "3.5");
 
-    // A variant with a copy of the light it sets.
-    CHECK(Find(record(MODEL_ARROW_AUTOLOAD, 1), "Effects[0].Direction[1]") == "0.800000012");
+    // A variant with a copy of the light it sets (blue 0.2; the call's is 0.7).
+    CHECK(Find(record(MODEL_ARROW_AUTOLOAD, 1), "Effects[0].Direction[2]") == "0.200000003");
 
     // The row copies the call's scale; SubType 5 gets the row's values.
     CHECK(Find(record(MODEL_WINDFOCE, 5), "Effects[0].LifeTime") == "50");

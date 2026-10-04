@@ -265,7 +265,8 @@ One PR each, small enough to check against the old code.
 | FX1.2 | Registry rows from data | FX1.1 | The `CreateParams` of `EffectRegistry.cpp` (22 rows, 32 types) move into `EffectTypes.json`; the registry table is built from the catalogue at loading. Handlers stay C++. |
 | FX1.3 | The 8 types that fit `CreateParams` | FX1.2 | Their cases move into data and are deleted. Sets up the recorder. |
 | FX1.4 | More creation fields | FX1.3 | The fields the 26 value-only cases need; those cases move into data. |
-| FX1.5 | Variants by SubType | FX1.4 | `variants` in effect rows; the 47 types that choose values by SubType move. |
+| FX1.5 | Variants by SubType | FX1.4 | `variants` in effect rows; the 47 types that choose values by SubType move (done: 41 types, see the FX1.5 note). |
+| FX1.5b | Fields for the rest | FX1.5 | The fields the other 12 types that choose values by SubType need (render type, alphaTarget, a lifeTime offset, start position values, the animation, copies from the light, the call's position and the call's angle); those cases move into data. |
 | FX1.6 | Effect browser | FX1.1 | Read-only tool in MuEditor; values from FX1.2 on. |
 | FX1.7 | Preview | FX1.6 | Creating the selected type in the world in editor builds. |
 

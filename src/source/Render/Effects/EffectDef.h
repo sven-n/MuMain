@@ -122,11 +122,6 @@ using MoveHandler = bool (*)(OBJECT* o, int index, float luminosity);
 // Per-frame draw. Defaults to RenderObject() when left null.
 using RenderHandler = void (*)(OBJECT* o);
 
-// A descriptor migrates each lifecycle stage independently: a type can have
-// its rendering driven by the registry while its creation still runs through
-// the legacy switch, or vice versa. CreateEffect treats creation as migrated
-// only when `create` or `onCreate` is set; MoveEffect / RenderEffects gate on
-// their respective handlers. An unset stage falls back to the legacy switch.
 // The creation parameters of one SubType that has a variant (D35): the row's
 // with the variant's on top, resolved when the registry is built.
 struct SubTypeCreateParams
@@ -135,6 +130,11 @@ struct SubTypeCreateParams
     CreateParams params;
 };
 
+// A descriptor migrates each lifecycle stage independently: a type can have
+// its rendering driven by the registry while its creation still runs through
+// the legacy switch, or vice versa. CreateEffect treats creation as migrated
+// only when `create` or `onCreate` is set; MoveEffect / RenderEffects gate on
+// their respective handlers. An unset stage falls back to the legacy switch.
 struct EffectDescriptor
 {
     std::optional<CreateParams> create;
