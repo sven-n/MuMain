@@ -1,10 +1,10 @@
 # RmlUi replaceability boundary — rollout task
 
 Date: 2026-10-04. Review baseline: `1fa69e277` plus the working-tree changes present during the review.
-Status: RB-01, RB-02, and RB-04 implemented; full RelWithDebInfo build passed. The user performed
-in-game spot checks and found no major issues; the specific acceptance scenarios below have not
-all been confirmed. RB-03's bounded inventory packet pilot is implemented and builds; the full
-`WSclient.cpp` compile boundary remains open. RB-05 reviewed; no code change needed.
+Status: RB-01, RB-02, and RB-04 implemented; full RelWithDebInfo build passed. The user reported
+that in-game spot checks were OK, including after the RB-03 inventory and transfer batches; exact
+scenario coverage was not enumerated. RB-03's bounded packet migrations are implemented and build,
+but the full `WSclient.cpp` compile boundary remains open. RB-05 reviewed; no code change needed.
 
 ## Goal and scope
 
@@ -42,7 +42,7 @@ boundary. Do not remove or wrap those merely to erase `Rml::` from implementatio
 |---|---|---|---|
 | RB-01 | Move legacy tooltip conversion and presentation types out of engine/game-facing APIs | None | Implemented; full build passed; in-game spot checks found no major issues |
 | RB-02 | Put chat-room state and send rules in a feature owner; bind the view from that state | None | Implemented; full build passed; in-game spot checks found no major issues |
-| RB-03 | Route a coherent inventory packet family through feature operations; measure remaining networking dependencies | None; recheck after RB-01/02 | Inventory packet pilot implemented; full build passed; broader compile boundary open |
+| RB-03 | Route a coherent inventory packet family through feature operations; measure remaining networking dependencies | None; recheck after RB-01/02 | Inventory and transfer batches built; user spot checks OK; broader compile boundary open |
 | RB-04 | Route the console theme command through a UI-owned handler | None | Implemented; full build passed; in-game spot checks found no major issues |
 | RB-05 | Reassess scene loading-overlay ownership after the higher-value boundaries | RB-01–04 review | Reviewed; no change needed |
 
@@ -141,9 +141,9 @@ batches. The count of concrete inventory/storage/mix control references in `WScl
 from 105 at `HEAD` to 84. The file still includes `WindowSystem.h` for other packet families, so
 its transitive RmlUi compile dependency remains. The developer-only `App/Control` callers were
 updated to the new lookup and passed MSVC syntax checks using the player compile flags plus
-`MU_ENABLE_CONTROL_SOCKET`; a full developer build was not run. New inventory
-delete/snapshot/modify/buy flows need in-game spot checks. The remaining concrete calls are
-concentrated in picked-item transfers, mix/storage, and personal-shop replies; those families need
+`MU_ENABLE_CONTROL_SOCKET`; a full developer build was not run. The user later reported that
+in-game spot checks were OK; exact inventory cases were not enumerated. The remaining concrete
+calls are concentrated in picked-item transfers, mix/storage, and personal-shop replies; they need
 their own behavior review before moving them behind feature operations.
 
 Follow-up implementation 2026-10-04: pickup and drop replies now use the inventory insertion,
@@ -157,8 +157,9 @@ main-grid deletion behavior for non-equipment indices; this pass does not reinte
 The full RelWithDebInfo executable and RML/RCSS guards built successfully. A consistent source
 search for concrete player inventory, storage, mix, and picked-item control references in
 `WSclient.cpp` fell from 85 at `779346761` to 60. `WindowSystem.h` remains included, so the complete
-compile boundary is still open. In-game checks are pending for normal pickup, full-inventory
-pickup, successful and rejected drop, and storage-to-inventory auto-move success/failure.
+compile boundary is still open. The user later reported that the requested in-game spot checks
+were OK. Coverage of normal pickup, full-inventory pickup, successful and rejected drop, and
+storage-to-inventory auto-move success/failure was not specified individually.
 
 ### RB-04 — Theme command ownership
 
