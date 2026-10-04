@@ -518,16 +518,27 @@ void ReadFields(ItemModelValueReader& reader, const std::string& objectKey, cons
     }
 }
 
-// CreateEffect does not set the start position, so without a value or a copy
-// the offset adds to what the slot's previous effect left there.
-void WarnAboutStartPositionOffset(const EffectCreateParams& params, const std::string& objectKey,
-                                  const ReportIssue& report)
+// CreateEffect sets neither the start position nor the lifeTime, so an offset
+// of a component or of the lifeTime that nothing sets or copies before adds to
+// what the slot's previous effect left there.
+void WarnAboutOffsetsOfOldValues(const EffectCreateParams& params, const std::string& objectKey,
+                                 const ReportIssue& report)
 {
-    if (params.startPositionOffset.IsSet() && !CopiesInto(params, Keys::StartPosition) &&
-        !SetsValueOf(params, Keys::StartPosition))
+    const EffectCreateVector& offset = params.startPositionOffset;
+    const bool copied = CopiesInto(params, Keys::StartPosition);
+    for (size_t i = 0; i < offset.components.size(); ++i)
     {
-        report(ItemDataIssueSeverity::Warning, objectKey + "." + Keys::Offset + "." + Keys::StartPosition,
-               "adds to the start position the slot's previous effect left; set or copy it first");
+        if (offset.components[i] && !copied && !params.startPosition.components[i])
+        {
+            report(ItemDataIssueSeverity::Warning, objectKey + "." + Keys::Offset + "." + Keys::StartPosition,
+                   "adds to the start position the slot's previous effect left; set or copy it first");
+            break;
+        }
+    }
+    if (params.lifeTimeOffset && !params.lifeTime)
+    {
+        report(ItemDataIssueSeverity::Warning, objectKey + "." + Keys::Offset + "." + Keys::LifeTime,
+               "adds to the lifeTime the slot's previous effect left; set it first");
     }
 }
 
@@ -628,9 +639,9 @@ bool ReadVariant(const OrderedJson& entry, const std::string& variantKey, const 
     {
         report(ItemDataIssueSeverity::Warning, variantKey, SetsNoValue);
     }
-    if (variant.params.startPositionOffset.IsSet())
+    if (variant.params.startPositionOffset.IsSet() || variant.params.lifeTimeOffset)
     {
-        WarnAboutStartPositionOffset(ResolveVariant(row, variant.params), variantKey, report);
+        WarnAboutOffsetsOfOldValues(ResolveVariant(row, variant.params), variantKey, report);
     }
     if (valid)
     {
@@ -707,7 +718,7 @@ EffectCreateParams ReadEffectCreateParams(const OrderedJson& json, const std::st
     ItemModelValueReader reader(json, objectKey, report);
     EffectCreateParams params;
     ReadFields(reader, objectKey, report, params);
-    WarnAboutStartPositionOffset(params, objectKey, report);
+    WarnAboutOffsetsOfOldValues(params, objectKey, report);
     ReadVariants(reader, objectKey, report, params);
     reader.WarnAboutUnknownKeys();
     return params;

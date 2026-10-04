@@ -371,9 +371,9 @@ TEST_CASE(
     "Render type, alphaTarget, animation, start position, lifeTime offset and more copies are read [data][effects]")
 {
     const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
-        {"name": "skull", "code": "BITMAP_SKULL", "create": {"alphaTarget": 0.75, "renderType": "alphaBlendMinus",
-         "animation": 0, "startPosition": {"x": 4.5, "y": 4.5},
-         "offset": {"lifeTime": {"value": -60, "timesFrameFactor": true}, "startPosition": {"z": 1}},
+        {"name": "skull", "code": "BITMAP_SKULL", "create": {"lifeTime": 1000, "alphaTarget": 0.75,
+         "renderType": "alphaBlendMinus", "animation": 0, "startPosition": {"x": 4.5, "y": 4.5},
+         "offset": {"lifeTime": {"value": -60, "timesFrameFactor": true}, "startPosition": {"x": 1}},
          "copy": {"direction": "callAngle", "eyeRight": "light", "deadPosition": "callAngle"}}},
         {"name": "piercing2", "code": "MODEL_PIERCING2", "create": {"renderType": "dark",
          "copy": {"startPosition": "callPosition"}}}]})",
@@ -387,8 +387,8 @@ TEST_CASE(
     CHECK(skull.animation == 0);
     CHECK(skull.startPosition == EffectCreateVector{{4.5, 4.5, std::nullopt}});
     CHECK(skull.lifeTimeOffset == EffectCreateNumber{-60.0, true});
-    // An offset of a start position the row sets is no warning.
-    CHECK(skull.startPositionOffset == EffectCreateVector{{std::nullopt, std::nullopt, 1.0}});
+    // An offset of a component of the start position the row sets is no warning.
+    CHECK(skull.startPositionOffset == EffectCreateVector{{1.0, std::nullopt, std::nullopt}});
     CHECK(skull.copyCallAngleToDirection);
     CHECK(skull.copyLightToEyeRight);
     CHECK(skull.copyCallAngleToDeadPosition);
@@ -412,7 +412,9 @@ TEST_CASE(
         {"name": "crater", "code": "BITMAP_CRATER", "create": {"startPosition": [1, 2, 3],
          "copy": {"startPosition": "light"}}},
         {"name": "piercing2", "code": "MODEL_PIERCING2", "create": {"lifeTime": 2, "copy": {"startPosition": "position"},
-         "variants": [{"subType": 1, "startPosition": {"x": 1}}]}}]})",
+         "variants": [{"subType": 1, "startPosition": {"x": 1}}]}},
+        {"name": "crater", "code": "BITMAP_CRATER", "create": {"startPosition": {"x": 1}, "offset": {
+         "startPosition": {"z": 1}, "lifeTime": 5}}}]})",
                                   EffectKind::Effect);
     for (const char* field :
          {"alphaTarget", "renderType", "animation", "offset.lifeTime", "copy.startPosition", "copy.eyeRight"})
@@ -422,7 +424,11 @@ TEST_CASE(
     }
     CHECK(HasError(wrong.issues, "types[1].create.copy.startPosition"));
     CHECK(HasError(wrong.issues, "types[2].create.variants[0].startPosition"));
-    REQUIRE(wrong.types.size() == 3);
+    // Offsets of a component of the start position or of the lifeTime that
+    // nothing sets add to what the slot held before.
+    CHECK(HasIssue(wrong.issues, ItemDataIssueSeverity::Warning, "types[3].create.offset.startPosition"));
+    CHECK(HasIssue(wrong.issues, ItemDataIssueSeverity::Warning, "types[3].create.offset.lifeTime"));
+    REQUIRE(wrong.types.size() == 4);
     CHECK(wrong.types[0].create == EffectCreateParams{.lifeTime = 1});
 }
 
@@ -600,7 +606,8 @@ TEST_CASE("Vectors, offsets and copies are written in a fixed order, vectors on 
 TEST_CASE("Render type, start position, the lifeTime offset and more copies are written [data][effects]")
 {
     EffectTypeEntry skull{"skull", "BITMAP_SKULL"};
-    skull.create = EffectCreateParams{.alphaTarget = 0.75,
+    skull.create = EffectCreateParams{.lifeTime = 1000,
+                                      .alphaTarget = 0.75,
                                       .renderType = Data::Effects::EffectRenderType::Dark,
                                       .animation = 0,
                                       .startPosition = EffectCreateVector{{4.5, 4.5, std::nullopt}},
@@ -619,6 +626,7 @@ TEST_CASE("Render type, start position, the lifeTime offset and more copies are 
                   "      \"name\": \"skull\",\n"
                   "      \"code\": \"BITMAP_SKULL\",\n"
                   "      \"create\": {\n"
+                  "        \"lifeTime\": 1000,\n"
                   "        \"alphaTarget\": 0.75,\n"
                   "        \"renderType\": \"dark\",\n"
                   "        \"animation\": 0,\n"

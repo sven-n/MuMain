@@ -444,13 +444,14 @@ before its angle is zeroed, and the dead position of
 `MODEL_ARROW_TANKER_HIT` before a variant sets its angle. The PR's second
 commit compared the old cases with the rows: all 2,016 calls equal at the
 frame factors 1 and 0.5, and all 1,008 at 25/60. The third deletes the 11
-cases; g++ finds the same 6 fallthroughs. The field lists (the struct,
-`ResolveVariant`, `ToCreateParams`, `GroupsOf` and the field test) now share
-one count, `EffectCreateFieldCount`, so a new field fails the build until
-each of them has it. All creation cases that only choose values by SubType
-are data now, except `BITMAP_MAGIC`, `MODEL_MAYASTONEFIRE` and
-`BITMAP_SWORD_FORCE`, which compute values from the call's scale or angle,
-and `MODEL_WARCRAFT`, which is never created.
+cases; g++ finds the same 6 fallthroughs. The name lists next to
+`ResolveVariant`, `ToCreateParams` and `GroupsOf` and the list of the field
+test check one count, `EffectCreateFieldCount`, so a new field fails the
+build until each list has it; the field test then fails until the functions
+apply it (the reader and the writer are not checked). All creation cases
+that only choose values by SubType are data now, except `BITMAP_MAGIC`,
+`MODEL_MAYASTONEFIRE` and `BITMAP_SWORD_FORCE`, which compute values from
+the call's scale or angle, and `MODEL_WARCRAFT`, which is never created.
 
 **FX1.6–FX1.7** add the effect browser and its preview to MuEditor. They
 change no game code outside editor builds.

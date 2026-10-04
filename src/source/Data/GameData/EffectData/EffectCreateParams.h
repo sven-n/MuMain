@@ -58,10 +58,11 @@ struct EffectCreateVariant;
 //
 // A new field goes into the reader and the writer (EffectCreateParamsJson.cpp),
 // ResolveVariant, the game's CreateParams with ToCreateParams, GroupsOf and
-// ApplyCreateParams, and the test that applies each field alone. The functions
-// next to ResolveVariant, ToCreateParams and GroupsOf name every field and
-// check their count against EffectCreateFieldCount, and the test checks its
-// list against it, so all of them stop compiling until they get the field.
+// ApplyCreateParams, and the test that applies each field alone. The name lists
+// next to ResolveVariant, ToCreateParams and GroupsOf and the list of the test
+// check one count, EffectCreateFieldCount, so a new field fails the build until
+// each list has it; the test then fails until the functions apply it. The
+// reader and the writer are not checked.
 struct EffectCreateParams
 {
     std::optional<double> lifeTime;

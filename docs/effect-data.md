@@ -93,9 +93,8 @@ with when the game creates it. Particles, lightning and sprites have none
 | `light` | The color it is drawn with, `[red, green, blue]`; replaces the color the creating code passes. |
 | `lightEnable`, `alphaEnable` | Flags (`true`/`false`) the move and draw code of the effect use; what they do depends on it. |
 | `kind`, `skill`, `pkKey`, `timer`, `distance`, `collisionRange` | Values the move code of the effect uses; what they do depends on it. `kind` (0 to 255) and `skill` (0 to 65535) replace the skill values the creating code passes, `pkKey` its PK key. |
-| `alphaTarget` | The opacity the effect moves towards, from 0 to 1. |
-| `renderType` | How it is drawn: `"dark"` (a model drawn dark) or `"alphaBlendMinus"` (a texture whose color is taken away from what is behind it). |
-| `animation` | The animation its move code starts with (0 or more). |
+| `alphaTarget`, `animation` | Values the move and draw code of the effect use (`alphaTarget` from 0 to 1, `animation` 0 or more); what they do depends on it. |
+| `renderType` | `"dark"`: a model drawn dark. `"alphaBlendMinus"`: the render type the old code of `BITMAP_SHINY+6` set; the draw code of the effect decides what it does. |
 | `position` | Where it starts; replaces the position the creating code passes. |
 | `angle` | How it is turned, in degrees; replaces the angle the creating code passes. |
 | `direction` | A vector its move code uses, often the way it moves. |
@@ -160,8 +159,9 @@ with when the game creates it. Particles, lightning and sprites have none
   `copyLightToDirection` (now `"copy": {"direction": "light"}`). An unknown
   field is a warning, and so is a `create` (or `offset`, `copy`, vector)
   that sets no value; a `create` without values still replaces the creation
-  code. An offset of `startPosition` without a value or a copy of it is a
-  warning: it adds to the start position the slot's previous effect left.
+  code. An offset of a component of `startPosition` that nothing sets or
+  copies, and an offset of `lifeTime` without a `lifeTime`, are warnings:
+  they add to what the slot's previous effect left.
 - `kind` in `create` is a value of the effect, not the `kind` of the file.
 
 ### Variants by SubType
@@ -200,17 +200,19 @@ can give some SubTypes other values:
   offsets are replaced component by component. A SubType without a variant
   gets the values of `create` alone.
 - A variant only adds or replaces: it cannot leave a field to the common
-  setup when `create` sets it, or drop a copy into `startPosition` or
-  `headTargetAngle` that `create` makes. Such cases need a `create` with
-  only variants.
+  setup when `create` sets it, or drop a copy into `headTargetAngle`,
+  `eyeRight` or `deadPosition` that `create` makes (only `scale`,
+  `direction` and `startPosition` have values that replace a copy). Such
+  cases need a `create` with only variants.
 - A `create` can hold only variants. The SubTypes without a variant then
   start with what the game sets for every new effect, and with the old
   values of the slot for the fields it does not set, as the original code
   did.
 - A SubType in two variants or twice in one list, a variant without SubTypes
   or with a negative one, a variant with variants, and a variant that sets
-  part of `direction` while `create` copies the light into it are errors. A
-  variant without values and an empty `variants` list are warnings.
+  part of `direction` or `startPosition` while `create` copies into it are
+  errors. A variant without values and an empty `variants` list are
+  warnings.
 
 ## How the names were chosen
 
