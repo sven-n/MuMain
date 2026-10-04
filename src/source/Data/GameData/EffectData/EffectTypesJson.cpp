@@ -252,6 +252,7 @@ std::string WriteEffectTypesJson(EffectKind kind, std::span<const EffectTypeEntr
     {
         text = Items::Json::PutObjectsOnOneLine(Items::Json::PutListsOnOneLine(text, key), key);
     }
+    text = Items::Json::PutObjectsOnOneLine(text, CreateLifeTimeKey);
     return text + "\n";
 }
 } // namespace Data::Effects

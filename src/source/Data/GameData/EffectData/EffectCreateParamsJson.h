@@ -34,6 +34,8 @@ constexpr const char* CreateKey = "create";
 constexpr const char* CreateLightKey = "light";
 constexpr std::array<const char*, 4> CreateVectorKeys = {"position", "angle", "direction", "startPosition"};
 constexpr const char* CreateSubTypesKey = "subTypes";
+// The lifeTime offset, when it is {"value": n, "timesFrameFactor": true}.
+constexpr const char* CreateLifeTimeKey = "lifeTime";
 
 // Reads the "create" object `json`; the issues name the fields as
 // "<objectKey>.<field>". Values with errors stay unset.

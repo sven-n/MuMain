@@ -28,11 +28,21 @@ struct CreateVector
     std::uint8_t timesFrameFactor = 0;
 };
 
+// A number of an offset; multiplied by FPS_ANIMATION_FACTOR when
+// timesFrameFactor is set.
+struct CreateNumber
+{
+    float value = 0.f;
+    bool timesFrameFactor = false;
+};
+
 // The arguments of the CreateEffect call that creation values can copy.
 struct CreateCall
 {
     std::array<float, 3> light{};
     float scale = 0.f;
+    std::array<float, 3> position{};
+    std::array<float, 3> angle{};
 };
 
 // Creation parameters applied on top of the common initialisation that
@@ -82,19 +92,24 @@ struct CreateParams
     std::optional<bool> alphaEnable;
     std::optional<std::uint8_t> kind;
     std::optional<std::uint16_t> skill;
+    std::optional<int> renderType;
+    std::optional<int> animation;
 
     // Numbers
     std::optional<float> pkKey;
     std::optional<float> timer;
     std::optional<float> distance;
     std::optional<float> collisionRange;
+    std::optional<float> alphaTarget;
 
     // Vectors
     CreateVector position;
     CreateVector angle;
     CreateVector direction;
+    CreateVector startPosition;
 
     // Offsets
+    std::optional<CreateNumber> lifeTimeOffset;
     CreateVector positionOffset;
     CreateVector angleOffset;
     CreateVector startPositionOffset;
@@ -102,8 +117,13 @@ struct CreateParams
     // Copies. Many legacy cases finish with `VectorCopy(o->Light,
     // o->Direction)`, stashing the colour so MoveEffect can fade it back in.
     bool copyLightToDirection = false;
+    bool copyCallAngleToDirection = false;
     bool copyPositionToStartPosition = false;
+    bool copyLightToStartPosition = false;
+    bool copyCallPositionToStartPosition = false;
     bool copyCallLightToHeadTargetAngle = false;
+    bool copyLightToEyeRight = false;
+    bool copyCallAngleToDeadPosition = false;
     bool copyCallScaleToScale = false;
 };
 

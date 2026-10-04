@@ -36,6 +36,9 @@ constexpr const char* PkKey = "pkKey";
 constexpr const char* Timer = "timer";
 constexpr const char* Distance = "distance";
 constexpr const char* CollisionRange = "collisionRange";
+constexpr const char* AlphaTarget = "alphaTarget";
+constexpr const char* RenderType = "renderType";
+constexpr const char* Animation = "animation";
 constexpr const char* Position = "position";
 constexpr const char* Angle = "angle";
 constexpr const char* Direction = "direction";
@@ -63,19 +66,15 @@ constexpr std::array<OffsetField, 3> OffsetFields = {{
     {Keys::StartPosition, &EffectCreateParams::startPositionOffset},
 }};
 
-// "copy": { "<target>": "<source>" }; the sources starting with "call" are
-// arguments of the CreateEffect call.
-struct CopyField
+// The names of the render types.
+struct RenderTypeName
 {
-    const char* target;
-    const char* source;
-    bool EffectCreateParams::* copy;
+    const char* name;
+    EffectRenderType type;
 };
-constexpr std::array<CopyField, 4> CopyFields = {{
-    {Keys::Direction, CreateLightKey, &EffectCreateParams::copyLightToDirection},
-    {Keys::StartPosition, Keys::Position, &EffectCreateParams::copyPositionToStartPosition},
-    {Keys::HeadTargetAngle, "callLight", &EffectCreateParams::copyCallLightToHeadTargetAngle},
-    {Keys::Scale, "callScale", &EffectCreateParams::copyCallScaleToScale},
+constexpr std::array<RenderTypeName, 2> RenderTypeNames = {{
+    {"dark", EffectRenderType::Dark},
+    {"alphaBlendMinus", EffectRenderType::AlphaBlendMinus},
 }};
 
 // hiddenMesh is a mesh number and blendMesh the texture number of meshes,
@@ -83,6 +82,9 @@ constexpr std::array<CopyField, 4> CopyFields = {{
 // model and a blendMesh of -2 means every mesh.
 constexpr int SmallestMeshNumber = -2;
 constexpr int LargestMeshNumber = std::numeric_limits<short>::max();
+
+// The animation is an int in the effect.
+constexpr int LargestAnimation = std::numeric_limits<int>::max();
 
 // Kind is a byte and Skill a 16-bit number in the effect.
 constexpr int LargestKind = std::numeric_limits<unsigned char>::max();
@@ -113,19 +115,37 @@ void ReadValue(ItemModelValueReader& reader, const char* key, std::optional<doub
     value = number;
 }
 
-void ReadAlpha(ItemModelValueReader& reader, std::optional<double>& value)
+void ReadAlpha(ItemModelValueReader& reader, const char* key, std::optional<double>& value)
 {
     double alpha = 0.0;
-    if (!reader.ReadNumber(Keys::Alpha, alpha, false))
+    if (!reader.ReadNumber(key, alpha, false))
     {
         return;
     }
     if (alpha < 0.0 || alpha > 1.0)
     {
-        reader.Error(Keys::Alpha, "must be from 0 to 1");
+        reader.Error(key, "must be from 0 to 1");
         return;
     }
     value = alpha;
+}
+
+void ReadRenderType(ItemModelValueReader& reader, std::optional<EffectRenderType>& value)
+{
+    const OrderedJson* field = reader.ReadJson(Keys::RenderType);
+    if (field == nullptr)
+    {
+        return;
+    }
+    for (const RenderTypeName& name : RenderTypeNames)
+    {
+        if (field->is_string() && field->get_ref<const std::string&>() == name.name)
+        {
+            value = name.type;
+            return;
+        }
+    }
+    reader.Error(Keys::RenderType, "must be \"dark\" or \"alphaBlendMinus\"");
 }
 
 bool ReadThreeValues(ItemModelValueReader& reader, const char* key, std::array<double, 3>& values)
@@ -201,11 +221,11 @@ void WarnIfEmpty(const NestedObject& object, const ReportIssue& report)
     }
 }
 
-// A component: a number, or, in an offset, { "value": n, "timesFrameFactor": true }.
-void ReadComponent(ItemModelValueReader& reader, const std::string& objectKey, size_t index, bool isOffset,
-                   const ReportIssue& report, EffectCreateVector& vector)
+// A number, or, in an offset, { "value": n, "timesFrameFactor": true }.
+// Values with errors stay unset.
+void ReadNumberOrFrameFactor(ItemModelValueReader& reader, const std::string& objectKey, const char* key, bool isOffset,
+                             const ReportIssue& report, std::optional<double>& value, bool& timesFrameFactor)
 {
-    const char* key = Keys::Components[index];
     const OrderedJson* field = reader.ReadJson(key);
     if (field == nullptr)
     {
@@ -213,7 +233,7 @@ void ReadComponent(ItemModelValueReader& reader, const std::string& objectKey, s
     }
     if (!field->is_object())
     {
-        ReadValue(reader, key, vector.components[index]);
+        ReadValue(reader, key, value);
         return;
     }
     if (!isOffset)
@@ -226,17 +246,25 @@ void ReadComponent(ItemModelValueReader& reader, const std::string& objectKey, s
     {
         number.Error(Keys::Value, "missing");
     }
-    std::optional<double> value;
-    ReadValue(number, Keys::Value, value);
-    bool timesFrameFactor = false;
-    const bool flagRead =
-        !number.Has(Keys::TimesFrameFactor) || number.ReadBool(Keys::TimesFrameFactor, timesFrameFactor);
+    std::optional<double> read;
+    ReadValue(number, Keys::Value, read);
+    bool flag = false;
+    const bool flagRead = !number.Has(Keys::TimesFrameFactor) || number.ReadBool(Keys::TimesFrameFactor, flag);
     number.WarnAboutUnknownKeys();
-    if (value && flagRead)
+    if (read && flagRead)
     {
-        vector.components[index] = value;
-        vector.timesFrameFactor[index] = timesFrameFactor;
+        value = read;
+        timesFrameFactor = flag;
     }
+}
+
+void ReadComponent(ItemModelValueReader& reader, const std::string& objectKey, size_t index, bool isOffset,
+                   const ReportIssue& report, EffectCreateVector& vector)
+{
+    bool timesFrameFactor = false;
+    ReadNumberOrFrameFactor(reader, objectKey, Keys::Components[index], isOffset, report, vector.components[index],
+                            timesFrameFactor);
+    vector.timesFrameFactor[index] = timesFrameFactor;
 }
 
 // A vector: a list of 3 numbers, or an object with the components it sets.
@@ -283,11 +311,56 @@ void ReadOffsets(ItemModelValueReader& reader, const std::string& objectKey, con
     }
     WarnIfEmpty(offsets, report);
     ItemModelValueReader offsetReader(*offsets.json, offsets.objectKey, report);
+    std::optional<double> lifeTime;
+    bool lifeTimeTimesFrameFactor = false;
+    ReadNumberOrFrameFactor(offsetReader, offsets.objectKey, Keys::LifeTime, true, report, lifeTime,
+                            lifeTimeTimesFrameFactor);
+    if (lifeTime)
+    {
+        params.lifeTimeOffset = EffectCreateNumber{*lifeTime, lifeTimeTimesFrameFactor};
+    }
     for (const OffsetField& field : OffsetFields)
     {
         ReadVector(offsetReader, offsets.objectKey, field.key, true, report, params.*field.offset);
     }
     offsetReader.WarnAboutUnknownKeys();
+}
+
+// The sources a copy into `target` can have: "a", "a" or "b", "a", "b" or "c".
+std::string SourcesOf(std::string_view target)
+{
+    std::vector<std::string> sources;
+    for (const EffectCopyField& field : EffectCopyFields)
+    {
+        if (field.target == target)
+        {
+            sources.push_back(std::string("\"") + field.source + "\"");
+        }
+    }
+    std::string text;
+    for (size_t i = 0; i < sources.size(); ++i)
+    {
+        text += (i == 0 ? "" : i + 1 == sources.size() ? " or " : ", ") + sources[i];
+    }
+    return text;
+}
+
+// Sets the copy into `target` from `source`; false when there is no such copy.
+bool ReadCopySource(const OrderedJson& source, std::string_view target, EffectCreateParams& params)
+{
+    if (!source.is_string())
+    {
+        return false;
+    }
+    for (const EffectCopyField& field : EffectCopyFields)
+    {
+        if (field.target == target && source.get_ref<const std::string&>() == field.source)
+        {
+            params.*field.copy = true;
+            return true;
+        }
+    }
+    return false;
 }
 
 void ReadCopies(ItemModelValueReader& reader, const std::string& objectKey, const ReportIssue& report,
@@ -301,32 +374,40 @@ void ReadCopies(ItemModelValueReader& reader, const std::string& objectKey, cons
     }
     WarnIfEmpty(copies, report);
     ItemModelValueReader copyReader(*copies.json, copies.objectKey, report);
-    for (const CopyField& field : CopyFields)
+    for (size_t i = 0; i < EffectCopyFields.size(); ++i)
     {
-        const OrderedJson* source = copyReader.ReadJson(field.target);
+        const std::string_view target = EffectCopyFields[i].target;
+        if (i > 0 && EffectCopyFields[i - 1].target == target)
+        {
+            continue; // the copies of a target are listed together
+        }
+        const OrderedJson* source = copyReader.ReadJson(EffectCopyFields[i].target);
         if (source == nullptr)
         {
             continue;
         }
-        if (!source->is_string() || source->get_ref<const std::string&>() != field.source)
+        if (!ReadCopySource(*source, target, params))
         {
-            copyReader.Error(field.target, std::string("must be \"") + field.source + "\"");
-            continue;
+            copyReader.Error(EffectCopyFields[i].target, "must be " + SourcesOf(target));
         }
-        params.*field.copy = true;
     }
     copyReader.WarnAboutUnknownKeys();
 
     // A field gets one value or one copy.
-    if (params.scale && params.copyCallScaleToScale)
+    for (size_t i = 0; i < EffectCopyFields.size(); ++i)
     {
-        copyReader.Error(Keys::Scale, "is also set as a value");
-        params.copyCallScaleToScale = false;
-    }
-    if (params.direction.IsSet() && params.copyLightToDirection)
-    {
-        copyReader.Error(Keys::Direction, "is also set as a value");
-        params.copyLightToDirection = false;
+        const char* target = EffectCopyFields[i].target;
+        if (SetsValueOf(params, target) && CopiesInto(params, target))
+        {
+            copyReader.Error(target, "is also set as a value");
+            for (const EffectCopyField& field : EffectCopyFields)
+            {
+                if (field.target == std::string_view(target))
+                {
+                    params.*field.copy = false;
+                }
+            }
+        }
     }
 }
 
@@ -349,6 +430,20 @@ template <typename T> void WriteExact(OrderedJson& json, const char* key, const 
     {
         json[key] = *value;
     }
+}
+
+// A number, or { "value": n, "timesFrameFactor": true }.
+OrderedJson WriteNumberOrFrameFactor(double value, bool timesFrameFactor)
+{
+    OrderedJson number = Items::ModelJson::WriteNumber(value);
+    if (!timesFrameFactor)
+    {
+        return number;
+    }
+    OrderedJson object = OrderedJson::object();
+    object[Keys::Value] = std::move(number);
+    object[Keys::TimesFrameFactor] = true;
+    return object;
 }
 
 // A list when all three components are set and none is multiplied by the
@@ -376,15 +471,7 @@ void WriteVector(OrderedJson& json, const char* key, const EffectCreateVector& v
         {
             continue;
         }
-        OrderedJson value = Items::ModelJson::WriteNumber(*vector.components[i]);
-        if (vector.timesFrameFactor[i])
-        {
-            OrderedJson number = OrderedJson::object();
-            number[Keys::Value] = std::move(value);
-            number[Keys::TimesFrameFactor] = true;
-            value = std::move(number);
-        }
-        components[Keys::Components[i]] = std::move(value);
+        components[Keys::Components[i]] = WriteNumberOrFrameFactor(*vector.components[i], vector.timesFrameFactor[i]);
     }
     json[key] = std::move(components);
 }
@@ -403,7 +490,7 @@ void ReadFields(ItemModelValueReader& reader, const std::string& objectKey, cons
     ReadMeshNumber(reader, Keys::HiddenMesh, params.hiddenMesh);
     ReadMeshNumber(reader, Keys::BlendMesh, params.blendMesh);
     ReadValue(reader, Keys::BlendMeshLight, params.blendMeshLight);
-    ReadAlpha(reader, params.alpha);
+    ReadAlpha(reader, Keys::Alpha, params.alpha);
     ReadLight(reader, params.light);
     ReadFlag(reader, Keys::LightEnable, params.lightEnable);
     ReadFlag(reader, Keys::AlphaEnable, params.alphaEnable);
@@ -413,9 +500,13 @@ void ReadFields(ItemModelValueReader& reader, const std::string& objectKey, cons
     ReadValue(reader, Keys::Timer, params.timer);
     ReadValue(reader, Keys::Distance, params.distance);
     ReadValue(reader, Keys::CollisionRange, params.collisionRange);
+    ReadAlpha(reader, Keys::AlphaTarget, params.alphaTarget);
+    ReadRenderType(reader, params.renderType);
+    ReadInteger(reader, Keys::Animation, 0, LargestAnimation, params.animation);
     ReadVector(reader, objectKey, Keys::Position, false, report, params.position);
     ReadVector(reader, objectKey, Keys::Angle, false, report, params.angle);
     ReadVector(reader, objectKey, Keys::Direction, false, report, params.direction);
+    ReadVector(reader, objectKey, Keys::StartPosition, false, report, params.startPosition);
     ReadOffsets(reader, objectKey, report, params);
     ReadCopies(reader, objectKey, report, params);
 
@@ -427,15 +518,16 @@ void ReadFields(ItemModelValueReader& reader, const std::string& objectKey, cons
     }
 }
 
-// CreateEffect does not set the start position, so without the copy the
-// offset adds to what the slot's previous effect left there.
+// CreateEffect does not set the start position, so without a value or a copy
+// the offset adds to what the slot's previous effect left there.
 void WarnAboutStartPositionOffset(const EffectCreateParams& params, const std::string& objectKey,
                                   const ReportIssue& report)
 {
-    if (params.startPositionOffset.IsSet() && !params.copyPositionToStartPosition)
+    if (params.startPositionOffset.IsSet() && !CopiesInto(params, Keys::StartPosition) &&
+        !SetsValueOf(params, Keys::StartPosition))
     {
         report(ItemDataIssueSeverity::Warning, objectKey + "." + Keys::Offset + "." + Keys::StartPosition,
-               "adds to the start position the slot's previous effect left; copy the position into it first");
+               "adds to the start position the slot's previous effect left; set or copy it first");
     }
 }
 
@@ -478,13 +570,22 @@ bool ReadSubTypes(ItemModelValueReader& reader, std::vector<int>& subTypes)
     return true;
 }
 
-// A variant that sets part of direction while the row copies the light into
-// it would mean "copy, then change one component", which the order of the
-// steps cannot express.
-bool SetsPartOfCopiedDirection(const EffectCreateParams& row, const EffectCreateParams& variant)
+// A variant that sets part of a vector the row copies into would mean "copy,
+// then change one component", which the order of the steps cannot express.
+// The name of such a vector, or null.
+const char* PartOfCopiedVector(const EffectCreateParams& row, const EffectCreateParams& variant)
 {
-    const auto& components = variant.direction.components;
-    return row.copyLightToDirection && variant.direction.IsSet() && !(components[0] && components[1] && components[2]);
+    const auto setsPart = [](const EffectCreateVector& vector)
+    { return vector.IsSet() && !(vector.components[0] && vector.components[1] && vector.components[2]); };
+    if (CopiesInto(row, Keys::Direction) && setsPart(variant.direction))
+    {
+        return Keys::Direction;
+    }
+    if (CopiesInto(row, Keys::StartPosition) && setsPart(variant.startPosition))
+    {
+        return Keys::StartPosition;
+    }
+    return nullptr;
 }
 
 // Reads variant `entry` of `row`; false when it has errors that drop it. Its
@@ -516,10 +617,11 @@ bool ReadVariant(const OrderedJson& entry, const std::string& variantKey, const 
             valid = false;
         }
     }
-    if (SetsPartOfCopiedDirection(row, variant.params))
+    if (const char* vector = PartOfCopiedVector(row, variant.params))
     {
-        reader.Error(Keys::Direction, "sets part of direction, which the row copies from the light; set all three "
-                                      "components");
+        reader.Error(vector, std::string("sets part of ") + vector +
+                                 ", which the row copies into; set all three "
+                                 "components");
         valid = false;
     }
     if (variant.params == EffectCreateParams{})
@@ -611,6 +713,40 @@ EffectCreateParams ReadEffectCreateParams(const OrderedJson& json, const std::st
     return params;
 }
 
+void WriteOffsets(OrderedJson& json, const EffectCreateParams& params)
+{
+    OrderedJson offsets = OrderedJson::object();
+    if (params.lifeTimeOffset)
+    {
+        offsets[Keys::LifeTime] =
+            WriteNumberOrFrameFactor(params.lifeTimeOffset->value, params.lifeTimeOffset->timesFrameFactor);
+    }
+    for (const OffsetField& field : OffsetFields)
+    {
+        WriteVector(offsets, field.key, params.*field.offset);
+    }
+    if (!offsets.empty())
+    {
+        json[Keys::Offset] = std::move(offsets);
+    }
+}
+
+void WriteCopies(OrderedJson& json, const EffectCreateParams& params)
+{
+    OrderedJson copies = OrderedJson::object();
+    for (const EffectCopyField& field : EffectCopyFields)
+    {
+        if (params.*field.copy)
+        {
+            copies[field.target] = field.source;
+        }
+    }
+    if (!copies.empty())
+    {
+        json[Keys::Copy] = std::move(copies);
+    }
+}
+
 OrderedJson WriteEffectCreateParams(const EffectCreateParams& params)
 {
     OrderedJson json = OrderedJson::object();
@@ -634,32 +770,24 @@ OrderedJson WriteEffectCreateParams(const EffectCreateParams& params)
     WriteValue(json, Keys::Timer, params.timer);
     WriteValue(json, Keys::Distance, params.distance);
     WriteValue(json, Keys::CollisionRange, params.collisionRange);
+    WriteValue(json, Keys::AlphaTarget, params.alphaTarget);
+    if (params.renderType)
+    {
+        for (const RenderTypeName& name : RenderTypeNames)
+        {
+            if (name.type == *params.renderType)
+            {
+                json[Keys::RenderType] = name.name;
+            }
+        }
+    }
+    WriteExact(json, Keys::Animation, params.animation);
     WriteVector(json, Keys::Position, params.position);
     WriteVector(json, Keys::Angle, params.angle);
     WriteVector(json, Keys::Direction, params.direction);
-
-    OrderedJson offsets = OrderedJson::object();
-    for (const OffsetField& field : OffsetFields)
-    {
-        WriteVector(offsets, field.key, params.*field.offset);
-    }
-    if (!offsets.empty())
-    {
-        json[Keys::Offset] = std::move(offsets);
-    }
-
-    OrderedJson copies = OrderedJson::object();
-    for (const CopyField& field : CopyFields)
-    {
-        if (params.*field.copy)
-        {
-            copies[field.target] = field.source;
-        }
-    }
-    if (!copies.empty())
-    {
-        json[Keys::Copy] = std::move(copies);
-    }
+    WriteVector(json, Keys::StartPosition, params.startPosition);
+    WriteOffsets(json, params);
+    WriteCopies(json, params);
 
     if (!params.variants.empty())
     {

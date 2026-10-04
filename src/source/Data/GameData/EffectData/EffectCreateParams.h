@@ -3,6 +3,7 @@
 #include <array>
 #include <cstddef>
 #include <optional>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
@@ -23,6 +24,24 @@ struct EffectCreateVector
     }
 
     bool operator==(const EffectCreateVector&) const = default;
+};
+
+// A number of an offset; the effect multiplies it by the frame factor
+// (FPS_ANIMATION_FACTOR) when timesFrameFactor is set.
+struct EffectCreateNumber
+{
+    double value = 0.0;
+    bool timesFrameFactor = false;
+
+    bool operator==(const EffectCreateNumber&) const = default;
+};
+
+// The render types the creation cases set, by name: RENDER_DARK of the models
+// and RENDER_TYPE_ALPHA_BLEND_MINUS of the textures.
+enum class EffectRenderType
+{
+    Dark,
+    AlphaBlendMinus,
 };
 
 struct EffectCreateVariant;
@@ -65,11 +84,16 @@ struct EffectCreateParams
     std::optional<double> timer;
     std::optional<double> distance;
     std::optional<double> collisionRange;
+    std::optional<double> alphaTarget;
+    std::optional<EffectRenderType> renderType;
+    std::optional<int> animation;
     EffectCreateVector position;
     EffectCreateVector angle;
     EffectCreateVector direction;
+    EffectCreateVector startPosition;
 
     // Added to the field after the values.
+    std::optional<EffectCreateNumber> lifeTimeOffset;
     EffectCreateVector positionOffset;
     EffectCreateVector angleOffset;
     EffectCreateVector startPositionOffset;
@@ -77,8 +101,13 @@ struct EffectCreateParams
     // Copies of other fields, or of the arguments of the CreateEffect call,
     // after the offsets.
     bool copyLightToDirection = false;
+    bool copyCallAngleToDirection = false;
     bool copyPositionToStartPosition = false;
+    bool copyLightToStartPosition = false;
+    bool copyCallPositionToStartPosition = false;
     bool copyCallLightToHeadTargetAngle = false;
+    bool copyLightToEyeRight = false;
+    bool copyCallAngleToDeadPosition = false;
     bool copyCallScaleToScale = false;
 
     // Values for some SubTypes on top of the ones above (D35); a SubType
@@ -92,11 +121,37 @@ struct EffectCreateParams
 // The number of fields of EffectCreateParams, variants included (C++ cannot
 // count the fields of a struct). The game's CreateParams has as many, with its
 // groups in place of the variants.
-inline constexpr std::size_t EffectCreateFieldCount = 28;
+inline constexpr std::size_t EffectCreateFieldCount = 38;
 
 // The number of its arguments; only for counting names at compile time, in
 // decltype.
 template <typename... T> std::integral_constant<std::size_t, sizeof...(T)> CountNames(const T&...);
+
+// One copy of "copy": { "<target>": "<source>" }; the sources starting with
+// "call" are arguments of the CreateEffect call. The copies of a target are
+// listed together, in the order they are written.
+struct EffectCopyField
+{
+    const char* target;
+    const char* source;
+    bool EffectCreateParams::* copy;
+};
+inline constexpr std::array<EffectCopyField, 9> EffectCopyFields = {{
+    {"direction", "light", &EffectCreateParams::copyLightToDirection},
+    {"direction", "callAngle", &EffectCreateParams::copyCallAngleToDirection},
+    {"startPosition", "position", &EffectCreateParams::copyPositionToStartPosition},
+    {"startPosition", "light", &EffectCreateParams::copyLightToStartPosition},
+    {"startPosition", "callPosition", &EffectCreateParams::copyCallPositionToStartPosition},
+    {"headTargetAngle", "callLight", &EffectCreateParams::copyCallLightToHeadTargetAngle},
+    {"eyeRight", "light", &EffectCreateParams::copyLightToEyeRight},
+    {"deadPosition", "callAngle", &EffectCreateParams::copyCallAngleToDeadPosition},
+    {"scale", "callScale", &EffectCreateParams::copyCallScaleToScale},
+}};
+
+// Whether `params` copies into `target`, and whether it sets the value of that
+// field (only scale, direction and startPosition have one).
+bool CopiesInto(const EffectCreateParams& params, std::string_view target);
+bool SetsValueOf(const EffectCreateParams& params, std::string_view target);
 
 // The values the SubTypes in `subTypes` get on top of the ones of the row.
 struct EffectCreateVariant

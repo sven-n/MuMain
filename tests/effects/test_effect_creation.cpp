@@ -46,6 +46,8 @@ constexpr std::array<int, 5> RecordedSubTypes = {0, 1, 2, 3, 99};
 // More SubTypes for the types whose old case handled them or whose callers
 // pass them, so the creation baseline holds what the old case did for them.
 const std::map<int, std::vector<int>> MoreRecordedSubTypes = {
+    {BITMAP_SKULL, {4, 5}},              // a branch for 4; callers pass 5
+    {MODEL_CIRCLE_LIGHT, {4}},           // a branch for 4
     {BITMAP_FIRE_CURSEDLICH, {4, 12}},   // a branch for 12; callers pass 4 and 12
     {MODEL_ALICE_BUFFSKILL_EFFECT, {4}}, // a branch for 4
     {MODEL_CHANGE_UP_NASA, {4}},         // the end of its range of SubTypes 1 to 3
@@ -596,4 +598,63 @@ TEST_CASE("The types of FX1.5 create from the catalogue what their cases chose b
     CHECK(Find(record(MODEL_WINDFOCE, 5), "Effects[0].LifeTime") == "50");
     CHECK(Find(record(MODEL_WINDFOCE, 5), "Effects[0].Scale") == "0");
     CHECK(Find(record(MODEL_WINDFOCE, 1), "Effects[0].LifeTime") == "999");
+}
+
+// TEMPORARY: the next commit deletes the cases and this test. With
+// MU_EFFECT_RECORDER_WRITE=1 it writes the creation baseline with the old
+// cases of these types.
+TEST_CASE("TEMP: the rows of FX1.5b give the records of their cases [effects][recorder]")
+{
+    const std::array<int, 12> types = {BITMAP_SKULL,
+                                       BITMAP_OUR_INFLUENCE_GROUND,
+                                       BITMAP_ENEMY_INFLUENCE_GROUND,
+                                       BITMAP_SHINY + 6,
+                                       MODEL_MAYAHANDSKILL,
+                                       MODEL_CIRCLE_LIGHT,
+                                       MODEL_PIERCING2,
+                                       BITMAP_TWLIGHT,
+                                       MODEL_MOONHARVEST_MOON,
+                                       MODEL_ARROW_TANKER_HIT,
+                                       BITMAP_CRATER,
+                                       BITMAP_CHROME_ENERGY2};
+    // At 60 frames per second the frame factor is 25/60, where a product with
+    // it is rounded, unlike at 1 and 0.5.
+    const Conditions frameRate[] = {{25.f / 60.f, SlotPattern::A}, {25.f / 60.f, SlotPattern::B}};
+    const auto record = [&](std::span<const Conditions> allConditions)
+    {
+        std::vector<Recorded> all;
+        for (const int type : types)
+        {
+            for (const EffectCall& call : SecondGeometryCallsFor(type, RecordedSubTypesOf(type)))
+            {
+                for (const Conditions& conditions : allConditions)
+                {
+                    all.push_back({Describe(call, conditions), RecordCall(call, conditions)});
+                }
+            }
+        }
+        return all;
+    };
+
+    BuildShippedRegistry(types);
+    const std::vector<Recorded> cases = record(AllConditions());
+    const std::vector<Recorded> casesAtFrameRate = record(frameRate);
+    if (std::getenv("MU_EFFECT_RECORDER_WRITE") != nullptr)
+    {
+        WriteBaseline(RecordBaseline());
+    }
+
+    BuildShippedRegistry();
+    const std::vector<Recorded> rows = record(AllConditions());
+    const std::vector<Recorded> rowsAtFrameRate = record(frameRate);
+
+    std::ostringstream log;
+    const int differing = CompareAll(cases, rows, log);
+    const int differingAtFrameRate = CompareAll(casesAtFrameRate, rowsAtFrameRate, log);
+    INFO(log.str());
+    CHECK(differing == 0);
+    CHECK(differingAtFrameRate == 0);
+    MESSAGE("FX1.5b cases against the rows: " << cases.size() << " calls, " << differing
+                                              << " differ; at 25/60: " << casesAtFrameRate.size() << " calls, "
+                                              << differingAtFrameRate << " differ");
 }
