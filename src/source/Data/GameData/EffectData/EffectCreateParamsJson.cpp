@@ -487,6 +487,56 @@ bool SetsPartOfCopiedDirection(const EffectCreateParams& row, const EffectCreate
     return row.copyLightToDirection && variant.direction.IsSet() && !(components[0] && components[1] && components[2]);
 }
 
+// Reads variant `entry` of `row`; false when it has errors that drop it. Its
+// SubTypes go into `taken` only when it is kept, so a dropped variant does not
+// report the later ones as duplicates.
+bool ReadVariant(const OrderedJson& entry, const std::string& variantKey, const ReportIssue& report,
+                 const EffectCreateParams& row, std::set<int>& taken, EffectCreateVariant& variant)
+{
+    if (!entry.is_object())
+    {
+        report(ItemDataIssueSeverity::Error, variantKey, "must be an object with subType or subTypes and values");
+        return false;
+    }
+    ItemModelValueReader reader(entry, variantKey, report);
+    bool valid = ReadSubTypes(reader, variant.subTypes);
+    ReadFields(reader, variantKey, report, variant.params);
+    if (reader.ReadJson(Keys::Variants) != nullptr)
+    {
+        reader.Error(Keys::Variants, "a variant cannot have variants");
+        valid = false;
+    }
+    reader.WarnAboutUnknownKeys();
+    for (const int subType : variant.subTypes)
+    {
+        if (taken.contains(subType))
+        {
+            report(ItemDataIssueSeverity::Error, variantKey,
+                   "SubType " + std::to_string(subType) + " is in another variant too");
+            valid = false;
+        }
+    }
+    if (SetsPartOfCopiedDirection(row, variant.params))
+    {
+        reader.Error(Keys::Direction, "sets part of direction, which the row copies from the light; set all three "
+                                      "components");
+        valid = false;
+    }
+    if (variant.params == EffectCreateParams{})
+    {
+        report(ItemDataIssueSeverity::Warning, variantKey, SetsNoValue);
+    }
+    if (variant.params.startPositionOffset.IsSet())
+    {
+        WarnAboutStartPositionOffset(ResolveVariant(row, variant.params), variantKey, report);
+    }
+    if (valid)
+    {
+        taken.insert(variant.subTypes.begin(), variant.subTypes.end());
+    }
+    return valid;
+}
+
 void ReadVariants(ItemModelValueReader& reader, const std::string& objectKey, const ReportIssue& report,
                   EffectCreateParams& params)
 {
@@ -508,50 +558,44 @@ void ReadVariants(ItemModelValueReader& reader, const std::string& objectKey, co
     std::set<int> taken;
     for (size_t i = 0; i < list->size(); ++i)
     {
-        const std::string variantKey = listKey + "[" + std::to_string(i) + "]";
-        const OrderedJson& entry = (*list)[i];
-        if (!entry.is_object())
-        {
-            report(ItemDataIssueSeverity::Error, variantKey, "must be an object with subType or subTypes and values");
-            continue;
-        }
-        ItemModelValueReader variantReader(entry, variantKey, report);
         EffectCreateVariant variant;
-        bool valid = ReadSubTypes(variantReader, variant.subTypes);
-        ReadFields(variantReader, variantKey, report, variant.params);
-        if (variantReader.ReadJson(Keys::Variants) != nullptr)
-        {
-            variantReader.Error(Keys::Variants, "a variant cannot have variants");
-        }
-        variantReader.WarnAboutUnknownKeys();
-        for (const int subType : variant.subTypes)
-        {
-            if (!taken.insert(subType).second)
-            {
-                report(ItemDataIssueSeverity::Error, variantKey,
-                       "SubType " + std::to_string(subType) + " is in another variant too");
-                valid = false;
-            }
-        }
-        if (SetsPartOfCopiedDirection(params, variant.params))
-        {
-            variantReader.Error(Keys::Direction, "sets part of direction, which the row copies from the light; "
-                                                 "set all three components");
-            valid = false;
-        }
-        if (variant.params == EffectCreateParams{})
-        {
-            report(ItemDataIssueSeverity::Warning, variantKey, SetsNoValue);
-        }
-        if (variant.params.startPositionOffset.IsSet())
-        {
-            WarnAboutStartPositionOffset(ResolveVariant(params, variant.params), variantKey, report);
-        }
-        if (valid)
+        if (ReadVariant((*list)[i], listKey + "[" + std::to_string(i) + "]", report, params, taken, variant))
         {
             params.variants.push_back(std::move(variant));
         }
     }
+}
+
+// The variants, sorted by their SubTypes; one SubType is written as "subType".
+OrderedJson WriteVariants(const std::vector<EffectCreateVariant>& variants)
+{
+    std::vector<const EffectCreateVariant*> sorted;
+    for (const EffectCreateVariant& variant : variants)
+    {
+        sorted.push_back(&variant);
+    }
+    std::sort(sorted.begin(), sorted.end(), [](const EffectCreateVariant* left, const EffectCreateVariant* right)
+              { return left->subTypes < right->subTypes; });
+    OrderedJson json = OrderedJson::array();
+    for (const EffectCreateVariant* variant : sorted)
+    {
+        OrderedJson entry = OrderedJson::object();
+        if (variant->subTypes.size() == 1)
+        {
+            entry[Keys::SubType] = variant->subTypes.front();
+        }
+        else
+        {
+            entry[CreateSubTypesKey] = variant->subTypes;
+        }
+        const OrderedJson fields = WriteEffectCreateParams(variant->params);
+        for (const auto& [key, value] : fields.items())
+        {
+            entry[key] = value;
+        }
+        json.push_back(std::move(entry));
+    }
+    return json;
 }
 } // namespace
 
@@ -619,33 +663,7 @@ OrderedJson WriteEffectCreateParams(const EffectCreateParams& params)
 
     if (!params.variants.empty())
     {
-        std::vector<const EffectCreateVariant*> sorted;
-        for (const EffectCreateVariant& variant : params.variants)
-        {
-            sorted.push_back(&variant);
-        }
-        std::sort(sorted.begin(), sorted.end(), [](const EffectCreateVariant* left, const EffectCreateVariant* right)
-                  { return left->subTypes < right->subTypes; });
-        OrderedJson variants = OrderedJson::array();
-        for (const EffectCreateVariant* variant : sorted)
-        {
-            OrderedJson entry = OrderedJson::object();
-            if (variant->subTypes.size() == 1)
-            {
-                entry[Keys::SubType] = variant->subTypes.front();
-            }
-            else
-            {
-                entry[CreateSubTypesKey] = variant->subTypes;
-            }
-            const OrderedJson fields = WriteEffectCreateParams(variant->params);
-            for (const auto& [key, value] : fields.items())
-            {
-                entry[key] = value;
-            }
-            variants.push_back(std::move(entry));
-        }
-        json[Keys::Variants] = std::move(variants);
+        json[Keys::Variants] = WriteVariants(params.variants);
     }
     return json;
 }

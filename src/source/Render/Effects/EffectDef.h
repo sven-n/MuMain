@@ -144,17 +144,19 @@ struct EffectDescriptor
     MoveHandler move = nullptr;
     RenderHandler render = nullptr;
 
-    // The creation parameters of `subType`; only when `create` is set. The
-    // few SubTypes of a row are searched in order, which costs less than a
+    // The creation parameters of `subType`, or null when the type has none.
+    // The few SubTypes of a row are searched in order, which costs less than a
     // table indexed by SubType (SubTypes can be model numbers).
-    const CreateParams& CreateParamsFor(int subType) const
+    const CreateParams* CreateParamsFor(int subType) const
     {
+        if (!create)
+            return nullptr;
         for (const SubTypeCreateParams& variant : createBySubType)
         {
             if (variant.subType == subType)
-                return variant.params;
+                return &variant.params;
         }
-        return *create;
+        return &*create;
     }
 };
 

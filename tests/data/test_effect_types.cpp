@@ -374,7 +374,9 @@ TEST_CASE("Wrong variants are errors, empty ones warnings [data][effects]")
          {"subType": 7, "lifeTime": 1, "variants": []}]}},
         {"name": "blood", "code": "MODEL_BLOOD", "create": {"lifeTime": 3, "copy": {"direction": "light"}, "variants": [
          {"subType": 1, "direction": {"x": 1}}, {"subType": 2, "offset": {"startPosition": {"z": 1}}}]}},
-        {"name": "fire", "code": "BITMAP_FIRE", "create": {"lifeTime": 4, "variants": []}}]})",
+        {"name": "fire", "code": "BITMAP_FIRE", "create": {"lifeTime": 4, "variants": []}},
+        {"name": "spear", "code": "MODEL_SPEAR", "create": {"lifeTime": 5, "copy": {"direction": "light"}, "variants": [
+         {"subTypes": [1, 5], "direction": {"x": 1}}, {"subType": 5, "lifeTime": 6}]}}]})",
                                    EffectKind::Effect);
     CHECK(HasError(result.issues, "types[0].create.variants"));
     for (const char* field : {"variants[0]", "variants[1].subType", "variants[2].subType", "variants[3].subType",
@@ -388,6 +390,13 @@ TEST_CASE("Wrong variants are errors, empty ones warnings [data][effects]")
     CHECK(HasError(result.issues, "types[2].create.variants[0].direction"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[2].create.variants[1].offset.startPosition"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[3].create.variants"));
+    // A variant dropped for an error does not take its SubTypes from the later ones.
+    CHECK(HasError(result.issues, "types[4].create.variants[0].direction"));
+    CHECK_FALSE(HasError(result.issues, "types[4].create.variants[1]"));
+    REQUIRE(result.types.size() == 5);
+    REQUIRE(result.types[4].create.has_value());
+    REQUIRE(result.types[4].create->variants.size() == 1);
+    CHECK(result.types[4].create->variants[0].subTypes == std::vector<int>{5});
 }
 
 TEST_CASE("Creation values are written in a fixed order, unset ones left out [data][effects]")
@@ -693,6 +702,7 @@ TEST_CASE("The effect registry takes creation values from the catalogue, handler
     const Render::Effects::EffectDescriptor* mayaStone = Render::Effects::Lookup(MODEL_MAYASTONE4);
     REQUIRE(mayaStone != nullptr);
     CHECK_FALSE(mayaStone->create.has_value());
+    CHECK(mayaStone->CreateParamsFor(0) == nullptr);
     CHECK(mayaStone->onCreate == &Render::Effects::Behaviors::CreateMayaStone45);
     CHECK(mayaStone->move != nullptr);
 
@@ -942,8 +952,9 @@ TEST_CASE("Every creation field is applied when it is the only one a row or a va
         Render::Effects::BuildRegistry(std::span<const EffectTypeCreateParams>(&variantRow, 1));
         const Render::Effects::EffectDescriptor* descriptor = Render::Effects::Lookup(MODEL_BLOOD);
         REQUIRE(descriptor != nullptr);
-        CHECK(field.applied(applyTo(descriptor->CreateParamsFor(VariantSubType))));
-        CHECK_FALSE(field.applied(applyTo(descriptor->CreateParamsFor(0))));
+        REQUIRE(descriptor->CreateParamsFor(VariantSubType) != nullptr);
+        CHECK(field.applied(applyTo(*descriptor->CreateParamsFor(VariantSubType))));
+        CHECK_FALSE(field.applied(applyTo(*descriptor->CreateParamsFor(0))));
     }
 
     BuildShippedRegistry();
@@ -965,18 +976,18 @@ TEST_CASE("The effect registry resolves the variants of a row for their SubTypes
     CHECK(descriptor->createBySubType[1].subType == 2);
     CHECK(descriptor->createBySubType[2].subType == 3);
 
-    const Render::Effects::CreateParams& other = descriptor->CreateParamsFor(0);
+    const Render::Effects::CreateParams& other = *descriptor->CreateParamsFor(0);
     CHECK(other.lifeTime == 30.f);
     CHECK(other.scale == 1.f);
     CHECK(other.groups == 0);
     for (const int subType : {1, 3})
     {
-        const Render::Effects::CreateParams& params = descriptor->CreateParamsFor(subType);
+        const Render::Effects::CreateParams& params = *descriptor->CreateParamsFor(subType);
         CHECK(params.lifeTime == 60.f);
         CHECK(params.scale == 1.f);
     }
     // The variant's copy of the scale replaces the row's value.
-    const Render::Effects::CreateParams& copied = descriptor->CreateParamsFor(2);
+    const Render::Effects::CreateParams& copied = *descriptor->CreateParamsFor(2);
     CHECK(copied.lifeTime == 30.f);
     CHECK_FALSE(copied.scale.has_value());
     CHECK(copied.copyCallScaleToScale);

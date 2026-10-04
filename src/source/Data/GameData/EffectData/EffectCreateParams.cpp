@@ -25,6 +25,16 @@ void OverrideComponents(EffectCreateVector& vector, const EffectCreateVector& va
         }
     }
 }
+// One name per field of EffectCreateParams: this stops compiling when the
+// struct gets a field, so ResolveVariant below is given it too.
+[[maybe_unused]] void NameEveryField(const EffectCreateParams& params)
+{
+    [[maybe_unused]] const auto& [lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha,
+                                  light, lightEnable, alphaEnable, kind, skill, pkKey, timer, distance, collisionRange,
+                                  position, angle, direction, positionOffset, angleOffset, startPositionOffset,
+                                  copyLightToDirection, copyPositionToStartPosition, copyCallLightToHeadTargetAngle,
+                                  copyCallScaleToScale, variants] = params;
+}
 } // namespace
 
 EffectCreateParams ResolveVariant(const EffectCreateParams& row, const EffectCreateParams& variant)

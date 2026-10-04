@@ -34,6 +34,12 @@ struct EffectCreateVariant;
 // slot's previous effect left, so an entry only states what differs (D34).
 // The values are kept as read, so a written file shows them as they were
 // written.
+//
+// A new field goes into the reader and the writer (EffectCreateParamsJson.cpp),
+// ResolveVariant, the game's CreateParams with ToCreateParams, GroupsOf and
+// ApplyCreateParams, and the test that applies each field alone.
+// ResolveVariant, ToCreateParams and GroupsOf name every field, so they stop
+// compiling until they get it.
 struct EffectCreateParams
 {
     std::optional<double> lifeTime;

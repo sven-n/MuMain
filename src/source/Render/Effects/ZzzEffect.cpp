@@ -393,9 +393,8 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             // not registry-driven fall through to the legacy switch below.
             if (const Render::Effects::EffectDescriptor* desc = Render::Effects::Lookup(Type); desc && (desc->create || desc->onCreate))
             {
-                if (desc->create)
-                    Render::Effects::ApplyCreateParams(o, desc->CreateParamsFor(SubType),
-                                                       {{Light[0], Light[1], Light[2]}, Scale});
+                if (const Render::Effects::CreateParams* params = desc->CreateParamsFor(SubType))
+                    Render::Effects::ApplyCreateParams(o, *params, {{Light[0], Light[1], Light[2]}, Scale});
                 if (desc->onCreate)
                     desc->onCreate(o);
                 return;

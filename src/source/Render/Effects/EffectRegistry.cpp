@@ -113,6 +113,17 @@ void ApplyCopies(OBJECT* o, const CreateParams& params, const CreateCall& call)
     if (params.copyCallScaleToScale)
         o->Scale = call.scale;
 }
+// One name per field of CreateParams: this stops compiling when the struct
+// gets a field, so GroupsOf below gives it a group and ApplyCreateParams
+// applies it.
+[[maybe_unused]] void NameEveryField(const CreateParams& params)
+{
+    [[maybe_unused]] const auto& [lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha,
+                                  light, groups, lightEnable, alphaEnable, kind, skill, pkKey, timer, distance,
+                                  collisionRange, position, angle, direction, positionOffset, angleOffset,
+                                  startPositionOffset, copyLightToDirection, copyPositionToStartPosition,
+                                  copyCallLightToHeadTargetAngle, copyCallScaleToScale] = params;
+}
 } // namespace
 
 std::uint8_t GroupsOf(const CreateParams& params)
@@ -186,6 +197,17 @@ template <typename T> std::optional<T> ToInteger(const std::optional<int>& value
     if (!value)
         return std::nullopt;
     return static_cast<T>(*value);
+}
+
+// One name per field of the catalogue's values: this stops compiling when
+// they get a field, so ToCreateParams below converts it too.
+[[maybe_unused]] void NameEveryField(const Data::Effects::EffectCreateParams& values)
+{
+    [[maybe_unused]] const auto& [lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha,
+                                  light, lightEnable, alphaEnable, kind, skill, pkKey, timer, distance, collisionRange,
+                                  position, angle, direction, positionOffset, angleOffset, startPositionOffset,
+                                  copyLightToDirection, copyPositionToStartPosition, copyCallLightToHeadTargetAngle,
+                                  copyCallScaleToScale, variants] = values;
 }
 
 // The values of the catalogue as the effects use them.

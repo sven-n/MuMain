@@ -177,13 +177,18 @@ can give some SubTypes other values:
 }
 ```
 
-- A variant names its SubTypes with `subType` (one) or `subTypes` (a list of
-  two or more) and holds the fields of `create`, except `variants`.
+- A variant names its SubTypes with `subType` (one) or `subTypes` (a list;
+  the writer writes a list of one as `subType`) and holds the fields of
+  `create`, except `variants`.
 - A SubType of a variant starts with the values of `create` and the
   variant's on top: a value replaces the value of its field and a copy into
   it, a copy replaces the value and the copy of its field, and vectors and
   offsets are replaced component by component. A SubType without a variant
   gets the values of `create` alone.
+- A variant only adds or replaces: it cannot leave a field to the common
+  setup when `create` sets it, or drop a copy into `startPosition` or
+  `headTargetAngle` that `create` makes. Such cases need a `create` with
+  only variants.
 - A `create` can hold only variants. The SubTypes without a variant then
   start with what the game sets for every new effect, and with the old
   values of the slot for the fields it does not set, as the original code
