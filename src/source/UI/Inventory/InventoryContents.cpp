@@ -99,7 +99,12 @@ void RejectTransfer()
         g_pStorageInventoryExt->ProcessStorageItemAutoMoveFailure();
 }
 
-const ITEM* FindPlayerItem(int index)
+bool HasPickedItem()
+{
+    return mu::ui::window::CInventoryCtrl::GetPickedItem() != nullptr;
+}
+
+ITEM* FindPlayerItem(int index)
 {
     if (!IsPlayerInventorySlot(index))
         return nullptr;
@@ -108,5 +113,25 @@ const ITEM* FindPlayerItem(int index)
         return g_pMyInventory != nullptr ? g_pMyInventory->FindItem(index) : nullptr;
 
     return g_pMyInventoryExt != nullptr ? g_pMyInventoryExt->FindItem(index) : nullptr;
+}
+
+ITEM* FindMainInventoryItem(int index)
+{
+    return g_pMyInventory->FindItem(index);
+}
+
+void DeleteMainInventoryItem(int index)
+{
+    g_pMyInventory->DeleteItem(index);
+}
+
+ITEM* StandbyItem()
+{
+    return g_pMyInventory->GetStandbyItem();
+}
+
+int StandbyItemIndex()
+{
+    return g_pMyInventory->GetStandbyItemIndex();
 }
 } // namespace UI::Inventory

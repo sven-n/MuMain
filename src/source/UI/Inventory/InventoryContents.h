@@ -18,5 +18,12 @@ void RestorePickedItem();
 int TransferSourceIndex();
 bool ReceivePlayerTransfer(int index, std::span<const std::uint8_t> itemData);
 void RejectTransfer();
-const ITEM* FindPlayerItem(int index);
+bool HasPickedItem();
+ITEM* FindPlayerItem(int index);
+// The main grid only, without the extension or equipment.
+ITEM* FindMainInventoryItem(int index);
+void DeleteMainInventoryItem(int index);
+// The item the player chose for an event entry, and its slot; nullptr if none.
+ITEM* StandbyItem();
+int StandbyItemIndex();
 }

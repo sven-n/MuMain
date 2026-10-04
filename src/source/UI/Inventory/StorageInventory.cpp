@@ -835,31 +835,32 @@ int CStorageInventory::FindEmptySlot(ITEM* pItemObj)
     return -1;
 }
 
-void CStorageInventory::ProcessToReceiveStorageStatus(BYTE byStatus)
+void CStorageInventory::ProcessToReceiveStorageStatus(UI::Storage::VaultStatus status)
 {
-    switch (byStatus)
+    using UI::Storage::VaultStatus;
+    switch (status)
     {
-    case 0:
+    case VaultStatus::Unlocked:
         LockStorage(false);
         SetCorrectPassword(false);
         break;
 
-    case 1:
+    case VaultStatus::Locked:
         LockStorage(true);
         SetCorrectPassword(false);
         break;
 
-    case 10:
+    case VaultStatus::WrongPassword:
         CreateOkMessageBox(I18N::Game::IncorrectPassword);
         CInventoryCtrl::BackupPickedItem();
         ProcessStorageItemAutoMoveFailure();
         break;
 
-    case 11:
+    case VaultStatus::AlreadyLocked:
         CreateOkMessageBox(I18N::Game::InventoryIsAlreadyLocked);
         break;
 
-    case 12:
+    case VaultStatus::PasswordAccepted:
         if (IsStorageLocked() && !IsCorrectPassword())
         {
             if (m_bTakeZen)
@@ -897,7 +898,7 @@ void CStorageInventory::ProcessToReceiveStorageStatus(BYTE byStatus)
         SetCorrectPassword(true);
         break;
 
-    case 13:
+    case VaultStatus::PasswordRejected:
         CreateOkMessageBox(I18N::Game::ThePasswordYouHaveEnteredIsIncorrect);
         break;
     }

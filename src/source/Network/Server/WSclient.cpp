@@ -64,6 +64,8 @@
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/ConfirmRequest.h"
 #include "UI/Inventory/TradeUpdates.h"
+#include "UI/Inventory/StorageUpdates.h"
+#include "UI/Inventory/MixUpdates.h"
 #include "UI/Core/WindowCommon.h" // ShowTrainerMenuDialog/ShowSeedMasterMenuDialog/etc.
 #include "UI/Inventory/InventoryCtrl.h"
 #include "GameLogic/Events/w_CursedTemple.h"
@@ -987,7 +989,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         StopMusic();
         AllStopSound();
 
-        mu::ui::window::CInventoryCtrl::BackupPickedItem();
+        UI::Inventory::RestorePickedItem();
 
         ReleaseMainData();
         CryWolfMVPInit();
@@ -1006,7 +1008,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             CryWolfMVPInit();
             StopMusic();
             AllStopSound();
-            mu::ui::window::CInventoryCtrl::BackupPickedItem();
+            UI::Inventory::RestorePickedItem();
             ReleaseMainData();
         }
 
@@ -1051,7 +1053,7 @@ void ResetClientToLoginScene()
     CryWolfMVPInit();
     StopMusic();
     AllStopSound();
-    mu::ui::window::CInventoryCtrl::BackupPickedItem();
+    UI::Inventory::RestorePickedItem();
     ReleaseMainData();
 
     g_GuildCache.Reset();
@@ -1734,20 +1736,23 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
 
     int Offset = sizeof(PHEADER_DEFAULT_SUBCODE_WORD);
 
+    // SubCode 3 and 5: a combination result (5: a failed resurrection) whose items refill the mix
+    // grid; anything else lists the open NPC shop's or vault's contents.
+    const bool isMixResult = Data->SubCode == 3 || Data->SubCode == 5;
     if (Data->SubCode == 3)
     {
-        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
+        UI::Mix::SetFinished();
         PlayBuffer(SOUND_MIX01);
         PlayBuffer(SOUND_BREAK01);
-        g_pMixInventory->DeleteAllItems();
+        UI::Mix::ClearItems();
     }
     else if (Data->SubCode == 5)
     {
         UI::Chat::PostSystem(I18N::Game::ResurrectionFailed, mu::ui::window::TYPE_ERROR_MESSAGE);
         PlayBuffer(SOUND_MIX01);
         PlayBuffer(SOUND_BREAK01);
-        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
-        g_pMixInventory->DeleteAllItems();
+        UI::Mix::SetFinished();
+        UI::Mix::ClearItems();
     }
     else
     {
@@ -1756,12 +1761,9 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
             i.Type = -1;
             i.Number = 0;
         }
-
-        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPCSHOP))
-        {
-            g_pNPCShop->DeleteAllItems();
-        }
     }
+
+    std::vector<UI::Storage::ContainerItem> listed;
 
     for (int i = 0; i < Data->Value; i++)
     {
@@ -1779,31 +1781,16 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         int length = CalcItemLength(itemData);
         itemData = itemData.subspan(0, length);
 
-        if (Data->SubCode == 3 || Data->SubCode == 5)
-        {
-            g_pMixInventory->InsertItem(itemindex, itemData);
-        }
+        if (isMixResult)
+            UI::Mix::InsertItem(itemindex, itemData);
         else
-        {
-            if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPCSHOP))
-            {
-                g_pNPCShop->InsertItem(itemindex, itemData);
-            }
-            else if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_STORAGE))
-            {
-                if (itemindex < MAX_SHOP_INVENTORY)
-                {
-                    g_pStorageInventory->InsertItem(itemindex, itemData);
-                }
-                else
-                {
-                    g_pStorageInventoryExt->InsertItem(itemindex, itemData);
-                }
-            }
-        }
+            listed.push_back({ itemindex, itemData });
 
         Offset += length;
     }
+
+    if (!isMixResult)
+        UI::Storage::ContainerListed(listed);
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x31 [ReceiveTradeInventoryExtended]");
 }
@@ -2156,7 +2143,7 @@ extern int EnableEvent;
 
 BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
-    mu::ui::window::CInventoryCtrl::BackupPickedItem();
+    UI::Inventory::RestorePickedItem();
 
     auto Data = (LPPRECEIVE_TELEPORT_POSITION)ReceiveBuffer;
     Hero->PositionX = Data->PositionX;
@@ -6279,25 +6266,16 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
         }
         else if (storageType == STORAGE_TYPE::VAULT)
         {
-            if (Data->Index < MAX_SHOP_INVENTORY)
-            {
-                g_pStorageInventory->ProcessToReceiveStorageItems(Data->Index, itemData);
-            }
-            else
-            {
-                g_pStorageInventoryExt->ProcessToReceiveStorageItems(Data->Index, itemData);
-            }
+            UI::Storage::VaultItemPlaced(Data->Index, itemData);
         }
         if (storageType == STORAGE_TYPE::CHAOS_MIX ||
             (storageType >= STORAGE_TYPE::TRAINER_MIX && storageType <= STORAGE_TYPE::DETACH_SOCKET_MIX))
         {
-            mu::ui::window::CInventoryCtrl::DeletePickedItem();
-            if (Data->Index >= 0 && Data->Index < MAX_MIX_INVENTORY)
-                g_pMixInventory->InsertItem(Data->Index, itemData);
+            UI::Mix::PlaceMovedItem(Data->Index, itemData);
         }
         else if (storageType == STORAGE_TYPE::LUCKYITEM_TRADE || storageType == STORAGE_TYPE::LUCKYITEM_REFINERY)
         {
-            g_pLuckyItemWnd->GetResult(1, Data->Index, itemData);
+            UI::Mix::LuckyItemResult(true, Data->Index, itemData);
         }
 
         PlayBuffer(SOUND_GET_ITEM01);
@@ -6332,9 +6310,9 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     int length = CalcItemLength(itemData);
     itemData = itemData.subspan(0, length);
 
-    if (mu::ui::window::CInventoryCtrl::GetPickedItem())
+    if (UI::Inventory::HasPickedItem())
     {
-        mu::ui::window::CInventoryCtrl::DeletePickedItem();
+        UI::Inventory::DiscardPickedItem();
     }
 
     int itemindex = Data->Index;
@@ -6656,13 +6634,12 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
     {
     case 0:
     {
-        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
+        if (UI::Mix::IsLuckyItemAwaiting(true))
         {
-            std::span<const BYTE> empty = {};
-            g_pLuckyItemWnd->GetResult(0, Data->Index, empty);
+            UI::Mix::LuckyItemResult(false, Data->Index, {});
             break;
         }
-        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
+        UI::Mix::SetFinished();
         wchar_t szText[256] = {
             0,
         };
@@ -6705,12 +6682,12 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
     break;
     case 1:
     {
-        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
+        if (UI::Mix::IsLuckyItemAwaiting(true))
         {
-            g_pLuckyItemWnd->GetResult(1, 0, itemData);
+            UI::Mix::LuckyItemResult(true, 0, itemData);
             break;
         }
-        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
+        UI::Mix::SetFinished();
         wchar_t szText[256] = {
             0,
         };
@@ -6750,8 +6727,8 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
             break;
         }
 
-        g_pMixInventory->DeleteAllItems();
-        g_pMixInventory->InsertItem(0, itemData);
+        UI::Mix::ClearItems();
+        UI::Mix::InsertItem(0, itemData);
 
         PlayBuffer(SOUND_MIX01);
         PlayBuffer(SOUND_JEWEL01);
@@ -6760,29 +6737,29 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
     case 2:
     case 0x0B:
     {
-        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_READY);
+        UI::Mix::SetReady();
         UI::Chat::PostSystem(I18N::Game::NotEnoughZenToCombineItems, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     break;
     case 4:
         mu::ui::window::CreateOkMessageBox(I18N::Game::MustBeOverLevel10ToCombineTheInvitationToDevilSquare);
-        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
+        UI::Mix::SetFinished();
         break;
 
     case 9:
         mu::ui::window::CreateOkMessageBox(I18N::Game::MustBeOverLevel15ToCombineACloakOfInvisibility);
-        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
+        UI::Mix::SetFinished();
         break;
 
     case 100:
-        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
-        g_pMixInventory->DeleteAllItems();
-        g_pMixInventory->InsertItem(0, itemData);
+        UI::Mix::SetFinished();
+        UI::Mix::ClearItems();
+        UI::Mix::InsertItem(0, itemData);
         break;
     case 0x20:
-        if (g_pLuckyItemWnd->GetAct())
+        if (UI::Mix::IsLuckyItemAwaiting(false))
         {
-            g_pLuckyItemWnd->GetResult(0, Data->Index, itemData);
+            UI::Mix::LuckyItemResult(false, Data->Index, itemData);
         }
         break;
     case 3:
@@ -6791,7 +6768,7 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
     case 8:
     case 0x0A:
     default:
-        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
+        UI::Mix::SetFinished();
         break;
     }
 
@@ -6805,7 +6782,7 @@ void ReceiveSell(const BYTE* ReceiveBuffer)
     {
         if (Data->Flag == 0xff)
         {
-            mu::ui::window::CInventoryCtrl::BackupPickedItem();
+            UI::Inventory::RestorePickedItem();
 
             UI::Chat::PostChat(Hero->ID, I18N::Game::CannotBeSold, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
@@ -6817,7 +6794,7 @@ void ReceiveSell(const BYTE* ReceiveBuffer)
         }
         else
         {
-            mu::ui::window::CInventoryCtrl::DeletePickedItem();
+            UI::Inventory::DiscardPickedItem();
 
             CharacterMachine->Gold = Data->Gold;
 
@@ -6828,7 +6805,7 @@ void ReceiveSell(const BYTE* ReceiveBuffer)
     }
     else
     {
-        mu::ui::window::CInventoryCtrl::BackupPickedItem();
+        UI::Inventory::RestorePickedItem();
     }
 
     g_pNPCShop->SetSellingItem(false);
@@ -7034,12 +7011,12 @@ void ReceiveStatsExtended(const BYTE* ReceiveBuffer)
         break;
     default:
         // todo: is that ever used?
-        if (ITEM* pItem = g_pMyInventory->FindItem(Data->Index))
+        if (ITEM* pItem = UI::Inventory::FindMainInventoryItem(Data->Index))
         {
             if (pItem->Durability > 0)
                 pItem->Durability--;
             if (pItem->Durability <= 0)
-                g_pMyInventory->DeleteItem(Data->Index);
+                UI::Inventory::DeleteMainInventoryItem(Data->Index);
         }
 
         break;
@@ -7117,10 +7094,10 @@ void ReceiveDurability(const BYTE* ReceiveBuffer)
     }
     else
     {
-        ITEM* pItem = g_pMyInventory->FindItem(Data->Value);
+        ITEM* pItem = UI::Inventory::FindMainInventoryItem(Data->Value);
         if (pItem == nullptr && IsInventoryExtensionSlot(Data->Value))
         {
-            pItem = g_pMyInventoryExt->FindItem(Data->Value);
+            pItem = UI::Inventory::FindPlayerItem(Data->Value);
         }
 
         if (pItem)
@@ -7309,7 +7286,16 @@ void ReceiveStorageStatus(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 
-    g_pStorageInventory->ProcessToReceiveStorageStatus(Data->Value);
+    switch (Data->Value)
+    {
+    case 0: UI::Storage::VaultStatusChanged(UI::Storage::VaultStatus::Unlocked); break;
+    case 1: UI::Storage::VaultStatusChanged(UI::Storage::VaultStatus::Locked); break;
+    case 10: UI::Storage::VaultStatusChanged(UI::Storage::VaultStatus::WrongPassword); break;
+    case 11: UI::Storage::VaultStatusChanged(UI::Storage::VaultStatus::AlreadyLocked); break;
+    case 12: UI::Storage::VaultStatusChanged(UI::Storage::VaultStatus::PasswordAccepted); break;
+    case 13: UI::Storage::VaultStatusChanged(UI::Storage::VaultStatus::PasswordRejected); break;
+    default: break;
+    }
 }
 
 void ReceiveParty(const BYTE* ReceiveBuffer)
@@ -8897,9 +8883,9 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             };
             cfg.onAccept = []
             {
-                if (ITEM* pItem = g_pMyInventory->GetStandbyItem())
+                if (ITEM* pItem = UI::Inventory::StandbyItem())
                 {
-                    int iSrcIndex = g_pMyInventory->GetStandbyItemIndex();
+                    int iSrcIndex = UI::Inventory::StandbyItemIndex();
                     SocketClient->ToGameServer()->SendChaosCastleEnterRequest(pItem->Level, iSrcIndex);
                 }
             };
@@ -8924,9 +8910,9 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             cfg.lines.push_back({ szOpenTime, false });
             cfg.onAccept = []
             {
-                if (ITEM* pItem = g_pMyInventory->GetStandbyItem())
+                if (ITEM* pItem = UI::Inventory::StandbyItem())
                 {
-                    int iSrcIndex = g_pMyInventory->GetStandbyItemIndex();
+                    int iSrcIndex = UI::Inventory::StandbyItemIndex();
                     SocketClient->ToGameServer()->SendChaosCastleEnterRequest(pItem->Level, iSrcIndex);
                 }
             };
@@ -9403,9 +9389,9 @@ void ReceiveSetPriceResult(const BYTE* ReceiveBuffer)
     if (Header->byResult != 0x01 && g_IsPurchaseShop == PSHOPWNDTYPE_SALE)
     {
         // Header->byResult == 0x06
-        if (mu::ui::window::CInventoryCtrl::GetPickedItem())
+        if (UI::Inventory::HasPickedItem())
         {
-            mu::ui::window::CInventoryCtrl::DeletePickedItem();
+            UI::Inventory::DiscardPickedItem();
         }
 
         RemovePersonalItemPrice(g_pMyShopInventory->GetTargetIndex(), PSHOPWNDTYPE_SALE);
@@ -9657,13 +9643,9 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
         auto offset = sizeof(PURCHASEITEM_RESULTINFO);
         auto itemData = ReceiveBuffer.subspan(offset);
 
-        if (IsMainInventorySlot(itemindex))
+        if (IsMainInventorySlot(itemindex) || IsInventoryExtensionSlot(itemindex))
         {
-            g_pMyInventory->InsertItem(itemindex, itemData);
-        }
-        else if (IsInventoryExtensionSlot(itemindex))
-        {
-            g_pMyInventoryExt->InsertItem(itemindex, itemData);
+            UI::Inventory::InsertItem(itemindex, itemData);
         }
     }
     else if (Header->Result == PURCHASEITEM_RESULTINFO::NameMismatchOrPriceMissing)
@@ -9690,7 +9672,7 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
         default:
             g_ErrorReport.Write(L"@ [Fault] ReceivePurchaseItem (result : %d)\n", Header->Result);
         }
-        mu::ui::window::CInventoryCtrl::BackupPickedItem();
+        UI::Inventory::RestorePickedItem();
     }
 }
 
@@ -13264,7 +13246,7 @@ bool ReceiveEquippingInventoryItem(const BYTE* pReceiveBuffer)
     if (iItemPos < MAX_EQUIPMENT || iItemPos >= MAX_INVENTORY)
         return false;
 
-    ITEM* pItem = g_pMyInventory->FindItem(iItemPos);
+    ITEM* pItem = UI::Inventory::FindMainInventoryItem(iItemPos);
     pItem->Durability = iResult;
 
 #ifdef CONSOLE_DEBUG
@@ -13293,7 +13275,7 @@ bool ReceivePeriodItemList(const BYTE* pReceiveBuffer)
     }
     else
     {
-        ITEM* pItem = g_pMyInventory->FindItem(Data->wItemSlotIndex);
+        ITEM* pItem = UI::Inventory::FindMainInventoryItem(Data->wItemSlotIndex);
 
         if (pItem == nullptr)
             return false;

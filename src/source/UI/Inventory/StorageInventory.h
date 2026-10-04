@@ -11,6 +11,7 @@
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/Inventory/StorageUpdates.h"
 
 namespace Rml { class ElementDocument; }
 
@@ -117,7 +118,7 @@ namespace mu::ui::window
 
         void SendRequestItemToMyInven(ITEM* pItemObj, int nStorageIndex, int nInvenIndex);
 
-        void ProcessToReceiveStorageStatus(BYTE byStatus);
+        void ProcessToReceiveStorageStatus(UI::Storage::VaultStatus status);
         void ProcessToReceiveStorageItems(int nIndex, std::span<const BYTE> pbyItemPacket);
         void ProcessStorageItemAutoMoveSuccess();
         void ProcessStorageItemAutoMoveFailure();
