@@ -327,6 +327,26 @@ Position, Kind, Timer, Distance, CollisionRange, …), then the 47 that
 choose values by SubType. Each step deletes the moved cases and is checked
 with the recorder.
 
+*FX1.3 done:* the creation values of `MODEL_KENTAUROS_ARROW`, `MODEL_WARP3`,
+`MODEL_WARP6`, `BITMAP_SPARK+1`, `BITMAP_SPARK+2`,
+`MODEL_1_STREAMBREATHFIRE`, `MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2` and
+`MODEL_EFFECT_SD_AURA` are `create` objects of `EffectTypes.json`, and their
+7 cases are deleted from `CreateEffect` (`CreateEffect` runs nothing after
+its switch, so a row replaces a case completely). The recorder is
+`tests/effects/EffectRecorder`, with `Random::Seed` as the only change to
+game code (no game code calls it). The PR's first commit records the old
+cases against the rows in one build, for the sub types 0 to 3 and 99, each
+owner (none, the hero, a monster), both frame factors and both slot
+patterns: all 480 calls are equal. The second commit deletes the cases and
+keeps spot checks of the values they set. g++ finds the same 6 fallthroughs
+in `ZzzEffect.cpp` before and after (with `-Wimplicit-fallthrough` in a real
+compile; it does not warn with `-fsyntax-only`). Close to fitting, for
+FX1.4: four cases whose other statements only repeat the common setup
+(`MODEL_SUMMONER_WRISTRING_EFFECT`, `MODEL_SUMMONER_CASTING_EFFECT4`,
+`BITMAP_FIRECRACKER0001`, and `MODEL_SHIELD_CRASH2`, whose `Gravity =
+Velocity` is always 0.3 there), the empty case of `MODEL_PHOENIX_SHOT`, and
+four cases that set `Scale = Scale` (the call's scale even when it is 0).
+
 **FX1.6–FX1.7** add the effect browser and its preview to MuEditor. They
 change no game code outside editor builds.
 
@@ -336,8 +356,8 @@ Every PR that moves values is checked with a recorder in the test binary
 (D40), as the items phases did, but committed as a test tool, because FX1.3
 to FX2 all need it:
 
-- **Fixed inputs:** a fixed `srand` seed, a seed for `Random::` (today
-  seeded from `random_device`, without a way to set it), the frame factor
+- **Fixed inputs:** a fixed `srand` seed, a seed for `Random::`
+  (`Random::Seed`, since FX1.3), the frame factor
   pinned to 1.0 and 0.5, a fixed `WorldTime`, and the hero and owners set
   up with the game's own setup functions.
 - **Slots:** every pool slot filled with pattern A, then pattern B, so the
@@ -355,9 +375,30 @@ to FX2 all need it:
   1 in `MoveEffect` (the stones and snow into the bones), all into cases
   that stay code in FX1. Each one must land on the same code after a
   deletion: a case that fell into a moved case calls its handler.
-- **Recorded:** the whole created slot, all pools (effects, skill effects,
-  particles, joints, sprites), a `rand()` and a `Random::` sentinel, and
-  the global state some cases change.
+- **Recorded:** every changed field of every slot of the five pools
+  (effects, skill effects, particles, joints, sprites), of the hero and the
+  monster owner, and of the call's position, angle and light; the trails
+  (blurs and object blurs, some of them live in pattern B), the lit cells of
+  the terrain light, and the sounds started and stopped (a recording audio
+  backend); how many values `rand()` and `Random::` gave. Pointers are named
+  (hero, monster, pool slots, character slots) or written as an address.
+  Bytes that change outside the field lists show up for particles and
+  joints, and the 64-bit Windows build stops when one of the structs changes
+  size. Each call runs with the game's default arguments and with uneven
+  ones (scale, PK key, skill values, target index). Not recorded yet: the
+  play speed of models and the owner's fields outside its object; not varied
+  yet: live slots, terrain height, `timeGetTime`. The test binary has no
+  option window and no models, so cases that reach `CreateParticle`,
+  `CreateSprite` or `Models` cannot be recorded yet, and the monster owner
+  is not a real monster. The phase that first moves such cases adds them.
+- **Tool:** `tests/effects/EffectRecorder` (since FX1.3): `RecordCall`
+  records one call under given conditions, `Compare` lists the differing
+  fields by name, and `EffectTestData::BuildShippedRegistry` builds the
+  registry without the rows being checked, so the old cases run in the same
+  build. The digests of the whole records of the moved types, taken with
+  their old cases, are committed (`tests/effects/recordings`), so later
+  changes are checked against the old cases again;
+  `MU_EFFECT_RECORDER_WRITE=1` writes them anew.
 - **Baseline:** the old case stays reachable in the PR's working commits
   and is deleted after the comparison; spot checks stay as tests.
 - **Speed:** a Release benchmark of creation and lookup, old against new,

@@ -542,7 +542,11 @@
     },
     {
       "name": "effectEgGuardianDefenderAttack2",
-      "code": "MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2"
+      "code": "MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2",
+      "create": {
+        "lifeTime": 20,
+        "scale": 0.9
+      }
     },
     {
       "name": "effectFireHik3Mono",
@@ -566,7 +570,11 @@
     },
     {
       "name": "effectSdAura",
-      "code": "MODEL_EFFECT_SD_AURA"
+      "code": "MODEL_EFFECT_SD_AURA",
+      "create": {
+        "lifeTime": 1000,
+        "scale": 1
+      }
     },
     {
       "name": "effectSkuraItem",
@@ -919,7 +927,14 @@
     },
     {
       "name": "kentaurosArrow",
-      "code": "MODEL_KENTAUROS_ARROW"
+      "code": "MODEL_KENTAUROS_ARROW",
+      "create": {
+        "lifeTime": 34,
+        "scale": 0.7,
+        "velocity": 70,
+        "alpha": 0,
+        "light": [1, 1, 1]
+      }
     },
     {
       "name": "knightPlancrackA",
@@ -1578,11 +1593,17 @@
     },
     {
       "name": "spark3",
-      "code": "BITMAP_SPARK+1"
+      "code": "BITMAP_SPARK+1",
+      "create": {
+        "lifeTime": 10
+      }
     },
     {
       "name": "sparks",
-      "code": "BITMAP_SPARK+2"
+      "code": "BITMAP_SPARK+2",
+      "create": {
+        "lifeTime": 100
+      }
     },
     {
       "name": "spear",
@@ -1650,7 +1671,10 @@
     },
     {
       "name": "streamBreathFire1",
-      "code": "MODEL_1_STREAMBREATHFIRE"
+      "code": "MODEL_1_STREAMBREATHFIRE",
+      "create": {
+        "lifeTime": 30
+      }
     },
     {
       "name": "streamOfIceBreath",
@@ -1907,7 +1931,12 @@
     },
     {
       "name": "warp3",
-      "code": "MODEL_WARP3"
+      "code": "MODEL_WARP3",
+      "create": {
+        "lifeTime": 16777215,
+        "scale": 0.6,
+        "blendMesh": -2
+      }
     },
     {
       "name": "warp4",
@@ -1919,7 +1948,12 @@
     },
     {
       "name": "warp6",
-      "code": "MODEL_WARP6"
+      "code": "MODEL_WARP6",
+      "create": {
+        "lifeTime": 16777215,
+        "scale": 0.6,
+        "blendMesh": -2
+      }
     },
     {
       "name": "waterWave",
