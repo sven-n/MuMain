@@ -128,29 +128,86 @@ inline constexpr std::size_t EffectCreateFieldCount = 38;
 // decltype.
 template <typename... T> std::integral_constant<std::size_t, sizeof...(T)> CountNames(const T&...);
 
+// The values of the fields a copy can write that have one (a copy replaces
+// them, and they replace a copy).
+struct EffectCopyTargetValue
+{
+    bool (*isSet)(const EffectCreateParams& params) = nullptr;
+    void (*clear)(EffectCreateParams& params) = nullptr;
+};
+inline bool ScaleIsSet(const EffectCreateParams& params)
+{
+    return params.scale.has_value();
+}
+inline void ClearScale(EffectCreateParams& params)
+{
+    params.scale.reset();
+}
+inline bool DirectionIsSet(const EffectCreateParams& params)
+{
+    return params.direction.IsSet();
+}
+inline void ClearDirection(EffectCreateParams& params)
+{
+    params.direction = {};
+}
+inline bool StartPositionIsSet(const EffectCreateParams& params)
+{
+    return params.startPosition.IsSet();
+}
+inline void ClearStartPosition(EffectCreateParams& params)
+{
+    params.startPosition = {};
+}
+inline constexpr EffectCopyTargetValue NoValue{};
+inline constexpr EffectCopyTargetValue ScaleValue{&ScaleIsSet, &ClearScale};
+inline constexpr EffectCopyTargetValue DirectionValue{&DirectionIsSet, &ClearDirection};
+inline constexpr EffectCopyTargetValue StartPositionValue{&StartPositionIsSet, &ClearStartPosition};
+
 // One copy of "copy": { "<target>": "<source>" }; the sources starting with
-// "call" are arguments of the CreateEffect call. The copies of a target are
-// listed together, in the order they are written.
+// "call" are arguments of the CreateEffect call. In the order they are
+// written; the copies of a target are listed together and name the same value
+// of it (checked below).
 struct EffectCopyField
 {
     const char* target;
     const char* source;
     bool EffectCreateParams::* copy;
+    EffectCopyTargetValue value;
 };
 inline constexpr std::array<EffectCopyField, 9> EffectCopyFields = {{
-    {"direction", "light", &EffectCreateParams::copyLightToDirection},
-    {"direction", "callAngle", &EffectCreateParams::copyCallAngleToDirection},
-    {"startPosition", "position", &EffectCreateParams::copyPositionToStartPosition},
-    {"startPosition", "light", &EffectCreateParams::copyLightToStartPosition},
-    {"startPosition", "callPosition", &EffectCreateParams::copyCallPositionToStartPosition},
-    {"headTargetAngle", "callLight", &EffectCreateParams::copyCallLightToHeadTargetAngle},
-    {"eyeRight", "light", &EffectCreateParams::copyLightToEyeRight},
-    {"deadPosition", "callAngle", &EffectCreateParams::copyCallAngleToDeadPosition},
-    {"scale", "callScale", &EffectCreateParams::copyCallScaleToScale},
+    {"direction", "light", &EffectCreateParams::copyLightToDirection, DirectionValue},
+    {"direction", "callAngle", &EffectCreateParams::copyCallAngleToDirection, DirectionValue},
+    {"startPosition", "position", &EffectCreateParams::copyPositionToStartPosition, StartPositionValue},
+    {"startPosition", "light", &EffectCreateParams::copyLightToStartPosition, StartPositionValue},
+    {"startPosition", "callPosition", &EffectCreateParams::copyCallPositionToStartPosition, StartPositionValue},
+    {"headTargetAngle", "callLight", &EffectCreateParams::copyCallLightToHeadTargetAngle, NoValue},
+    {"eyeRight", "light", &EffectCreateParams::copyLightToEyeRight, NoValue},
+    {"deadPosition", "callAngle", &EffectCreateParams::copyCallAngleToDeadPosition, NoValue},
+    {"scale", "callScale", &EffectCreateParams::copyCallScaleToScale, ScaleValue},
 }};
 
+constexpr bool CopiesOfEachTargetAreTogether()
+{
+    for (size_t i = 1; i < EffectCopyFields.size(); ++i)
+    {
+        const std::string_view target = EffectCopyFields[i].target;
+        const bool sameAsBefore = target == EffectCopyFields[i - 1].target;
+        for (size_t j = 0; j + 1 < i && !sameAsBefore; ++j)
+        {
+            if (target == EffectCopyFields[j].target)
+                return false; // the target came before, but not right before
+        }
+        if (sameAsBefore && (EffectCopyFields[i].value.isSet != EffectCopyFields[i - 1].value.isSet ||
+                             EffectCopyFields[i].value.clear != EffectCopyFields[i - 1].value.clear))
+            return false;
+    }
+    return true;
+}
+static_assert(CopiesOfEachTargetAreTogether(), "the copies of a target are listed together, with the same value");
+
 // Whether `params` copies into `target`, and whether it sets the value of that
-// field (only scale, direction and startPosition have one).
+// field (EffectCopyField::value).
 bool CopiesInto(const EffectCreateParams& params, std::string_view target);
 bool SetsValueOf(const EffectCreateParams& params, std::string_view target);
 

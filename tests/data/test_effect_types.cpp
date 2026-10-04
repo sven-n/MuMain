@@ -432,6 +432,24 @@ TEST_CASE(
     CHECK(wrong.types[0].create == EffectCreateParams{.lifeTime = 1});
 }
 
+// "dark" is a flag of the models and "alphaBlendMinus" a render type of the
+// textures; both are the same number in the game, which means something else
+// for the other kind.
+TEST_CASE("A render type of the other kind of effect is a warning [data][effects]")
+{
+    const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
+        {"name": "skull", "code": "BITMAP_SKULL", "create": {"renderType": "dark"}},
+        {"name": "circleLight", "code": "MODEL_CIRCLE_LIGHT", "create": {"lifeTime": 1,
+         "variants": [{"subType": 1, "renderType": "alphaBlendMinus"}]}},
+        {"name": "shiny5", "code": "BITMAP_SHINY+6", "create": {"renderType": "alphaBlendMinus"}},
+        {"name": "dragon", "code": "MODEL_DRAGON", "create": {"renderType": "dark"}}]})",
+                                   EffectKind::Effect);
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[0].create.renderType"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[1].create.variants[0].renderType"));
+    CHECK_FALSE(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[2].create.renderType"));
+    CHECK_FALSE(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[3].create.renderType"));
+}
+
 TEST_CASE("Wrong variants are errors, empty ones warnings [data][effects]")
 {
     const ReadResult result = Read(R"({"formatVersion": 1, "kind": "effect", "types": [
@@ -608,7 +626,7 @@ TEST_CASE("Render type, start position, the lifeTime offset and more copies are 
     EffectTypeEntry skull{"skull", "BITMAP_SKULL"};
     skull.create = EffectCreateParams{.lifeTime = 1000,
                                       .alphaTarget = 0.75,
-                                      .renderType = Data::Effects::EffectRenderType::Dark,
+                                      .renderType = Data::Effects::EffectRenderType::AlphaBlendMinus,
                                       .animation = 0,
                                       .startPosition = EffectCreateVector{{4.5, 4.5, std::nullopt}},
                                       .lifeTimeOffset = EffectCreateNumber{-60.0, true},
@@ -628,7 +646,7 @@ TEST_CASE("Render type, start position, the lifeTime offset and more copies are 
                   "      \"create\": {\n"
                   "        \"lifeTime\": 1000,\n"
                   "        \"alphaTarget\": 0.75,\n"
-                  "        \"renderType\": \"dark\",\n"
+                  "        \"renderType\": \"alphaBlendMinus\",\n"
                   "        \"animation\": 0,\n"
                   "        \"startPosition\": {\"x\": 4.5, \"y\": 4.5},\n"
                   "        \"offset\": {\n"

@@ -232,7 +232,7 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     }
 
     result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
-    KeepFieldsNotInBmd(result.items);
+    KeepFieldsNotInBmd(result.items, result.importedLocales);
     ValidateItems(result.items, result.validationIssues);
 
     g_ItemDatabase.Build(result.items);
@@ -256,14 +256,11 @@ int CItemDataHandler::KeepCurrentEnglishNames(std::vector<ItemDefinition>& items
     return keptCount;
 }
 
-void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items)
+void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items,
+                                          const std::vector<std::string>& importedLocales)
 {
-    const auto hasBmd = [](std::string_view locale)
-    {
-        const auto languages = GetItemBmdLanguages();
-        return std::any_of(languages.begin(), languages.end(),
-                           [&](const ItemBmdLanguage& language) { return language.locale == locale; });
-    };
+    const auto imported = [&](std::string_view locale)
+    { return std::find(importedLocales.begin(), importedLocales.end(), locale) != importedLocales.end(); };
     for (ItemDefinition& item : items)
     {
         if (const ItemDefinition* current = g_ItemDatabase.Find(item.group, item.number))
@@ -271,7 +268,7 @@ void CItemDataHandler::KeepFieldsNotInBmd(std::vector<ItemDefinition>& items)
             CopyFieldsNotInItemAttribute(*current, item);
             for (const auto& [locale, text] : current->names.GetTranslations())
             {
-                if (!hasBmd(locale))
+                if (!imported(locale))
                 {
                     item.names.Set(locale, text);
                 }

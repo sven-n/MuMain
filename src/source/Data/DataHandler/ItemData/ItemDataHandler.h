@@ -79,8 +79,10 @@ private:
     static int KeepCurrentEnglishNames(std::vector<Data::Items::ItemDefinition>& items);
     // Gives imported items the current values of the fields item.bmd does
     // not have (tags, wing tier, rule flags) and their current names in the
-    // languages that have no item.bmd (e.g. German).
-    static void KeepFieldsNotInBmd(std::vector<Data::Items::ItemDefinition>& items);
+    // languages whose item.bmd was not read: the ones without one (e.g.
+    // German) and the ones whose file is missing.
+    static void KeepFieldsNotInBmd(std::vector<Data::Items::ItemDefinition>& items,
+                                   const std::vector<std::string>& importedLocales);
 #endif
 
     bool m_localeObserverRegistered = false;

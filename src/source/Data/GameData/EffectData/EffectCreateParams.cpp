@@ -28,20 +28,24 @@ void OverrideComponents(EffectCreateVector& vector, const EffectCreateVector& va
     }
 }
 
-// Clears the value of `target`, which a copy replaces.
+// The value of `target`, which a copy replaces.
+const EffectCopyTargetValue& ValueOf(std::string_view target)
+{
+    for (const EffectCopyField& field : EffectCopyFields)
+    {
+        if (field.target == target)
+        {
+            return field.value;
+        }
+    }
+    return NoValue;
+}
+
 void ClearValueOf(EffectCreateParams& params, std::string_view target)
 {
-    if (target == "scale")
+    if (const EffectCopyTargetValue& value = ValueOf(target); value.clear != nullptr)
     {
-        params.scale.reset();
-    }
-    else if (target == "direction")
-    {
-        params.direction = {};
-    }
-    else if (target == "startPosition")
-    {
-        params.startPosition = {};
+        value.clear(params);
     }
 }
 
@@ -138,18 +142,7 @@ bool CopiesInto(const EffectCreateParams& params, std::string_view target)
 
 bool SetsValueOf(const EffectCreateParams& params, std::string_view target)
 {
-    if (target == "scale")
-    {
-        return params.scale.has_value();
-    }
-    if (target == "direction")
-    {
-        return params.direction.IsSet();
-    }
-    if (target == "startPosition")
-    {
-        return params.startPosition.IsSet();
-    }
-    return false;
+    const EffectCopyTargetValue& value = ValueOf(target);
+    return value.isSet != nullptr && value.isSet(params);
 }
 } // namespace Data::Effects

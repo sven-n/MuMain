@@ -94,7 +94,7 @@ with when the game creates it. Particles, lightning and sprites have none
 | `lightEnable`, `alphaEnable` | Flags (`true`/`false`) the move and draw code of the effect use; what they do depends on it. |
 | `kind`, `skill`, `pkKey`, `timer`, `distance`, `collisionRange` | Values the move code of the effect uses; what they do depends on it. `kind` (0 to 255) and `skill` (0 to 65535) replace the skill values the creating code passes, `pkKey` its PK key. |
 | `alphaTarget`, `animation` | Values the move and draw code of the effect use (`alphaTarget` from 0 to 1, `animation` 0 or more); what they do depends on it. |
-| `renderType` | `"dark"`: a model drawn dark. `"alphaBlendMinus"`: the render type the old code of `BITMAP_SHINY+6` set; the draw code of the effect decides what it does. |
+| `renderType` | `"dark"`: a model drawn dark. `"alphaBlendMinus"`: the render type the old code of `BITMAP_SHINY+6` set; the draw code of the effect decides what it does. `"dark"` on a texture (`BITMAP_`) and `"alphaBlendMinus"` on a model are warnings: the game keeps both in one number, which means something else for the other kind. |
 | `position` | Where it starts; replaces the position the creating code passes. |
 | `angle` | How it is turned, in degrees; replaces the angle the creating code passes. |
 | `direction` | A vector its move code uses, often the way it moves. |
