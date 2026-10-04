@@ -56,7 +56,7 @@ namespace
             }
             SocketClient->ToGameServer()->SendUnlockVault((WORD)_wtoi(strText.c_str()));
         };
-        cfg.onSecondary = []
+        cfg.onCancel = []
         {
             if (g_pPickedItem)
                 g_pPickedItem->ShowPickedItem();

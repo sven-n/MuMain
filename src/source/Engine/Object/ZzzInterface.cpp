@@ -1606,7 +1606,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 										SocketClient->ToGameServer()->SendCrywolfContractRequest(BackUp_Key);
 									}
 								};
-								cfg.onSecondary = []
+								cfg.onCancel = []
 								{
 									Button_Down = 1;
 									mu::ui::window::GenericDialogConfig needGuardianCfg;

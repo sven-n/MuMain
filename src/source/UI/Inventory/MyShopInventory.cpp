@@ -154,7 +154,7 @@ void mu::ui::window::ShowPersonalShopItemValueDialog()
                     }
                 }
             };
-            cfg.onSecondary = []
+            cfg.onCancel = []
             {
                 CInventoryCtrl::BackupPickedItem();
             };
@@ -208,7 +208,7 @@ void mu::ui::window::ShowPersonalShopItemValueDialog()
 
         g_pMyShopInventory->SetInputValueTextBox(false);
     };
-    cfg.onSecondary = []
+    cfg.onCancel = []
     {
         CInventoryCtrl::BackupPickedItem();
         g_pMyShopInventory->SetInputValueTextBox(false);

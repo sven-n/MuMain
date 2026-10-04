@@ -415,7 +415,7 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::DisjointBtnDown(c
     mu_swprintf(strText, I18N::Game::DissolvingCostDZen, COMGEM::m_iValue);
     cfg.lines.push_back({ strText, true });
     cfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
-    cfg.onSecondary = []
+    cfg.onCancel = []
     {
         COMGEM::GetBack();
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationDisjointMsgBoxLayout));
@@ -1554,7 +1554,7 @@ void mu::ui::window::ShowGemIntegrationMixDialog()
             mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
             confirmCfg.lines.push_back({ strText, true });
             confirmCfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
-            confirmCfg.onSecondary = []
+            confirmCfg.onCancel = []
             {
                 COMGEM::GetBack();
                 mu::ui::window::ShowGemIntegrationJewelDialog();

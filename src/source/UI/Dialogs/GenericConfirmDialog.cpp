@@ -256,6 +256,9 @@ namespace
 
 CGenericConfirmDialog::DialogId CGenericConfirmDialog::Show(GenericDialogConfig cfg)
 {
+    // onSecondary only fires from the secondary button; Cancel and Esc fire onCancel.
+    assert(!cfg.onSecondary || cfg.secondaryLabel);
+
     if (cfg.isValid && !cfg.isValid())
         return 0;
 

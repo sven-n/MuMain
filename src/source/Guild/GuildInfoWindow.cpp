@@ -1042,7 +1042,7 @@ void mu::ui::window::CGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshi
                 byRelationShipType, byRequestType, 0x01,
                 MAKEWORD(byTargetUserIndexH, byTargetUserIndexL));
         };
-        cfg.onSecondary = [byRelationShipType, byRequestType, byTargetUserIndexH, byTargetUserIndexL]
+        cfg.onCancel = [byRelationShipType, byRequestType, byTargetUserIndexH, byTargetUserIndexL]
         {
             SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
                 byRelationShipType, byRequestType, 0x00,

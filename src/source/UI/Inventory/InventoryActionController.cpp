@@ -286,7 +286,7 @@ bool CInventoryActionController::HandleSellToNPC(CInventoryCtrl* targetControl) 
                 CInventoryCtrl::BackupPickedItem();
             }
         };
-        cfg.onSecondary = []
+        cfg.onCancel = []
         {
             CInventoryCtrl::BackupPickedItem();
         };
@@ -568,7 +568,7 @@ bool CInventoryActionController::ApplyJewels(CInventoryCtrl* targetControl, CPic
             SendRequestUse(iSourceIndex, iTargetIndex);
             CInventoryCtrl::BackupPickedItem();
         };
-        cfg.onSecondary = [] { CInventoryCtrl::BackupPickedItem(); };
+        cfg.onCancel = [] { CInventoryCtrl::BackupPickedItem(); };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 
         pPickedItem->HidePickedItem();

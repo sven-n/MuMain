@@ -473,7 +473,7 @@ bool mu::ui::window::CNPCShop::InventoryProcess()
                     mu::ui::window::CInventoryCtrl::BackupPickedItem();
                 }
             };
-            cfg.onSecondary = []
+            cfg.onCancel = []
             {
                 mu::ui::window::CInventoryCtrl::BackupPickedItem();
             };

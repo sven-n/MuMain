@@ -7301,7 +7301,7 @@ void ReceiveParty(const BYTE* ReceiveBuffer)
         { I18N::Game::SomeoneRequestsYouToJoinTheirAParty, false },
     };
     cfg.onPrimary = [] { SocketClient->ToGameServer()->SendPartyInviteResponse(true, PartyKey); };
-    cfg.onSecondary = [] { SocketClient->ToGameServer()->SendPartyInviteResponse(false, PartyKey); };
+    cfg.onCancel = [] { SocketClient->ToGameServer()->SendPartyInviteResponse(false, PartyKey); };
     mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 }
 
@@ -7480,7 +7480,7 @@ void ReceiveGuild(const BYTE* ReceiveBuffer)
     cfg.lines.push_back({ CharactersClient[FindCharacterIndex(guildPlayerKey)].ID, false });
     cfg.lines.push_back({ I18N::Game::YouHaveReceivedAnOfferToJoinAGuild, false });
     cfg.onPrimary = [guildPlayerKey]() { SocketClient->ToGameServer()->SendGuildJoinResponse(true, guildPlayerKey); };
-    cfg.onSecondary = [guildPlayerKey]() { SocketClient->ToGameServer()->SendGuildJoinResponse(false, guildPlayerKey); };
+    cfg.onCancel = [guildPlayerKey]() { SocketClient->ToGameServer()->SendGuildJoinResponse(false, guildPlayerKey); };
     mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 }
 
@@ -7695,7 +7695,7 @@ void ReceiveDeclareWar(const BYTE* ReceiveBuffer)
             { I18N::Game::YouHaveBeenChallengedToBattleSoccer, false },
         };
         cfg.onPrimary = [] { SocketClient->ToGameServer()->SendGuildWarResponse(true); };
-        cfg.onSecondary = [] { SocketClient->ToGameServer()->SendGuildWarResponse(false); InitGuildWar(); };
+        cfg.onCancel = [] { SocketClient->ToGameServer()->SendGuildWarResponse(false); InitGuildWar(); };
     }
     else
     {
@@ -7704,7 +7704,7 @@ void ReceiveDeclareWar(const BYTE* ReceiveBuffer)
             { I18N::Game::ToAGuildWar, false },
         };
         cfg.onPrimary = [] { SocketClient->ToGameServer()->SendGuildWarResponse(true); };
-        cfg.onSecondary = [] { SocketClient->ToGameServer()->SendGuildWarResponse(false); InitGuildWar(); };
+        cfg.onCancel = [] { SocketClient->ToGameServer()->SendGuildWarResponse(false); InitGuildWar(); };
     }
     mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 }
@@ -9079,7 +9079,7 @@ void ReceiveDuelRequest(const BYTE* ReceiveBuffer)
         { I18N::Game::WouldYouLikeToAcceptTheChallenge, false },
     };
     cfg.onPrimary = [] { g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, TRUE); };
-    cfg.onSecondary = [] { g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, FALSE); };
+    cfg.onCancel = [] { g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, FALSE); };
     mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     PlayBuffer(SOUND_OPEN_DUELWINDOW);
 }

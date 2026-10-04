@@ -742,7 +742,7 @@ void CTrade::ProcessToReceiveTradeRequest(char* pbyYourID)
         { I18N::Game::WouldLikeToTradeWithYou, false },
     };
     cfg.onPrimary = [] { SocketClient->ToGameServer()->SendTradeRequestResponse(true); };
-    cfg.onSecondary = [] { SocketClient->ToGameServer()->SendTradeRequestResponse(false); };
+    cfg.onCancel = [] { SocketClient->ToGameServer()->SendTradeRequestResponse(false); };
     mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 
     mu::ui::window::CInventoryCtrl::BackupPickedItem();

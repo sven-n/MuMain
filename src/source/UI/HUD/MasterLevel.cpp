@@ -1036,7 +1036,7 @@ bool mu::ui::window::CMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DA
         MouseLButtonPop = false;
         MouseLButtonPush = false;
     };
-    cfg.onSecondary = []
+    cfg.onCancel = []
     {
         MouseLButton = false;
         MouseLButtonPop = false;
