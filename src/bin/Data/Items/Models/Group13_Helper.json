@@ -184,7 +184,7 @@
         "rotation": [165, -168, 198],
         "scale": 0.48
       },
-      "itemEffect": "invisibilityCloak"
+      "renderStyle": "invisibilityCloak"
     },
     {
       "number": 21,

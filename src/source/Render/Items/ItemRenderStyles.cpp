@@ -1710,6 +1710,20 @@ bool RenderBloodBone(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
     return true;
 }
 
+// The cloak see-through in the light of its level (a little darker), its
+// first mesh pulsing; the level glow comes on top as for other items.
+bool RenderInvisibilityCloak(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
+{
+    vec3_t light;
+    VectorCopy(b->BodyLight, light);
+    Vector(light[0] * 0.8f, light[1] * 0.8f, light[2] * 0.8f, b->BodyLight);
+    float sine = float(sinf(WorldTime * 0.002f) * 0.3f) + 0.7f;
+    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, 0, sine, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+                  o->HiddenMesh);
+    VectorCopy(light, b->BodyLight);
+    return true;
+}
+
 // ------------------------------------------------ glow passes
 
 // The whole staff glows, then its second mesh again, white; the object keeps
@@ -1763,6 +1777,7 @@ const RenderStyle RenderStyles[] = {
     {"oldScroll", RenderOldScroll},
     {"illusionSorcererCovenant", RenderIllusionSorcererCovenant, &HarmonyShine},
     {"bloodBone", RenderBloodBone},
+    {"invisibilityCloak", RenderInvisibilityCloak},
     {"scrollOfBlood", RenderScrollOfBlood},
     {"cursedCastleWater", RenderCursedCastleWater, &CursedCastleWaterShine},
     {"harmonyShine", RenderPlainly, &HarmonyShine},

@@ -159,16 +159,6 @@ Result ApplyFruits(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     return Result::Drawn;
 }
 
-Result ApplyInvisibilityCloak(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
-{
-    Vector(0.8f, 0.8f, 0.8f, b->BodyLight);
-    float sine = float(sinf(WorldTime * 0.002f) * 0.3f) + 0.7f;
-
-    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, 0, sine, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                  o->HiddenMesh);
-    return Result::Drawn;
-}
-
 Result ApplyDevilsEye(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 {
     float sine = (float)sinf(WorldTime * 0.002f) * 10.f + 15.65f;
@@ -546,7 +536,6 @@ const ItemEffect ItemEffects[] = {
     {"spirit", ApplySpirit},
     {"potion", ApplyPotion},
     {"fruits", ApplyFruits},
-    {"invisibilityCloak", ApplyInvisibilityCloak},
     {"devilsEye", ApplyDevilsEye},
     {"devilsKey", ApplyDevilsKey},
     {"devilsInvitation", ApplyDevilsInvitation},
