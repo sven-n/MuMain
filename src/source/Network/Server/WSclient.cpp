@@ -10050,52 +10050,23 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
     switch (Data->Result)
     {
     case 0x00:
-        g_pFriendMenu->RemoveRequestWindow(szName);
-        g_pWindowMgr->Dialogs().Notice(I18N::Game::TheConversationCannotContinue);
+        UI::Social::ChatRoomRefused(szName, I18N::Game::TheConversationCannotContinue);
         break;
     case 0x01:
-        g_pFriendMenu->RemoveRequestWindow(szName);
-        if (Data->Type == 0)
+    {
+        // Type: 0 the room this player asked for, 1 a friend's, 2 one this player was invited to.
+        const UI::Social::ChatRoomTicket ticket{ szIP, Data->RoomNumber, Data->Ticket };
+        switch (Data->Type)
         {
-            DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT, 100, 100, I18N::Game::Talking);
-            ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))
-                ->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
-        }
-        else if (Data->Type == 1)
-        {
-            DWORD dwUIID = g_pFriendMenu->CheckChatRoomDuplication(szName);
-            if (dwUIID == 0)
-            {
-                dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, I18N::Game::Talking);
-                ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))
-                    ->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
-                g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
-                g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
-
-                g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_HIDE);
-                g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, dwUIID, 0);
-            }
-            else if (dwUIID == -1)
-                ;
-            else
-            {
-                ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->DisconnectToChatServer();
-                ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))
-                    ->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
-            }
-        }
-        else if (Data->Type == 2)
-        {
-            DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, I18N::Game::Talking);
-            ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))
-                ->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
-            g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
-            g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
+        case 0: UI::Social::ChatRoomOpened(szName, UI::Social::ChatRoomArrival::Requested, ticket); break;
+        case 1: UI::Social::ChatRoomOpened(szName, UI::Social::ChatRoomArrival::FromFriend, ticket); break;
+        case 2: UI::Social::ChatRoomOpened(szName, UI::Social::ChatRoomArrival::Invited, ticket); break;
+        default: UI::Social::EndChatRoomRequest(szName); break;
         }
         break;
+    }
     case 0x02:
-        g_pFriendMenu->RemoveRequestWindow(szName);
-        g_pWindowMgr->Dialogs().Notice(I18N::Game::TheChatServerIsNowUnavailable);
+        UI::Social::ChatRoomRefused(szName, I18N::Game::TheChatServerIsNowUnavailable);
         break;
     default:
         break;
@@ -10105,31 +10076,17 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
 void ReceiveChatRoomInviteResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPFS_CHAT_INVITE_RESULT)ReceiveBuffer;
-    auto* pChatWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid);
-    if (pChatWindow == nullptr)
-        return;
 
     switch (Data->Result)
     {
     case 0x00:
-        pChatWindow->AddChatText(255, I18N::Game::UserIsOffline, 1, 0);
+        UI::Social::ChatInviteAnswered(Data->WindowGuid, UI::Social::ChatInviteOutcome::Offline);
         break;
     case 0x01:
-        if (pChatWindow->GetCurrentInvitePal() != nullptr)
-        {
-            wchar_t szText[MAX_TEXT_LENGTH + 1] = {0};
-            wcsncpy(szText, pChatWindow->GetCurrentInvitePal(), MAX_USERNAME_SIZE);
-            szText[MAX_USERNAME_SIZE] = '\0';
-            wcscat(szText, I18N::Game::HasBeenInvited);
-            pChatWindow->AddChatText(255, szText, 1, 0);
-        }
-        else
-        {
-            assert(!"ReceiveChatRoomInviteResult");
-        }
+        UI::Social::ChatInviteAnswered(Data->WindowGuid, UI::Social::ChatInviteOutcome::Invited);
         break;
     case 0x03:
-        pChatWindow->AddChatText(255, I18N::Game::YouHaveReachedTheMaximumNumberOfFriendsYouCanList, 1, 0);
+        UI::Social::ChatInviteAnswered(Data->WindowGuid, UI::Social::ChatInviteOutcome::ListFull);
         break;
     default:
         break;

@@ -180,4 +180,99 @@ void ShowLetter(const LetterBody& body)
     }
     pWindow->SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
 }
+
+namespace
+{
+CUIChatWindow* ChatWindow(DWORD dwUIID)
+{
+    return static_cast<CUIChatWindow*>(g_pWindowMgr->GetWindow(dwUIID));
+}
+}
+
+void ChatRoomOpened(std::wstring_view peer, ChatRoomArrival arrival, const ChatRoomTicket& ticket)
+{
+    const std::wstring peerName(peer);
+    const std::wstring server(ticket.server);
+    g_pFriendMenu->RemoveRequestWindow(peerName.c_str());
+
+    switch (arrival)
+    {
+    case ChatRoomArrival::Requested:
+    {
+        const DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT, 100, 100, I18N::Game::Talking);
+        ChatWindow(dwUIID)->ConnectToChatServer(server.c_str(), ticket.room, ticket.ticket);
+        break;
+    }
+    case ChatRoomArrival::FromFriend:
+    {
+        DWORD dwUIID = g_pFriendMenu->CheckChatRoomDuplication(peerName.c_str());
+        if (dwUIID == 0)
+        {
+            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, I18N::Game::Talking);
+            ChatWindow(dwUIID)->ConnectToChatServer(server.c_str(), ticket.room, ticket.ticket);
+            g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
+            g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
+
+            g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_HIDE);
+            g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, dwUIID, 0);
+        }
+        else if (dwUIID != static_cast<DWORD>(-1))
+        {
+            ChatWindow(dwUIID)->DisconnectToChatServer();
+            ChatWindow(dwUIID)->ConnectToChatServer(server.c_str(), ticket.room, ticket.ticket);
+        }
+        break;
+    }
+    case ChatRoomArrival::Invited:
+    {
+        const DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, I18N::Game::Talking);
+        ChatWindow(dwUIID)->ConnectToChatServer(server.c_str(), ticket.room, ticket.ticket);
+        g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
+        g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
+        break;
+    }
+    }
+}
+
+void EndChatRoomRequest(std::wstring_view peer)
+{
+    g_pFriendMenu->RemoveRequestWindow(std::wstring(peer).c_str());
+}
+
+void ChatRoomRefused(std::wstring_view peer, std::wstring_view notice)
+{
+    EndChatRoomRequest(peer);
+    ShowNotice(notice);
+}
+
+void ChatInviteAnswered(std::uint32_t chatWindow, ChatInviteOutcome outcome)
+{
+    CUIChatWindow* pChatWindow = ChatWindow(chatWindow);
+    if (pChatWindow == nullptr)
+        return;
+
+    switch (outcome)
+    {
+    case ChatInviteOutcome::Offline:
+        pChatWindow->AddChatText(255, I18N::Game::UserIsOffline, 1, 0);
+        break;
+    case ChatInviteOutcome::Invited:
+        if (pChatWindow->GetCurrentInvitePal() != nullptr)
+        {
+            wchar_t szText[MAX_TEXT_LENGTH + 1] = {0};
+            wcsncpy(szText, pChatWindow->GetCurrentInvitePal(), MAX_USERNAME_SIZE);
+            szText[MAX_USERNAME_SIZE] = '\0';
+            wcscat(szText, I18N::Game::HasBeenInvited);
+            pChatWindow->AddChatText(255, szText, 1, 0);
+        }
+        else
+        {
+            assert(!"ChatInviteAnswered");
+        }
+        break;
+    case ChatInviteOutcome::ListFull:
+        pChatWindow->AddChatText(255, I18N::Game::YouHaveReachedTheMaximumNumberOfFriendsYouCanList, 1, 0);
+        break;
+    }
+}
 }

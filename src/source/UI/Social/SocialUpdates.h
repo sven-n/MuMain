@@ -69,4 +69,39 @@ struct LetterBody
 void LetterBodyReceived(const LetterBody& body);
 // Opens a letter-reading window for a listed letter; does nothing if the letter isn't listed.
 void ShowLetter(const LetterBody& body);
+
+// Where to join a chat room the server opened.
+struct ChatRoomTicket
+{
+    std::wstring_view server;
+    std::uint32_t room;
+    std::uint32_t ticket;
+};
+
+enum class ChatRoomArrival
+{
+    // A room this player asked for: a chat window opens now.
+    Requested,
+    // A friend's room: rejoins an open room with that friend, or waits hidden behind the others.
+    FromFriend,
+    // A room this player was invited to: waits at the bottom of the window stack.
+    Invited,
+};
+
+// Ends the pending request to `peer` and joins the room.
+void ChatRoomOpened(std::wstring_view peer, ChatRoomArrival arrival, const ChatRoomTicket& ticket);
+// Ends the pending request to `peer` and shows why no room opened.
+void ChatRoomRefused(std::wstring_view peer, std::wstring_view notice);
+// Ends the pending request to `peer` without opening a room.
+void EndChatRoomRequest(std::wstring_view peer);
+
+enum class ChatInviteOutcome
+{
+    Offline,
+    Invited,
+    ListFull,
+};
+
+// Reports an invitation's outcome in the chat room window it was sent from.
+void ChatInviteAnswered(std::uint32_t chatWindow, ChatInviteOutcome outcome);
 }
