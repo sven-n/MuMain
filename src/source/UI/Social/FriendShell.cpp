@@ -123,6 +123,7 @@ void FriendShell::Unload()
     context->UnloadDocument(m_Document);
     m_Document = nullptr;
     m_Placed = false;
+    m_Settled = false;
     m_Binder.Destroy(context);
 }
 
@@ -159,7 +160,6 @@ bool FriendShell::Sync(bool shown)
     const bool reject = g_pWindowMgr->GetChatReject() != FALSE;
     if (model.rejectChat != reject) { model.rejectChat = reject; m_Binder.MarkDirty("reject_chat"); }
     const bool wasVisible = m_Document->IsVisible();
-    UI::RmlBridge::SyncDocumentVisibility(m_Document, true);
     SyncWorkspace();
     SyncGeometry();
     // A hidden document has no box, so neither the resting place nor a layout the manager restored
@@ -173,18 +173,24 @@ bool FriendShell::Sync(bool shown)
         m_Document->UpdateDocument();
         SyncGeometry();
     }
-    if (m_RestoreScroll)
+    else if (m_Placed)
+        m_Settled = true;
+    // window_shell places #panel through the data model, which the context applies only after this
+    // runs, so a document shown on the frame it is placed still renders once where .center-both
+    // left it -- centred and unsized.
+    UI::RmlBridge::SyncDocumentVisibility(m_Document, m_Settled);
+    if (m_Settled && m_RestoreScroll)
     {
         if (auto* pane = ActivePane())
             pane->SetScrollTop(m_Scroll[model.tab] * m_Document->GetContext()->GetDensityIndependentPixelRatio());
         m_RestoreScroll = false;
     }
-    if (m_FocusPane)
+    if (m_Settled && m_FocusPane)
     {
         m_FocusPane = false;
         FocusActivePane();
     }
-    return !wasVisible;
+    return m_Document->IsVisible() && !wasVisible;
 }
 
 void FriendShell::PullToFront() { if (m_Document) m_Document->PullToFront(); }
@@ -198,10 +204,14 @@ void FriendShell::SyncGeometry()
     const auto size = panel->GetBox().GetSize(Rml::BoxArea::Border);
     if (scale <= 0 || size.x <= 0 || size.y <= 0)
         return;
-    m_Left = panel->GetAbsoluteLeft() / scale;
-    m_Top = panel->GetAbsoluteTop() / scale;
     m_Width = size.x / scale;
     m_Height = size.y / scale;
+    // An unplaced document still sits at its own origin; reading that back would overwrite the
+    // position the manager assigned, which PlaceAtRest() is about to ask the owner for.
+    if (!m_Placed)
+        return;
+    m_Left = panel->GetAbsoluteLeft() / scale;
+    m_Top = panel->GetAbsoluteTop() / scale;
     const auto native = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight);
     const float ratio = scale / native.scaleX;
     m_Owner.SetPosition(static_cast<int>(m_Left * ratio), static_cast<int>(m_Top * ratio));

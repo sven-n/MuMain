@@ -102,6 +102,7 @@ void ChatRoomView::Unload()
     context->UnloadDocument(m_Document);
     m_Document = nullptr;
     m_Placed = false;
+    m_Settled = false;
     m_Binder.Destroy(context);
 }
 
@@ -128,7 +129,6 @@ bool ChatRoomView::Sync(bool shown)
     if (m_Title != m_Owner.GetTitle())
         PublishTitle();
     const bool wasVisible = m_Document->IsVisible();
-    UI::RmlBridge::SyncDocumentVisibility(m_Document, true);
     SyncWorkspace();
     SyncGeometry();
     if (!m_Placed && m_Width > 0 && m_Height > 0)
@@ -140,18 +140,24 @@ bool ChatRoomView::Sync(bool shown)
         m_Document->UpdateDocument();
         SyncGeometry();
     }
-    if (m_ScrollToEnd)
+    else if (m_Placed)
+        m_Settled = true;
+    // window_shell places #panel through the data model, which the context applies only after this
+    // runs, so a document shown on the frame it is placed still renders once where .center-both
+    // left it -- centred and unsized.
+    UI::RmlBridge::SyncDocumentVisibility(m_Document, m_Settled);
+    if (m_Settled && m_ScrollToEnd)
     {
         m_ScrollToEnd = false;
         ScrollLogToEnd();
     }
-    if (m_FocusField)
+    if (m_Settled && m_FocusField)
     {
         m_FocusField = false;
         if (auto* field = Field())
             field->Focus();
     }
-    return !wasVisible;
+    return m_Document->IsVisible() && !wasVisible;
 }
 
 void ChatRoomView::PullToFront()
@@ -511,10 +517,14 @@ void ChatRoomView::SyncGeometry()
     const auto size = panel->GetBox().GetSize(Rml::BoxArea::Border);
     if (scale <= 0 || size.x <= 0 || size.y <= 0)
         return;
-    m_Left = panel->GetAbsoluteLeft() / scale;
-    m_Top = panel->GetAbsoluteTop() / scale;
     m_Width = size.x / scale;
     m_Height = size.y / scale;
+    // An unplaced document still sits at its own origin; reading that back would overwrite the
+    // position the manager assigned, which PlaceAtRest() is about to ask the owner for.
+    if (!m_Placed)
+        return;
+    m_Left = panel->GetAbsoluteLeft() / scale;
+    m_Top = panel->GetAbsoluteTop() / scale;
     const auto native = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight);
     const float ratio = scale / native.scaleX;
     m_Owner.SetPosition(static_cast<int>(m_Left * ratio), static_cast<int>(m_Top * ratio));

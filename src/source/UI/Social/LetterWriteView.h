@@ -74,6 +74,8 @@ private:
     int m_PendingFocus = -1;
     int m_LastFocus = 0;
     bool m_Placed = false;
+    // Placed AND the context has applied that position: before this, the panel is still centred.
+    bool m_Settled = false;
     bool m_Maximized = false;
     bool m_CustomSize = false;
     bool m_CustomPosition = false;

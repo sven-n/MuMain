@@ -67,6 +67,8 @@ private:
     float m_DpRatio = 0;
     std::wstring m_Title;
     bool m_Placed = false;
+    // Placed AND the context has applied that position: before this, the panel is still centred.
+    bool m_Settled = false;
     bool m_Maximized = false;
     bool m_CustomSize = false;
     bool m_CustomPosition = false;

@@ -388,6 +388,7 @@ void CUIPhotoViewer::Init(int iInitType)
     Vector(-300, -300, -300, m_PhotoChar.Object.Position);
 
     m_bIsInitialized = TRUE;
+    m_bHasSlot = false;
 }
 
 BOOL CompareItemEqual(const PART_t* item1, const PART_t* item2)
@@ -725,6 +726,13 @@ BOOL CUIPhotoViewer::DoMouseAction()
     return TRUE;
 }
 
+void CUIPhotoViewer::SetSlot(int iPos_x, int iPos_y, int iWidth, int iHeight)
+{
+    SetPosition(iPos_x, iPos_y);
+    SetSize(iWidth, iHeight);
+    m_bHasSlot = true;
+}
+
 void CUIPhotoViewer::TurnBy(float degrees)
 {
     m_bHelpEnable = FALSE;
@@ -779,6 +787,9 @@ void CUIPhotoViewer::ShowHelpText()
 
 void CUIPhotoViewer::Render()
 {
+    if (!m_bHasSlot)
+        return;
+
     if (m_bIsWebzenMail == TRUE)
     {
         RenderColor(m_iPos_x, m_iPos_y, 119.f, 141.f);

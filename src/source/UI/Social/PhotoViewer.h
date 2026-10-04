@@ -62,6 +62,10 @@ public:
     virtual BOOL DoMouseAction();
     virtual void Render();
 
+    // The well this stands in, in the owner's own coordinates. Until its document has been placed
+    // there is no well yet, and Render() draws nothing rather than at the default rect.
+    void SetSlot(int iPos_x, int iPos_y, int iWidth, int iHeight);
+
     // Driven by UI::Social::PhotoViewerControl, which owns these gestures while the viewer stands
     // behind an RmlUi document and the native press never arrives. See its header.
     void TurnBy(float degrees);
@@ -91,6 +95,7 @@ protected:
     float m_fSettingZoom;
     float m_fCurrentZoom;
     BOOL m_bIsWebzenMail;
+    bool m_bHasSlot = false;
 
 public:
     void SetShowType(int Stype)

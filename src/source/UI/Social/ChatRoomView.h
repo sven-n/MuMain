@@ -95,6 +95,8 @@ private:
     std::wstring m_LastSent;
     std::wstring m_NameLookup;
     bool m_Placed = false;
+    // Placed AND the context has applied that position: before this, the panel is still centred.
+    bool m_Settled = false;
     bool m_Maximized = false;
     bool m_CustomSize = false;
     bool m_CustomPosition = false;

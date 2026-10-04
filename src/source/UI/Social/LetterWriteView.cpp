@@ -112,6 +112,7 @@ void LetterWriteView::Unload()
     context->UnloadDocument(m_Document);
     m_Document = nullptr;
     m_Placed = false;
+    m_Settled = false;
     m_Binder.Destroy(context);
 }
 
@@ -218,7 +219,6 @@ bool LetterWriteView::Sync(bool shown)
         m_Binder.MarkDirty("title");
     }
     const bool wasVisible = m_Document->IsVisible();
-    UI::RmlBridge::SyncDocumentVisibility(m_Document, true);
     SyncWorkspace();
     SyncGeometry();
     if (!m_Placed && m_Width > 0 && m_Height > 0)
@@ -230,15 +230,21 @@ bool LetterWriteView::Sync(bool shown)
         m_Document->UpdateDocument();
         SyncGeometry();
     }
+    else if (m_Placed)
+        m_Settled = true;
+    // window_shell places #panel through the data model, which the context applies only after this
+    // runs, so a document shown on the frame it is placed still renders once where .center-both
+    // left it -- centred and unsized.
+    UI::RmlBridge::SyncDocumentVisibility(m_Document, m_Settled);
     SyncPhoto();
-    if (m_PendingFocus >= 0)
+    if (m_Settled && m_PendingFocus >= 0)
     {
         // Deliberately after the document is shown: a hidden document cannot take focus.
         if (auto* field = m_Document->GetElementById(FieldIds[m_PendingFocus]))
             field->Focus();
         m_PendingFocus = -1;
     }
-    return !wasVisible;
+    return m_Document->IsVisible() && !wasVisible;
 }
 
 
@@ -255,11 +261,16 @@ void LetterWriteView::SyncPhoto()
     const auto native = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight);
     if (scale <= 0 || native.scaleX <= 0)
         return;
+    // Until the panel has settled its slot is still where window_shell centred it; moving the
+    // viewer there draws the portrait in the middle of the screen for that frame.
+    if (!m_Settled)
+        return;
     const float ratio = scale / native.scaleX;
     const auto size = slot->GetBox().GetSize(Rml::BoxArea::Border);
-    m_Owner.m_Photo.SetPosition(static_cast<int>(slot->GetAbsoluteLeft() / scale * ratio),
-                                static_cast<int>(slot->GetAbsoluteTop() / scale * ratio));
-    m_Owner.m_Photo.SetSize(static_cast<int>(size.x / scale * ratio), static_cast<int>(size.y / scale * ratio));
+    m_Owner.m_Photo.SetSlot(static_cast<int>(slot->GetAbsoluteLeft() / scale * ratio),
+                            static_cast<int>(slot->GetAbsoluteTop() / scale * ratio),
+                            static_cast<int>(size.x / scale * ratio),
+                            static_cast<int>(size.y / scale * ratio));
 }
 
 void LetterWriteView::PullToFront()
@@ -324,10 +335,14 @@ void LetterWriteView::SyncGeometry()
     const auto size = panel->GetBox().GetSize(Rml::BoxArea::Border);
     if (scale <= 0 || size.x <= 0 || size.y <= 0)
         return;
-    m_Left = panel->GetAbsoluteLeft() / scale;
-    m_Top = panel->GetAbsoluteTop() / scale;
     m_Width = size.x / scale;
     m_Height = size.y / scale;
+    // An unplaced document still sits at its own origin; reading that back would overwrite the
+    // position the manager assigned, which PlaceAtRest() is about to ask the owner for.
+    if (!m_Placed)
+        return;
+    m_Left = panel->GetAbsoluteLeft() / scale;
+    m_Top = panel->GetAbsoluteTop() / scale;
     const auto native = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight);
     const float ratio = scale / native.scaleX;
     m_Owner.SetPosition(static_cast<int>(m_Left * ratio), static_cast<int>(m_Top * ratio));
