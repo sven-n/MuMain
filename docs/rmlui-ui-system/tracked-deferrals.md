@@ -26,10 +26,9 @@ one of the trigger initiatives on the right.
 | Window(s) | Known deviation | Revisit when... |
 |---|---|---|
 | `CMuHelperDetailWindow`'s three threshold gauges | Their art is RmlUi but their input is still C++: a hit rectangle per gauge plus per-frame mouse polling (`UpdateGauge()`). Converting them to a stock `<input type="range">` was attempted and **stopped deliberately**: `WidgetSlider`'s value mapping is unusable under the docked panel's `transform: scale(root_scale)` (see `engine-findings.md`). Two smaller differences would also have to be settled: the slider has no wheel handling, and native's click mapping (`floor(10x/124) + 1`, so 0 is only reachable left of the bar) is not a proportional one. | Either the docked panels stop scaling via a CSS transform, or the hit area is hoisted out of it as a `<body>`-level element positioned from `root_x`/`root_y`/`root_scale`. `COptionWindow`'s sliders are not a precedent — that panel has no transform. |
-| `CBuffStrip` (`themes/modern/buff_strip.rcss`) | The tooltip overrides its shared text colour with `#ffffff`. | Replace with the existing text token when touching the stylesheet. A font-size token category is separate work. |
 | Migrated windows | Recorded validation does not cover every resolution, UI scale, theme and drag-state combination. | Extend and execute the existing [validation matrix](validation-matrix.md), including event-only states and actual item/skill activation. |
-| All draggable migrated windows | Existing drag system's interaction with theme-default-layout + UI-scale (§10–11) has never been explicitly audited | The drag/preference-integration audit (itself an unstarted gap, above) happens — check these windows specifically, don't just audit the mechanism in the abstract. |
-| `CBuffStrip` | Right-click-to-cancel not reproduced; tooltip is plain-text instead of the original's per-line-colored rich tooltip (both already documented as deliberate scope cuts in `newui-tier-adapter.md`, not silent gaps) | Right-click-distinct-from-left-click is proven generally in a `data-event-click` binding, or the three non-unified tooltip mechanisms (§12) get consolidated — whichever comes first. |
+| All draggable migrated windows | Existing drag system's interaction with theme-default-layout + UI-scale (§10–11) has never been explicitly audited | The dock-spacing design below ("Remaining ownership work") settles first-layout and saved-position rules — check these windows specifically then, don't just audit the mechanism in the abstract. |
+| `CBuffStrip` | Right-click-to-cancel not reproduced (a deliberate scope cut documented in `newui-tier-adapter.md`). The legacy theme has the original's per-line-coloured tooltip (`.tooltip-rich`); modern keeps a plain one by choice. | Right-click-distinct-from-left-click is proven generally in a `data-event-click` binding. |
 | `CMyInventory` (equipment paperdoll — `RenderEquippedItem()`, still fully native) | Background sprite, durability tint, and drag-compatibility highlight all paint *behind* the equipped item's live 3D icon today (native paint order); RmlUi's main context always composites last, so a straight port would paint them *in front of* instead — a real regression, not a straight port (Stage 2 was scoped, investigated, and deliberately skipped for this reason — see "What's migrated" above). | A background-context consolidation pass makes this mechanism reliable enough to trust with more per-frame-varying, class-conditional content, **or** the equipment grid gets its own future chrome pass anyway and folds this in at the same time — whichever comes first. If pursued alone, the static background sprite (no gameplay-state binding) is the only piece with a reasonable cost/value ratio on its own. |
 | `CMyInventory` (`my_inventory.rcss`, legacy theme only) | The 4 corner buttons (RmlUi, always renders last) can end up on top of `CInventoryCtrl`'s native item tooltip when a bottom-row item's tooltip extends into the button strip — before Stage 1 both were native, ordinary same-frame paint order put the tooltip on top. Confirmed cosmetic, not functional; user explicitly deferred it. | `UI::RmlBridge::OverlayRender` wraps `SetPostRmlUiCallback` as a registry any window can join (`component-catalog.md`) and has no other consumer, so rerouting the tooltip through it is a caller change. Or a future grid-chrome pass makes the tooltip an RmlUi element, resolving it for free via DOM order. |
 | HUD circular glass-orb + wrapping arc gauges (reference visual study, not yet built) | The 2026-09-10 iron-palette migration deliberately retinted `main_frame.rcss`'s existing rectangular HP/MP/AG/SD bars rather than rebuilding them as circular orbs/arcs — that's a structural rebuild (new markup, new `CMainFrameWindow` C++ binding shape, new tooltip anchors), not a retint, and touches live combat UI. Two RmlUi-native techniques were confirmed viable for it (`<progress direction="clockwise">` for the arcs via real octant geometry, layered `radial-gradient` for the orb liquid) but not used yet. | A dedicated, focused pass scoped just to this, once explicitly prioritized — see `modern-theme-visual-direction.md`'s "Known follow-up" section. |
@@ -284,16 +283,14 @@ boundary.
 
 ### The guard that freezes the population
 
-`Tools/check_rml_bound_geometry.py` is wired into the build beside the syntax and
+`tools/check_rml_bound_geometry.py` is wired into the build beside the syntax and
 contract-drift checks. It requires a reason for non-exempt geometry bindings in
-`Tools/rml_bound_geometry_allowlist.txt`. Root-placement/scaling expressions are
+`tools/rml_bound_geometry_allowlist.txt`. Root-placement/scaling expressions are
 exempt under the checker's rules.
 
-Run `python Tools/check_rml_bound_geometry.py --review` to compare each reason with
+Run `python tools/check_rml_bound_geometry.py --review` to compare each reason with
 its actual bound fields. An entry can still be required while its description has
-become obsolete. In particular, UnitedMarketPlace's description still mentions a
-native scrollbar absent from its current document; correct that reason without
-removing the entry's genuine counter-scale constraint.
+become obsolete, so update the reason when a port changes what a document binds.
 
 Allowlist totals are not defect counts. Review dynamic coordinates, native companions,
 counter-scale bridges and static presentation bindings separately. Passing the guard

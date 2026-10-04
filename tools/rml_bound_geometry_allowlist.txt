@@ -93,5 +93,5 @@ themes/modern/pet_info.rml: counter-scale bridge -- counter-scaled rows and gaug
 themes/modern/trade.rml: counter-scale bridge -- counter-scaled text layers
 themes/modern/window_shell.rml: counter-scale bridge -- counter-scaled text layers in the shared shell
 tooltip.rml: per-frame data -- tooltip is placed against the pointer
-united_market_place.rml: display-list port, and mirrors the native list's scrollbar geometry
+united_market_place.rml: counter-scale bridge -- the warp label is centred on the native font's line height
 window_menu.rml: counter-scale bridge -- each .sharp-text row's own width under the HUD stretch

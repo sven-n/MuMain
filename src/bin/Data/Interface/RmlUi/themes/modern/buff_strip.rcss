@@ -238,7 +238,7 @@
 	white-space: pre-line;
 	background-color: token(surface-tooltip);
 	border: 1dp token(border-frame);
-	color: #ffffff;
+	color: token(text-primary);
 	padding: 3dp 5dp;
 	border-radius: token(radius-sm)dp;
 	font-family: "token(font-body)";
