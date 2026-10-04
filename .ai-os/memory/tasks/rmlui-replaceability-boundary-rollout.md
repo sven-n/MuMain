@@ -165,6 +165,8 @@ Siege pass (2026-10-05): `UI/Combat/SiegeUpdates` now owns castle minimap and co
 
 Doppelganger pass (2026-10-05): `UI/Events/DoppelgangerUpdates` owns entry, progress, party positions, match-frame lifetime, and result-state presentation. `WSclient.cpp` keeps named protocol outcomes and passes decoded values. A full RelWithDebInfo build passed. In-game spot checks remain pending with the consolidated RB-03 checklist.
 
+Empire Guardian pass (2026-10-05): `UI/Events/EmpireGuardianUpdates` owns timer updates and uses its day/zone when composing result dialogs. `WSclient.cpp` keeps named entry and match outcomes. A full RelWithDebInfo build passed. In-game spot checks remain pending with the consolidated RB-03 checklist.
+
 ### RB-04 — Theme command ownership
 
 - Keep `$theme` command recognition in the console, but move theme validation, activation, config

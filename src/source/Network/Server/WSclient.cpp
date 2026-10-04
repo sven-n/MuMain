@@ -5,6 +5,7 @@
 #include "UI/Chat/ChatMessages.h"
 #include "UI/Combat/SiegeUpdates.h"
 #include "UI/Events/DoppelgangerUpdates.h"
+#include "UI/Events/EmpireGuardianUpdates.h"
 #include "UI/Core/WindowAccess.h"
 #include "UI/Social/SocialUpdates.h"
 #include <memory>
@@ -12605,22 +12606,37 @@ bool ReceiveRequestMoveMap(const BYTE* ReceiveBuffer)
     return true;
 }
 
+enum class EmpireEntryResult : std::uint8_t
+{
+    Entered = 0,
+    EntryDelay = 1,
+    MissingQuestItem = 2,
+    Full = 3,
+    ZoneCooldown = 4,
+    PartyRequired = 5,
+};
+
+enum class EmpireMatchResult : std::uint8_t
+{
+    Failed = 0,
+    ZoneCleared = 1,
+    Completed = 2,
+};
+
 bool ReceiveEnterEmpireGuardianEvent(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_RESULT_ENTER_EMPIREGUARDIAN)ReceiveBuffer;
 
-    switch (Data->Result)
+    switch (static_cast<EmpireEntryResult>(Data->Result))
     {
-    case 0:
+    case EmpireEntryResult::Entered:
     {
-        g_pEmpireGuardianTimer->SetDay((int)Data->Day);
-        g_pEmpireGuardianTimer->SetZone((int)Data->Zone);
-        g_pEmpireGuardianTimer->SetRemainTime(Data->RemainTick);
+        UI::EmpireGuardian::SetEntryInfo(Data->Day, Data->Zone, Data->RemainTick);
 
         g_EmpireGuardian1.SetWeather((int)Data->Wheather);
     }
     break;
-    case 1:
+    case EmpireEntryResult::EntryDelay:
     {
         wchar_t szText[256] = {};
         mu_swprintf(szText, I18N::Game::EnterAfterDMinutes, (Data->RemainTick / 60000));
@@ -12633,28 +12649,28 @@ bool ReceiveEnterEmpireGuardianEvent(const BYTE* ReceiveBuffer)
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
-    case 2:
+    case EmpireEntryResult::MissingQuestItem:
     {
         UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::QuestItemMissing, false });
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
-    case 3:
+    case EmpireEntryResult::Full:
     {
         UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::CapacityExceeded, false });
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
-    case 4:
+    case EmpireEntryResult::ZoneCooldown:
     {
         UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::ThereIsStillTimeRemainingInThisZone, false });
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
-    case 5:
+    case EmpireEntryResult::PartyRequired:
     {
         UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ I18N::Game::YouCanOnlyEnterAsAMemberOfAParty, false });
@@ -12673,14 +12689,7 @@ bool ReceiveRemainTickEmpireGuardian(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_REMAINTICK_EMPIREGUARDIAN)ReceiveBuffer;
 
-    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER) == false)
-    {
-        UI::Windows::Show(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
-    }
-
-    g_pEmpireGuardianTimer->SetType((int)Data->Type);
-    g_pEmpireGuardianTimer->SetRemainTime((int)Data->RemainTick);
-    g_pEmpireGuardianTimer->SetMonsterCount((int)Data->MonsterCount);
+    UI::EmpireGuardian::UpdateTimer(Data->Type, Data->RemainTick, Data->MonsterCount);
 
     return true;
 }
@@ -12689,9 +12698,9 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_CLEAR_RESULT_EMPIREGUARDIAN)ReceiveBuffer;
 
-    switch (Data->Result)
+    switch (static_cast<EmpireMatchResult>(Data->Result))
     {
-    case 0:
+    case EmpireMatchResult::Failed:
     {
         UI::Dialogs::ConfirmRequest cfg;
         cfg.lines = {
@@ -12701,38 +12710,19 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
-    case 1:
+    case EmpireMatchResult::ZoneCleared:
     {
-        int day = g_pEmpireGuardianTimer->GetDay();
-        int zone = g_pEmpireGuardianTimer->GetZone();
-        wchar_t szText[256] = {};
-        UI::Dialogs::ConfirmRequest cfg;
-        mu_swprintf(szText, I18N::Game::FortressOfEmpireGuardiansRoundD, day);
-        cfg.lines.push_back({ szText, false });
-        mu_swprintf(szText, L"%d%ls", zone, I18N::Game::ZoneCleared);
-        cfg.lines.push_back({ szText, false });
-        UI::Dialogs::ShowConfirm(std::move(cfg));
+        UI::EmpireGuardian::ShowZoneCleared();
     }
     break;
-    case 2:
+    case EmpireMatchResult::Completed:
     {
-        int day = g_pEmpireGuardianTimer->GetDay();
-        wchar_t szText[256] = {};
-        UI::Dialogs::ConfirmRequest cfg;
-        mu_swprintf(szText, I18N::Game::FortressOfEmpireGuardiansRoundD, day);
-        cfg.lines.push_back({ szText, false });
-        cfg.lines.push_back({ I18N::Game::HasBeenCleared, false });
-        mu_swprintf(szText, I18N::Game::RewardedExpD, Data->Exp);
-        cfg.lines.push_back({ szText, false });
-        UI::Dialogs::ShowConfirm(std::move(cfg));
+        UI::EmpireGuardian::ShowFinalReward(Data->Exp);
     }
     break;
     }
 
-    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER) == true)
-    {
-        UI::Windows::Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
-    }
+    UI::EmpireGuardian::HideTimer();
 
     return true;
 }
