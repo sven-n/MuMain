@@ -8,6 +8,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Events/KanturuEnterRmlModel.h"
+#include "UI/Events/KanturuUpdates.h"
 #include "UI/Events/KanturuInfoRmlModel.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
@@ -61,10 +62,11 @@ public:
     void SetNpcAnimation(bool bValue);
     bool IsEnterRequest();
     void SetEnterRequest(bool bValue);
-    void CreateMessageBox(BYTE btResult);
+    void CreateMessageBox(MSGBOX_TYPE result);
 
-    void ReceiveKanturu3rdInfo(BYTE btState, BYTE btDetailState, BYTE btEnter, BYTE btUserCount, int iRemainTime);
-    void ReceiveKanturu3rdEnter(BYTE btResult);
+    void ReceiveKanturu3rdInfo(UI::Kanturu::Stage stage, UI::Kanturu::Detail detail, bool canEnter,
+                                  BYTE userCount, int remainingSeconds);
+    void ReceiveKanturu3rdEnter(UI::Kanturu::EntryResult result);
     void SendRequestKanturu3rdInfo();
     void SendRequestKanturu3rdEnter();
 

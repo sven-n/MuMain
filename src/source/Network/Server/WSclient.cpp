@@ -8,6 +8,7 @@
 #include "UI/Events/EmpireGuardianUpdates.h"
 #include "UI/Events/CryWolfUpdates.h"
 #include "UI/Events/LuckyCoinUpdates.h"
+#include "UI/Events/KanturuUpdates.h"
 #include "UI/Core/WindowAccess.h"
 #include "UI/Social/SocialUpdates.h"
 #include <memory>
@@ -12098,14 +12099,15 @@ void ReceiveKanturu3rdStateInfo(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_ANS_KANTURU_STATE_INFO)ReceiveBuffer;
 
-    g_pKanturu2ndEnterNpc->ReceiveKanturu3rdInfo(pData->btState, pData->btDetailState, pData->btEnter,
-                                                 pData->btUserCount, pData->iRemainTime);
+    UI::Kanturu::ShowEntryInfo(static_cast<UI::Kanturu::Stage>(pData->btState),
+                               static_cast<UI::Kanturu::Detail>(pData->btDetailState),
+                               pData->btEnter == 1, pData->btUserCount, pData->iRemainTime);
 }
 
 void ReceiveKanturu3rdEnterBossMap(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_ANS_ENTER_KANTURU_BOSS_MAP)ReceiveBuffer;
-    g_pKanturu2ndEnterNpc->ReceiveKanturu3rdEnter(pData->btResult);
+    UI::Kanturu::CompleteEntry(static_cast<UI::Kanturu::EntryResult>(pData->btResult));
 }
 
 void ReceiveKanturu3rdCurrentState(const BYTE* ReceiveBuffer)
@@ -12130,17 +12132,11 @@ void ReceiveKanturu3rdState(const BYTE* ReceiveBuffer)
             (pData->btState == KANTURU_STATE_NIGHTMARE_BATTLE &&
              (pData->btDetailState == KANTURU_NIGHTMARE_DIRECTION_BATTLE)))
         {
-            if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_KANTURU_INFO) == false)
-            {
-                UI::Windows::Show(mu::ui::window::INTERFACE_KANTURU_INFO);
-            }
+            UI::Kanturu::SetBattleInfoVisible(true);
         }
         else
         {
-            if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_KANTURU_INFO) == true)
-            {
-                UI::Windows::Hide(mu::ui::window::INTERFACE_KANTURU_INFO);
-            }
+            UI::Kanturu::SetBattleInfoVisible(false);
         }
         M39Kanturu3rd::Kanturu3rdState(pData->btState, pData->btDetailState);
         M39Kanturu3rd::CheckSuccessBattle(pData->btState, pData->btDetailState);
@@ -12156,7 +12152,7 @@ void ReceiveKanturu3rdResult(const BYTE* ReceiveBuffer)
 void ReceiveKanturu3rdTimer(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_ANS_KANTURU_BATTLE_SCENE_TIMELIMIT)ReceiveBuffer;
-    g_pKanturuInfoWindow->SetTime(pData->btTimeLimit);
+    UI::Kanturu::SetBattleTime(pData->btTimeLimit);
 }
 
 void RecevieKanturu3rdMayaSKill(const BYTE* ReceiveBuffer)

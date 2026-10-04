@@ -169,6 +169,8 @@ Empire Guardian pass (2026-10-05): `UI/Events/EmpireGuardianUpdates` owns timer 
 
 Lucky Coin and CryWolf pass (2026-10-05): feature operations now own the registration and exchange button states, coin count display, and CryWolf countdown. Lucky Coin result codes are named in `WSclient.cpp`. A full RelWithDebInfo build passed. In-game spot checks remain pending with the consolidated RB-03 checklist.
 
+Kanturu pass (2026-10-05): `UI/Events/KanturuUpdates` owns entry-window updates and battle-info visibility/timer. The entry window takes named stage, detail, and result types; `WSclient.cpp` decodes the packet values before calling it. A full RelWithDebInfo build passed. In-game spot checks remain pending with the consolidated RB-03 checklist.
+
 ### RB-04 — Theme command ownership
 
 - Keep `$theme` command recognition in the console, but move theme validation, activation, config

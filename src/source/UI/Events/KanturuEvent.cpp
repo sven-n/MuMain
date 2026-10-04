@@ -209,34 +209,35 @@ void mu::ui::window::CKanturu2ndEnterNpc::SetEnterRequest(bool bValue)
     m_bEnterRequest = bValue;
 }
 
-void mu::ui::window::CKanturu2ndEnterNpc::CreateMessageBox(BYTE btResult)
+void mu::ui::window::CKanturu2ndEnterNpc::CreateMessageBox(MSGBOX_TYPE result)
 {
     wchar_t strMessage[256];
-    if (btResult == POPUP_FAILED || btResult == POPUP_FAILED2)
+    if (result == POPUP_FAILED || result == POPUP_FAILED2)
     {
         wcscpy(strMessage, I18N::Game::FailedToEnter);
     }
-    else if (btResult == POPUP_UNIRIA)
+    else if (result == POPUP_UNIRIA)
     {
         wcscpy(strMessage, I18N::Game::YouCannotWarpWhileRidingOnAUnicorn);
     }
-    else if (btResult == POPUP_CHANGERING)
+    else if (result == POPUP_CHANGERING)
     {
         wcscpy(strMessage, I18N::Game::YouCanTWarpWearingTheRingOfTransformation);
     }
-    else if (btResult == POPUP_NOT_HELPER)
+    else if (result == POPUP_NOT_HELPER)
     {
         wcscpy(strMessage, I18N::Game::YouCanOnlyWarpRidingA);
     }
     else
     {
-        wcscpy(strMessage, I18N::Game::Lookup(2170 + btResult));
+        wcscpy(strMessage, I18N::Game::Lookup(2170 + static_cast<int>(result)));
     }
 
     mu::ui::window::CreateOkMessageBox(strMessage);
 }
 
-void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYTE btDetailState, BYTE btEnter, BYTE btUserCount, int iRemainTime)
+void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(UI::Kanturu::Stage stage, UI::Kanturu::Detail detail, bool canEnter,
+                                                                 BYTE userCount, int remainingSeconds)
 {
     if (m_pNpcObject && m_pNpcObject->CurrentAction == KANTURU2ND_NPC_ANI_ROT)
     {
@@ -250,17 +251,17 @@ void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BY
 
     Initialize();
 
-    m_byState = btState;
+    m_byState = static_cast<BYTE>(stage);
 
-    m_EnterLocked = btEnter != 1;
+    m_EnterLocked = !canEnter;
 
-    if (btState == KANTURU_STATE_TOWER)
+    if (stage == UI::Kanturu::Stage::Tower)
     {
-        if (btDetailState == KANTURU_TOWER_REVITALIXATION || btDetailState == KANTURU_TOWER_NOTIFY)
+        if (detail == UI::Kanturu::Detail::TowerRevitalization || detail == UI::Kanturu::Detail::TowerNotify)
         {
             wcscpy(m_strSubject, I18N::Game::YouMayNowProceedToTheRefineryTower);
             wcscpy(m_strStateText[0], I18N::Game::PathToTheRefineryTowerIsNowOpened);
-            mu_swprintf(m_strStateText[1], I18N::Game::PathToTheRefineryTowerWillBeClosedInDHours, iRemainTime / 3600);
+            mu_swprintf(m_strStateText[1], I18N::Game::PathToTheRefineryTowerWillBeClosedInDHours, remainingSeconds / 3600);
             m_iStateTextNum = 2;
         }
         else
@@ -271,26 +272,26 @@ void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BY
             m_iStateTextNum = 2;
         }
     }
-    else if (btState == KANTURU_STATE_MAYA_BATTLE)
+    else if (stage == UI::Kanturu::Stage::MayaBattle)
     {
-        if (btDetailState != KANTURU_MAYA_DIRECTION_STANBY1
-            && btDetailState != KANTURU_MAYA_DIRECTION_STANBY2
-            && btDetailState != KANTURU_MAYA_DIRECTION_STANBY3)
+        if (detail != UI::Kanturu::Detail::MayaStandby1
+            && detail != UI::Kanturu::Detail::MayaStandby2
+            && detail != UI::Kanturu::Detail::MayaStandby3)
         {
             wcscpy(m_strSubject, I18N::Game::BattleWithMayaIsOngoing);
-            mu_swprintf(m_strStateText[0], I18N::Game::DPlayersAreTryingToOpen, btUserCount);
+            mu_swprintf(m_strStateText[0], I18N::Game::DPlayersAreTryingToOpen, userCount);
         }
         else
         {
             wcscpy(m_strSubject, I18N::Game::MorePlayersAreNeededToOpenThePathToTheTower);
 
-            if (btDetailState == KANTURU_MAYA_DIRECTION_STANBY1)
+            if (detail == UI::Kanturu::Detail::MayaStandby1)
             {
-                if (btUserCount < 15)
+                if (userCount < 15)
                 {
                     wcscpy(m_strStateText[0], I18N::Game::YouMayNowEnter);
                 }
-                else if (btUserCount == 15)
+                else if (userCount == 15)
                 {
                     wcscpy(m_strStateText[0], I18N::Game::MoonstonePendantAuthenticationHasFailed);
                 }
@@ -307,29 +308,29 @@ void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BY
                 }
                 m_iStateTextNum = 1;
             }
-            else if (btDetailState == KANTURU_MAYA_DIRECTION_STANBY2)
+            else if (detail == UI::Kanturu::Detail::MayaStandby2)
             {
-                if (btUserCount < 15)
+                if (userCount < 15)
                 {
-                    mu_swprintf(m_strStateText[0], I18N::Game::NightmareHasLostTheControlOf, btUserCount);
-                    mu_swprintf(m_strStateText[1], I18N::Game::MorePowerFromDPlayersAreNeeded, 15 - btUserCount);
+                    mu_swprintf(m_strStateText[0], I18N::Game::NightmareHasLostTheControlOf, userCount);
+                    mu_swprintf(m_strStateText[1], I18N::Game::MorePowerFromDPlayersAreNeeded, 15 - userCount);
                     m_iStateTextNum = 2;
                 }
-                else if (btUserCount == 15)
+                else if (userCount == 15)
                 {
                     wcscpy(m_strStateText[0], I18N::Game::NightmareHasLostTheControlOfMayaSLeftHand);
                     m_iStateTextNum = 1;
                 }
             }
-            else if (btDetailState == KANTURU_MAYA_DIRECTION_STANBY3)
+            else if (detail == UI::Kanturu::Detail::MayaStandby3)
             {
-                if (btUserCount < 15)
+                if (userCount < 15)
                 {
-                    mu_swprintf(m_strStateText[0], I18N::Game::NightmareHasLostTheControlOf2166, btUserCount);
-                    mu_swprintf(m_strStateText[1], I18N::Game::MorePowerFromDPlayersAreNeeded, 15 - btUserCount);
+                    mu_swprintf(m_strStateText[0], I18N::Game::NightmareHasLostTheControlOf2166, userCount);
+                    mu_swprintf(m_strStateText[1], I18N::Game::MorePowerFromDPlayersAreNeeded, 15 - userCount);
                     m_iStateTextNum = 2;
                 }
-                else if (btUserCount == 15)
+                else if (userCount == 15)
                 {
                     wcscpy(m_strStateText[0], I18N::Game::NightmareHasLostTheControlOfMayaSLeftHand);
                     m_iStateTextNum = 1;
@@ -346,43 +347,43 @@ void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BY
             }
         }
 
-        if (btDetailState == KANTURU_MAYA_DIRECTION_NOTIFY || btDetailState == KANTURU_MAYA_DIRECTION_MONSTER1 || btDetailState == KANTURU_MAYA_DIRECTION_MAYA1
-            || btDetailState == KANTURU_MAYA_DIRECTION_END_MAYA1 || btDetailState == KANTURU_MAYA_DIRECTION_ENDCYCLE_MAYA1)
+        if (detail == UI::Kanturu::Detail::MayaNotify || detail == UI::Kanturu::Detail::MayaMonster1 || detail == UI::Kanturu::Detail::Maya1
+            || detail == UI::Kanturu::Detail::MayaEnd1 || detail == UI::Kanturu::Detail::MayaEndCycle1)
         {
-            mu_swprintf(m_strStateText[1], I18N::Game::CurrentlyDPlayersAreInBattleWithMayaSLefeHand, btUserCount);
+            mu_swprintf(m_strStateText[1], I18N::Game::CurrentlyDPlayersAreInBattleWithMayaSLefeHand, userCount);
             m_iStateTextNum = 2;
         }
-        else if (btDetailState == KANTURU_MAYA_DIRECTION_MONSTER2 || btDetailState == KANTURU_MAYA_DIRECTION_MAYA2
-            || btDetailState == KANTURU_MAYA_DIRECTION_END_MAYA2 || btDetailState == KANTURU_MAYA_DIRECTION_ENDCYCLE_MAYA2)
+        else if (detail == UI::Kanturu::Detail::MayaMonster2 || detail == UI::Kanturu::Detail::Maya2
+            || detail == UI::Kanturu::Detail::MayaEnd2 || detail == UI::Kanturu::Detail::MayaEndCycle2)
         {
-            mu_swprintf(m_strStateText[1], I18N::Game::CurrentlyDPlayersAreInBattleWithMayaSRightHand, btUserCount);
+            mu_swprintf(m_strStateText[1], I18N::Game::CurrentlyDPlayersAreInBattleWithMayaSRightHand, userCount);
             m_iStateTextNum = 2;
         }
-        else if (btDetailState == KANTURU_MAYA_DIRECTION_MONSTER3 || btDetailState == KANTURU_MAYA_DIRECTION_MAYA3
-            || btDetailState == KANTURU_MAYA_DIRECTION_END_MAYA3 || btDetailState == KANTURU_MAYA_DIRECTION_ENDCYCLE_MAYA3)
+        else if (detail == UI::Kanturu::Detail::MayaMonster3 || detail == UI::Kanturu::Detail::Maya3
+            || detail == UI::Kanturu::Detail::MayaEnd3 || detail == UI::Kanturu::Detail::MayaEndCycle3)
         {
-            mu_swprintf(m_strStateText[1], I18N::Game::CurrentlyDPlayersAreInBattleWithMayaSBothHands, btUserCount);
+            mu_swprintf(m_strStateText[1], I18N::Game::CurrentlyDPlayersAreInBattleWithMayaSBothHands, userCount);
             m_iStateTextNum = 2;
         }
-        else if (btDetailState == KANTURU_MAYA_DIRECTION_NONE || btDetailState == KANTURU_MAYA_DIRECTION_END
-            || btDetailState == KANTURU_MAYA_DIRECTION_ENDCYCLE)
+        else if (detail == UI::Kanturu::Detail::None || detail == UI::Kanturu::Detail::MayaEnd
+            || detail == UI::Kanturu::Detail::MayaEndCycle)
         {
             m_iStateTextNum = 1;
         }
     }
-    else if (btState == KANTURU_STATE_NIGHTMARE_BATTLE)
+    else if (stage == UI::Kanturu::Stage::NightmareBattle)
     {
         wcscpy(m_strSubject, I18N::Game::BattleWithMayaIsOngoing);
-        mu_swprintf(m_strStateText[0], I18N::Game::DPlayersAreTryingToOpen, btUserCount);
-        mu_swprintf(m_strStateText[1], I18N::Game::CurrentlyDPlayersAreInBattleWithNightmare, btUserCount);
+        mu_swprintf(m_strStateText[0], I18N::Game::DPlayersAreTryingToOpen, userCount);
+        mu_swprintf(m_strStateText[1], I18N::Game::CurrentlyDPlayersAreInBattleWithNightmare, userCount);
         m_iStateTextNum = 2;
     }
-    else if (btState == KANTURU_STATE_STANDBY)
+    else if (stage == UI::Kanturu::Stage::Standby)
     {
         wcscpy(m_strSubject, I18N::Game::BossBattleWillStartSoon);
-        if (btDetailState == 1)	// STANBY_START
+        if (detail == UI::Kanturu::Detail::StandbyStart)
         {
-            mu_swprintf(m_strStateText[0], I18N::Game::ForceOfTheNightmareHasInvaded, iRemainTime / 60);
+            mu_swprintf(m_strStateText[0], I18N::Game::ForceOfTheNightmareHasInvaded, remainingSeconds / 60);
         }
         else // STANBY_NONE || STANBY_NOTIFY || STANBY_END || STANBY_ENDCYCLE
         {
@@ -403,10 +404,10 @@ void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BY
     }
 }
 
-void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdEnter(BYTE btResult)
+void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdEnter(UI::Kanturu::EntryResult result)
 {
     m_bEnterRequest = false;
-    CreateMessageBox(btResult);
+    CreateMessageBox(static_cast<MSGBOX_TYPE>(result));
 
     // The original dereferenced the gateway NPC unchecked: an entry answer before the client had
     // seen the NPC (the pointer is set when the NPC enters the viewport) crashed it.
