@@ -146,6 +146,20 @@ delete/snapshot/modify/buy flows need in-game spot checks. The remaining concret
 concentrated in picked-item transfers, mix/storage, and personal-shop replies; those families need
 their own behavior review before moving them behind feature operations.
 
+Follow-up implementation 2026-10-04: pickup and drop replies now use the inventory insertion,
+lookup, and picked-item operations. The inventory destination of an equipment-transfer reply now
+calls `UI::Inventory::ReceivePlayerTransfer()`, which keeps picked-item cleanup, equipment and grid
+insertion, and storage auto-move success in the inventory feature. Its failure path uses
+`RejectTransfer()` to restore the picked item and notify both storage grids. The source-slot lookup
+for personal-shop price transfer also lives in that feature. Trade, vault, mix, and lucky-item
+destinations remain in the packet handler for a later focused pass. The drop reply keeps its old
+main-grid deletion behavior for non-equipment indices; this pass does not reinterpret server slots.
+The full RelWithDebInfo executable and RML/RCSS guards built successfully. A consistent source
+search for concrete player inventory, storage, mix, and picked-item control references in
+`WSclient.cpp` fell from 85 at `779346761` to 60. `WindowSystem.h` remains included, so the complete
+compile boundary is still open. In-game checks are pending for normal pickup, full-inventory
+pickup, successful and rejected drop, and storage-to-inventory auto-move success/failure.
+
 ### RB-04 — Theme command ownership
 
 - Keep `$theme` command recognition in the console, but move theme validation, activation, config

@@ -28,6 +28,14 @@ void RemoveItem(int index)
         g_pMyShopInventory->DeleteItem(index);
 }
 
+void RemoveDroppedItem(int index)
+{
+    if (index >= 0 && index < MAX_EQUIPMENT_INDEX)
+        g_pMyInventory->UnequipItem(index);
+    else
+        g_pMyInventory->DeleteItem(index);
+}
+
 bool InsertItem(int index, std::span<const std::uint8_t> itemData)
 {
     if (index >= 0 && index < MAX_EQUIPMENT_INDEX)
@@ -44,6 +52,51 @@ bool InsertItem(int index, std::span<const std::uint8_t> itemData)
 void DiscardPickedItem()
 {
     mu::ui::window::CInventoryCtrl::DeletePickedItem();
+}
+
+void RestorePickedItem()
+{
+    mu::ui::window::CInventoryCtrl::BackupPickedItem();
+}
+
+int TransferSourceIndex()
+{
+    if (auto* pickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem())
+        return pickedItem->GetSourceLinealPos();
+
+    return g_pMyShopInventory->GetSourceIndex();
+}
+
+bool ReceivePlayerTransfer(int index, std::span<const std::uint8_t> itemData)
+{
+    DiscardPickedItem();
+
+    if (index >= 0 && index < MAX_EQUIPMENT_INDEX)
+    {
+        g_pMyInventory->EquipItem(index, itemData);
+        return true;
+    }
+
+    if (IsPlayerInventorySlot(index))
+    {
+        g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
+        g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
+        return InsertItem(index, itemData);
+    }
+
+    if (IsMyShopSlot(index))
+        return g_pMyShopInventory->InsertItem(index, itemData);
+
+    return true;
+}
+
+void RejectTransfer()
+{
+    RestorePickedItem();
+    if (g_pStorageInventory->IsItemAutoMove())
+        g_pStorageInventory->ProcessStorageItemAutoMoveFailure();
+    if (g_pStorageInventoryExt->IsItemAutoMove())
+        g_pStorageInventoryExt->ProcessStorageItemAutoMoveFailure();
 }
 
 const ITEM* FindPlayerItem(int index)

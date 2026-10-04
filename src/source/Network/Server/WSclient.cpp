@@ -6152,7 +6152,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
         }
         else
         {
-            auto pickedItem = &Items[ItemKey].Item;
+            const ITEM* pickedItem = &Items[ItemKey].Item;
             bool shouldResyncInventory = false;
             auto itemIndex = Data->Value;
             if (itemIndex != GET_ITEM_MULTI)
@@ -6168,22 +6168,11 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
                 int length = CalcItemLength(itemData);
                 itemData = itemData.subspan(0, length);
 
-                if (IsMainInventorySlot(itemIndex))
+                if (IsPlayerInventorySlot(itemIndex))
                 {
-                    if (g_pMyInventory->InsertItem(itemIndex, itemData))
+                    if (UI::Inventory::InsertItem(itemIndex, itemData))
                     {
-                        pickedItem = g_pMyInventory->FindItem(itemIndex);
-                    }
-                    else
-                    {
-                        shouldResyncInventory = true;
-                    }
-                }
-                else if (IsInventoryExtensionSlot(itemIndex))
-                {
-                    if (g_pMyInventoryExt->InsertItem(itemIndex, itemData))
-                    {
-                        pickedItem = g_pMyInventoryExt->FindItem(itemIndex);
+                        pickedItem = UI::Inventory::FindPlayerItem(itemIndex);
                     }
                     else
                     {
@@ -6228,20 +6217,12 @@ void ReceiveDropItem(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT_KEY)ReceiveBuffer;
     if (Data->KeyH)
     {
-        if (Data->KeyL < 12)
-        {
-            g_pMyInventory->UnequipItem(Data->KeyL);
-        }
-        else
-        {
-            g_pMyInventory->DeleteItem(Data->KeyL);
-        }
-
-        mu::ui::window::CInventoryCtrl::DeletePickedItem();
+        UI::Inventory::RemoveDroppedItem(Data->KeyL);
+        UI::Inventory::DiscardPickedItem();
     }
     else
     {
-        mu::ui::window::CInventoryCtrl::BackupPickedItem();
+        UI::Inventory::RestorePickedItem();
     }
 
     SendDropItem = -1;
@@ -6270,12 +6251,7 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
     if (Data->SubCode != 255)
     {
         const auto storageType = static_cast<STORAGE_TYPE>(Data->SubCode);
-        mu::ui::window::CPickedItem* pPickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem();
-        int iSourceIndex = g_pMyShopInventory->GetSourceIndex();
-        if (pPickedItem)
-        {
-            iSourceIndex = pPickedItem->GetSourceLinealPos();
-        }
+        int iSourceIndex = UI::Inventory::TransferSourceIndex();
 
         if (iSourceIndex >= MAX_MY_INVENTORY_EX_INDEX)
         {
@@ -6292,33 +6268,7 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
 
         if (storageType == STORAGE_TYPE::INVENTORY)
         {
-            mu::ui::window::CInventoryCtrl::DeletePickedItem();
-
-            int itemindex = Data->Index;
-            bool shouldResyncInventory = false;
-
-            if (itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
-            {
-                g_pMyInventory->EquipItem(itemindex, itemData);
-            }
-            else if (IsMainInventorySlot(itemindex))
-            {
-                g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
-                g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
-                shouldResyncInventory = !g_pMyInventory->InsertItem(itemindex, itemData);
-            }
-            else if (IsInventoryExtensionSlot(itemindex))
-            {
-                g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
-                g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
-                shouldResyncInventory = !g_pMyInventoryExt->InsertItem(itemindex, itemData);
-            }
-            else if (IsMyShopSlot(itemindex))
-            {
-                shouldResyncInventory = !g_pMyShopInventory->InsertItem(itemindex, itemData);
-            }
-
-            if (shouldResyncInventory)
+            if (!UI::Inventory::ReceivePlayerTransfer(Data->Index, itemData))
             {
                 RequestInventorySync();
             }
@@ -6354,16 +6304,7 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
     }
     else
     {
-        mu::ui::window::CInventoryCtrl::BackupPickedItem();
-        if (g_pStorageInventory->IsItemAutoMove())
-        {
-            g_pStorageInventory->ProcessStorageItemAutoMoveFailure();
-        }
-
-        if (g_pStorageInventoryExt->IsItemAutoMove())
-        {
-            g_pStorageInventoryExt->ProcessStorageItemAutoMoveFailure();
-        }
+        UI::Inventory::RejectTransfer();
     }
 
     if (g_bPacketAfter_EquipmentItem)
