@@ -288,6 +288,21 @@ Some fixed terms:
 | Illusion Temple | Illusionstempel |
 | Fortress of Empire Guardians | Festung der Kaiserlichen Wächter |
 | Refinery Tower | Raffinerieturm |
+| Jewel of Bless, Jewel of Soul, … | Juwel des Segens, Juwel der Seele, … |
+| Helm, Armor, Pants, Gloves, Boots, Mask | Helm, Rüstung, Hose, Handschuhe, Stiefel, Maske |
+| Great (in item names) | Großartig (*Großartiger Drachenhelm*) |
+| Seed, Sphere, Seed Sphere | Samen, Sphäre, Samensphäre |
+| Refining Stone | Verfeinerungsstein |
+| Transformation Ring | Verwandlungsring |
+
+The German item names (the `"de"` names in `src/bin/Data/Items/*.json`) are the
+same as the German item names of the OpenMU server (`ItemNames.de.resx`). Texts
+that mention an item use its German name. Armor set names are joined with the
+piece (*Drachenhelm*), proper names get a hyphen (*Hades-Helm*), and adjectives
+are declined (*Legendärer Helm*, *Legendäre Rüstung*). Skill, monster and event
+names stay English; items that teach a skill name it after a colon
+(*Schriftrolle: Evil Spirit*, *Pergament: Chain Lightning*,
+*Kugel: Twisting Slash*).
 
 ## Adding a new locale
 
@@ -320,13 +335,14 @@ Each item's `name` lists its names by language code:
 ```json
 "name": {
   "en": "Blade",
+  "de": "Klinge",
   "es": "Espada",
   "pt": "Lâmina"
 },
 ```
 
 - **Change a name:** edit the text.
-- **Add a translation:** add a line `"<code>": "<name>"`, e.g. `"de": "Klinge"`.
+- **Add a translation:** add a line `"<code>": "<name>"`, e.g. `"pl": "Ostrze"`.
 - **Remove a translation:** delete its line; the game then shows the English
   name for that language.
 - `en` is required and must stay. A translation that is the same as the
@@ -359,10 +375,10 @@ language:
 ### Translating items into a language the game already has
 
 The game's UI languages are `en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`,
-`tl`, `uk` and `zh-TW`. Items currently have Portuguese (`pt`) and Spanish
-(`es`) names. To translate items into another of these languages, add names
-with that code (by hand or in the item editor); nothing else is needed. The
-names show as soon as a player picks that language.
+`tl`, `uk` and `zh-TW`. Items currently have German (`de`), Portuguese (`pt`)
+and Spanish (`es`) names. To translate items into another of these languages,
+add names with that code (by hand or in the item editor); nothing else is
+needed. The names show as soon as a player picks that language.
 
 ### Adding a new language
 

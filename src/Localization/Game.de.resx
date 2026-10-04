@@ -409,7 +409,7 @@
     <comment>legacy_id=102</comment>
   </data>
   <data name="Transformation Ring" xml:space="preserve">
-    <value>Transformationsring</value>
+    <value>Verwandlungsring</value>
     <comment>legacy_id=103</comment>
   </data>
   <data name="Chaos Event Gift Certificate" xml:space="preserve">
@@ -441,7 +441,7 @@
     <comment>legacy_id=110</comment>
   </data>
   <data name="Box of Heaven" xml:space="preserve">
-    <value>Kiste des Himmels</value>
+    <value>Box des Himmels</value>
     <comment>legacy_id=111</comment>
   </data>
   <data name="When you drop it on the ground," xml:space="preserve">
@@ -457,7 +457,7 @@
     <comment>legacy_id=114</comment>
   </data>
   <data name="Box of Kundun" xml:space="preserve">
-    <value>Box of Kundun</value>
+    <value>Box des Kundun</value>
     <comment>legacy_id=115</comment>
   </data>
   <data name="Anniversary Box" xml:space="preserve">
@@ -536,7 +536,7 @@
     <comment>legacy_id=130</comment>
   </data>
   <data name="W : Use Mana Potion" xml:space="preserve">
-    <value>W : Mana-Trank verwenden</value>
+    <value>W : Manatrank verwenden</value>
     <comment>legacy_id=131</comment>
   </data>
   <data name="E : Use Antidote" xml:space="preserve">
@@ -2714,7 +2714,7 @@
     <comment>legacy_id=711</comment>
   </data>
   <data name="AfterTheRessurectionOfKundunSome" xml:space="preserve">
-    <value>Nach der Wiederauferstehung von Kundun haben einige Monster Besitz von der sogenannten Kiste des Himmels ergriffen. Wenn Sie Rena in der Kiste finden, bringen Sie sie zum Goldenen Bogenschützen vor Lorencia. Es heißt, dass er denen, die 10 Renas mitbringen, eine Geschichte erzählt.</value>
+    <value>Nach der Wiederauferstehung von Kundun haben einige Monster Besitz von der sogenannten Box des Himmels ergriffen. Wenn Sie Rena in der Box finden, bringen Sie sie zum Goldenen Bogenschützen vor Lorencia. Es heißt, dass er denen, die 10 Renas mitbringen, eine Geschichte erzählt.</value>
     <comment>legacy_id=712</comment>
   </data>
   <data name="YouVeBrought10RenaAs" xml:space="preserve">
@@ -2734,7 +2734,7 @@
     <comment>legacy_id=716</comment>
   </data>
   <data name="AfterTheResurrectionOfKundunI" xml:space="preserve">
-    <value>Nach der Auferstehung von Kundun habe ich entdeckt, dass einige Monster auf dem Kontinent überraschenderweise die Kiste des Himmels besaßen. Ich weiß nicht genau, was Kundun im Sinn hat, aber ich bin mir sicher, dass Kundun versucht, die Kraft von Rena zu nutzen.</value>
+    <value>Nach der Auferstehung von Kundun habe ich entdeckt, dass einige Monster auf dem Kontinent überraschenderweise die Box des Himmels besaßen. Ich weiß nicht genau, was Kundun im Sinn hat, aber ich bin mir sicher, dass Kundun versucht, die Kraft von Rena zu nutzen.</value>
     <comment>legacy_id=717</comment>
   </data>
   <data name="BeforeKundunFindsRenaHiddenIn" xml:space="preserve">
@@ -2750,7 +2750,7 @@
     <comment>legacy_id=720</comment>
   </data>
   <data name="Bring Rena from the box of heaven." xml:space="preserve">
-    <value>Bringen Sie Rena aus der Kiste des Himmels.</value>
+    <value>Bringen Sie Rena aus der Box des Himmels.</value>
     <comment>legacy_id=721</comment>
   </data>
   <data name="When you bring 10 Rena, you will be given a number blessed by Lugard." xml:space="preserve">
@@ -3266,11 +3266,11 @@
     <comment>legacy_id=869</comment>
   </data>
   <data name="Chaos Dragon Axe, Chaos Lightning Staff" xml:space="preserve">
-    <value>Chaos Dragon Axe, Chaos Lightning Staff</value>
+    <value>Chaos-Drachenaxt, Chaos-Blitzstab</value>
     <comment>legacy_id=870</comment>
   </data>
   <data name="Chaos Nature Bow" xml:space="preserve">
-    <value>Chaos Nature Bow</value>
+    <value>Chaos-Naturbogen</value>
     <comment>legacy_id=871</comment>
   </data>
   <data name="Wings(7 types), Fruit, Devil's Invitation" xml:space="preserve">
@@ -3282,7 +3282,7 @@
     <comment>legacy_id=873</comment>
   </data>
   <data name="Cape of Lord" xml:space="preserve">
-    <value>Cape of Lord</value>
+    <value>Umhang des Lords</value>
     <comment>legacy_id=874</comment>
   </data>
   <data name="Skill Damage: %d~%d" xml:space="preserve">
@@ -4634,7 +4634,7 @@
     <comment>legacy_id=1235</comment>
   </data>
   <data name="Used in combining Cape of Lord &amp; Warrior's Cloak" xml:space="preserve">
-    <value>Wird zur Kombination von Cape of Lord und Warrior's Cloak verwendet</value>
+    <value>Wird zur Kombination von Umhang des Lords und Kriegerumhang verwendet</value>
     <comment>legacy_id=1236</comment>
   </data>
   <data name="Check the details in pet information window" xml:space="preserve">
@@ -4818,7 +4818,7 @@
     <comment>legacy_id=1289</comment>
   </data>
   <data name="Sign of lord" xml:space="preserve">
-    <value>Sign of Lord</value>
+    <value>Zeichen des Lords</value>
     <comment>legacy_id=1290</comment>
   </data>
   <data name="Use in siege registration" xml:space="preserve">
@@ -6230,7 +6230,7 @@
     <comment>legacy_id=1665</comment>
   </data>
   <data name="Condor's feather" xml:space="preserve">
-    <value>Condor's Feather</value>
+    <value>Kondorfeder</value>
     <comment>legacy_id=1666</comment>
   </data>
   <data name="3rd wing" xml:space="preserve">
@@ -6286,7 +6286,7 @@
     <comment>legacy_id=1679</comment>
   </data>
   <data name="Fenrir's Horn, Scroll of Blood, Condor's Feather" xml:space="preserve">
-    <value>Horn of Fenrir, Scroll of Blood, Condor's Feather</value>
+    <value>Horn des Fenrir, Schriftrolle des Blutes, Kondorfeder</value>
     <comment>legacy_id=1680</comment>
   </data>
   <data name="Regular chat" xml:space="preserve">
@@ -6934,7 +6934,7 @@
     <comment>legacy_id=1864</comment>
   </data>
   <data name="Would you like to repair Fenrir's horn?" xml:space="preserve">
-    <value>Möchten Sie das Horn of Fenrir reparieren?</value>
+    <value>Möchten Sie das Horn des Fenrir reparieren?</value>
     <comment>legacy_id=1865</comment>
   </data>
   <data name="+Illusion" xml:space="preserve">
@@ -7130,7 +7130,7 @@
     <comment>legacy_id=1918</comment>
   </data>
   <data name="Fenrir's horn can be made through item combination." xml:space="preserve">
-    <value>Fenrirs Horn kann durch die Kombination von Gegenständen hergestellt werden.</value>
+    <value>Das Horn des Fenrir kann durch die Kombination von Gegenständen hergestellt werden.</value>
     <comment>legacy_id=1919</comment>
   </data>
   <data name="Can summon the Fenrir when equipped." xml:space="preserve">
@@ -7146,7 +7146,7 @@
     <comment>legacy_id=1922</comment>
   </data>
   <data name="Fenrir's horn" xml:space="preserve">
-    <value>Fenrirs Horn</value>
+    <value>Horn des Fenrir</value>
     <comment>legacy_id=1923</comment>
   </data>
   <data name="Increase damage" xml:space="preserve">
@@ -7762,7 +7762,7 @@
     <comment>legacy_id=2160</comment>
   </data>
   <data name="EntranceIsRestrictedToEnsureThe" xml:space="preserve">
-    <value>Der Zutritt ist zum Schutz von Maya beschränkt. Ein „Moonstone Pendant“ ist erforderlich.</value>
+    <value>Der Zutritt ist zum Schutz von Maya beschränkt. Ein „Mondsteinanhänger“ ist erforderlich.</value>
     <comment>legacy_id=2161</comment>
   </data>
   <data name="You will be able to approach Maya shortly." xml:space="preserve">
@@ -7806,7 +7806,7 @@
     <comment>legacy_id=2171</comment>
   </data>
   <data name="'Moonstone Pendant' authentication has failed." xml:space="preserve">
-    <value>Die Prüfung des „Moonstone Pendant“ ist fehlgeschlagen.</value>
+    <value>Die Prüfung des „Mondsteinanhängers“ ist fehlgeschlagen.</value>
     <comment>legacy_id=2172</comment>
   </data>
   <data name="Time limit for entrance is over." xml:space="preserve">
@@ -7818,7 +7818,7 @@
     <comment>legacy_id=2174</comment>
   </data>
   <data name="You can't warp wearing the Ring of Transformation." xml:space="preserve">
-    <value>Mit dem Transformation Ring können Sie nicht warpen.</value>
+    <value>Mit einem Verwandlungsring können Sie nicht warpen.</value>
     <comment>legacy_id=2175</comment>
   </data>
   <data name="YouCanOnlyWarpRidingA" xml:space="preserve">
@@ -8162,7 +8162,7 @@
     <comment>legacy_id=2262</comment>
   </data>
   <data name="Items except Chaos Card" xml:space="preserve">
-    <value>Gegenstände außer der Chaos Card</value>
+    <value>Gegenstände außer der Chaoskarte</value>
     <comment>legacy_id=2263</comment>
   </data>
   <data name="Can't execute combination. Check free space in your inventory." xml:space="preserve">
@@ -8498,7 +8498,7 @@
     <comment>legacy_id=2364</comment>
   </data>
   <data name="You need the Scroll of Blood to enter the %s zone." xml:space="preserve">
-    <value>Sie benötigen die Scroll of Blood, um die Zone %s zu betreten.</value>
+    <value>Sie benötigen die Schriftrolle des Blutes, um die Zone %s zu betreten.</value>
     <comment>legacy_id=2365</comment>
   </data>
   <data name="You must be of the minimum level 220 to enter the zone." xml:space="preserve">
@@ -8542,7 +8542,7 @@
     <comment>legacy_id=2375</comment>
   </data>
   <data name="Scroll of Blood +%d" xml:space="preserve">
-    <value>Scroll of Blood +%d</value>
+    <value>Schriftrolle des Blutes +%d</value>
     <comment>legacy_id=2376</comment>
   </data>
   <data name="Achieved Kill Point" xml:space="preserve">
@@ -8622,15 +8622,15 @@
     <comment>legacy_id=2395</comment>
   </data>
   <data name="Scroll of Blood" xml:space="preserve">
-    <value>Scroll of Blood</value>
+    <value>Schriftrolle des Blutes</value>
     <comment>legacy_id=2396</comment>
   </data>
   <data name="AssembleTheScrollOfBloodWith" xml:space="preserve">
-    <value>Stellen Sie die Scroll of Blood aus dem Vertrag von Illusion Sorcery her.</value>
+    <value>Stellen Sie die Schriftrolle des Blutes aus dem Vertrag des Illusionszauberers her.</value>
     <comment>legacy_id=2397</comment>
   </data>
   <data name="Assemble the Scroll of Blood with the old scrolls." xml:space="preserve">
-    <value>Stellen Sie die Scroll of Blood aus den alten Schriftrollen her.</value>
+    <value>Stellen Sie die Schriftrolle des Blutes aus den alten Schriftrollen her.</value>
     <comment>legacy_id=2398</comment>
   </data>
   <data name="This is a mark of Illusion Sorcery; this is required to enter the temple." xml:space="preserve">
@@ -9366,7 +9366,7 @@
     <comment>legacy_id=2664</comment>
   </data>
   <data name="Seed Sphere Assembly" xml:space="preserve">
-    <value>Seed Sphere zusammensetzen</value>
+    <value>Samensphäre zusammensetzen</value>
     <comment>legacy_id=2665</comment>
   </data>
   <data name="Seed Master" xml:space="preserve">
@@ -9374,7 +9374,7 @@
     <comment>legacy_id=2666</comment>
   </data>
   <data name="Extract the seed or the seed sphere" xml:space="preserve">
-    <value>Extrahieren Sie den Samen oder die Kugel,</value>
+    <value>Extrahieren Sie den Samen oder die Samensphäre,</value>
     <comment>legacy_id=2667</comment>
   </data>
   <data name="You may assembly them together." xml:space="preserve">
@@ -9382,11 +9382,11 @@
     <comment>legacy_id=2668</comment>
   </data>
   <data name="Seed sphere application" xml:space="preserve">
-    <value>Seed Sphere einsetzen</value>
+    <value>Samensphäre einsetzen</value>
     <comment>legacy_id=2669</comment>
   </data>
   <data name="Seed sphere destruction" xml:space="preserve">
-    <value>Seed Sphere zerstören</value>
+    <value>Samensphäre zerstören</value>
     <comment>legacy_id=2670</comment>
   </data>
   <data name="Seed researcher" xml:space="preserve">
@@ -9394,11 +9394,11 @@
     <comment>legacy_id=2671</comment>
   </data>
   <data name="Either apply the seed sphere" xml:space="preserve">
-    <value>Setzen Sie die Seed Sphere ein</value>
+    <value>Setzen Sie die Samensphäre ein</value>
     <comment>legacy_id=2672</comment>
   </data>
   <data name="or destroy the seed sphere accordingly." xml:space="preserve">
-    <value>oder zerstören Sie die Seed Sphere.</value>
+    <value>oder zerstören Sie die Samensphäre.</value>
     <comment>legacy_id=2673</comment>
   </data>
   <data name="Select applicable socket" xml:space="preserve">
@@ -9422,7 +9422,7 @@
     <comment>legacy_id=2678</comment>
   </data>
   <data name="There are no destructible seed spheres." xml:space="preserve">
-    <value>Es gibt keine zerstörbaren Seed Spheres.</value>
+    <value>Es gibt keine zerstörbaren Samensphären.</value>
     <comment>legacy_id=2679</comment>
   </data>
   <data name="Seed" xml:space="preserve">
@@ -9430,15 +9430,15 @@
     <comment>legacy_id=2680</comment>
   </data>
   <data name="Sphere" xml:space="preserve">
-    <value>Kugel</value>
+    <value>Sphäre</value>
     <comment>legacy_id=2681</comment>
   </data>
   <data name="Seed Sphere" xml:space="preserve">
-    <value>Seed Sphere</value>
+    <value>Samensphäre</value>
     <comment>legacy_id=2682</comment>
   </data>
   <data name="You cannot apply the same type of Sphere." xml:space="preserve">
-    <value>Sie können nicht dieselbe Art von Sphere einsetzen.</value>
+    <value>Sie können nicht dieselbe Art von Sphäre einsetzen.</value>
     <comment>legacy_id=2683</comment>
   </data>
   <data name="fire, ice, lightning" xml:space="preserve">
@@ -9554,43 +9554,43 @@
     <comment>legacy_id=2717</comment>
   </data>
   <data name="Increases your luck to create Wings of Satan." xml:space="preserve">
-    <value>Erhöht Ihr Glück, Wings of Satan zu erschaffen.</value>
+    <value>Erhöht Ihr Glück, Satansflügel zu erschaffen.</value>
     <comment>legacy_id=2718</comment>
   </data>
   <data name="Increases your luck to create Wings of Dragon." xml:space="preserve">
-    <value>Erhöht Ihr Glück, Wings of Dragon zu erschaffen.</value>
+    <value>Erhöht Ihr Glück, Drachenflügel zu erschaffen.</value>
     <comment>legacy_id=2719</comment>
   </data>
   <data name="Increases your luck to create Wings of Heaven." xml:space="preserve">
-    <value>Erhöht Ihr Glück, Wings of Heaven zu erschaffen.</value>
+    <value>Erhöht Ihr Glück, Himmelsflügel zu erschaffen.</value>
     <comment>legacy_id=2720</comment>
   </data>
   <data name="Increases your luck to create Wings of Soul." xml:space="preserve">
-    <value>Erhöht Ihr Glück, Wings of Soul zu erschaffen.</value>
+    <value>Erhöht Ihr Glück, Seelenflügel zu erschaffen.</value>
     <comment>legacy_id=2721</comment>
   </data>
   <data name="Increases your luck to create Wings of Elf." xml:space="preserve">
-    <value>Erhöht Ihr Glück, Wings of Elf zu erschaffen.</value>
+    <value>Erhöht Ihr Glück, Elfenflügel zu erschaffen.</value>
     <comment>legacy_id=2722</comment>
   </data>
   <data name="Increases your luck to create Wings of Spirits." xml:space="preserve">
-    <value>Erhöht Ihr Glück, Wings of Spirits zu erschaffen.</value>
+    <value>Erhöht Ihr Glück, Geisterflügel zu erschaffen.</value>
     <comment>legacy_id=2723</comment>
   </data>
   <data name="Increases your luck to create Wing of Curse." xml:space="preserve">
-    <value>Erhöht Ihr Glück, Wing of Curse zu erschaffen.</value>
+    <value>Erhöht Ihr Glück, Fluchflügel zu erschaffen.</value>
     <comment>legacy_id=2724</comment>
   </data>
   <data name="Increases your luck to create Wing of Despair." xml:space="preserve">
-    <value>Erhöht Ihr Glück, Wing of Despair zu erschaffen.</value>
+    <value>Erhöht Ihr Glück, Flügel der Verzweiflung zu erschaffen.</value>
     <comment>legacy_id=2725</comment>
   </data>
   <data name="Increases your luck to create Wings of Darkness." xml:space="preserve">
-    <value>Erhöht Ihr Glück, Wings of Darkness zu erschaffen.</value>
+    <value>Erhöht Ihr Glück, Flügel der Dunkelheit zu erschaffen.</value>
     <comment>legacy_id=2726</comment>
   </data>
   <data name="Increases your luck to create Cape of Emperor." xml:space="preserve">
-    <value>Erhöht Ihr Glück, Cape of Emperor zu erschaffen.</value>
+    <value>Erhöht Ihr Glück, Umhang des Imperators zu erschaffen.</value>
     <comment>legacy_id=2727</comment>
   </data>
   <data name="Only increases Master level exp." xml:space="preserve">
@@ -9610,43 +9610,43 @@
     <comment>legacy_id=2731</comment>
   </data>
   <data name="Talisman of Wings of Satan" xml:space="preserve">
-    <value>Talisman of Wings of Satan</value>
+    <value>Talisman der Satansflügel</value>
     <comment>legacy_id=2732</comment>
   </data>
   <data name="Talisman of Wings of Heaven" xml:space="preserve">
-    <value>Talisman of Wings of Heaven</value>
+    <value>Talisman der Himmelsflügel</value>
     <comment>legacy_id=2733</comment>
   </data>
   <data name="Talisman of Wings of Elf" xml:space="preserve">
-    <value>Talisman of Wings of Elf</value>
+    <value>Talisman der Elfenflügel</value>
     <comment>legacy_id=2734</comment>
   </data>
   <data name="Talisman of Wing of Curse" xml:space="preserve">
-    <value>Talisman of Wing of Curse</value>
+    <value>Talisman der Fluchflügel</value>
     <comment>legacy_id=2735</comment>
   </data>
   <data name="Talisman of Cape of Emperor" xml:space="preserve">
-    <value>Talisman of Cape of Emperor</value>
+    <value>Talisman des Umhangs des Imperators</value>
     <comment>legacy_id=2736</comment>
   </data>
   <data name="Talisman of Wings of Dragon" xml:space="preserve">
-    <value>Talisman of Wings of Dragon</value>
+    <value>Talisman der Drachenflügel</value>
     <comment>legacy_id=2737</comment>
   </data>
   <data name="Talisman of Wings of Soul" xml:space="preserve">
-    <value>Talisman of Wings of Soul</value>
+    <value>Talisman der Seelenflügel</value>
     <comment>legacy_id=2738</comment>
   </data>
   <data name="Talisman of Wings of Spirits" xml:space="preserve">
-    <value>Talisman of Wings of Spirits</value>
+    <value>Talisman der Geisterflügel</value>
     <comment>legacy_id=2739</comment>
   </data>
   <data name="Talisman of Wing of Despair" xml:space="preserve">
-    <value>Talisman of Wing of Despair</value>
+    <value>Talisman der Flügel der Verzweiflung</value>
     <comment>legacy_id=2740</comment>
   </data>
   <data name="Talisman of Wings of Darkness" xml:space="preserve">
-    <value>Talisman of Wings of Darkness</value>
+    <value>Talisman der Flügel der Dunkelheit</value>
     <comment>legacy_id=2741</comment>
   </data>
   <data name="Attack rate and defense rate increase." xml:space="preserve">
@@ -9682,7 +9682,7 @@
     <comment>legacy_id=2756</comment>
   </data>
   <data name="Only those in possession of a Mirror of Dimensions" xml:space="preserve">
-    <value>Nur wer einen Mirror of Dimensions besitzt,</value>
+    <value>Nur wer einen Spiegel der Dimensionen besitzt,</value>
     <comment>legacy_id=2757</comment>
   </data>
   <data name="may pass through the Doppelganger gate." xml:space="preserve">
@@ -9694,7 +9694,7 @@
     <comment>legacy_id=2759</comment>
   </data>
   <data name="Mirror of Dimensions" xml:space="preserve">
-    <value>Mirror of Dimensions</value>
+    <value>Spiegel der Dimensionen</value>
     <comment>legacy_id=2760</comment>
   </data>
   <data name="Entry Time" xml:space="preserve">
@@ -9746,11 +9746,11 @@
     <comment>legacy_id=2774</comment>
   </data>
   <data name="transform into a Mirror of Dimensions." xml:space="preserve">
-    <value>verwandeln sich automatisch in einen Mirror of Dimensions.</value>
+    <value>verwandeln sich automatisch in einen Spiegel der Dimensionen.</value>
     <comment>legacy_id=2775</comment>
   </data>
   <data name="You need %d more to create a Mirror of Dimensions." xml:space="preserve">
-    <value>Sie benötigen noch %d, um einen Mirror of Dimensions herzustellen.</value>
+    <value>Sie benötigen noch %d, um einen Spiegel der Dimensionen herzustellen.</value>
     <comment>legacy_id=2776</comment>
   </data>
   <data name="That's the only thing that will get Lugard to help you" xml:space="preserve">
@@ -9762,11 +9762,11 @@
     <comment>legacy_id=2778</comment>
   </data>
   <data name="Only those in possession of a Mirror of Dimensions may enter." xml:space="preserve">
-    <value>Nur wer einen Mirror of Dimensions besitzt, hat Zutritt.</value>
+    <value>Nur wer einen Spiegel der Dimensionen besitzt, hat Zutritt.</value>
     <comment>legacy_id=2779</comment>
   </data>
   <data name="Gaion's Order" xml:space="preserve">
-    <value>Gaion's Order</value>
+    <value>Gaions Befehl</value>
     <comment>legacy_id=2783</comment>
   </data>
   <data name="It contains Gaion's plans for the destruction of the empire" xml:space="preserve">
@@ -9782,7 +9782,7 @@
     <comment>legacy_id=2786</comment>
   </data>
   <data name="Suspicious Scrap of Paper" xml:space="preserve">
-    <value>Suspicious Scrap of Paper</value>
+    <value>Verdächtiger Papierfetzen</value>
     <comment>legacy_id=2787</comment>
   </data>
   <data name="It's a worn piece of paper containing incomprehensible text." xml:space="preserve">
@@ -9814,7 +9814,7 @@
     <comment>legacy_id=2794</comment>
   </data>
   <data name="Without Gaion's Order," xml:space="preserve">
-    <value>Ohne Gaion's Order</value>
+    <value>Ohne Gaions Befehl</value>
     <comment>legacy_id=2795</comment>
   </data>
   <data name="you cannot enter the Fortress of Empire Guardians." xml:space="preserve">
@@ -11214,7 +11214,7 @@
     <comment>legacy_id=3285</comment>
   </data>
   <data name="YouCannotUseTheTalismanOf" xml:space="preserve">
-    <value>Sie können Talisman of Chaos Assembly und Talisman of Luck nicht zusammen verwenden.</value>
+    <value>Sie können den Talisman der Chaos-Kombination und den Talisman des Glücks nicht zusammen verwenden.</value>
     <comment>legacy_id=3286</comment>
   </data>
   <data name="Can exchange with a Lucky item or refine it." xml:space="preserve">
@@ -11334,11 +11334,11 @@
     <comment>legacy_id=3316</comment>
   </data>
   <data name="Lower Refining Stone" xml:space="preserve">
-    <value>Lower Refine Stone</value>
+    <value>Niederer Verfeinerungsstein</value>
     <comment>legacy_id=3317</comment>
   </data>
   <data name="Higher Refining Stone" xml:space="preserve">
-    <value>Higher Refine Stone</value>
+    <value>Höherer Verfeinerungsstein</value>
     <comment>legacy_id=3318</comment>
   </data>
   <data name="Are you sure you want to dissolve" xml:space="preserve">
@@ -11606,7 +11606,7 @@
     <comment>legacy_id=3391,3396</comment>
   </data>
   <data name="YouCannotParticipateYouNeedA" xml:space="preserve">
-    <value>Sie können nicht teilnehmen. Für die Teilnahme am Arca-Krieg benötigen Sie ein Bündel mit mehr als 10 Sign of Lord.</value>
+    <value>Sie können nicht teilnehmen. Für die Teilnahme am Arca-Krieg benötigen Sie ein Bündel mit mehr als 10 Zeichen des Lords.</value>
     <comment>legacy_id=3392</comment>
   </data>
   <data name="YouCannotParticipateInTheArca" xml:space="preserve">
@@ -12694,7 +12694,7 @@
     <comment>legacy_id=3733</comment>
   </data>
   <data name="YouCannotUseTheElementalChaos" xml:space="preserve">
-    <value>Sie können Elemental Chaos Assembly Talisman und Elemental Talisman of Luck nicht zusammen verwenden.</value>
+    <value>Sie können den Elementar-Talisman der Chaos-Kombination und den Elementar-Talisman des Glücks nicht zusammen verwenden.</value>
     <comment>legacy_id=3734</comment>
   </data>
   <data name="Congratulations. Combination successful." xml:space="preserve">

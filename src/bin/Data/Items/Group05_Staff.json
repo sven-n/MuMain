@@ -6,6 +6,7 @@
       "number": 0,
       "name": {
         "en": "Skull Staff",
+        "de": "Schädelstab",
         "es": "Báculo Calavera",
         "pt": "Bastão da caveira"
       },
@@ -32,6 +33,7 @@
       "number": 1,
       "name": {
         "en": "Angelic Staff",
+        "de": "Engelsstab",
         "es": "Báculo Angelical",
         "pt": "Bastão angelical"
       },
@@ -58,6 +60,7 @@
       "number": 2,
       "name": {
         "en": "Serpent Staff",
+        "de": "Schlangenstab",
         "es": "Báculo Serpiente",
         "pt": "Bastão da serpente"
       },
@@ -84,6 +87,7 @@
       "number": 3,
       "name": {
         "en": "Thunder Staff",
+        "de": "Donnerstab",
         "es": "Báculo Trueno",
         "pt": "Bastão do trovão"
       },
@@ -111,6 +115,7 @@
       "number": 4,
       "name": {
         "en": "Gorgon Staff",
+        "de": "Gorgonenstab",
         "es": "Báculo Gorgon",
         "pt": "Bastão da górgone"
       },
@@ -137,6 +142,7 @@
       "number": 5,
       "name": {
         "en": "Legendary Staff",
+        "de": "Legendärer Stab",
         "es": "Báculo Legendario",
         "pt": "Bastão lendário"
       },
@@ -162,6 +168,7 @@
       "number": 6,
       "name": {
         "en": "Staff of Resurrection",
+        "de": "Stab der Auferstehung",
         "es": "Báculo de la Resurrección",
         "pt": "Bastão da ressurreição"
       },
@@ -188,6 +195,7 @@
       "number": 7,
       "name": {
         "en": "Chaos Lighting Staff",
+        "de": "Chaos-Blitzstab",
         "es": "Báculo Relámpago de Caos",
         "pt": "Bastão do relâmpago do caos"
       },
@@ -214,6 +222,7 @@
       "number": 8,
       "name": {
         "en": "Staff of Destruction",
+        "de": "Stab der Zerstörung",
         "es": "Báculo de la Destrucción",
         "pt": "Bastão da destruição"
       },
@@ -241,6 +250,7 @@
       "number": 9,
       "name": {
         "en": "Dragon Soul Staff",
+        "de": "Drachenseelenstab",
         "es": "Báculo Alma de Dragón",
         "pt": "Bastão da alma do dragão"
       },
@@ -266,6 +276,7 @@
       "number": 10,
       "name": {
         "en": "Divine Staff of Archangel",
+        "de": "Göttlicher Stab des Erzengels",
         "es": "Báculo Divino de Arcángel",
         "pt": "Bastão divino do arcanjo"
       },
@@ -292,6 +303,7 @@
       "number": 11,
       "name": {
         "en": "Staff of Kundun",
+        "de": "Stab von Kundun",
         "es": "Báculo de Kundun",
         "pt": "Bastão de Kundun"
       },
@@ -317,6 +329,7 @@
       "number": 12,
       "name": {
         "en": "Grand Viper Staff",
+        "de": "Großvipernstab",
         "es": "Gran Báculo Víbora",
         "pt": "Grande bastão da víbora"
       },
@@ -342,6 +355,7 @@
       "number": 13,
       "name": {
         "en": "Platina Staff",
+        "de": "Platinstab",
         "es": "Báculo Platina",
         "pt": "Bastão de platina"
       },
@@ -366,6 +380,7 @@
       "number": 14,
       "name": {
         "en": "Mystery Stick",
+        "de": "Mysterienstock",
         "es": "Vara del Misterio",
         "pt": "Cajado misterioso"
       },
@@ -390,6 +405,7 @@
       "number": 15,
       "name": {
         "en": "Violent Wind Stick",
+        "de": "Sturmwindstock",
         "es": "Vara Viento Violento",
         "pt": "Cajado do vento violento"
       },
@@ -414,6 +430,7 @@
       "number": 16,
       "name": {
         "en": "Red Wing Stick",
+        "de": "Rotschwingenstock",
         "es": "Vara Ala Roja",
         "pt": "Cajado da asa vermelha"
       },
@@ -438,6 +455,7 @@
       "number": 17,
       "name": {
         "en": "Ancient Stick",
+        "de": "Uralter Stock",
         "es": "Vara Antigua",
         "pt": "Cajado ancestral"
       },
@@ -462,6 +480,7 @@
       "number": 18,
       "name": {
         "en": "Demonic Stick",
+        "de": "Dämonischer Stock",
         "es": "Vara Demoníaca",
         "pt": "Cajado demoníaco"
       },
@@ -486,6 +505,7 @@
       "number": 19,
       "name": {
         "en": "Storm Blitz Stick",
+        "de": "Sturmblitzstock",
         "es": "Vara Ráfaga Tormentosa",
         "pt": "Caj. Relâmpago de Tempestade"
       },
@@ -511,6 +531,7 @@
       "number": 20,
       "name": {
         "en": "Eternal Wing Stick",
+        "de": "Ewigschwingenstock",
         "es": "Vara Ala Eterna",
         "pt": "Cajado da asa eterna"
       },
@@ -536,6 +557,7 @@
       "number": 21,
       "name": {
         "en": "Book of Samut",
+        "de": "Buch von Samut",
         "es": "Libro de Samut",
         "pt": "Livro de Samut"
       },
@@ -560,6 +582,7 @@
       "number": 22,
       "name": {
         "en": "Book of Neil",
+        "de": "Buch von Neil",
         "es": "Libro de Neil",
         "pt": "Livro de Neil"
       },
@@ -584,6 +607,7 @@
       "number": 23,
       "name": {
         "en": "Book of Lagle",
+        "de": "Buch von Lagle",
         "es": "Libro de Lagle",
         "pt": "Livro de Lagle"
       },
@@ -608,6 +632,7 @@
       "number": 30,
       "name": {
         "en": "Deadly Staff",
+        "de": "Todesstab",
         "es": "Báculo Mortal",
         "pt": "Bastão letal"
       },
@@ -634,6 +659,7 @@
       "number": 31,
       "name": {
         "en": "Inberial Staff",
+        "de": "Kaiserlicher Stab",
         "es": "Báculo Inberial",
         "pt": "Bastão inberial"
       },
@@ -659,6 +685,7 @@
       "number": 33,
       "name": {
         "en": "Chromatic Staff",
+        "de": "Chromatischer Stab",
         "es": "Báculo Cromático",
         "pt": "Bastão cromático"
       },
@@ -684,6 +711,7 @@
       "number": 34,
       "name": {
         "en": "Raven Stick",
+        "de": "Rabenstock",
         "es": "Vara Cuervo",
         "pt": "Cajado do corvo"
       },
@@ -708,6 +736,7 @@
       "number": 36,
       "name": {
         "en": "Divine Stick of the Archangel",
+        "de": "Göttlicher Stock des Erzengels",
         "es": "Bastón Divino de Arcángel",
         "pt": "Bastão Divino do Arcanjo"
       },
@@ -733,6 +762,7 @@
       "number": 38,
       "name": {
         "en": "Legendary Staff-J",
+        "de": "Legendärer Stab-J",
         "es": "Báculo Legendario-J",
         "pt": "Bastão lendário-J"
       },
@@ -758,6 +788,7 @@
       "number": 39,
       "name": {
         "en": "Red Wing Stick-J",
+        "de": "Rotschwingenstock-J",
         "es": "Vara Ala Roja-J",
         "pt": "Cajado da asa vermelha-J"
       },
@@ -782,6 +813,7 @@
       "number": 40,
       "name": {
         "en": "Book of Neil-J",
+        "de": "Buch von Neil-J",
         "es": "Libro de Lagle-J",
         "pt": "Livro de Neil-J"
       },

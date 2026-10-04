@@ -6,6 +6,7 @@
       "number": 0,
       "name": {
         "en": "Small Shield",
+        "de": "Kleiner Schild",
         "es": "Escudo Pequeño",
         "pt": "Escudo pequeno"
       },
@@ -32,6 +33,7 @@
       "number": 1,
       "name": {
         "en": "Horn Shield",
+        "de": "Hornschild",
         "es": "Escudo Cuerno",
         "pt": "Escudo de chifre"
       },
@@ -56,6 +58,7 @@
       "number": 2,
       "name": {
         "en": "Kite Shield",
+        "de": "Normannenschild",
         "es": "Escudo Cometa",
         "pt": "Escudo ogival"
       },
@@ -80,6 +83,7 @@
       "number": 3,
       "name": {
         "en": "Elven Shield",
+        "de": "Elfenschild",
         "es": "Escudo de los Elfos",
         "pt": "Escudo élfico"
       },
@@ -103,6 +107,7 @@
       "number": 4,
       "name": {
         "en": "Buckler",
+        "de": "Faustschild",
         "es": "Broquel",
         "pt": "Broquel"
       },
@@ -130,6 +135,7 @@
       "number": 5,
       "name": {
         "en": "Dragon Slayer Shield",
+        "de": "Drachentöterschild",
         "es": "Escudo Mata Dragones",
         "pt": "Escudo do matador de dragões"
       },
@@ -156,6 +162,7 @@
       "number": 6,
       "name": {
         "en": "Skull Shield",
+        "de": "Schädelschild",
         "es": "Escudo Calavera",
         "pt": "Escudo da caveira"
       },
@@ -183,6 +190,7 @@
       "number": 7,
       "name": {
         "en": "Spiked Shield",
+        "de": "Stachelschild",
         "es": "Escudo con Púas",
         "pt": "Escudo com espinhos"
       },
@@ -208,6 +216,7 @@
       "number": 8,
       "name": {
         "en": "Tower Shield",
+        "de": "Turmschild",
         "es": "Escudo Torre",
         "pt": "Escudo de torre"
       },
@@ -234,6 +243,7 @@
       "number": 9,
       "name": {
         "en": "Plate Shield",
+        "de": "Plattenschild",
         "es": "Escudo de Plata",
         "pt": "Escudo de placa"
       },
@@ -259,6 +269,7 @@
       "number": 10,
       "name": {
         "en": "Large Round Shield",
+        "de": "Großer Rundschild",
         "es": "Escudo Redondo Grande",
         "pt": "Grande escudo redondo"
       },
@@ -284,6 +295,7 @@
       "number": 11,
       "name": {
         "en": "Serpent Shield",
+        "de": "Schlangenschild",
         "es": "Escudo Serpiente",
         "pt": "Escudo da serpente"
       },
@@ -310,6 +322,7 @@
       "number": 12,
       "name": {
         "en": "Bronze Shield",
+        "de": "Bronzeschild",
         "es": "Escudo de Bronce",
         "pt": "Escudo de bronze"
       },
@@ -334,6 +347,7 @@
       "number": 13,
       "name": {
         "en": "Dragon Shield",
+        "de": "Drachenschild",
         "es": "Escudo Dragón",
         "pt": "Escudo do dragão"
       },
@@ -359,6 +373,7 @@
       "number": 14,
       "name": {
         "en": "Legendary Shield",
+        "de": "Legendärer Schild",
         "es": "Escudo Legendario",
         "pt": "Escudo lendário"
       },
@@ -384,6 +399,7 @@
       "number": 15,
       "name": {
         "en": "Grand Soul Shield",
+        "de": "Großseelenschild",
         "es": "Escudo Gran Alma",
         "pt": "Grande escudo da alma"
       },
@@ -407,6 +423,7 @@
       "number": 16,
       "name": {
         "en": "Elemental Shield",
+        "de": "Elementarschild",
         "es": "Escudo Elemental",
         "pt": "Escudo elemental"
       },
@@ -431,6 +448,7 @@
       "number": 17,
       "name": {
         "en": "Crimson Glory",
+        "de": "Purpurruhm",
         "es": "Gloria Carmesí",
         "pt": "Glória carmesim"
       },
@@ -456,6 +474,7 @@
       "number": 18,
       "name": {
         "en": "Salamander Shield",
+        "de": "Salamanderschild",
         "es": "Escudo Salamandra",
         "pt": "Escudo da salamandra"
       },
@@ -481,6 +500,7 @@
       "number": 19,
       "name": {
         "en": "Frost Barrier",
+        "de": "Frostbarriere",
         "es": "Barrera Congelada",
         "pt": "Barreira gelada"
       },
@@ -506,6 +526,7 @@
       "number": 20,
       "name": {
         "en": "Guardian Shield",
+        "de": "Wächterschild",
         "es": "Escudo Guardián",
         "pt": "Escudo do guardião"
       },
@@ -531,6 +552,7 @@
       "number": 21,
       "name": {
         "en": "Cross Shield",
+        "de": "Kreuzschild",
         "es": "Escudo Cruz",
         "pt": "Escudo em cruz"
       },
@@ -555,6 +577,7 @@
       "number": 27,
       "name": {
         "en": "Legendary Shield-J",
+        "de": "Legendärer Schild-J",
         "es": "Escudo Serpiente-J",
         "pt": "Escudo lendário-J"
       },
@@ -580,6 +603,7 @@
       "number": 28,
       "name": {
         "en": "Serpent Shield-J",
+        "de": "Schlangenschild-J",
         "es": "Escudo Legendario-J",
         "pt": "Escudo da serpente-J"
       },

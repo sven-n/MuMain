@@ -6,6 +6,7 @@
       "number": 0,
       "name": {
         "en": "Wings of Elf",
+        "de": "Elfenflügel",
         "es": "Alas de Elfa",
         "pt": "Asas do elfo"
       },
@@ -28,6 +29,7 @@
       "number": 1,
       "name": {
         "en": "Wings of Heaven",
+        "de": "Himmelsflügel",
         "es": "Alas de Cielo",
         "pt": "Asas do paraíso"
       },
@@ -51,6 +53,7 @@
       "number": 2,
       "name": {
         "en": "Wings of Satan",
+        "de": "Satansflügel",
         "es": "Alas de Satán",
         "pt": "Asas de Satã"
       },
@@ -74,6 +77,7 @@
       "number": 3,
       "name": {
         "en": "Wings of Spirits",
+        "de": "Geisterflügel",
         "es": "Alas de Espíritus",
         "pt": "Asas dos espíritos"
       },
@@ -96,6 +100,7 @@
       "number": 4,
       "name": {
         "en": "Wings of Soul",
+        "de": "Seelenflügel",
         "es": "Alas de Alma",
         "pt": "Asas da alma"
       },
@@ -118,6 +123,7 @@
       "number": 5,
       "name": {
         "en": "Wings of Dragon",
+        "de": "Drachenflügel",
         "es": "Alas de Dragón",
         "pt": "Asas do dragão"
       },
@@ -140,6 +146,7 @@
       "number": 6,
       "name": {
         "en": "Wings of Darkness",
+        "de": "Flügel der Dunkelheit",
         "es": "Alas de Oscuridad",
         "pt": "Asas da escuridão"
       },
@@ -162,6 +169,7 @@
       "number": 7,
       "name": {
         "en": "Orb of Twisting Slash",
+        "de": "Kugel: Twisting Slash",
         "es": "Orbe de Azote Tornado",
         "pt": "Orbe de golpe torcido"
       },
@@ -182,6 +190,7 @@
       "number": 8,
       "name": {
         "en": "Healing Orb",
+        "de": "Kugel: Heal",
         "es": "Orbe de Curación",
         "pt": "Orbe de cura"
       },
@@ -201,6 +210,7 @@
       "number": 9,
       "name": {
         "en": "Orb of Greater Fortitude",
+        "de": "Kugel: Greater Fortitude",
         "es": "Orbe de Mayor Fortaleza",
         "pt": "Orbe da sorte maior"
       },
@@ -220,6 +230,7 @@
       "number": 10,
       "name": {
         "en": "Orb of Greater Damage",
+        "de": "Kugel: Greater Damage",
         "es": "Orbe de Mayor Daño",
         "pt": "Orbe do dano maior"
       },
@@ -239,6 +250,7 @@
       "number": 11,
       "name": {
         "en": "Orb of Summoning",
+        "de": "Kugel: Summoning",
         "es": "Orbe de Invocación",
         "pt": "Orbe da invocação"
       },
@@ -255,6 +267,7 @@
       "number": 12,
       "name": {
         "en": "Orb of Rageful Blow",
+        "de": "Kugel: Rageful Blow",
         "es": "Orbe de Golpe Furioso",
         "pt": "Orbe do golpe raivoso"
       },
@@ -274,6 +287,7 @@
       "number": 13,
       "name": {
         "en": "Orb of Impale",
+        "de": "Kugel: Impale",
         "es": "Orbe para Atravesar",
         "pt": "Orbe de empalar"
       },
@@ -294,6 +308,7 @@
       "number": 14,
       "name": {
         "en": "Orb of Greater Fortitude",
+        "de": "Kugel: Greater Fortitude",
         "es": "Orbe de Mayor Fortaleza",
         "pt": "Orbe da sorte maior"
       },
@@ -313,6 +328,7 @@
       "number": 15,
       "name": {
         "en": "Jewel of Chaos",
+        "de": "Juwel des Chaos",
         "es": "Joya de Caos",
         "pt": "Joia do caos"
       },
@@ -333,6 +349,7 @@
       "number": 16,
       "name": {
         "en": "Orb of Fire Slash",
+        "de": "Kugel: Fire Slash",
         "es": "Orbe de Azote de Fuego",
         "pt": "Orbe do golpe de fogo"
       },
@@ -352,6 +369,7 @@
       "number": 17,
       "name": {
         "en": "Orb of Penetration",
+        "de": "Kugel: Penetration",
         "es": "Orbe de Penetración",
         "pt": "Orbe da penetração"
       },
@@ -371,6 +389,7 @@
       "number": 18,
       "name": {
         "en": "Orb of Ice Arrow",
+        "de": "Kugel: Ice Arrow",
         "es": "Orbe de Flecha de Hielo",
         "pt": "Orbe da flecha de gelo"
       },
@@ -390,6 +409,7 @@
       "number": 19,
       "name": {
         "en": "Orb of Death Stab",
+        "de": "Kugel: Death Stab",
         "es": "Orbe de Puñalada de la Muerte",
         "pt": "Orbe da facada mortal"
       },
@@ -409,6 +429,7 @@
       "number": 21,
       "name": {
         "en": "Scroll of FireBurst",
+        "de": "Schriftrolle: Fire Burst",
         "es": "Rollo de Explosión de Fuego",
         "pt": "Pergaminho Explosão de Fogo"
       },
@@ -427,6 +448,7 @@
       "number": 22,
       "name": {
         "en": "Scroll of Summon",
+        "de": "Schriftrolle: Summon",
         "es": "Rollo de Invocación",
         "pt": "Pergaminho de invocação"
       },
@@ -446,6 +468,7 @@
       "number": 23,
       "name": {
         "en": "Scroll of Critical Damage",
+        "de": "Schriftrolle: Critical Damage",
         "es": "Rollo de Daño Crítico",
         "pt": "Pergaminho de dano crítico"
       },
@@ -465,6 +488,7 @@
       "number": 24,
       "name": {
         "en": "Scroll of Electric Spark",
+        "de": "Schriftrolle: Electric Spark",
         "es": "Rollo de Chispa Eléctrica",
         "pt": "Pergaminho Centelha Elétrica"
       },
@@ -484,6 +508,7 @@
       "number": 26,
       "name": {
         "en": "gem of secret",
+        "de": "Edelstein des Geheimnisses",
         "es": "gema del secreto",
         "pt": "gema do segredo"
       },
@@ -502,6 +527,7 @@
       "number": 30,
       "name": {
         "en": "Bundle of Jewel of Bless",
+        "de": "Bündel Juwelen des Segens",
         "es": "manojo de Joyas de Bendición",
         "pt": "feixe da Joia da bênção"
       },
@@ -522,6 +548,7 @@
       "number": 31,
       "name": {
         "en": "Bundle of Jewel of Soul",
+        "de": "Bündel Juwelen der Seele",
         "es": "manojo de Joyas de Alma",
         "pt": "feixe da Joia da alma"
       },
@@ -542,6 +569,7 @@
       "number": 32,
       "name": {
         "en": "box of red ribbon",
+        "de": "Box mit roter Schleife",
         "es": "caja de moño rojo",
         "pt": "caixa de fita vermelha"
       },
@@ -560,6 +588,7 @@
       "number": 33,
       "name": {
         "en": "box of green ribbon",
+        "de": "Box mit grüner Schleife",
         "es": "caja de moño verde",
         "pt": "caixa de fita verde"
       },
@@ -578,6 +607,7 @@
       "number": 34,
       "name": {
         "en": "box of blue ribbon",
+        "de": "Box mit blauer Schleife",
         "es": "caja de moño azul",
         "pt": "caixa de fita azul"
       },
@@ -596,6 +626,7 @@
       "number": 35,
       "name": {
         "en": "Scroll of Fire Scream",
+        "de": "Schriftrolle: Fire Scream",
         "es": "Rollo de Alarido de Fuego",
         "pt": "Pergaminho de grito de fogo"
       },
@@ -615,6 +646,7 @@
       "number": 36,
       "name": {
         "en": "Wing of Storm",
+        "de": "Sturmflügel",
         "es": "Ala de Tormenta",
         "pt": "Asa da Tempestade"
       },
@@ -637,6 +669,7 @@
       "number": 37,
       "name": {
         "en": "Wing of Eternal",
+        "de": "Ewigkeitsflügel",
         "es": "Ala de Eternidad",
         "pt": "Asa da eternidade"
       },
@@ -659,6 +692,7 @@
       "number": 38,
       "name": {
         "en": "Wing of Illusion",
+        "de": "Illusionsflügel",
         "es": "Ala de Ilusión",
         "pt": "Asa da ilusão"
       },
@@ -681,6 +715,7 @@
       "number": 39,
       "name": {
         "en": "Wing of Ruin",
+        "de": "Flügel des Verderbens",
         "es": "Ala de Ruina",
         "pt": "Asa da ruína"
       },
@@ -703,6 +738,7 @@
       "number": 40,
       "name": {
         "en": "Cape of Emperor",
+        "de": "Umhang des Imperators",
         "es": "Capa de Emperador",
         "pt": "Capa do Imperador"
       },
@@ -725,6 +761,7 @@
       "number": 41,
       "name": {
         "en": "Wing of Curse",
+        "de": "Fluchflügel",
         "es": "Ala de Maldición",
         "pt": "Asa da maldição"
       },
@@ -747,6 +784,7 @@
       "number": 42,
       "name": {
         "en": "Wind of Despair",
+        "de": "Flügel der Verzweiflung",
         "es": "Viento de Desesperación",
         "pt": "Asa do desespero"
       },
@@ -769,6 +807,7 @@
       "number": 43,
       "name": {
         "en": "Wing of Dimension",
+        "de": "Dimensionsflügel",
         "es": "Ala de Dimensión",
         "pt": "Asa da dimensão"
       },
@@ -791,6 +830,7 @@
       "number": 44,
       "name": {
         "en": "Crystal of Destruction",
+        "de": "Kristall: Destruction",
         "es": "Cristal de Destrucción",
         "pt": "Cristal da destruição"
       },
@@ -809,6 +849,7 @@
       "number": 45,
       "name": {
         "en": "Crystal of Multi-Shot",
+        "de": "Kristall: Multi-Shot",
         "es": "Cristal de Disparo Múltiple",
         "pt": "Cristal de multidisparo"
       },
@@ -827,6 +868,7 @@
       "number": 46,
       "name": {
         "en": "Crystal of Recovery",
+        "de": "Kristall: Recovery",
         "es": "Cristal de Recuperación",
         "pt": "Cristal da recuperação"
       },
@@ -846,6 +888,7 @@
       "number": 47,
       "name": {
         "en": "Crystal of Flame Strike",
+        "de": "Kristall: Flame Strike",
         "es": "Cristal de Ataque con Llamas",
         "pt": "Cristal do golpe de chamas"
       },
@@ -864,6 +907,7 @@
       "number": 48,
       "name": {
         "en": "Scroll of Chaotic Diseier",
+        "de": "Schriftrolle: Chaotic Diseier",
         "es": "Rollo de Diseier Caótico",
         "pt": "Pergaminho Diseier Caótico"
       },
@@ -883,6 +927,7 @@
       "number": 49,
       "name": {
         "en": "Cape of Fighter",
+        "de": "Kämpferumhang",
         "es": "¹«ÀÎÀÇ¸ÁÅä",
         "pt": "Manto do Guerreiro"
       },
@@ -905,6 +950,7 @@
       "number": 50,
       "name": {
         "en": "Cape of Overrule",
+        "de": "Umhang der Herrschaft",
         "es": "±º¸²ÀÇ¸ÁÅä",
         "pt": "Manto Reinante"
       },
@@ -927,6 +973,7 @@
       "number": 60,
       "name": {
         "en": "Seed (Fire)",
+        "de": "Samen (Feuer)",
         "es": "Simiente (Fuego)",
         "pt": "Semente (Fogo)"
       },
@@ -949,6 +996,7 @@
       "number": 61,
       "name": {
         "en": "Seed (Water)",
+        "de": "Samen (Wasser)",
         "es": "Simiente (Agua)",
         "pt": "Semente (Água)"
       },
@@ -971,6 +1019,7 @@
       "number": 62,
       "name": {
         "en": "Seed (Ice)",
+        "de": "Samen (Eis)",
         "es": "Simiente (Hielo)",
         "pt": "Semente (Gelo)"
       },
@@ -993,6 +1042,7 @@
       "number": 63,
       "name": {
         "en": "Seed (Wind)",
+        "de": "Samen (Wind)",
         "es": "Simiente (Viento)",
         "pt": "Semente (Vento)"
       },
@@ -1015,6 +1065,7 @@
       "number": 64,
       "name": {
         "en": "Seed (Lightning)",
+        "de": "Samen (Blitz)",
         "es": "Simiente (Relámpago)",
         "pt": "Semente (Relâmpago)"
       },
@@ -1037,6 +1088,7 @@
       "number": 65,
       "name": {
         "en": "Seed (Earth)",
+        "de": "Samen (Erde)",
         "es": "Simiente (Tierra)",
         "pt": "Semente (Terra)"
       },
@@ -1059,6 +1111,7 @@
       "number": 70,
       "name": {
         "en": "Sphere (Mono)",
+        "de": "Sphäre (Mono)",
         "es": "Esfera (Mono)",
         "pt": "Esfera (Mono)"
       },
@@ -1081,6 +1134,7 @@
       "number": 71,
       "name": {
         "en": "Sphere (Di)",
+        "de": "Sphäre (Di)",
         "es": "Esfera (Di)",
         "pt": "Esfera (Di)"
       },
@@ -1103,6 +1157,7 @@
       "number": 72,
       "name": {
         "en": "Sphere (Tri)",
+        "de": "Sphäre (Tri)",
         "es": "Esfera (Tri)",
         "pt": "Esfera (Tri)"
       },
@@ -1125,6 +1180,7 @@
       "number": 100,
       "name": {
         "en": "Seed Sphere (Fire)",
+        "de": "Samensphäre (Feuer)",
         "es": "Esfera Simiente (Fuego)",
         "pt": "Esfera de semente (Fogo)"
       },
@@ -1147,6 +1203,7 @@
       "number": 101,
       "name": {
         "en": "Seed Sphere (Water)",
+        "de": "Samensphäre (Wasser)",
         "es": "Esfera Simiente (Agua)",
         "pt": "Esfera de semente (Água)"
       },
@@ -1169,6 +1226,7 @@
       "number": 102,
       "name": {
         "en": "Seed Sphere (Ice)",
+        "de": "Samensphäre (Eis)",
         "es": "Esfera Simiente (Hielo)",
         "pt": "Esfera de semente (Gelo)"
       },
@@ -1191,6 +1249,7 @@
       "number": 103,
       "name": {
         "en": "Seed Sphere (Wind)",
+        "de": "Samensphäre (Wind)",
         "es": "Esfera Simiente (Viento)",
         "pt": "Esfera de semente (Vento)"
       },
@@ -1213,6 +1272,7 @@
       "number": 104,
       "name": {
         "en": "Seed Sphere (Lightning)",
+        "de": "Samensphäre (Blitz)",
         "es": "Esfera Simiente (Relámpago)",
         "pt": "Esfera Semente (Relâmpago)"
       },
@@ -1235,6 +1295,7 @@
       "number": 105,
       "name": {
         "en": "Seed Sphere (Earth)",
+        "de": "Samensphäre (Erde)",
         "es": "Esfera Simiente (Tierra)",
         "pt": "Esfera de semente (Terra)"
       },
@@ -1257,6 +1318,7 @@
       "number": 106,
       "name": {
         "en": "Seed Sphere (Fire)",
+        "de": "Samensphäre (Feuer)",
         "es": "Esfera Simiente (Fuego)",
         "pt": "Esfera de semente (Fogo)"
       },
@@ -1279,6 +1341,7 @@
       "number": 107,
       "name": {
         "en": "Seed Sphere (Water)",
+        "de": "Samensphäre (Wasser)",
         "es": "Esfera Simiente (Agua)",
         "pt": "Esfera de semente (Água)"
       },
@@ -1301,6 +1364,7 @@
       "number": 108,
       "name": {
         "en": "Seed Sphere (Ice)",
+        "de": "Samensphäre (Eis)",
         "es": "Esfera Simiente (Hielo)",
         "pt": "Esfera de semente (Gelo)"
       },
@@ -1323,6 +1387,7 @@
       "number": 109,
       "name": {
         "en": "Seed Sphere (Wind)",
+        "de": "Samensphäre (Wind)",
         "es": "Esfera Simiente (Viento)",
         "pt": "Esfera de semente (Vento)"
       },
@@ -1345,6 +1410,7 @@
       "number": 110,
       "name": {
         "en": "Seed Sphere (Lightning)",
+        "de": "Samensphäre (Blitz)",
         "es": "Esfera Simiente (Relámpago)",
         "pt": "Esfera Semente (Relâmpago)"
       },
@@ -1367,6 +1433,7 @@
       "number": 111,
       "name": {
         "en": "Seed Sphere (Earth)",
+        "de": "Samensphäre (Erde)",
         "es": "Esfera Simiente (Tierra)",
         "pt": "Esfera de semente (Terra)"
       },
@@ -1389,6 +1456,7 @@
       "number": 112,
       "name": {
         "en": "Seed Sphere (Fire)",
+        "de": "Samensphäre (Feuer)",
         "es": "Esfera Simiente (Fuego)",
         "pt": "Esfera de semente (Fogo)"
       },
@@ -1411,6 +1479,7 @@
       "number": 113,
       "name": {
         "en": "Seed Sphere (Water)",
+        "de": "Samensphäre (Wasser)",
         "es": "Esfera Simiente (Agua)",
         "pt": "Esfera de semente (Água)"
       },
@@ -1433,6 +1502,7 @@
       "number": 114,
       "name": {
         "en": "Seed Sphere (Ice)",
+        "de": "Samensphäre (Eis)",
         "es": "Esfera Simiente (Hielo)",
         "pt": "Esfera de semente (Gelo)"
       },
@@ -1455,6 +1525,7 @@
       "number": 115,
       "name": {
         "en": "Seed Sphere (Wind)",
+        "de": "Samensphäre (Wind)",
         "es": "Esfera Simiente (Viento)",
         "pt": "Esfera de semente (Vento)"
       },
@@ -1477,6 +1548,7 @@
       "number": 116,
       "name": {
         "en": "Seed Sphere (Lightning)",
+        "de": "Samensphäre (Blitz)",
         "es": "Esfera Simiente (Relámpago)",
         "pt": "Esfera Semente (Relâmpago)"
       },
@@ -1499,6 +1571,7 @@
       "number": 117,
       "name": {
         "en": "Seed Sphere (Earth)",
+        "de": "Samensphäre (Erde)",
         "es": "Esfera Simiente (Tierra)",
         "pt": "Esfera de semente (Terra)"
       },
@@ -1521,6 +1594,7 @@
       "number": 118,
       "name": {
         "en": "Seed Sphere (Fire)",
+        "de": "Samensphäre (Feuer)",
         "es": "Esfera Simiente (Fuego)",
         "pt": "Esfera de semente (Fogo)"
       },
@@ -1531,6 +1605,7 @@
       "number": 119,
       "name": {
         "en": "Seed Sphere (Water)",
+        "de": "Samensphäre (Wasser)",
         "es": "Esfera Simiente (Agua)",
         "pt": "Esfera de semente (Água)"
       },
@@ -1541,6 +1616,7 @@
       "number": 120,
       "name": {
         "en": "Seed Sphere (Ice)",
+        "de": "Samensphäre (Eis)",
         "es": "Esfera Simiente (Hielo)",
         "pt": "Esfera de semente (Gelo)"
       },
@@ -1551,6 +1627,7 @@
       "number": 121,
       "name": {
         "en": "Seed Sphere (Wind)",
+        "de": "Samensphäre (Wind)",
         "es": "Esfera Simiente (Viento)",
         "pt": "Esfera de semente (Vento)"
       },
@@ -1561,6 +1638,7 @@
       "number": 122,
       "name": {
         "en": "Seed Sphere (Lightning)",
+        "de": "Samensphäre (Blitz)",
         "es": "Esfera Simiente (Relámpago)",
         "pt": "Esfera Semente (Relâmpago)"
       },
@@ -1571,6 +1649,7 @@
       "number": 123,
       "name": {
         "en": "Seed Sphere (Earth)",
+        "de": "Samensphäre (Erde)",
         "es": "Esfera Simiente (Tierra)",
         "pt": "Esfera de semente (Terra)"
       },
@@ -1581,6 +1660,7 @@
       "number": 124,
       "name": {
         "en": "Seed Sphere (Fire)",
+        "de": "Samensphäre (Feuer)",
         "es": "Esfera Simiente (Fuego)",
         "pt": "Esfera de semente (Fogo)"
       },
@@ -1591,6 +1671,7 @@
       "number": 125,
       "name": {
         "en": "Seed Sphere (Water)",
+        "de": "Samensphäre (Wasser)",
         "es": "Esfera Simiente (Agua)",
         "pt": "Esfera de semente (Água)"
       },
@@ -1601,6 +1682,7 @@
       "number": 126,
       "name": {
         "en": "Seed Sphere (Ice)",
+        "de": "Samensphäre (Eis)",
         "es": "Esfera Simiente (Hielo)",
         "pt": "Esfera de semente (Gelo)"
       },
@@ -1611,6 +1693,7 @@
       "number": 127,
       "name": {
         "en": "Seed Sphere (Wind)",
+        "de": "Samensphäre (Wind)",
         "es": "Esfera Simiente (Viento)",
         "pt": "Esfera de semente (Vento)"
       },
@@ -1621,6 +1704,7 @@
       "number": 128,
       "name": {
         "en": "Seed Sphere (Lightning)",
+        "de": "Samensphäre (Blitz)",
         "es": "Esfera Simiente (Relámpago)",
         "pt": "Esfera Semente (Relâmpago)"
       },
@@ -1631,6 +1715,7 @@
       "number": 129,
       "name": {
         "en": "Seed Sphere (Earth)",
+        "de": "Samensphäre (Erde)",
         "es": "Esfera Simiente (Tierra)",
         "pt": "Esfera de semente (Terra)"
       },
@@ -1641,6 +1726,7 @@
       "number": 130,
       "name": {
         "en": "Small Cape of Lord",
+        "de": "Kleiner Umhang des Lords",
         "es": "Capa de Señor Pequeña",
         "pt": "Pequena capa do Lorde"
       },
@@ -1669,6 +1755,7 @@
       "number": 131,
       "name": {
         "en": "Small Wing of Curse",
+        "de": "Kleine Fluchflügel",
         "es": "Ala de Maldición Pequeña",
         "pt": "Pequenas asas da maldição"
       },
@@ -1697,6 +1784,7 @@
       "number": 132,
       "name": {
         "en": "Small Wings of Elf",
+        "de": "Kleine Elfenflügel",
         "es": "Alas de Elfa Pequeñas",
         "pt": "Pequenas asas do elfo"
       },
@@ -1725,6 +1813,7 @@
       "number": 133,
       "name": {
         "en": "Small Wings of Heaven",
+        "de": "Kleine Himmelsflügel",
         "es": "Alas de Cielo Pequeñas",
         "pt": "Pequenas asas do paraíso"
       },
@@ -1754,6 +1843,7 @@
       "number": 134,
       "name": {
         "en": "Small Wings of Satan",
+        "de": "Kleine Satansflügel",
         "es": "Alas de Satán Pequeñas",
         "pt": "Pequenas asas de Satã"
       },
@@ -1783,6 +1873,7 @@
       "number": 135,
       "name": {
         "en": "Little Warrior's Cloak",
+        "de": "Kleiner Kriegerumhang",
         "es": "Capa del Pequeño Guerrero",
         "pt": "Manto de Pequeno Guerreiro"
       },
@@ -1811,6 +1902,7 @@
       "number": 136,
       "name": {
         "en": "Jewel of Life Bundle",
+        "de": "Bündel Juwelen des Lebens",
         "es": "Fardo de Joyas de la Vida",
         "pt": "Joia do Lote da Vida"
       },
@@ -1832,6 +1924,7 @@
       "number": 137,
       "name": {
         "en": "Jewel of Creation Bundle",
+        "de": "Bündel Juwelen der Schöpfung",
         "es": "Fardo de Joyas de la Creación",
         "pt": "Joia do Lote da Criação"
       },
@@ -1853,6 +1946,7 @@
       "number": 138,
       "name": {
         "en": "Jewel of Guardian Bundle",
+        "de": "Bündel Juwelen des Wächters",
         "es": "Fardo de Joyas Guardián",
         "pt": "Joia do Lote Guardião"
       },
@@ -1874,6 +1968,7 @@
       "number": 139,
       "name": {
         "en": "Gemstone Bundle",
+        "de": "Bündel Edelsteine",
         "es": "Fardo de Gemas",
         "pt": "Lote de Pedra Preciosa"
       },
@@ -1895,6 +1990,7 @@
       "number": 140,
       "name": {
         "en": "Jewel of Harmony Bundle",
+        "de": "Bündel Juwelen der Harmonie",
         "es": "Fardo de Joyas de la Armonía",
         "pt": "Joia do Lote da Harmonia"
       },
@@ -1916,6 +2012,7 @@
       "number": 141,
       "name": {
         "en": "Jewel of Chaos Bundle",
+        "de": "Bündel Juwelen des Chaos",
         "es": "Fardo de Joyas del Caos",
         "pt": "Joia do Lote do Caos"
       },
@@ -1937,6 +2034,7 @@
       "number": 142,
       "name": {
         "en": "Lower Refining Stone Bundle",
+        "de": "Bündel niederer Verfeinerungssteine",
         "es": "Fardo de Joyas de Bajo Pulido",
         "pt": "Lote de Joias de Baixo Polimento"
       },
@@ -1958,6 +2056,7 @@
       "number": 143,
       "name": {
         "en": "Higher Refining Stone Bundle",
+        "de": "Bündel höherer Verfeinerungssteine",
         "es": "Fardo de Joyas de Alto Pulido",
         "pt": "Lote de Joias de Alto Polimento"
       },

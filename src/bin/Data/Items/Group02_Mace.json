@@ -6,6 +6,7 @@
       "number": 0,
       "name": {
         "en": "Mace",
+        "de": "Streitkolben",
         "es": "Maza",
         "pt": "Maça"
       },
@@ -32,6 +33,7 @@
       "number": 1,
       "name": {
         "en": "Morning Star",
+        "de": "Morgenstern",
         "es": "Estrella del Alba",
         "pt": "Estrela da manhã"
       },
@@ -59,6 +61,7 @@
       "number": 2,
       "name": {
         "en": "Flail",
+        "de": "Flegel",
         "es": "Mayal",
         "pt": "Mangual"
       },
@@ -86,6 +89,7 @@
       "number": 3,
       "name": {
         "en": "Great Hammer",
+        "de": "Großartiger Hammer",
         "es": "Gran Martillo",
         "pt": "Martelo grande"
       },
@@ -113,6 +117,7 @@
       "number": 4,
       "name": {
         "en": "Crystal Morning Star",
+        "de": "Kristallmorgenstern",
         "es": "Estrella del Alba de Cristal",
         "pt": "Estrela da manhã de cristal"
       },
@@ -142,6 +147,7 @@
       "number": 5,
       "name": {
         "en": "Crystal Sword",
+        "de": "Kristallschwert",
         "es": "Espada de Cristal",
         "pt": "Espada de cristal"
       },
@@ -171,6 +177,7 @@
       "number": 6,
       "name": {
         "en": "Chaos Dragon Axe",
+        "de": "Chaos-Drachenaxt",
         "es": "Hacha Dragón del Caos",
         "pt": "Machado do dragão do caos"
       },
@@ -197,6 +204,7 @@
       "number": 7,
       "name": {
         "en": "Elemental Mace",
+        "de": "Elementarstreitkolben",
         "es": "Maza Elemental",
         "pt": "Maça elemental"
       },
@@ -221,6 +229,7 @@
       "number": 8,
       "name": {
         "en": "Battle Scepter",
+        "de": "Kampfzepter",
         "es": "Cetro de Batalla",
         "pt": "Cetro de batalha"
       },
@@ -247,6 +256,7 @@
       "number": 9,
       "name": {
         "en": "Master Scepter",
+        "de": "Meisterzepter",
         "es": "Cetro Maestro",
         "pt": "Cetro do mestre"
       },
@@ -273,6 +283,7 @@
       "number": 10,
       "name": {
         "en": "Great Scepter",
+        "de": "Großartiges Zepter",
         "es": "Gran Cetro",
         "pt": "Grande cetro"
       },
@@ -299,6 +310,7 @@
       "number": 11,
       "name": {
         "en": "Lord Scepter",
+        "de": "Lordzepter",
         "es": "Cetro del Señor",
         "pt": "Cetro do Lorde"
       },
@@ -325,6 +337,7 @@
       "number": 12,
       "name": {
         "en": "Great Lord Scepter",
+        "de": "Großartiges Lordzepter",
         "es": "Gran Cetro del Señor",
         "pt": "Grande cetro do Lorde"
       },
@@ -351,6 +364,7 @@
       "number": 13,
       "name": {
         "en": "Divine Scepter of Archangel",
+        "de": "Göttliches Zepter des Erzengels",
         "es": "Cetro Divino de Arcángel",
         "pt": "Cetro divino do arcanjo"
       },
@@ -378,6 +392,7 @@
       "number": 14,
       "name": {
         "en": "Soleil Sceptor",
+        "de": "Sonnenzepter",
         "es": "Cetro Soleil",
         "pt": "Cetro Soleil"
       },
@@ -404,6 +419,7 @@
       "number": 15,
       "name": {
         "en": "Shining Scepter",
+        "de": "Strahlendes Zepter",
         "es": "Cetro Brillante",
         "pt": "Cetro brilhante"
       },
@@ -429,6 +445,7 @@
       "number": 16,
       "name": {
         "en": "Frost Mace",
+        "de": "Froststreitkolben",
         "es": "Mazo Congelado",
         "pt": "Maça de gelo"
       },
@@ -454,6 +471,7 @@
       "number": 17,
       "name": {
         "en": "Absolute Scepter",
+        "de": "Absolutes Zepter",
         "es": "Cetro Absoluto",
         "pt": "Cetro absoluto"
       },
@@ -480,6 +498,7 @@
       "number": 18,
       "name": {
         "en": "Striker Scepter",
+        "de": "Stürmerzepter",
         "es": "Cero Ariete",
         "pt": "Cetro golpeador"
       },
@@ -505,6 +524,7 @@
       "number": 21,
       "name": {
         "en": "Master Scepter-J",
+        "de": "Meisterzepter-J",
         "es": "Cetro Maestro-J",
         "pt": "Cetro do mestre-J"
       },

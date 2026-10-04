@@ -6,6 +6,7 @@
       "number": 0,
       "name": {
         "en": "Apple",
+        "de": "Apfel",
         "es": "Manzana",
         "pt": "Maçã"
       },
@@ -20,6 +21,7 @@
       "number": 1,
       "name": {
         "en": "Small Healing Potion",
+        "de": "Kleiner Heiltrank",
         "es": "Pócima de Curación Pequeña",
         "pt": "Pequena poção de cura"
       },
@@ -34,6 +36,7 @@
       "number": 2,
       "name": {
         "en": "Healing Potion",
+        "de": "Heiltrank",
         "es": "Pócima de Curación",
         "pt": "Poção de cura"
       },
@@ -48,6 +51,7 @@
       "number": 3,
       "name": {
         "en": "Large Healing Potion",
+        "de": "Großer Heiltrank",
         "es": "Pócima de Curación Grande",
         "pt": "Grande poção de cura"
       },
@@ -62,6 +66,7 @@
       "number": 4,
       "name": {
         "en": "Small Mana Potion",
+        "de": "Kleiner Manatrank",
         "es": "Pócima de Maná Pequeña",
         "pt": "Pequena poção de mana"
       },
@@ -76,6 +81,7 @@
       "number": 5,
       "name": {
         "en": "Mana Potion",
+        "de": "Manatrank",
         "es": "Pócima de Maná",
         "pt": "Poção de mana"
       },
@@ -90,6 +96,7 @@
       "number": 6,
       "name": {
         "en": "Large Mana Potion",
+        "de": "Großer Manatrank",
         "es": "Pócima de Maná Grande",
         "pt": "Grande poção de mana"
       },
@@ -104,6 +111,7 @@
       "number": 7,
       "name": {
         "en": "Siege Potion",
+        "de": "Belagerungstrank",
         "es": "Pócima de Asedio",
         "pt": "Poção de sítio"
       },
@@ -116,6 +124,7 @@
       "number": 8,
       "name": {
         "en": "Antidote",
+        "de": "Gegengift",
         "es": "Antídoto",
         "pt": "Antídoto"
       },
@@ -129,6 +138,7 @@
       "number": 9,
       "name": {
         "en": "Ale",
+        "de": "Bier",
         "es": "Cerveza",
         "pt": "Cerveja"
       },
@@ -142,6 +152,7 @@
       "number": 10,
       "name": {
         "en": "Town Portal Scroll",
+        "de": "Stadtportal-Schriftrolle",
         "es": "Rollo del Portal del Pueblo",
         "pt": "Perg. de Portal para a Cidade"
       },
@@ -155,6 +166,7 @@
       "number": 11,
       "name": {
         "en": "Box of Luck",
+        "de": "Glücksbox",
         "es": "Caja de la Suerte",
         "pt": "Caixa da sorte"
       },
@@ -167,6 +179,7 @@
       "number": 12,
       "name": {
         "en": "Heart",
+        "de": "Herz",
         "es": "Corazón",
         "pt": "Coração"
       },
@@ -178,6 +191,7 @@
       "number": 13,
       "name": {
         "en": "Jewel of Bless",
+        "de": "Juwel des Segens",
         "es": "Joya de Bendición",
         "pt": "Joia da bênção"
       },
@@ -192,6 +206,7 @@
       "number": 14,
       "name": {
         "en": "Jewel of Soul",
+        "de": "Juwel der Seele",
         "es": "Joya de Alma",
         "pt": "Joia da alma"
       },
@@ -215,6 +230,7 @@
       "number": 16,
       "name": {
         "en": "Jewel of Life",
+        "de": "Juwel des Lebens",
         "es": "Joya de Vida",
         "pt": "Joia da vida"
       },
@@ -228,6 +244,7 @@
       "number": 17,
       "name": {
         "en": "Devil's Eye",
+        "de": "Auge des Teufels",
         "es": "Ojo del Diablo",
         "pt": "Olho do diabo"
       },
@@ -240,6 +257,7 @@
       "number": 18,
       "name": {
         "en": "Devil's Key",
+        "de": "Schlüssel des Teufels",
         "es": "Llave del Diablo",
         "pt": "Chave do diabo"
       },
@@ -252,6 +270,7 @@
       "number": 19,
       "name": {
         "en": "Devil's Invitation",
+        "de": "Einladung des Teufels",
         "es": "Invitación del Diablo",
         "pt": "Convite do diabo"
       },
@@ -263,6 +282,7 @@
       "number": 20,
       "name": {
         "en": "Remedy of Love",
+        "de": "Heilmittel der Liebe",
         "es": "Remedio de Amor",
         "pt": "Remédio do amor"
       },
@@ -286,6 +306,7 @@
       "number": 22,
       "name": {
         "en": "Jewel of Creation",
+        "de": "Juwel der Schöpfung",
         "es": "Joya de la Creación",
         "pt": "Joia da criação"
       },
@@ -299,6 +320,7 @@
       "number": 23,
       "name": {
         "en": "Scroll of the Emperor",
+        "de": "Schriftrolle des Imperators",
         "es": "Rollo del Emperador",
         "pt": "Pergaminho do Imperador"
       },
@@ -315,6 +337,7 @@
       "number": 24,
       "name": {
         "en": "Broken Sword",
+        "de": "Zerbrochenes Schwert",
         "es": "Espada Quebrada",
         "pt": "Espada quebrada"
       },
@@ -331,6 +354,7 @@
       "number": 25,
       "name": {
         "en": "Tear of Elf",
+        "de": "Träne der Elfe",
         "es": "Lágrima de Elfa",
         "pt": "Lágrima do elfo"
       },
@@ -347,6 +371,7 @@
       "number": 26,
       "name": {
         "en": "Soul Shard of Wizard",
+        "de": "Seelensplitter des Zauberers",
         "es": "Fragmento de Alma de Mago",
         "pt": "Fragmento da alma do Mago"
       },
@@ -363,6 +388,7 @@
       "number": 28,
       "name": {
         "en": "Lost Map",
+        "de": "Verlorene Karte",
         "es": "Mapa Perdido",
         "pt": "Mapa perdido"
       },
@@ -374,6 +400,7 @@
       "number": 29,
       "name": {
         "en": "Symbol of Kundun",
+        "de": "Symbol des Kundun",
         "es": "Símbolo de Kundun",
         "pt": "Símbolo de Kundun"
       },
@@ -385,6 +412,7 @@
       "number": 31,
       "name": {
         "en": "Jewel of Guardian",
+        "de": "Juwel des Wächters",
         "es": "Joya de Guardián",
         "pt": "Joia do guardião"
       },
@@ -398,6 +426,7 @@
       "number": 32,
       "name": {
         "en": "Pink Chocolate Box",
+        "de": "Rosa Pralinenschachtel",
         "es": "Caja de Chocolate Rosa",
         "pt": "Caixa de chocolate rosa"
       },
@@ -409,6 +438,7 @@
       "number": 33,
       "name": {
         "en": "Red Chocolate Box",
+        "de": "Rote Pralinenschachtel",
         "es": "Caja de Chocolate Roja",
         "pt": "Caixa de chocolate vermelha"
       },
@@ -420,6 +450,7 @@
       "number": 34,
       "name": {
         "en": "Blue Chocolate Box",
+        "de": "Blaue Pralinenschachtel",
         "es": "Caja de Chocolate Azul",
         "pt": "Caixa de chocolate azul"
       },
@@ -431,6 +462,7 @@
       "number": 35,
       "name": {
         "en": "Small SD Potion",
+        "de": "Kleiner SD-Trank",
         "es": "Pócima de SD Pequeña",
         "pt": "Pequena poção de SD"
       },
@@ -443,6 +475,7 @@
       "number": 36,
       "name": {
         "en": "SD Potion",
+        "de": "SD-Trank",
         "es": "Pócima de SD",
         "pt": "Poção de SD"
       },
@@ -455,6 +488,7 @@
       "number": 37,
       "name": {
         "en": "Large SD Potion",
+        "de": "Großer SD-Trank",
         "es": "Pócima de SD Grande",
         "pt": "Grande poção de SD"
       },
@@ -467,6 +501,7 @@
       "number": 38,
       "name": {
         "en": "Small Complex Potion",
+        "de": "Kleiner Komplextrank",
         "es": "Pócima Compleja Pequeña",
         "pt": "Pequena poção complexa"
       },
@@ -481,6 +516,7 @@
       "number": 39,
       "name": {
         "en": "Complex Potion",
+        "de": "Komplextrank",
         "es": "Pócima Compleja",
         "pt": "Poção complexa"
       },
@@ -495,6 +531,7 @@
       "number": 40,
       "name": {
         "en": "Large Complex Potion",
+        "de": "Großer Komplextrank",
         "es": "Pócima Compleja Grande",
         "pt": "Grande poção complexa"
       },
@@ -509,6 +546,7 @@
       "number": 41,
       "name": {
         "en": "Gemstone",
+        "de": "Edelstein",
         "es": "Gema",
         "pt": "Pedra preciosa"
       },
@@ -523,6 +561,7 @@
       "number": 42,
       "name": {
         "en": "Jewel of Harmony",
+        "de": "Juwel der Harmonie",
         "es": "Joya de la Armonía",
         "pt": "Joia da harmonia"
       },
@@ -537,6 +576,7 @@
       "number": 43,
       "name": {
         "en": "Lower refining stone",
+        "de": "Niederer Verfeinerungsstein",
         "es": "Piedra de Más Baja Refinación",
         "pt": "Pedra refinada inferior"
       },
@@ -551,6 +591,7 @@
       "number": 44,
       "name": {
         "en": "Higher refining stone",
+        "de": "Höherer Verfeinerungsstein",
         "es": "Piedra de Más Alta Refinación",
         "pt": "Pedra refinada superior"
       },
@@ -565,6 +606,7 @@
       "number": 45,
       "name": {
         "en": "Pumpkin of Luck",
+        "de": "Glückskürbis",
         "es": "Calabaza de la Suerte",
         "pt": "Abóbora da sorte"
       },
@@ -577,6 +619,7 @@
       "number": 46,
       "name": {
         "en": "Jack O'Lantern Blessings",
+        "de": "Segen von Jack O'Lantern",
         "es": "Bendiciones de Jack O'Lantern",
         "pt": "Bênçãos do Jack O'Lantern"
       },
@@ -588,6 +631,7 @@
       "number": 47,
       "name": {
         "en": "Jack O'Lantern Wrath",
+        "de": "Wut von Jack O'Lantern",
         "es": "Ira de Jack O'Lantern",
         "pt": "Ira do Jack O'Lantern"
       },
@@ -599,6 +643,7 @@
       "number": 48,
       "name": {
         "en": "Jack O'Lantern Cry",
+        "de": "Schrei von Jack O'Lantern",
         "es": "Grito de Jack O'Lantern",
         "pt": "Grito do Jack O'Lantern"
       },
@@ -610,6 +655,7 @@
       "number": 49,
       "name": {
         "en": "Jack O'Lantern Food",
+        "de": "Essen von Jack O'Lantern",
         "es": "Alimento de Jack O'Lantern",
         "pt": "Comida do Jack O'Lantern"
       },
@@ -621,6 +667,7 @@
       "number": 50,
       "name": {
         "en": "Jack O'Lantern Drink",
+        "de": "Getränk von Jack O'Lantern",
         "es": "Trago de Jack O'Lantern",
         "pt": "Bebida do Jack O'Lantern"
       },
@@ -632,6 +679,7 @@
       "number": 51,
       "name": {
         "en": "Chistmas Star",
+        "de": "Weihnachtsstern",
         "es": "Estrella de Navidad",
         "pt": "Estrela de Natal"
       },
@@ -643,6 +691,7 @@
       "number": 52,
       "name": {
         "en": "GM Gift",
+        "de": "GM-Geschenk",
         "es": "Regalo de GM",
         "pt": "Presente de GM"
       },
@@ -655,6 +704,7 @@
       "number": 53,
       "name": {
         "en": "Talisman of Luck",
+        "de": "Talisman des Glücks",
         "es": "Talismán de la Suerte",
         "pt": "Talismã da sorte"
       },
@@ -671,6 +721,7 @@
       "number": 54,
       "name": {
         "en": "Chaos Card",
+        "de": "Chaoskarte",
         "es": "Tarjeta de Caos",
         "pt": "Cartão do caos"
       },
@@ -687,6 +738,7 @@
       "number": 55,
       "name": {
         "en": "Green Chaos Box",
+        "de": "Grüne Chaosbox",
         "es": "Caja de Caos Verde",
         "pt": "Caixa do caos verde"
       },
@@ -698,6 +750,7 @@
       "number": 56,
       "name": {
         "en": "Red Chaos Box",
+        "de": "Rote Chaosbox",
         "es": "Caja de Caos Roja",
         "pt": "Caixa do caos vermelha"
       },
@@ -709,6 +762,7 @@
       "number": 57,
       "name": {
         "en": "Purple Chaos Box",
+        "de": "Lila Chaosbox",
         "es": "Caja de Caos Púrpura",
         "pt": "Caixa do caos roxa"
       },
@@ -720,6 +774,7 @@
       "number": 58,
       "name": {
         "en": "Rare Item Ticket1",
+        "de": "Ticket für seltenen Gegenstand 1",
         "es": "Boleto de Ítem Raro1",
         "pt": "Bilhete de item raro1"
       },
@@ -736,6 +791,7 @@
       "number": 59,
       "name": {
         "en": "Rare Item Ticket2",
+        "de": "Ticket für seltenen Gegenstand 2",
         "es": "Boleto de Ítem Raro2",
         "pt": "Bilhete de item raro2"
       },
@@ -752,6 +808,7 @@
       "number": 60,
       "name": {
         "en": "Rare Item Ticket3",
+        "de": "Ticket für seltenen Gegenstand 3",
         "es": "Boleto de Ítem Raro3",
         "pt": "Bilhete de item raro3"
       },
@@ -768,6 +825,7 @@
       "number": 61,
       "name": {
         "en": "Rare Item Ticket4",
+        "de": "Ticket für seltenen Gegenstand 4",
         "es": "Boleto de Ítem Raro4",
         "pt": "Bilhete de item raro4"
       },
@@ -784,6 +842,7 @@
       "number": 62,
       "name": {
         "en": "Rare Item Ticket5",
+        "de": "Ticket für seltenen Gegenstand 5",
         "es": "Boleto de Ítem Raro5",
         "pt": "Bilhete de item raro5"
       },
@@ -800,6 +859,7 @@
       "number": 63,
       "name": {
         "en": "Firecracker",
+        "de": "Knallkörper",
         "es": "Petardo",
         "pt": "Fogos de artifício"
       },
@@ -811,6 +871,7 @@
       "number": 64,
       "name": {
         "en": "Cursed Castle Water",
+        "de": "Verfluchtes Burgwasser",
         "es": "Agua de Castillo Maldito",
         "pt": "Água do Castelo Amaldiçoado"
       },
@@ -823,6 +884,7 @@
       "number": 65,
       "name": {
         "en": "Death-beam Knight Flame",
+        "de": "Flamme des Death Beam Knight",
         "es": "Llama Caballero Haz Mortal",
         "pt": "Chama do Cav. Raio da Morte"
       },
@@ -839,6 +901,7 @@
       "number": 66,
       "name": {
         "en": "Hell-Miner Horn",
+        "de": "Horn des Hell Maine",
         "es": "Cuerno de Minero Infiernal",
         "pt": "Chifre do Mineiro do Inferno"
       },
@@ -855,6 +918,7 @@
       "number": 67,
       "name": {
         "en": "Dark Phoenix Feather",
+        "de": "Feder des Dunkelphönix",
         "es": "Pluma de Fénix Oscuro",
         "pt": "Pena de fênix negra"
       },
@@ -871,6 +935,7 @@
       "number": 68,
       "name": {
         "en": "Abyssal Eye",
+        "de": "Auge des Abgrunds",
         "es": "Ojo Abismal",
         "pt": "Olho abissal"
       },
@@ -887,6 +952,7 @@
       "number": 70,
       "name": {
         "en": "Elite Healing Potion",
+        "de": "Elite-Heiltrank",
         "es": "Pócima de Curación de Élite",
         "pt": "Poção de cura de elite"
       },
@@ -903,6 +969,7 @@
       "number": 71,
       "name": {
         "en": "Elite Mana Potion",
+        "de": "Elite-Manatrank",
         "es": "Pócima de Maná de Élite",
         "pt": "Poção de mana de elite"
       },
@@ -919,6 +986,7 @@
       "number": 72,
       "name": {
         "en": "Scroll of Quickness",
+        "de": "Schriftrolle der Schnelligkeit",
         "es": "Rollo de Rapidez",
         "pt": "Pergaminho da rapidez"
       },
@@ -935,6 +1003,7 @@
       "number": 73,
       "name": {
         "en": "Scroll of Defense",
+        "de": "Schriftrolle der Verteidigung",
         "es": "Rollo de Defensa",
         "pt": "Pergaminho da defesa"
       },
@@ -951,6 +1020,7 @@
       "number": 74,
       "name": {
         "en": "Scroll of Wrath",
+        "de": "Schriftrolle des Zorns",
         "es": "Rollo de Ira",
         "pt": "Pergaminho da ira"
       },
@@ -967,6 +1037,7 @@
       "number": 75,
       "name": {
         "en": "Scroll of Wizardry",
+        "de": "Schriftrolle der Zauberkraft",
         "es": "Rollo de Magia",
         "pt": "Pergaminho do poder de magia"
       },
@@ -983,6 +1054,7 @@
       "number": 76,
       "name": {
         "en": "Scroll of Health",
+        "de": "Schriftrolle des Lebens",
         "es": "Rollo de Salud",
         "pt": "Pergaminho de vida"
       },
@@ -999,6 +1071,7 @@
       "number": 77,
       "name": {
         "en": "Scroll of Mana",
+        "de": "Schriftrolle des Manas",
         "es": "Rollo de Maná",
         "pt": "Pergaminho de mana"
       },
@@ -1015,6 +1088,7 @@
       "number": 78,
       "name": {
         "en": "Elixir of Strength",
+        "de": "Elixier der Stärke",
         "es": "Elixir de Fuerza",
         "pt": "Elixir da força"
       },
@@ -1031,6 +1105,7 @@
       "number": 79,
       "name": {
         "en": "Elixir of Agility",
+        "de": "Elixier der Beweglichkeit",
         "es": "Elixir de Agilidad",
         "pt": "Elixir da agilidade"
       },
@@ -1047,6 +1122,7 @@
       "number": 80,
       "name": {
         "en": "Elixir of Health",
+        "de": "Elixier der Vitalität",
         "es": "Elixir de Salud",
         "pt": "Elixir da vida"
       },
@@ -1063,6 +1139,7 @@
       "number": 81,
       "name": {
         "en": "Elixir of Energy",
+        "de": "Elixier der Energie",
         "es": "Elixir de Energía",
         "pt": "Elixir da energia"
       },
@@ -1079,6 +1156,7 @@
       "number": 82,
       "name": {
         "en": "Elixir of Control",
+        "de": "Elixier der Führung",
         "es": "Elixir de Control",
         "pt": "Elixir do controle"
       },
@@ -1095,6 +1173,7 @@
       "number": 83,
       "name": {
         "en": "Rare Item Ticket",
+        "de": "Ticket für seltenen Gegenstand",
         "es": "Boleto de Ítem Raro",
         "pt": "Bilhete de item raro"
       },
@@ -1106,6 +1185,7 @@
       "number": 84,
       "name": {
         "en": "Cherry Blossom Play-Box",
+        "de": "Kirschblüten-Spielbox",
         "es": "Caja Juegos Flor de Cerezo",
         "pt": "Cx. de Brinq. Flor de Cereja"
       },
@@ -1117,6 +1197,7 @@
       "number": 85,
       "name": {
         "en": "Cherry Blossom Wine",
+        "de": "Kirschblütenwein",
         "es": "Vino de Flor de Cerezo",
         "pt": "Vinho de flor de cereja"
       },
@@ -1128,6 +1209,7 @@
       "number": 86,
       "name": {
         "en": "Cherry Blossom Rice Cake",
+        "de": "Kirschblüten-Reiskuchen",
         "es": "Pastel Arroz Flor de Cerezo",
         "pt": "Bolo de Arroz Flor de Cereja"
       },
@@ -1139,6 +1221,7 @@
       "number": 87,
       "name": {
         "en": "Cherry Blossom Flower Petal",
+        "de": "Kirschblütenblatt",
         "es": "Pétalo de Flor de Cerezo",
         "pt": "Pétala da flor de cereja"
       },
@@ -1150,6 +1233,7 @@
       "number": 88,
       "name": {
         "en": "White Cherry Blossom Branch",
+        "de": "Weißer Kirschblütenzweig",
         "es": "Rama Blanca Flor de Cerezo",
         "pt": "Galho de cereja branco"
       },
@@ -1161,6 +1245,7 @@
       "number": 89,
       "name": {
         "en": "Red Cherry Blossom Branch",
+        "de": "Roter Kirschblütenzweig",
         "es": "Rama Roja de Flor de Cerezo",
         "pt": "Galho de cereja vermelho"
       },
@@ -1172,6 +1257,7 @@
       "number": 90,
       "name": {
         "en": "Golden Cherry Blossom Branch",
+        "de": "Goldener Kirschblütenzweig",
         "es": "Rama Dorada Flor de Cerezo",
         "pt": "Galho de cereja dourado"
       },
@@ -1183,6 +1269,7 @@
       "number": 91,
       "name": {
         "en": "Summoner Character Card",
+        "de": "Charakterkarte: Beschwörer",
         "es": "Tarjeta Personaje Invocador",
         "pt": "Cartão do Pers. Invocador"
       },
@@ -1199,6 +1286,7 @@
       "number": 92,
       "name": {
         "en": "Chaos Card Gold",
+        "de": "Chaoskarte (Gold)",
         "es": "Tarjeta de Caos Oro",
         "pt": "Cartão dourado do caos"
       },
@@ -1215,6 +1303,7 @@
       "number": 93,
       "name": {
         "en": "Chaos Card Rare",
+        "de": "Chaoskarte (Selten)",
         "es": "Tarjeta de Caos Rara",
         "pt": "Cartão raro do caos"
       },
@@ -1231,6 +1320,7 @@
       "number": 94,
       "name": {
         "en": "Medium Elite Healing Potion",
+        "de": "Mittlerer Elite-Heiltrank",
         "es": "Pócima Curación Élite Media",
         "pt": "Poção média de cura de elite"
       },
@@ -1247,6 +1337,7 @@
       "number": 95,
       "name": {
         "en": "Chaos Card  Mini",
+        "de": "Chaoskarte (Mini)",
         "es": "Tarjeta de Caos Mini",
         "pt": "Mini cartão do caos"
       },
@@ -1263,6 +1354,7 @@
       "number": 96,
       "name": {
         "en": "Talisman of Chaos Assembly",
+        "de": "Talisman der Chaos-Kombination",
         "es": "Ensamble Talismán del Caos",
         "pt": "Talismã do Agrup. do Caos"
       },
@@ -1279,6 +1371,7 @@
       "number": 97,
       "name": {
         "en": "Scroll of Battle",
+        "de": "Schriftrolle des Kampfes",
         "es": "Rollo de Batalla",
         "pt": "Pergaminho da batalha"
       },
@@ -1295,6 +1388,7 @@
       "number": 98,
       "name": {
         "en": "Scroll of Strength",
+        "de": "Schriftrolle der Stärke",
         "es": "Rollo de Fuerza",
         "pt": "Pergaminho da força"
       },
@@ -1311,6 +1405,7 @@
       "number": 99,
       "name": {
         "en": "Christmas Firecracker",
+        "de": "Weihnachtsknallkörper",
         "es": "Petardo de Navidad",
         "pt": "Fogos de artifício de Natal"
       },
@@ -1322,6 +1417,7 @@
       "number": 100,
       "name": {
         "en": "Lucky Coin",
+        "de": "Glücksmünze",
         "es": "Moneda de la Suerte",
         "pt": "Moeda da sorte"
       },
@@ -1333,6 +1429,7 @@
       "number": 101,
       "name": {
         "en": "Suspicious Scrap of Paper",
+        "de": "Verdächtiger Papierfetzen",
         "es": "Trozo de Papel Sospechoso",
         "pt": "Pedaço de papel suspeito"
       },
@@ -1345,6 +1442,7 @@
       "number": 102,
       "name": {
         "en": "Gaion's Order",
+        "de": "Gaions Befehl",
         "es": "Órden de Gaion",
         "pt": "Ordem de Gaion"
       },
@@ -1356,6 +1454,7 @@
       "number": 103,
       "name": {
         "en": "First Secromicon Fragment",
+        "de": "Erstes Secromicon-Fragment",
         "es": "1er Fragmento de Secromicon",
         "pt": "Prim. Frag. de Secromicon"
       },
@@ -1367,6 +1466,7 @@
       "number": 104,
       "name": {
         "en": "Second Secromicon Fragment",
+        "de": "Zweites Secromicon-Fragment",
         "es": "2do Fragmento de Secromicon",
         "pt": "Seg. Frag. de Secromicon"
       },
@@ -1378,6 +1478,7 @@
       "number": 105,
       "name": {
         "en": "Third Secromicon Fragment",
+        "de": "Drittes Secromicon-Fragment",
         "es": "3er Fragmento de Secromicon",
         "pt": "Ter. Frag. de Secromicon"
       },
@@ -1389,6 +1490,7 @@
       "number": 106,
       "name": {
         "en": "Fourth Secromicon Fragment",
+        "de": "Viertes Secromicon-Fragment",
         "es": "4to Fragmento de Secromicon",
         "pt": "Quarto Frag. de Secromicon"
       },
@@ -1400,6 +1502,7 @@
       "number": 107,
       "name": {
         "en": "Fifth Secromicon Fragment",
+        "de": "Fünftes Secromicon-Fragment",
         "es": "5to Fragmento de Secromicon",
         "pt": "Quinto Frag. de Secromicon"
       },
@@ -1411,6 +1514,7 @@
       "number": 108,
       "name": {
         "en": "Sixth Secromicon Fragment",
+        "de": "Sechstes Secromicon-Fragment",
         "es": "6to Fragmento de Secromicon",
         "pt": "Sexto Frag. de Secromicon"
       },
@@ -1422,6 +1526,7 @@
       "number": 109,
       "name": {
         "en": "Complete Secromicon",
+        "de": "Vollständiges Secromicon",
         "es": "Secromicon Completo",
         "pt": "Secromicon completo"
       },
@@ -1433,6 +1538,7 @@
       "number": 110,
       "name": {
         "en": "Sign of Dimensions",
+        "de": "Zeichen der Dimensionen",
         "es": "Signo de Dimensiones",
         "pt": "Sinal das dimensões"
       },
@@ -1445,6 +1551,7 @@
       "number": 111,
       "name": {
         "en": "Mirror of Dimensions",
+        "de": "Spiegel der Dimensionen",
         "es": "Espejo de Dimensiones",
         "pt": "Espelho das dimensões"
       },
@@ -1456,6 +1563,7 @@
       "number": 112,
       "name": {
         "en": "Silver Key",
+        "de": "Silberschlüssel",
         "es": "Llave de Plata",
         "pt": "Chave prateada"
       },
@@ -1473,6 +1581,7 @@
       "number": 113,
       "name": {
         "en": "Gold Key",
+        "de": "Goldschlüssel",
         "es": "Llave de Oro",
         "pt": "Chave dourada"
       },
@@ -1490,6 +1599,7 @@
       "number": 114,
       "name": {
         "en": "Master Skill Reset",
+        "de": "Rücksetzung der Meisterfähigkeiten",
         "es": "Reinicio de Habilidad Maestra",
         "pt": "Reinic. de Habilidade Mestre"
       },
@@ -1506,6 +1616,7 @@
       "number": 115,
       "name": {
         "en": "Stat Adjustment",
+        "de": "Anpassung der Werte",
         "es": "Ajuste de Estadísticas",
         "pt": "Ajuste de atributos"
       },
@@ -1522,6 +1633,7 @@
       "number": 116,
       "name": {
         "en": "Character Relocation Service",
+        "de": "Charakter-Umzugsdienst",
         "es": "Cuarto Fragmento Secromicon",
         "pt": "Serviço Nova Local. de Pers."
       },
@@ -1538,6 +1650,7 @@
       "number": 117,
       "name": {
         "en": "Character Rename Service",
+        "de": "Charakter-Umbenennungsdienst",
         "es": "Servicio Renombrar Personaje",
         "pt": "Serviço Novo Nome do Pers."
       },
@@ -1554,6 +1667,7 @@
       "number": 118,
       "name": {
         "en": "Server Relocation Service",
+        "de": "Server-Umzugsdienst",
         "es": "Servicio Reubicar Servidor",
         "pt": "Serviço Nova Local. de Serv."
       },
@@ -1570,6 +1684,7 @@
       "number": 119,
       "name": {
         "en": "Premium Package",
+        "de": "Premiumpaket",
         "es": "Paquete Premium",
         "pt": "Pacote Premium"
       },
@@ -1586,6 +1701,7 @@
       "number": 120,
       "name": {
         "en": "Goblin Gold Coin",
+        "de": "Goblin-Goldmünze",
         "es": "Moneda de Oro de Duendes",
         "pt": "Moeda dourada do goblin"
       },
@@ -1602,6 +1718,7 @@
       "number": 121,
       "name": {
         "en": "Sealed Golden Box",
+        "de": "Versiegelte goldene Box",
         "es": "Caja Dorada Sellada",
         "pt": "Caixa dourada lacrada"
       },
@@ -1615,6 +1732,7 @@
       "number": 122,
       "name": {
         "en": "Sealed Silver Box",
+        "de": "Versiegelte silberne Box",
         "es": "Caja Plateada Sellada",
         "pt": "Caixa prateada lacrada"
       },
@@ -1628,6 +1746,7 @@
       "number": 123,
       "name": {
         "en": "Golden Box",
+        "de": "Goldene Box",
         "es": "Caja Dorada",
         "pt": "Caixa dourada"
       },
@@ -1644,6 +1763,7 @@
       "number": 124,
       "name": {
         "en": "Silver Box",
+        "de": "Silberne Box",
         "es": "Caja Plateada",
         "pt": "Caixa prateada"
       },
@@ -1660,6 +1780,7 @@
       "number": 125,
       "name": {
         "en": "Package Box",
+        "de": "Paketbox",
         "es": "Caja de Paquete",
         "pt": "Caixa de pacote"
       },
@@ -1671,6 +1792,7 @@
       "number": 126,
       "name": {
         "en": "30-Day Pass",
+        "de": "30-Tage-Pass",
         "es": "Pase por 30 días",
         "pt": "Passe de 30 dias"
       },
@@ -1687,6 +1809,7 @@
       "number": 127,
       "name": {
         "en": "90-Day Pass",
+        "de": "90-Tage-Pass",
         "es": "Pase por 90 días",
         "pt": "Passe de 90 dias"
       },
@@ -1703,6 +1826,7 @@
       "number": 128,
       "name": {
         "en": "30-Day Pass - Points",
+        "de": "30-Tage-Pass - Punkte",
         "es": "Puntos - Pase por 30 días",
         "pt": "Passe de 30 dias - Pontos"
       },
@@ -1719,6 +1843,7 @@
       "number": 129,
       "name": {
         "en": "90-Day Pass - Points",
+        "de": "90-Tage-Pass - Punkte",
         "es": "Puntos - Pase por 90 días",
         "pt": "Passe de 90 dias - Pontos"
       },
@@ -1735,6 +1860,7 @@
       "number": 130,
       "name": {
         "en": "3-Hour Pass",
+        "de": "3-Stunden-Pass",
         "es": "Pase por 3 horas",
         "pt": "Passe de 3 horas"
       },
@@ -1751,6 +1877,7 @@
       "number": 131,
       "name": {
         "en": "5-Hour Pass",
+        "de": "5-Stunden-Pass",
         "es": "Pase por 5 horas",
         "pt": "Passe de 5 horas"
       },
@@ -1767,6 +1894,7 @@
       "number": 132,
       "name": {
         "en": "10-Hour Pass",
+        "de": "10-Stunden-Pass",
         "es": "Pase por 10 horas",
         "pt": "Passe de 10 horas"
       },
@@ -1783,6 +1911,7 @@
       "number": 133,
       "name": {
         "en": "Elite SD Potion",
+        "de": "Elite-SD-Trank",
         "es": "Pócima de SD de Élite",
         "pt": "Poção de SD de elite"
       },
@@ -1799,6 +1928,7 @@
       "number": 134,
       "name": {
         "en": "Package Box A",
+        "de": "Paketbox A",
         "es": "Caja de Paquete A",
         "pt": "Caixa de pacote A"
       },
@@ -1815,6 +1945,7 @@
       "number": 135,
       "name": {
         "en": "Package Box B",
+        "de": "Paketbox B",
         "es": "Caja de Paquete B",
         "pt": "Caixa de pacote B"
       },
@@ -1831,6 +1962,7 @@
       "number": 136,
       "name": {
         "en": "Package Box C",
+        "de": "Paketbox C",
         "es": "Caja de Paquete C",
         "pt": "Caixa de pacote C"
       },
@@ -1847,6 +1979,7 @@
       "number": 137,
       "name": {
         "en": "Package Box D",
+        "de": "Paketbox D",
         "es": "Caja de Paquete D",
         "pt": "Caixa de pacote D"
       },
@@ -1863,6 +1996,7 @@
       "number": 138,
       "name": {
         "en": "Package Box E",
+        "de": "Paketbox E",
         "es": "Caja de Paquete E",
         "pt": "Caixa de pacote E"
       },
@@ -1879,6 +2013,7 @@
       "number": 139,
       "name": {
         "en": "Package Box F",
+        "de": "Paketbox F",
         "es": "Caja de Paquete F",
         "pt": "Caixa de pacote F"
       },
@@ -1895,6 +2030,7 @@
       "number": 140,
       "name": {
         "en": "Scroll of Healing",
+        "de": "Schriftrolle der Heilung",
         "es": "Rollo de Curación",
         "pt": "Pergaminho da cura"
       },
@@ -1911,6 +2047,7 @@
       "number": 141,
       "name": {
         "en": "Shining Jewelry Case",
+        "de": "Glänzendes Schmuckkästchen",
         "es": "Joyero Brillante",
         "pt": "Estojo de joias brilhante"
       },
@@ -1922,6 +2059,7 @@
       "number": 142,
       "name": {
         "en": "Elegant Jewelry Case",
+        "de": "Elegantes Schmuckkästchen",
         "es": "Joyero Elegante",
         "pt": "Estojo de joias elegante"
       },
@@ -1933,6 +2071,7 @@
       "number": 143,
       "name": {
         "en": "Steel Jewelry Case",
+        "de": "Stählernes Schmuckkästchen",
         "es": "Joyero de Acero",
         "pt": "Estojo de joias de aço"
       },
@@ -1944,6 +2083,7 @@
       "number": 144,
       "name": {
         "en": "Old Jewelry Case",
+        "de": "Altes Schmuckkästchen",
         "es": "Joyero Antiguo",
         "pt": "Estojo de joias antigo"
       },
@@ -1955,6 +2095,7 @@
       "number": 145,
       "name": {
         "en": "Rare Item Ticket 7",
+        "de": "Ticket für seltenen Gegenstand 7",
         "es": "Boleto de Ítem Raro 7",
         "pt": "Bilhete de item raro7"
       },
@@ -1971,6 +2112,7 @@
       "number": 146,
       "name": {
         "en": "Rare Item Ticket 8",
+        "de": "Ticket für seltenen Gegenstand 8",
         "es": "Boleto de Ítem Raro 8",
         "pt": "Bilhete de item raro8"
       },
@@ -1987,6 +2129,7 @@
       "number": 147,
       "name": {
         "en": "Rare Item Ticket 9",
+        "de": "Ticket für seltenen Gegenstand 9",
         "es": "Boleto de Ítem Raro 9",
         "pt": "Bilhete de item raro9"
       },
@@ -2003,6 +2146,7 @@
       "number": 148,
       "name": {
         "en": "Rare Item Ticket 10",
+        "de": "Ticket für seltenen Gegenstand 10",
         "es": "Boleto de Ítem Raro 10",
         "pt": "Bilhete de item raro10"
       },
@@ -2019,6 +2163,7 @@
       "number": 149,
       "name": {
         "en": "Rare Item Ticket 11",
+        "de": "Ticket für seltenen Gegenstand 11",
         "es": "Boleto de Ítem Raro 11",
         "pt": "Bilhete de item raro11"
       },
@@ -2035,6 +2180,7 @@
       "number": 150,
       "name": {
         "en": "Rare Item Ticket 12",
+        "de": "Ticket für seltenen Gegenstand 12",
         "es": "Boleto de Ítem Raro 12",
         "pt": "Bilhete de item raro12"
       },
@@ -2051,6 +2197,7 @@
       "number": 151,
       "name": {
         "en": "Lv. 1 Letter of Request",
+        "de": "Auftragsschreiben Lv. 1",
         "es": "Nivel 1 Carta de Petición",
         "pt": "Nvl. 1Carta de Requisição"
       },
@@ -2062,6 +2209,7 @@
       "number": 152,
       "name": {
         "en": "Lv. 1 Completion Certificate",
+        "de": "Abschlusszertifikat Lv. 1",
         "es": "Nivel 1 Certificado",
         "pt": "Nvl. 1 Completada"
       },
@@ -2073,6 +2221,7 @@
       "number": 153,
       "name": {
         "en": "Stardust",
+        "de": "Sternenstaub",
         "es": "Polvo estelar",
         "pt": "Poeira estelar"
       },
@@ -2085,6 +2234,7 @@
       "number": 154,
       "name": {
         "en": "Kalt Stone",
+        "de": "Kalt-Stein",
         "es": "Piedra Kalt",
         "pt": "Pedra Kalt"
       },
@@ -2097,6 +2247,7 @@
       "number": 155,
       "name": {
         "en": "Tantalos's Armor",
+        "de": "Tantalos' Rüstung",
         "es": "Armadura de Tantalos",
         "pt": "Armadura de Tântalos"
       },
@@ -2109,6 +2260,7 @@
       "number": 156,
       "name": {
         "en": "Burnt Murderer's Club",
+        "de": "Verbrannte Keule des Mörders",
         "es": "Garrote de Asesinos Calcinados",
         "pt": "Porrete de Assassino Queimado"
       },
@@ -2121,6 +2273,7 @@
       "number": 157,
       "name": {
         "en": "Green Box",
+        "de": "Grüne Box",
         "es": "Caja verde",
         "pt": "Caixa verde"
       },
@@ -2133,6 +2286,7 @@
       "number": 158,
       "name": {
         "en": "Red Box",
+        "de": "Rote Box",
         "es": "Caja roja",
         "pt": "Caixa vermelha"
       },
@@ -2145,6 +2299,7 @@
       "number": 159,
       "name": {
         "en": "Purple Box",
+        "de": "Lila Box",
         "es": "Caja púrpura",
         "pt": "Caixa roxa"
       },
@@ -2157,6 +2312,7 @@
       "number": 160,
       "name": {
         "en": "Jewel of Extension",
+        "de": "Juwel der Erweiterung",
         "es": "Joya de Extensión",
         "pt": "Jóia de Extensão"
       },
@@ -2171,6 +2327,7 @@
       "number": 161,
       "name": {
         "en": "Jewel of Elevation",
+        "de": "Juwel der Erhebung",
         "es": "Joya de Elevación",
         "pt": "Jóia de Elevação"
       },
@@ -2185,6 +2342,7 @@
       "number": 162,
       "name": {
         "en": "Magic Backpack",
+        "de": "Magischer Rucksack",
         "es": "Morral Mágico",
         "pt": "Mochila Mágica"
       },
@@ -2196,6 +2354,7 @@
       "number": 163,
       "name": {
         "en": "Vault Expansion Certificate",
+        "de": "Tresorerweiterungs-Zertifikat",
         "es": "Certificado de Expansión de Bóveda",
         "pt": "Certificado de Expansão de Cofre"
       },
@@ -2207,6 +2366,7 @@
       "number": 169,
       "name": {
         "en": "RageFighter Character Card",
+        "de": "Charakterkarte: Wutkämpfer",
         "es": "Tarjeta - Peleador Feroz",
         "pt": "Carta de Person-RageFighter"
       },

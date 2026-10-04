@@ -6,6 +6,7 @@
       "number": 0,
       "name": {
         "en": "Bronze Gloves",
+        "de": "Bronzehandschuhe",
         "es": "Guantes de Bronce",
         "pt": "Luvas de bronze"
       },
@@ -31,6 +32,7 @@
       "number": 1,
       "name": {
         "en": "Dragon Gloves",
+        "de": "Drachenhandschuhe",
         "es": "Guantes Dragón",
         "pt": "Luvas do dragão"
       },
@@ -55,6 +57,7 @@
       "number": 2,
       "name": {
         "en": "Pad Gloves",
+        "de": "Polsterhandschuhe",
         "es": "Guantes Rellenos",
         "pt": "Luvas acolchoadas"
       },
@@ -77,6 +80,7 @@
       "number": 3,
       "name": {
         "en": "Legendary Gloves",
+        "de": "Legendäre Handschuhe",
         "es": "Guantes Legendarios",
         "pt": "Luvas lendárias"
       },
@@ -99,6 +103,7 @@
       "number": 4,
       "name": {
         "en": "Bone Gloves",
+        "de": "Knochenhandschuhe",
         "es": "Guantes de Hueso",
         "pt": "Luvas de osso"
       },
@@ -121,6 +126,7 @@
       "number": 5,
       "name": {
         "en": "Leather Gloves",
+        "de": "Lederhandschuhe",
         "es": "Guantes de Cuero",
         "pt": "Luvas de couro"
       },
@@ -145,6 +151,7 @@
       "number": 6,
       "name": {
         "en": "Scale Gloves",
+        "de": "Schuppenhandschuhe",
         "es": "Guantes de Escamas",
         "pt": "Luvas de escamas"
       },
@@ -169,6 +176,7 @@
       "number": 7,
       "name": {
         "en": "Sphinx Gloves",
+        "de": "Sphinxhandschuhe",
         "es": "Guantes Esfinge",
         "pt": "Luvas da esfinge"
       },
@@ -191,6 +199,7 @@
       "number": 8,
       "name": {
         "en": "Brass Gloves",
+        "de": "Messinghandschuhe",
         "es": "Guantes de Metal",
         "pt": "Luvas de latão"
       },
@@ -215,6 +224,7 @@
       "number": 9,
       "name": {
         "en": "Plate Gloves",
+        "de": "Plattenhandschuhe",
         "es": "Guantes de Plata",
         "pt": "Luvas de placa"
       },
@@ -238,6 +248,7 @@
       "number": 10,
       "name": {
         "en": "Vine Gloves",
+        "de": "Rankenhandschuhe",
         "es": "Guantes Vid",
         "pt": "Luvas da vinha"
       },
@@ -261,6 +272,7 @@
       "number": 11,
       "name": {
         "en": "Silk Gloves",
+        "de": "Seidenhandschuhe",
         "es": "Guantes de Seda",
         "pt": "Luvas de seda"
       },
@@ -284,6 +296,7 @@
       "number": 12,
       "name": {
         "en": "Wind Gloves",
+        "de": "Windhandschuhe",
         "es": "Guantes Viento",
         "pt": "Luvas do vento"
       },
@@ -307,6 +320,7 @@
       "number": 13,
       "name": {
         "en": "Spirit Gloves",
+        "de": "Geisterhandschuhe",
         "es": "Guantes Espíritu",
         "pt": "Luvas do espírito"
       },
@@ -330,6 +344,7 @@
       "number": 14,
       "name": {
         "en": "Guardian Gloves",
+        "de": "Wächterhandschuhe",
         "es": "Guantes Guardián",
         "pt": "Luvas do guardião"
       },
@@ -353,6 +368,7 @@
       "number": 15,
       "name": {
         "en": "Storm Crow Gloves",
+        "de": "Sturmkrähenhandschuhe",
         "es": "Guantes Cuervo de Tormenta",
         "pt": "Luvas do corvo da tempestade"
       },
@@ -376,6 +392,7 @@
       "number": 16,
       "name": {
         "en": "Black Dragon Gloves",
+        "de": "Schwarzdrachenhandschuhe",
         "es": "Guantes Dragón Negro",
         "pt": "Luvas do dragão negro"
       },
@@ -399,6 +416,7 @@
       "number": 17,
       "name": {
         "en": "Dark Phoenix Gloves",
+        "de": "Dunkelphönixhandschuhe",
         "es": "Guantes Fénix Oscuro",
         "pt": "Luvas da fênix negra"
       },
@@ -422,6 +440,7 @@
       "number": 18,
       "name": {
         "en": "Grand Soul Gloves",
+        "de": "Großseelenhandschuhe",
         "es": "Guantes Gran Alma",
         "pt": "Luvas da grande alma"
       },
@@ -445,6 +464,7 @@
       "number": 19,
       "name": {
         "en": "Divine Gloves",
+        "de": "Göttliche Handschuhe",
         "es": "Guantes Divinos",
         "pt": "Luvas divinas"
       },
@@ -468,6 +488,7 @@
       "number": 20,
       "name": {
         "en": "Thunder Hawk Gloves",
+        "de": "Donnerfalkenhandschuhe",
         "es": "Guantes Halcón de Trueno",
         "pt": "Luvas de Thunder Hawk"
       },
@@ -491,6 +512,7 @@
       "number": 21,
       "name": {
         "en": "Great Dragon Gloves",
+        "de": "Großartige Drachenhandschuhe",
         "es": "Guantes Gran Dragón",
         "pt": "Luvas do grande dragão"
       },
@@ -514,6 +536,7 @@
       "number": 22,
       "name": {
         "en": "Dark Soul Gloves",
+        "de": "Dunkelseelenhandschuhe",
         "es": "Guantes Alma Oscura",
         "pt": "Luvas da alma negra"
       },
@@ -537,6 +560,7 @@
       "number": 23,
       "name": {
         "en": "Hurricane Gloves",
+        "de": "Orkanhandschuhe",
         "es": "Guantes Huracán",
         "pt": "Luvas do furacão"
       },
@@ -560,6 +584,7 @@
       "number": 24,
       "name": {
         "en": "Red Spirit Gloves",
+        "de": "Rotgeisterhandschuhe",
         "es": "Guantes Espíritu Rojo",
         "pt": "Luvas do espírito vermelho"
       },
@@ -583,6 +608,7 @@
       "number": 25,
       "name": {
         "en": "Light Plate Gloves",
+        "de": "Leichtplattenhandschuhe",
         "es": "Guantes Plata de Luz",
         "pt": "Luvas de placa leve"
       },
@@ -606,6 +632,7 @@
       "number": 26,
       "name": {
         "en": "Adamantine Gloves",
+        "de": "Adamanthandschuhe",
         "es": "Guantes Adamantinos",
         "pt": "Luvas de adamantina"
       },
@@ -629,6 +656,7 @@
       "number": 27,
       "name": {
         "en": "Dark Steel Gloves",
+        "de": "Dunkelstahlhandschuhe",
         "es": "Guantes Acero Oscuro",
         "pt": "Luvas de aço negro"
       },
@@ -652,6 +680,7 @@
       "number": 28,
       "name": {
         "en": "Dark Master Gloves",
+        "de": "Dunkelmeisterhandschuhe",
         "es": "Guantes Amo Oscuro",
         "pt": "Luvas do Mestre negro"
       },
@@ -675,6 +704,7 @@
       "number": 29,
       "name": {
         "en": "Dragon Knight Gloves",
+        "de": "Drachenritterhandschuhe",
         "es": "Guantes Caballero Dragón",
         "pt": "Luvas do cavaleiro dragão"
       },
@@ -698,6 +728,7 @@
       "number": 30,
       "name": {
         "en": "Venom Mist Gloves",
+        "de": "Giftnebelhandschuhe",
         "es": "Guantes Bruma de Veneno",
         "pt": "Luvas da névoa de veneno"
       },
@@ -721,6 +752,7 @@
       "number": 31,
       "name": {
         "en": "Sylphid Ray Gloves",
+        "de": "Sylphenstrahlhandschuhe",
         "es": "Guantes Rayo de Sílfide",
         "pt": "Luvas do raio silfídico"
       },
@@ -744,6 +776,7 @@
       "number": 32,
       "name": {
         "en": "Volcano Gloves",
+        "de": "Vulkanhandschuhe",
         "es": "Guantes Volcán",
         "pt": "Luvas do vulcão"
       },
@@ -767,6 +800,7 @@
       "number": 33,
       "name": {
         "en": "Sunlight Gloves",
+        "de": "Sonnenlichthandschuhe",
         "es": "Guantes Luz Solar",
         "pt": "Luvas da luz do sol"
       },
@@ -790,6 +824,7 @@
       "number": 34,
       "name": {
         "en": "Ashcrow Gloves",
+        "de": "Aschkrähenhandschuhe",
         "es": "Guantes Cuervo Ceniza",
         "pt": "Luvas de Ashcrow"
       },
@@ -812,6 +847,7 @@
       "number": 35,
       "name": {
         "en": "Eclipse Gloves",
+        "de": "Finsternishandschuhe",
         "es": "Guantes Eclipse",
         "pt": "Luvas do eclipse"
       },
@@ -834,6 +870,7 @@
       "number": 36,
       "name": {
         "en": "Iris Gloves",
+        "de": "Iris-Handschuhe",
         "es": "Guantes Iris",
         "pt": "Luvas de Iris"
       },
@@ -856,6 +893,7 @@
       "number": 37,
       "name": {
         "en": "Valiant Gloves",
+        "de": "Kühne Handschuhe",
         "es": "Guantes Valientes",
         "pt": "Luvas do valor"
       },
@@ -878,6 +916,7 @@
       "number": 38,
       "name": {
         "en": "Glorious Gloves",
+        "de": "Glorreiche Handschuhe",
         "es": "Guantes Gloriosos",
         "pt": "Luvas gloriosas"
       },
@@ -900,6 +939,7 @@
       "number": 39,
       "name": {
         "en": "Violent Wind Gloves",
+        "de": "Sturmwindhandschuhe",
         "es": "Guantes Viento Violento",
         "pt": "Luvas do vento violento"
       },
@@ -922,6 +962,7 @@
       "number": 40,
       "name": {
         "en": "Red Wing Gloves",
+        "de": "Rotschwingenhandschuhe",
         "es": "Guantes Ala Roja",
         "pt": "Luvas da asa vermelha"
       },
@@ -945,6 +986,7 @@
       "number": 41,
       "name": {
         "en": "Ancient Gloves",
+        "de": "Uralte Handschuhe",
         "es": "Guantes Antiguos",
         "pt": "Luvas antigas"
       },
@@ -968,6 +1010,7 @@
       "number": 42,
       "name": {
         "en": "Demonic Gloves",
+        "de": "Dämonische Handschuhe",
         "es": "Guantes Demoníacos",
         "pt": "Luvas demoníacas"
       },
@@ -990,6 +1033,7 @@
       "number": 43,
       "name": {
         "en": "Storm Blitz Gloves",
+        "de": "Sturmblitzhandschuhe",
         "es": "Guantes Ráfaga Tormentosa",
         "pt": "Luvas Relâmpago de Tempest."
       },
@@ -1013,6 +1057,7 @@
       "number": 44,
       "name": {
         "en": "Eternal Wing Gloves",
+        "de": "Ewigschwingenhandschuhe",
         "es": "Guantes Ala Eterna",
         "pt": "Luvas da asa eterna"
       },
@@ -1036,6 +1081,7 @@
       "number": 45,
       "name": {
         "en": "Titan  Gloves",
+        "de": "Titanenhandschuhe",
         "es": "Guantes Titán",
         "pt": "Luvas do titã"
       },
@@ -1059,6 +1105,7 @@
       "number": 46,
       "name": {
         "en": "Brave Gloves",
+        "de": "Tapfere Handschuhe",
         "es": "Guantes Valerosos",
         "pt": "Luvas da coragem"
       },
@@ -1082,6 +1129,7 @@
       "number": 47,
       "name": {
         "en": "Phantom  Gloves",
+        "de": "Phantom-Handschuhe",
         "es": "Guantes Fantasma",
         "pt": "Luvas do fantasma"
       },
@@ -1105,6 +1153,7 @@
       "number": 48,
       "name": {
         "en": "Destroy Gloves",
+        "de": "Zerstörerhandschuhe",
         "es": "Guantes Destructores",
         "pt": "Luvas da destruição"
       },
@@ -1129,6 +1178,7 @@
       "number": 49,
       "name": {
         "en": "Seraphim Gloves",
+        "de": "Seraphim-Handschuhe",
         "es": "Guantes Serafín",
         "pt": "Luvas do serafim"
       },
@@ -1152,6 +1202,7 @@
       "number": 50,
       "name": {
         "en": "Divine Gloves",
+        "de": "Glaubenshandschuhe",
         "es": "Guantes Divinos",
         "pt": "Luvas divinas"
       },
@@ -1176,6 +1227,7 @@
       "number": 51,
       "name": {
         "en": "Royal Gloves",
+        "de": "Königliche Handschuhe",
         "es": "Guantes Reales",
         "pt": "Luvas reais"
       },
@@ -1199,6 +1251,7 @@
       "number": 52,
       "name": {
         "en": "Hades Gloves",
+        "de": "Hades-Handschuhe",
         "es": "Guantes Hades",
         "pt": "Luvas de Hades"
       },
@@ -1223,6 +1276,7 @@
       "number": 62,
       "name": {
         "en": "Scale Gloves",
+        "de": "Schuppenhandschuhe",
         "es": "Guantes de Escamas",
         "pt": "Luvas de escamas"
       },
@@ -1253,6 +1307,7 @@
       "number": 63,
       "name": {
         "en": "Silk Gloves",
+        "de": "Seidenhandschuhe",
         "es": "Guantes de Seda",
         "pt": "Luvas de seda"
       },
@@ -1280,6 +1335,7 @@
       "number": 64,
       "name": {
         "en": "Sphinx Gloves",
+        "de": "Sphinxhandschuhe",
         "es": "Guantes Esfinge",
         "pt": "Luvas de Esfinge"
       },
@@ -1307,6 +1363,7 @@
       "number": 65,
       "name": {
         "en": "Violent Wind Gloves",
+        "de": "Sturmwindhandschuhe",
         "es": "Guantes Viento Violento",
         "pt": "Luvas do vento violento"
       },
@@ -1334,6 +1391,7 @@
       "number": 66,
       "name": {
         "en": "Dark Soul Gloves",
+        "de": "Dunkelseelenhandschuhe",
         "es": "Guantes Adamantinos",
         "pt": "Luvas de adamantina"
       },
@@ -1361,6 +1419,7 @@
       "number": 67,
       "name": {
         "en": "Dragon Gloves",
+        "de": "Drachenhandschuhe",
         "es": "Guantes Dragón",
         "pt": "Luvas de Dragão"
       },
@@ -1389,6 +1448,7 @@
       "number": 68,
       "name": {
         "en": "Guardian Gloves",
+        "de": "Wächterhandschuhe",
         "es": "Guantes Guardián",
         "pt": "Luvas de Guardião"
       },
@@ -1416,6 +1476,7 @@
       "number": 69,
       "name": {
         "en": "Legendary Gloves",
+        "de": "Legendäre Handschuhe",
         "es": "Guantes Legendarios",
         "pt": "Luvas Lendárias"
       },
@@ -1443,6 +1504,7 @@
       "number": 70,
       "name": {
         "en": "Red Wing Gloves",
+        "de": "Rotschwingenhandschuhe",
         "es": "Guantes Ala Roja",
         "pt": "Luvas da asa vermelha"
       },
@@ -1470,6 +1532,7 @@
       "number": 71,
       "name": {
         "en": "Atlans Gloves",
+        "de": "Atlans-Handschuhe",
         "es": "Guantes Cuervo de Tormenta",
         "pt": "Luvas do corvo da tempestade"
       },
@@ -1497,6 +1560,7 @@
       "number": 78,
       "name": {
         "en": "Dragon Gloves-J",
+        "de": "Drachenhandschuhe-J",
         "es": "Guantes Dragón-J",
         "pt": "Luvas do dragão-J"
       },
@@ -1521,6 +1585,7 @@
       "number": 79,
       "name": {
         "en": "Legendary Gloves-J",
+        "de": "Legendäre Handschuhe-J",
         "es": "Guantes Legendario-J",
         "pt": "Luvas lendário-J"
       },
@@ -1543,6 +1608,7 @@
       "number": 80,
       "name": {
         "en": "Guardian Gloves-J",
+        "de": "Wächterhandschuhe-J",
         "es": "Guantes Guardián-J",
         "pt": "Luvas do guardião-J"
       },
@@ -1566,6 +1632,7 @@
       "number": 81,
       "name": {
         "en": "Light Plate Gloves-J",
+        "de": "Leichtplattenhandschuhe-J",
         "es": "Guantes Plata de Luz-J",
         "pt": "Luvas de placa leve-J"
       },
@@ -1589,6 +1656,7 @@
       "number": 82,
       "name": {
         "en": "Red Wing Gloves-J",
+        "de": "Rotschwingenhandschuhe-J",
         "es": "Guantes Ala Roja-J",
         "pt": "Luvas da asa vermelha-J"
       },
