@@ -187,6 +187,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME window_placement_layout_tests
+    SOURCES test_window_placement_layout.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(window_placement_layout_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi")
+
+mu_add_test(
     NAME rml_model_binder_tests
     SOURCES test_rml_model_binder.cpp
     LINK_LIBS MuClient
