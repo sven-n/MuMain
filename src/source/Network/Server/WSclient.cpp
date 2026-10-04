@@ -3,6 +3,7 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Chat/Chat.h"
 #include "UI/Chat/ChatMessages.h"
+#include "UI/Core/WindowAccess.h"
 #include <memory>
 #include "UI/Core/UIManager.h"
 #include "Guild/GuildCache.h"
@@ -945,7 +946,7 @@ void InitGame()
     g_csQuest.clearQuest();
 
     g_DuelMgr.Reset();
-    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_DUEL_WINDOW);
+    UI::Windows::Hide(mu::ui::window::INTERFACE_DUEL_WINDOW);
 
     if (g_pUIManager)
         g_pUIManager->Init();
@@ -1199,7 +1200,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     CreateEffect(BITMAP_MAGIC + 2, o->Position, o->Angle, o->Light, 0, o);
     o->Alpha = 0.f;
 
-    g_pNewUISystem->HideAll();
+    UI::Windows::HideAll();
 
     SelectedItem = -1;
     SelectedNpc = -1;
@@ -1253,12 +1254,12 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
 
     if (gMapManager.WorldActive < WD_65DOPPLEGANGER1 || gMapManager.WorldActive > WD_68DOPPLEGANGER4)
     {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
     }
 
     if (gMapManager.WorldActive < WD_69EMPIREGUARDIAN1 || WD_72EMPIREGUARDIAN4 < gMapManager.WorldActive)
     {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
     }
 
     // Initialize skill requirements cache on character login
@@ -1384,7 +1385,7 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
         if (!(Data->Map >= WD_45CURSEDTEMPLE_LV1 && Data->Map <= WD_45CURSEDTEMPLE_LV6))
         {
             g_CursedTemple->ResetCursedTemple();
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
+            UI::Windows::Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
         }
     }
 
@@ -1439,14 +1440,14 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
 
     if (gMapManager.WorldActive < WD_65DOPPLEGANGER1 || gMapManager.WorldActive > WD_68DOPPLEGANGER4)
     {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
     }
     if (gMapManager.WorldActive < WD_69EMPIREGUARDIAN1 || WD_72EMPIREGUARDIAN4 < gMapManager.WorldActive)
     {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
     }
 
-    g_pNewUISystem->HideAll();
+    UI::Windows::HideAll();
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x04 [ReceiveRevival]");
 }
@@ -1758,7 +1759,7 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
             i.Number = 0;
         }
 
-        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP))
+        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPCSHOP))
         {
             g_pNPCShop->DeleteAllItems();
         }
@@ -1786,11 +1787,11 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         }
         else
         {
-            if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP))
+            if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPCSHOP))
             {
                 g_pNPCShop->InsertItem(itemindex, itemData);
             }
-            else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE))
+            else if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_STORAGE))
             {
                 if (itemindex < MAX_SHOP_INVENTORY)
                 {
@@ -1978,7 +1979,7 @@ void ReceiveChatKey(const BYTE* ReceiveBuffer)
 
     if (Hero->GuildStatus == G_MASTER && wcscmp(CharactersClient[Index].ID, L"길드 마스터") == 0)
     {
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_NPCGUILDMASTER);
+        UI::Windows::Show(mu::ui::window::INTERFACE_NPCGUILDMASTER);
 
         GuildInputEnable = true;
         InputEnable = false;
@@ -2186,7 +2187,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         if (!(Data->Map >= WD_45CURSEDTEMPLE_LV1 && Data->Map <= WD_45CURSEDTEMPLE_LV6))
         {
             g_CursedTemple->ResetCursedTemple();
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
+            UI::Windows::Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
         }
     }
 
@@ -2222,7 +2223,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             {
                 PlayBuffer(SOUND_CHAOS_ENVIR, nullptr, true);
 
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_FRIEND);
+                UI::Windows::Hide(mu::ui::window::INTERFACE_FRIEND);
 
                 SetCharacterClass(Hero);
                 DeleteMount(&Hero->Object);
@@ -2279,14 +2280,14 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
         if (gMapManager.WorldActive < WD_65DOPPLEGANGER1 || gMapManager.WorldActive > WD_68DOPPLEGANGER4)
         {
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
+            UI::Windows::Hide(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
         }
         if (gMapManager.WorldActive < WD_69EMPIREGUARDIAN1 || WD_72EMPIREGUARDIAN4 < gMapManager.WorldActive)
         {
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
+            UI::Windows::Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
         }
 
-        g_pNewUISystem->HideAll();
+        UI::Windows::HideAll();
 
         CreatePetDarkSpirit_Now(Hero);
         CreateEffect(BITMAP_MAGIC + 2, o->Position, o->Angle, o->Light, 0, o);
@@ -3175,7 +3176,7 @@ void ReceiveDeleteCharacterViewport(const BYTE* ReceiveBuffer)
             CHARACTER* pCha = &CharactersClient[iIndex];
             if (pCha && pCha->Key == Key)
             {
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
+                UI::Windows::Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
             }
         }
 
@@ -6369,17 +6370,17 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 
-    g_pNewUISystem->HideAll();
+    UI::Windows::HideAll();
 
     switch (Data->Value)
     {
     case 2:
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_STORAGE);
+        UI::Windows::Show(mu::ui::window::INTERFACE_STORAGE);
         break;
 
     case 3:
         g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_GOBLIN_NORMAL);
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+        UI::Windows::Show(mu::ui::window::INTERFACE_MIXINVENTORY);
         // BYTE *pbyChaosRate = ( &Data->Value) + 1;
         // int iDummyRate[6];	// 광장표 확률을 서버에서 받으나 사용하지 않고 버림
         // for ( int i = 0; i < 6; ++i)
@@ -6387,7 +6388,7 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         break;
 
     case 4:
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_DEVILSQUARE);
+        UI::Windows::Show(mu::ui::window::INTERFACE_DEVILSQUARE);
         break;
 
     case 5:
@@ -6395,7 +6396,7 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         break;
 
     case 6:
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_BLOODCASTLE);
+        UI::Windows::Show(mu::ui::window::INTERFACE_BLOODCASTLE);
         break;
 
     case 7:
@@ -6406,14 +6407,14 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     {
         if (COMGEM::isAble())
         {
-            g_pNewUISystem->HideAll();
+            UI::Windows::HideAll();
             mu::ui::window::ShowGemIntegrationMenuDialog();
         }
     }
     break;
 
     case 0x0C:
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_SENATUS);
+        UI::Windows::Show(mu::ui::window::INTERFACE_SENATUS);
         break;
 
     case 0x0D:
@@ -6435,7 +6436,7 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         cfg.onPrimary = []
         {
             g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_OSBOURNE);
-            g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+            UI::Windows::Show(mu::ui::window::INTERFACE_MIXINVENTORY);
         };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         // 			BYTE *pbyChaosRate = ( &Data->Value) + 1;
@@ -6445,14 +6446,14 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     case 0x13:
     {
         g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_JERRIDON);
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+        UI::Windows::Show(mu::ui::window::INTERFACE_MIXINVENTORY);
         // 			BYTE *pbyChaosRate = ( &Data->Value) + 1;
         // 			g_pUIJewelHarmony->SetMixSuccessRate(pbyChaosRate);
     }
     break;
     case 0x14:
     {
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_CURSEDTEMPLE_NPC);
+        UI::Windows::Show(mu::ui::window::INTERFACE_CURSEDTEMPLE_NPC);
 
         BYTE* cursedtempleenterinfo = (&Data->Value) + 1;
         g_pCursedTempleEnterWindow->SetCursedTempleEnterInfo(cursedtempleenterinfo);
@@ -6461,13 +6462,13 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     case 0x15:
     {
         g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_CHAOS_CARD);
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+        UI::Windows::Show(mu::ui::window::INTERFACE_MIXINVENTORY);
     }
     break;
     case 0x16:
     {
         g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_CHERRYBLOSSOM);
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+        UI::Windows::Show(mu::ui::window::INTERFACE_MIXINVENTORY);
     }
     break;
     case 0x17:
@@ -6492,30 +6493,30 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     break;
     case 0x21:
     {
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_DUELWATCH);
+        UI::Windows::Show(mu::ui::window::INTERFACE_DUELWATCH);
     }
     break;
     case 0x22:
     {
         GambleSystem::Instance().SetGambleShop();
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_NPCSHOP);
+        UI::Windows::Show(mu::ui::window::INTERFACE_NPCSHOP);
     }
     break;
     case 0x23:
     {
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_DOPPELGANGER_NPC);
+        UI::Windows::Show(mu::ui::window::INTERFACE_DOPPELGANGER_NPC);
         BYTE* pbtRemainTime = (&Data->Value) + 1;
         g_pDoppelGangerWindow->SetRemainTime(*pbtRemainTime);
     }
     break;
     case 0x24:
     {
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
+        UI::Windows::Show(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
     }
     break;
     case 0x25:
     {
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
+        UI::Windows::Show(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
     }
     break;
     case 0x26:
@@ -6526,7 +6527,7 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     default:
     {
         // Data->Value
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_NPCSHOP);
+        UI::Windows::Show(mu::ui::window::INTERFACE_NPCSHOP);
     }
     break;
     }
@@ -6571,7 +6572,7 @@ void ReceiveBuy(const BYTE* ReceiveBuffer)
     }
     if (Data->Index == 0xfe)
     {
-        g_pNewUISystem->HideAll();
+        UI::Windows::HideAll();
 
         UI::Chat::PostChat(Hero->ID, I18N::Game::CannotBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
@@ -6602,7 +6603,7 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
 
     if (Data->Index == BUY_FAILED)
     {
-        g_pNewUISystem->HideAll();
+        UI::Windows::HideAll();
         UI::Chat::PostChat(Hero->ID, I18N::Game::CannotBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     else if (Data->Index == BUY_FAILED_SILENT)
@@ -6657,7 +6658,7 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
     {
     case 0:
     {
-        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
+        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
         {
             std::span<const BYTE> empty = {};
             g_pLuckyItemWnd->GetResult(0, Data->Index, empty);
@@ -6706,7 +6707,7 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
     break;
     case 1:
     {
-        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
+        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND) && g_pLuckyItemWnd->GetAct())
         {
             g_pLuckyItemWnd->GetResult(1, 0, itemData);
             break;
@@ -6812,7 +6813,7 @@ void ReceiveSell(const BYTE* ReceiveBuffer)
         }
         else if (Data->Flag == 0xfe)
         {
-            g_pNewUISystem->HideAll();
+            UI::Windows::HideAll();
 
             UI::Chat::PostChat(Hero->ID, I18N::Game::CannotBeSold, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
@@ -7593,7 +7594,7 @@ void ReceiveGuildLeave(const BYTE* ReceiveBuffer)
         g_nGuildMemberCount = -1;
         Hero->GuildStatus = G_NONE;
         Hero->GuildRelationShip = GR_NONE;
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GUILDINFO);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_GUILDINFO);
 
 #ifdef CSK_MOD_MOVE_COMMAND_WINDOW
         g_pMoveCommandWindow->SetCastleOwner(false);
@@ -7607,7 +7608,7 @@ void ReceiveGuildLeave(const BYTE* ReceiveBuffer)
 
 void ReceiveCreateGuildInterface(const BYTE* ReceiveBuffer)
 {
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_NPCGUILDMASTER);
+    UI::Windows::Show(mu::ui::window::INTERFACE_NPCGUILDMASTER);
 }
 
 void ReceiveCreateGuildMasterInterface(const BYTE* ReceiveBuffer) {}
@@ -7627,7 +7628,7 @@ void ReceiveDeleteGuildViewport(const BYTE* ReceiveBuffer)
 
     g_nGuildMemberCount = -1;
 
-    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GUILDINFO);
+    UI::Windows::Hide(mu::ui::window::INTERFACE_GUILDINFO);
 }
 
 void ReceiveCreateGuildResult(const BYTE* ReceiveBuffer)
@@ -7658,7 +7659,7 @@ void ReceiveCreateGuildResult(const BYTE* ReceiveBuffer)
         InputLength[0] = 0;
         InputTextMax[0] = MAX_USERNAME_SIZE;
 
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCGUILDMASTER);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_NPCGUILDMASTER);
 
         MouseUpdateTime = 0;
         MouseUpdateTimeMax = 6;
@@ -7784,7 +7785,7 @@ void ReceiveGuildBeginWar(const BYTE* ReceiveBuffer)
     SetActionClass(Hero, &Hero->Object, PLAYER_RUSH1, AT_RUSH1);
     SendRequestAction(Hero->Object, AT_RUSH1);
 
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE);
+    UI::Windows::Show(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE);
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x62 [ReceiveGuildBeginWar(%d)]", Data->Team);
 }
@@ -7854,7 +7855,7 @@ void ReceiveGuildEndWar(const BYTE* ReceiveBuffer)
         break;
     }
 
-    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE);
+    UI::Windows::Hide(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE);
 }
 
 void ReceiveGuildWarScore(const BYTE* ReceiveBuffer)
@@ -8169,12 +8170,12 @@ void ReceiveSoccerScore(const BYTE* ReceiveBuffer)
     if (GuildWarScore[0] != 255)
     {
         SoccerObserver = true;
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE);
+        UI::Windows::Show(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE);
     }
     else
     {
         SoccerObserver = false;
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE);
     }
 
     vec3_t Position, Angle, Light;
@@ -8669,7 +8670,7 @@ void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
 
 void ReceiveMoveToDevilSquareResult(const BYTE* ReceiveBuffer)
 {
-    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_DEVILSQUARE);
+    UI::Windows::Hide(mu::ui::window::INTERFACE_DEVILSQUARE);
 
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     switch (Data->Value)
@@ -8756,7 +8757,7 @@ void ReceiveDevilSquareRank(const BYTE* ReceiveBuffer)
 
 void ReceiveMoveToEventMatchResult(const BYTE* ReceiveBuffer)
 {
-    g_pNewUISystem->HideAll();
+    UI::Windows::HideAll();
 
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     switch (Data->Value)
@@ -8931,7 +8932,7 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
 
 void ReceiveMoveToEventMatchResult2(const BYTE* ReceiveBuffer)
 {
-    g_pNewUISystem->HideAll();
+    UI::Windows::HideAll();
 
     auto Data = (LPPWHEADER_DEFAULT_WORD)ReceiveBuffer;
     switch (Data->Value)
@@ -9098,7 +9099,7 @@ void ReceiveDuelStart(const BYTE* ReceiveBuffer)
         mu_swprintf(szMessage, I18N::Game::SHasAcceptedYourChallenge, g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
         UI::Chat::PostSystem(szMessage, mu::ui::window::TYPE_ERROR_MESSAGE);
 
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_DUEL_WINDOW);
+        UI::Windows::Show(mu::ui::window::INTERFACE_DUEL_WINDOW);
         PlayBuffer(SOUND_START_DUEL);
     }
     else if (Data->nResult == 15)
@@ -9138,7 +9139,7 @@ void ReceiveDuelEnd(const BYTE* ReceiveBuffer)
     {
         wchar_t playerName[MAX_USERNAME_SIZE + 1]{};
         CMultiLanguage::ConvertFromUtf8(playerName, Data->szID, MAX_USERNAME_SIZE);
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_DUEL_WINDOW);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_DUEL_WINDOW);
         g_DuelMgr.EnableDuel(FALSE);
         g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
 
@@ -9214,7 +9215,7 @@ void ReceiveDuelWatchRequestReply(const BYTE* ReceiveBuffer)
         CMultiLanguage::ConvertFromUtf8(name1, Data->szID1, MAX_USERNAME_SIZE);
         CMultiLanguage::ConvertFromUtf8(name2, Data->szID2, MAX_USERNAME_SIZE);
 
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_DUELWATCH);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_DUELWATCH);
 
         g_DuelMgr.SetCurrentChannel(Data->nChannelId);
         g_DuelMgr.SetDuelPlayer(DUEL_HERO, MAKEWORD(Data->bIndexL1, Data->bIndexH1), name1);
@@ -9454,15 +9455,15 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
 
     if (Header->byResult == Success)
     {
-        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE))
+        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_STORAGE))
         {
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_STORAGE);
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_STORAGE_EXT);
+            UI::Windows::Hide(mu::ui::window::INTERFACE_STORAGE);
+            UI::Windows::Hide(mu::ui::window::INTERFACE_STORAGE_EXT);
         }
 
-        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY))
+        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_INVENTORY))
         {
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
+            UI::Windows::Hide(mu::ui::window::INTERFACE_INVENTORY);
         }
 
         g_PersonalShopSeller.Initialize();
@@ -9472,8 +9473,8 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
         g_pPurchaseShopInventory->ChangeTitleText(shopName);
         g_pPurchaseShopInventory->GetInventoryCtrl()->RemoveAllItems();
 
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_INVENTORY);
+        UI::Windows::Show(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
+        UI::Windows::Show(mu::ui::window::INTERFACE_INVENTORY);
         g_pMyInventory->ChangeMyShopButtonStateOpen();
 
         RemoveAllPerosnalItemPrice(PSHOPWNDTYPE_PURCHASE); //. clear item price table
@@ -9507,9 +9508,9 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
                 g_ErrorReport.Write(L"@ ReceivePersonalShopItemList - item price less than zero(%d)\n",
                                     pShopItem->MoneyPrice);
 
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
+                UI::Windows::Hide(mu::ui::window::INTERFACE_INVENTORY);
+                UI::Windows::Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+                UI::Windows::Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
 
                 return;
             }
@@ -9633,7 +9634,7 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
 
     if (Header->Result == PURCHASEITEM_RESULTINFO::BoughtSuccessfully)
     {
-        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY))
+        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY))
         {
             RemovePersonalItemPrice(g_pPurchaseShopInventory->GetSourceIndex(), PSHOPWNDTYPE_PURCHASE);
             g_pPurchaseShopInventory->DeleteItem(g_pPurchaseShopInventory->GetSourceIndex());
@@ -9659,8 +9660,8 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
     else if (Header->Result == PURCHASEITEM_RESULTINFO::NameMismatchOrPriceMissing)
     {
         UI::Chat::PostSystem(I18N::Game::FailedToPurchasePleaseTryAgain, mu::ui::window::TYPE_ERROR_MESSAGE);
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
     }
     else
     {
@@ -9699,8 +9700,8 @@ void NotifyClosePersonalShop(const BYTE* ReceiveBuffer)
 {
     if (g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE)
     {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
 
         UI::Chat::PostSystem(I18N::Game::TheOtherCharacterHasClosedTheStore, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
@@ -9872,9 +9873,9 @@ void ReceiveRequestAcceptAddFriend(const BYTE* ReceiveBuffer)
     mu_swprintf(szText, L"%ls %ls", szText,
                 I18N::Game::HasRequestedToListYouAsAFriend); // " has requested to list you as a friend."
 
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_FRIEND) == false)
+    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_FRIEND) == false)
     {
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_FRIEND);
+        UI::Windows::Show(mu::ui::window::INTERFACE_FRIEND);
     }
 
     g_pWindowMgr->Dialogs().FriendRequest(szText, szName);
@@ -10294,19 +10295,19 @@ void ReceiveEventChipInfomation(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_EVENT_CHIP_INFO)ReceiveBuffer;
 
-    g_pNewUISystem->HideAll();
+    UI::Windows::HideAll();
     g_bEventChipDialogEnable = Data->m_byType + 1;
     g_shEventChipCount = Data->m_nChipCount;
 
     if (g_bEventChipDialogEnable == EVENT_SCRATCH_TICKET)
     {
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_GOLD_BOWMAN);
+        UI::Windows::Show(mu::ui::window::INTERFACE_GOLD_BOWMAN);
         g_bEventChipDialogEnable = 0;
     }
 
     if (g_bEventChipDialogEnable == EVENT_LENA)
     {
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA);
+        UI::Windows::Show(mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA);
         g_bEventChipDialogEnable = 0;
 
         if (Data->m_shMutoNum[0] != -1 && Data->m_shMutoNum[1] != -1 && Data->m_shMutoNum[2] != -1)
@@ -10451,8 +10452,8 @@ void ReceiveQuestState(const BYTE* ReceiveBuffer)
     auto Data = (LPPRECEIVE_QUEST_STATE)ReceiveBuffer;
 
     g_csQuest.setQuestList(Data->m_byQuestIndex, Data->m_byState);
-    g_pNewUISystem->HideAll();
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_NPCQUEST);
+    UI::Windows::HideAll();
+    UI::Windows::Show(mu::ui::window::INTERFACE_NPCQUEST);
 }
 
 void ReceiveQuestResult(const BYTE* ReceiveBuffer)
@@ -10462,8 +10463,8 @@ void ReceiveQuestResult(const BYTE* ReceiveBuffer)
     if (Data->m_byResult == 0)
     {
         g_csQuest.setQuestList(Data->m_byQuestIndex, Data->m_byState);
-        g_pNewUISystem->HideAll();
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_NPCQUEST);
+        UI::Windows::HideAll();
+        UI::Windows::Show(mu::ui::window::INTERFACE_NPCQUEST);
     }
 }
 
@@ -10630,7 +10631,7 @@ void ReceiveQuestLimitResult(const BYTE* ReceiveBuffer)
 {
     LPPMSG_ANS_QUESTEXP_RESULT pData = (LPPMSG_ANS_QUESTEXP_RESULT)ReceiveBuffer;
 
-    g_pNewUISystem->HideAll();
+    UI::Windows::HideAll();
 
     switch (pData->m_byResult)
     {
@@ -10656,7 +10657,7 @@ void ReceiveQuestByEtcEPList(const BYTE* ReceiveBuffer)
 void ReceiveQuestByNPCEPList(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
+    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
         g_pNPCDialogue->ProcessQuestListReceive((DWORD*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)),
                                                 pData->m_wQuestCount);
 }
@@ -10686,27 +10687,27 @@ void ReceiveQuestCompleteResult(const BYTE* ReceiveBuffer)
     case 0:
         break;
     case 1:
-        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_QUEST_PROGRESS);
-        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC);
+        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
+            UI::Windows::Hide(mu::ui::window::INTERFACE_QUEST_PROGRESS);
+        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
+            UI::Windows::Hide(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC);
 
         g_QuestMng.SetEPRequestRewardState(pData->m_dwQuestIndex, false);
         g_QuestMng.RemoveCurQuestIndexList(pData->m_dwQuestIndex);
         break;
 
     case 2:
-        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
+        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
             g_pQuestProgress->EnableCompleteBtn(false);
-        else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
+        else if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
             g_pQuestProgressByEtc->EnableCompleteBtn(false);
         UI::Chat::PostSystem(I18N::Game::YouHaveReachedYourZenLimit, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
 
     case 3:
-        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
+        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
             g_pQuestProgress->EnableCompleteBtn(false);
-        else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
+        else if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
             g_pQuestProgressByEtc->EnableCompleteBtn(false);
         UI::Chat::PostSystem(I18N::Game::InventoryIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
         UI::Chat::PostSystem(I18N::Game::TheSameItemThatYouWantToTrade, mu::ui::window::TYPE_ERROR_MESSAGE);
@@ -10745,14 +10746,14 @@ void ReceiveProgressQuestListReady(const BYTE* ReceiveBuffer)
 void ReceiveGensJoining(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_ANS_REG_GENS_MEMBER)ReceiveBuffer;
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
+    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
         g_pNPCDialogue->ProcessGensJoiningReceive(pData->m_byResult, pData->m_byInfluence);
 }
 
 void ReceiveGensSecession(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_ANS_SECEDE_GENS_MEMBER)ReceiveBuffer;
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
+    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
         g_pNPCDialogue->ProcessGensSecessionReceive(pData->m_byResult);
 }
 
@@ -10796,11 +10797,11 @@ void ReceiveOtherPlayerGensInfluenceViewport(const BYTE* ReceiveBuffer)
 void ReceiveNPCDlgUIStart(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_ANS_NPC_CLICK)ReceiveBuffer;
-    if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
+    if (!UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
     {
         g_QuestMng.SetNPC(pData->m_wNPCIndex);
         g_pNPCDialogue->SetContributePoint(pData->m_dwContributePoint);
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_NPC_DIALOGUE);
+        UI::Windows::Show(mu::ui::window::INTERFACE_NPC_DIALOGUE);
     }
 }
 
@@ -10809,7 +10810,7 @@ void ReceiveReward(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_GENS_REWARD_CODE)ReceiveBuffer;
 
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
+    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
         g_pNPCDialogue->ProcessGensRewardReceive(pData->m_byRewardResult);
 }
 #endif // PBG_ADD_GENSRANKING
@@ -11100,7 +11101,7 @@ void ReceiveBCStatus(const BYTE* ReceiveBuffer)
         break;
     case 0x01:
     case 0x02:
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_GUARDSMAN);
+        UI::Windows::Show(mu::ui::window::INTERFACE_GUARDSMAN);
         g_pGuardWindow->SetData(Data);
         break;
     case 0x03:
@@ -11542,7 +11543,7 @@ void ReceiveGateState(const BYTE* ReceiveBuffer)
 
     case 1:
         npcGateSwitch::DoInterfaceOpen(Key);
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_GATESWITCH);
+        UI::Windows::Show(mu::ui::window::INTERFACE_GATESWITCH);
         break;
 
     case 2:
@@ -11937,7 +11938,7 @@ void ReceiveCastleHuntZoneInfo(const BYTE* ReceiveBuffer)
     {
         g_pUIGateKeeper->SetInfo(pData->m_byResult, (bool)pData->m_byEnable, pData->m_iCurrPrice, pData->m_iUnitPrice,
                                  pData->m_iMaxPrice);
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_GATEKEEPER);
+        UI::Windows::Show(mu::ui::window::INTERFACE_GATEKEEPER);
     }
 }
 
@@ -11961,7 +11962,7 @@ void ReceiveCatapultState(const BYTE* ReceiveBuffer)
     {
         int Key = ((int)(pData->m_byKeyH) << 8) + pData->m_byKeyL;
 
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_CATAPULT);
+        UI::Windows::Show(mu::ui::window::INTERFACE_CATAPULT);
         g_pCatapultWindow->Init(Key, pData->m_byWeaponType);
     }
     else if (pData->m_byResult == 0)
@@ -12331,16 +12332,16 @@ void ReceiveKanturu3rdState(const BYTE* ReceiveBuffer)
             (pData->btState == KANTURU_STATE_NIGHTMARE_BATTLE &&
              (pData->btDetailState == KANTURU_NIGHTMARE_DIRECTION_BATTLE)))
         {
-            if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU_INFO) == false)
+            if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_KANTURU_INFO) == false)
             {
-                g_pNewUISystem->Show(mu::ui::window::INTERFACE_KANTURU_INFO);
+                UI::Windows::Show(mu::ui::window::INTERFACE_KANTURU_INFO);
             }
         }
         else
         {
-            if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU_INFO) == true)
+            if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_KANTURU_INFO) == true)
             {
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_KANTURU_INFO);
+                UI::Windows::Hide(mu::ui::window::INTERFACE_KANTURU_INFO);
             }
         }
         M39Kanturu3rd::Kanturu3rdState(pData->btState, pData->btDetailState);
@@ -12385,7 +12386,7 @@ void ReceiveCursedTempleEnterResult(const BYTE* ReceiveBuffer)
 
     if (data->Result == 0)
     {
-        g_pNewUISystem->HideAll();
+        UI::Windows::HideAll();
     }
     g_CursedTemple->UpdateTempleSystemMsg(data->Result);
 }
@@ -12418,19 +12419,19 @@ void ReceiveCursedTempleHolyItemRelics(const BYTE* ReceiveBuffer)
 
 void ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer)
 {
-    g_pNewUISystem->HideAll();
+    UI::Windows::HideAll();
 
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM))
+    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM))
     {
         g_pCursedTempleResultWindow->ResetGameResultInfo();
         g_pCursedTempleResultWindow->SetMyTeam(g_pCursedTempleWindow->GetMyTeam());
 
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
     }
 
     PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM5);
 
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT);
+    UI::Windows::Show(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT);
 
     g_pCursedTempleResultWindow->ReceiveCursedTempleGameResult(ReceiveBuffer);
 }
@@ -12444,14 +12445,14 @@ void ReceiveCursedTempleState(const BYTE* ReceiveBuffer)
 
     if (cursedtemple == SEASON3A::eCursedTempleState_Ready)
     {
-        g_pNewUISystem->HideAll();
+        UI::Windows::HideAll();
 
         g_pCursedTempleWindow->ResetCursedTempleSystemInfo();
         g_pCursedTempleWindow->StartTutorialStep();
 
         PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM1);
 
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
+        UI::Windows::Show(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
     }
 
     g_CursedTemple->ReceiveCursedTempleState(cursedtemple);
@@ -12568,7 +12569,7 @@ bool ReceiveRequestExChangeLuckyCoin(const BYTE* ReceiveBuffer)
     break;
     case 1:
     {
-        // g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN);
+        // UI::Windows::Hide(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN);
         UI::Chat::PostSystem(I18N::Game::ExchangeHasBeenMade, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
     break;
@@ -12640,7 +12641,7 @@ bool ReceiveDoppelGangerState(const BYTE* ReceiveBuffer)
         break;
     case 2: // ready->play
     {
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
+        UI::Windows::Show(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
 
         mu::ui::window::GenericDialogConfig cfg;
         cfg.lines = {
@@ -12853,9 +12854,9 @@ bool ReceiveRemainTickEmpireGuardian(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_REMAINTICK_EMPIREGUARDIAN)ReceiveBuffer;
 
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER) == false)
+    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER) == false)
     {
-        g_pNewUISystem->Show(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
+        UI::Windows::Show(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
     }
 
     g_pEmpireGuardianTimer->SetType((int)Data->Type);
@@ -12909,9 +12910,9 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
     break;
     }
 
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER) == true)
+    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER) == true)
     {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER);
     }
 
     return true;
@@ -12947,7 +12948,7 @@ bool ReceiveIGS_ShopOpenResult(const BYTE* pReceiveBuffer)
     char szCode = g_pInGameShop->GetCurrentStorageCode();
     SocketClient->ToGameServer()->SendCashShopStorageListRequest(1, szCode);
 
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_INGAMESHOP);
+    UI::Windows::Show(mu::ui::window::INTERFACE_INGAMESHOP);
 
     return true;
 }
@@ -13275,10 +13276,10 @@ bool ReceiveIGS_UpdateScript(const BYTE* pReceiveBuffer)
     g_InGameShopSystem->SetScriptVersion(Data->wSaleZone, Data->wYear, Data->wYearIdentify);
     g_InGameShopSystem->ShopOpenUnLock();
 #else  // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP) == true)
+    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_INGAMESHOP) == true)
     {
         SendRequestIGS_CashShopOpen(1);
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INGAMESHOP);
+        UI::Windows::Hide(mu::ui::window::INTERFACE_INGAMESHOP);
     }
 
     g_InGameShopSystem->Release();
@@ -15343,11 +15344,11 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
         break;
         case eBuff_DuelWatch:
         {
-            g_pNewUISystem->HideAll();
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MAINFRAME);
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_BUFF_WINDOW);
-            g_pNewUISystem->Show(mu::ui::window::INTERFACE_DUELWATCH_MAINFRAME);
-            g_pNewUISystem->Show(mu::ui::window::INTERFACE_DUELWATCH_USERLIST);
+            UI::Windows::HideAll();
+            UI::Windows::Hide(mu::ui::window::INTERFACE_MAINFRAME);
+            UI::Windows::Hide(mu::ui::window::INTERFACE_BUFF_WINDOW);
+            UI::Windows::Show(mu::ui::window::INTERFACE_DUELWATCH_MAINFRAME);
+            UI::Windows::Show(mu::ui::window::INTERFACE_DUELWATCH_USERLIST);
         }
         break;
         case eBuff_HonorOfGladiator:
@@ -15500,10 +15501,10 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
         break;
         case eBuff_DuelWatch:
         {
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_DUELWATCH_MAINFRAME);
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_DUELWATCH_USERLIST);
-            g_pNewUISystem->Show(mu::ui::window::INTERFACE_MAINFRAME);
-            g_pNewUISystem->Show(mu::ui::window::INTERFACE_BUFF_WINDOW);
+            UI::Windows::Hide(mu::ui::window::INTERFACE_DUELWATCH_MAINFRAME);
+            UI::Windows::Hide(mu::ui::window::INTERFACE_DUELWATCH_USERLIST);
+            UI::Windows::Show(mu::ui::window::INTERFACE_MAINFRAME);
+            UI::Windows::Show(mu::ui::window::INTERFACE_BUFF_WINDOW);
         }
         break;
         case eBuff_HonorOfGladiator:
