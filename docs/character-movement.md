@@ -1,8 +1,7 @@
 # Character movement and animation timing
 
 How the client decides *where* a character is drawn and *how fast* its equipment
-animates. Both are easy to get subtly wrong, and both show up as the same
-symptom: a character that stutters, slides or teleports while it attacks.
+animates.
 
 ## Tile, destination and rendered position
 
@@ -10,41 +9,53 @@ Every character carries three related but distinct notions of "where it is":
 
 | State | Meaning |
 | --- | --- |
-| `PositionX` / `PositionY` | The **logical map tile** the character occupies. Whole-tile integers. |
+| `PositionX` / `PositionY` | The **logical map tile**, as whole-tile integers. |
 | `TargetX` / `TargetY` | The **destination tile** of the last move packet. Can be a whole path away. |
 | `Object.Position[0/1]` | The **rendered world position**, smoothly interpolated between tile centres. |
 
 `MovePath` walks a character along its path one segment at a time. At the start
-of each segment it advances `PositionX/PositionY` to the *next* path tile, while
-`Object.Position` is still travelling toward it. So during a walk the logical
-tile is up to one tile ahead of the model, and the two only coincide for the
-single frame in which a segment completes.
+of each segment it advances `PositionX/PositionY` to the *next* path tile, and
+`Object.Position` then travels toward it. So mid-walk the logical tile runs ahead
+of the model — a full tile at the start of a segment, and up to about two right
+after a re-path — and the two coincide only on the frame a segment completes.
 
-`TargetX/TargetY` is not a position at all — it is where the character has been
-told to go. Outside of an active walk it happens to equal `PositionX/PositionY`,
-because every packet that places a character sets both together.
+None of the three is a safe stand-in for the others, and which one to use depends
+on what the code is doing:
 
-### Rule: never place a model from `TargetX/TargetY`
+- `MoveMonsterClient` re-paths from `PositionX/PositionY` to `TargetX/TargetY`
+  whenever the two differ, so a character with a stale destination keeps walking
+  toward it even after something set `Movement = false`.
+- `PushingCharacter` deliberately pulls the model toward `TargetX/TargetY` — that
+  is how a server-sent position correction is applied, and the pull is the point.
+- `ReceiveAction` places the model on `TargetX/TargetY`, which is the tile the
+  server believes the character to be standing on when it acts.
 
-When something has to put a model on a tile centre — an action packet, a stop, a
-teleport — it uses `PositionX/PositionY`:
+### Known issue: a walking attack still jumps
 
-```cpp
-c->Object.Position[0] = ((c->PositionX) + 0.5f) * TERRAIN_SCALE;
-c->Object.Position[1] = ((c->PositionY) + 0.5f) * TERRAIN_SCALE;
-```
+An Elf that starts a normal attack mid-walk visibly jumps, on its own screen and
+on watchers'. It is not an attack-speed or animation problem — all 14 bow and
+crossbow actions have 7 keys and the same play speed.
 
-The original S6 client's action handler used `TargetX/TargetY` here. When an
-action arrived mid-walk that flung the model to the far end of the path, and the
-next movement tick — which re-paths from `PositionX/PositionY` — dragged it back
-again. The result is the classic jump-then-slide: worst on ranged attacks, which
-fire between tiles far more often than melee swings do, and worst of all on a
-crossbow, whose longer draw makes the correction easy to see.
+`Action()` stops the hero between two tiles (`LetHeroStop` plus
+`Movement = false`) and sends the hit request from there. `LetHeroStop` sends a
+zero-step walk, which carries only a rotation, so the server is never told the
+hero stopped early and keeps walking it to the old destination. Watchers get
+`TargetX/TargetY` still pointing at that destination, so `ReceiveAction` places
+the model there and `MoveMonsterClient` walks it on.
 
-Placing from `PositionX/PositionY` bounds the correction to at most one tile and
-keeps the rendered model, the logical tile and the path in agreement. It does not
-change any logical state, so the character still walks on to its destination if
-the server told it to.
+The fix has to make the stop reach the server as a real walk — finish the current
+step, then shoot from the tile centre — rather than nudge the rendered position.
+
+Two details are worth knowing before touching this:
+
+- The symptom looks crossbow-specific because of the instant move the click
+  handler sends for a walking Elf. Its guard calls the `ITEM*` overload of
+  `GetEquipedBowType`, which only inspects `Equipment[0]` — the right hand. A
+  crossbow sits there; with a bow equipped that slot holds the arrows, so the
+  instant move is only ever sent for crossbows.
+- An Elf clicking a monster that is out of range walks toward it on the client
+  only: that branch of `Action()` re-paths and sets `Movement = true` without
+  sending the move. The server and watchers never see the walk at all.
 
 ## Weapon animation follows the character's action
 
@@ -57,15 +68,18 @@ weapon part:
 w->PlaySpeed = Models[MODEL_PLAYER].Actions[o->CurrentAction].PlaySpeed;
 ```
 
-Elves fire from four different poses — on foot, on wings, on a Uniria/Dinorant
-mount and on a Fenrir — and each pose has a separate animation track per weapon
-type, plus a raised-shot ("_UP") variant of all of them. `IsBowAttackAction` and
-`IsRaisedBowAttackAction` in `Engine/Object/PlayerActionState.h` enumerate the
-full set; anything that special-cases bow fire should use them rather than
-spelling out action constants.
+Elves fire from four poses — on foot, on wings, on a Uniria/Dinorant mount and on
+a Fenrir — each with a separate animation track per weapon type, plus raised-shot
+("_UP") variants for three of them (a Fenrir reuses the mounted track).
+`IsBowAttackAction` and `IsRaisedBowAttackAction` in
+`Engine/Object/PlayerActionState.h` enumerate the full set; anything that
+special-cases bow fire should use them rather than spelling out action constants.
 
 The original S6 client hardcoded `PLAYER_ATTACK_BOW` as the playback-speed source
 for every bow action, and only recognised the on-foot and winged poses at all.
-That works only for as long as every bow action shares a play speed, and it left
-mounted, Fenrir and raised shots falling through to the catch-all branch, which
-pins the weapon at `PlaySpeed = 0` — a bow frozen mid-draw for the whole shot.
+The hardcoded source works only for as long as every bow action shares a play
+speed, which `SetAttackSpeed` currently gives all 14 of them. The narrow
+condition was the visible half: mounted, Fenrir and raised shots fell through to
+the catch-all branch, which parks the weapon on frame 0 at `PlaySpeed = 0`, so
+the bow held its idle pose instead of drawing. (A Stinger Bow has its own branch
+and was never affected.)

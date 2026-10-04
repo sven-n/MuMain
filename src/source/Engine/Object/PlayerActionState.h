@@ -38,8 +38,9 @@ namespace Engine::Object
     }
 
     // True while a player is firing an equipped bow or crossbow in the raised-shot
-    // pose (see SetPlayerHighBow in WSclient.cpp). Same four poses as
-    // IsBowAttackAction, on the contiguous "_UP" animation tracks.
+    // pose (see SetPlayerHighBow in WSclient.cpp). There are only three raised-shot
+    // poses - on foot, on wings and mounted - on the contiguous "_UP" animation
+    // tracks; a Fenrir has no "_UP" track of its own and reuses the mounted one.
     inline bool IsRaisedBowAttackAction(int currentAction)
     {
         return currentAction >= PLAYER_ATTACK_BOW_UP && currentAction <= PLAYER_ATTACK_RIDE_CROSSBOW_UP;

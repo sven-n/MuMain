@@ -10095,9 +10095,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     // The weapon draws in step with the character, so it has to follow the
                     // playback speed of the action the character is actually playing. Reading
                     // PLAYER_ATTACK_BOW instead only happens to match while every bow action
-                    // shares a play speed, and the mounted, Fenrir and raised-shot actions used
-                    // to miss this branch entirely and fall through to the catch-all below,
-                    // which freezes the weapon at PlaySpeed 0 for the whole shot.
+                    // shares a play speed, which SetAttackSpeed currently gives all 14 of them.
+                    // The mounted, Fenrir and raised-shot actions used to miss this branch and
+                    // fall through to the catch-all below, which parks the weapon on frame 0 at
+                    // PlaySpeed 0 - the bow holds its idle pose instead of drawing.
                     w->PlaySpeed = Models[MODEL_PLAYER].Actions[o->CurrentAction].PlaySpeed;
                 }
                 else if (w->Type == MODEL_FLAIL)
