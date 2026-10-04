@@ -6,7 +6,7 @@
 #include "Render/Text/TextWrap.h"
 #include "I18N/All.h"
 
-extern void ReceiveLetterText(std::span<const BYTE> packet, bool cached);
+#include "UI/Social/SocialUpdates.h"
 extern int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
 
 // Owns the letter, sender's portrait, and actions. LetterReadView owns its RmlUi document.
@@ -122,8 +122,8 @@ void CUILetterReadWindow::StepLetter(int direction)
             g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, open, 0);
         return;
     }
-    if (auto* cached = g_pLetterList->GetLetterText(target))
-        ReceiveLetterText(std::span(reinterpret_cast<const BYTE*>(cached), sizeof(FS_LETTER_TEXT)), true);
+    if (const auto* cached = g_pLetterList->GetLetterText(target))
+        UI::Social::ShowLetter(*cached);
     else
         SocketClient->ToGameServer()->SendLetterReadRequest(target);
 }

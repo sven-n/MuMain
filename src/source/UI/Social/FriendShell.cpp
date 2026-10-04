@@ -15,7 +15,7 @@
 #include <RmlUi/Core.h>
 #include <algorithm>
 
-extern void ReceiveLetterText(std::span<const BYTE> packet, bool cached);
+#include "UI/Social/SocialUpdates.h"
 
 namespace UI::Social
 {
@@ -612,8 +612,8 @@ void FriendShell::OpenLetter()
         if (window) g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, window, 0);
         return;
     }
-    if (auto* cached = g_pLetterList->GetLetterText(id))
-        ReceiveLetterText(std::span(reinterpret_cast<const BYTE*>(cached), sizeof(FS_LETTER_TEXT)), true);
+    if (const auto* cached = g_pLetterList->GetLetterText(id))
+        UI::Social::ShowLetter(*cached);
     else
         SocketClient->ToGameServer()->SendLetterReadRequest(id);
 }

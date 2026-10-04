@@ -9918,43 +9918,30 @@ void ReceiveLetterSendResult(const BYTE* ReceiveBuffer)
     switch (Data->Result)
     {
     case 0x00:
-        if (Data->WindowGuid != 0)
-            ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->Dialogs().Notice(I18N::Game::TheLetterCouldNotBeSentPleaseTryAgain);
+        UI::Social::LetterSendFailed(Data->WindowGuid, I18N::Game::TheLetterCouldNotBeSentPleaseTryAgain);
         break;
     case 0x01:
     {
-        if (Data->WindowGuid != 0)
-            g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, Data->WindowGuid, 0);
+        UI::Social::LetterSent(Data->WindowGuid);
         wchar_t temp[MAX_TEXT_LENGTH + 1];
         mu_swprintf(temp, I18N::Game::LetterHasBeenSentCostDZen, g_cdwLetterCost);
         UI::Chat::PostSystem(temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
     break;
     case 0x02:
-        if (Data->WindowGuid != 0)
-            ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->Dialogs().Notice(I18N::Game::TheLetterCanTBeSentBecauseTheReceiverSMailBoxIsFull);
+        UI::Social::LetterSendFailed(Data->WindowGuid, I18N::Game::TheLetterCanTBeSentBecauseTheReceiverSMailBoxIsFull);
         break;
     case 0x03:
-        if (Data->WindowGuid != 0)
-            ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->Dialogs().Notice(I18N::Game::EitherTheReceiverDoesNotExistOrThereIsNoMailBox);
+        UI::Social::LetterSendFailed(Data->WindowGuid, I18N::Game::EitherTheReceiverDoesNotExistOrThereIsNoMailBox);
         break;
     case 0x04:
-        if (Data->WindowGuid != 0)
-            ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->Dialogs().Notice(I18N::Game::YouCannotSendALetterToYourself);
+        UI::Social::LetterSendFailed(Data->WindowGuid, I18N::Game::YouCannotSendALetterToYourself);
         break;
     case 0x06:
-        if (Data->WindowGuid != 0)
-            ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->Dialogs().Notice(I18N::Game::TheOtherCharacterMustBeOverLevel6);
+        UI::Social::LetterSendFailed(Data->WindowGuid, I18N::Game::TheOtherCharacterMustBeOverLevel6);
         break;
     case 0x07:
-        if (Data->WindowGuid != 0)
-            ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->Dialogs().Notice(I18N::Game::YouAreShortOfZen);
+        UI::Social::LetterSendFailed(Data->WindowGuid, I18N::Game::YouAreShortOfZen);
         break;
     default:
         break;
@@ -9979,36 +9966,30 @@ void ReceiveLetter(const BYTE* ReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(szSubject, Data->Subject, MAX_USERNAME_SIZE);
     szSubject[MAX_USERNAME_SIZE] = '\0';
 
+    const UI::Social::LetterSummary letter{ Data->Index, szName, szSubject, szDate, szTime };
     switch (Data->Read)
     {
-    case 0x02:
+    case 0x02: // just arrived
         PlayBuffer(SOUND_FRIEND_MAIL_ALERT);
-        g_pFriendMenu->SetNewMailAlert(TRUE);
         UI::Chat::PostSystem(I18N::Game::NewMailHasArrived, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-        g_pLetterList->AddLetter(Data->Index, szName, szSubject, szDate, szTime, 0x00);
-        g_pLetterList->Sort();
+        UI::Social::NewLetterArrived(letter);
         break;
     case 0x00:
     case 0x01:
-        g_pLetterList->AddLetter(Data->Index, szName, szSubject, szDate, szTime, Data->Read);
-        g_pLetterList->Sort(2);
+        UI::Social::LetterListed(letter, Data->Read);
         break;
     default:
         break;
     };
 
-    g_pWindowMgr->RefreshMainWndLetterList();
-
-    if (g_pLetterList->GetLetterCount() >= g_iMaxLetterCount)
+    if (UI::Social::LetterCount() >= g_iMaxLetterCount)
     {
         UI::Chat::PostSystem(I18N::Game::YourMailboxIsFullYouMustDeleteLettersToReceiveNewOnes,
                                  mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 }
 
-extern int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
-
-void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer, bool isCached)
+void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer)
 {
     auto Data = safe_cast<FS_LETTER_TEXT_HEADER>(ReceiveBuffer);
     if (Data == nullptr)
@@ -10017,61 +9998,27 @@ void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer, bool isCached)
         return;
     }
 
-    if (!isCached)
-    {
-        // Cache it if you can :)
-        auto CopiedData = new FS_LETTER_TEXT();
-        memcpy(CopiedData, ReceiveBuffer.data(), ReceiveBuffer.size());
-        g_pLetterList->CacheLetterText(Data->Index, CopiedData);
-    }
+    UI::Social::LetterBody body;
+    body.index = Data->Index;
 
-    auto pLetterHead = g_pLetterList->GetLetter(Data->Index);
-    if (pLetterHead == nullptr)
-    {
-        return;
-    }
-
-    pLetterHead->m_bIsRead = TRUE;
-    g_pWindowMgr->RefreshMainWndLetterList();
-
-    wchar_t tempTxt[MAX_TEXT_LENGTH + 1];
-    mu_swprintf(tempTxt, I18N::Game::ReadLetterS, pLetterHead->m_szText);
-    DWORD dwUIID = 0;
-    if (g_iLetterReadNextPos_x == UIWND_DEFAULT)
-    {
-        dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_READLETTER, 100, 100, tempTxt);
-    }
-    else
-    {
-        dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_READLETTER, g_iLetterReadNextPos_x, g_iLetterReadNextPos_y, tempTxt,
-                                         0, UIADDWND_FORCEPOSITION);
-        g_iLetterReadNextPos_x = UIWND_DEFAULT;
-    }
-
-    auto* pWindow = (CUILetterReadWindow*)g_pWindowMgr->GetWindow(dwUIID);
     auto* pLetterText = (char*)ReceiveBuffer.subspan(sizeof(FS_LETTER_TEXT_HEADER)).data();
     wchar_t letterText[1000 + 1] = {};
     CMultiLanguage::ConvertFromUtf8(letterText, pLetterText, MAX_LETTERTEXT_LENGTH);
     letterText[MAX_LETTERTEXT_LENGTH] = '\0';
-    pWindow->SetLetter(pLetterHead, letterText);
+    body.text = letterText;
 
-    g_pWindowMgr->SetLetterReadWindow(pLetterHead->m_dwLetterID, dwUIID);
+    // The sender's portrait: PhotoDir packs the angle in 6-degree steps (low 6 bits) and the zoom
+    // in 10% steps from 80% (high 2 bits).
+    static_assert(std::tuple_size_v<decltype(body.equipment)> == EQUIPMENT_LENGTH_EXTENDED);
+    body.classType = gCharacterManager.ChangeServerClassTypeToClientClassType(Data->Class);
+    std::copy(std::begin(Data->Equipment), std::end(Data->Equipment), body.equipment.begin());
+    body.animation = Data->PhotoAction + AT_ATTACK1;
+    const int iAngle = Data->PhotoDir & 0x3F;
+    const int iZoom = (Data->PhotoDir & 0xC0) >> 6;
+    body.angleDegrees = static_cast<float>(iAngle * 6);
+    body.zoom = (iZoom * 10 + 80) / 100.0f;
 
-    if (wcsnicmp(pLetterHead->m_szID, L"webzen", MAX_USERNAME_SIZE) == 0)
-    {
-        pWindow->m_Photo.SetWebzenMail(TRUE);
-    }
-    else
-    {
-        pWindow->m_Photo.SetClass(gCharacterManager.ChangeServerClassTypeToClientClassType(Data->Class));
-        pWindow->m_Photo.SetEquipmentPacket(Data->Equipment);
-        pWindow->m_Photo.SetAnimation(Data->PhotoAction + AT_ATTACK1);
-        int iAngle = Data->PhotoDir & 0x3F;
-        int iZoom = (Data->PhotoDir & 0xC0) >> 6;
-        pWindow->m_Photo.SetAngle(iAngle * 6);
-        pWindow->m_Photo.SetZoom((iZoom * 10 + 80) / 100.0f);
-    }
-    pWindow->SendUIMessageDirect(UI_MESSAGE_LISTSCRLTOP, 0, 0);
+    UI::Social::LetterBodyReceived(body);
 }
 
 void ReceiveLetterDeleteResult(const BYTE* ReceiveBuffer)
@@ -10080,17 +10027,14 @@ void ReceiveLetterDeleteResult(const BYTE* ReceiveBuffer)
     switch (Data->Result)
     {
     case 0x00:
-        g_pWindowMgr->Dialogs().Notice(I18N::Game::CouldnTDeleteLetter);
+        UI::Social::ShowNotice(I18N::Game::CouldnTDeleteLetter);
         break;
     case 0x01:
-        g_pLetterList->RemoveLetter(Data->Index);
-        g_pLetterList->RemoveLetterTextCache(Data->Index);
+        UI::Social::LetterDeleted(Data->Index);
         break;
     default:
         break;
     };
-
-    g_pWindowMgr->RefreshMainWndLetterList();
 }
 
 void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
@@ -14718,7 +14662,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
         ReceiveLetter(ReceiveBuffer);
         break;
     case 0xC7:
-        ReceiveLetterText(received_span, false);
+        ReceiveLetterText(received_span);
         break;
     case 0xC8:
         ReceiveLetterDeleteResult(ReceiveBuffer);

@@ -10,6 +10,7 @@
 #include "UI/Social/LetterReadWindow.h"
 #include "UI/Social/LetterWriteWindow.h"
 #include "Network/Server/WSclient.h"
+#include "UI/Social/SocialUpdates.h"
 #include <list>
 #include <map>
 #include <mutex>
@@ -88,8 +89,8 @@ public:
         return m_iCurrentSortType;
     }
 
-    void CacheLetterText(DWORD dwIndex, LPFS_LETTER_TEXT pLetterText);
-    LPFS_LETTER_TEXT GetLetterText(DWORD dwIndex);
+    void CacheLetterText(DWORD dwIndex, const UI::Social::LetterBody& body);
+    const UI::Social::LetterBody* GetLetterText(DWORD dwIndex);
     void RemoveLetterTextCache(DWORD dwIndex);
     void ClearLetterTextCache();
 
@@ -104,8 +105,8 @@ private:
     std::deque<LETTERLIST_TEXT> m_LetterList;
     std::deque<LETTERLIST_TEXT>::iterator m_LetterListIter;
 
-    std::map<DWORD, FS_LETTER_TEXT, std::less<DWORD>> m_LetterCache;
-    std::map<DWORD, FS_LETTER_TEXT, std::less<DWORD>>::iterator m_LetterCacheIter;
+    std::map<DWORD, UI::Social::LetterBody, std::less<DWORD>> m_LetterCache;
+    std::map<DWORD, UI::Social::LetterBody, std::less<DWORD>>::iterator m_LetterCacheIter;
 };
 
 typedef std::map<DWORD, CUIBaseWindow*, std::less<DWORD>> WndMap;

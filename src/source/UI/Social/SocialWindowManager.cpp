@@ -39,7 +39,6 @@ extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;
 extern DWORD g_dwTopWindow;
 extern DWORD g_dwKeyFocusUIID;
-extern void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer, bool isCached);
 
 int g_iLetterReadNextPos_x, g_iLetterReadNextPos_y;
 
@@ -1683,12 +1682,12 @@ BOOL CLetterList::CheckNoReadLetter()
     return FALSE;
 }
 
-void CLetterList::CacheLetterText(DWORD dwIndex, LPFS_LETTER_TEXT pLetterText)
+void CLetterList::CacheLetterText(DWORD dwIndex, const UI::Social::LetterBody& body)
 {
-    m_LetterCache.insert(std::pair<DWORD, FS_LETTER_TEXT>(dwIndex, *pLetterText));
+    m_LetterCache.insert({dwIndex, body});
 }
 
-LPFS_LETTER_TEXT CLetterList::GetLetterText(DWORD dwIndex)
+const UI::Social::LetterBody* CLetterList::GetLetterText(DWORD dwIndex)
 {
     m_LetterCacheIter = m_LetterCache.find(dwIndex);
     if (m_LetterCacheIter == m_LetterCache.end()) return NULL;
