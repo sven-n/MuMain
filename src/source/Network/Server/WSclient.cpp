@@ -67,6 +67,8 @@
 #include "UI/Inventory/StorageUpdates.h"
 #include "UI/Inventory/MixUpdates.h"
 #include "UI/Inventory/ShopUpdates.h"
+#include "Guild/GuildUpdates.h"
+#include "UI/HUD/HudUpdates.h"
 #include "UI/Core/WindowCommon.h" // ShowTrainerMenuDialog/ShowSeedMasterMenuDialog/etc.
 #include "UI/Inventory/InventoryCtrl.h"
 #include "GameLogic/Events/w_CursedTemple.h"
@@ -969,7 +971,7 @@ void InitGame()
     UI::Shop::ResetOwnShopTitle();
     g_pChatListBox->ResetFilter();
 
-    g_pGuildInfoWindow->NoticeClear();
+    UI::Guild::ClearNotices();
 }
 
 BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
@@ -2011,7 +2013,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
         wchar_t FullText[300]{0};
         mu_swprintf(FullText, I18N::Game::NoticeForGuildMembersS, Text);
         UI::Notices::Create(FullText, 1);
-        g_pGuildInfoWindow->AddGuildNotice(Text);
+        UI::Guild::AddNotice(Text);
     }
     else if (Data->Result >= 10 && Data->Result <= 15)
     {
@@ -7544,9 +7546,7 @@ void ReceiveGuildList(const BYTE* ReceiveBuffer)
 
     wchar_t rivalGuildName[sizeof Data->szRivalGuildName + 1]{};
     CMultiLanguage::ConvertFromUtf8(rivalGuildName, Data->szRivalGuildName, sizeof Data->szRivalGuildName);
-    g_pGuildInfoWindow->GuildClear();
-    g_pGuildInfoWindow->UnionGuildClear();
-    g_pGuildInfoWindow->SetRivalGuildName(rivalGuildName);
+    UI::Guild::ResetMembers(rivalGuildName);
     for (int i = 0; i < Data->Count; i++)
     {
         auto Data2 = (LPPRECEIVE_GUILD_LIST)(ReceiveBuffer + Offset);
@@ -7556,7 +7556,7 @@ void ReceiveGuildList(const BYTE* ReceiveBuffer)
         p->Server = (0x80 & Data2->CurrentServer) ? (0x7F & Data2->CurrentServer) : -1;
         p->GuildStatus = Data2->GuildStatus;
         Offset += sizeof(PRECEIVE_GUILD_LIST);
-        g_pGuildInfoWindow->AddGuildMember(p);
+        UI::Guild::AddMember(i);
     }
 }
 
@@ -7988,8 +7988,9 @@ void ReceiveGuildRelationShip(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_GUILD_RELATIONSHIP)ReceiveBuffer;
 
-    g_pGuildInfoWindow->ReceiveGuildRelationShip(pData->byRelationShipType, pData->byRequestType,
-                                                 pData->byTargetUserIndexH, pData->byTargetUserIndexL);
+    UI::Guild::ShowRelationshipRequest(static_cast<std::uint32_t>(pData->byRelationShipType),
+                                       static_cast<std::uint32_t>(pData->byRequestType), pData->byTargetUserIndexH,
+                                       pData->byTargetUserIndexL);
 }
 
 void ReceiveGuildRelationShipResult(const BYTE* ReceiveBuffer)
@@ -8097,11 +8098,11 @@ void ReceiveBanUnionGuildResult(const BYTE* ReceiveBuffer)
     auto pData = (LPPMSG_BAN_UNIONGUILD)ReceiveBuffer;
     if (pData->byResult == 0x01)
     {
-        if (g_pGuildInfoWindow->GetUnionCount() > 2)
+        if (UI::Guild::AllianceGuildCount() > 2)
         {
             SocketClient->ToGameServer()->SendRequestAllianceList();
         }
-        g_pGuildInfoWindow->UnionGuildClear();
+        UI::Guild::ClearAllianceGuilds();
     }
     else if (pData->byResult == 0)
     {
@@ -8131,7 +8132,7 @@ void ReceiveUnionViewportNotify(const BYTE* ReceiveBuffer)
 void ReceiveUnionList(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_UNIONLIST_COUNT)ReceiveBuffer;
-    g_pGuildInfoWindow->UnionGuildClear();
+    UI::Guild::ClearAllianceGuilds();
     if (pData->byResult == 1)
     {
         int Offset = sizeof(PMSG_UNIONLIST_COUNT);
@@ -8151,7 +8152,7 @@ void ReceiveUnionList(const BYTE* ReceiveBuffer)
             wchar_t guildName[MAX_GUILDNAME + 1];
             CMultiLanguage::ConvertFromUtf8(guildName, pData2->szGuildName, MAX_GUILDNAME);
 
-            g_pGuildInfoWindow->AddUnionList(tmp, guildName, pData2->byMemberCount);
+            UI::Guild::AddAllianceGuild(std::span<const std::uint8_t, 64>(tmp), guildName, pData2->byMemberCount);
 
             Offset += sizeof(PMSG_UNIONLIST);
         }
@@ -10609,9 +10610,7 @@ void ReceivePlayerGensInfluence(const BYTE* ReceiveBuffer)
     auto pData = (LPPMSG_MSG_SEND_GENS_INFO)ReceiveBuffer;
     Hero->m_byGensInfluence = pData->m_byInfluence;
     Hero->GensRanking = pData->m_nGensClass;
-    g_pNewUIGensRanking->SetContribution(pData->m_nContributionPoint);
-    g_pNewUIGensRanking->SetRanking(pData->m_nRanking);
-    g_pNewUIGensRanking->SetNextContribution(pData->m_nNextContributionPoint);
+    UI::Hud::SetGensStanding(pData->m_nContributionPoint, pData->m_nRanking, pData->m_nNextContributionPoint);
 }
 
 void ReceiveOtherPlayerGensInfluenceViewport(const BYTE* ReceiveBuffer)
