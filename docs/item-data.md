@@ -369,8 +369,8 @@ before the model is drawn and can:
   `hideMesh1`), the level potions glow like (`potion`: +7 at every level
   above 0);
 - draw the model itself instead of the usual drawing (the Dark Lord's
-  scrolls, `fruits`, `spirit`, `invisibilityCloak`, `firecracker`,
-  `gmGift`, `meshesPerLevel`).
+  scrolls, `fruits`, `spirit`, `firecracker`, `gmGift`,
+  `meshesPerLevel`).
 
 Items with the same item effect share it. The socket seeds and spheres and
 zen have no item effect; they glow like level 0 (`"glow": {"level": 0}`), whatever

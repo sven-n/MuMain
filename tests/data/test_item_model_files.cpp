@@ -869,6 +869,7 @@ TEST_CASE("Shipped item models keep the looks of the old drawing code [data][ite
     // The Deadly Staff also glows in its own way.
     CHECK(styleOf(5, 30) == "deadlyStaff");
     CHECK(styleOf(13, 17) == "bloodBone");
+    CHECK(styleOf(13, 18) == "invisibilityCloak");
 }
 
 TEST_CASE("Render styles that are not for every drawing leave it to the drawing code [data][items]")
@@ -1045,10 +1046,12 @@ TEST_CASE("Shipped item models keep the item effects of the old drawing code [da
     // Items with the same code share it.
     CHECK(effectOf(14, 7) == "hiddenMeshByLevel");
     CHECK(effectOf(13, 7) == "hiddenMeshByLevel");
-    // The shine below +3 is part of the render style; so is the red chrome of
-    // the Blood Bone, which glows by its level.
+    // The shine below +3 is part of the render style; so are the red chrome of
+    // the Blood Bone and the pulsing of the Invisibility Cloak, which glow by
+    // their level.
     CHECK(effectOf(13, 43).empty());
     CHECK(effectOf(13, 17).empty());
+    CHECK(effectOf(13, 18).empty());
     CHECK(effectOf(14, 64).empty());
 
     // The socket seeds and spheres and zen glow like level 0, whatever their
@@ -1095,6 +1098,11 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     // Some effects draw the model themselves.
     level = 2;
     CHECK(apply(MakeItemType(14, 27), level) == Result::Drawn);
+    // The Invisibility Cloak does not draw itself before the level glow; its
+    // render style draws it, at its level.
+    level = 5;
+    CHECK(apply(MakeItemType(13, 18), level) == Result::None);
+    CHECK(level == 5);
     // Items without an effect, and models that are not items.
     CHECK(apply(ITEM_KRIS, level) == Result::None);
     object.Type = MODEL_PLAYER;

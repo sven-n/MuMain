@@ -611,11 +611,12 @@ server with original clients (after phases 6 and B).
        +5 and +6 look alike, and like +13 from +7 (the original client doubled
        the level, a frame-rate change of 2023 turned that into `Level *=
        pow(2, …)` and its fix into `Level /= 2`, which gave +1 to +5 one
-       look); the Blood Bone and the Illusion Sorcerer Covenant glow by their
-       level like the Scroll of Archangel and the Old Scroll (the Blood Bone's
-       own drawing ended the drawing before the level glow; it is the render
-       style `bloodBone` now, which leaves 26 effects for 41 items and 139
-       styles; the Covenant glowed like level 0). The effects of the event
+       look); the Blood Bone, the Invisibility Cloak and the Illusion Sorcerer
+       Covenant glow by their level like the Scroll of Archangel and the Old
+       Scroll (the own drawing of the Blood Bone and of the cloak ended the
+       drawing before the level glow; they are the render styles `bloodBone`
+       and `invisibilityCloak` now, which leaves 25 effects for 40 items and
+       140 styles; the Covenant glowed like level 0). The effects of the event
        models of level variants stay in `RenderPartObjectEffect` (no model
        entries yet). Which values the effects take (bones, colors, sizes)
        comes with phase 13, when what the named looks are made of moves into
