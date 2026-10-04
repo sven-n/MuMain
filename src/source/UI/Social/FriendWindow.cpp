@@ -8,7 +8,6 @@
 #include "UI/Social/SocialWindowCore.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
-#include "UI/RmlBridge/RmlOverlayRender.h"
 
 using mu::ui::window::CheckMouseIn;   // WindowCommon.h
 
@@ -39,15 +38,6 @@ bool mu::ui::window::CFriendWindow::Create(CManager* pNewUIMng)
     m_pFriendWindowMgr = new CUIWindowMgr;
     m_pFriendWindowMgr->Reset();
 
-    // The letters' portraits composite after RmlUi, so a letter's own panel no longer covers
-    // them. One entry for the family: the manager walks its own arrange order inside it.
-    UI::RmlBridge::OverlayRender::Register(this,
-                                           [this]
-                                           {
-                                               if (m_pFriendWindowMgr && IsVisible())
-                                                   m_pFriendWindowMgr->RenderOverlay3D();
-                                           });
-
     GetFriendList()->ClearFriendList();
     GetLetterList()->ClearLetterList();
     GetFriendMenu()->Reset();
@@ -69,7 +59,6 @@ void mu::ui::window::CFriendWindow::Reset()
 
 void mu::ui::window::CFriendWindow::Release()
 {
-    UI::RmlBridge::OverlayRender::Unregister(this);
     m_Dialogs.Reset();
     SAFE_DELETE(m_pFriendWindowMgr);
     if (m_pNewUIMng)

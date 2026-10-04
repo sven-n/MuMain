@@ -251,8 +251,8 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   `CGuildMakeWindow`, `CGuildInfoWindow` with its lists, `CGuild_ToPerson_Position`, `CGensRanking`,
   `CItemExplanationWindow`, `CSetItemExplanation`. The friends family (`CFriendWindow`, finished
   2026-10-04): the shell with its three tabs, the add-friend and question dialogs, the letter read /
-  write windows and the chat rooms are each a semantic RmlUi document; only the letters' sender
-  portrait stays native 3D. The intermediate transcription layer this family was first ported
+  write windows and the chat rooms are each a semantic RmlUi document; the letters' sender portrait
+  is native 3D drawn into a render target the document shows as an image. The intermediate transcription layer this family was first ported
   through -- a `CollectRmlView()` twin per window emitting native geometry as named parts -- is
   **deleted**, along with `FriendWindowRmlBuilder`, `FriendWindowView` and `friend_window.rml`. It
   was scaffolding for porting a toolkit of draggable windows incrementally; do not revive it for a
@@ -265,11 +265,10 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
     at all. That asymmetry is the tell: if a ported window's wheel controls work and its click
     controls silently do nothing, this is why. `UI::Social::PhotoViewerControl` is the fix shape --
     drive the gesture from the document (`component-catalog.md`).
-  - **Native 3D can be drawn above RmlUi**, through `UI::RmlBridge::OverlayRender` wrapping
-    `SetPostRmlUiCallback` -- but above the *whole* main context, not at one window's depth, and
-    nothing RmlUi draws can paint over it. The Friend/Mail family draws the portrait only for the
-    window in front, and its help text is native for the same reason. See `component-catalog.md`
-    for the mechanism and `tracked-deferrals.md` for why render-to-texture is the real answer.
+  - **Native 3D can live inside a document.** `UI::RmlBridge::RenderTarget` draws it into a
+    texture an `<img>` shows, so it z-orders with the windows around it and a tooltip draws over it
+    like over anything else (`component-catalog.md`). Drawing above the main context instead
+    (`OverlayRender`) puts it over every panel, including the ones that should cover it.
   - **One document and data model per instance** (chat rooms, letters) through
     `LoadThemedDocument()`'s placeholder overload, so a closing window cannot take another's focus
     or scroll position with it.

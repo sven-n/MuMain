@@ -301,38 +301,6 @@ void CUIWindowMgr::Render()
     m_bRenderFrame = TRUE;
 }
 
-// Runs from the post-RmlUi seam (UI::RmlBridge::OverlayRender), so a portrait stands on its own
-// panel instead of under every panel in the frame.
-//
-// Only the window in focus draws one. That seam sits above the whole main context rather than at
-// any one window's depth, so a portrait drawn for a window that is not in front would stand over
-// the very windows covering it. The front window has nothing of this family above it, which is
-// the one case where "above everything" and "at this window's depth" agree. The others show their
-// empty well until they are brought forward -- GetTopWindowUIID()'s own notion of front, the same
-// one the original title bar used to decide which window looked active.
-void CUIWindowMgr::RenderOverlay3D()
-{
-    CUIBaseWindow* focused = nullptr;
-    for (const DWORD uiid : m_WindowArrangeList)
-    {
-        const auto found = m_WindowMap.find(uiid);
-        if (found == m_WindowMap.end())
-            continue;
-        CUIBaseWindow* window = found->second;
-        // Not GetTopWindowUIID() itself: that answers with the arrange list's back even when it
-        // is hidden, which would suppress the portrait of the window actually in front.
-        if (window->GetState() != UISTATE_HIDE && window->GetState() != UISTATE_READY)
-            focused = window;
-    }
-    if (focused == nullptr)
-        return;
-    // This seam runs outside CManager, which is what otherwise puts this family's transform in
-    // effect, so the portrait's rect would be mapped with whatever the last drawer left active.
-    const UI::Scaling::ScopedActiveTransform workspace(
-        UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight));
-    focused->RenderAboveRmlUi();
-}
-
 void CUIWindowMgr::DoAction()
 {
     if (g_dwTopWindow != 0)

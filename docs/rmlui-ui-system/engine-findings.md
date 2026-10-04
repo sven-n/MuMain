@@ -539,6 +539,21 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   root-transformed panel (the whole docked family), give it a hit area that is laid out in real
   pixels, outside the transform.
 
+- **A data-model change does not reach layout until the context's next update.**
+  `ElementDocument::UpdateDocument()` lays out and positions, but data models are flushed only in
+  `Context::Update()`. A position published through a binding (`window_shell`'s `root_x`/`root_y`)
+  therefore has not moved anything by the time the same frame measures the document again -- the
+  panel still sits where its static RCSS put it (`.center-both`: centred, unsized). Hiding costs
+  nothing to measure, though: `Show()`/`Hide()` toggle `visibility`, not `display`, so a hidden
+  document still lays out. Place it hidden and show it a sync later; the friend family's
+  `m_Settled` does exactly this.
+- **Releasing an owned GPU texture mid-frame drops that frame's native replay.**
+  `ReleaseOwnedTextureById()` sets `s_texturesInvalidated`, and `EndFrame` then skips every draw
+  command recorded that frame -- a whole blank frame of world and native UI, no error. It resets at
+  `BeginFrame`, so release between frames: `ReleaseRenderTarget()` queues for exactly that point.
+  `EnsureOffscreenColorTexture()` releases too when asked for a new size, which is why a render
+  target never resizes in place.
+
 ## `CObject`/`CManager`/`LayoutMode` gotchas
 
 Found during the `CWin`→`CObject` migration itself (now complete, see `migration-ledger.md`), but

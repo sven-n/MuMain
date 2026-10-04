@@ -2,16 +2,24 @@
 #include "UI/Social/PhotoViewerControl.h"
 
 #include "UI/Social/PhotoViewer.h"
+#include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/Scaling/UITransform.h"
+#include "Core/Utilities/StringUtils.h"
+#include "I18N/All.h"
 
 #include <RmlUi/Core.h>
+
+#include <cmath>
 
 namespace UI::Social
 {
 namespace
 {
 constexpr const char* SlotId = "photo_slot";
+constexpr const char* ImageId = "photo_image";
 constexpr const char* HelpId = "photo_help";
+// A letter from Webzen shows its logo where a sender would stand.
+constexpr const char* WebzenLogo = "/Data/Local/Webzenlogo.jpg";
 
 // RmlUi reports the cursor in its own pixels; the viewer thinks in native reference pixels, the
 // same conversion LetterReadView::SyncPhoto() uses to place it. Turning by the converted delta
@@ -49,6 +57,7 @@ void PhotoViewerControl::Attach(Rml::ElementDocument* document, CUIPhotoViewer& 
 
 void PhotoViewerControl::Detach()
 {
+    Suspend();
     if (m_Document != nullptr)
     {
         if (auto* slot = m_Document->GetElementById(SlotId))
@@ -61,6 +70,71 @@ void PhotoViewerControl::Detach()
     m_Document = nullptr;
     m_Viewer = nullptr;
     m_Turning = false;
+}
+
+void PhotoViewerControl::Sync()
+{
+    if (m_Document == nullptr || m_Viewer == nullptr)
+        return;
+    const bool webzen = m_Viewer->IsWebzenMail();
+    auto& target = m_Viewer->Target();
+    target.SetEnabled(!webzen);
+    if (auto* slot = m_Document->GetElementById(SlotId))
+        slot->SetClass("webzen", webzen);
+    if (auto* image = m_Document->GetElementById(ImageId))
+    {
+        // The image's own box in RmlUi pixels, which are physical ones: the character is drawn at
+        // exactly the size it is shown, never scaled.
+        if (!webzen)
+        {
+            const auto size = image->GetBox().GetSize(Rml::BoxArea::Content);
+            target.Resize(static_cast<std::uint32_t>(std::lround(size.x)),
+                          static_cast<std::uint32_t>(std::lround(size.y)));
+        }
+        const Rml::String source = webzen ? Rml::String(WebzenLogo) : target.Source();
+        if (image->GetAttribute<Rml::String>("src", "") != source)
+            image->SetAttribute("src", source);
+    }
+    SyncHelp();
+}
+
+void PhotoViewerControl::Suspend()
+{
+    if (m_Viewer != nullptr)
+        m_Viewer->Target().SetEnabled(false);
+    UI::RmlBridge::Tooltip::Hide(this);
+}
+
+// Three white lines left-aligned in a box centred on the well, ending at its bottom -- where
+// RenderTipTextList(..., RT3_SORT_LEFT) put them. Above the character now, since the character is
+// an image inside this same document.
+void PhotoViewerControl::SyncHelp()
+{
+    const bool shown = m_Viewer->IsHelpShown() && !m_Viewer->IsWebzenMail();
+    if (auto* help = m_Document->GetElementById(HelpId))
+        help->SetClass("active", shown);
+    auto* slot = m_Document->GetElementById(SlotId);
+    if (!shown || slot == nullptr)
+    {
+        UI::RmlBridge::Tooltip::Hide(this);
+        return;
+    }
+
+    UI::RmlBridge::Tooltip::Config config;
+    for (const wchar_t* text :
+         {I18N::Game::WheelButtonZoomInOut, I18N::Game::LeftClickRotation, I18N::Game::RightClickDefault})
+    {
+        UI::RmlBridge::Tooltip::Line line;
+        line.text = StringUtils::WideToNarrow(text);
+        config.lines.push_back(std::move(line));
+    }
+    const auto size = slot->GetBox().GetSize(Rml::BoxArea::Border);
+    config.anchorX = slot->GetAbsoluteLeft() + size.x * 0.5f;
+    config.anchorY = slot->GetAbsoluteTop() + size.y;
+    config.anchor = UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft;
+    config.centerHorizontally = true;
+    config.transform = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight);
+    UI::RmlBridge::Tooltip::Show(config, this);
 }
 
 void PhotoViewerControl::ProcessEvent(Rml::Event& event)

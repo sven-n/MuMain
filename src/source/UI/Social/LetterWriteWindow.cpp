@@ -186,9 +186,3 @@ bool CUILetterWriteWindow::SemanticFieldHasFocus() const
 {
     return m_View->AnyFieldHasFocus();
 }
-
-// After RmlUi's main context, not before it -- see CUIWindowMgr::RenderOverlay3D().
-void CUILetterWriteWindow::RenderAboveRmlUi()
-{
-    m_Photo.Render();
-}

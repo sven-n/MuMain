@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include <RmlUi_Renderer_SDL_GPU.h>
 #include <unordered_map>
+#include <unordered_set>
 
 // Rml::RenderInterface implementation for the SDL_GPU renderer. Subclasses RmlUi's own vendored
 // RenderInterface_SDL_GPU (ThirdParty/RmlUi/Backends/RmlUi_Renderer_SDL_GPU.cpp) and only
@@ -28,4 +29,6 @@ private:
     // (GenerateTexture's font/glyph atlases) and released via
     // RenderInterface_SDL_GPU::ReleaseTexture as before.
     std::unordered_map<Rml::TextureHandle, std::uint32_t> m_FileBackedBitmapIndexByHandle;
+    // Owned by their UI::RmlBridge::RenderTarget, which retires them itself; never released here.
+    std::unordered_set<Rml::TextureHandle> m_RenderTargetHandles;
 };

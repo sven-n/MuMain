@@ -1,11 +1,13 @@
 #pragma once
 
-// The native 3D character a letter shows its sender as -- the one thing in this family that is not
-// an RmlUi document. It composites after the main context through UI::RmlBridge::OverlayRender, so
-// it stands on its window rather than under it; UI::Social::PhotoViewerControl drives its gestures
-// from the document, because a press over a panel never reaches the legacy mouse globals.
+// The native 3D character a letter shows its sender as. It is drawn into a render target the
+// letter's document shows as an image (UI::RmlBridge::RenderTarget), so it stands at that document's
+// own depth -- under whatever covers the window, beneath the help drawn over it. UI::Social::
+// PhotoViewerControl sizes the target, drives the gestures and mirrors this viewer's state into the
+// document, because a press over a panel never reaches the legacy mouse globals.
 
 #include "UI/Social/SocialWindowCore.h"
+#include "UI/RmlBridge/RmlRenderTarget.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -60,10 +62,14 @@ public:
     }
 
     virtual BOOL DoMouseAction();
-    virtual void Render();
 
-    // The well this stands in, in the owner's own coordinates. Until its document has been placed
-    // there is no well yet, and Render() draws nothing rather than at the default rect.
+    // What the letter's #photo_image shows; PhotoViewerControl sizes it to that element.
+    UI::RmlBridge::RenderTarget& Target() { return m_Target; }
+    bool IsHelpShown() const { return m_bHelpEnable != FALSE; }
+    bool IsWebzenMail() const { return m_bIsWebzenMail != FALSE; }
+
+    // Where the well is, in the owner's own coordinates -- for the wheel, which never passes
+    // through RmlUi and is still read here natively.
     void SetSlot(int iPos_x, int iPos_y, int iWidth, int iHeight);
 
     // Driven by UI::Social::PhotoViewerControl, which owns these gestures while the viewer stands
@@ -73,8 +79,9 @@ public:
     void ToggleHelp();
 
 protected:
-    void RenderPhotoCharacter();
-    void ShowHelpText();
+    // The target's drawer: one frame of the character, framed for `width` x `height`.
+    void RenderInto(std::uint32_t width, std::uint32_t height);
+    void RenderPhotoCharacter(float aspect);
     int SetPhotoPose(int iCurrentAni, int iMoveDir = 0);
 
 protected:
@@ -95,7 +102,8 @@ protected:
     float m_fSettingZoom;
     float m_fCurrentZoom;
     BOOL m_bIsWebzenMail;
-    bool m_bHasSlot = false;
+    // Last, so it is destroyed first and its drawer never runs against a half-destroyed viewer.
+    UI::RmlBridge::RenderTarget m_Target;
 
 public:
     void SetShowType(int Stype)

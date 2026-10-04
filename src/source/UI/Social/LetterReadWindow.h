@@ -30,7 +30,6 @@ public:
 
 
     // Drawn in the post-RmlUi seam, not RenderOver(): the panel would cover it otherwise.
-    void RenderAboveRmlUi() override;
 
 protected:
     void InitControls() override {}

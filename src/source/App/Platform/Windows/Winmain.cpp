@@ -83,6 +83,7 @@
 #include "UI/Windows/LoginWin.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/RmlBridge/RmlOverlayRender.h"
+#include "UI/RmlBridge/RmlRenderTarget.h"
 
 #include "World/MapInfra/w_MapHeaders.h"
 
@@ -2089,6 +2090,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // LoginWin/CharMakeWin/MsgWin's own IsShow() guards make it safe to leave their calls
     // unconditional across every scene this callback now covers -- those windows are never shown
     // outside LOG_IN_SCENE/CHARACTER_SCENE regardless.
+    // Native drawing a document shows as an image: recorded last in the frame and rendered into its
+    // own textures before the main pass, so RmlUi samples this frame's drawing.
+    mu::GetRenderer().SetOffscreenRenderCallback([] { UI::RmlBridge::RenderTarget::RenderAll(); });
+
     mu::GetRenderer().SetPostRmlUiCallback(
         []()
         {

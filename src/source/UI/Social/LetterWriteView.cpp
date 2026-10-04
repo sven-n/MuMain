@@ -206,6 +206,7 @@ bool LetterWriteView::Sync(bool shown)
     if (!shown)
     {
         UI::RmlBridge::SyncDocumentVisibility(m_Document, false);
+        m_PhotoControl.Suspend();
         return false;
     }
     Build();
@@ -261,8 +262,7 @@ void LetterWriteView::SyncPhoto()
     const auto native = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight);
     if (scale <= 0 || native.scaleX <= 0)
         return;
-    // Until the panel has settled its slot is still where window_shell centred it; moving the
-    // viewer there draws the portrait in the middle of the screen for that frame.
+    // Until the panel has settled its slot is still where window_shell centred it.
     if (!m_Settled)
         return;
     const float ratio = scale / native.scaleX;
@@ -271,6 +271,7 @@ void LetterWriteView::SyncPhoto()
                             static_cast<int>(slot->GetAbsoluteTop() / scale * ratio),
                             static_cast<int>(size.x / scale * ratio),
                             static_cast<int>(size.y / scale * ratio));
+    m_PhotoControl.Sync();
 }
 
 void LetterWriteView::PullToFront()

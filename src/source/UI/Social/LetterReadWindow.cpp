@@ -142,9 +142,3 @@ void CUILetterReadWindow::Maximize()
 {
     m_View->Maximize();
 }
-
-// After RmlUi's main context, not before it -- see CUIWindowMgr::RenderOverlay3D().
-void CUILetterReadWindow::RenderAboveRmlUi()
-{
-    m_Photo.Render();
-}

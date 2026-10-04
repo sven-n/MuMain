@@ -342,6 +342,15 @@ public:
     // no-op backend never calls anything.
     virtual void SetPostRmlUiCallback(std::function<void()> /*callback*/) {}
 
+    // Fires at the top of EndFrame, while the frame is still recording but after every ordinary
+    // draw -- and after the last FlushRenderCommands(), so nothing recorded here has been replayed
+    // yet. The seam for render targets (CreateRenderTarget()): draws recorded here between
+    // BeginOffscreenCapture()/EndOffscreenCapture() render into their own textures before the
+    // frame's main pass, are kept out of it, and are ready before either UI seam above samples
+    // them. Recording a capture any earlier risks a mid-frame flush drawing it onto the frame
+    // first. Pass an empty std::function to unregister. Default no-op backend never calls anything.
+    virtual void SetOffscreenRenderCallback(std::function<void()> /*callback*/) {}
+
     // RmlUi-behind-3D-icons seam: RmlUi's main context always composites last in the frame, so a
     // caller that needs content to paint behind a live 3D render needs an earlier seam of its own.
     // Opens a real render pass NOW, mid-recording, replaying only what's been recorded into this
@@ -446,14 +455,12 @@ public:
         return false;
     }
 
-#ifdef _EDITOR
     // -----------------------------------------------------------------------
-    // Editor-only: isolated offscreen render captures for UI preview thumbnails
-    // (e.g. the Map Editor's object-model preview grid). Draw calls issued
-    // between BeginOffscreenCapture()/EndOffscreenCapture() render into a
-    // dedicated texture instead of the main frame and never appear on screen.
-    // Not available in non-editor builds - exists solely for editor preview UI,
-    // never on the normal gameplay rendering path.
+    // Isolated offscreen render captures. Draw calls issued between
+    // BeginOffscreenCapture()/EndOffscreenCapture() render into a dedicated
+    // texture instead of the main frame and never appear on screen: the Map
+    // Editor's object-model preview grid, and render targets an RmlUi document
+    // shows like any other image.
     // -----------------------------------------------------------------------
 
     // `textureId` may be an existing id (reused/resized as needed) or 0 to
@@ -467,6 +474,20 @@ public:
     // Closes the capture opened by BeginOffscreenCapture.
     virtual void EndOffscreenCapture() {}
 
+    // A texture that captures render into and anything can sample -- GetRawTexture() resolves it.
+    // Unlike a one-shot capture's, it owns a depth buffer of its own size and clears to
+    // transparent, so it composites over whatever is drawn behind it. Its size is fixed: capture
+    // into it with exactly `width` x `height`, and create another to resize. Returns 0 on failure.
+    [[nodiscard]] virtual std::uint32_t CreateRenderTarget(std::uint32_t /*width*/, std::uint32_t /*height*/)
+    {
+        return 0u;
+    }
+    // Released at the start of the next frame, never during one: releasing an owned texture
+    // mid-frame drops that whole frame's replay. A caller that a sampler may still read this frame
+    // must hold off releasing until it no longer can.
+    virtual void ReleaseRenderTarget(std::uint32_t /*textureId*/) {}
+
+#ifdef _EDITOR
     // Real GPU texture pointer for a texture id (from CreateTexture or
     // BeginOffscreenCapture), for handing to ImGui as ImTextureID. Returns
     // nullptr if the id isn't registered.

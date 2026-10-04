@@ -121,8 +121,6 @@ public:
                     int iOption = UIADDWND_NULL);
     void RemoveWindow(DWORD dwUIID);
     void Render();
-    // The family's native 3D, drawn after RmlUi has composited -- for the front window only.
-    void RenderOverlay3D();
     // Shows the family's documents in the draw order Render() uses; hides them all when
     // !familyShown.
     void SyncRmlViews(bool familyShown);

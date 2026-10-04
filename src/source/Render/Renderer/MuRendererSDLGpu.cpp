@@ -243,6 +243,7 @@ static std::function<void()> s_preSubmitCallback;
 // needs its own small render pass rather than just calling RenderQuad2D-style functions from
 // inside s_preSubmitCallback itself.
 static std::function<void()> s_postRmlUiCallback;
+static std::function<void()> s_offscreenRenderCallback;
 
 // The texture every pass of this frame renders into: the main pass, FlushRenderCommands'
 // mid-frame passes (behind which RmlUi's background contexts draw), and the UI seams (RmlUi's
@@ -584,12 +585,10 @@ struct RenderCmd
     bool depthTestEnabled{};
     bool depthMaskEnabled{};
     bool cullFaceEnabled{};
-#ifdef _EDITOR
-    // Set once this command has been replayed into an editor offscreen capture
-    // (see BeginOffscreenCapture/EndOffscreenCapture); the main frame's replay
-    // pass then skips it instead of drawing it a second time into the swapchain.
+    // Set once this command has been replayed into an offscreen capture (see
+    // BeginOffscreenCapture/EndOffscreenCapture); the main frame's replay pass then
+    // skips it instead of drawing it a second time into the frame.
     bool consumedByOffscreenCapture = false;
-#endif
 };
 
 static std::vector<RenderCmd> s_renderCmds;
@@ -881,12 +880,10 @@ static Uint32 s_depthW = 0u;
 static Uint32 s_depthH = 0u;
 static SDL_FColor s_clearColor{0.0f, 0.0f, 0.0f, 1.0f};
 
-#ifdef _EDITOR
-// Editor-only isolated offscreen render captures (e.g. the Map Editor's object
-// preview thumbnails). A capture batches a sub-range of s_renderCmds - recorded
-// between BeginOffscreenCapture()/EndOffscreenCapture() - to be replayed into a
-// dedicated texture instead of the main swapchain. Never used on the normal
-// gameplay rendering path.
+// Isolated offscreen render captures. A capture batches a sub-range of s_renderCmds -
+// recorded between BeginOffscreenCapture()/EndOffscreenCapture() - to be replayed into a
+// dedicated texture instead of the frame: the Map Editor's object thumbnails, and render
+// targets (CreateRenderTarget()) an RmlUi document shows.
 struct PendingOffscreenCapture
 {
     std::size_t startCmd;
@@ -901,12 +898,18 @@ static std::uint32_t s_offscreenCaptureTextureId = 0u;
 static Uint32 s_offscreenCaptureWidth = 0u;
 static Uint32 s_offscreenCaptureHeight = 0u;
 
-// Shared depth buffer for offscreen captures, resized on demand. Captures are
+// Shared depth buffer for one-shot captures, resized on demand. Captures are
 // processed strictly one at a time (never concurrently), so one is enough.
 static SDL_GPUTexture* s_offscreenDepthTexture = nullptr;
 static Uint32 s_offscreenDepthW = 0u;
 static Uint32 s_offscreenDepthH = 0u;
-#endif
+
+// A render target's own depth buffer, sized to it. Several are captured every frame at
+// different sizes, which the shared one above would recreate for each.
+static std::unordered_map<std::uint32_t, SDL_GPUTexture*> s_renderTargetDepth;
+// Drained at the start of the next frame: releasing an owned texture mid-frame sets
+// s_texturesInvalidated, which drops that whole frame's replay.
+static std::vector<std::uint32_t> s_pendingRenderTargetReleases;
 
 // Fog uniform buffer and transfer buffer.
 static SDL_GPUBuffer* s_fogUniformBuf = nullptr;
@@ -1255,6 +1258,14 @@ static bool ReleaseOwnedTextureById(std::uint32_t id)
 
     s_textureSizes.erase(id);
     s_ownedTextureIds.erase(owned);
+    if (const auto depth = s_renderTargetDepth.find(id); depth != s_renderTargetDepth.end())
+    {
+        if (s_device && depth->second)
+        {
+            SDL_ReleaseGPUTexture(s_device, depth->second);
+        }
+        s_renderTargetDepth.erase(depth);
+    }
     s_texturesInvalidated = true;
     return true;
 }
@@ -1705,6 +1716,13 @@ public:
             s_depthW = 0u;
             s_depthH = 0u;
         }
+        if (s_offscreenDepthTexture)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_offscreenDepthTexture);
+            s_offscreenDepthTexture = nullptr;
+            s_offscreenDepthW = 0u;
+            s_offscreenDepthH = 0u;
+        }
 
         // Release fog uniform buffers.
         if (s_fogUniformBuf)
@@ -1781,6 +1799,12 @@ public:
         s_lastBonePaletteSize = 0u;
         s_lastBonePaletteVersion = 0u;
         s_lastBonePaletteRowOffset = 0u;
+        // Before the reset below, so these invalidate nothing this frame records.
+        for (const std::uint32_t textureId : s_pendingRenderTargetReleases)
+        {
+            ReleaseOwnedTextureById(textureId);
+        }
+        s_pendingRenderTargetReleases.clear();
         s_texturesInvalidated = false; // Reset per-frame texture invalidation flag
         s_dbgDrawCallsThisFrame = 0u;
         s_dbgVtxBytesThisFrame = 0u;
@@ -2061,12 +2085,10 @@ public:
             {
                 continue;
             }
-#ifdef _EDITOR
             if (cmd.consumedByOffscreenCapture)
             {
-                continue; // already drawn into its own offscreen texture (Map Editor thumbnail, etc.)
+                continue; // already drawn into its own offscreen texture
             }
-#endif
             ++s_dbgRenderCmdsReplayedThisFrame;
 
             switch (cmd.type)
@@ -2191,6 +2213,12 @@ public:
             FailPendingFrameReadback();
             return;
         }
+        // Still recording, and after the last FlushRenderCommands(), so nothing this records has
+        // been replayed yet -- see SetOffscreenRenderCallback (MuRenderer.h).
+        if (s_offscreenRenderCallback)
+        {
+            s_offscreenRenderCallback();
+        }
         s_frameActive = false;
 
         // ---------------------------------------------------------------
@@ -2200,12 +2228,10 @@ public:
         // ---------------------------------------------------------------
         const bool boneDataReady = StageDeferredGpuData();
 
-#ifdef _EDITOR
-        // Editor-only: replay any pending offscreen captures (e.g. Map Editor object
-        // thumbnails) into their own dedicated textures now that the GPU vertex buffer
-        // holds their data, before the main pass below runs.
+        // Replay pending offscreen captures into their own textures now that the GPU vertex
+        // buffer holds their data: before the main pass below, which must skip them, and before
+        // the UI seams, which sample them.
         ProcessPendingOffscreenCaptures(boneDataReady);
-#endif
 
         // ---------------------------------------------------------------
         // Render pass — replay all recorded draw commands.
@@ -3064,7 +3090,20 @@ public:
         ReleaseOwnedTextureById(textureId);
     }
 
-#ifdef _EDITOR
+    // Every replay pipeline is built against the swapchain's colour format, and a pass whose
+    // target differs from it is invalid -- so an offscreen target takes that format, not a fixed one.
+    [[nodiscard]] static SDL_GPUTextureFormat OffscreenColorFormat()
+    {
+        constexpr SDL_GPUTextureUsageFlags usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
+        const SDL_GPUTextureFormat format = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
+        if (format != SDL_GPU_TEXTUREFORMAT_INVALID &&
+            SDL_GPUTextureSupportsFormat(s_device, format, SDL_GPU_TEXTURETYPE_2D, usage))
+        {
+            return format;
+        }
+        return SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+    }
+
     // Same shape as EnsureTexture, but with COLOR_TARGET usage added so the result
     // can be rendered into (not just sampled) - needed for offscreen captures.
     void EnsureOffscreenColorTexture(std::uint32_t textureId, std::uint32_t width, std::uint32_t height)
@@ -3093,7 +3132,7 @@ public:
 
         SDL_GPUTextureCreateInfo texInfo{};
         texInfo.type = SDL_GPU_TEXTURETYPE_2D;
-        texInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+        texInfo.format = OffscreenColorFormat();
         texInfo.usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
         texInfo.width = width;
         texInfo.height = height;
@@ -3153,6 +3192,9 @@ public:
             return 0u;
         }
 
+        // Neither side of a capture may merge into the other: a draw merged backward into a
+        // command outside the range would land on the wrong target.
+        s_previousDrawCommands.fill(kNoDrawCommand);
         s_offscreenCaptureStart = s_renderCmds.size();
         s_offscreenCaptureTextureId = textureId;
         s_offscreenCaptureWidth = width;
@@ -3171,8 +3213,60 @@ public:
                                               s_offscreenCaptureTextureId, s_offscreenCaptureWidth,
                                               s_offscreenCaptureHeight});
         s_offscreenCaptureTextureId = 0u;
+        s_previousDrawCommands.fill(kNoDrawCommand);
     }
 
+    [[nodiscard]] std::uint32_t CreateRenderTarget(std::uint32_t width, std::uint32_t height) override
+    {
+        if (!s_device || width == 0u || height == 0u)
+        {
+            return 0u;
+        }
+        const std::uint32_t textureId = AllocateOwnedDynamicTextureId();
+        if (textureId == 0u)
+        {
+            return 0u;
+        }
+        EnsureOffscreenColorTexture(textureId, width, height);
+        if (!IsTextureRegistered(textureId))
+        {
+            return 0u;
+        }
+
+        SDL_GPUTextureCreateInfo depthInfo{};
+        depthInfo.type = SDL_GPU_TEXTURETYPE_2D;
+        depthInfo.format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
+        depthInfo.width = width;
+        depthInfo.height = height;
+        depthInfo.layer_count_or_depth = 1;
+        depthInfo.num_levels = 1;
+        depthInfo.usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET;
+        SDL_GPUTexture* depth = SDL_CreateGPUTexture(s_device, &depthInfo);
+        if (!depth)
+        {
+            mu::log::Get("render")->warn("SDL_gpu -- render target depth creation failed ({}x{}): {}", width,
+                                         height, SDL_GetError());
+            s_pendingRenderTargetReleases.push_back(textureId);
+            return 0u;
+        }
+        s_renderTargetDepth[textureId] = depth;
+        return textureId;
+    }
+
+    void ReleaseRenderTarget(std::uint32_t textureId) override
+    {
+        if (textureId != 0u)
+        {
+            s_pendingRenderTargetReleases.push_back(textureId);
+        }
+    }
+
+    void SetOffscreenRenderCallback(std::function<void()> callback) override
+    {
+        s_offscreenRenderCallback = std::move(callback);
+    }
+
+#ifdef _EDITOR
     [[nodiscard]] void* GetTexturePointer(std::uint32_t textureId) const override
     {
         const auto it = s_textureMap.find(textureId);
@@ -4714,8 +4808,7 @@ private:
         return true;
     }
 
-#ifdef _EDITOR
-    // Depth buffer for editor offscreen captures (see BeginOffscreenCapture). Same
+    // Depth buffer for one-shot offscreen captures (see BeginOffscreenCapture). Same
     // shape as CreateOrResizeDepthTexture but keeps its own texture, since it's
     // sized for a small thumbnail, not the swapchain.
     static bool EnsureOffscreenDepthTexture(Uint32 width, Uint32 height)
@@ -4773,19 +4866,29 @@ private:
         for (const auto& capture : s_pendingOffscreenCaptures)
         {
             const auto textureIt = s_textureMap.find(capture.textureId);
-            if (textureIt == s_textureMap.end() || !EnsureOffscreenDepthTexture(capture.width, capture.height))
+            if (textureIt == s_textureMap.end())
+            {
+                continue;
+            }
+            // A render target brings its own depth and clears to transparent, so a document
+            // composites it over its own background; a one-shot capture keeps the shared depth
+            // and the editor's opaque backdrop.
+            const auto targetDepth = s_renderTargetDepth.find(capture.textureId);
+            const bool isRenderTarget = targetDepth != s_renderTargetDepth.end();
+            if (!isRenderTarget && !EnsureOffscreenDepthTexture(capture.width, capture.height))
             {
                 continue;
             }
 
             SDL_GPUColorTargetInfo colorTarget{};
             colorTarget.texture = static_cast<SDL_GPUTexture*>(textureIt->second);
-            colorTarget.clear_color = SDL_FColor{0.10f, 0.10f, 0.12f, 1.0f};
+            colorTarget.clear_color = isRenderTarget ? SDL_FColor{0.0f, 0.0f, 0.0f, 0.0f}
+                                                     : SDL_FColor{0.10f, 0.10f, 0.12f, 1.0f};
             colorTarget.load_op = SDL_GPU_LOADOP_CLEAR;
             colorTarget.store_op = SDL_GPU_STOREOP_STORE;
 
             SDL_GPUDepthStencilTargetInfo depthTarget{};
-            depthTarget.texture = s_offscreenDepthTexture;
+            depthTarget.texture = isRenderTarget ? targetDepth->second : s_offscreenDepthTexture;
             depthTarget.clear_depth = 1.0f;
             depthTarget.load_op = SDL_GPU_LOADOP_CLEAR;
             depthTarget.store_op = SDL_GPU_STOREOP_DONT_CARE;
@@ -4815,12 +4918,14 @@ private:
                                            cmd.type == RenderCmdType::DrawIndexedQuads ||
                                            cmd.type == RenderCmdType::DrawIndexedStrip ||
                                            cmd.type == RenderCmdType::DrawTriangles2D;
+                // Consumed either way: nothing recorded inside a capture belongs on the frame, and a
+                // viewport or scissor left to the main pass would apply to whatever it draws next.
+                cmd.consumedByOffscreenCapture = true;
                 if (!isGeometryDraw)
                 {
-                    continue; // skip SetViewport/SetScissor/EditorOverlay - not relevant to a model capture
+                    continue; // SetViewport/SetScissor/EditorOverlay - the capture sets its own viewport
                 }
                 ReplayDrawCommand(cmd, boneDataReady, scissor, replayState);
-                cmd.consumedByOffscreenCapture = true;
             }
 
             SDL_EndGPURenderPass(s_renderPass);
@@ -4829,7 +4934,6 @@ private:
 
         s_pendingOffscreenCaptures.clear();
     }
-#endif // _EDITOR
 
     // -----------------------------------------------------------------------
     // Creates the GPU buffer (s_fogUniformBuf) used as a storage buffer in

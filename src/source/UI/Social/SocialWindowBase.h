@@ -83,11 +83,6 @@ public:
 
     // CUIWindowMgr::Render() for a window with an RmlUi view: RenderOver() only.
     void RenderRmlOverlay();
-    // Native 3D this window owns, drawn after RmlUi's main context has composited rather than
-    // before it -- otherwise every panel in the frame paints over it. Reached through
-    // CUIWindowMgr::RenderOverlay3D(), and only while this window is the one in front: see there
-    // for why the others draw nothing.
-    virtual void RenderAboveRmlUi() {}
     // A window of this family that owns an RmlUi document of its own. FriendWindowViews::Sync()
     // drives these; nothing else of the family is drawn by the manager any more.
     virtual bool HasSemanticView() const

@@ -77,7 +77,7 @@ static void PhotoMakeTranslation(float x, float y, float z, float* out)
     memcpy(out, m, sizeof(m));
 }
 
-void CUIPhotoViewer::RenderPhotoCharacter()
+void CUIPhotoViewer::RenderPhotoCharacter(float aspect)
 {
     CHARACTER* c = &m_PhotoChar;
     OBJECT* o = &c->Object;
@@ -91,12 +91,9 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();
-    // The whole well, not native's fixed 141 inside it: the slot RCSS reserves is this viewer's
-    // own size, so the character is framed by the box it stands in at whatever height that is.
-    const auto viewport = UI::Scaling::ViewportForLogicalRect(
-        UI::Scaling::GetActiveTransform(), m_iPos_x, m_iPos_y, m_iWidth, static_cast<float>(m_iHeight));
-    SetRenderViewport(viewport.x, viewport.y, viewport.width, viewport.height);
-    gluPerspective2(1.f, static_cast<float>(viewport.width) / static_cast<float>(viewport.height), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
+    // The capture brings its own viewport, the whole target, so only the projection is set here:
+    // the character is framed by the well it stands in at whatever size that is.
+    gluPerspective2(1.f, aspect, 2000, 20000);
     mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();
@@ -154,7 +151,6 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     mu::GetRenderer().PopMatrix();
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PopMatrix();
-    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
 }
 
 int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
@@ -351,6 +347,7 @@ int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
 }
 
 CUIPhotoViewer::CUIPhotoViewer()
+    : m_Target([this](std::uint32_t width, std::uint32_t height) { RenderInto(width, height); })
 {
     m_bIsInitialized = FALSE;
     m_iSettingAnimation = 0;
@@ -388,7 +385,6 @@ void CUIPhotoViewer::Init(int iInitType)
     Vector(-300, -300, -300, m_PhotoChar.Object.Position);
 
     m_bIsInitialized = TRUE;
-    m_bHasSlot = false;
 }
 
 BOOL CompareItemEqual(const PART_t* item1, const PART_t* item2)
@@ -730,7 +726,6 @@ void CUIPhotoViewer::SetSlot(int iPos_x, int iPos_y, int iWidth, int iHeight)
 {
     SetPosition(iPos_x, iPos_y);
     SetSize(iWidth, iHeight);
-    m_bHasSlot = true;
 }
 
 void CUIPhotoViewer::TurnBy(float degrees)
@@ -751,52 +746,12 @@ void CUIPhotoViewer::ToggleHelp()
     m_bHelpEnable = (m_bHelpEnable + 1) % 2;
 }
 
-extern int TextNum;
-extern wchar_t TextList[50][100];
-extern int  TextListColor[50];
-extern int  TextBold[50];
-extern SIZE Size[50];
-
-// The help the "?" icon toggles: three white lines left-aligned in a box centred on the viewer,
-// its bottom lines ending at the viewer's bottom (RenderTipTextList(..., RT3_SORT_LEFT)), on the
-// shared RmlUi tooltip; natively only without RmlUi.
-// Drawn natively, not on the shared RmlUi tooltip, and from Render() so it lands in the same
-// post-RmlUi seam as the character. That seam is the only layer above the character: RmlUi's main
-// context composites before it, so a tooltip document would be painted over by the very portrait
-// it describes. Native text here puts the help back on top of the character, where the original
-// drew it.
-void CUIPhotoViewer::ShowHelpText()
+// The target's drawer, from the renderer's offscreen seam. Only the character: the "?" and its help
+// are the document's own now, drawn above this image rather than inside it.
+void CUIPhotoViewer::RenderInto(std::uint32_t width, std::uint32_t height)
 {
-    const wchar_t* const help[] = {I18N::Game::WheelButtonZoomInOut, I18N::Game::LeftClickRotation,
-                                   I18N::Game::RightClickDefault};
-    g_pRenderText->SetFont(g_hFont);
-    const SIZE TextSize = g_pRenderText->MeasureText(L"Z", 1);
-    const int sx = m_iPos_x + m_iWidth / 2;
-    const int sy = m_iPos_y + m_iHeight - static_cast<int>(std::size(help)) * (TextSize.cy + 2);
-
-    TextNum = 0;
-    for (const wchar_t* text : help)
-    {
-        mu_swprintf(TextList[TextNum], L"%ls", text);
-        TextListColor[TextNum] = 0;
-        TextBold[TextNum] = false;
-        TextNum++;
-    }
-    RenderTipTextList(sx, sy, TextNum, 0, RT3_SORT_LEFT);
-}
-
-void CUIPhotoViewer::Render()
-{
-    if (!m_bHasSlot)
+    if (m_bIsWebzenMail == TRUE || height == 0)
         return;
-
-    if (m_bIsWebzenMail == TRUE)
-    {
-        RenderColor(m_iPos_x, m_iPos_y, 119.f, 141.f);
-        EndRenderColor();
-        RenderBitmap(BITMAP_INTERFACE_EX + 22, m_iPos_x + 20, m_iPos_y + 38, 80.f, 62.f, 0.f, 0.f, 256.f / 256.f, 195.f / 256.f);
-        return;
-    }
 
     CHARACTER* c = &m_PhotoChar;
     OBJECT* o = &c->Object;
@@ -825,17 +780,5 @@ void CUIPhotoViewer::Render()
     {
         DeleteParts(&m_PhotoChar);
     }
-    RenderPhotoCharacter();
-
-    if (CheckOption(UIPHOTOVIEWER_CANCONTROL))
-    {
-        DisableAlphaBlend();
-        if (m_bHelpEnable == FALSE)
-            RenderBitmap(BITMAP_INTERFACE_EX + 20, m_iPos_x + 1, m_iPos_y + m_iHeight - 17, 16.0f, 16.0f, 0.f, 0.f, 16.f / 16.f, 16.f / 16.f);
-        else
-        {
-            RenderBitmap(BITMAP_INTERFACE_EX + 20, m_iPos_x + 2, m_iPos_y + m_iHeight - 16, 15.0f, 15.0f, 0.f, 0.f, 15.f / 16.f, 15.f / 16.f);
-            ShowHelpText();
-        }
-    }
+    RenderPhotoCharacter(static_cast<float>(width) / static_cast<float>(height));
 }

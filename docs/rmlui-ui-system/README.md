@@ -113,8 +113,7 @@ it:
 - **`SetPostRmlUiCallback`** — fires after RmlUi's own pass, for content that must render even
   later than RmlUi itself (the game cursor; historically also the login/char-make input-box text,
   until those fields became stock RmlUi `<input>`s and their `RenderTextOnTop()` overrides went
-  away — the seam itself is still load-bearing for the cursor, and now for the letter windows'
-  live-3D portrait via `UI::RmlBridge::OverlayRender`). By the
+  away — the seam itself is still load-bearing for the cursor). By the
   time RmlUi's pass is recorded its render pass is already closed, so drawing more content after
   it needs its own seam: a fresh render pass targeting the same swapchain texture with
   `LOAD_OP_LOAD` (preserve what's already there), plus re-staging any newly queued vertex data.
@@ -123,6 +122,12 @@ it:
   pass never backward-merges into a stale command from the main pass, and assigning the new
   render pass to the renderer's own tracked handle (not a local) so its draw calls actually land
   in it. Full detail in `.ai-os/memory/tasks/rmlui-sdl-gpu-port.md` if this seam needs revisiting.
+
+**`SetOffscreenRenderCallback`** fires at the top of `EndFrame`, while the frame is still recording
+but after the last `FlushRenderCommands()`. Draws recorded there between
+`BeginOffscreenCapture()`/`EndOffscreenCapture()` render into their own textures before the main
+pass and are kept out of it, ready before either seam above samples them — the seam behind
+`UI::RmlBridge::RenderTarget` (`component-catalog.md`).
 
 **A third seam answers the interleaving question this doc used to call open** — whether RmlUi
 content could render at a specific mid-frame point (behind legacy content drawn later the same

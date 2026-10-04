@@ -410,30 +410,49 @@ paired with a new generic persistence mechanism (`GameConfig::GetWindowPosition`
 reuse with one call each way — see `STATUS.md`'s "Known gaps" entry for the full mechanism and
 what's still unaudited (behavior across a resolution/UI-scale/theme change post-drag).
 
+## Native content inside a document
+
+`UI::RmlBridge::RenderTarget` (`UI/RmlBridge/RmlRenderTarget.h`/`.cpp`) — native drawing rendered
+into a texture a document shows like any other image, so it sits at its element's own depth: under
+a window that covers it, beneath the text and tooltips drawn over it. This is the default for live
+3D that belongs to one window. The letter portrait (`CUIPhotoViewer`) is the consumer.
+
+Construct one with a drawer, size it to an element with `Resize(width, height)` in physical pixels
+(RmlUi box sizes already are), `SetEnabled()` it while the window is shown, and set an `<img>`'s
+`src` to `Source()`. The drawer runs once a frame from the renderer's offscreen seam
+(`SetOffscreenRenderCallback`), inside a capture of exactly the target's size that brings its own
+viewport, depth and transparent clear — so it sets only a projection for `width / height` and
+draws. `UI::Social::PhotoViewerControl` is the worked example of the element side.
+
+What it takes care of, so a caller does not:
+
+- **A capture recorded early would land on the frame.** `RmlUiRuntime` flushes native commands
+  mid-frame for the background context, and a flushed command is drawn before anything can mark it
+  as captured. The offscreen seam runs at the top of `EndFrame`, after the last flush.
+- **Resizing never shows an empty or freed texture.** A new size takes a new texture, and
+  `Source()` moves to it only once it has been drawn. The old one is released a few frames after
+  the switch, since a new `src` reaches RmlUi a frame or two later, and the release itself waits
+  for the start of a frame: releasing an owned texture mid-frame drops that frame's whole replay.
+- **Sources never repeat**, unlike texture ids, so a stale RmlUi cache entry cannot resolve to a
+  recycled texture.
+
+One compositing difference to expect: native pipelines write straight alpha and RmlUi blends
+premultiplied, so opaque pixels are exact and only partly transparent edges can differ slightly.
+
 ## Native content above RmlUi
 
 `UI::RmlBridge::OverlayRender` (`UI/RmlBridge/RmlOverlayRender.h`/`.cpp`) — a registry of native
 draw callbacks drained once per frame from `Winmain.cpp`'s `SetPostRmlUiCallback`, which opens its
 own `LOAD_OP_LOAD` render pass after RmlUi's main context has closed. That pass is the **only**
-layer above RmlUi: the main context composites from `SetPreSubmitCallback` and is otherwise the
-frame's last UI pass, so anything a window draws from its own `Render()` lands under every panel.
+layer above RmlUi. `Register(owner, draw)` / `Unregister(owner)`, drawing in registration order.
+No window uses it today; the inventory's native item tooltip is the recorded candidate
+(`tracked-deferrals.md`).
 
-Use it for live 3D (or any native drawing) that must sit *on* its own panel rather than beneath it.
-`Register(owner, draw)` / `Unregister(owner)`, drawing in registration order; a family owning
-several registers one entry and walks its own z-order inside it, as `CUIWindowMgr::RenderOverlay3D()`
-does for the letter portraits.
-
-Two things to know before reaching for it:
-
-- **It is above the whole context, not at your window's depth.** There is no way to interleave one
-  window's native content between two RmlUi documents — three fixed layers, N windows. Content
-  drawn here stands over every panel, including ones that should cover it. The Friend/Mail family
-  mitigates this by drawing only for the window in front; see `tracked-deferrals.md` for the
-  general shape and why render-to-texture is the real answer.
-- **Nothing RmlUi can reach will paint over it.** A tooltip, a mask, any document content is below.
-  `CUIPhotoViewer`'s help text is native `RenderTipTextList()` for exactly this reason. 2D native
-  text and quads are proven in this seam (`RenderCursor`, the login text overlay); skinned 3D works
-  too, since the renderer re-stages bone data for this pass.
+Prefer a render target for anything that belongs to one window. This seam is above the whole
+context rather than at any window's depth, so what it draws stands over every panel, including
+ones that should cover it, and nothing RmlUi draws can paint over it. 2D native text and quads are
+proven here (`RenderCursor`), and skinned 3D works too, since the renderer re-stages bone data for
+this pass.
 
 Historical note: an earlier `SetPostRmlUiCallback` attempt for `CGenericConfirmDialog`'s item3D
 crashed twice and was abandoned for a third-context document split (`GetDialogBackgroundContext()`).
