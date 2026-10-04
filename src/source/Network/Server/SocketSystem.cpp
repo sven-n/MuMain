@@ -6,7 +6,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "WSclient.h"
-#include "UI/Widgets/UIControls.h"
+#include "UI/Social/SocialWindowCore.h"
 #include "Character/CharacterManager.h"
 
 #include <algorithm>

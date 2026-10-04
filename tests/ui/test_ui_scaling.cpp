@@ -11,7 +11,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Engine/Object/ZzzInventory.h"
-#include "UI/Widgets/UIControls.h"
+#include "UI/Social/SocialWindowCore.h"
 #include "UI/HUD/UIMapName.h"
 #include "UI/Dialogs/ChatCommandWindow.h"
 #include "UI/HUD/CommandWindow.h"

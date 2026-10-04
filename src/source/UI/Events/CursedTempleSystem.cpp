@@ -15,7 +15,7 @@
 
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Events/CSChaosCastle.h"
-#include "UI/Widgets/UIControls.h"
+#include "UI/Social/SocialWindowCore.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "GameLogic/Events/w_CursedTemple.h"

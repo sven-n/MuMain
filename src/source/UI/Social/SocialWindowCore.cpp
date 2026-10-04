@@ -5,8 +5,8 @@
 #include "Core/Input/KeyState.h"
 #include "Core/Time/FrameTimerScheduler.h"
 #include "GameLogic/Items/CComGem.h"
-#include "UIControls.h"
-#include "UI/Social/UIWindows.h"
+#include "UI/Social/SocialWindowCore.h"
+#include "UI/Social/SocialWindowManager.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -29,7 +29,6 @@
 #include <vector>
 
 extern BYTE m_CrywolfState;
-
 
 extern int g_iChatInputType;
 
@@ -59,23 +58,9 @@ DWORD g_dwCurrentPressedButtonID = 0;
 const int COORDINATE_TYPE_LEFT_TOP = 1;
 const int COORDINATE_TYPE_LEFT_DOWN = 2;
 
-static BOOL CheckMouseIn(int iPos_x, int iPos_y, int iWidth, int iHeight,
-                         int CoordType = COORDINATE_TYPE_LEFT_TOP)
+static BOOL CheckMouseIn(int iPos_x, int iPos_y, int iWidth, int iHeight)
 {
-    if (CoordType == COORDINATE_TYPE_LEFT_DOWN)
-    {
-        if (MouseX >= iPos_x && MouseX < iPos_x + iWidth &&
-            MouseY >= iPos_y - iHeight && MouseY < iPos_y)
-            return TRUE;
-        else return FALSE;
-    }
-    else
-    {
-        if (MouseX >= iPos_x && MouseX < iPos_x + iWidth &&
-            MouseY >= iPos_y && MouseY < iPos_y + iHeight)
-            return TRUE;
-        else return FALSE;
-    }
+    return MouseX >= iPos_x && MouseX < iPos_x + iWidth && MouseY >= iPos_y && MouseY < iPos_y + iHeight;
 }
 
 void CUIMessage::SendUIMessage(int iMessage, LONG_PTR iParam1, LONG_PTR iParam2)
@@ -108,9 +93,6 @@ CUIControl::CUIControl()
     m_iOptions = 0;
     SetPosition(0, 0);
     SetSize(100, 100);
-    SetArrangeType();
-    SetResizeType();
-    m_iCoordType = COORDINATE_TYPE_LEFT_TOP;
 }
 
 void CUIControl::SetState(int iState)
@@ -135,20 +117,6 @@ void CUIControl::SetSize(int iWidth, int iHeight)
     m_iHeight = iHeight;
 }
 
-void CUIControl::SetArrangeType(int iArrangeType, int iRelativePos_x, int iRelativePos_y)
-{
-    m_iArrangeType = iArrangeType;
-    m_iRelativePos_x = iRelativePos_x;
-    m_iRelativePos_y = iRelativePos_y;
-}
-
-void CUIControl::SetResizeType(int iResizeType, int iRelativeWidth, int iRelativeHeight)
-{
-    m_iResizeType = iResizeType;
-    m_iRelativeWidth = iRelativeWidth;
-    m_iRelativeHeight = iRelativeHeight;
-}
-
 void CUIControl::SendUIMessageDirect(int iMessage, int iParam1, int iParam2)
 {
     SendUIMessage(iMessage, iParam1, iParam2);
@@ -160,15 +128,14 @@ BOOL CUIControl::DoAction(BOOL bMessageOnly)
     while (m_MessageList.empty() == FALSE)
     {
         GetUIMessage();
-        if (HandleMessage() == FALSE)
-            DefaultHandleMessage();
+        HandleMessage();
     }
 
     DoActionSub(bMessageOnly);
 
     if (bMessageOnly == TRUE) return 0;
 
-    if (::CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight, m_iCoordType))
+    if (::CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight))
     {
         if (g_dwMouseUseUIID == 0)
         {
@@ -212,70 +179,4 @@ BOOL CUIControl::DoAction(BOOL bMessageOnly)
     }
     return DoMouseAction();
 }
-
-void CUIControl::DefaultHandleMessage()
-{
-    switch (m_WorkMessage.m_iMessage)
-    {
-    case UI_MESSAGE_P_MOVE:
-        if (m_dwParentUIID != 0)
-        {
-            CUIBaseWindow* pWindow = g_pWindowMgr->GetWindow(m_dwParentUIID);
-            if (pWindow != nullptr)
-            {
-                switch (m_iArrangeType)
-                {
-                case 0:
-                    SetPosition(pWindow->RPos_x(m_iRelativePos_x), pWindow->RPos_y(m_iRelativePos_y));
-                    break;
-                case 1:
-                    SetPosition(pWindow->RPos_x(-1 * m_iRelativePos_x) + pWindow->RWidth(), pWindow->RPos_y(m_iRelativePos_y));
-                    break;
-                case 2:
-                    SetPosition(pWindow->RPos_x(m_iRelativePos_x), pWindow->RPos_y(-1 * m_iRelativePos_y) + pWindow->RHeight());
-                    break;
-                case 3:
-                    SetPosition(pWindow->RPos_x(-1 * m_iRelativePos_x) + pWindow->RWidth(), pWindow->RPos_y(-1 * m_iRelativePos_y) + pWindow->RHeight());
-                    break;
-                default:
-                    break;
-                }
-            }
-        }
-        break;
-    case UI_MESSAGE_P_RESIZE:
-        if (m_dwParentUIID != 0)
-        {
-            CUIBaseWindow* pWindow = g_pWindowMgr->GetWindow(m_dwParentUIID);
-            if (pWindow != nullptr)
-            {
-                switch (m_iResizeType)
-                {
-                case 0:
-                    if (m_iRelativeWidth == 0 && m_iRelativeHeight == 0) break;
-                    else SetSize(m_iRelativeWidth, m_iRelativeHeight);
-                    break;
-                case 1:
-                    SetSize(pWindow->RWidth() + m_iRelativeWidth, m_iRelativeHeight);
-                    break;
-                case 2:
-                    SetSize(m_iRelativeWidth, pWindow->RHeight() + m_iRelativeHeight);
-                    break;
-                case 3:
-                    SetSize(pWindow->RWidth() + m_iRelativeWidth, pWindow->RHeight() + m_iRelativeHeight);
-                    break;
-                default:
-                    break;
-                }
-            }
-        }
-        break;
-    default:
-        break;
-    }
-}
-
-#ifndef KJH_ADD_INGAMESHOP_UI_SYSTEM
-const int UIMAX_TEXT_LINE = 150;
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 

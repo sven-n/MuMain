@@ -2,7 +2,7 @@
 
 #include "UI/Widgets/Window/Tooltip.h"
 #include "UI/Core/WindowCommon.h"
-#include "UI/Widgets/UIControls.h"
+#include "UI/Social/SocialWindowCore.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/Scaling/UITransform.h"
 #include "Core/Utilities/StringUtils.h"

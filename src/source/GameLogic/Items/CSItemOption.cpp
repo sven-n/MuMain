@@ -11,7 +11,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Character/CharacterManager.h"
-#include "UI/Widgets/UIControls.h"
+#include "UI/Social/SocialWindowCore.h"
 #include "UI/Core/WindowSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "GameLogic/Items/CSItemOption.h"

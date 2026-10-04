@@ -377,35 +377,6 @@ void CGuardWindow::ClearGuildList()
     m_GuildLists.ClearSiegeGuilds();
 }
 
-void CGuardWindow::RenderScrollBarFrame(int iPos_x, int iPos_y, int iHeight)
-{
-    RenderImage(IMAGE_GUARDWINDOW_SCROLL_TOP, iPos_x, iPos_y, 7, 3);
-#ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
-
-    BITMAP_t* pImage = &Bitmaps[IMAGE_GUARDWINDOW_SCROLL_MIDDLE];
-    float _Temp = pImage->Height - 1;
-    float _fMiddle_Cnt = (iHeight - 6) / _Temp;
-    int _iMiddle_Cnt = (int)_fMiddle_Cnt;
-    float _Middle_rest = _fMiddle_Cnt - _iMiddle_Cnt;
-
-    for (int i = 0; i < _iMiddle_Cnt; i++)
-        RenderImage(IMAGE_GUARDWINDOW_SCROLL_MIDDLE, iPos_x, iPos_y + (float)(i * _Temp + 3), 7, _Temp);
-
-    RenderImage(IMAGE_GUARDWINDOW_SCROLL_MIDDLE, iPos_x, iPos_y + (float)(_iMiddle_Cnt * _Temp + 3), 7, _Temp * _Middle_rest);
-#else //PBG_ADD_INGAMESHOP_UI_ITEMSHOP
-    RenderBitmap(IMAGE_GUARDWINDOW_SCROLL_MIDDLE, iPos_x, iPos_y + 3, 7.f, iHeight - 6, 0, 0, 7.f / 8.f, 15.f / 16.f);
-#endif //PBG_ADD_INGAMESHOP_UI_ITEMSHOP
-    RenderImage(IMAGE_GUARDWINDOW_SCROLL_BOTTOM, iPos_x, iPos_y + iHeight - 3, 7, 3);
-}
-
-void CGuardWindow::RenderScrollBar(int iPos_x, int iPos_y, BOOL bIsClicked)
-{
-    const DWORD scrollBarColor = bIsClicked
-        ? RGBA(200, 200, 200, 255)
-        : RGBA(255, 255, 255, 255);
-    RenderImage(IMAGE_GUARDWINDOW_SCROLLBAR_ON, iPos_x, iPos_y, 15, 30, 0.f, 0.f, scrollBarColor);
-}
-
 void CGuardWindow::BuildRmlUi()
 {
     if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())

@@ -14,7 +14,7 @@ detail.
 ## Why this exists
 
 The client's game UI is spread across three legacy widget frameworks — the `CWin`/`CButton`
-widget set, the `CUIControl`/`CUIBaseWindow` toolkit (`UIControls.h`), and the `mu::ui::window::CObject` tier,
+widget set, the `CUIControl`/`CUIBaseWindow` toolkit (`SocialWindowCore.h`), and the `mu::ui::window::CObject` tier,
 all living directly under `UI/` in topic folders (`UI/Widgets/`, `UI/HUD/`, `UI/Inventory/`, etc.)
 — with no layout engine, retained scene graph, or data-binding layer between them. RmlUi is being
 adopted as the long-term replacement per

@@ -1,5 +1,15 @@
-#ifndef __UICONTROL_H__
-#define __UICONTROL_H__
+#pragma once
+
+// What is left of the old UI/Social/SocialWindowCore.h widget toolkit: the base every window of the
+// friend/mail/chat family sits on, and the UI-message queue its manager runs them through.
+//
+// This is not a general widget toolkit any more and should not be used as one. Every widget that
+// made it one -- the buttons, the list boxes, the text input -- is deleted, and new UI is built
+// from RmlUi documents (docs/rmlui-ui-system/building-new-ui.md). It lives beside its only users
+// in UI/Social/ rather than in UI/Widgets/ so that is plain from the path.
+//
+// CUIControl carries a window's identity, state, geometry and options; CUIMessage carries the
+// queue. Taking CUIBaseWindow and CUIPhotoViewer off this base is what would delete the file.
 
 #include "Engine/Object/ZzzInfomation.h"
 
@@ -10,15 +20,6 @@
 #include <type_traits>
 #include <memory>
 #include <vector>
-
-inline DWORD _ARGB(BYTE a, BYTE r, BYTE g, BYTE b)
-{
-    return (a << 24) + (b << 16) + (g << 8) + (r);
-}
-
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#define UIMAX_TEXT_LINE 150
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 enum UISTATES
 {
@@ -61,8 +62,6 @@ enum UI_MESSAGE_ENUM
     UI_MESSAGE_BOTTOM,
     UI_MESSAGE_SELECTED,
     UI_MESSAGE_TEXTINPUT,
-    UI_MESSAGE_P_MOVE,
-    UI_MESSAGE_P_RESIZE,
     UI_MESSAGE_BTNLCLICK,
     UI_MESSAGE_TXTRETURN,
     UI_MESSAGE_YNRETURN,
@@ -147,10 +146,6 @@ public:
     {
         return m_iHeight;
     }
-    // cppcheck-suppress virtualCallInConstructor ; called from the constructor, static binding intended
-    virtual void SetArrangeType(int iArrangeType = 0, int iRelativePos_x = 0, int iRelativePos_y = 0);
-    // cppcheck-suppress virtualCallInConstructor ; called from the constructor, static binding intended
-    virtual void SetResizeType(int iResizeType = 0, int iRelativeWidth = 0, int iRelativeHeight = 0);
     virtual void Render() {}
     virtual BOOL DoAction(BOOL bMessageOnly = FALSE);
 
@@ -160,7 +155,6 @@ protected:
     {
         return TRUE;
     }
-    virtual void DefaultHandleMessage();
     virtual BOOL HandleMessage()
     {
         return FALSE;
@@ -173,14 +167,8 @@ protected:
     int m_iOptions;
     int m_iPos_x, m_iPos_y;
     int m_iWidth, m_iHeight;
-    int m_iArrangeType;
-    int m_iResizeType;
-    int m_iRelativePos_x, m_iRelativePos_y;
-    int m_iRelativeWidth, m_iRelativeHeight;
-    int m_iCoordType;
 };
 
 extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;
 
-#endif //__UICONTROL_H__

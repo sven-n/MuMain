@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "UI/Social/PhotoViewerControl.h"
 
-#include "UI/Social/UIWindows.h"
+#include "UI/Social/PhotoViewer.h"
 #include "UI/Scaling/UITransform.h"
 
 #include <RmlUi/Core.h>

@@ -8,7 +8,7 @@
 
 #include "stdafx.h"
 #include "Core/Utilities/UsefulDef.h"
-#include "UI/Widgets/UIControls.h"
+#include "UI/Social/SocialWindowCore.h"
 #include "Render/Text/CUIRenderText.h"
 #include "Render/Text/TextWrap.h"
 

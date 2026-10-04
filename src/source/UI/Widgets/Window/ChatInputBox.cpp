@@ -5,7 +5,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "UI/HUD/ChatLogWindow.h"
-#include "UI/Widgets/UIControls.h"
+#include "UI/Social/SocialWindowCore.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "Engine/Object/ZzzOpenData.h"

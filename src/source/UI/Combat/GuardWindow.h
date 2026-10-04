@@ -117,10 +117,6 @@ public:
     bool Update();
     bool Render();
 
-    // Shared with the still-native list boxes that draw the same scroll bar (UIControls.cpp);
-    // CGuardWindow loads its images (LoadScrollBarImages()).
-    void RenderScrollBarFrame(int iPos_x, int iPos_y, int iHeight);
-    void RenderScrollBar(int iPos_x, int iPos_y, BOOL bIsClicked);
 
     void OpeningProcess();
     void ClosingProcess();
@@ -138,6 +134,11 @@ public:
     void ReloadRmlTheme();
 
 private:
+    // KNOWN ISSUE, not this pass's to fix: these slots alias CChatLogWindow's, which CScrollBar
+    // (UI/Widgets/Window/ScrollBar.cpp) loads and renders from. Nothing in this window draws them
+    // any more -- the two renderers that did went with the native list boxes -- so the load is
+    // redundant and the unload on hide deletes textures CScrollBar still expects. Needs runtime
+    // checking of who owns these slots, not a blind deletion.
     void LoadScrollBarImages();
     void UnloadScrollBarImages();
     bool BtnProcess();

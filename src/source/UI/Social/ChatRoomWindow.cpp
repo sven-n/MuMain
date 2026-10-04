@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "UI/Social/UIWindows.h"
+#include "UI/Social/ChatRoomWindow.h"
 #include "UI/Social/ChatRoom.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowSystem.h"

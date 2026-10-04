@@ -17,7 +17,7 @@
 #include "UI/Scaling/UITransform.h"
 
 #include "Render/Effects/ZzzEffect.h"
-#include "UI/Widgets/UIControls.h"
+#include "UI/Social/SocialWindowCore.h"
 #include "UI/Core/WindowManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"

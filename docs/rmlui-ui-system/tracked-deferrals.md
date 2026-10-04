@@ -74,7 +74,7 @@ phases. Whether that one-file-three-classes shape is itself worth splitting (e.g
 lands and all three are ported) is a real, still-unmade decision; revisit it then, but it's a
 file-organization question now, not a naming one.
 
-## Tracked deferral: `CUIControl` family (`UIControls.h`) full retirement
+## Tracked deferral: `CUIControl` family (`SocialWindowCore.h`) full retirement
 
 **Closed 2026-10-04**, except for one item that was never part of it. Not a permanent third
 toolkit alongside RmlUi and `mu::ui::window` -- a fully enumerable, closeable checklist
@@ -119,16 +119,23 @@ there were four independent pieces, and all four are now gone:
 Slide help went separately (`CUISlideHelp`/`CSlideHelpMgr` are now `UI::HUD::SlideLane`/
 `SlideTicker`); its server-pushed notice lane remains unverified.
 
-**What is left, and why the header still exists.** `UIControls.h` is 186 lines: `CUIControl`, its
-`CUIMessage` plumbing, the `UISTATES`/`UI_MESSAGE_ENUM` enums, `g_dwActiveUIID`/`g_dwMouseUseUIID`,
-and the two row records. `CUIBaseWindow` and `CUIPhotoViewer` (`UI/Social/UIWindows.h`) still derive
-from `CUIControl` for what it carries -- position, size, state, parent id and the UI-message queue
-the friend family's window manager runs on. **Deleting the header needs those two off that base,
-which is its own piece of work and was never part of this checklist.** It is also the natural
-companion to splitting `UIWindows.h` itself, a grab-bag header whose name no longer says what it
-holds. A few dead enumerators remain inside otherwise-live enums (`UISTATE_SCROLL`,
-`UISTATE_DISABLE`, `UI_MESSAGE_NULL`, `UI_MESSAGE_TEXTINPUT`, the four list-message values);
-pruning them is cosmetic and was left alone.
+**What is left, and where it lives now.** The old `UI/Widgets/UIControls.h` is
+`UI/Social/SocialWindowCore.h` (174 lines): `CUIControl`, its `CUIMessage` plumbing, the
+`UISTATES`/`UI_MESSAGE_ENUM` enums, `g_dwActiveUIID`/`g_dwMouseUseUIID` and the two row records. It
+sits beside its only users rather than in `UI/Widgets/`, so the path says what it is -- one
+subsystem's base class, not a toolkit. `CUIBaseWindow` and `CUIPhotoViewer` still derive from it for
+position, size, state, parent id and the message queue the family's manager runs on. **Deleting the
+file needs those two off that base, which is its own piece of work and was never part of this
+checklist.**
+
+The grab-bag `UIWindows.h` is split (2026-10-04): `SocialWindowBase.h` (the shared base and window
+styles), one header per window matching the `.cpp` that implements it (`ChatRoomWindow.h`,
+`LetterReadWindow.h`, `LetterWriteWindow.h`, `FriendShellWindow.h`), `PhotoViewer.h/.cpp` for the
+native 3D sender, and `SocialWindowManager.h/.cpp` for the manager, the lists and the friend menu.
+
+Dead enumerators still sit inside otherwise-live enums (`UISTATE_SCROLL`, `UISTATE_DISABLE`,
+`UI_MESSAGE_NULL`, `UI_MESSAGE_TEXTINPUT`, the four list-message values); pruning them is cosmetic
+and was left alone.
 
 **Related finding, same investigation**: `CUIManager`/`g_pUIManager` (`UI/Core/UIManager.h/.cpp`)
 looks like a live top-level manager parallel to `mu::ui::window::CManager` — it isn't. Its
@@ -140,7 +147,7 @@ long since migrated to `mu::ui::window::CManager`) but `Open()`/`IsOpen()` only 
 still real: it constructs/owns `g_pUIPopup`/`g_pUIGateKeeper`/jewel-harmony/item-add-option-info as
 globals, and `IsInputEnable()` is a genuinely still-consulted query. Worth knowing mainly so a
 future session doesn't mistake the `MUTEX_*` enum for a live, comprehensive policy layer — most of
-it is vestigial. Not in this retirement checklist's scope (it's not `UIControls.h`), but touches
+it is vestigial. Not in this retirement checklist's scope (it's not `SocialWindowCore.h`), but touches
 the same investigation and the same `g_pUIPopup` dependency as item 3 above.
 
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Social/UIWindows.h"
+#include "UI/Social/SocialWindowManager.h"
 #include "UI/Social/FriendDialogs.h"
 
 namespace mu::ui::window

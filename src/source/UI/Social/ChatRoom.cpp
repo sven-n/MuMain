@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "UI/Social/ChatRoom.h"
 
-#include "UI/Social/UIWindows.h"
+#include "UI/Social/SocialWindowManager.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlDraggable.h"

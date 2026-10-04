@@ -321,7 +321,7 @@ useful detail; full history in git log):
     content, because nothing told them not to. `CMyQuestInfoWindow`'s `data-for` port off
     `CUICurQuestListBox`/`CUIQuestContentsListBox` is the proven reference (same pattern
     `CBuffStrip` established for a simpler array). ~18 `CUITextListBox<T>` subclasses remain
-    (`UI/Widgets/UIControls.h`) spanning guild/chat/letter/socket/in-game-shop/move-command lists —
+    (`UI/Social/SocialWindowCore.h`) spanning guild/chat/letter/socket/in-game-shop/move-command lists —
     see `tracked-deferrals.md`'s entry for the full list. Also found while investigating this:
     `CUIPopup`/`CUIButton`'s remaining live path (`WSclient.cpp`'s generic server-error popups)
     duplicates `CCommonMessageBox`'s job — moving those call sites there retires `CUIPopup`, and
@@ -405,7 +405,7 @@ useful detail; full history in git log):
     and developers can discover the correct component without historical
     knowledge of the codebase.
 
-    **Concrete instance, 2026-09-13**: `UIControls.h`'s `CUIControl` family is not a permanent
+    **Concrete instance, 2026-09-13**: `SocialWindowCore.h`'s `CUIControl` family is not a permanent
     third toolkit — it's a fully enumerable, closeable checklist. It reaches zero consumers and
     can be deleted outright (the same treatment `CWin`/`::CButton`/`CGaugeBar`/`CSlider` already
     got) once: (a) `CUITextInputBox`'s callers move to RmlUi's own native `<input>`/`<textarea>`

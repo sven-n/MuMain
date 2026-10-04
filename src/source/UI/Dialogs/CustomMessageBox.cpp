@@ -3,7 +3,7 @@
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Dialogs/GenericMenuDialog.h"
 #include "Audio/DSPlaySound.h"
-#include "UI/Widgets/UIControls.h"
+#include "UI/Social/SocialWindowCore.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"

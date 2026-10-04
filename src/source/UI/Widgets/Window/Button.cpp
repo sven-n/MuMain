@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 #include "UI/Widgets/Window/Button.h"
-#include "UI/Widgets/UIControls.h"
+#include "UI/Social/SocialWindowCore.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/Sprites/GlobalBitmap.h"
