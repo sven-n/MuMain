@@ -38,8 +38,8 @@
 		      data-class-gold-million="your_gold_tier == 'million'"
 		      data-class-gold-ten-million="your_gold_tier == 'ten-million'">{{your_gold_text}}</span>
 
-		<div id="your_confirm" class="checkbox-row confirm-your" data-class-checked="your_confirm_checked">
-			<div class="checkbox-box"></div>
+		<div id="your_confirm" class="checkbox-row confirm-your">
+			<div class="checkbox-box" data-class-checked="your_confirm_checked"></div>
 		</div>
 
 		<div id="divider"></div>
@@ -55,9 +55,9 @@
 		      data-class-gold-million="my_gold_tier == 'million'"
 		      data-class-gold-ten-million="my_gold_tier == 'ten-million'">{{my_gold_text}}</span>
 
-		<div id="my_confirm" class="checkbox-row confirm-my" data-class-checked="my_confirm_checked"
+		<div id="my_confirm" class="checkbox-row confirm-my"
 		     data-class-waiting="my_confirm_waiting" data-event-click="trade_my_confirm_click">
-			<div class="checkbox-box"></div>
+			<div class="checkbox-box" data-class-checked="my_confirm_checked"></div>
 		</div>
 
 		<div id="btn_exit" class="trade-btn trade-btn-exit" data-event-click="trade_exit_click"></div>
