@@ -10,6 +10,7 @@
 #include "Audio/AudioPlayer.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Theme/ThemeSelection.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Scenes/SceneManager.h"
@@ -921,18 +922,8 @@ void mu::ui::window::COptionWindow::ApplyPendingThemeSwitch()
         return;
     m_iThemeIndex = index;
 
-    // Same theme this dropdown just discovered, so ThemeExists() below is only a defensive
-    // recheck (e.g. the folder was deleted while this dropdown was open) -- Save() persists it the
-    // exact same way `$theme <name>` (muConsoleDebug.cpp) does at runtime, that command being
-    // explicitly session-only while this UI control should persist.
     const std::string& themeName = themes[static_cast<size_t>(index)];
-    if (!UI::RmlBridge::ThemeExists(themeName))
-        return;
-
-    GameConfig::GetInstance().SetRmlTheme(StringUtils::NarrowToWide(themeName));
-    GameConfig::GetInstance().Save();
-    UI::RmlBridge::SetActiveThemeName(themeName);
-    UI::RmlBridge::ReloadAllThemedDocuments();
+    UI::Theme::Select(themeName, UI::Theme::Persistence::Saved);
 }
 
 void mu::ui::window::COptionWindow::RmlUIScaleChanged(int index)

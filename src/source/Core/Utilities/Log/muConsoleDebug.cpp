@@ -22,10 +22,8 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Core/SceneUICoordinator.h"
-#include "UI/RmlBridge/RmlTheme.h"
-#include "UI/RmlBridge/RmlTooltip.h"
+#include "UI/Theme/ThemeSelection.h"
 #include "UI/Windows/RememberPasswordPrompt.h"
-#include "Data/GameConfig/GameConfig.h"
 #include "Core/Utilities/StringUtils.h"
 
 #ifdef _EDITOR
@@ -359,25 +357,14 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         SetMaxMessagePerCycle(message_limit);
         return true;
     }
-    // Runtime RmlUi theme hot-swap, e.g. "$theme modern"/"$theme legacy" -- see
-    // UI::RmlBridge::SetActiveThemeName()'s own comment (RmlTheme.h) for why this alone doesn't
-    // make the switch visible on its own: every currently-open themed window's document/model
-    // must also be rebuilt, which is what UI::RmlBridge::ReloadAllThemedDocuments() accomplishes
-    // below (every themed window/module registered itself via RegisterForThemeReload() at its own
-    // first-document-creation point). Session-only: doesn't persist to config.ini, so a relaunch
-    // still picks up whatever's saved there.
+    // Runtime theme selection is session-only; the Options window persists its choice.
     else if (strCommand.compare(0, 6, L"$theme") == 0)
     {
         if (strCommand.size() > 7)
         {
             const std::wstring themeNameW = strCommand.substr(7);
             const std::string themeName = StringUtils::WideToNarrow(themeNameW.c_str());
-            if (UI::RmlBridge::ThemeExists(themeName))
-            {
-                GameConfig::GetInstance().SetRmlTheme(themeNameW);
-                UI::RmlBridge::SetActiveThemeName(themeName);
-                UI::RmlBridge::ReloadAllThemedDocuments();
-            }
+            UI::Theme::Select(themeName, UI::Theme::Persistence::Session);
         }
         return true;
     }
