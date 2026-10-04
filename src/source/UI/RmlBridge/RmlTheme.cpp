@@ -287,7 +287,7 @@ namespace UI::RmlBridge
 
         // Prefer a per-theme override of the document's own MARKUP (not just its styling) at
         // themes/<theme>/<name>.rml, falling back to the shared documentPath when no such override
-        // exists -- every window but main_frame.rml still has none, so this is a no-op for them
+        // exists -- most windows have none, so this is a no-op for them
         // (one extra failed ifstream open, immediately falls through). This exists for content
         // that must genuinely differ, not just look different, per theme; CSS-only hiding
         // (`display: none`) and a data-model boolean gating `data-if` both put per-theme awareness

@@ -7,69 +7,114 @@
 	<link type="text/rcss" href="main_frame.rcss"/>
 </head>
 <body data-model="main_frame">
-	<!-- Modern theme's copy of CMainFrameWindow's HP/MP/AG/SD/EXP bars. Per-theme file since the
-	     bottom-HUD button row is genuinely absent here (moved to main_frame_top.rml's
-	     #top_right_row), not just CSS-hidden -- keep ids/classes/bindings in sync with
-	     themes/legacy/main_frame.rml except #buttons/#buttons_top. #bars gets left/top/scale
-	     live from C++; #exp nests inside it to inherit that transform. -->
+	<!-- CMainFrameWindow's HUD, shared by every theme: gauges, EXP, item and skill hotkeys, the
+	     skill grid and the corner buttons. A theme styles or hides each part in its own
+	     main_frame.rcss; markup only one theme uses is noted where it appears. #bars gets
+	     left/top/scale live from C++ and everything nests inside it to inherit that transform. -->
 	<div id="bars" data-style-left="bars_left + 'px'" data-style-top="bars_top + 'px'" data-style-transform="'scale(' + bars_scale + ')'">
-		<!-- #gauge_frame is declared AFTER the fill divs -- same-stacking-level siblings paint in
-		     DOM order, so declaring it first would let the fills' solid backgrounds paint over
-		     its thin top border. -->
+		<!-- The strip's backing, painted before everything over it: the original menu art
+		     (.frame-art), or flat zone and band fills under #gauge_frame's border, which comes
+		     after them so their backgrounds don't cover it. -->
+		<div id="frame_left" class="frame-art"></div>
+		<div id="frame_middle" class="frame-art"></div>
+		<div id="frame_right" class="frame-art"></div>
 		<div id="gauge_fill_left"></div>
 		<div id="gauge_fill_right"></div>
 		<div id="item_band_fill" class="slot-fill"></div>
 		<div id="skill_band_fill" class="slot-fill"></div>
 		<div id="skill_list_highlight" data-class-hidden="!skill_list_up"></div>
 		<div id="gauge_frame"></div>
+
+		<!-- Each gauge carries its readout twice, current value (.value-current) and current/max
+		     (.value-full), and each hint twice: .native-hint renders at the original's text size,
+		     cancelling #bars's scale, .scaled-hint scales with the HUD. A theme shows one of each. -->
 		<div id="bar_hp" class="gauge-slot slot-frame slot-fill">
 			<div id="bar_hp_fill" class="gauge-fill gauge-fill-hp gauge-fill-vertical" data-class-poisoned="poisoned" data-style-height="hp_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-hp gauge-fill-horizontal" data-class-poisoned="poisoned" data-style-width="hp_fraction * 100 + '%'"></div>
-			<span class="gauge-num">{{hp_text}}</span>
+			<span class="gauge-num value-current">{{hp_current_text}}</span>
+			<span class="gauge-num value-full">{{hp_text}}</span>
 		</div>
-		<span class="tooltip tooltip-hp">{{hp_tooltip}}</span>
+		<span class="tooltip tooltip-hp native-hint" data-style-font-size="hint_px + 'px'" data-style-transform="'scale(' + (1 / bars_scale) + ')'">{{hp_tooltip}}</span>
+		<span class="tooltip tooltip-hp scaled-hint">{{hp_tooltip}}</span>
 		<div id="bar_sd" class="gauge-slot slot-frame slot-fill">
 			<div class="gauge-fill gauge-fill-sd gauge-fill-vertical" data-style-height="sd_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-sd gauge-fill-horizontal" data-style-width="sd_fraction * 100 + '%'"></div>
-			<span class="gauge-num">{{sd_text}}</span>
+			<span class="gauge-num value-current">{{sd_current_text}}</span>
+			<span class="gauge-num value-full">{{sd_text}}</span>
 		</div>
-		<span class="tooltip tooltip-sd">{{sd_tooltip}}</span>
+		<span class="tooltip tooltip-sd native-hint" data-style-font-size="hint_px + 'px'" data-style-transform="'scale(' + (1 / bars_scale) + ')'">{{sd_tooltip}}</span>
+		<span class="tooltip tooltip-sd scaled-hint">{{sd_tooltip}}</span>
 		<div id="bar_ag" class="gauge-slot slot-frame slot-fill">
 			<div class="gauge-fill gauge-fill-ag gauge-fill-vertical" data-style-height="ag_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-ag gauge-fill-horizontal" data-style-width="ag_fraction * 100 + '%'"></div>
-			<span class="gauge-num">{{ag_text}}</span>
+			<span class="gauge-num value-current">{{ag_current_text}}</span>
+			<span class="gauge-num value-full">{{ag_text}}</span>
 		</div>
-		<span class="tooltip tooltip-ag">{{ag_tooltip}}</span>
+		<span class="tooltip tooltip-ag native-hint" data-style-font-size="hint_px + 'px'" data-style-transform="'scale(' + (1 / bars_scale) + ')'">{{ag_tooltip}}</span>
+		<span class="tooltip tooltip-ag scaled-hint">{{ag_tooltip}}</span>
 		<div id="bar_mp" class="gauge-slot slot-frame slot-fill">
 			<div class="gauge-fill gauge-fill-mp gauge-fill-vertical" data-style-height="mp_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-mp gauge-fill-horizontal" data-style-width="mp_fraction * 100 + '%'"></div>
-			<span class="gauge-num">{{mp_text}}</span>
+			<span class="gauge-num value-current">{{mp_current_text}}</span>
+			<span class="gauge-num value-full">{{mp_text}}</span>
 		</div>
-		<span class="tooltip tooltip-mp">{{mp_tooltip}}</span>
+		<span class="tooltip tooltip-mp native-hint" data-style-font-size="hint_px + 'px'" data-style-transform="'scale(' + (1 / bars_scale) + ')'">{{mp_tooltip}}</span>
+		<span class="tooltip tooltip-mp scaled-hint">{{mp_tooltip}}</span>
 
-		<!-- EXP bar spans from the item-hotkey band's start to the button group's end.
-		     exp_fraction is progress within the current decile, not overall level. -->
+		<!-- The original's bottom button row. A theme that puts these buttons elsewhere hides
+		     it (the modern theme's are in main_frame_top.rml). -->
+		<div id="buttons">
+			<div id="btn_cshop" class="frame-btn slot-frame slot-fill" data-class-open="cshop_open" data-event-click="mainframe_cshop_click">
+				<span class="btn-icon-label">SHOP</span>
+			</div>
+			<span class="tooltip tooltip-cshop" data-style-font-size="hint_px + 'px'" data-style-transform="'scale(' + (1 / bars_scale) + ')'">{{cshop_tooltip}}</span>
+			<div id="btn_chainfo" class="frame-btn slot-frame slot-fill" data-class-open="chainfo_open" data-event-click="mainframe_chainfo_click">
+				<span class="btn-icon-label">CHAR</span>
+				<div class="alert-dot" data-class-hidden="!chainfo_alert"></div>
+			</div>
+			<span class="tooltip tooltip-chainfo" data-style-font-size="hint_px + 'px'" data-style-transform="'scale(' + (1 / bars_scale) + ')'">{{chainfo_tooltip}}</span>
+			<div id="btn_myinven" class="frame-btn slot-frame slot-fill" data-class-open="myinven_open" data-event-click="mainframe_myinven_click">
+				<span class="btn-icon-label">INV</span>
+			</div>
+			<span class="tooltip tooltip-myinven" data-style-font-size="hint_px + 'px'" data-style-transform="'scale(' + (1 / bars_scale) + ')'">{{myinven_tooltip}}</span>
+			<div id="btn_friend" class="frame-btn slot-frame slot-fill" data-class-open="friend_open" data-event-click="mainframe_friend_click">
+				<span class="btn-icon-label">FRIEND</span>
+				<div class="alert-dot" data-class-hidden="!friend_alert"></div>
+			</div>
+			<span class="tooltip tooltip-friend" data-style-font-size="hint_px + 'px'" data-style-transform="'scale(' + (1 / bars_scale) + ')'">{{friend_tooltip}}</span>
+			<div id="btn_window" class="frame-btn slot-frame slot-fill" data-class-open="window_open" data-event-click="mainframe_window_click">
+				<span class="btn-icon-label">MENU</span>
+			</div>
+			<span class="tooltip tooltip-window" data-style-font-size="hint_px + 'px'" data-style-transform="'scale(' + (1 / bars_scale) + ')'">{{window_tooltip}}</span>
+		</div>
+
+		<!-- EXP bar across the strip, with the original art's bottom strip behind it
+		     (.exp-frame). exp_fraction is progress within the current decile, not overall
+		     level. -->
 		<div id="exp">
+			<div id="exp_frame_left" class="exp-frame"></div>
+			<div id="exp_frame_middle" class="exp-frame"></div>
+			<div id="exp_frame_right" class="exp-frame"></div>
 			<div id="exp_track" class="slot-frame slot-fill">
 				<div id="exp_fill" data-style-width="exp_fraction * 100 + '%'"></div>
 			</div>
 			<span id="exp_digit">{{exp_digit}}</span>
-			<span class="tooltip" id="exp_tooltip">{{exp_tooltip}}</span>
+			<span class="tooltip exp-tooltip native-hint" data-style-font-size="hint_px + 'px'" data-style-transform="'scale(' + (1 / bars_scale) + ')'">{{exp_tooltip}}</span>
+			<span class="tooltip exp-tooltip scaled-hint">{{exp_tooltip}}</span>
 		</div>
 
 		<!-- Item hotkeys: hover highlight, stack count, right-click-to-use, and the icon -- the
 		     item's native 3D render, drawn into a render target .item-icon shows
-		     (CItemHotKey::SyncSlotIcons()), so this theme's RCSS places it. -->
+		     (CItemHotKey::SyncSlotIcons()), so the theme's RCSS places it. -->
 		<div id="item_slots">
 			<div id="item_slot_0" class="slot-frame" data-class-selected="item_slot_0_hovered" data-event-mouseover="item_hotkey_hover(0)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(0)"><img id="item_icon_0" class="item-icon"/><span class="slot-hotkey-label">Q</span><span class="item-stack-label">{{item_slot_0_count}}</span></div>
 			<div id="item_slot_1" class="slot-frame" data-class-selected="item_slot_1_hovered" data-event-mouseover="item_hotkey_hover(1)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(1)"><img id="item_icon_1" class="item-icon"/><span class="slot-hotkey-label">W</span><span class="item-stack-label">{{item_slot_1_count}}</span></div>
 			<div id="item_slot_2" class="slot-frame" data-class-selected="item_slot_2_hovered" data-event-mouseover="item_hotkey_hover(2)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(2)"><img id="item_icon_2" class="item-icon"/><span class="slot-hotkey-label">E</span><span class="item-stack-label">{{item_slot_2_count}}</span></div>
 			<div id="item_slot_3" class="slot-frame" data-class-selected="item_slot_3_hovered" data-event-mouseover="item_hotkey_hover(3)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(3)"><img id="item_icon_3" class="item-icon"/><span class="slot-hotkey-label">R</span><span class="item-stack-label">{{item_slot_3_count}}</span></div>
 		</div>
-		<!-- data-class-selected mirrors which hotkey slot shows the equipped skill.
-		     skill-hotkey-label uses its own class (not .slot-hotkey-label) since it's real
-		     visible content, not sprite-baked; empty string renders nothing for an unbound
-		     slot. -->
+		<!-- data-class-selected mirrors which hotkey slot shows the equipped skill. Per slot:
+		     the skill icon (a skill_icons.rcss/master_skill_icons.rcss sprite bound by C++), its
+		     hotkey number, the cooldown wipe. -->
 		<div id="skill_slots">
 			<div id="skill_slot_0" class="slot-frame" data-class-selected="skill_slot_0_selected" data-event-click="skill_hotkey_click(0)" data-event-mouseover="skill_hotkey_hover(0)" data-event-mouseout="skill_unhover"><div class="skill-icon" data-style-decorator="skill_slot_0_icon"></div><span class="skill-hotkey-label">{{skill_slot_0_hotkey}}</span><div class="cooldown-wipe" data-style-height="skill_slot_0_cooldown * 100 + '%'"></div></div>
 			<div id="skill_slot_1" class="slot-frame" data-class-selected="skill_slot_1_selected" data-event-click="skill_hotkey_click(1)" data-event-mouseover="skill_hotkey_hover(1)" data-event-mouseout="skill_unhover"><div class="skill-icon" data-style-decorator="skill_slot_1_icon"></div><span class="skill-hotkey-label">{{skill_slot_1_hotkey}}</span><div class="cooldown-wipe" data-style-height="skill_slot_1_cooldown * 100 + '%'"></div></div>
@@ -79,8 +124,8 @@
 			<div id="current_skill_slot" class="slot-frame" data-event-click="skill_current_click" data-event-mouseover="skill_current_hover" data-event-mouseout="skill_unhover"><div class="skill-icon" data-style-decorator="current_skill_icon"></div><span class="skill-hotkey-label">{{current_skill_hotkey}}</span><div class="cooldown-wipe" data-style-height="current_skill_cooldown * 100 + '%'"></div></div>
 		</div>
 
-		<!-- Skill list: expanded grid + pet-command row. Each cell is its outline, skill icon,
-		     hotkey number and cooldown wipe; data-for since the cell count varies with skills
+		<!-- Skill list: expanded grid + pet-command row. Each cell is its box, icon, hotkey
+		     number and cooldown wipe; data-for since the cell count varies with skills
 		     learned. -->
 		<div id="skill_grid" data-class-hidden="!skill_grid_open">
 			<div class="skill-cell" data-for="cell : skill_grid_cells"

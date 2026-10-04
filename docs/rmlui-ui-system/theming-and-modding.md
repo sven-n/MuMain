@@ -22,7 +22,7 @@ a theme needs more than that.
 hardcoded directly into what's supposed to be the shared, theme-neutral file — backwards, since it
 meant `legacy` was the one being constrained by `modern`'s vocabulary, not the other way around.
 Each now has a `themes/modern/` fork carrying those classes; the shared file is `legacy`'s own
-theme-neutral copy, same pattern as `main_frame`'s existing two-file case below.
+theme-neutral copy.
 
 **Forking safely needs a check — built 2026-09-04**: whichever theme's RML a window loads, the
 C++ side still expects the exact same ids/`data-model` bindings/event-callback names to exist.
@@ -30,7 +30,7 @@ C++ side still expects the exact same ids/`data-model` bindings/event-callback n
 step) diffs the ids/bindings a window's C++ actually references against every theme's copy of that
 window's RML and fails the build if none of them provide something the code needs — otherwise a
 missing or renamed id would fail **completely silently** (a dead button, not a build error or even
-a log line), the same failure shape as `main_frame`'s existing two-file hand-sync burden below.
+a log line).
 
 ## How theme resolution works
 
@@ -65,38 +65,27 @@ a "modern" theme uses flat colors/vector shapes instead.
 
 `UI::RmlBridge::LoadThemedDocument()` ([`RmlTheme.cpp`](../../src/source/UI/RmlBridge/RmlTheme.cpp))
 looks for `themes/<theme>/<name>.rml` first, falling back to the shared `<name>.rml` when no such
-file exists. As of this writing, `modern` has its own `.rml` for `login`, `msg_win`,
-`remember_password_prompt`, `my_inventory` (+ its background-context companion
-`my_inventory_bg`), `my_quest_info`, and `main_frame` — every other window has no per-theme
-override, so the lookup is a no-op for them (one extra failed `ifstream` open). Grep
-`themes/modern/*.rml` for the live, current list rather than trusting this paragraph's exact
-file names — it's kept current on a best-effort basis, not mechanically checked. Most of these
-exist so `modern`'s own `.modern-frame`/`.modern-frame-crimson`/`.title-glow` class vocabulary
-doesn't have to live in the shared, theme-neutral file (the Core Principle section above). `main_frame` is the one example forked for a **different** reason — two independently-maintained files —
-[`themes/legacy/main_frame.rml`](../../src/bin/Data/Interface/RmlUi/themes/legacy/main_frame.rml)
-and
-[`themes/modern/main_frame.rml`](../../src/bin/Data/Interface/RmlUi/themes/modern/main_frame.rml)
-— because modern's bottom-HUD button row moved to a genuinely different place in the document
-(a top-right panel, `#top_right_row`, echoing `mu_helper_bar`'s styling; since the stacking table
-it is a document of its own, `themes/modern/main_frame_top.rml`, bound to the same model and
-loaded only when the theme has that file, so it stacks under the windows docked over that corner
-while the bars stay over them) while legacy's stayed
-nested inside `#bars` where the original bottom-HUD button row always was. Two things were tried
-and rejected first: CSS-only hiding (`display: none` on modern's copy of the old row leaked
-through no matter how it was hardened) and a `data-if` bound to a C++-set "is modern" model
-boolean (rejected as the same kind of per-context C++ branching
-[`legacy-theme-modernization.md`](legacy-theme-modernization.md) exists to move *out* of C++, just
-relocated into a model field instead of an `if` statement).
+file exists (for a window with no fork, one extra failed `ifstream` open). `modern` forks a
+few dozen documents; `themes/modern/*.rml` is the live list. Most of these exist so `modern`'s own `.modern-frame`/`.modern-frame-crimson`/`.title-glow` class vocabulary
+doesn't have to live in the shared, theme-neutral file (the Core Principle section above).
 
-**Fork the RML when a theme's content genuinely differs in DOM structure or position, not merely in
-visibility or style** — "this element doesn't exist in the other theme's layout at all"
-(main_frame's button row) is worth a fork; "this element is hidden/styled differently" (ordinary
-RCSS `.hidden`/selector differences) isn't — RCSS alone already covers that case, and forking for
-it would just be needless duplication, not a policy violation. A real fork does come with a cost,
-currently paid entirely by hand for `main_frame`: the two files' shared ids/classes/bindings have
-to be kept in sync manually (each file's own header comment says so explicitly — check the other
-file's comment before editing either one) — see the Core Principle section above for the drift-
-check tooling this should eventually have and doesn't yet.
+`main_frame` was forked for a different reason and has since been merged back, which makes it the
+worked example of *not* forking. Its two copies differed in structure: legacy kept the original
+bottom button row inside `#bars`, while modern moved its buttons to `main_frame_top.rml` and added
+flat backing elements legacy has no use for. Hand-syncing two copies of the HUD made every added,
+moved or removed part a two-file edit. The shared `main_frame.rml` now carries every part either
+theme uses, and each theme's `main_frame.rcss` hides the others (`display: none`). Where the two
+themes bind different values to the same spot, the markup carries both variants and each theme
+shows one: a gauge's readout as `.value-current` or `.value-full`, its hint as `.native-hint`
+(native text size, counter-scaled through bound inline styles a theme's RCSS cannot override) or
+`.scaled-hint`. An early attempt at CSS-only hiding was abandoned because the old row "leaked"
+through, but the record of it describes the whole stylesheet intermittently failing to apply, not
+`display: none` failing.
+
+**Fork the RML only when a theme needs markup the shared file cannot reasonably carry** — prefer
+adding the element to the shared file and letting the other theme hide it. A fork's
+ids/classes/bindings have to be kept in step with the shared file by hand;
+`tools/check_rml_rcss_drift.py` catches a missing binding, not a missing element.
 
 No source changes, no recompilation.
 

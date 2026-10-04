@@ -1,11 +1,15 @@
-/* Modern theme for CMainFrameWindow's HP/MP/AG/SD/EXP bars (the 5 corner buttons are in
-   main_frame_top.rcss). Same layout/transform group as themes/legacy/main_frame.rcss; only the
-   visual treatment differs here -- flat background-color/border shapes instead of legacy sprite
-   art.
+/* Modern theme for main_frame.rml: flat background-color/border shapes instead of the original
+   art. The corner buttons are in main_frame_top.rml, so #buttons is hidden here.
 
    .slot-frame (shared border/radius) and .slot-fill (translucent dark backing) give every
    slot-like element one consistent look. #item_slots/#skill_slots take .slot-frame only: the
    strip's own segments (#item_band_fill, #skill_band_fill) already back them. */
+
+/* The original art, the bottom button row, and the readout and hint variants this theme
+   doesn't use. */
+.frame-art, .exp-frame, #buttons, .gauge-num.value-current {
+	display: none;
+}
 
 #bars {
 	position: absolute;
@@ -140,11 +144,11 @@
    translateX(-50%) -- see the comment above for why. */
 #bars .tooltip-hp, #bars .tooltip-sd { left: -10px; top: 410px; bottom: auto; } /* anchor 70px */
 #bars .tooltip-mp, #bars .tooltip-ag { left: 491px; top: 410px; bottom: auto; } /* anchor 571px */
-#bar_hp:hover ~ .tooltip-hp,
-#bar_sd:hover ~ .tooltip-sd,
-#bar_ag:hover ~ .tooltip-ag,
-#bar_mp:hover ~ .tooltip-mp,
-#exp:hover .tooltip {
+#bar_hp:hover ~ .tooltip-hp.scaled-hint,
+#bar_sd:hover ~ .tooltip-sd.scaled-hint,
+#bar_ag:hover ~ .tooltip-ag.scaled-hint,
+#bar_mp:hover ~ .tooltip-mp.scaled-hint,
+#exp:hover .scaled-hint {
 	display: block;
 	z-index: 1;
 }
@@ -192,7 +196,7 @@
 }
 /* left is a precomputed centered value, not left:50%+translateX(-50%) -- same reason as the
    .tooltip-hp etc. rules above. */
-#exp_tooltip {
+.exp-tooltip {
 	bottom: 12px;
 	left: 240px;
 }

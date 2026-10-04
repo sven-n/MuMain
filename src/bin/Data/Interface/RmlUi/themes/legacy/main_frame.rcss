@@ -1,8 +1,14 @@
-/* Legacy theme for CMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner buttons. #bars binds
+/* Legacy theme for main_frame.rml: the original HUD art, with the bottom button row. #bars binds
    left/top/scale live from C++; #buttons/#exp nest inside it to inherit that transform, so their
    coordinates below are plain px, not dp -- dp would double the ancestor's own scale. Gauge
    fills use real legacy gauge textures; numeric readouts are plain text; buttons use their sheet's
    own hover frame, as native does. */
+
+/* The modern theme's flat backing, and the readout and hint variants this theme doesn't use. */
+#gauge_fill_left, #gauge_fill_right, #item_band_fill, #skill_band_fill, #gauge_frame,
+.gauge-num.value-full {
+	display: none;
+}
 
 #bars {
 	position: absolute;
@@ -108,11 +114,11 @@
 .tooltip-sd { left: 184px; }
 .tooltip-ag { left: 400px; }
 .tooltip-mp { left: 437px; }
-#bar_hp:hover ~ .tooltip-hp,
-#bar_sd:hover ~ .tooltip-sd,
-#bar_ag:hover ~ .tooltip-ag,
-#bar_mp:hover ~ .tooltip-mp,
-#exp:hover .tooltip {
+#bar_hp:hover ~ .tooltip-hp.native-hint,
+#bar_sd:hover ~ .tooltip-sd.native-hint,
+#bar_ag:hover ~ .tooltip-ag.native-hint,
+#bar_mp:hover ~ .tooltip-mp.native-hint,
+#exp:hover .native-hint {
 	display: block;
 	z-index: 1;
 }
@@ -153,8 +159,6 @@
 /* Item hotkey chrome: hit-test/stack-count only. Q/W/E/R letters are baked into the sprite art
    (.slot-hotkey-label stays hidden); stack count has no baked-in equivalent so it needs a real
    style below. */
-#buttons_top { display: none; }
-#gauge_bg_left, #gauge_bg_right { display: none; }
 .slot-hotkey-label { display: none; }
 
 /* Stack count for a bound potion, bottom-right of the icon (matches
@@ -356,7 +360,7 @@
 	pointer-events: none;
 }
 /* EXP shares the gauge hint row; #exp starts at reference y=470. */
-#exp_tooltip {
+.exp-tooltip {
 	top: -52px;
 	left: 280px;
 }
