@@ -30,7 +30,6 @@ one of the trigger initiatives on the right.
 | `CMainFrameWindow` (`main_frame.rcss`, both themes — HP/MP/AG/SD/EXP bars + 5 corner buttons) | `UI::Scaling::BottomHudScale()`/`CappedUniformScale()` (`UITransform.cpp`) fold `GameConfig::GetUIScalePercent()` in as a post-clamp multiplier, applied in the shared function itself so every caller codebase-wide (RmlUi bars/buttons/exp via `bars_scale`, the still-legacy chrome render, 3D potion-icon placement, and potion/skill click hit-testing) moves together automatically. Also folds `UI::Scaling::GetWindowContentScale()` (OS display-scale/pixel-density factor) into RmlUi's own `dp` ratio (`RmlUiRuntime.cpp`'s `ApplyUIScale()`) — **confirmed 2026-09-07 on a 125%-scaled display; see `layout-and-scaling.md`.** `main_frame.rcss` still deliberately uses `px`, not `dp`, throughout, tracking `bars_scale` exactly instead of being scaled a second time. | The `UIScalePercent` half needs verifying by actually using a potion/skill at more than one `UIScalePercent` value *and* resolution, not just a visual check. Phase 3 (item hotkeys → real RmlUi) landing (the skill icon-atlas port landed 2026-09-27) still eventually retires `BottomHudScale` from this window entirely in favor of the branch's normal fixed-`dp`/`UIScalePercent` policy. |
 | `CMyInventory` (equipment paperdoll — `RenderEquippedItem()`, still fully native) | Background sprite, durability tint, and drag-compatibility highlight all paint *behind* the equipped item's live 3D icon today (native paint order); RmlUi's main context always composites last, so a straight port would paint them *in front of* instead — a real regression, not a straight port (Stage 2 was scoped, investigated, and deliberately skipped for this reason — see "What's migrated" above). | A background-context consolidation pass makes this mechanism reliable enough to trust with more per-frame-varying, class-conditional content, **or** the equipment grid gets its own future chrome pass anyway and folds this in at the same time — whichever comes first. If pursued alone, the static background sprite (no gameplay-state binding) is the only piece with a reasonable cost/value ratio on its own. |
 | `CMyInventory` (`my_inventory.rcss`, legacy theme only) | The 4 corner buttons (RmlUi, always renders last) can end up on top of `CInventoryCtrl`'s native item tooltip when a bottom-row item's tooltip extends into the button strip — before Stage 1 both were native, ordinary same-frame paint order put the tooltip on top. Confirmed cosmetic, not functional; user explicitly deferred it. | **Update 2026-10-04**: that shared infra now exists — `UI::RmlBridge::OverlayRender` wraps `SetPostRmlUiCallback` as a registry any window can join (`component-catalog.md`), built for the Friend/Mail portraits. Rerouting the tooltip through it is no longer a from-scratch mechanism, just a caller change. Or a future grid-chrome pass makes the tooltip an RmlUi element, resolving it for free via DOM order. |
-| ~~All modern-theme `.rcss` files~~ | **Superseded 2026-09-10**: the entire modern-theme token layer was renamed and revalued a second time (cool-steel → blackened-iron/dark-forged-metal, a real design-system consolidation, not just a value refresh — see `modern-theme-visual-direction.md`'s "Second generation" note). Real duplication was also consolidated: `login.rcss`'s own-copy `.btn`/`.btn-ok`/`.checkbox-box` and `login_main.rcss`/`char_sel_main.rcss`'s independent `.btn-icon` copies were deleted in favor of `base.rcss`'s shared versions. New shared primitives added: `.btn-icon`, structured tooltip BEM classes, `.slot`/`.slot--filled`/`.slot--selected`. HUD gauge colors promoted from literal hex to `resource-hp`/`-mp`/`-sd`/`-ag` tokens (layout unchanged — see the next row). | Resolved — no further action, unless the tokens change again. |
 | HUD circular glass-orb + wrapping arc gauges (reference visual study, not yet built) | The 2026-09-10 iron-palette migration deliberately retinted `main_frame.rcss`'s existing rectangular HP/MP/AG/SD bars rather than rebuilding them as circular orbs/arcs — that's a structural rebuild (new markup, new `CMainFrameWindow` C++ binding shape, new tooltip anchors, interacts with `main_frame_bg.rcss`'s paint-order mechanism and `BottomHudScale()`), not a retint, and touches live combat UI. Two RmlUi-native techniques were confirmed viable for it (`<progress direction="clockwise">` for the arcs via real octant geometry, layered `radial-gradient` for the orb liquid) but not used yet. | A dedicated, focused pass scoped just to this, once explicitly prioritized — see `modern-theme-visual-direction.md`'s "Known follow-up" section. |
 
 | `CUILetterReadWindow`/`CUILetterWriteWindow` (the sender portrait) | The portrait is live 3D and cannot be ordered against the windows around it. It composites through `UI::RmlBridge::OverlayRender` — the post-RmlUi seam — which sits above RmlUi's **whole** main context, not at one window's depth, so a portrait drawn for a window that is not in front would stand over the windows covering it. Mitigated by drawing it only for the window in front of the family (`CUIWindowMgr::RenderOverlay3D()`), the one case where "above everything" and "at this window's depth" agree; a non-family window drawn over a focused letter still gets punched through. The same limit forces the "?" help text to be native `RenderTipTextList()` rather than the shared RmlUi tooltip, since any RmlUi document would be painted over by the portrait it describes. Three contexts, N windows — see `engine-findings.md`. | Render-to-texture exists for characters. Drawing the portrait into an offscreen target and handing it to RmlUi as `#photo_slot`'s decorator puts it inside the document tree, where ordinary z-order applies and all three of these disappear at once. The primitive is half-there: `EnsureOffscreenColorTexture` (`MuRendererSDLGpu.cpp`) already makes a `COLOR_TARGET|SAMPLER` texture, but it is `#ifdef _EDITOR` and used only for screenshot capture. |
@@ -74,82 +73,29 @@ phases. Whether that one-file-three-classes shape is itself worth splitting (e.g
 lands and all three are ported) is a real, still-unmade decision; revisit it then, but it's a
 file-organization question now, not a naming one.
 
-## Tracked deferral: `CUIControl` family (`SocialWindowCore.h`) full retirement
+## Tracked deferral: `CUIBaseWindow`/`CUIPhotoViewer` still derive from `CUIControl`
 
-**Closed 2026-10-04**, except for one item that was never part of it. Not a permanent third
-toolkit alongside RmlUi and `mu::ui::window` -- a fully enumerable, closeable checklist
-(`ui-target-architecture.md` item 17's "concrete instance"), found and scoped 2026-09-13 while
-investigating whether porting Friend/Mail would let this family retire. It did not on its own;
-there were four independent pieces, and all four are now gone:
+All that is left of the `CUIControl` family retirement, which closed 2026-10-04. The widgets that
+made that file a toolkit are deleted and the windows that kept it alive are RmlUi documents --
+`migration-ledger.md`'s "`CUIControl` list family" section has the outcome, and
+`ui-target-architecture.md` item 17 records the checklist closing.
 
-1. **`CUITextInputBox`** -- **gone.** Every consumer migrated to a stock RmlUi `<input>` with the
-   shared `.text-field` (`CMyShopInventory`, `CGenericConfirmDialog::Mode::Text`, `CLoginWin`,
-   `CCharMakeWin`, `CMsgWin`, the MU Helper windows, `CGuildMakeWindow`, `CGoldBowmanWindow`,
-   `MsgBoxIGSSendGift`, and the friend/mail family last). The old framing -- "permanent until RmlUi
-   gets native `<input>`" -- was wrong on both halves: the vendored RmlUi already shipped `<input>`,
-   and IME is handled centrally by `RmlUiRuntime`'s vendored `TextInputMethodEditor_SDL` plus
-   `RmlUiSystemInterface::ActivateKeyboard()`, which drives `SDL_SetTextInputArea`/
-   `SDL_StartTextInput`.
+What remains is one step that was never on that checklist. `UI/Social/SocialWindowCore.h` is 174
+lines: `CUIControl`, its `CUIMessage` queue, the `UISTATES`/`UI_MESSAGE_ENUM` enums,
+`g_dwActiveUIID`/`g_dwMouseUseUIID`, and the `GUILDLIST_TEXT`/`LETTERLIST_TEXT` records. Two classes
+derive from it, both in `UI/Social/`: `CUIBaseWindow` and `CUIPhotoViewer`. What they take from it
+is real, not vestigial -- identity, parent id, state, geometry, options, and the message queue
+`CUIWindowMgr` runs the family through.
 
-   With no instances left, the static focus API was permanently negative and every caller reduced
-   to its RmlUi-only half -- `GetFocusedPortable()` to `nullptr`, `IsAnyInputBoxFocused()` and
-   `IsFocusedForParent()` to `false`, `ReleaseFocus()` to a no-op. That took the whole legacy
-   portable-input path in `Winmain.cpp` with it: `FeedPortableTextInput`, `FeedPortableKey`,
-   `MapScancodeToEditVk`, the `SDL_EVENT_TEXT_EDITING` fallback, and the per-frame
-   `SDL_StartTextInput`/`StopTextInput`/`SetTextInputArea` block, which had already been written to
-   stand down whenever RmlUi held the keyboard.
+So "delete the header" is not a deletion. It is either **moving** `CUIControl`/`CUIMessage` into the
+family that uses them, which is relocation rather than retirement, or **dissolving** them by
+rewriting that manager so its windows need no common native base -- a rewrite of code ported and
+runtime-tested in 2026-10, for no behavioural gain. Neither is urgent. Do the first only alongside
+other work in `UI/Social/`; do the second only if that manager is being rewritten anyway.
 
-   `CGenericConfirmDialog`'s **`Mode::NumericKeypad` is not text input** and did not migrate: the
-   shuffled on-screen keypad is deliberate anti-keylogger behaviour and must not become
-   `<input type="number">`.
-
-2. **`CUITextListBox<T>`** -- **gone**, template and all. Every subclass retired with its host, and
-   the template, its explicit `GUILDLIST_TEXT` instantiation and `TextListScrollBarGeometry` went
-   once the last one did. `GUILDLIST_TEXT` and `LETTERLIST_TEXT` survive as plain data records that
-   `FriendShell` and `ChatRoom` still use. Several hosts' runtime acceptance is still pending --
-   GuildInfo, MixInventory socket selection, Lahap jewel dismantling, the Guard guild lists
-   (siege-only states), and the three cash-shop lists -- which is a *verification* gap, not a
-   consumer one.
-
-3. **`CUIButton`** -- **gone**, with the letter windows that held the last of them.
-
-4. **Verified dead branches** -- `CUIGuildInfo`, `CUIGuildMaster`, `CUIPopup` and the unused legacy
-   chat-input wrapper are removed. Distinct from the live `CGuildInfoWindow`/`CGuildMakeWindow`.
-
-Slide help went separately (`CUISlideHelp`/`CSlideHelpMgr` are now `UI::HUD::SlideLane`/
-`SlideTicker`); its server-pushed notice lane remains unverified.
-
-**What is left, and where it lives now.** The old `UI/Widgets/UIControls.h` is
-`UI/Social/SocialWindowCore.h` (174 lines): `CUIControl`, its `CUIMessage` plumbing, the
-`UISTATES`/`UI_MESSAGE_ENUM` enums, `g_dwActiveUIID`/`g_dwMouseUseUIID` and the two row records. It
-sits beside its only users rather than in `UI/Widgets/`, so the path says what it is -- one
-subsystem's base class, not a toolkit. `CUIBaseWindow` and `CUIPhotoViewer` still derive from it for
-position, size, state, parent id and the message queue the family's manager runs on. **Deleting the
-file needs those two off that base, which is its own piece of work and was never part of this
-checklist.**
-
-The grab-bag `UIWindows.h` is split (2026-10-04): `SocialWindowBase.h` (the shared base and window
-styles), one header per window matching the `.cpp` that implements it (`ChatRoomWindow.h`,
-`LetterReadWindow.h`, `LetterWriteWindow.h`, `FriendShellWindow.h`), `PhotoViewer.h/.cpp` for the
-native 3D sender, and `SocialWindowManager.h/.cpp` for the manager, the lists and the friend menu.
-
-Dead enumerators still sit inside otherwise-live enums (`UISTATE_SCROLL`, `UISTATE_DISABLE`,
-`UI_MESSAGE_NULL`, `UI_MESSAGE_TEXTINPUT`, the four list-message values); pruning them is cosmetic
-and was left alone.
-
-**Related finding, same investigation**: `CUIManager`/`g_pUIManager` (`UI/Core/UIManager.h/.cpp`)
-looks like a live top-level manager parallel to `mu::ui::window::CManager` — it isn't. Its
-`Render()` and `UpdateInput()` method bodies are both literally empty. Its `MUTEX_*` enum lists
-~30 interfaces (including `MUTEX_TRADE`/`MUTEX_STORAGE`/`MUTEX_GUILDINFO`/`MUTEX_NPCSHOP` — windows
-long since migrated to `mu::ui::window::CManager`) but `Open()`/`IsOpen()` only actually implement
-4 of them (`MUTEX_INVENTORY`, `MUTEX_PERSONALSHOPSALE`, `MUTEX_PERSONALSHOPPURCHASE`,
-`MUTEX_SERVERDIVISION`); everything else falls through to `default: return false`. What's actually
-still real: it constructs/owns `g_pUIPopup`/`g_pUIGateKeeper`/jewel-harmony/item-add-option-info as
-globals, and `IsInputEnable()` is a genuinely still-consulted query. Worth knowing mainly so a
-future session doesn't mistake the `MUTEX_*` enum for a live, comprehensive policy layer — most of
-it is vestigial. Not in this retirement checklist's scope (it's not `SocialWindowCore.h`), but touches
-the same investigation and the same `g_pUIPopup` dependency as item 3 above.
-
+A few dead enumerators sit inside otherwise-live enums (`UISTATE_SCROLL`, `UISTATE_DISABLE`,
+`UI_MESSAGE_NULL`, `UI_MESSAGE_TEXTINPUT`, the four list-message values). Cosmetic, deliberately
+left.
 
 ## Tracked deferral: audit where ports steered away from the original UI
 
@@ -426,19 +372,6 @@ documents bind no geometry at all, so none of them is allowlisted.
 
 ### The rest, in remediation order
 
-**P0 — the one place two layers could disagree at runtime. Fixed.**
-
-- **Guard / Castle held the current tab three times**: `m_TabBtn` (the natively hit-tested
-  authority), `m_iNumCurOpenTab` (a C++ mirror written only when `UpdateMouseEvent()` reported a
-  change), and `tabs[i].selected` in the model. The *highlight* derived from the first, the *page*
-  switched on the second, and `OpeningProcess()` wrote both by hand to keep them in step.
-  Both windows now route every write through one private `SetCurOpenTab()` that sets the member and
-  tells the radio group to follow, and the model's `selected` reads the member. The widget is
-  written to and never read from -- `GetCurButtonIndex()` has no callers in either file -- so it is
-  an input device reporting an edge, not a second copy of the state. Same shape
-  `PetInfoWindow`/`MuHelperConfigWindow` already had in `model.activeTab`; the difference is that
-  those two have no native control to drift from.
-
 **P1 — leaks that get copied into the next port.**
 
 - **The display-list port above.** Highest leverage precisely because it is a *method*: applied to
@@ -483,17 +416,12 @@ documents bind no geometry at all, so none of them is allowlisted.
   and collides with drag persistence (`GetWindowPosition` seeds the same `x`/`y`). What remains is
   "C++ owns column spacing, RCSS owns drawn width" -- one-directional, but still two numbers that
   must agree. Revisit when something actually needs panels to self-place.
-- **`CChatLogWindow` fused three layers into one string. Fixed.** `snprintf(backColor, ...,
-  "rgba(0,0,0,%d)", alpha)` composed a user preference (the cycled transparency), a semantic state
-  (frame shown) and a theme decision (the backdrop is black); its header comment recorded the
-  fusion as deliberate, "so no static RCSS rule competes with either" -- accurate about the
-  mechanism, and exactly the coupling §11 exists to prevent. Now three owners: `show_frame` drives
-  `.framed`, `back_alpha` is the user's setting alone as a bound opacity, and each theme colours a
-  `#backdrop` child that sits behind `#lines` so the fade never reaches the text.
-  **`CSystemLogWindow`'s own `back_color` stays** -- deliberately, not overlooked. Its transparency
-  is a *per-line* background on the very element that holds the line's text, so the same split needs
-  a backdrop element behind every row of a per-frame `data-for` list. That is a structural change to
-  a display-list document rather than the same edit, so it belongs with that finding.
+- **`CSystemLogWindow`'s `back_color` still fuses a user preference with a theme decision**, the
+  one case left of the three-layers-in-one-string shape `CChatLogWindow` was split out of. It stays
+  deliberately: its transparency is a *per-line* background on the element holding the line's text,
+  so the same split needs a backdrop element behind every row of a per-frame `data-for` list --
+  a structural change to a display-list document, so it belongs with that finding, not this one.
+
 **P2 — bounded cleanup.**
 
 - **Layout arithmetic shipped as a coordinate.** `MessageBoxView::SetFrame()`'s
@@ -508,18 +436,10 @@ documents bind no geometry at all, so none of them is allowlisted.
   (`l.top`, `b.left`/`b.top`, the list and its scrollbar). Note the genuine carve-out on the
   centring: inside a `.sharp-text` block layout height and rendered height disagree, which explains
   `button_label_top` -- it does not explain a button's `left`.
-- **C++ choosing which decorative pieces exist. Fixed.** `GuardWindowRmlModel::listFrame` was an
-  int C++ set to 0/1/2, and the document switched whole blocks of frame edges on it, each carrying
-  literal `style="left: 11px; top: 111px; ..."` in *shared* markup -- so neither theme could move an
-  edge. It is two booleans now, `list_shown` and `list_has_footer`, which is what the state actually
-  was: whether the guild list is on screen, and whether it has a summary row under it. One frame
-  shape in the RML, every edge placed by each theme's own RCSS, and `.with-footer` shortens the main
-  box. `CCastleWindow`'s four tax arrows came along -- they were `style="top: 73px"` and friends, and
-  are now `#tax_chaos_up`/`#tax_chaos_down`/`#tax_npc_up`/`#tax_npc_down` positioned per theme.
-  Neither document has an inline `style=` left.
-  Still in this family: the `std::string style` field on the event-window button structs, carrying
-  `"exit"` (semantic) alongside `"wide"` (a size picked in C++). One word in one struct, no practical
-  consequence; fold it into whatever next touches `MessageBoxView`.
+- **A `std::string style` field on the event-window button structs** carries `"exit"` (semantic)
+  alongside `"wide"` (a size picked in C++) -- the residue of a larger case, `GuardWindowRmlModel::
+  listFrame`, since split into two booleans with every edge placed by each theme's own RCSS. One
+  word in one struct, no practical consequence; fold it into whatever next touches `MessageBoxView`.
 - **`CGenericConfirmDialog`'s `kInputFieldWidth`/`kInputFieldHeight` (150x18)** are duplicated into
   both themes' `.gcd-input-anchor`, as its own comment states. The stated reason — the anchor "only
   supplies position" — is what `RefreshLogicalAnchorPosition()`'s sibling already solves for 21
