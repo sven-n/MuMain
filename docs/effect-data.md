@@ -267,10 +267,14 @@ by their code.
 | data | its `create` in `EffectTypes.json` | – | – |
 | hook, handler | a creation hook (after `create` when it has both) | a move handler | a draw handler |
 | switch | a case of `CreateEffect` | a case of `MoveEffect` | a case of `RenderEffects` |
+| on the ground | – | – | a case of `RenderEffectShadows`, which draws the effect on the ground (and changes some of its values while drawing) |
 | none of them | common setup only: what every effect gets | shared code only: what `MoveEffect` runs for every effect | drawn as model (the skill models, by the switch's default), or not drawn: most texture effects only create sprites, particles or joints |
 
-Effects that share a move handler or a creation hook list each other under
-their stages.
+`RenderEffectShadows` never asks the registry: it draws its effects on the
+ground besides a draw handler or a case of `RenderEffects`, which the
+browser shows as "+ on the ground", and a draw handler does not replace it.
+The filter "on the ground" lists all of them. Effects that share a move
+handler or a creation hook list each other under their stages.
 
 ### Creation values, slot and users
 
@@ -313,8 +317,9 @@ The effect browser tells a case in a switch from no code at all by a list of
 the cases: `src/MuEditor/UI/EffectBrowser/EffectLegacyCases.cpp`. A change
 that moves a stage of a type into data or a handler deletes its case and its
 flag in the list (a type without flags leaves it); a new case gets a flag.
-`test_effect_types` reads the three switches of `ZzzEffect.cpp` and fails
-when a case is left for a stage the registry handles, when a case names no
-type of the symbol list, and, in editor builds, when the list differs from
-the switches. An `#ifdef` in these functions needs its macro in the list of
-the test.
+`test_effect_types` reads the switches of `CreateEffect`, `MoveEffect`,
+`RenderEffects` and `RenderEffectShadows` in `ZzzEffect.cpp` and fails when
+a case is left for a stage the registry handles, when a case names no type
+of the symbol list, and, in editor builds, when the list differs from the
+switches. An `#ifdef` in these functions needs its macro in the list of the
+test.

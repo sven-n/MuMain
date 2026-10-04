@@ -21,17 +21,14 @@ using Data::Effects::EffectKind;
 
 namespace
 {
-std::string ToLower(std::string_view text)
-{
-    std::string lower(text);
-    std::transform(lower.begin(), lower.end(), lower.begin(),
-                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-    return lower;
-}
-
 std::string SearchTextOf(const EffectBrowserRow& row)
 {
-    return ToLower(row.name) + ' ' + ToLower(row.code) + ' ' + std::to_string(row.type);
+    return ToSearchText(row.name) + ' ' + ToSearchText(row.code) + ' ' + std::to_string(row.type);
+}
+
+bool MatchesRenderFilter(const EffectStages& stages, RenderStage filter)
+{
+    return stages.render == filter || (filter == RenderStage::OnGround && stages.drawnOnGround);
 }
 
 template <typename Handler>
@@ -61,6 +58,14 @@ std::vector<int> OthersInGroup(const std::vector<std::vector<int>>& groups, int 
     return {};
 }
 } // namespace
+
+std::string ToSearchText(std::string_view text)
+{
+    std::string lower(text);
+    std::transform(lower.begin(), lower.end(), lower.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    return lower;
+}
 
 void EffectBrowserModel::Build(const Data::Effects::EffectTypeCatalogue& catalogue, DescriptorLookup lookup)
 {
@@ -159,7 +164,8 @@ bool EffectBrowserModel::IsListed(EffectKind kind, const EffectBrowserRow& row, 
     if (kind != EffectKind::Effect)
         return true;
     return (!filter.create || row.stages.create == *filter.create) &&
-           (!filter.move || row.stages.move == *filter.move) && (!filter.render || row.stages.render == *filter.render);
+           (!filter.move || row.stages.move == *filter.move) &&
+           (!filter.render || MatchesRenderFilter(row.stages, *filter.render));
 }
 
 EffectBrowserDetails EffectBrowserModel::Describe(EffectTypeRef ref) const

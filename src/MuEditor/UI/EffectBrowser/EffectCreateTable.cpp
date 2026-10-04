@@ -79,22 +79,47 @@ FieldValues FlattenFields(const EffectCreateParams& params)
     return fields;
 }
 
-// Adds the fields of one column. A field no column before had goes after the
-// field before it in this column, so the lines keep the order of the file.
-void AddColumn(EffectCreateTable& table, size_t column, size_t columnCount, const FieldValues& fields)
+bool AnyColumnCopies(const EffectCreateParams& row, const Data::Effects::EffectCopyField& field)
 {
-    size_t insertAt = 0;
+    return row.*field.copy ||
+           std::any_of(row.variants.begin(), row.variants.end(),
+                       [&](const Data::Effects::EffectCreateVariant& variant) { return variant.params.*field.copy; });
+}
+
+// One line per field the row or a variant sets, in the order of the data file.
+// The order comes from writing one set of values with every value and offset
+// of the row and the variants and every copy one of them makes; the copies
+// are added last, so the copy of one variant does not clear a value another
+// sets.
+std::vector<EffectCreateTable::Line> LinesOf(const EffectCreateParams& row, size_t columnCount)
+{
+    EffectCreateParams all = row;
+    all.variants.clear();
+    for (const Data::Effects::EffectCreateVariant& variant : row.variants)
+    {
+        EffectCreateParams values = variant.params;
+        for (const Data::Effects::EffectCopyField& field : Data::Effects::EffectCopyFields)
+            values.*field.copy = false;
+        all = Data::Effects::ResolveVariant(all, values);
+    }
+    for (const Data::Effects::EffectCopyField& field : Data::Effects::EffectCopyFields)
+        all.*field.copy = all.*field.copy || AnyColumnCopies(row, field);
+
+    std::vector<EffectCreateTable::Line> lines;
+    for (const auto& field : FlattenFields(all))
+        lines.push_back({field.first, std::vector<std::string>(columnCount)});
+    return lines;
+}
+
+void FillColumn(EffectCreateTable& table, size_t column, const FieldValues& fields)
+{
     for (const auto& [field, value] : fields)
     {
-        auto line = std::find_if(table.lines.begin(), table.lines.end(),
-                                 [&](const EffectCreateTable::Line& existing) { return existing.field == field; });
-        if (line == table.lines.end())
-        {
-            line = table.lines.insert(table.lines.begin() + static_cast<std::ptrdiff_t>(insertAt),
-                                      EffectCreateTable::Line{field, std::vector<std::string>(columnCount)});
-        }
-        line->values[column] = value;
-        insertAt = static_cast<size_t>(line - table.lines.begin()) + 1;
+        const auto line =
+            std::find_if(table.lines.begin(), table.lines.end(),
+                         [&](const EffectCreateTable::Line& existing) { return existing.field == field; });
+        if (line != table.lines.end())
+            line->values[column] = value;
     }
 }
 } // namespace
@@ -102,14 +127,14 @@ void AddColumn(EffectCreateTable& table, size_t column, size_t columnCount, cons
 EffectCreateTable BuildEffectCreateTable(const EffectCreateParams& row)
 {
     EffectCreateTable table;
-    const size_t columnCount = row.variants.size() + 1;
+    table.lines = LinesOf(row, row.variants.size() + 1);
     EffectCreateParams common = row;
     common.variants.clear();
-    AddColumn(table, 0, columnCount, FlattenFields(common));
+    FillColumn(table, 0, FlattenFields(common));
     for (size_t i = 0; i < row.variants.size(); ++i)
     {
         table.variantSubTypes.push_back(row.variants[i].subTypes);
-        AddColumn(table, i + 1, columnCount, FlattenFields(Data::Effects::ResolveVariant(row, row.variants[i].params)));
+        FillColumn(table, i + 1, FlattenFields(Data::Effects::ResolveVariant(row, row.variants[i].params)));
     }
     return table;
 }

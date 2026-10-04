@@ -568,6 +568,12 @@
   <data name="Stage drawn as model" xml:space="preserve">
     <value>drawn as model</value>
   </data>
+  <data name="Stage on the ground" xml:space="preserve">
+    <value>on the ground</value>
+  </data>
+  <data name="Also on the ground" xml:space="preserve">
+    <value>+ on the ground</value>
+  </data>
   <data name="Stage not drawn" xml:space="preserve">
     <value>not drawn</value>
   </data>

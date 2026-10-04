@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <string_view>
+#include <utility>
 
 using Data::Effects::EffectKind;
 using MuEditor::Effects::EffectTypeRef;
@@ -109,6 +110,9 @@ void CMuEffectBrowserUI::RenderTabs()
 {
     if (!ImGui::BeginTabBar("kinds"))
         return;
+    // Taken before the tabs: a type clicked in this frame's details asks for
+    // its tab in the next frame, also when that tab comes before this one.
+    const std::optional<EffectKind> tabToSelect = std::exchange(m_tabToSelect, std::nullopt);
     for (const EffectKind kind : Data::Effects::EffectKinds)
     {
         // The id after ### is the kind, so the tab stays when the language
@@ -117,14 +121,13 @@ void CMuEffectBrowserUI::RenderTabs()
         char label[128];
         std::snprintf(label, sizeof(label), "%s (%d)###%.*s", MuEditor::Effects::Labels::Kind(kind),
                       static_cast<int>(m_model.GetRows(kind).size()), static_cast<int>(id.size()), id.data());
-        const ImGuiTabItemFlags flags = m_tabToSelect == kind ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
+        const ImGuiTabItemFlags flags = tabToSelect == kind ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
         if (ImGui::BeginTabItem(label, nullptr, flags))
         {
             RenderKind(kind);
             ImGui::EndTabItem();
         }
     }
-    m_tabToSelect.reset();
     ImGui::EndTabBar();
 }
 

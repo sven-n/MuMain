@@ -11,6 +11,7 @@
 #include "Render/Effects/EffectRegistry.h"
 
 #ifdef _EDITOR
+#include "Data/GameData/EffectData/EffectCreateParamsJson.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Render/Effects/Behaviors/EffectBehaviors.h"
 #include "UI/EffectBrowser/EffectBrowserModel.h"
@@ -30,8 +31,14 @@ using EffectSourceCases::Stage;
 
 namespace
 {
-// The macros of the #ifdef blocks in CreateEffect, MoveEffect and
-// RenderEffects, as the game is built (Defined_Global.h through stdafx.h).
+// The macros of the #ifdef blocks in CreateEffect, MoveEffect, RenderEffects
+// and RenderEffectShadows, as the game is built (Defined_Global.h through
+// stdafx.h).
+#ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
+constexpr bool InfluenceGroundEffect = true;
+#else
+constexpr bool InfluenceGroundEffect = false;
+#endif
 #ifdef ASG_ADD_KARUTAN_MONSTERS
 constexpr bool KarutanMonsters = true;
 #else
@@ -58,7 +65,8 @@ constexpr bool GuildWarEvent = true;
 constexpr bool GuildWarEvent = false;
 #endif
 
-constexpr std::array<EffectSourceCases::MacroState, 5> EffectMacros = {{
+constexpr std::array<EffectSourceCases::MacroState, 6> EffectMacros = {{
+    {"ASG_ADD_INFLUENCE_GROUND_EFFECT", InfluenceGroundEffect},
     {"ASG_ADD_KARUTAN_MONSTERS", KarutanMonsters},
     {"PJH_ADD_PANDA_CHANGERING", PandaChangeRing},
     {"PBG_ADD_CHARACTERSLOT", CharacterSlot},
@@ -66,7 +74,7 @@ constexpr std::array<EffectSourceCases::MacroState, 5> EffectMacros = {{
     {"GUILD_WAR_EVENT", GuildWarEvent},
 }};
 
-constexpr std::array<Stage, 3> Stages = {Stage::Create, Stage::Move, Stage::Render};
+constexpr std::array<Stage, 4> Stages = {Stage::Create, Stage::Move, Stage::Render, Stage::Ground};
 
 const char* NameOf(Stage stage)
 {
@@ -77,9 +85,11 @@ const char* NameOf(Stage stage)
     case Stage::Move:
         return "MoveEffect";
     case Stage::Render:
+        return "RenderEffects";
+    case Stage::Ground:
         break;
     }
-    return "RenderEffects";
+    return "RenderEffectShadows";
 }
 
 // The number of a label: the code of an effect symbol, or a number of an
@@ -143,7 +153,7 @@ std::map<Stage, std::set<int>> ReadAllCases()
 }
 
 // Whether the registry handles the stage of `type`, so its switch case would
-// never run.
+// never run. RenderEffectShadows never asks the registry.
 bool RegistryHandles(Stage stage, int type)
 {
     const Render::Effects::EffectDescriptor* descriptor = Render::Effects::Lookup(type);
@@ -156,9 +166,11 @@ bool RegistryHandles(Stage stage, int type)
     case Stage::Move:
         return descriptor->move != nullptr;
     case Stage::Render:
+        return descriptor->render != nullptr;
+    case Stage::Ground:
         break;
     }
-    return descriptor->render != nullptr;
+    return false;
 }
 } // namespace
 
@@ -199,9 +211,11 @@ std::uint8_t FlagOf(Stage stage)
     case Stage::Move:
         return MoveCase;
     case Stage::Render:
+        return RenderCase;
+    case Stage::Ground:
         break;
     }
-    return RenderCase;
+    return GroundCase;
 }
 
 EffectTypeCatalogue ShippedCatalogue()
@@ -230,6 +244,27 @@ std::vector<std::string_view> NamesOf(const EffectBrowserModel& model, EffectKin
         names.push_back(model.GetRows(kind)[row].name);
     }
     return names;
+}
+
+// The fields WriteEffectCreateParams writes for `params`, the fields of
+// "offset" and "copy" each on its own, as the creation table names them.
+std::vector<std::string> WrittenFields(const EffectCreateParams& params)
+{
+    std::vector<std::string> fields;
+    const Data::Items::Json::OrderedJson written = WriteEffectCreateParams(params);
+    for (const auto& [key, value] : written.items())
+    {
+        if (key != "offset" && key != "copy")
+        {
+            fields.push_back(key);
+            continue;
+        }
+        for (const auto& [field, fieldValue] : value.items())
+        {
+            fields.push_back(key + "." + field);
+        }
+    }
+    return fields;
 }
 
 const EffectCreateTable::Line* FindLine(const EffectCreateTable& table, std::string_view field)
@@ -280,6 +315,11 @@ TEST_CASE("The effect browser takes a stage from the registry, then the legacy c
     // RenderEffects' default draws the skill models.
     CHECK(DescribeEffectStages(MODEL_SKILL_BEGIN + 1, &descriptor, 0).render == RenderStage::DrawnAsModel);
     CHECK(DescribeEffectStages(MODEL_SKILL_END, &descriptor, 0).render == RenderStage::NotDrawn);
+    // RenderEffectShadows draws on the ground, besides any other stage.
+    CHECK(DescribeEffectStages(BITMAP_LIGHT, nullptr, GroundCase) ==
+          EffectStages{CreateStage::SetupOnly, MoveStage::SharedCodeOnly, RenderStage::OnGround, true});
+    CHECK(DescribeEffectStages(BITMAP_LIGHT, nullptr, static_cast<std::uint8_t>(RenderCase | GroundCase)) ==
+          EffectStages{CreateStage::SetupOnly, MoveStage::SharedCodeOnly, RenderStage::Switch, true});
 
     descriptor.create = Render::Effects::CreateParams{};
     descriptor.move = &Render::Effects::Behaviors::MoveSpear;
@@ -318,6 +358,12 @@ TEST_CASE("The effect browser lists the types of every kind with name, code, sta
     CHECK(fallingStone->stages == EffectStages{CreateStage::Switch, MoveStage::Switch, RenderStage::Switch});
     CHECK(IsWorldObjectSlot(fallingStone->assetSlot, fallingStone->type));
     CHECK_FALSE(IsWorldObjectSlot(ghost->assetSlot, ghost->type));
+    // RenderEffectShadows draws these on the ground; the second one is also a
+    // case of RenderEffects.
+    CHECK(model.FindRow(EffectKind::Effect, BITMAP_SHOCK_WAVE)->stages.render == RenderStage::OnGround);
+    const EffectStages raklionMagic = model.FindRow(EffectKind::Effect, MODEL_RAKLION_BOSS_MAGIC)->stages;
+    CHECK(raklionMagic.render == RenderStage::Switch);
+    CHECK(raklionMagic.drawnOnGround);
 
     // Each row of the catalogue is a type whose creation is data.
     const std::span<const EffectBrowserRow> effects = model.GetRows(EffectKind::Effect);
@@ -354,6 +400,12 @@ TEST_CASE("The effect browser filters by search, stage and loaded asset [data][e
     filter.render = RenderStage::Handler;
     CHECK(NamesOf(model, EffectKind::Effect, model.Filter(EffectKind::Effect, filter)) ==
           std::vector<std::string_view>{"desair"});
+    // "On the ground" also lists the effects drawn there besides another stage.
+    filter.render = RenderStage::OnGround;
+    const std::span<const EffectLegacyCases> cases = GetEffectLegacyCases();
+    const auto onGround = std::count_if(cases.begin(), cases.end(),
+                                        [](const EffectLegacyCases& entry) { return (entry.cases & GroundCase) != 0; });
+    CHECK(model.Filter(EffectKind::Effect, filter).size() == static_cast<size_t>(onGround));
 
     filter = {};
     filter.onlyLoaded = true;
@@ -428,5 +480,55 @@ TEST_CASE("The creation table lists each field once in the order of the file, wi
     // A value of the variant replaces the copy of the row.
     CHECK(FindLine(table, "copy.startPosition")->values == std::vector<std::string>{"position", ""});
     CHECK(FindLine(table, "offset.position")->values == std::vector<std::string>{"{\"z\": 1}", "{\"z\": 1}"});
+}
+// A field only a later variant sets keeps its place in the file: alpha after
+// scale, and a value before the copy another variant makes into the same field.
+TEST_CASE("The creation table keeps the order of the file across variants [data][effects][editor]")
+{
+    EffectCreateParams first;
+    first.lifeTime = 5.0;
+    first.copyCallScaleToScale = true;
+    EffectCreateParams second;
+    second.lifeTime = 6.0;
+    second.scale = 2.0;
+    second.alpha = 0.5;
+    EffectCreateParams row;
+    row.variants = {{{0}, first}, {{1}, second}};
+
+    const EffectCreateTable table = BuildEffectCreateTable(row);
+    std::vector<std::string> fields;
+    for (const EffectCreateTable::Line& line : table.lines)
+    {
+        fields.push_back(line.field);
+    }
+    CHECK(fields == std::vector<std::string>{"lifeTime", "scale", "alpha", "copy.scale"});
+    CHECK(FindLine(table, "scale")->values == std::vector<std::string>{"", "", "2"});
+    CHECK(FindLine(table, "copy.scale")->values == std::vector<std::string>{"", "callScale", ""});
+}
+
+TEST_CASE("The creation table of every shipped row has the fields of each column in the order of the file "
+          "[data][effects][editor]")
+{
+    const EffectTypeCatalogue catalogue = ShippedCatalogue();
+    for (const EffectTypeCreateParams& entry : catalogue.GetCreateParams())
+    {
+        INFO(CodeOf(entry.type));
+        const EffectCreateTable table = BuildEffectCreateTable(entry.params);
+        EffectCreateParams common = entry.params;
+        common.variants.clear();
+        for (size_t column = 0; column <= entry.params.variants.size(); ++column)
+        {
+            INFO(column);
+            const EffectCreateParams params =
+                column == 0 ? common : ResolveVariant(entry.params, entry.params.variants[column - 1].params);
+            std::vector<std::string> listed;
+            for (const EffectCreateTable::Line& line : table.lines)
+            {
+                if (!line.values[column].empty())
+                    listed.push_back(line.field);
+            }
+            CHECK(listed == WrittenFields(params));
+        }
+    }
 }
 #endif // _EDITOR

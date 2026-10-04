@@ -34,27 +34,32 @@ enum class MoveStage
 };
 
 // The drawing: a registry handler, the case of RenderEffects' switch, the
-// switch's default that draws the skill models, or not drawn by RenderEffects
-// (most texture effects only create sprites, particles or joints).
+// switch's default that draws the skill models, only the case of
+// RenderEffectShadows that draws on the ground, or not drawn (most texture
+// effects only create sprites, particles or joints).
 enum class RenderStage
 {
     Handler,
     Switch,
     DrawnAsModel,
+    OnGround,
     NotDrawn,
 };
 
 constexpr std::array<CreateStage, 5> CreateStages = {CreateStage::Data, CreateStage::Hook, CreateStage::DataThenHook,
                                                      CreateStage::Switch, CreateStage::SetupOnly};
 constexpr std::array<MoveStage, 3> MoveStages = {MoveStage::Handler, MoveStage::Switch, MoveStage::SharedCodeOnly};
-constexpr std::array<RenderStage, 4> RenderStages = {RenderStage::Handler, RenderStage::Switch,
-                                                     RenderStage::DrawnAsModel, RenderStage::NotDrawn};
+constexpr std::array<RenderStage, 5> RenderStages = {
+    RenderStage::Handler, RenderStage::Switch, RenderStage::DrawnAsModel, RenderStage::OnGround, RenderStage::NotDrawn};
 
 struct EffectStages
 {
     CreateStage create = CreateStage::SetupOnly;
     MoveStage move = MoveStage::SharedCodeOnly;
     RenderStage render = RenderStage::NotDrawn;
+    // RenderEffectShadows has a case: it draws the effect on the ground, also
+    // when a handler or RenderEffects draws it too.
+    bool drawnOnGround = false;
 
     bool operator==(const EffectStages&) const = default;
 };

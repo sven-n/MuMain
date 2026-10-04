@@ -13,6 +13,9 @@ enum LegacyCase : std::uint8_t
     CreateCase = 1 << 0, // CreateEffect
     MoveCase = 1 << 1,   // MoveEffect
     RenderCase = 1 << 2, // RenderEffects
+    // RenderEffectShadows, which draws on the ground and never asks the
+    // registry.
+    GroundCase = 1 << 3,
 };
 
 struct EffectLegacyCases

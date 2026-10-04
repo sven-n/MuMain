@@ -465,15 +465,16 @@ with a column per variant, and the data that names it. Its model needs no
 ImGui and is tested against the shipped catalogue. The runtime cannot tell a
 case in a switch from no code at all (14 effects are created with only the
 common setup, 27 move with only the shared code), so a compiled list of the
-cases (398 types: 327 creation, 134 move, 218 drawing cases) tells them
-apart; a test reads the three switches of `ZzzEffect.cpp` and checks it in
-editor builds, and in every build that no case is left for a stage the
-registry handles and that every case names a type of the symbol list. The
-slots are read without loading anything: a model's meshes with the file
-`CLoadData` remembers, or the texture of the number. Outside the editor only
-`CLoadData::GetModelFile` changed, from private to public; no behavior
-changed. "Used by" shows the creation values for now; the call sites of the
-code stay an open question.
+cases (408 types: 327 creation, 134 move and 218 drawing cases, and 24 cases
+of `RenderEffectShadows`, which draws on the ground and never asks the
+registry) tells them apart; a test reads the four switches of
+`ZzzEffect.cpp` and checks it in editor builds, and in every build that no
+case is left for a stage the registry handles and that every case names a
+type of the symbol list. The slots are read without loading anything: a
+model's meshes with the file `CLoadData` remembers, or the texture of the
+number. Outside the editor only `CLoadData::GetModelFile` changed, from
+private to public; no behavior changed. "Used by" shows the creation values
+for now; the call sites of the code stay an open question.
 
 ## Verification
 

@@ -45,11 +45,15 @@ struct EffectBrowserRow
     EffectAsset asset;
 };
 
+// A text as the search compares it: lowercase.
+std::string ToSearchText(std::string_view text);
+
 struct EffectBrowserFilter
 {
-    // Lowercase; a part of the name, the code or the number.
+    // A part of the name, the code or the number, as ToSearchText makes it.
     std::string search;
-    // Effects only; nullopt for any stage.
+    // Effects only; nullopt for any stage. OnGround also lists the effects
+    // that RenderEffectShadows draws besides another stage.
     std::optional<CreateStage> create;
     std::optional<MoveStage> move;
     std::optional<RenderStage> render;

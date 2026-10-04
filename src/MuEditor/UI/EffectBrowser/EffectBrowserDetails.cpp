@@ -238,7 +238,8 @@ std::optional<EffectTypeRef> CEffectBrowserDetails::RenderStages(const EffectBro
         ImGui::Text("%s: %s (%d %s)", I18N::Editor::Creation, creation, static_cast<int>(m_variantSubTypes.size()),
                     I18N::Editor::Variants);
     ImGui::Text("%s: %s", I18N::Editor::Move, MuEditor::Effects::Labels::Stage(row.stages.move));
-    ImGui::Text("%s: %s", I18N::Editor::Drawing, MuEditor::Effects::Labels::Stage(row.stages.render));
+    ImGui::Text("%s: %s %s", I18N::Editor::Drawing, MuEditor::Effects::Labels::Stage(row.stages.render),
+                MuEditor::Effects::Labels::GroundSuffix(row.stages));
 
     std::optional<int> clicked =
         RenderEffectList("sameHook", I18N::Editor::SameCreationHook, model, m_details.sameCreateHook);

@@ -11,8 +11,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cctype>
-#include <string>
 
 using Data::Effects::EffectKind;
 using MuEditor::Effects::EffectBrowserModel;
@@ -27,14 +25,6 @@ constexpr float NumberColumnWidth = 60.0f;
 
 constexpr int BasicColumnCount = 3;
 constexpr int EffectColumnCount = 6;
-
-std::string ToLower(const char* text)
-{
-    std::string lower(text);
-    std::transform(lower.begin(), lower.end(), lower.begin(),
-                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-    return lower;
-}
 
 // The width of a stage filter: its label and its combo.
 float StageFilterWidth(const char* label)
@@ -92,6 +82,11 @@ bool RenderRow(const EffectBrowserRow& row, bool withStages, bool selected)
     ImGui::TextUnformatted(MuEditor::Effects::Labels::Stage(row.stages.move));
     ImGui::TableNextColumn();
     ImGui::TextUnformatted(MuEditor::Effects::Labels::Stage(row.stages.render));
+    if (const char* ground = MuEditor::Effects::Labels::GroundSuffix(row.stages); ground[0] != '\0')
+    {
+        ImGui::SameLine();
+        ImGui::TextUnformatted(ground);
+    }
     return clicked;
 }
 
@@ -99,8 +94,13 @@ bool RenderRow(const EffectBrowserRow& row, bool withStages, bool selected)
 void CopySelectedName(const EffectBrowserModel& model, EffectKind kind, int selectedType)
 {
     const ImGuiIO& io = ImGui::GetIO();
-    if (selectedType < 0 || io.WantTextInput || !io.KeyCtrl || !ImGui::IsKeyPressed(ImGuiKey_C, false) ||
-        !ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
+    const bool focused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
+    if (!focused || io.WantTextInput || !io.KeyCtrl)
+        return;
+    // From the next frame on the game gets no keys while Ctrl is held, so the
+    // C of Ctrl+C does not open the character window too.
+    ImGui::SetNextFrameWantCaptureKeyboard(true);
+    if (selectedType < 0 || !ImGui::IsKeyPressed(ImGuiKey_C, false))
         return;
     if (const EffectBrowserRow* row = model.FindRow(kind, selectedType))
         ImGui::SetClipboardText(row->name.c_str());
@@ -135,7 +135,7 @@ void CEffectBrowserList::RenderFilters(EffectKind kind)
     ImGui::SameLine();
     ImGui::SetNextItemWidth(SearchWidth * g_MuEditorCore.GetUIScale());
     if (ImGui::InputText("##search", m_search, sizeof(m_search)))
-        m_filter.search = ToLower(m_search);
+        m_filter.search = MuEditor::Effects::ToSearchText(m_search);
     ImGui::SameLine();
     ImGui::Checkbox(I18N::Editor::LoadedNow, &m_filter.onlyLoaded);
     if (kind != EffectKind::Effect)

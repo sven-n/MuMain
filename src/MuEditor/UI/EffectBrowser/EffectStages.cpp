@@ -42,7 +42,9 @@ RenderStage DescribeRendering(int type, const Render::Effects::EffectDescriptor*
         return RenderStage::Handler;
     if ((legacyCases & RenderCase) != 0)
         return RenderStage::Switch;
-    return type >= MODEL_SKILL_BEGIN && type < MODEL_SKILL_END ? RenderStage::DrawnAsModel : RenderStage::NotDrawn;
+    if (type >= MODEL_SKILL_BEGIN && type < MODEL_SKILL_END)
+        return RenderStage::DrawnAsModel;
+    return (legacyCases & GroundCase) != 0 ? RenderStage::OnGround : RenderStage::NotDrawn;
 }
 } // namespace
 
@@ -50,7 +52,7 @@ EffectStages DescribeEffectStages(int type, const Render::Effects::EffectDescrip
                                   std::uint8_t legacyCases)
 {
     return {DescribeCreation(descriptor, legacyCases), DescribeMove(descriptor, legacyCases),
-            DescribeRendering(type, descriptor, legacyCases)};
+            DescribeRendering(type, descriptor, legacyCases), (legacyCases & GroundCase) != 0};
 }
 } // namespace MuEditor::Effects
 

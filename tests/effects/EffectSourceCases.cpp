@@ -21,12 +21,19 @@ std::string_view SignatureOf(Stage stage)
     case Stage::Move:
         return "void MoveEffect(OBJECT* o, int iIndex)";
     case Stage::Render:
+        return "void RenderEffects(bool bRenderBlendMesh)";
+    case Stage::Ground:
         break;
     }
-    return "void RenderEffects(bool bRenderBlendMesh)";
+    return "void RenderEffectShadows()";
 }
 
-constexpr std::string_view RegistryLookup = "Render::Effects::Lookup(";
+// The switch of a stage is the first one after this text; RenderEffectShadows
+// has no registry lookup, so its first switch counts.
+std::string_view SwitchAfter(Stage stage)
+{
+    return stage == Stage::Ground ? std::string_view() : std::string_view("Render::Effects::Lookup(");
+}
 
 bool IsIdentifierChar(char c)
 {
@@ -249,12 +256,13 @@ SwitchLabels ReadSwitchLabels(const std::string& source, Stage stage, std::span<
 {
     SwitchLabels result;
     const std::string function = FunctionText(source, SignatureOf(stage), macros, result.problems);
-    const size_t lookup = function.find(RegistryLookup);
-    const size_t switchStart = lookup == std::string::npos ? lookup : FindKeyword(function, "switch", lookup);
+    const std::string_view marker = SwitchAfter(stage);
+    const size_t after = marker.empty() ? 0 : function.find(marker);
+    const size_t switchStart = after == std::string::npos ? after : FindKeyword(function, "switch", after);
     const size_t body = switchStart == std::string::npos ? switchStart : function.find('{', switchStart);
     if (body == std::string::npos)
     {
-        result.problems.push_back("no switch after the registry lookup");
+        result.problems.push_back("no switch found");
         return result;
     }
     ReadLabels(function, body, result);

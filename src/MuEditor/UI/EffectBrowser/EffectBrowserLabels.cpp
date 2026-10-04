@@ -68,10 +68,17 @@ const char* Stage(RenderStage stage)
         return I18N::Editor::StageSwitch;
     case RenderStage::DrawnAsModel:
         return I18N::Editor::StageDrawnAsModel;
+    case RenderStage::OnGround:
+        return I18N::Editor::StageOnTheGround;
     case RenderStage::NotDrawn:
         break;
     }
     return I18N::Editor::StageNotDrawn;
+}
+
+const char* GroundSuffix(const EffectStages& stages)
+{
+    return stages.drawnOnGround && stages.render != RenderStage::OnGround ? I18N::Editor::AlsoOnTheGround : "";
 }
 
 const char* Slot(EffectAssetSlot slot)

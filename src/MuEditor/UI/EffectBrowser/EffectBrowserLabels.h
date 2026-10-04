@@ -15,6 +15,9 @@ const char* Kind(Data::Effects::EffectKind kind);
 const char* Stage(CreateStage stage);
 const char* Stage(MoveStage stage);
 const char* Stage(RenderStage stage);
+// Follows the drawing stage when RenderEffectShadows draws the effect on the
+// ground besides it; empty otherwise.
+const char* GroundSuffix(const EffectStages& stages);
 const char* Slot(EffectAssetSlot slot);
 } // namespace MuEditor::Effects::Labels
 
