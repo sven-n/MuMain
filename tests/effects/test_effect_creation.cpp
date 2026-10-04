@@ -548,90 +548,49 @@ TEST_CASE("The types of FX1.4 create from the catalogue what their cases set [ef
     CHECK_FALSE(Find(shot, "Effects[0].LifeTime").has_value());
 }
 
-// TEMPORARY: the next commit deletes the cases and this test. With
-// MU_EFFECT_RECORDER_WRITE=1 it writes the creation baseline with the old
-// cases of these types.
-TEST_CASE("TEMP: the rows of FX1.5 give the records of their cases [effects][recorder]")
+// FX1.5 moved the creation of these types from code into the catalogue, with
+// variants by SubType; the commit before the one that deleted their cases
+// compared both for every SubType a caller passes or a branch handles, one no
+// branch handles, every owner, argument set, slot pattern, both geometries
+// and the frame factors 1, 0.5 and 25/60. These are values the cases chose by
+// SubType.
+TEST_CASE("The types of FX1.5 create from the catalogue what their cases chose by SubType [effects][recorder]")
 {
-    const std::array<int, 41> types = {MODEL_ARROW_AUTOLOAD,
-                                       MODEL_INFINITY_ARROW1,
-                                       MODEL_INFINITY_ARROW2,
-                                       MODEL_INFINITY_ARROW3,
-                                       MODEL_BLADE_SKILL,
-                                       BITMAP_FIRE_CURSEDLICH,
-                                       MODEL_SWELL_OF_MAGICPOWER,
-                                       MODEL_ARROWSRE06,
-                                       MODEL_SUMMONER_CASTING_EFFECT1,
-                                       MODEL_SUMMONER_CASTING_EFFECT11,
-                                       MODEL_SUMMONER_CASTING_EFFECT111,
-                                       MODEL_SUMMONER_CASTING_EFFECT2,
-                                       MODEL_SUMMONER_CASTING_EFFECT22,
-                                       MODEL_SUMMONER_CASTING_EFFECT222,
-                                       MODEL_SUMMONER_SUMMON_SAHAMUTT,
-                                       BITMAP_ENERGY,
-                                       MODEL_LIGHTNING_ORB,
-                                       MODEL_CHAIN_LIGHTNING,
-                                       MODEL_ALICE_DRAIN_LIFE,
-                                       MODEL_ALICE_BUFFSKILL_EFFECT,
-                                       BITMAP_LIGHTNING + 1,
-                                       MODEL_RAKLION_BOSS_MAGIC,
-                                       BITMAP_FIRE_HIK2_MONO,
-                                       BITMAP_MAGIC_ZIN,
-                                       MODEL_MAGIC_CIRCLE1,
-                                       MODEL_CHANGE_UP_EFF,
-                                       MODEL_CHANGE_UP_NASA,
-                                       MODEL_CHANGE_UP_CYLINDER,
-                                       MODEL_AIR_FORCE,
-                                       BITMAP_DAMAGE_01_MONO,
-                                       BITMAP_FLARE,
-                                       MODEL_MANA_RUNE,
-                                       MODEL_SWORD_FORCE,
-                                       BITMAP_TARGET_POSITION_EFFECT1,
-                                       BITMAP_TARGET_POSITION_EFFECT2,
-                                       MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1,
-                                       MODEL_EFFECT_SKURA_ITEM,
-                                       BITMAP_RING_OF_GRADATION,
-                                       MODEL_EFFECT_UMBRELLA_DIE,
-                                       MODEL_WINDFOCE,
-                                       MODEL_SHOCKWAVE_GROUND01};
-    // At 60 frames per second the frame factor is 25/60, where a product with
-    // it is rounded, unlike at 1 and 0.5.
-    const Conditions frameRate[] = {{25.f / 60.f, SlotPattern::A}, {25.f / 60.f, SlotPattern::B}};
-    const auto record = [&](std::span<const Conditions> allConditions)
+    BuildShippedRegistry();
+    const auto record = [](int type, int subType)
     {
-        std::vector<Recorded> all;
-        for (const int type : types)
-        {
-            for (const EffectCall& call : SecondGeometryCallsFor(type, RecordedSubTypesOf(type)))
-            {
-                for (const Conditions& conditions : allConditions)
-                {
-                    all.push_back({Describe(call, conditions), RecordCall(call, conditions)});
-                }
-            }
-        }
-        return all;
+        EffectCall call = CallOf(type);
+        call.subType = subType;
+        return RecordCall(call, {});
     };
 
-    BuildShippedRegistry(types);
-    const std::vector<Recorded> cases = record(AllConditions());
-    const std::vector<Recorded> casesAtFrameRate = record(frameRate);
-    if (std::getenv("MU_EFFECT_RECORDER_WRITE") != nullptr)
-    {
-        WriteBaseline(RecordBaseline());
-    }
+    // The else branch is the row's value; the variants replace some of them.
+    CHECK(Find(record(MODEL_MAGIC_CIRCLE1, 0), "Effects[0].Velocity") == "0.100000001");
+    CHECK(Find(record(MODEL_MAGIC_CIRCLE1, 0), "Effects[0].LifeTime") == "30");
+    CHECK(Find(record(MODEL_MAGIC_CIRCLE1, 1), "Effects[0].LifeTime") == "20");
+    CHECK(Find(record(MODEL_MAGIC_CIRCLE1, 1), "Effects[0].HiddenMesh") == "0");
+    CHECK(Find(record(MODEL_MAGIC_CIRCLE1, 2), "Effects[0].LifeTime") == "15");
+    CHECK(Find(record(MODEL_MAGIC_CIRCLE1, 99), "Effects[0].LifeTime") == "30");
 
-    BuildShippedRegistry();
-    const std::vector<Recorded> rows = record(AllConditions());
-    const std::vector<Recorded> rowsAtFrameRate = record(frameRate);
+    // A row with only variants: a SubType without one keeps the slot's old
+    // lifeTime, as the case did (callers pass 4).
+    CHECK(Find(record(BITMAP_FIRE_CURSEDLICH, 12), "Effects[0].LifeTime") == "20");
+    CHECK(Find(record(BITMAP_FIRE_CURSEDLICH, 0), "Effects[0].BlendMesh") == "-2");
+    CHECK_FALSE(Find(record(BITMAP_FIRE_CURSEDLICH, 4), "Effects[0].LifeTime").has_value());
+    CHECK_FALSE(Find(record(MODEL_CHAIN_LIGHTNING, 3), "Effects[0].LifeTime").has_value());
 
-    std::ostringstream log;
-    const int differing = CompareAll(cases, rows, log);
-    const int differingAtFrameRate = CompareAll(casesAtFrameRate, rowsAtFrameRate, log);
-    INFO(log.str());
-    CHECK(differing == 0);
-    CHECK(differingAtFrameRate == 0);
-    MESSAGE("FX1.5 cases against the rows: " << cases.size() << " calls, " << differing
-                                             << " differ; at 25/60: " << casesAtFrameRate.size() << " calls, "
-                                             << differingAtFrameRate << " differ");
+    // A variant with an offset times the frame factor, one with other values.
+    const Record swordForce = record(MODEL_SWORD_FORCE, 2);
+    CHECK(Find(swordForce, "Effects[0].Scale") == "0");
+    CHECK(Find(swordForce, "Effects[0].Position[2]") == "240.75");
+    CHECK(Find(swordForce, "Effects[0].Velocity") == "0.25");
+    CHECK(Find(record(MODEL_SWORD_FORCE, 3), "Effects[0].Scale") == "3.5");
+
+    // A variant with a copy of the light it sets.
+    CHECK(Find(record(MODEL_ARROW_AUTOLOAD, 1), "Effects[0].Direction[1]") == "0.800000012");
+
+    // The row copies the call's scale; SubType 5 gets the row's values.
+    CHECK(Find(record(MODEL_WINDFOCE, 5), "Effects[0].LifeTime") == "50");
+    CHECK(Find(record(MODEL_WINDFOCE, 5), "Effects[0].Scale") == "0");
+    CHECK(Find(record(MODEL_WINDFOCE, 1), "Effects[0].LifeTime") == "999");
 }

@@ -386,6 +386,43 @@ their cases and 15.7 ns with their rows. The `Scale = PKKey / 100.f` cases
 (`MODEL_SKILL_FURY_STRIKE+3/+4/+6/+7`, `MODEL_AURORA`, `MODEL_WAVE_FORCE`)
 compute a value from a skill argument and stay code (D36).
 
+*FX1.5 done:* a `create` object can hold `variants` (D35), each for one or
+more SubTypes, with the fields of a row; the registry resolves them per
+SubType when it is built, and `CreateEffect` takes the values of its SubType
+(a search over the few SubTypes of a row). The creation cases of 41 types
+(34 cases) that only choose values by SubType are rows now:
+`MODEL_ARROW_AUTOLOAD`, `MODEL_INFINITY_ARROW1-3`, `MODEL_BLADE_SKILL`,
+`BITMAP_FIRE_CURSEDLICH`, `MODEL_SWELL_OF_MAGICPOWER`, `MODEL_ARROWSRE06`,
+`MODEL_SUMMONER_CASTING_EFFECT1/11/111/2/22/222`,
+`MODEL_SUMMONER_SUMMON_SAHAMUTT`, `BITMAP_ENERGY`, `MODEL_LIGHTNING_ORB`,
+`MODEL_CHAIN_LIGHTNING`, `MODEL_ALICE_DRAIN_LIFE`,
+`MODEL_ALICE_BUFFSKILL_EFFECT`, `BITMAP_LIGHTNING+1`,
+`MODEL_RAKLION_BOSS_MAGIC`, `BITMAP_FIRE_HIK2_MONO`, `BITMAP_MAGIC_ZIN`,
+`MODEL_MAGIC_CIRCLE1`, `MODEL_CHANGE_UP_EFF/NASA/CYLINDER`,
+`MODEL_AIR_FORCE`, `BITMAP_DAMAGE_01_MONO`, `BITMAP_FLARE`,
+`MODEL_MANA_RUNE`, `MODEL_SWORD_FORCE`, `BITMAP_TARGET_POSITION_EFFECT1/2`,
+`MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1`, `MODEL_EFFECT_SKURA_ITEM`,
+`BITMAP_RING_OF_GRADATION`, `MODEL_EFFECT_UMBRELLA_DIE`, `MODEL_WINDFOCE`
+and `MODEL_SHOCKWAVE_GROUND01`. An else branch becomes the row's values; a
+case without unconditional values becomes a row with only variants, so the
+SubTypes without a branch keep what the common setup and the slot give, as
+before (callers pass such SubTypes, for example 4 to
+`BITMAP_FIRE_CURSEDLICH`). The PR's second commit compared the old cases
+with the rows in one build for every SubType a caller passes or a branch
+handles (the recorder records extra SubTypes per type for that) and one no
+branch handles: all 6,752 calls equal at the frame factors 1 and 0.5, and
+all 3,376 at 25/60. The third deletes the 34 case groups; g++ finds the same
+6 fallthroughs. A benchmark of `CreateEffect` gave 14.6 ns per creation of
+the 41 types with their cases and 15.7 ns with their rows. The count differs
+from D35's 44 cases / 47 types: the scout of FX1.5 found 49 groups (57
+types) that only choose values by SubType today; 12 types (11 cases) need
+fields the format does not have yet (render type, alphaTarget, a lifeTime
+offset, start position values, the animation, copies from the light, the
+call's position and the call's angle) and move in FX1.5b; `BITMAP_MAGIC`,
+`MODEL_MAYASTONEFIRE` and `BITMAP_SWORD_FORCE` compute values from the
+call's scale or angle, and `MODEL_WARCRAFT` (never created) needs blend mesh
+numbers below -2, so they stay code.
+
 **FX1.6–FX1.7** add the effect browser and its preview to MuEditor. They
 change no game code outside editor builds.
 
