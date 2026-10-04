@@ -571,6 +571,20 @@ here. The input stays in C++, and a stock `<input type="range">` is not a drop-i
 inside a root-transformed panel — see `engine-findings.md` and its `tracked-deferrals.md` row.
 Move it to `base.rcss` when a second window needs it.
 
+## Feature operations for networking and game code
+
+Packet handlers and other non-UI code reach the UI through small free-function headers that
+include nothing from RmlUi or the window classes, so replacing the UI framework changes their
+`.cpp` files, not the callers. Each operation runs the owner's existing call sequence; callers
+keep decoding and protocol meaning (result codes become named enum values before the call), pass
+decoded values only, and strings or spans are borrowed for the call. Current headers:
+`UI/Chat/ChatMessages.h` (`UI::Chat`), `UI/Core/WindowAccess.h` (`UI::Windows`, over
+`Core/Globals/InterfaceList.h`), `UI/Dialogs/ConfirmRequest.h` (`UI::Dialogs::ShowConfirm`),
+`UI/Social/SocialUpdates.h`, `UI/Inventory/{InventoryContents,TradeUpdates,StorageUpdates,
+MixUpdates,ShopUpdates}.h`, `Guild/GuildUpdates.h`, `UI/HUD/HudUpdates.h`. Plain OK message boxes
+are already free functions in `UI/Core/WindowCommon.h`. Add an operation to the family's header
+when a caller needs one; do not add a generic UI command or event interface.
+
 ## Does not exist as a reusable primitive yet
 
 Recorded here so a future session doesn't assume otherwise — each of these is still ad hoc,
