@@ -75,7 +75,7 @@ BOOL CUILetterReadWindow::HandleMessage()
 void CUILetterReadWindow::Reply()
 {
     wchar_t temp[MAX_TEXT_LENGTH + 1] = {0};
-    mu_swprintf(temp, I18N::Game::WriteLetterCostDZen, g_cdwLetterCost);
+    mu_swprintf(temp, I18N::Game::WriteLetterCostDZen, UI::Social::LetterCost);
     const DWORD id = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);
     auto* window = dynamic_cast<CUILetterWriteWindow*>(g_pWindowMgr->GetWindow(id));
     if (!window)

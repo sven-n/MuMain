@@ -4,6 +4,7 @@
 
 #include "UI/Core/WindowSystem.h"
 #include "UI/HUD/GensRanking.h"
+#include "UI/HUD/MasterLevel.h"
 #include "UI/HUD/UIMapName.h"
 
 #include <string>
@@ -70,5 +71,20 @@ void SetGameOver(bool gameOver)
 void SetMoveCommandKey(std::uint32_t key)
 {
     g_pMoveCommandWindow->SetMoveCommandKey(key);
+}
+
+void ReplaceMasterSkills(CLASS_TYPE heroClass, std::span<const MasterSkill> skills)
+{
+    auto tree = mu::ui::window::CSystem::GetInstance()->GetUI_NewMasterLevelInterface();
+    tree->SetMasterType(heroClass);
+    tree->InitMasterSkillPoint();
+    for (const MasterSkill& skill : skills)
+        tree->SetMasterSkillTreeInfo(skill.index, skill.level, skill.value, skill.nextValue);
+}
+
+void UpgradeMasterSkill(const MasterSkill& skill)
+{
+    auto tree = mu::ui::window::CSystem::GetInstance()->GetUI_NewMasterLevelInterface();
+    tree->SkillUpgrade(skill.index, skill.level, skill.value, skill.nextValue);
 }
 }

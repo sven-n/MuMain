@@ -623,7 +623,7 @@ void FriendShell::WriteLetter(bool reply, bool toFriend)
     auto* letter = reply ? g_pLetterList->GetLetter(SelectedLetter()) : nullptr;
     if (reply && !letter) return;
     wchar_t title[MAX_TEXT_LENGTH + 1]{};
-    mu_swprintf(title, I18N::Game::WriteLetterCostDZen, g_cdwLetterCost);
+    mu_swprintf(title, I18N::Game::WriteLetterCostDZen, UI::Social::LetterCost);
     const DWORD id = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, UIWND_DEFAULT, UIWND_DEFAULT, title);
     auto* window = dynamic_cast<CUILetterWriteWindow*>(g_pWindowMgr->GetWindow(id));
     if (!window) return;

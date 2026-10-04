@@ -1,6 +1,9 @@
 #pragma once
 
+#include "Core/Globals/_enum.h"
+
 #include <cstdint>
+#include <span>
 #include <string_view>
 
 // HUD changes the server reports. Strings are borrowed for the call.
@@ -37,4 +40,15 @@ void SetGameOver(bool gameOver);
 
 // The key the server expects back with the next map-move request.
 void SetMoveCommandKey(std::uint32_t key);
+
+struct MasterSkill
+{
+    int index;
+    std::uint8_t level;
+    float value;
+    float nextValue;
+};
+// Rebuilds the master skill tree for `heroClass` from the learned skills.
+void ReplaceMasterSkills(CLASS_TYPE heroClass, std::span<const MasterSkill> skills);
+void UpgradeMasterSkill(const MasterSkill& skill);
 }

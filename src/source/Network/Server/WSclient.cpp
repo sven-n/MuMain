@@ -14,10 +14,10 @@
 #include "UI/Quests/QuestUpdates.h"
 #include "UI/Options/OptionUpdates.h"
 #include "UI/MuHelper/MuHelperUpdates.h"
+#include "UI/Windows/LoginSceneUpdates.h"
 #include "UI/Core/WindowAccess.h"
 #include "UI/Social/SocialUpdates.h"
 #include <memory>
-#include "UI/Core/UIManager.h"
 #include "Guild/GuildCache.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -54,15 +54,7 @@
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/InventoryUtils.h"
 #include "UI/Inventory/InventoryContents.h"
-#include "UI/HUD/UIMapName.h" // rozy
 #include "GameLogic/Commands/ChatCommandCatalog.h"
-#include "UI/Core/SceneUICoordinator.h"
-#include "UI/Windows/CreditWin.h"
-#include "UI/Windows/ServerSelWin.h"
-#include "UI/Windows/LoginMainWin.h"
-#include "UI/Windows/LoginWin.h"
-#include "Character/CharInfoBalloonMng.h"
-#include "Character/CharSelMainWin.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Character/CSParts.h"
 #include "Engine/Physics/PhysicsManager.h"
@@ -70,9 +62,6 @@
 #include "GameLogic/Items/MixMgr.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/Events/UIGuardsMan.h"
-#include "UI/Core/WindowSystem.h"
-#include "UI/Dialogs/CommonMessageBox.h"
-#include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/ConfirmRequest.h"
 #include "UI/Inventory/TradeUpdates.h"
 #include "UI/Inventory/StorageUpdates.h"
@@ -81,7 +70,6 @@
 #include "Guild/GuildUpdates.h"
 #include "UI/HUD/HudUpdates.h"
 #include "UI/Core/WindowCommon.h" // ShowTrainerMenuDialog/ShowSeedMasterMenuDialog/etc.
-#include "UI/Inventory/InventoryCtrl.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
@@ -112,12 +100,12 @@ using namespace mu::ui::window;
 #include <codecvt>
 #include <limits>
 
-#include "ServerListManager.h"
 #include "GameLogic/Social/MonkSystem.h"
 
 #include "Dotnet/Connection.h"
 
 #include "MUHelper/MuHelper.h"
+#include "Network/Server/ServerListManager.h"
 
 #define MAX_DEBUG_MAX 10
 
@@ -532,19 +520,7 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
         Offset += sizeof(PRECEIVE_SERVER_LIST);
     }
 
-    if (std::getenv("MU_INPUT_DIAGNOSTICS") != nullptr)
-    {
-        mu::log::Get("input")->info(
-            "[InputDiag] server-list groups={} selector(show={},active={}) login-main(show={},active={}) credits={}",
-            g_ServerListManager->GetServerGroupSize(), g_ServerSelWin.IsVisible(), g_ServerSelWin.IsActive(),
-            g_LoginMainWin.IsVisible(), g_LoginMainWin.IsActive(), g_CreditWin.IsVisible());
-    }
-    if (!g_CreditWin.IsVisible())
-    {
-        g_ServerSelWin.Show(true);
-        g_ServerSelWin.UpdateDisplay();
-        g_LoginMainWin.Show(true);
-    }
+    UI::LoginScene::ServerListReceived();
 
     g_ErrorReport.Write(L"Success Receive Server List.\r\n");
 
@@ -590,8 +566,6 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
     }
     else
     {
-        CSceneUICoordinator& rUIMng = CSceneUICoordinator::Instance();
-
         switch (Data2->Result)
         {
         case 0x01:
@@ -599,8 +573,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
             // don't surface the manual login window underneath it.
             if (!ReconnectManager::Instance().IsActive())
             {
-                g_LoginWin.Show(true);
-                g_LoginWin.FocusUsername();
+                UI::LoginScene::ShowLoginWindow();
             }
             HeroKey = ((int)(Data2->NumberH) << 8) + Data2->NumberL;
             CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
@@ -609,7 +582,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
         default:
             g_ErrorReport.Write(L"Connecting error. ");
             g_ErrorReport.WriteCurrentTime();
-            rUIMng.PopUpMsgWin(MESSAGE_SERVER_LOST);
+            UI::LoginScene::ShowMessage(MESSAGE_SERVER_LOST);
             break;
         }
 
@@ -625,8 +598,8 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
 
         if (actual < received)
         {
-            g_LoginWin.Show(false);
-            rUIMng.PopUpMsgWin(MESSAGE_VERSION);
+            UI::LoginScene::HideLoginWindow();
+            UI::LoginScene::ShowMessage(MESSAGE_VERSION);
             g_ErrorReport.Write(L"Version dismatch - Join server.\r\n");
         }
     }
@@ -862,15 +835,12 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
         CMultiLanguage::ConvertFromUtf8(CharactersClient[Data->Index].ID, Data->ID, MAX_USERNAME_SIZE);
         CharactersClient[Data->Index].ID[MAX_USERNAME_SIZE] = L'\0';
         CurrentProtocolState = RECEIVE_CREATE_CHARACTER_SUCCESS;
-        CSceneUICoordinator& rUIMng = CSceneUICoordinator::Instance();
-        rUIMng.CloseMsgWin();
-        g_CharSelMainWin.UpdateDisplay();
-        g_CharInfoBalloonMng.UpdateDisplay();
+        UI::LoginScene::CharacterCreated();
     }
     else if (Data->Result == 0)
-        CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_CREATE_CHARACTER_FAIL);
+        UI::LoginScene::ShowMessage(RECEIVE_CREATE_CHARACTER_FAIL);
     else if (Data->Result == 2)
-        CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_CREATE_CHARACTER_FAIL2);
+        UI::LoginScene::ShowMessage(RECEIVE_CREATE_CHARACTER_FAIL2);
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x01 [ReceiveCreateCharacter]");
 }
@@ -884,17 +854,17 @@ void ReceiveDeleteCharacter(const BYTE* ReceiveBuffer)
         INT iKey;
         iKey = CharactersClient[SelectedHero].Key;
         DeleteCharacter(iKey);
-        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_SUCCESS);
+        UI::LoginScene::ShowMessage(MESSAGE_DELETE_CHARACTER_SUCCESS);
         break;
     case 0:
-        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_GUILDWARNING);
+        UI::LoginScene::ShowMessage(MESSAGE_DELETE_CHARACTER_GUILDWARNING);
         break;
     case 3:
-        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_ITEM_BLOCK);
+        UI::LoginScene::ShowMessage(MESSAGE_DELETE_CHARACTER_ITEM_BLOCK);
         break;
     case 2:
     default:
-        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_STORAGE_RESIDENTWRONG);
+        UI::LoginScene::ShowMessage(MESSAGE_STORAGE_RESIDENTWRONG);
         break;
     }
 }
@@ -1571,18 +1541,17 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
 
 void Receive_Master_SetSkillList(PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
 {
-    auto interface = CSystem::GetInstance()->GetUI_NewMasterLevelInterface();
-    interface->SetMasterType(Hero->Class);
-    interface->InitMasterSkillPoint();
-
     memset(CharacterAttribute->MasterSkillInfo, 0, sizeof(CharacterAttribute->MasterSkillInfo));
 
-    for (int n = 0; n < lpMsg->count; n++)
+    std::vector<UI::Hud::MasterSkill> skills;
+    skills.reserve(lpMsg->count);
+    for (DWORD n = 0; n < lpMsg->count; n++)
     {
         auto lpInfo = (PMSG_MASTER_SKILL_LIST*)(((BYTE*)lpMsg) + sizeof(PMSG_MASTER_SKILL_LIST_SEND) +
                                                 (sizeof(PMSG_MASTER_SKILL_LIST) * n));
-        interface->SetMasterSkillTreeInfo(lpInfo->SkillIndex, lpInfo->SkillLevel, lpInfo->MainValue, lpInfo->NextValue);
+        skills.push_back({ lpInfo->SkillIndex, lpInfo->SkillLevel, lpInfo->MainValue, lpInfo->NextValue });
     }
+    UI::Hud::ReplaceMasterSkills(Hero->Class, skills);
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x53 [Receive_Master_SetSkillList]");
 }
@@ -2009,8 +1978,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
         }
         else
         {
-            CSceneUICoordinator& rUIMng = CSceneUICoordinator::Instance();
-            rUIMng.AddServerMsg(Text);
+            UI::LoginScene::AddServerMessage(Text);
         }
     }
     else if (Data->Result == 2)
@@ -6418,16 +6386,12 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             UI::Windows::Show(mu::ui::window::INTERFACE_MIXINVENTORY);
         };
         UI::Dialogs::ShowConfirm(std::move(cfg));
-        // 			BYTE *pbyChaosRate = ( &Data->Value) + 1;
-        // 			g_pUIJewelHarmony->SetMixSuccessRate(pbyChaosRate);
     }
     break;
     case 0x13:
     {
         g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_JERRIDON);
         UI::Windows::Show(mu::ui::window::INTERFACE_MIXINVENTORY);
-        // 			BYTE *pbyChaosRate = ( &Data->Value) + 1;
-        // 			g_pUIJewelHarmony->SetMixSuccessRate(pbyChaosRate);
     }
     break;
     case 0x14:
@@ -6523,39 +6487,6 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
     return (TRUE);
 }
-/*
-void ReceiveBuy(const BYTE* ReceiveBuffer)
-{
-    auto Data = (LPPHEADER_DEFAULT_ITEM)ReceiveBuffer;
-    if (Data->Index != 255)
-    {
-        if (Data->Index >= MAX_EQUIPMENT_INDEX && Data->Index < MAX_MY_INVENTORY_INDEX)
-        {
-            g_pMyInventory->InsertItem(Data->Index, Data->Item, Old);
-        }
-        else if (Data->Index >= MAX_MY_INVENTORY_INDEX && Data->Index < MAX_MY_INVENTORY_EX_INDEX)
-        {
-            g_pMyInventoryExt->InsertItem(Data->Index, Data->Item, Old);
-        }
-        else
-        {
-#ifdef _DEBUG
-            MU_DEBUG_BREAK();
-#endif // _DEBUG
-        }
-
-        PlayBuffer(SOUND_GET_ITEM01);
-    }
-    if (Data->Index == 0xfe)
-    {
-        UI::Windows::HideAll();
-
-        UI::Chat::PostChat(Hero->ID, I18N::Game::CannotBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
-    }
-    BuyCost = 0;
-
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x32 [ReceiveBuy(%d)]", Data->Index);
-}*/
 
 void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
 {
@@ -8337,9 +8268,9 @@ void Receive_Master_LevelGetSkill(const BYTE* ReceiveBuffer)
             }
         }
 
-        auto interface = CSystem::GetInstance()->GetUI_NewMasterLevelInterface();
-
-        interface->SkillUpgrade(Data->SkillIndex, Data->SkillLevel, Data->DisplayValue, Data->DisplayValueOfNextLevel);
+        UI::Hud::UpgradeMasterSkill(
+            { Data->SkillIndex, static_cast<std::uint8_t>(Data->SkillLevel), Data->DisplayValue,
+              Data->DisplayValueOfNextLevel });
     }
     Master_Level_Data.nMLevelUpMPoint = Data->MasterLevelUpPoints;
 
@@ -9883,7 +9814,7 @@ void ReceiveLetterSendResult(const BYTE* ReceiveBuffer)
     {
         UI::Social::LetterSent(Data->WindowGuid);
         wchar_t temp[MAX_TEXT_LENGTH + 1];
-        mu_swprintf(temp, I18N::Game::LetterHasBeenSentCostDZen, g_cdwLetterCost);
+        mu_swprintf(temp, I18N::Game::LetterHasBeenSentCostDZen, UI::Social::LetterCost);
         UI::Chat::PostSystem(temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
     break;
@@ -13354,7 +13285,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
                 CheckHack();
                 break;
             case 0x00:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_PASSWORD);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_PASSWORD);
                 break;
             case 0x01:
                 CurrentProtocolState = RECEIVE_LOG_IN_SUCCESS;
@@ -13362,60 +13293,60 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
                 CheckHack();
                 break;
             case 0x02:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ID);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_ID);
                 break;
             case 0x03:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ID_CONNECTED);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_ID_CONNECTED);
                 break;
             case 0x04:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_SERVER_BUSY);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_SERVER_BUSY);
                 break;
             case 0x05:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ID_BLOCK);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_ID_BLOCK);
                 break;
             case 0x06:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_VERSION);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_VERSION);
                 g_ErrorReport.Write(L"Version dismatch. - Login\r\n");
                 break;
             case 0x07:
             default:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_CONNECT);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_CONNECT);
                 break;
             case 0x08:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ERROR);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_ERROR);
                 break;
             case 0x09:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_NO_PAYMENT_INFO);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_NO_PAYMENT_INFO);
                 break;
             case 0x0a:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_USER_TIME1);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_USER_TIME1);
                 break;
             case 0x0b:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_USER_TIME2);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_USER_TIME2);
                 break;
             case 0x0c:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_PC_TIME1);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_PC_TIME1);
                 break;
             case 0x0d:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_PC_TIME2);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_PC_TIME2);
                 break;
             case 0x11:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ONLY_OVER_15);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_ONLY_OVER_15);
                 break;
             case 0x40:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL);
                 break;
             case 0xc0:
             case 0xd0:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_POINT_DATE);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_POINT_DATE);
                 break;
             case 0xc1:
             case 0xd1:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_POINT_HOUR);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_POINT_HOUR);
                 break;
             case 0xc2:
             case 0xd2:
-                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_INVALID_IP);
+                UI::LoginScene::ShowMessage(RECEIVE_LOG_IN_FAIL_INVALID_IP);
                 break;
             }
             break;

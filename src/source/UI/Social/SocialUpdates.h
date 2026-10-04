@@ -10,6 +10,9 @@
 // are borrowed for the call only.
 namespace UI::Social
 {
+// Zen charged for sending a letter.
+inline constexpr std::uint32_t LetterCost = 1000;
+
 struct FriendEntry
 {
     std::wstring_view name;

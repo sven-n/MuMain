@@ -3,8 +3,6 @@
 #include "UI/Social/SocialWindowBase.h"
 #include "UI/Social/PhotoViewer.h"
 
-const DWORD g_cdwLetterCost = 1000;
-
 class CUILetterReadWindow : public CUIBaseWindow
 {
 public:

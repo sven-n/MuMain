@@ -581,9 +581,15 @@ decoded values only, and strings or spans are borrowed for the call. Current hea
 `UI/Chat/ChatMessages.h` (`UI::Chat`), `UI/Core/WindowAccess.h` (`UI::Windows`, over
 `Core/Globals/InterfaceList.h`), `UI/Dialogs/ConfirmRequest.h` (`UI::Dialogs::ShowConfirm`),
 `UI/Social/SocialUpdates.h`, `UI/Inventory/{InventoryContents,TradeUpdates,StorageUpdates,
-MixUpdates,ShopUpdates}.h`, `Guild/GuildUpdates.h`, `UI/HUD/HudUpdates.h`. Plain OK message boxes
-are already free functions in `UI/Core/WindowCommon.h`. Add an operation to the family's header
-when a caller needs one; do not add a generic UI command or event interface.
+MixUpdates,ShopUpdates}.h`, `Guild/GuildUpdates.h`, `UI/HUD/HudUpdates.h`, `UI/Combat/SiegeUpdates.h`,
+`UI/Events/{Doppelganger,EmpireGuardian,CryWolf,LuckyCoin,Kanturu,CursedTemple}Updates.h`,
+`UI/NPCs/NpcDialogueUpdates.h`, `UI/Quests/QuestUpdates.h`, `UI/Options/OptionUpdates.h`,
+`UI/MuHelper/MuHelperUpdates.h`, `UI/Windows/LoginSceneUpdates.h`. Plain OK message boxes and the
+NPC menu dialogs are already free functions in `UI/Core/WindowCommon.h` (reached through the
+precompiled header; it includes nothing). `Network/Server/WSclient.cpp` includes only these headers
+from the UI, and its compiler include tree reaches no RmlUi header; keep it that way. Add an
+operation to the family's header when a caller needs one; do not add a generic UI command or event
+interface.
 
 ## Does not exist as a reusable primitive yet
 
