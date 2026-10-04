@@ -10,6 +10,9 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Core/Window3DRenderMng.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlRenderTarget.h"
+
+#include <memory>
 
 namespace Rml { class ElementDocument; }
 
@@ -54,10 +57,16 @@ namespace mu::ui::window
         void SetHotKey(int iHotKey, int iItemType, int iItemLevel);
         int GetHotKey(int iHotKey);
         int GetHotKeyLevel(int iHotKey);
-        void RenderItems();
 
-        // RmlUi now handles hit-testing/hover for the 4 item-hotkey slots (icon art stays native);
-        // sets a member read by SyncRmlModel() next frame.
+        // Each icon is a render target its slot's .item-icon shows, so RCSS places it like the rest
+        // of the slot. Once a frame from SyncRmlModel(): sizes each target to its icon's on-screen
+        // box -- the layout size times `scale`, #bars's own transform -- and points the icon at it.
+        void SyncSlotIcons(Rml::ElementDocument* document, float scale);
+        // From SyncDocVisibility(), which runs whether or not this window updates.
+        void SetSlotIconsShown(bool shown);
+
+        // RmlUi handles hit-testing/hover for the 4 item-hotkey slots; sets a member read by
+        // SyncRmlModel() and by the icon's own drawer.
         void OnHotkeySlotHover(int iSlotIndex) { m_iHoveredSlot = iSlotIndex; }
         void OnUnhover() { m_iHoveredSlot = -1; }
         int GetHoveredSlot() const { return m_iHoveredSlot; }
@@ -70,9 +79,14 @@ namespace mu::ui::window
         int GetHotKeyItemIndex(int iType, bool bItemCount = false);
         bool GetHotKeyCommonItem(IN int iHotKey, OUT int& iStart, OUT int& iEnd);
         int GetHotKeyItemCount(int iType);
+        ITEM* GetSlotItem(int iSlotIndex);
+        // A target's drawer: one frame of the slot's item, framed for `width` x `height`.
+        void RenderSlot(int iSlotIndex, std::uint32_t width, std::uint32_t height);
 
         int m_iHotKeyItemType[HOTKEY_COUNT];
         int m_iHotKeyItemLevel[HOTKEY_COUNT];
+        std::unique_ptr<UI::RmlBridge::RenderTarget> m_SlotTargets[HOTKEY_COUNT];
+        bool m_bSlotIconsShown = false;
 
         // -1 = nothing hovered; set by OnHotkeySlotHover(), cleared by OnUnhover().
         int m_iHoveredSlot = -1;
@@ -252,7 +266,7 @@ namespace mu::ui::window
     // texture (a stretched `image()` decorator would visibly distort it, and clipped-oversized-
     // image doesn't work in this RmlUi build -- see CBuffStrip); corner buttons only reproduce
     // "normal"/"panel-open" frames, with hover done via a CSS brightness filter.
-    class CMainFrameWindow : public CObject, public I3DRenderObj
+    class CMainFrameWindow : public CObject
     {
     public:
         enum IMAGE_LIST
@@ -268,14 +282,13 @@ namespace mu::ui::window
         CMainFrameWindow();
         virtual ~CMainFrameWindow();
 
-        bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
-        void Render3D();
 
         bool IsVisible() const;
 
@@ -333,7 +346,6 @@ namespace mu::ui::window
 
     private:
         CManager* m_pNewUIMng;
-        C3DRenderMng* m_pNewUI3DRenderMng;
 
         CItemHotKey m_ItemHotKey;
 
@@ -431,10 +443,8 @@ namespace mu::ui::window
         // while the bars stay over them (RmlStackingOrder.cpp).
         Rml::ElementDocument* m_pRmlTopDoc = nullptr;
 
-        // The left/center HUD-strip background must render BEHIND the legacy 3D-composited
-        // item/skill icons, which always paint after m_pRmlDoc's "main" context -- so it lives in
-        // a separate RmlUiRuntime::GetBackgroundContext() document/model, painted by
-        // CManager::Render()'s centralized RenderBackgroundLayer() call.
+        // The left/center HUD-strip background: a separate RmlUiRuntime::GetBackgroundContext()
+        // document/model, painted by CManager::Render()'s centralized RenderBackgroundLayer() call.
         struct MainFrameBgRmlModel
         {
             // Mirrors MainFrameRmlModel::barsLeft/barsTop/barsScale (#bg_root uses the same

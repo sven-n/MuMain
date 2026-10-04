@@ -554,6 +554,15 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   `EnsureOffscreenColorTexture()` releases too when asked for a new size, which is why a render
   target never resizes in place.
 
+- **Rendering an item moves the picking ray.** `RenderItem3D()` goes through
+  `CameraProjection::ScreenToWorldRay()`, which sets `MousePosition` as a side effect -- and
+  `MousePosition` is the origin of the ray terrain and object picking cast
+  (`CollisionDetectLineToFace(MousePosition, MouseTarget, ...)`). Every native item renderer puts it
+  back afterwards (`C3DCamera::Render()` through `UpdateMousePositionn()`); one that does not leaves
+  every ground click missing, so the hero stops moving with no error. `SaveCameraPerspective()`/
+  `RestoreCameraPerspective()` cover it along with the perspective and matrix item rendering also
+  overwrites.
+
 ## `CObject`/`CManager`/`LayoutMode` gotchas
 
 Found during the `CWin`→`CObject` migration itself (now complete, see `migration-ledger.md`), but

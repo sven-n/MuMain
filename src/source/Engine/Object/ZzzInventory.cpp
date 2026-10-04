@@ -9792,10 +9792,25 @@ bool UI::Items::ShouldAnimatePreview(bool pointerInside, bool pickedItemActive, 
     return pointerInside && (!pickedItemActive || renderingPickedItem);
 }
 
+static void RenderItem3DAt(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags,
+                           int ancientDiscriminator, bool PickUp, bool hovered);
+
 void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool PickUp)
 {
-    const bool Success = UI::Items::ShouldAnimatePreview(mu::ui::window::CheckMouseIn(sx, sy, Width, Height),
-                                                         g_pPickedItem != nullptr, PickUp);
+    RenderItem3DAt(sx, sy, Width, Height, Type, Level, excellentFlags, ancientDiscriminator, PickUp,
+                   mu::ui::window::CheckMouseIn(sx, sy, Width, Height));
+}
+
+void RenderItem3DWithHover(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags,
+                           int ancientDiscriminator, bool hovered)
+{
+    RenderItem3DAt(sx, sy, Width, Height, Type, Level, excellentFlags, ancientDiscriminator, false, hovered);
+}
+
+static void RenderItem3DAt(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags,
+                           int ancientDiscriminator, bool PickUp, bool hovered)
+{
+    const bool Success = UI::Items::ShouldAnimatePreview(hovered, g_pPickedItem != nullptr, PickUp);
 
     if (Type >= ITEM_SWORD && Type < ITEM_SWORD + MAX_ITEM_INDEX)
     {

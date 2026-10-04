@@ -271,8 +271,7 @@ no real call site backing it (invented for taxonomy-completeness alone) doesn't 
   [`tracked-deferrals.md`](tracked-deferrals.md) as a themeability-coupling gap). A value becoming
   `token(foo)` does not make duplicated geometry architecturally themeable — that requires actually
   deriving the position live (or, where that's currently impractical, an explicit pinned
-  cross-reference comment on both sides — see `tracked-deferrals.md`'s "hotkey slot pitch/size"
-  entry for the current example). Tokens are a color/typography/radius mechanism, not a substitute
+  cross-reference comment on both sides). Tokens are a color/typography/radius mechanism, not a substitute
   for the geometry-decoupling work tracked separately.
 
 **Cross-theme naming**: reuse a `modern` token's NAME for a `legacy` token when the semantic ROLE

@@ -522,13 +522,15 @@ void SetRenderViewport(int x, int y, int Width, int Height)
 
 // Saved camera state for save/restore around item rendering blocks.
 // Item rendering calls gluPerspective2 (corrupts PerspectiveX/Y/ScreenCenter)
-// and GetOpenGLMatrix(g_Camera.Matrix) (corrupts the camera matrix). Both must
-// be restored so ScreenToWorldRay reads correct values for click detection.
+// and GetOpenGLMatrix(g_Camera.Matrix) (corrupts the camera matrix), and its
+// ScreenToWorldRay() moves MousePosition -- the origin of the ray terrain and
+// object picking cast. All must be restored, or a click on the ground misses.
 static struct
 {
     float PerspectiveX, PerspectiveY;
     int ScreenCenterX, ScreenCenterY, ScreenCenterYFlip;
     float Matrix[3][4];
+    vec3_t MousePosition;
 } s_SavedCameraState;
 
 void SaveCameraPerspective()
@@ -539,6 +541,7 @@ void SaveCameraPerspective()
     s_SavedCameraState.ScreenCenterY    = g_Camera.ScreenCenterY;
     s_SavedCameraState.ScreenCenterYFlip = g_Camera.ScreenCenterYFlip;
     memcpy(s_SavedCameraState.Matrix, g_Camera.Matrix, sizeof(g_Camera.Matrix));
+    VectorCopy(MousePosition, s_SavedCameraState.MousePosition);
 }
 
 void RestoreCameraPerspective()
@@ -549,6 +552,7 @@ void RestoreCameraPerspective()
     g_Camera.ScreenCenterY    = s_SavedCameraState.ScreenCenterY;
     g_Camera.ScreenCenterYFlip = s_SavedCameraState.ScreenCenterYFlip;
     memcpy(g_Camera.Matrix, s_SavedCameraState.Matrix, sizeof(g_Camera.Matrix));
+    VectorCopy(s_SavedCameraState.MousePosition, MousePosition);
 }
 
 // Perspective setup for item/3D-UI rendering. Sets GL perspective AND updates

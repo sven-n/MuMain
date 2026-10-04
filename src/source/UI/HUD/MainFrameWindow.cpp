@@ -33,6 +33,8 @@
 // RmlUi migration -- see this class's header comment.
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Camera/CameraProjection.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
@@ -86,16 +88,13 @@ void mu::ui::window::CMainFrameWindow::UnloadImages()
     DeleteBitmap(IMAGE_MENU_2_1);
 }
 
-bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng)
+bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng)
 {
-    if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng)
+    if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MAINFRAME, this);
-
-    m_pNewUI3DRenderMng = pNewUI3DRenderMng;
-    m_pNewUI3DRenderMng->Add3DRenderObj(this, ITEMHOTKEYNUMBER_CAMERA_Z_ORDER);
 
     LoadImages();
 
@@ -376,12 +375,7 @@ void mu::ui::window::CMainFrameWindow::ReloadRmlTheme()
 void mu::ui::window::CMainFrameWindow::Release()
 {
     UnloadImages();
-
-    if (m_pNewUI3DRenderMng)
-    {
-        m_pNewUI3DRenderMng->Remove3DRenderObj(this);
-        m_pNewUI3DRenderMng = NULL;
-    }
+    m_ItemHotKey.SetSlotIconsShown(false);
 
     if (m_pNewUIMng)
     {
@@ -438,33 +432,14 @@ bool mu::ui::window::CMainFrameWindow::Render()
     return true;
 }
 
-void mu::ui::window::CMainFrameWindow::Render3D()
-{
-    // Uses centerTransform (item-hotkey band anchors next to the HP bar, not the window's left edge).
-    //
-    // transformMouse=true is required: RenderItem3D()'s hover check compares raw MouseX/MouseY
-    // against reference-space coordinates directly, so without it the hover test only lines up at
-    // identity scale/offset. Left independent of #item_slots' own RmlUi hover highlight since
-    // RenderItem3D() is a shared free function used elsewhere too.
-    //
-    // `* scaleX` must match Render()'s leftTransform exactly, or the 3D icons render somewhere
-    // other than where RenderLeftFrame()'s chrome and #item_slots' hit-testing expect them.
-    auto transform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
-    transform.offsetX += GetItemHotkeyOffsetX() * transform.scaleX;
-    UI::Scaling::ScopedActiveTransform layout(transform, true);
-    m_ItemHotKey.RenderItems();
-}
-
 bool mu::ui::window::CMainFrameWindow::IsVisible() const
 {
     return CObject::IsVisible();
 }
 
-// Theme-aware background fill behind the still-legacy 3D-composited item/skill icons. RmlUi's main
-// context always renders after the 3D-composited icons, so a background drawn through it would
-// cover them instead of sitting behind them -- painted instead by CManager::Render()'s centralized
-// RenderBackgroundLayer() call (before any window's Render()/Render3D() this frame). General
-// mechanism: any other window sharing C3DRenderMng can use it too.
+// Theme-aware background fill behind the item/skill slots, painted from the background context by
+// CManager::Render()'s centralized RenderBackgroundLayer() call, before any window's Render() this
+// frame.
 //
 // main_frame_bg.rcss's colors match main_frame.rcss's .slot-fill/.slot-frame tokens exactly so the
 // RmlUi-drawn panel and the RmlUi-drawn gauges/buttons on top of it read as one surface.
@@ -677,16 +652,18 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
                   UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, centerTransform));
 
         // Item-hotkey/skill-hotkey band offsets, read from #item_hotkey_anchor/#skill_list_anchor's
-        // real screen position and turned into a delta from centerTransform's offsetX; Render3D()
-        // and CSkillList apply this to keep render and hit-testing in sync. One frame of lag is
+        // real screen position and turned into a delta from centerTransform's offsetX; the legacy
+        // chrome and CSkillList apply this to keep render and hit-testing in sync. One frame of lag is
         // possible (harmless -- these markers only move on theme change).
         if (Rml::Element* pAnchor = m_pRmlDoc->GetElementById("item_hotkey_anchor"))
             m_fItemHotkeyOffsetX = pAnchor->GetAbsoluteOffset().x - centerTransform.offsetX;
         if (Rml::Element* pAnchor = m_pRmlDoc->GetElementById("skill_list_anchor"))
             m_fSkillListOffsetX = pAnchor->GetAbsoluteOffset().x - centerTransform.offsetX;
 
+        m_ItemHotKey.SyncSlotIcons(m_pRmlDoc, centerTransform.scaleX);
+
         // Background-layer panel tracks the same bars_left/top/scale plus the two anchor deltas,
-        // so it matches the legacy chrome the Render3D() icons composite against.
+        // so it matches the legacy chrome.
         if (m_pRmlBgDoc)
         {
             auto& bg = m_BgRmlBinder.GetModel();
@@ -1071,6 +1048,8 @@ mu::ui::window::CItemHotKey::CItemHotKey()
     {
         m_iHotKeyItemType[i] = -1;
         m_iHotKeyItemLevel[i] = 0;
+        m_SlotTargets[i] = std::make_unique<UI::RmlBridge::RenderTarget>(
+            [this, i](std::uint32_t width, std::uint32_t height) { RenderSlot(i, width, height); });
     }
 }
 
@@ -1357,28 +1336,96 @@ int mu::ui::window::CItemHotKey::GetHotKeyLevel(int iHotKey)
     return 0;
 }
 
-// PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size"): x=10+i*38/y=443/
-// 20x20 below is the same literal reference-space value both themes' main_frame.rcss hardcode for
-// #item_slot_0..3 -- "kept in sync by hand" per that file's own header comment. If either side
-// changes, update the other. The skill row no longer has this duplication (its icons are RmlUi);
-// the item icons stay native 3D renders, so this pair remains.
-void mu::ui::window::CItemHotKey::RenderItems()
+ITEM* mu::ui::window::CItemHotKey::GetSlotItem(int iSlotIndex)
 {
-    float x, y, width, height;
+    const int iIndex = GetHotKeyItemIndex(iSlotIndex);
+    return iIndex != -1 ? g_pMyInventory->FindItem(iIndex) : nullptr;
+}
 
+void mu::ui::window::CItemHotKey::SyncSlotIcons(Rml::ElementDocument* document, float scale)
+{
+    if (document == nullptr)
+        return;
     for (int i = 0; i < HOTKEY_COUNT; ++i)
     {
-        int iIndex = GetHotKeyItemIndex(i);
-        if (iIndex != -1)
+        Rml::Element* icon = document->GetElementById("item_icon_" + std::to_string(i));
+        if (icon == nullptr)
+            continue;
+        auto& target = *m_SlotTargets[i];
+        const bool filled = GetSlotItem(i) != nullptr;
+        target.SetEnabled(m_bSlotIconsShown && filled);
+        if (filled)
         {
-            ITEM* pItem = g_pMyInventory->FindItem(iIndex);
-            if (pItem)
-            {
-                x = 10 + (i * 38); y = 443; width = 20; height = 20;
-                RenderItem3D(x, y, width, height, pItem->Type, pItem->Level, 0, 0);
-            }
+            // Layout pixels are #bars's own, before its transform: the item is drawn at the size it
+            // is actually shown, never upscaled.
+            const auto size = icon->GetBox().GetSize(Rml::BoxArea::Content);
+            target.Resize(static_cast<std::uint32_t>(std::lround(size.x * scale)),
+                          static_cast<std::uint32_t>(std::lround(size.y * scale)));
         }
+        const Rml::String source = filled ? target.Source() : Rml::String();
+        if (icon->GetAttribute<Rml::String>("src", "") != source)
+            icon->SetAttribute("src", source);
     }
+}
+
+void mu::ui::window::CItemHotKey::SetSlotIconsShown(bool shown)
+{
+    m_bSlotIconsShown = shown;
+    if (shown)
+        return;
+    for (auto& target : m_SlotTargets)
+        target->SetEnabled(false);
+}
+
+// The item camera C3DCamera::Render() sets up -- an identity view at a 1-degree field of view --
+// with its projection cropped to one slot-sized rectangle, so that rectangle fills the target. At
+// that field of view where the rectangle sits barely matters, so it is centred, on-axis; only its
+// size frames the item, and every per-item offset in RenderItem3D() applies exactly as before.
+void mu::ui::window::CItemHotKey::RenderSlot(int iSlotIndex, std::uint32_t width, std::uint32_t height)
+{
+    ITEM* pItem = GetSlotItem(iSlotIndex);
+    if (pItem == nullptr || width == 0 || height == 0)
+        return;
+
+    const float windowWidth = static_cast<float>(WindowWidth);
+    const float windowHeight = static_cast<float>(WindowHeight);
+    const float w = static_cast<float>(width);
+    const float h = static_cast<float>(height);
+    const float x = (windowWidth - w) * 0.5f;
+    const float y = (windowHeight - h) * 0.5f;
+
+    // gluPerspective2() and the identity view overwrite g_Camera, which picking reads.
+    SaveCameraPerspective();
+    // The rectangle is in window pixels, which is what ScreenToWorldRay() turns it into.
+    const UI::Scaling::ScopedActiveTransform pixels({1.f, 1.f, 0.f, 0.f, 1.f});
+
+    auto& renderer = mu::GetRenderer();
+    renderer.SetMatrixMode(GL_PROJECTION);
+    renderer.PushMatrix();
+    renderer.LoadIdentity();
+    const float scaleX = windowWidth / w;
+    const float scaleY = windowHeight / h;
+    const float centerX = (2.f * x + w) / windowWidth - 1.f;
+    const float centerY = 1.f - (2.f * y + h) / windowHeight;
+    renderer.Translate(-centerX * scaleX, -centerY * scaleY, 0.f);
+    renderer.Scale(scaleX, scaleY, 1.f);
+    // gluPerspective2() takes the camera's screen centre from the viewport; the capture brings its own.
+    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
+    gluPerspective2(1.f, windowWidth / windowHeight, RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
+    renderer.SetMatrixMode(GL_MODELVIEW);
+    renderer.PushMatrix();
+    renderer.LoadIdentity();
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
+    EnableDepthTest();
+    EnableDepthMask();
+
+    RenderItem3DWithHover(x, y, w, h, pItem->Type, pItem->Level, 0, 0, m_iHoveredSlot == iSlotIndex);
+
+    renderer.SetMatrixMode(GL_MODELVIEW);
+    renderer.PopMatrix();
+    renderer.SetMatrixMode(GL_PROJECTION);
+    renderer.PopMatrix();
+    RestoreCameraPerspective();
 }
 
 void mu::ui::window::CItemHotKey::OnHotkeySlotRightClick(int iSlotIndex)
@@ -2428,6 +2475,7 @@ void mu::ui::window::CMainFrameWindow::SyncDocVisibility(bool sceneAllowsShow)
     const bool show = IsVisible() && sceneAllowsShow;
 
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, show);
+    m_ItemHotKey.SetSlotIconsShown(show);
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlTopDoc, show);
 
     // m_pRmlBgDoc needs the same gate: CManager::Render()'s centralized RenderBackgroundLayer()

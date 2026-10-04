@@ -229,7 +229,7 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewMainFrameWindow = new CMainFrameWindow;
-    if (m_pNewMainFrameWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
+    if (m_pNewMainFrameWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewSkillList = new CSkillList;

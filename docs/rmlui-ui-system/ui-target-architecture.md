@@ -363,11 +363,10 @@ useful detail; full history in git log):
       themselves a pattern to keep building — Rule 3 still applies: this shape is transitional and
       shrinking, not a peer to the other three.
     - **Hybrid RmlUi/native 3D UI** — `CItemHotKey` (welded into `UI/HUD/MainFrameWindow.h/.cpp`,
-      Phase 3 of that file's 3-phase port): RmlUi owns the potion-slot hover-highlight border,
-      stack-count text, and right-click-to-use; the potion icon itself stays a genuine live 3D
-      model render (`RenderItem3D()`/`RenderObjectScreen()`), the permanent Section E boundary this
-      whole document is built around. The same split `CSkillList` (Phase 2) already proved for
-      skill icons — not a one-off.
+      Phase 3 of that file's 3-phase port): RmlUi owns the potion slot, its hover border,
+      stack-count text and right-click-to-use; the potion is still a live 3D model render
+      (`RenderItem3D()`), the Section E boundary, but drawn into a render target the slot shows
+      (`UI::RmlBridge::RenderTarget`). Section E decides who draws the content, not where it may sit.
     - **World-overlay UI** — `CCharInfoBalloonMng` (`Character/CharInfoBalloonMng.h`), already
       this document's own Section C example of a window with no static 2D rect at all: its position
       is a per-frame `WorldToScreen()` projection, RmlUi-presented, no legacy widget members.

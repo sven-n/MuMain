@@ -415,7 +415,16 @@ what's still unaudited (behavior across a resolution/UI-scale/theme change post-
 `UI::RmlBridge::RenderTarget` (`UI/RmlBridge/RmlRenderTarget.h`/`.cpp`) — native drawing rendered
 into a texture a document shows like any other image, so it sits at its element's own depth: under
 a window that covers it, beneath the text and tooltips drawn over it. This is the default for live
-3D that belongs to one window. The letter portrait (`CUIPhotoViewer`) is the consumer.
+3D that belongs to one window. Consumers: the letter portrait (`CUIPhotoViewer`) and the item
+hotkeys (`CItemHotKey`).
+
+**An inventory item into a target**: `CItemHotKey::RenderSlot()` is the recipe. Set up the item camera
+`C3DCamera::Render()` uses — identity view, 1° field of view — but crop its projection to a
+rectangle the size of the target, and call `RenderItem3DWithHover()` with that rectangle. At that
+field of view only the rectangle's size frames the item, so every per-item offset and angle in
+`RenderItem3D()` applies exactly as on screen. Bracket it with `SaveCameraPerspective()`/
+`RestoreCameraPerspective()`: item rendering overwrites `g_Camera` and moves `MousePosition`, the
+origin of the ray picking casts, and leaving it moved stops click-to-move.
 
 Construct one with a drawer, size it to an element with `Resize(width, height)` in physical pixels
 (RmlUi box sizes already are), `SetEnabled()` it while the window is shown, and set an `<img>`'s
@@ -571,16 +580,10 @@ per-window, or entirely unbuilt:
   no reusable RmlUi component yet, but the pattern to build one isn't unproven: it's the same
   RmlUi-overlay-plus-native-icon split `CSkillList` (Phase 2) validated for skill icons (since
   2026-09-27 the skill icons themselves are RmlUi sprites too: `skill_icons.rcss`, `ResolveSkillIcon()`).
-  **Correction, 2026-09-06**: this entry previously called `CItemHotKey`'s icons "3D-camera-
-  composited" and framed the whole slot as "still 100% legacy 2D rendering... the next real
-  candidate to prove a pattern against" — wrong on both counts. Traced to source
-  (`CItemHotKey::RenderItems()` → `RenderItem3D()`/`ZzzInventory.cpp` →
-  `RenderObjectScreen(MODEL_...)`), the icon is a genuine **live 3D model render**, the same
-  technique `CCharMakeWin`'s character-preview panel uses — Section E of
-  [`ui-target-architecture.md`](ui-target-architecture.md) puts that in the *permanent*,
-  no-RmlUi-equivalent bucket, not the temporary sprite-atlas one. So only the slot chrome around
-  the icon is a real "prove the pattern" candidate; the icon itself stays native permanently, same
-  as `CCharMakeWin`'s preview.
+  An item icon is a live 3D model render (`RenderItem3D()`), which stays native, but it no longer
+  has to sit outside the slot: the item hotkeys draw theirs into a `RenderTarget` the slot's
+  `.item-icon` shows (see "Native content inside a document"), so a slot is one RmlUi element with
+  RCSS deciding where its icon sits.
 - **ProgressBar / HealthBar / ManaBar / ExperienceBar** — `main_frame.rcss`'s HP/MP/AG/SD/EXP
   gauge-fill rules (`#hp_fill` etc.) are ad hoc per-window CSS, not an abstracted, reusable bar
   component another window could reference. `title_scene.rml`'s loading bar uses RmlUi's own

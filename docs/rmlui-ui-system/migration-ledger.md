@@ -52,7 +52,7 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 
 | Component | Category | Status | Target shape / primitive | Detail pointer |
 |---|---|---|---|---|
-| `CMainFrameWindow` (+ nested `CSkillList`) | `CObject`-tier + live-3D | Done | Hybrid RmlUi/native 3D | `STATUS.md` "What's migrated" — 3-phase port; skill icons/boxes RmlUi since 2026-09-27 (`ResolveSkillIcon()`, `skill_icons.rcss`), only the item-hotkey potions stay native 3D |
+| `CMainFrameWindow` (+ nested `CSkillList`) | `CObject`-tier + live-3D | Done | Hybrid RmlUi/native 3D | `STATUS.md` "What's migrated" — 3-phase port; skill icons/boxes RmlUi since 2026-09-27 (`ResolveSkillIcon()`, `skill_icons.rcss`), the item-hotkey potions are native 3D drawn into render targets their slots show |
 | `CBuffStrip` | `CObject`-tier | Done | RmlUi-only 2D | `STATUS.md` "What's migrated"; the `data-for` pilot |
 | `CMuHelperBar` | `CObject`-tier | Done | RmlUi-only 2D | `STATUS.md` "What's migrated" |
 | `CHotKey` | `CObject`-tier | Nothing to port | — | `CHotKey::Render()` only returns true: the window handles hotkeys and draws nothing (verified 2026-09-28). Not the same class as `CItemHotKey`, a nested type inside `CMainFrameWindow`, already ported with it |

@@ -191,15 +191,15 @@
 }
 #current_skill_slot .skill-icon { left: 0; top: 0; }
 
-/* Zero-shift wrapper (legacy has no offset, unlike modern's shifted copy); each slot matches
-   CItemHotKey::RenderItems()'s native icon draw position/size (x = 10 + i*38, y = 443, 20x20).
-   PINNED (docs/rmlui-ui-system/tracked-deferrals.md, "hotkey slot pitch/size") -- both sides carry
-   an explicit cross-reference comment now; update together. */
+/* Zero-shift wrapper (legacy has no offset, unlike modern's shifted copy). Each slot is the
+   original's 20x20 icon box at x = 10 + i*38, y = 443, and its icon fills it -- drawn at whatever
+   size this box is shown, so moving or resizing it here is all it takes. */
 #item_slots { position: absolute; left: 0; top: 0; }
 #item_slot_0 { position: absolute; left: 10px;  top: 443px; width: 20px; height: 20px; }
 #item_slot_1 { position: absolute; left: 48px;  top: 443px; width: 20px; height: 20px; }
 #item_slot_2 { position: absolute; left: 86px;  top: 443px; width: 20px; height: 20px; }
 #item_slot_3 { position: absolute; left: 124px; top: 443px; width: 20px; height: 20px; }
+.item-icon { position: absolute; left: 0; top: 0; width: 20px; height: 20px; pointer-events: none; }
 
 /* Real hover/click targets now (main_frame.rml) -- opt back into pointer-events (inherited none
    from body). */

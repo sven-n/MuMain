@@ -85,16 +85,16 @@
 			<span class="tooltip" id="exp_tooltip" data-style-font-size="hint_px + 'px'" data-style-transform="'scale(' + (1 / bars_scale) + ')'">{{exp_tooltip}}</span>
 		</div>
 
-		<!-- Item hotkey chrome: interactive overlay only (hover highlight, stack count,
-		     right-click-to-use) -- icon art stays a live 3D model render underneath
-		     (RenderItem3D()/RenderObjectScreen(), no RmlUi equivalent). Legacy leaves
+		<!-- Item hotkeys: hover highlight, stack count, right-click-to-use, and the icon -- the
+		     item's native 3D render, drawn into a render target .item-icon shows
+		     (CItemHotKey::SyncSlotIcons()), so this theme's RCSS places it. Legacy leaves
 		     .slot-frame/.selected unstyled since its own sprite chrome already frames the
 		     slots. -->
 		<div id="item_slots">
-			<div id="item_slot_0" class="slot-frame" data-class-selected="item_slot_0_hovered" data-event-mouseover="item_hotkey_hover(0)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(0)"><span class="slot-hotkey-label">Q</span><span class="item-stack-label">{{item_slot_0_count}}</span></div>
-			<div id="item_slot_1" class="slot-frame" data-class-selected="item_slot_1_hovered" data-event-mouseover="item_hotkey_hover(1)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(1)"><span class="slot-hotkey-label">W</span><span class="item-stack-label">{{item_slot_1_count}}</span></div>
-			<div id="item_slot_2" class="slot-frame" data-class-selected="item_slot_2_hovered" data-event-mouseover="item_hotkey_hover(2)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(2)"><span class="slot-hotkey-label">E</span><span class="item-stack-label">{{item_slot_2_count}}</span></div>
-			<div id="item_slot_3" class="slot-frame" data-class-selected="item_slot_3_hovered" data-event-mouseover="item_hotkey_hover(3)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(3)"><span class="slot-hotkey-label">R</span><span class="item-stack-label">{{item_slot_3_count}}</span></div>
+			<div id="item_slot_0" class="slot-frame" data-class-selected="item_slot_0_hovered" data-event-mouseover="item_hotkey_hover(0)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(0)"><img id="item_icon_0" class="item-icon"/><span class="slot-hotkey-label">Q</span><span class="item-stack-label">{{item_slot_0_count}}</span></div>
+			<div id="item_slot_1" class="slot-frame" data-class-selected="item_slot_1_hovered" data-event-mouseover="item_hotkey_hover(1)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(1)"><img id="item_icon_1" class="item-icon"/><span class="slot-hotkey-label">W</span><span class="item-stack-label">{{item_slot_1_count}}</span></div>
+			<div id="item_slot_2" class="slot-frame" data-class-selected="item_slot_2_hovered" data-event-mouseover="item_hotkey_hover(2)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(2)"><img id="item_icon_2" class="item-icon"/><span class="slot-hotkey-label">E</span><span class="item-stack-label">{{item_slot_2_count}}</span></div>
+			<div id="item_slot_3" class="slot-frame" data-class-selected="item_slot_3_hovered" data-event-mouseover="item_hotkey_hover(3)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(3)"><img id="item_icon_3" class="item-icon"/><span class="slot-hotkey-label">R</span><span class="item-stack-label">{{item_slot_3_count}}</span></div>
 		</div>
 		<!-- data-class-selected mirrors which hotkey slot shows the equipped skill (the
 		     original's IMAGE_SKILLBOX_USE box). Per slot, in the original's paint order: the skill
