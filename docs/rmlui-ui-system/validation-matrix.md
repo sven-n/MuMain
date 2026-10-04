@@ -54,7 +54,7 @@ reason — worth knowing, because "does this need a scale conversion?" has no si
 | Site | Why it's correct |
 |---|---|
 | `CGenericConfirmDialog` | `dp`-sized `.center-both` panel, no root transform — its box genuinely *is* screen px, so `LogicalX` is right |
-| `CMainFrameWindow` | takes the delta against `centerTransform.offsetX`, then multiplies the scale back in at the point of use |
+| `CMainFrameWindow` | no root transform: it reads the hovered slot's screen-px box and divides by the dp ratio (`SlotBoxInReference()`), which is also the frame its tooltip anchors map back through |
 | `CNPCDialogue` | subtracts two siblings' offsets and divides by a pitch — units cancel |
 | `RmlTooltip` | no root transform, and its C++ pre-multiplies the scale into the width it sets |
 | `COptionWindow` | compares a screen-px rect against `MouseX/MouseY`, which is only safe because `INTERFACE_OPTION` maps to `LayoutMode::Legacy` (identity) in `UILayoutPolicy.cpp` — deliberately, after the same click-through was found live |

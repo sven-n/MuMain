@@ -27,9 +27,10 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   replacing the old hand-rolled `EVENT_STATE` hover/click machine entirely), and Phase 3
   (`CItemHotKey` — potion-slot hover-highlight border, stack-count text, and right-click-to-use,
   all via RmlUi; the potion icon is a native 3D render drawn into a render target each slot's
-  `.item-icon` shows, so RCSS places it — see below). **Icon/box-frame
-  art for the skill grid and pet row stays legacy 2D**, a deliberate Phase 2 scope cut — see the
-  pilots-to-revisit table below. **Correction, 2026-09-06**: Phase 3's icons are not a sprite-atlas
+  `.item-icon` shows, so RCSS places it — see below). Since 2026-10-04 the whole HUD is one
+  shared `main_frame.rml`, sized in `dp` and split into self-placed parts each theme places by RCSS
+  alone (`theming-and-modding.md`); the buff strip and both corner-button rows follow the same
+  model. **Correction, 2026-09-06**: Phase 3's icons are not a sprite-atlas
   porting gap — traced to `RenderItem3D()`/`RenderObjectScreen(MODEL_...)`
   (`ZzzInventory.cpp`), they're genuine live 3D model renders, the same permanent, no-RmlUi-
   equivalent category as `CCharMakeWin`'s character-preview panel (`ui-target-architecture.md`
@@ -382,8 +383,8 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
     background context, behind its other documents: a docked panel's frame is painted there, so
     a main-context document would draw over it however far back it is pushed.
   - **An overlay the original drew under the bottom HUD** (the mini map) stays under the main
-    frame's document by the stacking table and must not paint over the still-native left/centre
-    HUD art.
+    frame's document by the stacking table, and paints only outside the HUD strip
+    (`CMainFrameWindow::GetStripRect()`), wherever the theme places it.
   - **RenderText() shrinks a text wider than its box** (player names, event lines): use
     `NativeTextPixelSizeInBox()` per text, not only for titles.
 - **HUD menus and the party list** — **done, both themes (2026-09-27)**: `CHelpWindow`,
@@ -517,9 +518,9 @@ same numbers order the background context. Passes outside the window list: objec
 and the map name 0.5, notices 20, scene windows 30 (balloons 29, the remember-password prompt 31),
 loading and title screens 40, reconnect dialog 50. The shared tooltip is 10.69, above every window
 and under the message boxes (10.7): the original drew each tooltip at its owner's depth, where the
-chat log, the friends window and the HUD hid its rows. The modern theme's top-right button row
-is its own document (`main_frame_top.rml`, 1.05: over the names, under every window, which dock
-over that corner). Native parts (item grids, 3D items) keep
+chat log, the friends window and the HUD hid its rows. The top-right button row (the modern
+theme's choice) is its own document (`main_frame_top.rml`, 1.05: over the names, under every
+window, which dock over that corner). Native parts (item grids, 3D items) keep
 the native order and stay under the main context. `rml_stacking_order_tests` checks that every
 document the sources name has an entry.
 
@@ -654,17 +655,9 @@ for "the full architecture is in place":
       context uses. Needs no input routing at all (never registered as an `IUiInputConsumer`) —
       every document loaded into it is `pointer-events: none`, same convention as
       `char_sel_main.rml`'s `#panel`.
-    - **Proven end-to-end**: `MainFrameWindow.cpp`'s `RenderLeftFrame()`/`RenderCenterFrame()`
-      background-fill hack (`RenderColorQuadARGB` + `ThemeProvidesOwnIconChrome()`) is retired —
-      replaced by `themes/modern/main_frame_bg.rml`/`.rcss`, a real RmlUi document rendered via
-      `RenderBackgroundLayer()`, tracking the same `BottomHudCenterTransform`/anchor-offset values
-      `main_frame.rml`'s own `#bars` group already used (`CMainFrameWindow::SyncRmlModel()`,
-      a second small `RmlModelBinder`). The skill-list-up highlight overlay in the same function
-      stays a legacy quad — never blocked by this constraint, no reason to move it. **Verified
-      visually against a real server, modern theme, 2026-09-04**: potions and skill icons still
-      render and animate correctly on top of the now-RmlUi-authored background, no regression.
-      Since retired: once the potions were render targets inside `main_frame.rml`, the fills and
-      the highlight moved into that document and `main_frame_bg.rml` was deleted.
+    - **First consumer**: the modern main frame's strip fills (`main_frame_bg.rml`, 2026-09-04),
+      painted behind the then-native 3D potions. Retired once the potions became render targets
+      inside `main_frame.rml`; the inventory family's frames are its consumers now.
   - **Phase 2 done (2026-09-13)**: the trigger condition below fired nine times over (the whole
     inventory-family port), so the call is now centralized in
     `mu::ui::window::CManager::Render()`'s own z-sorted loop (`WindowManager.cpp`) instead of each
@@ -676,11 +669,7 @@ for "the full architecture is in place":
     iteration's call in the same frame free). One consequence worth knowing: this call now fires
     every frame regardless of which window happens to be first in z-order, not just ones that own
     background content — any window whose own background-context document stays `Show()`n across
-    its own hidden state must gate that document's visibility itself (`CMainFrameWindow` needed a
-    fix here: `m_pRmlBgDoc` used to rely on `RenderBackgroundLayer()` only running while
-    `RenderLeftFrame()` did, i.e. while `CMainFrameWindow` itself was visible — no longer true, so
-    `SyncDocVisibility()` now gates `m_pRmlBgDoc` the same `IsVisible() && sceneAllowsShow` way it
-    already gated `m_pRmlDoc`). The inventory-family windows never had this problem — each one's
+    its own hidden state must gate that document's visibility itself. The inventory-family windows never had this problem — each one's
     own `SyncRmlModel()` already explicitly `Show()`/`Hide()`s its bg doc off its own `IsVisible()`,
     independent of who calls `RenderBackgroundLayer()`.
   - **Correction, 2026-09-13**: the first version of this centralization put the call directly in
