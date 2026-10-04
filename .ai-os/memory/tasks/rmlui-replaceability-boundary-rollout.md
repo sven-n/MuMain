@@ -173,6 +173,8 @@ Kanturu pass (2026-10-05): `UI/Events/KanturuUpdates` owns entry-window updates 
 
 Cursed Temple pass (2026-10-05): `UI/Events/CursedTempleUpdates` owns the entry offer and per-level counts, match status, skill use/end, kill points, the result screen, and the ready-phase window switch. `WSclient.cpp` decodes every packet (party positions, result rows with converted names and client classes) and the three windows no longer read packet buffers or include `WSclient.h`; the window keeps its own copy of the party positions, clamped to `MAX_PARTYS`. The relic-holder handler stays an empty no-op, as it was. A full RelWithDebInfo build passed. In-game spot checks remain pending with the consolidated RB-03 checklist.
 
+NPC and quest pass (2026-10-05): `UI/NPCs/NpcDialogueUpdates` owns the dialogue-open check, opening the dialogue, the quest list, and the Gens join/leave/reward answers; the dialogue takes named `GensJoinResult`/`GensLeaveResult`/`GensRewardResult` values and `WSclient.cpp` maps the protocol codes (unknown codes are dropped, as the old switches ignored them). `UI/Quests/QuestUpdates` owns disabling Complete on the open progress window, the quest-log reward refresh, and the (compiled-out) quest-count-limit box. A full RelWithDebInfo build passed. In-game spot checks remain pending with the consolidated RB-03 checklist.
+
 ### RB-04 — Theme command ownership
 
 - Keep `$theme` command recognition in the console, but move theme validation, activation, config

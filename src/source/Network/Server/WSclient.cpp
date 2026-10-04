@@ -10,6 +10,8 @@
 #include "UI/Events/LuckyCoinUpdates.h"
 #include "UI/Events/KanturuUpdates.h"
 #include "UI/Events/CursedTempleUpdates.h"
+#include "UI/NPCs/NpcDialogueUpdates.h"
+#include "UI/Quests/QuestUpdates.h"
 #include "UI/Core/WindowAccess.h"
 #include "UI/Social/SocialUpdates.h"
 #include <memory>
@@ -10477,7 +10479,7 @@ void ReceiveQuestLimitResult(const BYTE* ReceiveBuffer)
     switch (pData->m_byResult)
     {
     case QUEST_RESULT_CNT_LIMIT:
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CQuestCountLimitMsgBoxLayout));
+        UI::Quest::ShowQuestCountLimit();
         break;
     }
 }
@@ -10498,9 +10500,8 @@ void ReceiveQuestByEtcEPList(const BYTE* ReceiveBuffer)
 void ReceiveQuestByNPCEPList(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
-    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
-        g_pNPCDialogue->ProcessQuestListReceive((DWORD*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)),
-                                                pData->m_wQuestCount);
+    auto questIndices = (const std::uint32_t*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST));
+    UI::Npc::ShowQuestList({ questIndices, pData->m_wQuestCount });
 }
 
 void ReceiveQuestQSSelSentence(const BYTE* ReceiveBuffer)
@@ -10538,18 +10539,12 @@ void ReceiveQuestCompleteResult(const BYTE* ReceiveBuffer)
         break;
 
     case 2:
-        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
-            g_pQuestProgress->EnableCompleteBtn(false);
-        else if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
-            g_pQuestProgressByEtc->EnableCompleteBtn(false);
+        UI::Quest::DisableCompleteButton();
         UI::Chat::PostSystem(I18N::Game::YouHaveReachedYourZenLimit, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
 
     case 3:
-        if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
-            g_pQuestProgress->EnableCompleteBtn(false);
-        else if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
-            g_pQuestProgressByEtc->EnableCompleteBtn(false);
+        UI::Quest::DisableCompleteButton();
         UI::Chat::PostSystem(I18N::Game::InventoryIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
         UI::Chat::PostSystem(I18N::Game::TheSameItemThatYouWantToTrade, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
@@ -10574,7 +10569,7 @@ void ReceiveProgressQuestRequestReward(const BYTE* ReceiveBuffer)
     auto pData = (LPPMSG_NPC_QUESTEXP_INFO)ReceiveBuffer;
     g_QuestMng.SetQuestRequestReward(ReceiveBuffer);
     g_QuestMng.SetEPRequestRewardState(pData->m_dwQuestIndex, true);
-    g_pMyQuestInfoWindow->SetSelQuestRequestReward();
+    UI::Quest::RefreshSelectedQuestReward();
 }
 
 void ReceiveProgressQuestListReady(const BYTE* ReceiveBuffer)
@@ -10587,15 +10582,37 @@ void ReceiveProgressQuestListReady(const BYTE* ReceiveBuffer)
 void ReceiveGensJoining(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_ANS_REG_GENS_MEMBER)ReceiveBuffer;
-    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
-        g_pNPCDialogue->ProcessGensJoiningReceive(pData->m_byResult, pData->m_byInfluence);
+    using UI::Npc::GensJoinResult;
+    GensJoinResult result;
+    switch (pData->m_byResult)
+    {
+    case 0: result = GensJoinResult::Joined; break;
+    case 1: result = GensJoinResult::AlreadyMember; break;
+    case 2: result = GensJoinResult::LeftTooRecently; break;
+    case 3: result = GensJoinResult::LevelTooLow; break;
+    case 4: result = GensJoinResult::GuildMasterInOtherGens; break;
+    case 5: result = GensJoinResult::GuildMasterNotMember; break;
+    case 6: result = GensJoinResult::InParty; break;
+    case 7: result = GensJoinResult::AllianceMaster; break;
+    default: return;
+    }
+    UI::Npc::GensJoinAnswered(result, pData->m_byInfluence);
 }
 
 void ReceiveGensSecession(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_ANS_SECEDE_GENS_MEMBER)ReceiveBuffer;
-    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
-        g_pNPCDialogue->ProcessGensSecessionReceive(pData->m_byResult);
+    using UI::Npc::GensLeaveResult;
+    GensLeaveResult result;
+    switch (pData->m_byResult)
+    {
+    case 0: result = GensLeaveResult::Left; break;
+    case 1: result = GensLeaveResult::NotMember; break;
+    case 2: result = GensLeaveResult::GuildMasterCannotLeave; break;
+    case 3: result = GensLeaveResult::WrongNpc; break;
+    default: return;
+    }
+    UI::Npc::GensLeaveAnswered(result);
 }
 
 void ReceivePlayerGensInfluence(const BYTE* ReceiveBuffer)
@@ -10636,11 +10653,10 @@ void ReceiveOtherPlayerGensInfluenceViewport(const BYTE* ReceiveBuffer)
 void ReceiveNPCDlgUIStart(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_ANS_NPC_CLICK)ReceiveBuffer;
-    if (!UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
+    if (!UI::Npc::IsDialogueOpen())
     {
         g_QuestMng.SetNPC(pData->m_wNPCIndex);
-        g_pNPCDialogue->SetContributePoint(pData->m_dwContributePoint);
-        UI::Windows::Show(mu::ui::window::INTERFACE_NPC_DIALOGUE);
+        UI::Npc::OpenDialogue(pData->m_dwContributePoint);
     }
 }
 
@@ -10648,9 +10664,20 @@ void ReceiveNPCDlgUIStart(const BYTE* ReceiveBuffer)
 void ReceiveReward(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_GENS_REWARD_CODE)ReceiveBuffer;
-
-    if (UI::Windows::IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
-        g_pNPCDialogue->ProcessGensRewardReceive(pData->m_byRewardResult);
+    using UI::Npc::GensRewardResult;
+    GensRewardResult result;
+    switch (pData->m_byRewardResult)
+    {
+    case 0: result = GensRewardResult::Granted; break;
+    case 1: result = GensRewardResult::OutsidePeriod; break;
+    case 2: result = GensRewardResult::NotEligible; break;
+    case 3: result = GensRewardResult::InventoryFull; break;
+    case 4: result = GensRewardResult::AlreadyClaimed; break;
+    case 5: result = GensRewardResult::WrongNpc; break;
+    case 6: result = GensRewardResult::NotMember; break;
+    default: return;
+    }
+    UI::Npc::GensRewardAnswered(result);
 }
 #endif // PBG_ADD_GENSRANKING
 

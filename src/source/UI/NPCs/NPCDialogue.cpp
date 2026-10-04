@@ -466,12 +466,13 @@ void CNPCDialogue::CalculateSelTextMaxPage(int nSelTextCount, int nMaxLinePerPag
     }
 }
 
-void CNPCDialogue::SetQuestListText(DWORD* adwSrcQuestIndex, int nIndexCount)
+void CNPCDialogue::SetQuestListText(std::span<const std::uint32_t> questIndices)
 {
+    const int nIndexCount = static_cast<int>(questIndices.size());
     _ASSERT(0 <= nIndexCount && nIndexCount <= ND_QUEST_INDEX_MAX_COUNT);
 
     ::memset(m_adwQuestIndex, 0, sizeof(DWORD) * ND_QUEST_INDEX_MAX_COUNT);
-    ::memcpy(m_adwQuestIndex, adwSrcQuestIndex, sizeof(DWORD) * nIndexCount);
+    ::memcpy(m_adwQuestIndex, questIndices.data(), sizeof(DWORD) * nIndexCount);
 
     m_nSelTextCount = nIndexCount + 1;
 
@@ -585,121 +586,93 @@ void CNPCDialogue::ProcessSelTextResult()
     }
 }
 
-void CNPCDialogue::ProcessQuestListReceive(DWORD* adwSrcQuestIndex, int nIndexCount)
+void CNPCDialogue::ProcessQuestListReceive(std::span<const std::uint32_t> questIndices)
 {
     m_bQuestListMode = true;
-    SetCurNPCWords(nIndexCount);
-    SetQuestListText(adwSrcQuestIndex, nIndexCount);
+    SetCurNPCWords(static_cast<int>(questIndices.size()));
+    SetQuestListText(questIndices);
     m_bCanClick = true;
     m_nSelSelText = 0;
 }
 
-enum GENS_JOINING_ERR_CODE
+void CNPCDialogue::ProcessGensJoiningReceive(UI::Npc::GensJoinResult result, BYTE byInfluence)
 {
-    GJEC_NONE_ERR = 0,
-    GJEC_REG_GENS_ERR,
-    GJEC_GENS_SECEDE_DAY_ERR,
-    GJEC_REG_GENS_LV_ERR,
-    GJEC_REG_GENS_NOT_EQL_GUILDMA_ERR,
-    GJEC_NONE_REG_GENS_GUILDMA_ERR,
-    GJEC_PARTY,
-    GJEC_GUILD_UNION_MASTER
-};
-
-void CNPCDialogue::ProcessGensJoiningReceive(BYTE byResult, BYTE byInfluence)
-{
-    switch (byResult)
+    using UI::Npc::GensJoinResult;
+    switch (result)
     {
-    case GJEC_NONE_ERR:
+    case GensJoinResult::Joined:
         Hero->m_byGensInfluence = byInfluence;
         SetContents(5);
         break;
-    case GJEC_REG_GENS_ERR:
+    case GensJoinResult::AlreadyMember:
         SetContents(9);
         break;
-    case GJEC_GENS_SECEDE_DAY_ERR:
+    case GensJoinResult::LeftTooRecently:
         SetContents(11);
         break;
-    case GJEC_REG_GENS_LV_ERR:
+    case GensJoinResult::LevelTooLow:
         SetContents(8);
         break;
-    case GJEC_REG_GENS_NOT_EQL_GUILDMA_ERR:
+    case GensJoinResult::GuildMasterInOtherGens:
         SetContents(10);
         break;
-    case GJEC_NONE_REG_GENS_GUILDMA_ERR:
+    case GensJoinResult::GuildMasterNotMember:
         SetContents(12);
         break;
-    case GJEC_PARTY:
+    case GensJoinResult::InParty:
         SetContents(18);
         break;
-    case GJEC_GUILD_UNION_MASTER:
+    case GensJoinResult::AllianceMaster:
         SetContents(19);
         break;
     }
 }
 
-enum GENS_SECEDE_ERR_CODE
+void CNPCDialogue::ProcessGensSecessionReceive(UI::Npc::GensLeaveResult result)
 {
-    GSEC_NONE_ERR = 0,
-    GSEC_IS_NOT_REG_GENS,
-    GSEC_GUILD_MASTER_CAN_NOT_SECEDE,
-    GSEC_IS_NOT_INFLUENCE_NPC
-};
-
-enum GENS_REWARD_ERR_CODE
-{
-    GENS_REWARD_CALL = 0,
-    GENS_REWARD_TERM,
-    GENS_REWARD_TARGET,
-    GENS_REWARD_SPACE,
-    GENS_REWARD_ALREADY,
-    GENS_REWARD_DIFFERENT,
-    GENS_REWARD_NOT_REG,
-};
-
-void CNPCDialogue::ProcessGensSecessionReceive(BYTE byResult)
-{
-    switch (byResult)
+    using UI::Npc::GensLeaveResult;
+    switch (result)
     {
-    case GSEC_NONE_ERR:
+    case GensLeaveResult::Left:
         Hero->m_byGensInfluence = 0;
         SetContents(16);
         break;
-    case GSEC_IS_NOT_REG_GENS:
+    case GensLeaveResult::NotMember:
         SetContents(15);
         break;
-    case GSEC_GUILD_MASTER_CAN_NOT_SECEDE:
+    case GensLeaveResult::GuildMasterCannotLeave:
         SetContents(14);
         break;
-    case GSEC_IS_NOT_INFLUENCE_NPC:
+    case GensLeaveResult::WrongNpc:
         SetContents(17);
         break;
     }
 }
 
-void CNPCDialogue::ProcessGensRewardReceive(BYTE byResult)
+void CNPCDialogue::ProcessGensRewardReceive(UI::Npc::GensRewardResult result)
 {
-    switch (byResult)
+    using UI::Npc::GensRewardResult;
+    switch (result)
     {
-    case GENS_REWARD_CALL:
+    case GensRewardResult::Granted:
         SetContents(20);
         break;
-    case GENS_REWARD_TERM:
+    case GensRewardResult::OutsidePeriod:
         SetContents(21);
         break;
-    case GENS_REWARD_TARGET:
+    case GensRewardResult::NotEligible:
         SetContents(22);
         break;
-    case GENS_REWARD_SPACE:
+    case GensRewardResult::InventoryFull:
         SetContents(23);
         break;
-    case GENS_REWARD_ALREADY:
+    case GensRewardResult::AlreadyClaimed:
         SetContents(24);
         break;
-    case GENS_REWARD_DIFFERENT:
+    case GensRewardResult::WrongNpc:
         SetContents(17);
         break;
-    case GENS_REWARD_NOT_REG:
+    case GensRewardResult::NotMember:
         SetContents(25);
         break;
     }
