@@ -442,6 +442,15 @@ to FX2 all need it:
   phase; the FX1.2 rows were recorded before FX1.4 changed how rows are
   applied), so later changes are checked against the old cases again;
   `MU_EFFECT_RECORDER_WRITE=1` writes them anew.
+- **Digests:** a baseline only while the shipped data has to behave like the
+  old code. A deliberate change to a type's creation (a fix, a look
+  correction) rewrites its lines with `MU_EFFECT_RECORDER_WRITE=1` and says
+  why in its PR. Once the shipped data is edited on purpose (the effect
+  editor of FX2), every edit would fail them, so they go: all at once, or
+  the lines of a type on its first deliberate edit; the data files and their
+  history then show what changed. The recorder stays for the cases that FX2
+  turns into building blocks, and the tests with made-up rows
+  (`tests/data/test_effect_types.cpp`) keep checking how rows are applied.
 - **Baseline:** the old case stays reachable in the PR's working commits
   and is deleted after the comparison; spot checks stay as tests.
 - **Speed:** a Release benchmark of creation and lookup, old against new,
