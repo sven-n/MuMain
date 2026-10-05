@@ -19,10 +19,29 @@ Current source and the completed rollout show:
 
 The broader event-only, theme-switch, drag/restore and item/skill-use checks are
 still validation work. The low-priority CObject registry and Social base are still
-present. Read the source and `tracked-deferrals.md` before acting on any pilot row
-below; several rows describe the 2026-10-04 state and are now resolved.
+present. The next interaction candidate is MU Helper's threshold gauges, but the
+stock RmlUi slider still maps positions incorrectly inside a transformed dock.
+That integration constraint needs a tested solution before replacing its native input.
+Gens Ranking also needs an in-game scroll check in both themes and at a non-100 % scale;
+the build and asset guards passed, but no Gens account was exercised.
 
-## Recommendation
+Other pilot claims checked against current source:
+
+- The modern buff tooltip no longer contains the hardcoded white colour. Buff
+  right-click cancellation remains deferred.
+- The old `GenericConfirmDialog` input-field constants and the System Log
+  `back_color` binding are gone.
+- Gens and United Marketplace no longer have `display-list port` allowlist reasons.
+  The current guard reports 174 RML documents and 76 allowlisted entries.
+- Inventory paperdoll paint order and the item-tooltip overlap remain separate
+  native/RmlUi layering issues. The letter portrait fix did not settle them.
+- Counter-scaled sharp text still uses bound geometry; the pinned RmlUi engine's
+  adoption question for stylesheet arithmetic remains open.
+
+The detailed tables below preserve the original 2026-10-04 evidence. Treat their
+`Current assessment` cells as historical, using this follow-up for present status.
+
+## Original recommendation (2026-10-04 snapshot)
 
 Start with **item-hotkey slot geometry ownership** as a bounded implementation task.
 It removes a demonstrated theme limitation without replacing native 3D rendering.
@@ -33,7 +52,7 @@ renderer initiative with a portrait proof of concept first.
 Run targeted validation alongside each change. The broad missing runtime coverage
 is a release-confidence priority, not evidence that every untested screen is broken.
 
-## Priorities
+## Original priorities (2026-10-04 snapshot)
 
 | Order | Work | Why / scope |
 |---|---|---|
