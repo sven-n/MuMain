@@ -65,8 +65,8 @@ extension, castle/guard/gatekeeper, catapult, lucky item, inventory moves/drag/r
 windows' click-through. One regression found: dragging an item from one window's grid to another's
 (inventory to vault) showed no blue drop guide. Cause: since LayoutMode::Slot each placed window has
 its own space, and the guide compared the target grid with the picked item's position in its
-owner window's space. Fixed by taking the item's box from the pointer in the target grid's space;
-needs a re-check by hand (the socket cannot hover a dragged item without dropping it).
+owner window's space. Fixed (`e2ba923b3`) by taking the item's box from the pointer in the target
+grid's space; re-checked by the user.
 
 Trade attempt (stopped by the user): accounts `ancient`/`ancient` and `test400`/`test400`, both in
 Noria, adjacent. Socket `say` sends chat to the server, so the client's `/trade` handling
