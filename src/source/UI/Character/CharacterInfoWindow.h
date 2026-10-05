@@ -71,6 +71,8 @@ namespace mu::ui::window
         bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
         void SetPos(int x, int y);
+        bool SupportsFillPlacement() const override { return true; }
+        void SetFillPlacementSize(float width, float height) override;
         void Show(bool bShow) override;
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -106,6 +108,7 @@ namespace mu::ui::window
         };
 
         void BuildRmlUi();
+        void ApplyFillPlacementSize();
         void SyncRmlModel();
         void BuildSubjectTexts();
         void BuildTableTexts();
@@ -156,6 +159,8 @@ namespace mu::ui::window
         };
         RmlModelBinder<CharacterInfoRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
+        float m_FillWidth = 0.f;
+        float m_FillHeight = 0.f;
 
     private:
         CManager* m_pNewUIMng;

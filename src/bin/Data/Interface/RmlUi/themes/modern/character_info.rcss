@@ -6,6 +6,27 @@
    all come from docked_panel_frame.rcss, shared with the other three -- only genuinely
    window-specific content stays here. */
 
+/* The placement service sizes this panel only when its theme slot requests fill. */
+#panel.fill-placement { box-sizing: border-box; }
+/* The frame's corner close follows the panel's edge in both content and fill placement. */
+#frame_corner_close {
+	position: absolute;
+	top: 7px;
+	right: 8px;
+	width: 13px;
+	height: 12px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+#panel.fill-placement #name,
+#panel.fill-placement #classname,
+#panel.fill-placement #servername { width: 100%; }
+#panel.fill-placement .summary-fill { right: 12px; width: auto; }
+#panel.fill-placement .attr-textbox { right: 9px; width: auto; }
+#panel.fill-placement .attr-value { right: 36px; width: auto; }
+#panel.fill-placement .stat-btn { right: 14px; left: auto; }
+#panel.fill-placement .tooltip { top: auto; bottom: 37px; }
+
 #name, #classname, #servername {
 	position: absolute;
 	left: 0;

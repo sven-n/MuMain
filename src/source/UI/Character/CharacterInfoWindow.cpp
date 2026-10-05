@@ -25,6 +25,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
+#include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 
@@ -216,6 +217,7 @@ void mu::ui::window::CCharacterInfoWindow::BuildRmlUi()
 
     m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
         "Data/Interface/RmlUi/character_info.rml");
+    ApplyFillPlacementSize();
 }
 
 void mu::ui::window::CCharacterInfoWindow::ReloadRmlTheme()
@@ -256,6 +258,36 @@ void mu::ui::window::CCharacterInfoWindow::SetPos(int x, int y)
     m_Pos.y = y;
 }
 
+void mu::ui::window::CCharacterInfoWindow::SetFillPlacementSize(float width, float height)
+{
+    if (m_FillWidth == width && m_FillHeight == height)
+        return;
+    m_FillWidth = width;
+    m_FillHeight = height;
+    ApplyFillPlacementSize();
+}
+
+void mu::ui::window::CCharacterInfoWindow::ApplyFillPlacementSize()
+{
+    Rml::Element* panel = m_pRmlDoc != nullptr ? m_pRmlDoc->GetElementById("panel") : nullptr;
+    if (panel == nullptr)
+        return;
+
+    const bool fill = m_FillWidth > 0.f && m_FillHeight > 0.f;
+    panel->SetClass("fill-placement", fill);
+    if (fill)
+    {
+        panel->SetProperty(Rml::PropertyId::Width, Rml::Property(m_FillWidth, Rml::Unit::PX));
+        panel->SetProperty(Rml::PropertyId::Height, Rml::Property(m_FillHeight, Rml::Unit::PX));
+    }
+    else
+    {
+        panel->RemoveProperty(Rml::PropertyId::Width);
+        panel->RemoveProperty(Rml::PropertyId::Height);
+    }
+    m_pRmlDoc->UpdateDocument();
+}
+
 void mu::ui::window::CCharacterInfoWindow::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
@@ -268,10 +300,7 @@ void mu::ui::window::CCharacterInfoWindow::Show(bool bShow)
 
 bool mu::ui::window::CCharacterInfoWindow::UpdateMouseEvent()
 {
-    // Top-right corner close "X" (shared frame). Hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_CHARACTER))
-        return false;
-
+    // RmlUi handles both close targets; the corner target follows the theme-sized panel edge.
     // #panel's own live RCSS size is the source of truth -- CHAINFO_WINDOW_WIDTH/HEIGHT only cover
     // the first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
     float panelWidth = CHAINFO_WINDOW_WIDTH;

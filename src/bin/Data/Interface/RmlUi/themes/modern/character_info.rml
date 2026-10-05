@@ -108,6 +108,7 @@
 			<span class="modern-icon-btn-glyph-px">M</span>
 		</div>
 		<span class="tooltip tooltip-masterlevel">{{masterlevel_tooltip}}</span>
+		<div id="frame_corner_close" data-event-click="chainfo_click_exit"></div>
 	</div>
 </body>
 </rml>

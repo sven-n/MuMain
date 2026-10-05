@@ -2,7 +2,7 @@
 
 Design (tracked, governing): `docs/rmlui-ui-system/window-placement.md`. Read it first; it holds
 the design, phase table, rule classification, theme recipes and the "Theme-sized windows" audit.
-Continuation prompt for a new agent: `rmlui-window-placement-continuation-prompt.md` (this folder).
+Current handover prompt for a new agent: `rmlui-window-placement-fill-handover.md` (this folder).
 
 ## User decisions
 
@@ -12,11 +12,12 @@ Continuation prompt for a new agent: `rmlui-window-placement-continuation-prompt
   slot rectangles is the one readback exception (alongside `GetStripRect()`).
 - Window sizes are the theme's choice: a sprite frame stretches; contents are laid out by the theme
   (fixed coordinates, grid or flex).
-- Phase 4 (fill: full/half-screen windows) deferred until a theme wants it.
+- Phase 4 (fill: full/half-screen windows) reopened by the user; character info is the first
+  opt-in. Player drag-to-dock remains out of scope; themes choose the dock.
 - No RmlUi fork needed (no `calc()`); the user offered one if ever required.
 - Keep `legacy` and `modern` in step; only those two themes. No third theme, not even for tests.
-- Undecided (user's call): per-theme saved drag positions, and whether dragging takes a window out
-  of its slot instead of today's "saved position only while first in its region".
+- Player drag-to-dock is not needed now. Preserve the existing saved-position behavior; any change
+  to drag persistence needs a separate user decision.
 
 ## Commits (all built; full RelWithDebInfo build passes)
 
@@ -49,6 +50,14 @@ Both themes: docking and pairing of character info, inventory, extension, quest 
 `data-closes` rule; MU Helper config + detail; party and guild windows; layout experiments (split
 docks, centre stage, composed row); widened character info (260); moved inventory grid and helm
 slot; MU Helper gauge click; personal store grid.
+
+Phase 4 character-info fill prototype: temporarily set its runtime-copy slot to `data-fit="fill"`,
+35% of workspace width and 100% of HUD-safe height. At 1024x768 in the legacy theme, the panel,
+summary/stat backgrounds and bottom action row followed the enlarged slot. The top-right close
+target also closed the filled panel through its RmlUi event. Runtime-copy edits were restored.
+The committed workspaces remain content-sized. The headless two-theme slot test passed (2 cases,
+54 assertions), and the full RelWithDebInfo build passed after the latest code changes. Modern
+fill appearance, other resolutions and detailed interaction checks remain open.
 
 ## Not verified (needs an NPC, a second player or mouse dragging)
 
@@ -84,7 +93,10 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
    slot (needs a region with the `hud` scale or its own space); HUD widgets centring in the free
    width ignore a left dock (`GetScreenWidth()` only uses the right edge); unslotted families (move
    map, friends, centred dialogs, HUD widgets) with per-window content sizes and region scales.
-7. Phase 4 fill: deferred by the user.
+7. Phase 4 fill: the service now accepts a theme-sized `data-fit=fill` slot for character info,
+   with fallback for unsupported or zero-sized slots. Both shipped themes keep their content-sized
+   workspace. The remaining windows need individual fill capability and theme content recipes;
+   native grids and live 3D need more than a stretched frame.
 
 ## How to work on this
 

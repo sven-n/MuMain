@@ -124,6 +124,7 @@
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
 		      data-style-width="(110 * root_scale) + 'px'"
 		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{masterlevel_tooltip}}</span></span>
+		<div id="frame_corner_close" data-event-click="chainfo_click_exit"></div>
 	</div>
 </body>
 </rml>

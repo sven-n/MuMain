@@ -29,6 +29,32 @@
 
 .frame-top { decorator: image(docked-bg-top-a); }
 
+/* The placement service sizes this panel only when its theme slot requests fill. */
+#panel.fill-placement { box-sizing: border-box; }
+/* The frame's corner close follows the panel's edge in both content and fill placement. */
+#frame_corner_close {
+	position: absolute;
+	top: 7px;
+	right: 8px;
+	width: 13px;
+	height: 12px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+/* The original content stays at the top; the panel frame, summary and action row follow its
+   theme-sized edges when the workspace asks character info to fill a slot. */
+#panel.fill-placement .summary-fill { right: 18px; width: auto; }
+#panel.fill-placement .corner-tr,
+#panel.fill-placement .corner-br,
+#panel.fill-placement .edge-right { right: 13px; left: auto; }
+#panel.fill-placement .edge-top,
+#panel.fill-placement .edge-bottom { right: 27px; width: auto; }
+#panel.fill-placement .edge-separator { right: 17px; width: auto; }
+#panel.fill-placement .attr-textbox { right: 9px; width: auto; }
+#panel.fill-placement .attr-value { right: 36px; width: auto; }
+#panel.fill-placement .stat-btn { right: 14px; left: auto; }
+#panel.fill-placement .info-btn { top: auto; bottom: 8px; }
+
 #name, #classname, #servername {
 	position: absolute;
 	left: 0;

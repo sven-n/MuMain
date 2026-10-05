@@ -69,6 +69,59 @@ void Open(Rml::ElementDocument* document, const std::string& window, float scale
 }
 } // namespace
 
+// A theme can remove the original dock height and let one fill-capable window occupy a fraction
+// of the safe area. The service reads this resolved border box and hands it to the window.
+TEST_CASE("A theme-sized slot fills the safe area's height [ui][window-placement]")
+{
+    NullRenderer renderer;
+    Rml::SetRenderInterface(&renderer);
+    REQUIRE(Rml::Initialise());
+    auto* context = Rml::CreateContext("window-fill", {1920, 1080});
+    REQUIRE(context != nullptr);
+
+    for (const char* theme : {"legacy", "modern"})
+    {
+        CAPTURE(theme);
+        std::string rml = WorkspaceFor(theme);
+        const std::string region = "class=\"region dock-right\" data-ref-height=\"432\"";
+        const auto regionAt = rml.find(region);
+        REQUIRE(regionAt != std::string::npos);
+        rml.replace(regionAt, region.size(), "class=\"region dock-right\"");
+        const std::string character = "class=\"slot\" data-window=\"character\"";
+        const auto characterAt = rml.find(character);
+        REQUIRE(characterAt != std::string::npos);
+        rml.replace(characterAt, character.size(),
+                    "class=\"slot fill-character\" data-window=\"character\" data-fit=\"fill\"");
+        const auto headEnd = rml.find("</head>");
+        REQUIRE(headEnd != std::string::npos);
+        rml.insert(headEnd, "<style>.dock-right { top: 0; } "
+                            ".fill-character { width: 35%; height: 100%; }</style>");
+
+        auto* document = context->LoadDocumentFromMemory(rml);
+        REQUIRE(document != nullptr);
+        document->GetElementById("safe_area")
+            ->SetProperty(Rml::PropertyId::Bottom, Rml::Property(102.f, Rml::Unit::PX));
+        Rml::Element* characterSlot = Slot(document, "character");
+        REQUIRE(characterSlot != nullptr);
+        characterSlot->SetClass("open", true);
+        document->UpdateDocument();
+
+        const Rml::Vector2f size = characterSlot->GetBox().GetSize(Rml::BoxArea::Border);
+        const Rml::Vector2f offset = characterSlot->GetAbsoluteOffset(Rml::BoxArea::Border);
+        CHECK(size.x == doctest::Approx(672.f));
+        CHECK(size.y == doctest::Approx(978.f));
+        CHECK(offset.x == doctest::Approx(1248.f));
+        CHECK(offset.y == doctest::Approx(0.f));
+
+        context->UnloadDocument(document);
+        context->Update();
+    }
+
+    Rml::RemoveContext("window-fill");
+    Rml::Shutdown();
+    Rml::SetRenderInterface(nullptr);
+}
+
 // The game's inputs at 1920x1080: dock scale 2.25, HUD scale 2.0 (51 units tall). Open windows
 // must land on the original's columns, 190 units each from the right, on the dock's top edge,
 // even though the workspace document is never shown.
