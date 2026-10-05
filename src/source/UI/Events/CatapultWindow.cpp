@@ -31,6 +31,9 @@ using namespace mu::ui::window;
 
 namespace
 {
+constexpr float kPanelFallbackWidth = 190.f;
+constexpr float kPanelFallbackHeight = 429.f;
+
 // CCatapultGroupButton::Create(): each side's target areas, in reference px in the window.
 struct CatapultArea
 {
@@ -102,9 +105,14 @@ void mu::ui::window::CCatapultWindow::SetPos(int x, int y)
 bool mu::ui::window::CCatapultWindow::UpdateMouseEvent()
 {
     if (BtnProcess() == true)
-    {
         return false;
-    }
+
+    float panelWidth = kPanelFallbackWidth;
+    float panelHeight = kPanelFallbackHeight;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
+                                       static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
+        return false;
 
     return true;
 }

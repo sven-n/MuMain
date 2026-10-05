@@ -73,7 +73,7 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
 2. Castle, guard, gatekeeper: native tab radio groups, gate/statue picks and the public toggle sit
    over RmlUi-drawn elements. Right fix: RmlUi click events, and tab positions in RCSS (today bound
    in RML as `12 + i * 41`). Needs testing at the siege NPCs.
-3. Catapult has no hit box (clicks fall through to the world; predates this work).
+3. Done: catapult consumes pointer input over its measured `#panel`, with 190x429 as the first-layout fallback. Full RelWithDebInfo build passed; a siege NPC in-game check is pending.
 4. Done: lucky item's panel and background sizes are in each theme's RCSS. The native hit box reads `#panel`, and legacy counter-scaled text reads `panel_width`. Full RelWithDebInfo build passed; in-game verification is pending.
 5. Done: the eight inventory-family legacy-theme RML documents center counter-scaled text
    with `panel_width` read from `#panel`. Each owner binds and syncs it. The modern theme already
