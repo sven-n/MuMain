@@ -16,7 +16,7 @@ namespace
 // BMD::Release clears the meshes; the file CLoadData remembers stays.
 EffectAsset ProbeModel(int type)
 {
-    if (Models == nullptr || Models[type].NumMeshs <= 0 || Models[type].Meshs == nullptr)
+    if (!IsModelLoaded(type))
         return {};
     return {true, Core::Text::ToUtf8(gLoadData.GetModelFile(type).c_str()), gLoadData.GetModelLoadWorld(type)};
 }
@@ -45,6 +45,11 @@ EffectAsset ProbeLoadedAsset(EffectAssetSlot slot, int type)
         break;
     }
     return {};
+}
+
+bool IsModelLoaded(int model)
+{
+    return Models != nullptr && model >= 0 && Models[model].NumMeshs > 0 && Models[model].Meshs != nullptr;
 }
 } // namespace MuEditor::Effects
 

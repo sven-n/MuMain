@@ -4,13 +4,14 @@
 
 #include "EffectPreviewScene.h"
 
+#include "EffectBrowserAssets.h"
 #include "EffectPoolGuard.h"
 #include "EffectPreviewGeometry.h"
+#include "EffectPreviewItems.h"
 #include "EffectPreviewObject.h"
 #include "SavedGameRenderState.h"
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_enum.h"
-#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/w_CharacterInfo.h"
 #include "Render/Effects/EffectRegistry.h"
@@ -55,11 +56,6 @@ constexpr int AncientDiscriminator = 1;
 
 const std::uint32_t White = mu::PackABGR(1.0f, 1.0f, 1.0f, 1.0f);
 const std::uint32_t OpaqueBlack = mu::PackABGR(0.0f, 0.0f, 0.0f, 1.0f);
-
-bool IsModelLoaded(int type)
-{
-    return type >= 0 && Models[type].NumMeshs > 0 && Models[type].Meshs != nullptr;
-}
 
 PreviewVector CenterOf(const PreviewVector& min, const PreviewVector& max)
 {
@@ -341,18 +337,19 @@ void EffectPreviewScene::DrawBase(const EffectPreviewRequest& request, float sub
 // and effects are removed again.
 void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
 {
-    const int model =
-        Render::Items::Display::GetDrawnModel(Data::Items::ToModelSlot(request.itemType), request.itemLevel);
-    const int skeleton = Render::Items::Display::IsDrawnOnCharacterSkeleton(model) ? MODEL_PLAYER : model;
-    if (!IsModelLoaded(model) || !IsModelLoaded(skeleton))
+    const PreviewItemModels models = GetPreviewItemModels(request.itemType, request.itemLevel);
+    if (!models.CanDraw())
         return;
-    BMD& b = Models[skeleton];
-    const ScopedModelState saved(b);
-    const Render::Items::Display::GroundDisplay ground = Render::Items::Display::GetGroundDisplay(model);
+    // Armor is drawn with its own meshes on the bones of the skeleton; both
+    // keep their fields.
+    BMD& b = Models[models.skeleton];
+    const ScopedModelState savedSkeleton(b);
+    const ScopedModelState savedModel(Models[models.model]);
+    const Render::Items::Display::GroundDisplay ground = Render::Items::Display::GetGroundDisplay(models.model);
 
     CHARACTER item;
     OBJECT* o = &item.Object;
-    o->Type = model;
+    o->Type = models.model;
     ItemObjectAttribute(o);
     o->LightEnable = false;
     item.Class = CLASS_ELF;
@@ -366,8 +363,9 @@ void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
 
     vec3_t light = {1.0f, 1.0f, 1.0f};
     const EffectPoolGuard removeItemEffects;
-    RenderPartObject(o, model, nullptr, light, o->Alpha, request.itemLevel, request.itemExcellent ? ExcellentFlags : 0,
-                     request.itemAncient ? AncientDiscriminator : 0, true, true, true);
+    RenderPartObject(o, models.model, nullptr, light, o->Alpha, request.itemLevel,
+                     request.itemExcellent ? ExcellentFlags : 0, request.itemAncient ? AncientDiscriminator : 0, true,
+                     true, true);
 }
 
 void EffectPreviewScene::DrawSubject(const EffectPreviewRequest& request, const EffectPreviewCamera& camera)

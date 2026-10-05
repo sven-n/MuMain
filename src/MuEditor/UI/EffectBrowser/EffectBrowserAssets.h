@@ -10,6 +10,10 @@ namespace MuEditor::Effects
 // AccessModel opened into it, or the texture loaded with that number, and
 // the world that was active when it was loaded. Loads nothing.
 EffectAsset ProbeLoadedAsset(EffectAssetSlot slot, int type);
+
+// Whether the model slot holds a model with meshes now (BMD::Release clears
+// them). Loads nothing.
+bool IsModelLoaded(int model);
 } // namespace MuEditor::Effects
 
 #endif // _EDITOR

@@ -5,16 +5,20 @@
 // The parts of the effect browser's preview (FX1.7a) that need neither ImGui
 // nor a frame: the camera and the editor's look-at view, the quads, what is
 // shown for a type, the SubTypes, the texture size, the item search, the
-// effect's object and the pool guard.
+// models an item is drawn with, the effect's object and the pool guard.
 #ifdef _EDITOR
 #include "EffectTestData.h"
+#include "TestModelSlots.h"
 
 #include "Core/Globals/_TextureIndex.h"
 #include "Core/Globals/_enum.h"
+#include "Data/DataHandler/LoadData.h"
+#include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/w_ObjectInfo.h"
 #include "Render/Effects/EffectRegistry.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "UI/Common/LookAt.h"
+#include "UI/EffectBrowser/EffectBrowserAssets.h"
 #include "UI/EffectBrowser/EffectPoolGuard.h"
 #include "UI/EffectBrowser/EffectPreviewCamera.h"
 #include "UI/EffectBrowser/EffectPreviewGeometry.h"
@@ -25,6 +29,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -273,6 +278,40 @@ TEST_CASE("The effect preview finds items by a part of their name or their numbe
     CHECK(typesOf(items.Filter("SWORD")) == std::vector<int>{2});
     CHECK(typesOf(items.Filter("4")) == std::vector<int>{4});
     CHECK(items.Filter("").size() == 3);
+}
+
+TEST_CASE("The effect preview draws an item with the model of its level, armor on the character skeleton "
+          "[effects][editor]")
+{
+    const int eventItem = Data::Items::MakeItemType(14, 12);
+    const PreviewItemModels own = GetPreviewItemModels(eventItem, 1);
+    CHECK(own.model == MODEL_POTION + 12);
+    CHECK(own.skeleton == MODEL_POTION + 12);
+    // Two level variants of (14,12) are drawn with event models.
+    CHECK(GetPreviewItemModels(eventItem, 0).model == MODEL_EVENT);
+    CHECK(GetPreviewItemModels(eventItem, 2).model == MODEL_EVENT + 1);
+
+    const PreviewItemModels helm = GetPreviewItemModels(ITEM_BRONZE_HELM, 0);
+    CHECK(helm.model == MODEL_BRONZE_HELM);
+    CHECK(helm.skeleton == MODEL_PLAYER);
+    CHECK(GetPreviewItemModels(ITEM_KRIS, 0).skeleton == MODEL_KRIS);
+}
+
+TEST_CASE("The effect preview draws an item once its model has meshes and its skeleton has actions "
+          "[effects][editor]")
+{
+    const TestModelSlots slots;
+    const std::wstring playerFolder = (std::filesystem::path(MU_TEST_DATA_DIR) / "Player").wstring() + L'/';
+    const PreviewItemModels helm = GetPreviewItemModels(ITEM_BRONZE_HELM, 0);
+    CHECK_FALSE(PreviewItemModels{}.CanDraw());
+    CHECK_FALSE(helm.CanDraw());
+
+    REQUIRE(gLoadData.AccessModel(MODEL_BRONZE_HELM, playerFolder.c_str(), L"HelmMale", 1));
+    CHECK_FALSE(helm.CanDraw());
+    // The character skeleton has bones and actions but no meshes.
+    REQUIRE(gLoadData.AccessModel(MODEL_PLAYER, playerFolder.c_str(), L"player"));
+    CHECK_FALSE(IsModelLoaded(MODEL_PLAYER));
+    CHECK(helm.CanDraw());
 }
 
 TEST_CASE("The effect preview makes an effect as CreateEffect would, without its hook and outside the pools "

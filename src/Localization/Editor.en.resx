@@ -733,6 +733,9 @@
   <data name="Preview item effects left out" xml:space="preserve">
     <value>The item's own sprites and particles are not shown.</value>
   </data>
+  <data name="Preview item not loaded" xml:space="preserve">
+    <value>A model this item is drawn with at this level is not loaded, so the preview does not draw the item.</value>
+  </data>
   <data name="Assets all" xml:space="preserve">
     <value>All</value>
   </data>

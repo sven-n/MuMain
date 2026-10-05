@@ -346,7 +346,8 @@ world (FX1.7b) is for that.
 - **Notes** under the view say what the preview cannot show: an empty slot,
   a texture the code chooses, a model the game never draws itself, an effect
   whose values start it transparent or at size 0 (the preview shows it
-  anyway), a model without animation.
+  anyway), a model without animation, an item that cannot be drawn at the
+  chosen level because a model it needs is not loaded.
 
 ## When the code changes
 

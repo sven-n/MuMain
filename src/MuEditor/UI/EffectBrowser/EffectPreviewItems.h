@@ -18,6 +18,22 @@ struct PreviewItem
     std::string searchText;
 };
 
+// The models the preview draws an item with at a level, as the inventory
+// chooses them (RenderObjectScreen): the model of that level, which two level
+// variants of (14,12) change (GetDrawnModel), and the model that places its
+// bones, the character skeleton for armor.
+struct PreviewItemModels
+{
+    int model = -1;
+    int skeleton = -1;
+
+    // Whether both are loaded now: the model has meshes and the skeleton has
+    // actions to place the bones. The character skeleton has no meshes.
+    bool CanDraw() const;
+};
+
+PreviewItemModels GetPreviewItemModels(int itemType, int level);
+
 // The items the effect preview can show a type on: those with a name and a
 // model to draw, found by a part of their name or their number.
 class EffectPreviewItems

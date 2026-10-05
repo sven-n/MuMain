@@ -47,6 +47,9 @@ enum PreviewNote : std::uint16_t
     // The slot holds an object of this map, not the effect's model: an
     // effect drawing a map object away from its home map.
     NoteNotItsModel = 1 << 9,
+    // A model the item is drawn with at its level is not loaded: the model of
+    // that level or the skeleton that places its bones.
+    NoteItemNotLoaded = 1 << 10,
 };
 
 struct PreviewSubject

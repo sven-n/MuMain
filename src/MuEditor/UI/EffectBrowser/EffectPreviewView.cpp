@@ -4,7 +4,9 @@
 
 #include "EffectPreviewView.h"
 
+#include "EffectBrowserAssets.h"
 #include "EffectBrowserLayout.h"
+#include "EffectPreviewItems.h"
 #include "EffectPreviewSubject.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "Core/Globals/_define.h"
@@ -13,7 +15,6 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "I18N/All.h"
-#include "Render/Models/ZzzBMD.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "UI/Common/ScopedOffscreenCapture.h"
 #include "imgui.h"
@@ -97,8 +98,7 @@ void RenderChoiceCombo(const char* id, const char* label, Choice& value, const s
 
 bool IsItemDrawable(int itemType)
 {
-    const BMD& model = Models[Data::Items::ToModelSlot(itemType)];
-    return model.NumMeshs > 0 && model.Meshs != nullptr;
+    return MuEditor::Effects::IsModelLoaded(Data::Items::ToModelSlot(itemType));
 }
 
 const char* NoteText(MuEditor::Effects::PreviewNote note)
@@ -124,10 +124,23 @@ const char* NoteText(MuEditor::Effects::PreviewNote note)
         return I18N::Editor::PreviewNoAnimation;
     case NoteItemEffectsLeftOut:
         return I18N::Editor::PreviewItemEffectsLeftOut;
+    case NoteItemNotLoaded:
+        return I18N::Editor::PreviewItemNotLoaded;
     case NoteNotItsModel:
         break;
     }
     return I18N::Editor::PreviewNotItsModel;
+}
+
+// What the preview says about the item the type is shown on: that its own
+// effects are left out, or that it cannot be drawn at this level.
+std::uint16_t ItemNotes(const EffectPreviewRequest& request)
+{
+    if (request.showOn != PreviewShowOn::Item || request.itemType < 0)
+        return 0;
+    if (!MuEditor::Effects::GetPreviewItemModels(request.itemType, request.itemLevel).CanDraw())
+        return MuEditor::Effects::NoteItemNotLoaded;
+    return MuEditor::Effects::NoteItemEffectsLeftOut;
 }
 } // namespace
 
@@ -140,10 +153,7 @@ void CEffectPreviewView::Render(const MuEditor::Effects::EffectBrowserRow& row, 
     const EffectPreviewRequest request = MakeRequest(row, kind);
     RenderControls(request);
     RenderView(request);
-    std::uint16_t notes = request.subject.notes | m_scene.GetObjectNotes();
-    if (request.showOn == PreviewShowOn::Item && request.itemType >= 0)
-        notes |= MuEditor::Effects::NoteItemEffectsLeftOut;
-    RenderNotes(notes);
+    RenderNotes(request.subject.notes | m_scene.GetObjectNotes() | ItemNotes(request));
 }
 
 void CEffectPreviewView::SelectType(const MuEditor::Effects::EffectBrowserRow& row, EffectKind kind,
@@ -302,7 +312,9 @@ void CEffectPreviewView::RenderItemList()
 }
 
 // The names come from the items as the game has them now; the list is made
-// again when the item editor changes them or the language changes.
+// again when the item editor changes them or the language changes. The item
+// models are all opened on the loading screen and stay, so the list does not
+// change with the map; the models of the chosen level are checked when drawn.
 void CEffectPreviewView::RefreshItems()
 {
     const int version = g_ItemDatabase.GetVersion();
