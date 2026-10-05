@@ -722,7 +722,7 @@
     <value>The game does not draw this model itself: it has no drawing code.</value>
   </data>
   <data name="Preview starts invisible" xml:space="preserve">
-    <value>Its creation values start it invisible and its move code fades it in; the preview shows it.</value>
+    <value>Its creation values start it transparent or at size 0 and its move code fades or grows it in; the preview shows it.</value>
   </data>
   <data name="Preview hidden model" xml:space="preserve">
     <value>Its creation values hide the whole model.</value>

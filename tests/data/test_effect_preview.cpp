@@ -58,18 +58,6 @@ PreviewVector Apply(const std::array<float, 16>& m, const PreviewVector& p)
     return {m[0] * p[0] + m[4] * p[1] + m[8] * p[2] + m[12], m[1] * p[0] + m[5] * p[1] + m[9] * p[2] + m[13],
             m[2] * p[0] + m[6] * p[1] + m[10] * p[2] + m[14]};
 }
-
-int CountLive()
-{
-    int live = 0;
-    for (int i = 0; i < MAX_EFFECTS; ++i)
-        live += Effects[i].Live ? 1 : 0;
-    for (int i = 0; i < MAX_JOINTS; ++i)
-        live += Joints[i].Live ? 1 : 0;
-    for (int i = 0; i < MAX_PARTICLES; ++i)
-        live += Particles[i].Live ? 1 : 0;
-    return live;
-}
 } // namespace
 
 TEST_CASE("The effect preview's camera looks at the type from the thumbnails' direction and turns and zooms within "
@@ -98,9 +86,14 @@ TEST_CASE("The effect preview's camera looks at the type from the thumbnails' di
 
     // Turning stops short of looking straight down; zooming stays within
     // limits; Reset brings back the first view.
+    const float limit = std::sin(89.0f * 3.14159265f / 180.0f);
     camera.Turn(0.0f, 100000.0f);
-    CHECK(Minus(camera.Eye(), camera.Center())[2] < framed);
-    CHECK(camera.GetBasis().up[2] > 0.0f);
+    const PreviewVector top = Minus(camera.Eye(), camera.Center());
+    CHECK(top[2] / framed == doctest::Approx(limit).epsilon(Tolerance));
+    // Still on the first side, not over the top.
+    CHECK(top[0] > 0.0f);
+    camera.Turn(0.0f, -200000.0f);
+    CHECK(Minus(camera.Eye(), camera.Center())[2] / framed == doctest::Approx(-limit).epsilon(Tolerance));
     camera.Zoom(1000.0f);
     CHECK(camera.Distance() >= framed * 0.19f);
     camera.Zoom(-1000.0f);
@@ -132,6 +125,12 @@ TEST_CASE("The effect preview's quads face the camera, lie flat and cover the vi
     const PreviewGeometry::Quad ground = PreviewGeometry::GroundQuad({5.0f, 5.0f, 2.0f}, 30.0f, 45.0f, 0u);
     CHECK(std::all_of(ground.begin(), ground.end(), [](const mu::Vertex3D& vertex) { return vertex.z == 2.0f; }));
     CHECK(Length(Minus(PositionOf(ground[1]), PositionOf(ground[0]))) == doctest::Approx(30.0f).epsilon(Tolerance));
+    // As RenderTerrainAlphaBitmap: u grows along x, v along y.
+    const PreviewGeometry::Quad flat = PreviewGeometry::GroundQuad({0.0f, 0.0f, 0.0f}, 10.0f, 0.0f, 0u);
+    CHECK(flat[1].x > flat[0].x);
+    CHECK(flat[1].u > flat[0].u);
+    CHECK(flat[3].y > flat[0].y);
+    CHECK(flat[3].v > flat[0].v);
 
     const PreviewGeometry::PlaneQuads plane = PreviewGeometry::Plane(800.0f);
     CHECK(std::all_of(plane.begin(), plane.end(), [](const mu::Vertex3D& vertex)
@@ -263,16 +262,20 @@ TEST_CASE("The effect preview makes an effect as CreateEffect would, without its
     CHECK(BuildPreviewEffectObject(o, MODEL_KENTAUROS_ARROW, 0, Render::Effects::Lookup(MODEL_KENTAUROS_ARROW)) ==
           NoteStartsInvisible);
     CHECK(o.Alpha == 1.0f);
+    CHECK(BuildPreviewEffectObject(o, MODEL_DARK_ELF_SKILL, 0, Render::Effects::Lookup(MODEL_DARK_ELF_SKILL)) ==
+          NoteStartsInvisible);
+    CHECK(o.Scale == 1.0f);
     BuildPreviewEffectObject(o, MODEL_TARGETMON_EFFECT, 0, Render::Effects::Lookup(MODEL_TARGETMON_EFFECT));
     CHECK(o.Scale == 1.0f);
     BuildPreviewEffectObject(o, MODEL_DRAGON, 0, Render::Effects::Lookup(MODEL_DRAGON));
     CHECK(o.Position[2] == 0.0f);
 
-    // The creation hook creates effects in the pools; the preview never runs
-    // it.
-    const int live = CountLive();
+    // MODEL_MAYASTONE4 has only a creation hook, which draws a random lifetime
+    // of 32 or more and a scale of 1 or more; the preview never runs it, so
+    // the object keeps the setup every effect gets.
     BuildPreviewEffectObject(o, MODEL_MAYASTONE4, 0, Render::Effects::Lookup(MODEL_MAYASTONE4));
-    CHECK(CountLive() == live);
+    CHECK(o.LifeTime == 0);
+    CHECK(o.Scale == 0.9f);
 }
 
 TEST_CASE("MoveEffect animates the models of the skill range except some [effects][editor]")

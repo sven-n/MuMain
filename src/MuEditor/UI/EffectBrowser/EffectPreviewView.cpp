@@ -255,7 +255,8 @@ void CEffectPreviewView::RenderItemPicker()
     const float scale = g_MuEditorCore.GetUIScale();
     const MuEditor::Effects::PreviewItem* item = m_items.Find(m_itemType);
     ImGui::SetNextItemWidth(ItemComboWidth * scale);
-    if (ImGui::BeginCombo("##item", item != nullptr ? item->name.c_str() : I18N::Editor::FindAnItem))
+    if (ImGui::BeginCombo("##item", item != nullptr ? item->name.c_str() : I18N::Editor::FindAnItem,
+                          ImGuiComboFlags_HeightLargest))
     {
         if (ImGui::IsWindowAppearing())
             ImGui::SetKeyboardFocusHere();
@@ -309,13 +310,15 @@ void CEffectPreviewView::RenderItemList()
 }
 
 // The names come from the items as the game has them now; the list is made
-// again when the item editor changes them.
+// again when the item editor changes them or the language changes.
 void CEffectPreviewView::RefreshItems()
 {
     const int version = g_ItemDatabase.GetVersion();
-    if (m_itemsVersion == version)
+    const char* locale = I18N::GetCurrentLocale();
+    if (m_itemsVersion == version && m_itemsLocale == locale)
         return;
     m_itemsVersion = version;
+    m_itemsLocale = locale;
     m_items.Build(
         MAX_ITEM, [](int itemType) { return Core::Text::ToUtf8(ItemAttribute[itemType].Name); }, IsItemDrawable);
     m_itemMatchesValid = false;
@@ -327,7 +330,11 @@ void CEffectPreviewView::RenderView(const EffectPreviewRequest& request)
     if (width < 1.0f)
         return;
     const float scale = g_MuEditorCore.GetUIScale();
-    const float height = std::clamp(width * ViewAspect, MinViewHeight * scale, MaxViewHeight * scale);
+    // The width without the vertical scrollbar, so the height does not make
+    // the scrollbar show and hide by turns.
+    const ImGuiStyle& style = ImGui::GetStyle();
+    const float widthWithoutScrollbar = ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize;
+    const float height = std::clamp(widthWithoutScrollbar * ViewAspect, MinViewHeight * scale, MaxViewHeight * scale);
     ImGui::InvisibleButton("##view", ImVec2(width, height), ImGuiButtonFlags_MouseButtonLeft);
     ImGui::SetItemKeyOwner(ImGuiKey_MouseWheelY);
     HandleViewInput();
@@ -335,10 +342,9 @@ void CEffectPreviewView::RenderView(const EffectPreviewRequest& request)
         ImGui::SetTooltip("%s", I18N::Editor::PreviewControls);
     const ImVec2 min = ImGui::GetItemRectMin();
     const ImVec2 max = ImGui::GetItemRectMax();
+    Frame(request);
     if (!ImGui::IsItemVisible() || !mu::GetRenderer().IsFrameActive())
         return;
-
-    Frame(request);
     const float framebufferScale = ImGui::GetIO().DisplayFramebufferScale.x;
     const MuEditor::Effects::PreviewTextureSize size =
         MuEditor::Effects::ChoosePreviewTextureSize(width, height, framebufferScale);

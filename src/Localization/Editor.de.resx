@@ -722,7 +722,7 @@
     <value>Das Spiel zeichnet dieses Modell nicht selbst: es hat keinen Zeichencode.</value>
   </data>
   <data name="Preview starts invisible" xml:space="preserve">
-    <value>Seine Erstellungswerte machen es zuerst unsichtbar und sein Bewegungscode blendet es ein; die Vorschau zeigt es.</value>
+    <value>Seine Erstellungswerte lassen es durchsichtig oder mit Größe 0 beginnen und sein Bewegungscode blendet es ein oder lässt es wachsen; die Vorschau zeigt es.</value>
   </data>
   <data name="Preview hidden model" xml:space="preserve">
     <value>Seine Erstellungswerte verbergen das ganze Modell.</value>

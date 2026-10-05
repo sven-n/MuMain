@@ -70,10 +70,10 @@ Quad GroundQuad(const PreviewVector& center, float size, float angleDegrees, std
     const PreviewVector x = {std::cos(angle), std::sin(angle), 0.0f};
     const PreviewVector y = {-std::sin(angle), std::cos(angle), 0.0f};
     const float half = size * 0.5f;
-    return {Vertex(Offset(center, x, -half, y, -half), 0.0f, 1.0f, color),
-            Vertex(Offset(center, x, half, y, -half), 1.0f, 1.0f, color),
-            Vertex(Offset(center, x, half, y, half), 1.0f, 0.0f, color),
-            Vertex(Offset(center, x, -half, y, half), 0.0f, 0.0f, color)};
+    return {Vertex(Offset(center, x, -half, y, -half), 0.0f, 0.0f, color),
+            Vertex(Offset(center, x, half, y, -half), 1.0f, 0.0f, color),
+            Vertex(Offset(center, x, half, y, half), 1.0f, 1.0f, color),
+            Vertex(Offset(center, x, -half, y, half), 0.0f, 1.0f, color)};
 }
 
 PlaneQuads Plane(float size)

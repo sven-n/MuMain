@@ -335,8 +335,8 @@ world (FX1.7b) is for that.
   **Reset view** puts it back; **Turn** turns the type slowly.
 - **Notes** under the view say what the preview cannot show: an empty slot,
   a texture the code chooses, a model the game never draws itself, an effect
-  whose values start it invisible (the preview shows it anyway), a model
-  without animation.
+  whose values start it transparent or at size 0 (the preview shows it
+  anyway), a model without animation.
 
 ## When the code changes
 

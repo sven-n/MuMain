@@ -580,15 +580,18 @@ void CMuEditorCore::Render()
             g_DevEditorUI.Render(&m_bShowDevEditor);
         }
 
-        if (m_bShowEffectBrowser)
-        {
-            g_MuEffectBrowserUI.Render(&m_bShowEffectBrowser);
-        }
-
         // Render Map Editor. Called every frame (not gated on the show flag) so
         // it can restore the game to normal mode the frame after it is closed;
         // it owns EditFlag while its window is open.
         g_MapEditorUI.Render(&m_bShowMapEditor);
+
+        // After the Map Editor: its object browser starts a thumbnail only
+        // while no capture is pending, and the effect preview leaves one
+        // pending until the frame ends.
+        if (m_bShowEffectBrowser)
+        {
+            g_MuEffectBrowserUI.Render(&m_bShowEffectBrowser);
+        }
 
         // Render console (if enabled)
         if (m_bShowConsole)

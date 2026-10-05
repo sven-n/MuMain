@@ -17,8 +17,8 @@ namespace MuEditor::Effects
 // light, angle and scale arguments at the origin: the setup every effect gets
 // and the creation values of its row (`descriptor`, null without one). The
 // creation hook is not run and `o` stays outside the effect pools. An effect
-// whose values start it invisible is made visible. Returns the PreviewNote
-// flags this adds.
+// whose values start it transparent or at scale 0 is shown at alpha and
+// scale 1. Returns the PreviewNote flags this adds.
 std::uint16_t BuildPreviewEffectObject(OBJECT& o, int type, int subType,
                                        const Render::Effects::EffectDescriptor* descriptor);
 

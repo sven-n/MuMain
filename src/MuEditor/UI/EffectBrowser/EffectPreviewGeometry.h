@@ -25,7 +25,8 @@ using CubeQuads = std::array<mu::Vertex3D, 6 * 4>;
 Quad Billboard(const PreviewVector& center, const EffectPreviewCamera::Basis& basis, float width, float height,
                std::uint32_t color);
 
-// A texture lying flat at `center`, `size` across, turned by `angleDegrees`.
+// A texture lying flat at `center`, `size` across, turned by `angleDegrees`,
+// as RenderTerrainAlphaBitmap lays it: u along x, v along y.
 Quad GroundQuad(const PreviewVector& center, float size, float angleDegrees, std::uint32_t color);
 
 // A grey checkered square at height 0, `size` across, around the origin.

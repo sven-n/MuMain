@@ -17,36 +17,40 @@ namespace MuEditor::Effects
 {
 namespace
 {
-// The values of AlphaBlendType the render state functions set.
-constexpr int NoBlend = 0;
-constexpr int GlowBlend = 3;
+// The values of AlphaBlendType and the functions that set them
+// (ZzzOpenglUtil.cpp).
+constexpr int NoBlend = 0;        // DisableAlphaBlend
+constexpr int LightMapBlend = 1;  // EnableLightMap
+constexpr int AlphaTestBlend = 2; // EnableAlphaTest
+constexpr int GlowBlend = 3;      // EnableAlphaBlend
+constexpr int SubtractBlend = 4;  // EnableAlphaBlendMinus
+constexpr int LuminanceBlend = 5; // EnableAlphaBlend2
+constexpr int AlphaBlend3 = 6;    // EnableAlphaBlend3
+constexpr int MixedBlend = 7;     // EnableAlphaBlend4
 
-// The blend of each value of AlphaBlendType (ZzzOpenglUtil.cpp): 1 is
-// EnableLightMap, 2 EnableAlphaTest, 3 EnableAlphaBlend, 4
-// EnableAlphaBlendMinus, 5, 6 and 7 EnableAlphaBlend2, 3 and 4.
 void ApplyBlend(int blendType)
 {
     mu::IMuRenderer& renderer = mu::GetRenderer();
     AlphaBlendType = blendType;
     switch (blendType)
     {
-    case 1:
+    case LightMapBlend:
         renderer.SetBlendMode(mu::BlendMode::LightMap);
         return;
-    case 2:
-    case 6:
+    case AlphaTestBlend:
+    case AlphaBlend3:
         renderer.SetBlendMode(mu::BlendMode::Alpha);
         return;
-    case 3:
+    case GlowBlend:
         renderer.SetBlendMode(mu::BlendMode::Glow);
         return;
-    case 4:
+    case SubtractBlend:
         renderer.SetBlendMode(mu::BlendMode::Subtract);
         return;
-    case 5:
+    case LuminanceBlend:
         renderer.SetBlendMode(mu::BlendMode::Luminance);
         return;
-    case 7:
+    case MixedBlend:
         renderer.SetBlendMode(mu::BlendMode::Mixed);
         return;
     default:

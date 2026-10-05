@@ -541,13 +541,18 @@ pools, without the creation hook); textures as sprites with a chosen blend
 or flat for ground effects; notes instead of what cannot be shown. What the
 plan did not say: the item's own effect code creates sprites, particles,
 joints and effects in the game's pools, so the preview removes what appears
-there while the item is drawn; a texture of another size is made only
-between frames, through a call before the editor's frame starts
-(`CMuEditorCore::Update`), because releasing a texture inside a frame makes
-the renderer skip the game's draws of that frame; the blends leave the
-picture's alpha below 1, so a last quad with the glow blend makes it opaque;
-the item is drawn with the turn and scale it has on the ground; effects
-whose values start them invisible are shown. The render state the game's
+there while the item is drawn; a texture of another size replaces the old
+one only at a frame boundary: the old one is released through a call before
+the editor's frame starts (`CMuEditorCore::Update`) and the new one is made
+in the next frame, because releasing a texture inside a frame makes the
+renderer skip the game's draws of that frame; the effect browser draws after
+the map editor, whose object browser starts a thumbnail only while no
+capture is pending; the blends leave the picture's alpha below 1, so a last
+quad with the glow blend makes it opaque; the item is drawn with the turn
+and scale it has on the ground; the plane and the cube are untextured (a
+grey checker, a cube with shaded faces); on an item every type sits at the
+item's origin, ground types too; effects whose values start them transparent
+or at scale 0 are shown at alpha and scale 1. The render state the game's
 functions cache is saved before the view and put back into the renderer and
 the cache after it. The capture's color format on Linux and macOS (RGBA8 for
 the capture, the swapchain's format for the pipelines) is still to be

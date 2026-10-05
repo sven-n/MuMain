@@ -296,7 +296,8 @@ float EffectPreviewScene::BaseTop(const EffectPreviewRequest& request, float sub
 }
 
 // The type stands on the plane and on the cube, and sits at the centre of an
-// item; a ground decal lies on what it is shown on.
+// item (a ground decal too); on the plane and the cube a ground decal lies on
+// top.
 PreviewVector EffectPreviewScene::Anchor(const EffectPreviewRequest& request) const
 {
     const Extent extent = SubjectExtent(request);

@@ -16,8 +16,10 @@ namespace
 // CreateEffect gives an effect this scale when the call passes none.
 constexpr float DefaultScale = 0.9f;
 constexpr float DefaultVelocity = 0.3f;
-// Below this alpha RenderObject draws nothing.
+// Below this alpha RenderObject draws nothing; below this scale a model is
+// too small to see.
 constexpr float InvisibleAlpha = 0.01f;
+constexpr float InvisibleScale = 0.01f;
 // HiddenMesh -2 hides the whole model.
 constexpr int HideAllMeshes = -2;
 
@@ -74,6 +76,11 @@ std::uint16_t BuildPreviewEffectObject(OBJECT& o, int type, int subType,
     if (o.Alpha < InvisibleAlpha)
     {
         o.Alpha = 1.0f;
+        notes |= NoteStartsInvisible;
+    }
+    if (o.Scale < InvisibleScale)
+    {
+        o.Scale = 1.0f;
         notes |= NoteStartsInvisible;
     }
     if (o.HiddenMesh == HideAllMeshes)

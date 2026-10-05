@@ -37,8 +37,8 @@ enum PreviewNote : std::uint16_t
     // A particle or lightning texture the code of a SubType can change.
     NoteCodeMayChooseTexture = 1 << 3,
     NoteWorldObjectSlot = 1 << 4,
-    // The creation values start the effect invisible; its move code fades it
-    // in. The preview shows it.
+    // The creation values start the effect transparent or at scale 0; its
+    // move code fades or grows it in. The preview shows it.
     NoteStartsInvisible = 1 << 5,
     NoteHiddenModel = 1 << 6,
     NoteNoAnimation = 1 << 7,
