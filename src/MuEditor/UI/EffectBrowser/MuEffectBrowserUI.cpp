@@ -92,11 +92,20 @@ void CMuEffectBrowserUI::RefreshAssets()
 {
     m_assetWorld = gMapManager.WorldActive;
     m_model.RefreshAssets(MuEditor::Effects::ProbeLoadedAsset, *m_assetWorld);
+    NameMap();
+}
+
+void CMuEffectBrowserUI::NameMap()
+{
     m_mapName = MuEditor::Effects::Labels::MapName(*m_assetWorld);
+    m_mapNameLocale = I18N::GetCurrentLocale();
 }
 
 void CMuEffectBrowserUI::RenderMapLine()
 {
+    // The login and character screens are named in the editor's language.
+    if (m_mapNameLocale != I18N::GetCurrentLocale())
+        NameMap();
     ImGui::Text("%s: %s (%d)", I18N::Editor::CurrentMap, m_mapName.c_str(), *m_assetWorld);
     ImGui::SameLine();
     if (ImGui::Button(I18N::Editor::Refresh))

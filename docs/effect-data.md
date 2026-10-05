@@ -301,10 +301,12 @@ when they reach their target. A change that moves a type looks at these too.
   effect with a texture number and a sprite draw the texture of their
   number. Particles and lightning start with the texture of their number,
   but the code of a SubType can choose another. The browser shows the file
-  loaded into the slot right now and what loaded it: the loading screen,
-  this map, or a map visited before (slots keep what an earlier map loaded).
-  It never loads anything. The slots are read again when the map changes and
-  on **Refresh**.
+  loaded into the slot right now and what loaded it last: the loading
+  screen, this map, or a map visited before and which (slots keep what an
+  earlier map loaded). A map that loads a file the slot holds already counts
+  as having loaded it, so **Loaded by this map** lists everything the map
+  loads. The browser itself never loads anything. The slots are read again
+  when the map changes and on **Refresh**.
 - **Map objects**: five effects draw an object of a map: the castle walls
   (`battleCastleWall1` to `4`), which the Battle Castle siege map creates
   when a wall breaks, and `kalimaFallingStone`, the rocks that fall on the

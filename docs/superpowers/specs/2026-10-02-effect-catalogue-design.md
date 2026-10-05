@@ -558,7 +558,7 @@ the cache after it. The capture's color format on Linux and macOS (RGBA8 for
 the capture, the swapchain's format for the pipelines) is still to be
 checked in game; it works on Windows. Added with it on request: in editor
 builds `CLoadData` and `CGlobalBitmap` remember the map that was active when
-a model or texture was loaded into a slot (from `Core::AssetLoadWorld`,
+a model or texture was last loaded into a slot (from `Core::AssetLoadWorld`,
 which the editor points at `gMapManager`; the loaders are linked into tests
 without the map code), so the details say whether an asset was loaded on the
 loading screen, by this map or by a map visited before, and the list filters

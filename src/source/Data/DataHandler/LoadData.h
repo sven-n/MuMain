@@ -48,8 +48,8 @@ public:
     // editor. It stays after the model is released.
     std::wstring GetModelFile(int Model) const;
 #ifdef _EDITOR
-    // The world that was active when AccessModel or ShareModel filled the
-    // slot (Core::AssetLoadWorld: the loading screen or a map), for the
+    // The world that was active when AccessModel or ShareModel last filled
+    // the slot (Core::AssetLoadWorld: the loading screen or a map), for the
     // editor; nullopt when nothing was opened into it. It stays after the
     // model is released.
     std::optional<int> GetModelLoadWorld(int Model) const;

@@ -556,6 +556,11 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
             if (0 == _wcsicmp(pBitmap->FileName, filename.c_str()))
             {
                 pBitmap->Ref++;
+#ifdef _EDITOR
+                // The last loader, as for models: a map that loads the file
+                // again has loaded it too.
+                m_loadWorlds[uiBitmapIndex] = Core::AssetLoadWorld::Get();
+#endif
                 return true;
             }
             else

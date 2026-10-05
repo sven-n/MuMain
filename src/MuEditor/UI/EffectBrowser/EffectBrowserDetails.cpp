@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <string>
 
 using Data::Effects::EffectKind;
 using MuEditor::Effects::EffectBrowserModel;
@@ -56,8 +57,13 @@ std::string DescribeOrigin(const EffectBrowserRow& row)
     case MuEditor::Effects::AssetOrigin::ThisMap:
         return I18N::Editor::OriginThisMap;
     case MuEditor::Effects::AssetOrigin::EarlierMap:
-        return std::string(I18N::Editor::OriginEarlierMap) + ' ' +
-               MuEditor::Effects::Labels::MapName(row.asset.loadWorld.value_or(-1));
+    {
+        // With the number, as in the map line: the levels of a map share
+        // their name.
+        const int world = row.asset.loadWorld.value_or(-1);
+        return std::string(I18N::Editor::OriginEarlierMap) + ' ' + MuEditor::Effects::Labels::MapName(world) + " (" +
+               std::to_string(world) + ')';
+    }
     case MuEditor::Effects::AssetOrigin::Unknown:
         return I18N::Editor::OriginUnknown;
     case MuEditor::Effects::AssetOrigin::NotLoaded:
@@ -174,10 +180,12 @@ std::optional<EffectTypeRef> CEffectBrowserDetails::Render(const EffectBrowserMo
 
 void CEffectBrowserDetails::Refresh(const EffectBrowserModel& model, EffectTypeRef selected)
 {
-    if (m_ref == selected && m_assetGeneration == model.GetAssetGeneration())
+    const char* locale = I18N::GetCurrentLocale();
+    if (m_ref == selected && m_assetGeneration == model.GetAssetGeneration() && m_locale == locale)
         return;
     m_ref = selected;
     m_assetGeneration = model.GetAssetGeneration();
+    m_locale = locale;
     const EffectBrowserRow* row = model.FindRow(selected.kind, selected.type);
     m_assetOrigin = row != nullptr ? DescribeOrigin(*row) : std::string();
     const std::optional<int> home = MuEditor::Effects::GetHomeWorld(selected.type);

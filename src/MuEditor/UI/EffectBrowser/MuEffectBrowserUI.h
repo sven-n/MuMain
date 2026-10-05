@@ -35,6 +35,7 @@ private:
     // What the slots hold changes with the map.
     void RefreshAssetsWhenMapChanges();
     void RefreshAssets();
+    void NameMap();
     void RenderMapLine();
     void RenderTabs();
     void RenderKind(Data::Effects::EffectKind kind);
@@ -47,9 +48,11 @@ private:
     std::array<int, Data::Effects::EffectKindCount> m_selected = {-1, -1, -1, -1};
     // The tab to select at the next frame.
     std::optional<Data::Effects::EffectKind> m_tabToSelect;
-    // The map the assets were read on, and its name.
+    // The map the assets were read on, and its name in the language of
+    // m_mapNameLocale.
     std::optional<int> m_assetWorld;
     std::string m_mapName;
+    const char* m_mapNameLocale = nullptr;
 };
 
 #define g_MuEffectBrowserUI CMuEffectBrowserUI::GetInstance()

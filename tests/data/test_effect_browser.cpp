@@ -432,8 +432,8 @@ TEST_CASE("The effect browser filters by search, stage and loaded asset [data][e
     // The poison model was loaded by this map, the fire model by an earlier
     // one, the ghost's on the loading screen; slot 64 holds this map's object,
     // which is the wall's model only on the siege map.
-    constexpr int ThisWorld = 0;
-    constexpr int EarlierWorld = 2;
+    static constexpr int ThisWorld = 0;
+    static constexpr int EarlierWorld = 2;
     const auto probe = [](int wallWorld)
     {
         return [wallWorld](EffectAssetSlot slot, int type) -> EffectAsset

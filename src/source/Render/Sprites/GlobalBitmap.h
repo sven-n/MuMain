@@ -140,9 +140,10 @@ public:
     BITMAP_t* FindTexture(const std::wstring& filename);
     BITMAP_t* FindTextureByName(const std::wstring& name);
 #ifdef _EDITOR
-    // The world that was active when the texture of this number was loaded
-    // (Core::AssetLoadWorld: the loading screen or a map), for the editor;
-    // nullopt when none is loaded.
+    // The world that was active when the texture of this number was last
+    // loaded, also when the file was loaded already (Core::AssetLoadWorld:
+    // the loading screen or a map), for the editor; nullopt when none is
+    // loaded.
     std::optional<int> GetLoadWorld(GLuint uiBitmapIndex) const;
 #endif
 
