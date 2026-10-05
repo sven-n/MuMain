@@ -62,7 +62,7 @@ Current handover prompt for a new agent: `rmlui-window-placement-hud-handover.md
 | `6a2d08718` | Generic fill (`GetFillDocument()`), 24 windows; native corner close follows panel width |
 | `a1f677709` | HUD in the workspace H1: flex shell, `PlacementParticipant`, main HUD as one footer unit, minimap clip from the slot |
 | `c1049e7ef` | Header slots for the MU Helper bar and top bar; modern caps its docks at the content area (windows drawn smaller to fit) |
-| (H2 chat) | Chat log and input in a `chat-stack` region; adapter options (measure, placedWhileHidden, placed) |
+| `2eadc3b8b` | Chat log and input in a `chat-stack` region; adapter options (measure, placedWhileHidden, placed) |
 
 Regression lesson: since `LayoutMode::Slot`, a placed window's `m_Pos` is (0, 0) in its slot space.
 Any native part positioned once at creation (not moved by `SetPos()` or re-placed each frame) ends
@@ -103,8 +103,9 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
 ## Open work, in suggested order
 
 1. HUD in the workspace: H1 and H2's header batch are done. Next H2 batches, one component each:
-   buff row, party list, item endurance need the user's call first (window-placement.md,
-   "Findings for the rest of H2"; chat done, minimap needs no slot); then H3 and H4
+   H2 is done (user, 2026-10-05): buff row, party list and item endurance stay edge-followers,
+   the minimap needs no slot. Next H3 (event HUDs; first check whether they share the dock/HUD
+   scale split), then H4
    (`window-placement.md`, "HUD in the workspace"). Hand checks pending: the minimap's clip
    around the HUD; in modern at a capped scale, dragging items between windows and item
    tooltips; the chat log's resize handle and F4/F5 (socket hotkeys did not reach the client).
