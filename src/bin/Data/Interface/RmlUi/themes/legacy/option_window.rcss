@@ -166,51 +166,32 @@
 	color: token(text-input);
 }
 
-.option-slider-row,
-.option-select-row {
+.option-select-row,
+.option-gauge-row {
 	height: 20dp;
 }
 
-/* First real use of RmlUi's native <input type="range"> in this codebase -- drives the same
-   WidgetSlider class as scrollbars, styled via the same slidertrack/sliderbar sub-elements
-   generic_confirm_dialog.rcss already proves render/receive-input correctly in this build. Arrow
-   sub-elements collapsed to 0 like that file's own scrollbar rule -- drag/click-only, matching
-   native's own slider affordance (no stepper buttons).
-
-   pointer-events: auto is required directly on this element, not just an ancestor -- same reason
-   generic_confirm_dialog.rcss's own .gcd-text-col states it explicitly right next to its
-   scrollbar rules: base.rcss's `body { pointer-events: none; }` inherits down to every descendant
-   that doesn't opt back in, and WidgetSlider's generated slidertrack/sliderbar are real DOM
-   children of THIS element (the <input> itself), inheriting whatever ITS OWN computed value is.
-   .window-shell-content resetting to auto further up the tree covers ordinary rows fine, but
-   leaving this un-stated here relies on that inheritance chain never getting interrupted anywhere
-   in between -- without it explicitly set here, the slider never moves on drag. */
-.option-slider {
-	flex-grow: 1;
-	height: 12dp;
-	pointer-events: auto;
+/* Volume and effect-limit gauges: base.rcss's .level-gauge at native's sizes (the volume bars
+   124x16, the effect bar drawn 70x15), beside their labels. Native's volume hit area began 8
+   units before the bar. */
+.option-gauge {
+	position: relative;
+	width: 124dp;
+	height: 16dp;
+	margin-left: auto;
 }
-.option-slider slidertrack {
-	height: 4dp;
-	background-color: token(surface-recessed);
-	border-width: 1dp;
-	border-color: token(border-control);
+.option-gauge.effect-gauge {
+	width: 70dp;
+	height: 15dp;
 }
-.option-slider sliderbar {
-	width: 10dp;
-	background-color: #8f6922;
-	decorator: linear-gradient(to bottom, #d3aa4e, #8f6922);
-	border-width: 1dp;
-	border-color: #aa8132;
+.option-gauge .level-gauge-fill {
+	left: 0;
+	top: 0;
+	bottom: 0;
 }
-.option-slider sliderbar:hover,
-.option-slider sliderbar:active {
-	background-color: #a67c2c;
-}
-.option-slider sliderarrowdec,
-.option-slider sliderarrowinc {
-	width: 0;
-	height: 0;
+.option-gauge-hit {
+	left: -8dp;
+	right: 0;
 }
 
 /* Custom dropdown -- NOT RmlUi's native <select>/<option> (WidgetDropDown). That was tried first

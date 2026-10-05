@@ -359,3 +359,56 @@ input, select, textarea, .btn, [data-event-click] { drag: block; }
 .gold-amount.gold-hundred-thousand { color: #00c918; }
 .gold-amount.gold-million          { color: #ff9600; }
 .gold-amount.gold-ten-million      { color: #ff0000; }
+
+/* Level gauge: native's fill-by-level bar. The rail is the empty bar; the fill is the full bar
+   cropped to the level (a sprite per level, since native sampled texels 1:1 from the left edge
+   instead of stretching the image). .level-gauge-hit takes the pointer; consumers size and place
+   all three. C++: UI::RmlBridge::ApplyLevelGaugeEvent(). Volume art: 10 levels (the MU Helper
+   thresholds and the options' volumes); effect art: 5 cells (the options' effect limit). */
+@spritesheet level-gauge-back-sheet { src: "../../../newui_option_volume01.tga"; level-gauge-back: 0px 0px 124px 16px; }
+@spritesheet level-gauge-fill-sheet
+{
+	src: "../../../newui_option_volume02.tga";
+	level-gauge-fill-1:  0px 0px 12.4px 16px;
+	level-gauge-fill-2:  0px 0px 24.8px 16px;
+	level-gauge-fill-3:  0px 0px 37.2px 16px;
+	level-gauge-fill-4:  0px 0px 49.6px 16px;
+	level-gauge-fill-5:  0px 0px 62px 16px;
+	level-gauge-fill-6:  0px 0px 74.4px 16px;
+	level-gauge-fill-7:  0px 0px 86.8px 16px;
+	level-gauge-fill-8:  0px 0px 99.2px 16px;
+	level-gauge-fill-9:  0px 0px 111.6px 16px;
+	level-gauge-fill-10: 0px 0px 124px 16px;
+}
+@spritesheet effect-gauge-back-sheet { src: "../../../newui_option_effect03.tga"; effect-gauge-back: 0px 0px 141px 29px; }
+@spritesheet effect-gauge-fill-sheet
+{
+	src: "../../../newui_option_effect04.tga";
+	effect-gauge-fill-1: 0px 0px 28.2px 29px;
+	effect-gauge-fill-2: 0px 0px 56.4px 29px;
+	effect-gauge-fill-3: 0px 0px 84.6px 29px;
+	effect-gauge-fill-4: 0px 0px 112.8px 29px;
+	effect-gauge-fill-5: 0px 0px 141px 29px;
+}
+.level-gauge { decorator: image(level-gauge-back); pointer-events: none; }
+.level-gauge.effect-gauge { decorator: image(effect-gauge-back); }
+.level-gauge-fill { position: absolute; pointer-events: none; }
+.level-gauge-hit { position: absolute; top: 0; bottom: 0; pointer-events: auto; drag: drag; cursor: pointer; }
+
+/* A fill's level as a class (level-<n>), so each theme decides how a level is drawn; a consumer
+   binding its own width and decorator (the MU Helper detail window) does not use these. */
+.level-gauge-fill.level-1 { width: 10%; decorator: image(level-gauge-fill-1); }
+.level-gauge-fill.level-2 { width: 20%; decorator: image(level-gauge-fill-2); }
+.level-gauge-fill.level-3 { width: 30%; decorator: image(level-gauge-fill-3); }
+.level-gauge-fill.level-4 { width: 40%; decorator: image(level-gauge-fill-4); }
+.level-gauge-fill.level-5 { width: 50%; decorator: image(level-gauge-fill-5); }
+.level-gauge-fill.level-6 { width: 60%; decorator: image(level-gauge-fill-6); }
+.level-gauge-fill.level-7 { width: 70%; decorator: image(level-gauge-fill-7); }
+.level-gauge-fill.level-8 { width: 80%; decorator: image(level-gauge-fill-8); }
+.level-gauge-fill.level-9 { width: 90%; decorator: image(level-gauge-fill-9); }
+.level-gauge-fill.level-10 { width: 100%; decorator: image(level-gauge-fill-10); }
+.effect-gauge .level-gauge-fill.level-1 { width: 20%; decorator: image(effect-gauge-fill-1); }
+.effect-gauge .level-gauge-fill.level-2 { width: 40%; decorator: image(effect-gauge-fill-2); }
+.effect-gauge .level-gauge-fill.level-3 { width: 60%; decorator: image(effect-gauge-fill-3); }
+.effect-gauge .level-gauge-fill.level-4 { width: 80%; decorator: image(effect-gauge-fill-4); }
+.effect-gauge .level-gauge-fill.level-5 { width: 100%; decorator: image(effect-gauge-fill-5); }

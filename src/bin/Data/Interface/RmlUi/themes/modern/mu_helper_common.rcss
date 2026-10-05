@@ -68,27 +68,11 @@
 .mh-pane-h70 .p-body { height: 70px; }
 .mh-pane .mh-text { left: 9px; top: 4px; color: token(text-secondary); font-weight: bold; }
 
-/* Threshold gauge: a recessed rail and a gold fill in tenths. Input stays native
-   (CMuHelperDetailWindow::UpdateGauge), which is why nothing here takes the mouse. */
-.mh-gauge {
-	position: absolute;
-	width: 124px;
-	height: 16px;
-	background-color: token(metal-rail-dark);
-	border-width: 1px;
-	border-color: token(border-inner);
-	border-radius: token(radius-sm)px;
-	box-sizing: border-box;
-	pointer-events: none;
-}
-.mh-gauge-fill {
-	position: absolute;
-	height: 16px;
-	background-color: token(accent-gold);
-	decorator: linear-gradient(to bottom, token(accent-gold-hover), token(accent-gold));
-	border-radius: token(radius-sm)px;
-	pointer-events: none;
-}
+/* Threshold gauge: base.rcss's .level-gauge at native's size. Native's hit rectangle began 7
+   units before the rail and ended 1 unit after it. */
+.mh-gauge { position: absolute; width: 124px; height: 16px; }
+.mh-gauge-hit { left: -7px; right: -1px; }
+.mh-gauge-fill { height: 16px; }
 
 /* Checkbox / radio -- base.rcss's .modern-checkbox-px, boxed at native's 15-unit square with a
    1-unit inset. Only the box takes the click, as natively. */

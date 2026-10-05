@@ -12,7 +12,7 @@
      that stylesheet at themes/<theme>/option_window.rcss, there is no equivalent "shared" fallback
      for a <link>'s href the way there is for the .rml file itself. A root-level RCSS at this same
      directory is never reachable by either theme, regardless of edits made there.
-     checkboxes/range-sliders/selects use the same shared base.rcss primitives in both themes, no
+     checkboxes/level gauges/selects use the same shared base.rcss primitives in both themes, no
      structural fork of THIS file needed yet. If a theme-specific rendering workaround ever forces a
      DOM difference (the way generic_menu_dialog.rml's modern fork needed an extra .gmd-btn-fill
      div), fork this file at that point rather than pre-emptively.
@@ -79,27 +79,33 @@
 
 	<!-- Tab 1: Audio -->
 	<div class="option-tab-panel" data-class-hidden="active_tab != 1">
-		<div class="option-row option-slider-row">
+		<div class="option-row option-gauge-row">
 			<span class="option-row-label">{{sound_volume_label}}</span>
-			<input type="range" class="option-slider" min="0" max="10" step="1"
-			       data-attr-max="sound_volume_max" data-value="sound_volume"
-			       data-event-change="option_sound_volume_changed"/>
+			<div class="level-gauge option-gauge">
+				<div data-attr-class="'level-gauge-fill level-' + sound_volume"></div>
+				<div class="level-gauge-hit option-gauge-hit" data-event-mousedown="option_gauge(0)"
+				     data-event-drag="option_gauge(0)" data-event-mousescroll="option_gauge(0)"></div>
+			</div>
 		</div>
-		<div class="option-row option-slider-row">
+		<div class="option-row option-gauge-row">
 			<span class="option-row-label">{{music_volume_label}}</span>
-			<input type="range" class="option-slider" min="0" max="10" step="1"
-			       data-attr-max="music_volume_max" data-value="music_volume"
-			       data-event-change="option_music_volume_changed"/>
+			<div class="level-gauge option-gauge">
+				<div data-attr-class="'level-gauge-fill level-' + music_volume"></div>
+				<div class="level-gauge-hit option-gauge-hit" data-event-mousedown="option_gauge(1)"
+				     data-event-drag="option_gauge(1)" data-event-mousescroll="option_gauge(1)"></div>
+			</div>
 		</div>
 	</div>
 
 	<!-- Tab 2: Video -->
 	<div class="option-tab-panel" data-class-hidden="active_tab != 2">
-		<div class="option-row option-slider-row">
+		<div class="option-row option-gauge-row">
 			<span class="option-row-label">{{render_level_label}}</span>
-			<input type="range" class="option-slider" min="0" max="5" step="1"
-			       data-attr-max="render_level_max" data-value="render_level"
-			       data-event-change="option_render_level_changed"/>
+			<div class="level-gauge option-gauge effect-gauge">
+				<div data-attr-class="'level-gauge-fill level-' + (render_level + 1)"></div>
+				<div class="level-gauge-hit option-gauge-hit" data-event-mousedown="option_gauge(2)"
+				     data-event-drag="option_gauge(2)" data-event-mousescroll="option_gauge(2)"></div>
+			</div>
 		</div>
 		<!-- Custom dropdown, not RmlUi's native <select>/<option> -- that was tried first and never
 		     reliably worked in this engine: WidgetDropDown's own generated

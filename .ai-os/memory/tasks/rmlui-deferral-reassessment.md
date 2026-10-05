@@ -25,6 +25,23 @@ That integration constraint needs a tested solution before replacing its native 
 The user confirmed Gens Ranking's text scrolling and thumb drag in game on 2026-10-06.
 A both-theme, non-100 % scale sweep has not been recorded.
 
+## MU Helper gauge implementation, awaiting hand checks (2026-10-06)
+
+The three threshold gauges now receive RmlUi mousedown, drag and wheel events from
+hit areas attached to their theme-owned bars. `CMuHelperDetailWindow` maps the
+unprojected pointer against the rendered bar box, preserving the native 0–10 steps,
+one-unit origin inset, wheel direction and Save/discard behavior. Per-frame
+`UpdateGauge()` polling and its hardcoded bar positions are gone. The full
+RelWithDebInfo build passed, including RML/RCSS syntax, theme drift and bound
+geometry checks. No in-game test was run, per the user's instruction.
+
+Keep the gauge pilot in `tracked-deferrals.md` until the user checks all three
+gauges in both themes at 100% and a non-100% UI scale: left edge reaches zero,
+click and drag reach ten, wheel steps both ways, dragging outside clamps, and
+Save persists while closing without Save discards the change. Then remove the
+pilot row; the stock slider's transformed-input limitation remains an engine
+finding but no longer blocks these gauges.
+
 Other pilot claims checked against current source:
 
 - The modern buff tooltip no longer contains the hardcoded white colour. Buff

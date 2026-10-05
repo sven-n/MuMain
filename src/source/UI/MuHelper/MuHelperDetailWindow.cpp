@@ -11,6 +11,7 @@
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlKeyboardFocus.h"
+#include "UI/RmlBridge/RmlLevelGauge.h"
 #include "UI/RmlBridge/RmlNumericInputFilter.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
@@ -19,6 +20,7 @@
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
 
 #include <algorithm>
 #include <string>
@@ -36,12 +38,8 @@ namespace
         ON_MORE_THAN_TWO_MOBS, ON_MORE_THAN_THREE_MOBS, ON_MORE_THAN_FOUR_MOBS, ON_MORE_THAN_FIVE_MOBS
     };
 
-    // The gauge bars' own reference-space left edge and the tops of each; the RCSS draws them at
-    // exactly these positions (mu_helper_detail.rcss).
-    constexpr int GaugeLeft = 32;
-    constexpr int GaugePotionTop = 80;
-    constexpr int GaugeHealTop = 145;
-    constexpr int GaugePartyHealTop = 100;
+    constexpr int GaugeMaxLevel = 10;
+    constexpr float GaugeOriginInset = 1.f;
 
     bool IsSkillPage(int page) { return page == SUB_PAGE_SKILL2_CONFIG || page == SUB_PAGE_SKILL3_CONFIG; }
     bool IsPotionPage(int page)
@@ -131,54 +129,41 @@ bool CMuHelperDetailWindow::UpdateMouseEvent()
     if (!WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return true;
 
-    // Only the gauges the current page actually shows take input. Native tested the potion gauge's
-    // rect on every page, where it overlaps the condition radios -- clicking a radio also moved an
-    // invisible threshold, which Save then committed.
-    if (IsPotionPage(m_iCurrentPage))
-        UpdateGauge("gauge_potion", GaugeLeft, GaugePotionTop, m_iCurrentPotionThreshold, m_Pos);
-    if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG_ELF || m_iCurrentPage == SUB_PAGE_POTION_CONFIG_SUMMY)
-        UpdateGauge("gauge_heal", GaugeLeft, GaugeHealTop, m_iCurrentHealThreshold, m_Pos);
-    if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG_ELF)
-        UpdateGauge("gauge_party_heal", GaugeLeft, GaugePartyHealTop, m_iCurrentPartyHealThreshold, m_Pos);
-
     return false;
 }
 
-bool CMuHelperDetailWindow::UpdateGauge(const char* gaugeId, int left, int top, int& level, const POINT& panelPos)
+void CMuHelperDetailWindow::HandleGaugeEvent(Rml::Event& event, int gauge)
 {
-    float barX = static_cast<float>(panelPos.x + left);
-    float barY = static_cast<float>(panelPos.y + top);
-    float barWidth = 124.f;
-    float barHeight = 0.f;
-    UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "panel", gaugeId, panelPos, barX, barY);
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, gaugeId, barWidth, barHeight);
+    if (!IsVisible())
+        return;
 
-    // Native's own geometry: the drag origin sits one unit inside the drawn bar, and the hit area
-    // starts 8 units before it, 16 tall, so a press just left of the bar reads as zero. Native's
-    // party gauge used an origin one unit further left than the other two for its hit test only;
-    // all three share one rule here.
-    const int origin = static_cast<int>(barX) + 1;
-    const int width = static_cast<int>(barWidth);
-    if (!CheckMouseIn(origin - 8, static_cast<int>(barY), width + 8, 16))
-        return false;
+    int* level = nullptr;
+    switch (gauge)
+    {
+    case 0:
+        if (IsPotionPage(m_iCurrentPage))
+            level = &m_iCurrentPotionThreshold;
+        break;
+    case 1:
+        if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG_ELF || m_iCurrentPage == SUB_PAGE_POTION_CONFIG_SUMMY)
+            level = &m_iCurrentHealThreshold;
+        break;
+    case 2:
+        if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG_ELF)
+            level = &m_iCurrentPartyHealThreshold;
+        break;
+    }
+    if (!level)
+        return;
 
-    if (MouseWheel > 0)
+    // Native's drag origin sits one unit inside the drawn bar, and a press left of it reads 0.
+    const auto fromPointer = [](float x, float width)
     {
-        MouseWheel = 0;
-        level = std::min(level + 1, 10);
-    }
-    else if (MouseWheel < 0)
-    {
-        MouseWheel = 0;
-        level = std::max(level - 1, 0);
-    }
-
-    if (IsRepeat(VK_LBUTTON))
-    {
-        const int x = MouseX - origin;
-        level = x < 0 ? 0 : std::min(static_cast<int>((10.f * x) / barWidth) + 1, 10);
-    }
-    return true;
+        x -= GaugeOriginInset;
+        return x < 0.f ? 0 : static_cast<int>(GaugeMaxLevel * x / width) + 1;
+    };
+    if (const auto next = UI::RmlBridge::ApplyLevelGaugeEvent(event, *level, GaugeMaxLevel, fromPointer))
+        *level = *next;
 }
 
 bool CMuHelperDetailWindow::UpdateKeyEvent()
@@ -400,6 +385,12 @@ void CMuHelperDetailWindow::BuildRmlUi()
                 {
                     if (args.size() == 1)
                         SetSubCondition(args[0].Get<int>(-1));
+                });
+            c.BindEventCallback("muhelper_detail_gauge",
+                [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+                {
+                    if (args.size() == 1)
+                        HandleGaugeEvent(event, args[0].Get<int>(-1));
                 });
             c.BindEventCallback("muhelper_detail_party_heal",
                 [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)

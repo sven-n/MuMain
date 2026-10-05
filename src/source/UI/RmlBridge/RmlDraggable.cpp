@@ -47,6 +47,11 @@ public:
 
     void ProcessEvent(Rml::Event& event) override
     {
+        // A control inside the handle with its own `drag` (a gauge, a scrollbar thumb) is the drag
+        // element for its own drags, which bubble up here; only the handle's own drags move the panel.
+        if (event.GetId() != Rml::EventId::Mousedown && event.GetTargetElement() != event.GetCurrentElement())
+            return;
+
         switch (event.GetId())
         {
         case Rml::EventId::Mousedown:

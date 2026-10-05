@@ -163,44 +163,25 @@
 	color: token(text-secondary);
 }
 
-.option-slider-row,
-.option-select-row {
+.option-select-row,
+.option-gauge-row {
 	height: 20dp;
 }
 
-/* First real use of RmlUi's native <input type="range"> in this codebase -- drives the same
-   WidgetSlider class as scrollbars, styled via the same slidertrack/sliderbar sub-elements
-   generic_confirm_dialog.rcss already proves render/receive-input correctly in this build. Arrow
-   sub-elements collapsed to 0 like that file's own scrollbar rule -- drag/click-only, matching
-   native's own slider affordance (no stepper buttons).
-
-   pointer-events: auto is required directly on this element, not just an ancestor -- same reason
-   generic_confirm_dialog.rcss's own .gcd-text-col states it explicitly right next to its
-   scrollbar rules: base.rcss's `body { pointer-events: none; }` inherits down to every descendant
-   that doesn't opt back in, and WidgetSlider's generated slidertrack/sliderbar are real DOM
-   children of THIS element (the <input> itself), inheriting whatever ITS OWN computed value is.
-   .window-shell-content resetting to auto further up the tree covers ordinary rows fine, but
-   leaving this un-stated here relies on that inheritance chain never getting interrupted anywhere
-   in between -- without it explicitly set here, the slider never moves on drag. */
-.option-slider {
-	flex-grow: 1;
+/* Volume and effect-limit gauges: base.rcss's .level-gauge beside the label. */
+.option-gauge {
+	position: relative;
+	width: 124dp;
 	height: 12dp;
-	pointer-events: auto;
 }
-.option-slider slidertrack {
-	height: 4dp;
-	background-color: rgba(0, 0, 0, 140);
-	border-radius: token(radius-sm)dp;
+.option-gauge .level-gauge-fill {
+	left: 0;
+	top: 0;
+	bottom: 0;
 }
-.option-slider sliderbar {
-	width: 10dp;
-	decorator: linear-gradient(to bottom, token(accent-gold-hover), token(accent-gold));
-	border-radius: token(radius-sm)dp;
-}
-.option-slider sliderarrowdec,
-.option-slider sliderarrowinc {
-	width: 0;
-	height: 0;
+.option-gauge-hit {
+	left: -8dp;
+	right: 0;
 }
 
 /* Custom dropdown -- NOT RmlUi's native <select>/<option> (WidgetDropDown). That was tried first

@@ -17,7 +17,7 @@
 
 	     The four tabbed panes are laid out once by geometry rather than once per page -- each carries
 	     the header of every page it appears on, and shows only the current one's. The gauges draw
-	     here but take their input in C++ (CMuHelperDetailWindow::UpdateGauge). -->
+	     here and receive input through their own RmlUi hit areas. -->
 	<div id="panel" data-model="mu_helper_detail" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div class="frame-piece frame-top"></div>
@@ -128,17 +128,25 @@
 
 		<!-- Recovery: the potion threshold on every class, plus auto heal (elf) or drain life (summoner). -->
 		<div class="mhd-page" data-class-hidden="!(page == 4 || page == 5 || page == 6)">
-			<div id="gauge_potion" class="mh-gauge"></div>
-			<div id="gauge_potion_fill" class="mh-gauge-fill" data-class-hidden="potion_level == 0"
+			<div id="gauge_potion" class="level-gauge mh-gauge">
+				<div class="level-gauge-hit mh-gauge-hit" data-event-mousedown="muhelper_detail_gauge(0)"
+				     data-event-drag="muhelper_detail_gauge(0)"
+				     data-event-mousescroll="muhelper_detail_gauge(0)"></div>
+			</div>
+			<div id="gauge_potion_fill" class="level-gauge-fill mh-gauge-fill" data-class-hidden="potion_level == 0"
 			     data-style-width="(potion_level * 12.4) + 'px'"
-			     data-style-decorator="'image(mh-gauge-fill-' + potion_level + ')'"></div>
+			     data-style-decorator="'image(level-gauge-fill-' + potion_level + ')'"></div>
 			<span class="sharp-text mh-text mh-center" id="gauge_potion_label" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-width="(124 * root_scale) + 'px'">{{labels.hp_status}}</span>
 		</div>
 		<div class="mhd-page" data-class-hidden="page != 4 &amp;&amp; page != 5">
-			<div id="gauge_heal" class="mh-gauge"></div>
-			<div id="gauge_heal_fill" class="mh-gauge-fill" data-class-hidden="heal_level == 0"
+			<div id="gauge_heal" class="level-gauge mh-gauge">
+				<div class="level-gauge-hit mh-gauge-hit" data-event-mousedown="muhelper_detail_gauge(1)"
+				     data-event-drag="muhelper_detail_gauge(1)"
+				     data-event-mousescroll="muhelper_detail_gauge(1)"></div>
+			</div>
+			<div id="gauge_heal_fill" class="level-gauge-fill mh-gauge-fill" data-class-hidden="heal_level == 0"
 			     data-style-width="(heal_level * 12.4) + 'px'"
-			     data-style-decorator="'image(mh-gauge-fill-' + heal_level + ')'"></div>
+			     data-style-decorator="'image(level-gauge-fill-' + heal_level + ')'"></div>
 			<span class="sharp-text mh-text mh-center" id="gauge_heal_label" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-width="(124 * root_scale) + 'px'">{{labels.hp_status}}</span>
 		</div>
 
@@ -161,10 +169,14 @@
 				<div class="checkbox-box" data-class-checked="party_heal" data-event-click="muhelper_detail_party_heal"></div>
 				<span class="sharp-text mh-text checkbox-label" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{labels.party_heal}}</span>
 			</div>
-			<div id="gauge_party_heal" class="mh-gauge"></div>
-			<div id="gauge_party_heal_fill" class="mh-gauge-fill" data-class-hidden="party_heal_level == 0"
+			<div id="gauge_party_heal" class="level-gauge mh-gauge">
+				<div class="level-gauge-hit mh-gauge-hit" data-event-mousedown="muhelper_detail_gauge(2)"
+				     data-event-drag="muhelper_detail_gauge(2)"
+				     data-event-mousescroll="muhelper_detail_gauge(2)"></div>
+			</div>
+			<div id="gauge_party_heal_fill" class="level-gauge-fill mh-gauge-fill" data-class-hidden="party_heal_level == 0"
 			     data-style-width="(party_heal_level * 12.4) + 'px'"
-			     data-style-decorator="'image(mh-gauge-fill-' + party_heal_level + ')'"></div>
+			     data-style-decorator="'image(level-gauge-fill-' + party_heal_level + ')'"></div>
 			<span class="sharp-text mh-text mh-center" id="gauge_party_heal_label" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-width="(124 * root_scale) + 'px'">{{labels.hp_status_party}}</span>
 			<div id="party_duration_elf" class="mh-check">
 				<div class="checkbox-box" data-class-checked="party_duration" data-event-click="muhelper_detail_party_duration"></div>

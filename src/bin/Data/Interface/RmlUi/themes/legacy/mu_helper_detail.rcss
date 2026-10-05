@@ -1,7 +1,7 @@
 /* Legacy layout for CMuHelperDetailWindow. Every position is native's own m_Pos + K from the draw
    and hit-test calls it replaces; the pieces themselves (panes, gauges, checkboxes, buttons, number
-   plate) come from mu_helper_common.rcss. The gauges draw here and take their input
-   in C++, which reads each bar's place and width from here. */
+   plate) come from mu_helper_common.rcss. The gauges draw here; the hit area follows
+   each bar in the RML hierarchy. */
 
 .mhd-page { position: absolute; left: 0; top: 0; }
 

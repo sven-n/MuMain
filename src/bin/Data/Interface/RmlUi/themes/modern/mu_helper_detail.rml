@@ -79,14 +79,22 @@
 
 		<!-- Recovery: the potion threshold on every class, plus auto heal (elf) or drain life (summoner). -->
 		<div class="mhd-page" data-class-hidden="!(page == 4 || page == 5 || page == 6)">
-			<div id="gauge_potion" class="mh-gauge"></div>
-			<div id="gauge_potion_fill" class="mh-gauge-fill" data-class-hidden="potion_level == 0"
+			<div id="gauge_potion" class="level-gauge mh-gauge">
+				<div class="level-gauge-hit mh-gauge-hit" data-event-mousedown="muhelper_detail_gauge(0)"
+				     data-event-drag="muhelper_detail_gauge(0)"
+				     data-event-mousescroll="muhelper_detail_gauge(0)"></div>
+			</div>
+			<div id="gauge_potion_fill" class="level-gauge-fill mh-gauge-fill" data-class-hidden="potion_level == 0"
 			     data-style-width="(potion_level * 12.4) + 'px'"></div>
 			<span class="mh-text mh-center" id="gauge_potion_label">{{labels.hp_status}}</span>
 		</div>
 		<div class="mhd-page" data-class-hidden="page != 4 &amp;&amp; page != 5">
-			<div id="gauge_heal" class="mh-gauge"></div>
-			<div id="gauge_heal_fill" class="mh-gauge-fill" data-class-hidden="heal_level == 0"
+			<div id="gauge_heal" class="level-gauge mh-gauge">
+				<div class="level-gauge-hit mh-gauge-hit" data-event-mousedown="muhelper_detail_gauge(1)"
+				     data-event-drag="muhelper_detail_gauge(1)"
+				     data-event-mousescroll="muhelper_detail_gauge(1)"></div>
+			</div>
+			<div id="gauge_heal_fill" class="level-gauge-fill mh-gauge-fill" data-class-hidden="heal_level == 0"
 			     data-style-width="(heal_level * 12.4) + 'px'"></div>
 			<span class="mh-text mh-center" id="gauge_heal_label">{{labels.hp_status}}</span>
 		</div>
@@ -110,8 +118,12 @@
 				<div class="checkbox-box modern-checkbox-px" data-class-checked="party_heal" data-event-click="muhelper_detail_party_heal"></div>
 				<span class="mh-text checkbox-label">{{labels.party_heal}}</span>
 			</div>
-			<div id="gauge_party_heal" class="mh-gauge"></div>
-			<div id="gauge_party_heal_fill" class="mh-gauge-fill" data-class-hidden="party_heal_level == 0"
+			<div id="gauge_party_heal" class="level-gauge mh-gauge">
+				<div class="level-gauge-hit mh-gauge-hit" data-event-mousedown="muhelper_detail_gauge(2)"
+				     data-event-drag="muhelper_detail_gauge(2)"
+				     data-event-mousescroll="muhelper_detail_gauge(2)"></div>
+			</div>
+			<div id="gauge_party_heal_fill" class="level-gauge-fill mh-gauge-fill" data-class-hidden="party_heal_level == 0"
 			     data-style-width="(party_heal_level * 12.4) + 'px'"></div>
 			<span class="mh-text mh-center" id="gauge_party_heal_label">{{labels.hp_status_party}}</span>
 			<div id="party_duration_elf" class="mh-check">

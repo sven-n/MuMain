@@ -12,7 +12,7 @@
 #include "UI/Inventory/MyInventory.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
-namespace Rml { class ElementDocument; class Element; }
+namespace Rml { class ElementDocument; class Element; class Event; }
 
 namespace UI::Options
 {
@@ -165,6 +165,8 @@ namespace mu::ui::window
         void RmlSoundVolumeChanged(int value);
         void RmlMusicVolumeChanged(int value);
         void RmlRenderLevelChanged(int value);
+        // The volume and effect-limit gauges' pointer and wheel events (0 sound, 1 music, 2 effects).
+        void RmlGaugeEvent(Rml::Event& event, int gauge);
         void RmlResolutionChanged(int index);
         void RmlLanguageChanged(int index);
         void RmlFontChanged(int index);
@@ -236,13 +238,10 @@ namespace mu::ui::window
             Rml::String windowedModeLabel;
 
             int soundVolume = 0;
-            int soundVolumeMax = 10;
             Rml::String soundVolumeLabel;
             int musicVolume = 0;
-            int musicVolumeMax = 10;
             Rml::String musicVolumeLabel;
             int renderLevel = 4;
-            int renderLevelMax = 5;
             Rml::String renderLevelLabel;
 
             std::vector<Rml::String> resolutionLabels;

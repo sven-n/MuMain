@@ -10,6 +10,7 @@
 #include "Audio/AudioPlayer.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDraggable.h"
+#include "UI/RmlBridge/RmlLevelGauge.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Theme/ThemeSelection.h"
 #include "UI/RmlBridge/RmlTooltip.h"
@@ -27,7 +28,6 @@
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/ElementUtilities.h>
-#include <RmlUi/Core/Elements/ElementFormControl.h>
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/EventListener.h>
 #include <RmlUi/Core/ScrollTypes.h>
@@ -273,13 +273,10 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
             c.Bind("windowed_mode_label", &model.windowedModeLabel);
 
             c.Bind("sound_volume", &model.soundVolume);
-            c.Bind("sound_volume_max", &model.soundVolumeMax);
             c.Bind("sound_volume_label", &model.soundVolumeLabel);
             c.Bind("music_volume", &model.musicVolume);
-            c.Bind("music_volume_max", &model.musicVolumeMax);
             c.Bind("music_volume_label", &model.musicVolumeLabel);
             c.Bind("render_level", &model.renderLevel);
-            c.Bind("render_level_max", &model.renderLevelMax);
             c.Bind("render_level_label", &model.renderLevelLabel);
 
             c.RegisterArray<std::vector<Rml::String>>();
@@ -352,28 +349,11 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
             c.BindEventCallback("option_toggle_windowed_mode",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleWindowedMode(); });
 
-            // Range/select inputs: `data-value` two-way-binds for display, but the callback reads
-            // the just-committed value straight off the event's own target element rather than
-            // trusting that data-value's internal write-back listener already ran first on this
-            // same "change" event -- listener ordering between two independently-attached
-            // listeners for the same event isn't part of the documented contract.
-            c.BindEventCallback("option_sound_volume_changed",
-                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
+            c.BindEventCallback("option_gauge",
+                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList& args)
                 {
-                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
-                        RmlSoundVolumeChanged(std::atoi(control->GetValue().c_str()));
-                });
-            c.BindEventCallback("option_music_volume_changed",
-                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
-                {
-                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
-                        RmlMusicVolumeChanged(std::atoi(control->GetValue().c_str()));
-                });
-            c.BindEventCallback("option_render_level_changed",
-                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
-                {
-                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
-                        RmlRenderLevelChanged(std::atoi(control->GetValue().c_str()));
+                    if (args.size() == 1)
+                        RmlGaugeEvent(ev, args[0].Get<int>(-1));
                 });
             // .option-dropdown custom control (replaces the resolution/language/font/fps-cap/theme
             // native <select>s, see model.openDropdown's own comment) -- one shared toggle callback
@@ -772,7 +752,36 @@ void mu::ui::window::COptionWindow::RmlMusicVolumeChanged(int value)
 
 void mu::ui::window::COptionWindow::RmlRenderLevelChanged(int value)
 {
-    m_iRenderLevel = std::clamp(value, 0, 5);
+    // Five cells, levels 0..4; the game reads level 4 as everything on.
+    m_iRenderLevel = std::clamp(value, 0, 4);
+}
+
+void mu::ui::window::COptionWindow::RmlGaugeEvent(Rml::Event& event, int gauge)
+{
+    // Native's volume bars rounded to the nearest of 0..10, and a press left of the bar read 0.
+    const auto volumeFromPointer = [](float x, float width)
+    { return x < 0.f ? 0 : static_cast<int>(10.f * x / width + 0.5f); };
+    // The effect bar shows level + 1 cells, so the pointer's cell is the level.
+    const auto renderFromPointer = [](float x, float width)
+    { return x < 0.f ? 0 : static_cast<int>(5.f * x / width); };
+
+    switch (gauge)
+    {
+    case 0:
+        if (const auto next = UI::RmlBridge::ApplyLevelGaugeEvent(event, m_iVolumeLevel, 10, volumeFromPointer))
+            RmlSoundVolumeChanged(*next);
+        break;
+    case 1:
+        if (const auto next = UI::RmlBridge::ApplyLevelGaugeEvent(event, m_iMusicLevel, 10, volumeFromPointer))
+            RmlMusicVolumeChanged(*next);
+        break;
+    case 2:
+        if (const auto next = UI::RmlBridge::ApplyLevelGaugeEvent(event, m_iRenderLevel, 4, renderFromPointer))
+            RmlRenderLevelChanged(*next);
+        break;
+    default:
+        break;
+    }
 }
 
 void mu::ui::window::COptionWindow::RmlResolutionChanged(int index)

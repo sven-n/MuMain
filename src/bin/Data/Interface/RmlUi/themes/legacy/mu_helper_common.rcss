@@ -70,27 +70,11 @@
 .mh-pane-h70 .p-left { height: 70px; }
 
 /* --- Threshold gauge ---------------------------------------------------------------------------
-   RenderHpLevel(): the empty bar, then the full bar CROPPED to level / 10 of its width -- native's
-   RenderImage() samples texels 1:1 from the left edge rather than stretching the image into the
-   box, so the fill is a sprite per level, never a stretched one. Input stays native (see
-   CMuHelperDetailWindow::UpdateGauge), which is why nothing here takes the mouse. */
-@spritesheet mh-gauge-back-sheet { src: "../../../newui_option_volume01.tga"; mh-gauge-back: 0px 0px 124px 16px; }
-@spritesheet mh-gauge-fill-sheet
-{
-	src: "../../../newui_option_volume02.tga";
-	mh-gauge-fill-1:  0px 0px 12.4px 16px;
-	mh-gauge-fill-2:  0px 0px 24.8px 16px;
-	mh-gauge-fill-3:  0px 0px 37.2px 16px;
-	mh-gauge-fill-4:  0px 0px 49.6px 16px;
-	mh-gauge-fill-5:  0px 0px 62px 16px;
-	mh-gauge-fill-6:  0px 0px 74.4px 16px;
-	mh-gauge-fill-7:  0px 0px 86.8px 16px;
-	mh-gauge-fill-8:  0px 0px 99.2px 16px;
-	mh-gauge-fill-9:  0px 0px 111.6px 16px;
-	mh-gauge-fill-10: 0px 0px 124px 16px;
-}
-.mh-gauge { position: absolute; width: 124px; height: 16px; decorator: image(mh-gauge-back); pointer-events: none; }
-.mh-gauge-fill { position: absolute; height: 16px; pointer-events: none; }
+   base.rcss's .level-gauge at RenderHpLevel()'s size. Native's hit rectangle began 7 units before
+   the rail and ended 1 unit after it. */
+.mh-gauge { position: absolute; width: 124px; height: 16px; }
+.mh-gauge-hit { left: -7px; right: -1px; }
+.mh-gauge-fill { height: 16px; }
 
 /* --- Checkbox / radio --------------------------------------------------------------------------
    CCheckBox: a 15x15 box from a two-frame 15x30 sheet -- frame 0 (top) is CHECKED, frame 1 the

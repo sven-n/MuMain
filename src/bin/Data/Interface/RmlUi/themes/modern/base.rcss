@@ -1066,3 +1066,40 @@ input, select, textarea, .btn, [data-event-click] { drag: block; }
 .gold-amount.gold-hundred-thousand { color: #00c918; }
 .gold-amount.gold-million          { color: #ff9600; }
 .gold-amount.gold-ten-million      { color: #ff0000; }
+
+/* Level gauge: a recessed rail and a gold fill by level. .level-gauge-hit takes the pointer;
+   consumers size and place all three. C++: UI::RmlBridge::ApplyLevelGaugeEvent(). */
+.level-gauge {
+	background-color: token(metal-rail-dark);
+	border-width: 1px;
+	border-color: token(border-inner);
+	border-radius: token(radius-sm)px;
+	box-sizing: border-box;
+	pointer-events: none;
+}
+.level-gauge-fill {
+	position: absolute;
+	background-color: token(accent-gold);
+	decorator: linear-gradient(to bottom, token(accent-gold-hover), token(accent-gold));
+	border-radius: token(radius-sm)px;
+	pointer-events: none;
+}
+.level-gauge-hit { position: absolute; top: 0; bottom: 0; pointer-events: auto; drag: drag; cursor: pointer; }
+
+/* A fill's level as a class (level-<n>); 10 steps, or 5 on an effect gauge. A consumer binding its
+   own width (the MU Helper detail window) does not use these. */
+.level-gauge-fill.level-1 { width: 10%; }
+.level-gauge-fill.level-2 { width: 20%; }
+.level-gauge-fill.level-3 { width: 30%; }
+.level-gauge-fill.level-4 { width: 40%; }
+.level-gauge-fill.level-5 { width: 50%; }
+.level-gauge-fill.level-6 { width: 60%; }
+.level-gauge-fill.level-7 { width: 70%; }
+.level-gauge-fill.level-8 { width: 80%; }
+.level-gauge-fill.level-9 { width: 90%; }
+.level-gauge-fill.level-10 { width: 100%; }
+.effect-gauge .level-gauge-fill.level-1 { width: 20%; }
+.effect-gauge .level-gauge-fill.level-2 { width: 40%; }
+.effect-gauge .level-gauge-fill.level-3 { width: 60%; }
+.effect-gauge .level-gauge-fill.level-4 { width: 80%; }
+.effect-gauge .level-gauge-fill.level-5 { width: 100%; }
