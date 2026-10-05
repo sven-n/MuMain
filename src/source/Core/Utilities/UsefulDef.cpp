@@ -9,6 +9,12 @@
 #include "stdafx.h"
 #include "Core/Utilities/UsefulDef.h"
 #include "UI/Legacy/UIControls.h"
+#include "Core/Text/TextLineWrap.h"
+#include "Core/Utilities/Log/MuLogger.h"
+
+#include <algorithm>
+#include <string>
+#include <vector>
 
 
 
@@ -29,36 +35,42 @@ bool ReduceStringByPixel(LPTSTR lpszDst, int nDstSize, LPCTSTR lpszSrc, int nPix
     return true;
 }
 
+namespace
+{
+// Same margin CutStr keeps from the line width: a line must stay narrower than width - 5.
+constexpr int kTextWrapPadding = 5;
+
+int MeasureUiTextWidth(const wchar_t* text, size_t length)
+{
+    return g_pRenderText->MeasureText(text, static_cast<int>(length)).cx;
+}
+} // namespace
+
 int DivideStringByPixel(wchar_t* alpszDst, int nDstRow, int nDstColumn, const wchar_t* lpszSrc, int nPixelPerLine, bool bSpaceInsert, const wchar_t szNewlineChar)
 {
-    if (nullptr == alpszDst || 0 >= nDstRow || 0 >= nDstColumn || nullptr == lpszSrc || 16 > nPixelPerLine)
+    if (nullptr == alpszDst || 0 >= nDstRow || 1 >= nDstColumn || nullptr == lpszSrc || 16 > nPixelPerLine)
         return 0;
 
-    std::wstring szWorkSrc(lpszSrc);  // Convert lpszSrc to std::wstring
+    const int maxWidth = nPixelPerLine - kTextWrapPadding - 1;
+    const size_t maxCharactersPerLine = static_cast<size_t>(nDstColumn - 1);
+    const std::vector<std::wstring> lines = WrapParagraphsToWidth(lpszSrc, szNewlineChar, maxWidth, maxCharactersPerLine,
+                                                                  bSpaceInsert, MeasureUiTextWidth);
 
-    wchar_t szWorkToken[1024];
-    int nLine = 0;
-
-    const wchar_t szNewlineDelimiters[] = {szNewlineChar, L'\0'};
-    wchar_t* context = nullptr;
-    wchar_t* pszToken = wcstok_s(&szWorkSrc[0], szNewlineDelimiters, &context);
-
-    while (pszToken != nullptr)
+    const int lineCount = std::min(static_cast<int>(lines.size()), nDstRow);
+    if (lineCount < static_cast<int>(lines.size()))
     {
-        if (bSpaceInsert)
-        {
-            mu_swprintf(szWorkToken, L" %ls", pszToken);
-            nLine += CutText3(szWorkToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
-        }
-        else
-        {
-            nLine += CutText3(pszToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
-        }
-
-        pszToken = wcstok_s(nullptr, szNewlineDelimiters, &context);
+        mu::log::Get("ui")->warn("DivideStringByPixel: the text needs {} lines, only {} fit; the rest is not shown.",
+                                 lines.size(), nDstRow);
     }
 
-    return nLine;
+    for (int i = 0; i < lineCount; ++i)
+    {
+        wchar_t* row = alpszDst + i * nDstColumn;
+        const size_t length = lines[i].copy(row, maxCharactersPerLine);
+        row[length] = L'\0';
+    }
+
+    return lineCount;
 }
 
 int DivideString(LPTSTR alpszDst, int nDstRow, int nDstColumn, LPCTSTR lpszSrc)

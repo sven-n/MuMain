@@ -21,6 +21,8 @@ CNewUINPCDialogue::CNewUINPCDialogue()
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_dwContributePoint = 0;
+    m_nSelNPCPage = 0;
+    m_nMaxNPCPage = 0;
 }
 
 CNewUINPCDialogue::~CNewUINPCDialogue()
@@ -400,6 +402,9 @@ void CNewUINPCDialogue::SetContents(DWORD dwDlgIndex)
 void CNewUINPCDialogue::SetCurNPCWords(int nQuestListCount)
 {
     memset(m_aszNPCWords[0], 0, sizeof(wchar_t) * ND_NPC_LINE_MAX * ND_WORDS_ROW_MAX);
+    // Reset before the early return below: RenderText indexes the words with the page.
+    m_nSelNPCPage = 0;
+    m_nMaxNPCPage = 0;
 
     g_pRenderText->SetFont(g_hFont);
     const wchar_t* pszSrc;
