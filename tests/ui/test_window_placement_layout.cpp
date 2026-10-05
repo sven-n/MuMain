@@ -162,6 +162,17 @@ TEST_CASE("The header's corners and the docks the content area caps [ui][window-
         const float dock = docks[0]->GetBox().GetSize().y;
         CHECK(dock == doctest::Approx(std::string(theme) == "modern" ? content : 432.f * Scale));
 
+        // The chat stands on the HUD: the input box on the content area's bottom, the log on the
+        // input, overlapping it by one unit as the original drew them.
+        openSized("chat_log", 281.f, 100.f);
+        openSized("chat_input", 281.f, 47.f);
+        document->UpdateDocument();
+        const float hudTop = 768.f - 51.f * Scale;
+        CHECK(Slot(document, "chat_input")->GetAbsoluteOffset().x == doctest::Approx(0.f));
+        CHECK(Slot(document, "chat_input")->GetAbsoluteOffset().y == doctest::Approx(hudTop - 47.f * Scale));
+        CHECK(Slot(document, "chat_log")->GetAbsoluteOffset().y ==
+              doctest::Approx(hudTop - 47.f * Scale + Scale - 100.f * Scale));
+
         context->UnloadDocument(document);
         context->Update();
     }

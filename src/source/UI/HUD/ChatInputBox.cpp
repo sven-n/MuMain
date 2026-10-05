@@ -8,6 +8,9 @@
 #include "UI/Social/SocialWindowCore.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlWorkspaceParticipant.h"
+#include "UI/Placement/WindowPlacement.h"
+#include "UI/Scaling/UITransform.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "World/MapInfra/MapManager.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -80,6 +83,25 @@ bool mu::ui::window::CChatInputBox::Create(
     m_pNewUIChatLogWnd = pNewUIChatLogWnd;
     m_pNewUISystemLogWnd = pNewUISystemLogWnd;
     SetWndPos(x, y);
+    m_HomePos = m_WndPos;
+
+    // A theme slot moves the box; the native hit test follows it in HUD space. The slot stays
+    // while the box is hidden, so the log above it does not drop when typing ends.
+    UI::RmlBridge::WorkspaceDocumentOptions options;
+    options.placedWhileHidden = true;
+    options.measure = [] { return UI::Placement::PlacementParticipant::Size{CHATBOX_WIDTH, CHATBOX_HEIGHT}; };
+    options.placed = [this](const UI::Placement::PlacementParticipant::Box* box)
+    {
+        if (box == nullptr)
+        {
+            SetWndPos(m_HomePos.x, m_HomePos.y);
+            return;
+        }
+        const auto hud = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Hud, WindowWidth, WindowHeight);
+        SetWndPos(static_cast<int>(std::lround((box->left - hud.offsetX) / hud.scaleX)),
+                  static_cast<int>(std::lround((box->top - hud.offsetY) / hud.scaleY)));
+    };
+    UI::RmlBridge::RegisterWorkspaceDocument("chat_input", [this] { return m_pRmlDoc; }, "panel", std::move(options));
 
     // Both text fields, their tab pairing, their colours/limits and every button's hit box now
     // come from chat_input.rml/.rcss -- nothing to construct here.
@@ -92,6 +114,7 @@ bool mu::ui::window::CChatInputBox::Create(
 
 void mu::ui::window::CChatInputBox::Release()
 {
+    UI::Placement::UnregisterParticipant("chat_input");
     UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
@@ -600,6 +623,7 @@ void mu::ui::window::CChatInputBox::ReloadRmlTheme()
     m_pRmlDoc = nullptr;
 
     BuildRmlUi();
+    UI::Placement::Invalidate();
     m_RmlBinder.GetModel().chatText = chatText;
     m_RmlBinder.GetModel().whisperId = whisperId;
     m_RmlBinder.MarkDirty("chat_text");

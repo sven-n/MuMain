@@ -8,6 +8,7 @@
    the treatment: flat token-driven left-edge accents on a common recessed ground, rather than
    nine fully-saturated fills. */
 
+#panel.workspace-placed { bottom: auto; transform-origin: left top; }
 #panel {
 	position: absolute;
 	left: 0;

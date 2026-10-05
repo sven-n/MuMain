@@ -17,6 +17,7 @@
 @spritesheet cib-size-sheet   { src: "../../../newui_chat_btn_size.jpg";   cib-size:   0px 0px 27px 26px; }
 @spritesheet cib-alpha-sheet  { src: "../../../newui_chat_btn_alpha.jpg";  cib-alpha:  0px 0px 27px 26px; }
 
+#panel.workspace-placed { bottom: auto; transform-origin: left top; }
 #panel {
 	position: absolute;
 	left: 0;

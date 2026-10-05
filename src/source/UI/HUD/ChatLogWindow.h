@@ -189,6 +189,8 @@ namespace mu::ui::window
 
         RmlModelBinder<ChatLogRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
+        // Where Create() put the window, kept while the theme gives it no slot.
+        POINT m_HomePos{};
         bool m_bLinesDirty = true;
         bool m_bFollowTail = true;
         // One-shot, set when the line list changes and consumed on the next frame once RmlUi has

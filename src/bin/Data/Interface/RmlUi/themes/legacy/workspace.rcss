@@ -55,6 +55,17 @@ body {
 	align-items: flex-start;
 }
 
+/* The chat in the bottom-left corner above the HUD; the log overlaps the input box by 1 unit,
+   as the original drew them. */
+.chat-stack {
+	left: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+.chat-stack .slot[data-window="chat_log"] { margin-bottom: -1dp; }
+
 /* Where a free window (the friend list) first opens: the bottom-right corner above the HUD. */
 .free-bottom-right {
 	right: 0;

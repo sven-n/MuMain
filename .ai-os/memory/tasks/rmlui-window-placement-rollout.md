@@ -61,7 +61,8 @@ Current handover prompt for a new agent: `rmlui-window-placement-hud-handover.md
 | `ab5efa0e1` | Centred NPC panels on a `panel-stage` region |
 | `6a2d08718` | Generic fill (`GetFillDocument()`), 24 windows; native corner close follows panel width |
 | `a1f677709` | HUD in the workspace H1: flex shell, `PlacementParticipant`, main HUD as one footer unit, minimap clip from the slot |
-| (H2 header) | Header slots for the MU Helper bar and top bar; modern caps its docks at the content area (windows drawn smaller to fit) |
+| `c1049e7ef` | Header slots for the MU Helper bar and top bar; modern caps its docks at the content area (windows drawn smaller to fit) |
+| (H2 chat) | Chat log and input in a `chat-stack` region; adapter options (measure, placedWhileHidden, placed) |
 
 Regression lesson: since `LayoutMode::Slot`, a placed window's `m_Pos` is (0, 0) in its slot space.
 Any native part positioned once at creation (not moved by `SetPos()` or re-placed each frame) ends
@@ -102,10 +103,10 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
 ## Open work, in suggested order
 
 1. HUD in the workspace: H1 and H2's header batch are done. Next H2 batches, one component each:
-   chat log and input, minimap, buff row, party list, item endurance; then H3 and H4
+   minimap, buff row, party list, item endurance (chat done); then H3 and H4
    (`window-placement.md`, "HUD in the workspace"). Hand checks pending: the minimap's clip
    around the HUD; in modern at a capped scale, dragging items between windows and item
-   tooltips (socket hotkeys did not reach the client).
+   tooltips; the chat log's resize handle and F4/F5 (socket hotkeys did not reach the client).
 2. Not verified in game: the Cursed Temple result panel (needs a finished event); Gens ranking,
    move map, friends and the NPC panels in the modern theme; filled windows at resolutions other
    than 1024x768.

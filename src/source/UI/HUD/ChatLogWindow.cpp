@@ -14,6 +14,8 @@
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlWorkspaceParticipant.h"
+#include "UI/Placement/WindowPlacement.h"
 #include "UI/Scaling/UITransform.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Render/Text/CUIRenderText.h"
@@ -63,7 +65,24 @@ bool mu::ui::window::CChatLogWindow::Create(CManager* pNewUIMng, int x, int y, i
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CHATLOGWINDOW, this);
     m_WndPos.x = x; m_WndPos.y = y;
+    m_HomePos = m_WndPos;
     SetNumberOfShowingLines(nShowingLines);
+
+    // A theme slot moves the log; its native bottom edge (the resize bands) follows it in HUD space.
+    UI::RmlBridge::WorkspaceDocumentOptions options;
+    options.measure = [this] { return UI::Placement::PlacementParticipant::Size{WND_WIDTH, static_cast<float>(m_WndSize.cy)}; };
+    options.placed = [this](const UI::Placement::PlacementParticipant::Box* box)
+    {
+        if (box == nullptr)
+        {
+            SetPosition(m_HomePos.x, m_HomePos.y);
+            return;
+        }
+        const auto hud = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Hud, WindowWidth, WindowHeight);
+        SetPosition(static_cast<int>(std::lround((box->left - hud.offsetX) / hud.scaleX)),
+                    static_cast<int>(std::lround((box->top + box->height - hud.offsetY) / hud.scaleY)));
+    };
+    UI::RmlBridge::RegisterWorkspaceDocument("chat_log", [this] { return m_pRmlDoc; }, "panel", std::move(options));
     // No LoadImages() any more: every sprite this window used is referenced by chat_log.rcss and
     // loaded through RmlUi's own exclusive-slot path instead. CGuildInfoWindow/CGuardWindow alias
     // this class's IMAGE_LIST values but load their own copies, so nothing depended on it -- the
@@ -73,6 +92,7 @@ bool mu::ui::window::CChatLogWindow::Create(CManager* pNewUIMng, int x, int y, i
 
 void mu::ui::window::CChatLogWindow::Release()
 {
+    UI::Placement::UnregisterParticipant("chat_log");
     UI::RmlBridge::UnregisterForThemeReload(this);
     ResetFilter();
     ClearAll();
@@ -442,6 +462,8 @@ void mu::ui::window::CChatLogWindow::SetNumberOfShowingLines(int nShowingLines, 
 
     UpdateWndSize();
     UpdateScrollPos();
+    // Re-placed now, so a slot standing on the input grows upward in the same frame.
+    UI::Placement::Arrange();
 
     if (lpBoxSize)
     {
@@ -654,6 +676,7 @@ void mu::ui::window::CChatLogWindow::ReloadRmlTheme()
 
     BuildRmlUi();
     m_bLinesDirty = true; // next SyncRmlModel() repopulates the fresh document
+    UI::Placement::Invalidate();
 }
 
 void mu::ui::window::CChatLogWindow::SyncDocVisibility(bool sceneAllowsShow)

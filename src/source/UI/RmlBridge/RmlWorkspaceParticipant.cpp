@@ -10,7 +10,7 @@
 namespace UI::RmlBridge
 {
 void RegisterWorkspaceDocument(std::string_view name, std::function<Rml::ElementDocument*()> document,
-                               const char* rootId)
+                               const char* rootId, WorkspaceDocumentOptions options)
 {
     const auto root = [document, id = std::string(rootId)]() -> Rml::Element*
     {
@@ -18,9 +18,15 @@ void RegisterWorkspaceDocument(std::string_view name, std::function<Rml::Element
         return doc != nullptr ? doc->GetElementById(id) : nullptr;
     };
     UI::Placement::PlacementParticipant participant;
-    participant.visible = [root]() { const auto* element = root(); return element != nullptr && element->IsVisible(true); };
-    participant.measure = [root]()
+    participant.visible = [root, keep = options.placedWhileHidden]()
     {
+        const auto* element = root();
+        return element != nullptr && (keep || element->IsVisible(true));
+    };
+    participant.measure = [root, measure = options.measure]()
+    {
+        if (measure)
+            return measure();
         auto* element = root();
         if (element == nullptr)
             return UI::Placement::PlacementParticipant::Size{};
@@ -29,8 +35,10 @@ void RegisterWorkspaceDocument(std::string_view name, std::function<Rml::Element
         const auto size = element->GetBox().GetSize(Rml::BoxArea::Border);
         return UI::Placement::PlacementParticipant::Size{size.x / dp, size.y / dp};
     };
-    participant.place = [root](const UI::Placement::PlacementParticipant::Box* box)
+    participant.place = [root, placed = options.placed](const UI::Placement::PlacementParticipant::Box* box)
     {
+        if (placed)
+            placed(box);
         auto* element = root();
         if (element == nullptr)
             return;

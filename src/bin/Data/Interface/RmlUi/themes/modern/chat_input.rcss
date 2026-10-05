@@ -4,6 +4,7 @@
    OFF state, so an unlit button is invisible-but-present there, whereas here each button needs a
    visible resting state of its own. */
 
+#panel.workspace-placed { bottom: auto; transform-origin: left top; }
 #panel {
 	position: absolute;
 	left: 0;

@@ -81,6 +81,12 @@
 				<div class="region dock-left" data-ref-height="432">
 					<div class="slot" data-window="move_map"></div>
 				</div>
+				<!-- The chat: the log stands on the input box, which stands on the content area's
+				     bottom edge. Windows draw over it; it takes no room from them. -->
+				<div class="region chat-stack" data-scale="hud">
+					<div class="slot" data-window="chat_log"></div>
+					<div class="slot" data-window="chat_input"></div>
+				</div>
 				<!-- Where the friend list first opens: the corner above the HUD. -->
 				<div class="region free-bottom-right">
 					<div class="slot" data-window="friends"></div>

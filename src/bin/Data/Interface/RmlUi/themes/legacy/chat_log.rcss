@@ -7,6 +7,7 @@
    inset (WND_TOP_BOTTOM_EDGE 2 + SCROLL_TOP_BOTTOM_PART_HEIGHT 3). The panel's own height comes
    from C++ (15 * showing lines + 10), since the user resizes it in 3-line steps. */
 
+#panel.workspace-placed { bottom: auto; transform-origin: left top; }
 #panel {
 	position: absolute;
 	left: 0;

@@ -126,6 +126,8 @@ namespace mu::ui::window
 
         RmlModelBinder<ChatInputRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
+        // Where Create() put the box, kept while the theme gives it no slot.
+        POINT m_HomePos{};
         // Set by OpenningProcess(), consumed once the document is actually visible. CSystem::Show()
         // runs OpenningProcess() BEFORE ShowInterface(), so IsVisible() is still false there and
         // focusing the field at that point lands on a hidden document and is lost. It also has to
