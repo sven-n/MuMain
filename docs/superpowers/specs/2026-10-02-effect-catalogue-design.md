@@ -280,7 +280,7 @@ One PR each, small enough to check against the old code.
 | FX1.5 | Variants by SubType | FX1.4 | `variants` in effect rows; the 47 types that choose values by SubType move (done: 41 types, see the FX1.5 note). |
 | FX1.5b | Fields for the rest | FX1.5 | The fields the other 12 types that choose values by SubType need (render type, alphaTarget, a lifeTime offset, start position values, the animation, copies from the light, the call's position and the call's angle); those cases move into data. Done, see the FX1.5b note. |
 | FX1.6 | Effect browser | FX1.1 | Read-only tool in MuEditor; values from FX1.2 on. Done, see the FX1.6 note. |
-| FX1.7a | Preview in the browser | FX1.6 | A 3D view in the details: the slot's model or texture, shown on nothing, a plane, a cube or an item. Editor code only. |
+| FX1.7a | Preview in the browser | FX1.6 | A 3D view in the details: the slot's model or texture, shown on nothing, a plane, a cube or an item. Editor code only. Done, see the FX1.7a note. |
 | FX1.7b | Preview in the world | FX1.6 | Creating the selected type in front of the hero in editor builds, with a SubType from the variants of its row or typed in. |
 | FX1.7c | Live preview in the browser | FX1.7a, FX1.7b | Later, decided after FX1.7b: the objects of FX1.7b drawn in the browser's view on the chosen object instead of in the world. |
 
@@ -530,6 +530,44 @@ capture code (`_EDITOR`) if the format check below needs a fix.
   on Linux and macOS (the capture texture is RGBA8, the pipelines are built
   for the swapchain's format; it works on Windows), and that the render
   state the game caches is the same after the view as before.
+
+*FX1.7a done:* the details of the effect browser have the preview (see
+docs/effect-data.md). As planned: a view drawn every frame into one texture
+with the renderer's editor capture, recorded from the browser's code inside
+the frame; an orbit camera; Show on nothing, a plane, a cube or an item; the
+model drawn with RenderObject's generic path and the creation values of a
+chosen SubType column (an object made as CreateEffect makes it, outside the
+pools, without the creation hook); textures as sprites with a chosen blend
+or flat for ground effects; notes instead of what cannot be shown. What the
+plan did not say: the item's own effect code creates sprites, particles,
+joints and effects in the game's pools, so the preview removes what appears
+there while the item is drawn; a texture of another size replaces the old
+one only at a frame boundary: the old one is released through a call before
+the editor's frame starts (`CMuEditorCore::Update`) and the new one is made
+in the next frame, because releasing a texture inside a frame makes the
+renderer skip the game's draws of that frame; the effect browser draws after
+the map editor, whose object browser starts a thumbnail only while no
+capture is pending; the blends leave the picture's alpha below 1, so a last
+quad with the glow blend makes it opaque; the item is drawn with the turn
+and scale it has on the ground; the plane and the cube are untextured (a
+grey checker, a cube with shaded faces); on an item every type sits at the
+item's origin, ground types too; effects whose values start them transparent
+or at scale 0 are shown at alpha and scale 1. The render state the game's
+functions cache is saved before the view and put back into the renderer and
+the cache after it. The capture's color format on Linux and macOS (RGBA8 for
+the capture, the swapchain's format for the pipelines) is still to be
+checked in game; it works on Windows. Added with it on request: in editor
+builds `CLoadData` and `CGlobalBitmap` remember the map that was active when
+a model or texture was last loaded into a slot (from `Core::AssetLoadWorld`,
+which the editor points at `gMapManager`; the loaders are linked into tests
+without the map code), so the details say whether an asset was loaded on the
+loading screen, by this map or by a map visited before, and the list filters
+by that (all, loaded now, loaded at start, loaded by this map). The five
+effects that draw a map object (the castle walls, the Kalima falling stone)
+know their map: elsewhere their slot holds another map's object, which the
+browser says instead of showing it. Player builds compile none of this. The
+parts without ImGui (camera, quads, what is shown, the SubTypes, the item
+search, the effect's object, the pool guard) are unit tested.
 
 **FX1.7b Preview in the world.** The real effect, in the game view.
 

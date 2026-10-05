@@ -245,8 +245,9 @@ in the files for now.
 
 - **A tab per kind**: Effects, Particles, Lightning and trails (the joints)
   and Sprites, with the name, code and number of each type. **Search** finds
-  a part of the name, the code or the number; **Loaded now** lists only the
-  types whose model or texture is loaded right now. On the Effects tab,
+  a part of the name, the code or the number; **Asset** lists all types,
+  those whose model or texture is loaded now, those loaded at start (on the
+  loading screen) or those loaded by this map. On the Effects tab,
   **Creation**, **Move** and **Drawing** list the effects whose stage is of
   one sort (see below). Ctrl+C copies the name of the selected type.
 - **The details** of the selected type: its code, number and catalogue file,
@@ -300,13 +301,53 @@ when they reach their target. A change that moves a type looks at these too.
   effect with a texture number and a sprite draw the texture of their
   number. Particles and lightning start with the texture of their number,
   but the code of a SubType can choose another. The browser shows the file
-  loaded into the slot right now and never loads anything. A slot can still
-  hold the model a map visited before loaded, and the slots below 160 hold
-  the objects of the current map, so "loaded" does not mean "this map uses
-  it". The slots are read again when the map changes and on **Refresh**.
+  loaded into the slot right now and what loaded it last: the loading
+  screen, this map, or a map visited before and which (slots keep what an
+  earlier map loaded). A map that loads a file the slot holds already counts
+  as having loaded it, so **Loaded by this map** lists everything the map
+  loads. The browser itself never loads anything. The slots are read again
+  when the map changes and on **Refresh**.
+- **Map objects**: five effects draw an object of a map: the castle walls
+  (`battleCastleWall1` to `4`), which the Battle Castle siege map creates
+  when a wall breaks, and `kalimaFallingStone`, the rocks that fall on the
+  Kalima maps. Their numbers are slots of the map's objects, which every map
+  fills with its own objects, so their slot holds their model only on their
+  map. Elsewhere the details say which map they belong to, the preview draws
+  nothing, and **Asset** does not count them as loaded.
 - **Used by data**: the data that names the type. For now only the creation
   values of an effect name it; item looks, skills and monsters will name
   types later.
+
+### Preview
+
+The **Preview** section of the details shows what the selected type's slot
+holds in a small 3D view. It loads nothing: a slot that holds nothing on
+this map says so. The effect's own move and draw code do not run, so nothing
+it would create (sprites, particles, sounds) appears; the preview in the
+world (FX1.7b) is for that.
+
+- **What it shows.** An effect with a model number shows its model, animated
+  as the game animates it and turning, with the scale, light, blend mesh and
+  render type of its creation values. Effects with a texture number,
+  sprites, particles and lightning show their texture as a sprite facing the
+  camera; **Blend** chooses how it is blended (the four blends of a sprite's
+  SubType). The effects that `RenderEffectShadows` draws on the ground show
+  their texture lying on the ground.
+- **Show on**: nothing, a plane, a cube or an item. The type stands on the
+  plane and on the cube and sits at the middle of an item. For an item, pick
+  it in the drop-down (type a part of its name or its number to find it),
+  and set its level and whether it is excellent or ancient; the item is
+  drawn with its looks, without its own sprites and particles.
+- **SubType** (types with variants): the values of which column of the
+  creation table the preview uses; the first stands for the SubTypes without
+  a variant.
+- **The view**: drag to turn the camera, the wheel zooms, a double click or
+  **Reset view** puts it back; **Turn** turns the type slowly.
+- **Notes** under the view say what the preview cannot show: an empty slot,
+  a texture the code chooses, a model the game never draws itself, an effect
+  whose values start it transparent or at size 0 (the preview shows it
+  anyway), a model without animation, an item that cannot be drawn at the
+  chosen level because a model it needs is not loaded.
 
 ## When the code changes
 

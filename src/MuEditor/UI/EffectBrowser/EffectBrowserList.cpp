@@ -5,6 +5,7 @@
 #include "EffectBrowserList.h"
 
 #include "EffectBrowserLabels.h"
+#include "EffectBrowserLayout.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "I18N/All.h"
 #include "imgui.h"
@@ -15,31 +16,18 @@
 using Data::Effects::EffectKind;
 using MuEditor::Effects::EffectBrowserModel;
 using MuEditor::Effects::EffectBrowserRow;
+namespace Layout = MuEditor::Effects::Layout;
 
 namespace
 {
 // Widths at UI scale 1.
 constexpr float SearchWidth = 180.0f;
 constexpr float StageComboWidth = 140.0f;
+constexpr float AssetComboWidth = 150.0f;
 constexpr float NumberColumnWidth = 60.0f;
 
 constexpr int BasicColumnCount = 3;
 constexpr int EffectColumnCount = 6;
-
-// The width of a stage filter: its label and its combo.
-float StageFilterWidth(const char* label)
-{
-    return ImGui::CalcTextSize(label).x + ImGui::GetStyle().ItemSpacing.x +
-           StageComboWidth * g_MuEditorCore.GetUIScale();
-}
-
-// Goes on in the same line when `width` fits there, else in the next one.
-void SameLineIfFits(float width)
-{
-    ImGui::SameLine();
-    if (ImGui::GetContentRegionAvail().x < width)
-        ImGui::NewLine();
-}
 
 // A label in front of a combo that sets `value` to one of `stages` or to any.
 template <typename Stage, size_t Count>
@@ -58,6 +46,21 @@ void RenderStageCombo(const char* id, const char* label, std::optional<Stage>& v
     {
         if (ImGui::Selectable(MuEditor::Effects::Labels::Stage(stage), value == stage))
             value = stage;
+    }
+    ImGui::EndCombo();
+}
+
+void RenderAssetFilter(MuEditor::Effects::AssetFilter& value)
+{
+    ImGui::TextUnformatted(I18N::Editor::Asset);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(AssetComboWidth * g_MuEditorCore.GetUIScale());
+    if (!ImGui::BeginCombo("##assets", MuEditor::Effects::Labels::Assets(value)))
+        return;
+    for (const MuEditor::Effects::AssetFilter filter : MuEditor::Effects::AssetFilters)
+    {
+        if (ImGui::Selectable(MuEditor::Effects::Labels::Assets(filter), filter == value))
+            value = filter;
     }
     ImGui::EndCombo();
 }
@@ -139,14 +142,14 @@ void CEffectBrowserList::RenderFilters(EffectKind kind)
     ImGui::SetNextItemWidth(SearchWidth * g_MuEditorCore.GetUIScale());
     if (ImGui::InputText("##search", m_search, sizeof(m_search)))
         m_filter.search = MuEditor::Effects::ToSearchText(m_search);
-    ImGui::SameLine();
-    ImGui::Checkbox(I18N::Editor::LoadedNow, &m_filter.onlyLoaded);
+    Layout::SameLineIfFits(Layout::LabeledComboWidth(I18N::Editor::Asset, AssetComboWidth));
+    RenderAssetFilter(m_filter.assets);
     if (kind != EffectKind::Effect)
         return;
     RenderStageCombo("##create", I18N::Editor::Creation, m_filter.create, MuEditor::Effects::CreateStages);
-    SameLineIfFits(StageFilterWidth(I18N::Editor::Move));
+    Layout::SameLineIfFits(Layout::LabeledComboWidth(I18N::Editor::Move, StageComboWidth));
     RenderStageCombo("##move", I18N::Editor::Move, m_filter.move, MuEditor::Effects::MoveStages);
-    SameLineIfFits(StageFilterWidth(I18N::Editor::Drawing));
+    Layout::SameLineIfFits(Layout::LabeledComboWidth(I18N::Editor::Drawing, StageComboWidth));
     RenderStageCombo("##render", I18N::Editor::Drawing, m_filter.render, MuEditor::Effects::RenderStages);
 }
 

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <optional>
 #include <span>
 #include <string>
 #include <vector>
@@ -46,6 +47,13 @@ public:
     // The file AccessModel opened into the slot, for error messages and the
     // editor. It stays after the model is released.
     std::wstring GetModelFile(int Model) const;
+#ifdef _EDITOR
+    // The world that was active when AccessModel or ShareModel last filled
+    // the slot (Core::AssetLoadWorld: the loading screen or a map), for the
+    // editor; nullopt when nothing was opened into it. It stays after the
+    // model is released.
+    std::optional<int> GetModelLoadWorld(int Model) const;
+#endif
 
 private:
     void OpenModelTextures(int Model, std::span<const std::wstring> SubFolders, int Wrap, int Type,
@@ -53,6 +61,9 @@ private:
     void RememberModelFile(int Model, const std::wstring& path);
 
     std::vector<std::wstring> m_modelFiles;
+#ifdef _EDITOR
+    std::vector<std::optional<int>> m_modelLoadWorlds;
+#endif
 };
 
 extern CLoadData gLoadData;

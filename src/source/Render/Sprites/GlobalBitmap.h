@@ -8,6 +8,7 @@
 #include <array>
 #include <deque>
 #include <map>
+#include <optional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -110,6 +111,9 @@ class CGlobalBitmap
     using type_index_list = std::list<GLuint>;
 
     type_bitmap_map	m_mapBitmap;
+#ifdef _EDITOR
+    std::map<GLuint, int> m_loadWorlds;
+#endif
     type_index_list m_listNonamedIndex;
 
     GLuint m_uiAlternate, m_uiTextureIndexStream;
@@ -135,6 +139,13 @@ public:
     BITMAP_t* FindTexture(GLuint uiBitmapIndex);
     BITMAP_t* FindTexture(const std::wstring& filename);
     BITMAP_t* FindTextureByName(const std::wstring& name);
+#ifdef _EDITOR
+    // The world that was active when the texture of this number was last
+    // loaded, also when the file was loaded already (Core::AssetLoadWorld:
+    // the loading screen or a map), for the editor; nullopt when none is
+    // loaded.
+    std::optional<int> GetLoadWorld(GLuint uiBitmapIndex) const;
+#endif
 
     std::uint32_t GetUsedTextureMemory() const;
     size_t GetNumberOfTexture() const;

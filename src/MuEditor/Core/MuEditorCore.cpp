@@ -18,7 +18,9 @@
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
+#include "Core/Utilities/AssetLoadWorld.h"
 #include "Core/Utilities/StringUtils.h"
+#include "World/MapInfra/MapManager.h"
 #include "Render/Renderer/MuRenderer.h"
 
 namespace mu
@@ -179,6 +181,10 @@ void CMuEditorCore::Initialize(SDL_Window* window)
 {
     if (m_bInitialized)
         return;
+
+    // The effect browser shows what loaded each model and texture; the
+    // records take the map of the moment from the map manager.
+    Core::AssetLoadWorld::SetSource([] { return gMapManager.WorldActive; });
 
     if (window == nullptr)
     {
@@ -438,6 +444,10 @@ void CMuEditorCore::Update()
         m_bDrawDataReady = false;
         ImGui_ImplSDLGPU3_NewFrame();
 
+        // Between frames: the effect browser's preview releases its texture
+        // only before the renderer's frame starts.
+        g_MuEffectBrowserUI.BeforeFrame();
+
         // The SDL3 backend fills display size and mouse/keyboard from the SDL
         // events fed via ImGui_ImplSDL3_ProcessEvent, so it works the same
         // whether the editor is open or only the "Open Editor" button is shown
@@ -576,15 +586,18 @@ void CMuEditorCore::Render()
             g_DevEditorUI.Render(&m_bShowDevEditor);
         }
 
-        if (m_bShowEffectBrowser)
-        {
-            g_MuEffectBrowserUI.Render(&m_bShowEffectBrowser);
-        }
-
         // Render Map Editor. Called every frame (not gated on the show flag) so
         // it can restore the game to normal mode the frame after it is closed;
         // it owns EditFlag while its window is open.
         g_MapEditorUI.Render(&m_bShowMapEditor);
+
+        // After the Map Editor: its object browser starts a thumbnail only
+        // while no capture is pending, and the effect preview leaves one
+        // pending until the frame ends.
+        if (m_bShowEffectBrowser)
+        {
+            g_MuEffectBrowserUI.Render(&m_bShowEffectBrowser);
+        }
 
         // Render console (if enabled)
         if (m_bShowConsole)

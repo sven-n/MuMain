@@ -43,7 +43,24 @@ struct EffectBrowserRow
     EffectStages stages;
     EffectAssetSlot assetSlot = EffectAssetSlot::Texture;
     EffectAsset asset;
+    AssetOrigin assetOrigin = AssetOrigin::NotLoaded;
+    // The slot holds an object of this map that is not the effect's own
+    // model: an effect drawing a map object away from its home map.
+    bool foreignMapObject = false;
 };
+
+// Which types the list shows by what their slot holds. A slot holding an
+// object of another map than the effect's counts as holding nothing.
+enum class AssetFilter
+{
+    All,
+    LoadedNow,
+    LoadedAtStart,
+    LoadedByThisMap,
+};
+
+constexpr std::array<AssetFilter, 4> AssetFilters = {AssetFilter::All, AssetFilter::LoadedNow,
+                                                     AssetFilter::LoadedAtStart, AssetFilter::LoadedByThisMap};
 
 // A text as the search compares it: lowercase.
 std::string ToSearchText(std::string_view text);
@@ -57,8 +74,7 @@ struct EffectBrowserFilter
     std::optional<CreateStage> create;
     std::optional<MoveStage> move;
     std::optional<RenderStage> render;
-    // Types whose slot holds something right now.
-    bool onlyLoaded = false;
+    AssetFilter assets = AssetFilter::All;
 
     bool operator==(const EffectBrowserFilter&) const = default;
 };
@@ -92,8 +108,9 @@ public:
         return m_built;
     }
 
-    // Reads again what the slot of each type holds.
-    void RefreshAssets(const EffectAssetProbe& probe);
+    // Reads again what the slot of each type holds, seen from the world
+    // `currentWorld`.
+    void RefreshAssets(const EffectAssetProbe& probe, int currentWorld);
     // Changes with each RefreshAssets.
     int GetAssetGeneration() const
     {

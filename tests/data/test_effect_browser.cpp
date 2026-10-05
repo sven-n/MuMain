@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "EffectSourceCases.h"
+#include "EffectSourceCondition.h"
 #include "EffectTestData.h"
 
 #include "Core/Globals/_TextureIndex.h"
@@ -14,16 +15,22 @@
 #include "Data/GameData/EffectData/EffectCreateParamsJson.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Render/Effects/Behaviors/EffectBehaviors.h"
+#include "Core/Utilities/AssetLoadWorld.h"
 #include "UI/EffectBrowser/EffectBrowserModel.h"
 #include "UI/EffectBrowser/EffectLegacyCases.h"
+#include "UI/EffectBrowser/EffectPreviewObject.h"
+#include "World/MapInfra/MapManager.h"
 #endif
 
 #include <algorithm>
 #include <array>
 #include <charconv>
 #include <map>
+#include <optional>
 #include <set>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 using namespace Data::Effects;
@@ -275,11 +282,42 @@ std::vector<std::string> WrittenFields(const EffectCreateParams& params)
     return fields;
 }
 
+// Whether the filter lists the effect named `name`.
+bool MatchesNames(const EffectBrowserModel& model, const EffectBrowserFilter& filter, std::string_view name)
+{
+    const std::vector<std::string_view> names =
+        NamesOf(model, EffectKind::Effect, model.Filter(EffectKind::Effect, filter));
+    return std::find(names.begin(), names.end(), name) != names.end();
+}
+
 const EffectCreateTable::Line* FindLine(const EffectCreateTable& table, std::string_view field)
 {
     const auto found = std::find_if(table.lines.begin(), table.lines.end(),
                                     [&](const EffectCreateTable::Line& line) { return line.field == field; });
     return found != table.lines.end() ? &*found : nullptr;
+}
+
+// The bounds of the type range of MoveEffect's shared code, which are no
+// effect types.
+constexpr std::array<std::pair<std::string_view, int>, 2> RangeBounds = {{
+    {"MODEL_BIRD01", MODEL_BIRD01},
+    {"MODEL_SKILL_END", MODEL_SKILL_END},
+}};
+
+// A name in the conditions of MoveEffect's shared code: an effect symbol or a
+// bound of the range. Looked up in a table, as the test evaluates the
+// conditions for many types and SubTypes.
+std::optional<int> ValueOfName(std::string_view name)
+{
+    static const std::map<std::string, int, std::less<>> values = []
+    {
+        std::map<std::string, int, std::less<>> byName(RangeBounds.begin(), RangeBounds.end());
+        for (const EffectTypeSymbol& symbol : GetEffectTypeSymbols(EffectKind::Effect))
+            byName.emplace(symbol.code, symbol.type);
+        return byName;
+    }();
+    const auto found = values.find(name);
+    return found != values.end() ? std::optional<int>(found->second) : std::nullopt;
 }
 } // namespace
 
@@ -310,6 +348,86 @@ TEST_CASE("The effect browser's list of the legacy cases is the cases of the swi
         CHECK((found != fromSource.end() ? found->second : 0) == entry.cases);
     }
     CHECK(FindEffectLegacyCases(MODEL_BLOOD) == 0);
+}
+
+// The preview animates a model where the code MoveEffect runs after its switch
+// does. The test evaluates the conditions of that code and finds the cases
+// that return before it, so a type a phase takes out of them or adds fails
+// here until IsAnimatedByMoveEffect follows.
+TEST_CASE("The effect preview animates the models that MoveEffect's shared code animates [data][effects][editor]")
+{
+    const std::string source =
+        EffectSourceCases::ReadEffectSource(std::filesystem::path(MU_TEST_SOURCE_DIR) / "Render/Effects/ZzzEffect.cpp");
+    REQUIRE_FALSE(source.empty());
+    const EffectSourceCases::SharedMoveConditions conditions =
+        EffectSourceCases::ReadSharedMoveConditions(source, EffectMacros);
+    for (const std::string& problem : conditions.problems)
+    {
+        FAIL_CHECK(problem);
+    }
+    REQUIRE(conditions.problems.empty());
+
+    // A case that returns first skips that code.
+    const EffectSourceCases::SwitchLabels returning =
+        EffectSourceCases::ReadCasesThatReturn(source, Stage::Move, EffectMacros);
+    for (const std::string& problem : returning.problems)
+    {
+        FAIL_CHECK(problem);
+    }
+    std::set<int> returnsFirst;
+    for (const std::string& label : returning.labels)
+    {
+        INFO(label);
+        const int type = ResolveLabel(label);
+        CHECK(type >= 0);
+        returnsFirst.insert(type);
+    }
+
+    // The names do not depend on the type, so one reading finds every problem
+    // and every number. A comparison of the SubType with a number changes at
+    // that number; the range covers SubTypes only the copy might compare with.
+    std::set<int> subTypes;
+    for (int subType = -1; subType <= 255; ++subType)
+    {
+        subTypes.insert(subType);
+    }
+    for (const std::string& condition : {conditions.skipped, conditions.animated})
+    {
+        const EffectSourceCases::ConditionValue first =
+            EffectSourceCases::EvaluateCondition(condition, 0, 0, ValueOfName);
+        for (const std::string& problem : first.problems)
+        {
+            FAIL_CHECK(problem);
+        }
+        REQUIRE(first.problems.empty());
+        for (const int number : first.numbers)
+        {
+            subTypes.insert({number - 1, number, number + 1});
+        }
+    }
+
+    std::set<int> types;
+    for (const EffectTypeSymbol& symbol : GetEffectTypeSymbols(EffectKind::Effect))
+    {
+        types.insert(symbol.type);
+    }
+    for (const auto& bound : RangeBounds)
+    {
+        types.insert({bound.second - 1, bound.second});
+    }
+    for (const int type : types)
+    {
+        INFO(CodeOf(type));
+        for (const int subType : subTypes)
+        {
+            INFO(subType);
+            const bool skipped =
+                EffectSourceCases::EvaluateCondition(conditions.skipped, type, subType, ValueOfName).value;
+            const bool animated =
+                EffectSourceCases::EvaluateCondition(conditions.animated, type, subType, ValueOfName).value;
+            CHECK(IsAnimatedByMoveEffect(type, subType) == (!returnsFirst.contains(type) && !skipped && animated));
+        }
+    }
 }
 
 TEST_CASE("The effect browser takes a stage from the registry, then the legacy case [data][effects][editor]")
@@ -419,20 +537,78 @@ TEST_CASE("The effect browser filters by search, stage and loaded asset [data][e
                                         [](const EffectLegacyCases& entry) { return (entry.cases & GroundCase) != 0; });
     CHECK(model.Filter(EffectKind::Effect, filter).size() == static_cast<size_t>(onGround));
 
+    // The poison model was loaded by this map, the fire model by an earlier
+    // one, the ghost's on the loading screen; slot 64 holds this map's object,
+    // which is the wall's model only on the siege map.
+    static constexpr int ThisWorld = 0;
+    static constexpr int EarlierWorld = 2;
+    const auto probe = [](int wallWorld)
+    {
+        return [wallWorld](EffectAssetSlot slot, int type) -> EffectAsset
+        {
+            if (slot != EffectAssetSlot::Model)
+                return {};
+            switch (type)
+            {
+            case MODEL_CUNDUN_GHOST:
+                return {true, "Data/Skill/x.bmd", Core::AssetLoadWorld::LoadingScreen};
+            case MODEL_POISON:
+                return {true, "Data/Skill/Poison01.bmd", ThisWorld};
+            case MODEL_FIRE:
+                return {true, "Data/Skill/Fire01.bmd", EarlierWorld};
+            case BATTLE_CASTLE_WALL4:
+                return {true, "Data/Object/Object65.bmd", wallWorld};
+            default:
+                return {};
+            }
+        };
+    };
     filter = {};
-    filter.onlyLoaded = true;
+    filter.assets = AssetFilter::LoadedNow;
     CHECK(model.Filter(EffectKind::Effect, filter).empty());
     const int generation = model.GetAssetGeneration();
-    model.RefreshAssets(
-        [](EffectAssetSlot slot, int type)
-        {
-            return type == MODEL_CUNDUN_GHOST && slot == EffectAssetSlot::Model ? EffectAsset{true, "Data/Skill/x.bmd"}
-                                                                                : EffectAsset{};
-        });
+    model.RefreshAssets(probe(ThisWorld), ThisWorld);
     CHECK(model.GetAssetGeneration() != generation);
     CHECK(NamesOf(model, EffectKind::Effect, model.Filter(EffectKind::Effect, filter)) ==
+          std::vector<std::string_view>{"fireModel", "poison", "kundunGhost"});
+    filter.assets = AssetFilter::LoadedAtStart;
+    CHECK(NamesOf(model, EffectKind::Effect, model.Filter(EffectKind::Effect, filter)) ==
           std::vector<std::string_view>{"kundunGhost"});
+    filter.assets = AssetFilter::LoadedByThisMap;
+    CHECK(NamesOf(model, EffectKind::Effect, model.Filter(EffectKind::Effect, filter)) ==
+          std::vector<std::string_view>{"poison"});
+    CHECK(model.FindRow(EffectKind::Effect, MODEL_FIRE)->assetOrigin == AssetOrigin::EarlierMap);
     CHECK(model.FindRow(EffectKind::Effect, MODEL_CUNDUN_GHOST)->asset.file == "Data/Skill/x.bmd");
+    CHECK(model.FindRow(EffectKind::Effect, BATTLE_CASTLE_WALL4)->foreignMapObject);
+
+    // On the siege map the wall's slot holds the wall.
+    model.RefreshAssets(probe(WD_30BATTLECASTLE), WD_30BATTLECASTLE);
+    const EffectBrowserRow* wall = model.FindRow(EffectKind::Effect, BATTLE_CASTLE_WALL4);
+    CHECK_FALSE(wall->foreignMapObject);
+    CHECK(wall->assetOrigin == AssetOrigin::ThisMap);
+    CHECK(MatchesNames(model, filter, "battleCastleWall4"));
+}
+
+TEST_CASE("The effect browser tells what loaded an asset and which map a map-object effect belongs to "
+          "[data][effects][editor]")
+{
+    CHECK(ClassifyAssetOrigin({}, 0) == AssetOrigin::NotLoaded);
+    CHECK(ClassifyAssetOrigin({true, "a.bmd", std::nullopt}, 0) == AssetOrigin::Unknown);
+    CHECK(ClassifyAssetOrigin({true, "a.bmd", Core::AssetLoadWorld::LoadingScreen}, 0) == AssetOrigin::LoadingScreen);
+    CHECK(ClassifyAssetOrigin({true, "a.bmd", 5}, 5) == AssetOrigin::ThisMap);
+    CHECK(ClassifyAssetOrigin({true, "a.bmd", 5}, 6) == AssetOrigin::EarlierMap);
+    // Without the editor's source every asset counts as loaded on the loading
+    // screen.
+    CHECK(Core::AssetLoadWorld::Get() == Core::AssetLoadWorld::LoadingScreen);
+
+    CHECK(GetHomeWorld(BATTLE_CASTLE_WALL1) == WD_30BATTLECASTLE);
+    CHECK(GetHomeWorld(MODEL_KALIMA_FALLING_STONE) == WD_24HELLAS);
+    CHECK_FALSE(GetHomeWorld(MODEL_POISON).has_value());
+    CHECK(IsHomeWorld(BATTLE_CASTLE_WALL3, WD_30BATTLECASTLE));
+    CHECK_FALSE(IsHomeWorld(BATTLE_CASTLE_WALL3, 0));
+    CHECK(IsHomeWorld(MODEL_KALIMA_FALLING_STONE, WD_24HELLAS_7));
+    CHECK_FALSE(IsHomeWorld(MODEL_KALIMA_FALLING_STONE, WD_30BATTLECASTLE));
+    CHECK_FALSE(IsHomeWorld(MODEL_POISON, 0));
 }
 
 TEST_CASE("The effect browser shows the other kinds of a number, shared code and creation values "

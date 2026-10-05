@@ -664,4 +664,109 @@
   <data name="Sprite code" xml:space="preserve">
     <value>Sprites zeichnen die Textur ihrer Nummer; der SubType ist die Überblendung.</value>
   </data>
+  <data name="Preview" xml:space="preserve">
+    <value>Vorschau</value>
+  </data>
+  <data name="Show on" xml:space="preserve">
+    <value>Zeigen auf</value>
+  </data>
+  <data name="Show on nothing" xml:space="preserve">
+    <value>Nichts</value>
+  </data>
+  <data name="Show on plane" xml:space="preserve">
+    <value>Ebene</value>
+  </data>
+  <data name="Show on cube" xml:space="preserve">
+    <value>Würfel</value>
+  </data>
+  <data name="Show on item" xml:space="preserve">
+    <value>Gegenstand</value>
+  </data>
+  <data name="Blend" xml:space="preserve">
+    <value>Überblendung</value>
+  </data>
+  <data name="Blend glow" xml:space="preserve">
+    <value>Leuchten (0)</value>
+  </data>
+  <data name="Blend subtract" xml:space="preserve">
+    <value>Abziehen (1)</value>
+  </data>
+  <data name="Blend alpha test" xml:space="preserve">
+    <value>Alpha-Test (2)</value>
+  </data>
+  <data name="Blend luminance" xml:space="preserve">
+    <value>Luminanz (3)</value>
+  </data>
+  <data name="Turn" xml:space="preserve">
+    <value>Drehen</value>
+  </data>
+  <data name="Reset view" xml:space="preserve">
+    <value>Ansicht zurücksetzen</value>
+  </data>
+  <data name="Find an item" xml:space="preserve">
+    <value>Gegenstand suchen</value>
+  </data>
+  <data name="Level" xml:space="preserve">
+    <value>Stufe</value>
+  </data>
+  <data name="Excellent" xml:space="preserve">
+    <value>Exzellent</value>
+  </data>
+  <data name="Ancient" xml:space="preserve">
+    <value>Antik</value>
+  </data>
+  <data name="Preview controls" xml:space="preserve">
+    <value>Ziehen zum Drehen, Mausrad zum Zoomen, Doppelklick setzt die Ansicht zurück.</value>
+  </data>
+  <data name="Preview not drawn by game" xml:space="preserve">
+    <value>Das Spiel zeichnet dieses Modell nicht selbst: es hat keinen Zeichencode.</value>
+  </data>
+  <data name="Preview starts invisible" xml:space="preserve">
+    <value>Seine Erstellungswerte lassen es durchsichtig oder mit Größe 0 beginnen und sein Bewegungscode blendet es ein oder lässt es wachsen; die Vorschau zeigt es.</value>
+  </data>
+  <data name="Preview hidden model" xml:space="preserve">
+    <value>Seine Erstellungswerte verbergen das ganze Modell.</value>
+  </data>
+  <data name="Preview no animation" xml:space="preserve">
+    <value>Das Modell hat keine Animation, die seine Knochen setzt, daher zeichnet die Vorschau es nicht.</value>
+  </data>
+  <data name="Preview item effects left out" xml:space="preserve">
+    <value>Die eigenen Sprites und Partikel des Gegenstands werden nicht gezeigt.</value>
+  </data>
+  <data name="Preview item not loaded" xml:space="preserve">
+    <value>Ein Modell, mit dem dieser Gegenstand auf dieser Stufe gezeichnet wird, ist nicht geladen, daher zeichnet die Vorschau den Gegenstand nicht.</value>
+  </data>
+  <data name="Assets all" xml:space="preserve">
+    <value>Alle</value>
+  </data>
+  <data name="Loaded at start" xml:space="preserve">
+    <value>Beim Start geladen</value>
+  </data>
+  <data name="Loaded by this map" xml:space="preserve">
+    <value>Von dieser Karte geladen</value>
+  </data>
+  <data name="Origin loading screen" xml:space="preserve">
+    <value>Beim Start geladen (Ladebildschirm).</value>
+  </data>
+  <data name="Origin this map" xml:space="preserve">
+    <value>Von dieser Karte geladen.</value>
+  </data>
+  <data name="Origin earlier map" xml:space="preserve">
+    <value>Von einer zuvor besuchten Karte geladen:</value>
+  </data>
+  <data name="Origin unknown" xml:space="preserve">
+    <value>Geladen; was es geladen hat, ist nicht festgehalten.</value>
+  </data>
+  <data name="Map object elsewhere" xml:space="preserve">
+    <value>Dieser Platz enthält ein Objekt dieser Karte, nicht das Modell dieses Effekts. Der Effekt zeigt sein eigenes Modell nur auf:</value>
+  </data>
+  <data name="Map object here" xml:space="preserve">
+    <value>Das Objekt dieser Karte, das dieser Effekt zeigt.</value>
+  </data>
+  <data name="Belongs to map" xml:space="preserve">
+    <value>Zeigt ein Objekt der Karte:</value>
+  </data>
+  <data name="Preview not its model" xml:space="preserve">
+    <value>Der Platz dieser Karte enthält ein anderes Objekt, nicht das Modell dieses Effekts (siehe Ressource).</value>
+  </data>
 </root>

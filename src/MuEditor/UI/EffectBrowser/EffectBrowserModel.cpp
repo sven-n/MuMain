@@ -26,6 +26,23 @@ std::string SearchTextOf(const EffectBrowserRow& row)
     return ToSearchText(row.name) + ' ' + ToSearchText(row.code) + ' ' + std::to_string(row.type);
 }
 
+bool MatchesAssetFilter(const EffectBrowserRow& row, AssetFilter filter)
+{
+    const bool ownAsset = row.asset.loaded && !row.foreignMapObject;
+    switch (filter)
+    {
+    case AssetFilter::LoadedNow:
+        return ownAsset;
+    case AssetFilter::LoadedAtStart:
+        return ownAsset && row.assetOrigin == AssetOrigin::LoadingScreen;
+    case AssetFilter::LoadedByThisMap:
+        return ownAsset && row.assetOrigin == AssetOrigin::ThisMap;
+    case AssetFilter::All:
+        break;
+    }
+    return true;
+}
+
 bool MatchesRenderFilter(const EffectStages& stages, RenderStage filter)
 {
     return stages.render == filter || (filter == RenderStage::OnGround && stages.drawnOnGround);
@@ -118,13 +135,16 @@ void EffectBrowserModel::GroupSharedCode(DescriptorLookup lookup)
     m_createHookGroups = GroupsOfMoreThanOne(typesByCreateHook);
 }
 
-void EffectBrowserModel::RefreshAssets(const EffectAssetProbe& probe)
+void EffectBrowserModel::RefreshAssets(const EffectAssetProbe& probe, int currentWorld)
 {
     for (std::vector<EffectBrowserRow>& rows : m_rows)
     {
         for (EffectBrowserRow& row : rows)
         {
             row.asset = probe(row.assetSlot, row.type);
+            row.assetOrigin = ClassifyAssetOrigin(row.asset, currentWorld);
+            row.foreignMapObject =
+                row.asset.loaded && IsWorldObjectSlot(row.assetSlot, row.type) && !IsHomeWorld(row.type, currentWorld);
         }
     }
     ++m_assetGeneration;
@@ -159,7 +179,7 @@ bool EffectBrowserModel::IsListed(EffectKind kind, const EffectBrowserRow& row, 
 {
     if (!filter.search.empty() && row.searchText.find(filter.search) == std::string::npos)
         return false;
-    if (filter.onlyLoaded && !row.asset.loaded)
+    if (!MatchesAssetFilter(row, filter.assets))
         return false;
     if (kind != EffectKind::Effect)
         return true;

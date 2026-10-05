@@ -664,4 +664,109 @@
   <data name="Sprite code" xml:space="preserve">
     <value>Sprites draw the texture of their number; the SubType is the blend.</value>
   </data>
+  <data name="Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="Show on" xml:space="preserve">
+    <value>Show on</value>
+  </data>
+  <data name="Show on nothing" xml:space="preserve">
+    <value>Nothing</value>
+  </data>
+  <data name="Show on plane" xml:space="preserve">
+    <value>Plane</value>
+  </data>
+  <data name="Show on cube" xml:space="preserve">
+    <value>Cube</value>
+  </data>
+  <data name="Show on item" xml:space="preserve">
+    <value>Item</value>
+  </data>
+  <data name="Blend" xml:space="preserve">
+    <value>Blend</value>
+  </data>
+  <data name="Blend glow" xml:space="preserve">
+    <value>Glow (0)</value>
+  </data>
+  <data name="Blend subtract" xml:space="preserve">
+    <value>Subtract (1)</value>
+  </data>
+  <data name="Blend alpha test" xml:space="preserve">
+    <value>Alpha test (2)</value>
+  </data>
+  <data name="Blend luminance" xml:space="preserve">
+    <value>Luminance (3)</value>
+  </data>
+  <data name="Turn" xml:space="preserve">
+    <value>Turn</value>
+  </data>
+  <data name="Reset view" xml:space="preserve">
+    <value>Reset view</value>
+  </data>
+  <data name="Find an item" xml:space="preserve">
+    <value>Find an item</value>
+  </data>
+  <data name="Level" xml:space="preserve">
+    <value>Level</value>
+  </data>
+  <data name="Excellent" xml:space="preserve">
+    <value>Excellent</value>
+  </data>
+  <data name="Ancient" xml:space="preserve">
+    <value>Ancient</value>
+  </data>
+  <data name="Preview controls" xml:space="preserve">
+    <value>Drag to turn, use the wheel to zoom, double-click to reset the view.</value>
+  </data>
+  <data name="Preview not drawn by game" xml:space="preserve">
+    <value>The game does not draw this model itself: it has no drawing code.</value>
+  </data>
+  <data name="Preview starts invisible" xml:space="preserve">
+    <value>Its creation values start it transparent or at size 0 and its move code fades or grows it in; the preview shows it.</value>
+  </data>
+  <data name="Preview hidden model" xml:space="preserve">
+    <value>Its creation values hide the whole model.</value>
+  </data>
+  <data name="Preview no animation" xml:space="preserve">
+    <value>The model has no animation to place its bones, so the preview does not draw it.</value>
+  </data>
+  <data name="Preview item effects left out" xml:space="preserve">
+    <value>The item's own sprites and particles are not shown.</value>
+  </data>
+  <data name="Preview item not loaded" xml:space="preserve">
+    <value>A model this item is drawn with at this level is not loaded, so the preview does not draw the item.</value>
+  </data>
+  <data name="Assets all" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Loaded at start" xml:space="preserve">
+    <value>Loaded at start</value>
+  </data>
+  <data name="Loaded by this map" xml:space="preserve">
+    <value>Loaded by this map</value>
+  </data>
+  <data name="Origin loading screen" xml:space="preserve">
+    <value>Loaded at start (loading screen).</value>
+  </data>
+  <data name="Origin this map" xml:space="preserve">
+    <value>Loaded by this map.</value>
+  </data>
+  <data name="Origin earlier map" xml:space="preserve">
+    <value>Loaded by a map visited before:</value>
+  </data>
+  <data name="Origin unknown" xml:space="preserve">
+    <value>Loaded; what loaded it is not recorded.</value>
+  </data>
+  <data name="Map object elsewhere" xml:space="preserve">
+    <value>This slot holds an object of this map, not this effect's model. The effect draws its own model only on:</value>
+  </data>
+  <data name="Map object here" xml:space="preserve">
+    <value>The object of this map that this effect draws.</value>
+  </data>
+  <data name="Belongs to map" xml:space="preserve">
+    <value>Draws an object of the map:</value>
+  </data>
+  <data name="Preview not its model" xml:space="preserve">
+    <value>This map's slot holds another object, not this effect's model (see Asset).</value>
+  </data>
 </root>

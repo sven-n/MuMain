@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "TestFiles.h"
+#include "TestModelSlots.h"
 
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
@@ -385,30 +386,25 @@ TEST_CASE("A model slot does not share missing data or its own [data][items]")
 
 namespace
 {
-// The game's model slots for a test: Models points to slots of the test
-// until the end of the test, and the item model database is emptied again.
-class TestModelSlots
+// The game's model slots for a test, and the item model database emptied
+// again at its end.
+class TestItemModelSlots
 {
 public:
-    TestModelSlots() : m_slots(new BMD[MAX_MODELS]), m_previous(Models)
-    {
-        Models = m_slots.get();
-    }
+    TestItemModelSlots() = default;
 
-    ~TestModelSlots()
+    ~TestItemModelSlots()
     {
-        Models = m_previous;
         g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
         // Problems a failed check left behind do not reach the next test.
         ModelLoader::TakeProblemMessage();
     }
 
-    TestModelSlots(const TestModelSlots&) = delete;
-    TestModelSlots& operator=(const TestModelSlots&) = delete;
+    TestItemModelSlots(const TestItemModelSlots&) = delete;
+    TestItemModelSlots& operator=(const TestItemModelSlots&) = delete;
 
 private:
-    std::unique_ptr<BMD[]> m_slots;
-    BMD* m_previous;
+    TestModelSlots m_slots;
 };
 
 // An item of a shared model, with the file filled in like the loading does.
@@ -427,7 +423,7 @@ ItemModelDefinition MakeSharedModelItem(int number, const std::string& model, co
 
 TEST_CASE("The first item of a shared model opens its file and the others share it [data][items]")
 {
-    TestModelSlots slots;
+    TestItemModelSlots slots;
     const std::vector<ItemModelDefinition> models{
         MakeSharedModelItem(19, "skillParchment", "Data/Item/rollofpaper.bmd"),
         MakeSharedModelItem(20, "skillParchment", "Data/Item/rollofpaper.bmd"),

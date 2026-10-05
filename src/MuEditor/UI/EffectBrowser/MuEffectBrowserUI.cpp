@@ -7,7 +7,6 @@
 #include "EffectBrowserAssets.h"
 #include "EffectBrowserLabels.h"
 #include "../MuEditor/Core/MuEditorCore.h"
-#include "Core/Text/Utf8.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "I18N/All.h"
 #include "Render/Effects/EffectRegistry.h"
@@ -91,14 +90,23 @@ void CMuEffectBrowserUI::RefreshAssetsWhenMapChanges()
 
 void CMuEffectBrowserUI::RefreshAssets()
 {
-    m_model.RefreshAssets(MuEditor::Effects::ProbeLoadedAsset);
     m_assetWorld = gMapManager.WorldActive;
-    m_mapName = *m_assetWorld >= 0 ? Core::Text::ToUtf8(gMapManager.GetMapName(*m_assetWorld)) : "-";
+    m_model.RefreshAssets(MuEditor::Effects::ProbeLoadedAsset, *m_assetWorld);
+    NameMap();
+}
+
+void CMuEffectBrowserUI::NameMap()
+{
+    m_mapName = MuEditor::Effects::Labels::MapName(*m_assetWorld);
+    m_mapNameLocale = I18N::GetCurrentLocale();
 }
 
 void CMuEffectBrowserUI::RenderMapLine()
 {
-    ImGui::Text("%s: %s", I18N::Editor::CurrentMap, m_mapName.c_str());
+    // The login and character screens are named in the editor's language.
+    if (m_mapNameLocale != I18N::GetCurrentLocale())
+        NameMap();
+    ImGui::Text("%s: %s (%d)", I18N::Editor::CurrentMap, m_mapName.c_str(), *m_assetWorld);
     ImGui::SameLine();
     if (ImGui::Button(I18N::Editor::Refresh))
         RefreshAssets();
