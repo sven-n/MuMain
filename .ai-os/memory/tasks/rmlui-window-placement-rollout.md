@@ -70,9 +70,10 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
 ## Open work, in suggested order
 
 1. Hand checks above (or teach the socket world picking so trade/NPC checks can be scripted).
-2. Castle, guard, gatekeeper: native tab radio groups, gate/statue picks and the public toggle sit
-   over RmlUi-drawn elements. Right fix: RmlUi click events, and tab positions in RCSS (today bound
-   in RML as `12 + i * 41`). Needs testing at the siege NPCs.
+2. Gatekeeper public toggle done: the RmlUi hit target follows both themes' RCSS and sends
+   the same request. Full RelWithDebInfo build passes; siege NPC validation is pending. Castle and
+   guard still have native tab radio groups and gate/statue picks over RmlUi-drawn elements. Move
+   their click targets and positions into RML/RCSS, then validate at the siege NPCs.
 3. Done: catapult consumes pointer input over its measured `#panel`, with 190x429 as the first-layout fallback. Full RelWithDebInfo build passed; a siege NPC in-game check is pending.
 4. Done: lucky item's panel and background sizes are in each theme's RCSS. The native hit box reads `#panel`, and legacy counter-scaled text reads `panel_width`. Full RelWithDebInfo build passed; in-game verification is pending.
 5. Done: the eight inventory-family legacy-theme RML documents center counter-scaled text

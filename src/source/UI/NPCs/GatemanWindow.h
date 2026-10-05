@@ -17,8 +17,7 @@ class ElementDocument;
 namespace mu::ui::window
 {
 // The castle gatekeeper, docked right: the guest, guild member or guild master page.
-// gateman.rml draws it; C++ keeps the gatekeeper state (CUIGateKeeper), the public toggle's
-// native hit test, Escape and every request.
+// gateman.rml draws it; C++ keeps the gatekeeper state (CUIGateKeeper), Escape and requests.
 class CGatemanWindow : public CObject
 {
 public:
@@ -46,6 +45,7 @@ private:
     RmlModelBinder<GatemanRmlModel> m_RmlBinder;
     Rml::ElementDocument* m_pRmlDoc = nullptr;
     GATEMAN_BUTTON m_PendingButton = GATEMAN_BUTTON_NONE;
+    bool m_PendingPublicToggle = false;
 
 public:
     CGatemanWindow();

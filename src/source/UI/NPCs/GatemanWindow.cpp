@@ -85,16 +85,6 @@ void CGatemanWindow::SetPos(int x, int y)
 
 bool CGatemanWindow::UpdateMouseEvent()
 {
-    // The guild master's public toggle stays a native hit test (the document leaves that area to
-    // the pointer); the buttons are RmlUi's (see Update()).
-    if (g_pUIGateKeeper->GetType() == TOUCH_TYPE_GUILD_MASTER)
-    {
-        const POINT ptOrigin = {m_Pos.x, m_Pos.y + 50};
-        if (mu::ui::window::IsPress(VK_LBUTTON) &&
-            mu::ui::window::CheckMouseIn(ptOrigin.x + 35, ptOrigin.y + 60, 100, 16))
-            g_pUIGateKeeper->SendPublicSetting();
-    }
-
     if (true == BtnProcess())
         return false;
 
@@ -129,7 +119,11 @@ bool CGatemanWindow::Update()
 {
     // A button RmlUi reported (the original's CButton handling in UpdateMouseEvent()).
     const GATEMAN_BUTTON button = m_PendingButton;
+    const bool publicToggle = m_PendingPublicToggle;
     m_PendingButton = GATEMAN_BUTTON_NONE;
+    m_PendingPublicToggle = false;
+    if (IsVisible() && publicToggle && g_pUIGateKeeper->GetType() == TOUCH_TYPE_GUILD_MASTER)
+        g_pUIGateKeeper->SendPublicSetting();
     if (IsVisible() && button == GATEMAN_BUTTON_EXIT)
     {
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GATEKEEPER);
@@ -283,6 +277,9 @@ void CGatemanWindow::BuildRmlUi()
             c.Bind("is_public", &model.isPublic);
             c.Bind("guest_can_afford", &model.guestCanAfford);
             c.Bind("exit_tooltip", &model.exitTooltip);
+            c.BindEventCallback("gateman_public_toggle",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                                { m_PendingPublicToggle = true; });
             c.BindEventCallback("gateman_button",
                                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
                                 {

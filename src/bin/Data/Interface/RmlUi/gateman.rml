@@ -7,7 +7,7 @@
 </head>
 <body>
 	<!-- The castle gatekeeper (CGatemanWindow), docked right: the guest, guild member or guild
-	     master page. For the master: the public checkbox (hit-tested natively), the fee backdrop
+	     master page. For the master: the public toggle, the fee backdrop
 	     and the fee arrows. root_x/root_y/root_scale come from the dock transform; every position
 	     and size below is the theme's. A .sharp-text layer's own width and font size stay bound: it
 	     is laid out in physical pixels and counter-scaled out of the panel (base.rcss). C++ keeps
@@ -25,7 +25,9 @@
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title.text}}</span>
 
 		<div class="gk-page" data-if="page == 1">
-			<div id="checkbox"><div id="check_mark" data-if="is_public"></div></div>
+			<div id="public_toggle" data-event-click="gateman_public_toggle">
+				<div id="checkbox"><div id="check_mark" data-if="is_public"></div></div>
+			</div>
 			<div id="fee_back"></div>
 			<div class="fee-btn fee-up" data-event-click="gateman_button(2)"></div>
 			<div class="fee-btn fee-down" data-event-click="gateman_button(3)"></div>

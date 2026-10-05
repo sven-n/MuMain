@@ -30,13 +30,13 @@
 @spritesheet gk-check-sheet { src: "../../../win_check.tga"; gk-check: 0px 0px 5px 5px; }
 
 .frame-top { decorator: image(docked-bg-top-b); }
-/* The public checkbox is hit-tested natively. */
 #panel { pointer-events: none; }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
 
-#checkbox { position: absolute; left: 35px; top: 110px; width: 9px; height: 9px; border: 1px #928679; box-sizing: border-box; }
-#check_mark { position: absolute; left: 1px; top: 1px; width: 5px; height: 5px; decorator: image(gk-check); }
+#public_toggle { position: absolute; left: 35px; top: 110px; width: 100px; height: 16px; pointer-events: auto; }
+#checkbox { position: absolute; left: 0; top: 0; width: 9px; height: 9px; pointer-events: none; border: 1px #928679; box-sizing: border-box; }
+#check_mark { position: absolute; left: 1px; top: 1px; width: 5px; height: 5px; pointer-events: none; decorator: image(gk-check); }
 #fee_back { position: absolute; left: 20px; top: 180px; width: 90px; height: 30px; background-color: rgba(0, 0, 0, 77); }
 
 .fee-btn { position: absolute; left: 118px; width: 15px; height: 13px; pointer-events: auto; }
