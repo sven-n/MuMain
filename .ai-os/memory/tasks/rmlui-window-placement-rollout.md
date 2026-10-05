@@ -2,7 +2,7 @@
 
 Design (tracked, governing): `docs/rmlui-ui-system/window-placement.md`. Read it first; it holds
 the design, phase table, rule classification, theme recipes and the "Theme-sized windows" audit.
-Current handover prompt for a new agent: `rmlui-window-placement-fill-handover.md` (this folder).
+Current handover prompt for a new agent: `rmlui-window-placement-hud-handover.md` (this folder).
 
 ## User decisions
 
@@ -18,6 +18,13 @@ Current handover prompt for a new agent: `rmlui-window-placement-fill-handover.m
 - Keep `legacy` and `modern` in step; only those two themes. No third theme, not even for tests.
 - Player drag-to-dock is not needed now. Preserve the existing saved-position behavior; any change
   to drag persistence needs a separate user decision.
+- Fill is the theme's decision for every window that can take it (`CObject::GetFillDocument()`).
+  A shared window `<template>` was judged not worth it (the shared frame already lives in
+  `docked_panel_frame.rcss`); revisit only if a theme author needs one place for frame structure.
+- HUD joins the workspace's layout model (user's direction, 2026-10-05): HUD components receive a
+  position and available size from workspace slots, keep their own documents, controllers and
+  scale settings; the theme chooses per region whether it reserves space or overlays. Design and
+  phases H1-H4: `window-placement.md`, "HUD in the workspace".
 
 ## Commits (all built; full RelWithDebInfo build passes)
 
@@ -38,6 +45,19 @@ Current handover prompt for a new agent: `rmlui-window-placement-fill-handover.m
 | `b3f45d9d8` | Inventory equipment slots, grid and option tooltip from `.native-anchor` boxes |
 | `f140742cb` | Every inventory-family grid follows an anchor (`CInventoryCtrl::FollowAnchor()`); fixes the slot-placement grid regression |
 | `ff0431c6f` | Castle and guard tab hit areas follow the window each frame (same regression) |
+| `eb53c7777` | Phase 4: character info fills a `data-fit=fill` slot |
+| `2d0262f8f` | Fill slots never smaller than the content size; character info pinned to `#panel` edges |
+| `5a62826ac` | Modern character info hides its + buttons without points |
+| `e708a3343` | Seven docked windows stay open across a theme switch |
+| `05d54637d` | HUD widgets follow both uncovered edges in their own units (`GetScreenLeft()`) |
+| `f9d2b0406` | Pet info fills; `FillPlacementSize` helper; shared `#frame_corner_close` |
+| `e2ba923b3` | Drop guide when dragging an item between windows |
+| `e907e54d7` | Gens ranking slot |
+| `01e45526b` | Control socket: typed Enter submits a focused field (`$win <name> full` works) |
+| `389c2ad8d` | Move map left-dock slot; fill gives its rows' height and its width |
+| `7cbc0d0bd` | Friend list's first position from a `friends` slot (`InitialPosition()`) |
+| `ab5efa0e1` | Centred NPC panels on a `panel-stage` region |
+| `6a2d08718` | Generic fill (`GetFillDocument()`), 24 windows; native corner close follows panel width |
 
 Regression lesson: since `LayoutMode::Slot`, a placed window's `m_Pos` is (0, 0) in its slot space.
 Any native part positioned once at creation (not moved by `SetPos()` or re-placed each frame) ends
@@ -77,38 +97,19 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
 
 ## Open work, in suggested order
 
-1. Hand checks above (or teach the socket world picking so trade/NPC checks can be scripted).
-2. Done in code: gatekeeper public toggle, guard and castle tabs, and castle gate/statue
-   picks use RmlUi click targets. The themes place the tabs and map icons in RCSS. Full
-   RelWithDebInfo build passes; test the toggle, tabs, map picks and resulting requests at the
-   siege NPCs before marking the interaction validated in game.
-3. Done: catapult consumes pointer input over its measured `#panel`, with 190x429 as the first-layout fallback. Full RelWithDebInfo build passed; a siege NPC in-game check is pending.
-4. Done: lucky item's panel and background sizes are in each theme's RCSS. The native hit box reads `#panel`, and legacy counter-scaled text reads `panel_width`. Full RelWithDebInfo build passed; in-game verification is pending.
-5. Done: the eight inventory-family legacy-theme RML documents center counter-scaled text
-   with `panel_width` read from `#panel`. Each owner binds and syncs it. The modern theme already
-   uses panel-relative header layout. Full RelWithDebInfo build and RML checks pass; in-game checks
-   are pending alongside the hand checks above.
-6. Placement leftovers: per-theme saved positions and the drag rule (user decision); unslotted families (move map,
-   friends, centred dialogs) with per-window content sizes and region scales. Done: HUD widgets
-   follow both uncovered edges in their own layout each frame (durability icons and party list had
-   been off by the dock/stretch scale ratio at any UI scale other than 100 % or a non-4:3 window).
-   Verified in game at 80 %: durability icons beside the panel; buff row centred beside a left dock.
-7. Phase 4 fill: character info and pet info support `data-fit=fill` (pet verified in game, both themes, 35 %); a fill slot is never smaller than the
-   window's content size. Both shipped themes keep their content-sized workspace. The remaining
-   windows need individual fill capability and theme content recipes; native grids and live 3D
-   need more than a stretched frame.
-
-8. Done: Gens ranking has a right-dock slot after character info; verified in game at 90 and 100 %
-   (`$win gensranking full`). Done: the move map has a left-dock
-   slot and supports fill (height = its rows' space, width from `#panel`, minimum chrome + 3 rows);
-   verified in game in both themes. Done: the friend list's first position comes from a `friends`
-   slot (`InitialPosition()`), verified in game. Done: the centred NPC panels (Kanturu entry, Cursed Temple
-   entry/result) sit on a `panel-stage` region; verified in game. Slot coverage is complete for
-   every window C++ used to place in a dock, a column or the panel centre.
-
-9. Done: fill is generic (`CObject::GetFillDocument()`); 24 windows opt in. The native corner
-   close follows the panel width. Verified in game: MU Helper config filled (frame, close).
-   Next: a shared fluid window `<template>` per theme.
+1. HUD in the workspace, phases H1-H4 (`window-placement.md`, "HUD in the workspace"). Start with
+   H1: shell regions, participation attribute, the main strip as a `reserve` footer slot, and its
+   readers (`HudReserve()`, `CMiniMap::SyncClips()`) reading the slot. Settle that section's open
+   points first and record the answers there.
+2. Not verified in game: the Cursed Temple result panel (needs a finished event); Gens ranking,
+   move map, friends and the NPC panels in the modern theme; filled windows at resolutions other
+   than 1024x768.
+3. Optional polish: fluid content RCSS for the 22 fillable windows other than character and pet
+   (today they get a larger frame with content at the top-left); Gens ranking's description box
+   should compute its visible rows (it clips the last one at 90 %); `HeroX` still uses only the
+   right edge (gameplay call).
+4. User decisions pending: dragging a window out of its slot; per-theme saved positions.
+5. Separate project: native grids and live 3D that resize (render-target design).
 
 ## How to work on this
 
