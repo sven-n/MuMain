@@ -490,4 +490,178 @@
   <data name="No model" xml:space="preserve">
     <value>Der ausgewählte Gegenstand hat kein Modell.</value>
   </data>
+  <data name="Effect Browser" xml:space="preserve">
+    <value>Effekt-Browser</value>
+  </data>
+  <data name="Effect types not loaded" xml:space="preserve">
+    <value>Die Effekttypen sind noch nicht geladen; der Ladebildschirm lädt sie.</value>
+  </data>
+  <data name="Current map" xml:space="preserve">
+    <value>Karte</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Aktualisieren</value>
+  </data>
+  <data name="Refresh assets" xml:space="preserve">
+    <value>Liest erneut, was der Platz jedes Typs enthält.</value>
+  </data>
+  <data name="Slots keep models" xml:space="preserve">
+    <value>Ein Platz kann noch das Modell einer zuvor besuchten Karte enthalten.</value>
+  </data>
+  <data name="Particles" xml:space="preserve">
+    <value>Partikel</value>
+  </data>
+  <data name="Lightning and trails" xml:space="preserve">
+    <value>Blitze und Spuren</value>
+  </data>
+  <data name="Sprites" xml:space="preserve">
+    <value>Sprites</value>
+  </data>
+  <data name="Creation" xml:space="preserve">
+    <value>Erstellung</value>
+  </data>
+  <data name="Move" xml:space="preserve">
+    <value>Bewegung</value>
+  </data>
+  <data name="Drawing" xml:space="preserve">
+    <value>Zeichnen</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>Alle</value>
+  </data>
+  <data name="Loaded now" xml:space="preserve">
+    <value>Jetzt geladen</value>
+  </data>
+  <data name="Listed" xml:space="preserve">
+    <value>Angezeigt</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>Nummer</value>
+  </data>
+  <data name="Stage data" xml:space="preserve">
+    <value>Daten</value>
+  </data>
+  <data name="Stage hook" xml:space="preserve">
+    <value>Hook</value>
+  </data>
+  <data name="Stage data then hook" xml:space="preserve">
+    <value>Daten, dann Hook</value>
+  </data>
+  <data name="Stage switch" xml:space="preserve">
+    <value>Switch</value>
+  </data>
+  <data name="Stage setup only" xml:space="preserve">
+    <value>nur gemeinsame Einrichtung</value>
+  </data>
+  <data name="Stage handler" xml:space="preserve">
+    <value>Handler</value>
+  </data>
+  <data name="Stage shared code only" xml:space="preserve">
+    <value>nur gemeinsamer Code</value>
+  </data>
+  <data name="Stage drawn as model" xml:space="preserve">
+    <value>als Modell gezeichnet</value>
+  </data>
+  <data name="Stage on the ground" xml:space="preserve">
+    <value>auf dem Boden</value>
+  </data>
+  <data name="Also on the ground" xml:space="preserve">
+    <value>+ auf dem Boden</value>
+  </data>
+  <data name="Also after the characters" xml:space="preserve">
+    <value>+ nach den Charakteren</value>
+  </data>
+  <data name="Stage not drawn" xml:space="preserve">
+    <value>nicht gezeichnet</value>
+  </data>
+  <data name="Variants" xml:space="preserve">
+    <value>Varianten</value>
+  </data>
+  <data name="Select an effect type" xml:space="preserve">
+    <value>Wählen Sie einen Typ in der Liste aus, um seine Details zu sehen.</value>
+  </data>
+  <data name="Kind" xml:space="preserve">
+    <value>Art</value>
+  </data>
+  <data name="Defined in" xml:space="preserve">
+    <value>Definiert in</value>
+  </data>
+  <data name="Same number" xml:space="preserve">
+    <value>Gleiche Nummer</value>
+  </data>
+  <data name="No other kind" xml:space="preserve">
+    <value>Keine andere Art hat einen Typ mit dieser Nummer.</value>
+  </data>
+  <data name="Asset" xml:space="preserve">
+    <value>Ressource</value>
+  </data>
+  <data name="Slot model" xml:space="preserve">
+    <value>Modell</value>
+  </data>
+  <data name="Slot texture" xml:space="preserve">
+    <value>Textur</value>
+  </data>
+  <data name="Slot default texture" xml:space="preserve">
+    <value>Der Code eines SubTypes kann eine andere Textur wählen.</value>
+  </data>
+  <data name="Slot texture chosen in code" xml:space="preserve">
+    <value>Sein Code wählt eine Textur</value>
+  </data>
+  <data name="Nothing loaded" xml:space="preserve">
+    <value>Auf dieser Karte nichts geladen</value>
+  </data>
+  <data name="World object slot" xml:space="preserve">
+    <value>Dieser Platz enthält ein Objekt der aktuellen Karte.</value>
+  </data>
+  <data name="Stages" xml:space="preserve">
+    <value>Phasen</value>
+  </data>
+  <data name="Same move handler" xml:space="preserve">
+    <value>Gleicher Bewegungs-Handler</value>
+  </data>
+  <data name="Same creation hook" xml:space="preserve">
+    <value>Gleicher Erstellungs-Hook</value>
+  </data>
+  <data name="Creation values" xml:space="preserve">
+    <value>Erstellungswerte</value>
+  </data>
+  <data name="No creation values" xml:space="preserve">
+    <value>Keine Erstellungswerte in den Daten.</value>
+  </data>
+  <data name="Field" xml:space="preserve">
+    <value>Feld</value>
+  </data>
+  <data name="All SubTypes" xml:space="preserve">
+    <value>Alle SubTypes</value>
+  </data>
+  <data name="Other SubTypes" xml:space="preserve">
+    <value>Andere SubTypes</value>
+  </data>
+  <data name="SubType" xml:space="preserve">
+    <value>SubType</value>
+  </data>
+  <data name="Used by data" xml:space="preserve">
+    <value>Von Daten verwendet</value>
+  </data>
+  <data name="Named by its creation values" xml:space="preserve">
+    <value>seine Erstellungswerte</value>
+  </data>
+  <data name="Named by no data" xml:space="preserve">
+    <value>Noch keine Daten nennen diesen Typ.</value>
+  </data>
+  <data name="Particle code" xml:space="preserve">
+    <value>Partikel werden von ihrem Code erstellt, bewegt und gezeichnet; sie haben keine Registry.</value>
+  </data>
+  <data name="Joint code" xml:space="preserve">
+    <value>Blitze und Spuren werden von ihrem Code erstellt, bewegt und gezeichnet; sie haben keine Registry.</value>
+  </data>
+  <data name="Sprite code" xml:space="preserve">
+    <value>Sprites zeichnen die Textur ihrer Nummer; der SubType ist die Überblendung.</value>
+  </data>
 </root>

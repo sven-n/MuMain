@@ -490,4 +490,178 @@
   <data name="No model" xml:space="preserve">
     <value>The selected item has no model.</value>
   </data>
+  <data name="Effect Browser" xml:space="preserve">
+    <value>Effect Browser</value>
+  </data>
+  <data name="Effect types not loaded" xml:space="preserve">
+    <value>The effect types are not loaded yet; the loading screen loads them.</value>
+  </data>
+  <data name="Current map" xml:space="preserve">
+    <value>Map</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Refresh assets" xml:space="preserve">
+    <value>Reads again what the slot of each type holds.</value>
+  </data>
+  <data name="Slots keep models" xml:space="preserve">
+    <value>A slot can still hold the model of a map visited before.</value>
+  </data>
+  <data name="Particles" xml:space="preserve">
+    <value>Particles</value>
+  </data>
+  <data name="Lightning and trails" xml:space="preserve">
+    <value>Lightning and trails</value>
+  </data>
+  <data name="Sprites" xml:space="preserve">
+    <value>Sprites</value>
+  </data>
+  <data name="Creation" xml:space="preserve">
+    <value>Creation</value>
+  </data>
+  <data name="Move" xml:space="preserve">
+    <value>Move</value>
+  </data>
+  <data name="Drawing" xml:space="preserve">
+    <value>Drawing</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>Any</value>
+  </data>
+  <data name="Loaded now" xml:space="preserve">
+    <value>Loaded now</value>
+  </data>
+  <data name="Listed" xml:space="preserve">
+    <value>Listed</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>Number</value>
+  </data>
+  <data name="Stage data" xml:space="preserve">
+    <value>data</value>
+  </data>
+  <data name="Stage hook" xml:space="preserve">
+    <value>hook</value>
+  </data>
+  <data name="Stage data then hook" xml:space="preserve">
+    <value>data, then hook</value>
+  </data>
+  <data name="Stage switch" xml:space="preserve">
+    <value>switch</value>
+  </data>
+  <data name="Stage setup only" xml:space="preserve">
+    <value>common setup only</value>
+  </data>
+  <data name="Stage handler" xml:space="preserve">
+    <value>handler</value>
+  </data>
+  <data name="Stage shared code only" xml:space="preserve">
+    <value>shared code only</value>
+  </data>
+  <data name="Stage drawn as model" xml:space="preserve">
+    <value>drawn as model</value>
+  </data>
+  <data name="Stage on the ground" xml:space="preserve">
+    <value>on the ground</value>
+  </data>
+  <data name="Also on the ground" xml:space="preserve">
+    <value>+ on the ground</value>
+  </data>
+  <data name="Also after the characters" xml:space="preserve">
+    <value>+ after the characters</value>
+  </data>
+  <data name="Stage not drawn" xml:space="preserve">
+    <value>not drawn</value>
+  </data>
+  <data name="Variants" xml:space="preserve">
+    <value>variants</value>
+  </data>
+  <data name="Select an effect type" xml:space="preserve">
+    <value>Select a type in the list to see its details.</value>
+  </data>
+  <data name="Kind" xml:space="preserve">
+    <value>Kind</value>
+  </data>
+  <data name="Defined in" xml:space="preserve">
+    <value>Defined in</value>
+  </data>
+  <data name="Same number" xml:space="preserve">
+    <value>Same number</value>
+  </data>
+  <data name="No other kind" xml:space="preserve">
+    <value>No other kind has a type with this number.</value>
+  </data>
+  <data name="Asset" xml:space="preserve">
+    <value>Asset</value>
+  </data>
+  <data name="Slot model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="Slot texture" xml:space="preserve">
+    <value>Texture</value>
+  </data>
+  <data name="Slot default texture" xml:space="preserve">
+    <value>The code of a SubType can choose another texture.</value>
+  </data>
+  <data name="Slot texture chosen in code" xml:space="preserve">
+    <value>Its code chooses a texture</value>
+  </data>
+  <data name="Nothing loaded" xml:space="preserve">
+    <value>Nothing loaded on this map</value>
+  </data>
+  <data name="World object slot" xml:space="preserve">
+    <value>This slot holds an object of the current map.</value>
+  </data>
+  <data name="Stages" xml:space="preserve">
+    <value>Stages</value>
+  </data>
+  <data name="Same move handler" xml:space="preserve">
+    <value>Same move handler</value>
+  </data>
+  <data name="Same creation hook" xml:space="preserve">
+    <value>Same creation hook</value>
+  </data>
+  <data name="Creation values" xml:space="preserve">
+    <value>Creation values</value>
+  </data>
+  <data name="No creation values" xml:space="preserve">
+    <value>No creation values in the data.</value>
+  </data>
+  <data name="Field" xml:space="preserve">
+    <value>Field</value>
+  </data>
+  <data name="All SubTypes" xml:space="preserve">
+    <value>All SubTypes</value>
+  </data>
+  <data name="Other SubTypes" xml:space="preserve">
+    <value>Other SubTypes</value>
+  </data>
+  <data name="SubType" xml:space="preserve">
+    <value>SubType</value>
+  </data>
+  <data name="Used by data" xml:space="preserve">
+    <value>Used by data</value>
+  </data>
+  <data name="Named by its creation values" xml:space="preserve">
+    <value>its creation values</value>
+  </data>
+  <data name="Named by no data" xml:space="preserve">
+    <value>No data names this type yet.</value>
+  </data>
+  <data name="Particle code" xml:space="preserve">
+    <value>Particles are created, moved and drawn by their code; they have no registry.</value>
+  </data>
+  <data name="Joint code" xml:space="preserve">
+    <value>Lightning and trails are created, moved and drawn by their code; they have no registry.</value>
+  </data>
+  <data name="Sprite code" xml:space="preserve">
+    <value>Sprites draw the texture of their number; the SubType is the blend.</value>
+  </data>
 </root>

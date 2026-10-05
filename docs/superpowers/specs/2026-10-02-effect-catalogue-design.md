@@ -48,7 +48,7 @@ decision can move to the roadmap without being renumbered.
 | D39 | What stays code | The per-type lists (`IsSkillEffect`, the shadow list, `DrawCaseOverridesBlend`, …), the range rules, all move and render handlers, the creation hooks, loading assets into slots, and the code call sites, which keep their enum constants. |
 | D40 | Verification | A recorder in the test binary compares the old and the new creation for every moved type (see Verification). It is committed as a test tool, with a seed function for `Random::`, because FX1.3 to FX2 all need it. |
 | D41 | Fixes | The data reproduces the old behavior with its quirks. The bugs found while writing this document are fixed in its PR (the owner's choice, see "Fixed with this document"); bugs found later are filed on sven-n/MuMain and fixed in their own PRs. |
-| D42 | Effect browser | Read only in FX1: lists per kind, details, "used by" from data, and a preview in the world in editor builds. Values are edited in the FX2 effect editor. |
+| D42 | Effect browser | Read only in FX1: lists per kind, details, "used by" from data, a preview in the browser (what the type's slot holds, shown on nothing, a plane, a cube or an item) and a preview in the world, in editor builds. Values are edited in the FX2 effect editor. |
 
 ## Current state
 
@@ -249,9 +249,21 @@ A MuEditor tool, in editor builds only, read only in FX1 (D42):
   or events).
 - "Used by" from data users (D26): the registry rows in FX1, the looks of
   items from phase 13 on, later skills and monsters.
-- Preview: creates the type in the world in front of the hero, with the
-  hero as owner and a chosen SubType; sprites are created again every frame
-  while previewing.
+- Preview in the browser (FX1.7a): a 3D view in the details with a camera
+  that turns and zooms. **Show on** chooses what the type is shown on:
+  nothing, a plane, a cube or an item (picked from a list or found by typing
+  its name). It shows what the slot holds: the model, turning and animated,
+  with the render type, blend mesh and light of its creation values, or the
+  texture as a sprite facing the camera, or flat on the plane. The effect's
+  own move and draw code do not run, so nothing spawns or sounds; types
+  whose drawing stage draws nothing say so.
+- Preview in the world (FX1.7b): creates the type in the world in front of
+  the hero, with the hero as owner and a chosen SubType, so its real code
+  runs: move, draw, the particles and sprites it creates, its sounds.
+  Sprites are created again every frame while previewing; Repeat creates the
+  type again when it ends.
+- Later (FX1.7c): the live effect of FX1.7b drawn in the browser's view, on
+  the chosen object, instead of in the world.
 
 ## Phases
 
@@ -267,8 +279,10 @@ One PR each, small enough to check against the old code.
 | FX1.4 | More creation fields | FX1.3 | The fields the 26 value-only cases need; those cases move into data. |
 | FX1.5 | Variants by SubType | FX1.4 | `variants` in effect rows; the 47 types that choose values by SubType move (done: 41 types, see the FX1.5 note). |
 | FX1.5b | Fields for the rest | FX1.5 | The fields the other 12 types that choose values by SubType need (render type, alphaTarget, a lifeTime offset, start position values, the animation, copies from the light, the call's position and the call's angle); those cases move into data. Done, see the FX1.5b note. |
-| FX1.6 | Effect browser | FX1.1 | Read-only tool in MuEditor; values from FX1.2 on. |
-| FX1.7 | Preview | FX1.6 | Creating the selected type in the world in editor builds. |
+| FX1.6 | Effect browser | FX1.1 | Read-only tool in MuEditor; values from FX1.2 on. Done, see the FX1.6 note. |
+| FX1.7a | Preview in the browser | FX1.6 | A 3D view in the details: the slot's model or texture, shown on nothing, a plane, a cube or an item. Editor code only. |
+| FX1.7b | Preview in the world | FX1.6 | Creating the selected type in front of the hero in editor builds, with a SubType from the variants of its row or typed in. |
+| FX1.7c | Live preview in the browser | FX1.7a, FX1.7b | Later, decided after FX1.7b: the objects of FX1.7b drawn in the browser's view on the chosen object instead of in the world. |
 
 **FX1.1 Names for all types.** The compiled list of symbols per kind (about
 640 lines), generated once by a script and kept by hand afterwards. The four
@@ -453,8 +467,117 @@ that only choose values by SubType are data now, except `BITMAP_MAGIC`,
 `MODEL_MAYASTONEFIRE` and `BITMAP_SWORD_FORCE`, which compute values from
 the call's scale or angle, and `MODEL_WARCRAFT`, which is never created.
 
-**FX1.6–FX1.7** add the effect browser and its preview to MuEditor. They
-change no game code outside editor builds.
+**FX1.6–FX1.7c** add the effect browser and its previews to MuEditor.
+They change no game code outside editor builds.
+
+*FX1.6 done:* MuEditor has the effect browser (docs/effect-data.md): a tab
+per kind with search and filters (asset loaded now; for effects, the stage
+of creation, move and drawing), and the details of a type: code, number and
+file, the types of other kinds with that number, what its slot holds, its
+stages with the effects that share its handler or hook, its creation values
+with a column per variant, and the data that names it. Its model needs no
+ImGui and is tested against the shipped catalogue. The runtime cannot tell a
+case in a switch from no code at all (14 effects are created with only the
+common setup, 27 move with only the shared code), so a compiled list of the
+cases (408 types: 327 creation, 134 move and 218 drawing cases, and 24 cases
+of `RenderEffectShadows`, which draws on the ground and never asks the
+registry, and 3 of `RenderAfterEffects`, which draws again after the
+characters) tells them apart; a test reads the five switches of
+`ZzzEffect.cpp` and checks it in editor builds, and in every build that no
+case is left for a stage the registry handles and that every case names a
+type of the symbol list. Code for single types outside these switches
+(`EffectDestructor`, the shared code of `MoveEffect`, `CheckTargetRange`) is
+listed in docs/effect-data.md, not shown. The slots are read without loading
+anything: a model's meshes with the file `CLoadData` remembers, or the
+texture of the number. Outside the editor only `CLoadData::GetModelFile`
+changed, from private to public; no behavior changed. "Used by" shows the
+creation values for now; the call sites of the code stay an open question.
+
+**FX1.7a Preview in the browser.** What a type's slot holds, alone, in the
+details of the browser. Editor code only: MuEditor files, and the renderer's
+capture code (`_EDITOR`) if the format check below needs a fix.
+
+- **The view.** A 3D view drawn every frame into one texture with the
+  renderer's editor capture (`BeginOffscreenCapture` /
+  `EndOffscreenCapture`), which the map editor's object thumbnails use; each
+  draw keeps its blending and depth. The browser records it from its own
+  code, which runs inside the frame (between `BeginFrame` and `EndFrame`;
+  the comment in `ObjectThumbnail.h` that says otherwise is out of date), so
+  the view shows the current frame. It keeps its texture and size, so no
+  texture is made per frame, and it draws only while the details are shown.
+  The mouse turns the camera around the type, the wheel zooms.
+- **Show on.** A drop-down: nothing, a plane, a cube or an item. The plane
+  and the cube are textured quads (`RenderQuad3D`). An item is picked from a
+  list or found by typing a part of its name, as in the item editor's table.
+  It is set up as the inventory sets it up
+  (`Render::Items::Display::GetDrawnModel`, `ItemObjectAttribute`) and drawn
+  with `RenderPartObject` with its level, excellent and ancient flags at the
+  centre of the view, so it keeps its looks. `RenderObjectScreen` itself is
+  not called: it places the item in front of the game camera and scales it
+  by the window. The type sits at the centre of the object, on top of the
+  plane and the cube; ground types lie at its base, on the plane when one is
+  shown.
+- **What is shown.** An effect with a model number shows its model, turning
+  and animated, with the render type, blend mesh and light of its creation
+  values where it has a row. Effects with a texture number, and sprites,
+  show the texture as a sprite facing the camera, or flat on the plane for
+  the types `RenderEffectShadows` draws on the ground. Particles and
+  lightning show the texture of their number (the code of a SubType can
+  choose another). Types whose code chooses the texture, and slots that hold
+  nothing now, say so instead: the preview loads nothing. No move or draw
+  code of the effect runs.
+- **Checked in the phase.** The capture's color format against the pipelines
+  on Linux and macOS (the capture texture is RGBA8, the pipelines are built
+  for the swapchain's format; it works on Windows), and that the render
+  state the game caches is the same after the view as before.
+
+**FX1.7b Preview in the world.** The real effect, in the game view.
+
+- **Creating it.** A Preview button creates the selected type in front of
+  the hero with the call the game uses (`CreateEffect`, `CreateParticle`,
+  `CreateJoint`, `CreateSprite`), with the hero as owner (and as target for
+  lightning) and a SubType from the variants of its row or typed in
+  (particles, lightning and sprites have no rows; a sprite's SubType is its
+  blend). Sprites are created again every frame while previewing; Repeat
+  creates the type again when it ends. The click is handled after the
+  frame's move and draw, so the effect shows from the next frame; the
+  free-fly camera lets one look at it from any side.
+- **Removing it.** The preview remembers the pool slots it filled, by
+  comparing the pools before and after its call, and the objects later
+  created with one of those slots as owner (`Target` for particles and
+  lightning), and removes those when it stops, when another type is chosen
+  and before the map changes. Objects created with the hero or no owner as
+  their owner cannot be told from the game's own; they, trails and terrain
+  lights end by themselves. `DeleteEffect` by type would also remove the
+  hero's own effects of that type.
+- **Sound and owner.** The effect code plays its sounds itself
+  (`PlayBuffer`); a mute switch, in editor builds only, silences them while
+  previewing. About a third of the creation cases still in code use the
+  owner or the hero (a rough count), so the hero is the owner; types that
+  need a target or a skill state may create nothing, and the browser says
+  so.
+
+**FX1.7c Live preview in the browser (later).** The objects of FX1.7b drawn
+in the browser's view, on the chosen object, instead of in the world. The
+render loops of their pools (`RenderEffectShadows`, `RenderEffects`,
+`RenderParticles`, `RenderJoints`, `RenderSprites`, and `RenderAfterEffects`
+in the Kanturu Maya scene; trails of `RenderBlurs` stay in the world) would
+skip the preview's objects in the world and draw only them inside the
+capture, with the view's camera (`SaveCameraPerspective` /
+`RestoreCameraPerspective`), as visible (only `RenderEffects` and
+`RenderAfterEffects` test the frustum). The costs: changes to six game
+render loops, in editor builds only; an object is drawn in the view or in
+the world, not in both, because the draw code advances animations and
+creates sprites and particles; effects that follow their owner follow the
+hero, so the view centres on the hero's place or the chosen object becomes
+the owner; the view has no terrain, and ground parts are tiles at the
+terrain height of their cell (`RenderTerrainAlphaBitmap`), so the plane goes
+at that height; `ZzzEffectJoint.cpp` and `zzzeffectsprite.cpp` are to be
+checked with cppcheck first (`ZzzEffectParticle.cpp` passed it in FX1.0).
+Decided after FX1.7b, once it shows whether the world preview with the
+free-fly camera is enough. The game view as an editor window would also
+bring FX1.7b into the editor; that is an editor change for all tools, not
+part of FX1.
 
 ## Verification
 
@@ -554,7 +677,8 @@ to FX2 all need it:
   few branches per creation, measured against the old compiled cases.
 - **Assets depend on the map.** 143 effect models are loaded only by map or
   event code, and slots from 160 up are not released when the map changes.
-  Recorder runs and previews pin the map.
+  Recorder runs pin the map; the previews show what the slots hold now
+  (possibly loaded by an earlier map) and load nothing.
 - **Names last.** Once looks reference them, renames go through D26, so
   poor generated names are fixed in FX1.1.
 
@@ -654,3 +778,6 @@ Still to check and file upstream: the owner is used without a null check in
 
 - **Browser, later.** A generated index of the code call sites for "used
   by", besides the data users.
+- **Preview inside the editor.** FX1.7c, or the game view as an editor
+  window, which would show FX1.7b inside the editor and help the map editor
+  too; decided after FX1.7b.

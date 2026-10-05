@@ -43,13 +43,14 @@ public:
     // Problems instead of being shown.
     void OpenTexture(int Model, std::span<const std::wstring> SubFolders, std::vector<TextureProblem>& Problems,
                      int Wrap = GL_REPEAT, int Type = GL_NEAREST);
+    // The file AccessModel opened into the slot, for error messages and the
+    // editor. It stays after the model is released.
+    std::wstring GetModelFile(int Model) const;
 
 private:
     void OpenModelTextures(int Model, std::span<const std::wstring> SubFolders, int Wrap, int Type,
                            std::vector<TextureProblem>* Problems);
     void RememberModelFile(int Model, const std::wstring& path);
-    // The file AccessModel opened into the slot, for error messages.
-    std::wstring GetModelFile(int Model) const;
 
     std::vector<std::wstring> m_modelFiles;
 };

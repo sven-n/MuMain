@@ -131,8 +131,9 @@ and opened from the item, skill, monster and NPC editors:
   and picks bones by clicking them. Lists all users of the look; saving a
   change to a look that others use shows a warning with that list. A new
   look starts as a copy of another.
-- **Effect browser** (FX1) and **effect editor** (FX2): an effect alone in
-  a preview, its values, and where it is used.
+- **Effect browser** (FX1) and **effect editor** (FX2): an effect alone in a
+  preview (shown on nothing, a plane, a cube or an item) and in the world in
+  front of the hero, its values, and where it is used.
 
 ## When an area starts
 
