@@ -23,7 +23,7 @@ std::uint16_t BuildPreviewEffectObject(OBJECT& o, int type, int subType,
                                        const Render::Effects::EffectDescriptor* descriptor);
 
 // Whether MoveEffect plays the model's animation for this type, in the code
-// it runs for every effect.
+// after its switch, which a case that returns first skips.
 bool IsAnimatedByMoveEffect(int type, int subType);
 } // namespace MuEditor::Effects
 

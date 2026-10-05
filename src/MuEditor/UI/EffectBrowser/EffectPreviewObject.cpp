@@ -88,17 +88,19 @@ std::uint16_t BuildPreviewEffectObject(OBJECT& o, int type, int subType,
     return notes;
 }
 
-// The conditions of the code MoveEffect runs for every effect after its
-// switch (ZzzEffect.cpp); test_effect_browser.cpp reads them from the source
-// and fails when this copy no longer agrees.
+// The conditions of the code MoveEffect runs after its switch (ZzzEffect.cpp),
+// and the cases that return before it; test_effect_browser.cpp reads both from
+// the source and fails when this copy no longer agrees.
 bool IsAnimatedByMoveEffect(int type, int subType)
 {
+    // MoveEffect's case of the big meteors returns before that code.
+    const bool returnsFirst = type == MODEL_BIG_METEO1 || type == MODEL_BIG_METEO2 || type == MODEL_BIG_METEO3;
     const bool notPlayed = type == MODEL_SKILL_WHEEL1 || type == MODEL_SKILL_WHEEL2 ||
                            type == MODEL_SKILL_FURY_STRIKE ||
                            ((type == MODEL_STONE1 || type == MODEL_STONE2) && subType == 5) ||
                            (type == MODEL_ARROW_DRILL && subType == 3) || type == MODEL_PIER_PART ||
                            type == MODEL_DEATH_SPI_SKILL || type == MODEL_CHANGE_UP_EFF;
-    return !notPlayed && type >= MODEL_BIRD01 && type < MODEL_SKILL_END;
+    return !returnsFirst && !notPlayed && type >= MODEL_BIRD01 && type < MODEL_SKILL_END;
 }
 } // namespace MuEditor::Effects
 

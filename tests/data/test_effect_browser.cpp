@@ -305,15 +305,19 @@ constexpr std::array<std::pair<std::string_view, int>, 2> RangeBounds = {{
 }};
 
 // A name in the conditions of MoveEffect's shared code: an effect symbol or a
-// bound of the range.
+// bound of the range. Looked up in a table, as the test evaluates the
+// conditions for many types and SubTypes.
 std::optional<int> ValueOfName(std::string_view name)
 {
-    const auto bound =
-        std::find_if(RangeBounds.begin(), RangeBounds.end(), [name](const auto& entry) { return entry.first == name; });
-    if (bound != RangeBounds.end())
-        return bound->second;
-    const int type = ResolveLabel(std::string(name));
-    return type >= 0 ? std::optional<int>(type) : std::nullopt;
+    static const std::map<std::string, int, std::less<>> values = []
+    {
+        std::map<std::string, int, std::less<>> byName(RangeBounds.begin(), RangeBounds.end());
+        for (const EffectTypeSymbol& symbol : GetEffectTypeSymbols(EffectKind::Effect))
+            byName.emplace(symbol.code, symbol.type);
+        return byName;
+    }();
+    const auto found = values.find(name);
+    return found != values.end() ? std::optional<int>(found->second) : std::nullopt;
 }
 } // namespace
 
@@ -346,10 +350,10 @@ TEST_CASE("The effect browser's list of the legacy cases is the cases of the swi
     CHECK(FindEffectLegacyCases(MODEL_BLOOD) == 0);
 }
 
-// The preview animates a model where the code MoveEffect runs for every
-// effect does. The test evaluates the conditions of that code, so a type a
-// phase takes out of them or adds fails here until IsAnimatedByMoveEffect
-// follows.
+// The preview animates a model where the code MoveEffect runs after its switch
+// does. The test evaluates the conditions of that code and finds the cases
+// that return before it, so a type a phase takes out of them or adds fails
+// here until IsAnimatedByMoveEffect follows.
 TEST_CASE("The effect preview animates the models that MoveEffect's shared code animates [data][effects][editor]")
 {
     const std::string source =
@@ -363,10 +367,30 @@ TEST_CASE("The effect preview animates the models that MoveEffect's shared code 
     }
     REQUIRE(conditions.problems.empty());
 
+    // A case that returns first skips that code.
+    const EffectSourceCases::SwitchLabels returning =
+        EffectSourceCases::ReadCasesThatReturn(source, Stage::Move, EffectMacros);
+    for (const std::string& problem : returning.problems)
+    {
+        FAIL_CHECK(problem);
+    }
+    std::set<int> returnsFirst;
+    for (const std::string& label : returning.labels)
+    {
+        INFO(label);
+        const int type = ResolveLabel(label);
+        CHECK(type >= 0);
+        returnsFirst.insert(type);
+    }
+
     // The names do not depend on the type, so one reading finds every problem
     // and every number. A comparison of the SubType with a number changes at
-    // that number.
-    std::set<int> subTypes = {0};
+    // that number; the range covers SubTypes only the copy might compare with.
+    std::set<int> subTypes;
+    for (int subType = -1; subType <= 255; ++subType)
+    {
+        subTypes.insert(subType);
+    }
     for (const std::string& condition : {conditions.skipped, conditions.animated})
     {
         const EffectSourceCases::ConditionValue first =
@@ -401,7 +425,7 @@ TEST_CASE("The effect preview animates the models that MoveEffect's shared code 
                 EffectSourceCases::EvaluateCondition(conditions.skipped, type, subType, ValueOfName).value;
             const bool animated =
                 EffectSourceCases::EvaluateCondition(conditions.animated, type, subType, ValueOfName).value;
-            CHECK(IsAnimatedByMoveEffect(type, subType) == (!skipped && animated));
+            CHECK(IsAnimatedByMoveEffect(type, subType) == (!returnsFirst.contains(type) && !skipped && animated));
         }
     }
 }

@@ -12,7 +12,7 @@
 // draws on the ground, and RenderAfterEffects, which draws again after the
 // characters; those two have no registry lookup. For the tests that check
 // which stages of an effect type are still a case. Also the conditions of the
-// code MoveEffect runs for every effect after its switch.
+// code MoveEffect runs after its switch, and the cases that return before it.
 namespace EffectSourceCases
 {
 enum class Stage
@@ -61,4 +61,9 @@ struct SharedMoveConditions
 };
 
 SharedMoveConditions ReadSharedMoveConditions(const std::string& source, std::span<const MacroState> macros);
+
+// The labels of the cases of the switch of `stage` whose statements always end
+// with `return;`, so the code after the switch never runs for them. A label
+// without statements counts as the case it falls through to.
+SwitchLabels ReadCasesThatReturn(const std::string& source, Stage stage, std::span<const MacroState> macros);
 } // namespace EffectSourceCases
