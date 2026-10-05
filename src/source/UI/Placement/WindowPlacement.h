@@ -24,8 +24,9 @@ void CloseForOpening(std::uint32_t windowId);
 void Arrange();
 // Once a frame: re-places windows when the screen size, UI scale or HUD position changed.
 void Update();
-// Right edge, in screen pixels, of the world the open windows leave uncovered: the leftmost open
-// slot in a region marked data-covers-world, or the screen width.
+// Edges, in screen pixels, of the world the open windows leave uncovered. An open slot in a region
+// marked data-covers-world narrows it from the side of the screen the slot is on.
+float UncoveredWorldLeft();
 float UncoveredWorldRight();
 void Release();
 }

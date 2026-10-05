@@ -196,6 +196,34 @@ Windows with a slot use `Slot`. `Legacy` (scene windows that work in real pixels
 `FloatingWorkspace` and `Dialog` rows of `UILayoutPolicy.cpp` disappear as their windows gain
 slots.
 
+## Theme recipes (verified in game)
+
+Tried against the legacy theme by editing only its workspace (2026-10-05, 1024x768, UI scale 90 %).
+Each worked, including clicks inside moved windows.
+
+- **Split docks.** Move the character-side slots (`character`, `my_quest`, `pet`,
+  `quest_progress_etc`) into a second region styled like `.dock-right` with `flex-direction: row`
+  and no `right`. Character info and the quest log dock on the left while the inventory family
+  stays right. Drop the cross-side `data-closes` (inventory/quest log, extension/character), since
+  the two sides no longer compete for room.
+- **Centre stage.** Put the inventory family in a region with `display: flex;
+  justify-content: center; align-items: center` filling `#safe_area`. The inventory, and the
+  inventory with its extension or a shop, centre as a group. Remove `data-saved-position` from
+  the inventory slot, or the saved drag position wins while it is first in its region.
+- **Composed row.** Regions are independent, so a centred region overlaps a dock on a narrow
+  screen. Making `#safe_area` a flex row of left dock, centre (`flex: 1 1 auto`) and right dock,
+  with the regions `position: relative`, centres windows in the space the docks leave. RmlUi has
+  no `order` property, so the regions must be in that order in the markup (a fork of
+  `workspace.rml`).
+
+What these exposed:
+- The uncovered world was one-sided; open slots now narrow it from whichever side of the screen
+  they are on (`UncoveredWorldLeft()`/`UncoveredWorldRight()`). `GetScreenWidth()` and its HUD
+  consumers still use only the right edge, so a left dock does not yet move the buff strip or
+  macro bar.
+- HUD parts stay where `main_frame.rcss` puts them; a left dock covers the chat log, which a
+  theme using one would move.
+
 ## Open questions
 
 - One workspace document or one per region; which RmlUi context it lives in. Background-context

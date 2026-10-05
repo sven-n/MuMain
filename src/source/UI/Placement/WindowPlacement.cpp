@@ -48,6 +48,7 @@ UI::Scaling::Transform g_lastDock{};
 Reserve g_lastReserve{};
 unsigned int g_lastWidth = 0;
 unsigned int g_lastHeight = 0;
+float g_uncoveredLeft = 0.f;
 float g_uncoveredRight = 0.f;
 const int g_themeReloadToken = 0;
 
@@ -211,12 +212,21 @@ void Arrange()
 
     workspace->UpdateDocument();
 
-    g_uncoveredRight = static_cast<float>(WindowWidth);
+    // Open slots in covering regions narrow the world from the side of the screen they are on.
+    const float screenWidth = static_cast<float>(WindowWidth);
+    g_uncoveredLeft = 0.f;
+    g_uncoveredRight = screenWidth;
     for (Rml::Element* slot : slots)
     {
         Rml::Element* region = slot->GetParentNode();
-        if (slot->IsClassSet("open") && region != nullptr && region->HasAttribute("data-covers-world"))
-            g_uncoveredRight = std::min(g_uncoveredRight, slot->GetAbsoluteOffset(Rml::BoxArea::Border).x);
+        if (!slot->IsClassSet("open") || region == nullptr || !region->HasAttribute("data-covers-world"))
+            continue;
+        const float left = slot->GetAbsoluteOffset(Rml::BoxArea::Border).x;
+        const float right = left + slot->GetBox().GetSize(Rml::BoxArea::Border).x;
+        if (left + right >= screenWidth)
+            g_uncoveredRight = std::min(g_uncoveredRight, left);
+        else
+            g_uncoveredLeft = std::max(g_uncoveredLeft, right);
     }
 
     for (Rml::Element* slot : slots)
@@ -257,6 +267,11 @@ void Update()
     if (WindowWidth != g_lastWidth || WindowHeight != g_lastHeight || dock.scaleX != g_lastDock.scaleX ||
         dock.offsetY != g_lastDock.offsetY || !SameReserve(HudReserve(dock), g_lastReserve))
         Arrange();
+}
+
+float UncoveredWorldLeft()
+{
+    return g_workspace != nullptr ? g_uncoveredLeft : 0.f;
 }
 
 float UncoveredWorldRight()
