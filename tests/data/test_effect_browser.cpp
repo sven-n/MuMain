@@ -3,6 +3,7 @@
 #include "doctest.h"
 
 #include "EffectSourceCases.h"
+#include "EffectSourceCondition.h"
 #include "EffectTestData.h"
 
 #include "Core/Globals/_TextureIndex.h"
@@ -17,6 +18,7 @@
 #include "Core/Utilities/AssetLoadWorld.h"
 #include "UI/EffectBrowser/EffectBrowserModel.h"
 #include "UI/EffectBrowser/EffectLegacyCases.h"
+#include "UI/EffectBrowser/EffectPreviewObject.h"
 #include "World/MapInfra/MapManager.h"
 #endif
 
@@ -24,8 +26,11 @@
 #include <array>
 #include <charconv>
 #include <map>
+#include <optional>
 #include <set>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 using namespace Data::Effects;
@@ -291,6 +296,25 @@ const EffectCreateTable::Line* FindLine(const EffectCreateTable& table, std::str
                                     [&](const EffectCreateTable::Line& line) { return line.field == field; });
     return found != table.lines.end() ? &*found : nullptr;
 }
+
+// The bounds of the type range of MoveEffect's shared code, which are no
+// effect types.
+constexpr std::array<std::pair<std::string_view, int>, 2> RangeBounds = {{
+    {"MODEL_BIRD01", MODEL_BIRD01},
+    {"MODEL_SKILL_END", MODEL_SKILL_END},
+}};
+
+// A name in the conditions of MoveEffect's shared code: an effect symbol or a
+// bound of the range.
+std::optional<int> ValueOfName(std::string_view name)
+{
+    const auto bound =
+        std::find_if(RangeBounds.begin(), RangeBounds.end(), [name](const auto& entry) { return entry.first == name; });
+    if (bound != RangeBounds.end())
+        return bound->second;
+    const int type = ResolveLabel(std::string(name));
+    return type >= 0 ? std::optional<int>(type) : std::nullopt;
+}
 } // namespace
 
 TEST_CASE("The effect browser's list of the legacy cases is the cases of the switches [data][effects][editor]")
@@ -320,6 +344,66 @@ TEST_CASE("The effect browser's list of the legacy cases is the cases of the swi
         CHECK((found != fromSource.end() ? found->second : 0) == entry.cases);
     }
     CHECK(FindEffectLegacyCases(MODEL_BLOOD) == 0);
+}
+
+// The preview animates a model where the code MoveEffect runs for every
+// effect does. The test evaluates the conditions of that code, so a type a
+// phase takes out of them or adds fails here until IsAnimatedByMoveEffect
+// follows.
+TEST_CASE("The effect preview animates the models that MoveEffect's shared code animates [data][effects][editor]")
+{
+    const std::string source =
+        EffectSourceCases::ReadEffectSource(std::filesystem::path(MU_TEST_SOURCE_DIR) / "Render/Effects/ZzzEffect.cpp");
+    REQUIRE_FALSE(source.empty());
+    const EffectSourceCases::SharedMoveConditions conditions =
+        EffectSourceCases::ReadSharedMoveConditions(source, EffectMacros);
+    for (const std::string& problem : conditions.problems)
+    {
+        FAIL_CHECK(problem);
+    }
+    REQUIRE(conditions.problems.empty());
+
+    // The names do not depend on the type, so one reading finds every problem
+    // and every number. A comparison of the SubType with a number changes at
+    // that number.
+    std::set<int> subTypes = {0};
+    for (const std::string& condition : {conditions.skipped, conditions.animated})
+    {
+        const EffectSourceCases::ConditionValue first =
+            EffectSourceCases::EvaluateCondition(condition, 0, 0, ValueOfName);
+        for (const std::string& problem : first.problems)
+        {
+            FAIL_CHECK(problem);
+        }
+        REQUIRE(first.problems.empty());
+        for (const int number : first.numbers)
+        {
+            subTypes.insert({number - 1, number, number + 1});
+        }
+    }
+
+    std::set<int> types;
+    for (const EffectTypeSymbol& symbol : GetEffectTypeSymbols(EffectKind::Effect))
+    {
+        types.insert(symbol.type);
+    }
+    for (const auto& bound : RangeBounds)
+    {
+        types.insert({bound.second - 1, bound.second});
+    }
+    for (const int type : types)
+    {
+        INFO(CodeOf(type));
+        for (const int subType : subTypes)
+        {
+            INFO(subType);
+            const bool skipped =
+                EffectSourceCases::EvaluateCondition(conditions.skipped, type, subType, ValueOfName).value;
+            const bool animated =
+                EffectSourceCases::EvaluateCondition(conditions.animated, type, subType, ValueOfName).value;
+            CHECK(IsAnimatedByMoveEffect(type, subType) == (!skipped && animated));
+        }
+    }
 }
 
 TEST_CASE("The effect browser takes a stage from the registry, then the legacy case [data][effects][editor]")

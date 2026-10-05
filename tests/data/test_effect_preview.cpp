@@ -284,16 +284,6 @@ TEST_CASE("The effect preview makes an effect as CreateEffect would, without its
     CHECK(o.Scale == 0.9f);
 }
 
-TEST_CASE("MoveEffect animates the models of the skill range except some [effects][editor]")
-{
-    CHECK(IsAnimatedByMoveEffect(MODEL_POISON, 0));
-    CHECK_FALSE(IsAnimatedByMoveEffect(MODEL_SKILL_WHEEL1, 0));
-    CHECK_FALSE(IsAnimatedByMoveEffect(MODEL_STONE1, 5));
-    CHECK(IsAnimatedByMoveEffect(MODEL_STONE1, 0));
-    CHECK_FALSE(IsAnimatedByMoveEffect(MODEL_SKILL_END, 0));
-    CHECK_FALSE(IsAnimatedByMoveEffect(BITMAP_SKULL, 0));
-}
-
 TEST_CASE("The effect preview's pool guard removes what was created while it lived [effects][editor]")
 {
     const bool keptBefore = Sprites[10].Live;

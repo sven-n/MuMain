@@ -88,7 +88,9 @@ std::uint16_t BuildPreviewEffectObject(OBJECT& o, int type, int subType,
     return notes;
 }
 
-// The condition of MoveEffect's shared code (ZzzEffect.cpp).
+// The conditions of the code MoveEffect runs for every effect after its
+// switch (ZzzEffect.cpp); test_effect_browser.cpp reads them from the source
+// and fails when this copy no longer agrees.
 bool IsAnimatedByMoveEffect(int type, int subType)
 {
     const bool notPlayed = type == MODEL_SKILL_WHEEL1 || type == MODEL_SKILL_WHEEL2 ||

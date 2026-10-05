@@ -11,7 +11,8 @@
 // MoveEffect and RenderEffects, and the switches of RenderEffectShadows, which
 // draws on the ground, and RenderAfterEffects, which draws again after the
 // characters; those two have no registry lookup. For the tests that check
-// which stages of an effect type are still a case.
+// which stages of an effect type are still a case. Also the conditions of the
+// code MoveEffect runs for every effect after its switch.
 namespace EffectSourceCases
 {
 enum class Stage
@@ -45,4 +46,19 @@ struct SwitchLabels
 std::string ReadEffectSource(const std::filesystem::path& zzzEffect);
 
 SwitchLabels ReadSwitchLabels(const std::string& source, Stage stage, std::span<const MacroState> macros);
+
+// The conditions of the code after MoveEffect's switch, without spaces:
+// `skipped` holds the types that code leaves alone, `animated` the types of
+// the others whose model it animates.
+struct SharedMoveConditions
+{
+    std::string skipped;
+    std::string animated;
+    // What the scan cannot read: the function or the switch not found, or the
+    // code after the switch no longer
+    // `if (skipped) {} else { if (animated) { ... PlayAnimation(...) ... } ... }`.
+    std::vector<std::string> problems;
+};
+
+SharedMoveConditions ReadSharedMoveConditions(const std::string& source, std::span<const MacroState> macros);
 } // namespace EffectSourceCases

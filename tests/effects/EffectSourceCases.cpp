@@ -240,6 +240,55 @@ void ReadLabels(std::string_view function, size_t body, SwitchLabels& result)
     }
     result.problems.push_back("switch not closed");
 }
+
+// Where the body of the switch of `stage` opens in the text of its function;
+// npos without one.
+size_t SwitchBody(std::string_view function, Stage stage)
+{
+    const std::string_view marker = SwitchAfter(stage);
+    const size_t after = marker.empty() ? 0 : function.find(marker);
+    const size_t switchStart = after == std::string_view::npos ? after : FindKeyword(function, "switch", after);
+    return switchStart == std::string_view::npos ? switchStart : function.find('{', switchStart);
+}
+
+// The position after the bracket that closes the '(' or '{' at `open`; npos
+// when it is not closed.
+size_t AfterClosing(std::string_view text, size_t open)
+{
+    const char opening = text[open];
+    const char closing = opening == '(' ? ')' : '}';
+    int depth = 0;
+    for (size_t k = open; k < text.size(); ++k)
+    {
+        depth += text[k] == opening ? 1 : text[k] == closing ? -1 : 0;
+        if (depth == 0)
+            return k + 1;
+    }
+    return std::string_view::npos;
+}
+
+// Whether `text` goes on with `expected` at `pos`; moves `pos` past it.
+bool TakeText(std::string_view text, size_t& pos, std::string_view expected)
+{
+    if (text.compare(pos, expected.size(), expected) != 0)
+        return false;
+    pos += expected.size();
+    return true;
+}
+
+// Reads what is inside the `opening` bracket at `pos` and moves `pos` past
+// the bracket that closes it.
+bool TakeBracketed(std::string_view text, size_t& pos, char opening, std::string& inside)
+{
+    if (pos >= text.size() || text[pos] != opening)
+        return false;
+    const size_t end = AfterClosing(text, pos);
+    if (end == std::string_view::npos)
+        return false;
+    inside = std::string(text.substr(pos + 1, end - pos - 2));
+    pos = end;
+    return true;
+}
 } // namespace
 
 std::string ReadEffectSource(const std::filesystem::path& zzzEffect)
@@ -259,16 +308,36 @@ SwitchLabels ReadSwitchLabels(const std::string& source, Stage stage, std::span<
 {
     SwitchLabels result;
     const std::string function = FunctionText(source, SignatureOf(stage), macros, result.problems);
-    const std::string_view marker = SwitchAfter(stage);
-    const size_t after = marker.empty() ? 0 : function.find(marker);
-    const size_t switchStart = after == std::string::npos ? after : FindKeyword(function, "switch", after);
-    const size_t body = switchStart == std::string::npos ? switchStart : function.find('{', switchStart);
+    const size_t body = SwitchBody(function, stage);
     if (body == std::string::npos)
     {
         result.problems.push_back("no switch found");
         return result;
     }
     ReadLabels(function, body, result);
+    return result;
+}
+
+SharedMoveConditions ReadSharedMoveConditions(const std::string& source, std::span<const MacroState> macros)
+{
+    SharedMoveConditions result;
+    const std::string function = FunctionText(source, SignatureOf(Stage::Move), macros, result.problems);
+    const size_t body = SwitchBody(function, Stage::Move);
+    const size_t switchEnd = body == std::string::npos ? body : AfterClosing(function, body);
+    if (switchEnd == std::string::npos)
+    {
+        result.problems.push_back("no switch found");
+        return result;
+    }
+    const std::string shared = WithoutSpaces(std::string_view(function).substr(switchEnd));
+    size_t pos = 0;
+    std::string animatedCode;
+    const bool read = TakeText(shared, pos, "if") && TakeBracketed(shared, pos, '(', result.skipped) &&
+                      TakeText(shared, pos, "{}else{if") && TakeBracketed(shared, pos, '(', result.animated) &&
+                      TakeBracketed(shared, pos, '{', animatedCode) &&
+                      animatedCode.find("PlayAnimation(") != std::string::npos;
+    if (!read)
+        result.problems.push_back("the code after the switch is not as expected: " + shared.substr(0, 160));
     return result;
 }
 } // namespace EffectSourceCases
