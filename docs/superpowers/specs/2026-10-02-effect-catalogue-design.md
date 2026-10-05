@@ -281,7 +281,7 @@ One PR each, small enough to check against the old code.
 | FX1.5b | Fields for the rest | FX1.5 | The fields the other 12 types that choose values by SubType need (render type, alphaTarget, a lifeTime offset, start position values, the animation, copies from the light, the call's position and the call's angle); those cases move into data. Done, see the FX1.5b note. |
 | FX1.6 | Effect browser | FX1.1 | Read-only tool in MuEditor; values from FX1.2 on. Done, see the FX1.6 note. |
 | FX1.7a | Preview in the browser | FX1.6 | A 3D view in the details: the slot's model or texture, shown on nothing, a plane, a cube or an item. Editor code only. Done, see the FX1.7a note. |
-| FX1.7b | Preview in the world | FX1.6 | Creating the selected type in front of the hero in editor builds, with a SubType from the variants of its row or typed in. |
+| FX1.7b | Preview in the world | FX1.6 | Creating the selected type in front of the hero in editor builds, with a SubType from the variants of its row or typed in. Done, see the FX1.7b note. |
 | FX1.7c | Live preview in the browser | FX1.7a, FX1.7b | Later, decided after FX1.7b: the objects of FX1.7b drawn in the browser's view on the chosen object instead of in the world. |
 
 **FX1.1 Names for all types.** The compiled list of symbols per kind (about
@@ -594,6 +594,40 @@ search, the effect's object, the pool guard) are unit tested.
   owner or the hero (a rough count), so the hero is the owner; types that
   need a target or a skill state may create nothing, and the browser says
   so.
+
+*FX1.7b done:* the details' Preview section has an "In the world" part
+(Create, Stop, Repeat, Mute sounds, a count of what runs and notes), and the
+SubType is one value for both previews: typed in, or picked from the columns
+of the creation table. `EffectWorldPreview` runs once a frame from
+`CMuEditorCore::Render`, after the game's move and draw, also while the
+editor is hidden; it creates with the game's calls and copies of the vectors
+(creation code writes into them). Corrections to the plan above: there are
+five pools, not four: with the hero as owner, `CreateEffect` puts eight
+skill types into `g_SkillEffects`, which a map change does not clear; the
+preview compares and follows all five, and remembers each slot's type, so a
+slot the game refills is not taken for the preview's. What a call creates is
+found by comparing the pools around it; followers are the objects that
+became live since the last frame and are owned (effects) or targeted
+(particles, joints) by a followed effect, followers of followers too.
+Removal runs in one pass (`EffectDestructor` with the effect's trails,
+`Live` false for particles and joints), so no followed object outlives its
+owner; sprites need none. "Before the map changes": the game clears its
+pools in `CMapManager::DeleteObjects` (map change, reload of the map, scene
+change), and an editor-only listener there (`Core::WorldClearing`, set by
+the editor like `Core::AssetLoadWorld`) lets the preview remove its objects
+first; after the clearing their slots may already hold the game's new
+objects. The mute is an editor-only flag checked in `PlayBuffer`
+(`Audio::EditorMute`): it starts no sound effect played once while a muted
+preview runs, so it mutes the game's other sound effects too; telling the
+preview's sounds apart would need per-object scopes in the game's loops.
+Types that change the game with the hero as owner are refused: the catapult
+stones' SubTypes 88 and 99 (knock-back sent to the server, the catapult
+camera) and the Lagul's SubType 1 (writes into its owner as a joint); a
+source test checks the latter kind of case. Player builds compile none of
+it; the two listeners in game code are under `#ifdef _EDITOR`. Checked in
+the client against the in-game test server: an effect (the storm, in the
+skill pool), a particle, lightning and a sprite created, followed and
+removed, Repeat, removal when leaving for the character list.
 
 **FX1.7c Live preview in the browser (later).** The objects of FX1.7b drawn
 in the browser's view, on the chosen object, instead of in the world. The

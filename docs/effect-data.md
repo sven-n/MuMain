@@ -324,7 +324,7 @@ The **Preview** section of the details shows what the selected type's slot
 holds in a small 3D view. It loads nothing: a slot that holds nothing on
 this map says so. The effect's own move and draw code do not run, so nothing
 it would create (sprites, particles, sounds) appears; the preview in the
-world (FX1.7b) is for that.
+world (below) is for that.
 
 - **What it shows.** An effect with a model number shows its model, animated
   as the game animates it and turning, with the scale, light, blend mesh and
@@ -338,9 +338,11 @@ world (FX1.7b) is for that.
   it in the drop-down (type a part of its name or its number to find it),
   and set its level and whether it is excellent or ancient; the item is
   drawn with its looks, without its own sprites and particles.
-- **SubType** (types with variants): the values of which column of the
-  creation table the preview uses; the first stands for the SubTypes without
-  a variant.
+- **SubType**: typed in, or picked from the SubTypes of the creation table's
+  columns (the first stands for the SubTypes without a variant, which get
+  the row's own values). The view uses the values the game gives that
+  SubType; the preview in the world creates the type with it. A sprite's
+  SubType is its **Blend**.
 - **The view**: drag to turn the camera, the wheel zooms, a double click or
   **Reset view** puts it back; **Turn** turns the type slowly.
 - **Notes** under the view say what the preview cannot show: an empty slot,
@@ -348,6 +350,41 @@ world (FX1.7b) is for that.
   whose values start it transparent or at size 0 (the preview shows it
   anyway), a model without animation, an item that cannot be drawn at the
   chosen level because a model it needs is not loaded.
+
+#### In the world
+
+Under the view, **In the world** creates the selected type in the game
+world, with the game's own call (`CreateEffect`, `CreateParticle`,
+`CreateJoint`, `CreateSprite`) and the SubType chosen above, so its own move
+and draw code run: what it creates, its sounds, how it moves and ends. It
+needs a character in a map; the free camera of the Dev Editor shows it from
+any side, and F12 hides the editor while it runs.
+
+- **Create** places it two tiles in front of the character (particles,
+  lightning and sprites at the height of the chest), with the character as
+  its owner, as the target of particles and lightning, which run to it. Each
+  click creates it once more. Effects that follow their owner show at the
+  character.
+- **Stop** removes what the preview created and what that created in turn;
+  so do choosing another type, closing the browser and leaving the map (the
+  game clears its pools then; the preview removes its objects first).
+  Objects created later with the character or no one as owner cannot be told
+  from the game's own and end by themselves.
+- **Repeat** creates the type again shortly after what it created has ended.
+  A sprite lasts one frame; the preview creates it every frame.
+- **Mute sounds** keeps the game from starting sound effects while the
+  preview runs (editor builds only); music and looped sounds go on.
+- A line counts the effects, particles and lightning that run. Notes say why
+  nothing shows: no character in a map, all effects off in the options (no
+  particles and sprites are created), effects hidden in the Dev Editor, the
+  call created nothing (the type may need a target, a skill or a state of
+  the character, or its pool is full), what it created ended in its first
+  frame.
+- A few types are not created: with the character as owner they change the
+  game (the catapult stones' SubTypes 88 and 99 knock the character back and
+  tell the server or move the catapult camera; SubType 1 of the summoner's
+  Lagul writes into its owner as if it were lightning). A test finds every
+  case that takes its owner for lightning and checks the list.
 
 ## When the code changes
 
