@@ -1,10 +1,6 @@
 /* Legacy theme for CMyInventory's chrome (frame/title/gold/buttons). #panel's left/top/scale come
    live from C++ (SyncRmlModel()), so coordinates below are plain reference px, not dp. Button
-   icons/positions match CMyInventory::SetButtonInfo()'s former constants.
-
-   Known limitation: .inv-btn (always renders last, RmlUi's main context) can sit on top of
-   CInventoryCtrl's native item tooltip when a bottom-row item's tooltip extends into this button
-   strip. Confirmed cosmetic, not fixed here. */
+   icons/positions match CMyInventory::SetButtonInfo()'s former constants. */
 
 #panel {
 	position: absolute;

@@ -409,8 +409,7 @@ premultiplied, so opaque pixels are exact and only partly transparent edges can 
 draw callbacks drained once per frame from `Winmain.cpp`'s `SetPostRmlUiCallback`, which opens its
 own `LOAD_OP_LOAD` render pass after RmlUi's main context has closed. That pass is the **only**
 layer above RmlUi. `Register(owner, draw)` / `Unregister(owner)`, drawing in registration order.
-No window uses it today; the inventory's native item tooltip is the recorded candidate
-(`tracked-deferrals.md`).
+No window uses it today.
 
 Prefer a render target for anything that belongs to one window. This seam is above the whole
 context rather than at any window's depth, so what it draws stands over every panel, including
