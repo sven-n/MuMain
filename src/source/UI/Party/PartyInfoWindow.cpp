@@ -131,7 +131,9 @@ void CPartyInfoWindow::ReloadRmlTheme()
     m_pRmlDoc = nullptr;
 
     BuildRmlUi();
-    // Next frame's SyncRmlModel() self-corrects visibility/live model state.
+    // The new document starts hidden; an open window shows it again.
+    if (m_pRmlDoc && IsVisible())
+        m_pRmlDoc->Show();
 }
 
 void CPartyInfoWindow::Release()

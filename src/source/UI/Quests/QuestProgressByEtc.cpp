@@ -148,6 +148,9 @@ void CQuestProgressByEtc::ReloadRmlTheme()
     m_pRmlDoc = nullptr;
 
     BuildRmlUi();
+    // The new document starts hidden; an open window shows it again.
+    if (m_pRmlDoc && IsVisible())
+        m_pRmlDoc->Show();
 }
 
 void CQuestProgressByEtc::Release()
