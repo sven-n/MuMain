@@ -103,7 +103,8 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
 ## Open work, in suggested order
 
 1. HUD in the workspace: H1 and H2's header batch are done. Next H2 batches, one component each:
-   minimap, buff row, party list, item endurance (chat done); then H3 and H4
+   buff row, party list, item endurance need the user's call first (window-placement.md,
+   "Findings for the rest of H2"; chat done, minimap needs no slot); then H3 and H4
    (`window-placement.md`, "HUD in the workspace"). Hand checks pending: the minimap's clip
    around the HUD; in modern at a capped scale, dragging items between windows and item
    tooltips; the chat log's resize handle and F4/F5 (socket hotkeys did not reach the client).

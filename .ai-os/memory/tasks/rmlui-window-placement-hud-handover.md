@@ -20,8 +20,8 @@ game: modern 100 %, legacy 90 %, HUD moved to a reserve header. Pending hand che
 H2's first batch is committed: the header holds the MU Helper bar (left slot) and the modern top
 bar (right slot); modern caps its dock regions (max-height: 100%) and the service draws their
 windows smaller to fit (window-placement.md, "Header and docks"). The chat is in a chat-stack
-region (window-placement.md, "Chat"). Next H2 batches, one component each: minimap, buff row,
-party list, item endurance. A component
+region (window-placement.md, "Chat"). The minimap needs no slot. Buff row, party list and item
+endurance wait on the user's call (window-placement.md, "Findings for the rest of H2"). A component
 whose measured size changes must call UI::Placement::Invalidate().
 
 Read first: AGENTS.md, docs/CODING_RULES.md, docs/rmlui-ui-system/architecture-principles.md,

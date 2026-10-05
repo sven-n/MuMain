@@ -428,10 +428,24 @@ Chat (done, second H2 batch):
 - Verified in game at 1024x768: modern at 100 %, legacy at 90 %, and the HUD-in-header layout.
   Hand check: dragging the log's resize handle and F4/F5 (the socket's keys did not reach it).
 
+Findings for the rest of H2 (2026-10-05, not started; needs the user's call):
+- The minimap is not a corner widget: it is the full-screen map (Tab), drawn round the window
+  centre, which already avoids the HUD through the `main_hud` slot (H1). It needs no slot, and
+  H4's "minimap in a corner the windows avoid" does not apply to this game's map.
+- The buff row, party list and item durability follow the uncovered-world edges in C++
+  (`UncoveredWorld*In()`), so they already move with docks on either side. They are in two
+  spaces: the party list and item durability in the docked windows' transform (dock scale and
+  origin), the buff row in the HUD's. A `world_area` region sized by the service to the uncovered
+  edges could hold them, but one region has one scale, and the dock scale is not RCSS's `dp`,
+  so a theme could not write their offsets in its own units. Options: leave them as
+  edge-followers; give each scale its own world-area region, with offsets the theme writes in
+  `dp` and the service converts; or move the two dock-space widgets to the HUD scale (which
+  changes their size at wide resolutions).
+
 | Phase | Work |
 |---|---|
 | H1 | Shell regions in both workspaces (header, footer, left, right, content); `#safe_area` becomes the content region; participation attribute with `reserve`/`overlay`. Main strip (`#hud_strip` + `#exp`) as a content-sized `reserve` footer slot; `HudReserve()` and `GetStripRect()` readers (placement, minimap clips) read the slot. Headless layout test for the shell; in-game check, both themes, 100 % and a non-100 % scale. |
-| H2 | Done: top bar and MU Helper bar as header slots, modern's docks capped to the content area; chat log and input in a `chat-stack` region. Next: minimap; buff row (`buff_strip.rml`); party list; item endurance. One component per batch, each verified in game. The HUD widgets' `UncoveredWorld*In()` positioning becomes their slots. |
+| H2 | Done: top bar and MU Helper bar as header slots, modern's docks capped to the content area; chat log and input in a `chat-stack` region. The minimap needs no slot. Buff row, party list and item endurance: open, see "Findings for the rest of H2". One component per batch, each verified in game. The HUD widgets' `UncoveredWorld*In()` positioning becomes their slots. |
 | H3 | Event HUDs (Blood/Chaos Castle timers, battle soccer, duel, Crywolf, siege, Doppelganger frame, Empire Guardian timer, Cursed Temple system, Kanturu info): `overlay` slots. |
 | H4 | Theme recipes on runtime copies, recorded in "Theme recipes": side HUD (left `reserve` region), header plus footer, split HUD, minimap docked in a corner the windows avoid. |
 
