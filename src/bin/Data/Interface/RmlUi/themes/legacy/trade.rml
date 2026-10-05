@@ -19,7 +19,7 @@
 		<div id="partner_grid" class="native-anchor"></div>
 		<div id="item_grid" class="native-anchor"></div>
 		<span class="sharp-text" id="title"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{title}}</span>
 
 		<div id="your_nick_bg" class="nick-bg nick-bg-your"></div>
 		<span id="your_guild_name" class="sharp-text guild-name" data-class-hidden="!your_guild_visible"

@@ -22,7 +22,7 @@
 		     socket prompt at 280 instead of running into it and the socket list, as they do in the
 		     original. -->
 		<span class="sharp-text" id="title" data-class-low="!show_tax_rate"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{title}}</span>
 
 		<div class="mix-tax-rate sharp-text" data-class-hidden="!show_tax_rate"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'">

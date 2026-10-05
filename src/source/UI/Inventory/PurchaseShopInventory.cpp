@@ -74,6 +74,7 @@ void mu::ui::window::CPurchaseShopInventory::BuildRmlUi()
                 c.Bind("root_x", &model.rootX);
                 c.Bind("root_y", &model.rootY);
                 c.Bind("root_scale", &model.rootScale);
+                c.Bind("panel_width", &model.panelWidth);
                 c.Bind("text_px", &model.textPx);
 
                 c.Bind("title", &model.title);
@@ -315,6 +316,7 @@ void mu::ui::window::CPurchaseShopInventory::SyncRmlModel()
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->FollowAnchor(m_pRmlDoc, "item_grid", m_Pos, 16, 90);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);

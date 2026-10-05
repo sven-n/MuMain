@@ -16,9 +16,9 @@
 		<!-- Where the native item grid goes: invisible boxes the theme places; the window reads them each frame. -->
 		<div id="item_grid" class="native-anchor"></div>
 		<span class="sharp-text" id="title"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'"><span class="native-fit">{{title}}</span></span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'"><span class="native-fit">{{title}}</span></span>
 		<span class="sharp-text" id="tax_rate"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'"><span class="native-fit">{{tax_rate_text}}</span></span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'"><span class="native-fit">{{tax_rate_text}}</span></span>
 
 		<div id="btn_repair" class="shop-btn shop-btn-repair" data-class-hidden="!repair_visible"
 		     data-event-click="npc_shop_repair_click"></div>

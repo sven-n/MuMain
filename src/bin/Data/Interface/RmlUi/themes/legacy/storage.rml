@@ -14,7 +14,7 @@
 		<!-- Where the native item grid goes: invisible boxes the theme places; the window reads them each frame. -->
 		<div id="item_grid" class="native-anchor"></div>
 		<span class="sharp-text" id="title" data-class-locked="title_locked"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{title}}</span>
 
 		<div id="money_bg"></div>
 		<span id="zen_text" class="sharp-text sharp-right gold-amount" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"

@@ -14,14 +14,14 @@
 		<!-- Where the native item grid goes: invisible boxes the theme places; the window reads them each frame. -->
 		<div id="item_grid" class="native-anchor"></div>
 		<span class="sharp-text" id="title"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{title}}</span>
 
 		<!-- Reproduces IMAGE_MYSHOPINVENTORY_EDIT (newui_Box_openTitle.tga), the same sprite
 		     CMyShopInventory's own subject strip uses -- here purely decorative behind the
 		     shop-owner's (read-only) name, not a live text-input widget. -->
 		<div class="shop-title-strip"></div>
 		<span class="sharp-text" id="shop_owner_text"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{shop_owner_text}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{shop_owner_text}}</span>
 
 		<span class="sharp-text warning-label"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{warning_label}}</span>

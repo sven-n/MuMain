@@ -14,7 +14,7 @@
 		<!-- Where the native item grid goes: invisible boxes the theme places; the window reads them each frame. -->
 		<div id="item_grid" class="native-anchor"></div>
 		<span class="sharp-text" id="title"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{title}}</span>
 
 		<!-- Shop name. Stock RmlUi <input>: it owns the edit buffer, caret, selection and IME, and
 		     two-way binds the committed value to MyShopRmlModel::shopTitle. Deliberately NOT
@@ -47,7 +47,7 @@
 		     the native RenderText() calls used, static except still_opening's visibility. Colors are
 		     plain RCSS (myshop-line-* classes), not data-bound -- fixed decorative constants. -->
 		<div id="still_opening_line" class="sharp-text myshop-line myshop-line-still-opening" data-class-hidden="!show_still_opening"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{still_opening_text}}</div>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{still_opening_text}}</div>
 		<div id="warning_line" class="sharp-text myshop-line myshop-line-warning"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{warning_text}}</div>
 		<div id="selling_price_line" class="sharp-text myshop-line myshop-line-info"

@@ -58,6 +58,7 @@ namespace mu::ui::window
         struct NPCShopRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+            float panelWidth = 190.f;
             float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
             Rml::String title;
