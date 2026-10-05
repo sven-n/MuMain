@@ -5,7 +5,6 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
 
@@ -72,12 +71,7 @@ namespace mu::ui::window
         bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
         void SetPos(int x, int y);
-        bool SupportsFillPlacement() const override { return true; }
-        void SetFillPlacementSize(float width, float height) override
-        {
-            if (m_FillSize.Set(width, height))
-                m_FillSize.Apply(m_pRmlDoc, "panel");
-        }
+        Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
         void Show(bool bShow) override;
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -163,7 +157,6 @@ namespace mu::ui::window
         };
         RmlModelBinder<CharacterInfoRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
-        UI::RmlBridge::FillPlacementSize m_FillSize;
 
     private:
         CManager* m_pNewUIMng;

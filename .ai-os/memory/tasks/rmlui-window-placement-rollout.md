@@ -106,6 +106,10 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
    entry/result) sit on a `panel-stage` region; verified in game. Slot coverage is complete for
    every window C++ used to place in a dock, a column or the panel centre.
 
+9. Done: fill is generic (`CObject::GetFillDocument()`); 24 windows opt in. The native corner
+   close follows the panel width. Verified in game: MU Helper config filled (frame, close).
+   Next: a shared fluid window `<template>` per theme.
+
 ## How to work on this
 
 - Build (PowerShell; Git Bash quoting swallows its output):

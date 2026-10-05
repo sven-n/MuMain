@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/Scaling/UITransform.h"
 
 extern unsigned int WindowWidth;
@@ -32,6 +33,7 @@ namespace mu::ui::window
         bool m_bActive;
         UI::Scaling::LayoutMode m_layoutMode;
         UI::Scaling::Transform m_slotTransform{1.f, 1.f, 0.f, 0.f, 1.f};
+        UI::RmlBridge::FillPlacementSize m_fillSize;
     public:
         CObject()
             : m_hRelatedWnd(nullptr), m_bRender(true), m_bUpdate(true), m_bActive(true),
@@ -47,8 +49,17 @@ namespace mu::ui::window
         HWND GetRelatedWnd() const { return m_hRelatedWnd; }
         void SetLayoutMode(UI::Scaling::LayoutMode mode) { m_layoutMode = mode; }
         UI::Scaling::LayoutMode GetLayoutMode() const { return m_layoutMode; }
-        virtual bool SupportsFillPlacement() const { return false; }
-        virtual void SetFillPlacementSize(float, float) {}
+        // A window drawn wholly by RmlUi whose hit box reads its #panel returns that document: a
+        // theme's data-fit="fill" slot then sizes the #panel. How the content fills it is the theme's.
+        virtual Rml::ElementDocument* GetFillDocument() const { return nullptr; }
+        virtual bool SupportsFillPlacement() const { return GetFillDocument() != nullptr; }
+        virtual void SetFillPlacementSize(float width, float height)
+        {
+            if (m_fillSize.Set(width, height))
+                m_fillSize.Apply(GetFillDocument(), "panel");
+        }
+        // Once a frame: gives a document rebuilt since (a theme switch) its fill size again.
+        void SyncFillPlacement() const { m_fillSize.Sync(GetFillDocument(), "panel"); }
         // The smallest size a fill slot may give this window, in its layout units; without one the
         // window's content size.
         virtual bool GetFillMinimumSize(float&, float&) const { return false; }

@@ -405,6 +405,25 @@ void Update()
     if (WindowWidth != g_lastWidth || WindowHeight != g_lastHeight || dock.scaleX != g_lastDock.scaleX ||
         dock.offsetY != g_lastDock.offsetY || !SameReserve(HudReserve(dock), g_lastReserve))
         Arrange();
+    for (const auto& [name, entry] : g_windows)
+    {
+        if (const mu::ui::window::CObject* window = entry.getWindow ? entry.getWindow() : nullptr)
+            window->SyncFillPlacement();
+    }
+}
+
+bool PanelSizeOf(std::uint32_t windowId, float& width, float& height)
+{
+    for (const auto& [name, entry] : g_windows)
+    {
+        if (entry.windowId != windowId || entry.document.empty())
+            continue;
+        const Rml::Vector2f size = PanelSize(entry);
+        width = size.x;
+        height = size.y;
+        return true;
+    }
+    return false;
 }
 
 float UncoveredWorldLeft()

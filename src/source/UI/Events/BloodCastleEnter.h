@@ -64,6 +64,7 @@ namespace mu::ui::window
         virtual ~CEnterBloodCastle();
 
         bool Create(CManager* pNewUIMng, int x, int y);
+        Rml::ElementDocument* GetFillDocument() const override { return m_View.Document(); }
         void Release();
 
         void SetPos(int x, int y);

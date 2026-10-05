@@ -131,7 +131,6 @@ void CPetInfoWindow::BuildRmlUi()
 
     m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
         "Data/Interface/RmlUi/pet_info.rml");
-    m_FillSize.Apply(m_pRmlDoc, "panel");
 }
 
 void CPetInfoWindow::ReloadRmlTheme()

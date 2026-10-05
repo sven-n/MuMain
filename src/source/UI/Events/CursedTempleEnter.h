@@ -39,6 +39,7 @@ public:
     virtual ~CCursedTempleEnter();
 
     bool Create(CManager* pNewUIMng, int x, int y);
+    Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
 
 public:
     bool UpdateMouseEvent();

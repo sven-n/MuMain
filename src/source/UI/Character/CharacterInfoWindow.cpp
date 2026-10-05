@@ -216,7 +216,6 @@ void mu::ui::window::CCharacterInfoWindow::BuildRmlUi()
 
     m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
         "Data/Interface/RmlUi/character_info.rml");
-    m_FillSize.Apply(m_pRmlDoc, "panel");
 }
 
 void mu::ui::window::CCharacterInfoWindow::ReloadRmlTheme()

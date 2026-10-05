@@ -5,7 +5,6 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
@@ -39,12 +38,7 @@ namespace mu::ui::window
 
         void SetPos(int x, int y);
         void Show(bool bShow) override;
-        bool SupportsFillPlacement() const override { return true; }
-        void SetFillPlacementSize(float width, float height) override
-        {
-            if (m_FillSize.Set(width, height))
-                m_FillSize.Apply(m_pRmlDoc, "panel");
-        }
+        Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -99,7 +93,6 @@ namespace mu::ui::window
         };
         RmlModelBinder<PetInfoRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
-        UI::RmlBridge::FillPlacementSize m_FillSize;
 
     private:
         CManager* m_pNewUIMng;

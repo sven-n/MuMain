@@ -76,5 +76,7 @@ namespace UI::RmlBridge
         // Sizes `panelId` in `doc` and sets its "fill-placement" class, or clears both while zero,
         // so the theme's fill rules apply only to a filled panel.
         void Apply(Rml::ElementDocument* doc, const char* panelId) const;
+        // Applies a non-zero size again to a document that lost it (rebuilt by a theme switch).
+        void Sync(Rml::ElementDocument* doc, const char* panelId) const;
     };
 }

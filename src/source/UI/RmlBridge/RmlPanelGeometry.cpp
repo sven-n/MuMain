@@ -59,6 +59,15 @@ void UI::RmlBridge::FillPlacementSize::Apply(Rml::ElementDocument* doc, const ch
     doc->UpdateDocument();
 }
 
+void UI::RmlBridge::FillPlacementSize::Sync(Rml::ElementDocument* doc, const char* panelId) const
+{
+    if (width <= 0.f || height <= 0.f || doc == nullptr)
+        return;
+    Rml::Element* panel = doc->GetElementById(panelId);
+    if (panel != nullptr && !panel->IsClassSet("fill-placement"))
+        Apply(doc, panelId);
+}
+
 bool UI::RmlBridge::RefreshLogicalAnchorRect(Rml::ElementDocument* doc, const char* panelId, const char* anchorId,
     const POINT& panelPos, float& x, float& y, float& width, float& height)
 {

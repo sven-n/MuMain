@@ -58,6 +58,7 @@ namespace mu::ui::window
         virtual ~CGuildMakeWindow();
 
         bool Create(CManager* pNewUIMng, int x, int y);
+        Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
         void Release();
 
         void ClosingProcess();

@@ -42,6 +42,7 @@ public:
     // The theme's #panel size in the window's layout units; false (outputs untouched) before the
     // document has laid out.
     bool PanelSize(float& width, float& height) const;
+    Rml::ElementDocument* Document() const { return m_pRmlDoc; }
 
     // A click RmlUi reported since the last call: an enabled level button's index (else -1), the
     // exit button.

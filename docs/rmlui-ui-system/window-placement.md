@@ -181,8 +181,16 @@ work and is left for a gameplay pass.
   - live 3D drawn into a `RenderTarget` the document shows (component catalog, "Native content
     inside a document") instead of at `m_Pos` plus fixed offsets.
 
-  A window declares support in C++, and the theme's RCSS for it must be fluid, which usually
-  means the theme forks that window's RCSS. Character info is the first fill-capable window: its
+  Fill is the theme's decision for every window that can take it: a window drawn wholly by
+  RmlUi whose hit box reads its `#panel` returns that document from `CObject::GetFillDocument()`,
+  and `CObject` sizes the panel (the placement service re-applies it after a theme switch). 24
+  windows do: the docked RmlUi windows (character, pet, party, guild info and make, command and
+  command list, NPC dialogue, quest log and progress, MU Helper config and detail, castle, guard,
+  gatekeeper, gate switch, catapult, duel watch, Gens ranking, Blood Castle and Devil Square entry)
+  and the centred NPC panels. How the content uses the extra room is the theme's RCSS; a theme
+  that has not made a window's content fluid still gets a larger frame with the content at the
+  top-left. The native corner close (`HandleFrameCornerClose()`) reads the panel's width, so it
+  stays on the corner of a filled panel. Character info is the first fill-capable window: its
   frame follows the filled panel and its actions follow the lower edge. Pet info is the second:
   its title centres on the panel and its group boxes reach the right edge. A window opts in with
   `UI::RmlBridge::FillPlacementSize` (store the slot's size, apply it to `#panel`) and a top-right
