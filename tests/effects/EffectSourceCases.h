@@ -8,8 +8,9 @@
 
 // The case labels of the legacy switches of ZzzEffect.cpp, read from the
 // source text: the switch after the registry lookup in CreateEffect,
-// MoveEffect and RenderEffects, and the switch of RenderEffectShadows, which
-// draws on the ground and has no registry lookup. For the tests that check
+// MoveEffect and RenderEffects, and the switches of RenderEffectShadows, which
+// draws on the ground, and RenderAfterEffects, which draws again after the
+// characters; those two have no registry lookup. For the tests that check
 // which stages of an effect type are still a case.
 namespace EffectSourceCases
 {
@@ -19,9 +20,10 @@ enum class Stage
     Move,
     Render,
     Ground,
+    AfterCharacters,
 };
 
-// Whether the macro of an #ifdef or #ifndef in the four functions is defined.
+// Whether the macro of an #ifdef or #ifndef in the five functions is defined.
 struct MacroState
 {
     std::string_view name;

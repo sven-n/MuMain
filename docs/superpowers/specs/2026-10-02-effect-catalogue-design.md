@@ -481,14 +481,17 @@ case in a switch from no code at all (14 effects are created with only the
 common setup, 27 move with only the shared code), so a compiled list of the
 cases (408 types: 327 creation, 134 move and 218 drawing cases, and 24 cases
 of `RenderEffectShadows`, which draws on the ground and never asks the
-registry) tells them apart; a test reads the four switches of
+registry, and 3 of `RenderAfterEffects`, which draws again after the
+characters) tells them apart; a test reads the five switches of
 `ZzzEffect.cpp` and checks it in editor builds, and in every build that no
 case is left for a stage the registry handles and that every case names a
-type of the symbol list. The slots are read without loading anything: a
-model's meshes with the file `CLoadData` remembers, or the texture of the
-number. Outside the editor only `CLoadData::GetModelFile` changed, from
-private to public; no behavior changed. "Used by" shows the creation values
-for now; the call sites of the code stay an open question.
+type of the symbol list. Code for single types outside these switches
+(`EffectDestructor`, the shared code of `MoveEffect`, `CheckTargetRange`) is
+listed in docs/effect-data.md, not shown. The slots are read without loading
+anything: a model's meshes with the file `CLoadData` remembers, or the
+texture of the number. Outside the editor only `CLoadData::GetModelFile`
+changed, from private to public; no behavior changed. "Used by" shows the
+creation values for now; the call sites of the code stay an open question.
 
 **FX1.7a Preview in the browser.** What a type's slot holds, alone, in the
 details of the browser. Editor code only: MuEditor files, and the renderer's

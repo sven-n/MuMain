@@ -574,6 +574,9 @@
   <data name="Also on the ground" xml:space="preserve">
     <value>+ auf dem Boden</value>
   </data>
+  <data name="Also after the characters" xml:space="preserve">
+    <value>+ nach den Charakteren</value>
+  </data>
   <data name="Stage not drawn" xml:space="preserve">
     <value>nicht gezeichnet</value>
   </data>

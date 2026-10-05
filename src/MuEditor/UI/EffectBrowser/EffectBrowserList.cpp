@@ -82,10 +82,13 @@ bool RenderRow(const EffectBrowserRow& row, bool withStages, bool selected)
     ImGui::TextUnformatted(MuEditor::Effects::Labels::Stage(row.stages.move));
     ImGui::TableNextColumn();
     ImGui::TextUnformatted(MuEditor::Effects::Labels::Stage(row.stages.render));
-    if (const char* ground = MuEditor::Effects::Labels::GroundSuffix(row.stages); ground[0] != '\0')
+    for (const char* suffix : {MuEditor::Effects::Labels::GroundSuffix(row.stages),
+                               MuEditor::Effects::Labels::AfterCharactersSuffix(row.stages)})
     {
+        if (suffix[0] == '\0')
+            continue;
         ImGui::SameLine();
-        ImGui::TextUnformatted(ground);
+        ImGui::TextUnformatted(suffix);
     }
     return clicked;
 }

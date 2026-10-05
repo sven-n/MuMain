@@ -273,8 +273,22 @@ by their code.
 `RenderEffectShadows` never asks the registry: it draws its effects on the
 ground besides a draw handler or a case of `RenderEffects`, which the
 browser shows as "+ on the ground", and a draw handler does not replace it.
-The filter "on the ground" lists all of them. Effects that share a move
-handler or a creation hook list each other under their stages.
+The filter "on the ground" lists all of them. `RenderAfterEffects` draws
+`MODEL_STORM3`, `MODEL_MAYASTAR` and `MODEL_MAYAHANDSKILL` again after the
+characters in the Kanturu Maya scene, when their case of `RenderEffects`
+asks for it ("+ after the characters"); a draw handler for one of them has
+to take that drawing along. Effects that share a move handler or a creation
+hook list each other under their stages.
+
+Some code for single types runs whatever the stages say, and the browser
+does not show it: `EffectDestructor` removes the trails of
+`MODEL_EFFECT_FLAME_STRIKE` and the lightning of
+`MODEL_SUMMONER_SUMMON_LAGUL` when they end; the shared code of `MoveEffect`
+(which also runs after a move handler that asks for it) skips the animation
+and the particle step for a list of types, moves the particles of some types
+its own way and moves `BITMAP_LIGHT` and `MODEL_FIRE` of some SubTypes a
+second time at random; `CheckTargetRange` creates what some types create
+when they reach their target. A change that moves a type looks at these too.
 
 ### Creation values, slot and users
 
@@ -318,8 +332,9 @@ the cases: `src/MuEditor/UI/EffectBrowser/EffectLegacyCases.cpp`. A change
 that moves a stage of a type into data or a handler deletes its case and its
 flag in the list (a type without flags leaves it); a new case gets a flag.
 `test_effect_types` reads the switches of `CreateEffect`, `MoveEffect`,
-`RenderEffects` and `RenderEffectShadows` in `ZzzEffect.cpp` and fails when
-a case is left for a stage the registry handles, when a case names no type
-of the symbol list, and, in editor builds, when the list differs from the
-switches. An `#ifdef` in these functions needs its macro in the list of the
-test.
+`RenderEffects`, `RenderEffectShadows` and `RenderAfterEffects` in
+`ZzzEffect.cpp` and fails when a case is left for a stage the registry
+handles (a case of `RenderAfterEffects` counts as part of the drawing), when
+a case names no type of the symbol list, and, in editor builds, when the
+list differs from the switches. An `#ifdef` in these functions needs its
+macro in the list of the test.

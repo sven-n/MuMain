@@ -31,9 +31,9 @@ using EffectSourceCases::Stage;
 
 namespace
 {
-// The macros of the #ifdef blocks in CreateEffect, MoveEffect, RenderEffects
-// and RenderEffectShadows, as the game is built (Defined_Global.h through
-// stdafx.h).
+// The macros of the #ifdef blocks in CreateEffect, MoveEffect, RenderEffects,
+// RenderEffectShadows and RenderAfterEffects, as the game is built
+// (Defined_Global.h through stdafx.h).
 #ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
 constexpr bool InfluenceGroundEffect = true;
 #else
@@ -74,7 +74,8 @@ constexpr std::array<EffectSourceCases::MacroState, 6> EffectMacros = {{
     {"GUILD_WAR_EVENT", GuildWarEvent},
 }};
 
-constexpr std::array<Stage, 4> Stages = {Stage::Create, Stage::Move, Stage::Render, Stage::Ground};
+constexpr std::array<Stage, 5> Stages = {Stage::Create, Stage::Move, Stage::Render, Stage::Ground,
+                                         Stage::AfterCharacters};
 
 const char* NameOf(Stage stage)
 {
@@ -87,9 +88,11 @@ const char* NameOf(Stage stage)
     case Stage::Render:
         return "RenderEffects";
     case Stage::Ground:
+        return "RenderEffectShadows";
+    case Stage::AfterCharacters:
         break;
     }
-    return "RenderEffectShadows";
+    return "RenderAfterEffects";
 }
 
 // The number of a label: the code of an effect symbol, or a number of an
@@ -122,7 +125,7 @@ std::string CodeOf(int type)
 std::set<int> ReadCases(const std::string& source, Stage stage)
 {
     const EffectSourceCases::SwitchLabels labels = EffectSourceCases::ReadSwitchLabels(source, stage, EffectMacros);
-    INFO(NameOf(stage));
+    INFO(std::string(NameOf(stage)));
     for (const std::string& problem : labels.problems)
     {
         FAIL_CHECK(problem);
@@ -153,7 +156,9 @@ std::map<Stage, std::set<int>> ReadAllCases()
 }
 
 // Whether the registry handles the stage of `type`, so its switch case would
-// never run. RenderEffectShadows never asks the registry.
+// never run. RenderEffectShadows never asks the registry. RenderAfterEffects
+// draws what the case of RenderEffects asked for, so a draw handler leaves its
+// case behind: the handler has to take that drawing along.
 bool RegistryHandles(Stage stage, int type)
 {
     const Render::Effects::EffectDescriptor* descriptor = Render::Effects::Lookup(type);
@@ -166,6 +171,7 @@ bool RegistryHandles(Stage stage, int type)
     case Stage::Move:
         return descriptor->move != nullptr;
     case Stage::Render:
+    case Stage::AfterCharacters:
         return descriptor->render != nullptr;
     case Stage::Ground:
         break;
@@ -183,7 +189,7 @@ TEST_CASE("The legacy switches of ZzzEffect.cpp have cases only for stages the r
     EffectTestData::BuildShippedRegistry();
     for (const auto& [stage, types] : ReadAllCases())
     {
-        INFO(NameOf(stage));
+        INFO(std::string(NameOf(stage)));
         for (const int type : types)
         {
             INFO(CodeOf(type));
@@ -213,9 +219,11 @@ std::uint8_t FlagOf(Stage stage)
     case Stage::Render:
         return RenderCase;
     case Stage::Ground:
+        return GroundCase;
+    case Stage::AfterCharacters:
         break;
     }
-    return GroundCase;
+    return AfterCharactersCase;
 }
 
 EffectTypeCatalogue ShippedCatalogue()
@@ -320,6 +328,9 @@ TEST_CASE("The effect browser takes a stage from the registry, then the legacy c
           EffectStages{CreateStage::SetupOnly, MoveStage::SharedCodeOnly, RenderStage::OnGround, true});
     CHECK(DescribeEffectStages(BITMAP_LIGHT, nullptr, static_cast<std::uint8_t>(RenderCase | GroundCase)) ==
           EffectStages{CreateStage::SetupOnly, MoveStage::SharedCodeOnly, RenderStage::Switch, true});
+    // RenderAfterEffects draws again what the case of RenderEffects asked for.
+    CHECK(DescribeEffectStages(BITMAP_LIGHT, nullptr, static_cast<std::uint8_t>(RenderCase | AfterCharactersCase)) ==
+          EffectStages{CreateStage::SetupOnly, MoveStage::SharedCodeOnly, RenderStage::Switch, false, true});
 
     descriptor.create = Render::Effects::CreateParams{};
     descriptor.move = &Render::Effects::Behaviors::MoveSpear;
@@ -364,6 +375,7 @@ TEST_CASE("The effect browser lists the types of every kind with name, code, sta
     const EffectStages raklionMagic = model.FindRow(EffectKind::Effect, MODEL_RAKLION_BOSS_MAGIC)->stages;
     CHECK(raklionMagic.render == RenderStage::Switch);
     CHECK(raklionMagic.drawnOnGround);
+    CHECK(model.FindRow(EffectKind::Effect, MODEL_MAYASTAR)->stages.drawnAfterCharacters);
 
     // Each row of the catalogue is a type whose creation is data.
     const std::span<const EffectBrowserRow> effects = model.GetRows(EffectKind::Effect);

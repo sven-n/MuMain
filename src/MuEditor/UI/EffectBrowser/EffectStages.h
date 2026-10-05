@@ -60,6 +60,9 @@ struct EffectStages
     // RenderEffectShadows has a case: it draws the effect on the ground, also
     // when a handler or RenderEffects draws it too.
     bool drawnOnGround = false;
+    // RenderAfterEffects has a case: it draws the effect again after the
+    // characters when the case of RenderEffects asks for it.
+    bool drawnAfterCharacters = false;
 
     bool operator==(const EffectStages&) const = default;
 };

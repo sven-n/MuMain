@@ -23,16 +23,19 @@ std::string_view SignatureOf(Stage stage)
     case Stage::Render:
         return "void RenderEffects(bool bRenderBlendMesh)";
     case Stage::Ground:
+        return "void RenderEffectShadows()";
+    case Stage::AfterCharacters:
         break;
     }
-    return "void RenderEffectShadows()";
+    return "void RenderAfterEffects()";
 }
 
 // The switch of a stage is the first one after this text; RenderEffectShadows
-// has no registry lookup, so its first switch counts.
+// and RenderAfterEffects have no registry lookup, so their first switch counts.
 std::string_view SwitchAfter(Stage stage)
 {
-    return stage == Stage::Ground ? std::string_view() : std::string_view("Render::Effects::Lookup(");
+    const bool afterLookup = stage == Stage::Create || stage == Stage::Move || stage == Stage::Render;
+    return afterLookup ? std::string_view("Render::Effects::Lookup(") : std::string_view();
 }
 
 bool IsIdentifierChar(char c)

@@ -81,6 +81,11 @@ const char* GroundSuffix(const EffectStages& stages)
     return stages.drawnOnGround && stages.render != RenderStage::OnGround ? I18N::Editor::AlsoOnTheGround : "";
 }
 
+const char* AfterCharactersSuffix(const EffectStages& stages)
+{
+    return stages.drawnAfterCharacters ? I18N::Editor::AlsoAfterTheCharacters : "";
+}
+
 const char* Slot(EffectAssetSlot slot)
 {
     switch (slot)

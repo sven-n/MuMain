@@ -16,6 +16,9 @@ enum LegacyCase : std::uint8_t
     // RenderEffectShadows, which draws on the ground and never asks the
     // registry.
     GroundCase = 1 << 3,
+    // RenderAfterEffects, which draws again after the characters in the
+    // Kanturu Maya scene when the RenderEffects case asks for it.
+    AfterCharactersCase = 1 << 4,
 };
 
 struct EffectLegacyCases

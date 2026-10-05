@@ -52,7 +52,8 @@ EffectStages DescribeEffectStages(int type, const Render::Effects::EffectDescrip
                                   std::uint8_t legacyCases)
 {
     return {DescribeCreation(descriptor, legacyCases), DescribeMove(descriptor, legacyCases),
-            DescribeRendering(type, descriptor, legacyCases), (legacyCases & GroundCase) != 0};
+            DescribeRendering(type, descriptor, legacyCases), (legacyCases & GroundCase) != 0,
+            (legacyCases & AfterCharactersCase) != 0};
 }
 } // namespace MuEditor::Effects
 
