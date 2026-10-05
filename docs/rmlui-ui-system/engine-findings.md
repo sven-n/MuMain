@@ -534,10 +534,9 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   (`Context::GetElementAtPoint()` calls `Element::Project()`), so the control looks alive — it
   hovers, it takes the press — and then maps that press through unscaled geometry. At 100% the two
   agree and everything looks right; at any other UI scale the value is wrong by both an offset and a
-  gain. `COptionWindow`'s sliders are unaffected because that panel sizes in `dp`, which resolves
-  into the layout box itself, rather than scaling via a transform. Before putting a slider inside a
-  root-transformed panel (the whole docked family), give it a hit area that is laid out in real
-  pixels, outside the transform.
+  gain. Before putting a slider inside a root-transformed panel (the whole docked family), give it
+  a hit area that is laid out in real pixels, outside the transform, or use the level gauge
+  (`component-catalog.md`), which maps the pointer against the drawn bar.
 
 - **Dragging a transform-centred panel: two traps** (found turning on dialog dragging,
   `RmlDraggable.cpp`). An inline `transform: none` set from C++ did not cancel `.center-both`'s

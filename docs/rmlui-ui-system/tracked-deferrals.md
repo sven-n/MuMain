@@ -29,7 +29,6 @@ one of the trigger initiatives on the right.
 
 | Window(s) | Known deviation | Revisit when... |
 |---|---|---|
-| `CMuHelperDetailWindow`'s three threshold gauges | Their art is RmlUi but their input is still C++: a hit rectangle per gauge plus per-frame mouse polling (`UpdateGauge()`). Converting them to a stock `<input type="range">` was attempted and **stopped deliberately**: `WidgetSlider`'s value mapping is unusable under the docked panel's `transform: scale(root_scale)` (see `engine-findings.md`). Two smaller differences would also have to be settled: the slider has no wheel handling, and native's click mapping (`floor(10x/124) + 1`, so 0 is only reachable left of the bar) is not a proportional one. | Either the docked panels stop scaling via a CSS transform, or the hit area is hoisted out of it as a `<body>`-level element positioned from `root_x`/`root_y`/`root_scale`. `COptionWindow`'s sliders are not a precedent — that panel has no transform. |
 | Migrated windows | Recorded validation does not cover every resolution, UI scale, theme and drag-state combination. | Extend and execute the existing [validation matrix](validation-matrix.md), including event-only states and actual item/skill activation. |
 | All draggable migrated windows | Existing drag system's interaction with theme-default-layout + UI-scale (§10–11) has never been explicitly audited | Scope decided ([window-placement.md](window-placement.md) section 7): only dialogs and the friend system drag, plus the inventory's saved position. Dialog dragging was checked in both themes at 100 % and 90 % with `drag-ui` (2026-10-05); the friend windows were re-checked in modern at 100 %. Still open: friend windows and the inventory at other UI scales and resolutions. Check these windows specifically then, don't just audit the mechanism in the abstract. |
 | `CBuffStrip` | Right-click-to-cancel not reproduced (a deliberate scope cut documented in `newui-tier-adapter.md`). The legacy theme has the original's per-line-coloured tooltip (`.tooltip-rich`); modern keeps a plain one by choice. | Right-click-distinct-from-left-click is proven generally in a `data-event-click` binding. |
@@ -131,9 +130,6 @@ ways, and only the first is self-announcing:
   reconciles layout height with the counter-scale.
 
 
-- **`COptionWindow`'s volume slider is a gold-thumb slider**; native drew the same fill gauge
-  (`newui_option_volume01/02`) the MU Helper's detail window now draws in both themes. The gauge
-  pieces are in `mu_helper_common.rcss` if the options window is revisited.
 - **Modern-theme treatments picked without checking dock neighbours** — already its own gap note in
   `STATUS.md`, which has recurred twice and whose *process* half is still unfixed.
 

@@ -408,7 +408,10 @@ zero legacy `CWin` dependency. **First real caller landed 2026-09-07**: `CMyInve
 paired with a new generic persistence mechanism (`GameConfig::GetWindowPosition`/
 `SetWindowPosition`, an `OnDragEnd` hook on `MakeDraggable` itself) any future draggable window can
 reuse with one call each way — see `STATUS.md`'s "Known gaps" entry for the full mechanism and
-what's still unaudited (behavior across a resolution/UI-scale/theme change post-drag).
+what's still unaudited (behavior across a resolution/UI-scale/theme change post-drag). Only drags
+of the handle itself move the panel: a control inside it with its own `drag` (a level gauge's hit
+area) is the drag element for its own drags, and those are ignored even though they bubble up to
+the handle.
 
 ## Native content inside a document
 
@@ -564,12 +567,22 @@ this primitive's positioning/clamping logic for two low-traffic windows.
 `data-style-decorator`. It is the one resolver for every skill icon: the HUD (`CSkillList`), the
 master tree and the MU Helper windows (`UI::MuHelper::SkillIconDecorator()`, always lit).
 
-A *gauge*, native's fill-by-level slider (`newui_option_volume01` back, `volume02` fill clipped to
-`level * 10%`), is built in `mu_helper_common.rcss` (`.mh-gauge`/`.mh-gauge-fill`). Legacy uses one
-sprite rect per level (`mh-gauge-fill-1..10`), because a clipped wrapper doesn't clip absolutely-positioned children
-here. The input stays in C++, and a stock `<input type="range">` is not a drop-in replacement
-inside a root-transformed panel — see `engine-findings.md` and its `tracked-deferrals.md` row.
-Move it to `base.rcss` when a second window needs it.
+## Level gauge
+
+Native's fill-by-level bar, in both `base.rcss`: `.level-gauge` (the rail), `.level-gauge-fill`
+and `.level-gauge-hit` (a child of the rail that takes the pointer); the consumer sizes and places
+all three. Legacy draws the original art — `newui_option_volume01/02` for 10 levels,
+`newui_option_effect03/04` for 5 (`.level-gauge.effect-gauge`) — with one sprite rect per level,
+since a clipped wrapper doesn't clip absolutely-positioned children here. A fill shows its level
+through a class, `level-<n>`, which each theme maps to a width (and, in legacy, a sprite); the MU
+Helper detail window binds its own width instead.
+
+The hit child binds `mousedown`, `drag` and `mousescroll` to one callback that passes each event
+to `UI::RmlBridge::ApplyLevelGaugeEvent()` (`RmlLevelGauge.h`) with the window's own pointer-to-
+level rule: a press or drag sets the level from where the pointer is on the drawn bar (correct
+inside a transformed panel, unlike a stock `<input type="range">`, `engine-findings.md`), the wheel
+steps it. Consumers: the MU Helper detail window's thresholds, the options window's sound, music
+and effect-limit gauges.
 
 ## Feature operations for networking and game code
 
