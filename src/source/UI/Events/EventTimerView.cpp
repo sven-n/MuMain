@@ -93,7 +93,7 @@ void mu::ui::window::EventTimerView::Sync(bool visible, const POINT& pos, const 
     if (!visible)
         return;
 
-    // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
+    // CManager scopes LayoutMode::HudFrame around the window: the bottom HUD's uniform scale, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncField(m_RmlBinder, &EventTimerRmlModel::scaleX, "scale_x", transform.scaleX);
     SyncField(m_RmlBinder, &EventTimerRmlModel::scaleY, "scale_y", transform.scaleY);

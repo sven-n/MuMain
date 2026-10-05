@@ -804,7 +804,7 @@ void mu::ui::window::CKanturuInfoWindow::SyncView()
     if (!IsVisible())
         return;
 
-    // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
+    // CManager scopes LayoutMode::HudFrame around the window: the bottom HUD's uniform scale, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncInfoField(m_RmlBinder, &KanturuInfoRmlModel::scaleX, "scale_x", transform.scaleX);
     SyncInfoField(m_RmlBinder, &KanturuInfoRmlModel::scaleY, "scale_y", transform.scaleY);

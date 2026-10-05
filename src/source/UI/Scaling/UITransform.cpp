@@ -258,6 +258,11 @@ UI::Scaling::Transform UI::Scaling::TransformForLayout(LayoutMode mode, int wind
         return {1.0f, 1.0f, 0.0f, 0.0f, 1.0f};
     if (mode == LayoutMode::Hud || mode == LayoutMode::WorldOverlay)
         return ScreenOverlayTransform(windowWidth, windowHeight);
+    if (mode == LayoutMode::HudFrame)
+    {
+        const float scale = BottomHudScale(windowWidth, windowHeight);
+        return {scale, scale, 0.0f, 0.0f, scale};
+    }
     if (mode == LayoutMode::HudLeft)
         return BottomHudLeftTransform(windowWidth, windowHeight);
     if (mode == LayoutMode::HudCenter)

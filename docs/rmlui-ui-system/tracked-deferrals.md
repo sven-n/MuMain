@@ -140,10 +140,14 @@ risk, not a formality: a wrong position here surfaces only during the event.
   clock's state all moved unseen. It also carried a real bug: altars were pushed only when they
   had something to show, so a contracted altar shifted every altar after it along the hill.
 - **`SiegeWarfare`** — renders only inside Battle Castle during a siege.
-- **The Illusion Temple result and HUD**, the three event timers, the Doppelganger frame, the duel
-  spectator frame and Battle Soccer's score rows. Of these the Temple HUD is the weakest: its
-  chrome left the sprite list, and the draw order rests on the argument that the regrouped pieces
-  do not overlap on screen rather than on having been looked at.
+- **The Illusion Temple result and HUD**, the Blood Castle and Chaos Castle timers and the duel
+  spectator list (empty without spectators). Of these the Temple HUD is the weakest: its chrome
+  left the sprite list, and the draw order rests on the argument that the regrouped pieces do not
+  overlap on screen rather than on having been looked at.
+
+The Battle Soccer score, the duel frame, the Empire Guardian timer and the Doppelganger frame draw
+outside their event (`$win soccer full`, `duel`, `empiretimer`, `doppelframe`), and were looked at
+in both themes at 90 % UI scale: right, and standing on the HUD.
 
 Everything else in the ownership rollout was verified in game, both themes, including the scale
 sweep.

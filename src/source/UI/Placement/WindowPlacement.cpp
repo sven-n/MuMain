@@ -233,7 +233,8 @@ void RegisterHudWindow(std::string_view name, std::uint32_t windowId, SetPositio
             setPosition(homeX, homeY);
             return;
         }
-        const auto hud = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Hud, WindowWidth, WindowHeight);
+        const auto hud =
+            UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::HudFrame, WindowWidth, WindowHeight);
         setPosition(static_cast<int>(std::lround((box->left - hud.offsetX) / hud.scaleX)),
                     static_cast<int>(std::lround((box->top - hud.offsetY) / hud.scaleY)));
     };

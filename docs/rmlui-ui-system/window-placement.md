@@ -104,6 +104,9 @@ theme reload, a HUD part shown or hidden, the chat log resizing) call `Invalidat
   RmlUi applies the model), `placedWhileHidden`, and a `placed` callback.
 - **HUD-space windows** (the chat, the event HUDs): `UI::Placement::RegisterHudWindow()` converts
   the slot box to a HUD-space `m_Pos`/`m_WndPos`, so native hit tests keep working in HUD space.
+  The event HUDs draw in `LayoutMode::HudFrame`, the bottom HUD's own uniform, UI-scaled scale, the
+  same one their region sizes slots in; the original's W/640 x H/480 stretch left out the UI scale,
+  so at 90 % a frame came out bigger than its slot and ran under the HUD.
 - Without a slot, `place(nullptr)` restores the component's own placement.
 
 ## 4. Slot sizing: content or fill

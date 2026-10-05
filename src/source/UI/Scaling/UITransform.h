@@ -48,6 +48,9 @@ namespace UI::Scaling
     enum class LayoutMode
     {
         Hud,
+        // An event HUD standing on the bottom HUD (the workspace's event-hud region): the HUD's
+        // own uniform, UI-scaled scale, no offset, so it is drawn at the size its slot was given.
+        HudFrame,
         HudLeft,
         HudCenter,
         HudRight,

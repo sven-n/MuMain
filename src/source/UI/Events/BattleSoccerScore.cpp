@@ -192,7 +192,7 @@ void mu::ui::window::CBattleSoccerScore::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    // CManager scopes LayoutMode::Hud around this window: W/640 x H/480, no offset.
+    // CManager scopes LayoutMode::HudFrame around this window: the bottom HUD's uniform scale, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     Sync(m_RmlBinder, &BattleSoccerScoreRmlModel::scaleX, "scale_x", transform.scaleX);
     Sync(m_RmlBinder, &BattleSoccerScoreRmlModel::scaleY, "scale_y", transform.scaleY);

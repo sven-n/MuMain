@@ -133,6 +133,12 @@ TEST_CASE("HUD fills the viewport while dialogs stay capped [ui][scaling]")
     CHECK(UI::Scaling::PositionX(hud, 640.0f) == doctest::Approx(1920.0f));
     CHECK(UI::Scaling::PositionY(hud, 480.0f) == doctest::Approx(1080.0f));
 
+    const auto frame = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::HudFrame, 1920, 1080);
+    CHECK(frame.scaleX == doctest::Approx(UI::Scaling::BottomHudScale(1920, 1080)));
+    CHECK(frame.scaleY == doctest::Approx(frame.scaleX));
+    CHECK(frame.offsetX == doctest::Approx(0.0f));
+    CHECK(frame.offsetY == doctest::Approx(0.0f));
+
     const auto dialog = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Dialog, 1920, 1080);
     CHECK(dialog.scaleX == doctest::Approx(2.0f));
     CHECK(dialog.offsetX == doctest::Approx(320.0f));
@@ -691,6 +697,7 @@ TEST_CASE("interface policy selects viewport dock and dialog layouts [ui][scalin
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MAINFRAME) == LayoutMode::Hud);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_SKILL_LIST) == LayoutMode::HudCenter);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_HOTKEY) == LayoutMode::Hud);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE) == LayoutMode::HudFrame);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_ITEM_ENDURANCE_INFO) == LayoutMode::DockRight);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_PARTY_INFO_WINDOW) == LayoutMode::DockRight);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_INVENTORY) == LayoutMode::DockRight);
