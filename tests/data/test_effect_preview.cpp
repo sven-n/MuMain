@@ -3,8 +3,9 @@
 #include "doctest.h"
 
 // The parts of the effect browser's preview (FX1.7a) that need neither ImGui
-// nor a frame: the camera, the quads, what is shown for a type, the SubTypes,
-// the texture size, the item search, the effect's object and the pool guard.
+// nor a frame: the camera and the editor's look-at view, the quads, what is
+// shown for a type, the SubTypes, the texture size, the item search, the
+// effect's object and the pool guard.
 #ifdef _EDITOR
 #include "EffectTestData.h"
 
@@ -13,6 +14,7 @@
 #include "Engine/Object/w_ObjectInfo.h"
 #include "Render/Effects/EffectRegistry.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "UI/Common/LookAt.h"
 #include "UI/EffectBrowser/EffectPoolGuard.h"
 #include "UI/EffectBrowser/EffectPreviewCamera.h"
 #include "UI/EffectBrowser/EffectPreviewGeometry.h"
@@ -21,6 +23,7 @@
 #include "UI/EffectBrowser/EffectPreviewSubject.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <string>
 #include <vector>
@@ -102,6 +105,38 @@ TEST_CASE("The effect preview's camera looks at the type from the thumbnails' di
     CHECK(camera.Distance() == doctest::Approx(framed).epsilon(Tolerance));
     CHECK(Minus(camera.Eye(), camera.Center())[2] / framed == doctest::Approx(0.8f / diagonal).epsilon(Tolerance));
     CHECK(camera.Near() >= 1.0f);
+}
+
+TEST_CASE("The editor's look-at view is gluLookAt's, and the effect preview's camera gives the same view "
+          "[effects][editor]")
+{
+    // From (10, 0, 0) toward the origin with Z up, column by column as
+    // gluLookAt makes it: +y is right on the screen, +z is up and the origin
+    // lies 10 ahead.
+    const MuEditor::LookAt::Vector up = {0.0f, 0.0f, 1.0f};
+    const MuEditor::LookAt::Matrix view = MuEditor::LookAt::ViewMatrix({10.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, up);
+    const MuEditor::LookAt::Matrix expected = {0.0f, 0.0f, 1.0f,   0.0f, //
+                                               1.0f, 0.0f, 0.0f,   0.0f, //
+                                               0.0f, 1.0f, 0.0f,   0.0f, //
+                                               0.0f, 0.0f, -10.0f, 1.0f};
+    for (size_t i = 0; i < expected.size(); ++i)
+    {
+        INFO(i);
+        CHECK(view[i] == doctest::Approx(expected[i]).epsilon(Tolerance));
+    }
+
+    // The map editor's thumbnails look from an eye toward a center; the
+    // preview's camera gives the same view for its own eye and center.
+    EffectPreviewCamera camera;
+    camera.Frame({10.0f, 20.0f, 30.0f}, 100.0f);
+    camera.Turn(37.0f, -12.0f);
+    const MuEditor::LookAt::Matrix fromEye = MuEditor::LookAt::ViewMatrix(camera.Eye(), camera.Center(), up);
+    const std::array<float, 16> cameraView = camera.View();
+    for (size_t i = 0; i < cameraView.size(); ++i)
+    {
+        INFO(i);
+        CHECK(fromEye[i] == doctest::Approx(cameraView[i]).epsilon(Tolerance));
+    }
 }
 
 TEST_CASE("The effect preview's quads face the camera, lie flat and cover the view [effects][editor]")

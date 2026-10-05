@@ -28,22 +28,6 @@ constexpr float NearShare = 0.02f;
 constexpr float FarMargin = 4000.0f;
 constexpr float FarRadii = 8.0f;
 constexpr float MinRadius = 1.0f;
-
-PreviewVector Cross(const PreviewVector& a, const PreviewVector& b)
-{
-    return {a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]};
-}
-
-float Dot(const PreviewVector& a, const PreviewVector& b)
-{
-    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-}
-
-PreviewVector Normalized(const PreviewVector& v)
-{
-    const float length = std::sqrt(Dot(v, v));
-    return length > 0.0f ? PreviewVector{v[0] / length, v[1] / length, v[2] / length} : v;
-}
 } // namespace
 
 void EffectPreviewCamera::Frame(const PreviewVector& center, float radius)
@@ -93,19 +77,13 @@ EffectPreviewCamera::Basis EffectPreviewCamera::GetBasis() const
 {
     const PreviewVector direction = Direction();
     const PreviewVector forward = {-direction[0], -direction[1], -direction[2]};
-    const PreviewVector right = Normalized(Cross(forward, {0.0f, 0.0f, 1.0f}));
-    return {right, Cross(right, forward), forward};
+    return LookAt::BasisAlong(forward, {0.0f, 0.0f, 1.0f});
 }
 
 // The gluLookAt matrix, as the map editor's thumbnails load it.
 std::array<float, 16> EffectPreviewCamera::View() const
 {
-    const PreviewVector eye = Eye();
-    const Basis basis = GetBasis();
-    return {basis.right[0],         basis.up[0],         -basis.forward[0],       0.0f,
-            basis.right[1],         basis.up[1],         -basis.forward[1],       0.0f,
-            basis.right[2],         basis.up[2],         -basis.forward[2],       0.0f,
-            -Dot(basis.right, eye), -Dot(basis.up, eye), Dot(basis.forward, eye), 1.0f};
+    return LookAt::ViewMatrix(GetBasis(), Eye());
 }
 
 PreviewVector EffectPreviewCamera::Direction() const

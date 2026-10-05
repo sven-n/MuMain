@@ -15,6 +15,7 @@
 #include "I18N/All.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "UI/Common/ScopedOffscreenCapture.h"
 #include "imgui.h"
 
 #include <algorithm>
@@ -43,17 +44,6 @@ constexpr float LevelSliderWidth = 90.0f;
 constexpr int MaxListedItems = 12;
 // The levels an item can have.
 constexpr int MaxItemLevel = 15;
-
-// Guarantees EndOffscreenCapture on every way out, as the map editor's
-// thumbnails do: an open capture refuses every later one.
-class ScopedOffscreenCapture
-{
-public:
-    ~ScopedOffscreenCapture()
-    {
-        mu::GetRenderer().EndOffscreenCapture();
-    }
-};
 
 const char* ShowOnLabel(PreviewShowOn showOn)
 {
@@ -354,7 +344,7 @@ void CEffectPreviewView::RenderView(const EffectPreviewRequest& request)
     if (texture == 0)
         return;
     {
-        const ScopedOffscreenCapture endCapture;
+        const MuEditor::ScopedOffscreenCapture endCapture;
         m_scene.Draw(request, m_camera, width / height);
     }
     if (void* pointer = mu::GetRenderer().GetTexturePointer(texture))

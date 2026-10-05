@@ -2,6 +2,8 @@
 
 #ifdef _EDITOR
 
+#include "UI/Common/LookAt.h"
+
 #include <array>
 
 namespace MuEditor::Effects
@@ -21,12 +23,7 @@ public:
 
     // The unit vectors of the view: right and up on the screen, and forward
     // into it.
-    struct Basis
-    {
-        PreviewVector right{};
-        PreviewVector up{};
-        PreviewVector forward{};
-    };
+    using Basis = LookAt::Basis;
 
     // Looks at `center` from the distance that shows a sphere of `radius`,
     // keeping the direction.

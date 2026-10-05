@@ -6,6 +6,8 @@
 
 #include "Render/Models/ZzzBMD.h"        // BMD / Models[] / BoneTransform / RENDER_TEXTURE / OBB_t
 #include "Render/Renderer/MuRenderer.h"  // mu::GetRenderer()
+#include "UI/Common/LookAt.h"
+#include "UI/Common/ScopedOffscreenCapture.h"
 #include "UI/Console/MuEditorConsoleUI.h"
 
 #include <algorithm>
@@ -15,53 +17,6 @@
 // Global bone scale the model Transform/Animation multiply by; the game sets it
 // per object (Calc_RenderObject). Must be 1 for an un-scaled preview.
 extern float BoneScale;
-
-namespace
-{
-    void Normalize3(float v[3])
-    {
-        const float len = std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-        if (len > 1e-6f) { v[0] /= len; v[1] /= len; v[2] /= len; }
-    }
-
-    void Cross3(const float a[3], const float b[3], float out[3])
-    {
-        out[0] = a[1] * b[2] - a[2] * b[1];
-        out[1] = a[2] * b[0] - a[0] * b[2];
-        out[2] = a[0] * b[1] - a[1] * b[0];
-    }
-
-    float Dot3(const float a[3], const float b[3])
-    {
-        return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-    }
-
-    // Guarantees EndOffscreenCapture() runs even if something in between throws or
-    // an early return gets added later - otherwise the capture stays "open" forever
-    // and BeginOffscreenCapture() refuses every future call, silently breaking
-    // every thumbnail after this one for the rest of the process.
-    class ScopedOffscreenCapture
-    {
-    public:
-        ~ScopedOffscreenCapture() { mu::GetRenderer().EndOffscreenCapture(); }
-    };
-
-    // Loads a look-at view (column-major) into the current matrix.
-    void LoadLookAt(const float eye[3], const float center[3], const float up[3])
-    {
-        float fwd[3] = { center[0] - eye[0], center[1] - eye[1], center[2] - eye[2] };
-        Normalize3(fwd);
-        float side[3]; Cross3(fwd, up, side); Normalize3(side);
-        float up2[3];  Cross3(side, fwd, up2);
-
-        float m[16];
-        m[0] = side[0]; m[4] = side[1]; m[8]  = side[2];  m[12] = -Dot3(side, eye);
-        m[1] = up2[0];  m[5] = up2[1];  m[9]  = up2[2];   m[13] = -Dot3(up2, eye);
-        m[2] = -fwd[0]; m[6] = -fwd[1]; m[10] = -fwd[2];  m[14] =  Dot3(fwd, eye);
-        m[3] = 0.0f;    m[7] = 0.0f;    m[11] = 0.0f;     m[15] = 1.0f;
-        mu::GetRenderer().LoadMatrix(m);
-    }
-}
 
 CObjectThumbnail& CObjectThumbnail::GetInstance()
 {
@@ -198,7 +153,7 @@ unsigned int CObjectThumbnail::RenderNow(int type)
         g_MuEditorConsoleUI.LogEditor(msg);
         return 0;
     }
-    const ScopedOffscreenCapture endCaptureOnReturn; // EndOffscreenCapture() on every exit path below
+    const MuEditor::ScopedOffscreenCapture endCaptureOnReturn; // EndOffscreenCapture() on every exit path below
 
     glMatrixMode(GL_PROJECTION); glPushMatrix();
     glMatrixMode(GL_MODELVIEW);  glPushMatrix();
@@ -256,10 +211,10 @@ unsigned int CObjectThumbnail::RenderNow(int type)
     const float dist = radius / std::tan(fovDeg * 0.5f * 3.14159265f / 180.0f) * 1.8f;
 
     float dir[3] = { 1.0f, -1.0f, 0.8f };
-    Normalize3(dir);
-    const float eye[3]    = { cx + dir[0] * dist, cy + dir[1] * dist, cz + dir[2] * dist };
-    const float center[3] = { cx, cy, cz };
-    const float up[3]     = { 0.0f, 0.0f, 1.0f };
+    VectorNormalize(dir);
+    const MuEditor::LookAt::Vector eye    = { cx + dir[0] * dist, cy + dir[1] * dist, cz + dir[2] * dist };
+    const MuEditor::LookAt::Vector center = { cx, cy, cz };
+    const MuEditor::LookAt::Vector up     = { 0.0f, 0.0f, 1.0f };
 
     // Generous near/far so nothing clips regardless of true model size.
     const float znear = std::fmax(2.0f, dist * 0.05f);
@@ -267,7 +222,8 @@ unsigned int CObjectThumbnail::RenderNow(int type)
     glMatrixMode(GL_PROJECTION); glLoadIdentity();
     gluPerspective(fovDeg, 1.0f, znear, zfar);
     glMatrixMode(GL_MODELVIEW); glLoadIdentity();
-    LoadLookAt(eye, center, up);
+    const MuEditor::LookAt::Matrix view = MuEditor::LookAt::ViewMatrix(eye, center, up);
+    mu::GetRenderer().LoadMatrix(view.data());
 
     b->RenderBody(RENDER_TEXTURE, 1.0f, -1, 1.0f, 0.0f, 0.0f);
 
