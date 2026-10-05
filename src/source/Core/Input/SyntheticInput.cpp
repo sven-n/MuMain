@@ -65,6 +65,13 @@ struct Injection
     Core::Input::Synthetic::MouseButton button = Core::Input::Synthetic::MouseButton::Left;
     std::string text;
     bool enter = false;
+    // A drag: the pointer moves from windowX/Y to these over moveFrames held frames.
+    float fromX = 0.0f;
+    float fromY = 0.0f;
+    float toX = 0.0f;
+    float toY = 0.0f;
+    int moveFrames = 0;
+    int moveFrame = 0;
     bool legacyDown = false;
     bool uiDown = false;
     SDL_Window* window = nullptr;
@@ -332,6 +339,22 @@ bool Click(float windowX, float windowY, MouseButton button)
     return true;
 }
 
+bool Drag(float fromX, float fromY, float toX, float toY, MouseButton button)
+{
+    // Enough steps for a UI to see a drag start and follow it, few enough to finish quickly.
+    constexpr int MoveFrames = 8;
+    if (!Click(fromX, fromY, button))
+    {
+        return false;
+    }
+    g_injection.fromX = fromX;
+    g_injection.fromY = fromY;
+    g_injection.toX = toX;
+    g_injection.toY = toY;
+    g_injection.moveFrames = MoveFrames;
+    return true;
+}
+
 bool ValidText(std::string_view text)
 {
     if (text.empty() || text.size() > 256)
@@ -504,6 +527,21 @@ void AdvanceClick()
         if (g_injection.legacyDown)
             ApplyPointerPosition();
         g_injection.stage = Stage::Held;
+    }
+    else if (g_injection.stage == Stage::Held && g_injection.moveFrame < g_injection.moveFrames)
+    {
+        // A drag moves one step per frame with the button still held.
+        ++g_injection.moveFrame;
+        const float t = static_cast<float>(g_injection.moveFrame) / static_cast<float>(g_injection.moveFrames);
+        g_injection.windowX = g_injection.fromX + (g_injection.toX - g_injection.fromX) * t;
+        g_injection.windowY = g_injection.fromY + (g_injection.toY - g_injection.fromY) * t;
+        if (!DeliverMotion())
+        {
+            Fail(DeliveryFailure::TargetLost);
+            return;
+        }
+        if (g_injection.legacyDown)
+            ApplyPointerPosition();
     }
     else if (g_injection.stage == Stage::Held)
     {

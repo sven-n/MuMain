@@ -18,6 +18,7 @@
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
 #include "Scenes/MainScene.h"
+#include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/HUD/ChatLogWindow.h"
@@ -202,6 +203,18 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         }
         g_pSystemLogBox->AddText((L"no such window: " + argument).c_str(),
                                  mu::ui::window::TYPE_ERROR_MESSAGE);
+        return true;
+    }
+
+    // A test confirmation, to check the generic dialog (dragging, layout) without a game action.
+    if (strCommand.compare(L"$dialog") == 0)
+    {
+        mu::ui::window::CreateOkMessageBox(L"Test dialog: drag it by any part that is not a button.");
+        return true;
+    }
+    if (strCommand.compare(L"$dialog title") == 0)
+    {
+        mu::ui::window::CreateOkMessageBoxWithTitle(L"Test dialog", L"Drag it by any part that is not a button.");
         return true;
     }
 

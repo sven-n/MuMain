@@ -37,6 +37,11 @@ enum class MouseButton : std::uint8_t
 // another injection is still in flight.
 [[nodiscard]] bool Click(float windowX, float windowY, MouseButton button);
 
+// Schedules a press at one window pixel, a move to another over several frames
+// with the button held, and the release there. False when another injection is
+// still in flight.
+[[nodiscard]] bool Drag(float fromX, float fromY, float toX, float toY, MouseButton button);
+
 // Committed UTF-8 text, optionally followed by a separately framed Return.
 [[nodiscard]] bool TypeText(std::string_view text, bool enter);
 [[nodiscard]] bool ValidText(std::string_view text);

@@ -630,6 +630,58 @@ std::string ClickUi(const Request& request, std::unique_ptr<Act>& act)
     act = std::make_unique<SyntheticInputAct>("click-ui", result.dump());
     return {};
 }
+std::string DragUi(const Request& request, std::unique_ptr<Act>& act)
+{
+    double fromX = 0.0;
+    double fromY = 0.0;
+    double toX = 0.0;
+    double toY = 0.0;
+    if (!request.GetDouble("x", fromX) || !request.GetDouble("y", fromY) || !request.GetDouble("to_x", toX) ||
+        !request.GetDouble("to_y", toY))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`drag-ui` needs `x`, `y`, `to_x` and `to_y` window pixels");
+    }
+    // Bounded as `click-ui`'s are: the coordinates are cast to `float` below.
+    for (const double value : {fromX, fromY, toX, toY})
+    {
+        if (!(std::abs(value) <= MaxWindowPixel))
+        {
+            return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                               "coordinates are window pixels, at most " +
+                                   std::to_string(static_cast<int>(MaxWindowPixel)) + " from the origin");
+        }
+    }
+
+    std::string buttonName = "left";
+    if (request.Has("button") && !request.GetString("button", buttonName))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`button` is `left` or `right`");
+    }
+    const std::optional<Core::Input::Synthetic::MouseButton> button =
+        Core::Input::Synthetic::MouseButtonFromName(buttonName);
+    if (!button)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "unknown button `" + buttonName + "`; known: left, right");
+    }
+
+    if (!Core::Input::Synthetic::Drag(static_cast<float>(fromX), static_cast<float>(fromY), static_cast<float>(toX),
+                                      static_cast<float>(toY), *button))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
+    }
+
+    json result;
+    result["x"] = fromX;
+    result["y"] = fromY;
+    result["to_x"] = toX;
+    result["to_y"] = toY;
+    result["button"] = buttonName;
+    act = std::make_unique<SyntheticInputAct>("drag-ui", result.dump());
+    return {};
+}
+
 std::string Type(const Request& request, std::unique_ptr<Act>& act)
 {
     std::string text;

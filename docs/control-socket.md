@@ -73,6 +73,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `screenshot` (`out`) | capture the next frame to a path; without `out` it names itself, uniquely per capture |
 | `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
+| `drag-ui` (`x`, `y`, `to_x`, `to_y`, `button`) | press at one window pixel, move to the other over eight frames with the button held, release there |
 | `type` (`text`, `enter`) | deliver committed UTF-8 to the focused field; optional boolean `enter` submits on a later frame |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |
 | `select-char` (`name` or `slot`) | enter the world with that character |
@@ -119,7 +120,7 @@ Focus a text field with a supported UI click or keyboard navigation before
 `enter` must be boolean. A successful reply confirms delivery, **not** that a
 field accepted the characters or a login succeeded. Its result reports only
 byte count and whether Enter was requested, never the text (which may be a
-password). No IME composition, key chords or drag operation is synthesized.
+password). No IME composition or key chords are synthesized; `drag-ui` is the only drag.
 
 Only one injection runs at a time; another answers `busy`. Injection commands
 are observational and do not interrupt an ongoing world act. They answer after

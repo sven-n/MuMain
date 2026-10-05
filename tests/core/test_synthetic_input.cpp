@@ -253,6 +253,42 @@ TEST_CASE("A click walks press, hold, release through the mouse globals [core][s
     CHECK(IsIdle());
 }
 
+TEST_CASE("A drag presses, moves with the button held, and releases at its end [core][synthetic-input]")
+{
+    ResetInjector guard;
+    WindowWidth = 1280;
+    WindowHeight = 960;
+    MouseLButton = false;
+    MouseLButtonPush = false;
+    MouseLButtonPop = false;
+
+    CHECK(Drag(100.0f, 200.0f, 500.0f, 600.0f, MouseButton::Left));
+
+    BeginFrame();
+    CHECK(MouseLButton);
+    CHECK(g_fWindowMouseX == doctest::Approx(100.0f));
+    MouseLButtonPush = false;
+    BeginFrame();
+    CHECK(MouseLButton);
+
+    // Eight held steps carry the pointer to the end.
+    for (int step = 1; step <= 8; ++step)
+    {
+        BeginFrame();
+        CHECK(MouseLButton);
+        CHECK(g_fWindowMouseX == doctest::Approx(100.0f + 400.0f * static_cast<float>(step) / 8.0f));
+    }
+    CHECK(g_fWindowMouseY == doctest::Approx(600.0f));
+
+    BeginFrame();
+    CHECK_FALSE(MouseLButton);
+    CHECK(MouseLButtonPop);
+    CHECK(g_fWindowMouseX == doctest::Approx(500.0f));
+
+    BeginFrame();
+    CHECK(IsIdle());
+}
+
 TEST_CASE("Abandoning an injection releases what it pressed [core][synthetic-input]")
 {
     ResetInjector guard;
