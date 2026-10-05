@@ -30,7 +30,7 @@ enum WorldPreviewNote : std::uint16_t
     WorldNoteNothingCreated = 1 << 0,
     // What the call created ended in its first frame.
     WorldNoteEndedAtOnce = 1 << 1,
-    // The type changes the game when the character owns it.
+    // The type's code changes the character or tells the server.
     WorldNoteRefused = 1 << 2,
 };
 
@@ -48,7 +48,8 @@ inline constexpr float WorldPreviewDistance = 200.0f;
 // game's forward direction (0, -1, 0) turned by the yaw, as AngleMatrix does.
 PreviewVector PlaceInFrontOf(const PreviewVector& position, float yawDegrees, float distance);
 
-// The types that change the game when the character owns them.
+// The types whose code changes the character or tells the server, whoever
+// owns them.
 std::span<const RefusedWorldPreview> GetRefusedWorldPreviews();
 bool IsRefusedInWorld(const WorldPreviewRequest& request);
 
@@ -57,10 +58,13 @@ bool IsRefusedInWorld(const WorldPreviewRequest& request);
 bool IsWorldReadyForPreview();
 
 // The selected type created in the game world in front of the character,
-// with the game's own create call and the character as its owner (as the
-// target of particles and lightning). It follows what it created and removes
-// it when it stops: on Stop, when another type is shown, when the browser
-// closes and before the game clears its pools.
+// with the game's own create call. Its owner (the target of particles and
+// lightning) is a copy of the character's object that follows the character:
+// code that writes into its owner changes the copy, and the branches the game
+// runs only for the character's own effects (the skill effects, the catapult
+// camera, ...) stay off. It follows what it created and removes it when it
+// stops: on Stop, when another type is shown, when the browser closes and
+// before the game clears its pools.
 class EffectWorldPreview
 {
 public:
@@ -104,6 +108,11 @@ public:
     {
         return m_tracker.Count();
     }
+    // The owner of what the preview creates.
+    const OBJECT& GetOwner() const
+    {
+        return m_owner;
+    }
 
 private:
     void Create(const EffectPools& pools);
@@ -111,13 +120,16 @@ private:
     void ApplyMute() const;
 
     EffectPreviewTracker m_tracker;
+    OBJECT m_owner;
     std::optional<WorldPreviewRequest> m_running;
     std::optional<EffectTypeRef> m_notesFor;
     bool m_createPending = false;
     bool m_repeat = false;
     bool m_mute = false;
-    // Frames since the last create call, to tell what ended at once.
+    // Frames since the last create call that filled a slot, to tell what
+    // ended at once.
     int m_framesSinceCreate = 0;
+    bool m_lastCallFilled = false;
     // When Repeat creates the type again (WorldTime), 0 while waiting for
     // what was created to end.
     double m_repeatAt = 0.0;

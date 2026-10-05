@@ -218,6 +218,39 @@ TEST_CASE("The world preview keeps what its call created and what that created i
     CHECK(tracker.IsEmpty());
 }
 
+TEST_CASE("The world preview tells a refilled slot by its type: a follower is kept, the game's object owns nothing "
+          "[effects][editor]")
+{
+    auto pools = std::make_unique<TestPools>();
+    EffectPreviewTracker tracker;
+    tracker.BeginCreate(pools->Spans());
+    Live(pools->effects[1], 10);
+    tracker.EndCreate(pools->Spans());
+    Live(pools->particles[0], 20, &pools->effects[1]);
+    Live(pools->effects[2], 11, &pools->effects[1]);
+    tracker.Update(pools->Spans());
+    REQUIRE(tracker.Count().particles == 1);
+    REQUIRE(tracker.Count().effects == 2);
+
+    // Within one frame the followed particle ends and the effect's next
+    // particle, of another type, takes its slot.
+    Live(pools->particles[0], 21, &pools->effects[1]);
+    // The followed child ends and the game puts an effect of its own there,
+    // whose particle must not count as the preview's.
+    Live(pools->effects[2], 50);
+    Live(pools->particles[1], 22, &pools->effects[2]);
+    tracker.Update(pools->Spans());
+    CHECK(tracker.Count().particles == 1);
+    CHECK(tracker.Count().effects == 1);
+
+    g_removedEffects = 0;
+    tracker.RemoveAll(pools->Spans(), &RemoveTestEffect);
+    CHECK_FALSE(pools->particles[0].Live);
+    CHECK_FALSE(pools->effects[1].Live);
+    CHECK(pools->effects[2].Live);
+    CHECK(pools->particles[1].Live);
+}
+
 TEST_CASE("The world preview forgets without removing, and tells when its call created nothing [effects][editor]")
 {
     auto pools = std::make_unique<TestPools>();
@@ -240,13 +273,19 @@ TEST_CASE("The world preview forgets without removing, and tells when its call c
     CHECK(tracker.IsEmpty());
 }
 
-TEST_CASE("The world preview refuses the types that change the game when the character owns them [effects][editor]")
+TEST_CASE("The world preview refuses the types whose code changes the character or tells the server "
+          "[effects][editor]")
 {
     CHECK(IsRefusedInWorld({EffectKind::Effect, MODEL_SUMMONER_SUMMON_LAGUL, 1}));
     CHECK_FALSE(IsRefusedInWorld({EffectKind::Effect, MODEL_SUMMONER_SUMMON_LAGUL, 0}));
-    CHECK(IsRefusedInWorld({EffectKind::Effect, MODEL_FLY_BIG_STONE1, 88}));
-    CHECK(IsRefusedInWorld({EffectKind::Effect, MODEL_FLY_BIG_STONE2, 99}));
-    CHECK_FALSE(IsRefusedInWorld({EffectKind::Effect, MODEL_FLY_BIG_STONE1, 0}));
+    // The stones of SubTypes 0 and 1 land as 88 and 99.
+    for (const int subType : {0, 1, 2, 88, 99})
+    {
+        CHECK(IsRefusedInWorld({EffectKind::Effect, MODEL_FLY_BIG_STONE1, subType}));
+        CHECK(IsRefusedInWorld({EffectKind::Effect, MODEL_FLY_BIG_STONE2, subType}));
+    }
+    CHECK(IsRefusedInWorld({EffectKind::Effect, MODEL_CHANGE_UP_EFF, 0}));
+    CHECK_FALSE(IsRefusedInWorld({EffectKind::Effect, MODEL_CHANGE_UP_EFF, 1}));
     CHECK_FALSE(IsRefusedInWorld({EffectKind::Particle, MODEL_FLY_BIG_STONE1, 88}));
 }
 
@@ -266,15 +305,20 @@ TEST_CASE("The world preview creates the type with the game's call, follows it a
     const std::optional<int> own = FindEffect(MODEL_POISON, &character);
     REQUIRE(own.has_value());
 
-    EffectWorldPreview world;
+    auto worldPreview = std::make_unique<EffectWorldPreview>();
+    EffectWorldPreview& world = *worldPreview;
+    const OBJECT* owner = &world.GetOwner();
     world.SetMute(true);
     world.Start({EffectKind::Effect, MODEL_POISON, 0});
     CHECK(Audio::EditorMute::IsMuted());
     world.AfterFrame(true, true);
     CHECK(world.IsRunning());
     CHECK(world.GetCounts().effects >= 1);
-    const std::optional<int> created = FindEffect(MODEL_POISON, &character, own);
+    // The owner is a copy of the character where the character stands.
+    const std::optional<int> created = FindEffect(MODEL_POISON, owner);
     REQUIRE(created.has_value());
+    CHECK(owner->Position[0] == doctest::Approx(character.Position[0]));
+    CHECK(owner->Position[1] == doctest::Approx(character.Position[1]));
 
     world.Stop();
     CHECK_FALSE(Effects[*created].Live);
@@ -287,31 +331,56 @@ TEST_CASE("The world preview creates the type with the game's call, follows it a
         world.SetRepeat(true);
         world.Start({EffectKind::Effect, MODEL_POISON, 0});
         world.AfterFrame(true, true);
-        const std::optional<int> first = FindEffect(MODEL_POISON, &character, own);
+        const std::optional<int> first = FindEffect(MODEL_POISON, owner);
         REQUIRE(first.has_value());
         Effects[*first].Live = false;
         world.AfterFrame(true, true);
-        CHECK_FALSE(FindEffect(MODEL_POISON, &character, own).has_value());
+        CHECK_FALSE(FindEffect(MODEL_POISON, owner).has_value());
         WorldTime += 1000.0;
         world.AfterFrame(true, true);
-        CHECK(FindEffect(MODEL_POISON, &character, own).has_value());
+        CHECK(FindEffect(MODEL_POISON, owner).has_value());
         world.Stop();
-        CHECK_FALSE(FindEffect(MODEL_POISON, &character, own).has_value());
+        CHECK_FALSE(FindEffect(MODEL_POISON, owner).has_value());
     }
     SUBCASE("Closing the browser and clearing the world remove what the preview created")
     {
         world.Start({EffectKind::Effect, MODEL_POISON, 0});
         world.AfterFrame(true, true);
-        REQUIRE(FindEffect(MODEL_POISON, &character, own).has_value());
+        REQUIRE(FindEffect(MODEL_POISON, owner).has_value());
         world.AfterFrame(false, true);
-        CHECK_FALSE(FindEffect(MODEL_POISON, &character, own).has_value());
+        CHECK_FALSE(FindEffect(MODEL_POISON, owner).has_value());
         CHECK_FALSE(world.IsRunning());
 
         world.Start({EffectKind::Effect, MODEL_POISON, 0});
         world.AfterFrame(true, true);
-        REQUIRE(FindEffect(MODEL_POISON, &character, own).has_value());
+        REQUIRE(FindEffect(MODEL_POISON, owner).has_value());
         world.OnWorldClearing();
-        CHECK_FALSE(FindEffect(MODEL_POISON, &character, own).has_value());
+        CHECK_FALSE(FindEffect(MODEL_POISON, owner).has_value());
+    }
+    SUBCASE("A call that creates nothing leaves what earlier calls created running, and Stop removes it")
+    {
+        world.Start({EffectKind::Effect, MODEL_POISON, 0});
+        world.AfterFrame(true, true);
+        REQUIRE(FindEffect(MODEL_POISON, owner).has_value());
+        // A full pool: the next call fills nothing.
+        std::array<bool, MAX_EFFECTS> live{};
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+        {
+            live[static_cast<size_t>(i)] = Effects[i].Live;
+            Effects[i].Live = true;
+        }
+        world.Start({EffectKind::Effect, MODEL_POISON, 0});
+        world.AfterFrame(true, true);
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+        {
+            if (Effects[i].Owner != owner)
+                Effects[i].Live = live[static_cast<size_t>(i)];
+        }
+        CHECK((world.GetNotes() & WorldNoteNothingCreated) != 0);
+        CHECK(world.IsRunning());
+        world.KeepOnly(EffectTypeRef{EffectKind::Effect, MODEL_FIRE});
+        CHECK_FALSE(world.IsRunning());
+        CHECK_FALSE(FindEffect(MODEL_POISON, owner).has_value());
     }
     SUBCASE("Showing another type stops the preview; a refused type creates nothing")
     {
@@ -319,7 +388,7 @@ TEST_CASE("The world preview creates the type with the game's call, follows it a
         world.AfterFrame(true, true);
         world.KeepOnly(EffectTypeRef{EffectKind::Effect, MODEL_FIRE});
         CHECK_FALSE(world.IsRunning());
-        CHECK_FALSE(FindEffect(MODEL_POISON, &character, own).has_value());
+        CHECK_FALSE(FindEffect(MODEL_POISON, owner).has_value());
 
         world.Start({EffectKind::Effect, MODEL_SUMMONER_SUMMON_LAGUL, 1});
         CHECK_FALSE(world.IsRunning());

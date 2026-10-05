@@ -601,11 +601,18 @@ SubType is one value for both previews: typed in, or picked from the columns
 of the creation table. `EffectWorldPreview` runs once a frame from
 `CMuEditorCore::Render`, after the game's move and draw, also while the
 editor is hidden; it creates with the game's calls and copies of the vectors
-(creation code writes into them). Corrections to the plan above: there are
-five pools, not four: with the hero as owner, `CreateEffect` puts eight
-skill types into `g_SkillEffects`, which a map change does not clear; the
-preview compares and follows all five, and remembers each slot's type, so a
-slot the game refills is not taken for the preview's. What a call creates is
+(creation code writes into them). Corrections to the plan above: the owner
+is not the hero but a copy of the hero's object that follows the hero. With
+the hero itself, code that writes into its owner turns, moves, hides or
+speeds up the hero (move handlers set `o->Owner->Angle`, `Velocity`,
+`Alpha`; lightning of some SubTypes copies its position into its target),
+and 17 places run hero-only branches (attacks, now no-ops, the skill
+effects, the catapult camera, water waves). There are five pools, not four:
+with the hero as owner, `CreateEffect` would put eight skill types into
+`g_SkillEffects`, which a map change does not clear; the preview compares
+and follows all five, and remembers each slot's type, so a slot the game
+refills with another type is not taken for the preview's (a refill with the
+same type within one frame cannot be told apart). What a call creates is
 found by comparing the pools around it; followers are the objects that
 became live since the last frame and are owned (effects) or targeted
 (particles, joints) by a followed effect, followers of followers too.
@@ -620,14 +627,16 @@ objects. The mute is an editor-only flag checked in `PlayBuffer`
 (`Audio::EditorMute`): it starts no sound effect played once while a muted
 preview runs, so it mutes the game's other sound effects too; telling the
 preview's sounds apart would need per-object scopes in the game's loops.
-Types that change the game with the hero as owner are refused: the catapult
-stones' SubTypes 88 and 99 (knock-back sent to the server, the catapult
-camera) and the Lagul's SubType 1 (writes into its owner as a joint); a
-source test checks the latter kind of case. Player builds compile none of
-it; the two listeners in game code are under `#ifdef _EDITOR`. Checked in
-the client against the in-game test server: an effect (the storm, in the
-skill pool), a particle, lightning and a sprite created, followed and
-removed, Repeat, removal when leaving for the character list.
+Types whose code changes the hero or reaches the server whoever owns them
+are refused: the catapult stones of every SubType (they land as SubType 88
+or 99, knock the hero back and send it), the class change's SubType 0 (stops
+the hero) and the Lagul's SubType 1 (takes its owner for a joint); a source
+test finds such code in the effect code and checks the list. Player builds
+compile none of it; the two listeners in game code are under `#ifdef
+_EDITOR`. Checked in the client against the in-game test server: an effect
+(the storm, with the lightning it creates followed), a particle, lightning
+and a sprite created, followed and removed, Repeat, removal when leaving for
+the character list, the character not moved or turned.
 
 **FX1.7c Live preview in the browser (later).** The objects of FX1.7b drawn
 in the browser's view, on the chosen object, instead of in the world. The

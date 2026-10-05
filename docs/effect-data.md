@@ -361,15 +361,19 @@ needs a character in a map; the free camera of the Dev Editor shows it from
 any side, and F12 hides the editor while it runs.
 
 - **Create** places it two tiles in front of the character (particles,
-  lightning and sprites at the height of the chest), with the character as
-  its owner, as the target of particles and lightning, which run to it. Each
-  click creates it once more. Effects that follow their owner show at the
-  character.
+  lightning and sprites at the height of the chest), with a copy of the
+  character as its owner (the target of particles and lightning, which run
+  to it). The copy follows the character, so code that writes into its owner
+  cannot turn, move or hide the character, and the branches the game runs
+  only for the character's own effects (its skill effects, the catapult
+  camera, the water waves of its effects) stay off. Each click creates it
+  once more. Effects that follow their owner show at the character.
 - **Stop** removes what the preview created and what that created in turn;
   so do choosing another type, closing the browser and leaving the map (the
   game clears its pools then; the preview removes its objects first).
   Objects created later with the character or no one as owner cannot be told
-  from the game's own and end by themselves.
+  from the game's own and end by themselves; so does a slot the game fills
+  again with the same type in the same frame.
 - **Repeat** creates the type again shortly after what it created has ended.
   A sprite lasts one frame; the preview creates it every frame.
 - **Mute sounds** keeps the game from starting sound effects while the
@@ -380,11 +384,12 @@ any side, and F12 hides the editor while it runs.
   call created nothing (the type may need a target, a skill or a state of
   the character, or its pool is full), what it created ended in its first
   frame.
-- A few types are not created: with the character as owner they change the
-  game (the catapult stones' SubTypes 88 and 99 knock the character back and
-  tell the server or move the catapult camera; SubType 1 of the summoner's
-  Lagul writes into its owner as if it were lightning). A test finds every
-  case that takes its owner for lightning and checks the list.
+- A few types are not created: their code changes the character or tells the
+  server whoever owns them (the catapult stones of every SubType knock the
+  character back when they land and tell the server; SubType 0 of the class
+  change stops the character; SubType 1 of the summoner's Lagul takes its
+  owner for lightning). A test finds such code in the effect code and checks
+  that its type is on the list.
 
 ## When the code changes
 

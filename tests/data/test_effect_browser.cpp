@@ -435,48 +435,87 @@ TEST_CASE("The effect preview animates the models that MoveEffect's shared code 
     }
 }
 
-// The world preview creates a type with the character as its owner. A case
-// that takes its owner for a lightning object writes into the character, so
-// the preview refuses that type. The cast may only be in ZzzEffect.cpp's
-// creation cases, where the test finds it.
-TEST_CASE("The world preview refuses every type whose code takes its owner for lightning [data][effects][editor]")
+// Code of an effect that changes the character or reaches the server whoever
+// owns the effect: the world preview refuses its type. The test finds the
+// code in ZzzEffect.cpp's switches and in the move handlers (Move_<code>) and
+// checks that each type is refused; elsewhere in the effect code it may not
+// be.
+TEST_CASE("The world preview refuses every type whose code changes the character or tells the server "
+          "[data][effects][editor]")
 {
-    constexpr std::string_view OwnerAsJoint = "(JOINT*)o->Owner";
+    constexpr std::array<std::string_view, 4> Markers = {"(JOINT*)o->Owner", "SetPlayerStop(Hero",
+                                                         "CollisionHeroCharacter(", "SocketClient->"};
     const std::filesystem::path effects = std::filesystem::path(MU_TEST_SOURCE_DIR) / "Render/Effects";
-    const std::string source = EffectSourceCases::ReadEffectSource(effects / "ZzzEffect.cpp");
-    REQUIRE_FALSE(source.empty());
-    const EffectSourceCases::SwitchLabels cases =
-        EffectSourceCases::ReadCasesContaining(source, Stage::Create, EffectMacros, OwnerAsJoint);
-    for (const std::string& problem : cases.problems)
-    {
-        FAIL_CHECK(problem);
-    }
     const std::span<const RefusedWorldPreview> refused = GetRefusedWorldPreviews();
-    for (const std::string& label : cases.labels)
+    const auto isRefused = [&](int type)
     {
-        INFO(label);
-        const int type = ResolveLabel(label);
-        CHECK(std::any_of(refused.begin(), refused.end(),
-                          [type](const RefusedWorldPreview& entry) { return entry.type == type; }));
+        return std::any_of(refused.begin(), refused.end(),
+                           [type](const RefusedWorldPreview& entry) { return entry.type == type; });
+    };
+    // Occurrences in a text read by ReadEffectSource, spaces left out.
+    const auto count = [](const std::string& source, std::string_view marker)
+    {
+        std::string compact;
+        std::copy_if(source.begin(), source.end(), std::back_inserter(compact),
+                     [](char c) { return std::isspace(static_cast<unsigned char>(c)) == 0; });
+        int found = 0;
+        for (size_t at = compact.find(marker); at != std::string::npos; at = compact.find(marker, at + 1))
+            ++found;
+        return found;
+    };
+
+    const std::string zzzEffect = EffectSourceCases::ReadEffectSource(effects / "ZzzEffect.cpp");
+    REQUIRE_FALSE(zzzEffect.empty());
+    for (const std::string_view marker : Markers)
+    {
+        INFO(marker);
+        int inCases = 0;
+        for (const Stage stage : {Stage::Create, Stage::Move, Stage::Render})
+        {
+            const EffectSourceCases::SwitchLabels cases =
+                EffectSourceCases::ReadCasesContaining(zzzEffect, stage, EffectMacros, marker);
+            for (const std::string& problem : cases.problems)
+            {
+                FAIL_CHECK(problem);
+            }
+            for (const std::string& label : cases.labels)
+            {
+                INFO(label);
+                CHECK(isRefused(ResolveLabel(label)));
+            }
+            inCases += static_cast<int>(cases.labels.size());
+        }
+        // One occurrence per case; more fail here, to be looked at.
+        CHECK(count(zzzEffect, marker) == inCases);
     }
 
-    const auto contains = [&](const std::filesystem::path& file)
-    {
-        std::ifstream stream(file, std::ios::binary);
-        const std::string text((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-        std::string compact;
-        std::copy_if(text.begin(), text.end(), std::back_inserter(compact),
-                     [](char c) { return std::isspace(static_cast<unsigned char>(c)) == 0; });
-        return compact.find(OwnerAsJoint) != std::string::npos;
-    };
-    CHECK(contains(effects / "ZzzEffect.cpp") == !cases.labels.empty());
     for (const auto& entry : std::filesystem::recursive_directory_iterator(effects))
     {
         if (!entry.is_regular_file() || entry.path().extension() != ".cpp" ||
             entry.path().filename() == "ZzzEffect.cpp")
             continue;
         INFO(entry.path().string());
-        CHECK_FALSE(contains(entry.path()));
+        const std::string text = EffectSourceCases::ReadEffectSource(entry.path());
+        for (const std::string_view marker : Markers)
+        {
+            INFO(marker);
+            if (count(text, marker) == 0)
+                continue;
+            // Each occurrence lies in the move handler of a refused type.
+            std::string compact;
+            std::copy_if(text.begin(), text.end(), std::back_inserter(compact),
+                         [](char c) { return std::isspace(static_cast<unsigned char>(c)) == 0; });
+            for (size_t at = compact.find(marker); at != std::string::npos; at = compact.find(marker, at + 1))
+            {
+                constexpr std::string_view Handler = "boolMove_";
+                const size_t start = compact.rfind(Handler, at);
+                REQUIRE(start != std::string::npos);
+                const size_t name = start + Handler.size();
+                const std::string code = compact.substr(name, compact.find('(', name) - name);
+                INFO(code);
+                CHECK(isRefused(ResolveLabel(code)));
+            }
+        }
     }
 }
 

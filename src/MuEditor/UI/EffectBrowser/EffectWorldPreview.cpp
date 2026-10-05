@@ -31,16 +31,15 @@ constexpr float CharacterChest = 80.0f;
 // Repeat waits this long after what was created ended (WorldTime, ms).
 constexpr double RepeatPauseMs = 300.0;
 
-// SubType 1 of the summoner's Lagul treats its owner as a lightning object
-// and writes into it. SubType 88 of the catapult stones knocks the character
-// back and sends the action to the server; SubType 99 moves the catapult
-// camera.
-constexpr std::array<RefusedWorldPreview, 5> Refused = {{
+// The catapult stones of every SubType knock the character back when they
+// land near it and tell the server (SubTypes 0 and 1 land as 88 and 99).
+// SubType 0 of the class change stops the character when it ends. SubType 1
+// of the summoner's Lagul takes its owner for a lightning object.
+constexpr std::array<RefusedWorldPreview, 4> Refused = {{
+    {MODEL_FLY_BIG_STONE1, -1},
+    {MODEL_FLY_BIG_STONE2, -1},
+    {MODEL_CHANGE_UP_EFF, 0},
     {MODEL_SUMMONER_SUMMON_LAGUL, 1},
-    {MODEL_FLY_BIG_STONE1, 88},
-    {MODEL_FLY_BIG_STONE1, 99},
-    {MODEL_FLY_BIG_STONE2, 88},
-    {MODEL_FLY_BIG_STONE2, 99},
 }};
 
 // Removes an effect as the game does when its life ends, with its trails.
@@ -79,6 +78,8 @@ void EffectWorldPreview::Start(const WorldPreviewRequest& request)
 {
     if (m_running && *m_running != request)
         Stop();
+    if (!m_running && Hero != nullptr)
+        m_owner = Hero->Object;
     m_notesFor = EffectTypeRef{request.kind, request.type};
     m_notes = 0;
     if (IsRefusedInWorld(request))
@@ -133,6 +134,10 @@ void EffectWorldPreview::AfterFrame(bool browserOpen, bool worldReady)
         Stop();
         return;
     }
+    // The copy follows the character; what the type's code wrote into it
+    // stays.
+    VectorCopy(Hero->Object.Position, m_owner.Position);
+    m_owner.Live = true;
     const EffectPools pools = GetGamePools();
     m_tracker.Update(pools);
     if (std::exchange(m_createPending, false))
@@ -149,7 +154,7 @@ void EffectWorldPreview::AfterFrame(bool browserOpen, bool worldReady)
         return;
     }
     const bool createdLive = m_tracker.AnyCreatedLive(pools);
-    if (++m_framesSinceCreate == 1 && !createdLive)
+    if (++m_framesSinceCreate == 1 && m_lastCallFilled && !createdLive)
         m_notes |= WorldNoteEndedAtOnce;
     if (createdLive)
         return;
@@ -176,7 +181,7 @@ void EffectWorldPreview::OnWorldClearing()
 void EffectWorldPreview::Create(const EffectPools& pools)
 {
     const WorldPreviewRequest request = *m_running;
-    OBJECT& hero = Hero->Object;
+    const OBJECT& hero = Hero->Object;
     const PreviewVector front =
         PlaceInFrontOf({hero.Position[0], hero.Position[1], hero.Position[2]}, hero.Angle[2], WorldPreviewDistance);
     vec3_t position = {front[0], front[1], RequestTerrainHeight(front[0], front[1])};
@@ -186,31 +191,34 @@ void EffectWorldPreview::Create(const EffectPools& pools)
     switch (request.kind)
     {
     case Data::Effects::EffectKind::Effect:
-        CreateEffect(request.type, position, angle, light, request.subType, &hero);
+        CreateEffect(request.type, position, angle, light, request.subType, &m_owner);
         break;
     case Data::Effects::EffectKind::Particle:
         position[2] += AboveGround;
-        CreateParticle(request.type, position, angle, light, request.subType, 1.0f, &hero);
+        CreateParticle(request.type, position, angle, light, request.subType, 1.0f, &m_owner);
         break;
     case Data::Effects::EffectKind::Joint:
     {
         position[2] += AboveGround;
         vec3_t target = {hero.Position[0], hero.Position[1], hero.Position[2] + CharacterChest};
-        CreateJoint(request.type, position, target, angle, request.subType, &hero);
+        CreateJoint(request.type, position, target, angle, request.subType, &m_owner);
         break;
     }
     case Data::Effects::EffectKind::Sprite:
         position[2] += AboveGround;
-        CreateSprite(request.type, position, 1.0f, light, &hero, 0.0f, request.subType);
+        CreateSprite(request.type, position, 1.0f, light, &m_owner, 0.0f, request.subType);
         break;
     }
     const int filled = m_tracker.EndCreate(pools);
     m_framesSinceCreate = 0;
+    m_lastCallFilled = filled > 0;
     m_repeatAt = 0.0;
     if (filled == 0)
     {
         m_notes |= WorldNoteNothingCreated;
-        End();
+        // What earlier calls created still runs until it ends or is stopped.
+        if (m_tracker.IsEmpty())
+            End();
     }
 }
 

@@ -5,6 +5,7 @@
 #include "EffectPreviewTracker.h"
 
 #include <algorithm>
+#include <climits>
 #include <cstddef>
 #include <functional>
 
@@ -12,6 +13,8 @@ namespace MuEditor::Effects
 {
 namespace
 {
+constexpr int NotKept = INT_MIN;
+
 size_t IndexOf(EffectPool pool)
 {
     return static_cast<size_t>(pool);
@@ -74,40 +77,62 @@ int SlotOf(std::span<OBJECT> pool, const OBJECT* object)
 
 void EffectPreviewTracker::Fit(const EffectPools& pools)
 {
-    m_keptSlots[IndexOf(EffectPool::Effect)].resize(pools.effects.size());
-    m_keptSlots[IndexOf(EffectPool::SkillEffect)].resize(pools.skillEffects.size());
-    m_keptSlots[IndexOf(EffectPool::Sprite)].resize(pools.sprites.size());
-    m_keptSlots[IndexOf(EffectPool::Particle)].resize(pools.particles.size());
-    m_keptSlots[IndexOf(EffectPool::Joint)].resize(pools.joints.size());
+    m_keptTypes[IndexOf(EffectPool::Effect)].resize(pools.effects.size(), NotKept);
+    m_keptTypes[IndexOf(EffectPool::SkillEffect)].resize(pools.skillEffects.size(), NotKept);
+    m_keptTypes[IndexOf(EffectPool::Sprite)].resize(pools.sprites.size(), NotKept);
+    m_keptTypes[IndexOf(EffectPool::Particle)].resize(pools.particles.size(), NotKept);
+    m_keptTypes[IndexOf(EffectPool::Joint)].resize(pools.joints.size(), NotKept);
 }
 
+int EffectPreviewTracker::KeptType(EffectPool pool, int index) const
+{
+    const std::vector<int>& kept = m_keptTypes[IndexOf(pool)];
+    const auto at = static_cast<size_t>(index);
+    return at < kept.size() ? kept[at] : NotKept;
+}
+
+// A kept slot that now holds another type ended and was filled again by its
+// follower: the entry takes the new type.
 bool EffectPreviewTracker::Keep(const EffectPoolSlot& slot)
 {
-    std::vector<char>& kept = m_keptSlots[IndexOf(slot.pool)];
+    std::vector<int>& kept = m_keptTypes[IndexOf(slot.pool)];
     const auto index = static_cast<size_t>(slot.index);
-    if (index >= kept.size() || kept[index] != 0)
+    if (index >= kept.size() || kept[index] == slot.type)
         return false;
-    kept[index] = 1;
+    if (kept[index] != NotKept)
+    {
+        const auto same = [&](const EffectPoolSlot& entry)
+        { return entry.pool == slot.pool && entry.index == slot.index; };
+        std::erase_if(m_kept, same);
+        std::erase_if(m_created, same);
+    }
+    kept[index] = slot.type;
     m_kept.push_back(slot);
     return true;
 }
 
 bool EffectPreviewTracker::IsKept(const EffectPoolSlot& slot) const
 {
-    const std::vector<char>& kept = m_keptSlots[IndexOf(slot.pool)];
-    const auto index = static_cast<size_t>(slot.index);
-    return index < kept.size() && kept[index] != 0;
+    return KeptType(slot.pool, slot.index) == slot.type;
 }
 
+// An effect that ended in this frame still owns the last objects it created;
+// one the game put into its slot since, with another type, owns nothing of
+// the preview's.
 bool EffectPreviewTracker::IsKeptEffect(const EffectPools& pools, const OBJECT* object) const
 {
     if (object == nullptr)
         return false;
-    if (const int index = SlotOf(pools.effects, object); index >= 0)
-        return IsKept({EffectPool::Effect, index, 0});
-    if (const int index = SlotOf(pools.skillEffects, object); index >= 0)
-        return IsKept({EffectPool::SkillEffect, index, 0});
-    return false;
+    const auto isKeptIn = [&](EffectPool pool, std::span<OBJECT> objects)
+    {
+        const int index = SlotOf(objects, object);
+        if (index < 0)
+            return false;
+        const int kept = KeptType(pool, index);
+        const OBJECT& slot = objects[static_cast<size_t>(index)];
+        return kept != NotKept && (!slot.Live || slot.Type == kept);
+    };
+    return isKeptIn(EffectPool::Effect, pools.effects) || isKeptIn(EffectPool::SkillEffect, pools.skillEffects);
 }
 
 void EffectPreviewTracker::BeginCreate(const EffectPools& pools)
@@ -158,7 +183,7 @@ void EffectPreviewTracker::ForgetEnded(const EffectPools& pools)
                   {
                       if (IsLiveAs(pools, slot))
                           return false;
-                      m_keptSlots[IndexOf(slot.pool)][static_cast<size_t>(slot.index)] = 0;
+                      m_keptTypes[IndexOf(slot.pool)][static_cast<size_t>(slot.index)] = NotKept;
                       return true;
                   });
     std::erase_if(m_created, [&](const EffectPoolSlot& slot) { return !IsLiveAs(pools, slot); });
@@ -213,9 +238,9 @@ void EffectPreviewTracker::Forget()
 {
     m_kept.clear();
     m_created.clear();
-    for (std::vector<char>& kept : m_keptSlots)
+    for (std::vector<int>& kept : m_keptTypes)
     {
-        std::fill(kept.begin(), kept.end(), 0);
+        std::fill(kept.begin(), kept.end(), NotKept);
     }
 }
 

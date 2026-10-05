@@ -31,7 +31,8 @@ public:
     int EndCreate(const EffectPools& pools);
     // Once a frame: takes in the objects that became live since the last
     // update and are owned (effects) or targeted (particles, joints) by a kept
-    // effect, then forgets the slots that ended or hold another type.
+    // effect, then forgets the slots that ended or hold another type. A slot
+    // refilled with the type it held cannot be told from it.
     void Update(const EffectPools& pools);
     // Whether a slot the last create call filled is still the preview's.
     bool AnyCreatedLive(const EffectPools& pools) const;
@@ -51,6 +52,7 @@ private:
     void Fit(const EffectPools& pools);
     bool Keep(const EffectPoolSlot& slot);
     bool IsKept(const EffectPoolSlot& slot) const;
+    int KeptType(EffectPool pool, int index) const;
     bool IsKeptEffect(const EffectPools& pools, const OBJECT* object) const;
     void TakeInFollowers(const EffectPools& pools);
     void ForgetEnded(const EffectPools& pools);
@@ -58,8 +60,8 @@ private:
     std::vector<EffectPoolSlot> m_kept;
     // The slots the last create call filled.
     std::vector<EffectPoolSlot> m_created;
-    // Per pool and slot, whether a kept entry has it.
-    std::array<std::vector<char>, EffectPoolCount> m_keptSlots;
+    // Per pool and slot, the type of the kept entry that has it, or NotKept.
+    std::array<std::vector<int>, EffectPoolCount> m_keptTypes;
     EffectPoolSnapshot m_beforeCall;
     EffectPoolSnapshot m_lastUpdate;
 };

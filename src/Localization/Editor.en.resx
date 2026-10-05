@@ -743,7 +743,7 @@
     <value>Create</value>
   </data>
   <data name="Create in world tooltip" xml:space="preserve">
-    <value>Creates the type two tiles in front of the character with the game's own call, the character as its owner. Each click creates it once more. It needs a character in a map.</value>
+    <value>Creates the type two tiles in front of the character with the game's own call. Its owner is a copy of the character that follows it, so the type's code cannot change the character. Each click creates it once more. It needs a character in a map.</value>
   </data>
   <data name="Stop preview" xml:space="preserve">
     <value>Stop</value>
@@ -779,7 +779,7 @@
     <value>What the call created ended in its first frame: the type may need a target, a skill or other call values.</value>
   </data>
   <data name="World refused" xml:space="preserve">
-    <value>With this SubType the type changes the game when the character owns it (it knocks the character back and tells the server, moves the catapult camera, or writes into its owner), so the preview does not create it.</value>
+    <value>The code of this type with this SubType changes the character or tells the server (the catapult stones knock the character back, the class change stops it, the Lagul writes into its owner), so the preview does not create it.</value>
   </data>
   <data name="Assets all" xml:space="preserve">
     <value>All</value>

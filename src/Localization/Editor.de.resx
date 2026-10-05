@@ -743,7 +743,7 @@
     <value>Erzeugen</value>
   </data>
   <data name="Create in world tooltip" xml:space="preserve">
-    <value>Erzeugt den Typ zwei Felder vor der Figur mit dem Aufruf des Spiels, mit der Figur als Besitzer. Jeder Klick erzeugt ihn noch einmal. Dafür muss eine Figur auf einer Karte stehen.</value>
+    <value>Erzeugt den Typ zwei Felder vor der Figur mit dem Aufruf des Spiels. Sein Besitzer ist eine Kopie der Figur, die ihr folgt, daher kann der Code des Typs die Figur nicht ändern. Jeder Klick erzeugt ihn noch einmal. Dafür muss eine Figur auf einer Karte stehen.</value>
   </data>
   <data name="Stop preview" xml:space="preserve">
     <value>Stoppen</value>
@@ -779,7 +779,7 @@
     <value>Was der Aufruf erzeugt hat, endete in seinem ersten Bild: Der Typ braucht vielleicht ein Ziel, eine Fertigkeit oder andere Aufrufwerte.</value>
   </data>
   <data name="World refused" xml:space="preserve">
-    <value>Mit diesem SubType verändert der Typ das Spiel, wenn die Figur ihn besitzt (er wirft die Figur zurück und meldet es dem Server, bewegt die Katapultkamera oder schreibt in seinen Besitzer), daher erzeugt die Vorschau ihn nicht.</value>
+    <value>Der Code dieses Typs mit diesem SubType ändert die Figur oder meldet es dem Server (die Katapultsteine werfen die Figur zurück, der Klassenwechsel hält sie an, der Lagul schreibt in seinen Besitzer), daher erzeugt die Vorschau ihn nicht.</value>
   </data>
   <data name="Assets all" xml:space="preserve">
     <value>Alle</value>
