@@ -32,6 +32,17 @@ constexpr float MaxDefaultScreenShare = 0.8f;
 // The share of the width the list takes the first time; its border can be
 // dragged.
 constexpr float ListShare = 0.5f;
+
+// GetMapName has no names for the worlds of the login and character screens:
+// it would return an unrelated text.
+std::string MapNameOf(int world)
+{
+    if (world == WD_73NEW_LOGIN_SCENE)
+        return I18N::Editor::LoginScene;
+    if (world == WD_74NEW_CHARACTER_SCENE)
+        return I18N::Editor::CharacterScene;
+    return world >= 0 ? Core::Text::ToUtf8(gMapManager.GetMapName(world)) : std::string("-");
+}
 } // namespace
 
 CMuEffectBrowserUI& CMuEffectBrowserUI::GetInstance()
@@ -93,12 +104,12 @@ void CMuEffectBrowserUI::RefreshAssets()
 {
     m_model.RefreshAssets(MuEditor::Effects::ProbeLoadedAsset);
     m_assetWorld = gMapManager.WorldActive;
-    m_mapName = *m_assetWorld >= 0 ? Core::Text::ToUtf8(gMapManager.GetMapName(*m_assetWorld)) : "-";
+    m_mapName = MapNameOf(*m_assetWorld);
 }
 
 void CMuEffectBrowserUI::RenderMapLine()
 {
-    ImGui::Text("%s: %s", I18N::Editor::CurrentMap, m_mapName.c_str());
+    ImGui::Text("%s: %s (%d)", I18N::Editor::CurrentMap, m_mapName.c_str(), *m_assetWorld);
     ImGui::SameLine();
     if (ImGui::Button(I18N::Editor::Refresh))
         RefreshAssets();
