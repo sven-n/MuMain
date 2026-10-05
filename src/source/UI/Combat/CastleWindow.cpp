@@ -71,9 +71,6 @@ bool CCastleWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    // The tabs stay a native radio group for their hit tests; castle_window.rml draws them.
-    m_TabBtn.CreateRadioGroup(4, BITMAP_GUILDINFO_BEGIN);
-    m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 12.f, m_Pos.y + 32.f, 40, 22);
     SetCurOpenTab(m_iNumCurOpenTab);
 
     BuildRmlUi();
@@ -101,20 +98,14 @@ void CCastleWindow::SetPos(int x, int y)
     m_Pos.y = y;
 }
 
-// The only writer of the open tab: the radio group follows it, never the other way round, so the
-// highlight the document draws and the page it draws cannot disagree.
+// The page and the tab highlight read the same value.
 void CCastleWindow::SetCurOpenTab(int iTab)
 {
     m_iNumCurOpenTab = iTab;
-    m_TabBtn.ChangeFrame(iTab);
 }
 
 bool CCastleWindow::UpdateMouseEvent()
 {
-    // The gate and statue picks keep their native hit tests; the buttons are RmlUi's (see
-    // Update()).
-    UpdateIconPick();
-
     if (true == BtnProcess())
         return false;
 
@@ -171,21 +162,25 @@ bool CCastleWindow::Update()
         }
     }
 
-    if (IsVisible())
+    const int pick = m_PendingPick;
+    m_PendingPick = -1;
+    if (IsVisible() && pick >= 0)
     {
-        // The window moves with its slot, so the tabs' hit areas follow it each frame.
-        m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 12.f, m_Pos.y + 32.f, 40, 22);
-        const int iNumCurOpenTab = m_TabBtn.UpdateMouseEvent();
-        if (iNumCurOpenTab != RADIOGROUPEVENT_NONE)
-        {
-            SetCurOpenTab(iNumCurOpenTab);
+        if (m_iNumCurOpenTab == TAB_GATE_MANAGING && pick < 6)
+            g_SenatusInfo.SetCurrGate(pick);
+        else if (m_iNumCurOpenTab == TAB_STATUE_MANAGING && pick < 4)
+            g_SenatusInfo.SetCurrStatue(pick);
+    }
 
-            if (iNumCurOpenTab == TAB_CASTLE_MIX)
-            {
-                g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_CASTLE_SENIOR);
-                //	 		g_pNewUISystem->Hide(mu::ui::window::INTERFACE_SENATUS);
-                g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
-            }
+    const int tab = m_PendingTab;
+    m_PendingTab = -1;
+    if (IsVisible() && tab >= TAB_GATE_MANAGING && tab <= TAB_CASTLE_MIX)
+    {
+        SetCurOpenTab(tab);
+        if (tab == TAB_CASTLE_MIX)
+        {
+            g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_CASTLE_SENIOR);
+            g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
         }
     }
 
@@ -252,43 +247,6 @@ bool CCastleWindow::ButtonLocked(SENATUS_BUTTON button) const
         return model.withdrawButton.locked;
     default:
         return false;
-    }
-}
-
-void CCastleWindow::UpdateIconPick()
-{
-    if (!MouseLButtonPush)
-        return;
-
-    const POINT ptOrigin = {m_Pos.x, m_Pos.y + 55 + 6 + 12};
-    if (!CheckMouseIn(ptOrigin.x + 15, ptOrigin.y, 160.f, 165.f))
-        return;
-
-    if (m_iNumCurOpenTab == TAB_GATE_MANAGING)
-    {
-        if (CheckMouseIn(ptOrigin.x + 82, ptOrigin.y + 35, 24, 24))
-            g_SenatusInfo.SetCurrGate(0);
-        else if (CheckMouseIn(ptOrigin.x + 64, ptOrigin.y + 83, 24, 24))
-            g_SenatusInfo.SetCurrGate(1);
-        else if (CheckMouseIn(ptOrigin.x + 100, ptOrigin.y + 83, 24, 24))
-            g_SenatusInfo.SetCurrGate(2);
-        else if (CheckMouseIn(ptOrigin.x + 48, ptOrigin.y + 135, 24, 24))
-            g_SenatusInfo.SetCurrGate(3);
-        else if (CheckMouseIn(ptOrigin.x + 82, ptOrigin.y + 135, 24, 24))
-            g_SenatusInfo.SetCurrGate(4);
-        else if (CheckMouseIn(ptOrigin.x + 116, ptOrigin.y + 135, 24, 24))
-            g_SenatusInfo.SetCurrGate(5);
-    }
-    else if (m_iNumCurOpenTab == TAB_STATUE_MANAGING)
-    {
-        if (CheckMouseIn(ptOrigin.x + 82, ptOrigin.y + 20, 24, 24))
-            g_SenatusInfo.SetCurrStatue(0);
-        else if (CheckMouseIn(ptOrigin.x + 82, ptOrigin.y + 65, 24, 24))
-            g_SenatusInfo.SetCurrStatue(1);
-        else if (CheckMouseIn(ptOrigin.x + 64, ptOrigin.y + 110, 24, 24))
-            g_SenatusInfo.SetCurrStatue(2);
-        else if (CheckMouseIn(ptOrigin.x + 100, ptOrigin.y + 110, 24, 24))
-            g_SenatusInfo.SetCurrStatue(3);
     }
 }
 
@@ -597,6 +555,18 @@ void CCastleWindow::BuildRmlUi()
             c.RegisterArray<std::vector<CastleTabEntry>>();
             c.Bind("tabs", &model.tabs);
             c.Bind("active_tab", &model.activeTab);
+            c.BindEventCallback("senatus_tab",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                                {
+                                    if (args.size() == 1)
+                                        m_PendingTab = args[0].Get<int>(-1);
+                                });
+            c.BindEventCallback("senatus_pick",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                                {
+                                    if (args.size() == 1)
+                                        m_PendingPick = args[0].Get<int>(-1);
+                                });
             auto lineType = c.RegisterStruct<CastleLine>();
             lineType.RegisterMember("text", &CastleLine::text);
             lineType.RegisterMember("text_px", &CastleLine::textPx);
@@ -638,8 +608,6 @@ void CCastleWindow::BuildRmlUi()
             c.Bind("apply_button", &model.applyButton);
             c.Bind("withdraw_button", &model.withdrawButton);
             auto mapItem = c.RegisterStruct<CastleMapItem>();
-            mapItem.RegisterMember("left", &CastleMapItem::left);
-            mapItem.RegisterMember("top", &CastleMapItem::top);
             mapItem.RegisterMember("statue", &CastleMapItem::statue);
             mapItem.RegisterMember("live", &CastleMapItem::live);
             mapItem.RegisterMember("current", &CastleMapItem::current);
@@ -747,13 +715,10 @@ void CCastleWindow::SyncContent()
     CastleLine footer1, footer2, footer3;
     CastleActionButton applyButton, withdrawButton;
 
-    // RenderCastleItem(): a gate or statue's slot on the map art, and how far each of its bars
-    // has been filled. Their colours, heights and stacking are the theme's.
-    auto addItem = [&](float left, float top, LPPMSG_NPCDBLIST pInfo, bool statue)
+    // The theme places each gate or statue on the map; only bar lengths come from game state.
+    auto addItem = [&](LPPMSG_NPCDBLIST pInfo, bool statue)
     {
         CastleMapItem item;
-        item.left = left;
-        item.top = top;
         item.statue = statue;
         item.live = pInfo->btNpcLive != 0;
         item.current = pInfo->iNpcIndex ==
@@ -788,19 +753,19 @@ void CCastleWindow::SyncContent()
         mapTitle = line(I18N::Game::PurchaseAndRepair, true, 190.f);
         if (statue)
         {
-            addItem(82, 93, &g_SenatusInfo.GetStatueInfo(0), true);
-            addItem(82, 138, &g_SenatusInfo.GetStatueInfo(1), true);
-            addItem(64, 183, &g_SenatusInfo.GetStatueInfo(2), true);
-            addItem(100, 183, &g_SenatusInfo.GetStatueInfo(3), true);
+            addItem(&g_SenatusInfo.GetStatueInfo(0), true);
+            addItem(&g_SenatusInfo.GetStatueInfo(1), true);
+            addItem(&g_SenatusInfo.GetStatueInfo(2), true);
+            addItem(&g_SenatusInfo.GetStatueInfo(3), true);
         }
         else
         {
-            addItem(82, 108, &g_SenatusInfo.GetGateInfo(0), false);
-            addItem(64, 156, &g_SenatusInfo.GetGateInfo(1), false);
-            addItem(100, 156, &g_SenatusInfo.GetGateInfo(2), false);
-            addItem(48, 208, &g_SenatusInfo.GetGateInfo(3), false);
-            addItem(82, 208, &g_SenatusInfo.GetGateInfo(4), false);
-            addItem(116, 208, &g_SenatusInfo.GetGateInfo(5), false);
+            addItem(&g_SenatusInfo.GetGateInfo(0), false);
+            addItem(&g_SenatusInfo.GetGateInfo(1), false);
+            addItem(&g_SenatusInfo.GetGateInfo(2), false);
+            addItem(&g_SenatusInfo.GetGateInfo(3), false);
+            addItem(&g_SenatusInfo.GetGateInfo(4), false);
+            addItem(&g_SenatusInfo.GetGateInfo(5), false);
         }
 
         itemLive = pNPCInfo->btNpcLive != 0;

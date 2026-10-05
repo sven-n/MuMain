@@ -7,10 +7,9 @@
 </head>
 <body>
 	<!-- The Senatus (CCastleWindow), docked right: the title, the Castle Gate / Guardian Statue /
-	     Tax / Store tabs and the tab's page. The tabs and the icon picks are hit-tested natively,
-	     so #panel leaves the pointer alone outside the buttons.
+	     Tax / Store tabs and the tab's page. RmlUi handles tab and map-icon clicks.
 	     root_x/root_y/root_scale come from the dock transform; every position and size below is
-	     the theme's, except a map item's own slot and its bars' lengths. A .sharp-text layer's own
+	     the theme's, except the bars' lengths. A .sharp-text layer's own
 	     width and font size stay bound: it is laid out in physical pixels and counter-scaled out of
 	     the panel (base.rcss). A button click is queued with senatus_button(n). -->
 	<div id="panel" data-model="castle_window" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
@@ -24,16 +23,16 @@
 		      data-style-font-size="title.text_px + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title.text}}</span>
 
-		<div class="cw-tab" data-for="t, i : tabs" data-class-selected="t.selected" data-style-left="(12 + i * 41) + 'px'"></div>
-		<!-- The labels over every tab. A label wider than its tab ("Castle Gate", "Guardian
-		     Statue") overflows both its sides and runs over its neighbours, as in the original
-		     client: the minimum font size cannot fit it into 40 px, and wider tabs would be a
-		     redesign. -->
-		<span class="sharp-text cw-tab-label" data-for="t, i : tabs" data-class-selected="t.selected"
-		      data-style-left="(12 + i * 41) + 'px'" data-style-top="(32 + tab_label_top) + 'px'"
-		      data-style-width="(40 * root_scale) + 'px'"
-		      data-style-font-size="t.text_px + 'px'" data-style-line-height="line_height_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
+		<!-- Long tab labels can overflow their 40px tab as in the original client. -->
+		<div class="cw-tab" data-for="t, i : tabs" data-class-selected="t.selected"
+		     data-class-tab-0="i == 0" data-class-tab-1="i == 1"
+		     data-class-tab-2="i == 2" data-class-tab-3="i == 3"
+		     data-event-click="senatus_tab(i)">
+			<span class="sharp-text cw-tab-label" data-style-top="tab_label_top + 'px'"
+			      data-style-width="(40 * root_scale) + 'px'"
+			      data-style-font-size="t.text_px + 'px'" data-style-line-height="line_height_px + 'px'"
+			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
+		</div>
 
 		<!-- The castle gate and guardian statue pages. The map's lower frame paints over the map
 		     art, as the original's RenderOutlineLower() did, so the map comes first. -->
@@ -48,8 +47,11 @@
 			      data-style-font-size="map_title.text_px + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{map_title.text}}</span>
 
-			<div class="cw-item" data-for="it : map_items" data-class-statue="it.statue"
-			     data-class-current="it.current" data-style-left="it.left + 'px'" data-style-top="it.top + 'px'">
+			<div class="cw-item" data-for="it, i : map_items" data-class-statue="it.statue"
+			     data-class-current="it.current" data-class-item-0="i == 0"
+			     data-class-item-1="i == 1" data-class-item-2="i == 2"
+			     data-class-item-3="i == 3" data-class-item-4="i == 4"
+			     data-class-item-5="i == 5" data-event-click="senatus_pick(i)">
 				<div class="cw-bars" data-if="it.live && !it.statue">
 					<div class="bar bar-track bar-gate-hp" data-style-width="it.hp_width + 'px'"></div>
 					<div class="bar bar-track bar-gate-def-track"></div>

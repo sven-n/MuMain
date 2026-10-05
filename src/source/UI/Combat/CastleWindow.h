@@ -8,7 +8,6 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Combat/CastleWindowRmlModel.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
-#include "UI/Widgets/Window/Button.h"
 
 #include <string>
 #include <vector>
@@ -21,8 +20,7 @@ class ElementDocument;
 namespace mu::ui::window
 {
 // The Senatus (castle lord's NPC), docked right: the Castle Gate, Guardian Statue, Tax and
-// Store tabs. castle_window.rml draws it; the tab radio group and the gate / statue icon picks
-// stay native hit tests, C++ keeps every request.
+// Store tabs. castle_window.rml owns tab and map-icon hit targets; C++ keeps every request.
 class CCastleWindow : public CObject
 {
 public:
@@ -77,9 +75,7 @@ private:
     CManager* m_pNewUIMng;
     POINT m_Pos;
 
-    // The radio group is the tabs' hit test only; m_iNumCurOpenTab is the tab itself, and the one
-    // thing the page and the document's highlight both read. Write it through SetCurOpenTab().
-    CRadioGroupButton m_TabBtn;
+    // The current page and highlight share this value. RmlUi owns the tab hit targets.
     int m_iNumCurOpenTab;
     int m_iCurrMsgBoxRequest;
 
@@ -88,6 +84,8 @@ private:
     RmlModelBinder<CastleWindowRmlModel> m_RmlBinder;
     Rml::ElementDocument* m_pRmlDoc = nullptr;
     SENATUS_BUTTON m_PendingButton = SENATUS_BUTTON_NONE;
+    int m_PendingTab = -1;
+    int m_PendingPick = -1;
 
 public:
     CCastleWindow();
@@ -127,7 +125,6 @@ private:
     void UpdateGateManagingTab(SENATUS_BUTTON button);
     void UpdateStatueManagingTab(SENATUS_BUTTON button);
     void UpdateTaxManagingTab(SENATUS_BUTTON button);
-    void UpdateIconPick();
     bool ButtonLocked(SENATUS_BUTTON button) const;
 
     void BuildRmlUi();

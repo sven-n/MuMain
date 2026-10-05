@@ -27,14 +27,11 @@ struct CastleActionButton
     bool operator==(const CastleActionButton&) const = default;
 };
 
-// One gate or statue standing on the castle map. `left`/`top` is its slot on the map art, which
-// only the art can decide; everything else is its state -- whether it stands, whether it is the
-// one picked, and how far each of its bars has been filled (RenderCastleItem()'s own widths, in
-// reference px out of the bar's 24). A gate has two bars, a statue three.
+// One gate or statue standing on the castle map. RCSS places its slot on the map art; the
+// model carries whether it stands, whether it is picked, and how far its bars are filled.
+// A gate has two bars, a statue three.
 struct CastleMapItem
 {
-    float left = 0.f;
-    float top = 0.f;
     bool statue = false;
     bool live = false;
     bool current = false;

@@ -12,10 +12,14 @@
 
 #panel { pointer-events: none; }
 
-.cw-tab { position: absolute; top: 32px; width: 40px; height: 22px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+.cw-tab { position: absolute; top: 32px; width: 40px; height: 22px; pointer-events: auto; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
+.cw-tab.tab-0 { left: 12px; }
+.cw-tab.tab-1 { left: 53px; }
+.cw-tab.tab-2 { left: 94px; }
+.cw-tab.tab-3 { left: 135px; }
 .cw-tab.selected { background-color: token(surface-raised); border: 1px token(accent-steel); }
 .cw-tab-label { color: token(text-muted); }
-.cw-tab-label.selected { color: token(text-primary); }
+.cw-tab.selected .cw-tab-label { color: token(text-primary); }
 
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
@@ -148,10 +152,20 @@
 .tax-rate-store { top: 103px; }
 .tax-divider { position: absolute; left: 15px; top: 91px; width: 158px; }
 
-/* A gate or statue on the map: only its slot and its bars' lengths come from C++. */
-.cw-item { position: absolute; width: 24px; height: 24px; }
-.cw-bars { position: static; }
-.cw-icon { position: absolute; left: 0; top: 0; width: 24px; height: 24px; }
+/* The theme places each gate and statue; C++ supplies only live bar lengths. */
+.cw-item { position: absolute; width: 24px; height: 24px; pointer-events: auto; }
+.cw-item.item-0 { left: 82px; top: 108px; }
+.cw-item.item-1 { left: 64px; top: 156px; }
+.cw-item.item-2 { left: 100px; top: 156px; }
+.cw-item.item-3 { left: 48px; top: 208px; }
+.cw-item.item-4 { left: 82px; top: 208px; }
+.cw-item.item-5 { left: 116px; top: 208px; }
+.cw-page.statue .cw-item.item-0 { left: 82px; top: 93px; }
+.cw-page.statue .cw-item.item-1 { left: 82px; top: 138px; }
+.cw-page.statue .cw-item.item-2 { left: 64px; top: 183px; }
+.cw-page.statue .cw-item.item-3 { left: 100px; top: 183px; }
+.cw-bars { position: static; pointer-events: none; }
+.cw-icon { position: absolute; left: 0; top: 0; width: 24px; height: 24px; pointer-events: none; }
 .bar { position: absolute; left: 0; height: 3px; }
 .bar-gate-hp { top: -10px; }
 .bar-gate-def-track, .bar-gate-def { top: -5px; }

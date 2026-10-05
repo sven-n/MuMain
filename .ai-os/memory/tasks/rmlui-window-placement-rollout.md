@@ -70,10 +70,10 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
 ## Open work, in suggested order
 
 1. Hand checks above (or teach the socket world picking so trade/NPC checks can be scripted).
-2. Gatekeeper public toggle done: the RmlUi hit target follows both themes' RCSS and sends
-   the same request. Full RelWithDebInfo build passes; siege NPC validation is pending. Castle and
-   guard tabs now use RmlUi click events and per-theme RCSS positions. Castle tabs and
-   gate/statue picks remain; validate all of these at the siege NPCs.
+2. Done in code: gatekeeper public toggle, guard and castle tabs, and castle gate/statue
+   picks use RmlUi click targets. The themes place the tabs and map icons in RCSS. Full
+   RelWithDebInfo build passes; test the toggle, tabs, map picks and resulting requests at the
+   siege NPCs before marking the interaction validated in game.
 3. Done: catapult consumes pointer input over its measured `#panel`, with 190x429 as the first-layout fallback. Full RelWithDebInfo build passed; a siege NPC in-game check is pending.
 4. Done: lucky item's panel and background sizes are in each theme's RCSS. The native hit box reads `#panel`, and legacy counter-scaled text reads `panel_width`. Full RelWithDebInfo build passed; in-game verification is pending.
 5. Done: the eight inventory-family legacy-theme RML documents center counter-scaled text
