@@ -17,11 +17,11 @@ re-places once. The minimap clips around SlotBox("main_hud"). GetStripRect()/Hud
 gone. The NPC panel stage sits outside the shell so it centres on the whole screen. Verified in
 game: modern 100 %, legacy 90 %, HUD moved to a reserve header. Pending hand check: minimap clip.
 
-Next: H2, one component per batch. First batch, decided with the user: the header holds the MU
-Helper bar (left slot) and the modern top bar (right slot); modern reserves the header, legacy
-keeps it an overlay; dock regions get data-scale="fit" so they never overlap a reserved header.
-The exact design is in window-placement.md, "Header and docks". A component whose measured size
-changes must call UI::Placement::Invalidate().
+H2's first batch is committed: the header holds the MU Helper bar (left slot) and the modern top
+bar (right slot); modern caps its dock regions (max-height: 100%) and the service draws their
+windows smaller to fit (window-placement.md, "Header and docks"). Next H2 batches, one
+component each: chat log and input, minimap, buff row, party list, item endurance. A component
+whose measured size changes must call UI::Placement::Invalidate().
 
 Read first: AGENTS.md, docs/CODING_RULES.md, docs/rmlui-ui-system/architecture-principles.md,
 docs/rmlui-ui-system/building-new-ui.md, docs/rmlui-ui-system/window-placement.md (whole file;

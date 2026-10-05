@@ -9,6 +9,7 @@
 	display: flex;
 	justify-content: flex-end;
 }
+#buttons_top.workspace-placed { position: absolute; transform-origin: left top; }
 #buttons_top {
 	position: relative;
 	width: 256dp;

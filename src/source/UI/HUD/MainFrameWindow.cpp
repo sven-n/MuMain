@@ -70,6 +70,7 @@ bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng)
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MAINFRAME, this);
 
     UI::RmlBridge::RegisterWorkspaceDocument("main_hud", [this] { return m_pRmlDoc; }, "hud_layout");
+    UI::RmlBridge::RegisterWorkspaceDocument("top_bar", [this] { return m_pRmlTopDoc; }, "buttons_top");
 
     // Guarded so the doc/model are created once, even though Create() re-runs on resolution change.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
@@ -324,6 +325,7 @@ void mu::ui::window::CMainFrameWindow::ReloadRmlTheme()
 void mu::ui::window::CMainFrameWindow::Release()
 {
     UI::Placement::UnregisterParticipant("main_hud");
+    UI::Placement::UnregisterParticipant("top_bar");
     m_ItemHotKey.SetSlotIconsShown(false);
 
     if (m_pNewUIMng)

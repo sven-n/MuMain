@@ -50,6 +50,8 @@ Rml::ElementDocument* g_workspace = nullptr;
 bool g_namesChecked = false;
 UI::Scaling::Transform g_lastDock{};
 bool g_dirty = true;
+// Regions the theme capped below their reference height, and the factor that makes them fit.
+std::unordered_map<Rml::Element*, float> g_regionFit;
 unsigned int g_lastWidth = 0;
 unsigned int g_lastHeight = 0;
 float g_uncoveredLeft = 0.f;
@@ -120,7 +122,7 @@ void SetLength(Rml::Element* element, Rml::PropertyId property, float px)
 }
 
 // The scale a region's windows are drawn at, chosen by its data-scale.
-float RegionScale(Rml::Element* region, const UI::Scaling::Transform& dock)
+float BaseRegionScale(Rml::Element* region, const UI::Scaling::Transform& dock)
 {
     const std::string scale = region != nullptr ? region->GetAttribute<Rml::String>("data-scale", "") : "";
     if (scale == "panel")
@@ -128,6 +130,13 @@ float RegionScale(Rml::Element* region, const UI::Scaling::Transform& dock)
     if (scale == "hud")
         return UI::Scaling::BottomHudScale(WindowWidth, WindowHeight);
     return dock.scaleX;
+}
+
+// The base scale, smaller where the theme caps the region below its reference height.
+float RegionScale(Rml::Element* region, const UI::Scaling::Transform& dock)
+{
+    const auto fit = g_regionFit.find(region);
+    return BaseRegionScale(region, dock) * (fit != g_regionFit.end() ? fit->second : 1.f);
 }
 
 // The window's own #panel size, in its layout units; the docked windows' size without one.
@@ -277,6 +286,29 @@ static void PrepareRegions(Rml::ElementDocument* workspace, const UI::Scaling::T
             SetLength(region, Rml::PropertyId::Height, referenceHeight * RegionScale(region, dock));
     }
 
+}
+
+// A region whose theme caps it (max-height) below its reference height draws its windows at the
+// scale that fits. True when a region changed, so the slots need sizing again.
+static bool FitRegions(Rml::ElementDocument* workspace, const UI::Scaling::Transform& dock)
+{
+    bool changed = false;
+    Rml::ElementList regions;
+    workspace->QuerySelectorAll(regions, ".region");
+    for (Rml::Element* region : regions)
+    {
+        const float referenceHeight = region->GetAttribute<float>("data-ref-height", 0.f);
+        if (referenceHeight <= 0.f)
+            continue;
+        const float wanted = referenceHeight * BaseRegionScale(region, dock);
+        const float resolved = region->GetBox().GetSize(Rml::BoxArea::Border).y;
+        if (resolved > 0.f && resolved < wanted - 0.5f)
+        {
+            g_regionFit[region] = resolved / wanted;
+            changed = true;
+        }
+    }
+    return changed;
 }
 
 static Rml::ElementList PrepareSlots(Rml::ElementDocument* workspace, const UI::Scaling::Transform& dock)
@@ -441,9 +473,17 @@ static void ArrangeNow()
     for (auto& [name, entry] : g_windows)
         entry.lastVisible = IsOpen(entry);
 
+    g_regionFit.clear();
     PrepareRegions(workspace, dock);
-    const Rml::ElementList slots = PrepareSlots(workspace, dock);
+    Rml::ElementList slots = PrepareSlots(workspace, dock);
     workspace->UpdateDocument();
+    // The content area depends only on the shell, so one more pass sizes capped regions' windows.
+    if (FitRegions(workspace, dock))
+    {
+        PrepareRegions(workspace, dock);
+        slots = PrepareSlots(workspace, dock);
+        workspace->UpdateDocument();
+    }
     UpdateUncoveredArea(workspace, slots);
     PlaceSlots(slots, dock);
     RestoreUnslotted(slots);

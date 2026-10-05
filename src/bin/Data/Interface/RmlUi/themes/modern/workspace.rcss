@@ -12,7 +12,10 @@ body {
 #shell_middle { position: relative; display: flex; flex-direction: row; flex: 1 1 0; min-height: 0; }
 #safe_area { position: relative; flex: 1 1 0; min-width: 0; min-height: 0; }
 .region.shell-region { position: relative; display: flex; flex: 0 0 auto; }
-#shell_header, #shell_footer { justify-content: center; }
+/* Steady while the MU Helper bar hides for a fourth column of windows, so the docks keep their scale. */
+#shell_header { align-items: flex-start; min-height: 25dp; }
+#shell_header .slot[data-window="top_bar"] { margin-left: auto; }
+#shell_footer { justify-content: center; }
 #shell_left, #shell_right { flex-direction: column; }
 .shell-region[data-participation="overlay"] { position: absolute; }
 #shell_header[data-participation="overlay"] { top: 0; left: 0; right: 0; }
@@ -24,8 +27,10 @@ body {
 	position: absolute;
 }
 
-/* The original's docked columns: open windows pack from the right edge, sitting on the HUD. */
+/* The original's docked columns: open windows pack from the right edge, sitting on the HUD.
+   Capped to the content area, so the windows draw smaller rather than cover the top bar. */
 .dock-right {
+	max-height: 100%;
 	left: 0;
 	right: 0;
 	bottom: 0;
@@ -45,6 +50,7 @@ body {
 
 /* The original's left-docked warp list, sitting on the HUD. */
 .dock-left {
+	max-height: 100%;
 	left: 0;
 	right: 0;
 	bottom: 0;

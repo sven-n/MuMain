@@ -12,7 +12,9 @@ body {
 #shell_middle { position: relative; display: flex; flex-direction: row; flex: 1 1 0; min-height: 0; }
 #safe_area { position: relative; flex: 1 1 0; min-width: 0; min-height: 0; }
 .region.shell-region { position: relative; display: flex; flex: 0 0 auto; }
-#shell_header, #shell_footer { justify-content: center; }
+#shell_header { align-items: flex-start; }
+#shell_header .slot[data-window="top_bar"] { margin-left: auto; }
+#shell_footer { justify-content: center; }
 #shell_left, #shell_right { flex-direction: column; }
 .shell-region[data-participation="overlay"] { position: absolute; }
 #shell_header[data-participation="overlay"] { top: 0; left: 0; right: 0; }

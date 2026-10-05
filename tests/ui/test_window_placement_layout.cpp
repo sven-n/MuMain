@@ -119,6 +119,57 @@ TEST_CASE("Workspace shell reserves regions and collapses hidden slots [ui][wind
     Rml::SetRenderInterface(nullptr);
 }
 
+// The header holds the MU Helper bar (left) and the top bar (right). Modern caps its docks at the
+// content area, so the service draws them smaller instead of over the top bar; legacy keeps the
+// original's docks, which reach above it.
+TEST_CASE("The header's corners and the docks the content area caps [ui][window-placement]")
+{
+    NullRenderer renderer;
+    Rml::SetRenderInterface(&renderer);
+    REQUIRE(Rml::Initialise());
+    auto* context = Rml::CreateContext("workspace-header", {1024, 768});
+    REQUIRE(context != nullptr);
+    constexpr float Scale = 1.6f;
+    context->SetDensityIndependentPixelRatio(Scale);
+    for (const char* theme : {"legacy", "modern"})
+    {
+        CAPTURE(theme);
+        auto* document = context->LoadDocumentFromMemory(WorkspaceFor(theme));
+        REQUIRE(document != nullptr);
+        const auto openSized = [&](const char* window, float width, float height)
+        {
+            Rml::Element* slot = Slot(document, window);
+            REQUIRE(slot != nullptr);
+            slot->SetClass("open", true);
+            slot->SetProperty(Rml::PropertyId::Width, Rml::Property(width * Scale, Rml::Unit::PX));
+            slot->SetProperty(Rml::PropertyId::Height, Rml::Property(height * Scale, Rml::Unit::PX));
+        };
+        openSized("mu_helper_bar", 207.f, 25.f);
+        openSized("top_bar", 256.f, 24.f);
+        openSized("main_hud", 640.f, 51.f);
+        Rml::ElementList docks;
+        document->QuerySelectorAll(docks, ".dock-right");
+        REQUIRE(docks.size() == 1);
+        docks[0]->SetProperty(Rml::PropertyId::Height, Rml::Property(432.f * Scale, Rml::Unit::PX));
+        document->UpdateDocument();
+
+        CHECK(Slot(document, "mu_helper_bar")->GetAbsoluteOffset().x == doctest::Approx(0.f));
+        CHECK(Slot(document, "mu_helper_bar")->GetAbsoluteOffset().y == doctest::Approx(0.f));
+        CHECK(Slot(document, "top_bar")->GetAbsoluteOffset().x == doctest::Approx(1024.f - 256.f * Scale));
+        CHECK(Slot(document, "top_bar")->GetAbsoluteOffset().y == doctest::Approx(0.f));
+        const float content = 768.f - 25.f * Scale - 51.f * Scale;
+        CHECK(document->GetElementById("safe_area")->GetBox().GetSize().y == doctest::Approx(content));
+        const float dock = docks[0]->GetBox().GetSize().y;
+        CHECK(dock == doctest::Approx(std::string(theme) == "modern" ? content : 432.f * Scale));
+
+        context->UnloadDocument(document);
+        context->Update();
+    }
+    Rml::RemoveContext("workspace-header");
+    Rml::Shutdown();
+    Rml::SetRenderInterface(nullptr);
+}
+
 // A theme can remove the original dock height and let one fill-capable window occupy a fraction
 // of the safe area. The service reads this resolved border box and hands it to the window.
 TEST_CASE("A theme-sized slot fills the safe area's height [ui][window-placement]")
@@ -158,12 +209,14 @@ TEST_CASE("A theme-sized slot fills the safe area's height [ui][window-placement
         fillSlot->SetClass("open", true);
         document->UpdateDocument();
 
+        // A theme's header (modern keeps one) takes its height off the content area's top.
+        const float header = document->GetElementById("shell_header")->GetBox().GetSize(Rml::BoxArea::Border).y;
         const Rml::Vector2f size = fillSlot->GetBox().GetSize(Rml::BoxArea::Border);
         const Rml::Vector2f offset = fillSlot->GetAbsoluteOffset(Rml::BoxArea::Border);
         CHECK(size.x == doctest::Approx(672.f));
-        CHECK(size.y == doctest::Approx(978.f));
+        CHECK(size.y == doctest::Approx(978.f - header));
         CHECK(offset.x == doctest::Approx(1248.f));
-        CHECK(offset.y == doctest::Approx(0.f));
+        CHECK(offset.y == doctest::Approx(header));
 
         // The service gives a fill slot the window's content size as its minimum.
         fillSlot->SetProperty(Rml::PropertyId::MinWidth, Rml::Property(800.f, Rml::Unit::PX));
@@ -219,7 +272,10 @@ TEST_CASE("Both themes' workspaces place docked windows on the original columns 
         Open(document, "character", Scale);
         document->UpdateDocument();
 
-        const float dockTop = HudTop - 432.f * Scale;
+        // A theme that caps its docks at the content area starts them below its header; the
+        // service then draws the windows smaller to fit (not part of this RCSS-only check).
+        const float header = document->GetElementById("shell_header")->GetBox().GetSize(Rml::BoxArea::Border).y;
+        const float dockTop = std::string(theme) == "modern" ? header : HudTop - 432.f * Scale;
         const auto column = [&](const char* window, int n)
         {
             CAPTURE(window);

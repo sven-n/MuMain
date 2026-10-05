@@ -11,6 +11,8 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlWorkspaceParticipant.h"
+#include "UI/Placement/WindowPlacement.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
@@ -38,6 +40,7 @@ bool CMuHelperBar::Create(CManager* pNewUIMng, int x, int y)
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MU_HELPER_BAR, this);
+    UI::RmlBridge::RegisterWorkspaceDocument("mu_helper_bar", [this] { return m_pRmlDoc; }, "panel");
 
     // Guarded so the doc/model are created once, even though Create() re-runs on resolution change.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
@@ -84,11 +87,13 @@ void CMuHelperBar::ReloadRmlTheme()
     m_pRmlDoc = nullptr;
 
     BuildRmlUi();
+    UI::Placement::Invalidate();
     // Next frame's Update()/SyncDocVisibility() self-corrects live state/visibility.
 }
 
 void CMuHelperBar::Release()
 {
+    UI::Placement::UnregisterParticipant("mu_helper_bar");
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);

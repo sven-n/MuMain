@@ -60,7 +60,8 @@ Current handover prompt for a new agent: `rmlui-window-placement-hud-handover.md
 | `7cbc0d0bd` | Friend list's first position from a `friends` slot (`InitialPosition()`) |
 | `ab5efa0e1` | Centred NPC panels on a `panel-stage` region |
 | `6a2d08718` | Generic fill (`GetFillDocument()`), 24 windows; native corner close follows panel width |
-| (H1 commit) | HUD in the workspace H1: flex shell, `PlacementParticipant`, main HUD as one footer unit, minimap clip from the slot |
+| `a1f677709` | HUD in the workspace H1: flex shell, `PlacementParticipant`, main HUD as one footer unit, minimap clip from the slot |
+| (H2 header) | Header slots for the MU Helper bar and top bar; modern caps its docks at the content area (windows drawn smaller to fit) |
 
 Regression lesson: since `LayoutMode::Slot`, a placed window's `m_Pos` is (0, 0) in its slot space.
 Any native part positioned once at creation (not moved by `SetPos()` or re-placed each frame) ends
@@ -100,11 +101,11 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
 
 ## Open work, in suggested order
 
-1. HUD in the workspace: H1 is done (shell, participant adapter, main HUD as one `reserve`
-   footer unit). Next is H2, one component per batch, starting with the top bar
-   (`main_frame_top.rml`) as a header slot; then H3 and H4 (`window-placement.md`, "HUD in the
-   workspace"). Hand check pending from H1: the minimap's clip around the HUD (socket hotkeys
-   did not reach the client).
+1. HUD in the workspace: H1 and H2's header batch are done. Next H2 batches, one component each:
+   chat log and input, minimap, buff row, party list, item endurance; then H3 and H4
+   (`window-placement.md`, "HUD in the workspace"). Hand checks pending: the minimap's clip
+   around the HUD; in modern at a capped scale, dragging items between windows and item
+   tooltips (socket hotkeys did not reach the client).
 2. Not verified in game: the Cursed Temple result panel (needs a finished event); Gens ranking,
    move map, friends and the NPC panels in the modern theme; filled windows at resolutions other
    than 1024x768.

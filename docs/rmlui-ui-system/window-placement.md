@@ -308,13 +308,14 @@ Counts come from a scan of each window's `.cpp` and RML (`RefreshLogicalPanelSiz
 `RefreshLogicalAnchorPosition` use, `CInventoryCtrl`, 3D rendering, `m_Pos.x/y + n` offsets, 190/429
 literals). Fill placement (phase 4) needs the same groundwork.
 
-## HUD in the workspace (H1 done; H2-H4 not started)
+## HUD in the workspace (H1 done; H2 in progress)
 
 H1 status (2026-10-05): done. Shell regions, the participant adapter, the main HUD as a
 footer `reserve` slot and the minimap's clip from that slot are in both themes; both look as
 before. Verified in game at 1024x768: modern at 100 % (docks, the Kanturu panel on the
 whole-screen stage), legacy at 90 % (docks), and a runtime layout with the HUD in a `reserve`
-header (docks take the content area below it). H2-H4 have not started.
+header (docks take the content area below it). H2's first batch (header and capped docks) is
+done; the rest of H2 and H3-H4 have not started.
 
 Before H1, the HUD laid itself out (`main_frame.rml` and the other HUD documents) and the workspace
 learned only one thing from it: the strip's rectangle (`CMainFrameWindow::GetStripRect()`), which
@@ -388,32 +389,33 @@ Settled in H1:
 - A component whose measured size can change (H2's chat log) calls `UI::Placement::Invalidate()`
   when it does; the slot then takes the new size before the next frame's windows update.
 
-Header and docks (decided with the user, 2026-10-05; first H2 batch):
+Header and docks (decided with the user, 2026-10-05; done, first H2 batch):
 - The header holds both top corners: the MU Helper bar (207x25 dp, with the location text) in a
   left slot `mu_helper_bar`, and the modern theme's menu buttons (`main_frame_top.rml`,
-  `#buttons_top`, 256x24 dp) in a right slot `top_bar`. Both are registered through
-  `RegisterWorkspaceDocument()` at the HUD scale.
-- Modern makes the header `reserve`. Legacy keeps it `overlay` and has no top bar, so its screen
-  stays the original's (the MU Helper bar is still hidden when a fourth column of windows opens,
-  `ShouldHideMuHelperBar()`).
-- Docks no longer overlap a reserved header: a dock region with `data-scale="fit"` is drawn at
-  the docked scale, capped so its `data-ref-height` fits the content area
-  (`min(dock scale, content height / reference height)`). The windows are scaled whole
-  (RmlUi, native grids, 3D icons follow the slot transform), so no window needs a shrink or
-  scroll policy. At 1024x768 and 100 % the modern panels are drawn at about 1.5 instead of 1.6;
-  where they already fit nothing changes. Fill windows can still take the whole content height.
-- The content height depends only on the shell, never on the windows: the service lays out the
-  shell, reads `#safe_area`'s height, then sizes the dock regions and slots (a second document
-  update, only when something changed).
-- Check after it lands: anything still drawn in the docked transform instead of the slot's
-  (dragged items, tooltips, the drop guide) at a capped scale; the uncovered-world edge; with a
-  reserved header, `ShouldHideMuHelperBar()` becomes unnecessary for that theme (a theme rule,
-  like `data-closes`, could replace it later).
+  `#buttons_top`, 256x24 dp) in a right slot `top_bar` (pushed right by `margin-left: auto`).
+  Both register through `RegisterWorkspaceDocument()` at the HUD scale. Legacy hides the top bar,
+  so its slot collapses.
+- A theme caps a dock region at the content area with `max-height: 100%`; the service then
+  draws that region's windows at the scale that fits (the region's resolved height over its
+  `data-ref-height` at the docked scale). The windows are scaled whole (RmlUi, native grids, 3D
+  icons follow the slot transform), so no window needs a shrink or scroll policy. The content
+  height depends only on the shell, so this is a second document update, only when the layout
+  changed.
+- Modern caps its docks and keeps the header at least 25 dp tall (steady while the MU Helper bar
+  hides for a fourth column, `ShouldHideMuHelperBar()`). At 1024x768 and 100 % its panels are
+  drawn at about 1.5 instead of 1.6, below the menu buttons; where they fit nothing changes.
+  Legacy does not cap: its docks still reach above the header, as the original's did.
+- Verified in game at 1024x768: modern at 100 % (panels under the menu buttons, close buttons
+  and hover in place at the smaller scale), legacy at 100 % unchanged. Headless test: the header
+  corners, modern's capped dock, legacy's uncapped one.
+- Still to check by hand at a capped scale: dragging an item between windows (the drop guide),
+  item tooltips, the uncovered-world edge. With a reserved header, `ShouldHideMuHelperBar()`
+  only matters to legacy; a theme rule like `data-closes` could replace it later.
 
 | Phase | Work |
 |---|---|
 | H1 | Shell regions in both workspaces (header, footer, left, right, content); `#safe_area` becomes the content region; participation attribute with `reserve`/`overlay`. Main strip (`#hud_strip` + `#exp`) as a content-sized `reserve` footer slot; `HudReserve()` and `GetStripRect()` readers (placement, minimap clips) read the slot. Headless layout test for the shell; in-game check, both themes, 100 % and a non-100 % scale. |
-| H2 | Top bar (`main_frame_top.rml`) as a header slot; chat log and chat input; minimap; buff row (`buff_strip.rml`); party list; MU Helper bar; item endurance. One component per batch, each verified in game. The HUD widgets' `UncoveredWorld*In()` positioning becomes their slots. |
+| H2 | Done: top bar and MU Helper bar as header slots, modern's docks capped to the content area. Next: chat log and chat input; minimap; buff row (`buff_strip.rml`); party list; item endurance. One component per batch, each verified in game. The HUD widgets' `UncoveredWorld*In()` positioning becomes their slots. |
 | H3 | Event HUDs (Blood/Chaos Castle timers, battle soccer, duel, Crywolf, siege, Doppelganger frame, Empire Guardian timer, Cursed Temple system, Kanturu info): `overlay` slots. |
 | H4 | Theme recipes on runtime copies, recorded in "Theme recipes": side HUD (left `reserve` region), header plus footer, split HUD, minimap docked in a corner the windows avoid. |
 
@@ -436,7 +438,7 @@ UI scale with the [validation matrix](validation-matrix.md).
 | 3 | Done, in-game checks pending: column-1/column-2 conflicts and the three-column limit are `data-closes` in both workspaces; `HideGroupBeforeOpenInterface()` is gone. `HideAllGroupA()` stays in C++ (it ends trades and NPC sessions, which a theme must not control). The MU Helper bar rule and the help-panel exclusions stay until their windows have slots. Change: windows closed by these rules now run their closing process; for the Gold Bowman windows that tells the server the event-chip dialog ended, which the old silent hide skipped. |
 | 4 | In progress: character info and pet info opt into `data-fit=fill`. A theme sizes its slot in RCSS; the service gives that size to the panel, never less than the content size. Character info's right-hand pieces and action rows are pinned to `#panel`'s edges in both themes, so a wider content-sized panel stretches too. The shipped themes stay content-sized. Verified in game at 1024x768 (runtime layouts, both themes): 35%, 30% and 22% slots at UI scale 80, 90 and 100 %; action buttons and hints, both close targets, and live theme switches between a filled and a content-sized workspace. Pet info verified the same way at 35 % in both themes (tabs, corner close). The headless test passes (82 assertions, both windows). Other windows opt in after their hit areas and native content can follow a filled panel. |
 | 5 | Done: Gens ranking has a right-dock slot (docked scale and place, like its neighbours; it used to be drawn in the stretched 640x480 space, wider than the docks on wide screens and ignoring the UI scale). The move map has a left-dock slot on the HUD (`.dock-left`), not marked `data-covers-world`, so nothing shifts around it as before. Verified in game: shipped layout, centre-left at 60 % height (legacy), full height at 30 % and 45 % width (modern). The friend list, which moves and sizes itself, asks its `friends` slot only where it first opens (`InitialPosition()`); the shipped themes put it in the bottom-right corner above the HUD, as before, and the player's moves win after that. Its chat and letter windows keep the friend manager's cascade. Verified in game, including a theme moving it to the left edge. The centred NPC panels (Kanturu entry, Cursed Temple entry and result) sit on a `panel-stage` region: the original's 640x480 stage centred on the screen, where `1dp` is one of its units, each panel at its original height; verified in game. The generic confirm and menu dialogs already centre themselves in their own theme CSS; help, item explanations and the quick command follow the pointer or their target, and the in-game shop covers the screen, so none of them needs a slot. |
-| H1-H4 | H1 done (see the HUD section). H2-H4 not started. |
+| H1-H4 | H1 done; H2 in progress (header and capped docks done). See the HUD section. |
 
 Docs to update with phase 1: [theming-and-modding.md](theming-and-modding.md) ("three different
 owners"), [layout-and-scaling.md](layout-and-scaling.md), [tracked-deferrals.md](tracked-deferrals.md),

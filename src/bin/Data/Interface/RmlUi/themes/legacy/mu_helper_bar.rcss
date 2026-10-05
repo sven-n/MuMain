@@ -35,6 +35,7 @@
 	muhelper-stop-hover: 0px 13px 18px 13px;
 }
 
+#panel.workspace-placed { transform-origin: left top; }
 #panel {
 	position: absolute;
 	width: 207dp;

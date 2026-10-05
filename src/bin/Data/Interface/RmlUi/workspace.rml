@@ -12,7 +12,8 @@
 	     holds the left side, #safe_area (the content area) and the right side. A shell region's
 	     data-participation is reserve (it takes the space, so the content area avoids it) or
 	     overlay (placed over the content area, taking no space). A hidden component's slot
-	     collapses. The main HUD (main_hud) is one unit: its parts are laid out inside it by
+	     collapses. A dock region the theme caps (max-height) below its data-ref-height draws its
+	     windows smaller, so they fit the content area. The main HUD (main_hud) is one unit: its parts are laid out inside it by
 	     main_frame.rcss.
 
 	     Set by the game: each slot's size (its component's own size), and a region's height from
@@ -24,7 +25,10 @@
 	     window of its region. A window that moves itself (the friend list) only asks its slot where
 	     it first opens; the player's moves win after that. -->
 	<div id="workspace_shell">
-		<div id="shell_header" class="region shell-region" data-scale="hud" data-participation="reserve"></div>
+		<div id="shell_header" class="region shell-region" data-scale="hud" data-participation="reserve">
+			<div class="slot" data-window="mu_helper_bar"></div>
+			<div class="slot" data-window="top_bar"></div>
+		</div>
 		<div id="shell_middle">
 			<div id="shell_left" class="region shell-region" data-scale="hud" data-participation="reserve"></div>
 			<div id="safe_area">
