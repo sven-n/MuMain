@@ -624,6 +624,55 @@ void CMyInventory::SetPos(int x, int y)
     SetEquipmentSlotInfo();
 
     m_pNewInventoryCtrl->SetPos(x + 15, y + 200);
+    SyncNativeLayout();
+}
+
+void CMyInventory::SyncNativeLayout()
+{
+    struct SlotAnchor
+    {
+        int slot;
+        const char* id;
+    };
+    static constexpr SlotAnchor SlotAnchors[] = {
+        {EQUIPMENT_HELPER, "slot_helper"},
+        {EQUIPMENT_HELM, "slot_helm"},
+        {EQUIPMENT_WING, "slot_wing"},
+        {EQUIPMENT_WEAPON_LEFT, "slot_weapon_left"},
+        {EQUIPMENT_ARMOR, "slot_armor"},
+        {EQUIPMENT_WEAPON_RIGHT, "slot_weapon_right"},
+        {EQUIPMENT_GLOVES, "slot_gloves"},
+        {EQUIPMENT_PANTS, "slot_pants"},
+        {EQUIPMENT_BOOTS, "slot_boots"},
+        {EQUIPMENT_RING_LEFT, "slot_ring_left"},
+        {EQUIPMENT_AMULET, "slot_amulet"},
+        {EQUIPMENT_RING_RIGHT, "slot_ring_right"},
+    };
+    for (const SlotAnchor& anchor : SlotAnchors)
+    {
+        auto& slot = m_EquipmentSlots[anchor.slot];
+        float x = static_cast<float>(slot.x);
+        float y = static_cast<float>(slot.y);
+        float width = static_cast<float>(slot.width);
+        float height = static_cast<float>(slot.height);
+        if (UI::RmlBridge::RefreshLogicalAnchorRect(m_pRmlDoc, "panel", anchor.id, m_Pos, x, y, width, height))
+        {
+            slot.x = static_cast<int>(std::lround(x));
+            slot.y = static_cast<int>(std::lround(y));
+            slot.width = static_cast<int>(std::lround(width));
+            slot.height = static_cast<int>(std::lround(height));
+        }
+    }
+
+    float gridX = static_cast<float>(m_Pos.x + 15);
+    float gridY = static_cast<float>(m_Pos.y + 200);
+    if (UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "panel", "item_grid", m_Pos, gridX, gridY))
+    {
+        const int x = static_cast<int>(std::lround(gridX));
+        const int y = static_cast<int>(std::lround(gridY));
+        if (m_pNewInventoryCtrl->GetPos().x != x || m_pNewInventoryCtrl->GetPos().y != y)
+            m_pNewInventoryCtrl->SetPos(x, y);
+    }
 }
 
 const POINT& CMyInventory::GetPos() const
@@ -915,6 +964,7 @@ void CMyInventory::SyncRmlModel()
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    SyncNativeLayout();
 
     auto syncBool = [this](bool MyInventoryRmlModel::* field, const char* boundName, bool value)
     {
@@ -1027,8 +1077,12 @@ void CMyInventory::SyncRmlModel()
         // 95 was its horizontal center, 40 its top edge. Converted through the ambient transform
         // like every other MyInventory-relative anchor (see SyncRootTransform()).
         const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-        config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(m_Pos.x + 95));
-        config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(m_Pos.y + 40));
+        float tooltipX = static_cast<float>(m_Pos.x + 95);
+        float tooltipY = static_cast<float>(m_Pos.y + 40);
+        UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "panel", "option_tooltip_anchor", m_Pos, tooltipX,
+                                                    tooltipY);
+        config.anchorX = UI::Scaling::PositionX(activeTransform, tooltipX);
+        config.anchorY = UI::Scaling::PositionY(activeTransform, tooltipY);
         config.centerHorizontally = true;
         config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center;
         config.fixedWidth = model.setOptionHovered ? kSetOptionTooltipWidth : kSocketOptionTooltipWidth;

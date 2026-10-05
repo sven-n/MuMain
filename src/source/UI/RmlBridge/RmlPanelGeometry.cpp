@@ -29,6 +29,20 @@ bool UI::RmlBridge::RefreshLogicalPanelSize(Rml::ElementDocument* doc, const cha
     return true;
 }
 
+bool UI::RmlBridge::RefreshLogicalAnchorRect(Rml::ElementDocument* doc, const char* panelId, const char* anchorId,
+    const POINT& panelPos, float& x, float& y, float& width, float& height)
+{
+    float w = width;
+    float h = height;
+    if (!RefreshLogicalPanelSize(doc, anchorId, w, h))
+        return false;
+    if (!RefreshLogicalAnchorPosition(doc, panelId, anchorId, panelPos, x, y))
+        return false;
+    width = w;
+    height = h;
+    return true;
+}
+
 bool UI::RmlBridge::RefreshLogicalAnchorPosition(Rml::ElementDocument* doc, const char* panelId,
     const char* anchorId, const POINT& panelPos, float& x, float& y)
 {

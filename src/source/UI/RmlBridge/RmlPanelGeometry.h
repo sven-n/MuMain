@@ -57,4 +57,10 @@ namespace UI::RmlBridge
     // convention as RefreshLogicalPanelSize() above.
     bool RefreshLogicalAnchorPosition(Rml::ElementDocument* doc, const char* panelId,
         const char* anchorId, const POINT& panelPos, float& x, float& y);
+
+    // RefreshLogicalAnchorPosition() plus the anchor's own size: a native rectangle (a hit area,
+    // a slot) wherever the theme draws `anchorId`. Leaves the outputs unchanged and returns false
+    // until the anchor exists and has a size.
+    bool RefreshLogicalAnchorRect(Rml::ElementDocument* doc, const char* panelId, const char* anchorId,
+        const POINT& panelPos, float& x, float& y, float& width, float& height);
 }

@@ -165,6 +165,8 @@ namespace mu::ui::window
         void DeleteAllItems() const;
 
         void SetPos(int x, int y);
+        // Moves the equipment slots and item grid to where the theme draws their anchors.
+        void SyncNativeLayout();
         const POINT& GetPos() const;
 
         void SetRepairMode(bool bRepair);

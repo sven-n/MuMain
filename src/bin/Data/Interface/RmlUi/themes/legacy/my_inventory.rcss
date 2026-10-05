@@ -145,3 +145,22 @@
 }
 .option-hover-set { left: 0; }
 .option-hover-socket { left: 95px; }
+
+/* Native equipment slots, item grid and item-option tooltip: where CMyInventory places them, in
+   #panel's units. A slot's box is its hit and drop area; the grid's top-left is its first cell;
+   the tooltip anchor is the tooltip's top centre. */
+.native-anchor { position: absolute; pointer-events: none; }
+#slot_helper { left: 15px; top: 44px; width: 46px; height: 46px; }
+#slot_helm { left: 75px; top: 44px; width: 46px; height: 46px; }
+#slot_wing { left: 120px; top: 44px; width: 61px; height: 46px; }
+#slot_weapon_left { left: 135px; top: 87px; width: 46px; height: 66px; }
+#slot_armor { left: 75px; top: 87px; width: 46px; height: 66px; }
+#slot_weapon_right { left: 15px; top: 87px; width: 46px; height: 66px; }
+#slot_gloves { left: 15px; top: 150px; width: 46px; height: 46px; }
+#slot_pants { left: 75px; top: 150px; width: 46px; height: 46px; }
+#slot_boots { left: 135px; top: 150px; width: 46px; height: 46px; }
+#slot_ring_left { left: 114px; top: 150px; width: 28px; height: 28px; }
+#slot_amulet { left: 54px; top: 87px; width: 28px; height: 28px; }
+#slot_ring_right { left: 54px; top: 150px; width: 28px; height: 28px; }
+#item_grid { left: 15px; top: 200px; }
+#option_tooltip_anchor { left: 95px; top: 40px; }

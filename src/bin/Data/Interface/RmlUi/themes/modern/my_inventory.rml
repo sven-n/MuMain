@@ -10,6 +10,22 @@
 	     behind the native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
+		<!-- Where the native equipment slots, item grid and item-option tooltip go: invisible boxes
+		     the theme places (my_inventory.rcss); CMyInventory reads them each frame. -->
+		<div id="slot_helper" class="native-anchor"></div>
+		<div id="slot_helm" class="native-anchor"></div>
+		<div id="slot_wing" class="native-anchor"></div>
+		<div id="slot_weapon_left" class="native-anchor"></div>
+		<div id="slot_armor" class="native-anchor"></div>
+		<div id="slot_weapon_right" class="native-anchor"></div>
+		<div id="slot_gloves" class="native-anchor"></div>
+		<div id="slot_pants" class="native-anchor"></div>
+		<div id="slot_boots" class="native-anchor"></div>
+		<div id="slot_ring_left" class="native-anchor"></div>
+		<div id="slot_amulet" class="native-anchor"></div>
+		<div id="slot_ring_right" class="native-anchor"></div>
+		<div id="item_grid" class="native-anchor"></div>
+		<div id="option_tooltip_anchor" class="native-anchor"></div>
 		<!-- Header rail: `-px` variants since #panel carries transform:scale(root_scale) (see
 		     base.rcss). Fill/accent live in my_inventory_bg.rml's .rail-fill/.rail-accent instead --
 		     this box only holds the rivet/title. -->
