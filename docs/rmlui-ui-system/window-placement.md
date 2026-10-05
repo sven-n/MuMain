@@ -241,7 +241,7 @@ UI scale with the [validation matrix](validation-matrix.md).
 | 1 | Done, in-game checks pending: placement service and both themes' workspaces place the right-docked windows (content fit). The `PanelColumnX`/`SetPos` juggling in `Show()`/`Hide()` is gone; Gens ranking (stretched HUD space, not the dock) keeps its own. Differences from before: with character info, inventory and its extension open, the extension now sits beside the inventory (columns 3 and 2 swapped); windows that used to overlap in column 1 now sit side by side. |
 | 2 | Done, in-game checks pending: HUD reserve from the HUD strip; uncovered world edge replaces `GetScreenWidth()`'s table. |
 | 3 | Done, in-game checks pending: column-1/column-2 conflicts and the three-column limit are `data-closes` in both workspaces; `HideGroupBeforeOpenInterface()` is gone. `HideAllGroupA()` stays in C++ (it ends trades and NPC sessions, which a theme must not control). The MU Helper bar rule and the help-panel exclusions stay until their windows have slots. Change: windows closed by these rules now run their closing process; for the Gold Bowman windows that tells the server the event-chip dialog ended, which the old silent hide skipped. |
-| 4 | Fill support: hover hit-testing, `RenderTarget` for native content per window; character info first. |
+| 4 | Deferred (user, 2026-10-05) until a theme wants fill: hover hit-testing, `RenderTarget` for native content per window; character info first. |
 | 5 | Remaining families: NPC windows, move map, friends, centred dialogs. |
 
 Docs to update with phase 1: [theming-and-modding.md](theming-and-modding.md) ("three different
