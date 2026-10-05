@@ -212,19 +212,13 @@ only; the PR ships `Tests/Source/Benchmarks/Calculation.cpp` to borrow from).
 **Revisit when** upstream merges #983, which removes the fork objection entirely — or when the
 counter-scale bindings start costing something concrete, rather than being an inventory number.
 
-### Remaining ownership work
-
-- **Display-list documents:** repeated rows with variable content still need
-  a per-window review before moving bound `top` values to RCSS. The `:nth-child`
-  selector works on `data-for` rows at runtime (`engine-findings.md`), and the
-  event-entry, Gold Bowman, Castle, Guard and Catapult documents use it.
-  Counter-scaled text cannot always stack through normal flow; use the proven
-  selector where the row count and pitch are actually bounded.
-- **Root-placement names:** `root_x`/`root_y` and `panel_x`/`panel_y` name similar placement
-  bridges. Consolidation is low-priority
-  naming work, separate from changing who owns dock spacing.
-
 ### Deliberately not on this list
+
+The rest of the allowlist, reviewed entry by entry: per-frame data (gauges, things that follow the
+pointer or scroll, windows that grow with their content, projected markers), counts the server does
+not bound, text measured the way the native renderer measured it, and the counter-scale block above.
+`root_x`/`root_y` and `panel_x`/`panel_y` stay apart: the first is the physical origin of a root
+scaled uniformly by `root_scale`, the second a reference-unit position inside a stretched `.screen`.
 
 `.sharp-text` counter-scaled tops, `MiniMap`/`WorldLabelLayer` marker coordinates, and
 `TitleSceneUI`'s loading bar (pushed as real `px` because the scene's background is still native
