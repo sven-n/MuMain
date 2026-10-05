@@ -33,11 +33,6 @@ CGensRanking::CGensRanking() : m_fBooleanSize(0.8f)
 
 CGensRanking::~CGensRanking()
 {
-    if (m_pScrollBar)
-        m_pScrollBar->Release();
-
-    SAFE_DELETE(m_pScrollBar);
-
     if (m_pTextBox)
         m_pTextBox->Release();
 
@@ -48,12 +43,12 @@ CGensRanking::~CGensRanking()
 void CGensRanking::Init()
 {
     m_nContribution = 0;
-    memset(m_szRanking, 0, sizeof(char) * TEAMNAME_LENTH);
+    memset(m_szRanking, 0, sizeof(m_szRanking));
 
     m_Pos.x = 0;
     m_Pos.y = 0;
 
-    memset(m_szGensTeam, 0, sizeof(char) * TEAMNAME_LENTH);
+    memset(m_szGensTeam, 0, sizeof(m_szGensTeam));
 
     m_byGensInfluence = GENSTYPE_NONE;
     m_ptRenderMarkPos.x = 0;
@@ -61,7 +56,8 @@ void CGensRanking::Init()
 
     m_nNextContribution = 0;
 
-    memset(m_szTitleName, 0, sizeof(char) * TITLENAME_END * MAX_TITLELENGTH);
+    // CutStr() copies characters without appending a terminator to each title row.
+    memset(m_szTitleName, 0, sizeof(m_szTitleName));
     SetTitleName();
 }
 
@@ -84,9 +80,6 @@ bool CGensRanking::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(INTERFACE_GENSRANKING, this);
 
-    m_pScrollBar = new CScrollBar();
-    m_pScrollBar->Create(x, y, 110);
-
     m_pTextBox = new CTextBox();
     m_pTextBox->Create(x, y, 200, 110);
 
@@ -103,9 +96,6 @@ void CGensRanking::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
-    if (m_pScrollBar)
-        m_pScrollBar->SetPos(x + 20 + 150, y + 273);
-
     if (m_pTextBox)
         m_pTextBox->SetPos(x + 20, y + 280, 150, 110);
 }
@@ -131,33 +121,6 @@ bool CGensRanking::Update()
         return true;
     }
 
-    if (m_pTextBox)
-    {
-        m_pTextBox->ClearText();
-        m_pTextBox->AddText(I18N::Game::GensRankingRewardsAreGivenOut);
-        m_pTextBox->AddText(I18N::Game::GensRankingRewardsCanBeClaimed);
-
-        if (m_pTextBox->GetMoveableLine() > 0)
-        {
-            if (m_pScrollBar)
-            {
-                m_pScrollBar->Show(true);
-
-                int iMaxPos = m_pTextBox->GetMoveableLine();
-
-                m_pScrollBar->SetMaxPos(iMaxPos);
-                m_pScrollBar->Update();
-                m_pTextBox->SetCurLine(m_pScrollBar->GetCurPos());
-            }
-        }
-        else
-        {
-            if (m_pScrollBar)
-            {
-                m_pScrollBar->Show(false);
-            }
-        }
-    }
     SyncRmlModel();
     return true;
 }
@@ -166,9 +129,6 @@ bool CGensRanking::UpdateMouseEvent()
 {
     if (!g_pNewUISystem->IsVisible(INTERFACE_GENSRANKING))
         return true;
-
-    if (m_pScrollBar)
-        m_pScrollBar->UpdateMouseEvent();
 
     if (BtnProcess())
         return false;
@@ -179,6 +139,8 @@ bool CGensRanking::UpdateMouseEvent()
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight))
             .Contains(MouseX, MouseY))
     {
+        // The pane consumes its wheel event; keep the same notch from reaching the camera.
+        MouseWheel = 0;
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {
             MouseRButton = false;
@@ -408,8 +370,6 @@ void CGensRanking::BuildRmlUi()
             c.Bind("promo_lines", &model.promoLines);
             c.Bind("desc_lines", &model.descLines);
             c.Bind("desc_line_step", &model.descLineStep);
-            c.Bind("thumb_top", &model.thumbTop);
-            c.Bind("thumb_active", &model.thumbActive);
             c.Bind("exit_tooltip", &model.exitTooltip);
             c.BindEventCallback("gens_ranking_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                                 { m_PendingExit = true; });
@@ -507,16 +467,20 @@ void CGensRanking::SyncContent()
             promoLines.push_back(line(lines[j], false, 180.f));
     }
 
-    // CTextBox::Render(): its visible lines from the scroll position, one text height + 2 apart.
+    // Keep CTextBox's original wrapping and measured row pitch. RmlUi scrolls all rows.
     std::vector<GensLine> descLines;
     float descLineStep = 0.f;
     if (m_pTextBox)
     {
+        m_pTextBox->ClearText();
+        m_pTextBox->AddText(I18N::Game::GensRankingRewardsAreGivenOut);
+        m_pTextBox->AddText(I18N::Game::GensRankingRewardsCanBeClaimed);
         g_pRenderText->SetFont(g_hFont);
         descLineStep = static_cast<float>(g_pRenderText->MeasureText(L"A", 1).cy + 2);
-        for (int i = 0; i < m_pTextBox->GetLimitLine(); ++i)
+        descLines.reserve(m_pTextBox->GetMaxLine());
+        for (int i = 0; i < m_pTextBox->GetMaxLine(); ++i)
         {
-            const std::wstring text = m_pTextBox->GetLineText(m_pTextBox->GetCurLine() + i);
+            const std::wstring text = m_pTextBox->GetLineText(i);
             descLines.push_back(line(text.c_str(), false, 150.f));
         }
     }
@@ -557,20 +521,6 @@ void CGensRanking::SyncContent()
         m_RmlBinder.MarkDirty("mark_sprite");
     }
 
-    if (m_pScrollBar)
-    {
-        const float thumbTop = static_cast<float>(m_pScrollBar->GetScrollBtnPos().y - m_Pos.y);
-        if (model.thumbTop != thumbTop)
-        {
-            model.thumbTop = thumbTop;
-            m_RmlBinder.MarkDirty("thumb_top");
-        }
-        if (model.thumbActive != m_pScrollBar->IsScrollBtnActive())
-        {
-            model.thumbActive = m_pScrollBar->IsScrollBtnActive();
-            m_RmlBinder.MarkDirty("thumb_active");
-        }
-    }
     const Rml::String exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
     if (model.exitTooltip != exitTooltip)
     {

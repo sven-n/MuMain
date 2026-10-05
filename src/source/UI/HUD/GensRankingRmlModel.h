@@ -42,14 +42,11 @@ struct GensRankingRmlModel
     // while there is a next rank, so the theme gives the group its own rows.
     std::vector<GensLine> promoLines;
 
-    // CTextBox::Render()'s visible lines from its scroll position. Their pitch is one measured
-    // text height + 2, so it is the renderer's, not the theme's; the box they start from is the
-    // theme's.
+    // All CTextBox-wrapped lines. RmlUi owns their scroll position; the pitch remains the
+    // native renderer's measured text height + 2.
     std::vector<GensLine> descLines;
     float descLineStep = 0.f;
 
-    float thumbTop = 0.f; // the scroll bar's thumb, reference px
-    bool thumbActive = true;
     Rml::String exitTooltip;
 };
 } // namespace mu::ui::window

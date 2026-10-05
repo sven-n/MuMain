@@ -8,7 +8,6 @@
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
 #include "UI/Widgets/Window/Button.h"
-#include "UI/Widgets/Window/ScrollBar.h"
 #include "UI/Widgets/Window/TextBox.h"
 #include "UI/HUD/GensRankingRmlModel.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
@@ -22,8 +21,8 @@ class ElementDocument;
 namespace mu::ui::window
 {
 // The Gens ranking window, docked right. gens_ranking.rml draws it; the rewards text box and
-// its scroll bar stay native controls for their lines and dragging (their drawing is the
-// document's). RanderMark() still draws the small family marks over players (UI/Chat).
+// its reward lines keep the native wrapping while RmlUi owns scrolling and drawing.
+// RanderMark() still draws the small family marks over players (UI/Chat).
 class CGensRanking : public CObject
 {
     enum IMAGE_LIST
@@ -93,7 +92,6 @@ private:
 
 public:
     CManager* m_pNewUIMng;
-    CScrollBar* m_pScrollBar;
     CTextBox* m_pTextBox;
     CGensRanking();
     virtual ~CGensRanking();

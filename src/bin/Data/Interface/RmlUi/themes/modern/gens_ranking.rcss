@@ -76,11 +76,6 @@
 .fill { position: absolute; background-color: token(surface-recessed); }
 .t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { display: none; }
 
-.s-top, .s-bottom { display: none; }
-.s-mid { position: absolute; left: 172px; width: 3px; height: 15px; background-color: token(surface-recessed); }
-.thumb { position: absolute; left: 169px; width: 9px; height: 30px; background-color: token(accent-steel); border-radius: token(radius-sm)px; }
-.thumb.off { background-color: token(surface-raised); }
-
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
 
 #btn_exit {
@@ -116,20 +111,8 @@
 .text-back-level { top: 151px; }
 .text-back-rank { top: 175px; }
 
-/* The scroll track: its top cap, seven 15 px middles (the last one cut to 14) and its bottom. */
-.gr-scroll { position: static; }
-.s-top { top: 273px; }
-.s-mid:nth-child(2) { top: 276px; }
-.s-mid:nth-child(3) { top: 291px; }
-.s-mid:nth-child(4) { top: 306px; }
-.s-mid:nth-child(5) { top: 321px; }
-.s-mid:nth-child(6) { top: 336px; }
-.s-mid:nth-child(7) { top: 351px; }
-.s-mid:nth-child(8) { top: 366px; height: 14px; }
-.s-bottom { top: 380px; }
-
 /* The window's own lines. */
-.gr-line, .gr-promo-line, .gr-desc-line { position: absolute; }
+.gr-line, .gr-promo-line { position: absolute; }
 #gr_title { left: 0; top: 15px; text-align: center; font-weight: bold; }
 #gr_gens_label { left: 102px; top: 90px; font-weight: bold; }
 #gr_gens_name { left: 102px; top: 110px; }
@@ -152,11 +135,12 @@
 .gr-promo-line:nth-child(6) { top: 275px; }
 .gr-promo-line:nth-child(7) { top: 290px; }
 
-/* The description box the text box's lines start from; their pitch is bound. */
-/* The rewards text box (150x110); clips the lines its scroll position shows. */
-.gr-desc { position: absolute; left: 20px; top: 280px; width: 150px; height: 110px; overflow: hidden; }
-.gr-desc-line { left: 0; }
+/* The frame's bottom edge starts at y=376. The pane counters the panel's scale,
+   so its scroll geometry and scrollbar use physical pixels. */
+.gr-desc { position: absolute; left: 20px; top: 280px; transform-origin: left top; overflow: hidden scroll; clip: always; pointer-events: auto; }
+.gr-desc-line { position: relative; display: block; }
+.gr-desc-text { position: absolute; display: block; left: 0; top: 0; white-space: nowrap; pointer-events: none; }
 
-.gr-line, .gr-promo-line, .gr-desc-line { color: token(text-primary); }
+.gr-line, .gr-promo-line, .gr-desc-text { color: token(text-primary); }
 #gr_gens_label { color: token(accent-gold); }
 #gr_rank_label, #gr_contrib_label, #gr_desc_label { color: token(accent-gold); }

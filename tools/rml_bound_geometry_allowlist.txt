@@ -42,7 +42,7 @@ gate_switch.rml: counter-scale bridge -- the button labels' top from the live li
 gateman.rml: counter-scale bridge -- the button labels' top from the live line height, which inside a .sharp-text block layout height and rendered height disagree on
 generic_confirm_dialog.rml: per-frame data -- native 3D item anchor, and a panel sized to its content
 generic_menu_dialog.rml: per-frame data -- native companion geometry for the menu it still measures
-gens_ranking.rml: display-list port, and mirrors the native list's scrollbar geometry
+gens_ranking.rml: counter-scale bridge -- sharp-text widths and the native measured reward-row pitch; the scroll pane is RmlUi-owned
 gold_bowman.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
 gold_bowman_lena.rml: counter-scale bridge -- each .sharp-text layer's own width and the button labels' top from the live line height (EventItemEntryView's shared contract)
 guard_window.rml: native text metrics require counter-scaled list panes and tab/button label offsets; RmlUi owns list scrolling and selection. The tab positions are in each theme's RCSS

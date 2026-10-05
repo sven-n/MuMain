@@ -8,9 +8,8 @@
 <body>
 	<!-- The Gens ranking window (CGensRanking), docked right: the family mark on its rank back,
 	     the family, title, ranking and contribution, the description box with the rewards text
-	     and its scroll bar, the exit button. The text box and the scroll bar stay native controls
-	     (their lines and thumb are bound here); the thumb is dragged natively, so #panel leaves the
-	     pointer alone outside the exit button. root_x/root_y/root_scale come from the dock
+	     and its scroll bar, the exit button. The reward lines keep native wrapping, while RmlUi
+	     owns the scroll position and thumb. root_x/root_y/root_scale come from the dock
 	     transform; every position and size below is the theme's. A .sharp-text layer's own width
 	     and font size stay bound: it is laid out in physical pixels and counter-scaled out of the
 	     panel (base.rcss). The window's layout is Hud (the original stretched it per axis):
@@ -43,19 +42,6 @@
 
 		<div class="text-back text-back-level"></div>
 		<div class="text-back text-back-rank"></div>
-
-		<div class="gr-scroll">
-			<div class="s-top"></div>
-			<div class="s-mid"></div>
-			<div class="s-mid"></div>
-			<div class="s-mid"></div>
-			<div class="s-mid"></div>
-			<div class="s-mid"></div>
-			<div class="s-mid"></div>
-			<div class="s-mid"></div>
-			<div class="s-bottom"></div>
-		</div>
-		<div class="thumb" data-class-off="!thumb_active" data-style-top="thumb_top + 'px'"></div>
 
 		<span id="gr_title" class="sharp-text gr-line" data-style-width="(190 * root_scale) + 'px'"
 		      data-style-font-size="title.text_px + 'px'"
@@ -96,13 +82,18 @@
 			      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{l.text}}</span>
 		</div>
 
-		<!-- The description box's visible lines. The theme places the box; the pitch inside it is
-		     the text renderer's own measured line height, so it stays bound. -->
-		<div class="gr-desc">
-			<span class="sharp-text gr-desc-line" data-for="l, i : desc_lines"
-			      data-style-top="(i * desc_line_step) + 'px'" data-style-width="(150 * root_scale) + 'px'"
-			      data-style-font-size="l.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{l.text}}</span>
+		<!-- Counter-scale the pane to physical pixels like other docked scroll lists.
+		     Block rows establish scroll height; RmlUi owns the scrollbar and its drag. -->
+		<div class="gr-desc scroll-pane"
+		     data-style-width="(165 * root_scale) + 'px'"
+		     data-style-height="(96 * root_scale_y) + 'px'"
+		     data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">
+			<div class="gr-desc-line" data-for="l : desc_lines"
+			     data-style-width="(150 * root_scale) + 'px'"
+			     data-style-height="(desc_line_step * root_scale_y) + 'px'">
+				<span class="gr-desc-text" data-style-width="(150 * root_scale) + 'px'"
+				      data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
+			</div>
 		</div>
 
 		<div id="btn_exit" data-event-click="gens_ranking_exit"></div>

@@ -131,12 +131,6 @@ ways, and only the first is self-announcing:
   reconciles layout height with the counter-scale.
 
 
-- **A port can mirror a native scrollbar's geometry into its model** rather than letting RCSS own
-  it. The native list this was first written about (`CUITextListBox::GetScrollBarGeometry()`) is
-  deleted, and with it most instances; `CGensRanking` still does it, reading `thumb_top` off its
-  own `CScrollBar`. Not hand-rolled scroll maths, but it is the "RmlUi draws, native decides" split
-  that `CMoveCommandWindow` retired by adopting `.scroll-pane` -- the remaining case should follow
-  it when that window is next touched.
 - **`COptionWindow`'s volume slider is a gold-thumb slider**; native drew the same fill gauge
   (`newui_option_volume01/02`) the MU Helper's detail window now draws in both themes. The gauge
   pieces are in `mu_helper_common.rcss` if the options window is revisited.
@@ -244,10 +238,6 @@ counter-scale bindings start costing something concrete, rather than being an in
   event-entry, Gold Bowman, Castle, Guard and Catapult documents use it.
   Counter-scaled text cannot always stack through normal flow; use the proven
   selector where the row count and pitch are actually bounded.
-- **GensRanking scrollbar:** the model still mirrors native CScrollBar thumb geometry.
-  Replacing it with the shared RmlUi scroll pane also requires moving all
-  wrapped reward-description lines into the DOM and handing it scroll state.
-  Keep their native measured line pitch and counter-scale behavior.
 - **MessageBoxView:** measured stacking and centring retain geometry bindings;
   review literal button positions with the relevant box classes. Counter-scaled
   text metrics remain a constraint, not automatically removable layout constants.
