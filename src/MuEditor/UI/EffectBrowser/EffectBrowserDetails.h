@@ -3,20 +3,28 @@
 #ifdef _EDITOR
 
 #include "EffectBrowserModel.h"
+#include "EffectPreviewView.h"
 
 #include <array>
 #include <optional>
 #include <string>
 
 // The details of the type selected in the effect browser: name, code and
-// number, the types of other kinds with that number, what its slot holds, its
-// stages, its creation values and the data that names it.
+// number, a preview of what its slot holds, the types of other kinds with
+// that number, what its slot holds, its stages, its creation values and the
+// data that names it.
 class CEffectBrowserDetails
 {
 public:
     // Returns a type clicked in a list of other types, to show it.
     std::optional<MuEditor::Effects::EffectTypeRef> Render(const MuEditor::Effects::EffectBrowserModel& model,
                                                            std::optional<MuEditor::Effects::EffectTypeRef> selected);
+
+    // Called between frames.
+    void BeforeFrame()
+    {
+        m_preview.BeforeFrame();
+    }
 
 private:
     void Refresh(const MuEditor::Effects::EffectBrowserModel& model, MuEditor::Effects::EffectTypeRef selected);
@@ -37,6 +45,7 @@ private:
     std::vector<std::string> m_variantSubTypes;
     // The catalogue file of each kind, written once.
     std::array<std::string, Data::Effects::EffectKindCount> m_files;
+    CEffectPreviewView m_preview;
 };
 
 #endif // _EDITOR

@@ -5,6 +5,7 @@
 #include "EffectBrowserList.h"
 
 #include "EffectBrowserLabels.h"
+#include "EffectBrowserLayout.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "I18N/All.h"
 #include "imgui.h"
@@ -15,6 +16,7 @@
 using Data::Effects::EffectKind;
 using MuEditor::Effects::EffectBrowserModel;
 using MuEditor::Effects::EffectBrowserRow;
+namespace Layout = MuEditor::Effects::Layout;
 
 namespace
 {
@@ -25,21 +27,6 @@ constexpr float NumberColumnWidth = 60.0f;
 
 constexpr int BasicColumnCount = 3;
 constexpr int EffectColumnCount = 6;
-
-// The width of a stage filter: its label and its combo.
-float StageFilterWidth(const char* label)
-{
-    return ImGui::CalcTextSize(label).x + ImGui::GetStyle().ItemSpacing.x +
-           StageComboWidth * g_MuEditorCore.GetUIScale();
-}
-
-// Goes on in the same line when `width` fits there, else in the next one.
-void SameLineIfFits(float width)
-{
-    ImGui::SameLine();
-    if (ImGui::GetContentRegionAvail().x < width)
-        ImGui::NewLine();
-}
 
 // A label in front of a combo that sets `value` to one of `stages` or to any.
 template <typename Stage, size_t Count>
@@ -144,9 +131,9 @@ void CEffectBrowserList::RenderFilters(EffectKind kind)
     if (kind != EffectKind::Effect)
         return;
     RenderStageCombo("##create", I18N::Editor::Creation, m_filter.create, MuEditor::Effects::CreateStages);
-    SameLineIfFits(StageFilterWidth(I18N::Editor::Move));
+    Layout::SameLineIfFits(Layout::LabeledComboWidth(I18N::Editor::Move, StageComboWidth));
     RenderStageCombo("##move", I18N::Editor::Move, m_filter.move, MuEditor::Effects::MoveStages);
-    SameLineIfFits(StageFilterWidth(I18N::Editor::Drawing));
+    Layout::SameLineIfFits(Layout::LabeledComboWidth(I18N::Editor::Drawing, StageComboWidth));
     RenderStageCombo("##render", I18N::Editor::Drawing, m_filter.render, MuEditor::Effects::RenderStages);
 }
 

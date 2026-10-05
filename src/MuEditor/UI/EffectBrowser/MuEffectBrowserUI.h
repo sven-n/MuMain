@@ -19,6 +19,13 @@ public:
 
     void Render(bool* open);
 
+    // Called between frames, before the renderer's frame starts: the preview
+    // releases its texture only then.
+    void BeforeFrame()
+    {
+        m_details.BeforeFrame();
+    }
+
 private:
     CMuEffectBrowserUI() = default;
 

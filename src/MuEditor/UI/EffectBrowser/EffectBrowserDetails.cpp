@@ -141,7 +141,8 @@ std::optional<EffectTypeRef> CEffectBrowserDetails::Render(const EffectBrowserMo
     }
     Refresh(model, *selected);
     RenderIdentity(*row, selected->kind);
-    // FX1.7 adds the preview here.
+    if (BeginSection("preview", I18N::Editor::Preview))
+        m_preview.Render(*row, selected->kind, m_details);
     std::optional<EffectTypeRef> clicked = RenderSameNumber(model);
     RenderAsset(*row);
     if (const std::optional<EffectTypeRef> sharing = RenderStages(model, *row, selected->kind))

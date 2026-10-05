@@ -438,6 +438,10 @@ void CMuEditorCore::Update()
         m_bDrawDataReady = false;
         ImGui_ImplSDLGPU3_NewFrame();
 
+        // Between frames: the effect browser's preview releases its texture
+        // only before the renderer's frame starts.
+        g_MuEffectBrowserUI.BeforeFrame();
+
         // The SDL3 backend fills display size and mouse/keyboard from the SDL
         // events fed via ImGui_ImplSDL3_ProcessEvent, so it works the same
         // whether the editor is open or only the "Open Editor" button is shown
