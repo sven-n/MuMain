@@ -253,7 +253,7 @@ Goal: a window's size is the theme's choice, like its place. A slot already take
 
 | Tier | Windows | Work |
 |---|---|---|
-| 1. RCSS only | character, party, pet, NPC dialogue, gate switch, MU Helper config | Edge-anchored frame; panel-relative text widths |
+| 1. RCSS only | character, party, pet, NPC dialogue, gate switch, MU Helper config | Done: the docked frame and the modern bottom button row pin to `#panel`'s edges; counter-scaled leaves take `panel_width` (`SyncPanelWidth()`). Verified in game by widening character info to 260 in a runtime edit. |
 | 2. Plus hit box | guild info, guild make, command, command list, Blood Castle and Devil Square entry, catapult, lucky coin registration, lucky item | Tier 1, plus `RefreshLogicalPanelSize()` hit boxes |
 | 3. Plus anchors | quest progress (and etc), quest log, NPC quest, castle, guard, gatekeeper, duel watch, MU Helper detail (gauge hit areas), United Marketplace | Tier 2, plus native parts placed from RCSS anchors |
 | 4. Native grids | inventory, extension, vault (and extension), NPC shop, mix, trade, personal shops | Equipment slots and item grid placed from RCSS anchors; cell size stays native |

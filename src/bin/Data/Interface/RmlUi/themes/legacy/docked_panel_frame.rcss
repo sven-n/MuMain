@@ -41,10 +41,11 @@
    window's own .rcss adds one line, ".frame-top { decorator: image(docked-bg-top-a); }" (or
    docked-bg-top-b), which merges into this rule via the normal multi-file cascade. No RML change
    needed either way. */
-.frame-top    { left: 0;   top: 0;    width: 190px; height: 64px; }
-.frame-left   { left: 0;   top: 64px; width: 21px;  height: 320px; decorator: image(docked-bg-left); }
-.frame-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(docked-bg-right); }
-.frame-bottom { left: 0;   top: 384px; width: 190px; height: 45px; decorator: image(docked-bg-bottom); }
+/* Pinned to #panel's edges, so a theme that resizes the panel stretches the strips with it. */
+.frame-top    { left: 0;  right: 0; top: 0;     height: 64px; }
+.frame-left   { left: 0;  top: 64px; bottom: 45px; width: 21px; decorator: image(docked-bg-left); }
+.frame-right  { right: 0; top: 64px; bottom: 45px; width: 21px; decorator: image(docked-bg-right); }
+.frame-bottom { left: 0;  right: 0; bottom: 0;  height: 45px; decorator: image(docked-bg-bottom); }
 
 /* Group-box corner-bracket-and-fill technique -- reproduces RenderGroupBox()'s 9-slice tiling as 4
    corner sprites + 2 flat fills, not a literal 1px-tile port (no verified repeat pattern exists in
@@ -72,14 +73,15 @@
 	pointer-events: none;
 }
 
-/* Exit is byte-identical everywhere (same sprite, same 13,392,36,29 box) -- targeted by id since
+/* Exit is byte-identical everywhere (same sprite, 36x29 at 13 from the left, 8 above the panel's
+   bottom: the original's 13,392 in a 429-tall panel) -- targeted by id since
    every window's exit div already has id="btn_exit", so no per-window class or RML change is
    needed. Wins over any leftover per-window class rule regardless of link order (id beats class
    specificity), so old per-window "-exit" rules are safe to delete without a race. */
 #btn_exit {
 	position: absolute;
 	left: 13px;
-	top: 392px;
+	bottom: 8px;
 	width: 36px;
 	height: 29px;
 	cursor: pointer;

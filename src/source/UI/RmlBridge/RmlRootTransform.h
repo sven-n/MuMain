@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/Scaling/UITransform.h"
 
 // Shared "root transform" sync for every RmlUi window whose position tracks a native, legacy-
@@ -37,6 +38,21 @@ namespace UI::RmlBridge
         binder.MarkDirty("root_x");
         binder.MarkDirty("root_y");
         binder.MarkDirty("root_scale");
+    }
+
+    // The width the theme gives #panel, in its layout units, for leaves that counter-scale out of
+    // the root transform and so need the width as a number (a centring box as wide as the panel).
+    // `Model` must expose `float panelWidth` bound to "panel_width"; it keeps its previous value
+    // until the document has laid out.
+    template <typename Model> void SyncPanelWidth(RmlModelBinder<Model>& binder, Rml::ElementDocument* doc)
+    {
+        Model& model = binder.GetModel();
+        float width = model.panelWidth;
+        float height = 0.f;
+        if (!RefreshLogicalPanelSize(doc, "panel", width, height) || width == model.panelWidth)
+            return;
+        model.panelWidth = width;
+        binder.MarkDirty("panel_width");
     }
 
     // Legacy-theme text that must match the native text renderer's size (and be rasterised at it)

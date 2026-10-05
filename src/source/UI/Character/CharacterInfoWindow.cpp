@@ -127,6 +127,7 @@ void mu::ui::window::CCharacterInfoWindow::BuildRmlUi()
                 c.Bind("root_x", &model.rootX);
                 c.Bind("root_y", &model.rootY);
                 c.Bind("root_scale", &model.rootScale);
+                c.Bind("panel_width", &model.panelWidth);
                 model.textPx =
                     UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, UI::Scaling::GetActiveTransform());
                 c.Bind("text_px", &model.textPx);
@@ -451,6 +452,7 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
     auto& model = m_RmlBinder.GetModel();
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     SyncField(m_RmlBinder, &CharacterInfoRmlModel::canLevelUp, "can_level_up", CharacterAttribute->LevelUpPoint > 0);

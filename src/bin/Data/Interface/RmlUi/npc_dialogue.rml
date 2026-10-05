@@ -22,7 +22,7 @@
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span id="title" class="sharp-text" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{npc_name}}</span>
+		<span id="title" class="sharp-text" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'">{{npc_name}}</span>
 		<div class="nd-contribute sharp-text" data-class-hidden="!show_contribute"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(168 * root_scale) + 'px'" data-style-line-height="(18 * root_scale) + 'px'">{{contribute_text}}</div>
 

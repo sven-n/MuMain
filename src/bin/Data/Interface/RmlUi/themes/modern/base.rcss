@@ -897,9 +897,10 @@ body {
    default (CMyInventory's already-tuned values) -- override per-window only
    when that window's own layout genuinely differs, same convention as
    .modern-header-rail-px's top/height override in my_inventory.rcss. */
+/* 9 above the panel's bottom: the original row's top 392 in a 429-tall panel, for the 28-tall box. */
 .modern-icon-btn-px {
 	position: absolute;
-	top: 392px;
+	bottom: 9px;
 	width: 37px;
 	height: 26px;
 	cursor: pointer;

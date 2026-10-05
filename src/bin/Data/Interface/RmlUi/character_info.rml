@@ -24,14 +24,14 @@
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<!-- The header leaves keep the original's 190-unit centring box: counter-scaled, it must be
-		     root_scale times wider (and shifted back by half the growth), or a long server name
+		<!-- The header leaves centre in a box as wide as #panel (panel_width): counter-scaled, it must
+		     be root_scale times wider (and shifted back by half the growth), or a long server name
 		     wraps instead of staying centred on one line. -->
-		<span id="name" data-style-width="(190 * root_scale) + 'px'" data-style-margin-left="(95 - 95 * root_scale) + 'px'" data-class-pk-0="pk_level == 0" data-class-pk-1="pk_level == 1" data-class-pk-2="pk_level == 2" data-class-pk-3="pk_level == 3" data-class-pk-4="pk_level == 4" data-class-pk-5="pk_level == 5" data-class-pk-6="pk_level >= 6" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{name_text}}</span>
+		<span id="name" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'" data-class-pk-0="pk_level == 0" data-class-pk-1="pk_level == 1" data-class-pk-2="pk_level == 2" data-class-pk-3="pk_level == 3" data-class-pk-4="pk_level == 4" data-class-pk-5="pk_level == 5" data-class-pk-6="pk_level >= 6" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{name_text}}</span>
 		<!-- Class name and server name crossfade in place (legacy's sine-wave alpha blend
 		     between the two, RenderSubjectTexts()) -- two stacked spans, opacity-driven. -->
-		<span id="classname" data-style-width="(190 * root_scale) + 'px'" data-style-margin-left="(95 - 95 * root_scale) + 'px'" data-style-opacity="classname_opacity" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{classname_text}}</span>
-		<span id="servername" data-style-width="(190 * root_scale) + 'px'" data-style-margin-left="(95 - 95 * root_scale) + 'px'" data-style-opacity="servername_opacity" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{servername_text}}</span>
+		<span id="classname" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'" data-style-opacity="classname_opacity" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{classname_text}}</span>
+		<span id="servername" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'" data-style-opacity="servername_opacity" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{servername_text}}</span>
 
 		<!-- Summary backdrop: the original's 8-piece frame (RenderFrame()) -- translucent fill, 4
 		     corner sprites, 1px-wide edge sprites stretched across each edge, and the separator

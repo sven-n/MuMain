@@ -25,7 +25,7 @@
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span id="title" class="sharp-text mh-text mh-center mh-bold mh-title" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-width="(190 * root_scale) + 'px'">{{labels.title}}</span>
+		<span id="title" class="sharp-text mh-text mh-center mh-bold mh-title" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-width="(panel_width * root_scale) + 'px'">{{labels.title}}</span>
 
 		<div id="tab_0" class="mh-tab" data-class-active="active_tab == 0" data-event-click="muhelper_tab(0)"></div><span id="tab_0_label" class="sharp-text mh-text mh-center mh-tab-label" data-class-active="active_tab == 0" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-width="(56 * root_scale) + 'px'" data-style-height="(22 * root_scale) + 'px'" data-style-line-height="(22 * root_scale) + 'px'">{{labels.tab_hunting}}</span>
 		<div id="tab_1" class="mh-tab" data-class-active="active_tab == 1" data-event-click="muhelper_tab(1)"></div><span id="tab_1_label" class="sharp-text mh-text mh-center mh-tab-label" data-class-active="active_tab == 1" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-width="(56 * root_scale) + 'px'" data-style-height="(22 * root_scale) + 'px'" data-style-line-height="(22 * root_scale) + 'px'">{{labels.tab_obtaining}}</span>

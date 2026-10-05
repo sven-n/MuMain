@@ -80,6 +80,7 @@ namespace mu::ui::window
         // Docked-right window -- sourced from UI::Scaling::GetActiveTransform(), which CManager
         // scopes to LayoutMode::DockRight around every call into this window.
         float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+        float panelWidth = 190.f;
         float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
         int activeTab = 0;

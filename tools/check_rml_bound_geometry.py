@@ -33,9 +33,11 @@ inventory rather than an implicit one.
 
 Deliberately allowed everywhere, unlisted: expressions that reference only the root
 transform (`root_x`, `root_y`, `root_scale`, and the older `panel_x`/`panel_y` spelling
-of the same `m_Pos` placement). That pair *is* the scaling bridge -- the panel's own
-placement and the `.sharp-text` counter-scale -- and is not something a theme should be
-overriding. Everything else needs a line in the allowlist.
+of the same `m_Pos` placement) and `panel_width`. That set *is* the scaling bridge -- the
+panel's own placement and the `.sharp-text` counter-scale -- and is not something a theme
+should be overriding. `panel_width` is the theme's own `#panel` width read back
+(SyncPanelWidth), so a counter-scaled leaf as wide as the panel follows whatever width the
+theme chose. Everything else needs a line in the allowlist.
 
 Also deliberately narrow: this checks the four box offsets and the two sizes only. A
 bound `color`, `decorator` or `font-size` has the same override problem, but those are
@@ -69,7 +71,7 @@ STRING_LITERAL_RE = re.compile(r"'[^']*'|\"[^\"]*\"")
 # The scaling bridge: a document may place and counter-scale itself without being listed.
 # panel_x/panel_y are the same m_Pos placement under an older name, used by the windows that
 # place themselves without a root scale; one spelling should win, which is a separate tidy-up.
-ROOT_TRANSFORM_FIELDS = {"root_x", "root_y", "root_scale", "panel_x", "panel_y"}
+ROOT_TRANSFORM_FIELDS = {"root_x", "root_y", "root_scale", "panel_x", "panel_y", "panel_width"}
 
 
 def bound_fields(expression):

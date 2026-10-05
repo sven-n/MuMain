@@ -535,6 +535,7 @@ void CMuHelperConfigWindow::BuildRmlUi()
             c.Bind("root_x", &model.rootX);
             c.Bind("root_y", &model.rootY);
             c.Bind("root_scale", &model.rootScale);
+            c.Bind("panel_width", &model.panelWidth);
             c.Bind("text_px", &model.textPx);
 
             c.Bind("active_tab", &model.activeTab);
@@ -827,6 +828,7 @@ void CMuHelperConfigWindow::SyncRmlModel()
         return;
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     MuHelperConfigRmlModel& model = m_RmlBinder.GetModel();

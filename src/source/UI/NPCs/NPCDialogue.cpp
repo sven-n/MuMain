@@ -98,6 +98,7 @@ void CNPCDialogue::BuildRmlUi()
             c.Bind("root_x", &model.rootX);
             c.Bind("root_y", &model.rootY);
             c.Bind("root_scale", &model.rootScale);
+            c.Bind("panel_width", &model.panelWidth);
             c.Bind("text_px", &model.textPx);
 
             c.Bind("npc_name", &model.npcName);
@@ -764,6 +765,7 @@ void CNPCDialogue::SyncRmlModel()
         m_RmlBinder.MarkDirty("root_y");
         m_RmlBinder.MarkDirty("root_scale");
     }
+    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     model.npcName = StringUtils::WideToNarrow(g_QuestMng.GetNPCName());
