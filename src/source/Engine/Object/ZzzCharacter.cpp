@@ -4815,13 +4815,8 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                 || c->Skill == AT_SKILL_TRIPLE_SHOT_STR
                 || c->Skill == AT_SKILL_TRIPLE_SHOT_MASTERY)
                 Skill = 1;
-            if ((o->Type == MODEL_PLAYER &&
-                (o->CurrentAction == PLAYER_ATTACK_BOW || o->CurrentAction == PLAYER_ATTACK_CROSSBOW ||
-                    o->CurrentAction == PLAYER_ATTACK_FLY_BOW || o->CurrentAction == PLAYER_ATTACK_FLY_CROSSBOW ||
-                    o->CurrentAction == PLAYER_FENRIR_ATTACK_BOW || o->CurrentAction == PLAYER_FENRIR_ATTACK_CROSSBOW ||
-                    o->CurrentAction == PLAYER_ATTACK_RIDE_BOW || o->CurrentAction == PLAYER_ATTACK_RIDE_CROSSBOW)) ||
-                o->Type != MODEL_PLAYER && o->Kind == KIND_PLAYER
-                )
+            if ((o->Type == MODEL_PLAYER && Engine::Object::IsBowAttackAction(o->CurrentAction))
+                || (o->Type != MODEL_PLAYER && o->Kind == KIND_PLAYER))
             {
                 if (AT_SKILL_MULTI_SHOT != (c->Skill))
                     CreateArrows(c, o, NULL, FindHotKey((c->Skill)), Skill, (c->Skill));
@@ -4837,12 +4832,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
         {
             CHARACTER* tc = &CharactersClient[c->TargetCharacter];
             OBJECT* to = &tc->Object;
-            if (o->Type == MODEL_PLAYER &&
-                (o->CurrentAction == PLAYER_ATTACK_BOW || o->CurrentAction == PLAYER_ATTACK_CROSSBOW ||
-                    o->CurrentAction == PLAYER_ATTACK_FLY_BOW || o->CurrentAction == PLAYER_ATTACK_FLY_CROSSBOW ||
-                    o->CurrentAction == PLAYER_ATTACK_RIDE_BOW || o->CurrentAction == PLAYER_ATTACK_RIDE_CROSSBOW
-                    || o->CurrentAction == PLAYER_FENRIR_ATTACK_BOW || o->CurrentAction == PLAYER_FENRIR_ATTACK_CROSSBOW	//^ 펜릴 스킬 관련(요정 화살 나가게 하는 것)
-                    ))
+            if (o->Type == MODEL_PLAYER && Engine::Object::IsBowAttackAction(o->CurrentAction))
             {
                 if (AT_SKILL_MULTI_SHOT != (c->Skill))
                     CreateArrows(c, o, to, FindHotKey((c->Skill)), 0, (c->Skill));
@@ -10091,7 +10081,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             PART_t* w = &c->Weapon[i];
             if (w->Type != -1 && !GameLogic::Items::IsAmmunitionModel(w->Type) && w->Type != MODEL_DARK_RAVEN_ITEM)
             {
-                if (o->CurrentAction == PLAYER_ATTACK_BOW || o->CurrentAction == PLAYER_ATTACK_CROSSBOW || o->CurrentAction == PLAYER_ATTACK_FLY_BOW || o->CurrentAction == PLAYER_ATTACK_FLY_CROSSBOW)
+                if (Engine::Object::IsBowAttackAction(o->CurrentAction) || Engine::Object::IsRaisedBowAttackAction(o->CurrentAction))
                 {
                     if (w->Type == MODEL_STINGER_BOW)
                     {
@@ -10101,7 +10091,14 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     {
                         w->CurrentAction = 0;
                     }
-                    w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_BOW].PlaySpeed;
+                    // The weapon draws in step with the character, so it has to follow the
+                    // playback speed of the action the character is actually playing. Reading
+                    // PLAYER_ATTACK_BOW instead only happens to match while every bow action
+                    // shares a play speed, which SetAttackSpeed currently gives all 14 of them.
+                    // The mounted, Fenrir and raised-shot actions used to miss this branch and
+                    // fall through to the catch-all below, which parks the weapon on frame 0 at
+                    // PlaySpeed 0 - the bow holds its idle pose instead of drawing.
+                    w->PlaySpeed = Models[MODEL_PLAYER].Actions[o->CurrentAction].PlaySpeed;
                 }
                 else if (w->Type == MODEL_FLAIL)
                 {
