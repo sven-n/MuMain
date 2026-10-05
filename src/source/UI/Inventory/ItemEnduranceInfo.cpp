@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/Inventory/ItemEnduranceInfo.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Placement/WindowPlacement.h"
 #include "UI/Scaling/UITransform.h"
 #include "I18N/All.h"
 
@@ -201,20 +202,21 @@ void mu::ui::window::CItemEnduranceInfo::SetPos(int x, int y)
     m_UIStartPos.x = x;
     m_UIStartPos.y = y;
 
-    m_ItemDurUIStartPos.x = GetScreenWidth() - ITEM_DUR_WIDTH - 2;
-    m_ItemDurUIStartPos.y = 140;
+    FollowUncoveredWorld();
 
     m_iTextEndPosX = m_UIStartPos.x + PETHP_FRAME_WIDTH;
 }
 
-void mu::ui::window::CItemEnduranceInfo::SetPos(int x)
+void mu::ui::window::CItemEnduranceInfo::FollowUncoveredWorld()
 {
-    m_ItemDurUIStartPos.x = x - ITEM_DUR_WIDTH - 2;
+    const float right = UI::Placement::UncoveredWorldRightIn(GetLayoutTransform());
+    m_ItemDurUIStartPos.x = static_cast<int>(std::lround(right)) - ITEM_DUR_WIDTH - 2;
     m_ItemDurUIStartPos.y = 140;
 }
 
 bool mu::ui::window::CItemEnduranceInfo::UpdateMouseEvent()
 {
+    FollowUncoveredWorld();
     if (true == BtnProcess())
         return false;
 
@@ -363,6 +365,7 @@ bool mu::ui::window::CItemEnduranceInfo::Update()
 {
     if (!IsVisible())
         return true;
+    FollowUncoveredWorld();
 
     if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF)
     {

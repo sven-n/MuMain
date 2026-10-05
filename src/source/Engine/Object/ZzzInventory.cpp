@@ -6747,6 +6747,16 @@ int GetScreenWidth()
     return iWidth;
 }
 
+int GetScreenLeft()
+{
+    if (WindowWidth == 0)
+        return 0;
+
+    // Left edge of the world the open docked windows leave uncovered, in the 640-wide HUD space.
+    return static_cast<int>(
+        std::lround(UI::Placement::UncoveredWorldLeft() * REFERENCE_WIDTH / static_cast<float>(WindowWidth)));
+}
+
 void ClearInventory()
 {
     for (int i = 0; i < MAX_EQUIPMENT; i++)

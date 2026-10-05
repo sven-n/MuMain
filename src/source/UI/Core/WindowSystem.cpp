@@ -1139,10 +1139,6 @@ void CSystem::Show(DWORD dwKey)
 
     UpdateMuHelperBarVisibilityForLayoutChange(dwKey);
 
-    int iScreenWidth = GetScreenWidth();
-    m_pNewItemEnduranceInfo->SetPos(iScreenWidth);
-    m_pBuffStrip->SetPos(iScreenWidth);
-    m_pNewPartyListWindow->SetPos(iScreenWidth);
 }
 
 void CSystem::Hide(DWORD dwKey)
@@ -1530,10 +1526,6 @@ void CSystem::Hide(DWORD dwKey)
 
     UpdateMuHelperBarVisibilityForLayoutChange(dwKey);
 
-    int iScreenWidth = GetScreenWidth();
-    m_pNewItemEnduranceInfo->SetPos(iScreenWidth);
-    m_pBuffStrip->SetPos(iScreenWidth);
-    m_pNewPartyListWindow->SetPos(iScreenWidth);
 }
 
 void CSystem::Toggle(DWORD dwKey)

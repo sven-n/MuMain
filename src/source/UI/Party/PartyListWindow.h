@@ -61,7 +61,6 @@ namespace mu::ui::window
         void Release();
 
         void SetPos(int x, int y);
-        void SetPos(int x);
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -80,6 +79,7 @@ namespace mu::ui::window
         void SetListBGColor();
 
     private:
+        void FollowUncoveredWorld();
         void BuildRmlUi();
         void SyncRmlModel();
         void SyncCards(const UI::Scaling::Transform& transform);

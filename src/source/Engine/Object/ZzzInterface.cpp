@@ -3904,7 +3904,7 @@ void RenderTournamentInterface()
                     mu_swprintf(t_Str, I18N::Game::RemainingSecondsDD, t_valueMin, t_valueSec);
                 }
             }
-            x += (float)GetScreenWidth() / 2; y += 350;
+            x += (float)(GetScreenLeft() + GetScreenWidth()) / 2; y += 350;
             g_pRenderText->RenderText((int)x, (int)y, t_Str, 0, 0, RT3_WRITE_CENTER); x++; y++;
 
             g_pRenderText->SetTextColor(0xffffffff);
@@ -4063,7 +4063,7 @@ void RenderTimes()
         constexpr float width = 50;
         constexpr float height = 2;
         constexpr int y = REFERENCE_HEIGHT - 48 - 40;
-        const float x = (static_cast<float>(GetScreenWidth()) - width) / 2.0f;
+        const float x = (static_cast<float>(GetScreenLeft() + GetScreenWidth()) - width) / 2.0f;
 
         const uint64_t remainingMacroCooldownTime = MacroCooldownMs - (currentTickCount - LastMacroTime);
         const float progressValue = static_cast<float>(remainingMacroCooldownTime) / MacroCooldownMs * width;

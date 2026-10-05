@@ -15,6 +15,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Party/PartyListLayout.h"
+#include "UI/Placement/WindowPlacement.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -80,9 +81,11 @@ void CPartyListWindow::SetPos(int x, int y)
     m_Pos.y = y;
 }
 
-void CPartyListWindow::SetPos(int x)
+// Right-aligned to the world the open windows leave uncovered, in this window's own units.
+void CPartyListWindow::FollowUncoveredWorld()
 {
-    SetPos(x - (PARTY_LIST_WINDOW_WIDTH + 2), m_Pos.y);
+    const float right = UI::Placement::UncoveredWorldRightIn(GetLayoutTransform());
+    m_Pos.x = static_cast<int>(std::lround(right)) - (PARTY_LIST_WINDOW_WIDTH + 2);
 }
 
 int CPartyListWindow::GetSelectedCharacter()
@@ -143,6 +146,7 @@ bool CPartyListWindow::BtnProcess()
 
 bool CPartyListWindow::UpdateMouseEvent()
 {
+    FollowUncoveredWorld();
     if (!m_bActive)
         return true;
 
@@ -168,6 +172,7 @@ bool CPartyListWindow::UpdateKeyEvent()
 
 bool CPartyListWindow::Update()
 {
+    FollowUncoveredWorld();
     if (m_PendingLeave >= 0)
     {
         const int member = m_PendingLeave;

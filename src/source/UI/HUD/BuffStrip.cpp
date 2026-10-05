@@ -8,6 +8,7 @@
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/Placement/WindowPlacement.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
@@ -358,12 +359,14 @@ void CBuffStrip::SyncTooltipLineHeight()
 
 void CBuffStrip::SyncStripSlot()
 {
-    // Native CNewUIBuffWindow::SetPos(): the strip starts at (free - 200) / 2 of the free width
-    // (640, 450, 373 or 260 units the docked panels leave, x 220/125/86/30), in its own stretched
-    // HUD space -- not centred in the docks' space, which at wide window sizes is narrower.
+    // Native CNewUIBuffWindow::SetPos(): a 200-unit row centred in the width the docked panels
+    // leave free, in its own stretched HUD space; here, centred between the uncovered world's
+    // edges, so a dock on either side moves it.
     constexpr float kNativeRowWidth = 200.0f;
     const auto hud = GetLayoutTransform();
-    const float left = UI::Scaling::PositionX(hud, (static_cast<float>(m_iFreeScreenWidth) - kNativeRowWidth) * 0.5f);
+    const float freeLeft = UI::Placement::UncoveredWorldLeftIn(hud);
+    const float freeRight = UI::Placement::UncoveredWorldRightIn(hud);
+    const float left = UI::Scaling::PositionX(hud, (freeLeft + freeRight - kNativeRowWidth) * 0.5f);
     const float width = kNativeRowWidth * hud.scaleX;
 
     auto& model = m_RmlBinder.GetModel();

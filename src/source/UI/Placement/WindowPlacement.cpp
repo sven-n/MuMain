@@ -416,6 +416,16 @@ float UncoveredWorldRight()
     return g_workspace != nullptr ? g_uncoveredRight : static_cast<float>(WindowWidth);
 }
 
+float UncoveredWorldLeftIn(const UI::Scaling::Transform& transform)
+{
+    return (UncoveredWorldLeft() - transform.offsetX) / transform.scaleX;
+}
+
+float UncoveredWorldRightIn(const UI::Scaling::Transform& transform)
+{
+    return (UncoveredWorldRight() - transform.offsetX) / transform.scaleX;
+}
+
 void Release()
 {
     UI::RmlBridge::UnregisterForThemeReload(&g_themeReloadToken);

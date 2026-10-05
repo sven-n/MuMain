@@ -9,6 +9,11 @@ namespace mu::ui::window
 class CObject;
 }
 
+namespace UI::Scaling
+{
+struct Transform;
+}
+
 // Places windows where the active theme's workspace.rml puts their slots. Each theme lays out
 // regions and slots in RML/RCSS; this lays the workspace out, reads back each open window's slot
 // and maps the window onto it (LayoutMode::Slot).
@@ -37,5 +42,8 @@ void Update();
 // marked data-covers-world narrows it from the side of the screen the slot is on.
 float UncoveredWorldLeft();
 float UncoveredWorldRight();
+// The same edges in `transform`'s units, for a widget that follows them in its own layout.
+float UncoveredWorldLeftIn(const UI::Scaling::Transform& transform);
+float UncoveredWorldRightIn(const UI::Scaling::Transform& transform);
 void Release();
 }

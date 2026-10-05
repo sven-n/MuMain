@@ -76,7 +76,6 @@ namespace mu::ui::window
         void Release();
 
         void SetPos(int x, int y);
-        void SetPos(int x);
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -94,6 +93,8 @@ namespace mu::ui::window
         void SyncDocVisibility(bool sceneAllowsShow);
 
     private:
+        // Right-aligns the durability icons to the world the open windows leave uncovered.
+        void FollowUncoveredWorld();
         void LoadImages();
         void UnloadImages();
 

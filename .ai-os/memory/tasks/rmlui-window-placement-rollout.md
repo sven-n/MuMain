@@ -89,9 +89,11 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
    uses panel-relative header layout. Full RelWithDebInfo build and RML checks pass; in-game checks
    are pending alongside the hand checks above.
 6. Placement leftovers: per-theme saved positions and the drag rule (user decision); Gens ranking
-   slot (needs a region with the `hud` scale or its own space); HUD widgets centring in the free
-   width ignore a left dock (`GetScreenWidth()` only uses the right edge); unslotted families (move
-   map, friends, centred dialogs, HUD widgets) with per-window content sizes and region scales.
+   slot (needs a region with the `hud` scale or its own space); unslotted families (move map,
+   friends, centred dialogs) with per-window content sizes and region scales. Done: HUD widgets
+   follow both uncovered edges in their own layout each frame (durability icons and party list had
+   been off by the dock/stretch scale ratio at any UI scale other than 100 % or a non-4:3 window).
+   Verified in game at 80 %: durability icons beside the panel; buff row centred beside a left dock.
 7. Phase 4 fill: character info supports `data-fit=fill`; a fill slot is never smaller than the
    window's content size. Both shipped themes keep their content-sized workspace. The remaining
    windows need individual fill capability and theme content recipes; native grids and live 3D

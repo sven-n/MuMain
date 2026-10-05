@@ -159,10 +159,14 @@ edge (`UI::Placement::UncoveredWorldRight()`): the leftmost open slot in a regio
 without slots still count as one column each. A theme can leave a full-screen overlay region
 unmarked, so nothing shifts under it.
 
-At 4:3 this equals the old table. At wider screens it follows the docks' real edge, where the old
-table assumed 190 stretched units per column, so the buff strip, item endurance, party list, pet
-bars and shop titles now line up with the docks. The HUD widgets keep their own `SetPos()`; they
-need no slots while the uncovered edge positions them.
+At 4:3 and 100 % this equals the old table. Elsewhere it follows the docks' real edge, where the
+old table assumed 190 units per column. `GetScreenLeft()` is the matching left edge; centred HUD
+text (the macro cooldown, timers) centres between the two, so a left dock moves it too.
+
+HUD widgets read the edges in their own layout every frame
+(`UI::Placement::UncoveredWorldLeftIn()`/`RightIn()`), so they also follow a resize, UI-scale or
+HUD change: the durability icons and party list right-align in their dock units, and the buff
+row centres between both edges. They need no slots.
 
 `HeroX` (the point the hero's head turns from) still uses it. The world viewport no longer
 shrinks for open windows, so the hero stays at the screen centre; that mismatch predates this
@@ -248,9 +252,8 @@ Each worked, including clicks inside moved windows.
 
 What these exposed:
 - The uncovered world was one-sided; open slots now narrow it from whichever side of the screen
-  they are on (`UncoveredWorldLeft()`/`UncoveredWorldRight()`). `GetScreenWidth()` and its HUD
-  consumers still use only the right edge, so a left dock does not yet move the buff strip or
-  macro bar.
+  they are on (`UncoveredWorldLeft()`/`UncoveredWorldRight()`), and the buff row and centred HUD
+  text follow both edges. The hero's facing centre (`HeroX`) still uses the right edge only.
 - HUD parts stay where `main_frame.rcss` puts them; a left dock covers the chat log, which a
   theme using one would move.
 

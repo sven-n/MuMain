@@ -26,14 +26,6 @@ namespace mu::ui::window
 
         // Vestigial -- RmlUi/CSS owns this widget's position now (.center-x in buff_strip.rml).
         void SetPos(int x, int y) {}
-        // The original places the strip by the screen width its docked panels leave free
-        // (GetScreenWidth(), reference units); this keeps that width so the model can expose the
-        // original's strip box (strip_slot_left/width) for a theme that follows it.
-        void SetPos(int iScreenWidth)
-        {
-            m_iFreeScreenWidth = iScreenWidth;
-        }
-
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();
@@ -90,7 +82,5 @@ namespace mu::ui::window
         void SyncRmlModel();
         void SyncStripSlot();
         void SyncTooltipLineHeight();
-
-        int m_iFreeScreenWidth = REFERENCE_WIDTH;
     };
 }

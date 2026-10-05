@@ -79,6 +79,7 @@ void RenderItems();
 void MoveItems();
 int SelectItem();
 int GetScreenWidth();
+int GetScreenLeft();
 void ClearItems();
 
 void RenderCloudLowLevel(int index, int Type);
