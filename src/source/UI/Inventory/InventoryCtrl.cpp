@@ -1101,8 +1101,14 @@ void mu::ui::window::CInventoryCtrl::Render()
 
         if (pickitemvisible)
         {
-            RECT rcPickedItem, rcInventory, rcIntersect;
-            ms_pPickedItem->GetRect(rcPickedItem);
+            // The picked item's own position is in its owner window's space; every placed window
+            // has its own, so take the item's box from the pointer in this grid's space.
+            const POINT pickedTopLeft =
+                UI::Items::Drag::ItemTopLeft(MouseX, MouseY, ms_pPickedItem->GetPickupOffset());
+            const SIZE& pickedSize = ms_pPickedItem->GetSize();
+            RECT rcPickedItem{pickedTopLeft.x, pickedTopLeft.y, pickedTopLeft.x + pickedSize.cx,
+                              pickedTopLeft.y + pickedSize.cy};
+            RECT rcInventory, rcIntersect;
             GetRect(rcInventory);
 
             if (IntersectRect(&rcIntersect, &rcPickedItem, &rcInventory))

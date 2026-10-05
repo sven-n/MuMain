@@ -58,15 +58,15 @@ hints and both close targets work; live theme switches between a filled and a co
 workspace resize the open panel. Headless test: 2 cases, 58 assertions. Synthetic world clicks
 do not move the character, so click-through on the enlarged area is a hand check.
 
-## Not verified (needs an NPC, a second player or mouse dragging)
+## Hand checks (user, 2026-10-05)
 
-1. Trade between two clients: both grids inside the window, add/remove items.
-2. Vault (+ extension; vault keeper in Noria), NPC shop, Chaos Machine: grids aligned, drop/pick.
-3. Browsing another player's shop: grid aligned, buying works.
-4. Inventory extension with an unlocked extension: grids aligned.
-5. Castle senate and guard: tab clicks switch pages.
-6. Inventory equip/unequip/move; drag the inventory, close/reopen, relog (saved position).
-7. A widened window does not let clicks through its new area.
+All passed: trade, vault and extension, NPC shop, Chaos Machine, browsed shop, inventory
+extension, castle/guard/gatekeeper, catapult, lucky item, inventory moves/drag/relog, filled
+windows' click-through. One regression found: dragging an item from one window's grid to another's
+(inventory to vault) showed no blue drop guide. Cause: since LayoutMode::Slot each placed window has
+its own space, and the guide compared the target grid with the picked item's position in its
+owner window's space. Fixed by taking the item's box from the pointer in the target grid's space;
+needs a re-check by hand (the socket cannot hover a dragged item without dropping it).
 
 Trade attempt (stopped by the user): accounts `ancient`/`ancient` and `test400`/`test400`, both in
 Noria, adjacent. Socket `say` sends chat to the server, so the client's `/trade` handling
