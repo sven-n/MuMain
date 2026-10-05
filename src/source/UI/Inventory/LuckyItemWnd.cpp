@@ -214,7 +214,6 @@ bool CLuckyItemWnd::Create(CManager* pNewUIMng, int x, int y)
     m_pNewInventoryCtrl->GetSquareColorWarning(m_fInvenClrWarning);
 
     SetPos(x, y);
-    SetSize(190.0f, 429.0f);
 
     for (int i = 0; i < LUCKYITEMMAXLINE; i++)
     {
@@ -243,8 +242,7 @@ void CLuckyItemWnd::BuildRmlUi()
                 c.Bind("root_y", &model.rootY);
                 c.Bind("root_scale", &model.rootScale);
                 c.Bind("text_px", &model.textPx);
-                c.Bind("root_width", &model.rootWidth);
-                c.Bind("root_height", &model.rootHeight);
+                c.Bind("panel_width", &model.panelWidth);
                 c.Bind("title", &model.title);
                 c.Bind("mix_tooltip", &model.mixTooltip);
                 c.Bind("mix_visible", &model.mixVisible);
@@ -275,8 +273,6 @@ void CLuckyItemWnd::BuildRmlUi()
                     c.Bind("root_x", &model.rootX);
                     c.Bind("root_y", &model.rootY);
                     c.Bind("root_scale", &model.rootScale);
-                    c.Bind("root_width", &model.rootWidth);
-                    c.Bind("root_height", &model.rootHeight);
                 });
             if (bgModelCreated)
             {
@@ -592,7 +588,10 @@ bool CLuckyItemWnd::UpdateMouseEvent(void)
     // Mix button click is handled by the RmlUi "lucky_item_mix_click" event callback (see
     // Create()), which calls Process_BTN_Action() directly -- not polled here.
 
-    if (mu::ui::window::WindowGeometry(static_cast<int>(m_ptPos.x), static_cast<int>(m_ptPos.y), static_cast<int>(m_fSizeX), static_cast<int>(m_fSizeY)).Contains(MouseX, MouseY))
+    float panelWidth = 190.f;
+    float panelHeight = 429.f;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_ptPos.x, m_ptPos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {
@@ -648,12 +647,6 @@ void CLuckyItemWnd::SyncRmlModel()
     {
         UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_ptPos);
 
-        auto& bgModel = m_BgRmlBinder.GetModel();
-        bgModel.rootWidth = m_fSizeX;
-        bgModel.rootHeight = m_fSizeY;
-        m_BgRmlBinder.MarkDirty("root_width");
-        m_BgRmlBinder.MarkDirty("root_height");
-
         // RenderBackgroundLayer() renders whatever's shown in the shared background context
         // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
         UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, IsVisible());
@@ -663,16 +656,12 @@ void CLuckyItemWnd::SyncRmlModel()
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_ptPos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->FollowAnchor(m_pRmlDoc, "item_grid", m_ptPos, 15, 110);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     auto& model = m_RmlBinder.GetModel();
-    model.rootWidth = m_fSizeX;
-    model.rootHeight = m_fSizeY;
-    m_RmlBinder.MarkDirty("root_width");
-    m_RmlBinder.MarkDirty("root_height");
-
     auto syncWide = [&](Rml::String LuckyItemRmlModel::* field, const char* boundName, const wchar_t* text)
     {
         const Rml::String value = StringUtils::WideToNarrow(text);

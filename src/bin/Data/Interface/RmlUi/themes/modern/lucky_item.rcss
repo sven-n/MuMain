@@ -1,12 +1,13 @@
 /* Modern theme for CLuckyItemWnd's chrome -- header/mix-button/result-description text are vector
    forged-metal chrome (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language).
-   Inventory grid and the mix-completion sparkle effect stay fully native, same as legacy. Unlike
-   every other window in this family, #panel's width/height are runtime-variable
-   (root_width/root_height), not a fixed px value -- see lucky_item.rml. */
+   Inventory grid and the mix-completion sparkle effect stay native. The theme owns #panel's
+   width and height. */
 
 #panel {
 	position: absolute;
 	transform-origin: left top;
+	width: 190px;
+	height: 429px;
 	font-family: "token(font-body)";
 }
 
@@ -60,8 +61,7 @@
 #btn_mix:hover ~ .tooltip-mix { display: block; }
 
 /* Former Render_Frame()'s m_sText[]/AddText() text loop. left:10/right:10 (rather than a fixed
-   width) mirrors the native `m_fSizeX - 20` width exactly, since #panel's own width is runtime-
-   variable (root_width). top:208px matches the native `m_ptPos.y + 18 + 190` baseline. Each line
+   width) follows #panel's theme width minus 20px. top:208px matches the native `m_ptPos.y + 18 + 190` baseline. Each line
    is a fixed 11px-tall block (matching the native loop's `11.0f * i` per-slot spacing) so blank
    spacer entries (empty text) still preserve the original's vertical rhythm. */
 #text_lines {

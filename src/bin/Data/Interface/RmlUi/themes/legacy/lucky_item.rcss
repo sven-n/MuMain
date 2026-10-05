@@ -1,12 +1,11 @@
-/* Legacy theme for CLuckyItemWnd's chrome (frame/title/mix button). #panel's left/top/scale/
-   width/height come live from C++ (SyncRmlModel()) -- width/height are genuinely runtime-variable
-   for this window (m_fSizeX/m_fSizeY), unlike every other fixed-size window in this family, so
-   there is no static width/height declared here (compare storage_ext.rcss's fixed 190px/429px).
-   Coordinates below are plain reference px, not dp. */
+/* Legacy theme for CLuckyItemWnd's chrome (frame/title/mix button). C++ supplies position
+   and scale; the theme owns width and height. Coordinates below are reference px, not dp. */
 
 #panel {
 	position: absolute;
 	transform-origin: left top;
+	width: 190px;
+	height: 429px;
 	font-family: "token(font-body)";
 }
 
@@ -51,7 +50,7 @@
 .tooltip {
 	display: none;
 	position: absolute;
-	bottom: auto; /* bound: root_height - 380 (lucky_item.rml) */
+	top: 364px; /* above the mix button at 380px */
 	width: 120px;
 	white-space: nowrap;
 	color: token(text-primary);
@@ -68,8 +67,7 @@
 #btn_mix:hover ~ .tooltip-mix { display: block; }
 
 /* Former Render_Frame()'s m_sText[]/AddText() text loop. left:10/right:10 (rather than a fixed
-   width) mirrors the native `m_fSizeX - 20` width exactly, since #panel's own width is runtime-
-   variable (root_width). top:208px matches the native `m_ptPos.y + 18 + 190` baseline. Each line
+   width) follows #panel's theme width minus 20px. top:208px matches the native `m_ptPos.y + 18 + 190` baseline. Each line
    is a fixed 11px-tall block (matching the native loop's `11.0f * i` per-slot spacing) so blank
    spacer entries (empty text) still preserve the original's vertical rhythm. */
 #text_lines {

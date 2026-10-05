@@ -74,7 +74,7 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
    over RmlUi-drawn elements. Right fix: RmlUi click events, and tab positions in RCSS (today bound
    in RML as `12 + i * 41`). Needs testing at the siege NPCs.
 3. Catapult has no hit box (clicks fall through to the world; predates this work).
-4. Lucky item panel size is bound from C++ (`root_width`/`root_height`); move it to RCSS.
+4. Done: lucky item's panel and background sizes are in each theme's RCSS. The native hit box reads `#panel`, and legacy counter-scaled text reads `panel_width`. Full RelWithDebInfo build passed; in-game verification is pending.
 5. Done: the eight inventory-family legacy-theme RML documents center counter-scaled text
    with `panel_width` read from `#panel`. Each owner binds and syncs it. The modern theme already
    uses panel-relative header layout. Full RelWithDebInfo build and RML checks pass; in-game checks

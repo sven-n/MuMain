@@ -7,16 +7,13 @@
 <body data-model="lucky_item">
 	<!-- Window frame/title/mix-button/result-description text block -- inventory grid and the
 	     mix-completion sparkle effect stay native (LuckyItemWnd.h/.cpp). Background lives in
-	     lucky_item_bg.rml instead, since it must paint behind the native 3D icons. Unlike every
-	     other window in this "inventory family", #panel's width/height are genuinely
-	     runtime-variable (root_width/root_height), not a fixed CSS value -- m_fSizeX/m_fSizeY are
-	     real runtime floats (LuckyItemWnd.h). -->
+	     lucky_item_bg.rml instead, since it must paint behind the native 3D icons.
+	     The theme sizes #panel and #bg_root in their respective RCSS files. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-width="root_width + 'px'" data-style-height="root_height + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<!-- Where the native item grid goes: invisible boxes the theme places; the window reads them each frame. -->
 		<div id="item_grid" class="native-anchor"></div>
-		<!-- Header rail: left/right insets (base.rcss default) let it stretch with root_width. -->
+		<!-- Header rail: left/right insets (base.rcss default) let it stretch with #panel. -->
 		<div class="modern-header-rail-px lucky-header-rail">
 			<div class="modern-joint-px"></div>
 			<div class="modern-header-text-px">

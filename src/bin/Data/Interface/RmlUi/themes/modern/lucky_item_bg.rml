@@ -6,9 +6,8 @@
 <body data-model="lucky_item_bg">
 	<!-- Background-context document (see my_inventory_bg.rml for the mechanism) -- paints the
 	     outer frame behind CInventoryCtrl's own native grid/table-frame/item-icon rendering.
-	     Width/height are runtime-variable (root_width/root_height) -- see lucky_item.rml. -->
+	     The theme sizes #bg_root in lucky_item_bg.rcss. -->
 	<div id="bg_root" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-width="root_width + 'px'" data-style-height="root_height + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div class="bg-panel">
 			<div class="inv-shell-edge"></div>

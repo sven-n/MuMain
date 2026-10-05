@@ -75,8 +75,6 @@ siege_warfare.rml: the hero, the other characters' dots and each command's icon 
 slide_notice.rml: per-frame data -- the ticker scrolls right to left every frame, so the text's left and the band's fading height are its state, not a layout a theme could own
 themes/legacy/chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
 themes/legacy/help_window.rml: per-frame data -- native renderer geometry for the page it still measures
-themes/legacy/lucky_item.rml: counter-scale bridge -- counter-scaled text layers
-themes/legacy/lucky_item_bg.rml: counter-scale bridge -- counter-scaled text layers
 themes/legacy/mix_inventory.rml: counter-scale bridge -- recipe line spacing and text size; socket list uses RmlUi scrolling
 themes/legacy/system_log.rml: per-frame data -- native renderer geometry for the lines it still measures
 themes/legacy/tooltip.rml: per-frame data -- tooltip is placed against the pointer
@@ -84,8 +82,6 @@ themes/legacy/trade.rml: counter-scale bridge -- counter-scaled text layers
 themes/legacy/window_shell.rml: counter-scale bridge -- counter-scaled text layers in the shared shell
 themes/modern/command_window.rml: per-frame data -- target marker follows the selected command
 themes/modern/generic_confirm_dialog.rml: per-frame data -- native 3D item anchor, and a panel sized to its content
-themes/modern/lucky_item.rml: counter-scale bridge -- counter-scaled text layers
-themes/modern/lucky_item_bg.rml: counter-scale bridge -- counter-scaled text layers
 themes/modern/mu_helper_detail.rml: counter-scale bridge -- gauge fills; the gauge port is a tracked deferral
 themes/modern/npc_quest.rml: counter-scale bridge -- message/answer tops -- its own tracked deferral, see tracked-deferrals.md
 themes/modern/party_info.rml: counter-scale bridge -- counter-scaled member rows

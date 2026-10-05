@@ -38,8 +38,6 @@ namespace mu::ui::window
         sText					m_sText[LUCKYITEMMAXLINE];
         int						m_nTextMaxLine;
         POINT					m_ptPos;
-        float					m_fSizeX;
-        float					m_fSizeY;
         int						m_nResult;
         int						m_nMixEffectTimer;
         eLUCKYITEMTYPE			m_eType;
@@ -49,10 +47,7 @@ namespace mu::ui::window
         // Window frame/title/mix-button/result-description text block are RmlUi; only the inventory
         // grid and the mix-completion sparkle effect stay native -- grid icons are live 3D renders
         // (same reasoning as CStorageInventoryExt), and the sparkle effect is a native 2D particle
-        // overlay with no RmlUi equivalent. Unlike every other window in this "inventory family",
-        // #panel/#bg_root's width/height are NOT a fixed constant -- m_fSizeX/m_fSizeY are genuinely
-        // runtime-variable (see SetSize()), so both RmlUi models also bind/sync
-        // rootWidth/rootHeight every tick instead of hardcoding a px size in RCSS.
+        // overlay with no RmlUi equivalent. Both panel sizes belong to the active theme's RCSS.
         struct LuckyLine
         {
             Rml::String text;
@@ -64,7 +59,7 @@ namespace mu::ui::window
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
-            float rootWidth = 0.f, rootHeight = 0.f;
+            float panelWidth = 190.f;
             Rml::String title;
             Rml::String mixTooltip;
             bool mixVisible = true;
@@ -85,7 +80,6 @@ namespace mu::ui::window
         struct LuckyItemBgRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-            float rootWidth = 0.f, rootHeight = 0.f;
         };
         RmlModelBinder<LuckyItemBgRmlModel> m_BgRmlBinder;
         Rml::ElementDocument* m_pRmlBgDoc = nullptr;
@@ -133,7 +127,6 @@ namespace mu::ui::window
 
         __inline void	SetAct(eLUCKYITEMTYPE _eAct) { m_eType = _eAct; }
         __inline void	SetPos(int _nX, int _nY) { m_ptPos.x = _nX, m_ptPos.y = _nY; }
-        __inline void	SetSize(float _fX, float _fY) { m_fSizeX = _fX, m_fSizeY = _fY; }
 
         __inline eLUCKYITEMTYPE	GetAct(void) { return m_eType; }
         CLuckyItemWnd();

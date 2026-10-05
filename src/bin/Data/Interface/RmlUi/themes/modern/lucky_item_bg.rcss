@@ -1,15 +1,14 @@
 /* Background-layer companion to lucky_item.rcss -- same forged-metal panel recipe as
    storage_ext_bg.rcss/my_inventory_bg.rcss (sys_menu.rcss's #panel + base.rcss's
-   .modern-shell-edge/.modern-groove). Unlike those siblings' fixed 190x429, #bg_root/.bg-panel
-   here stretch to fill their parent via left/top/right/bottom insets instead of literal width/
-   height, since m_fSizeX/m_fSizeY are genuinely runtime-variable for this window
-   (LuckyItemWnd.h). .inv-shell-edge/.inv-groove are copied verbatim, unchanged -- they already
-   used left/right/top/bottom insets, not a fixed size, so they're already width/height-agnostic.
+   .modern-shell-edge/.modern-groove). The theme owns #bg_root's size; .bg-panel and its
+   frame pieces stretch within it using left/right/top/bottom insets.
    Does NOT link base.rcss -- no *_bg.rml in this theme does. */
 
 #bg_root {
 	position: absolute;
 	transform-origin: left top;
+	width: 190px;
+	height: 429px;
 	pointer-events: none;
 }
 
@@ -66,7 +65,7 @@
 
 /* Rail fill/accent relocated from the fg's now paint-less .modern-header-rail-px -- see
    base.rcss's comment on that class. left/right stay plain insets (like .bg-panel) so the rail
-   stretches with this window's runtime-variable root_width. */
+   stretches with this theme's #bg_root width. */
 .rail-fill {
 	position: absolute;
 	left: 8px;

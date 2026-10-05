@@ -7,27 +7,24 @@
 <body data-model="lucky_item">
 	<!-- Window frame/title/mix-button/result-description text block -- inventory grid and the
 	     mix-completion sparkle effect stay native (LuckyItemWnd.h/.cpp). Background lives in
-	     lucky_item_bg.rml instead, since it must paint behind the native 3D icons. Unlike every
-	     other window in this "inventory family", #panel's width/height are genuinely
-	     runtime-variable (root_width/root_height), not a fixed CSS value -- m_fSizeX/m_fSizeY are
-	     real runtime floats (LuckyItemWnd.h). -->
+	     lucky_item_bg.rml instead, since it must paint behind the native 3D icons.
+	     The theme sizes #panel and #bg_root in their respective RCSS files. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-width="root_width + 'px'" data-style-height="root_height + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<!-- Where the native item grid goes: invisible boxes the theme places; the window reads them each frame. -->
 		<div id="item_grid" class="native-anchor"></div>
 		<span class="sharp-text" id="title"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
-		     data-style-width="(root_width * root_scale) + 'px'">{{title}}</span>
+		     data-style-width="(panel_width * root_scale) + 'px'">{{title}}</span>
 
 		<div id="btn_mix" class="mix-btn" data-class-hidden="!mix_visible" data-event-click="lucky_item_mix_click"></div>
-		<span class="sharp-text tooltip tooltip-mix" data-style-bottom="(root_height - 380) + 'px'"
+		<span class="sharp-text tooltip tooltip-mix"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{mix_tooltip}}</span></span>
 
 		<!-- Former Render_Frame()'s m_sText[]/AddText() result/description block. -->
 		<div class="sharp-text" id="text_lines"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="((root_width - 20) * root_scale) + 'px'" data-style-line-height="(11 * root_scale) + 'px'">
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="((panel_width - 20) * root_scale) + 'px'" data-style-line-height="(11 * root_scale) + 'px'">
 			<div class="lucky-line" data-for="t : text_lines" data-style-color="t.color"
 			     data-style-text-align="t.align">{{t.text}}</div>
 		</div>
