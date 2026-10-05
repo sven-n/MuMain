@@ -21,12 +21,12 @@
 		<div class="frame-piece frame-bottom"></div>
 
 		<span class="sharp-text gm-centred" id="title" data-style-font-size="title_px + 'px'"
-		      data-style-width="(190 * root_scale) + 'px'"
+		      data-style-width="(panel_width * root_scale) + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title_text}}</span>
 
 		<div data-if="page == 0">
 			<span class="sharp-text gm-centred" id="info" data-style-font-size="info_px + 'px'"
-			      data-style-width="(190 * root_scale) + 'px'"
+			      data-style-width="(panel_width * root_scale) + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{info_text}}</span>
 			<div class="gm-btn gm-btn-big" id="btn_make" data-event-click="guild_make_button(0)">
 				<span class="sharp-text gm-label" data-style-font-size="text_px + 'px'"
@@ -80,7 +80,7 @@
 			<div class="gold-rect" id="result_rect"><div class="gold-h"></div><div class="gold-h gold-h-end"></div><div class="gold-v"></div><div class="gold-v gold-v-end"></div></div>
 			<div id="result_mark"><div class="mark-cell" data-for="m : mark_cells" data-style-background-color="m"></div></div>
 			<span class="sharp-text gm-centred" id="result" data-style-font-size="result_px + 'px'"
-			      data-style-width="(190 * root_scale) + 'px'"
+			      data-style-width="(panel_width * root_scale) + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{result_text}}</span>
 		</div>
 

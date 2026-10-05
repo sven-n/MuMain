@@ -8,6 +8,7 @@
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/Text/CUIRenderText.h"
@@ -41,6 +42,7 @@ void mu::ui::window::EventEntryView::Build()
             c.Bind("root_x", &model.rootX);
             c.Bind("root_y", &model.rootY);
             c.Bind("root_scale", &model.rootScale);
+            c.Bind("panel_width", &model.panelWidth);
             c.Bind("text_px", &model.textPx);
             c.Bind("title_text_px", &model.titleTextPx);
             c.Bind("title_line_px", &model.titleLinePx);
@@ -122,6 +124,11 @@ void mu::ui::window::EventEntryView::SetContent(const wchar_t* title, const std:
     m_RmlBinder.MarkDirty("buttons");
 }
 
+bool mu::ui::window::EventEntryView::PanelSize(float& width, float& height) const
+{
+    return UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", width, height);
+}
+
 void mu::ui::window::EventEntryView::Sync(bool visible, const POINT& pos)
 {
     Build();
@@ -134,6 +141,7 @@ void mu::ui::window::EventEntryView::Sync(bool visible, const POINT& pos)
         return;
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
     SyncTextSizes();
 }

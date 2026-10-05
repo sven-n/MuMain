@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "GuildMakeWindow.h"
 #include "UI/Core/WindowManager.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "Audio/DSPlaySound.h"
@@ -377,7 +378,11 @@ bool CGuildMakeWindow::UpdateMouseEvent()
         UpdateEditGuildMark(m_Pos.x, m_Pos.y);
     }
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, GUILDMAKE_WIDTH, GUILDMAKE_HEIGHT).Contains(MouseX, MouseY))
+    float panelWidth = static_cast<float>(GUILDMAKE_WIDTH);
+    float panelHeight = static_cast<float>(GUILDMAKE_HEIGHT);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
+                                       static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {
@@ -411,6 +416,7 @@ void CGuildMakeWindow::BuildRmlUi()
             c.Bind("root_x", &model.rootX);
             c.Bind("root_y", &model.rootY);
             c.Bind("root_scale", &model.rootScale);
+            c.Bind("panel_width", &model.panelWidth);
             c.Bind("text_px", &model.textPx);
             c.Bind("page", &model.page);
             c.Bind("title_text", &model.titleText);
@@ -484,6 +490,7 @@ void CGuildMakeWindow::SyncRmlModel()
         return;
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
     SyncContent();
 

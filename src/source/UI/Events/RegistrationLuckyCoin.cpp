@@ -165,7 +165,11 @@ namespace mu::ui::window
             return false;
         }
 
-        if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, LUCKYCOIN_REG_WIDTH, LUCKYCOIN_REG_HEIGHT).Contains(MouseX, MouseY))
+        float panelWidth = static_cast<float>(LUCKYCOIN_REG_WIDTH);
+        float panelHeight = static_cast<float>(LUCKYCOIN_REG_HEIGHT);
+        m_View.RefreshPanelSize(panelWidth, panelHeight);
+        if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
+                                           static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         {
             if (mu::ui::window::IsPress(VK_RBUTTON))
             {

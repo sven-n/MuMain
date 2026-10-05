@@ -592,8 +592,8 @@ bool CSystem::LoadMainSceneInterface()
     slot(INTERFACE_GUILDINFO, "guild_info", m_pNewGuildInfoWindow, "guild_info.rml");
     slot(INTERFACE_COMMAND, "command", m_pNewCommandWindow, "command_window.rml");
     slot(INTERFACE_COMMAND_LIST, "command_list", m_pNewChatCommandWindow, "chat_command.rml");
-    slot(INTERFACE_GOLD_BOWMAN, "gold_bowman", m_pNewGoldBowman);
-    slot(INTERFACE_GOLD_BOWMAN_LENA, "gold_bowman_lena", m_pNewGoldBowmanLena);
+    slot(INTERFACE_GOLD_BOWMAN, "gold_bowman", m_pNewGoldBowman, "gold_bowman.rml");
+    slot(INTERFACE_GOLD_BOWMAN_LENA, "gold_bowman_lena", m_pNewGoldBowmanLena, "gold_bowman_lena.rml");
     slot(INTERFACE_NPC_DIALOGUE, "npc_dialogue", m_pNewNPCDialogue, "npc_dialogue.rml");
     slot(INTERFACE_QUEST_PROGRESS, "quest_progress", m_pNewQuestProgress, "quest_progress.rml");
     slot(INTERFACE_NPCQUEST, "npc_quest", m_pNewNPCQuest, "npc_quest.rml");
@@ -606,8 +606,8 @@ bool CSystem::LoadMainSceneInterface()
     slot(INTERFACE_NPCGUILDMASTER, "guild_make", m_pNewGuildMakeWindow, "guild_make.rml");
     slot(INTERFACE_CATAPULT, "catapult", m_pNewCatapultWindow, "catapult.rml");
     slot(INTERFACE_DUELWATCH, "duel_watch", m_pNewDuelWatchWindow, "duel_watch.rml");
-    slot(INTERFACE_DOPPELGANGER_NPC, "doppelganger_entry", m_pNewDoppelGangerWindow);
-    slot(INTERFACE_EMPIREGUARDIAN_NPC, "empire_guardian_entry", m_pNewEmpireGuardianNPC);
+    slot(INTERFACE_DOPPELGANGER_NPC, "doppelganger_entry", m_pNewDoppelGangerWindow, "doppelganger_enter.rml");
+    slot(INTERFACE_EMPIREGUARDIAN_NPC, "empire_guardian_entry", m_pNewEmpireGuardianNPC, "empire_guardian_enter.rml");
     slot(INTERFACE_UNITEDMARKETPLACE_NPC_JULIA, "united_marketplace", m_pNewUnitedMarketPlaceWindow, "united_market_place.rml");
     slot(INTERFACE_MYQUEST, "my_quest", m_pNewMyQuestInfoWindow, "my_quest_info.rml");
     slot(INTERFACE_PET, "pet", m_pNewPetInfoWindow, "pet_info.rml");
@@ -621,8 +621,8 @@ bool CSystem::LoadMainSceneInterface()
     slot(INTERFACE_TRADE, "trade", m_pNewTrade, "trade.rml");
     slot(INTERFACE_MYSHOP_INVENTORY, "my_shop", m_pNewMyShopInventory, "my_shop.rml");
     slot(INTERFACE_PURCHASESHOP_INVENTORY, "purchase_shop", m_pNewPurchaseShopInventory, "purchase_shop.rml");
-    slot(INTERFACE_LUCKYCOIN_REGISTRATION, "lucky_coin_registration", m_pNewLuckyCoinRegistration);
-    slot(INTERFACE_EXCHANGE_LUCKYCOIN, "lucky_coin_exchange", m_pNewExchangeLuckyCoinWindow);
+    slot(INTERFACE_LUCKYCOIN_REGISTRATION, "lucky_coin_registration", m_pNewLuckyCoinRegistration, "lucky_coin_registration.rml");
+    slot(INTERFACE_EXCHANGE_LUCKYCOIN, "lucky_coin_exchange", m_pNewExchangeLuckyCoinWindow, "lucky_coin_exchange.rml");
     slot(INTERFACE_LUCKYITEMWND, "lucky_item", m_pNewUILuckyItemWnd, "lucky_item.rml");
     // Named only in data-closes.
     UI::Placement::RegisterName(INTERFACE_GENSRANKING, "gens_ranking");

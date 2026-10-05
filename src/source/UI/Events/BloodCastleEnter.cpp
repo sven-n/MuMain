@@ -96,7 +96,11 @@ bool CEnterBloodCastle::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, ENTERBC_BASE_WINDOW_WIDTH, ENTERBC_BASE_WINDOW_HEIGHT).Contains(MouseX, MouseY))
+    float panelWidth = static_cast<float>(ENTERBC_BASE_WINDOW_WIDTH);
+    float panelHeight = static_cast<float>(ENTERBC_BASE_WINDOW_HEIGHT);
+    m_View.PanelSize(panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
+                                       static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return false;
 
     return true;

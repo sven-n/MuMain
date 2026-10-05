@@ -3,6 +3,7 @@
 #include "I18N/All.h"
 
 #include "UI/HUD/CommandWindow.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
@@ -128,7 +129,11 @@ bool mu::ui::window::CCommandWindow::UpdateMouseEvent()
         return false;
     }
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, COMMAND_WINDOW_WIDTH, COMMAND_WINDOW_HEIGHT).Contains(MouseX, MouseY))
+    float panelWidth = static_cast<float>(COMMAND_WINDOW_WIDTH);
+    float panelHeight = static_cast<float>(COMMAND_WINDOW_HEIGHT);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
+                                       static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         SetMouseCursor(CURSOR_NORMAL);
         return false;

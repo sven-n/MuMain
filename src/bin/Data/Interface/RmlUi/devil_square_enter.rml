@@ -29,7 +29,7 @@
 		     at the first line / first button. -->
 		<div class="entry-lines">
 			<span class="sharp-text entry-line" data-for="line : lines"
-			      data-style-font-size="line.text_px + 'px'" data-style-width="(190 * root_scale) + 'px'"
+			      data-style-font-size="line.text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line.text}}</span>
 		</div>
 

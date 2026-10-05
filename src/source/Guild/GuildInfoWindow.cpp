@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "GuildInfoWindow.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
@@ -186,7 +187,11 @@ bool mu::ui::window::CGuildInfoWindow::UpdateMouseEvent()
         return false;
     }
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, GUILDINFO_WIDTH, GUILDINFO_HEIGHT).Contains(MouseX, MouseY))
+    float panelWidth = static_cast<float>(GUILDINFO_WIDTH);
+    float panelHeight = static_cast<float>(GUILDINFO_HEIGHT);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
+                                       static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         return false;
     }
@@ -448,6 +453,7 @@ void mu::ui::window::CGuildInfoWindow::BuildRmlUi()
             c.Bind("root_x", &model.rootX);
             c.Bind("root_y", &model.rootY);
             c.Bind("root_scale", &model.rootScale);
+            c.Bind("panel_width", &model.panelWidth);
             c.Bind("text_px", &model.textPx);
             c.Bind("no_guild", &model.noGuild);
             c.Bind("tab", &model.tab);
@@ -563,6 +569,7 @@ void mu::ui::window::CGuildInfoWindow::SyncRmlModel()
         return;
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
     SyncContent();
 }

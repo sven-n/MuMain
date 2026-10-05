@@ -23,7 +23,7 @@
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span id="cc_title" class="sharp-text cc-title" data-style-width="(190 * root_scale) + 'px'"
+		<span id="cc_title" class="sharp-text cc-title" data-style-width="(panel_width * root_scale) + 'px'"
 		      data-style-font-size="title.text_px + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title.text}}</span>
 		<span id="cc_empty" class="sharp-text cc-line" data-style-width="(146 * root_scale) + 'px'"

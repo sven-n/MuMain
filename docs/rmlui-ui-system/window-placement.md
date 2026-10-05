@@ -249,15 +249,15 @@ Goal: a window's size is the theme's choice, like its place. A slot already take
   (`CInventoryCtrl` at `+15, +200`). These need positions from RCSS anchors
   (`RefreshLogicalAnchorPosition()`, already used by the quest windows), or native content drawn
   into an element (`RenderTarget`).
-- **No document to measure.** Six windows draw through shared entry views and take 190x429.
+- **No document to measure** (corrected): the six shared-view windows each load their own document and now register it.
 
 | Tier | Windows | Work |
 |---|---|---|
 | 1. RCSS only | character, party, pet, NPC dialogue, gate switch, MU Helper config | Done: the docked frame and the modern bottom button row pin to `#panel`'s edges; counter-scaled leaves take `panel_width` (`SyncPanelWidth()`). Verified in game by widening character info to 260 in a runtime edit. |
-| 2. Plus hit box | guild info, guild make, command, command list, Blood Castle and Devil Square entry, catapult, lucky coin registration, lucky item | Tier 1, plus `RefreshLogicalPanelSize()` hit boxes |
+| 2. Plus hit box | guild info, guild make, command, command list, Blood Castle and Devil Square entry, catapult, lucky coin registration, lucky item | Done for all but two: hit boxes read `#panel` (`RefreshLogicalPanelSize()`, or the entry views' `PanelSize()`/`RefreshPanelSize()`), and `panel_width` replaces the 190 literals. Catapult has no hit box at all (clicks fall through; a separate fix), and lucky item's panel size is set from C++ (`root_width`/`root_height`), so a theme cannot size it yet. |
 | 3. Plus anchors | quest progress (and etc), quest log, NPC quest, castle, guard, gatekeeper, duel watch, MU Helper detail (gauge hit areas), United Marketplace | Tier 2, plus native parts placed from RCSS anchors |
 | 4. Native grids | inventory, extension, vault (and extension), NPC shop, mix, trade, personal shops | Equipment slots and item grid placed from RCSS anchors; cell size stays native |
-| 5. Shared views | Gold Bowman (both), Doppelganger and Empire Guardian entry, lucky coin exchange | The entry views report their panel and take anchors |
+| 5. Shared views | Gold Bowman (both), Doppelganger and Empire Guardian entry, lucky coin exchange | Each view instance does load its own document; they now register it, so their slots take the theme's `#panel` size. Native parts still need anchors. |
 
 Counts come from a scan of each window's `.cpp` and RML (`RefreshLogicalPanelSize`/
 `RefreshLogicalAnchorPosition` use, `CInventoryCtrl`, 3D rendering, `m_Pos.x/y + n` offsets, 190/429

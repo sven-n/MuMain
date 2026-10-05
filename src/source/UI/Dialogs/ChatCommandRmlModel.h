@@ -62,6 +62,7 @@ struct ChatCommandRmlModel
 
     // Right-docked window -- UI::Scaling::GetActiveTransform() while CManager runs it.
     float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+    float panelWidth = 190.f;
     float textPx = 0.f; // native normal text size in physical px (RmlRootTransform.h)
     float windowHeight = 0.f;
 
