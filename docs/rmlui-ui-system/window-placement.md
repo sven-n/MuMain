@@ -155,8 +155,8 @@ reads it: the hero's screen centre for facing the mouse (`HeroX` in `ZzzInterfac
 bars, personal-shop titles, the macro cooldown bar, endurance tooltips, and the terrain viewport
 outside the main scene. `GetScreenWidth()` now returns the placement service's uncovered right
 edge (`UI::Placement::UncoveredWorldRight()`): the leftmost open slot in a region marked
-`data-covers-world`, converted to the 640-wide HUD space. Gens ranking and the two legacy panels
-without slots still count as one column each. A theme can leave a full-screen overlay region
+`data-covers-world`, converted to the 640-wide HUD space. The two legacy panels without slots (refinery, server
+division) still count as one column each. A theme can leave a full-screen overlay region
 unmarked, so nothing shifts under it.
 
 At 4:3 and 100 % this equals the old table. Elsewhere it follows the docks' real edge, where the
@@ -312,7 +312,7 @@ UI scale with the [validation matrix](validation-matrix.md).
 | 2 | Done, in-game checks pending: HUD reserve from the HUD strip; uncovered world edge replaces `GetScreenWidth()`'s table. |
 | 3 | Done, in-game checks pending: column-1/column-2 conflicts and the three-column limit are `data-closes` in both workspaces; `HideGroupBeforeOpenInterface()` is gone. `HideAllGroupA()` stays in C++ (it ends trades and NPC sessions, which a theme must not control). The MU Helper bar rule and the help-panel exclusions stay until their windows have slots. Change: windows closed by these rules now run their closing process; for the Gold Bowman windows that tells the server the event-chip dialog ended, which the old silent hide skipped. |
 | 4 | In progress: character info and pet info opt into `data-fit=fill`. A theme sizes its slot in RCSS; the service gives that size to the panel, never less than the content size. Character info's right-hand pieces and action rows are pinned to `#panel`'s edges in both themes, so a wider content-sized panel stretches too. The shipped themes stay content-sized. Verified in game at 1024x768 (runtime layouts, both themes): 35%, 30% and 22% slots at UI scale 80, 90 and 100 %; action buttons and hints, both close targets, and live theme switches between a filled and a content-sized workspace. Pet info verified the same way at 35 % in both themes (tabs, corner close). The headless test passes (82 assertions, both windows). Other windows opt in after their hit areas and native content can follow a filled panel. |
-| 5 | Remaining families: NPC windows, move map, friends, centred dialogs. |
+| 5 | In progress: Gens ranking has a right-dock slot (docked scale and place, like its neighbours; it used to be drawn in the stretched 640x480 space, wider than the docks on wide screens and ignoring the UI scale). Remaining: move map, friends, centred dialogs. |
 
 Docs to update with phase 1: [theming-and-modding.md](theming-and-modding.md) ("three different
 owners"), [layout-and-scaling.md](layout-and-scaling.md), [tracked-deferrals.md](tracked-deferrals.md),

@@ -6,6 +6,7 @@
 #include "UI/HUD/GensRanking.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 
 #include "Core/Utilities/StringUtils.h"
 #include "Core/Utilities/UsefulDef.h"
@@ -172,7 +173,11 @@ bool CGensRanking::UpdateMouseEvent()
     if (BtnProcess())
         return false;
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, GENSRANKING_WIDTH, GENSRANKING_HEIGHT).Contains(MouseX, MouseY))
+    float panelWidth = GENSRANKING_WIDTH;
+    float panelHeight = GENSRANKING_HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight))
+            .Contains(MouseX, MouseY))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {

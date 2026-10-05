@@ -67,7 +67,6 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_DOPPELGANGER_FRAME:
     case INTERFACE_EMPIREGUARDIAN_TIMER:
     case INTERFACE_MINI_MAP:
-    case INTERFACE_GENSRANKING:
     case INTERFACE_HOTKEY:
     case INTERFACE_SYSTEMLOGWINDOW:
     case INTERFACE_CURSEDTEMPLE_GAMESYSTEM:
@@ -118,6 +117,7 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_COMMAND_LIST:
     case INTERFACE_ITEM_ENDURANCE_INFO:
     case INTERFACE_PARTY_INFO_WINDOW:
+    case INTERFACE_GENSRANKING:
         return LayoutMode::DockRight;
 
     default:

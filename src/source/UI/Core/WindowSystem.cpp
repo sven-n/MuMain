@@ -541,7 +541,7 @@ bool CSystem::LoadMainSceneInterface()
 #endif //PBG_MOD_STAMINA_UI
 
     m_pNewGensRanking = new CGensRanking;
-    if (m_pNewGensRanking->Create(m_pNewUIMng, 640, 480) == false)
+    if (m_pNewGensRanking->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewUnitedMarketPlaceWindow = new CUnitedMarketPlaceWindow;
@@ -624,8 +624,8 @@ bool CSystem::LoadMainSceneInterface()
     slot(INTERFACE_LUCKYCOIN_REGISTRATION, "lucky_coin_registration", m_pNewLuckyCoinRegistration, "lucky_coin_registration.rml");
     slot(INTERFACE_EXCHANGE_LUCKYCOIN, "lucky_coin_exchange", m_pNewExchangeLuckyCoinWindow, "lucky_coin_exchange.rml");
     slot(INTERFACE_LUCKYITEMWND, "lucky_item", m_pNewUILuckyItemWnd, "lucky_item.rml");
+    slot(INTERFACE_GENSRANKING, "gens_ranking", m_pNewGensRanking, "gens_ranking.rml");
     // Named only in data-closes.
-    UI::Placement::RegisterName(INTERFACE_GENSRANKING, "gens_ranking");
     UI::Placement::RegisterName(INTERFACE_MUHELPER_SKILL_LIST, "mu_helper_skill_list");
 
     return true;
@@ -1117,7 +1117,6 @@ void CSystem::Show(DWORD dwKey)
     {
         HideAllGroupA();
         g_pNewUIGensRanking->OpenningProcess();
-        g_pNewUIGensRanking->SetPos(PanelColumnX(1), 0);
     }
     else if (dwKey == INTERFACE_UNITEDMARKETPLACE_NPC_JULIA)
     {

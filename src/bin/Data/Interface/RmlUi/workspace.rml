@@ -19,6 +19,7 @@
 		<!-- Fills from the right edge in document order. -->
 		<div class="region dock-right" data-ref-height="432" data-covers-world>
 			<div class="slot" data-window="character" data-closes="party guild_info command command_list gold_bowman gold_bowman_lena gens_ranking mu_helper mu_helper_detail mu_helper_skill_list"></div>
+			<div class="slot" data-window="gens_ranking"></div>
 			<div class="slot" data-window="mu_helper"></div>
 			<div class="slot" data-window="mu_helper_detail"></div>
 			<div class="slot" data-window="party"></div>

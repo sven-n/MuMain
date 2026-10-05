@@ -88,8 +88,7 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
    with `panel_width` read from `#panel`. Each owner binds and syncs it. The modern theme already
    uses panel-relative header layout. Full RelWithDebInfo build and RML checks pass; in-game checks
    are pending alongside the hand checks above.
-6. Placement leftovers: per-theme saved positions and the drag rule (user decision); Gens ranking
-   slot (needs a region with the `hud` scale or its own space); unslotted families (move map,
+6. Placement leftovers: per-theme saved positions and the drag rule (user decision); unslotted families (move map,
    friends, centred dialogs) with per-window content sizes and region scales. Done: HUD widgets
    follow both uncovered edges in their own layout each frame (durability icons and party list had
    been off by the dock/stretch scale ratio at any UI scale other than 100 % or a non-4:3 window).
@@ -98,6 +97,10 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
    window's content size. Both shipped themes keep their content-sized workspace. The remaining
    windows need individual fill capability and theme content recipes; native grids and live 3D
    need more than a stretched frame.
+
+8. Done: Gens ranking has a right-dock slot after character info; verified in game at 90 and 100 %
+   (`$win gensranking full`). Next: move map (height from its region: a height-only fill), friends
+   (free layout with an initial corner), centred dialogs.
 
 ## How to work on this
 
@@ -113,7 +116,9 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
   `out/build/windows-x64/src/RelWithDebInfo` with `MU_CONTROL_SOCKET=<path>`; Windows Python has no
   `AF_UNIX`, so use a ctypes/Winsock client (`AF_UNIX=1`). Commands: `login`, `select-char`,
   `hotkey`, `click-ui` (RmlUi and native UI; not world clicks), `screenshot`, `move`, `state`,
-  `quit`. Synthetic Enter does not submit the chat field; switch themes via `config.ini`
+  `quit`. Open any registered window with chat: `hotkey enter`, then `type` `$win <name> full`
+  with `enter: true` (`$win list` names them; without `full` it skips CSystem::Show() and so the
+  placement service); switch themes via `config.ini`
   (`RmlTheme`) and restore it. If a client stops answering, it may be stuck at login: kill and retry.
 - Layout experiments: edit the runtime copies under
   `out/build/windows-x64/src/RelWithDebInfo/Data/Interface/RmlUi/` (the next build re-mirrors them

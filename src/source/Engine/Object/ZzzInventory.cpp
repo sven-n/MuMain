@@ -6737,8 +6737,7 @@ int GetScreenWidth()
         std::lround(UI::Placement::UncoveredWorldRight() * REFERENCE_WIDTH / static_cast<float>(WindowWidth)));
 
     // Docked windows the workspace does not place yet, each one column wide.
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GENSRANKING)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_REFINERY)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_REFINERY)
         || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_SERVERDIVISION))
     {
         iWidth = std::min(iWidth, REFERENCE_WIDTH - 190);

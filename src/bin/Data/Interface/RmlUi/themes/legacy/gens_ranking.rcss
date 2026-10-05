@@ -169,7 +169,8 @@
 .gr-promo-line:nth-child(7) { top: 290px; }
 
 /* The description box the text box's lines start from; their pitch is bound. */
-.gr-desc { position: absolute; left: 20px; top: 280px; }
+/* The rewards text box (150x110); clips the lines its scroll position shows. */
+.gr-desc { position: absolute; left: 20px; top: 280px; width: 150px; height: 110px; overflow: hidden; }
 .gr-desc-line { left: 0; }
 
 .gr-line, .gr-promo-line, .gr-desc-line { color: #ffffff; }
