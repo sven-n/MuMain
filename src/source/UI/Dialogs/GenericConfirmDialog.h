@@ -324,6 +324,8 @@ namespace mu::ui::window
 
         // Set by RmlUi click bindings; polled and cleared in Update() -- never act synchronously
         // inside the RmlUi callback itself.
+        // Set once the player drags the panel; its chrome then follows the panel's drawn place.
+        bool m_bDragged = false;
         bool m_bPrimaryClicked = false;
         bool m_bSecondaryClicked = false;
         bool m_bCancelClicked = false;

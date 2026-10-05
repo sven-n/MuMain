@@ -13,6 +13,7 @@
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDialogCanvas.h"
+#include "UI/RmlBridge/RmlDraggable.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
@@ -80,8 +81,8 @@ void CGenericMenuDialog::BuildRmlUi()
             c.Bind("canvas_top", &model.canvasTop);
             c.Bind("title", &model.title);
 
-            // window_shell's positioning/dragging extension -- unused here, this dialog stays
-            // screen-centered (see GenericMenuRmlModel's own comment).
+            // window_shell's positioning extension -- unused here: the theme centres this dialog
+            // and the player may drag it (see MakeDraggable() below).
             c.Bind("positioned", &model.positioned);
             c.Bind("root_x", &model.rootX);
             c.Bind("root_y", &model.rootY);
@@ -104,6 +105,11 @@ void CGenericMenuDialog::BuildRmlUi()
     if (modelCreated)
         m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
             "Data/Interface/RmlUi/generic_menu_dialog.rml");
+    // Dragged by any part that is not a button (base.rcss blocks those): most menus, the system
+    // menu among them, have no title to grab.
+    if (m_pRmlDoc)
+        UI::RmlBridge::MakeDraggable(m_pRmlDoc, m_pRmlDoc, nullptr,
+                                     [this] { UI::RmlBridge::KeepInsideWindow(m_pRmlDoc); });
 }
 
 void CGenericMenuDialog::ReloadRmlTheme()
@@ -154,6 +160,7 @@ void CGenericMenuDialog::Show(GenericMenuConfig cfg)
 
     if (m_pRmlDoc)
     {
+        UI::RmlBridge::ResetDraggedPosition(m_pRmlDoc);
         SyncRmlModel();
         m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
     }
@@ -174,6 +181,7 @@ void CGenericMenuDialog::ShowNext()
 
     if (m_pRmlDoc)
     {
+        UI::RmlBridge::ResetDraggedPosition(m_pRmlDoc);
         SyncRmlModel();
         m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
     }

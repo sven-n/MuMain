@@ -14,6 +14,8 @@ body {
 	height: 100%;
 }
 
+/* The dialog was dragged: GenericConfirmDialog.cpp places this chrome at its drawn top-left. */
+#panel.dragged { transform: none; margin: 0; }
 #panel {
 	position: absolute;
 	left: 50%;

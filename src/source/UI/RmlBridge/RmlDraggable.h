@@ -47,6 +47,15 @@ namespace UI::RmlBridge
     // chain and dragstart/drag never fire. Listens for RmlUi's native dragstart/drag/dragend
     // events, moves `panel` by setting left/top directly, and calls onMove/onDragEnd as the drag
     // proceeds and finishes.
+    // A `center-both` panel (a dialog the theme centres) is pinned where it is drawn when the drag
+    // starts: its centring transform is dropped and left/top take over, net of its margins.
     void MakeDraggable(Rml::Element* handle, Rml::Element* panel, OnPanelMoved onMove = nullptr,
         OnDragEnd onDragEnd = nullptr);
+
+    // Returns a dragged panel to the place its theme gives it (a dialog back to the centre).
+    void ResetDraggedPosition(Rml::Element* panel);
+
+    // Moves a dragged panel back inside the window if part of it was left outside; call it from
+    // the drag's end, as the friend windows bounce back.
+    void KeepInsideWindow(Rml::Element* panel);
 }

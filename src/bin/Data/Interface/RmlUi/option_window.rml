@@ -29,9 +29,9 @@
 
      Frame/border/header/positioning/dragging all live in window_shell.rml -- this document
      supplies only its own content, spliced into that template's #content slot. `positioned` is
-     always false for this window right now (see OptionWindow.h's own model comment) -- dragging
-     is off, so it's screen-centered via window_shell's own .center-both fallback, same as every
-     other window_shell consumer; no C++-computed position involved.
+     always false for this window (see OptionWindow.h's own model comment): it opens
+     screen-centered via window_shell's own .center-both, and the player may drag it by any
+     non-control part for the session; no C++-computed position involved.
 
      Tabs: one .option-tab-row of .option-tab-btn's, each data-class-active-tab="active_tab == N" +
      data-event-click="option_select_tab(N)" -- same data-class-X toggle mechanism

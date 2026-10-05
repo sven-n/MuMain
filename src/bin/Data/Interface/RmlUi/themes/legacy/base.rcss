@@ -311,6 +311,12 @@ body {
 	top: 50%;
 	transform: translateY(-50%);
 }
+/* A press on a control never drags the window around it: RmlUi starts a drag from the nearest
+   ancestor with `drag` set, and the control's click would still fire on release. */
+input, select, textarea, .btn, [data-event-click] { drag: block; }
+/* A centred panel the player dragged: left/top place it (UI::RmlBridge::MakeDraggable()). */
+.center-both.dragged { transform: none; }
+
 .center-both {
 	position: absolute;
 	left: 50%;

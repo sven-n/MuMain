@@ -44,8 +44,9 @@
      that can be dragged to a specific real-pixel spot instead of always centering.
      `#window_shell_header` (the header rail, given a stable id here rather than only a class) is
      the drag handle a positioned consumer can pass to `UI::RmlBridge::MakeDraggable()`, same
-     pattern as `my_inventory.rml`'s `#title` -- `CGenericMenuDialog` doesn't do this today, native
-     menu dialogs were never draggable.
+     pattern as `my_inventory.rml`'s `#title`. The options window and the generic menu dialog drag
+     by any part that is not a control instead (legacy shows no title to grab); neither uses
+     `positioned`: the drag pins a `.center-both` panel where it is drawn.
 
      id="panel" set here, not by the consumer -- every current *_dialog.rcss defines its own
      document-scoped `#panel { width/height/... }` sizing rule (RmlUi CSS/IDs are per-document, so

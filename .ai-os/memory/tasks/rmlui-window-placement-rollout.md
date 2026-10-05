@@ -107,8 +107,9 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
    the minimap needs no slot. H3 is done (eight event HUDs in an `event-hud` region; `$win`
    names bctime/cctime/soccer/duel/kanturuinfo/empiretimer/doppelframe/duelusers). The placement
    entries in tracked-deferrals.md are closed; the dead refinery/server-division check is gone;
-   1920x1080, 1280x720 and a live switch verified. Dragging scope decided: dialogs and the friend
-   system only (window-placement.md section 7). Next H4
+   1920x1080, 1280x720 and a live switch verified. Dragging done for dialogs (options, generic menu,
+   generic confirm; window-placement.md section 7), no saved positions; control socket `drag-ui`
+   and `$dialog` added for testing. Native message boxes stay undraggable. Next H4
    (`window-placement.md`, "HUD in the workspace"). Hand checks pending: the minimap's clip
    around the HUD; in modern at a capped scale, dragging items between windows and item
    tooltips; the chat log's resize handle and F4/F5 (socket hotkeys did not reach the client).

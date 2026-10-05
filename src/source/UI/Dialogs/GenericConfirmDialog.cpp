@@ -16,6 +16,7 @@
 #include "UI/Core/WindowSystem.h"       // g_pNewUI3DRenderMng macro resolves through CSystem
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDialogCanvas.h"
+#include "UI/RmlBridge/RmlDraggable.h"
 #include "UI/RmlBridge/RmlNumericInputFilter.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
@@ -144,6 +145,10 @@ void CGenericConfirmDialog::BuildRmlUi()
             "Data/Interface/RmlUi/generic_confirm_dialog.rml");
 
         UI::RmlBridge::AttachNumericInputFilter(m_pRmlDoc);
+        // Dragged by any part that is not a control (base.rcss blocks those) for this dialog only.
+        if (Rml::Element* panel = m_pRmlDoc ? m_pRmlDoc->GetElementById("panel") : nullptr)
+            UI::RmlBridge::MakeDraggable(panel, panel, [this](float, float) { m_bDragged = true; },
+                                         [panel] { UI::RmlBridge::KeepInsideWindow(panel); });
     }
 
     // Background-context companion -- see the class comment for the mechanism. No RmlModelBinder
@@ -284,6 +289,13 @@ void CGenericConfirmDialog::Activate(GenericDialogConfig cfg, DialogId id)
     m_KeypadBuffer.clear();
     m_KeypadMapping.clear();
     m_bItem3DDebugLogged = false;
+
+    // Each dialog opens where its theme puts it, wherever the last one was dragged.
+    m_bDragged = false;
+    if (m_pRmlDoc)
+        UI::RmlBridge::ResetDraggedPosition(m_pRmlDoc->GetElementById("panel"));
+    for (Rml::ElementDocument* chrome : {m_pRmlBgDoc, m_pRmlChromeDoc})
+        UI::RmlBridge::ResetDraggedPosition(chrome ? chrome->GetElementById("panel") : nullptr);
 
     if (m_Active.input && m_Active.input->mode == GenericDialogConfig::InputField::Mode::NumericKeypad)
         m_KeypadMapping = ShuffledDigits();
@@ -457,6 +469,20 @@ void CGenericConfirmDialog::SyncBackgroundPanel()
     const float height = pPanel->GetBox().GetSize(Rml::BoxArea::Border).y;
     if (height > 0.f && height != pBgPanel->GetBox().GetSize(Rml::BoxArea::Border).y)
         pBgPanel->SetProperty(Rml::PropertyId::Height, Rml::Property(height, Rml::Unit::PX));
+
+    if (m_bDragged)
+    {
+        // The chrome takes the dragged panel's drawn top-left, without its own centring.
+        const Rml::Vector2f at = pPanel->GetAbsoluteOffset(Rml::BoxArea::Border);
+        if (at == pBgPanel->GetAbsoluteOffset(Rml::BoxArea::Border))
+            return;
+        const Rml::Vector2f origin = pBgPanel->GetAbsoluteOffset(Rml::BoxArea::Border)
+            - Rml::Vector2f(pBgPanel->GetOffsetLeft(), pBgPanel->GetOffsetTop());
+        pBgPanel->SetClass("dragged", true);
+        pBgPanel->SetProperty(Rml::PropertyId::Left, Rml::Property(at.x - origin.x, Rml::Unit::PX));
+        pBgPanel->SetProperty(Rml::PropertyId::Top, Rml::Property(at.y - origin.y, Rml::Unit::PX));
+        return;
+    }
 
     // Only a panel placed without the centering transform reports its real top edge.
     if (pPanel->GetComputedValues().has_local_transform())

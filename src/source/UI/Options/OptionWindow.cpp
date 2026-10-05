@@ -9,6 +9,7 @@
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Audio/AudioPlayer.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlDraggable.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Theme/ThemeSelection.h"
 #include "UI/RmlBridge/RmlTooltip.h"
@@ -25,6 +26,7 @@
 
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/ElementUtilities.h>
 #include <RmlUi/Core/Elements/ElementFormControl.h>
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/EventListener.h>
@@ -413,12 +415,14 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
 
     (void)modelCreated;
 
-    // Not draggable for now -- window_shell_header's id and GameConfig's "option_window" position
-    // slot are still there, ready to wire back up via UI::RmlBridge::MakeDraggable() the same way
-    // CMyInventory's #title does, once dragging is revisited.
     m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
         "Data/Interface/RmlUi/option_window.rml");
     m_pPanelEl = m_pRmlDoc ? m_pRmlDoc->GetElementById("panel") : nullptr;
+    // Dragged by any part that is not a control (base.rcss blocks those; legacy shows no title to
+    // grab) for the session; the position is not saved.
+    if (m_pRmlDoc)
+        UI::RmlBridge::MakeDraggable(m_pRmlDoc, m_pRmlDoc, nullptr,
+                                     [this] { UI::RmlBridge::KeepInsideWindow(m_pRmlDoc); });
 }
 
 void mu::ui::window::COptionWindow::InitResolutionCombo()
@@ -534,12 +538,12 @@ bool mu::ui::window::COptionWindow::UpdateMouseEvent()
 
     if (m_pPanelEl)
     {
-        const Rml::Vector2f offset = m_pPanelEl->GetAbsoluteOffset(Rml::BoxArea::Border);
-        const int panelWidthPx = static_cast<int>(m_pPanelEl->GetOffsetWidth());
-        const int panelHeightPx = static_cast<int>(m_pPanelEl->GetOffsetHeight());
-        if (mu::ui::window::WindowGeometry(static_cast<int>(offset.x), static_cast<int>(offset.y), panelWidthPx,
-                                            panelHeightPx)
-                .Contains(MouseX, MouseY))
+        // Where the panel is drawn: its centring transform included, or its dragged place.
+        Rml::Rectanglef drawn;
+        if (Rml::ElementUtilities::GetBoundingBox(drawn, m_pPanelEl, Rml::BoxArea::Border)
+            && mu::ui::window::WindowGeometry(static_cast<int>(drawn.Left()), static_cast<int>(drawn.Top()),
+                                              static_cast<int>(drawn.Width()), static_cast<int>(drawn.Height()))
+                   .Contains(MouseX, MouseY))
             return false;
     }
 
@@ -1258,8 +1262,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     syncLabel(model.uiScaleTooltip, "ui_scale_tooltip", I18N::Game::UIScaleTooltip);
 
     // positioned/root_x/root_y stay at their model defaults (false/0/0, see OptionRmlModel's own
-    // comment) -- nothing to sync while dragging is off; window_shell's `.center-both` CSS owns
-    // positioning entirely, same as every other window_shell consumer.
+    // comment): window_shell's `.center-both` CSS places the window, a drag moves it.
 
     if (model.autoAttack != m_bAutoAttack) { model.autoAttack = m_bAutoAttack; m_RmlBinder.MarkDirty("auto_attack"); }
     if (model.whisperSound != m_bWhisperSound) { model.whisperSound = m_bWhisperSound; m_RmlBinder.MarkDirty("whisper_sound"); }

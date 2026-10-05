@@ -187,14 +187,10 @@ namespace mu::ui::window
 
         struct OptionRmlModel
         {
-            // window_shell's positioning/dragging extension -- always false for now (not
-            // draggable), so window_shell's own `.center-both` CSS centers this window exactly
-            // the same way it does every other window_shell consumer; no C++-computed position
-            // needed. Still bound below since window_shell.rml's template always references these
-            // three fields regardless of value. Re-enable by setting positioned=true and rootX/
-            // rootY to real device pixels (see window_shell.rml's own comment on why NOT
-            // UI::Scaling::GetActiveTransform()'s older reference-resolution convention) if
-            // dragging comes back.
+            // window_shell's positioning extension -- always false: `.center-both` centres this
+            // window, and a drag (MakeDraggable()) moves it for the session without
+            // a C++-computed position. Still bound since window_shell.rml's template always
+            // references these three fields.
             bool positioned = false;
             float rootX = 0.f, rootY = 0.f;
 

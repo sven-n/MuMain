@@ -539,6 +539,15 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   root-transformed panel (the whole docked family), give it a hit area that is laid out in real
   pixels, outside the transform.
 
+- **Dragging a transform-centred panel: two traps** (found turning on dialog dragging,
+  `RmlDraggable.cpp`). An inline `transform: none` set from C++ did not cancel `.center-both`'s
+  `translate(-50%, -50%)`; a class rule does (`.center-both.dragged`), as window_shell's
+  `.window-shell-positioned` already found. And mouse events on an element inside a transformed
+  panel carry that panel's local coordinates: a press at window x 400 on a panel shifted by its
+  centring arrived as 659. `MakeDraggable()` therefore takes the start from the handle's
+  `mousedown`, subtracts the panel's layout-to-drawn offset while the transform is still in effect,
+  and pins the panel where it is drawn (`ElementUtilities::GetBoundingBox()`).
+
 - **A data-model change does not reach layout until the context's next update.**
   `ElementDocument::UpdateDocument()` lays out and positions, but data models are flushed only in
   `Context::Update()`. A position published through a binding (`window_shell`'s `root_x`/`root_y`)

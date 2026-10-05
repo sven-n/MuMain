@@ -17,6 +17,8 @@ body {
 
 /* Same native placement as the fg #panel (top edge at y=100); its height is copied from the fg
    #panel's laid-out height each frame (GenericConfirmDialog.cpp), 117dp until then. */
+/* The dialog was dragged: GenericConfirmDialog.cpp places this chrome at its drawn top-left. */
+#panel.dragged { transform: none; margin: 0; }
 #panel {
 	position: absolute;
 	left: 50%;

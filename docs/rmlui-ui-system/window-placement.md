@@ -224,11 +224,17 @@ The legacy theme declares exactly today's behaviour; other themes may relax spac
 ### 7. User placement and saved positions
 
 Decided with the user (2026-10-05): the player drags dialogs and the friend system only, for
-now. Docked windows stay in their slots; dragging a window out of its slot (`data-draggable`) is
-not planned. The friend list, chat rooms and letters already drag through
-`UI::RmlBridge::MakeDraggable()`; the friend list asks its slot only where it first opens. The
-dialogs that are wired but switched off (the options window, the generic menu dialog) use the
-same helper when they are turned on.
+now, and no position is saved. Docked windows stay in their slots; dragging a window out of its
+slot (`data-draggable`) is not planned. The friend list, chat rooms and letters drag through
+`UI::RmlBridge::MakeDraggable()` and bounce back on screen; the friend list asks its slot only
+where it first opens. The options window, the generic menu dialog (the system menu among them)
+and the generic confirm dialog drag by any part that is not a control (base.rcss gives
+`input, select, textarea, .btn, [data-event-click]` `drag: block`), stay where they were dropped
+for the session, and move back inside the window if dropped partly outside
+(`KeepInsideWindow()`). A menu or confirmation opens centred each time
+(`ResetDraggedPosition()`); the confirm dialog's chrome documents follow its dragged panel. The
+native message boxes (`CMessageBoxBase` family) are not draggable: their parts are placed
+natively and each class would need checking.
 
 The inventory keeps today's behaviour: `data-saved-position` names the saved drag
 position, which is used while the window is the first open window of its region. Behind another
