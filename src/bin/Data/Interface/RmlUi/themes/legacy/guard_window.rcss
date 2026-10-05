@@ -35,7 +35,7 @@
 .gd-tab:nth-child(2) { left: 69px; }
 .gd-tab:nth-child(3) { left: 126px; }
 .gd-tab.selected { decorator: image(gd-tab-down); }
-.gd-tab-label { color: #b5b5b5; }
+.gd-tab .gd-tab-label { left: 0; text-align: center; color: #b5b5b5; }
 .gd-tab.selected .gd-tab-label { color: #ffffff; }
 
 .t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right { position: absolute; }
