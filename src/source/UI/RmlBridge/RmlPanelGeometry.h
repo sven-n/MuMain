@@ -63,4 +63,18 @@ namespace UI::RmlBridge
     // until the anchor exists and has a size.
     bool RefreshLogicalAnchorRect(Rml::ElementDocument* doc, const char* panelId, const char* anchorId,
         const POINT& panelPos, float& x, float& y, float& width, float& height);
+
+    // The size a theme's data-fit="fill" slot gives a window (CObject::SetFillPlacementSize()), in
+    // the panel's reference units; zero while the window is content-sized.
+    struct FillPlacementSize
+    {
+        float width = 0.f;
+        float height = 0.f;
+
+        // Returns whether the size changed.
+        bool Set(float newWidth, float newHeight);
+        // Sizes `panelId` in `doc` and sets its "fill-placement" class, or clears both while zero,
+        // so the theme's fill rules apply only to a filled panel.
+        void Apply(Rml::ElementDocument* doc, const char* panelId) const;
+    };
 }

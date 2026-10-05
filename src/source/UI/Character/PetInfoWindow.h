@@ -5,6 +5,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
@@ -38,6 +39,12 @@ namespace mu::ui::window
 
         void SetPos(int x, int y);
         void Show(bool bShow) override;
+        bool SupportsFillPlacement() const override { return true; }
+        void SetFillPlacementSize(float width, float height) override
+        {
+            if (m_FillSize.Set(width, height))
+                m_FillSize.Apply(m_pRmlDoc, "panel");
+        }
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -66,6 +73,7 @@ namespace mu::ui::window
             // sourced from UI::Scaling::GetActiveTransform(), same convention as character_info.
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
+            float panelWidth = 190.f; // #panel's width (SyncPanelWidth())
 
             int activeTab = TAB_TYPE_DARKHORSE;
             Rml::String windowTitle;
@@ -91,6 +99,7 @@ namespace mu::ui::window
         };
         RmlModelBinder<PetInfoRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
+        UI::RmlBridge::FillPlacementSize m_FillSize;
 
     private:
         CManager* m_pNewUIMng;

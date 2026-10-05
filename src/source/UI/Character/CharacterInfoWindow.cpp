@@ -25,7 +25,6 @@
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
-#include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 
@@ -217,7 +216,7 @@ void mu::ui::window::CCharacterInfoWindow::BuildRmlUi()
 
     m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
         "Data/Interface/RmlUi/character_info.rml");
-    ApplyFillPlacementSize();
+    m_FillSize.Apply(m_pRmlDoc, "panel");
 }
 
 void mu::ui::window::CCharacterInfoWindow::ReloadRmlTheme()
@@ -258,36 +257,6 @@ void mu::ui::window::CCharacterInfoWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
-}
-
-void mu::ui::window::CCharacterInfoWindow::SetFillPlacementSize(float width, float height)
-{
-    if (m_FillWidth == width && m_FillHeight == height)
-        return;
-    m_FillWidth = width;
-    m_FillHeight = height;
-    ApplyFillPlacementSize();
-}
-
-void mu::ui::window::CCharacterInfoWindow::ApplyFillPlacementSize()
-{
-    Rml::Element* panel = m_pRmlDoc != nullptr ? m_pRmlDoc->GetElementById("panel") : nullptr;
-    if (panel == nullptr)
-        return;
-
-    const bool fill = m_FillWidth > 0.f && m_FillHeight > 0.f;
-    panel->SetClass("fill-placement", fill);
-    if (fill)
-    {
-        panel->SetProperty(Rml::PropertyId::Width, Rml::Property(m_FillWidth, Rml::Unit::PX));
-        panel->SetProperty(Rml::PropertyId::Height, Rml::Property(m_FillHeight, Rml::Unit::PX));
-    }
-    else
-    {
-        panel->RemoveProperty(Rml::PropertyId::Width);
-        panel->RemoveProperty(Rml::PropertyId::Height);
-    }
-    m_pRmlDoc->UpdateDocument();
 }
 
 void mu::ui::window::CCharacterInfoWindow::Show(bool bShow)

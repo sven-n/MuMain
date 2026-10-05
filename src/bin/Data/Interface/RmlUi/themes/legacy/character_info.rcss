@@ -29,18 +29,6 @@
 
 .frame-top { decorator: image(docked-bg-top-a); }
 
-/* The placement service sizes this panel only when its theme slot requests fill. */
-#panel.fill-placement { box-sizing: border-box; }
-/* The frame's corner close follows the panel's edge in both content and fill placement. */
-#frame_corner_close {
-	position: absolute;
-	top: 7px;
-	right: 8px;
-	width: 13px;
-	height: 12px;
-	cursor: pointer;
-	pointer-events: auto;
-}
 /* Right-hand pieces and the action row are pinned to #panel's edges (the original's places in a
    190x429 panel), so they follow a wider or filled panel; the content stays at the top. */
 

@@ -93,6 +93,7 @@
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
 		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+		<div id="frame_corner_close" data-event-click="petinfo_click_exit"></div>
 	</div>
 </body>
 </rml>

@@ -5,9 +5,9 @@
    character_info's own .summary-fill), not the legacy corner-and-fill technique. */
 #title {
 	position: absolute;
-	left: 60px;
+	left: 0;
 	top: 13px;
-	width: 70px;
+	width: 100%;
 	text-align: center;
 	color: token(text-warm);
 	font-weight: bold;
@@ -44,14 +44,14 @@
 .tab-btn-darkhorse { left: 0; }
 .tab-btn-darkspirit { left: 56px; }
 
-.pet-tab { position: absolute; left: 0; top: 0; width: 190px; height: 429px; }
+.pet-tab { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
 
 .pet-no-pet-msg {
 	display: block;
 	position: absolute;
 	left: 15px;
 	top: 100px;
-	width: 160px;
+	right: 15px;
 	color: token(accent-gold-hover);
 	font-weight: bold;
 	font-size: 12px;
@@ -62,9 +62,9 @@
 .pet-subtitle {
 	display: block;
 	position: absolute;
-	left: 60px;
+	left: 0;
 	top: 25px;
-	width: 70px;
+	width: 100%;
 	text-align: center;
 	font-size: 12px;
 	font-family: "token(font-body)";
@@ -89,13 +89,13 @@
 	pointer-events: none;
 }
 
-.gbox-dh-content-fill { left: 12px; top: 75px; width: 166px; height: 105px; }
+.gbox-dh-content-fill { left: 12px; top: 75px; right: 12px; height: 105px; }
 .gbox-dh-title-text { left: 14px; top: 80px; width: 56px; }
 
-.gbox-ds1-content-fill { left: 12px; top: 75px; width: 166px; height: 121px; }
+.gbox-ds1-content-fill { left: 12px; top: 75px; right: 12px; height: 121px; }
 .gbox-ds1-title-text { left: 14px; top: 80px; width: 56px; }
 
-.gbox-ds2-content-fill { left: 12px; top: 196px; width: 166px; height: 195px; }
+.gbox-ds2-content-fill { left: 12px; top: 196px; right: 12px; height: 195px; }
 .gbox-ds2-title-text { left: 14px; top: 201px; width: 56px; }
 
 .pet-stat-text {
@@ -192,4 +192,6 @@
 .pet-btn-exit { left: 13px; }
 
 .tooltip { top: 365px; }
+/* Above the bottom-pinned action row once the panel is no longer 429 tall. */
+#panel.fill-placement .tooltip { top: auto; bottom: 45px; }
 .tooltip-exit { left: -24px; }

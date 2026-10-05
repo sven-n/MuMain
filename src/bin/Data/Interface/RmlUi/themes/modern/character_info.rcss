@@ -6,18 +6,6 @@
    all come from docked_panel_frame.rcss, shared with the other three -- only genuinely
    window-specific content stays here. */
 
-/* The placement service sizes this panel only when its theme slot requests fill. */
-#panel.fill-placement { box-sizing: border-box; }
-/* The frame's corner close follows the panel's edge in both content and fill placement. */
-#frame_corner_close {
-	position: absolute;
-	top: 7px;
-	right: 8px;
-	width: 13px;
-	height: 12px;
-	cursor: pointer;
-	pointer-events: auto;
-}
 /* Right-hand pieces are pinned to #panel's edges, so they follow a wider or filled panel. The
    hints sit above the bottom-pinned action row once the panel is no longer 429 tall. */
 #panel.fill-placement .tooltip { top: auto; bottom: 37px; }

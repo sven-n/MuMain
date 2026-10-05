@@ -18,7 +18,7 @@
 		<div class="frame-piece frame-bottom"></div>
 
 		<span class="sharp-text" id="title"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(70 * root_scale) + 'px'">{{window_title}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'">{{window_title}}</span>
 
 		<div class="tab-row">
 			<div class="sharp-text tab-btn tab-btn-darkhorse" data-class-active="active_tab == 0" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(56 * root_scale) + 'px'" data-style-height="(22 * root_scale) + 'px'" data-style-line-height="(22 * root_scale) + 'px'"
@@ -30,10 +30,10 @@
 		<!-- Dark Horse tab -->
 		<div class="pet-tab" data-class-hidden="active_tab != 0">
 			<span class="sharp-text pet-no-pet-msg" data-class-hidden="dh_has_pet"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'" data-style-height="(27 * root_scale) + 'px'" data-style-padding-top="(3 * root_scale) + 'px'">{{dh_no_pet_text}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="((panel_width - 30) * root_scale) + 'px'" data-style-height="(27 * root_scale) + 'px'" data-style-padding-top="(3 * root_scale) + 'px'">{{dh_no_pet_text}}</span>
 			<div class="pet-info-block" data-class-hidden="!dh_has_pet">
 				<span class="sharp-text pet-subtitle"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(70 * root_scale) + 'px'">{{tab_darkhorse_label}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'">{{tab_darkhorse_label}}</span>
 
 				<div class="gbox-corner gbox-dh-corner-tl"></div>
 				<div class="gbox-corner gbox-dh-corner-tr"></div>
@@ -61,10 +61,10 @@
 		<!-- Dark Spirit tab -->
 		<div class="pet-tab" data-class-hidden="active_tab != 1">
 			<span class="sharp-text pet-no-pet-msg" data-class-hidden="ds_has_pet"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'" data-style-height="(27 * root_scale) + 'px'" data-style-padding-top="(3 * root_scale) + 'px'">{{ds_no_pet_text}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="((panel_width - 30) * root_scale) + 'px'" data-style-height="(27 * root_scale) + 'px'" data-style-padding-top="(3 * root_scale) + 'px'">{{ds_no_pet_text}}</span>
 			<div class="pet-info-block" data-class-hidden="!ds_has_pet">
 				<span class="sharp-text pet-subtitle"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(70 * root_scale) + 'px'">{{tab_darkspirit_label}}</span>
+		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'">{{tab_darkspirit_label}}</span>
 
 				<div class="gbox-corner gbox-ds1-corner-tl"></div>
 				<div class="gbox-corner gbox-ds1-corner-tr"></div>
@@ -120,6 +120,7 @@
 		<div id="btn_exit" data-event-click="petinfo_click_exit"></div>
 		<span class="sharp-text tooltip tooltip-exit"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(110 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
+		<div id="frame_corner_close" data-event-click="petinfo_click_exit"></div>
 	</div>
 </body>
 </rml>

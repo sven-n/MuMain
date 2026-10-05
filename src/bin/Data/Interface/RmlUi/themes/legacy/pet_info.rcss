@@ -22,9 +22,9 @@
 
 #title {
 	position: absolute;
-	left: 60px;
+	left: 0;
 	top: 13px;
-	width: 70px;
+	width: 190px;
 	text-align: center;
 	color: token(text-primary);
 	font-weight: bold;
@@ -52,7 +52,7 @@
 .tab-btn-darkhorse { left: 0; }
 .tab-btn-darkspirit { left: 56px; }
 
-.pet-tab { position: absolute; left: 0; top: 0; width: 190px; height: 429px; }
+.pet-tab { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
 
 /* Native draws it bold in 0xFF0000FF -- an ABGR DWORD, i.e. red -- into a 160x30 text box at
    (15,100) whose background shows as a dark translucent band (the renderer's background colour is
@@ -78,9 +78,9 @@
 .pet-subtitle {
 	display: block;
 	position: absolute;
-	left: 60px;
+	left: 0;
 	top: 25px;
-	width: 70px;
+	width: 190px;
 	text-align: center;
 	font-size: 1em;
 	color: token(text-primary);
@@ -90,27 +90,27 @@
 /* Group-box shape (.gbox-corner/.gbox-title-fill/.gbox-content-fill/.gbox-title-text) comes from
    docked_panel_frame.rcss -- only per-instance position + which corner sprite stays here. */
 .gbox-dh-corner-tl { left: 12px; top: 75px; decorator: image(docked-corner-tl); }
-.gbox-dh-corner-tr { left: 166px; top: 75px; decorator: image(docked-corner-tr); }
+.gbox-dh-corner-tr { right: 10px; top: 75px; decorator: image(docked-corner-tr); }
 .gbox-dh-corner-bl { left: 12px; top: 166px; decorator: image(docked-corner-bl); }
-.gbox-dh-corner-br { left: 166px; top: 166px; decorator: image(docked-corner-br); }
+.gbox-dh-corner-br { right: 10px; top: 166px; decorator: image(docked-corner-br); }
 .gbox-dh-title-fill { left: 15px; top: 77px; width: 52px; height: 20px; }
-.gbox-dh-content-fill { left: 15px; top: 97px; width: 161px; height: 78px; }
+.gbox-dh-content-fill { left: 15px; top: 97px; right: 14px; height: 78px; }
 .gbox-dh-title-text { left: 14px; top: 83px; width: 56px; }
 
 .gbox-ds1-corner-tl { left: 12px; top: 75px; decorator: image(docked-corner-tl); }
-.gbox-ds1-corner-tr { left: 166px; top: 75px; decorator: image(docked-corner-tr); }
+.gbox-ds1-corner-tr { right: 10px; top: 75px; decorator: image(docked-corner-tr); }
 .gbox-ds1-corner-bl { left: 12px; top: 182px; decorator: image(docked-corner-bl); }
-.gbox-ds1-corner-br { left: 166px; top: 182px; decorator: image(docked-corner-br); }
+.gbox-ds1-corner-br { right: 10px; top: 182px; decorator: image(docked-corner-br); }
 .gbox-ds1-title-fill { left: 15px; top: 77px; width: 52px; height: 20px; }
-.gbox-ds1-content-fill { left: 15px; top: 97px; width: 161px; height: 94px; }
+.gbox-ds1-content-fill { left: 15px; top: 97px; right: 14px; height: 94px; }
 .gbox-ds1-title-text { left: 14px; top: 83px; width: 56px; }
 
 .gbox-ds2-corner-tl { left: 12px; top: 196px; decorator: image(docked-corner-tl); }
-.gbox-ds2-corner-tr { left: 166px; top: 196px; decorator: image(docked-corner-tr); }
+.gbox-ds2-corner-tr { right: 10px; top: 196px; decorator: image(docked-corner-tr); }
 .gbox-ds2-corner-bl { left: 12px; top: 377px; decorator: image(docked-corner-bl); }
-.gbox-ds2-corner-br { left: 166px; top: 377px; decorator: image(docked-corner-br); }
+.gbox-ds2-corner-br { right: 10px; top: 377px; decorator: image(docked-corner-br); }
 .gbox-ds2-title-fill { left: 15px; top: 198px; width: 52px; height: 20px; }
-.gbox-ds2-content-fill { left: 15px; top: 218px; width: 161px; height: 168px; }
+.gbox-ds2-content-fill { left: 15px; top: 218px; right: 14px; height: 168px; }
 .gbox-ds2-title-text { left: 14px; top: 204px; width: 56px; }
 
 .pet-stat-text {

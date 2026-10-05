@@ -66,6 +66,7 @@ void CPetInfoWindow::BuildRmlUi()
                 c.Bind("root_y", &model.rootY);
                 c.Bind("root_scale", &model.rootScale);
                 c.Bind("text_px", &model.textPx);
+                c.Bind("panel_width", &model.panelWidth);
 
                 c.Bind("active_tab", &model.activeTab);
                 c.Bind("window_title", &model.windowTitle);
@@ -130,6 +131,7 @@ void CPetInfoWindow::BuildRmlUi()
 
     m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
         "Data/Interface/RmlUi/pet_info.rml");
+    m_FillSize.Apply(m_pRmlDoc, "panel");
 }
 
 void CPetInfoWindow::ReloadRmlTheme()
@@ -181,10 +183,7 @@ void CPetInfoWindow::Show(bool bShow)
 
 bool CPetInfoWindow::UpdateMouseEvent()
 {
-    // Top-right corner close "X" (shared frame). Hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_PET))
-        return false;
-
+    // RmlUi handles both close targets; the corner target follows the theme-sized panel edge.
     float panelWidth = PETINFOWINDOW_WIDTH;
     float panelHeight = PETINFOWINDOW_HEIGHT;
     UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
@@ -303,6 +302,7 @@ void CPetInfoWindow::SyncRmlModel()
     m_RmlBinder.MarkDirty("root_y");
     m_RmlBinder.MarkDirty("root_scale");
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
 
     // Dark Horse tab
     {

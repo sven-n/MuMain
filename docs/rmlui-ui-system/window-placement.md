@@ -183,7 +183,11 @@ work and is left for a gameplay pass.
 
   A window declares support in C++, and the theme's RCSS for it must be fluid, which usually
   means the theme forks that window's RCSS. Character info is the first fill-capable window: its
-  frame follows the filled panel and its actions follow the lower edge. Windows with live 3D or
+  frame follows the filled panel and its actions follow the lower edge. Pet info is the second:
+  its title centres on the panel and its group boxes reach the right edge. A window opts in with
+  `UI::RmlBridge::FillPlacementSize` (store the slot's size, apply it to `#panel`) and a top-right
+  `#frame_corner_close` element (shared `docked_panel_frame.rcss` rule) instead of the native
+  fixed-offset `HandleFrameCornerClose()`, which ten other windows still use. Windows with live 3D or
   native item grids need more work: inventory family (`CInventoryCtrl` in inventory, extension,
   vault, mix, trade, NPC/personal shops, lucky item), NPC quest, Doppelganger, Empire Guardian
   NPC, United Marketplace, duel watch, skill list.
@@ -307,7 +311,7 @@ UI scale with the [validation matrix](validation-matrix.md).
 | 1 | Done, in-game checks pending: placement service and both themes' workspaces place the right-docked windows (content fit). The `PanelColumnX`/`SetPos` juggling in `Show()`/`Hide()` is gone; Gens ranking (stretched HUD space, not the dock) keeps its own. Differences from before: with character info, inventory and its extension open, the extension now sits beside the inventory (columns 3 and 2 swapped); windows that used to overlap in column 1 now sit side by side. |
 | 2 | Done, in-game checks pending: HUD reserve from the HUD strip; uncovered world edge replaces `GetScreenWidth()`'s table. |
 | 3 | Done, in-game checks pending: column-1/column-2 conflicts and the three-column limit are `data-closes` in both workspaces; `HideGroupBeforeOpenInterface()` is gone. `HideAllGroupA()` stays in C++ (it ends trades and NPC sessions, which a theme must not control). The MU Helper bar rule and the help-panel exclusions stay until their windows have slots. Change: windows closed by these rules now run their closing process; for the Gold Bowman windows that tells the server the event-chip dialog ended, which the old silent hide skipped. |
-| 4 | In progress: character info opts into `data-fit=fill`. A theme sizes its slot in RCSS; the service gives that size to the panel, never less than the content size. Character info's right-hand pieces and action rows are pinned to `#panel`'s edges in both themes, so a wider content-sized panel stretches too. The shipped themes stay content-sized. Verified in game at 1024x768 (runtime layouts, both themes): 35%, 30% and 22% slots at UI scale 80, 90 and 100 %; action buttons and hints, both close targets, and live theme switches between a filled and a content-sized workspace. The headless test passes (58 assertions). Other windows opt in after their hit areas and native content can follow a filled panel. |
+| 4 | In progress: character info and pet info opt into `data-fit=fill`. A theme sizes its slot in RCSS; the service gives that size to the panel, never less than the content size. Character info's right-hand pieces and action rows are pinned to `#panel`'s edges in both themes, so a wider content-sized panel stretches too. The shipped themes stay content-sized. Verified in game at 1024x768 (runtime layouts, both themes): 35%, 30% and 22% slots at UI scale 80, 90 and 100 %; action buttons and hints, both close targets, and live theme switches between a filled and a content-sized workspace. Pet info verified the same way at 35 % in both themes (tabs, corner close). The headless test passes (82 assertions, both windows). Other windows opt in after their hit areas and native content can follow a filled panel. |
 | 5 | Remaining families: NPC windows, move map, friends, centred dialogs. |
 
 Docs to update with phase 1: [theming-and-modding.md](theming-and-modding.md) ("three different

@@ -29,6 +29,36 @@ bool UI::RmlBridge::RefreshLogicalPanelSize(Rml::ElementDocument* doc, const cha
     return true;
 }
 
+bool UI::RmlBridge::FillPlacementSize::Set(float newWidth, float newHeight)
+{
+    if (width == newWidth && height == newHeight)
+        return false;
+    width = newWidth;
+    height = newHeight;
+    return true;
+}
+
+void UI::RmlBridge::FillPlacementSize::Apply(Rml::ElementDocument* doc, const char* panelId) const
+{
+    Rml::Element* panel = doc != nullptr ? doc->GetElementById(panelId) : nullptr;
+    if (panel == nullptr)
+        return;
+
+    const bool fill = width > 0.f && height > 0.f;
+    panel->SetClass("fill-placement", fill);
+    if (fill)
+    {
+        panel->SetProperty(Rml::PropertyId::Width, Rml::Property(width, Rml::Unit::PX));
+        panel->SetProperty(Rml::PropertyId::Height, Rml::Property(height, Rml::Unit::PX));
+    }
+    else
+    {
+        panel->RemoveProperty(Rml::PropertyId::Width);
+        panel->RemoveProperty(Rml::PropertyId::Height);
+    }
+    doc->UpdateDocument();
+}
+
 bool UI::RmlBridge::RefreshLogicalAnchorRect(Rml::ElementDocument* doc, const char* panelId, const char* anchorId,
     const POINT& panelPos, float& x, float& y, float& width, float& height)
 {

@@ -80,44 +80,46 @@ TEST_CASE("A theme-sized slot fills the safe area's height [ui][window-placement
     REQUIRE(context != nullptr);
 
     for (const char* theme : {"legacy", "modern"})
+    for (const std::string window : {"character", "pet"})
     {
         CAPTURE(theme);
+        CAPTURE(window);
         std::string rml = WorkspaceFor(theme);
         const std::string region = "class=\"region dock-right\" data-ref-height=\"432\"";
         const auto regionAt = rml.find(region);
         REQUIRE(regionAt != std::string::npos);
         rml.replace(regionAt, region.size(), "class=\"region dock-right\"");
-        const std::string character = "class=\"slot\" data-window=\"character\"";
-        const auto characterAt = rml.find(character);
-        REQUIRE(characterAt != std::string::npos);
-        rml.replace(characterAt, character.size(),
-                    "class=\"slot fill-character\" data-window=\"character\" data-fit=\"fill\"");
+        const std::string slot = "class=\"slot\" data-window=\"" + window + "\"";
+        const auto slotAt = rml.find(slot);
+        REQUIRE(slotAt != std::string::npos);
+        rml.replace(slotAt, slot.size(),
+                    "class=\"slot fill-window\" data-window=\"" + window + "\" data-fit=\"fill\"");
         const auto headEnd = rml.find("</head>");
         REQUIRE(headEnd != std::string::npos);
         rml.insert(headEnd, "<style>.dock-right { top: 0; } "
-                            ".fill-character { width: 35%; height: 100%; }</style>");
+                            ".fill-window { width: 35%; height: 100%; }</style>");
 
         auto* document = context->LoadDocumentFromMemory(rml);
         REQUIRE(document != nullptr);
         document->GetElementById("safe_area")
             ->SetProperty(Rml::PropertyId::Bottom, Rml::Property(102.f, Rml::Unit::PX));
-        Rml::Element* characterSlot = Slot(document, "character");
-        REQUIRE(characterSlot != nullptr);
-        characterSlot->SetClass("open", true);
+        Rml::Element* fillSlot = Slot(document, window);
+        REQUIRE(fillSlot != nullptr);
+        fillSlot->SetClass("open", true);
         document->UpdateDocument();
 
-        const Rml::Vector2f size = characterSlot->GetBox().GetSize(Rml::BoxArea::Border);
-        const Rml::Vector2f offset = characterSlot->GetAbsoluteOffset(Rml::BoxArea::Border);
+        const Rml::Vector2f size = fillSlot->GetBox().GetSize(Rml::BoxArea::Border);
+        const Rml::Vector2f offset = fillSlot->GetAbsoluteOffset(Rml::BoxArea::Border);
         CHECK(size.x == doctest::Approx(672.f));
         CHECK(size.y == doctest::Approx(978.f));
         CHECK(offset.x == doctest::Approx(1248.f));
         CHECK(offset.y == doctest::Approx(0.f));
 
         // The service gives a fill slot the window's content size as its minimum.
-        characterSlot->SetProperty(Rml::PropertyId::MinWidth, Rml::Property(800.f, Rml::Unit::PX));
+        fillSlot->SetProperty(Rml::PropertyId::MinWidth, Rml::Property(800.f, Rml::Unit::PX));
         document->UpdateDocument();
-        CHECK(characterSlot->GetBox().GetSize(Rml::BoxArea::Border).x == doctest::Approx(800.f));
-        CHECK(characterSlot->GetAbsoluteOffset(Rml::BoxArea::Border).x == doctest::Approx(1120.f));
+        CHECK(fillSlot->GetBox().GetSize(Rml::BoxArea::Border).x == doctest::Approx(800.f));
+        CHECK(fillSlot->GetAbsoluteOffset(Rml::BoxArea::Border).x == doctest::Approx(1120.f));
 
         context->UnloadDocument(document);
         context->Update();
