@@ -181,6 +181,8 @@ Login scene and step 5 (2026-10-05): `UI/Windows/LoginSceneUpdates` owns the ser
 
 Follow-up (2026-10-05): two state classes that lived under `UI/` moved to game logic. `CUIGuardsMan` became `GameLogic/Events/SiegeRegistration` (`g_SiegeRegistration`: registered flag, handed-in mark count, declare-level check); its two inventory scans (guild-mark count and slot) moved into `GuardWindow.cpp`, their only caller. `CSenatusInfo` moved unchanged to `GameLogic/Events/SenatusInfo`. `GameLogic/Items/CComGem.h` no longer includes `UIManager.h` (it used nothing from it) and gained `#pragma once`; the files that relied on that chain now include `UIManager.h`, `WSclient.h` or `GuildTypes.h` directly. `WSclient.cpp`'s include tree now reaches only the operation headers plus `Chat.h`, `Whisper.h`, `Notices.h`, `WindowCommon.h` (precompiled header), `ItemMng.h` and `SkillTooltipModel.h` (through engine headers), and no RmlUi. A full RelWithDebInfo build passed. No behaviour change.
 
+Handover checkpoint (2026-10-05): the five siege/event passes above are committed; `f7cf64dca` is the last passing code commit. Cursed Temple is next. Its incomplete draft was parked in `.ai-os/scratch/rb03_cursed_wip/`, leaving the source tree at the last passing state. Remaining order: Cursed Temple, NPCs/quests, HUD/main frame, login-scene windows, then the include-tree proof and final build. See `.ai-os/memory/tasks/rmlui-rb03-continuation-prompt.md` for the full handover. In-game spot checks for these passes are still pending.
+
 ### RB-04 — Theme command ownership
 
 - Keep `$theme` command recognition in the console, but move theme validation, activation, config
