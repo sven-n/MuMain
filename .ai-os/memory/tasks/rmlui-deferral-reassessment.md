@@ -15,15 +15,15 @@ Current source and the completed rollout show:
 | 1. Item-hotkey slot geometry | Resolved in `b22326020`: the RmlUi slot boxes supply icon geometry and interaction. Runtime scale checks remain useful validation. |
 | 2. Theme-driven dock placement | Resolved by the workspace placement rollout through `e789fb469`: both themes place docks, panel-stage windows and the HUD shell from slots. Player docking was explicitly deferred. |
 | 3. Letter portrait compositing | Resolved in `2e7eb2e2d`: the portrait is rendered into an offscreen target used inside the letter document. Inventory paperdoll/tooltip ordering is a separate issue. |
-| 4. Remaining native presentation | The bounded quest, Catapult and Castle/Guard arithmetic was removed in `d5960f116`. Gens Ranking's native scrollbar was replaced by an RmlUi scroll pane in the current batch; its native text wrapper remains for line breaks. MU Helper threshold-gauge input remains the main constrained interaction case. |
+| 4. Remaining native presentation | The bounded quest, Catapult and Castle/Guard arithmetic was removed in `d5960f116`. Gens Ranking's native scrollbar was replaced by an RmlUi scroll pane in `374d2f720`; its native text wrapper remains for line breaks. MU Helper threshold-gauge input remains the main constrained interaction case. |
 
 The broader event-only, theme-switch, drag/restore and item/skill-use checks are
 still validation work. The low-priority CObject registry and Social base are still
 present. The next interaction candidate is MU Helper's threshold gauges, but the
 stock RmlUi slider still maps positions incorrectly inside a transformed dock.
 That integration constraint needs a tested solution before replacing its native input.
-Gens Ranking also needs an in-game scroll check in both themes and at a non-100 % scale;
-the build and asset guards passed, but no Gens account was exercised.
+The user confirmed Gens Ranking's text scrolling and thumb drag in game on 2026-10-06.
+A both-theme, non-100 % scale sweep has not been recorded.
 
 Other pilot claims checked against current source:
 
@@ -97,8 +97,8 @@ is a release-confidence priority, not evidence that every untested screen is bro
 | Five files can uniformly drop bold because all have semantic style | **Partially valid; uniform-fix claim wrong.** QuestRewardModel::Entry has style plus bold, and ToEntry derives bold from Heading. GenericConfirmDialog/GenericMenuDialog LineEntry instead contain text, bold and color, with no semantic style. Quest cleanup is bounded; generic dialogs need a caller-contract review. |
 | GenericConfirmDialog 150x18 native anchor coupling | **Active coupling resolved; dead constants remain.** kInputFieldWidth/Height have declarations only. The document has a stock `gcd_input`; the old `.gcd-input-anchor` is not present in the inspected theme files. Remove stale constants/comments opportunistically, not as a layout refactor. |
 | System-log back_color mixes preference and theme | **Old binding gone.** Searches found no back_color/backColor in its implementation or RML. Do not reopen the named binding defect from the historical paragraph. |
-| Index arithmetic still affects all listed six documents | **List partly stale.** Guard and Castle tab positions, Catapult lines and Gens description rows still bind index arithmetic. Battle Soccer and server message rows no longer have the cited index-position binding in their current documents. |
-| No display-list allowlist labels remain | **Incorrect inventory claim.** Two entries still use that wording: gens_ranking and united_market_place. Gens still mirrors CScrollBar thumb geometry. UnitedMarketPlace's current document has named elements and no scrollbar binding, so its reason is stale. Update reasons after reviewing actual fields; do not classify both as remaining full re-ports. |
+| Index arithmetic still affects all listed six documents | **List partly stale.** Guard and Castle tab positions and Catapult lines still bind index arithmetic. Gens description rows now use RmlUi flow and measured row height; Battle Soccer and server message rows no longer have the cited index-position binding. |
+| No display-list allowlist labels remain | **Resolved for Gens Ranking.** The earlier inventory found two entries with that wording: gens_ranking and united_market_place. Gens now uses RmlUi scrolling with a working, scaled scrollbar (user checked in game); its native CScrollBar mirror is gone. UnitedMarketPlace's document has named elements and no scrollbar binding, so its reason was stale. Review any remaining allowlist wording against the current files. |
 
 ## Validation priorities
 
