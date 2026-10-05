@@ -566,6 +566,11 @@ body {
    translateY(-50%), so its middle sits on top: 50% at any panel scale. */
 .sharp-text.sharp-middle { top: 50%; transform-origin: left center; }
 .sharp-text.sharp-right.sharp-middle { transform-origin: right center; }
+/* A layer centred on its parent's width (the parent is the box the theme sizes and places): wide
+   enough that its text never overflows, which would start-align it, and scaled back around its
+   centre, so the text stays centred on the box at any panel scale. */
+.sharp-text.sharp-centre { left: 50%; width: 2000px; margin-left: -1000px; transform-origin: center top; }
+.sharp-text.sharp-centre.sharp-middle { transform-origin: center center; }
 
 .anchor-top-left {
 	position: absolute;

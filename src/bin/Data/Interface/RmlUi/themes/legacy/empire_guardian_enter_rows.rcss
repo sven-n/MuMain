@@ -25,3 +25,7 @@
 .entry-btn:nth-child(2):hover { decorator: image(item-entry-btn-over); }
 .entry-btn:nth-child(2):active { decorator: image(item-entry-btn-down); }
 .entry-btn:nth-child(2).locked, .entry-btn:nth-child(2).locked:hover, .entry-btn:nth-child(2).locked:active { decorator: image(item-entry-btn-up); image-color: #646464; }
+
+/* The bold lines' boxes are 110 wide, the party warning's 200. */
+.entry-text:nth-child(1), .entry-text:nth-child(6), .entry-text:nth-child(7) { width: 110px; }
+.entry-text:nth-child(n+8) { width: 200px; }

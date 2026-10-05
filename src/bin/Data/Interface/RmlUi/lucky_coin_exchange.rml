@@ -18,17 +18,18 @@
 		     :nth-child rule per line and per button. Each repeated set has its own container so
 		     the count starts at the first one. -->
 		<div class="entry-texts">
-			<span class="sharp-text entry-text" data-for="t : texts"
-			      data-style-font-size="t.text_px + 'px'" data-style-width="(t.width * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.text}}</span>
+			<div class="entry-text" data-for="t : texts">
+				<span class="sharp-text sharp-centre"
+				      data-style-font-size="t.text_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.text}}</span>
+			</div>
 		</div>
 
 		<div class="entry-buttons">
 			<div class="entry-btn" data-for="b, i : buttons" data-class-locked="b.locked"
 			     data-event-click="item_entry_press(i)">
-				<span class="sharp-text sharp-middle entry-label" data-if="b.label != ''"
+				<span class="sharp-text sharp-middle sharp-centre entry-label" data-if="b.label != ''"
 				      data-style-font-size="(b.bold ? bold_text_px : text_px) + 'px'"
-				      data-style-width="(b.width * root_scale) + 'px'"
 				      data-style-line-height="b.label_line_px + 'px'"
 				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
 			</div>

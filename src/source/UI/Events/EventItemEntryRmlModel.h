@@ -7,14 +7,12 @@
 namespace mu::ui::window
 {
 // One RenderText() of the window. Where it sits, what colour it is and how it is aligned are the
-// theme's (each document's own <document>_rows.rcss, one :nth-child rule per line); `width` is the
-// box the native renderer shrank the text to, and rides along because a counter-scaled layer's own
-// width has to be that box times the root scale.
+// theme's (each document's own <document>_rows.rcss, one :nth-child rule per line), and so is the
+// box it centres on.
 struct EventItemEntryTextEntry
 {
     Rml::String text;
     float textPx = 0.f; // physical px
-    float width = 0.f;  // box width, reference px
 
     bool operator==(const EventItemEntryTextEntry&) const = default;
 };
@@ -27,7 +25,6 @@ struct EventItemEntryButtonEntry
     Rml::String label;
     bool locked = false;
     bool bold = false; // the label in the bold font
-    float width = 0.f; // reference px, the label's own centring box
     // CButton::Render(): height / 2 - h / 2 whole units down, the label font's line height in
     // physical px. Both follow the button's own height, so they stay per button.
     float labelLinePx = 0.f;

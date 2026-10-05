@@ -33,5 +33,7 @@
 	position: absolute;
 	pointer-events: auto;
 }
-.entry-label { left: 0; color: #ffffff; }
+/* A line's box: the panel's width unless its row rule says otherwise. Its text centres on it. */
+.entry-text { display: block; position: absolute; width: 190px; }
+.entry-label { color: #ffffff; }
 .entry-btn.locked .entry-label { color: #646464; }

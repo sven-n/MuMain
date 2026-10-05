@@ -21,3 +21,8 @@
 .entry-btn:nth-child(2), .entry-btn:nth-child(2):hover { decorator: image(gb-exit-up); }
 .entry-btn:nth-child(2):active { decorator: image(gb-exit-down); }
 .entry-btn:nth-child(2).locked, .entry-btn:nth-child(2).locked:hover, .entry-btn:nth-child(2).locked:active { decorator: image(gb-exit-up); image-color: #ffffff; }
+
+/* The two left-aligned labels start at their box's left edge and scale back from it. */
+.entry-text:nth-child(5) .sharp-text, .entry-text:nth-child(7) .sharp-text {
+	left: 0; width: auto; margin-left: 0; text-align: left; transform-origin: left top;
+}

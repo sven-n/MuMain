@@ -14,3 +14,6 @@
 .entry-btn:nth-child(1) { left: 68px; top: 190px; width: 53px; height: 23px; }
 
 .entry-btn:nth-child(2) { left: 68px; top: 360px; width: 53px; height: 23px; }
+
+/* The name's box is 160 wide. */
+.entry-text:nth-child(1) { width: 160px; }

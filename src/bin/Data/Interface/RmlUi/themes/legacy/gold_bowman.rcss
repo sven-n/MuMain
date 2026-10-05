@@ -20,7 +20,7 @@
 	gb-exit-down: 0px 29px 36px 29px;
 }
 
-.entry-text { white-space: pre; }
+.entry-text .sharp-text { white-space: pre; }
 
 
 #serial_field {

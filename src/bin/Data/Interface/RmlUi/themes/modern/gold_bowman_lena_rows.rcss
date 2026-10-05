@@ -15,3 +15,8 @@
 .entry-btn:nth-child(1) { left: 45px; top: 285px; width: 108px; height: 29px; }
 
 .entry-btn:nth-child(2) { left: 13px; top: 392px; width: 36px; height: 29px; }
+
+/* The two left-aligned labels start at their box's left edge and scale back from it. */
+.entry-text:nth-child(5) .sharp-text, .entry-text:nth-child(7) .sharp-text {
+	left: 0; width: auto; margin-left: 0; text-align: left; transform-origin: left top;
+}

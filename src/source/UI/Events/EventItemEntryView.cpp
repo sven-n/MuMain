@@ -42,7 +42,6 @@ void mu::ui::window::EventItemEntryView::Build()
             auto text = c.RegisterStruct<EventItemEntryTextEntry>();
             text.RegisterMember("text", &EventItemEntryTextEntry::text);
             text.RegisterMember("text_px", &EventItemEntryTextEntry::textPx);
-            text.RegisterMember("width", &EventItemEntryTextEntry::width);
             c.RegisterArray<std::vector<EventItemEntryTextEntry>>();
             c.Bind("texts", &model.texts);
 
@@ -50,7 +49,6 @@ void mu::ui::window::EventItemEntryView::Build()
             button.RegisterMember("label", &EventItemEntryButtonEntry::label);
             button.RegisterMember("locked", &EventItemEntryButtonEntry::locked);
             button.RegisterMember("bold", &EventItemEntryButtonEntry::bold);
-            button.RegisterMember("width", &EventItemEntryButtonEntry::width);
             button.RegisterMember("label_line_px", &EventItemEntryButtonEntry::labelLinePx);
             c.RegisterArray<std::vector<EventItemEntryButtonEntry>>();
             c.Bind("buttons", &model.buttons);
@@ -152,8 +150,7 @@ void mu::ui::window::EventItemEntryView::SyncTexts()
         const int width = g_pRenderText->MeasureText(text.text.c_str(), static_cast<int>(text.text.size())).cx;
         texts.push_back(
             {StringUtils::WideToNarrow(text.text.c_str()),
-             UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), text.width),
-             text.width});
+             UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), text.width)});
     }
     if (model.texts == texts)
         return;
@@ -183,7 +180,6 @@ void mu::ui::window::EventItemEntryView::SyncButtons()
         entry.label = StringUtils::WideToNarrow(button.label.c_str());
         entry.locked = button.locked;
         entry.bold = button.bold;
-        entry.width = button.width;
         entry.labelLinePx = static_cast<float>(lineHeight) * transform.scaleY;
         entries.push_back(std::move(entry));
     }

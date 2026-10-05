@@ -17,3 +17,7 @@
 .entry-btn:nth-child(1) { left: 68px; top: 190px; width: 53px; height: 23px; }
 
 .entry-btn:nth-child(2) { left: 68px; top: 380px; width: 53px; height: 23px; }
+
+/* The bold lines' boxes are 110 wide, the party warning's 200. */
+.entry-text:nth-child(1), .entry-text:nth-child(6), .entry-text:nth-child(7) { width: 110px; }
+.entry-text:nth-child(n+8) { width: 200px; }
