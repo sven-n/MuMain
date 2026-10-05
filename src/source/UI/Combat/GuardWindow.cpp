@@ -195,6 +195,8 @@ bool CGuardWindow::Update()
 
     if (IsVisible())
     {
+        // The window moves with its slot, so the tabs' hit areas follow it each frame.
+        m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 12.f, m_Pos.y + 84.f, 56, 22);
         const int iNumCurOpenTab = m_TabBtn.UpdateMouseEvent();
         if (iNumCurOpenTab != RADIOGROUPEVENT_NONE)
         {

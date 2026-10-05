@@ -173,6 +173,8 @@ bool CCastleWindow::Update()
 
     if (IsVisible())
     {
+        // The window moves with its slot, so the tabs' hit areas follow it each frame.
+        m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 12.f, m_Pos.y + 32.f, 40, 22);
         const int iNumCurOpenTab = m_TabBtn.UpdateMouseEvent();
         if (iNumCurOpenTab != RADIOGROUPEVENT_NONE)
         {
