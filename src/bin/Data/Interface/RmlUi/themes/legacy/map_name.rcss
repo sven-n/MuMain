@@ -1,10 +1,8 @@
-/* Legacy theme for CUIMapName, reproducing its Render(): the 166 x 90 name image at physical
-   ((W - 166) / 2, 220 * H / 480), unscaled, and on a Gens battle map the 166 x 28 strife banner
-   right above it; both at the fade alpha (opacity from C++). Shown 1:1: the original magnified a
-   corner of them through texture coordinates meant for padded textures (see UIMapName.cpp). */
+/* The original placed the map title at 220/480 of the screen height. Keep that anchor,
+   while dp scales the artwork with the other UI at larger resolutions and user UI scales. */
 
 body { pointer-events: none; }
 
-#banner { position: absolute; width: 166px; height: 90px; pointer-events: none; }
-#name { position: absolute; left: 0; top: 0; width: 166px; height: 90px; }
-#strife { position: absolute; left: 0; top: -28px; width: 166px; height: 28px; }
+#banner { top: 45.8333%; width: 166dp; height: 90dp; pointer-events: none; }
+#name { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+#strife { position: absolute; left: 0; top: -28dp; width: 100%; height: 28dp; }

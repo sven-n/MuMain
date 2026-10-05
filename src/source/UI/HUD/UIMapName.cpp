@@ -283,8 +283,6 @@ void CUIMapName::BuildRmlUi()
     const bool modelCreated = m_RmlBinder.Create(MapNameContext(), "map_name",
                                                  [](Rml::DataModelConstructor& c, UI::MapName::MapNameRmlModel& model)
                                                  {
-                                                     c.Bind("left", &model.left);
-                                                     c.Bind("top", &model.top);
                                                      c.Bind("alpha", &model.alpha);
                                                      c.Bind("image_source", &model.imageSource);
                                                      c.Bind("strife", &model.strife);
@@ -310,11 +308,9 @@ void CUIMapName::ReloadRmlTheme()
     BuildRmlUi();
 }
 
-// The original's Render(): the map's name image at physical ((W - 166) / 2, 220 * H / 480), 166 x 90
-// unscaled, and on a Gens battle map the strife banner (166 x 28) right above it, both at the fade
-// alpha. Fixed: the original's texture coordinates assume textures padded to 256 x 128 (256 x 32),
-// but the images load at their own 166 x 90 (166 x 28), so it magnified their top-left 108 x 63
-// texels non-uniformly (1.55 x 1.42); the port shows the whole image 1:1.
+// The native fallback still draws the 166 x 90 name at physical ((W - 166) / 2, 220 * H / 480).
+// RmlUi places and scales the whole image from the theme. The original texture coordinates assumed
+// padded textures and cropped the loaded art; the RmlUi image shows it in full.
 void CUIMapName::SyncView()
 {
     const bool visible = HIDE != m_eState;
@@ -323,8 +319,6 @@ void CUIMapName::SyncView()
         return;
 
     using UI::MapName::MapNameRmlModel;
-    SyncMapNameField(m_RmlBinder, &MapNameRmlModel::left, "left", UI::MapName::PhysicalLeft(WindowWidth));
-    SyncMapNameField(m_RmlBinder, &MapNameRmlModel::top, "top", kImageTop * g_fScreenRate_y);
     SyncMapNameField(m_RmlBinder, &MapNameRmlModel::alpha, "alpha", std::clamp(m_fAlpha, 0.0f, 1.0f));
     SyncMapNameField(m_RmlBinder, &MapNameRmlModel::imageSource, "image_source",
                      BitmapSource(BITMAP_INTERFACE_EX + 45));

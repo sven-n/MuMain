@@ -5,11 +5,9 @@
 	<link type="text/rcss" href="map_name.rcss"/>
 </head>
 <body data-model="map_name">
-	<!-- The map name banner shown on every map change (CUIMapName): the map's name image and, on a
-	     Gens battle map, the strife banner right above it, fading in and out together. Physical px
-	     like the original, which drew both unscaled. In the background context, behind its other
-	     documents (the original drew it before every window). Takes no pointer events. -->
-	<div id="banner" data-style-left="left + 'px'" data-style-top="top + 'px'" data-style-opacity="alpha">
+	<!-- The map name image and optional Gens strife banner fade together. The theme owns their
+	     size and position; the background context keeps them behind other windows. -->
+	<div id="banner" class="center-x" data-style-opacity="alpha">
 		<img id="strife" data-if="strife" data-attr-src="strife_source"/>
 		<img id="name" data-attr-src="image_source"/>
 	</div>

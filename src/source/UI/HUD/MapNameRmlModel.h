@@ -6,10 +6,7 @@ namespace UI::MapName
 {
 struct MapNameRmlModel
 {
-    // Physical px, like the original: the name image's top-left (the strife banner sits right above
-    // it) and the fade alpha.
-    float left = 0.f;
-    float top = 0.f;
+    // Placement and size belong to the theme; C++ supplies the fade and current artwork.
     float alpha = 1.f;
     Rml::String imageSource;  // the map's name image as CGlobalBitmap loaded it
     bool strife = false;      // a Gens battle map: the strife banner above the name
