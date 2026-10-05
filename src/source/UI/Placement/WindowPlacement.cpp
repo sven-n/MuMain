@@ -304,7 +304,8 @@ void Arrange()
         {
             // The theme sizes a fill slot, but never below the window's content size.
             const float scale = RegionScale(slot->GetParentNode(), dock);
-            const Rml::Vector2f content = PanelSize(*entry);
+            Rml::Vector2f content = PanelSize(*entry);
+            window->GetFillMinimumSize(content.x, content.y);
             slot->RemoveProperty(Rml::PropertyId::Width);
             slot->RemoveProperty(Rml::PropertyId::Height);
             SetLength(slot, Rml::PropertyId::MinWidth, content.x * scale);

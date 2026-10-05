@@ -49,6 +49,9 @@ namespace mu::ui::window
         UI::Scaling::LayoutMode GetLayoutMode() const { return m_layoutMode; }
         virtual bool SupportsFillPlacement() const { return false; }
         virtual void SetFillPlacementSize(float, float) {}
+        // The smallest size a fill slot may give this window, in its layout units; without one the
+        // window's content size.
+        virtual bool GetFillMinimumSize(float&, float&) const { return false; }
         // The workspace places this window: its logical space is `transform`, with (0, 0) at the
         // slot's top-left.
         void PlaceInSlot(const UI::Scaling::Transform& transform)

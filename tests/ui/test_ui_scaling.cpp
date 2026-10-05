@@ -91,6 +91,16 @@ TEST_CASE("teleport layout uses stable width and fits above the dock [ui][scalin
     CHECK(1 + layout.windowHeight <= UI::Scaling::DockLogicalBottom);
 }
 
+TEST_CASE("teleport layout takes a theme slot's height and width [ui][scaling]")
+{
+    const auto layout = UI::MoveCommand::CalculateLayout(0, 14, 200, 300);
+    CHECK(layout.windowWidth == 300);
+    CHECK(layout.visibleRows == 10);
+    CHECK(layout.windowHeight == 200);
+    CHECK(layout.listTop == 38);
+    CHECK(layout.closeTop == 180);
+}
+
 TEST_CASE("teleport width is independent of measured row height [ui][scaling]")
 {
     CHECK(UI::MoveCommand::CalculateLayout(1, 12).windowWidth == 230);

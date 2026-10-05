@@ -105,7 +105,7 @@
 #close_bar {
 	position: absolute;
 	left: 2px;
-	width: 225px;
+	right: 3px;
 	border-radius: token(radius-sm)px;
 	background-color: token(accent-crimson);
 	pointer-events: auto;
@@ -125,3 +125,6 @@
 /* The leftover part of a row at the end of the list, so it scrolls in whole rows; its height is
    what the list's own height leaves over. */
 .list-tail { display: block; }
+
+/* A theme's data-fit="fill" slot sizes #panel (class fill-placement), its border included. */
+#panel.fill-placement { box-sizing: border-box; }

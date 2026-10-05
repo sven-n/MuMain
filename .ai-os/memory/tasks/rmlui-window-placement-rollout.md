@@ -99,8 +99,10 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
    need more than a stretched frame.
 
 8. Done: Gens ranking has a right-dock slot after character info; verified in game at 90 and 100 %
-   (`$win gensranking full`). Next: move map (height from its region: a height-only fill), friends
-   (free layout with an initial corner), centred dialogs.
+   (`$win gensranking full`). Done: the move map has a left-dock
+   slot and supports fill (height = its rows' space, width from `#panel`, minimum chrome + 3 rows);
+   verified in game in both themes. Next: friends (free layout with an initial corner), centred
+   dialogs.
 
 ## How to work on this
 

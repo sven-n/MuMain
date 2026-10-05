@@ -131,10 +131,58 @@ void mu::ui::window::CMoveCommandWindow::RefreshLayoutMetrics()
     g_pRenderText->SetFont(g_hFont);
     const int measuredFontHeight = g_pRenderText->MeasureText(L"Q", 1).cy;
     m_iRealFontHeight = measuredFontHeight > 0 ? measuredFontHeight + 2 : kDefaultRowHeight;
-    m_layout = UI::MoveCommand::CalculateLayout(m_Pos.y, m_iRealFontHeight);
+
+    // The theme's panel width; a fill slot's height less the panel's own border.
+    float contentWidth = static_cast<float>(UI::MoveCommand::kWindowWidth);
+    float frameHeight = 0.f;
+    if (Rml::Element* panel = m_pRmlDoc != nullptr ? m_pRmlDoc->GetElementById("panel") : nullptr)
+    {
+        const Rml::Box& box = panel->GetBox();
+        if (box.GetSize(Rml::BoxArea::Content).x > 0.f)
+            contentWidth = box.GetSize(Rml::BoxArea::Content).x;
+        frameHeight = box.GetSize(Rml::BoxArea::Border).y - box.GetSize(Rml::BoxArea::Content).y;
+    }
+    const int availableHeight = m_FillHeight > 0.f ? static_cast<int>(m_FillHeight - frameHeight) : -1;
+    m_layout = UI::MoveCommand::CalculateLayout(m_Pos.y, m_iRealFontHeight, availableHeight,
+                                                static_cast<int>(std::lround(contentWidth)));
 
     m_MapNameUISize.x = m_layout.windowWidth;
     m_MapNameUISize.y = m_layout.windowHeight;
+}
+
+void mu::ui::window::CMoveCommandWindow::SetFillPlacementSize(float width, float height)
+{
+    if (m_FillWidth == width && m_FillHeight == height)
+        return;
+    m_FillWidth = width;
+    m_FillHeight = height;
+    ApplyFillWidth();
+    RefreshLayoutMetrics();
+}
+
+bool mu::ui::window::CMoveCommandWindow::GetFillMinimumSize(float& width, float& height) const
+{
+    // Its content width, and the chrome with three rows: the rows follow the height it is given.
+    float panelWidth = static_cast<float>(UI::MoveCommand::kWindowWidth);
+    float panelHeight = 0.f;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    width = panelWidth;
+    height = static_cast<float>(UI::MoveCommand::kFixedChromeHeight + 3 * m_iRealFontHeight);
+    return true;
+}
+
+void mu::ui::window::CMoveCommandWindow::ApplyFillWidth()
+{
+    Rml::Element* panel = m_pRmlDoc != nullptr ? m_pRmlDoc->GetElementById("panel") : nullptr;
+    if (panel == nullptr)
+        return;
+    const bool fill = m_FillWidth > 0.f && m_FillHeight > 0.f;
+    panel->SetClass("fill-placement", fill);
+    if (fill)
+        panel->SetProperty(Rml::PropertyId::Width, Rml::Property(m_FillWidth, Rml::Unit::PX));
+    else
+        panel->RemoveProperty(Rml::PropertyId::Width);
+    m_pRmlDoc->UpdateDocument();
 }
 
 bool mu::ui::window::CMoveCommandWindow::IsLuckySealBuff()
@@ -442,6 +490,7 @@ void mu::ui::window::CMoveCommandWindow::BuildRmlUi()
             c.Bind("text_px", &model.textPx);
 
             c.Bind("panel_height", &model.panelHeight);
+            c.Bind("panel_width", &model.panelWidth);
             c.Bind("list_height", &model.listHeight);
             c.Bind("list_tail", &model.listTail);
             c.Bind("list_width", &model.listWidth);
@@ -495,6 +544,7 @@ void mu::ui::window::CMoveCommandWindow::BuildRmlUi()
 
         m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
                                                       "Data/Interface/RmlUi/move_command.rml");
+        ApplyFillWidth();
     }
 }
 
@@ -556,6 +606,7 @@ void mu::ui::window::CMoveCommandWindow::SyncRmlModel()
     syncFloat(&MoveCommandRmlModel::rowWidth, "row_width", rowWidth);
     syncFloat(&MoveCommandRmlModel::rowHeight, "row_height", rowHeight);
     syncFloat(&MoveCommandRmlModel::closeTop, "close_top", closeTop);
+    syncFloat(&MoveCommandRmlModel::panelWidth, "panel_width", static_cast<float>(m_layout.windowWidth));
 
     SettingCanMoveMap();
     RebuildRowModel();

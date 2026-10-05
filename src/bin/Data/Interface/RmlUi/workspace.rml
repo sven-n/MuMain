@@ -60,6 +60,11 @@
 			<div class="slot" data-window="lucky_coin_exchange"></div>
 			<div class="slot" data-window="lucky_item"></div>
 		</div>
+		<!-- Fills from the left edge. Not data-covers-world: the original centred nothing around
+		     the warp list. -->
+		<div class="region dock-left" data-ref-height="432">
+			<div class="slot" data-window="move_map"></div>
+		</div>
 	</div>
 </body>
 </rml>

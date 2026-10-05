@@ -33,6 +33,7 @@ namespace mu::ui::window
         // Reference-space geometry CalculateLayout() derives from the dock height and the measured
         // row height; #panel and its children are authored in the same reference units.
         float panelHeight = 0.f;
+        float panelWidth = 230.f; // #panel's content width
         float listHeight = 0.f;
         float listTail = 0.f; // listHeight modulo rowHeight
         float listWidth = 0.f;

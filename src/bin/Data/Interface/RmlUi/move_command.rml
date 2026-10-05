@@ -26,8 +26,8 @@
 
 		<span id="title"
 		      data-style-font-size="text_px + 'px'"
-		      data-style-width="(230 * root_scale) + 'px'"
-		      data-style-margin-left="(115 - 115 * root_scale) + 'px'"
+		      data-style-width="(panel_width * root_scale) + 'px'"
+		      data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title_text}}</span>
 
 		<div id="head"
@@ -75,8 +75,8 @@
 		     data-event-click="movecommand_close">
 			<span id="close_label"
 			      data-style-font-size="text_px + 'px'"
-			      data-style-width="(226 * root_scale) + 'px'"
-			      data-style-margin-left="(113 - 113 * root_scale) + 'px'"
+			      data-style-width="((panel_width - 4) * root_scale) + 'px'"
+			      data-style-margin-left="((panel_width - 4) / 2 - (panel_width - 4) / 2 * root_scale) + 'px'"
 			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{close_text}}</span>
 		</div>
 	</div>

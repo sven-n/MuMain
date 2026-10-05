@@ -37,3 +37,13 @@ body {
 .slot.open {
 	display: block;
 }
+
+/* The original's left-docked warp list, sitting on the HUD. */
+.dock-left {
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+}

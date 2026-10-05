@@ -625,6 +625,7 @@ bool CSystem::LoadMainSceneInterface()
     slot(INTERFACE_EXCHANGE_LUCKYCOIN, "lucky_coin_exchange", m_pNewExchangeLuckyCoinWindow, "lucky_coin_exchange.rml");
     slot(INTERFACE_LUCKYITEMWND, "lucky_item", m_pNewUILuckyItemWnd, "lucky_item.rml");
     slot(INTERFACE_GENSRANKING, "gens_ranking", m_pNewGensRanking, "gens_ranking.rml");
+    slot(INTERFACE_MOVEMAP, "move_map", m_pNewMoveCommandWindow, "move_command.rml");
     // Named only in data-closes.
     UI::Placement::RegisterName(INTERFACE_MUHELPER_SKILL_LIST, "mu_helper_skill_list");
 
