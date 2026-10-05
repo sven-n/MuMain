@@ -69,6 +69,56 @@ void Open(Rml::ElementDocument* document, const std::string& window, float scale
 }
 } // namespace
 
+TEST_CASE("Workspace shell reserves regions and collapses hidden slots [ui][window-placement]")
+{
+    NullRenderer renderer;
+    Rml::SetRenderInterface(&renderer);
+    REQUIRE(Rml::Initialise());
+    auto* context = Rml::CreateContext("workspace-shell", {1920, 1080});
+    REQUIRE(context != nullptr);
+    for (const char* theme : {"legacy", "modern"})
+    {
+        CAPTURE(theme);
+        auto* document = context->LoadDocumentFromMemory(WorkspaceFor(theme));
+        REQUIRE(document != nullptr);
+        auto* header = document->GetElementById("shell_header");
+        auto* left = document->GetElementById("shell_left");
+        auto* content = document->GetElementById("safe_area");
+        header->SetProperty("height", "60px");
+        left->SetProperty("width", "180px");
+        Open(document, "main_hud", 1.f);
+        Slot(document, "main_hud")->SetProperty("width", "1280px");
+        Slot(document, "main_hud")->SetProperty("height", "102px");
+        document->UpdateDocument();
+        CHECK(content->GetAbsoluteOffset().x == doctest::Approx(180.f));
+        CHECK(content->GetAbsoluteOffset().y == doctest::Approx(60.f));
+        CHECK(content->GetBox().GetSize().x == doctest::Approx(1740.f));
+        CHECK(content->GetBox().GetSize().y == doctest::Approx(918.f));
+        CHECK(Slot(document, "main_hud")->GetAbsoluteOffset().x == doctest::Approx(320.f));
+        CHECK(Slot(document, "main_hud")->GetAbsoluteOffset().y == doctest::Approx(978.f));
+        // The NPC panel stage centres on the whole screen, not on the area the shell leaves.
+        Rml::ElementList stages;
+        document->QuerySelectorAll(stages, ".panel-stage");
+        REQUIRE(stages.size() == 1);
+        CHECK(stages[0]->GetAbsoluteOffset().y == doctest::Approx(300.f));
+
+        // Overlay keeps its placement but gives its space back to content.
+        header->SetAttribute("data-participation", "overlay");
+        document->UpdateDocument();
+        CHECK(content->GetAbsoluteOffset().y == doctest::Approx(0.f));
+        CHECK(content->GetBox().GetSize().y == doctest::Approx(978.f));
+        Slot(document, "main_hud")->SetClass("open", false);
+        document->UpdateDocument();
+        CHECK(content->GetBox().GetSize().y == doctest::Approx(1080.f));
+
+        context->UnloadDocument(document);
+        context->Update();
+    }
+    Rml::RemoveContext("workspace-shell");
+    Rml::Shutdown();
+    Rml::SetRenderInterface(nullptr);
+}
+
 // A theme can remove the original dock height and let one fill-capable window occupy a fraction
 // of the safe area. The service reads this resolved border box and hands it to the window.
 TEST_CASE("A theme-sized slot fills the safe area's height [ui][window-placement]")
@@ -101,8 +151,8 @@ TEST_CASE("A theme-sized slot fills the safe area's height [ui][window-placement
 
         auto* document = context->LoadDocumentFromMemory(rml);
         REQUIRE(document != nullptr);
-        document->GetElementById("safe_area")
-            ->SetProperty(Rml::PropertyId::Bottom, Rml::Property(102.f, Rml::Unit::PX));
+        Open(document, "main_hud", 1.f);
+        Slot(document, "main_hud")->SetProperty(Rml::PropertyId::Height, Rml::Property(102.f, Rml::Unit::PX));
         Rml::Element* fillSlot = Slot(document, window);
         REQUIRE(fillSlot != nullptr);
         fillSlot->SetClass("open", true);
@@ -151,14 +201,17 @@ TEST_CASE("Both themes' workspaces place docked windows on the original columns 
         auto* document = context->LoadDocumentFromMemory(WorkspaceFor(theme));
         REQUIRE(document != nullptr);
 
-        document->GetElementById("safe_area")
-            ->SetProperty(Rml::PropertyId::Bottom, Rml::Property(Height - HudTop, Rml::Unit::PX));
+        Open(document, "main_hud", 1.f);
+        Slot(document, "main_hud")->SetProperty(Rml::PropertyId::Height, Rml::Property(Height - HudTop, Rml::Unit::PX));
         Rml::ElementList regions;
         document->QuerySelectorAll(regions, ".region");
         for (Rml::Element* region : regions)
-            region->SetProperty(Rml::PropertyId::Height,
-                                Rml::Property(region->GetAttribute<float>("data-ref-height", 0.f) * Scale,
-                                              Rml::Unit::PX));
+        {
+            if (region->HasAttribute("data-ref-height"))
+                region->SetProperty(Rml::PropertyId::Height,
+                                    Rml::Property(region->GetAttribute<float>("data-ref-height", 0.f) * Scale,
+                                                  Rml::Unit::PX));
+        }
 
         // Opened out of document order: placement follows the slots' order, not the opening order.
         Open(document, "storage", Scale);

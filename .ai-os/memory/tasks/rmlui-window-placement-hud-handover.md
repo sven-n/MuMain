@@ -6,7 +6,20 @@ the design, including the new "HUD in the workspace" section, is in
 
 ```text
 Continue the RmlUi window-placement rollout in C:\Users\benit\MU\client\MuMain, branch
-dev/rmlui-ui-system. The next piece of work is bringing the HUD into the workspace's layout model.
+dev/rmlui-ui-system. H1 of bringing the HUD into the workspace is committed; continue with H2.
+
+Status: the workspace has a flex shell (header, middle row with left/#safe_area/right, footer;
+reserve or overlay per region). The main HUD is one unit (#hud_layout in main_frame.rml, user's
+decision 2026-10-05) in a footer `main_hud` slot, registered through
+UI::RmlBridge::RegisterWorkspaceDocument() (PlacementParticipant: visible/measure/place).
+Arrange() places synchronously after Show/Hide; passive changes call Invalidate() and Update()
+re-places once. The minimap clips around SlotBox("main_hud"). GetStripRect()/HudReserve() are
+gone. The NPC panel stage sits outside the shell so it centres on the whole screen. Verified in
+game: modern 100 %, legacy 90 %, HUD moved to a reserve header. Pending hand check: minimap clip.
+
+Next: H2, one component per batch, starting with the top bar (main_frame_top.rml) as a header
+slot (it currently draws under a HUD moved into the header). A component whose measured size
+changes must call UI::Placement::Invalidate().
 
 Read first: AGENTS.md, docs/CODING_RULES.md, docs/rmlui-ui-system/architecture-principles.md,
 docs/rmlui-ui-system/building-new-ui.md, docs/rmlui-ui-system/window-placement.md (whole file;
@@ -14,7 +27,7 @@ the governing section is "HUD in the workspace") and
 .ai-os/memory/tasks/rmlui-window-placement-rollout.md (decisions, commits, open work, how to
 build and test). Check git status and recent commits first; stage only your own files.
 
-Where things stand: every window the game placed itself (docks, columns, the panel centre) now
+Baseline before H1 (history): every window the game placed itself (docks, columns, the panel centre) now
 takes its place from the theme's workspace.rml/workspace.rcss (right dock, left dock for the move
 map, a panel-stage region for the centred NPC panels, a first-position slot for the friend list).
 Fill is the theme's decision for 24 RmlUi windows (CObject::GetFillDocument()); native grids and
@@ -29,15 +42,24 @@ taking part means it receives a position and available size from a slot, the sam
 windows have. Nothing is merged into one RML document. The theme chooses per region how it
 participates: reserve (takes space the content area avoids) or overlay (placed, takes no space).
 
-Do, in order, following the phase table H1-H4 in that design section:
-H1. Settle the section's open points (how the main frame applies a received box with #hud_strip
-    and #exp in one document; registration for HUD documents that are not CObjects) and write the
-    answers into the design doc. Then: shell regions (header, footer, left, right, content) in
-    both themes' workspaces, #safe_area becoming the content region; the participation attribute;
-    the main strip as a content-sized reserve footer slot; HudReserve() and
-    CMiniMap::SyncClips() reading the slot instead of GetStripRect(); UncoveredWorld*() becoming
-    the content region's edges. Both shipped themes must look exactly as today. Extend
-    tests/ui/test_window_placement_layout.cpp for the shell.
+Further decisions approved by the user:
+- Nested RML/RCSS flex containers calculate the shell. Header/footer/sides/center are a theme
+  recipe, not a fixed C++ layout algorithm. C++ supplies visibility and preferred sizes and
+  applies the resolved rectangles.
+- Keep the HUD-safe content area distinct from the uncovered area after open window docks.
+  Neither implicitly resizes the game's rendered viewport.
+- Hidden components collapse by default; themes may retain an empty slot for stable layout.
+- Reserve corners through rectangular regions (corner cell and adjacent regions, or sidebar).
+  Do not implement arbitrary-shape collision avoidance.
+- Measure then arrange: preferred content size must not depend cyclically on assigned size.
+  Fill consumes assigned space; define overflow per component. Slots always place components,
+  but only fill-capable components accept resizing.
+- Use a small placement adapter for identity, visibility, preferred size and applying placement.
+  HUD components need not inherit CObject. Keep rendering and input in their owners.
+- Invalidate on resize, scale, theme, visibility and preferred-size changes; coalesce changes
+  into one layout pass before rendering. A per-frame dirty check is fine.
+
+Do, in order, following the phase table H2-H4 in that design section:
 H2. One HUD component per batch: top bar (main_frame_top.rml), chat log and input, minimap, buff
     row, party list, MU Helper bar, item endurance. The HUD widgets' UncoveredWorld*In() code
     becomes their slots.

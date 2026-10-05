@@ -1,5 +1,7 @@
 #pragma once
 
+#include "UI/Placement/PlacementParticipant.h"
+
 #include <cstdint>
 #include <functional>
 #include <string_view>
@@ -19,6 +21,13 @@ struct Transform;
 // and maps the window onto it (LayoutMode::Slot).
 namespace UI::Placement
 {
+void RegisterParticipant(std::string_view name, PlacementParticipant participant);
+void UnregisterParticipant(std::string_view name);
+// Marks placement stale; the next Update() re-places once (a theme reload, a measured size change).
+void Invalidate();
+// Last resolved slot rectangle in screen pixels; false for a closed or absent slot.
+bool SlotBox(std::string_view name, PlacementParticipant::Box& box);
+
 using GetWindow = std::function<mu::ui::window::CObject*()>;
 using SetPosition = std::function<void(int x, int y)>;
 
@@ -38,7 +47,7 @@ void CloseForOpening(std::uint32_t windowId);
 // pixels), as the window's first position. False when the theme has no such slot.
 bool InitialPosition(std::string_view slotName, float width, float height, float& x, float& y);
 
-// Re-places every open window that has a slot. Call after a window opens or closes.
+// Re-places every open component now. Call after a window opens or closes.
 void Arrange();
 // Once a frame: re-places windows when the screen size, UI scale or HUD position changed.
 void Update();

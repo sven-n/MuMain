@@ -123,29 +123,31 @@ window means registering it (window, slot name, `SetPos()`, document) and deleti
 `PanelColumnX`/`SetPos` lines, not rewriting it. A registered window the workspace gives no slot
 returns to its policy mode. A fill window would also take its slot's size (phase 4).
 
-The service runs synchronously after every `CSystem::Show()`/`Hide()` and when the screen size or
-UI scale changes, so a newly shown window never draws a frame at a stale position. The workspace
+The service runs synchronously after every `CSystem::Show()`/`Hide()` (`Arrange()`), so a newly
+shown window never draws or hit-tests a frame at a stale position. Passive changes (screen size,
+UI scale, a theme reload, a HUD part shown or hidden) mark it stale (`Invalidate()`), and
+`Update()` re-places once before the frame's windows update. The workspace
 document is never shown: it is never drawn or hit, and the service lays it out itself.
 
 Implemented in `UI/Placement/WindowPlacement.{h,cpp}`; the window registry is at the end of
-`CSystem::LoadMainSceneInterface()`. Inputs the game sets on the workspace: `#safe_area`'s
-`top`/`bottom`, content slot sizes, and region heights from `data-ref-height`. A `data-window` or
+`CSystem::LoadMainSceneInterface()`. Inputs the game sets on the workspace: content slot sizes
+and region heights from `data-ref-height`. A `data-window` or
 `data-closes` name no window answers to is logged once per workspace (`[Placement]` in
 MuError.log).
 
 **Reading geometry back.** The main-frame rollout's rule was that C++ never reads RCSS geometry to
 draw or place chrome. That rule stays for chrome. This design adds one narrow, named exception
-that the minimap already uses (`CMiniMap::SyncClips()` reads `GetStripRect()`): C++ reads the
+that the minimap also uses (`CMiniMap::SyncClips()` reads the `main_hud` slot): C++ reads the
 resolved rectangles of a document whose only job is placement, and hands them to other documents
 and native code. C++ still never computes a layout itself.
 
 ### 4. HUD reserve
 
-`#safe_area` keeps free the screen edge the HUD strip sits on, read from the main frame's
-resolved strip (`CMainFrameWindow::GetStripRect()`): its top for a bottom HUD, its bottom for a top
-HUD. Docks therefore follow a theme that moves the HUD. While the HUD is not on screen the
-original strip's place is kept. Both themes' strips end 51 dp above the bottom today, which is
-the original's height, so nothing moves yet.
+`#safe_area` is the content area of the workspace's shell: what the `reserve` header, footer and
+side regions leave (see "HUD in the workspace"). The main HUD is a `main_hud` slot in the
+footer, sized 640x51 dp (the original strip and EXP bar) by each theme's `main_frame.rcss`, so
+docks sit on it as before and follow a theme that moves it. While the HUD is hidden its slot
+collapses and the content area reaches the screen edge.
 
 ### 4a. Uncovered world area
 
@@ -306,10 +308,16 @@ Counts come from a scan of each window's `.cpp` and RML (`RefreshLogicalPanelSiz
 `RefreshLogicalAnchorPosition` use, `CInventoryCtrl`, 3D rendering, `m_Pos.x/y + n` offsets, 190/429
 literals). Fill placement (phase 4) needs the same groundwork.
 
-## HUD in the workspace (approved direction, not started)
+## HUD in the workspace (H1 done; H2-H4 not started)
 
-Today the HUD lays itself out (`main_frame.rml` and the other HUD documents) and the workspace
-learns only one thing from it: the strip's rectangle (`CMainFrameWindow::GetStripRect()`), which
+H1 status (2026-10-05): done. Shell regions, the participant adapter, the main HUD as a
+footer `reserve` slot and the minimap's clip from that slot are in both themes; both look as
+before. Verified in game at 1024x768: modern at 100 % (docks, the Kanturu panel on the
+whole-screen stage), legacy at 90 % (docks), and a runtime layout with the HUD in a `reserve`
+header (docks take the content area below it). H2-H4 have not started.
+
+Before H1, the HUD laid itself out (`main_frame.rml` and the other HUD documents) and the workspace
+learned only one thing from it: the strip's rectangle (`CMainFrameWindow::GetStripRect()`), which
 sets `#safe_area`'s top or bottom (section 4). So windows avoid one edge of one strip; a side HUD,
 a header and footer, or a window docked beside a HUD part cannot be expressed.
 
@@ -328,8 +336,10 @@ workspace is the one place a theme arranges headers, footers, side panels and th
     bottom strip.
   - `overlay`: placed by the workspace, takes no space. Corner widgets, the minimap.
 
-  This replaces the special cases: the strip readback in `HudReserve()`, `data-covers-world`'s
-  one-sided arithmetic, and `UncoveredWorldLeft()`/`Right()` become the content region's edges.
+  The content area excludes reserved HUD regions. The uncovered area additionally accounts for
+  open window docks inside it. Preserve that distinction in `UncoveredWorldLeft()`/`Right()`;
+  returning the content area's edges alone would lose the existing dock adjustment. Neither
+  area implicitly changes the rendered game viewport.
 - Sizing order: shell regions lay out first, then the content region from what is left, then the
   windows in it. A HUD slot is content-sized (the component's measured `#panel` or root box, as a
   window's) or fill (a full-width header), chosen per slot, so a size never depends on itself.
@@ -340,15 +350,52 @@ workspace is the one place a theme arranges headers, footers, side panels and th
 - Migration is per component: a HUD component without a slot keeps placing itself, so each one
   moves on its own with both themes unchanged.
 
-Open points to settle in phase H1:
-- How the main frame applies a received box. `#hud_strip` and `#exp` sit in one document; the
-  likely cut is a container element positioned from the slot (`root_x`/`root_y`/`root_scale`
-  bindings, as windows do), the parts laid out inside it by `main_frame.rcss`.
-- `main_frame_top.rml` (the top bar) is its own document: a header candidate.
-- The minimap clips itself around the strip (`CMiniMap::SyncClips()` reads `GetStripRect()`); it
-  should read the strip's slot instead.
-- HUD documents that are not `CObject`s, or that are shared across scenes, need a registration
-  path; the main scene is the only one that takes part.
+Implementation decisions approved by the user:
+- RML/RCSS performs shell layout using nested flex containers. Header, footer, sides and center
+  are a theme recipe; themes may rearrange or nest them. C++ supplies visibility and preferred
+  sizes and reads resolved rectangles, without a second shell layout algorithm.
+- Hidden components collapse by default. A theme may retain an empty slot for layout stability;
+  visibility and space retention are distinct from reserve/overlay participation.
+- Corner reservations use rectangular theme regions: a corner cell with adjacent regions, or
+  a whole reserved sidebar. Automatic avoidance around arbitrary HUD shapes is outside this
+  design. An overlay minimap consumes no layout space.
+- Measure preferred content size before arranging. A fill component accepts its assigned size;
+  a content-sized component must not derive its preferred size from that same assigned size.
+  Wrapped content may measure against a constrained width without feeding its height back into
+  the width. Each migrated component needs an explicit overflow policy.
+- A small placement adapter exposes identity, visibility, preferred size where applicable and
+  a callback to apply placement. HUD components need not inherit `CObject`; existing windows
+  can adapt to the same contract. Every slot places its component; only fill-capable components
+  must accept resizing. Rendering and input remain with the component.
+- Resize, scale, theme, visibility and preferred-size changes invalidate layout. Coalesce those
+  changes into one layout pass before rendering; checking a dirty flag each frame is fine.
+
+Settled in H1:
+- The main HUD is one unit for now (user's decision, 2026-10-05). `main_frame.rml` wraps its
+  parts in `#hud_layout`, whose size each theme sets (640x51 dp, the strip and EXP bar); the
+  parts are laid out inside it and may overflow it (the skill list does), but only its box is
+  reserved. Splitting it into a slot per part waits until a layout needs it (H4's split HUD).
+- Registration: `UI::Placement::RegisterParticipant()` takes a `PlacementParticipant` (visible,
+  measure, place callbacks) under a slot name; `UI::RmlBridge::RegisterWorkspaceDocument()`
+  adapts a document root to it (visible when the root and its document are, measured from the
+  root's box, placed by `left`/`top` and a scale transform; the `workspace-placed` class lets
+  the theme drop its own positioning). Without a slot, `place(nullptr)` restores the
+  component's own placement.
+- Readers of the strip's rectangle read the slot (`UI::Placement::SlotBox("main_hud")`);
+  `GetStripRect()` and `HudReserve()` are gone.
+- The NPC panel stage stays outside the shell (a direct child of the workspace body), so it
+  centres on the whole screen as the original did, whatever the shell reserves.
+- A component whose measured size can change (H2's chat log) calls `UI::Placement::Invalidate()`
+  when it does; the slot then takes the new size before the next frame's windows update.
+
+Open for H2 (user's call): the docks keep the original's fixed height (432 units standing on the
+HUD), so they overlap whatever sits above them. In the modern theme the top menu bar and the MU
+Helper bar are covered today (at 1024x768, 100 %: 691 px of panel over an 82 px HUD). Moving
+them into a `reserve` header does not by itself stop this, since the dock regions are anchored to the
+bottom and overflow upward. The theme's choices: keep them as overlays (today); reserve the header and
+cap the docks at the content area (`max-height: 100%`), which needs a policy for panels taller
+than the room left (shrink, scroll or fill); or reserve it and accept that panels fit only at
+a lower UI scale.
 
 | Phase | Work |
 |---|---|
@@ -362,7 +409,6 @@ Open points to settle in phase H1:
 - One workspace document or one per region; which RmlUi context it lives in. Background-context
   documents (inventory family) already follow their window through `root_*` bindings.
 - How z-order and focus interact with regions.
-- HUD in the workspace: see that section's open points.
 
 ## Plan
 
@@ -377,7 +423,7 @@ UI scale with the [validation matrix](validation-matrix.md).
 | 3 | Done, in-game checks pending: column-1/column-2 conflicts and the three-column limit are `data-closes` in both workspaces; `HideGroupBeforeOpenInterface()` is gone. `HideAllGroupA()` stays in C++ (it ends trades and NPC sessions, which a theme must not control). The MU Helper bar rule and the help-panel exclusions stay until their windows have slots. Change: windows closed by these rules now run their closing process; for the Gold Bowman windows that tells the server the event-chip dialog ended, which the old silent hide skipped. |
 | 4 | In progress: character info and pet info opt into `data-fit=fill`. A theme sizes its slot in RCSS; the service gives that size to the panel, never less than the content size. Character info's right-hand pieces and action rows are pinned to `#panel`'s edges in both themes, so a wider content-sized panel stretches too. The shipped themes stay content-sized. Verified in game at 1024x768 (runtime layouts, both themes): 35%, 30% and 22% slots at UI scale 80, 90 and 100 %; action buttons and hints, both close targets, and live theme switches between a filled and a content-sized workspace. Pet info verified the same way at 35 % in both themes (tabs, corner close). The headless test passes (82 assertions, both windows). Other windows opt in after their hit areas and native content can follow a filled panel. |
 | 5 | Done: Gens ranking has a right-dock slot (docked scale and place, like its neighbours; it used to be drawn in the stretched 640x480 space, wider than the docks on wide screens and ignoring the UI scale). The move map has a left-dock slot on the HUD (`.dock-left`), not marked `data-covers-world`, so nothing shifts around it as before. Verified in game: shipped layout, centre-left at 60 % height (legacy), full height at 30 % and 45 % width (modern). The friend list, which moves and sizes itself, asks its `friends` slot only where it first opens (`InitialPosition()`); the shipped themes put it in the bottom-right corner above the HUD, as before, and the player's moves win after that. Its chat and letter windows keep the friend manager's cascade. Verified in game, including a theme moving it to the left edge. The centred NPC panels (Kanturu entry, Cursed Temple entry and result) sit on a `panel-stage` region: the original's 640x480 stage centred on the screen, where `1dp` is one of its units, each panel at its original height; verified in game. The generic confirm and menu dialogs already centre themselves in their own theme CSS; help, item explanations and the quick command follow the pointer or their target, and the in-game shop covers the screen, so none of them needs a slot. |
-| H1-H4 | HUD in the workspace: see that section. Not started. |
+| H1-H4 | H1 done (see the HUD section). H2-H4 not started. |
 
 Docs to update with phase 1: [theming-and-modding.md](theming-and-modding.md) ("three different
 owners"), [layout-and-scaling.md](layout-and-scaling.md), [tracked-deferrals.md](tracked-deferrals.md),

@@ -7,11 +7,14 @@
 	<link type="text/rcss" href="main_frame.rcss"/>
 </head>
 <body data-model="main_frame">
-	<!-- CMainFrameWindow's HUD, shared by every theme. Each top-level .hud-part is one piece the
-	     theme's main_frame.rcss places on its own, against any edge of the screen, with the part's
-	     contents laid out inside it: the strip backing, the two gauge groups, EXP, the corner
-	     buttons, the item hotkeys, the skill row and the skill list. A theme styles or hides each
-	     part, and anything only one theme uses is noted where it appears. -->
+	<!-- CMainFrameWindow's HUD, shared by every theme. #hud_layout is the one unit the workspace
+	     places (its main_hud slot); its size is the theme's, in main_frame.rcss. Each .hud-part is
+	     one piece the theme places inside it, with the part's contents laid out from its own
+	     corner: the strip backing, the two gauge groups, EXP, the corner buttons, the item hotkeys,
+	     the skill row and the skill list. A part may overflow the unit (the skill list does), but
+	     only the unit's box is kept clear of windows. A theme styles or hides each part, and
+	     anything only one theme uses is noted where it appears. -->
+	<div id="hud_layout">
 	<!-- The strip's backing: the original menu art (.frame-art), or flat zone and band fills under
 	     #gauge_frame's border, which comes after them so their backgrounds don't cover it. -->
 	<div id="hud_strip" class="hud-part">
@@ -162,6 +165,7 @@
 				<div class="cooldown-wipe" data-style-height="cell.cooldown_fraction * 100 + '%'"></div>
 			</div>
 		</div>
+	</div>
 	</div>
 </body>
 </rml>

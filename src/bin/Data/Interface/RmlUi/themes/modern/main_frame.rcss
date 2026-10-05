@@ -15,6 +15,10 @@
    where the original drew them: margin-left is the part's x in the original's 640x480 frame
    minus 320, bottom is 480 minus its lower edge. Move a part by changing its rule alone; its
    contents are laid out from its own corner. */
+/* The root measures the strip plus EXP; popups may overflow above it. */
+#hud_layout { position: absolute; left: 50%; bottom: 0; margin-left: -320dp;
+    width: 640dp; height: 51dp; overflow: visible; pointer-events: none; }
+#hud_layout.workspace-placed { margin-left: 0; bottom: auto; transform-origin: left top; }
 .hud-part {
 	position: absolute;
 	left: 50%;

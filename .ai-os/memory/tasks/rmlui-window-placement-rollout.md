@@ -21,6 +21,8 @@ Current handover prompt for a new agent: `rmlui-window-placement-hud-handover.md
 - Fill is the theme's decision for every window that can take it (`CObject::GetFillDocument()`).
   A shared window `<template>` was judged not worth it (the shared frame already lives in
   `docked_panel_frame.rcss`); revisit only if a theme author needs one place for frame structure.
+- The main HUD is one workspace unit for now (`#hud_layout`, user, 2026-10-05); a slot per part
+  waits until a layout needs it.
 - HUD joins the workspace's layout model (user's direction, 2026-10-05): HUD components receive a
   position and available size from workspace slots, keep their own documents, controllers and
   scale settings; the theme chooses per region whether it reserves space or overlays. Design and
@@ -58,6 +60,7 @@ Current handover prompt for a new agent: `rmlui-window-placement-hud-handover.md
 | `7cbc0d0bd` | Friend list's first position from a `friends` slot (`InitialPosition()`) |
 | `ab5efa0e1` | Centred NPC panels on a `panel-stage` region |
 | `6a2d08718` | Generic fill (`GetFillDocument()`), 24 windows; native corner close follows panel width |
+| (H1 commit) | HUD in the workspace H1: flex shell, `PlacementParticipant`, main HUD as one footer unit, minimap clip from the slot |
 
 Regression lesson: since `LayoutMode::Slot`, a placed window's `m_Pos` is (0, 0) in its slot space.
 Any native part positioned once at creation (not moved by `SetPos()` or re-placed each frame) ends
@@ -97,10 +100,11 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
 
 ## Open work, in suggested order
 
-1. HUD in the workspace, phases H1-H4 (`window-placement.md`, "HUD in the workspace"). Start with
-   H1: shell regions, participation attribute, the main strip as a `reserve` footer slot, and its
-   readers (`HudReserve()`, `CMiniMap::SyncClips()`) reading the slot. Settle that section's open
-   points first and record the answers there.
+1. HUD in the workspace: H1 is done (shell, participant adapter, main HUD as one `reserve`
+   footer unit). Next is H2, one component per batch, starting with the top bar
+   (`main_frame_top.rml`) as a header slot; then H3 and H4 (`window-placement.md`, "HUD in the
+   workspace"). Hand check pending from H1: the minimap's clip around the HUD (socket hotkeys
+   did not reach the client).
 2. Not verified in game: the Cursed Temple result panel (needs a finished event); Gens ranking,
    move map, friends and the NPC panels in the modern theme; filled windows at resolutions other
    than 1024x768.

@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "UI/Placement/WindowPlacement.h"
 #include "I18N/All.h"
 
 #include "UI/HUD/MiniMap.h"
@@ -408,19 +409,21 @@ void mu::ui::window::CMiniMap::SyncClips()
     // above the strip, and beside it down to the screen's bottom edge.
     const float width = static_cast<float>(WindowWidth);
     const float height = static_cast<float>(WindowHeight);
-    float stripLeft = 0.f, stripTop = height, stripRight = 0.f, stripBottom = height;
-    if (g_pMainFrame == nullptr || !g_pMainFrame->GetStripRect(stripLeft, stripTop, stripRight, stripBottom))
-        stripTop = height;
-    const float bandTop = std::clamp(stripTop, 0.f, height);
-    const float bandLeft = std::clamp(stripLeft, 0.f, width);
-    const float bandRight = std::clamp(stripRight, 0.f, width);
+    UI::Placement::PlacementParticipant::Box strip;
+    const bool hasStrip = UI::Placement::SlotBox("main_hud", strip);
+    const float bandTop = hasStrip ? std::clamp(strip.top, 0.f, height) : height;
+    const float bandBottom = hasStrip ? std::clamp(strip.top + strip.height, bandTop, height) : height;
+    const float bandLeft = std::clamp(strip.left, 0.f, width);
+    const float bandRight = std::clamp(strip.left + strip.width, bandLeft, width);
 
     std::vector<MiniMapClipEntry> clips;
     clips.push_back({0.f, 0.f, width, bandTop, 0.f, 0.f});
-    if (bandLeft > 0.f && bandTop < height)
-        clips.push_back({0.f, bandTop, bandLeft, height - bandTop, 0.f, -bandTop});
-    if (bandRight < width && bandTop < height)
-        clips.push_back({bandRight, bandTop, width - bandRight, height - bandTop, -bandRight, -bandTop});
+    if (bandLeft > 0.f && bandBottom > bandTop)
+        clips.push_back({0.f, bandTop, bandLeft, bandBottom - bandTop, 0.f, -bandTop});
+    if (bandRight < width && bandBottom > bandTop)
+        clips.push_back({bandRight, bandTop, width - bandRight, bandBottom - bandTop, -bandRight, -bandTop});
+    if (bandBottom < height)
+        clips.push_back({0.f, bandBottom, width, height - bandBottom, 0.f, -bandBottom});
 
     MiniMapRmlModel& model = m_RmlBinder.GetModel();
     const bool same =

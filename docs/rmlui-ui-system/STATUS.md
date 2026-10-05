@@ -383,8 +383,8 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
     background context, behind its other documents: a docked panel's frame is painted there, so
     a main-context document would draw over it however far back it is pushed.
   - **An overlay the original drew under the bottom HUD** (the mini map) stays under the main
-    frame's document by the stacking table, and paints only outside the HUD strip
-    (`CMainFrameWindow::GetStripRect()`), wherever the theme places it.
+    frame's document by the stacking table, and paints only outside the main HUD's workspace
+    slot (`UI::Placement::SlotBox("main_hud")`), wherever the theme places it.
   - **RenderText() shrinks a text wider than its box** (player names, event lines): use
     `NativeTextPixelSizeInBox()` per text, not only for titles.
 - **HUD menus and the party list** — **done, both themes (2026-09-27)**: `CHelpWindow`,

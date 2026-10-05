@@ -36,22 +36,20 @@ struct Entry
     GetWindow getWindow;
     SetPosition setPosition;
     std::string document;
+    PlacementParticipant participant;
+    PlacementParticipant::Box box;
+    bool hasBox = false;
+    bool lastVisible = false;
     bool placed = false;
     bool warnedUnsupportedFill = false;
     POINT lastPosition{};
-};
-
-struct Reserve
-{
-    float top = 0.f;
-    float bottom = 0.f;
 };
 
 std::unordered_map<std::string, Entry> g_windows;
 Rml::ElementDocument* g_workspace = nullptr;
 bool g_namesChecked = false;
 UI::Scaling::Transform g_lastDock{};
-Reserve g_lastReserve{};
+bool g_dirty = true;
 unsigned int g_lastWidth = 0;
 unsigned int g_lastHeight = 0;
 float g_uncoveredLeft = 0.f;
@@ -106,7 +104,8 @@ void CheckNames(const Rml::ElementList& slots)
 
 bool IsOpen(const Entry& entry)
 {
-    return g_pNewUISystem != nullptr && g_pNewUISystem->IsVisible(entry.windowId);
+    return entry.participant.visible ? entry.participant.visible()
+        : g_pNewUISystem != nullptr && g_pNewUISystem->IsVisible(entry.windowId);
 }
 
 Entry* EntryFor(Rml::Element* slot)
@@ -134,6 +133,11 @@ float RegionScale(Rml::Element* region, const UI::Scaling::Transform& dock)
 // The window's own #panel size, in its layout units; the docked windows' size without one.
 Rml::Vector2f PanelSize(const Entry& entry)
 {
+    if (entry.participant.measure)
+    {
+        const auto size = entry.participant.measure();
+        return {size.width, size.height};
+    }
     const Rml::Vector2f fallback{DefaultPanelWidth, DefaultPanelHeight};
     Rml::Context* context = RmlUiRuntime::Instance().GetContext();
     if (entry.document.empty() || context == nullptr)
@@ -185,26 +189,35 @@ bool IsFirstOpenSlot(Rml::Element* slot)
     return false;
 }
 
-// The screen edge the HUD strip sits on is kept free, so docks follow a theme that moves the HUD.
-Reserve HudReserve(const UI::Scaling::Transform& dock)
-{
-    const float height = static_cast<float>(WindowHeight);
-    float left = 0.f, top = 0.f, right = 0.f, bottom = 0.f;
-    if (g_pMainFrame != nullptr && g_pMainFrame->GetStripRect(left, top, right, bottom))
-    {
-        if (bottom >= height - 2.f)
-            return {0.f, height - top};
-        if (top <= 2.f)
-            return {bottom, 0.f};
-    }
-    // HUD not on screen: keep the original strip's place, as before.
-    return {0.f, height - (dock.offsetY + UI::Scaling::DockLogicalBottom * dock.scaleY)};
 }
 
-bool SameReserve(const Reserve& a, const Reserve& b)
+void Invalidate()
 {
-    return a.top == b.top && a.bottom == b.bottom;
+    g_dirty = true;
 }
+
+void RegisterParticipant(std::string_view name, PlacementParticipant participant)
+{
+    Entry& entry = g_windows[std::string(name)];
+    entry = {};
+    entry.participant = std::move(participant);
+    g_namesChecked = false;
+    Invalidate();
+}
+
+void UnregisterParticipant(std::string_view name)
+{
+    g_windows.erase(std::string(name));
+    Invalidate();
+}
+
+bool SlotBox(std::string_view name, PlacementParticipant::Box& box)
+{
+    const auto found = g_windows.find(std::string(name));
+    if (found == g_windows.end() || !found->second.hasBox)
+        return false;
+    box = found->second.box;
+    return true;
 }
 
 void RegisterWindow(std::uint32_t windowId, std::string_view slotName, GetWindow getWindow, SetPosition setPosition,
@@ -250,25 +263,11 @@ void CloseForOpening(std::uint32_t windowId)
     }
 }
 
-void Arrange()
+static void PrepareRegions(Rml::ElementDocument* workspace, const UI::Scaling::Transform& dock)
 {
-    Rml::ElementDocument* workspace = Workspace();
-    if (workspace == nullptr)
-        return;
-
-    const auto dock = UI::Scaling::DockRightTransform(WindowWidth, WindowHeight);
-    const Reserve reserve = HudReserve(dock);
-    g_lastDock = dock;
-    g_lastReserve = reserve;
-    g_lastWidth = WindowWidth;
-    g_lastHeight = WindowHeight;
-
-    // The area the HUD leaves, and region lengths authored in the windows' units.
-    if (Rml::Element* safeArea = workspace->GetElementById("safe_area"))
-    {
-        SetLength(safeArea, Rml::PropertyId::Top, reserve.top);
-        SetLength(safeArea, Rml::PropertyId::Bottom, reserve.bottom);
-    }
+    // RCSS lays out the shell; only component sizes and region reference units enter from C++.
+    for (auto& [name, entry] : g_windows)
+        entry.hasBox = false;
     Rml::ElementList regions;
     workspace->QuerySelectorAll(regions, ".region");
     for (Rml::Element* region : regions)
@@ -278,6 +277,10 @@ void Arrange()
             SetLength(region, Rml::PropertyId::Height, referenceHeight * RegionScale(region, dock));
     }
 
+}
+
+static Rml::ElementList PrepareSlots(Rml::ElementDocument* workspace, const UI::Scaling::Transform& dock)
+{
     Rml::ElementList slots;
     workspace->QuerySelectorAll(slots, ".slot");
     CheckNames(slots);
@@ -285,9 +288,9 @@ void Arrange()
     {
         Entry* entry = EntryFor(slot);
         mu::ui::window::CObject* window = entry != nullptr && entry->getWindow ? entry->getWindow() : nullptr;
-        const bool open = window != nullptr && IsOpen(*entry);
+        const bool open = entry != nullptr && (window != nullptr || entry->participant.visible) && IsOpen(*entry);
         const bool wantsFill = slot->GetAttribute<Rml::String>("data-fit", "") == "fill";
-        const bool fill = open && wantsFill && window->SupportsFillPlacement();
+        const bool fill = open && wantsFill && window != nullptr && window->SupportsFillPlacement();
         slot->SetClass("open", open);
         slot->SetClass("fill", fill);
         if (wantsFill && open && !fill && !entry->warnedUnsupportedFill)
@@ -320,12 +323,17 @@ void Arrange()
         }
     }
 
-    workspace->UpdateDocument();
+    return slots;
+}
 
+static void UpdateUncoveredArea(Rml::ElementDocument* workspace, const Rml::ElementList& slots)
+{
     // Open slots in covering regions narrow the world from the side of the screen they are on.
     const float screenWidth = static_cast<float>(WindowWidth);
-    g_uncoveredLeft = 0.f;
-    g_uncoveredRight = screenWidth;
+    Rml::Element* content = workspace->GetElementById("safe_area");
+    g_uncoveredLeft = content != nullptr ? content->GetAbsoluteOffset(Rml::BoxArea::Border).x : 0.f;
+    g_uncoveredRight = content != nullptr
+        ? g_uncoveredLeft + content->GetBox().GetSize(Rml::BoxArea::Border).x : screenWidth;
     for (Rml::Element* slot : slots)
     {
         Rml::Element* region = slot->GetParentNode();
@@ -339,13 +347,17 @@ void Arrange()
             g_uncoveredLeft = std::max(g_uncoveredLeft, right);
     }
 
+}
+
+static void PlaceSlots(const Rml::ElementList& slots, const UI::Scaling::Transform& dock)
+{
     // Each open window's logical space becomes its slot: (0, 0) at the slot's top-left, at the
     // region's scale.
     for (Rml::Element* slot : slots)
     {
         Entry* entry = EntryFor(slot);
         mu::ui::window::CObject* window = entry != nullptr && entry->getWindow ? entry->getWindow() : nullptr;
-        if (window == nullptr)
+        if (entry == nullptr)
             continue;
         if (!slot->IsClassSet("open"))
         {
@@ -355,6 +367,16 @@ void Arrange()
 
         const float scale = RegionScale(slot->GetParentNode(), dock);
         const Rml::Vector2f offset = slot->GetAbsoluteOffset(Rml::BoxArea::Border);
+        const Rml::Vector2f size = slot->GetBox().GetSize(Rml::BoxArea::Border);
+        entry->box = {offset.x, offset.y, size.x, size.y, scale};
+        entry->hasBox = true;
+        if (entry->participant.place)
+        {
+            entry->participant.place(&entry->box);
+            continue;
+        }
+        if (window == nullptr)
+            continue;
         const UI::Scaling::Transform transform{scale, scale, offset.x, offset.y, scale};
         window->PlaceInSlot(transform);
         if (slot->IsClassSet("fill"))
@@ -383,9 +405,15 @@ void Arrange()
             entry->setPosition(position.x, position.y);
     }
 
-    // A registered window the workspace gives no slot keeps its own layout mode.
+}
+
+static void RestoreUnslotted(const Rml::ElementList& slots)
+{
+    // A registered component the workspace gives no slot keeps its own placement.
     for (auto& [name, entry] : g_windows)
     {
+        if (entry.participant.place && !entry.hasBox)
+            entry.participant.place(nullptr);
         mu::ui::window::CObject* window = entry.getWindow ? entry.getWindow() : nullptr;
         if (window == nullptr || window->GetLayoutMode() != UI::Scaling::LayoutMode::Slot)
             continue;
@@ -399,12 +427,49 @@ void Arrange()
     }
 }
 
+static void ArrangeNow()
+{
+    Rml::ElementDocument* workspace = Workspace();
+    if (workspace == nullptr)
+        return;
+
+    const auto dock = UI::Scaling::DockRightTransform(WindowWidth, WindowHeight);
+    g_lastDock = dock;
+    g_dirty = false;
+    g_lastWidth = WindowWidth;
+    g_lastHeight = WindowHeight;
+    for (auto& [name, entry] : g_windows)
+        entry.lastVisible = IsOpen(entry);
+
+    PrepareRegions(workspace, dock);
+    const Rml::ElementList slots = PrepareSlots(workspace, dock);
+    workspace->UpdateDocument();
+    UpdateUncoveredArea(workspace, slots);
+    PlaceSlots(slots, dock);
+    RestoreUnslotted(slots);
+}
+
+void Arrange()
+{
+    // Immediate, so a window opened during this frame's input is drawn and hit-tested in place.
+    ArrangeNow();
+}
+
 void Update()
 {
     const auto dock = UI::Scaling::DockRightTransform(WindowWidth, WindowHeight);
-    if (WindowWidth != g_lastWidth || WindowHeight != g_lastHeight || dock.scaleX != g_lastDock.scaleX ||
-        dock.offsetY != g_lastDock.offsetY || !SameReserve(HudReserve(dock), g_lastReserve))
-        Arrange();
+    for (auto& [name, entry] : g_windows)
+    {
+        const bool visible = IsOpen(entry);
+        if (visible != entry.lastVisible)
+        {
+            entry.lastVisible = visible;
+            Invalidate();
+        }
+    }
+    if (g_dirty || WindowWidth != g_lastWidth || WindowHeight != g_lastHeight || dock.scaleX != g_lastDock.scaleX ||
+        dock.offsetY != g_lastDock.offsetY)
+        ArrangeNow();
     for (const auto& [name, entry] : g_windows)
     {
         if (const mu::ui::window::CObject* window = entry.getWindow ? entry.getWindow() : nullptr)
@@ -482,5 +547,6 @@ void Release()
         g_workspace->Close();
     g_workspace = nullptr;
     g_windows.clear();
+    g_dirty = true;
 }
 }

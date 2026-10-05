@@ -4,71 +4,88 @@
 	<link type="text/rcss" href="workspace.rcss"/>
 </head>
 <body>
-	<!-- Where windows go. Each .slot names its window in data-window; an open window's slot is
-	     shown (class "open") and the window is placed on it. A theme arranges regions and slots in
-	     its workspace.rcss, or forks this file to move slots between regions.
+	<!-- Where windows and HUD parts go. Each .slot names its window or HUD part in data-window; an
+	     open slot is shown (class "open") and its component is placed on it. A theme arranges
+	     regions and slots in its workspace.rcss, or forks this file to move slots between regions.
 
-	     Set by the game: #safe_area's top and bottom (the screen edge the HUD strip sits on), each
-	     content slot's size (the window's own size), and a region's height from data-ref-height,
-	     given in its windows' units. A region's data-scale picks the scale its windows are drawn at:
-	     dock (default), panel or hud. data-closes lists the windows that close when a slot's
-	     window opens, because the theme gives them no room beside it. Open slots in a data-covers-world region narrow the world
-	     area HUD widgets centre in. data-saved-position names a window's saved drag position, used
-	     while it is the first open window of its region. A window that moves itself (the friend list)
-	     only asks its slot where it first opens; the player's moves win after that. -->
-	<div id="safe_area">
-		<!-- Fills from the right edge in document order. -->
-		<div class="region dock-right" data-ref-height="432" data-covers-world>
-			<div class="slot" data-window="character" data-closes="party guild_info command command_list gold_bowman gold_bowman_lena gens_ranking mu_helper mu_helper_detail mu_helper_skill_list"></div>
-			<div class="slot" data-window="gens_ranking"></div>
-			<div class="slot" data-window="mu_helper"></div>
-			<div class="slot" data-window="mu_helper_detail"></div>
-			<div class="slot" data-window="party"></div>
-			<div class="slot" data-window="guild_info"></div>
-			<div class="slot" data-window="command"></div>
-			<div class="slot" data-window="command_list"></div>
-			<div class="slot" data-window="gold_bowman"></div>
-			<div class="slot" data-window="gold_bowman_lena"></div>
-			<div class="slot" data-window="npc_dialogue"></div>
-			<div class="slot" data-window="quest_progress"></div>
-			<div class="slot" data-window="npc_quest"></div>
-			<div class="slot" data-window="blood_castle_entry"></div>
-			<div class="slot" data-window="devil_square_entry"></div>
-			<div class="slot" data-window="castle"></div>
-			<div class="slot" data-window="guard"></div>
-			<div class="slot" data-window="gatekeeper"></div>
-			<div class="slot" data-window="gate_switch"></div>
-			<div class="slot" data-window="guild_make"></div>
-			<div class="slot" data-window="catapult"></div>
-			<div class="slot" data-window="duel_watch"></div>
-			<div class="slot" data-window="doppelganger_entry"></div>
-			<div class="slot" data-window="empire_guardian_entry"></div>
-			<div class="slot" data-window="united_marketplace"></div>
-			<div class="slot" data-window="my_quest" data-closes="party guild_info command command_list gold_bowman gold_bowman_lena gens_ranking mu_helper mu_helper_detail mu_helper_skill_list inventory pet"></div>
-			<div class="slot" data-window="pet" data-closes="inventory my_quest party guild_info command command_list gold_bowman gold_bowman_lena gens_ranking mu_helper mu_helper_detail mu_helper_skill_list"></div>
-			<div class="slot" data-window="quest_progress_etc" data-closes="inventory my_quest"></div>
-			<div class="slot" data-window="inventory" data-saved-position="my_inventory"
-			     data-closes="party guild_info command command_list gold_bowman gold_bowman_lena gens_ranking mu_helper mu_helper_detail mu_helper_skill_list my_quest"></div>
-			<div class="slot" data-window="inventory_extension" data-closes="storage_extension my_quest character"></div>
-			<div class="slot" data-window="storage"></div>
-			<div class="slot" data-window="storage_extension"></div>
-			<div class="slot" data-window="npc_shop"></div>
-			<div class="slot" data-window="mix"></div>
-			<div class="slot" data-window="trade"></div>
-			<div class="slot" data-window="my_shop"></div>
-			<div class="slot" data-window="purchase_shop"></div>
-			<div class="slot" data-window="lucky_coin_registration"></div>
-			<div class="slot" data-window="lucky_coin_exchange"></div>
-			<div class="slot" data-window="lucky_item"></div>
+	     The shell: #workspace_shell is a flex column of header, middle and footer; the middle row
+	     holds the left side, #safe_area (the content area) and the right side. A shell region's
+	     data-participation is reserve (it takes the space, so the content area avoids it) or
+	     overlay (placed over the content area, taking no space). A hidden component's slot
+	     collapses. The main HUD (main_hud) is one unit: its parts are laid out inside it by
+	     main_frame.rcss.
+
+	     Set by the game: each slot's size (its component's own size), and a region's height from
+	     data-ref-height, given in its windows' units. A region's data-scale picks the scale its
+	     components are drawn at: dock (default), panel or hud. data-closes lists the windows that
+	     close when a slot's window opens, because the theme gives them no room beside it. Open
+	     slots in a data-covers-world region narrow the world area HUD widgets centre in.
+	     data-saved-position names a window's saved drag position, used while it is the first open
+	     window of its region. A window that moves itself (the friend list) only asks its slot where
+	     it first opens; the player's moves win after that. -->
+	<div id="workspace_shell">
+		<div id="shell_header" class="region shell-region" data-scale="hud" data-participation="reserve"></div>
+		<div id="shell_middle">
+			<div id="shell_left" class="region shell-region" data-scale="hud" data-participation="reserve"></div>
+			<div id="safe_area">
+				<!-- Fills from the right edge in document order. -->
+				<div class="region dock-right" data-ref-height="432" data-covers-world>
+					<div class="slot" data-window="character" data-closes="party guild_info command command_list gold_bowman gold_bowman_lena gens_ranking mu_helper mu_helper_detail mu_helper_skill_list"></div>
+					<div class="slot" data-window="gens_ranking"></div>
+					<div class="slot" data-window="mu_helper"></div>
+					<div class="slot" data-window="mu_helper_detail"></div>
+					<div class="slot" data-window="party"></div>
+					<div class="slot" data-window="guild_info"></div>
+					<div class="slot" data-window="command"></div>
+					<div class="slot" data-window="command_list"></div>
+					<div class="slot" data-window="gold_bowman"></div>
+					<div class="slot" data-window="gold_bowman_lena"></div>
+					<div class="slot" data-window="npc_dialogue"></div>
+					<div class="slot" data-window="quest_progress"></div>
+					<div class="slot" data-window="npc_quest"></div>
+					<div class="slot" data-window="blood_castle_entry"></div>
+					<div class="slot" data-window="devil_square_entry"></div>
+					<div class="slot" data-window="castle"></div>
+					<div class="slot" data-window="guard"></div>
+					<div class="slot" data-window="gatekeeper"></div>
+					<div class="slot" data-window="gate_switch"></div>
+					<div class="slot" data-window="guild_make"></div>
+					<div class="slot" data-window="catapult"></div>
+					<div class="slot" data-window="duel_watch"></div>
+					<div class="slot" data-window="doppelganger_entry"></div>
+					<div class="slot" data-window="empire_guardian_entry"></div>
+					<div class="slot" data-window="united_marketplace"></div>
+					<div class="slot" data-window="my_quest" data-closes="party guild_info command command_list gold_bowman gold_bowman_lena gens_ranking mu_helper mu_helper_detail mu_helper_skill_list inventory pet"></div>
+					<div class="slot" data-window="pet" data-closes="inventory my_quest party guild_info command command_list gold_bowman gold_bowman_lena gens_ranking mu_helper mu_helper_detail mu_helper_skill_list"></div>
+					<div class="slot" data-window="quest_progress_etc" data-closes="inventory my_quest"></div>
+					<div class="slot" data-window="inventory" data-saved-position="my_inventory"
+					     data-closes="party guild_info command command_list gold_bowman gold_bowman_lena gens_ranking mu_helper mu_helper_detail mu_helper_skill_list my_quest"></div>
+					<div class="slot" data-window="inventory_extension" data-closes="storage_extension my_quest character"></div>
+					<div class="slot" data-window="storage"></div>
+					<div class="slot" data-window="storage_extension"></div>
+					<div class="slot" data-window="npc_shop"></div>
+					<div class="slot" data-window="mix"></div>
+					<div class="slot" data-window="trade"></div>
+					<div class="slot" data-window="my_shop"></div>
+					<div class="slot" data-window="purchase_shop"></div>
+					<div class="slot" data-window="lucky_coin_registration"></div>
+					<div class="slot" data-window="lucky_coin_exchange"></div>
+					<div class="slot" data-window="lucky_item"></div>
+				</div>
+				<!-- Fills from the left edge. Not data-covers-world: the original centred nothing around
+				     the warp list. -->
+				<div class="region dock-left" data-ref-height="432">
+					<div class="slot" data-window="move_map"></div>
+				</div>
+				<!-- Where the friend list first opens: the corner above the HUD. -->
+				<div class="region free-bottom-right">
+					<div class="slot" data-window="friends"></div>
+				</div>
+			</div>
+			<div id="shell_right" class="region shell-region" data-scale="hud" data-participation="reserve"></div>
 		</div>
-		<!-- Fills from the left edge. Not data-covers-world: the original centred nothing around
-		     the warp list. -->
-		<div class="region dock-left" data-ref-height="432">
-			<div class="slot" data-window="move_map"></div>
-		</div>
-		<!-- Where the friend list first opens: the corner above the HUD. -->
-		<div class="region free-bottom-right">
-			<div class="slot" data-window="friends"></div>
+		<div id="shell_footer" class="region shell-region" data-scale="hud" data-participation="reserve">
+			<div class="slot" data-window="main_hud"></div>
 		</div>
 	</div>
 	<!-- The original's centred NPC panels, on the 640x480 stage it centred them on (outside the

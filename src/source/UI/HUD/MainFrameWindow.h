@@ -275,8 +275,6 @@ namespace mu::ui::window
         // Whether the cursor is on a part of the HUD that takes the pointer, wherever the theme
         // placed it -- so world clicks there don't go through.
         bool IsMouseOverHud() const;
-        // The screen rectangle the strip and EXP bar cover, false while they aren't shown.
-        bool GetStripRect(float& left, float& top, float& right, float& bottom) const;
 
         void ReloadRmlTheme();
 

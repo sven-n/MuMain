@@ -37,6 +37,8 @@
 #include "Camera/CameraProjection.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlWorkspaceParticipant.h"
+#include "UI/Placement/WindowPlacement.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/Context.h>
@@ -66,6 +68,8 @@ bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng)
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MAINFRAME, this);
+
+    UI::RmlBridge::RegisterWorkspaceDocument("main_hud", [this] { return m_pRmlDoc; }, "hud_layout");
 
     // Guarded so the doc/model are created once, even though Create() re-runs on resolution change.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
@@ -313,11 +317,13 @@ void mu::ui::window::CMainFrameWindow::ReloadRmlTheme()
     }
 
     BuildRmlUi();
+    UI::Placement::Invalidate();
     // Next frame's Update()/SyncDocVisibility() self-corrects live state/visibility for both docs.
 }
 
 void mu::ui::window::CMainFrameWindow::Release()
 {
+    UI::Placement::UnregisterParticipant("main_hud");
     m_ItemHotKey.SetSlotIconsShown(false);
 
     if (m_pNewUIMng)
@@ -352,29 +358,6 @@ bool mu::ui::window::CMainFrameWindow::IsMouseOverHud() const
     Rml::Context* context = m_pRmlDoc->GetContext();
     Rml::Element* hover = context ? context->GetHoverElement() : nullptr;
     return hover != nullptr && hover != m_pRmlDoc && hover->GetOwnerDocument() == m_pRmlDoc;
-}
-
-bool mu::ui::window::CMainFrameWindow::GetStripRect(float& left, float& top, float& right, float& bottom) const
-{
-    if (m_pRmlDoc == nullptr || !m_pRmlDoc->IsVisible())
-        return false;
-    bool found = false;
-    for (const char* id : {"hud_strip", "exp"})
-    {
-        Rml::Element* part = m_pRmlDoc->GetElementById(id);
-        if (part == nullptr || !part->IsVisible())
-            continue;
-        const Rml::Vector2f offset = part->GetAbsoluteOffset(Rml::BoxArea::Border);
-        const Rml::Vector2f size = part->GetBox().GetSize(Rml::BoxArea::Border);
-        if (size.x <= 0.f || size.y <= 0.f)
-            continue;
-        left = found ? std::min(left, offset.x) : offset.x;
-        top = found ? std::min(top, offset.y) : offset.y;
-        right = found ? std::max(right, offset.x + size.x) : offset.x + size.x;
-        bottom = found ? std::max(bottom, offset.y + size.y) : offset.y + size.y;
-        found = true;
-    }
-    return found;
 }
 
 // RenderRightFrame()/RenderExperienceBackground()/RenderLifeMana()/RenderGuageAG()/RenderGuageSD()/
