@@ -34,7 +34,7 @@ Checked against the UNION of every theme copy's text, not each copy individually
 confirmed necessary by running this against main_frame, then the one forked
 window, before trusting it: C++ deliberately computes multiple, non-overlapping
 display-text fields for the same value (e.g. `hp_text` "935 / 935" vs legacy's own
-`hp_current_text` "935" -- see MainFrameWindow.cpp and STATUS.md's worked
+`hp_current_text` "935" -- see MainFrameWindow.cpp for the worked
 example), and each theme's own markup binds only the one it wants. A per-copy
 requirement flags that legitimate pattern as drift; a union requirement still
 catches the actual failure mode this script exists for (C++ references a name no

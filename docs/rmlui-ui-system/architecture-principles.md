@@ -2,11 +2,10 @@
 
 **Read this before touching any RmlUi UI code on this branch — before opening `README.md` or any
 other doc in this directory.** Everything else in `docs/rmlui-ui-system/` is either an
-implementation of these principles on this specific codebase (`layout-and-scaling.md`,
-`theming-and-modding.md`, `newui-tier-adapter.md`), an amendment scoped to one recurring question
-(`legacy-theme-modernization.md`), a status/reference report against all of the above (`STATUS.md`,
-`engine-findings.md`, `tracked-deferrals.md`), or a design record for the wider C++ UI-kit story
-this policy also governs (`ui-target-architecture.md`). None of them repeat the reasoning here — if
+implementation of these principles on this specific codebase (`building-new-ui.md` for the C++ UI
+kit, `layout-and-scaling.md`, `theming-and-modding.md`, `window-placement.md`), or a
+status/reference report against all of the above (`STATUS.md`, `engine-findings.md`,
+`tracked-deferrals.md`). None of them repeat the reasoning here — if
 something below and something elsewhere in this directory ever seem to disagree, this file wins; go
 fix the other file.
 
@@ -380,11 +379,62 @@ undiscoverable dependency §18–19's override system is meant to prevent. A the
 non-default C++ behavior should be **stating** that want (a manifest property, a data flag), not
 being **recognized by name**. See `STATUS.md` for known current violations of this rule.
 
+## 31. The Legacy Theme Is Not an Exemption From the Architecture
+
+The Legacy Theme is a compatibility and visual-preservation layer, **not an exemption from the
+modern RmlUi architecture** (§13). Where legacy UI behaviour lives in C++, maintaining or migrating
+it means moving its presentation into RML/RCSS **wherever RML/RCSS can express the behaviour
+without compromising gameplay logic or compatibility**.
+
+> Preserve the legacy UI's intended appearance and behaviour, but move its presentation and
+> UI-specific implementation from C++ into RML/RCSS whenever RmlUi can represent it cleanly.
+
+The objective is **not** to rewrite legacy behaviour for the sake of modernization; it is to
+separate legacy **intent and behaviour** from legacy **implementation artifacts**:
+
+**C++ determines what the UI means and what state it is in.**
+
+**RmlUi determines how that state is presented and laid out.**
+
+Classify each piece of legacy UI code into one of three categories:
+
+1. **Preserve in C++** — genuine application/game logic or engine integration ("when the player
+   clicks the inventory button, open the inventory system").
+2. **Move to RmlUi** — behaviour that exists because the old UI framework lacked declarative
+   layout and styling: X from screen width, Y from screen height, moving a panel on a resolution
+   change, resizing for widescreen, positioning children by hand, changing a button's appearance
+   by state. A branch such as `if (screenWidth >= 1920) SetPosition(320, …)` is a migration
+   candidate: express its intent ("bottom-aligned, stretched or centred depending on the theme")
+   in RML/RCSS or the theme's layout.
+3. **Split** — code that mixes both. Separate them: C++ sets the state and updates the data; RmlUi
+   shows the window, positions and sizes it, applies the theme and visual state.
+
+"The legacy theme originally did this in C++, so it should continue doing it in C++" is **not**
+sufficient reasoning. Ask instead:
+
+1. What was the original UI intent?
+2. Is the current C++ implementation actually expressing that intent?
+3. Is some of it merely an artifact of the old UI framework?
+4. Can RML/RCSS express the same behaviour?
+5. Can it be moved without changing the externally observable legacy behaviour?
+6. Does keeping it in C++ create unnecessary coupling with the theme?
+
+If RmlUi can represent the behaviour cleanly, **prefer the RmlUi implementation**. But do not
+force a behaviour into RML/RCSS merely because the code can be moved: the goal is **architectural
+ownership**, not maximum migration percentage. Where RmlUi can express it only partially, split
+the responsibilities; where it cannot, keep the C++ integration.
+
+The Legacy Theme preserves the legacy visual identity, sprites and textures, intentional
+dimensions, positioning and alignment, interaction semantics and visual states, and genuinely
+legacy-specific behaviour. It does **not** preserve C++ coordinate calculations, resolution
+branches, manual layout calculations, duplicated widget implementations, theme-specific rendering
+code, C++ presentation state machines, or historical framework abstractions RmlUi replaces.
+
+> **Legacy in appearance and compatibility, but not unnecessarily legacy in architecture.** When
+> migrating legacy code, preserve the behaviour users recognize — not the implementation technique
+> that originally produced it.
+
 ---
 
-**Next**: [`legacy-theme-modernization.md`](legacy-theme-modernization.md) — an amendment
-resolving one recurring question this document leaves implicit: when legacy-theme UI behavior
-currently lives in C++, when should maintaining/migrating it mean moving that behavior into
-RML/RCSS, and when does it genuinely stay in C++. Then [`STATUS.md`](STATUS.md) for what's
-actually implemented against both documents today, known gaps, and open conflicts with other
-standing decisions on this branch.
+**Next**: [`STATUS.md`](STATUS.md) for what's implemented against this document today and the
+known gaps.

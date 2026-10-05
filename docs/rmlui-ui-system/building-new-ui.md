@@ -1,74 +1,136 @@
 # Building New UI: Windows, Dialogs, HUD Panels, and Widgets
 
 A decision guide for "which base class / widget class / folder do I use when adding something
-new under `UI/`?" The codebase has two widget toolkits left -- a third, the `CUIControl` family,
-was retired in 2026-10 -- and on the surface they look interchangeable; several classes even share
-almost the same name across them. They aren't interchangeable, and this doc exists so a new window doesn't
-accidentally reach for a closed, historical one. Read `architecture-principles.md` first for the
-overall philosophy this follows; this doc is the concrete "what do I actually type" answer for the
-C++ object layer specifically (`component-catalog.md` covers the parallel RmlUi/RCSS layer).
+new under `UI/`?", and how a window's C++ side plugs into RmlUi. Read `architecture-principles.md`
+first for the philosophy; this doc is the concrete C++ object-layer answer (`component-catalog.md`
+covers the parallel RmlUi/RCSS layer).
 
-**Read this before the toolkit table below**: for anything with a visible presentation, RmlUi +
-`base.rcss`'s shared classes (`.btn`, `.checkbox-box`, `.tooltip`) is canonical — not a fourth
-option alongside the historical toolkits here. The `mu::ui::window` tier's own widget family
-(`Widgets/Window/*.h`, the cheat sheet below) is a **transitional bridge for content that must stay
-native** — live 3D-camera-viewport content (e.g. `CCharMakeWin`'s character-preview panel),
-world-anchored overlays, or a documented Type-1/Type-2 RmlUi-companion pattern (a redundant
-click-detector behind a real RmlUi button; the Type-2 "real widget RmlUi can't host" category has
-no instances left) — not a permanent alternative to RmlUi for ordinary 2D chrome. See
-[`ui-target-architecture.md`](ui-target-architecture.md) for the full reasoning and the
-cross-check against `architecture-principles.md` that established this. **This doc's base-class
-guidance below is unchanged** (`mu::ui::window::CObject`, always) — what changed is which widgets a
-*new* window reaches for once it has one.
+For anything with a visible presentation, RmlUi + `base.rcss`'s shared classes (`.btn`,
+`.checkbox-box`, `.tooltip`, `.text-field`) is canonical. The `mu::ui::window` widget family
+(`UI/Widgets/Window/*.h`) is a **transitional bridge for content that must stay native** — live
+3D-camera content, world-anchored overlays, or a documented native companion — not an alternative
+to RmlUi for ordinary 2D chrome. "Shape of the kit" below has the reasoning and where the line
+sits.
 
-## Toolkit generations and their current roles
+## Toolkits and their current roles
 
 | Toolkit | Base class(es) | Real home | Status |
 |---|---|---|---|
-| Sprite widgets | *(none — `CButton` and `CGaugeBar` both fully closed)* | — | **Closed to new production consumers.** The sprite CButton remains covered by `tests/ui/test_ui_scaling.cpp`. `CWin`/`CWinEx` are fully deleted now (`UI/Widgets/{Win,WinEx}.h/.cpp` removed outright) — they'd already reached zero live subclasses and zero remaining composed members anywhere (`CSysMenuWin`/`CCharMakeWin`/`CServerSelWin` were the last three holders; all provably dead — never rendered, any real state moved to a plain struct read by RmlUi's data binding). The sprite-tier `CButton`'s last consumer was `CCreditWin::m_btnClose` — Stage 1 of that screen's RmlUi port (`credit_win.rml`/`.rcss`: background/deco/logo/close button) retired it, so `::CButton` had zero remaining production consumers from that point on. Stage 2 finished the rest of `CCreditWin`: the scrolling credit text (department/team/names, opacity-faded via the model instead of `g_pRenderText` + a black hide-overlay sprite) and the illustration crossfade — the latter's first attempt used two `<img>`s with a C++-swapped `data-attr-src`, but `<img>`/`ElementImage` didn't fill its CSS box correctly in this engine (root cause never pinned down); the working version instead uses two named `@spritesheet`-backed decorators, C++-swapped via `data-style-decorator` the same way `CBuffStrip`'s buff icons already do, plus a model-pushed `opacity` — `CCreditWin` is fully off the sprite toolkit and its `Render()` override is a no-op. That pass also registered a second RmlUi font face (`NanumGothic-Regular.ttf`, `RmlUiRuntime.cpp`) for the credit names, since they aren't guaranteed ASCII the way every other RmlUi string ported so far has been — full CJK/Cyrillic RmlUi text coverage beyond that one face remains a separate, pre-existing, project-wide gap (every other ported window's legacy theme still hardcodes `"Liberation Sans"`), not something this pass tried to fix. `CGaugeBar`'s last consumer was `TitleSceneUI.cpp`'s splash-screen loading bar — ported to RmlUi's own built-in `<progress>` element (`title_scene.rml`/`.rcss`; `Factory.cpp` registers it in Core, no extra setup needed), with `SetValue()`/`SetMax()` called directly from C++ each frame — no data-model binding needed, `<progress>` already owns that state. Its `left`/`top`/`width`/`height` are pushed from C++ as real `px` too, not static `dp`: this scene's 13 background tiles are still native `CSprite`, scaled via the original `fScaleX`/`fScaleY` (800x600-reference, independent per axis, unclamped) math, which RmlUi's shared `dp` unit (640x480-reference, one uniform clamped/damped factor, `UITransform.cpp`'s `ViewportFitScale()`) can't reproduce at arbitrary window sizes — confirmed live, the first `dp`-based attempt only lined up at exactly 640x480. Recomputing the identical `fScaleX`/`fScaleY` math `CGaugeBar::Create()`/`SetPosition()` used and pushing it as `px` keeps the bar pixel-exact with the sprites at any resolution, the same reasoning `login_main.rcss`'s own `#panel` uses for pushing its geometry from C++. `GaugeBar.h/.cpp` are deleted outright, same treatment `CWin`/`CWinEx` got. (`CMsgWin`/`CLoginMainWin`/`CCharSelMainWin`/`CLoginWin` used to also hold sprite `CButton`s as a deliberate redundant-click-detection companion behind their real RmlUi buttons; that companion path has been dropped from all four — RmlUi is now the sole click path, and `CLoginWin`'s checkbox state moved to plain `bool`s.) Nothing left to add a new consumer to. |
-| `CUIControl` family | `CUIControl : CUIMessage`, `CUIBaseWindow : CUIControl`, `CUIWindowMgr`, `CUIPhotoViewer` | `UI/Social/SocialWindowCore.h` | **Retired down to its base (2026-10-04).** `CUIButton`, `CUITextListBox<T>` and all ~20 of its subclasses, `CUITextInputBox`, `CUIChatInputBox`, `CRadioButton`, `CUISlideHelp`/`CSlideHelpMgr`, `CUIGuildInfo`/`CUIGuildMaster`/`CUIPopup` are **deleted** -- `SocialWindowCore.h` went 1,488 -> 186 lines. Do not reach for anything in this family when building new UI: text fields are a stock RmlUi `<input>` with the shared `.text-field`, lists are a `data-for` binding in a `.scroll-pane`, buttons are `.btn`. What survives is `CUIControl` and its UI-message plumbing, still the base of `CUIBaseWindow`/`CUIPhotoViewer` -- the friend/mail/chat family's own window manager, which is fully ported to RmlUi documents and keeps that base only for position/state/message bookkeeping. Taking those two off it is what deletes the header; see `tracked-deferrals.md`. |
-| `mu::ui::window` tier | `CObject : IObject`, `CManager`, `CButton`/`CRadioButton`/`CRadioGroupButton`/`CCheckBox`/`CComboBox`/`CScrollBar`/`CTextBox` | `UI/Core/{WindowObject,WindowManager}.h`, `UI/Widgets/Window/*.h` | **`CObject`/`CManager` are the default base class for all new work** — this is the toolkit the other ~88 in-game HUD/inventory/combat/event/NPC/option/quest windows already use. Its own **widget family is transitional**, for native-only content only (see the note above) — for anything with an RmlUi presentation, use RmlUi + `base.rcss` instead. |
+| Sprite widgets | *(none left)* | — | **Closed.** `CWin`/`CWinEx`, `CGaugeBar` and `CSlider` are deleted; the sprite `::CButton` has no production consumer (still covered by `tests/ui/test_ui_scaling.cpp`). Nothing to add a consumer to. |
+| `CUIControl` family | `CUIControl : CUIMessage`, `CUIBaseWindow`, `CUIWindowMgr`, `CUIPhotoViewer` | `UI/Social/SocialWindowCore.h` | **Retired down to its base.** Every widget in it is deleted. What survives is the base and its UI-message plumbing under the friend/mail/chat family, kept only for position/state/message bookkeeping; see `tracked-deferrals.md`. |
+| `mu::ui::window` tier | `CObject : IObject`, `CManager`, `CButton`/`CRadioButton`/`CRadioGroupButton`/`CCheckBox`/`CComboBox`/`CScrollBar`/`CTextBox` | `UI/Core/{WindowObject,WindowManager}.h`, `UI/Widgets/Window/*.h` | **`CObject`/`CManager` are the base for all new work.** The widget family is for native-only content. |
 
-## Reference screens — copy these, not an arbitrary neighboring window
+## Shape of the kit
 
-`ui-target-architecture.md` Section H, item 15: one named, already-verified example per shape. The
-end state is **3 permanent shapes** — RmlUi owns all ordinary 2D UI, a hybrid RmlUi/native-3D split
-for content with a live 3D-camera-viewport or world-anchored piece, and world-overlay UI for
-per-frame-projected content with no static 2D rect. The former native-only social
-subsystem now uses RmlUi documents. Start from the reference matching your content:
+```
+1. UI Runtime     — CObject / CManager (lifecycle, dispatch, depth/key order, show/enable)
+2. UI Geometry    — UI::Scaling::UITransform / UILayoutPolicy, the opt-in WindowGeometry,
+                    and the theme's workspace (window-placement.md)
+3. UI Components  — RmlUi + base.rcss components; the mu::ui::window widgets only for
+                    content that stays native
+4. Presentation   — RmlUi/RCSS, CSprite (native visuals), CUIRenderText
+5. Application UI — CTrade, CMyInventory, CMainFrameWindow, … — composes 1–4
+```
+
+- **`CObject` stays thin — no geometry, rendering, input or styling fields.** `CCharInfoBalloonMng`
+  has no static rect at all (a per-frame `WorldToScreen()` projection), so a base-class geometry
+  field would be meaningless for it. A window with a real rect owns a `WindowGeometry` value
+  (composition) and calls `Contains()` from its own `UpdateMouseEvent()`; per-row or per-tab
+  sub-rects stay inline. `CObject`'s shown/active split (`UpdateWhileShown()`/
+  `UpdateWhileActive()`) is the same opt-in shape.
+- **`CManager` provides only a coordinate space.** Its dispatch wraps every `Update()`/`Render()`/
+  `UpdateMouseEvent()`/`UpdateKeyEvent()` in a `ScopedActiveTransform` from `GetLayoutMode()`, and
+  is topmost-first, consume-and-stop (`UpdateMouseEvent()` returns `false` only to consume).
+  `UI::Scaling` (seven `LayoutMode`s) is the one coordinate-transform layer.
+- **Input**: `CInput` is built on `CNewKeyInput` (its keyboard queries forward to the
+  `IsPress`/`IsRelease` free functions) — one root sampler plus a façade scoped to login and
+  character select, whose mouse state is stale elsewhere. RmlUi's own events drive RmlUi elements
+  only.
+- **No native container layer.** `CManager`'s registry is flat; RmlUi's DOM gives every ported
+  window containment and scroll clipping, so a native `Panel`/`ScrollContainer`/`HUDContainer`
+  (principles §20) would serve only the shrinking native population and is not built.
+
+**The RmlUi/native boundary.** Permanently native is only content with no RmlUi equivalent:
+**live 3D** (item grids and icons, equipped items, character and item previews) and
+**world-anchored positions** (`WorldToScreen()` projections). The background context lets RmlUi
+paint *behind* live 3D, and `UI::RmlBridge::RenderTarget` lets a document *show* it as an image;
+neither makes the 3D render portable. That decides who draws the content, not where it may sit.
+Everything else — chrome, layout, text, buttons, tooltips, sprite-atlas icons — is RmlUi; the test
+is "is this a live 3D render or a world-space projection", not "is this hard to port". A ported
+window may keep one kind of native companion: a control kept for hit-testing or for state other
+code reads (the quick command menu's hover index, which the control socket observes).
+
+## Reference screens — copy these, not an arbitrary neighbouring window
+
+Three permanent shapes, following that boundary:
 
 | Shape | Reference | Why |
 |---|---|---|
-| RmlUi-only 2D UI | `CMsgWin` (`UI/Windows/MsgWin.h`) | Ordinary screen-anchored modal, no `CWin` involvement. `RememberPasswordPrompt` for a free-function variant with no reusable state. This is the default destination for every screen; the other two permanent shapes below are the only carve-outs. |
-| Hybrid RmlUi/native 3D UI | `CItemHotKey` (`UI/HUD/MainFrameWindow.h/.cpp`) | RmlUi owns the slot chrome; the item icon stays a genuine live 3D render — the permanent boundary, not a porting gap. |
+| RmlUi-only 2D UI | `CMsgWin` (`UI/Windows/MsgWin.h`); `RememberPasswordPrompt` for a free-function variant | The default for every screen; the other two are the only carve-outs. |
+| Hybrid RmlUi/native 3D UI | `CItemHotKey` (`UI/HUD/MainFrameWindow.h/.cpp`) | RmlUi owns the slot chrome; the item icon stays a live 3D render — the permanent boundary, not a porting gap. |
 | World-overlay UI | `CCharInfoBalloonMng` (`Character/CharInfoBalloonMng.h`) | Per-frame `WorldToScreen()` projection, no static 2D rect. |
-| ~~Native-only UI~~ | — | **No longer a shape.** `CFriendWindow` was this row's only example; its windows are RmlUi documents as of 2026-10-04. Three shapes remain: RmlUi-only 2D, hybrid RmlUi/native-3D, and world-overlay. |
-
-See `ui-target-architecture.md` Section H item 15 for the full reasoning behind each pick.
 
 ## Quick decision guide for a new window, dialog, or HUD panel
 
-1. **Base class: `mu::ui::window::CObject`.** Always. Never `CWin`/`CWinEx` — see above, that's a
-   closed set with no live subclasses left to imitate.
-2. **Register it** with the scene's `mu::ui::window::CManager` (`AddUIObj(INTERFACE_KEY, this)`)
-   the same way every other window in this tier does — see any file in `UI/HUD/`, `UI/Inventory/`,
-   etc. for the pattern, or `newui-tier-adapter.md`'s "adapter shape" section for the full method
-   contract (`Render()`/`Update()`/`UpdateMouseEvent()`/`UpdateKeyEvent()`/`GetLayerDepth()`).
-3. **Widgets: use RmlUi and shared `base.rcss` classes.** Use `.btn`, `.checkbox-box`,
-   `.tooltip`, and stock `<input>` elements styled with `.text-field`. The native widget
-   cheat sheet applies only to documented native companions; it is not the default for new UI.
+1. **Base class: `mu::ui::window::CObject`.** Always.
+2. **Register it** with `CManager` (`AddUIObj(INTERFACE_KEY, this)`) like every window in
+   `UI/HUD/`, `UI/Inventory/`, etc. Implement it as in "The C++ side of an RmlUi window" below.
+3. **Widgets: RmlUi and shared `base.rcss` classes.** The native cheat sheet below applies only
+   to documented native companions.
 4. **Folder: by feature domain, not by toolkit.** `UI/Combat/`, `UI/Inventory/`, `UI/Events/`,
-   `UI/HUD/`, `UI/NPCs/`, `UI/Party/`, `UI/Social/`, `UI/Quests/`, `UI/Character/`, `UI/Options/`. `UI/Widgets/`
-   is for genuinely generic, feature-agnostic controls only (not a catch-all). `UI/Dialogs/` is for
-   modal/message-box-style windows. `UI/Windows/` is the closed, already-migrated `CWin`-heritage
-   set — don't add new windows there.
-5. **Porting/wrapping an existing big legacy subsystem instead of writing one from scratch?** Wrap
-   it behind a thin `mu::ui::window::CObject` adapter whose methods forward into the legacy
-   implementation, rather than reimplementing it or inventing a second parallel manager.
-   `CFriendWindow` (owns and forwards to `CUIWindowMgr`, see below) is the template — it's the
-   same shape `newui-tier-adapter.md` documents for porting a window's *rendering* to RmlUi, just
-   applied one layer earlier (wrapping the object lifecycle before the render target changes at
-   all).
+   `UI/HUD/`, `UI/NPCs/`, `UI/Party/`, `UI/Social/`, `UI/Quests/`, `UI/Character/`, `UI/Options/`,
+   `UI/MuHelper/`. `UI/Widgets/` is for genuinely feature-agnostic controls only; `UI/Dialogs/` for
+   modal/message-box-style windows. `UI/Windows/` is the closed login/credit set — don't add there.
+5. **Wrapping a big legacy subsystem instead of writing one?** Put a thin `CObject` adapter in
+   front that forwards into it, rather than reimplementing it or inventing a second manager.
+   `CFriendWindow` (owns and forwards to `CUIWindowMgr`) is the template.
+6. **Coordinates go through `UI::Scaling`.** No second `g_fScreenRate_x`-style global or
+   hand-rolled reference scale; add a `LayoutMode` case if none fits (and a `UILayoutPolicy.cpp`
+   case for the new `INTERFACE_*` key — `AddUIObj()` overwrites the window's own mode).
+7. **Widget-level polling goes through `mu::ui::window::IsPress`/`IsRelease`/`IsNone`/`IsRepeat`**
+   (`UI/Core/WindowCommon.h`); `CInput::Instance()` only for the login/character-select family's
+   real-pixel needs (double-click, left-hand swap, raw cursor).
+8. **Load documents through `UI::RmlBridge::LoadThemedDocument()`**; theme-specific behaviour is a
+   `theme.ini` capability, never a theme-name branch. Tooltips use `UI::RmlBridge::Tooltip` or the
+   `.tooltip` RCSS convention, never a new per-window `RenderTooltip()`.
+9. **Deprecated families get no new call sites, features or subclasses**, and no new native
+   button implementation.
+
+## The C++ side of an RmlUi window
+
+`CObject`'s interface (`UI/Core/WindowObject.h`) is `Render()`/`Update()`/`UpdateMouseEvent()`/
+`UpdateKeyEvent()`/`GetLayerDepth()`/`IsVisible()`, plus non-virtual `Create()`/`Release()`/
+`Show()`. For a window whose visuals are an RmlUi document:
+
+- **`Render()` draws nothing** and returns `true`; RmlUi renders the document in its own pass.
+- **`UpdateMouseEvent()` claims the panel**, so a click on it doesn't also reach windows below or
+  the world: read the live RCSS size with `UI::RmlBridge::RefreshLogicalPanelSize()` and return
+  `false` while the cursor is inside `WindowGeometry(m_Pos, size)` (`CCharacterInfoWindow` is the
+  shape). RmlUi does the actual hit-testing of buttons and fields. Test it at a non-100 % UI scale
+  (`layout-and-scaling.md`'s scale sweep).
+- **`UpdateKeyEvent()`** keeps only real key behaviour (Esc to close, hotkeys).
+- **`Create()` builds the document and model once**, guarded by
+  `if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())` — `Create()` runs again on resolution
+  change and must not recreate the document. Register for theme reload
+  (`RegisterForThemeReload`) and unregister in `Release()`.
+- **`Update()`** reads live game state into the model; it runs only during `MAIN_SCENE`.
+- **Visibility.** Show/hide the document from `Show(bool)`, or from a per-frame sync through
+  `UI::RmlBridge::SyncDocumentVisibility()` (transition-only — re-asserting `Show()` every frame
+  steals focus from a text field; see `RmlDocumentVisibility.h`). A HUD document that stays shown
+  across scenes must also be added to `CSystem::SyncMainSceneHudVisibility()`
+  (`WindowSystem.cpp`) through a `SyncDocVisibility(bool sceneAllowsShow)` method: `CObject`'s
+  `Update()` only runs in `MAIN_SCENE`, so nothing else hides it on the login and
+  character-select screens.
+- **Delete the native widgets the document replaces** (`CButton`s, `SetButtonInfo()`, tooltip
+  helpers, `LoadImages()`/`UnloadImages()` no one else aliases). Once `Render()` paints nothing
+  they cannot do anything; they are not redundancy.
+- **Blur on every hide** if the document has a text field: a hidden document's focused `<input>`
+  keeps `RmlUiRuntime::IsTextInputActive()` true and silences every hotkey
+  (`CChatInputBox::ClosingProcess()` is the shape).
+- **Clicks on the world.** `Input/Selection.cpp` (`SelectObjects()`) and
+  `Engine/Object/ZzzInterface.cpp` (`Attack()`) check `Core::Input::IsMouseOverUI()` beside the
+  native `MouseOnWindow`/`mouseOnHud`/`CheckMouseUse()` flags, so every RmlUi document is covered
+  automatically. A new gameplay call site that gates on those flags needs the same check.
 
 ## Ownership: what the C++ side of a window may own
 
@@ -127,8 +189,15 @@ set its own container and let the theme address them with `:nth-child` (`engine-
 10. **Branch on a declared theme capability, never a theme name** (§30) — `theme.ini`'s
     `[Capabilities]`, read via `ThemeUsesNativeTextSize()`. Better
     still, ship the content in shared markup and let a theme that doesn't want it hide it in RCSS.
-11. **Expose a purpose-built view model, never a game object.** Currently true of all ~98
-    registered structs — don't be the first exception.
+11. **Expose a purpose-built view model, never a game object.** Currently true of every
+    registered struct — don't be the first exception.
+
+**The shape in one example.** The skill hotkey's number used to be a digit-sprite subscript drawn
+in C++ for both themes. Now `CSkillList::GetHotKeySlotNumber()` returns the number,
+`SyncRmlModel()` binds it, and each theme's `main_frame.rml`/`.rcss` places it through
+`.skill-hotkey-label` (modern: top-left like its Q/W/E/R; legacy: bottom-right like the original).
+Likewise the HP readout: C++ computes both `hp_text` ("935 / 935") and `hp_current_text` ("935"),
+and each theme binds the one it wants — no theme-name check anywhere (§30, §31).
 
 **Two documents to compare before choosing a shape.** `mu_helper_config.rml` and
 `guard_window.rml` are the same kind of window — same dock, same `docked_panel_frame.rcss`, both
@@ -136,79 +205,80 @@ tabbed, both with a native control retained underneath. The first binds *only* i
 and places ~65 controls by id in RCSS; the second binds its every label position, size, alignment,
 weight and colour, and its RCSS can change almost nothing. Copy the first.
 
+## Naming
+
+Name the C++ class and the RmlUi assets after what the window *is*, not the legacy tier or class
+it came from, and rename at port time (`architecture-principles.md` §12):
+`CNewUIHeroPositionInfo` became `CMuHelperBar` / `mu_helper_bar.rml`, with its `INTERFACE_*` key,
+accessor and globals renamed to match. Port one legacy class as one component; split only where
+the code already has two independent lifecycles.
+
 ## Widget cheat sheet (native-only content on new `mu::ui::window::CObject` windows)
 
-Applies only to content that must stay native (see the note above) — for anything with an RmlUi
-presentation, skip this table and use RmlUi + `base.rcss`'s `.btn`/`.checkbox-box`/`.tooltip`
-instead.
+Applies only to content that must stay native — for anything with an RmlUi presentation, skip this
+table.
 
 | Need | Use | Header | Don't confuse with |
 |---|---|---|---|
-| Button | `mu::ui::window::CButton` | `UI/Widgets/Window/Button.h` | `::CButton` (sprite toolkit, closed) — two unrelated classes, same bare name, disambiguated by namespace. A third, `CUIButton`, is deleted |
-| Radio button | `mu::ui::window::CRadioButton` (+ `CRadioGroupButton` to coordinate a set) | `UI/Widgets/Window/Button.h` | The former global `::CRadioButton` was deleted with the old widget family |
+| Button | `mu::ui::window::CButton` | `UI/Widgets/Window/Button.h` | `::CButton` (sprite toolkit, closed) — two unrelated classes, same bare name, disambiguated by namespace |
+| Radio button | `mu::ui::window::CRadioButton` (+ `CRadioGroupButton` to coordinate a set) | `UI/Widgets/Window/Button.h` | — |
 | Checkbox | `mu::ui::window::CCheckBox` | `UI/Widgets/Window/Button.h` | — |
-| Dropdown | `mu::ui::window::CComboBox` | `UI/Widgets/Window/ComboBox.h` | Deliberately base-less by design (see its own header comment) — don't force it onto `CObject` |
+| Dropdown | `mu::ui::window::CComboBox` | `UI/Widgets/Window/ComboBox.h` | Deliberately base-less (see its header) — don't force it onto `CObject` |
 | Scroll bar | `mu::ui::window::CScrollBar` | `UI/Widgets/Window/ScrollBar.h` | — |
 | Multi-line read-only text | `mu::ui::window::CTextBox` | `UI/Widgets/Window/TextBox.h` | — |
-| Single-line text entry | **stock RmlUi `<input>`** + shared `.text-field` | `themes/*/base.rcss`, `themes/*/my_shop.rml` | The convention for new UI — bind with `data-value`, style with `.text-field`, keep `maxlength`/validation in C++. See `component-catalog.md`'s "Text field". `CUITextInputBox` has been deleted |
-| Progress/gauge bar | *(none yet as a reusable wrapper — `CGaugeBar` is sprite-toolkit-only, closed)* | — | RmlUi's own built-in `<progress>` element (`RmlUi/Core/Elements/ElementProgress.h`, registered by `Factory.cpp` with no extra setup) is a real, proven option now — `title_scene.rml`'s loading bar uses it, with `SetValue()`/`SetMax()` called directly from C++. `main_frame.rcss`/`server_select.rcss`'s own gauges predate that and still use a plain div + `data-style-width`, not retrofitted — check `component-catalog.md`'s "doesn't exist yet" list before inventing a third pattern |
-| Scrollable list of rows | *(no native-tier wrapper — don't build one)* | — | RmlUi's `data-for` binding in a `.scroll-pane` is the answer; see `component-catalog.md`'s "List / repeated rows". The native family that used to serve this, `CUITextListBox<T>`, is deleted |
-| MU Helper configuration windows | `CMuHelperConfigWindow`, `CMuHelperDetailWindow`, `CMuHelperSkillPicker` | `UI/MuHelper/` | Named for what each window is; none can be mistaken for `MUHelper::CMuHelper`, the bot-logic engine they configure |
+| Single-line text entry | **stock RmlUi `<input>`** + `.text-field` | `themes/*/base.rcss` | Bind with `data-value`, keep `maxlength`/validation in C++; numeric fields use `UI::RmlBridge::NumericInputFilter`. See `component-catalog.md`'s "Text field" |
+| Progress/gauge bar | RmlUi's built-in `<progress>` | — | `title_scene.rml`'s loading bar; check `component-catalog.md` before inventing another pattern |
+| Scrollable list of rows | RmlUi `data-for` in a `.scroll-pane` | — | `component-catalog.md`'s "List / repeated rows" |
 
-## Namespaces and existing class names
+## Namespaces and look-alike names
 
-`mu::ui::window` identifies the established CObject/CManager family across feature
-folders. Keep that namespace when moving existing classes; it need not mirror paths.
+- `::CButton` is the closed sprite implementation; `mu::ui::window::CButton` is the native
+  companion. Qualify where both are visible.
+- `MUHelper::CMuHelper` is the bot engine; `CMuHelperConfigWindow`/`CMuHelperDetailWindow`/
+  `CMuHelperSkillPicker` (`UI/MuHelper/`) are its settings UI.
+- `UI/HUD/ChatInputBox.h` is the complete chat-input window, not a reusable text-entry widget.
+  `UI/HUD/SlideWindow.h` similarly owns the notice window beside its SlideTicker.
 
-- `::CButton` is the closed CSprite-derived implementation;
-  `mu::ui::window::CButton` is the transitional native companion. Ordinary visible
-  buttons use RmlUi's shared `.btn` style. Qualify existing C++ names where both are visible.
-- The global `::CRadioButton` and `CUIButton` have been deleted. The remaining
-  `mu::ui::window::CRadioButton` is for documented native companions.
-- `MUHelper::CMuHelper` is the bot engine; `CMuHelperConfigWindow` is its settings UI.
-- `UI/HUD/ChatInputBox.h` declares the complete RmlUi chat-input window. It is a
-  feature window, not a reusable text-entry widget. `UI/HUD/SlideWindow.h` similarly
-  owns the notice window beside its SlideTicker implementation.
+## Kept out of the UI kit on purpose
 
-## Confirmed dead — don't resurrect these as a pattern
+Domain logic a component may call into, but which never moves into a generic UI type:
 
-- **`CSlider`** (`UI/Widgets/Slider.h`, composed a `CButton` + `CGaugeBar`) — deleted 2026-09-05,
-  confirmed zero consumers anywhere in the tree. If a slider control is genuinely needed again,
-  use an RmlUi control and theme styling rather than reviving this.
-- **`UIDefaultBase`** — deleted during the `UI/` directory restructure, fully inert (`#ifdef`-gated
-  on a macro that was never defined).
+- **`CInventoryActionController`/item drag-drop** — inventory business logic (move/split/stack,
+  server round-trips) that renders through UI.
+- **`CUIManager`'s open/close exclusion** (`MUTEX_*` keys) — domain policy ("opening Inventory
+  closes the personal shop purchase window"); don't merge it into `CManager`.
+- **Skill-tooltip content** (`UI::Skills::Tooltip::BuildModelForSlot`) — rendering uses the shared
+  tooltip; deciding what a skill tooltip says stays domain logic.
+- **3D-camera and world-space rendering** (`Window3DRenderMng`/`I3DRenderObj`, `WorldOverlay`) —
+  the boundary above.
 
-## The `SocialWindowManager.cpp` / `CFriendWindow` seam
+## Driving `CSprite` from native code
+
+`CSprite` takes reference-resolution coordinates and applies the active transform's scale and the
+live screen offset inside `Render()` (pre-scaling double-applies the offset). It bakes scale and
+its Y-flip's `WindowHeight` basis in at `Create()`, with no live updater — rebuild it whenever
+image, frame count, size, `WindowHeight` or scale change. `CButton::Render(true)`'s UV crop for
+`MiniMap.cpp` is the one remaining `RenderImage()` path.
+
+## The `CFriendWindow` seam
 
 `UI/Social/SocialWindow*.h/.cpp` holds `CUIBaseWindow`, `CUIWindowMgr` and `CUIPhotoViewer`, reached
-through exactly one seam: `CFriendWindow : public mu::ui::window::CObject` owns one `CUIWindowMgr*`
-and forwards into it. **The windows themselves are RmlUi now** (2026-10-04) -- the shell, each chat
-room and each letter own a document and a data model, and `SocialWindowManager.cpp` keeps the manager that
-arranges them, the UI-message queue they talk over, and the native `CUIPhotoViewer` that draws a
-letter's sender.
+through one seam: `CFriendWindow : public mu::ui::window::CObject` owns one `CUIWindowMgr*` and
+forwards into it. The windows themselves are RmlUi documents — the shell, each chat room and each
+letter — and `SocialWindowManager.cpp` keeps the manager that arranges them, the UI-message queue
+they talk over, and the native `CUIPhotoViewer` that draws a letter's sender.
 
-So this is no longer a "native-only stopgap" to wrap rather than reimplement. Two things are worth
-knowing if you touch it:
-
-- `CUIBaseWindow`/`CUIPhotoViewer` still derive from `CUIControl`, which is the only reason
-  `SocialWindowCore.h` still exists. Taking them off that base is what finishes the toolkit retirement
+- `CUIBaseWindow`/`CUIPhotoViewer` still derive from `CUIControl`, the only reason
+  `SocialWindowCore.h` exists. Taking them off that base finishes the toolkit retirement
   (`tracked-deferrals.md`).
-- The file is a grab-bag whose name says nothing about what it holds, and until 2026-10-04 it was
-  `#include`d by ~30 files across maps, events, pets and scenes that used nothing from it. Those are
-  cleaned up; don't add a new one without needing a symbol it declares.
+- Don't `#include` `SocialWindowCore.h` without needing a symbol it declares.
 
 ## Cross-references
 
-- [`ui-target-architecture.md`](ui-target-architecture.md) — the canonical/transitional
-  framing this doc's widget guidance follows, the full RmlUi-vs-native boundary reasoning, and the
-  broader UI-kit migration plan this is one item of.
-- [`newui-tier-adapter.md`](newui-tier-adapter.md) — how to port a window's *rendering* to RmlUi
-  once it exists (a separate, later step from choosing its base class here).
 - [`architecture-principles.md`](architecture-principles.md) — the overarching design philosophy.
-- [`component-catalog.md`](component-catalog.md) — the RmlUi/RCSS-layer component catalog, the
-  parallel axis to this doc's C++ object layer.
-- [`engine-findings.md`](engine-findings.md) — why the Ownership section's rules are hard rules:
-  a `data-style-*` binding and a `style=` attribute are both inline properties, and inline beats
-  every stylesheet rule in this build with no `!important` escape.
+- [`component-catalog.md`](component-catalog.md) — the RmlUi/RCSS-layer components, the parallel
+  axis to this doc's C++ object layer.
+- [`engine-findings.md`](engine-findings.md) — why the Ownership rules are hard rules, and the
+  engine quirks a port runs into.
 - [`tracked-deferrals.md`](tracked-deferrals.md) — the ownership-boundary entry: which shipped
-  windows already violate those rules, and in what order they are worth fixing.
+  windows already violate those rules.

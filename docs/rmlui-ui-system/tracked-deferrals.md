@@ -1,8 +1,7 @@
 # Tracked Deferrals
 
 This file tracks remaining work and accepted constraints with explicit revisit triggers.
-Completed migrations belong in [migration-ledger.md](migration-ledger.md); validation
-results belong in [validation-matrix.md](validation-matrix.md).
+Completed migrations belong in [migration-ledger.md](migration-ledger.md).
 
 ## Priorities
 
@@ -16,9 +15,6 @@ the Cursed Temple result panel needs a finished event to check.
 Run targeted scale/theme/interaction validation alongside each change. The CObject
 registry and residual Social base remain lower-priority structural work.
 
-Source evidence and disposition history are in the
-[2026-10-04 reassessment](../../.ai-os/memory/tasks/rmlui-deferral-reassessment.md).
-
 ## Pilots to revisit when the relevant phase arrives
 
 Every already-shipped window that doesn't fully match the principles doc is **left as-is now,
@@ -29,12 +25,10 @@ one of the trigger initiatives on the right.
 
 | Window(s) | Known deviation | Revisit when... |
 |---|---|---|
-| Migrated windows | Recorded validation does not cover every resolution, UI scale, theme and drag-state combination. | Extend and execute the existing [validation matrix](validation-matrix.md), including event-only states and actual item/skill activation. |
-| All draggable migrated windows | Existing drag system's interaction with theme-default-layout + UI-scale (§10–11) has never been explicitly audited | Scope decided ([window-placement.md](window-placement.md) section 7): only dialogs and the friend system drag, plus the inventory's saved position. Dialog dragging was checked in both themes at 100 % and 90 % with `drag-ui` (2026-10-05); the friend windows were re-checked in modern at 100 %. Still open: friend windows and the inventory at other UI scales and resolutions. Check these windows specifically then, don't just audit the mechanism in the abstract. |
-| `CBuffStrip` | Right-click-to-cancel not reproduced (a deliberate scope cut documented in `newui-tier-adapter.md`). The legacy theme has the original's per-line-coloured tooltip (`.tooltip-rich`); modern keeps a plain one by choice. | Right-click-distinct-from-left-click is proven generally in a `data-event-click` binding. |
-| `CMyInventory` (equipment paperdoll — `RenderEquippedItem()`, still fully native) | Background sprite, durability tint, and drag-compatibility highlight all paint *behind* the equipped item's live 3D icon today (native paint order); RmlUi's main context always composites last, so a straight port would paint them *in front of* instead — a real regression, not a straight port (Stage 2 was scoped, investigated, and deliberately skipped for this reason — see "What's migrated" above). | A background-context consolidation pass makes this mechanism reliable enough to trust with more per-frame-varying, class-conditional content, **or** the equipment grid gets its own future chrome pass anyway and folds this in at the same time — whichever comes first. If pursued alone, the static background sprite (no gameplay-state binding) is the only piece with a reasonable cost/value ratio on its own. |
-| `CMyInventory` (`my_inventory.rcss`, legacy theme only) | The 4 corner buttons (RmlUi, always renders last) can end up on top of `CInventoryCtrl`'s native item tooltip when a bottom-row item's tooltip extends into the button strip — before Stage 1 both were native, ordinary same-frame paint order put the tooltip on top. Confirmed cosmetic, not functional; user explicitly deferred it. | `UI::RmlBridge::OverlayRender` wraps `SetPostRmlUiCallback` as a registry any window can join (`component-catalog.md`) and has no other consumer, so rerouting the tooltip through it is a caller change. Or a future grid-chrome pass makes the tooltip an RmlUi element, resolving it for free via DOM order. |
-| HUD circular glass-orb + wrapping arc gauges (reference visual study, not yet built) | The 2026-09-10 iron-palette migration deliberately retinted `main_frame.rcss`'s existing rectangular HP/MP/AG/SD bars rather than rebuilding them as circular orbs/arcs — that's a structural rebuild (new markup, new `CMainFrameWindow` C++ binding shape, new tooltip anchors), not a retint, and touches live combat UI. Two RmlUi-native techniques were confirmed viable for it (`<progress direction="clockwise">` for the arcs via real octant geometry, layered `radial-gradient` for the orb liquid) but not used yet. | A dedicated, focused pass scoped just to this, once explicitly prioritized — see `modern-theme-visual-direction.md`'s "Known follow-up" section. |
+| `CBuffStrip` | Right-click-to-cancel (Infinity Arrow, Swell of Magic Power) not reproduced, a deliberate scope cut. The legacy theme has the original's per-line-coloured tooltip (`.tooltip-rich`); modern keeps a plain one by choice. | Right-click is available through `data-event-mouseup` (button 1), as `#item_slots` uses. |
+| `CMyInventory` (equipment paperdoll — `RenderEquippedItem()`, still fully native) | Background sprite, durability tint, and drag-compatibility highlight all paint *behind* the equipped item's live 3D icon today (native paint order); RmlUi's main context always composites last, so a straight port would paint them *in front of* instead — a real regression, not a straight port (deliberately skipped for this reason). | A background-context consolidation pass makes this mechanism reliable enough to trust with more per-frame-varying, class-conditional content, **or** the equipment grid gets its own future chrome pass anyway and folds this in at the same time — whichever comes first. If pursued alone, the static background sprite (no gameplay-state binding) is the only piece with a reasonable cost/value ratio on its own. |
+| `CMyInventory` (`my_inventory.rcss`, legacy theme only) | The 4 corner buttons (RmlUi, always renders last) can end up on top of `CInventoryCtrl`'s native item tooltip when a bottom-row item's tooltip extends into the button strip — before Stage 1 both were native, ordinary same-frame paint order put the tooltip on top. Confirmed cosmetic, not functional; user explicitly deferred it. | `UI::RmlBridge::OverlayRender` wraps `SetPostRmlUiCallback` as a registry any window can join (`component-catalog.md`) and has no consumer yet, so rerouting the tooltip through it is a caller change. Or a future grid-chrome pass makes the tooltip an RmlUi element, resolving it for free via DOM order. |
+| HUD circular glass-orb + wrapping arc gauges (reference visual study, not yet built) | The modern theme retinted `main_frame.rcss`'s rectangular HP/MP/AG/SD bars rather than rebuilding them as circular orbs/arcs — that's a structural rebuild (new markup, new `CMainFrameWindow` C++ binding shape, new tooltip anchors), not a retint, and touches live combat UI. Two RmlUi-native techniques were confirmed viable for it (`<progress direction="clockwise">` for the arcs, which needs a `fill-image` — see `engine-findings.md`; layered `radial-gradient` for the orb liquid) but not used yet. | A dedicated pass scoped just to this, once explicitly prioritized. Low priority: the modern theme exists to prove the architecture. |
 
 ## Tracked deferral: C++ adapter classes still on the `mu::ui::window::CObject` tier
 
@@ -44,21 +38,26 @@ requirements justify changing that shared machinery. Migration coverage is suffi
 to study existing examples; a replacement is not required merely because these
 adapters retain their established base.
 
+## Tracked deferral: one obvious component surface
+
+Normalise the canonical UI surface so a developer meets one component family rather than
+historical header boundaries — compatibility aliases or forwarding headers over mass renames.
+Done when every common UI concern has one canonical implementation or an explicitly documented
+presentation-specific split, discoverable without knowing the codebase's history. Retiring the
+last native widget consumers (`CInGameShop`) is part of it.
+
 ## Tracked deferral: `CMainFrameWindow` file split
 
 `MainFrameWindow.cpp/.h` contain CMainFrameWindow, CSkillList and CItemHotKey.
-Consider separating them when working on their responsibilities. Skill icons already
-use RmlUi; item icons remain native 3D. This is a file-organization decision with no
-need to rename the classes or change their behavior.
+Consider separating them when working on their responsibilities. Skill icons are RmlUi
+decorators; item icons are still drawn in 3D, into render targets the slots show. This is a
+file-organization decision with no need to rename the classes or change their behavior.
 
 ## Tracked deferral: `CUIBaseWindow`/`CUIPhotoViewer` still derive from `CUIControl`
 
-All that is left of the `CUIControl` family retirement, which closed 2026-10-04. The widgets that
-made that file a toolkit are deleted and the windows that kept it alive are RmlUi documents --
-`migration-ledger.md`'s "`CUIControl` list family" section has the outcome, and
-`ui-target-architecture.md` item 17 records the checklist closing.
-
-What remains is one step that was never on that checklist. `UI/Social/SocialWindowCore.h` contains `CUIControl`, its `CUIMessage` queue, the `UISTATES`/`UI_MESSAGE_ENUM` enums,
+All that is left of the `CUIControl` family: its widgets are deleted and the windows that kept it
+alive are RmlUi documents (`migration-ledger.md`'s "`CUIControl` list family" section).
+`UI/Social/SocialWindowCore.h` contains `CUIControl`, its `CUIMessage` queue, the `UISTATES`/`UI_MESSAGE_ENUM` enums,
 `g_dwActiveUIID`/`g_dwMouseUseUIID`, and the `GUILDLIST_TEXT`/`LETTERLIST_TEXT` records. Two classes
 derive from it, both in `UI/Social/`: `CUIBaseWindow` and `CUIPhotoViewer`. What they take from it
 is real, not vestigial -- identity, parent id, state, geometry, options, and the message queue
@@ -75,10 +74,9 @@ left.
 
 ## Tracked deferral: audit where ports steered away from the original UI
 
-Requested 2026-09-27, after `origin/dev/rmlui-ui-system`'s parity pass (PR #644) merged in. Not a
-suspicion that something is broken — it's the recognition that a port makes dozens of small
-judgement calls that never get revisited once it's marked Done, and the only two mechanisms that
-have caught any of them so far are somebody playing the game and somebody else's parity review.
+Not a suspicion that something is broken: a port makes dozens of small judgement calls that are
+never revisited once it's marked Done, and so far only playing the game and parity reviews have
+caught any of them.
 
 **What to look for.** Not bugs — decisions. A port diverges from the original in four recognisable
 ways, and only the first is self-announcing:
@@ -129,10 +127,6 @@ ways, and only the first is self-announcing:
   legacy's text ever stops being counter-scaled, or alongside a `.sharp-text` flow container that
   reconciles layout height with the counter-scale.
 
-
-- **Modern-theme treatments picked without checking dock neighbours** — already its own gap note in
-  `STATUS.md`, which has recurred twice and whose *process* half is still unfixed.
-
 **The precedent worth knowing before starting.** `CCharacterInfoWindow`'s summary box shipped as
 corner brackets plus a flat fill, a recorded and reasonable simplification of `RenderFrame()`'s
 8-piece frame — and #623 later restored the real thing. So at least one entry of exactly this kind
@@ -160,8 +154,8 @@ risk, not a formality: a wrong position here surfaces only during the event.
   chrome left the sprite list, and the draw order rests on the argument that the regrouped pieces
   do not overlap on screen rather than on having been looked at.
 
-Everything else in the rollout was verified in game by the user, both themes, including the scale
-sweep: see the rollout task's own verification section for the per-batch record.
+Everything else in the ownership rollout was verified in game, both themes, including the scale
+sweep.
 
 ### Accepted as it stands, with its trigger
 
@@ -181,9 +175,6 @@ sweep: see the rollout task's own verification section for the per-batch record.
   exist rather than a tidier binding. The guard deliberately does not cover `color`.
 
 ### The counter-scale block, and a way out that was prototyped and not taken
-
-The prototype evidence below is dated 2026-10-02; recheck upstream status and runtime
-invalidation before making an adoption decision.
 
 Several allowlist entries share one counter-scale constraint. A `.sharp-text` layer cancels `#panel`'s
 scale so glyphs rasterise sharp, which means its layout width must arrive *pre-multiplied* —
@@ -248,12 +239,6 @@ counter-scale bindings start costing something concrete, rather than being an in
 sprites on an 800x600-reference per-axis scale `dp` cannot reproduce). Each is a justified hybrid
 with an explicit, recorded constraint. The last one has an expiry, though, and nothing currently
 links the two: it ends when those background sprites port.
-
-`CSystemLogWindow`'s `back_color` also stays fused, the last case of the three-layers-in-one-string
-shape `CChatLogWindow` was split out of: its transparency is a *per-line* background, so separating
-the user preference from the theme decision needs a backdrop element behind every row of a
-per-frame `data-for` list. That makes it part of the display-list conversion above, not of this
-boundary.
 
 ### The guard that freezes the population
 

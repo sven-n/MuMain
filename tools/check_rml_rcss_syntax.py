@@ -16,8 +16,7 @@ Both comment syntaxes share the same trap: they don't nest. `/* ... "/* x */"
 the intended one, so everything between that premature close and the next
 real close-marker is parsed as garbage markup/CSS -- with no error, just
 silent misbehavior. A comment written this way in a shared base.rcss once
-broke every window that linked it in one shot (see STATUS.md's Findings
-section).
+broke every window that linked it in one shot (see engine-findings.md).
 
 Element nesting is checked because an unbalanced `</div>` fails the same silent
 way: RmlUi closes whatever is open and carries on, so a stray closer ends an

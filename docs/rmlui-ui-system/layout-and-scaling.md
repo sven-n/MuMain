@@ -27,7 +27,7 @@ multiplies. Picking a value writes `GameConfig::SetUIScalePercent()` (clamped to
 between two offered steps, and the row then shows the nearest one), saves, and re-applies the scale
 by resizing the window to the size it already has (`MuApplyWindowResolution(WindowWidth,
 WindowHeight, windowed)`): nothing recomputes the ratio on its own, but every resolution-dependent
-system — all three contexts' `dp` ratio, `UI::Scaling`'s active transform, the legacy `CWin` layout,
+system — all three contexts' `dp` ratio, `UI::Scaling`'s active transform, the workspace,
 the 3D UI cameras — does so on a resize. That apply is deferred to `COptionWindow::Update()`, out of
 RmlUi's own event dispatch, like the theme switch next to it.
 
@@ -46,11 +46,10 @@ auto-scale (`BottomHudScale`, `CappedUniformScale` → `PanelTransform`/`DockTra
 640×480 reference (1.0×) and each ceiling is **linear** — `ViewportFitScale()` is
 `clamp(min(w/640, h/480), 1, ceiling)`, the same formula the original client used — so at
 `UIScalePercent=100` a migrated window lands on exactly the pixels the legacy one did at every
-resolution, which is what makes screenshot comparison against the original meaningful. (A
-quadratic damping of that ramp existed briefly; it was removed because it broke that parity at
-every intermediate resolution — 1.25× instead of 1.5× at 1280×720 — and the user dial below is
-the right lever for "too big at my resolution".) It drives still-legacy
-`CWin`/`mu::ui::window::CObject` rendering/hit-testing. The main frame HUD is sized in `dp` like
+resolution, which is what makes screenshot comparison against the original meaningful. Don't damp
+the ramp (a quadratic one broke that parity at every intermediate resolution); the user dial is
+the lever for "too big at my resolution". It drives `CObject` windows' native rendering and
+hit-testing and the workspace's region scales. The main frame HUD is sized in `dp` like
 every other window; `BottomHudScale()` is the same number, still used to seat docked windows on
 the HUD's top edge. Whether the cursor is over the HUD is asked of the HUD itself
 (`CMainFrameWindow::IsMouseOverHud()`: the hovered element belongs to `main_frame.rml`), so it
@@ -72,23 +71,16 @@ fold would mean changing the percent does nothing, silently defeating the settin
 is folded into the **clamp bounds** instead, since its job is widening legitimate high-DPI headroom,
 not acting as a 1:1 user dial.
 
-**Confirmed live, 2026-09-07, on a 125%-scaled Windows display (`AppliedDPI=120`, no genuine
-high-pixel-density panel — `SDL_GetWindowPixelDensity()` presumably 1.0, `SDL_GetWindowDisplayScale()`
-1.25):** `contentScale` folding into `ViewportFitScale`'s clamp **lower** bound (not just the upper
-one) forced scale above 1.0 even exactly at the 640×480 reference resolution, overflowing every
-reference-pixel layout that assumes unity there with zero margin — reported as `CMyInventory`'s
-panel and `CMainFrameWindow`'s HUD bars both clipping at the bottom edge at 640×480. Fixed in
-`UI::Scaling::ViewportFitScale` (`UITransform.cpp`) by only folding `contentScale` into the upper
-bound (widening headroom, the original stated intent) — the lower bound now stays a fixed `1.0f`
-regardless of `contentScale`. `RmlUiRuntime.cpp`'s `dp`-ratio auto-fit reuses the same function, so
-it inherited the fix for free; no double-scaling observed at the reference size afterward.
+**`contentScale` widens only the upper clamp bound.** On a 125 %-scaled Windows display, folding
+it into the lower bound forced scale above 1.0 at the 640×480 reference and overflowed every
+reference-pixel layout there; `ViewportFitScale()` keeps the lower bound at `1.0f`, and the `dp`
+auto-fit reuses it.
 
 Still open: whether a genuine high-pixel-density panel (where `SDL_GetWindowPixelDensity() > 1`,
 not just an OS scale preference) needs different handling for the `dp`-ratio path specifically —
 `Rml::Context`'s dimensions come from SDL's window-coordinate size (`RmlUiRuntime::OnResize`), not
 `SDL_GetWindowSizeInPixels()`, so window-coordinate size and real pixel size can still genuinely
-diverge there. Confirm on real high-DPI hardware (not just OS-scaled hardware, now confirmed above)
-before trusting that path in play.
+diverge there. Confirm on real high-DPI hardware before trusting that path in play (OS-scaled hardware is confirmed).
 
 See `engine-findings.md`'s font-family inheritance finding before assuming a new element's
 invisible text is a layout bug — it's the single most-recurring gotcha in this doc set.
@@ -123,32 +115,14 @@ anchor class, give it a `dp` size, done.
 
 ## The "C++ pushes real pixels into RmlUi" pattern is retired everywhere except one documented exception
 
-Every migrated window's `Element::SetProperty("left"/"top"/"width"/"height", ...)` push from C++ —
-the pattern `char_sel_main` retired first (see the worked example below) — is gone from `login`,
-`login_main`, `sys_menu`, and `remember_password_prompt` too. RCSS anchor classes + fixed `dp`
-sizes own every element's layout; C++'s only remaining roles are: a window's own genuine screen
-placement (still legitimately C++-computed — `#panel`'s `left`/`top`, not its internal layout),
-keeping a real non-RmlUi companion object (a `CButton` kept for click-detection redundancy) in
-sync with what RCSS decided by scaling the same fixed
-offsets by the same combined ratio RmlUi's own `dp` ratio uses (`GameConfig::GetUIScalePercent() ×
-UI::Scaling::ViewportFitScale()`) — `UI::Scaling::CompanionRatio(windowWidth, windowHeight)`
-(`UITransform.cpp`) is the single shared implementation of this, extracted after
-`CharSelMainWin.cpp`'s `GetUIScaleRatio()`, `LoginMainWin.cpp`'s inline version, and
-`LoginWin.cpp`'s `LoginUIScaleRatio()` had each independently hand-copied it — and the exact same
-staleness bug (reading `CInput::Instance().GetScreenWidth()/GetScreenHeight()` instead of the
-`WindowWidth`/`WindowHeight` globals RmlUi itself uses) got reintroduced and re-fixed in more than
-one of those copies before this existed. `LoginWin.cpp` still keeps its own thin zero-arg
-`LoginUIScaleRatio()` wrapper for
-its two call sites' convenience, but it just forwards to `UI::Scaling::CompanionRatio()` now —
-`CharSelMainWin.cpp`/`LoginMainWin.cpp` call the shared function directly. The formula itself
-lives in exactly one place either way. See also `char_make`'s deliberate `#panel` exception in the
-table above. If a window with a real Type-2 companion is ever made draggable (there are none left -- the
-category's only example, `CUITextInputBox`, is deleted), `UI::RmlBridge::MakeDraggable()`'s existing
-`OnPanelMoved` callback (`RmlDraggable.h` — zero live callers today) is the right hook for this,
-but whatever gets wired into it will need to include the same combined-ratio scaling this section
-describes, not just a raw position sync — `RmlDraggable.h`'s own gap note doesn't mention this yet
-(it flags `px`-vs-`UIScalePercent` and missing persistence, both about the panel's *own* position,
-not a companion object's).
+No migrated window pushes `left`/`top`/`width`/`height` into its elements from C++: RCSS anchor
+classes and fixed `dp` sizes own internal layout. C++ keeps two roles: a window's own screen
+placement where no workspace slot or RCSS anchoring covers it, and keeping a native companion
+(a `CSprite`/`CButton` kept for hit-testing) in step with what RCSS decided, by scaling the same
+fixed offsets by the ratio RmlUi's `dp` uses — `UI::Scaling::CompanionRatio(windowWidth,
+windowHeight)` (`UITransform.cpp`), the one implementation. Read `WindowWidth`/`WindowHeight`
+there, not `CInput`'s screen size, which went stale in more than one hand copy before this
+existed. `char_make`'s `#panel` is the one deliberate `px` exception (table above).
 
 ## Worked example: `CCharSelMainWin`'s retrofit
 
@@ -162,18 +136,14 @@ constants, so the two are visually identical at the historical 800x600/100%-scal
 intentionally diverge at other resolutions — fixed-size-anchored-to-a-corner, not
 scaled-proportionally-to-800x600, is the policy going forward).
 
-**The legacy hit-test objects must stay numerically in sync with the CSS, not just visually
-similar.** `CCharSelMainWin` still keeps a `CButton`/`CSprite` per element alive purely for
-`CSceneUICoordinator::IsCursorOnUI()`/click-detection bookkeeping (never rendered — RmlUi owns 100% of the
-visuals). Positioning those legacy objects via the *old* `CalculateLayout()` while the RmlUi
-visuals moved to the *new* fixed-dp-anchor math caused a real, user-visible bug: at resolutions
-where the two calculations diverge, a click on the visually-correct (RmlUi-rendered) Delete button
-landed outside the legacy `CButton`'s hit rect, so `IsCursorOnUI()` reported the cursor as being
-over the 3D world instead of UI — letting `CharacterScene::Update()`'s world-click handler reset
-the character selection in the same frame, silently no-op'ing Delete. Fixed by adding
-`UI::CharacterSelection::CalculateFixedAnchorLayout()` (`CharSelMainWin.h`), a second calculator
-that mirrors the RCSS's fixed-dp-anchor math exactly (scaled only by `UIScalePercent`, not
-resolution), and switching `ApplyLayout()`'s legacy-object feed to it. **Takeaway for the next
+**Native hit-test objects must stay numerically in sync with the CSS, not just visually
+similar.** `CCharSelMainWin` keeps a `CSprite` per element, never rendered, for its own
+`UpdateMouseEvent()` hit-testing. Placed by the old calculator while RmlUi used the fixed-dp
+anchors, a click on the drawn Delete button missed the sprite's rect at some resolutions, the
+world-click handler reset the selection, and Delete silently did nothing.
+`UI::CharacterSelection::CalculateFixedAnchorLayout()` (`CharSelMainWin.h`) mirrors the RCSS's
+fixed-dp math (scaled by `CompanionRatio()`), and feeds the sprites; `CharacterScene.cpp` also
+checks `Core::Input::IsMouseOverUI()` now, so a stale rect is no longer the only guard. **Takeaway for the next
 retrofit**: if a window keeps legacy hit-test objects alive alongside RmlUi visuals, whatever
 positions those objects must be derived from the *same* math as the CSS, not just "close enough
 at the reference resolution" — verify by actually clicking through create/delete/connect-style
@@ -204,13 +174,36 @@ whole sum through the transform wrongly divided the child half. It now takes the
 **delta against `#panel`** and adds the caller's own position — a signature that cannot express the
 bug — and its three callers were corrected with it.
 
+### Checking it: the scale sweep
+
+A window's native bookkeeping and its RCSS agree trivially at scale 1.0 and can disagree at every
+other scale, so a window whose hit box or anchors come from live RCSS (the callers of
+`RefreshLogicalPanelSize()`/`RefreshLogicalAnchorPosition()` — grep for the current list) is
+checked at **50 %** and **200 %** (Options → UI → UI scale, applies live), in both themes:
+
+1. **Click every interactive element**, and for item grids at least one cell in each **corner** —
+   a proportional error leaves the top-left working and fails the far edges.
+2. **Confirm the click lands on the window, not the world**; the tell for a miss is the character
+   walking.
+3. **Hover anything with a tooltip or popup**; it must sit on its element, not be pulled toward
+   the panel's top-left (the anchor-readback failure).
+
+Sites that read RmlUi geometry without converting it are each correct for their own reason:
+`CGenericConfirmDialog` (`dp` panel, no root transform: its box is screen px), `CMainFrameWindow`
+(screen-px slot box divided by the dp ratio, `SlotBoxInReference()`), `CNPCDialogue` (a
+difference of two offsets over a pitch: units cancel), `RmlTooltip` (no root transform, scale
+pre-multiplied in C++), `COptionWindow` (screen-px rect against `MouseX/MouseY`, safe only
+because `INTERFACE_OPTION` is `LayoutMode::Legacy`). "Does this need a conversion?" has no single
+answer — check which kind a document is.
+
+Not covered by the sweep: resolution (scale is the sharper probe; `PanelTransform` derives scale
+from resolution), drag state across a scale or theme change, and a theme change while a window is
+open. These are not tracked: whoever touches a window checks them for it.
+
 ## Deferred (not part of this policy yet)
 
-- A formal multi-resolution automated visual-regression test matrix — see `tracked-deferrals.md`
-  for the current status; keep doing manual spot-checks per window until one exists.
-- Whether `CButton` and `mu::ui::window::CButton` (one per legacy era; `CUIButton`, the third,
-  is deleted) should eventually merge into one. **Not a naming-collision question** — that part is
-  already resolved, each lives in its own namespace (`building-new-ui.md`'s "Resolved name
-  collisions" section) and the compiler never confuses them. What's still open is purely whether
-  consolidating their *behavior* is worth it; migrating a window to RmlUi already retires whichever
-  of the three it used, so this only matters for the shrinking population still native.
+- An automated multi-resolution visual-regression test; keep doing manual spot-checks per
+  window until one exists.
+- Whether `::CButton` (no production consumer) and `mu::ui::window::CButton` should merge. Each
+  is in its own namespace; porting a window retires whichever it used, so this only matters for
+  the shrinking native population.
