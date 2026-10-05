@@ -902,7 +902,10 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     std::vector<unsigned char> pakBuffer((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
     input.close();
 
-    if (pakBuffer.size() < 18) // minimal TGA header length check for OZT payload
+    // An OZT file has 4 bytes before the 18 bytes of the TGA header; the
+    // header's size and depth are read below.
+    constexpr size_t OztHeaderSize = 4 + 18;
+    if (pakBuffer.size() < OztHeaderSize)
     {
         g_ErrorReport.Write(L"OpenTga: file too small %ls (%zu bytes)\r\n", filename_ozt.c_str(), pakBuffer.size());
         return false;
