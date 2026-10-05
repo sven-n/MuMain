@@ -384,7 +384,10 @@ any side, and F12 hides the editor while it runs.
   NPC, which follows it, so lightning runs to it) and, for lightning, **PK**
   and **SkillIndex**, which some SubTypes read their lifetime and speed
   from. Creating the type again with other values keeps what is there, so
-  parts can be compared side by side.
+  parts can be compared side by side. While the preview runs, Repeat and
+  sprites take the values as they are set. Many types choose their own
+  place, size or light in their code, or move to their owner: notes after
+  each call say which values the type did not keep.
 - **The game's calls** list where the game's code creates the type
   (`CreateEffect`, `CreateParticle`, `CreateJoint`, `CreateSprite` and their
   FpsChecked forms) with the SubType, size and owner they write, read from

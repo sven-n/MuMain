@@ -478,4 +478,58 @@ TEST_CASE("The world preview creates with the call's size, light, place and targ
     CHECK(Effects[*poison].Position[2] == doctest::Approx(RequestTerrainHeight(1000.0f, 900.0f) + 50.0f));
     world.Stop();
 }
+TEST_CASE("The running world preview creates with the values as they are now and tells which its code did not keep "
+          "[effects][editor]")
+{
+    EffectTestData::BuildShippedRegistry();
+    const TestHero hero;
+    auto worldPreview = std::make_unique<EffectWorldPreview>();
+    EffectWorldPreview& world = *worldPreview;
+    const OBJECT* owner = &world.GetOwner();
+    const double worldTime = WorldTime;
+
+    // An effect whose code puts it at its owner and chooses its own size.
+    // (Particles are left out: CreateParticle asks the options window, which
+    // the tests do not build.)
+    WorldPreviewCall distant = DefaultWorldPreviewCall(EffectKind::Effect);
+    distant.distance = 300.0f;
+    distant.scale = 5.0f;
+    world.Start({EffectKind::Effect, MODEL_BIG_STONE1, 5, distant});
+    world.AfterFrame(true, true);
+    CHECK((world.GetNotes() & WorldNoteOwnPlace) != 0);
+    CHECK((world.GetNotes() & WorldNoteOwnSize) != 0);
+    world.Stop();
+
+    // Lightning that keeps the call's size; Repeat takes a size set later.
+    const auto findJoint = [owner]() -> JOINT*
+    {
+        for (int i = 0; i < MAX_JOINTS; ++i)
+        {
+            if (Joints[i].Live && Joints[i].Type == BITMAP_JOINT_ENERGY && Joints[i].Target == owner)
+                return &Joints[i];
+        }
+        return nullptr;
+    };
+    WorldPreviewCall thin = DefaultWorldPreviewCall(EffectKind::Joint);
+    thin.scale = 20.0f;
+    world.SetRepeat(true);
+    world.Start({EffectKind::Joint, BITMAP_JOINT_ENERGY, 0, thin});
+    world.AfterFrame(true, true);
+    JOINT* first = findJoint();
+    REQUIRE(first != nullptr);
+    CHECK(first->Scale == doctest::Approx(20.0f));
+    CHECK((world.GetNotes() & WorldNoteOwnSize) == 0);
+    first->Live = false;
+    WorldPreviewCall wide = thin;
+    wide.scale = 80.0f;
+    world.UpdateRunning({EffectKind::Joint, BITMAP_JOINT_ENERGY, 0, wide});
+    world.AfterFrame(true, true);
+    WorldTime += 1000.0;
+    world.AfterFrame(true, true);
+    JOINT* again = findJoint();
+    REQUIRE(again != nullptr);
+    CHECK(again->Scale == doctest::Approx(80.0f));
+    world.Stop();
+    WorldTime = worldTime;
+}
 #endif // _EDITOR

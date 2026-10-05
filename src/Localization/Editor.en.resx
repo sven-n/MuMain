@@ -850,6 +850,18 @@
   <data name="World no character near" xml:space="preserve">
     <value>No monster or NPC stands near the character, so the copy of the character is the target.</value>
   </data>
+  <data name="World own place" xml:space="preserve">
+    <value>The type's code put what it created elsewhere, so Distance and Height do not place it.</value>
+  </data>
+  <data name="World follows owner" xml:space="preserve">
+    <value>What the type created moves to its owner, so it shows at the target, not at Distance and Height.</value>
+  </data>
+  <data name="World own size" xml:space="preserve">
+    <value>The type's code chooses its own size, so Size does not change it.</value>
+  </data>
+  <data name="World own light" xml:space="preserve">
+    <value>The type's code chooses its own light, so Light does not change it.</value>
+  </data>
   <data name="Assets all" xml:space="preserve">
     <value>All</value>
   </data>

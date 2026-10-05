@@ -60,6 +60,14 @@ const char* WorldNoteText(MuEditor::Effects::WorldPreviewNote note)
         return I18N::Editor::WorldEndedAtOnce;
     case MuEditor::Effects::WorldNoteNoCharacterNear:
         return I18N::Editor::WorldNoCharacterNear;
+    case MuEditor::Effects::WorldNoteOwnPlace:
+        return I18N::Editor::WorldOwnPlace;
+    case MuEditor::Effects::WorldNoteFollowsOwner:
+        return I18N::Editor::WorldFollowsOwner;
+    case MuEditor::Effects::WorldNoteOwnSize:
+        return I18N::Editor::WorldOwnSize;
+    case MuEditor::Effects::WorldNoteOwnLight:
+        return I18N::Editor::WorldOwnLight;
     case MuEditor::Effects::WorldNoteRefused:
         break;
     }
@@ -108,6 +116,8 @@ std::optional<int> CEffectWorldPreviewView::Render(EffectWorldPreview& world, Ef
     RenderButtons(world, request, ready);
     RenderCallValues(kind);
     const std::optional<int> used = RenderGameCalls();
+    // What runs creates with the values as they are now.
+    world.UpdateRunning({kind, type, used.value_or(subType), m_call});
     RenderRunning(world, request);
     RenderNotes(world, ready);
     return used;

@@ -36,6 +36,12 @@ public:
     void Update(const EffectPools& pools);
     // Whether a slot the last create call filled is still the preview's.
     bool AnyCreatedLive(const EffectPools& pools) const;
+    // The slots the last create call filled that are still the preview's,
+    // sprites left out.
+    const std::vector<EffectPoolSlot>& GetCreated() const
+    {
+        return m_created;
+    }
     // Takes in the latest followers, then removes everything kept in one pass,
     // so no kept object outlives its owner. Effects go through removeEffect.
     void RemoveAll(const EffectPools& pools, RemoveEffect removeEffect);

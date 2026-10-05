@@ -16,7 +16,10 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
+#include <cstdint>
 #include <cmath>
+#include <optional>
 #include <utility>
 
 namespace MuEditor::Effects
@@ -26,6 +29,13 @@ namespace
 constexpr float DegreesToRadians = 3.14159265f / 180.0f;
 // Lightning runs to the chest of its target.
 constexpr float CharacterChest = 80.0f;
+// How far from where the call put it an object may start before its code
+// counts as putting it elsewhere (many add a random offset), and how near
+// its owner it must be a frame later to count as following it.
+constexpr float OwnPlaceDistance = 50.0f;
+constexpr float FollowingDistance = 30.0f;
+// The notes about what the last call created.
+constexpr std::uint16_t KeptNotes = WorldNoteOwnPlace | WorldNoteFollowsOwner | WorldNoteOwnSize | WorldNoteOwnLight;
 // Repeat waits this long after what was created ended (WorldTime, ms).
 constexpr double RepeatPauseMs = 300.0;
 
@@ -114,25 +124,42 @@ void EffectWorldPreview::Start(const WorldPreviewRequest& request)
         m_notes = WorldNoteRefused;
         return;
     }
-    // A monster or NPC is chosen once a run; a run with another one ends
-    // first, so no object follows a copy that changed.
-    if (request.call.target == WorldPreviewTarget::NearestCharacter && Hero != nullptr)
-    {
-        const PreviewVector position = {Hero->Object.Position[0], Hero->Object.Position[1], Hero->Object.Position[2]};
-        OBJECT* nearest =
-            FindNearestCharacter({CharactersClient, MAX_CHARACTERS_CLIENT}, position, NearestCharacterRange);
-        if (nearest != m_targetFollowed && m_running)
-            Stop();
-        m_targetFollowed = nearest;
-        if (nearest != nullptr)
-            m_targetCopy = *nearest;
-        else
-            m_notes |= WorldNoteNoCharacterNear;
-    }
+    ChooseTarget(request.call);
     m_running = request;
     m_createPending = true;
     m_repeatAt = 0.0;
     ApplyMute();
+}
+
+// The monster or NPC nearest to the character becomes the target; the copy
+// takes it over, so what aims at the copy turns to it.
+void EffectWorldPreview::ChooseTarget(const WorldPreviewCall& call)
+{
+    if (call.target != WorldPreviewTarget::NearestCharacter || Hero == nullptr)
+        return;
+    const PreviewVector position = {Hero->Object.Position[0], Hero->Object.Position[1], Hero->Object.Position[2]};
+    OBJECT* nearest = FindNearestCharacter({CharactersClient, MAX_CHARACTERS_CLIENT}, position, NearestCharacterRange);
+    m_targetFollowed = nearest;
+    if (nearest != nullptr)
+    {
+        m_targetCopy = *nearest;
+        m_notes &= static_cast<std::uint16_t>(~WorldNoteNoCharacterNear);
+    }
+    else
+    {
+        m_notes |= WorldNoteNoCharacterNear;
+    }
+}
+
+void EffectWorldPreview::UpdateRunning(const WorldPreviewRequest& request)
+{
+    if (!m_running || m_running->kind != request.kind || m_running->type != request.type)
+        return;
+    if (request.call.target == WorldPreviewTarget::NearestCharacter &&
+        (m_running->call.target != WorldPreviewTarget::NearestCharacter || m_targetFollowed == nullptr))
+        ChooseTarget(request.call);
+    m_running->subType = request.subType;
+    m_running->call = request.call;
 }
 
 void EffectWorldPreview::Stop()
@@ -199,8 +226,12 @@ void EffectWorldPreview::AfterFrame(bool browserOpen, bool worldReady)
         return;
     }
     const bool createdLive = m_tracker.AnyCreatedLive(pools);
-    if (++m_framesSinceCreate == 1 && m_lastCallFilled && !createdLive)
-        m_notes |= WorldNoteEndedAtOnce;
+    if (++m_framesSinceCreate == 1 && m_lastCallFilled)
+    {
+        if (!createdLive)
+            m_notes |= WorldNoteEndedAtOnce;
+        NoteFollowing(pools);
+    }
     if (createdLive)
         return;
     if (!m_repeat)
@@ -281,6 +312,9 @@ void EffectWorldPreview::Create(const EffectPools& pools)
     const int filled = m_tracker.EndCreate(pools);
     m_framesSinceCreate = 0;
     m_lastCallFilled = filled > 0;
+    m_lastPosition = {position[0], position[1], position[2]};
+    if (request.kind != Data::Effects::EffectKind::Sprite)
+        NoteWhatWasKept(pools, m_lastPosition, call);
     m_repeatAt = 0.0;
     if (filled == 0)
     {
@@ -288,6 +322,97 @@ void EffectWorldPreview::Create(const EffectPools& pools)
         // What earlier calls created still runs until it ends or is stopped.
         if (m_tracker.IsEmpty())
             End();
+    }
+}
+
+namespace
+{
+// What the code of a created object kept of the call.
+struct Kept
+{
+    PreviewVector position;
+    float scale;
+    PreviewVector light;
+};
+
+template <typename Object> Kept KeptBy(const Object& o)
+{
+    return {{o.Position[0], o.Position[1], o.Position[2]}, o.Scale, {o.Light[0], o.Light[1], o.Light[2]}};
+}
+
+std::optional<Kept> KeptAt(const EffectPools& pools, const EffectPoolSlot& slot)
+{
+    const auto index = static_cast<size_t>(slot.index);
+    switch (slot.pool)
+    {
+    case EffectPool::Effect:
+        return KeptBy(pools.effects[index]);
+    case EffectPool::SkillEffect:
+        return KeptBy(pools.skillEffects[index]);
+    case EffectPool::Particle:
+        return KeptBy(pools.particles[index]);
+    case EffectPool::Joint:
+        return KeptBy(pools.joints[index]);
+    case EffectPool::Sprite:
+        break;
+    }
+    return std::nullopt;
+}
+
+float DistanceBetween(const PreviewVector& a, const PreviewVector& b)
+{
+    const float dx = a[0] - b[0];
+    const float dy = a[1] - b[1];
+    const float dz = a[2] - b[2];
+    return std::sqrt(dx * dx + dy * dy + dz * dz);
+}
+
+bool SameLight(const PreviewVector& a, const PreviewVector& b)
+{
+    return std::abs(a[0] - b[0]) < 0.01f && std::abs(a[1] - b[1]) < 0.01f && std::abs(a[2] - b[2]) < 0.01f;
+}
+} // namespace
+
+// Right after the call: what its code changed of the place, the size and the
+// light the preview gave it. Only the values the user chose count: a size of
+// 0 and white light are the defaults.
+void EffectWorldPreview::NoteWhatWasKept(const EffectPools& pools, const PreviewVector& position,
+                                         const WorldPreviewCall& call)
+{
+    m_notes &= static_cast<std::uint16_t>(~KeptNotes);
+    const auto first = std::find_if(m_tracker.GetCreated().begin(), m_tracker.GetCreated().end(),
+                                    [&](const EffectPoolSlot& slot) { return KeptAt(pools, slot).has_value(); });
+    if (first == m_tracker.GetCreated().end())
+        return;
+    const Kept kept = *KeptAt(pools, *first);
+    if (DistanceBetween(kept.position, position) > OwnPlaceDistance)
+        m_notes |= WorldNoteOwnPlace;
+    if (call.scale > 0.0f && std::abs(kept.scale - call.scale) > 0.01f * call.scale)
+        m_notes |= WorldNoteOwnSize;
+    const PreviewVector white = {1.0f, 1.0f, 1.0f};
+    if (!SameLight(call.light, white) && !SameLight(kept.light, call.light))
+        m_notes |= WorldNoteOwnLight;
+}
+
+// A frame later: an object put away from its owner that is at its owner now
+// follows it.
+void EffectWorldPreview::NoteFollowing(const EffectPools& pools)
+{
+    const OBJECT* owner = TargetOf(m_running->call);
+    if (owner == nullptr)
+        return;
+    const PreviewVector ownerPosition = {owner->Position[0], owner->Position[1], owner->Position[2]};
+    if (DistanceBetween(m_lastPosition, ownerPosition) <= OwnPlaceDistance)
+        return;
+    for (const EffectPoolSlot& slot : m_tracker.GetCreated())
+    {
+        const std::optional<Kept> kept = KeptAt(pools, slot);
+        if (kept && DistanceBetween(kept->position, ownerPosition) <= FollowingDistance)
+        {
+            m_notes |= WorldNoteFollowsOwner;
+            m_notes &= static_cast<std::uint16_t>(~WorldNoteOwnPlace);
+            return;
+        }
     }
 }
 

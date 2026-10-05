@@ -78,6 +78,13 @@ enum WorldPreviewNote : std::uint16_t
     // No monster or NPC near the character: the copy of the character is
     // the target.
     WorldNoteNoCharacterNear = 1 << 3,
+    // What the last call created does not keep a value of the call: its code
+    // put it elsewhere, it moved to its owner, it chose its size or its
+    // light.
+    WorldNoteOwnPlace = 1 << 4,
+    WorldNoteFollowsOwner = 1 << 5,
+    WorldNoteOwnSize = 1 << 6,
+    WorldNoteOwnLight = 1 << 7,
 };
 
 // A type and SubType the world preview does not create (-1: every SubType).
@@ -123,6 +130,9 @@ public:
     void Start(const WorldPreviewRequest& request);
     // Removes what the preview created.
     void Stop();
+    // The SubType and the call values the running preview creates with from
+    // now on (Repeat, sprites); for another type nothing changes.
+    void UpdateRunning(const WorldPreviewRequest& request);
     void SetRepeat(bool repeat)
     {
         m_repeat = repeat;
@@ -168,6 +178,9 @@ public:
 private:
     void Create(const EffectPools& pools);
     OBJECT* TargetOf(const WorldPreviewCall& call);
+    void ChooseTarget(const WorldPreviewCall& call);
+    void NoteWhatWasKept(const EffectPools& pools, const PreviewVector& position, const WorldPreviewCall& call);
+    void NoteFollowing(const EffectPools& pools);
     void End();
     void ApplyMute() const;
 
@@ -186,6 +199,8 @@ private:
     // ended at once.
     int m_framesSinceCreate = 0;
     bool m_lastCallFilled = false;
+    // Where the last call put the type.
+    PreviewVector m_lastPosition{};
     // When Repeat creates the type again (WorldTime), 0 while waiting for
     // what was created to end.
     double m_repeatAt = 0.0;
