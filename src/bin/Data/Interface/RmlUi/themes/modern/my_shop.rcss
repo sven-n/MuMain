@@ -85,3 +85,7 @@
 #cant_be_returned_line { top: 298px; }
 #all_item_trading_line { top: 320px; }
 #can_only_be_done_using_zen_line { top: 332px; }
+
+/* Native item grid: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#item_grid { left: 16px; top: 90px; }

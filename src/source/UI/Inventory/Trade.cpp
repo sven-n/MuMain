@@ -462,6 +462,10 @@ void CTrade::SyncRmlModel()
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    if (m_pYourInvenCtrl)
+        m_pYourInvenCtrl->FollowAnchor(m_pRmlDoc, "partner_grid", m_Pos, 16, 68);
+    if (m_pMyInvenCtrl)
+        m_pMyInvenCtrl->FollowAnchor(m_pRmlDoc, "item_grid", m_Pos, 16, 274);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     auto syncBool = [this](bool TradeRmlModel::* field, const char* boundName, bool value)

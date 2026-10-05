@@ -10,6 +10,8 @@
 	     it must paint behind the native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
+		<!-- Where the native item grid goes: invisible boxes the theme places; the window reads them each frame. -->
+		<div id="item_grid" class="native-anchor"></div>
 		<!-- Header rail holds only the static "Personal Store" label -- the shop-owner's name
 		     gets its own nameplate strip below (.pshop-title-strip). -->
 		<div class="modern-header-rail-px pshop-header-rail">

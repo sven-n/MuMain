@@ -521,6 +521,8 @@ void CStorageInventory::SyncRmlModel()
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    if (m_pNewInventoryCtrl)
+        m_pNewInventoryCtrl->FollowAnchor(m_pRmlDoc, "item_grid", m_Pos, 15, 36);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     auto syncBool = [this](bool StorageRmlModel::* field, const char* boundName, bool value)

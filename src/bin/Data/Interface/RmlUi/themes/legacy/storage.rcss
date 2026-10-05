@@ -123,3 +123,7 @@
 #btn_expand:hover ~ .tooltip-expand {
 	display: block;
 }
+
+/* Native item grid: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#item_grid { left: 15px; top: 36px; }

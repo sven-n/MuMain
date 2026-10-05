@@ -12,6 +12,8 @@
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
+		<!-- Where the native item grid goes: invisible boxes the theme places; the window reads them each frame. -->
+		<div id="item_grid" class="native-anchor"></div>
 		<!-- Text laid out where native RenderFrame()/RenderMixDescriptions() drew it: the title a
 		     little lower when there is no tax line, the recipe block at 49, the prediction/source/
 		     status list at 203 (15 apart, advice after one blank line), the descriptions at their own

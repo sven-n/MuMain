@@ -107,3 +107,7 @@
 .mix-kind.warning { color: token(semantic-danger); }
 .mix-kind.loss { color: token(semantic-danger); }
 .mix-kind.dim { color: token(text-muted); }
+
+/* Native item grid: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#item_grid { left: 15px; top: 110px; }

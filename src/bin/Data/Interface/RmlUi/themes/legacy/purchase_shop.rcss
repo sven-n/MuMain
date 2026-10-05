@@ -89,3 +89,7 @@
 	decorator: image(pshop-btn-exit);
 }
 .shop-btn-exit:hover { filter: brightness(1.25); }
+
+/* Native item grid: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#item_grid { left: 16px; top: 90px; }

@@ -321,6 +321,14 @@ void CInventoryExtension::SyncRmlModel()
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
 
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+    if (m_extensions[0])
+        m_extensions[0]->FollowAnchor(m_pRmlDoc, "item_grid_1", m_Pos, 15, 45);
+    if (m_extensions[1])
+        m_extensions[1]->FollowAnchor(m_pRmlDoc, "item_grid_2", m_Pos, 15, 132);
+    if (m_extensions[2])
+        m_extensions[2]->FollowAnchor(m_pRmlDoc, "item_grid_3", m_Pos, 15, 219);
+    if (m_extensions[3])
+        m_extensions[3]->FollowAnchor(m_pRmlDoc, "item_grid_4", m_Pos, 15, 306);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
     auto& model = m_RmlBinder.GetModel();

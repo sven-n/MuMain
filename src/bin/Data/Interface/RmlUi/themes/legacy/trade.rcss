@@ -203,3 +203,8 @@
 .level-text.level-bucket-200 { color: #d2e6ff; }
 .level-text.level-bucket-300 { color: #ff99ff; }
 .level-text.level-bucket-400 { color: #ff9999; }
+
+/* Native item grids: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#partner_grid { left: 16px; top: 68px; }
+#item_grid { left: 16px; top: 274px; }

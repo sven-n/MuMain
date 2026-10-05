@@ -10,6 +10,11 @@
 	     must paint behind the native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
+		<!-- Where the native item grids go: invisible boxes the theme places; the window reads them each frame. -->
+		<div id="item_grid_1" class="native-anchor"></div>
+		<div id="item_grid_2" class="native-anchor"></div>
+		<div id="item_grid_3" class="native-anchor"></div>
+		<div id="item_grid_4" class="native-anchor"></div>
 		<!-- Header rail: `-px` since #panel carries transform:scale(root_scale) (base.rcss). -->
 		<div class="modern-header-rail-px ext-header-rail">
 			<div class="modern-joint-px"></div>

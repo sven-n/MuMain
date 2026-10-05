@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/Core/UIManager.h"
 #include "UI/Inventory/InventoryCtrl.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/Inventory/ItemMng.h"
 #include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -1301,6 +1302,18 @@ void mu::ui::window::CInventoryCtrl::SetPos(int x, int y)
 const POINT& mu::ui::window::CInventoryCtrl::GetPos() const
 {
     return m_Pos;
+}
+
+void mu::ui::window::CInventoryCtrl::FollowAnchor(Rml::ElementDocument* doc, const char* anchorId, const POINT& panelPos,
+                                  int offsetX, int offsetY)
+{
+    float x = static_cast<float>(panelPos.x + offsetX);
+    float y = static_cast<float>(panelPos.y + offsetY);
+    UI::RmlBridge::RefreshLogicalAnchorPosition(doc, "panel", anchorId, panelPos, x, y);
+    const int gridX = static_cast<int>(std::lround(x));
+    const int gridY = static_cast<int>(std::lround(y));
+    if (GetPos().x != gridX || GetPos().y != gridY)
+        SetPos(gridX, gridY);
 }
 
 int mu::ui::window::CInventoryCtrl::GetNumberOfColumn() const

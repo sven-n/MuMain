@@ -94,3 +94,7 @@
 	color: #d59b79;
 	border-color: #5c382b;
 }
+
+/* Native item grid: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#item_grid { left: 16px; top: 90px; }

@@ -206,3 +206,7 @@
 .mix-descriptions.lowered .mix-description.row-6 { top: 348px; }
 .mix-descriptions.lowered .mix-description.row-7 { top: 361px; }
 .mix-descriptions.lowered .mix-description.row-8 { top: 374px; }
+
+/* Native item grid: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#item_grid { left: 15px; top: 110px; }

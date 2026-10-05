@@ -15,6 +15,9 @@
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
+		<!-- Where the native item grids go: invisible boxes the theme places; the window reads them each frame. -->
+		<div id="partner_grid" class="native-anchor"></div>
+		<div id="item_grid" class="native-anchor"></div>
 		<span class="sharp-text" id="title"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{title}}</span>
 

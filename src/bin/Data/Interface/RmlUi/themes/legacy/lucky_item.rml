@@ -15,6 +15,8 @@
 	     data-style-width="root_width + 'px'" data-style-height="root_height + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
+		<!-- Where the native item grid goes: invisible boxes the theme places; the window reads them each frame. -->
+		<div id="item_grid" class="native-anchor"></div>
 		<span class="sharp-text" id="title"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
 		     data-style-width="(root_width * root_scale) + 'px'">{{title}}</span>

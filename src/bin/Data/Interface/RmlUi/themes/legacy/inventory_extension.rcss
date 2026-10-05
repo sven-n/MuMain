@@ -90,3 +90,10 @@
 .page-2 .ext-locked-icon { decorator: image(ext-lock-2); }
 .page-3 .ext-locked-icon { decorator: image(ext-lock-3); }
 .page-4 .ext-locked-icon { decorator: image(ext-lock-4); }
+
+/* Native item grids: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#item_grid_1 { left: 15px; top: 45px; }
+#item_grid_2 { left: 15px; top: 132px; }
+#item_grid_3 { left: 15px; top: 219px; }
+#item_grid_4 { left: 15px; top: 306px; }

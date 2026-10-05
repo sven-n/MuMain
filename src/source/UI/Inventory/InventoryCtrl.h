@@ -11,6 +11,11 @@
 #include <span>
 #include "Render/Textures/ZzzTexture.h"
 
+namespace Rml
+{
+    class ElementDocument;
+}
+
 namespace UI::Items::Drag
 {
     POINT PickupOffset(int itemLeft, int itemTop, int itemWidth, int itemHeight,
@@ -232,6 +237,10 @@ namespace mu::ui::window
 
         void SetPos(int x, int y);
         const POINT& GetPos() const;
+        // Each frame: puts the grid's first cell where the theme draws `anchorId` in `doc`, or at
+        // `panelPos` + (`offsetX`, `offsetY`) (the original's place) until that has laid out.
+        void FollowAnchor(Rml::ElementDocument* doc, const char* anchorId, const POINT& panelPos, int offsetX,
+                          int offsetY);
         int GetNumberOfColumn() const;
         int GetNumberOfRow() const;
         void GetRect(RECT& rcBox);

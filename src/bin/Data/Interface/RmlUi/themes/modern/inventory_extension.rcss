@@ -87,3 +87,10 @@
 .ext-locked-page.page-2 { top: 158px; }
 .ext-locked-page.page-3 { top: 245px; }
 .ext-locked-page.page-4 { top: 332px; }
+
+/* Native item grids: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#item_grid_1 { left: 15px; top: 45px; }
+#item_grid_2 { left: 15px; top: 132px; }
+#item_grid_3 { left: 15px; top: 219px; }
+#item_grid_4 { left: 15px; top: 306px; }
