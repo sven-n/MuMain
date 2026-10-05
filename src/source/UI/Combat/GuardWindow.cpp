@@ -93,9 +93,6 @@ bool CGuardWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    // The tabs stay a native radio group for their hit tests; guard_window.rml draws them.
-    m_TabBtn.CreateRadioGroup(3, BITMAP_GUILDINFO_BEGIN);
-    m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 12.f, m_Pos.y + 84.f, 56, 22);
     SetCurOpenTab(m_iNumCurOpenTab);
 
     BuildRmlUi();
@@ -131,12 +128,10 @@ void CGuardWindow::SetPos(int x, int y)
     m_Pos.y = y;
 }
 
-// The only writer of the open tab: the radio group follows it, never the other way round, so the
-// highlight the document draws and the page it draws cannot disagree.
+// The page and the tab highlight read the same value.
 void CGuardWindow::SetCurOpenTab(int iTab)
 {
     m_iNumCurOpenTab = iTab;
-    m_TabBtn.ChangeFrame(iTab);
 }
 
 bool CGuardWindow::UpdateMouseEvent()
@@ -193,26 +188,17 @@ bool CGuardWindow::Update()
             UpdateRegisterInfoTab(button);
     }
 
-    if (IsVisible())
+    const int tab = m_PendingTab;
+    m_PendingTab = -1;
+    if (IsVisible() && tab >= TAB_SIEGE_INFO && tab <= TAB_REGISTER_INFO)
     {
-        // The window moves with its slot, so the tabs' hit areas follow it each frame.
-        m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 12.f, m_Pos.y + 84.f, 56, 22);
-        const int iNumCurOpenTab = m_TabBtn.UpdateMouseEvent();
-        if (iNumCurOpenTab != RADIOGROUPEVENT_NONE)
+        SetCurOpenTab(tab);
+        if (tab == TAB_REGISTER_INFO)
         {
-            SetCurOpenTab(iNumCurOpenTab);
-
-            if (iNumCurOpenTab == TAB_REGISTER_INFO)
-            {
-                if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK)
-                {
-                    SocketClient->ToGameServer()->SendCastleSiegeRegisteredGuildsListRequest();
-                }
-                else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY || m_eTimeType == CASTLESIEGE_STATE_READYSIEGE)
-                {
-                    SocketClient->ToGameServer()->SendCastleOwnerListRequest();
-                }
-            }
+            if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK)
+                SocketClient->ToGameServer()->SendCastleSiegeRegisteredGuildsListRequest();
+            else if (m_eTimeType == CASTLESIEGE_STATE_NOTIFY || m_eTimeType == CASTLESIEGE_STATE_READYSIEGE)
+                SocketClient->ToGameServer()->SendCastleOwnerListRequest();
         }
     }
 
@@ -407,6 +393,12 @@ void CGuardWindow::BuildRmlUi()
             c.RegisterArray<std::vector<GuardTabEntry>>();
             c.Bind("tabs", &model.tabs);
             c.Bind("active_tab", &model.activeTab);
+            c.BindEventCallback("guard_tab",
+                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                                {
+                                    if (args.size() == 1)
+                                        m_PendingTab = args[0].Get<int>(-1);
+                                });
             auto lineType = c.RegisterStruct<GuardLine>();
             lineType.RegisterMember("text", &GuardLine::text);
             lineType.RegisterMember("text_px", &GuardLine::textPx);

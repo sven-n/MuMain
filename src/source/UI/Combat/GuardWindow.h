@@ -9,7 +9,6 @@
 #include "UI/Combat/GuardWindowRmlModel.h"
 #include "UI/Combat/GuardGuildLists.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
-#include "UI/Widgets/Window/Button.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
 #include "Guild/GuildInfoWindow.h"
@@ -54,9 +53,7 @@ private:
     CManager* m_pNewUIMng;
     POINT m_Pos;
 
-    // The radio group is the tabs' hit test only; m_iNumCurOpenTab is the tab itself, and the one
-    // thing the page and the document's highlight both read. Write it through SetCurOpenTab().
-    CRadioGroupButton m_TabBtn;
+    // The current page and highlight share this value. RmlUi owns the tab hit targets.
     int m_iNumCurOpenTab; // ���� �����ִ� �ǹ�ư��ȣ
 
     void SetCurOpenTab(int iTab);
@@ -64,6 +61,7 @@ private:
     RmlModelBinder<GuardWindowRmlModel> m_RmlBinder;
     Rml::ElementDocument* m_pRmlDoc = nullptr;
     GUARD_BUTTON m_PendingButton = GUARD_BUTTON_NONE;
+    int m_PendingTab = -1;
 
     // ������ ��� ����Ʈ
     UI::Combat::GuardGuildLists m_GuildLists;

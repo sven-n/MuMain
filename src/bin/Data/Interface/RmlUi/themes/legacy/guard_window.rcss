@@ -29,7 +29,10 @@
 /* The tab radio group still supplies its native hit areas. */
 #panel { pointer-events: none; }
 
-.gd-tab { position: absolute; top: 84px; width: 56px; height: 22px; decorator: image(gd-tab-up); }
+.gd-tab { position: absolute; top: 84px; width: 56px; height: 22px; pointer-events: auto; decorator: image(gd-tab-up); }
+.gd-tab.tab-0 { left: 12px; }
+.gd-tab.tab-1 { left: 69px; }
+.gd-tab.tab-2 { left: 126px; }
 .gd-tab.selected { decorator: image(gd-tab-down); }
 .gd-tab-label { color: #b5b5b5; }
 .gd-tab.selected .gd-tab-label { color: #ffffff; }
