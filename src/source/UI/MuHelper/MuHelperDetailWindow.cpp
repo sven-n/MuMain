@@ -135,23 +135,31 @@ bool CMuHelperDetailWindow::UpdateMouseEvent()
     // rect on every page, where it overlaps the condition radios -- clicking a radio also moved an
     // invisible threshold, which Save then committed.
     if (IsPotionPage(m_iCurrentPage))
-        UpdateGauge(GaugeLeft, GaugePotionTop, m_iCurrentPotionThreshold, m_Pos);
+        UpdateGauge("gauge_potion", GaugeLeft, GaugePotionTop, m_iCurrentPotionThreshold, m_Pos);
     if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG_ELF || m_iCurrentPage == SUB_PAGE_POTION_CONFIG_SUMMY)
-        UpdateGauge(GaugeLeft, GaugeHealTop, m_iCurrentHealThreshold, m_Pos);
+        UpdateGauge("gauge_heal", GaugeLeft, GaugeHealTop, m_iCurrentHealThreshold, m_Pos);
     if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG_ELF)
-        UpdateGauge(GaugeLeft, GaugePartyHealTop, m_iCurrentPartyHealThreshold, m_Pos);
+        UpdateGauge("gauge_party_heal", GaugeLeft, GaugePartyHealTop, m_iCurrentPartyHealThreshold, m_Pos);
 
     return false;
 }
 
-bool CMuHelperDetailWindow::UpdateGauge(int left, int top, int& level, const POINT& panelPos)
+bool CMuHelperDetailWindow::UpdateGauge(const char* gaugeId, int left, int top, int& level, const POINT& panelPos)
 {
+    float barX = static_cast<float>(panelPos.x + left);
+    float barY = static_cast<float>(panelPos.y + top);
+    float barWidth = 124.f;
+    float barHeight = 0.f;
+    UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "panel", gaugeId, panelPos, barX, barY);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, gaugeId, barWidth, barHeight);
+
     // Native's own geometry: the drag origin sits one unit inside the drawn bar, and the hit area
-    // starts 8 units before it so a press just left of the bar reads as zero. Native's party gauge
-    // used an origin one unit further left than the other two for its hit test only; all three
-    // share one rule here.
-    const int origin = panelPos.x + left + 1;
-    if (!CheckMouseIn(origin - 8, panelPos.y + top, 124 + 8, 16))
+    // starts 8 units before it, 16 tall, so a press just left of the bar reads as zero. Native's
+    // party gauge used an origin one unit further left than the other two for its hit test only;
+    // all three share one rule here.
+    const int origin = static_cast<int>(barX) + 1;
+    const int width = static_cast<int>(barWidth);
+    if (!CheckMouseIn(origin - 8, static_cast<int>(barY), width + 8, 16))
         return false;
 
     if (MouseWheel > 0)
@@ -168,7 +176,7 @@ bool CMuHelperDetailWindow::UpdateGauge(int left, int top, int& level, const POI
     if (IsRepeat(VK_LBUTTON))
     {
         const int x = MouseX - origin;
-        level = x < 0 ? 0 : std::min(static_cast<int>((10.f * x) / 124.f) + 1, 10);
+        level = x < 0 ? 0 : std::min(static_cast<int>((10.f * x) / barWidth) + 1, 10);
     }
     return true;
 }

@@ -1,6 +1,6 @@
 /* Modern layout for CMuHelperDetailWindow -- the same positions as the legacy theme's copy (this is
-   layout, not presentation: native's own m_Pos + K, and the gauge positions must stay equal to
-   CMuHelperDetailWindow's Gauge* constants, which take their input in C++). The pieces' look comes
+   layout, not presentation: native's own m_Pos + K, and the gauges, which take their input in C++,
+   are hit-tested where this places them). The pieces' look comes
    from this theme's mu_helper_common.rcss. */
 
 .mhd-page { position: absolute; left: 0; top: 0; }

@@ -89,11 +89,11 @@ namespace mu::ui::window
         void InitConfig();
 
     private:
-        // Native's gauge input, kept in C++: a click maps to floor(10 * x / 124) + 1, the wheel
+        // Native's gauge input, kept in C++: a click maps to floor(10 * x / width) + 1, the wheel
         // steps by one, and holding the button drags. A stock <input type="range"> rounds
-        // differently and has no wheel handling. `left`/`top` are the gauge bar's own reference
-        // position, the same one the RCSS draws it at.
-        static bool UpdateGauge(int left, int top, int& level, const POINT& panelPos);
+        // differently and has no wheel handling. The bar is wherever the theme draws `gaugeId`;
+        // `left`/`top` (and a 124 width) are the original's place, used until it has laid out.
+        bool UpdateGauge(const char* gaugeId, int left, int top, int& level, const POINT& panelPos);
 
         void SetPreCondition(int index);
         void SetSubCondition(int index);
