@@ -120,7 +120,7 @@
 	font-size: 12px;
 	color: token(text-primary);
 }
-.quest-content-row.bold { font-weight: bold; }
+.quest-content-row.row-heading { font-weight: bold; }
 .quest-content-row.clickable { cursor: pointer; pointer-events: auto; }
 .quest-content-row.clickable:hover { color: token(accent-gold-hover); }
 

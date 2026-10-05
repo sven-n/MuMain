@@ -238,29 +238,19 @@ counter-scale bindings start costing something concrete, rather than being an in
 
 ### Remaining ownership work
 
-- **Display-list documents:** the conversion that lets a repeated row of variable
-  length be positioned by RCSS rather than by a bound `top` per entry. This is a
-  method, not one window: applied once it produces most of the findings below at
-  once. Its enabling selector is proven -- `:nth-child` on `data-for` rows works at
-  runtime and the event-entry and Gold Bowman documents already use it
-  (`engine-findings.md`) -- so what remains is applying it to the documents that
-  still bind a `top` per row, keeping in mind that counter-scaled layers cannot be
-  stacked by flow. Rule on it before the next port rather than retrofitting later.
-- **Static index arithmetic:** Castle and Guard tab positions, Catapult lines and
-  GensRanking description rows still bind positions derived from row indices.
-  Move bounded layout into RCSS while preserving required counter-scale metrics.
+- **Display-list documents:** repeated rows with variable content still need
+  a per-window review before moving bound `top` values to RCSS. The `:nth-child`
+  selector works on `data-for` rows at runtime (`engine-findings.md`), and the
+  event-entry, Gold Bowman, Castle, Guard and Catapult documents use it.
+  Counter-scaled text cannot always stack through normal flow; use the proven
+  selector where the row count and pitch are actually bounded.
 - **GensRanking scrollbar:** the model still mirrors native CScrollBar thumb geometry.
-  Consider the shared RmlUi scroll pane when this window is next changed.
-- **Quest row weight:** QuestRewardModel::Entry carries `style` and a `bold` flag
-  derived from Heading. Let RCSS derive weight from the semantic style in
-  MyQuestInfoWindow, QuestProgress and QuestProgressByEtc. Validate all row kinds.
-  Generic dialogs have caller-supplied bold/color without that semantic style;
-  changing their contract requires a separate caller review.
+  Replacing it with the shared RmlUi scroll pane also requires moving all
+  wrapped reward-description lines into the DOM and handing it scroll state.
+  Keep their native measured line pitch and counter-scale behavior.
 - **MessageBoxView:** measured stacking and centring retain geometry bindings;
   review literal button positions with the relevant box classes. Counter-scaled
   text metrics remain a constraint, not automatically removable layout constants.
-- **Event button style:** review the presentation-sized `wide` value alongside the
-  semantic `exit` value when next touching those button structs.
 - **Root-placement names:** `root_x`/`root_y` and `panel_x`/`panel_y` name similar placement
   bridges. Consolidation is low-priority
   naming work, separate from changing who owns dock spacing.

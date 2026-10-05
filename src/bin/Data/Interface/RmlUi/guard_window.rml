@@ -31,13 +31,14 @@
 		      data-style-font-size="owner_guild.text_px + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{owner_guild.text}}</span>
 
-		<div class="gd-tab" data-for="t, i : tabs" data-class-selected="t.selected"
-		     data-class-tab-0="i == 0" data-class-tab-1="i == 1" data-class-tab-2="i == 2"
-		     data-event-click="guard_tab(i)">
-			<span class="sharp-text gd-tab-label" data-style-top="tab_label_top + 'px'"
-			      data-style-width="(56 * root_scale) + 'px'"
-			      data-style-font-size="text_px + 'px'" data-style-line-height="line_height_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
+		<div class="gd-tabs">
+			<div class="gd-tab" data-for="t, i : tabs" data-class-selected="t.selected"
+			     data-event-click="guard_tab(i)">
+				<span class="sharp-text gd-tab-label" data-style-top="tab_label_top + 'px'"
+				      data-style-width="(56 * root_scale) + 'px'"
+				      data-style-font-size="text_px + 'px'" data-style-line-height="line_height_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
+			</div>
 		</div>
 
 		<!-- One page per tab. Each line is named and placed by the theme; C++ fills only the page

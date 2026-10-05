@@ -48,7 +48,7 @@
 
 		<div class="qp-reward" data-class-hidden="active_view != 2">
 			<div class="qp-reward-list">
-				<span class="qp-reward-row" data-for="r : reward_rows" data-class-bold="r.bold"
+				<span class="qp-reward-row" data-for="r : reward_rows"
 				      data-class-clickable="r.clickable"
 				      data-class-row-heading="r.style == 'heading'"
 				      data-class-row-requirement="r.style == 'requirement'"

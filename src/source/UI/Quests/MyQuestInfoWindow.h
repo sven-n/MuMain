@@ -115,7 +115,6 @@ namespace mu::ui::window
         {
             Rml::String text;
             Rml::String style; // UI::Quests::RewardModel::StyleKey()
-            bool bold = false;
             int index = 0; // position within m_ContentRows -- passed back to RmlClickSelectContent
             bool clickable = false; // true for a reward/request-item row (data-event-click target)
         };

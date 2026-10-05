@@ -138,7 +138,7 @@
 	font-size: 12px;
 	color: token(text-primary);
 }
-.qp-reward-row.bold { font-weight: bold; }
+.qp-reward-row.row-heading { font-weight: bold; }
 .qp-reward-row.clickable { cursor: pointer; pointer-events: auto; }
 .qp-reward-row.clickable:hover { color: token(accent-gold-hover); }
 

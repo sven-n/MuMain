@@ -95,7 +95,6 @@ void CQuestProgressByEtc::BuildRmlUi()
             auto reward = c.RegisterStruct<UI::Quests::RewardModel::Entry>();
             reward.RegisterMember("text", &UI::Quests::RewardModel::Entry::text);
             reward.RegisterMember("style", &UI::Quests::RewardModel::Entry::style);
-            reward.RegisterMember("bold", &UI::Quests::RewardModel::Entry::bold);
             reward.RegisterMember("index", &UI::Quests::RewardModel::Entry::index);
             reward.RegisterMember("clickable", &UI::Quests::RewardModel::Entry::clickable);
             c.RegisterArray<std::vector<UI::Quests::RewardModel::Entry>>();

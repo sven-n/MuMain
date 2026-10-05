@@ -141,7 +141,7 @@
 	font-size: 1em;
 	color: token(text-info);
 }
-.quest-content-row.bold { font-weight: bold; }
+.quest-content-row.row-heading { font-weight: bold; }
 /* A clickable row keeps its colour on hover, as the original list box does. */
 .quest-content-row.clickable { cursor: pointer; pointer-events: auto; }
 

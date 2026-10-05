@@ -37,6 +37,10 @@
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
 .cp-title { left: 0; top: 13px; font-weight: bold; color: #dcdcdc; }
 .cp-line { left: 0; font-weight: bold; color: #dcdcdc; }
+.cp-lines { position: static; }
+.cp-line:nth-child(1) { top: 50px; }
+.cp-line:nth-child(2) { top: 65px; }
+.cp-line:nth-child(3) { top: 80px; }
 
 .t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { position: absolute; }
 .t-edge-top { height: 14px; decorator: image(cp-edge-top); }

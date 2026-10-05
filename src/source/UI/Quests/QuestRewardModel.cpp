@@ -98,7 +98,6 @@ namespace UI::Quests::RewardModel
     Entry ToEntry(const RowData& row, int index)
     {
         const bool clickable = row.pItem && (row.dwType == QUEST_REQUEST_ITEM || row.dwType == QUEST_REWARD_ITEM);
-        // GetRequestRewardText() draws its headings in g_hFontBold.
-        return Entry{row.text, StyleKey(row.style), row.style == RowStyle::Heading, index, clickable};
+        return Entry{row.text, StyleKey(row.style), index, clickable};
     }
 }

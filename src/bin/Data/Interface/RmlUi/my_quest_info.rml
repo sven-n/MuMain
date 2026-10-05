@@ -47,7 +47,7 @@
 
 			<div class="sharp-text quest-contents"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(172 * root_scale) + 'px'" data-style-height="(199 * root_scale) + 'px'">
-				<span class="quest-content-row" data-for="c : contents" data-class-bold="c.bold"
+				<span class="quest-content-row" data-for="c : contents"
 				      data-style-padding="(1 * root_scale) + 'px ' + (4 * root_scale) + 'px'"
 				      data-class-clickable="c.clickable"
 				      data-class-row-subject="c.style == 'subject'"

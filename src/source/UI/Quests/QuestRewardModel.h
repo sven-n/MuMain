@@ -46,7 +46,6 @@ struct RowData
     {
         Rml::String text;
         Rml::String style; // StyleKey(RowData::style)
-        bool bold = false;
         int index = 0;
         bool clickable = false;
     };

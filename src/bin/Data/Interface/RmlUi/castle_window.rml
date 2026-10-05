@@ -24,14 +24,14 @@
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title.text}}</span>
 
 		<!-- Long tab labels can overflow their 40px tab as in the original client. -->
-		<div class="cw-tab" data-for="t, i : tabs" data-class-selected="t.selected"
-		     data-class-tab-0="i == 0" data-class-tab-1="i == 1"
-		     data-class-tab-2="i == 2" data-class-tab-3="i == 3"
-		     data-event-click="senatus_tab(i)">
-			<span class="sharp-text cw-tab-label" data-style-top="tab_label_top + 'px'"
-			      data-style-width="(40 * root_scale) + 'px'"
-			      data-style-font-size="t.text_px + 'px'" data-style-line-height="line_height_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
+		<div class="cw-tabs">
+			<div class="cw-tab" data-for="t, i : tabs" data-class-selected="t.selected"
+			     data-event-click="senatus_tab(i)">
+				<span class="sharp-text cw-tab-label" data-style-top="tab_label_top + 'px'"
+				      data-style-width="(40 * root_scale) + 'px'"
+				      data-style-font-size="t.text_px + 'px'" data-style-line-height="line_height_px + 'px'"
+				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
+			</div>
 		</div>
 
 		<!-- The castle gate and guardian statue pages. The map's lower frame paints over the map

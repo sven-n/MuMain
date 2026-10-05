@@ -55,11 +55,12 @@
 .frame-top { decorator: image(docked-bg-top-b); }
 #panel { pointer-events: none; }
 
+.cw-tabs { position: static; }
 .cw-tab { position: absolute; top: 32px; width: 40px; height: 22px; pointer-events: auto; decorator: image(cw-tab-up); }
-.cw-tab.tab-0 { left: 12px; }
-.cw-tab.tab-1 { left: 53px; }
-.cw-tab.tab-2 { left: 94px; }
-.cw-tab.tab-3 { left: 135px; }
+.cw-tab:nth-child(1) { left: 12px; }
+.cw-tab:nth-child(2) { left: 53px; }
+.cw-tab:nth-child(3) { left: 94px; }
+.cw-tab:nth-child(4) { left: 135px; }
 .cw-tab.selected { decorator: image(cw-tab-down); }
 .cw-tab-label { color: #b5b5b5; }
 .cw-tab.selected .cw-tab-label { color: #ffffff; }

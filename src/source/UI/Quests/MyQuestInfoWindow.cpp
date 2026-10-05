@@ -119,7 +119,6 @@ void mu::ui::window::CMyQuestInfoWindow::BuildRmlUi()
                 auto content = c.RegisterStruct<ContentEntry>();
                 content.RegisterMember("text", &ContentEntry::text);
                 content.RegisterMember("style", &ContentEntry::style);
-                content.RegisterMember("bold", &ContentEntry::bold);
                 content.RegisterMember("index", &ContentEntry::index);
                 content.RegisterMember("clickable", &ContentEntry::clickable);
                 c.RegisterArray<std::vector<ContentEntry>>();
@@ -564,7 +563,7 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
     {
         const UI::Quests::RewardModel::Entry entry =
             UI::Quests::RewardModel::ToEntry(m_ContentRows[rowIndex], static_cast<int>(rowIndex));
-        model.contents.push_back({entry.text, entry.style, entry.bold, entry.index, entry.clickable});
+        model.contents.push_back({entry.text, entry.style, entry.index, entry.clickable});
     }
     m_RmlBinder.MarkDirty("contents");
 

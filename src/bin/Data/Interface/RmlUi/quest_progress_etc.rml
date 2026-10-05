@@ -46,7 +46,7 @@
 		<div class="qp-reward" data-class-hidden="active_view != 2">
 			<div class="sharp-text qp-reward-list"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(174 * root_scale) + 'px'" data-style-height="(150 * root_scale) + 'px'">
-				<span class="qp-reward-row" data-for="r : reward_rows" data-class-bold="r.bold"
+				<span class="qp-reward-row" data-for="r : reward_rows"
 				      data-style-padding="(1 * root_scale) + 'px ' + (4 * root_scale) + 'px'"
 				      data-class-clickable="r.clickable"
 				      data-class-row-heading="r.style == 'heading'"
