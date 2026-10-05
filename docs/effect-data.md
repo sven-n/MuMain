@@ -308,6 +308,36 @@ when they reach their target. A change that moves a type looks at these too.
   values of an effect name it; item looks, skills and monsters will name
   types later.
 
+### Preview
+
+The **Preview** section of the details shows what the selected type's slot
+holds in a small 3D view. It loads nothing: a slot that holds nothing on
+this map says so. The effect's own move and draw code do not run, so nothing
+it would create (sprites, particles, sounds) appears; the preview in the
+world (FX1.7b) is for that.
+
+- **What it shows.** An effect with a model number shows its model, animated
+  as the game animates it and turning, with the scale, light, blend mesh and
+  render type of its creation values. Effects with a texture number,
+  sprites, particles and lightning show their texture as a sprite facing the
+  camera; **Blend** chooses how it is blended (the four blends of a sprite's
+  SubType). The effects that `RenderEffectShadows` draws on the ground show
+  their texture lying on the ground.
+- **Show on**: nothing, a plane, a cube or an item. The type stands on the
+  plane and on the cube and sits at the middle of an item. For an item, pick
+  it in the drop-down (type a part of its name or its number to find it),
+  and set its level and whether it is excellent or ancient; the item is
+  drawn with its looks, without its own sprites and particles.
+- **SubType** (types with variants): the values of which column of the
+  creation table the preview uses; the first stands for the SubTypes without
+  a variant.
+- **The view**: drag to turn the camera, the wheel zooms, a double click or
+  **Reset view** puts it back; **Turn** turns the type slowly.
+- **Notes** under the view say what the preview cannot show: an empty slot,
+  a texture the code chooses, a model the game never draws itself, an effect
+  whose values start it invisible (the preview shows it anyway), a model
+  without animation.
+
 ## When the code changes
 
 A new type in the code gets a line in the list of its kind in
