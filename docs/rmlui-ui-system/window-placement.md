@@ -230,6 +230,39 @@ What these exposed:
 - HUD parts stay where `main_frame.rcss` puts them; a left dock covers the chat log, which a
   theme using one would move.
 
+## Theme-sized windows: audit (2026-10-05)
+
+Goal: a window's size is the theme's choice, like its place. A slot already takes the window's
+`#panel` size; what still fixes the size is inside the windows. Five things do:
+
+- **Chrome at fixed pixels.** The docked frame (`docked_panel_frame.rcss`, 25 windows) places its
+  sprite pieces absolutely (`.frame-right { left: 169px }`, edges `height: 320px`) instead of
+  anchoring them to `#panel`'s edges; the inventory family's own chrome does the same. RCSS only.
+- **Size literals in RML.** 28 documents write 190 or 429, mostly counter-scaled text layers
+  (`data-style-width="(190 * root_scale) + 'px'"`). These should follow the panel's width.
+- **Fixed hit boxes.** Eight windows hit-test against C++ constants instead of their `#panel`
+  (`GUILDINFO_WIDTH`, `COMMAND_WINDOW_WIDTH`, `ENTERBC_BASE_WINDOW_WIDTH`, …), so a larger panel
+  would not take clicks outside the old box. Switch them to `RefreshLogicalPanelSize()` (the other
+  windows already use it) or RmlUi hover.
+- **Native parts at fixed offsets.** Native controls and drawing at `m_Pos + constant`: tab hit
+  areas, radio buttons, icons, and the inventory's equipment slots (26 offsets) and item grid
+  (`CInventoryCtrl` at `+15, +200`). These need positions from RCSS anchors
+  (`RefreshLogicalAnchorPosition()`, already used by the quest windows), or native content drawn
+  into an element (`RenderTarget`).
+- **No document to measure.** Six windows draw through shared entry views and take 190x429.
+
+| Tier | Windows | Work |
+|---|---|---|
+| 1. RCSS only | character, party, pet, NPC dialogue, gate switch, MU Helper config | Edge-anchored frame; panel-relative text widths |
+| 2. Plus hit box | guild info, guild make, command, command list, Blood Castle and Devil Square entry, catapult, lucky coin registration, lucky item | Tier 1, plus `RefreshLogicalPanelSize()` hit boxes |
+| 3. Plus anchors | quest progress (and etc), quest log, NPC quest, castle, guard, gatekeeper, duel watch, MU Helper detail (gauge hit areas), United Marketplace | Tier 2, plus native parts placed from RCSS anchors |
+| 4. Native grids | inventory, extension, vault (and extension), NPC shop, mix, trade, personal shops | Equipment slots and item grid placed from RCSS anchors; cell size stays native |
+| 5. Shared views | Gold Bowman (both), Doppelganger and Empire Guardian entry, lucky coin exchange | The entry views report their panel and take anchors |
+
+Counts come from a scan of each window's `.cpp` and RML (`RefreshLogicalPanelSize`/
+`RefreshLogicalAnchorPosition` use, `CInventoryCtrl`, 3D rendering, `m_Pos.x/y + n` offsets, 190/429
+literals). Fill placement (phase 4) needs the same groundwork.
+
 ## Open questions
 
 - One workspace document or one per region; which RmlUi context it lives in. Background-context
