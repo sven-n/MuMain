@@ -17,7 +17,7 @@ UI::Scaling::Transform TransformForOwner(I3DRenderObj* object)
         owner = object->GetLayoutOwner();
     if (!owner)
         return UI::Scaling::GetActiveTransform();
-    return UI::Scaling::TransformForLayout(owner->GetLayoutMode(), WindowWidth, WindowHeight);
+    return owner->GetLayoutTransform();
 }
 
 void RenderWithOwnerLayout(I3DRenderObj* object)

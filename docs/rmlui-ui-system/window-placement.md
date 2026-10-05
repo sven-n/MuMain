@@ -69,9 +69,10 @@ Each theme ships `workspace.rml` with its RCSS. It holds one **slot** per placea
 ### 2. Slot sizing: content or fill
 
 - **`data-fit="content"`** (default): the slot takes the window's own panel size times the region's
-  scale. C++ reads the window's `#panel` box (as `RefreshLogicalPanelSize()` already does) and
-  writes the slot size. Pixel-art panels authored at a reference size (the whole legacy theme)
-  stay exactly as they are.
+  scale. C++ reads the window's `#panel` box through `RefreshLogicalPanelSize()`, finding the
+  document by the file name the window registers; windows drawn through a shared entry view (the
+  Gold Bowman, Doppelganger, Empire Guardian and Lucky Coin windows) have none and take the docked
+  windows' 190x429. Pixel-art panels authored at a reference size stay exactly as they are.
 - **`data-fit="fill"`**: the window takes the slot's size. Its document receives the slot's width
   and height and lays itself out fluidly. Only windows that support it can be placed this way
   (section 5); otherwise the service logs a warning and uses `content`.
@@ -89,12 +90,14 @@ On a change (open, close, resize, UI scale, theme switch, HUD move), not every f
 3. read each visible slot's resolved rectangle;
 4. give each window its rectangle.
 
-A content-fit window receives its slot's top-left as a position in its own layout space, through
-its existing `SetPos()`. Everything built on that keeps working unchanged: `CManager` hit-testing,
-grids at fixed offsets, 3D icons, and `SyncRootTransform()`'s `root_x`/`root_y`/`root_scale`.
-Migrating a docked window means registering it and deleting its `PanelColumnX`/`SetPos` lines, not
-rewriting it. A fill window also needs its size, so fill brings a `LayoutMode::Slot` whose
-transform maps the window onto its slot (phase 4).
+A placed window's layout mode becomes `LayoutMode::Slot`: its logical space is its slot, with
+(0, 0) at the slot's top-left and the region's scale (`CObject::PlaceInSlot()`), and its `m_Pos`
+is (0, 0) unless a saved drag position applies. Everything that maps a window's coordinates reads
+`CObject::GetLayoutTransform()`, so `CManager` hit-testing, grids at fixed offsets, 3D icons and
+`SyncRootTransform()`'s `root_x`/`root_y`/`root_scale` follow the slot unchanged. Migrating a
+window means registering it (window, slot name, `SetPos()`, document) and deleting its
+`PanelColumnX`/`SetPos` lines, not rewriting it. A registered window the workspace gives no slot
+returns to its policy mode. A fill window would also take its slot's size (phase 4).
 
 The service runs synchronously after every `CSystem::Show()`/`Hide()` and when the screen size or
 UI scale changes, so a newly shown window never draws a frame at a stale position. The workspace
@@ -102,7 +105,9 @@ document is never shown: it is never drawn or hit, and the service lays it out i
 
 Implemented in `UI/Placement/WindowPlacement.{h,cpp}`; the window registry is at the end of
 `CSystem::LoadMainSceneInterface()`. Inputs the game sets on the workspace: `#safe_area`'s
-`bottom`, content slot sizes, and region heights from `data-ref-height`.
+`top`/`bottom`, content slot sizes, and region heights from `data-ref-height`. A `data-window` or
+`data-closes` name no window answers to is logged once per workspace (`[Placement]` in
+MuError.log).
 
 **Reading geometry back.** The main-frame rollout's rule was that C++ never reads RCSS geometry to
 draw or place chrome. That rule stays for chrome. This design adds one narrow, named exception
@@ -185,16 +190,17 @@ way, so the shops sit beside it as before.
 
 ### 8. Scale
 
-Content-fit windows keep reference-unit panels scaled by their region. Today docks cap at 2.25×,
-panels and the HUD at 2.0×. Each region declares which scale it uses (for example
-`data-scale="dock"`); the legacy theme declares today's values. Fill windows use `dp`.
+Content-fit windows keep reference-unit panels scaled by their region. A region's `data-scale`
+picks the scale: `dock` (the default; the original docks, capped at 2.25×), `panel` (centred
+panels, 2.0×) or `hud` (the HUD strip, 2.0×). Fill windows would use `dp`.
 
 ### 9. What `LayoutMode` becomes
 
-Windows with a slot use `Slot`. `Legacy` (scene windows that work in real pixels) and
-`WorldOverlay` (world-anchored balloons and names) stay. The `Hud*`, `Dock*`,
-`FloatingWorkspace` and `Dialog` rows of `UILayoutPolicy.cpp` disappear as their windows gain
-slots.
+Windows with a slot use `Slot` while placed (done for the 39 right-docked windows). `Legacy`
+(scene windows that work in real pixels) and `WorldOverlay` (world-anchored balloons and names)
+stay. The `Hud*`, `Dock*`, `FloatingWorkspace` and `Dialog` rows of `UILayoutPolicy.cpp` remain
+for windows without slots and shrink as more windows gain them. `DockTransform()`'s fixed HUD
+height now only serves unslotted docked windows and the saved-position conversion.
 
 ## Theme recipes (verified in game)
 

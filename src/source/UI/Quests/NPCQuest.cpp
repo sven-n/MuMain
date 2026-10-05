@@ -297,7 +297,7 @@ void CNPCQuest::RenderItem3D()
     {
         if (Rml::Element* conditionsEl = m_pRmlDoc->GetElementById("conditions_anchor"))
         {
-            const auto transform = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight);
+            const auto transform = GetLayoutTransform();
             if (transform.scaleX > 0.0f && transform.scaleY > 0.0f)
             {
                 // Icon sits 22px left / 9px above the row's own text origin -- a native rendering

@@ -208,10 +208,10 @@ void CMyInventory::BuildRmlUi()
         if (modelCreated)
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/my_inventory.rml");
 
-        // #title is the drag handle (MakeDraggable). onMove recomputes DockRightTransform directly
-        // instead of reading the ambient active transform, since this callback fires from RmlUi's
-        // own event processing, outside this window's ScopedActiveTransform scope. SetPos() keeps
-        // the native paperdoll/grid in sync automatically.
+        // #title is the drag handle (MakeDraggable). onMove reads this window's own layout transform
+        // instead of the ambient active one, since this callback fires from RmlUi's own event
+        // processing, outside this window's ScopedActiveTransform scope. SetPos() keeps the native
+        // paperdoll/grid in sync automatically.
         if (m_pRmlDoc)
         {
             Rml::Element* panelEl = m_pRmlDoc->GetElementById("panel");
@@ -221,15 +221,22 @@ void CMyInventory::BuildRmlUi()
                 UI::RmlBridge::MakeDraggable(titleEl, panelEl,
                     [this](float newLeftPx, float newTopPx)
                     {
-                        const auto transform = UI::Scaling::DockRightTransform(WindowWidth, WindowHeight);
+                        const auto transform = GetLayoutTransform();
                         const int newX = static_cast<int>(std::lround(UI::Scaling::LogicalX(transform, newLeftPx)));
                         const int newY = static_cast<int>(std::lround(UI::Scaling::LogicalY(transform, newTopPx)));
                         SetPos(newX, newY);
                     },
                     [this]()
                     {
-                        // Persist immediately -- m_Pos already holds the drag's final resolved position.
-                        GameConfig::GetInstance().SetWindowPosition(L"my_inventory", m_Pos.x, m_Pos.y);
+                        // Saved in the original docked windows' space, wherever the workspace placed
+                        // the inventory.
+                        const auto from = GetLayoutTransform();
+                        const auto dock = UI::Scaling::DockRightTransform(WindowWidth, WindowHeight);
+                        const int savedX = static_cast<int>(std::lround(
+                            UI::Scaling::LogicalX(dock, UI::Scaling::PositionX(from, static_cast<float>(m_Pos.x)))));
+                        const int savedY = static_cast<int>(std::lround(
+                            UI::Scaling::LogicalY(dock, UI::Scaling::PositionY(from, static_cast<float>(m_Pos.y)))));
+                        GameConfig::GetInstance().SetWindowPosition(L"my_inventory", savedX, savedY);
                     });
             }
         }

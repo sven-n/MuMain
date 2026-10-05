@@ -304,7 +304,7 @@ void CNPCDialogue::ResolveDialogueWrapGeometry(float& npcWrapWidth, int& npcLine
     if (!m_pRmlDoc)
         return;
 
-    const auto transform = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight);
+    const auto transform = GetLayoutTransform();
     if (transform.scaleX <= 0.0f || transform.scaleY <= 0.0f)
         return;
 
@@ -380,7 +380,7 @@ void CNPCDialogue::SetCurNPCWords(int nQuestListCount)
     // Wrap in this window's own layout space: the budget below is in its logical units, and there
     // MeasureText() reports the width the text is drawn at (the native text size).
     const UI::Scaling::ScopedActiveTransform wrapSpace(
-        UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight));
+        GetLayoutTransform());
     float npcWrapWidth, answerWrapWidth;
     int npcLinesPerPage, answerLinesPerPage;
     ResolveDialogueWrapGeometry(npcWrapWidth, npcLinesPerPage, answerWrapWidth, answerLinesPerPage);
@@ -411,7 +411,7 @@ void CNPCDialogue::SetCurSelTexts()
     // Wrap in this window's own layout space: the budget below is in its logical units, and there
     // MeasureText() reports the width the text is drawn at (the native text size).
     const UI::Scaling::ScopedActiveTransform wrapSpace(
-        UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight));
+        GetLayoutTransform());
     float npcWrapWidth, answerWrapWidth;
     int npcLinesPerPage, answerLinesPerPage;
     ResolveDialogueWrapGeometry(npcWrapWidth, npcLinesPerPage, answerWrapWidth, answerLinesPerPage);
@@ -482,7 +482,7 @@ void CNPCDialogue::SetQuestListText(std::span<const std::uint32_t> questIndices)
     // Wrap in this window's own layout space: the budget below is in its logical units, and there
     // MeasureText() reports the width the text is drawn at (the native text size).
     const UI::Scaling::ScopedActiveTransform wrapSpace(
-        UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight));
+        GetLayoutTransform());
     float npcWrapWidth, answerWrapWidth;
     int npcLinesPerPage, answerLinesPerPage;
     ResolveDialogueWrapGeometry(npcWrapWidth, npcLinesPerPage, answerWrapWidth, answerLinesPerPage);

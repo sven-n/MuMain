@@ -67,6 +67,9 @@ namespace UI::Scaling
         // global MouseX/MouseY into that same wrong reference space, breaking click hit-testing
         // too. TransformForLayout() maps this to a genuine identity transform instead.
         Legacy,
+        // Placed by the theme's workspace: the window's own transform maps it onto its slot
+        // (CObject::PlaceInSlot()). TransformForLayout() cannot know it.
+        Slot,
     };
 
     class ScopedActiveTransform

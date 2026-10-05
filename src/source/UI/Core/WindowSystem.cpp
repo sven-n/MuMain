@@ -574,57 +574,59 @@ bool CSystem::LoadMainSceneInterface()
 
     // Windows the theme's workspace places. The members are re-created per main scene, so each
     // setter reads the member when it runs.
-    const auto slot = [](DWORD windowId, const char* slotName, auto*& window)
+    const auto slot = [](DWORD windowId, const char* slotName, auto*& window, const char* document = nullptr)
     {
-        UI::Placement::RegisterWindow(windowId, slotName,
-                                      [&window](int x, int y)
-                                      {
-                                          if (window != nullptr)
-                                              window->SetPos(x, y);
-                                      });
+        UI::Placement::RegisterWindow(
+            windowId, slotName, [&window]() -> CObject* { return window; },
+            [&window](int x, int y)
+            {
+                if (window != nullptr)
+                    window->SetPos(x, y);
+            },
+            document);
     };
-    slot(INTERFACE_CHARACTER, "character", m_pNewCharacterInfoWindow);
-    slot(INTERFACE_MUHELPER, "mu_helper", m_pMuHelperConfig);
-    slot(INTERFACE_MUHELPER_EXT, "mu_helper_detail", m_pMuHelperDetail);
-    slot(INTERFACE_PARTY, "party", m_pNewPartyInfoWindow);
-    slot(INTERFACE_GUILDINFO, "guild_info", m_pNewGuildInfoWindow);
-    slot(INTERFACE_COMMAND, "command", m_pNewCommandWindow);
-    slot(INTERFACE_COMMAND_LIST, "command_list", m_pNewChatCommandWindow);
+    slot(INTERFACE_CHARACTER, "character", m_pNewCharacterInfoWindow, "character_info.rml");
+    slot(INTERFACE_MUHELPER, "mu_helper", m_pMuHelperConfig, "mu_helper_config.rml");
+    slot(INTERFACE_MUHELPER_EXT, "mu_helper_detail", m_pMuHelperDetail, "mu_helper_detail.rml");
+    slot(INTERFACE_PARTY, "party", m_pNewPartyInfoWindow, "party_info.rml");
+    slot(INTERFACE_GUILDINFO, "guild_info", m_pNewGuildInfoWindow, "guild_info.rml");
+    slot(INTERFACE_COMMAND, "command", m_pNewCommandWindow, "command_window.rml");
+    slot(INTERFACE_COMMAND_LIST, "command_list", m_pNewChatCommandWindow, "chat_command.rml");
     slot(INTERFACE_GOLD_BOWMAN, "gold_bowman", m_pNewGoldBowman);
     slot(INTERFACE_GOLD_BOWMAN_LENA, "gold_bowman_lena", m_pNewGoldBowmanLena);
-    slot(INTERFACE_NPC_DIALOGUE, "npc_dialogue", m_pNewNPCDialogue);
-    slot(INTERFACE_QUEST_PROGRESS, "quest_progress", m_pNewQuestProgress);
-    slot(INTERFACE_NPCQUEST, "npc_quest", m_pNewNPCQuest);
-    slot(INTERFACE_BLOODCASTLE, "blood_castle_entry", m_pNewEnterBloodCastle);
-    slot(INTERFACE_DEVILSQUARE, "devil_square_entry", m_pNewEnterDevilSquare);
-    slot(INTERFACE_SENATUS, "castle", m_pNewCastleWindow);
-    slot(INTERFACE_GUARDSMAN, "guard", m_pNewGuardWindow);
-    slot(INTERFACE_GATEKEEPER, "gatekeeper", m_pNewGatemanWindow);
-    slot(INTERFACE_GATESWITCH, "gate_switch", m_pNewGateSwitchWindow);
-    slot(INTERFACE_NPCGUILDMASTER, "guild_make", m_pNewGuildMakeWindow);
-    slot(INTERFACE_CATAPULT, "catapult", m_pNewCatapultWindow);
-    slot(INTERFACE_DUELWATCH, "duel_watch", m_pNewDuelWatchWindow);
+    slot(INTERFACE_NPC_DIALOGUE, "npc_dialogue", m_pNewNPCDialogue, "npc_dialogue.rml");
+    slot(INTERFACE_QUEST_PROGRESS, "quest_progress", m_pNewQuestProgress, "quest_progress.rml");
+    slot(INTERFACE_NPCQUEST, "npc_quest", m_pNewNPCQuest, "npc_quest.rml");
+    slot(INTERFACE_BLOODCASTLE, "blood_castle_entry", m_pNewEnterBloodCastle, "blood_castle_enter.rml");
+    slot(INTERFACE_DEVILSQUARE, "devil_square_entry", m_pNewEnterDevilSquare, "devil_square_enter.rml");
+    slot(INTERFACE_SENATUS, "castle", m_pNewCastleWindow, "castle_window.rml");
+    slot(INTERFACE_GUARDSMAN, "guard", m_pNewGuardWindow, "guard_window.rml");
+    slot(INTERFACE_GATEKEEPER, "gatekeeper", m_pNewGatemanWindow, "gateman.rml");
+    slot(INTERFACE_GATESWITCH, "gate_switch", m_pNewGateSwitchWindow, "gate_switch.rml");
+    slot(INTERFACE_NPCGUILDMASTER, "guild_make", m_pNewGuildMakeWindow, "guild_make.rml");
+    slot(INTERFACE_CATAPULT, "catapult", m_pNewCatapultWindow, "catapult.rml");
+    slot(INTERFACE_DUELWATCH, "duel_watch", m_pNewDuelWatchWindow, "duel_watch.rml");
     slot(INTERFACE_DOPPELGANGER_NPC, "doppelganger_entry", m_pNewDoppelGangerWindow);
     slot(INTERFACE_EMPIREGUARDIAN_NPC, "empire_guardian_entry", m_pNewEmpireGuardianNPC);
-    slot(INTERFACE_UNITEDMARKETPLACE_NPC_JULIA, "united_marketplace", m_pNewUnitedMarketPlaceWindow);
-    slot(INTERFACE_MYQUEST, "my_quest", m_pNewMyQuestInfoWindow);
-    slot(INTERFACE_PET, "pet", m_pNewPetInfoWindow);
-    slot(INTERFACE_QUEST_PROGRESS_ETC, "quest_progress_etc", m_pNewQuestProgressByEtc);
-    slot(INTERFACE_INVENTORY, "inventory", m_pNewMyInventory);
-    slot(INTERFACE_INVENTORY_EXT, "inventory_extension", m_pNewMyInventoryExt);
-    slot(INTERFACE_STORAGE, "storage", m_pNewStorageInventory);
-    slot(INTERFACE_STORAGE_EXT, "storage_extension", m_pNewStorageInventoryExt);
-    slot(INTERFACE_NPCSHOP, "npc_shop", m_pNewNPCShop);
-    slot(INTERFACE_MIXINVENTORY, "mix", m_pNewMixInventory);
-    slot(INTERFACE_TRADE, "trade", m_pNewTrade);
-    slot(INTERFACE_MYSHOP_INVENTORY, "my_shop", m_pNewMyShopInventory);
-    slot(INTERFACE_PURCHASESHOP_INVENTORY, "purchase_shop", m_pNewPurchaseShopInventory);
+    slot(INTERFACE_UNITEDMARKETPLACE_NPC_JULIA, "united_marketplace", m_pNewUnitedMarketPlaceWindow, "united_market_place.rml");
+    slot(INTERFACE_MYQUEST, "my_quest", m_pNewMyQuestInfoWindow, "my_quest_info.rml");
+    slot(INTERFACE_PET, "pet", m_pNewPetInfoWindow, "pet_info.rml");
+    slot(INTERFACE_QUEST_PROGRESS_ETC, "quest_progress_etc", m_pNewQuestProgressByEtc, "quest_progress_etc.rml");
+    slot(INTERFACE_INVENTORY, "inventory", m_pNewMyInventory, "my_inventory.rml");
+    slot(INTERFACE_INVENTORY_EXT, "inventory_extension", m_pNewMyInventoryExt, "inventory_extension.rml");
+    slot(INTERFACE_STORAGE, "storage", m_pNewStorageInventory, "storage.rml");
+    slot(INTERFACE_STORAGE_EXT, "storage_extension", m_pNewStorageInventoryExt, "storage_ext.rml");
+    slot(INTERFACE_NPCSHOP, "npc_shop", m_pNewNPCShop, "npc_shop.rml");
+    slot(INTERFACE_MIXINVENTORY, "mix", m_pNewMixInventory, "mix_inventory.rml");
+    slot(INTERFACE_TRADE, "trade", m_pNewTrade, "trade.rml");
+    slot(INTERFACE_MYSHOP_INVENTORY, "my_shop", m_pNewMyShopInventory, "my_shop.rml");
+    slot(INTERFACE_PURCHASESHOP_INVENTORY, "purchase_shop", m_pNewPurchaseShopInventory, "purchase_shop.rml");
     slot(INTERFACE_LUCKYCOIN_REGISTRATION, "lucky_coin_registration", m_pNewLuckyCoinRegistration);
     slot(INTERFACE_EXCHANGE_LUCKYCOIN, "lucky_coin_exchange", m_pNewExchangeLuckyCoinWindow);
-    slot(INTERFACE_LUCKYITEMWND, "lucky_item", m_pNewUILuckyItemWnd);
+    slot(INTERFACE_LUCKYITEMWND, "lucky_item", m_pNewUILuckyItemWnd, "lucky_item.rml");
     // Named only in data-closes.
-    UI::Placement::RegisterWindow(INTERFACE_GENSRANKING, "gens_ranking", nullptr);
-    UI::Placement::RegisterWindow(INTERFACE_MUHELPER_SKILL_LIST, "mu_helper_skill_list", nullptr);
+    UI::Placement::RegisterName(INTERFACE_GENSRANKING, "gens_ranking");
+    UI::Placement::RegisterName(INTERFACE_MUHELPER_SKILL_LIST, "mu_helper_skill_list");
 
     return true;
 }

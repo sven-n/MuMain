@@ -132,7 +132,7 @@ bool mu::ui::window::CManager::UpdateMouseEvent()
             bool bResult;
             {
                 const auto transform =
-                    UI::Scaling::TransformForLayout((*vi)->GetLayoutMode(), WindowWidth, WindowHeight);
+                    (*vi)->GetLayoutTransform();
                 UI::Scaling::ScopedActiveTransform layout(transform, true);
                 bResult = (*vi)->UpdateMouseEvent();
             }
@@ -194,7 +194,7 @@ bool mu::ui::window::CManager::UpdateKeyEvent()
             bool result;
             {
                 const auto transform =
-                    UI::Scaling::TransformForLayout((*vi)->GetLayoutMode(), WindowWidth, WindowHeight);
+                    (*vi)->GetLayoutTransform();
                 UI::Scaling::ScopedActiveTransform layout(transform, true);
                 result = (*vi)->UpdateKeyEvent();
             }
@@ -220,7 +220,7 @@ bool mu::ui::window::CManager::Update()
             bool result;
             {
                 const auto transform =
-                    UI::Scaling::TransformForLayout((*vi)->GetLayoutMode(), WindowWidth, WindowHeight);
+                    (*vi)->GetLayoutTransform();
                 UI::Scaling::ScopedActiveTransform layout(transform, true);
                 result = (*vi)->Update();
             }
@@ -245,7 +245,7 @@ bool mu::ui::window::CManager::Render()
         {
             if (!object->IsVisible())
                 continue;
-            const auto transform = UI::Scaling::TransformForLayout(object->GetLayoutMode(), WindowWidth, WindowHeight);
+            const auto transform = object->GetLayoutTransform();
             UI::Scaling::ScopedActiveTransform layout(transform, true);
             object->PrepareBackgroundLayer();
         }
@@ -277,7 +277,7 @@ bool mu::ui::window::CManager::Render()
             if (m_bDrivesBackgroundLayer && (*vi)->GetLayerDepth() >= INFORMATION_CAMERA_Z_ORDER)
                 RmlUiRuntime::Instance().RenderDialogBackgroundLayer();
 
-            const auto transform = UI::Scaling::TransformForLayout((*vi)->GetLayoutMode(), WindowWidth, WindowHeight);
+            const auto transform = (*vi)->GetLayoutTransform();
             UI::Scaling::ScopedActiveTransform layout(transform, true);
             (*vi)->Render();
         }

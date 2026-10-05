@@ -5,7 +5,9 @@
 
 #include "UI/Scaling/UITransform.h"
 
- 
+extern unsigned int WindowWidth;
+extern unsigned int WindowHeight;
+
 namespace mu::ui::window
 {
     class IObject
@@ -29,6 +31,7 @@ namespace mu::ui::window
         bool m_bRender, m_bUpdate;
         bool m_bActive;
         UI::Scaling::LayoutMode m_layoutMode;
+        UI::Scaling::Transform m_slotTransform{1.f, 1.f, 0.f, 0.f, 1.f};
     public:
         CObject()
             : m_hRelatedWnd(nullptr), m_bRender(true), m_bUpdate(true), m_bActive(true),
@@ -44,6 +47,21 @@ namespace mu::ui::window
         HWND GetRelatedWnd() const { return m_hRelatedWnd; }
         void SetLayoutMode(UI::Scaling::LayoutMode mode) { m_layoutMode = mode; }
         UI::Scaling::LayoutMode GetLayoutMode() const { return m_layoutMode; }
+        // The workspace places this window: its logical space is `transform`, with (0, 0) at the
+        // slot's top-left.
+        void PlaceInSlot(const UI::Scaling::Transform& transform)
+        {
+            m_layoutMode = UI::Scaling::LayoutMode::Slot;
+            m_slotTransform = transform;
+        }
+        // The transform this window's logical coordinates map through to screen pixels.
+        UI::Scaling::Transform GetLayoutTransform() const
+        {
+            if (m_layoutMode == UI::Scaling::LayoutMode::Slot)
+                return m_slotTransform;
+            return UI::Scaling::TransformForLayout(m_layoutMode, static_cast<int>(WindowWidth),
+                                                   static_cast<int>(WindowHeight));
+        }
 
         // Virtual so a window needing more than a flag flip on show/hide (e.g. toggling its own
         // sprites) still runs correctly through CManager's generic CObject*/IObject* dispatch.

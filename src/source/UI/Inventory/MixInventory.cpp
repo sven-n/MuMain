@@ -584,8 +584,8 @@ void CMixInventory::SyncMixContentModel()
     Rml::Element* fitProbe = m_pRmlDoc->GetElementById("title");
     float probeUnitsPerLayoutUnit = 1.f;
     if (fitProbe != nullptr && fitProbe->GetComputedValues().has_local_transform())
-        probeUnitsPerLayoutUnit = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight).scaleX;
-    const auto layout = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight);
+        probeUnitsPerLayoutUnit = GetLayoutTransform().scaleX;
+    const auto layout = GetLayoutTransform();
     const float minimumFit = static_cast<float>(UI::Scaling::MinimumFontPointSize(UI::Scaling::FontRole::Normal)) /
                              static_cast<float>(UI::Scaling::FontPointSize(UI::Scaling::FontRole::Normal, layout));
     auto& model = m_RmlBinder.GetModel();

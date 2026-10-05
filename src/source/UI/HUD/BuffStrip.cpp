@@ -341,7 +341,7 @@ void CBuffStrip::SyncRmlModel()
 void CBuffStrip::SyncTooltipLineHeight()
 {
     constexpr float kNativeRowAdvance = 1.1f;
-    const auto transform = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight);
+    const auto transform = GetLayoutTransform();
     float lineHeight = 0.0f;
     {
         const UI::Scaling::ScopedActiveTransform measureScope(transform);
@@ -362,7 +362,7 @@ void CBuffStrip::SyncStripSlot()
     // (640, 450, 373 or 260 units the docked panels leave, x 220/125/86/30), in its own stretched
     // HUD space -- not centred in the docks' space, which at wide window sizes is narrower.
     constexpr float kNativeRowWidth = 200.0f;
-    const auto hud = UI::Scaling::TransformForLayout(GetLayoutMode(), WindowWidth, WindowHeight);
+    const auto hud = GetLayoutTransform();
     const float left = UI::Scaling::PositionX(hud, (static_cast<float>(m_iFreeScreenWidth) - kNativeRowWidth) * 0.5f);
     const float width = kNativeRowWidth * hud.scaleX;
 
