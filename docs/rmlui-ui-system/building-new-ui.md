@@ -67,7 +67,7 @@ Three permanent shapes, following that boundary:
 | Shape | Reference | Why |
 |---|---|---|
 | RmlUi-only 2D UI | `CMsgWin` (`UI/Windows/MsgWin.h`); `RememberPasswordPrompt` for a free-function variant | The default for every screen; the other two are the only carve-outs. |
-| Hybrid RmlUi/native 3D UI | `CItemHotKey` (`UI/HUD/MainFrameWindow.h/.cpp`) | RmlUi owns the slot chrome; the item icon stays a live 3D render — the permanent boundary, not a porting gap. |
+| Hybrid RmlUi/native 3D UI | `CItemHotKey` (`UI/HUD/ItemHotKey.h/.cpp`) | RmlUi owns the slot chrome; the item icon stays a live 3D render — the permanent boundary, not a porting gap. |
 | World-overlay UI | `CCharInfoBalloonMng` (`Character/CharInfoBalloonMng.h`) | Per-frame `WorldToScreen()` projection, no static 2D rect. |
 
 ## Quick decision guide for a new window, dialog, or HUD panel

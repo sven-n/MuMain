@@ -44,13 +44,6 @@ Done when every common UI concern has one canonical implementation or an explici
 presentation-specific split, discoverable without knowing the codebase's history. Retiring the
 last native widget consumers (`CInGameShop`) is part of it.
 
-## Tracked deferral: `CMainFrameWindow` file split
-
-`MainFrameWindow.cpp/.h` contain CMainFrameWindow, CSkillList and CItemHotKey.
-Consider separating them when working on their responsibilities. Skill icons are RmlUi
-decorators; item icons are still drawn in 3D, into render targets the slots show. This is a
-file-organization decision with no need to rename the classes or change their behavior.
-
 ## Tracked deferral: `CUIBaseWindow`/`CUIPhotoViewer` still derive from `CUIControl`
 
 All that is left of the `CUIControl` family: its widgets are deleted and the windows that kept it
