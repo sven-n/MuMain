@@ -38,7 +38,6 @@ struct Entry
     std::string document;
     bool placed = false;
     bool warnedUnsupportedFill = false;
-    bool warnedEmptyFill = false;
     POINT lastPosition{};
 };
 
@@ -69,7 +68,6 @@ void ReloadWorkspace()
     {
         entry.placed = false;
         entry.warnedUnsupportedFill = false;
-        entry.warnedEmptyFill = false;
     }
     Arrange();
 }
@@ -298,15 +296,21 @@ void Arrange()
                                 slot->GetAttribute<Rml::String>("data-window", "").c_str());
             entry->warnedUnsupportedFill = true;
         }
-        if (fill)
-        {
-            slot->RemoveProperty(Rml::PropertyId::Width);
-            slot->RemoveProperty(Rml::PropertyId::Height);
-            continue;
-        }
         if (window != nullptr)
             window->SetFillPlacementSize(0.f, 0.f);
-        if (open)
+        slot->RemoveProperty(Rml::PropertyId::MinWidth);
+        slot->RemoveProperty(Rml::PropertyId::MinHeight);
+        if (fill)
+        {
+            // The theme sizes a fill slot, but never below the window's content size.
+            const float scale = RegionScale(slot->GetParentNode(), dock);
+            const Rml::Vector2f content = PanelSize(*entry);
+            slot->RemoveProperty(Rml::PropertyId::Width);
+            slot->RemoveProperty(Rml::PropertyId::Height);
+            SetLength(slot, Rml::PropertyId::MinWidth, content.x * scale);
+            SetLength(slot, Rml::PropertyId::MinHeight, content.y * scale);
+        }
+        else if (open)
         {
             const float scale = RegionScale(slot->GetParentNode(), dock);
             const Rml::Vector2f size = PanelSize(*entry);
@@ -316,30 +320,6 @@ void Arrange()
     }
 
     workspace->UpdateDocument();
-    bool relayout = false;
-    for (Rml::Element* slot : slots)
-    {
-        if (!slot->IsClassSet("fill"))
-            continue;
-        const Rml::Vector2f size = slot->GetBox().GetSize(Rml::BoxArea::Border);
-        if (size.x > 0.f && size.y > 0.f)
-            continue;
-        Entry* entry = EntryFor(slot);
-        if (!entry->warnedEmptyFill)
-        {
-            g_ErrorReport.Write(L"> [Placement] data-fit=fill slot '%hs' has no size; using content size.\r\n",
-                                slot->GetAttribute<Rml::String>("data-window", "").c_str());
-            entry->warnedEmptyFill = true;
-        }
-        slot->SetClass("fill", false);
-        const float scale = RegionScale(slot->GetParentNode(), dock);
-        const Rml::Vector2f content = PanelSize(*entry);
-        SetLength(slot, Rml::PropertyId::Width, content.x * scale);
-        SetLength(slot, Rml::PropertyId::Height, content.y * scale);
-        relayout = true;
-    }
-    if (relayout)
-        workspace->UpdateDocument();
 
     // Open slots in covering regions narrow the world from the side of the screen they are on.
     const float screenWidth = static_cast<float>(WindowWidth);

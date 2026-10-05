@@ -97,8 +97,11 @@ height. For example, inside `#safe_area`:
 ```
 
 The service passes the resolved slot size to character info; its panel fills that rectangle and
-its native hit box follows the panel. A window without fill support falls back to its content
-size and logs a warning. The theme still owns the inner RCSS: moving or stretching its content
+its native hit box follows the panel. A fill slot never gets smaller than the window's content
+size: the service gives the slot that size as its `min-width`/`min-height`, so a percentage that
+gets too small at a high UI scale or in a small game window still shows the whole panel. A theme
+that wants a smaller minimum makes `#panel` smaller. A window without fill support falls back to
+its content size and logs a warning. The theme still owns the inner RCSS: moving or stretching its content
 for a very wide or narrow panel is a theme decision. The shipped themes leave their workspace
 slots at content size, preserving the current layout.
 
@@ -301,7 +304,7 @@ UI scale with the [validation matrix](validation-matrix.md).
 | 1 | Done, in-game checks pending: placement service and both themes' workspaces place the right-docked windows (content fit). The `PanelColumnX`/`SetPos` juggling in `Show()`/`Hide()` is gone; Gens ranking (stretched HUD space, not the dock) keeps its own. Differences from before: with character info, inventory and its extension open, the extension now sits beside the inventory (columns 3 and 2 swapped); windows that used to overlap in column 1 now sit side by side. |
 | 2 | Done, in-game checks pending: HUD reserve from the HUD strip; uncovered world edge replaces `GetScreenWidth()`'s table. |
 | 3 | Done, in-game checks pending: column-1/column-2 conflicts and the three-column limit are `data-closes` in both workspaces; `HideGroupBeforeOpenInterface()` is gone. `HideAllGroupA()` stays in C++ (it ends trades and NPC sessions, which a theme must not control). The MU Helper bar rule and the help-panel exclusions stay until their windows have slots. Change: windows closed by these rules now run their closing process; for the Gold Bowman windows that tells the server the event-chip dialog ended, which the old silent hide skipped. |
-| 4 | In progress (user reopened fill work, 2026-10-05): character info opts into `data-fit=fill`. A theme sizes its slot in RCSS; the service transfers that resolved size to the panel. The shipped themes remain content-sized. A two-theme headless layout test passes (54 assertions); a temporary legacy runtime layout at 1024x768/UI scale 90% showed the stretched panel and a working top-right close target. Modern-theme fill, other sizes and detailed interactions remain to be checked. Other windows must opt in after their hit areas and native content can follow a filled panel. |
+| 4 | In progress: character info opts into `data-fit=fill`. A theme sizes its slot in RCSS; the service gives that size to the panel, never less than the content size. Character info's right-hand pieces and action rows are pinned to `#panel`'s edges in both themes, so a wider content-sized panel stretches too. The shipped themes stay content-sized. Verified in game at 1024x768 (runtime layouts, both themes): 35%, 30% and 22% slots at UI scale 80, 90 and 100 %; action buttons and hints, both close targets, and live theme switches between a filled and a content-sized workspace. The headless test passes (58 assertions). Other windows opt in after their hit areas and native content can follow a filled panel. |
 | 5 | Remaining families: NPC windows, move map, friends, centred dialogs. |
 
 Docs to update with phase 1: [theming-and-modding.md](theming-and-modding.md) ("three different

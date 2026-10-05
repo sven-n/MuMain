@@ -113,6 +113,12 @@ TEST_CASE("A theme-sized slot fills the safe area's height [ui][window-placement
         CHECK(offset.x == doctest::Approx(1248.f));
         CHECK(offset.y == doctest::Approx(0.f));
 
+        // The service gives a fill slot the window's content size as its minimum.
+        characterSlot->SetProperty(Rml::PropertyId::MinWidth, Rml::Property(800.f, Rml::Unit::PX));
+        document->UpdateDocument();
+        CHECK(characterSlot->GetBox().GetSize(Rml::BoxArea::Border).x == doctest::Approx(800.f));
+        CHECK(characterSlot->GetAbsoluteOffset(Rml::BoxArea::Border).x == doctest::Approx(1120.f));
+
         context->UnloadDocument(document);
         context->Update();
     }

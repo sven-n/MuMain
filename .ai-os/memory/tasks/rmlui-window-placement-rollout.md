@@ -51,13 +51,12 @@ Both themes: docking and pairing of character info, inventory, extension, quest 
 docks, centre stage, composed row); widened character info (260); moved inventory grid and helm
 slot; MU Helper gauge click; personal store grid.
 
-Phase 4 character-info fill prototype: temporarily set its runtime-copy slot to `data-fit="fill"`,
-35% of workspace width and 100% of HUD-safe height. At 1024x768 in the legacy theme, the panel,
-summary/stat backgrounds and bottom action row followed the enlarged slot. The top-right close
-target also closed the filled panel through its RmlUi event. Runtime-copy edits were restored.
-The committed workspaces remain content-sized. The headless two-theme slot test passed (2 cases,
-54 assertions), and the full RelWithDebInfo build passed after the latest code changes. Modern
-fill appearance, other resolutions and detailed interaction checks remain open.
+Phase 4 character-info fill (runtime-copy layouts, 1024x768): 35%, 30% and 22% slots in both
+themes at UI scale 80, 90 and 100 %. The frame, summary, stat rows and action row follow the
+filled panel; the 22% slot (below the content width) keeps the content size; Quest/close buttons,
+hints and both close targets work; live theme switches between a filled and a content-sized
+workspace resize the open panel. Headless test: 2 cases, 58 assertions. Synthetic world clicks
+do not move the character, so click-through on the enlarged area is a hand check.
 
 ## Not verified (needs an NPC, a second player or mouse dragging)
 
@@ -93,10 +92,10 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
    slot (needs a region with the `hud` scale or its own space); HUD widgets centring in the free
    width ignore a left dock (`GetScreenWidth()` only uses the right edge); unslotted families (move
    map, friends, centred dialogs, HUD widgets) with per-window content sizes and region scales.
-7. Phase 4 fill: the service now accepts a theme-sized `data-fit=fill` slot for character info,
-   with fallback for unsupported or zero-sized slots. Both shipped themes keep their content-sized
-   workspace. The remaining windows need individual fill capability and theme content recipes;
-   native grids and live 3D need more than a stretched frame.
+7. Phase 4 fill: character info supports `data-fit=fill`; a fill slot is never smaller than the
+   window's content size. Both shipped themes keep their content-sized workspace. The remaining
+   windows need individual fill capability and theme content recipes; native grids and live 3D
+   need more than a stretched frame.
 
 ## How to work on this
 
