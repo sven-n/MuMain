@@ -34,6 +34,9 @@
 
 #tab_list { position: absolute; left: 12px; top: 68px; width: 166px; height: 22px; decorator: image(gi-tab-list); }
 #tab_point { position: absolute; top: 68px; width: 56px; height: 22px; decorator: image(gi-tab-point); }
+#tab_point.tab-0 { left: 12px; }
+#tab_point.tab-1 { left: 68px; }
+#tab_point.tab-2 { left: 124px; }
 #tab_head { position: absolute; left: 11px; top: 237px; width: 63px; height: 25px; decorator: image(gi-tab-head); }
 
 .t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { position: absolute; }

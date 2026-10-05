@@ -35,7 +35,6 @@ empire_guardian_timer.rml: the text box's left and width are EventTimerView's ca
 generic_confirm_dialog.rml: per-frame data -- native 3D item anchor, and a panel sized to its content
 generic_menu_dialog.rml: per-frame data -- native companion geometry for the menu it still measures
 gens_ranking.rml: counter-scale bridge -- sharp-text widths and the native measured reward-row pitch; the scroll pane is RmlUi-owned
-guild_info.rml: counter-scale bridge -- native text metrics; all three lists use RmlUi scrolling
 item_endurance.rml: per-frame data -- the hovered item's tooltip follows the mouse (clamped to the screen edge); the pet bars are lengths from their health; the left column is a flow whose rows depend on whether the elf's arrow line is shown and which frames exist, and its names are screen-converted physical px; the icon column's start is right-anchored to the live screen width, which is the window's to decide -- the pack inside it is the theme's
 item_explanation.rml: per-frame data -- placed against the hovered item
 kanturu_enter.rml: the subject's and state texts' lines sit where SeparateTextIntoLines() put them -- each group starts under however many lines the one before it wrapped to, so the stacking is derived from the text, not a table the theme could hold

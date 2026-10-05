@@ -23,7 +23,7 @@
 
 		<div data-if="!no_guild">
 			<div id="tab_list"></div>
-			<div id="tab_point" data-style-left="(12 + tab * 56) + 'px'"></div>
+			<div id="tab_point" data-class-tab-0="tab == 0" data-class-tab-1="tab == 1" data-class-tab-2="tab == 2"></div>
 		</div>
 
 		<!-- RenderNoneGuild(). -->

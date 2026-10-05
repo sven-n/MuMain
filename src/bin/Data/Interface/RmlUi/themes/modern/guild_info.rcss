@@ -6,6 +6,9 @@
 
 #tab_list { position: absolute; left: 12px; top: 68px; width: 166px; height: 22px; background-color: token(surface-recessed); border-radius: token(radius-sm)px; }
 #tab_point { position: absolute; top: 68px; width: 56px; height: 22px; background-color: token(surface-raised); border: 1px token(accent-steel); border-radius: token(radius-sm)px; }
+#tab_point.tab-0 { left: 12px; }
+#tab_point.tab-1 { left: 68px; }
+#tab_point.tab-2 { left: 124px; }
 #tab_head { position: absolute; left: 11px; top: 237px; width: 63px; height: 25px; background-color: token(surface-raised); }
 
 .t-edge-top, .t-edge-bottom { position: absolute; height: 1px; margin-top: 6px; background-color: token(border-frame); }
