@@ -152,8 +152,10 @@ sweep.
 
 - **`SiegeWarfare`'s team/command buttons** — geometry read off live
   native controls that also hit-test it. Trigger: retiring the native `CButton`s.
-- **`MessageBoxView`** — measured centring and stacking; residue is one box class's four literal
-  button positions. Trigger: splitting the shared document per box class.
+- **`MessageBoxView`** — every text line is centred by measurement and stacked by measured
+  height, and a box's buttons come from its own `CMessageBoxButton`s. A box whose buttons were
+  literals names its kind and the theme places them (`CGuild_ToPerson_Position`). Trigger: the
+  counter-scale block below.
 - **`Notices`** — physical px with no root transform, its transform taken ambiently. Trigger: that
   HUD gaining a reference-px space.
 - **`MiniMap`** — no reference-px space exists: the art is turned 45° in physical px.
@@ -173,7 +175,9 @@ scale so glyphs rasterise sharp, which means its layout width must arrive *pre-m
 arithmetic only in the data-binding evaluator** (`Source/Core/DataExpression.cpp`, where `'*'` is a
 real operator) and never in a stylesheet. The data model is the only thing in the engine that can
 multiply, so the width has to travel through it — and that is precisely the inline-property leak
-the guard flags. These entries require an engine or text-layout solution.
+the guard flags. These entries require an engine or text-layout solution. Centred text is the
+exception: `.sharp-middle` and `.sharp-centre` (`engine-findings.md`) centre a layer without a width
+multiplied in, and the button labels and entry-window lines have moved to them.
 
 **The way out, measured rather than guessed (2026-10-02).** Upstream
 [PR #983](https://github.com/mikke89/RmlUi/pull/983) adds CSS math expressions: `calc()`, `min()`,
@@ -216,9 +220,6 @@ counter-scale bindings start costing something concrete, rather than being an in
   event-entry, Gold Bowman, Castle, Guard and Catapult documents use it.
   Counter-scaled text cannot always stack through normal flow; use the proven
   selector where the row count and pitch are actually bounded.
-- **MessageBoxView:** measured stacking and centring retain geometry bindings;
-  review literal button positions with the relevant box classes. Counter-scaled
-  text metrics remain a constraint, not automatically removable layout constants.
 - **Root-placement names:** `root_x`/`root_y` and `panel_x`/`panel_y` name similar placement
   bridges. Consolidation is low-priority
   naming work, separate from changing who owns dock spacing.

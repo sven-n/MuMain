@@ -29,8 +29,7 @@ bool SameLine(const MessageBoxViewLineEntry& a, const MessageBoxViewLineEntry& b
 bool SameButton(const MessageBoxViewButtonEntry& a, const MessageBoxViewButtonEntry& b)
 {
     return a.label == b.label && a.index == b.index && a.left == b.left && a.top == b.top && a.width == b.width &&
-           a.height == b.height && a.labelLeft == b.labelLeft && a.labelTop == b.labelTop && a.enabled == b.enabled &&
-           a.okArt == b.okArt;
+           a.height == b.height && a.enabled == b.enabled && a.okArt == b.okArt;
 }
 } // namespace
 
@@ -39,7 +38,7 @@ mu::ui::window::MessageBoxView::~MessageBoxView()
     Destroy();
 }
 
-void mu::ui::window::MessageBoxView::Create(int middleCount, float backHeight)
+void mu::ui::window::MessageBoxView::Create(int middleCount, float backHeight, const char* kind)
 {
     if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
         return;
@@ -54,6 +53,7 @@ void mu::ui::window::MessageBoxView::Create(int middleCount, float backHeight)
             c.Bind("root_x", &model.rootX);
             c.Bind("root_y", &model.rootY);
             c.Bind("root_scale", &model.rootScale);
+            c.Bind("kind", &model.kind);
             c.Bind("text_px", &model.textPx);
             c.Bind("bold_text_px", &model.boldTextPx);
             c.Bind("back_height", &model.backHeight);
@@ -86,12 +86,11 @@ void mu::ui::window::MessageBoxView::Create(int middleCount, float backHeight)
             button.RegisterMember("top", &MessageBoxViewButtonEntry::top);
             button.RegisterMember("width", &MessageBoxViewButtonEntry::width);
             button.RegisterMember("height", &MessageBoxViewButtonEntry::height);
-            button.RegisterMember("label_left", &MessageBoxViewButtonEntry::labelLeft);
-            button.RegisterMember("label_top", &MessageBoxViewButtonEntry::labelTop);
             button.RegisterMember("enabled", &MessageBoxViewButtonEntry::enabled);
             button.RegisterMember("ok_art", &MessageBoxViewButtonEntry::okArt);
             c.RegisterArray<std::vector<MessageBoxViewButtonEntry>>();
             c.Bind("buttons", &model.buttons);
+            c.Bind("placed_buttons", &model.placedButtons);
 
             BindList(c, model);
 
@@ -108,6 +107,7 @@ void mu::ui::window::MessageBoxView::Create(int middleCount, float backHeight)
         return;
     }
 
+    m_RmlBinder.GetModel().kind = kind;
     SetFrame(middleCount, backHeight);
 
     m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
@@ -225,25 +225,26 @@ void mu::ui::window::MessageBoxView::Sync(const POINT& pos, const std::vector<Li
         m_RmlBinder.MarkDirty("lines");
     }
 
-    // CMessageBoxButton::Render(): the label in the normal font at the box's whole-unit centre.
-    g_pRenderText->SetFont(g_hFont);
+    // CMessageBoxButton::Render(): the label in the normal font, centred on its button.
     std::vector<MessageBoxViewButtonEntry> buttonEntries;
+    std::vector<MessageBoxViewButtonEntry> placedEntries;
     for (std::size_t i = 0; i < buttons.size(); ++i)
     {
         const Button& button = buttons[i];
-        const SIZE size = g_pRenderText->MeasureText(button.label.c_str(), static_cast<int>(button.label.size()));
-        const int labelLeft = static_cast<int>(button.width / 2) - static_cast<int>(size.cx / 2);
-        const int labelTop = static_cast<int>(button.height / 2) - static_cast<int>(size.cy / 2);
-        buttonEntries.push_back({StringUtils::WideToNarrow(button.label.c_str()), static_cast<int>(i), button.left,
-                                 button.top, button.width, button.height, static_cast<float>(labelLeft),
-                                 static_cast<float>(labelTop), button.enabled, button.okArt});
+        (button.placed ? placedEntries : buttonEntries)
+            .push_back({StringUtils::WideToNarrow(button.label.c_str()), static_cast<int>(i), button.left, button.top,
+                        button.width, button.height, button.enabled, button.okArt});
     }
-    if (model.buttons.size() != buttonEntries.size() ||
-        !std::equal(model.buttons.begin(), model.buttons.end(), buttonEntries.begin(), SameButton))
+    const auto syncButtons = [this](std::vector<MessageBoxViewButtonEntry>& current,
+                                    std::vector<MessageBoxViewButtonEntry>&& next, const char* name)
     {
-        model.buttons = std::move(buttonEntries);
-        m_RmlBinder.MarkDirty("buttons");
-    }
+        if (current.size() == next.size() && std::equal(current.begin(), current.end(), next.begin(), SameButton))
+            return;
+        current = std::move(next);
+        m_RmlBinder.MarkDirty(name);
+    };
+    syncButtons(model.buttons, std::move(buttonEntries), "buttons");
+    syncButtons(model.placedButtons, std::move(placedEntries), "placed_buttons");
 }
 
 void mu::ui::window::MessageBoxView::BindList(Rml::DataModelConstructor& constructor, MessageBoxViewRmlModel& model)

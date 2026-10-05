@@ -7,10 +7,11 @@
 <body>
 	<!-- A native message box drawn by RmlUi (UI/Dialogs/MessageBoxView.h): the box art, its text
 	     lines, its buttons or its progress bar. The box keeps its callbacks; a click is queued with
-	     message_box_button(n). root_x/root_y/root_scale come from the message box manager's
+	     message_box_button(n). #panel carries the box's kind as its class, for a theme that places a
+	     kind's own buttons (placed_buttons); the rest arrive with their box. root_x/root_y/root_scale come from the message box manager's
 	     layout; everything inside is reference px; text is .sharp-text at the native size,
 	     counter-scaled out of the panel. -->
-	<div id="panel" data-model="message_box_view"
+	<div id="panel" data-model="message_box_view" data-attr-class="kind"
 	     data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div id="back" data-style-height="back_height + 'px'"></div>
@@ -35,9 +36,15 @@
 		     data-style-left="b.left + 'px'" data-style-top="b.top + 'px'"
 		     data-style-width="b.width + 'px'" data-style-height="b.height + 'px'"
 		     data-event-click="message_box_button(b.index)">
-			<span class="sharp-text box-label" data-style-left="b.label_left + 'px'" data-style-top="b.label_top + 'px'"
-			      data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+			<span class="sharp-text sharp-middle sharp-centre box-label" data-style-font-size="text_px + 'px'"
+			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+		</div>
+		<div class="box-placed">
+			<div class="box-btn" data-for="b : placed_buttons" data-class-disabled="!b.enabled"
+			     data-event-click="message_box_button(b.index)">
+				<span class="sharp-text sharp-middle sharp-centre box-label" data-style-font-size="text_px + 'px'"
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+			</div>
 		</div>
 
         <div id="list_box" data-if="list_shown"></div>

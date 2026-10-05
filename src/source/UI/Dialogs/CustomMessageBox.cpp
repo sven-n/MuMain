@@ -2100,7 +2100,7 @@ bool mu::ui::window::CGuild_ToPerson_Position::Create(float fPriority)
     CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     // The original's RenderFrame(): five middle strips, the back 75 units shorter than the box.
-    m_View.Create(5, static_cast<float>(height) - MSGBOX_BACK_BLANK_HEIGHT - 75);
+    m_View.Create(5, static_cast<float>(height) - MSGBOX_BACK_BLANK_HEIGHT - 75, "guild-appoint");
 
     return true;
 }
@@ -2151,14 +2151,19 @@ bool mu::ui::window::CGuild_ToPerson_Position::Update()
         y += static_cast<int>(size.cy) + 4;
     }
 
-    // The original's SetButtonInfo(): the two appointments 114 wide at (57, 30) and (57, 57),
-    // OK and Close at (48, 127) and (112, 127).
-    const float wide = MSGBOX_BTN_EMPTY_SMALL_WIDTH + 50;
+    // The two appointments, OK and Close; the theme places them (message_box_view.rcss).
+    const auto placed = [](const wchar_t* label)
+    {
+        MessageBoxView::Button button;
+        button.label = label;
+        button.placed = true;
+        return button;
+    };
     const std::vector<MessageBoxView::Button> buttons = {
-        {I18N::Game::AppointAsAssistantGuildMaster, 57, 30, wide, MSGBOX_BTN_EMPTY_HEIGHT},
-        {I18N::Game::AppointAsABattleMaster, 57, 57, wide, MSGBOX_BTN_EMPTY_HEIGHT},
-        {I18N::Game::OK, 48, 127, MSGBOX_BTN_EMPTY_SMALL_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT},
-        {I18N::Game::Close388, 112, 127, MSGBOX_BTN_EMPTY_SMALL_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT},
+        placed(I18N::Game::AppointAsAssistantGuildMaster),
+        placed(I18N::Game::AppointAsABattleMaster),
+        placed(I18N::Game::OK),
+        placed(I18N::Game::Close388),
     };
     m_View.Sync(GetPos(), lines, buttons);
 

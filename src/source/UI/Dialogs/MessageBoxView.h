@@ -41,6 +41,9 @@ public:
         float height = 0.f;
         bool enabled = true;
         bool okArt = false; // newui_button_ok's lettered art instead of a labelled newui_btn_empty_small
+        // Where it sits and how big it is are the theme's, by the box's kind (Create()); left, top,
+        // width and height are then unused.
+        bool placed = false;
     };
 
     using List = std::vector<MessageBoxViewListRowEntry>;
@@ -50,7 +53,8 @@ public:
     MessageBoxView(const MessageBoxView&) = delete;
     MessageBoxView& operator=(const MessageBoxView&) = delete;
 
-    void Create(int middleCount, float backHeight);
+    // `kind` names the box for a theme that places its buttons (Button::placed).
+    void Create(int middleCount, float backHeight, const char* kind = "");
     // A box whose size changes after Create() (CProgressMsgBox grows with its text). With
     // middlesAboveDivider >= 0 the 21-unit newui_Message_Line follows that many middle strips
     // (CDevilSquareRankMsgBox).

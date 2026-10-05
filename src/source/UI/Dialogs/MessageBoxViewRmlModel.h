@@ -17,8 +17,8 @@ struct MessageBoxViewLineEntry
     float textPx = 0.f; // physical px; 0: the font's native size (text_px / bold_text_px)
 };
 
-// A message box button (CMessageBoxButton): its art stretched to its box, its label at the
-// original's whole-unit centre.
+// A message box button (CMessageBoxButton): its art stretched to its box, its label centred on it.
+// A theme-placed button's box is the theme's, and its left/top/width/height go unused.
 struct MessageBoxViewButtonEntry
 {
     Rml::String label;
@@ -27,8 +27,6 @@ struct MessageBoxViewButtonEntry
     float top = 0.f;
     float width = 0.f;
     float height = 0.f;
-    float labelLeft = 0.f; // reference px in the button
-    float labelTop = 0.f;
     bool enabled = true;
     bool okArt = false; // newui_button_ok's lettered art, no label
 };
@@ -52,6 +50,8 @@ struct MessageBoxViewRmlModel
 {
     // The message box manager's layout -- UI::Scaling::GetActiveTransform() while it runs.
     float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+    // The box's kind, #panel's class: a theme places that kind's placedButtons. Empty for most.
+    Rml::String kind;
     float textPx = 0.f;     // native normal text size in physical px
     float boldTextPx = 0.f; // native bold text size in physical px
 
@@ -68,6 +68,7 @@ struct MessageBoxViewRmlModel
     float progressTop = 0.f;
     float progressWidth = 0.f;
     std::vector<MessageBoxViewButtonEntry> buttons;
+    std::vector<MessageBoxViewButtonEntry> placedButtons;
 
     bool listShown = false;
     std::vector<MessageBoxViewListRowEntry> listRows;

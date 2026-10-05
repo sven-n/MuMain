@@ -43,3 +43,11 @@
 .list-row-back { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
 .list-row.selected .list-row-back { background-color: token(accent-steel); }
 .list-row-text { position: absolute; left: 3.5714%; top: 23.0769%; white-space: pre; pointer-events: none; color: token(text-primary); }
+
+/* CGuild_ToPerson_Position's buttons, as its SetButtonInfo() placed them: the two appointments 114
+   wide at (57, 30) and (57, 57), OK and Close 64 wide at (48, 127) and (112, 127). */
+.guild-appoint .box-placed .box-btn { width: 64px; height: 29px; }
+.guild-appoint .box-placed .box-btn:nth-child(1) { left: 57px; top: 30px; width: 114px; }
+.guild-appoint .box-placed .box-btn:nth-child(2) { left: 57px; top: 57px; width: 114px; }
+.guild-appoint .box-placed .box-btn:nth-child(3) { left: 48px; top: 127px; }
+.guild-appoint .box-placed .box-btn:nth-child(4) { left: 112px; top: 127px; }

@@ -177,6 +177,14 @@ around it. See [`STATUS.md`](STATUS.md) for migration status and
   after it is pushed down by a gap that grows with UI scale. Give each such block its own `top`
   (`npc_quest.rml` in legacy).
 
+- **A counter-scaled layer can still be centred by the theme.** Scaling back around its centre
+  keeps a layer's middle where layout put it, so `base.rcss` has two recipes that need no C++
+  measurement. `.sharp-middle` centres a one-line layer on its parent's height: `top: 50%`, with
+  `translateY(-50%)` leading its RML transform. `.sharp-centre` centres it on its parent's width:
+  a 2000-unit layer centred with `left: 50%` and a negative margin, wide enough never to overflow,
+  because an overflowing line is start-aligned. The parent is the box the theme sizes, such as a
+  button or a line's row.
+
 - **`<input type="range">` computes the wrong value inside a `transform: scale()` panel** while
   hit-testing correctly: `WidgetSlider::AbsolutePositionToBarPosition()` ignores transforms, input
   hit-testing doesn't. Right at 100 %, wrong elsewhere. In a root-transformed panel, give the slider
