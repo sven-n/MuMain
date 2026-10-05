@@ -11,7 +11,8 @@
 	     it with position: fixed. -->
 	<div id="strip_slot" data-style-left="strip_slot_left + 'px'" data-style-width="strip_slot_width + 'px'">
 		<div id="panel">
-			<div class="buff-slot" data-for="buff : buffs">
+			<!-- A right-click offers to cancel the buffs the player can end early (CBuffStrip). -->
+			<div class="buff-slot" data-for="buff : buffs" data-event-mouseup="buff_cancel(it_index)">
 				<div class="buff-icon-art" data-style-decorator="buff.decorator"></div>
 				<!-- The hover hint twice: one plain text block (.tooltip-plain), or the original's
 				     RenderTipTextList() split, name, description and remaining duration each in its own

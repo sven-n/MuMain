@@ -12,6 +12,8 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/Dialogs/ConfirmRequest.h"
+#include "Network/Server/WSclient.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
@@ -148,6 +150,20 @@ namespace
         return "image(" + Rml::String(isAtlas1 ? "atlas1-" : "atlas2-") + std::to_string(tileIndex) + ")";
     }
 
+    // The skill whose buff a right-click offers to cancel; 0 if it can't be cancelled.
+    int CancellableSkill(eBuffState buff)
+    {
+        switch (buff)
+        {
+        case eBuff_InfinityArrow:
+            return AT_SKILL_INFINITY_ARROW;
+        case eBuff_SwellOfMagicPower:
+            return AT_SKILL_EXPANSION_OF_WIZARDRY;
+        default:
+            return 0;
+        }
+    }
+
     std::wstring JoinLines(std::list<std::wstring>::const_iterator first, std::list<std::wstring>::const_iterator last)
     {
         std::wstring combined;
@@ -243,6 +259,14 @@ void CBuffStrip::BuildRmlUi()
             buff.RegisterMember("tooltip_duration", &BuffEntry::tooltipDuration);
             c.RegisterArray<std::vector<BuffEntry>>();
 
+            c.BindEventCallback("buff_cancel",
+                [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+                {
+                    if (event.GetParameter<int>("button", -1) != 1 || args.empty())
+                        return;
+                    OnBuffRightClick(args[0].Get<int>());
+                });
+
             c.Bind("buffs", &model.buffs);
             c.Bind("strip_slot_left", &model.stripSlotLeft);
             c.Bind("strip_slot_width", &model.stripSlotWidth);
@@ -283,7 +307,6 @@ void CBuffStrip::Release()
 bool CBuffStrip::UpdateMouseEvent()
 {
     // RmlUi's own context does hit-testing now; never consumes the legacy mouse event.
-    // (Right-click-to-cancel isn't reproduced -- see this class's header comment.)
     return true;
 }
 
@@ -317,6 +340,7 @@ void CBuffStrip::SyncRmlModel()
     auto& model = m_RmlBinder.GetModel();
     model.buffs.clear();
     model.buffs.reserve(buffstate.size());
+    m_ShownBuffs.assign(buffstate.begin(), buffstate.end());
 
     // Slot positions are the stylesheets' own: #panel wraps its 20x28 slots at 8 per row, which is
     // what native's own counters produced. Order here is the order they appear.
@@ -376,6 +400,24 @@ void CBuffStrip::SyncStripSlot()
     model.stripSlotWidth = width;
     m_RmlBinder.MarkDirty("strip_slot_left");
     m_RmlBinder.MarkDirty("strip_slot_width");
+}
+
+void CBuffStrip::OnBuffRightClick(int slot)
+{
+    if (slot < 0 || slot >= static_cast<int>(m_ShownBuffs.size()))
+        return;
+    const int skill = CancellableSkill(static_cast<eBuffState>(m_ShownBuffs[slot]));
+    if (skill == 0)
+        return;
+
+    wchar_t text[MAX_GLOBAL_TEXT_STRING];
+    mu_swprintf(text, L"%ls %ls", SkillAttribute[skill].Name, I18N::Game::WouldYouLikeToCancel);
+
+    UI::Dialogs::ConfirmRequest request;
+    request.cancellable = true;
+    request.lines = {{text, true, RGBA(255, 255, 0, 255)}};
+    request.onAccept = [skill] { SocketClient->ToGameServer()->SendMagicEffectCancelRequest(skill, HeroKey); };
+    UI::Dialogs::ShowConfirm(std::move(request));
 }
 
 float CBuffStrip::GetLayerDepth()

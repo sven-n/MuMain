@@ -30,7 +30,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | Component | Status | Shape | Note |
 |---|---|---|---|
 | `CMainFrameWindow` (+ `CSkillList`, `CItemHotKey`) | Done | Hybrid | One shared `main_frame.rml` in `dp`, its parts placed by each theme's RCSS; one workspace slot (`window-placement.md`). Skill icons are sprites (`ResolveSkillIcon()`, `skill_icons.rcss`); potions are native 3D in render targets their slots show |
-| `CBuffStrip` | Done | RmlUi-only 2D | The `data-for` pilot; right-click-to-cancel not reproduced (`tracked-deferrals.md`) |
+| `CBuffStrip` | Done | RmlUi-only 2D | The `data-for` pilot. Right-clicking Infinity Arrow or Swell of Magic Power asks to cancel it, as native did. Legacy has native's per-line-coloured tooltip; modern keeps a plain one by choice |
 | `CMuHelperBar` | Done | RmlUi-only 2D | Header slot |
 | `CHotKey` | Nothing to port | — | Handles hotkeys, draws nothing. Not `CItemHotKey` |
 | `CGensRanking` | Done | RmlUi-only 2D | Reward text keeps native wrapping and measured row pitch; RmlUi owns scrolling and the scrollbar (drag and scale checked in game) |

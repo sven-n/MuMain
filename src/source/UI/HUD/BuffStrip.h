@@ -11,10 +11,7 @@ namespace Rml { class ElementDocument; }
 namespace mu::ui::window
 {
     // RmlUi-backed active-buff strip, a variable-length list (unlike CMuHelperBar's fixed layout).
-    // Two known fidelity gaps vs the legacy window: right-click-to-cancel (Infinity Arrow / Swell
-    // of Magic Power) isn't reproduced -- no RmlUi content here distinguishes right-click from
-    // left-click in a data-event-click binding yet. Tooltip text is one plain newline-joined block
-    // (BuildTooltipText()), not the original's per-line bold/white/purple coloring.
+    // Right-clicking Infinity Arrow or Swell of Magic Power asks to cancel it, as the original did.
     class CBuffStrip : public CObject
     {
     public:
@@ -79,7 +76,11 @@ namespace mu::ui::window
 
         CManager* m_pNewUIMng = nullptr;
 
+        // The buffs shown, in slot order, for mapping a slot's event back to its buff.
+        std::vector<int> m_ShownBuffs;
+
         void SyncRmlModel();
+        void OnBuffRightClick(int slot);
         void SyncStripSlot();
         void SyncTooltipLineHeight();
     };
