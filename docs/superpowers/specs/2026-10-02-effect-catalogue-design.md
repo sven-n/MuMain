@@ -556,9 +556,18 @@ or at scale 0 are shown at alpha and scale 1. The render state the game's
 functions cache is saved before the view and put back into the renderer and
 the cache after it. The capture's color format on Linux and macOS (RGBA8 for
 the capture, the swapchain's format for the pipelines) is still to be
-checked in game; it works on Windows. The parts without ImGui (camera,
-quads, what is shown, the SubTypes, the item search, the effect's object,
-the pool guard) are unit tested.
+checked in game; it works on Windows. Added with it on request: in editor
+builds `CLoadData` and `CGlobalBitmap` remember the map that was active when
+a model or texture was loaded into a slot (from `Core::AssetLoadWorld`,
+which the editor points at `gMapManager`; the loaders are linked into tests
+without the map code), so the details say whether an asset was loaded on the
+loading screen, by this map or by a map visited before, and the list filters
+by that (all, loaded now, loaded at start, loaded by this map). The five
+effects that draw a map object (the castle walls, the Kalima falling stone)
+know their map: elsewhere their slot holds another map's object, which the
+browser says instead of showing it. Player builds compile none of this. The
+parts without ImGui (camera, quads, what is shown, the SubTypes, the item
+search, the effect's object, the pool guard) are unit tested.
 
 **FX1.7b Preview in the world.** The real effect, in the game view.
 

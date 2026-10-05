@@ -10,6 +10,9 @@
 
 #include <SDL3/SDL_gpu.h>
 #include "Render/Renderer/MuRenderer.h"
+#ifdef _EDITOR
+#include "Core/Utilities/AssetLoadWorld.h"
+#endif
 
 #include <algorithm>
 #include <array>
@@ -568,12 +571,16 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
     std::wstring ext;
     SplitExt(filename, ext, false);
 
+    bool loaded = false;
     if (0 == _wcsicmp(ext.c_str(), L"jpg"))
-        return OpenJpegTurbo(uiBitmapIndex, filename, uiFilter, uiWrapMode);
+        loaded = OpenJpegTurbo(uiBitmapIndex, filename, uiFilter, uiWrapMode);
     else if (0 == _wcsicmp(ext.c_str(), L"tga"))
-        return OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode);
-
-    return false;
+        loaded = OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode);
+#ifdef _EDITOR
+    if (loaded)
+        m_loadWorlds[uiBitmapIndex] = Core::AssetLoadWorld::Get();
+#endif
+    return loaded;
 }
 void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
 {
@@ -605,6 +612,9 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
             m_dwUsedTextureMemory -= memoryUsed;
 
             m_mapBitmap.erase(mi);
+#ifdef _EDITOR
+            m_loadWorlds.erase(uiBitmapIndex);
+#endif
 
             if (uiBitmapIndex >= BITMAP_NONAMED_TEXTURES_BEGIN && uiBitmapIndex <= BITMAP_NONAMED_TEXTURES_END)
             {
@@ -614,6 +624,16 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
         }
     }
 }
+#ifdef _EDITOR
+std::optional<int> CGlobalBitmap::GetLoadWorld(GLuint uiBitmapIndex) const
+{
+    const auto found = m_loadWorlds.find(uiBitmapIndex);
+    if (found == m_loadWorlds.end())
+        return std::nullopt;
+    return found->second;
+}
+#endif
+
 void CGlobalBitmap::UnloadAllImages()
 {
     if (m_mapBitmap.empty())
@@ -664,6 +684,9 @@ void CGlobalBitmap::UnloadAllImages()
     }
 
     m_mapBitmap.clear();
+#ifdef _EDITOR
+    m_loadWorlds.clear();
+#endif
     m_listNonamedIndex.clear();
     m_BitmapCache.RemoveAll();
 

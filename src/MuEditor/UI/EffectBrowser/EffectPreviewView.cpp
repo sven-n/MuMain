@@ -133,9 +133,11 @@ const char* NoteText(MuEditor::Effects::PreviewNote note)
     case NoteNoAnimation:
         return I18N::Editor::PreviewNoAnimation;
     case NoteItemEffectsLeftOut:
+        return I18N::Editor::PreviewItemEffectsLeftOut;
+    case NoteNotItsModel:
         break;
     }
-    return I18N::Editor::PreviewItemEffectsLeftOut;
+    return I18N::Editor::PreviewNotItsModel;
 }
 } // namespace
 
@@ -170,8 +172,8 @@ EffectPreviewRequest CEffectPreviewView::MakeRequest(const MuEditor::Effects::Ef
     request.kind = kind;
     request.type = row.type;
     request.subType = m_subTypes.empty() ? 0 : m_subTypes[std::min<size_t>(m_subTypeIndex, m_subTypes.size() - 1)];
-    request.subject =
-        MuEditor::Effects::DescribePreviewSubject(kind, row.type, row.assetSlot, row.asset.loaded, row.stages);
+    request.subject = MuEditor::Effects::DescribePreviewSubject(kind, row.type, row.assetSlot, row.asset.loaded,
+                                                                row.foreignMapObject, row.stages);
     request.showOn = m_showOn;
     request.itemType = m_itemType;
     request.itemLevel = m_itemLevel;

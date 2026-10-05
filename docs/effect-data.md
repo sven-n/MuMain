@@ -245,8 +245,9 @@ in the files for now.
 
 - **A tab per kind**: Effects, Particles, Lightning and trails (the joints)
   and Sprites, with the name, code and number of each type. **Search** finds
-  a part of the name, the code or the number; **Loaded now** lists only the
-  types whose model or texture is loaded right now. On the Effects tab,
+  a part of the name, the code or the number; **Asset** lists all types,
+  those whose model or texture is loaded now, those loaded at start (on the
+  loading screen) or those loaded by this map. On the Effects tab,
   **Creation**, **Move** and **Drawing** list the effects whose stage is of
   one sort (see below). Ctrl+C copies the name of the selected type.
 - **The details** of the selected type: its code, number and catalogue file,
@@ -300,10 +301,17 @@ when they reach their target. A change that moves a type looks at these too.
   effect with a texture number and a sprite draw the texture of their
   number. Particles and lightning start with the texture of their number,
   but the code of a SubType can choose another. The browser shows the file
-  loaded into the slot right now and never loads anything. A slot can still
-  hold the model a map visited before loaded, and the slots below 160 hold
-  the objects of the current map, so "loaded" does not mean "this map uses
-  it". The slots are read again when the map changes and on **Refresh**.
+  loaded into the slot right now and what loaded it: the loading screen,
+  this map, or a map visited before (slots keep what an earlier map loaded).
+  It never loads anything. The slots are read again when the map changes and
+  on **Refresh**.
+- **Map objects**: five effects draw an object of a map: the castle walls
+  (`battleCastleWall1` to `4`), which the Battle Castle siege map creates
+  when a wall breaks, and `kalimaFallingStone`, the rocks that fall on the
+  Kalima maps. Their numbers are slots of the map's objects, which every map
+  fills with its own objects, so their slot holds their model only on their
+  map. Elsewhere the details say which map they belong to, the preview draws
+  nothing, and **Asset** does not count them as loaded.
 - **Used by data**: the data that names the type. For now only the creation
   values of an effect name it; item looks, skills and monsters will name
   types later.

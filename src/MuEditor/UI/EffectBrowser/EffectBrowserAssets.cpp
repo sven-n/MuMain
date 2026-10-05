@@ -18,7 +18,7 @@ EffectAsset ProbeModel(int type)
 {
     if (Models == nullptr || Models[type].NumMeshs <= 0 || Models[type].Meshs == nullptr)
         return {};
-    return {true, Core::Text::ToUtf8(gLoadData.GetModelFile(type).c_str())};
+    return {true, Core::Text::ToUtf8(gLoadData.GetModelFile(type).c_str()), gLoadData.GetModelLoadWorld(type)};
 }
 
 // FindTexture returns null for a number nothing is loaded with (GetTexture
@@ -28,7 +28,7 @@ EffectAsset ProbeTexture(int type)
     const BITMAP_t* bitmap = Bitmaps.FindTexture(static_cast<GLuint>(type));
     if (bitmap == nullptr)
         return {};
-    return {true, Core::Text::ToUtf8(bitmap->FileName)};
+    return {true, Core::Text::ToUtf8(bitmap->FileName), Bitmaps.GetLoadWorld(static_cast<GLuint>(type))};
 }
 } // namespace
 

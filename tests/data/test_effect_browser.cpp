@@ -14,8 +14,10 @@
 #include "Data/GameData/EffectData/EffectCreateParamsJson.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Render/Effects/Behaviors/EffectBehaviors.h"
+#include "Core/Utilities/AssetLoadWorld.h"
 #include "UI/EffectBrowser/EffectBrowserModel.h"
 #include "UI/EffectBrowser/EffectLegacyCases.h"
+#include "World/MapInfra/MapManager.h"
 #endif
 
 #include <algorithm>
@@ -275,6 +277,14 @@ std::vector<std::string> WrittenFields(const EffectCreateParams& params)
     return fields;
 }
 
+// Whether the filter lists the effect named `name`.
+bool MatchesNames(const EffectBrowserModel& model, const EffectBrowserFilter& filter, std::string_view name)
+{
+    const std::vector<std::string_view> names =
+        NamesOf(model, EffectKind::Effect, model.Filter(EffectKind::Effect, filter));
+    return std::find(names.begin(), names.end(), name) != names.end();
+}
+
 const EffectCreateTable::Line* FindLine(const EffectCreateTable& table, std::string_view field)
 {
     const auto found = std::find_if(table.lines.begin(), table.lines.end(),
@@ -419,20 +429,78 @@ TEST_CASE("The effect browser filters by search, stage and loaded asset [data][e
                                         [](const EffectLegacyCases& entry) { return (entry.cases & GroundCase) != 0; });
     CHECK(model.Filter(EffectKind::Effect, filter).size() == static_cast<size_t>(onGround));
 
+    // The poison model was loaded by this map, the fire model by an earlier
+    // one, the ghost's on the loading screen; slot 64 holds this map's object,
+    // which is the wall's model only on the siege map.
+    constexpr int ThisWorld = 0;
+    constexpr int EarlierWorld = 2;
+    const auto probe = [](int wallWorld)
+    {
+        return [wallWorld](EffectAssetSlot slot, int type) -> EffectAsset
+        {
+            if (slot != EffectAssetSlot::Model)
+                return {};
+            switch (type)
+            {
+            case MODEL_CUNDUN_GHOST:
+                return {true, "Data/Skill/x.bmd", Core::AssetLoadWorld::LoadingScreen};
+            case MODEL_POISON:
+                return {true, "Data/Skill/Poison01.bmd", ThisWorld};
+            case MODEL_FIRE:
+                return {true, "Data/Skill/Fire01.bmd", EarlierWorld};
+            case BATTLE_CASTLE_WALL4:
+                return {true, "Data/Object/Object65.bmd", wallWorld};
+            default:
+                return {};
+            }
+        };
+    };
     filter = {};
-    filter.onlyLoaded = true;
+    filter.assets = AssetFilter::LoadedNow;
     CHECK(model.Filter(EffectKind::Effect, filter).empty());
     const int generation = model.GetAssetGeneration();
-    model.RefreshAssets(
-        [](EffectAssetSlot slot, int type)
-        {
-            return type == MODEL_CUNDUN_GHOST && slot == EffectAssetSlot::Model ? EffectAsset{true, "Data/Skill/x.bmd"}
-                                                                                : EffectAsset{};
-        });
+    model.RefreshAssets(probe(ThisWorld), ThisWorld);
     CHECK(model.GetAssetGeneration() != generation);
     CHECK(NamesOf(model, EffectKind::Effect, model.Filter(EffectKind::Effect, filter)) ==
+          std::vector<std::string_view>{"fireModel", "poison", "kundunGhost"});
+    filter.assets = AssetFilter::LoadedAtStart;
+    CHECK(NamesOf(model, EffectKind::Effect, model.Filter(EffectKind::Effect, filter)) ==
           std::vector<std::string_view>{"kundunGhost"});
+    filter.assets = AssetFilter::LoadedByThisMap;
+    CHECK(NamesOf(model, EffectKind::Effect, model.Filter(EffectKind::Effect, filter)) ==
+          std::vector<std::string_view>{"poison"});
+    CHECK(model.FindRow(EffectKind::Effect, MODEL_FIRE)->assetOrigin == AssetOrigin::EarlierMap);
     CHECK(model.FindRow(EffectKind::Effect, MODEL_CUNDUN_GHOST)->asset.file == "Data/Skill/x.bmd");
+    CHECK(model.FindRow(EffectKind::Effect, BATTLE_CASTLE_WALL4)->foreignMapObject);
+
+    // On the siege map the wall's slot holds the wall.
+    model.RefreshAssets(probe(WD_30BATTLECASTLE), WD_30BATTLECASTLE);
+    const EffectBrowserRow* wall = model.FindRow(EffectKind::Effect, BATTLE_CASTLE_WALL4);
+    CHECK_FALSE(wall->foreignMapObject);
+    CHECK(wall->assetOrigin == AssetOrigin::ThisMap);
+    CHECK(MatchesNames(model, filter, "battleCastleWall4"));
+}
+
+TEST_CASE("The effect browser tells what loaded an asset and which map a map-object effect belongs to "
+          "[data][effects][editor]")
+{
+    CHECK(ClassifyAssetOrigin({}, 0) == AssetOrigin::NotLoaded);
+    CHECK(ClassifyAssetOrigin({true, "a.bmd", std::nullopt}, 0) == AssetOrigin::Unknown);
+    CHECK(ClassifyAssetOrigin({true, "a.bmd", Core::AssetLoadWorld::LoadingScreen}, 0) == AssetOrigin::LoadingScreen);
+    CHECK(ClassifyAssetOrigin({true, "a.bmd", 5}, 5) == AssetOrigin::ThisMap);
+    CHECK(ClassifyAssetOrigin({true, "a.bmd", 5}, 6) == AssetOrigin::EarlierMap);
+    // Without the editor's source every asset counts as loaded on the loading
+    // screen.
+    CHECK(Core::AssetLoadWorld::Get() == Core::AssetLoadWorld::LoadingScreen);
+
+    CHECK(GetHomeWorld(BATTLE_CASTLE_WALL1) == WD_30BATTLECASTLE);
+    CHECK(GetHomeWorld(MODEL_KALIMA_FALLING_STONE) == WD_24HELLAS);
+    CHECK_FALSE(GetHomeWorld(MODEL_POISON).has_value());
+    CHECK(IsHomeWorld(BATTLE_CASTLE_WALL3, WD_30BATTLECASTLE));
+    CHECK_FALSE(IsHomeWorld(BATTLE_CASTLE_WALL3, 0));
+    CHECK(IsHomeWorld(MODEL_KALIMA_FALLING_STONE, WD_24HELLAS_7));
+    CHECK_FALSE(IsHomeWorld(MODEL_KALIMA_FALLING_STONE, WD_30BATTLECASTLE));
+    CHECK_FALSE(IsHomeWorld(MODEL_POISON, 0));
 }
 
 TEST_CASE("The effect browser shows the other kinds of a number, shared code and creation values "

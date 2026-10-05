@@ -4,7 +4,9 @@
 
 #include "EffectBrowserLabels.h"
 
+#include "Core/Text/Utf8.h"
 #include "I18N/All.h"
+#include "World/MapInfra/MapManager.h"
 
 namespace MuEditor::Effects::Labels
 {
@@ -99,6 +101,30 @@ const char* Slot(EffectAssetSlot slot)
         break;
     }
     return I18N::Editor::SlotTextureChosenInCode;
+}
+const char* Assets(AssetFilter filter)
+{
+    switch (filter)
+    {
+    case AssetFilter::LoadedNow:
+        return I18N::Editor::LoadedNow;
+    case AssetFilter::LoadedAtStart:
+        return I18N::Editor::LoadedAtStart;
+    case AssetFilter::LoadedByThisMap:
+        return I18N::Editor::LoadedByThisMap;
+    case AssetFilter::All:
+        break;
+    }
+    return I18N::Editor::AssetsAll;
+}
+
+std::string MapName(int world)
+{
+    if (world == WD_73NEW_LOGIN_SCENE)
+        return I18N::Editor::LoginScene;
+    if (world == WD_74NEW_CHARACTER_SCENE)
+        return I18N::Editor::CharacterScene;
+    return world >= 0 ? Core::Text::ToUtf8(gMapManager.GetMapName(world)) : std::string("-");
 }
 } // namespace MuEditor::Effects::Labels
 

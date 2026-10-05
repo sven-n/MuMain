@@ -733,4 +733,37 @@
   <data name="Preview item effects left out" xml:space="preserve">
     <value>Die eigenen Sprites und Partikel des Gegenstands werden nicht gezeigt.</value>
   </data>
+  <data name="Assets all" xml:space="preserve">
+    <value>Alle</value>
+  </data>
+  <data name="Loaded at start" xml:space="preserve">
+    <value>Beim Start geladen</value>
+  </data>
+  <data name="Loaded by this map" xml:space="preserve">
+    <value>Von dieser Karte geladen</value>
+  </data>
+  <data name="Origin loading screen" xml:space="preserve">
+    <value>Beim Start geladen (Ladebildschirm).</value>
+  </data>
+  <data name="Origin this map" xml:space="preserve">
+    <value>Von dieser Karte geladen.</value>
+  </data>
+  <data name="Origin earlier map" xml:space="preserve">
+    <value>Von einer zuvor besuchten Karte geladen:</value>
+  </data>
+  <data name="Origin unknown" xml:space="preserve">
+    <value>Geladen; was es geladen hat, ist nicht festgehalten.</value>
+  </data>
+  <data name="Map object elsewhere" xml:space="preserve">
+    <value>Dieser Platz enthält ein Objekt dieser Karte, nicht das Modell dieses Effekts. Der Effekt zeigt sein eigenes Modell nur auf:</value>
+  </data>
+  <data name="Map object here" xml:space="preserve">
+    <value>Das Objekt dieser Karte, das dieser Effekt zeigt.</value>
+  </data>
+  <data name="Belongs to map" xml:space="preserve">
+    <value>Zeigt ein Objekt der Karte:</value>
+  </data>
+  <data name="Preview not its model" xml:space="preserve">
+    <value>Der Platz dieser Karte enthält ein anderes Objekt, nicht das Modell dieses Effekts (siehe Ressource).</value>
+  </data>
 </root>

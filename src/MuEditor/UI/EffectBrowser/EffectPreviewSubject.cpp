@@ -30,12 +30,14 @@ bool IsNotDrawnByGame(Data::Effects::EffectKind kind, const EffectStages& stages
 } // namespace
 
 PreviewSubject DescribePreviewSubject(Data::Effects::EffectKind kind, int type, EffectAssetSlot slot, bool loaded,
-                                      const EffectStages& stages)
+                                      bool foreignMapObject, const EffectStages& stages)
 {
     if (slot == EffectAssetSlot::TextureChosenInCode)
         return {PreviewDraw::None, NoteTextureChosenInCode};
     if (!loaded)
         return {PreviewDraw::None, NoteNothingLoaded};
+    if (foreignMapObject)
+        return {PreviewDraw::None, NoteNotItsModel};
     switch (slot)
     {
     case EffectAssetSlot::Model:

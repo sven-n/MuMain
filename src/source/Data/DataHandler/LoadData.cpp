@@ -9,6 +9,9 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Core/Text/Utf8.h"
+#ifdef _EDITOR
+#include "Core/Utilities/AssetLoadWorld.h"
+#endif
 #include "Data/GameData/ItemData/ItemTextureFiles.h"
 
 #include <string>
@@ -87,7 +90,25 @@ void CLoadData::RememberModelFile(int Model, const std::wstring& path)
         m_modelFiles.resize(static_cast<size_t>(Model) + 1);
     }
     m_modelFiles[Model] = path;
+#ifdef _EDITOR
+    if (static_cast<size_t>(Model) >= m_modelLoadWorlds.size())
+    {
+        m_modelLoadWorlds.resize(static_cast<size_t>(Model) + 1);
+    }
+    m_modelLoadWorlds[Model] = path.empty() ? std::nullopt : std::optional<int>(Core::AssetLoadWorld::Get());
+#endif
 }
+
+#ifdef _EDITOR
+std::optional<int> CLoadData::GetModelLoadWorld(int Model) const
+{
+    if (Model < 0 || static_cast<size_t>(Model) >= m_modelLoadWorlds.size())
+    {
+        return std::nullopt;
+    }
+    return m_modelLoadWorlds[Model];
+}
+#endif
 
 std::wstring CLoadData::GetModelFile(int Model) const
 {

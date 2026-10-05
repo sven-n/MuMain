@@ -46,6 +46,26 @@ std::string CatalogueFile(EffectKind kind)
     return (Data::Effects::GetEffectDataDirectory() / fileName).generic_string();
 }
 
+// What loaded the slot's asset, from the record of the game's loaders.
+std::string DescribeOrigin(const EffectBrowserRow& row)
+{
+    switch (row.assetOrigin)
+    {
+    case MuEditor::Effects::AssetOrigin::LoadingScreen:
+        return I18N::Editor::OriginLoadingScreen;
+    case MuEditor::Effects::AssetOrigin::ThisMap:
+        return I18N::Editor::OriginThisMap;
+    case MuEditor::Effects::AssetOrigin::EarlierMap:
+        return std::string(I18N::Editor::OriginEarlierMap) + ' ' +
+               MuEditor::Effects::Labels::MapName(row.asset.loadWorld.value_or(-1));
+    case MuEditor::Effects::AssetOrigin::Unknown:
+        return I18N::Editor::OriginUnknown;
+    case MuEditor::Effects::AssetOrigin::NotLoaded:
+        break;
+    }
+    return {};
+}
+
 // Particles, joints and sprites have no registry; their stages are code.
 const char* DescribeCodeOf(EffectKind kind)
 {
@@ -154,9 +174,14 @@ std::optional<EffectTypeRef> CEffectBrowserDetails::Render(const EffectBrowserMo
 
 void CEffectBrowserDetails::Refresh(const EffectBrowserModel& model, EffectTypeRef selected)
 {
-    if (m_ref == selected)
+    if (m_ref == selected && m_assetGeneration == model.GetAssetGeneration())
         return;
     m_ref = selected;
+    m_assetGeneration = model.GetAssetGeneration();
+    const EffectBrowserRow* row = model.FindRow(selected.kind, selected.type);
+    m_assetOrigin = row != nullptr ? DescribeOrigin(*row) : std::string();
+    const std::optional<int> home = MuEditor::Effects::GetHomeWorld(selected.type);
+    m_homeMap = home && selected.kind == EffectKind::Effect ? MuEditor::Effects::Labels::MapName(*home) : std::string();
     m_details = model.Describe(selected);
     m_variantSubTypes.clear();
     if (!m_details.creation)
@@ -209,17 +234,34 @@ void CEffectBrowserDetails::RenderAsset(const EffectBrowserRow& row)
         return;
     const char* slot = MuEditor::Effects::Labels::Slot(row.assetSlot);
     if (row.assetSlot == MuEditor::Effects::EffectAssetSlot::TextureChosenInCode)
+    {
         ImGui::TextUnformatted(slot);
-    else if (row.asset.loaded)
-        ImGui::Text("%s: %s", slot, row.asset.file.c_str());
-    else
-        ImGui::Text("%s: %s", slot, I18N::Editor::NothingLoaded);
+        return;
+    }
+    ImGui::Text("%s: %s", slot, row.asset.loaded ? row.asset.file.c_str() : I18N::Editor::NothingLoaded);
     if (row.assetSlot == MuEditor::Effects::EffectAssetSlot::DefaultTexture)
         ImGui::TextDisabled("%s", I18N::Editor::SlotDefaultTexture);
-    if (row.asset.loaded && row.assetSlot == MuEditor::Effects::EffectAssetSlot::Model)
-        ImGui::TextDisabled("%s", I18N::Editor::SlotsKeepModels);
-    if (MuEditor::Effects::IsWorldObjectSlot(row.assetSlot, row.type))
-        ImGui::TextDisabled("%s", I18N::Editor::WorldObjectSlot);
+    if (!m_homeMap.empty())
+    {
+        RenderMapObject(row);
+        return;
+    }
+    if (!m_assetOrigin.empty())
+        ImGui::TextDisabled("%s", m_assetOrigin.c_str());
+}
+
+// An effect that draws an object of a map: what the slot holds is its own
+// model only on that map.
+void CEffectBrowserDetails::RenderMapObject(const EffectBrowserRow& row)
+{
+    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+    if (row.foreignMapObject)
+        ImGui::TextWrapped("%s %s", I18N::Editor::MapObjectElsewhere, m_homeMap.c_str());
+    else if (row.asset.loaded)
+        ImGui::TextWrapped("%s", I18N::Editor::MapObjectHere);
+    else
+        ImGui::TextWrapped("%s %s", I18N::Editor::BelongsToMap, m_homeMap.c_str());
+    ImGui::PopStyleColor();
 }
 
 std::optional<EffectTypeRef> CEffectBrowserDetails::RenderStages(const EffectBrowserModel& model,

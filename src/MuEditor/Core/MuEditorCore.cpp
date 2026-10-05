@@ -18,7 +18,9 @@
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
+#include "Core/Utilities/AssetLoadWorld.h"
 #include "Core/Utilities/StringUtils.h"
+#include "World/MapInfra/MapManager.h"
 #include "Render/Renderer/MuRenderer.h"
 
 namespace mu
@@ -179,6 +181,10 @@ void CMuEditorCore::Initialize(SDL_Window* window)
 {
     if (m_bInitialized)
         return;
+
+    // The effect browser shows what loaded each model and texture; the
+    // records take the map of the moment from the map manager.
+    Core::AssetLoadWorld::SetSource([] { return gMapManager.WorldActive; });
 
     if (window == nullptr)
     {

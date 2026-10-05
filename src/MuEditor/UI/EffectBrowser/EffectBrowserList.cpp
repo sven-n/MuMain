@@ -23,6 +23,7 @@ namespace
 // Widths at UI scale 1.
 constexpr float SearchWidth = 180.0f;
 constexpr float StageComboWidth = 140.0f;
+constexpr float AssetComboWidth = 150.0f;
 constexpr float NumberColumnWidth = 60.0f;
 
 constexpr int BasicColumnCount = 3;
@@ -45,6 +46,21 @@ void RenderStageCombo(const char* id, const char* label, std::optional<Stage>& v
     {
         if (ImGui::Selectable(MuEditor::Effects::Labels::Stage(stage), value == stage))
             value = stage;
+    }
+    ImGui::EndCombo();
+}
+
+void RenderAssetFilter(MuEditor::Effects::AssetFilter& value)
+{
+    ImGui::TextUnformatted(I18N::Editor::Asset);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(AssetComboWidth * g_MuEditorCore.GetUIScale());
+    if (!ImGui::BeginCombo("##assets", MuEditor::Effects::Labels::Assets(value)))
+        return;
+    for (const MuEditor::Effects::AssetFilter filter : MuEditor::Effects::AssetFilters)
+    {
+        if (ImGui::Selectable(MuEditor::Effects::Labels::Assets(filter), filter == value))
+            value = filter;
     }
     ImGui::EndCombo();
 }
@@ -126,8 +142,8 @@ void CEffectBrowserList::RenderFilters(EffectKind kind)
     ImGui::SetNextItemWidth(SearchWidth * g_MuEditorCore.GetUIScale());
     if (ImGui::InputText("##search", m_search, sizeof(m_search)))
         m_filter.search = MuEditor::Effects::ToSearchText(m_search);
-    ImGui::SameLine();
-    ImGui::Checkbox(I18N::Editor::LoadedNow, &m_filter.onlyLoaded);
+    Layout::SameLineIfFits(Layout::LabeledComboWidth(I18N::Editor::Asset, AssetComboWidth));
+    RenderAssetFilter(m_filter.assets);
     if (kind != EffectKind::Effect)
         return;
     RenderStageCombo("##create", I18N::Editor::Creation, m_filter.create, MuEditor::Effects::CreateStages);

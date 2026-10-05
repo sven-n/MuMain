@@ -733,4 +733,37 @@
   <data name="Preview item effects left out" xml:space="preserve">
     <value>The item's own sprites and particles are not shown.</value>
   </data>
+  <data name="Assets all" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Loaded at start" xml:space="preserve">
+    <value>Loaded at start</value>
+  </data>
+  <data name="Loaded by this map" xml:space="preserve">
+    <value>Loaded by this map</value>
+  </data>
+  <data name="Origin loading screen" xml:space="preserve">
+    <value>Loaded at start (loading screen).</value>
+  </data>
+  <data name="Origin this map" xml:space="preserve">
+    <value>Loaded by this map.</value>
+  </data>
+  <data name="Origin earlier map" xml:space="preserve">
+    <value>Loaded by a map visited before:</value>
+  </data>
+  <data name="Origin unknown" xml:space="preserve">
+    <value>Loaded; what loaded it is not recorded.</value>
+  </data>
+  <data name="Map object elsewhere" xml:space="preserve">
+    <value>This slot holds an object of this map, not this effect's model. The effect draws its own model only on:</value>
+  </data>
+  <data name="Map object here" xml:space="preserve">
+    <value>The object of this map that this effect draws.</value>
+  </data>
+  <data name="Belongs to map" xml:space="preserve">
+    <value>Draws an object of the map:</value>
+  </data>
+  <data name="Preview not its model" xml:space="preserve">
+    <value>This map's slot holds another object, not this effect's model (see Asset).</value>
+  </data>
 </root>

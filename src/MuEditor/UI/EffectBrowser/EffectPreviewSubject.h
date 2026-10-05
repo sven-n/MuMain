@@ -44,6 +44,9 @@ enum PreviewNote : std::uint16_t
     NoteNoAnimation = 1 << 7,
     // The item's own sprites, particles and effects are removed again.
     NoteItemEffectsLeftOut = 1 << 8,
+    // The slot holds an object of this map, not the effect's model: an
+    // effect drawing a map object away from its home map.
+    NoteNotItsModel = 1 << 9,
 };
 
 struct PreviewSubject
@@ -53,9 +56,10 @@ struct PreviewSubject
 };
 
 // What the preview shows for a type of `kind` with this slot, whether the
-// slot holds something now, and its stages (effects only).
+// slot holds something now and whether that is another map's object, and its
+// stages (effects only).
 PreviewSubject DescribePreviewSubject(Data::Effects::EffectKind kind, int type, EffectAssetSlot slot, bool loaded,
-                                      const EffectStages& stages);
+                                      bool foreignMapObject, const EffectStages& stages);
 
 // The SubTypes the preview offers for a row with variants, one per column of
 // the creation table: first one no variant names (the row's own values),

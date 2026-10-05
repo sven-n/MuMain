@@ -7,7 +7,6 @@
 #include "EffectBrowserAssets.h"
 #include "EffectBrowserLabels.h"
 #include "../MuEditor/Core/MuEditorCore.h"
-#include "Core/Text/Utf8.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "I18N/All.h"
 #include "Render/Effects/EffectRegistry.h"
@@ -32,17 +31,6 @@ constexpr float MaxDefaultScreenShare = 0.8f;
 // The share of the width the list takes the first time; its border can be
 // dragged.
 constexpr float ListShare = 0.5f;
-
-// GetMapName has no names for the worlds of the login and character screens:
-// it would return an unrelated text.
-std::string MapNameOf(int world)
-{
-    if (world == WD_73NEW_LOGIN_SCENE)
-        return I18N::Editor::LoginScene;
-    if (world == WD_74NEW_CHARACTER_SCENE)
-        return I18N::Editor::CharacterScene;
-    return world >= 0 ? Core::Text::ToUtf8(gMapManager.GetMapName(world)) : std::string("-");
-}
 } // namespace
 
 CMuEffectBrowserUI& CMuEffectBrowserUI::GetInstance()
@@ -102,9 +90,9 @@ void CMuEffectBrowserUI::RefreshAssetsWhenMapChanges()
 
 void CMuEffectBrowserUI::RefreshAssets()
 {
-    m_model.RefreshAssets(MuEditor::Effects::ProbeLoadedAsset);
     m_assetWorld = gMapManager.WorldActive;
-    m_mapName = MapNameOf(*m_assetWorld);
+    m_model.RefreshAssets(MuEditor::Effects::ProbeLoadedAsset, *m_assetWorld);
+    m_mapName = MuEditor::Effects::Labels::MapName(*m_assetWorld);
 }
 
 void CMuEffectBrowserUI::RenderMapLine()

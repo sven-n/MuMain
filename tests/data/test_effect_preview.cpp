@@ -160,30 +160,36 @@ TEST_CASE("The effect preview shows models, sprites and ground decals by slot an
     onGround.drawnOnGround = true;
 
     const PreviewSubject model =
-        DescribePreviewSubject(EffectKind::Effect, MODEL_POISON, EffectAssetSlot::Model, true, asModel);
+        DescribePreviewSubject(EffectKind::Effect, MODEL_POISON, EffectAssetSlot::Model, true, false, asModel);
     CHECK(model.draw == PreviewDraw::Model);
     CHECK(model.notes == 0);
-    CHECK(DescribePreviewSubject(EffectKind::Effect, MODEL_POISON, EffectAssetSlot::Model, true, notDrawn).notes ==
-          NoteNotDrawnByGame);
-    CHECK((DescribePreviewSubject(EffectKind::Effect, MODEL_KALIMA_FALLING_STONE, EffectAssetSlot::Model, true, asModel)
+    CHECK(
+        DescribePreviewSubject(EffectKind::Effect, MODEL_POISON, EffectAssetSlot::Model, true, false, notDrawn).notes ==
+        NoteNotDrawnByGame);
+    CHECK((DescribePreviewSubject(EffectKind::Effect, MODEL_KALIMA_FALLING_STONE, EffectAssetSlot::Model, true, false,
+                                  asModel)
                .notes &
            NoteWorldObjectSlot) != 0);
 
     const PreviewSubject empty =
-        DescribePreviewSubject(EffectKind::Effect, MODEL_POISON, EffectAssetSlot::Model, false, asModel);
+        DescribePreviewSubject(EffectKind::Effect, MODEL_POISON, EffectAssetSlot::Model, false, false, asModel);
     CHECK(empty.draw == PreviewDraw::None);
     CHECK(empty.notes == NoteNothingLoaded);
-    CHECK(DescribePreviewSubject(EffectKind::Joint, MODEL_SPEARSKILL, EffectAssetSlot::TextureChosenInCode, true,
+    // Another map's object in the slot is not the effect's model.
+    const PreviewSubject foreign =
+        DescribePreviewSubject(EffectKind::Effect, BATTLE_CASTLE_WALL4, EffectAssetSlot::Model, true, true, asModel);
+    CHECK(foreign.draw == PreviewDraw::None);
+    CHECK(foreign.notes == NoteNotItsModel);
+    CHECK(DescribePreviewSubject(EffectKind::Joint, MODEL_SPEARSKILL, EffectAssetSlot::TextureChosenInCode, true, false,
                                  notDrawn)
               .notes == NoteTextureChosenInCode);
 
-    CHECK(
-        DescribePreviewSubject(EffectKind::Effect, BITMAP_SHOCK_WAVE, EffectAssetSlot::Texture, true, onGround).draw ==
-        PreviewDraw::GroundDecal);
-    CHECK(DescribePreviewSubject(EffectKind::Effect, BITMAP_SKULL, EffectAssetSlot::Texture, true, notDrawn).draw ==
-          PreviewDraw::Sprite);
-    const PreviewSubject particle =
-        DescribePreviewSubject(EffectKind::Particle, BITMAP_SMOKE, EffectAssetSlot::DefaultTexture, true, notDrawn);
+    CHECK(DescribePreviewSubject(EffectKind::Effect, BITMAP_SHOCK_WAVE, EffectAssetSlot::Texture, true, false, onGround)
+              .draw == PreviewDraw::GroundDecal);
+    CHECK(DescribePreviewSubject(EffectKind::Effect, BITMAP_SKULL, EffectAssetSlot::Texture, true, false, notDrawn)
+              .draw == PreviewDraw::Sprite);
+    const PreviewSubject particle = DescribePreviewSubject(EffectKind::Particle, BITMAP_SMOKE,
+                                                           EffectAssetSlot::DefaultTexture, true, false, notDrawn);
     CHECK(particle.draw == PreviewDraw::Sprite);
     CHECK(particle.notes == NoteCodeMayChooseTexture);
 }
