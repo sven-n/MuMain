@@ -87,6 +87,17 @@
 					<div class="slot" data-window="chat_log"></div>
 					<div class="slot" data-window="chat_input"></div>
 				</div>
+				<!-- The event HUDs (timers, scores), at their places in the original's 640x480 frame. -->
+				<div class="region event-hud" data-scale="hud">
+					<div class="slot" data-window="blood_castle_time"></div>
+					<div class="slot" data-window="chaos_castle_time"></div>
+					<div class="slot" data-window="battle_soccer"></div>
+					<div class="slot" data-window="duel"></div>
+					<div class="slot" data-window="kanturu_info"></div>
+					<div class="slot" data-window="empire_guardian_timer"></div>
+					<div class="slot" data-window="doppelganger_frame"></div>
+					<div class="slot" data-window="duel_watch_users"></div>
+				</div>
 				<!-- Where the friend list first opens: the corner above the HUD. -->
 				<div class="region free-bottom-right">
 					<div class="slot" data-window="friends"></div>

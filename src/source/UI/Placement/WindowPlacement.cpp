@@ -220,6 +220,26 @@ void UnregisterParticipant(std::string_view name)
     Invalidate();
 }
 
+void RegisterHudWindow(std::string_view name, std::uint32_t windowId, SetPosition setPosition, float width,
+                       float height, int homeX, int homeY)
+{
+    PlacementParticipant participant;
+    participant.visible = [windowId] { return g_pNewUISystem != nullptr && g_pNewUISystem->IsVisible(windowId); };
+    participant.measure = [width, height] { return PlacementParticipant::Size{width, height}; };
+    participant.place = [setPosition, homeX, homeY](const PlacementParticipant::Box* box)
+    {
+        if (box == nullptr)
+        {
+            setPosition(homeX, homeY);
+            return;
+        }
+        const auto hud = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Hud, WindowWidth, WindowHeight);
+        setPosition(static_cast<int>(std::lround((box->left - hud.offsetX) / hud.scaleX)),
+                    static_cast<int>(std::lround((box->top - hud.offsetY) / hud.scaleY)));
+    };
+    RegisterParticipant(name, std::move(participant));
+}
+
 bool SlotBox(std::string_view name, PlacementParticipant::Box& box)
 {
     const auto found = g_windows.find(std::string(name));

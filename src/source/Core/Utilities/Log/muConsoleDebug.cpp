@@ -129,6 +129,14 @@ constexpr DebugWindowName kDebugWindows[] = {
     {L"muhelper", mu::ui::window::INTERFACE_MUHELPER},
     {L"option", mu::ui::window::INTERFACE_OPTION},
     {L"help", mu::ui::window::INTERFACE_HELP},
+    {L"bctime", mu::ui::window::INTERFACE_BLOODCASTLE_TIME},
+    {L"cctime", mu::ui::window::INTERFACE_CHAOSCASTLE_TIME},
+    {L"soccer", mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE},
+    {L"duel", mu::ui::window::INTERFACE_DUEL_WINDOW},
+    {L"kanturuinfo", mu::ui::window::INTERFACE_KANTURU_INFO},
+    {L"empiretimer", mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER},
+    {L"doppelframe", mu::ui::window::INTERFACE_DOPPELGANGER_FRAME},
+    {L"duelusers", mu::ui::window::INTERFACE_DUELWATCH_USERLIST},
 };
 
 void ListDebugWindows()

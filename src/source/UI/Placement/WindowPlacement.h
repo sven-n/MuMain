@@ -47,6 +47,12 @@ void CloseForOpening(std::uint32_t windowId);
 // pixels), as the window's first position. False when the theme has no such slot.
 bool InitialPosition(std::string_view slotName, float width, float height, float& x, float& y);
 
+// A window drawn from its own position in HUD space (LayoutMode::Hud) takes its place from a slot:
+// the slot's box, sized width x height HUD units, becomes its position. Without a slot it returns
+// to (homeX, homeY).
+void RegisterHudWindow(std::string_view name, std::uint32_t windowId, SetPosition setPosition, float width,
+                       float height, int homeX, int homeY);
+
 // Re-places every open component now. Call after a window opens or closes.
 void Arrange();
 // Once a frame: re-places windows when the screen size, UI scale or HUD position changed.

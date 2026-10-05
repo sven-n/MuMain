@@ -173,6 +173,13 @@ TEST_CASE("The header's corners and the docks the content area caps [ui][window-
         CHECK(Slot(document, "chat_log")->GetAbsoluteOffset().y ==
               doctest::Approx(hudTop - 47.f * Scale + Scale - 100.f * Scale));
 
+        // Event HUDs keep the original's places in its 640x480 frame standing on the HUD.
+        openSized("doppelganger_frame", 227.f, 87.f);
+        document->UpdateDocument();
+        CHECK(Slot(document, "doppelganger_frame")->GetAbsoluteOffset().x == doctest::Approx(413.f * Scale));
+        CHECK(Slot(document, "doppelganger_frame")->GetAbsoluteOffset().y ==
+              doctest::Approx(hudTop - 429.f * Scale + 342.f * Scale));
+
         context->UnloadDocument(document);
         context->Update();
     }

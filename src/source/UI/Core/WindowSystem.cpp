@@ -630,6 +630,32 @@ bool CSystem::LoadMainSceneInterface()
     slot(INTERFACE_CURSEDTEMPLE_NPC, "cursed_temple_entry", m_pNewCursedTempleEnterWindow, "cursed_temple_enter.rml");
     slot(INTERFACE_CURSEDTEMPLE_RESULT, "cursed_temple_result", m_pNewCursedTempleResultWindow,
          "cursed_temple_result.rml");
+
+    // Event HUDs drawn from their own HUD-space position; sizes are each window's own constants,
+    // homes the positions created above.
+    const auto hudSlot = [](DWORD windowId, const char* slotName, auto*& window, float width, float height,
+                            int homeX, int homeY)
+    {
+        UI::Placement::RegisterHudWindow(
+            slotName, windowId,
+            [&window](int x, int y)
+            {
+                if (window != nullptr)
+                    window->SetPos(x, y);
+            },
+            width, height, homeX, homeY);
+    };
+    hudSlot(INTERFACE_BLOODCASTLE_TIME, "blood_castle_time", m_pNewBloodCastle, 124.f, 81.f, 640 - 127, 480 - 132);
+    hudSlot(INTERFACE_CHAOSCASTLE_TIME, "chaos_castle_time", m_pNewChaosCastleTime, 124.f, 81.f, 640 - 127, 480 - 132);
+    hudSlot(INTERFACE_BATTLE_SOCCER_SCORE, "battle_soccer", m_pNewBattleSoccerScore, 131.f, 70.f, 509, 359);
+    hudSlot(INTERFACE_DUEL_WINDOW, "duel", m_pNewDuelWindow, 131.f, 70.f, 509, 359);
+    hudSlot(INTERFACE_KANTURU_INFO, "kanturu_info", m_pNewKanturuInfoWindow, 99.f, 78.f, 541, 351);
+    hudSlot(INTERFACE_EMPIREGUARDIAN_TIMER, "empire_guardian_timer", m_pNewEmpireGuardianTimer, 124.f, 81.f, 507, 342);
+    hudSlot(INTERFACE_DOPPELGANGER_FRAME, "doppelganger_frame", m_pNewDoppelGangerFrame, 227.f, 87.f, 640 - 227,
+            480 - 51 - 87);
+    // Its position is the list's bottom-left corner; the spectators stack upwards from it.
+    hudSlot(INTERFACE_DUELWATCH_USERLIST, "duel_watch_users", m_pNewDuelWatchUserListWindow, 57.f, 0.f, 640 - 57,
+            480 - 51);
     // Named only in data-closes.
     UI::Placement::RegisterName(INTERFACE_MUHELPER_SKILL_LIST, "mu_helper_skill_list");
     // Places itself; its slot is only where it first opens (UI::Placement::InitialPosition()).
