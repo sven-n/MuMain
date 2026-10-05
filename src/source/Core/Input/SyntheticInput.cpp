@@ -548,7 +548,9 @@ void AdvanceText()
             Fail(DeliveryFailure::TargetLost);
             return;
         }
-        g_injection.legacyDown = propagates;
+        // The focused field consumes Return, but the game submits it from the key state, which a
+        // physical press sets either way.
+        g_injection.legacyDown = true;
         g_injection.stage = Stage::Held;
     }
     else if (g_injection.stage == Stage::Held)
