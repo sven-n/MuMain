@@ -630,6 +630,34 @@ std::string ClickUi(const Request& request, std::unique_ptr<Act>& act)
     act = std::make_unique<SyntheticInputAct>("click-ui", result.dump());
     return {};
 }
+std::string HoverUi(const Request& request, std::unique_ptr<Act>& act)
+{
+    double windowX = 0.0;
+    double windowY = 0.0;
+    if (!request.GetDouble("x", windowX) || !request.GetDouble("y", windowY))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`hover-ui` needs `x` and `y` window pixels");
+    }
+    // Bounded as `click-ui`'s are: the coordinates are cast to `float` below.
+    if (!(std::abs(windowX) <= MaxWindowPixel && std::abs(windowY) <= MaxWindowPixel))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`x` and `y` are window pixels, at most " +
+                               std::to_string(static_cast<int>(MaxWindowPixel)) + " from the origin");
+    }
+
+    if (!Core::Input::Synthetic::Move(static_cast<float>(windowX), static_cast<float>(windowY)))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::Busy, "another input is still being injected");
+    }
+
+    json result;
+    result["x"] = windowX;
+    result["y"] = windowY;
+    act = std::make_unique<SyntheticInputAct>("hover-ui", result.dump());
+    return {};
+}
+
 std::string DragUi(const Request& request, std::unique_ptr<Act>& act)
 {
     double fromX = 0.0;

@@ -37,6 +37,10 @@ enum class MouseButton : std::uint8_t
 // another injection is still in flight.
 [[nodiscard]] bool Click(float windowX, float windowY, MouseButton button);
 
+// Schedules a pointer move to a window pixel with no button, as physical motion: the UI and the
+// game's own pointer both follow it. False when another injection is still in flight.
+[[nodiscard]] bool Move(float windowX, float windowY);
+
 // Schedules a press at one window pixel, a move to another over several frames
 // with the button held, and the release there. False when another injection is
 // still in flight.

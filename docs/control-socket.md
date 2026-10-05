@@ -73,6 +73,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `screenshot` (`out`) | capture the next frame to a path; without `out` it names itself, uniquely per capture |
 | `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
+| `hover-ui` (`x`, `y`) | move the pointer to a window pixel with no button, as physical motion: RmlUi hover and the game's own pointer (native hover, tooltips) both follow it |
 | `drag-ui` (`x`, `y`, `to_x`, `to_y`, `button`) | press at one window pixel, move to the other over eight frames with the button held, release there |
 | `type` (`text`, `enter`) | deliver committed UTF-8 to the focused field; optional boolean `enter` submits on a later frame |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |

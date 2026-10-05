@@ -41,6 +41,7 @@ enum class Kind : std::uint8_t
     None,
     Key,
     Click,
+    Move,
     Text,
 };
 
@@ -339,6 +340,16 @@ bool Click(float windowX, float windowY, MouseButton button)
     return true;
 }
 
+bool Move(float windowX, float windowY)
+{
+    if (!Click(windowX, windowY, MouseButton::Left))
+    {
+        return false;
+    }
+    g_injection.kind = Kind::Move;
+    return true;
+}
+
 bool Drag(float fromX, float fromY, float toX, float toY, MouseButton button)
 {
     // Enough steps for a UI to see a drag start and follow it, few enough to finish quickly.
@@ -563,6 +574,23 @@ void AdvanceClick()
         g_injection = {};
 }
 
+void AdvanceMove()
+{
+    if (g_injection.stage == Stage::Idle)
+    {
+        if (!DeliverMotion())
+        {
+            Fail(DeliveryFailure::TargetLost);
+            return;
+        }
+        // Physical motion reaches the game's pointer whether or not the UI is under it.
+        ApplyPointerPosition();
+        g_injection.stage = Stage::Released;
+    }
+    else
+        g_injection = {};
+}
+
 void AdvanceText()
 {
     bool propagates = true;
@@ -616,6 +644,9 @@ void BeginFrame()
         return;
     case Kind::Click:
         AdvanceClick();
+        return;
+    case Kind::Move:
+        AdvanceMove();
         return;
     case Kind::Text:
         AdvanceText();
