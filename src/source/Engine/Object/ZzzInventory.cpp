@@ -6733,17 +6733,8 @@ int GetScreenWidth()
         return REFERENCE_WIDTH;
 
     // Right edge of the world the open docked windows leave uncovered, in the 640-wide HUD space.
-    int iWidth = static_cast<int>(
+    return static_cast<int>(
         std::lround(UI::Placement::UncoveredWorldRight() * REFERENCE_WIDTH / static_cast<float>(WindowWidth)));
-
-    // Docked windows the workspace does not place yet, each one column wide.
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_REFINERY)
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_SERVERDIVISION))
-    {
-        iWidth = std::min(iWidth, REFERENCE_WIDTH - 190);
-    }
-
-    return iWidth;
 }
 
 int GetScreenLeft()

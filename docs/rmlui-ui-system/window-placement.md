@@ -52,7 +52,7 @@ Each theme ships `workspace.rml` with its RCSS. It holds one **slot** per placea
     <div class="slot" data-window="npc_dialogue"/>
   </div>
   <div class="region free">                  <!-- absolutely positioned slots -->
-    <div class="slot" data-window="friends" data-draggable/>
+    <div class="slot" data-window="friends"/>
   </div>
 </body>
 ```
@@ -157,9 +157,8 @@ reads it: the hero's screen centre for facing the mouse (`HeroX` in `ZzzInterfac
 bars, personal-shop titles, the macro cooldown bar, endurance tooltips, and the terrain viewport
 outside the main scene. `GetScreenWidth()` now returns the placement service's uncovered right
 edge (`UI::Placement::UncoveredWorldRight()`): the leftmost open slot in a region marked
-`data-covers-world`, converted to the 640-wide HUD space. The two legacy panels without slots (refinery, server
-division) still count as one column each. A theme can leave a full-screen overlay region
-unmarked, so nothing shifts under it.
+`data-covers-world`, converted to the 640-wide HUD space. A theme can leave a full-screen
+overlay region unmarked, so nothing shifts under it.
 
 At 4:3 and 100 % this equals the old table. Elsewhere it follows the docks' real edge, where the
 old table assumed 190 units per column. `GetScreenLeft()` is the matching left edge; centred HUD
@@ -224,12 +223,14 @@ The legacy theme declares exactly today's behaviour; other themes may relax spac
 
 ### 7. User placement and saved positions
 
-Target: a slot marked `data-draggable` lets the player drag its window out of the slot. The window
-leaves the region's flow (neighbours repack) and is saved per theme as an anchor plus offset
-relative to its region (principles §10–11), not raw pixels. Precedence: theme default, then user
-override. A reset returns it to its slot.
+Decided with the user (2026-10-05): the player drags dialogs and the friend system only, for
+now. Docked windows stay in their slots; dragging a window out of its slot (`data-draggable`) is
+not planned. The friend list, chat rooms and letters already drag through
+`UI::RmlBridge::MakeDraggable()`; the friend list asks its slot only where it first opens. The
+dialogs that are wired but switched off (the options window, the generic menu dialog) use the
+same helper when they are turned on.
 
-Phase 1 keeps today's inventory behaviour instead: `data-saved-position` names the saved drag
+The inventory keeps today's behaviour: `data-saved-position` names the saved drag
 position, which is used while the window is the first open window of its region. Behind another
 window (character info open) it takes its slot, and its slot still occupies the region either
 way, so the shops sit beside it as before.
@@ -464,6 +465,10 @@ Event HUDs (H3, done):
 - Verified in game at 1024x768: battle soccer, duel, Empire Guardian timer and Doppelganger frame
   at their original places in modern at 100 % and (timer) legacy at 90 %; a runtime stylesheet
   edit moved the timer to (0, 100), so the slot drives it.
+
+Resolutions (2026-10-05): both themes at 100 % at 1920x1080 (HUD scale 2.25) and 1280x720, and a
+live switch from 1024x768 to 1280x720 in the options window: docks (modern capped below the top
+bar, legacy to the screen top), chat, event HUD and edge-following widgets in place.
 
 | Phase | Work |
 |---|---|

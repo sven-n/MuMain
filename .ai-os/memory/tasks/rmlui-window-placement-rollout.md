@@ -106,7 +106,9 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
    H2 is done (user, 2026-10-05): buff row, party list and item endurance stay edge-followers,
    the minimap needs no slot. H3 is done (eight event HUDs in an `event-hud` region; `$win`
    names bctime/cctime/soccer/duel/kanturuinfo/empiretimer/doppelframe/duelusers). The placement
-   entries in tracked-deferrals.md are closed. Next H4
+   entries in tracked-deferrals.md are closed; the dead refinery/server-division check is gone;
+   1920x1080, 1280x720 and a live switch verified. Dragging scope decided: dialogs and the friend
+   system only (window-placement.md section 7). Next H4
    (`window-placement.md`, "HUD in the workspace"). Hand checks pending: the minimap's clip
    around the HUD; in modern at a capped scale, dragging items between windows and item
    tooltips; the chat log's resize handle and F4/F5 (socket hotkeys did not reach the client).
