@@ -102,7 +102,9 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
    (`$win gensranking full`). Done: the move map has a left-dock
    slot and supports fill (height = its rows' space, width from `#panel`, minimum chrome + 3 rows);
    verified in game in both themes. Done: the friend list's first position comes from a `friends`
-   slot (`InitialPosition()`), verified in game. Next: centred dialogs.
+   slot (`InitialPosition()`), verified in game. Done: the centred NPC panels (Kanturu entry, Cursed Temple
+   entry/result) sit on a `panel-stage` region; verified in game. Slot coverage is complete for
+   every window C++ used to place in a dock, a column or the panel centre.
 
 ## How to work on this
 

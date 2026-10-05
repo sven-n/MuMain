@@ -17,6 +17,7 @@
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -165,7 +166,10 @@ bool mu::ui::window::CCursedTempleEnter::CheckInventory(BYTE& itempos, int enter
 bool mu::ui::window::CCursedTempleEnter::UpdateMouseEvent()
 {
     // The Enter and Close buttons are RmlUi's (see Update()); the window keeps the pointer.
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, CURSEDTEMPLE_ENTER_WINDOW_WIDTH, CURSEDTEMPLE_ENTER_WINDOW_HEIGHT).Contains(MouseX, MouseY))
+    float panelWidth = CURSEDTEMPLE_ENTER_WINDOW_WIDTH;
+    float panelHeight = CURSEDTEMPLE_ENTER_WINDOW_HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         return false;
     }

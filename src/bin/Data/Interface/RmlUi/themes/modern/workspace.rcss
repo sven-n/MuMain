@@ -53,3 +53,20 @@ body {
 	right: 0;
 	bottom: 0;
 }
+
+/* The original's centred NPC panels: a 640x480 stage in the screen's centre (1dp is one of its
+   units at the panel scale), each panel centred across it at the original's height. */
+.panel-stage {
+	left: 50%;
+	top: 50%;
+	width: 640dp;
+	height: 480dp;
+	margin-left: -320dp;
+	margin-top: -240dp;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.panel-stage .slot[data-window="kanturu_entry"] { margin-top: 20dp; }
+.panel-stage .slot[data-window="cursed_temple_entry"] { margin-top: 80dp; }
+.panel-stage .slot[data-window="cursed_temple_result"] { margin-top: 120dp; }

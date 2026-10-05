@@ -18,6 +18,7 @@
 #include "Character/CharacterManager.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -129,7 +130,10 @@ void mu::ui::window::CCursedTempleResult::ClosingProcess()
 bool mu::ui::window::CCursedTempleResult::UpdateMouseEvent()
 {
     // The Close button is RmlUi's (see Update()); the window keeps the pointer.
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, CURSEDTEMPLE_RESULT_WINDOW_HEIGHT).Contains(MouseX, MouseY))
+    float panelWidth = CURSEDTEMPLE_RESULT_WINDOW_WIDTH;
+    float panelHeight = CURSEDTEMPLE_RESULT_WINDOW_HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         return false;
     }
@@ -305,13 +309,16 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
     updated.labelLinePx = updated.lineHeightPx;
     updated.closeText = StringUtils::WideToNarrow(I18N::Game::Close388);
 
-    // The original's RenderResultPanel(): the banner centred on the reference width, 110 units
-    // above the window, fading in. It drew under the alpha test (EnableAlphaTest(), GL_GREATER
-    // 0.25), so the banner stayed invisible until the fade passed a quarter.
+    // The original's RenderResultPanel(): the banner centred over the window (which sat centred on
+    // the reference width), 110 units above it, fading in. It drew under the alpha test
+    // (EnableAlphaTest(), GL_GREATER 0.25), so the banner stayed invisible until the fade passed a
+    // quarter.
     constexpr float kAlphaTestReference = 0.25f;
     updated.banner = m_WinState;
-    const int bannerX = (REFERENCE_WIDTH - 360) / 2;
-    updated.bannerLeft = static_cast<float>(bannerX - m_Pos.x);
+    float panelWidth = CURSEDTEMPLE_RESULT_WINDOW_WIDTH;
+    float panelHeight = CURSEDTEMPLE_RESULT_WINDOW_HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    updated.bannerLeft = (panelWidth - 360.f) / 2.f;
     const float fade = std::clamp(m_ResultEffectAlph, 0.f, 1.f);
     updated.bannerAlpha = fade > kAlphaTestReference ? fade : 0.f;
 

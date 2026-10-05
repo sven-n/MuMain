@@ -4,6 +4,7 @@
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "I18N/All.h"
@@ -106,7 +107,10 @@ void mu::ui::window::CKanturu2ndEnterNpc::SetPos(int x, int y)
 bool mu::ui::window::CKanturu2ndEnterNpc::UpdateMouseEvent()
 {
     // The Refresh, Enter and Close buttons are RmlUi's (see Update()); the window keeps the pointer.
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, KANTURU2ND_ENTER_WINDOW_WIDTH, KANTURU2ND_ENTER_WINDOW_HEIGHT).Contains(MouseX, MouseY))
+    float panelWidth = KANTURU2ND_ENTER_WINDOW_WIDTH;
+    float panelHeight = KANTURU2ND_ENTER_WINDOW_HEIGHT;
+    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         return false;
     }

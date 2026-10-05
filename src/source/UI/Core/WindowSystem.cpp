@@ -626,6 +626,10 @@ bool CSystem::LoadMainSceneInterface()
     slot(INTERFACE_LUCKYITEMWND, "lucky_item", m_pNewUILuckyItemWnd, "lucky_item.rml");
     slot(INTERFACE_GENSRANKING, "gens_ranking", m_pNewGensRanking, "gens_ranking.rml");
     slot(INTERFACE_MOVEMAP, "move_map", m_pNewMoveCommandWindow, "move_command.rml");
+    slot(INTERFACE_KANTURU2ND_ENTERNPC, "kanturu_entry", m_pNewKanturu2ndEnterNpc, "kanturu_enter.rml");
+    slot(INTERFACE_CURSEDTEMPLE_NPC, "cursed_temple_entry", m_pNewCursedTempleEnterWindow, "cursed_temple_enter.rml");
+    slot(INTERFACE_CURSEDTEMPLE_RESULT, "cursed_temple_result", m_pNewCursedTempleResultWindow,
+         "cursed_temple_result.rml");
     // Named only in data-closes.
     UI::Placement::RegisterName(INTERFACE_MUHELPER_SKILL_LIST, "mu_helper_skill_list");
     // Places itself; its slot is only where it first opens (UI::Placement::InitialPosition()).

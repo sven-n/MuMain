@@ -71,5 +71,12 @@
 			<div class="slot" data-window="friends"></div>
 		</div>
 	</div>
+	<!-- The original's centred NPC panels, on the 640x480 stage it centred them on (outside the
+	     safe area: it centred them on the whole screen). -->
+	<div class="region panel-stage" data-scale="panel">
+		<div class="slot" data-window="kanturu_entry"></div>
+		<div class="slot" data-window="cursed_temple_entry"></div>
+		<div class="slot" data-window="cursed_temple_result"></div>
+	</div>
 </body>
 </rml>
