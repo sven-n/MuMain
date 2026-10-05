@@ -380,12 +380,23 @@ static Rml::ElementList PrepareSlots(Rml::ElementDocument* workspace, const UI::
 
 static void UpdateUncoveredArea(Rml::ElementDocument* workspace, const Rml::ElementList& slots)
 {
-    // Open slots in covering regions narrow the world from the side of the screen they are on.
+    // Open slots in a covering region narrow the world from the content area's edge they pack
+    // against: a region's open slots touching the right edge cover from the right, and so on. A
+    // group touching neither edge counts on the side of the content area's centre it is on.
     const float screenWidth = static_cast<float>(WindowWidth);
     Rml::Element* content = workspace->GetElementById("safe_area");
-    g_uncoveredLeft = content != nullptr ? content->GetAbsoluteOffset(Rml::BoxArea::Border).x : 0.f;
-    g_uncoveredRight = content != nullptr
-        ? g_uncoveredLeft + content->GetBox().GetSize(Rml::BoxArea::Border).x : screenWidth;
+    const float contentLeft = content != nullptr ? content->GetAbsoluteOffset(Rml::BoxArea::Border).x : 0.f;
+    const float contentRight =
+        content != nullptr ? contentLeft + content->GetBox().GetSize(Rml::BoxArea::Border).x : screenWidth;
+    g_uncoveredLeft = contentLeft;
+    g_uncoveredRight = contentRight;
+
+    struct Group
+    {
+        float left;
+        float right;
+    };
+    std::unordered_map<Rml::Element*, Group> groups;
     for (Rml::Element* slot : slots)
     {
         Rml::Element* region = slot->GetParentNode();
@@ -393,12 +404,24 @@ static void UpdateUncoveredArea(Rml::ElementDocument* workspace, const Rml::Elem
             continue;
         const float left = slot->GetAbsoluteOffset(Rml::BoxArea::Border).x;
         const float right = left + slot->GetBox().GetSize(Rml::BoxArea::Border).x;
-        if (left + right >= screenWidth)
-            g_uncoveredRight = std::min(g_uncoveredRight, left);
-        else
-            g_uncoveredLeft = std::max(g_uncoveredLeft, right);
+        const auto [it, added] = groups.try_emplace(region, Group{left, right});
+        if (!added)
+            it->second = {std::min(it->second.left, left), std::max(it->second.right, right)};
     }
-
+    constexpr float Touch = 1.f;
+    for (const auto& [region, group] : groups)
+    {
+        const bool fromRight = group.right >= contentRight - Touch;
+        const bool fromLeft = group.left <= contentLeft + Touch;
+        if (fromRight && !fromLeft)
+            g_uncoveredRight = std::min(g_uncoveredRight, group.left);
+        else if (fromLeft && !fromRight)
+            g_uncoveredLeft = std::max(g_uncoveredLeft, group.right);
+        else if (group.left + group.right >= contentLeft + contentRight)
+            g_uncoveredRight = std::min(g_uncoveredRight, group.left);
+        else
+            g_uncoveredLeft = std::max(g_uncoveredLeft, group.right);
+    }
 }
 
 static void PlaceSlots(const Rml::ElementList& slots, const UI::Scaling::Transform& dock)

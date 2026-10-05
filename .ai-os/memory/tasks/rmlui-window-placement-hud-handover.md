@@ -23,7 +23,7 @@ windows smaller to fit (window-placement.md, "Header and docks"). The chat is in
 region (window-placement.md, "Chat"). H2 is done (user's decision): the minimap needs no slot;
 buff row, party list and item endurance stay edge-followers (window-placement.md, "The rest of
 H2"). H3 is done: eight event HUDs take their place from an event-hud region
-(window-placement.md, "Event HUDs"). Next is H4, theme recipes on runtime copies. A component
+(window-placement.md, "Event HUDs"). H4 is done too: the HUD-in-workspace plan is complete; see tracked-deferrals.md for what is left. A component
 whose measured size changes must call UI::Placement::Invalidate().
 
 Read first: AGENTS.md, docs/CODING_RULES.md, docs/rmlui-ui-system/architecture-principles.md,

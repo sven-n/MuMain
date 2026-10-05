@@ -102,15 +102,14 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
 
 ## Open work, in suggested order
 
-1. HUD in the workspace: H1 and H2's header batch are done. Next H2 batches, one component each:
-   H2 is done (user, 2026-10-05): buff row, party list and item endurance stay edge-followers,
-   the minimap needs no slot. H3 is done (eight event HUDs in an `event-hud` region; `$win`
-   names bctime/cctime/soccer/duel/kanturuinfo/empiretimer/doppelframe/duelusers). The placement
-   entries in tracked-deferrals.md are closed; the dead refinery/server-division check is gone;
-   1920x1080, 1280x720 and a live switch verified. Dragging done for dialogs (options, generic menu,
-   generic confirm; window-placement.md section 7), no saved positions; control socket `drag-ui`
-   and `$dialog` added for testing. Native message boxes stay undraggable. Next H4
-   (`window-placement.md`, "HUD in the workspace"). Hand checks pending: the minimap's clip
+1. Done (2026-10-05): HUD in the workspace H1-H4 (`window-placement.md`, "HUD in the
+   workspace" and "Theme recipes"); buff row, party list and item endurance stay
+   edge-followers; the minimap needs no slot; eight event HUDs in an `event-hud` region (`$win`
+   names bctime/cctime/soccer/duel/kanturuinfo/empiretimer/doppelframe/duelusers); 1920x1080,
+   1280x720 and a live resolution switch verified; dialog dragging (options, generic menu,
+   generic confirm; no saved positions; native message boxes not draggable); control socket
+   `drag-ui` and chat `$dialog` for testing. What remains is in tracked-deferrals.md.
+   Hand checks pending: the minimap's clip
    around the HUD; in modern at a capped scale, dragging items between windows and item
    tooltips; the chat log's resize handle and F4/F5 (socket hotkeys did not reach the client).
 2. Not verified in game: the Cursed Temple result panel (needs a finished event); Gens ranking,
