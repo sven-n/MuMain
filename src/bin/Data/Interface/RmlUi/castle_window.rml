@@ -27,10 +27,10 @@
 		<div class="cw-tabs">
 			<div class="cw-tab" data-for="t, i : tabs" data-class-selected="t.selected"
 			     data-event-click="senatus_tab(i)">
-				<span class="sharp-text cw-tab-label" data-style-top="tab_label_top + 'px'"
+				<span class="sharp-text sharp-middle cw-tab-label"
 				      data-style-width="(40 * root_scale) + 'px'"
 				      data-style-font-size="t.text_px + 'px'" data-style-line-height="line_height_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
 			</div>
 		</div>
 
@@ -101,33 +101,33 @@
 
 			<div id="btn_buy" class="cw-btn" data-if="buy_button.shown" data-class-locked="buy_button.locked"
 			     data-event-click="senatus_button(0)">
-				<span class="sharp-text cw-label" data-style-font-size="text_px + 'px'" data-style-top="button_label_top + 'px'"
+				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
 				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{buy_button.label}}</span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{buy_button.label}}</span>
 			</div>
 			<div id="btn_repair" class="cw-btn" data-if="repair_button.shown" data-class-locked="repair_button.locked"
 			     data-event-click="senatus_button(1)">
-				<span class="sharp-text cw-label" data-style-font-size="text_px + 'px'" data-style-top="button_label_top + 'px'"
+				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
 				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{repair_button.label}}</span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{repair_button.label}}</span>
 			</div>
 			<div id="btn_hp" class="cw-btn" data-if="hp_button.shown" data-class-locked="hp_button.locked"
 			     data-event-click="senatus_button(2)">
-				<span class="sharp-text cw-label" data-style-font-size="text_px + 'px'" data-style-top="button_label_top + 'px'"
+				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
 				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{hp_button.label}}</span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{hp_button.label}}</span>
 			</div>
 			<div id="btn_defense" class="cw-btn" data-if="defense_button.shown" data-class-locked="defense_button.locked"
 			     data-event-click="senatus_button(3)">
-				<span class="sharp-text cw-label" data-style-font-size="text_px + 'px'" data-style-top="button_label_top + 'px'"
+				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
 				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{defense_button.label}}</span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{defense_button.label}}</span>
 			</div>
 			<div id="btn_recover" class="cw-btn" data-if="recover_button.shown" data-class-locked="recover_button.locked"
 			     data-event-click="senatus_button(4)">
-				<span class="sharp-text cw-label" data-style-font-size="text_px + 'px'" data-style-top="button_label_top + 'px'"
+				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
 				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{recover_button.label}}</span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{recover_button.label}}</span>
 			</div>
 		</div>
 
@@ -206,15 +206,15 @@
 
 			<div id="btn_apply" class="cw-btn" data-if="apply_button.shown" data-class-locked="apply_button.locked"
 			     data-event-click="senatus_button(5)">
-				<span class="sharp-text cw-label" data-style-font-size="text_px + 'px'" data-style-top="button_label_top + 'px'"
+				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
 				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{apply_button.label}}</span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{apply_button.label}}</span>
 			</div>
 			<div id="btn_withdraw" class="cw-btn" data-if="withdraw_button.shown"
 			     data-class-locked="withdraw_button.locked" data-event-click="senatus_button(6)">
-				<span class="sharp-text cw-label" data-style-font-size="text_px + 'px'" data-style-top="button_label_top + 'px'"
+				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
 				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{withdraw_button.label}}</span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{withdraw_button.label}}</span>
 			</div>
 		</div>
 

@@ -101,15 +101,15 @@
 
 		<div id="btn_confirm" class="gk-btn" data-if="confirm_button.shown"
 		     data-class-locked="confirm_button.locked" data-event-click="gateman_button(1)">
-			<span class="sharp-text gk-label" data-style-font-size="text_px + 'px'" data-style-top="label_top + 'px'"
+			<span class="sharp-text sharp-middle gk-label" data-style-font-size="text_px + 'px'"
 			      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{confirm_button.label}}</span>
+			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{confirm_button.label}}</span>
 		</div>
 		<div id="btn_enter" class="gk-btn" data-if="enter_button.shown"
 		     data-class-locked="enter_button.locked" data-event-click="gateman_button(0)">
-			<span class="sharp-text gk-label" data-style-font-size="text_px + 'px'" data-style-top="label_top + 'px'"
+			<span class="sharp-text sharp-middle gk-label" data-style-font-size="text_px + 'px'"
 			      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{enter_button.label}}</span>
+			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{enter_button.label}}</span>
 		</div>
 
 		<div id="btn_exit" data-event-click="gateman_button(4)"></div>

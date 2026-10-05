@@ -44,10 +44,10 @@
 		<div id="gate" data-class-opened="gate_opened"></div>
 
 		<div id="btn_toggle" data-event-click="gate_switch_toggle">
-			<span class="sharp-text gs-label" data-style-font-size="text_px + 'px'"
-			      data-style-width="(108 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+			<span class="sharp-text sharp-middle gs-label" data-style-font-size="text_px + 'px'"
+			      data-style-width="(108 * root_scale) + 'px'"
 			      data-style-line-height="label_line_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{button_text}}</span>
+			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{button_text}}</span>
 		</div>
 
 		<div id="btn_exit" data-event-click="gate_switch_exit"></div>

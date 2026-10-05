@@ -122,10 +122,10 @@
 				</div>
 			</div>
 			<div id="btn_guild_out" class="gi-btn" data-if="guild_out_button.shown" data-event-click="guild_info_button(0)">
-				<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
-				      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+				<span class="sharp-text sharp-middle gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-width="(64 * root_scale) + 'px'"
 				      data-style-line-height="label_line_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{guild_out_button.label}}</span></span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{guild_out_button.label}}</span></span>
 			</div>
 		</div>
 
@@ -171,22 +171,22 @@
 				</div>
 			</div>
 			<div id="btn_get_position" class="gi-btn" data-if="get_position_button.shown" data-event-click="guild_info_button(1)">
-				<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
-				      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+				<span class="sharp-text sharp-middle gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-width="(64 * root_scale) + 'px'"
 				      data-style-line-height="label_line_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{get_position_button.label}}</span></span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{get_position_button.label}}</span></span>
 			</div>
 			<div id="btn_free_position" class="gi-btn" data-if="free_position_button.shown" data-event-click="guild_info_button(2)">
-				<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
-				      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+				<span class="sharp-text sharp-middle gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-width="(64 * root_scale) + 'px'"
 				      data-style-line-height="label_line_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{free_position_button.label}}</span></span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{free_position_button.label}}</span></span>
 			</div>
 			<div id="btn_get_out" class="gi-btn" data-if="get_out_button.shown" data-event-click="guild_info_button(3)">
-				<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
-				      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+				<span class="sharp-text sharp-middle gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-width="(64 * root_scale) + 'px'"
 				      data-style-line-height="label_line_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{get_out_button.label}}</span></span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{get_out_button.label}}</span></span>
 			</div>
 		</div>
 
@@ -231,16 +231,16 @@
 				</div>
 			</div>
 			<div id="btn_union_create" class="gi-btn" data-if="union_create_button.shown" data-event-click="guild_info_button(4)">
-				<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
-				      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+				<span class="sharp-text sharp-middle gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-width="(64 * root_scale) + 'px'"
 				      data-style-line-height="label_line_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{union_create_button.label}}</span></span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{union_create_button.label}}</span></span>
 			</div>
 			<div id="btn_union_out" class="gi-btn" data-if="union_out_button.shown" data-event-click="guild_info_button(5)">
-				<span class="sharp-text gi-label" data-style-font-size="text_px + 'px'"
-				      data-style-width="(64 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+				<span class="sharp-text sharp-middle gi-label" data-style-font-size="text_px + 'px'"
+				      data-style-width="(64 * root_scale) + 'px'"
 				      data-style-line-height="label_line_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{union_out_button.label}}</span></span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{union_out_button.label}}</span></span>
 			</div>
 		</div>
 

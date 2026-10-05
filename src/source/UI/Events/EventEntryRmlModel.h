@@ -37,7 +37,6 @@ struct EventEntryRmlModel
     float titleLinePx = 0.f;
     // Every button's label sits the same way -- CButton::Render() derives it from the font, not
     // from which button it is.
-    float buttonLabelTop = 0.f;
     float buttonLabelLinePx = 0.f;
     float buttonLabelTextPx = 0.f;
 

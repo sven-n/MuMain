@@ -70,10 +70,10 @@
 		</div>
 
 		<div class="result-btn" id="btn_close" data-event-click="result_close">
-			<span class="sharp-text result-label" data-style-font-size="text_px + 'px'"
-			      data-style-width="(54 * root_scale) + 'px'" data-style-top="label_top + 'px'"
+			<span class="sharp-text sharp-middle result-label" data-style-font-size="text_px + 'px'"
+			      data-style-width="(54 * root_scale) + 'px'"
 			      data-style-line-height="label_line_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{close_text}}</span>
+			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{close_text}}</span>
 		</div>
 	</div>
 </body>

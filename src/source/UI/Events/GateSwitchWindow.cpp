@@ -173,7 +173,6 @@ void CGateSwitchWindow::BuildRmlUi()
             c.Bind("warning", &model.warning);
             c.Bind("gate_opened", &model.gateOpened);
             c.Bind("button_text", &model.buttonText);
-            c.Bind("label_top", &model.labelTop);
             c.Bind("label_line_px", &model.labelLinePx);
             c.Bind("exit_tooltip", &model.exitTooltip);
             c.BindEventCallback("gate_switch_toggle", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
@@ -238,8 +237,6 @@ void CGateSwitchWindow::SyncRmlModel()
     SyncField(m_RmlBinder, &GateSwitchRmlModel::buttonText, "button_text",
          StringUtils::WideToNarrow(opened ? I18N::Game::Close388 : I18N::Game::Open1107));
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    const int labelTop = 29 / 2 - lineHeight / 2;
-    SyncField(m_RmlBinder, &GateSwitchRmlModel::labelTop, "label_top", static_cast<float>(labelTop));
     SyncField(m_RmlBinder, &GateSwitchRmlModel::labelLinePx, "label_line_px", static_cast<float>(lineHeight) * transform.scaleY);
     SyncField(m_RmlBinder, &GateSwitchRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }

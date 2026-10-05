@@ -28,11 +28,11 @@
 		<div class="entry-buttons">
 			<div class="entry-btn" data-for="b, i : buttons" data-class-locked="b.locked"
 			     data-event-click="item_entry_press(i)">
-				<span class="sharp-text entry-label" data-if="b.label != ''"
+				<span class="sharp-text sharp-middle entry-label" data-if="b.label != ''"
 				      data-style-font-size="(b.bold ? bold_text_px : text_px) + 'px'"
-				      data-style-width="(b.width * root_scale) + 'px'" data-style-top="b.label_top + 'px'"
+				      data-style-width="(b.width * root_scale) + 'px'"
 				      data-style-line-height="b.label_line_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
 			</div>
 		</div>
 	</div>

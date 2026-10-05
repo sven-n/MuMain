@@ -433,7 +433,6 @@ void CGuildMakeWindow::BuildRmlUi()
             c.Bind("palette_hint_2", &model.paletteHint2);
             c.Bind("exit_tooltip", &model.exitTooltip);
             c.Bind("guild_name", &model.guildName);
-            c.Bind("label_top", &model.labelTop);
             c.Bind("label_line_px", &model.labelLinePx);
             auto cell = c.RegisterStruct<GuildMakeCellEntry>();
             cell.RegisterMember("color", &GuildMakeCellEntry::color);
@@ -532,8 +531,6 @@ void CGuildMakeWindow::SyncContent()
     SyncField(m_RmlBinder, &GuildMakeRmlModel::resultPx, "result_px", TextPxInBox(transform, result, 190.f));
 
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    const int labelTop = 29 / 2 - lineHeight / 2;
-    SyncField(m_RmlBinder, &GuildMakeRmlModel::labelTop, "label_top", static_cast<float>(labelTop));
     SyncField(m_RmlBinder, &GuildMakeRmlModel::labelLinePx, "label_line_px",
               static_cast<float>(lineHeight) * transform.scaleY);
 

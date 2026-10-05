@@ -16,8 +16,7 @@ struct GateSwitchRmlModel
     Rml::String line1, line2, warning;
     bool gateOpened = false;
     Rml::String buttonText;
-    // CButton::Render(): 29 / 2 - h / 2 whole units down, the native line height in physical px.
-    float labelTop = 0.f;
+    // The native line height in physical px; the label centres on its button.
     float labelLinePx = 0.f;
     Rml::String exitTooltip;
 };

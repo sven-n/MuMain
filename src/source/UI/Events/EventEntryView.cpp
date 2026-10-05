@@ -21,7 +21,6 @@ namespace
 {
 constexpr int kTitleBoxWidth = 72;
 constexpr int kLineBoxWidth = 190;
-constexpr int kButtonHeight = 29;
 
 } // namespace
 
@@ -46,7 +45,6 @@ void mu::ui::window::EventEntryView::Build()
             c.Bind("text_px", &model.textPx);
             c.Bind("title_text_px", &model.titleTextPx);
             c.Bind("title_line_px", &model.titleLinePx);
-            c.Bind("button_label_top", &model.buttonLabelTop);
             c.Bind("button_label_line_px", &model.buttonLabelLinePx);
             c.Bind("button_label_text_px", &model.buttonLabelTextPx);
             c.Bind("title_text", &model.titleText);
@@ -181,11 +179,9 @@ void mu::ui::window::EventEntryView::SyncTextSizes()
     if (linesChanged)
         m_RmlBinder.MarkDirty("lines");
 
-    // CButton::Render(): the bold label at x + (180 / 2 - w / 2), y + (29 / 2 - h / 2), whole
-    // units -- the same for every button, so it is the model's, not each entry's.
+    // CButton::Render(): the bold label, centred on its button -- the same for every button, so
+    // it is the model's, not each entry's.
     const int boldHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold);
-    SyncField(m_RmlBinder, &EventEntryRmlModel::buttonLabelTop, "button_label_top",
-              static_cast<float>(kButtonHeight / 2 - boldHeight / 2));
     SyncField(m_RmlBinder, &EventEntryRmlModel::buttonLabelLinePx, "button_label_line_px",
               static_cast<float>(boldHeight) * transform.scaleY);
     SyncField(m_RmlBinder, &EventEntryRmlModel::buttonLabelTextPx, "button_label_text_px", boldPx);

@@ -20,7 +20,6 @@ struct UnitedMarketPlaceRmlModel
     Rml::String warpText;
     // CButton::Render(): the label centred on its native line height, 23 / 2 - h / 2 whole units
     // down (reference px), its line box in physical px.
-    float labelTop = 0.f;
     float labelLinePx = 0.f;
     bool warpLocked = false; // the Warp button after a click, or while a remaining time is set
     Rml::String exitTooltip;

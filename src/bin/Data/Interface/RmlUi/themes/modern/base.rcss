@@ -562,6 +562,10 @@ body {
    copy for the full explanation. */
 .sharp-text { transform-origin: left top; }
 .sharp-text.sharp-right { transform-origin: right top; }
+/* A one-line layer centred on its box's height (a button's label): its RML transform starts with
+   translateY(-50%), so its middle sits on top: 50% at any panel scale. */
+.sharp-text.sharp-middle { top: 50%; transform-origin: left center; }
+.sharp-text.sharp-right.sharp-middle { transform-origin: right center; }
 
 .anchor-top-left {
 	position: absolute;

@@ -42,17 +42,16 @@
 		<div class="cp-areas" data-class-attack="mode == 1" data-class-defense="mode == 2">
 			<div class="cp-area" data-for="a : areas" data-class-big="a.big" data-class-locked="a.locked"
 			     data-event-click="catapult_area(a.index)">
-				<span class="sharp-text cp-label cp-area-label" data-style-font-size="a.label_px + 'px'"
-				      data-style-top="a.label_top + 'px'"
+				<span class="sharp-text sharp-middle cp-label cp-area-label" data-style-font-size="a.label_px + 'px'"
 				      data-style-line-height="line_height_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{a.label}}</span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{a.label}}</span>
 			</div>
 		</div>
 
 		<div id="btn_fire" data-class-locked="fire_locked" data-event-click="catapult_fire">
-			<span class="sharp-text cp-label" data-style-font-size="text_px + 'px'" data-style-top="fire_label_top + 'px'"
+			<span class="sharp-text sharp-middle cp-label" data-style-font-size="text_px + 'px'"
 			      data-style-line-height="line_height_px + 'px'" data-style-width="(108 * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{fire_text}}</span>
+			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{fire_text}}</span>
 		</div>
 
 		<div id="btn_exit" data-event-click="catapult_exit"></div>

@@ -14,7 +14,6 @@ struct CatapultAreaEntry
     int index = 0;
     bool big = false;   // newui_Btn_round 77 x 47, else newui_Btn_gate 46 x 36
     bool locked = false;
-    float labelTop = 0.f; // CButton::Render(): h / 2 - text height / 2, whole units
     // The text shrunk to the button's width when wider; the centring itself is the theme's.
     float labelPx = 0.f;
 };
@@ -43,7 +42,6 @@ struct CatapultRmlModel
     std::vector<CatapultAreaEntry> areas;
     Rml::String fireText;
     bool fireLocked = true;
-    float fireLabelTop = 0.f;
     Rml::String exitTooltip;
 };
 } // namespace mu::ui::window

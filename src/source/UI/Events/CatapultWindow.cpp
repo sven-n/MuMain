@@ -321,13 +321,11 @@ void mu::ui::window::CCatapultWindow::BuildRmlUi()
             area.RegisterMember("index", &CatapultAreaEntry::index);
             area.RegisterMember("big", &CatapultAreaEntry::big);
             area.RegisterMember("locked", &CatapultAreaEntry::locked);
-            area.RegisterMember("label_top", &CatapultAreaEntry::labelTop);
             area.RegisterMember("label_px", &CatapultAreaEntry::labelPx);
             c.RegisterArray<std::vector<CatapultAreaEntry>>();
             c.Bind("areas", &model.areas);
             c.Bind("fire_text", &model.fireText);
             c.Bind("fire_locked", &model.fireLocked);
-            c.Bind("fire_label_top", &model.fireLabelTop);
             c.Bind("exit_tooltip", &model.exitTooltip);
             c.BindEventCallback("catapult_area",
                                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
@@ -406,7 +404,7 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
         m_RmlBinder.MarkDirty("lines");
     }
 
-    // The buttons' labels in the normal font at CButton::Render()'s whole-unit centre.
+    // The buttons' labels in the normal font, centred on their buttons by the theme.
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     SyncField(m_RmlBinder, &CatapultRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
     std::vector<CatapultAreaEntry> areas;
@@ -423,7 +421,7 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
         const int measured = g_pRenderText->MeasureText(*a.label, static_cast<int>(wcslen(*a.label))).cx;
         areas.push_back(
             {StringUtils::WideToNarrow(*a.label), static_cast<int>(i), a.big,
-             static_cast<int>(i) == m_iAreaIndex, static_cast<float>(height / 2 - lineHeight / 2),
+             static_cast<int>(i) == m_iAreaIndex,
              UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
                                                    static_cast<float>(measured), static_cast<float>(width))});
     }
@@ -433,7 +431,7 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
                                       [](const CatapultAreaEntry& x, const CatapultAreaEntry& y)
                                       {
                                           return x.label == y.label && x.big == y.big && x.locked == y.locked &&
-                                                 x.labelTop == y.labelTop && x.labelPx == y.labelPx;
+                                                 x.labelPx == y.labelPx;
                                       });
     if (!sameAreas)
     {
@@ -442,6 +440,5 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
     }
     SyncField(m_RmlBinder, &CatapultRmlModel::fireText, "fire_text", StringUtils::WideToNarrow(I18N::Game::Shoot));
     SyncField(m_RmlBinder, &CatapultRmlModel::fireLocked, "fire_locked", m_bFireLocked);
-    SyncField(m_RmlBinder, &CatapultRmlModel::fireLabelTop, "fire_label_top", static_cast<float>(29 / 2 - lineHeight / 2));
     SyncField(m_RmlBinder, &CatapultRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }

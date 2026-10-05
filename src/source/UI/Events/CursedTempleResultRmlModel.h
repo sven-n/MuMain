@@ -45,7 +45,6 @@ struct CursedTempleResultRmlModel
     std::vector<CursedTempleResultRow> illusionRows;
     Rml::String closeText;
     // CButton::Render(): 23 / 2 - h / 2 whole units down, the native line height in physical px.
-    float labelTop = 0.f;
     float labelLinePx = 0.f;
 
     // The victory / defeat banner fading in above the window: 0 none, 1 success, 2 failure.

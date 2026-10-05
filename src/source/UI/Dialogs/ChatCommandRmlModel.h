@@ -94,7 +94,6 @@ struct ChatCommandRmlModel
     Rml::String leftText;
     Rml::String rightText;
     // CButton::Render(): 29 / 2 - h / 2 whole units down, the native line height in physical px.
-    float labelTop = 0.f;
     float labelLinePx = 0.f;
     Rml::String exitTooltip;
 };

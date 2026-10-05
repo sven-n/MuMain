@@ -243,7 +243,6 @@ void CGatemanWindow::BuildRmlUi()
             c.Bind("root_scale", &model.rootScale);
             c.Bind("text_px", &model.textPx);
             c.Bind("line_height_px", &model.lineHeightPx);
-            c.Bind("label_top", &model.labelTop);
             auto lineType = c.RegisterStruct<GatemanLine>();
             lineType.RegisterMember("text", &GatemanLine::text);
             lineType.RegisterMember("text_px", &GatemanLine::textPx);
@@ -444,6 +443,5 @@ void CGatemanWindow::SyncContent()
     SyncField(m_RmlBinder, &GatemanRmlModel::guestCanAfford, "guest_can_afford", guestCanAfford);
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     SyncField(m_RmlBinder, &GatemanRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
-    SyncField(m_RmlBinder, &GatemanRmlModel::labelTop, "label_top", static_cast<float>(23 / 2 - lineHeight / 2));
     SyncField(m_RmlBinder, &GatemanRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }

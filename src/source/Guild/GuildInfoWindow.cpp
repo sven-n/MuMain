@@ -516,7 +516,6 @@ void mu::ui::window::CGuildInfoWindow::BuildRmlUi()
             c.Bind("union_create_button", &model.unionCreateButton);
             c.Bind("union_out_button", &model.unionOutButton);
             c.Bind("exit_tooltip", &model.exitTooltip);
-            c.Bind("label_top", &model.labelTop);
             c.Bind("label_line_px", &model.labelLinePx);
             c.BindEventCallback("guild_info_button",
                                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
@@ -753,8 +752,6 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
               StringUtils::WideToNarrow(I18N::Game::Close388));
 
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    const int labelTop = GuildConstants::UILayout::BUTTON_HEIGHT / 2 - lineHeight / 2;
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::labelTop, "label_top", static_cast<float>(labelTop));
     SyncField(m_RmlBinder, &GuildInfoRmlModel::labelLinePx, "label_line_px",
               static_cast<float>(lineHeight) * transform.scaleY);
 }

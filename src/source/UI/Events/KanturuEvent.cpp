@@ -529,7 +529,6 @@ void mu::ui::window::CKanturu2ndEnterNpc::BuildRmlUi()
             c.Bind("close_text", &model.closeText);
             c.Bind("refresh_locked", &model.refreshLocked);
             c.Bind("enter_locked", &model.enterLocked);
-            c.Bind("label_top", &model.labelTop);
             c.Bind("label_line_px", &model.labelLinePx);
             c.BindEventCallback("kanturu_refresh", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                                 { m_PendingRefresh = true; });
@@ -579,9 +578,6 @@ void mu::ui::window::CKanturu2ndEnterNpc::SyncContent()
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     KanturuEnterRmlModel updated = m_RmlBinder.GetModel();
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    // CButton::Render()'s whole-unit centring.
-    const int labelTopUnits = 23 / 2 - lineHeight / 2;
-    updated.labelTop = static_cast<float>(labelTopUnits);
     updated.labelLinePx = static_cast<float>(lineHeight) * transform.scaleY;
     updated.refreshText = StringUtils::WideToNarrow(I18N::Game::Refresh);
     updated.enterText = StringUtils::WideToNarrow(I18N::Game::Enter);
@@ -623,7 +619,6 @@ void mu::ui::window::CKanturu2ndEnterNpc::SyncContent()
     }
 
     KanturuEnterRmlModel& model = m_RmlBinder.GetModel();
-    SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::labelTop, "label_top", updated);
     SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::labelLinePx, "label_line_px", updated);
     SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::refreshText, "refresh_text", updated);
     SyncFieldFrom(m_RmlBinder, &KanturuEnterRmlModel::enterText, "enter_text", updated);

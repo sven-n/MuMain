@@ -753,7 +753,6 @@ void mu::ui::window::CChatCommandWindow::BuildRmlUi()
             c.Bind("has_right_button", &model.hasRightButton);
             c.Bind("left_text", &model.leftText);
             c.Bind("right_text", &model.rightText);
-            c.Bind("label_top", &model.labelTop);
             c.Bind("label_line_px", &model.labelLinePx);
             c.Bind("exit_tooltip", &model.exitTooltip);
 
@@ -1003,8 +1002,6 @@ void mu::ui::window::CChatCommandWindow::SyncContent()
               StringUtils::WideToNarrow(m_page == PAGE_COMMANDS ? I18N::Game::ChatCommandsTemplates
                                                                 : I18N::Game::ChatCommandsExecute));
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    const int labelTop = BUTTON_HEIGHT / 2 - lineHeight / 2;
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::labelTop, "label_top", static_cast<float>(labelTop));
     SyncField(m_RmlBinder, &ChatCommandRmlModel::labelLinePx, "label_line_px",
               static_cast<float>(lineHeight) * transform.scaleY);
 }

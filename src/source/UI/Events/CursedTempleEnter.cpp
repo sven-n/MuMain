@@ -275,7 +275,6 @@ void mu::ui::window::CCursedTempleEnter::BuildRmlUi()
             c.Bind("bands", &model.bands);
             c.Bind("enter_text", &model.enterText);
             c.Bind("close_text", &model.closeText);
-            c.Bind("label_top", &model.labelTop);
             c.Bind("label_line_px", &model.labelLinePx);
             c.BindEventCallback("temple_enter", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                                 { m_PendingEnter = true; });
@@ -325,7 +324,6 @@ void mu::ui::window::CCursedTempleEnter::SyncLines()
     updated.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     updated.lineHeightPx = static_cast<float>(lineHeight) * transform.scaleY;
-    updated.labelTop = static_cast<float>(23 / 2 - lineHeight / 2);
     updated.labelLinePx = updated.lineHeightPx;
     updated.title = StringUtils::WideToNarrow(I18N::Game::DoYouWishToGoToTheIllusionTemple);
     updated.enterText = StringUtils::WideToNarrow(I18N::Game::Enter);
@@ -372,7 +370,6 @@ void mu::ui::window::CCursedTempleEnter::SyncLines()
     CursedTempleEnterRmlModel& model = m_RmlBinder.GetModel();
     SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::boldTextPx, "bold_text_px", updated);
     SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::lineHeightPx, "line_height_px", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::labelTop, "label_top", updated);
     SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::labelLinePx, "label_line_px", updated);
     SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::title, "title", updated);
     SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::enterText, "enter_text", updated);

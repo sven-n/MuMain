@@ -31,7 +31,6 @@ struct GatemanRmlModel
     float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
     float textPx = 0.f; // native normal text size in physical px (RmlRootTransform.h)
     float lineHeightPx = 0.f;
-    float labelTop = 0.f; // CButton::Render(): 23 / 2 - h / 2 whole units
 
     // Which page the gatekeeper shows: 0 none, 1 the guild master's, 2 a guild member's,
     // 3 a guest's (CUIGateKeeper::GetType()).

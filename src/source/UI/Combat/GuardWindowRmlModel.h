@@ -66,8 +66,6 @@ struct GuardWindowRmlModel
     float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
     float textPx = 0.f; // native normal text size in physical px (RmlRootTransform.h)
     float lineHeightPx = 0.f;
-    float buttonLabelTop = 0.f; // CButton::Render(): 23 / 2 - h / 2 whole units
-    float tabLabelTop = 0.f;    // CRadioButton::Render(): 22 / 2 - h / 2 whole units
 
     int activeTab = 0; // CGuardWindow::CURR_OPEN_TAB_BUTTON -- which page the document shows.
     std::vector<GuardTabEntry> tabs;

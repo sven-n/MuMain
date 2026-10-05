@@ -15,7 +15,6 @@ struct CommandButtonEntry
     bool selected = false;
     // CButton::Render() centred the label on the button with the native text's own height:
     // its top in reference px, its line box and size in physical px.
-    float labelTop = 0.f;
     float labelLinePx = 0.f;
     float labelTextPx = 0.f;
 };

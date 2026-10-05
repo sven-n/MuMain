@@ -192,7 +192,6 @@ void CDuelWatchWindow::BuildRmlUi()
             c.Bind("vs_text", &model.vsText);
             c.Bind("no_duel_text", &model.noDuelText);
             c.Bind("watch_text", &model.watchText);
-            c.Bind("label_top", &model.labelTop);
             c.Bind("label_line_px", &model.labelLinePx);
 
             auto room = c.RegisterStruct<DuelWatchRoomEntry>();
@@ -264,17 +263,14 @@ void CDuelWatchWindow::SyncRmlModel()
     UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
 
-    // CButton::Render(): label top y + (23 / 2 - h / 2), whole units, h the native line height.
+    // The button label's line height: the native line height in physical px.
     {
         const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-        const float labelTop = static_cast<float>(23 / 2 - lineHeight / 2);
         const float labelLinePx = static_cast<float>(lineHeight) * UI::Scaling::GetActiveTransform().scaleY;
         auto& labelModel = m_RmlBinder.GetModel();
-        if (labelModel.labelTop != labelTop || labelModel.labelLinePx != labelLinePx)
+        if (labelModel.labelLinePx != labelLinePx)
         {
-            labelModel.labelTop = labelTop;
             labelModel.labelLinePx = labelLinePx;
-            m_RmlBinder.MarkDirty("label_top");
             m_RmlBinder.MarkDirty("label_line_px");
         }
     }

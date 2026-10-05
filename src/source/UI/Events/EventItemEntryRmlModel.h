@@ -30,7 +30,6 @@ struct EventItemEntryButtonEntry
     float width = 0.f; // reference px, the label's own centring box
     // CButton::Render(): height / 2 - h / 2 whole units down, the label font's line height in
     // physical px. Both follow the button's own height, so they stay per button.
-    float labelTop = 0.f;
     float labelLinePx = 0.f;
 
     bool operator==(const EventItemEntryButtonEntry&) const = default;

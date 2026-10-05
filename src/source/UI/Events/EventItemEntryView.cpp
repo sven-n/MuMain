@@ -51,7 +51,6 @@ void mu::ui::window::EventItemEntryView::Build()
             button.RegisterMember("locked", &EventItemEntryButtonEntry::locked);
             button.RegisterMember("bold", &EventItemEntryButtonEntry::bold);
             button.RegisterMember("width", &EventItemEntryButtonEntry::width);
-            button.RegisterMember("label_top", &EventItemEntryButtonEntry::labelTop);
             button.RegisterMember("label_line_px", &EventItemEntryButtonEntry::labelLinePx);
             c.RegisterArray<std::vector<EventItemEntryButtonEntry>>();
             c.Bind("buttons", &model.buttons);
@@ -185,8 +184,6 @@ void mu::ui::window::EventItemEntryView::SyncButtons()
         entry.locked = button.locked;
         entry.bold = button.bold;
         entry.width = button.width;
-        // CButton::Render()'s whole-unit centring.
-        entry.labelTop = static_cast<float>(static_cast<int>(button.height) / 2 - lineHeight / 2);
         entry.labelLinePx = static_cast<float>(lineHeight) * transform.scaleY;
         entries.push_back(std::move(entry));
     }

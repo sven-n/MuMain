@@ -254,7 +254,6 @@ void mu::ui::window::CCursedTempleResult::BuildRmlUi()
             c.Bind("allied_rows", &model.alliedRows);
             c.Bind("illusion_rows", &model.illusionRows);
             c.Bind("close_text", &model.closeText);
-            c.Bind("label_top", &model.labelTop);
             c.Bind("label_line_px", &model.labelLinePx);
             c.Bind("banner", &model.banner);
             c.Bind("banner_left", &model.bannerLeft);
@@ -305,7 +304,6 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
     const float textPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     updated.lineHeightPx = static_cast<float>(lineHeight) * transform.scaleY;
-    updated.labelTop = static_cast<float>(23 / 2 - lineHeight / 2);
     updated.labelLinePx = updated.lineHeightPx;
     updated.closeText = StringUtils::WideToNarrow(I18N::Game::Close388);
 
@@ -362,7 +360,6 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
 
     CursedTempleResultRmlModel& model = m_RmlBinder.GetModel();
     SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::lineHeightPx, "line_height_px", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::labelTop, "label_top", updated);
     SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::labelLinePx, "label_line_px", updated);
     SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::closeText, "close_text", updated);
     SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::banner, "banner", updated);

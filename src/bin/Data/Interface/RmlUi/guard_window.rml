@@ -34,10 +34,10 @@
 		<div class="gd-tabs">
 			<div class="gd-tab" data-for="t, i : tabs" data-class-selected="t.selected"
 			     data-event-click="guard_tab(i)">
-				<span class="sharp-text gd-tab-label" data-style-top="tab_label_top + 'px'"
+				<span class="sharp-text sharp-middle gd-tab-label"
 				      data-style-width="(56 * root_scale) + 'px'"
 				      data-style-font-size="text_px + 'px'" data-style-line-height="line_height_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
 			</div>
 		</div>
 
@@ -155,21 +155,21 @@
 
 		<div id="btn_proclaim" class="gd-btn" data-if="proclaim_button.shown"
 		     data-class-locked="proclaim_button.locked" data-event-click="guard_button(0)">
-			<span class="sharp-text gd-label" data-style-font-size="text_px + 'px'" data-style-top="button_label_top + 'px'"
+			<span class="sharp-text sharp-middle gd-label" data-style-font-size="text_px + 'px'"
 			      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{proclaim_button.label}}</span>
+			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{proclaim_button.label}}</span>
 		</div>
 		<div id="btn_register" class="gd-btn" data-if="register_button.shown"
 		     data-class-locked="register_button.locked" data-event-click="guard_button(1)">
-			<span class="sharp-text gd-label" data-style-font-size="text_px + 'px'" data-style-top="button_label_top + 'px'"
+			<span class="sharp-text sharp-middle gd-label" data-style-font-size="text_px + 'px'"
 			      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{register_button.label}}</span>
+			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{register_button.label}}</span>
 		</div>
 		<div id="btn_give_up" class="gd-btn" data-if="give_up_button.shown"
 		     data-class-locked="give_up_button.locked" data-event-click="guard_button(2)">
-			<span class="sharp-text gd-label" data-style-font-size="text_px + 'px'" data-style-top="button_label_top + 'px'"
+			<span class="sharp-text sharp-middle gd-label" data-style-font-size="text_px + 'px'"
 			      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{give_up_button.label}}</span>
+			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{give_up_button.label}}</span>
 		</div>
 
 		<div id="btn_exit" data-event-click="guard_button(3)"></div>

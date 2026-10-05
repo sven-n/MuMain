@@ -36,11 +36,11 @@
 		<div class="entry-buttons">
 			<div class="entry-btn" data-for="b, i : buttons" data-class-enabled="b.enabled"
 			     data-event-click="entry_press(i)">
-				<span class="sharp-text entry-label" data-style-top="button_label_top + 'px'"
+				<span class="sharp-text sharp-middle entry-label"
 				      data-style-font-size="button_label_text_px + 'px'"
 				      data-style-line-height="button_label_line_px + 'px'"
 				      data-style-width="(180 * root_scale) + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
 			</div>
 		</div>
 

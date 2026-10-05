@@ -46,7 +46,6 @@ struct CursedTempleEnterRmlModel
     Rml::String enterText;
     Rml::String closeText;
     // CButton::Render(): 23 / 2 - h / 2 whole units down, the native line height in physical px.
-    float labelTop = 0.f;
     float labelLinePx = 0.f;
 };
 } // namespace mu::ui::window
