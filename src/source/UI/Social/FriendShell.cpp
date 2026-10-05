@@ -3,6 +3,7 @@
 
 #include "UI/Social/FriendWindow.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Placement/WindowPlacement.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlDraggable.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -317,14 +318,22 @@ void FriendShell::ApplyLayout()
     }
 }
 
-// Docked into the bottom-right corner of the usable viewport, by the user's call: native's own
-// Init() opened it at (50, 50), against the top-left. The bottom edge is the workspace's, not the
-// window's, so it sits on top of the bottom HUD rather than under it.
+// Where the theme's "friends" slot puts it; without one, the bottom-right corner of the usable
+// viewport (native's own Init() opened it at (50, 50), against the top-left). The bottom edge is
+// the workspace's, not the window's, so it sits on top of the bottom HUD rather than under it.
 void FriendShell::PlaceAtRest()
 {
     const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
     if (scale <= 0)
         return;
+    float x = 0.f;
+    float y = 0.f;
+    if (UI::Placement::InitialPosition("friends", m_Width * scale, m_Height * scale, x, y))
+    {
+        m_Left = std::max(0.f, x / scale);
+        m_Top = std::max(0.f, y / scale);
+        return;
+    }
     m_Left = std::max(0.f, WindowWidth / scale - m_Width);
     m_Top = std::max(0.f, m_Binder.GetModel().workspaceHeight / scale - m_Height);
 }

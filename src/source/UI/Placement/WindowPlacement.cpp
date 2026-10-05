@@ -417,6 +417,35 @@ float UncoveredWorldRight()
     return g_workspace != nullptr ? g_uncoveredRight : static_cast<float>(WindowWidth);
 }
 
+bool InitialPosition(std::string_view slotName, float width, float height, float& x, float& y)
+{
+    Rml::ElementDocument* workspace = Workspace();
+    if (workspace == nullptr)
+        return false;
+
+    Rml::ElementList slots;
+    workspace->QuerySelectorAll(slots, ".slot");
+    for (Rml::Element* slot : slots)
+    {
+        if (slot->GetAttribute<Rml::String>("data-window", "") != slotName)
+            continue;
+        // Laid out only to be read: the window floats, so it takes no room in its region.
+        slot->SetClass("open", true);
+        SetLength(slot, Rml::PropertyId::Width, width);
+        SetLength(slot, Rml::PropertyId::Height, height);
+        workspace->UpdateDocument();
+        const Rml::Vector2f offset = slot->GetAbsoluteOffset(Rml::BoxArea::Border);
+        x = offset.x;
+        y = offset.y;
+        slot->SetClass("open", false);
+        slot->RemoveProperty(Rml::PropertyId::Width);
+        slot->RemoveProperty(Rml::PropertyId::Height);
+        workspace->UpdateDocument();
+        return true;
+    }
+    return false;
+}
+
 float UncoveredWorldLeftIn(const UI::Scaling::Transform& transform)
 {
     return (UncoveredWorldLeft() - transform.offsetX) / transform.scaleX;

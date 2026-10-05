@@ -628,6 +628,8 @@ bool CSystem::LoadMainSceneInterface()
     slot(INTERFACE_MOVEMAP, "move_map", m_pNewMoveCommandWindow, "move_command.rml");
     // Named only in data-closes.
     UI::Placement::RegisterName(INTERFACE_MUHELPER_SKILL_LIST, "mu_helper_skill_list");
+    // Places itself; its slot is only where it first opens (UI::Placement::InitialPosition()).
+    UI::Placement::RegisterName(INTERFACE_FRIEND, "friends");
 
     return true;
 }

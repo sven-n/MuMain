@@ -34,6 +34,10 @@ void RegisterName(std::uint32_t windowId, std::string_view name);
 // theme gives no room beside it.
 void CloseForOpening(std::uint32_t windowId);
 
+// For a window that places itself: where the theme's slot puts a `width` x `height` box (screen
+// pixels), as the window's first position. False when the theme has no such slot.
+bool InitialPosition(std::string_view slotName, float width, float height, float& x, float& y);
+
 // Re-places every open window that has a slot. Call after a window opens or closes.
 void Arrange();
 // Once a frame: re-places windows when the screen size, UI scale or HUD position changed.

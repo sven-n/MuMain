@@ -14,7 +14,8 @@
 	     dock (default), panel or hud. data-closes lists the windows that close when a slot's
 	     window opens, because the theme gives them no room beside it. Open slots in a data-covers-world region narrow the world
 	     area HUD widgets centre in. data-saved-position names a window's saved drag position, used
-	     while it is the first open window of its region. -->
+	     while it is the first open window of its region. A window that moves itself (the friend list)
+	     only asks its slot where it first opens; the player's moves win after that. -->
 	<div id="safe_area">
 		<!-- Fills from the right edge in document order. -->
 		<div class="region dock-right" data-ref-height="432" data-covers-world>
@@ -64,6 +65,10 @@
 		     the warp list. -->
 		<div class="region dock-left" data-ref-height="432">
 			<div class="slot" data-window="move_map"></div>
+		</div>
+		<!-- Where the friend list first opens: the corner above the HUD. -->
+		<div class="region free-bottom-right">
+			<div class="slot" data-window="friends"></div>
 		</div>
 	</div>
 </body>

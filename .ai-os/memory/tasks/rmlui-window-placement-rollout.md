@@ -101,8 +101,8 @@ select the character. Next step would be `Core/Input/SyntheticInput.cpp` (sets `
 8. Done: Gens ranking has a right-dock slot after character info; verified in game at 90 and 100 %
    (`$win gensranking full`). Done: the move map has a left-dock
    slot and supports fill (height = its rows' space, width from `#panel`, minimum chrome + 3 rows);
-   verified in game in both themes. Next: friends (free layout with an initial corner), centred
-   dialogs.
+   verified in game in both themes. Done: the friend list's first position comes from a `friends`
+   slot (`InitialPosition()`), verified in game. Next: centred dialogs.
 
 ## How to work on this
 

@@ -47,3 +47,9 @@ body {
 	flex-direction: row;
 	align-items: flex-start;
 }
+
+/* Where a free window (the friend list) first opens: the bottom-right corner above the HUD. */
+.free-bottom-right {
+	right: 0;
+	bottom: 0;
+}
