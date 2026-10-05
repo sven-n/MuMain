@@ -3,10 +3,40 @@
 #include "Core/Platform/WinCompat.h"
 #include "Core/Globals/_enum.h"
 
+namespace
+{
+bool UsesBottomHudFrame(std::uint32_t interfaceKey)
+{
+    using namespace SEASON3B;
+
+    switch (interfaceKey)
+    {
+    case INTERFACE_CHATINPUTBOX:
+    case INTERFACE_WINDOW_MENU:
+    case INTERFACE_KANTURU_INFO:
+    case INTERFACE_CHATLOGWINDOW:
+    case INTERFACE_BLOODCASTLE_TIME:
+    case INTERFACE_CHAOSCASTLE_TIME:
+    case INTERFACE_BATTLE_SOCCER_SCORE:
+    case INTERFACE_DUEL_WINDOW:
+    case INTERFACE_DUELWATCH_MAINFRAME:
+    case INTERFACE_DUELWATCH_USERLIST:
+    case INTERFACE_DOPPELGANGER_FRAME:
+    case INTERFACE_EMPIREGUARDIAN_TIMER:
+        return true;
+    default:
+        return false;
+    }
+}
+}
+
 UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
 {
     using namespace SEASON3B;
     using Scaling::LayoutMode;
+
+    if (UsesBottomHudFrame(interfaceKey))
+        return LayoutMode::HudLeft;
 
     switch (interfaceKey)
     {
@@ -20,25 +50,13 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_FRIEND:
         return LayoutMode::FloatingWorkspace;
 
-    case INTERFACE_CHATINPUTBOX:
-    case INTERFACE_WINDOW_MENU:
-    case INTERFACE_KANTURU_INFO:
-    case INTERFACE_CHATLOGWINDOW:
-    case INTERFACE_BLOODCASTLE_TIME:
-    case INTERFACE_CHAOSCASTLE_TIME:
-    case INTERFACE_BATTLE_SOCCER_SCORE:
     case INTERFACE_SLIDEWINDOW:
     case INTERFACE_HERO_POSITION_INFO:
-    case INTERFACE_DUEL_WINDOW:
     case INTERFACE_CRYWOLF:
     case INTERFACE_SIEGEWARFARE:
     case INTERFACE_MAINFRAME:
     case INTERFACE_BUFF_WINDOW:
     case INTERFACE_MASTER_LEVEL:
-    case INTERFACE_DUELWATCH_MAINFRAME:
-    case INTERFACE_DUELWATCH_USERLIST:
-    case INTERFACE_DOPPELGANGER_FRAME:
-    case INTERFACE_EMPIREGUARDIAN_TIMER:
     case INTERFACE_MINI_MAP:
     case INTERFACE_GENSRANKING:
     case INTERFACE_HOTKEY:

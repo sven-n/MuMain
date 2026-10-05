@@ -25,7 +25,6 @@
 #include "Guild/GuildCache.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Camera/CameraProjection.h"
-#include "UI/Scaling/UITransform.h"
 
 
 extern  int     WaterTextureNumber;
@@ -599,12 +598,12 @@ namespace battleCastle
 
         const DWORD smokeColor = RGBA(77, 77, 64, 255);
         float WindX2 = (float)((int)WorldTime % 100000) * 0.0005f;
-        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH,
-            UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX2, 0.f, 3.f, 2.f, smokeColor);
+        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT,
+            WindX2, 0.f, 3.f, 2.f, smokeColor);
         EnableAlphaBlend();
         float WindX = (float)((int)WorldTime % 100000) * 0.0002f;
-        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
-            UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f, smokeColor);
+        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT,
+            WindX, 0.f, 0.3f, 0.3f, smokeColor);
     }
 
     bool CreateFireSnuff(PARTICLE* o)

@@ -18,7 +18,6 @@
 #include "GameLogic/Pets/GIPetManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Skills/SkillManager.h"
-#include "UI/Scaling/UITransform.h"
 
 using namespace SEASON3C;
 
@@ -43,12 +42,12 @@ void GMSwampOfQuiet::RenderBaseSmoke()
     EnableAlphaTest();
     const DWORD smokeColor = RGBA(102, 102, 115, 255);
     float WindX2 = (float)((int)WorldTime % 100000) * 0.0005f;
-    RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH,
-        UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX2, 0.f, 3.f, 2.f, smokeColor);
+    RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT,
+        WindX2, 0.f, 3.f, 2.f, smokeColor);
     EnableAlphaBlend();
     float WindX = (float)((int)WorldTime % 100000) * 0.0002f;
-    RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
-        UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f, smokeColor);
+    RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT,
+        WindX, 0.f, 0.3f, 0.3f, smokeColor);
 }
 
 void GMSwampOfQuiet::CreateObject(OBJECT* pObject)

@@ -21,6 +21,8 @@ extern BOOL g_bUseWindowMode;
 void ReinitializeFonts();
 std::vector<std::pair<int, int>> MuGetSupportedDisplayResolutions();
 void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed);
+void MuSetVSyncPreference(bool enabled);
+void SetShowFpsCounter(bool enabled);
 float ConvertX(float x);
 float ConvertY(float y);
 
@@ -171,30 +173,94 @@ namespace
     constexpr int EFFECT_BAR_SRC_WIDTH  = 141;
     constexpr int EFFECT_BAR_SRC_HEIGHT = 29;
 
-    // Resolution combo box placement (relative to m_Pos)
-    constexpr int RES_COMBO_X_LOCAL = 22;
-    constexpr int RES_COMBO_Y_LOCAL = 335;
-    constexpr int RES_COMBO_WIDTH   = 148;  // spans the old left-to-right arrow area
-    constexpr int RES_COMBO_HEIGHT  = 16;
-    constexpr int RES_COMBO_MAX_VISIBLE = 4;  // scrollbar appears when list > this
+    // Two columns, each the old 190-wide stack. Left keeps attack/audio and the
+    // resolution combo. Right keeps the render toggles (including weather), the
+    // font and language combos, and windowed mode. An open dropdown can cover
+    // the Close button; UpdateMouseEvent already gives that list the click.
+    constexpr int COLUMN_WIDTH = 190;
+    constexpr int LEFT_COLUMN_X = 0;
+    constexpr int RIGHT_COLUMN_X = COLUMN_WIDTH;
+    constexpr int POINT_X_LOCAL = 20;
+    constexpr int LABEL_X_LOCAL = 40;
+    constexpr int CHECKBOX_X_LOCAL = 150;
+    constexpr int CHECKBOX_SIZE = 15;
+    constexpr float CHECKBOX_UNCHECKED_V = 15.f;
+    constexpr int POINT_ABOVE_LABEL = 2;
+    constexpr int LINE_X_LOCAL = 18;
+    constexpr int LINE_WIDTH = 154;
 
-    // Language combo box placement (relative to m_Pos).
-    constexpr int LANG_LABEL_Y_LOCAL = 283;
-    constexpr int LANG_COMBO_X_LOCAL = 22;
-    constexpr int LANG_COMBO_Y_LOCAL = 296;
-    constexpr int LANG_COMBO_WIDTH   = 148;
-    constexpr int LANG_COMBO_HEIGHT  = 16;
-    constexpr int LANG_COMBO_MAX_VISIBLE = 5;
-
-    // Font combo box placement (relative to m_Pos). Row order below the effect
-    // rows is: Font, Language, Resolution, Windowed mode (combos grouped at the
-    // top so an open dropdown never overlaps the Close button).
-    constexpr int FONT_LABEL_Y_LOCAL = 244;
-    constexpr int FONT_COMBO_X_LOCAL = 22;
-    constexpr int FONT_COMBO_Y_LOCAL = 257;
-    constexpr int FONT_COMBO_WIDTH   = 148;
-    constexpr int FONT_COMBO_HEIGHT  = 16;
+    constexpr int COMBO_X_LOCAL = 22;
+    constexpr int COMBO_WIDTH = 148;
+    constexpr int COMBO_HEIGHT = 16;
     constexpr int FONT_COMBO_MAX_VISIBLE = 5;
+    constexpr int LANG_COMBO_MAX_VISIBLE = 5;
+    constexpr int RES_COMBO_MAX_VISIBLE = 4;
+
+    constexpr int AUTO_CHECK_Y_LOCAL = 43;
+    constexpr int AUTO_LABEL_Y_LOCAL = 48;
+    constexpr int WHISPER_CHECK_Y_LOCAL = 65;
+    constexpr int WHISPER_LABEL_Y_LOCAL = 70;
+    constexpr int SOUND_LABEL_Y_LOCAL = 92;
+    constexpr int SOUND_SLIDER_Y_LOCAL = 104;
+    constexpr int MUSIC_LABEL_Y_LOCAL = 120;
+    constexpr int MUSIC_SLIDER_Y_LOCAL = 132;
+    constexpr int SLIDE_CHECK_Y_LOCAL = 155;
+    constexpr int SLIDE_LABEL_Y_LOCAL = 160;
+    constexpr int EFFECT_LABEL_Y_LOCAL = 182;
+
+    // Resolution sits under the effect slider, still in the left column.
+    constexpr int RES_LABEL_Y_LOCAL = 220;
+    constexpr int RES_COMBO_X_LOCAL = LEFT_COLUMN_X + COMBO_X_LOCAL;
+    constexpr int RES_COMBO_Y_LOCAL = 233;
+
+    // Right column. Checkbox hit Y is the sprite Y so rows cannot steal each other.
+    constexpr int EFFECTS_CHECK_Y_LOCAL = 43;
+    constexpr int EFFECTS_LABEL_Y_LOCAL = 48;
+    constexpr int WEATHER_CHECK_Y_LOCAL = 65;
+    constexpr int WEATHER_LABEL_Y_LOCAL = 70;
+    constexpr int FPS_CHECK_Y_LOCAL = 87;
+    constexpr int FPS_LABEL_Y_LOCAL = 92;
+    constexpr int VSYNC_CHECK_Y_LOCAL = 109;
+    constexpr int VSYNC_LABEL_Y_LOCAL = 114;
+    constexpr int FONT_LABEL_Y_LOCAL = 140;
+    constexpr int FONT_COMBO_X_LOCAL = RIGHT_COLUMN_X + COMBO_X_LOCAL;
+    constexpr int FONT_COMBO_Y_LOCAL = 153;
+    constexpr int LANG_LABEL_Y_LOCAL = 186;
+    constexpr int LANG_COMBO_X_LOCAL = RIGHT_COLUMN_X + COMBO_X_LOCAL;
+    constexpr int LANG_COMBO_Y_LOCAL = 199;
+    constexpr int WINDOWED_CHECK_Y_LOCAL = 232;
+    constexpr int WINDOWED_LABEL_Y_LOCAL = 237;
+
+    constexpr int CLOSE_BUTTON_WIDTH = 54;
+    constexpr int CLOSE_BUTTON_HEIGHT = 30;
+    constexpr int CLOSE_BUTTON_Y_LOCAL = 276;
+    constexpr int CLOSE_BUTTON_X_LOCAL = (UI::Options::kOptionWindowWidth - CLOSE_BUTTON_WIDTH) / 2;
+
+    // 64px top + 21*10px slats + 45px bottom. The Close button sits on that bottom cap.
+    constexpr int OPTION_FRAME_TOP = 64;
+    constexpr int OPTION_FRAME_SLAT_HEIGHT = 10;
+    constexpr int OPTION_FRAME_BOTTOM = 45;
+    constexpr int OPTION_FRAME_SLAT_COUNT = 21;
+    constexpr int OPTION_WINDOW_HIT_HEIGHT =
+        OPTION_FRAME_TOP + OPTION_FRAME_SLAT_COUNT * OPTION_FRAME_SLAT_HEIGHT + OPTION_FRAME_BOTTOM;
+
+    constexpr int LINE_AFTER_AUTO_Y = 60;
+    constexpr int LINE_AFTER_WHISPER_Y = 82;
+    constexpr int LINE_AFTER_MUSIC_Y = 150;
+    constexpr int LINE_AFTER_SLIDE_Y = 172;
+    constexpr int LINE_AFTER_EFFECT_Y = 211;
+    constexpr int LINE_AFTER_EFFECTS_Y = 60;
+    constexpr int LINE_AFTER_WEATHER_Y = 82;
+    constexpr int LINE_AFTER_FPS_Y = 104;
+    constexpr int LINE_AFTER_VSYNC_Y = 130;
+    constexpr int LINE_AFTER_FONT_Y = 176;
+    constexpr int LINE_AFTER_LANGUAGE_Y = 222;
+
+    constexpr int LEFT_CHECKBOX_X = LEFT_COLUMN_X + CHECKBOX_X_LOCAL;
+    constexpr int RIGHT_CHECKBOX_X = RIGHT_COLUMN_X + CHECKBOX_X_LOCAL;
+    constexpr int OPTION_FRAME_SIDE = 21;
+
+    static_assert(UI::Options::kOptionWindowWidth == COLUMN_WIDTH * 2);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -214,6 +280,9 @@ SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
     m_iMusicLevel = GameConfig::GetInstance().GetMusicVolume();
     m_iRenderLevel = 4;
     m_bRenderAllEffects = true;
+    m_bWeatherEffects = GameConfig::GetInstance().GetWeatherEffects();
+    m_bShowFps = GameConfig::GetInstance().GetShowFps();
+    m_bVSync = GameConfig::GetInstance().GetVSyncEnabled();
     m_iResolutionIndex = 0;
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
     m_iLanguageIndex = FindCurrentLanguageIndex();
@@ -271,8 +340,8 @@ void SEASON3B::CNewUIOptionWindow::InitResolutionCombo()
     m_ResolutionCombo.Setup(
         m_Pos.x + RES_COMBO_X_LOCAL,
         m_Pos.y + RES_COMBO_Y_LOCAL,
-        RES_COMBO_WIDTH,
-        RES_COMBO_HEIGHT,
+        COMBO_WIDTH,
+        COMBO_HEIGHT,
         m_resolutionLabelPointers.data(),
         static_cast<int>(m_resolutions.size()),
         m_iResolutionIndex,
@@ -284,8 +353,8 @@ void SEASON3B::CNewUIOptionWindow::InitLanguageCombo()
     m_LanguageCombo.Setup(
         m_Pos.x + LANG_COMBO_X_LOCAL,
         m_Pos.y + LANG_COMBO_Y_LOCAL,
-        LANG_COMBO_WIDTH,
-        LANG_COMBO_HEIGHT,
+        COMBO_WIDTH,
+        COMBO_HEIGHT,
         GetLanguageLabels(),
         s_NumLanguages,
         m_iLanguageIndex,
@@ -297,8 +366,8 @@ void SEASON3B::CNewUIOptionWindow::InitFontCombo()
     m_FontCombo.Setup(
         m_Pos.x + FONT_COMBO_X_LOCAL,
         m_Pos.y + FONT_COMBO_Y_LOCAL,
-        FONT_COMBO_WIDTH,
-        FONT_COMBO_HEIGHT,
+        COMBO_WIDTH,
+        COMBO_HEIGHT,
         GetFontLabels(),
         s_NumFonts,
         m_iFontIndex,
@@ -309,7 +378,8 @@ void SEASON3B::CNewUIOptionWindow::SetButtonInfo()
 {
     m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnClose.ChangeButtonImgState(true, IMAGE_OPTION_BTN_CLOSE, true);
-    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + 388, 54, 30);
+    m_BtnClose.ChangeButtonInfo(m_Pos.x + CLOSE_BUTTON_X_LOCAL, m_Pos.y + CLOSE_BUTTON_Y_LOCAL,
+                                CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT);
     m_BtnClose.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
@@ -403,22 +473,41 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
     }
 
     bool oldWindowedMode = m_bWindowedMode;
+    const bool oldWeatherEffects = m_bWeatherEffects;
+    const bool oldShowFps = m_bShowFps;
+    const bool oldVSync = m_bVSync;
     HandleCheckboxInputs();
 
     if (m_bWindowedMode != oldWindowedMode)
         ApplyWindowModeToggle();
 
-    if (HandleVolumeSlider(m_iVolumeLevel, 104))
+    if (m_bWeatherEffects != oldWeatherEffects)
+    {
+        GameConfig::GetInstance().SetWeatherEffects(m_bWeatherEffects);
+        GameConfig::GetInstance().Save();
+    }
+
+    if (m_bShowFps != oldShowFps)
+    {
+        GameConfig::GetInstance().SetShowFps(m_bShowFps);
+        GameConfig::GetInstance().Save();
+        SetShowFpsCounter(m_bShowFps);
+    }
+
+    if (m_bVSync != oldVSync)
+        MuSetVSyncPreference(m_bVSync);
+
+    if (HandleVolumeSlider(m_iVolumeLevel, SOUND_SLIDER_Y_LOCAL))
         OnSoundVolumeChanged();
 
-    if (HandleVolumeSlider(m_iMusicLevel, 132))
+    if (HandleVolumeSlider(m_iMusicLevel, MUSIC_SLIDER_Y_LOCAL))
         OnMusicVolumeChanged();
 
     HandleRenderLevelSlider();
 
     // Combo box already processed at the top. Just consume clicks inside the
     // option window itself so they don't fall through to the world.
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 419))
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, UI::Options::kOptionWindowWidth, OPTION_WINDOW_HIT_HEIGHT))
         return false;
 
     return true;
@@ -426,24 +515,24 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
 
 void SEASON3B::CNewUIOptionWindow::HandleCheckboxInputs()
 {
-    struct Checkbox { int yLocal; bool* target; };
+    struct Checkbox { int xLocal; int yLocal; bool* target; };
     const Checkbox boxes[] = {
-        {  43, &m_bAutoAttack        },
-        {  65, &m_bWhisperSound      },
-        { 155, &m_bSlideHelp         },
-        { 238, &m_bRenderAllEffects  },
-        { 356, &m_bWindowedMode      },
+        { LEFT_CHECKBOX_X,  AUTO_CHECK_Y_LOCAL,      &m_bAutoAttack        },
+        { LEFT_CHECKBOX_X,  WHISPER_CHECK_Y_LOCAL,   &m_bWhisperSound      },
+        { LEFT_CHECKBOX_X,  SLIDE_CHECK_Y_LOCAL,     &m_bSlideHelp         },
+        { RIGHT_CHECKBOX_X, EFFECTS_CHECK_Y_LOCAL,   &m_bRenderAllEffects  },
+        { RIGHT_CHECKBOX_X, WEATHER_CHECK_Y_LOCAL,   &m_bWeatherEffects    },
+        { RIGHT_CHECKBOX_X, FPS_CHECK_Y_LOCAL,       &m_bShowFps           },
+        { RIGHT_CHECKBOX_X, VSYNC_CHECK_Y_LOCAL,     &m_bVSync             },
+        { RIGHT_CHECKBOX_X, WINDOWED_CHECK_Y_LOCAL,  &m_bWindowedMode      },
     };
-
-    constexpr int CHECKBOX_X_LOCAL = 150;
-    constexpr int CHECKBOX_SIZE = 15;
 
     if (!SEASON3B::IsPress(VK_LBUTTON))
         return;
 
     for (const auto& cb : boxes)
     {
-        if (CheckMouseIn(m_Pos.x + CHECKBOX_X_LOCAL, m_Pos.y + cb.yLocal, CHECKBOX_SIZE, CHECKBOX_SIZE))
+        if (CheckMouseIn(m_Pos.x + cb.xLocal, m_Pos.y + cb.yLocal, CHECKBOX_SIZE, CHECKBOX_SIZE))
             *cb.target = !*cb.target;
     }
 }
@@ -577,6 +666,10 @@ void SEASON3B::CNewUIOptionWindow::OpenningProcess()
     m_FontCombo.SetSelectedIndex(m_iFontIndex);
     m_FontCombo.Close();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
+    m_bWeatherEffects = GameConfig::GetInstance().GetWeatherEffects();
+    m_bShowFps = GameConfig::GetInstance().GetShowFps();
+    SetShowFpsCounter(m_bShowFps);
+    m_bVSync = GameConfig::GetInstance().GetVSyncEnabled();
 }
 
 void SEASON3B::CNewUIOptionWindow::ClosingProcess()
@@ -620,135 +713,130 @@ void SEASON3B::CNewUIOptionWindow::UnloadImages()
     DeleteBitmap(IMAGE_OPTION_VOLUME_COLOR);
 }
 
+void SEASON3B::CNewUIOptionWindow::RenderOptionCheck(int xLocal, int yLocal, bool checked)
+{
+    RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + xLocal, m_Pos.y + yLocal, CHECKBOX_SIZE, CHECKBOX_SIZE, 0,
+                checked ? 0.f : CHECKBOX_UNCHECKED_V);
+}
+
+void SEASON3B::CNewUIOptionWindow::RenderOptionPoint(int columnX, int labelY)
+{
+    constexpr int kMarkerSize = 10;
+    RenderImage(IMAGE_OPTION_POINT, m_Pos.x + columnX + POINT_X_LOCAL, m_Pos.y + labelY - POINT_ABOVE_LABEL,
+                kMarkerSize, kMarkerSize);
+}
+
+void SEASON3B::CNewUIOptionWindow::RenderOptionLine(int columnX, int yLocal)
+{
+    constexpr float kLineHeight = 2.f;
+    RenderImage(IMAGE_OPTION_LINE, m_Pos.x + columnX + LINE_X_LOCAL, m_Pos.y + yLocal, LINE_WIDTH, kLineHeight);
+}
+
+void SEASON3B::CNewUIOptionWindow::RenderOptionLabel(int columnX, int labelY, const wchar_t* text)
+{
+    g_pRenderText->RenderText(m_Pos.x + columnX + LABEL_X_LOCAL, m_Pos.y + labelY, text);
+}
+
 void SEASON3B::CNewUIOptionWindow::RenderFrame()
 {
-    float x, y;
-    x = m_Pos.x;
-    y = m_Pos.y;
-    // Frame is composed of: 64px top + N*10px middle slats + 45px bottom. The
-    // slat count is tuned so the frame reaches the Close button (Y 388) plus the
-    // bottom border, after the Font/Language/Resolution/Windowed rows.
-    constexpr int SLAT_COUNT = 30;
-    constexpr float FRAME_HEIGHT = 64.f + SLAT_COUNT * 10.f + 45.f;
-    RenderImage(IMAGE_OPTION_FRAME_BACK, x, y, 190.f, FRAME_HEIGHT);
-    RenderImage(IMAGE_OPTION_FRAME_UP, x, y, 190.f, 64.f);
-    y += 64.f;
-    for (int i = 0; i < SLAT_COUNT; ++i)
+    const float x = m_Pos.x;
+    float y = m_Pos.y;
+    const float width = static_cast<float>(UI::Options::kOptionWindowWidth);
+    const float frameHeight = static_cast<float>(OPTION_WINDOW_HIT_HEIGHT);
+    RenderImage(IMAGE_OPTION_FRAME_BACK, x, y, width, frameHeight);
+    RenderImage(IMAGE_OPTION_FRAME_UP, x, y, width, static_cast<float>(OPTION_FRAME_TOP));
+    y += static_cast<float>(OPTION_FRAME_TOP);
+    for (int i = 0; i < OPTION_FRAME_SLAT_COUNT; ++i)
     {
-        RenderImage(IMAGE_OPTION_FRAME_LEFT, x, y, 21.f, 10.f);
-        RenderImage(IMAGE_OPTION_FRAME_RIGHT, x + 190 - 21, y, 21.f, 10.f);
-        y += 10.f;
+        RenderImage(IMAGE_OPTION_FRAME_LEFT, x, y, static_cast<float>(OPTION_FRAME_SIDE),
+                    static_cast<float>(OPTION_FRAME_SLAT_HEIGHT));
+        RenderImage(IMAGE_OPTION_FRAME_RIGHT, x + width - OPTION_FRAME_SIDE, y,
+                    static_cast<float>(OPTION_FRAME_SIDE), static_cast<float>(OPTION_FRAME_SLAT_HEIGHT));
+        y += static_cast<float>(OPTION_FRAME_SLAT_HEIGHT);
     }
-    RenderImage(IMAGE_OPTION_FRAME_DOWN, x, y, 190.f, 45.f);
+    RenderImage(IMAGE_OPTION_FRAME_DOWN, x, y, width, static_cast<float>(OPTION_FRAME_BOTTOM));
 
-    y = m_Pos.y + 60.f;
-    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after auto attack
-    y += 22.f;
-    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after whisper
+    RenderOptionLine(LEFT_COLUMN_X, LINE_AFTER_AUTO_Y);
+    RenderOptionLine(LEFT_COLUMN_X, LINE_AFTER_WHISPER_Y);
+    RenderOptionLine(LEFT_COLUMN_X, LINE_AFTER_MUSIC_Y);
+    RenderOptionLine(LEFT_COLUMN_X, LINE_AFTER_SLIDE_Y);
+    RenderOptionLine(LEFT_COLUMN_X, LINE_AFTER_EFFECT_Y);
 
-    y = m_Pos.y + 150.f;
-    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after music vol
-
-    y += 22.f;
-    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after slide help
-
-    y += 39.f;
-    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after render level
-
-    y += 25.f;
-    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after render full effects
+    RenderOptionLine(RIGHT_COLUMN_X, LINE_AFTER_EFFECTS_Y);
+    RenderOptionLine(RIGHT_COLUMN_X, LINE_AFTER_WEATHER_Y);
+    RenderOptionLine(RIGHT_COLUMN_X, LINE_AFTER_FPS_Y);
+    RenderOptionLine(RIGHT_COLUMN_X, LINE_AFTER_VSYNC_Y);
+    RenderOptionLine(RIGHT_COLUMN_X, LINE_AFTER_FONT_Y);
+    RenderOptionLine(RIGHT_COLUMN_X, LINE_AFTER_LANGUAGE_Y);
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderContents()
 {
-    float x, y;
-    x = m_Pos.x + 20.f;
-    y = m_Pos.y + 46.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Auto Attack
-    y += 22.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Whisper Sound
-    y += 22.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Sound Volume
-    y += 28.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Music Volume
-    y += 40.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Slide Help
-    y += 22.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Render Level
+    RenderOptionPoint(LEFT_COLUMN_X, AUTO_LABEL_Y_LOCAL);
+    RenderOptionPoint(LEFT_COLUMN_X, WHISPER_LABEL_Y_LOCAL);
+    RenderOptionPoint(LEFT_COLUMN_X, SOUND_LABEL_Y_LOCAL);
+    RenderOptionPoint(LEFT_COLUMN_X, MUSIC_LABEL_Y_LOCAL);
+    RenderOptionPoint(LEFT_COLUMN_X, SLIDE_LABEL_Y_LOCAL);
+    RenderOptionPoint(LEFT_COLUMN_X, EFFECT_LABEL_Y_LOCAL);
+    RenderOptionPoint(LEFT_COLUMN_X, RES_LABEL_Y_LOCAL);
 
-    y += 39.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Render Full Effects
+    RenderOptionPoint(RIGHT_COLUMN_X, EFFECTS_LABEL_Y_LOCAL);
+    RenderOptionPoint(RIGHT_COLUMN_X, WEATHER_LABEL_Y_LOCAL);
+    RenderOptionPoint(RIGHT_COLUMN_X, FPS_LABEL_Y_LOCAL);
+    RenderOptionPoint(RIGHT_COLUMN_X, VSYNC_LABEL_Y_LOCAL);
+    RenderOptionPoint(RIGHT_COLUMN_X, FONT_LABEL_Y_LOCAL);
+    RenderOptionPoint(RIGHT_COLUMN_X, LANG_LABEL_Y_LOCAL);
+    RenderOptionPoint(RIGHT_COLUMN_X, WINDOWED_LABEL_Y_LOCAL);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 48, I18N::Game::AutomaticAttack);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 70, I18N::Game::BeepSoundForWhispering);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 92, I18N::Game::SoundVolume);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 120, I18N::Game::MusicVolume);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 160, I18N::Game::SlideHelp);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 182, I18N::Game::EffectLimitation);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 221, I18N::Game::RenderFullEffects);
+    RenderOptionLabel(LEFT_COLUMN_X, AUTO_LABEL_Y_LOCAL, I18N::Game::AutomaticAttack);
+    RenderOptionLabel(LEFT_COLUMN_X, WHISPER_LABEL_Y_LOCAL, I18N::Game::BeepSoundForWhispering);
+    RenderOptionLabel(LEFT_COLUMN_X, SOUND_LABEL_Y_LOCAL, I18N::Game::SoundVolume);
+    RenderOptionLabel(LEFT_COLUMN_X, MUSIC_LABEL_Y_LOCAL, I18N::Game::MusicVolume);
+    RenderOptionLabel(LEFT_COLUMN_X, SLIDE_LABEL_Y_LOCAL, I18N::Game::SlideHelp);
+    RenderOptionLabel(LEFT_COLUMN_X, EFFECT_LABEL_Y_LOCAL, I18N::Game::EffectLimitation);
+    RenderOptionLabel(LEFT_COLUMN_X, RES_LABEL_Y_LOCAL, I18N::Game::Resolution);
 
-    y += 25.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Font
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + FONT_LABEL_Y_LOCAL, I18N::Game::Font);
-
-    y += 39.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Language
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + LANG_LABEL_Y_LOCAL, I18N::Game::Language);
-
-    y += 39.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Resolution
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 322, I18N::Game::Resolution);
-
-    y += 39.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Windowed Mode
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 361, I18N::Game::WindowedMode);
+    RenderOptionLabel(RIGHT_COLUMN_X, EFFECTS_LABEL_Y_LOCAL, I18N::Game::RenderFullEffects);
+    RenderOptionLabel(RIGHT_COLUMN_X, WEATHER_LABEL_Y_LOCAL, I18N::Game::WeatherEffects);
+    RenderOptionLabel(RIGHT_COLUMN_X, FPS_LABEL_Y_LOCAL, I18N::Game::ShowFPS);
+    RenderOptionLabel(RIGHT_COLUMN_X, VSYNC_LABEL_Y_LOCAL, I18N::Game::VSync);
+    RenderOptionLabel(RIGHT_COLUMN_X, FONT_LABEL_Y_LOCAL, I18N::Game::Font);
+    RenderOptionLabel(RIGHT_COLUMN_X, LANG_LABEL_Y_LOCAL, I18N::Game::Language);
+    RenderOptionLabel(RIGHT_COLUMN_X, WINDOWED_LABEL_Y_LOCAL, I18N::Game::WindowedMode);
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderButtons()
 {
     m_BtnClose.Render();
 
-    if (m_bAutoAttack)
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 43, 15, 15, 0, 0);
-    }
-    else
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 43, 15, 15, 0, 15.f);
-    }
+    RenderOptionCheck(LEFT_CHECKBOX_X, AUTO_CHECK_Y_LOCAL, m_bAutoAttack);
+    RenderOptionCheck(LEFT_CHECKBOX_X, WHISPER_CHECK_Y_LOCAL, m_bWhisperSound);
+    RenderOptionCheck(LEFT_CHECKBOX_X, SLIDE_CHECK_Y_LOCAL, m_bSlideHelp);
+    RenderOptionCheck(RIGHT_CHECKBOX_X, EFFECTS_CHECK_Y_LOCAL, m_bRenderAllEffects);
+    RenderOptionCheck(RIGHT_CHECKBOX_X, WEATHER_CHECK_Y_LOCAL, m_bWeatherEffects);
+    RenderOptionCheck(RIGHT_CHECKBOX_X, FPS_CHECK_Y_LOCAL, m_bShowFps);
+    RenderOptionCheck(RIGHT_CHECKBOX_X, VSYNC_CHECK_Y_LOCAL, m_bVSync);
+    RenderOptionCheck(RIGHT_CHECKBOX_X, WINDOWED_CHECK_Y_LOCAL, m_bWindowedMode);
 
-    if (m_bWhisperSound)
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 65, 15, 15, 0, 0);
-    }
-    else
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 65, 15, 15, 0, 15.f);
-    }
-
-    if (m_bSlideHelp)
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 155, 15, 15, 0, 0);
-    }
-    else
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 155, 15, 15, 0, 15.f);
-    }
-
-    RenderImage(IMAGE_OPTION_VOLUME_BACK, m_Pos.x + 33, m_Pos.y + 104, 124.f, 16.f);
+    RenderImage(IMAGE_OPTION_VOLUME_BACK, m_Pos.x + SLIDER_X_LOCAL, m_Pos.y + SOUND_SLIDER_Y_LOCAL,
+                static_cast<float>(SLIDER_WIDTH), static_cast<float>(SLIDER_HIT_HEIGHT));
     if (m_iVolumeLevel > 0)
     {
-        RenderImage(IMAGE_OPTION_VOLUME_COLOR, m_Pos.x + 33, m_Pos.y + 104, 124.f * 0.1f * (m_iVolumeLevel), 16.f);
+        const float fill = static_cast<float>(SLIDER_WIDTH) * m_iVolumeLevel / static_cast<float>(MAX_VOLUME);
+        RenderImage(IMAGE_OPTION_VOLUME_COLOR, m_Pos.x + SLIDER_X_LOCAL, m_Pos.y + SOUND_SLIDER_Y_LOCAL, fill,
+                    static_cast<float>(SLIDER_HIT_HEIGHT));
     }
 
-    // Music volume bar
-    RenderImage(IMAGE_OPTION_VOLUME_BACK, m_Pos.x + 33, m_Pos.y + 132, 124.f, 16.f);
+    RenderImage(IMAGE_OPTION_VOLUME_BACK, m_Pos.x + SLIDER_X_LOCAL, m_Pos.y + MUSIC_SLIDER_Y_LOCAL,
+                static_cast<float>(SLIDER_WIDTH), static_cast<float>(SLIDER_HIT_HEIGHT));
     if (m_iMusicLevel > 0)
     {
-        RenderImage(IMAGE_OPTION_VOLUME_COLOR, m_Pos.x + 33, m_Pos.y + 132, 124.f * 0.1f * (m_iMusicLevel), 16.f);
+        const float fill = static_cast<float>(SLIDER_WIDTH) * m_iMusicLevel / static_cast<float>(MAX_VOLUME);
+        RenderImage(IMAGE_OPTION_VOLUME_COLOR, m_Pos.x + SLIDER_X_LOCAL, m_Pos.y + MUSIC_SLIDER_Y_LOCAL, fill,
+                    static_cast<float>(SLIDER_HIT_HEIGHT));
     }
 
     RenderImageStretch(IMAGE_OPTION_EFFECT_BACK, m_Pos.x + RENDER_SLIDER_X_LOCAL, m_Pos.y + RENDER_SLIDER_Y_LOCAL,
@@ -758,28 +846,10 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
     {
         // Reveal proportionally to the level: shrink both the dest width and the
         // sampled source width by the same fraction so the squares stay aligned.
-        const float fill = 0.2f * (m_iRenderLevel + 1);
+        const float fill = (m_iRenderLevel + 1) / RENDER_LEVEL_MAX;
         RenderImageStretch(IMAGE_OPTION_EFFECT_COLOR, m_Pos.x + RENDER_SLIDER_X_LOCAL, m_Pos.y + RENDER_SLIDER_Y_LOCAL,
                            (float)RENDER_SLIDER_WIDTH * fill, (float)RENDER_SLIDER_HEIGHT,
                            0.f, 0.f, (float)EFFECT_BAR_SRC_WIDTH * fill, (float)EFFECT_BAR_SRC_HEIGHT);
-    }
-
-    if (m_bRenderAllEffects)
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 217, 15, 15, 0, 0);
-    }
-    else
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 217, 15, 15, 0, 15.f);
-    }
-
-    if (m_bWindowedMode)
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 356, 15, 15, 0, 0);
-    }
-    else
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 356, 15, 15, 0, 15.f);
     }
 
     // Combo boxes drawn last so their expanded dropdowns sit on top of
@@ -851,6 +921,40 @@ void SEASON3B::CNewUIOptionWindow::SetRenderAllEffects(bool bRenderAllEffects)
 bool SEASON3B::CNewUIOptionWindow::GetRenderAllEffects()
 {
     return m_bRenderAllEffects;
+}
+
+void SEASON3B::CNewUIOptionWindow::SetWeatherEffects(bool enabled)
+{
+    m_bWeatherEffects = enabled;
+    GameConfig::GetInstance().SetWeatherEffects(enabled);
+}
+
+bool SEASON3B::CNewUIOptionWindow::IsWeatherEffects() const
+{
+    return m_bWeatherEffects;
+}
+
+void SEASON3B::CNewUIOptionWindow::SetShowFps(bool enabled)
+{
+    m_bShowFps = enabled;
+    GameConfig::GetInstance().SetShowFps(enabled);
+    SetShowFpsCounter(enabled);
+}
+
+bool SEASON3B::CNewUIOptionWindow::IsShowFps() const
+{
+    return m_bShowFps;
+}
+
+void SEASON3B::CNewUIOptionWindow::SetVSyncEnabled(bool enabled)
+{
+    m_bVSync = enabled;
+    MuSetVSyncPreference(enabled);
+}
+
+bool SEASON3B::CNewUIOptionWindow::IsVSyncEnabled() const
+{
+    return m_bVSync;
 }
 
 int SEASON3B::CNewUIOptionWindow::FindCurrentResolutionIndex()

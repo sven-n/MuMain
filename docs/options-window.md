@@ -12,7 +12,11 @@ For the camera architecture see [`camera-system.md`](camera-system.md).
 
 The options window is now **the same window in every scene** (login,
 character select, gameplay) - it shares one layout, one apply path, and one
-backing config object. There is no separate per-scene options dialog.
+backing config object. There is no separate per-scene options dialog. The
+frame is **380 by 319** reference pixels (the old window was a single 190-wide
+column) and lays the same controls out in two columns: attack, audio, and
+resolution on the left; render toggles, font, language, and windowed mode on
+the right.
 
 What was added on top of that:
 
@@ -46,9 +50,22 @@ Settings are written next to the executable as `config.ini`. The options
 window writes to these sections:
 
 - `[Window]` - width, height, windowed flag.
-- `[Render]` - the persisted `VSync` preference. `$vsync on` and `$vsync off`
-  update it; startup and fullscreen/resolution changes reapply it before the
-  next frame begins.
+- `[Render]` - the persisted `VSync` preference. The options checkbox **VSync**
+  and the commands `$vsync on` / `$vsync off` update it. Startup, the checkbox,
+  and fullscreen/resolution changes reapply it before the next frame: on uses
+  the swapchain's vsync present mode, off presents immediately. Also
+  `WeatherEffects`: the options checkbox **Weather effects**. Checked (the
+  default) keeps rain, snow, mist, and the map haze overlays, including the
+  Tarkan sandstorm and its dust vents. Unchecked turns those off on every map
+  and writes the key immediately, the same way the volume sliders save. Wind
+  is unchanged. Equipment, skin, and item sparkles stay on, and so does map
+  fire: braziers and torches, and the floating embers on Battle Castle, the
+  login scene, Balgas' Refuge, Vulcanus, and Doppelganger. Also `ShowFps`:
+  the options checkbox **Show FPS**. Unchecked (the default) hides the
+  counter. Checked draws `FPS:` in the top-left of the screen and writes the
+  key immediately. `$fpscounter on` / `$fpscounter off` still toggle that
+  readout for the current session; opening Options loads the saved checkbox
+  again.
 - `[Audio]` - volumes.
 - `[Login]` - language, and the remembered-credential keys (`RememberMe`,
   `SavePassword`, `EncryptedUsername`, `EncryptedPassword`); see
