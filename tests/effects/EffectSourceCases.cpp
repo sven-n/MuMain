@@ -329,6 +329,40 @@ bool TakeBracketed(std::string_view text, size_t& pos, char opening, std::string
     pos = end;
     return true;
 }
+
+// The labels of the cases of the switch of `stage` whose statements match. A
+// label without statements runs those of the case it falls through to.
+template <typename Matches>
+SwitchLabels ReadCasesWhere(const std::string& source, Stage stage, std::span<const MacroState> macros, Matches matches)
+{
+    SwitchLabels result;
+    const std::string function = FunctionText(source, SignatureOf(stage), macros, result.problems);
+    const size_t body = SwitchBody(function, stage);
+    if (body == std::string::npos)
+    {
+        result.problems.push_back("no switch found");
+        return result;
+    }
+    std::vector<LabelPosition> labels;
+    const size_t close = ReadLabelPositions(function, body, labels, result.problems);
+    if (close == std::string::npos)
+        return result;
+    const std::string_view text = function;
+    for (size_t i = 0; i < labels.size(); ++i)
+    {
+        std::string_view statements;
+        for (size_t j = i; j < labels.size(); ++j)
+        {
+            const size_t next = j + 1 < labels.size() ? labels[j + 1].start : close;
+            statements = text.substr(labels[j].statements, next - labels[j].statements);
+            if (!WithoutSpaces(statements).empty())
+                break;
+        }
+        if (labels[i].label != "default" && matches(statements))
+            result.labels.push_back(labels[i].label);
+    }
+    return result;
+}
 } // namespace
 
 std::string ReadEffectSource(const std::filesystem::path& zzzEffect)
@@ -383,32 +417,14 @@ SharedMoveConditions ReadSharedMoveConditions(const std::string& source, std::sp
 
 SwitchLabels ReadCasesThatReturn(const std::string& source, Stage stage, std::span<const MacroState> macros)
 {
-    SwitchLabels result;
-    const std::string function = FunctionText(source, SignatureOf(stage), macros, result.problems);
-    const size_t body = SwitchBody(function, stage);
-    if (body == std::string::npos)
-    {
-        result.problems.push_back("no switch found");
-        return result;
-    }
-    std::vector<LabelPosition> labels;
-    const size_t close = ReadLabelPositions(function, body, labels, result.problems);
-    if (close == std::string::npos)
-        return result;
-    const std::string_view text = function;
-    for (size_t i = 0; i < labels.size(); ++i)
-    {
-        std::string_view statements;
-        for (size_t j = i; j < labels.size(); ++j)
-        {
-            const size_t next = j + 1 < labels.size() ? labels[j + 1].start : close;
-            statements = text.substr(labels[j].statements, next - labels[j].statements);
-            if (!WithoutSpaces(statements).empty())
-                break;
-        }
-        if (labels[i].label != "default" && EndsWithReturn(statements))
-            result.labels.push_back(labels[i].label);
-    }
-    return result;
+    return ReadCasesWhere(source, stage, macros, EndsWithReturn);
+}
+
+SwitchLabels ReadCasesContaining(const std::string& source, Stage stage, std::span<const MacroState> macros,
+                                 std::string_view text)
+{
+    const std::string wanted = WithoutSpaces(text);
+    return ReadCasesWhere(source, stage, macros, [&](std::string_view statements)
+                          { return WithoutSpaces(statements).find(wanted) != std::string::npos; });
 }
 } // namespace EffectSourceCases

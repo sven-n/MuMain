@@ -19,12 +19,17 @@
 #include "UI/EffectBrowser/EffectBrowserModel.h"
 #include "UI/EffectBrowser/EffectLegacyCases.h"
 #include "UI/EffectBrowser/EffectPreviewObject.h"
+#include "UI/EffectBrowser/EffectWorldPreview.h"
 #include "World/MapInfra/MapManager.h"
 #endif
 
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <charconv>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
 #include <map>
 #include <optional>
 #include <set>
@@ -427,6 +432,51 @@ TEST_CASE("The effect preview animates the models that MoveEffect's shared code 
                 EffectSourceCases::EvaluateCondition(conditions.animated, type, subType, ValueOfName).value;
             CHECK(IsAnimatedByMoveEffect(type, subType) == (!returnsFirst.contains(type) && !skipped && animated));
         }
+    }
+}
+
+// The world preview creates a type with the character as its owner. A case
+// that takes its owner for a lightning object writes into the character, so
+// the preview refuses that type. The cast may only be in ZzzEffect.cpp's
+// creation cases, where the test finds it.
+TEST_CASE("The world preview refuses every type whose code takes its owner for lightning [data][effects][editor]")
+{
+    constexpr std::string_view OwnerAsJoint = "(JOINT*)o->Owner";
+    const std::filesystem::path effects = std::filesystem::path(MU_TEST_SOURCE_DIR) / "Render/Effects";
+    const std::string source = EffectSourceCases::ReadEffectSource(effects / "ZzzEffect.cpp");
+    REQUIRE_FALSE(source.empty());
+    const EffectSourceCases::SwitchLabels cases =
+        EffectSourceCases::ReadCasesContaining(source, Stage::Create, EffectMacros, OwnerAsJoint);
+    for (const std::string& problem : cases.problems)
+    {
+        FAIL_CHECK(problem);
+    }
+    const std::span<const RefusedWorldPreview> refused = GetRefusedWorldPreviews();
+    for (const std::string& label : cases.labels)
+    {
+        INFO(label);
+        const int type = ResolveLabel(label);
+        CHECK(std::any_of(refused.begin(), refused.end(),
+                          [type](const RefusedWorldPreview& entry) { return entry.type == type; }));
+    }
+
+    const auto contains = [&](const std::filesystem::path& file)
+    {
+        std::ifstream stream(file, std::ios::binary);
+        const std::string text((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+        std::string compact;
+        std::copy_if(text.begin(), text.end(), std::back_inserter(compact),
+                     [](char c) { return std::isspace(static_cast<unsigned char>(c)) == 0; });
+        return compact.find(OwnerAsJoint) != std::string::npos;
+    };
+    CHECK(contains(effects / "ZzzEffect.cpp") == !cases.labels.empty());
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(effects))
+    {
+        if (!entry.is_regular_file() || entry.path().extension() != ".cpp" ||
+            entry.path().filename() == "ZzzEffect.cpp")
+            continue;
+        INFO(entry.path().string());
+        CHECK_FALSE(contains(entry.path()));
     }
 }
 

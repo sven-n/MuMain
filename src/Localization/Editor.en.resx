@@ -736,6 +736,51 @@
   <data name="Preview item not loaded" xml:space="preserve">
     <value>A model this item is drawn with at this level is not loaded, so the preview does not draw the item.</value>
   </data>
+  <data name="In the world" xml:space="preserve">
+    <value>In the world</value>
+  </data>
+  <data name="Create in world" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Create in world tooltip" xml:space="preserve">
+    <value>Creates the type two tiles in front of the character with the game's own call, the character as its owner. Each click creates it once more. It needs a character in a map.</value>
+  </data>
+  <data name="Stop preview" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Repeat preview" xml:space="preserve">
+    <value>Repeat</value>
+  </data>
+  <data name="Repeat preview tooltip" xml:space="preserve">
+    <value>Creates the type again shortly after what it created has ended.</value>
+  </data>
+  <data name="Mute sounds" xml:space="preserve">
+    <value>Mute sounds</value>
+  </data>
+  <data name="Mute sounds tooltip" xml:space="preserve">
+    <value>While the preview runs, the game starts no sound effects. Music, looped sounds and sounds already playing go on.</value>
+  </data>
+  <data name="Sprite every frame" xml:space="preserve">
+    <value>A sprite lasts one frame; the preview creates it again every frame.</value>
+  </data>
+  <data name="World not in game" xml:space="preserve">
+    <value>Creating in the world needs a character in a map.</value>
+  </data>
+  <data name="World effects off" xml:space="preserve">
+    <value>All effects are off in the options, so the game creates no particles and sprites.</value>
+  </data>
+  <data name="World effects hidden" xml:space="preserve">
+    <value>Effects are hidden in the Dev Editor, so they are not drawn.</value>
+  </data>
+  <data name="World nothing created" xml:space="preserve">
+    <value>The game's call created nothing: the type may need a target, a skill or a state of the character, the effects may be off in the options, or its pool is full.</value>
+  </data>
+  <data name="World ended at once" xml:space="preserve">
+    <value>What the call created ended in its first frame: the type may need a target, a skill or other call values.</value>
+  </data>
+  <data name="World refused" xml:space="preserve">
+    <value>With this SubType the type changes the game when the character owns it (it knocks the character back and tells the server, moves the catapult camera, or writes into its owner), so the preview does not create it.</value>
+  </data>
   <data name="Assets all" xml:space="preserve">
     <value>All</value>
   </data>

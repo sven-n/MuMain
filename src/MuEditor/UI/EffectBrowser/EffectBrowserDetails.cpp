@@ -157,7 +157,8 @@ void RenderCreateTable(const EffectCreateTable& table, const std::vector<std::st
 } // namespace
 
 std::optional<EffectTypeRef> CEffectBrowserDetails::Render(const EffectBrowserModel& model,
-                                                           std::optional<EffectTypeRef> selected)
+                                                           std::optional<EffectTypeRef> selected,
+                                                           MuEditor::Effects::EffectWorldPreview& world)
 {
     const EffectBrowserRow* row = selected ? model.FindRow(selected->kind, selected->type) : nullptr;
     if (row == nullptr)
@@ -168,7 +169,7 @@ std::optional<EffectTypeRef> CEffectBrowserDetails::Render(const EffectBrowserMo
     Refresh(model, *selected);
     RenderIdentity(*row, selected->kind);
     if (BeginSection("preview", I18N::Editor::Preview))
-        m_preview.Render(*row, selected->kind, m_details);
+        m_preview.Render(*row, selected->kind, m_details, world);
     std::optional<EffectTypeRef> clicked = RenderSameNumber(model);
     RenderAsset(*row);
     if (const std::optional<EffectTypeRef> sharing = RenderStages(model, *row, selected->kind))

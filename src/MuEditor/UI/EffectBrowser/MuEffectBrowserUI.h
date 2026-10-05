@@ -5,6 +5,7 @@
 #include "EffectBrowserDetails.h"
 #include "EffectBrowserList.h"
 #include "EffectBrowserModel.h"
+#include "EffectWorldPreview.h"
 
 #include <array>
 #include <optional>
@@ -26,6 +27,16 @@ public:
         m_details.BeforeFrame();
     }
 
+    // Called every frame after the game's move and draw, also while the editor
+    // is hidden: the world preview creates and follows its objects then.
+    void AfterRender(bool open);
+    // The game is about to clear its pools: the world preview removes its
+    // objects while they are still there.
+    void OnWorldClearing()
+    {
+        m_worldPreview.OnWorldClearing();
+    }
+
 private:
     CMuEffectBrowserUI() = default;
 
@@ -42,6 +53,7 @@ private:
     void Show(MuEditor::Effects::EffectTypeRef type);
 
     MuEditor::Effects::EffectBrowserModel m_model;
+    MuEditor::Effects::EffectWorldPreview m_worldPreview;
     CEffectBrowserList m_list;
     CEffectBrowserDetails m_details;
     // The selected type of each kind, -1 for none.

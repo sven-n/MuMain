@@ -2,9 +2,7 @@
 
 #ifdef _EDITOR
 
-#include "Core/Globals/_define.h"
-
-#include <array>
+#include "EffectPoolSnapshot.h"
 
 namespace MuEditor::Effects
 {
@@ -22,10 +20,8 @@ public:
     EffectPoolGuard& operator=(const EffectPoolGuard&) = delete;
 
 private:
-    std::array<bool, MAX_EFFECTS> m_effects{};
-    std::array<bool, MAX_SPRITES> m_sprites{};
-    std::array<bool, MAX_PARTICLES> m_particles{};
-    std::array<bool, MAX_JOINTS> m_joints{};
+    EffectPools m_pools;
+    EffectPoolSnapshot m_before;
 };
 } // namespace MuEditor::Effects
 

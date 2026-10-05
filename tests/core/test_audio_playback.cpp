@@ -14,6 +14,11 @@
 #undef private
 
 #include "Scenes/SceneCore.h"
+#ifdef _EDITOR
+#include "Audio/DSPlaySound.h"
+#include "Audio/EditorSoundMute.h"
+#include "Core/Platform/IPlatformAudio.h"
+#endif
 
 TEST_CASE("effect volume changes only the SFX gain [audio][volume]")
 {
@@ -195,3 +200,80 @@ TEST_CASE("a track stopped by name plays again when replayed [audio][music]")
     backend->Shutdown();
     std::filesystem::remove_all(testDirectory);
 }
+
+#ifdef _EDITOR
+namespace
+{
+// An audio backend that counts the sound effects started and stopped.
+class CountingAudio final : public mu::IPlatformAudio
+{
+public:
+    int played = 0;
+    int playedLooped = 0;
+    int stopped = 0;
+
+    bool Initialize() override
+    {
+        return true;
+    }
+    void Shutdown() override {}
+    void LoadSound(ESound, const wchar_t*, int, bool) override {}
+    bool PlaySound(ESound, const void*, bool looped) override
+    {
+        ++(looped ? playedLooped : played);
+        return true;
+    }
+    void StopSound(ESound, bool) override
+    {
+        ++stopped;
+    }
+    void AllStopSound() override {}
+    void ReleaseSound(ESound) override {}
+    void Set3DSoundPosition() override {}
+    void SetVolume(ESound, long) override {}
+    void SetMasterVolume(long) override {}
+    void PlayMusic(const char*, bool) override {}
+    void StopMusic(const char*, bool) override {}
+    bool IsEndMusic() override
+    {
+        return true;
+    }
+    int GetMusicPosition() override
+    {
+        return 0;
+    }
+    void SetBGMVolume(float) override {}
+    void SetSFXVolume(float) override {}
+    float GetBGMVolume() const override
+    {
+        return 1.0f;
+    }
+    float GetSFXVolume() const override
+    {
+        return 1.0f;
+    }
+};
+} // namespace
+
+TEST_CASE("the editor's mute starts no sound effect played once, and lets looped ones and stops through "
+          "[audio][editor]")
+{
+    CountingAudio audio;
+    mu::IPlatformAudio* const previous = g_platformAudio;
+    g_platformAudio = &audio;
+
+    Audio::EditorMute::SetMuted(true);
+    PlayBuffer(SOUND_CLICK01, nullptr, FALSE);
+    PlayBuffer(SOUND_CLICK01, nullptr, TRUE);
+    StopBuffer(SOUND_CLICK01, TRUE);
+    CHECK(audio.played == 0);
+    CHECK(audio.playedLooped == 1);
+    CHECK(audio.stopped == 1);
+
+    Audio::EditorMute::SetMuted(false);
+    PlayBuffer(SOUND_CLICK01, nullptr, FALSE);
+    CHECK(audio.played == 1);
+
+    g_platformAudio = previous;
+}
+#endif // _EDITOR

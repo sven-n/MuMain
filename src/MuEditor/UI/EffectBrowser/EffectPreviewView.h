@@ -7,19 +7,21 @@
 #include "EffectPreviewItems.h"
 #include "EffectPreviewScene.h"
 #include "EffectPreviewTarget.h"
+#include "EffectWorldPreviewView.h"
 
 #include <cstdint>
 #include <optional>
 #include <vector>
 
 // The preview in the effect browser's details: a view of what the selected
-// type's slot holds, shown on nothing, a plane, a cube or an item. The mouse
-// turns the camera, the wheel zooms, a double click puts it back.
+// type's slot holds, shown on nothing, a plane, a cube or an item, and below it
+// the type created in the world. The mouse turns the camera, the wheel zooms,
+// a double click puts it back.
 class CEffectPreviewView
 {
 public:
     void Render(const MuEditor::Effects::EffectBrowserRow& row, Data::Effects::EffectKind kind,
-                const MuEditor::Effects::EffectBrowserDetails& details);
+                const MuEditor::Effects::EffectBrowserDetails& details, MuEditor::Effects::EffectWorldPreview& world);
 
     // Called between frames: the preview's texture can only be released
     // then.
@@ -48,7 +50,8 @@ private:
                                                         Data::Effects::EffectKind kind) const;
     void RenderControls(const MuEditor::Effects::EffectPreviewRequest& request);
     void RenderShowOn();
-    void RenderSubTypes();
+    void RenderSubType();
+    void RenderSubTypePresets();
     void RenderSpriteBlend();
     void RenderItemPicker();
     void RenderItemList();
@@ -63,10 +66,11 @@ private:
     MuEditor::Effects::EffectPreviewTarget m_target;
     std::optional<FramingKey> m_framedFor;
 
-    // The selected type, and the SubTypes of its creation table's columns.
+    // The selected type, the SubType both previews use (a sprite's is its
+    // blend), and one SubType of each column of its creation table to choose.
     std::optional<MuEditor::Effects::EffectTypeRef> m_selected;
-    std::vector<int> m_subTypes;
-    int m_subTypeIndex = 0;
+    int m_subType = 0;
+    std::vector<int> m_subTypePresets;
 
     MuEditor::Effects::PreviewShowOn m_showOn = MuEditor::Effects::PreviewShowOn::Nothing;
     MuEditor::Effects::PreviewSpriteBlend m_spriteBlend = MuEditor::Effects::PreviewSpriteBlend::Glow;
@@ -83,6 +87,8 @@ private:
     int m_itemLevel = 0;
     bool m_itemExcellent = false;
     bool m_itemAncient = false;
+
+    CEffectWorldPreviewView m_world;
 };
 
 #endif // _EDITOR

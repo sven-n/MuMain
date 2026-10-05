@@ -34,13 +34,14 @@ target_compile_definitions(test_item_database_files PRIVATE
 # needs the client globals of Winmain.cpp. The effect browser test reads the
 # switches of ZzzEffect.cpp and the conditions of MoveEffect's shared code
 # (MU_TEST_SOURCE_DIR) and, in editor builds, checks the browser's model and
-# the parts of its preview that need no frame.
+# the parts of its previews that need no frame.
 mu_add_test(
     NAME test_effect_types
     SOURCES
         test_effect_types.cpp
         test_effect_browser.cpp
         test_effect_preview.cpp
+        test_effect_world_preview.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCases.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCondition.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectTestData.cpp

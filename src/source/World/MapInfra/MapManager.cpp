@@ -20,7 +20,9 @@
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/WSclient.h"
 #include "I18N/All.h"
-
+#ifdef _EDITOR
+#include "Core/Utilities/WorldClearing.h"
+#endif
 
 CMapManager gMapManager;
 
@@ -1510,6 +1512,11 @@ void CMapManager::LoadWorld(int Map)
 
 void CMapManager::DeleteObjects()
 {
+#ifdef _EDITOR
+    // The editor removes what its effect preview created while the pools
+    // still hold it.
+    Core::WorldClearing::Notify();
+#endif
     if (Models != nullptr)
     {
         for (int i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
