@@ -17,8 +17,10 @@ re-places once. The minimap clips around SlotBox("main_hud"). GetStripRect()/Hud
 gone. The NPC panel stage sits outside the shell so it centres on the whole screen. Verified in
 game: modern 100 %, legacy 90 %, HUD moved to a reserve header. Pending hand check: minimap clip.
 
-Next: H2, one component per batch, starting with the top bar (main_frame_top.rml) as a header
-slot (it currently draws under a HUD moved into the header). A component whose measured size
+Next: H2, one component per batch. First batch, decided with the user: the header holds the MU
+Helper bar (left slot) and the modern top bar (right slot); modern reserves the header, legacy
+keeps it an overlay; dock regions get data-scale="fit" so they never overlap a reserved header.
+The exact design is in window-placement.md, "Header and docks". A component whose measured size
 changes must call UI::Placement::Invalidate().
 
 Read first: AGENTS.md, docs/CODING_RULES.md, docs/rmlui-ui-system/architecture-principles.md,

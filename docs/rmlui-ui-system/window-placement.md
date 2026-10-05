@@ -388,14 +388,27 @@ Settled in H1:
 - A component whose measured size can change (H2's chat log) calls `UI::Placement::Invalidate()`
   when it does; the slot then takes the new size before the next frame's windows update.
 
-Open for H2 (user's call): the docks keep the original's fixed height (432 units standing on the
-HUD), so they overlap whatever sits above them. In the modern theme the top menu bar and the MU
-Helper bar are covered today (at 1024x768, 100 %: 691 px of panel over an 82 px HUD). Moving
-them into a `reserve` header does not by itself stop this, since the dock regions are anchored to the
-bottom and overflow upward. The theme's choices: keep them as overlays (today); reserve the header and
-cap the docks at the content area (`max-height: 100%`), which needs a policy for panels taller
-than the room left (shrink, scroll or fill); or reserve it and accept that panels fit only at
-a lower UI scale.
+Header and docks (decided with the user, 2026-10-05; first H2 batch):
+- The header holds both top corners: the MU Helper bar (207x25 dp, with the location text) in a
+  left slot `mu_helper_bar`, and the modern theme's menu buttons (`main_frame_top.rml`,
+  `#buttons_top`, 256x24 dp) in a right slot `top_bar`. Both are registered through
+  `RegisterWorkspaceDocument()` at the HUD scale.
+- Modern makes the header `reserve`. Legacy keeps it `overlay` and has no top bar, so its screen
+  stays the original's (the MU Helper bar is still hidden when a fourth column of windows opens,
+  `ShouldHideMuHelperBar()`).
+- Docks no longer overlap a reserved header: a dock region with `data-scale="fit"` is drawn at
+  the docked scale, capped so its `data-ref-height` fits the content area
+  (`min(dock scale, content height / reference height)`). The windows are scaled whole
+  (RmlUi, native grids, 3D icons follow the slot transform), so no window needs a shrink or
+  scroll policy. At 1024x768 and 100 % the modern panels are drawn at about 1.5 instead of 1.6;
+  where they already fit nothing changes. Fill windows can still take the whole content height.
+- The content height depends only on the shell, never on the windows: the service lays out the
+  shell, reads `#safe_area`'s height, then sizes the dock regions and slots (a second document
+  update, only when something changed).
+- Check after it lands: anything still drawn in the docked transform instead of the slot's
+  (dragged items, tooltips, the drop guide) at a capped scale; the uncovered-world edge; with a
+  reserved header, `ShouldHideMuHelperBar()` becomes unnecessary for that theme (a theme rule,
+  like `data-closes`, could replace it later).
 
 | Phase | Work |
 |---|---|
