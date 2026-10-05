@@ -42,6 +42,7 @@ mu_add_test(
         test_effect_browser.cpp
         test_effect_preview.cpp
         test_effect_world_preview.cpp
+        test_effect_call_sites.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCases.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCondition.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectTestData.cpp

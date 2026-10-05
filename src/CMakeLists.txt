@@ -581,6 +581,12 @@ target_compile_definitions(MuClient PUBLIC
   $<$<BOOL:${ENABLE_CONTROL_SOCKET}>:MU_ENABLE_CONTROL_SOCKET>  # Developer control socket
 )
 
+# The effect browser lists the game's create calls of a type, read from the
+# sources the editor was built from.
+if(ENABLE_EDITOR)
+  target_compile_definitions(MuClient PRIVATE "MU_EDITOR_SOURCE_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/source\"")
+endif()
+
 if (MSVC)
   target_compile_definitions(MuClient PUBLIC
     WIN32

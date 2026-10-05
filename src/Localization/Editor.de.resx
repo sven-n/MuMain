@@ -781,6 +781,75 @@
   <data name="World refused" xml:space="preserve">
     <value>Der Code dieses Typs mit diesem SubType ändert die Figur oder meldet es dem Server (die Katapultsteine werfen die Figur zurück, der Klassenwechsel hält sie an, der Lagul schreibt in seinen Besitzer), daher erzeugt die Vorschau ihn nicht.</value>
   </data>
+  <data name="Call values" xml:space="preserve">
+    <value>Aufrufwerte</value>
+  </data>
+  <data name="Call distance" xml:space="preserve">
+    <value>Abstand</value>
+  </data>
+  <data name="Call distance tooltip" xml:space="preserve">
+    <value>Wie weit vor der Figur der Aufruf den Typ beginnt; 0 ist, wo sie steht.</value>
+  </data>
+  <data name="Call height" xml:space="preserve">
+    <value>Höhe</value>
+  </data>
+  <data name="Call size" xml:space="preserve">
+    <value>Größe</value>
+  </data>
+  <data name="Call size tooltip" xml:space="preserve">
+    <value>Der Maßstab des Aufrufs; 0 nimmt den Standard der Erzeugungsfunktion (Effekte 0,9, Partikel und Sprites 1, Blitze 10).</value>
+  </data>
+  <data name="Call light" xml:space="preserve">
+    <value>Licht</value>
+  </data>
+  <data name="Call random angle" xml:space="preserve">
+    <value>Zufälliger Winkel</value>
+  </data>
+  <data name="Call target" xml:space="preserve">
+    <value>Ziel</value>
+  </data>
+  <data name="Call owner" xml:space="preserve">
+    <value>Besitzer</value>
+  </data>
+  <data name="Call target character" xml:space="preserve">
+    <value>Figur (Kopie)</value>
+  </data>
+  <data name="Call target none" xml:space="preserve">
+    <value>Keins</value>
+  </data>
+  <data name="Call target nearest" xml:space="preserve">
+    <value>Nächstes Monster oder NPC (Kopie)</value>
+  </data>
+  <data name="Call target none tooltip" xml:space="preserve">
+    <value>Das Spiel erzeugt diesen Typ nie ohne Besitzer, und sein Code braucht vielleicht einen.</value>
+  </data>
+  <data name="Call pk" xml:space="preserve">
+    <value>PK</value>
+  </data>
+  <data name="Call skill index" xml:space="preserve">
+    <value>SkillIndex</value>
+  </data>
+  <data name="Call pk tooltip" xml:space="preserve">
+    <value>Manche Blitz-SubTypes lesen ihre Lebensdauer und Geschwindigkeit aus PK und SkillIndex.</value>
+  </data>
+  <data name="Game calls" xml:space="preserve">
+    <value>Aufrufe des Spiels</value>
+  </data>
+  <data name="Use call" xml:space="preserve">
+    <value>Übernehmen</value>
+  </data>
+  <data name="Game calls not found" xml:space="preserve">
+    <value>Die Quellen des Spiels, aus denen der Editor gebaut wurde, wurden nicht gefunden, daher können die Aufrufe des Spiels nicht aufgelistet werden.</value>
+  </data>
+  <data name="No game calls" xml:space="preserve">
+    <value>Der Code des Spiels erzeugt diesen Typ nicht über seinen Namen.</value>
+  </data>
+  <data name="Call random types" xml:space="preserve">
+    <value>einer von %d per Zufall</value>
+  </data>
+  <data name="World no character near" xml:space="preserve">
+    <value>Kein Monster oder NPC steht nahe der Figur, daher ist die Kopie der Figur das Ziel.</value>
+  </data>
   <data name="Assets all" xml:space="preserve">
     <value>Alle</value>
   </data>

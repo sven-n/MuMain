@@ -781,6 +781,75 @@
   <data name="World refused" xml:space="preserve">
     <value>The code of this type with this SubType changes the character or tells the server (the catapult stones knock the character back, the class change stops it, the Lagul writes into its owner), so the preview does not create it.</value>
   </data>
+  <data name="Call values" xml:space="preserve">
+    <value>Call values</value>
+  </data>
+  <data name="Call distance" xml:space="preserve">
+    <value>Distance</value>
+  </data>
+  <data name="Call distance tooltip" xml:space="preserve">
+    <value>How far in front of the character the call starts the type; 0 is where it stands.</value>
+  </data>
+  <data name="Call height" xml:space="preserve">
+    <value>Height</value>
+  </data>
+  <data name="Call size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Call size tooltip" xml:space="preserve">
+    <value>The scale of the call; 0 takes the create function's default (effects 0.9, particles and sprites 1, lightning 10).</value>
+  </data>
+  <data name="Call light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Call random angle" xml:space="preserve">
+    <value>Random angle</value>
+  </data>
+  <data name="Call target" xml:space="preserve">
+    <value>Target</value>
+  </data>
+  <data name="Call owner" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+  <data name="Call target character" xml:space="preserve">
+    <value>Character (copy)</value>
+  </data>
+  <data name="Call target none" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="Call target nearest" xml:space="preserve">
+    <value>Nearest monster or NPC (copy)</value>
+  </data>
+  <data name="Call target none tooltip" xml:space="preserve">
+    <value>The game never creates this type without an owner, and its code may need one.</value>
+  </data>
+  <data name="Call pk" xml:space="preserve">
+    <value>PK</value>
+  </data>
+  <data name="Call skill index" xml:space="preserve">
+    <value>SkillIndex</value>
+  </data>
+  <data name="Call pk tooltip" xml:space="preserve">
+    <value>Some lightning SubTypes read their lifetime and speed from PK and SkillIndex.</value>
+  </data>
+  <data name="Game calls" xml:space="preserve">
+    <value>The game's calls</value>
+  </data>
+  <data name="Use call" xml:space="preserve">
+    <value>Use</value>
+  </data>
+  <data name="Game calls not found" xml:space="preserve">
+    <value>The sources of the game the editor was built from were not found, so the game's calls cannot be listed.</value>
+  </data>
+  <data name="No game calls" xml:space="preserve">
+    <value>The game's code does not create this type by its name.</value>
+  </data>
+  <data name="Call random types" xml:space="preserve">
+    <value>one of %d at random</value>
+  </data>
+  <data name="World no character near" xml:space="preserve">
+    <value>No monster or NPC stands near the character, so the copy of the character is the target.</value>
+  </data>
   <data name="Assets all" xml:space="preserve">
     <value>All</value>
   </data>

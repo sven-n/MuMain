@@ -5,6 +5,7 @@
 #include "EffectBrowserModel.h"
 #include "EffectPreviewCamera.h"
 #include "EffectPreviewTracker.h"
+#include "Engine/Object/w_CharacterInfo.h"
 
 #include <cstdint>
 #include <optional>
@@ -12,13 +13,55 @@
 
 namespace MuEditor::Effects
 {
+// What the world preview's call is aimed at: its owner (the target of
+// particles and lightning).
+enum class WorldPreviewTarget : std::uint8_t
+{
+    // A copy of the character, which follows it.
+    Character,
+    // None, as the game passes for some calls.
+    None,
+    // A copy of the monster or NPC nearest to the character.
+    NearestCharacter,
+};
+
+// How far in front of the character the preview creates a type: two tiles;
+// particles, lightning and sprites start at about the height of the chest.
+inline constexpr float WorldPreviewDistance = 200.0f;
+inline constexpr float WorldPreviewChestHeight = 100.0f;
+
+// The values of the world preview's call besides the type and the SubType.
+struct WorldPreviewCall
+{
+    // Where the call starts the type: this far in front of the character and
+    // this high above the ground.
+    float distance = WorldPreviewDistance;
+    float height = 0.0f;
+    // 0: the default of the create function (effects 0.9, particles and
+    // sprites 1, lightning 10).
+    float scale = 0.0f;
+    PreviewVector light{1.0f, 1.0f, 1.0f};
+    // A random angle for each call, as many game calls give lightning.
+    bool randomAngle = false;
+    WorldPreviewTarget target = WorldPreviewTarget::Character;
+    // Lightning only: the values some SubTypes read from PK and SkillIndex.
+    int pk = -1;
+    int skillIndex = 0;
+
+    bool operator==(const WorldPreviewCall&) const = default;
+};
+
+// The values the preview starts with for a kind.
+WorldPreviewCall DefaultWorldPreviewCall(Data::Effects::EffectKind kind);
+
 // What the world preview creates: a type of a kind with a SubType (for a
-// sprite, its blend).
+// sprite, its blend) and the values of the call.
 struct WorldPreviewRequest
 {
     Data::Effects::EffectKind kind = Data::Effects::EffectKind::Effect;
     int type = 0;
     int subType = 0;
+    WorldPreviewCall call;
 
     bool operator==(const WorldPreviewRequest&) const = default;
 };
@@ -32,6 +75,9 @@ enum WorldPreviewNote : std::uint16_t
     WorldNoteEndedAtOnce = 1 << 1,
     // The type's code changes the character or tells the server.
     WorldNoteRefused = 1 << 2,
+    // No monster or NPC near the character: the copy of the character is
+    // the target.
+    WorldNoteNoCharacterNear = 1 << 3,
 };
 
 // A type and SubType the world preview does not create (-1: every SubType).
@@ -40,9 +86,6 @@ struct RefusedWorldPreview
     int type = 0;
     int subType = -1;
 };
-
-// How far in front of the character the preview creates a type: two tiles.
-inline constexpr float WorldPreviewDistance = 200.0f;
 
 // The point `distance` in front of `position` for a yaw in degrees: the
 // game's forward direction (0, -1, 0) turned by the yaw, as AngleMatrix does.
@@ -57,6 +100,13 @@ bool IsRefusedInWorld(const WorldPreviewRequest& request);
 // it.
 bool IsWorldReadyForPreview();
 
+// How far around the character the preview looks for a monster or NPC.
+inline constexpr float NearestCharacterRange = 1000.0f;
+
+// The live monster or NPC of `characters` nearest to `position`, within
+// `range`; nullptr without one.
+OBJECT* FindNearestCharacter(std::span<CHARACTER> characters, const PreviewVector& position, float range);
+
 // The selected type created in the game world in front of the character,
 // with the game's own create call. Its owner (the target of particles and
 // lightning) is a copy of the character's object that follows the character:
@@ -68,7 +118,8 @@ bool IsWorldReadyForPreview();
 class EffectWorldPreview
 {
 public:
-    // Creates the type at the end of this frame, again on every call.
+    // Creates the type at the end of this frame, again on every call; with
+    // other values, what earlier calls created stays.
     void Start(const WorldPreviewRequest& request);
     // Removes what the preview created.
     void Stop();
@@ -116,11 +167,16 @@ public:
 
 private:
     void Create(const EffectPools& pools);
+    OBJECT* TargetOf(const WorldPreviewCall& call);
     void End();
     void ApplyMute() const;
 
     EffectPreviewTracker m_tracker;
     OBJECT m_owner;
+    // The copy of the monster or NPC the call is aimed at, and the one it
+    // follows while that lives.
+    OBJECT m_targetCopy;
+    OBJECT* m_targetFollowed = nullptr;
     std::optional<WorldPreviewRequest> m_running;
     std::optional<EffectTypeRef> m_notesFor;
     bool m_createPending = false;

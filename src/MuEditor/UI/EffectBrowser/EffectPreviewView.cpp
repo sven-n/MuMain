@@ -158,7 +158,15 @@ void CEffectPreviewView::Render(const MuEditor::Effects::EffectBrowserRow& row, 
     RenderView(request);
     RenderNotes(request.subject.notes | m_scene.GetObjectNotes() | ItemNotes(request));
     const int worldSubType = kind == EffectKind::Sprite ? static_cast<int>(m_spriteBlend) : m_subType;
-    m_world.Render(world, {kind, row.type, worldSubType});
+    // A game call taken with Use sets the SubType of both previews.
+    if (const std::optional<int> used = m_world.Render(world, kind, row.type, worldSubType))
+    {
+        if (kind == EffectKind::Sprite)
+            m_spriteBlend = static_cast<MuEditor::Effects::PreviewSpriteBlend>(
+                std::clamp(*used, 0, static_cast<int>(MuEditor::Effects::PreviewSpriteBlend::Luminance)));
+        else
+            m_subType = *used;
+    }
 }
 
 void CEffectPreviewView::SelectType(const MuEditor::Effects::EffectBrowserRow& row, EffectKind kind,

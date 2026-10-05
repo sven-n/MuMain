@@ -638,6 +638,18 @@ _EDITOR`. Checked in the client against the in-game test server: an effect
 and a sprite created, followed and removed, Repeat, removal when leaving for
 the character list, the character not moved or turned.
 
+*FX1.7b follow-up (call values):* a type created with defaults can look
+unlike the game's (the Fenrir's plasma storm makes its bolts 100 wide from
+in front of the rider to each monster in range, the preview's default is 10
+wide to the character). "In the world" therefore sets the rest of the call
+(distance and height of the start, size, light, a random angle, the target:
+the copy of the character, none where the game passes none, or a copy of the
+nearest monster or NPC; PK and SkillIndex for lightning), and lists the
+game's own create calls of the type, read from the sources of the editor's
+build (about 4,300 calls, 96% naming a type of the symbol lists; a compiled
+list would be a large generated file), with Use taking the values they write
+as numbers. A skill's whole look stays for SK2.
+
 **FX1.7c Live preview in the browser (later).** The objects of FX1.7b drawn
 in the browser's view, on the chosen object, instead of in the world. The
 render loops of their pools (`RenderEffectShadows`, `RenderEffects`,

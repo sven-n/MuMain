@@ -374,6 +374,28 @@ any side, and F12 hides the editor while it runs.
   Objects created later with the character or no one as owner cannot be told
   from the game's own and end by themselves; so does a slot the game fills
   again with the same type in the same frame.
+- **Call values** set the rest of the call: **Distance** in front of the
+  character (0: where it stands) and **Height** above the ground, **Size**
+  (0 takes the create function's default: effects 0.9, particles and sprites
+  1, lightning 10), **Light**, **Random angle** (as many game calls give
+  lightning), the **Target** (the copy of the character; none, offered only
+  for types the game itself creates without an owner, as the code of others
+  may read their owner without checking; or a copy of the nearest monster or
+  NPC, which follows it, so lightning runs to it) and, for lightning, **PK**
+  and **SkillIndex**, which some SubTypes read their lifetime and speed
+  from. Creating the type again with other values keeps what is there, so
+  parts can be compared side by side.
+- **The game's calls** list where the game's code creates the type
+  (`CreateEffect`, `CreateParticle`, `CreateJoint`, `CreateSprite` and their
+  FpsChecked forms) with the SubType, size and owner they write, read from
+  the sources the editor was built from (`MU_EDITOR_SOURCE_DIR`) the first
+  time the list opens. **Use** takes the values a call writes as numbers:
+  its SubType, size, the light it sets just before (`Vector(r, g, b,
+  light)`), no owner when it passes none, PK and SkillIndex. What depends on
+  the moment (the Fenrir's colour, which monster) stays for the user to
+  choose. A skill's whole look, several types from the caster's bones at the
+  right moment of its animation, is not one call: its preview comes with the
+  skill looks (SK2).
 - **Repeat** creates the type again shortly after what it created has ended.
   A sprite lasts one frame; the preview creates it every frame.
 - **Mute sounds** keeps the game from starting sound effects while the

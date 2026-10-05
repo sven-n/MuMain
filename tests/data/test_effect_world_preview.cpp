@@ -12,6 +12,7 @@
 #include "Core/Globals/_enum.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "UI/EffectBrowser/EffectPoolSnapshot.h"
 #include "UI/EffectBrowser/EffectPreviewTracker.h"
@@ -21,6 +22,7 @@
 #include <array>
 #include <memory>
 #include <optional>
+#include <span>
 #include <vector>
 
 using namespace MuEditor::Effects;
@@ -397,5 +399,83 @@ TEST_CASE("The world preview creates the type with the game's call, follows it a
 
     Effects[*own].Live = false;
     WorldTime = worldTime;
+}
+TEST_CASE("The world preview starts particles, lightning and sprites at the chest and finds the nearest monster or "
+          "NPC [effects][editor]")
+{
+    CHECK(DefaultWorldPreviewCall(EffectKind::Effect).height == 0.0f);
+    CHECK(DefaultWorldPreviewCall(EffectKind::Joint).height == WorldPreviewChestHeight);
+    CHECK(DefaultWorldPreviewCall(EffectKind::Particle).distance == WorldPreviewDistance);
+
+    auto characters = std::make_unique<CHARACTER[]>(4);
+    const auto place = [&](int index, int kind, float x, int action)
+    {
+        OBJECT& o = characters[static_cast<size_t>(index)].Object;
+        o.Live = true;
+        o.Kind = kind;
+        o.CurrentAction = action;
+        Vector(x, 0.0f, 0.0f, o.Position);
+    };
+    place(0, KIND_MONSTER, 300.0f, 0);
+    place(1, KIND_NPC, 100.0f, MONSTER01_DIE);
+    place(2, KIND_PLAYER, 50.0f, 0);
+    place(3, KIND_NPC, 700.0f, 0);
+    const std::span<CHARACTER> all(characters.get(), 4);
+    CHECK(FindNearestCharacter(all, {0.0f, 0.0f, 0.0f}, NearestCharacterRange) == &characters[0].Object);
+    CHECK(FindNearestCharacter(all, {650.0f, 0.0f, 0.0f}, NearestCharacterRange) == &characters[3].Object);
+    CHECK(FindNearestCharacter(all, {0.0f, 0.0f, 0.0f}, 200.0f) == nullptr);
+}
+
+TEST_CASE("The world preview creates with the call's size, light, place and target [effects][editor]")
+{
+    EffectTestData::BuildShippedRegistry();
+    const TestHero hero;
+    auto worldPreview = std::make_unique<EffectWorldPreview>();
+    EffectWorldPreview& world = *worldPreview;
+    const OBJECT* owner = &world.GetOwner();
+    const auto findJoint = [](int type, const OBJECT* target) -> JOINT*
+    {
+        for (int i = 0; i < MAX_JOINTS; ++i)
+        {
+            if (Joints[i].Live && Joints[i].Type == type && Joints[i].Target == target)
+                return &Joints[i];
+        }
+        return nullptr;
+    };
+
+    WorldPreviewCall call = DefaultWorldPreviewCall(EffectKind::Joint);
+    call.scale = 100.0f;
+    call.light = {0.2f, 0.4f, 1.0f};
+    world.Start({EffectKind::Joint, BITMAP_JOINT_ENERGY, 0, call});
+    world.AfterFrame(true, true);
+    JOINT* withCharacter = findJoint(BITMAP_JOINT_ENERGY, owner);
+    REQUIRE(withCharacter != nullptr);
+    CHECK(withCharacter->Scale == doctest::Approx(100.0f));
+    CHECK(withCharacter->Light[2] == doctest::Approx(1.0f));
+    CHECK(withCharacter->Light[0] == doctest::Approx(0.2f));
+
+    // Another target, same type: what is there stays.
+    call.target = WorldPreviewTarget::None;
+    world.Start({EffectKind::Joint, BITMAP_JOINT_ENERGY, 0, call});
+    world.AfterFrame(true, true);
+    CHECK(findJoint(BITMAP_JOINT_ENERGY, owner) != nullptr);
+    CHECK(findJoint(BITMAP_JOINT_ENERGY, nullptr) != nullptr);
+    CHECK(world.GetCounts().joints >= 2);
+    world.Stop();
+    CHECK(findJoint(BITMAP_JOINT_ENERGY, owner) == nullptr);
+
+    // The place: this far in front of the character (yaw 0 is -y) and this
+    // high above the ground.
+    WorldPreviewCall placed = DefaultWorldPreviewCall(EffectKind::Effect);
+    placed.distance = 100.0f;
+    placed.height = 50.0f;
+    world.Start({EffectKind::Effect, MODEL_POISON, 0, placed});
+    world.AfterFrame(true, true);
+    const std::optional<int> poison = FindEffect(MODEL_POISON, owner);
+    REQUIRE(poison.has_value());
+    CHECK(Effects[*poison].Position[0] == doctest::Approx(1000.0f).epsilon(Tolerance));
+    CHECK(Effects[*poison].Position[1] == doctest::Approx(900.0f).epsilon(Tolerance));
+    CHECK(Effects[*poison].Position[2] == doctest::Approx(RequestTerrainHeight(1000.0f, 900.0f) + 50.0f));
+    world.Stop();
 }
 #endif // _EDITOR
