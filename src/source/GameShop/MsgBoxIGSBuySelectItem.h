@@ -13,7 +13,7 @@ using namespace SEASON3B;
 using namespace mu::ui::window;
 
 #include "GameShop/BuyOptionSelection.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <RmlUi/Core/Types.h>
 
@@ -120,13 +120,13 @@ private:
         float textPx = 0.f;
         std::vector<OptionRow> options;
     };
-    RmlModelBinder<BuySelectRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, BuySelectRmlModel& model);
+    UI::RmlBridge::ThemedView<BuySelectRmlModel> m_RmlView{"igs_buy_select",
+        [this](Rml::DataModelConstructor& c, BuySelectRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/igs_buy_select.rml"}}};
 
     void BuildRmlUi();
-    void DestroyRmlUi();
     void SyncRmlModel();
-    void ReloadRmlTheme();
 
     int m_iPackageSeq;
     int m_iDisplaySeq;

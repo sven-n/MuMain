@@ -15,7 +15,8 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Sprites/Sprite.h"
 #include "InGameShopSystem.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "GameShop/StorageItemSelection.h"
 
 #include <RmlUi/Core/Types.h>
@@ -306,8 +307,9 @@ private:
     {
         float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
     };
-    RmlModelBinder<InGameShopBgRmlModel> m_BgRmlBinder;
-    Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+    static void BindRmlBgModel(Rml::DataModelConstructor& c, InGameShopBgRmlModel& model);
+    UI::RmlBridge::ThemedView<InGameShopBgRmlModel> m_RmlBgView{"in_game_shop_bg", BindRmlBgModel,
+        {{"Data/Interface/RmlUi/in_game_shop_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
 
     // One row of the storage / gift list. Where it sits is the theme's; only what it says and
     // whether it is the picked row travel through the model.
@@ -325,15 +327,15 @@ private:
         float textPx = 0.f;
         std::vector<StorageRow> storageRows;
     };
-    RmlModelBinder<InGameShopRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, InGameShopRmlModel& model);
+    UI::RmlBridge::ThemedView<InGameShopRmlModel> m_RmlView{"in_game_shop",
+        [this](Rml::DataModelConstructor& c, InGameShopRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/in_game_shop.rml"}}};
     bool m_StorageRowsDirty = true;
 
     void BuildRmlUi();
-    void ReloadRmlTheme();
     void SyncRmlModel();
     void SyncStorageRows();
-    void DestroyRmlUi();
 };
 } // namespace mu::ui::window
 

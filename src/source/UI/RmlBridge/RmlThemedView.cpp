@@ -201,7 +201,14 @@ void ThemedDocuments::UnloadDocuments()
     for (Slot& slot : m_Slots)
     {
         if (slot.document != nullptr && IsContextAlive(slot.context))
+        {
+            // UnloadDocument() drops the focus without a blur, so a focused field never releases
+            // the keyboard and the client keeps believing text is being typed: no hotkeys.
+            Rml::Element* focused = slot.context->GetFocusElement();
+            if (focused != nullptr && focused->GetOwnerDocument() == slot.document)
+                focused->Blur();
             slot.context->UnloadDocument(slot.document);
+        }
         slot.document = nullptr;
         slot.context = nullptr;
     }

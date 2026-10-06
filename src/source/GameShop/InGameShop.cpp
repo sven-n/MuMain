@@ -59,8 +59,8 @@ void CInGameShop::Init()
 
 void CInGameShop::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
-    DestroyRmlUi();
+    m_RmlView.Release();
+    m_RmlBgView.Release();
 
     UnloadImages();
 
@@ -92,94 +92,55 @@ bool CInGameShop::Create(CManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CInGameShop::ReloadRmlTheme()
+void CInGameShop::BindRmlModel(Rml::DataModelConstructor& c, InGameShopRmlModel& model)
 {
-    if (!m_pRmlBgDoc)
-        return; // never built -- BuildRmlUi() picks up whatever theme is current when it runs
-    DestroyRmlUi();
-    BuildRmlUi();
-    // The next Update()/SyncRmlModel() restores position and visibility.
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    auto row = c.RegisterStruct<StorageRow>();
+    row.RegisterMember("name", &StorageRow::name);
+    row.RegisterMember("period", &StorageRow::period);
+    row.RegisterMember("selected", &StorageRow::selected);
+    c.RegisterArray<std::vector<StorageRow>>();
+    c.Bind("storage_rows", &model.storageRows);
+    c.BindEventCallback("igs_select_storage",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                        {
+                            if (args.size() == 1 && m_StorageItems.SelectRow(args[0].Get<int>(-1)))
+                                m_StorageRowsDirty = true;
+                        });
 }
 
+void CInGameShop::BindRmlBgModel(Rml::DataModelConstructor& c, InGameShopBgRmlModel& model)
+{
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+}
+
+// The frame first, as it always was: the background context draws before the main one anyway.
 void CInGameShop::BuildRmlUi()
 {
-    if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-    {
-        const bool created = m_BgRmlBinder.Create(bgContext, "in_game_shop_bg",
-            [](Rml::DataModelConstructor& c, InGameShopBgRmlModel& model)
-            {
-                c.Bind("root_x", &model.rootX);
-                c.Bind("root_y", &model.rootY);
-                c.Bind("root_scale", &model.rootScale);
-            });
-        if (created)
-        {
-            // Starts hidden; SyncRmlModel() is what shows and hides it.
-            m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/in_game_shop_bg.rml");
-        }
-    }
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    const bool created = m_RmlBinder.Create(context, "in_game_shop",
-        [this](Rml::DataModelConstructor& c, InGameShopRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-            auto row = c.RegisterStruct<StorageRow>();
-            row.RegisterMember("name", &StorageRow::name);
-            row.RegisterMember("period", &StorageRow::period);
-            row.RegisterMember("selected", &StorageRow::selected);
-            c.RegisterArray<std::vector<StorageRow>>();
-            c.Bind("storage_rows", &model.storageRows);
-            c.BindEventCallback("igs_select_storage",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                                {
-                                    if (args.size() == 1 && m_StorageItems.SelectRow(args[0].Get<int>(-1)))
-                                        m_StorageRowsDirty = true;
-                                });
-        });
-    if (created)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(context, "Data/Interface/RmlUi/in_game_shop.rml");
-
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-}
-
-void CInGameShop::DestroyRmlUi()
-{
-    if (m_pRmlDoc)
-    {
-        Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-        m_RmlBinder.Destroy(context);
-        context->UnloadDocument(m_pRmlDoc);
-        m_pRmlDoc = nullptr;
-    }
-    if (!m_pRmlBgDoc)
-        return;
-    if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-    {
-        m_BgRmlBinder.Destroy(bgContext);
-        bgContext->UnloadDocument(m_pRmlBgDoc);
-    }
-    m_pRmlBgDoc = nullptr;
+    m_RmlBgView.Ensure();
+    m_RmlView.Ensure();
 }
 
 void CInGameShop::SyncRmlModel()
 {
-    if (!m_pRmlBgDoc)
+    if (!m_RmlBgView.Document())
         return;
-    UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
+    UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
     // RenderBackgroundLayer() paints whatever is shown in the shared background context whoever
     // asked for it, so this is what keeps the backdrop off screen while the shop is closed.
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
 
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncStorageRows();
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 }
 
 void CInGameShop::SyncStorageRows()
@@ -207,7 +168,7 @@ void CInGameShop::SyncStorageRows()
         rows.push_back(std::move(row));
         ++index;
     }
-    SyncField(m_RmlBinder, &InGameShopRmlModel::storageRows, "storage_rows", std::move(rows));
+    SyncField(m_RmlView.Binder(), &InGameShopRmlModel::storageRows, "storage_rows", std::move(rows));
 }
 
 void CInGameShop::SetPos(int x, int y)

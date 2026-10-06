@@ -29,116 +29,89 @@ void CGenericMenuDialog::Create(CManager* pMng)
 {
     Release();
 
-    if (RmlUiRuntime::Instance().IsCreated())
-    {
-        BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-    }
+    BuildRmlUi();
 
     pMng->AddUIObj(mu::ui::window::INTERFACE_GENERIC_MENU_DIALOG, this);
 }
 
-void CGenericMenuDialog::BuildRmlUi()
+void CGenericMenuDialog::BindRmlModel(Rml::DataModelConstructor& c, GenericMenuRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "generic_menu_dialog",
-        [this](Rml::DataModelConstructor& c, GenericMenuRmlModel& model)
+    auto line = c.RegisterStruct<LineEntry>();
+    line.RegisterMember("text", &LineEntry::text);
+    line.RegisterMember("bold", &LineEntry::bold);
+    line.RegisterMember("color", &LineEntry::color);
+    c.RegisterArray<std::vector<LineEntry>>();
+    c.Bind("lines", &model.lines);
+
+    auto button = c.RegisterStruct<MenuButtonEntry>();
+    button.RegisterMember("label", &MenuButtonEntry::label);
+    button.RegisterMember("tooltip", &MenuButtonEntry::tooltip);
+    // Reuses the LineEntry/std::vector<LineEntry> array type already registered above for
+    // the top-level `lines` -- per-button description text, rendered directly above that
+    // button rather than lumped into the shared summary (see MenuButton::lines).
+    button.RegisterMember("lines", &MenuButtonEntry::lines);
+    button.RegisterMember("has_tooltip", &MenuButtonEntry::hasTooltip);
+    button.RegisterMember("has_lines", &MenuButtonEntry::hasLines);
+    button.RegisterMember("enabled", &MenuButtonEntry::enabled);
+    button.RegisterMember("compact", &MenuButtonEntry::compact);
+    button.RegisterMember("cols2", &MenuButtonEntry::cols2);
+    button.RegisterMember("native_top", &MenuButtonEntry::nativeTop);
+    button.RegisterMember("native_button_gap", &MenuButtonEntry::nativeButtonGap);
+    button.RegisterMember("narrow", &MenuButtonEntry::narrow);
+    button.RegisterMember("lines_below", &MenuButtonEntry::linesBelow);
+    c.RegisterArray<std::vector<MenuButtonEntry>>();
+    c.Bind("buttons", &model.buttons);
+
+    c.Bind("has_title", &model.hasTitle);
+    c.Bind("highlight_title", &model.highlightTitle);
+    c.Bind("is_system_menu", &model.isSystemMenu);
+    c.Bind("native_top", &model.nativeTop);
+    c.Bind("native_height", &model.nativeHeight);
+    c.Bind("native_text_top", &model.nativeTextTop);
+    c.Bind("native_line_advance", &model.nativeLineAdvance);
+    c.Bind("native_text_inset", &model.nativeTextInset);
+    c.Bind("native_divider_top", &model.nativeDividerTop);
+    c.Bind("canvas_top", &model.canvasTop);
+    c.Bind("title", &model.title);
+
+    // window_shell's positioning extension -- unused here: the theme centres this dialog
+    // and the player may drag it (see MakeDraggable() below).
+    c.Bind("positioned", &model.positioned);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+
+    // Position argument is the clicked button's own data-for index (it_index) -- a
+    // proven RmlUi pattern already used by char_make.rml/server_select.rml/
+    // my_quest_info.rml/main_frame.rml, not a fixed-slot workaround.
+    c.BindEventCallback("gmd_button_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
         {
-            auto line = c.RegisterStruct<LineEntry>();
-            line.RegisterMember("text", &LineEntry::text);
-            line.RegisterMember("bold", &LineEntry::bold);
-            line.RegisterMember("color", &LineEntry::color);
-            c.RegisterArray<std::vector<LineEntry>>();
-            c.Bind("lines", &model.lines);
-
-            auto button = c.RegisterStruct<MenuButtonEntry>();
-            button.RegisterMember("label", &MenuButtonEntry::label);
-            button.RegisterMember("tooltip", &MenuButtonEntry::tooltip);
-            // Reuses the LineEntry/std::vector<LineEntry> array type already registered above for
-            // the top-level `lines` -- per-button description text, rendered directly above that
-            // button rather than lumped into the shared summary (see MenuButton::lines).
-            button.RegisterMember("lines", &MenuButtonEntry::lines);
-            button.RegisterMember("has_tooltip", &MenuButtonEntry::hasTooltip);
-            button.RegisterMember("has_lines", &MenuButtonEntry::hasLines);
-            button.RegisterMember("enabled", &MenuButtonEntry::enabled);
-            button.RegisterMember("compact", &MenuButtonEntry::compact);
-            button.RegisterMember("cols2", &MenuButtonEntry::cols2);
-            button.RegisterMember("native_top", &MenuButtonEntry::nativeTop);
-            button.RegisterMember("native_button_gap", &MenuButtonEntry::nativeButtonGap);
-            button.RegisterMember("narrow", &MenuButtonEntry::narrow);
-            button.RegisterMember("lines_below", &MenuButtonEntry::linesBelow);
-            c.RegisterArray<std::vector<MenuButtonEntry>>();
-            c.Bind("buttons", &model.buttons);
-
-            c.Bind("has_title", &model.hasTitle);
-            c.Bind("highlight_title", &model.highlightTitle);
-            c.Bind("is_system_menu", &model.isSystemMenu);
-            c.Bind("native_top", &model.nativeTop);
-            c.Bind("native_height", &model.nativeHeight);
-            c.Bind("native_text_top", &model.nativeTextTop);
-            c.Bind("native_line_advance", &model.nativeLineAdvance);
-            c.Bind("native_text_inset", &model.nativeTextInset);
-            c.Bind("native_divider_top", &model.nativeDividerTop);
-            c.Bind("canvas_top", &model.canvasTop);
-            c.Bind("title", &model.title);
-
-            // window_shell's positioning extension -- unused here: the theme centres this dialog
-            // and the player may drag it (see MakeDraggable() below).
-            c.Bind("positioned", &model.positioned);
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-
-            // Position argument is the clicked button's own data-for index (it_index) -- a
-            // proven RmlUi pattern already used by char_make.rml/server_select.rml/
-            // my_quest_info.rml/main_frame.rml, not a fixed-slot workaround.
-            c.BindEventCallback("gmd_button_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                {
-                    if (!m_bActive) return;
-                    const int index = args.empty() ? -1 : args[0].Get<int>(-1);
-                    if (index < 0 || index >= static_cast<int>(m_Active.buttons.size())) return;
-                    if (!m_Active.buttons[index].enabled) return;
-                    m_bButtonClicked = true;
-                    m_iClickedButtonIndex = index;
-                });
+            if (!m_bActive) return;
+            const int index = args.empty() ? -1 : args[0].Get<int>(-1);
+            if (index < 0 || index >= static_cast<int>(m_Active.buttons.size())) return;
+            if (!m_Active.buttons[index].enabled) return;
+            m_bButtonClicked = true;
+            m_iClickedButtonIndex = index;
         });
-
-    if (modelCreated)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-            "Data/Interface/RmlUi/generic_menu_dialog.rml");
-    // Dragged by any part that is not a button (base.rcss blocks those): most menus, the system
-    // menu among them, have no title to grab.
-    if (m_pRmlDoc)
-        UI::RmlBridge::MakeDraggable(m_pRmlDoc, m_pRmlDoc, nullptr,
-                                     [this] { UI::RmlBridge::KeepInsideWindow(m_pRmlDoc); });
 }
 
-void CGenericMenuDialog::ReloadRmlTheme()
+// Dragged by any part that is not a button (base.rcss blocks those): most menus, the system
+// menu among them, have no title to grab.
+void CGenericMenuDialog::OnRmlBuilt()
 {
-    if (!m_pRmlDoc) return;
+    Rml::ElementDocument* document = m_RmlView.Document();
+    UI::RmlBridge::MakeDraggable(document, document, nullptr,
+                                 [document] { UI::RmlBridge::KeepInsideWindow(document); });
+}
 
-    const bool wasVisible = m_pRmlDoc->IsVisible();
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-    if (wasVisible)
-    {
-        SyncRmlModel();
-        if (m_pRmlDoc)
-            m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
-    }
+void CGenericMenuDialog::BuildRmlUi()
+{
+    m_RmlView.Ensure();
 }
 
 void CGenericMenuDialog::Release()
 {
-    // Heap-owned by CSystem, so it can be destroyed before shutdown -- see
-    // RegisterForThemeReload()'s contract.
-    UI::RmlBridge::UnregisterForThemeReload(this);
-
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
+    m_RmlView.Release();
     m_bActive = false;
     m_Queue.clear();
 }
@@ -158,11 +131,11 @@ void CGenericMenuDialog::Show(GenericMenuConfig cfg)
     m_bButtonClicked = false;
     m_iClickedButtonIndex = -1;
 
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        UI::RmlBridge::ResetDraggedPosition(m_pRmlDoc);
+        UI::RmlBridge::ResetDraggedPosition(m_RmlView.Document());
         SyncRmlModel();
-        m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
+        m_RmlView.Document()->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
     }
 }
 
@@ -179,11 +152,11 @@ void CGenericMenuDialog::ShowNext()
     m_bButtonClicked = false;
     m_iClickedButtonIndex = -1;
 
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        UI::RmlBridge::ResetDraggedPosition(m_pRmlDoc);
+        UI::RmlBridge::ResetDraggedPosition(m_RmlView.Document());
         SyncRmlModel();
-        m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
+        m_RmlView.Document()->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
     }
 }
 
@@ -200,8 +173,8 @@ void CGenericMenuDialog::Resolve(int buttonIndex)
         cfg.onCancel();
     }
 
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
+    if (m_RmlView.Document())
+        m_RmlView.Document()->Hide();
 
     ShowNext();
 }
@@ -260,7 +233,7 @@ bool CGenericMenuDialog::SameLine(const LineEntry& a, const LineEntry& b)
 
 void CGenericMenuDialog::SyncNativeFrame()
 {
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
     // Native CNewUIMessageBoxBase frame heights: 67 top cap + n * 15 middle strips + 50 bottom cap.
     constexpr float kTopCapHeight = 67.f;
     constexpr float kMiddleStripHeight = 15.f;
@@ -275,60 +248,60 @@ void CGenericMenuDialog::SyncNativeFrame()
     if (model.nativeTop != top)
     {
         model.nativeTop = top;
-        m_RmlBinder.MarkDirty("native_top");
+        m_RmlView.MarkDirty("native_top");
     }
     if (model.nativeHeight != height)
     {
         model.nativeHeight = height;
-        m_RmlBinder.MarkDirty("native_height");
+        m_RmlView.MarkDirty("native_height");
     }
 
-    SyncField(m_RmlBinder, &GenericMenuRmlModel::nativeTextTop, "native_text_top", static_cast<float>(frame.textTop));
-    SyncField(m_RmlBinder, &GenericMenuRmlModel::nativeLineAdvance, "native_line_advance", static_cast<float>(frame.lineAdvance));
-    SyncField(m_RmlBinder, &GenericMenuRmlModel::nativeTextInset, "native_text_inset", static_cast<float>(frame.textInset));
-    SyncField(m_RmlBinder, &GenericMenuRmlModel::nativeDividerTop, "native_divider_top", static_cast<float>(frame.dividerTop));
+    SyncField(m_RmlView.Binder(), &GenericMenuRmlModel::nativeTextTop, "native_text_top", static_cast<float>(frame.textTop));
+    SyncField(m_RmlView.Binder(), &GenericMenuRmlModel::nativeLineAdvance, "native_line_advance", static_cast<float>(frame.lineAdvance));
+    SyncField(m_RmlView.Binder(), &GenericMenuRmlModel::nativeTextInset, "native_text_inset", static_cast<float>(frame.textInset));
+    SyncField(m_RmlView.Binder(), &GenericMenuRmlModel::nativeDividerTop, "native_divider_top", static_cast<float>(frame.dividerTop));
 }
 
 void CGenericMenuDialog::SyncCanvasTop()
 {
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
     const float canvasTop = UI::RmlBridge::DialogCanvasTop(RmlUiRuntime::Instance().GetContext());
     if (model.canvasTop == canvasTop)
         return;
     model.canvasTop = canvasTop;
-    m_RmlBinder.MarkDirty("canvas_top");
+    m_RmlView.MarkDirty("canvas_top");
 }
 
 void CGenericMenuDialog::SyncRmlModel()
 {
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
     SyncCanvasTop();
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
 
     const bool hasTitle = !m_Active.title.empty();
     if (model.hasTitle != hasTitle)
     {
         model.hasTitle = hasTitle;
-        m_RmlBinder.MarkDirty("has_title");
+        m_RmlView.MarkDirty("has_title");
     }
     if (model.highlightTitle != m_Active.highlightTitle)
     {
         model.highlightTitle = m_Active.highlightTitle;
-        m_RmlBinder.MarkDirty("highlight_title");
+        m_RmlView.MarkDirty("highlight_title");
     }
     const bool isSystemMenu = m_Active.systemMenu;
     if (model.isSystemMenu != isSystemMenu)
     {
         model.isSystemMenu = isSystemMenu;
-        m_RmlBinder.MarkDirty("is_system_menu");
+        m_RmlView.MarkDirty("is_system_menu");
     }
     SyncNativeFrame();
     const std::string title = StringUtils::WideToNarrow(m_Active.title.c_str());
     if (model.title != title)
     {
         model.title = title;
-        m_RmlBinder.MarkDirty("title");
+        m_RmlView.MarkDirty("title");
     }
 
     std::vector<LineEntry> newLines;
@@ -341,7 +314,7 @@ void CGenericMenuDialog::SyncRmlModel()
     if (linesChanged)
     {
         model.lines = std::move(newLines);
-        m_RmlBinder.MarkDirty("lines");
+        m_RmlView.MarkDirty("lines");
     }
 
     std::vector<MenuButtonEntry> newButtons;
@@ -388,7 +361,7 @@ void CGenericMenuDialog::SyncRmlModel()
     if (buttonsChanged)
     {
         model.buttons = std::move(newButtons);
-        m_RmlBinder.MarkDirty("buttons");
+        m_RmlView.MarkDirty("buttons");
     }
 
 }

@@ -271,3 +271,29 @@ TEST_CASE("a theme switch keeps the documents' stacking [ui][rml-themed-view]")
     for (size_t i = 0; i < views.size(); ++i)
         CHECK(fixture.context->GetDocument(static_cast<int>(i)) == views[i]->Document());
 }
+
+// Unloading drops the focus without a blur; a focused field that never blurs leaves the client's
+// text-input latch set, and every hotkey stays dead.
+TEST_CASE("release blurs a focused field it owns [ui][rml-themed-view]")
+{
+    struct BlurCounter : Rml::EventListener
+    {
+        int blurs = 0;
+        void ProcessEvent(Rml::Event&) override { ++blurs; }
+    };
+
+    Fixture fixture;
+    UI::RmlBridge::ThemedView<> view({fixture.Spec(fixture.Write(
+        "field.rml", "<rml><head></head><body><input id='field' type='text'/></body></rml>"))});
+    REQUIRE(view.Ensure());
+    view.Document()->Show();
+    Rml::Element* field = view.Document()->GetElementById("field");
+    BlurCounter counter;
+    field->AddEventListener(Rml::EventId::Blur, &counter);
+    REQUIRE(field->Focus());
+    fixture.context->Update();
+
+    view.Release();
+    CHECK(counter.blurs == 1);
+    fixture.context->Update();
+}

@@ -118,7 +118,7 @@ void CMsgBoxIGSBuyPackageItem::Initialize(CShopPackage* pPackage)
 
 void CMsgBoxIGSBuyPackageItem::Release()
 {
-    DestroyRmlUi();
+    m_RmlView.Release();
 
     CMessageBoxBase::Release();
 
@@ -332,59 +332,37 @@ void CMsgBoxIGSBuyPackageItem::ReleaseListBox()
     m_DescriptionLines.clear();
 }
 
+void CMsgBoxIGSBuyPackageItem::BindRmlModel(Rml::DataModelConstructor& c, BuyPackageRmlModel& model)
+{
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    auto line = c.RegisterStruct<DescriptionLine>();
+    line.RegisterMember("text", &DescriptionLine::text);
+    c.RegisterArray<std::vector<DescriptionLine>>();
+    c.Bind("description_lines", &model.descriptionLines);
+}
+
 void CMsgBoxIGSBuyPackageItem::BuildRmlUi()
 {
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    const bool created = m_RmlBinder.Create(context, "igs_buy_package",
-        [](Rml::DataModelConstructor& c, BuyPackageRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-            auto line = c.RegisterStruct<DescriptionLine>();
-            line.RegisterMember("text", &DescriptionLine::text);
-            c.RegisterArray<std::vector<DescriptionLine>>();
-            c.Bind("description_lines", &model.descriptionLines);
-        });
-    if (created)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(context, "Data/Interface/RmlUi/igs_buy_package.rml");
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-}
-
-void CMsgBoxIGSBuyPackageItem::DestroyRmlUi()
-{
-    UI::RmlBridge::UnregisterForThemeReload(this);
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-}
-
-void CMsgBoxIGSBuyPackageItem::ReloadRmlTheme()
-{
-    if (!m_pRmlDoc)
-        return;
-    DestroyRmlUi();
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void CMsgBoxIGSBuyPackageItem::SyncRmlModel()
 {
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, GetPos());
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), GetPos());
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     std::vector<DescriptionLine> lines;
     lines.reserve(m_DescriptionLines.size());
     for (const std::wstring& text : m_DescriptionLines)
         lines.push_back({StringUtils::WideToNarrow(text.c_str())});
-    SyncField(m_RmlBinder, &BuyPackageRmlModel::descriptionLines, "description_lines", std::move(lines));
+    SyncField(m_RmlView.Binder(), &BuyPackageRmlModel::descriptionLines, "description_lines", std::move(lines));
 
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 }
 
 bool CMsgBoxBuyPackageItemLayout::SetLayout()

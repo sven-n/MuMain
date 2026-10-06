@@ -4,7 +4,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <RmlUi/Core/Types.h>
 
@@ -132,10 +132,10 @@ namespace mu::ui::window
         // value, not low -- CManager::CompareKeyEventOrder sorts descending (highest runs first),
         // the opposite of what "first priority" suggests. 100.0f, matching that sibling exactly.
         float GetKeyEventOrder() override { return 100.0f; }
-        void ReloadRmlTheme();
 
     private:
         void BuildRmlUi();
+        void OnRmlBuilt();
         void SyncRmlModel();
         void SyncNativeFrame();
         void SyncCanvasTop();
@@ -190,8 +190,12 @@ namespace mu::ui::window
             float rootX = 0.f;
             float rootY = 0.f;
         };
-        RmlModelBinder<GenericMenuRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, GenericMenuRmlModel& model);
+        UI::RmlBridge::ThemedView<GenericMenuRmlModel> m_RmlView{"generic_menu_dialog",
+            [this](Rml::DataModelConstructor& c, GenericMenuRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/generic_menu_dialog.rml"}},
+            {.modal = Rml::ModalFlag::Modal, .focus = Rml::FocusFlag::Document,
+             .afterBuild = [this] { OnRmlBuilt(); }}};
 
         bool m_bButtonClicked = false;
         int m_iClickedButtonIndex = -1;

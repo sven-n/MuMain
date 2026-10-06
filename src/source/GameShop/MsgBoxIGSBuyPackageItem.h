@@ -15,7 +15,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <RmlUi/Core/Types.h>
 
@@ -126,13 +126,13 @@ private:
         float textPx = 0.f;
         std::vector<DescriptionLine> descriptionLines;
     };
-    RmlModelBinder<BuyPackageRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, BuyPackageRmlModel& model);
+    UI::RmlBridge::ThemedView<BuyPackageRmlModel> m_RmlView{"igs_buy_package",
+        [this](Rml::DataModelConstructor& c, BuyPackageRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/igs_buy_package.rml"}}};
 
     void BuildRmlUi();
-    void DestroyRmlUi();
     void SyncRmlModel();
-    void ReloadRmlTheme();
 
     int m_iPackageSeq;
     int m_iDisplaySeq;

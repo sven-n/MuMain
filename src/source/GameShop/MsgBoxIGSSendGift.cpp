@@ -64,9 +64,9 @@ bool CMsgBoxIGSSendGift::Create(float fPriority)
 void CMsgBoxIGSSendGift::InitInputBox()
 {
     BuildRmlUi();
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (auto* field = m_pRmlDoc->GetElementById("igs_gift_id"))
+        if (auto* field = m_RmlView.Document()->GetElementById("igs_gift_id"))
             field->Focus();
     }
 }
@@ -88,7 +88,7 @@ void CMsgBoxIGSSendGift::Initialize(int iPackageSeq, int iDisplaySeq, int iPrice
 
 void CMsgBoxIGSSendGift::Release()
 {
-    DestroyRmlUi();
+    m_RmlView.Release();
     CMessageBoxBase::Release();
     UnloadImages();
 }
@@ -99,7 +99,7 @@ bool CMsgBoxIGSSendGift::Update()
     m_BtnCancel.Update();
 
     // The fields are two-way bound, so the model is what the player typed.
-    const auto& model = m_RmlBinder.GetModel();
+    const auto& model = m_RmlView.GetModel();
     wcsncpy(m_szID, StringUtils::NarrowToWide(model.recipient).c_str(), MAX_USERNAME_SIZE);
     m_szID[MAX_USERNAME_SIZE] = L'\0';
     wcsncpy(m_szMessage, StringUtils::NarrowToWide(model.message).c_str(), MAX_GIFT_MESSAGE_SIZE - 1);
@@ -255,71 +255,41 @@ void CMsgBoxIGSSendGift::RenderButtons()
 // Tab walks the two fields, as it did when they were native boxes.
 void CMsgBoxIGSSendGift::ChangeInputBoxFocus()
 {
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
     const char* next = FieldHasFocus("igs_gift_id") ? "igs_gift_message" : "igs_gift_id";
-    if (auto* field = m_pRmlDoc->GetElementById(next))
+    if (auto* field = m_RmlView.Document()->GetElementById(next))
         field->Focus();
 }
 
 bool CMsgBoxIGSSendGift::FieldHasFocus(const char* id) const
 {
-    auto* field = m_pRmlDoc ? m_pRmlDoc->GetElementById(id) : nullptr;
+    auto* field = m_RmlView.Document() ? m_RmlView.Document()->GetElementById(id) : nullptr;
     return field != nullptr && field->IsPseudoClassSet("focus");
+}
+
+void CMsgBoxIGSSendGift::BindRmlModel(Rml::DataModelConstructor& c, SendGiftRmlModel& model)
+{
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("recipient", &model.recipient);
+    c.Bind("message", &model.message);
 }
 
 void CMsgBoxIGSSendGift::BuildRmlUi()
 {
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    const bool created = m_RmlBinder.Create(context, "igs_send_gift",
-        [](Rml::DataModelConstructor& c, SendGiftRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-            c.Bind("recipient", &model.recipient);
-            c.Bind("message", &model.message);
-        });
-    if (created)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(context, "Data/Interface/RmlUi/igs_send_gift.rml");
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-}
-
-void CMsgBoxIGSSendGift::DestroyRmlUi()
-{
-    UI::RmlBridge::UnregisterForThemeReload(this);
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    // A hidden document whose field still holds focus leaves the client believing text input is
-    // active, and every hotkey dies with it.
-    if (auto* focused = context->GetFocusElement(); focused && focused->GetOwnerDocument() == m_pRmlDoc)
-        focused->Blur();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-}
-
-void CMsgBoxIGSSendGift::ReloadRmlTheme()
-{
-    if (!m_pRmlDoc)
-        return;
-    const SendGiftRmlModel kept = m_RmlBinder.GetModel();
-    DestroyRmlUi();
-    BuildRmlUi();
-    m_RmlBinder.GetModel() = kept;
-    m_RmlBinder.MarkDirty("recipient");
-    m_RmlBinder.MarkDirty("message");
+    m_RmlView.Ensure();
 }
 
 void CMsgBoxIGSSendGift::SyncRmlModel()
 {
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, GetPos());
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, true);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), GetPos());
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), true);
 }
 
 void CMsgBoxIGSSendGift::LoadImages()

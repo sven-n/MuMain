@@ -105,7 +105,7 @@ void CMsgBoxIGSBuySelectItem::Initialize(CShopPackage* pPackage)
 
 void CMsgBoxIGSBuySelectItem::Release()
 {
-    DestroyRmlUi();
+    m_RmlView.Release();
 
     CMessageBoxBase::Release();
 
@@ -127,58 +127,36 @@ bool CMsgBoxIGSBuySelectItem::Update()
     return true;
 }
 
+void CMsgBoxIGSBuySelectItem::BindRmlModel(Rml::DataModelConstructor& c, BuySelectRmlModel& model)
+{
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    auto row = c.RegisterStruct<OptionRow>();
+    row.RegisterMember("name", &OptionRow::name);
+    row.RegisterMember("selected", &OptionRow::selected);
+    c.RegisterArray<std::vector<OptionRow>>();
+    c.Bind("options", &model.options);
+    c.BindEventCallback("igs_select_option",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                        {
+                            if (args.size() == 1)
+                                m_BuyOptions.SelectRow(args[0].Get<int>(-1));
+                        });
+}
+
 void CMsgBoxIGSBuySelectItem::BuildRmlUi()
 {
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    const bool created = m_RmlBinder.Create(context, "igs_buy_select",
-        [this](Rml::DataModelConstructor& c, BuySelectRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-            auto row = c.RegisterStruct<OptionRow>();
-            row.RegisterMember("name", &OptionRow::name);
-            row.RegisterMember("selected", &OptionRow::selected);
-            c.RegisterArray<std::vector<OptionRow>>();
-            c.Bind("options", &model.options);
-            c.BindEventCallback("igs_select_option",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                                {
-                                    if (args.size() == 1)
-                                        m_BuyOptions.SelectRow(args[0].Get<int>(-1));
-                                });
-        });
-    if (created)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(context, "Data/Interface/RmlUi/igs_buy_select.rml");
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-}
-
-void CMsgBoxIGSBuySelectItem::DestroyRmlUi()
-{
-    UI::RmlBridge::UnregisterForThemeReload(this);
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-}
-
-void CMsgBoxIGSBuySelectItem::ReloadRmlTheme()
-{
-    if (!m_pRmlDoc)
-        return;
-    DestroyRmlUi();
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void CMsgBoxIGSBuySelectItem::SyncRmlModel()
 {
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, GetPos());
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), GetPos());
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     std::vector<OptionRow> rows;
     rows.reserve(m_BuyOptions.Options().size());
@@ -189,9 +167,9 @@ void CMsgBoxIGSBuySelectItem::SyncRmlModel()
         rows.push_back({StringUtils::WideToNarrow(option.m_szItemName), index == selected});
         ++index;
     }
-    SyncField(m_RmlBinder, &BuySelectRmlModel::options, "options", std::move(rows));
+    SyncField(m_RmlView.Binder(), &BuySelectRmlModel::options, "options", std::move(rows));
 
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 }
 
 bool CMsgBoxIGSBuySelectItem::Render()

@@ -43,7 +43,6 @@ void CServerMsgWin::Create()
     m_nMsgLine = 0;
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SERVER_MESSAGE, this);
     Show(false);
@@ -56,7 +55,7 @@ void CServerMsgWin::Release()
     // (CSceneUICoordinator::CreateMainScene()) hides itself in its own Release(), so a server
     // notice showing at that moment must not linger either.
     mu::ui::window::CObject::Show(false);
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, false);
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), false);
 }
 
 void CServerMsgWin::SetPosition(int nXCoord, int nYCoord)
@@ -108,67 +107,48 @@ bool CServerMsgWin::Update()
     return true;
 }
 
-void CServerMsgWin::BuildRmlUi()
+void CServerMsgWin::BindRmlModel(Rml::DataModelConstructor& c, ServerMsgRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
-
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "server_msg",
-                                                 [](Rml::DataModelConstructor& c, ServerMsgRmlModel& model)
-                                                 {
-                                                     c.Bind("root_x", &model.rootX);
-                                                     c.Bind("root_y", &model.rootY);
-                                                     c.Bind("root_scale", &model.rootScale);
-                                                     c.Bind("text_px", &model.textPx);
-                                                     c.Bind("side_height", &model.sideHeight);
-                                                     c.RegisterArray<std::vector<Rml::String>>();
-                                                     c.Bind("lines", &model.lines);
-                                                 });
-    if (!modelCreated)
-        return;
-
-    m_pRmlDoc =
-        UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/server_msg.rml");
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("side_height", &model.sideHeight);
+    c.RegisterArray<std::vector<Rml::String>>();
+    c.Bind("lines", &model.lines);
 }
 
-void CServerMsgWin::ReloadRmlTheme()
+void CServerMsgWin::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void CServerMsgWin::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // Layer depth 10: over the character-list scene's other windows.
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
     // LayoutMode::Legacy keeps the transform identity here: real pixels, as the original drew.
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_ptPos);
-    ServerMsgRmlModel& model = m_RmlBinder.GetModel();
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_ptPos);
+    ServerMsgRmlModel& model = m_RmlView.GetModel();
     const float textPx =
         UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Fixed, UI::Scaling::GetActiveTransform());
     if (model.textPx != textPx)
     {
         model.textPx = textPx;
-        m_RmlBinder.MarkDirty("text_px");
+        m_RmlView.MarkDirty("text_px");
     }
     const float sideHeight = static_cast<float>(kSideStepHeight * m_nBgSideNow);
     if (model.sideHeight != sideHeight)
     {
         model.sideHeight = sideHeight;
-        m_RmlBinder.MarkDirty("side_height");
+        m_RmlView.MarkDirty("side_height");
     }
     std::vector<Rml::String> lines;
     for (int i = 0; i < m_nMsgLine; ++i)
@@ -176,6 +156,6 @@ void CServerMsgWin::SyncRmlModel()
     if (model.lines != lines)
     {
         model.lines = std::move(lines);
-        m_RmlBinder.MarkDirty("lines");
+        m_RmlView.MarkDirty("lines");
     }
 }

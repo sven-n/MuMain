@@ -8,7 +8,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Windows/ServerMsgRmlModel.h"
 
 namespace Rml
@@ -54,11 +54,11 @@ protected:
 
 private:
     void BuildRmlUi();
-    void ReloadRmlTheme();
     void SyncRmlModel();
 
-    RmlModelBinder<ServerMsgRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    static void BindRmlModel(Rml::DataModelConstructor& c, ServerMsgRmlModel& model);
+    UI::RmlBridge::ThemedView<ServerMsgRmlModel> m_RmlView{"server_msg", BindRmlModel,
+        {{"Data/Interface/RmlUi/server_msg.rml"}}};
 };
 
 extern CServerMsgWin g_ServerMsgWin;

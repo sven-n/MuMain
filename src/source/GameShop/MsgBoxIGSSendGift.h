@@ -3,7 +3,7 @@
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Dialogs/CommonMessageBox.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 
 #include <RmlUi/Core/Types.h>
@@ -120,13 +120,13 @@ private:
         Rml::String recipient;
         Rml::String message;
     };
-    RmlModelBinder<SendGiftRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, SendGiftRmlModel& model);
+    UI::RmlBridge::ThemedView<SendGiftRmlModel> m_RmlView{"igs_send_gift",
+        [this](Rml::DataModelConstructor& c, SendGiftRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/igs_send_gift.rml"}}};
 
     void BuildRmlUi();
-    void DestroyRmlUi();
     void SyncRmlModel();
-    void ReloadRmlTheme();
     bool FieldHasFocus(const char* id) const;
 
     int m_iPackageSeq;

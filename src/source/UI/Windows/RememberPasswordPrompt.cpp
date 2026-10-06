@@ -5,8 +5,7 @@
 #include "Core/Input/Input.h"
 #include "I18N/All.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
-#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "Core/Utilities/StringUtils.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
@@ -26,48 +25,34 @@ namespace
         Rml::String cancelLabel;
     };
 
-    RmlModelBinder<PromptModel> g_Binder;
-    Rml::ElementDocument* g_pDoc = nullptr;
     UI::Login::RememberPasswordChoice g_Choice = UI::Login::RememberPasswordChoice::None;
 
-    // Stable identity token for UI::RmlBridge's theme-reload registry -- this module has no `this`
-    // of its own, so its own address stands in.
-    char s_ThemeReloadOwner = 0;
+    void Resolve(UI::Login::RememberPasswordChoice choice);
+
+    void BindModel(Rml::DataModelConstructor& c, PromptModel& model)
+    {
+        c.Bind("title_text", &model.titleText);
+        c.Bind("body_text", &model.bodyText);
+        c.Bind("ok_label", &model.okLabel);
+        c.Bind("cancel_label", &model.cancelLabel);
+
+        c.BindEventCallback("prompt_ok_click",
+            [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { Resolve(UI::Login::RememberPasswordChoice::Ok); });
+        c.BindEventCallback("prompt_cancel_click",
+            [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { Resolve(UI::Login::RememberPasswordChoice::Cancel); });
+    }
+
+    // Built lazily, on first open. Modal: without it the login document underneath stays clickable
+    // and can steal focus back. Centering is #panel's own `.center-both` RCSS class.
+    UI::RmlBridge::ThemedView<PromptModel> g_View{"remember_password_prompt", BindModel,
+        {{"Data/Interface/RmlUi/remember_password_prompt.rml"}},
+        {.modal = Rml::ModalFlag::Modal, .focus = Rml::FocusFlag::Document}};
 
     void Resolve(UI::Login::RememberPasswordChoice choice)
     {
         g_Choice = choice;
         PlayBuffer(SOUND_CLICK01);
-        if (g_pDoc)
-            g_pDoc->Hide();
-    }
-
-    // Creates the document/model once, lazily, on first open.
-    void EnsureCreated()
-    {
-        if (g_pDoc || !RmlUiRuntime::Instance().IsCreated())
-            return;
-
-        const bool modelCreated = g_Binder.Create(RmlUiRuntime::Instance().GetContext(), "remember_password_prompt",
-            [](Rml::DataModelConstructor& c, PromptModel& model)
-            {
-                c.Bind("title_text", &model.titleText);
-                c.Bind("body_text", &model.bodyText);
-                c.Bind("ok_label", &model.okLabel);
-                c.Bind("cancel_label", &model.cancelLabel);
-
-                c.BindEventCallback("prompt_ok_click",
-                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { Resolve(UI::Login::RememberPasswordChoice::Ok); });
-                c.BindEventCallback("prompt_cancel_click",
-                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { Resolve(UI::Login::RememberPasswordChoice::Cancel); });
-            });
-
-        if (modelCreated)
-            g_pDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/remember_password_prompt.rml");
-        if (g_pDoc)
-            UI::RmlBridge::RegisterForThemeReload(&s_ThemeReloadOwner, &UI::Login::ReloadRmlTheme);
-
-        // Centering is handled by #panel's own `.center-both` RCSS class, not pushed from here.
+        g_View.Hide();
     }
 
     void SyncLabels()
@@ -75,10 +60,10 @@ namespace
         auto syncLabel = [](Rml::String PromptModel::* field, const char* boundName, const wchar_t* text)
         {
             const std::string utf8 = StringUtils::WideToNarrow(text);
-            if (g_Binder.GetModel().*field != utf8)
+            if (g_View.GetModel().*field != utf8)
             {
-                g_Binder.GetModel().*field = utf8;
-                g_Binder.MarkDirty(boundName);
+                g_View.GetModel().*field = utf8;
+                g_View.MarkDirty(boundName);
             }
         };
         syncLabel(&PromptModel::titleText, "title_text", I18N::Game::LoginSavePasswordWarningTitle);
@@ -93,12 +78,10 @@ namespace UI::Login
 void OpenRememberPasswordPrompt()
 {
     g_Choice = RememberPasswordChoice::Pending;
-    EnsureCreated();
-    if (g_pDoc)
+    if (g_View.Ensure())
     {
         SyncLabels();
-        // Modal: without it the login document underneath stays clickable and can steal focus back.
-        g_pDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
+        g_View.Document()->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
     }
 }
 
@@ -121,23 +104,5 @@ void Tick()
         Resolve(RememberPasswordChoice::Ok);
     else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
         Resolve(RememberPasswordChoice::Cancel);
-}
-
-void ReloadRmlTheme()
-{
-    if (!g_pDoc) return; // never opened; EnsureCreated() will pick up the new theme later
-
-    const bool wasPending = (g_Choice == RememberPasswordChoice::Pending);
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    g_Binder.Destroy(context);
-    context->UnloadDocument(g_pDoc);
-    g_pDoc = nullptr;
-
-    EnsureCreated();
-    if (g_pDoc && wasPending)
-    {
-        SyncLabels();
-        g_pDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
-    }
 }
 } // namespace UI::Login
