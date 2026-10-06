@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UI/Events/EventTimerRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <string>
 
@@ -24,7 +24,8 @@ public:
     EventTimerView(const char* modelName, const char* documentPath);
 
     void Build();
-    void ReloadTheme();
+    // Unloads the document; from the window's own Release().
+    void Release() { m_View.Release(); }
 
     struct Line
     {
@@ -41,9 +42,6 @@ public:
               float boxLeft = 0.f, float boxWidth = 124.f);
 
 private:
-    const char* m_ModelName;
-    const char* m_DocumentPath;
-    RmlModelBinder<EventTimerRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    UI::RmlBridge::ThemedView<EventTimerRmlModel> m_View;
 };
 } // namespace mu::ui::window

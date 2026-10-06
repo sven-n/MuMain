@@ -27,6 +27,15 @@ struct ThemedDocumentSpec
     std::function<Rml::Context*()> context;
 };
 
+// Where a document shown again after a theme switch goes among the documents of its depth: as
+// SyncDocumentVisibilityInFront() or Behind() put it, or wherever Show() leaves it.
+enum class ThemedStacking
+{
+    AsShown,
+    Front,
+    Back,
+};
+
 struct ThemedViewOptions
 {
     // Per-instance documents: every occurrence of this in the markup (its data-model name) becomes
@@ -35,6 +44,7 @@ struct ThemedViewOptions
     // How a document that was visible is shown again after a theme switch.
     Rml::ModalFlag modal = Rml::ModalFlag::None;
     Rml::FocusFlag focus = Rml::FocusFlag::None;
+    ThemedStacking stacking = ThemedStacking::AsShown;
     // After every build, once all the documents are loaded: dragging, input filters, layout that
     // depends on the theme, caches to invalidate.
     std::function<void()> afterBuild;
@@ -60,6 +70,8 @@ public:
     void Hide();
     // What a theme switch runs.
     void Reload();
+    // Replaces the options' afterBuild, for an owner that sets it after constructing the view.
+    void SetAfterBuild(std::function<void()> afterBuild) { m_Options.afterBuild = std::move(afterBuild); }
 
     bool IsBuilt() const { return m_Built; }
     Rml::ElementDocument* Document(size_t index = 0) const;

@@ -61,7 +61,6 @@ bool CEnterBloodCastle::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
 
     m_View.Build();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -72,7 +71,7 @@ bool CEnterBloodCastle::Create(CManager* pNewUIMng, int x, int y)
 // Release
 void CEnterBloodCastle::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
+    m_View.Release();
 
     if (m_pNewUIMng)
     {
@@ -232,11 +231,6 @@ void CEnterBloodCastle::OpenningProcess()
 void CEnterBloodCastle::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
-}
-
-void CEnterBloodCastle::ReloadRmlTheme()
-{
-    m_View.ReloadTheme();
 }
 
 void CEnterBloodCastle::SetViewContent(const std::vector<EventEntryView::Button>& buttons)

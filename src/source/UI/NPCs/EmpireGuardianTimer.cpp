@@ -34,7 +34,6 @@ bool CEmpireGuardianTimer::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
 
     m_View.Build();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -43,7 +42,7 @@ bool CEmpireGuardianTimer::Create(CManager* pNewUIMng, int x, int y)
 
 void CEmpireGuardianTimer::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
+    m_View.Release();
 
     if (m_pNewUIMng)
     {
@@ -126,11 +125,6 @@ void CEmpireGuardianTimer::SyncView()
         time = {szText, timeState};
     }
     m_View.Sync(IsVisible(), m_Pos, round, caption, time, TIMER_WINDOW_WIDTH / 2.f - 55.f, 110.f);
-}
-
-void CEmpireGuardianTimer::ReloadRmlTheme()
-{
-    m_View.ReloadTheme();
 }
 
 bool CEmpireGuardianTimer::BtnProcess()

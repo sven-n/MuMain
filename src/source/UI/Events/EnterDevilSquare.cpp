@@ -57,7 +57,6 @@ bool CEnterDevilSquare::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
 
     m_View.Build();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -66,7 +65,7 @@ bool CEnterDevilSquare::Create(CManager* pNewUIMng, int x, int y)
 
 void CEnterDevilSquare::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
+    m_View.Release();
 
     if (m_pNewUIMng)
     {
@@ -229,14 +228,6 @@ void CEnterDevilSquare::ClosingProcess()
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-
-//---------------------------------------------------------------------------------------------
-// UnloadImages
-
-void CEnterDevilSquare::ReloadRmlTheme()
-{
-    m_View.ReloadTheme();
-}
 
 void CEnterDevilSquare::SetViewContent(const std::vector<EventEntryView::Button>& buttons)
 {

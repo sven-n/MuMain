@@ -81,7 +81,6 @@ namespace mu::ui::window
         void OpenningProcess();
         void ClosingProcess();
 
-        void ReloadRmlTheme();
 
     private:
         // The title and description lines of the original's Render(), with the level buttons.

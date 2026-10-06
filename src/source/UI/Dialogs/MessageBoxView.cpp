@@ -33,85 +33,82 @@ bool SameButton(const MessageBoxViewButtonEntry& a, const MessageBoxViewButtonEn
 }
 } // namespace
 
+mu::ui::window::MessageBoxView::MessageBoxView()
+    // One document and model name: a second box while one is open gets no view (CreateDataModel()
+    // refuses the name), which no caller does.
+    : m_View("message_box_view",
+             [this](Rml::DataModelConstructor& c, MessageBoxViewRmlModel& model) { BindModel(c, model); },
+             {{"Data/Interface/RmlUi/message_box_view.rml"}}, {.stacking = UI::RmlBridge::ThemedStacking::Front})
+{
+}
+
 mu::ui::window::MessageBoxView::~MessageBoxView()
 {
     Destroy();
 }
 
+void mu::ui::window::MessageBoxView::BindModel(Rml::DataModelConstructor& c, MessageBoxViewRmlModel& model)
+{
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("kind", &model.kind);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("bold_text_px", &model.boldTextPx);
+    c.Bind("back_height", &model.backHeight);
+    c.RegisterArray<std::vector<float>>();
+    if (auto strip = c.RegisterStruct<MessageBoxViewStripEntry>())
+    {
+        strip.RegisterMember("kind", &MessageBoxViewStripEntry::kind);
+    }
+    c.RegisterArray<std::vector<MessageBoxViewStripEntry>>();
+    c.Bind("strips", &model.strips);
+    c.Bind("separators", &model.separators);
+    c.Bind("progress_shown", &model.progressShown);
+    c.Bind("progress_top", &model.progressTop);
+    c.Bind("progress_width", &model.progressWidth);
+
+    auto line = c.RegisterStruct<MessageBoxViewLineEntry>();
+    line.RegisterMember("text", &MessageBoxViewLineEntry::text);
+    line.RegisterMember("left", &MessageBoxViewLineEntry::left);
+    line.RegisterMember("top", &MessageBoxViewLineEntry::top);
+    line.RegisterMember("bold", &MessageBoxViewLineEntry::bold);
+    line.RegisterMember("color", &MessageBoxViewLineEntry::color);
+    line.RegisterMember("text_px", &MessageBoxViewLineEntry::textPx);
+    c.RegisterArray<std::vector<MessageBoxViewLineEntry>>();
+    c.Bind("lines", &model.lines);
+
+    auto button = c.RegisterStruct<MessageBoxViewButtonEntry>();
+    button.RegisterMember("label", &MessageBoxViewButtonEntry::label);
+    button.RegisterMember("index", &MessageBoxViewButtonEntry::index);
+    button.RegisterMember("left", &MessageBoxViewButtonEntry::left);
+    button.RegisterMember("top", &MessageBoxViewButtonEntry::top);
+    button.RegisterMember("width", &MessageBoxViewButtonEntry::width);
+    button.RegisterMember("height", &MessageBoxViewButtonEntry::height);
+    button.RegisterMember("enabled", &MessageBoxViewButtonEntry::enabled);
+    button.RegisterMember("ok_art", &MessageBoxViewButtonEntry::okArt);
+    c.RegisterArray<std::vector<MessageBoxViewButtonEntry>>();
+    c.Bind("buttons", &model.buttons);
+    c.Bind("placed_buttons", &model.placedButtons);
+
+    BindList(c, model);
+
+    c.BindEventCallback("message_box_button",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                m_PressedButton = arguments[0].Get<int>(-1);
+                        });
+}
+
 void mu::ui::window::MessageBoxView::Create(int middleCount, float backHeight, const char* kind)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+    if (m_View.Document() != nullptr || !RmlUiRuntime::Instance().IsCreated())
         return;
 
-    // One document and model name: a second box of this kind while one is open gets no view
-    // (CreateDataModel() refuses the name), which no caller does.
-    m_ModelName = "message_box_view";
-    const bool modelCreated = m_RmlBinder.Create(
-        RmlUiRuntime::Instance().GetContext(), m_ModelName,
-        [this](Rml::DataModelConstructor& c, MessageBoxViewRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("kind", &model.kind);
-            c.Bind("text_px", &model.textPx);
-            c.Bind("bold_text_px", &model.boldTextPx);
-            c.Bind("back_height", &model.backHeight);
-            c.RegisterArray<std::vector<float>>();
-            if (auto strip = c.RegisterStruct<MessageBoxViewStripEntry>())
-            {
-                strip.RegisterMember("kind", &MessageBoxViewStripEntry::kind);
-            }
-            c.RegisterArray<std::vector<MessageBoxViewStripEntry>>();
-            c.Bind("strips", &model.strips);
-            c.Bind("separators", &model.separators);
-            c.Bind("progress_shown", &model.progressShown);
-            c.Bind("progress_top", &model.progressTop);
-            c.Bind("progress_width", &model.progressWidth);
-
-            auto line = c.RegisterStruct<MessageBoxViewLineEntry>();
-            line.RegisterMember("text", &MessageBoxViewLineEntry::text);
-            line.RegisterMember("left", &MessageBoxViewLineEntry::left);
-            line.RegisterMember("top", &MessageBoxViewLineEntry::top);
-            line.RegisterMember("bold", &MessageBoxViewLineEntry::bold);
-            line.RegisterMember("color", &MessageBoxViewLineEntry::color);
-            line.RegisterMember("text_px", &MessageBoxViewLineEntry::textPx);
-            c.RegisterArray<std::vector<MessageBoxViewLineEntry>>();
-            c.Bind("lines", &model.lines);
-
-            auto button = c.RegisterStruct<MessageBoxViewButtonEntry>();
-            button.RegisterMember("label", &MessageBoxViewButtonEntry::label);
-            button.RegisterMember("index", &MessageBoxViewButtonEntry::index);
-            button.RegisterMember("left", &MessageBoxViewButtonEntry::left);
-            button.RegisterMember("top", &MessageBoxViewButtonEntry::top);
-            button.RegisterMember("width", &MessageBoxViewButtonEntry::width);
-            button.RegisterMember("height", &MessageBoxViewButtonEntry::height);
-            button.RegisterMember("enabled", &MessageBoxViewButtonEntry::enabled);
-            button.RegisterMember("ok_art", &MessageBoxViewButtonEntry::okArt);
-            c.RegisterArray<std::vector<MessageBoxViewButtonEntry>>();
-            c.Bind("buttons", &model.buttons);
-            c.Bind("placed_buttons", &model.placedButtons);
-
-            BindList(c, model);
-
-            c.BindEventCallback("message_box_button",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                                {
-                                    if (arguments.size() == 1)
-                                        m_PressedButton = arguments[0].Get<int>(-1);
-                                });
-        });
-    if (!modelCreated)
-    {
-        m_ModelName.clear();
-        return;
-    }
-
-    m_RmlBinder.GetModel().kind = kind;
+    m_View.GetModel().kind = kind;
     SetFrame(middleCount, backHeight);
-
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                  "Data/Interface/RmlUi/message_box_view.rml");
+    m_View.Ensure();
 }
 
 void mu::ui::window::MessageBoxView::SetFrame(int middleCount, float backHeight, int middlesAboveDivider)
@@ -130,7 +127,7 @@ void mu::ui::window::MessageBoxView::SetFrame(int middleCount, float backHeight,
     if (middlesAboveDivider >= middleCount)
         strips.push_back({"divider"});
 
-    MessageBoxViewRmlModel& model = m_RmlBinder.GetModel();
+    MessageBoxViewRmlModel& model = m_View.GetModel();
     const bool sameStrips =
         model.strips.size() == strips.size() &&
         std::equal(model.strips.begin(), model.strips.end(), strips.begin(),
@@ -141,39 +138,39 @@ void mu::ui::window::MessageBoxView::SetFrame(int middleCount, float backHeight,
     model.middleCount = middleCount;
     model.backHeight = backHeight;
     model.strips = std::move(strips);
-    m_RmlBinder.MarkDirty("back_height");
-    m_RmlBinder.MarkDirty("strips");
+    m_View.MarkDirty("back_height");
+    m_View.MarkDirty("strips");
 }
 
 void mu::ui::window::MessageBoxView::SetSeparators(const std::vector<float>& tops)
 {
-    MessageBoxViewRmlModel& model = m_RmlBinder.GetModel();
+    MessageBoxViewRmlModel& model = m_View.GetModel();
     if (model.separators == tops)
         return;
     model.separators = tops;
-    m_RmlBinder.MarkDirty("separators");
+    m_View.MarkDirty("separators");
 }
 
 void mu::ui::window::MessageBoxView::SetProgress(float top, float fraction)
 {
-    MessageBoxViewRmlModel& model = m_RmlBinder.GetModel();
+    MessageBoxViewRmlModel& model = m_View.GetModel();
     const bool shown = top >= 0.f;
     // RenderProgress(): the fill 150 units wide at the full fraction, not clamped.
     const float width = 150.f * fraction;
     if (model.progressShown != shown)
     {
         model.progressShown = shown;
-        m_RmlBinder.MarkDirty("progress_shown");
+        m_View.MarkDirty("progress_shown");
     }
     if (model.progressTop != top)
     {
         model.progressTop = top;
-        m_RmlBinder.MarkDirty("progress_top");
+        m_View.MarkDirty("progress_top");
     }
     if (model.progressWidth != width)
     {
         model.progressWidth = width;
-        m_RmlBinder.MarkDirty("progress_width");
+        m_View.MarkDirty("progress_width");
     }
 }
 
@@ -181,37 +178,27 @@ void mu::ui::window::MessageBoxView::Destroy()
 {
     m_PressedButton = -1;
     m_PressedListRow = -1;
-    if (m_ModelName.empty())
-        return;
-    if (RmlUiRuntime::Instance().IsCreated())
-    {
-        Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-        if (m_pRmlDoc)
-            context->UnloadDocument(m_pRmlDoc);
-        m_RmlBinder.Destroy(context);
-    }
-    m_pRmlDoc = nullptr;
-    m_ModelName.clear();
+    m_View.Release();
 }
 
 void mu::ui::window::MessageBoxView::Sync(const POINT& pos, const std::vector<Line>& lines,
                                           const std::vector<Button>& buttons)
 {
-    if (!m_pRmlDoc)
+    if (!m_View.Document())
         return;
 
     // Message boxes draw over every window: in front of the other documents.
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, true);
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, pos);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_View.Document(), true);
+    UI::RmlBridge::SyncRootTransform(m_View.Binder(), pos);
+    UI::RmlBridge::SyncNativeTextSize(m_View.Binder());
 
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    MessageBoxViewRmlModel& model = m_RmlBinder.GetModel();
+    MessageBoxViewRmlModel& model = m_View.GetModel();
     const float boldPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
     if (model.boldTextPx != boldPx)
     {
         model.boldTextPx = boldPx;
-        m_RmlBinder.MarkDirty("bold_text_px");
+        m_View.MarkDirty("bold_text_px");
     }
 
     std::vector<MessageBoxViewLineEntry> lineEntries;
@@ -222,7 +209,7 @@ void mu::ui::window::MessageBoxView::Sync(const POINT& pos, const std::vector<Li
         !std::equal(model.lines.begin(), model.lines.end(), lineEntries.begin(), SameLine))
     {
         model.lines = std::move(lineEntries);
-        m_RmlBinder.MarkDirty("lines");
+        m_View.MarkDirty("lines");
     }
 
     // CMessageBoxButton::Render(): the label in the normal font, centred on its button.
@@ -241,7 +228,7 @@ void mu::ui::window::MessageBoxView::Sync(const POINT& pos, const std::vector<Li
         if (current.size() == next.size() && std::equal(current.begin(), current.end(), next.begin(), SameButton))
             return;
         current = std::move(next);
-        m_RmlBinder.MarkDirty(name);
+        m_View.MarkDirty(name);
     };
     syncButtons(model.buttons, std::move(buttonEntries), "buttons");
     syncButtons(model.placedButtons, std::move(placedEntries), "placed_buttons");
@@ -268,13 +255,13 @@ void mu::ui::window::MessageBoxView::BindList(Rml::DataModelConstructor& constru
 
 void mu::ui::window::MessageBoxView::SyncList(const List* list)
 {
-    if (!m_pRmlDoc)
+    if (!m_View.Document())
         return;
-    SyncField(m_RmlBinder, &MessageBoxViewRmlModel::listShown, "list_shown", list != nullptr);
-    if (list && m_RmlBinder.GetModel().listRows != *list)
+    SyncField(m_View.Binder(), &MessageBoxViewRmlModel::listShown, "list_shown", list != nullptr);
+    if (list && m_View.GetModel().listRows != *list)
     {
-        m_RmlBinder.GetModel().listRows = *list;
-        m_RmlBinder.MarkDirty("list_rows");
+        m_View.GetModel().listRows = *list;
+        m_View.MarkDirty("list_rows");
     }
 }
 

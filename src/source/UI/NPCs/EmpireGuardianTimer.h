@@ -88,7 +88,6 @@ public:
         return m_iZone;
     }
 
-    void ReloadRmlTheme();
 
 private:
     void SyncView();

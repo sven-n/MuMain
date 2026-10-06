@@ -42,7 +42,6 @@ bool mu::ui::window::CItemExplanationWindow::Create(CManager* pNewUIMng, int x, 
     SetPos(x, y);
 
     m_View.Build();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { m_View.ReloadTheme(); });
 
     Show(false);
 
@@ -51,7 +50,7 @@ bool mu::ui::window::CItemExplanationWindow::Create(CManager* pNewUIMng, int x, 
 
 void mu::ui::window::CItemExplanationWindow::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
+    m_View.Release();
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);

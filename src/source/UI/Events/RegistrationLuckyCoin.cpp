@@ -32,7 +32,6 @@ namespace mu::ui::window
 
         SetPos(x, y);
         m_View.Build();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { m_View.ReloadTheme(); });
         Show(false);
         return true;
     }
@@ -229,7 +228,7 @@ namespace mu::ui::window
 
     void CRegistrationLuckyCoin::Release()
     {
-        UI::RmlBridge::UnregisterForThemeReload(this);
+        m_View.Release();
 
         if (m_pNewUIMng)
         {

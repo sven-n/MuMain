@@ -35,7 +35,6 @@ bool CExchangeLuckyCoin::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
 
     m_View.Build();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { m_View.ReloadTheme(); });
 
     Show(false);
 
@@ -44,7 +43,7 @@ bool CExchangeLuckyCoin::Create(CManager* pNewUIMng, int x, int y)
 
 void CExchangeLuckyCoin::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
+    m_View.Release();
 
     if (m_pNewUIMng)
     {

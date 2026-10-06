@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UI/Events/EventItemEntryRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <string>
 #include <vector>
@@ -49,7 +49,14 @@ public:
                        const char* bgDocumentPath);
 
     void Build();
-    void ReloadTheme();
+    // Unloads the documents; from the window's own Release().
+    void Release()
+    {
+        m_View.Release();
+        m_BgView.Release();
+    }
+    // Runs after every build of the main document, including a theme switch's.
+    void SetAfterBuild(std::function<void()> afterBuild) { m_View.SetAfterBuild(std::move(afterBuild)); }
 
     void SetTexts(std::vector<Text> texts);
     void SetButtons(const std::vector<Button>& buttons);
@@ -74,17 +81,13 @@ public:
     void RefreshPanelSize(float& width, float& height) const;
 
 private:
+    void BindModel(Rml::DataModelConstructor& c, EventItemEntryRmlModel& model);
+    static void BindBgModel(Rml::DataModelConstructor& c, EventItemEntryBgRmlModel& model);
     void SyncTexts();
     void SyncButtons();
 
-    const char* m_ModelName;
-    const char* m_DocumentPath;
-    const char* m_BgModelName;
-    const char* m_BgDocumentPath;
-    RmlModelBinder<EventItemEntryRmlModel> m_RmlBinder;
-    RmlModelBinder<EventItemEntryBgRmlModel> m_BgRmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
-    Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+    UI::RmlBridge::ThemedView<EventItemEntryRmlModel> m_View;
+    UI::RmlBridge::ThemedView<EventItemEntryBgRmlModel> m_BgView;
     std::vector<Text> m_Texts;
     std::vector<Button> m_Buttons;
     int m_PressedButton = -1;

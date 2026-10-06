@@ -70,7 +70,6 @@ public:
     void OpenningProcess();
     void ClosingProcess();
 
-    void ReloadRmlTheme();
 
 private:
     void SyncView();

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UI/Dialogs/MessageBoxViewRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <string>
 #include <vector>
@@ -48,7 +48,7 @@ public:
 
     using List = std::vector<MessageBoxViewListRowEntry>;
 
-    MessageBoxView() = default;
+    MessageBoxView();
     ~MessageBoxView();
     MessageBoxView(const MessageBoxView&) = delete;
     MessageBoxView& operator=(const MessageBoxView&) = delete;
@@ -73,17 +73,16 @@ public:
     // The document is loaded: the box draws nothing natively.
     bool IsShown() const
     {
-        return m_pRmlDoc != nullptr;
+        return m_View.Document() != nullptr;
     }
 
     int TakePressedButton();
     int TakePressedListRow();
 
 private:
+    void BindModel(Rml::DataModelConstructor& c, MessageBoxViewRmlModel& model);
     void BindList(Rml::DataModelConstructor& constructor, MessageBoxViewRmlModel& model);
-    std::string m_ModelName;
-    RmlModelBinder<MessageBoxViewRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    UI::RmlBridge::ThemedView<MessageBoxViewRmlModel> m_View;
     int m_PressedButton = -1;
     int m_PressedListRow = -1;
 };

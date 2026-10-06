@@ -63,14 +63,9 @@ bool CGoldBowmanWindow::Create(CManager* pNewUIMng, int x, int y)
     m_ExitTooltip.SetText(&I18N::Game::Close388);
     m_ExitTooltip.SetAnchorAbove(true);
 
+    // A new document's field is unfocused (a theme switch rebuilds it).
+    m_View.SetAfterBuild([this] { m_SerialFocusPending = IsVisible(); });
     m_View.Build();
-    UI::RmlBridge::RegisterForThemeReload(this,
-                                          [this]
-                                          {
-                                              // A new document: its field starts empty and unfocused.
-                                              m_View.ReloadTheme();
-                                              m_SerialFocusPending = IsVisible();
-                                          });
 
     Show(false);
 
@@ -79,7 +74,7 @@ bool CGoldBowmanWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void CGoldBowmanWindow::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
+    m_View.Release();
     UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
 
     if (m_pNewUIMng)

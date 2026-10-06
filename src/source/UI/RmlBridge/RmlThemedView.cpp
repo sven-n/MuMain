@@ -156,8 +156,14 @@ void ThemedDocuments::Reload()
 
     for (size_t i = 0; i < m_Slots.size(); ++i)
     {
-        if (wasVisible[i] && m_Slots[i].document != nullptr)
-            m_Slots[i].document->Show(m_Options.modal, m_Options.focus);
+        Rml::ElementDocument* document = m_Slots[i].document;
+        if (!wasVisible[i] || document == nullptr)
+            continue;
+        document->Show(m_Options.modal, m_Options.focus);
+        if (m_Options.stacking == ThemedStacking::Front)
+            document->PullToFront();
+        else if (m_Options.stacking == ThemedStacking::Back)
+            document->PushToBack();
     }
 }
 

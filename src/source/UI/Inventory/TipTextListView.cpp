@@ -35,72 +35,56 @@ bool SameLine(const TipTextListLineEntry& a, const TipTextListLineEntry& b)
     return a.text == b.text && a.left == b.left && a.top == b.top && a.width == b.width && a.textPx == b.textPx &&
            a.align == b.align && a.bold == b.bold && a.color == b.color;
 }
+
+void BindTipTextListModel(Rml::DataModelConstructor& c, TipTextListRmlModel& model)
+{
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    auto box = c.RegisterStruct<TipTextListBoxEntry>();
+    box.RegisterMember("left", &TipTextListBoxEntry::left);
+    box.RegisterMember("top", &TipTextListBoxEntry::top);
+    box.RegisterMember("width", &TipTextListBoxEntry::width);
+    box.RegisterMember("height", &TipTextListBoxEntry::height);
+    box.RegisterMember("kind", &TipTextListBoxEntry::kind);
+    c.RegisterArray<std::vector<TipTextListBoxEntry>>();
+    c.Bind("boxes", &model.boxes);
+    auto line = c.RegisterStruct<TipTextListLineEntry>();
+    line.RegisterMember("text", &TipTextListLineEntry::text);
+    line.RegisterMember("left", &TipTextListLineEntry::left);
+    line.RegisterMember("top", &TipTextListLineEntry::top);
+    line.RegisterMember("width", &TipTextListLineEntry::width);
+    line.RegisterMember("text_px", &TipTextListLineEntry::textPx);
+    line.RegisterMember("align", &TipTextListLineEntry::align);
+    line.RegisterMember("bold", &TipTextListLineEntry::bold);
+    line.RegisterMember("color", &TipTextListLineEntry::color);
+    c.RegisterArray<std::vector<TipTextListLineEntry>>();
+    c.Bind("lines", &model.lines);
+}
 } // namespace
 
 mu::ui::window::TipTextListView::TipTextListView(const char* modelName, const char* documentPath)
-    : m_ModelName(modelName), m_DocumentPath(documentPath)
+    : m_View(modelName, BindTipTextListModel, {{documentPath}}, {.stacking = UI::RmlBridge::ThemedStacking::Front})
 {
 }
 
 void mu::ui::window::TipTextListView::Build()
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
-
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), m_ModelName,
-                                                 [](Rml::DataModelConstructor& c, TipTextListRmlModel& model)
-                                                 {
-                                                     c.Bind("root_x", &model.rootX);
-                                                     c.Bind("root_y", &model.rootY);
-                                                     c.Bind("root_scale", &model.rootScale);
-                                                     auto box = c.RegisterStruct<TipTextListBoxEntry>();
-                                                     box.RegisterMember("left", &TipTextListBoxEntry::left);
-                                                     box.RegisterMember("top", &TipTextListBoxEntry::top);
-                                                     box.RegisterMember("width", &TipTextListBoxEntry::width);
-                                                     box.RegisterMember("height", &TipTextListBoxEntry::height);
-                                                     box.RegisterMember("kind", &TipTextListBoxEntry::kind);
-                                                     c.RegisterArray<std::vector<TipTextListBoxEntry>>();
-                                                     c.Bind("boxes", &model.boxes);
-                                                     auto line = c.RegisterStruct<TipTextListLineEntry>();
-                                                     line.RegisterMember("text", &TipTextListLineEntry::text);
-                                                     line.RegisterMember("left", &TipTextListLineEntry::left);
-                                                     line.RegisterMember("top", &TipTextListLineEntry::top);
-                                                     line.RegisterMember("width", &TipTextListLineEntry::width);
-                                                     line.RegisterMember("text_px", &TipTextListLineEntry::textPx);
-                                                     line.RegisterMember("align", &TipTextListLineEntry::align);
-                                                     line.RegisterMember("bold", &TipTextListLineEntry::bold);
-                                                     line.RegisterMember("color", &TipTextListLineEntry::color);
-                                                     c.RegisterArray<std::vector<TipTextListLineEntry>>();
-                                                     c.Bind("lines", &model.lines);
-                                                 });
-    if (!modelCreated)
-        return;
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), m_DocumentPath);
-}
-
-void mu::ui::window::TipTextListView::ReloadTheme()
-{
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-    Build();
+    m_View.Ensure();
 }
 
 void mu::ui::window::TipTextListView::Sync(bool visible, const TipTextListRecord& record)
 {
     Build();
-    if (!m_pRmlDoc)
+    if (!m_View.Document())
         return;
 
     // Layer depth 6.5 / 6.6: over the HUD and the panels.
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, visible);
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_View.Document(), visible);
     if (!visible)
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, POINT{0, 0});
+    UI::RmlBridge::SyncRootTransform(m_View.Binder(), POINT{0, 0});
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
 
     std::vector<TipTextListBoxEntry> boxes;
@@ -124,17 +108,17 @@ void mu::ui::window::TipTextListView::Sync(bool visible, const TipTextListRecord
              line.bold, UI::RmlBridge::RgbaToCss(line.color)});
     }
 
-    TipTextListRmlModel& model = m_RmlBinder.GetModel();
+    TipTextListRmlModel& model = m_View.GetModel();
     if (model.boxes.size() != boxes.size() ||
         !std::equal(model.boxes.begin(), model.boxes.end(), boxes.begin(), SameBox))
     {
         model.boxes = std::move(boxes);
-        m_RmlBinder.MarkDirty("boxes");
+        m_View.MarkDirty("boxes");
     }
     if (model.lines.size() != lines.size() ||
         !std::equal(model.lines.begin(), model.lines.end(), lines.begin(), SameLine))
     {
         model.lines = std::move(lines);
-        m_RmlBinder.MarkDirty("lines");
+        m_View.MarkDirty("lines");
     }
 }

@@ -61,7 +61,6 @@ bool CGoldBowmanLena::Create(CManager* pNewUIMng, int x, int y)
     m_ExitTooltip.SetAnchorAbove(true);
 
     m_View.Build();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { m_View.ReloadTheme(); });
 
     Show(false);
 
@@ -70,7 +69,7 @@ bool CGoldBowmanLena::Create(CManager* pNewUIMng, int x, int y)
 
 void CGoldBowmanLena::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
+    m_View.Release();
     HideTooltips();
 }
 

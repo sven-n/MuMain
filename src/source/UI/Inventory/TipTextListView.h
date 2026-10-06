@@ -2,7 +2,7 @@
 
 #include "UI/Inventory/TipTextListLayout.h"
 #include "UI/Inventory/TipTextListRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -20,15 +20,13 @@ public:
     TipTextListView(const char* modelName, const char* documentPath);
 
     void Build();
-    void ReloadTheme();
+    // Unloads the document; from the window's own Release().
+    void Release() { m_View.Release(); }
 
     // Per frame, inside the window's CManager transform scope: shown with `record`, or hidden.
     void Sync(bool visible, const TipTextListRecord& record);
 
 private:
-    const char* m_ModelName;
-    const char* m_DocumentPath;
-    RmlModelBinder<TipTextListRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    UI::RmlBridge::ThemedView<TipTextListRmlModel> m_View;
 };
 } // namespace mu::ui::window

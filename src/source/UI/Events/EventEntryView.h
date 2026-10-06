@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UI/Events/EventEntryRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <string>
 #include <vector>
@@ -29,7 +29,8 @@ public:
     EventEntryView(const char* modelName, const char* documentPath);
 
     void Build();
-    void ReloadTheme();
+    // Unloads the document; from the window's own Release().
+    void Release() { m_View.Release(); }
 
     // The static content, set when the window opens. Where the lines and buttons land is the
     // theme's: each window's own .rcss gives its rows (event_entry.rcss).
@@ -42,7 +43,7 @@ public:
     // The theme's #panel size in the window's layout units; false (outputs untouched) before the
     // document has laid out.
     bool PanelSize(float& width, float& height) const;
-    Rml::ElementDocument* Document() const { return m_pRmlDoc; }
+    Rml::ElementDocument* Document() const { return m_View.Document(); }
 
     // A click RmlUi reported since the last call: an enabled level button's index (else -1), the
     // exit button.
@@ -50,12 +51,10 @@ public:
     bool TakeExitPressed();
 
 private:
+    void BindModel(Rml::DataModelConstructor& c, EventEntryRmlModel& model);
     void SyncTextSizes();
 
-    const char* m_ModelName;
-    const char* m_DocumentPath;
-    RmlModelBinder<EventEntryRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    UI::RmlBridge::ThemedView<EventEntryRmlModel> m_View;
     std::wstring m_Title;
     std::vector<std::wstring> m_LineTexts;
     int m_PressedButton = -1;

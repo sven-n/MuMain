@@ -19,85 +19,55 @@ using namespace mu::ui::window;
 
 mu::ui::window::EventItemEntryView::EventItemEntryView(const char* modelName, const char* documentPath,
                                                        const char* bgModelName, const char* bgDocumentPath)
-    : m_ModelName(modelName), m_DocumentPath(documentPath), m_BgModelName(bgModelName), m_BgDocumentPath(bgDocumentPath)
+    : m_View(modelName, [this](Rml::DataModelConstructor& c, EventItemEntryRmlModel& model) { BindModel(c, model); },
+             {{documentPath}}, {.stacking = UI::RmlBridge::ThemedStacking::Front}),
+      m_BgView(bgModelName, BindBgModel,
+               {{bgDocumentPath, [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}})
 {
+}
+
+void mu::ui::window::EventItemEntryView::BindModel(Rml::DataModelConstructor& c, EventItemEntryRmlModel& model)
+{
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("bold_text_px", &model.boldTextPx);
+    c.Bind("input_value", &model.inputValue);
+
+    auto text = c.RegisterStruct<EventItemEntryTextEntry>();
+    text.RegisterMember("text", &EventItemEntryTextEntry::text);
+    text.RegisterMember("text_px", &EventItemEntryTextEntry::textPx);
+    c.RegisterArray<std::vector<EventItemEntryTextEntry>>();
+    c.Bind("texts", &model.texts);
+
+    auto button = c.RegisterStruct<EventItemEntryButtonEntry>();
+    button.RegisterMember("label", &EventItemEntryButtonEntry::label);
+    button.RegisterMember("locked", &EventItemEntryButtonEntry::locked);
+    button.RegisterMember("bold", &EventItemEntryButtonEntry::bold);
+    button.RegisterMember("label_line_px", &EventItemEntryButtonEntry::labelLinePx);
+    c.RegisterArray<std::vector<EventItemEntryButtonEntry>>();
+    c.Bind("buttons", &model.buttons);
+
+    c.BindEventCallback("item_entry_press",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                m_PressedButton = arguments[0].Get<int>(-1);
+                        });
+}
+
+void mu::ui::window::EventItemEntryView::BindBgModel(Rml::DataModelConstructor& c, EventItemEntryBgRmlModel& model)
+{
+c.Bind("root_x", &model.rootX);
+c.Bind("root_y", &model.rootY);
+c.Bind("root_scale", &model.rootScale);
 }
 
 void mu::ui::window::EventItemEntryView::Build()
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
-
-    const bool modelCreated = m_RmlBinder.Create(
-        RmlUiRuntime::Instance().GetContext(), m_ModelName,
-        [this](Rml::DataModelConstructor& c, EventItemEntryRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-            c.Bind("bold_text_px", &model.boldTextPx);
-            c.Bind("input_value", &model.inputValue);
-
-            auto text = c.RegisterStruct<EventItemEntryTextEntry>();
-            text.RegisterMember("text", &EventItemEntryTextEntry::text);
-            text.RegisterMember("text_px", &EventItemEntryTextEntry::textPx);
-            c.RegisterArray<std::vector<EventItemEntryTextEntry>>();
-            c.Bind("texts", &model.texts);
-
-            auto button = c.RegisterStruct<EventItemEntryButtonEntry>();
-            button.RegisterMember("label", &EventItemEntryButtonEntry::label);
-            button.RegisterMember("locked", &EventItemEntryButtonEntry::locked);
-            button.RegisterMember("bold", &EventItemEntryButtonEntry::bold);
-            button.RegisterMember("label_line_px", &EventItemEntryButtonEntry::labelLinePx);
-            c.RegisterArray<std::vector<EventItemEntryButtonEntry>>();
-            c.Bind("buttons", &model.buttons);
-
-            c.BindEventCallback("item_entry_press",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                                {
-                                    if (arguments.size() == 1)
-                                        m_PressedButton = arguments[0].Get<int>(-1);
-                                });
-        });
-    if (!modelCreated)
-        return;
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), m_DocumentPath);
-
-    if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-    {
-        const bool bgModelCreated =
-            m_BgRmlBinder.Create(bgContext, m_BgModelName,
-                                 [](Rml::DataModelConstructor& c, EventItemEntryBgRmlModel& model)
-                                 {
-                                     c.Bind("root_x", &model.rootX);
-                                     c.Bind("root_y", &model.rootY);
-                                     c.Bind("root_scale", &model.rootScale);
-                                 });
-        if (bgModelCreated)
-            m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument(m_BgDocumentPath);
-    }
-}
-
-void mu::ui::window::EventItemEntryView::ReloadTheme()
-{
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-    if (m_pRmlBgDoc)
-    {
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-        {
-            m_BgRmlBinder.Destroy(bgContext);
-            bgContext->UnloadDocument(m_pRmlBgDoc);
-        }
-        m_pRmlBgDoc = nullptr;
-    }
-
-    Build();
+    m_View.Ensure();
+    m_BgView.Ensure();
 }
 
 void mu::ui::window::EventItemEntryView::SetTexts(std::vector<Text> texts)
@@ -113,25 +83,25 @@ void mu::ui::window::EventItemEntryView::SetButtons(const std::vector<Button>& b
 void mu::ui::window::EventItemEntryView::Sync(bool visible, const POINT& pos)
 {
     Build();
-    if (!m_pRmlDoc)
+    if (!m_View.Document())
         return;
 
     // The frame: RenderBackgroundLayer() paints whatever is shown in the background context, so
     // this is what hides it with the window.
-    if (m_pRmlBgDoc)
+    if (m_BgView.Document())
     {
-        UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, visible);
+        UI::RmlBridge::SyncDocumentVisibility(m_BgView.Document(), visible);
         if (visible)
-            UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, pos);
+            UI::RmlBridge::SyncRootTransform(m_BgView.Binder(), pos);
     }
 
     // Texts and buttons: over the HUD like every panel the original opened.
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, visible);
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_View.Document(), visible);
     if (!visible)
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, pos);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_View.Binder(), pos);
+    UI::RmlBridge::SyncNativeTextSize(m_View.Binder());
     SyncTexts();
     SyncButtons();
 }
@@ -139,7 +109,7 @@ void mu::ui::window::EventItemEntryView::Sync(bool visible, const POINT& pos)
 void mu::ui::window::EventItemEntryView::SyncTexts()
 {
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    EventItemEntryRmlModel& model = m_RmlBinder.GetModel();
+    EventItemEntryRmlModel& model = m_View.GetModel();
 
     // RenderText(x, y, text, width, 0, RT3_SORT_CENTER): shrunk to its box if wider.
     std::vector<EventItemEntryTextEntry> texts;
@@ -155,19 +125,19 @@ void mu::ui::window::EventItemEntryView::SyncTexts()
     if (model.texts == texts)
         return;
     model.texts = std::move(texts);
-    m_RmlBinder.MarkDirty("texts");
+    m_View.MarkDirty("texts");
 }
 
 void mu::ui::window::EventItemEntryView::SyncButtons()
 {
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    EventItemEntryRmlModel& model = m_RmlBinder.GetModel();
+    EventItemEntryRmlModel& model = m_View.GetModel();
 
     const float boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
     if (model.boldTextPx != boldTextPx)
     {
         model.boldTextPx = boldTextPx;
-        m_RmlBinder.MarkDirty("bold_text_px");
+        m_View.MarkDirty("bold_text_px");
     }
 
     std::vector<EventItemEntryButtonEntry> entries;
@@ -186,7 +156,7 @@ void mu::ui::window::EventItemEntryView::SyncButtons()
     if (model.buttons == entries)
         return;
     model.buttons = std::move(entries);
-    m_RmlBinder.MarkDirty("buttons");
+    m_View.MarkDirty("buttons");
 }
 
 int mu::ui::window::EventItemEntryView::TakePressedButton()
@@ -200,20 +170,20 @@ int mu::ui::window::EventItemEntryView::TakePressedButton()
 
 Rml::Element* mu::ui::window::EventItemEntryView::GetElementById(const char* id) const
 {
-    return m_pRmlDoc != nullptr ? m_pRmlDoc->GetElementById(id) : nullptr;
+    return m_View.Document() != nullptr ? m_View.Document()->GetElementById(id) : nullptr;
 }
 
 const Rml::String& mu::ui::window::EventItemEntryView::InputValue() const
 {
-    return m_RmlBinder.GetModel().inputValue;
+    return m_View.GetModel().inputValue;
 }
 
 void mu::ui::window::EventItemEntryView::SetInputValue(const Rml::String& value)
 {
-    SyncField(m_RmlBinder, &EventItemEntryRmlModel::inputValue, "input_value", Rml::String(value));
+    SyncField(m_View.Binder(), &EventItemEntryRmlModel::inputValue, "input_value", Rml::String(value));
 }
 
 void mu::ui::window::EventItemEntryView::RefreshPanelSize(float& width, float& height) const
 {
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", width, height);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_View.Document(), "panel", width, height);
 }
