@@ -9,6 +9,7 @@
 class RmlUiRenderInterface;
 class RmlUiSystemInterface;
 class TextInputMethodEditor_SDL; // ThirdParty/RmlUi/Backends/RmlUi_Platform_SDL.h
+namespace Rml { class FileInterface; }
 union SDL_Event;
 struct SDL_Window;
 
@@ -30,6 +31,8 @@ struct RmlUiRuntimeHooks
     // A texture source the game draws itself: true if `source` is one, with its texture (null if
     // it has none yet) and size.
     std::function<bool(const Rml::String& source, void*& texture, int& width, int& height)> resolveTexture;
+    // Optional application resource provider; installed before Rml::Initialise().
+    std::function<std::unique_ptr<Rml::FileInterface>()> createFileInterface;
 };
 
 // Owns the Rml::Context lifecycle and the one per-frame Update()/Render() entry point. Create()
@@ -176,6 +179,7 @@ private:
 
     std::unique_ptr<RmlUiRenderInterface> m_RenderInterface;
     std::unique_ptr<RmlUiSystemInterface> m_SystemInterface;
+    std::unique_ptr<Rml::FileInterface> m_FileInterface;
 
     // Installed globally via Rml::SetTextInputHandler() in Create() -- global, not per-Context,
     // per TextInputHandler.h's own doc comment, so one instance covers all three contexts below.

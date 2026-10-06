@@ -9,6 +9,7 @@
 #include <RmlUi/Core/Core.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/FileInterface.h>
 #include <RmlUi_Platform_SDL.h> // ThirdParty/RmlUi/Backends -- see the CMakeLists.txt addition
 #include "Render/Renderer/MuRenderer.h"
 #include "Core/Utilities/FrameProfiler.h"
@@ -66,12 +67,19 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     m_RenderInterface = std::make_unique<RmlUiRenderInterface>(device, window);
     m_RenderInterface->SetTextureSourceResolver(m_Hooks.resolveTexture);
     m_SystemInterface = std::make_unique<RmlUiSystemInterface>(window);
+    if (m_Hooks.createFileInterface)
+        m_FileInterface = m_Hooks.createFileInterface();
 
     Rml::SetRenderInterface(m_RenderInterface.get());
     Rml::SetSystemInterface(m_SystemInterface.get());
+    if (m_FileInterface)
+        Rml::SetFileInterface(m_FileInterface.get());
 
     if (!Rml::Initialise())
     {
+        if (m_FileInterface)
+            Rml::SetFileInterface(nullptr);
+        m_FileInterface.reset();
         m_RenderInterface.reset();
         m_SystemInterface.reset();
         return;
@@ -182,6 +190,7 @@ void RmlUiRuntime::Destroy()
     // during element/document destruction, i.e. during the Shutdown() call above).
     m_RenderInterface.reset();
     m_SystemInterface.reset();
+    m_FileInterface.reset();
     m_TextInputMethodEditor.reset();
 }
 

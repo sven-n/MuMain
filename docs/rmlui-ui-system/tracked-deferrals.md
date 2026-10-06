@@ -135,13 +135,13 @@ against the library is where RmlUi meets the legacy UI. In order of value:
    retire `dialog_background`; move the inventory family's live items into render targets and
    retire `background` with its `*_bg.rml` documents, taking each out of the test's list. Trigger:
    the paperdoll row above, which waits on the same pass.
-2. **Design tokens are inlined by regex.** The themed loader rewrites `<link>` tags into
-   `<style>` blocks, so tokenised sheets skip RmlUi's stylesheet cache and parse once per document,
-   and a `<link>` with its attributes in another order is silently left unsubstituted. The need is
-   real: this RmlUi has no `var()`. Direction: a `Rml::FileInterface` that substitutes tokens when
-   it serves an `.rcss`, which can also resolve the per-theme `.rml` overrides. Trigger: a token
-   found unsubstituted, or the counter-scale block below moving to `calc()` with `var()`, which
-   could replace tokens too.
+2. **Design-token resource loading — awaiting in-game sign-off.** The themed loader now leaves
+   ordinary RCSS `<link>` elements intact. An application-owned `Rml::FileInterface` substitutes
+   `token(name)` when RmlUi opens a themed sheet, so attribute order no longer controls substitution
+   and RmlUi can cache the parsed external sheet by path. Theme selection clears the stylesheet
+   cache before documents rebuild. The per-theme `.rml` override and model-placeholder path remain
+   in the loader because they need memory-backed markup. Confirm legacy/modern theme switching and
+   relative assets in game, then remove this entry.
 3. **A display-scale change leaves RmlUi's `dp` ratio stale.**
    `SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED` updates the content scale `ViewportFitScale()` folds
    in, but nothing calls `RmlUiRuntime::OnResize()` until the next resize. A bug; fix it with the

@@ -15,7 +15,6 @@
 #include <cctype>
 #include <filesystem>
 #include <fstream>
-#include <regex>
 #include <sstream>
 #include <utility>
 #include <vector>
@@ -51,96 +50,6 @@ namespace UI::RmlBridge
             return out;
         }
 
-        // Directory portion of `path` (up to and including the last '/'), empty if `path` has no
-        // '/'. Used to resolve a <link href="X.rcss"> the same way RmlUi's own AbsolutePath()
-        // would -- relative to whichever RML file actually loaded, not always documentPath.
-        std::string DirectoryOf(const std::string& path)
-        {
-            const size_t lastSlash = path.find_last_of('/');
-            return (lastSlash == std::string::npos) ? std::string() : path.substr(0, lastSlash + 1);
-        }
-
-        // Reads themes/<theme>/tokens.ini's [Tokens] section via the same private-profile API
-        // theme.ini's capability reader uses.
-        // Missing file/theme/key all resolve to an empty string -- an RCSS rule referencing an
-        // undefined token renders visibly wrong (empty value), which is enough: this is an
-        // authoring-time mistake to catch in review, not a runtime condition worth handling more
-        // gracefully than that.
-        std::string ResolveToken(const std::string& tokenName)
-        {
-            const std::string iniPath = "Data/Interface/RmlUi/themes/" + GetActiveThemeName() + "/tokens.ini";
-            wchar_t buffer[256] = {};
-            GetPrivateProfileStringW(L"Tokens", WidenAscii(tokenName).c_str(), L"", buffer,
-                static_cast<DWORD>(std::size(buffer)), WidenAscii(iniPath).c_str());
-            return NarrowAscii(buffer);
-        }
-
-        // Replaces every token(name) in `rcssText` with ResolveToken(name). Plain text
-        // substitution, not CSS-aware -- the author is responsible for quoting a token() call the
-        // same way they'd quote a literal (e.g. font-family: "token(font-body)";).
-        std::string SubstituteTokens(const std::string& rcssText)
-        {
-            static const std::regex tokenPattern(R"(token\(([a-zA-Z0-9_-]+)\))");
-            std::string out;
-            out.reserve(rcssText.size());
-            size_t lastEnd = 0;
-            for (auto it = std::sregex_iterator(rcssText.begin(), rcssText.end(), tokenPattern);
-                 it != std::sregex_iterator(); ++it)
-            {
-                const std::smatch& m = *it;
-                out.append(rcssText, lastEnd, static_cast<size_t>(m.position(0)) - lastEnd);
-                out += ResolveToken(m[1].str());
-                lastEnd = static_cast<size_t>(m.position(0) + m.length(0));
-            }
-            out.append(rcssText, lastEnd, rcssText.size() - lastEnd);
-            return out;
-        }
-
-        // Design-token substitution -- this vendored RmlUi has
-        // no var()/custom-property mechanism, so a themed .rcss authored with token(name) markers
-        // needs its tokens resolved before RmlUi ever sees the text. RmlUi's XMLNodeHandlerHead
-        // treats an inline <style> block in <head> identically to an external
-        // <link type="text/rcss"> for cascade purposes, so this iterates every <link> in the
-        // RML's <head> (a document typically links two: base.rcss, then its own <name>.rcss) and
-        // substitutes each stylesheet independently, in place, preserving order.
-        //
-        // Content-driven, not theme-name-driven: a stylesheet with no token(...) marker leaves
-        // its own <link> untouched, so `legacy` never enters the substitution branch at all.
-        std::string InlineTokenizedStylesheet(const std::string& rmlText, const std::string& resolvedRmlPath)
-        {
-            // Custom raw-string delimiter (R"re(...)re") -- the pattern's own text contains `)"`
-            // (the capture group closing right before a literal quote), which would otherwise be
-            // misread as the raw string's own terminator.
-            static const std::regex linkPattern(R"re(<link\s+type="text/rcss"\s+href="([^"]+)"\s*/>)re");
-
-            std::string out;
-            out.reserve(rmlText.size());
-            size_t lastEnd = 0;
-            for (auto it = std::sregex_iterator(rmlText.begin(), rmlText.end(), linkPattern);
-                 it != std::sregex_iterator(); ++it)
-            {
-                const std::smatch& m = *it;
-                out.append(rmlText, lastEnd, static_cast<size_t>(m.position(0)) - lastEnd);
-
-                std::string replacement = m.str(0); // default: leave this <link> exactly as authored
-                std::ifstream rcssFile(DirectoryOf(resolvedRmlPath) + m[1].str(), std::ios::binary);
-                if (rcssFile)
-                {
-                    std::ostringstream rcssBuffer;
-                    rcssBuffer << rcssFile.rdbuf();
-                    const std::string rcssText = rcssBuffer.str();
-                    if (rcssText.find("token(") != std::string::npos)
-                        replacement = "<style>" + SubstituteTokens(rcssText) + "</style>";
-                }
-                // If the file can't be read here, replacement stays the original <link> -- let
-                // RmlUi's own <link> loading attempt it and surface the real error, same as before.
-
-                out += replacement;
-                lastEnd = static_cast<size_t>(m.position(0) + m.length(0));
-            }
-            out.append(rmlText, lastEnd, rmlText.size() - lastEnd);
-            return out;
-        }
     }
 
     namespace
@@ -194,6 +103,9 @@ namespace UI::RmlBridge
         // active now -- so a document reloaded against the *other* theme could still splice in the
         // wrong theme's template content. Clearing here forces every <body template="..."> lookup
         // after this point to reload fresh from the now-active theme's own file.
+        // A theme reload must read updated token values and RCSS, including when switching
+        // back to a theme whose sheets were cached earlier this session.
+        Rml::Factory::ClearStyleSheetCache();
         Rml::Factory::ClearTemplateCache();
     }
 
@@ -302,11 +214,7 @@ namespace UI::RmlBridge
         std::ostringstream buffer;
         buffer << file.rdbuf();
 
-        // Design-token substitution -- see InlineTokenizedStylesheet()'s own comment. Resolves a
-        // <link href> against sourceUrl's directory (always themes/<theme>/), matching what
-        // RmlUi's own LoadDocumentFromMemory(rmlText, sourceUrl) resolves it against internally,
-        // regardless of which path the RML text itself was actually read from.
-        std::string rmlText = InlineTokenizedStylesheet(buffer.str(), sourceUrl);
+        std::string rmlText = buffer.str();
         if (!modelPlaceholder.empty())
         {
             for (size_t at = rmlText.find(modelPlaceholder); at != std::string::npos;

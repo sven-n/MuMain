@@ -209,6 +209,12 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME theme_file_interface_tests
+    SOURCES test_theme_file_interface.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
     NAME rml_friend_window_identity_tests
     SOURCES test_rml_friend_window_identity.cpp
     LINK_LIBS MuClient

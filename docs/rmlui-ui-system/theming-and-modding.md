@@ -42,13 +42,14 @@ also live-mutable via `UI::RmlBridge::SetActiveThemeName()` — see
 window goes through its `ThemedView`, which hands `"Data/Interface/RmlUi/login.rml"` to
 `UI::RmlBridge::ThemedDocumentLoader::Load()`:
 
-1. It reads `login.rml`'s raw text once — the same file is shared, never duplicated per theme.
+1. It reads the active theme's `login.rml` override if present, otherwise the shared markup.
 2. It builds a synthetic source URL, `Data/Interface/RmlUi/themes/<name>/login.rml` — this path
    need not exist on disk.
 3. It calls `Rml::Context::LoadDocumentFromMemory(text, syntheticSourceUrl)`.
 4. RmlUi resolves the document's `<link href="login.rcss"/>` relative to that synthetic URL,
    landing on `Data/Interface/RmlUi/themes/<name>/login.rcss` — which *does* need to exist on
-   disk.
+   disk. The game's file interface expands that sheet's `token(name)` markers while preserving
+   the external link and its path for RmlUi's stylesheet cache and relative assets.
 
 This is confirmed against RmlUi's own source: `Context::LoadDocumentFromMemory` wraps the string
 in a `StreamMemory` and calls `SetSourceURL()` on it before parsing; `XMLNodeHandlerHead.cpp`'s
@@ -219,12 +220,13 @@ game-asset pipeline everything else still depends on.
 
 Both built-in themes have a `tokens.ini` file (`[Tokens]` section, plain `name=value` lines) that a theme's own `.rcss`
 files reference via a `token(name)` marker instead of repeating a literal value everywhere it's
-used. The themed loader's `InlineTokenizedStylesheet()`/`SubstituteTokens()`
-(`RmlTheme.cpp`) resolve every `token(name)` against the ACTIVE theme's own `tokens.ini` before
-RmlUi ever sees the stylesheet text — this vendored RmlUi build has no `var()`/custom-property
-mechanism of its own, so this is plain regex text substitution, not a CSS feature. The mechanism
-is theme-name-agnostic (it keys off whichever theme is active), so adding a token layer to a new
-theme is a pure content change.
+used. RmlUi follows each document's ordinary external `<link>` and loads the themed `.rcss`
+through the game's file interface. That interface resolves `token(name)` from the `tokens.ini`
+beside the stylesheet before RmlUi parses and caches it. This vendored RmlUi build has no
+`var()`/custom-property mechanism, so `token(name)` is plain text substitution, not a CSS
+feature. A new theme needs only its own files; it does not need a C++ change. The stylesheet
+cache is cleared when a theme is selected again, so editing theme files and reselecting that
+theme refreshes their values.
 
 **What a token is for**: a *reusable, theme-level semantic choice* — the standard body text color,
 a shared muted/secondary text tier, the common tooltip backing, a shared accent/highlight, a
