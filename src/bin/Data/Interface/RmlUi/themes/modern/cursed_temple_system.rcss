@@ -36,6 +36,9 @@ body { pointer-events: none; }
 @spritesheet ct-minmap-frame-sheet { src: "../../../newui_ctminmapframe.tga"; ct-minmap-frame: 0px 0px 128px 165px; }
 
 .panels, .score, .tutorial { position: static; }
+/* The corner part moves left of the worn-equipment icons, which modern's dock transform puts below
+   the top bar, into the original's place. */
+#corner { position: absolute; left: -72px; top: 0; width: 0; height: 0; }
 
 #game_time_frame { position: absolute; left: 506px; top: 393px; width: 134px; height: 37px;
                    decorator: image(ct-game-time-frame); }

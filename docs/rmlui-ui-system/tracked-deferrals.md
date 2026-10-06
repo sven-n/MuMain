@@ -7,9 +7,7 @@ is recorded where the code it changed is described.
 
 ## Before merging to main
 
-1. **Two event HUDs at the original's fixed positions** ([below](#seen-through-preview)): the
-   Illusion Temple HUD and the CryWolf battle HUD do not follow the theme's placement, so they collide
-   with what it moved or run off the screen edge.
+No code-health item is left.
 
 ## After the merge
 
@@ -158,9 +156,10 @@ create the siege minimap that a map join does. What the previews showed, in both
 
 - **Illusion Temple result**: the original's columns are too narrow for the English strings, and
   legacy keeps them; modern lays out its own table.
-- **Illusion Temple HUD**: its top overlaps the worn-equipment icons, which the theme's dock
-  transform moves below the top bar while the HUD keeps the original's position.
-- **CryWolf battle HUD**: runs off the right edge of the screen.
+- **Illusion Temple HUD**: its corner part (time, mini map, skill panel) is `#corner` in
+  `cursed_temple_system.rml`; a theme moves it with `left`/`top`, and C++ reads the offset back to
+  place its markers, digits, buttons and hit tests. Modern moves it left of the worn-equipment icons.
+  Its hover tooltips did not show in the preview at either position.
 - **Siege commander HUD**: the member and NPC dots the preview sends fall outside the part of the map
   it shows, so it is unconfirmed whether they draw where native drew them.
 

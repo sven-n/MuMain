@@ -15,7 +15,10 @@
 	     background context, behind its other documents (the original drew it under nearly every
 	     panel). Takes no pointer events: the buttons' input stays native. -->
 	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
-		<!-- The panel chrome, hidden together when every window the original checked is open. -->
+		<!-- The panel chrome, hidden together when every window the original checked is open. The
+		     theme may move the corner part with #corner's left and top, in the screen's 640x480
+		     units; C++ reads that offset back and moves its own sprites and buttons the same way. -->
+		<div id="corner">
 		<div class="panels" data-if="panels_shown">
 			<div id="game_time_frame"></div>
 			<div id="game_time_dot"></div>
@@ -23,6 +26,7 @@
 			<div id="mini_map"></div>
 			<div id="mini_map_frame"></div>
 			<img id="skill_icon" data-attr-src="skill_icon_src" data-attr-rect="skill_icon_rect"/>
+		</div>
 		</div>
 
 		<!-- The score effect: each team's points in big digits between their banners. A team past

@@ -78,6 +78,9 @@ private:
     void LoadImages();
     void UnloadImages();
     void SetButtonInfo();
+    // How far the theme moved the corner part (the time, the mini map, the skill panel) from the
+    // original's place, in HUD units: #corner's offset in the stretched screen.
+    Rml::Vector2f CornerOffset() const;
 
 public:
     bool UpdateMouseEvent();

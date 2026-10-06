@@ -74,9 +74,9 @@ namespace
     };
     //#endif //_DEBUG
 
-    float MiniMapPos(float pointX, float pointY, float scale, int aXis)
+    float MiniMapPos(float pointX, float pointY, float scale, int aXis, const Rml::Vector2f& offset)
     {
-        float minmapframeposX = 464.f, minmapframeposY = 299.f;
+        float minmapframeposX = 464.f + offset.x, minmapframeposY = 299.f + offset.y;
 
         if (aXis == AXIS_X)
         {
@@ -473,6 +473,13 @@ SEASON3A::eCursedTempleTeam mu::ui::window::CCursedTempleSystem::GetMyTeam()
     return m_MyTeam;
 }
 
+Rml::Vector2f mu::ui::window::CCursedTempleSystem::CornerOffset() const
+{
+    Rml::ElementDocument* document = m_RmlView.Document();
+    Rml::Element* corner = document ? document->GetElementById("corner") : nullptr;
+    return corner ? Rml::Vector2f(corner->GetOffsetLeft(), corner->GetOffsetTop()) : Rml::Vector2f(0.f, 0.f);
+}
+
 void mu::ui::window::CCursedTempleSystem::SetButtonInfo()
 {
     m_Button[CURSEDTEMPLERESULT_ALPH].ChangeButtonImgState(true, IMAGE_CURSEDTEMPLESYSTEM_MINIMAPALPBTN, true);
@@ -672,7 +679,8 @@ bool mu::ui::window::CCursedTempleSystem::UpdateMouseEvent()
         return false;
     }
 
-    if (CheckMouseIn(512, 232.f - 53.f, 128, 255))
+    const Rml::Vector2f corner = CornerOffset();
+    if (CheckMouseIn(static_cast<int>(512 + corner.x), static_cast<int>(232.f - 53.f + corner.y), 128, 255))
     {
         return false;
     }
@@ -884,8 +892,9 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
     const int CursedTempleCurSkillType = Hero->m_CursedTempleCurSkill;
     const int MaxKillCount = SkillAttribute[CursedTempleCurSkillType].KillCount;
 
-    float x = 512.f + 27.f;
-    float y = 258.f - 58.f;
+    const Rml::Vector2f corner = CornerOffset();
+    float x = 512.f + 27.f + corner.x;
+    float y = 258.f - 58.f + corner.y;
     // The icon's own place is the theme's; which sheet and cell it shows is the current skill and
     // whether the hero has the kill points for it.
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::skillIconSrc, "skill_icon_src",
@@ -895,18 +904,19 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
     AddNumber<100>(sprites, {x + 55.f, y + 8.f}, MaxKillCount);
     AddNumber<100>(sprites, {x + 77.f, y + 8.f}, m_SkillPoint);
 
-    m_Button[CURSEDTEMPLERESULT_SKILLUP].SetPos(512 + 50, 201);
+    m_Button[CURSEDTEMPLERESULT_SKILLUP].SetPos(static_cast<int>(512 + 50 + corner.x), static_cast<int>(201 + corner.y));
     m_Button[CURSEDTEMPLERESULT_SKILLUP].ChangeAlpha(m_Alph);
     AddButton(sprites, m_Button[CURSEDTEMPLERESULT_SKILLUP], "newui_ctskillup.jpg", m_Alph);
-    m_Button[CURSEDTEMPLERESULT_SKILLDOWN].SetPos(512 + 50, 203 + 11);
+    m_Button[CURSEDTEMPLERESULT_SKILLDOWN].SetPos(static_cast<int>(512 + 50 + corner.x),
+                                                 static_cast<int>(203 + 11 + corner.y));
     m_Button[CURSEDTEMPLERESULT_SKILLDOWN].ChangeAlpha(m_Alph);
     AddButton(sprites, m_Button[CURSEDTEMPLERESULT_SKILLDOWN], "newui_ctskilldown.jpg", m_Alph);
 
     bool anyTooltipHovered = false;
     constexpr float Width = 18;
     constexpr float Height = 24;
-    x = 512.f + 28;
-    y = 258.f - 55.f;
+    x = 512.f + 28 + corner.x;
+    y = 258.f - 55.f + corner.y;
     if (CheckMouseIn(static_cast<int>(x), static_cast<int>(y), static_cast<int>(Width), static_cast<int>(Height)))
     {
         anyTooltipHovered = true;
@@ -933,7 +943,7 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
         ShowSkillHoverTooltip(x, y - 20, TextNum);
     }
 
-    x = 512.f + 28 + 55;
+    x = 512.f + 28 + 55 + corner.x;
     if (CheckMouseIn(static_cast<int>(x), static_cast<int>(y), static_cast<int>(Width), static_cast<int>(Height)))
     {
         anyTooltipHovered = true;
@@ -951,7 +961,7 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
         ShowSkillHoverTooltip(x, y - 20, TextNum);
     }
 
-    x = 512.f + 28 + 77;
+    x = 512.f + 28 + 77 + corner.x;
     if (CheckMouseIn(static_cast<int>(x), static_cast<int>(y), static_cast<int>(Width), static_cast<int>(Height)))
     {
         anyTooltipHovered = true;
@@ -980,8 +990,9 @@ void mu::ui::window::CCursedTempleSystem::SyncGameTime(std::vector<CursedTempleS
 {
     const int minute = static_cast<int>(m_EventMapTime / 60);
     const int second = static_cast<int>(m_EventMapTime % 60);
-    const float x = 507.5f + (134.f / 2);
-    const float y = 404.5f;
+    const Rml::Vector2f corner = CornerOffset();
+    const float x = 507.5f + (134.f / 2) + corner.x;
+    const float y = 404.5f + corner.y;
     // The original drew the digits twice over each other.
     AddNumber<110>(sprites, {x - 15.f, y}, minute);
     AddNumber<110>(sprites, {x + 20.f, y}, second);
@@ -995,12 +1006,13 @@ void mu::ui::window::CCursedTempleSystem::SyncGameTime(std::vector<CursedTempleS
 void mu::ui::window::CCursedTempleSystem::SyncMiniMap(std::vector<CursedTempleSpriteEntry>& sprites)
 {
     m_Scale = 1.56f;
+    const Rml::Vector2f corner = CornerOffset();
 
     const auto marker = [&](float tileX, float tileY, const Rml::Vector2f& size, const char* file)
     {
         AddSprite(
             sprites,
-            {MiniMapPos(tileX, tileY, m_Scale, AXIS_X), MiniMapPos(tileX, tileY, m_Scale, AXIS_Y), size.x, size.y},
+            {MiniMapPos(tileX, tileY, m_Scale, AXIS_X, corner), MiniMapPos(tileX, tileY, m_Scale, AXIS_Y, corner), size.x, size.y},
             file, TexelRect(0.f, 0.f, size.x, size.y));
     };
     marker(138, 44, {9.f, 9.f}, "newui_ctminmap_TeamB_npc.tga");
@@ -1017,8 +1029,8 @@ void mu::ui::window::CCursedTempleSystem::SyncMiniMap(std::vector<CursedTempleSp
 
         if (p->userIndex != Hero->Key && p->userIndex != m_HolyItemPlayerIndex)
         {
-            const float pcX = MiniMapPos(p->x, p->y, m_Scale, AXIS_X);
-            const float pcY = MiniMapPos(p->x, p->y, m_Scale, AXIS_Y);
+            const float pcX = MiniMapPos(p->x, p->y, m_Scale, AXIS_X, corner);
+            const float pcY = MiniMapPos(p->x, p->y, m_Scale, AXIS_Y, corner);
             AddSprite(sprites, {pcX - 3.f, pcY - 3.f, 7.f, 7.f},
                       m_MyTeam == SEASON3A::eTeam_Allied ? "newui_ctminmap_TeamB_member.tga"
                                                          : "newui_ctminmap_TeamA_member.tga",
@@ -1028,25 +1040,26 @@ void mu::ui::window::CCursedTempleSystem::SyncMiniMap(std::vector<CursedTempleSp
 
     if (m_HolyItemPlayerIndex != 0xffff && m_HolyItemPlayerIndex != Hero->Key)
     {
-        const float holypcX = MiniMapPos(m_HolyItemPlayerPosX, m_HolyItemPlayerPosY, m_Scale, AXIS_X);
-        const float holypcY = MiniMapPos(m_HolyItemPlayerPosX, m_HolyItemPlayerPosY, m_Scale, AXIS_Y);
+        const float holypcX = MiniMapPos(m_HolyItemPlayerPosX, m_HolyItemPlayerPosY, m_Scale, AXIS_X, corner);
+        const float holypcY = MiniMapPos(m_HolyItemPlayerPosX, m_HolyItemPlayerPosY, m_Scale, AXIS_Y, corner);
         AddSprite(sprites, {holypcX - 5.f, holypcY - 5.f, 14.f, 14.f}, "newui_ctminmap_Relic.tga",
                   TexelRect(0.f, 0.f, 14.f, 14.f));
     }
 
+    m_Button[CURSEDTEMPLERESULT_ALPH].SetPos(static_cast<int>(513 + corner.x), static_cast<int>(238 + corner.y));
     m_Button[CURSEDTEMPLERESULT_ALPH].ChangeAlpha(m_Alph);
     AddButton(sprites, m_Button[CURSEDTEMPLERESULT_ALPH], "newui_Bt_clearness_illusion.jpg", m_Alph);
 
     const auto heroX = static_cast<float>(Hero->PositionX);
     const auto heroY = static_cast<float>(Hero->PositionY);
-    const float hero_x = MiniMapPos(heroX, heroY, m_Scale, AXIS_X);
-    const float hero_y = MiniMapPos(heroX, heroY, m_Scale, AXIS_Y);
+    const float hero_x = MiniMapPos(heroX, heroY, m_Scale, AXIS_X, corner);
+    const float hero_y = MiniMapPos(heroX, heroY, m_Scale, AXIS_Y, corner);
     AddSprite(sprites, {hero_x - 4, hero_y - 4, 11.f, 11.f}, "newui_ctminmap_Hero.tga",
               TexelRect(0.f, 0.f, 11.f, 11.f));
 
-    AddNumber2D(sprites, {517.f + 15.f, 246.f}, static_cast<int>(m_Alph * 100));
-    AddNumber2D(sprites, {517.f + 66.f, 246.f}, m_AlliedPoint);
-    AddNumber2D(sprites, {517.f + 110.f, 246.f}, m_IllusionPoint);
+    AddNumber2D(sprites, {517.f + 15.f + corner.x, 246.f + corner.y}, static_cast<int>(m_Alph * 100));
+    AddNumber2D(sprites, {517.f + 66.f + corner.x, 246.f + corner.y}, m_AlliedPoint);
+    AddNumber2D(sprites, {517.f + 110.f + corner.x, 246.f + corner.y}, m_IllusionPoint);
 }
 
 // The original RenderScore(): the two teams' points in big digits between their banners, shown for

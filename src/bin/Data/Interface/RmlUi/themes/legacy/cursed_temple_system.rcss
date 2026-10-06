@@ -38,6 +38,7 @@ body { pointer-events: none; }
 @spritesheet ct-minmap-frame-sheet { src: "../../../newui_ctminmapframe.tga"; ct-minmap-frame: 0px 0px 128px 165px; }
 
 .panels, .score, .tutorial { position: static; }
+#corner { position: absolute; left: 0; top: 0; width: 0; height: 0; }
 
 #game_time_frame { position: absolute; left: 506px; top: 393px; width: 134px; height: 37px;
                    decorator: image(ct-game-time-frame); }
