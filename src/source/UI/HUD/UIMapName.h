@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UI/HUD/MapNameRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -58,11 +58,11 @@ protected:
     // original drew it before every window). Render() fills it; the native drawing is the fallback
     // when RmlUi is not available.
     void BuildRmlUi();
-    void ReloadRmlTheme();
     void SyncView();
     void RenderNative();
 
-    RmlModelBinder<UI::MapName::MapNameRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
-    bool m_themeReloadRegistered = false;
+    void BindRmlModel(Rml::DataModelConstructor& c, UI::MapName::MapNameRmlModel& model);
+    UI::RmlBridge::ThemedView<UI::MapName::MapNameRmlModel> m_RmlView{"map_name",
+        [this](Rml::DataModelConstructor& c, UI::MapName::MapNameRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/map_name.rml", UI::RmlBridge::BackgroundOrMainContext}}};
 };

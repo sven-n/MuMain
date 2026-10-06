@@ -181,20 +181,17 @@ void mu::ui::window::CItemEnduranceInfo::Release()
 {
     UnloadImages();
 
-    if (m_themeReloadRegistered)
-    {
-        UI::RmlBridge::UnregisterForThemeReload(this);
-        m_themeReloadRegistered = false;
-    }
     // Hidden directly: RmlUi renders last in the frame regardless of scene.
-    if (m_pRmlDoc != nullptr)
-        m_pRmlDoc->Hide();
+    if (m_RmlView.Document() != nullptr)
+        m_RmlView.Document()->Hide();
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 void mu::ui::window::CItemEnduranceInfo::SetPos(int x, int y)
@@ -389,7 +386,7 @@ bool mu::ui::window::CItemEnduranceInfo::Update()
 bool mu::ui::window::CItemEnduranceInfo::Render()
 {
     BuildRmlUi();
-    if (m_pRmlDoc != nullptr)
+    if (m_RmlView.Document() != nullptr)
     {
         SyncView();
         return true;
@@ -773,11 +770,6 @@ void mu::ui::window::CItemEnduranceInfo::UnloadImages()
 
 namespace
 {
-Rml::Context* ItemEnduranceContext()
-{
-    return RmlUiRuntime::Instance().GetContext();
-}
-
 template <typename T>
 void SyncItemEnduranceField(RmlModelBinder<UI::ItemEndurance::ItemEnduranceRmlModel>& binder,
                             T UI::ItemEndurance::ItemEnduranceRmlModel::* field, const char* name, T value)
@@ -805,84 +797,63 @@ const char* DurabilityBand(int durability, int maxDurability)
 void mu::ui::window::CItemEnduranceInfo::SyncDocVisibility(bool sceneAllowsShow)
 {
     m_sceneAllowsShow = sceneAllowsShow;
-    UI::RmlBridge::SyncDocumentVisibilityBehind(m_pRmlDoc, IsVisible() && sceneAllowsShow);
+    UI::RmlBridge::SyncDocumentVisibilityBehind(m_RmlView.Document(), IsVisible() && sceneAllowsShow);
+}
+
+void mu::ui::window::CItemEnduranceInfo::BindRmlModel(Rml::DataModelConstructor& c, UI::ItemEndurance::ItemEnduranceRmlModel& model)
+{
+    using namespace UI::ItemEndurance;
+    c.Bind("left_x", &model.leftX);
+    c.Bind("left_y", &model.leftY);
+    c.Bind("left_scale_x", &model.leftScaleX);
+    c.Bind("left_scale_y", &model.leftScaleY);
+    c.Bind("right_x", &model.rightX);
+    c.Bind("icons_left", &model.iconsLeft);
+    c.Bind("icons_top", &model.iconsTop);
+    c.Bind("right_y", &model.rightY);
+    c.Bind("right_scale_x", &model.rightScaleX);
+    c.Bind("right_scale_y", &model.rightScaleY);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("line_height_px", &model.lineHeightPx);
+    c.Bind("bold_text_px", &model.boldTextPx);
+    c.Bind("bold_line_height_px", &model.boldLineHeightPx);
+    c.Bind("arrows", &model.arrows);
+    c.Bind("arrows_left", &model.arrowsLeft);
+    c.Bind("arrows_top", &model.arrowsTop);
+
+    auto pet = c.RegisterStruct<PetFrameEntry>();
+    pet.RegisterMember("top", &PetFrameEntry::top);
+    pet.RegisterMember("bar_width", &PetFrameEntry::barWidth);
+    pet.RegisterMember("name", &PetFrameEntry::name);
+    pet.RegisterMember("name_centre_x", &PetFrameEntry::nameCentreX);
+    pet.RegisterMember("name_top", &PetFrameEntry::nameTop);
+    c.RegisterArray<std::vector<PetFrameEntry>>();
+    c.Bind("pets", &model.pets);
+
+    auto icon = c.RegisterStruct<DurabilityIconEntry>();
+    icon.RegisterMember("cell", &DurabilityIconEntry::cell);
+    icon.RegisterMember("image", &DurabilityIconEntry::image);
+    icon.RegisterMember("tint_half", &DurabilityIconEntry::tintHalf);
+    icon.RegisterMember("band", &DurabilityIconEntry::band);
+    c.RegisterArray<std::vector<DurabilityIconEntry>>();
+    c.Bind("icons", &model.icons);
+
+    c.Bind("tooltip", &model.tooltip);
+    c.Bind("tooltip_band", &model.tooltipBand);
+    c.Bind("tooltip_centre_x", &model.tooltipCentreX);
+    c.Bind("tooltip_top", &model.tooltipTop);
 }
 
 void mu::ui::window::CItemEnduranceInfo::BuildRmlUi()
 {
-    if (m_pRmlDoc != nullptr || !RmlUiRuntime::Instance().IsCreated() || ItemEnduranceContext() == nullptr)
-        return;
-
-    using namespace UI::ItemEndurance;
-    const bool modelCreated = m_RmlBinder.Create(ItemEnduranceContext(), "item_endurance",
-                                                 [](Rml::DataModelConstructor& c, ItemEnduranceRmlModel& model)
-                                                 {
-                                                     c.Bind("left_x", &model.leftX);
-                                                     c.Bind("left_y", &model.leftY);
-                                                     c.Bind("left_scale_x", &model.leftScaleX);
-                                                     c.Bind("left_scale_y", &model.leftScaleY);
-                                                     c.Bind("right_x", &model.rightX);
-                                                     c.Bind("icons_left", &model.iconsLeft);
-                                                     c.Bind("icons_top", &model.iconsTop);
-                                                     c.Bind("right_y", &model.rightY);
-                                                     c.Bind("right_scale_x", &model.rightScaleX);
-                                                     c.Bind("right_scale_y", &model.rightScaleY);
-                                                     c.Bind("text_px", &model.textPx);
-                                                     c.Bind("line_height_px", &model.lineHeightPx);
-                                                     c.Bind("bold_text_px", &model.boldTextPx);
-                                                     c.Bind("bold_line_height_px", &model.boldLineHeightPx);
-                                                     c.Bind("arrows", &model.arrows);
-                                                     c.Bind("arrows_left", &model.arrowsLeft);
-                                                     c.Bind("arrows_top", &model.arrowsTop);
-
-                                                     auto pet = c.RegisterStruct<PetFrameEntry>();
-                                                     pet.RegisterMember("top", &PetFrameEntry::top);
-                                                     pet.RegisterMember("bar_width", &PetFrameEntry::barWidth);
-                                                     pet.RegisterMember("name", &PetFrameEntry::name);
-                                                     pet.RegisterMember("name_centre_x", &PetFrameEntry::nameCentreX);
-                                                     pet.RegisterMember("name_top", &PetFrameEntry::nameTop);
-                                                     c.RegisterArray<std::vector<PetFrameEntry>>();
-                                                     c.Bind("pets", &model.pets);
-
-                                                     auto icon = c.RegisterStruct<DurabilityIconEntry>();
-                                                     icon.RegisterMember("cell", &DurabilityIconEntry::cell);
-                                                     icon.RegisterMember("image", &DurabilityIconEntry::image);
-                                                     icon.RegisterMember("tint_half", &DurabilityIconEntry::tintHalf);
-                                                     icon.RegisterMember("band", &DurabilityIconEntry::band);
-                                                     c.RegisterArray<std::vector<DurabilityIconEntry>>();
-                                                     c.Bind("icons", &model.icons);
-
-                                                     c.Bind("tooltip", &model.tooltip);
-                                                     c.Bind("tooltip_band", &model.tooltipBand);
-                                                     c.Bind("tooltip_centre_x", &model.tooltipCentreX);
-                                                     c.Bind("tooltip_top", &model.tooltipTop);
-                                                 });
-    if (modelCreated)
-        m_pRmlDoc =
-            UI::RmlBridge::LoadThemedDocument(ItemEnduranceContext(), "Data/Interface/RmlUi/item_endurance.rml");
-    if (m_pRmlDoc != nullptr && !m_themeReloadRegistered)
-    {
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-        m_themeReloadRegistered = true;
-    }
-}
-
-void mu::ui::window::CItemEnduranceInfo::ReloadRmlTheme()
-{
-    if (m_pRmlDoc == nullptr)
-        return;
-    Rml::Context* context = ItemEnduranceContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 // Render() under the dock-right transform the window manager set, like the original's.
 void mu::ui::window::CItemEnduranceInfo::SyncView()
 {
     SyncDocVisibility(m_sceneAllowsShow);
-    if (!m_pRmlDoc->IsVisible())
+    if (!m_RmlView.Document()->IsVisible())
         return;
 
     SyncLeftColumn();
@@ -901,16 +872,16 @@ void mu::ui::window::CItemEnduranceInfo::SyncLeftColumn()
     UI::Scaling::ScopedActiveTransform layout(overlay);
 
     // #pets starts at the frames' x (2); the frames' tops are reference px from the screen's top.
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::leftX, "left_x",
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::leftX, "left_x",
                            UI::Scaling::PositionX(overlay, static_cast<float>(m_UIStartPos.x)));
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::leftY, "left_y", overlay.offsetY);
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::leftScaleX, "left_scale_x", overlay.scaleX);
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::leftScaleY, "left_scale_y", overlay.scaleY);
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::leftY, "left_y", overlay.offsetY);
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::leftScaleX, "left_scale_x", overlay.scaleX);
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::leftScaleY, "left_scale_y", overlay.scaleY);
 
     g_pRenderText->SetFont(g_hFont);
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::textPx, "text_px",
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::textPx, "text_px",
                            UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, overlay));
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::lineHeightPx, "line_height_px",
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::lineHeightPx, "line_height_px",
                            static_cast<float>(g_pRenderText->MeasureText(L"Q", 1).cy) * overlay.scaleY);
 
     int iNextPosY = m_UIStartPos.y;
@@ -921,13 +892,13 @@ void mu::ui::window::CItemEnduranceInfo::SyncLeftColumn()
         ArrowCountText(m_iCurArrowType, ARROWTYPE_BOW, ARROWTYPE_CROSSBOW, szText))
     {
         arrows = StringUtils::WideToNarrow(szText);
-        SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::arrowsLeft, "arrows_left",
+        SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::arrowsLeft, "arrows_left",
                                UI::Scaling::PositionX(overlay, static_cast<float>(m_UIStartPos.x)));
-        SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::arrowsTop, "arrows_top",
+        SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::arrowsTop, "arrows_top",
                                UI::Scaling::PositionY(overlay, static_cast<float>(iNextPosY)));
         iNextPosY += (UI_INTERVAL_HEIGHT + 10);
     }
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::arrows, "arrows", std::move(arrows));
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::arrows, "arrows", std::move(arrows));
 
     std::vector<PetFrameEntry> pets;
     const auto addFrame = [&](const wchar_t* name, int life, int maxLife)
@@ -958,7 +929,7 @@ void mu::ui::window::CItemEnduranceInfo::SyncLeftColumn()
         addFrame(I18N::Game::SummonedMonsterHP, SummonLife, 100);
     }
 
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::pets, "pets", std::move(pets));
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::pets, "pets", std::move(pets));
 }
 
 // The original's RenderItemEndurance() under the dock-right transform: every worn item at most half
@@ -968,19 +939,19 @@ void mu::ui::window::CItemEnduranceInfo::SyncIcons()
 {
     using namespace UI::ItemEndurance;
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::rightX, "right_x", transform.offsetX);
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::rightY, "right_y", transform.offsetY);
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::rightScaleX, "right_scale_x", transform.scaleX);
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::rightScaleY, "right_scale_y", transform.scaleY);
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::rightX, "right_x", transform.offsetX);
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::rightY, "right_y", transform.offsetY);
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::rightScaleX, "right_scale_x", transform.scaleX);
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::rightScaleY, "right_scale_y", transform.scaleY);
 
     std::vector<DurabilityIconEntry> icons;
     if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE))
     {
         // The column is right-anchored to the live screen width, so where it starts is the
         // window's; the theme packs the cells inside it.
-        SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::iconsLeft, "icons_left",
+        SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::iconsLeft, "icons_left",
                                static_cast<float>(m_ItemDurUIStartPos.x));
-        SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::iconsTop, "icons_top",
+        SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::iconsTop, "icons_top",
                                static_cast<float>(m_ItemDurUIStartPos.y));
         int icntItemDurIcon = 0;
         bool bRenderRingWarning = false;
@@ -1074,7 +1045,7 @@ void mu::ui::window::CItemEnduranceInfo::SyncIcons()
                 icntItemDurIcon++;
         }
     }
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::icons, "icons", std::move(icons));
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::icons, "icons", std::move(icons));
 }
 
 // The original's tooltip of the icon UpdateMouseEvent() found under the pointer: "name (dur/max)",
@@ -1085,9 +1056,9 @@ void mu::ui::window::CItemEnduranceInfo::SyncTooltip()
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
 
     g_pRenderText->SetFont(g_hFontBold);
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::boldTextPx, "bold_text_px",
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::boldTextPx, "bold_text_px",
                            UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::boldLineHeightPx, "bold_line_height_px",
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::boldLineHeightPx, "bold_line_height_px",
                            static_cast<float>(g_pRenderText->MeasureText(L"Q", 1).cy) * transform.scaleY);
 
     Rml::String tooltip;
@@ -1108,13 +1079,13 @@ void mu::ui::window::CItemEnduranceInfo::SyncTooltip()
 
             tooltip = StringUtils::WideToNarrow(szText);
             band = DurabilityBand(pItem->Durability, iMaxDurability);
-            SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::tooltipCentreX, "tooltip_centre_x",
+            SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::tooltipCentreX, "tooltip_centre_x",
                                    UI::Scaling::PositionX(transform, static_cast<float>(iX)));
-            SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::tooltipTop, "tooltip_top",
+            SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::tooltipTop, "tooltip_top",
                                    UI::Scaling::PositionY(transform, static_cast<float>(MouseY - 10)));
             m_iTooltipIndex = -1;
         }
     }
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::tooltip, "tooltip", std::move(tooltip));
-    SyncItemEnduranceField(m_RmlBinder, &ItemEnduranceRmlModel::tooltipBand, "tooltip_band", std::move(band));
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::tooltip, "tooltip", std::move(tooltip));
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::tooltipBand, "tooltip_band", std::move(band));
 }

@@ -209,7 +209,7 @@ void CUIMapName::Render()
     Update();
 
     BuildRmlUi();
-    if (m_pRmlDoc != nullptr)
+    if (m_RmlView.Document() != nullptr)
     {
         SyncView();
         return;
@@ -244,12 +244,6 @@ void CUIMapName::RenderNative()
 
 namespace
 {
-Rml::Context* MapNameContext()
-{
-    Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext();
-    return context != nullptr ? context : RmlUiRuntime::Instance().GetContext();
-}
-
 // "/Data/Local/Eng/ImgsMapName/x.tga": the loaded bitmap's own file name, absolute to the file
 // interface root, as CGlobalBitmap loaded it.
 Rml::String BitmapSource(GLuint bitmapIndex)
@@ -275,37 +269,17 @@ void SyncMapNameField(RmlModelBinder<UI::MapName::MapNameRmlModel>& binder, T UI
 }
 } // namespace
 
-void CUIMapName::BuildRmlUi()
+void CUIMapName::BindRmlModel(Rml::DataModelConstructor& c, UI::MapName::MapNameRmlModel& model)
 {
-    if (m_pRmlDoc != nullptr || !RmlUiRuntime::Instance().IsCreated() || MapNameContext() == nullptr)
-        return;
-
-    const bool modelCreated = m_RmlBinder.Create(MapNameContext(), "map_name",
-                                                 [](Rml::DataModelConstructor& c, UI::MapName::MapNameRmlModel& model)
-                                                 {
-                                                     c.Bind("alpha", &model.alpha);
-                                                     c.Bind("image_source", &model.imageSource);
-                                                     c.Bind("strife", &model.strife);
-                                                     c.Bind("strife_source", &model.strifeSource);
-                                                 });
-    if (modelCreated)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(MapNameContext(), "Data/Interface/RmlUi/map_name.rml");
-    if (m_pRmlDoc != nullptr && !m_themeReloadRegistered)
-    {
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-        m_themeReloadRegistered = true;
-    }
+    c.Bind("alpha", &model.alpha);
+    c.Bind("image_source", &model.imageSource);
+    c.Bind("strife", &model.strife);
+    c.Bind("strife_source", &model.strifeSource);
 }
 
-void CUIMapName::ReloadRmlTheme()
+void CUIMapName::BuildRmlUi()
 {
-    if (m_pRmlDoc == nullptr)
-        return;
-    Rml::Context* context = MapNameContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 // The native fallback still draws the 166 x 90 name at physical ((W - 166) / 2, 220 * H / 480).
@@ -314,17 +288,17 @@ void CUIMapName::ReloadRmlTheme()
 void CUIMapName::SyncView()
 {
     const bool visible = HIDE != m_eState;
-    UI::RmlBridge::SyncDocumentVisibilityBehind(m_pRmlDoc, visible);
+    UI::RmlBridge::SyncDocumentVisibilityBehind(m_RmlView.Document(), visible);
     if (!visible)
         return;
 
     using UI::MapName::MapNameRmlModel;
-    SyncMapNameField(m_RmlBinder, &MapNameRmlModel::alpha, "alpha", std::clamp(m_fAlpha, 0.0f, 1.0f));
-    SyncMapNameField(m_RmlBinder, &MapNameRmlModel::imageSource, "image_source",
+    SyncMapNameField(m_RmlView.Binder(), &MapNameRmlModel::alpha, "alpha", std::clamp(m_fAlpha, 0.0f, 1.0f));
+    SyncMapNameField(m_RmlView.Binder(), &MapNameRmlModel::imageSource, "image_source",
                      BitmapSource(BITMAP_INTERFACE_EX + 45));
 #ifdef ASG_ADD_GENS_SYSTEM
-    SyncMapNameField(m_RmlBinder, &MapNameRmlModel::strife, "strife", m_bStrife);
-    SyncMapNameField(m_RmlBinder, &MapNameRmlModel::strifeSource, "strife_source",
+    SyncMapNameField(m_RmlView.Binder(), &MapNameRmlModel::strife, "strife", m_bStrife);
+    SyncMapNameField(m_RmlView.Binder(), &MapNameRmlModel::strifeSource, "strife_source",
                      m_bStrife ? BitmapSource(BITMAP_INTERFACE_EX + 47) : Rml::String());
 #endif // ASG_ADD_GENS_SYSTEM
 }
