@@ -29,6 +29,6 @@ endfunction()
 
 require_in_window_process("float panelWidth = INVENTORY_WIDTH;")
 require_in_window_process("float panelHeight = INVENTORY_HEIGHT;")
-require_in_window_process("UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, \"panel\", panelWidth, panelHeight);")
+require_in_window_process("UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), \"panel\", panelWidth, panelHeight);")
 require_in_window_process(
     "mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY) == false)\n    {\n        return false;\n    }")
