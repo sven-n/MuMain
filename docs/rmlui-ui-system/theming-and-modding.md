@@ -115,21 +115,13 @@ Mechanically: it validates `themes/<name>/base.rcss` exists (`UI::RmlBridge::The
 an unknown name is rejected with no state change, not left to fail silently per-window — then
 calls `UI::RmlBridge::SetActiveThemeName()` to update the live cache and
 `UI::RmlBridge::ReloadAllThemedDocuments()` to invoke every registered theme-reload callback.
-Every themed window/module registers one callback via `UI::RmlBridge::RegisterForThemeReload(owner,
-callback)` right next to the code that already creates its first document (typically
-`Create()`'s guarded `BuildRmlUi()` call) — a tier-agnostic registry keyed by an opaque owner
-pointer (`this` for a window, a private static token's address for a free-function module), not a
-`CManager`-tier sweep. A window unregisters (`UnregisterForThemeReload(this)`) at the exact point,
-if any, it already unhooks from its `CManager` (`RemoveUIObj(this)` in `Release()`) — a handful of
-app/scene-lifetime singleton windows never unhook from `CManager` at all, so they never unregister
-here either, matching that same lifetime. Each callback tears down its `Rml::ElementDocument`/
-`DataModel`(s) via `RmlModelBinder<T>::Destroy()` and `Context::UnloadDocument()`, then rebuilds
-them against whatever theme is now active, the same `BuildRmlUi()` helper `Create()` itself calls.
-A window that was never opened needs no explicit rebuild — it simply picks up the new theme the
-first time it *is* opened, since `LoadThemedDocument()` always reads the live cache.
-`UI::Login::ReloadRmlTheme()` (`RememberPasswordPrompt.h`) and `UI::RmlBridge::Tooltip::ReloadRmlTheme()`
-are no longer special cases — both free-function modules register with the same registry as every
-`CObject`-tier window, just keyed by a private static token instead of `this` since neither has one.
+Every themed document belongs to a `UI::RmlBridge::ThemedView` (`component-catalog.md`'s Theming
+section), which registers for theme switches the first time it builds. On a switch each view keeps
+its model's values, unloads its documents, loads them again from the active theme and shows again
+the ones that were visible; views rebuild from the bottom of their context's stack up, so the
+stacking survives. A window that was never opened has nothing to rebuild and picks up the active
+theme when it first builds. The free-function modules (the tooltip, notices, the remember-password
+prompt) hold a namespace-scope view and work the same way.
 
 **Session-only**: this does not write to `config.ini` — `GameConfig::SetRmlTheme()` only updates
 the in-memory value, so a relaunch still picks up whatever `config.ini` says. Use it for quickly
@@ -317,18 +309,14 @@ coordinate into `dp`.
 
 - **Live hot-swap is session-only.** `$theme <name>` (see
   ["Switching themes without relaunching"](#switching-themes-without-relaunching) above) rebuilds
-  every open window's document/model in place, but doesn't persist to `config.ini` — a relaunch
-  still uses whatever's saved there. A window with genuinely live, frequently-changing state
-  (`CMuHelperBar`, `CBuffStrip`, `CCharInfoBalloonMng`, `CMainFrameWindow`) relies on its own
-  normal per-frame resync to repopulate the rebuilt model correctly; a window that doesn't
-  self-resync every frame pushes its current state back explicitly right after rebuilding instead
-  (see each window's own `ReloadRmlTheme()`) — a new themed window should follow whichever of the
-  two patterns matches its own update shape, not assume the sweep alone is enough.
+  every open window's document in place, but doesn't persist to `config.ini` — a relaunch still
+  uses whatever's saved there. The model survives the rebuild, so a window needs no resync of its
+  own; what it sized or placed from the old theme's metrics goes in its view's `afterReload`.
 - **Custom theme images require the engine's proprietary OZT/OZJ format, not plain PNG/JPG** —
   see [Bringing your own images to a theme](#bringing-your-own-images-to-a-theme) above. No
   converter tool exists in this repo today, and a missing/wrong-format image fails silently.
-- **Every themed window registers with the theme-reload registry** (grep `RegisterForThemeReload(`),
-  so `$theme` covers all of them; a new window follows the same pattern.
+- **Every themed document belongs to a `ThemedView`**, so `$theme` covers all of them; a new
+  window declares one.
 - **Theme identity must never drive C++ branching** — `architecture-principles.md` §30. Where a
   theme must change C++ behaviour, it declares a capability in `theme.ini` (`NativeTextSize` is the
   one in use). Prefer removing the need: the main frame's `ProvidesOwnIconChrome` existed only so

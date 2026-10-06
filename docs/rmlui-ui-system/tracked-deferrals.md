@@ -10,8 +10,9 @@ Completed migrations belong in [migration-ledger.md](migration-ledger.md).
 What would otherwise grow with every new window, or break a principle in a way new code copies.
 Most are items of the integration seams below.
 
-1. **One owner for a window's document** (seams item 2). Every port copies the lifetime
-   boilerplate, the copies have already drifted, and each port after the merge adds another.
+1. **One owner for a window's document** (seams item 2): the last two owners move onto
+   `ThemedView`, and the loader and reload registry become internal to it, so no port after the
+   merge can copy the old lifetime boilerplate again.
 2. **Keyboard ownership in the runtime** (item 3), with the runtime's layering (item 5) in the same
    change. Every window with a text field copies the fake `HWND`, and a slip kills every hotkey;
    the layering fix keeps runtime-level fixes from reaching for `SceneFlag` and `GameConfig`.
@@ -148,12 +149,13 @@ against the library is where RmlUi meets the legacy UI. In order of value:
    `dialog_background`; move the inventory family's live items into render targets and retire
    `background` with its `*_bg.rml` documents. Trigger: the deletion now; the rest with the
    paperdoll row above, which waits on the same pass.
-2. **Each window hand-writes its document's lifetime.** 86 windows repeat create the model, load,
-   register for reload, rebuild and release, and the copies have drifted: 65 destroy the data model
-   only on a theme reload, so `Release()` leaves it in the context, and some close with `Close()`,
-   others with `UnloadDocument()`. Direction: one owner in `RmlBridge` holding the document, the
-   model and the reload registration, and restoring visibility after a reload. Trigger: before the
-   next port, or when a window's teardown next bites.
+2. **Two owners still hand-write their document's lifetime.** `UI::RmlBridge::ThemedView` holds
+   every other themed document with its model and theme-switch registration. The chat and system
+   logs (`ChatLogWindow.cpp`) and the workspace document (`WindowPlacement.cpp`) still load through
+   `LoadThemedDocument()` and register themselves. Direction: move both onto views, then make
+   `LoadThemedDocument()`, `CreateBackgroundDocument()` and the reload registry internal to
+   `RmlBridge`, so the compiler stops a new window from bypassing the view. Trigger: when the
+   logs' workspace change in progress lands.
 3. **Keyboard ownership is patched in five places.** The RmlUi behaviour is real (checked in its
    source): `ElementDocument::Hide()` gives focus back to the previous document's remembered field,
    and unloading a document clears focus without a blur, which leaves the typing flag set. The

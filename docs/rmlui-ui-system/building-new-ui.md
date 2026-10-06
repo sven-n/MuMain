@@ -90,7 +90,7 @@ Three permanent shapes, following that boundary:
 7. **Widget-level polling goes through `mu::ui::window::IsPress`/`IsRelease`/`IsNone`/`IsRepeat`**
    (`UI/Core/WindowCommon.h`); `CInput::Instance()` only for the login/character-select family's
    real-pixel needs (double-click, left-hand swap, raw cursor).
-8. **Load documents through `UI::RmlBridge::LoadThemedDocument()`**; theme-specific behaviour is a
+8. **Load documents through a `UI::RmlBridge::ThemedView`**; theme-specific behaviour is a
    `theme.ini` capability, never a theme-name branch. Tooltips use `UI::RmlBridge::Tooltip` or the
    `.tooltip` RCSS convention, never a new per-window `RenderTooltip()`.
 9. **Deprecated families get no new call sites, features or subclasses**, and no new native
@@ -109,10 +109,12 @@ Three permanent shapes, following that boundary:
   shape). RmlUi does the actual hit-testing of buttons and fields. Test it at a non-100 % UI scale
   (`layout-and-scaling.md`'s scale sweep).
 - **`UpdateKeyEvent()`** keeps only real key behaviour (Esc to close, hotkeys).
-- **`Create()` builds the document and model once**, guarded by
-  `if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())` — `Create()` runs again on resolution
-  change and must not recreate the document. Register for theme reload
-  (`RegisterForThemeReload`) and unregister in `Release()`.
+- **A `UI::RmlBridge::ThemedView` member owns the documents and the model**
+  (`UI/RmlBridge/RmlThemedView.h`): the model's binding function, the document paths and any
+  setup. `Create()` calls its `Ensure()`, which builds once and is cheap after (`Create()` runs
+  again on resolution change), and `Release()` calls its `Release()`. A theme switch needs nothing
+  from the window: the view keeps the model's values, rebuilds the documents and shows again what
+  was visible (`component-catalog.md`'s Theming section).
 - **`Update()`** reads live game state into the model; it runs only during `MAIN_SCENE`.
 - **Visibility.** Show/hide the document from `Show(bool)`, or from a per-frame sync through
   `UI::RmlBridge::SyncDocumentVisibility()` (transition-only — re-asserting `Show()` every frame

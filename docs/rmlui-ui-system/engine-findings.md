@@ -153,7 +153,7 @@ around it. See [`STATUS.md`](STATUS.md) for migration status and
 
 - **No `static bool` guard around `RegisterStruct<T>()`/`RegisterArray<C>()`.**
   `RmlModelBinder<T>::Create()` gives each call a fresh `DataTypeRegister`, so the registration
-  lambda must run in full every time; a guard skips it on `ReloadRmlTheme()` and breaks the bind.
+  lambda must run in full every time; a guard skips it on a theme switch and breaks the bind.
 
 - **Unloading a document does not blur its focused element** (`Context::UnloadDocument()`/
   `OnElementDetach()` clear focus by assignment), so a focused `<input>` destroyed that way leaves

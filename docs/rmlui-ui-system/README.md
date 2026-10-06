@@ -111,6 +111,10 @@ literal source text. Clicks go through `data-event-click` → `BindEventCallback
 through `data-event-mouseup`, button 1). A window with no dynamic state can skip the binder and
 use `AddEventListener`.
 
+A window holds its binder and documents through `UI::RmlBridge::ThemedView<Model>`
+(`UI/RmlBridge/RmlThemedView.h`), which creates the model before loading the documents, rebuilds
+both on a theme switch and tears them down; `component-catalog.md` has its options.
+
 ## Theming
 
 A theme is a **folder name** — adding one needs no recompile. `UI::RmlBridge::LoadThemedDocument()`
@@ -164,7 +168,7 @@ must hide its document** (`CLoginWin::Release()`), or it paints over the next sc
 | System interface | [`Render/RmlUi/RmlUiSystemInterface.h/.cpp`](../../src/source/Render/RmlUi/RmlUiSystemInterface.h) |
 | Renderer seams | [`Render/Renderer/MuRenderer.h`](../../src/source/Render/Renderer/MuRenderer.h) |
 | Input gating | [`Core/Input/UiInputRouter.cpp`](../../src/source/Core/Input/UiInputRouter.cpp) (`IsMouseOverUI()`) |
-| Model/binder layer | [`UI/RmlBridge/RmlModelBinder.h`](../../src/source/UI/RmlBridge/RmlModelBinder.h) |
+| Model/binder layer | [`UI/RmlBridge/RmlModelBinder.h`](../../src/source/UI/RmlBridge/RmlModelBinder.h), [`UI/RmlBridge/RmlThemedView.h`](../../src/source/UI/RmlBridge/RmlThemedView.h) |
 | Theme framework | [`UI/RmlBridge/RmlTheme.h/.cpp`](../../src/source/UI/RmlBridge/RmlTheme.h) |
 | Draggable helper | [`UI/RmlBridge/RmlDraggable.h/.cpp`](../../src/source/UI/RmlBridge/RmlDraggable.h) |
 | Native drawing in a document | [`UI/RmlBridge/RmlRenderTarget.h/.cpp`](../../src/source/UI/RmlBridge/RmlRenderTarget.h) |

@@ -13,8 +13,8 @@ Every window is a `mu::ui::window::CObject` owning one or more RmlUi documents. 
 - **Frame behind live 3D** — the inventory family (`CMyInventory`, `CTrade`, `CStorageInventory`,
   `CStorageInventoryExt`, `CMixInventory`, `CNPCShop`, `CMyShopInventory`,
   `CPurchaseShopInventory`, `CInventoryExtension`, `CLuckyItemWnd`). The frame chrome is a
-  `*_bg.rml` document in the background context (`UI::RmlBridge::CreateBackgroundDocument()`,
-  `SyncRootTransform()`), painted before the native item grids and 3D icons; titles, buttons and
+  `*_bg.rml` document in the background context (a second `ThemedView` whose document spec names
+  that context; `SyncRootTransform()`), painted before the native item grids and 3D icons; titles, buttons and
   text are a foreground document. `CManager::Render()` drives `RenderBackgroundLayer()` centrally
   (README, "Frame lifecycle"); each window gates its background document on its own `IsVisible()`.
   The equipment paperdoll's own chrome stays native (`tracked-deferrals.md`).
@@ -229,10 +229,10 @@ identical class names and behavior in each.
 
 ## Data binding
 
-`RmlModelBinder<T>` (`UI/RmlBridge/RmlModelBinder.h`) — the per-window model/binder lifecycle
-wrapper every migrated window uses: owns the `Model` instance, creates the `Rml::DataModelHandle`
-once, exposes `MarkDirty()` so packet-handler/action-controller code doesn't need to know RmlUi's
-binding API directly.
+`RmlModelBinder<T>` (`UI/RmlBridge/RmlModelBinder.h`) owns the `Model` instance and its
+`Rml::DataModelHandle`, and exposes `MarkDirty()` so packet-handler/action-controller code doesn't
+need to know RmlUi's binding API. Windows reach it through their `ThemedView` (below):
+`GetModel()`, `MarkDirty()`, and `Binder()` for the `SyncField`/`SyncRootTransform` helpers.
 
 ## Semantic colours
 
@@ -269,30 +269,42 @@ future capability flag). See `theming-and-modding.md`'s "Forking a theme's RML" 
 per-theme RML/RCSS override mechanism itself, not a separate component but part of this same
 theming layer.
 
-**Every window that creates a themed document calls
-`UI::RmlBridge::RegisterForThemeReload(this, [this]{ ReloadRmlTheme(); })`** next to its first
-`BuildRmlUi()` call (inside `Create()`'s guard), and `UnregisterForThemeReload(this)` where it
-calls `RemoveUIObj(this)` in `Release()`, if it does. App/scene-lifetime singletons (`CLoginWin`,
-`CGenericConfirmDialog`, …) never unhook from `CManager` and never unregister. A theme switch is
-one call, `UI::RmlBridge::ReloadAllThemedDocuments()`.
+**Every themed document belongs to a `UI::RmlBridge::ThemedView<Model>`**
+(`UI/RmlBridge/RmlThemedView.h`; `ThemedView<>` for documents without a model). A window declares
+it as a member with its model name, a binding function (`BindRmlModel(c, model)`), its document
+paths and options, calls `Ensure()` where it builds and `Release()` where it tears down:
 
-`ReloadRmlTheme()`: factor the RmlUi setup (model binder registration plus
-`LoadThemedDocument()`/`CreateBackgroundDocument()`) into a private `BuildRmlUi()` called from
-`Create()`. On reload: return if `m_pRmlDoc` is null (never opened); otherwise destroy the binder,
-`UnloadDocument()` the document and null it (likewise `m_pRmlBgDoc` via
-`RmlUiRuntime::Instance().GetBackgroundContext()`), then `BuildRmlUi()` again. A window with a
-per-frame `SyncRmlModel()` needs nothing more; one without (`CServerSelWin`) must re-run whatever
-populates its model and re-apply visibility. References: `CMainFrameWindow::ReloadRmlTheme()`
-(main + background document), `CCharacterInfoWindow::ReloadRmlTheme()` (main only).
+```cpp
+void BindRmlModel(Rml::DataModelConstructor& c, PetInfoRmlModel& model);
+UI::RmlBridge::ThemedView<PetInfoRmlModel> m_RmlView{"pet_info",
+    [this](Rml::DataModelConstructor& c, PetInfoRmlModel& model) { BindRmlModel(c, model); },
+    {{"Data/Interface/RmlUi/pet_info.rml"}}};
+```
 
-**Text the player has typed is not live data.** It exists only in the model, which `Destroy()`
-resets, so no per-frame poll can bring it back. Copy each `data-value` field before `Destroy()`,
-restore it after `BuildRmlUi()`, and `MarkDirty()` it before the rebuilt document is shown
-(`CMyShopInventory`, `CLoginWin`, `CCharMakeWin`, `CMsgWin`, `CChatInputBox`, the MU Helper windows,
-`CGenericConfirmDialog`).
-Set the field's limits (`maxlength`, `type`) inside `BuildRmlUi()`, not in the code that opens the
-dialog, so the rebuilt field has them before the value lands. Restore only in the reload path:
-opening a dialog afresh should still clear it.
+- **Builds once, when it can.** `Ensure()` creates the model, then loads each document into its
+  context (the main one, or the spec's getter: `BackgroundOrMainContext` for a frame behind native
+  3D). It waits while a context is missing and retries a failed load on the next call. It registers
+  for theme switches on its first call.
+- **A theme switch keeps the model** and rebuilds the documents over it: typed text, selections
+  and labels survive with no copying. Each document that was visible is shown again with the
+  options' `modal`/`focus` and `stacking` (`Front`/`Back`). Owners rebuild from the bottom of their
+  context's stack up, so the stacking survives too; a window with several views builds the one
+  that must end up underneath first (`CGenericConfirmDialog`'s chrome).
+- **Hooks.** `afterBuild` runs after every build (drag handles, input filters, `maxlength`, cached
+  elements). `afterReload` runs after a theme switch's rebuild, for what the window sized or placed
+  from the old theme (`CLoginWin`, `CCharSelMainWin`, a `UI::Placement::Invalidate()`).
+  `beforeUnload` runs before every unload, theme switch or release (listeners, attached controls,
+  cached element pointers).
+- **`Release()`** blurs a focused field it owns (unloading drops the focus without a blur and
+  leaves every hotkey dead), unloads the documents, removes the model and stops following theme
+  switches. `Hide()` keeps them for the next `Show()`. Both, and `Document()`, are safe after
+  `Rml::Shutdown()`, which a static window's destructor reaches.
+- **One document per instance**: `modelPlaceholder` rewrites the markup's `data-model="…"` to the
+  view's name, given late with `SetModelName()` when it depends on the owner (the friend views).
+
+Shapes to copy: `CCharacterInfoWindow` (one document), `CMyInventory` (two views, content and
+background frame), `CMainFrameWindow` (two documents, one model), `CGenericConfirmDialog` (three
+views), `ChatRoomView` (per instance), `ReconnectDialog.cpp` (a namespace-scope view, no window).
 
 ## List / repeated rows
 

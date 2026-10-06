@@ -164,8 +164,8 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
 - **Image paths** in a themed document resolve from the theme folder (`../../../../Logo/…`); an
   absolute `/Interface/…` path misses `Data` and draws a white quad.
 - **Animations the original stepped in `Render()`** move to `Update()`.
-- **One document and model per instance** (chat rooms, letters) through `LoadThemedDocument()`'s
-  placeholder overload.
+- **One document and model per instance** (chat rooms, letters) through `ThemedView`'s
+  `modelPlaceholder` and `SetModelName()`.
 - **A block-scope `extern` inside `mu::ui::window`** declares a namespace member, not the global.
 - **Windows the original never showed** can carry latent crashes; exercise every size.
 
