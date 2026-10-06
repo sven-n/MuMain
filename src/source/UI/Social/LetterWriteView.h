@@ -12,9 +12,8 @@ class CUILetterWriteWindow;
 
 namespace UI::Social
 {
-// A letter being written. Two documents for the same reason the read window has two: this window
-// shows the player's own character as live 3D, which renders between the two RmlUi passes, so the
-// chrome goes in a background-context document and the foreground paints nothing of its own.
+// A letter being written: one document, the player's own character live 3D in a render target it
+// shows (CUIPhotoViewer), as the read window.
 class LetterWriteView : public Rml::EventListener
 {
 public:

@@ -18,7 +18,7 @@
 	     Paint order is the original's: background, then node by node (box, icon, arrow, level)
 	     in tree order, so later nodes paint over the arrows of earlier ones; then the close button
 	     and the header text. The black the original's padded background leaves below the tree is
-	     master_level_bg.rml, under the bottom HUD. -->
+	     master_level_band.rml, under the bottom HUD. -->
 	<div id="panel" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
 		<div id="back_left"></div>
 		<div id="back_right"></div>

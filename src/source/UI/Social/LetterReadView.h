@@ -12,15 +12,8 @@ class CUILetterReadWindow;
 
 namespace UI::Social
 {
-// A letter being read: two documents, because this window shows the sender's character as live 3D.
-//
-//   background context  ->  chrome and the panel's back   (before the native pass)
-//   native pass         ->  CUIPhotoViewer                (unchanged)
-//   main context        ->  the header, the body and the buttons, and nothing else
-//
-// The foreground keeps window_shell's boxes -- the title rail still drags, #content still hosts the
-// buttons -- but drops its paint, so the portrait is never covered. Both documents are instanced
-// per window through ThemedView's modelPlaceholder, as rooms are.
+// A letter being read: one document, the sender's character live 3D in a render target it shows
+// (CUIPhotoViewer). Instanced per window through ThemedView's modelPlaceholder, as rooms are.
 class LetterReadView : public Rml::EventListener
 {
 public:

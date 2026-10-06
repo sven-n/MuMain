@@ -107,10 +107,8 @@ private:
     void ApplyRmlModel(const SiegeWarfareRmlModel& next);
 
     void BindRmlModel(Rml::DataModelConstructor& c, SiegeWarfareRmlModel& model);
-    // The original drew the HUD under nearly every other window (layer depth 1.6), and a docked
-    // panel's frame is painted in the background context before the native windows: only a document
-    // in that same context, behind the others, stays under them (as the duel and battle-soccer boards
-    // do). The durability warnings, the logs and every native window then draw over the HUD.
+    // The original drew the HUD under nearly every other window (layer depth 1.6), as the duel and
+    // battle-soccer boards: the durability warnings, the logs and every window draw over it.
     UI::RmlBridge::ThemedView<SiegeWarfareRmlModel> m_RmlView{"siege_warfare",
         [this](Rml::DataModelConstructor& c, SiegeWarfareRmlModel& model) { BindRmlModel(c, model); },
         {{"Data/Interface/RmlUi/siege_warfare.rml"}}};

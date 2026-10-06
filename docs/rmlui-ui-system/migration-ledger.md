@@ -55,7 +55,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CCharacterInfoWindow` | Done | RmlUi-only 2D | `docked_panel_frame.rcss` family; fill-capable |
 | `CPetInfoWindow` | Done | RmlUi-only 2D | `docked_panel_frame.rcss`; opens with character info. Fill-capable |
 | `CPartyInfoWindow` | Done | RmlUi-only 2D | `docked_panel_frame.rcss`; member rows `data-for` over `Party[]` |
-| `CNameWindow` | Done | World-overlay | `world_labels.rml` (`UI::Character::WorldLabelLayer`): pooled elements in the background context, filled from the native label code under an `Overlay2DRecordScope` |
+| `CNameWindow` | Done | World-overlay | `world_labels.rml` (`UI::Character::WorldLabelLayer`): pooled elements behind every other document, filled from the native label code under an `Overlay2DRecordScope` |
 | `CFriendWindow` | Done | Hybrid | `UI/Social/`: shell (`friend_shell.rml`), one document per chat room and letter; the letter portrait is live 3D in a render target, driven by `UI::Social::PhotoViewerControl`. `CUIWindowMgr` still arranges them (`building-new-ui.md`). The original's F5 menu of open windows is retired: the shell's Window List tab lists them |
 | `CGuildMakeWindow` | Done | RmlUi-only 2D | |
 | `CGuildInfoWindow` | Done | RmlUi-only 2D | Three RmlUi-scrolled lists; the tab highlight is placed by RCSS. Checked in game: the tabs and the members list |
@@ -89,8 +89,8 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CCastleWindow` | Done | RmlUi-only 2D | Senatus: gate, statue and tax pages; tab positions in RCSS |
 | `CGuardWindow` | Done | RmlUi-only 2D | Guild lists; tab positions in RCSS |
 | `CGateSwitchWindow`, `CCatapultWindow` | Done | RmlUi-only 2D | Right-docked; catapult not checked in game |
-| `CSiegeWarfare` | Done | RmlUi-only 2D | Background context (drawn under every panel); buttons still hit-test natively |
-| `CDuelWindow`, `CBattleSoccerScore` | Done | RmlUi-only 2D | Background context; event-HUD slots, drawn at the HUD's scale (`LayoutMode::HudFrame`) |
+| `CSiegeWarfare` | Done | RmlUi-only 2D | Drawn under every panel (its stacking depth); buttons still hit-test natively |
+| `CDuelWindow`, `CBattleSoccerScore` | Done | RmlUi-only 2D | Under every panel; event-HUD slots, drawn at the HUD's scale (`LayoutMode::HudFrame`) |
 | `CDuelWatchWindow` | Done | RmlUi-only 2D | Right-docked |
 | `CDuelWatchUserListWindow` | Done | RmlUi-only 2D | Event-HUD slot (bottom-left corner, grows upward), `LayoutMode::HudFrame` |
 | `CDuelWatchMainFrameWindow` | Done | RmlUi-only 2D | Replaces the main frame while spectating; catch-up bars stepped in `Update()` |
@@ -151,7 +151,7 @@ siege lists, the cash shop lists.
 | Surface | Native code | Status |
 |---|---|---|
 | Centre-screen notices | `UI::Notices::Render()` | Done: `notices.rml`, above every document but the tooltip |
-| Map name banner | `CUIMapName::Render()` | Done: `map_name.rml`, background context |
+| Map name banner | `CUIMapName::Render()` | Done: `map_name.rml`, behind every window |
 | Party HP bars over heads, Kanturu result banner, siege crown switch lines and build-time bars, Hellas object labels | `RenderPartyHP()`, `M39Kanturu3rd::RenderKanturu3rdinterface()`, `RenderSwichState()`, `battleCastle::RenderBuildTimes()`, `RenderObjectDescription()` | Done: recorded by the world-label layer |
 | Reconnect dialog | `UI::Reconnect::RenderDialog()` | Done: `reconnect_dialog.rml`, above every document |
 | Login scene logo and lines | `NewRenderLogInScene()` | Done: `login_scene.rml` (`Scenes::LoginOverlay`) |

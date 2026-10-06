@@ -160,7 +160,7 @@ void mu::ui::window::CBattleSoccerScore::SyncRmlModel()
     if (!m_RmlView.Document())
         return;
 
-    // Layer depth 1.8: behind every other document of the background context (RmlStackingOrder.cpp).
+    // Layer depth 1.8: under the windows (RmlStackingOrder.cpp).
     UI::RmlBridge::SyncDocumentVisibilityBehind(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;

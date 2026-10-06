@@ -12,8 +12,8 @@ class Element;
 namespace mu::ui::window
 {
 // The Golden Archer's lucky number (scratch ticket) registration window. gold_bowman.rml draws
-// it (the frame and the field's back in the background context): the texts, the 12-character
-// number field, Register and the exit button. C++ keeps the field's focus, the registration
+// it: the frame, the field's back, the texts, the 12-character number field, Register and the
+// exit button. C++ keeps the field's focus, the registration
 // request, the exit tooltip, Escape and the dialog-exit request on closing.
 class CGoldBowmanWindow : public CObject
 {

@@ -78,14 +78,13 @@ Hexagons are native 3D, rounded boxes are RmlUi contexts:
 flowchart TD
     scene["World and legacy 2D"]
     subgraph loop["CManager::Render(): windows in layer-depth order"]
-        bg("Flush, then the background context:<br/>inventory-family frames, event boards,<br/>map name, world labels")
-        win{{"Each window's native Render():<br/>item grids, equipped items"}}
-        cam{{"3D cameras: grid and equipped items"}}
+        win{{"Each window's native Render(): state for its document,<br/>what little still draws natively"}}
+        cam{{"3D cameras: the native message boxes' items"}}
     end
-    rtt{{"Offscreen pass: RenderTarget drawers into textures:<br/>potions, letter portrait, character creation, item previews, the item on the cursor"}}
-    main("Pre-submit: the main context, every other document;<br/>render-target textures show here as images")
+    rtt{{"Offscreen pass: RenderTarget drawers into textures:<br/>the item windows' items and effects, the cash shop, potions,<br/>letter portrait, character creation, item previews, the item on the cursor"}}
+    main("Pre-submit: the one RmlUi context, every document;<br/>render-target textures show here as images")
     post["Post-RmlUi pass: the cursor"]
-    scene --> bg --> win --> cam --> rtt --> main --> post
+    scene --> win --> cam --> rtt --> main --> post
 ```
 
 A flush draws what has been recorded so far (`FlushRenderCommands()`), so a context rendered right
@@ -96,13 +95,9 @@ registered once in `Winmain.cpp`.
   opaque panel covers any legacy drawing meant to stay on top. That drawing goes in the post-RmlUi
   pass (`SetPostRmlUiCallback`), which also runs `CSystem::SyncMainSceneHudVisibility()` every
   frame.
-- **The background context takes no input**: every document in it is `pointer-events: none`.
-  Only the manager with `SetDrivesBackgroundLayer(true)` (`CSystem`'s) renders them; a window with
-  a background document gates that document's visibility on its own `IsVisible()`.
 - **Native drawing inside one document** goes into a `UI::RmlBridge::RenderTarget`
-  (`SetOffscreenRenderCallback`, `component-catalog.md`), so it sits at its element's depth.
-  Moving the background contexts' 3D onto render targets is tracked (`tracked-deferrals.md`), and
-  this diagram changes with it.
+  (`SetOffscreenRenderCallback`, `component-catalog.md`), so it sits at its element's depth: live
+  3D, and native 2D a window still draws (`SetOffscreen2DRect()`).
 
 ## Data binding: `RmlModelBinder<T>`
 

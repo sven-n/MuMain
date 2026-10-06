@@ -10,14 +10,12 @@ Every window is a `mu::ui::window::CObject` owning one or more RmlUi documents. 
 (`building-new-ui.md`'s "Shape of the kit"):
 
 - **Pure RmlUi** — `CMsgWin`, `RememberPasswordPrompt`, `CCharInfoBalloonMng`, and most windows.
-- **Frame behind live 3D** — the inventory family (`CMyInventory`, `CTrade`, `CStorageInventory`,
+- **Live 3D items** — the inventory family (`CMyInventory`, `CTrade`, `CStorageInventory`,
   `CStorageInventoryExt`, `CMixInventory`, `CNPCShop`, `CMyShopInventory`,
-  `CPurchaseShopInventory`, `CInventoryExtension`, `CLuckyItemWnd`). The frame chrome is a
-  `*_bg.rml` document in the background context (a second `ThemedView` whose document spec names
-  that context; `SyncRootTransform()`), painted before the native item grids and 3D icons; titles, buttons and
-  text are a foreground document. `CManager::Render()` drives `RenderBackgroundLayer()` centrally
-  (README, "Frame lifecycle"); each window gates its background document on its own `IsVisible()`.
-  The equipment paperdoll's own chrome stays native (`tracked-deferrals.md`).
+  `CPurchaseShopInventory`, `CInventoryExtension`, `CLuckyItemWnd`). One document each: the frame,
+  the item grids ("Item grids" below), an `ItemCameraTarget` image the window draws its items and
+  remaining native effects into, the stack counts, titles, buttons and text (`SyncRootTransform()`,
+  since the grids still hit-test in reference coordinates).
 
 Visual frame primitives are theme-specific, not shared (correct per §15 — presentation is the
 theme's job, not the component's):
@@ -29,14 +27,14 @@ theme's job, not the component's):
   `.panel-middle`.
 
 A second, narrower shared frame exists for one specific window family: the `PanelColumnX()`-docked,
-single-document (no background-context split) windows that visually read as one group on screen —
+single-document windows that visually read as one group on screen —
 `character_info`, `my_quest_info`, `pet_info`, `party_info` today. Their `#panel`/frame sprites/exit
 button/tooltip shape/group-box corner-and-fill technique (legacy) and forged-dialog panel gradient/
 shell-edge/groove/header-rail (modern) are byte-identical, so they link a shared
 `docked_panel_frame.rcss` (both themes) instead of each re-declaring it, so windows docked side by
 side read as one family (STATUS.md's checklist item 7). **A new window joining this same `PanelColumnX` dock group should link this partial too**,
 not copy-paste a fifth version — check its current window list before assuming it doesn't apply.
-`CMyInventory` is deliberately not part of it (separate `*_bg.rml` context, can't link it).
+`CMyInventory` and the other item windows keep frames of their own.
 
 ## Button
 
@@ -413,9 +411,8 @@ draws. `UI::Social::PhotoViewerControl` is the worked example of the element sid
 
 What it takes care of, so a caller does not:
 
-- **A capture recorded early would land on the frame.** `RmlUiRuntime` flushes native commands
-  mid-frame for the background context, and a flushed command is drawn before anything can mark it
-  as captured. The offscreen seam runs at the top of `EndFrame`, after the last flush.
+- **A capture recorded early would land on the frame.** `FlushRenderCommands()` draws native
+  commands mid-frame, and a flushed command is drawn before anything can mark it as captured. The offscreen seam runs at the top of `EndFrame`, after the last flush.
 - **Resizing never shows an empty or freed texture.** A new size takes a new texture, and
   `Source()` moves to it only once it has been drawn. The old one is released a few frames after
   the switch, since a new `src` reaches RmlUi a frame or two later, and the release itself waits

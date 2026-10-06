@@ -3728,7 +3728,7 @@ void RenderInterface(bool Render)
 
     RenderOutSides();
     // The overlays below are recorded into the world-label layer instead when it is available
-    // (CNameWindow::PrepareBackgroundLayer()).
+    // (CNameWindow::PrepareFrame()).
     const bool overlaysRecorded = g_pNameWindow != nullptr && g_pNameWindow->RecordsInterfaceOverlays();
     if (!overlaysRecorded)
     {

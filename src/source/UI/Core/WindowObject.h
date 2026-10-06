@@ -116,10 +116,10 @@ namespace mu::ui::window
 
         virtual float GetKeyEventOrder() { return 3.0f; }		//. Default
 
-        // Called every frame for each visible object, under its layout transform, by the manager
-        // that drives RmlUi's background context, right before that context renders: a document
-        // filled here shows this frame's state under every window (CNameWindow's world labels).
-        virtual void PrepareBackgroundLayer() {}
+        // Called every frame for each visible object, under its layout transform, before any
+        // window renders: a document filled here shows this frame's state (CNameWindow's world
+        // labels, recorded from the scene's overlay passes).
+        virtual void PrepareFrame() {}
     };
 }
 

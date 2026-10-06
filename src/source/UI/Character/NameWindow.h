@@ -25,7 +25,7 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
-        void PrepareBackgroundLayer() override;
+        void PrepareFrame() override;
         void Show(bool bShow) override;
 
         // True when the world-label layer draws RenderInterface()'s overlays -- the party members'

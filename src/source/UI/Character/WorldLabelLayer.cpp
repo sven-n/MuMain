@@ -91,9 +91,7 @@ void UI::Character::WorldLabelLayer::BeginFrame()
     if (m_view.Document() == nullptr)
         return;
 
-    // Under every window, as the original's depth-1.0 window: behind every other document of the
-    // background context (the duel and siege boards, the docked panels' frames), which itself
-    // renders before the native windows and the main context.
+    // Under every window, as the original's depth-1.0 window: behind every other document.
     UI::RmlBridge::SyncDocumentVisibilityBehind(m_view.Document(), true);
     Rml::Context* context = m_view.Document()->GetContext();
     if (context->GetNumDocuments() > 1 && context->GetDocument(0) != m_view.Document())

@@ -116,13 +116,6 @@ around it. See [`STATUS.md`](STATUS.md) for migration status and
   `CSkillList::IsSkillListUp()` reports the hotkey row's scrolled slot set, not whether the skill
   popup is open; `main_frame.rml` binds `IsSkillGridOpen()`.
 
-- **Header-rail chrome split across fg and bg documents duplicates `top`/`height`.** The rail's
-  paint lives in each window's `*_bg.rcss` (`.rail-fill`/`.rail-accent`) so it draws *behind* live
-  3D item icons; `base.rcss`'s `.modern-header-rail-px` is layout only. The values are copied from
-  the fg override (`storage.rcss`'s `.stor-header-rail` ↔ `storage_bg.rcss`'s `.rail-fill`) across
-  the 10 inventory-family windows, and `check_rml_rcss_drift.py` does not compare numbers — grep
-  the sibling selector before changing either.
-
 - **`<template>` files are sliced with comment-blind text search** (`Template::Load()`,
   `XMLParseTools::FindTag()`), so comment text can break them:
   1. A literal tag-shaped example such as a `body` tag carrying `template="window_shell"`, even

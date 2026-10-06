@@ -1,6 +1,6 @@
-/* Legacy theme for master_level_bg.rml: the black padding of the original's background textures
+/* Legacy theme for master_level_band.rml: the black padding of the original's background textures
    from reference y 428 (428/480 of the screen) to the bottom, full width. body's size must be set
-   here: bg documents do not link base.rcss. */
+   here: this document does not link base.rcss. */
 
 body {
 	width: 100%;

@@ -132,8 +132,8 @@ private:
         [this](Rml::DataModelConstructor& c, MasterLevelRmlModel& model) { BindRmlModel(c, model); },
         {{"Data/Interface/RmlUi/master_level.rml"}}};
     // Background-context companion: the black the original's padded background texture
-    // leaves below the tree, under the bottom HUD (master_level_bg.rml).
-    UI::RmlBridge::ThemedView<> m_RmlBgView{{{"Data/Interface/RmlUi/master_level_bg.rml"}}};
+    // leaves below the tree, under the bottom HUD (master_level_band.rml).
+    UI::RmlBridge::ThemedView<> m_RmlBgView{{{"Data/Interface/RmlUi/master_level_band.rml"}}};
 
     // Set by the RmlUi events, read every frame: the node press opens its dialog from
     // Update(), the hovers show the matching hint.

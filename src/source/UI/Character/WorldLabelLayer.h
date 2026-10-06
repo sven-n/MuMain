@@ -16,8 +16,8 @@ class ElementText;
 
 namespace UI::Character
 {
-// CNameWindow's world labels in RmlUi: one background-context document (world_labels.rml) behind
-// every other document, holding a pool of absolutely positioned elements filled in draw order from
+// CNameWindow's world labels in RmlUi: one document (world_labels.rml) behind every other
+// document, holding a pool of absolutely positioned elements filled in draw order from
 // what the native label code draws while this layer records (Render::Renderer::Overlay2DRecordScope).
 // Each frame only the properties that changed are written and the unused tail is hidden, so the cost
 // follows the labels drawn, not the pool.
@@ -92,7 +92,7 @@ private:
     std::vector<Slot> m_slots;
     std::size_t m_used = 0;
     std::size_t m_shown = 0; // slots used by the last finished frame
-    // In the background context only: the labels draw under every window.
+    // The labels draw under every window.
     UI::RmlBridge::ThemedView<> m_view{{{"Data/Interface/RmlUi/world_labels.rml"}},
                                        {.stacking = UI::RmlBridge::ThemedStacking::Back,
                                         .afterBuild = [this] { OnBuilt(); }}};

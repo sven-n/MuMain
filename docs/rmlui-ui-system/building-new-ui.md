@@ -52,9 +52,9 @@ sits.
 
 **The RmlUi/native boundary.** Permanently native is only content with no RmlUi equivalent:
 **live 3D** (item grids and icons, equipped items, character and item previews) and
-**world-anchored positions** (`WorldToScreen()` projections). The background context lets RmlUi
-paint *behind* live 3D, and `UI::RmlBridge::RenderTarget` lets a document *show* it as an image;
-neither makes the 3D render portable. That decides who draws the content, not where it may sit.
+**world-anchored positions** (`WorldToScreen()` projections). `UI::RmlBridge::RenderTarget` lets a
+document *show* live 3D as an image at its element's depth; that does not make the 3D render
+portable. That decides who draws the content, not where it may sit.
 Everything else — chrome, layout, text, buttons, tooltips, sprite-atlas icons — is RmlUi; the test
 is "is this a live 3D render or a world-space projection", not "is this hard to port". A ported
 window may keep one kind of native companion: a control kept for hit-testing or for state other

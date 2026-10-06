@@ -9,8 +9,6 @@
 #include <set>
 #include <string>
 
-using UI::RmlBridge::ContextForDocument;
-using UI::RmlBridge::DocumentContext;
 using UI::RmlBridge::DocumentScene;
 using UI::RmlBridge::SceneForDocument;
 using UI::RmlBridge::StackingDepthForDocument;
@@ -49,28 +47,6 @@ TEST_CASE("every document the client loads has a stacking depth [ui][stacking]")
     CHECK(names.size() > 100);
     for (const std::string& name : names)
         CHECK_MESSAGE(StackingDepthForDocument(name).has_value(), name);
-}
-
-// The background contexts draw before the native windows, so frame art there stays behind live
-// item models. They are closed: new native 3D goes into a RenderTarget its document shows. A
-// document leaves these lists when its window moves to one; none joins them.
-TEST_CASE("the background contexts hold only the documents already in them [ui][stacking]")
-{
-    const std::set<std::string> background = {
-        "battle_soccer_score.rml", "blood_castle_time.rml", "chaos_castle_time.rml",
-        "cursed_temple_system.rml", "doppelganger_frame.rml", "duel_window.rml",
-        "empire_guardian_timer.rml", "kanturu_info.rml", "map_name.rml", "master_level_bg.rml",
-        "siege_warfare.rml", "world_labels.rml",
-    };
-
-    const std::set<std::string> named = DocumentsNamedInSources();
-    for (const std::string& name : background)
-        CHECK_MESSAGE(named.contains(name), name);
-    for (const std::string& name : named)
-    {
-        const DocumentContext context = ContextForDocument(name);
-        CHECK_MESSAGE((context == DocumentContext::Background) == background.contains(name), name);
-    }
 }
 
 TEST_CASE("every document the client loads has a scene [ui][stacking]")
@@ -135,6 +111,6 @@ TEST_CASE("documents stack as the original's windows did [ui][stacking]")
     CHECK(Depth("loading.rml") > Depth("notices.rml"));
     CHECK(Depth("sys_menu.rml") > Depth("notices.rml"));
     CHECK(Depth("reconnect_dialog.rml") > Depth("loading.rml"));
-    // A window's background document shares its depth.
-    CHECK(Depth("master_level_bg.rml") == Depth("master_level.rml"));
+    // The master skill tree's band shares its depth.
+    CHECK(Depth("master_level_band.rml") == Depth("master_level.rml"));
 }

@@ -11,9 +11,9 @@
 
 namespace mu::ui::window
 {
-// Delgado's lucky coin registration window. lucky_coin_registration.rml draws it (the frame in
-// the background context, under the native 3D coin); C++ keeps the count, the Register lock,
-// the coin preview and every request it sends.
+// Delgado's lucky coin registration window. lucky_coin_registration.rml draws it, the live 3D
+// coin C++ draws into it included; C++ keeps the count, the Register lock and every request it
+// sends.
 class CRegistrationLuckyCoin : public CObject
 {
 private:

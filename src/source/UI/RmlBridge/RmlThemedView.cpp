@@ -60,18 +60,10 @@ ContextTracker& Tracker()
 
 namespace
 {
-Rml::Context* RuntimeContextFor(std::string_view documentName)
+Rml::Context* RuntimeContextFor(std::string_view /*documentName*/)
 {
     RmlUiRuntime& runtime = RmlUiRuntime::Instance();
-    if (!runtime.IsCreated())
-        return nullptr;
-    switch (ContextForDocument(documentName))
-    {
-    case DocumentContext::Background:
-        return runtime.GetBackgroundContext();
-    default:
-        return runtime.GetContext();
-    }
+    return runtime.IsCreated() ? runtime.GetContext() : nullptr;
 }
 
 ContextResolver& Resolver()

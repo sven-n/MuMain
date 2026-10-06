@@ -162,8 +162,7 @@ private:
     DWORD m_dwColonTime = 0; // the colon's last blink
     bool m_bColonVisible = true;
     static void BindRmlModel(Rml::DataModelConstructor& c, KanturuInfoRmlModel& model);
-    // The original drew the HUD under every panel (layer depth 1.92): the document sits in the
-    // background context, behind its other documents.
+    // The original drew the HUD under every panel (layer depth 1.92), and so does the document.
     UI::RmlBridge::ThemedView<KanturuInfoRmlModel> m_RmlView{"kanturu_info", BindRmlModel,
         {{"Data/Interface/RmlUi/kanturu_info.rml"}}};
 };

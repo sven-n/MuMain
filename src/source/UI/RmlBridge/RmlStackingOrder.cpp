@@ -18,40 +18,36 @@ constexpr float ReconnectDialogDepth = 50.0f; // after the whole scene
 
 constexpr DocumentScene MainScene = DocumentScene::Main;
 constexpr DocumentScene AnyScene = DocumentScene::Any;
-constexpr DocumentContext Background = DocumentContext::Background;
 
 struct DocumentPlacement
 {
     std::string_view name;
     float depth;
     DocumentScene scene;
-    DocumentContext context = DocumentContext::Main;
 };
 
-// The original's GetLayerDepth() of each window, for its foreground and background
-// (_bg) documents alike, the scene whose windows the document belongs to, and the context it
-// loads into when that is not the main one.
+// The original's GetLayerDepth() of each window and the scene whose windows the document belongs
+// to.
 constexpr DocumentPlacement Placements[] = {
     {"login_scene.rml", BeforeWindowsDepth, AnyScene},
     // Never drawn: it only lays out where windows go.
     {"workspace.rml", BeforeWindowsDepth, AnyScene},
-    {"map_name.rml", BeforeWindowsDepth, MainScene, Background},
+    {"map_name.rml", BeforeWindowsDepth, MainScene},
     {"buff_strip.rml", 0.95f, MainScene},
-    {"world_labels.rml", 1.0f, MainScene, Background},
+    {"world_labels.rml", 1.0f, MainScene},
     // The modern theme's top-right button row: under every window, which dock over it.
     {"main_frame_top.rml", 1.05f, MainScene},
-    // The duel and soccer boards drew under every panel, the docked panels' frames included; those
-    // frames are in the background context, so the boards are too, behind them.
-    {"duel_window.rml", 1.1f, MainScene, Background},
-    {"blood_castle_time.rml", 1.2f, MainScene, Background},
-    {"doppelganger_frame.rml", 1.2f, MainScene, Background},
+    // The duel and soccer boards drew under every panel.
+    {"duel_window.rml", 1.1f, MainScene},
+    {"blood_castle_time.rml", 1.2f, MainScene},
+    {"doppelganger_frame.rml", 1.2f, MainScene},
     {"empire_guardian_enter.rml", 1.2f, MainScene},
-    {"empire_guardian_timer.rml", 1.2f, MainScene, Background},
-    {"chaos_castle_time.rml", 1.3f, MainScene, Background},
-    {"cursed_temple_system.rml", 1.5f, MainScene, Background},
-    {"siege_warfare.rml", 1.6f, MainScene, Background},
-    {"battle_soccer_score.rml", 1.8f, MainScene, Background},
-    {"kanturu_info.rml", 1.92f, MainScene, Background},
+    {"empire_guardian_timer.rml", 1.2f, MainScene},
+    {"chaos_castle_time.rml", 1.3f, MainScene},
+    {"cursed_temple_system.rml", 1.5f, MainScene},
+    {"siege_warfare.rml", 1.6f, MainScene},
+    {"battle_soccer_score.rml", 1.8f, MainScene},
+    {"kanturu_info.rml", 1.92f, MainScene},
     {"quick_command.rml", 2.0f, MainScene},
     {"trade.rml", 2.1f, MainScene},
     {"storage.rml", 2.2f, MainScene},
@@ -119,7 +115,7 @@ constexpr DocumentPlacement Placements[] = {
     {"igs_send_gift.rml", 10.09f, MainScene},
     {"kanturu_enter.rml", 10.1f, MainScene},
     {"master_level.rml", 10.1f, MainScene},
-    {"master_level_bg.rml", 10.1f, MainScene, Background},
+    {"master_level_band.rml", 10.1f, MainScene},
     {"cursed_temple_result.rml", 10.2f, MainScene},
     {"cursed_temple_enter.rml", 10.3f, MainScene},
     {"window_menu.rml", 10.4f, MainScene},
@@ -187,9 +183,4 @@ std::optional<DocumentScene> SceneForDocument(std::string_view documentName)
     return placement->scene;
 }
 
-DocumentContext ContextForDocument(std::string_view documentName)
-{
-    const DocumentPlacement* placement = FindPlacement(documentName);
-    return placement != nullptr ? placement->context : DocumentContext::Main;
-}
 } // namespace UI::RmlBridge

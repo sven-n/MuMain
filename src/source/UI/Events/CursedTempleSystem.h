@@ -173,8 +173,8 @@ private:
     DWORD m_TutorialStepTime;
 
     void BindRmlModel(Rml::DataModelConstructor& c, CursedTempleSystemRmlModel& model);
-    // The original drew the HUD at layer depth 1.5, under nearly every panel: the document sits in the
-    // background context, behind its other documents.
+    // The original drew the HUD at layer depth 1.5, under nearly every panel, and so does the
+    // document.
     UI::RmlBridge::ThemedView<CursedTempleSystemRmlModel> m_RmlView{"cursed_temple_system",
         [this](Rml::DataModelConstructor& c, CursedTempleSystemRmlModel& model) { BindRmlModel(c, model); },
         {{"Data/Interface/RmlUi/cursed_temple_system.rml"}}};

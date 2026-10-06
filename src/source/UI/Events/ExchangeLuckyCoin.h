@@ -8,8 +8,8 @@
 
 namespace mu::ui::window
 {
-// Delgado's lucky coin exchange window. lucky_coin_exchange.rml draws it (the frame in the
-// background context); C++ keeps the button locks, Escape and every request it sends.
+// Delgado's lucky coin exchange window. lucky_coin_exchange.rml draws it; C++ keeps the button
+// locks, Escape and every request it sends.
 class CExchangeLuckyCoin : public CObject
 {
 private:

@@ -7,8 +7,8 @@
 // pass) the document replaces. Loading a themed document sets it as its z-index. The original
 // drew its windows in ascending GetLayerDepth() order (CNewUIManager::Render()), then the notices,
 // the scene windows (CUIMng) and the reconnect dialog; RmlUi sorts a context's documents by z-index
-// and keeps show/focus order only among documents of equal depth, which reproduces that order in
-// both the main and the background context. See docs/rmlui-ui-system/STATUS.md, "Stacking order".
+// and keeps show/focus order only among documents of equal depth, which reproduces that order.
+// See docs/rmlui-ui-system/STATUS.md, "Stacking order".
 namespace UI::RmlBridge
 {
 // The scene whose windows a document belongs to. The original drew CNewUIManager's windows only in
@@ -22,16 +22,6 @@ enum class DocumentScene
     Any,
 };
 
-// The context a document loads into. Background draws before the native windows and their 3D, so
-// frame art there stays behind live item models. New native 3D goes into a
-// UI::RmlBridge::RenderTarget the document shows instead: the list is closed, and
-// tests/ui/test_rml_stacking_order.cpp holds it.
-enum class DocumentContext
-{
-    Main,
-    Background,
-};
-
 // Depth for a document file name such as "chat_log.rml" (no directory); none for a name the
 // table does not know (such a document keeps z-index:auto, under every listed one).
 std::optional<float> StackingDepthForDocument(std::string_view documentName);
@@ -39,7 +29,4 @@ std::optional<float> StackingDepthForDocument(std::string_view documentName);
 // Scene for a document file name, from the same table; none for a name the table does not know
 // (such a document is never suspended).
 std::optional<DocumentScene> SceneForDocument(std::string_view documentName);
-
-// Context for a document file name, from the same table; Main for a name the table does not know.
-DocumentContext ContextForDocument(std::string_view documentName);
 } // namespace UI::RmlBridge

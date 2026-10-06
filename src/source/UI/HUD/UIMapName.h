@@ -54,8 +54,8 @@ public:
 protected:
     void InitImgPathMap();
 
-    // The banner in RmlUi (map_name.rml): background context, behind every other document (the
-    // original drew it before every window). Render() fills it; the native drawing is the fallback
+    // The banner in RmlUi (map_name.rml): behind every window, as the original drew it before
+    // them. Render() fills it; the native drawing is the fallback
     // when RmlUi is not available.
     void BuildRmlUi();
     void SyncView();

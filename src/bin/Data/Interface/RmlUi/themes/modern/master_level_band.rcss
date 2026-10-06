@@ -1,6 +1,6 @@
-/* Modern theme for master_level_bg.rml: the band below the tree (reference y 428 down), under the
+/* Modern theme for master_level_band.rml: the band below the tree (reference y 428 down), under the
    bottom HUD, in the panel's own deepest surface so the tree reads as one full-screen sheet as in
-   the legacy theme. body's size must be set here: bg documents do not link base.rcss. */
+   the legacy theme. body's size must be set here: this document does not link base.rcss. */
 
 body {
 	width: 100%;

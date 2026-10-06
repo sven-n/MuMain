@@ -112,8 +112,7 @@ private:
 
     BOOL m_bIsEnabled;
     void BindRmlModel(Rml::DataModelConstructor& c, DoppelGangerFrameRmlModel& model);
-    // The original drew the background context's HUDs under every panel (layer depth 1.2): the
-    // document sits in the background context, behind its other documents.
+    // The original drew the HUD under every panel (layer depth 1.2), and so does the document.
     UI::RmlBridge::ThemedView<DoppelGangerFrameRmlModel> m_RmlView{"doppelganger_frame",
         [this](Rml::DataModelConstructor& c, DoppelGangerFrameRmlModel& model) { BindRmlModel(c, model); },
         {{"Data/Interface/RmlUi/doppelganger_frame.rml"}}};

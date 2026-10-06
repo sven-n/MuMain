@@ -13,8 +13,8 @@ No code-health item is left.
 
 In order:
 
-1. [Native 3D against RmlUi](#native-3d-against-rmlui): retire the background contexts, and with
-   them the root transform and counter-scaled text they keep alive; the equipment paperdoll follows.
+1. [Native coordinates in the item windows](#native-coordinates-in-the-item-windows): their
+   pointing to RmlUi, then `dp`, retiring the root transform and counter-scaled text there.
 2. [One obvious component surface](#one-obvious-component-surface).
 3. [The counter-scale block](#the-counter-scale-block): settle the open question, then move it to
    `calc()`.
@@ -27,33 +27,22 @@ exists to prove the architecture, so its unchecked windows are not tracked. The 
 accepted as the base ([building-new-ui.md](building-new-ui.md)'s "Accepted as the base"), and window
 placement is theme-owned ([window-placement.md](window-placement.md)).
 
-## Native 3D against RmlUi
+## Native coordinates in the item windows
 
-The review of `Render/RmlUi` and `UI/RmlBridge` against the vendored RmlUi found the core idiomatic;
-what remains is where RmlUi meets native 3D. Two mechanisms order it:
+Native 3D reaches RmlUi only through render targets (`UI::RmlBridge::RenderTarget`; items through
+`UI::Items::ItemCameraTarget`), and every document is in the one context. What still ties the item
+windows to the original's reference coordinates is input: `CInventoryCtrl`, the paperdoll and
+`CInventoryActionController` hit-test in 640x480 units against the `.native-anchor` readback, and a
+grid's cell pitch is fixed at 20 (`INVENTORY_SQUARE_WIDTH`). That is why these windows keep
+`SyncRootTransform` and counter-scaled `.sharp-text`.
 
-- **The `background` context**, rendered mid-frame from `CManager::Render()`. It splits 12
-  windows into a foreground and a `*_bg.rml` document, each with its own model and root-transform
-  sync, and holds the HUD boards that draw under them.
-- **`RenderTarget`**, the idiomatic one: native drawing becomes an image at its element's depth.
+**Direction.** Drive the grids' and slots' pointing from RmlUi events on their cells (`.item-cell`,
+`.equip-slot`), read the cell pitch from RCSS, then move the windows to `dp`; the counter-scale
+block shrinks with it. The shared item camera's last users are the native message boxes that show
+an item (`C3DItemCommonMsgBox`, the cash shop's buy boxes); the cash shop's own native widgets draw
+into its render target until its port ([one obvious component surface](#one-obvious-component-surface)).
 
-The stacking table (`RmlStackingOrder.cpp`) says which context each document loads into, and
-`test_rml_stacking_order.cpp` holds the background list closed, so new native 3D can only go into
-a render target. `UI::Items::ItemCameraTarget` draws items into one; the confirm dialog's item
-preview moved first, retiring `dialog_background`, then the single previews (`CNPCQuest`, the
-`EventItemEntryView` windows).
-
-**Direction.** Move the inventory family's live items into render targets and retire
-`background` with its `*_bg.rml` documents, taking each out of the test's list. The root transform
-and its counter-scaled text (`SyncRootTransform`, `.sharp-text`, the panel readback) exist because a
-window shares reference coordinates with native grids and hit tests; a window whose native content
-has moved into a render target moves to `dp` and RmlUi's own hit testing.
-
-**The equipment paperdoll** (`CMyInventory::RenderEquippedItem()`, still native). Its background
-sprite, durability tint and drag-compatibility highlight paint *behind* the equipped item's live 3D
-icon; ported into the main context they would paint in front of it. Port it in the same pass, once
-the equipped items are render targets, or with the equipment grid's own chrome pass, whichever comes
-first. Alone, only the static background sprite is worth the cost.
+**Revisit when** an item window's layout or input is next touched.
 
 ## The counter-scale block
 

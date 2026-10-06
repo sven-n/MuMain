@@ -158,10 +158,10 @@ void mu::ui::window::CNameWindow::Show(bool bShow)
         m_labelLayer.Hide();
 }
 
-void mu::ui::window::CNameWindow::PrepareBackgroundLayer()
+void mu::ui::window::CNameWindow::PrepareFrame()
 {
-    // Recorded before the background context renders this frame, so the labels use this frame's
-    // camera and selection and sit under every window, as the original's depth-1.0 window did.
+    // Recorded before the windows render, with this frame's camera and selection; the document
+    // sits under every window, as the original's depth-1.0 window did.
     if (!m_labelLayer.Create())
         return;
 

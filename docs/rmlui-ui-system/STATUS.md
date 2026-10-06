@@ -18,8 +18,8 @@ Every window is a `mu::ui::window::CObject` drawn by RmlUi in both themes, excep
   menus, the party list, the move list. The whole HUD is one theme-placed unit in the workspace
   (`window-placement.md`).
 - **Inventory family** — `CMyInventory`, `CTrade`, storage and its extension, mix, NPC shop, the
-  personal shops, inventory extension, lucky items. Frames paint from the background context so
-  they sit behind the live 3D items.
+  personal shops, inventory extension, lucky items. One document each: the grids are
+  `item_grid.rcss` cells, and the live 3D items draw into the window's render target over them.
 - **Docked panels** — character info, quests, pet, party, guild, the MU Helper config and detail
   windows, all on `docked_panel_frame.rcss`.
 - **Dialogs** — `CGenericConfirmDialog` and `CGenericMenuDialog` replace most of the native
@@ -64,8 +64,8 @@ replaces, from one table (`UI/RmlBridge/RmlStackingOrder.cpp`), set when a theme
 The original drew its windows in ascending `GetLayerDepth()` order, then the notices, the scene
 windows, the login scene's message box and the reconnect dialog; RmlUi sorts a context's
 documents by `z-index` and keeps show/focus order only among equal depths, so
-`SyncDocumentVisibilityInFront()`/`Behind()` and focus only order documents of one depth. The
-same numbers order the background context. Passes outside the window list: object descriptions
+`SyncDocumentVisibilityInFront()`/`Behind()` and focus only order documents of one depth. Passes
+outside the window list: object descriptions
 and the map name 0.5, notices 20, scene windows 30 (balloons 29, the remember-password prompt 31),
 loading and title screens 40, reconnect dialog 50. The shared tooltip is 10.69, above every window
 and under the message boxes (10.7): the original drew each tooltip at its owner's depth, where the
@@ -145,14 +145,14 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
 
 **Drawing**
 - **A window the original drew under every panel** (siege HUD, duel and battle-soccer boards)
-  lives in the background context; **one with a live 3D preview** puts its frame there and its
-  texts and buttons in the main context (`UI/Events/EventItemEntryView`).
+  takes its low depth from the stacking table; **one with a live 3D preview** draws it into a render
+  target in its own document (`UI::Items::ItemCameraTarget`, `UI/Events/EventItemEntryView`).
 - **Native 3D inside a document** goes through `UI::RmlBridge::RenderTarget`, so it z-orders with
   the windows around it.
 - **World-anchored or shared legacy drawing** goes through the world-label layer's
   `Overlay2DRecordScope`, which records `RenderText()`/`RenderColorQuadARGB()`/`RenderBitmap()`
-  and replays them into pooled elements; `CObject::PrepareBackgroundLayer()` runs before the
-  background context.
+  and replays them into pooled elements; `CObject::PrepareFrame()` records them before any window
+  renders.
 - **`EnableAlphaBlend()` is additive** (ONE, ONE): `decorator: additive-fill(<colour>)` /
   `additive-image(<colour> <image>)`.
 - **Textures are premultiplied on load** (`RmlUiRenderInterface::LoadTexture`).

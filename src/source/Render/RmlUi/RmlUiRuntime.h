@@ -70,23 +70,6 @@ public:
     // free function (a lambda) rather than a member, and doesn't need any further access.
     void RenderFrame();
 
-    // The RmlUi-behind-3D-icons seam: a second, background-only Rml::Context (m_BackgroundContext)
-    // that CManager::Render() (WindowManager.cpp) drives explicitly, right before the first
-    // visible window/C3DCamera in its z-sorted loop each frame, instead of waiting for
-    // RenderFrame()'s single fixed pre-submit slot. Flushes whatever legacy content has been
-    // recorded so far (mu::GetRenderer().
-    // FlushRenderCommands(), MuRenderer.h) so it's actually on screen, then renders this context
-    // into the resulting gap -- content recorded after this call returns lands on top of it, in
-    // front of everything recorded before this call. No-op if nothing was ever loaded into the
-    // background context (every theme but the ones that opt in, e.g. `legacy`). Never receives
-    // input (see m_BackgroundContext's own comment) -- Update() still needs calling per frame for
-    // data-model/animation purposes, so this does that too, not just Render().
-    void RenderBackgroundLayer();
-
-    // Every RmlUi document meant to render via RenderBackgroundLayer() loads into this context
-    // instead of GetContext()'s "main" one: its ThemedView's document spec names it.
-    Rml::Context* GetBackgroundContext() const { return m_BackgroundContext; }
-
     // Forwards one SDL event to RmlUi. Motion and button down/up are handled directly (see the
     // .cpp) to avoid two real bugs in RmlUi's official RmlSDL::InputEventHandler (vendored at
     // ThirdParty/RmlUi/Backends/RmlUi_Platform_SDL.cpp) that don't fit this engine's own
@@ -165,23 +148,4 @@ private:
     std::unique_ptr<TextInputMethodEditor_SDL> m_TextInputMethodEditor;
 
     Rml::Context* m_Context = nullptr; // owned by Rml::Core, released via Rml::Shutdown()
-
-    // Background-only companion to m_Context -- see RenderBackgroundLayer()'s own comment. Never
-    // registered as (or participating in) the active IUiInputConsumer: every document loaded into
-    // it is expected to be entirely `pointer-events: none` (same convention as char_sel_main.rml's
-    // #panel), so it needs no ProcessSdlEvent/IsMouseOverUI involvement at all -- Update()+Render()
-    // only, driven directly by RenderBackgroundLayer(), never through the single-slot UiInputRouter
-    // or the single-slot SetPreSubmitCallback m_Context itself uses. Also owned by Rml::Core,
-    // released by the same Rml::Shutdown() call in Destroy().
-    Rml::Context* m_BackgroundContext = nullptr;
-
-    // RenderBackgroundLayer() replays the ENTIRE shared background context -- every document
-    // currently Show()n in it, not just one particular window's. CManager::Render()
-    // (WindowManager.cpp) is the sole caller, once per visible window/C3DCamera in its z-sorted
-    // loop -- this guard is what makes only the first (lowest-GetLayerDepth) visible one actually
-    // render; every later one this same frame is a cheap no-op. Reset in RenderFrame() (the one
-    // guaranteed-once-per-frame choke point), not BeginFrame(), since RenderFrame() fires late
-    // (SetPreSubmitCallback) -- after every RenderBackgroundLayer() call this frame already
-    // happened, so resetting there arms the guard correctly for next frame.
-    bool m_backgroundLayerRenderedThisFrame = false;
 };

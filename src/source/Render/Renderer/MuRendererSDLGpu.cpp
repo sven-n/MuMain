@@ -247,11 +247,10 @@ static std::function<void()> s_postRmlUiCallback;
 static std::function<void()> s_offscreenRenderCallback;
 
 // The texture every pass of this frame renders into: the main pass, FlushRenderCommands'
-// mid-frame passes (behind which RmlUi's background contexts draw), and the UI seams (RmlUi's
-// pre-submit callback, the post-RmlUi pass). Normally the swapchain texture; on a frame that
-// captures its pixels (screenshot readback, reconnect capture) it is that frame's substitute
-// colour target, chosen once in BeginFrame() so the capture includes everything the player
-// sees -- the background-context documents flushed mid-frame included. nullptr means the
+// mid-frame passes, and the UI seams (RmlUi's pre-submit callback, the post-RmlUi pass). Normally
+// the swapchain texture; on a frame that captures its pixels (screenshot readback, reconnect
+// capture) it is that frame's substitute colour target, chosen once in BeginFrame() so the
+// capture includes everything the player sees. nullptr means the
 // swapchain (GetFrameGpuContext() falls back to it); reset at the end of EndFrame().
 static SDL_GPUTexture* s_frameColorTarget = nullptr;
 

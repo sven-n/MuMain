@@ -128,7 +128,7 @@ void mu::ui::window::CDuelWindow::SyncRmlModel()
     if (!m_RmlView.Document())
         return;
 
-    // Layer depth 1.1: behind every other document of the background context (RmlStackingOrder.cpp).
+    // Layer depth 1.1: under the windows (RmlStackingOrder.cpp).
     UI::RmlBridge::SyncDocumentVisibilityBehind(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;

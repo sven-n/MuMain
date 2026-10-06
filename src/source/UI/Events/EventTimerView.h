@@ -15,8 +15,7 @@ namespace mu::ui::window
 // The RmlUi side of the event time HUDs that share the original's layout (CBloodCastle,
 // CChaosCastleTime, CEmpireGuardianTimer): newui_Figure_blood (124 x 81), an optional first line
 // at y 13, a second at y 38 and the time in the big font at y 50, each in its own colour. The original drew them under
-// every panel (layer depth 1.2 / 1.3), so the document is in the background context, behind its other documents, like
-// the duel and siege boards. Each window owns one, with its own document and data model; the window keeps its time, its
+// every panel (layer depth 1.2 / 1.3), and so does the document, like the duel and siege boards. Each window owns one, with its own document and data model; the window keeps its time, its
 // counts and when it is shown.
 class EventTimerView
 {

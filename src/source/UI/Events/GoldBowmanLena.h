@@ -6,9 +6,9 @@
 
 namespace mu::ui::window
 {
-// The Golden Archer's Rena registration window. gold_bowman_lena.rml draws it (the frame in the
-// background context, under the two native 3D Rena): the texts with the collected and
-// registered counts, Register and the exit button. C++ keeps the Rena, the counts, the
+// The Golden Archer's Rena registration window. gold_bowman_lena.rml draws it: the frame, the
+// texts with the collected and registered counts, Register and the exit button, and the two live
+// 3D Rena C++ draws into it. C++ keeps the Rena, the counts, the
 // registration request, the button tooltips, Escape and the dialog-exit request on closing.
 class CGoldBowmanLena : public CObject
 {
