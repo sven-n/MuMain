@@ -2,7 +2,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/HUD/SlideTicker.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <RmlUi/Core/Types.h>
 
@@ -54,13 +54,13 @@ namespace mu::ui::window
             Rml::String textColor;
             Rml::String text;
         };
-        RmlModelBinder<SlideNoticeRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, SlideNoticeRmlModel& model);
+        UI::RmlBridge::ThemedView<SlideNoticeRmlModel> m_RmlView{"slide_notice",
+            [this](Rml::DataModelConstructor& c, SlideNoticeRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/slide_notice.rml"}}};
 
         void BuildRmlUi();
-        void DestroyRmlUi();
         void SyncRmlModel();
-        void ReloadRmlTheme();
 
         UI::HUD::SlideTicker* m_pSlideMgr;
     };

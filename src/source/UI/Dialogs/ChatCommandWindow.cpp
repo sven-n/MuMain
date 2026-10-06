@@ -96,7 +96,6 @@ bool mu::ui::window::CChatCommandWindow::Create(CManager* pNewUIMng, int x, int 
 
     SetPos(x, y);
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     Show(false);
 
     return true;
@@ -104,13 +103,14 @@ bool mu::ui::window::CChatCommandWindow::Create(CManager* pNewUIMng, int x, int 
 
 void mu::ui::window::CChatCommandWindow::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = nullptr;
     }
+
+    m_RmlView.Release();
 }
 
 void mu::ui::window::CChatCommandWindow::SetPos(int x, int y)
@@ -399,7 +399,7 @@ void mu::ui::window::CChatCommandWindow::BeginEditingParameter(size_t parameterI
     }
 
     m_editedParameter = static_cast<int>(parameterIndex);
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::editValue, "edit_value",
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::editValue, "edit_value",
               Rml::String(StringUtils::WideToNarrow(m_parameterValues[parameterIndex].c_str())));
 
     // The field takes the focus once the document shows it at its new place (SyncRmlModel());
@@ -493,7 +493,7 @@ bool mu::ui::window::CChatCommandWindow::UpdateMouseEvent()
 
     float panelWidth = static_cast<float>(WINDOW_WIDTH);
     float panelHeight = static_cast<float>(WindowHeight);
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (!mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
                                         static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
@@ -691,123 +691,108 @@ bool mu::ui::window::CChatCommandWindow::Render()
 
 Rml::Element* mu::ui::window::CChatCommandWindow::GetValueField() const
 {
-    return m_pRmlDoc != nullptr ? m_pRmlDoc->GetElementById("value_field") : nullptr;
+    return m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("value_field") : nullptr;
 }
 
 std::wstring mu::ui::window::CChatCommandWindow::ReadValueField() const
 {
     // No element lookup: the value lives in the model, and the element only exists while the field
     // is shown at its parameter. Its one caller already guards on m_editedParameter.
-    return StringUtils::NarrowToWide(m_RmlBinder.GetModel().editValue);
+    return StringUtils::NarrowToWide(m_RmlView.GetModel().editValue);
+}
+
+void mu::ui::window::CChatCommandWindow::BindRmlModel(Rml::DataModelConstructor& c, ChatCommandRmlModel& model)
+{
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("panel_width", &model.panelWidth);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("window_height", &model.windowHeight);
+
+    auto lineType = c.RegisterStruct<ChatCommandLine>();
+    lineType.RegisterMember("text", &ChatCommandLine::text);
+    lineType.RegisterMember("text_px", &ChatCommandLine::textPx);
+    c.RegisterArray<std::vector<ChatCommandLine>>();
+    c.Bind("title", &model.title);
+    c.Bind("empty_message", &model.emptyMessage);
+    c.Bind("description_lines", &model.descriptionLines);
+    c.Bind("template_rows", &model.templateRows);
+    c.Bind("favourite_action", &model.favouriteAction);
+    c.Bind("save_action", &model.saveAction);
+    auto commandRow = c.RegisterStruct<ChatCommandRow>();
+    commandRow.RegisterMember("text", &ChatCommandRow::text);
+    commandRow.RegisterMember("text_px", &ChatCommandRow::textPx);
+    commandRow.RegisterMember("favourite", &ChatCommandRow::favourite);
+    c.RegisterArray<std::vector<ChatCommandRow>>();
+    c.Bind("command_rows", &model.commandRows);
+    auto parameter = c.RegisterStruct<ChatCommandParameterRow>();
+    parameter.RegisterMember("label", &ChatCommandParameterRow::label);
+    parameter.RegisterMember("label_text_px", &ChatCommandParameterRow::labelTextPx);
+    parameter.RegisterMember("missing", &ChatCommandParameterRow::missing);
+    parameter.RegisterMember("value", &ChatCommandParameterRow::value);
+    parameter.RegisterMember("value_text_px", &ChatCommandParameterRow::valueTextPx);
+    parameter.RegisterMember("placeholder", &ChatCommandParameterRow::placeholder);
+    parameter.RegisterMember("edited", &ChatCommandParameterRow::edited);
+    c.RegisterArray<std::vector<ChatCommandParameterRow>>();
+    c.Bind("parameters", &model.parameters);
+    c.Bind("parameter_top", &model.parameterTop);
+    c.Bind("action_top", &model.actionTop);
+    c.Bind("page", &model.page);
+    c.Bind("editing", &model.editing);
+    c.Bind("edit_top", &model.editTop);
+    c.Bind("edit_value", &model.editValue);
+    c.Bind("has_left_button", &model.hasLeftButton);
+    c.Bind("has_right_button", &model.hasRightButton);
+    c.Bind("left_text", &model.leftText);
+    c.Bind("right_text", &model.rightText);
+    c.Bind("label_line_px", &model.labelLinePx);
+    c.Bind("exit_tooltip", &model.exitTooltip);
+
+    c.BindEventCallback(
+        "chat_command_hit",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+        {
+            if (arguments.size() == 2)
+                m_pendingHits.push_back(
+                    {static_cast<ChatCommandAction>(arguments[0].Get<int>(0)), arguments[1].Get<int>(-1)});
+        });
+    c.BindEventCallback("chat_command_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_pendingExit = true; });
+    c.BindEventCallback("chat_command_left", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_pendingLeft = true; });
+    c.BindEventCallback("chat_command_right", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_pendingRight = true; });
+
+    wchar_t closeText[256] = {};
+    mu_swprintf_s(closeText, I18N::Game::CloseS, L"J");
+    model.exitTooltip = StringUtils::WideToNarrow(closeText);
+}
+
+void mu::ui::window::CChatCommandWindow::OnRmlUnloading()
+{
+    StopEditing();
 }
 
 void mu::ui::window::CChatCommandWindow::BuildRmlUi()
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
-
-    const bool modelCreated = m_RmlBinder.Create(
-        RmlUiRuntime::Instance().GetContext(), "chat_command",
-        [this](Rml::DataModelConstructor& c, ChatCommandRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("panel_width", &model.panelWidth);
-            c.Bind("text_px", &model.textPx);
-            c.Bind("window_height", &model.windowHeight);
-
-            auto lineType = c.RegisterStruct<ChatCommandLine>();
-            lineType.RegisterMember("text", &ChatCommandLine::text);
-            lineType.RegisterMember("text_px", &ChatCommandLine::textPx);
-            c.RegisterArray<std::vector<ChatCommandLine>>();
-            c.Bind("title", &model.title);
-            c.Bind("empty_message", &model.emptyMessage);
-            c.Bind("description_lines", &model.descriptionLines);
-            c.Bind("template_rows", &model.templateRows);
-            c.Bind("favourite_action", &model.favouriteAction);
-            c.Bind("save_action", &model.saveAction);
-            auto commandRow = c.RegisterStruct<ChatCommandRow>();
-            commandRow.RegisterMember("text", &ChatCommandRow::text);
-            commandRow.RegisterMember("text_px", &ChatCommandRow::textPx);
-            commandRow.RegisterMember("favourite", &ChatCommandRow::favourite);
-            c.RegisterArray<std::vector<ChatCommandRow>>();
-            c.Bind("command_rows", &model.commandRows);
-            auto parameter = c.RegisterStruct<ChatCommandParameterRow>();
-            parameter.RegisterMember("label", &ChatCommandParameterRow::label);
-            parameter.RegisterMember("label_text_px", &ChatCommandParameterRow::labelTextPx);
-            parameter.RegisterMember("missing", &ChatCommandParameterRow::missing);
-            parameter.RegisterMember("value", &ChatCommandParameterRow::value);
-            parameter.RegisterMember("value_text_px", &ChatCommandParameterRow::valueTextPx);
-            parameter.RegisterMember("placeholder", &ChatCommandParameterRow::placeholder);
-            parameter.RegisterMember("edited", &ChatCommandParameterRow::edited);
-            c.RegisterArray<std::vector<ChatCommandParameterRow>>();
-            c.Bind("parameters", &model.parameters);
-            c.Bind("parameter_top", &model.parameterTop);
-            c.Bind("action_top", &model.actionTop);
-            c.Bind("page", &model.page);
-            c.Bind("editing", &model.editing);
-            c.Bind("edit_top", &model.editTop);
-            c.Bind("edit_value", &model.editValue);
-            c.Bind("has_left_button", &model.hasLeftButton);
-            c.Bind("has_right_button", &model.hasRightButton);
-            c.Bind("left_text", &model.leftText);
-            c.Bind("right_text", &model.rightText);
-            c.Bind("label_line_px", &model.labelLinePx);
-            c.Bind("exit_tooltip", &model.exitTooltip);
-
-            c.BindEventCallback(
-                "chat_command_hit",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                {
-                    if (arguments.size() == 2)
-                        m_pendingHits.push_back(
-                            {static_cast<ChatCommandAction>(arguments[0].Get<int>(0)), arguments[1].Get<int>(-1)});
-                });
-            c.BindEventCallback("chat_command_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                { m_pendingExit = true; });
-            c.BindEventCallback("chat_command_left", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                { m_pendingLeft = true; });
-            c.BindEventCallback("chat_command_right", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                { m_pendingRight = true; });
-        });
-    if (!modelCreated)
-        return;
-
-    wchar_t closeText[256] = {};
-    mu_swprintf_s(closeText, I18N::Game::CloseS, L"J");
-    m_RmlBinder.GetModel().exitTooltip = StringUtils::WideToNarrow(closeText);
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                  "Data/Interface/RmlUi/chat_command.rml");
-}
-
-void mu::ui::window::CChatCommandWindow::ReloadRmlTheme()
-{
-    if (!m_pRmlDoc)
-        return;
-    StopEditing();
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CChatCommandWindow::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // Layer depth UI::Layout::ForegroundPanelLayerDepth: over the HUD and its logs.
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncContent();
     SyncValueField();
 }
@@ -824,13 +809,13 @@ void mu::ui::window::CChatCommandWindow::SyncValueField()
     if (command != nullptr && static_cast<size_t>(m_editedParameter) < command->Parameters.size() &&
         command->Parameters[m_editedParameter].Type == ChatCommandParameterType::Number)
     {
-        SyncField(m_RmlBinder, &ChatCommandRmlModel::editValue, "edit_value",
-                  UI::RmlBridge::KeepDigitsOnly(m_RmlBinder.GetModel().editValue));
+        SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::editValue, "edit_value",
+                  UI::RmlBridge::KeepDigitsOnly(m_RmlView.GetModel().editValue));
     }
 
     // The field exists only while it is shown at its parameter (see chat_command.rml); focus it
     // once it does.
-    if (m_valueFieldFocusPending && m_pRmlDoc->IsVisible() && m_RmlBinder.GetModel().editing)
+    if (m_valueFieldFocusPending && m_RmlView.Document()->IsVisible() && m_RmlView.GetModel().editing)
     {
         field->Focus();
         if (field->IsPseudoClassSet("focus"))
@@ -961,47 +946,47 @@ void mu::ui::window::CChatCommandWindow::SyncContent()
         }
     }
 
-    ChatCommandRmlModel& model = m_RmlBinder.GetModel();
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::windowHeight, "window_height", static_cast<float>(WindowHeight));
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::page, "page", static_cast<int>(m_page));
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::title, "title", std::move(title));
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::emptyMessage, "empty_message", std::move(emptyMessage));
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::favouriteAction, "favourite_action", std::move(favouriteAction));
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::saveAction, "save_action", std::move(saveAction));
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::parameterTop, "parameter_top", parameterTop);
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::actionTop, "action_top", actionTop);
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::editing, "editing", editing);
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::editTop, "edit_top", editTop);
+    ChatCommandRmlModel& model = m_RmlView.GetModel();
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::windowHeight, "window_height", static_cast<float>(WindowHeight));
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::page, "page", static_cast<int>(m_page));
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::title, "title", std::move(title));
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::emptyMessage, "empty_message", std::move(emptyMessage));
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::favouriteAction, "favourite_action", std::move(favouriteAction));
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::saveAction, "save_action", std::move(saveAction));
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::parameterTop, "parameter_top", parameterTop);
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::actionTop, "action_top", actionTop);
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::editing, "editing", editing);
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::editTop, "edit_top", editTop);
     if (model.commandRows != commandRows)
     {
         model.commandRows = std::move(commandRows);
-        m_RmlBinder.MarkDirty("command_rows");
+        m_RmlView.MarkDirty("command_rows");
     }
     if (model.descriptionLines != descriptionLines)
     {
         model.descriptionLines = std::move(descriptionLines);
-        m_RmlBinder.MarkDirty("description_lines");
+        m_RmlView.MarkDirty("description_lines");
     }
     if (model.templateRows != templateRows)
     {
         model.templateRows = std::move(templateRows);
-        m_RmlBinder.MarkDirty("template_rows");
+        m_RmlView.MarkDirty("template_rows");
     }
     if (model.parameters != parameters)
     {
         model.parameters = std::move(parameters);
-        m_RmlBinder.MarkDirty("parameters");
+        m_RmlView.MarkDirty("parameters");
     }
 
     // The left and right buttons: CButton::Render()'s label in the normal font, white.
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::hasLeftButton, "has_left_button", HasLeftButton());
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::hasRightButton, "has_right_button", HasRightButton());
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::leftText, "left_text",
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::hasLeftButton, "has_left_button", HasLeftButton());
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::hasRightButton, "has_right_button", HasRightButton());
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::leftText, "left_text",
               StringUtils::WideToNarrow(I18N::Game::ChatCommandsBack));
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::rightText, "right_text",
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::rightText, "right_text",
               StringUtils::WideToNarrow(m_page == PAGE_COMMANDS ? I18N::Game::ChatCommandsTemplates
                                                                 : I18N::Game::ChatCommandsExecute));
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    SyncField(m_RmlBinder, &ChatCommandRmlModel::labelLinePx, "label_line_px",
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::labelLinePx, "label_line_px",
               static_cast<float>(lineHeight) * transform.scaleY);
 }

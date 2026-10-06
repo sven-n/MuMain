@@ -3,7 +3,7 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Events/DoppelGangerFrameRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -91,7 +91,6 @@ public:
         return m_bIsEnabled;
     }
 
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();
@@ -112,7 +111,11 @@ private:
     float m_fIceWalkerPosition;
 
     BOOL m_bIsEnabled;
-    RmlModelBinder<DoppelGangerFrameRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, DoppelGangerFrameRmlModel& model);
+    // The original drew the background context's HUDs under every panel (layer depth 1.2): the
+    // document sits in the background context, behind its other documents.
+    UI::RmlBridge::ThemedView<DoppelGangerFrameRmlModel> m_RmlView{"doppelganger_frame",
+        [this](Rml::DataModelConstructor& c, DoppelGangerFrameRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/doppelganger_frame.rml", UI::RmlBridge::BackgroundOrMainContext}}};
 };
 }

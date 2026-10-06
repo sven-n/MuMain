@@ -5,7 +5,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/UILayoutPolicy.h"
 #include "UI/Dialogs/ChatCommandRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Scaling/UITransform.h"
 #include "GameLogic/Commands/ChatCommandCatalog.h"
 #include "GameLogic/Commands/ChatCommandTemplate.h"
@@ -136,7 +136,6 @@ private:
     void HandleHit(ChatCommandAction action, int index);
 
     void BuildRmlUi();
-    void ReloadRmlTheme();
     void SyncRmlModel();
     void SyncContent();
     void SyncValueField();
@@ -161,8 +160,11 @@ private:
 
     std::vector<GameLogic::Commands::ChatCommandTemplate> m_templates;
 
-    RmlModelBinder<ChatCommandRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, ChatCommandRmlModel& model);
+    void OnRmlUnloading();
+    UI::RmlBridge::ThemedView<ChatCommandRmlModel> m_RmlView{"chat_command",
+        [this](Rml::DataModelConstructor& c, ChatCommandRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/chat_command.rml"}}, {.beforeUnload = [this] { OnRmlUnloading(); }}};
     // Clicks RmlUi reported since the last Update().
     struct PendingHit
     {

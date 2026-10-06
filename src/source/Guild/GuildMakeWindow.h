@@ -8,7 +8,7 @@
 #include "UI/Social/SocialWindowBase.h"   // UISTATES
 #include "Guild/GuildMakeRmlModel.h"
 #include "UI/Dialogs/MessageBox.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -58,7 +58,7 @@ namespace mu::ui::window
         virtual ~CGuildMakeWindow();
 
         bool Create(CManager* pNewUIMng, int x, int y);
-        Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+        Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         void Release();
 
         void ClosingProcess();
@@ -76,7 +76,6 @@ namespace mu::ui::window
     public:
         bool Render();
 
-        void ReloadRmlTheme();
 
     private:
         void BuildRmlUi();
@@ -103,8 +102,12 @@ namespace mu::ui::window
         // The name field (the original's CUITextInputBox): shown on the mark page only.
         bool m_NameFieldShown = false;
         bool m_NameFieldFocusPending = false;
-        RmlModelBinder<GuildMakeRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, GuildMakeRmlModel& model);
+        void OnRmlReloaded();
+        UI::RmlBridge::ThemedView<GuildMakeRmlModel> m_RmlView{"guild_make",
+            [this](Rml::DataModelConstructor& c, GuildMakeRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/guild_make.rml"}},
+            {.afterReload = [this] { OnRmlReloaded(); }}};
         GUILDMAKE_BUTTON m_PendingButton = GUILDMAKEBUTTON_NONE;
     };
 

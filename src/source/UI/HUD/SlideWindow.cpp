@@ -41,87 +41,65 @@ bool mu::ui::window::CSlideWindow::Create(CManager* pNewUIMng)
     return true;
 }
 
+void mu::ui::window::CSlideWindow::BindRmlModel(Rml::DataModelConstructor& c, SlideNoticeRmlModel& model)
+{
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("shown", &model.shown);
+    c.Bind("text_x", &model.textX);
+    c.Bind("text_top", &model.textTop);
+    c.Bind("band_top", &model.bandTop);
+    c.Bind("band_height", &model.bandHeight);
+    c.Bind("band_color", &model.bandColor);
+    c.Bind("text_color", &model.textColor);
+    c.Bind("text", &model.text);
+}
+
 void mu::ui::window::CSlideWindow::BuildRmlUi()
 {
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    const bool created = m_RmlBinder.Create(context, "slide_notice",
-        [](Rml::DataModelConstructor& c, SlideNoticeRmlModel& model)
-        {
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-            c.Bind("shown", &model.shown);
-            c.Bind("text_x", &model.textX);
-            c.Bind("text_top", &model.textTop);
-            c.Bind("band_top", &model.bandTop);
-            c.Bind("band_height", &model.bandHeight);
-            c.Bind("band_color", &model.bandColor);
-            c.Bind("text_color", &model.textColor);
-            c.Bind("text", &model.text);
-        });
-    if (created)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(context, "Data/Interface/RmlUi/slide_notice.rml");
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-}
-
-void mu::ui::window::CSlideWindow::DestroyRmlUi()
-{
-    UI::RmlBridge::UnregisterForThemeReload(this);
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-}
-
-void mu::ui::window::CSlideWindow::ReloadRmlTheme()
-{
-    if (!m_pRmlDoc)
-        return;
-    DestroyRmlUi();
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CSlideWindow::SyncRmlModel()
 {
-    if (!m_pRmlDoc || !m_pSlideMgr)
+    if (!m_RmlView.Document() || !m_pSlideMgr)
         return;
 
     const UI::HUD::SlideDisplay d = m_pSlideMgr->Display();
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
 
     const auto transform = UI::Scaling::GetActiveTransform();
-    SyncField(m_RmlBinder, &SlideNoticeRmlModel::rootScale, "root_scale", transform.scaleY);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    SyncField(m_RmlView.Binder(), &SlideNoticeRmlModel::rootScale, "root_scale", transform.scaleY);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
-    SyncField(m_RmlBinder, &SlideNoticeRmlModel::shown, "shown", d.shown);
+    SyncField(m_RmlView.Binder(), &SlideNoticeRmlModel::shown, "shown", d.shown);
     if (d.shown)
     {
-        SyncField(m_RmlBinder, &SlideNoticeRmlModel::textX, "text_x", d.x);
-        SyncField(m_RmlBinder, &SlideNoticeRmlModel::textTop, "text_top", static_cast<float>(d.y));
-        SyncField(m_RmlBinder, &SlideNoticeRmlModel::bandTop, "band_top", static_cast<float>(d.y - 3));
-        SyncField(m_RmlBinder, &SlideNoticeRmlModel::bandHeight, "band_height", static_cast<float>(d.bandHeight));
+        SyncField(m_RmlView.Binder(), &SlideNoticeRmlModel::textX, "text_x", d.x);
+        SyncField(m_RmlView.Binder(), &SlideNoticeRmlModel::textTop, "text_top", static_cast<float>(d.y));
+        SyncField(m_RmlView.Binder(), &SlideNoticeRmlModel::bandTop, "band_top", static_cast<float>(d.y - 3));
+        SyncField(m_RmlView.Binder(), &SlideNoticeRmlModel::bandHeight, "band_height", static_cast<float>(d.bandHeight));
         // RmlUi's rgba() alpha is 0-255, not 0-1, so both colours are built whole here rather
         // than assembled in the document.
         char band[40] = {};
         std::snprintf(band, sizeof(band), "rgba(0,0,0,%u)", static_cast<unsigned>(d.alpha));
-        SyncField(m_RmlBinder, &SlideNoticeRmlModel::bandColor, "band_color", Rml::String(band));
+        SyncField(m_RmlView.Binder(), &SlideNoticeRmlModel::bandColor, "band_color", Rml::String(band));
 
         char rgb[48] = {};
         std::snprintf(rgb, sizeof(rgb), "rgba(%u,%u,%u,%u)", d.colorRgb & 0xFF,
                       (d.colorRgb >> 8) & 0xFF, (d.colorRgb >> 16) & 0xFF,
                       static_cast<unsigned>(d.alpha));
-        SyncField(m_RmlBinder, &SlideNoticeRmlModel::textColor, "text_color", Rml::String(rgb));
-        SyncField(m_RmlBinder, &SlideNoticeRmlModel::text, "text",
+        SyncField(m_RmlView.Binder(), &SlideNoticeRmlModel::textColor, "text_color", Rml::String(rgb));
+        SyncField(m_RmlView.Binder(), &SlideNoticeRmlModel::text, "text",
                   StringUtils::WideToNarrow(d.text ? d.text : L""));
     }
 
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, true);
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), true);
 }
 
 void mu::ui::window::CSlideWindow::Release()
 {
-    DestroyRmlUi();
+    m_RmlView.Release();
     SAFE_DELETE(m_pSlideMgr);
 
     if (m_pNewUIMng)
