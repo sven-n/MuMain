@@ -233,7 +233,8 @@ plus [PR #989](https://github.com/mikke89/RmlUi/pull/989) (SDL_GPU renderer pari
 | `aspect-ratio` | Not a property | An explicit `width`/`height` |
 | `text-shadow` | Not a property | `font-effect: outline(...)` |
 | `:focus-visible` | Not supported (`:hover`/`:active`/`:focus` and structural selectors are) | `:focus` |
-| `clamp()`, `minmax()`, `calc()` | Not registered | Fixed `dp`/`px` values |
+| `calc()`, `min()`, `max()` | In the pin (upstream PR #983, carried on the fork), unused so far | Fixed `dp`/`px` values until tried |
+| `clamp()`, `minmax()` | Not registered | Fixed `dp`/`px` values |
 | `var(--x)` | Supported by 6.3, unused here | The project's `token(name)` (`theming-and-modding.md`) |
 | `backdrop-filter: blur()` | Works, over the game world too (frosted glass) | — |
 | `filter: blur()`/`drop-shadow()`, `mask-image` | Unverified | — |

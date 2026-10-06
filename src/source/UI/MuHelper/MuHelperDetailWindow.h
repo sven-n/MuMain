@@ -76,6 +76,12 @@ namespace mu::ui::window
         bool UpdateMouseEvent() override;
         bool UpdateKeyEvent() override;
         bool Update() override;
+        // Native's text box swallowed Escape; claimed deliberately so Escape closes the panel from
+        // inside the buff-interval field too.
+        bool TakesTypingFrom(const Rml::ElementDocument* document) const override
+        {
+            return document == m_RmlView.Document();
+        }
         bool Render() override;
         float GetLayerDepth() override;
         float GetKeyEventOrder() override;

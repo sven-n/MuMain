@@ -24,6 +24,7 @@ namespace mu::ui::window
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();
+        bool TakesTypingFrom(const Rml::ElementDocument* document) const override;
         bool Render();
 
         float GetLayerDepth();		// 6.f

@@ -428,7 +428,6 @@ void mu::ui::window::CChatCommandWindow::StopEditing()
         field->Blur();
     }
 
-    SetRelatedWnd(g_hWnd);
 }
 
 int mu::ui::window::CChatCommandWindow::GetScrollableRowCount() const
@@ -661,24 +660,6 @@ bool mu::ui::window::CChatCommandWindow::Update()
     }
 
     SyncRmlModel();
-
-    // CManager::UpdateKeyEvent() only dispatches to a window whose GetRelatedWnd() matches the
-    // focused handle, and it reports a focused RmlUi <input> as RmlUiRuntime's own address:
-    // claiming it while the value field is focused keeps Escape and Enter reaching this window,
-    // the role the CUITextInputBox's handle played (CChatInputBox::Update() does the same).
-    const HWND rmlFocus = reinterpret_cast<HWND>(&RmlUiRuntime::Instance());
-    Rml::Element* field = GetValueField();
-    const bool fieldFocused = m_editedParameter >= 0 && field != nullptr && field->IsPseudoClassSet("focus");
-    if (fieldFocused)
-    {
-        if (GetRelatedWnd() != rmlFocus)
-            SetRelatedWnd(rmlFocus);
-    }
-    else if (GetRelatedWnd() != g_hWnd)
-    {
-        SetRelatedWnd(g_hWnd);
-    }
-
     return true;
 }
 

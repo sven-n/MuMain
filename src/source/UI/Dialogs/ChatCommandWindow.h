@@ -85,6 +85,11 @@ public:
     bool UpdateMouseEvent() override;
     bool UpdateKeyEvent() override;
     bool Update() override;
+    // Escape and Enter while a parameter's value is being typed.
+    bool TakesTypingFrom(const Rml::ElementDocument* document) const override
+    {
+        return m_editedParameter >= 0 && document == m_RmlView.Document();
+    }
     bool Render() override;
 
     float GetLayerDepth() override;

@@ -485,23 +485,6 @@ bool mu::ui::window::CChatInputBox::Update()
 {
     BuildRmlUi();
     SyncRmlModel();
-
-    // CManager::UpdateKeyEvent() only dispatches to a window whose GetRelatedWnd() matches the
-    // currently-focused handle, and it reports a focused RmlUi <input> as RmlUiRuntime's own
-    // address. Claiming that address here is what keeps THIS window receiving keys while the
-    // player is typing -- exactly the role the focused CUITextInputBox's HWND used to play. Get it
-    // wrong and Enter/Escape/history simply never arrive.
-    HWND hRmlFocus = reinterpret_cast<HWND>(&RmlUiRuntime::Instance());
-    if (HaveFocus())
-    {
-        if (GetRelatedWnd() != hRmlFocus)
-            SetRelatedWnd(hRmlFocus);
-    }
-    else if (GetRelatedWnd() != g_hWnd)
-    {
-        SetRelatedWnd(g_hWnd);
-    }
-
     return true;
 }
 

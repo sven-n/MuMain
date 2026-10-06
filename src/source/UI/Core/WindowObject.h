@@ -47,6 +47,9 @@ namespace mu::ui::window
             m_hRelatedWnd = hWnd;
         }
         HWND GetRelatedWnd() const { return m_hRelatedWnd; }
+        // While the player types in a RmlUi field, keys go only to the window that claims the
+        // field's document; every other window's keys and hotkeys wait (CManager::UpdateKeyEvent()).
+        virtual bool TakesTypingFrom(const Rml::ElementDocument* document) const { return false; }
         void SetLayoutMode(UI::Scaling::LayoutMode mode) { m_layoutMode = mode; }
         UI::Scaling::LayoutMode GetLayoutMode() const { return m_layoutMode; }
         // A window drawn wholly by RmlUi whose hit box reads its #panel returns that document: a

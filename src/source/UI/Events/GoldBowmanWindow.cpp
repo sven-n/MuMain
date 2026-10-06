@@ -7,7 +7,6 @@
 #include "I18N/All.h"
 
 #include "Core/Utilities/StringUtils.h"
-#include "UI/RmlBridge/RmlKeyboardFocus.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 
@@ -108,7 +107,6 @@ void CGoldBowmanWindow::ClosingProcess()
     ZeroMemory(g_strGiftName, sizeof(g_strGiftName));
     ClearSerialField();
     m_SerialFocusPending = false;
-    SetRelatedWnd(g_hWnd);
     UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
     SocketClient->ToGameServer()->SendEventChipExitDialog();
 }
@@ -264,9 +262,14 @@ void CGoldBowmanWindow::SyncView()
         if (field->IsPseudoClassSet("focus"))
             m_SerialFocusPending = false;
     }
-    // The original pointed its related window at the focused edit box, so Escape still closes the
-    // window while the player types.
-    UI::RmlBridge::ClaimKeyboardWhileTyping(*this, field->GetOwnerDocument());
+}
+
+// The original pointed its related window at the focused edit box, so Escape still closes the
+// window while the player types.
+bool CGoldBowmanWindow::TakesTypingFrom(const Rml::ElementDocument* document) const
+{
+    const Rml::Element* field = GetSerialField();
+    return field != nullptr && field->GetOwnerDocument() == document;
 }
 
 bool CGoldBowmanWindow::Render()

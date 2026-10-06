@@ -29,6 +29,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlRuntimeHooks.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
@@ -2079,6 +2080,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     // Must run after InitSDLGpuRenderer() -- RmlUiRuntime::Create() needs a live
     // SDL_GPUDevice/SDL_Window from mu::GetRenderer() (GetDevice()/GetWindow()).
+    UI::RmlBridge::InstallRuntimeHooks();
     RmlUiRuntime::Instance().Create(WindowWidth, WindowHeight);
 
     // Content that must always sit visually on top of RmlUi, regardless of theme: the game

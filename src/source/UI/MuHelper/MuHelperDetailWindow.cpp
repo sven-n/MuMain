@@ -10,7 +10,6 @@
 #include "UI/MuHelper/MuHelperShared.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
-#include "UI/RmlBridge/RmlKeyboardFocus.h"
 #include "UI/RmlBridge/RmlLevelGauge.h"
 #include "UI/RmlBridge/RmlNumericInputFilter.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
@@ -173,11 +172,6 @@ bool CMuHelperDetailWindow::UpdateKeyEvent()
 bool CMuHelperDetailWindow::Update()
 {
     SyncRmlModel();
-
-    // Without this, a focused buff-interval field swallows Escape: no window receives keys while an
-    // RmlUi field has the focus unless it claims it. Native's own text box behaved the same; changed
-    // deliberately so Escape closes the panel from inside the field too.
-    UI::RmlBridge::ClaimKeyboardWhileTyping(*this, m_RmlView.Document());
     return true;
 }
 

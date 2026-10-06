@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "UI/Diagnostics/DiagnosticsOverlay.h"
 #include "Core/Input/SyntheticInput.h"
 #include "RmlUiRuntime.h"
 #include "RmlUiRenderInterface.h"
@@ -12,49 +11,32 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi_Platform_SDL.h> // ThirdParty/RmlUi/Backends -- see the CMakeLists.txt addition
 #include "Render/Renderer/MuRenderer.h"
-#include "Data/GameConfig/GameConfig.h"
-#include "UI/Scaling/UITransform.h"
-#include "UI/RmlBridge/RmlNativeText.h"
-#include "UI/RmlBridge/RmlNativeTextFit.h"
-#include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/FrameProfiler.h"
 
 namespace
 {
-    // Global UI scale -- the one RmlUi-native call site every `dp`-authored RCSS dimension
-    // responds to. Two multipliers, composed the same way
-    // UI::Scaling's own legacy transforms compose them (UITransform.cpp):
-    //   - GameConfig::GetUIScalePercent() -- the user's own preference dial.
-    //   - UI::Scaling::ViewportFitScale() -- auto-fit-to-window-size (the same formula
-    //     BottomHudScale uses for the dock row above the HUD), which
-    //     already folds in UI::Scaling::GetWindowContentScale() (OS display-scale/pixel-density)
-    //     internally -- do NOT also multiply GetWindowContentScale() here, it would double-count.
-    //
-    // Confirmed live on a 125%-scaled (non-high-DPI-pixel-density) display: contentScale folded
-    // into ViewportFitScale's UPPER bound only (see that function's own comment -- it used to also
-    // raise the lower bound, which overflowed every reference-pixel layout at/near the reference
-    // resolution). No double-scaling seen at the reference size after that fix. Whether a genuine
-    // high-pixel-density panel (SDL_GetWindowPixelDensity() > 1, not just an OS scale preference)
-    // needs anything different here is still unconfirmed.
-    //
-    // Re-applied on resize too: SetDensityIndependentPixelRatio() sets an absolute ratio, not a
-    // relative one, so it doesn't drift on its own, but re-asserting it here costs nothing and
-    // removes any doubt about whether some other code path could have reset it in between.
-    void ApplyUIScale(Rml::Context* context, int windowWidth, int windowHeight)
-    {
-        if (!context) return;
-        const int percent = GameConfig::GetInstance().GetUIScalePercent();
-        const float autoFit =
-            UI::Scaling::ViewportFitScale(windowWidth, windowHeight, UI::Scaling::MaximumPanelScale);
-        context->SetDensityIndependentPixelRatio((static_cast<float>(percent) / 100.0f) * autoFit);
-        UI::RmlBridge::ApplyNativeTextSize(context);
-    }
-
     bool IsTextEntry(const Rml::Element* element)
     {
         const Rml::String& tag = element->GetTagName();
         return tag == "input" || tag == "textarea";
     }
+}
+
+// SetDensityIndependentPixelRatio() sets an absolute ratio, so re-applying it on every resize
+// cannot drift.
+void RmlUiRuntime::ApplyUIScale(Rml::Context* context, int windowWidth, int windowHeight)
+{
+    if (!context)
+        return;
+    context->SetDensityIndependentPixelRatio(m_Hooks.dpRatio ? m_Hooks.dpRatio(windowWidth, windowHeight) : 1.f);
+    if (m_Hooks.afterScale)
+        m_Hooks.afterScale(context);
+}
+
+void RmlUiRuntime::AfterUpdate(Rml::Context* context)
+{
+    if (m_Hooks.afterUpdate)
+        m_Hooks.afterUpdate(context);
 }
 
 RmlUiRuntime& RmlUiRuntime::Instance()
@@ -82,6 +64,7 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     }
 
     m_RenderInterface = std::make_unique<RmlUiRenderInterface>(device, window);
+    m_RenderInterface->SetTextureSourceResolver(m_Hooks.resolveTexture);
     m_SystemInterface = std::make_unique<RmlUiSystemInterface>(window);
 
     Rml::SetRenderInterface(m_RenderInterface.get());
@@ -159,14 +142,16 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     // gameplay's mouse-gating checks (Selection.cpp, ZzzInterface.cpp) go through the router, not
     // this concrete type, from this point on.
     Core::Input::SetUiInputConsumer(this);
-    UI::Diagnostics::Initialize();
+    if (m_Hooks.afterCreate)
+        m_Hooks.afterCreate();
 }
 
 void RmlUiRuntime::Destroy()
 {
     if (!m_Context) return;
 
-    UI::Diagnostics::Release();
+    if (m_Hooks.beforeDestroy)
+        m_Hooks.beforeDestroy();
     Core::Input::Synthetic::CancelDelivery();
     Core::Input::SetUiInputConsumer(nullptr);
     mu::GetRenderer().SetPreSubmitCallback(nullptr);
@@ -223,10 +208,11 @@ void RmlUiRuntime::Update()
 {
     if (!m_Context) return;
     FRAME_PROFILE(RmlUiUpdate);
-    UI::RmlBridge::SuspendMainSceneDocumentsOutsideMainScene();
+    if (m_Hooks.beforeUpdate)
+        m_Hooks.beforeUpdate();
     ReleaseStrandedFieldFocus();
     m_Context->Update();
-    UI::RmlBridge::FitNativeTextToBoxes(m_Context);
+    AfterUpdate(m_Context);
 }
 
 void RmlUiRuntime::ReleaseStrandedFieldFocus()
@@ -319,10 +305,10 @@ bool RmlUiRuntime::IsMouseOverUI() const
     return m_Context && m_Context->IsMouseInteracting();
 }
 
-bool RmlUiRuntime::IsTextInputActive() const
+Rml::Element* RmlUiRuntime::GetFocusedTextField() const
 {
     if (!m_SystemInterface || !m_SystemInterface->IsTextInputActive())
-        return false;
+        return nullptr;
 
     // The flag above is a latch, set by ActivateKeyboard/DeactivateKeyboard, and RmlUi can drop a
     // focused element WITHOUT a matching Blur: Context::UnloadDocument() and
@@ -332,13 +318,24 @@ bool RmlUiRuntime::IsTextInputActive() const
     // a stale one silently kills every hotkey for the rest of the session.
     //
     // So confirm it against the live focus. Only a text-entry widget ever activates the keyboard,
-    // so requiring the focused element to still be one cannot produce a false negative.
+    // so requiring the focused element to still be one cannot produce a false negative. A field
+    // in a hidden document takes no typing either, so hiding a window releases the keys at once,
+    // whether or not its hide path blurred the field.
     Rml::Element* focused = m_Context ? m_Context->GetFocusElement() : nullptr;
-    if (!focused)
-        return false;
+    if (!focused || !IsTextEntry(focused) || !focused->IsVisible(true))
+        return nullptr;
+    return focused;
+}
 
-    const Rml::String& tag = focused->GetTagName();
-    return tag == "input" || tag == "textarea";
+bool RmlUiRuntime::IsTextInputActive() const
+{
+    return GetFocusedTextField() != nullptr;
+}
+
+Rml::ElementDocument* RmlUiRuntime::GetTypingDocument() const
+{
+    Rml::Element* field = GetFocusedTextField();
+    return field ? field->GetOwnerDocument() : nullptr;
 }
 
 void RmlUiRuntime::ProcessTextEditing(const SDL_Event& event)
@@ -411,7 +408,7 @@ void RmlUiRuntime::RenderBackgroundLayer()
     {
         FRAME_PROFILE(RmlUiUpdate);
         m_BackgroundContext->Update();
-        UI::RmlBridge::FitNativeTextToBoxes(m_BackgroundContext);
+        AfterUpdate(m_BackgroundContext);
     }
     {
         FRAME_PROFILE(RmlUiRender);
@@ -441,7 +438,7 @@ void RmlUiRuntime::RenderDialogBackgroundLayer()
     {
         FRAME_PROFILE(RmlUiUpdate);
         m_DialogBackgroundContext->Update();
-        UI::RmlBridge::FitNativeTextToBoxes(m_DialogBackgroundContext);
+        AfterUpdate(m_DialogBackgroundContext);
     }
     {
         FRAME_PROFILE(RmlUiRender);

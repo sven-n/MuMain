@@ -47,6 +47,7 @@ public:
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();
     bool Update();
+    bool TakesTypingFrom(const Rml::ElementDocument* document) const override;
     bool Render();
 
     float GetLayerDepth(); // 3.4f

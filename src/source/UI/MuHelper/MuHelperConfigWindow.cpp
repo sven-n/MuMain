@@ -14,7 +14,6 @@
 #include "UI/MuHelper/MuHelperSkillPicker.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
-#include "UI/RmlBridge/RmlKeyboardFocus.h"
 #include "UI/RmlBridge/RmlNumericInputFilter.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
@@ -166,9 +165,6 @@ bool CMuHelperConfigWindow::UpdateKeyEvent()
 bool CMuHelperConfigWindow::Update()
 {
     SyncRmlModel();
-
-    // So Escape still closes the window while one of its fields has the keyboard.
-    UI::RmlBridge::ClaimKeyboardWhileTyping(*this, m_RmlView.Document());
     return true;
 }
 

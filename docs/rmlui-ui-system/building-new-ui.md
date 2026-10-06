@@ -126,9 +126,9 @@ Three permanent shapes, following that boundary:
 - **Delete the native widgets the document replaces** (`CButton`s, `SetButtonInfo()`, tooltip
   helpers, `LoadImages()`/`UnloadImages()` no one else aliases). Once `Render()` paints nothing
   they cannot do anything; they are not redundancy.
-- **Blur on every hide** if the document has a text field: a hidden document's focused `<input>`
-  keeps `RmlUiRuntime::IsTextInputActive()` true and silences every hotkey
-  (`CChatInputBox::ClosingProcess()` is the shape).
+- **Blur on hide** if the document has a text field, so it opens again without the old focus
+  (`CChatInputBox::ClosingProcess()` is the shape). Hotkeys don't depend on it: a field in a hidden
+  document never counts as typing.
 - **Clicks on the world.** `Input/Selection.cpp` (`SelectObjects()`) and
   `Engine/Object/ZzzInterface.cpp` (`Attack()`) check `Core::Input::IsMouseOverUI()` beside the
   native `MouseOnWindow`/`mouseOnHud`/`CheckMouseUse()` flags, so every RmlUi document is covered

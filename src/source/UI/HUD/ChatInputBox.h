@@ -23,8 +23,7 @@ namespace mu::ui::window
 
     // Every piece of this window's presentation is RmlUi's now: the bar art, all ten buttons, the
     // tooltip and both text fields. C++ keeps the chat/whisper history, the send logic and the
-    // keyboard handling -- which still has to run while a field is focused, see
-    // CChatInputBox::Update()'s SetRelatedWnd() note.
+    // keyboard handling, which runs while one of its fields is focused (TakesTypingFrom()).
     struct ChatInputRmlModel
     {
         Rml::String chatText;
@@ -168,6 +167,11 @@ namespace mu::ui::window
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();
+        // Enter, Escape and the history keys while the player types a line.
+        bool TakesTypingFrom(const Rml::ElementDocument* document) const override
+        {
+            return document == m_RmlView.Document();
+        }
         bool Render();
 
         float GetLayerDepth();

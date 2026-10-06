@@ -77,12 +77,11 @@ shop name, `CCharMakeWin`'s character name, `CGenericConfirmDialog`'s `Mode::Tex
    `SyncDocumentVisibility()`'s own `Show()`, which defaults to `FocusFlag::Auto` and would blur the
    field again. Arm a one-shot latch in `OpenningProcess()`; consume it in the sync, immediately
    after the visibility call.
-2. **A window whose field is focused must claim `RmlUiRuntime`'s address as its related window.**
-   `CManager::UpdateKeyEvent()` dispatches only to windows whose `GetRelatedWnd()` matches the
-   focused handle, and it reports a focused RmlUi `<input>` as `&RmlUiRuntime::Instance()`. Without
-   `SetRelatedWnd()` matching that, the owning window stops receiving keys the moment the player
-   starts typing — Enter, Escape and history all silently never arrive. This is the exact role the
-   focused `CUITextInputBox`'s `HWND` used to play.
+2. **A window that handles keys while its field is focused claims the field's document.**
+   While the player types, `CManager::UpdateKeyEvent()` gives keys only to the window whose
+   `TakesTypingFrom(document)` returns true for the document holding the focused field
+   (`RmlUiRuntime::GetTypingDocument()`). Without the override, Enter, Escape and history never
+   arrive. This is the role the focused `CUITextInputBox`'s `HWND` used to play.
 
 **Two rules that are invisible at compile time and will silently break a field:**
 
@@ -134,11 +133,11 @@ caret to index 0. Clipboard paste raises no `textinput`, so filter on read as we
 handled once, centrally, by `RmlUiRuntime`'s installed `TextInputMethodEditor_SDL` plus
 `RmlUiSystemInterface::ActivateKeyboard()` — a consumer needs no IME code of its own.
 
-A focused field suspends every window's key handling (`CManager::UpdateKeyEvent()`), its own
-included, so Esc and Enter never reach the window you're typing in. A window that should still close
-on Esc from inside its field calls `UI::RmlBridge::ClaimKeyboardWhileTyping(*this, doc)` from
-`Update()` (`RmlKeyboardFocus.h`); `CChatInputBox` hand-rolls the same claim and could adopt it.
-Blur the focused field on every hide path as well, or hotkeys stay suspended after the window closes.
+A focused field suspends every window's key handling (`CManager::UpdateKeyEvent()`) except the
+window that claims its document, so a window that should still close on Esc from inside its field
+overrides `TakesTypingFrom()` to return `document == m_RmlView.Document()`. A field in a hidden
+document never counts as typing (`RmlUiRuntime::GetFocusedTextField()`), so closing the window
+gives the hotkeys back at once; blurring on hide still clears the field for the next open.
 
 ## Scrolling pane
 

@@ -6,7 +6,6 @@
 #include "Core/Globals/_TextureIndex.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlPremultiply.h"
-#include "UI/RmlBridge/RmlRenderTarget.h"
 #include <algorithm>
 
 RmlUiRenderInterface::RmlUiRenderInterface(SDL_GPUDevice* device, SDL_Window* window)
@@ -17,11 +16,11 @@ RmlUiRenderInterface::RmlUiRenderInterface(SDL_GPUDevice* device, SDL_Window* wi
 Rml::TextureHandle RmlUiRenderInterface::LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source)
 {
     // Native drawing rendered into a texture this engine owns, not a file.
-    if (UI::RmlBridge::RenderTarget::IsSource(source))
+    void* raw = nullptr;
+    int width = 0;
+    int height = 0;
+    if (m_ResolveTextureSource && m_ResolveTextureSource(source, raw, width, height))
     {
-        int width = 0;
-        int height = 0;
-        void* raw = UI::RmlBridge::RenderTarget::Resolve(source, width, height);
         if (!raw)
             return 0;
         texture_dimensions = {width, height};

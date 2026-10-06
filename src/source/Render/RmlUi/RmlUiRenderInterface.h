@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include <RmlUi_Renderer_SDL_GPU.h>
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -19,7 +20,12 @@ public:
     Rml::TextureHandle LoadTexture(Rml::Vector2i& texture_dimensions, const Rml::String& source) override;
     void ReleaseTexture(Rml::TextureHandle texture_handle) override;
 
+    // Texture sources the game draws itself (RmlUiRuntimeHooks::resolveTexture).
+    using TextureSourceResolver = std::function<bool(const Rml::String& source, void*& texture, int& width, int& height)>;
+    void SetTextureSourceResolver(TextureSourceResolver resolver) { m_ResolveTextureSource = std::move(resolver); }
+
 private:
+    TextureSourceResolver m_ResolveTextureSource;
     // RmlUi's own TextureHandle IS the raw SDL_GPUTexture* (see RenderInterface_SDL_GPU.cpp) --
     // ReleaseTexture only gets that value back, not which path created it, so this engine needs
     // its own kind-tracking. FileBacked entries route release through Bitmaps.UnloadImage()

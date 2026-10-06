@@ -100,11 +100,10 @@ a new port inherits them:
 Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porting patterns.
 
 **Input and focus**
-- **A text field's window must claim RmlUi's text-input identity.** `CManager::UpdateKeyEvent()`
-  dispatches only to windows whose `GetRelatedWnd()` matches the focused handle, and reports a
-  focused RmlUi `<input>` as `&RmlUiRuntime::Instance()`; `CChatInputBox` (and the chat command
-  list's field, through `SetRelatedWnd()` while focused) claims it, or Enter/Escape never arrive.
-  A window native never routed keys to while typing (the MU Helper config) stays unclaimed.
+- **A text field's window claims the field's document.** While the player types,
+  `CManager::UpdateKeyEvent()` gives keys only to the window whose `TakesTypingFrom()` accepts the
+  focused field's document (`RmlUiRuntime::GetTypingDocument()`); the chat line, chat command,
+  Gold Bowman, MU Helper and friend windows claim theirs, or Enter/Escape never arrive.
 - **Focus, scroll pins and scroll rewinds are one-shot latches**, done once on the frame after the
   view caught up — never per frame (that steals focus and kills the scrollbar). `CSystem::Show()`
   runs `OpenningProcess()` before `ShowInterface()`, so arm there and consume in the sync.

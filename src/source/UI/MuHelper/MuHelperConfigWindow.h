@@ -126,6 +126,11 @@ namespace mu::ui::window
         bool UpdateMouseEvent() override;
         bool UpdateKeyEvent() override;
         bool Update() override;
+        // So Escape still closes the window while one of its fields has the keyboard.
+        bool TakesTypingFrom(const Rml::ElementDocument* document) const override
+        {
+            return document == m_RmlView.Document();
+        }
         bool Render() override;
         float GetLayerDepth() override;
         float GetKeyEventOrder() override;

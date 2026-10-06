@@ -10,21 +10,13 @@ Completed migrations belong in [migration-ledger.md](migration-ledger.md).
 What would otherwise grow with every new window, or break a principle in a way new code copies.
 Most are items of the integration seams below.
 
-1. **Keyboard ownership in the runtime** (item 2), with the runtime's layering (item 4) in the same
-   change. Every window with a text field copies the fake `HWND`, and a slip kills every hotkey;
-   the layering fix keeps runtime-level fixes from reaching for `SceneFlag` and `GameConfig`.
-2. **No new background-context documents** (item 1): new native 3D goes into a `RenderTarget`, and
+1. **No new background-context documents** (item 1): new native 3D goes into a `RenderTarget`, and
    `OverlayRender`, which nothing uses, is deleted. Retiring the existing background contexts can
    follow the merge.
-3. **The tooltip measures its own document** (item 3), not the whole context twice a frame.
-4. **A display-scale change applies the `dp` ratio** (item 6). A bug against §9.
-5. **An unsubstituted design token is logged** (item 5): a sheet containing `token(` that was not
+2. **The tooltip measures its own document** (item 2), not the whole context twice a frame.
+3. **A display-scale change applies the `dp` ratio** (item 4). A bug against §9.
+4. **An unsubstituted design token is logged** (item 3): a sheet containing `token(` that was not
    inlined warns instead of drawing empty values. The `FileInterface` replacement can follow.
-6. **The RmlUi submodule pin is settled.** `.gitmodules` names `mikke89/RmlUi`, but `22282190`
-   exists only on `nitoygo/RmlUi`'s `integration/sdl-gpu-parity`, which carries the SDL_GPU
-   renderer work. A fresh clone fetches it today only because GitHub serves objects across a fork
-   network; if that branch is deleted or rewritten, main stops cloning. Upstream the renderer
-   work, or point `.gitmodules` at the fork and say so.
 
 Also before merging, though not code health: the event windows nobody has seen in game (the
 ownership boundary's first list) are either looked at on a server that can run the events, or
@@ -131,8 +123,7 @@ resolution.
 
 ## Tracked deferral: the RmlUi integration seams
 
-A review of `Render/RmlUi` and `UI/RmlBridge` against the vendored RmlUi (2026-10-06, pin
-`22282190`) found the core idiomatic: the renderer overrides only texture loading, shutdown runs in
+A review of `Render/RmlUi` and `UI/RmlBridge` against the vendored RmlUi (2026-10-06) found the core idiomatic: the renderer overrides only texture loading, shutdown runs in
 the right order, windows bind through data models and `data-event-*`, and custom features use
 RmlUi's own extension points (decorator instancers, `LoadTexture` sources, drag events). What works
 against the library is where RmlUi meets the legacy UI. In order of value:
@@ -146,31 +137,19 @@ against the library is where RmlUi meets the legacy UI. In order of value:
    `dialog_background`; move the inventory family's live items into render targets and retire
    `background` with its `*_bg.rml` documents. Trigger: the deletion now; the rest with the
    paperdoll row above, which waits on the same pass.
-2. **Keyboard ownership is patched in five places.** The RmlUi behaviour is real (checked in its
-   source): `ElementDocument::Hide()` gives focus back to the previous document's remembered field,
-   and unloading a document clears focus without a blur, which leaves the typing flag set. The
-   fixes are `ReleaseStrandedFieldFocus()`, the focus check in `IsTextInputActive()`, the blur in
-   `ReloadAllThemedDocuments()`, the fake `HWND` in `CManager::UpdateKeyEvent()` with
-   `ClaimKeyboardWhileTyping()`, and blurs in windows' hide paths. Direction: the runtime owns the
-   rule and answers one query (the focused field and its document), which `CManager` uses instead
-   of the fake handle. Trigger: the next stuck-hotkey bug.
-3. **`Tooltip::Show()` runs `Context::Update()` twice** to measure itself, every frame while
+2. **`Tooltip::Show()` runs `Context::Update()` twice** to measure itself, every frame while
    something is hovered: every data model and document in the main context updates, hover events
    dispatch, and all nine fields are marked changed without a change check. Direction: measure with
    the tooltip document's own `UpdateDocument()` and skip an unchanged config. Trigger: now; it is
    small.
-4. **`Render/RmlUi` depends on `UI/RmlBridge` and on game state.** The runtime includes the theme,
-   native-text and text-fit headers and reads `GameConfig` and `SceneFlag`; the render interface
-   includes `RmlRenderTarget.h`. Direction: the runtime exposes hooks (before and after update, a
-   texture-source resolver, the `dp` ratio) and `RmlBridge` registers the game's policy. Trigger:
-   with 2, which changes the runtime anyway.
-5. **Design tokens are inlined by regex.** The themed loader rewrites `<link>` tags into
+3. **Design tokens are inlined by regex.** The themed loader rewrites `<link>` tags into
    `<style>` blocks, so tokenised sheets skip RmlUi's stylesheet cache and parse once per document,
    and a `<link>` with its attributes in another order is silently left unsubstituted. The need is
    real: this RmlUi has no `var()`. Direction: a `Rml::FileInterface` that substitutes tokens when
    it serves an `.rcss`, which can also resolve the per-theme `.rml` overrides. Trigger: a token
-   found unsubstituted, or PR #983 (the counter-scale block below), whose `var()` replaces tokens.
-6. **A display-scale change leaves RmlUi's `dp` ratio stale.**
+   found unsubstituted, or the counter-scale block below moving to `calc()` with `var()`, which
+   could replace tokens too.
+4. **A display-scale change leaves RmlUi's `dp` ratio stale.**
    `SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED` updates the content scale `ViewportFitScale()` folds
    in, but nothing calls `RmlUiRuntime::OnResize()` until the next resize. A bug; fix it with the
    next change to `Winmain.cpp`'s event pump.
@@ -255,11 +234,9 @@ What was actually verified:
   linked against it at exit 0 with all three asset checkers green.
 - The merge is on the fork as `nitoygo/RmlUi` `integration/sdl-gpu-parity` (`0f8b5dcb`).
 
-**Not adopted, deliberately.** The submodule pin stays at `22282190` and `.gitmodules` keeps
-pointing at `mikke89/RmlUi`. Adopting it would mean the project builds against an unmerged upstream
-PR carried on a personal fork, which is a bigger commitment than the allowlist saving justifies on
-its own. The MuMain-side change that would switch it on — the `.gitmodules` repoint plus its README
-and sync-log notes — is preserved unmerged on the local branch **`spike/rmlui-calc-via-fork`**.
+**Now in the pin, not yet used.** `.gitmodules` points at the fork, and the fork, rebased on
+upstream master, carries #983, so the stylesheets can use `calc()` today. The local branch
+`spike/rmlui-calc-via-fork` held the same repoint and is superseded.
 
 **The open question nobody has answered**, and the thing to settle before revisiting: whether C++
 can set a custom property on `#panel` at runtime and have every `calc()` depending on it recompute.
@@ -269,8 +246,8 @@ per-frame cost is the second unknown — `--root-scale` changes on a UI-scale ch
 frame, but if setting it dirties every dependent property that wants measuring (RelWithDebInfo
 only; the PR ships `Tests/Source/Benchmarks/Calculation.cpp` to borrow from).
 
-**Revisit when** upstream merges #983, which removes the fork objection entirely — or when the
-counter-scale bindings start costing something concrete, rather than being an inventory number.
+**Revisit when** a counter-scaled window is next touched: settle the open question on it, then
+move the class. Upstream merging #983 only removes the dependency on the fork.
 
 ### Deliberately not on this list
 

@@ -130,24 +130,14 @@ bool mu::ui::window::CFriendWindow::Update()
     // The windows' RmlUi documents (FriendWindowViews.h), also while the family is hidden.
     if (m_pFriendWindowMgr)
         m_pFriendWindowMgr->SyncRmlViews(IsVisible());
-
-    // CManager::UpdateKeyEvent() hands keys only to the window whose GetRelatedWnd() matches the
-    // focused handle, and it reports a focused RmlUi <input> as RmlUiRuntime's own address.
-    // Claiming that address while one of this family's fields has the keyboard is what lets
-    // Escape arrive at all while the player is typing -- the same move CChatInputBox makes for
-    // the main chat line. Without it the key is simply swallowed.
-    const HWND hRmlFocus = reinterpret_cast<HWND>(&RmlUiRuntime::Instance());
-    const bool typing = m_pFriendWindowMgr != nullptr && m_pFriendWindowMgr->GetFieldFocusWindow() != nullptr;
-    if (typing)
-    {
-        if (GetRelatedWnd() != hRmlFocus)
-            SetRelatedWnd(hRmlFocus);
-    }
-    else if (GetRelatedWnd() != g_hWnd)
-    {
-        SetRelatedWnd(g_hWnd);
-    }
     return true;
+}
+
+// The family's windows are separate documents; whichever of them has the typing field, Escape
+// reaches this window.
+bool mu::ui::window::CFriendWindow::TakesTypingFrom(const Rml::ElementDocument*) const
+{
+    return m_pFriendWindowMgr != nullptr && m_pFriendWindowMgr->GetFieldFocusWindow() != nullptr;
 }
 
 float mu::ui::window::CFriendWindow::GetLayerDepth()
