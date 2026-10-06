@@ -183,12 +183,7 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     if (m_bInitialized)
         return;
 
-    // The effect browser shows what loaded each model and texture; the
-    // records take the map of the moment from the map manager.
-    Core::AssetLoadWorld::SetSource([] { return gMapManager.WorldActive; });
-    // The effect browser's world preview removes its objects before the game
-    // clears its pools.
-    Core::WorldClearing::SetListener([] { g_MuEffectBrowserUI.OnWorldClearing(); });
+    ConnectGameHooks();
 
     if (window == nullptr)
     {
@@ -410,6 +405,16 @@ void CMuEditorCore::Initialize(SDL_Window* window)
 
     fwprintf(stderr, L"[MuEditor] Initialize() completed\n");
     fflush(stderr);
+}
+
+void CMuEditorCore::ConnectGameHooks()
+{
+    // The effect browser shows what loaded each model and texture; the
+    // records take the map of the moment from the map manager.
+    Core::AssetLoadWorld::SetSource([] { return gMapManager.WorldActive; });
+    // The effect browser's world preview removes its objects before the game
+    // clears its pools.
+    Core::WorldClearing::SetListener([] { g_MuEffectBrowserUI.OnWorldClearing(); });
 }
 
 void CMuEditorCore::Shutdown()

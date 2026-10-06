@@ -15,6 +15,10 @@ public:
 
     // window is the SDL window used by the ImGui SDL3 backend (issue #442).
     void Initialize(SDL_Window* window);
+    // Sets the editor's listeners in game code: where the asset record takes
+    // the active map from, and the effect browser's world preview removing
+    // its objects before the game clears its pools. Initialize calls it.
+    void ConnectGameHooks();
     void Shutdown();
     void Update();
     void Render();

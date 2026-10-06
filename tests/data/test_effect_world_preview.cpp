@@ -710,10 +710,9 @@ TEST_CASE("The map code tells the editor before it clears the effect pools, and 
     CHECK(g_watchedLiveWhenTold);
     CHECK_FALSE(Effects[slot].Live);
 
-    // The editor sets its listener when it starts, before it needs a window
-    // (without one it stops there). Its listener stops the effect browser's
+    // The editor's listener (set when it starts) stops the effect browser's
     // world preview, which lets the game start sounds again.
-    g_MuEditorCore.Initialize(nullptr);
+    g_MuEditorCore.ConnectGameHooks();
     Audio::EditorMute::SetMuted(true);
     gMapManager.DeleteObjects();
     CHECK_FALSE(Audio::EditorMute::IsMuted());
