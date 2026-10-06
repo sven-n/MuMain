@@ -9,7 +9,7 @@ numbers refer to [`architecture-principles.md`](architecture-principles.md). Per
 
 Every window is a `mu::ui::window::CObject` drawn by RmlUi in both themes, except
 **`CInGameShop`** (partial, unscheduled — OpenMU has no cash shop; see its ledger row). The
-`CWin` toolkit, the sprite widgets and all of the `CUIControl` widgets are deleted. Families:
+`CWin` toolkit, the sprite widgets and the `CUIControl` toolkit are deleted. Families:
 
 - **Login and character select** — login, server select, character select and creation, the
   system menu, the credits, message boxes, the remember-password prompt, character balloons.
@@ -81,7 +81,9 @@ Differences to the original found by the paired comparison suites and fixed in s
 a new port inherits them:
 
 - **Scene gate.** A window `CSystem` updates only in the main scene still has a live document in
-  every scene: gate it through `CSystem::SyncMainSceneHudVisibility()`.
+  every scene. Its stacking-table entry marks it a main-scene document, and every such document is
+  suspended outside the main scene (`SuspendMainSceneDocumentsOutsideMainScene()`). The HUD's
+  documents also wait for the world to load (`CSystem::SyncMainSceneHudVisibility()`).
 - **Scroll thumb.** The legacy `.scroll-pane` thumb is the native 15x30 knob, not a proportional
   bar; a list the original scrolled one row per wheel notch takes `mousescroll` itself
   (`CMoveCommandWindow::RmlWheelList()`), since RmlUi scrolls 80 dp per notch.
@@ -132,6 +134,12 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
 - **`overflow: hidden` does not clip under a panel's `transform: scale()`**; crop a bar with
   `decorator: image(<sprite> scale-none left top)` on an element of the shown width, or an
   untransformed box with `clip: always`.
+- **Centre a counter-scaled label in RCSS**, not by a C++-measured top or a width multiplied by
+  the root scale: `.sharp-middle` centres it on its button's height and `.sharp-centre` on its
+  parent's width (`engine-findings.md`).
+- **Draw a window in the scale its slot is sized in.** The event HUDs were placed in the HUD's
+  UI-scaled units but drawn in the original's W/640 x H/480 stretch, so at 90 % they outgrew their
+  slots; `LayoutMode::HudFrame` is the HUD's own scale.
 - **Data expressions have no unary minus**: bind `-x` from C++.
 - **Class-specific controls are one tested C++ table bound as flags**
   (`UI::MuHelper::ResolveClassFeatures()`), never RCSS — the themes cannot disagree.
@@ -167,6 +175,10 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
   name; no user layer over a theme and no partial theme inheriting from a base. A stated
   requirement waiting on priority. (A third first-party theme is ruled out by the project owner;
   §25/§28's coupling concern is met by `modern`'s divergence and the drift checker.)
+- **The legacy compatibility seams are not yet behind one mechanism** (§14, §21): three contexts
+  and a dead overlay seam order native 3D against RmlUi where `RenderTarget` would do, and design
+  tokens are a text preprocessor rather than an RmlUi feature (`tracked-deferrals.md`'s
+  integration seams).
 - **Validation covers the UI-scale axis only** (`layout-and-scaling.md`'s scale sweep);
   resolution, drag state across a scale change, and theme change while open are uncovered, and
   are left to whoever touches each window rather than tracked.

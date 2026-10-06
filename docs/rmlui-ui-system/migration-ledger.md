@@ -58,7 +58,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CNameWindow` | Done | World-overlay | `world_labels.rml` (`UI::Character::WorldLabelLayer`): pooled elements in the background context, filled from the native label code under an `Overlay2DRecordScope` |
 | `CFriendWindow` | Done | Hybrid | `UI/Social/`: shell (`friend_shell.rml`), one document per chat room and letter; the letter portrait is live 3D in a render target, driven by `UI::Social::PhotoViewerControl`. `CUIWindowMgr` still arranges them (`building-new-ui.md`). The original's F5 menu of open windows is retired: the shell's Window List tab lists them |
 | `CGuildMakeWindow` | Done | RmlUi-only 2D | |
-| `CGuildInfoWindow` | Done; not checked in game | RmlUi-only 2D | Three RmlUi-scrolled lists |
+| `CGuildInfoWindow` | Done | RmlUi-only 2D | Three RmlUi-scrolled lists; the tab highlight is placed by RCSS. Checked in game: the tabs and the members list |
 | `CServerMsgWin` | Done | RmlUi-only 2D | Real pixels (`LayoutMode::Legacy`), fixed face (Cousine) |
 
 ### Inventory, shops, trade
@@ -90,9 +90,9 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CGuardWindow` | Done | RmlUi-only 2D | Guild lists; tab positions in RCSS |
 | `CGateSwitchWindow`, `CCatapultWindow` | Done | RmlUi-only 2D | Right-docked; catapult not checked in game |
 | `CSiegeWarfare` | Done | RmlUi-only 2D | Background context (drawn under every panel); buttons still hit-test natively |
-| `CDuelWindow`, `CBattleSoccerScore` | Done | RmlUi-only 2D | Background context; event-HUD slots |
+| `CDuelWindow`, `CBattleSoccerScore` | Done | RmlUi-only 2D | Background context; event-HUD slots, drawn at the HUD's scale (`LayoutMode::HudFrame`) |
 | `CDuelWatchWindow` | Done | RmlUi-only 2D | Right-docked |
-| `CDuelWatchUserListWindow` | Done | RmlUi-only 2D | Event-HUD slot (bottom-left corner, grows upward) |
+| `CDuelWatchUserListWindow` | Done | RmlUi-only 2D | Event-HUD slot (bottom-left corner, grows upward), `LayoutMode::HudFrame` |
 | `CDuelWatchMainFrameWindow` | Done | RmlUi-only 2D | Replaces the main frame while spectating; catch-up bars stepped in `Update()` |
 
 ### Events
@@ -100,8 +100,8 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | Component | Status | Note |
 |---|---|---|
 | `CEnterBloodCastle`, `CEnterDevilSquare` | Done | `UI/Events/EventEntryView` (`event_entry.rcss`), rows by `:nth-child` |
-| `CBloodCastle`, `CChaosCastleTime`, `CEmpireGuardianTimer` | Done | `UI/Events/EventTimerView`; event-HUD slots |
-| `CDoppelGangerFrame`, `CKanturuInfoWindow` | Done | Event-HUD slots |
+| `CBloodCastle`, `CChaosCastleTime`, `CEmpireGuardianTimer` | Done | `UI/Events/EventTimerView`; event-HUD slots, `LayoutMode::HudFrame` |
+| `CDoppelGangerFrame`, `CKanturuInfoWindow` | Done | Event-HUD slots, `LayoutMode::HudFrame` |
 | `CCursedTempleEnter`, `CCursedTempleResult`, `CCursedTempleSystem` | Done | Panel stage (enter, result); the Illusion Temple HUD places itself |
 | `CCryWolf` | Done; not seen | Renders only in the event (`tracked-deferrals.md`) |
 | `CGoldBowmanWindow`, `CGoldBowmanLena`, `CExchangeLuckyCoin`, `CRegistrationLuckyCoin` | Done | `UI/Events/EventItemEntryView`; the registration coin stays native 3D |
@@ -126,7 +126,7 @@ other places for single confirmations. What remains of the native family:
 
 | Component | Status | Note |
 |---|---|---|
-| `CGuild_ToPerson_Position` | Done | RmlUi through `UI/Dialogs/MessageBoxView` |
+| `CGuild_ToPerson_Position` | Done | RmlUi through `UI/Dialogs/MessageBoxView`; its buttons are placed by the theme (the box's kind) |
 | `CGemIntegrationDisjointMsgBox` | Done; not checked in game | `MessageBoxView` with a scrolling jewel list; stale items rejected again at confirmation |
 | `CBloodCastleResultMsgBoxLayout`, `CDevilSquareRankMsgBoxLayout`, `CChaosCastleResultMsgBoxLayout` | Done | `MessageBoxView`; texts from each match's `CollectMatchResult()` |
 | `CProgressMsgBox` layouts (crown switch, seal register, crown defence) and `CCursedTempleProgressMsgBox` layouts | Done | `MessageBoxView` with frame and progress bar |

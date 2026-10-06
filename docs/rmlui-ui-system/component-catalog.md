@@ -50,6 +50,10 @@ Inside a panel scaled by `transform: scale(root_scale)`, `.btn`'s `dp` sizes wou
 Modern has `.modern-btn-px` (and `.modern-checkbox-px` for checkboxes), the same recipe in
 reference `px` with no size of its own; the MU Helper windows use both.
 
+A counter-scaled button label (`.sharp-text`) centres itself on its button with `.sharp-middle`,
+and `.sharp-centre` when the theme rather than C++ gives its width (`base.rcss`, both themes;
+`engine-findings.md` has why). Its RML transform starts with `translateY(-50%)`.
+
 ## Checkbox
 
 `.checkbox-row`/`.checkbox-box`/`.checkbox-box.checked`/`.checkbox-label`, both themes' `base.rcss`
@@ -342,10 +346,11 @@ labeled action buttons" shape (a multi-option menu, not two/three fixed named sl
 tooltip/per-button lines/compact flag, an optional `columns` grid width, `onCancel`). Frame/border/
 header chrome lives in the shared `window_shell` `<template>` (both themes), not duplicated per
 dialog. Proven on 13 real dialogs (`migration-ledger.md`'s Dialog family table has the current
-list) — the two remaining native "multi-option menu" classes (`CGuild_ToPerson_Position`,
-`CGemIntegrationDisjointMsgBox`) stay native because their actual shape doesn't fit this
-primitive's plain "click closes" model (simultaneous radio-select, an embedded live inventory
-list-selection widget). Several consumers chain a second `Show()` from inside a button's own
+list) — the two remaining "multi-option menu" classes (`CGuild_ToPerson_Position`,
+`CGemIntegrationDisjointMsgBox`) stay message boxes drawn by `MessageBoxView` because their shape
+doesn't fit this primitive's plain "click closes" model (simultaneous radio-select, an embedded
+jewel list). A `MessageBoxView` box can name its kind, which becomes `#panel`'s class, and mark
+buttons as theme-placed: the appointment box's four buttons are placed by `message_box_view.rcss`. Several consumers chain a second `Show()` from inside a button's own
 `onClick` — closing this menu and immediately opening a different one (or the same one with
 different content) — a reentrant pattern proven by the Trainer menu pair, the Gem Integration
 jewel-type→mix-amount flow, and Elpis's text-only variant; `GenericMenuDialog.h`'s own header

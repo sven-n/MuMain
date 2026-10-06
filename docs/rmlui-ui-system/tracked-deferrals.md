@@ -5,15 +5,48 @@ Completed migrations belong in [migration-ledger.md](migration-ledger.md).
 
 ## Priorities
 
-1. Address remaining native interactions and presentation bindings one screen at a time.
+### Before merging to main
 
-Theme-owned window placement is done ([window-placement.md](window-placement.md)): the theme's
-workspace places the docks, the centred panels, the HUD shell, the chat and the event HUDs.
-The modern theme exists to prove the architecture, so its unchecked windows are not tracked;
-the Cursed Temple result panel needs a finished event to check.
+What would otherwise grow with every new window, or break a principle in a way new code copies.
+Most are items of the integration seams below.
 
-Run targeted scale/theme/interaction validation alongside each change. The `CObject` tier is
-accepted as the base ([building-new-ui.md](building-new-ui.md)'s "Accepted as the base").
+1. **One owner for a window's document** (seams item 2). Every port copies the lifetime
+   boilerplate, the copies have already drifted, and each port after the merge adds another.
+2. **Keyboard ownership in the runtime** (item 3), with the runtime's layering (item 5) in the same
+   change. Every window with a text field copies the fake `HWND`, and a slip kills every hotkey;
+   the layering fix keeps runtime-level fixes from reaching for `SceneFlag` and `GameConfig`.
+3. **No new background-context documents** (item 1): new native 3D goes into a `RenderTarget`, and
+   `OverlayRender`, which nothing uses, is deleted. Retiring the existing background contexts can
+   follow the merge.
+4. **The tooltip measures its own document** (item 4), not the whole context twice a frame.
+5. **A display-scale change applies the `dp` ratio** (item 7). A bug against §9.
+6. **An unsubstituted design token is logged** (item 6): a sheet containing `token(` that was not
+   inlined warns instead of drawing empty values. The `FileInterface` replacement can follow.
+7. **The RmlUi submodule pin is settled.** `.gitmodules` names `mikke89/RmlUi`, but `22282190`
+   exists only on `nitoygo/RmlUi`'s `integration/sdl-gpu-parity`, which carries the SDL_GPU
+   renderer work. A fresh clone fetches it today only because GitHub serves objects across a fork
+   network; if that branch is deleted or rewritten, main stops cloning. Upstream the renderer
+   work, or point `.gitmodules` at the fork and say so.
+
+Also before merging, though not code health: the event windows nobody has seen in game (the
+ownership boundary's first list) are either looked at on a server that can run the events, or
+named as unseen in the pull request.
+
+### After the merge
+
+The divergence audit; retiring the background contexts, with the root transform and counter-scaled
+text they keep alive; the token `FileInterface`; and one obvious component surface, whose native
+widgets `CInGameShop` keeps alive and new code must not use. The equipment paperdoll and the modern
+HUD orbs wait on their triggers, and the counter-scale block on upstream RmlUi, with the
+bound-geometry guard keeping its allowlist from growing meanwhile. Each accepted constraint in the
+ownership boundary carries its own trigger.
+
+### Throughout
+
+Theme-owned window placement is done ([window-placement.md](window-placement.md)). The modern
+theme exists to prove the architecture, so its unchecked windows are not tracked. Run targeted
+scale, theme and interaction checks alongside each change. The `CObject` tier is accepted as the
+base ([building-new-ui.md](building-new-ui.md)'s "Accepted as the base").
 
 ## Pilots to revisit when the relevant phase arrives
 
@@ -25,7 +58,7 @@ one of the trigger initiatives on the right.
 
 | Window(s) | Known deviation | Revisit when... |
 |---|---|---|
-| `CMyInventory` (equipment paperdoll — `RenderEquippedItem()`, still fully native) | Background sprite, durability tint, and drag-compatibility highlight all paint *behind* the equipped item's live 3D icon today (native paint order); RmlUi's main context always composites last, so a straight port would paint them *in front of* instead — a real regression, not a straight port (deliberately skipped for this reason). | A background-context consolidation pass makes this mechanism reliable enough to trust with more per-frame-varying, class-conditional content, **or** the equipment grid gets its own future chrome pass anyway and folds this in at the same time — whichever comes first. If pursued alone, the static background sprite (no gameplay-state binding) is the only piece with a reasonable cost/value ratio on its own. |
+| `CMyInventory` (equipment paperdoll — `RenderEquippedItem()`, still fully native) | Background sprite, durability tint, and drag-compatibility highlight all paint *behind* the equipped item's live 3D icon today (native paint order); RmlUi's main context always composites last, so a straight port would paint them *in front of* instead — a real regression, not a straight port (deliberately skipped for this reason). | A background-context consolidation pass (the integration seams' item 1, below) makes this mechanism reliable enough to trust with more per-frame-varying, class-conditional content, **or** the equipment grid gets its own future chrome pass anyway and folds this in at the same time — whichever comes first. If pursued alone, the static background sprite (no gameplay-state binding) is the only piece with a reasonable cost/value ratio on its own. |
 | HUD circular glass-orb + wrapping arc gauges (reference visual study, not yet built) | The modern theme retinted `main_frame.rcss`'s rectangular HP/MP/AG/SD bars rather than rebuilding them as circular orbs/arcs — that's a structural rebuild (new markup, new `CMainFrameWindow` C++ binding shape, new tooltip anchors), not a retint, and touches live combat UI. Two RmlUi-native techniques were confirmed viable for it (`<progress direction="clockwise">` for the arcs, which needs a `fill-image` — see `engine-findings.md`; layered `radial-gradient` for the orb liquid) but not used yet. | A dedicated pass scoped just to this, once explicitly prioritized. Low priority: the modern theme exists to prove the architecture. |
 
 ## Tracked deferral: one obvious component surface
@@ -98,9 +131,67 @@ has already been found worth reverting by someone looking specifically for it. T
 for the audit, and also the reason to treat "recorded simplification" as a finding rather than a
 resolution.
 
+## Tracked deferral: the RmlUi integration seams
+
+A review of `Render/RmlUi` and `UI/RmlBridge` against the vendored RmlUi (2026-10-06, pin
+`22282190`) found the core idiomatic: the renderer overrides only texture loading, shutdown runs in
+the right order, windows bind through data models and `data-event-*`, and custom features use
+RmlUi's own extension points (decorator instancers, `LoadTexture` sources, drag events). What works
+against the library is where RmlUi meets the legacy UI. In order of value:
+
+1. **Four ways to order native 3D against RmlUi.** The `background` and `dialog_background`
+   contexts (rendered mid-frame from `CManager::Render()`), `OverlayRender` and `RenderTarget`.
+   `OverlayRender` has no users. The background context splits 15 windows into a foreground and a
+   `*_bg.rml` document, each with its own model and root-transform sync. `RenderTarget` is the
+   idiomatic one: native drawing becomes an image at its element's depth. Direction: delete
+   `OverlayRender`; move the confirm dialog's item preview into a render target and retire
+   `dialog_background`; move the inventory family's live items into render targets and retire
+   `background` with its `*_bg.rml` documents. Trigger: the deletion now; the rest with the
+   paperdoll row above, which waits on the same pass.
+2. **Each window hand-writes its document's lifetime.** 86 windows repeat create the model, load,
+   register for reload, rebuild and release, and the copies have drifted: 65 destroy the data model
+   only on a theme reload, so `Release()` leaves it in the context, and some close with `Close()`,
+   others with `UnloadDocument()`. Direction: one owner in `RmlBridge` holding the document, the
+   model and the reload registration, and restoring visibility after a reload. Trigger: before the
+   next port, or when a window's teardown next bites.
+3. **Keyboard ownership is patched in five places.** The RmlUi behaviour is real (checked in its
+   source): `ElementDocument::Hide()` gives focus back to the previous document's remembered field,
+   and unloading a document clears focus without a blur, which leaves the typing flag set. The
+   fixes are `ReleaseStrandedFieldFocus()`, the focus check in `IsTextInputActive()`, the blur in
+   `ReloadAllThemedDocuments()`, the fake `HWND` in `CManager::UpdateKeyEvent()` with
+   `ClaimKeyboardWhileTyping()`, and blurs in windows' hide paths. Direction: the runtime owns the
+   rule and answers one query (the focused field and its document), which `CManager` uses instead
+   of the fake handle. Trigger: the next stuck-hotkey bug, or alongside 2.
+4. **`Tooltip::Show()` runs `Context::Update()` twice** to measure itself, every frame while
+   something is hovered: every data model and document in the main context updates, hover events
+   dispatch, and all nine fields are marked changed without a change check. Direction: measure with
+   the tooltip document's own `UpdateDocument()` and skip an unchanged config. Trigger: now; it is
+   small.
+5. **`Render/RmlUi` depends on `UI/RmlBridge` and on game state.** The runtime includes the theme,
+   native-text and text-fit headers and reads `GameConfig` and `SceneFlag`; the render interface
+   includes `RmlRenderTarget.h`. Direction: the runtime exposes hooks (before and after update, a
+   texture-source resolver, the `dp` ratio) and `RmlBridge` registers the game's policy. Trigger:
+   with 3, which changes the runtime anyway.
+6. **Design tokens are inlined by regex.** `LoadThemedDocument()` rewrites `<link>` tags into
+   `<style>` blocks, so tokenised sheets skip RmlUi's stylesheet cache and parse once per document,
+   and a `<link>` with its attributes in another order is silently left unsubstituted. The need is
+   real: this RmlUi has no `var()`. Direction: a `Rml::FileInterface` that substitutes tokens when
+   it serves an `.rcss`, which can also resolve the per-theme `.rml` overrides. Trigger: a token
+   found unsubstituted, or PR #983 (the counter-scale block below), whose `var()` replaces tokens.
+7. **A display-scale change leaves RmlUi's `dp` ratio stale.**
+   `SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED` updates the content scale `ViewportFitScale()` folds
+   in, but nothing calls `RmlUiRuntime::OnResize()` until the next resize. A bug; fix it with the
+   next change to `Winmain.cpp`'s event pump.
+
+The root transform and its counter-scaled text (`SyncRootTransform`, `.sharp-text`, the panel
+readback) belong to 1: they are needed while a window shares reference coordinates with native
+grids and hit tests. A window whose native content has moved into a render target should move to
+`dp` and RmlUi's own hit testing. The counter-scale block below is the other way out.
+
 ## Tracked deferral: the C++ ↔ RML/RCSS ownership boundary
 
-The remaining ownership work is listed below. For new UI, follow
+The ownership rollout moved layout out of C++ into the themes. What is left of it: windows not yet
+seen in game, constraints accepted with a trigger, and the counter-scale block. For new UI, follow
 [building-new-ui.md](building-new-ui.md)'s Ownership section.
 
 ### What is implemented but not seen

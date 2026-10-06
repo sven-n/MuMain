@@ -15,6 +15,21 @@ the long-term replacement, adopted window by window with old and new coexisting 
 big-bang rewrite. Every window is now a `mu::ui::window::CObject` (the older `CWin` toolkit is
 deleted); see [`migration-ledger.md`](migration-ledger.md) for each window's status.
 
+## Where code goes
+
+- **`Render/RmlUi`**: what RmlUi needs from any host engine. The runtime (lifetime, contexts, the
+  frame hook, SDL input, IME), the render and system interfaces, custom decorators. No themes and
+  no game state.
+- **`UI/RmlBridge`**: what game windows share. Themed loading and theme switching, the model
+  helpers, visibility and stacking, the shared tooltip, dragging, text-size policy, and the
+  adapters between legacy reference coordinates and RmlUi (root transform, panel readback, the
+  keyboard claim). No widget classes and no event or layout system of its own: use RmlUi's.
+- **A window**: its model fields, its event callbacks and its game behaviour. Layout, units,
+  colours and placement stay in RML/RCSS.
+
+The runtime still reaches into `RmlBridge` and game state today; that and the other integration
+seams are in [`tracked-deferrals.md`](tracked-deferrals.md).
+
 ## The documents
 
 - **[Building New UI](building-new-ui.md)** — the C++ UI kit's shape and the RmlUi/native
@@ -52,27 +67,39 @@ scene re-entry.
 
 ## Frame lifecycle: render seams
 
-**The main `Rml::Context` renders after all other content in the frame.**
-`RmlUiRuntime::RenderFrame()` fires from one pre-submit callback, so an opaque RmlUi panel covers
-anything legacy that should stay on top unless it uses the later seam. Seams on `IMuRenderer`,
-registered once in `Winmain.cpp`:
+Native drawing and RmlUi share one frame, and each step draws over everything before it.
+Hexagons are native 3D, rounded boxes are RmlUi contexts:
 
-- **`SetPreSubmitCallback`** — after the frame's game and legacy-2D content is recorded, before
-  submit; the main context renders here.
-- **`SetPostRmlUiCallback`** — after RmlUi's pass, in a fresh render pass on the same swapchain
-  texture with `LOAD_OP_LOAD`. The game cursor draws here, and
-  `CSystem::SyncMainSceneHudVisibility()` runs here every frame.
-- **`SetOffscreenRenderCallback`** — at the top of `EndFrame`; draws between
-  `BeginOffscreenCapture()`/`EndOffscreenCapture()` render into their own textures before the main
-  pass. The seam behind `UI::RmlBridge::RenderTarget` (`component-catalog.md`).
+```mermaid
+flowchart TD
+    scene["World and legacy 2D"]
+    subgraph loop["CManager::Render(): windows in layer-depth order"]
+        bg("Flush, then the background context:<br/>inventory-family frames, event boards,<br/>map name, world labels")
+        win{{"Each window's native Render():<br/>item grids, equipped items"}}
+        dlgbg("At depth 10.9: flush, then dialog_background:<br/>the confirm dialog's panel")
+        cam{{"3D cameras: the confirm dialog's item"}}
+    end
+    rtt{{"Offscreen pass: RenderTarget drawers into textures:<br/>potions, letter portrait, event previews"}}
+    main("Pre-submit: the main context, every other document;<br/>render-target textures show here as images")
+    post["Post-RmlUi pass: the cursor"]
+    scene --> bg --> win --> dlgbg --> cam --> rtt --> main --> post
+```
 
-**A background context paints behind native 3D content.** `RmlUiRuntime::GetBackgroundContext()`/
-`RenderBackgroundLayer()` is a second, input-less context (every document in it is
-`pointer-events: none`) used for window frames that must sit behind live item icons, such as
-`my_inventory_bg.rml`. `CManager::Render()` (`WindowManager.cpp`) calls it from its z-sorted loop,
-only on the manager with `SetDrivesBackgroundLayer(true)` (`CSystem`'s). A window with a
-background document doesn't call `RenderBackgroundLayer()` itself; it gates that document's
-visibility on its own `IsVisible()`.
+A flush draws what has been recorded so far (`FlushRenderCommands()`), so a context rendered right
+after it lands over that and under whatever is recorded next. The seams are on `IMuRenderer` and
+registered once in `Winmain.cpp`.
+
+- **The main context renders last** (`SetPreSubmitCallback`, `RmlUiRuntime::RenderFrame()`), so an
+  opaque panel covers any legacy drawing meant to stay on top. That drawing goes in the post-RmlUi
+  pass (`SetPostRmlUiCallback`), which also runs `CSystem::SyncMainSceneHudVisibility()` every
+  frame.
+- **The background contexts take no input**: every document in them is `pointer-events: none`.
+  Only the manager with `SetDrivesBackgroundLayer(true)` (`CSystem`'s) renders them; a window with
+  a background document gates that document's visibility on its own `IsVisible()`.
+- **Native drawing inside one document** goes into a `UI::RmlBridge::RenderTarget`
+  (`SetOffscreenRenderCallback`, `component-catalog.md`), so it sits at its element's depth.
+  Moving the background contexts' 3D onto render targets is tracked (`tracked-deferrals.md`), and
+  this diagram changes with it.
 
 ## Data binding: `RmlModelBinder<T>`
 
@@ -140,6 +167,7 @@ must hide its document** (`CLoginWin::Release()`), or it paints over the next sc
 | Model/binder layer | [`UI/RmlBridge/RmlModelBinder.h`](../../src/source/UI/RmlBridge/RmlModelBinder.h) |
 | Theme framework | [`UI/RmlBridge/RmlTheme.h/.cpp`](../../src/source/UI/RmlBridge/RmlTheme.h) |
 | Draggable helper | [`UI/RmlBridge/RmlDraggable.h/.cpp`](../../src/source/UI/RmlBridge/RmlDraggable.h) |
+| Native drawing in a document | [`UI/RmlBridge/RmlRenderTarget.h/.cpp`](../../src/source/UI/RmlBridge/RmlRenderTarget.h) |
 | Workspace placement | [`UI/Placement/WindowPlacement.h/.cpp`](../../src/source/UI/Placement/WindowPlacement.h) |
 | Texture lifetime | [`Render/Sprites/GlobalBitmap.h/.cpp`](../../src/source/Render/Sprites/GlobalBitmap.h) — `LoadImageExclusive()` |
 | RML/RCSS assets | [`bin/Data/Interface/RmlUi/`](../../src/bin/Data/Interface/RmlUi/) — one `.rml` per window + `themes/{legacy,modern}/` |
