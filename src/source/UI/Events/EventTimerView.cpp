@@ -17,12 +17,6 @@ using namespace mu::ui::window;
 
 namespace
 {
-Rml::Context* TimerContext()
-{
-    Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext();
-    return context != nullptr ? context : RmlUiRuntime::Instance().GetContext();
-}
-
 // RenderText(x, y, text, boxWidth, 0, RT3_SORT_CENTER) in `font`: the size it drew `text` at.
 float TextPxInBox(UI::Scaling::FontRole role, HFONT font, const UI::Scaling::Transform& transform,
                   const std::wstring& text, float boxWidth)
@@ -57,7 +51,7 @@ void BindTimerModel(Rml::DataModelConstructor& c, EventTimerRmlModel& model)
 } // namespace
 
 mu::ui::window::EventTimerView::EventTimerView(const char* modelName, const char* documentPath)
-    : m_View(modelName, BindTimerModel, {{documentPath, TimerContext}}, {.stacking = UI::RmlBridge::ThemedStacking::Back})
+    : m_View(modelName, BindTimerModel, {{documentPath}}, {.stacking = UI::RmlBridge::ThemedStacking::Back})
 {
 }
 

@@ -84,7 +84,6 @@
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/LoginWin.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
-#include "UI/RmlBridge/RmlOverlayRender.h"
 #include "UI/RmlBridge/RmlRenderTarget.h"
 
 #include "World/MapInfra/w_MapHeaders.h"
@@ -2132,10 +2131,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
             // special-cases -- correctly hides them.
             if (g_pNewUISystem)
                 g_pNewUISystem->SyncMainSceneHudVisibility();
-
-            // Native 3D that belongs on top of its own RmlUi panel rather than under every
-            // panel in the frame. Before the cursor, which stays above everything.
-            UI::RmlBridge::OverlayRender::RenderAll();
 
             if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE || SceneFlag == MAIN_SCENE)
             {

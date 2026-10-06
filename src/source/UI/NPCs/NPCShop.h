@@ -90,7 +90,7 @@ namespace mu::ui::window
         };
         static void BindRmlBgModel(Rml::DataModelConstructor& c, NPCShopBgRmlModel& model);
         UI::RmlBridge::ThemedView<NPCShopBgRmlModel> m_RmlBgView{"npc_shop_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/npc_shop_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
+            {{"Data/Interface/RmlUi/npc_shop_bg.rml"}}};
 
         void BuildRmlUi();
         void SyncRmlModel();

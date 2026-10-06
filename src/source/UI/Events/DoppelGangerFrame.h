@@ -116,6 +116,6 @@ private:
     // document sits in the background context, behind its other documents.
     UI::RmlBridge::ThemedView<DoppelGangerFrameRmlModel> m_RmlView{"doppelganger_frame",
         [this](Rml::DataModelConstructor& c, DoppelGangerFrameRmlModel& model) { BindRmlModel(c, model); },
-        {{"Data/Interface/RmlUi/doppelganger_frame.rml", UI::RmlBridge::BackgroundOrMainContext}}};
+        {{"Data/Interface/RmlUi/doppelganger_frame.rml"}}};
 };
 }

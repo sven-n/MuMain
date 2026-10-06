@@ -56,7 +56,7 @@ private:
     void BindRmlModel(Rml::DataModelConstructor& c, BattleSoccerScoreRmlModel& model);
     UI::RmlBridge::ThemedView<BattleSoccerScoreRmlModel> m_RmlView{"battle_soccer_score",
         [this](Rml::DataModelConstructor& c, BattleSoccerScoreRmlModel& model) { BindRmlModel(c, model); },
-        {{"Data/Interface/RmlUi/battle_soccer_score.rml", UI::RmlBridge::BackgroundOrMainContext}}};
+        {{"Data/Interface/RmlUi/battle_soccer_score.rml"}}};
 };
 } // namespace mu::ui::window
 

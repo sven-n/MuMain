@@ -25,16 +25,6 @@ using namespace mu::ui::window;
 
 namespace
 {
-// The original drew this board under every panel (layer depth 1.1 / 1.8), and a docked panel's
-// frame is painted in the background context before the native windows (my_inventory_bg.rml...):
-// only a document in that same context, behind the others, stays under it. Like the original, the
-// location bar, the logs and every native window then draw over the board.
-Rml::Context* BoardContext()
-{
-    Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext();
-    return context != nullptr ? context : RmlUiRuntime::Instance().GetContext();
-}
-
 template <typename Model, typename T>
 void Sync(RmlModelBinder<Model>& binder, T Model::* field, const char* name, T value)
 {
@@ -170,7 +160,7 @@ void mu::ui::window::CBattleSoccerScore::SyncRmlModel()
     if (!m_RmlView.Document())
         return;
 
-    // Layer depth 1.8: behind every other document of the background context (see BoardContext()).
+    // Layer depth 1.8: behind every other document of the background context (RmlStackingOrder.cpp).
     UI::RmlBridge::SyncDocumentVisibilityBehind(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;

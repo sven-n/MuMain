@@ -64,5 +64,5 @@ protected:
     void BindRmlModel(Rml::DataModelConstructor& c, UI::MapName::MapNameRmlModel& model);
     UI::RmlBridge::ThemedView<UI::MapName::MapNameRmlModel> m_RmlView{"map_name",
         [this](Rml::DataModelConstructor& c, UI::MapName::MapNameRmlModel& model) { BindRmlModel(c, model); },
-        {{"Data/Interface/RmlUi/map_name.rml", UI::RmlBridge::BackgroundOrMainContext}}};
+        {{"Data/Interface/RmlUi/map_name.rml"}}};
 };

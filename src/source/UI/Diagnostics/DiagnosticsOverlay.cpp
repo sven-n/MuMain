@@ -72,7 +72,7 @@ bool EnsureView()
         UI::RmlBridge::ThemedViewOptions options;
         options.afterBuild = [] { UI::Placement::Invalidate(); };
         g_view = std::make_unique<View>("diagnostics", RegisterModel,
-            std::vector<UI::RmlBridge::ThemedDocumentSpec>{{"Data/Interface/RmlUi/diagnostics.rml", {}}},
+            std::vector<UI::RmlBridge::ThemedDocumentSpec>{{"Data/Interface/RmlUi/diagnostics.rml"}},
             std::move(options));
 
     }

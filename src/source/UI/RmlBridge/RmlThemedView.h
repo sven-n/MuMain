@@ -21,10 +21,9 @@ namespace UI::RmlBridge
 {
 struct ThemedDocumentSpec
 {
-    std::string path; // under Data/Interface/RmlUi; the active theme's sheets apply
-    // The context the document loads into; RmlUiRuntime's main context when empty. Null means not
-    // yet: Ensure() waits.
-    std::function<Rml::Context*()> context;
+    // Under Data/Interface/RmlUi; the active theme's sheets apply. The stacking table
+    // (RmlStackingOrder.cpp) says which context the document loads into.
+    std::string path;
 };
 
 // Where a document shown again after a theme switch goes among the documents of its depth: as
@@ -59,9 +58,11 @@ struct ThemedViewOptions
 // True while RmlUi still owns `context`: false once it was removed or RmlUi shut down.
 bool IsContextAlive(const Rml::Context* context);
 
-// For a ThemedDocumentSpec: the background context, which draws before native 3D, or the main one
-// when there is none.
-Rml::Context* BackgroundOrMainContext();
+// The context a document loads into, from its file name: by default RmlUiRuntime's context the
+// stacking table names. Null means not yet, and Ensure() waits. Tests replace it; an empty one
+// restores the default.
+using ContextResolver = std::function<Rml::Context*(std::string_view documentName)>;
+void SetContextResolver(ContextResolver resolver);
 
 // The documents and the theme-switch registration; ThemedView<Model> adds the model.
 class ThemedDocuments

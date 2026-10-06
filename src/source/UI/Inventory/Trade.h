@@ -130,7 +130,7 @@ namespace mu::ui::window
         };
         static void BindRmlBgModel(Rml::DataModelConstructor& c, TradeBgRmlModel& model);
         UI::RmlBridge::ThemedView<TradeBgRmlModel> m_RmlBgView{"trade_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/trade_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
+            {{"Data/Interface/RmlUi/trade_bg.rml"}}};
 
         void BuildRmlUi();
         void SyncRmlModel();

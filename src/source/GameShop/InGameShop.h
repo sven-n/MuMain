@@ -309,7 +309,7 @@ private:
     };
     static void BindRmlBgModel(Rml::DataModelConstructor& c, InGameShopBgRmlModel& model);
     UI::RmlBridge::ThemedView<InGameShopBgRmlModel> m_RmlBgView{"in_game_shop_bg", BindRmlBgModel,
-        {{"Data/Interface/RmlUi/in_game_shop_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
+        {{"Data/Interface/RmlUi/in_game_shop_bg.rml"}}};
 
     // One row of the storage / gift list. Where it sits is the theme's; only what it says and
     // whether it is the picked row travel through the model.

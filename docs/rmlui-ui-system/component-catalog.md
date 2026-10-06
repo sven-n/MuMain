@@ -422,21 +422,10 @@ premultiplied, so opaque pixels are exact and only partly transparent edges can 
 
 ## Native content above RmlUi
 
-`UI::RmlBridge::OverlayRender` (`UI/RmlBridge/RmlOverlayRender.h`/`.cpp`) — a registry of native
-draw callbacks drained once per frame from `Winmain.cpp`'s `SetPostRmlUiCallback`, which opens its
-own `LOAD_OP_LOAD` render pass after RmlUi's main context has closed. That pass is the **only**
-layer above RmlUi. `Register(owner, draw)` / `Unregister(owner)`, drawing in registration order.
-No window uses it today.
-
-Prefer a render target for anything that belongs to one window. This seam is above the whole
-context rather than at any window's depth, so what it draws stands over every panel, including
-ones that should cover it, and nothing RmlUi draws can paint over it. 2D native text and quads are
-proven here (`RenderCursor`), and skinned 3D works too, since the renderer re-stages bone data for
-this pass.
-
-A `SetPostRmlUiCallback`-based approach to `CGenericConfirmDialog`'s item3D was abandoned for a
-third-context document split before the renderer re-staged bone data for that pass; the split only
-suits always-on-top content such as a modal, not a draggable, stackable window.
+`Winmain.cpp`'s `SetPostRmlUiCallback` opens a `LOAD_OP_LOAD` render pass after RmlUi's main
+context has closed: the only layer above RmlUi. It draws the cursor. Window content does not go
+there: what it draws stands over every panel, including ones that should cover it, so native
+drawing that belongs to a window goes into a render target.
 
 ## Native 3D viewer input
 

@@ -10,12 +10,9 @@ Completed migrations belong in [migration-ledger.md](migration-ledger.md).
 What would otherwise grow with every new window, or break a principle in a way new code copies.
 Most are items of the integration seams below.
 
-1. **No new background-context documents** (item 1): new native 3D goes into a `RenderTarget`, and
-   `OverlayRender`, which nothing uses, is deleted. Retiring the existing background contexts can
-   follow the merge.
-2. **The tooltip measures its own document** (item 2), not the whole context twice a frame.
-3. **A display-scale change applies the `dp` ratio** (item 4). A bug against §9.
-4. **An unsubstituted design token is logged** (item 3): a sheet containing `token(` that was not
+1. **The tooltip measures its own document** (item 2), not the whole context twice a frame.
+2. **A display-scale change applies the `dp` ratio** (item 4). A bug against §9.
+3. **An unsubstituted design token is logged** (item 3): a sheet containing `token(` that was not
    inlined warns instead of drawing empty values. The `FileInterface` replacement can follow.
 
 Also before merging, though not code health: the event windows nobody has seen in game (the
@@ -128,15 +125,17 @@ the right order, windows bind through data models and `data-event-*`, and custom
 RmlUi's own extension points (decorator instancers, `LoadTexture` sources, drag events). What works
 against the library is where RmlUi meets the legacy UI. In order of value:
 
-1. **Four ways to order native 3D against RmlUi.** The `background` and `dialog_background`
-   contexts (rendered mid-frame from `CManager::Render()`), `OverlayRender` and `RenderTarget`.
-   `OverlayRender` has no users. The background context splits 15 windows into a foreground and a
-   `*_bg.rml` document, each with its own model and root-transform sync. `RenderTarget` is the
-   idiomatic one: native drawing becomes an image at its element's depth. Direction: delete
-   `OverlayRender`; move the confirm dialog's item preview into a render target and retire
-   `dialog_background`; move the inventory family's live items into render targets and retire
-   `background` with its `*_bg.rml` documents. Trigger: the deletion now; the rest with the
-   paperdoll row above, which waits on the same pass.
+1. **Three ways to order native 3D against RmlUi.** The `background` and `dialog_background`
+   contexts (rendered mid-frame from `CManager::Render()`) and `RenderTarget`. The background
+   context splits 15 windows into a foreground and a `*_bg.rml` document, each with its own model
+   and root-transform sync, and holds the HUD boards that draw under them. `RenderTarget` is the
+   idiomatic one: native drawing becomes an image at its element's depth. The stacking table
+   (`RmlStackingOrder.cpp`) says which context each document loads into, and
+   `test_rml_stacking_order.cpp` holds both background lists closed, so new native 3D can only go
+   into a render target. Direction: move the confirm dialog's item preview into a render target and
+   retire `dialog_background`; move the inventory family's live items into render targets and
+   retire `background` with its `*_bg.rml` documents, taking each out of the test's list. Trigger:
+   the paperdoll row above, which waits on the same pass.
 2. **`Tooltip::Show()` runs `Context::Update()` twice** to measure itself, every frame while
    something is hovered: every data model and document in the main context updates, hover events
    dispatch, and all nine fields are marked changed without a change check. Direction: measure with

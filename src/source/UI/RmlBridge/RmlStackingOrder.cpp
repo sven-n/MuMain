@@ -18,89 +18,95 @@ constexpr float ReconnectDialogDepth = 50.0f; // after the whole scene
 
 constexpr DocumentScene MainScene = DocumentScene::Main;
 constexpr DocumentScene AnyScene = DocumentScene::Any;
+constexpr DocumentContext Background = DocumentContext::Background;
+constexpr DocumentContext DialogBackground = DocumentContext::DialogBackground;
 
 struct DocumentPlacement
 {
     std::string_view name;
     float depth;
     DocumentScene scene;
+    DocumentContext context = DocumentContext::Main;
 };
 
 // The original's GetLayerDepth() of each window, for its foreground and background
-// (_bg) documents alike, and the scene whose windows the document belongs to.
+// (_bg) documents alike, the scene whose windows the document belongs to, and the context it
+// loads into when that is not the main one.
 constexpr DocumentPlacement Placements[] = {
     {"login_scene.rml", BeforeWindowsDepth, AnyScene},
     // Never drawn: it only lays out where windows go.
     {"workspace.rml", BeforeWindowsDepth, AnyScene},
-    {"map_name.rml", BeforeWindowsDepth, MainScene},
+    {"map_name.rml", BeforeWindowsDepth, MainScene, Background},
     {"buff_strip.rml", 0.95f, MainScene},
-    {"world_labels.rml", 1.0f, MainScene},
+    {"world_labels.rml", 1.0f, MainScene, Background},
     // The modern theme's top-right button row: under every window, which dock over it.
     {"main_frame_top.rml", 1.05f, MainScene},
-    {"duel_window.rml", 1.1f, MainScene},
-    {"blood_castle_time.rml", 1.2f, MainScene},
-    {"doppelganger_frame.rml", 1.2f, MainScene},
+    // The duel and soccer boards drew under every panel, the docked panels' frames included; those
+    // frames are in the background context, so the boards are too, behind them.
+    {"duel_window.rml", 1.1f, MainScene, Background},
+    {"blood_castle_time.rml", 1.2f, MainScene, Background},
+    {"doppelganger_frame.rml", 1.2f, MainScene, Background},
     {"empire_guardian_enter.rml", 1.2f, MainScene},
-    {"empire_guardian_enter_bg.rml", 1.2f, MainScene},
-    {"empire_guardian_timer.rml", 1.2f, MainScene},
-    {"chaos_castle_time.rml", 1.3f, MainScene},
-    {"cursed_temple_system.rml", 1.5f, MainScene},
-    {"siege_warfare.rml", 1.6f, MainScene},
-    {"battle_soccer_score.rml", 1.8f, MainScene},
-    {"kanturu_info.rml", 1.92f, MainScene},
+    {"empire_guardian_enter_bg.rml", 1.2f, MainScene, Background},
+    {"empire_guardian_timer.rml", 1.2f, MainScene, Background},
+    {"chaos_castle_time.rml", 1.3f, MainScene, Background},
+    {"cursed_temple_system.rml", 1.5f, MainScene, Background},
+    {"siege_warfare.rml", 1.6f, MainScene, Background},
+    {"battle_soccer_score.rml", 1.8f, MainScene, Background},
+    {"kanturu_info.rml", 1.92f, MainScene, Background},
     {"quick_command.rml", 2.0f, MainScene},
     {"trade.rml", 2.1f, MainScene},
-    {"trade_bg.rml", 2.1f, MainScene},
+    {"trade_bg.rml", 2.1f, MainScene, Background},
     {"storage.rml", 2.2f, MainScene},
-    {"storage_bg.rml", 2.2f, MainScene},
+    {"storage_bg.rml", 2.2f, MainScene, Background},
     {"storage_ext.rml", 2.2f, MainScene},
-    {"storage_ext_bg.rml", 2.2f, MainScene},
+    {"storage_ext_bg.rml", 2.2f, MainScene, Background},
     {"pet_info.rml", 2.3f, MainScene},
     {"party_info.rml", 2.4f, MainScene},
     {"npc_dialogue.rml", 3.1f, MainScene},
     {"npc_quest.rml", 3.1f, MainScene},
-    {"npc_quest_bg.rml", 3.1f, MainScene},
+    {"npc_quest_bg.rml", 3.1f, MainScene, Background},
     {"quest_progress.rml", 3.1f, MainScene},
     {"quest_progress_etc.rml", 3.1f, MainScene},
     {"my_shop.rml", 3.2f, MainScene},
-    {"my_shop_bg.rml", 3.2f, MainScene},
+    {"my_shop_bg.rml", 3.2f, MainScene, Background},
     {"purchase_shop.rml", 3.2f, MainScene},
-    {"purchase_shop_bg.rml", 3.2f, MainScene},
+    {"purchase_shop_bg.rml", 3.2f, MainScene, Background},
     {"my_quest_info.rml", 3.3f, MainScene},
     {"mix_inventory.rml", 3.4f, MainScene},
-    {"mix_inventory_bg.rml", 3.4f, MainScene},
+    {"mix_inventory_bg.rml", 3.4f, MainScene, Background},
     {"lucky_item.rml", 3.4f, MainScene},
-    {"lucky_item_bg.rml", 3.4f, MainScene},
+    {"lucky_item_bg.rml", 3.4f, MainScene, Background},
     {"gold_bowman.rml", 3.4f, MainScene},
-    {"gold_bowman_bg.rml", 3.4f, MainScene},
+    {"gold_bowman_bg.rml", 3.4f, MainScene, Background},
     {"gold_bowman_lena.rml", 3.4f, MainScene},
-    {"gold_bowman_lena_bg.rml", 3.4f, MainScene},
+    {"gold_bowman_lena_bg.rml", 3.4f, MainScene, Background},
     {"mu_helper_config.rml", 3.4f, MainScene},
     {"mu_helper_detail.rml", 3.4f, MainScene},
     {"item_endurance.rml", 3.5f, MainScene},
     {"devil_square_enter.rml", 4.0f, MainScene},
     {"blood_castle_enter.rml", 4.1f, MainScene},
     {"my_inventory.rml", 4.2f, MainScene},
-    {"my_inventory_bg.rml", 4.2f, MainScene},
+    {"my_inventory_bg.rml", 4.2f, MainScene, Background},
     {"gens_ranking.rml", 4.2f, MainScene},
     {"lucky_coin_exchange.rml", 4.2f, MainScene},
-    {"lucky_coin_exchange_bg.rml", 4.2f, MainScene},
+    {"lucky_coin_exchange_bg.rml", 4.2f, MainScene, Background},
     {"lucky_coin_registration.rml", 4.2f, MainScene},
-    {"lucky_coin_registration_bg.rml", 4.2f, MainScene},
+    {"lucky_coin_registration_bg.rml", 4.2f, MainScene, Background},
     {"mu_helper_bar.rml", 4.3f, MainScene}, // the location bar (CNewUIHeroPositionInfo)
     {"guild_make.rml", 4.3f, MainScene},
     {"guild_info.rml", 4.5f, MainScene},
     {"npc_shop.rml", 4.55f, MainScene},
-    {"npc_shop_bg.rml", 4.55f, MainScene},
+    {"npc_shop_bg.rml", 4.55f, MainScene, Background},
     {"inventory_extension.rml", 4.55f, MainScene},
-    {"inventory_extension_bg.rml", 4.55f, MainScene},
+    {"inventory_extension_bg.rml", 4.55f, MainScene, Background},
     {"castle_window.rml", 5.0f, MainScene},
     {"guard_window.rml", 5.0f, MainScene},
     {"gateman.rml", 5.0f, MainScene},
     {"gate_switch.rml", 5.0f, MainScene},
     {"catapult.rml", 5.0f, MainScene},
     {"doppelganger_enter.rml", 5.0f, MainScene},
-    {"doppelganger_enter_bg.rml", 5.0f, MainScene},
+    {"doppelganger_enter_bg.rml", 5.0f, MainScene, Background},
     {"united_market_place.rml", 5.0f, MainScene},
     {"duel_watch.rml", 5.0f, MainScene},
     {"duel_watch_frame.rml", 5.0f, MainScene},
@@ -125,14 +131,14 @@ constexpr DocumentPlacement Placements[] = {
     {"crywolf.rml", 10.0f, MainScene},
     // CInGameShop::GetLayerDepth(): the shop sits above crywolf and below kanturu_enter.
     {"in_game_shop.rml", 10.08f, MainScene},
-    {"in_game_shop_bg.rml", 10.08f, MainScene},
+    {"in_game_shop_bg.rml", 10.08f, MainScene, Background},
     // The shop's own buy dialog, above the shop it opens from.
     {"igs_buy_package.rml", 10.09f, MainScene},
     {"igs_buy_select.rml", 10.09f, MainScene},
     {"igs_send_gift.rml", 10.09f, MainScene},
     {"kanturu_enter.rml", 10.1f, MainScene},
     {"master_level.rml", 10.1f, MainScene},
-    {"master_level_bg.rml", 10.1f, MainScene},
+    {"master_level_bg.rml", 10.1f, MainScene, Background},
     {"cursed_temple_result.rml", 10.2f, MainScene},
     {"cursed_temple_enter.rml", 10.3f, MainScene},
     {"window_menu.rml", 10.4f, MainScene},
@@ -149,7 +155,7 @@ constexpr DocumentPlacement Placements[] = {
     {"message_box_view.rml", MessageBoxDepth, MainScene},
     // New-only dialogs that replace message boxes.
     {"generic_confirm_dialog.rml", MessageBoxDepth, MainScene},
-    {"generic_confirm_dialog_bg.rml", MessageBoxDepth, MainScene},
+    {"generic_confirm_dialog_bg.rml", MessageBoxDepth, MainScene, DialogBackground},
     {"generic_menu_dialog.rml", MessageBoxDepth, MainScene},
     {"notices.rml", NoticesDepth, AnyScene},
     {"char_info_balloon.rml", SceneBalloonDepth, AnyScene},
@@ -197,5 +203,11 @@ std::optional<DocumentScene> SceneForDocument(std::string_view documentName)
     if (placement == nullptr)
         return std::nullopt;
     return placement->scene;
+}
+
+DocumentContext ContextForDocument(std::string_view documentName)
+{
+    const DocumentPlacement* placement = FindPlacement(documentName);
+    return placement != nullptr ? placement->context : DocumentContext::Main;
 }
 } // namespace UI::RmlBridge

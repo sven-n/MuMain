@@ -98,7 +98,7 @@ namespace mu::ui::window
         };
         static void BindRmlBgModel(Rml::DataModelConstructor& c, MyShopBgRmlModel& model);
         UI::RmlBridge::ThemedView<MyShopBgRmlModel> m_RmlBgView{"my_shop_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/my_shop_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
+            {{"Data/Interface/RmlUi/my_shop_bg.rml"}}};
 
         // Mirrors the old CButton array's Lock()/tooltip-text state (OpenButtonLock()/UnLock(),
         // ChangePersonal()) now that the buttons themselves are RmlUi-owned.

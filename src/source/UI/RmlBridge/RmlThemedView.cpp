@@ -2,6 +2,7 @@
 #include "UI/RmlBridge/RmlThemedView.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlStackingOrder.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include <RmlUi/Core/Context.h>
@@ -57,13 +58,34 @@ ContextTracker& Tracker()
 }
 } // namespace
 
-Rml::Context* BackgroundOrMainContext()
+namespace
+{
+Rml::Context* RuntimeContextFor(std::string_view documentName)
 {
     RmlUiRuntime& runtime = RmlUiRuntime::Instance();
     if (!runtime.IsCreated())
         return nullptr;
-    Rml::Context* context = runtime.GetBackgroundContext();
-    return context != nullptr ? context : runtime.GetContext();
+    switch (ContextForDocument(documentName))
+    {
+    case DocumentContext::Background:
+        return runtime.GetBackgroundContext();
+    case DocumentContext::DialogBackground:
+        return runtime.GetDialogBackgroundContext();
+    default:
+        return runtime.GetContext();
+    }
+}
+
+ContextResolver& Resolver()
+{
+    static ContextResolver resolver;
+    return resolver;
+}
+} // namespace
+
+void SetContextResolver(ContextResolver resolver)
+{
+    Resolver() = std::move(resolver);
 }
 
 bool IsContextAlive(const Rml::Context* context)
@@ -87,10 +109,10 @@ ThemedDocuments::~ThemedDocuments()
 
 Rml::Context* ThemedDocuments::ResolveContext(const Slot& slot) const
 {
-    if (slot.spec.context)
-        return slot.spec.context();
-    RmlUiRuntime& runtime = RmlUiRuntime::Instance();
-    return runtime.IsCreated() ? runtime.GetContext() : nullptr;
+    const size_t slash = slot.spec.path.find_last_of('/');
+    const std::string_view name = slash == std::string::npos ? std::string_view(slot.spec.path)
+                                                             : std::string_view(slot.spec.path).substr(slash + 1);
+    return Resolver() ? Resolver()(name) : RuntimeContextFor(name);
 }
 
 bool ThemedDocuments::Ensure()

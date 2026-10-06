@@ -106,7 +106,7 @@ namespace mu::ui::window
         };
         static void BindRmlBgModel(Rml::DataModelConstructor& c, PurchaseShopBgRmlModel& model);
         UI::RmlBridge::ThemedView<PurchaseShopBgRmlModel> m_RmlBgView{"purchase_shop_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/purchase_shop_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
+            {{"Data/Interface/RmlUi/purchase_shop_bg.rml"}}};
 
         void BuildRmlUi();
         void SyncRmlModel();

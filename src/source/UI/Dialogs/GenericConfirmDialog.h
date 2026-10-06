@@ -311,8 +311,7 @@ namespace mu::ui::window
         // other windows' own foreground content paint over this dialog wherever they overlap.
         // Shown/Hidden in lockstep with m_RmlView at every transition point -- but only for a
         // dialog with `item3D`, the one reason the chrome has to paint before the 3D pass.
-        UI::RmlBridge::ThemedView<> m_RmlBgView{{{"Data/Interface/RmlUi/generic_confirm_dialog_bg.rml",
-            [] { return RmlUiRuntime::Instance().GetDialogBackgroundContext(); }}}};
+        UI::RmlBridge::ThemedView<> m_RmlBgView{{{"Data/Interface/RmlUi/generic_confirm_dialog_bg.rml"}}};
 
         // The same background markup loaded a second time, into the main context, for every
         // dialog WITHOUT `item3D`. The dialog-background context paints before the main context,

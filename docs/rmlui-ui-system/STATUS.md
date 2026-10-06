@@ -175,7 +175,7 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
   requirement waiting on priority. (A third first-party theme is ruled out by the project owner;
   §25/§28's coupling concern is met by `modern`'s divergence and the drift checker.)
 - **The legacy compatibility seams are not yet behind one mechanism** (§14, §21): three contexts
-  and a dead overlay seam order native 3D against RmlUi where `RenderTarget` would do, and design
+  order native 3D against RmlUi where `RenderTarget` would do (the background lists are closed), and design
   tokens are a text preprocessor rather than an RmlUi feature (`tracked-deferrals.md`'s
   integration seams).
 - **Validation covers the UI-scale axis only** (`layout-and-scaling.md`'s scale sweep);

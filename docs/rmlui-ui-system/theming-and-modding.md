@@ -327,5 +327,5 @@ coordinate into `dp`.
   goes into a `UI::RmlBridge::RenderTarget` the document shows, and frame art that must sit
   *behind* native 3D goes into the background context (or, for a modal's `item3D`,
   `RmlUiRuntime::GetDialogBackgroundContext()` — `GenericConfirmDialog.h` documents why).
-  `UI::RmlBridge::OverlayRender` draws natively *above* every document, skinned 3D included, but
-  over every panel too (`component-catalog.md`).
+  Which context a document loads into is the stacking table's (`RmlStackingOrder.cpp`), and the
+  two background lists are closed: new native 3D goes into a render target.

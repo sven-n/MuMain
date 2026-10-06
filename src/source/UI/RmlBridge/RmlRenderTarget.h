@@ -7,7 +7,7 @@
 
 // Native drawing rendered into a texture an RmlUi document shows like any other image, so it sits at
 // its element's own depth -- under a window that covers it, beside the text drawn over it -- instead
-// of above or below a whole context the way UI::RmlBridge::OverlayRender has to.
+// of above or below a whole context.
 //
 // Bind Source() to an <img src>. The drawer runs once a frame from the renderer's offscreen seam
 // (MuRenderer::SetOffscreenRenderCallback), inside a capture of exactly Width() x Height() physical

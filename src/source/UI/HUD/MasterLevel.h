@@ -133,8 +133,7 @@ private:
         {{"Data/Interface/RmlUi/master_level.rml"}}};
     // Background-context companion: the black the original's padded background texture
     // leaves below the tree, under the bottom HUD (master_level_bg.rml).
-    UI::RmlBridge::ThemedView<> m_RmlBgView{{{"Data/Interface/RmlUi/master_level_bg.rml",
-        [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
+    UI::RmlBridge::ThemedView<> m_RmlBgView{{{"Data/Interface/RmlUi/master_level_bg.rml"}}};
 
     // Set by the RmlUi events, read every frame: the node press opens its dialog from
     // Update(), the hovers show the matching hint.

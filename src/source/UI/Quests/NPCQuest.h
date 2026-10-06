@@ -62,8 +62,7 @@ namespace mu::ui::window
         };
         static void BindRmlBgModel(Rml::DataModelConstructor& c, NPCQuestBgRmlModel& model);
         UI::RmlBridge::ThemedView<NPCQuestBgRmlModel> m_RmlBgView{"npc_quest_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/npc_quest_bg.rml",
-              [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
+            {{"Data/Interface/RmlUi/npc_quest_bg.rml"}}};
 
     public:
         CNPCQuest();

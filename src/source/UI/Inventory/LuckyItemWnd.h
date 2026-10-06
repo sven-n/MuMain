@@ -86,7 +86,7 @@ namespace mu::ui::window
         };
         static void BindRmlBgModel(Rml::DataModelConstructor& c, LuckyItemBgRmlModel& model);
         UI::RmlBridge::ThemedView<LuckyItemBgRmlModel> m_RmlBgView{"lucky_item_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/lucky_item_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
+            {{"Data/Interface/RmlUi/lucky_item_bg.rml"}}};
 
         void BuildRmlUi();
         void SyncRmlModel();

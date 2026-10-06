@@ -143,7 +143,7 @@ namespace mu::ui::window
         };
         static void BindRmlBgModel(Rml::DataModelConstructor& c, MyInventoryBgRmlModel& model);
         UI::RmlBridge::ThemedView<MyInventoryBgRmlModel> m_RmlBgView{"my_inventory_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/my_inventory_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
+            {{"Data/Interface/RmlUi/my_inventory_bg.rml"}}};
 
         void BuildRmlUi();
         void SyncRmlModel();

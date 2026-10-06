@@ -59,7 +59,7 @@ namespace mu::ui::window
         };
         static void BindRmlBgModel(Rml::DataModelConstructor& c, StorageExtBgRmlModel& model);
         UI::RmlBridge::ThemedView<StorageExtBgRmlModel> m_RmlBgView{"storage_ext_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/storage_ext_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
+            {{"Data/Interface/RmlUi/storage_ext_bg.rml"}}};
 
         void BuildRmlUi();
         void SyncRmlModel();

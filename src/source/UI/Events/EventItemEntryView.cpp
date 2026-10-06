@@ -22,7 +22,7 @@ mu::ui::window::EventItemEntryView::EventItemEntryView(const char* modelName, co
     : m_View(modelName, [this](Rml::DataModelConstructor& c, EventItemEntryRmlModel& model) { BindModel(c, model); },
              {{documentPath}}, {.stacking = UI::RmlBridge::ThemedStacking::Front}),
       m_BgView(bgModelName, BindBgModel,
-               {{bgDocumentPath, [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}})
+               {{bgDocumentPath}})
 {
 }
 

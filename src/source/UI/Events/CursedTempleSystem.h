@@ -174,7 +174,7 @@ private:
     // background context, behind its other documents.
     UI::RmlBridge::ThemedView<CursedTempleSystemRmlModel> m_RmlView{"cursed_temple_system",
         [this](Rml::DataModelConstructor& c, CursedTempleSystemRmlModel& model) { BindRmlModel(c, model); },
-        {{"Data/Interface/RmlUi/cursed_temple_system.rml", UI::RmlBridge::BackgroundOrMainContext}}};
+        {{"Data/Interface/RmlUi/cursed_temple_system.rml"}}};
 };
 
     inline

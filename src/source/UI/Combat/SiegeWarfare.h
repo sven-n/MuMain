@@ -111,7 +111,7 @@ private:
     // do). The durability warnings, the logs and every native window then draw over the HUD.
     UI::RmlBridge::ThemedView<SiegeWarfareRmlModel> m_RmlView{"siege_warfare",
         [this](Rml::DataModelConstructor& c, SiegeWarfareRmlModel& model) { BindRmlModel(c, model); },
-        {{"Data/Interface/RmlUi/siege_warfare.rml", UI::RmlBridge::BackgroundOrMainContext}}};
+        {{"Data/Interface/RmlUi/siege_warfare.rml"}}};
     // The frame's values, filled in place every frame: its collections keep their storage, and it
     // holds last frame's values where FillRmlModel() leaves a field alone.
     SiegeWarfareRmlModel m_NextRmlModel;

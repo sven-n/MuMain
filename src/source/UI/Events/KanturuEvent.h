@@ -165,7 +165,7 @@ private:
     // The original drew the HUD under every panel (layer depth 1.92): the document sits in the
     // background context, behind its other documents.
     UI::RmlBridge::ThemedView<KanturuInfoRmlModel> m_RmlView{"kanturu_info", BindRmlModel,
-        {{"Data/Interface/RmlUi/kanturu_info.rml", UI::RmlBridge::BackgroundOrMainContext}}};
+        {{"Data/Interface/RmlUi/kanturu_info.rml"}}};
 };
 } // namespace mu::ui::window
 

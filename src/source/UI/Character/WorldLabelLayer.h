@@ -93,8 +93,7 @@ private:
     std::size_t m_used = 0;
     std::size_t m_shown = 0; // slots used by the last finished frame
     // In the background context only: the labels draw under every window.
-    UI::RmlBridge::ThemedView<> m_view{{{"Data/Interface/RmlUi/world_labels.rml",
-                                         [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}},
+    UI::RmlBridge::ThemedView<> m_view{{{"Data/Interface/RmlUi/world_labels.rml"}},
                                        {.stacking = UI::RmlBridge::ThemedStacking::Back,
                                         .afterBuild = [this] { OnBuilt(); }}};
 };

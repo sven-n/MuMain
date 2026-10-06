@@ -52,7 +52,7 @@ private:
     void BindRmlModel(Rml::DataModelConstructor& c, DuelWindowRmlModel& model);
     UI::RmlBridge::ThemedView<DuelWindowRmlModel> m_RmlView{"duel_window",
         [this](Rml::DataModelConstructor& c, DuelWindowRmlModel& model) { BindRmlModel(c, model); },
-        {{"Data/Interface/RmlUi/duel_window.rml", UI::RmlBridge::BackgroundOrMainContext}}};
+        {{"Data/Interface/RmlUi/duel_window.rml"}}};
 };
 }
 

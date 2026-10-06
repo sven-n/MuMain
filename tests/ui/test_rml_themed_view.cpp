@@ -59,6 +59,8 @@ public:
         REQUIRE(Rml::Initialise());
         context = Rml::CreateContext("rml-themed-view", {320, 240});
         REQUIRE(context != nullptr);
+        resolved = context;
+        UI::RmlBridge::SetContextResolver([this](std::string_view) { return resolved; });
         m_Folder = std::filesystem::temp_directory_path() / "rml_themed_view_tests";
         std::filesystem::remove_all(m_Folder);
         std::filesystem::create_directories(m_Folder);
@@ -66,6 +68,7 @@ public:
 
     ~Fixture()
     {
+        UI::RmlBridge::SetContextResolver({});
         if (!m_ShutDown)
             ShutDown();
         std::filesystem::remove_all(m_Folder);
@@ -86,11 +89,7 @@ public:
         return Path(name);
     }
 
-    UI::RmlBridge::ThemedDocumentSpec Spec(const std::string& path) const
-    {
-        Rml::Context* target = context;
-        return {path, [target] { return target; }};
-    }
+    UI::RmlBridge::ThemedDocumentSpec Spec(const std::string& path) const { return {path}; }
 
     Rml::String Title(Rml::ElementDocument* document) const
     {
@@ -99,6 +98,8 @@ public:
     }
 
     Rml::Context* context = nullptr;
+    // What every document resolves to; null until a context exists.
+    Rml::Context* resolved = nullptr;
 
 private:
     NullRenderer m_Renderer;
@@ -164,10 +165,10 @@ TEST_CASE("a failed build retries and still follows theme switches [ui][rml-them
 TEST_CASE("a view waits for its context [ui][rml-themed-view]")
 {
     Fixture fixture;
-    Rml::Context* available = nullptr;
-    UI::RmlBridge::ThemedView<> view({{fixture.Write("plain.rml", kPlainDocument), [&available] { return available; }}});
+    fixture.resolved = nullptr;
+    UI::RmlBridge::ThemedView<> view({fixture.Spec(fixture.Write("plain.rml", kPlainDocument))});
     CHECK_FALSE(view.Ensure());
-    available = fixture.context;
+    fixture.resolved = fixture.context;
     CHECK(view.Ensure());
     CHECK(view.Document()->GetContext() == fixture.context);
 }
