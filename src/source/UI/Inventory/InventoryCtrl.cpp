@@ -1009,8 +1009,220 @@ void mu::ui::window::CInventoryCtrl::UpdateProcess()
     }
 }
 
+namespace
+{
+// The stack count the original drew on an item (RenderNumberOfItem()), or 0 for none.
+int StackCount(const ITEM* pItem)
+{
+    const int type = pItem->Type;
+    const bool stack = (type >= ITEM_POTION && type <= ITEM_ANTIDOTE)
+        || (type >= ITEM_JACK_OLANTERN_BLESSINGS && type <= ITEM_JACK_OLANTERN_DRINK)
+        || (type >= ITEM_SMALL_SHIELD_POTION && type <= ITEM_LARGE_COMPLEX_POTION)
+        || (type >= ITEM_POTION + 70 && type <= ITEM_POTION + 71) || type == ITEM_POTION + 94
+        || (type >= ITEM_POTION + 78 && type <= ITEM_POTION + 82)
+        || (type >= ITEM_CHERRY_BLOSSOM_WINE && type <= ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH)
+        || type == ITEM_POTION + 133;
+    if (stack && pItem->Durability > 1)
+        return pItem->Durability;
+    if (COMGEM::isCompiledGem(pItem))
+        return (pItem->Level + 1) * COMGEM::FIRST;
+    return 0;
+}
+
+const char* TintClass(BYTE colorState)
+{
+    switch (colorState)
+    {
+    case ITEM_COLOR_DURABILITY_50: return "tint-durability-50";
+    case ITEM_COLOR_DURABILITY_70: return "tint-durability-70";
+    case ITEM_COLOR_DURABILITY_80: return "tint-durability-80";
+    case ITEM_COLOR_DURABILITY_100: return "tint-durability-100";
+    case ITEM_COLOR_TRADE_WARNING: return "tint-untradeable";
+    default: return "tint-normal";
+    }
+}
+
+} // namespace
+
+// Whether dropping `pPickItem` on `pTargetItem` acts on it (Render()'s green cell).
+bool mu::ui::window::CInventoryCtrl::DropActsOn(ITEM* pPickItem, ITEM* pTargetItem)
+{
+    bool bSuccess = false;
+    const int iType = pTargetItem->Type;
+    const int iDurability = pTargetItem->Durability;
+
+    if ((pPickItem->Type == ITEM_JEWEL_OF_BLESS) || (pPickItem->Type == ITEM_JEWEL_OF_SOUL))
+    {
+        bSuccess = CanUpgradeItem(pPickItem, pTargetItem);
+    }
+    else if (pPickItem->Type == ITEM_JEWEL_OF_HARMONY)
+    {
+        if (pTargetItem->Jewel_Of_Harmony_Option == 0)
+        {
+            const StrengthenItem strengthitem = g_pUIJewelHarmonyinfo->GetItemType(static_cast<int>(pTargetItem->Type));
+            if ((strengthitem != SI_None) && (!g_SocketItemMgr.IsSocketItem(pTargetItem))
+                && (pTargetItem->AncientDiscriminator > 0))
+            {
+                bSuccess = true;
+            }
+        }
+    }
+    else if (pPickItem->Type == ITEM_LOWER_REFINE_STONE || pPickItem->Type == ITEM_HIGHER_REFINE_STONE)
+    {
+        if (pTargetItem->Jewel_Of_Harmony_Option != 0)
+            bSuccess = true;
+    }
+
+    if (pPickItem->Type == ITEM_JEWEL_OF_BLESS && iType == ITEM_HORN_OF_FENRIR && iDurability != 255)
+        bSuccess = true;
+
+    if (bSuccess == false && m_pOwner == g_pMyInventory)
+        bSuccess = AreItemsStackable(pPickItem, pTargetItem);
+    if (Check_LuckyItem(pTargetItem->Type))
+    {
+        bSuccess = false;
+        if (pPickItem->Type == ITEM_POTION + 161)
+        {
+            if (pTargetItem->Jewel_Of_Harmony_Option == 0)
+                bSuccess = true;
+        }
+        else if (pPickItem->Type == ITEM_POTION + 160)
+        {
+            if (pTargetItem->Durability > 0)
+                bSuccess = true;
+        }
+    }
+    return bSuccess;
+}
+
+void mu::ui::window::CInventoryCtrl::DrawInDocument()
+{
+    m_bDocumentDrawn = true;
+    if (m_pNew3DRenderMng)
+        m_pNew3DRenderMng->Remove3DRenderObj(this);
+}
+
+// Render()'s cell pass, as state: the tint under each item, the drop preview under the item on the
+// cursor, and each item's stack count.
+void mu::ui::window::CInventoryCtrl::UpdateCells()
+{
+    m_Cells.assign(static_cast<std::size_t>(m_nColumn * m_nRow), UI::Items::ItemGridCell{});
+
+    for (int iCurSquareIndex = 0; iCurSquareIndex < m_nColumn * m_nRow; ++iCurSquareIndex)
+    {
+        const DWORD slotKey = m_pdwItemCheckBox[iCurSquareIndex];
+        if (slotKey <= 1)
+            continue;
+        ITEM* pItem = FindItemByKey(slotKey);
+        if (pItem == nullptr)
+        {
+            ClearSlotKey(slotKey);
+            RequestInventoryRefresh();
+            continue;
+        }
+        if (CanChangeItemColorState(pItem) == true)
+            SetItemColorState(pItem);
+        m_Cells[iCurSquareIndex].tint = TintClass(pItem->byColorState);
+    }
+
+    for (const ITEM* pItem : m_vecItem)
+    {
+        const int count = StackCount(pItem);
+        if (count <= 0)
+            continue;
+        const int topRight = pItem->y * m_nColumn + pItem->x + ItemAttribute[pItem->Type].Width - 1;
+        if (topRight >= 0 && topRight < static_cast<int>(m_Cells.size()))
+            m_Cells[topRight].count = std::to_string(count);
+    }
+
+    m_bCanPushItem = false;
+    if (ms_pPickedItem == nullptr || !ms_pPickedItem->IsVisible())
+        return;
+
+    // The picked item's own position is in its owner window's space; every placed window has its
+    // own, so take the item's box from the pointer in this grid's space.
+    const POINT itemTopLeft = UI::Items::Drag::ItemTopLeft(MouseX, MouseY, ms_pPickedItem->GetPickupOffset());
+    const SIZE& pickedSize = ms_pPickedItem->GetSize();
+    RECT rcPickedItem{itemTopLeft.x, itemTopLeft.y, itemTopLeft.x + pickedSize.cx, itemTopLeft.y + pickedSize.cy};
+    RECT rcInventory, rcIntersect;
+    GetRect(rcInventory);
+    if (!IntersectRect(&rcIntersect, &rcPickedItem, &rcInventory))
+        return;
+
+    ITEM* pPickItem = ms_pPickedItem->GetItem();
+    const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pPickItem->Type];
+    int iColumnX = 0, iRowY = 0;
+    int nItemColumn = pItemAttr->Width, nItemRow = pItemAttr->Height;
+    if (false == GetSquarePosAtPt(itemTopLeft.x, itemTopLeft.y, iColumnX, iRowY))
+    {
+        iColumnX = (itemTopLeft.x - rcInventory.left) / INVENTORY_SQUARE_WIDTH;
+        if (itemTopLeft.x - rcInventory.left < 0)
+            iColumnX -= 1;
+        iRowY = (itemTopLeft.y - rcInventory.top) / INVENTORY_SQUARE_HEIGHT;
+        if (itemTopLeft.y - rcInventory.top < 0)
+            iRowY -= 1;
+    }
+
+    bool bWarning = false;
+    if (iColumnX < 0 && iColumnX >= -nItemColumn)
+    {
+        nItemColumn = nItemColumn + iColumnX;
+        iColumnX = 0;
+        bWarning = true;
+    }
+    if (iColumnX + nItemColumn > m_nColumn && iColumnX < m_nColumn)
+    {
+        nItemColumn = m_nColumn - iColumnX;
+        bWarning = true;
+    }
+    if (iRowY < 0 && iRowY >= -nItemRow)
+    {
+        nItemRow = nItemRow + iRowY;
+        iRowY = 0;
+        bWarning = true;
+    }
+    if (iRowY + nItemRow > m_nRow && iRowY < m_nRow)
+    {
+        nItemRow = m_nRow - iRowY;
+        bWarning = true;
+    }
+    m_bCanPushItem = bWarning;
+    if (iColumnX < 0 || iColumnX >= m_nColumn || iRowY < 0 || iRowY >= m_nRow)
+        return;
+
+    // The window's "normal" colour turns red where it refuses the item (the mix and lucky item
+    // windows set it), and a box hanging off the grid is all red.
+    const bool blocked = m_afColorStateNormal[0] >= 0.9f && m_afColorStateNormal[1] <= 0.3f;
+    for (int y = 0; y < nItemRow; y++)
+    {
+        for (int x = 0; x < nItemColumn; x++)
+        {
+            const int iCurSquareIndex = (iRowY + y) * m_nColumn + (iColumnX + x);
+            const char* state = blocked ? "drop-blocked" : "drop-free";
+            if (bWarning)
+            {
+                state = "drop-invalid";
+            }
+            else if (m_pdwItemCheckBox[iCurSquareIndex] > 1)
+            {
+                ITEM* pTargetItem = FindItemByKey(m_pdwItemCheckBox[iCurSquareIndex]);
+                state = pTargetItem && DropActsOn(pPickItem, pTargetItem) ? "drop-valid" : "drop-invalid";
+            }
+            m_Cells[iCurSquareIndex].drop = state;
+        }
+    }
+}
+
 void mu::ui::window::CInventoryCtrl::Render()
 {
+    if (m_bDocumentDrawn)
+    {
+        UpdateCells();
+        if (m_pToolTipItem && GetPickedItem() == nullptr)
+            RenderItemToolTip();
+        return;
+    }
+
     int x, y;
     for (y = 0; y < m_nRow; y++)
     {

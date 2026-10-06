@@ -1,0 +1,51 @@
+/* Modern theme for the native item grids (CInventoryCtrl), drawn from the window's model
+   (UI/Inventory/ItemGridModel.h): recessed cells with a hairline edge, tinted by their item's
+   state as in legacy, a forged edge round the grid, and the same drop preview. The items are 3D,
+   drawn into the window's .item-view image over all of it; the stack counts (.item-grid-counts)
+   sit over the items. Reference px under the window's root transform; a cell is 20 x 20. A window
+   places and sizes each grid by its id: width and height are its columns and rows times 20. */
+
+.item-grid, .item-grid-counts { position: absolute; pointer-events: none; }
+.item-grid-cells, .item-grid-counts { display: flex; flex-wrap: wrap; }
+.item-grid-cells { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+
+.item-cell, .item-count { position: relative; flex: 0 0 20px; width: 20px; height: 20px; }
+/* The legacy tints, so wear reads the same in both themes. */
+.item-cell.tint-normal { background-color: rgba(80, 128, 128, 120); }
+.item-cell.tint-durability-50 { background-color: rgba(255, 255, 0, 102); }
+.item-cell.tint-durability-70 { background-color: rgba(255, 168, 0, 102); }
+.item-cell.tint-durability-80 { background-color: rgba(255, 84, 0, 102); }
+.item-cell.tint-durability-100 { background-color: rgba(255, 0, 0, 102); }
+.item-cell.tint-untradeable { background-color: rgba(255, 51, 26, 102); }
+.item-cell-art { position: absolute; left: 0; top: 0; width: 20px; height: 20px; box-sizing: border-box; border: 1px token(border-inner); }
+.item-cell-drop { position: absolute; left: 0; top: 0; width: 20px; height: 20px; }
+.item-cell.drop-free .item-cell-drop { background-color: rgba(26, 102, 204, 102); }
+.item-cell.drop-blocked .item-cell-drop, .item-cell.drop-invalid .item-cell-drop { background-color: rgba(255, 51, 51, 102); }
+.item-cell.drop-valid .item-cell-drop { background-color: rgba(51, 102, 51, 102); }
+
+.item-grid-cells { background-color: token(surface-recessed); }
+.item-grid-frame {
+	position: absolute;
+	left: -2px;
+	top: -2px;
+	right: -2px;
+	bottom: -2px;
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	box-shadow: inset 0 0 6px rgba(0, 0, 0, 160);
+}
+.igf { display: none; }
+
+.item-count-text {
+	position: absolute;
+	right: 0;
+	top: 1px;
+	transform-origin: right top;
+	white-space: nowrap;
+	font-weight: bold;
+	color: token(text-primary);
+	font-effect: outline(1px #000000);
+}
+
+/* The window's live items: the panel and a margin round it, for a model reaching past its slot. */
+.item-view { position: absolute; left: -20px; top: -20px; width: 230px; height: 469px; pointer-events: none; }

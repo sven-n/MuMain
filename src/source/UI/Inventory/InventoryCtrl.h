@@ -5,6 +5,7 @@
 #pragma once
 
 #pragma warning(disable : 4786)
+#include "UI/Inventory/ItemGridModel.h"
 #include <vector>
 
 #include "UI/Core/Window3DRenderMng.h"
@@ -170,6 +171,13 @@ namespace mu::ui::window
 
         bool m_bCanPushItem;
 
+        // Set by a window whose document draws this grid (DrawInDocument()).
+        bool m_bDocumentDrawn = false;
+        UI::Items::ItemGridCells m_Cells;
+        void UpdateCells();
+        // Whether dropping `pPickItem` on `pTargetItem` acts on it: Render()'s green cell.
+        bool DropActsOn(ITEM* pPickItem, ITEM* pTargetItem);
+
         void Init();
 
         void LoadImages();
@@ -235,6 +243,13 @@ namespace mu::ui::window
         bool Update();
 
         void Render();
+
+        // The window's document draws this grid from Cells(), and the window draws its items
+        // (Render3D()) into its own render target: Render() then draws nothing, and the shared item
+        // camera no longer draws the items.
+        void DrawInDocument();
+        // As of the last Render(); empty until then.
+        const UI::Items::ItemGridCells& Cells() const { return m_Cells; }
 
         void SetPos(int x, int y);
         const POINT& GetPos() const;

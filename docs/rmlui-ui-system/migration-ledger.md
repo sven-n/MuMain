@@ -65,7 +65,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 
 | Component | Status | Shape | Note |
 |---|---|---|---|
-| `CMyInventory` | Done | Hybrid | Frame in the background context; grids, equipped items and the paperdoll chrome stay native (`tracked-deferrals.md`). Native grids follow RCSS anchors |
+| `CMyInventory` | Done | Hybrid | One document: frame, equipment slots (`slot_states`), the item grid (`item_grid.rcss`), the equipped and grid items in a render target, stack counts. Hit tests stay native, on RCSS anchors |
 | `CTrade`, `CStorageInventory`, `CStorageInventoryExt`, `CMixInventory`, `CNPCShop`, `CMyShopInventory`, `CPurchaseShopInventory`, `CInventoryExtension`, `CLuckyItemWnd` | Done | Hybrid | Same pattern. Stays native: the grids, the lucky-item sparkle, the trade warning-arrow glyph |
 | `CItemExplanationWindow`, `CSetItemExplanation` | Done | RmlUi-only 2D | `UI/Inventory/TipTextListView` |
 | `CUnitedMarketPlaceWindow` | Done | RmlUi-only 2D | Its 3D hook draws nothing |

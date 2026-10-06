@@ -82,7 +82,6 @@ constexpr DocumentPlacement Placements[] = {
     {"devil_square_enter.rml", 4.0f, MainScene},
     {"blood_castle_enter.rml", 4.1f, MainScene},
     {"my_inventory.rml", 4.2f, MainScene},
-    {"my_inventory_bg.rml", 4.2f, MainScene, Background},
     {"gens_ranking.rml", 4.2f, MainScene},
     {"lucky_coin_exchange.rml", 4.2f, MainScene},
     {"lucky_coin_registration.rml", 4.2f, MainScene},

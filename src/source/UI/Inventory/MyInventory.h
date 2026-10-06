@@ -12,6 +12,8 @@
 #include "UI/Inventory/InventoryActionController.h"
 #include "GameLogic/Items/IInventoryActionContext.h"
 #include "UI/RmlBridge/RmlThemedView.h"
+#include "UI/Inventory/ItemCameraTarget.h"
+#include "UI/Inventory/ItemGridModel.h"
 #include <span>
 #include <vector>
 #include "Core/Globals/_enum.h"
@@ -22,7 +24,6 @@ namespace mu::ui::window
 {
     class CMyInventory
         : public CObject
-        , public I3DRenderObj
         , public SEASON3B::IInventoryActionContext
     {
     public:
@@ -92,8 +93,8 @@ namespace mu::ui::window
         bool m_bMyShopOpen;
         bool m_bMyShopLocked = false;
 
-        // Window frame/title/gold/buttons are RmlUi. The paperdoll and inventory grid stay native
-        // since their icons are live 3D model renders (RenderItem3D()/Render3D()).
+        // The whole window is RmlUi: the equipped and the grid's items are live 3D, drawn into the
+        // document's #item_view (m_ItemTarget).
         struct MyInventoryRmlModel
         {
             // Shared transform group for this document, sourced from UI::Scaling::GetActiveTransform()
@@ -124,6 +125,11 @@ namespace mu::ui::window
             bool socketOptionActive = false; // IsSocketSetOptionEnabled() -- label color
             bool setOptionHovered = false;
             bool socketOptionHovered = false;
+
+            // Per EQUIPMENT_* slot: "no-art", or its tint ("broken", "durability-20/30/50",
+            // "unequipable"), and "refused" while the item on the cursor cannot go in.
+            std::vector<Rml::String> slotStates = std::vector<Rml::String>(MAX_EQUIPMENT_INDEX);
+            UI::Items::ItemGridCells gridCells;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, MyInventoryRmlModel& model);
         void OnRmlBuilt();
@@ -132,21 +138,10 @@ namespace mu::ui::window
             {{"Data/Interface/RmlUi/my_inventory.rml"}},
             {.afterBuild = [this] { OnRmlBuilt(); }}};
 
-        // The frame background panel must render behind the paperdoll's and inventory grid's live
-        // 3D icons, but RmlUi's main context always renders last -- so it goes through
-        // RmlUiRuntime's background context instead, painted by CManager::Render()'s centralized
-        // RenderBackgroundLayer() call (before every window's own Render()/Render3D()). Separate
-        // document/model from m_RmlView.Document() since RmlUi data models are per-context.
-        struct MyInventoryBgRmlModel
-        {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-        };
-        static void BindRmlBgModel(Rml::DataModelConstructor& c, MyInventoryBgRmlModel& model);
-        UI::RmlBridge::ThemedView<MyInventoryBgRmlModel> m_RmlBgView{"my_inventory_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/my_inventory_bg.rml"}}};
-
         void BuildRmlUi();
         void SyncRmlModel();
+        // The equipment slots' states and the grid's cells, into the model.
+        void SyncSlotStates();
 
     public:
         CMyInventory();
@@ -211,7 +206,6 @@ namespace mu::ui::window
         int   FindManaItemIndex() const;
         int   FindHealingItemIndex() const;
 
-        static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 
         void  SetStandbyItemKey(DWORD dwItemKey);
         DWORD GetStandbyItemKey() const;
@@ -241,8 +235,6 @@ namespace mu::ui::window
         void LoadImages() const;
         void UnloadImages();
 
-        void RenderEquippedItem();
-
         bool EquipmentWindowProcess();
         bool InventoryProcess() const;
         bool WindowProcess();
@@ -250,6 +242,10 @@ namespace mu::ui::window
         void RenderItemToolTip(int iSlotIndex) const;
         bool CanOpenMyShopInterface();
         void ToggleRepairMode();
+
+        // The equipped and the grid's items, into the document's #item_view. Last, so it is
+        // destroyed first.
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { Render3D(); }, this};
     };
 
 } // namespace mu::ui::window

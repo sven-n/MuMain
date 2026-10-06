@@ -98,7 +98,6 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
     m_pNewUIMng->AddUIObj(INTERFACE_INVENTORY, this);
 
     m_pNewUI3DRenderMng = pNewUI3DRenderMng;
-    m_pNewUI3DRenderMng->Add3DRenderObj(this, INVENTORY_CAMERA_Z_ORDER);
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
     if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::INVENTORY, m_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 200, 8, 8, MAX_EQUIPMENT))
@@ -106,6 +105,7 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
+    m_pNewInventoryCtrl->DrawInDocument();
 
     m_ActionController.SetContext(this);
 
@@ -147,6 +147,10 @@ void CMyInventory::BindRmlModel(Rml::DataModelConstructor& c, MyInventoryRmlMode
     c.Bind("socket_option_label", &model.socketOptionLabel);
     c.Bind("set_option_active", &model.setOptionActive);
     c.Bind("socket_option_active", &model.socketOptionActive);
+    c.RegisterArray<std::vector<Rml::String>>();
+    c.Bind("slot_states", &model.slotStates);
+    UI::Items::RegisterItemGridCells(c);
+    c.Bind("grid_cells", &model.gridCells);
 
     c.BindEventCallback("my_inventory_set_option_hover",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
@@ -198,13 +202,6 @@ void CMyInventory::BindRmlModel(Rml::DataModelConstructor& c, MyInventoryRmlMode
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pNewUISystem->Toggle(INTERFACE_INVENTORY_EXT); });
 }
 
-void CMyInventory::BindRmlBgModel(Rml::DataModelConstructor& c, MyInventoryBgRmlModel& model)
-{
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
-}
-
 // #title is the drag handle (MakeDraggable). onMove reads this window's own layout transform
 // instead of the ambient active one, since this callback fires from RmlUi's own event
 // processing, outside this window's ScopedActiveTransform scope. SetPos() keeps the native
@@ -241,14 +238,11 @@ void CMyInventory::OnRmlBuilt()
 void CMyInventory::BuildRmlUi()
 {
     m_RmlView.Ensure();
-    m_RmlBgView.Ensure();
 }
 
 void CMyInventory::Release()
 {
-    if (m_pNewUI3DRenderMng)
-        m_pNewUI3DRenderMng->DeleteUI2DEffectObject(UI2DEffectCallback);
-
+    m_ItemTarget.Disable();
     UnequipAllItems();
     DeleteAllItems();
 
@@ -256,11 +250,7 @@ void CMyInventory::Release()
 
     SAFE_DELETE(m_pNewInventoryCtrl);
 
-    if (m_pNewUI3DRenderMng)
-    {
-        m_pNewUI3DRenderMng->Remove3DRenderObj(this);
-        m_pNewUI3DRenderMng = nullptr;
-    }
+    m_pNewUI3DRenderMng = nullptr;
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
@@ -268,7 +258,6 @@ void CMyInventory::Release()
     }
 
     m_RmlView.Release();
-    m_RmlBgView.Release();
 }
 
 bool CMyInventory::EquipItem(int iIndex, std::span<const BYTE> pbyItemPacket)
@@ -903,21 +892,14 @@ bool CMyInventory::Update()
 
 void CMyInventory::SyncRmlModel()
 {
-    if (m_RmlBgView.Document())
-    {
-        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
-
-        // RenderBackgroundLayer() renders whatever's shown in the shared background context
-        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
-    }
-
+    m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncNativeLayout();
+    SyncSlotStates();
 
     auto syncBool = [this](bool MyInventoryRmlModel::* field, const char* boundName, bool value)
     {
@@ -1050,23 +1032,22 @@ void CMyInventory::SyncRmlModel()
     }
 }
 
+// The document draws everything: the grid's Render() computes its cells and shows its tooltip,
+// and a pointed slot shows its item's.
 bool CMyInventory::Render()
 {
-    EnableAlphaTest();
-
-    // Frame background panel is RmlUi, routed through the background context (see
-    // MyInventoryBgRmlModel), painted by CManager::Render()'s centralized RenderBackgroundLayer()
-    // call before this window's own Render()/Render3D() run.
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->Render();
-
-    RenderEquippedItem();
-    DisableAlphaBlend();
+    if (m_iPointedSlot != -1)
+        RenderItemToolTip(m_iPointedSlot);
     return true;
 }
 
+// Into #item_view (m_ItemTarget), in this window's layout space: the equipped items, then the grid's.
 void CMyInventory::Render3D()
 {
+    if (m_pNewInventoryCtrl && m_pNewInventoryCtrl->IsVisible())
+        m_pNewInventoryCtrl->Render3D();
     for (int i = 0; i < MAX_EQUIPMENT_INDEX; i++)
     {
         const ITEM* pEquippedItem = &CharacterMachine->Equipment[i];
@@ -1234,15 +1215,6 @@ int CMyInventory::FindEmptySlotIncludingExtensions(ITEM* pItem) const
 
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
     return FindEmptySlotIncludingExtensions(pItemAttr->Width, pItemAttr->Height);
-}
-
-void CMyInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD /*dwParamB*/)
-{
-    if (pClass)
-    {
-        auto* pMyInventory = (CMyInventory*)(pClass);
-        pMyInventory->RenderItemToolTip(dwParamA);
-    }
 }
 
 void CMyInventory::SetStandbyItemKey(DWORD dwItemKey)
@@ -1504,85 +1476,64 @@ void CMyInventory::UnloadImages()
     DeleteBitmap(IMAGE_INVENTORY_ITEM_BOOT);
 }
 
-void CMyInventory::RenderEquippedItem()
+void CMyInventory::SyncSlotStates()
 {
+    auto& states = m_RmlView.GetModel().slotStates;
+    bool changed = false;
     for (int i = 0; i < MAX_EQUIPMENT_INDEX; i++)
     {
-        if (i == EQUIPMENT_HELM)
+        const char* state = "";
+        const int baseClass = gCharacterManager.GetBaseClass(Hero->Class);
+        if ((i == EQUIPMENT_HELM && baseClass == CLASS_DARK) || (i == EQUIPMENT_GLOVES && baseClass == CLASS_RAGEFIGHTER))
         {
-            if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK)
-            {
-                continue;
-            }
+            state = "no-art";
         }
-        if ((i == EQUIPMENT_GLOVES) && (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER))
-            continue;
-
-        EnableAlphaTest();
-
-        RenderImage(m_EquipmentSlots[i].dwBgImage, m_EquipmentSlots[i].x, m_EquipmentSlots[i].y,
-            m_EquipmentSlots[i].width, m_EquipmentSlots[i].height);
-        DisableAlphaBlend();
-
-        ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[i];
-        if (pEquipmentItemSlot->Type != -1)
+        else if (ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[i]; pEquipmentItemSlot->Type != -1)
         {
             ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pEquipmentItemSlot->Type];
             const int iLevel = pEquipmentItemSlot->Level;
             const int iMaxDurability = CalcMaxDurability(pEquipmentItemSlot, pItemAttr, iLevel);
-
-            if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
-            {
-                if (pEquipmentItemSlot->Type == ITEM_WIZARDS_RING && iLevel == 1
-                    || iLevel == 2)
-                {
-                    continue;
-                }
-            }
-
-            if ((pEquipmentItemSlot->bPeriodItem == true) && (pEquipmentItemSlot->bExpiredPeriod == false))
-                continue;
-
-            unsigned int overlayColor;
-            if (pEquipmentItemSlot->Durability <= 0)
-                overlayColor = 0x40FF0000u;
+            const bool exempt = ((i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
+                                 && (pEquipmentItemSlot->Type == ITEM_WIZARDS_RING && iLevel == 1 || iLevel == 2))
+                || (pEquipmentItemSlot->bPeriodItem == true && pEquipmentItemSlot->bExpiredPeriod == false);
+            if (exempt)
+                state = "";
+            else if (pEquipmentItemSlot->Durability <= 0)
+                state = "broken";
             else if (pEquipmentItemSlot->Durability <= (iMaxDurability * 0.2f))
-                overlayColor = 0x40FF2600u;
+                state = "durability-20";
             else if (pEquipmentItemSlot->Durability <= (iMaxDurability * 0.3f))
-                overlayColor = 0x40FF8000u;
+                state = "durability-30";
             else if (pEquipmentItemSlot->Durability <= (iMaxDurability * 0.5f))
-                overlayColor = 0x40FFFF00u;
+                state = "durability-50";
             else if (IsEquipable(i, pEquipmentItemSlot) == false)
-                overlayColor = 0x40FF0000u;
-            else
-            {
-                continue;
-            }
-
-            EnableAlphaTest();
-            RenderColorQuadARGB(m_EquipmentSlots[i].x + 1, m_EquipmentSlots[i].y,
-                m_EquipmentSlots[i].width - 4, m_EquipmentSlots[i].height - 4, overlayColor);
+                state = "unequipable";
         }
-    }
 
-    if (CInventoryCtrl::GetPickedItem() && m_iPointedSlot != -1)
-    {
-        ITEM* pItemObj = CInventoryCtrl::GetPickedItem()->GetItem();
-        const ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[m_iPointedSlot];
-        if (pItemObj && (pEquipmentItemSlot->Type != -1 || false == IsEquipable(m_iPointedSlot, pItemObj))
-            && !((gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER) && (m_iPointedSlot == EQUIPMENT_GLOVES)))
+        Rml::String value = state;
+        if (i == m_iPointedSlot && CInventoryCtrl::GetPickedItem())
         {
-            EnableAlphaTest();
-            RenderColorQuadARGB(m_EquipmentSlots[m_iPointedSlot].x + 1, m_EquipmentSlots[m_iPointedSlot].y,
-                m_EquipmentSlots[m_iPointedSlot].width - 4, m_EquipmentSlots[m_iPointedSlot].height - 4,
-                0x66E61A1Au);
+            ITEM* pItemObj = CInventoryCtrl::GetPickedItem()->GetItem();
+            const ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[i];
+            if (pItemObj && (pEquipmentItemSlot->Type != -1 || false == IsEquipable(i, pItemObj))
+                && !(baseClass == CLASS_RAGEFIGHTER && i == EQUIPMENT_GLOVES))
+                value += value.empty() ? "refused" : " refused";
+        }
+        if (states[i] != value)
+        {
+            states[i] = std::move(value);
+            changed = true;
         }
     }
+    if (changed)
+        m_RmlView.MarkDirty("slot_states");
 
-    if (m_iPointedSlot != -1 && m_pNewUI3DRenderMng)
+    if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())
     {
-        m_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, m_iPointedSlot, 0);
+        m_RmlView.GetModel().gridCells = m_pNewInventoryCtrl->Cells();
+        m_RmlView.MarkDirty("grid_cells");
     }
+
 }
 
 bool CMyInventory::EquipmentWindowProcess()

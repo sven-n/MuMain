@@ -423,8 +423,20 @@ What it takes care of, so a caller does not:
 - **Sources never repeat**, unlike texture ids, so a stale RmlUi cache entry cannot resolve to a
   recycled texture.
 
-One compositing difference to expect: native pipelines write straight alpha and RmlUi blends
-premultiplied, so opaque pixels are exact and only partly transparent edges can differ slightly.
+Alpha in a target is coverage: the renderer's alpha-style blend modes accumulate it over and its
+additive and multiplying modes leave it (`MuRendererSDLGpu.cpp`'s blend table), so RmlUi's
+premultiplied composite lands each one on whatever is behind the image as it would have on screen;
+an additive glow adds to the panel under it instead of painting a black box.
+
+**Item grids** (`UI/Inventory/ItemGridModel.h`, both themes' `item_grid.rcss`). A native
+`CInventoryCtrl` a window's document draws calls `DrawInDocument()`: its `Render()` then computes
+`Cells()` (each cell's tint, drop preview and stack count, from the native logic) instead of
+drawing, and the shared item camera stops drawing its items, which the window draws into its own
+`ItemCameraTarget` with `Render3D()`. The window binds the cells (`RegisterItemGridCells()`) and
+its markup lays them out: `.item-grid` (cells, then the frame) at the grid's anchor, the window's
+`.item-view` image over it, then `.item-grid-counts` at the same place. The hit tests stay native,
+reading the anchor. `CMyInventory` is the worked example, with its equipment slots as
+`slot_states` classes on their anchors.
 
 ## Native content above RmlUi
 
@@ -568,9 +580,6 @@ interface.
 Recorded here so a future session doesn't assume otherwise — each of these is still ad hoc,
 per-window, or entirely unbuilt:
 
-- **ItemSlot / ItemGrid** — the slot chrome (border, hover highlight, count, cooldown) has no
-  reusable component. The pattern exists: `CItemHotKey`'s slot is one RmlUi element whose
-  `.item-icon` shows the live 3D item through a `RenderTarget`, with RCSS deciding where it sits.
 - **ProgressBar / HealthBar / ManaBar / ExperienceBar** — `main_frame.rcss`'s gauge fills are
   per-window CSS. `title_scene.rml`'s loading bar uses RmlUi's built-in `<progress>`
   (`SetValue()`/`SetMax()` from C++) — a proven raw element, not a shared component.

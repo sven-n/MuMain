@@ -2,29 +2,53 @@
 <head>
 	<title>My Inventory</title>
 	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="item_grid.rcss"/>
 	<link type="text/rcss" href="my_inventory.rcss"/>
 </head>
 <body data-model="my_inventory">
-	<!-- Window frame/title/gold/buttons only -- paperdoll and inventory grid stay native
-	     (MyInventory.h). Background lives in my_inventory_bg.rml instead, since it must paint
-	     behind the native 3D icons this document never overlaps. -->
+	<!-- CMyInventory (MyInventory.h): the frame, the equipment slots, the item grid, the items
+	     C++ draws live into #item_view, the stack counts, the title, gold and buttons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
-		<!-- Where the native equipment slots, item grid and item-option tooltip go: invisible boxes
-		     the theme places (my_inventory.rcss); CMyInventory reads them each frame. -->
-		<div id="slot_helper" class="native-anchor"></div>
-		<div id="slot_helm" class="native-anchor"></div>
-		<div id="slot_wing" class="native-anchor"></div>
-		<div id="slot_weapon_left" class="native-anchor"></div>
-		<div id="slot_armor" class="native-anchor"></div>
-		<div id="slot_weapon_right" class="native-anchor"></div>
-		<div id="slot_gloves" class="native-anchor"></div>
-		<div id="slot_pants" class="native-anchor"></div>
-		<div id="slot_boots" class="native-anchor"></div>
-		<div id="slot_ring_left" class="native-anchor"></div>
-		<div id="slot_amulet" class="native-anchor"></div>
-		<div id="slot_ring_right" class="native-anchor"></div>
-		<div id="item_grid" class="native-anchor"></div>
+		<!-- CMyInventory::RenderFrame()'s five pieces. -->
+		<div class="bg-fill"></div>
+		<div class="bg-top"></div>
+		<div class="bg-left"></div>
+		<div class="bg-right"></div>
+		<div class="bg-bottom"></div>
+		<!-- The equipment slots, the item grid and the item-option tooltip: boxes the theme places
+		     (my_inventory.rcss); CMyInventory reads them each frame for its hit tests. A slot's class
+		     is its state (MyInventory.h's slot_states). -->
+		<div id="slot_helper" data-attr-class="'native-anchor equip-slot ' + slot_states[8]"><div class="equip-slot-tint"></div></div>
+		<div id="slot_helm" data-attr-class="'native-anchor equip-slot ' + slot_states[2]"><div class="equip-slot-tint"></div></div>
+		<div id="slot_wing" data-attr-class="'native-anchor equip-slot ' + slot_states[7]"><div class="equip-slot-tint"></div></div>
+		<div id="slot_weapon_left" data-attr-class="'native-anchor equip-slot ' + slot_states[1]"><div class="equip-slot-tint"></div></div>
+		<div id="slot_armor" data-attr-class="'native-anchor equip-slot ' + slot_states[3]"><div class="equip-slot-tint"></div></div>
+		<div id="slot_weapon_right" data-attr-class="'native-anchor equip-slot ' + slot_states[0]"><div class="equip-slot-tint"></div></div>
+		<div id="slot_gloves" data-attr-class="'native-anchor equip-slot ' + slot_states[5]"><div class="equip-slot-tint"></div></div>
+		<div id="slot_pants" data-attr-class="'native-anchor equip-slot ' + slot_states[4]"><div class="equip-slot-tint"></div></div>
+		<div id="slot_boots" data-attr-class="'native-anchor equip-slot ' + slot_states[6]"><div class="equip-slot-tint"></div></div>
+		<div id="slot_ring_left" data-attr-class="'native-anchor equip-slot ' + slot_states[11]"><div class="equip-slot-tint"></div></div>
+		<div id="slot_amulet" data-attr-class="'native-anchor equip-slot ' + slot_states[9]"><div class="equip-slot-tint"></div></div>
+		<div id="slot_ring_right" data-attr-class="'native-anchor equip-slot ' + slot_states[10]"><div class="equip-slot-tint"></div></div>
+		<!-- The inventory grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="item_grid" class="native-anchor item-grid">
+			<div class="item-grid-cells">
+				<div data-for="c : grid_cells" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The equipped and the grid's items, live 3D drawn by C++ over the slots and the cells. -->
+		<img id="item_view" class="item-view"/>
+		<div id="item_grid_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+		</div>
 		<div id="option_tooltip_anchor" class="native-anchor"></div>
 		<!-- Text leaves marked native-text render at the native text renderer's size: text_px is the
 		     physical size, and 1 / root_scale cancels #panel's scale so glyphs rasterise at it (same

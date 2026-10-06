@@ -4579,17 +4579,24 @@ private:
         // Modes: Alpha=0, Additive=1, Subtract=2, InverseColor=3,
         //        Mixed=4, LightMap=5, Glow=6, Luminance=7, Disabled=8
 
+        // Alpha is coverage, which only an offscreen capture keeps (a render target RmlUi
+        // composites premultiplied): the alpha-style modes accumulate it over, the additive and
+        // multiplying ones leave it, so their colour lands on whatever is behind the image as it
+        // would have on screen.
         struct BlendEntry
         {
             const char* name;
             SDL_GPUBlendFactor src;
             SDL_GPUBlendFactor dst;
             bool enableBlend;
+            SDL_GPUBlendFactor srcAlpha = SDL_GPU_BLENDFACTOR_ZERO;
+            SDL_GPUBlendFactor dstAlpha = SDL_GPU_BLENDFACTOR_ONE;
         };
 
         const BlendEntry table[k_PipelineCount] = {
             // Alpha
-            {"alpha", SDL_GPU_BLENDFACTOR_SRC_ALPHA, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, true},
+            {"alpha", SDL_GPU_BLENDFACTOR_SRC_ALPHA, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, true,
+             SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA},
             // Additive
             {"additive", SDL_GPU_BLENDFACTOR_SRC_ALPHA, SDL_GPU_BLENDFACTOR_ONE, true},
             // Subtract
@@ -4597,7 +4604,8 @@ private:
             // InverseColor
             {"inverse-color", SDL_GPU_BLENDFACTOR_ONE_MINUS_DST_COLOR, SDL_GPU_BLENDFACTOR_ZERO, true},
             // Mixed
-            {"mixed", SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, true},
+            {"mixed", SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, true,
+             SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA},
             // LightMap
             {"light-map", SDL_GPU_BLENDFACTOR_ZERO, SDL_GPU_BLENDFACTOR_SRC_COLOR, true},
             // Glow
@@ -4605,7 +4613,8 @@ private:
             // Luminance
             {"luminance", SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR, SDL_GPU_BLENDFACTOR_ONE, true},
             // Disabled (index 8, no blend)
-            {"disabled", SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ZERO, false},
+            {"disabled", SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ZERO, false, SDL_GPU_BLENDFACTOR_ONE,
+             SDL_GPU_BLENDFACTOR_ZERO},
         };
 
         const char* deviceDriver = SDL_GetGPUDeviceDriver(s_device);
@@ -4650,8 +4659,8 @@ private:
             blendState.src_color_blendfactor = table[i].src;
             blendState.dst_color_blendfactor = table[i].dst;
             blendState.color_blend_op = SDL_GPU_BLENDOP_ADD;
-            blendState.src_alpha_blendfactor = table[i].src;
-            blendState.dst_alpha_blendfactor = table[i].dst;
+            blendState.src_alpha_blendfactor = table[i].srcAlpha;
+            blendState.dst_alpha_blendfactor = table[i].dstAlpha;
             blendState.alpha_blend_op = SDL_GPU_BLENDOP_ADD;
             blendState.enable_blend = table[i].enableBlend;
 

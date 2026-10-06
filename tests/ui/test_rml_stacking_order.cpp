@@ -61,7 +61,7 @@ TEST_CASE("the background contexts hold only the documents already in them [ui][
         "cursed_temple_system.rml", "doppelganger_frame.rml", "duel_window.rml",
         "empire_guardian_timer.rml", "in_game_shop_bg.rml", "inventory_extension_bg.rml",
         "kanturu_info.rml", "lucky_item_bg.rml", "map_name.rml", "master_level_bg.rml",
-        "mix_inventory_bg.rml", "my_inventory_bg.rml", "my_shop_bg.rml",
+        "mix_inventory_bg.rml", "my_shop_bg.rml",
         "npc_shop_bg.rml", "purchase_shop_bg.rml", "siege_warfare.rml", "storage_bg.rml",
         "storage_ext_bg.rml", "trade_bg.rml", "world_labels.rml",
     };
@@ -85,7 +85,7 @@ TEST_CASE("every document the client loads has a scene [ui][stacking]")
 TEST_CASE("only the main scene's windows are suspended outside it [ui][stacking]")
 {
     // CNewUIManager's windows, the HUD, the world labels and their tooltip and message boxes.
-    for (const char* name : {"my_inventory.rml", "my_inventory_bg.rml", "move_command.rml", "friend_shell.rml",
+    for (const char* name : {"my_inventory.rml", "move_command.rml", "friend_shell.rml",
                              "chat_room.rml", "letter_read.rml", "letter_write.rml",
                              "blood_castle_enter.rml", "duel_window.rml", "siege_warfare.rml", "main_frame.rml",
                              "world_labels.rml", "map_name.rml", "tooltip.rml", "message_box_view.rml",
@@ -127,8 +127,8 @@ TEST_CASE("documents stack as the original's windows did [ui][stacking]")
     CHECK(Depth("main_frame_top.rml") < Depth("duel_window.rml"));
     // Names under the duel board, the duel board under the panels (TODO 45, 48).
     CHECK(Depth("world_labels.rml") < Depth("duel_window.rml"));
-    CHECK(Depth("duel_window.rml") < Depth("my_inventory_bg.rml"));
-    CHECK(Depth("world_labels.rml") < Depth("my_inventory_bg.rml"));
+    CHECK(Depth("duel_window.rml") < Depth("my_inventory.rml"));
+    CHECK(Depth("world_labels.rml") < Depth("my_inventory.rml"));
     // TODO 44: the message box over the tooltip; the tooltip over every window.
     CHECK(Depth("message_box_view.rml") > Depth("tooltip.rml"));
     CHECK(Depth("tooltip.rml") > Depth("chat_command.rml"));
@@ -139,5 +139,5 @@ TEST_CASE("documents stack as the original's windows did [ui][stacking]")
     CHECK(Depth("sys_menu.rml") > Depth("notices.rml"));
     CHECK(Depth("reconnect_dialog.rml") > Depth("loading.rml"));
     // A window's background document shares its depth.
-    CHECK(Depth("my_inventory_bg.rml") == Depth("my_inventory.rml"));
+    CHECK(Depth("trade_bg.rml") == Depth("trade.rml"));
 }
