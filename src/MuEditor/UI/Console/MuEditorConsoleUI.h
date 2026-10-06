@@ -2,6 +2,7 @@
 
 #ifdef _EDITOR
 
+#include <mutex>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -19,10 +20,16 @@ protected:
     virtual std::streamsize xsputn(const char* s, std::streamsize n) override;
 
 private:
+    // Adds a character to the line; m_mutex is held.
+    void Put(char c);
+
     std::ostream& m_stream;
     std::streambuf* m_oldBuf;
     std::string m_buffer;
     bool m_isStdout;
+    // Threads may write to the stream at once: the line and the original
+    // stream are changed under it, a whole write at a time.
+    std::mutex m_mutex;
 };
 
 class CMuEditorConsoleUI

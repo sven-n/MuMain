@@ -86,43 +86,47 @@ std::streambuf::int_type ConsoleStreamBuf::overflow(int_type c)
 {
     if (c != EOF)
     {
-        m_buffer += static_cast<char>(c);
-
-        // If we hit a newline, flush the buffer
-        if (c == '\n')
-        {
-            // Remove trailing newline for our buffer
-            std::string line = m_buffer;
-            if (!line.empty() && line.back() == '\n')
-                line.pop_back();
-
-            // Send to ImGui console. LogGame takes the console mutex itself:
-            // holding it here as well deadlocked where std::mutex is not
-            // recursive (Linux, macOS) on the first line written.
-            if (!line.empty())
-            {
-                g_MuEditorConsoleUI.LogGame(line);
-            }
-
-            // Also write to original stream
-            {
-                std::lock_guard<std::mutex> lock(g_consoleMutex);
-                m_oldBuf->sputn(m_buffer.c_str(), m_buffer.size());
-            }
-
-            m_buffer.clear();
-        }
+        std::lock_guard<std::mutex> lock(m_mutex);
+        Put(static_cast<char>(c));
     }
     return c;
 }
 
 std::streamsize ConsoleStreamBuf::xsputn(const char* s, std::streamsize n)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     for (std::streamsize i = 0; i < n; ++i)
     {
-        overflow(s[i]);
+        Put(s[i]);
     }
     return n;
+}
+
+void ConsoleStreamBuf::Put(char c)
+{
+    m_buffer += c;
+
+    // If we hit a newline, flush the buffer
+    if (c == '\n')
+    {
+        // Remove trailing newline for our buffer
+        std::string line = m_buffer;
+        if (!line.empty() && line.back() == '\n')
+            line.pop_back();
+
+        // Send to ImGui console. LogGame takes the console mutex itself, so
+        // it is not held here: std::mutex is not recursive on Linux and
+        // macOS, and holding it twice deadlocked on the first line written.
+        if (!line.empty())
+        {
+            g_MuEditorConsoleUI.LogGame(line);
+        }
+
+        // Also write to original stream
+        m_oldBuf->sputn(m_buffer.c_str(), m_buffer.size());
+
+        m_buffer.clear();
+    }
 }
 
 CMuEditorConsoleUI::CMuEditorConsoleUI()
