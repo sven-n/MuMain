@@ -52,6 +52,10 @@
             </div>
             <div class="metric"><span class="label">Draws</span><span class="value pair">requested {{requested}}</span><span class="value pair">submitted {{submitted}}</span></div>
             <div class="metric"><span class="label">Uploads</span><span class="value pair">textures {{textures_uploaded}}</span><span class="value pair">glyphs {{glyphs_uploaded}}</span></div>
+            <div class="metric"><span class="label">Binds</span><span class="value pair">pipeline {{pipeline_binds}}</span><span class="value pair">sampler {{sampler_binds}}</span></div>
+            <div class="metric"><span class="label">Uniforms</span><span class="value pair">vertex {{vertex_uniforms}}</span><span class="value pair">fragment {{fragment_uniforms}}</span></div>
+            <div class="metric"><span class="label">Batches</span><span class="value pair">draws {{batch_draws}}</span><span class="value pair">vtx/draw {{vertices_per_batch | fixed}}</span><span class="value pair">2D merged {{merged_2d}}</span></div>
+            <div class="metric"><span class="label">Skinning</span><span class="value pair">GPU {{skin_gpu}}</span><span class="value pair">CPU only {{skin_cpu_ineligible}}</span><span class="value pair">failed {{skin_failed}}</span></div>
         </div>
     </div>
 </body>

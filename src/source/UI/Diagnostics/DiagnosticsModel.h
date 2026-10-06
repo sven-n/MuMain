@@ -36,6 +36,16 @@ struct DiagnosticsModel
     int submitted = 0;
     int texturesUploaded = 0;
     int glyphsUploaded = 0;
+    int pipelineBinds = 0;
+    int samplerBinds = 0;
+    int vertexUniformPushes = 0;
+    int fragmentUniformPushes = 0;
+    int merged2D = 0;
+    int skinGpu = 0;
+    int skinCpuIneligible = 0;
+    int skinFailed = 0;
+    int batchDraws = 0;
+    float verticesPerBatch = 0;
     Rml::Vector<PassRow> passes;
     Rml::Vector<float> history;
 };

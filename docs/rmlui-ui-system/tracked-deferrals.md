@@ -7,16 +7,8 @@ is recorded where the code it changed is described.
 
 ## Before merging to main
 
-1. **`render_diagnostics_contract` fails.** It requires the Bind Pipe, 2D Merge and Skin counter
-   lines (`tests/render/test_render_diagnostics.cmake`), which the RmlUi diagnostics overlay no
-   longer formats. Put the counters back on the overlay or change the contract to what the overlay
-   shows; it is the suite's only failure.
-2. **The event windows nobody has seen in game** ([below](#implemented-but-not-seen)) are looked at
-   on a server that can run the events, or named as unseen in the pull request.
-3. **A display-scale change without a resize** reapplies the `dp` ratio, reloads the native fonts and
-   re-places the theme's windows (`HandleContentScaleChange()`, tested in
-   `test_rml_runtime_scale.cpp`), but has not been watched happen: drag the running window to a
-   display with a different effective scale and back. Needs two displays whose scale differs.
+1. **The event windows nobody has seen in game** ([below](#implemented-but-not-seen)) are looked at,
+   with sample data fed to them locally where no server runs the event.
 
 ## After the merge
 

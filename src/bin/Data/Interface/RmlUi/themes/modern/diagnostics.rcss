@@ -57,7 +57,7 @@ body { pointer-events: none; }
     background-color: rgba(10, 10, 12, 180);
     border-width: 1dp;
     border-color: token(border-frame);
-    border-radius: token(radius-sm);
+    border-radius: token(radius-sm)dp;
 }
 .title, .heading, .pass-head { color: token(accent-gold); }
 .note, .metric .label { color: token(text-secondary); }

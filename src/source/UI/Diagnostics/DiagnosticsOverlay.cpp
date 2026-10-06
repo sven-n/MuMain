@@ -61,6 +61,16 @@ void RegisterModel(Rml::DataModelConstructor& constructor, DiagnosticsModel& mod
     constructor.Bind("submitted", &model.submitted);
     constructor.Bind("textures_uploaded", &model.texturesUploaded);
     constructor.Bind("glyphs_uploaded", &model.glyphsUploaded);
+    constructor.Bind("pipeline_binds", &model.pipelineBinds);
+    constructor.Bind("sampler_binds", &model.samplerBinds);
+    constructor.Bind("vertex_uniforms", &model.vertexUniformPushes);
+    constructor.Bind("fragment_uniforms", &model.fragmentUniformPushes);
+    constructor.Bind("merged_2d", &model.merged2D);
+    constructor.Bind("skin_gpu", &model.skinGpu);
+    constructor.Bind("skin_cpu_ineligible", &model.skinCpuIneligible);
+    constructor.Bind("skin_failed", &model.skinFailed);
+    constructor.Bind("batch_draws", &model.batchDraws);
+    constructor.Bind("vertices_per_batch", &model.verticesPerBatch);
     constructor.Bind("passes", &model.passes);
     constructor.Bind("history", &model.history);
 }
@@ -101,6 +111,18 @@ void UpdateCounters(DiagnosticsModel& model)
     model.submitted = static_cast<int>(stats.submittedDrawCalls);
     model.texturesUploaded = static_cast<int>(stats.textureUploads);
     model.glyphsUploaded = static_cast<int>(FrameProfiler::CompletedCounter(Counter::GlyphUploads));
+    model.pipelineBinds = static_cast<int>(stats.pipelineBinds);
+    model.samplerBinds = static_cast<int>(stats.samplerBinds);
+    model.vertexUniformPushes = static_cast<int>(stats.vertexUniformPushes);
+    model.fragmentUniformPushes = static_cast<int>(stats.fragmentUniformPushes);
+    model.merged2D = static_cast<int>(stats.merged2DDrawCalls);
+    model.skinGpu = static_cast<int>(FrameProfiler::CompletedCounter(Counter::GpuSkinningSubmissions));
+    model.skinCpuIneligible = static_cast<int>(FrameProfiler::CompletedCounter(Counter::CpuSkinningIneligible));
+    model.skinFailed = static_cast<int>(FrameProfiler::CompletedCounter(Counter::GpuSkinningFailures));
+    const auto batchDraws = FrameProfiler::CompletedCounter(Counter::BatchDraws);
+    const auto batchVertices = FrameProfiler::CompletedCounter(Counter::BatchVertices);
+    model.batchDraws = static_cast<int>(batchDraws);
+    model.verticesPerBatch = batchDraws > 0 ? static_cast<float>(batchVertices) / static_cast<float>(batchDraws) : 0.f;
     model.passes.resize(static_cast<size_t>(FrameProfiler::Pass::Count_));
     for (size_t index = 0; index < model.passes.size(); ++index)
     {
@@ -158,7 +180,9 @@ void Update(const FrameSummary& summary)
         static constexpr const char* Fields[] = {
             "details", "counters", "fps_only", "fps", "average_fps", "low_fps", "frame_ms", "cpu", "vsync",
             "driver", "ui_update", "ui_render", "rml_update", "rml_render", "renderer_begin", "renderer_end",
-            "submit", "requested", "submitted", "textures_uploaded", "glyphs_uploaded", "passes", "history"};
+            "submit", "requested", "submitted", "textures_uploaded", "glyphs_uploaded", "pipeline_binds",
+            "sampler_binds", "vertex_uniforms", "fragment_uniforms", "merged_2d", "skin_gpu",
+            "skin_cpu_ineligible", "skin_failed", "batch_draws", "vertices_per_batch", "passes", "history"};
         for (const char* field : Fields)
             g_view->MarkDirty(field);
         g_nextRefresh = now + RefreshInterval;
