@@ -5,9 +5,9 @@ same commit as any port — a stale row reads as a confident false negative. Sha
 `building-new-ui.md`'s reference shapes (RmlUi-only 2D, Hybrid RmlUi/native 3D, World-overlay).
 
 Statuses: `Done` / `Partial` / `Not started` / `Stays native` (a deliberate permanent decision) /
-`Deleted` (dead code removed). **`Done` means ported, not audited**: `tracked-deferrals.md`'s
-"audit where ports steered away from the original UI" lists known divergences — read it before
-treating a row as settled.
+`Deleted` (dead code removed). **`Done` means ported and signed off**: `legacy` follows the
+original as closely as was practical, and further parity tuning is left to contributors rather
+than tracked.
 
 ## Login and character select
 
@@ -42,7 +42,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CChatInputBox` | Done | RmlUi-only 2D | Bar art, ten buttons, tooltip and both fields (`<input>` + `.text-field`, document Tab navigation). C++ keeps history, sending and keys |
 | `CMiniMap` | Done | RmlUi-only 2D | The full-screen map: 45°-turned quads as CSS `matrix()` (`UI/HUD/MiniMapLayout`), clipped around the `main_hud` slot |
 | `CMasterLevel` | Done | RmlUi-only 2D | `MasterSkillTreeLayout`, `master_skill_icons.rcss`; its learn confirm is `CGenericConfirmDialog` |
-| `CMuHelperConfigWindow`, `CMuHelperDetailWindow`, `CMuHelperSkillPicker` (were `CUIMuHelper`, `CMuHelperExt`, `CMuHelperSkillList`) | Done | RmlUi-only 2D | `UI/MuHelper/`; docked config and detail on the `character_info` recipe, a borderless picker whose fan-out stays in C++. Class-specific controls from `UI::MuHelper::ResolveClassFeatures()` bound as flags. Detail thresholds are level gauges (`component-catalog.md`). Native bugs fixed are listed in the divergence audit |
+| `CMuHelperConfigWindow`, `CMuHelperDetailWindow`, `CMuHelperSkillPicker` (were `CUIMuHelper`, `CMuHelperExt`, `CMuHelperSkillList`) | Done | RmlUi-only 2D | `UI/MuHelper/`; docked config and detail on the `character_info` recipe, a borderless picker whose fan-out stays in C++. Class-specific controls from `UI::MuHelper::ResolveClassFeatures()` bound as flags. Detail thresholds are level gauges (`component-catalog.md`). Deliberate behaviour changes: pick-all and pick-selected exclude each other, ticking a skill's Condition fills an empty radio group, Esc closes from a focused field, the extra-item list is always sorted |
 | `CHelpWindow` | Done | RmlUi-only 2D | Shown unfocused, in front (`SyncDocumentVisibilityInFront()`) |
 | `CWindowMenu` | Done | RmlUi-only 2D | `LayoutMode::Hud`; row clicks queued and run from `Update()` |
 | `CPartyListWindow` | Done | RmlUi-only 2D | The HUD mini list (not `CPartyInfoWindow`); C++ keeps the hovered card `Selection.cpp` reads |

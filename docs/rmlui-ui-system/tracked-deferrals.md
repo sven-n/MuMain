@@ -15,9 +15,8 @@ In order:
 
 1. [Native 3D against RmlUi](#native-3d-against-rmlui): retire the background contexts, and with
    them the root transform and counter-scaled text they keep alive; the equipment paperdoll follows.
-2. [The divergence audit](#audit-where-ports-steered-away-from-the-original-ui).
-3. [One obvious component surface](#one-obvious-component-surface).
-4. [The counter-scale block](#the-counter-scale-block): settle the open question, then move it to
+2. [One obvious component surface](#one-obvious-component-surface).
+3. [The counter-scale block](#the-counter-scale-block): settle the open question, then move it to
    `calc()`.
 
 Waiting on their own triggers: the [accepted constraints](#accepted-as-it-stands-with-its-trigger)
@@ -76,57 +75,10 @@ The PR's tests cover invalidation behind `var()` for font-size changes only.
 
 **Revisit when** a counter-scaled window is next touched: settle the question on it, then move the
 class. Upstream merging #983 only removes the dependency on the fork. The ownership boundary's
-`MessageBoxView` and `CNPCQuest` entries wait on this.
-
-## Audit where ports steered away from the original UI
-
-Not a suspicion that something is broken: a port makes dozens of small judgement calls that are
-never revisited once it is marked Done, and so far only playing the game and parity reviews have
-caught any of them. A port diverges from the original in four recognisable ways, and only the first
-announces itself:
-
-1. **A deliberate, recorded simplification.** Already written down where it was made; the audit asks
-   whether the reason still holds.
-2. **A primitive that generalized past its first consumer.** Extracting a shared class changes every
-   window that adopts it, invisibly in the consumer's own file.
-3. **An RmlUi behaviour standing in for a native one because it was free.** `:hover` for a
-   C++-computed selection flag, `line-height` for a measured row pitch, DOM scrolling for a
-   line-window model. Each is right in isolation and shifts the rendering slightly.
-4. **A judgement call made with no reference to hand**, i.e. most modern-theme treatments.
-
-**The precedent.** `CCharacterInfoWindow`'s summary box shipped as corner brackets plus a flat fill, a
-recorded and reasonable simplification of `RenderFrame()`'s 8-piece frame, and #623 later restored
-the real thing. Treat "recorded simplification" as a finding, not a resolution.
-
-**Known instances to start from:**
-
-- **`.scroll-pane` reaching `CGenericConfirmDialog`.** `7dabcf54` moved `.gcd-text-col` off the
-  dialog's flat 6dp rail onto the shared primitive's 15dp native sprite art, and `2e619ea6` added the
-  3dp end caps: right for the primitive, and a change to a legacy dialog PR #644 was tuning for
-  parity independently.
-- **`.scroll-pane`'s own legacy simplifications**: the middle slice stretched as one ninepatch
-  rather than repeat-tiled, and native's 7-vs-15 thumb overhang not reproduced
-  (`component-catalog.md`).
-- **Hover highlights paint behind their text** in `CChatLogWindow` and `CMoveCommandWindow`. Native
-  drew the tint quad after the row text.
-- **`CMoveCommandWindow`'s scrollbar is `dp`-sized**, so it follows the user's scale dial rather than
-  the dock's. Deliberate (its pane's net transform is identity).
-- **Reward-item preview moved from hover to click** in `CMyQuestInfoWindow`/`CQuestProgress`.
-- **The MU Helper windows' behaviour changes**, each deliberate and confirmed in play:
-  - Legacy tabs draw `newui_guild_tab04`; native pointed them at a slot nothing loads, so they
-    shipped with labels only.
-  - Pick-all and pick-selected clear each other's flag; native only unticked the other box.
-  - Ticking a skill's Condition fills an empty radio group with a default; native left the skill
-    unable to fire.
-  - Esc closes the window from inside a focused field; native's field swallowed it.
-  - The open skill picker passes clicks through to the world everywhere except its icons.
-  - The extra-item list is always reverse-alphabetical; native sorted it so only after a reload.
-- **`CNPCQuest`'s message/answer tops stay in its model.** `message_top` is a per-instance value
-  (native centres the message-plus-answer block by its line count), and legacy's separate
-  `answers_top` exists because flow does not stack counter-scaled text layers. The answers' anchor at
-  250 is absolute while its block's top is data-driven, so a declarative version needs another bound
-  number or the markup duplicated per quest state. Revisit with [the counter-scale
-  block](#the-counter-scale-block).
+`MessageBoxView` entry waits on this, and so does `CNPCQuest`: its message and answer tops stay in
+its model. `message_top` is per instance (native centres the message-plus-answer block by its line
+count), and legacy's separate `answers_top` exists because flow does not stack counter-scaled text
+layers, so a declarative version needs another bound number or the markup duplicated per quest state.
 
 ## One obvious component surface
 

@@ -47,7 +47,7 @@ move_command.rml: per-frame data -- panel height follows the row count
 mu_helper_detail.rml: per-frame data -- the three gauges' fill levels
 mu_helper_skill_picker.rml: per-frame data -- fan-out is data-driven; recorded as the per-frame carve-out at port time
 notices.rml: a screen-converted document: it carries no root transform, and every position is physical px put through the transform the native text used, which UI::Notices::Render() takes ambiently rather than inside a known layout scope. Each row is deliberately sized 2 * PositionX(320) wide from x 0 so its centre lands on the original's centre whatever the transform's offset is, and the text centres in it. Moving the 300 + 13-a-line table into RCSS means giving this document a reference-px space and a stretch, which is a coordinate-space change on an unverified transform, not this rollout's edit
-npc_quest.rml: counter-scale bridge -- the message and answer tops (tracked-deferrals.md's divergence audit)
+npc_quest.rml: counter-scale bridge -- the message and answer tops (tracked-deferrals.md's counter-scale block)
 party_info.rml: per-frame data -- each member's health bar is a fraction
 party_list.rml: per-frame data -- each card's health bar is a length from the member's health
 pet_info.rml: per-frame data -- the pets' health bars are fractions
@@ -67,7 +67,7 @@ themes/legacy/window_shell.rml: the shell's own placement: a window the player d
 themes/modern/command_window.rml: per-frame data -- target marker follows the selected command
 themes/modern/generic_confirm_dialog.rml: per-frame data -- the timed confirm's progress bar is a fraction of its countdown
 themes/modern/mu_helper_detail.rml: per-frame data -- the three gauges' fill levels
-themes/modern/npc_quest.rml: counter-scale bridge -- the message and answer tops (tracked-deferrals.md's divergence audit)
+themes/modern/npc_quest.rml: counter-scale bridge -- the message and answer tops (tracked-deferrals.md's counter-scale block)
 themes/modern/party_info.rml: per-frame data -- each member's health bar is a fraction
 themes/modern/pet_info.rml: per-frame data -- the pets' health bars are fractions
 themes/modern/trade.rml: counter-scale bridge -- counter-scaled text layers
