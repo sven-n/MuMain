@@ -7,7 +7,7 @@
 #include "UI/Inventory/MyInventory.h"
 #include "UI/Quests/MyQuestInfoWindow.h"
 #include "UI/Combat/DuelWatchRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -44,8 +44,10 @@ private:
 
     BOOL m_bChannelEnable[4];
 
-    RmlModelBinder<DuelWatchRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, DuelWatchRmlModel& model);
+    UI::RmlBridge::ThemedView<DuelWatchRmlModel> m_RmlView{"duel_watch",
+        [this](Rml::DataModelConstructor& c, DuelWatchRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/duel_watch.rml"}}};
     int m_PendingJoin = -1;
 
 public:
@@ -53,7 +55,7 @@ public:
     virtual ~CDuelWatchWindow();
 
     bool Create(CManager* pNewUIMng, int x, int y);
-    Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+    Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     void Release();
 
     void SetPos(int x, int y);
@@ -68,7 +70,6 @@ public:
 
     float GetLayerDepth(); //. 5.0f
 
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();

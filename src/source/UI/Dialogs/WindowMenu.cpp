@@ -55,7 +55,6 @@ bool mu::ui::window::CWindowMenu::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -64,13 +63,14 @@ bool mu::ui::window::CWindowMenu::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CWindowMenu::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 void mu::ui::window::CWindowMenu::SetPos(int x, int y)
@@ -166,68 +166,45 @@ void mu::ui::window::CWindowMenu::RunMenuEntry(int entry)
     }
 }
 
-void mu::ui::window::CWindowMenu::BuildRmlUi()
+void mu::ui::window::CWindowMenu::BindRmlModel(Rml::DataModelConstructor& c, WindowMenuRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    c.Bind("scale_x", &model.scaleX);
+    c.Bind("scale_y", &model.scaleY);
+    c.Bind("inverse_scale_x", &model.inverseScaleX);
+    c.Bind("inverse_scale_y", &model.inverseScaleY);
+    c.Bind("text_px", &model.textPx);
 
-    const bool modelCreated = m_RmlBinder.Create(
-        RmlUiRuntime::Instance().GetContext(), "window_menu",
-        [this](Rml::DataModelConstructor& c, WindowMenuRmlModel& model)
-        {
-            c.Bind("scale_x", &model.scaleX);
-            c.Bind("scale_y", &model.scaleY);
-            c.Bind("inverse_scale_x", &model.inverseScaleX);
-            c.Bind("inverse_scale_y", &model.inverseScaleY);
-            c.Bind("text_px", &model.textPx);
+    auto row = c.RegisterStruct<WindowMenuRowEntry>();
+    row.RegisterMember("label", &WindowMenuRowEntry::label);
+    row.RegisterMember("index", &WindowMenuRowEntry::index);
+    c.RegisterArray<std::vector<WindowMenuRowEntry>>();
+    c.Bind("rows", &model.rows);
 
-            auto row = c.RegisterStruct<WindowMenuRowEntry>();
-            row.RegisterMember("label", &WindowMenuRowEntry::label);
-            row.RegisterMember("index", &WindowMenuRowEntry::index);
-            c.RegisterArray<std::vector<WindowMenuRowEntry>>();
-            c.Bind("rows", &model.rows);
+    c.BindEventCallback("windowmenu_select",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                m_PendingEntry = arguments[0].Get<int>(-1);
+                        });
 
-            c.BindEventCallback("windowmenu_select",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                                {
-                                    if (arguments.size() == 1)
-                                        m_PendingEntry = arguments[0].Get<int>(-1);
-                                });
-        });
-
-    if (modelCreated)
-    {
-        WindowMenuRmlModel& model = m_RmlBinder.GetModel();
-        model.rows.clear();
-        for (int i = 0; i < MENU_MAX_INDEX; ++i)
-            model.rows.push_back({StringUtils::WideToNarrow(I18N::Game::Lookup(kMenuTextIds[i])), i});
-
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                      "Data/Interface/RmlUi/window_menu.rml");
-    }
+    model.rows.clear();
+    for (int i = 0; i < MENU_MAX_INDEX; ++i)
+        model.rows.push_back({StringUtils::WideToNarrow(I18N::Game::Lookup(kMenuTextIds[i])), i});
 }
 
-void mu::ui::window::CWindowMenu::ReloadRmlTheme()
+void mu::ui::window::CWindowMenu::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CWindowMenu::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // The original drew the menu over the HUD and over every window below its layer depth.
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
@@ -238,11 +215,11 @@ void mu::ui::window::CWindowMenu::SyncTransform()
 {
     // CManager scopes LayoutMode::Hud around this window: W/640 x H/480, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    SyncFloat(m_RmlBinder, &WindowMenuRmlModel::scaleX, "scale_x", transform.scaleX);
-    SyncFloat(m_RmlBinder, &WindowMenuRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncFloat(m_RmlBinder, &WindowMenuRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    SyncFloat(m_RmlBinder, &WindowMenuRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    SyncFloat(m_RmlView.Binder(), &WindowMenuRmlModel::scaleX, "scale_x", transform.scaleX);
+    SyncFloat(m_RmlView.Binder(), &WindowMenuRmlModel::scaleY, "scale_y", transform.scaleY);
+    SyncFloat(m_RmlView.Binder(), &WindowMenuRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
+    SyncFloat(m_RmlView.Binder(), &WindowMenuRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 }
 
 float mu::ui::window::CWindowMenu::GetLayerDepth()

@@ -82,7 +82,6 @@ bool mu::ui::window::CMoveCommandWindow::Create(CManager* pNewUIMng, int x, int 
     SetPos(x, y);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -91,13 +90,14 @@ bool mu::ui::window::CMoveCommandWindow::Create(CManager* pNewUIMng, int x, int 
 
 void mu::ui::window::CMoveCommandWindow::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 void mu::ui::window::CMoveCommandWindow::SetPos(int x, int y)
@@ -135,7 +135,7 @@ void mu::ui::window::CMoveCommandWindow::RefreshLayoutMetrics()
     // The theme's panel width; a fill slot's height less the panel's own border.
     float contentWidth = static_cast<float>(UI::MoveCommand::kWindowWidth);
     float frameHeight = 0.f;
-    if (Rml::Element* panel = m_pRmlDoc != nullptr ? m_pRmlDoc->GetElementById("panel") : nullptr)
+    if (Rml::Element* panel = m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr)
     {
         const Rml::Box& box = panel->GetBox();
         if (box.GetSize(Rml::BoxArea::Content).x > 0.f)
@@ -165,7 +165,7 @@ bool mu::ui::window::CMoveCommandWindow::GetFillMinimumSize(float& width, float&
     // Its content width, and the chrome with three rows: the rows follow the height it is given.
     float panelWidth = static_cast<float>(UI::MoveCommand::kWindowWidth);
     float panelHeight = 0.f;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     width = panelWidth;
     height = static_cast<float>(UI::MoveCommand::kFixedChromeHeight + 3 * m_iRealFontHeight);
     return true;
@@ -173,7 +173,7 @@ bool mu::ui::window::CMoveCommandWindow::GetFillMinimumSize(float& width, float&
 
 void mu::ui::window::CMoveCommandWindow::ApplyFillWidth()
 {
-    Rml::Element* panel = m_pRmlDoc != nullptr ? m_pRmlDoc->GetElementById("panel") : nullptr;
+    Rml::Element* panel = m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr;
     if (panel == nullptr)
         return;
     const bool fill = m_FillWidth > 0.f && m_FillHeight > 0.f;
@@ -182,7 +182,7 @@ void mu::ui::window::CMoveCommandWindow::ApplyFillWidth()
         panel->SetProperty(Rml::PropertyId::Width, Rml::Property(m_FillWidth, Rml::Unit::PX));
     else
         panel->RemoveProperty(Rml::PropertyId::Width);
-    m_pRmlDoc->UpdateDocument();
+    m_RmlView.Document()->UpdateDocument();
 }
 
 bool mu::ui::window::CMoveCommandWindow::IsLuckySealBuff()
@@ -387,7 +387,7 @@ void mu::ui::window::CMoveCommandWindow::SettingCanMoveMap()
 void mu::ui::window::CMoveCommandWindow::RmlWheelList(Rml::Event& event)
 {
     Rml::Element* list = event.GetCurrentElement();
-    const MoveCommandRmlModel& model = m_RmlBinder.GetModel();
+    const MoveCommandRmlModel& model = m_RmlView.GetModel();
     const float rowStep = model.rowHeight * model.rootScale;
     if (list == nullptr || rowStep <= 0.f)
         return;
@@ -430,7 +430,7 @@ bool mu::ui::window::CMoveCommandWindow::UpdateMouseEvent()
     // rectangle so a click on it doesn't fall through to the world.
     float panelWidth = static_cast<float>(m_layout.windowWidth);
     float panelHeight = static_cast<float>(m_layout.windowHeight);
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     m_MapNameUISize.x = static_cast<LONG>(panelWidth);
     m_MapNameUISize.y = static_cast<LONG>(panelHeight);
 
@@ -476,110 +476,91 @@ bool mu::ui::window::CMoveCommandWindow::Render()
     return true;
 }
 
-void mu::ui::window::CMoveCommandWindow::BuildRmlUi()
+void mu::ui::window::CMoveCommandWindow::BindRmlModel(Rml::DataModelConstructor& c, MoveCommandRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
 
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "move_command",
-        [this](Rml::DataModelConstructor& c, MoveCommandRmlModel& model)
+    c.Bind("panel_height", &model.panelHeight);
+    c.Bind("panel_width", &model.panelWidth);
+    c.Bind("list_height", &model.listHeight);
+    c.Bind("list_tail", &model.listTail);
+    c.Bind("list_width", &model.listWidth);
+    c.Bind("row_width", &model.rowWidth);
+    c.Bind("row_height", &model.rowHeight);
+    c.Bind("close_top", &model.closeTop);
+
+    auto row = c.RegisterStruct<MoveCommandRowEntry>();
+    row.RegisterMember("strife_text", &MoveCommandRowEntry::strifeText);
+    row.RegisterMember("map_name", &MoveCommandRowEntry::mapName);
+    row.RegisterMember("req_level", &MoveCommandRowEntry::reqLevel);
+    row.RegisterMember("req_zen", &MoveCommandRowEntry::reqZen);
+    row.RegisterMember("can_move", &MoveCommandRowEntry::canMove);
+    row.RegisterMember("level_unmet", &MoveCommandRowEntry::levelUnmet);
+    row.RegisterMember("zen_unmet", &MoveCommandRowEntry::zenUnmet);
+    row.RegisterMember("index", &MoveCommandRowEntry::index);
+    c.RegisterArray<std::vector<MoveCommandRowEntry>>();
+    c.Bind("rows", &model.rows);
+
+    c.Bind("title_text", &model.titleText);
+    c.Bind("head_strife", &model.headStrife);
+    c.Bind("head_map", &model.headMap);
+    c.Bind("head_level", &model.headLevel);
+    c.Bind("head_zen", &model.headZen);
+    c.Bind("close_text", &model.closeText);
+
+    c.BindEventCallback("movecommand_warp",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
         {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-
-            c.Bind("panel_height", &model.panelHeight);
-            c.Bind("panel_width", &model.panelWidth);
-            c.Bind("list_height", &model.listHeight);
-            c.Bind("list_tail", &model.listTail);
-            c.Bind("list_width", &model.listWidth);
-            c.Bind("row_width", &model.rowWidth);
-            c.Bind("row_height", &model.rowHeight);
-            c.Bind("close_top", &model.closeTop);
-
-            auto row = c.RegisterStruct<MoveCommandRowEntry>();
-            row.RegisterMember("strife_text", &MoveCommandRowEntry::strifeText);
-            row.RegisterMember("map_name", &MoveCommandRowEntry::mapName);
-            row.RegisterMember("req_level", &MoveCommandRowEntry::reqLevel);
-            row.RegisterMember("req_zen", &MoveCommandRowEntry::reqZen);
-            row.RegisterMember("can_move", &MoveCommandRowEntry::canMove);
-            row.RegisterMember("level_unmet", &MoveCommandRowEntry::levelUnmet);
-            row.RegisterMember("zen_unmet", &MoveCommandRowEntry::zenUnmet);
-            row.RegisterMember("index", &MoveCommandRowEntry::index);
-            c.RegisterArray<std::vector<MoveCommandRowEntry>>();
-            c.Bind("rows", &model.rows);
-
-            c.Bind("title_text", &model.titleText);
-            c.Bind("head_strife", &model.headStrife);
-            c.Bind("head_map", &model.headMap);
-            c.Bind("head_level", &model.headLevel);
-            c.Bind("head_zen", &model.headZen);
-            c.Bind("close_text", &model.closeText);
-
-            c.BindEventCallback("movecommand_warp",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                {
-                    if (arguments.size() == 1)
-                        RmlClickWarp(arguments[0].Get<int>(-1));
-                });
-            c.BindEventCallback("movecommand_wheel", [this](Rml::DataModelHandle, Rml::Event& event,
-                                                            const Rml::VariantList&) { RmlWheelList(event); });
-            c.BindEventCallback("movecommand_close",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                {
-                    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MOVEMAP);
-                });
+            if (arguments.size() == 1)
+                RmlClickWarp(arguments[0].Get<int>(-1));
+        });
+    c.BindEventCallback("movecommand_wheel", [this](Rml::DataModelHandle, Rml::Event& event,
+                                                    const Rml::VariantList&) { RmlWheelList(event); });
+    c.BindEventCallback("movecommand_close",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MOVEMAP);
         });
 
-    if (modelCreated)
-    {
-        MoveCommandRmlModel& model = m_RmlBinder.GetModel();
-        model.titleText = StringUtils::WideToNarrow(I18N::Game::WarpCommandWindow);
-        model.headStrife = StringUtils::WideToNarrow(I18N::Game::BattleZone);
-        model.headMap = StringUtils::WideToNarrow(I18N::Game::Map);
-        model.headLevel = StringUtils::WideToNarrow(I18N::Game::MinLevel);
-        model.headZen = StringUtils::WideToNarrow(I18N::Game::Cost);
-        model.closeText = StringUtils::WideToNarrow(I18N::Game::Close388);
-
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                      "Data/Interface/RmlUi/move_command.rml");
-        ApplyFillWidth();
-    }
+    model.titleText = StringUtils::WideToNarrow(I18N::Game::WarpCommandWindow);
+    model.headStrife = StringUtils::WideToNarrow(I18N::Game::BattleZone);
+    model.headMap = StringUtils::WideToNarrow(I18N::Game::Map);
+    model.headLevel = StringUtils::WideToNarrow(I18N::Game::MinLevel);
+    model.headZen = StringUtils::WideToNarrow(I18N::Game::Cost);
+    model.closeText = StringUtils::WideToNarrow(I18N::Game::Close388);
 }
 
-void mu::ui::window::CMoveCommandWindow::ReloadRmlTheme()
+void mu::ui::window::CMoveCommandWindow::OnRmlBuilt()
 {
-    if (!m_pRmlDoc)
-        return; // never opened -- BuildRmlUi() picks up the new theme whenever it first is
+    ApplyFillWidth();
+}
 
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-    // Next frame's SyncRmlModel() self-corrects visibility and the live row list.
+void mu::ui::window::CMoveCommandWindow::BuildRmlUi()
+{
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CMoveCommandWindow::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     // Re-measured every frame, not just on open: the row height and therefore the whole window's
     // height follow the window size, which a resolution change moves under an already-open window.
     RefreshLayoutMetrics();
 
-    MoveCommandRmlModel& model = m_RmlBinder.GetModel();
+    MoveCommandRmlModel& model = m_RmlView.GetModel();
 
     // The list area is what is left of the panel once the header block above and the close bar
     // below it are taken out -- native's own kListOffsetY and closeTop, restated as a height.
@@ -596,7 +577,7 @@ void mu::ui::window::CMoveCommandWindow::SyncRmlModel()
 
     auto syncFloat = [&](float MoveCommandRmlModel::* field, const char* name, float value)
     {
-        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(name); }
+        if (model.*field != value) { model.*field = value; m_RmlView.MarkDirty(name); }
     };
 
     syncFloat(&MoveCommandRmlModel::panelHeight, "panel_height", panelHeight);
@@ -614,14 +595,14 @@ void mu::ui::window::CMoveCommandWindow::SyncRmlModel()
     if (m_bRewindPending)
     {
         m_bRewindPending = false;
-        if (Rml::Element* list = m_pRmlDoc->GetElementById("list"))
+        if (Rml::Element* list = m_RmlView.Document()->GetElementById("list"))
             list->SetScrollTop(0.f);
     }
 }
 
 void mu::ui::window::CMoveCommandWindow::RebuildRowModel()
 {
-    MoveCommandRmlModel& model = m_RmlBinder.GetModel();
+    MoveCommandRmlModel& model = m_RmlView.GetModel();
 
     std::vector<MoveCommandRowEntry> rows;
     rows.reserve(m_listMoveInfoData.size());
@@ -676,7 +657,7 @@ void mu::ui::window::CMoveCommandWindow::RebuildRowModel()
         return;
 
     model.rows = std::move(rows);
-    m_RmlBinder.MarkDirty("rows");
+    m_RmlView.MarkDirty("rows");
 }
 
 void mu::ui::window::CMoveCommandWindow::OpenningProcess()

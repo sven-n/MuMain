@@ -6,7 +6,7 @@
 
 #include "UI/Core/WindowManager.h"
 #include "UI/HUD/QuickCommandRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"
 
@@ -42,7 +42,6 @@ namespace mu::ui::window
         void CloseQuickCommand();
         void SetID(const wchar_t* strID);
         void SetSelectedCharacterIndex(int iIndex);
-        void ReloadRmlTheme();
 
     private:
         void BuildRmlUi();
@@ -57,8 +56,10 @@ namespace mu::ui::window
         wchar_t m_strID[32];
         int m_iSelectedCharacterIndex;
 
-        RmlModelBinder<QuickCommandRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, QuickCommandRmlModel& model);
+        UI::RmlBridge::ThemedView<QuickCommandRmlModel> m_RmlView{"quick_command",
+            [this](Rml::DataModelConstructor& c, QuickCommandRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/quick_command.rml"}}};
     };
 }
 

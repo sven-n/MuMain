@@ -253,7 +253,7 @@ TEST_CASE("documents sharing one model all bind it [ui][rml-themed-view]")
 }
 
 // A reloaded document goes on top of its context, so the order the owners reload in is the order
-// they stack in afterwards: the order they were first built in, not wherever a hash put them.
+// they stack in afterwards: the stacking at the switch, a window raised since it was built included.
 TEST_CASE("a theme switch keeps the documents' stacking [ui][rml-themed-view]")
 {
     Fixture fixture;
@@ -265,11 +265,20 @@ TEST_CASE("a theme switch keeps the documents' stacking [ui][rml-themed-view]")
             std::vector<UI::RmlBridge::ThemedDocumentSpec>{fixture.Spec(fixture.Write(name.c_str(), kPlainDocument))}));
         REQUIRE(views.back()->Ensure());
     }
+    views[2]->Document()->PullToFront();
 
     UI::RmlBridge::ReloadAllThemedDocuments();
+    fixture.context->Update();
     REQUIRE(fixture.context->GetNumDocuments() == static_cast<int>(views.size()));
+    const int top = static_cast<int>(views.size()) - 1;
+    CHECK(fixture.context->GetDocument(top) == views[2]->Document());
+    int expected = 0;
     for (size_t i = 0; i < views.size(); ++i)
-        CHECK(fixture.context->GetDocument(static_cast<int>(i)) == views[i]->Document());
+    {
+        if (i == 2)
+            continue;
+        CHECK(fixture.context->GetDocument(expected++) == views[i]->Document());
+    }
 }
 
 // Unloading drops the focus without a blur; a focused field that never blurs leaves the client's

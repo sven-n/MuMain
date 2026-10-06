@@ -70,7 +70,6 @@ bool mu::ui::window::CHelpWindow::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -79,13 +78,14 @@ bool mu::ui::window::CHelpWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CHelpWindow::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 void mu::ui::window::CHelpWindow::SetPos(int x, int y)
@@ -138,62 +138,45 @@ bool mu::ui::window::CHelpWindow::Render()
     return true;
 }
 
-void mu::ui::window::CHelpWindow::BuildRmlUi()
+void mu::ui::window::CHelpWindow::BindRmlModel(Rml::DataModelConstructor& c, HelpWindowRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    c.Bind("panel_x", &model.panelX);
+    c.Bind("panel_y", &model.panelY);
+    c.Bind("content_width", &model.contentWidth);
+    c.Bind("padding_px", &model.paddingPx);
+    c.Bind("border_px", &model.borderPx);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("bold_text_px", &model.boldTextPx);
 
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "help_window",
-                                                 [](Rml::DataModelConstructor& c, HelpWindowRmlModel& model)
-                                                 {
-                                                     c.Bind("panel_x", &model.panelX);
-                                                     c.Bind("panel_y", &model.panelY);
-                                                     c.Bind("content_width", &model.contentWidth);
-                                                     c.Bind("padding_px", &model.paddingPx);
-                                                     c.Bind("border_px", &model.borderPx);
-                                                     c.Bind("text_px", &model.textPx);
-                                                     c.Bind("bold_text_px", &model.boldTextPx);
-
-                                                     auto line = c.RegisterStruct<HelpLineEntry>();
-                                                     line.RegisterMember("text", &HelpLineEntry::text);
-                                                     line.RegisterMember("heading", &HelpLineEntry::heading);
-                                                     line.RegisterMember("half_spacer", &HelpLineEntry::halfSpacer);
-                                                     line.RegisterMember("height_px", &HelpLineEntry::heightPx);
-                                                     line.RegisterMember("gap_px", &HelpLineEntry::gapPx);
-                                                     c.RegisterArray<std::vector<HelpLineEntry>>();
-                                                     c.Bind("lines", &model.lines);
-                                                 });
-
-    if (modelCreated)
-    {
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                      "Data/Interface/RmlUi/help_window.rml");
-    }
+    auto line = c.RegisterStruct<HelpLineEntry>();
+    line.RegisterMember("text", &HelpLineEntry::text);
+    line.RegisterMember("heading", &HelpLineEntry::heading);
+    line.RegisterMember("half_spacer", &HelpLineEntry::halfSpacer);
+    line.RegisterMember("height_px", &HelpLineEntry::heightPx);
+    line.RegisterMember("gap_px", &HelpLineEntry::gapPx);
+    c.RegisterArray<std::vector<HelpLineEntry>>();
+    c.Bind("lines", &model.lines);
 }
 
-void mu::ui::window::CHelpWindow::ReloadRmlTheme()
+void mu::ui::window::CHelpWindow::OnRmlReloaded()
 {
-    if (!m_pRmlDoc)
-        return;
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
     m_BuiltPage = -1;
+}
 
-    BuildRmlUi();
+void mu::ui::window::CHelpWindow::BuildRmlUi()
+{
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CHelpWindow::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // The original drew this page over the location bar and the chat and system logs.
     const bool visible = IsVisible();
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, visible);
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), visible);
     if (!visible)
         return;
 
@@ -212,7 +195,7 @@ void mu::ui::window::CHelpWindow::RebuildPageModel(const UI::Scaling::Transform&
     const float normalHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal));
     const float boldHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold));
 
-    HelpWindowRmlModel& model = m_RmlBinder.GetModel();
+    HelpWindowRmlModel& model = m_RmlView.GetModel();
     model.lines.clear();
     model.lines.reserve(page.size());
 
@@ -249,7 +232,7 @@ void mu::ui::window::CHelpWindow::RebuildPageModel(const UI::Scaling::Transform&
 
     for (const char* field :
          {"lines", "panel_x", "panel_y", "content_width", "padding_px", "border_px", "text_px", "bold_text_px"})
-        m_RmlBinder.MarkDirty(field);
+        m_RmlView.MarkDirty(field);
 }
 
 float mu::ui::window::CHelpWindow::GetLayerDepth()

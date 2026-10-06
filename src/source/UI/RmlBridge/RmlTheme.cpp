@@ -386,11 +386,15 @@ namespace UI::RmlBridge
 
     namespace
     {
-        using ThemeReloadEntry = std::pair<const void*, ThemeReloadCallback>;
+        struct ThemeReloadEntry
+        {
+            const void* owner;
+            ThemeReloadCallback callback;
+            ThemeReloadDocument document;
+        };
 
         // Never destroyed: an owner destroyed at exit after it (a static window) still unregisters.
-        // In registration order: owners register as they first load, and a reloaded document goes on
-        // top of its context, so reloading in this order rebuilds the stacking it was first built in.
+        // In registration order, which owners without a document keep on a theme switch.
         std::vector<ThemeReloadEntry>& ThemeReloadRegistry()
         {
             static auto* registry = new std::vector<ThemeReloadEntry>();
@@ -401,17 +405,58 @@ namespace UI::RmlBridge
         {
             auto& registry = ThemeReloadRegistry();
             return std::find_if(registry.begin(), registry.end(),
-                                [owner](const ThemeReloadEntry& entry) { return entry.first == owner; });
+                                [owner](const ThemeReloadEntry& entry) { return entry.owner == owner; });
+        }
+
+        // Where `document` sits among its context's documents, bottom first; -1 if it has none.
+        int StackPosition(const ThemeReloadEntry& entry)
+        {
+            Rml::ElementDocument* document = entry.document ? entry.document() : nullptr;
+            Rml::Context* context = document != nullptr ? document->GetContext() : nullptr;
+            if (context == nullptr)
+                return -1;
+            for (int i = 0; i < context->GetNumDocuments(); ++i)
+            {
+                if (context->GetDocument(i) == document)
+                    return i;
+            }
+            return -1;
+        }
+
+        // The registry, with the owners whose documents are loaded reordered among themselves from
+        // the bottom of their stacks up.
+        std::vector<ThemeReloadEntry> ReloadOrder()
+        {
+            std::vector<ThemeReloadEntry> entries = ThemeReloadRegistry();
+            std::vector<size_t> slots;
+            std::vector<std::pair<int, size_t>> stacked;
+            for (size_t i = 0; i < entries.size(); ++i)
+            {
+                const int position = StackPosition(entries[i]);
+                if (position < 0)
+                    continue;
+                slots.push_back(i);
+                stacked.emplace_back(position, i);
+            }
+            std::stable_sort(stacked.begin(), stacked.end(),
+                             [](const auto& a, const auto& b) { return a.first < b.first; });
+            std::vector<ThemeReloadEntry> ordered = entries;
+            for (size_t k = 0; k < slots.size(); ++k)
+                ordered[slots[k]] = entries[stacked[k].second];
+            return ordered;
         }
     }
 
-    void RegisterForThemeReload(const void* owner, ThemeReloadCallback callback)
+    void RegisterForThemeReload(const void* owner, ThemeReloadCallback callback, ThemeReloadDocument document)
     {
         const auto entry = FindThemeReloadEntry(owner);
         if (entry != ThemeReloadRegistry().end())
-            entry->second = std::move(callback);
+        {
+            entry->callback = std::move(callback);
+            entry->document = std::move(document);
+        }
         else
-            ThemeReloadRegistry().emplace_back(owner, std::move(callback));
+            ThemeReloadRegistry().push_back({owner, std::move(callback), std::move(document)});
     }
 
     void UnregisterForThemeReload(const void* owner)
@@ -442,11 +487,10 @@ namespace UI::RmlBridge
         }
 
         // Copy first -- see this function's own header comment (RmlTheme.h) for why.
-        const auto callbacks = ThemeReloadRegistry();
-        for (const auto& [owner, callback] : callbacks)
+        for (const ThemeReloadEntry& entry : ReloadOrder())
         {
-            if (callback)
-                callback();
+            if (entry.callback)
+                entry.callback();
         }
     }
 }

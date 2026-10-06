@@ -6,7 +6,7 @@
 
 #include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/WindowMenuRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -55,7 +55,6 @@ public:
     void OpenningProcess();
     void ClosingProcess();
 
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();
@@ -69,8 +68,10 @@ private:
     CManager* m_pNewUIMng;
     POINT m_Pos;
 
-    RmlModelBinder<WindowMenuRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, WindowMenuRmlModel& model);
+    UI::RmlBridge::ThemedView<WindowMenuRmlModel> m_RmlView{"window_menu",
+        [this](Rml::DataModelConstructor& c, WindowMenuRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/window_menu.rml"}}};
     int m_PendingEntry = -1;
 };
 } // namespace mu::ui::window

@@ -100,7 +100,7 @@ bool ThemedDocuments::Ensure()
 
     if (!m_Registered)
     {
-        RegisterForThemeReload(this, [this] { Reload(); });
+        RegisterForThemeReload(this, [this] { Reload(); }, [this] { return Document(); });
         m_Registered = true;
     }
 

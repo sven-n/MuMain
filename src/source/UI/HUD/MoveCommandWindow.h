@@ -6,7 +6,7 @@
 #include "UI/Core/WindowManager.h"
 #include "Network/MoveCommandData.h"
 #include "UI/HUD/MoveCommandRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Scaling/UITransform.h"
 
 namespace Rml
@@ -68,8 +68,11 @@ namespace mu::ui::window
         UI::MoveCommand::Layout		m_layout{};
         DWORD						m_dwMoveCommandKey;
 
-        RmlModelBinder<MoveCommandRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, MoveCommandRmlModel& model);
+        void OnRmlBuilt();
+        UI::RmlBridge::ThemedView<MoveCommandRmlModel> m_RmlView{"move_command",
+            [this](Rml::DataModelConstructor& c, MoveCommandRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/move_command.rml"}}, {.afterBuild = [this] { OnRmlBuilt(); }}};
         // One-shot: rewind the list to the top on the first frame after the window opens, once
         // the document is visible and RmlUi has laid it out. Re-asserting a scroll position every
         // frame would fight the player's own drag and wheel.
@@ -94,7 +97,6 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        void ReloadRmlTheme();
 
         virtual void OpenningProcess();
         void ClosingProcess();

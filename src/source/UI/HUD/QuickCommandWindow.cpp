@@ -51,7 +51,6 @@ bool mu::ui::window::CQuickCommandWindow::Create(CManager* pNewUIMng, int x, int
     SetPos(x, y);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -60,13 +59,14 @@ bool mu::ui::window::CQuickCommandWindow::Create(CManager* pNewUIMng, int x, int
 
 void mu::ui::window::CQuickCommandWindow::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 void mu::ui::window::CQuickCommandWindow::SetPos(int x, int y)
@@ -217,82 +217,60 @@ bool mu::ui::window::CQuickCommandWindow::Render()
     return true;
 }
 
-void mu::ui::window::CQuickCommandWindow::BuildRmlUi()
+void mu::ui::window::CQuickCommandWindow::BindRmlModel(Rml::DataModelConstructor& c, QuickCommandRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("bold_text_px", &model.boldTextPx);
+    c.Bind("target_name", &model.targetName);
 
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "quick_command",
-                                                 [](Rml::DataModelConstructor& c, QuickCommandRmlModel& model)
-                                                 {
-                                                     c.Bind("root_x", &model.rootX);
-                                                     c.Bind("root_y", &model.rootY);
-                                                     c.Bind("root_scale", &model.rootScale);
-                                                     c.Bind("text_px", &model.textPx);
-                                                     c.Bind("bold_text_px", &model.boldTextPx);
-                                                     c.Bind("target_name", &model.targetName);
+    auto row = c.RegisterStruct<QuickCommandRowEntry>();
+    row.RegisterMember("label", &QuickCommandRowEntry::label);
+    row.RegisterMember("selected", &QuickCommandRowEntry::selected);
+    c.RegisterArray<std::vector<QuickCommandRowEntry>>();
+    c.Bind("rows", &model.rows);
 
-                                                     auto row = c.RegisterStruct<QuickCommandRowEntry>();
-                                                     row.RegisterMember("label", &QuickCommandRowEntry::label);
-                                                     row.RegisterMember("selected", &QuickCommandRowEntry::selected);
-                                                     c.RegisterArray<std::vector<QuickCommandRowEntry>>();
-                                                     c.Bind("rows", &model.rows);
-                                                 });
-
-    if (!modelCreated)
-        return;
-
-    QuickCommandRmlModel& model = m_RmlBinder.GetModel();
     model.rows.clear();
     for (int i = 0; i < kQuickCommandCount; ++i)
         model.rows.push_back({StringUtils::WideToNarrow(I18N::Game::Lookup(kQuickCommandTextIds[i])), false});
-
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                  "Data/Interface/RmlUi/quick_command.rml");
 }
 
-void mu::ui::window::CQuickCommandWindow::ReloadRmlTheme()
+void mu::ui::window::CQuickCommandWindow::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CQuickCommandWindow::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // The original drew nothing while no player was attached to the menu.
     const bool visible = IsVisible() && m_iSelectedCharacterIndex >= 0;
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, visible);
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), visible);
     if (!visible)
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
-    QuickCommandRmlModel& model = m_RmlBinder.GetModel();
+    QuickCommandRmlModel& model = m_RmlView.GetModel();
     const float boldTextPx =
         UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, UI::Scaling::GetActiveTransform());
     if (model.boldTextPx != boldTextPx)
     {
         model.boldTextPx = boldTextPx;
-        m_RmlBinder.MarkDirty("bold_text_px");
+        m_RmlView.MarkDirty("bold_text_px");
     }
 
     const Rml::String targetName = StringUtils::WideToNarrow(m_strID);
     if (model.targetName != targetName)
     {
         model.targetName = targetName;
-        m_RmlBinder.MarkDirty("target_name");
+        m_RmlView.MarkDirty("target_name");
     }
 
     SyncRows();
@@ -300,7 +278,7 @@ void mu::ui::window::CQuickCommandWindow::SyncRmlModel()
 
 void mu::ui::window::CQuickCommandWindow::SyncRows()
 {
-    QuickCommandRmlModel& model = m_RmlBinder.GetModel();
+    QuickCommandRmlModel& model = m_RmlView.GetModel();
     bool changed = false;
     for (int i = 0; i < static_cast<int>(model.rows.size()); ++i)
     {
@@ -309,7 +287,7 @@ void mu::ui::window::CQuickCommandWindow::SyncRows()
         model.rows[i].selected = selected;
     }
     if (changed)
-        m_RmlBinder.MarkDirty("rows");
+        m_RmlView.MarkDirty("rows");
 }
 
 float mu::ui::window::CQuickCommandWindow::GetLayerDepth()

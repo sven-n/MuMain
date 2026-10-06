@@ -7,7 +7,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/UILayoutPolicy.h"
 #include "UI/HUD/CommandWindowRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Scaling/UITransform.h"
 #include "Engine/Object/ZzzCharacter.h"
 
@@ -40,8 +40,10 @@ namespace mu::ui::window
         bool						m_bSelectedChar;
         bool						m_bCanCommand;
 
-        RmlModelBinder<CommandWindowRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, CommandWindowRmlModel& model);
+        UI::RmlBridge::ThemedView<CommandWindowRmlModel> m_RmlView{"command_window",
+            [this](Rml::DataModelConstructor& c, CommandWindowRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/command_window.rml"}}};
         // A button press, queued by RmlUi's click and run from Update(), outside RmlUi's own
         // event dispatch (Special opens another window).
         int m_PendingCommand = COMMAND_NONE;
@@ -51,7 +53,7 @@ namespace mu::ui::window
         virtual ~CCommandWindow();
 
         bool Create(CManager* pNewUIMng, int x, int y);
-        Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+        Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         void Release();
 
         void SetPos(int x, int y);
@@ -61,7 +63,6 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        void ReloadRmlTheme();
 
         float GetLayerDepth();	//. 4.6f
 

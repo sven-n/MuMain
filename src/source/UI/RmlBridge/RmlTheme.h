@@ -138,6 +138,8 @@ namespace UI::RmlBridge
     // token) -- registers one callback here, right next to the code that already creates its first
     // document, instead of overriding a virtual and hoping every sweep call site reaches it.
     using ThemeReloadCallback = std::function<void()>;
+    // The owner's document, for where it sits among its context's documents; null while it has none.
+    using ThemeReloadDocument = std::function<Rml::ElementDocument*()>;
 
     // Registers-or-replaces `owner`'s callback (same shape as
     // Core::Time::FrameTimerScheduler::SetRepeating() -- calling again for an already-registered
@@ -152,7 +154,10 @@ namespace UI::RmlBridge
     // owner -- a file-scope global, a function-local static -- need not bother, which is why roughly
     // a fifth of the current callers don't: they cannot outlive the registry. Anything heap-owned
     // should unregister in its Release()/destructor, as the windows on CManager already do.
-    void RegisterForThemeReload(const void* owner, ThemeReloadCallback callback);
+    //
+    // A reloaded document goes on top of its context, so the owners that name their document reload
+    // from the bottom of its context's stack up, and the stacking survives a theme switch.
+    void RegisterForThemeReload(const void* owner, ThemeReloadCallback callback, ThemeReloadDocument document = {});
 
     // Removes `owner`'s callback, if any -- a no-op if `owner` isn't registered (same shape as
     // FrameTimerScheduler::Kill()), so it's safe to call from a Release()/destructor path that may

@@ -63,7 +63,6 @@ bool CDuelWatchWindow::Create(CManager* pNewUIMng, int x, int y)
         m_bChannelEnable[i] = FALSE;
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -72,13 +71,14 @@ bool CDuelWatchWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void CDuelWatchWindow::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 void CDuelWatchWindow::SetPos(int x, int y)
@@ -93,10 +93,10 @@ bool CDuelWatchWindow::UpdateMouseEvent()
         return false;
 
     // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
     float panelWidth = INVENTORY_WIDTH;
     float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
                                       static_cast<int>(panelHeight))
             .Contains(MouseX, MouseY))
@@ -172,52 +172,40 @@ bool CDuelWatchWindow::BtnProcess()
     return false;
 }
 
-void CDuelWatchWindow::BuildRmlUi()
+void CDuelWatchWindow::BindRmlModel(Rml::DataModelConstructor& c, DuelWatchRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("bold_text_px", &model.boldTextPx);
+    c.Bind("title", &model.title);
+    c.Bind("subtitle", &model.subtitle);
+    c.Bind("subtitle_px", &model.subtitlePx);
+    c.Bind("vs_text", &model.vsText);
+    c.Bind("no_duel_text", &model.noDuelText);
+    c.Bind("watch_text", &model.watchText);
+    c.Bind("label_line_px", &model.labelLinePx);
 
-    const bool modelCreated = m_RmlBinder.Create(
-        RmlUiRuntime::Instance().GetContext(), "duel_watch",
-        [this](Rml::DataModelConstructor& c, DuelWatchRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-            c.Bind("bold_text_px", &model.boldTextPx);
-            c.Bind("title", &model.title);
-            c.Bind("subtitle", &model.subtitle);
-            c.Bind("subtitle_px", &model.subtitlePx);
-            c.Bind("vs_text", &model.vsText);
-            c.Bind("no_duel_text", &model.noDuelText);
-            c.Bind("watch_text", &model.watchText);
-            c.Bind("label_line_px", &model.labelLinePx);
+    auto room = c.RegisterStruct<DuelWatchRoomEntry>();
+    room.RegisterMember("index", &DuelWatchRoomEntry::index);
+    room.RegisterMember("heading", &DuelWatchRoomEntry::heading);
+    room.RegisterMember("running", &DuelWatchRoomEntry::running);
+    room.RegisterMember("player1", &DuelWatchRoomEntry::player1);
+    room.RegisterMember("player2", &DuelWatchRoomEntry::player2);
+    room.RegisterMember("player1_px", &DuelWatchRoomEntry::player1Px);
+    room.RegisterMember("player2_px", &DuelWatchRoomEntry::player2Px);
+    room.RegisterMember("joinable", &DuelWatchRoomEntry::joinable);
+    c.RegisterArray<std::vector<DuelWatchRoomEntry>>();
+    c.Bind("rooms", &model.rooms);
 
-            auto room = c.RegisterStruct<DuelWatchRoomEntry>();
-            room.RegisterMember("index", &DuelWatchRoomEntry::index);
-            room.RegisterMember("heading", &DuelWatchRoomEntry::heading);
-            room.RegisterMember("running", &DuelWatchRoomEntry::running);
-            room.RegisterMember("player1", &DuelWatchRoomEntry::player1);
-            room.RegisterMember("player2", &DuelWatchRoomEntry::player2);
-            room.RegisterMember("player1_px", &DuelWatchRoomEntry::player1Px);
-            room.RegisterMember("player2_px", &DuelWatchRoomEntry::player2Px);
-            room.RegisterMember("joinable", &DuelWatchRoomEntry::joinable);
-            c.RegisterArray<std::vector<DuelWatchRoomEntry>>();
-            c.Bind("rooms", &model.rooms);
+    c.BindEventCallback("duelwatch_join",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                m_PendingJoin = arguments[0].Get<int>(-1);
+                        });
 
-            c.BindEventCallback("duelwatch_join",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                                {
-                                    if (arguments.size() == 1)
-                                        m_PendingJoin = arguments[0].Get<int>(-1);
-                                });
-        });
-
-    if (!modelCreated)
-        return;
-
-    DuelWatchRmlModel& model = m_RmlBinder.GetModel();
     model.title = StringUtils::WideToNarrow(I18N::Game::DoorkeeperTitus);
     model.subtitle = StringUtils::WideToNarrow(I18N::Game::SelectAnColosseumYouDLikeToWatch);
     model.vsText = "VS";
@@ -233,54 +221,44 @@ void CDuelWatchWindow::BuildRmlUi()
         entry.heading = StringUtils::WideToNarrow(heading);
         model.rooms.push_back(std::move(entry));
     }
-
-    m_pRmlDoc =
-        UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/duel_watch.rml");
 }
 
-void CDuelWatchWindow::ReloadRmlTheme()
+void CDuelWatchWindow::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void CDuelWatchWindow::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     // The button label's line height: the native line height in physical px.
     {
         const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
         const float labelLinePx = static_cast<float>(lineHeight) * UI::Scaling::GetActiveTransform().scaleY;
-        auto& labelModel = m_RmlBinder.GetModel();
+        auto& labelModel = m_RmlView.GetModel();
         if (labelModel.labelLinePx != labelLinePx)
         {
             labelModel.labelLinePx = labelLinePx;
-            m_RmlBinder.MarkDirty("label_line_px");
+            m_RmlView.MarkDirty("label_line_px");
         }
     }
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    SyncField(m_RmlBinder, &DuelWatchRmlModel::boldTextPx, "bold_text_px",
+    SyncField(m_RmlView.Binder(), &DuelWatchRmlModel::boldTextPx, "bold_text_px",
               UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
-    SyncField(m_RmlBinder, &DuelWatchRmlModel::subtitlePx, "subtitle_px",
+    SyncField(m_RmlView.Binder(), &DuelWatchRmlModel::subtitlePx, "subtitle_px",
               TextPxInBox(UI::Scaling::FontRole::Bold, transform, I18N::Game::SelectAnColosseumYouDLikeToWatch, 190));
 
-    DuelWatchRmlModel& model = m_RmlBinder.GetModel();
+    DuelWatchRmlModel& model = m_RmlView.GetModel();
     bool changed = false;
     for (DuelWatchRoomEntry& room : model.rooms)
     {
@@ -305,5 +283,5 @@ void CDuelWatchWindow::SyncRmlModel()
         }
     }
     if (changed)
-        m_RmlBinder.MarkDirty("rooms");
+        m_RmlView.MarkDirty("rooms");
 }

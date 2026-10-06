@@ -6,7 +6,7 @@
 
 #include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/HelpWindowRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Scaling/UITransform.h"
 
 namespace Rml
@@ -39,7 +39,6 @@ public:
     void ClosingProcess();
 
     void AutoUpdateIndex();
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();
@@ -53,8 +52,11 @@ private:
 
     int m_iIndex;
 
-    RmlModelBinder<HelpWindowRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, HelpWindowRmlModel& model);
+    void OnRmlReloaded();
+    UI::RmlBridge::ThemedView<HelpWindowRmlModel> m_RmlView{"help_window",
+        [this](Rml::DataModelConstructor& c, HelpWindowRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/help_window.rml"}}, {.afterReload = [this] { OnRmlReloaded(); }}};
     int m_BuiltPage = -1;
     UI::Scaling::Transform m_BuiltTransform{};
 };
