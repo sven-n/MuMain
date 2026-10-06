@@ -51,8 +51,8 @@ mu::ui::window::CItemHotKey::CItemHotKey()
     {
         m_iHotKeyItemType[i] = -1;
         m_iHotKeyItemLevel[i] = 0;
-        m_SlotTargets[i] = std::make_unique<UI::RmlBridge::RenderTarget>(
-            [this, i](std::uint32_t width, std::uint32_t height) { RenderSlot(i, width, height); });
+        m_SlotTargets[i] = std::make_unique<UI::Items::ItemCameraTarget>(
+            [this, i](const Rml::Vector2f& offset, const Rml::Vector2f& size) { RenderSlot(i, offset, size); });
     }
 }
 
@@ -354,21 +354,9 @@ void mu::ui::window::CItemHotKey::SyncSlotIcons(Rml::ElementDocument* document)
         Rml::Element* icon = document->GetElementById("item_icon_" + std::to_string(i));
         if (icon == nullptr)
             continue;
-        auto& target = *m_SlotTargets[i];
         const bool filled = GetSlotItem(i) != nullptr;
-        target.SetEnabled(m_bSlotIconsShown && filled);
-        if (filled)
-        {
-            // The box is in screen pixels: the item is drawn at the size it is shown, never upscaled.
-            const auto size = icon->GetBox().GetSize(Rml::BoxArea::Content);
-            target.Resize(static_cast<std::uint32_t>(std::lround(size.x)),
-                          static_cast<std::uint32_t>(std::lround(size.y)));
-        }
-        // An <img> without a texture still draws its quad, untextured: white.
         icon->SetClass("hidden", !filled);
-        const Rml::String source = filled ? target.Source() : Rml::String();
-        if (icon->GetAttribute<Rml::String>("src", "") != source)
-            icon->SetAttribute("src", source);
+        m_SlotTargets[i]->Sync(icon, m_bSlotIconsShown && filled);
     }
 }
 
@@ -378,58 +366,13 @@ void mu::ui::window::CItemHotKey::SetSlotIconsShown(bool shown)
     if (shown)
         return;
     for (auto& target : m_SlotTargets)
-        target->SetEnabled(false);
+        target->Disable();
 }
 
-// The item camera C3DCamera::Render() sets up -- an identity view at a 1-degree field of view --
-// with its projection cropped to one slot-sized rectangle, so that rectangle fills the target. At
-// that field of view where the rectangle sits barely matters, so it is centred, on-axis; only its
-// size frames the item, and every per-item offset in RenderItem3D() applies exactly as before.
-void mu::ui::window::CItemHotKey::RenderSlot(int iSlotIndex, std::uint32_t width, std::uint32_t height)
+void mu::ui::window::CItemHotKey::RenderSlot(int iSlotIndex, const Rml::Vector2f& offset, const Rml::Vector2f& size)
 {
-    ITEM* pItem = GetSlotItem(iSlotIndex);
-    if (pItem == nullptr || width == 0 || height == 0)
-        return;
-
-    const float windowWidth = static_cast<float>(WindowWidth);
-    const float windowHeight = static_cast<float>(WindowHeight);
-    const float w = static_cast<float>(width);
-    const float h = static_cast<float>(height);
-    const float x = (windowWidth - w) * 0.5f;
-    const float y = (windowHeight - h) * 0.5f;
-
-    // gluPerspective2() and the identity view overwrite g_Camera, which picking reads.
-    SaveCameraPerspective();
-    // The rectangle is in window pixels, which is what ScreenToWorldRay() turns it into.
-    const UI::Scaling::ScopedActiveTransform pixels({1.f, 1.f, 0.f, 0.f, 1.f});
-
-    auto& renderer = mu::GetRenderer();
-    renderer.SetMatrixMode(GL_PROJECTION);
-    renderer.PushMatrix();
-    renderer.LoadIdentity();
-    const float scaleX = windowWidth / w;
-    const float scaleY = windowHeight / h;
-    const float centerX = (2.f * x + w) / windowWidth - 1.f;
-    const float centerY = 1.f - (2.f * y + h) / windowHeight;
-    renderer.Translate(-centerX * scaleX, -centerY * scaleY, 0.f);
-    renderer.Scale(scaleX, scaleY, 1.f);
-    // gluPerspective2() takes the camera's screen centre from the viewport; the capture brings its own.
-    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
-    gluPerspective2(1.f, windowWidth / windowHeight, RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    renderer.SetMatrixMode(GL_MODELVIEW);
-    renderer.PushMatrix();
-    renderer.LoadIdentity();
-    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
-    EnableDepthTest();
-    EnableDepthMask();
-
-    RenderItem3DWithHover(x, y, w, h, pItem->Type, pItem->Level, 0, 0, m_iHoveredSlot == iSlotIndex);
-
-    renderer.SetMatrixMode(GL_MODELVIEW);
-    renderer.PopMatrix();
-    renderer.SetMatrixMode(GL_PROJECTION);
-    renderer.PopMatrix();
-    RestoreCameraPerspective();
+    if (ITEM* pItem = GetSlotItem(iSlotIndex))
+        RenderItem3DWithHover(offset.x, offset.y, size.x, size.y, pItem->Type, pItem->Level, 0, 0, m_iHoveredSlot == iSlotIndex);
 }
 
 void mu::ui::window::CItemHotKey::OnHotkeySlotRightClick(int iSlotIndex)

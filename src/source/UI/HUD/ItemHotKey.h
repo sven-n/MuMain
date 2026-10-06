@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "UI/Core/WindowObject.h"
-#include "UI/RmlBridge/RmlRenderTarget.h"
+#include "UI/Inventory/ItemCameraTarget.h"
 
 namespace Rml { class ElementDocument; }
 
@@ -54,11 +54,11 @@ namespace mu::ui::window
         int GetHotKeyItemCount(int iType);
         ITEM* GetSlotItem(int iSlotIndex);
         // A target's drawer: one frame of the slot's item, framed for `width` x `height`.
-        void RenderSlot(int iSlotIndex, std::uint32_t width, std::uint32_t height);
+        void RenderSlot(int iSlotIndex, const Rml::Vector2f& offset, const Rml::Vector2f& size);
 
         int m_iHotKeyItemType[HOTKEY_COUNT];
         int m_iHotKeyItemLevel[HOTKEY_COUNT];
-        std::unique_ptr<UI::RmlBridge::RenderTarget> m_SlotTargets[HOTKEY_COUNT];
+        std::unique_ptr<UI::Items::ItemCameraTarget> m_SlotTargets[HOTKEY_COUNT];
         bool m_bSlotIconsShown = false;
 
         // -1 = nothing hovered; set by OnHotkeySlotHover(), cleared by OnUnhover().
