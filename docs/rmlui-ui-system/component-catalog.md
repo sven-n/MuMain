@@ -507,7 +507,7 @@ kept on purpose; the MU Helper skill picker shows no hover tooltip, as native ne
 **Deliberately not on this primitive**: `CBuffStrip`/`CMuHelperBar`'s own hover tooltip is still a
 separate, CSS-only `:hover` mechanism (plain text, no per-line color) — deferred because it lives
 in a `dp`-based coordinate system, unlike every other caller's reference-pixel one; see
-`tracked-deferrals.md`'s pilots-to-revisit table. `HelpWindow.cpp`/`ItemExplanationWindow.cpp` also
+`tracked-deferrals.md`'s component-surface entry. `HelpWindow.cpp`/`ItemExplanationWindow.cpp` also
 stay on native `RenderTipTextList()` on purpose: they render unconditionally while their own window
 is open rather than on hover, so they don't fit this primitive's owner-token model (the newest
 `Show()` always wins, which assumes a momentary, naturally mutually-exclusive hover tooltip) — a

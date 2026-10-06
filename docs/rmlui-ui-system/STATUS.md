@@ -174,10 +174,9 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
   name; no user layer over a theme and no partial theme inheriting from a base. A stated
   requirement waiting on priority. (A third first-party theme is ruled out by the project owner;
   §25/§28's coupling concern is met by `modern`'s divergence and the drift checker.)
-- **The legacy compatibility seams are not yet behind one mechanism** (§14, §21): three contexts
-  order native 3D against RmlUi where `RenderTarget` would do (the background lists are closed), and design
-  tokens are a text preprocessor rather than an RmlUi feature (`tracked-deferrals.md`'s
-  integration seams).
+- **Native 3D is not yet behind one mechanism** (§14, §21): three contexts order it against RmlUi
+  where `RenderTarget` would do (the background lists are closed; `tracked-deferrals.md`'s native
+  3D entry).
 - **Validation covers the UI-scale axis only** (`layout-and-scaling.md`'s scale sweep);
   resolution, drag state across a scale change, and theme change while open are uncovered, and
   are left to whoever touches each window rather than tracked.

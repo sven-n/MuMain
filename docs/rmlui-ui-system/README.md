@@ -27,8 +27,9 @@ deleted); see [`migration-ledger.md`](migration-ledger.md) for each window's sta
 - **A window**: its model fields, its event callbacks and its game behaviour. Layout, units,
   colours and placement stay in RML/RCSS.
 
-The runtime still reaches into `RmlBridge` and game state today; that and the other integration
-seams are in [`tracked-deferrals.md`](tracked-deferrals.md).
+The runtime renders, updates and routes input; the game adds the rest through
+`RmlUiRuntimeHooks`. What remains where RmlUi meets native 3D is in
+[`tracked-deferrals.md`](tracked-deferrals.md).
 
 ## The documents
 
