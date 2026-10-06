@@ -10,9 +10,10 @@ Completed migrations belong in [migration-ledger.md](migration-ledger.md).
 What would otherwise grow with every new window, or break a principle in a way new code copies.
 Most are items of the integration seams below.
 
-1. **A display-scale change applies the `dp` ratio** (item 3). A bug against §9.
-2. **An unsubstituted design token is logged** (item 2): a sheet containing `token(` that was not
-   inlined warns instead of drawing empty values. The `FileInterface` replacement can follow.
+1. **A display-scale change applies the `dp` ratio** (item 2). A bug against §9.
+2. **An undefined design token is logged**: `ThemeFileInterface` currently substitutes an empty
+   value when `token(name)` is missing from `tokens.ini`. Log the token name and sheet path so
+   theme authors can find the mistake.
 
 Also before merging, though not code health: the event windows nobody has seen in game (the
 ownership boundary's first list) are either looked at on a server that can run the events, or
@@ -21,7 +22,7 @@ named as unseen in the pull request.
 ### After the merge
 
 The divergence audit; retiring the background contexts, with the root transform and counter-scaled
-text they keep alive; the token `FileInterface`; and one obvious component surface, whose native
+text they keep alive; and one obvious component surface, whose native
 widgets `CInGameShop` keeps alive and new code must not use. The equipment paperdoll and the modern
 HUD orbs wait on their triggers, and the counter-scale block on upstream RmlUi, with the
 bound-geometry guard keeping its allowlist from growing meanwhile. Each accepted constraint in the
@@ -135,14 +136,7 @@ against the library is where RmlUi meets the legacy UI. In order of value:
    retire `dialog_background`; move the inventory family's live items into render targets and
    retire `background` with its `*_bg.rml` documents, taking each out of the test's list. Trigger:
    the paperdoll row above, which waits on the same pass.
-2. **Design-token resource loading — awaiting in-game sign-off.** The themed loader now leaves
-   ordinary RCSS `<link>` elements intact. An application-owned `Rml::FileInterface` substitutes
-   `token(name)` when RmlUi opens a themed sheet, so attribute order no longer controls substitution
-   and RmlUi can cache the parsed external sheet by path. Theme selection clears the stylesheet
-   cache before documents rebuild. The per-theme `.rml` override and model-placeholder path remain
-   in the loader because they need memory-backed markup. Confirm legacy/modern theme switching and
-   relative assets in game, then remove this entry.
-3. **A display-scale change leaves RmlUi's `dp` ratio stale.**
+2. **A display-scale change leaves RmlUi's `dp` ratio stale.**
    `SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED` updates the content scale `ViewportFitScale()` folds
    in, but nothing calls `RmlUiRuntime::OnResize()` until the next resize. A bug; fix it with the
    next change to `Winmain.cpp`'s event pump.
