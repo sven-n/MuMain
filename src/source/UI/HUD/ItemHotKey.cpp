@@ -364,6 +364,8 @@ void mu::ui::window::CItemHotKey::SyncSlotIcons(Rml::ElementDocument* document)
             target.Resize(static_cast<std::uint32_t>(std::lround(size.x)),
                           static_cast<std::uint32_t>(std::lround(size.y)));
         }
+        // An <img> without a texture still draws its quad, untextured: white.
+        icon->SetClass("hidden", !filled);
         const Rml::String source = filled ? target.Source() : Rml::String();
         if (icon->GetAttribute<Rml::String>("src", "") != source)
             icon->SetAttribute("src", source);
