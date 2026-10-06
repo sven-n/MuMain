@@ -385,11 +385,11 @@ namespace UI::RmlBridge
 
     namespace
     {
-        // Function-local static, same idiom ActiveThemeNameStorage() above already uses.
+        // Never destroyed: an owner destroyed at exit after it (a static window) still unregisters.
         std::unordered_map<const void*, ThemeReloadCallback>& ThemeReloadRegistry()
         {
-            static std::unordered_map<const void*, ThemeReloadCallback> registry;
-            return registry;
+            static auto* registry = new std::unordered_map<const void*, ThemeReloadCallback>();
+            return *registry;
         }
     }
 

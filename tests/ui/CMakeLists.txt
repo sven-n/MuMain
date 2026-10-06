@@ -201,6 +201,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME rml_themed_view_tests
+    SOURCES
+        test_rml_themed_view.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
     NAME rml_friend_window_identity_tests
     SOURCES test_rml_friend_window_identity.cpp
     LINK_LIBS MuClient

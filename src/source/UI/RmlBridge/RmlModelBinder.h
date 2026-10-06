@@ -74,11 +74,13 @@ public:
     // pre-Create() state so Create() can be called again (e.g. rebuilding against a new RmlUi
     // theme -- see UI::RmlBridge::RegisterForThemeReload()). No-op if Create() was never called or
     // already undone. `context` must be the same context Create() was given; RmlUi's data models
-    // are owned per-Context, not globally.
+    // are owned per-Context, not globally. A null `context` (RmlUi already released it) only
+    // resets the binder.
     void Destroy(Rml::Context* context)
     {
         if (m_ModelName.empty()) return;
-        context->RemoveDataModel(m_ModelName);
+        if (context)
+            context->RemoveDataModel(m_ModelName);
         m_TypeRegister.reset(); // after the model, which holds a raw pointer to it
         m_Model = Model{};
         m_Handle = Rml::DataModelHandle{};
