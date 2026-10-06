@@ -141,7 +141,9 @@ class EffectWorldPreview
 {
 public:
     // Creates the type at the end of this frame, again on every call; with
-    // other values, what earlier calls created stays.
+    // other values, what earlier calls created stays. A SubType below 0
+    // counts as 0: the game's code was written for the SubTypes its calls
+    // pass (a particle reads Hero->Weapon[SubType % 2]).
     void Start(const WorldPreviewRequest& request);
     // Removes what the preview created.
     void Stop();

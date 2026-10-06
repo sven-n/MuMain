@@ -667,6 +667,18 @@ was taken), and leaves out code under `#if 0` and under `#ifdef` of macros
 nothing defines; a refused SubType chosen while the preview runs ends the
 run.
 
+*Fork review of FX1.7b:* the SubType is 0 and up (one particle reads
+`Hero->Weapon[SubType % 2]`); the scan for code that changes the character
+or reaches the server also finds the character passed on, its object taken
+other than to compare it, writes through `Hero` and `Send...` calls, and
+attributes each place to its type or fails (code all types run, or a
+function effect code calls), which added Gaion's swords and frame strike to
+the refused types (their creation ends the character's own trails); the
+reader keeps whether an `#if` branch is known to be taken, so the `#else` of
+`#ifndef` of a macro that is off is left out; only the effect browser's view
+reads the source folder, from a header CMake generates. The editor console's
+stream redirect, which deadlocked on Linux and macOS, locks once per write.
+
 **FX1.7c Live preview in the browser (later).** The objects of FX1.7b drawn
 in the browser's view, on the chosen object, instead of in the world. The
 render loops of their pools (`RenderEffectShadows`, `RenderEffects`,

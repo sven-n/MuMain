@@ -242,6 +242,23 @@ void Skipped(OBJECT* o, vec3_t Position, vec3_t Angle, vec3_t Light)
 #ifdef SOMETIMES_DEFINED
     CreateEffect(MODEL_STONE2, Position, Angle, Light, 0, o);
 #endif
+#ifndef NEVER_DEFINED
+    CreateEffect(MODEL_BIG_STONE1, Position, Angle, Light, 0, o);
+#else
+    CreateEffect(MODEL_BIG_STONE2, Position, Angle, Light, 0, o);
+#endif
+#if 0
+    CreateEffect(MODEL_SKILL_BLAST, Position, Angle, Light, 0, o);
+#elif defined(NEVER_DEFINED)
+    CreateEffect(MODEL_GATE, Position, Angle, Light, 0, o);
+#else
+    CreateEffect(MODEL_BLADE_SKILL, Position, Angle, Light, 0, o);
+#endif
+#if !defined(NEVER_DEFINED)
+    CreateEffect(MODEL_BIG_STONE_PART1, Position, Angle, Light, 0, o);
+#elif defined(SOMETIMES_DEFINED)
+    CreateEffect(MODEL_BIG_STONE_PART2, Position, Angle, Light, 0, o);
+#endif
 }
 )source";
     const std::vector<EffectCallSite> calls = ReadEffectCallSites(source, "Test/Skipped.cpp", {"NEVER_DEFINED"});
@@ -249,6 +266,15 @@ void Skipped(OBJECT* o, vec3_t Position, vec3_t Angle, vec3_t Light)
     CHECK(FindCall(calls, EffectKind::Effect, MODEL_STONE1) == nullptr);
     CHECK(FindCall(calls, EffectKind::Effect, MODEL_ICE) == nullptr);
     CHECK(FindCall(calls, EffectKind::Effect, MODEL_STONE2) != nullptr);
+    // An #else or #elif after a branch known to be taken is left out; one
+    // after branches known not to be is read.
+    CHECK(FindCall(calls, EffectKind::Effect, MODEL_BIG_STONE1) != nullptr);
+    CHECK(FindCall(calls, EffectKind::Effect, MODEL_BIG_STONE2) == nullptr);
+    CHECK(FindCall(calls, EffectKind::Effect, MODEL_SKILL_BLAST) == nullptr);
+    CHECK(FindCall(calls, EffectKind::Effect, MODEL_GATE) == nullptr);
+    CHECK(FindCall(calls, EffectKind::Effect, MODEL_BLADE_SKILL) != nullptr);
+    CHECK(FindCall(calls, EffectKind::Effect, MODEL_BIG_STONE_PART1) != nullptr);
+    CHECK(FindCall(calls, EffectKind::Effect, MODEL_BIG_STONE_PART2) == nullptr);
     const EffectCallSite* poison = FindCall(calls, EffectKind::Effect, MODEL_POISON);
     REQUIRE(poison != nullptr);
     CHECK(poison->line == 7);

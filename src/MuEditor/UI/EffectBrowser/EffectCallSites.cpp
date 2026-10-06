@@ -135,35 +135,73 @@ std::optional<Directive> DirectiveOf(std::string_view line)
     return Directive{name, line.substr(at + name.size())};
 }
 
-// The macro an #ifdef or an #if defined(X) tests; empty for any other
-// condition.
-std::string_view MacroTested(const Directive& directive)
+// The macro an #ifdef, #ifndef, #if defined(X) or #if !defined(X) tests,
+// and whether the test is negated; no macro for any other condition.
+struct MacroTest
+{
+    std::string_view macro;
+    bool negated = false;
+};
+
+MacroTest MacroTested(const Directive& directive)
 {
     const std::string_view rest = directive.rest;
     if (directive.name == "ifdef" || directive.name == "ifndef")
-        return IdentifierAt(rest, SkipSpaces(rest, 0));
+        return {IdentifierAt(rest, SkipSpaces(rest, 0)), directive.name == "ifndef"};
     if (directive.name != "if" && directive.name != "elif")
         return {};
     const std::string compact = WithoutSpaces(rest);
+    const bool negated = !compact.empty() && compact.front() == '!';
+    const std::string_view test = std::string_view(compact).substr(negated ? 1 : 0);
     for (const std::string_view form : {std::string_view("defined("), std::string_view("defined")})
     {
-        if (compact.rfind(form, 0) != 0)
+        if (test.rfind(form, 0) != 0)
             continue;
-        const std::string_view name = IdentifierAt(compact, form.size());
+        const std::string_view name = IdentifierAt(test, form.size());
         const size_t end = form.size() + name.size() + (form.back() == '(' ? 1 : 0);
-        if (!name.empty() && end == compact.size())
-            return rest.substr(rest.find(name), name.size());
+        if (!name.empty() && end == test.size())
+            return {rest.substr(rest.find(name), name.size()), negated};
     }
     return {};
 }
 
-// The text with the lines of #if 0 and of #ifdef or #if defined of a macro
-// that is off blanked; their #else is kept. Other conditions are kept whole.
+enum class Condition
+{
+    False,
+    True,
+    Unknown,
+};
+
+// What the build makes of the condition of an #if, #ifdef, #ifndef or
+// #elif, as far as #if 0, #if 1 and the macros that are off tell.
+Condition ConditionOf(const Directive& directive, const std::unordered_set<std::string>& macrosOff)
+{
+    const std::string compact = WithoutSpaces(directive.rest);
+    if ((directive.name == "if" || directive.name == "elif") && (compact == "0" || compact == "1"))
+        return compact == "1" ? Condition::True : Condition::False;
+    const MacroTest test = MacroTested(directive);
+    if (test.macro.empty() || macrosOff.count(std::string(test.macro)) == 0)
+        return Condition::Unknown;
+    return test.negated ? Condition::True : Condition::False;
+}
+
+// The text with the branches the build leaves out blanked: a branch whose
+// condition is known to be false (#if 0, #ifdef or #if defined of a macro
+// that is off), and an #else or #elif after a branch known to be taken (#if 1,
+// #ifndef or #if !defined of a macro that is off). A branch whose condition
+// is not known is kept.
 std::string WithoutBranchesOff(std::string text, const std::unordered_set<std::string>& macrosOff)
 {
-    // Per open #if, whether its current branch is off.
-    std::vector<bool> open;
-    const auto anyOff = [&] { return std::find(open.begin(), open.end(), true) != open.end(); };
+    // Per open #if: whether its current branch is off, and whether a branch
+    // so far is known to be taken.
+    struct Branches
+    {
+        bool off;
+        bool taken;
+    };
+    std::vector<Branches> open;
+    const auto anyOff = [&]
+    { return std::any_of(open.begin(), open.end(), [](const Branches& branches) { return branches.off; }); };
     for (size_t start = 0; start < text.size();)
     {
         const size_t end = std::min(text.find('\n', start), text.size());
@@ -171,15 +209,20 @@ std::string WithoutBranchesOff(std::string text, const std::unordered_set<std::s
         bool blank = anyOff();
         if (directive && (directive->name == "if" || directive->name == "ifdef" || directive->name == "ifndef"))
         {
-            const std::string_view macro = MacroTested(*directive);
-            const bool knownFalse =
-                (directive->name == "if" && WithoutSpaces(directive->rest) == "0") ||
-                (directive->name != "ifndef" && !macro.empty() && macrosOff.count(std::string(macro)) != 0);
-            open.push_back(knownFalse);
+            const Condition condition = ConditionOf(*directive, macrosOff);
+            open.push_back({condition == Condition::False, condition == Condition::True});
         }
-        else if (directive && (directive->name == "else" || directive->name == "elif") && !open.empty())
+        else if (directive && directive->name == "elif" && !open.empty())
         {
-            open.back() = false;
+            const Condition condition = ConditionOf(*directive, macrosOff);
+            Branches& branches = open.back();
+            branches.off = branches.taken || condition == Condition::False;
+            branches.taken = branches.taken || condition == Condition::True;
+            blank = anyOff();
+        }
+        else if (directive && directive->name == "else" && !open.empty())
+        {
+            open.back().off = open.back().taken;
             blank = anyOff();
         }
         else if (directive && directive->name == "endif" && !open.empty())
@@ -703,8 +746,8 @@ void NoteMacros(std::string_view text, std::unordered_set<std::string>& defined,
         {
             if (directive->name == "define")
                 defined.emplace(IdentifierAt(directive->rest, SkipSpaces(directive->rest, 0)));
-            else if (const std::string_view macro = MacroTested(*directive); !macro.empty())
-                tested.emplace(macro);
+            else if (const MacroTest test = MacroTested(*directive); !test.macro.empty())
+                tested.emplace(test.macro);
         }
         start = end + 1;
     }

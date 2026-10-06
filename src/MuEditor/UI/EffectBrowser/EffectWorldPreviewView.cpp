@@ -8,6 +8,7 @@
 #include "EffectBrowserLayout.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "I18N/All.h"
+#include "MuEditorSourceDir.h"
 #include "UI/DevEditor/DevEditorUI.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "imgui.h"
@@ -33,11 +34,7 @@ constexpr int VisibleGameCalls = 8;
 
 // The sources the editor was built from (src/source), for the game's calls;
 // UTF-8, as the path may hold any letter.
-#ifdef MU_EDITOR_SOURCE_DIR
 constexpr const char8_t* SourceDirectory = MU_EDITOR_SOURCE_DIR;
-#else
-constexpr const char8_t* SourceDirectory = u8"";
-#endif
 
 void TextDisabledWrapped(const char* text)
 {

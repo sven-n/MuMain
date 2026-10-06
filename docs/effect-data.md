@@ -339,13 +339,14 @@ world (below) is for that.
   it in the drop-down (type a part of its name or its number to find it),
   and set its level and whether it is excellent or ancient; the item is
   drawn with its looks, without its own sprites and particles.
-- **SubType**: typed in, or picked from the SubTypes of the creation table's
-  columns (the first stands for the SubTypes without a variant, which get
-  the row's own values). The view uses the values the game gives that
-  SubType; the preview in the world creates the type with it. A sprite's
-  SubType is its blend: the four blends are offered (0 glow, 1 subtract, 2
-  alpha test, 3 luminance), and the formation mark's SubType picks its frame
-  (0 to 7) instead.
+- **SubType**: 0 and up, typed in or picked from the SubTypes of the
+  creation table's columns (the first stands for the SubTypes without a
+  variant, which get the row's own values). The game's code was written for
+  the SubTypes its calls pass, none below 0. The view uses the values the
+  game gives that SubType; the preview in the world creates the type with
+  it. A sprite's SubType is its blend: the four blends are offered (0 glow,
+  1 subtract, 2 alpha test, 3 luminance), and the formation mark's SubType
+  picks its frame (0 to 7) instead.
 - **The view**: drag to turn the camera, the wheel zooms, a double click or
   **Reset view** puts it back; **Turn** turns the type slowly.
 - **Notes** under the view say what the preview cannot show: an empty slot,
@@ -436,8 +437,12 @@ any side, and F12 hides the editor while it runs.
   server whoever owns them (the catapult stones of every SubType knock the
   character back when they land and tell the server; SubType 0 of the class
   change stops the character; SubType 1 of the summoner's Lagul takes its
-  owner for lightning). A test finds such code in the effect code and checks
-  that its type is on the list.
+  owner for lightning; Gaion's swords and frame strike end the character's
+  own trails when they are created). A test marks such code in the effect
+  code (the character passed on, its object taken other than to compare it,
+  a write through `Hero`, a request to the server) and checks that the type
+  of each place is on the list; a place in code all types run, or in another
+  function the effect code calls, fails it.
 
 ## When the code changes
 

@@ -423,6 +423,36 @@ TEST_CASE("The world preview creates the type with the game's call, follows it a
     Effects[*own].Live = false;
     WorldTime = worldTime;
 }
+TEST_CASE("The world preview creates a SubType below 0 as 0, for which the game's code was written "
+          "[effects][editor]")
+{
+    EffectTestData::BuildShippedRegistry();
+    const TestHero hero;
+    auto worldPreview = std::make_unique<EffectWorldPreview>();
+    EffectWorldPreview& world = *worldPreview;
+    const OBJECT* owner = &world.GetOwner();
+    const double worldTime = WorldTime;
+
+    world.SetRepeat(true);
+    world.Start({EffectKind::Effect, MODEL_POISON, -1});
+    world.AfterFrame(true, true);
+    const std::optional<int> first = FindEffect(MODEL_POISON, owner);
+    REQUIRE(first.has_value());
+    CHECK(Effects[*first].SubType == 0);
+
+    // Also while it runs.
+    world.UpdateRunning({EffectKind::Effect, MODEL_POISON, -3});
+    Effects[*first].Live = false;
+    world.AfterFrame(true, true);
+    WorldTime += 1000.0;
+    world.AfterFrame(true, true);
+    const std::optional<int> again = FindEffect(MODEL_POISON, owner);
+    REQUIRE(again.has_value());
+    CHECK(Effects[*again].SubType == 0);
+    world.Stop();
+    WorldTime = worldTime;
+}
+
 TEST_CASE("The world preview starts particles, lightning and sprites at the chest and finds the nearest monster or "
           "NPC [effects][editor]")
 {

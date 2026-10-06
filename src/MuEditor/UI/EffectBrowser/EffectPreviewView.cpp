@@ -159,7 +159,7 @@ void CEffectPreviewView::Render(const MuEditor::Effects::EffectBrowserRow& row, 
     RenderNotes(request.subject.notes | m_scene.GetObjectNotes() | ItemNotes(request));
     // A game call taken with Use sets the SubType of both previews.
     if (const std::optional<int> used = m_world.Render(world, kind, row.type, m_subType))
-        m_subType = *used;
+        m_subType = std::max(*used, 0);
 }
 
 void CEffectPreviewView::SelectType(const MuEditor::Effects::EffectBrowserRow& row, EffectKind kind,
@@ -237,7 +237,10 @@ void CEffectPreviewView::RenderSubType(EffectKind kind)
     ImGui::TextUnformatted(I18N::Editor::SubType);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(SubTypeInputWidth * g_MuEditorCore.GetUIScale());
-    ImGui::InputInt("##subType", &m_subType);
+    // 0 and up, as the creation table's variants: the game's code was
+    // written for the SubTypes its calls pass.
+    if (ImGui::InputInt("##subType", &m_subType))
+        m_subType = std::max(m_subType, 0);
     if (m_subTypePresets.size() > 1)
     {
         ImGui::SameLine(0.0f, 0.0f);

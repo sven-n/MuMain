@@ -44,12 +44,20 @@ constexpr double RepeatPauseMs = 300.0;
 // The catapult stones of every SubType knock the character back when they
 // land near it and tell the server (SubTypes 0 and 1 land as 88 and 99).
 // SubType 0 of the class change stops the character when it ends. SubType 1
-// of the summoner's Lagul takes its owner for a lightning object.
-constexpr std::array<RefusedWorldPreview, 4> Refused = {{
+// of the summoner's Lagul takes its owner for a lightning object. Gaion's
+// swords and frame strike end the character's own trails (SubTypes 113 to
+// 155) when they are created.
+constexpr std::array<RefusedWorldPreview, 10> Refused = {{
     {MODEL_FLY_BIG_STONE1, -1},
     {MODEL_FLY_BIG_STONE2, -1},
     {MODEL_CHANGE_UP_EFF, 0},
     {MODEL_SUMMONER_SUMMON_LAGUL, 1},
+    {MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, -1},
+    {MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, -1},
+    {MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, -1},
+    {MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, -1},
+    {MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, -1},
+    {MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE, -1},
 }};
 
 // CreateJoint copies the colour of these without checking that there is one;
@@ -155,8 +163,18 @@ CHARACTER* FindNearestCharacter(std::span<CHARACTER> characters, const PreviewVe
     return nearest;
 }
 
-void EffectWorldPreview::Start(const WorldPreviewRequest& request)
+namespace
 {
+WorldPreviewRequest WithSubTypeFromZero(WorldPreviewRequest request)
+{
+    request.subType = std::max(request.subType, 0);
+    return request;
+}
+} // namespace
+
+void EffectWorldPreview::Start(const WorldPreviewRequest& requested)
+{
+    const WorldPreviewRequest request = WithSubTypeFromZero(requested);
     if (m_running && (m_running->kind != request.kind || m_running->type != request.type))
         Stop();
     if (!m_running && Hero != nullptr)
@@ -197,8 +215,9 @@ void EffectWorldPreview::ChooseTarget(const WorldPreviewCall& call)
     }
 }
 
-void EffectWorldPreview::UpdateRunning(const WorldPreviewRequest& request)
+void EffectWorldPreview::UpdateRunning(const WorldPreviewRequest& requested)
 {
+    const WorldPreviewRequest request = WithSubTypeFromZero(requested);
     if (!m_running || m_running->kind != request.kind || m_running->type != request.type)
         return;
     // A SubType the preview refuses ends the run: Repeat would create it.
