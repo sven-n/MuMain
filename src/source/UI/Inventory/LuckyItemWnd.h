@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "UI/Inventory/ItemCameraTarget.h"
+#include "UI/Inventory/ItemGridModel.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
@@ -70,23 +72,18 @@ namespace mu::ui::window
             // matches the original's fixed per-slot vertical rhythm without duplicating its pixel
             // math (see SyncMixLines() equivalent in SyncRmlModel(), LuckyItemWnd.cpp).
             std::vector<LuckyLine> textLines;
+            // The grids as their documents draw them (CInventoryCtrl::Cells()).
+            UI::Items::ItemGridCells gridCells;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, LuckyItemRmlModel& model);
         UI::RmlBridge::ThemedView<LuckyItemRmlModel> m_RmlView{"lucky_item",
             [this](Rml::DataModelConstructor& c, LuckyItemRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/lucky_item.rml"}}};
 
-        // The frame background panel must render behind the grid's live 3D icons, but RmlUi's
-        // main context always renders last -- so it goes through
-        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (see
-        // CStorageInventoryExt's identical StorageExtBgRmlModel for the full mechanism).
-        struct LuckyItemBgRmlModel
-        {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-        };
-        static void BindRmlBgModel(Rml::DataModelConstructor& c, LuckyItemBgRmlModel& model);
-        UI::RmlBridge::ThemedView<LuckyItemBgRmlModel> m_RmlBgView{"lucky_item_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/lucky_item_bg.rml"}}};
+        // The grids' items, into the document's #item_view.
+        void RenderItems();
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
+                                                 this};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -96,7 +93,6 @@ namespace mu::ui::window
         bool	Process_InventoryCtrl(void);
 
         int		GetLuckyItemRate(int _nType);
-        void	Render_Frame(void);
         void	RenderMixEffect(void);
         void	Reset(void);
         void	AddText(int _nGlobalTextIndex, DWORD _dwColor = 0xFFFFFFFF, int _bLine = RT3_SORT_CENTER);
@@ -104,7 +100,6 @@ namespace mu::ui::window
         bool	Check_LuckyItem_Trade(ITEM* _pItem);
         bool	Check_LuckyItem_Refinery(ITEM* _pItem);
 
-        static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
     public:
         CInventoryCtrl* GetInventoryCtrl() const;
 

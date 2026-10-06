@@ -2,17 +2,39 @@
 <head>
 	<title>Personal Store</title>
 	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="item_grid.rcss"/>
 	<link type="text/rcss" href="my_shop.rcss"/>
 </head>
 <body data-model="my_shop">
-	<!-- Window frame/title/shop-name field/Open-Close-Exit buttons only -- the inventory grid stays
-	     native (MyShopInventory.h). Frame background lives in my_shop_bg.rml instead, since it must
-	     paint behind the native 3D icons. -->
+	<!-- CMyShopInventory (MyShopInventory.h): the frame, the item grid, the items C++ draws live into
+	     #item_view, the stack counts, title, shop-name field and Open/Close/Exit buttons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
-		<!-- Where the native item grid goes: invisible boxes the theme places; the window reads them each frame. -->
-		<div id="item_grid" class="native-anchor"></div>
+		<!-- The frame. -->
+		<div class="bg-fill"></div>
+		<div class="bg-top"></div>
+		<div class="bg-left"></div>
+		<div class="bg-right"></div>
+		<div class="bg-bottom"></div>
+		<!-- The item_grid grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="item_grid" class="native-anchor item-grid">
+			<div class="item-grid-cells">
+				<div data-for="c : grid_cells" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
+		<img id="item_view" class="item-view"/>
+		<div id="item_grid_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+		</div>
 		<span class="sharp-text" id="title"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{title}}</span>
 

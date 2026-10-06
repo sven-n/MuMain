@@ -2,22 +2,60 @@
 <head>
 	<title>Trade</title>
 	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="item_grid.rcss"/>
 	<link type="text/rcss" href="trade.rcss"/>
 </head>
 <body data-model="trade">
-	<!-- Window frame/title/both nickname displays/both gold strips/both confirm checkboxes/divider/
-	     buttons only -- both CInventoryCtrl grids stay native (Trade.h). Background lives in
-	     trade_bg.rml instead, since it must paint behind the native 3D icons. The guild-mark emblem
-	     (RenderGuildMark()) and the warning arrow's animated glyph (RenderWarningArrow()) also stay
-	     native -- both are live-rendered/live-tracking effects, not static chrome. The arrow's
-	     "Warning" text badge (item_warning_badges below) is RmlUi now, positioned per-frame from
-	     C++ since it tracks a live, variable-length set of flagged item grid cells. -->
+	<!-- CTrade (Trade.h): the frame, title, both nickname displays, gold strips and confirm
+	     checkboxes, divider, buttons and both item grids; C++ draws the items, the partner's
+	     guild mark (RenderGuildMark()) and the warning arrow's animated glyph (RenderWarningArrow())
+	     live into #item_view. The arrow's "Warning" text badge (item_warning_badges below) is
+	     positioned per-frame from C++ since it tracks a live, variable-length set of flagged item
+	     grid cells. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
+		<!-- The frame. -->
+		<div class="bg-fill"></div>
+		<div class="bg-top"></div>
+		<div class="bg-left"></div>
+		<div class="bg-right"></div>
+		<div class="bg-bottom"></div>
 		<!-- Where the native item grids go: invisible boxes the theme places; the window reads them each frame. -->
-		<div id="partner_grid" class="native-anchor"></div>
-		<div id="item_grid" class="native-anchor"></div>
+		<!-- The partner_grid grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="partner_grid" class="native-anchor item-grid">
+			<div class="item-grid-cells">
+				<div data-for="c : partner_cells" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The item_grid grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="item_grid" class="native-anchor item-grid">
+			<div class="item-grid-cells">
+				<div data-for="c : grid_cells" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
+		<img id="item_view" class="item-view"/>
+		<div id="partner_grid_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : partner_cells"><span class="item-count-text" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+		</div>
+		<div id="item_grid_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+		</div>
 		<span class="sharp-text" id="title"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{title}}</span>
 

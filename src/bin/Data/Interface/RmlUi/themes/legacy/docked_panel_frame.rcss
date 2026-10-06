@@ -1,13 +1,7 @@
 /* Shared frame for the PanelColumnX()-docked single-document window family: character_info,
    my_quest_info, pet_info, party_info. Their #panel/frame sprites/exit button/tooltip shape are
    byte-identical (confirmed by diffing all four before this file existed) -- link this BEFORE the
-   window's own .rcss and keep only genuinely window-specific content there.
-
-   my_inventory is NOT part of this family here -- its frame paint lives in a separate *_bg.rml
-   RmlUi context that deliberately does not link base.rcss (see my_inventory_bg.rcss's own header
-   comment), so this file isn't reachable from there. It keeps its own duplicate of these same
-   values for that real technical reason, not oversight -- if that constraint is ever lifted, copy
-   these same values in, don't approximate them. */
+   window's own .rcss and keep only genuinely window-specific content there. */
 
 @spritesheet docked-bg-fill-sheet  { src: "../../../newui_msgbox_back.jpg";  docked-bg-fill:   0px 0px 190px 429px; }
 @spritesheet docked-bg-top-a-sheet { src: "../../../newui_item_back04.tga"; docked-bg-top-a: 0px 0px 190px 64px; }

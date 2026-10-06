@@ -248,6 +248,7 @@ bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
+    m_pNewInventoryCtrl->DrawInDocument();
 
     m_pNewInventoryCtrl->SetToolTipType(TOOLTIP_TYPE_MY_SHOP);
 
@@ -265,6 +266,8 @@ void mu::ui::window::CMyShopInventory::BindRmlModel(Rml::DataModelConstructor& c
     c.Bind("root_x", &model.rootX);
     c.Bind("root_y", &model.rootY);
     c.Bind("root_scale", &model.rootScale);
+    UI::Items::RegisterItemGridCells(c);
+    c.Bind("grid_cells", &model.gridCells);
     c.Bind("panel_width", &model.panelWidth);
     c.Bind("text_px", &model.textPx);
 
@@ -363,21 +366,14 @@ void mu::ui::window::CMyShopInventory::BindRmlModel(Rml::DataModelConstructor& c
     model.stillOpeningText = StringUtils::WideToNarrow(I18N::Game::StillOpening);
 }
 
-void mu::ui::window::CMyShopInventory::BindRmlBgModel(Rml::DataModelConstructor& c, MyShopBgRmlModel& model)
-{
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
-}
-
 void mu::ui::window::CMyShopInventory::BuildRmlUi()
 {
     m_RmlView.Ensure();
-    m_RmlBgView.Ensure();
 }
 
 void mu::ui::window::CMyShopInventory::Release()
 {
+    m_ItemTarget.Disable();
     SAFE_DELETE(m_pNewInventoryCtrl);
 
     if (m_pNewUIMng)
@@ -387,7 +383,6 @@ void mu::ui::window::CMyShopInventory::Release()
     }
 
     m_RmlView.Release();
-    m_RmlBgView.Release();
 }
 
 void mu::ui::window::CMyShopInventory::SetPos(int x, int y)
@@ -709,15 +704,7 @@ bool mu::ui::window::CMyShopInventory::Update()
 
 void mu::ui::window::CMyShopInventory::SyncRmlModel()
 {
-    if (m_RmlBgView.Document())
-    {
-        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
-
-        // RenderBackgroundLayer() renders whatever's shown in the shared background context
-        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
-    }
-
+    m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
@@ -725,6 +712,11 @@ void mu::ui::window::CMyShopInventory::SyncRmlModel()
     UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_Pos, 16, 90);
+    if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())
+    {
+        m_RmlView.GetModel().gridCells = m_pNewInventoryCtrl->Cells();
+        m_RmlView.MarkDirty("grid_cells");
+    }
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     auto& model = m_RmlView.GetModel();
@@ -754,9 +746,6 @@ bool mu::ui::window::CMyShopInventory::Render()
 {
     EnableAlphaTest();
 
-    // Frame background panel is RmlUi, routed through the background context (see
-    // MyShopBgRmlModel), painted by CManager::Render()'s centralized RenderBackgroundLayer() call
-    // before this window's own Render()/Render3D() run. The former RenderTextInfo() instructional
     // text is RmlUi now too (MyShopRmlModel), driven by SyncRmlModel()/my_shop.rml. The shop-title
     // field is a stock RmlUi <input> in that same document, so it needs no native render pass here.
 
@@ -803,4 +792,11 @@ bool mu::ui::window::CMyShopInventory::IsEnableInputValueTextBox()
 void mu::ui::window::CMyShopInventory::SetInputValueTextBox(bool bIsEnable)
 {
     m_bIsEnableInputValueTextBox = bIsEnable;
+}
+
+// Into #item_view (m_ItemTarget), in this window's layout space.
+void mu::ui::window::CMyShopInventory::RenderItems()
+{
+    if (m_pNewInventoryCtrl && m_pNewInventoryCtrl->IsVisible())
+        m_pNewInventoryCtrl->Render3D();
 }

@@ -34,7 +34,7 @@ CLuckyItemWnd::CLuckyItemWnd()
     m_eType = eLuckyItemType_None;
     m_nMixEffectTimer = 0;
     // Otherwise garbage until OpeningProcess()/SetFrame_Text() first run -- SyncRmlModel() now
-    // reads this every Update() tick (not just while Render_Frame() used to run), so an
+    // reads this every Update() tick (not only while the window draws), so an
     // uninitialized value here could drive an out-of-bounds m_sText[] loop before the window is
     // ever opened.
     m_nTextMaxLine = 0;
@@ -53,17 +53,6 @@ int CLuckyItemWnd::GetLuckyItemRate(int _nType)
     if (_nType == eLuckyItemType_Refinery)	return 50;
 
     return 0;
-}
-
-void CLuckyItemWnd::Render_Frame(void)
-{
-    // Frame background/border/subject-title/mix-button/result-description text are RmlUi now
-    // (lucky_item.rml/lucky_item_bg.rml -- see SyncRmlModel()). Only the mix-completion sparkle
-    // effect stays native here, untouched.
-    if (m_eEnd == eLuckyItem_End)
-    {
-        g_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
-    }
 }
 
 STORAGE_TYPE CLuckyItemWnd::SetMoveAction()
@@ -91,15 +80,6 @@ int CLuckyItemWnd::SetActAction()
             return 52;
         default:
             return -1;
-    }
-}
-
-void CLuckyItemWnd::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
-{
-    if (pClass)
-    {
-        CLuckyItemWnd* pInventory = (CLuckyItemWnd*)pClass;
-        pInventory->RenderMixEffect();
     }
 }
 
@@ -210,6 +190,7 @@ bool CLuckyItemWnd::Create(CManager* pNewUIMng, int x, int y)
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
+    m_pNewInventoryCtrl->DrawInDocument();
     m_pNewInventoryCtrl->GetSquareColorNormal(m_fInvenClr);
     m_pNewInventoryCtrl->GetSquareColorWarning(m_fInvenClrWarning);
 
@@ -234,6 +215,8 @@ void CLuckyItemWnd::BindRmlModel(Rml::DataModelConstructor& c, LuckyItemRmlModel
     c.Bind("root_x", &model.rootX);
     c.Bind("root_y", &model.rootY);
     c.Bind("root_scale", &model.rootScale);
+    UI::Items::RegisterItemGridCells(c);
+    c.Bind("grid_cells", &model.gridCells);
     c.Bind("text_px", &model.textPx);
     c.Bind("panel_width", &model.panelWidth);
     c.Bind("title", &model.title);
@@ -254,21 +237,14 @@ void CLuckyItemWnd::BindRmlModel(Rml::DataModelConstructor& c, LuckyItemRmlModel
         });
 }
 
-void CLuckyItemWnd::BindRmlBgModel(Rml::DataModelConstructor& c, LuckyItemBgRmlModel& model)
-{
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
-}
-
 void CLuckyItemWnd::BuildRmlUi()
 {
     m_RmlView.Ensure();
-    m_RmlBgView.Ensure();
 }
 
 void CLuckyItemWnd::Release()
 {
+    m_ItemTarget.Disable();
 #ifdef LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
     SAFE_DELETE(m_pNewInventoryCtrl);
 #endif // LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
@@ -279,7 +255,6 @@ void CLuckyItemWnd::Release()
     }
 
     m_RmlView.Release();
-    m_RmlBgView.Release();
 }
 
 void CLuckyItemWnd::OpeningProcess(void)
@@ -585,32 +560,14 @@ bool CLuckyItemWnd::Update(void)
 
 bool CLuckyItemWnd::Render(void)
 {
-    EnableAlphaTest();
-
-    // Frame background panel is RmlUi, routed through the background context (see
-    // LuckyItemBgRmlModel), painted by CManager::Render()'s centralized RenderBackgroundLayer()
-    // call before this window's own Render()/Render3D() run.
-    Render_Frame();
-
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->Render();
-
-    DisableAlphaBlend();
-
     return true;
 }
 
 void CLuckyItemWnd::SyncRmlModel()
 {
-    if (m_RmlBgView.Document())
-    {
-        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_ptPos);
-
-        // RenderBackgroundLayer() renders whatever's shown in the shared background context
-        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
-    }
-
+    m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
@@ -618,6 +575,11 @@ void CLuckyItemWnd::SyncRmlModel()
     UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_ptPos, 15, 110);
+    if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())
+    {
+        m_RmlView.GetModel().gridCells = m_pNewInventoryCtrl->Cells();
+        m_RmlView.MarkDirty("grid_cells");
+    }
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     auto& model = m_RmlView.GetModel();
@@ -643,7 +605,7 @@ void CLuckyItemWnd::SyncRmlModel()
     const wchar_t* mixTooltipText = (m_eType == eLuckyItemType_Refinery) ? I18N::Game::Refine : I18N::Game::Combining;
     syncWide(&LuckyItemRmlModel::mixTooltip, "mix_tooltip", mixTooltipText);
 
-    // Same m_eEnd != eLuckyItem_End condition Render_Frame() checks for the mix-completion
+    // Same m_eEnd != eLuckyItem_End condition RenderItems() checks for the mix-completion
     // sparkle effect -- drives the RmlUi mix button's visibility here.
     syncBool(&LuckyItemRmlModel::mixVisible, "mix_visible", m_eEnd != eLuckyItem_End);
 
@@ -678,4 +640,19 @@ void CLuckyItemWnd::SyncRmlModel()
 float CLuckyItemWnd::GetLayerDepth(void)
 {
     return 3.4f;
+}
+
+// Into #item_view (m_ItemTarget), in this window's layout space.
+void CLuckyItemWnd::RenderItems()
+{
+    if (m_pNewInventoryCtrl && m_pNewInventoryCtrl->IsVisible())
+        m_pNewInventoryCtrl->Render3D();
+    // The mix-completion sparkle over the items.
+    if (m_eEnd == eLuckyItem_End)
+    {
+        DisableDepthTest();
+        EnableAlphaTest();
+        RenderMixEffect();
+        DisableAlphaBlend();
+    }
 }

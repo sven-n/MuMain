@@ -79,9 +79,8 @@
 	portrait2d-image: 0px 0px 148px 138px;
 }
 
-/* Message well -- layout only (position/overflow/flex); the recessed fill lives in
-   generic_confirm_dialog_bg.rcss's .gcd-bg-content-fill instead (same left/right/top/bottom, so
-   the fill still lines up exactly behind this box). Text sits directly on it, scrolling (via
+/* Message well -- layout only (position/overflow/flex); the recessed fill is .gcd-well at the same
+   left/right/top/bottom, so it lines up exactly behind this box. Text sits directly on it, scrolling (via
    base.rcss's .scroll-pane, which .gcd-text-col carries) rather than growing the panel by
    default.
 

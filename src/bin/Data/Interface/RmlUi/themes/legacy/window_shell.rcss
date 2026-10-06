@@ -52,8 +52,7 @@
 	pointer-events: none;
 	decorator: image(msgbox-top-image);
 }
-/* Single stretched fill (not tiled) -- same technique generic_confirm_dialog_bg.rcss's own
-   .gcd-bg-sprite-middle uses. */
+/* Single stretched fill (not tiled), as the confirm dialog's .gcd-sprite-middle. */
 .window-shell-sprite-middle {
 	position: absolute;
 	left: 0;

@@ -473,6 +473,10 @@ public:
     }
     // Closes the capture opened by BeginOffscreenCapture.
     virtual void EndOffscreenCapture() {}
+    // Until the open capture closes, 2D drawing (quads, text) maps this rectangle of the window, in
+    // pixels from its top-left, onto the capture instead of the whole window: native 2D lands in a
+    // render target where it would have landed on screen.
+    virtual void SetOffscreen2DRect(float /*left*/, float /*top*/, float /*width*/, float /*height*/) {}
 
     // A texture that captures render into and anything can sample -- GetRawTexture() resolves it.
     // Unlike a one-shot capture's, it owns a depth buffer of its own size and clears to

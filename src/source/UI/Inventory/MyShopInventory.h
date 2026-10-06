@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "UI/Inventory/ItemCameraTarget.h"
+#include "UI/Inventory/ItemGridModel.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
@@ -81,6 +83,8 @@ namespace mu::ui::window
             Rml::String cantBeReturnedText;
             Rml::String allItemTradingText;
             Rml::String canOnlyBeDoneUsingZenText;
+            // The grids as their documents draw them (CInventoryCtrl::Cells()).
+            UI::Items::ItemGridCells gridCells;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, MyShopRmlModel& model);
         UI::RmlBridge::ThemedView<MyShopRmlModel> m_RmlView{"my_shop",
@@ -88,17 +92,10 @@ namespace mu::ui::window
             {{"Data/Interface/RmlUi/my_shop.rml"}},
             {.afterBuild = [this] { ApplyShopTitleLimit(); }}};
 
-        // The frame background panel must render behind the grid's live 3D icons, but RmlUi's main
-        // context always renders last -- so it goes through
-        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (see
-        // CStorageInventoryExt's identical StorageExtBgRmlModel for the full mechanism).
-        struct MyShopBgRmlModel
-        {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-        };
-        static void BindRmlBgModel(Rml::DataModelConstructor& c, MyShopBgRmlModel& model);
-        UI::RmlBridge::ThemedView<MyShopBgRmlModel> m_RmlBgView{"my_shop_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/my_shop_bg.rml"}}};
+        // The grids' items, into the document's #item_view.
+        void RenderItems();
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
+                                                 this};
 
         // Mirrors the old CButton array's Lock()/tooltip-text state (OpenButtonLock()/UnLock(),
         // ChangePersonal()) now that the buttons themselves are RmlUi-owned.

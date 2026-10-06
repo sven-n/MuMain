@@ -2,19 +2,61 @@
 <head>
 	<title>Trade</title>
 	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="item_grid.rcss"/>
 	<link type="text/rcss" href="trade.rcss"/>
 </head>
 <body data-model="trade">
-	<!-- Chrome only -- both CInventoryCtrl grids, the guild-mark emblem, and the warning arrow's
-	     animated glyph stay native (Trade.h). Elements below sit in the gaps the grids' fixed
-	     y-offsets leave. The arrow's "Warning" text badge (item_warning_badges below) is RmlUi now,
-	     positioned per-frame from C++ since it tracks a live, variable-length set of flagged item
-	     grid cells. -->
+	<!-- CTrade (Trade.h): both item grids, and the items, guild mark and warning arrow C++ draws
+	     live into #item_view (RenderGuildMark(), RenderWarningArrow()). Elements below sit in the
+	     gaps the grids' fixed y-offsets leave. The arrow's "Warning" text badge
+	     (item_warning_badges below) is positioned per-frame from C++ since it tracks a live,
+	     variable-length set of flagged item grid cells. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
+		<!-- The frame. -->
+		<div class="bg-panel">
+			<div class="inv-shell-edge"></div>
+			<div class="inv-groove"></div>
+			<!-- Header rail's fill and accent; the title is the rail below. -->
+			<div class="rail-fill">
+				<div class="rail-accent"></div>
+			</div>
+		</div>
 		<!-- Where the native item grids go: invisible boxes the theme places; the window reads them each frame. -->
-		<div id="partner_grid" class="native-anchor"></div>
-		<div id="item_grid" class="native-anchor"></div>
+		<!-- The partner_grid grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="partner_grid" class="native-anchor item-grid">
+			<div class="item-grid-cells">
+				<div data-for="c : partner_cells" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The item_grid grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="item_grid" class="native-anchor item-grid">
+			<div class="item-grid-cells">
+				<div data-for="c : grid_cells" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
+		<img id="item_view" class="item-view"/>
+		<div id="partner_grid_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : partner_cells"><span class="item-count-text" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+		</div>
+		<div id="item_grid_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+		</div>
 		<!-- Header rail: `-px` since #panel carries transform:scale(root_scale) (base.rcss). -->
 		<div class="modern-header-rail-px trade-header-rail">
 			<div class="modern-joint-px"></div>

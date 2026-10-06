@@ -101,13 +101,15 @@ void UI::Items::ItemCameraTarget::Render(std::uint32_t width, std::uint32_t heig
         renderer.Scale(scaleX, scaleY, 1.f);
         // gluPerspective2() takes the camera's screen centre from the viewport; the capture brings its own.
         SetRenderViewport(0, 0, WindowWidth, WindowHeight);
-        gluPerspective2(1.f, windowWidth / windowHeight, RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
+        gluPerspective2(m_fieldOfView, windowWidth / windowHeight, RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
         renderer.SetMatrixMode(GL_MODELVIEW);
         renderer.PushMatrix();
         renderer.LoadIdentity();
         CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
         EnableDepthTest();
         EnableDepthMask();
+        // Native 2D drawn here lands where it would have on screen too.
+        renderer.SetOffscreen2DRect(m_offset.x, m_offset.y, w, h);
 
         m_drawer(m_offset, m_size);
 

@@ -80,6 +80,7 @@ bool CMixInventory::Create(CManager* pNewUIMng, int x, int y)
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
+    m_pNewInventoryCtrl->DrawInDocument();
 
     SetPos(x, y);
 
@@ -99,6 +100,8 @@ void CMixInventory::BindRmlModel(Rml::DataModelConstructor& c, MixInventoryRmlMo
     c.Bind("root_x", &model.rootX);
     c.Bind("root_y", &model.rootY);
     c.Bind("root_scale", &model.rootScale);
+    UI::Items::RegisterItemGridCells(c);
+    c.Bind("grid_cells", &model.gridCells);
     c.Bind("panel_width", &model.panelWidth);
     c.Bind("text_px", &model.textPx);
     c.Bind("title", &model.title);
@@ -169,13 +172,6 @@ void CMixInventory::BindRmlModel(Rml::DataModelConstructor& c, MixInventoryRmlMo
         });
 }
 
-void CMixInventory::BindRmlBgModel(Rml::DataModelConstructor& c, MixInventoryBgRmlModel& model)
-{
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
-}
-
 void CMixInventory::OnRmlReloaded()
 {
     m_SocketTextDirty = true;
@@ -184,11 +180,11 @@ void CMixInventory::OnRmlReloaded()
 void CMixInventory::BuildRmlUi()
 {
     m_RmlView.Ensure();
-    m_RmlBgView.Ensure();
 }
 
 void CMixInventory::Release()
 {
+    m_ItemTarget.Disable();
 
     SAFE_DELETE(m_pNewInventoryCtrl);
 
@@ -197,11 +193,7 @@ void CMixInventory::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-    if (g_pNewUI3DRenderMng)
-        g_pNewUI3DRenderMng->DeleteUI2DEffectObject(UI2DEffectCallback);
-
     m_RmlView.Release();
-    m_RmlBgView.Release();
 }
 
 void CMixInventory::SetMixState(int iMixState)
@@ -362,30 +354,14 @@ bool CMixInventory::Update()
 }
 bool CMixInventory::Render()
 {
-    EnableAlphaTest();
-
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->Render();
-
-    if (GetMixState() >= MIX_REQUESTED && g_pNewUI3DRenderMng)
-        g_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
-
-    DisableAlphaBlend();
-
     return true;
 }
 
 void CMixInventory::SyncRmlModel()
 {
-    if (m_RmlBgView.Document())
-    {
-        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
-
-        // RenderBackgroundLayer() renders whatever's shown in the shared background context
-        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
-    }
-
+    m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
@@ -393,6 +369,11 @@ void CMixInventory::SyncRmlModel()
     UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_Pos, 15, 110);
+    if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())
+    {
+        m_RmlView.GetModel().gridCells = m_pNewInventoryCtrl->Cells();
+        m_RmlView.MarkDirty("grid_cells");
+    }
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     auto& model = m_RmlView.GetModel();
@@ -521,15 +502,6 @@ void CMixInventory::SyncSocketListModel()
             continue;
         row.selected = selected;
         m_RmlView.MarkDirty("socket_lines");
-    }
-}
-
-void CMixInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
-{
-    if (pClass)
-    {
-        auto* pMixInventory = (CMixInventory*)pClass;
-        pMixInventory->RenderMixEffect();
     }
 }
 
@@ -1229,4 +1201,19 @@ void CMixInventory::RenderMixEffect()
 int mu::ui::window::CMixInventory::GetPointedItemIndex()
 {
     return m_pNewInventoryCtrl->GetPointedSquareIndex();
+}
+
+// Into #item_view (m_ItemTarget), in this window's layout space.
+void CMixInventory::RenderItems()
+{
+    if (m_pNewInventoryCtrl && m_pNewInventoryCtrl->IsVisible())
+        m_pNewInventoryCtrl->Render3D();
+    // The sparkle over the items while the mix runs.
+    if (GetMixState() >= MIX_REQUESTED)
+    {
+        DisableDepthTest();
+        EnableAlphaTest();
+        RenderMixEffect();
+        DisableAlphaBlend();
+    }
 }

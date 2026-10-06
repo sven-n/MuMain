@@ -209,4 +209,22 @@
 
 /* Native item grid: the first cell's top-left, in #panel's units. */
 .native-anchor { position: absolute; pointer-events: none; }
-#item_grid { left: 15px; top: 110px; }
+#item_grid, #item_grid_counts { left: 15px; top: 110px; width: 160px; height: 80px; }
+
+/* The frame. */
+@spritesheet mix-bg-fill-sheet   { src: "../../../newui_msgbox_back.jpg";   mix-bg-fill:   0px 0px 190px 429px; }
+@spritesheet mix-bg-top-sheet    { src: "../../../newui_item_back04.tga";   mix-bg-top:    0px 0px 190px 64px;  }
+@spritesheet mix-bg-left-sheet   { src: "../../../newui_item_back02-L.tga"; mix-bg-left:   0px 0px 21px 320px;  }
+@spritesheet mix-bg-right-sheet  { src: "../../../newui_item_back02-R.tga"; mix-bg-right:  0px 0px 21px 320px;  }
+@spritesheet mix-bg-bottom-sheet { src: "../../../newui_item_back03.tga";   mix-bg-bottom: 0px 0px 190px 45px;  }
+
+.bg-fill, .bg-top, .bg-left, .bg-right, .bg-bottom {
+	position: absolute;
+	pointer-events: none;
+}
+
+.bg-fill   { left: 0;    top: 0;    width: 190px; height: 429px; decorator: image(mix-bg-fill); }
+.bg-top    { left: 0;    top: 0;    width: 190px; height: 64px;  decorator: image(mix-bg-top); }
+.bg-left   { left: 0;    top: 64px; width: 21px;  height: 320px; decorator: image(mix-bg-left); }
+.bg-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(mix-bg-right); }
+.bg-bottom { left: 0;    top: 384px; width: 190px; height: 45px; decorator: image(mix-bg-bottom); }

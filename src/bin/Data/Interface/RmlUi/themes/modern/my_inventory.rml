@@ -52,8 +52,7 @@
 		</div>
 		<div id="option_tooltip_anchor" class="native-anchor"></div>
 		<!-- Header rail: `-px` variants since #panel carries transform:scale(root_scale) (see
-		     base.rcss). Fill/accent live in my_inventory_bg.rml's .rail-fill/.rail-accent instead --
-		     this box only holds the rivet/title. -->
+		     base.rcss). Fill/accent are the frame's .rail-fill/.rail-accent above. -->
 		<div class="modern-header-rail-px inv-header-rail">
 			<div class="modern-joint-px"></div>
 			<div class="modern-header-text-px">

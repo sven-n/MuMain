@@ -59,11 +59,8 @@ TEST_CASE("the background contexts hold only the documents already in them [ui][
     const std::set<std::string> background = {
         "battle_soccer_score.rml", "blood_castle_time.rml", "chaos_castle_time.rml",
         "cursed_temple_system.rml", "doppelganger_frame.rml", "duel_window.rml",
-        "empire_guardian_timer.rml", "in_game_shop_bg.rml", "inventory_extension_bg.rml",
-        "kanturu_info.rml", "lucky_item_bg.rml", "map_name.rml", "master_level_bg.rml",
-        "mix_inventory_bg.rml", "my_shop_bg.rml",
-        "npc_shop_bg.rml", "purchase_shop_bg.rml", "siege_warfare.rml", "storage_bg.rml",
-        "storage_ext_bg.rml", "trade_bg.rml", "world_labels.rml",
+        "empire_guardian_timer.rml", "kanturu_info.rml", "map_name.rml", "master_level_bg.rml",
+        "siege_warfare.rml", "world_labels.rml",
     };
 
     const std::set<std::string> named = DocumentsNamedInSources();
@@ -139,5 +136,5 @@ TEST_CASE("documents stack as the original's windows did [ui][stacking]")
     CHECK(Depth("sys_menu.rml") > Depth("notices.rml"));
     CHECK(Depth("reconnect_dialog.rml") > Depth("loading.rml"));
     // A window's background document shares its depth.
-    CHECK(Depth("trade_bg.rml") == Depth("trade.rml"));
+    CHECK(Depth("master_level_bg.rml") == Depth("master_level.rml"));
 }

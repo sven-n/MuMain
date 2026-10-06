@@ -56,6 +56,7 @@ bool CInventoryExtension::Create(CManager* pNewUIMng, int x, int y)
             SAFE_DELETE(m_extension);
             return false;
         }
+        m_extension->DrawInDocument();
 
         if (m_extension)
         {
@@ -86,6 +87,11 @@ void CInventoryExtension::BindRmlModel(Rml::DataModelConstructor& c, InventoryEx
     c.Bind("root_x", &model.rootX);
     c.Bind("root_y", &model.rootY);
     c.Bind("root_scale", &model.rootScale);
+    UI::Items::RegisterItemGridCells(c);
+    c.Bind("grid_cells_1", &model.gridCells1);
+    c.Bind("grid_cells_2", &model.gridCells2);
+    c.Bind("grid_cells_3", &model.gridCells3);
+    c.Bind("grid_cells_4", &model.gridCells4);
     c.Bind("panel_width", &model.panelWidth);
     c.Bind("text_px", &model.textPx);
     c.Bind("title", &model.title);
@@ -99,21 +105,14 @@ void CInventoryExtension::BindRmlModel(Rml::DataModelConstructor& c, InventoryEx
         });
 }
 
-void CInventoryExtension::BindRmlBgModel(Rml::DataModelConstructor& c, InventoryExtensionBgRmlModel& model)
-{
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
-}
-
 void CInventoryExtension::BuildRmlUi()
 {
     m_RmlView.Ensure();
-    m_RmlBgView.Ensure();
 }
 
 void CInventoryExtension::Release()
 {
+    m_ItemTarget.Disable();
     UnloadImages();
 
     for (auto extension : m_extensions)
@@ -131,7 +130,6 @@ void CInventoryExtension::Release()
     }
 
     m_RmlView.Release();
-    m_RmlBgView.Release();
 }
 
 void CInventoryExtension::SetPos(int x, int y)
@@ -233,13 +231,6 @@ bool CInventoryExtension::Update()
 
 bool CInventoryExtension::Render()
 {
-    EnableAlphaTest();
-
-    // Frame background panel is RmlUi, routed through the background context (see
-    // InventoryExtensionBgRmlModel), painted by CManager::Render()'s centralized
-    // RenderBackgroundLayer() call before this window's own Render()/Render3D() run.
-    RenderFrame();
-
     for (int i = 0; i < CharacterAttribute->InventoryExtensions; i++)
     {
         if (const auto& m_extension = m_extensions[i])
@@ -247,8 +238,6 @@ bool CInventoryExtension::Render()
             m_extension->Render();
         }
     }
-
-    DisableAlphaBlend();
     return true;
 }
 
@@ -268,15 +257,7 @@ void CInventoryExtension::RenderFrame() const
 
 void CInventoryExtension::SyncRmlModel()
 {
-    if (m_RmlBgView.Document())
-    {
-        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
-
-        // RenderBackgroundLayer() renders whatever's shown in the shared background context
-        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
-    }
-
+    m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
@@ -290,6 +271,26 @@ void CInventoryExtension::SyncRmlModel()
         m_extensions[2]->FollowAnchor(m_RmlView.Document(), "item_grid_3", m_Pos, 15, 219);
     if (m_extensions[3])
         m_extensions[3]->FollowAnchor(m_RmlView.Document(), "item_grid_4", m_Pos, 15, 306);
+    if (m_extensions[0] && m_RmlView.GetModel().gridCells1 != m_extensions[0]->Cells())
+    {
+        m_RmlView.GetModel().gridCells1 = m_extensions[0]->Cells();
+        m_RmlView.MarkDirty("grid_cells_1");
+    }
+    if (m_extensions[1] && m_RmlView.GetModel().gridCells2 != m_extensions[1]->Cells())
+    {
+        m_RmlView.GetModel().gridCells2 = m_extensions[1]->Cells();
+        m_RmlView.MarkDirty("grid_cells_2");
+    }
+    if (m_extensions[2] && m_RmlView.GetModel().gridCells3 != m_extensions[2]->Cells())
+    {
+        m_RmlView.GetModel().gridCells3 = m_extensions[2]->Cells();
+        m_RmlView.MarkDirty("grid_cells_3");
+    }
+    if (m_extensions[3] && m_RmlView.GetModel().gridCells4 != m_extensions[3]->Cells())
+    {
+        m_RmlView.GetModel().gridCells4 = m_extensions[3]->Cells();
+        m_RmlView.MarkDirty("grid_cells_4");
+    }
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     auto& model = m_RmlView.GetModel();
@@ -327,7 +328,7 @@ float CInventoryExtension::GetLayerDepth()
 
 void CInventoryExtension::LoadImages()
 {
-    // Frame/exit-button art moved to RmlUi (inventory_extension.rcss/inventory_extension_bg.rcss).
+    // Frame/exit-button art moved to RmlUi (inventory_extension.rcss).
     // Numbered lock glyphs moved to RmlUi too -- only the locked page's table/empty-slot backing
     // art stays native (see this class's header comment).
     LoadBitmap(L"Interface\\newui_item_add_marking_non.jpg", IMAGE_EXTENSION_EMPTY, GL_LINEAR);
@@ -442,4 +443,23 @@ CInventoryCtrl* CInventoryExtension::GetOwnerOf(const CPickedItem* pPickedItem) 
     }
 
     return nullptr;
+}
+
+// Into #item_view (m_ItemTarget), in this window's layout space: the locked extensions' art, then
+// the items.
+void CInventoryExtension::RenderItems()
+{
+    DisableDepthTest();
+    EnableAlphaTest();
+    RenderFrame();
+    DisableAlphaBlend();
+    EnableDepthTest();
+    if (m_extensions[0] && m_extensions[0]->IsVisible())
+        m_extensions[0]->Render3D();
+    if (m_extensions[1] && m_extensions[1]->IsVisible())
+        m_extensions[1]->Render3D();
+    if (m_extensions[2] && m_extensions[2]->IsVisible())
+        m_extensions[2]->Render3D();
+    if (m_extensions[3] && m_extensions[3]->IsVisible())
+        m_extensions[3]->Render3D();
 }

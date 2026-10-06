@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "UI/Inventory/ItemCameraTarget.h"
+#include "UI/Inventory/ItemGridModel.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
@@ -114,6 +116,8 @@ namespace mu::ui::window
 
             bool showSocketList = false;
             std::vector<SocketListLine> socketLines;
+            // The grids as their documents draw them (CInventoryCtrl::Cells()).
+            UI::Items::ItemGridCells gridCells;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, MixInventoryRmlModel& model);
         void OnRmlReloaded();
@@ -122,17 +126,10 @@ namespace mu::ui::window
             {{"Data/Interface/RmlUi/mix_inventory.rml"}},
             {.afterReload = [this] { OnRmlReloaded(); }}};
 
-        // The frame background panel must render behind the grid's live 3D icons, but RmlUi's
-        // main context always renders last -- so it goes through
-        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (see
-        // CMyInventory's identical MyInventoryBgRmlModel for the full mechanism).
-        struct MixInventoryBgRmlModel
-        {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-        };
-        static void BindRmlBgModel(Rml::DataModelConstructor& c, MixInventoryBgRmlModel& model);
-        UI::RmlBridge::ThemedView<MixInventoryBgRmlModel> m_RmlBgView{"mix_inventory_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/mix_inventory_bg.rml"}}};
+        // The grids' items, into the document's #item_view.
+        void RenderItems();
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
+                                                 this};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -169,7 +166,6 @@ namespace mu::ui::window
 
         CInventoryCtrl* GetInventoryCtrl() const;
 
-        static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 
     private:
 

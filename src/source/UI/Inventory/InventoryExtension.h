@@ -1,5 +1,7 @@
 #pragma once
 
+#include "UI/Inventory/ItemCameraTarget.h"
+#include "UI/Inventory/ItemGridModel.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
@@ -15,7 +17,7 @@ namespace mu::ui::window
     public:
         enum IMAGE_LIST
         {
-            // Frame/title/exit button moved to RmlUi (inventory_extension.rcss/inventory_extension_bg.rcss).
+            // Frame/title/exit button moved to RmlUi (inventory_extension.rcss).
             // Numbered lock glyphs (formerly IMAGE_EXTENSION_NO1..4) moved to RmlUi too (see
             // LockedExtPageEntry below) -- only the locked page's table/empty-slot backing art stays native.
             IMAGE_EXTENSION_EMPTY = BITMAP_INTERFACE_NEW_INVENTORY_EXT_BEGIN,
@@ -61,22 +63,21 @@ namespace mu::ui::window
             Rml::String title;
             Rml::String exitTooltip;
             std::vector<LockedExtPageEntry> lockedPages;
+            // The grids as their documents draw them (CInventoryCtrl::Cells()).
+            UI::Items::ItemGridCells gridCells1;
+            UI::Items::ItemGridCells gridCells2;
+            UI::Items::ItemGridCells gridCells3;
+            UI::Items::ItemGridCells gridCells4;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, InventoryExtensionRmlModel& model);
         UI::RmlBridge::ThemedView<InventoryExtensionRmlModel> m_RmlView{"inventory_extension",
             [this](Rml::DataModelConstructor& c, InventoryExtensionRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/inventory_extension.rml"}}};
 
-        // Frame background panel must render behind the grids' live 3D icons, but RmlUi's main
-        // context always renders last -- so it goes through RmlUiRuntime's background context
-        // instead (see CMyInventory/CStorageInventoryExt's identical *BgRmlModel for the mechanism).
-        struct InventoryExtensionBgRmlModel
-        {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-        };
-        static void BindRmlBgModel(Rml::DataModelConstructor& c, InventoryExtensionBgRmlModel& model);
-        UI::RmlBridge::ThemedView<InventoryExtensionBgRmlModel> m_RmlBgView{"inventory_extension_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/inventory_extension_bg.rml"}}};
+        // The grids' items, into the document's #item_view.
+        void RenderItems();
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
+                                                 this};
 
         void BuildRmlUi();
         void SyncRmlModel();

@@ -21,8 +21,9 @@ class CObject;
 // Live 3D items shown through an <img>: the drawer runs under the item camera the original drew
 // every UI item with (an identity view at a 1-degree field of view over the whole window), its
 // projection cropped to the image's box, so each RenderItem3D() call lands in the target exactly
-// where it would have landed on screen. The drawer keeps its own coordinates: whatever space its
-// RenderItem3D() rectangles are in, through the transform it was built with.
+// where it would have landed on screen; native 2D the drawer draws (with the depth test off) maps
+// the same way. The drawer keeps its own coordinates: whatever space its RenderItem3D() rectangles
+// are in, through the transform it was built with.
 namespace UI::Items
 {
 // `element`'s content box where it is drawn, in window pixels: through every transform on it and
@@ -45,12 +46,16 @@ public:
     // target. Null or disabled stops the drawing; the image is invisible while it has no frame.
     void Sync(Rml::Element* image, bool enabled);
     void Disable() { m_target.SetEnabled(false); }
+    // The camera's vertical field of view, in degrees: the item camera's 1 unless a window drew
+    // its items through another.
+    void SetFieldOfView(float degrees) { m_fieldOfView = degrees; }
 
 private:
     void Render(std::uint32_t width, std::uint32_t height);
 
     Drawer m_drawer;
     TransformSource m_transform;
+    float m_fieldOfView = 1.f;
     // The image's box in window pixels as of the last Sync().
     Rml::Vector2f m_offset{0.f, 0.f};
     Rml::Vector2f m_size{0.f, 0.f};

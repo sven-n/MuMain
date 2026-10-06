@@ -59,8 +59,8 @@ void CInGameShop::Init()
 
 void CInGameShop::Release()
 {
+    m_NativeTarget.Disable();
     m_RmlView.Release();
-    m_RmlBgView.Release();
 
     UnloadImages();
 
@@ -112,29 +112,14 @@ void CInGameShop::BindRmlModel(Rml::DataModelConstructor& c, InGameShopRmlModel&
                         });
 }
 
-void CInGameShop::BindRmlBgModel(Rml::DataModelConstructor& c, InGameShopBgRmlModel& model)
-{
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
-}
-
-// The frame first, as it always was: the background context draws before the main one anyway.
 void CInGameShop::BuildRmlUi()
 {
-    m_RmlBgView.Ensure();
     m_RmlView.Ensure();
 }
 
 void CInGameShop::SyncRmlModel()
 {
-    if (!m_RmlBgView.Document())
-        return;
-    UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
-    // RenderBackgroundLayer() paints whatever is shown in the shared background context whoever
-    // asked for it, so this is what keeps the backdrop off screen while the shop is closed.
-    UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
-
+    m_NativeTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("igs_view") : nullptr, IsVisible());
     if (!m_RmlView.Document())
         return;
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
@@ -179,21 +164,35 @@ void CInGameShop::SetPos(int x, int y)
 
 bool CInGameShop::Render()
 {
+    return true;
+}
+
+// Into #igs_view (m_NativeTarget), in this window's layout space, under the 2-degree camera the
+// package items always had.
+void CInGameShop::RenderNative()
+{
+    DisableDepthTest();
     EnableAlphaTest();
     RenderFrame();
     RenderButtons();
     RenderTexts();
     RenderBanner();
     RenderListBox();
-    RenderDisplayItems();
     DisableAlphaBlend();
-    return true;
+
+    EnableDepthTest();
+    EnableDepthMask();
+    for (int i = 0; i < g_InGameShopSystem->GetSizePackageAsDisplayPackage(); i++)
+    {
+        int iPosX = IGS_ITEMRENDER_POS_X_STANDAD + (IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X * (i % IGS_NUM_ITEMS_WIDTH));
+        int iPosY = IGS_ITEMRENDER_POS_Y_STANDAD + (IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y * (i / IGS_NUM_ITEMS_HEIGHT));
+        RenderItem3D(iPosX, iPosY, IGS_ITEMRENDER_POS_WIDTH, IGS_ITEMRENDER_POS_HEIGHT, g_InGameShopSystem->GetPackageItemCode(i), 0, 0, 0, true);
+    }
 }
 
 void CInGameShop::RenderFrame()
 {
-    // The flat backdrop is in_game_shop_bg.rml, painted by RenderBackgroundLayer()
-    // before this runs so the 3D package items stay above it.
+    // The flat backdrop is in_game_shop.rml's, under #igs_view.
 
     int iSizeCategory = g_InGameShopSystem->GetSizeCategoriesAsSelectedZone();
 
@@ -401,51 +400,6 @@ void CInGameShop::SetRateScale(int _ItemType)
     {
         m_fRate_Scale = _fRate_Value;
     }
-}
-
-// A shadow-compare diagnostic validated RenderDisplayItems()'s proj/view closed
-// form and post-pop restore across multiple soaks; the diagnostic and the FFP
-// matrix-stack calls it was validating were since deleted (see RenderDisplayItems()'s own comments below). Its per-item
-// loop only calls RenderItem3D(), which carries no GL model transform. The restore mirror runs
-// BEFORE BeginBitmap() is called again (unlike C3DCamera::Render(), where it runs after) — a
-// genuine save/restore of whatever context was active at entry, not a BeginBitmap()-delegated
-// restore, hence its own pre-panel snapshot below.
-static float s_PreShopProj[16];
-static float s_PreShopView[16];
-
-void CInGameShop::RenderDisplayItems()
-{
-    EndBitmap();
-
-    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
-    mu::GetRenderer().PushMatrix();
-    mu::GetRenderer().LoadIdentity();
-    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
-    gluPerspective2(2.0f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
-    mu::GetRenderer().PushMatrix();
-    mu::GetRenderer().LoadIdentity();
-    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
-    EnableDepthTest();
-    EnableDepthMask();
-
-    mu::GetRenderer().ClearDepthBuffer();
-
-    for (int i = 0; i < g_InGameShopSystem->GetSizePackageAsDisplayPackage(); i++)
-    {
-        int iPosX = IGS_ITEMRENDER_POS_X_STANDAD + (IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X * (i % IGS_NUM_ITEMS_WIDTH));
-        int iPosY = IGS_ITEMRENDER_POS_Y_STANDAD + (IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y * (i / IGS_NUM_ITEMS_HEIGHT));
-        RenderItem3D(iPosX, iPosY, IGS_ITEMRENDER_POS_WIDTH, IGS_ITEMRENDER_POS_HEIGHT, g_InGameShopSystem->GetPackageItemCode(i), 0, 0, 0, true);
-    }
-
-    UpdateMousePositionn();
-
-    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
-    mu::GetRenderer().PopMatrix();
-    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
-    mu::GetRenderer().PopMatrix();
-
-    BeginBitmap();
 }
 
 bool CInGameShop::BtnProcess()

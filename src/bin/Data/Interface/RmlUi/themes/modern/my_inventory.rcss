@@ -16,7 +16,7 @@
    #panel like this one needs the px variants, not the dp originals).
 
    top:7 matches SysMenu's own rail top exactly (so .modern-joint-px's rivet sits at the same -1px
-   relative to the frame's shell-edge at -3px in my_inventory_bg.rcss -- 2px contained clearance,
+   relative to the frame's shell-edge at -3px -- 2px contained clearance,
    identical relationship to SysMenu's). Only height is trimmed, 36 vs SysMenu's 38, because the
    native paperdoll grid starts at `m_Pos.y + 44` (MyInventory.cpp) -- ends at 43px, 1px clear. */
 .inv-header-rail {

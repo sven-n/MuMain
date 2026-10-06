@@ -432,7 +432,8 @@ an additive glow adds to the panel under it instead of painting a black box.
 `CInventoryCtrl` a window's document draws calls `DrawInDocument()`: its `Render()` then computes
 `Cells()` (each cell's tint, drop preview and stack count, from the native logic) instead of
 drawing, and the shared item camera stops drawing its items, which the window draws into its own
-`ItemCameraTarget` with `Render3D()`. The window binds the cells (`RegisterItemGridCells()`) and
+`ItemCameraTarget` with `Render3D()`. Native 2D a drawer draws lands in the target too, where it
+would have on screen (`SetOffscreen2DRect()`), for a window's remaining effects. The window binds the cells (`RegisterItemGridCells()`) and
 its markup lays them out: `.item-grid` (cells, then the frame) at the grid's anchor, the window's
 `.item-view` image over it, then `.item-grid-counts` at the same place. The hit tests stay native,
 reading the anchor. `CMyInventory` is the worked example, with its equipment slots as

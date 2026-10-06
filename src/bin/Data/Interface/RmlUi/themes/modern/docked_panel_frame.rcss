@@ -9,12 +9,7 @@
    applies the shared classes directly. Only the PAINT that base.rcss's shared classes don't
    already cover (the #panel gradient/border/box-shadow body, and the header-rail's own
    fill/border/box-shadow + accent line) lives here -- these four windows share this one
-   forged-dialog recipe so they render as one family.
-
-   my_inventory is NOT part of this -- my_inventory_bg.rcss's own .bg-panel/.inv-shell-edge/
-   .inv-groove/.rail-fill are a real, separately-justified duplicate (its background paint lives in a
-   *_bg.rml context that deliberately can't link base.rcss or this file). Copy these same values in
-   if that constraint is ever lifted; don't approximate them. */
+   forged-dialog recipe so they render as one family. */
 
 #panel {
 	position: absolute;

@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "UI/Inventory/ItemCameraTarget.h"
+#include "UI/Inventory/ItemGridModel.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Dialogs/MessageBox.h"
@@ -24,7 +26,7 @@ namespace mu::ui::window
         enum IMAGE_LIST
         {
             // Cursor-following warning-arrow overlay only -- every other sprite in this window
-            // (frame/nick-back/money/confirm/line/buttons) is RmlUi (trade.rml/trade_bg.rml);
+            // (frame/nick-back/money/confirm/line/buttons) is RmlUi (trade.rml);
             // see RenderWarningArrow()/LoadImages().
             IMAGE_TRADE_WARNING_ARROW = BITMAP_CURSOR + 7,
         };
@@ -114,23 +116,19 @@ namespace mu::ui::window
             };
             Rml::String itemWarningText; // "Warning" -- set once, same string every badge
             std::vector<ItemWarningBadge> itemWarningBadges;
+            // The grids as their documents draw them (CInventoryCtrl::Cells()).
+            UI::Items::ItemGridCells partnerCells;
+            UI::Items::ItemGridCells gridCells;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model);
         UI::RmlBridge::ThemedView<TradeRmlModel> m_RmlView{"trade",
             [this](Rml::DataModelConstructor& c, TradeRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/trade.rml"}}};
 
-        // The frame background panel must render behind both grids' live 3D icons, but RmlUi's
-        // main context always renders last -- so it goes through
-        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (see CMyInventory's
-        // identical MyInventoryBgRmlModel for the full mechanism).
-        struct TradeBgRmlModel
-        {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-        };
-        static void BindRmlBgModel(Rml::DataModelConstructor& c, TradeBgRmlModel& model);
-        UI::RmlBridge::ThemedView<TradeBgRmlModel> m_RmlBgView{"trade_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/trade_bg.rml"}}};
+        // The grids' items, into the document's #item_view.
+        void RenderItems();
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
+                                                 this};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -151,7 +149,6 @@ namespace mu::ui::window
 
         float GetLayerDepth();	//. 2.1f
 
-        static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 
         // Returns the other player's (grid-based) trade inventory control.
         CInventoryCtrl* GetYourInvenCtrl() const

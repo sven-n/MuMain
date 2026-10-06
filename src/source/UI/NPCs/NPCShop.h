@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "UI/Inventory/ItemCameraTarget.h"
+#include "UI/Inventory/ItemGridModel.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
@@ -74,23 +76,18 @@ namespace mu::ui::window
             Rml::String repairAllLabel;
             Rml::String repairGoldText;
             Rml::String repairGoldTier; // UI::RmlBridge::GoldTierKey() of the amount
+            // The grids as their documents draw them (CInventoryCtrl::Cells()).
+            UI::Items::ItemGridCells gridCells;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, NPCShopRmlModel& model);
         UI::RmlBridge::ThemedView<NPCShopRmlModel> m_RmlView{"npc_shop",
             [this](Rml::DataModelConstructor& c, NPCShopRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/npc_shop.rml"}}};
 
-        // The frame background panel must render behind the grid's live 3D icons, but RmlUi's
-        // main context always renders last -- so it goes through
-        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (see
-        // CMyInventory's identical MyInventoryBgRmlModel for the full mechanism).
-        struct NPCShopBgRmlModel
-        {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-        };
-        static void BindRmlBgModel(Rml::DataModelConstructor& c, NPCShopBgRmlModel& model);
-        UI::RmlBridge::ThemedView<NPCShopBgRmlModel> m_RmlBgView{"npc_shop_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/npc_shop_bg.rml"}}};
+        // The grids' items, into the document's #item_view.
+        void RenderItems();
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
+                                                 this};
 
         void BuildRmlUi();
         void SyncRmlModel();

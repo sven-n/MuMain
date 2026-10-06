@@ -53,6 +53,7 @@ bool CTrade::Create(CManager* pNewUIMng, int x, int y)
         SAFE_DELETE(m_pYourInvenCtrl);
         return false;
     }
+    m_pYourInvenCtrl->DrawInDocument();
 
     m_pMyInvenCtrl = new CInventoryCtrl;
     if (false == m_pMyInvenCtrl->Create(STORAGE_TYPE::TRADE, g_pNewUI3DRenderMng, g_pNewItemMng,
@@ -61,6 +62,7 @@ bool CTrade::Create(CManager* pNewUIMng, int x, int y)
         SAFE_DELETE(m_pMyInvenCtrl);
         return false;
     }
+    m_pMyInvenCtrl->DrawInDocument();
 
     SetPos(x, y);
 
@@ -84,6 +86,9 @@ void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
     c.Bind("root_x", &model.rootX);
     c.Bind("root_y", &model.rootY);
     c.Bind("root_scale", &model.rootScale);
+    UI::Items::RegisterItemGridCells(c);
+    c.Bind("partner_cells", &model.partnerCells);
+    c.Bind("grid_cells", &model.gridCells);
     c.Bind("panel_width", &model.panelWidth);
     c.Bind("text_px", &model.textPx);
 
@@ -178,17 +183,9 @@ void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
         });
 }
 
-void CTrade::BindRmlBgModel(Rml::DataModelConstructor& c, TradeBgRmlModel& model)
-{
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
-}
-
 void CTrade::BuildRmlUi()
 {
     m_RmlView.Ensure();
-    m_RmlBgView.Ensure();
 }
 
 void CTrade::InitTradeInfo()
@@ -209,6 +206,7 @@ void CTrade::InitYourInvenBackUp()
 
 void CTrade::Release()
 {
+    m_ItemTarget.Disable();
     UnloadImages();
 
     SAFE_DELETE(m_pMyInvenCtrl);
@@ -220,11 +218,7 @@ void CTrade::Release()
         m_pNewUIMng = NULL;
     }
 
-    if (g_pNewUI3DRenderMng)
-        g_pNewUI3DRenderMng->DeleteUI2DEffectObject(UI2DEffectCallback);
-
     m_RmlView.Release();
-    m_RmlBgView.Release();
 }
 
 void CTrade::SetPos(int x, int y)
@@ -306,34 +300,11 @@ bool CTrade::Update()
 
 bool CTrade::Render()
 {
-    ::EnableAlphaTest();
-
-    // Frame background panel is RmlUi, routed through the background context (see
-    // TradeBgRmlModel), painted by CManager::Render()'s centralized RenderBackgroundLayer() call
-    // before this window's own Render()/Render3D() run.
-    RenderGuildMark();
-
     if (m_pYourInvenCtrl)
         m_pYourInvenCtrl->Render();
     if (m_pMyInvenCtrl)
         m_pMyInvenCtrl->Render();
-
-    if (g_pNewUI3DRenderMng)
-        g_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER,
-            UI2DEffectCallback, this, 0, 0);
-
-    ::DisableAlphaBlend();
-
     return true;
-}
-
-void CTrade::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
-{
-    if (pClass)
-    {
-        auto* pNewUITrade = (CTrade*)pClass;
-        pNewUITrade->RenderWarningArrow();
-    }
 }
 
 // Dynamically-generated guild-emblem bitmap (::CreateGuildMark() builds it fresh from the guild's
@@ -403,15 +374,7 @@ int CTrade::ConvertYourLevel() const
 
 void CTrade::SyncRmlModel()
 {
-    if (m_RmlBgView.Document())
-    {
-        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
-
-        // RenderBackgroundLayer() renders whatever's shown in the shared background context
-        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
-    }
-
+    m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
@@ -421,6 +384,16 @@ void CTrade::SyncRmlModel()
         m_pYourInvenCtrl->FollowAnchor(m_RmlView.Document(), "partner_grid", m_Pos, 16, 68);
     if (m_pMyInvenCtrl)
         m_pMyInvenCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_Pos, 16, 274);
+    if (m_pYourInvenCtrl && m_RmlView.GetModel().partnerCells != m_pYourInvenCtrl->Cells())
+    {
+        m_RmlView.GetModel().partnerCells = m_pYourInvenCtrl->Cells();
+        m_RmlView.MarkDirty("partner_cells");
+    }
+    if (m_pMyInvenCtrl && m_RmlView.GetModel().gridCells != m_pMyInvenCtrl->Cells())
+    {
+        m_RmlView.GetModel().gridCells = m_pMyInvenCtrl->Cells();
+        m_RmlView.MarkDirty("grid_cells");
+    }
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     auto syncBool = [this](bool TradeRmlModel::* field, const char* boundName, bool value)
@@ -951,4 +924,21 @@ int mu::ui::window::CTrade::GetPointedItemIndexMyInven()
 int mu::ui::window::CTrade::GetPointedItemIndexYourInven()
 {
     return m_pYourInvenCtrl->GetPointedSquareIndex();
+}
+
+// Into #item_view (m_ItemTarget), in this window's layout space: the partner's guild mark under
+// the items, the warning arrows over them.
+void CTrade::RenderItems()
+{
+    DisableDepthTest();
+    ::EnableAlphaTest();
+    RenderGuildMark();
+    EnableDepthTest();
+    if (m_pYourInvenCtrl && m_pYourInvenCtrl->IsVisible())
+        m_pYourInvenCtrl->Render3D();
+    if (m_pMyInvenCtrl && m_pMyInvenCtrl->IsVisible())
+        m_pMyInvenCtrl->Render3D();
+    DisableDepthTest();
+    RenderWarningArrow();
+    ::DisableAlphaBlend();
 }

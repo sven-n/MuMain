@@ -20,6 +20,7 @@
 
 // Include SDL3 GPU header only in this file — not exposed to game logic.
 // SDL3 is a required project dependency, so these includes are unconditional.
+#include <optional>
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL.h>
 #if __has_include(<SDL3_ttf/SDL_ttf.h>)
@@ -894,6 +895,8 @@ struct PendingOffscreenCapture
 static std::vector<PendingOffscreenCapture> s_pendingOffscreenCaptures;
 static std::size_t s_offscreenCaptureStart = 0u;
 static std::uint32_t s_offscreenCaptureTextureId = 0u;
+// SetOffscreen2DRect()'s projection for the open capture's 2D draws.
+static std::optional<glm::mat4> s_offscreen2DProjection;
 static Uint32 s_offscreenCaptureWidth = 0u;
 static Uint32 s_offscreenCaptureHeight = 0u;
 
@@ -2965,8 +2968,8 @@ public:
         // positive y-axis is upwards so the signs of the y-coords is reversed").
         // Vertex positions are in Y-up space with the text origin at (0,0).
         // drawX/drawY offset the text to the correct screen position.
-        cmd.vu.mvp =
-            glm::ortho(0.0f, static_cast<float>(s_cachedWinW), 0.0f, static_cast<float>(s_cachedWinH), -1.0f, 1.0f);
+        cmd.vu.mvp = s_offscreen2DProjection.value_or(
+            glm::ortho(0.0f, static_cast<float>(s_cachedWinW), 0.0f, static_cast<float>(s_cachedWinH), -1.0f, 1.0f));
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, cmd.vtxCount);
         std::size_t& previousCommand =
             Render::PreviousDrawCommand(s_previousDrawCommands, Render::DrawCommandFamily::TextTriangles2D);
@@ -3187,6 +3190,7 @@ public:
         s_previousDrawCommands.fill(kNoDrawCommand);
         s_offscreenCaptureStart = s_renderCmds.size();
         s_offscreenCaptureTextureId = textureId;
+        s_offscreen2DProjection.reset();
         s_offscreenCaptureWidth = width;
         s_offscreenCaptureHeight = height;
         return textureId;
@@ -3203,7 +3207,17 @@ public:
                                               s_offscreenCaptureTextureId, s_offscreenCaptureWidth,
                                               s_offscreenCaptureHeight});
         s_offscreenCaptureTextureId = 0u;
+        s_offscreen2DProjection.reset();
         s_previousDrawCommands.fill(kNoDrawCommand);
+    }
+
+    void SetOffscreen2DRect(float left, float top, float width, float height) override
+    {
+        if (s_offscreenCaptureTextureId == 0u || width <= 0.f || height <= 0.f)
+            return;
+        // 2D vertices are window pixels with y up from the bottom edge.
+        const float bottom = static_cast<float>(s_cachedWinH) - (top + height);
+        s_offscreen2DProjection = glm::ortho(left, left + width, bottom, bottom + height, -1.0f, 1.0f);
     }
 
     [[nodiscard]] std::uint32_t CreateRenderTarget(std::uint32_t width, std::uint32_t height) override
@@ -3429,8 +3443,8 @@ public:
         // 2D ortho MVP: maps [0,W]×[0,H] to NDC, replicating gluOrtho2D.
         // GLM_FORCE_DEPTH_ZERO_TO_ONE → correct Z [0,1] for Metal/Vulkan.
         // fogStart=fogEnd=0 → range=0 → vertex shader sets fogFactor=1.0 (no fog for 2D).
-        cmd.vu.mvp =
-            glm::ortho(0.0f, static_cast<float>(s_cachedWinW), 0.0f, static_cast<float>(s_cachedWinH), -1.0f, 1.0f);
+        cmd.vu.mvp = s_offscreen2DProjection.value_or(
+            glm::ortho(0.0f, static_cast<float>(s_cachedWinW), 0.0f, static_cast<float>(s_cachedWinH), -1.0f, 1.0f));
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, drawQuads * 4u);
         std::size_t& previousCommand =
             Render::PreviousDrawCommand(s_previousDrawCommands, Render::DrawCommandFamily::ScreenQuads2D);

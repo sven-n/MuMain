@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "UI/Inventory/ItemCameraTarget.h"
+#include "UI/Inventory/ItemGridModel.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
@@ -90,23 +92,18 @@ namespace mu::ui::window
             Rml::String cantBeReturnedLine;
             Rml::String allItemTradingLine;
             Rml::String zenOnlyLine;
+            // The grids as their documents draw them (CInventoryCtrl::Cells()).
+            UI::Items::ItemGridCells gridCells;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, PurchaseShopRmlModel& model);
         UI::RmlBridge::ThemedView<PurchaseShopRmlModel> m_RmlView{"purchase_shop",
             [this](Rml::DataModelConstructor& c, PurchaseShopRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/purchase_shop.rml"}}};
 
-        // The frame background panel must render behind the grid's live 3D icons, but RmlUi's
-        // main context always renders last -- so it goes through
-        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (see
-        // CStorageInventoryExt's identical StorageExtBgRmlModel for the full mechanism).
-        struct PurchaseShopBgRmlModel
-        {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-        };
-        static void BindRmlBgModel(Rml::DataModelConstructor& c, PurchaseShopBgRmlModel& model);
-        UI::RmlBridge::ThemedView<PurchaseShopBgRmlModel> m_RmlBgView{"purchase_shop_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/purchase_shop_bg.rml"}}};
+        // The grids' items, into the document's #item_view.
+        void RenderItems();
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
+                                                 this};
 
         void BuildRmlUi();
         void SyncRmlModel();

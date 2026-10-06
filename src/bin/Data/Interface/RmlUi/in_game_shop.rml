@@ -5,11 +5,13 @@
 	<link type="text/rcss" href="in_game_shop.rcss"/>
 </head>
 <body data-model="in_game_shop">
-	<!-- Only the storage/gift list lives here. The shop's frame is in_game_shop_bg.rml (background
-	     context, behind the live 3D package items), and its buttons and radio columns are still
-	     mu::ui::window widgets, which are a different retirement boundary from this toolkit. -->
+	<!-- The shop's backdrop, everything still native in #igs_view (its buttons and radio columns are
+	     mu::ui::window widgets, its texts, banner and the live 3D package items: C++ draws them all
+	     into the image), and the storage/gift list over them. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="bg-back"></div>
+		<img id="igs_view"/>
 		<!-- 9 rows of 13 units, the native box's own m_iNumRenderLine times its line step. -->
 		<div id="igs_storage_list" class="scroll-pane igs-pane"
 		     data-style-font-size="text_px + 'px'"

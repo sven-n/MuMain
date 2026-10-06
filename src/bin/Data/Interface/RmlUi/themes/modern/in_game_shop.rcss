@@ -10,6 +10,11 @@
 	pointer-events: none;
 }
 
+/* CInGameShop::RenderFrame()'s backdrop, then the image C++ draws the rest of the shop into. */
+@spritesheet igs-bg-back-sheet { src: "../../../InGameShop/Ingame_shopback.jpg"; igs-bg-back: 0px 0px 640px 429px; }
+.bg-back { position: absolute; left: 0; top: 0; width: 640px; height: 429px; decorator: image(igs-bg-back); }
+#igs_view { position: absolute; left: 0; top: 0; width: 640px; height: 429px; }
+
 /* Native put the box at (490, 360) in left-down coordinates, 146 x 115 -- so its top edge is
    360 - 115. The height here is the 9 rows it actually drew. */
 #igs_storage_list {

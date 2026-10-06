@@ -16,6 +16,7 @@
 #include "Render/Sprites/Sprite.h"
 #include "InGameShopSystem.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/Inventory/ItemCameraTarget.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "GameShop/StorageItemSelection.h"
 
@@ -260,7 +261,6 @@ private:
     void RenderTexts();
     void RenderButtons();
     void RenderListBox();
-    void RenderDisplayItems();
 
     void RenderBanner();
     bool UpdateBanner();
@@ -299,17 +299,11 @@ private:
 
     GameShop::StorageItemSelection m_StorageItems;
 
-    // The window's flat backdrop must render behind the 3x3 package grid's live 3D item renders,
-    // but RmlUi's main context always renders last -- so it goes through RmlUiRuntime's background
-    // context, painted by CManager::Render()'s RenderBackgroundLayer() before every window's own
-    // Render(). This window is screen-space at the full reference area, so its root is {0,0}.
-    struct InGameShopBgRmlModel
-    {
-        float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-    };
-    static void BindRmlBgModel(Rml::DataModelConstructor& c, InGameShopBgRmlModel& model);
-    UI::RmlBridge::ThemedView<InGameShopBgRmlModel> m_RmlBgView{"in_game_shop_bg", BindRmlBgModel,
-        {{"Data/Interface/RmlUi/in_game_shop_bg.rml"}}};
+    // Everything native the shop still draws -- its decoration, buttons, texts, banner, list box,
+    // then the 3x3 package grid's live 3D items -- into the document's #igs_view, over the backdrop
+    // and under the storage list.
+    void RenderNative();
+    UI::Items::ItemCameraTarget m_NativeTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderNative(); }, this};
 
     // One row of the storage / gift list. Where it sits is the theme's; only what it says and
     // whether it is the picked row travel through the model.
