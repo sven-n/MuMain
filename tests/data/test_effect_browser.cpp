@@ -19,12 +19,17 @@
 #include "UI/EffectBrowser/EffectBrowserModel.h"
 #include "UI/EffectBrowser/EffectLegacyCases.h"
 #include "UI/EffectBrowser/EffectPreviewObject.h"
+#include "UI/EffectBrowser/EffectWorldPreview.h"
 #include "World/MapInfra/MapManager.h"
 #endif
 
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <charconv>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
 #include <map>
 #include <optional>
 #include <set>
@@ -213,6 +218,282 @@ namespace
 bool IsBelow(const EffectLegacyCases& left, const EffectLegacyCases& right)
 {
     return left.type < right.type;
+}
+
+std::string WithoutSpaces(std::string_view text)
+{
+    std::string result;
+    std::copy_if(text.begin(), text.end(), std::back_inserter(result),
+                 [](char c) { return std::isspace(static_cast<unsigned char>(c)) == 0; });
+    return result;
+}
+
+bool IsWordAt(const std::string& text, size_t at, std::string_view word)
+{
+    const auto identifier = [](char c) { return std::isalnum(static_cast<unsigned char>(c)) != 0 || c == '_'; };
+    return text.compare(at, word.size(), word) == 0 && (at == 0 || !identifier(text[at - 1])) &&
+           (at + word.size() >= text.size() || !identifier(text[at + word.size()]));
+}
+
+// The bracket that closes the one at `open`.
+size_t ClosingOf(const std::string& text, size_t open)
+{
+    int depth = 0;
+    for (size_t k = open; k < text.size(); ++k)
+    {
+        if (text[k] == '(' || text[k] == '{')
+            ++depth;
+        else if ((text[k] == ')' || text[k] == '}') && --depth == 0)
+            return k;
+    }
+    return std::string::npos;
+}
+
+size_t SkipSpaces(const std::string& text, size_t at)
+{
+    while (at < text.size() && std::isspace(static_cast<unsigned char>(text[at])) != 0)
+        ++at;
+    return at;
+}
+
+bool IsIdentifierChar(char c)
+{
+    return std::isalnum(static_cast<unsigned char>(c)) != 0 || c == '_';
+}
+
+// Whether the member chain after `Hero` at `at` (->Object.Position[0], ...)
+// is assigned to.
+bool IsAssignedAt(const std::string& text, size_t at)
+{
+    size_t j = at;
+    for (;;)
+    {
+        j = SkipSpaces(text, j);
+        if (text.compare(j, 2, "->") == 0 || (j < text.size() && text[j] == '.'))
+        {
+            j = SkipSpaces(text, j + (text[j] == '.' ? 1 : 2));
+            const size_t start = j;
+            while (j < text.size() && IsIdentifierChar(text[j]))
+                ++j;
+            if (j == start)
+                return false;
+        }
+        else if (j < text.size() && text[j] == '[')
+        {
+            int depth = 0;
+            for (; j < text.size(); ++j)
+            {
+                if (text[j] == '[')
+                    ++depth;
+                else if (text[j] == ']' && --depth == 0)
+                    break;
+            }
+            ++j;
+        }
+        else
+        {
+            break;
+        }
+    }
+    const std::string_view op = std::string_view(text).substr(std::min(j, text.size()), 2);
+    if (op.empty())
+        return false;
+    if (op[0] == '=')
+        return op.size() < 2 || op[1] != '=';
+    return op == "+=" || op == "-=" || op == "*=" || op == "/=" || op == "|=" || op == "&=" || op == "^=" ||
+           op == "++" || op == "--";
+}
+
+// A call of a function whose name begins with Send and a capital letter.
+bool IsSendCallAt(const std::string& text, size_t at)
+{
+    if (text.compare(at, 4, "Send") != 0 || (at > 0 && IsIdentifierChar(text[at - 1])) || at + 4 >= text.size() ||
+        std::isupper(static_cast<unsigned char>(text[at + 4])) == 0)
+        return false;
+    size_t j = at + 4;
+    while (j < text.size() && IsIdentifierChar(text[j]))
+        ++j;
+    j = SkipSpaces(text, j);
+    return j < text.size() && text[j] == '(';
+}
+
+// The text with the code that may change the character or reach the server
+// marked, so that one string finds it: a write through Hero gets
+// "heroWrite " before it, a Send...( call "serverSend ", and Hero where the
+// character's object is only compared (== &Hero->Object) becomes
+// HeroCompared.
+std::string MarkCharacterAndServer(const std::string& text)
+{
+    const auto skipBack = [&](size_t k)
+    {
+        while (k > 0 && (std::isspace(static_cast<unsigned char>(text[k - 1])) != 0 || text[k - 1] == '('))
+            --k;
+        return k;
+    };
+    std::string marked;
+    marked.reserve(text.size() + 4096);
+    for (size_t i = 0; i < text.size(); ++i)
+    {
+        if (IsWordAt(text, i, "Hero"))
+        {
+            size_t k = skipBack(i);
+            if (k > 0 && text[k - 1] == '&')
+            {
+                k = skipBack(k - 1);
+                if (k >= 2 && (text.compare(k - 2, 2, "==") == 0 || text.compare(k - 2, 2, "!=") == 0))
+                {
+                    marked += "HeroCompared";
+                    i += 3;
+                    continue;
+                }
+            }
+            if (IsAssignedAt(text, i + 4))
+                marked += "heroWrite ";
+        }
+        else if (IsSendCallAt(text, i))
+        {
+            marked += "serverSend ";
+        }
+        marked += text[i];
+    }
+    return marked;
+}
+
+// The places in `text` where `marker` stands, spaces left out on both sides.
+std::vector<size_t> PositionsOf(const std::string& text, std::string_view marker)
+{
+    std::string compact;
+    std::vector<size_t> origin;
+    for (size_t i = 0; i < text.size(); ++i)
+    {
+        if (std::isspace(static_cast<unsigned char>(text[i])) == 0)
+        {
+            compact += text[i];
+            origin.push_back(i);
+        }
+    }
+    std::vector<size_t> positions;
+    for (size_t at = compact.find(marker); at != std::string::npos; at = compact.find(marker, at + 1))
+        positions.push_back(origin[at]);
+    return positions;
+}
+
+// The function whose body holds `at`: its name and where its body begins;
+// the outermost block that follows a parameter list.
+struct EnclosingFunction
+{
+    std::string name;
+    size_t body = std::string::npos;
+};
+
+EnclosingFunction FunctionAround(const std::string& text, size_t at)
+{
+    std::vector<size_t> open;
+    for (size_t i = 0; i < at; ++i)
+    {
+        if (text[i] == '{')
+            open.push_back(i);
+        else if (text[i] == '}' && !open.empty())
+            open.pop_back();
+    }
+    for (const size_t brace : open)
+    {
+        size_t k = brace;
+        while (k > 0 && std::isspace(static_cast<unsigned char>(text[k - 1])) != 0)
+            --k;
+        if (k >= 5 && text.compare(k - 5, 5, "const") == 0)
+        {
+            k -= 5;
+            while (k > 0 && std::isspace(static_cast<unsigned char>(text[k - 1])) != 0)
+                --k;
+        }
+        if (k == 0 || text[k - 1] != ')')
+            continue;
+        int depth = 0;
+        size_t paren = std::string::npos;
+        for (size_t j = k; j > 0; --j)
+        {
+            if (text[j - 1] == ')')
+                ++depth;
+            else if (text[j - 1] == '(' && --depth == 0)
+            {
+                paren = j - 1;
+                break;
+            }
+        }
+        if (paren == std::string::npos)
+            continue;
+        size_t end = paren;
+        while (end > 0 && std::isspace(static_cast<unsigned char>(text[end - 1])) != 0)
+            --end;
+        size_t start = end;
+        while (start > 0 && IsIdentifierChar(text[start - 1]))
+            --start;
+        return {text.substr(start, end - start), brace};
+    }
+    return {};
+}
+
+// A switch open at a place of a function, with the labels of the case the
+// place belongs to (labels without statements between them share one).
+struct OpenSwitch
+{
+    std::string expression;
+    int depth = 0;
+    std::vector<std::string> labels;
+    bool afterLabel = false;
+};
+
+// The switches open at `at`, outermost first, read from `begin` (the '{' of
+// the function); `text` without comments and strings.
+std::vector<OpenSwitch> SwitchesOpenAt(const std::string& text, size_t begin, size_t at)
+{
+    std::vector<OpenSwitch> open;
+    std::optional<std::string> nextSwitch;
+    int depth = 0;
+    for (size_t i = begin; i < at; ++i)
+    {
+        if (std::isspace(static_cast<unsigned char>(text[i])) != 0)
+            continue;
+        if (IsWordAt(text, i, "switch"))
+        {
+            const size_t paren = text.find('(', i);
+            const size_t close = ClosingOf(text, paren);
+            nextSwitch = WithoutSpaces(std::string_view(text).substr(paren + 1, close - paren - 1));
+            i = close;
+            continue;
+        }
+        if (!open.empty() && depth == open.back().depth && (IsWordAt(text, i, "case") || IsWordAt(text, i, "default")))
+        {
+            size_t colon = text.find(':', i);
+            while (colon != std::string::npos && colon + 1 < text.size() && text[colon + 1] == ':')
+                colon = text.find(':', colon + 2);
+            OpenSwitch& current = open.back();
+            if (!current.afterLabel)
+                current.labels.clear();
+            current.labels.push_back(IsWordAt(text, i, "default")
+                                         ? std::string("default")
+                                         : WithoutSpaces(std::string_view(text).substr(i + 4, colon - i - 4)));
+            current.afterLabel = true;
+            i = colon;
+            continue;
+        }
+        if (!open.empty())
+            open.back().afterLabel = false;
+        if (text[i] == '{')
+        {
+            ++depth;
+            if (nextSwitch)
+                open.push_back({*std::exchange(nextSwitch, std::nullopt), depth});
+        }
+        else if (text[i] == '}')
+        {
+            if (!open.empty() && open.back().depth == depth)
+                open.pop_back();
+            --depth;
+        }
+    }
+    return open;
 }
 
 std::uint8_t FlagOf(Stage stage)
@@ -427,6 +708,202 @@ TEST_CASE("The effect preview animates the models that MoveEffect's shared code 
                 EffectSourceCases::EvaluateCondition(conditions.animated, type, subType, ValueOfName).value;
             CHECK(IsAnimatedByMoveEffect(type, subType) == (!returnsFirst.contains(type) && !skipped && animated));
         }
+    }
+}
+
+// Code of an effect that changes the character or reaches the server whoever
+// owns the effect: the world preview refuses its type. The test marks such
+// code in every effect file and finds the type of each place: the case of
+// the type switch around it in ZzzEffect.cpp's create, move and draw
+// functions, or the move handler (Move_<code>) it lies in. Code shared by
+// all types fails, and so does code in another function that effect code
+// calls.
+TEST_CASE("The world preview refuses every type whose code changes the character or tells the server "
+          "[data][effects][editor]")
+{
+    constexpr std::array<std::string_view, 11> Markers = {
+        // Takes its owner for lightning.
+        "(JOINT*)o->Owner",
+        // Passes the character on, takes its object (not to compare it) or
+        // writes into it.
+        "(Hero)",
+        "(Hero,",
+        ",Hero)",
+        ",Hero,",
+        "&Hero->Object",
+        "&(Hero->Object)",
+        "heroWriteHero",
+        // Knocks the character back.
+        "CollisionHeroCharacter(",
+        // Reaches the server.
+        "SocketClient->",
+        "serverSendSend",
+    };
+    constexpr std::array<std::string_view, 3> SwitchFunctions = {"CreateEffect", "MoveEffect", "RenderEffects"};
+    const std::filesystem::path effects = std::filesystem::path(MU_TEST_SOURCE_DIR) / "Render/Effects";
+    const std::span<const RefusedWorldPreview> refused = GetRefusedWorldPreviews();
+    const auto isRefused = [&](int type)
+    {
+        return std::any_of(refused.begin(), refused.end(),
+                           [type](const RefusedWorldPreview& entry) { return entry.type == type; });
+    };
+
+    std::vector<std::pair<std::string, std::string>> files;
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(effects))
+    {
+        if (entry.is_regular_file() && entry.path().extension() == ".cpp")
+            files.emplace_back(entry.path().filename().string(),
+                               MarkCharacterAndServer(EffectSourceCases::ReadEffectSource(entry.path())));
+    }
+    REQUIRE_FALSE(files.empty());
+    // Whether effect code calls `function`: a call besides its definition.
+    const auto calledByEffects = [&](const std::string& function)
+    {
+        int found = 0;
+        for (const auto& [name, text] : files)
+        {
+            for (size_t at = text.find(function); at != std::string::npos; at = text.find(function, at + 1))
+            {
+                const size_t after = SkipSpaces(text, at + function.size());
+                if (IsWordAt(text, at, function) && after < text.size() && text[after] == '(')
+                    ++found;
+            }
+        }
+        return found > 1;
+    };
+
+    int places = 0;
+    for (const auto& [file, text] : files)
+    {
+        INFO(file);
+        for (const std::string_view marker : Markers)
+        {
+            INFO(marker);
+            for (const size_t at : PositionsOf(text, marker))
+            {
+                ++places;
+                INFO("line " << std::count(text.begin(), text.begin() + static_cast<std::ptrdiff_t>(at), '\n') + 1);
+                const EnclosingFunction function = FunctionAround(text, at);
+                INFO(function.name);
+                REQUIRE_FALSE(function.name.empty());
+                if (std::find(SwitchFunctions.begin(), SwitchFunctions.end(), function.name) != SwitchFunctions.end())
+                {
+                    // The labels of the type switch around it.
+                    std::vector<std::string> labels;
+                    for (const OpenSwitch& open : SwitchesOpenAt(text, function.body, at))
+                    {
+                        if (open.expression == "Type" || open.expression == "o->Type")
+                            labels = open.labels;
+                    }
+                    CHECK_FALSE(labels.empty());
+                    for (const std::string& label : labels)
+                    {
+                        INFO(label);
+                        CHECK(isRefused(ResolveLabel(label)));
+                    }
+                }
+                else if (function.name.rfind("Move_", 0) == 0)
+                {
+                    CHECK(isRefused(ResolveLabel(function.name.substr(5))));
+                }
+                else
+                {
+                    CHECK_FALSE(calledByEffects(function.name));
+                }
+            }
+        }
+    }
+    // The scan finds the code of the types refused today.
+    CHECK(places > 0);
+}
+
+// CreateJoint copies the colour of a few lightning SubTypes without checking
+// that the call passed one; the world preview passes white for those when no
+// colour is chosen. The test finds each such read and checks the list.
+TEST_CASE("The world preview passes a colour to every lightning SubType whose code reads it unchecked "
+          "[data][effects][editor]")
+{
+    const std::string text = EffectSourceCases::ReadEffectSource(std::filesystem::path(MU_TEST_SOURCE_DIR) /
+                                                                 "Render/Effects/ZzzEffectJoint.cpp");
+    const size_t function = text.find("void CreateJoint(");
+    REQUIRE(function != std::string::npos);
+    const size_t body = text.find('{', ClosingOf(text, text.find('(', function)));
+    const size_t end = ClosingOf(text, body);
+    REQUIRE(end != std::string::npos);
+
+    const std::span<const EffectTypeSymbol> joints = GetEffectTypeSymbols(EffectKind::Joint);
+    const auto typeOf = [&](const std::string& code)
+    {
+        const auto found = std::find_if(joints.begin(), joints.end(),
+                                        [&](const EffectTypeSymbol& symbol) { return symbol.code == code; });
+        return found != joints.end() ? found->type : -1;
+    };
+    // if (vPriorColor) or if (!vPriorColor).
+    const auto isCheck = [&](size_t at)
+    {
+        size_t k = at;
+        while (k > 0 && (std::isspace(static_cast<unsigned char>(text[k - 1])) != 0 || text[k - 1] == '!'))
+            --k;
+        if (k == 0 || text[k - 1] != '(')
+            return false;
+        --k;
+        while (k > 0 && std::isspace(static_cast<unsigned char>(text[k - 1])) != 0)
+            --k;
+        return k >= 2 && IsWordAt(text, k - 2, "if");
+    };
+
+    constexpr std::string_view Colour = "vPriorColor";
+    std::set<std::pair<int, int>> unchecked;
+    for (size_t at = text.find(Colour, body); at != std::string::npos && at < end; at = text.find(Colour, at + 1))
+    {
+        if (!IsWordAt(text, at, Colour) || isCheck(at))
+            continue;
+        // A read in the block of `if (vPriorColor)`, or right after it.
+        const size_t delimiter = text.find_last_of(";{}", at);
+        const std::string statement = WithoutSpaces(std::string_view(text).substr(delimiter + 1, at - delimiter - 1));
+        const std::string before = WithoutSpaces(std::string_view(text).substr(body, delimiter + 1 - body));
+        if (statement.rfind("if(vPriorColor)", 0) == 0 ||
+            (text[delimiter] == '{' && before.ends_with("if(vPriorColor){")))
+            continue;
+
+        INFO("line " << std::count(text.begin(), text.begin() + static_cast<std::ptrdiff_t>(at), '\n') + 1);
+        std::vector<std::string> types;
+        std::vector<std::string> subTypes;
+        for (const OpenSwitch& open : SwitchesOpenAt(text, body, at))
+        {
+            if (open.expression == "Type" || open.expression == "o->Type")
+                types = open.labels;
+            else if (open.expression == "o->SubType")
+                subTypes = open.labels;
+        }
+        REQUIRE_FALSE(types.empty());
+        if (subTypes.empty())
+            subTypes.push_back("-1");
+        for (const std::string& type : types)
+        {
+            for (const std::string& subType : subTypes)
+            {
+                INFO(type << " SubType " << subType);
+                int number = -1;
+                std::from_chars(subType.data(), subType.data() + subType.size(), number);
+                CHECK(typeOf(type) >= 0);
+                unchecked.insert({typeOf(type), number});
+            }
+        }
+    }
+
+    const std::span<const JointNeedingColour> listed = GetJointsNeedingColour();
+    CHECK_FALSE(unchecked.empty());
+    for (const auto& [type, subType] : unchecked)
+    {
+        INFO("type " << type << " SubType " << subType);
+        CHECK(std::any_of(listed.begin(), listed.end(), [&](const JointNeedingColour& entry)
+                          { return entry.type == type && entry.subType == subType; }));
+    }
+    for (const JointNeedingColour& entry : listed)
+    {
+        INFO("type " << entry.type << " SubType " << entry.subType);
+        CHECK(unchecked.count({entry.type, entry.subType}) == 1);
     }
 }
 

@@ -736,6 +736,138 @@
   <data name="Preview item not loaded" xml:space="preserve">
     <value>A model this item is drawn with at this level is not loaded, so the preview does not draw the item.</value>
   </data>
+  <data name="In the world" xml:space="preserve">
+    <value>In the world</value>
+  </data>
+  <data name="Create in world" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Create in world tooltip" xml:space="preserve">
+    <value>Creates the type two tiles in front of the character with the game's own call. Its owner is a copy of the character that follows it, so the type's code cannot change the character. Each click creates it once more. It needs a character in a map.</value>
+  </data>
+  <data name="Stop preview" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Repeat preview" xml:space="preserve">
+    <value>Repeat</value>
+  </data>
+  <data name="Repeat preview tooltip" xml:space="preserve">
+    <value>Creates the type again shortly after what it created has ended.</value>
+  </data>
+  <data name="Mute sounds" xml:space="preserve">
+    <value>Mute sounds</value>
+  </data>
+  <data name="Mute sounds tooltip" xml:space="preserve">
+    <value>While the preview runs, the game starts no sound effects. Music, looped sounds and sounds already playing go on.</value>
+  </data>
+  <data name="Sprite every frame" xml:space="preserve">
+    <value>A sprite lasts one frame; the preview creates it again every frame.</value>
+  </data>
+  <data name="World not in game" xml:space="preserve">
+    <value>Creating in the world needs a character in a map.</value>
+  </data>
+  <data name="World effects off" xml:space="preserve">
+    <value>All effects are off in the options, so the game creates no particles and sprites.</value>
+  </data>
+  <data name="World effects hidden" xml:space="preserve">
+    <value>Effects are hidden in the Dev Editor, so they are not drawn.</value>
+  </data>
+  <data name="World nothing created" xml:space="preserve">
+    <value>The game's call created nothing: the type may need a target, a skill or a state of the character, the effects may be off in the options, or its pool is full.</value>
+  </data>
+  <data name="World ended at once" xml:space="preserve">
+    <value>What the call created ended in its first frame: the type may need a target, a skill or other call values.</value>
+  </data>
+  <data name="World refused" xml:space="preserve">
+    <value>The code of this type with this SubType changes the character or tells the server (the catapult stones knock the character back, the class change stops it, the Lagul writes into its owner), so the preview does not create it.</value>
+  </data>
+  <data name="Call values" xml:space="preserve">
+    <value>Call values</value>
+  </data>
+  <data name="Call distance" xml:space="preserve">
+    <value>Distance</value>
+  </data>
+  <data name="Call distance tooltip" xml:space="preserve">
+    <value>How far in front of the character the call starts the type; 0 is where it stands.</value>
+  </data>
+  <data name="Call height" xml:space="preserve">
+    <value>Height</value>
+  </data>
+  <data name="Call size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Call size tooltip" xml:space="preserve">
+    <value>The scale of the call; 0 takes the create function's default (effects 0.9, particles and sprites 1, lightning 10).</value>
+  </data>
+  <data name="Call light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Call colour tooltip" xml:space="preserve">
+    <value>Lightning: the call passes the light as its colour. Most of the game's calls pass none; some types then choose their colour by SubType.</value>
+  </data>
+  <data name="Call random angle" xml:space="preserve">
+    <value>Random angle</value>
+  </data>
+  <data name="Call target" xml:space="preserve">
+    <value>Target</value>
+  </data>
+  <data name="Call owner" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+  <data name="Call target character" xml:space="preserve">
+    <value>Character (copy)</value>
+  </data>
+  <data name="Call target none" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="Call target nearest" xml:space="preserve">
+    <value>Nearest monster or NPC (copy)</value>
+  </data>
+  <data name="Call target none tooltip" xml:space="preserve">
+    <value>No game call creates this type with this SubType without an owner, and its code may need one.</value>
+  </data>
+  <data name="Call target none no sources" xml:space="preserve">
+    <value>The game's calls could not be read (the sources were not found), so None is not offered.</value>
+  </data>
+  <data name="Call pk" xml:space="preserve">
+    <value>PK</value>
+  </data>
+  <data name="Call skill index" xml:space="preserve">
+    <value>SkillIndex</value>
+  </data>
+  <data name="Call pk tooltip" xml:space="preserve">
+    <value>Some lightning SubTypes read their lifetime and speed from PK and SkillIndex.</value>
+  </data>
+  <data name="Game calls" xml:space="preserve">
+    <value>The game's calls</value>
+  </data>
+  <data name="Use call" xml:space="preserve">
+    <value>Use</value>
+  </data>
+  <data name="Game calls not found" xml:space="preserve">
+    <value>The sources of the game the editor was built from were not found, so the game's calls cannot be listed.</value>
+  </data>
+  <data name="No game calls" xml:space="preserve">
+    <value>The game's code does not create this type by its name.</value>
+  </data>
+  <data name="Call random types" xml:space="preserve">
+    <value>one of %d at random</value>
+  </data>
+  <data name="World no character near" xml:space="preserve">
+    <value>No monster or NPC stands near the character, so the copy of the character is the target.</value>
+  </data>
+  <data name="World own place" xml:space="preserve">
+    <value>The type's code moved what it created away from where the call put it, so it is not exactly at the Distance and Height set.</value>
+  </data>
+  <data name="World follows owner" xml:space="preserve">
+    <value>What the type created moves to its owner, so it shows at the target, not at Distance and Height.</value>
+  </data>
+  <data name="World own size" xml:space="preserve">
+    <value>The type's code changes the size the call gives it, so what it created does not have exactly the Size set.</value>
+  </data>
+  <data name="World own light" xml:space="preserve">
+    <value>The type's code changes the light the call gives it, so what it created does not have exactly the Light set.</value>
+  </data>
   <data name="Assets all" xml:space="preserve">
     <value>All</value>
   </data>

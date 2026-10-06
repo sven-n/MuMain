@@ -66,4 +66,9 @@ SharedMoveConditions ReadSharedMoveConditions(const std::string& source, std::sp
 // with `return;`, so the code after the switch never runs for them. A label
 // without statements counts as the case it falls through to.
 SwitchLabels ReadCasesThatReturn(const std::string& source, Stage stage, std::span<const MacroState> macros);
+
+// The labels of the cases of the switch of `stage` whose statements contain
+// `text` (spaces left out on both sides).
+SwitchLabels ReadCasesContaining(const std::string& source, Stage stage, std::span<const MacroState> macros,
+                                 std::string_view text);
 } // namespace EffectSourceCases

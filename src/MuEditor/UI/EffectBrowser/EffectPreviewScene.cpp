@@ -10,6 +10,7 @@
 #include "EffectPreviewItems.h"
 #include "EffectPreviewObject.h"
 #include "SavedGameRenderState.h"
+#include "Core/Globals/_TextureIndex.h"
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_enum.h"
 #include "Engine/Object/ZzzObject.h"
@@ -182,6 +183,15 @@ void ApplySpriteBlend(PreviewSpriteBlend blend)
     EnableAlphaBlend();
 }
 } // namespace
+
+PreviewSpriteBlend SpriteBlendOf(int type, int subType)
+{
+    if (type == BITMAP_FORMATION_MARK)
+        return PreviewSpriteBlend::AlphaTest;
+    if (subType < 0 || subType > static_cast<int>(PreviewSpriteBlend::Luminance))
+        return PreviewSpriteBlend::Glow;
+    return static_cast<PreviewSpriteBlend>(subType);
+}
 
 EffectPreviewScene::EffectPreviewScene() : m_effect(std::make_unique<OBJECT>()) {}
 

@@ -18,7 +18,8 @@ class CEffectBrowserDetails
 public:
     // Returns a type clicked in a list of other types, to show it.
     std::optional<MuEditor::Effects::EffectTypeRef> Render(const MuEditor::Effects::EffectBrowserModel& model,
-                                                           std::optional<MuEditor::Effects::EffectTypeRef> selected);
+                                                           std::optional<MuEditor::Effects::EffectTypeRef> selected,
+                                                           MuEditor::Effects::EffectWorldPreview& world);
 
     // Called between frames.
     void BeforeFrame()

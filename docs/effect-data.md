@@ -324,23 +324,29 @@ The **Preview** section of the details shows what the selected type's slot
 holds in a small 3D view. It loads nothing: a slot that holds nothing on
 this map says so. The effect's own move and draw code do not run, so nothing
 it would create (sprites, particles, sounds) appears; the preview in the
-world (FX1.7b) is for that.
+world (below) is for that.
 
 - **What it shows.** An effect with a model number shows its model, animated
   as the game animates it and turning, with the scale, light, blend mesh and
   render type of its creation values. Effects with a texture number,
   sprites, particles and lightning show their texture as a sprite facing the
-  camera; **Blend** chooses how it is blended (the four blends of a sprite's
-  SubType). The effects that `RenderEffectShadows` draws on the ground show
-  their texture lying on the ground.
+  camera: a sprite with the blend of its SubType, the others with the one
+  chosen under **Blend** (the four blends of a sprite's SubType). The
+  effects that `RenderEffectShadows` draws on the ground show their texture
+  lying on the ground.
 - **Show on**: nothing, a plane, a cube or an item. The type stands on the
   plane and on the cube and sits at the middle of an item. For an item, pick
   it in the drop-down (type a part of its name or its number to find it),
   and set its level and whether it is excellent or ancient; the item is
   drawn with its looks, without its own sprites and particles.
-- **SubType** (types with variants): the values of which column of the
-  creation table the preview uses; the first stands for the SubTypes without
-  a variant.
+- **SubType**: 0 and up, typed in or picked from the SubTypes of the
+  creation table's columns (the first stands for the SubTypes without a
+  variant, which get the row's own values). The game's code was written for
+  the SubTypes its calls pass, none below 0. The view uses the values the
+  game gives that SubType; the preview in the world creates the type with
+  it. A sprite's SubType is its blend: the four blends are offered (0 glow,
+  1 subtract, 2 alpha test, 3 luminance), and the formation mark's SubType
+  picks its frame (0 to 7) instead.
 - **The view**: drag to turn the camera, the wheel zooms, a double click or
   **Reset view** puts it back; **Turn** turns the type slowly.
 - **Notes** under the view say what the preview cannot show: an empty slot,
@@ -348,6 +354,95 @@ world (FX1.7b) is for that.
   whose values start it transparent or at size 0 (the preview shows it
   anyway), a model without animation, an item that cannot be drawn at the
   chosen level because a model it needs is not loaded.
+
+#### In the world
+
+Under the view, **In the world** creates the selected type in the game
+world, with the game's own call (`CreateEffect`, `CreateParticle`,
+`CreateJoint`, `CreateSprite`) and the SubType chosen above, so its own move
+and draw code run: what it creates, its sounds, how it moves and ends. It
+needs a character in a map; the free camera of the Dev Editor shows it from
+any side, and F12 hides the editor while it runs.
+
+- **Create** places it two tiles in front of the character (particles,
+  lightning and sprites at the height of the chest), with a copy of the
+  character as its owner (the target of particles and lightning, which run
+  to it). The copy follows the character, so code that writes into its owner
+  cannot turn, move or hide the character, and the branches the game runs
+  only for the character's own effects (its skill effects, the catapult
+  camera, the water waves of its effects) stay off. Each click creates it
+  once more. Effects that follow their owner show at the character.
+- **Stop** removes what the preview created and what the effects it follows
+  created in turn; so do choosing another type, closing the browser and
+  leaving the map (the game clears its pools then; the preview removes its
+  objects first). Objects created later are followed only when their owner
+  (for particles and lightning, their target) is an effect the preview
+  follows; those created with the character, a copy or no one as owner, or
+  by a followed particle or lightning, cannot be told from the game's own
+  and end by themselves; so does a slot the game fills again with the same
+  type in the same frame.
+- **Call values** set the rest of the call: **Distance** in front of the
+  character (0: where it stands) and **Height** above the ground, **Size**
+  (0 takes the create function's default: effects 0.9, particles 1,
+  lightning 10; sprites, whose create function has none, get 1), **Light**,
+  **Random angle** (as many game calls give lightning), the **Target** and,
+  for lightning, **PK** and **SkillIndex**, which some SubTypes read their
+  lifetime and speed from. The target is the copy of the character; none,
+  offered only for a SubType the game itself creates without an owner, as
+  the code of other SubTypes may read their owner without checking; or a
+  copy of the nearest monster or NPC, so lightning runs to it. That copy has
+  bones of its own and follows the monster while its slot holds it; once the
+  monster is gone, the next call looks for the nearest one again. Lightning
+  gets the light only when the box before it is ticked: the call then passes
+  it as the colour. Most of the game's calls pass none, and some types then
+  choose their colour by SubType; the three SubTypes whose code reads the
+  colour without checking get white. The values stay for another type of the
+  same kind and go back to the kind's own when the kind changes. Creating
+  the type again with other values keeps what is there, so parts can be
+  compared side by side. While the preview runs, Repeat and sprites take the
+  values as they are set; a refused SubType chosen then ends the run. Many
+  types change the place, size or light they are given in their code, or
+  move to their owner: after each call that creates an effect, particle or
+  lightning, notes on the object of the type itself say which values its
+  code changed.
+- **The game's calls** list where the game's code creates the type
+  (`CreateEffect`, `CreateParticle`, `CreateJoint`, `CreateSprite` and the
+  FpsChecked forms of the first three) with the SubType, size and owner they
+  write, read from the sources the editor was built from
+  (`MU_EDITOR_SOURCE_DIR`, the build's own checkout) the first time the list
+  or the target's drop-down opens. Code the build leaves out is not read:
+  `#if 0`, and `#ifdef` of a macro that no file defines and the build files
+  do not name. **Use** takes the values a call writes as numbers: its
+  SubType, size, PK and SkillIndex, no owner when it passes none (with a
+  SubType written as a number), and the light: the last write of the call's
+  light variable that reaches the call in its function, `Vector(r, g, b,
+  light)` or a declaration with r, g, b (for lightning, the colour it
+  passes). A light written otherwise, or only on some paths, is unknown; a
+  size or light not known goes back to the default. What depends on the
+  moment (the Fenrir's colour, which monster) stays for the user to choose.
+  A skill's whole look, several types from the caster's bones at the right
+  moment of its animation, is not one call: its preview comes with the skill
+  looks (SK2).
+- **Repeat** creates the type again shortly after what it created has ended.
+  A sprite lasts one frame; the preview creates it every frame.
+- **Mute sounds** keeps the game from starting sound effects while the
+  preview runs (editor builds only); music and looped sounds go on.
+- A line counts the effects, particles and lightning that run. Notes say why
+  nothing shows: no character in a map, all effects off in the options (no
+  particles and sprites are created), effects hidden in the Dev Editor, the
+  call created nothing (the type may need a target, a skill or a state of
+  the character, or its pool is full), what it created ended in its first
+  frame.
+- A few types are not created: their code changes the character or tells the
+  server whoever owns them (the catapult stones of every SubType knock the
+  character back when they land and tell the server; SubType 0 of the class
+  change stops the character; SubType 1 of the summoner's Lagul takes its
+  owner for lightning; Gaion's swords and frame strike end the character's
+  own trails when they are created). A test marks such code in the effect
+  code (the character passed on, its object taken other than to compare it,
+  a write through `Hero`, a request to the server) and checks that the type
+  of each place is on the list; a place in code all types run, or in another
+  function the effect code calls, fails it.
 
 ## When the code changes
 

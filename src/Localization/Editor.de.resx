@@ -736,6 +736,138 @@
   <data name="Preview item not loaded" xml:space="preserve">
     <value>Ein Modell, mit dem dieser Gegenstand auf dieser Stufe gezeichnet wird, ist nicht geladen, daher zeichnet die Vorschau den Gegenstand nicht.</value>
   </data>
+  <data name="In the world" xml:space="preserve">
+    <value>In der Welt</value>
+  </data>
+  <data name="Create in world" xml:space="preserve">
+    <value>Erzeugen</value>
+  </data>
+  <data name="Create in world tooltip" xml:space="preserve">
+    <value>Erzeugt den Typ zwei Felder vor der Figur mit dem Aufruf des Spiels. Sein Besitzer ist eine Kopie der Figur, die ihr folgt, daher kann der Code des Typs die Figur nicht ändern. Jeder Klick erzeugt ihn noch einmal. Dafür muss eine Figur auf einer Karte stehen.</value>
+  </data>
+  <data name="Stop preview" xml:space="preserve">
+    <value>Stoppen</value>
+  </data>
+  <data name="Repeat preview" xml:space="preserve">
+    <value>Wiederholen</value>
+  </data>
+  <data name="Repeat preview tooltip" xml:space="preserve">
+    <value>Erzeugt den Typ kurz nach dem Ende dessen, was er erzeugt hat, noch einmal.</value>
+  </data>
+  <data name="Mute sounds" xml:space="preserve">
+    <value>Töne stumm</value>
+  </data>
+  <data name="Mute sounds tooltip" xml:space="preserve">
+    <value>Solange die Vorschau läuft, startet das Spiel keine Toneffekte. Musik, Tonschleifen und schon laufende Töne spielen weiter.</value>
+  </data>
+  <data name="Sprite every frame" xml:space="preserve">
+    <value>Ein Sprite hält ein Bild lang; die Vorschau erzeugt es jedes Bild neu.</value>
+  </data>
+  <data name="World not in game" xml:space="preserve">
+    <value>Zum Erzeugen in der Welt muss eine Figur auf einer Karte stehen.</value>
+  </data>
+  <data name="World effects off" xml:space="preserve">
+    <value>In den Optionen sind alle Effekte aus, daher erzeugt das Spiel keine Partikel und Sprites.</value>
+  </data>
+  <data name="World effects hidden" xml:space="preserve">
+    <value>Effekte sind im Dev Editor ausgeblendet, daher werden sie nicht gezeichnet.</value>
+  </data>
+  <data name="World nothing created" xml:space="preserve">
+    <value>Der Aufruf des Spiels hat nichts erzeugt: Der Typ braucht vielleicht ein Ziel, eine Fertigkeit oder einen Zustand der Figur, die Effekte sind in den Optionen aus, oder sein Pool ist voll.</value>
+  </data>
+  <data name="World ended at once" xml:space="preserve">
+    <value>Was der Aufruf erzeugt hat, endete in seinem ersten Bild: Der Typ braucht vielleicht ein Ziel, eine Fertigkeit oder andere Aufrufwerte.</value>
+  </data>
+  <data name="World refused" xml:space="preserve">
+    <value>Der Code dieses Typs mit diesem SubType ändert die Figur oder meldet es dem Server (die Katapultsteine werfen die Figur zurück, der Klassenwechsel hält sie an, der Lagul schreibt in seinen Besitzer), daher erzeugt die Vorschau ihn nicht.</value>
+  </data>
+  <data name="Call values" xml:space="preserve">
+    <value>Aufrufwerte</value>
+  </data>
+  <data name="Call distance" xml:space="preserve">
+    <value>Abstand</value>
+  </data>
+  <data name="Call distance tooltip" xml:space="preserve">
+    <value>Wie weit vor der Figur der Aufruf den Typ beginnt; 0 ist, wo sie steht.</value>
+  </data>
+  <data name="Call height" xml:space="preserve">
+    <value>Höhe</value>
+  </data>
+  <data name="Call size" xml:space="preserve">
+    <value>Größe</value>
+  </data>
+  <data name="Call size tooltip" xml:space="preserve">
+    <value>Der Maßstab des Aufrufs; 0 nimmt den Standard der Erzeugungsfunktion (Effekte 0,9, Partikel und Sprites 1, Blitze 10).</value>
+  </data>
+  <data name="Call light" xml:space="preserve">
+    <value>Licht</value>
+  </data>
+  <data name="Call colour tooltip" xml:space="preserve">
+    <value>Blitze: Der Aufruf gibt das Licht als Farbe mit. Die meisten Aufrufe des Spiels geben keine mit; manche Typen wählen ihre Farbe dann nach dem SubType.</value>
+  </data>
+  <data name="Call random angle" xml:space="preserve">
+    <value>Zufälliger Winkel</value>
+  </data>
+  <data name="Call target" xml:space="preserve">
+    <value>Ziel</value>
+  </data>
+  <data name="Call owner" xml:space="preserve">
+    <value>Besitzer</value>
+  </data>
+  <data name="Call target character" xml:space="preserve">
+    <value>Figur (Kopie)</value>
+  </data>
+  <data name="Call target none" xml:space="preserve">
+    <value>Keins</value>
+  </data>
+  <data name="Call target nearest" xml:space="preserve">
+    <value>Nächstes Monster oder NPC (Kopie)</value>
+  </data>
+  <data name="Call target none tooltip" xml:space="preserve">
+    <value>Kein Aufruf des Spiels erzeugt diesen Typ mit diesem SubType ohne Besitzer, und sein Code braucht vielleicht einen.</value>
+  </data>
+  <data name="Call target none no sources" xml:space="preserve">
+    <value>Die Aufrufe des Spiels konnten nicht gelesen werden (die Quellen wurden nicht gefunden), daher wird „Keins“ nicht angeboten.</value>
+  </data>
+  <data name="Call pk" xml:space="preserve">
+    <value>PK</value>
+  </data>
+  <data name="Call skill index" xml:space="preserve">
+    <value>SkillIndex</value>
+  </data>
+  <data name="Call pk tooltip" xml:space="preserve">
+    <value>Manche Blitz-SubTypes lesen ihre Lebensdauer und Geschwindigkeit aus PK und SkillIndex.</value>
+  </data>
+  <data name="Game calls" xml:space="preserve">
+    <value>Aufrufe des Spiels</value>
+  </data>
+  <data name="Use call" xml:space="preserve">
+    <value>Übernehmen</value>
+  </data>
+  <data name="Game calls not found" xml:space="preserve">
+    <value>Die Quellen des Spiels, aus denen der Editor gebaut wurde, wurden nicht gefunden, daher können die Aufrufe des Spiels nicht aufgelistet werden.</value>
+  </data>
+  <data name="No game calls" xml:space="preserve">
+    <value>Der Code des Spiels erzeugt diesen Typ nicht über seinen Namen.</value>
+  </data>
+  <data name="Call random types" xml:space="preserve">
+    <value>einer von %d per Zufall</value>
+  </data>
+  <data name="World no character near" xml:space="preserve">
+    <value>Kein Monster oder NPC steht nahe der Figur, daher ist die Kopie der Figur das Ziel.</value>
+  </data>
+  <data name="World own place" xml:space="preserve">
+    <value>Der Code des Typs hat das Erzeugte von der Stelle des Aufrufs weggerückt, daher steht es nicht genau beim eingestellten Abstand und der eingestellten Höhe.</value>
+  </data>
+  <data name="World follows owner" xml:space="preserve">
+    <value>Was der Typ erzeugt hat, geht zu seinem Besitzer, daher zeigt es sich am Ziel, nicht bei Abstand und Höhe.</value>
+  </data>
+  <data name="World own size" xml:space="preserve">
+    <value>Der Code des Typs ändert die Größe, die der Aufruf mitgibt, daher hat das Erzeugte nicht genau die eingestellte Größe.</value>
+  </data>
+  <data name="World own light" xml:space="preserve">
+    <value>Der Code des Typs ändert das Licht, das der Aufruf mitgibt, daher hat das Erzeugte nicht genau das eingestellte Licht.</value>
+  </data>
   <data name="Assets all" xml:space="preserve">
     <value>Alle</value>
   </data>

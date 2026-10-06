@@ -67,6 +67,11 @@ void CMuEffectBrowserUI::Render(bool* open)
     ImGui::End();
 }
 
+void CMuEffectBrowserUI::AfterRender(bool open)
+{
+    m_worldPreview.AfterFrame(open, MuEditor::Effects::IsWorldReadyForPreview());
+}
+
 bool CMuEffectBrowserUI::BuildWhenLoaded()
 {
     if (m_model.IsBuilt())
@@ -152,13 +157,13 @@ void CMuEffectBrowserUI::RenderKind(EffectKind kind)
     ImGui::EndChild();
 
     ImGui::SameLine();
+    const std::optional<EffectTypeRef> current =
+        selected >= 0 ? std::optional<EffectTypeRef>(EffectTypeRef{kind, selected}) : std::nullopt;
+    // The world preview runs only for the type shown.
+    m_worldPreview.KeepOnly(current);
     std::optional<EffectTypeRef> clicked;
     if (ImGui::BeginChild("details", ImVec2(0.0f, 0.0f), ImGuiChildFlags_Borders))
-    {
-        const std::optional<EffectTypeRef> current =
-            selected >= 0 ? std::optional<EffectTypeRef>(EffectTypeRef{kind, selected}) : std::nullopt;
-        clicked = m_details.Render(m_model, current);
-    }
+        clicked = m_details.Render(m_model, current, m_worldPreview);
     ImGui::EndChild();
     if (clicked)
         Show(*clicked);

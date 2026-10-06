@@ -15,6 +15,9 @@
 
 #include "DSPlaySound.h"
 #include "Core/Platform/IPlatformAudio.h"
+#ifdef _EDITOR
+#include "Audio/EditorSoundMute.h"
+#endif
 
 void LoadWaveFile(ESound bufferId, const wchar_t* filename, int maxChannel, bool enable3D)
 {
@@ -35,6 +38,11 @@ HRESULT ReleaseBuffer(int bufferId)
 
 HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
 {
+#ifdef _EDITOR
+    // Nothing started; no caller reads the result.
+    if (Audio::EditorMute::IsMuted() && looped == FALSE)
+        return S_FALSE;
+#endif
     if (g_platformAudio != nullptr)
     {
         return g_platformAudio->PlaySound(bufferId, object, looped != FALSE) ? S_OK : E_FAIL;

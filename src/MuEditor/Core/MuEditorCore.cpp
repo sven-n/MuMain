@@ -19,6 +19,7 @@
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
 #include "Core/Utilities/AssetLoadWorld.h"
+#include "Core/Utilities/WorldClearing.h"
 #include "Core/Utilities/StringUtils.h"
 #include "World/MapInfra/MapManager.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -182,9 +183,7 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     if (m_bInitialized)
         return;
 
-    // The effect browser shows what loaded each model and texture; the
-    // records take the map of the moment from the map manager.
-    Core::AssetLoadWorld::SetSource([] { return gMapManager.WorldActive; });
+    ConnectGameHooks();
 
     if (window == nullptr)
     {
@@ -408,6 +407,16 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     fflush(stderr);
 }
 
+void CMuEditorCore::ConnectGameHooks()
+{
+    // The effect browser shows what loaded each model and texture; the
+    // records take the map of the moment from the map manager.
+    Core::AssetLoadWorld::SetSource([] { return gMapManager.WorldActive; });
+    // The effect browser's world preview removes its objects before the game
+    // clears its pools.
+    Core::WorldClearing::SetListener([] { g_MuEffectBrowserUI.OnWorldClearing(); });
+}
+
 void CMuEditorCore::Shutdown()
 {
     if (!m_bInitialized)
@@ -416,6 +425,8 @@ void CMuEditorCore::Shutdown()
     // Do not touch the editor singletons here: their destructors already save the column
     // preferences, and when this runs from ~CMuEditorCore during static destruction they
     // would be built from scratch or, if they were opened, already destroyed.
+
+    Core::WorldClearing::SetListener(nullptr);
 
     mu::WaitForSDLGpuIdle();
     ImGui_ImplSDLGPU3_Shutdown();
@@ -611,6 +622,10 @@ void CMuEditorCore::Render()
         // game doesn't stay stuck in an edit mode.
         g_MapEditorUI.Render(nullptr);
     }
+
+    // After the game's move and draw, also while the editor is hidden: the
+    // effect browser's world preview keeps what it created running.
+    g_MuEffectBrowserUI.AfterRender(m_bShowEffectBrowser);
 
     // Store current hover state for next frame's input blocking
     m_bPreviousFrameHoveringUI = m_bHoveringUI;
