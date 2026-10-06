@@ -270,8 +270,6 @@ public:
     int GetLetterBlink();
     void IncreaseLetterBlink();
 
-    void RenderFriendButton();
-
     DWORD CheckChatRoomDuplication(const wchar_t* pszTargetName);
     void SendChatRoomConnectCheck();
     void UpdateAllChatWindowInviteList();
@@ -290,13 +288,7 @@ public:
     void LockAllChatWindow();
 
 protected:
-    virtual void InitControls() {}
-    virtual void RenderSub();
     virtual BOOL HandleMessage();
-    virtual void DoActionSub(BOOL bMessageOnly);
-    virtual void DoMouseActionSub();
-
-    void RenderWindowList();
 
 protected:
     std::deque<DWORD> m_WindowList;

@@ -28,7 +28,6 @@ void CUIChatWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     SetParentUIID(dwParentID);
     SetPosition(50, 50);
     SetSize(250, 170);
-    SetLimitSize(250, 150);
     m_View->Build();
 }
 

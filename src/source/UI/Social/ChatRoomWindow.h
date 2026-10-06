@@ -52,7 +52,6 @@ public:
     void PullSemanticViewToFront() override;
 
 protected:
-    void InitControls() override {}
     BOOL HandleMessage() override;
 
 private:

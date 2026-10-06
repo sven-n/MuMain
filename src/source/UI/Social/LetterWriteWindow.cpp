@@ -48,8 +48,6 @@ void CUILetterWriteWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     SetPosition(50, 50);
     // Native added the portrait's own 120 to its 250x216 before anything was laid out.
     SetSize(250 + 120, 216);
-    SetLimitSize(250 + 120, 150);
-    SetOption(UIWINDOWSTYLE_TITLEBAR | UIWINDOWSTYLE_FRAME | UIWINDOWSTYLE_MOVEABLE | UIWINDOWSTYLE_MINBUTTON);
     m_Photo.Init(0);
     m_Photo.SetOption(UIPHOTOVIEWER_CANCONTROL);
     m_Photo.SetParentUIID(GetUIID());
