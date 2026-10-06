@@ -465,7 +465,9 @@ direction, and a real measure-then-clamp pass so a tooltip near any screen edge 
 on-screen (every prior mechanism clamped horizontally at best, some not at all). `Owner` is an
 opaque per-caller token so one caller's per-frame `Hide()` can't clobber a different caller's
 `Show()` from earlier the same frame — see the header's own comment for the real bug this shape
-fixed.
+fixed. Callers show it every frame while hovered: `Show()` rebuilds and measures only when the
+content, its native metrics or the `dp` ratio changed (one context update to create the rows, then
+the tooltip document's own layout), and otherwise only places the measured panel at the anchor.
 
 Migrated onto it: the item/pet tooltip (`RenderItemInfo()`/`RenderRepairInfo()`,
 `Engine/Object/ZzzInventory.cpp`), the generic button tooltip (`CTooltip`,

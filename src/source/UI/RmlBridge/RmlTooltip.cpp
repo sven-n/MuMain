@@ -14,6 +14,7 @@
 #include <RmlUi/Core/ElementUtilities.h>
 
 #include <algorithm>
+#include <optional>
 #include <string>
 
 namespace UI::RmlBridge::Tooltip
@@ -46,6 +47,8 @@ namespace UI::RmlBridge::Tooltip
             // The native row box and the space to the next row (NativeMetrics()).
             float heightPx = 0.0f;
             float gapPx = 0.0f;
+
+            bool operator==(const TooltipLineEntry&) const = default;
         };
 
         struct TooltipRmlModel
@@ -78,6 +81,7 @@ namespace UI::RmlBridge::Tooltip
         void ApplyNativeMetrics(TooltipRmlModel& model, const Config& config)
         {
             const UI::Scaling::Transform transform = config.transform.value_or(UI::Scaling::GetActiveTransform());
+            model.centerText = (config.textAlign == Config::TextAlign::Center);
             model.fixedWidthPx = config.fixedWidth * transform.scaleX;
             model.textPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
             model.buttonHint = (config.box == Config::Box::ButtonHint);
@@ -111,6 +115,21 @@ namespace UI::RmlBridge::Tooltip
         }
 
         Owner s_CurrentOwner = nullptr;
+
+        // #tooltip_panel as last measured: its border box and the frame edges the anchor sits inside.
+        struct Measurement
+        {
+            Rml::Vector2f size;
+            Rml::Vector2f frameTopLeft;
+            float frameBottom = 0.0f;
+            // The context's dp ratio the panel was laid out at.
+            float dpRatio = 0.0f;
+        };
+        // Valid while the document holds the model's current content: hiding only changes its
+        // visibility, which leaves the layout as it was. Cleared when the document is rebuilt.
+        std::optional<Measurement> s_Measured;
+        // The width last set on #tooltip_panel; empty once the document is rebuilt.
+        std::string s_PanelWidth;
 
         void BindModel(Rml::DataModelConstructor& c, TooltipRmlModel& model)
         {
@@ -151,13 +170,15 @@ namespace UI::RmlBridge::Tooltip
         // again on its next hover check.
         void OnReloaded();
 
-        UI::RmlBridge::ThemedView<TooltipRmlModel> s_View{"tooltip", BindModel, {{"Data/Interface/RmlUi/tooltip.rml"}},
-                                                          {.afterReload = [] { OnReloaded(); }}};
+        UI::RmlBridge::ThemedView<TooltipRmlModel> s_View{
+            "tooltip", BindModel, {{"Data/Interface/RmlUi/tooltip.rml"}},
+            {.afterBuild = [] { s_Measured.reset(); s_PanelWidth.clear(); }, .afterReload = [] { OnReloaded(); }}};
 
         void OnReloaded()
         {
             s_View.Hide();
             s_CurrentOwner = nullptr;
+            s_Measured.reset();
         }
 
         TooltipLineEntry ToLineEntry(const Line& line)
@@ -188,6 +209,97 @@ namespace UI::RmlBridge::Tooltip
             return entry;
         }
 
+        // Copies `next` into the model, marking only the fields whose values changed. True when any did.
+        bool UpdateContent(TooltipRmlModel& model, TooltipRmlModel&& next)
+        {
+            bool changed = false;
+            const auto assign = [&changed](auto& field, auto&& value, const char* name) {
+                if (field == value)
+                    return;
+                field = std::move(value);
+                s_View.Binder().MarkDirty(name);
+                changed = true;
+            };
+            assign(model.lines, std::move(next.lines), "lines");
+            assign(model.centerText, next.centerText, "center_text");
+            assign(model.textPx, next.textPx, "text_px");
+            assign(model.borderPx, next.borderPx, "border_px");
+            assign(model.paddingPx, next.paddingPx, "padding_px");
+            assign(model.fixedWidthPx, next.fixedWidthPx, "fixed_width_px");
+            assign(model.buttonHint, next.buttonHint, "button_hint");
+            return changed;
+        }
+
+        // Lays the panel out for the model's content and measures it. The context update creates the
+        // data-for rows with their resolved fonts; the width they need is then set explicitly and only
+        // this document is laid out again.
+        Measurement Measure(Rml::Context& context, const Config& config)
+        {
+            context.Update();
+
+            // #tooltip_panel must not rely on shrink-to-fit width: this build's box-width computation
+            // for an absolutely-positioned block with multiple block children undersizes it (the same
+            // family of bug engine-findings.md documents for a single pre-line text node -- confirmed
+            // in practice by main_frame.rcss's #skill_tooltip needing an explicit, if fixed, width for
+            // exactly this reason). A tooltip's width genuinely varies with content (an item tooltip's
+            // longest line is nothing like a skill tooltip's), so a fixed width isn't an option here --
+            // measure the real per-line text width via RmlUi's own font engine (the same one that will
+            // actually draw it, so this can't drift from the real render the way a native GDI
+            // measurement transplanted onto RmlUi's own font metrics could) and set an explicit `width`
+            // from that instead of trusting auto-sizing.
+            Measurement measured;
+            measured.dpRatio = context.GetDensityIndependentPixelRatio();
+            Rml::Element* panel = s_View.Document()->GetElementById("tooltip_panel");
+            if (!panel)
+                return measured;
+
+            float maxLineWidth = 0.0f;
+            const int lineCount = panel->GetNumChildren();
+            for (int i = 0; i < lineCount && i < static_cast<int>(config.lines.size()); ++i)
+            {
+                const Line& line = config.lines[static_cast<size_t>(i)];
+                if (line.kind != Line::Kind::Text)
+                    continue; // spacer lines render no text -- nothing to measure.
+                if (Rml::Element* lineElement = panel->GetChild(i))
+                    maxLineWidth = std::max(maxLineWidth, static_cast<float>(Rml::ElementUtilities::GetStringWidth(lineElement, line.text)));
+            }
+            // +1px slack -- GetStringWidth() is a font-metrics estimate, not a guarantee against
+            // sub-pixel rounding wrapping the very last character early.
+            const std::string width = std::to_string(static_cast<int>(maxLineWidth) + 1) + "px";
+            if (width != s_PanelWidth)
+            {
+                panel->SetProperty("width", width);
+                s_PanelWidth = width;
+            }
+
+            // Lay out again at that width, so the box below has the final wrapped height.
+            s_View.Document()->UpdateDocument();
+
+            // #tooltip_panel's own box, not the document's: the document body spans the viewport.
+            const Rml::Box& box = panel->GetBox();
+            measured.size = box.GetSize(Rml::BoxArea::Border);
+            measured.frameTopLeft.x = box.GetEdge(Rml::BoxArea::Border, Rml::BoxEdge::Left);
+            measured.frameTopLeft.y = box.GetEdge(Rml::BoxArea::Border, Rml::BoxEdge::Top);
+            measured.frameBottom = box.GetEdge(Rml::BoxArea::Border, Rml::BoxEdge::Bottom);
+            return measured;
+        }
+
+        // Top-left of the panel for the anchor, kept fully inside the viewport.
+        Rml::Vector2f Place(const Config& config, const Measurement& measured, Rml::Vector2i viewport)
+        {
+            // The anchor places the panel's inner (padding) box; a theme's frame lies outside it, as
+            // RenderTipTextList() draws its 1-unit frame around the box it anchored.
+            const Rml::Vector2f size = measured.size;
+            float left = config.centerHorizontally ? (config.anchorX - size.x * 0.5f) : (config.anchorX - measured.frameTopLeft.x);
+            float top = (config.anchor == AnchorPoint::AboveLeft) ? (config.anchorY - size.y + measured.frameBottom)
+                                                                  : (config.anchorY - measured.frameTopLeft.y);
+
+            // Clamp on all four sides to the real viewport (this document has no parent transform),
+            // not REFERENCE_WIDTH/HEIGHT. Wider or taller than the viewport sticks to its left/top.
+            left = std::max(0.0f, std::min(left, static_cast<float>(viewport.x) - size.x));
+            top = std::max(0.0f, std::min(top, static_cast<float>(viewport.y) - size.y));
+            return {left, top};
+        }
     }
 
     void Show(const Config& config, Owner owner)
@@ -200,131 +312,32 @@ namespace UI::RmlBridge::Tooltip
 
         s_CurrentOwner = owner;
 
-        // config.anchorX/Y are already real screen pixels -- see RmlTooltip.h's own comment for why
-        // this document doesn't convert them itself (it used to, via the ambient
-        // UI::Scaling::GetActiveTransform(), which broke the skill-hotkey tooltip: its anchor is
-        // meaningful only relative to MainFrameWindow's own reference frame,
-        // not whatever transform happens to be ambient during MainFrameWindow::Update()).
-        const float screenAnchorX = config.anchorX;
-        const float screenAnchorY = config.anchorY;
+        TooltipRmlModel next;
+        next.lines.reserve(config.lines.size());
+        for (const Line& line : config.lines)
+            next.lines.push_back(ToLineEntry(line));
+        ApplyNativeMetrics(next, config);
 
         auto& model = s_View.Binder().GetModel();
-        model.lines.clear();
-        model.lines.reserve(config.lines.size());
-        for (const Line& line : config.lines)
-            model.lines.push_back(ToLineEntry(line));
-        model.centerText = (config.textAlign == Config::TextAlign::Center);
-        ApplyNativeMetrics(model, config);
+        Rml::ElementDocument* document = s_View.Document();
+        Rml::Context& context = *document->GetContext();
+        const bool contentChanged = UpdateContent(model, std::move(next));
+        if (!document->IsVisible())
+            document->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
+        if (contentChanged || !s_Measured || s_Measured->dpRatio != context.GetDensityIndependentPixelRatio())
+            s_Measured = Measure(context, config);
 
-        // First pass: a reasonable guess so layout has something sane to measure. Growing upward
-        // needs the real height to place the bottom edge at anchorY, which isn't known yet -- use
-        // anchorY as a placeholder top for that case too, corrected below once measured.
-        model.posX = screenAnchorX;
-        model.posY = screenAnchorY;
-        s_View.Binder().MarkDirty("lines");
-        s_View.Binder().MarkDirty("pos_x");
-        s_View.Binder().MarkDirty("pos_y");
-        s_View.Binder().MarkDirty("center_text");
-        s_View.Binder().MarkDirty("text_px");
-        s_View.Binder().MarkDirty("border_px");
-        s_View.Binder().MarkDirty("padding_px");
-        s_View.Binder().MarkDirty("fixed_width_px");
-        s_View.Binder().MarkDirty("button_hint");
-
-        s_View.Document()->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
-
-        // Force layout now so the .tt-line children data-for just created actually exist, with
-        // their real resolved font (family/size/weight, including .bold) applied -- needed for the
-        // width measurement below. Context::Update() only dispatches hover/click events on real
-        // input-state transitions and otherwise just re-resolves data-model/layout state, so
-        // calling it again here (and again below) with no new input in between doesn't double-fire
-        // anything, it just makes each successive change visible to the next read/write in this
-        // same function, all before the frame's own Update()/Render() pass runs.
-        Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-        context->Update();
-
-        // #tooltip_panel must not rely on shrink-to-fit width: this build's box-width computation
-        // for an absolutely-positioned block with multiple block children undersizes it (the same
-        // family of bug engine-findings.md documents for a single pre-line text node -- confirmed
-        // in practice by main_frame.rcss's #skill_tooltip needing an explicit, if fixed, width for
-        // exactly this reason). A tooltip's width genuinely varies with content (an item tooltip's
-        // longest line is nothing like a skill tooltip's), so a fixed width isn't an option here --
-        // measure the real per-line text width via RmlUi's own font engine (the same one that will
-        // actually draw it, so this can't drift from the real render the way a native GDI
-        // measurement transplanted onto RmlUi's own font metrics could) and set an explicit `width`
-        // from that instead of trusting auto-sizing.
-        Rml::Element* panel = s_View.Document()->GetElementById("tooltip_panel");
-        float maxLineWidth = 0.0f;
-        if (panel)
+        const Rml::Vector2f position = Place(config, *s_Measured, context.GetDimensions());
+        if (model.posX != position.x)
         {
-            const int lineCount = panel->GetNumChildren();
-            for (int i = 0; i < lineCount && i < static_cast<int>(config.lines.size()); ++i)
-            {
-                if (config.lines[static_cast<size_t>(i)].kind != Line::Kind::Text)
-                    continue; // spacer lines render no text -- nothing to measure.
-                if (Rml::Element* lineElement = panel->GetChild(i))
-                {
-                    const float lineWidth =
-                        static_cast<float>(Rml::ElementUtilities::GetStringWidth(lineElement, config.lines[static_cast<size_t>(i)].text));
-                    maxLineWidth = std::max(maxLineWidth, lineWidth);
-                }
-            }
-            // +1px slack -- GetStringWidth() is a font-metrics estimate, not a guarantee against
-            // sub-pixel rounding wrapping the very last character early.
-            panel->SetProperty("width", std::to_string(static_cast<int>(maxLineWidth) + 1) + "px");
+            model.posX = position.x;
+            s_View.Binder().MarkDirty("pos_x");
         }
-
-        // Re-layout now that the panel has a real, explicit width, so the box below reflects the
-        // final wrapped height at that width (relevant once any single line is long enough that a
-        // future consumer's content wraps rather than fitting on one line).
-        context->Update();
-
-        // #tooltip_panel's own box, NOT s_View.Document()->GetBox() -- confirmed via runtime diagnostic
-        // that the document's own outer body box reports the full viewport size here (1024x768,
-        // not the actual small tooltip), not the shrink-wrapped panel size a plain element would
-        // give. Since that always exceeded the viewport, the clamp below unconditionally forced
-        // left/top back to 0 -- the real cause of every item/skill tooltip landing at the top-left
-        // corner regardless of the (correctly computed) anchor.
-        const Rml::Vector2f size = panel ? panel->GetBox().GetSize(Rml::BoxArea::Border) : Rml::Vector2f(0.0f, 0.0f);
-
-        // The anchor places the panel's inner (padding) box; a theme's frame lies outside it, as
-        // RenderTipTextList() draws its 1-unit frame around the box it anchored.
-        Rml::Vector2f frameTopLeft(0.0f, 0.0f);
-        float frameBottom = 0.0f;
-        if (panel)
+        if (model.posY != position.y)
         {
-            const Rml::Box& box = panel->GetBox();
-            frameTopLeft.x = box.GetEdge(Rml::BoxArea::Border, Rml::BoxEdge::Left);
-            frameTopLeft.y = box.GetEdge(Rml::BoxArea::Border, Rml::BoxEdge::Top);
-            frameBottom = box.GetEdge(Rml::BoxArea::Border, Rml::BoxEdge::Bottom);
+            model.posY = position.y;
+            s_View.Binder().MarkDirty("pos_y");
         }
-        float left = config.centerHorizontally ? (screenAnchorX - size.x * 0.5f) : (screenAnchorX - frameTopLeft.x);
-        float top = (config.anchor == AnchorPoint::AboveLeft) ? (screenAnchorY - size.y + frameBottom)
-                                                              : (screenAnchorY - frameTopLeft.y);
-
-        // Clamp on all four sides -- every prior mechanism clamped at most horizontally; hovering
-        // something near any screen edge must not clip the tooltip. Bounds are the real viewport
-        // (this document has no parent transform of its own -- see the anchor conversion above),
-        // not REFERENCE_WIDTH/HEIGHT.
-        const Rml::Vector2i viewport = context->GetDimensions();
-        if (left < 0.0f)
-            left = 0.0f;
-        if (left + size.x > static_cast<float>(viewport.x))
-            left = static_cast<float>(viewport.x) - size.x;
-        if (left < 0.0f)
-            left = 0.0f; // wider than the viewport itself -- clamp to the left edge, not negative.
-
-        if (top < 0.0f)
-            top = 0.0f;
-        if (top + size.y > static_cast<float>(viewport.y))
-            top = static_cast<float>(viewport.y) - size.y;
-        if (top < 0.0f)
-            top = 0.0f;
-
-        model.posX = left;
-        model.posY = top;
-        s_View.Binder().MarkDirty("pos_x");
-        s_View.Binder().MarkDirty("pos_y");
     }
 
     void Hide(Owner owner)

@@ -10,9 +10,8 @@ Completed migrations belong in [migration-ledger.md](migration-ledger.md).
 What would otherwise grow with every new window, or break a principle in a way new code copies.
 Most are items of the integration seams below.
 
-1. **The tooltip measures its own document** (item 2), not the whole context twice a frame.
-2. **A display-scale change applies the `dp` ratio** (item 4). A bug against §9.
-3. **An unsubstituted design token is logged** (item 3): a sheet containing `token(` that was not
+1. **A display-scale change applies the `dp` ratio** (item 3). A bug against §9.
+2. **An unsubstituted design token is logged** (item 2): a sheet containing `token(` that was not
    inlined warns instead of drawing empty values. The `FileInterface` replacement can follow.
 
 Also before merging, though not code health: the event windows nobody has seen in game (the
@@ -136,19 +135,14 @@ against the library is where RmlUi meets the legacy UI. In order of value:
    retire `dialog_background`; move the inventory family's live items into render targets and
    retire `background` with its `*_bg.rml` documents, taking each out of the test's list. Trigger:
    the paperdoll row above, which waits on the same pass.
-2. **`Tooltip::Show()` runs `Context::Update()` twice** to measure itself, every frame while
-   something is hovered: every data model and document in the main context updates, hover events
-   dispatch, and all nine fields are marked changed without a change check. Direction: measure with
-   the tooltip document's own `UpdateDocument()` and skip an unchanged config. Trigger: now; it is
-   small.
-3. **Design tokens are inlined by regex.** The themed loader rewrites `<link>` tags into
+2. **Design tokens are inlined by regex.** The themed loader rewrites `<link>` tags into
    `<style>` blocks, so tokenised sheets skip RmlUi's stylesheet cache and parse once per document,
    and a `<link>` with its attributes in another order is silently left unsubstituted. The need is
    real: this RmlUi has no `var()`. Direction: a `Rml::FileInterface` that substitutes tokens when
    it serves an `.rcss`, which can also resolve the per-theme `.rml` overrides. Trigger: a token
    found unsubstituted, or the counter-scale block below moving to `calc()` with `var()`, which
    could replace tokens too.
-4. **A display-scale change leaves RmlUi's `dp` ratio stale.**
+3. **A display-scale change leaves RmlUi's `dp` ratio stale.**
    `SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED` updates the content scale `ViewportFitScale()` folds
    in, but nothing calls `RmlUiRuntime::OnResize()` until the next resize. A bug; fix it with the
    next change to `Winmain.cpp`'s event pump.

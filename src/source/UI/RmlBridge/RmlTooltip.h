@@ -160,8 +160,8 @@ namespace UI::RmlBridge::Tooltip
     // a position derived from anchorX/anchorY and clamped to stay fully within the real viewport on
     // all four sides (see .cpp for how the real, measured size is obtained before the clamp is
     // applied). Safe to call every frame while a hover persists (e.g. from a native Render() hover
-    // check) -- rebuilding identical content is cheap and idempotent. No-op if RmlUiRuntime isn't
-    // created yet or `config.lines` is empty.
+    // check): content identical to what is showing is not rebuilt or measured again, only placed at
+    // the anchor. No-op if RmlUiRuntime isn't created yet or `config.lines` is empty.
     void Show(const Config& config, Owner owner = nullptr);
 
     // Hides the shared tooltip document -- but only if `owner` matches the current owner (or
