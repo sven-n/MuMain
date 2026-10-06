@@ -3,9 +3,10 @@
 
 #pragma once
 
+#include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/HUD/MasterLevelRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -107,8 +108,6 @@ public:
     bool UpdateKeyEvent() override;
     float GetLayerDepth() override;
 
-    void ReloadRmlTheme();
-
 private:
     int PosX;
     int PosY;
@@ -128,11 +127,14 @@ private:
 
     CManager* m_pNewUIMng;
 
-    RmlModelBinder<MasterLevelRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, MasterLevelRmlModel& model);
+    UI::RmlBridge::ThemedView<MasterLevelRmlModel> m_RmlView{"master_level",
+        [this](Rml::DataModelConstructor& c, MasterLevelRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/master_level.rml"}}};
     // Background-context companion: the black the original's padded background texture
     // leaves below the tree, under the bottom HUD (master_level_bg.rml).
-    Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+    UI::RmlBridge::ThemedView<> m_RmlBgView{{{"Data/Interface/RmlUi/master_level_bg.rml",
+        [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
 
     // Set by the RmlUi events, read every frame: the node press opens its dialog from
     // Update(), the hovers show the matching hint.

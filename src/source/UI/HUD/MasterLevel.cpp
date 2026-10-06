@@ -119,7 +119,6 @@ bool mu::ui::window::CMasterLevel::Create(CManager* pNewUIMng)
     this->LoadImages();
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     return true;
 }
@@ -130,10 +129,12 @@ void mu::ui::window::CMasterLevel::Release()
     this->ClearSkillTooltipData();
     if (m_pNewUIMng)
     {
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = nullptr;
     }
+
+    m_RmlView.Release();
+    m_RmlBgView.Release();
 }
 
 void mu::ui::window::CMasterLevel::SetPos()
@@ -512,112 +513,81 @@ void mu::ui::window::CMasterLevel::UnloadImages()
     DeleteBitmap(IMAGE_MASTER_INTERFACE + 3, false);
 }
 
-void mu::ui::window::CMasterLevel::BuildRmlUi()
+void mu::ui::window::CMasterLevel::BindRmlModel(Rml::DataModelConstructor& c, MasterLevelRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    c.Bind("scale_x", &model.scaleX);
+    c.Bind("scale_y", &model.scaleY);
+    c.Bind("inverse_scale_x", &model.inverseScaleX);
+    c.Bind("inverse_scale_y", &model.inverseScaleY);
+    c.Bind("text_px", &model.textPx);
 
-    const bool modelCreated = m_RmlBinder.Create(
-        RmlUiRuntime::Instance().GetContext(), "master_level",
-        [this](Rml::DataModelConstructor& c, MasterLevelRmlModel& model)
-        {
-            c.Bind("scale_x", &model.scaleX);
-            c.Bind("scale_y", &model.scaleY);
-            c.Bind("inverse_scale_x", &model.inverseScaleX);
-            c.Bind("inverse_scale_y", &model.inverseScaleY);
-            c.Bind("text_px", &model.textPx);
+    c.Bind("class_name_text", &model.classNameText);
+    c.Bind("master_level_text", &model.masterLevelText);
+    c.Bind("level_point_text", &model.levelPointText);
+    c.Bind("experience_text", &model.experienceText);
+    c.Bind("column_text_0", &model.columnText0);
+    c.Bind("column_text_1", &model.columnText1);
+    c.Bind("column_text_2", &model.columnText2);
 
-            c.Bind("class_name_text", &model.classNameText);
-            c.Bind("master_level_text", &model.masterLevelText);
-            c.Bind("level_point_text", &model.levelPointText);
-            c.Bind("experience_text", &model.experienceText);
-            c.Bind("column_text_0", &model.columnText0);
-            c.Bind("column_text_1", &model.columnText1);
-            c.Bind("column_text_2", &model.columnText2);
+    auto node = c.RegisterStruct<MasterLevelNodeEntry>();
+    node.RegisterMember("id", &MasterLevelNodeEntry::id);
+    node.RegisterMember("column", &MasterLevelNodeEntry::column);
+    node.RegisterMember("slot", &MasterLevelNodeEntry::slot);
+    node.RegisterMember("rank", &MasterLevelNodeEntry::rank);
+    node.RegisterMember("icon", &MasterLevelNodeEntry::icon);
+    node.RegisterMember("usable", &MasterLevelNodeEntry::usable);
+    node.RegisterMember("arrow", &MasterLevelNodeEntry::arrow);
+    node.RegisterMember("level_text", &MasterLevelNodeEntry::levelText);
+    c.RegisterArray<std::vector<MasterLevelNodeEntry>>();
+    c.Bind("nodes", &model.nodes);
 
-            auto node = c.RegisterStruct<MasterLevelNodeEntry>();
-            node.RegisterMember("id", &MasterLevelNodeEntry::id);
-            node.RegisterMember("column", &MasterLevelNodeEntry::column);
-            node.RegisterMember("slot", &MasterLevelNodeEntry::slot);
-            node.RegisterMember("rank", &MasterLevelNodeEntry::rank);
-            node.RegisterMember("icon", &MasterLevelNodeEntry::icon);
-            node.RegisterMember("usable", &MasterLevelNodeEntry::usable);
-            node.RegisterMember("arrow", &MasterLevelNodeEntry::arrow);
-            node.RegisterMember("level_text", &MasterLevelNodeEntry::levelText);
-            c.RegisterArray<std::vector<MasterLevelNodeEntry>>();
-            c.Bind("nodes", &model.nodes);
-
-            // Only recorded here and acted on in Update(): the press opens a modal dialog, which
-            // must not happen inside this document's own event dispatch.
-            c.BindEventCallback("master_node_press",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                                {
-                                    if (arguments.size() == 1)
-                                        m_PressedNodeId = arguments[0].Get<int>(-1);
-                                });
-            c.BindEventCallback("master_node_hover",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                                {
-                                    if (arguments.size() == 1)
-                                        m_HoveredNodeId = arguments[0].Get<int>(-1);
-                                });
-            c.BindEventCallback("master_experience_hover",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                                {
-                                    if (arguments.size() == 1)
-                                        m_bExperienceHovered = arguments[0].Get<int>(0) != 0;
-                                });
-            c.BindEventCallback("master_close_hover",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                                {
-                                    if (arguments.size() == 1)
-                                        m_bCloseHovered = arguments[0].Get<int>(0) != 0;
-                                });
-            c.BindEventCallback("master_close", [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                { g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MASTER_LEVEL); });
-        });
-
-    if (modelCreated)
-    {
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                      "Data/Interface/RmlUi/master_level.rml");
-    }
-
-    m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/master_level_bg.rml");
+    // Only recorded here and acted on in Update(): the press opens a modal dialog, which
+    // must not happen inside this document's own event dispatch.
+    c.BindEventCallback("master_node_press",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                m_PressedNodeId = arguments[0].Get<int>(-1);
+                        });
+    c.BindEventCallback("master_node_hover",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                m_HoveredNodeId = arguments[0].Get<int>(-1);
+                        });
+    c.BindEventCallback("master_experience_hover",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                m_bExperienceHovered = arguments[0].Get<int>(0) != 0;
+                        });
+    c.BindEventCallback("master_close_hover",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                m_bCloseHovered = arguments[0].Get<int>(0) != 0;
+                        });
+    c.BindEventCallback("master_close", [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MASTER_LEVEL); });
 }
 
-void mu::ui::window::CMasterLevel::ReloadRmlTheme()
+void mu::ui::window::CMasterLevel::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return; // never opened -- BuildRmlUi() picks up the new theme whenever it first is
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    if (m_pRmlBgDoc)
-    {
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-            bgContext->UnloadDocument(m_pRmlBgDoc);
-        m_pRmlBgDoc = nullptr;
-    }
-
-    BuildRmlUi();
-    // Next frame's SyncRmlModel() restores visibility, the header and the node list.
+    m_RmlView.Ensure();
+    m_RmlBgView.Ensure();
 }
 
 void mu::ui::window::CMasterLevel::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     const bool visible = IsVisible();
-    const bool wasVisible = m_pRmlDoc->IsVisible();
+    const bool wasVisible = m_RmlView.Document()->IsVisible();
     // Show() pulls the tree to the front of the main context, above the HUD documents it covers,
     // as the original drew it over them.
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, visible);
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), visible);
     SyncBackgroundVisibility(visible);
 
     if (!visible)
@@ -643,18 +613,18 @@ void mu::ui::window::CMasterLevel::SyncRmlModel()
 
 void mu::ui::window::CMasterLevel::SyncBackgroundVisibility(bool visible)
 {
-    if (m_pRmlBgDoc == nullptr || m_pRmlBgDoc->IsVisible() == visible)
+    if (m_RmlBgView.Document() == nullptr || m_RmlBgView.Document()->IsVisible() == visible)
         return;
 
     if (!visible)
     {
-        m_pRmlBgDoc->Hide();
+        m_RmlBgView.Document()->Hide();
         return;
     }
 
     // Behind every other background document: the bottom HUD's own art draws over this black.
-    m_pRmlBgDoc->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
-    m_pRmlBgDoc->PushToBack();
+    m_RmlBgView.Document()->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
+    m_RmlBgView.Document()->PushToBack();
 }
 
 void mu::ui::window::CMasterLevel::SyncTransform()
@@ -663,26 +633,26 @@ void mu::ui::window::CMasterLevel::SyncTransform()
     // pushed rather than computed in the markup so each text leaf's transform stays a plain
     // binding.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    SyncFloat(m_RmlBinder, &MasterLevelRmlModel::scaleX, "scale_x", transform.scaleX);
-    SyncFloat(m_RmlBinder, &MasterLevelRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncFloat(m_RmlBinder, &MasterLevelRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    SyncFloat(m_RmlBinder, &MasterLevelRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::scaleX, "scale_x", transform.scaleX);
+    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::scaleY, "scale_y", transform.scaleY);
+    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
+    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 }
 
 void mu::ui::window::CMasterLevel::SyncHeaderTexts()
 {
     wchar_t buffer[256] = {};
 
-    SyncString(m_RmlBinder, &MasterLevelRmlModel::classNameText, "class_name_text",
+    SyncString(m_RmlView.Binder(), &MasterLevelRmlModel::classNameText, "class_name_text",
                StringUtils::WideToNarrow(I18N::Game::Lookup(this->ClassNameTextIndex)));
 
     mu_swprintf(buffer, I18N::Game::MasterLevelD, Master_Level_Data.nMLevel);
-    SyncString(m_RmlBinder, &MasterLevelRmlModel::masterLevelText, "master_level_text",
+    SyncString(m_RmlView.Binder(), &MasterLevelRmlModel::masterLevelText, "master_level_text",
                StringUtils::WideToNarrow(buffer));
 
     mu_swprintf(buffer, I18N::Game::LevelPointD, Master_Level_Data.nMLevelUpMPoint);
-    SyncString(m_RmlBinder, &MasterLevelRmlModel::levelPointText, "level_point_text",
+    SyncString(m_RmlView.Binder(), &MasterLevelRmlModel::levelPointText, "level_point_text",
                StringUtils::WideToNarrow(buffer));
 
     Rml::String experienceText;
@@ -694,7 +664,7 @@ void mu::ui::window::CMasterLevel::SyncHeaderTexts()
         mu_swprintf(buffer, I18N::Game::EXP62f, percent);
         experienceText = StringUtils::WideToNarrow(buffer);
     }
-    SyncString(m_RmlBinder, &MasterLevelRmlModel::experienceText, "experience_text", std::move(experienceText));
+    SyncString(m_RmlView.Binder(), &MasterLevelRmlModel::experienceText, "experience_text", std::move(experienceText));
 
     Rml::String MasterLevelRmlModel::* const columnFields[MAX_MASTER_SKILL_CATEGORY] = {
         &MasterLevelRmlModel::columnText0, &MasterLevelRmlModel::columnText1, &MasterLevelRmlModel::columnText2};
@@ -702,13 +672,13 @@ void mu::ui::window::CMasterLevel::SyncHeaderTexts()
     for (int column = 0; column < MAX_MASTER_SKILL_CATEGORY; ++column)
     {
         mu_swprintf(buffer, I18N::Game::Lookup(this->CategoryTextIndex + column), this->CategoryPoint[column]);
-        SyncString(m_RmlBinder, columnFields[column], columnNames[column], StringUtils::WideToNarrow(buffer));
+        SyncString(m_RmlView.Binder(), columnFields[column], columnNames[column], StringUtils::WideToNarrow(buffer));
     }
 }
 
 void mu::ui::window::CMasterLevel::RebuildNodeModel()
 {
-    MasterLevelRmlModel& model = m_RmlBinder.GetModel();
+    MasterLevelRmlModel& model = m_RmlView.GetModel();
 
     std::vector<MasterLevelNodeEntry> nodes;
     nodes.reserve(this->map_masterData.size());
@@ -751,7 +721,7 @@ void mu::ui::window::CMasterLevel::RebuildNodeModel()
         return;
 
     model.nodes = std::move(nodes);
-    m_RmlBinder.MarkDirty("nodes");
+    m_RmlView.MarkDirty("nodes");
 }
 
 bool mu::ui::window::CMasterLevel::IsNodeUsable(const _MASTER_SKILLTREE_DATA& skillData)
@@ -846,7 +816,7 @@ bool mu::ui::window::CMasterLevel::ShowNodeHint(int nodeId)
     float nodeLeft = static_cast<float>(position.left);
     float nodeTop = static_cast<float>(position.top);
     const std::string nodeElementId = "node_" + std::to_string(nodeId);
-    UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "panel", nodeElementId.c_str(), POINT{0, 0}, nodeLeft,
+    UI::RmlBridge::RefreshLogicalAnchorPosition(m_RmlView.Document(), "panel", nodeElementId.c_str(), POINT{0, 0}, nodeLeft,
                                                 nodeTop);
     const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
     UI::Tooltip::ShowLegacyTextList(

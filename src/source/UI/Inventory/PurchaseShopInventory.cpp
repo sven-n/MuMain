@@ -56,92 +56,49 @@ bool mu::ui::window::CPurchaseShopInventory::Create(CManager* pNewUIMng, int x, 
     m_pNewInventoryCtrl->LockInventory();
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
     return true;
 }
 
-void mu::ui::window::CPurchaseShopInventory::BuildRmlUi()
+void mu::ui::window::CPurchaseShopInventory::BindRmlModel(Rml::DataModelConstructor& c, PurchaseShopRmlModel& model)
 {
-    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "purchase_shop",
-            [this](Rml::DataModelConstructor& c, PurchaseShopRmlModel& model)
-            {
-                c.Bind("root_x", &model.rootX);
-                c.Bind("root_y", &model.rootY);
-                c.Bind("root_scale", &model.rootScale);
-                c.Bind("panel_width", &model.panelWidth);
-                c.Bind("text_px", &model.textPx);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("panel_width", &model.panelWidth);
+    c.Bind("text_px", &model.textPx);
 
-                c.Bind("title", &model.title);
-                c.Bind("shop_owner_text", &model.shopOwnerText);
-                c.Bind("warning_label", &model.warningLabel);
-                c.Bind("selling_price_line", &model.sellingPriceLine);
-                c.Bind("verify_line", &model.verifyLine);
-                c.Bind("already_in_store_line", &model.alreadyInStoreLine);
-                c.Bind("cancel_purchased_line", &model.cancelPurchasedLine);
-                c.Bind("cant_be_returned_line", &model.cantBeReturnedLine);
-                c.Bind("all_item_trading_line", &model.allItemTradingLine);
-                c.Bind("zen_only_line", &model.zenOnlyLine);
+    c.Bind("title", &model.title);
+    c.Bind("shop_owner_text", &model.shopOwnerText);
+    c.Bind("warning_label", &model.warningLabel);
+    c.Bind("selling_price_line", &model.sellingPriceLine);
+    c.Bind("verify_line", &model.verifyLine);
+    c.Bind("already_in_store_line", &model.alreadyInStoreLine);
+    c.Bind("cancel_purchased_line", &model.cancelPurchasedLine);
+    c.Bind("cant_be_returned_line", &model.cantBeReturnedLine);
+    c.Bind("all_item_trading_line", &model.allItemTradingLine);
+    c.Bind("zen_only_line", &model.zenOnlyLine);
 
-                c.BindEventCallback("purchase_shop_exit_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
-                    });
-            });
-
-        if (modelCreated)
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/purchase_shop.rml");
-
-        // Frame background panel uses the background context -- see PurchaseShopBgRmlModel (PurchaseShopInventory.h).
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+    c.BindEventCallback("purchase_shop_exit_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
         {
-            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "purchase_shop_bg",
-                [](Rml::DataModelConstructor& c, PurchaseShopBgRmlModel& model)
-                {
-                    c.Bind("root_x", &model.rootX);
-                    c.Bind("root_y", &model.rootY);
-                    c.Bind("root_scale", &model.rootScale);
-                });
-            if (bgModelCreated)
-            {
-                // Starts hidden -- CreateBackgroundDocument() no longer Show()s eagerly (see its
-                // own comment, RmlTheme.h); SyncRmlModel() below is what shows/hides it.
-                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/purchase_shop_bg.rml");
-            }
-        }
-
-        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
-        // SyncRmlModel(), not an eager Show() at Create() time.
-    }
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
+        });
 }
 
-void mu::ui::window::CPurchaseShopInventory::ReloadRmlTheme()
+void mu::ui::window::CPurchaseShopInventory::BindRmlBgModel(Rml::DataModelConstructor& c, PurchaseShopBgRmlModel& model)
 {
-    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+}
 
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    if (m_pRmlBgDoc)
-    {
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-        {
-            m_BgRmlBinder.Destroy(bgContext);
-            bgContext->UnloadDocument(m_pRmlBgDoc);
-        }
-        m_pRmlBgDoc = nullptr;
-    }
-
-    BuildRmlUi();
-    // Next frame's Update()/SyncRmlModel() self-corrects live state/visibility for both docs.
+void mu::ui::window::CPurchaseShopInventory::BuildRmlUi()
+{
+    m_RmlView.Ensure();
+    m_RmlBgView.Ensure();
 }
 
 void mu::ui::window::CPurchaseShopInventory::Release()
@@ -151,9 +108,11 @@ void mu::ui::window::CPurchaseShopInventory::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
+    m_RmlBgView.Release();
 }
 
 bool mu::ui::window::CPurchaseShopInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
@@ -230,10 +189,10 @@ bool mu::ui::window::CPurchaseShopInventory::UpdateMouseEvent()
 bool mu::ui::window::CPurchaseShopInventory::WindowProcess()
 {
     // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
     float panelWidth = INVENTORY_WIDTH;
     float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY) == false)
     {
         return false;
@@ -303,29 +262,29 @@ bool mu::ui::window::CPurchaseShopInventory::Update()
 
 void mu::ui::window::CPurchaseShopInventory::SyncRmlModel()
 {
-    if (m_pRmlBgDoc)
+    if (m_RmlBgView.Document())
     {
-        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
+        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
 
         // RenderBackgroundLayer() renders whatever's shown in the shared background context
         // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, IsVisible());
+        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
     }
 
-    if (!m_pRmlDoc) return;
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    if (!m_RmlView.Document()) return;
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowAnchor(m_pRmlDoc, "item_grid", m_Pos, 16, 90);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+        m_pNewInventoryCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_Pos, 16, 90);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
     auto syncWide = [&](Rml::String PurchaseShopRmlModel::* field, const char* boundName, const wchar_t* text)
     {
         const Rml::String value = StringUtils::WideToNarrow(text);
-        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+        if (model.*field != value) { model.*field = value; m_RmlView.MarkDirty(boundName); }
     };
 
     syncWide(&PurchaseShopRmlModel::title, "title", I18N::Game::PersonalStore);

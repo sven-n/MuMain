@@ -254,184 +254,126 @@ bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
     ChangePersonal(m_EnablePersonalShop);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
     return true;
 }
 
-void mu::ui::window::CMyShopInventory::BuildRmlUi()
+void mu::ui::window::CMyShopInventory::BindRmlModel(Rml::DataModelConstructor& c, MyShopRmlModel& model)
 {
-    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "my_shop",
-            [this](Rml::DataModelConstructor& c, MyShopRmlModel& model)
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("panel_width", &model.panelWidth);
+    c.Bind("text_px", &model.textPx);
+
+    c.Bind("title", &model.title);
+    c.Bind("shop_title", &model.shopTitle);
+    c.Bind("exit_tooltip", &model.exitTooltip);
+
+    c.Bind("open_locked", &model.openLocked);
+    c.Bind("open_tooltip", &model.openTooltip);
+
+    c.Bind("close_locked", &model.closeLocked);
+    c.Bind("close_tooltip", &model.closeTooltip);
+
+    c.Bind("show_still_opening", &model.showStillOpening);
+    c.Bind("still_opening_text", &model.stillOpeningText);
+    c.Bind("warning_text", &model.warningText);
+    c.Bind("selling_price_text", &model.sellingPriceText);
+    c.Bind("please_verify_text", &model.pleaseVerifyText);
+    c.Bind("already_in_store_text", &model.alreadyInStoreText);
+    c.Bind("cancel_sold_text", &model.cancelSoldText);
+    c.Bind("cant_be_returned_text", &model.cantBeReturnedText);
+    c.Bind("all_item_trading_text", &model.allItemTradingText);
+    c.Bind("can_only_be_done_using_zen_text", &model.canOnlyBeDoneUsingZenText);
+
+    c.BindEventCallback("my_shop_exit_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+        });
+    c.BindEventCallback(
+        "my_shop_open_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            if (m_bOpenLocked) // a locked CNewUIButton shows its hint but takes no click
+                return;
+            wchar_t shopTitle[MAX_SHOPTITLE + 1]{};
+            GetTitle(shopTitle);
+            if (IsExistUndecidedPrice() == false && wcslen(shopTitle) > 0)
             {
-                c.Bind("root_x", &model.rootX);
-                c.Bind("root_y", &model.rootY);
-                c.Bind("root_scale", &model.rootScale);
-                c.Bind("panel_width", &model.panelWidth);
-                c.Bind("text_px", &model.textPx);
-
-                c.Bind("title", &model.title);
-                c.Bind("shop_title", &model.shopTitle);
-                c.Bind("exit_tooltip", &model.exitTooltip);
-
-                c.Bind("open_locked", &model.openLocked);
-                c.Bind("open_tooltip", &model.openTooltip);
-
-                c.Bind("close_locked", &model.closeLocked);
-                c.Bind("close_tooltip", &model.closeTooltip);
-
-                c.Bind("show_still_opening", &model.showStillOpening);
-                c.Bind("still_opening_text", &model.stillOpeningText);
-                c.Bind("warning_text", &model.warningText);
-                c.Bind("selling_price_text", &model.sellingPriceText);
-                c.Bind("please_verify_text", &model.pleaseVerifyText);
-                c.Bind("already_in_store_text", &model.alreadyInStoreText);
-                c.Bind("cancel_sold_text", &model.cancelSoldText);
-                c.Bind("cant_be_returned_text", &model.cantBeReturnedText);
-                c.Bind("all_item_trading_text", &model.allItemTradingText);
-                c.Bind("can_only_be_done_using_zen_text", &model.canOnlyBeDoneUsingZenText);
-
-                c.BindEventCallback("my_shop_exit_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
-                    });
-                c.BindEventCallback(
-                    "my_shop_open_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        if (m_bOpenLocked) // a locked CNewUIButton shows its hint but takes no click
-                            return;
-                        wchar_t shopTitle[MAX_SHOPTITLE + 1]{};
-                        GetTitle(shopTitle);
-                        if (IsExistUndecidedPrice() == false && wcslen(shopTitle) > 0)
-                        {
-                            if (m_EnablePersonalShop == false)
-                            {
-                                mu::ui::window::GenericDialogConfig cfg;
-                                cfg.showCancel = true;
-                                cfg.lines.push_back({ I18N::Game::DoYouWantToOpenAStore, false });
-                                cfg.onPrimary = [this]
-                                {
-                                    wchar_t confirmedTitle[MAX_SHOPTITLE]{};
-                                    GetTitle(confirmedTitle);
-                                    wcscpy(g_szPersonalShopTitle, confirmedTitle);
-                                    SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(confirmedTitle));
-
-                                    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
-                                    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
-                                };
-                                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-                            }
-                            else
-                            {
-                                wcscpy(g_szPersonalShopTitle, shopTitle);
-                                SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(shopTitle));
-
-                                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
-                                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
-                                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY_EXT);
-                            }
-                        }
-                        else
-                        {
-                            g_pSystemLogBox->AddText(I18N::Game::ThereSNoStoreNameOrItemPrice, mu::ui::window::TYPE_ERROR_MESSAGE);
-                        }
-                    });
-                c.BindEventCallback("my_shop_close_click",
-                                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                    {
-                                        if (!m_EnablePersonalShop) // locked until the shop is open
-                                            return;
-                                        SocketClient->ToGameServer()->SendPlayerShopClose();
-
-                                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
-                                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
-                                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY_EXT);
-                                    });
-            });
-
-        if (modelCreated)
-        {
-            // Former RenderTextInfo()'s static instructional lines -- set once here, not
-            // re-synced every frame, since none of this text ever changes at runtime (same
-            // convention CCharacterInfoWindow's own static labels use). Only show_still_opening
-            // (SyncRmlModel()) reflects live state.
-            auto& model = m_RmlBinder.GetModel();
-            model.warningText = StringUtils::WideToNarrow(I18N::Game::Warning);
-            model.sellingPriceText = StringUtils::WideToNarrow(I18N::Game::SellingPriceWhenOpeningTheStore);
-            model.pleaseVerifyText = StringUtils::WideToNarrow(I18N::Game::PleaseVerify);
-            model.alreadyInStoreText = StringUtils::WideToNarrow(I18N::Game::AlreadyInThePersonalStore);
-            model.cancelSoldText = StringUtils::WideToNarrow(I18N::Game::CancelSoldItem);
-            model.cantBeReturnedText = StringUtils::WideToNarrow(I18N::Game::CanTBeReturned);
-            model.allItemTradingText = StringUtils::WideToNarrow(I18N::Game::AllItemTrading);
-            model.canOnlyBeDoneUsingZenText = StringUtils::WideToNarrow(I18N::Game::CanOnlyBeDoneUsingZen);
-            model.stillOpeningText = StringUtils::WideToNarrow(I18N::Game::StillOpening);
-
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/my_shop.rml");
-            ApplyShopTitleLimit();
-        }
-
-        // Frame background panel uses the background context -- see MyShopBgRmlModel (MyShopInventory.h).
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-        {
-            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "my_shop_bg",
-                [](Rml::DataModelConstructor& c, MyShopBgRmlModel& model)
+                if (m_EnablePersonalShop == false)
                 {
-                    c.Bind("root_x", &model.rootX);
-                    c.Bind("root_y", &model.rootY);
-                    c.Bind("root_scale", &model.rootScale);
-                });
-            if (bgModelCreated)
-            {
-                // Starts hidden -- CreateBackgroundDocument() no longer Show()s eagerly (see its
-                // own comment, RmlTheme.h); SyncRmlModel() below is what shows/hides it.
-                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/my_shop_bg.rml");
-            }
-        }
+                    mu::ui::window::GenericDialogConfig cfg;
+                    cfg.showCancel = true;
+                    cfg.lines.push_back({ I18N::Game::DoYouWantToOpenAStore, false });
+                    cfg.onPrimary = [this]
+                    {
+                        wchar_t confirmedTitle[MAX_SHOPTITLE]{};
+                        GetTitle(confirmedTitle);
+                        wcscpy(g_szPersonalShopTitle, confirmedTitle);
+                        SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(confirmedTitle));
 
-        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
-        // SyncRmlModel(), not an eager Show() at Create() time.
-    }
+                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
+                    };
+                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+                }
+                else
+                {
+                    wcscpy(g_szPersonalShopTitle, shopTitle);
+                    SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(shopTitle));
+
+                    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+                    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
+                    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY_EXT);
+                }
+            }
+            else
+            {
+                g_pSystemLogBox->AddText(I18N::Game::ThereSNoStoreNameOrItemPrice, mu::ui::window::TYPE_ERROR_MESSAGE);
+            }
+        });
+    c.BindEventCallback("my_shop_close_click",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        {
+                            if (!m_EnablePersonalShop) // locked until the shop is open
+                                return;
+                            SocketClient->ToGameServer()->SendPlayerShopClose();
+
+                            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+                            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
+                            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY_EXT);
+                        });
+
+    // Former RenderTextInfo()'s static instructional lines -- set once here, not
+    // re-synced every frame, since none of this text ever changes at runtime (same
+    // convention CCharacterInfoWindow's own static labels use). Only show_still_opening
+    // (SyncRmlModel()) reflects live state.
+    model.warningText = StringUtils::WideToNarrow(I18N::Game::Warning);
+    model.sellingPriceText = StringUtils::WideToNarrow(I18N::Game::SellingPriceWhenOpeningTheStore);
+    model.pleaseVerifyText = StringUtils::WideToNarrow(I18N::Game::PleaseVerify);
+    model.alreadyInStoreText = StringUtils::WideToNarrow(I18N::Game::AlreadyInThePersonalStore);
+    model.cancelSoldText = StringUtils::WideToNarrow(I18N::Game::CancelSoldItem);
+    model.cantBeReturnedText = StringUtils::WideToNarrow(I18N::Game::CanTBeReturned);
+    model.allItemTradingText = StringUtils::WideToNarrow(I18N::Game::AllItemTrading);
+    model.canOnlyBeDoneUsingZenText = StringUtils::WideToNarrow(I18N::Game::CanOnlyBeDoneUsingZen);
+    model.stillOpeningText = StringUtils::WideToNarrow(I18N::Game::StillOpening);
 }
 
-void mu::ui::window::CMyShopInventory::ReloadRmlTheme()
+void mu::ui::window::CMyShopInventory::BindRmlBgModel(Rml::DataModelConstructor& c, MyShopBgRmlModel& model)
 {
-    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+}
 
-    // The typed shop name lives in the data model, which is destroyed below -- carry it across the
-    // rebuild so switching theme mid-edit doesn't silently clear the field (the native
-    // CUITextInputBox this replaced was theme-independent and never lost it).
-    const Rml::String preservedShopTitle = m_RmlBinder.GetModel().shopTitle;
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    if (m_pRmlBgDoc)
-    {
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-        {
-            m_BgRmlBinder.Destroy(bgContext);
-            bgContext->UnloadDocument(m_pRmlBgDoc);
-        }
-        m_pRmlBgDoc = nullptr;
-    }
-
-    BuildRmlUi();
-
-    if (m_pRmlDoc)
-    {
-        m_RmlBinder.GetModel().shopTitle = preservedShopTitle;
-        m_RmlBinder.MarkDirty("shop_title");
-    }
-    // Next frame's Update()/SyncRmlModel() self-corrects live state/visibility for both docs.
+void mu::ui::window::CMyShopInventory::BuildRmlUi()
+{
+    m_RmlView.Ensure();
+    m_RmlBgView.Ensure();
 }
 
 void mu::ui::window::CMyShopInventory::Release()
@@ -441,15 +383,11 @@ void mu::ui::window::CMyShopInventory::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = NULL;
     }
 
-    // Hide explicitly -- Release() has no other way to hide these once created.
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
-    if (m_pRmlBgDoc)
-        m_pRmlBgDoc->Hide();
+    m_RmlView.Release();
+    m_RmlBgView.Release();
 }
 
 void mu::ui::window::CMyShopInventory::SetPos(int x, int y)
@@ -468,9 +406,9 @@ void mu::ui::window::CMyShopInventory::SetPos(int x, int y)
 // the limit stays a single C++ rule that can't drift per theme.
 void mu::ui::window::CMyShopInventory::ApplyShopTitleLimit()
 {
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
-    if (Rml::Element* field = m_pRmlDoc->GetElementById("shop_title"))
+    if (Rml::Element* field = m_RmlView.Document()->GetElementById("shop_title"))
         field->SetAttribute("maxlength", iMAX_SHOPTITLE_MULTI - 1);
 }
 
@@ -480,9 +418,9 @@ void mu::ui::window::CMyShopInventory::ApplyShopTitleLimit()
 // inconsistently, so a hand-rolled rect blurred the field even on clicks inside it.
 void mu::ui::window::CMyShopInventory::BlurShopTitleOnOutsideClick()
 {
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
-    Rml::Element* field = m_pRmlDoc->GetElementById("shop_title");
+    Rml::Element* field = m_RmlView.Document()->GetElementById("shop_title");
     if (field == nullptr)
         return;
 
@@ -494,15 +432,15 @@ void mu::ui::window::CMyShopInventory::GetTitle(wchar_t* titletext)
 {
     if (titletext == nullptr) return;
 
-    const std::wstring title = StringUtils::NarrowToWide(m_RmlBinder.GetModel().shopTitle);
+    const std::wstring title = StringUtils::NarrowToWide(m_RmlView.GetModel().shopTitle);
     wcsncpy(titletext, title.c_str(), iMAX_SHOPTITLE_MULTI - 1);
     titletext[iMAX_SHOPTITLE_MULTI - 1] = L'\0';
 }
 
 void mu::ui::window::CMyShopInventory::SetTitle(wchar_t* titletext)
 {
-    m_RmlBinder.GetModel().shopTitle = (titletext != nullptr) ? StringUtils::WideToNarrow(titletext) : Rml::String();
-    m_RmlBinder.MarkDirty("shop_title");
+    m_RmlView.GetModel().shopTitle = (titletext != nullptr) ? StringUtils::WideToNarrow(titletext) : Rml::String();
+    m_RmlView.MarkDirty("shop_title");
 }
 
 bool mu::ui::window::CMyShopInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
@@ -586,10 +524,10 @@ bool mu::ui::window::CMyShopInventory::UpdateKeyEvent()
 bool mu::ui::window::CMyShopInventory::MyShopInventoryProcess()
 {
     // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
     float panelWidth = INVENTORY_WIDTH;
     float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY) == false)
     {
         return false;
@@ -701,10 +639,10 @@ bool mu::ui::window::CMyShopInventory::UpdateMouseEvent()
     }
 
     // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
     float panelWidth = INVENTORY_WIDTH;
     float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         if (MyShopInventoryProcess() == true)
@@ -739,10 +677,10 @@ bool mu::ui::window::CMyShopInventory::UpdateMouseEvent()
 bool mu::ui::window::CMyShopInventory::WindowProcess()
 {
     // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
     float panelWidth = INVENTORY_WIDTH;
     float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY) == false)
     {
         return false;
@@ -771,33 +709,33 @@ bool mu::ui::window::CMyShopInventory::Update()
 
 void mu::ui::window::CMyShopInventory::SyncRmlModel()
 {
-    if (m_pRmlBgDoc)
+    if (m_RmlBgView.Document())
     {
-        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
+        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
 
         // RenderBackgroundLayer() renders whatever's shown in the shared background context
         // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, IsVisible());
+        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
     }
 
-    if (!m_pRmlDoc) return;
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    if (!m_RmlView.Document()) return;
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowAnchor(m_pRmlDoc, "item_grid", m_Pos, 16, 90);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+        m_pNewInventoryCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_Pos, 16, 90);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
     auto syncBool = [&](bool MyShopRmlModel::* field, const char* boundName, bool value)
     {
-        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+        if (model.*field != value) { model.*field = value; m_RmlView.MarkDirty(boundName); }
     };
     auto syncWide = [&](Rml::String MyShopRmlModel::* field, const char* boundName, const wchar_t* text)
     {
         const Rml::String value = StringUtils::WideToNarrow(text);
-        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+        if (model.*field != value) { model.*field = value; m_RmlView.MarkDirty(boundName); }
     };
 
     syncWide(&MyShopRmlModel::title, "title", I18N::Game::PersonalStore);
@@ -836,7 +774,7 @@ void mu::ui::window::CMyShopInventory::ClosingProcess()
 {
     CInventoryCtrl::BackupPickedItem();
     g_pMyInventory->ChangeMyShopButtonStateOpen();
-    // The shop-title field is blurred by m_pRmlDoc->Hide() itself (ElementDocument::Hide() calls
+    // The shop-title field is blurred by m_RmlView.Document()->Hide() itself (ElementDocument::Hide() calls
     // Context::UnfocusDocument()), which is what releases SDL text input -- no explicit release
     // here, and notably not CUITextInputBox::ReleaseFocus(), which would now blur some other
     // window's still-native field rather than this one's.

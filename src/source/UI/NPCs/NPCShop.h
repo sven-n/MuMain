@@ -4,10 +4,11 @@
 
 #pragma once
 
+#include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include <span>
 
 namespace Rml { class ElementDocument; }
@@ -74,8 +75,10 @@ namespace mu::ui::window
             Rml::String repairGoldText;
             Rml::String repairGoldTier; // UI::RmlBridge::GoldTierKey() of the amount
         };
-        RmlModelBinder<NPCShopRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, NPCShopRmlModel& model);
+        UI::RmlBridge::ThemedView<NPCShopRmlModel> m_RmlView{"npc_shop",
+            [this](Rml::DataModelConstructor& c, NPCShopRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/npc_shop.rml"}}};
 
         // The frame background panel must render behind the grid's live 3D icons, but RmlUi's
         // main context always renders last -- so it goes through
@@ -85,8 +88,9 @@ namespace mu::ui::window
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         };
-        RmlModelBinder<NPCShopBgRmlModel> m_BgRmlBinder;
-        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+        static void BindRmlBgModel(Rml::DataModelConstructor& c, NPCShopBgRmlModel& model);
+        UI::RmlBridge::ThemedView<NPCShopBgRmlModel> m_RmlBgView{"npc_shop_bg", BindRmlBgModel,
+            {{"Data/Interface/RmlUi/npc_shop_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -131,8 +135,6 @@ namespace mu::ui::window
 
         void SetSellingItem(bool bFlag);
         bool IsSellingItem();
-
-        void ReloadRmlTheme();
 
     private:
         void Init();

@@ -7,10 +7,11 @@
 
 #pragma once
 
+#include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Dialogs/MessageBox.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Inventory/StorageUpdates.h"
 
 namespace Rml { class ElementDocument; }
@@ -68,8 +69,10 @@ namespace mu::ui::window
             Rml::String takeTooltip;
             Rml::String lockTooltip;
         };
-        RmlModelBinder<StorageRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, StorageRmlModel& model);
+        UI::RmlBridge::ThemedView<StorageRmlModel> m_RmlView{"storage",
+            [this](Rml::DataModelConstructor& c, StorageRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/storage.rml"}}};
 
         // The frame background panel must render behind the grid's live 3D icons, but RmlUi's
         // main context always renders last -- so it goes through
@@ -79,8 +82,9 @@ namespace mu::ui::window
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         };
-        RmlModelBinder<StorageBgRmlModel> m_BgRmlBinder;
-        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+        static void BindRmlBgModel(Rml::DataModelConstructor& c, StorageBgRmlModel& model);
+        UI::RmlBridge::ThemedView<StorageBgRmlModel> m_RmlBgView{"storage_bg", BindRmlBgModel,
+            {{"Data/Interface/RmlUi/storage_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -98,8 +102,6 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
-
-        void ReloadRmlTheme();
 
         float GetLayerDepth();	//. 2.2f
 

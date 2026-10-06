@@ -1,8 +1,9 @@
 #pragma once
 
+#include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include <vector>
 
 namespace Rml { class ElementDocument; }
@@ -61,8 +62,10 @@ namespace mu::ui::window
             Rml::String exitTooltip;
             std::vector<LockedExtPageEntry> lockedPages;
         };
-        RmlModelBinder<InventoryExtensionRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, InventoryExtensionRmlModel& model);
+        UI::RmlBridge::ThemedView<InventoryExtensionRmlModel> m_RmlView{"inventory_extension",
+            [this](Rml::DataModelConstructor& c, InventoryExtensionRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/inventory_extension.rml"}}};
 
         // Frame background panel must render behind the grids' live 3D icons, but RmlUi's main
         // context always renders last -- so it goes through RmlUiRuntime's background context
@@ -71,8 +74,9 @@ namespace mu::ui::window
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         };
-        RmlModelBinder<InventoryExtensionBgRmlModel> m_BgRmlBinder;
-        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+        static void BindRmlBgModel(Rml::DataModelConstructor& c, InventoryExtensionBgRmlModel& model);
+        UI::RmlBridge::ThemedView<InventoryExtensionBgRmlModel> m_RmlBgView{"inventory_extension_bg", BindRmlBgModel,
+            {{"Data/Interface/RmlUi/inventory_extension_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -90,8 +94,6 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
-
-        void ReloadRmlTheme();
 
         float GetLayerDepth();	//. 2.5f
         ITEM* FindItem(int iIndex) const;

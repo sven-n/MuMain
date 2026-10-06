@@ -4,13 +4,14 @@
 
 #pragma once
 
+#include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Core/Window3DRenderMng.h"
 #include "UI/Inventory/InventoryActionController.h"
 #include "GameLogic/Items/IInventoryActionContext.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include <span>
 #include <vector>
 #include "Core/Globals/_enum.h"
@@ -62,7 +63,7 @@ namespace mu::ui::window
         // Pre-layout fallback only -- WindowGeometry's real hit-box comes from #panel's own live
         // RCSS size (UI::RmlBridge::RefreshLogicalPanelSize(), read at each call site), not these
         // constants. Used solely to seed that call before RmlUi's first layout pass has run
-        // (Create()/Show(true)/ReloadRmlTheme()'s first frame); never referenced by the native
+        // (Create()/Show(true)/a theme switch's first frame); never referenced by the native
         // paperdoll/grid rendering, which has its own separate, still-native offset.
         static constexpr float INVENTORY_WIDTH  = 190.0f;
         static constexpr float INVENTORY_HEIGHT = 429.0f;
@@ -124,20 +125,25 @@ namespace mu::ui::window
             bool setOptionHovered = false;
             bool socketOptionHovered = false;
         };
-        RmlModelBinder<MyInventoryRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, MyInventoryRmlModel& model);
+        void OnRmlBuilt();
+        UI::RmlBridge::ThemedView<MyInventoryRmlModel> m_RmlView{"my_inventory",
+            [this](Rml::DataModelConstructor& c, MyInventoryRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/my_inventory.rml"}},
+            {.afterBuild = [this] { OnRmlBuilt(); }}};
 
         // The frame background panel must render behind the paperdoll's and inventory grid's live
         // 3D icons, but RmlUi's main context always renders last -- so it goes through
         // RmlUiRuntime's background context instead, painted by CManager::Render()'s centralized
         // RenderBackgroundLayer() call (before every window's own Render()/Render3D()). Separate
-        // document/model from m_pRmlDoc since RmlUi data models are per-context.
+        // document/model from m_RmlView.Document() since RmlUi data models are per-context.
         struct MyInventoryBgRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         };
-        RmlModelBinder<MyInventoryBgRmlModel> m_BgRmlBinder;
-        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+        static void BindRmlBgModel(Rml::DataModelConstructor& c, MyInventoryBgRmlModel& model);
+        UI::RmlBridge::ThemedView<MyInventoryBgRmlModel> m_RmlBgView{"my_inventory_bg", BindRmlBgModel,
+            {{"Data/Interface/RmlUi/my_inventory_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -182,8 +188,6 @@ namespace mu::ui::window
         void Render3D();
 
         bool IsVisible() const;
-
-        void ReloadRmlTheme();
 
         void OpenningProcess();
         void ClosingProcess();

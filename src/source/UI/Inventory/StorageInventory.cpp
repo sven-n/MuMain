@@ -202,206 +202,163 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
     InitBackupItemInfo();
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
     return true;
 }
 
-void CStorageInventory::BuildRmlUi()
+void CStorageInventory::BindRmlModel(Rml::DataModelConstructor& c, StorageRmlModel& model)
 {
-    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "storage",
-            [this](Rml::DataModelConstructor& c, StorageRmlModel& model)
-            {
-                c.Bind("root_x", &model.rootX);
-                c.Bind("root_y", &model.rootY);
-                c.Bind("root_scale", &model.rootScale);
-                c.Bind("panel_width", &model.panelWidth);
-                c.Bind("text_px", &model.textPx);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("panel_width", &model.panelWidth);
+    c.Bind("text_px", &model.textPx);
 
-                c.Bind("title", &model.title);
-                c.Bind("title_locked", &model.titleLocked);
+    c.Bind("title", &model.title);
+    c.Bind("title_locked", &model.titleLocked);
 
-                c.Bind("zen_text", &model.zenText);
-                c.Bind("zen_tier", &model.zenTier);
-                c.Bind("fee_label", &model.feeLabel);
-                c.Bind("fee_value", &model.feeValue);
+    c.Bind("zen_text", &model.zenText);
+    c.Bind("zen_tier", &model.zenTier);
+    c.Bind("fee_label", &model.feeLabel);
+    c.Bind("fee_value", &model.feeValue);
 
-                c.Bind("expand_visible", &model.expandVisible);
-                c.Bind("expand_tooltip", &model.expandTooltip);
+    c.Bind("expand_visible", &model.expandVisible);
+    c.Bind("expand_tooltip", &model.expandTooltip);
 
-                c.Bind("storage_locked", &model.storageLocked);
+    c.Bind("storage_locked", &model.storageLocked);
 
-                c.Bind("insert_tooltip", &model.insertTooltip);
-                c.Bind("take_tooltip", &model.takeTooltip);
-                c.Bind("lock_tooltip", &model.lockTooltip);
+    c.Bind("insert_tooltip", &model.insertTooltip);
+    c.Bind("take_tooltip", &model.takeTooltip);
+    c.Bind("lock_tooltip", &model.lockTooltip);
 
-                c.BindEventCallback("storage_insert_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        mu::ui::window::GenericDialogConfig cfg;
-                        cfg.showCancel = true;
-                        cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToDeposit, false } };
-                        cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
-                        cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
-                        cfg.input->maxLength = 8;
-                        cfg.input->numericOnly = true;
-                        cfg.onPrimary = []
-                        {
-                            const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
-                            const int iInputZen = strText.empty() ? 0 : _wtoi(strText.c_str());
-                            if (iInputZen == 0)
-                            {
-                                mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
-                                return;
-                            }
-                            if (iInputZen <= (int)CharacterMachine->Gold)
-                            {
-                                SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(
-                                    VaultMoneyMoveDirection::InventoryToVault, iInputZen);
-                            }
-                            else
-                            {
-                                mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
-                            }
-                        };
-                        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-                    });
-                c.BindEventCallback("storage_take_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        // The insufficient-storage-gold branch chains into
-                        // ShowVaultPinVerifyDialog() (this file).
-                        mu::ui::window::GenericDialogConfig cfg;
-                        cfg.showCancel = true;
-                        cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToWithdraw, false } };
-                        cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
-                        cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
-                        cfg.input->maxLength = 8;
-                        cfg.input->numericOnly = true;
-                        cfg.onPrimary = []
-                        {
-                            const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
-                            const int iInputZen = strText.empty() ? 0 : _wtoi(strText.c_str());
-                            if (iInputZen == 0)
-                            {
-                                mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
-                                return;
-                            }
-                            if (iInputZen <= CharacterMachine->StorageGold
-                                && CharacterMachine->Gold + iInputZen <= 2000000000)
-                            {
-                                if (!g_pStorageInventory->IsStorageLocked() || g_pStorageInventory->IsCorrectPassword())
-                                {
-                                    SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(
-                                        VaultMoneyMoveDirection::VaultToInventory, iInputZen);
-                                }
-                                else
-                                {
-                                    g_pStorageInventory->SetBackupTakeZen(iInputZen);
-                                    ShowVaultPinVerifyDialog();
-                                }
-                            }
-                            else if (CharacterMachine->Gold + iInputZen > 2000000000)
-                            {
-                                // Silent no-op, matching native -- still closes.
-                            }
-                            else
-                            {
-                                mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
-                            }
-                        };
-                        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-                    });
-                c.BindEventCallback("storage_lock_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        if (m_bLock)
-                        {
-                            mu::ui::window::GenericDialogConfig cfg;
-                            cfg.showCancel = true;
-                            cfg.lines = {
-                                { I18N::Game::WarehouseLockUnlock, false },
-                                { I18N::Game::EnterYourWEBZENCOMPassword697, false },
-                            };
-                            cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
-                            cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
-                            cfg.input->maxLength = g_iLengthAuthorityCode;
-                            cfg.input->masked = true;
-                            cfg.onPrimary = []
-                            {
-                                const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
-                                if (strText.empty())
-                                {
-                                    mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
-                                    return;
-                                }
-                                SocketClient->ToGameServer()->SendRemoveVaultPin(MU_C16(strText.c_str()));
-                            };
-                            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-                        }
-                        else
-                            ShowStorageLockPinDialog();
-                    });
-                c.BindEventCallback("storage_expand_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        if (CharacterAttribute->IsVaultExtended > 0)
-                            g_pNewUISystem->Toggle(INTERFACE_STORAGE_EXT);
-                    });
-            });
-
-        if (modelCreated)
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/storage.rml");
-
-        // Frame background panel uses the background context -- see StorageBgRmlModel (StorageInventory.h).
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+    c.BindEventCallback("storage_insert_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
         {
-            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "storage_bg",
-                [](Rml::DataModelConstructor& c, StorageBgRmlModel& model)
-                {
-                    c.Bind("root_x", &model.rootX);
-                    c.Bind("root_y", &model.rootY);
-                    c.Bind("root_scale", &model.rootScale);
-                });
-            if (bgModelCreated)
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.showCancel = true;
+            cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToDeposit, false } };
+            cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
+            cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
+            cfg.input->maxLength = 8;
+            cfg.input->numericOnly = true;
+            cfg.onPrimary = []
             {
-                // Starts hidden -- CreateBackgroundDocument() no longer Show()s eagerly (see its
-                // own comment, RmlTheme.h); SyncRmlModel() below is what shows/hides it.
-                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/storage_bg.rml");
+                const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
+                const int iInputZen = strText.empty() ? 0 : _wtoi(strText.c_str());
+                if (iInputZen == 0)
+                {
+                    mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
+                    return;
+                }
+                if (iInputZen <= (int)CharacterMachine->Gold)
+                {
+                    SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(
+                        VaultMoneyMoveDirection::InventoryToVault, iInputZen);
+                }
+                else
+                {
+                    mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
+                }
+            };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        });
+    c.BindEventCallback("storage_take_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            // The insufficient-storage-gold branch chains into
+            // ShowVaultPinVerifyDialog() (this file).
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.showCancel = true;
+            cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToWithdraw, false } };
+            cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
+            cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
+            cfg.input->maxLength = 8;
+            cfg.input->numericOnly = true;
+            cfg.onPrimary = []
+            {
+                const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
+                const int iInputZen = strText.empty() ? 0 : _wtoi(strText.c_str());
+                if (iInputZen == 0)
+                {
+                    mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
+                    return;
+                }
+                if (iInputZen <= CharacterMachine->StorageGold
+                    && CharacterMachine->Gold + iInputZen <= 2000000000)
+                {
+                    if (!g_pStorageInventory->IsStorageLocked() || g_pStorageInventory->IsCorrectPassword())
+                    {
+                        SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(
+                            VaultMoneyMoveDirection::VaultToInventory, iInputZen);
+                    }
+                    else
+                    {
+                        g_pStorageInventory->SetBackupTakeZen(iInputZen);
+                        ShowVaultPinVerifyDialog();
+                    }
+                }
+                else if (CharacterMachine->Gold + iInputZen > 2000000000)
+                {
+                    // Silent no-op, matching native -- still closes.
+                }
+                else
+                {
+                    mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
+                }
+            };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        });
+    c.BindEventCallback("storage_lock_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            if (m_bLock)
+            {
+                mu::ui::window::GenericDialogConfig cfg;
+                cfg.showCancel = true;
+                cfg.lines = {
+                    { I18N::Game::WarehouseLockUnlock, false },
+                    { I18N::Game::EnterYourWEBZENCOMPassword697, false },
+                };
+                cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
+                cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
+                cfg.input->maxLength = g_iLengthAuthorityCode;
+                cfg.input->masked = true;
+                cfg.onPrimary = []
+                {
+                    const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
+                    if (strText.empty())
+                    {
+                        mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
+                        return;
+                    }
+                    SocketClient->ToGameServer()->SendRemoveVaultPin(MU_C16(strText.c_str()));
+                };
+                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             }
-        }
-
-        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
-        // SyncRmlModel(), not an eager Show() at Create() time.
-    }
+            else
+                ShowStorageLockPinDialog();
+        });
+    c.BindEventCallback("storage_expand_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            if (CharacterAttribute->IsVaultExtended > 0)
+                g_pNewUISystem->Toggle(INTERFACE_STORAGE_EXT);
+        });
 }
 
-void CStorageInventory::ReloadRmlTheme()
+void CStorageInventory::BindRmlBgModel(Rml::DataModelConstructor& c, StorageBgRmlModel& model)
 {
-    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+}
 
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    if (m_pRmlBgDoc)
-    {
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-        {
-            m_BgRmlBinder.Destroy(bgContext);
-            bgContext->UnloadDocument(m_pRmlBgDoc);
-        }
-        m_pRmlBgDoc = nullptr;
-    }
-
-    BuildRmlUi();
-    // Next frame's Update()/SyncRmlModel() self-corrects live state/visibility for both docs.
+void CStorageInventory::BuildRmlUi()
+{
+    m_RmlView.Ensure();
+    m_RmlBgView.Ensure();
 }
 
 void CStorageInventory::Release()
@@ -411,9 +368,11 @@ void CStorageInventory::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = nullptr;
     }
+
+    m_RmlView.Release();
+    m_RmlBgView.Release();
 }
 
 void CStorageInventory::SetPos(int x, int y)
@@ -437,10 +396,10 @@ bool CStorageInventory::UpdateMouseEvent()
         return false;
 
     // #panel's own live RCSS size is the source of truth -- STORAGE_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
     float panelWidth = STORAGE_WIDTH;
     float panelHeight = STORAGE_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         if (IsPress(VK_RBUTTON))
@@ -509,31 +468,31 @@ bool CStorageInventory::Render()
 
 void CStorageInventory::SyncRmlModel()
 {
-    if (m_pRmlBgDoc)
+    if (m_RmlBgView.Document())
     {
-        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
+        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
 
         // RenderBackgroundLayer() renders whatever's shown in the shared background context
         // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, IsVisible());
+        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
     }
 
-    if (!m_pRmlDoc) return;
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    if (!m_RmlView.Document()) return;
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowAnchor(m_pRmlDoc, "item_grid", m_Pos, 15, 36);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+        m_pNewInventoryCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_Pos, 15, 36);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     auto syncBool = [this](bool StorageRmlModel::* field, const char* boundName, bool value)
     {
-        if (m_RmlBinder.GetModel().*field != value) { m_RmlBinder.GetModel().*field = value; m_RmlBinder.MarkDirty(boundName); }
+        if (m_RmlView.GetModel().*field != value) { m_RmlView.GetModel().*field = value; m_RmlView.MarkDirty(boundName); }
     };
     auto syncText = [this](Rml::String StorageRmlModel::* field, const char* boundName, const Rml::String& value)
     {
-        if (m_RmlBinder.GetModel().*field != value) { m_RmlBinder.GetModel().*field = value; m_RmlBinder.MarkDirty(boundName); }
+        if (m_RmlView.GetModel().*field != value) { m_RmlView.GetModel().*field = value; m_RmlView.MarkDirty(boundName); }
     };
     auto syncWide = [&](Rml::String StorageRmlModel::* field, const char* boundName, const wchar_t* text)
     {

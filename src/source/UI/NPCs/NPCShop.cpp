@@ -74,10 +74,9 @@ bool mu::ui::window::CNPCShop::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
 
     // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    if (!m_RmlView.Document() && RmlUiRuntime::Instance().IsCreated())
     {
         BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     }
 
     Show(false);
@@ -85,82 +84,44 @@ bool mu::ui::window::CNPCShop::Create(CManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void mu::ui::window::CNPCShop::BuildRmlUi()
+void mu::ui::window::CNPCShop::BindRmlModel(Rml::DataModelConstructor& c, NPCShopRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "npc_shop",
-            [this](Rml::DataModelConstructor& c, NPCShopRmlModel& model)
-            {
-                c.Bind("root_x", &model.rootX);
-                c.Bind("root_y", &model.rootY);
-                c.Bind("root_scale", &model.rootScale);
-                c.Bind("panel_width", &model.panelWidth);
-                c.Bind("text_px", &model.textPx);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("panel_width", &model.panelWidth);
+    c.Bind("text_px", &model.textPx);
 
-                c.Bind("title", &model.title);
-                c.Bind("tax_rate_text", &model.taxRateText);
+    c.Bind("title", &model.title);
+    c.Bind("tax_rate_text", &model.taxRateText);
 
-                c.Bind("repair_visible", &model.repairVisible);
-                c.Bind("repair_tooltip", &model.repairTooltip);
-                c.Bind("repair_all_tooltip", &model.repairAllTooltip);
-                c.Bind("repair_all_label", &model.repairAllLabel);
-                c.Bind("repair_gold_text", &model.repairGoldText);
-                c.Bind("repair_gold_tier", &model.repairGoldTier);
+    c.Bind("repair_visible", &model.repairVisible);
+    c.Bind("repair_tooltip", &model.repairTooltip);
+    c.Bind("repair_all_tooltip", &model.repairAllTooltip);
+    c.Bind("repair_all_label", &model.repairAllLabel);
+    c.Bind("repair_gold_text", &model.repairGoldText);
+    c.Bind("repair_gold_tier", &model.repairGoldTier);
 
-                c.BindEventCallback("npc_shop_repair_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { ToggleState(); });
-                c.BindEventCallback("npc_shop_repair_all_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        SocketClient->ToGameServer()->SendRepairItemRequest(0xFF, 0);
-                    });
-            });
-
-        if (modelCreated)
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/npc_shop.rml");
-
-        // Frame background panel uses the background context -- see NPCShopBgRmlModel (NPCShop.h).
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+    c.BindEventCallback("npc_shop_repair_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { ToggleState(); });
+    c.BindEventCallback("npc_shop_repair_all_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
         {
-            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "npc_shop_bg",
-                [](Rml::DataModelConstructor& c, NPCShopBgRmlModel& model)
-                {
-                    c.Bind("root_x", &model.rootX);
-                    c.Bind("root_y", &model.rootY);
-                    c.Bind("root_scale", &model.rootScale);
-                });
-            if (bgModelCreated)
-            {
-                // Starts hidden -- CreateBackgroundDocument() no longer Show()s eagerly (see its
-                // own comment, RmlTheme.h); SyncRmlModel() below is what shows/hides it.
-                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/npc_shop_bg.rml");
-            }
-        }
-
-    // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
-    // SyncRmlModel(), not an eager Show() at Create() time.
+            SocketClient->ToGameServer()->SendRepairItemRequest(0xFF, 0);
+        });
 }
 
-void mu::ui::window::CNPCShop::ReloadRmlTheme()
+void mu::ui::window::CNPCShop::BindRmlBgModel(Rml::DataModelConstructor& c, NPCShopBgRmlModel& model)
 {
-    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+}
 
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    if (m_pRmlBgDoc)
-    {
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-        {
-            m_BgRmlBinder.Destroy(bgContext);
-            bgContext->UnloadDocument(m_pRmlBgDoc);
-        }
-        m_pRmlBgDoc = nullptr;
-    }
-
-    BuildRmlUi();
-    // Next frame's SyncRmlModel() self-corrects visibility for both docs.
+void mu::ui::window::CNPCShop::BuildRmlUi()
+{
+    m_RmlView.Ensure();
+    m_RmlBgView.Ensure();
 }
 
 void mu::ui::window::CNPCShop::Release()
@@ -169,16 +130,12 @@ void mu::ui::window::CNPCShop::Release()
 
     if (m_pNewUIMng)
     {
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
 
-    // Hide explicitly -- Release() has no other way to hide these once created.
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
-    if (m_pRmlBgDoc)
-        m_pRmlBgDoc->Hide();
+    m_RmlView.Release();
+    m_RmlBgView.Release();
 }
 
 void mu::ui::window::CNPCShop::SetPos(int x, int y)
@@ -274,7 +231,7 @@ bool mu::ui::window::CNPCShop::WindowProcess()
     // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
     float panelWidth = NPCSHOP_WIDTH;
     float panelHeight = NPCSHOP_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     return mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY);
 }
 
@@ -344,32 +301,32 @@ bool mu::ui::window::CNPCShop::Render()
 
 void mu::ui::window::CNPCShop::SyncRmlModel()
 {
-    if (m_pRmlBgDoc)
+    if (m_RmlBgView.Document())
     {
-        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
+        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
 
         // RenderBackgroundLayer() renders whatever's shown in the shared background context
         // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, IsVisible());
+        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
     }
 
-    if (!m_pRmlDoc) return;
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    if (!m_RmlView.Document()) return;
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowAnchor(m_pRmlDoc, "item_grid", m_Pos, 15, 50);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+        m_pNewInventoryCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_Pos, 15, 50);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
     auto syncBool = [&](bool NPCShopRmlModel::* field, const char* boundName, bool value)
     {
-        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+        if (model.*field != value) { model.*field = value; m_RmlView.MarkDirty(boundName); }
     };
     auto syncText = [&](Rml::String NPCShopRmlModel::* field, const char* boundName, const Rml::String& value)
     {
-        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+        if (model.*field != value) { model.*field = value; m_RmlView.MarkDirty(boundName); }
     };
     auto syncWide = [&](Rml::String NPCShopRmlModel::* field, const char* boundName, const wchar_t* text)
     {

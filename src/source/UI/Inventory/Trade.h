@@ -3,12 +3,13 @@
 
 #pragma once
 
+#include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
 #include "UI/Quests/MyQuestInfoWindow.h"
 #include "UI/Inventory/StorageInventory.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Inventory/TradeUpdates.h"
 
 #include <vector>
@@ -114,8 +115,10 @@ namespace mu::ui::window
             Rml::String itemWarningText; // "Warning" -- set once, same string every badge
             std::vector<ItemWarningBadge> itemWarningBadges;
         };
-        RmlModelBinder<TradeRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model);
+        UI::RmlBridge::ThemedView<TradeRmlModel> m_RmlView{"trade",
+            [this](Rml::DataModelConstructor& c, TradeRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/trade.rml"}}};
 
         // The frame background panel must render behind both grids' live 3D icons, but RmlUi's
         // main context always renders last -- so it goes through
@@ -125,8 +128,9 @@ namespace mu::ui::window
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         };
-        RmlModelBinder<TradeBgRmlModel> m_BgRmlBinder;
-        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+        static void BindRmlBgModel(Rml::DataModelConstructor& c, TradeBgRmlModel& model);
+        UI::RmlBridge::ThemedView<TradeBgRmlModel> m_RmlBgView{"trade_bg", BindRmlBgModel,
+            {{"Data/Interface/RmlUi/trade_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -144,8 +148,6 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
-
-        void ReloadRmlTheme();
 
         float GetLayerDepth();	//. 2.1f
 

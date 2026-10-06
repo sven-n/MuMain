@@ -4,11 +4,12 @@
 
 #pragma once
 
+#include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <vector>
 
@@ -70,8 +71,10 @@ namespace mu::ui::window
             // math (see SyncMixLines() equivalent in SyncRmlModel(), LuckyItemWnd.cpp).
             std::vector<LuckyLine> textLines;
         };
-        RmlModelBinder<LuckyItemRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, LuckyItemRmlModel& model);
+        UI::RmlBridge::ThemedView<LuckyItemRmlModel> m_RmlView{"lucky_item",
+            [this](Rml::DataModelConstructor& c, LuckyItemRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/lucky_item.rml"}}};
 
         // The frame background panel must render behind the grid's live 3D icons, but RmlUi's
         // main context always renders last -- so it goes through
@@ -81,8 +84,9 @@ namespace mu::ui::window
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         };
-        RmlModelBinder<LuckyItemBgRmlModel> m_BgRmlBinder;
-        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+        static void BindRmlBgModel(Rml::DataModelConstructor& c, LuckyItemBgRmlModel& model);
+        UI::RmlBridge::ThemedView<LuckyItemBgRmlModel> m_RmlBgView{"lucky_item_bg", BindRmlBgModel,
+            {{"Data/Interface/RmlUi/lucky_item_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -122,7 +126,6 @@ namespace mu::ui::window
         bool	UpdateKeyEvent();
         bool	Update();
         bool	Render();
-        void	ReloadRmlTheme();
         float	GetLayerDepth();	//. 3.4f
 
         __inline void	SetAct(eLUCKYITEMTYPE _eAct) { m_eType = _eAct; }

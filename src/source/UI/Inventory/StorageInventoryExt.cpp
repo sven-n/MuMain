@@ -65,83 +65,40 @@ bool CStorageInventoryExt::Create(CManager* pNewUIMng, int x, int y)
     SetItemAutoMove(false);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
     return true;
 }
 
-void CStorageInventoryExt::BuildRmlUi()
+void CStorageInventoryExt::BindRmlModel(Rml::DataModelConstructor& c, StorageExtRmlModel& model)
 {
-    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "storage_ext",
-            [this](Rml::DataModelConstructor& c, StorageExtRmlModel& model)
-            {
-                c.Bind("root_x", &model.rootX);
-                c.Bind("root_y", &model.rootY);
-                c.Bind("root_scale", &model.rootScale);
-                c.Bind("panel_width", &model.panelWidth);
-                c.Bind("text_px", &model.textPx);
-                c.Bind("title", &model.title);
-                c.Bind("exit_tooltip", &model.exitTooltip);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("panel_width", &model.panelWidth);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("title", &model.title);
+    c.Bind("exit_tooltip", &model.exitTooltip);
 
-                c.BindEventCallback("storage_ext_exit_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        g_pNewUISystem->Hide(INTERFACE_STORAGE_EXT);
-                    });
-            });
-
-        if (modelCreated)
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/storage_ext.rml");
-
-        // Frame background panel uses the background context -- see StorageExtBgRmlModel (StorageInventoryExt.h).
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+    c.BindEventCallback("storage_ext_exit_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
         {
-            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "storage_ext_bg",
-                [](Rml::DataModelConstructor& c, StorageExtBgRmlModel& model)
-                {
-                    c.Bind("root_x", &model.rootX);
-                    c.Bind("root_y", &model.rootY);
-                    c.Bind("root_scale", &model.rootScale);
-                });
-            if (bgModelCreated)
-            {
-                // Starts hidden -- CreateBackgroundDocument() no longer Show()s eagerly (see its
-                // own comment, RmlTheme.h); SyncRmlModel() below is what shows/hides it.
-                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/storage_ext_bg.rml");
-            }
-        }
-
-        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
-        // SyncRmlModel(), not an eager Show() at Create() time.
-    }
+            g_pNewUISystem->Hide(INTERFACE_STORAGE_EXT);
+        });
 }
 
-void CStorageInventoryExt::ReloadRmlTheme()
+void CStorageInventoryExt::BindRmlBgModel(Rml::DataModelConstructor& c, StorageExtBgRmlModel& model)
 {
-    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+}
 
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    if (m_pRmlBgDoc)
-    {
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-        {
-            m_BgRmlBinder.Destroy(bgContext);
-            bgContext->UnloadDocument(m_pRmlBgDoc);
-        }
-        m_pRmlBgDoc = nullptr;
-    }
-
-    BuildRmlUi();
-    // Next frame's Update()/SyncRmlModel() self-corrects live state/visibility for both docs.
+void CStorageInventoryExt::BuildRmlUi()
+{
+    m_RmlView.Ensure();
+    m_RmlBgView.Ensure();
 }
 
 void CStorageInventoryExt::Release()
@@ -151,9 +108,11 @@ void CStorageInventoryExt::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = nullptr;
     }
+
+    m_RmlView.Release();
+    m_RmlBgView.Release();
 }
 
 void CStorageInventoryExt::SetPos(int x, int y)
@@ -173,10 +132,10 @@ bool CStorageInventoryExt::UpdateMouseEvent()
         return false;
 
     // #panel's own live RCSS size is the source of truth -- STORAGE_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
     float panelWidth = STORAGE_WIDTH;
     float panelHeight = STORAGE_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         if (IsPress(VK_RBUTTON))
@@ -238,29 +197,29 @@ bool CStorageInventoryExt::Render()
 
 void CStorageInventoryExt::SyncRmlModel()
 {
-    if (m_pRmlBgDoc)
+    if (m_RmlBgView.Document())
     {
-        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
+        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
 
         // RenderBackgroundLayer() renders whatever's shown in the shared background context
         // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, IsVisible());
+        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
     }
 
-    if (!m_pRmlDoc) return;
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    if (!m_RmlView.Document()) return;
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowAnchor(m_pRmlDoc, "item_grid", m_Pos, 15, 36);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+        m_pNewInventoryCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_Pos, 15, 36);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
     auto syncWide = [&](Rml::String StorageExtRmlModel::* field, const char* boundName, const wchar_t* text)
     {
         const Rml::String value = StringUtils::WideToNarrow(text);
-        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+        if (model.*field != value) { model.*field = value; m_RmlView.MarkDirty(boundName); }
     };
 
     syncWide(&StorageExtRmlModel::title, "title", I18N::Game::ExpandedVault);

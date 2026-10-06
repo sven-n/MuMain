@@ -4,11 +4,12 @@
 
 #pragma once
 
+#include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml { class ElementDocument; }
 
@@ -81,8 +82,11 @@ namespace mu::ui::window
             Rml::String allItemTradingText;
             Rml::String canOnlyBeDoneUsingZenText;
         };
-        RmlModelBinder<MyShopRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, MyShopRmlModel& model);
+        UI::RmlBridge::ThemedView<MyShopRmlModel> m_RmlView{"my_shop",
+            [this](Rml::DataModelConstructor& c, MyShopRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/my_shop.rml"}},
+            {.afterBuild = [this] { ApplyShopTitleLimit(); }}};
 
         // The frame background panel must render behind the grid's live 3D icons, but RmlUi's main
         // context always renders last -- so it goes through
@@ -92,8 +96,9 @@ namespace mu::ui::window
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         };
-        RmlModelBinder<MyShopBgRmlModel> m_BgRmlBinder;
-        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+        static void BindRmlBgModel(Rml::DataModelConstructor& c, MyShopBgRmlModel& model);
+        UI::RmlBridge::ThemedView<MyShopBgRmlModel> m_RmlBgView{"my_shop_bg", BindRmlBgModel,
+            {{"Data/Interface/RmlUi/my_shop_bg.rml", [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
 
         // Mirrors the old CButton array's Lock()/tooltip-text state (OpenButtonLock()/UnLock(),
         // ChangePersonal()) now that the buttons themselves are RmlUi-owned.
@@ -115,7 +120,6 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
-        void ReloadRmlTheme();
         void ClosingProcess();
         float GetLayerDepth();	//. 3.2f
 

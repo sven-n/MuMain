@@ -73,165 +73,122 @@ bool CTrade::Create(CManager* pNewUIMng, int x, int y)
     InitYourInvenBackUp();
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
     return true;
 }
 
-void CTrade::BuildRmlUi()
+void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
 {
-    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "trade",
-            [this](Rml::DataModelConstructor& c, TradeRmlModel& model)
-            {
-                c.Bind("root_x", &model.rootX);
-                c.Bind("root_y", &model.rootY);
-                c.Bind("root_scale", &model.rootScale);
-                c.Bind("panel_width", &model.panelWidth);
-                c.Bind("text_px", &model.textPx);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("panel_width", &model.panelWidth);
+    c.Bind("text_px", &model.textPx);
 
-                c.Bind("title", &model.title);
+    c.Bind("title", &model.title);
 
-                c.Bind("your_id_text", &model.yourIdText);
-                c.Bind("your_guild_visible", &model.yourGuildVisible);
-                c.Bind("your_guild_name", &model.yourGuildName);
-                c.Bind("your_level_text", &model.yourLevelText);
-                c.Bind("your_level_bucket", &model.yourLevelBucket);
-                c.Bind("your_gold_text", &model.yourGoldText);
-                c.Bind("your_gold_tier", &model.yourGoldTier);
-                c.Bind("your_confirm_checked", &model.yourConfirmChecked);
+    c.Bind("your_id_text", &model.yourIdText);
+    c.Bind("your_guild_visible", &model.yourGuildVisible);
+    c.Bind("your_guild_name", &model.yourGuildName);
+    c.Bind("your_level_text", &model.yourLevelText);
+    c.Bind("your_level_bucket", &model.yourLevelBucket);
+    c.Bind("your_gold_text", &model.yourGoldText);
+    c.Bind("your_gold_tier", &model.yourGoldTier);
+    c.Bind("your_confirm_checked", &model.yourConfirmChecked);
 
-                c.Bind("my_id_text", &model.myIdText);
-                c.Bind("my_gold_text", &model.myGoldText);
-                c.Bind("my_gold_tier", &model.myGoldTier);
-                c.Bind("my_confirm_checked", &model.myConfirmChecked);
-                c.Bind("my_confirm_waiting", &model.myConfirmWaiting);
+    c.Bind("my_id_text", &model.myIdText);
+    c.Bind("my_gold_text", &model.myGoldText);
+    c.Bind("my_gold_tier", &model.myGoldTier);
+    c.Bind("my_confirm_checked", &model.myConfirmChecked);
+    c.Bind("my_confirm_waiting", &model.myConfirmWaiting);
 
-                c.Bind("warning_label", &model.warningLabel);
-                c.Bind("notice_line1", &model.noticeLine1);
-                c.Bind("notice_line2", &model.noticeLine2);
-                c.Bind("notice_line3", &model.noticeLine3);
-                c.Bind("warning_opacity", &model.warningOpacity);
+    c.Bind("warning_label", &model.warningLabel);
+    c.Bind("notice_line1", &model.noticeLine1);
+    c.Bind("notice_line2", &model.noticeLine2);
+    c.Bind("notice_line3", &model.noticeLine3);
+    c.Bind("warning_opacity", &model.warningOpacity);
 
-                c.Bind("close_tooltip", &model.closeTooltip);
-                c.Bind("zen_tooltip", &model.zenTooltip);
+    c.Bind("close_tooltip", &model.closeTooltip);
+    c.Bind("zen_tooltip", &model.zenTooltip);
 
-                c.Bind("item_warning_text", &model.itemWarningText);
-                auto itemWarningBadge = c.RegisterStruct<TradeRmlModel::ItemWarningBadge>();
-                itemWarningBadge.RegisterMember("x", &TradeRmlModel::ItemWarningBadge::x);
-                itemWarningBadge.RegisterMember("y", &TradeRmlModel::ItemWarningBadge::y);
-                itemWarningBadge.RegisterMember("width", &TradeRmlModel::ItemWarningBadge::width);
-                c.RegisterArray<std::vector<TradeRmlModel::ItemWarningBadge>>();
-                c.Bind("item_warning_badges", &model.itemWarningBadges);
+    c.Bind("item_warning_text", &model.itemWarningText);
+    auto itemWarningBadge = c.RegisterStruct<TradeRmlModel::ItemWarningBadge>();
+    itemWarningBadge.RegisterMember("x", &TradeRmlModel::ItemWarningBadge::x);
+    itemWarningBadge.RegisterMember("y", &TradeRmlModel::ItemWarningBadge::y);
+    itemWarningBadge.RegisterMember("width", &TradeRmlModel::ItemWarningBadge::width);
+    c.RegisterArray<std::vector<TradeRmlModel::ItemWarningBadge>>();
+    c.Bind("item_warning_badges", &model.itemWarningBadges);
 
-                c.BindEventCallback("trade_exit_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        ::PlayBuffer(SOUND_CLICK01);
-                        ProcessCloseBtn();
-                    });
-                c.BindEventCallback("trade_zen_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        // Numeric Mode::Text amount entry, same shape as every other zen-input dialog.
-                        mu::ui::window::GenericDialogConfig cfg;
-                        cfg.showCancel = true;
-                        cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToTrade, false } };
-                        cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
-                        cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
-                        cfg.input->maxLength = 8;
-                        cfg.input->numericOnly = true;
-                        cfg.onPrimary = [this]
-                        {
-                            const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
-                            const int iInputZen = strText.empty() ? 0 : _wtoi(strText.c_str());
-                            if (iInputZen == 0)
-                            {
-                                mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
-                                return;
-                            }
-                            SendRequestMyGoldInput(iInputZen);
-                        };
-                        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-                        ::PlayBuffer(SOUND_CLICK01);
-                    });
-                c.BindEventCallback("trade_my_confirm_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        if (m_nMyTradeWait > 0 || CInventoryCtrl::GetPickedItem() != NULL)
-                            return;
-
-                        ::PlayBuffer(SOUND_CLICK01);
-
-                        if (m_bTradeAlert && !m_bMyConfirm)
-                        {
-                            // GenericDialogConfig only has bold/not-bold, not per-line color, so all
-                            // 4 lines (3 warning + 1 red in the native layout) collapse to bold here.
-                            mu::ui::window::GenericDialogConfig cfg;
-                            cfg.showCancel = true;
-                            for (int i = 0; i < 4; ++i)
-                                cfg.lines.push_back({ I18N::Game::Lookup(371 + i), true });
-                            cfg.onPrimary = [this] { AlertTrade(); };
-                            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-                        }
-                        else
-                        {
-                            AlertTrade();
-                        }
-                    });
-            });
-
-        if (modelCreated)
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/trade.rml");
-
-        // Frame background panel uses the background context -- see TradeBgRmlModel (Trade.h).
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+    c.BindEventCallback("trade_exit_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
         {
-            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "trade_bg",
-                [](Rml::DataModelConstructor& c, TradeBgRmlModel& model)
-                {
-                    c.Bind("root_x", &model.rootX);
-                    c.Bind("root_y", &model.rootY);
-                    c.Bind("root_scale", &model.rootScale);
-                });
-            if (bgModelCreated)
+            ::PlayBuffer(SOUND_CLICK01);
+            ProcessCloseBtn();
+        });
+    c.BindEventCallback("trade_zen_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            // Numeric Mode::Text amount entry, same shape as every other zen-input dialog.
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.showCancel = true;
+            cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToTrade, false } };
+            cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
+            cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
+            cfg.input->maxLength = 8;
+            cfg.input->numericOnly = true;
+            cfg.onPrimary = [this]
             {
-                // Starts hidden -- CreateBackgroundDocument() no longer Show()s eagerly (see its
-                // own comment, RmlTheme.h); SyncRmlModel() below is what shows/hides it.
-                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/trade_bg.rml");
-            }
-        }
+                const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
+                const int iInputZen = strText.empty() ? 0 : _wtoi(strText.c_str());
+                if (iInputZen == 0)
+                {
+                    mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
+                    return;
+                }
+                SendRequestMyGoldInput(iInputZen);
+            };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+            ::PlayBuffer(SOUND_CLICK01);
+        });
+    c.BindEventCallback("trade_my_confirm_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            if (m_nMyTradeWait > 0 || CInventoryCtrl::GetPickedItem() != NULL)
+                return;
 
-        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
-        // SyncRmlModel(), not an eager Show() at Create() time.
-    }
+            ::PlayBuffer(SOUND_CLICK01);
+
+            if (m_bTradeAlert && !m_bMyConfirm)
+            {
+                // GenericDialogConfig only has bold/not-bold, not per-line color, so all
+                // 4 lines (3 warning + 1 red in the native layout) collapse to bold here.
+                mu::ui::window::GenericDialogConfig cfg;
+                cfg.showCancel = true;
+                for (int i = 0; i < 4; ++i)
+                    cfg.lines.push_back({ I18N::Game::Lookup(371 + i), true });
+                cfg.onPrimary = [this] { AlertTrade(); };
+                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+            }
+            else
+            {
+                AlertTrade();
+            }
+        });
 }
 
-void CTrade::ReloadRmlTheme()
+void CTrade::BindRmlBgModel(Rml::DataModelConstructor& c, TradeBgRmlModel& model)
 {
-    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+}
 
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    if (m_pRmlBgDoc)
-    {
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-        {
-            m_BgRmlBinder.Destroy(bgContext);
-            bgContext->UnloadDocument(m_pRmlBgDoc);
-        }
-        m_pRmlBgDoc = nullptr;
-    }
-
-    BuildRmlUi();
-    // Next frame's Update()/SyncRmlModel() self-corrects live state/visibility for both docs.
+void CTrade::BuildRmlUi()
+{
+    m_RmlView.Ensure();
+    m_RmlBgView.Ensure();
 }
 
 void CTrade::InitTradeInfo()
@@ -260,18 +217,14 @@ void CTrade::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = NULL;
     }
 
     if (g_pNewUI3DRenderMng)
         g_pNewUI3DRenderMng->DeleteUI2DEffectObject(UI2DEffectCallback);
 
-    // Hide explicitly -- Release() has no other way to hide these once created.
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
-    if (m_pRmlBgDoc)
-        m_pRmlBgDoc->Hide();
+    m_RmlView.Release();
+    m_RmlBgView.Release();
 }
 
 void CTrade::SetPos(int x, int y)
@@ -302,10 +255,10 @@ bool CTrade::UpdateMouseEvent()
         return false;
 
     // #panel's own live RCSS size is the source of truth -- TRADE_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
     float panelWidth = TRADE_WIDTH;
     float panelHeight = TRADE_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
@@ -450,37 +403,37 @@ int CTrade::ConvertYourLevel() const
 
 void CTrade::SyncRmlModel()
 {
-    if (m_pRmlBgDoc)
+    if (m_RmlBgView.Document())
     {
-        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
+        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
 
         // RenderBackgroundLayer() renders whatever's shown in the shared background context
         // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, IsVisible());
+        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
     }
 
-    if (!m_pRmlDoc) return;
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    if (!m_RmlView.Document()) return;
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pYourInvenCtrl)
-        m_pYourInvenCtrl->FollowAnchor(m_pRmlDoc, "partner_grid", m_Pos, 16, 68);
+        m_pYourInvenCtrl->FollowAnchor(m_RmlView.Document(), "partner_grid", m_Pos, 16, 68);
     if (m_pMyInvenCtrl)
-        m_pMyInvenCtrl->FollowAnchor(m_pRmlDoc, "item_grid", m_Pos, 16, 274);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+        m_pMyInvenCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_Pos, 16, 274);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     auto syncBool = [this](bool TradeRmlModel::* field, const char* boundName, bool value)
     {
-        if (m_RmlBinder.GetModel().*field != value) { m_RmlBinder.GetModel().*field = value; m_RmlBinder.MarkDirty(boundName); }
+        if (m_RmlView.GetModel().*field != value) { m_RmlView.GetModel().*field = value; m_RmlView.MarkDirty(boundName); }
     };
     auto syncFloat = [this](float TradeRmlModel::* field, const char* boundName, float value)
     {
-        if (m_RmlBinder.GetModel().*field != value) { m_RmlBinder.GetModel().*field = value; m_RmlBinder.MarkDirty(boundName); }
+        if (m_RmlView.GetModel().*field != value) { m_RmlView.GetModel().*field = value; m_RmlView.MarkDirty(boundName); }
     };
     auto syncText = [this](Rml::String TradeRmlModel::* field, const char* boundName, const Rml::String& value)
     {
-        if (m_RmlBinder.GetModel().*field != value) { m_RmlBinder.GetModel().*field = value; m_RmlBinder.MarkDirty(boundName); }
+        if (m_RmlView.GetModel().*field != value) { m_RmlView.GetModel().*field = value; m_RmlView.MarkDirty(boundName); }
     };
     auto syncWide = [&](Rml::String TradeRmlModel::* field, const char* boundName, const wchar_t* text)
     {
@@ -512,10 +465,10 @@ void CTrade::SyncRmlModel()
     wchar_t levelBuf[160];
     mu_swprintf(levelBuf, L"Lv.%ls", levelValueBuf);
     syncWide(&TradeRmlModel::yourLevelText, "your_level_text", levelBuf);
-    if (m_RmlBinder.GetModel().yourLevelBucket != nLevel)
+    if (m_RmlView.GetModel().yourLevelBucket != nLevel)
     {
-        m_RmlBinder.GetModel().yourLevelBucket = nLevel;
-        m_RmlBinder.MarkDirty("your_level_bucket");
+        m_RmlView.GetModel().yourLevelBucket = nLevel;
+        m_RmlView.MarkDirty("your_level_bucket");
     }
 
     wchar_t goldBuf[256];
@@ -570,10 +523,10 @@ void CTrade::SyncRmlModel()
             itemWarningBadges.push_back({ fX - m_Pos.x, fY - m_Pos.y, fWidth });
         }
     }
-    if (m_RmlBinder.GetModel().itemWarningBadges != itemWarningBadges)
+    if (m_RmlView.GetModel().itemWarningBadges != itemWarningBadges)
     {
-        m_RmlBinder.GetModel().itemWarningBadges = std::move(itemWarningBadges);
-        m_RmlBinder.MarkDirty("item_warning_badges");
+        m_RmlView.GetModel().itemWarningBadges = std::move(itemWarningBadges);
+        m_RmlView.MarkDirty("item_warning_badges");
     }
 }
 

@@ -223,91 +223,48 @@ bool CLuckyItemWnd::Create(CManager* pNewUIMng, int x, int y)
     }
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
     return true;
 }
 
-void CLuckyItemWnd::BuildRmlUi()
+void CLuckyItemWnd::BindRmlModel(Rml::DataModelConstructor& c, LuckyItemRmlModel& model)
 {
-    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "lucky_item",
-            [this](Rml::DataModelConstructor& c, LuckyItemRmlModel& model)
-            {
-                c.Bind("root_x", &model.rootX);
-                c.Bind("root_y", &model.rootY);
-                c.Bind("root_scale", &model.rootScale);
-                c.Bind("text_px", &model.textPx);
-                c.Bind("panel_width", &model.panelWidth);
-                c.Bind("title", &model.title);
-                c.Bind("mix_tooltip", &model.mixTooltip);
-                c.Bind("mix_visible", &model.mixVisible);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("panel_width", &model.panelWidth);
+    c.Bind("title", &model.title);
+    c.Bind("mix_tooltip", &model.mixTooltip);
+    c.Bind("mix_visible", &model.mixVisible);
 
-                auto luckyLine = c.RegisterStruct<LuckyLine>();
-                luckyLine.RegisterMember("text", &LuckyLine::text);
-                luckyLine.RegisterMember("color", &LuckyLine::color);
-                luckyLine.RegisterMember("align", &LuckyLine::align);
-                c.RegisterArray<std::vector<LuckyLine>>();
-                c.Bind("text_lines", &model.textLines);
+    auto luckyLine = c.RegisterStruct<LuckyLine>();
+    luckyLine.RegisterMember("text", &LuckyLine::text);
+    luckyLine.RegisterMember("color", &LuckyLine::color);
+    luckyLine.RegisterMember("align", &LuckyLine::align);
+    c.RegisterArray<std::vector<LuckyLine>>();
+    c.Bind("text_lines", &model.textLines);
 
-                c.BindEventCallback("lucky_item_mix_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                    {
-                        Process_BTN_Action();
-                    });
-            });
-
-        if (modelCreated)
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/lucky_item.rml");
-
-        // Frame background panel uses the background context -- see LuckyItemBgRmlModel (LuckyItemWnd.h).
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+    c.BindEventCallback("lucky_item_mix_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
         {
-            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "lucky_item_bg",
-                [](Rml::DataModelConstructor& c, LuckyItemBgRmlModel& model)
-                {
-                    c.Bind("root_x", &model.rootX);
-                    c.Bind("root_y", &model.rootY);
-                    c.Bind("root_scale", &model.rootScale);
-                });
-            if (bgModelCreated)
-            {
-                // Starts hidden -- CreateBackgroundDocument() no longer Show()s eagerly (see its
-                // own comment, RmlTheme.h); SyncRmlModel() below is what shows/hides it.
-                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/lucky_item_bg.rml");
-            }
-        }
-
-        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
-        // SyncRmlModel(), not an eager Show() at Create() time.
-    }
+            Process_BTN_Action();
+        });
 }
 
-void CLuckyItemWnd::ReloadRmlTheme()
+void CLuckyItemWnd::BindRmlBgModel(Rml::DataModelConstructor& c, LuckyItemBgRmlModel& model)
 {
-    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+}
 
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    if (m_pRmlBgDoc)
-    {
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-        {
-            m_BgRmlBinder.Destroy(bgContext);
-            bgContext->UnloadDocument(m_pRmlBgDoc);
-        }
-        m_pRmlBgDoc = nullptr;
-    }
-
-    BuildRmlUi();
-    // Next frame's Update()/SyncRmlModel() self-corrects live state/visibility for both docs.
+void CLuckyItemWnd::BuildRmlUi()
+{
+    m_RmlView.Ensure();
+    m_RmlBgView.Ensure();
 }
 
 void CLuckyItemWnd::Release()
@@ -318,9 +275,11 @@ void CLuckyItemWnd::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
+    m_RmlBgView.Release();
 }
 
 void CLuckyItemWnd::OpeningProcess(void)
@@ -590,7 +549,7 @@ bool CLuckyItemWnd::UpdateMouseEvent(void)
 
     float panelWidth = 190.f;
     float panelHeight = 429.f;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_ptPos.x, m_ptPos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
@@ -643,38 +602,38 @@ bool CLuckyItemWnd::Render(void)
 
 void CLuckyItemWnd::SyncRmlModel()
 {
-    if (m_pRmlBgDoc)
+    if (m_RmlBgView.Document())
     {
-        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_ptPos);
+        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_ptPos);
 
         // RenderBackgroundLayer() renders whatever's shown in the shared background context
         // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, IsVisible());
+        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
     }
 
-    if (!m_pRmlDoc) return;
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    if (!m_RmlView.Document()) return;
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_ptPos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_ptPos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowAnchor(m_pRmlDoc, "item_grid", m_ptPos, 15, 110);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+        m_pNewInventoryCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_ptPos, 15, 110);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
     auto syncWide = [&](Rml::String LuckyItemRmlModel::* field, const char* boundName, const wchar_t* text)
     {
         const Rml::String value = StringUtils::WideToNarrow(text);
-        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+        if (model.*field != value) { model.*field = value; m_RmlView.MarkDirty(boundName); }
     };
     auto syncBool = [&](bool LuckyItemRmlModel::* field, const char* boundName, bool value)
     {
-        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+        if (model.*field != value) { model.*field = value; m_RmlView.MarkDirty(boundName); }
     };
     auto syncLines = [&](std::vector<LuckyLine> LuckyItemRmlModel::* field, const char* boundName,
         std::vector<LuckyLine> newLines)
     {
-        if (model.*field != newLines) { model.*field = std::move(newLines); m_RmlBinder.MarkDirty(boundName); }
+        if (model.*field != newLines) { model.*field = std::move(newLines); m_RmlView.MarkDirty(boundName); }
     };
 
     // m_szSubject is only re-written by OpeningProcess() (on Trade/Refinery mode switch), but it's
