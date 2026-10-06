@@ -237,7 +237,6 @@ static void UpdateUIAndInput()
         g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHATINPUTBOX) == false)
     {
         g_pWindowMgr->SetWindowsEnable(FALSE);
-        g_pFriendMenu->HideMenu();
         g_dwKeyFocusUIID = 0;
         if (GetFocus() != g_hWnd)
         {

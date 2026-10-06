@@ -56,7 +56,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CPetInfoWindow` | Done | RmlUi-only 2D | `docked_panel_frame.rcss`; opens with character info. Fill-capable |
 | `CPartyInfoWindow` | Done | RmlUi-only 2D | `docked_panel_frame.rcss`; member rows `data-for` over `Party[]` |
 | `CNameWindow` | Done | World-overlay | `world_labels.rml` (`UI::Character::WorldLabelLayer`): pooled elements in the background context, filled from the native label code under an `Overlay2DRecordScope` |
-| `CFriendWindow` | Done | Hybrid | `UI/Social/`: shell (`friend_shell.rml`), one document per chat room and letter; the letter portrait is live 3D in a render target, driven by `UI::Social::PhotoViewerControl`. `CUIWindowMgr` still arranges them (`building-new-ui.md`) |
+| `CFriendWindow` | Done | Hybrid | `UI/Social/`: shell (`friend_shell.rml`), one document per chat room and letter; the letter portrait is live 3D in a render target, driven by `UI::Social::PhotoViewerControl`. `CUIWindowMgr` still arranges them (`building-new-ui.md`). The original's F5 menu of open windows is retired: the shell's Window List tab lists them |
 | `CGuildMakeWindow` | Done | RmlUi-only 2D | |
 | `CGuildInfoWindow` | Done; not checked in game | RmlUi-only 2D | Three RmlUi-scrolled lists |
 | `CServerMsgWin` | Done | RmlUi-only 2D | Real pixels (`LayoutMode::Legacy`), fixed face (Cousine) |

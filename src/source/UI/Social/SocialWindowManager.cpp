@@ -298,11 +298,6 @@ void CUIWindowMgr::DoAction()
         }
     }
 
-    if (GetFocus() == g_hWnd && PressKey(VK_F5))
-    {
-        g_pFriendMenu->ShowMenu(TRUE);
-    }
-
     if (PressKey(VK_F6))
     {
         if ((m_bCurrentHideWindowState == FALSE || m_HideWindowList.empty() == FALSE))
@@ -476,7 +471,6 @@ void CUIWindowMgr::HandleMessage()
 
             SetWindowsEnable(m_WorkMessage.m_iParam1);
             g_pFriendMenu->SetNewChatAlertOff(m_WorkMessage.m_iParam1);
-            g_pFriendMenu->HideMenu();
         }
         break;
     case UI_MESSAGE_HIDE:
@@ -1330,9 +1324,6 @@ int CLetterList::GetLineNum(DWORD dwLetterID)
 
 void CUIFriendMenu::Reset()
 {
-    if (m_WindowList.size() != 0)
-        m_WindowListSelectIter = m_WindowList.end();
-
     m_WindowList.clear();
     m_NewChatWindowList.clear();
     RemoveAllRequestWindow();
@@ -1340,22 +1331,9 @@ void CUIFriendMenu::Reset()
 
 void CUIFriendMenu::Init()
 {
-    memset(&m_WorkMessage, 0, sizeof(UI_MESSAGE));
-    m_bHaveTextBox = FALSE;
-
-    m_iFriendMenuPos_y = 459 - 24;
-    m_iFriendMenuHeight = 18;
-    SetPosition(582, m_iFriendMenuPos_y);
-    SetSize(52, 0);	//m_iFriendMenuHeight);
-    m_fLineHeight = 0;
-    m_WindowListSelectIter = m_WindowList.end();
-    SetState(UISTATE_HIDE);
-    m_fMenuAlpha = 0;
-    m_fMenuAlphaAdd = 0;
     m_bNewMailAlert = FALSE;
     m_iBlinkTemp = 0;
     m_iLetterBlink = 0;
-    m_bHotKey = FALSE;
 }
 
 void CUIFriendMenu::AddWindow(DWORD dwUIID, CUIBaseWindow* pWindow)
@@ -1378,12 +1356,6 @@ void CUIFriendMenu::RemoveWindow(DWORD dwUIID)
     }
     if (bFind == FALSE) return;
     m_WindowList.erase(m_WindowListIter);
-    m_WindowListSelectIter = m_WindowList.end();
-}
-
-BOOL CUIFriendMenu::HandleMessage()
-{
-    return FALSE;
 }
 
 int CUIFriendMenu::GetBlinkTemp()
@@ -1414,54 +1386,6 @@ void CUIFriendMenu::IncreaseLetterBlink()
     {
         m_iLetterBlink = 0;
         m_bNewMailAlert = FALSE;
-    }
-}
-
-void CUIFriendMenu::ShowMenu(BOOL bHotKey)
-{
-    if (m_WindowList.empty() == TRUE) return;
-    m_bHotKey = bHotKey;
-
-    if (GetState() == UISTATE_HIDE)
-    {
-        SetState(UISTATE_NORMAL);
-        m_iHeight += (m_fLineHeight + 4) * m_WindowList.size();
-        m_iPos_y -= (m_fLineHeight + 4) * m_WindowList.size();
-        m_fMenuAlphaAdd = 0.25f;
-
-        if (bHotKey == TRUE)
-        {
-            m_WindowListSelectIter = m_WindowList.begin();
-            if (m_WindowList.size() > 1)
-            {
-                while (*m_WindowListSelectIter == g_pWindowMgr->GetTopWindowUIID())
-                {
-                    ++m_WindowListSelectIter;
-                    if (m_WindowListSelectIter == m_WindowList.end()) break;
-                };
-            }
-        }
-    }
-    else if (bHotKey == TRUE)
-    {
-        if (m_WindowListSelectIter == m_WindowList.end()) m_WindowListSelectIter = m_WindowList.begin();
-        else
-        {
-            ++m_WindowListSelectIter;
-            if (m_WindowListSelectIter == m_WindowList.end()) m_WindowListSelectIter = m_WindowList.begin();
-        }
-    }
-}
-
-void CUIFriendMenu::HideMenu()
-{
-    if (GetState() == UISTATE_NORMAL)
-    {
-        SetState(UISTATE_HIDE);
-        m_iHeight = 0;
-        m_iPos_y = m_iFriendMenuPos_y;
-        m_fMenuAlphaAdd = -0.25f;
-        m_bHotKey = FALSE;
     }
 }
 

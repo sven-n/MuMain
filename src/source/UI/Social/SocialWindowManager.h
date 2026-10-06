@@ -236,14 +236,17 @@ protected:
     int m_iFriendMainWindowTitleNumber;
 };
 
-class CUIFriendMenu : public CUIBaseWindow
+// The friend family's open chat rooms, pending chat requests and new-chat and new-mail alerts. Once
+// also the F5 menu listing the open windows, retired in favour of the friend window's Window List
+// tab; it is no window itself.
+class CUIFriendMenu
 {
 public:
     CUIFriendMenu()
     {
         Init();
     }
-    virtual ~CUIFriendMenu()
+    ~CUIFriendMenu()
     {
         Reset();
     }
@@ -252,9 +255,6 @@ public:
     void Init();
     void AddWindow(DWORD dwUIID, CUIBaseWindow* pWindow);
     void RemoveWindow(DWORD dwUIID);
-
-    void ShowMenu(BOOL bHotKey = FALSE);
-    void HideMenu();
 
     void SetNewChatAlert(DWORD dwAlertWindowID);
     void SetNewChatAlertOff(DWORD dwAlertWindowID);
@@ -274,11 +274,6 @@ public:
     void SendChatRoomConnectCheck();
     void UpdateAllChatWindowInviteList();
 
-    BOOL IsHotkeyEnable()
-    {
-        return m_bHotKey;
-    }
-
     void AddRequestWindow(const wchar_t* szTargetName);
     BOOL IsRequestWindow(const wchar_t* szTargetName);
     void RemoveRequestWindow(const wchar_t* szTargetName);
@@ -288,22 +283,12 @@ public:
     void LockAllChatWindow();
 
 protected:
-    virtual BOOL HandleMessage();
-
-protected:
     std::deque<DWORD> m_WindowList;
     std::deque<DWORD>::iterator m_WindowListIter;
-    std::deque<DWORD>::iterator m_WindowListSelectIter;
-    float m_fLineHeight;
-    int m_iFriendMenuPos_y;
-    int m_iFriendMenuHeight;
-    float m_fMenuAlpha;
-    float m_fMenuAlphaAdd;
     std::deque<DWORD> m_NewChatWindowList;
     BOOL m_bNewMailAlert;
     int m_iBlinkTemp;
     int m_iLetterBlink;
-    BOOL m_bHotKey;
     std::deque<wchar_t*> m_RequestChatWindowList;
     std::deque<wchar_t*>::iterator m_RequestChatWindowListIter;
 };

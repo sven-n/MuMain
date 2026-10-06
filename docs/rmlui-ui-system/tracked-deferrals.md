@@ -36,15 +36,6 @@ Done when every common UI concern has one canonical implementation or an explici
 presentation-specific split, discoverable without knowing the codebase's history. Retiring the
 last native widget consumers (`CInGameShop`) is part of it.
 
-## Tracked deferral: the F5 friend menu
-
-The original listed the open chat and letter windows above the HUD's friend button: F5 opened it and
-cycled through them, and Enter or a click brought one forward. It has shown nothing since the friend
-family moved to RmlUi, because nothing drew it or ran its input, and that native drawing and input
-are deleted. `CUIFriendMenu` keeps the model: the window list, the new-chat and new-mail alerts,
-`ShowMenu()`/`HideMenu()`. The friend window's Window List tab lists the same windows. To decide:
-port it as a small RmlUi popup, or retire F5 in favour of the tab.
-
 ## Tracked deferral: audit where ports steered away from the original UI
 
 Not a suspicion that something is broken: a port makes dozens of small judgement calls that are
