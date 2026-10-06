@@ -384,36 +384,44 @@ any side, and F12 hides the editor while it runs.
   character (0: where it stands) and **Height** above the ground, **Size**
   (0 takes the create function's default: effects 0.9, particles 1,
   lightning 10; sprites, whose create function has none, get 1), **Light**,
-  **Random angle** (as many game calls give lightning), the **Target** (the
-  copy of the character; none, offered only for types the game itself
-  creates without an owner, as the code of others may read their owner
-  without checking; or a copy of the nearest monster or NPC, which follows
-  it, so lightning runs to it) and, for lightning, **PK** and
-  **SkillIndex**, which some SubTypes read their lifetime and speed from.
-  Lightning gets the light only when the box before it is ticked: the call
-  then passes it as the colour. Most of the game's calls pass none, and some
-  types then choose their colour by SubType; the three SubTypes whose code
-  reads the colour without checking get white. The values stay for another
-  type of the same kind and go back to the kind's own when the kind changes.
-  Creating the type again with other values keeps what is there, so parts
-  can be compared side by side. While the preview runs, Repeat and sprites
-  take the values as they are set. Many types choose their own place, size
-  or light in their code, or move to their owner: notes after each call that
-  creates an effect, particle or lightning say which values the type did not
-  keep.
+  **Random angle** (as many game calls give lightning), the **Target** and,
+  for lightning, **PK** and **SkillIndex**, which some SubTypes read their
+  lifetime and speed from. The target is the copy of the character; none,
+  offered only for a SubType the game itself creates without an owner, as
+  the code of other SubTypes may read their owner without checking; or a
+  copy of the nearest monster or NPC, so lightning runs to it. That copy has
+  bones of its own and follows the monster while its slot holds it; once the
+  monster is gone, the next call looks for the nearest one again. Lightning
+  gets the light only when the box before it is ticked: the call then passes
+  it as the colour. Most of the game's calls pass none, and some types then
+  choose their colour by SubType; the three SubTypes whose code reads the
+  colour without checking get white. The values stay for another type of the
+  same kind and go back to the kind's own when the kind changes. Creating
+  the type again with other values keeps what is there, so parts can be
+  compared side by side. While the preview runs, Repeat and sprites take the
+  values as they are set; a refused SubType chosen then ends the run. Many
+  types change the place, size or light they are given in their code, or
+  move to their owner: after each call that creates an effect, particle or
+  lightning, notes on the object of the type itself say which values its
+  code changed.
 - **The game's calls** list where the game's code creates the type
   (`CreateEffect`, `CreateParticle`, `CreateJoint`, `CreateSprite` and the
   FpsChecked forms of the first three) with the SubType, size and owner they
   write, read from the sources the editor was built from
   (`MU_EDITOR_SOURCE_DIR`, the build's own checkout) the first time the list
-  or the target's drop-down opens. **Use** takes the values a call writes as
-  numbers: its SubType, size, the light it sets just before (`Vector(r, g,
-  b, light)`; for lightning, the colour it passes), no owner when it passes
-  none, PK and SkillIndex; a size or light not written as numbers goes back
-  to the default. What depends on the moment (the Fenrir's colour, which
-  monster) stays for the user to choose. A skill's whole look, several types
-  from the caster's bones at the right moment of its animation, is not one
-  call: its preview comes with the skill looks (SK2).
+  or the target's drop-down opens. Code the build leaves out is not read:
+  `#if 0`, and `#ifdef` of a macro that no file defines and the build files
+  do not name. **Use** takes the values a call writes as numbers: its
+  SubType, size, PK and SkillIndex, no owner when it passes none (with a
+  SubType written as a number), and the light: the last write of the call's
+  light variable that reaches the call in its function, `Vector(r, g, b,
+  light)` or a declaration with r, g, b (for lightning, the colour it
+  passes). A light written otherwise, or only on some paths, is unknown; a
+  size or light not known goes back to the default. What depends on the
+  moment (the Fenrir's colour, which monster) stays for the user to choose.
+  A skill's whole look, several types from the caster's bones at the right
+  moment of its animation, is not one call: its preview comes with the skill
+  looks (SK2).
 - **Repeat** creates the type again shortly after what it created has ended.
   A sprite lasts one frame; the preview creates it every frame.
 - **Mute sounds** keeps the game from starting sound effects while the

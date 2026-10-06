@@ -646,8 +646,8 @@ sets the rest of the call (distance and height of the start, size, light, a
 random angle, the target: the copy of the character, none where the game
 passes none, or a copy of the nearest monster or NPC; PK and SkillIndex for
 lightning), and lists the game's own create calls of the type, read from the
-sources of the editor's build (about 4,260 calls, about 98% naming a type of
-the symbol lists, listed as about 4,310 rows because a call of `NAME +
+sources of the editor's build (about 98% of the create calls naming a type
+of the symbol lists, listed as about 4,340 rows because a call of `NAME +
 rand() % N` is listed under each of its types; a compiled list would be a
 large generated file), with Use taking the values they write as numbers.
 Lightning gets the light only as a colour the call passes: `CreateJoint`
@@ -655,6 +655,17 @@ lets some types choose their colour by SubType when the call passes none, as
 most game calls do, and three SubTypes copy it without checking, so the
 preview passes white for those (a source test keeps that list complete). A
 skill's whole look stays for SK2.
+
+*Review of the call values:* None became a choice per SubType (the game
+creates some SubTypes of a type without an owner and others, whose code
+reads it, always with one); the copy of a monster or NPC got bones of its
+own and stops following its slot once that holds another character (the game
+frees and reallocates a slot's bones); the reader follows the blocks of a
+function and every write of the light variable (a light from an earlier
+case, a sibling branch or another function, or one changed before the call,
+was taken), and leaves out code under `#if 0` and under `#ifdef` of macros
+nothing defines; a refused SubType chosen while the preview runs ends the
+run.
 
 **FX1.7c Live preview in the browser (later).** The objects of FX1.7b drawn
 in the browser's view, on the chosen object, instead of in the world. The

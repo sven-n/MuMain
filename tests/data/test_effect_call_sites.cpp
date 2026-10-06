@@ -10,6 +10,7 @@
 #include "UI/EffectBrowser/EffectCallSites.h"
 
 #include <algorithm>
+#include <cmath>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -26,6 +27,21 @@ const EffectCallSite* FindCall(const std::vector<EffectCallSite>& calls, EffectK
     const auto found = std::find_if(calls.begin(), calls.end(),
                                     [&](const EffectCallSite& call) { return call.kind == kind && call.type == type; });
     return found != calls.end() ? &*found : nullptr;
+}
+
+bool IsLight(const std::optional<PreviewVector>& light, float r, float g, float b)
+{
+    return light && std::abs((*light)[0] - r) < Tolerance && std::abs((*light)[1] - g) < Tolerance &&
+           std::abs((*light)[2] - b) < Tolerance;
+}
+
+// Whether one of `calls` lies in `file`, with this SubType and light.
+bool HasCall(const std::vector<const EffectCallSite*>& calls, std::string_view file, int subType, float r, float g,
+             float b)
+{
+    return std::any_of(
+        calls.begin(), calls.end(), [&](const EffectCallSite* call)
+        { return call->file == file && call->subTypeValue == subType && IsLight(call->light, r, g, b); });
 }
 } // namespace
 
@@ -127,6 +143,115 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light)
     const EffectCallSite* shiny = FindCall(calls, EffectKind::Sprite, BITMAP_SHINY);
     REQUIRE(shiny != nullptr);
     CHECK_FALSE(shiny->light.has_value());
+
+    // None only with the SubType of a call that passes no owner.
+    const std::vector<const EffectCallSite*> thunderCalls = {joint};
+    CHECK(CreatesWithoutOwner(thunderCalls, 3));
+    CHECK_FALSE(CreatesWithoutOwner(thunderCalls, 4));
+    const std::vector<const EffectCallSite*> stoneCalls = {stone};
+    CHECK_FALSE(CreatesWithoutOwner(stoneCalls, 13));
+}
+
+TEST_CASE("The effect browser takes the light that reaches the call, in its function [effects][editor]")
+{
+    const std::string source = R"source(
+namespace Effects
+{
+    void Moved(OBJECT* o, vec3_t Position, vec3_t Angle, int kind)
+    {
+        vec3_t Light, vColour;
+        vec3_t vLight = { 0.45f, 0.45f, 0.7f };
+        CreateEffect(MODEL_FIRE, Position, Angle, vLight, 1, o);
+        Vector(1.f, 1.f, 1.f, Light);
+        switch (kind)
+        {
+        case 0:
+            Vector(0.2f, 0.2f, 0.2f, Light);
+            CreateEffect(MODEL_POISON, Position, Angle, Light, 0, o);
+            break;
+        case 1:
+            CreateEffect(MODEL_STONE1, Position, Angle, Light, 0, o);
+            break;
+        }
+        if (kind > 2)
+        {
+            Vector(0.5f, 0.5f, 0.5f, Light);
+        }
+        CreateEffect(MODEL_STONE2, Position, Angle, Light, 0, o);
+        Vector(0.3f, 0.3f, 0.3f, Light);
+        VectorScale(Light, 0.5f, Light);
+        CreateEffect(MODEL_BIG_STONE1, Position, Angle, Light, 0, o);
+        Vector(0.6f, 0.6f, 0.6f, Light);
+        Light[0] = 1.f;
+        CreateEffect(MODEL_BIG_STONE2, Position, Angle, Light, 0, o);
+        Vector(0.4f, 0.4f, 1.0f, vColour);
+        CreateJoint(BITMAP_JOINT_ENERGY, Position, Position, Angle, 0, o, 20.f, -1, 0, 0, -1, vColour);
+        CreateJoint(BITMAP_JOINT_THUNDER, Position, Position, Angle, 0, o, 20.f, -1, 0, 0, -1, vColour);
+    }
+
+    void Next(OBJECT* o, vec3_t Position, vec3_t Angle)
+    {
+        vec3_t Light;
+        CreateEffect(MODEL_ICE, Position, Angle, Light, 0, o);
+    }
+}
+)source";
+    const std::vector<EffectCallSite> calls = ReadEffectCallSites(source, "Test/Moved.cpp");
+    const auto lightOf = [&](int type) -> std::optional<PreviewVector>
+    {
+        const EffectCallSite* call = FindCall(calls, EffectKind::Effect, type);
+        REQUIRE(call != nullptr);
+        return call->light;
+    };
+    // A declaration with r, g, b, and a Vector of the same case.
+    CHECK(IsLight(lightOf(MODEL_FIRE), 0.45f, 0.45f, 0.7f));
+    CHECK(IsLight(lightOf(MODEL_POISON), 0.2f, 0.2f, 0.2f));
+    // What an earlier case wrote does not reach a later case.
+    CHECK(IsLight(lightOf(MODEL_STONE1), 1.0f, 1.0f, 1.0f));
+    // Written on some paths only, changed after the Vector, or written in
+    // another function: unknown.
+    CHECK_FALSE(lightOf(MODEL_STONE2).has_value());
+    CHECK_FALSE(lightOf(MODEL_BIG_STONE1).has_value());
+    CHECK_FALSE(lightOf(MODEL_BIG_STONE2).has_value());
+    CHECK_FALSE(lightOf(MODEL_ICE).has_value());
+    // A create call that passes the colour last only reads it.
+    const EffectCallSite* energy = FindCall(calls, EffectKind::Joint, BITMAP_JOINT_ENERGY);
+    const EffectCallSite* thunder = FindCall(calls, EffectKind::Joint, BITMAP_JOINT_THUNDER);
+    REQUIRE(energy != nullptr);
+    REQUIRE(thunder != nullptr);
+    CHECK(IsLight(energy->light, 0.4f, 0.4f, 1.0f));
+    CHECK(IsLight(thunder->light, 0.4f, 0.4f, 1.0f));
+}
+
+TEST_CASE("The effect browser leaves out the calls in code the build skips [effects][editor]")
+{
+    const std::string source = R"source(
+void Skipped(OBJECT* o, vec3_t Position, vec3_t Angle, vec3_t Light)
+{
+#ifdef NEVER_DEFINED
+    CreateEffect(MODEL_FIRE, Position, Angle, Light, 0, o);
+#else
+    CreateEffect(MODEL_POISON, Position, Angle, Light, 0, o);
+#endif
+#if 0
+    CreateEffect(MODEL_STONE1, Position, Angle, Light, 0, o);
+#endif
+#if defined(NEVER_DEFINED)
+    CreateEffect(MODEL_ICE, Position, Angle, Light, 0, o);
+#endif
+#ifdef SOMETIMES_DEFINED
+    CreateEffect(MODEL_STONE2, Position, Angle, Light, 0, o);
+#endif
+}
+)source";
+    const std::vector<EffectCallSite> calls = ReadEffectCallSites(source, "Test/Skipped.cpp", {"NEVER_DEFINED"});
+    CHECK(FindCall(calls, EffectKind::Effect, MODEL_FIRE) == nullptr);
+    CHECK(FindCall(calls, EffectKind::Effect, MODEL_STONE1) == nullptr);
+    CHECK(FindCall(calls, EffectKind::Effect, MODEL_ICE) == nullptr);
+    CHECK(FindCall(calls, EffectKind::Effect, MODEL_STONE2) != nullptr);
+    const EffectCallSite* poison = FindCall(calls, EffectKind::Effect, MODEL_POISON);
+    REQUIRE(poison != nullptr);
+    CHECK(poison->line == 7);
 }
 
 TEST_CASE("The effect browser finds the game's calls of a type in the sources, the Fenrir's plasma storm among them "
@@ -163,6 +288,25 @@ TEST_CASE("The effect browser finds the game's calls of a type in the sources, t
                                  (*call->light)[2] == doctest::Approx(1.0f) &&
                                  (*call->light)[0] == doctest::Approx(0.4f);
                       }));
+
+    // The light that reaches the call: a declaration in a move handler,
+    // where the functions are indented in a namespace, and the light of the
+    // function rather than that of an earlier case.
+    CHECK(HasCall(index.Find(EffectKind::Effect, MODEL_STONE1), "Render/Effects/Behaviors/MoveHandlers.cpp", 13, 0.45f,
+                  0.45f, 0.7f));
+    CHECK(HasCall(index.Find(EffectKind::Particle, BITMAP_SMOKE), "Render/Effects/Behaviors/MoveHandlers.cpp", 54,
+                  0.45f, 0.45f, 0.7f));
+    CHECK(HasCall(index.Find(EffectKind::Effect, MODEL_BIG_STONE_PART1), "Render/Models/ZzzBMD.cpp", 1, 1.0f, 1.0f,
+                  1.0f));
+    // Code under a macro nothing defines is left out.
+    const std::vector<const EffectCallSite*> shiny = index.Find(EffectKind::Sprite, BITMAP_SHINY + 6);
+    CHECK(std::none_of(shiny.begin(), shiny.end(), [](const EffectCallSite* call)
+                       { return call->file == "World/GameMaps/GMEmpireGuardian2.cpp"; }));
+    // The blade skill is created without an owner with SubType 0 only; its
+    // SubType 1 reads its owner.
+    const std::vector<const EffectCallSite*> blade = index.Find(EffectKind::Effect, MODEL_BLADE_SKILL);
+    CHECK(CreatesWithoutOwner(blade, 0));
+    CHECK_FALSE(CreatesWithoutOwner(blade, 1));
 
     EffectCallSiteIndex missing;
     CHECK_FALSE(missing.Load(std::filesystem::path(MU_TEST_SOURCE_DIR) / "no such folder"));

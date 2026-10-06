@@ -16,6 +16,7 @@
 #include <array>
 #include <cstdint>
 #include <cstdio>
+#include <filesystem>
 #include <string>
 
 using Data::Effects::EffectKind;
@@ -30,11 +31,12 @@ namespace
 constexpr float ValueWidth = 90.0f;
 constexpr int VisibleGameCalls = 8;
 
-// The sources the editor was built from (src/source), for the game's calls.
+// The sources the editor was built from (src/source), for the game's calls;
+// UTF-8, as the path may hold any letter.
 #ifdef MU_EDITOR_SOURCE_DIR
-constexpr const char* SourceDirectory = MU_EDITOR_SOURCE_DIR;
+constexpr const char8_t* SourceDirectory = MU_EDITOR_SOURCE_DIR;
 #else
-constexpr const char* SourceDirectory = "";
+constexpr const char8_t* SourceDirectory = u8"";
 #endif
 
 void TextDisabledWrapped(const char* text)
@@ -112,11 +114,13 @@ std::optional<int> CEffectWorldPreviewView::Render(EffectWorldPreview& world, Ef
         Select(kind, type);
     ImGui::SeparatorText(I18N::Editor::InTheWorld);
     const bool ready = MuEditor::Effects::IsWorldReadyForPreview();
+    KeepTargetAllowed(subType);
     const WorldPreviewRequest request{kind, type, subType, m_call};
     RenderButtons(world, request, ready);
-    RenderCallValues(kind);
+    RenderCallValues(kind, subType);
     const std::optional<int> used = RenderGameCalls();
     // What runs creates with the values as they are now.
+    KeepTargetAllowed(used.value_or(subType));
     world.UpdateRunning({kind, type, used.value_or(subType), m_call});
     RenderRunning(world, request);
     RenderNotes(world, ready);
@@ -131,9 +135,13 @@ void CEffectWorldPreviewView::Select(EffectKind kind, int type)
         m_call = MuEditor::Effects::DefaultWorldPreviewCall(kind);
     m_selected = MuEditor::Effects::EffectTypeRef{kind, type};
     m_typeCalls = m_gameCalls.IsLoaded() ? m_gameCalls.Find(kind, type) : std::vector<const EffectCallSite*>();
-    if (m_call.target == WorldPreviewTarget::None &&
-        std::none_of(m_typeCalls.begin(), m_typeCalls.end(),
-                     [](const EffectCallSite* call) { return call->withoutOwner; }))
+}
+
+// None only for a SubType the game creates without an owner: the code of
+// other SubTypes may read their owner without checking it.
+void CEffectWorldPreviewView::KeepTargetAllowed(int subType)
+{
+    if (m_call.target == WorldPreviewTarget::None && !MuEditor::Effects::CreatesWithoutOwner(m_typeCalls, subType))
         m_call.target = WorldPreviewTarget::Character;
 }
 
@@ -164,7 +172,7 @@ void CEffectWorldPreviewView::RenderButtons(EffectWorldPreview& world, const Wor
     Tooltip(I18N::Editor::MuteSoundsTooltip);
 }
 
-void CEffectWorldPreviewView::RenderCallValues(EffectKind kind)
+void CEffectWorldPreviewView::RenderCallValues(EffectKind kind, int subType)
 {
     if (!ImGui::TreeNode("callValues", "%s", I18N::Editor::CallValues))
         return;
@@ -195,7 +203,7 @@ void CEffectWorldPreviewView::RenderCallValues(EffectKind kind)
         Tooltip(I18N::Editor::CallColourTooltip);
     ImGui::SameLine();
     ImGui::Checkbox(I18N::Editor::CallRandomAngle, &m_call.randomAngle);
-    RenderTarget();
+    RenderTarget(subType);
     if (kind == EffectKind::Joint)
     {
         ImGui::SetNextItemWidth(width);
@@ -209,17 +217,14 @@ void CEffectWorldPreviewView::RenderCallValues(EffectKind kind)
     ImGui::TreePop();
 }
 
-// None only for types the game creates without an owner somewhere: the
-// creation code of others may read their owner without checking it.
-void CEffectWorldPreviewView::RenderTarget()
+void CEffectWorldPreviewView::RenderTarget(int subType)
 {
     ImGui::SetNextItemWidth(2.5f * ValueWidth * g_MuEditorCore.GetUIScale());
     if (!ImGui::BeginCombo(I18N::Editor::CallTarget, TargetLabel(m_call.target)))
         return;
     if (ImGui::IsWindowAppearing())
         LoadGameCalls();
-    const bool noneAllowed = std::any_of(m_typeCalls.begin(), m_typeCalls.end(),
-                                         [](const EffectCallSite* call) { return call->withoutOwner; });
+    const bool noneAllowed = MuEditor::Effects::CreatesWithoutOwner(m_typeCalls, subType);
     constexpr std::array<WorldPreviewTarget, 3> targets = {WorldPreviewTarget::Character, WorldPreviewTarget::None,
                                                            WorldPreviewTarget::NearestCharacter};
     for (const WorldPreviewTarget target : targets)
@@ -229,7 +234,7 @@ void CEffectWorldPreviewView::RenderTarget()
                               disabled ? ImGuiSelectableFlags_Disabled : ImGuiSelectableFlags_None))
             m_call.target = target;
         if (disabled)
-            Tooltip(I18N::Editor::CallTargetNoneTooltip);
+            Tooltip(m_gameCallsFound ? I18N::Editor::CallTargetNoneTooltip : I18N::Editor::CallTargetNoneNoSources);
     }
     ImGui::EndCombo();
 }
@@ -237,7 +242,7 @@ void CEffectWorldPreviewView::RenderTarget()
 std::optional<int> CEffectWorldPreviewView::RenderGameCalls()
 {
     char label[96];
-    if (m_gameCalls.IsLoaded())
+    if (m_gameCalls.IsLoaded() && m_gameCallsFound)
         std::snprintf(label, sizeof(label), "%s (%d)###gameCalls", I18N::Editor::GameCalls,
                       static_cast<int>(m_typeCalls.size()));
     else
@@ -252,9 +257,13 @@ std::optional<int> CEffectWorldPreviewView::RenderGameCalls()
         TextDisabledWrapped(I18N::Editor::NoGameCalls);
     else
     {
+        // A row is a small button and text, a line high; the bordered box
+        // keeps the window padding.
+        const ImGuiStyle& style = ImGui::GetStyle();
         const float rows = static_cast<float>(std::min<size_t>(m_typeCalls.size(), VisibleGameCalls));
-        if (ImGui::BeginChild("gameCalls", ImVec2(0.0f, rows * ImGui::GetFrameHeightWithSpacing()),
-                              ImGuiChildFlags_Borders))
+        const float height =
+            rows * ImGui::GetTextLineHeightWithSpacing() - style.ItemSpacing.y + 2.0f * style.WindowPadding.y;
+        if (ImGui::BeginChild("gameCalls", ImVec2(0.0f, height), ImGuiChildFlags_Borders))
         {
             ImGuiListClipper clipper;
             clipper.Begin(static_cast<int>(m_typeCalls.size()));
@@ -285,7 +294,8 @@ std::optional<int> CEffectWorldPreviewView::Use(const EffectCallSite& call)
 {
     m_call.scale = call.scaleValue.value_or(0.0f);
     m_call.light = call.light.value_or(MuEditor::Effects::PreviewVector{1.0f, 1.0f, 1.0f});
-    if (call.withoutOwner)
+    // None only with the SubType of the call that passes no owner.
+    if (call.withoutOwner && call.subTypeValue)
         m_call.target = WorldPreviewTarget::None;
     else if (m_call.target == WorldPreviewTarget::None)
         m_call.target = WorldPreviewTarget::Character;
@@ -301,7 +311,7 @@ std::optional<int> CEffectWorldPreviewView::Use(const EffectCallSite& call)
 void CEffectWorldPreviewView::LoadGameCalls()
 {
     if (!m_gameCalls.IsLoaded())
-        m_gameCallsFound = m_gameCalls.Load(SourceDirectory);
+        m_gameCallsFound = m_gameCalls.Load(std::filesystem::path(SourceDirectory));
     if (m_selected)
         m_typeCalls = m_gameCalls.Find(m_selected->kind, m_selected->type);
 }

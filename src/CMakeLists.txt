@@ -584,7 +584,7 @@ target_compile_definitions(MuClient PUBLIC
 # The effect browser lists the game's create calls of a type, read from the
 # sources the editor was built from.
 if(ENABLE_EDITOR)
-  target_compile_definitions(MuClient PRIVATE "MU_EDITOR_SOURCE_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/source\"")
+  target_compile_definitions(MuClient PRIVATE "MU_EDITOR_SOURCE_DIR=u8\"${CMAKE_CURRENT_SOURCE_DIR}/source\"")
 endif()
 
 if (MSVC)

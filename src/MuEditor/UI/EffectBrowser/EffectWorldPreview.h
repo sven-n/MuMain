@@ -8,6 +8,7 @@
 #include "Engine/Object/w_CharacterInfo.h"
 
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <span>
 
@@ -125,14 +126,15 @@ inline constexpr float NearestCharacterRange = 1000.0f;
 
 // The live monster or NPC of `characters` nearest to `position`, within
 // `range`; nullptr without one.
-OBJECT* FindNearestCharacter(std::span<CHARACTER> characters, const PreviewVector& position, float range);
+CHARACTER* FindNearestCharacter(std::span<CHARACTER> characters, const PreviewVector& position, float range);
 
 // The selected type created in the game world in front of the character,
 // with the game's own create call. Its owner (the target of particles and
 // lightning) is a copy of the character's object that follows the character:
 // code that writes into its owner changes the copy, and the branches the game
 // runs only for the character's own effects (the skill effects, the catapult
-// camera, ...) stay off. It follows what it created and removes it when it
+// camera, ...) stay off. The copies have bones of their own and point to no
+// object of the game, which may free or reuse its characters' slots. It follows what it created and removes it when it
 // stops: on Stop, when another type is shown, when the browser closes and
 // before the game clears its pools.
 class EffectWorldPreview
@@ -199,10 +201,13 @@ private:
 
     EffectPreviewTracker m_tracker;
     OBJECT m_owner;
-    // The copy of the monster or NPC the call is aimed at, and the one it
-    // follows while that lives.
+    std::unique_ptr<vec34_t[]> m_ownerBones;
+    // The copy of the monster or NPC the call is aimed at, and the character
+    // it follows while its slot holds it (by its key).
     OBJECT m_targetCopy;
-    OBJECT* m_targetFollowed = nullptr;
+    std::unique_ptr<vec34_t[]> m_targetBones;
+    CHARACTER* m_targetFollowed = nullptr;
+    int m_targetKey = 0;
     std::optional<WorldPreviewRequest> m_running;
     std::optional<EffectTypeRef> m_notesFor;
     bool m_createPending = false;

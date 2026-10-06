@@ -9,8 +9,10 @@
 #include <filesystem>
 #include <map>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
 
 namespace MuEditor::Effects
@@ -37,8 +39,10 @@ struct EffectCallSite
     // left out gets the call's default.
     std::optional<int> subTypeValue;
     std::optional<float> scaleValue;
-    // The light: Vector(r, g, b, light) before the call, in its function; for
-    // lightning, the colour it passes.
+    // The light: the last write of the call's light variable that reaches
+    // the call in its function, Vector(r, g, b, light) or a declaration with
+    // r, g, b; for lightning, the colour it passes. Unknown when that write
+    // is anything else or runs only on some paths.
     std::optional<PreviewVector> light;
     bool withoutOwner = false;
     // Lightning only: the values some SubTypes read from PK and SkillIndex.
@@ -46,14 +50,23 @@ struct EffectCallSite
     std::optional<int> skillIndexValue;
 };
 
-// The calls in the text of one source file.
-std::vector<EffectCallSite> ReadEffectCallSites(std::string_view source, std::string_view file);
+// Whether one of the calls creates its type with this SubType, written as a
+// number, and no owner. The code of other SubTypes may read their owner
+// without checking it.
+bool CreatesWithoutOwner(std::span<const EffectCallSite* const> calls, int subType);
+
+// The calls in the text of one source file. Code under #if 0, and under
+// #ifdef or #if defined of a macro of `macrosOff`, is left out.
+std::vector<EffectCallSite> ReadEffectCallSites(std::string_view source, std::string_view file,
+                                                const std::unordered_set<std::string>& macrosOff = {});
 
 // The calls of every .cpp file under a source folder, by kind and type.
 class EffectCallSiteIndex
 {
 public:
-    // Reads the folder; false when it holds no source.
+    // Reads the folder; false when it holds no source. A macro that a file
+    // tests but none defines, and that the build files beside the folder do
+    // not name, counts as off.
     bool Load(const std::filesystem::path& sourceDirectory);
     bool IsLoaded() const
     {

@@ -15,6 +15,7 @@
 #include "Core/Utilities/WorldClearing.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "UI/EffectBrowser/EffectPoolSnapshot.h"
@@ -445,8 +446,8 @@ TEST_CASE("The world preview starts particles, lightning and sprites at the ches
     place(2, KIND_PLAYER, 50.0f, 0);
     place(3, KIND_NPC, 700.0f, 0);
     const std::span<CHARACTER> all(characters.get(), 4);
-    CHECK(FindNearestCharacter(all, {0.0f, 0.0f, 0.0f}, NearestCharacterRange) == &characters[0].Object);
-    CHECK(FindNearestCharacter(all, {650.0f, 0.0f, 0.0f}, NearestCharacterRange) == &characters[3].Object);
+    CHECK(FindNearestCharacter(all, {0.0f, 0.0f, 0.0f}, NearestCharacterRange) == &characters[0]);
+    CHECK(FindNearestCharacter(all, {650.0f, 0.0f, 0.0f}, NearestCharacterRange) == &characters[3]);
     CHECK(FindNearestCharacter(all, {0.0f, 0.0f, 0.0f}, 200.0f) == nullptr);
 }
 
@@ -558,6 +559,80 @@ TEST_CASE("The running world preview creates with the values as they are now and
     CHECK(again->Scale == doctest::Approx(80.0f));
     world.Stop();
     WorldTime = worldTime;
+}
+
+TEST_CASE("The world preview aims at a copy of the nearest monster or NPC with bones of its own, and stops following "
+          "it once its slot holds another [effects][editor]")
+{
+    EffectTestData::BuildShippedRegistry();
+    const TestHero hero;
+    auto characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT);
+    auto bones = std::make_unique<vec34_t[]>(MAX_BONES);
+    bones[5][0][3] = 42.0f;
+    CHARACTER& monster = characters[7];
+    monster.Key = 77;
+    monster.Object.Live = true;
+    monster.Object.Kind = KIND_MONSTER;
+    monster.Object.BoneTransform = bones.get();
+    Vector(1100.0f, 1000.0f, 0.0f, monster.Object.Position);
+    CHARACTER* const previous = CharactersClient;
+    CharactersClient = characters.get();
+
+    auto worldPreview = std::make_unique<EffectWorldPreview>();
+    EffectWorldPreview& world = *worldPreview;
+    const OBJECT* owner = &world.GetOwner();
+    const auto findJoint = [](const OBJECT* target) -> JOINT*
+    {
+        for (int i = 0; i < MAX_JOINTS; ++i)
+        {
+            if (Joints[i].Live && Joints[i].Type == BITMAP_JOINT_ENERGY && Joints[i].Target == target)
+                return &Joints[i];
+        }
+        return nullptr;
+    };
+    const auto findAimed = [&]() -> JOINT*
+    {
+        for (int i = 0; i < MAX_JOINTS; ++i)
+        {
+            if (Joints[i].Live && Joints[i].Type == BITMAP_JOINT_ENERGY && Joints[i].Target != nullptr &&
+                Joints[i].Target != owner)
+                return &Joints[i];
+        }
+        return nullptr;
+    };
+
+    WorldPreviewCall aimed = DefaultWorldPreviewCall(EffectKind::Joint);
+    aimed.target = WorldPreviewTarget::NearestCharacter;
+    world.Start({EffectKind::Joint, BITMAP_JOINT_ENERGY, 0, aimed});
+    world.AfterFrame(true, true);
+    const JOINT* joint = findAimed();
+    REQUIRE(joint != nullptr);
+    const OBJECT* copy = joint->Target;
+    CHECK(copy != &monster.Object);
+    CHECK(copy->Position[0] == doctest::Approx(1100.0f));
+    REQUIRE(copy->BoneTransform != nullptr);
+    CHECK(copy->BoneTransform != monster.Object.BoneTransform);
+    CHECK(copy->BoneTransform[5][0][3] == doctest::Approx(42.0f));
+    CHECK((world.GetNotes() & WorldNoteNoCharacterNear) == 0);
+
+    // It follows the monster until its slot holds another character.
+    monster.Object.Position[0] = 1200.0f;
+    world.AfterFrame(true, true);
+    CHECK(copy->Position[0] == doctest::Approx(1200.0f));
+    monster.Key = 78;
+    monster.Object.Position[0] = 1300.0f;
+    world.AfterFrame(true, true);
+    CHECK(copy->Position[0] == doctest::Approx(1200.0f));
+    world.Stop();
+
+    // With none near, the copy of the character is the target.
+    monster.Object.Live = false;
+    world.Start({EffectKind::Joint, BITMAP_JOINT_ENERGY, 0, aimed});
+    CHECK((world.GetNotes() & WorldNoteNoCharacterNear) != 0);
+    world.AfterFrame(true, true);
+    CHECK(findJoint(owner) != nullptr);
+    world.Stop();
+    CharactersClient = previous;
 }
 
 TEST_CASE("The world preview gives lightning a colour only when one is chosen, as most of the game's calls do "

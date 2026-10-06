@@ -23,8 +23,9 @@ private:
     void Select(Data::Effects::EffectKind kind, int type);
     void RenderButtons(MuEditor::Effects::EffectWorldPreview& world,
                        const MuEditor::Effects::WorldPreviewRequest& request, bool ready);
-    void RenderCallValues(Data::Effects::EffectKind kind);
-    void RenderTarget();
+    void RenderCallValues(Data::Effects::EffectKind kind, int subType);
+    void RenderTarget(int subType);
+    void KeepTargetAllowed(int subType);
     std::optional<int> RenderGameCalls();
     std::optional<int> Use(const MuEditor::Effects::EffectCallSite& call);
     void LoadGameCalls();

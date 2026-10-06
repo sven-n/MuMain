@@ -824,7 +824,10 @@
     <value>Nächstes Monster oder NPC (Kopie)</value>
   </data>
   <data name="Call target none tooltip" xml:space="preserve">
-    <value>Das Spiel erzeugt diesen Typ nie ohne Besitzer, und sein Code braucht vielleicht einen.</value>
+    <value>Kein Aufruf des Spiels erzeugt diesen Typ mit diesem SubType ohne Besitzer, und sein Code braucht vielleicht einen.</value>
+  </data>
+  <data name="Call target none no sources" xml:space="preserve">
+    <value>Die Aufrufe des Spiels konnten nicht gelesen werden (die Quellen wurden nicht gefunden), daher wird „Keins“ nicht angeboten.</value>
   </data>
   <data name="Call pk" xml:space="preserve">
     <value>PK</value>
@@ -854,16 +857,16 @@
     <value>Kein Monster oder NPC steht nahe der Figur, daher ist die Kopie der Figur das Ziel.</value>
   </data>
   <data name="World own place" xml:space="preserve">
-    <value>Der Code des Typs hat das Erzeugte anderswo hingesetzt, daher setzen Abstand und Höhe es nicht.</value>
+    <value>Der Code des Typs hat das Erzeugte von der Stelle des Aufrufs weggerückt, daher steht es nicht genau beim eingestellten Abstand und der eingestellten Höhe.</value>
   </data>
   <data name="World follows owner" xml:space="preserve">
     <value>Was der Typ erzeugt hat, geht zu seinem Besitzer, daher zeigt es sich am Ziel, nicht bei Abstand und Höhe.</value>
   </data>
   <data name="World own size" xml:space="preserve">
-    <value>Der Code des Typs wählt seine Größe selbst, daher ändert Größe sie nicht.</value>
+    <value>Der Code des Typs ändert die Größe, die der Aufruf mitgibt, daher hat das Erzeugte nicht genau die eingestellte Größe.</value>
   </data>
   <data name="World own light" xml:space="preserve">
-    <value>Der Code des Typs wählt sein Licht selbst, daher ändert Licht es nicht.</value>
+    <value>Der Code des Typs ändert das Licht, das der Aufruf mitgibt, daher hat das Erzeugte nicht genau das eingestellte Licht.</value>
   </data>
   <data name="Assets all" xml:space="preserve">
     <value>Alle</value>

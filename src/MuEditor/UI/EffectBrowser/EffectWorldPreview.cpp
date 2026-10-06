@@ -9,6 +9,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Scenes/SceneCommon.h"
@@ -19,6 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cmath>
+#include <cstring>
 #include <optional>
 #include <utility>
 
@@ -62,6 +64,29 @@ bool NeedsJointColour(int type, int subType)
 {
     return std::any_of(NeedColour.begin(), NeedColour.end(),
                        [&](const JointNeedingColour& entry) { return entry.type == type && entry.subType == subType; });
+}
+
+// The bones of a character's object: the game allocates MAX_BONES of them.
+void CopyBones(vec34_t* bones, const OBJECT& character)
+{
+    if (character.BoneTransform != nullptr)
+        std::memcpy(bones, character.BoneTransform, sizeof(vec34_t) * MAX_BONES);
+}
+
+// A copy of a character's object with bones of its own and no pointer into
+// the game's objects: what the preview's objects write into it stays in it,
+// and nothing it holds is freed when the game reuses the character's slot.
+void CopyCharacter(OBJECT& copy, const OBJECT& character, std::unique_ptr<vec34_t[]>& bones)
+{
+    if (!bones)
+        bones = std::make_unique<vec34_t[]>(MAX_BONES);
+    copy = character;
+    copy.BoneTransform = bones.get();
+    copy.Owner = nullptr;
+    copy.Prior = nullptr;
+    copy.Next = nullptr;
+    copy.m_pCloth = nullptr;
+    CopyBones(bones.get(), character);
 }
 
 // Removes an effect as the game does when its life ends, with its trails.
@@ -109,9 +134,9 @@ bool IsWorldReadyForPreview()
     return SceneFlag == MAIN_SCENE && LoadingWorld == 0 && EnableMainRender && Hero != nullptr && Hero->Object.Live;
 }
 
-OBJECT* FindNearestCharacter(std::span<CHARACTER> characters, const PreviewVector& position, float range)
+CHARACTER* FindNearestCharacter(std::span<CHARACTER> characters, const PreviewVector& position, float range)
 {
-    OBJECT* nearest = nullptr;
+    CHARACTER* nearest = nullptr;
     float nearestDistance = range * range;
     for (CHARACTER& character : characters)
     {
@@ -123,7 +148,7 @@ OBJECT* FindNearestCharacter(std::span<CHARACTER> characters, const PreviewVecto
         const float distance = dx * dx + dy * dy;
         if (distance <= nearestDistance)
         {
-            nearest = &o;
+            nearest = &character;
             nearestDistance = distance;
         }
     }
@@ -135,7 +160,7 @@ void EffectWorldPreview::Start(const WorldPreviewRequest& request)
     if (m_running && (m_running->kind != request.kind || m_running->type != request.type))
         Stop();
     if (!m_running && Hero != nullptr)
-        m_owner = Hero->Object;
+        CopyCharacter(m_owner, Hero->Object, m_ownerBones);
     m_notesFor = EffectTypeRef{request.kind, request.type};
     m_notes = 0;
     if (IsRefusedInWorld(request))
@@ -157,11 +182,13 @@ void EffectWorldPreview::ChooseTarget(const WorldPreviewCall& call)
     if (call.target != WorldPreviewTarget::NearestCharacter || Hero == nullptr)
         return;
     const PreviewVector position = {Hero->Object.Position[0], Hero->Object.Position[1], Hero->Object.Position[2]};
-    OBJECT* nearest = FindNearestCharacter({CharactersClient, MAX_CHARACTERS_CLIENT}, position, NearestCharacterRange);
+    CHARACTER* nearest =
+        FindNearestCharacter({CharactersClient, MAX_CHARACTERS_CLIENT}, position, NearestCharacterRange);
     m_targetFollowed = nearest;
     if (nearest != nullptr)
     {
-        m_targetCopy = *nearest;
+        m_targetKey = nearest->Key;
+        CopyCharacter(m_targetCopy, nearest->Object, m_targetBones);
         m_notes &= static_cast<std::uint16_t>(~WorldNoteNoCharacterNear);
     }
     else
@@ -229,12 +256,25 @@ void EffectWorldPreview::AfterFrame(bool browserOpen, bool worldReady)
         Stop();
         return;
     }
-    // The copies follow the character and the monster or NPC while it lives;
-    // what the type's code wrote into them stays.
+    // The copies follow the character, and the monster or NPC while its slot
+    // holds it; what the type's code wrote into them otherwise stays.
     VectorCopy(Hero->Object.Position, m_owner.Position);
+    CopyBones(m_ownerBones.get(), Hero->Object);
     m_owner.Live = true;
-    if (m_targetFollowed != nullptr && m_targetFollowed->Live)
-        VectorCopy(m_targetFollowed->Position, m_targetCopy.Position);
+    if (m_targetFollowed != nullptr)
+    {
+        if (m_targetFollowed->Object.Live && m_targetFollowed->Key == m_targetKey)
+        {
+            VectorCopy(m_targetFollowed->Object.Position, m_targetCopy.Position);
+            CopyBones(m_targetBones.get(), m_targetFollowed->Object);
+        }
+        else
+        {
+            // Gone or replaced: the copy stays where it was, and the next
+            // call looks for the nearest one again.
+            m_targetFollowed = nullptr;
+        }
+    }
     m_targetCopy.Live = true;
     const EffectPools pools = GetGamePools();
     m_tracker.Update(pools);
@@ -359,6 +399,7 @@ namespace
 // What the code of a created object kept of the call.
 struct Kept
 {
+    int type;
     PreviewVector position;
     float scale;
     PreviewVector light;
@@ -366,7 +407,7 @@ struct Kept
 
 template <typename Object> Kept KeptBy(const Object& o)
 {
-    return {{o.Position[0], o.Position[1], o.Position[2]}, o.Scale, {o.Light[0], o.Light[1], o.Light[2]}};
+    return {o.Type, {o.Position[0], o.Position[1], o.Position[2]}, o.Scale, {o.Light[0], o.Light[1], o.Light[2]}};
 }
 
 std::optional<Kept> KeptAt(const EffectPools& pools, const EffectPoolSlot& slot)
@@ -386,6 +427,29 @@ std::optional<Kept> KeptAt(const EffectPools& pools, const EffectPoolSlot& slot)
         break;
     }
     return std::nullopt;
+}
+
+// The object the call made of the requested type, not one its code made
+// besides.
+std::optional<Kept> KeptOfType(const EffectPools& pools, const EffectPoolSlot& slot, const WorldPreviewRequest& request)
+{
+    bool ofKind = false;
+    switch (request.kind)
+    {
+    case Data::Effects::EffectKind::Effect:
+        ofKind = slot.pool == EffectPool::Effect || slot.pool == EffectPool::SkillEffect;
+        break;
+    case Data::Effects::EffectKind::Particle:
+        ofKind = slot.pool == EffectPool::Particle;
+        break;
+    case Data::Effects::EffectKind::Joint:
+        ofKind = slot.pool == EffectPool::Joint;
+        break;
+    case Data::Effects::EffectKind::Sprite:
+        break;
+    }
+    const std::optional<Kept> kept = ofKind ? KeptAt(pools, slot) : std::nullopt;
+    return kept && kept->type == request.type ? kept : std::nullopt;
 }
 
 float DistanceBetween(const PreviewVector& a, const PreviewVector& b)
@@ -410,11 +474,12 @@ void EffectWorldPreview::NoteWhatWasKept(const EffectPools& pools, const Preview
 {
     const WorldPreviewCall& call = request.call;
     m_notes &= static_cast<std::uint16_t>(~KeptNotes);
-    const auto first = std::find_if(m_tracker.GetCreated().begin(), m_tracker.GetCreated().end(),
-                                    [&](const EffectPoolSlot& slot) { return KeptAt(pools, slot).has_value(); });
+    const auto first =
+        std::find_if(m_tracker.GetCreated().begin(), m_tracker.GetCreated().end(),
+                     [&](const EffectPoolSlot& slot) { return KeptOfType(pools, slot, request).has_value(); });
     if (first == m_tracker.GetCreated().end())
         return;
-    const Kept kept = *KeptAt(pools, *first);
+    const Kept kept = *KeptOfType(pools, *first, request);
     if (DistanceBetween(kept.position, position) > OwnPlaceDistance)
         m_notes |= WorldNoteOwnPlace;
     if (call.scale > 0.0f && std::abs(kept.scale - call.scale) > 0.01f * call.scale)
@@ -437,7 +502,7 @@ void EffectWorldPreview::NoteFollowing(const EffectPools& pools)
         return;
     for (const EffectPoolSlot& slot : m_tracker.GetCreated())
     {
-        const std::optional<Kept> kept = KeptAt(pools, slot);
+        const std::optional<Kept> kept = KeptOfType(pools, slot, *m_running);
         if (kept && DistanceBetween(kept->position, ownerPosition) <= FollowingDistance)
         {
             m_notes |= WorldNoteFollowsOwner;

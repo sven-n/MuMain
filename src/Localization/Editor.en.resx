@@ -824,7 +824,10 @@
     <value>Nearest monster or NPC (copy)</value>
   </data>
   <data name="Call target none tooltip" xml:space="preserve">
-    <value>The game never creates this type without an owner, and its code may need one.</value>
+    <value>No game call creates this type with this SubType without an owner, and its code may need one.</value>
+  </data>
+  <data name="Call target none no sources" xml:space="preserve">
+    <value>The game's calls could not be read (the sources were not found), so None is not offered.</value>
   </data>
   <data name="Call pk" xml:space="preserve">
     <value>PK</value>
@@ -854,16 +857,16 @@
     <value>No monster or NPC stands near the character, so the copy of the character is the target.</value>
   </data>
   <data name="World own place" xml:space="preserve">
-    <value>The type's code put what it created elsewhere, so Distance and Height do not place it.</value>
+    <value>The type's code moved what it created away from where the call put it, so it is not exactly at the Distance and Height set.</value>
   </data>
   <data name="World follows owner" xml:space="preserve">
     <value>What the type created moves to its owner, so it shows at the target, not at Distance and Height.</value>
   </data>
   <data name="World own size" xml:space="preserve">
-    <value>The type's code chooses its own size, so Size does not change it.</value>
+    <value>The type's code changes the size the call gives it, so what it created does not have exactly the Size set.</value>
   </data>
   <data name="World own light" xml:space="preserve">
-    <value>The type's code chooses its own light, so Light does not change it.</value>
+    <value>The type's code changes the light the call gives it, so what it created does not have exactly the Light set.</value>
   </data>
   <data name="Assets all" xml:space="preserve">
     <value>All</value>
