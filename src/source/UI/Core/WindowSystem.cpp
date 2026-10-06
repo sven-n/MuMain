@@ -8,6 +8,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Scenes/SceneCore.h"
 #include "UI/Placement/WindowPlacement.h"
+#include "UI/Inventory/CursorItemLayer.h"
 
 // Defined in Winmain.cpp; only ever declared at file scope (see MainScene.cpp).
 extern int LoadingWorld;
@@ -182,6 +183,7 @@ void CSystem::Release()
     }
 
     UnloadMainSceneInterface();
+    UI::Items::ReleaseCursorItemLayer();
     UI::Placement::Release();
     g_MessageBox->Release();
 
@@ -1862,6 +1864,7 @@ bool CSystem::Render()
     if (m_pNewUIMng)
         bResult = m_pNewUIMng->Render();
     EndBitmap();
+    UI::Items::SyncCursorItemLayer();
 
     return bResult;
 }

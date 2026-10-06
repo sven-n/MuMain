@@ -55,7 +55,8 @@ namespace mu::ui::window
         COLOR_STATE_WARNING,
     };
 
-    class CPickedItem : public I3DRenderObj
+    // The item on the cursor; UI::Items::SyncCursorItemLayer() draws it.
+    class CPickedItem
     {
         CItemMng* m_pNewItemMng;
         CInventoryCtrl* m_pSrcInventory;
@@ -88,7 +89,7 @@ namespace mu::ui::window
         int GetTargetLinealPos(CInventoryCtrl* pDest);
 
         bool IsVisible() const;
-        CObject* GetLayoutOwner() const override;
+        CObject* GetLayoutOwner() const;
         void ShowPickedItem();
         void HidePickedItem();
 

@@ -80,9 +80,9 @@ flowchart TD
     subgraph loop["CManager::Render(): windows in layer-depth order"]
         bg("Flush, then the background context:<br/>inventory-family frames, event boards,<br/>map name, world labels")
         win{{"Each window's native Render():<br/>item grids, equipped items"}}
-        cam{{"3D cameras: grid and equipped items, the item on the cursor"}}
+        cam{{"3D cameras: grid and equipped items"}}
     end
-    rtt{{"Offscreen pass: RenderTarget drawers into textures:<br/>potions, letter portrait, character creation, the confirm dialog's item"}}
+    rtt{{"Offscreen pass: RenderTarget drawers into textures:<br/>potions, letter portrait, character creation, item previews, the item on the cursor"}}
     main("Pre-submit: the main context, every other document;<br/>render-target textures show here as images")
     post["Post-RmlUi pass: the cursor"]
     scene --> bg --> win --> cam --> rtt --> main --> post

@@ -88,7 +88,7 @@ mu::ui::window::CPickedItem::~CPickedItem()
 bool mu::ui::window::CPickedItem::Create(CItemMng* pNewItemMng, CInventoryCtrl* pSrc, ITEM* pItem,
                                        bool preservePickupAnchor)
 {
-    if (g_pNewUI3DRenderMng == nullptr || pNewItemMng == nullptr || pItem == nullptr)
+    if (pNewItemMng == nullptr || pItem == nullptr)
         return false;
 
     m_pNewItemMng = pNewItemMng;
@@ -97,8 +97,6 @@ bool mu::ui::window::CPickedItem::Create(CItemMng* pNewItemMng, CInventoryCtrl* 
     {
         return false;
     }
-
-    g_pNewUI3DRenderMng->Add3DRenderObj(this, INFORMATION_CAMERA_Z_ORDER);
 
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pPickedItem->Type];
     m_Size.cx = pItemAttr->Width * INVENTORY_SQUARE_WIDTH;
@@ -115,7 +113,6 @@ bool mu::ui::window::CPickedItem::Create(CItemMng* pNewItemMng, CInventoryCtrl* 
 
 void mu::ui::window::CPickedItem::Release()
 {
-    g_pNewUI3DRenderMng->Remove3DRenderObj(this);
     m_pNewItemMng->DeleteDuplicatedItem(m_pPickedItem);
     m_pPickedItem = nullptr;
     m_pNewItemMng = nullptr;

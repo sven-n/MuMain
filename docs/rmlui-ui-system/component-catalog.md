@@ -400,7 +400,9 @@ origin of the ray picking casts, and leaving it moved stops click-to-move. A mod
 its slot, as natively, so a slot's image can be larger than the slot with the drawer framing the
 item by the slot's own box (the confirm dialog's `item3D`). Consumers: the item hotkeys, the
 confirm dialog's item preview, `CNPCQuest` and `UI/Events/EventItemEntryView`
-(`SetItemDrawer()`: a panel-sized `#entry_item` its window's own item code draws into).
+(`SetItemDrawer()`: a panel-sized `#entry_item` its window's own item code draws into). The item
+on the cursor has a document of its own above every window (`UI/Inventory/CursorItemLayer.h`,
+`cursor_item.rml`), at the original's 10.9 so it also stays over the message boxes.
 
 Construct one with a drawer, size it to an element with `Resize(width, height)` in physical pixels
 (RmlUi box sizes already are), `SetEnabled()` it while the window is shown, and set an `<img>`'s
