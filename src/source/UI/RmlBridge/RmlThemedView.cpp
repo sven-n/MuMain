@@ -69,8 +69,6 @@ Rml::Context* RuntimeContextFor(std::string_view documentName)
     {
     case DocumentContext::Background:
         return runtime.GetBackgroundContext();
-    case DocumentContext::DialogBackground:
-        return runtime.GetDialogBackgroundContext();
     default:
         return runtime.GetContext();
     }

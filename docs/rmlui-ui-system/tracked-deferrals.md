@@ -32,18 +32,17 @@ placement is theme-owned ([window-placement.md](window-placement.md)).
 The review of `Render/RmlUi` and `UI/RmlBridge` against the vendored RmlUi found the core idiomatic;
 what remains is where RmlUi meets native 3D. Two mechanisms order it:
 
-- **The `background` and `dialog_background` contexts**, rendered mid-frame from
-  `CManager::Render()`. The background context splits 15 windows into a foreground and a
-  `*_bg.rml` document, each with its own model and root-transform sync, and holds the HUD boards
-  that draw under them.
+- **The `background` context**, rendered mid-frame from `CManager::Render()`. It splits 18
+  windows into a foreground and a `*_bg.rml` document, each with its own model and root-transform
+  sync, and holds the HUD boards that draw under them.
 - **`RenderTarget`**, the idiomatic one: native drawing becomes an image at its element's depth.
 
 The stacking table (`RmlStackingOrder.cpp`) says which context each document loads into, and
-`test_rml_stacking_order.cpp` holds both background lists closed, so new native 3D can only go into
-a render target.
+`test_rml_stacking_order.cpp` holds the background list closed, so new native 3D can only go into
+a render target. `UI::Items::ItemCameraTarget` draws items into one; the confirm dialog's item
+preview moved first, retiring `dialog_background`.
 
-**Direction.** Move the confirm dialog's item preview into a render target and retire
-`dialog_background`. Move the inventory family's live items into render targets and retire
+**Direction.** Move the inventory family's live items into render targets and retire
 `background` with its `*_bg.rml` documents, taking each out of the test's list. The root transform
 and its counter-scaled text (`SyncRootTransform`, `.sharp-text`, the panel readback) exist because a
 window shares reference coordinates with native grids and hit tests; a window whose native content

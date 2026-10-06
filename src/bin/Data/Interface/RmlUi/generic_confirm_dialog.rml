@@ -8,21 +8,19 @@
 	<!-- This is legacy's own markup in practice -- modern has its own complete fork
 	     (themes/modern/generic_confirm_dialog.rml) and never loads this shared copy. Keep ids/
 	     data-model/event names in sync with the modern fork, GenericConfirmDialog.cpp binds both
-	     by name.
-
-	     Native CCommonMessageBox's own sprite composite (back fill -> top cap -> middle fill ->
-	     bottom cap) moved to generic_confirm_dialog_bg.rml -- a background-context document
-	     rendered BEFORE the 3D pass that draws item3D each frame, so the item shows through this
-	     now-paint-less #panel instead of being painted over by it. See that file's own comment. -->
+	     by name. -->
 	<div id="panel" class="center-both" data-model="generic_confirm_dialog" data-class-tall="has_tall_panel"
 	     data-style-margin-top="canvas_top + 'dp'"
 	     data-class-portrait="has_portrait2d_overlay">
+		<!-- Native CCommonMessageBox's sprite composite: back fill, top cap, middle fill, bottom cap. -->
+		<div class="gcd-sprite-back"></div>
+		<div class="gcd-sprite-top"></div>
+		<div class="gcd-sprite-middle"></div>
+		<div class="gcd-sprite-bottom"></div>
 		<!-- Native's own IMAGE_MSGBOX_TOP_TITLEBAR sprite (newui_Message_03.tga) swapped in for the
-		     plain top-cap art whenever a title is shown -- see .rcss's own comment. Lives here, not
-		     in generic_confirm_dialog_bg.rml -- unlike item3D, a title banner has no compositing-
-		     order reason to sit behind anything. A direct #panel child, sibling of .gcd-body, since
-		     it's positioned in #panel's own coordinate space (edge-to-edge), not .gcd-body's inset
-		     content area. -->
+		     plain top-cap art whenever a title is shown -- see .rcss's own comment. A direct #panel
+		     child, sibling of .gcd-body, since it's positioned in #panel's own coordinate space
+		     (edge-to-edge), not .gcd-body's inset content area. -->
 		<div class="gcd-header-rail" data-class-hidden="!has_title"></div>
 		<!-- Title text drawn directly over the sprite above -- simplified to one centered line
 		     rather than replicating native's exact pixel-wrap math. severity_warning/_error
@@ -33,12 +31,11 @@
 		     fixed offset in #panel's own coordinate space; its caption is the first text row below. -->
 		<div class="gcd-portrait2d" data-class-hidden="!has_portrait2d_overlay"></div>
 		<div class="gcd-body">
-			<!-- Invisible position reference for the native 3D item-preview render pass
-			     (GenericConfirmDialog.cpp's Render3D()) -- renders nothing itself. A flex sibling of
-			     .gcd-text-col, not a member of it: the item icon sits at a fixed top-left offset with
-			     body text starting to its right, side-by-side rather than stacked (collapses to
-			     nothing, .gcd-text-col alone fills the row, when there's no item). -->
-			<div id="gcd_item3d_anchor" class="gcd-item3d-anchor layout-anchor" data-class-hidden="!has_item3d"></div>
+			<!-- The live 3D item (GenericDialogConfig::item3D), framed by its slot and drawn into
+			     #gcd_item3d, which reaches past it. A flex sibling of .gcd-text-col, not a member of
+			     it: the icon sits left of the text (collapses to nothing, .gcd-text-col alone fills the
+			     row, when there's no item). -->
+			<div id="gcd_item3d_slot" class="gcd-item3d" data-class-hidden="!has_item3d"><img id="gcd_item3d"/></div>
 			<!-- Portrait2D's Beside layout -- same row-sibling slot as #gcd_item3d_anchor above
 			     (icon-left/text-right). Mutually exclusive with the Overlay slot inside
 			     .gcd-text-col below; no dialog uses both. -->

@@ -259,15 +259,6 @@ bool mu::ui::window::CManager::Render()
             if (m_bDrivesBackgroundLayer)
                 RmlUiRuntime::Instance().RenderBackgroundLayer();
 
-            // See RmlUiRuntime::RenderDialogBackgroundLayer()'s own comment -- fires once, right
-            // before the first visible object whose GetLayerDepth() reaches the shared 3D
-            // camera's own z-order, so any active modal dialog's own background-context panel
-            // (CGenericConfirmDialog's m_pRmlBgDoc) always paints strictly after every ordinary
-            // window's own Render() this frame and strictly before item3D itself draws (still
-            // inside that camera's own Render3D() pass, unchanged).
-            if (m_bDrivesBackgroundLayer && (*vi)->GetLayerDepth() >= INFORMATION_CAMERA_Z_ORDER)
-                RmlUiRuntime::Instance().RenderDialogBackgroundLayer();
-
             const auto transform = (*vi)->GetLayoutTransform();
             UI::Scaling::ScopedActiveTransform layout(transform, true);
             (*vi)->Render();

@@ -331,7 +331,6 @@ coordinate into `dp`.
   RCSS in the legacy theme's own stylesheet.
 - **RmlUi renders last in the frame**, so native content that must sit *in* a window's stacking
   goes into a `UI::RmlBridge::RenderTarget` the document shows, and frame art that must sit
-  *behind* native 3D goes into the background context (or, for a modal's `item3D`,
-  `RmlUiRuntime::GetDialogBackgroundContext()` — `GenericConfirmDialog.h` documents why).
-  Which context a document loads into is the stacking table's (`RmlStackingOrder.cpp`), and the
-  two background lists are closed: new native 3D goes into a render target.
+  *behind* native 3D goes into the background context. Which context a document loads into is the
+  stacking table's (`RmlStackingOrder.cpp`), and the background list is closed: new native 3D goes
+  into a render target.

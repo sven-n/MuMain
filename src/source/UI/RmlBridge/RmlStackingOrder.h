@@ -23,15 +23,13 @@ enum class DocumentScene
 };
 
 // The context a document loads into. Background draws before the native windows and their 3D, so
-// frame art there stays behind live item models; DialogBackground does the same for the confirm
-// dialog's item preview (RmlUiRuntime). New native 3D goes into a UI::RmlBridge::RenderTarget the
-// document shows instead: these two lists are closed, and tests/ui/test_rml_stacking_order.cpp
-// holds them.
+// frame art there stays behind live item models. New native 3D goes into a
+// UI::RmlBridge::RenderTarget the document shows instead: the list is closed, and
+// tests/ui/test_rml_stacking_order.cpp holds it.
 enum class DocumentContext
 {
     Main,
     Background,
-    DialogBackground,
 };
 
 // Depth for a document file name such as "chat_log.rml" (no directory); none for a name the

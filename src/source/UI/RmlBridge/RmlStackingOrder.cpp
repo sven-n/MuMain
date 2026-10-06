@@ -19,7 +19,6 @@ constexpr float ReconnectDialogDepth = 50.0f; // after the whole scene
 constexpr DocumentScene MainScene = DocumentScene::Main;
 constexpr DocumentScene AnyScene = DocumentScene::Any;
 constexpr DocumentContext Background = DocumentContext::Background;
-constexpr DocumentContext DialogBackground = DocumentContext::DialogBackground;
 
 struct DocumentPlacement
 {
@@ -155,7 +154,6 @@ constexpr DocumentPlacement Placements[] = {
     {"message_box_view.rml", MessageBoxDepth, MainScene},
     // New-only dialogs that replace message boxes.
     {"generic_confirm_dialog.rml", MessageBoxDepth, MainScene},
-    {"generic_confirm_dialog_bg.rml", MessageBoxDepth, MainScene, DialogBackground},
     {"generic_menu_dialog.rml", MessageBoxDepth, MainScene},
     {"notices.rml", NoticesDepth, AnyScene},
     {"char_info_balloon.rml", SceneBalloonDepth, AnyScene},

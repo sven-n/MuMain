@@ -40,7 +40,7 @@ void RmlUiRuntime::ApplyScale(std::span<Rml::Context* const> contexts, const Rml
 
 void RmlUiRuntime::RefreshScale()
 {
-    Rml::Context* const contexts[] = {m_Context, m_BackgroundContext, m_DialogBackgroundContext};
+    Rml::Context* const contexts[] = {m_Context, m_BackgroundContext};
     ApplyScale(contexts, m_Hooks);
 }
 
@@ -142,10 +142,6 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     // future debug tooling can tell them apart.
     m_BackgroundContext = Rml::CreateContext("background", Rml::Vector2i(windowWidth, windowHeight));
 
-    // See GetDialogBackgroundContext()'s own comment -- a third context, exclusively for
-    // CGenericConfirmDialog's own panel, rendered at a different point in the frame than
-    // m_BackgroundContext's own documents.
-    m_DialogBackgroundContext = Rml::CreateContext("dialog_background", Rml::Vector2i(windowWidth, windowHeight));
     RefreshScale();
 
     // Renders once per frame, after this frame's game content is recorded onto the command
@@ -189,7 +185,6 @@ void RmlUiRuntime::Destroy()
     Rml::Shutdown();
     m_Context = nullptr;
     m_BackgroundContext = nullptr; // released by the same Rml::Shutdown() call above
-    m_DialogBackgroundContext = nullptr; // ditto
 
     // Per RenderInterface.h/SystemInterface.h's own contract: the application must keep these
     // alive until after Rml::Shutdown() and destroy them itself afterward -- RmlUi never takes
@@ -205,7 +200,7 @@ void RmlUiRuntime::Destroy()
 void RmlUiRuntime::OnResize(int windowWidth, int windowHeight)
 {
     if (!m_Context) return;
-    for (Rml::Context* context : {m_Context, m_BackgroundContext, m_DialogBackgroundContext})
+    for (Rml::Context* context : {m_Context, m_BackgroundContext})
     {
         if (context)
             context->SetDimensions(Rml::Vector2i(windowWidth, windowHeight));
@@ -383,7 +378,6 @@ void RmlUiRuntime::RenderFrame()
     // m_backgroundLayerRenderedThisFrame's own header comment (RmlUiRuntime.h) for why this,
     // not BeginFrame(), is the correct reset point.
     m_backgroundLayerRenderedThisFrame = false;
-    m_dialogBackgroundLayerRenderedThisFrame = false;
 }
 
 void RmlUiRuntime::RenderBackgroundLayer()
@@ -423,36 +417,6 @@ void RmlUiRuntime::RenderBackgroundLayer()
         FRAME_PROFILE(RmlUiRender);
         m_RenderInterface->BeginFrame(ctx.commandBuffer, ctx.swapchainTexture, ctx.width, ctx.height);
         m_BackgroundContext->Render();
-        m_RenderInterface->EndFrame();
-    }
-}
-
-void RmlUiRuntime::RenderDialogBackgroundLayer()
-{
-    if (!m_DialogBackgroundContext) return;
-    if (m_dialogBackgroundLayerRenderedThisFrame) return;
-
-    // Same reasoning as RenderBackgroundLayer()'s own FlushRenderCommands() call -- see that
-    // method's comment. Called from a different point in the frame (CManager::Render(), right
-    // before the first object at/past the 3D camera's own z-order, not before the first visible
-    // object overall), so this flushes whatever every ordinary window's own Render() recorded in
-    // between, not just whatever RenderBackgroundLayer() itself already flushed earlier this frame.
-    mu::GetRenderer().FlushRenderCommands();
-
-    const mu::FrameGpuContext ctx = mu::GetRenderer().GetFrameGpuContext();
-    if (!ctx.commandBuffer || !ctx.swapchainTexture) return;
-
-    m_dialogBackgroundLayerRenderedThisFrame = true;
-
-    {
-        FRAME_PROFILE(RmlUiUpdate);
-        m_DialogBackgroundContext->Update();
-        AfterUpdate(m_DialogBackgroundContext);
-    }
-    {
-        FRAME_PROFILE(RmlUiRender);
-        m_RenderInterface->BeginFrame(ctx.commandBuffer, ctx.swapchainTexture, ctx.width, ctx.height);
-        m_DialogBackgroundContext->Render();
         m_RenderInterface->EndFrame();
     }
 }

@@ -4,9 +4,9 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Core/Window3DRenderMng.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlThemedView.h"
+#include "UI/Inventory/ItemCameraTarget.h"
 
 #include <RmlUi/Core/EventListener.h>
 #include <RmlUi/Core/Types.h>
@@ -92,9 +92,7 @@ namespace mu::ui::window
         struct Progress { DWORD elapseMs = 3000; };
         std::optional<Progress> progress;
 
-        // Optional 3D item preview slot (stores a value snapshot). Rendered via
-        // I3DRenderObj/Render3D() -- see the class comment for why that renders on top of the
-        // panel instead of behind it (the fg/bg document split).
+        // Optional 3D item preview slot (stores a value snapshot), drawn live into #gcd_item3d.
         std::optional<ITEM> item3D;
 
         // Optional 2D image portrait -- a flat sprite with a short caption, as opposed to
@@ -129,25 +127,7 @@ namespace mu::ui::window
     // Single active instance, not a stack: if Show() is called while one is already open, the new
     // config is queued and shown once the active one resolves -- matches CMsgWin's own single-
     // instance shape.
-    //
-    // Also an I3DRenderObj: only actually registers 3D-render behavior while a dialog with
-    // `item3D` set is active (see Render3D()'s own guard).
-    //
-    // item3D renders on top of the panel via a foreground/background RmlUi document split, not a
-    // post-RmlUi callback. RmlUi's main context always composites LAST in the frame, strictly
-    // after the item3D render pass -- so with only one document, the item always rendered
-    // *behind* the panel's own opaque background regardless of z-order. Fixed by moving the
-    // panel's own background art to a second document (`m_RmlBgView`) in its own dedicated
-    // context, rendered by RmlUiRuntime::RenderDialogBackgroundLayer() at a point CManager::Render()
-    // guarantees is after every ordinary window's own 2D Render() this frame but strictly before
-    // item3D itself draws (sorted by GetLayerDepth(), just below the shared 3D camera's own
-    // z-order). This document (the foreground one, still the sole owner of
-    // `data-model="generic_confirm_dialog"`) is paint-less where the background used to be, so it
-    // no longer covers the item once the dedicated context has already painted it earlier the
-    // same frame. See generic_confirm_dialog_bg.rml (both themes) for the actual markup split.
-    // That context paints under every main-context document, so only an item3D dialog uses it;
-    // every other dialog shows the same chrome from the main context (m_RmlChromeView).
-    class CGenericConfirmDialog : public CObject, public I3DRenderObj
+    class CGenericConfirmDialog : public CObject
     {
     public:
         void Create(CManager* pMng);
@@ -171,10 +151,6 @@ namespace mu::ui::window
         // GetInputText() fails validation, right before returning from `onPrimary`.
         void KeepOpen() { m_bKeepOpenRequested = true; }
 
-        // Called from Winmain.cpp's SetPostRmlUiCallback, after RmlUi's main context composites --
-        // NOT from the normal CManager-driven Render() below (that always runs before RmlUi's own
-        // composite, so anything drawn there gets painted over by #panel's opaque background).
-
         bool Render() override;
         bool Update() override;
         // Unconditionally claims input while shown -- a true modal.
@@ -196,12 +172,6 @@ namespace mu::ui::window
         // CMessageBoxMng/COptionWindow/etc.).
         float GetKeyEventOrder() override { return 100.0f; }
 
-        // I3DRenderObj. Window3DRenderMng.cpp's shared render loop dynamic_casts each registered
-        // object to CObject first and uses its own GetLayoutMode() when that succeeds -- true
-        // here, so this object's Dialog layout transform is pushed automatically before Render3D()
-        // runs.
-        void Render3D() override;
-
     private:
         void BuildRmlUi();
         void OnRmlBuilt();
@@ -220,19 +190,6 @@ namespace mu::ui::window
         // shared, so the field is reconfigured on every Show().
         void ApplyInputFieldConfig(const Rml::String& value);
         Rml::String InitialInputText() const;
-        // #panel is centered via `.center-both` (`left:50%; top:50%; transform:translate(-50%,-50%)`,
-        // base.rcss) -- GetAbsoluteOffset() walks the ancestor chain summing offsets but does NOT
-        // apply CSS `transform` at any level, so every element inside #panel is off by half the
-        // panel's own size. Add this correction to any of #panel's descendants' own
-        // GetAbsoluteOffset() before treating it as a real screen position. Returns {0,0} if
-        // #panel can't be found.
-        Rml::Vector2f PanelTranslateCorrection() const;
-
-        // The bg document paints the frame the fg document's text sits in; a theme may size the fg
-        // #panel by its content (legacy grows it per line, like native), so the bg #panel follows
-        // the fg one's laid-out height (and, for an untransformed panel, its top edge) every frame
-        // the dialog is open.
-        void SyncBackgroundPanel();
         void SyncCanvasTop();
 
         struct LineEntry
@@ -278,7 +235,7 @@ namespace mu::ui::window
             float canvasTop = 0.f; // UI::RmlBridge::DialogCanvasTop, in dp
             float progressFraction = 0.f;
 
-            // Toggles #gcd_item3d_anchor's own hidden/shown state and .gcd-body's icon-left/text-
+            // Toggles .gcd-item3d's own hidden/shown state and .gcd-body's icon-left/text-
             // right layout -- the item icon sits at a fixed offset with body text starting to its
             // right, side-by-side rather than stacked.
             bool hasItem3D = false;
@@ -303,36 +260,8 @@ namespace mu::ui::window
             {.modal = Rml::ModalFlag::Modal, .focus = Rml::FocusFlag::Document,
              .afterBuild = [this] { OnRmlBuilt(); }, .afterReload = [this] { OnRmlReloaded(); }}};
 
-        // Background-context companion to m_RmlView -- see the class comment for the mechanism.
-        // No RmlModelBinder of its own: it's 100% static markup (this dialog centers via plain
-        // CSS, never a per-frame C++-computed position). Lives in its OWN dedicated context
-        // (RmlUiRuntime::GetDialogBackgroundContext()), not the shared one every ordinary window's
-        // own bg doc uses -- a shared context renders once globally per frame, which would let
-        // other windows' own foreground content paint over this dialog wherever they overlap.
-        // Shown/Hidden in lockstep with m_RmlView at every transition point -- but only for a
-        // dialog with `item3D`, the one reason the chrome has to paint before the 3D pass.
-        UI::RmlBridge::ThemedView<> m_RmlBgView{{{"Data/Interface/RmlUi/generic_confirm_dialog_bg.rml"}}};
-
-        // The same background markup loaded a second time, into the main context, for every
-        // dialog WITHOUT `item3D`. The dialog-background context paints before the main context,
-        // so chrome there sits under every main-context document -- a full-screen RmlUi window
-        // (the master skill tree) would cover the panel and leave only its text and buttons on
-        // top. In the main context the chrome is pulled to the front right under m_RmlView, as
-        // native message boxes drew above every other window.
-        UI::RmlBridge::ThemedView<> m_RmlChromeView{{{"Data/Interface/RmlUi/generic_confirm_dialog_bg.rml"}},
-            {.afterBuild = [this] { m_RmlChromeView.Document()->SetProperty("pointer-events", "none"); }}};
-
-        // m_RmlChromeView, or m_RmlBgView while the active dialog has `item3D`.
-        Rml::ElementDocument* ActiveChromeDocument() const;
-        // Shows the active dialog's chrome document (hiding the other one) and mirrors
-        // tallPanel onto it; call before showing m_RmlView so the text stays above it.
-        void ShowChrome();
-        void HideChrome();
-
         // Set by RmlUi click bindings; polled and cleared in Update() -- never act synchronously
         // inside the RmlUi callback itself.
-        // Set once the player drags the panel; its chrome then follows the panel's drawn place.
-        bool m_bDragged = false;
         bool m_bPrimaryClicked = false;
         bool m_bSecondaryClicked = false;
         bool m_bCancelClicked = false;
@@ -360,10 +289,10 @@ namespace mu::ui::window
         GenericDialogConfig m_Active;
         bool m_bActive = false;
 
-        // Logs Render3D()'s anchor position/transform/final coordinates once per Show(), so an
-        // item3D mismatch can be read out of MuError.log instead of guessed at blind. Cheap enough
-        // to leave in permanently.
-        bool m_bItem3DDebugLogged = false;
+        // item3D, at #gcd_item3d's place and size. Last, so it is destroyed first.
+        UI::Items::ItemCameraTarget m_Item3DTarget{
+            [this](const Rml::Vector2f& offset, const Rml::Vector2f& size) { RenderItem3DInto(offset, size); }};
+        void RenderItem3DInto(const Rml::Vector2f& offset, const Rml::Vector2f& size);
     };
 
     // Convenience global for the scattered native call sites this primitive replaces (guild/quest

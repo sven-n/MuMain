@@ -331,17 +331,9 @@ reading it cold:
 - `KeepOpen()` lets `onPrimary`/`onSecondary` veto their own click (invalid typed input, etc.) —
   the dialog stays open exactly as it was, as if the click never happened. Needed by any consumer
   migrating a native dialog whose `OkBtnDown` could return "keep this open" instead of closing.
-- `item3D` (a live 3D item-preview snapshot) renders on top of the panel via a foreground/
-  background RmlUi document split, not a post-RmlUi callback — RmlUi's main context always
-  composites last in the frame, so a single-document panel would always paint over the item
-  instead of under it. The mechanism (a dedicated third `Rml::Context`,
-  `RmlUiRuntime::RenderDialogBackgroundLayer()`, fired from `CManager::Render()`'s own loop right
-  before the shared 3D camera's z-order) is fully documented in the class's own header comment —
-  read that, not a paraphrase, before touching anything `item3D`-adjacent. Only an `item3D` dialog
-  paints its chrome in that context: every other dialog shows the same background markup as a
-  second document in the main context, pulled to the front right under its text, so a
-  full-screen RmlUi window (the master skill tree) cannot cover the panel of a dialog opened over
-  it.
+- `item3D` (a live 3D item-preview snapshot) draws into `#gcd_item3d` through a
+  `UI::Items::ItemCameraTarget`, framed by its slot (`#gcd_item3d_slot`); the image is far larger
+  than the slot, so a long model reaches past the panel as it did natively.
 - Single active instance, not a real stack — a second `Show()` call while one is open queues
   instead of replacing it; see the class's own header comment for why that's not a functional
   regression from what it replaces.
@@ -393,13 +385,21 @@ a window that covers it, beneath the text and tooltips drawn over it. This is th
 hotkeys (`CItemHotKey`) and the character-creation preview (`CCharMakeWin`, a character with the
 scene camera saved and restored around it).
 
-**An inventory item into a target**: `CItemHotKey::RenderSlot()` is the recipe. Set up the item camera
-`C3DCamera::Render()` uses — identity view, 1° field of view — but crop its projection to a
-rectangle the size of the target, and call `RenderItem3DWithHover()` with that rectangle. At that
-field of view only the rectangle's size frames the item, so every per-item offset and angle in
-`RenderItem3D()` applies exactly as on screen. Bracket it with `SaveCameraPerspective()`/
+**Inventory items into a target**: `UI::Items::ItemCameraTarget` (`UI/Inventory/ItemCameraTarget.h`).
+Its drawer runs under the item camera `C3DCamera::Render()` uses — identity view, 1° field of view
+over the whole window — with the projection cropped to the image's drawn box, so each
+`RenderItem3D()` call lands in the texture exactly where it would have landed on screen, every
+per-item offset and angle included. The drawer keeps its own coordinates: window pixels by
+default, or a window's layout space when constructed with that `CObject`, as `C3DCamera` drew it.
+`Sync(image, enabled)` once a frame sizes the target to the image's drawn box (through any
+transform on it or its ancestors, which `GetAbsoluteOffset()` leaves out;
+`UI::Items::DrawnContentBox()` does the same for any element), points its `src` at the target and
+keeps it invisible until the first frame. It brackets the drawer with `SaveCameraPerspective()`/
 `RestoreCameraPerspective()`: item rendering overwrites `g_Camera` and moves `MousePosition`, the
-origin of the ray picking casts, and leaving it moved stops click-to-move.
+origin of the ray picking casts, and leaving it moved stops click-to-move. A model may reach past
+its slot, as natively, so a slot's image can be larger than the slot with the drawer framing the
+item by the slot's own box (the confirm dialog's `item3D`). Consumers: the item hotkeys and the
+confirm dialog's item preview.
 
 Construct one with a drawer, size it to an element with `Resize(width, height)` in physical pixels
 (RmlUi box sizes already are), `SetEnabled()` it while the window is shown, and set an `<img>`'s

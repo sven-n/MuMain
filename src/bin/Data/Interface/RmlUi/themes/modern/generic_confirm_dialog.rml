@@ -7,13 +7,11 @@
 <body>
 	<!-- Modern theme's own copy of the generic confirm dialog -- per-theme file since the
 	     forged-dialog shell structure differs by theme. Keep ids/data-model/event-callback names
-	     in sync with ../../generic_confirm_dialog.rml.
-
-	     #panel's own paint (background/border/box-shadow), the shell-edge/groove, and the well's
-	     recessed fill all moved to generic_confirm_dialog_bg.rml -- a background-context document
-	     rendered BEFORE the 3D pass that draws item3D each frame, so item3D shows through this
-	     now-paint-less #panel instead of being painted over by it. -->
+	     in sync with ../../generic_confirm_dialog.rml. -->
 	<div id="panel" class="center-both" data-model="generic_confirm_dialog" data-class-tall="has_tall_panel">
+		<div class="modern-shell-edge"></div>
+		<div class="modern-groove"></div>
+		<div class="gcd-well"></div>
 		<!-- data-class-has-title: with a title shown, .gcd-body reserves the header's own space
 		     as padding-top instead of stacking it as a flex sibling of .gcd-content-row -- see
 		     .rcss's own comment for why (keeps content-row's own centering scoped to the space
@@ -35,17 +33,16 @@
 				<span class="gcd-header-title">{{title}}</span>
 			</div>
 			<div class="gcd-content-row">
-				<!-- See ../../generic_confirm_dialog.rml's own comment for why gcd_item3d_anchor
-				     is a flex sibling of .gcd-text-col (icon-left/text-right), not a member of it
-				     -- keep both fork copies' structure in sync. -->
-				<div id="gcd_item3d_anchor" class="gcd-item3d-anchor layout-anchor" data-class-hidden="!has_item3d"></div>
+				<!-- See ../../generic_confirm_dialog.rml's own comment for #gcd_item3d -- keep both
+				     fork copies' structure in sync. -->
+				<div id="gcd_item3d_slot" class="gcd-item3d" data-class-hidden="!has_item3d"><img id="gcd_item3d"/></div>
 				<!-- See ../../generic_confirm_dialog.rml's own comment for Portrait2D's Beside
 				     layout -- keep both fork copies' structure in sync. -->
 				<div class="gcd-portrait2d gcd-portrait2d-beside" data-class-hidden="!has_portrait2d_beside"></div>
 				<div class="gcd-text-col scroll-pane">
 					<!-- See ../../generic_confirm_dialog.rml's own comment for what this
 					     reproduces and why it nests inside .gcd-text-col instead of beside it
-					     like #gcd_item3d_anchor -- keep both fork copies' structure in sync. -->
+					     like #gcd_item3d -- keep both fork copies' structure in sync. -->
 					<div class="gcd-portrait2d" data-class-hidden="!has_portrait2d_overlay">
 						<div class="gcd-portrait2d-text">{{portrait2d_text}}</div>
 					</div>

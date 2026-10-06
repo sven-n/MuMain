@@ -6,14 +6,12 @@
 
 #include "Audio/DSPlaySound.h"
 #include "Core/Globals/_enum.h"
-#include "Core/Utilities/Log/MuLogger.h" // item3D positioning diagnostic, see Render3D()
 #include "Core/Utilities/StringUtils.h"
 #include "Engine/Object/ZzzInventory.h" // RenderItem3D
 #include "Render/RmlUi/RmlUiRuntime.h"
-#include "UI/Core/Window3DRenderMng.h"  // g_pNewUI3DRenderMng
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowManager.h"
-#include "UI/Core/WindowSystem.h"       // g_pNewUI3DRenderMng macro resolves through CSystem
+#include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDialogCanvas.h"
 #include "UI/RmlBridge/RmlDraggable.h"
@@ -35,13 +33,6 @@ namespace mu::ui::window
 
 CGenericConfirmDialog* g_pGenericConfirmDialog = nullptr;
 
-namespace
-{
-    // Reference-space size of the 3D-item preview slot -- matches C3DItemCommonMsgBox's own
-    // MSGBOX_3DITEM_WIDTH/HEIGHT (CommonMessageBox.h) exactly.
-    constexpr float kItem3DSize = 40.0f;
-}
-
 void CGenericConfirmDialog::Create(CManager* pMng)
 {
     Release();
@@ -49,12 +40,6 @@ void CGenericConfirmDialog::Create(CManager* pMng)
     BuildRmlUi();
 
     pMng->AddUIObj(mu::ui::window::INTERFACE_GENERIC_CONFIRM_DIALOG, this);
-
-    // Registered for this object's whole lifetime -- Render3D() below no-ops whenever the active
-    // config has no `item3D`, and the camera's own IsVisible() gate skips calling it at all while
-    // no dialog is active, so there's no cost to staying registered between dialogs.
-    if (g_pNewUI3DRenderMng)
-        g_pNewUI3DRenderMng->Add3DRenderObj(this);
 }
 
 void CGenericConfirmDialog::BindRmlModel(Rml::DataModelConstructor& c, GenericDialogRmlModel& model)
@@ -138,72 +123,31 @@ void CGenericConfirmDialog::OnRmlBuilt()
     UI::RmlBridge::AttachNumericInputFilter(document);
     // Dragged by any part that is not a control (base.rcss blocks those) for this dialog only.
     if (Rml::Element* panel = document->GetElementById("panel"))
-        UI::RmlBridge::MakeDraggable(panel, panel, [this](float, float) { m_bDragged = true; },
-                                     [panel] { UI::RmlBridge::KeepInsideWindow(panel); });
+        UI::RmlBridge::MakeDraggable(panel, panel, nullptr, [panel] { UI::RmlBridge::KeepInsideWindow(panel); });
 }
 
-// The chrome's "tall" class, the dialog above its chrome, and the input field's type, limit and
-// focus are set when a dialog shows; a rebuilt document has none of them.
+// The input field's type, limit and focus are set when a dialog shows; a rebuilt document has none
+// of them.
 void CGenericConfirmDialog::OnRmlReloaded()
 {
     Rml::ElementDocument* document = m_RmlView.Document();
     if (document == nullptr || !document->IsVisible())
         return;
-    ShowChrome();
     document->PullToFront();
     ApplyInputFieldConfig(m_RmlView.GetModel().inputValue);
 }
 
-// The chrome first: a theme switch rebuilds in the order the views were built, and the dialog has
-// to come back above its chrome.
 void CGenericConfirmDialog::BuildRmlUi()
 {
-    m_RmlChromeView.Ensure();
-    m_RmlBgView.Ensure();
     m_RmlView.Ensure();
-}
-
-Rml::ElementDocument* CGenericConfirmDialog::ActiveChromeDocument() const
-{
-    return m_Active.item3D ? m_RmlBgView.Document() : m_RmlChromeView.Document();
-}
-
-void CGenericConfirmDialog::ShowChrome()
-{
-    Rml::ElementDocument* chrome = ActiveChromeDocument();
-    Rml::ElementDocument* other = chrome == m_RmlBgView.Document() ? m_RmlChromeView.Document() : m_RmlBgView.Document();
-    if (other)
-        other->Hide();
-    if (!chrome)
-        return;
-
-    chrome->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
-    chrome->PullToFront();
-    // The bg documents have no data model of their own -- tallPanel's "tall" class is mirrored
-    // onto their #panel imperatively instead.
-    if (Rml::Element* bgPanel = chrome->GetElementById("panel"))
-        bgPanel->SetClass("tall", m_Active.tallPanel);
-}
-
-void CGenericConfirmDialog::HideChrome()
-{
-    if (m_RmlBgView.Document())
-        m_RmlBgView.Document()->Hide();
-    if (m_RmlChromeView.Document())
-        m_RmlChromeView.Document()->Hide();
 }
 
 void CGenericConfirmDialog::Release()
 {
-    if (g_pNewUI3DRenderMng)
-        g_pNewUI3DRenderMng->Remove3DRenderObj(this);
-
     DismissActive();
     m_Queue.clear();
 
     m_RmlView.Release();
-    m_RmlBgView.Release();
-    m_RmlChromeView.Release();
 }
 
 namespace
@@ -249,14 +193,10 @@ void CGenericConfirmDialog::Activate(GenericDialogConfig cfg, DialogId id)
     m_bCancelClicked = false;
     m_KeypadBuffer.clear();
     m_KeypadMapping.clear();
-    m_bItem3DDebugLogged = false;
 
     // Each dialog opens where its theme puts it, wherever the last one was dragged.
-    m_bDragged = false;
     if (m_RmlView.Document())
         UI::RmlBridge::ResetDraggedPosition(m_RmlView.Document()->GetElementById("panel"));
-    for (Rml::ElementDocument* chrome : {m_RmlBgView.Document(), m_RmlChromeView.Document()})
-        UI::RmlBridge::ResetDraggedPosition(chrome ? chrome->GetElementById("panel") : nullptr);
 
     if (m_Active.input && m_Active.input->mode == GenericDialogConfig::InputField::Mode::NumericKeypad)
         m_KeypadMapping = ShuffledDigits();
@@ -267,7 +207,6 @@ void CGenericConfirmDialog::Activate(GenericDialogConfig cfg, DialogId id)
         m_dwProgressEndTime = m_dwProgressStartTime + m_Active.progress->elapseMs;
     }
 
-    ShowChrome();
     if (m_RmlView.Document())
     {
         SyncRmlModel();
@@ -301,7 +240,7 @@ void CGenericConfirmDialog::DismissActive()
             field->Blur();
         m_RmlView.Document()->Hide();
     }
-    HideChrome();
+    m_Item3DTarget.Disable();
     m_RmlView.GetModel().inputValue.clear();
     m_RmlView.MarkDirty("input_value");
     m_Active = {};
@@ -370,10 +309,9 @@ void CGenericConfirmDialog::Resolve(ClickResult which)
 
 bool CGenericConfirmDialog::Render()
 {
-    // RmlUi's #panel owns this dialog's entire 2D visual, the Mode::Text field included (it's a
-    // stock <input> in that same document now). item3D still renders via Render3D() below
-    // (I3DRenderObj).
     SyncRmlModel();
+    Rml::ElementDocument* document = m_RmlView.Document();
+    m_Item3DTarget.Sync(document ? document->GetElementById("gcd_item3d") : nullptr, m_bActive && m_Active.item3D);
     return true;
 }
 
@@ -405,52 +343,6 @@ void CGenericConfirmDialog::ApplyInputFieldConfig(const Rml::String& value)
     // This dialog opens with FocusFlag::Document, so the field needs an explicit focus rather than
     // an autofocus attribute -- the attribute would also fight the keypad mode, which shares the row.
     field->Focus();
-}
-
-Rml::Vector2f CGenericConfirmDialog::PanelTranslateCorrection() const
-{
-    Rml::Element* pPanel = m_RmlView.Document() ? m_RmlView.Document()->GetElementById("panel") : nullptr;
-    if (!pPanel)
-        return { 0.f, 0.f };
-    // A theme may place #panel without the centering transform (legacy anchors it like native).
-    if (!pPanel->GetComputedValues().has_local_transform())
-        return {0.f, 0.f};
-    const Rml::Vector2f size = pPanel->GetBox().GetSize();
-    return { -size.x * 0.5f, -size.y * 0.5f };
-}
-
-void CGenericConfirmDialog::SyncBackgroundPanel()
-{
-    Rml::Element* pPanel = m_RmlView.Document() ? m_RmlView.Document()->GetElementById("panel") : nullptr;
-    Rml::ElementDocument* chrome = ActiveChromeDocument();
-    Rml::Element* pBgPanel = chrome ? chrome->GetElementById("panel") : nullptr;
-    if (!pPanel || !pBgPanel)
-        return;
-
-    const float height = pPanel->GetBox().GetSize(Rml::BoxArea::Border).y;
-    if (height > 0.f && height != pBgPanel->GetBox().GetSize(Rml::BoxArea::Border).y)
-        pBgPanel->SetProperty(Rml::PropertyId::Height, Rml::Property(height, Rml::Unit::PX));
-
-    if (m_bDragged)
-    {
-        // The chrome takes the dragged panel's drawn top-left, without its own centring.
-        const Rml::Vector2f at = pPanel->GetAbsoluteOffset(Rml::BoxArea::Border);
-        if (at == pBgPanel->GetAbsoluteOffset(Rml::BoxArea::Border))
-            return;
-        const Rml::Vector2f origin = pBgPanel->GetAbsoluteOffset(Rml::BoxArea::Border)
-            - Rml::Vector2f(pBgPanel->GetOffsetLeft(), pBgPanel->GetOffsetTop());
-        pBgPanel->SetClass("dragged", true);
-        pBgPanel->SetProperty(Rml::PropertyId::Left, Rml::Property(at.x - origin.x, Rml::Unit::PX));
-        pBgPanel->SetProperty(Rml::PropertyId::Top, Rml::Property(at.y - origin.y, Rml::Unit::PX));
-        return;
-    }
-
-    // Only a panel placed without the centering transform reports its real top edge.
-    if (pPanel->GetComputedValues().has_local_transform())
-        return;
-    const float top = pPanel->GetAbsoluteOffset(Rml::BoxArea::Border).y;
-    if (top != pBgPanel->GetAbsoluteOffset(Rml::BoxArea::Border).y)
-        pBgPanel->SetProperty(Rml::PropertyId::Top, Rml::Property(top, Rml::Unit::PX));
 }
 
 void CGenericConfirmDialog::UpdateProgress()
@@ -491,7 +383,6 @@ bool CGenericConfirmDialog::Update()
     }
 
     SyncCanvasTop();
-    SyncBackgroundPanel();
 
     if (m_Active.progress)
     {
@@ -552,42 +443,18 @@ bool CGenericConfirmDialog::UpdateKeyEvent()
     return !IsVisible();
 }
 
-void CGenericConfirmDialog::Render3D()
+// The item is framed by its slot, in window pixels; the image around the slot is larger, since a
+// model reaches past its slot as it did natively.
+void CGenericConfirmDialog::RenderItem3DInto(const Rml::Vector2f&, const Rml::Vector2f&)
 {
-    // Guarded here, not by staying unregistered -- see Create()'s own comment.
-    //
-    // KNOWN GAP: this draws behind the dialog's own opaque panel background, since RmlUi's main
-    // context always composites LAST in the frame -- see the class's header comment.
-    if (!m_bActive || !m_Active.item3D || !m_RmlView.Document())
+    Rml::ElementDocument* document = m_RmlView.Document();
+    Rml::Element* slot = document ? document->GetElementById("gcd_item3d_slot") : nullptr;
+    Rml::Vector2f offset, size;
+    if (!m_bActive || !m_Active.item3D || !slot || !UI::Items::DrawnContentBox(*slot, offset, size))
         return;
-
-    Rml::Element* pAnchor = m_RmlView.Document()->GetElementById("gcd_item3d_anchor");
-    if (!pAnchor)
-        return;
-
-    // RenderItem3D() expects REFERENCE-space coordinates and re-applies the active transform
-    // internally to reach real screen pixels, so the anchor's real screen position (+
-    // PanelTranslateCorrection()) must be converted back to reference space via LogicalX/LogicalY.
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    const Rml::Vector2f correction = PanelTranslateCorrection();
-    const Rml::Vector2f rawScreenPos = pAnchor->GetAbsoluteOffset();
-    const Rml::Vector2f screenPos = { rawScreenPos.x + correction.x, rawScreenPos.y + correction.y };
-    const float refX = UI::Scaling::LogicalX(transform, screenPos.x);
-    const float refY = UI::Scaling::LogicalY(transform, screenPos.y);
-
-    if (!m_bItem3DDebugLogged)
-    {
-        m_bItem3DDebugLogged = true;
-        mu::log::Get("ui")->info(
-            "GenericConfirmDialog item3D debug -- window={}x{} rawAnchorAbsOffset=({:.1f},{:.1f}) "
-            "panelTranslateCorrection=({:.1f},{:.1f}) correctedScreenPos=({:.1f},{:.1f}) refXY=({:.1f},{:.1f})",
-            WindowWidth, WindowHeight, rawScreenPos.x, rawScreenPos.y,
-            correction.x, correction.y, screenPos.x, screenPos.y, refX, refY);
-    }
-
     const ITEM& item = *m_Active.item3D;
-    RenderItem3D(refX, refY, kItem3DSize, kItem3DSize, item.Type, item.Level, item.ExcellentFlags,
-                 item.AncientDiscriminator, /*PickUp=*/true);
+    RenderItem3D(offset.x, offset.y, size.x, size.y, item.Type, item.Level, item.ExcellentFlags, item.AncientDiscriminator,
+                 /*PickUp=*/true);
 }
 
 std::wstring CGenericConfirmDialog::GetInputText() const

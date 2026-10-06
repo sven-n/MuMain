@@ -1,33 +1,69 @@
-/* Modern theme for the generic confirm dialog. #panel's own background/border/box-shadow recipe
-   (matching sys_menu.rcss's #panel -- both are small forged-iron dialogs with no hero-banner), the
-   shell-edge/groove, and the well's recessed fill all moved to generic_confirm_dialog_bg.rcss --
-   see that file's own comment for why (item3D layering). This file is layout/content only now,
-   except for `.gcd-header-rail` below -- an in-flow, CSS-painted title banner using Login/SysMenu's
-   own header-rail/hero-banner recipes and hardware at their own full size, unlike those two which
-   paint their header chrome as part of the shared forged-dialog shell. */
+/* Modern theme for the generic confirm dialog: a hatched-iron panel (the reference mockup for
+   plain confirm/message dialogs) with a recessed well, and `.gcd-header-rail` below -- an in-flow,
+   CSS-painted title banner using Login/SysMenu's own header-rail/hero-banner recipes and hardware
+   at their own full size. */
 
 /* #panel is centered via .center-both, not a GetProperty()-read-back calc. dp throughout: a
    LayoutMode::Dialog window (no transform:scale(root_scale)), not one of the root_scale-tracking
-   inventory-family windows. Deliberately no paint here -- generic_confirm_dialog_bg.rcss's own
-   #panel carries the same width/height so the two documents' panels align exactly. Height is
-   160dp + 18dp for the header rail's own full 38dp height (.gcd-body's own top/bottom stay the
-   same, so this increase becomes exactly the content area's own gain; bg document's #panel must
-   match this exactly). */
+   inventory-family windows. Height is 160dp + 18dp for the header rail's own full 38dp height
+   (.gcd-body's own top/bottom stay the same, so this increase becomes exactly the content area's
+   own gain). */
 #panel {
 	width: 230dp;
 	height: 178dp;
 	font-family: "token(font-body)";
 	font-size: 12dp;
 	color: token(text-primary);
+	border-radius: token(radius-sm)dp;
+	background-color: #080a08;
+	decorator:
+		repeating-linear-gradient(135deg, rgba(255, 255, 255, 2) 0px 2dp, transparent 2dp 5dp),
+		linear-gradient(to bottom, #11130f 0%, #080a08 100%);
+	border-width: 1dp;
+	border-color: token(border-frame);
+	box-shadow:
+		0 11dp 30dp rgba(0, 0, 0, 158),
+		0 2dp 5dp rgba(0, 0, 0, 217),
+		inset 0 0 0 1dp #090a08,
+		inset 0 0 0 3dp rgba(90, 87, 69, 46);
+}
+/* base.rcss's shell edge and groove, at this panel's dimmer highlight alphas. */
+.modern-shell-edge {
+	box-shadow:
+		inset 1dp 0 0 rgba(130, 121, 91, 28),
+		inset -1dp 0 0 rgba(0, 0, 0, 204),
+		inset 0 1dp 0 rgba(151, 139, 101, 20),
+		inset 0 -1dp 0 rgba(0, 0, 0, 230);
+}
+.modern-groove {
+	box-shadow:
+		inset 0 0 0 1dp rgba(121, 112, 83, 15),
+		inset 0 0 12dp rgba(0, 0, 0, 153);
+}
+/* The recessed well behind .gcd-body, at the same insets. */
+.gcd-well {
+	position: absolute;
+	left: 16dp;
+	right: 16dp;
+	top: 10dp;
+	bottom: 54dp;
+	pointer-events: none;
+	background-color: token(surface-recessed);
+	decorator:
+		repeating-linear-gradient(135deg, rgba(255, 255, 255, 2) 0px 1dp, transparent 1dp 4dp),
+		linear-gradient(to bottom, #0b0d0b, #070907);
+	border-width: 1dp;
+	border-color: token(border-inner);
+	box-shadow:
+		inset 0 0 16dp rgba(0, 0, 0, 166),
+		inset 0 1dp 0 rgba(255, 255, 255, 5);
 }
 /* Optional taller variant (GenericDialogConfig::tallPanel) -- .gcd-body's own top/bottom insets
    are fixed dp offsets from #panel's edges, so this alone grows .gcd-body/.gcd-content-row/
    .gcd-text-col's available content height for free; the footer/OK/Cancel buttons below need
    their own .tall override since they're positioned via a fixed `top` from #panel's TOP edge.
    250dp grows the ~114dp content well to ~186dp -- enough for a grown .gcd-portrait2d (100x93dp)
-   + up to 3 lines, or the numeric-keypad input row, without .gcd-text-col's own scrollbar.
-   Mirrored onto the bg document's own #panel imperatively (GenericConfirmDialog.cpp's Show()/
-   ShowNext()) since that document has no data model of its own to bind a class through. */
+   + up to 3 lines, or the numeric-keypad input row, without .gcd-text-col's own scrollbar. */
 #panel.tall {
 	height: 250dp;
 }
@@ -238,28 +274,22 @@
 }
 .gcd-line.bold { font-weight: bold; color: token(text-warm); }
 
-/* Invisible position reference for the native 3D item-preview render pass
-   (GenericConfirmDialog.cpp's Render3D()); fixed reference-space size matching
-   C3DItemCommonMsgBox's own MSGBOX_3DITEM_WIDTH/HEIGHT (40x40). Renders nothing itself.
-
-   position: static overrides base.rcss's `.layout-anchor { position: absolute; ... }` -- that
-   class assumes its own explicit top/left elsewhere, which this anchor doesn't have: it's meant
-   to flow as an ordinary flex child of .gcd-body (a row, sibling of .gcd-text-col). */
-.gcd-item3d-anchor {
-	position: static;
+/* The live 3D item: native C3DItemCommonMsgBox's 40x40 slot. */
+.gcd-item3d {
+	position: relative;
 	width: 40dp;
 	height: 40dp;
 	flex-shrink: 0;
 	margin-right: 8dp;
 }
-/* Cascade-tie fix: this anchor is conditionally hidden (data-class-hidden="!has_item3d") so
-   .gcd-text-col alone fills the row when there's no item3D, instead of always reserving a
-   40dp-wide empty slot. */
-.gcd-item3d-anchor.hidden { display: none; }
+/* Collapses when there's no item, so .gcd-text-col alone fills the row. */
+.gcd-item3d.hidden { display: none; }
+/* The model reaches past its slot, and past the panel, as natively: the image around it is far larger. */
+#gcd_item3d { position: absolute; left: -80dp; top: -80dp; width: 200dp; height: 200dp; pointer-events: none; }
 
 /* Optional 2D portrait (GenericDialogConfig::Portrait2D), Overlay layout (the default) -- a
    static flex child INSIDE .gcd-text-col (icon-top/text-below) rather than a sibling like
-   .gcd-item3d-anchor (icon-left/text-right, that's the Beside layout below). Same 100x93dp
+   .gcd-item3d (icon-left/text-right, that's the Beside layout below). Same 100x93dp
    sizing as legacy's own copy of this rule -- a plain native asset, not theme-skinned art, so
    it's identical in both themes. */
 .gcd-portrait2d {
@@ -270,7 +300,7 @@
 	margin-bottom: 4dp;
 	decorator: image(portrait2d-image);
 }
-/* Same cascade-tie fix as .gcd-item3d-anchor above. */
+/* Same cascade-tie fix as .gcd-item3d above. */
 .gcd-portrait2d.hidden { display: none; }
 /* Beside layout -- same sizing as legacy's own copy of this rule. */
 .gcd-portrait2d-beside {

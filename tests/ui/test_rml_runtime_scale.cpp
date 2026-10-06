@@ -29,7 +29,7 @@ public:
     {
         Rml::SetRenderInterface(&m_Renderer);
         REQUIRE(Rml::Initialise());
-        for (const char* name : {"main", "background", "dialog_background"})
+        for (const char* name : {"main", "background"})
             all.push_back(Rml::CreateContext(name, {1920, 1080}));
     }
     ~Contexts()

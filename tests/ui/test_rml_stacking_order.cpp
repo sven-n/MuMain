@@ -67,18 +67,14 @@ TEST_CASE("the background contexts hold only the documents already in them [ui][
         "npc_quest_bg.rml", "npc_shop_bg.rml", "purchase_shop_bg.rml", "siege_warfare.rml",
         "storage_bg.rml", "storage_ext_bg.rml", "trade_bg.rml", "world_labels.rml",
     };
-    const std::set<std::string> dialogBackground = {"generic_confirm_dialog_bg.rml"};
 
     const std::set<std::string> named = DocumentsNamedInSources();
     for (const std::string& name : background)
-        CHECK_MESSAGE(named.contains(name), name);
-    for (const std::string& name : dialogBackground)
         CHECK_MESSAGE(named.contains(name), name);
     for (const std::string& name : named)
     {
         const DocumentContext context = ContextForDocument(name);
         CHECK_MESSAGE((context == DocumentContext::Background) == background.contains(name), name);
-        CHECK_MESSAGE((context == DocumentContext::DialogBackground) == dialogBackground.contains(name), name);
     }
 }
 

@@ -137,8 +137,8 @@ around it. See [`STATUS.md`](STATUS.md) for migration status and
 - **A `<link>` inside a `<template>` file's head gets no `token(...)` substitution.**
   `InlineTokenizedStylesheet()` rewrites the links of the document `ThemedDocumentLoader::Load()`
   loads; RmlUi's `TemplateCache` reads template files directly. Link
-  token-using stylesheets from the consuming document (`generic_confirm_dialog_bg.rml` links
-  `base.rcss`); a template's own `.rcss` must be token-free (`window_shell*.rcss` are).
+  token-using stylesheets from the consuming document; a template's own `.rcss` must be token-free
+  (`window_shell.rcss` is).
 
 - **`Rml::TemplateCache` also caches templates by declared name, and that entry is not refreshed
   per lookup**, so two themes' forks of the same template name could splice in the wrong theme

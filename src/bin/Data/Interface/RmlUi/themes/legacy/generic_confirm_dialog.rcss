@@ -1,22 +1,14 @@
-/* Legacy theme for the generic confirm dialog. CCommonMessageBox's own native sprite composite
-   (back-fill + top cap + middle fill + bottom cap) moved to generic_confirm_dialog_bg.rcss -- see
-   that file's own comment for why (item3D layering: RmlUi's main context, which this document is
-   part of, always composites LAST in the frame, so the item would otherwise always be painted
-   over by the panel's own frame art). This file is layout/content only now, except for
-   `.gcd-header-rail`'s own sprite decorator below (an ordinary opaque foreground image, not a
-   compositing-order concern the way item3D is).
+/* Legacy theme for the generic confirm dialog: CCommonMessageBox's sprite composite.
 
    #panel is placed like native's box (see #panel below, overriding the markup's .center-both);
    every dimension is dp -- a LayoutMode::Dialog window (no transform:scale(root_scale)), not one
    of the root_scale-tracking inventory-family windows -- and text is rem (native text size,
-   RmlNativeText.h). No background-color/border here -- the sprite composite lives in
-   generic_confirm_dialog_bg.rcss's own #panel, which follows this one's height. */
+   RmlNativeText.h). */
 #panel {
 	/* Native CCommonMessageBox: centred horizontally, top edge at y=100, 117 tall for up to two
 	   lines and growing with each further line -- so no centering transform and no fixed height:
-	   the flowing .gcd-body below sizes it (GenericConfirmDialog.cpp copies the result to the bg
-	   document's own #panel). Native counts y=100 from its 640x480 canvas top: the markup adds
-	   that canvas's offset (canvas_top, RmlDialogCanvas.h) as margin-top. */
+	   the flowing .gcd-body below sizes it. Native counts y=100 from its 640x480 canvas top: the
+	   markup adds that canvas's offset (canvas_top, RmlDialogCanvas.h) as margin-top. */
 	top: 100dp;
 	left: 50%;
 	margin-left: -115dp;
@@ -29,10 +21,26 @@
 }
 /* Optional taller variant (GenericDialogConfig::tallPanel) -- a larger minimum for the flowing
    content (a grown .gcd-portrait2d, the numeric-keypad input row); the bottom-anchored buttons
-   follow on their own, and the bg #panel follows the laid-out height. */
+   and the sprite composite follow on their own. */
 #panel.tall {
 	min-height: 240dp;
 }
+
+@spritesheet msgbox-top-sheet { src: "../../../newui_msgbox_top.tga"; msgbox-top-image: 0px 0px 230px 67px; }
+@spritesheet msgbox-middle-sheet { src: "../../../newui_msgbox_middle.tga"; msgbox-middle-image: 0px 0px 230px 15px; }
+@spritesheet msgbox-bottom-sheet { src: "../../../newui_msgbox_bottom.tga"; msgbox-bottom-image: 0px 0px 230px 50px; }
+@spritesheet msgbox-back-sheet { src: "../../../newui_msgbox_back.jpg"; msgbox-back-image: 0px 0px 222px 150px; }
+.gcd-sprite-back, .gcd-sprite-top, .gcd-sprite-middle, .gcd-sprite-bottom {
+	position: absolute;
+	left: 0;
+	right: 0;
+	pointer-events: none;
+}
+.gcd-sprite-back { left: 4dp; right: 4dp; top: 5dp; bottom: 5dp; decorator: image(msgbox-back-image); }
+.gcd-sprite-top { top: 0; height: 67dp; decorator: image(msgbox-top-image); }
+/* A single stretched fill, not native's tiled repeat. */
+.gcd-sprite-middle { top: 67dp; bottom: 50dp; decorator: image(msgbox-middle-image); }
+.gcd-sprite-bottom { bottom: 0; height: 50dp; decorator: image(msgbox-bottom-image); }
 /* The overlay-portrait box is native's CDuelMsgBox/CDuelResultMsgBox: top edge at y=70, 67 + 7*15 +
    50 = 222 tall, the 148x138 crest drawn at y+15 behind the text. The text block ends right
    above the buttons (last line at y+151 in both boxes), with the bold caption one 20 row above
@@ -125,6 +133,8 @@
 	   renderer's glyphs run about 2% wider than native's, so the text column gets 184 (23 each
 	   side) to break lines where native does. */
 	margin: 35dp 23dp 56dp 23dp;
+	/* Positioned so it paints above the sprite composite, which comes first in the markup. */
+	position: relative;
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
@@ -156,28 +166,22 @@
 }
 .gcd-line.bold { font-weight: bold; }
 
-/* Invisible position reference for the native 3D item-preview render pass
-   (GenericConfirmDialog.cpp's Render3D()); fixed reference-space size matching
-   C3DItemCommonMsgBox's own MSGBOX_3DITEM_WIDTH/HEIGHT (40x40). Renders nothing itself.
-
-   position: static overrides base.rcss's `.layout-anchor { position: absolute; ... }` -- that
-   class assumes its own explicit top/left elsewhere, which this anchor doesn't have: it's meant
-   to flow as an ordinary flex child of .gcd-body (a row, sibling of .gcd-text-col). */
-.gcd-item3d-anchor {
-	position: static;
+/* The live 3D item: native C3DItemCommonMsgBox's 40x40 slot. */
+.gcd-item3d {
+	position: relative;
 	width: 40dp;
 	height: 40dp;
 	flex-shrink: 0;
 	margin-right: 8dp;
 }
-/* Cascade-tie fix: this anchor is conditionally hidden (data-class-hidden="!has_item3d") so
-   .gcd-text-col alone fills the row when there's no item3D, instead of always reserving a
-   40dp-wide empty slot. */
-.gcd-item3d-anchor.hidden { display: none; }
+/* Collapses when there's no item, so .gcd-text-col alone fills the row. */
+.gcd-item3d.hidden { display: none; }
+/* The model reaches past its slot, and past the panel, as natively: the image around it is far larger. */
+#gcd_item3d { position: absolute; left: -80dp; top: -80dp; width: 200dp; height: 200dp; pointer-events: none; }
 
 /* Optional 2D portrait (GenericDialogConfig::Portrait2D), Overlay layout (the default) -- a direct
    #panel child at native's fixed crest position (x+41, y+15, 148x138), behind the text, unlike
-   .gcd-item3d-anchor (icon-left/text-right, that's the Beside layout below). */
+   .gcd-item3d (icon-left/text-right, that's the Beside layout below). */
 .gcd-portrait2d {
 	position: absolute;
 	left: 41dp; /* (230 - 148) / 2 */
@@ -186,9 +190,9 @@
 	height: 138dp;
 	decorator: image(portrait2d-image);
 }
-/* Same cascade-tie fix as .gcd-item3d-anchor above. */
+/* Same cascade-tie fix as .gcd-item3d above. */
 .gcd-portrait2d.hidden { display: none; }
-/* Beside layout -- same row-sibling slot/sizing convention as .gcd-item3d-anchor, sized a little
+/* Beside layout -- same row-sibling slot/sizing convention as .gcd-item3d, sized a little
    larger since this reads as hero art rather than a small icon. No text overlay in this layout --
    .gcd-portrait2d-text is never a child of this element in the .rml. */
 .gcd-portrait2d-beside {

@@ -21,6 +21,7 @@
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Core/SceneUICoordinator.h"
 #include "UI/Events/EventPreview.h"
@@ -223,6 +224,18 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     if (strCommand.compare(L"$dialog title") == 0)
     {
         mu::ui::window::CreateOkMessageBoxWithTitle(L"Test dialog", L"Drag it by any part that is not a button.");
+        return true;
+    }
+    if (strCommand.compare(L"$dialog item") == 0 && mu::ui::window::g_pGenericConfirmDialog)
+    {
+        mu::ui::window::GenericDialogConfig cfg;
+        ITEM item{};
+        item.Type = ITEM_SWORD + 5;
+        item.Level = 9;
+        cfg.item3D = item;
+        cfg.showCancel = true;
+        cfg.lines = {{L"Test dialog with a live item preview.", false}};
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         return true;
     }
 
