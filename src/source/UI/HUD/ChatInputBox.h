@@ -4,7 +4,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #pragma warning(disable : 4786)
 #include <string>
@@ -124,8 +124,11 @@ namespace mu::ui::window
         void SetFieldText(const char* id, const type_string& text);
         void FocusField(const char* id);
 
-        RmlModelBinder<ChatInputRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, ChatInputRmlModel& model);
+        void OnRmlReloaded();
+        UI::RmlBridge::ThemedView<ChatInputRmlModel> m_RmlView{"chat_input",
+            [this](Rml::DataModelConstructor& c, ChatInputRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/chat_input.rml"}}, {.afterReload = [this] { OnRmlReloaded(); }}};
         // Where Create() put the box, kept while the theme gives it no slot.
         POINT m_HomePos{};
         // Set by OpenningProcess(), consumed once the document is actually visible. CSystem::Show()
@@ -148,7 +151,6 @@ namespace mu::ui::window
 
         void SetWndPos(int x, int y);
 
-        void ReloadRmlTheme();
 
         bool HaveFocus();
 

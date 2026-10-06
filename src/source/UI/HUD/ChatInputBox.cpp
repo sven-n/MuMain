@@ -101,7 +101,7 @@ bool mu::ui::window::CChatInputBox::Create(
         SetWndPos(static_cast<int>(std::lround((box->left - hud.offsetX) / hud.scaleX)),
                   static_cast<int>(std::lround((box->top - hud.offsetY) / hud.scaleY)));
     };
-    UI::RmlBridge::RegisterWorkspaceDocument("chat_input", [this] { return m_pRmlDoc; }, "panel", std::move(options));
+    UI::RmlBridge::RegisterWorkspaceDocument("chat_input", [this] { return m_RmlView.Document(); }, "panel", std::move(options));
 
     // Both text fields, their tab pairing, their colours/limits and every button's hit box now
     // come from chat_input.rml/.rcss -- nothing to construct here.
@@ -115,7 +115,6 @@ bool mu::ui::window::CChatInputBox::Create(
 void mu::ui::window::CChatInputBox::Release()
 {
     UI::Placement::UnregisterParticipant("chat_input");
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -123,6 +122,8 @@ void mu::ui::window::CChatInputBox::Release()
     }
 
     Init();
+
+    m_RmlView.Release();
 }
 
 void mu::ui::window::CChatInputBox::SetWndPos(int x, int y)
@@ -511,144 +512,119 @@ bool mu::ui::window::CChatInputBox::Render()
     return true;
 }
 
-void mu::ui::window::CChatInputBox::BuildRmlUi()
+void mu::ui::window::CChatInputBox::BindRmlModel(Rml::DataModelConstructor& c, ChatInputRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    c.Bind("chat_text", &model.chatText);
+    c.Bind("whisper_id", &model.whisperId);
+    c.Bind("input_msg_type", &model.inputMsgType);
+    c.Bind("block_whisper", &model.blockWhisper);
+    c.Bind("show_system", &model.showSystem);
+    c.Bind("show_chat_log", &model.showChatLog);
+    c.Bind("show_frame", &model.showFrame);
+    c.Bind("whisper_send", &model.whisperSend);
+    c.Bind("tooltip_index", &model.tooltipIndex);
+    c.Bind("tooltip_left", &model.tooltipLeft);
+    c.Bind("tooltip_text", &model.tooltipText);
 
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "chat_input",
-        [this](Rml::DataModelConstructor& c, ChatInputRmlModel& model)
+    c.BindEventCallback("chat_set_type",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
         {
-            c.Bind("chat_text", &model.chatText);
-            c.Bind("whisper_id", &model.whisperId);
-            c.Bind("input_msg_type", &model.inputMsgType);
-            c.Bind("block_whisper", &model.blockWhisper);
-            c.Bind("show_system", &model.showSystem);
-            c.Bind("show_chat_log", &model.showChatLog);
-            c.Bind("show_frame", &model.showFrame);
-            c.Bind("whisper_send", &model.whisperSend);
-            c.Bind("tooltip_index", &model.tooltipIndex);
-            c.Bind("tooltip_left", &model.tooltipLeft);
-            c.Bind("tooltip_text", &model.tooltipText);
-
-            c.BindEventCallback("chat_set_type",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                {
-                    if (args.empty()) return;
-                    SetInputMsgType(INPUT_CHAT_MESSAGE + args[0].Get<int>(0));
-                    PlayBuffer(SOUND_CLICK01);
-                });
-
-            c.BindEventCallback("chat_toggle_whisper_block",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                {
-                    m_bBlockWhisper = !m_bBlockWhisper;
-                    PlayBuffer(SOUND_CLICK01);
-                });
-
-            c.BindEventCallback("chat_toggle_system",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                {
-                    m_bShowSystemMessages = !m_bShowSystemMessages;
-                    if (m_bShowSystemMessages)
-                        m_pNewUISystemLogWnd->ShowMessages();
-                    else
-                        m_pNewUISystemLogWnd->HideMessages();
-                    PlayBuffer(SOUND_CLICK01);
-                });
-
-            c.BindEventCallback("chat_toggle_chatlog",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                {
-                    m_bShowChatLog = !m_bShowChatLog;
-                    if (m_bShowChatLog)
-                        m_pNewUIChatLogWnd->ShowChatLog();
-                    else
-                        m_pNewUIChatLogWnd->HideChatLog();
-                    PlayBuffer(SOUND_CLICK01);
-                });
-
-            c.BindEventCallback("chat_toggle_frame",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                {
-                    if (m_pNewUIChatLogWnd->IsShowFrame())
-                        m_pNewUIChatLogWnd->HideFrame();
-                    else
-                        m_pNewUIChatLogWnd->ShowFrame();
-                    PlayBuffer(SOUND_CLICK01);
-                });
-
-            c.BindEventCallback("chat_size_step",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                {
-                    m_pNewUIChatLogWnd->SetSizeAuto();
-                    m_pNewUIChatLogWnd->UpdateWndSize();
-                    m_pNewUIChatLogWnd->UpdateScrollPos();
-                    PlayBuffer(SOUND_CLICK01);
-                });
-
-            c.BindEventCallback("chat_alpha_step",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                {
-                    m_pNewUIChatLogWnd->SetBackAlphaAuto();
-                    PlayBuffer(SOUND_CLICK01);
-                });
-
-            c.BindEventCallback("chat_tooltip",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                {
-                    m_iTooltipType = args.empty() ? INPUT_TOOLTIP_NOTHING : args[0].Get<int>(-1);
-                });
+            if (args.empty()) return;
+            SetInputMsgType(INPUT_CHAT_MESSAGE + args[0].Get<int>(0));
+            PlayBuffer(SOUND_CLICK01);
         });
 
-    if (modelCreated)
-    {
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                     "Data/Interface/RmlUi/chat_input.rml");
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-    }
+    c.BindEventCallback("chat_toggle_whisper_block",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            m_bBlockWhisper = !m_bBlockWhisper;
+            PlayBuffer(SOUND_CLICK01);
+        });
+
+    c.BindEventCallback("chat_toggle_system",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            m_bShowSystemMessages = !m_bShowSystemMessages;
+            if (m_bShowSystemMessages)
+                m_pNewUISystemLogWnd->ShowMessages();
+            else
+                m_pNewUISystemLogWnd->HideMessages();
+            PlayBuffer(SOUND_CLICK01);
+        });
+
+    c.BindEventCallback("chat_toggle_chatlog",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            m_bShowChatLog = !m_bShowChatLog;
+            if (m_bShowChatLog)
+                m_pNewUIChatLogWnd->ShowChatLog();
+            else
+                m_pNewUIChatLogWnd->HideChatLog();
+            PlayBuffer(SOUND_CLICK01);
+        });
+
+    c.BindEventCallback("chat_toggle_frame",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            if (m_pNewUIChatLogWnd->IsShowFrame())
+                m_pNewUIChatLogWnd->HideFrame();
+            else
+                m_pNewUIChatLogWnd->ShowFrame();
+            PlayBuffer(SOUND_CLICK01);
+        });
+
+    c.BindEventCallback("chat_size_step",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            m_pNewUIChatLogWnd->SetSizeAuto();
+            m_pNewUIChatLogWnd->UpdateWndSize();
+            m_pNewUIChatLogWnd->UpdateScrollPos();
+            PlayBuffer(SOUND_CLICK01);
+        });
+
+    c.BindEventCallback("chat_alpha_step",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            m_pNewUIChatLogWnd->SetBackAlphaAuto();
+            PlayBuffer(SOUND_CLICK01);
+        });
+
+    c.BindEventCallback("chat_tooltip",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+        {
+            m_iTooltipType = args.empty() ? INPUT_TOOLTIP_NOTHING : args[0].Get<int>(-1);
+        });
 }
 
-void mu::ui::window::CChatInputBox::ReloadRmlTheme()
+void mu::ui::window::CChatInputBox::OnRmlReloaded()
 {
-    if (!m_pRmlDoc) return;
-
-    // Destroy() resets the model, so carry the unsent text across the rebuild.
-    const Rml::String chatText = m_RmlBinder.GetModel().chatText;
-    const Rml::String whisperId = m_RmlBinder.GetModel().whisperId;
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
     UI::Placement::Invalidate();
-    m_RmlBinder.GetModel().chatText = chatText;
-    m_RmlBinder.GetModel().whisperId = whisperId;
-    m_RmlBinder.MarkDirty("chat_text");
-    m_RmlBinder.MarkDirty("whisper_id");
+}
+
+void mu::ui::window::CChatInputBox::BuildRmlUi()
+{
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CChatInputBox::SyncRmlModel()
 {
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
     // Deliberately after the line above: the field can only take focus once its document is
     // showing, and SyncDocumentVisibility()'s Show() would blur it if the order were reversed.
-    if (m_bFocusPending && m_pRmlDoc->IsVisible())
+    if (m_bFocusPending && m_RmlView.Document()->IsVisible())
     {
         m_bFocusPending = false;
         FocusField("chat_field");
     }
 
-    ChatInputRmlModel& model = m_RmlBinder.GetModel();
+    ChatInputRmlModel& model = m_RmlView.GetModel();
 
     auto syncBool = [&](bool ChatInputRmlModel::* field, const char* name, bool value)
     {
-        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(name); }
+        if (model.*field != value) { model.*field = value; m_RmlView.MarkDirty(name); }
     };
 
     syncBool(&ChatInputRmlModel::blockWhisper, "block_whisper", m_bBlockWhisper);
@@ -662,13 +638,13 @@ void mu::ui::window::CChatInputBox::SyncRmlModel()
     if (model.inputMsgType != typeIndex)
     {
         model.inputMsgType = typeIndex;
-        m_RmlBinder.MarkDirty("input_msg_type");
+        m_RmlView.MarkDirty("input_msg_type");
     }
 
     if (model.tooltipIndex != m_iTooltipType)
     {
         model.tooltipIndex = m_iTooltipType;
-        m_RmlBinder.MarkDirty("tooltip_index");
+        m_RmlView.MarkDirty("tooltip_index");
 
         if (m_iTooltipType != INPUT_TOOLTIP_NOTHING)
         {
@@ -681,13 +657,13 @@ void mu::ui::window::CChatInputBox::SyncRmlModel()
             if (m_iTooltipType >= 0 && m_iTooltipType < 10)
             {
                 model.tooltipText = StringUtils::WideToNarrow(I18N::Game::Lookup(iTextIndex[m_iTooltipType]));
-                m_RmlBinder.MarkDirty("tooltip_text");
+                m_RmlView.MarkDirty("tooltip_text");
 
                 // Native then subtracted half the measured text width; the RCSS centres on this
                 // point instead, so no measurement is needed here.
                 model.tooltipLeft = (float)m_iTooltipType * BUTTON_WIDTH
                                   + (float)(m_iTooltipType / 3) * GROUP_SEPARATING_WIDTH + 10.0f;
-                m_RmlBinder.MarkDirty("tooltip_left");
+                m_RmlView.MarkDirty("tooltip_left");
             }
         }
     }
@@ -695,7 +671,7 @@ void mu::ui::window::CChatInputBox::SyncRmlModel()
 
 Rml::Element* mu::ui::window::CChatInputBox::GetField(const char* id) const
 {
-    return m_pRmlDoc ? m_pRmlDoc->GetElementById(id) : nullptr;
+    return m_RmlView.Document() ? m_RmlView.Document()->GetElementById(id) : nullptr;
 }
 
 bool mu::ui::window::CChatInputBox::IsFieldFocused(const char* id) const
@@ -706,20 +682,20 @@ bool mu::ui::window::CChatInputBox::IsFieldFocused(const char* id) const
 
 void mu::ui::window::CChatInputBox::SetFieldText(const char* id, const type_string& text)
 {
-    ChatInputRmlModel& model = m_RmlBinder.GetModel();
+    ChatInputRmlModel& model = m_RmlView.GetModel();
     const Rml::String narrow = StringUtils::WideToNarrow(text.c_str());
 
     if (strcmp(id, "chat_field") == 0)
     {
         if (model.chatText == narrow) return;
         model.chatText = narrow;
-        m_RmlBinder.MarkDirty("chat_text");
+        m_RmlView.MarkDirty("chat_text");
     }
     else
     {
         if (model.whisperId == narrow) return;
         model.whisperId = narrow;
-        m_RmlBinder.MarkDirty("whisper_id");
+        m_RmlView.MarkDirty("whisper_id");
     }
 }
 
@@ -761,12 +737,12 @@ void mu::ui::window::CChatInputBox::ClosingProcess()
 
 void mu::ui::window::CChatInputBox::GetChatText(type_string& strText)
 {
-    strText = StringUtils::NarrowToWide(m_RmlBinder.GetModel().chatText);
+    strText = StringUtils::NarrowToWide(m_RmlView.GetModel().chatText);
 }
 
 void mu::ui::window::CChatInputBox::GetWhsprID(type_string& strWhsprID)
 {
-    strWhsprID = StringUtils::NarrowToWide(m_RmlBinder.GetModel().whisperId);
+    strWhsprID = StringUtils::NarrowToWide(m_RmlView.GetModel().whisperId);
 }
 
 void mu::ui::window::CChatInputBox::SetWhsprID(const wchar_t* strWhsprID)
