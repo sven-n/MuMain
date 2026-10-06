@@ -45,3 +45,11 @@
 /* Native's two colours: system messages blue, everything else the error red. */
 .syslog-line--system { color: rgb(100, 150, 255); }
 .syslog-line--error  { color: rgb(255, 30, 0); }
+
+/* Keep all six message rows available, including while no message is visible. */
+#panel { min-height: 7.2em; }
+#panel.workspace-placed { transform-origin: left top; }
+.syslog-line { flex-shrink: 0; }
+
+.syslog-line { min-height: 1.2em; }
+.syslog-line.empty { border-left-color: transparent; }

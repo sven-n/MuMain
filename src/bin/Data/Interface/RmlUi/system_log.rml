@@ -15,8 +15,8 @@
 		     owns its colour and only the user's transparency setting stays bound; the text is
 		     not faded, as native did not fade it. -->
 		<div data-for="line : lines"
-		     data-attr-class="'syslog-line syslog-line--' + line.kind"
-		     ><div class="syslog-back" data-style-opacity="back_alpha"></div><span class="syslog-text">{{line.text}}</span></div>
+		     data-attr-class="'syslog-line syslog-line--' + line.kind" data-class-empty="line.text == ''"
+		     ><div data-if="line.text != ''" class="syslog-back" data-style-opacity="back_alpha"></div><span class="syslog-text">{{line.text}}</span></div>
 	</div>
 </body>
 </rml>

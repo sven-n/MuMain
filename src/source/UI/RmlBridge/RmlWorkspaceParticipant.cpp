@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "UI/RmlBridge/RmlWorkspaceParticipant.h"
 #include "UI/Placement/WindowPlacement.h"
 
@@ -30,7 +31,10 @@ void RegisterWorkspaceDocument(std::string_view name, std::function<Rml::Element
         auto* element = root();
         if (element == nullptr)
             return UI::Placement::PlacementParticipant::Size{};
-        element->GetOwnerDocument()->UpdateDocument();
+        {
+            FRAME_PROFILE(UILayout);
+            element->GetOwnerDocument()->UpdateDocument();
+        }
         const float dp = element->GetContext()->GetDensityIndependentPixelRatio();
         const auto size = element->GetBox().GetSize(Rml::BoxArea::Border);
         return UI::Placement::PlacementParticipant::Size{size.x / dp, size.y / dp};
@@ -54,7 +58,10 @@ void RegisterWorkspaceDocument(std::string_view name, std::function<Rml::Element
         element->SetProperty(Rml::PropertyId::Top, Rml::Property(box->top, Rml::Unit::PX));
         const float ratio = box->scale / element->GetContext()->GetDensityIndependentPixelRatio();
         element->SetProperty("transform", "scale(" + std::to_string(ratio) + ")");
-        element->GetOwnerDocument()->UpdateDocument();
+        {
+            FRAME_PROFILE(UILayout);
+            element->GetOwnerDocument()->UpdateDocument();
+        }
     };
     UI::Placement::RegisterParticipant(name, std::move(participant));
 }

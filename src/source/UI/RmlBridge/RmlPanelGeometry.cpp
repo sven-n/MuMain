@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "RmlPanelGeometry.h"
 
 #include "UI/Scaling/UITransform.h"
@@ -56,7 +57,10 @@ void UI::RmlBridge::FillPlacementSize::Apply(Rml::ElementDocument* doc, const ch
         panel->RemoveProperty(Rml::PropertyId::Width);
         panel->RemoveProperty(Rml::PropertyId::Height);
     }
-    doc->UpdateDocument();
+    {
+        FRAME_PROFILE(UILayout);
+        doc->UpdateDocument();
+    }
 }
 
 void UI::RmlBridge::FillPlacementSize::Sync(Rml::ElementDocument* doc, const char* panelId) const

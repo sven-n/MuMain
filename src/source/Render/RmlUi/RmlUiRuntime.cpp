@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "UI/Diagnostics/DiagnosticsOverlay.h"
 #include "Core/Input/SyntheticInput.h"
 #include "RmlUiRuntime.h"
 #include "RmlUiRenderInterface.h"
@@ -158,12 +159,14 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     // gameplay's mouse-gating checks (Selection.cpp, ZzzInterface.cpp) go through the router, not
     // this concrete type, from this point on.
     Core::Input::SetUiInputConsumer(this);
+    UI::Diagnostics::Initialize();
 }
 
 void RmlUiRuntime::Destroy()
 {
     if (!m_Context) return;
 
+    UI::Diagnostics::Release();
     Core::Input::Synthetic::CancelDelivery();
     Core::Input::SetUiInputConsumer(nullptr);
     mu::GetRenderer().SetPreSubmitCallback(nullptr);

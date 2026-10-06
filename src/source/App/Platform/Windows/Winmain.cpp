@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
@@ -849,6 +850,20 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
 }
 
 double CPU_AVG = 0.0;
+static void RenderProfiledFrame()
+{
+    {
+        FRAME_PROFILE(RendererBegin);
+        mu::GetRenderer().BeginFrame();
+    }
+    RenderScene(g_hDC);
+    {
+        FRAME_PROFILE(RendererEnd);
+        mu::GetRenderer().EndFrame();
+    }
+    FrameProfiler::CompleteFrame();
+}
+
 void RecordCpuUsage()
 {
     constexpr int max_recordings = 60;
@@ -1487,9 +1502,7 @@ MSG MainLoop()
 
                 RequestDiagnosticFrameCapture();
                 ApplyPendingVSyncPreference();
-                mu::GetRenderer().BeginFrame();
-                RenderScene(g_hDC);
-                mu::GetRenderer().EndFrame();
+                RenderProfiledFrame();
                 ConsumeDiagnosticFrameCapture();
             }
         }
@@ -2092,11 +2105,16 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // outside LOG_IN_SCENE/CHARACTER_SCENE regardless.
     // Native drawing a document shows as an image: recorded last in the frame and rendered into its
     // own textures before the main pass, so RmlUi samples this frame's drawing.
-    mu::GetRenderer().SetOffscreenRenderCallback([] { UI::RmlBridge::RenderTarget::RenderAll(); });
+    mu::GetRenderer().SetOffscreenRenderCallback([]
+    {
+        FRAME_PROFILE(UI);
+        UI::RmlBridge::RenderTarget::RenderAll();
+    });
 
     mu::GetRenderer().SetPostRmlUiCallback(
         []()
         {
+            FRAME_PROFILE(UI);
             extern EGameScene SceneFlag;
 
             // CSystem's own RmlUi-backed HUD (MU Helper bar, buff strip) needs a real per-scene

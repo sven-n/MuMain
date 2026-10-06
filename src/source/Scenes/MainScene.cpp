@@ -222,6 +222,7 @@ static void InitializeSceneFrame()
  */
 static void UpdateUIAndInput()
 {
+    FRAME_PROFILE(UIUpdate);
     if (g_Camera.TopViewEnable || LoadingWorld >= 30)
         return;
 

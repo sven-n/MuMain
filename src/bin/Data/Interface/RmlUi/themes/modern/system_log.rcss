@@ -46,3 +46,11 @@
 	border-left-color: rgb(255, 60, 40);
 	color: rgb(255, 120, 100);
 }
+
+/* Keep all six message rows available, including while no message is visible. */
+#panel { min-height: 7.2em; }
+#panel.workspace-placed { transform-origin: left top; }
+.syslog-line { flex-shrink: 0; }
+
+.syslog-line { min-height: 1.2em; }
+.syslog-line.empty { border-left-color: transparent; }

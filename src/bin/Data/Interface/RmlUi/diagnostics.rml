@@ -1,0 +1,58 @@
+<rml>
+<head>
+    <title>Performance diagnostics</title>
+    <link type="text/rcss" href="base.rcss"/>
+    <link type="text/rcss" href="diagnostics.rcss"/>
+</head>
+<body data-model="diagnostics">
+    <div id="panel">
+        <div id="summary" class="section" data-if="details || fps_only" data-class-fps-only="!details">
+            <div class="section-back"></div>
+            <div class="title">FPS {{fps | fixed}}</div>
+            <div data-if="details">
+                <div class="metric"><span class="label">Average</span><span class="value">{{average_fps | fixed}}</span><span class="label">1% low</span><span class="value">{{low_fps | fixed}}</span></div>
+                <div class="metric"><span class="label">Frame</span><span class="value">{{frame_ms | fixed}} ms</span><span class="label">CPU</span><span class="value">{{cpu | fixed}}%</span></div>
+                <div class="metric"><span class="label">SDL GPU</span><span class="value">{{driver}}</span><span class="label">VSync</span><span class="value">{{vsync}}</span></div>
+                <div class="heading">CPU time (ms)</div>
+                <div class="metric"><span class="label">UI</span><span class="value pair">update {{ui_update | fixed}}</span><span class="value pair">render {{ui_render | fixed}}</span></div>
+                <div class="metric"><span class="label">RmlUi</span><span class="value pair">update {{rml_update | fixed}}</span><span class="value pair">render {{rml_render | fixed}}</span></div>
+                <div class="metric"><span class="label">Renderer</span><span class="value pair">begin {{renderer_begin | fixed}}</span><span class="value pair">end {{renderer_end | fixed}}</span></div>
+                <div class="metric"><span class="label">Submit</span><span class="value">{{submit | fixed}}</span></div>
+                <div id="graph">
+                    <progress data-for="sample : history" direction="top" max="33.3"
+                        data-attr-value="sample" data-class-slow="sample &gt;= 25"
+                        data-class-medium="sample &gt;= 16.67 &amp;&amp; sample &lt; 25"/>
+                </div>
+                <div class="note">Frame history, 0–33.3 ms</div>
+                <div class="note">Completed frame; inclusive timings overlap.</div>
+            </div>
+        </div>
+        <div id="counters" class="section" data-if="counters">
+            <div class="section-back"></div>
+            <div class="title">SDL GPU: {{driver}}</div>
+            <div class="note">Completed frame; CPU timings are inclusive.</div>
+            <!-- The passes in two columns: the first half, then the rest. -->
+            <div class="pass-columns">
+                <div class="pass-column">
+                    <div class="pass-row pass-head"><span>Pass</span><span>ms</span><span>Draw</span><span>Merge</span><span>KB</span></div>
+                    <div data-for="pass, i : passes">
+                        <div class="pass-row" data-if="i * 2 &lt; passes.size">
+                            <span>{{pass.name}}</span><span>{{pass.ms | fixed}}</span><span>{{pass.draws}}</span><span>{{pass.merged}}</span><span>{{pass.vertex_kb | fixed}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="pass-column">
+                    <div class="pass-row pass-head"><span>Pass</span><span>ms</span><span>Draw</span><span>Merge</span><span>KB</span></div>
+                    <div data-for="pass, i : passes">
+                        <div class="pass-row" data-if="i * 2 &gt;= passes.size">
+                            <span>{{pass.name}}</span><span>{{pass.ms | fixed}}</span><span>{{pass.draws}}</span><span>{{pass.merged}}</span><span>{{pass.vertex_kb | fixed}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="metric"><span class="label">Draws</span><span class="value pair">requested {{requested}}</span><span class="value pair">submitted {{submitted}}</span></div>
+            <div class="metric"><span class="label">Uploads</span><span class="value pair">textures {{textures_uploaded}}</span><span class="value pair">glyphs {{glyphs_uploaded}}</span></div>
+        </div>
+    </div>
+</body>
+</rml>

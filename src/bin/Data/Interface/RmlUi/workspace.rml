@@ -24,6 +24,10 @@
 	     data-saved-position names a window's saved drag position, used while it is the first open
 	     window of its region. A window that moves itself (the friend list) only asks its slot where
 	     it first opens; the player's moves win after that. -->
+    <div class="region diagnostics-stack" data-scale="hud" data-participation="overlay">
+        <div class="slot" data-window="system_log"></div>
+        <div class="slot" data-window="diagnostics"></div>
+    </div>
 	<div id="workspace_shell">
 		<div id="shell_header" class="region shell-region" data-scale="hud" data-participation="reserve">
 			<div class="slot" data-window="mu_helper_bar"></div>

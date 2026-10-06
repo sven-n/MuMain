@@ -5,16 +5,16 @@
 	<link type="text/rcss" href="system_log.rcss"/>
 </head>
 <!-- Legacy override: laid out like the original's RenderMessages() under the HUD layout -- the
-     first line's origin, the row pitch, each line's background height and the text size are the
+     row pitch, each line's background height and the text size are the
      native renderer's, computed in C++ (CSystemLogWindow::SyncNativeGeometry()) in physical px. -->
 <body data-model="system_log">
-	<div id="panel" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
+	<div id="panel" data-style-font-size="text_px + 'px'">
 		<div data-for="line : lines"
-		     data-attr-class="'syslog-line syslog-line--' + line.kind"
+		     data-attr-class="'syslog-line syslog-line--' + line.kind" data-class-empty="line.text == ''"
 		     data-style-font-size="text_px + 'px'"
 		     data-style-height="line_px + 'px'" data-style-line-height="line_px + 'px'"
 		     data-style-margin-bottom="(row_px - line_px) + 'px'"
-		     ><div class="syslog-back" data-style-opacity="back_alpha"></div><span class="syslog-text">{{line.text}}</span></div>
+		     ><div data-if="line.text != ''" class="syslog-back" data-style-opacity="back_alpha"></div><span class="syslog-text">{{line.text}}</span></div>
 	</div>
 </body>
 </rml>

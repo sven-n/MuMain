@@ -279,10 +279,8 @@ namespace mu::ui::window
         Rml::Vector<ChatLogLineEntry> lines;
 
         // The native renderer's geometry under the window's layout, in physical px (the legacy
-        // theme's system_log.rml): the first line's origin, the row pitch, each line's background
+        // theme's system_log.rml): the row pitch, each line's background
         // height and the text size.
-        float panelX = 0.f;
-        float panelY = 0.f;
         float rowPx = 0.f;
         float linePx = 0.f;
         float textPx = 0.f;
@@ -329,6 +327,8 @@ namespace mu::ui::window
         RmlModelBinder<SystemLogRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
         bool m_bLinesDirty = true;
+        float m_LastPanelHeight = -1.f;
+        void TrackPanelSize();
 
         void RemoveFrontLine();
         int GetCurrentRenderEndLine() const;

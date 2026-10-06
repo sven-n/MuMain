@@ -400,7 +400,11 @@ static void BlitTextureToSwapchain(SDL_GPUCommandBuffer* commandBuffer, SDL_GPUT
         return false;
     }
 
-    SDL_GPUFence* fence = SDL_SubmitGPUCommandBufferAndAcquireFence(commandBuffer);
+    SDL_GPUFence* fence = nullptr;
+    {
+        FRAME_PROFILE(RendererSubmit);
+        fence = SDL_SubmitGPUCommandBufferAndAcquireFence(commandBuffer);
+    }
     if (!fence)
     {
         mu::log::Get("render")->warn("SDL_gpu -- frame readback fence acquisition failed: {}", SDL_GetError());
@@ -476,11 +480,6 @@ static mu::RendererStats s_lastFrameStats;
 static std::chrono::steady_clock::time_point s_frameBeginTime;
 static std::chrono::steady_clock::time_point s_renderReplayBeginTime;
 static std::chrono::steady_clock::time_point s_submitTime;
-
-[[nodiscard]] static bool IsFrameTimingEnabled()
-{
-    return s_frameTimingEnabled || s_statsEnabled;
-}
 
 static void ConfigureD3D12Diagnostics(const char* driverName)
 {
@@ -1769,10 +1768,7 @@ public:
             s_frameTimingEnabled = std::getenv("MU_RENDER_TIMING") != nullptr;
             s_frameTimingInitialized = true;
         }
-        if (IsFrameTimingEnabled())
-        {
-            s_frameBeginTime = std::chrono::steady_clock::now();
-        }
+        s_frameBeginTime = std::chrono::steady_clock::now();
 
         s_cmdBuf = SDL_AcquireGPUCommandBuffer(s_device);
         if (!s_cmdBuf)
@@ -2213,6 +2209,8 @@ public:
             FailPendingFrameReadback();
             return;
         }
+        // Loading screens can submit several renderer frames within one game-loop sample.
+        const float submittedBefore = FrameProfiler::AccumulatorMs(FrameProfiler::Pass::RendererSubmit);
         // Still recording, and after the last FlushRenderCommands(), so nothing this records has
         // been replayed yet -- see SetOffscreenRenderCallback (MuRenderer.h).
         if (s_offscreenRenderCallback)
@@ -2274,10 +2272,7 @@ public:
         const std::size_t replayStart = chosenLate ? 0u : s_replayedCmdCount;
 
         bool renderPassCompleted = false;
-        if (IsFrameTimingEnabled())
-        {
-            s_renderReplayBeginTime = std::chrono::steady_clock::now();
-        }
+        s_renderReplayBeginTime = std::chrono::steady_clock::now();
 #ifdef _EDITOR
         PreparePendingEditorDrawData(s_cmdBuf);
 #endif
@@ -2454,6 +2449,7 @@ public:
             BlitTextureToSwapchain(s_cmdBuf, frameColorTexture);
         }
 
+        s_submitTime = std::chrono::steady_clock::now();
         if (s_frameReadbackTexture)
         {
             if (!renderPassCompleted)
@@ -2473,13 +2469,9 @@ public:
 
         if (s_cmdBuf)
         {
+            FRAME_PROFILE(RendererSubmit);
             SDL_SubmitGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
-        }
-
-        if (IsFrameTimingEnabled())
-        {
-            s_submitTime = std::chrono::steady_clock::now();
         }
 
         s_swapchainTexture = nullptr;
@@ -2498,14 +2490,12 @@ public:
         s_lastFrameStats.samplerBinds = s_dbgSamplerBindsThisFrame;
         s_lastFrameStats.vertexUniformPushes = s_dbgVertexUniformPushesThisFrame;
         s_lastFrameStats.fragmentUniformPushes = s_dbgFragmentUniformPushesThisFrame;
-        if (IsFrameTimingEnabled())
-        {
-            const auto milliseconds = [](auto begin, auto end)
-            { return std::chrono::duration<double, std::milli>(end - begin).count(); };
-            s_lastFrameStats.frameMilliseconds = milliseconds(s_frameBeginTime, frameCompletedAt);
-            s_lastFrameStats.replayMilliseconds = milliseconds(s_renderReplayBeginTime, s_submitTime);
-            s_lastFrameStats.submitMilliseconds = milliseconds(s_submitTime, frameCompletedAt);
-        }
+        const auto milliseconds = [](auto begin, auto end)
+        { return std::chrono::duration<double, std::milli>(end - begin).count(); };
+        s_lastFrameStats.frameMilliseconds = milliseconds(s_frameBeginTime, frameCompletedAt);
+        s_lastFrameStats.replayMilliseconds = milliseconds(s_renderReplayBeginTime, s_submitTime);
+        s_lastFrameStats.submitMilliseconds =
+            FrameProfiler::AccumulatorMs(FrameProfiler::Pass::RendererSubmit) - submittedBefore;
 
         const bool emitTimingDiagnostics = s_frameTimingEnabled && s_dbgFrameCount % 60 == 0;
         if (emitTimingDiagnostics)

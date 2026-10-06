@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/FrameProfiler.h"
 
 #include "UI/Placement/WindowPlacement.h"
 
@@ -162,7 +163,10 @@ Rml::Vector2f PanelSize(const Entry& entry)
         if (!UI::RmlBridge::RefreshLogicalPanelSize(document, "panel", size.x, size.y))
         {
             // Never shown yet: lay it out once to learn its size.
-            document->UpdateDocument();
+            {
+                FRAME_PROFILE(UILayout);
+                document->UpdateDocument();
+            }
             UI::RmlBridge::RefreshLogicalPanelSize(document, "panel", size.x, size.y);
         }
         return size;
@@ -520,13 +524,19 @@ static void ArrangeNow()
     g_regionFit.clear();
     PrepareRegions(workspace, dock);
     Rml::ElementList slots = PrepareSlots(workspace, dock);
-    workspace->UpdateDocument();
+    {
+        FRAME_PROFILE(UILayout);
+        workspace->UpdateDocument();
+    }
     // The content area depends only on the shell, so one more pass sizes capped regions' windows.
     if (FitRegions(workspace, dock))
     {
         PrepareRegions(workspace, dock);
         slots = PrepareSlots(workspace, dock);
-        workspace->UpdateDocument();
+        {
+            FRAME_PROFILE(UILayout);
+            workspace->UpdateDocument();
+        }
     }
     UpdateUncoveredArea(workspace, slots);
     PlaceSlots(slots, dock);
@@ -601,14 +611,20 @@ bool InitialPosition(std::string_view slotName, float width, float height, float
         slot->SetClass("open", true);
         SetLength(slot, Rml::PropertyId::Width, width);
         SetLength(slot, Rml::PropertyId::Height, height);
-        workspace->UpdateDocument();
+        {
+            FRAME_PROFILE(UILayout);
+            workspace->UpdateDocument();
+        }
         const Rml::Vector2f offset = slot->GetAbsoluteOffset(Rml::BoxArea::Border);
         x = offset.x;
         y = offset.y;
         slot->SetClass("open", false);
         slot->RemoveProperty(Rml::PropertyId::Width);
         slot->RemoveProperty(Rml::PropertyId::Height);
-        workspace->UpdateDocument();
+        {
+            FRAME_PROFILE(UILayout);
+            workspace->UpdateDocument();
+        }
         return true;
     }
     return false;

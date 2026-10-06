@@ -164,6 +164,7 @@ constexpr DocumentPlacement Placements[] = {
     {"loading.rml", LoadingScreenDepth, AnyScene},
     {"title_scene.rml", LoadingScreenDepth, AnyScene},
     {"reconnect_dialog.rml", ReconnectDialogDepth, AnyScene},
+    {"diagnostics.rml", ReconnectDialogDepth, AnyScene},
 };
 } // namespace
 

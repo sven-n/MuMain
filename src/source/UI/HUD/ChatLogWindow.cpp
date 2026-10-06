@@ -1158,11 +1158,15 @@ bool mu::ui::window::CSystemLogWindow::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_SYSTEMLOGWINDOW, this);
     m_WndPos.x = x;
     m_WndPos.y = y;
+    UI::RmlBridge::WorkspaceDocumentOptions options;
+    options.placedWhileHidden = true;
+    UI::RmlBridge::RegisterWorkspaceDocument("system_log", [this] { return m_pRmlDoc; }, "panel", std::move(options));
     return true;
 }
 
 void mu::ui::window::CSystemLogWindow::Release()
 {
+    UI::Placement::UnregisterParticipant("system_log");
     UI::RmlBridge::UnregisterForThemeReload(this);
     ClearAll();
 
@@ -1271,10 +1275,9 @@ void mu::ui::window::CSystemLogWindow::BuildRmlUi()
             line.RegisterMember("has_id", &ChatLogLineEntry::hasId);
             c.RegisterArray<Rml::Vector<ChatLogLineEntry>>();
 
+            model.lines.resize(MAX_NUMBER_OF_LINES);
             c.Bind("lines", &model.lines);
             c.Bind("back_alpha", &model.backAlpha);
-            c.Bind("panel_x", &model.panelX);
-            c.Bind("panel_y", &model.panelY);
             c.Bind("row_px", &model.rowPx);
             c.Bind("line_px", &model.linePx);
             c.Bind("text_px", &model.textPx);
@@ -1284,6 +1287,7 @@ void mu::ui::window::CSystemLogWindow::BuildRmlUi()
     {
         m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
                                                      "Data/Interface/RmlUi/system_log.rml");
+        UI::Placement::Invalidate();
         UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     }
 }
@@ -1310,6 +1314,7 @@ void mu::ui::window::CSystemLogWindow::SyncDocVisibility(bool sceneAllowsShow)
 void mu::ui::window::CSystemLogWindow::SyncRmlModel()
 {
     if (!m_pRmlDoc) return;
+    TrackPanelSize();
 
     // m_bShowMessages is the input box's own "system messages" toggle; IsVisible() is the window's.
     UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible() && m_bShowMessages && m_bSceneAllowsShow);
@@ -1329,8 +1334,20 @@ void mu::ui::window::CSystemLogWindow::SyncRmlModel()
     }
 }
 
-// Native's RenderMessages(): the first line at the window position plus FONT_LEADING on both axes,
-// one row every MeasureText("Q").cy * 1.2 (logical), each line's background as tall as the text.
+void mu::ui::window::CSystemLogWindow::TrackPanelSize()
+{
+    auto* panel = m_pRmlDoc->GetElementById("panel");
+    if (!panel)
+        return;
+    const float height = panel->GetBox().GetSize(Rml::BoxArea::Border).y;
+    if (height != m_LastPanelHeight)
+    {
+        m_LastPanelHeight = height;
+        UI::Placement::Invalidate();
+    }
+}
+
+// Retain the legacy font metrics; the workspace now owns the message area's origin.
 void mu::ui::window::CSystemLogWindow::SyncNativeGeometry()
 {
     const auto transform = UI::Scaling::GetActiveTransform();
@@ -1345,12 +1362,9 @@ void mu::ui::window::CSystemLogWindow::SyncNativeGeometry()
         {
             model.*field = value;
             m_RmlBinder.MarkDirty(name);
+            UI::Placement::Invalidate();
         }
     };
-    syncFloat(&SystemLogRmlModel::panelX, "panel_x",
-              UI::Scaling::PositionX(transform, static_cast<float>(m_WndPos.x + FONT_LEADING)));
-    syncFloat(&SystemLogRmlModel::panelY, "panel_y",
-              UI::Scaling::PositionY(transform, static_cast<float>(m_WndPos.y + FONT_LEADING)));
     syncFloat(&SystemLogRmlModel::rowPx, "row_px", UI::Scaling::SizeY(transform, static_cast<float>(rowHeight)));
     syncFloat(&SystemLogRmlModel::linePx, "line_px", UI::Scaling::SizeY(transform, static_cast<float>(textHeight)));
     syncFloat(&SystemLogRmlModel::textPx, "text_px",
@@ -1375,6 +1389,8 @@ void mu::ui::window::CSystemLogWindow::RebuildLineModel()
         entry.text = StringUtils::WideToNarrow(pMsgText->GetText().c_str());
         model.lines.push_back(std::move(entry));
     }
+    // Empty rows preserve the six-line workspace reservation without drawing a backdrop.
+    model.lines.resize(MAX_NUMBER_OF_LINES);
 }
 
 float mu::ui::window::CSystemLogWindow::GetLayerDepth()
