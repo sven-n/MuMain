@@ -2,7 +2,7 @@
 #include "RmlTooltip.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
@@ -110,13 +110,55 @@ namespace UI::RmlBridge::Tooltip
             }
         }
 
-        RmlModelBinder<TooltipRmlModel> s_RmlBinder;
-        Rml::ElementDocument* s_pRmlDoc = nullptr;
         Owner s_CurrentOwner = nullptr;
 
-        // Stable identity token for UI::RmlBridge's theme-reload registry -- this module has no
-        // `this` of its own, so its own address stands in.
-        char s_ThemeReloadOwner = 0;
+        void BindModel(Rml::DataModelConstructor& c, TooltipRmlModel& model)
+        {
+            auto line = c.RegisterStruct<TooltipLineEntry>();
+            line.RegisterMember("text", &TooltipLineEntry::text);
+            line.RegisterMember("color_blue", &TooltipLineEntry::colorBlue);
+            line.RegisterMember("color_gray", &TooltipLineEntry::colorGray);
+            line.RegisterMember("color_red", &TooltipLineEntry::colorRed);
+            line.RegisterMember("color_yellow", &TooltipLineEntry::colorYellow);
+            line.RegisterMember("color_green", &TooltipLineEntry::colorGreen);
+            line.RegisterMember("color_purple", &TooltipLineEntry::colorPurple);
+            line.RegisterMember("color_redpurple", &TooltipLineEntry::colorRedPurple);
+            line.RegisterMember("color_violet", &TooltipLineEntry::colorViolet);
+            line.RegisterMember("color_orange", &TooltipLineEntry::colorOrange);
+            line.RegisterMember("highlight_darkred", &TooltipLineEntry::highlightDarkRed);
+            line.RegisterMember("highlight_darkblue", &TooltipLineEntry::highlightDarkBlue);
+            line.RegisterMember("highlight_darkyellow", &TooltipLineEntry::highlightDarkYellow);
+            line.RegisterMember("highlight_greenblue", &TooltipLineEntry::highlightGreenBlue);
+            line.RegisterMember("bold", &TooltipLineEntry::bold);
+            line.RegisterMember("is_half_spacer", &TooltipLineEntry::isHalfSpacer);
+            line.RegisterMember("is_full_spacer", &TooltipLineEntry::isFullSpacer);
+            line.RegisterMember("height_px", &TooltipLineEntry::heightPx);
+            line.RegisterMember("gap_px", &TooltipLineEntry::gapPx);
+            c.RegisterArray<std::vector<TooltipLineEntry>>();
+
+            c.Bind("lines", &model.lines);
+            c.Bind("pos_x", &model.posX);
+            c.Bind("pos_y", &model.posY);
+            c.Bind("center_text", &model.centerText);
+            c.Bind("text_px", &model.textPx);
+            c.Bind("border_px", &model.borderPx);
+            c.Bind("padding_px", &model.paddingPx);
+            c.Bind("fixed_width_px", &model.fixedWidthPx);
+            c.Bind("button_hint", &model.buttonHint);
+        }
+
+        // A theme switch leaves it hidden and ownerless: whichever caller has the hover shows it
+        // again on its next hover check.
+        void OnReloaded();
+
+        UI::RmlBridge::ThemedView<TooltipRmlModel> s_View{"tooltip", BindModel, {{"Data/Interface/RmlUi/tooltip.rml"}},
+                                                          {.afterReload = [] { OnReloaded(); }}};
+
+        void OnReloaded()
+        {
+            s_View.Hide();
+            s_CurrentOwner = nullptr;
+        }
 
         TooltipLineEntry ToLineEntry(const Line& line)
         {
@@ -146,50 +188,6 @@ namespace UI::RmlBridge::Tooltip
             return entry;
         }
 
-        void BuildRmlUi()
-        {
-            const bool modelCreated = s_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "tooltip",
-                [](Rml::DataModelConstructor& c, TooltipRmlModel& model)
-                {
-                    auto line = c.RegisterStruct<TooltipLineEntry>();
-                    line.RegisterMember("text", &TooltipLineEntry::text);
-                    line.RegisterMember("color_blue", &TooltipLineEntry::colorBlue);
-                    line.RegisterMember("color_gray", &TooltipLineEntry::colorGray);
-                    line.RegisterMember("color_red", &TooltipLineEntry::colorRed);
-                    line.RegisterMember("color_yellow", &TooltipLineEntry::colorYellow);
-                    line.RegisterMember("color_green", &TooltipLineEntry::colorGreen);
-                    line.RegisterMember("color_purple", &TooltipLineEntry::colorPurple);
-                    line.RegisterMember("color_redpurple", &TooltipLineEntry::colorRedPurple);
-                    line.RegisterMember("color_violet", &TooltipLineEntry::colorViolet);
-                    line.RegisterMember("color_orange", &TooltipLineEntry::colorOrange);
-                    line.RegisterMember("highlight_darkred", &TooltipLineEntry::highlightDarkRed);
-                    line.RegisterMember("highlight_darkblue", &TooltipLineEntry::highlightDarkBlue);
-                    line.RegisterMember("highlight_darkyellow", &TooltipLineEntry::highlightDarkYellow);
-                    line.RegisterMember("highlight_greenblue", &TooltipLineEntry::highlightGreenBlue);
-                    line.RegisterMember("bold", &TooltipLineEntry::bold);
-                    line.RegisterMember("is_half_spacer", &TooltipLineEntry::isHalfSpacer);
-                    line.RegisterMember("is_full_spacer", &TooltipLineEntry::isFullSpacer);
-                    line.RegisterMember("height_px", &TooltipLineEntry::heightPx);
-                    line.RegisterMember("gap_px", &TooltipLineEntry::gapPx);
-                    c.RegisterArray<std::vector<TooltipLineEntry>>();
-
-                    c.Bind("lines", &model.lines);
-                    c.Bind("pos_x", &model.posX);
-                    c.Bind("pos_y", &model.posY);
-                    c.Bind("center_text", &model.centerText);
-                    c.Bind("text_px", &model.textPx);
-                    c.Bind("border_px", &model.borderPx);
-                    c.Bind("padding_px", &model.paddingPx);
-                    c.Bind("fixed_width_px", &model.fixedWidthPx);
-                    c.Bind("button_hint", &model.buttonHint);
-                });
-
-            if (modelCreated)
-                s_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                    "Data/Interface/RmlUi/tooltip.rml");
-            if (s_pRmlDoc)
-                UI::RmlBridge::RegisterForThemeReload(&s_ThemeReloadOwner, &ReloadRmlTheme);
-        }
     }
 
     void Show(const Config& config, Owner owner)
@@ -197,9 +195,7 @@ namespace UI::RmlBridge::Tooltip
         if (!RmlUiRuntime::Instance().IsCreated() || config.lines.empty())
             return;
 
-        if (!s_pRmlDoc)
-            BuildRmlUi();
-        if (!s_pRmlDoc)
+        if (!s_View.Ensure())
             return;
 
         s_CurrentOwner = owner;
@@ -212,7 +208,7 @@ namespace UI::RmlBridge::Tooltip
         const float screenAnchorX = config.anchorX;
         const float screenAnchorY = config.anchorY;
 
-        auto& model = s_RmlBinder.GetModel();
+        auto& model = s_View.Binder().GetModel();
         model.lines.clear();
         model.lines.reserve(config.lines.size());
         for (const Line& line : config.lines)
@@ -225,17 +221,17 @@ namespace UI::RmlBridge::Tooltip
         // anchorY as a placeholder top for that case too, corrected below once measured.
         model.posX = screenAnchorX;
         model.posY = screenAnchorY;
-        s_RmlBinder.MarkDirty("lines");
-        s_RmlBinder.MarkDirty("pos_x");
-        s_RmlBinder.MarkDirty("pos_y");
-        s_RmlBinder.MarkDirty("center_text");
-        s_RmlBinder.MarkDirty("text_px");
-        s_RmlBinder.MarkDirty("border_px");
-        s_RmlBinder.MarkDirty("padding_px");
-        s_RmlBinder.MarkDirty("fixed_width_px");
-        s_RmlBinder.MarkDirty("button_hint");
+        s_View.Binder().MarkDirty("lines");
+        s_View.Binder().MarkDirty("pos_x");
+        s_View.Binder().MarkDirty("pos_y");
+        s_View.Binder().MarkDirty("center_text");
+        s_View.Binder().MarkDirty("text_px");
+        s_View.Binder().MarkDirty("border_px");
+        s_View.Binder().MarkDirty("padding_px");
+        s_View.Binder().MarkDirty("fixed_width_px");
+        s_View.Binder().MarkDirty("button_hint");
 
-        s_pRmlDoc->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
+        s_View.Document()->Show(Rml::ModalFlag::None, Rml::FocusFlag::None);
 
         // Force layout now so the .tt-line children data-for just created actually exist, with
         // their real resolved font (family/size/weight, including .bold) applied -- needed for the
@@ -257,7 +253,7 @@ namespace UI::RmlBridge::Tooltip
         // actually draw it, so this can't drift from the real render the way a native GDI
         // measurement transplanted onto RmlUi's own font metrics could) and set an explicit `width`
         // from that instead of trusting auto-sizing.
-        Rml::Element* panel = s_pRmlDoc->GetElementById("tooltip_panel");
+        Rml::Element* panel = s_View.Document()->GetElementById("tooltip_panel");
         float maxLineWidth = 0.0f;
         if (panel)
         {
@@ -283,7 +279,7 @@ namespace UI::RmlBridge::Tooltip
         // future consumer's content wraps rather than fitting on one line).
         context->Update();
 
-        // #tooltip_panel's own box, NOT s_pRmlDoc->GetBox() -- confirmed via runtime diagnostic
+        // #tooltip_panel's own box, NOT s_View.Document()->GetBox() -- confirmed via runtime diagnostic
         // that the document's own outer body box reports the full viewport size here (1024x768,
         // not the actual small tooltip), not the shrink-wrapped panel size a plain element would
         // give. Since that always exceeded the viewport, the clamp below unconditionally forced
@@ -327,13 +323,13 @@ namespace UI::RmlBridge::Tooltip
 
         model.posX = left;
         model.posY = top;
-        s_RmlBinder.MarkDirty("pos_x");
-        s_RmlBinder.MarkDirty("pos_y");
+        s_View.Binder().MarkDirty("pos_x");
+        s_View.Binder().MarkDirty("pos_y");
     }
 
     void Hide(Owner owner)
     {
-        if (!s_pRmlDoc)
+        if (!s_View.Document())
             return;
         // See Owner's own comment (RmlTooltip.h) -- only actually hide if this caller (or an
         // ownerless caller) is the one the tooltip is currently showing for, so a not-hovered
@@ -347,23 +343,7 @@ namespace UI::RmlBridge::Tooltip
         // owner's.
         if (owner != nullptr && owner != s_CurrentOwner)
             return;
-        s_pRmlDoc->Hide();
+        s_View.Document()->Hide();
         s_CurrentOwner = nullptr;
-    }
-
-    void ReloadRmlTheme()
-    {
-        if (!s_pRmlDoc)
-            return;
-
-        Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-        s_RmlBinder.Destroy(context);
-        context->UnloadDocument(s_pRmlDoc);
-        s_pRmlDoc = nullptr;
-        s_CurrentOwner = nullptr;
-
-        BuildRmlUi();
-        // Left hidden -- whichever caller currently has the mouse hovered will call Show() again
-        // on its own very next hover-detection tick, same as every other themed document's reload.
     }
 }

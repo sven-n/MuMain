@@ -16,7 +16,6 @@
 
 namespace
 {
-constexpr const char* kDocumentPath = "Data/Interface/RmlUi/world_labels.rml";
 
 Rml::Colourb ColourFromAbgr(std::uint32_t abgr)
 {
@@ -60,79 +59,45 @@ UI::Character::WorldLabelLayer::~WorldLabelLayer()
 
 bool UI::Character::WorldLabelLayer::Create()
 {
-    if (!m_registered && RmlUiRuntime::Instance().GetBackgroundContext() != nullptr)
-    {
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadTheme(); });
-        m_registered = true;
-    }
-    Build();
+    m_view.Ensure();
     return IsAvailable();
 }
 
 void UI::Character::WorldLabelLayer::Release()
 {
-    if (m_registered)
-    {
-        UI::RmlBridge::UnregisterForThemeReload(this);
-        m_registered = false;
-    }
-    // Unload the document while its context still exists; at shutdown the runtime may already be
-    // gone, and with it the document. Idempotent.
-    if (m_document != nullptr && RmlUiRuntime::Instance().IsCreated())
-    {
-        if (Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext())
-            context->UnloadDocument(m_document);
-    }
-    m_document = nullptr;
+    m_view.Release();
     m_slots.clear();
     m_used = 0;
     m_shown = 0;
 }
 
-void UI::Character::WorldLabelLayer::Build()
+// A rebuilt document has none of the old one's slots.
+void UI::Character::WorldLabelLayer::OnBuilt()
 {
-    if (m_document != nullptr)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext();
-    if (context == nullptr)
-        return;
-    m_document = UI::RmlBridge::LoadThemedDocument(context, kDocumentPath);
     m_slots.clear();
     m_used = 0;
     m_shown = 0;
-}
-
-void UI::Character::WorldLabelLayer::ReloadTheme()
-{
-    if (m_document == nullptr)
-        return;
-    const bool wasVisible = m_document->IsVisible();
-    m_document->GetContext()->UnloadDocument(m_document);
-    m_document = nullptr;
-    Build();
-    if (m_document != nullptr && wasVisible)
-        UI::RmlBridge::SyncDocumentVisibilityBehind(m_document, true);
 }
 
 void UI::Character::WorldLabelLayer::Hide()
 {
-    if (m_document != nullptr)
-        UI::RmlBridge::SyncDocumentVisibility(m_document, false);
+    if (m_view.Document() != nullptr)
+        UI::RmlBridge::SyncDocumentVisibility(m_view.Document(), false);
 }
 
 void UI::Character::WorldLabelLayer::BeginFrame()
 {
     m_used = 0;
-    if (m_document == nullptr)
+    if (m_view.Document() == nullptr)
         return;
 
     // Under every window, as the original's depth-1.0 window: behind every other document of the
     // background context (the duel and siege boards, the docked panels' frames), which itself
     // renders before the native windows and the main context.
-    UI::RmlBridge::SyncDocumentVisibilityBehind(m_document, true);
-    Rml::Context* context = m_document->GetContext();
-    if (context->GetNumDocuments() > 1 && context->GetDocument(0) != m_document)
-        m_document->PushToBack();
+    UI::RmlBridge::SyncDocumentVisibilityBehind(m_view.Document(), true);
+    Rml::Context* context = m_view.Document()->GetContext();
+    if (context->GetNumDocuments() > 1 && context->GetDocument(0) != m_view.Document())
+        m_view.Document()->PushToBack();
 }
 
 void UI::Character::WorldLabelLayer::EndFrame()
@@ -148,9 +113,9 @@ UI::Character::WorldLabelLayer::Slot& UI::Character::WorldLabelLayer::NextSlot(S
     if (m_used == m_slots.size())
     {
         Slot slot;
-        Rml::ElementPtr box = m_document->CreateElement("div");
+        Rml::ElementPtr box = m_view.Document()->CreateElement("div");
         box->SetClass("label", true);
-        slot.box = m_document->AppendChild(std::move(box));
+        slot.box = m_view.Document()->AppendChild(std::move(box));
         SetDisplay(slot.box, false);
         m_slots.push_back(slot);
     }
@@ -166,14 +131,14 @@ void UI::Character::WorldLabelLayer::SetKind(Slot& slot, SlotKind kind)
 
     if (kind == SlotKind::Text && slot.text == nullptr)
     {
-        Rml::ElementPtr text = m_document->CreateElement("span");
+        Rml::ElementPtr text = m_view.Document()->CreateElement("span");
         text->SetClass("label-text", true);
         slot.text = slot.box->AppendChild(std::move(text));
-        slot.textNode = static_cast<Rml::ElementText*>(slot.text->AppendChild(m_document->CreateTextNode("")));
+        slot.textNode = static_cast<Rml::ElementText*>(slot.text->AppendChild(m_view.Document()->CreateTextNode("")));
     }
     if (kind == SlotKind::Bitmap && slot.image == nullptr)
     {
-        Rml::ElementPtr image = m_document->CreateElement("img");
+        Rml::ElementPtr image = m_view.Document()->CreateElement("img");
         image->SetClass("label-image", true);
         slot.image = slot.box->AppendChild(std::move(image));
     }

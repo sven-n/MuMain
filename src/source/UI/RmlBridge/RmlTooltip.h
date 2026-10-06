@@ -167,10 +167,4 @@ namespace UI::RmlBridge::Tooltip
     // Hides the shared tooltip document -- but only if `owner` matches the current owner (or
     // either is nullptr). No-op if it was never built, already hidden, or owned by someone else.
     void Hide(Owner owner = nullptr);
-
-    // Rebuilds the shared document against the now-active theme. Not a CObject/IObject and has no
-    // `this` of its own, so it registers itself with UI::RmlBridge's theme-reload registry (keyed
-    // by a private static token) instead, the same way UI::Login::ReloadRmlTheme() does for
-    // RememberPasswordPrompt (also not a CObject).
-    void ReloadRmlTheme();
 }

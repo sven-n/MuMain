@@ -12,7 +12,7 @@
 #include "UI/HUD/NoticesRmlModel.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/Text/CUIRenderText.h"
@@ -39,15 +39,25 @@ namespace
     float  s_blinkPhase = 0.f;
     Notice s_notices[MAX_NOTICE];
 
+    void BindModel(Rml::DataModelConstructor& c, UI::Notices::NoticesRmlModel& model)
+    {
+        c.Bind("row_width", &model.rowWidth);
+        c.Bind("text_px", &model.textPx);
+        c.Bind("line_height_px", &model.lineHeightPx);
+        auto line = c.RegisterStruct<UI::Notices::NoticeLineEntry>();
+        line.RegisterMember("text", &UI::Notices::NoticeLineEntry::text);
+        line.RegisterMember("kind", &UI::Notices::NoticeLineEntry::kind);
+        line.RegisterMember("top", &UI::Notices::NoticeLineEntry::top);
+        c.RegisterArray<std::vector<UI::Notices::NoticeLineEntry>>();
+        c.Bind("lines", &model.lines);
+    }
+
     // The notices in RmlUi (notices.rml): one main-context document above every other document but
     // the tooltip (the original drew the notices after every window). Render() fills it; Move(),
     // which runs once per frame before the scene draws, hides it when the scene stopped calling
     // Render() (the loading scene draws no notices).
-    RmlModelBinder<UI::Notices::NoticesRmlModel> s_binder;
-    Rml::ElementDocument* s_document = nullptr;
+    UI::RmlBridge::ThemedView<UI::Notices::NoticesRmlModel> s_view{"notices", BindModel, {{"Data/Interface/RmlUi/notices.rml"}}};
     bool s_renderedThisFrame = false;
-    bool s_themeReloadRegistered = false;
-    const int s_themeReloadOwner = 0; // the theme-reload registration's owner key
 
     // Shift the buffer up by one when it is full so the newest line fits.
     void Scroll()
@@ -103,7 +113,7 @@ namespace UI::Notices
     void Move()
     {
         if (!s_renderedThisFrame)
-            UI::RmlBridge::SyncDocumentVisibility(s_document, false);
+            UI::RmlBridge::SyncDocumentVisibility(s_view.Document(), false);
         s_renderedThisFrame = false;
 
         s_time -= FPS_ANIMATION_FACTOR;
@@ -116,66 +126,22 @@ namespace UI::Notices
 
     namespace
     {
-    Rml::Context* NoticesContext()
-    {
-        return RmlUiRuntime::Instance().GetContext();
-    }
-
-    void BuildView();
-
-    void ReloadTheme()
-    {
-        if (s_document == nullptr)
-            return;
-        s_binder.Destroy(NoticesContext());
-        NoticesContext()->UnloadDocument(s_document);
-        s_document = nullptr;
-        BuildView();
-    }
-
-    void BuildView()
-    {
-        if (s_document != nullptr || !RmlUiRuntime::Instance().IsCreated() || NoticesContext() == nullptr)
-            return;
-
-        const bool modelCreated = s_binder.Create(NoticesContext(), "notices",
-                                                  [](Rml::DataModelConstructor& c, NoticesRmlModel& model)
-                                                  {
-                                                      c.Bind("row_width", &model.rowWidth);
-                                                      c.Bind("text_px", &model.textPx);
-                                                      c.Bind("line_height_px", &model.lineHeightPx);
-                                                      auto line = c.RegisterStruct<NoticeLineEntry>();
-                                                      line.RegisterMember("text", &NoticeLineEntry::text);
-                                                      line.RegisterMember("kind", &NoticeLineEntry::kind);
-                                                      line.RegisterMember("top", &NoticeLineEntry::top);
-                                                      c.RegisterArray<std::vector<NoticeLineEntry>>();
-                                                      c.Bind("lines", &model.lines);
-                                                  });
-        if (modelCreated)
-            s_document = UI::RmlBridge::LoadThemedDocument(NoticesContext(), "Data/Interface/RmlUi/notices.rml");
-        if (s_document != nullptr && !s_themeReloadRegistered)
-        {
-            UI::RmlBridge::RegisterForThemeReload(&s_themeReloadOwner, [] { ReloadTheme(); });
-            s_themeReloadRegistered = true;
-        }
-    }
-
 
     // The original's per-line draw: RenderText(320, 300 + i * 13) centred, bold, on a
     // half-transparent black box sized to the text; empty lines draw nothing.
     void SyncView(bool visible)
     {
-        UI::RmlBridge::SyncDocumentVisibility(s_document, visible);
+        UI::RmlBridge::SyncDocumentVisibility(s_view.Document(), visible);
         if (!visible)
             return;
 
         const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
         g_pRenderText->SetFont(g_hFontBold);
         const SIZE lineSize = g_pRenderText->MeasureText(L"Q", 1);
-        SyncField(s_binder, &NoticesRmlModel::rowWidth, "row_width", 2.f * UI::Scaling::PositionX(transform, 320.f));
-        SyncField(s_binder, &NoticesRmlModel::textPx, "text_px",
+        SyncField(s_view.Binder(), &NoticesRmlModel::rowWidth, "row_width", 2.f * UI::Scaling::PositionX(transform, 320.f));
+        SyncField(s_view.Binder(), &NoticesRmlModel::textPx, "text_px",
                   UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
-        SyncField(s_binder, &NoticesRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineSize.cy) * transform.scaleY);
+        SyncField(s_view.Binder(), &NoticesRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineSize.cy) * transform.scaleY);
 
         std::vector<NoticeLineEntry> lines;
         for (int i = 0; i < MAX_NOTICE; i++)
@@ -192,7 +158,7 @@ namespace UI::Notices
             line.top = UI::Scaling::PositionY(transform, static_cast<float>(300 + i * 13));
             lines.push_back(std::move(line));
         }
-        SyncField(s_binder, &NoticesRmlModel::lines, "lines", std::move(lines));
+        SyncField(s_view.Binder(), &NoticesRmlModel::lines, "lines", std::move(lines));
     }
 
     void RenderNative()
@@ -234,13 +200,13 @@ namespace UI::Notices
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
         if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP) == true)
         {
-            UI::RmlBridge::SyncDocumentVisibility(s_document, false);
+            UI::RmlBridge::SyncDocumentVisibility(s_view.Document(), false);
             return;
         }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-        BuildView();
-        if (s_document != nullptr)
+        s_view.Ensure();
+        if (s_view.Document() != nullptr)
             SyncView(true);
         else
             RenderNative();

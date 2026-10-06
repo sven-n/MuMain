@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Render/Renderer/Overlay2DRecorder.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <string>
 #include <vector>
@@ -30,7 +32,7 @@ public:
     void Release();
     bool IsAvailable() const
     {
-        return m_document != nullptr;
+        return m_view.Document() != nullptr;
     }
 
     void BeginFrame();
@@ -73,8 +75,7 @@ private:
         float imageAlpha = -1.0f;
     };
 
-    void Build();
-    void ReloadTheme();
+    void OnBuilt();
     Slot& NextSlot(SlotKind kind);
     void SetKind(Slot& slot, SlotKind kind);
     struct Rect
@@ -88,10 +89,13 @@ private:
     void SetFill(Slot& slot, const Rect& rect, std::uint32_t abgr, Render::Renderer::RecordedBlend blend);
     void SetAdditive(Slot& slot, bool additive, std::uint32_t abgr);
 
-    Rml::ElementDocument* m_document = nullptr;
     std::vector<Slot> m_slots;
     std::size_t m_used = 0;
     std::size_t m_shown = 0; // slots used by the last finished frame
-    bool m_registered = false;
+    // In the background context only: the labels draw under every window.
+    UI::RmlBridge::ThemedView<> m_view{{{"Data/Interface/RmlUi/world_labels.rml",
+                                         [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}},
+                                       {.stacking = UI::RmlBridge::ThemedStacking::Back,
+                                        .afterBuild = [this] { OnBuilt(); }}};
 };
 } // namespace UI::Character
