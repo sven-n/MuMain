@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Social/PhotoViewerControl.h"
 #include "UI/Social/LetterReadModel.h"
 #include <RmlUi/Core/EventListener.h>
@@ -45,7 +45,8 @@ private:
     };
     void RegisterModel(Rml::DataModelConstructor& constructor, Model& model);
     void Unload();
-    void ReloadTheme();
+    void OnBuilt();
+    void OnUnload();
     void SyncGeometry();
     void SyncWorkspace();
     void SyncPhoto();
@@ -58,10 +59,12 @@ private:
     Rml::Element* Panel() const;
 
     CUILetterReadWindow& m_Owner;
-    RmlModelBinder<Model> m_Binder;
+    UI::RmlBridge::ThemedView<Model> m_View{"", [this](auto& c, auto& m) { RegisterModel(c, m); },
+        {{"Data/Interface/RmlUi/letter_read.rml"}},
+        {.modelPlaceholder = "letter_read",
+         .afterBuild = [this] { OnBuilt(); },
+         .beforeUnload = [this] { OnUnload(); }}};
     PhotoViewerControl m_PhotoControl;
-    Rml::ElementDocument* m_Document = nullptr;
-    Rml::String m_ModelName;
     std::vector<Action> m_Actions;
     Rml::Vector2i m_Viewport{};
     float m_DpRatio = 0;

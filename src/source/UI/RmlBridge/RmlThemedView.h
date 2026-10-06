@@ -38,8 +38,8 @@ enum class ThemedStacking
 
 struct ThemedViewOptions
 {
-    // Per-instance documents: every occurrence of this in the markup (its data-model name) becomes
-    // the view's model name, so each instance binds its own model.
+    // Per-instance documents: the markup's data-model="<this>" binds the view's model name instead,
+    // so each instance binds its own model.
     std::string modelPlaceholder;
     // How a document that was visible is shown again after a theme switch.
     Rml::ModalFlag modal = Rml::ModalFlag::None;
@@ -51,6 +51,9 @@ struct ThemedViewOptions
     // After a theme switch's rebuild, once what was visible is shown again: whatever the owner sized
     // or placed from the previous theme's metrics.
     std::function<void()> afterReload;
+    // Before the documents unload, on a theme switch and on Release(): listeners and controls the
+    // owner attached to them.
+    std::function<void()> beforeUnload;
 };
 
 // True while RmlUi still owns `context`: false once it was removed or RmlUi shut down.
@@ -76,6 +79,9 @@ public:
     // Replaces the options' afterBuild, for an owner that sets it after constructing the view.
     void SetAfterBuild(std::function<void()> afterBuild) { m_Options.afterBuild = std::move(afterBuild); }
     void SetAfterReload(std::function<void()> afterReload) { m_Options.afterReload = std::move(afterReload); }
+    // For an owner that knows its per-instance model name only once it is built; ignored once the
+    // model exists.
+    void SetModelName(std::string modelName);
 
     bool IsBuilt() const { return m_Built; }
     // Null until built, and once RmlUi no longer owns the document's context.

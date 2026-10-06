@@ -18,10 +18,6 @@ namespace UI::Social
 {
 namespace
 {
-constexpr const char* DocumentPath = "Data/Interface/RmlUi/chat_room.rml";
-// Rewritten per instance by LoadThemedDocument()'s own per-window overload, so each room binds a
-// data model of its own rather than every room sharing one.
-constexpr const char* ModelPlaceholder = "data-model=\"chat_room\"";
 constexpr int SystemSpeaker = 255;
 Rml::String Text(const wchar_t* text)
 {
@@ -31,12 +27,10 @@ Rml::String Text(const wchar_t* text)
 
 ChatRoomView::ChatRoomView(CUIChatWindow& owner) : m_Owner(owner)
 {
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadTheme(); });
 }
 
 ChatRoomView::~ChatRoomView()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
     Unload();
 }
 
@@ -56,78 +50,57 @@ void ChatRoomView::RegisterModel(Rml::DataModelConstructor& c, Model& m)
 
 void ChatRoomView::Build()
 {
-    if (m_Document || !RmlUiRuntime::Instance().IsCreated())
-        return;
-    auto* context = RmlUiRuntime::Instance().GetContext();
     // One model per window: two rooms sharing a name would share their state.
-    if (m_ModelName.empty())
-        m_ModelName = "chat_room_" + Rml::ToString(static_cast<int>(m_Owner.GetUIID()));
-    if (!m_Binder.Create(context, m_ModelName, [this](auto& c, auto& m) { RegisterModel(c, m); }))
-        return;
-    m_Document = UI::RmlBridge::LoadThemedDocument(context, DocumentPath, ModelPlaceholder,
-                                                  "data-model=\"" + m_ModelName + "\"");
-    if (!m_Document)
-        return;
-    m_Document->AddEventListener(Rml::EventId::Mousedown, this);
-    m_Document->AddEventListener(Rml::EventId::Handledrag, this);
-    if (auto* header = m_Document->GetElementById("window_shell_header"))
-        UI::RmlBridge::MakeDraggable(header, m_Document, nullptr, [this] { SyncDraggedPosition(); });
+    if (m_View.ModelName().empty())
+        m_View.SetModelName("chat_room_" + Rml::ToString(static_cast<int>(m_Owner.GetUIID())));
+    m_View.Ensure();
+}
 
-    auto& model = m_Binder.GetModel();
+void ChatRoomView::OnBuilt()
+{
+    m_View.Document()->AddEventListener(Rml::EventId::Mousedown, this);
+    m_View.Document()->AddEventListener(Rml::EventId::Handledrag, this);
+    if (auto* header = m_View.Document()->GetElementById("window_shell_header"))
+        UI::RmlBridge::MakeDraggable(header, m_View.Document(), nullptr, [this] { SyncDraggedPosition(); });
+
+    auto& model = m_View.GetModel();
     model.inviteButtonLabel = Text(model.showInvite ? I18N::Game::CloseInvitation : I18N::Game::Invite);
     model.inviteLabel = Text(I18N::Game::Invite);
-    m_Binder.MarkDirty("invite_button_label");
-    m_Binder.MarkDirty("invite_label");
+    m_View.MarkDirty("invite_button_label");
+    m_View.MarkDirty("invite_label");
 
     SyncWorkspace();
-    m_Document->UpdateDocument();
+    m_View.Document()->UpdateDocument();
     SyncGeometry();
     m_ScrollToEnd = true;
 }
 
-void ChatRoomView::Unload()
+void ChatRoomView::OnUnload()
 {
-    auto* context = RmlUiRuntime::Instance().GetContext();
-    if (!m_Document)
-    {
-        if (context)
-            m_Binder.Destroy(context);
-        return;
-    }
-    if (auto* focused = context->GetFocusElement(); focused && focused->GetOwnerDocument() == m_Document)
-        focused->Blur();
-    m_Document->RemoveEventListener(Rml::EventId::Mousedown, this);
-    m_Document->RemoveEventListener(Rml::EventId::Handledrag, this);
-    context->UnloadDocument(m_Document);
-    m_Document = nullptr;
+    m_View.Document()->RemoveEventListener(Rml::EventId::Mousedown, this);
+    m_View.Document()->RemoveEventListener(Rml::EventId::Handledrag, this);
     m_Placed = false;
     m_Settled = false;
-    m_Binder.Destroy(context);
 }
 
-void ChatRoomView::ReloadTheme()
+void ChatRoomView::Unload()
 {
-    if (!m_Document)
-        return;
-    Model model = m_Binder.GetModel();
-    Unload();
-    m_Binder.GetModel() = std::move(model);
-    Build();
+    m_View.Release();
 }
 
 bool ChatRoomView::Sync(bool shown)
 {
     if (!shown)
     {
-        UI::RmlBridge::SyncDocumentVisibility(m_Document, false);
+        UI::RmlBridge::SyncDocumentVisibility(m_View.Document(), false);
         return false;
     }
     Build();
-    if (!m_Document)
+    if (!m_View.Document())
         return false;
     if (m_Title != m_Owner.GetTitle())
         PublishTitle();
-    const bool wasVisible = m_Document->IsVisible();
+    const bool wasVisible = m_View.Document()->IsVisible();
     SyncWorkspace();
     SyncGeometry();
     if (!m_Placed && m_Width > 0 && m_Height > 0)
@@ -136,7 +109,7 @@ bool ChatRoomView::Sync(bool shown)
         if (!m_CustomPosition)
             PlaceAtRest();
         ApplyLayout();
-        m_Document->UpdateDocument();
+        m_View.Document()->UpdateDocument();
         SyncGeometry();
     }
     else if (m_Placed)
@@ -144,7 +117,7 @@ bool ChatRoomView::Sync(bool shown)
     // window_shell places #panel through the data model, which the context applies only after this
     // runs, so a document shown on the frame it is placed still renders once where .center-both
     // left it -- centred and unsized.
-    UI::RmlBridge::SyncDocumentVisibility(m_Document, m_Settled);
+    UI::RmlBridge::SyncDocumentVisibility(m_View.Document(), m_Settled);
     if (m_Settled && m_ScrollToEnd)
     {
         m_ScrollToEnd = false;
@@ -156,20 +129,20 @@ bool ChatRoomView::Sync(bool shown)
         if (auto* field = Field())
             field->Focus();
     }
-    return m_Document->IsVisible() && !wasVisible;
+    return m_View.Document()->IsVisible() && !wasVisible;
 }
 
 void ChatRoomView::PullToFront()
 {
-    if (m_Document)
-        m_Document->PullToFront();
+    if (m_View.Document())
+        m_View.Document()->PullToFront();
 }
 
 void ChatRoomView::PublishTitle()
 {
     m_Title = m_Owner.GetTitle();
-    m_Binder.GetModel().title = Text(m_Title.c_str());
-    m_Binder.MarkDirty("title");
+    m_View.GetModel().title = Text(m_Title.c_str());
+    m_View.MarkDirty("title");
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -177,7 +150,7 @@ void ChatRoomView::PublishTitle()
 
 void ChatRoomView::AddPal(const wchar_t* name, BYTE number)
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     const auto narrow = Text(name);
     const auto it = std::find_if(m.pals.begin(), m.pals.end(),
                                  [&](const auto& pal) { return pal.name == narrow; });
@@ -185,28 +158,28 @@ void ChatRoomView::AddPal(const wchar_t* name, BYTE number)
         it->number = number;
     else
         m.pals.push_back({narrow, number});
-    m_Binder.MarkDirty("pals");
+    m_View.MarkDirty("pals");
     SyncPalVisibility();
 }
 
 void ChatRoomView::RemovePal(const wchar_t* name)
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     const auto narrow = Text(name);
     std::erase_if(m.pals, [&](const auto& pal) { return pal.name == narrow; });
-    m_Binder.MarkDirty("pals");
+    m_View.MarkDirty("pals");
     SyncPalVisibility();
 }
 
 // Native only showed the column once the room was more than a pair, or while inviting.
 void ChatRoomView::SyncPalVisibility()
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     const bool show = m.pals.size() > 2 || m.showInvite;
     if (m.showPals == show)
         return;
     m.showPals = show;
-    m_Binder.MarkDirty("show_pals");
+    m_View.MarkDirty("show_pals");
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -216,7 +189,7 @@ void ChatRoomView::AddLine(BYTE byIndex, const wchar_t* text, int type)
 {
     if (!text || text[0] == L'\0')
         return;
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     Rml::String speaker;
     if (byIndex != SystemSpeaker)
     {
@@ -228,26 +201,26 @@ void ChatRoomView::AddLine(BYTE byIndex, const wchar_t* text, int type)
     // Native pushed each line to the front of a list drawn bottom-up, so arrival order ran down
     // the box: appended here and read top-down, which is the same order.
     m.lines.push_back({speaker, Text(text), type});
-    m_Binder.MarkDirty("lines");
+    m_View.MarkDirty("lines");
     m_ScrollToEnd = true;
 }
 
 void ChatRoomView::ScrollLogToEnd()
 {
-    auto* log = m_Document ? m_Document->GetElementById("chat_log") : nullptr;
+    auto* log = m_View.Document() ? m_View.Document()->GetElementById("chat_log") : nullptr;
     if (!log)
         return;
-    m_Document->UpdateDocument();
+    m_View.Document()->UpdateDocument();
     log->SetScrollTop(log->GetScrollHeight());
 }
 
 void ChatRoomView::SetLocked(bool locked)
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     if (m.locked == locked)
         return;
     m.locked = locked;
-    m_Binder.MarkDirty("locked");
+    m_View.MarkDirty("locked");
 }
 
 void ChatRoomView::FocusField()
@@ -257,7 +230,7 @@ void ChatRoomView::FocusField()
 
 Rml::Element* ChatRoomView::Field() const
 {
-    return m_Document ? m_Document->GetElementById("chat_field") : nullptr;
+    return m_View.Document() ? m_View.Document()->GetElementById("chat_field") : nullptr;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -265,12 +238,12 @@ Rml::Element* ChatRoomView::Field() const
 
 bool ChatRoomView::InviteShown() const
 {
-    return m_Binder.GetModel().showInvite;
+    return m_View.GetModel().showInvite;
 }
 
 void ChatRoomView::RefreshInviteList()
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     std::deque<GUILDLIST_TEXT> entries;
     g_pFriendList->UpdateFriendList(entries, nullptr);
     m.invitePals.clear();
@@ -290,13 +263,13 @@ void ChatRoomView::RefreshInviteList()
     if (std::none_of(m.invitePals.begin(), m.invitePals.end(),
                      [&](const auto& pal) { return pal.name == m.selectedInvite; }))
         m.selectedInvite.clear();
-    m_Binder.MarkDirty("invite_pals");
-    m_Binder.MarkDirty("selected_invite");
+    m_View.MarkDirty("invite_pals");
+    m_View.MarkDirty("selected_invite");
 }
 
 const wchar_t* ChatRoomView::SelectedInvite()
 {
-    const auto& selected = m_Binder.GetModel().selectedInvite;
+    const auto& selected = m_View.GetModel().selectedInvite;
     if (selected.empty())
         return nullptr;
     m_SelectedInvite = StringUtils::NarrowToWide(selected);
@@ -305,31 +278,31 @@ const wchar_t* ChatRoomView::SelectedInvite()
 
 void ChatRoomView::ToggleInvite()
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     // Measured before the column is hidden, so closing gives back exactly what opening took.
     const float column = m.showInvite ? InviteColumnWidth() : 0.f;
     m.showInvite = !m.showInvite;
     m.inviteButtonLabel = Text(m.showInvite ? I18N::Game::CloseInvitation : I18N::Game::Invite);
-    m_Binder.MarkDirty("show_invite");
-    m_Binder.MarkDirty("invite_button_label");
+    m_View.MarkDirty("show_invite");
+    m_View.MarkDirty("invite_button_label");
     if (m.showInvite)
         RefreshInviteList();
     SyncPalVisibility();
     m_Maximized = false;
     m.maximized = false;
-    m_Binder.MarkDirty("maximized");
+    m_View.MarkDirty("maximized");
 
     // Native widened the window to make room rather than squeezing the log, then pulled it back
     // on-screen if that pushed its right edge off.
-    if (!m_Document)
+    if (!m_View.Document())
         return;
-    m_Document->UpdateDocument();
+    m_View.Document()->UpdateDocument();
     const float opened = m.showInvite ? InviteColumnWidth() : column;
     if (opened <= 0)
         return;
     m_CustomSize = true;
     RestoreLayout(m_Left, m_Top, m_Width + (m.showInvite ? opened : -opened), m_Height, true);
-    m_Document->UpdateDocument();
+    m_View.Document()->UpdateDocument();
     SyncGeometry();
 }
 
@@ -344,19 +317,19 @@ bool ChatRoomView::FieldHasFocus() const
 
 void ChatRoomView::SubmitDraft()
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     const auto line = StringUtils::NarrowToWide(m.draft);
     m_Owner.SubmitLine(line);
     m.draft.clear();
-    m_Binder.MarkDirty("draft");
+    m_View.MarkDirty("draft");
 }
 
 float ChatRoomView::InviteColumnWidth() const
 {
-    auto* pane = m_Document ? m_Document->GetElementById("invite_pane") : nullptr;
+    auto* pane = m_View.Document() ? m_View.Document()->GetElementById("invite_pane") : nullptr;
     if (!pane)
         return 0.f;
-    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
+    const float scale = m_View.Document()->GetContext()->GetDensityIndependentPixelRatio();
     const float width = pane->GetBox().GetSize(Rml::BoxArea::Border).x;
     return scale > 0 ? width / scale : 0.f;
 }
@@ -371,8 +344,8 @@ void ChatRoomView::ProcessEvent(Rml::Event& event)
     {
         m_CustomSize = true;
         m_Maximized = false;
-        m_Binder.GetModel().maximized = false;
-        m_Binder.MarkDirty("maximized");
+        m_View.GetModel().maximized = false;
+        m_View.MarkDirty("maximized");
     }
 }
 
@@ -388,7 +361,7 @@ void ChatRoomView::ProcessActions()
 
 void ChatRoomView::ActionRequested(const Action& a)
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     if (a.name == "invite_send_clicked")
     {
         PlayBuffer(SOUND_CLICK01);
@@ -405,7 +378,7 @@ void ChatRoomView::ActionRequested(const Action& a)
                         [&](const auto& pal) { return pal.name == name; }))
         {
             m.selectedInvite = name;
-            m_Binder.MarkDirty("selected_invite");
+            m_View.MarkDirty("selected_invite");
         }
     }
     else if (a.name == "close")
@@ -421,7 +394,7 @@ void ChatRoomView::ActionRequested(const Action& a)
 
 Rml::Element* ChatRoomView::Panel() const
 {
-    return m_Document;
+    return m_View.Document();
 }
 
 void ChatRoomView::SyncGeometry()
@@ -429,7 +402,7 @@ void ChatRoomView::SyncGeometry()
     auto* panel = Panel();
     if (!panel)
         return;
-    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
+    const float scale = m_View.Document()->GetContext()->GetDensityIndependentPixelRatio();
     const auto size = panel->GetBox().GetSize(Rml::BoxArea::Border);
     if (scale <= 0 || size.x <= 0 || size.y <= 0)
         return;
@@ -451,40 +424,40 @@ void ChatRoomView::SyncGeometry()
 
 void ChatRoomView::SyncWorkspace()
 {
-    auto* context = m_Document->GetContext();
+    auto* context = m_View.Document()->GetContext();
     const auto viewport = context->GetDimensions();
     const float scale = context->GetDensityIndependentPixelRatio();
     const float height = UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight) *
                          UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight).scaleY;
-    auto& model = m_Binder.GetModel();
+    auto& model = m_View.GetModel();
     if (model.workspaceHeight == height && m_Viewport == viewport && m_DpRatio == scale)
         return;
     model.workspaceHeight = height;
-    m_Binder.MarkDirty("workspace_height");
+    m_View.MarkDirty("workspace_height");
     m_Viewport = viewport;
     m_DpRatio = scale;
     if (m_CustomPosition)
         ApplyLayout();
-    m_Document->UpdateDocument();
+    m_View.Document()->UpdateDocument();
 }
 
 void ChatRoomView::PublishPosition()
 {
-    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
-    auto& model = m_Binder.GetModel();
+    const float scale = m_View.Document()->GetContext()->GetDensityIndependentPixelRatio();
+    auto& model = m_View.GetModel();
     model.rootX = m_Left * scale;
     model.rootY = m_Top * scale;
-    m_Binder.MarkDirty("root_x");
-    m_Binder.MarkDirty("root_y");
+    m_View.MarkDirty("root_x");
+    m_View.MarkDirty("root_y");
 }
 
 void ChatRoomView::ClampToWorkspace()
 {
-    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
+    const float scale = m_View.Document()->GetContext()->GetDensityIndependentPixelRatio();
     if (scale <= 0)
         return;
     const float maxLeft = WindowWidth / scale - m_Width;
-    const float maxTop = m_Binder.GetModel().workspaceHeight / scale - m_Height;
+    const float maxTop = m_View.GetModel().workspaceHeight / scale - m_Height;
     if (maxLeft > 0)
         m_Left = std::clamp(m_Left, 0.f, maxLeft);
     if (maxTop > 0)
@@ -513,7 +486,7 @@ void ChatRoomView::RestoreLayout(float x, float y, float width, float height, bo
     m_Left = x;
     m_Top = y;
     m_CustomPosition = true;
-    if (!m_Document)
+    if (!m_View.Document())
         return;
     ClampToWorkspace();
     ApplyLayout();
@@ -523,14 +496,14 @@ void ChatRoomView::RestoreMaximized(bool maximized, float top, float height)
 {
     m_Maximized = maximized;
     m_RestoreRect = {m_Left, top, m_Width, height};
-    m_Binder.GetModel().maximized = maximized;
-    m_Binder.MarkDirty("maximized");
+    m_View.GetModel().maximized = maximized;
+    m_View.MarkDirty("maximized");
 }
 
 // Rooms cascade down from the top-left, as CUIWindowMgr::AddWindow() steps each new window by 20.
 void ChatRoomView::PlaceAtRest()
 {
-    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
+    const float scale = m_View.Document()->GetContext()->GetDensityIndependentPixelRatio();
     if (scale <= 0)
         return;
     const float ratio = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight).scaleX / scale;
@@ -540,30 +513,30 @@ void ChatRoomView::PlaceAtRest()
 
 void ChatRoomView::Maximize()
 {
-    if (!m_Document)
+    if (!m_View.Document())
         return;
     if (!m_Maximized)
     {
         m_RestoreRect = {m_Left, m_Top, m_Width, m_Height};
         m_CustomSize = true;
         RestoreLayout(m_Left, 0, m_Width,
-                      m_Binder.GetModel().workspaceHeight /
-                          m_Document->GetContext()->GetDensityIndependentPixelRatio());
+                      m_View.GetModel().workspaceHeight /
+                          m_View.Document()->GetContext()->GetDensityIndependentPixelRatio());
     }
     else
         RestoreLayout(m_RestoreRect[0], m_RestoreRect[1], m_RestoreRect[2], m_RestoreRect[3]);
     m_Maximized = !m_Maximized;
-    m_Binder.GetModel().maximized = m_Maximized;
-    m_Binder.MarkDirty("maximized");
-    m_Document->UpdateDocument();
+    m_View.GetModel().maximized = m_Maximized;
+    m_View.MarkDirty("maximized");
+    m_View.Document()->UpdateDocument();
     SyncGeometry();
 }
 
 void ChatRoomView::SyncDraggedPosition()
 {
-    if (!m_Document)
+    if (!m_View.Document())
         return;
-    m_Document->UpdateDocument();
+    m_View.Document()->UpdateDocument();
     SyncGeometry();
     ClampToWorkspace();
     m_CustomPosition = true;

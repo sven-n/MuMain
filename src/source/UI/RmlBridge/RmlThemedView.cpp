@@ -125,8 +125,9 @@ bool ThemedDocuments::Ensure()
             continue;
         slot.document = m_Options.modelPlaceholder.empty()
                             ? LoadThemedDocument(contexts[i], slot.spec.path.c_str())
-                            : LoadThemedDocument(contexts[i], slot.spec.path.c_str(), m_Options.modelPlaceholder,
-                                                 m_ModelName);
+                            : LoadThemedDocument(contexts[i], slot.spec.path.c_str(),
+                                                 "data-model=\"" + m_Options.modelPlaceholder + "\"",
+                                                 "data-model=\"" + m_ModelName + "\"");
         if (slot.document == nullptr)
             return false;
         slot.context = contexts[i];
@@ -189,6 +190,12 @@ void ThemedDocuments::Hide()
     }
 }
 
+void ThemedDocuments::SetModelName(std::string modelName)
+{
+    if (!m_ModelCreated)
+        m_ModelName = std::move(modelName);
+}
+
 Rml::ElementDocument* ThemedDocuments::Document(size_t index) const
 {
     if (index >= m_Slots.size() || !IsContextAlive(m_Slots[index].context))
@@ -198,6 +205,10 @@ Rml::ElementDocument* ThemedDocuments::Document(size_t index) const
 
 void ThemedDocuments::UnloadDocuments()
 {
+    const bool anyLoaded = std::any_of(m_Slots.begin(), m_Slots.end(), [](const Slot& slot)
+                                       { return slot.document != nullptr && IsContextAlive(slot.context); });
+    if (anyLoaded && m_Options.beforeUnload)
+        m_Options.beforeUnload();
     for (Slot& slot : m_Slots)
     {
         if (slot.document != nullptr && IsContextAlive(slot.context))

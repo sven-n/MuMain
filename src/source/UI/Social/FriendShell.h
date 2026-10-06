@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Social/FriendShellModel.h"
 #include <RmlUi/Core/EventListener.h>
 #include <array>
@@ -41,7 +41,8 @@ private:
     void RegisterModel(Rml::DataModelConstructor& constructor, Model& model);
     void BindLabels(Rml::DataModelConstructor& constructor);
     void Unload();
-    void ReloadTheme();
+    void OnBuilt();
+    void OnUnload();
     void SyncGeometry();
     void SyncWorkspace();
     bool SelectRow(const Action& action);
@@ -67,8 +68,11 @@ private:
     Rml::Element* ActivePane() const;
 
     CUIFriendWindow& m_Owner;
-    RmlModelBinder<Model> m_Binder;
-    Rml::ElementDocument* m_Document = nullptr;
+    UI::RmlBridge::ThemedView<Model> m_View{"friend_shell", [this](auto& c, auto& m) { RegisterModel(c, m); },
+        {{"Data/Interface/RmlUi/friend_shell.rml"}},
+        {.afterBuild = [this] { OnBuilt(); },
+         .afterReload = [this] { m_RestoreScroll = true; },
+         .beforeUnload = [this] { OnUnload(); }}};
     std::array<Rml::String, 22> m_Labels;
     std::vector<Action> m_Actions;
     Rml::Vector2i m_Viewport{};

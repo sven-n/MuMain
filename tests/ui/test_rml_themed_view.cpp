@@ -46,7 +46,7 @@ void RegisterViewTestModel(Rml::DataModelConstructor& constructor, ViewTestModel
 }
 
 constexpr const char* kTitleDocument =
-    "<rml><head></head><body data-model='view_test'><div id='title'>{{title}}</div></body></rml>";
+    "<rml><head></head><body data-model=\"view_test\"><div id='title'>{{title}}</div></body></rml>";
 constexpr const char* kPlainDocument = "<rml><head></head><body><div id='plain'>plain</div></body></rml>";
 
 // RmlUi running headless, with a folder for the test's documents.
@@ -296,4 +296,32 @@ TEST_CASE("release blurs a focused field it owns [ui][rml-themed-view]")
     view.Release();
     CHECK(counter.blurs == 1);
     fixture.context->Update();
+}
+
+// The friend family's windows know their model's name only once they are built, and detach their
+// listeners from a document before it goes, on a theme switch as on a close.
+TEST_CASE("a late model name and a hook before every unload [ui][rml-themed-view]")
+{
+    Fixture fixture;
+    int unloads = 0;
+    UI::RmlBridge::ThemedViewOptions options;
+    options.modelPlaceholder = "view_test";
+    options.beforeUnload = [&unloads] { ++unloads; };
+    UI::RmlBridge::ThemedView<ViewTestModel> view("", RegisterViewTestModel,
+                                                  {fixture.Spec(fixture.Write("late.rml", kTitleDocument))}, options);
+    view.Release();
+    CHECK(unloads == 0);
+
+    view.SetModelName("view_test_7");
+    REQUIRE(view.Ensure());
+    view.SetModelName("ignored");
+    CHECK(view.ModelName() == "view_test_7");
+    view.GetModel().title = "Late";
+    view.MarkDirty("title");
+    CHECK(fixture.Title(view.Document()) == "Late");
+
+    UI::RmlBridge::ReloadAllThemedDocuments();
+    CHECK(unloads == 1);
+    view.Release();
+    CHECK(unloads == 2);
 }

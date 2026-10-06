@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Social/ChatRoomModel.h"
 #include <RmlUi/Core/EventListener.h>
 #include <string>
@@ -61,7 +61,8 @@ private:
     };
     void RegisterModel(Rml::DataModelConstructor& constructor, Model& model);
     void Unload();
-    void ReloadTheme();
+    void OnBuilt();
+    void OnUnload();
     void SyncGeometry();
     void SyncWorkspace();
     void ActionRequested(const Action& action);
@@ -79,9 +80,11 @@ private:
     Rml::Element* Field() const;
 
     CUIChatWindow& m_Owner;
-    RmlModelBinder<Model> m_Binder;
-    Rml::ElementDocument* m_Document = nullptr;
-    Rml::String m_ModelName;
+    UI::RmlBridge::ThemedView<Model> m_View{"", [this](auto& c, auto& m) { RegisterModel(c, m); },
+        {{"Data/Interface/RmlUi/chat_room.rml"}},
+        {.modelPlaceholder = "chat_room",
+         .afterBuild = [this] { OnBuilt(); },
+         .beforeUnload = [this] { OnUnload(); }}};
     std::vector<Action> m_Actions;
     Rml::Vector2i m_Viewport{};
     float m_DpRatio = 0;

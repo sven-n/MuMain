@@ -22,7 +22,6 @@ namespace UI::Social
 {
 namespace
 {
-constexpr const char* DocumentPath = "Data/Interface/RmlUi/friend_shell.rml";
 constexpr int FriendsTab = 0;
 constexpr int LettersTab = 1;
 constexpr int WindowsTab = 2;
@@ -45,12 +44,10 @@ Rml::String ServerLabel(int server)
 
 FriendShell::FriendShell(CUIFriendWindow& owner) : m_Owner(owner)
 {
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadTheme(); });
 }
 
 FriendShell::~FriendShell()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
     Unload();
 }
 
@@ -90,77 +87,57 @@ void FriendShell::RegisterModel(Rml::DataModelConstructor& c, Model& m)
 
 void FriendShell::Build()
 {
-    if (m_Document || !RmlUiRuntime::Instance().IsCreated())
-        return;
-    auto* context = RmlUiRuntime::Instance().GetContext();
-    if (!m_Binder.Create(context, "friend_shell", [this](auto& c, auto& m) { RegisterModel(c, m); }))
-        return;
-    m_Document = UI::RmlBridge::LoadThemedDocument(context, DocumentPath);
-    if (!m_Document)
-        return;
-    m_Document->AddEventListener(Rml::EventId::Mousedown, this);
-    m_Document->AddEventListener(Rml::EventId::Keydown, this);
-    m_Document->AddEventListener(Rml::EventId::Handledrag, this);
-    if (auto* header = m_Document->GetElementById("window_shell_header"))
-        UI::RmlBridge::MakeDraggable(header, m_Document, nullptr, [this] { SyncDraggedPosition(); });
+    m_View.Ensure();
+}
+
+void FriendShell::OnBuilt()
+{
+    m_View.Document()->AddEventListener(Rml::EventId::Mousedown, this);
+    m_View.Document()->AddEventListener(Rml::EventId::Keydown, this);
+    m_View.Document()->AddEventListener(Rml::EventId::Handledrag, this);
+    if (auto* header = m_View.Document()->GetElementById("window_shell_header"))
+        UI::RmlBridge::MakeDraggable(header, m_View.Document(), nullptr, [this] { SyncDraggedPosition(); });
     SyncWorkspace();
-    m_Document->UpdateDocument();
+    m_View.Document()->UpdateDocument();
     SyncGeometry();
+}
+
+void FriendShell::OnUnload()
+{
+    if (auto* pane = ActivePane())
+        m_Scroll[m_View.GetModel().tab] = pane->GetScrollTop() / m_View.Document()->GetContext()->GetDensityIndependentPixelRatio();
+    m_View.Document()->RemoveEventListener(Rml::EventId::Mousedown, this);
+    m_View.Document()->RemoveEventListener(Rml::EventId::Keydown, this);
+    m_View.Document()->RemoveEventListener(Rml::EventId::Handledrag, this);
+    m_Placed = false;
+    m_Settled = false;
 }
 
 void FriendShell::Unload()
 {
-    auto* context = RmlUiRuntime::Instance().GetContext();
-    if (!m_Document)
-    {
-        if (context) m_Binder.Destroy(context);
-        return;
-    }
-    if (auto* focused = context->GetFocusElement(); focused && focused->GetOwnerDocument() == m_Document)
-        focused->Blur();
-    m_Document->RemoveEventListener(Rml::EventId::Mousedown, this);
-    m_Document->RemoveEventListener(Rml::EventId::Keydown, this);
-    m_Document->RemoveEventListener(Rml::EventId::Handledrag, this);
-    context->UnloadDocument(m_Document);
-    m_Document = nullptr;
-    m_Placed = false;
-    m_Settled = false;
-    m_Binder.Destroy(context);
-}
-
-void FriendShell::ReloadTheme()
-{
-    if (!m_Document)
-        return;
-    Model model = m_Binder.GetModel();
-    if (auto* pane = ActivePane())
-        m_Scroll[model.tab] = pane->GetScrollTop() / m_Document->GetContext()->GetDensityIndependentPixelRatio();
-    Unload();
-    m_Binder.GetModel() = std::move(model);
-    Build();
-    m_RestoreScroll = true;
+    m_View.Release();
 }
 
 bool FriendShell::Sync(bool shown)
 {
     if (!shown)
     {
-        UI::RmlBridge::SyncDocumentVisibility(m_Document, false);
+        UI::RmlBridge::SyncDocumentVisibility(m_View.Document(), false);
         return false;
     }
     Build();
-    if (!m_Document)
+    if (!m_View.Document())
         return false;
-    auto& model = m_Binder.GetModel();
+    auto& model = m_View.GetModel();
     if (m_Title != m_Owner.GetTitle())
     {
         m_Title = m_Owner.GetTitle();
         model.title = Text(m_Title.c_str());
-        m_Binder.MarkDirty("title");
+        m_View.MarkDirty("title");
     }
     const bool reject = g_pWindowMgr->GetChatReject() != FALSE;
-    if (model.rejectChat != reject) { model.rejectChat = reject; m_Binder.MarkDirty("reject_chat"); }
-    const bool wasVisible = m_Document->IsVisible();
+    if (model.rejectChat != reject) { model.rejectChat = reject; m_View.MarkDirty("reject_chat"); }
+    const bool wasVisible = m_View.Document()->IsVisible();
     SyncWorkspace();
     SyncGeometry();
     // A hidden document has no box, so neither the resting place nor a layout the manager restored
@@ -171,7 +148,7 @@ bool FriendShell::Sync(bool shown)
         if (!m_CustomPosition)
             PlaceAtRest();
         ApplyLayout();
-        m_Document->UpdateDocument();
+        m_View.Document()->UpdateDocument();
         SyncGeometry();
     }
     else if (m_Placed)
@@ -179,11 +156,11 @@ bool FriendShell::Sync(bool shown)
     // window_shell places #panel through the data model, which the context applies only after this
     // runs, so a document shown on the frame it is placed still renders once where .center-both
     // left it -- centred and unsized.
-    UI::RmlBridge::SyncDocumentVisibility(m_Document, m_Settled);
+    UI::RmlBridge::SyncDocumentVisibility(m_View.Document(), m_Settled);
     if (m_Settled && m_RestoreScroll)
     {
         if (auto* pane = ActivePane())
-            pane->SetScrollTop(m_Scroll[model.tab] * m_Document->GetContext()->GetDensityIndependentPixelRatio());
+            pane->SetScrollTop(m_Scroll[model.tab] * m_View.Document()->GetContext()->GetDensityIndependentPixelRatio());
         m_RestoreScroll = false;
     }
     if (m_Settled && m_FocusPane)
@@ -191,17 +168,17 @@ bool FriendShell::Sync(bool shown)
         m_FocusPane = false;
         FocusActivePane();
     }
-    return m_Document->IsVisible() && !wasVisible;
+    return m_View.Document()->IsVisible() && !wasVisible;
 }
 
-void FriendShell::PullToFront() { if (m_Document) m_Document->PullToFront(); }
+void FriendShell::PullToFront() { if (m_View.Document()) m_View.Document()->PullToFront(); }
 
 void FriendShell::SyncGeometry()
 {
     auto* panel = Panel();
     if (!panel)
         return;
-    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
+    const float scale = m_View.Document()->GetContext()->GetDensityIndependentPixelRatio();
     const auto size = panel->GetBox().GetSize(Rml::BoxArea::Border);
     if (scale <= 0 || size.x <= 0 || size.y <= 0)
         return;
@@ -223,36 +200,36 @@ void FriendShell::SyncGeometry()
 
 void FriendShell::SyncWorkspace()
 {
-    auto* context = m_Document->GetContext();
+    auto* context = m_View.Document()->GetContext();
     const auto viewport = context->GetDimensions();
     const float scale = context->GetDensityIndependentPixelRatio();
     const float height = UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight) *
                          UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight).scaleY;
-    auto& model = m_Binder.GetModel();
+    auto& model = m_View.GetModel();
     if (model.workspaceHeight == height && m_Viewport == viewport && m_DpRatio == scale)
         return;
     model.workspaceHeight = height;
-    m_Binder.MarkDirty("workspace_height");
+    m_View.MarkDirty("workspace_height");
     m_Viewport = viewport;
     m_DpRatio = scale;
     if (m_CustomPosition)
         RestoreLayout(m_Left, m_Top, m_Width, m_Maximized ? height / scale : m_Height);
-    m_Document->UpdateDocument();
+    m_View.Document()->UpdateDocument();
 }
 
 void FriendShell::RestoreMaximized(bool maximized, float top, float height)
 {
     m_Maximized = maximized;
     m_RestoreRect = {m_Left, top, m_Width, height};
-    m_Binder.GetModel().maximized = maximized;
-    m_Binder.MarkDirty("maximized");
+    m_View.GetModel().maximized = maximized;
+    m_View.MarkDirty("maximized");
 }
 
 void FriendShell::SyncDraggedPosition()
 {
-    if (!m_Document)
+    if (!m_View.Document())
         return;
-    m_Document->UpdateDocument();
+    m_View.Document()->UpdateDocument();
     SyncGeometry();
     // Pull it back inside only where there is room to: a panel taller than the workspace would
     // otherwise be yanked to the top edge at the end of every drag.
@@ -265,12 +242,12 @@ void FriendShell::SyncDraggedPosition()
 // centering transform while `positioned`.
 void FriendShell::PublishPosition()
 {
-    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
-    auto& model = m_Binder.GetModel();
+    const float scale = m_View.Document()->GetContext()->GetDensityIndependentPixelRatio();
+    auto& model = m_View.GetModel();
     model.rootX = m_Left * scale;
     model.rootY = m_Top * scale;
-    m_Binder.MarkDirty("root_x");
-    m_Binder.MarkDirty("root_y");
+    m_View.MarkDirty("root_x");
+    m_View.MarkDirty("root_y");
 }
 
 // Records the layout whether or not a document exists yet: the manager hands back the geometry it
@@ -284,7 +261,7 @@ void FriendShell::RestoreLayout(float x, float y, float width, float height, boo
     m_Left = x;
     m_Top = y;
     m_CustomPosition = true;
-    if (!m_Document)
+    if (!m_View.Document())
         return;
     ClampToWorkspace();
     ApplyLayout();
@@ -292,11 +269,11 @@ void FriendShell::RestoreLayout(float x, float y, float width, float height, boo
 
 void FriendShell::ClampToWorkspace()
 {
-    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
+    const float scale = m_View.Document()->GetContext()->GetDensityIndependentPixelRatio();
     if (scale <= 0)
         return;
     const float maxLeft = WindowWidth / scale - m_Width;
-    const float maxTop = m_Binder.GetModel().workspaceHeight / scale - m_Height;
+    const float maxTop = m_View.GetModel().workspaceHeight / scale - m_Height;
     if (maxLeft > 0)
         m_Left = std::clamp(m_Left, 0.f, maxLeft);
     if (maxTop > 0)
@@ -323,7 +300,7 @@ void FriendShell::ApplyLayout()
 // the workspace's, not the window's, so it sits on top of the bottom HUD rather than under it.
 void FriendShell::PlaceAtRest()
 {
-    const float scale = m_Document->GetContext()->GetDensityIndependentPixelRatio();
+    const float scale = m_View.Document()->GetContext()->GetDensityIndependentPixelRatio();
     if (scale <= 0)
         return;
     float x = 0.f;
@@ -335,38 +312,38 @@ void FriendShell::PlaceAtRest()
         return;
     }
     m_Left = std::max(0.f, WindowWidth / scale - m_Width);
-    m_Top = std::max(0.f, m_Binder.GetModel().workspaceHeight / scale - m_Height);
+    m_Top = std::max(0.f, m_View.GetModel().workspaceHeight / scale - m_Height);
 }
 
 Rml::Element* FriendShell::Panel() const
 {
-    return m_Document;
+    return m_View.Document();
 }
 
 void FriendShell::Maximize()
 {
-    if (!m_Document)
+    if (!m_View.Document())
         return;
     if (!m_Maximized)
     {
         m_RestoreRect = {m_Left, m_Top, m_Width, m_Height};
         m_CustomSize = true;
         RestoreLayout(m_Left, 0, m_Width,
-                      m_Binder.GetModel().workspaceHeight / m_Document->GetContext()->GetDensityIndependentPixelRatio());
+                      m_View.GetModel().workspaceHeight / m_View.Document()->GetContext()->GetDensityIndependentPixelRatio());
     }
     else
         RestoreLayout(m_RestoreRect[0], m_RestoreRect[1], m_RestoreRect[2], m_RestoreRect[3]);
     m_Maximized = !m_Maximized;
-    m_Binder.GetModel().maximized = m_Maximized;
-    m_Binder.MarkDirty("maximized");
-    m_Document->UpdateDocument();
+    m_View.GetModel().maximized = m_Maximized;
+    m_View.MarkDirty("maximized");
+    m_View.Document()->UpdateDocument();
     SyncGeometry();
 }
 
 
 void FriendShell::RefreshFriends()
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     std::deque<GUILDLIST_TEXT> entries;
     g_pFriendList->UpdateFriendList(entries, nullptr);
     m.friends.clear();
@@ -377,14 +354,14 @@ void FriendShell::RefreshFriends()
     if (std::none_of(m.friends.begin(), m.friends.end(), [&](const auto& row) { return row.name == m.selectedFriend; }))
         m.selectedFriend.clear();
     m.friendSort = g_pFriendList->GetCurrentSortType();
-    m_Binder.MarkDirty("friends");
-    m_Binder.MarkDirty("selected_friend");
-    m_Binder.MarkDirty("friend_sort");
+    m_View.MarkDirty("friends");
+    m_View.MarkDirty("selected_friend");
+    m_View.MarkDirty("friend_sort");
 }
 
 void FriendShell::RefreshLetters()
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     std::deque<LETTERLIST_TEXT> entries;
     g_pLetterList->UpdateLetterList(entries, m.selectedLetter);
     m.letters.clear();
@@ -396,64 +373,64 @@ void FriendShell::RefreshLetters()
     m.letterSort = g_pLetterList->GetCurrentSortType();
     m.checkAll = false;
     g_pLetterList->ResetLetterSelect(FALSE);
-    for (const char* key : {"letters", "selected_letter", "letter_sort", "check_all"}) m_Binder.MarkDirty(key);
+    for (const char* key : {"letters", "selected_letter", "letter_sort", "check_all"}) m_View.MarkDirty(key);
 }
 
 void FriendShell::AddWindow(DWORD id, const wchar_t* title)
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     if (std::any_of(m.windows.begin(), m.windows.end(), [id](const auto& row) { return row.id == id; })) return;
     m.windows.push_back({static_cast<int>(id), Text(title)});
     // Only the first window opened is selected for you; later ones clear the selection.
     m.selectedWindow = m.windows.size() == 1 ? static_cast<int>(id) : 0;
-    m_Binder.MarkDirty("windows");
-    m_Binder.MarkDirty("selected_window");
+    m_View.MarkDirty("windows");
+    m_View.MarkDirty("selected_window");
 }
 
 void FriendShell::RemoveWindow(DWORD id)
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     std::erase_if(m.windows, [id](const auto& row) { return row.id == id; });
     if (m.selectedWindow == id) m.selectedWindow = m.windows.empty() ? 0 : m.windows.back().id;
-    m_Binder.MarkDirty("windows");
-    m_Binder.MarkDirty("selected_window");
+    m_View.MarkDirty("windows");
+    m_View.MarkDirty("selected_window");
 }
 
 void FriendShell::ResetWindows()
 {
-    m_Binder.GetModel().windows.clear();
-    m_Binder.GetModel().selectedWindow = 0;
-    m_Binder.MarkDirty("windows");
-    m_Binder.MarkDirty("selected_window");
+    m_View.GetModel().windows.clear();
+    m_View.GetModel().selectedWindow = 0;
+    m_View.MarkDirty("windows");
+    m_View.MarkDirty("selected_window");
 }
 
-DWORD FriendShell::SelectedWindow() const { return m_Binder.GetModel().selectedWindow; }
-DWORD FriendShell::SelectedLetter() const { return m_Binder.GetModel().selectedLetter; }
-int FriendShell::GetTab() const { return m_Binder.GetModel().tab; }
+DWORD FriendShell::SelectedWindow() const { return m_View.GetModel().selectedWindow; }
+DWORD FriendShell::SelectedLetter() const { return m_View.GetModel().selectedLetter; }
+int FriendShell::GetTab() const { return m_View.GetModel().tab; }
 
 void FriendShell::SelectLetterLine(int line)
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     if (line <= 0 || line > static_cast<int>(m.letters.size())) return;
     m.selectedLetter = m.letters[m.letters.size() - line].id;
-    m_Binder.MarkDirty("selected_letter");
+    m_View.MarkDirty("selected_letter");
     ScrollToSelection();
 }
 
 Rml::Element* FriendShell::ActivePane() const
 {
     static constexpr const char* panes[] = {"friends_pane", "mail_pane", "windows_pane"};
-    return m_Document ? m_Document->GetElementById(panes[GetTab()]) : nullptr;
+    return m_View.Document() ? m_View.Document()->GetElementById(panes[GetTab()]) : nullptr;
 }
 
 void FriendShell::SetTab(int tab)
 {
     if (tab < FriendsTab || tab > WindowsTab || tab == GetTab()) return;
     if (auto* pane = ActivePane())
-        m_Scroll[GetTab()] = pane->GetScrollTop() / m_Document->GetContext()->GetDensityIndependentPixelRatio();
+        m_Scroll[GetTab()] = pane->GetScrollTop() / m_View.Document()->GetContext()->GetDensityIndependentPixelRatio();
     PlayBuffer(SOUND_CLICK01);
-    m_Binder.GetModel().tab = tab;
-    m_Binder.MarkDirty("active_tab");
+    m_View.GetModel().tab = tab;
+    m_View.MarkDirty("active_tab");
     m_RestoreScroll = true;
     m_FocusPane = true;
 }
@@ -468,7 +445,7 @@ void FriendShell::RequestPaneFocus()
 
 void FriendShell::FocusActivePane()
 {
-    if (!m_Document || !m_Document->IsVisible())
+    if (!m_View.Document() || !m_View.Document()->IsVisible())
         return;
     // Never take the keyboard off a field somebody is typing in -- native's key-focus id and its
     // text focus were separate, so selecting this window never interrupted a chat line.
@@ -497,8 +474,8 @@ void FriendShell::ProcessEvent(Rml::Event& event)
         // Only the resize grip is a <handle>; a scroll thumb is a sliderbar and never lands here.
         m_CustomSize = true;
         m_Maximized = false;
-        m_Binder.GetModel().maximized = false;
-        m_Binder.MarkDirty("maximized");
+        m_View.GetModel().maximized = false;
+        m_View.MarkDirty("maximized");
     }
 }
 
@@ -517,14 +494,14 @@ void FriendShell::ProcessActions()
 
 bool FriendShell::SelectRow(const Action& a)
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     if (a.name == "friend_select" || a.name == "friend_open")
     {
         const auto name = a.value.Get<Rml::String>();
         if (std::none_of(m.friends.begin(), m.friends.end(), [&](const auto& row) { return row.name == name; }))
             return true;
         m.selectedFriend = name;
-        m_Binder.MarkDirty("selected_friend");
+        m_View.MarkDirty("selected_friend");
         if (a.name == "friend_open") ActivateFriend();
         return true;
     }
@@ -534,7 +511,7 @@ bool FriendShell::SelectRow(const Action& a)
         if (std::none_of(m.letters.begin(), m.letters.end(), [id](const auto& row) { return row.id == id; }))
             return true;
         m.selectedLetter = id;
-        m_Binder.MarkDirty("selected_letter");
+        m_View.MarkDirty("selected_letter");
         if (a.name == "letter_open") OpenLetter();
         return true;
     }
@@ -543,7 +520,7 @@ bool FriendShell::SelectRow(const Action& a)
     if (std::none_of(m.windows.begin(), m.windows.end(), [id](const auto& row) { return row.id == id; }))
         return true;
     m.selectedWindow = id;
-    m_Binder.MarkDirty("selected_window");
+    m_View.MarkDirty("selected_window");
     if (a.name == "window_open") ActivateWindow();
     return true;
 }
@@ -577,7 +554,7 @@ void FriendShell::ActionRequested(const Action& a)
 
 void FriendShell::ActivateFriend()
 {
-    const auto& m = m_Binder.GetModel();
+    const auto& m = m_View.GetModel();
     const auto it = std::find_if(m.friends.begin(), m.friends.end(), [&](const auto& row) { return row.name == m.selectedFriend; });
     if (it == m.friends.end() || it->server > LastOnlineServer) return;
     const auto name = StringUtils::NarrowToWide(it->name);
@@ -603,7 +580,7 @@ void FriendShell::ActivateFriend()
 
 void FriendShell::DeleteFriend()
 {
-    const auto name = StringUtils::NarrowToWide(m_Binder.GetModel().selectedFriend);
+    const auto name = StringUtils::NarrowToWide(m_View.GetModel().selectedFriend);
     if (name.empty()) return;
     wchar_t prompt[MAX_TEXT_LENGTH + 1]{};
     mu_swprintf(prompt, L"%ls %ls", I18N::Game::DoYouReallyWishToDeleteThisFriend, name.c_str());
@@ -636,8 +613,8 @@ void FriendShell::WriteLetter(bool reply, bool toFriend)
     const DWORD id = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, UIWND_DEFAULT, UIWND_DEFAULT, title);
     auto* window = dynamic_cast<CUILetterWriteWindow*>(g_pWindowMgr->GetWindow(id));
     if (!window) return;
-    if (toFriend && !m_Binder.GetModel().selectedFriend.empty())
-        window->SetMailtoText(StringUtils::NarrowToWide(m_Binder.GetModel().selectedFriend).c_str());
+    if (toFriend && !m_View.GetModel().selectedFriend.empty())
+        window->SetMailtoText(StringUtils::NarrowToWide(m_View.GetModel().selectedFriend).c_str());
     if (letter)
     {
         window->SetMailtoText(letter->m_szID);
@@ -652,7 +629,7 @@ void FriendShell::WriteLetter(bool reply, bool toFriend)
 void FriendShell::DeleteLetters()
 {
     std::vector<DWORD> ids;
-    for (const auto& row : m_Binder.GetModel().letters)
+    for (const auto& row : m_View.GetModel().letters)
         if (row.checked) ids.push_back(row.id);
     if (ids.empty())
     {
@@ -668,20 +645,20 @@ void FriendShell::DeleteLetters()
 
 void FriendShell::ToggleLetter(int id)
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     for (auto& row : m.letters) if (row.id == id) row.checked = !row.checked;
     m.checkAll = !m.letters.empty() && std::all_of(m.letters.begin(), m.letters.end(), [](const auto& row) { return row.checked; });
-    m_Binder.MarkDirty("letters");
-    m_Binder.MarkDirty("check_all");
+    m_View.MarkDirty("letters");
+    m_View.MarkDirty("check_all");
 }
 
 void FriendShell::ToggleAllLetters()
 {
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     m.checkAll = !m.checkAll;
     for (auto& row : m.letters) row.checked = m.checkAll;
-    m_Binder.MarkDirty("letters");
-    m_Binder.MarkDirty("check_all");
+    m_View.MarkDirty("letters");
+    m_View.MarkDirty("check_all");
 }
 
 void FriendShell::ActivateWindow()
@@ -720,7 +697,7 @@ void FriendShell::MoveSelection(int key)
         return;
     }
     if (key != Rml::Input::KI_UP && key != Rml::Input::KI_DOWN && key != Rml::Input::KI_HOME && key != Rml::Input::KI_END) return;
-    auto& m = m_Binder.GetModel();
+    auto& m = m_View.GetModel();
     auto move = [&](const auto& rows, auto& selected, auto identity)
     {
         if (rows.empty()) return;
@@ -734,7 +711,7 @@ void FriendShell::MoveSelection(int key)
     if (m.tab == FriendsTab) move(m.friends, m.selectedFriend, [](const auto& r) { return r.name; });
     else if (m.tab == LettersTab) move(m.letters, m.selectedLetter, [](const auto& r) { return r.id; });
     else move(m.windows, m.selectedWindow, [](const auto& r) { return r.id; });
-    for (const char* field : {"selected_friend", "selected_letter", "selected_window"}) m_Binder.MarkDirty(field);
+    for (const char* field : {"selected_friend", "selected_letter", "selected_window"}) m_View.MarkDirty(field);
     ScrollToSelection();
 }
 
@@ -742,7 +719,7 @@ void FriendShell::ScrollToSelection()
 {
     auto* pane = ActivePane();
     if (!pane) return;
-    m_Document->UpdateDocument();
+    m_View.Document()->UpdateDocument();
     if (auto* row = pane->QuerySelector(".selected")) row->ScrollIntoView();
 }
 }
