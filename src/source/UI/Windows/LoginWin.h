@@ -5,7 +5,7 @@
 
 #include "UI/Core/WindowObject.h"
 
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <atomic>
 #include <thread>
@@ -82,7 +82,6 @@ public:
     // mu::ui::window::IObject
     bool Render() override;
     // Rebuilds this window's RmlUi document/model for the active theme. No-op if never opened.
-    void ReloadRmlTheme();
     // Claims clicks within its own bounding box only -- not modal, world/credits/system-menu stay
     // reachable around it. Depth 20.0f is below the full-screen-claiming overlays (CSysMenuWin/
     // CMsgWin/CCreditWin), so no explicit modal check is needed here.
@@ -145,12 +144,14 @@ private:
         Rml::String username;
         Rml::String password;
     };
-    RmlModelBinder<LoginRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    UI::RmlBridge::ThemedView<LoginRmlModel> m_RmlView{"login",
+        [this](Rml::DataModelConstructor& c, LoginRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/login.rml"}},
+        {.afterBuild = [this] { ApplyCredentialLimits(); }, .afterReload = [this] { OnRmlReloaded(); }}};
 
     void SyncRmlModel();
-    // Factored out of Create() so ReloadRmlTheme() can re-run it after tearing down the old document.
-    void BuildRmlUi();
+    void BindRmlModel(Rml::DataModelConstructor& c, LoginRmlModel& model);
+    void OnRmlReloaded();
     // Pushes MAX_USERNAME_SIZE/MAX_PASSWORD_SIZE onto the two fields, so the caps stay one C++ rule
     // rather than a literal duplicated per theme.
     void ApplyCredentialLimits();

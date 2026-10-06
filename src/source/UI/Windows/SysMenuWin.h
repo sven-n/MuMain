@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml { class ElementDocument; }
 
@@ -42,7 +42,6 @@ public:
     {
         return 40.0f;
     }
-    void ReloadRmlTheme();
 
 protected:
     void ExitGame();
@@ -51,7 +50,6 @@ protected:
     void Close();
 
 private:
-    void BuildRmlUi();
 
     struct SysMenuRmlModel
     {
@@ -63,8 +61,11 @@ private:
         Rml::String optionLabel;
         Rml::String closeLabel;
     };
-    RmlModelBinder<SysMenuRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, SysMenuRmlModel& model);
+    UI::RmlBridge::ThemedView<SysMenuRmlModel> m_RmlView{"sys_menu",
+        [this](Rml::DataModelConstructor& c, SysMenuRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/sys_menu.rml"}},
+        {.stacking = UI::RmlBridge::ThemedStacking::Front}};
     bool m_bSelectServerEnabled = false;
 
     void SyncRmlModel();

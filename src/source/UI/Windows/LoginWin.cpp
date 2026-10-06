@@ -108,7 +108,7 @@ void CLoginWin::Create()
     // Tab order between the two fields is RmlUi's own document-level navigation (ElementDocument
     // handles KI_TAB, and WidgetTextInput deliberately lets it bubble), replacing the native boxes'
     // reciprocal SetTabTarget() pair.
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
     model.username.clear();
     model.password.clear();
     if (m_RememberMe) {
@@ -118,8 +118,8 @@ void CLoginWin::Create()
     }
     // Create() runs on every entry to the login scene, but the document outlives it: push the
     // fresh values into the fields, or they keep what an earlier visit typed.
-    m_RmlBinder.MarkDirty("username");
-    m_RmlBinder.MarkDirty("password");
+    m_RmlView.MarkDirty("username");
+    m_RmlView.MarkDirty("password");
 
     // The password is only pre-filled and re-saved when the player previously
     // opted in on a trusted machine.
@@ -132,84 +132,41 @@ void CLoginWin::Create()
 
     this->FirstLoad = 1;
 
-    // Guarded on m_pRmlDoc: Create() re-runs on every resolution change, but the RmlUi
-    // document/model are set up once and only repositioned afterward (see SetPosition()).
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-    }
+    // Builds once; Create() re-runs on every resolution change and only repositions it afterward
+    // (see SetPosition()).
+    m_RmlView.Ensure();
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_LOGIN, this);
     Show(false);
 }
 
-void CLoginWin::BuildRmlUi()
+void CLoginWin::BindRmlModel(Rml::DataModelConstructor& c, LoginRmlModel& model)
 {
-    // The data model must exist before the document is loaded -- RmlUi resolves data-model
-    // bindings while parsing the RML, so a model created after LoadDocument() renders every
-    // {{...}} as literal text instead of its bound value.
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "login",
-        [this](Rml::DataModelConstructor& c, LoginRmlModel& model)
-        {
-            c.Bind("remember_me_checked", &model.rememberMeChecked);
-            c.Bind("save_password_checked", &model.savePasswordChecked);
-            c.Bind("server_name", &model.serverName);
-            c.Bind("account_label", &model.accountLabel);
-            c.Bind("password_label", &model.passwordLabel);
-            c.Bind("remember_me_label", &model.rememberMeLabel);
-            c.Bind("save_password_label", &model.savePasswordLabel);
-            c.Bind("trust_warning", &model.trustWarning);
-            c.Bind("ok_label", &model.okLabel);
-            c.Bind("cancel_label", &model.cancelLabel);
-            c.Bind("username", &model.username);
-            c.Bind("password", &model.password);
+    c.Bind("remember_me_checked", &model.rememberMeChecked);
+    c.Bind("save_password_checked", &model.savePasswordChecked);
+    c.Bind("server_name", &model.serverName);
+    c.Bind("account_label", &model.accountLabel);
+    c.Bind("password_label", &model.passwordLabel);
+    c.Bind("remember_me_label", &model.rememberMeLabel);
+    c.Bind("save_password_label", &model.savePasswordLabel);
+    c.Bind("trust_warning", &model.trustWarning);
+    c.Bind("ok_label", &model.okLabel);
+    c.Bind("cancel_label", &model.cancelLabel);
+    c.Bind("username", &model.username);
+    c.Bind("password", &model.password);
 
-            c.BindEventCallback("login_ok_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
-            c.BindEventCallback("login_cancel_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
-            c.BindEventCallback("login_toggle_remember_me",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRememberMe(); });
-            c.BindEventCallback("login_toggle_save_password",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleSavePassword(); });
-        });
-
-    // Routed through LoadThemedDocument so this resolves against the active theme's stylesheet.
-    if (modelCreated)
-    {
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/login.rml");
-        ApplyCredentialLimits();
-    }
-
-    // Deliberately NOT calling UI::RmlBridge::MakeDraggable() here -- the login screen is
-    // meant to stay static.
+    c.BindEventCallback("login_ok_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
+    c.BindEventCallback("login_cancel_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
+    c.BindEventCallback("login_toggle_remember_me",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRememberMe(); });
+    c.BindEventCallback("login_toggle_save_password",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleSavePassword(); });
 }
 
-void CLoginWin::ReloadRmlTheme()
+void CLoginWin::OnRmlReloaded()
 {
-    if (!m_pRmlDoc) return; // never opened; BuildRmlUi() will pick up the new theme later
-
-    // The document's own visibility, not CObject::IsVisible() -- Release() hides m_pRmlDoc
-    // directly, so the latter goes stale across scene transitions.
-    const bool wasVisible = m_pRmlDoc->IsVisible();
-    // Destroy() resets the model, so carry the typed credentials across the rebuild. Emptied
-    // fields would also read as an edit and revoke the saved credentials
-    // (RevokeSavedCredentialsIfEdited()).
-    const Rml::String username = m_RmlBinder.GetModel().username;
-    const Rml::String password = m_RmlBinder.GetModel().password;
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-    m_RmlBinder.GetModel().username = username;
-    m_RmlBinder.GetModel().password = password;
-    m_RmlBinder.MarkDirty("username");
-    m_RmlBinder.MarkDirty("password");
-
     // The panel's size follows the theme's units (LoginUIScaleRatio()); keep it where
     // CSceneUICoordinator::CreateLoginScene() places it: centred, 2/3 down the free height.
     const SIZE previousSize = m_Size;
@@ -217,7 +174,6 @@ void CLoginWin::ReloadRmlTheme()
     m_Size.cx = ScaledOffset(329, uiScale);
     m_Size.cy = ScaledOffset(245, uiScale);
     SetPosition(m_ptPos.x + (previousSize.cx - m_Size.cx) / 2, m_ptPos.y + (previousSize.cy - m_Size.cy) * 2 / 3);
-    if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) m_pRmlDoc->Show(); }
 }
 
 void CLoginWin::SetPosition(int x, int y)
@@ -230,9 +186,9 @@ void CLoginWin::SetPosition(int x, int y)
 
 	// RmlUi panel origin: real window pixels, no scale conversion needed (RmlUi's Context already
 	// operates in real pixels; only the panel's own size/children are dp, scaled by RmlUi itself).
-	if (m_pRmlDoc)
+	if (m_RmlView.Document())
 	{
-		if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))
+		if (Rml::Element* panel = m_RmlView.Document()->GetElementById("panel"))
 		{
 			panel->SetProperty("left", std::to_string(x) + "px");
 			panel->SetProperty("top", std::to_string(y) + "px");
@@ -246,18 +202,17 @@ void CLoginWin::Show(bool bShow)
 
     // Hiding the document unfocuses it (Context::UnfocusDocument()), which is what releases SDL
     // text input now that the fields are RmlUi's -- no separate widget state to drive (#447).
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (bShow) { SyncRmlModel(); m_pRmlDoc->Show(); }
-        else       m_pRmlDoc->Hide();
+        if (bShow) { SyncRmlModel(); m_RmlView.Document()->Show(); }
+        else       m_RmlView.Document()->Hide();
     }
 }
 
 void CLoginWin::Release()
 {
     // Hide, not unload -- the document/model are created once and reused.
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
+    m_RmlView.Hide();
 }
 
 void CLoginWin::RmlClickOk() { SubmitLogin(); }
@@ -399,7 +354,7 @@ void CLoginWin::RevokeSavedCredentialsIfEdited()
     // Editing the account or password drops any stored credentials and revokes
     // the save-password consent, so an out-of-date password never lingers in
     // config.ini for the next person on this machine.
-    const auto& model = m_RmlBinder.GetModel();
+    const auto& model = m_RmlView.GetModel();
     const std::wstring curUser = StringUtils::NarrowToWide(model.username);
     const std::wstring curPass = StringUtils::NarrowToWide(model.password);
 
@@ -442,7 +397,7 @@ bool CLoginWin::Render()
     // Through the transition-only helper, not a bare Show(): this runs every frame, and
     // ElementDocument::Show() defaults to FocusFlag::Auto, which would hand focus back to the
     // document and blur #input_account/#input_password on every single frame.
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, !coveredByCredits);
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), !coveredByCredits);
 
 
     // Everything renders via the RmlUi overlay now, the two credential fields included, so there's
@@ -455,19 +410,19 @@ bool CLoginWin::Render()
 
 void CLoginWin::ApplyCredentialLimits()
 {
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
-    if (Rml::Element* account = m_pRmlDoc->GetElementById("input_account"))
+    if (Rml::Element* account = m_RmlView.Document()->GetElementById("input_account"))
         account->SetAttribute("maxlength", static_cast<int>(MAX_USERNAME_SIZE));
-    if (Rml::Element* password = m_pRmlDoc->GetElementById("input_password"))
+    if (Rml::Element* password = m_RmlView.Document()->GetElementById("input_password"))
         password->SetAttribute("maxlength", static_cast<int>(MAX_PASSWORD_SIZE));
 }
 
 void CLoginWin::FocusCredentialField(const char* elementId, bool selectAll)
 {
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
-    Rml::Element* field = m_pRmlDoc->GetElementById(elementId);
+    Rml::Element* field = m_RmlView.Document()->GetElementById(elementId);
     if (field == nullptr || !field->Focus())
         return;
 
@@ -492,40 +447,40 @@ void CLoginWin::FocusPassword(bool selectAll)
 
 void CLoginWin::SyncRmlModel()
 {
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
     const bool rememberChecked = m_bRememberMeChecked;
-    if (m_RmlBinder.GetModel().rememberMeChecked != rememberChecked)
+    if (m_RmlView.GetModel().rememberMeChecked != rememberChecked)
     {
-        m_RmlBinder.GetModel().rememberMeChecked = rememberChecked;
-        m_RmlBinder.MarkDirty("remember_me_checked");
+        m_RmlView.GetModel().rememberMeChecked = rememberChecked;
+        m_RmlView.MarkDirty("remember_me_checked");
     }
 
     const bool saveChecked = m_bSavePasswordChecked;
-    if (m_RmlBinder.GetModel().savePasswordChecked != saveChecked)
+    if (m_RmlView.GetModel().savePasswordChecked != saveChecked)
     {
-        m_RmlBinder.GetModel().savePasswordChecked = saveChecked;
-        m_RmlBinder.MarkDirty("save_password_checked");
+        m_RmlView.GetModel().savePasswordChecked = saveChecked;
+        m_RmlView.MarkDirty("save_password_checked");
     }
 
     wchar_t szServerName[MAX_TEXT_LENGTH] = {};
     const wchar_t* pServerStatus = g_ServerListManager->GetNonPVPInfo() ? I18N::Game::SDServer : I18N::Game::SDNonPvPServer;
     mu_swprintf(szServerName, pServerStatus, g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
     const std::string serverNameUtf8 = StringUtils::WideToNarrow(szServerName);
-    if (m_RmlBinder.GetModel().serverName != serverNameUtf8)
+    if (m_RmlView.GetModel().serverName != serverNameUtf8)
     {
-        m_RmlBinder.GetModel().serverName = serverNameUtf8;
-        m_RmlBinder.MarkDirty("server_name");
+        m_RmlView.GetModel().serverName = serverNameUtf8;
+        m_RmlView.MarkDirty("server_name");
     }
 
     // Static (per-locale) labels; only dirties the model on an active locale change.
     auto syncLabel = [this](Rml::String LoginRmlModel::* field, const char* boundName, const wchar_t* text)
     {
         const std::string utf8 = StringUtils::WideToNarrow(text);
-        if (m_RmlBinder.GetModel().*field != utf8)
+        if (m_RmlView.GetModel().*field != utf8)
         {
-            m_RmlBinder.GetModel().*field = utf8;
-            m_RmlBinder.MarkDirty(boundName);
+            m_RmlView.GetModel().*field = utf8;
+            m_RmlView.MarkDirty(boundName);
         }
     };
     syncLabel(&LoginRmlModel::accountLabel, "account_label", I18N::Game::Account);
@@ -558,7 +513,7 @@ void CLoginWin::RequestLogin()
 
     Show(false);
 
-    const auto& model = m_RmlBinder.GetModel();
+    const auto& model = m_RmlView.GetModel();
     wcsncpy(m_Username, StringUtils::NarrowToWide(model.username).c_str(), _countof(m_Username) - 1);
     m_Username[_countof(m_Username) - 1] = L'\0';
     wcsncpy(m_Password, StringUtils::NarrowToWide(model.password).c_str(), _countof(m_Password) - 1);

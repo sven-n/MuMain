@@ -67,79 +67,49 @@ void CMsgWin::Create()
     m_nGameExit = -1;
     m_dDeltaTickSum = 0.0;
 
-    // Guarded so the document/model are created once, since Create() re-runs on resolution change.
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-    }
+    // Builds once; Create() re-runs on resolution change.
+    m_RmlView.Ensure();
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_MSG_WINDOW, this);
     Show(false);
 }
 
-void CMsgWin::BuildRmlUi()
+void CMsgWin::BindRmlModel(Rml::DataModelConstructor& c, MsgWinRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "msg_win",
-        [this](Rml::DataModelConstructor& c, MsgWinRmlModel& model)
-        {
-            c.Bind("line1", &model.line1);
-            c.Bind("line2", &model.line2);
-            c.Bind("line2_hidden", &model.line2Hidden);
-            c.Bind("no_buttons", &model.noButtons);
-            c.Bind("mode_cancel_only", &model.modeCancelOnly);
-            c.Bind("mode_ok_only", &model.modeOkOnly);
-            c.Bind("mode_both", &model.modeBoth);
-            c.Bind("mode_input", &model.modeInput);
-            c.Bind("ok_label", &model.okLabel);
-            c.Bind("cancel_label", &model.cancelLabel);
-            c.Bind("password_input", &model.residentPassword);
+    c.Bind("line1", &model.line1);
+    c.Bind("line2", &model.line2);
+    c.Bind("line2_hidden", &model.line2Hidden);
+    c.Bind("no_buttons", &model.noButtons);
+    c.Bind("mode_cancel_only", &model.modeCancelOnly);
+    c.Bind("mode_ok_only", &model.modeOkOnly);
+    c.Bind("mode_both", &model.modeBoth);
+    c.Bind("mode_input", &model.modeInput);
+    c.Bind("ok_label", &model.okLabel);
+    c.Bind("cancel_label", &model.cancelLabel);
+    c.Bind("password_input", &model.residentPassword);
 
-            c.BindEventCallback("msgwin_ok_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
-            c.BindEventCallback("msgwin_cancel_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
-        });
-
-    if (modelCreated)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/msg_win.rml");
-
-    // Set on every build, so a rebuilt document keeps it; the field only shows in one mode.
-    if (m_pRmlDoc)
-    {
-        if (Rml::Element* field = m_pRmlDoc->GetElementById("msgwin_input"))
-            field->SetAttribute("maxlength", kResidentPasswordMaxLength);
-    }
+    c.BindEventCallback("msgwin_ok_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
+    c.BindEventCallback("msgwin_cancel_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
 }
 
-void CMsgWin::ReloadRmlTheme()
+void CMsgWin::ApplyInputLimit()
 {
-    if (!m_pRmlDoc) return;
-
-    // See CLoginWin::ReloadRmlTheme()'s comment on why this reads m_pRmlDoc directly.
-    const bool wasVisible = m_pRmlDoc->IsVisible();
-    // Destroy() resets the model, so carry the unsent text across the rebuild.
-    const Rml::String residentPassword = m_RmlBinder.GetModel().residentPassword;
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-    m_RmlBinder.GetModel().residentPassword = residentPassword;
-    m_RmlBinder.MarkDirty("password_input");
-
-    if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) m_pRmlDoc->Show(); }
+    // Set on every build, so a rebuilt document keeps it; the field only shows in one mode.
+    if (Rml::ElementDocument* document = m_RmlView.Document())
+    {
+        if (Rml::Element* field = document->GetElementById("msgwin_input"))
+            field->SetAttribute("maxlength", kResidentPasswordMaxLength);
+    }
 }
 
 void CMsgWin::Release()
 {
     m_sprBack.Release();
 
-    // Called explicitly at each scene transition; no base-class auto-release for m_pRmlDoc.
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
+    // Called explicitly at each scene transition; no base-class auto-release for m_RmlView.Document().
+    m_RmlView.Hide();
 
     // Base-class visibility reset, NOT the full CMsgWin::Show(false) override (same reasoning as
     // CServerMsgWin::Release()/CCharMakeWin::Release()) -- without this, a message box open at the
@@ -171,10 +141,10 @@ void CMsgWin::Show(bool bShow)
 
     m_sprBack.Show(bShow);
 
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (bShow) { SyncRmlModel(); m_pRmlDoc->Show(); }
-        else       m_pRmlDoc->Hide();
+        if (bShow) { SyncRmlModel(); m_RmlView.Document()->Show(); }
+        else       m_RmlView.Document()->Hide();
     }
 }
 
@@ -262,23 +232,23 @@ bool CMsgWin::Render()
 
 void CMsgWin::SyncRmlModel()
 {
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
     auto syncLabel = [this](Rml::String MsgWinRmlModel::* field, const char* boundName, const wchar_t* text)
     {
         const std::string utf8 = StringUtils::WideToNarrow(text);
-        if (m_RmlBinder.GetModel().*field != utf8)
+        if (m_RmlView.GetModel().*field != utf8)
         {
-            m_RmlBinder.GetModel().*field = utf8;
-            m_RmlBinder.MarkDirty(boundName);
+            m_RmlView.GetModel().*field = utf8;
+            m_RmlView.MarkDirty(boundName);
         }
     };
     auto syncBool = [this](bool MsgWinRmlModel::* field, const char* boundName, bool value)
     {
-        if (m_RmlBinder.GetModel().*field != value)
+        if (m_RmlView.GetModel().*field != value)
         {
-            m_RmlBinder.GetModel().*field = value;
-            m_RmlBinder.MarkDirty(boundName);
+            m_RmlView.GetModel().*field = value;
+            m_RmlView.MarkDirty(boundName);
         }
     };
 
@@ -540,8 +510,8 @@ void CMsgWin::ManageCancelClick()
 {
     if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
     {
-        m_RmlBinder.GetModel().residentPassword.clear();
-        m_RmlBinder.MarkDirty("password_input");
+        m_RmlView.GetModel().residentPassword.clear();
+        m_RmlView.MarkDirty("password_input");
     }
 
     m_nMsgCode = -1;
@@ -556,12 +526,12 @@ void CMsgWin::InitResidentNumInput()
     InputTextMax[0] = g_iLengthAuthorityCode;
     InputTextHide[0] = 1;
 
-    m_RmlBinder.GetModel().residentPassword.clear();
-    m_RmlBinder.MarkDirty("password_input");
+    m_RmlView.GetModel().residentPassword.clear();
+    m_RmlView.MarkDirty("password_input");
 
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (Rml::Element* field = m_pRmlDoc->GetElementById("msgwin_input"))
+        if (Rml::Element* field = m_RmlView.Document()->GetElementById("msgwin_input"))
         {
             // Explicit focus, not an autofocus attribute: this document is reused by every other
             // MSG_WIN_TYPE, and only this one mode has a field to focus.
@@ -572,7 +542,7 @@ void CMsgWin::InitResidentNumInput()
 
 std::wstring CMsgWin::GetResidentPasswordInput() const
 {
-    return StringUtils::NarrowToWide(m_RmlBinder.GetModel().residentPassword);
+    return StringUtils::NarrowToWide(m_RmlView.GetModel().residentPassword);
 }
 
 void CMsgWin::RequestDeleteCharacter()
@@ -580,8 +550,8 @@ void CMsgWin::RequestDeleteCharacter()
     const std::wstring typed = GetResidentPasswordInput();
     wcsncpy(InputText[0], typed.c_str(), kResidentPasswordMaxLength);
     InputText[0][kResidentPasswordMaxLength] = L'\0';
-    m_RmlBinder.GetModel().residentPassword.clear();
-    m_RmlBinder.MarkDirty("password_input");
+    m_RmlView.GetModel().residentPassword.clear();
+    m_RmlView.MarkDirty("password_input");
 
     InputEnable = false;
     CurrentProtocolState = REQUEST_DELETE_CHARACTER;

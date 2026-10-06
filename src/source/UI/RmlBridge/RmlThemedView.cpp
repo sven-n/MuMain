@@ -165,6 +165,8 @@ void ThemedDocuments::Reload()
         else if (m_Options.stacking == ThemedStacking::Back)
             document->PushToBack();
     }
+    if (m_Built && m_Options.afterReload)
+        m_Options.afterReload();
 }
 
 void ThemedDocuments::Release()
@@ -182,14 +184,16 @@ void ThemedDocuments::Hide()
 {
     for (const Slot& slot : m_Slots)
     {
-        if (slot.document != nullptr && slot.document->IsVisible())
+        if (slot.document != nullptr && IsContextAlive(slot.context) && slot.document->IsVisible())
             slot.document->Hide();
     }
 }
 
 Rml::ElementDocument* ThemedDocuments::Document(size_t index) const
 {
-    return index < m_Slots.size() ? m_Slots[index].document : nullptr;
+    if (index >= m_Slots.size() || !IsContextAlive(m_Slots[index].context))
+        return nullptr;
+    return m_Slots[index].document;
 }
 
 void ThemedDocuments::UnloadDocuments()

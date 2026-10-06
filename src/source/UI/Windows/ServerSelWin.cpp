@@ -44,11 +44,7 @@ void CServerSelWin::Create()
     // does not reopen on the group an earlier visit picked.
     m_iSelectServerBtnIndex = -1;
 
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-    }
+    m_RmlView.Ensure();
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SERVER_SELECT, this);
 
@@ -57,99 +53,69 @@ void CServerSelWin::Create()
     UpdateDisplay();
 }
 
-void CServerSelWin::BuildRmlUi()
+void CServerSelWin::BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "server_select",
-            [this](Rml::DataModelConstructor& c, ServerSelRmlModel& model)
-            {
-                auto group = c.RegisterStruct<GroupEntry>();
-                group.RegisterMember("label", &GroupEntry::label);
-                group.RegisterMember("btn_pos", &GroupEntry::btnPos);
-                group.RegisterMember("checked", &GroupEntry::checked);
-                c.RegisterArray<std::vector<GroupEntry>>();
+    auto group = c.RegisterStruct<GroupEntry>();
+    group.RegisterMember("label", &GroupEntry::label);
+    group.RegisterMember("btn_pos", &GroupEntry::btnPos);
+    group.RegisterMember("checked", &GroupEntry::checked);
+    c.RegisterArray<std::vector<GroupEntry>>();
 
-                auto server = c.RegisterStruct<ServerEntry>();
-                server.RegisterMember("label", &ServerEntry::label);
-                server.RegisterMember("index", &ServerEntry::index);
-                server.RegisterMember("load_fraction", &ServerEntry::loadFraction);
-                server.RegisterMember("color_gray", &ServerEntry::colorGray);
-                server.RegisterMember("color_orange", &ServerEntry::colorOrange);
-                c.RegisterArray<std::vector<ServerEntry>>();
+    auto server = c.RegisterStruct<ServerEntry>();
+    server.RegisterMember("label", &ServerEntry::label);
+    server.RegisterMember("index", &ServerEntry::index);
+    server.RegisterMember("load_fraction", &ServerEntry::loadFraction);
+    server.RegisterMember("color_gray", &ServerEntry::colorGray);
+    server.RegisterMember("color_orange", &ServerEntry::colorOrange);
+    c.RegisterArray<std::vector<ServerEntry>>();
 
-                c.Bind("groups", &model.groups);
-                c.Bind("servers", &model.servers);
-                c.Bind("server_list_visible", &model.serverListVisible);
+    c.Bind("groups", &model.groups);
+    c.Bind("servers", &model.servers);
+    c.Bind("server_list_visible", &model.serverListVisible);
 
-                c.Bind("pvp_notice", &model.pvpNotice);
-                c.Bind("pvp_notice_line0", &model.pvpNoticeLine0);
-                c.Bind("pvp_notice_line1", &model.pvpNoticeLine1);
-                c.Bind("pvp_notice_line2", &model.pvpNoticeLine2);
+    c.Bind("pvp_notice", &model.pvpNotice);
+    c.Bind("pvp_notice_line0", &model.pvpNoticeLine0);
+    c.Bind("pvp_notice_line1", &model.pvpNoticeLine1);
+    c.Bind("pvp_notice_line2", &model.pvpNoticeLine2);
 
-                c.Bind("description_text", &model.descriptionText);
+    c.Bind("description_text", &model.descriptionText);
 
-                c.BindEventCallback("serversel_select_group",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                    {
-                        if (arguments.size() == 1)
-                            RmlClickSelectGroup(arguments[0].Get<int>(-1));
-                    });
-                c.BindEventCallback("serversel_select_server",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                    {
-                        if (arguments.size() == 1)
-                            RmlClickSelectServer(arguments[0].Get<int>(-1));
-                    });
-            });
-
-        if (modelCreated)
+    c.BindEventCallback("serversel_select_group",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
         {
-            m_RmlBinder.GetModel().pvpNoticeLine0 = StringUtils::WideToNarrow(I18N::Game::SinceHelheimServer);
-            m_RmlBinder.GetModel().pvpNoticeLine1 = StringUtils::WideToNarrow(I18N::Game::TendsToBeCrowded);
-            m_RmlBinder.GetModel().pvpNoticeLine2 = StringUtils::WideToNarrow(I18N::Game::WeRecommendThatYouUseOtherServers);
-
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/server_select.rml");
-    }
-}
-
-void CServerSelWin::ReloadRmlTheme()
-{
-    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
-
-    // No per-frame SyncRmlModel() poll here (see Update()), unlike the other 6 ported windows --
-    // a fresh BuildRmlUi() would otherwise come up with an empty/default model and hidden until
-    // the player closes/reopens this window, so both are restored explicitly below.
-    const bool wasVisible = IsVisible();
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-    UpdateDisplay();
-    Show(wasVisible);
+            if (arguments.size() == 1)
+                RmlClickSelectGroup(arguments[0].Get<int>(-1));
+        });
+    c.BindEventCallback("serversel_select_server",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+        {
+            if (arguments.size() == 1)
+                RmlClickSelectServer(arguments[0].Get<int>(-1));
+        });
+    model.pvpNoticeLine0 = StringUtils::WideToNarrow(I18N::Game::SinceHelheimServer);
+    model.pvpNoticeLine1 = StringUtils::WideToNarrow(I18N::Game::TendsToBeCrowded);
+    model.pvpNoticeLine2 = StringUtils::WideToNarrow(I18N::Game::WeRecommendThatYouUseOtherServers);
 }
 
 void CServerSelWin::Release()
 {
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
+    m_RmlView.Hide();
 }
 
 void CServerSelWin::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
 
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (bShow) { SyncRmlModel(); m_pRmlDoc->Show(); }
-        else       m_pRmlDoc->Hide();
+        if (bShow) { SyncRmlModel(); m_RmlView.Document()->Show(); }
+        else       m_RmlView.Document()->Hide();
     }
 }
 
 void CServerSelWin::UpdateDisplay()
 {
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
 
     model.groups.clear();
 
@@ -225,10 +191,10 @@ void CServerSelWin::UpdateDisplay()
     }
 
     // Unconditional: this is a genuine rebuild (clear + repopulate), not a per-frame poll.
-    m_RmlBinder.MarkDirty("groups");
-    m_RmlBinder.MarkDirty("servers");
-    m_RmlBinder.MarkDirty("pvp_notice");
-    m_RmlBinder.MarkDirty("description_text");
+    m_RmlView.MarkDirty("groups");
+    m_RmlView.MarkDirty("servers");
+    m_RmlView.MarkDirty("pvp_notice");
+    m_RmlView.MarkDirty("description_text");
 
     SyncRmlModel();
 }
@@ -237,7 +203,7 @@ void CServerSelWin::SelectGroup(int nBtnPos)
 {
     if (m_iSelectServerBtnIndex != -1)
     {
-        for (auto& entry : m_RmlBinder.GetModel().groups)
+        for (auto& entry : m_RmlView.GetModel().groups)
             if (entry.btnPos == m_iSelectServerBtnIndex) entry.checked = false;
     }
 
@@ -375,9 +341,9 @@ bool CServerSelWin::Render()
 // this window's state only ever changes from its own click handlers.
 void CServerSelWin::SyncRmlModel()
 {
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
 
     bool groupsChanged = false;
     for (auto& entry : model.groups)
@@ -386,13 +352,13 @@ void CServerSelWin::SyncRmlModel()
         if (entry.checked != checked) { entry.checked = checked; groupsChanged = true; }
     }
     if (groupsChanged)
-        m_RmlBinder.MarkDirty("groups");
+        m_RmlView.MarkDirty("groups");
 
     // Derived from m_pSelectServerGroup rather than stored separately, so it can't drift out of sync.
     const bool serverListVisible = (m_pSelectServerGroup != nullptr);
     if (model.serverListVisible != serverListVisible)
     {
         model.serverListVisible = serverListVisible;
-        m_RmlBinder.MarkDirty("server_list_visible");
+        m_RmlView.MarkDirty("server_list_visible");
     }
 }

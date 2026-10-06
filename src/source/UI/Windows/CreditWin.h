@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "UI/Core/WindowObject.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml { class ElementDocument; }
 
@@ -69,7 +69,6 @@ public:
 	void Release();
 	void Show(bool bShow) override;
 
-	void ReloadRmlTheme();
 
 	// Set by the RmlUi close button's click binding; polled and cleared in Update().
 	void RmlClickClose() { m_bRmlCloseClicked = true; }
@@ -108,12 +107,13 @@ private:
 		Rml::String illustLeftDecorator, illustRightDecorator;
 		float illustOpacity = 0.f;
 	};
-	RmlModelBinder<CreditWinRmlModel> m_RmlBinder;
-	Rml::ElementDocument* m_pRmlDoc = nullptr;
+	UI::RmlBridge::ThemedView<CreditWinRmlModel> m_RmlView{"credit_win",
+		[this](Rml::DataModelConstructor& c, CreditWinRmlModel& model) { BindRmlModel(c, model); },
+		{{"Data/Interface/RmlUi/credit_win.rml"}}};
 
 	bool m_bRmlCloseClicked = false;
 
-	void BuildRmlUi();
+	void BindRmlModel(Rml::DataModelConstructor& c, CreditWinRmlModel& model);
 	void SyncRmlModel();
 };
 

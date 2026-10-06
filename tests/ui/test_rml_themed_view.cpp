@@ -8,6 +8,9 @@
 
 #include <filesystem>
 #include <fstream>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace
 {
@@ -109,9 +112,12 @@ private:
 TEST_CASE("a theme switch keeps the model and shows again what was visible [ui][rml-themed-view]")
 {
     Fixture fixture;
+    bool shownWhenReloaded = false;
     UI::RmlBridge::ThemedView<ViewTestModel> view("view_test", RegisterViewTestModel,
                                                   {fixture.Spec(fixture.Write("title.rml", kTitleDocument))});
+    view.SetAfterReload([&] { shownWhenReloaded = view.Document()->IsVisible(); });
     REQUIRE(view.Ensure());
+    CHECK_FALSE(shownWhenReloaded);
     view.GetModel().title = "Typed";
     view.MarkDirty("title");
     view.Document()->Show();
@@ -122,6 +128,7 @@ TEST_CASE("a theme switch keeps the model and shows again what was visible [ui][
     REQUIRE(view.Document() != nullptr);
     CHECK(view.Document() != before);
     CHECK(view.Document()->IsVisible());
+    CHECK(shownWhenReloaded);
     CHECK(fixture.Title(view.Document()) == "Typed");
 
     view.Document()->Hide();
@@ -203,6 +210,9 @@ TEST_CASE("a view outliving RmlUi tears down without touching it [ui][rml-themed
     CHECK(UI::RmlBridge::IsContextAlive(context));
     fixture.ShutDown();
     CHECK_FALSE(UI::RmlBridge::IsContextAlive(context));
+    // A static window's destructor calling its Release(), which hides.
+    view->Hide();
+    CHECK(view->Document() == nullptr);
     view.reset();
 }
 
@@ -240,4 +250,24 @@ TEST_CASE("documents sharing one model all bind it [ui][rml-themed-view]")
 
     UI::RmlBridge::ReloadAllThemedDocuments();
     CHECK(fixture.Title(view.Document(1)) == "Shared");
+}
+
+// A reloaded document goes on top of its context, so the order the owners reload in is the order
+// they stack in afterwards: the order they were first built in, not wherever a hash put them.
+TEST_CASE("a theme switch keeps the documents' stacking [ui][rml-themed-view]")
+{
+    Fixture fixture;
+    std::vector<std::unique_ptr<UI::RmlBridge::ThemedView<>>> views;
+    for (int i = 0; i < 8; ++i)
+    {
+        const std::string name = "plain" + std::to_string(i) + ".rml";
+        views.push_back(std::make_unique<UI::RmlBridge::ThemedView<>>(
+            std::vector<UI::RmlBridge::ThemedDocumentSpec>{fixture.Spec(fixture.Write(name.c_str(), kPlainDocument))}));
+        REQUIRE(views.back()->Ensure());
+    }
+
+    UI::RmlBridge::ReloadAllThemedDocuments();
+    REQUIRE(fixture.context->GetNumDocuments() == static_cast<int>(views.size()));
+    for (size_t i = 0; i < views.size(); ++i)
+        CHECK(fixture.context->GetDocument(static_cast<int>(i)) == views[i]->Document());
 }

@@ -98,12 +98,8 @@ void CCreditWin::Create()
 
 	LoadText();
 
-	// Guarded so the document/model are created once, since Create() re-runs on resolution change.
-	if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-	{
-		BuildRmlUi();
-		UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-	}
+	// Builds once; Create() re-runs on resolution change.
+	m_RmlView.Ensure();
 
 	// AddUIObj() is idempotent, so this is safe to call again on every recreate.
 	CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CREDITS, this);
@@ -111,62 +107,41 @@ void CCreditWin::Create()
 	Show(false);
 }
 
-void CCreditWin::BuildRmlUi()
+void CCreditWin::BindRmlModel(Rml::DataModelConstructor& c, CreditWinRmlModel& model)
 {
-	const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "credit_win",
-		[this](Rml::DataModelConstructor& c, CreditWinRmlModel& model)
-		{
-			c.BindEventCallback("creditwin_close_click",
-				[this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
+	c.BindEventCallback("creditwin_close_click",
+		[this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
 
-			c.Bind("department", &model.department);
-			c.Bind("team", &model.team);
-			c.Bind("department_opacity", &model.departmentOpacity);
-			c.Bind("team_opacity", &model.teamOpacity);
-			c.Bind("names_opacity", &model.namesOpacity);
+	c.Bind("department", &model.department);
+	c.Bind("team", &model.team);
+	c.Bind("department_opacity", &model.departmentOpacity);
+	c.Bind("team_opacity", &model.teamOpacity);
+	c.Bind("names_opacity", &model.namesOpacity);
 
-			auto name = c.RegisterStruct<CreditNameEntry>();
-			name.RegisterMember("text", &CreditNameEntry::text);
-			c.RegisterArray<std::vector<CreditNameEntry>>();
-			c.Bind("names", &model.names);
+	auto name = c.RegisterStruct<CreditNameEntry>();
+	name.RegisterMember("text", &CreditNameEntry::text);
+	c.RegisterArray<std::vector<CreditNameEntry>>();
+	c.Bind("names", &model.names);
 
-			c.Bind("illust_left_decorator", &model.illustLeftDecorator);
-			c.Bind("illust_right_decorator", &model.illustRightDecorator);
-			c.Bind("illust_opacity", &model.illustOpacity);
-		});
-
-	if (modelCreated)
-		m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/credit_win.rml");
-}
-
-void CCreditWin::ReloadRmlTheme()
-{
-	if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
-
-	Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-	m_RmlBinder.Destroy(context);
-	context->UnloadDocument(m_pRmlDoc);
-	m_pRmlDoc = nullptr;
-
-	BuildRmlUi();
-	// Next frame's SyncRmlModel() self-corrects visibility/live model state.
+	c.Bind("illust_left_decorator", &model.illustLeftDecorator);
+	c.Bind("illust_right_decorator", &model.illustRightDecorator);
+	c.Bind("illust_opacity", &model.illustOpacity);
 }
 
 void CCreditWin::Release()
 {
-	// Called explicitly at each scene transition; no base-class auto-release for m_pRmlDoc.
-	if (m_pRmlDoc)
-		m_pRmlDoc->Hide();
+	// Called explicitly at each scene transition; no base-class auto-release for m_RmlView.Document().
+	m_RmlView.Hide();
 }
 
 void CCreditWin::Show(bool bShow)
 {
 	mu::ui::window::CObject::Show(bShow);
 
-	if (m_pRmlDoc)
+	if (m_RmlView.Document())
 	{
-		if (bShow) m_pRmlDoc->Show();
-		else       m_pRmlDoc->Hide();
+		if (bShow) m_RmlView.Document()->Show();
+		else       m_RmlView.Document()->Hide();
 	}
 
 	if (bShow)
@@ -386,23 +361,23 @@ void CCreditWin::AnimationText(int nClass, DurationMs deltaTime)
 
 void CCreditWin::SyncRmlModel()
 {
-	if (!m_pRmlDoc) return;
+	if (!m_RmlView.Document()) return;
 
 	auto syncText = [this](Rml::String CreditWinRmlModel::* field, const char* boundName, const wchar_t* text)
 	{
 		const std::string utf8 = StringUtils::WideToNarrow(text);
-		if (m_RmlBinder.GetModel().*field != utf8)
+		if (m_RmlView.GetModel().*field != utf8)
 		{
-			m_RmlBinder.GetModel().*field = utf8;
-			m_RmlBinder.MarkDirty(boundName);
+			m_RmlView.GetModel().*field = utf8;
+			m_RmlView.MarkDirty(boundName);
 		}
 	};
 	auto syncFloat = [this](float CreditWinRmlModel::* field, const char* boundName, float value)
 	{
-		if (m_RmlBinder.GetModel().*field != value)
+		if (m_RmlView.GetModel().*field != value)
 		{
-			m_RmlBinder.GetModel().*field = value;
-			m_RmlBinder.MarkDirty(boundName);
+			m_RmlView.GetModel().*field = value;
+			m_RmlView.MarkDirty(boundName);
 		}
 	};
 	// Named-sprite decorator string, e.g. "image(illust-im3-1)" -- matches one of the 16 single-rect
@@ -424,26 +399,26 @@ void CCreditWin::SyncRmlModel()
 	syncFloat(&CreditWinRmlModel::namesOpacity, "names_opacity", m_anTextAlpha[CRW_INDEX_NAME] / 255.0f);
 
 	// Small (<=4-entry) list; rebuilt and marked dirty unconditionally every frame.
-	auto& model = m_RmlBinder.GetModel();
+	auto& model = m_RmlView.GetModel();
 	model.names.clear();
 	for (int i = 0; i < m_nNameCount; ++i)
 	{
 		CopyNameToWide(m_aCredit[m_anTextIndex[CRW_INDEX_NAME0 + i]].szName, buffer);
 		model.names.push_back({ StringUtils::WideToNarrow(buffer) });
 	}
-	m_RmlBinder.MarkDirty("names");
+	m_RmlView.MarkDirty("names");
 
 	const std::string illustLeftDecorator = illustDecorator(m_byIllust, 0);
 	if (model.illustLeftDecorator != illustLeftDecorator)
 	{
 		model.illustLeftDecorator = illustLeftDecorator;
-		m_RmlBinder.MarkDirty("illust_left_decorator");
+		m_RmlView.MarkDirty("illust_left_decorator");
 	}
 	const std::string illustRightDecorator = illustDecorator(m_byIllust, 1);
 	if (model.illustRightDecorator != illustRightDecorator)
 	{
 		model.illustRightDecorator = illustRightDecorator;
-		m_RmlBinder.MarkDirty("illust_right_decorator");
+		m_RmlView.MarkDirty("illust_right_decorator");
 	}
 	syncFloat(&CreditWinRmlModel::illustOpacity, "illust_opacity", m_nIllustAlpha / 255.0f);
 }

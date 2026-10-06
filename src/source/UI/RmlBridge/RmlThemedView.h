@@ -48,6 +48,9 @@ struct ThemedViewOptions
     // After every build, once all the documents are loaded: dragging, input filters, layout that
     // depends on the theme, caches to invalidate.
     std::function<void()> afterBuild;
+    // After a theme switch's rebuild, once what was visible is shown again: whatever the owner sized
+    // or placed from the previous theme's metrics.
+    std::function<void()> afterReload;
 };
 
 // True while RmlUi still owns `context`: false once it was removed or RmlUi shut down.
@@ -72,8 +75,10 @@ public:
     void Reload();
     // Replaces the options' afterBuild, for an owner that sets it after constructing the view.
     void SetAfterBuild(std::function<void()> afterBuild) { m_Options.afterBuild = std::move(afterBuild); }
+    void SetAfterReload(std::function<void()> afterReload) { m_Options.afterReload = std::move(afterReload); }
 
     bool IsBuilt() const { return m_Built; }
+    // Null until built, and once RmlUi no longer owns the document's context.
     Rml::ElementDocument* Document(size_t index = 0) const;
     const std::string& ModelName() const { return m_ModelName; }
 

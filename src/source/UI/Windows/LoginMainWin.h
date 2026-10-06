@@ -8,6 +8,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml { class ElementDocument; }
 
@@ -63,14 +64,15 @@ public:
     {
         return 15.0f;
     }
-    void ReloadRmlTheme();
 
 private:
     void OpenSysMenu();
     void OpenCredits();
-    void BuildRmlUi();
+    void OnRmlBuilt();
+    void OnRmlReloaded();
 
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    UI::RmlBridge::ThemedView<> m_RmlView{{{"Data/Interface/RmlUi/login_main.rml"}},
+        {.afterBuild = [this] { OnRmlBuilt(); }, .afterReload = [this] { OnRmlReloaded(); }}};
 };
 
 extern CLoginMainWin g_LoginMainWin;

@@ -9,7 +9,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "Render/Sprites/Sprite.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <vector>
 
@@ -113,8 +113,7 @@ protected:
     void RenderCreateCharacter();
 
 private:
-    void BuildRmlUi();
-    void ReloadRmlTheme();
+    void OnRmlReloaded();
     void ApplyNameLimit();
 
     struct JobButtonEntry
@@ -153,8 +152,11 @@ private:
         // (ApplyNameLimit()).
         Rml::String charName;
     };
-    RmlModelBinder<CharMakeRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, CharMakeRmlModel& model);
+    UI::RmlBridge::ThemedView<CharMakeRmlModel> m_RmlView{"char_make",
+        [this](Rml::DataModelConstructor& c, CharMakeRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/char_make.rml"}},
+        {.afterBuild = [this] { ApplyNameLimit(); }, .afterReload = [this] { OnRmlReloaded(); }}};
 
     int m_nOriginX = 0;
     int m_nOriginY = 0;

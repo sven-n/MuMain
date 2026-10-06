@@ -4,7 +4,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <vector>
 
@@ -29,7 +29,6 @@ public:
     void UpdateDisplay();
     void Show(bool bShow) override;
 
-    void ReloadRmlTheme();
 
     // Bound to the RmlUi document's data-event-click callbacks; acts immediately.
     void RmlClickSelectGroup(int nBtnPos);
@@ -57,7 +56,6 @@ public:
 
 private:
     void SelectGroup(int nBtnPos);
-    void BuildRmlUi();
     void SyncRmlModel();
 
     // Shared by RmlClickSelectServer() and SelectServer(). Returns false (and
@@ -96,8 +94,10 @@ private:
 
         Rml::String descriptionText;
     };
-    RmlModelBinder<ServerSelRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel& model);
+    UI::RmlBridge::ThemedView<ServerSelRmlModel> m_RmlView{"server_select",
+        [this](Rml::DataModelConstructor& c, ServerSelRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/server_select.rml"}}};
 
     int m_iSelectServerBtnIndex = -1;
     CServerGroup* m_pSelectServerGroup = nullptr;

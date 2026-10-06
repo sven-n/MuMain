@@ -10,7 +10,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "Render/Sprites/Sprite.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Scaling/UITransform.h"
 
 #define CSMW_SPR_DECO 0
@@ -241,8 +241,7 @@ protected:
 
 private:
     void ApplyLayout(const UI::CharacterSelection::Layout& layout);
-    void BuildRmlUi();
-    void ReloadRmlTheme();
+    void OnRmlReloaded();
 
     struct CharSelMainRmlModel
     {
@@ -253,8 +252,11 @@ private:
         Rml::String accountBlockLine1;
         Rml::String accountBlockLine2;
     };
-    RmlModelBinder<CharSelMainRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, CharSelMainRmlModel& model);
+    UI::RmlBridge::ThemedView<CharSelMainRmlModel> m_RmlView{"char_sel_main",
+        [this](Rml::DataModelConstructor& c, CharSelMainRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/char_sel_main.rml"}},
+        {.afterReload = [this] { OnRmlReloaded(); }}};
 
     bool m_bCreateEnabled = false;
     bool m_bConnectEnabled = false;

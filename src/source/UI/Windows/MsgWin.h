@@ -5,7 +5,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "Render/Sprites/Sprite.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <string>
 
@@ -66,7 +66,6 @@ public:
     {
         return 50.0f;
     }
-    void ReloadRmlTheme();
 
     // The message code currently on screen, or -1 when the window is hidden.
     // Automation reads it because several results — a refused login above all —
@@ -80,7 +79,7 @@ public:
     bool DismissMessage();
 
 protected:
-    void BuildRmlUi();
+    void ApplyInputLimit();
     void SetCtrlPosition();
     void SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpszMsg2 = L"");
     void ManageOKClick();
@@ -113,8 +112,11 @@ private:
         // and CCharSelMainWin's delete flow read.
         Rml::String residentPassword;
     };
-    RmlModelBinder<MsgWinRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, MsgWinRmlModel& model);
+    UI::RmlBridge::ThemedView<MsgWinRmlModel> m_RmlView{"msg_win",
+        [this](Rml::DataModelConstructor& c, MsgWinRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/msg_win.rml"}},
+        {.afterBuild = [this] { ApplyInputLimit(); }}};
 
     bool m_bRmlOkClicked = false;
     bool m_bRmlCancelClicked = false;

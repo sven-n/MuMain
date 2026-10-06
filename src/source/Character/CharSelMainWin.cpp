@@ -137,18 +137,10 @@ void CCharSelMainWin::Create()
     m_ptPos.x = m_ptPos.y = 0;
     m_Size.cx = m_Size.cy = 0;
 
-    // RmlUi migration -- see this class's header comment. Guarded the same way CLoginWin::Create()
-    // is (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change), so the document/model
-    // are created once, ever, and only repositioned/resized/re-synced afterward. Must run BEFORE
-    // ApplyLayout() below -- that call pushes the computed rects into the RmlUi elements too, and
-    // does nothing on a null m_pRmlDoc, so calling it first (as an earlier version of this method
-    // briefly did, after rebasing onto upstream's own Create() ordering) left every RmlUi element
-    // at its unstyled default position on the window's very first Create() call.
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-    }
+    // Builds once (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change).
+    // Before ApplyLayout() below: it pushes the computed rects into the document's elements, and
+    // does nothing while there is no document.
+    m_RmlView.Ensure();
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CHAR_SEL_MAIN, this);
 
@@ -158,46 +150,28 @@ void CCharSelMainWin::Create()
     Show(false);
 }
 
-void CCharSelMainWin::BuildRmlUi()
+void CCharSelMainWin::BindRmlModel(Rml::DataModelConstructor& c, CharSelMainRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "char_sel_main",
-        [this](Rml::DataModelConstructor& c, CharSelMainRmlModel& model)
-        {
-            c.Bind("create_disabled", &model.createDisabled);
-            c.Bind("connect_disabled", &model.connectDisabled);
-            c.Bind("delete_disabled", &model.deleteDisabled);
-            c.Bind("account_block_hidden", &model.accountBlockHidden);
-            c.Bind("account_block_line1", &model.accountBlockLine1);
-            c.Bind("account_block_line2", &model.accountBlockLine2);
+    c.Bind("create_disabled", &model.createDisabled);
+    c.Bind("connect_disabled", &model.connectDisabled);
+    c.Bind("delete_disabled", &model.deleteDisabled);
+    c.Bind("account_block_hidden", &model.accountBlockHidden);
+    c.Bind("account_block_line1", &model.accountBlockLine1);
+    c.Bind("account_block_line2", &model.accountBlockLine2);
 
-            c.BindEventCallback("charsel_create_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCreate(); });
-            c.BindEventCallback("charsel_menu_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickMenu(); });
-            c.BindEventCallback("charsel_connect_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickConnect(); });
-            c.BindEventCallback("charsel_delete_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickDelete(); });
-        });
-
-    if (modelCreated)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_sel_main.rml");
+    c.BindEventCallback("charsel_create_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCreate(); });
+    c.BindEventCallback("charsel_menu_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickMenu(); });
+    c.BindEventCallback("charsel_connect_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickConnect(); });
+    c.BindEventCallback("charsel_delete_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickDelete(); });
 }
 
-void CCharSelMainWin::ReloadRmlTheme()
+void CCharSelMainWin::OnRmlReloaded()
 {
-    if (!m_pRmlDoc) return;
-
-    // See CLoginWin::ReloadRmlTheme()'s comment on why this reads m_pRmlDoc directly.
-    const bool wasVisible = m_pRmlDoc->IsVisible();
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
     ApplyLayout(ThemedLayout());
-    if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) m_pRmlDoc->Show(); }
 }
 
 void CCharSelMainWin::ApplyLayout(const UI::CharacterSelection::Layout& layout)
@@ -231,11 +205,10 @@ void CCharSelMainWin::Release()
 
     // See CLoginMainWin::PreRelease()'s identical comment -- each migrated window's Release() is
     // called explicitly at every scene transition, not swept automatically by any shared list, and
-    // this class has no base-class knowledge of m_pRmlDoc, so without this it can keep rendering
+    // this class has no base-class knowledge of m_RmlView.Document(), so without this it can keep rendering
     // into whatever scene comes next if this window happened to be open at the moment of
     // transition.
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
+    m_RmlView.Hide();
 
     // Base-class visibility reset (same fix as CServerMsgWin::Release()/CMsgWin::Release()) -- this
     // is the screen the player is on right up until the transition instant, so IsVisible() is
@@ -269,10 +242,10 @@ void CCharSelMainWin::Show(bool bShow)
     for (auto& sprite : m_asprBack)
         sprite.Show(bShow);
 
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (bShow) { SyncRmlModel(); m_pRmlDoc->Show(); }
-        else       m_pRmlDoc->Hide();
+        if (bShow) { SyncRmlModel(); m_RmlView.Document()->Show(); }
+        else       m_RmlView.Document()->Hide();
     }
 }
 
@@ -351,14 +324,14 @@ bool CCharSelMainWin::Render()
 
 void CCharSelMainWin::SyncRmlModel()
 {
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
     auto syncBool = [this](bool CharSelMainRmlModel::* field, const char* boundName, bool value)
     {
-        if (m_RmlBinder.GetModel().*field != value)
+        if (m_RmlView.GetModel().*field != value)
         {
-            m_RmlBinder.GetModel().*field = value;
-            m_RmlBinder.MarkDirty(boundName);
+            m_RmlView.GetModel().*field = value;
+            m_RmlView.MarkDirty(boundName);
         }
     };
     syncBool(&CharSelMainRmlModel::createDisabled, "create_disabled", !m_bCreateEnabled);
@@ -369,10 +342,10 @@ void CCharSelMainWin::SyncRmlModel()
     auto syncLabel = [this](Rml::String CharSelMainRmlModel::* field, const char* boundName, const wchar_t* text)
     {
         const std::string utf8 = StringUtils::WideToNarrow(text);
-        if (m_RmlBinder.GetModel().*field != utf8)
+        if (m_RmlView.GetModel().*field != utf8)
         {
-            m_RmlBinder.GetModel().*field = utf8;
-            m_RmlBinder.MarkDirty(boundName);
+            m_RmlView.GetModel().*field = utf8;
+            m_RmlView.MarkDirty(boundName);
         }
     };
     syncLabel(&CharSelMainRmlModel::accountBlockLine1, "account_block_line1", I18N::Game::ThisAccountIsItemBlocked);

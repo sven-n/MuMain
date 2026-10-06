@@ -68,51 +68,35 @@ void CLoginMainWin::Create()
     m_Size.cy = ButtonBarHeight();
     m_ptPos.x = m_ptPos.y = 0;
 
-    // Guarded so the document is loaded once, ever, and only repositioned/resized afterward.
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-    }
+    // Builds once, and is only repositioned and resized afterward.
+    m_RmlView.Ensure();
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_LOGIN_MAIN, this);
     Show(false);
 }
 
-void CLoginMainWin::BuildRmlUi()
+void CLoginMainWin::OnRmlBuilt()
 {
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/login_main.rml");
-    if (m_pRmlDoc)
-    {
-        if (Rml::Element* e = m_pRmlDoc->GetElementById("btn_menu"))
-            e->AddEventListener(Rml::EventId::Click, new ClickCallbackListener([this] { RmlClickMenu(); }));
-        if (Rml::Element* e = m_pRmlDoc->GetElementById("btn_credit"))
-            e->AddEventListener(Rml::EventId::Click, new ClickCallbackListener([this] { RmlClickCredit(); }));
-    }
+    Rml::ElementDocument* document = m_RmlView.Document();
+    if (Rml::Element* e = document->GetElementById("btn_menu"))
+        e->AddEventListener(Rml::EventId::Click, new ClickCallbackListener([this] { RmlClickMenu(); }));
+    if (Rml::Element* e = document->GetElementById("btn_credit"))
+        e->AddEventListener(Rml::EventId::Click, new ClickCallbackListener([this] { RmlClickCredit(); }));
 }
 
-void CLoginMainWin::ReloadRmlTheme()
+void CLoginMainWin::OnRmlReloaded()
 {
-    if (!m_pRmlDoc) return;
-
-    const bool wasVisible = m_pRmlDoc->IsVisible();
-    RmlUiRuntime::Instance().GetContext()->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
     // Bottom-anchored (CSceneUICoordinator::CreateLoginScene()): the bar's height follows the theme.
     const int previousHeight = m_Size.cy;
     m_Size.cy = ButtonBarHeight();
     SetPosition(m_ptPos.x, m_ptPos.y + previousHeight - m_Size.cy);
-    if (m_pRmlDoc) { if (wasVisible) m_pRmlDoc->Show(); else m_pRmlDoc->Hide(); }
 }
 
 void CLoginMainWin::Release()
 {
     // Called explicitly at each scene transition; without it this bar's icons stay visible and
     // overlap the next scene's own UI. Hide, not unload -- the document is created once and reused.
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
+    m_RmlView.Hide();
 }
 
 void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
@@ -122,9 +106,9 @@ void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
 
     // #panel's bounding box is a genuinely computed value (tied to screen size), so it stays
     // C++-pushed; its children position themselves via login_main.rcss's anchor rules instead.
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))
+        if (Rml::Element* panel = m_RmlView.Document()->GetElementById("panel"))
         {
             panel->SetProperty("left", std::to_string(nXCoord) + "px");
             panel->SetProperty("top", std::to_string(nYCoord) + "px");
@@ -138,10 +122,10 @@ void CLoginMainWin::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
 
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (bShow) m_pRmlDoc->Show();
-        else       m_pRmlDoc->Hide();
+        if (bShow) m_RmlView.Document()->Show();
+        else       m_RmlView.Document()->Hide();
     }
 }
 

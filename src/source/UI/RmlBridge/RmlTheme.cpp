@@ -17,7 +17,8 @@
 #include <fstream>
 #include <regex>
 #include <sstream>
-#include <unordered_map>
+#include <utility>
+#include <vector>
 
 extern EGameScene SceneFlag;
 
@@ -385,22 +386,39 @@ namespace UI::RmlBridge
 
     namespace
     {
+        using ThemeReloadEntry = std::pair<const void*, ThemeReloadCallback>;
+
         // Never destroyed: an owner destroyed at exit after it (a static window) still unregisters.
-        std::unordered_map<const void*, ThemeReloadCallback>& ThemeReloadRegistry()
+        // In registration order: owners register as they first load, and a reloaded document goes on
+        // top of its context, so reloading in this order rebuilds the stacking it was first built in.
+        std::vector<ThemeReloadEntry>& ThemeReloadRegistry()
         {
-            static auto* registry = new std::unordered_map<const void*, ThemeReloadCallback>();
+            static auto* registry = new std::vector<ThemeReloadEntry>();
             return *registry;
+        }
+
+        std::vector<ThemeReloadEntry>::iterator FindThemeReloadEntry(const void* owner)
+        {
+            auto& registry = ThemeReloadRegistry();
+            return std::find_if(registry.begin(), registry.end(),
+                                [owner](const ThemeReloadEntry& entry) { return entry.first == owner; });
         }
     }
 
     void RegisterForThemeReload(const void* owner, ThemeReloadCallback callback)
     {
-        ThemeReloadRegistry()[owner] = std::move(callback);
+        const auto entry = FindThemeReloadEntry(owner);
+        if (entry != ThemeReloadRegistry().end())
+            entry->second = std::move(callback);
+        else
+            ThemeReloadRegistry().emplace_back(owner, std::move(callback));
     }
 
     void UnregisterForThemeReload(const void* owner)
     {
-        ThemeReloadRegistry().erase(owner);
+        const auto entry = FindThemeReloadEntry(owner);
+        if (entry != ThemeReloadRegistry().end())
+            ThemeReloadRegistry().erase(entry);
     }
 
     void ReloadAllThemedDocuments()

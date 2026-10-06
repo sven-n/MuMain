@@ -10,7 +10,7 @@
 
 #include "CharInfoBalloon.h"
 #include "UI/Core/WindowObject.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml { class ElementDocument; }
 
@@ -81,8 +81,6 @@ public:
     }
 
 private:
-    void BuildRmlUi();
-    void ReloadRmlTheme();
 
     struct BalloonEntry
     {
@@ -98,8 +96,10 @@ private:
     {
         std::vector<BalloonEntry> balloons;
     };
-    RmlModelBinder<BalloonListModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, BalloonListModel& model);
+    UI::RmlBridge::ThemedView<BalloonListModel> m_RmlView{"char_info_balloons",
+        [this](Rml::DataModelConstructor& c, BalloonListModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/char_info_balloon.rml"}}};
 
     void SyncRmlModel();
 };

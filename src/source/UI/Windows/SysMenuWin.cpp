@@ -46,64 +46,37 @@ void CSysMenuWin::Create()
 
     m_bSelectServerEnabled = (SceneFlag == CHARACTER_SCENE);
 
-    // Guarded so BuildRmlUi() runs once; Create() re-runs on resolution change.
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-    }
+    // Builds once; Create() re-runs on resolution change.
+    m_RmlView.Ensure();
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SYS_MENU, this);
 
     Show(false);
 }
 
-void CSysMenuWin::BuildRmlUi()
+void CSysMenuWin::BindRmlModel(Rml::DataModelConstructor& c, SysMenuRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "sys_menu",
-        [this](Rml::DataModelConstructor& c, SysMenuRmlModel& model)
-        {
-            c.Bind("select_server_hidden", &model.selectServerHidden);
-            c.Bind("system_menu_label", &model.systemMenuLabel);
-            c.Bind("exit_game_label", &model.exitGameLabel);
-            c.Bind("select_server_label", &model.selectServerLabel);
-            c.Bind("option_label", &model.optionLabel);
-            c.Bind("close_label", &model.closeLabel);
+    c.Bind("select_server_hidden", &model.selectServerHidden);
+    c.Bind("system_menu_label", &model.systemMenuLabel);
+    c.Bind("exit_game_label", &model.exitGameLabel);
+    c.Bind("select_server_label", &model.selectServerLabel);
+    c.Bind("option_label", &model.optionLabel);
+    c.Bind("close_label", &model.closeLabel);
 
-            c.BindEventCallback("sysmenu_exit_game_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExitGame(); });
-            c.BindEventCallback("sysmenu_select_server_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickSelectServer(); });
-            c.BindEventCallback("sysmenu_option_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOption(); });
-            c.BindEventCallback("sysmenu_close_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
-        });
-
-    if (modelCreated)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/sys_menu.rml");
-}
-
-void CSysMenuWin::ReloadRmlTheme()
-{
-    if (!m_pRmlDoc) return;
-
-    // See CLoginWin::ReloadRmlTheme()'s comment on why this reads m_pRmlDoc directly.
-    const bool wasVisible = m_pRmlDoc->IsVisible();
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-    if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) { m_pRmlDoc->PullToFront(); m_pRmlDoc->Show(); } }
+    c.BindEventCallback("sysmenu_exit_game_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExitGame(); });
+    c.BindEventCallback("sysmenu_select_server_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickSelectServer(); });
+    c.BindEventCallback("sysmenu_option_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOption(); });
+    c.BindEventCallback("sysmenu_close_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
 }
 
 void CSysMenuWin::Release()
 {
-    // Called explicitly at each scene transition; no base-class auto-release for m_pRmlDoc.
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
+    // Called explicitly at each scene transition; no base-class auto-release for m_RmlView.Document().
+    m_RmlView.Hide();
 
     // Base-class visibility reset (same fix as CServerMsgWin::Release()/CMsgWin::Release()) -- ESC
     // right before entering the game leaves this open at the exact transition instant otherwise,
@@ -115,13 +88,13 @@ void CSysMenuWin::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
 
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
         // PullToFront() is required: this document is never recreated after scene setup, so it
         // otherwise stays at its original creation-time z-order (GetLayerDepth() only orders this
         // legacy manager's own dispatch, not RmlUi's document stack).
-        if (bShow) { SyncRmlModel(); m_pRmlDoc->PullToFront(); m_pRmlDoc->Show(); }
-        else       m_pRmlDoc->Hide();
+        if (bShow) { SyncRmlModel(); m_RmlView.Document()->PullToFront(); m_RmlView.Document()->Show(); }
+        else       m_RmlView.Document()->Hide();
     }
 }
 
@@ -167,21 +140,21 @@ bool CSysMenuWin::Render()
 
 void CSysMenuWin::SyncRmlModel()
 {
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
-    if (m_RmlBinder.GetModel().selectServerHidden != !m_bSelectServerEnabled)
+    if (m_RmlView.GetModel().selectServerHidden != !m_bSelectServerEnabled)
     {
-        m_RmlBinder.GetModel().selectServerHidden = !m_bSelectServerEnabled;
-        m_RmlBinder.MarkDirty("select_server_hidden");
+        m_RmlView.GetModel().selectServerHidden = !m_bSelectServerEnabled;
+        m_RmlView.MarkDirty("select_server_hidden");
     }
 
     auto syncLabel = [this](Rml::String SysMenuRmlModel::* field, const char* boundName, const wchar_t* text)
     {
         const std::string utf8 = StringUtils::WideToNarrow(text);
-        if (m_RmlBinder.GetModel().*field != utf8)
+        if (m_RmlView.GetModel().*field != utf8)
         {
-            m_RmlBinder.GetModel().*field = utf8;
-            m_RmlBinder.MarkDirty(boundName);
+            m_RmlView.GetModel().*field = utf8;
+            m_RmlView.MarkDirty(boundName);
         }
     };
     syncLabel(&SysMenuRmlModel::systemMenuLabel, "system_menu_label", I18N::Game::SystemMenu);
