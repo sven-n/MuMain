@@ -91,21 +91,24 @@ std::streambuf::int_type ConsoleStreamBuf::overflow(int_type c)
         // If we hit a newline, flush the buffer
         if (c == '\n')
         {
-            std::lock_guard<std::mutex> lock(g_consoleMutex);
-
             // Remove trailing newline for our buffer
             std::string line = m_buffer;
             if (!line.empty() && line.back() == '\n')
                 line.pop_back();
 
-            // Send to ImGui console
+            // Send to ImGui console. LogGame takes the console mutex itself:
+            // holding it here as well deadlocked where std::mutex is not
+            // recursive (Linux, macOS) on the first line written.
             if (!line.empty())
             {
                 g_MuEditorConsoleUI.LogGame(line);
             }
 
             // Also write to original stream
-            m_oldBuf->sputn(m_buffer.c_str(), m_buffer.size());
+            {
+                std::lock_guard<std::mutex> lock(g_consoleMutex);
+                m_oldBuf->sputn(m_buffer.c_str(), m_buffer.size());
+            }
 
             m_buffer.clear();
         }
