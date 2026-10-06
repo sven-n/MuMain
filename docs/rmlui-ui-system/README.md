@@ -56,8 +56,11 @@ RmlUi renders through its own vendored SDL_GPU backend
 `IMuRenderer`'s game-oriented primitives. `RmlUiRenderInterface`
 (`Render/RmlUi/RmlUiRenderInterface.cpp/.h`) subclasses it, overriding only
 `LoadTexture`/`ReleaseTexture` so game assets (`.OZT`/`.OZJ`) route through `CGlobalBitmap`.
-`transform`, gradients and `box-shadow` render; `filter`/`backdrop-filter`/`mask-image` mostly
-don't — `engine-findings.md` has the current list. Test a new visual property in isolation rather
+The submodule points at the fork `nitoygo/RmlUi` (`integration/sdl-gpu-parity`), which carries
+the renderer work upstream doesn't have yet; renderer changes are committed there first, then the
+submodule pin is moved.
+`transform`, gradients, `box-shadow` and `backdrop-filter: blur()` render; most of `filter` and
+`mask-image` don't — `engine-findings.md` has the current list. Test a new visual property in isolation rather
 than trusting the parser.
 
 **Texture-lifetime rule**: `CGlobalBitmap`'s numbered slots get force-reassigned across scene

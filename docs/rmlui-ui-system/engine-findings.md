@@ -74,7 +74,14 @@ around it. See [`STATUS.md`](STATUS.md) for migration status and
 - **`box-shadow` renders, including blur, inset and multiple shadows** (`PushLayer`/
   `CompositeLayers`/`CompileFilter`/`RenderBlur` are implemented in `RmlUi_Renderer_SDL_GPU.cpp`).
   `rgba()` alpha is a 0–255 integer, not a 0–1 float: `rgba(0,0,0,.62)` is invisible.
-  `filter`/`backdrop-filter` are unimplemented, except `filter: brightness()`/`contrast()`.
+  Of `filter`, only `brightness()`/`contrast()` are verified.
+
+- **`backdrop-filter: blur()` blurs the game world behind a panel.** The renderer starts each
+  context's base layer as a copy of the swapchain, which already holds the scene and anything an
+  earlier context drew, and writes the layer back at the end, so a backdrop has the scene to read.
+  Before that the base layer started empty and was blended onto the scene afterwards, and a
+  backdrop blurred nothing. The modern options screen uses it (`option_window.rcss`). A full-screen
+  backdrop blur costs a blur pass every frame it is visible.
 
 - **`decorator: image(...)` does not stretch a sprite rect to a box of a different size;
   `ninepatch(...)` with a declared inner rect does.** `server_select.rcss`'s `.server-row`/
@@ -228,7 +235,8 @@ plus [PR #989](https://github.com/mikke89/RmlUi/pull/989) (SDL_GPU renderer pari
 | `:focus-visible` | Not supported (`:hover`/`:active`/`:focus` and structural selectors are) | `:focus` |
 | `clamp()`, `minmax()`, `calc()` | Not registered | Fixed `dp`/`px` values |
 | `var(--x)` | Supported by 6.3, unused here | The project's `token(name)` (`theming-and-modding.md`) |
-| `filter: blur()`/`drop-shadow()`, `backdrop-filter`, `mask-image` | Unimplemented despite the PR's scope | No equivalent for a frosted look |
+| `backdrop-filter: blur()` | Works, over the game world too (frosted glass) | — |
+| `filter: blur()`/`drop-shadow()`, `mask-image` | Unverified | — |
 | `filter: brightness()`/`contrast()` | Works (`my_inventory.rcss`'s `.inv-btn:hover`) | — |
 | `box-shadow` | Works: inset, outset, blur, comma-separated; `rgba()` alpha is 0–255 | — |
 | `linear`/`radial`/`conic-gradient`, and `repeating-*` | Work, through `CompileShader` | — |

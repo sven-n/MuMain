@@ -6,4 +6,5 @@
 	url = https://github.com/libsdl-org/SDL.git
 [submodule "src/ThirdParty/RmlUi"]
 	path = src/ThirdParty/RmlUi
-	url = https://github.com/mikke89/RmlUi.git
+	url = https://github.com/nitoygo/RmlUi.git
+	branch = integration/sdl-gpu-parity
