@@ -62,8 +62,7 @@ private:
     void SendSerial();
     Rml::Element* GetSerialField() const;
 
-    EventItemEntryView m_View{"gold_bowman", "Data/Interface/RmlUi/gold_bowman.rml", "gold_bowman_bg",
-                              "Data/Interface/RmlUi/gold_bowman_bg.rml"};
+    EventItemEntryView m_View{"gold_bowman", "Data/Interface/RmlUi/gold_bowman.rml"};
     CTooltip m_ExitTooltip;
     // The field takes the focus once the document shows it, as the original's GiveFocus() did.
     bool m_SerialFocusPending = false;

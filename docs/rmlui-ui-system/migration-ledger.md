@@ -77,10 +77,10 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 |---|---|---|---|
 | `CMyQuestInfoWindow` | Done | RmlUi-only 2D | `data-for` list reference; tab reference |
 | `CQuestProgress`, `CQuestProgressByEtc` | Done | RmlUi-only 2D | Share `quest_progress.rcss` (`#panel.qp-etc` modifier) and `UI::Quests::RewardModel`; 7-line pagination kept; reward preview is click, not hover |
-| `CNPCQuest` | Done | Hybrid | Frame in `npc_quest_bg.rml` (background context) under the live 3D condition items; content in `npc_quest.rml`. Message/answer tops stay in the model (`tracked-deferrals.md`) |
+| `CNPCQuest` | Done | Hybrid | `npc_quest.rml`: the frame, the live 3D condition items in a render target (`#nq_item`), the content. Message/answer tops stay in the model (`tracked-deferrals.md`) |
 | `CNPCDialogue` | Done | RmlUi-only 2D | Two paged lists in one document; Gens flows native logic synced into the model |
 | `CGatemanWindow` | Done | RmlUi-only 2D | Guest, staff and master pages |
-| `CEmpireGuardianNPC`, `CDoppelGangerWindow` | Done | Hybrid | `UI/Events/EventItemEntryView`: frame in the background context under the native 3D preview |
+| `CEmpireGuardianNPC`, `CDoppelGangerWindow` | Done | Hybrid | `UI/Events/EventItemEntryView`: one document, the 3D preview in a render target (`#entry_item`) |
 
 ### Combat, siege, duel
 
@@ -104,7 +104,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CDoppelGangerFrame`, `CKanturuInfoWindow` | Done | Event-HUD slots, `LayoutMode::HudFrame` |
 | `CCursedTempleEnter`, `CCursedTempleResult`, `CCursedTempleSystem` | Done | Panel stage (enter, result); the Illusion Temple HUD places itself |
 | `CCryWolf` | Done | Renders only in the event; seen through `$preview crywolf`/`crywolfresult` (`tracked-deferrals.md`) |
-| `CGoldBowmanWindow`, `CGoldBowmanLena`, `CExchangeLuckyCoin`, `CRegistrationLuckyCoin` | Done | `UI/Events/EventItemEntryView`; the registration coin stays native 3D |
+| `CGoldBowmanWindow`, `CGoldBowmanLena`, `CExchangeLuckyCoin`, `CRegistrationLuckyCoin` | Done | `UI/Events/EventItemEntryView`; the Rena and the registration coin draw into its render target. The Rena now follow the panel (the original drew them at a fixed screen x) |
 | `CKanturu2ndEnterNpc` | Done | Panel stage |
 
 ### Options

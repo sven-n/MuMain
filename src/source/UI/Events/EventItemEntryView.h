@@ -1,8 +1,10 @@
 #pragma once
 
 #include "UI/Events/EventItemEntryRmlModel.h"
+#include "UI/Inventory/ItemCameraTarget.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -14,13 +16,13 @@ class ElementDocument;
 
 namespace mu::ui::window
 {
+class CObject;
+
 // The RmlUi side of the right-docked NPC entry windows that show the entry item as a live 3D
-// preview (CDoppelGangerWindow, CEmpireGuardianNPC). The frame and the separator line are a
-// background-context document, painted before the native 3D pass so the item draws over them as
-// it did over the original's frame; the texts and the buttons are a main-context document. Each
-// window owns one, with its own documents and data models; the window keeps its data, its 3D
-// preview and its requests. The lucky coin windows (CRegistrationLuckyCoin, CExchangeLuckyCoin)
-// share it for their other button kinds.
+// preview (CDoppelGangerWindow, CEmpireGuardianNPC): the frame, the preview, the texts and the
+// buttons, in one document. Each window owns one, with its own document and data model; the window
+// keeps its data, draws its preview and sends its requests. The Golden Archer's and the lucky coin
+// windows share it for their other button kinds.
 class EventItemEntryView
 {
 public:
@@ -45,16 +47,15 @@ public:
         bool bold = false;
     };
 
-    EventItemEntryView(const char* modelName, const char* documentPath, const char* bgModelName,
-                       const char* bgDocumentPath);
+    EventItemEntryView(const char* modelName, const char* documentPath);
+
+    // The live preview: `draw` runs once a frame into the document's #entry_item, its
+    // RenderItem3D() rectangles in `owner`'s layout space, as the shared item camera drew them.
+    void SetItemDrawer(std::function<void()> draw, const CObject* owner);
 
     void Build();
-    // Unloads the documents; from the window's own Release().
-    void Release()
-    {
-        m_View.Release();
-        m_BgView.Release();
-    }
+    // Unloads the document; from the window's own Release().
+    void Release() { m_View.Release(); }
     // Runs after every build of the main document, including a theme switch's.
     void SetAfterBuild(std::function<void()> afterBuild) { m_View.SetAfterBuild(std::move(afterBuild)); }
 
@@ -82,14 +83,13 @@ public:
 
 private:
     void BindModel(Rml::DataModelConstructor& c, EventItemEntryRmlModel& model);
-    static void BindBgModel(Rml::DataModelConstructor& c, EventItemEntryBgRmlModel& model);
     void SyncTexts();
     void SyncButtons();
 
     UI::RmlBridge::ThemedView<EventItemEntryRmlModel> m_View;
-    UI::RmlBridge::ThemedView<EventItemEntryBgRmlModel> m_BgView;
     std::vector<Text> m_Texts;
     std::vector<Button> m_Buttons;
     int m_PressedButton = -1;
+    std::unique_ptr<UI::Items::ItemCameraTarget> m_ItemTarget;
 };
 } // namespace mu::ui::window

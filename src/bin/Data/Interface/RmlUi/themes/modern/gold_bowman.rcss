@@ -17,3 +17,15 @@
 	color: token(text-primary);
 	pointer-events: auto;
 }
+
+/* The docked frame and the lucky number field's back. */
+#serial_back {
+	position: absolute;
+	left: 45px;
+	top: 255px;
+	width: 108px;
+	height: 23px;
+	background-color: token(surface-recessed);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+}

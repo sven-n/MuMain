@@ -17,13 +17,16 @@
 
 using namespace mu::ui::window;
 
-mu::ui::window::EventItemEntryView::EventItemEntryView(const char* modelName, const char* documentPath,
-                                                       const char* bgModelName, const char* bgDocumentPath)
+mu::ui::window::EventItemEntryView::EventItemEntryView(const char* modelName, const char* documentPath)
     : m_View(modelName, [this](Rml::DataModelConstructor& c, EventItemEntryRmlModel& model) { BindModel(c, model); },
-             {{documentPath}}, {.stacking = UI::RmlBridge::ThemedStacking::Front}),
-      m_BgView(bgModelName, BindBgModel,
-               {{bgDocumentPath}})
+             {{documentPath}}, {.stacking = UI::RmlBridge::ThemedStacking::Front})
 {
+}
+
+void mu::ui::window::EventItemEntryView::SetItemDrawer(std::function<void()> draw, const CObject* owner)
+{
+    m_ItemTarget = std::make_unique<UI::Items::ItemCameraTarget>(
+        [draw = std::move(draw)](const Rml::Vector2f&, const Rml::Vector2f&) { draw(); }, owner);
 }
 
 void mu::ui::window::EventItemEntryView::BindModel(Rml::DataModelConstructor& c, EventItemEntryRmlModel& model)
@@ -57,17 +60,9 @@ void mu::ui::window::EventItemEntryView::BindModel(Rml::DataModelConstructor& c,
                         });
 }
 
-void mu::ui::window::EventItemEntryView::BindBgModel(Rml::DataModelConstructor& c, EventItemEntryBgRmlModel& model)
-{
-c.Bind("root_x", &model.rootX);
-c.Bind("root_y", &model.rootY);
-c.Bind("root_scale", &model.rootScale);
-}
-
 void mu::ui::window::EventItemEntryView::Build()
 {
     m_View.Ensure();
-    m_BgView.Ensure();
 }
 
 void mu::ui::window::EventItemEntryView::SetTexts(std::vector<Text> texts)
@@ -86,17 +81,10 @@ void mu::ui::window::EventItemEntryView::Sync(bool visible, const POINT& pos)
     if (!m_View.Document())
         return;
 
-    // The frame: RenderBackgroundLayer() paints whatever is shown in the background context, so
-    // this is what hides it with the window.
-    if (m_BgView.Document())
-    {
-        UI::RmlBridge::SyncDocumentVisibility(m_BgView.Document(), visible);
-        if (visible)
-            UI::RmlBridge::SyncRootTransform(m_BgView.Binder(), pos);
-    }
-
-    // Texts and buttons: over the HUD like every panel the original opened.
+    // Over the HUD like every panel the original opened.
     UI::RmlBridge::SyncDocumentVisibilityInFront(m_View.Document(), visible);
+    if (m_ItemTarget)
+        m_ItemTarget->Sync(m_View.Document()->GetElementById("entry_item"), visible);
     if (!visible)
         return;
 

@@ -9,26 +9,18 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
-#include "UI/Core/Window3DRenderMng.h"
+#include "UI/Inventory/ItemCameraTarget.h"
 #include "UI/Quests/NPCQuestRmlModel.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml { class ElementDocument; }
 
-// RmlUi-based (npc_quest.rml/.rcss) except the live quest-condition item preview, which stays a
-// native per-frame 3D draw (Render3D()/RenderItem3D()) -- genuine 3D content, the same class of
-// permanent hybrid boundary CQuestProgress's own m_pSelectedRewardItem/::RenderItemInfo() already
-// established, just for multiple always-visible rows instead of one on-hover popup.
-//
-// Split into two RmlUi documents, unlike every 2D-only sibling this session: the frame chrome
-// (npc_quest_bg.rml, m_RmlBgView) renders via RmlUiRuntime::GetBackgroundContext() so it paints
-// BEFORE the native 3D preview each frame, while the actual content (npc_quest.rml, m_RmlView) stays
-// on the main context, which always renders last (on top of the 3D preview, as intended). Same
-// mechanism CNPCShop/CMyInventory already use for their own live-3D icon grids.
+// RmlUi-based (npc_quest.rml/.rcss); C++ draws the live quest-condition items (RenderItem3D())
+// into the document's #nq_item, beside their rows.
 namespace mu::ui::window
 {
-    class CNPCQuest : public CObject, public I3DRenderObj
+    class CNPCQuest : public CObject
     {
     private:
         enum
@@ -38,7 +30,6 @@ namespace mu::ui::window
         };
 
         CManager* m_pNewUIMng;
-        C3DRenderMng* m_pNewUI3DRenderMng;
         POINT					m_Pos;
 
         // Mirrors the native Lock()/UnLock() state RenderItemMobText()'s return value drove every
@@ -51,24 +42,11 @@ namespace mu::ui::window
             [this](Rml::DataModelConstructor& c, NPCQuestRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/npc_quest.rml"}}};
 
-        // The frame chrome must render behind the live-3D quest-item preview, but RmlUi's main
-        // context always renders last -- so it goes through
-        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead, same mechanism
-        // CNPCShop's own NPCShopBgRmlModel already established. Root-transform passthrough only --
-        // all the actual chrome is static markup/CSS in npc_quest_bg.rml.
-        struct NPCQuestBgRmlModel
-        {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-        };
-        static void BindRmlBgModel(Rml::DataModelConstructor& c, NPCQuestBgRmlModel& model);
-        UI::RmlBridge::ThemedView<NPCQuestBgRmlModel> m_RmlBgView{"npc_quest_bg", BindRmlBgModel,
-            {{"Data/Interface/RmlUi/npc_quest_bg.rml"}}};
-
     public:
         CNPCQuest();
         virtual ~CNPCQuest();
 
-        bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -78,7 +56,6 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
-        void Render3D();
 
         bool IsVisible() const;
 
@@ -104,6 +81,9 @@ namespace mu::ui::window
         bool BuildConditionRows(std::vector<NPCQuestConditionRow>& outRows);
 
         void RenderItem3D();
+        // Last, so it is destroyed first.
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItem3D(); },
+                                                 this};
     };
 }
 

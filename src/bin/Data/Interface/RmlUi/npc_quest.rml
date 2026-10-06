@@ -10,18 +10,22 @@
      CNPCDialogue/CQuestProgress use). Two mutually exclusive upper panels (conditions checklist with
      a live-3D item preview, or a Zen-cost banner) plus a shared dialogue/answers block below them.
 
-     No frame chrome here at all -- unlike every other sibling this session, this window's live-3D
-     quest-item preview (Render3D()/RenderItem3D()) paints in the same frame as this document but
-     BEFORE it (RmlUi's main context always renders last), so an opaque #panel here would paint over
-     the icons. The chrome instead lives in npc_quest_bg.rml, loaded into
-     RmlUiRuntime::GetBackgroundContext() (rendered explicitly before the 3D pass) -- same split
-     CNPCShop/CMyInventory already use for the same reason. #content_root is a plain, unpainted
-     positioning anchor only; every element below is styled with its own absolute position in
-     npc_quest.rcss, matching where npc_quest_bg.rml's own frame graphics actually sit. -->
+     #content_root is the positioning root; the frame is #panel inside it, then the item preview,
+     then every element below at its own absolute position in npc_quest.rcss. -->
 <body>
 	<div id="content_root" data-model="npc_quest" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
+		<div id="panel">
+			<div class="frame-piece frame-top"></div>
+			<div class="frame-piece frame-left"></div>
+			<div class="frame-piece frame-right"></div>
+			<div class="frame-piece frame-bottom"></div>
+			<!-- Native RenderBackImage() always draws this divider under the dialogue text. -->
+			<div class="nq-divider nq-divider-dialogue"></div>
+		</div>
+		<!-- The live 3D quest-condition items, drawn by C++ beside their rows over the frame. -->
+		<img id="nq_item" class="nq-item"/>
 		<span class="sharp-text" id="title"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{npc_name}}</span>
 		<div class="sharp-text nq-quest-title" data-class-hidden="!show_quest_title"

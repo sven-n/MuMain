@@ -31,6 +31,13 @@ namespace mu::ui::window
         m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION, this);
 
         SetPos(x, y);
+        m_View.SetItemDrawer(
+            [this]
+            {
+                if (m_CoinItem)
+                    RenderLuckyCoin();
+            },
+            this);
         m_View.Build();
         Show(false);
         return true;
@@ -44,10 +51,6 @@ namespace mu::ui::window
 
     bool CRegistrationLuckyCoin::Render()
     {
-        // Nothing native left but the 3D coin: the frame, the texts and the buttons are RmlUi.
-        EnableAlphaTest();
-        RenderLuckyCoin();
-        DisableAlphaBlend();
         return true;
     }
 
@@ -77,48 +80,13 @@ namespace mu::ui::window
         m_View.Sync(IsVisible(), m_Pos);
     }
 
-    // Pre-panel proj/view snapshot, restored around EndBitmap()/BeginBitmap() -- same shape as CGoldBowmanLena::Render3D.
-    static float s_PreLuckyCoinProj[16];
-    static float s_PreLuckyCoinView[16];
-
+    // Into the document's #entry_item, under the item camera EventItemEntryView sets up.
     void CRegistrationLuckyCoin::RenderLuckyCoin()
     {
-        float x, y, width, height;
-
-        x = GetPos().x - 20;
-        y = GetPos().y + 50;
-
-        width = LUCKYCOIN_REG_WIDTH;
-        height = LUCKYCOIN_REG_HEIGHT;
-
-        EndBitmap();
-
-        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
-        mu::GetRenderer().PushMatrix();
-        mu::GetRenderer().LoadIdentity();
-        SetRenderViewport(0, 0, WindowWidth, WindowHeight);
-        gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
-        mu::GetRenderer().PushMatrix();
-        mu::GetRenderer().LoadIdentity();
-        CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
-        EnableDepthTest();
-        EnableDepthMask();
-
-        mu::GetRenderer().ClearDepthBuffer();
-
         SetItemRotation(true);
-        RenderItem3D(x, y, width, height, m_CoinItem->Type, m_CoinItem->Level, 0, 0, true);
+        RenderItem3D(GetPos().x - 20.f, GetPos().y + 50.f, LUCKYCOIN_REG_WIDTH, LUCKYCOIN_REG_HEIGHT, m_CoinItem->Type,
+                     m_CoinItem->Level, 0, 0, true);
         SetItemRotation(false);
-
-        UpdateMousePositionn();
-
-        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
-        mu::GetRenderer().PopMatrix();
-        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
-        mu::GetRenderer().PopMatrix();
-
-        BeginBitmap();
     }
 
     bool CRegistrationLuckyCoin::BtnProcess()

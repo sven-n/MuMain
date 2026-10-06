@@ -1,6 +1,13 @@
 /* Modern theme for the texts and buttons of the right-docked entry windows with a 3D item preview
-   (CDoppelGangerWindow, CEmpireGuardianNPC): modern buttons, locked ones dimmed. The panel paint is
-   event_item_entry_bg.rcss. Geometry is the legacy one (reference px under the dock transform). */
+   (CDoppelGangerWindow, CEmpireGuardianNPC): modern buttons, locked ones dimmed, over
+   docked_panel_frame.rcss's forged panel (linked first) and a thin separator where the legacy line
+   sits. Geometry is the legacy one (reference px under the dock transform). */
+
+.entry-line { position: absolute; left: 10px; top: 230px; width: 170px; height: 1px; background-color: token(border-frame); }
+
+/* The live 3D preview: the panel and a margin around it, since the original drew the lucky coin
+   from 20 left of the panel. */
+.entry-item { position: absolute; left: -60px; top: -30px; width: 310px; height: 489px; pointer-events: none; }
 
 #panel {
 	position: absolute;

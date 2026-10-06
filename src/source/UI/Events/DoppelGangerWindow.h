@@ -1,16 +1,14 @@
 #pragma once
 #include "UI/Core/WindowObject.h"
-#include "UI/Core/Window3DRenderMng.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Events/EventItemEntryView.h"
 
 namespace mu::ui::window
 {
-// Lugard's Doppelganger entry window, docked right. doppelganger_enter.rml draws its texts and
-// buttons, doppelganger_enter_bg.rml its frame; the Mirror of Dimensions stays a native 3D
-// preview over the frame. C++ keeps the remaining time, the corner close, Escape and the entry
+// Lugard's Doppelganger entry window, docked right. doppelganger_enter.rml draws it; C++ draws the
+// Mirror of Dimensions into it and keeps the remaining time, the corner close, Escape and the entry
 // request.
-class CDoppelGangerWindow : public CObject, public I3DRenderObj
+class CDoppelGangerWindow : public CObject
 {
 private:
     enum
@@ -20,17 +18,15 @@ private:
     };
 
     CManager* m_pNewUIMng;
-    C3DRenderMng* m_pNewUI3DRenderMng;
     POINT m_Pos;
 
-    EventItemEntryView m_View{"doppelganger_enter", "Data/Interface/RmlUi/doppelganger_enter.rml",
-                              "doppelganger_enter_bg", "Data/Interface/RmlUi/doppelganger_enter_bg.rml"};
+    EventItemEntryView m_View{"doppelganger_enter", "Data/Interface/RmlUi/doppelganger_enter.rml"};
 
 public:
     CDoppelGangerWindow();
     virtual ~CDoppelGangerWindow();
 
-    bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y);
+    bool Create(CManager* pNewUIMng, int x, int y);
     void Release();
 
     void SetPos(int x, int y);
@@ -39,7 +35,6 @@ public:
     bool UpdateKeyEvent();
     bool Update();
     bool Render();
-    void Render3D();
 
     bool IsVisible() const;
 

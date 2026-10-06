@@ -105,6 +105,18 @@ struct DebugWindowName
 
 constexpr DebugWindowName kDebugWindows[] = {
     {L"guard", mu::ui::window::INTERFACE_GUARDSMAN},
+    {L"luckycoin", mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION},
+    {L"coinexchange", mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN},
+    {L"npcquest", mu::ui::window::INTERFACE_NPCQUEST},
+    {L"storage", mu::ui::window::INTERFACE_STORAGE},
+    {L"storageext", mu::ui::window::INTERFACE_STORAGE_EXT},
+    {L"npcshop", mu::ui::window::INTERFACE_NPCSHOP},
+    {L"mix", mu::ui::window::INTERFACE_MIXINVENTORY},
+    {L"trade", mu::ui::window::INTERFACE_TRADE},
+    {L"inventoryext", mu::ui::window::INTERFACE_INVENTORY_EXT},
+    {L"myshop", mu::ui::window::INTERFACE_MYSHOP_INVENTORY},
+    {L"purchaseshop", mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY},
+    {L"luckyitem", mu::ui::window::INTERFACE_LUCKYITEMWND},
     {L"ingameshop", mu::ui::window::INTERFACE_INGAMESHOP},
     {L"senatus", mu::ui::window::INTERFACE_SENATUS},
     {L"gateman", mu::ui::window::INTERFACE_GATEKEEPER},
@@ -226,12 +238,16 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         mu::ui::window::CreateOkMessageBoxWithTitle(L"Test dialog", L"Drag it by any part that is not a button.");
         return true;
     }
-    if (strCommand.compare(L"$dialog item") == 0 && mu::ui::window::g_pGenericConfirmDialog)
+    // "$dialog item [group index [level]]": a test confirmation with a live item preview.
+    if (strCommand.compare(0, 12, L"$dialog item") == 0 && mu::ui::window::g_pGenericConfirmDialog)
     {
+        int group = ITEM_GROUP_SWORD, index = 5, level = 9;
+        if (strCommand.size() > 13)
+            swscanf_s(strCommand.c_str() + 13, L"%d %d %d", &group, &index, &level);
         mu::ui::window::GenericDialogConfig cfg;
         ITEM item{};
-        item.Type = ITEM_SWORD + 5;
-        item.Level = 9;
+        item.Type = static_cast<short>(group * MAX_ITEM_INDEX + index);
+        item.Level = level;
         cfg.item3D = item;
         cfg.showCancel = true;
         cfg.lines = {{L"Test dialog with a live item preview.", false}};

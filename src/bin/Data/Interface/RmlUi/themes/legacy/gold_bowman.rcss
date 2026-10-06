@@ -34,3 +34,9 @@
 	color: rgba(255, 255, 230, 230);
 	pointer-events: auto;
 }
+
+/* The docked frame and the lucky number field's back. */
+@spritesheet gb-serial-back-sheet { src: "../../../newui_guildmakeeditbox.tga"; gb-serial-back: 0px 0px 108px 23px; }
+
+.frame-top { decorator: image(docked-bg-top-a); }
+#serial_back { position: absolute; left: 45px; top: 255px; width: 108px; height: 23px; decorator: image(gb-serial-back); }

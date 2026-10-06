@@ -55,8 +55,7 @@ private:
     void HideTooltips();
     void Render3D();
 
-    EventItemEntryView m_View{"gold_bowman_lena", "Data/Interface/RmlUi/gold_bowman_lena.rml", "gold_bowman_lena_bg",
-                              "Data/Interface/RmlUi/gold_bowman_lena_bg.rml"};
+    EventItemEntryView m_View{"gold_bowman_lena", "Data/Interface/RmlUi/gold_bowman_lena.rml"};
     CTooltip m_RegisterTooltip;
     CTooltip m_ExitTooltip;
 };

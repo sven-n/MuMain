@@ -47,9 +47,4 @@ struct EventItemEntryRmlModel
     std::vector<EventItemEntryButtonEntry> buttons;
 };
 
-// The frame, in the background context under the live 3D preview.
-struct EventItemEntryBgRmlModel
-{
-    float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-};
 } // namespace mu::ui::window

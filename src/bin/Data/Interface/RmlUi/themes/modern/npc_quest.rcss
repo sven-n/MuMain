@@ -1,22 +1,13 @@
-/* Shared by both CNPCQuest documents this session's split introduced: the foreground
-   (npc_quest.rml, content only) and the background (npc_quest_bg.rml, shell-edge/groove/
-   header-rail fill/joint/accent only -- see that file's own header comment for why this window
-   needs the split every other sibling doesn't). docked_panel_frame.rcss (linked before this file by
-   both documents) supplies those shared modern classes plus #btn_exit/.tooltip -- the shell-edge/
-   groove/header-rail classes only ever match in the background document (the foreground's own root
-   is #content_root, styled below, precisely because an opaque header rail there would paint over
-   the live-3D item preview). Divider/Zen-banner sprites reuse legacy's own assets (theme-local
+/* CNPCQuest (themes/modern/npc_quest.rml). docked_panel_frame.rcss (linked first) supplies #panel,
+   the shell-edge/groove/header-rail classes, #btn_exit and .tooltip; #panel is the frame inside
+   #content_root, the document's positioning root. Divider/Zen-banner sprites reuse legacy's own assets (theme-local
    duplication), same reasoning every sibling this session uses -- window-specific art with no
    generic modern equivalent. */
 @spritesheet nq-line-sheet { src: "../../../newui_myquest_Line.tga"; nq-line-img: 0px 0px 188px 21px; }
 @spritesheet nq-zen-sheet { src: "../../../newui_item_money2.tga"; nq-zen-img: 0px 0px 170px 24px; }
 
-/* Foreground-only positioning anchor -- deliberately unpainted (see this file's own header
-   comment). Same width/height/font-family #panel itself uses, just no decorator -- font-family
-   matters here even though nothing here is painted: docked_panel_frame.rcss's own #panel rule is
-   where every OTHER sibling this session gets its inherited font-family from, and #content_root
-   isn't that selector, so every text element under it would otherwise have no resolvable font at
-   all (invisible text, unlike non-text decorators, which don't need one). */
+/* The positioning root, unpainted: #panel inside it is the frame. It carries the font-family
+   docked_panel_frame.rcss's #panel gives every sibling, which the texts here would otherwise lack. */
 #content_root {
 	position: absolute;
 	transform-origin: left top;
@@ -25,7 +16,11 @@
 	font-family: "token(font-body)";
 }
 
-/* Bare, unwrapped title -- the background doc's own header rail supplies the paint underneath;
+/* The frame, at #content_root's own place; the item preview over it, under the rows. */
+#content_root > #panel { left: 0; top: 0; pointer-events: none; }
+.nq-item { position: absolute; left: 0; top: 0; width: 190px; height: 429px; pointer-events: none; }
+
+/* Bare, unwrapped title -- #panel's header rail supplies the paint underneath;
    this just lands the text in the same spot the wrapped .modern-header-title-px would have. */
 #title {
 	position: absolute;

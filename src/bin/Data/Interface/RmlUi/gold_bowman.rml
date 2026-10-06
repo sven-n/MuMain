@@ -2,20 +2,27 @@
 <head>
 	<title>Golden Archer's lucky number registration (CGoldBowmanWindow)</title>
 	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
 	<link type="text/rcss" href="event_item_entry.rcss"/>
 	<link type="text/rcss" href="gold_bowman.rcss"/>
 	<link type="text/rcss" href="gold_bowman_rows.rcss"/>
 </head>
 <body>
 	<!-- The Golden Archer's lucky number registration (CGoldBowmanWindow), docked right: its texts,
-	     the 12-character number field, Register and the exit button. The frame and the field's back
-	     are gold_bowman_bg.rml in the background context (UI/Events/EventItemEntryView.h).
+	     the 12-character number field, Register and the exit button, over the docked frame and the
+	     field's back (UI/Events/EventItemEntryView.h).
 	     root_x/root_y/root_scale come from the dock transform; everything inside is reference px;
 	     text is .sharp-text at the native size, counter-scaled out of the panel. C++ focuses the
 	     field on opening and reads it for the request, keeps the exit tooltip, the corner close,
 	     Escape and the requests; a click is queued with item_entry_press. -->
 	<div id="panel" data-model="gold_bowman" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
+		<!-- The docked frame. -->
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+		<div id="serial_back"></div>
 		<!-- The rows these land on are the theme's: this document's own _rows.rcss gives one
 		     :nth-child rule per line and per button. Each repeated set has its own container so
 		     the count starts at the first one. -->

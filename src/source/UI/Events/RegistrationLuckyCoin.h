@@ -81,7 +81,6 @@ private:
     bool m_ItemAngle;
     int m_RegistCount;
     bool m_RegisterLocked = false;
-    EventItemEntryView m_View{"lucky_coin_registration", "Data/Interface/RmlUi/lucky_coin_registration.rml",
-                              "lucky_coin_registration_bg", "Data/Interface/RmlUi/lucky_coin_registration_bg.rml"};
+    EventItemEntryView m_View{"lucky_coin_registration", "Data/Interface/RmlUi/lucky_coin_registration.rml"};
 };
 }

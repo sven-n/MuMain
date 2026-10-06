@@ -40,7 +40,6 @@ using namespace mu::ui::window;
 CNPCQuest::CNPCQuest()
 {
     m_pNewUIMng = NULL;
-    m_pNewUI3DRenderMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
@@ -49,18 +48,13 @@ CNPCQuest::~CNPCQuest()
     Release();
 }
 
-bool CNPCQuest::Create(CManager* pNewUIMng,
-    C3DRenderMng* pNewUI3DRenderMng, int x, int y)
+bool CNPCQuest::Create(CManager* pNewUIMng, int x, int y)
 {
-    if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng
-        || NULL == g_pNewItemMng)
+    if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPCQUEST, this);
-
-    m_pNewUI3DRenderMng = pNewUI3DRenderMng;
-    m_pNewUI3DRenderMng->Add3DRenderObj(this, INVENTORY_CAMERA_Z_ORDER);
 
     SetPos(x, y);
 
@@ -132,29 +126,15 @@ void CNPCQuest::BindRmlModel(Rml::DataModelConstructor& c, NPCQuestRmlModel& mod
     model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
 }
 
-void CNPCQuest::BindRmlBgModel(Rml::DataModelConstructor& c, NPCQuestBgRmlModel& model)
-{
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
-}
-
 void CNPCQuest::BuildRmlUi()
 {
     m_RmlView.Ensure();
-    m_RmlBgView.Ensure();
 }
 
 void CNPCQuest::Release()
 {
+    m_ItemTarget.Disable();
     m_RmlView.Release();
-    m_RmlBgView.Release();
-
-    if (m_pNewUI3DRenderMng)
-    {
-        m_pNewUI3DRenderMng->Remove3DRenderObj(this);
-        m_pNewUI3DRenderMng = NULL;
-    }
 
     if (m_pNewUIMng)
     {
@@ -185,12 +165,9 @@ bool CNPCQuest::UpdateMouseEvent()
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPCQUEST))
         return false;
 
-    // Frame chrome (and thus #panel's real size) lives in the background-context doc, not
-    // m_RmlView.Document() -- see BuildRmlUi()'s own comment on the fg/bg split this window needs for its
-    // still-native live-3D quest-item preview.
     float panelWidth = NPCQUEST_WIDTH;
     float panelHeight = NPCQUEST_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlBgView.Document(), "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return false;
@@ -222,9 +199,6 @@ bool CNPCQuest::Update()
 
 bool CNPCQuest::Render()
 {
-    // RmlUi's #panel owns all chrome/text/list rendering now; only the live quest-condition item
-    // preview is still a native per-frame call, via Render3D() (I3DRenderObj's own separate draw
-    // pass, unchanged interface).
     return true;
 }
 
@@ -311,11 +285,6 @@ void CNPCQuest::RenderItem3D()
             y += rowStep;
         }
     }
-}
-
-void CNPCQuest::Render3D()
-{
-    RenderItem3D();
 }
 
 bool CNPCQuest::IsVisible() const
@@ -451,14 +420,7 @@ void CNPCQuest::RmlClickComplete()
 
 void CNPCQuest::SyncRmlModel()
 {
-    if (m_RmlBgView.Document())
-    {
-        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
-        // RenderBackgroundLayer() renders whatever's shown in the shared background context
-        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
-    }
-
+    m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("nq_item") : nullptr, IsVisible());
     if (!m_RmlView.Document())
         return;
 

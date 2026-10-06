@@ -3,7 +3,17 @@
    box in the normal or bold font and its own colour (bound: the original's SetTextColor()), the
    53 x 23 buttons newui_btn_empty_very_small up / over / down with a white label, tinted
    (100, 100, 100) with a grey label and never hovered while locked. The frame is
-   event_item_entry_bg.rcss. Coordinates are reference px inside #panel. */
+   docked_panel_frame.rcss's pieces (linked first) with the newui_item_back01 top, and the
+   newui_myquest_Line separator (188 x 21) at (1, 220). Coordinates are reference px inside
+   #panel. */
+
+@spritesheet item-entry-line-sheet { src: "../../../newui_myquest_Line.tga"; item-entry-line: 0px 0px 188px 21px; }
+.frame-top { decorator: image(docked-bg-top-b); }
+.entry-line { position: absolute; left: 1px; top: 220px; width: 188px; height: 21px; decorator: image(item-entry-line); }
+
+/* The live 3D preview: the panel and a margin around it, since the original drew the lucky coin
+   from 20 left of the panel. */
+.entry-item { position: absolute; left: -60px; top: -30px; width: 310px; height: 489px; pointer-events: none; }
 
 @spritesheet item-entry-btn-sheet
 {

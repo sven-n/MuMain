@@ -398,8 +398,9 @@ keeps it invisible until the first frame. It brackets the drawer with `SaveCamer
 `RestoreCameraPerspective()`: item rendering overwrites `g_Camera` and moves `MousePosition`, the
 origin of the ray picking casts, and leaving it moved stops click-to-move. A model may reach past
 its slot, as natively, so a slot's image can be larger than the slot with the drawer framing the
-item by the slot's own box (the confirm dialog's `item3D`). Consumers: the item hotkeys and the
-confirm dialog's item preview.
+item by the slot's own box (the confirm dialog's `item3D`). Consumers: the item hotkeys, the
+confirm dialog's item preview, `CNPCQuest` and `UI/Events/EventItemEntryView`
+(`SetItemDrawer()`: a panel-sized `#entry_item` its window's own item code draws into).
 
 Construct one with a drawer, size it to an element with `Resize(width, height)` in physical pixels
 (RmlUi box sizes already are), `SetEnabled()` it while the window is shown, and set an `<img>`'s

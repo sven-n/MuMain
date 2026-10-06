@@ -31,8 +31,7 @@ private:
     CManager* m_pNewUIMng;
     POINT m_Pos;
     bool m_ExchangeLocked = false;
-    EventItemEntryView m_View{"lucky_coin_exchange", "Data/Interface/RmlUi/lucky_coin_exchange.rml",
-                              "lucky_coin_exchange_bg", "Data/Interface/RmlUi/lucky_coin_exchange_bg.rml"};
+    EventItemEntryView m_View{"lucky_coin_exchange", "Data/Interface/RmlUi/lucky_coin_exchange.rml"};
 
 public:
     CExchangeLuckyCoin();

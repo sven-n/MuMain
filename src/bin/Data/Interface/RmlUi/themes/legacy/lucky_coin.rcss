@@ -22,3 +22,6 @@
 
 /* CButton::Lock()'s ChangeTextColor(0xff808080). */
 .entry-btn.locked .entry-label { color: #808080; }
+
+/* The docked frame's newui_item_back04 top, as their RenderFrame() drew. */
+.frame-top { decorator: image(docked-bg-top-a); }

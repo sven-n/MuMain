@@ -27,16 +27,14 @@ CEmpireGuardianNPC::~CEmpireGuardianNPC()
     Release();
 }
 
-bool CEmpireGuardianNPC::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y)
+bool CEmpireGuardianNPC::Create(CManager* pNewUIMng, int x, int y)
 {
-    if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng || NULL == g_pNewItemMng)
+    if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC, this);
-
-    m_pNewUI3DRenderMng = pNewUI3DRenderMng;
-    m_pNewUI3DRenderMng->Add3DRenderObj(this, INVENTORY_CAMERA_Z_ORDER);
+    m_View.SetItemDrawer([this] { RenderItem3D(); }, this);
 
     SetPos(x, y);
 
@@ -175,11 +173,6 @@ void CEmpireGuardianNPC::OpenningProcess()
 
 void CEmpireGuardianNPC::ClosingProcess()
 {
-}
-
-void CEmpireGuardianNPC::Render3D()
-{
-    RenderItem3D();
 }
 
 void CEmpireGuardianNPC::RenderItem3D()

@@ -321,7 +321,7 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewNPCQuest = new CNPCQuest;
-    if (m_pNewNPCQuest->Create(m_pNewUIMng, m_pNewUI3DRenderMng, PanelColumnX(1), 0) == false)
+    if (m_pNewNPCQuest->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewEnterBloodCastle = new CEnterBloodCastle;
@@ -507,7 +507,7 @@ bool CSystem::LoadMainSceneInterface()
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
     m_pNewDoppelGangerWindow = new CDoppelGangerWindow;
-    if (m_pNewDoppelGangerWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng, PanelColumnX(1), 0) == false)
+    if (m_pNewDoppelGangerWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewDoppelGangerFrame = new CDoppelGangerFrame;
@@ -527,7 +527,7 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewEmpireGuardianNPC = new CEmpireGuardianNPC;
-    if (m_pNewEmpireGuardianNPC->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 450, 0) == false)
+    if (m_pNewEmpireGuardianNPC->Create(m_pNewUIMng, 450, 0) == false)
         return false;
 
     m_pNewEmpireGuardianTimer = new CEmpireGuardianTimer;

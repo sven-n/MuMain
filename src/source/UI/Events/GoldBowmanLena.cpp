@@ -60,6 +60,7 @@ bool CGoldBowmanLena::Create(CManager* pNewUIMng, int x, int y)
     m_ExitTooltip.SetText(&I18N::Game::Close388);
     m_ExitTooltip.SetAnchorAbove(true);
 
+    m_View.SetItemDrawer([this] { Render3D(); }, this);
     m_View.Build();
 
     Show(false);
@@ -198,13 +199,6 @@ void CGoldBowmanLena::SyncView()
 
 bool CGoldBowmanLena::Render()
 {
-    // The frame, the texts and the buttons are RmlUi (the frame in the background context, under
-    // the Rena); the two Rena stay native 3D, over the frame as before, in the render state the
-    // original's 2D pass left them.
-    EnableAlphaTest();
-    DisableAlphaBlend();
-    Render3D();
-
     // The buttons' hover tooltips (the shared RmlUi one), shown from here as the original's
     // CButton::Render() showed them, after the hover checks of the windows under it.
     m_RegisterTooltip.Render(m_Pos.x + static_cast<int>(kRegisterX), m_Pos.y + static_cast<int>(kRegisterY),
@@ -219,41 +213,19 @@ float CGoldBowmanLena::GetLayerDepth()	// 3.4f
     return 3.4f;
 }
 
-// Pre-panel proj/view snapshot, restored around Render3D()'s matrix push/pop -- same shape as RenderDisplayItems().
-static float s_PreGBLProj[16];
-static float s_PreGBLView[16];
-
+// Into the document's #entry_item, under the item camera EventItemEntryView sets up. The original
+// drew the two Rena at (640 - 120, 200) from its column-one place at x 450: 70 into the panel.
 void CGoldBowmanLena::Render3D()
 {
-    EndBitmap();
-
-    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
-    mu::GetRenderer().PushMatrix();
-    mu::GetRenderer().LoadIdentity();
-    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
-    gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
-    mu::GetRenderer().PushMatrix();
-    mu::GetRenderer().LoadIdentity();
-    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
-    EnableDepthTest();
-    EnableDepthMask();
+    EnableAlphaTest();
+    DisableAlphaBlend();
 
     int Type = ITEM_POTION + 21;
     int Level = 0;
-    float x = (float)REFERENCE_WIDTH - 120.f;
-    float y = 200.f;
+    float x = static_cast<float>(m_Pos.x) + 70.f;
+    float y = static_cast<float>(m_Pos.y) + 200.f;
     float Width = (float)ItemAttribute[Type].Width * INVENTORY_SCALE;
     float Height = (float)ItemAttribute[Type].Height * INVENTORY_SCALE;
     RenderItem3D(x, y, Width, Height, Type, Level, 0, 0, false);
     RenderItem3D(x, y + 42, Width, Height, Type, Level, 0, 0, false);
-
-    UpdateMousePositionn();
-
-    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
-    mu::GetRenderer().PopMatrix();
-    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
-    mu::GetRenderer().PopMatrix();
-
-    BeginBitmap();
 }

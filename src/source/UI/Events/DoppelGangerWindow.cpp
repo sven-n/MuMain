@@ -24,7 +24,6 @@ using namespace mu::ui::window;
 CDoppelGangerWindow::CDoppelGangerWindow()
 {
     m_pNewUIMng = NULL;
-    m_pNewUI3DRenderMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_iRemainTime = 0;
     m_bIsEnterButtonLocked = FALSE;
@@ -35,16 +34,14 @@ CDoppelGangerWindow::~CDoppelGangerWindow()
     Release();
 }
 
-bool CDoppelGangerWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y)
+bool CDoppelGangerWindow::Create(CManager* pNewUIMng, int x, int y)
 {
-    if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng || NULL == g_pNewItemMng)
+    if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DOPPELGANGER_NPC, this);
-
-    m_pNewUI3DRenderMng = pNewUI3DRenderMng;
-    m_pNewUI3DRenderMng->Add3DRenderObj(this, INVENTORY_CAMERA_Z_ORDER);
+    m_View.SetItemDrawer([this] { RenderItem3D(); }, this);
 
     SetPos(x, y);
 
@@ -58,12 +55,6 @@ bool CDoppelGangerWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRend
 void CDoppelGangerWindow::Release()
 {
     m_View.Release();
-
-    if (m_pNewUI3DRenderMng)
-    {
-        m_pNewUI3DRenderMng->Remove3DRenderObj(this);
-        m_pNewUI3DRenderMng = NULL;
-    }
 
     if (m_pNewUIMng)
     {
@@ -175,11 +166,6 @@ void CDoppelGangerWindow::SyncView()
         m_View.SetButtons({{I18N::Game::Enter, m_bIsEnterButtonLocked == TRUE}, {I18N::Game::Close388, false}});
     }
     m_View.Sync(IsVisible(), m_Pos);
-}
-
-void CDoppelGangerWindow::Render3D()
-{
-    RenderItem3D();
 }
 
 void CDoppelGangerWindow::RenderItem3D()

@@ -58,14 +58,12 @@ TEST_CASE("the background contexts hold only the documents already in them [ui][
 {
     const std::set<std::string> background = {
         "battle_soccer_score.rml", "blood_castle_time.rml", "chaos_castle_time.rml",
-        "cursed_temple_system.rml", "doppelganger_enter_bg.rml", "doppelganger_frame.rml",
-        "duel_window.rml", "empire_guardian_enter_bg.rml", "empire_guardian_timer.rml",
-        "gold_bowman_bg.rml", "gold_bowman_lena_bg.rml", "in_game_shop_bg.rml",
-        "inventory_extension_bg.rml", "kanturu_info.rml", "lucky_coin_exchange_bg.rml",
-        "lucky_coin_registration_bg.rml", "lucky_item_bg.rml", "map_name.rml",
-        "master_level_bg.rml", "mix_inventory_bg.rml", "my_inventory_bg.rml", "my_shop_bg.rml",
-        "npc_quest_bg.rml", "npc_shop_bg.rml", "purchase_shop_bg.rml", "siege_warfare.rml",
-        "storage_bg.rml", "storage_ext_bg.rml", "trade_bg.rml", "world_labels.rml",
+        "cursed_temple_system.rml", "doppelganger_frame.rml", "duel_window.rml",
+        "empire_guardian_timer.rml", "in_game_shop_bg.rml", "inventory_extension_bg.rml",
+        "kanturu_info.rml", "lucky_item_bg.rml", "map_name.rml", "master_level_bg.rml",
+        "mix_inventory_bg.rml", "my_inventory_bg.rml", "my_shop_bg.rml",
+        "npc_shop_bg.rml", "purchase_shop_bg.rml", "siege_warfare.rml", "storage_bg.rml",
+        "storage_ext_bg.rml", "trade_bg.rml", "world_labels.rml",
     };
 
     const std::set<std::string> named = DocumentsNamedInSources();
