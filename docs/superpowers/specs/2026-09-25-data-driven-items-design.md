@@ -526,6 +526,35 @@ server with original clients (after phases 6 and B).
 
    **A (OpenMU):** new rule fields/tables with migration, initialization,
    update plug-in and server enforcement, based on the mapping above.
+
+   **3b Remaining item lists (not started).** The lists of item ids outside
+   the phase 3 files: about 35 places (see "Item-specific code that is left"
+   → Phase 3b) that repeat data the items already have (tags, `slot`,
+   `wingTier`, `storable`, the model and display files) or need one new tag
+   (bow, crossbow, sceptre, …). As in phase 3, the code asks the item data
+   instead of naming items, and a one-time test compares the old and the new
+   code for every item before the lists go; intended behavior changes, if
+   any, get commits of their own. New tags that OpenMU checks in
+   `ItemConstants` go into the mapping for A.
+
+   **3c Item stats by level (not started).** What the item level adds to
+   damage, magic power, defense, blocking, the requirements and the wing
+   options, and the bonus of excellent and ancient items, is computed today
+   by `SetItemAttributes` and its `Calc*` functions in `ZzzInfomation.cpp`;
+   the formulas are listed under "Item-specific code that is left" → Item
+   stats by level. They become named level bonus tables and formula
+   parameters in data (D43 of the roadmap), shared in the item exchange and
+   matching OpenMU's `ItemLevelBonusTable` per stat. Checked like phase 3: a
+   one-time test compares the old and the new values for every item at
+   levels 0–15, normal, excellent and ancient. The differences 815b8828
+   brought into these formulas (blocking by the drop level, the excellent
+   bonus for wings with a wing option, the empty level requirement range
+   from the Wing of Dimension on) move as they are and are decided on their
+   own, not changed on the way. The fork branch `fix-some-item-calculations`
+   (January 2026, still in the old `Source Main 5.2` layout) holds fixes of
+   these formulas after the Season 6 client and is compared when this phase
+   starts. **A (OpenMU):** the mapping of the tables to
+   `ItemLevelBonusTable`, and the formulas OpenMU does not have.
 4. **Models into data**: model and display data in their own files,
    `Data/Items/Models/GroupNN_*.json` (D22):
 

@@ -258,12 +258,14 @@ A MuEditor tool, in editor builds only, read only in FX1 (D42):
   own move and draw code do not run, so nothing spawns or sounds; types
   whose drawing stage draws nothing say so.
 - Preview in the world (FX1.7b): creates the type in the world in front of
-  the hero, with the hero as owner and a chosen SubType, so its real code
-  runs: move, draw, the particles and sprites it creates, its sounds.
+  the hero, with a copy of the hero's object as owner and a chosen SubType,
+  so its real code runs: move, draw, the particles and sprites it creates,
+  its sounds.
   Sprites are created again every frame while previewing; Repeat creates the
   type again when it ends.
-- Later (FX1.7c): the live effect of FX1.7b drawn in the browser's view, on
-  the chosen object, instead of in the world.
+- Not for now, maybe later (FX1.7c, see Possible follow-ups): the live
+  effect of FX1.7b drawn in the browser's view, on the chosen object,
+  instead of in the world.
 
 ## Phases
 
@@ -282,7 +284,7 @@ One PR each, small enough to check against the old code.
 | FX1.6 | Effect browser | FX1.1 | Read-only tool in MuEditor; values from FX1.2 on. Done, see the FX1.6 note. |
 | FX1.7a | Preview in the browser | FX1.6 | A 3D view in the details: the slot's model or texture, shown on nothing, a plane, a cube or an item. Editor code only. Done, see the FX1.7a note. |
 | FX1.7b | Preview in the world | FX1.6 | Creating the selected type in front of the hero in editor builds, with a SubType from the variants of its row or typed in. Done, see the FX1.7b note. |
-| FX1.7c | Live preview in the browser | FX1.7a, FX1.7b | Later, decided after FX1.7b: the objects of FX1.7b drawn in the browser's view on the chosen object instead of in the world. |
+| FX1.7c | Live preview in the browser | FX1.7a, FX1.7b | Not for now, maybe later: moved to the possible follow-ups, described in the [possible follow-up ideas](2026-10-06-possible-follow-up-ideas.md#fx17c-live-preview-in-the-browser). The objects of FX1.7b drawn in the browser's view on the chosen object instead of in the world. |
 
 **FX1.1 Names for all types.** The compiled list of symbols per kind (about
 640 lines), generated once by a script and kept by hand afterwards. The four
@@ -467,8 +469,9 @@ that only choose values by SubType are data now, except `BITMAP_MAGIC`,
 `MODEL_MAYASTONEFIRE` and `BITMAP_SWORD_FORCE`, which compute values from
 the call's scale or angle, and `MODEL_WARCRAFT`, which is never created.
 
-**FX1.6–FX1.7c** add the effect browser and its previews to MuEditor.
-They change no game code outside editor builds.
+**FX1.6–FX1.7b** add the effect browser and its previews to MuEditor.
+They change no game code outside editor builds. FX1.7c is a possible
+follow-up.
 
 *FX1.6 done:* MuEditor has the effect browser (docs/effect-data.md): a tab
 per kind with search and filters (asset loaded now; for effects, the stage
@@ -679,27 +682,14 @@ reader keeps whether an `#if` branch is known to be taken, so the `#else` of
 reads the source folder, from a header CMake generates. The editor console's
 stream redirect, which deadlocked on Linux and macOS, locks once per write.
 
-**FX1.7c Live preview in the browser (later).** The objects of FX1.7b drawn
-in the browser's view, on the chosen object, instead of in the world. The
-render loops of their pools (`RenderEffectShadows`, `RenderEffects`,
-`RenderParticles`, `RenderJoints`, `RenderSprites`, and `RenderAfterEffects`
-in the Kanturu Maya scene; trails of `RenderBlurs` stay in the world) would
-skip the preview's objects in the world and draw only them inside the
-capture, with the view's camera (`SaveCameraPerspective` /
-`RestoreCameraPerspective`), as visible (only `RenderEffects` and
-`RenderAfterEffects` test the frustum). The costs: changes to six game
-render loops, in editor builds only; an object is drawn in the view or in
-the world, not in both, because the draw code advances animations and
-creates sprites and particles; effects that follow their owner follow the
-hero, so the view centres on the hero's place or the chosen object becomes
-the owner; the view has no terrain, and ground parts are tiles at the
-terrain height of their cell (`RenderTerrainAlphaBitmap`), so the plane goes
-at that height; `ZzzEffectJoint.cpp` and `zzzeffectsprite.cpp` are to be
-checked with cppcheck first (`ZzzEffectParticle.cpp` passed it in FX1.0).
-Decided after FX1.7b, once it shows whether the world preview with the
-free-fly camera is enough. The game view as an editor window would also
-bring FX1.7b into the editor; that is an editor change for all tools, not
-part of FX1.
+**FX1.7c Live preview in the browser: not for now, maybe later.** Decided
+after FX1.7b: the world preview, with the Dev Editor's free camera and F12
+hiding the editor, shows the real effect, while FX1.7c would change six game
+render loops (in editor builds) to draw it in the browser's view instead. It
+is the first of the possible follow-ups at the end of this document; what it
+would take is in the [possible follow-up
+ideas](2026-10-06-possible-follow-up-ideas.md#fx17c-live-preview-in-the-browser),
+to be extended into its own design when the work starts.
 
 ## Verification
 
@@ -896,10 +886,21 @@ Still to check and file upstream: the owner is used without a null check in
 27 creation cases, and 9 effect types are created but have no code
 (`MODEL_EX01_SHADOW_MASTER_*`).
 
-## Open questions
+## Possible follow-ups
 
-- **Browser, later.** A generated index of the code call sites for "used
-  by", besides the data users.
-- **Preview inside the editor.** FX1.7c, or the game view as an editor
-  window, which would show FX1.7b inside the editor and help the map editor
-  too; decided after FX1.7b.
+Not planned for now; each is decided on its own, maybe later. They are
+described in the [possible follow-up
+ideas](2026-10-06-possible-follow-up-ideas.md#from-the-effect-catalogue-fx1).
+
+1. [**FX1.7c Live preview in the
+   browser**](2026-10-06-possible-follow-up-ideas.md#fx17c-live-preview-in-the-browser):
+   the objects of the world preview (FX1.7b) drawn in the browser's view, on
+   the chosen object, instead of in the world.
+2. [**The game view as an editor
+   window**](2026-10-06-possible-follow-up-ideas.md#the-game-view-as-an-editor-window):
+   the game's frame drawn into a window of the editor, for the world
+   preview, the map editor and the other tools.
+3. [**"Used by" from the
+   code**](2026-10-06-possible-follow-up-ideas.md#used-by-from-the-code): a
+   generated index of the code's call sites for "used by", besides the data
+   users.
