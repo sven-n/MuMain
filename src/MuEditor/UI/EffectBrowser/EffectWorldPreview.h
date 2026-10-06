@@ -37,10 +37,14 @@ struct WorldPreviewCall
     // this high above the ground.
     float distance = WorldPreviewDistance;
     float height = 0.0f;
-    // 0: the default of the create function (effects 0.9, particles and
-    // sprites 1, lightning 10).
+    // 0: the default of the create function (effects 0.9, particles 1,
+    // lightning 10); sprites, whose create function has none, get 1.
     float scale = 0.0f;
     PreviewVector light{1.0f, 1.0f, 1.0f};
+    // Lightning only: whether the call passes the light as its colour. Most
+    // of the game's calls pass none, and some types then choose their colour
+    // by SubType.
+    bool jointColour = false;
     // A random angle for each call, as many game calls give lightning.
     bool randomAngle = false;
     WorldPreviewTarget target = WorldPreviewTarget::Character;
@@ -94,6 +98,14 @@ struct RefusedWorldPreview
     int subType = -1;
 };
 
+// A lightning SubType whose creation code reads the colour without checking
+// that the call passed one: the preview passes white when none is chosen.
+struct JointNeedingColour
+{
+    int type = 0;
+    int subType = 0;
+};
+
 // The point `distance` in front of `position` for a yaw in degrees: the
 // game's forward direction (0, -1, 0) turned by the yaw, as AngleMatrix does.
 PreviewVector PlaceInFrontOf(const PreviewVector& position, float yawDegrees, float distance);
@@ -102,6 +114,7 @@ PreviewVector PlaceInFrontOf(const PreviewVector& position, float yawDegrees, fl
 // owns them.
 std::span<const RefusedWorldPreview> GetRefusedWorldPreviews();
 bool IsRefusedInWorld(const WorldPreviewRequest& request);
+std::span<const JointNeedingColour> GetJointsNeedingColour();
 
 // Whether a character stands in a map, so a type can be created in front of
 // it.
@@ -179,7 +192,7 @@ private:
     void Create(const EffectPools& pools);
     OBJECT* TargetOf(const WorldPreviewCall& call);
     void ChooseTarget(const WorldPreviewCall& call);
-    void NoteWhatWasKept(const EffectPools& pools, const PreviewVector& position, const WorldPreviewCall& call);
+    void NoteWhatWasKept(const EffectPools& pools, const PreviewVector& position, const WorldPreviewRequest& request);
     void NoteFollowing(const EffectPools& pools);
     void End();
     void ApplyMute() const;

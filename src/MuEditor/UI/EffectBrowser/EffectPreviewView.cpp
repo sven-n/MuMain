@@ -157,22 +157,24 @@ void CEffectPreviewView::Render(const MuEditor::Effects::EffectBrowserRow& row, 
     RenderControls(request);
     RenderView(request);
     RenderNotes(request.subject.notes | m_scene.GetObjectNotes() | ItemNotes(request));
-    const int worldSubType = kind == EffectKind::Sprite ? static_cast<int>(m_spriteBlend) : m_subType;
     // A game call taken with Use sets the SubType of both previews.
-    if (const std::optional<int> used = m_world.Render(world, kind, row.type, worldSubType))
-    {
-        if (kind == EffectKind::Sprite)
-            m_spriteBlend = static_cast<MuEditor::Effects::PreviewSpriteBlend>(
-                std::clamp(*used, 0, static_cast<int>(MuEditor::Effects::PreviewSpriteBlend::Luminance)));
-        else
-            m_subType = *used;
-    }
+    if (const std::optional<int> used = m_world.Render(world, kind, row.type, m_subType))
+        m_subType = *used;
 }
 
 void CEffectPreviewView::SelectType(const MuEditor::Effects::EffectBrowserRow& row, EffectKind kind,
                                     const MuEditor::Effects::EffectBrowserDetails& details)
 {
+    const bool spriteBefore = m_selected && m_selected->kind == EffectKind::Sprite;
     m_selected = MuEditor::Effects::EffectTypeRef{kind, row.type};
+    if (kind == EffectKind::Sprite)
+    {
+        // The blends; the one chosen stays for the next sprite.
+        m_subTypePresets = {0, 1, 2, 3};
+        if (!spriteBefore)
+            m_subType = 0;
+        return;
+    }
     const std::vector<std::vector<int>> none;
     m_subTypePresets = MuEditor::Effects::PreviewSubTypes(details.creation ? details.creation->variantSubTypes : none);
     m_subType = m_subTypePresets.front();
@@ -192,7 +194,8 @@ EffectPreviewRequest CEffectPreviewView::MakeRequest(const MuEditor::Effects::Ef
     request.itemLevel = m_itemLevel;
     request.itemExcellent = m_itemExcellent;
     request.itemAncient = m_itemAncient;
-    request.spriteBlend = m_spriteBlend;
+    request.spriteBlend =
+        kind == EffectKind::Sprite ? MuEditor::Effects::SpriteBlendOf(row.type, m_subType) : m_spriteBlend;
     request.turn = m_turn;
     return request;
 }
@@ -200,14 +203,12 @@ EffectPreviewRequest CEffectPreviewView::MakeRequest(const MuEditor::Effects::Ef
 void CEffectPreviewView::RenderControls(const EffectPreviewRequest& request)
 {
     RenderShowOn();
-    // A sprite's SubType is its blend.
-    if (request.kind != EffectKind::Sprite)
-    {
-        const float presets = m_subTypePresets.size() > 1 ? PresetsComboWidth : 0.0f;
-        Layout::SameLineIfFits(Layout::LabeledComboWidth(I18N::Editor::SubType, SubTypeInputWidth + presets));
-        RenderSubType();
-    }
-    if (request.subject.draw == MuEditor::Effects::PreviewDraw::Sprite || request.kind == EffectKind::Sprite)
+    const float presets = m_subTypePresets.size() > 1 ? PresetsComboWidth : 0.0f;
+    Layout::SameLineIfFits(Layout::LabeledComboWidth(I18N::Editor::SubType, SubTypeInputWidth + presets));
+    RenderSubType(request.kind);
+    // A sprite's SubType is its blend; the texture of another kind is shown
+    // with a blend of its own.
+    if (request.kind != EffectKind::Sprite && request.subject.draw == MuEditor::Effects::PreviewDraw::Sprite)
     {
         Layout::SameLineIfFits(Layout::LabeledComboWidth(I18N::Editor::Blend, ComboWidth));
         RenderSpriteBlend();
@@ -229,8 +230,9 @@ void CEffectPreviewView::RenderShowOn()
 }
 
 // Typed in, or one SubType of each column of the creation table: the game
-// takes a SubType no variant names as the row's own values.
-void CEffectPreviewView::RenderSubType()
+// takes a SubType no variant names as the row's own values. A sprite's
+// SubType is its blend (the formation mark's, its frame).
+void CEffectPreviewView::RenderSubType(EffectKind kind)
 {
     ImGui::TextUnformatted(I18N::Editor::SubType);
     ImGui::SameLine();
@@ -239,19 +241,23 @@ void CEffectPreviewView::RenderSubType()
     if (m_subTypePresets.size() > 1)
     {
         ImGui::SameLine(0.0f, 0.0f);
-        RenderSubTypePresets();
+        RenderSubTypePresets(kind);
     }
 }
 
-void CEffectPreviewView::RenderSubTypePresets()
+void CEffectPreviewView::RenderSubTypePresets(EffectKind kind)
 {
     if (!ImGui::BeginCombo("##subTypePresets", nullptr, ImGuiComboFlags_NoPreview))
         return;
     char label[64];
     for (size_t i = 0; i < m_subTypePresets.size(); ++i)
     {
-        // The first one stands for the SubTypes without a variant.
-        if (i == 0)
+        // A sprite's are the blends; otherwise the first one stands for the
+        // SubTypes without a variant.
+        if (kind == EffectKind::Sprite)
+            std::snprintf(label, sizeof(label), "%d (%s)", m_subTypePresets[i],
+                          SpriteBlendLabel(static_cast<PreviewSpriteBlend>(m_subTypePresets[i])));
+        else if (i == 0)
             std::snprintf(label, sizeof(label), "%d (%s)", m_subTypePresets[i], I18N::Editor::OtherSubTypes);
         else
             std::snprintf(label, sizeof(label), "%d", m_subTypePresets[i]);

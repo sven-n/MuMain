@@ -24,6 +24,7 @@
 #include "UI/EffectBrowser/EffectPreviewGeometry.h"
 #include "UI/EffectBrowser/EffectPreviewItems.h"
 #include "UI/EffectBrowser/EffectPreviewObject.h"
+#include "UI/EffectBrowser/EffectPreviewScene.h"
 #include "UI/EffectBrowser/EffectPreviewSubject.h"
 
 #include <algorithm>
@@ -377,5 +378,18 @@ TEST_CASE("The effect preview's pool guard removes what was created while it liv
     Sprites[10].Live = keptBefore;
     Sprites[11].Live = newBefore;
     Particles[5].Live = particleBefore;
+}
+
+TEST_CASE("A sprite's SubType chooses its blend, and the formation mark's its frame [effects][editor]")
+{
+    CHECK(SpriteBlendOf(BITMAP_LIGHT, 0) == PreviewSpriteBlend::Glow);
+    CHECK(SpriteBlendOf(BITMAP_LIGHT, 1) == PreviewSpriteBlend::Subtract);
+    CHECK(SpriteBlendOf(BITMAP_LIGHT, 2) == PreviewSpriteBlend::AlphaTest);
+    CHECK(SpriteBlendOf(BITMAP_LIGHT, 3) == PreviewSpriteBlend::Luminance);
+    // RenderSprites sets no blend for other SubTypes.
+    CHECK(SpriteBlendOf(BITMAP_LIGHT, 7) == PreviewSpriteBlend::Glow);
+    CHECK(SpriteBlendOf(BITMAP_LIGHT, -1) == PreviewSpriteBlend::Glow);
+    CHECK(SpriteBlendOf(BITMAP_FORMATION_MARK, 0) == PreviewSpriteBlend::AlphaTest);
+    CHECK(SpriteBlendOf(BITMAP_FORMATION_MARK, 5) == PreviewSpriteBlend::AlphaTest);
 }
 #endif // _EDITOR

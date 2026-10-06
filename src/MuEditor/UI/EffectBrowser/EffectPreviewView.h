@@ -50,8 +50,8 @@ private:
                                                         Data::Effects::EffectKind kind) const;
     void RenderControls(const MuEditor::Effects::EffectPreviewRequest& request);
     void RenderShowOn();
-    void RenderSubType();
-    void RenderSubTypePresets();
+    void RenderSubType(Data::Effects::EffectKind kind);
+    void RenderSubTypePresets(Data::Effects::EffectKind kind);
     void RenderSpriteBlend();
     void RenderItemPicker();
     void RenderItemList();
@@ -67,12 +67,15 @@ private:
     std::optional<FramingKey> m_framedFor;
 
     // The selected type, the SubType both previews use (a sprite's is its
-    // blend), and one SubType of each column of its creation table to choose.
+    // blend, the formation mark's its frame), and the SubTypes to choose from:
+    // one of each column of the creation table, a sprite's blends.
     std::optional<MuEditor::Effects::EffectTypeRef> m_selected;
     int m_subType = 0;
     std::vector<int> m_subTypePresets;
 
     MuEditor::Effects::PreviewShowOn m_showOn = MuEditor::Effects::PreviewShowOn::Nothing;
+    // The blend the texture of a type of another kind than sprites is shown
+    // with.
     MuEditor::Effects::PreviewSpriteBlend m_spriteBlend = MuEditor::Effects::PreviewSpriteBlend::Glow;
     bool m_turn = true;
 

@@ -37,7 +37,8 @@ struct EffectCallSite
     // left out gets the call's default.
     std::optional<int> subTypeValue;
     std::optional<float> scaleValue;
-    // The light: Vector(r, g, b, light) before the call, in its function.
+    // The light: Vector(r, g, b, light) before the call, in its function; for
+    // lightning, the colour it passes.
     std::optional<PreviewVector> light;
     bool withoutOwner = false;
     // Lightning only: the values some SubTypes read from PK and SkillIndex.

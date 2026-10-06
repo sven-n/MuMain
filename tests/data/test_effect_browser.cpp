@@ -220,6 +220,97 @@ bool IsBelow(const EffectLegacyCases& left, const EffectLegacyCases& right)
     return left.type < right.type;
 }
 
+std::string WithoutSpaces(std::string_view text)
+{
+    std::string result;
+    std::copy_if(text.begin(), text.end(), std::back_inserter(result),
+                 [](char c) { return std::isspace(static_cast<unsigned char>(c)) == 0; });
+    return result;
+}
+
+bool IsWordAt(const std::string& text, size_t at, std::string_view word)
+{
+    const auto identifier = [](char c) { return std::isalnum(static_cast<unsigned char>(c)) != 0 || c == '_'; };
+    return text.compare(at, word.size(), word) == 0 && (at == 0 || !identifier(text[at - 1])) &&
+           (at + word.size() >= text.size() || !identifier(text[at + word.size()]));
+}
+
+// The bracket that closes the one at `open`.
+size_t ClosingOf(const std::string& text, size_t open)
+{
+    int depth = 0;
+    for (size_t k = open; k < text.size(); ++k)
+    {
+        if (text[k] == '(' || text[k] == '{')
+            ++depth;
+        else if ((text[k] == ')' || text[k] == '}') && --depth == 0)
+            return k;
+    }
+    return std::string::npos;
+}
+
+// A switch open at a place of a function, with the labels of the case the
+// place belongs to (labels without statements between them share one).
+struct OpenSwitch
+{
+    std::string expression;
+    int depth = 0;
+    std::vector<std::string> labels;
+    bool afterLabel = false;
+};
+
+// The switches open at `at`, outermost first, read from `begin` (the '{' of
+// the function); `text` without comments and strings.
+std::vector<OpenSwitch> SwitchesOpenAt(const std::string& text, size_t begin, size_t at)
+{
+    std::vector<OpenSwitch> open;
+    std::optional<std::string> nextSwitch;
+    int depth = 0;
+    for (size_t i = begin; i < at; ++i)
+    {
+        if (std::isspace(static_cast<unsigned char>(text[i])) != 0)
+            continue;
+        if (IsWordAt(text, i, "switch"))
+        {
+            const size_t paren = text.find('(', i);
+            const size_t close = ClosingOf(text, paren);
+            nextSwitch = WithoutSpaces(std::string_view(text).substr(paren + 1, close - paren - 1));
+            i = close;
+            continue;
+        }
+        if (!open.empty() && depth == open.back().depth && (IsWordAt(text, i, "case") || IsWordAt(text, i, "default")))
+        {
+            size_t colon = text.find(':', i);
+            while (colon != std::string::npos && colon + 1 < text.size() && text[colon + 1] == ':')
+                colon = text.find(':', colon + 2);
+            OpenSwitch& current = open.back();
+            if (!current.afterLabel)
+                current.labels.clear();
+            current.labels.push_back(IsWordAt(text, i, "default")
+                                         ? std::string("default")
+                                         : WithoutSpaces(std::string_view(text).substr(i + 4, colon - i - 4)));
+            current.afterLabel = true;
+            i = colon;
+            continue;
+        }
+        if (!open.empty())
+            open.back().afterLabel = false;
+        if (text[i] == '{')
+        {
+            ++depth;
+            if (nextSwitch)
+                open.push_back({*std::exchange(nextSwitch, std::nullopt), depth});
+        }
+        else if (text[i] == '}')
+        {
+            if (!open.empty() && open.back().depth == depth)
+                open.pop_back();
+            --depth;
+        }
+    }
+    return open;
+}
+
 std::uint8_t FlagOf(Stage stage)
 {
     switch (stage)
@@ -516,6 +607,96 @@ TEST_CASE("The world preview refuses every type whose code changes the character
                 CHECK(isRefused(ResolveLabel(code)));
             }
         }
+    }
+}
+
+// CreateJoint copies the colour of a few lightning SubTypes without checking
+// that the call passed one; the world preview passes white for those when no
+// colour is chosen. The test finds each such read and checks the list.
+TEST_CASE("The world preview passes a colour to every lightning SubType whose code reads it unchecked "
+          "[data][effects][editor]")
+{
+    const std::string text = EffectSourceCases::ReadEffectSource(std::filesystem::path(MU_TEST_SOURCE_DIR) /
+                                                                 "Render/Effects/ZzzEffectJoint.cpp");
+    const size_t function = text.find("void CreateJoint(");
+    REQUIRE(function != std::string::npos);
+    const size_t body = text.find('{', ClosingOf(text, text.find('(', function)));
+    const size_t end = ClosingOf(text, body);
+    REQUIRE(end != std::string::npos);
+
+    const std::span<const EffectTypeSymbol> joints = GetEffectTypeSymbols(EffectKind::Joint);
+    const auto typeOf = [&](const std::string& code)
+    {
+        const auto found = std::find_if(joints.begin(), joints.end(),
+                                        [&](const EffectTypeSymbol& symbol) { return symbol.code == code; });
+        return found != joints.end() ? found->type : -1;
+    };
+    // if (vPriorColor) or if (!vPriorColor).
+    const auto isCheck = [&](size_t at)
+    {
+        size_t k = at;
+        while (k > 0 && (std::isspace(static_cast<unsigned char>(text[k - 1])) != 0 || text[k - 1] == '!'))
+            --k;
+        if (k == 0 || text[k - 1] != '(')
+            return false;
+        --k;
+        while (k > 0 && std::isspace(static_cast<unsigned char>(text[k - 1])) != 0)
+            --k;
+        return k >= 2 && IsWordAt(text, k - 2, "if");
+    };
+
+    constexpr std::string_view Colour = "vPriorColor";
+    std::set<std::pair<int, int>> unchecked;
+    for (size_t at = text.find(Colour, body); at != std::string::npos && at < end; at = text.find(Colour, at + 1))
+    {
+        if (!IsWordAt(text, at, Colour) || isCheck(at))
+            continue;
+        // A read in the block of `if (vPriorColor)`, or right after it.
+        const size_t delimiter = text.find_last_of(";{}", at);
+        const std::string statement = WithoutSpaces(std::string_view(text).substr(delimiter + 1, at - delimiter - 1));
+        const std::string before = WithoutSpaces(std::string_view(text).substr(body, delimiter + 1 - body));
+        if (statement.rfind("if(vPriorColor)", 0) == 0 ||
+            (text[delimiter] == '{' && before.ends_with("if(vPriorColor){")))
+            continue;
+
+        INFO("line " << std::count(text.begin(), text.begin() + static_cast<std::ptrdiff_t>(at), '\n') + 1);
+        std::vector<std::string> types;
+        std::vector<std::string> subTypes;
+        for (const OpenSwitch& open : SwitchesOpenAt(text, body, at))
+        {
+            if (open.expression == "Type" || open.expression == "o->Type")
+                types = open.labels;
+            else if (open.expression == "o->SubType")
+                subTypes = open.labels;
+        }
+        REQUIRE_FALSE(types.empty());
+        if (subTypes.empty())
+            subTypes.push_back("-1");
+        for (const std::string& type : types)
+        {
+            for (const std::string& subType : subTypes)
+            {
+                INFO(type << " SubType " << subType);
+                int number = -1;
+                std::from_chars(subType.data(), subType.data() + subType.size(), number);
+                CHECK(typeOf(type) >= 0);
+                unchecked.insert({typeOf(type), number});
+            }
+        }
+    }
+
+    const std::span<const JointNeedingColour> listed = GetJointsNeedingColour();
+    CHECK_FALSE(unchecked.empty());
+    for (const auto& [type, subType] : unchecked)
+    {
+        INFO("type " << type << " SubType " << subType);
+        CHECK(std::any_of(listed.begin(), listed.end(), [&](const JointNeedingColour& entry)
+                          { return entry.type == type && entry.subType == subType; }));
+    }
+    for (const JointNeedingColour& entry : listed)
+    {
+        INFO("type " << entry.type << " SubType " << entry.subType);
+        CHECK(unchecked.count({entry.type, entry.subType}) == 1);
     }
 }
 

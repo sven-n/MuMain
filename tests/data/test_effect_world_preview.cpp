@@ -10,6 +10,9 @@
 
 #include "Audio/EditorSoundMute.h"
 #include "Core/Globals/_enum.h"
+#include "Core/MuEditorCore.h"
+#include "Core/Utilities/AssetLoadWorld.h"
+#include "Core/Utilities/WorldClearing.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -17,6 +20,7 @@
 #include "UI/EffectBrowser/EffectPoolSnapshot.h"
 #include "UI/EffectBrowser/EffectPreviewTracker.h"
 #include "UI/EffectBrowser/EffectWorldPreview.h"
+#include "World/MapInfra/MapManager.h"
 
 #include <algorithm>
 #include <array>
@@ -69,6 +73,17 @@ void Live(JOINT& joint, int type, OBJECT* target)
 }
 
 int g_removedEffects = 0;
+
+// The effect slot a listener of the map code looks at, and what it saw.
+int g_watchedEffect = 0;
+int g_clearingsTold = 0;
+bool g_watchedLiveWhenTold = false;
+
+void WatchClearing()
+{
+    ++g_clearingsTold;
+    g_watchedLiveWhenTold = Effects[g_watchedEffect].Live;
+}
 
 // Removes an effect of the test pools.
 void RemoveTestEffect(OBJECT& effect)
@@ -395,6 +410,13 @@ TEST_CASE("The world preview creates the type with the game's call, follows it a
         world.Start({EffectKind::Effect, MODEL_SUMMONER_SUMMON_LAGUL, 1});
         CHECK_FALSE(world.IsRunning());
         CHECK(world.GetNotes() == WorldNoteRefused);
+
+        // A refused SubType chosen while the preview runs ends the run.
+        world.Start({EffectKind::Effect, MODEL_SUMMONER_SUMMON_LAGUL, 0});
+        CHECK(world.IsRunning());
+        world.UpdateRunning({EffectKind::Effect, MODEL_SUMMONER_SUMMON_LAGUL, 1});
+        CHECK_FALSE(world.IsRunning());
+        CHECK(world.GetNotes() == WorldNoteRefused);
     }
 
     Effects[*own].Live = false;
@@ -405,7 +427,9 @@ TEST_CASE("The world preview starts particles, lightning and sprites at the ches
 {
     CHECK(DefaultWorldPreviewCall(EffectKind::Effect).height == 0.0f);
     CHECK(DefaultWorldPreviewCall(EffectKind::Joint).height == WorldPreviewChestHeight);
-    CHECK(DefaultWorldPreviewCall(EffectKind::Particle).distance == WorldPreviewDistance);
+    CHECK(DefaultWorldPreviewCall(EffectKind::Particle).height == WorldPreviewChestHeight);
+    CHECK(DefaultWorldPreviewCall(EffectKind::Sprite).height == WorldPreviewChestHeight);
+    CHECK(DefaultWorldPreviewCall(EffectKind::Effect).distance == WorldPreviewDistance);
 
     auto characters = std::make_unique<CHARACTER[]>(4);
     const auto place = [&](int index, int kind, float x, int action)
@@ -445,6 +469,7 @@ TEST_CASE("The world preview creates with the call's size, light, place and targ
 
     WorldPreviewCall call = DefaultWorldPreviewCall(EffectKind::Joint);
     call.scale = 100.0f;
+    call.jointColour = true;
     call.light = {0.2f, 0.4f, 1.0f};
     world.Start({EffectKind::Joint, BITMAP_JOINT_ENERGY, 0, call});
     world.AfterFrame(true, true);
@@ -455,6 +480,7 @@ TEST_CASE("The world preview creates with the call's size, light, place and targ
     CHECK(withCharacter->Light[0] == doctest::Approx(0.2f));
 
     // Another target, same type: what is there stays.
+    CHECK(findJoint(BITMAP_JOINT_ENERGY, nullptr) == nullptr);
     call.target = WorldPreviewTarget::None;
     world.Start({EffectKind::Joint, BITMAP_JOINT_ENERGY, 0, call});
     world.AfterFrame(true, true);
@@ -463,6 +489,7 @@ TEST_CASE("The world preview creates with the call's size, light, place and targ
     CHECK(world.GetCounts().joints >= 2);
     world.Stop();
     CHECK(findJoint(BITMAP_JOINT_ENERGY, owner) == nullptr);
+    CHECK(findJoint(BITMAP_JOINT_ENERGY, nullptr) == nullptr);
 
     // The place: this far in front of the character (yaw 0 is -y) and this
     // high above the ground.
@@ -531,5 +558,93 @@ TEST_CASE("The running world preview creates with the values as they are now and
     CHECK(again->Scale == doctest::Approx(80.0f));
     world.Stop();
     WorldTime = worldTime;
+}
+
+TEST_CASE("The world preview gives lightning a colour only when one is chosen, as most of the game's calls do "
+          "[effects][editor]")
+{
+    EffectTestData::BuildShippedRegistry();
+    const TestHero hero;
+    auto worldPreview = std::make_unique<EffectWorldPreview>();
+    EffectWorldPreview& world = *worldPreview;
+    const OBJECT* owner = &world.GetOwner();
+    const auto findJoint = [owner](int type) -> JOINT*
+    {
+        for (int i = 0; i < MAX_JOINTS; ++i)
+        {
+            if (Joints[i].Live && Joints[i].Type == type && Joints[i].Target == owner)
+                return &Joints[i];
+        }
+        return nullptr;
+    };
+
+    // Without one the type's code chooses it: SubType 0 of the energy bolt is
+    // brown, and nothing is noted.
+    world.Start({EffectKind::Joint, BITMAP_JOINT_ENERGY, 0, DefaultWorldPreviewCall(EffectKind::Joint)});
+    world.AfterFrame(true, true);
+    const JOINT* own = findJoint(BITMAP_JOINT_ENERGY);
+    REQUIRE(own != nullptr);
+    CHECK(own->Light[0] == doctest::Approx(0.4f));
+    CHECK(own->Light[1] == doctest::Approx(0.3f));
+    CHECK(own->Light[2] == doctest::Approx(0.2f));
+    CHECK((world.GetNotes() & WorldNoteOwnLight) == 0);
+    world.Stop();
+
+    // A chosen colour goes to the call.
+    WorldPreviewCall coloured = DefaultWorldPreviewCall(EffectKind::Joint);
+    coloured.jointColour = true;
+    coloured.light = {0.1f, 0.9f, 0.1f};
+    world.Start({EffectKind::Joint, BITMAP_JOINT_ENERGY, 0, coloured});
+    world.AfterFrame(true, true);
+    const JOINT* chosen = findJoint(BITMAP_JOINT_ENERGY);
+    REQUIRE(chosen != nullptr);
+    CHECK(chosen->Light[1] == doctest::Approx(0.9f));
+    world.Stop();
+
+    // The SubTypes whose code copies the colour unchecked get white.
+    for (const JointNeedingColour& entry : GetJointsNeedingColour())
+    {
+        CAPTURE(entry.type);
+        CAPTURE(entry.subType);
+        world.Start({EffectKind::Joint, entry.type, entry.subType, DefaultWorldPreviewCall(EffectKind::Joint)});
+        world.AfterFrame(true, true);
+        const JOINT* white = findJoint(entry.type);
+        REQUIRE(white != nullptr);
+        CHECK(white->Light[0] == doctest::Approx(1.0f));
+        CHECK(white->Light[1] == doctest::Approx(1.0f));
+        CHECK(white->Light[2] == doctest::Approx(1.0f));
+        world.Stop();
+    }
+}
+
+TEST_CASE("The map code tells the editor before it clears the effect pools, and the editor's listener stops the "
+          "world preview [effects][editor]")
+{
+    int slot = 0;
+    while (slot < MAX_EFFECTS && Effects[slot].Live)
+        ++slot;
+    REQUIRE(slot < MAX_EFFECTS);
+    Effects[slot].Live = true;
+    Effects[slot].Type = MODEL_POISON;
+    g_watchedEffect = slot;
+    g_clearingsTold = 0;
+    g_watchedLiveWhenTold = false;
+    Core::WorldClearing::SetListener(&WatchClearing);
+    gMapManager.DeleteObjects();
+    CHECK(g_clearingsTold == 1);
+    CHECK(g_watchedLiveWhenTold);
+    CHECK_FALSE(Effects[slot].Live);
+
+    // The editor sets its listener when it starts, before it needs a window
+    // (without one it stops there). Its listener stops the effect browser's
+    // world preview, which lets the game start sounds again.
+    g_MuEditorCore.Initialize(nullptr);
+    Audio::EditorMute::SetMuted(true);
+    gMapManager.DeleteObjects();
+    CHECK_FALSE(Audio::EditorMute::IsMuted());
+
+    Core::WorldClearing::SetListener(nullptr);
+    Core::AssetLoadWorld::SetSource(nullptr);
+    Audio::EditorMute::SetMuted(false);
 }
 #endif // _EDITOR

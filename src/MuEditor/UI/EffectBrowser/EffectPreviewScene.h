@@ -33,6 +33,12 @@ enum class PreviewSpriteBlend
     Luminance,
 };
 
+// The blend RenderSprites draws a sprite of this type and SubType with. The
+// formation mark always alpha tests: its SubType picks a frame. SubTypes
+// other than 0 to 3 set no blend and keep the one of the sprite drawn before;
+// the preview takes the glow for them.
+PreviewSpriteBlend SpriteBlendOf(int type, int subType);
+
 struct EffectPreviewRequest
 {
     Data::Effects::EffectKind kind = Data::Effects::EffectKind::Effect;

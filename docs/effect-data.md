@@ -330,9 +330,10 @@ world (below) is for that.
   as the game animates it and turning, with the scale, light, blend mesh and
   render type of its creation values. Effects with a texture number,
   sprites, particles and lightning show their texture as a sprite facing the
-  camera; **Blend** chooses how it is blended (the four blends of a sprite's
-  SubType). The effects that `RenderEffectShadows` draws on the ground show
-  their texture lying on the ground.
+  camera: a sprite with the blend of its SubType, the others with the one
+  chosen under **Blend** (the four blends of a sprite's SubType). The
+  effects that `RenderEffectShadows` draws on the ground show their texture
+  lying on the ground.
 - **Show on**: nothing, a plane, a cube or an item. The type stands on the
   plane and on the cube and sits at the middle of an item. For an item, pick
   it in the drop-down (type a part of its name or its number to find it),
@@ -342,7 +343,9 @@ world (below) is for that.
   columns (the first stands for the SubTypes without a variant, which get
   the row's own values). The view uses the values the game gives that
   SubType; the preview in the world creates the type with it. A sprite's
-  SubType is its **Blend**.
+  SubType is its blend: the four blends are offered (0 glow, 1 subtract, 2
+  alpha test, 3 luminance), and the formation mark's SubType picks its frame
+  (0 to 7) instead.
 - **The view**: drag to turn the camera, the wheel zooms, a double click or
   **Reset view** puts it back; **Turn** turns the type slowly.
 - **Notes** under the view say what the preview cannot show: an empty slot,
@@ -368,37 +371,49 @@ any side, and F12 hides the editor while it runs.
   only for the character's own effects (its skill effects, the catapult
   camera, the water waves of its effects) stay off. Each click creates it
   once more. Effects that follow their owner show at the character.
-- **Stop** removes what the preview created and what that created in turn;
-  so do choosing another type, closing the browser and leaving the map (the
-  game clears its pools then; the preview removes its objects first).
-  Objects created later with the character or no one as owner cannot be told
-  from the game's own and end by themselves; so does a slot the game fills
-  again with the same type in the same frame.
+- **Stop** removes what the preview created and what the effects it follows
+  created in turn; so do choosing another type, closing the browser and
+  leaving the map (the game clears its pools then; the preview removes its
+  objects first). Objects created later are followed only when their owner
+  (for particles and lightning, their target) is an effect the preview
+  follows; those created with the character, a copy or no one as owner, or
+  by a followed particle or lightning, cannot be told from the game's own
+  and end by themselves; so does a slot the game fills again with the same
+  type in the same frame.
 - **Call values** set the rest of the call: **Distance** in front of the
   character (0: where it stands) and **Height** above the ground, **Size**
-  (0 takes the create function's default: effects 0.9, particles and sprites
-  1, lightning 10), **Light**, **Random angle** (as many game calls give
-  lightning), the **Target** (the copy of the character; none, offered only
-  for types the game itself creates without an owner, as the code of others
-  may read their owner without checking; or a copy of the nearest monster or
-  NPC, which follows it, so lightning runs to it) and, for lightning, **PK**
-  and **SkillIndex**, which some SubTypes read their lifetime and speed
-  from. Creating the type again with other values keeps what is there, so
-  parts can be compared side by side. While the preview runs, Repeat and
-  sprites take the values as they are set. Many types choose their own
-  place, size or light in their code, or move to their owner: notes after
-  each call say which values the type did not keep.
+  (0 takes the create function's default: effects 0.9, particles 1,
+  lightning 10; sprites, whose create function has none, get 1), **Light**,
+  **Random angle** (as many game calls give lightning), the **Target** (the
+  copy of the character; none, offered only for types the game itself
+  creates without an owner, as the code of others may read their owner
+  without checking; or a copy of the nearest monster or NPC, which follows
+  it, so lightning runs to it) and, for lightning, **PK** and
+  **SkillIndex**, which some SubTypes read their lifetime and speed from.
+  Lightning gets the light only when the box before it is ticked: the call
+  then passes it as the colour. Most of the game's calls pass none, and some
+  types then choose their colour by SubType; the three SubTypes whose code
+  reads the colour without checking get white. The values stay for another
+  type of the same kind and go back to the kind's own when the kind changes.
+  Creating the type again with other values keeps what is there, so parts
+  can be compared side by side. While the preview runs, Repeat and sprites
+  take the values as they are set. Many types choose their own place, size
+  or light in their code, or move to their owner: notes after each call that
+  creates an effect, particle or lightning say which values the type did not
+  keep.
 - **The game's calls** list where the game's code creates the type
-  (`CreateEffect`, `CreateParticle`, `CreateJoint`, `CreateSprite` and their
-  FpsChecked forms) with the SubType, size and owner they write, read from
-  the sources the editor was built from (`MU_EDITOR_SOURCE_DIR`) the first
-  time the list opens. **Use** takes the values a call writes as numbers:
-  its SubType, size, the light it sets just before (`Vector(r, g, b,
-  light)`), no owner when it passes none, PK and SkillIndex. What depends on
-  the moment (the Fenrir's colour, which monster) stays for the user to
-  choose. A skill's whole look, several types from the caster's bones at the
-  right moment of its animation, is not one call: its preview comes with the
-  skill looks (SK2).
+  (`CreateEffect`, `CreateParticle`, `CreateJoint`, `CreateSprite` and the
+  FpsChecked forms of the first three) with the SubType, size and owner they
+  write, read from the sources the editor was built from
+  (`MU_EDITOR_SOURCE_DIR`, the build's own checkout) the first time the list
+  or the target's drop-down opens. **Use** takes the values a call writes as
+  numbers: its SubType, size, the light it sets just before (`Vector(r, g,
+  b, light)`; for lightning, the colour it passes), no owner when it passes
+  none, PK and SkillIndex; a size or light not written as numbers goes back
+  to the default. What depends on the moment (the Fenrir's colour, which
+  monster) stays for the user to choose. A skill's whole look, several types
+  from the caster's bones at the right moment of its animation, is not one
+  call: its preview comes with the skill looks (SK2).
 - **Repeat** creates the type again shortly after what it created has ended.
   A sprite lasts one frame; the preview creates it every frame.
 - **Mute sounds** keeps the game from starting sound effects while the

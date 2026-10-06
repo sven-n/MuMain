@@ -179,8 +179,20 @@ void CEffectWorldPreviewView::RenderCallValues(EffectKind kind)
     ImGui::DragFloat(I18N::Editor::CallSize, &m_call.scale, 0.05f, 0.0f, 200.0f, "%.2f");
     Tooltip(I18N::Editor::CallSizeTooltip);
     ImGui::SameLine();
+    // Lightning gets the light only as a colour the call passes.
+    const bool joint = kind == EffectKind::Joint;
+    if (joint)
+    {
+        ImGui::Checkbox("##jointColour", &m_call.jointColour);
+        Tooltip(I18N::Editor::CallColourTooltip);
+        ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
+    }
+    ImGui::BeginDisabled(joint && !m_call.jointColour);
     ImGui::ColorEdit3(I18N::Editor::CallLight, m_call.light.data(),
                       ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR);
+    ImGui::EndDisabled();
+    if (joint)
+        Tooltip(I18N::Editor::CallColourTooltip);
     ImGui::SameLine();
     ImGui::Checkbox(I18N::Editor::CallRandomAngle, &m_call.randomAngle);
     RenderTarget();
@@ -279,6 +291,7 @@ std::optional<int> CEffectWorldPreviewView::Use(const EffectCallSite& call)
         m_call.target = WorldPreviewTarget::Character;
     if (call.kind == EffectKind::Joint)
     {
+        m_call.jointColour = call.light.has_value();
         m_call.pk = call.pkValue.value_or(-1);
         m_call.skillIndex = call.skillIndexValue.value_or(0);
     }

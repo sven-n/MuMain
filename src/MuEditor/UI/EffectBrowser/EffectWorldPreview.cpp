@@ -50,6 +50,20 @@ constexpr std::array<RefusedWorldPreview, 4> Refused = {{
     {MODEL_SUMMONER_SUMMON_LAGUL, 1},
 }};
 
+// CreateJoint copies the colour of these without checking that there is one;
+// the game always passes one there.
+constexpr std::array<JointNeedingColour, 3> NeedColour = {{
+    {BITMAP_JOINT_THUNDER, 27},
+    {BITMAP_JOINT_THUNDER, 28},
+    {MODEL_SPEARSKILL, 14},
+}};
+
+bool NeedsJointColour(int type, int subType)
+{
+    return std::any_of(NeedColour.begin(), NeedColour.end(),
+                       [&](const JointNeedingColour& entry) { return entry.type == type && entry.subType == subType; });
+}
+
 // Removes an effect as the game does when its life ends, with its trails.
 void RemoveGameEffect(OBJECT& effect)
 {
@@ -83,6 +97,11 @@ bool IsRefusedInWorld(const WorldPreviewRequest& request)
            std::any_of(
                Refused.begin(), Refused.end(), [&](const RefusedWorldPreview& refused)
                { return refused.type == request.type && (refused.subType < 0 || refused.subType == request.subType); });
+}
+
+std::span<const JointNeedingColour> GetJointsNeedingColour()
+{
+    return NeedColour;
 }
 
 bool IsWorldReadyForPreview()
@@ -155,6 +174,13 @@ void EffectWorldPreview::UpdateRunning(const WorldPreviewRequest& request)
 {
     if (!m_running || m_running->kind != request.kind || m_running->type != request.type)
         return;
+    // A SubType the preview refuses ends the run: Repeat would create it.
+    if (IsRefusedInWorld(request))
+    {
+        Stop();
+        m_notes = WorldNoteRefused;
+        return;
+    }
     if (request.call.target == WorldPreviewTarget::NearestCharacter &&
         (m_running->call.target != WorldPreviewTarget::NearestCharacter || m_targetFollowed == nullptr))
         ChooseTarget(request.call);
@@ -299,9 +325,12 @@ void EffectWorldPreview::Create(const EffectPools& pools)
         // Without a target, lightning runs to where the character stands.
         const OBJECT& aimedAt = target != nullptr ? *target : hero;
         vec3_t targetPosition = {aimedAt.Position[0], aimedAt.Position[1], aimedAt.Position[2] + CharacterChest};
+        // Without a chosen colour the call passes none, as most of the game's
+        // calls do, so the type's code chooses it.
+        const float* colour = call.jointColour || NeedsJointColour(request.type, request.subType) ? light : nullptr;
         CreateJoint(request.type, position, targetPosition, angle, request.subType, target,
                     call.scale > 0.0f ? call.scale : 10.0f, static_cast<short>(call.pk),
-                    static_cast<WORD>(call.skillIndex), 0, -1, light);
+                    static_cast<WORD>(call.skillIndex), 0, -1, colour);
         break;
     }
     case Data::Effects::EffectKind::Sprite:
@@ -314,7 +343,7 @@ void EffectWorldPreview::Create(const EffectPools& pools)
     m_lastCallFilled = filled > 0;
     m_lastPosition = {position[0], position[1], position[2]};
     if (request.kind != Data::Effects::EffectKind::Sprite)
-        NoteWhatWasKept(pools, m_lastPosition, call);
+        NoteWhatWasKept(pools, m_lastPosition, request);
     m_repeatAt = 0.0;
     if (filled == 0)
     {
@@ -375,10 +404,11 @@ bool SameLight(const PreviewVector& a, const PreviewVector& b)
 
 // Right after the call: what its code changed of the place, the size and the
 // light the preview gave it. Only the values the user chose count: a size of
-// 0 and white light are the defaults.
+// 0, white light and lightning without a colour are the defaults.
 void EffectWorldPreview::NoteWhatWasKept(const EffectPools& pools, const PreviewVector& position,
-                                         const WorldPreviewCall& call)
+                                         const WorldPreviewRequest& request)
 {
+    const WorldPreviewCall& call = request.call;
     m_notes &= static_cast<std::uint16_t>(~KeptNotes);
     const auto first = std::find_if(m_tracker.GetCreated().begin(), m_tracker.GetCreated().end(),
                                     [&](const EffectPoolSlot& slot) { return KeptAt(pools, slot).has_value(); });
@@ -390,7 +420,8 @@ void EffectWorldPreview::NoteWhatWasKept(const EffectPools& pools, const Preview
     if (call.scale > 0.0f && std::abs(kept.scale - call.scale) > 0.01f * call.scale)
         m_notes |= WorldNoteOwnSize;
     const PreviewVector white = {1.0f, 1.0f, 1.0f};
-    if (!SameLight(call.light, white) && !SameLight(kept.light, call.light))
+    const bool lightGiven = request.kind != Data::Effects::EffectKind::Joint || call.jointColour;
+    if (lightGiven && !SameLight(call.light, white) && !SameLight(kept.light, call.light))
         m_notes |= WorldNoteOwnLight;
 }
 

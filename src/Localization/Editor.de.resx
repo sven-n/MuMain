@@ -802,6 +802,9 @@
   <data name="Call light" xml:space="preserve">
     <value>Licht</value>
   </data>
+  <data name="Call colour tooltip" xml:space="preserve">
+    <value>Blitze: Der Aufruf gibt das Licht als Farbe mit. Die meisten Aufrufe des Spiels geben keine mit; manche Typen wählen ihre Farbe dann nach dem SubType.</value>
+  </data>
   <data name="Call random angle" xml:space="preserve">
     <value>Zufälliger Winkel</value>
   </data>

@@ -23,7 +23,8 @@ namespace
 {
 using Data::Effects::EffectKind;
 
-// What each create function takes, by argument index (-1: none).
+// What each create function takes, by argument index (-1: none). The light
+// of lightning is its colour, which most calls leave out.
 struct CallShape
 {
     std::string_view name;
@@ -39,7 +40,7 @@ struct CallShape
 constexpr std::array<CallShape, 4> Shapes = {{
     {"CreateEffect", EffectKind::Effect, 3, 4, 5, 10, -1, -1},
     {"CreateParticle", EffectKind::Particle, 3, 4, 6, 5, -1, -1},
-    {"CreateJoint", EffectKind::Joint, -1, 4, 5, 6, 7, 8},
+    {"CreateJoint", EffectKind::Joint, 11, 4, 5, 6, 7, 8},
     {"CreateSprite", EffectKind::Sprite, 3, 6, 4, 2, -1, -1},
 }};
 
@@ -356,8 +357,7 @@ std::vector<EffectCallSite> ReadEffectCallSites(std::string_view source, std::st
             call.withoutOwner = owner.empty() || owner == "NULL" || owner == "nullptr" || owner == "0";
             call.pkValue = IntegerOf(Argument(arguments, shape.pk));
             call.skillIndexValue = IntegerOf(Argument(arguments, shape.skillIndex));
-            if (shape.light >= 0)
-                call.light = LightBefore(text, at, Argument(arguments, shape.light));
+            call.light = LightBefore(text, at, Argument(arguments, shape.light));
             for (const int type : types)
             {
                 call.type = type;

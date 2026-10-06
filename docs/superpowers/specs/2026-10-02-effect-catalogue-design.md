@@ -639,16 +639,22 @@ and a sprite created, followed and removed, Repeat, removal when leaving for
 the character list, the character not moved or turned.
 
 *FX1.7b follow-up (call values):* a type created with defaults can look
-unlike the game's (the Fenrir's plasma storm makes its bolts 100 wide from
-in front of the rider to each monster in range, the preview's default is 10
-wide to the character). "In the world" therefore sets the rest of the call
-(distance and height of the start, size, light, a random angle, the target:
-the copy of the character, none where the game passes none, or a copy of the
-nearest monster or NPC; PK and SkillIndex for lightning), and lists the
-game's own create calls of the type, read from the sources of the editor's
-build (about 4,300 calls, 96% naming a type of the symbol lists; a compiled
-list would be a large generated file), with Use taking the values they write
-as numbers. A skill's whole look stays for SK2.
+unlike the game's (the Fenrir's plasma storm makes its bolts 100 and 80 wide
+from in front of the rider to its target and each monster in range, the
+preview's default is 10 wide to the character). "In the world" therefore
+sets the rest of the call (distance and height of the start, size, light, a
+random angle, the target: the copy of the character, none where the game
+passes none, or a copy of the nearest monster or NPC; PK and SkillIndex for
+lightning), and lists the game's own create calls of the type, read from the
+sources of the editor's build (about 4,260 calls, about 98% naming a type of
+the symbol lists, listed as about 4,310 rows because a call of `NAME +
+rand() % N` is listed under each of its types; a compiled list would be a
+large generated file), with Use taking the values they write as numbers.
+Lightning gets the light only as a colour the call passes: `CreateJoint`
+lets some types choose their colour by SubType when the call passes none, as
+most game calls do, and three SubTypes copy it without checking, so the
+preview passes white for those (a source test keeps that list complete). A
+skill's whole look stays for SK2.
 
 **FX1.7c Live preview in the browser (later).** The objects of FX1.7b drawn
 in the browser's view, on the chosen object, instead of in the world. The
