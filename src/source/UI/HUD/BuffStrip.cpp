@@ -231,10 +231,10 @@ bool CBuffStrip::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_BUFF_WINDOW, this);
 
     // Guarded so the doc/model are created once, even though Create() re-runs on resolution change.
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    if (!m_RmlView.Document() && RmlUiRuntime::Instance().IsCreated())
     {
         BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
+        
     }
         // Not Show()n here -- Create() runs before SceneFlag reaches MAIN_SCENE; SyncDocVisibility()
         // (called every frame) shows it once the scene gate allows it.
@@ -244,50 +244,35 @@ bool CBuffStrip::Create(CManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CBuffStrip::BuildRmlUi()
+void CBuffStrip::BindRmlModel(Rml::DataModelConstructor& c, BuffStripRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "buff_strip",
-        [this](Rml::DataModelConstructor& c, BuffStripRmlModel& model)
+    // See CCharMakeWin::BindRmlModel()'s comment on why this must re-run in full every
+    // call, including on a theme switch -- no guard here.
+    auto buff = c.RegisterStruct<BuffEntry>();
+    buff.RegisterMember("decorator", &BuffEntry::decorator);
+    buff.RegisterMember("tooltip", &BuffEntry::tooltip);
+    buff.RegisterMember("tooltip_title", &BuffEntry::tooltipTitle);
+    buff.RegisterMember("tooltip_body", &BuffEntry::tooltipBody);
+    buff.RegisterMember("tooltip_duration", &BuffEntry::tooltipDuration);
+    c.RegisterArray<std::vector<BuffEntry>>();
+
+    c.BindEventCallback("buff_cancel",
+        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
         {
-            // See CCharMakeWin::BuildRmlUi()'s comment on why this must re-run in full every
-            // call, including from ReloadRmlTheme() -- no guard here.
-            auto buff = c.RegisterStruct<BuffEntry>();
-            buff.RegisterMember("decorator", &BuffEntry::decorator);
-            buff.RegisterMember("tooltip", &BuffEntry::tooltip);
-            buff.RegisterMember("tooltip_title", &BuffEntry::tooltipTitle);
-            buff.RegisterMember("tooltip_body", &BuffEntry::tooltipBody);
-            buff.RegisterMember("tooltip_duration", &BuffEntry::tooltipDuration);
-            c.RegisterArray<std::vector<BuffEntry>>();
-
-            c.BindEventCallback("buff_cancel",
-                [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
-                {
-                    if (event.GetParameter<int>("button", -1) != 1 || args.empty())
-                        return;
-                    OnBuffRightClick(args[0].Get<int>());
-                });
-
-            c.Bind("buffs", &model.buffs);
-            c.Bind("strip_slot_left", &model.stripSlotLeft);
-            c.Bind("strip_slot_width", &model.stripSlotWidth);
-            c.Bind("tooltip_line_px", &model.tooltipLinePx);
+            if (event.GetParameter<int>("button", -1) != 1 || args.empty())
+                return;
+            OnBuffRightClick(args[0].Get<int>());
         });
 
-    if (modelCreated)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/buff_strip.rml");
+    c.Bind("buffs", &model.buffs);
+    c.Bind("strip_slot_left", &model.stripSlotLeft);
+    c.Bind("strip_slot_width", &model.stripSlotWidth);
+    c.Bind("tooltip_line_px", &model.tooltipLinePx);
 }
 
-void CBuffStrip::ReloadRmlTheme()
+void CBuffStrip::BuildRmlUi()
 {
-    if (!m_pRmlDoc) return;
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-    // Next frame's Update()/SyncDocVisibility() self-corrects live state/visibility.
+    m_RmlView.Ensure();
 }
 
 void CBuffStrip::Release()
@@ -295,13 +280,14 @@ void CBuffStrip::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = NULL;
     }
 
     // Hide the doc directly since RmlUi renders last in the frame regardless of scene (see CLoginWin::PreRelease()).
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
+    if (m_RmlView.Document())
+        m_RmlView.Document()->Hide();
+
+    m_RmlView.Release();
 }
 
 bool CBuffStrip::UpdateMouseEvent()
@@ -329,7 +315,7 @@ bool CBuffStrip::Render()
 
 void CBuffStrip::SyncRmlModel()
 {
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
     std::list<eBuffState> buffstate;
     BuffSort(buffstate);
@@ -337,7 +323,7 @@ void CBuffStrip::SyncRmlModel()
     // Rebuilt and marked dirty unconditionally every frame -- deliberate, since this verifies
     // RmlModelBinder handling a bound std::vector whose size changes at runtime. Revisit if this
     // proves too expensive in practice.
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
     model.buffs.clear();
     model.buffs.reserve(buffstate.size());
     m_ShownBuffs.assign(buffstate.begin(), buffstate.end());
@@ -358,7 +344,7 @@ void CBuffStrip::SyncRmlModel()
         model.buffs.push_back(entry);
     }
 
-    m_RmlBinder.MarkDirty("buffs");
+    m_RmlView.MarkDirty("buffs");
     SyncStripSlot();
     SyncTooltipLineHeight();
 }
@@ -374,11 +360,11 @@ void CBuffStrip::SyncTooltipLineHeight()
     }
     const float advance = lineHeight * transform.scaleY * kNativeRowAdvance;
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
     if (model.tooltipLinePx == advance)
         return;
     model.tooltipLinePx = advance;
-    m_RmlBinder.MarkDirty("tooltip_line_px");
+    m_RmlView.MarkDirty("tooltip_line_px");
 }
 
 void CBuffStrip::SyncStripSlot()
@@ -393,13 +379,13 @@ void CBuffStrip::SyncStripSlot()
     const float left = UI::Scaling::PositionX(hud, (freeLeft + freeRight - kNativeRowWidth) * 0.5f);
     const float width = kNativeRowWidth * hud.scaleX;
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
     if (model.stripSlotLeft == left && model.stripSlotWidth == width)
         return;
     model.stripSlotLeft = left;
     model.stripSlotWidth = width;
-    m_RmlBinder.MarkDirty("strip_slot_left");
-    m_RmlBinder.MarkDirty("strip_slot_width");
+    m_RmlView.MarkDirty("strip_slot_left");
+    m_RmlView.MarkDirty("strip_slot_width");
 }
 
 void CBuffStrip::OnBuffRightClick(int slot)
@@ -427,7 +413,7 @@ float CBuffStrip::GetLayerDepth()
 
 void CBuffStrip::SyncDocVisibility(bool sceneAllowsShow)
 {
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible() && sceneAllowsShow);
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible() && sceneAllowsShow);
 }
 
 void CBuffStrip::OpenningProcess()

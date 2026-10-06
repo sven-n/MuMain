@@ -10,7 +10,7 @@
 #include "UI/Widgets/Window/Button.h"
 #include "UI/Widgets/Window/TextBox.h"
 #include "UI/HUD/GensRankingRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #define MAX_TITLELENGTH		32
 
 namespace Rml
@@ -77,12 +77,13 @@ private:
     GENS_TYPE m_byGensInfluence;
     POINT m_ptRenderMarkPos;
 
-    RmlModelBinder<GensRankingRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, GensRankingRmlModel& model);
+    UI::RmlBridge::ThemedView<GensRankingRmlModel> m_RmlView{"gens_ranking",
+        [this](Rml::DataModelConstructor& c, GensRankingRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/gens_ranking.rml"}}};
     bool m_PendingExit = false;
 
     void BuildRmlUi();
-    void ReloadRmlTheme();
     void SyncRmlModel();
     void SyncContent();
 
@@ -97,7 +98,7 @@ public:
     virtual ~CGensRanking();
 
     bool Create(CManager* pNewUIMng, int x, int y);
-    Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+    Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     void SetPos(int x, int y);
     const POINT& GetPos()
     {

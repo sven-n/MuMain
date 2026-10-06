@@ -7,7 +7,7 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Combat/CastleWindowRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <string>
 #include <vector>
@@ -81,8 +81,10 @@ private:
 
     void SetCurOpenTab(int iTab);
 
-    RmlModelBinder<CastleWindowRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, CastleWindowRmlModel& model);
+    UI::RmlBridge::ThemedView<CastleWindowRmlModel> m_RmlView{"castle_window",
+        [this](Rml::DataModelConstructor& c, CastleWindowRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/castle_window.rml"}}};
     SENATUS_BUTTON m_PendingButton = SENATUS_BUTTON_NONE;
     int m_PendingTab = -1;
     int m_PendingPick = -1;
@@ -92,7 +94,7 @@ public:
     virtual ~CCastleWindow();
 
     bool Create(CManager* pNewUIMng, int x, int y);
-    Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+    Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     void Release();
 
     void SetPos(int x, int y);
@@ -112,7 +114,6 @@ public:
         return m_iCurrMsgBoxRequest;
     }
 
-    void ReloadRmlTheme();
 
 private:
     bool BtnProcess();

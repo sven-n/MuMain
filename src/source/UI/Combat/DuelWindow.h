@@ -5,7 +5,7 @@
 
 #include "UI/Combat/DuelWindowRmlModel.h"
 #include "UI/Core/WindowManager.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -41,7 +41,6 @@ public:
 
     float GetLayerDepth(); //. 1.1f
 
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();
@@ -50,8 +49,10 @@ private:
     CManager* m_pNewUIMng;
     POINT m_Pos;
 
-    RmlModelBinder<DuelWindowRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, DuelWindowRmlModel& model);
+    UI::RmlBridge::ThemedView<DuelWindowRmlModel> m_RmlView{"duel_window",
+        [this](Rml::DataModelConstructor& c, DuelWindowRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/duel_window.rml", UI::RmlBridge::BackgroundOrMainContext}}};
 };
 }
 

@@ -78,7 +78,6 @@ bool mu::ui::window::CCatapultWindow::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -87,13 +86,14 @@ bool mu::ui::window::CCatapultWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CCatapultWindow::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 void mu::ui::window::CCatapultWindow::SetPos(int x, int y)
@@ -109,7 +109,7 @@ bool mu::ui::window::CCatapultWindow::UpdateMouseEvent()
 
     float panelWidth = kPanelFallbackWidth;
     float panelHeight = kPanelFallbackHeight;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
                                        static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return false;
@@ -293,87 +293,67 @@ bool mu::ui::window::CCatapultWindow::BtnProcess()
     return false;
 }
 
-void mu::ui::window::CCatapultWindow::BuildRmlUi()
+void mu::ui::window::CCatapultWindow::BindRmlModel(Rml::DataModelConstructor& c, CatapultRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
-
-    const bool modelCreated = m_RmlBinder.Create(
-        RmlUiRuntime::Instance().GetContext(), "catapult",
-        [this](Rml::DataModelConstructor& c, CatapultRmlModel& model)
-        {
-            c.Bind("mode", &model.mode);
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("panel_width", &model.panelWidth);
-            c.Bind("text_px", &model.textPx);
-            c.Bind("line_height_px", &model.lineHeightPx);
-            c.Bind("title", &model.title);
-            c.Bind("title_px", &model.titlePx);
-            auto line = c.RegisterStruct<CatapultLineEntry>();
-            line.RegisterMember("text", &CatapultLineEntry::text);
-            line.RegisterMember("text_px", &CatapultLineEntry::textPx);
-            c.RegisterArray<std::vector<CatapultLineEntry>>();
-            c.Bind("lines", &model.lines);
-            auto area = c.RegisterStruct<CatapultAreaEntry>();
-            area.RegisterMember("label", &CatapultAreaEntry::label);
-            area.RegisterMember("index", &CatapultAreaEntry::index);
-            area.RegisterMember("big", &CatapultAreaEntry::big);
-            area.RegisterMember("locked", &CatapultAreaEntry::locked);
-            area.RegisterMember("label_px", &CatapultAreaEntry::labelPx);
-            c.RegisterArray<std::vector<CatapultAreaEntry>>();
-            c.Bind("areas", &model.areas);
-            c.Bind("fire_text", &model.fireText);
-            c.Bind("fire_locked", &model.fireLocked);
-            c.Bind("exit_tooltip", &model.exitTooltip);
-            c.BindEventCallback("catapult_area",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                                {
-                                    if (arguments.size() == 1)
-                                        m_PendingArea = arguments[0].Get<int>(-1);
-                                });
-            c.BindEventCallback("catapult_fire", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                { m_PendingFire = true; });
-            c.BindEventCallback("catapult_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                { m_PendingExit = true; });
-        });
-    if (!modelCreated)
-        return;
-
-    m_pRmlDoc =
-        UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/catapult.rml");
+    c.Bind("mode", &model.mode);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("panel_width", &model.panelWidth);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("line_height_px", &model.lineHeightPx);
+    c.Bind("title", &model.title);
+    c.Bind("title_px", &model.titlePx);
+    auto line = c.RegisterStruct<CatapultLineEntry>();
+    line.RegisterMember("text", &CatapultLineEntry::text);
+    line.RegisterMember("text_px", &CatapultLineEntry::textPx);
+    c.RegisterArray<std::vector<CatapultLineEntry>>();
+    c.Bind("lines", &model.lines);
+    auto area = c.RegisterStruct<CatapultAreaEntry>();
+    area.RegisterMember("label", &CatapultAreaEntry::label);
+    area.RegisterMember("index", &CatapultAreaEntry::index);
+    area.RegisterMember("big", &CatapultAreaEntry::big);
+    area.RegisterMember("locked", &CatapultAreaEntry::locked);
+    area.RegisterMember("label_px", &CatapultAreaEntry::labelPx);
+    c.RegisterArray<std::vector<CatapultAreaEntry>>();
+    c.Bind("areas", &model.areas);
+    c.Bind("fire_text", &model.fireText);
+    c.Bind("fire_locked", &model.fireLocked);
+    c.Bind("exit_tooltip", &model.exitTooltip);
+    c.BindEventCallback("catapult_area",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                m_PendingArea = arguments[0].Get<int>(-1);
+                        });
+    c.BindEventCallback("catapult_fire", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_PendingFire = true; });
+    c.BindEventCallback("catapult_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_PendingExit = true; });
 }
 
-void mu::ui::window::CCatapultWindow::ReloadRmlTheme()
+void mu::ui::window::CCatapultWindow::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CCatapultWindow::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // Layer depth 5: over the HUD like every panel the original opened.
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    CatapultRmlModel& model = m_RmlBinder.GetModel();
+    CatapultRmlModel& model = m_RmlView.GetModel();
     // RenderText() in a 190-unit box, bold: shrunk to it when wider.
     auto boldPxIn = [&](const wchar_t* text)
     {
@@ -387,8 +367,8 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
     const wchar_t* title = m_iType == CATAPULT_ATTACK    ? I18N::Game::WeaponForInvadingTeam
                            : m_iType == CATAPULT_DEFENSE ? I18N::Game::WeaponForDefendingTeam
                                                          : L"";
-    SyncField(m_RmlBinder, &CatapultRmlModel::title, "title", StringUtils::WideToNarrow(title));
-    SyncField(m_RmlBinder, &CatapultRmlModel::titlePx, "title_px", title[0] != L'\0' ? boldPxIn(title) : 0.f);
+    SyncField(m_RmlView.Binder(), &CatapultRmlModel::title, "title", StringUtils::WideToNarrow(title));
+    SyncField(m_RmlView.Binder(), &CatapultRmlModel::titlePx, "title_px", title[0] != L'\0' ? boldPxIn(title) : 0.f);
     const wchar_t* const texts[] = {I18N::Game::DesiredAttackingLocation, I18N::Game::SelectTheButtonAndPress,
                                     I18N::Game::ToShoot};
     std::vector<CatapultLineEntry> lines;
@@ -401,12 +381,12 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
     if (!sameLines)
     {
         model.lines = std::move(lines);
-        m_RmlBinder.MarkDirty("lines");
+        m_RmlView.MarkDirty("lines");
     }
 
     // The buttons' labels in the normal font, centred on their buttons by the theme.
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    SyncField(m_RmlBinder, &CatapultRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
+    SyncField(m_RmlView.Binder(), &CatapultRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
     std::vector<CatapultAreaEntry> areas;
     const std::span<const CatapultArea> sideAreas =
         m_iType == CATAPULT_ATTACK    ? std::span<const CatapultArea>(kAttackAreas)
@@ -425,7 +405,7 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
              UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
                                                    static_cast<float>(measured), static_cast<float>(width))});
     }
-    SyncField(m_RmlBinder, &CatapultRmlModel::mode, "mode", static_cast<int>(m_iType));
+    SyncField(m_RmlView.Binder(), &CatapultRmlModel::mode, "mode", static_cast<int>(m_iType));
     const bool sameAreas = model.areas.size() == areas.size() &&
                            std::equal(model.areas.begin(), model.areas.end(), areas.begin(),
                                       [](const CatapultAreaEntry& x, const CatapultAreaEntry& y)
@@ -436,9 +416,9 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
     if (!sameAreas)
     {
         model.areas = std::move(areas);
-        m_RmlBinder.MarkDirty("areas");
+        m_RmlView.MarkDirty("areas");
     }
-    SyncField(m_RmlBinder, &CatapultRmlModel::fireText, "fire_text", StringUtils::WideToNarrow(I18N::Game::Shoot));
-    SyncField(m_RmlBinder, &CatapultRmlModel::fireLocked, "fire_locked", m_bFireLocked);
-    SyncField(m_RmlBinder, &CatapultRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
+    SyncField(m_RmlView.Binder(), &CatapultRmlModel::fireText, "fire_text", StringUtils::WideToNarrow(I18N::Game::Shoot));
+    SyncField(m_RmlView.Binder(), &CatapultRmlModel::fireLocked, "fire_locked", m_bFireLocked);
+    SyncField(m_RmlView.Binder(), &CatapultRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }

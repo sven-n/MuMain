@@ -9,7 +9,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Combat/SiegeWarBase.h"
 #include "UI/Combat/SiegeWarfareRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -98,18 +98,23 @@ public:
     void InitSkillUI();
     void ReleaseSkillUI();
 
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();
     void SyncRmlModel();
     void ApplyRmlModel(const SiegeWarfareRmlModel& next);
 
-    RmlModelBinder<SiegeWarfareRmlModel> m_RmlBinder;
+    void BindRmlModel(Rml::DataModelConstructor& c, SiegeWarfareRmlModel& model);
+    // The original drew the HUD under nearly every other window (layer depth 1.6), and a docked
+    // panel's frame is painted in the background context before the native windows: only a document
+    // in that same context, behind the others, stays under them (as the duel and battle-soccer boards
+    // do). The durability warnings, the logs and every native window then draw over the HUD.
+    UI::RmlBridge::ThemedView<SiegeWarfareRmlModel> m_RmlView{"siege_warfare",
+        [this](Rml::DataModelConstructor& c, SiegeWarfareRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/siege_warfare.rml", UI::RmlBridge::BackgroundOrMainContext}}};
     // The frame's values, filled in place every frame: its collections keep their storage, and it
     // holds last frame's values where FillRmlModel() leaves a field alone.
     SiegeWarfareRmlModel m_NextRmlModel;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
 };
 }
 

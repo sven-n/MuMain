@@ -9,7 +9,7 @@
 #include "Guild/GuildInfoRmlModel.h"
 #include "GuildMakeWindow.h"
 #include "GuildConstants.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <string>
 #include <vector>
@@ -63,8 +63,11 @@ namespace mu::ui::window
         int						m_nCurrentTab;
         int						m_Tot_Notice;
 
-        RmlModelBinder<GuildInfoRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, GuildInfoRmlModel& model);
+        void OnRmlReloaded();
+        UI::RmlBridge::ThemedView<GuildInfoRmlModel> m_RmlView{"guild_info",
+            [this](Rml::DataModelConstructor& c, GuildInfoRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/guild_info.rml"}}, {.afterReload = [this] { OnRmlReloaded(); }}};
         int m_PendingButton = -1; // a BUTTON_EVENT, or BUTTON_EXIT
 
         // Announcement lines in reading order; RmlUi owns scrolling.
@@ -104,7 +107,7 @@ namespace mu::ui::window
         virtual ~CGuildInfoWindow();
 
         bool Create(CManager* pNewUIMng, int x, int y);
-        Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+        Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         void Release();
 
         void SetPos(int x, int y);
@@ -146,7 +149,6 @@ namespace mu::ui::window
         void ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType,
             BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL);
 
-        void ReloadRmlTheme();
 
     private:
         bool Check_Mouse(int mx, int my);

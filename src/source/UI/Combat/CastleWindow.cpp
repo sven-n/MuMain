@@ -74,7 +74,6 @@ bool CCastleWindow::Create(CManager* pNewUIMng, int x, int y)
     SetCurOpenTab(m_iNumCurOpenTab);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -83,13 +82,14 @@ bool CCastleWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void CCastleWindow::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 void CCastleWindow::SetPos(int x, int y)
@@ -110,10 +110,10 @@ bool CCastleWindow::UpdateMouseEvent()
         return false;
 
     // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
     float panelWidth = INVENTORY_WIDTH;
     float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
                                       static_cast<int>(panelHeight))
             .Contains(MouseX, MouseY))
@@ -228,7 +228,7 @@ bool CCastleWindow::BtnProcess()
 bool CCastleWindow::ButtonLocked(SENATUS_BUTTON button) const
 {
     // A locked CButton ignored clicks; the lock is the one the page was last drawn with.
-    const CastleWindowRmlModel& model = m_RmlBinder.GetModel();
+    const CastleWindowRmlModel& model = m_RmlView.GetModel();
     switch (button)
     {
     case SENATUS_BUTTON_BUY:
@@ -532,131 +532,111 @@ void CCastleWindow::UpdateTaxManagingTab(SENATUS_BUTTON button)
     }
 }
 
-void CCastleWindow::BuildRmlUi()
+void CCastleWindow::BindRmlModel(Rml::DataModelConstructor& c, CastleWindowRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
-
-    const bool modelCreated = m_RmlBinder.Create(
-        RmlUiRuntime::Instance().GetContext(), "castle_window",
-        [this](Rml::DataModelConstructor& c, CastleWindowRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-            c.Bind("line_height_px", &model.lineHeightPx);
-            auto tab = c.RegisterStruct<CastleTabEntry>();
-            tab.RegisterMember("label", &CastleTabEntry::label);
-            tab.RegisterMember("text_px", &CastleTabEntry::textPx);
-            tab.RegisterMember("selected", &CastleTabEntry::selected);
-            c.RegisterArray<std::vector<CastleTabEntry>>();
-            c.Bind("tabs", &model.tabs);
-            c.Bind("active_tab", &model.activeTab);
-            c.BindEventCallback("senatus_tab",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                                {
-                                    if (args.size() == 1)
-                                        m_PendingTab = args[0].Get<int>(-1);
-                                });
-            c.BindEventCallback("senatus_pick",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                                {
-                                    if (args.size() == 1)
-                                        m_PendingPick = args[0].Get<int>(-1);
-                                });
-            auto lineType = c.RegisterStruct<CastleLine>();
-            lineType.RegisterMember("text", &CastleLine::text);
-            lineType.RegisterMember("text_px", &CastleLine::textPx);
-            c.Bind("title", &model.title);
-            c.Bind("map_title", &model.mapTitle);
-            c.Bind("improve_title", &model.improveTitle);
-            c.Bind("stat_hp", &model.statHp);
-            c.Bind("stat_defense", &model.statDefense);
-            c.Bind("stat_recover", &model.statRecover);
-            c.Bind("next_hp", &model.nextHp);
-            c.Bind("next_defense", &model.nextDefense);
-            c.Bind("next_recover", &model.nextRecover);
-            c.Bind("tax_title", &model.taxTitle);
-            c.Bind("chaos_rate", &model.chaosRate);
-            c.Bind("store_rate", &model.storeRate);
-            c.Bind("note1", &model.note1);
-            c.Bind("note2", &model.note2);
-            c.Bind("note3", &model.note3);
-            c.Bind("rule1", &model.rule1);
-            c.Bind("rule2", &model.rule2);
-            c.Bind("rule3", &model.rule3);
-            c.Bind("rule4", &model.rule4);
-            c.Bind("rule5", &model.rule5);
-            c.Bind("rule6", &model.rule6);
-            c.Bind("zen_label", &model.zenLabel);
-            c.Bind("castle_money", &model.castleMoney);
-            c.Bind("footer1", &model.footer1);
-            c.Bind("footer2", &model.footer2);
-            c.Bind("footer3", &model.footer3);
-            auto actionButton = c.RegisterStruct<CastleActionButton>();
-            actionButton.RegisterMember("label", &CastleActionButton::label);
-            actionButton.RegisterMember("shown", &CastleActionButton::shown);
-            actionButton.RegisterMember("locked", &CastleActionButton::locked);
-            c.Bind("buy_button", &model.buyButton);
-            c.Bind("repair_button", &model.repairButton);
-            c.Bind("hp_button", &model.hpButton);
-            c.Bind("defense_button", &model.defenseButton);
-            c.Bind("recover_button", &model.recoverButton);
-            c.Bind("apply_button", &model.applyButton);
-            c.Bind("withdraw_button", &model.withdrawButton);
-            auto mapItem = c.RegisterStruct<CastleMapItem>();
-            mapItem.RegisterMember("statue", &CastleMapItem::statue);
-            mapItem.RegisterMember("live", &CastleMapItem::live);
-            mapItem.RegisterMember("current", &CastleMapItem::current);
-            mapItem.RegisterMember("hp_width", &CastleMapItem::hpWidth);
-            mapItem.RegisterMember("hp_fill_width", &CastleMapItem::hpFillWidth);
-            mapItem.RegisterMember("defense_width", &CastleMapItem::defenseWidth);
-            mapItem.RegisterMember("recover_width", &CastleMapItem::recoverWidth);
-            c.RegisterArray<std::vector<CastleMapItem>>();
-            c.Bind("map_items", &model.mapItems);
-            c.Bind("statue_page", &model.statuePage);
-            c.Bind("item_live", &model.itemLive);
-            c.Bind("exit_tooltip", &model.exitTooltip);
-            c.BindEventCallback("senatus_button",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                                {
-                                    if (arguments.size() == 1)
-                                        m_PendingButton = static_cast<SENATUS_BUTTON>(arguments[0].Get<int>(-1));
-                                });
-        });
-    if (!modelCreated)
-        return;
-
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                  "Data/Interface/RmlUi/castle_window.rml");
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("line_height_px", &model.lineHeightPx);
+    auto tab = c.RegisterStruct<CastleTabEntry>();
+    tab.RegisterMember("label", &CastleTabEntry::label);
+    tab.RegisterMember("text_px", &CastleTabEntry::textPx);
+    tab.RegisterMember("selected", &CastleTabEntry::selected);
+    c.RegisterArray<std::vector<CastleTabEntry>>();
+    c.Bind("tabs", &model.tabs);
+    c.Bind("active_tab", &model.activeTab);
+    c.BindEventCallback("senatus_tab",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                        {
+                            if (args.size() == 1)
+                                m_PendingTab = args[0].Get<int>(-1);
+                        });
+    c.BindEventCallback("senatus_pick",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                        {
+                            if (args.size() == 1)
+                                m_PendingPick = args[0].Get<int>(-1);
+                        });
+    auto lineType = c.RegisterStruct<CastleLine>();
+    lineType.RegisterMember("text", &CastleLine::text);
+    lineType.RegisterMember("text_px", &CastleLine::textPx);
+    c.Bind("title", &model.title);
+    c.Bind("map_title", &model.mapTitle);
+    c.Bind("improve_title", &model.improveTitle);
+    c.Bind("stat_hp", &model.statHp);
+    c.Bind("stat_defense", &model.statDefense);
+    c.Bind("stat_recover", &model.statRecover);
+    c.Bind("next_hp", &model.nextHp);
+    c.Bind("next_defense", &model.nextDefense);
+    c.Bind("next_recover", &model.nextRecover);
+    c.Bind("tax_title", &model.taxTitle);
+    c.Bind("chaos_rate", &model.chaosRate);
+    c.Bind("store_rate", &model.storeRate);
+    c.Bind("note1", &model.note1);
+    c.Bind("note2", &model.note2);
+    c.Bind("note3", &model.note3);
+    c.Bind("rule1", &model.rule1);
+    c.Bind("rule2", &model.rule2);
+    c.Bind("rule3", &model.rule3);
+    c.Bind("rule4", &model.rule4);
+    c.Bind("rule5", &model.rule5);
+    c.Bind("rule6", &model.rule6);
+    c.Bind("zen_label", &model.zenLabel);
+    c.Bind("castle_money", &model.castleMoney);
+    c.Bind("footer1", &model.footer1);
+    c.Bind("footer2", &model.footer2);
+    c.Bind("footer3", &model.footer3);
+    auto actionButton = c.RegisterStruct<CastleActionButton>();
+    actionButton.RegisterMember("label", &CastleActionButton::label);
+    actionButton.RegisterMember("shown", &CastleActionButton::shown);
+    actionButton.RegisterMember("locked", &CastleActionButton::locked);
+    c.Bind("buy_button", &model.buyButton);
+    c.Bind("repair_button", &model.repairButton);
+    c.Bind("hp_button", &model.hpButton);
+    c.Bind("defense_button", &model.defenseButton);
+    c.Bind("recover_button", &model.recoverButton);
+    c.Bind("apply_button", &model.applyButton);
+    c.Bind("withdraw_button", &model.withdrawButton);
+    auto mapItem = c.RegisterStruct<CastleMapItem>();
+    mapItem.RegisterMember("statue", &CastleMapItem::statue);
+    mapItem.RegisterMember("live", &CastleMapItem::live);
+    mapItem.RegisterMember("current", &CastleMapItem::current);
+    mapItem.RegisterMember("hp_width", &CastleMapItem::hpWidth);
+    mapItem.RegisterMember("hp_fill_width", &CastleMapItem::hpFillWidth);
+    mapItem.RegisterMember("defense_width", &CastleMapItem::defenseWidth);
+    mapItem.RegisterMember("recover_width", &CastleMapItem::recoverWidth);
+    c.RegisterArray<std::vector<CastleMapItem>>();
+    c.Bind("map_items", &model.mapItems);
+    c.Bind("statue_page", &model.statuePage);
+    c.Bind("item_live", &model.itemLive);
+    c.Bind("exit_tooltip", &model.exitTooltip);
+    c.BindEventCallback("senatus_button",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                m_PendingButton = static_cast<SENATUS_BUTTON>(arguments[0].Get<int>(-1));
+                        });
 }
 
-void CCastleWindow::ReloadRmlTheme()
+void CCastleWindow::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void CCastleWindow::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // Layer depth 5: over the HUD like every panel the original opened.
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncContent();
 }
 
@@ -854,47 +834,47 @@ void CCastleWindow::SyncContent()
         break;
     }
 
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::tabs, "tabs", std::move(tabs));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::activeTab, "active_tab", m_iNumCurOpenTab);
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::title, "title", std::move(title));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::statuePage, "statue_page", statuePage);
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::itemLive, "item_live", itemLive);
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::mapItems, "map_items", std::move(mapItems));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::mapTitle, "map_title", std::move(mapTitle));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::improveTitle, "improve_title", std::move(improveTitle));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::statHp, "stat_hp", std::move(statHp));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::statDefense, "stat_defense", std::move(statDefense));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::statRecover, "stat_recover", std::move(statRecover));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::nextHp, "next_hp", std::move(nextHp));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::nextDefense, "next_defense", std::move(nextDefense));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::nextRecover, "next_recover", std::move(nextRecover));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::buyButton, "buy_button", std::move(buyButton));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::repairButton, "repair_button", std::move(repairButton));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::hpButton, "hp_button", std::move(hpButton));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::defenseButton, "defense_button", std::move(defenseButton));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::recoverButton, "recover_button", std::move(recoverButton));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::taxTitle, "tax_title", std::move(taxTitle));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::chaosRate, "chaos_rate", std::move(chaosRate));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::storeRate, "store_rate", std::move(storeRate));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::note1, "note1", std::move(note1));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::note2, "note2", std::move(note2));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::note3, "note3", std::move(note3));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::rule1, "rule1", std::move(rule1));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::rule2, "rule2", std::move(rule2));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::rule3, "rule3", std::move(rule3));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::rule4, "rule4", std::move(rule4));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::rule5, "rule5", std::move(rule5));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::rule6, "rule6", std::move(rule6));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::zenLabel, "zen_label", std::move(zenLabel));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::castleMoney, "castle_money", std::move(castleMoney));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::footer1, "footer1", std::move(footer1));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::footer2, "footer2", std::move(footer2));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::footer3, "footer3", std::move(footer3));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::applyButton, "apply_button", std::move(applyButton));
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::withdrawButton, "withdraw_button", std::move(withdrawButton));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::tabs, "tabs", std::move(tabs));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::activeTab, "active_tab", m_iNumCurOpenTab);
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::title, "title", std::move(title));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::statuePage, "statue_page", statuePage);
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::itemLive, "item_live", itemLive);
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::mapItems, "map_items", std::move(mapItems));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::mapTitle, "map_title", std::move(mapTitle));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::improveTitle, "improve_title", std::move(improveTitle));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::statHp, "stat_hp", std::move(statHp));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::statDefense, "stat_defense", std::move(statDefense));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::statRecover, "stat_recover", std::move(statRecover));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::nextHp, "next_hp", std::move(nextHp));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::nextDefense, "next_defense", std::move(nextDefense));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::nextRecover, "next_recover", std::move(nextRecover));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::buyButton, "buy_button", std::move(buyButton));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::repairButton, "repair_button", std::move(repairButton));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::hpButton, "hp_button", std::move(hpButton));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::defenseButton, "defense_button", std::move(defenseButton));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::recoverButton, "recover_button", std::move(recoverButton));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::taxTitle, "tax_title", std::move(taxTitle));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::chaosRate, "chaos_rate", std::move(chaosRate));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::storeRate, "store_rate", std::move(storeRate));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::note1, "note1", std::move(note1));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::note2, "note2", std::move(note2));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::note3, "note3", std::move(note3));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::rule1, "rule1", std::move(rule1));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::rule2, "rule2", std::move(rule2));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::rule3, "rule3", std::move(rule3));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::rule4, "rule4", std::move(rule4));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::rule5, "rule5", std::move(rule5));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::rule6, "rule6", std::move(rule6));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::zenLabel, "zen_label", std::move(zenLabel));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::castleMoney, "castle_money", std::move(castleMoney));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::footer1, "footer1", std::move(footer1));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::footer2, "footer2", std::move(footer2));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::footer3, "footer3", std::move(footer3));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::applyButton, "apply_button", std::move(applyButton));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::withdrawButton, "withdraw_button", std::move(withdrawButton));
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
-    SyncField(m_RmlBinder, &CastleWindowRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }
 
 void CCastleWindow::InsertComma(wchar_t* pszText, DWORD dwNumber)

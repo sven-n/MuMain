@@ -59,6 +59,10 @@ struct ThemedViewOptions
 // True while RmlUi still owns `context`: false once it was removed or RmlUi shut down.
 bool IsContextAlive(const Rml::Context* context);
 
+// For a ThemedDocumentSpec: the background context, which draws before native 3D, or the main one
+// when there is none.
+Rml::Context* BackgroundOrMainContext();
+
 // The documents and the theme-switch registration; ThemedView<Model> adds the model.
 class ThemedDocuments
 {

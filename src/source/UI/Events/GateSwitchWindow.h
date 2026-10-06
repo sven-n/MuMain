@@ -7,7 +7,7 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Events/GateSwitchRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -30,8 +30,10 @@ private:
     CManager* m_pNewUIMng;
     POINT m_Pos;
 
-    RmlModelBinder<GateSwitchRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, GateSwitchRmlModel& model);
+    UI::RmlBridge::ThemedView<GateSwitchRmlModel> m_RmlView{"gate_switch",
+        [this](Rml::DataModelConstructor& c, GateSwitchRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/gate_switch.rml"}}};
     bool m_PendingToggle = false;
     bool m_PendingExit = false;
 
@@ -40,7 +42,7 @@ public:
     virtual ~CGateSwitchWindow();
 
     bool Create(CManager* pNewUIMng, int x, int y);
-    Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+    Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     void Release();
 
     void SetPos(int x, int y);
@@ -55,7 +57,6 @@ public:
 
     float GetLayerDepth(); //. 5.0f
 
-    void ReloadRmlTheme();
 
 private:
     bool BtnProcess();

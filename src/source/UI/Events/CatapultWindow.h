@@ -6,7 +6,7 @@
 
 #include "UI/Core/WindowManager.h"
 #include "UI/Events/CatapultRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -32,7 +32,7 @@ public:
     virtual ~CCatapultWindow();
 
     bool Create(CManager* pNewUIMng, int x, int y);
-    Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+    Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     void Release();
 
     void SetPos(int x, int y);
@@ -53,7 +53,6 @@ public:
     void SetCameraPos(float x = 0.f, float y = 0.f, float z = 0.f);
     void GetCameraPos(vec3_t& vPos);
 
-    void ReloadRmlTheme();
 
 private:
     bool BtnProcess();
@@ -68,8 +67,10 @@ private:
     // is locked until one is chosen.
     int m_iAreaIndex = -1;
     bool m_bFireLocked = true;
-    RmlModelBinder<CatapultRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, CatapultRmlModel& model);
+    UI::RmlBridge::ThemedView<CatapultRmlModel> m_RmlView{"catapult",
+        [this](Rml::DataModelConstructor& c, CatapultRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/catapult.rml"}}};
     int m_PendingArea = -1;
     bool m_PendingFire = false;
     bool m_PendingExit = false;

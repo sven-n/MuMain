@@ -4,7 +4,7 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Combat/DuelWatchSpectatorRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -48,13 +48,14 @@ public:
     void OpeningProcess();
     void ClosingProcess();
 
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();
     void SyncView();
 
-    RmlModelBinder<DuelWatchSpectatorsRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, DuelWatchSpectatorsRmlModel& model);
+    UI::RmlBridge::ThemedView<DuelWatchSpectatorsRmlModel> m_RmlView{"duel_watch_spectators",
+        [this](Rml::DataModelConstructor& c, DuelWatchSpectatorsRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/duel_watch_spectators.rml"}}};
 };
 }

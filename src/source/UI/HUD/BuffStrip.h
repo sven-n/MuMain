@@ -2,7 +2,7 @@
 #pragma once
 
 #include "UI/Core/WindowManager.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <vector>
 
@@ -36,7 +36,6 @@ namespace mu::ui::window
         // Same MAIN_SCENE-only Update() gate and fix as CMuHelperBar::SyncDocVisibility() (MuHelperBar.h).
         void SyncDocVisibility(bool sceneAllowsShow);
 
-        void ReloadRmlTheme();
 
     private:
         void BuildRmlUi();
@@ -71,8 +70,10 @@ namespace mu::ui::window
             // heights of the native renderer per line.
             float tooltipLinePx = 0.0f;
         };
-        RmlModelBinder<BuffStripRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, BuffStripRmlModel& model);
+        UI::RmlBridge::ThemedView<BuffStripRmlModel> m_RmlView{"buff_strip",
+            [this](Rml::DataModelConstructor& c, BuffStripRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/buff_strip.rml"}}};
 
         CManager* m_pNewUIMng = nullptr;
 

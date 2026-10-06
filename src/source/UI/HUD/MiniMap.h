@@ -8,7 +8,7 @@
 #include "UI/Widgets/Window/Button.h"
 #include "UI/HUD/MiniMapLayout.h"
 #include "UI/HUD/MiniMapRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Widgets/Window/Tooltip.h"
 
 #include <string>
@@ -50,7 +50,6 @@ public:
     void LoadImages(const wchar_t* Filename);
     void UnloadImages();
 
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();
@@ -69,8 +68,10 @@ private:
     // m_BtnExit's hint ("Close", above the button).
     CTooltip m_ExitTooltip;
 
-    RmlModelBinder<MiniMapRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, MiniMapRmlModel& model);
+    UI::RmlBridge::ThemedView<MiniMapRmlModel> m_RmlView{"mini_map",
+        [this](Rml::DataModelConstructor& c, MiniMapRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/mini_map.rml"}}};
     bool m_PendingClose = false;
     // The screen the border tiles' matrices were built for (SyncScreen()).
     UI::MiniMap::Screen m_SideLinesScreen;

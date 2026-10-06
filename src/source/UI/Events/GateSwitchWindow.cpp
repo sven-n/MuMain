@@ -46,7 +46,6 @@ bool CGateSwitchWindow::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -55,13 +54,14 @@ bool CGateSwitchWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void CGateSwitchWindow::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 void CGateSwitchWindow::SetPos(int x, int y)
@@ -77,10 +77,10 @@ bool CGateSwitchWindow::UpdateMouseEvent()
         return false;
 
     // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
+    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
     float panelWidth = INVENTORY_WIDTH;
     float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
                                       static_cast<int>(panelHeight))
             .Contains(MouseX, MouseY))
@@ -152,91 +152,71 @@ bool CGateSwitchWindow::BtnProcess()
     return false;
 }
 
-void CGateSwitchWindow::BuildRmlUi()
+void CGateSwitchWindow::BindRmlModel(Rml::DataModelConstructor& c, GateSwitchRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
-
-    const bool modelCreated = m_RmlBinder.Create(
-        RmlUiRuntime::Instance().GetContext(), "gate_switch",
-        [this](Rml::DataModelConstructor& c, GateSwitchRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-            c.Bind("bold_text_px", &model.boldTextPx);
-            c.Bind("title", &model.title);
-            c.Bind("title_px", &model.titlePx);
-            c.Bind("line1", &model.line1);
-            c.Bind("line2", &model.line2);
-            c.Bind("warning", &model.warning);
-            c.Bind("gate_opened", &model.gateOpened);
-            c.Bind("button_text", &model.buttonText);
-            c.Bind("label_line_px", &model.labelLinePx);
-            c.Bind("exit_tooltip", &model.exitTooltip);
-            c.BindEventCallback("gate_switch_toggle", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                { m_PendingToggle = true; });
-            c.BindEventCallback("gate_switch_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                { m_PendingExit = true; });
-        });
-    if (!modelCreated)
-        return;
-
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                  "Data/Interface/RmlUi/gate_switch.rml");
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("bold_text_px", &model.boldTextPx);
+    c.Bind("title", &model.title);
+    c.Bind("title_px", &model.titlePx);
+    c.Bind("line1", &model.line1);
+    c.Bind("line2", &model.line2);
+    c.Bind("warning", &model.warning);
+    c.Bind("gate_opened", &model.gateOpened);
+    c.Bind("button_text", &model.buttonText);
+    c.Bind("label_line_px", &model.labelLinePx);
+    c.Bind("exit_tooltip", &model.exitTooltip);
+    c.BindEventCallback("gate_switch_toggle", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_PendingToggle = true; });
+    c.BindEventCallback("gate_switch_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_PendingExit = true; });
 }
 
-void CGateSwitchWindow::ReloadRmlTheme()
+void CGateSwitchWindow::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void CGateSwitchWindow::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // Layer depth 5: over the HUD like every panel the original opened.
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     // The original's RenderFrame() and Render(): the title bold (220, 220, 220) in its 160-unit
     // box; the three lines in the font and colour RenderFrame() left set (bold, (220, 220, 220)),
     // each centred on x 95, the warning on a (160, 0, 0) text box; Open or Close by the gate state.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    GateSwitchRmlModel& model = m_RmlBinder.GetModel();
+    GateSwitchRmlModel& model = m_RmlView.GetModel();
     g_pRenderText->SetFont(g_hFontBold);
     const int titleWidth =
         g_pRenderText->MeasureText(I18N::Game::CastleGateSwitch, static_cast<int>(wcslen(I18N::Game::CastleGateSwitch)))
             .cx;
-    SyncField(m_RmlBinder, &GateSwitchRmlModel::boldTextPx, "bold_text_px",
+    SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::boldTextPx, "bold_text_px",
          UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
-    SyncField(m_RmlBinder, &GateSwitchRmlModel::titlePx, "title_px",
+    SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::titlePx, "title_px",
          UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Bold, transform, static_cast<float>(titleWidth),
                                                160.f));
-    SyncField(m_RmlBinder, &GateSwitchRmlModel::title, "title", StringUtils::WideToNarrow(I18N::Game::CastleGateSwitch));
-    SyncField(m_RmlBinder, &GateSwitchRmlModel::line1, "line1", StringUtils::WideToNarrow(I18N::Game::CanCommandToOpenOrClose));
-    SyncField(m_RmlBinder, &GateSwitchRmlModel::line2, "line2", StringUtils::WideToNarrow(I18N::Game::TheCastleGateInFront));
-    SyncField(m_RmlBinder, &GateSwitchRmlModel::warning, "warning",
+    SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::title, "title", StringUtils::WideToNarrow(I18N::Game::CastleGateSwitch));
+    SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::line1, "line1", StringUtils::WideToNarrow(I18N::Game::CanCommandToOpenOrClose));
+    SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::line2, "line2", StringUtils::WideToNarrow(I18N::Game::TheCastleGateInFront));
+    SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::warning, "warning",
          StringUtils::WideToNarrow(I18N::Game::BeCarefulItMightBeBeneficialToTheEnemy));
     const bool opened = npcGateSwitch::IsGateOpened();
-    SyncField(m_RmlBinder, &GateSwitchRmlModel::gateOpened, "gate_opened", opened);
-    SyncField(m_RmlBinder, &GateSwitchRmlModel::buttonText, "button_text",
+    SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::gateOpened, "gate_opened", opened);
+    SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::buttonText, "button_text",
          StringUtils::WideToNarrow(opened ? I18N::Game::Close388 : I18N::Game::Open1107));
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    SyncField(m_RmlBinder, &GateSwitchRmlModel::labelLinePx, "label_line_px", static_cast<float>(lineHeight) * transform.scaleY);
-    SyncField(m_RmlBinder, &GateSwitchRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
+    SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::labelLinePx, "label_line_px", static_cast<float>(lineHeight) * transform.scaleY);
+    SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }

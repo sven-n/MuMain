@@ -10,7 +10,7 @@
 #include "UI/Widgets/Window/Button.h"
 #include "UI/Events/CursedTempleEnterRmlModel.h"
 #include "UI/Events/CursedTempleUpdates.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -39,7 +39,7 @@ public:
     virtual ~CCursedTempleEnter();
 
     bool Create(CManager* pNewUIMng, int x, int y);
-    Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+    Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
 
 public:
     bool UpdateMouseEvent();
@@ -54,7 +54,6 @@ public:
 public:
     bool Render();
 
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();
@@ -79,8 +78,10 @@ private:
 private:
     CManager* m_pNewUIMng;
     POINT m_Pos;
-    RmlModelBinder<CursedTempleEnterRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, CursedTempleEnterRmlModel& model);
+    UI::RmlBridge::ThemedView<CursedTempleEnterRmlModel> m_RmlView{"cursed_temple_enter",
+        [this](Rml::DataModelConstructor& c, CursedTempleEnterRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/cursed_temple_enter.rml"}}};
     bool m_PendingEnter = false;
     bool m_PendingClose = false;
     int m_EnterTime;

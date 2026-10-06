@@ -7,7 +7,7 @@
 #include "UI/Core/Window3DRenderMng.h"
 #include "UI/Inventory/MyInventory.h"
 #include "UI/Combat/DuelWatchSpectatorRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -56,8 +56,10 @@ private:
     float m_fReceivedSDRate1;
     float m_fReceivedSDRate2;
 
-    RmlModelBinder<DuelWatchFrameRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, DuelWatchFrameRmlModel& model);
+    UI::RmlBridge::ThemedView<DuelWatchFrameRmlModel> m_RmlView{"duel_watch_frame",
+        [this](Rml::DataModelConstructor& c, DuelWatchFrameRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/duel_watch_frame.rml"}}};
 
 public:
     CDuelWatchMainFrameWindow();
@@ -81,7 +83,6 @@ public:
 
     float GetLayerDepth(); //. 5.0f
 
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();

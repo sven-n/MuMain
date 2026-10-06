@@ -8,7 +8,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Party/PartyInfoWindow.h"
 #include "UI/Party/PartyListRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Scaling/UITransform.h"
 
 namespace Rml
@@ -47,8 +47,10 @@ namespace mu::ui::window
 
         int							m_iSelectedCharacter;
 
-        RmlModelBinder<PartyListRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, PartyListRmlModel& model);
+        UI::RmlBridge::ThemedView<PartyListRmlModel> m_RmlView{"party_list",
+            [this](Rml::DataModelConstructor& c, PartyListRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/party_list.rml"}}};
         // A leave button press, queued by RmlUi's click and run from Update(), outside RmlUi's
         // own event dispatch.
         int m_PendingLeave = -1;
@@ -68,7 +70,6 @@ namespace mu::ui::window
         bool Render();
 
         bool BtnProcess();
-        void ReloadRmlTheme();
 
         float GetLayerDepth();	//. 5.4f
 

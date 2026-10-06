@@ -57,6 +57,15 @@ ContextTracker& Tracker()
 }
 } // namespace
 
+Rml::Context* BackgroundOrMainContext()
+{
+    RmlUiRuntime& runtime = RmlUiRuntime::Instance();
+    if (!runtime.IsCreated())
+        return nullptr;
+    Rml::Context* context = runtime.GetBackgroundContext();
+    return context != nullptr ? context : runtime.GetContext();
+}
+
 bool IsContextAlive(const Rml::Context* context)
 {
     return context != nullptr && Tracker().IsAlive(context);

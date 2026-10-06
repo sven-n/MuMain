@@ -20,19 +20,6 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-namespace
-{
-// The original drew the HUD under nearly every other window (layer depth 1.6), and a docked
-// panel's frame is painted in the background context before the native windows: only a document
-// in that same context, behind the others, stays under them (as the duel and battle-soccer boards
-// do). The durability warnings, the logs and every native window then draw over the HUD.
-Rml::Context* HudContext()
-{
-    Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext();
-    return context != nullptr ? context : RmlUiRuntime::Instance().GetContext();
-}
-} // namespace
-
 mu::ui::window::CSiegeWarfare::CSiegeWarfare()
 {
     m_pNewUIMng = NULL;
@@ -65,7 +52,6 @@ bool mu::ui::window::CSiegeWarfare::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_SIEGEWARFARE, this);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(true);
 
@@ -76,7 +62,6 @@ bool mu::ui::window::CSiegeWarfare::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CSiegeWarfare::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pSiegeWarUI)
     {
@@ -89,6 +74,8 @@ void mu::ui::window::CSiegeWarfare::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 void mu::ui::window::CSiegeWarfare::SetPos(int x, int y)
@@ -171,94 +158,77 @@ bool mu::ui::window::CSiegeWarfare::Render()
     return true;
 }
 
-void mu::ui::window::CSiegeWarfare::BuildRmlUi()
+void mu::ui::window::CSiegeWarfare::BindRmlModel(Rml::DataModelConstructor& c, SiegeWarfareRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    c.Bind("scale_x", &model.scaleX);
+    c.Bind("scale_y", &model.scaleY);
+    c.Bind("inverse_scale_x", &model.inverseScaleX);
+    c.Bind("inverse_scale_y", &model.inverseScaleY);
+    c.Bind("bold_text_px", &model.boldTextPx);
+    c.Bind("big_text_px", &model.bigTextPx);
+    c.Bind("frame_x", &model.frameX);
+    c.Bind("frame_y", &model.frameY);
+    c.Bind("alpha", &model.alpha);
+    c.Bind("map_rect", &model.mapRect);
+    c.Bind("alpha_label", &model.alphaLabel);
+    c.Bind("alpha_frame", &model.alphaFrame);
+    c.Bind("time_visible", &model.timeVisible);
+    c.Bind("time_text", &model.timeText);
 
-    const bool modelCreated = m_RmlBinder.Create(HudContext(), "siege_warfare",
-                                                 [](Rml::DataModelConstructor& c, SiegeWarfareRmlModel& model)
-                                                 {
-                                                     c.Bind("scale_x", &model.scaleX);
-                                                     c.Bind("scale_y", &model.scaleY);
-                                                     c.Bind("inverse_scale_x", &model.inverseScaleX);
-                                                     c.Bind("inverse_scale_y", &model.inverseScaleY);
-                                                     c.Bind("bold_text_px", &model.boldTextPx);
-                                                     c.Bind("big_text_px", &model.bigTextPx);
-                                                     c.Bind("frame_x", &model.frameX);
-                                                     c.Bind("frame_y", &model.frameY);
-                                                     c.Bind("alpha", &model.alpha);
-                                                     c.Bind("map_rect", &model.mapRect);
-                                                     c.Bind("alpha_label", &model.alphaLabel);
-                                                     c.Bind("alpha_frame", &model.alphaFrame);
-                                                     c.Bind("time_visible", &model.timeVisible);
-                                                     c.Bind("time_text", &model.timeText);
+    auto dot = c.RegisterStruct<SiegeWarDotEntry>();
+    dot.RegisterMember("left", &SiegeWarDotEntry::left);
+    dot.RegisterMember("top", &SiegeWarDotEntry::top);
+    c.RegisterArray<std::vector<SiegeWarDotEntry>>();
+    c.Bind("dots", &model.dots);
+    c.Bind("hero_left", &model.heroLeft);
+    c.Bind("hero_top", &model.heroTop);
 
-                                                     auto dot = c.RegisterStruct<SiegeWarDotEntry>();
-                                                     dot.RegisterMember("left", &SiegeWarDotEntry::left);
-                                                     dot.RegisterMember("top", &SiegeWarDotEntry::top);
-                                                     c.RegisterArray<std::vector<SiegeWarDotEntry>>();
-                                                     c.Bind("dots", &model.dots);
-                                                     c.Bind("hero_left", &model.heroLeft);
-                                                     c.Bind("hero_top", &model.heroTop);
+    auto command = c.RegisterStruct<SiegeWarCommandEntry>();
+    command.RegisterMember("left", &SiegeWarCommandEntry::left);
+    command.RegisterMember("top", &SiegeWarCommandEntry::top);
+    command.RegisterMember("command", &SiegeWarCommandEntry::command);
+    command.RegisterMember("team", &SiegeWarCommandEntry::team);
+    command.RegisterMember("color", &SiegeWarCommandEntry::color);
+    c.RegisterArray<std::vector<SiegeWarCommandEntry>>();
+    c.Bind("commands", &model.commands);
 
-                                                     auto command = c.RegisterStruct<SiegeWarCommandEntry>();
-                                                     command.RegisterMember("left", &SiegeWarCommandEntry::left);
-                                                     command.RegisterMember("top", &SiegeWarCommandEntry::top);
-                                                     command.RegisterMember("command", &SiegeWarCommandEntry::command);
-                                                     command.RegisterMember("team", &SiegeWarCommandEntry::team);
-                                                     command.RegisterMember("color", &SiegeWarCommandEntry::color);
-                                                     c.RegisterArray<std::vector<SiegeWarCommandEntry>>();
-                                                     c.Bind("commands", &model.commands);
+    c.Bind("skill_visible", &model.skillVisible);
+    c.Bind("skill_rect", &model.skillRect);
+    c.Bind("skill_affordable", &model.skillAffordable);
+    c.Bind("kills_needed", &model.killsNeeded);
+    c.Bind("kills", &model.kills);
+    c.Bind("scroll_up_frame", &model.scrollUpFrame);
+    c.Bind("scroll_down_frame", &model.scrollDownFrame);
 
-                                                     c.Bind("skill_visible", &model.skillVisible);
-                                                     c.Bind("skill_rect", &model.skillRect);
-                                                     c.Bind("skill_affordable", &model.skillAffordable);
-                                                     c.Bind("kills_needed", &model.killsNeeded);
-                                                     c.Bind("kills", &model.kills);
-                                                     c.Bind("scroll_up_frame", &model.scrollUpFrame);
-                                                     c.Bind("scroll_down_frame", &model.scrollDownFrame);
-
-                                                     auto button = c.RegisterStruct<SiegeWarButtonEntry>();
-                                                     button.RegisterMember("left", &SiegeWarButtonEntry::left);
-                                                     button.RegisterMember("top", &SiegeWarButtonEntry::top);
-                                                     button.RegisterMember("frame", &SiegeWarButtonEntry::frame);
-                                                     button.RegisterMember("label", &SiegeWarButtonEntry::label);
-                                                     c.RegisterArray<std::vector<SiegeWarButtonEntry>>();
-                                                     c.Bind("teams", &model.teams);
-                                                     c.Bind("orders", &model.orders);
-                                                     c.Bind("cursor_visible", &model.cursorVisible);
-                                                     c.Bind("cursor_left", &model.cursorLeft);
-                                                     c.Bind("cursor_top", &model.cursorTop);
-                                                     c.Bind("cursor_command", &model.cursorCommand);
-                                                     c.Bind("cursor_team", &model.cursorTeam);
-                                                 });
-
-    if (modelCreated)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(HudContext(), "Data/Interface/RmlUi/siege_warfare.rml");
+    auto button = c.RegisterStruct<SiegeWarButtonEntry>();
+    button.RegisterMember("left", &SiegeWarButtonEntry::left);
+    button.RegisterMember("top", &SiegeWarButtonEntry::top);
+    button.RegisterMember("frame", &SiegeWarButtonEntry::frame);
+    button.RegisterMember("label", &SiegeWarButtonEntry::label);
+    c.RegisterArray<std::vector<SiegeWarButtonEntry>>();
+    c.Bind("teams", &model.teams);
+    c.Bind("orders", &model.orders);
+    c.Bind("cursor_visible", &model.cursorVisible);
+    c.Bind("cursor_left", &model.cursorLeft);
+    c.Bind("cursor_top", &model.cursorTop);
+    c.Bind("cursor_command", &model.cursorCommand);
+    c.Bind("cursor_team", &model.cursorTeam);
 }
 
-void mu::ui::window::CSiegeWarfare::ReloadRmlTheme()
+void mu::ui::window::CSiegeWarfare::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = HudContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CSiegeWarfare::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // The original drew the HUD only on the siege map (Render()).
     const bool shown = IsVisible() && m_pSiegeWarUI != NULL && gMapManager.InBattleCastle();
-    UI::RmlBridge::SyncDocumentVisibilityBehind(m_pRmlDoc, shown);
+    UI::RmlBridge::SyncDocumentVisibilityBehind(m_RmlView.Document(), shown);
     if (!shown)
         return;
 
@@ -277,39 +247,39 @@ void mu::ui::window::CSiegeWarfare::SyncRmlModel()
 
 void mu::ui::window::CSiegeWarfare::ApplyRmlModel(const SiegeWarfareRmlModel& next)
 {
-    SiegeWarfareRmlModel& model = m_RmlBinder.GetModel();
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::scaleX, "scale_x", next.scaleX);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::scaleY, "scale_y", next.scaleY);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::inverseScaleX, "inverse_scale_x", next.inverseScaleX);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::inverseScaleY, "inverse_scale_y", next.inverseScaleY);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::boldTextPx, "bold_text_px", next.boldTextPx);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::bigTextPx, "big_text_px", next.bigTextPx);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::frameX, "frame_x", next.frameX);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::frameY, "frame_y", next.frameY);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::alpha, "alpha", next.alpha);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::mapRect, "map_rect", next.mapRect);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::alphaLabel, "alpha_label", next.alphaLabel);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::alphaFrame, "alpha_frame", next.alphaFrame);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::timeVisible, "time_visible", next.timeVisible);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::timeText, "time_text", next.timeText);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::dots, "dots", next.dots);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::heroLeft, "hero_left", next.heroLeft);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::heroTop, "hero_top", next.heroTop);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::commands, "commands", next.commands);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::skillVisible, "skill_visible", next.skillVisible);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::skillRect, "skill_rect", next.skillRect);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::skillAffordable, "skill_affordable", next.skillAffordable);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::killsNeeded, "kills_needed", next.killsNeeded);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::kills, "kills", next.kills);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::scrollUpFrame, "scroll_up_frame", next.scrollUpFrame);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::scrollDownFrame, "scroll_down_frame", next.scrollDownFrame);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::teams, "teams", next.teams);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::orders, "orders", next.orders);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::cursorVisible, "cursor_visible", next.cursorVisible);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::cursorLeft, "cursor_left", next.cursorLeft);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::cursorTop, "cursor_top", next.cursorTop);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::cursorCommand, "cursor_command", next.cursorCommand);
-    SyncField(m_RmlBinder, &SiegeWarfareRmlModel::cursorTeam, "cursor_team", next.cursorTeam);
+    SiegeWarfareRmlModel& model = m_RmlView.GetModel();
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::scaleX, "scale_x", next.scaleX);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::scaleY, "scale_y", next.scaleY);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::inverseScaleX, "inverse_scale_x", next.inverseScaleX);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::inverseScaleY, "inverse_scale_y", next.inverseScaleY);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::boldTextPx, "bold_text_px", next.boldTextPx);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::bigTextPx, "big_text_px", next.bigTextPx);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::frameX, "frame_x", next.frameX);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::frameY, "frame_y", next.frameY);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::alpha, "alpha", next.alpha);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::mapRect, "map_rect", next.mapRect);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::alphaLabel, "alpha_label", next.alphaLabel);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::alphaFrame, "alpha_frame", next.alphaFrame);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::timeVisible, "time_visible", next.timeVisible);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::timeText, "time_text", next.timeText);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::dots, "dots", next.dots);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::heroLeft, "hero_left", next.heroLeft);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::heroTop, "hero_top", next.heroTop);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::commands, "commands", next.commands);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::skillVisible, "skill_visible", next.skillVisible);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::skillRect, "skill_rect", next.skillRect);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::skillAffordable, "skill_affordable", next.skillAffordable);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::killsNeeded, "kills_needed", next.killsNeeded);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::kills, "kills", next.kills);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::scrollUpFrame, "scroll_up_frame", next.scrollUpFrame);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::scrollDownFrame, "scroll_down_frame", next.scrollDownFrame);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::teams, "teams", next.teams);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::orders, "orders", next.orders);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::cursorVisible, "cursor_visible", next.cursorVisible);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::cursorLeft, "cursor_left", next.cursorLeft);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::cursorTop, "cursor_top", next.cursorTop);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::cursorCommand, "cursor_command", next.cursorCommand);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::cursorTeam, "cursor_team", next.cursorTeam);
 }
 
 float mu::ui::window::CSiegeWarfare::GetLayerDepth()

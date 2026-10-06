@@ -8,7 +8,7 @@
 #include "UI/Combat/SiegeUpdates.h"
 #include "UI/Combat/GuardWindowRmlModel.h"
 #include "UI/Combat/GuardGuildLists.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
 #include "Guild/GuildInfoWindow.h"
@@ -58,8 +58,11 @@ private:
 
     void SetCurOpenTab(int iTab);
 
-    RmlModelBinder<GuardWindowRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, GuardWindowRmlModel& model);
+    void OnRmlReloaded();
+    UI::RmlBridge::ThemedView<GuardWindowRmlModel> m_RmlView{"guard_window",
+        [this](Rml::DataModelConstructor& c, GuardWindowRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/guard_window.rml"}}, {.afterReload = [this] { OnRmlReloaded(); }}};
     GUARD_BUTTON m_PendingButton = GUARD_BUTTON_NONE;
     int m_PendingTab = -1;
 
@@ -97,7 +100,7 @@ public:
     virtual ~CGuardWindow();
 
     bool Create(CManager* pNewUIMng, int x, int y);
-    Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+    Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     void Release();
 
     void SetPos(int x, int y);
@@ -121,7 +124,6 @@ public:
     void AddGuildList(std::wstring_view name, BYTE side, BYTE involvement, int score);
     void ClearGuildList();
 
-    void ReloadRmlTheme();
 
 private:
     bool BtnProcess();

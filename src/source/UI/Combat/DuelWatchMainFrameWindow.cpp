@@ -132,7 +132,6 @@ bool CDuelWatchMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI
     m_ExitTooltip.SetAnchorAbove(true);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -141,7 +140,6 @@ bool CDuelWatchMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI
 
 void CDuelWatchMainFrameWindow::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
     UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
 
     if (m_pNewUI3DRenderMng)
@@ -155,6 +153,8 @@ void CDuelWatchMainFrameWindow::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 bool CDuelWatchMainFrameWindow::UpdateMouseEvent()
@@ -218,55 +218,37 @@ float CDuelWatchMainFrameWindow::GetLayerDepth()
     return 5.0f;
 }
 
-void CDuelWatchMainFrameWindow::BuildRmlUi()
+void CDuelWatchMainFrameWindow::BindRmlModel(Rml::DataModelConstructor& c, DuelWatchFrameRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    const bool modelCreated = m_RmlBinder.Create(
-        context, "duel_watch_frame",
-        [this](Rml::DataModelConstructor& c, DuelWatchFrameRmlModel& model)
-        {
-            c.Bind("scale_x", &model.scaleX);
-            c.Bind("scale_y", &model.scaleY);
-            c.Bind("inverse_scale_x", &model.inverseScaleX);
-            c.Bind("inverse_scale_y", &model.inverseScaleY);
-            c.Bind("watching", &model.watching);
-            auto name = c.RegisterStruct<DuelWatchNameEntry>();
-            name.RegisterMember("text", &DuelWatchNameEntry::text);
-            name.RegisterMember("text_px", &DuelWatchNameEntry::textPx);
-            c.Bind("hero_name", &model.heroName);
-            c.Bind("enemy_name", &model.enemyName);
-            c.RegisterArray<std::vector<float>>();
-            c.Bind("score_marks", &model.scoreMarks);
-            auto gauge = c.RegisterStruct<DuelWatchGaugeEntry>();
-            gauge.RegisterMember("src", &DuelWatchGaugeEntry::src);
-            gauge.RegisterMember("rect", &DuelWatchGaugeEntry::rect);
-            gauge.RegisterMember("left", &DuelWatchGaugeEntry::left);
-            gauge.RegisterMember("top", &DuelWatchGaugeEntry::top);
-            gauge.RegisterMember("width", &DuelWatchGaugeEntry::width);
-            gauge.RegisterMember("height", &DuelWatchGaugeEntry::height);
-            gauge.RegisterMember("mirrored", &DuelWatchGaugeEntry::mirrored);
-            c.RegisterArray<std::vector<DuelWatchGaugeEntry>>();
-            c.Bind("gauges", &model.gauges);
-            c.BindEventCallback("duel_watch_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                { m_PendingExit = true; });
-        });
-    if (modelCreated)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(context, "Data/Interface/RmlUi/duel_watch_frame.rml");
+    c.Bind("scale_x", &model.scaleX);
+    c.Bind("scale_y", &model.scaleY);
+    c.Bind("inverse_scale_x", &model.inverseScaleX);
+    c.Bind("inverse_scale_y", &model.inverseScaleY);
+    c.Bind("watching", &model.watching);
+    auto name = c.RegisterStruct<DuelWatchNameEntry>();
+    name.RegisterMember("text", &DuelWatchNameEntry::text);
+    name.RegisterMember("text_px", &DuelWatchNameEntry::textPx);
+    c.Bind("hero_name", &model.heroName);
+    c.Bind("enemy_name", &model.enemyName);
+    c.RegisterArray<std::vector<float>>();
+    c.Bind("score_marks", &model.scoreMarks);
+    auto gauge = c.RegisterStruct<DuelWatchGaugeEntry>();
+    gauge.RegisterMember("src", &DuelWatchGaugeEntry::src);
+    gauge.RegisterMember("rect", &DuelWatchGaugeEntry::rect);
+    gauge.RegisterMember("left", &DuelWatchGaugeEntry::left);
+    gauge.RegisterMember("top", &DuelWatchGaugeEntry::top);
+    gauge.RegisterMember("width", &DuelWatchGaugeEntry::width);
+    gauge.RegisterMember("height", &DuelWatchGaugeEntry::height);
+    gauge.RegisterMember("mirrored", &DuelWatchGaugeEntry::mirrored);
+    c.RegisterArray<std::vector<DuelWatchGaugeEntry>>();
+    c.Bind("gauges", &model.gauges);
+    c.BindEventCallback("duel_watch_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_PendingExit = true; });
 }
 
-void CDuelWatchMainFrameWindow::ReloadRmlTheme()
+void CDuelWatchMainFrameWindow::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 std::vector<DuelWatchGaugeEntry> CDuelWatchMainFrameWindow::StepGauges()
@@ -321,10 +303,10 @@ std::vector<DuelWatchGaugeEntry> CDuelWatchMainFrameWindow::StepGauges()
 void CDuelWatchMainFrameWindow::SyncView()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
     {
         UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
@@ -333,16 +315,16 @@ void CDuelWatchMainFrameWindow::SyncView()
 
     // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    SyncField(m_RmlBinder, &DuelWatchFrameRmlModel::scaleX, "scale_x", transform.scaleX);
-    SyncField(m_RmlBinder, &DuelWatchFrameRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncField(m_RmlBinder, &DuelWatchFrameRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    SyncField(m_RmlBinder, &DuelWatchFrameRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
+    SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::scaleX, "scale_x", transform.scaleX);
+    SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::scaleY, "scale_y", transform.scaleY);
+    SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
+    SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
 
     m_ExitTooltip.Render(static_cast<int>(kExitX), static_cast<int>(kExitY), static_cast<int>(kExitWidth),
                          static_cast<int>(kExitHeight));
 
     const bool watching = g_DuelMgr.GetCurrentChannel() != -1;
-    SyncField(m_RmlBinder, &DuelWatchFrameRmlModel::watching, "watching", watching);
+    SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::watching, "watching", watching);
     if (!watching)
         return;
 
@@ -356,9 +338,9 @@ void CDuelWatchMainFrameWindow::SyncView()
                                   UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Bold, transform,
                                                                         static_cast<float>(width), 55.f)};
     };
-    SyncField(m_RmlBinder, &DuelWatchFrameRmlModel::heroName, "hero_name", name(DUEL_HERO));
-    SyncField(m_RmlBinder, &DuelWatchFrameRmlModel::enemyName, "enemy_name", name(DUEL_ENEMY));
-    DuelWatchFrameRmlModel& model = m_RmlBinder.GetModel();
+    SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::heroName, "hero_name", name(DUEL_HERO));
+    SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::enemyName, "enemy_name", name(DUEL_ENEMY));
+    DuelWatchFrameRmlModel& model = m_RmlView.GetModel();
 
     // A mark per point: the left fighter's from x 57 rightwards, the right one's from x 566 leftwards.
     std::vector<float> scoreMarks;
@@ -371,7 +353,7 @@ void CDuelWatchMainFrameWindow::SyncView()
     if (model.scoreMarks != scoreMarks)
     {
         model.scoreMarks = std::move(scoreMarks);
-        m_RmlBinder.MarkDirty("score_marks");
+        m_RmlView.MarkDirty("score_marks");
     }
 
     std::vector<DuelWatchGaugeEntry> gauges = StepGauges();
@@ -386,6 +368,6 @@ void CDuelWatchMainFrameWindow::SyncView()
     if (!sameGauges)
     {
         model.gauges = std::move(gauges);
-        m_RmlBinder.MarkDirty("gauges");
+        m_RmlView.MarkDirty("gauges");
     }
 }

@@ -65,7 +65,6 @@ bool mu::ui::window::CCursedTempleEnter::Create(CManager* pNewUIMng, int x, int 
     SetPos(x, y);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -88,7 +87,6 @@ void mu::ui::window::CCursedTempleEnter::Initialize()
 
 void mu::ui::window::CCursedTempleEnter::Destroy()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
@@ -168,7 +166,7 @@ bool mu::ui::window::CCursedTempleEnter::UpdateMouseEvent()
     // The Enter and Close buttons are RmlUi's (see Update()); the window keeps the pointer.
     float panelWidth = CURSEDTEMPLE_ENTER_WINDOW_WIDTH;
     float panelHeight = CURSEDTEMPLE_ENTER_WINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         return false;
@@ -244,83 +242,62 @@ void mu::ui::window::CCursedTempleEnter::SetEntryCounts(std::span<const std::uin
         m_EnterCount = counts[enterlevel - 1];
 }
 
-void mu::ui::window::CCursedTempleEnter::BuildRmlUi()
+void mu::ui::window::CCursedTempleEnter::BindRmlModel(Rml::DataModelConstructor& c, CursedTempleEnterRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
-
-    const bool modelCreated = m_RmlBinder.Create(
-        RmlUiRuntime::Instance().GetContext(), "cursed_temple_enter",
-        [this](Rml::DataModelConstructor& c, CursedTempleEnterRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-            c.Bind("bold_text_px", &model.boldTextPx);
-            c.Bind("line_height_px", &model.lineHeightPx);
-            c.Bind("title", &model.title);
-            c.Bind("eligible", &model.eligible);
-            auto line = c.RegisterStruct<CursedTempleEnterLine>();
-            line.RegisterMember("text", &CursedTempleEnterLine::text);
-            line.RegisterMember("text_px", &CursedTempleEnterLine::textPx);
-            c.Bind("temple_line", &model.templeLine);
-            c.Bind("members_line", &model.membersLine);
-            c.Bind("notice", &model.notice);
-            auto band = c.RegisterStruct<CursedTempleEnterBand>();
-            band.RegisterMember("text", &CursedTempleEnterBand::text);
-            band.RegisterMember("text_px", &CursedTempleEnterBand::textPx);
-            band.RegisterMember("hero", &CursedTempleEnterBand::hero);
-            c.RegisterArray<std::vector<CursedTempleEnterBand>>();
-            c.Bind("bands", &model.bands);
-            c.Bind("enter_text", &model.enterText);
-            c.Bind("close_text", &model.closeText);
-            c.Bind("label_line_px", &model.labelLinePx);
-            c.BindEventCallback("temple_enter", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                { m_PendingEnter = true; });
-            c.BindEventCallback("temple_close", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                { m_PendingClose = true; });
-        });
-
-    if (!modelCreated)
-        return;
-
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                  "Data/Interface/RmlUi/cursed_temple_enter.rml");
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("bold_text_px", &model.boldTextPx);
+    c.Bind("line_height_px", &model.lineHeightPx);
+    c.Bind("title", &model.title);
+    c.Bind("eligible", &model.eligible);
+    auto line = c.RegisterStruct<CursedTempleEnterLine>();
+    line.RegisterMember("text", &CursedTempleEnterLine::text);
+    line.RegisterMember("text_px", &CursedTempleEnterLine::textPx);
+    c.Bind("temple_line", &model.templeLine);
+    c.Bind("members_line", &model.membersLine);
+    c.Bind("notice", &model.notice);
+    auto band = c.RegisterStruct<CursedTempleEnterBand>();
+    band.RegisterMember("text", &CursedTempleEnterBand::text);
+    band.RegisterMember("text_px", &CursedTempleEnterBand::textPx);
+    band.RegisterMember("hero", &CursedTempleEnterBand::hero);
+    c.RegisterArray<std::vector<CursedTempleEnterBand>>();
+    c.Bind("bands", &model.bands);
+    c.Bind("enter_text", &model.enterText);
+    c.Bind("close_text", &model.closeText);
+    c.Bind("label_line_px", &model.labelLinePx);
+    c.BindEventCallback("temple_enter", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_PendingEnter = true; });
+    c.BindEventCallback("temple_close", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_PendingClose = true; });
 }
 
-void mu::ui::window::CCursedTempleEnter::ReloadRmlTheme()
+void mu::ui::window::CCursedTempleEnter::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CCursedTempleEnter::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // Layer depth 10.3: over the HUD and the panels.
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncLines();
 }
 
 void mu::ui::window::CCursedTempleEnter::SyncLines()
 {
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    CursedTempleEnterRmlModel updated = m_RmlBinder.GetModel();
+    CursedTempleEnterRmlModel updated = m_RmlView.GetModel();
     updated.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     updated.lineHeightPx = static_cast<float>(lineHeight) * transform.scaleY;
@@ -367,20 +344,20 @@ void mu::ui::window::CCursedTempleEnter::SyncLines()
                                   CURSEDTEMPLE_ENTER_WINDOW_WIDTH);
     }
 
-    CursedTempleEnterRmlModel& model = m_RmlBinder.GetModel();
-    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::boldTextPx, "bold_text_px", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::lineHeightPx, "line_height_px", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::labelLinePx, "label_line_px", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::title, "title", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::enterText, "enter_text", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::closeText, "close_text", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::eligible, "eligible", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::templeLine, "temple_line", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::membersLine, "members_line", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleEnterRmlModel::notice, "notice", updated);
+    CursedTempleEnterRmlModel& model = m_RmlView.GetModel();
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleEnterRmlModel::boldTextPx, "bold_text_px", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleEnterRmlModel::lineHeightPx, "line_height_px", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleEnterRmlModel::labelLinePx, "label_line_px", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleEnterRmlModel::title, "title", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleEnterRmlModel::enterText, "enter_text", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleEnterRmlModel::closeText, "close_text", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleEnterRmlModel::eligible, "eligible", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleEnterRmlModel::templeLine, "temple_line", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleEnterRmlModel::membersLine, "members_line", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleEnterRmlModel::notice, "notice", updated);
     if (model.bands != updated.bands)
     {
         model.bands = std::move(updated.bands);
-        m_RmlBinder.MarkDirty("bands");
+        m_RmlView.MarkDirty("bands");
     }
 }

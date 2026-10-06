@@ -60,7 +60,6 @@ bool mu::ui::window::CCursedTempleResult::Create(CManager* pNewUIMng, int x, int
     SetPos(x, y);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -81,7 +80,6 @@ void mu::ui::window::CCursedTempleResult::Initialize() {}
 
 void mu::ui::window::CCursedTempleResult::Destroy()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -132,7 +130,7 @@ bool mu::ui::window::CCursedTempleResult::UpdateMouseEvent()
     // The Close button is RmlUi's (see Update()); the window keeps the pointer.
     float panelWidth = CURSEDTEMPLE_RESULT_WINDOW_WIDTH;
     float panelHeight = CURSEDTEMPLE_RESULT_WINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
         return false;
@@ -223,84 +221,63 @@ void mu::ui::window::CCursedTempleResult::SetResult(const UI::CursedTemple::Matc
     }
 }
 
-void mu::ui::window::CCursedTempleResult::BuildRmlUi()
+void mu::ui::window::CCursedTempleResult::BindRmlModel(Rml::DataModelConstructor& c, CursedTempleResultRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
-
-    const bool modelCreated = m_RmlBinder.Create(
-        RmlUiRuntime::Instance().GetContext(), "cursed_temple_result",
-        [this](Rml::DataModelConstructor& c, CursedTempleResultRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-            c.Bind("line_height_px", &model.lineHeightPx);
-            auto lineType = c.RegisterStruct<CursedTempleResultLine>();
-            lineType.RegisterMember("text", &CursedTempleResultLine::text);
-            lineType.RegisterMember("text_px", &CursedTempleResultLine::textPx);
-            c.Bind("hero_list_label", &model.heroListLabel);
-            c.Bind("column_header", &model.columnHeader);
-            c.Bind("reward_hint", &model.rewardHint);
-            auto resultRow = c.RegisterStruct<CursedTempleResultRow>();
-            resultRow.RegisterMember("team", &CursedTempleResultRow::team);
-            resultRow.RegisterMember("name", &CursedTempleResultRow::name);
-            resultRow.RegisterMember("class_name", &CursedTempleResultRow::className);
-            resultRow.RegisterMember("added_exp", &CursedTempleResultRow::addedExp);
-            resultRow.RegisterMember("point", &CursedTempleResultRow::point);
-            resultRow.RegisterMember("hero", &CursedTempleResultRow::hero);
-            c.RegisterArray<std::vector<CursedTempleResultRow>>();
-            c.Bind("allied_rows", &model.alliedRows);
-            c.Bind("illusion_rows", &model.illusionRows);
-            c.Bind("close_text", &model.closeText);
-            c.Bind("label_line_px", &model.labelLinePx);
-            c.Bind("banner", &model.banner);
-            c.Bind("banner_left", &model.bannerLeft);
-            c.Bind("banner_alpha", &model.bannerAlpha);
-            c.BindEventCallback("result_close", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                { m_PendingClose = true; });
-        });
-
-    if (!modelCreated)
-        return;
-
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                  "Data/Interface/RmlUi/cursed_temple_result.rml");
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("line_height_px", &model.lineHeightPx);
+    auto lineType = c.RegisterStruct<CursedTempleResultLine>();
+    lineType.RegisterMember("text", &CursedTempleResultLine::text);
+    lineType.RegisterMember("text_px", &CursedTempleResultLine::textPx);
+    c.Bind("hero_list_label", &model.heroListLabel);
+    c.Bind("column_header", &model.columnHeader);
+    c.Bind("reward_hint", &model.rewardHint);
+    auto resultRow = c.RegisterStruct<CursedTempleResultRow>();
+    resultRow.RegisterMember("team", &CursedTempleResultRow::team);
+    resultRow.RegisterMember("name", &CursedTempleResultRow::name);
+    resultRow.RegisterMember("class_name", &CursedTempleResultRow::className);
+    resultRow.RegisterMember("added_exp", &CursedTempleResultRow::addedExp);
+    resultRow.RegisterMember("point", &CursedTempleResultRow::point);
+    resultRow.RegisterMember("hero", &CursedTempleResultRow::hero);
+    c.RegisterArray<std::vector<CursedTempleResultRow>>();
+    c.Bind("allied_rows", &model.alliedRows);
+    c.Bind("illusion_rows", &model.illusionRows);
+    c.Bind("close_text", &model.closeText);
+    c.Bind("label_line_px", &model.labelLinePx);
+    c.Bind("banner", &model.banner);
+    c.Bind("banner_left", &model.bannerLeft);
+    c.Bind("banner_alpha", &model.bannerAlpha);
+    c.BindEventCallback("result_close", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_PendingClose = true; });
 }
 
-void mu::ui::window::CCursedTempleResult::ReloadRmlTheme()
+void mu::ui::window::CCursedTempleResult::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CCursedTempleResult::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // Layer depth 10.2: over the HUD and the panels.
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncTexts();
 }
 
 void mu::ui::window::CCursedTempleResult::SyncTexts()
 {
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    CursedTempleResultRmlModel updated = m_RmlBinder.GetModel();
+    CursedTempleResultRmlModel updated = m_RmlView.GetModel();
     const float textPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     updated.lineHeightPx = static_cast<float>(lineHeight) * transform.scaleY;
@@ -315,7 +292,7 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
     updated.banner = m_WinState;
     float panelWidth = CURSEDTEMPLE_RESULT_WINDOW_WIDTH;
     float panelHeight = CURSEDTEMPLE_RESULT_WINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     updated.bannerLeft = (panelWidth - 360.f) / 2.f;
     const float fade = std::clamp(m_ResultEffectAlph, 0.f, 1.f);
     updated.bannerAlpha = fade > kAlphaTestReference ? fade : 0.f;
@@ -358,16 +335,16 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
     addRows(m_IllusionTeamGameResult, updated.illusionRows);
     updated.rewardHint = line(I18N::Game::YouMayBeCompensatedByClickingOnTheCloseButton);
 
-    CursedTempleResultRmlModel& model = m_RmlBinder.GetModel();
-    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::lineHeightPx, "line_height_px", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::labelLinePx, "label_line_px", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::closeText, "close_text", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::banner, "banner", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::bannerLeft, "banner_left", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::bannerAlpha, "banner_alpha", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::heroListLabel, "hero_list_label", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::columnHeader, "column_header", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::rewardHint, "reward_hint", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::alliedRows, "allied_rows", updated);
-    SyncFieldFrom(m_RmlBinder, &CursedTempleResultRmlModel::illusionRows, "illusion_rows", updated);
+    CursedTempleResultRmlModel& model = m_RmlView.GetModel();
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::lineHeightPx, "line_height_px", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::labelLinePx, "label_line_px", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::closeText, "close_text", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::banner, "banner", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::bannerLeft, "banner_left", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::bannerAlpha, "banner_alpha", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::heroListLabel, "hero_list_label", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::columnHeader, "column_header", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::rewardHint, "reward_hint", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::alliedRows, "allied_rows", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::illusionRows, "illusion_rows", updated);
 }

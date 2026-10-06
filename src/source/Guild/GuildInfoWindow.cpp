@@ -130,7 +130,6 @@ bool mu::ui::window::CGuildInfoWindow::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -151,13 +150,14 @@ void mu::ui::window::CGuildInfoWindow::ClosingProcess()
 
 void mu::ui::window::CGuildInfoWindow::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 void mu::ui::window::CGuildInfoWindow::SetPos(int x, int y)
@@ -189,7 +189,7 @@ bool mu::ui::window::CGuildInfoWindow::UpdateMouseEvent()
 
     float panelWidth = static_cast<float>(GUILDINFO_WIDTH);
     float panelHeight = static_cast<float>(GUILDINFO_HEIGHT);
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
                                        static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
     {
@@ -441,135 +441,119 @@ bool mu::ui::window::CGuildInfoWindow::Render()
     return true;
 }
 
-void mu::ui::window::CGuildInfoWindow::BuildRmlUi()
+void mu::ui::window::CGuildInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, GuildInfoRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("panel_width", &model.panelWidth);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("no_guild", &model.noGuild);
+    c.Bind("tab", &model.tab);
+    c.Bind("union_shown", &model.unionShown);
+    c.RegisterArray<std::vector<Rml::String>>();
+    c.Bind("mark_cells", &model.markCells);
 
-    const bool modelCreated = m_RmlBinder.Create(
-        RmlUiRuntime::Instance().GetContext(), "guild_info",
-        [this](Rml::DataModelConstructor& c, GuildInfoRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("panel_width", &model.panelWidth);
-            c.Bind("text_px", &model.textPx);
-            c.Bind("no_guild", &model.noGuild);
-            c.Bind("tab", &model.tab);
-            c.Bind("union_shown", &model.unionShown);
-            c.RegisterArray<std::vector<Rml::String>>();
-            c.Bind("mark_cells", &model.markCells);
-
-            auto lineType = c.RegisterStruct<GuildLine>();
-            lineType.RegisterMember("text", &GuildLine::text);
-            lineType.RegisterMember("text_px", &GuildLine::textPx);
-            c.Bind("hint_title", &model.hintTitle);
-            c.Bind("hint_line1", &model.hintLine1);
-            c.Bind("hint_line2", &model.hintLine2);
-            c.Bind("hint_line3", &model.hintLine3);
-            c.Bind("title", &model.title);
-            c.Bind("guild_name", &model.guildName);
-            c.Bind("tab_info", &model.tabInfo);
-            c.Bind("tab_members", &model.tabMembers);
-            c.Bind("tab_union", &model.tabUnion);
-            c.Bind("notice_label", &model.noticeLabel);
-            c.Bind("created", &model.created);
-            c.Bind("score", &model.score);
-            c.Bind("member_count", &model.memberCount);
-            c.Bind("rival", &model.rival);
-            c.Bind("header_name", &model.headerName);
-            c.Bind("header_position", &model.headerPosition);
-            c.Bind("header_server", &model.headerServer);
-            c.Bind("header_union_name", &model.headerUnionName);
-            c.Bind("header_union_members", &model.headerUnionMembers);
-            c.RegisterArray<std::vector<GuildLine>>();
-            c.Bind("alliance_lines", &model.allianceLines);
-            auto noticeRow = c.RegisterStruct<GuildNoticeRow>();
-            noticeRow.RegisterMember("text", &GuildNoticeRow::text);
-            c.RegisterArray<std::vector<GuildNoticeRow>>();
-            c.Bind("notice_rows", &model.noticeRows);
-            auto memberRow = c.RegisterStruct<GuildMemberRow>();
-            memberRow.RegisterMember("name", &GuildMemberRow::name);
-            memberRow.RegisterMember("role", &GuildMemberRow::role);
-            memberRow.RegisterMember("role_text_px", &GuildMemberRow::roleTextPx);
-            memberRow.RegisterMember("server", &GuildMemberRow::server);
-            memberRow.RegisterMember("selected", &GuildMemberRow::selected);
-            memberRow.RegisterMember("officer", &GuildMemberRow::officer);
-            c.RegisterArray<std::vector<GuildMemberRow>>();
-            c.Bind("member_rows", &model.memberRows);
-            auto unionRow = c.RegisterStruct<GuildUnionRow>();
-            unionRow.RegisterMember("name", &GuildUnionRow::name);
-            unionRow.RegisterMember("member_count", &GuildUnionRow::memberCount);
-            unionRow.RegisterMember("count_text_px", &GuildUnionRow::countTextPx);
-            unionRow.RegisterMember("mark_cells", &GuildUnionRow::markCells);
-            unionRow.RegisterMember("selected", &GuildUnionRow::selected);
-            c.RegisterArray<std::vector<GuildUnionRow>>();
-            c.Bind("union_rows", &model.unionRows);
-            auto actionButton = c.RegisterStruct<GuildActionButton>();
-            actionButton.RegisterMember("label", &GuildActionButton::label);
-            actionButton.RegisterMember("shown", &GuildActionButton::shown);
-            c.Bind("guild_out_button", &model.guildOutButton);
-            c.Bind("get_position_button", &model.getPositionButton);
-            c.Bind("free_position_button", &model.freePositionButton);
-            c.Bind("get_out_button", &model.getOutButton);
-            c.Bind("union_create_button", &model.unionCreateButton);
-            c.Bind("union_out_button", &model.unionOutButton);
-            c.Bind("exit_tooltip", &model.exitTooltip);
-            c.Bind("label_line_px", &model.labelLinePx);
-            c.BindEventCallback("guild_info_button",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                                {
-                                    if (arguments.size() == 1)
-                                        m_PendingButton = arguments[0].Get<int>(-1);
-                                });
-            c.BindEventCallback("guild_info_select_union",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                                {
-                                    if (arguments.size() == 1)
-                                        SelectUnion(arguments[0].Get<int>(-1));
-                                });
-            c.BindEventCallback("guild_info_select_member",
-                                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                                {
-                                    if (arguments.size() == 1)
-                                        SelectMember(arguments[0].Get<int>(-1));
-                                });
-        });
-    if (!modelCreated)
-        return;
-
-    m_pRmlDoc =
-        UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/guild_info.rml");
+    auto lineType = c.RegisterStruct<GuildLine>();
+    lineType.RegisterMember("text", &GuildLine::text);
+    lineType.RegisterMember("text_px", &GuildLine::textPx);
+    c.Bind("hint_title", &model.hintTitle);
+    c.Bind("hint_line1", &model.hintLine1);
+    c.Bind("hint_line2", &model.hintLine2);
+    c.Bind("hint_line3", &model.hintLine3);
+    c.Bind("title", &model.title);
+    c.Bind("guild_name", &model.guildName);
+    c.Bind("tab_info", &model.tabInfo);
+    c.Bind("tab_members", &model.tabMembers);
+    c.Bind("tab_union", &model.tabUnion);
+    c.Bind("notice_label", &model.noticeLabel);
+    c.Bind("created", &model.created);
+    c.Bind("score", &model.score);
+    c.Bind("member_count", &model.memberCount);
+    c.Bind("rival", &model.rival);
+    c.Bind("header_name", &model.headerName);
+    c.Bind("header_position", &model.headerPosition);
+    c.Bind("header_server", &model.headerServer);
+    c.Bind("header_union_name", &model.headerUnionName);
+    c.Bind("header_union_members", &model.headerUnionMembers);
+    c.RegisterArray<std::vector<GuildLine>>();
+    c.Bind("alliance_lines", &model.allianceLines);
+    auto noticeRow = c.RegisterStruct<GuildNoticeRow>();
+    noticeRow.RegisterMember("text", &GuildNoticeRow::text);
+    c.RegisterArray<std::vector<GuildNoticeRow>>();
+    c.Bind("notice_rows", &model.noticeRows);
+    auto memberRow = c.RegisterStruct<GuildMemberRow>();
+    memberRow.RegisterMember("name", &GuildMemberRow::name);
+    memberRow.RegisterMember("role", &GuildMemberRow::role);
+    memberRow.RegisterMember("role_text_px", &GuildMemberRow::roleTextPx);
+    memberRow.RegisterMember("server", &GuildMemberRow::server);
+    memberRow.RegisterMember("selected", &GuildMemberRow::selected);
+    memberRow.RegisterMember("officer", &GuildMemberRow::officer);
+    c.RegisterArray<std::vector<GuildMemberRow>>();
+    c.Bind("member_rows", &model.memberRows);
+    auto unionRow = c.RegisterStruct<GuildUnionRow>();
+    unionRow.RegisterMember("name", &GuildUnionRow::name);
+    unionRow.RegisterMember("member_count", &GuildUnionRow::memberCount);
+    unionRow.RegisterMember("count_text_px", &GuildUnionRow::countTextPx);
+    unionRow.RegisterMember("mark_cells", &GuildUnionRow::markCells);
+    unionRow.RegisterMember("selected", &GuildUnionRow::selected);
+    c.RegisterArray<std::vector<GuildUnionRow>>();
+    c.Bind("union_rows", &model.unionRows);
+    auto actionButton = c.RegisterStruct<GuildActionButton>();
+    actionButton.RegisterMember("label", &GuildActionButton::label);
+    actionButton.RegisterMember("shown", &GuildActionButton::shown);
+    c.Bind("guild_out_button", &model.guildOutButton);
+    c.Bind("get_position_button", &model.getPositionButton);
+    c.Bind("free_position_button", &model.freePositionButton);
+    c.Bind("get_out_button", &model.getOutButton);
+    c.Bind("union_create_button", &model.unionCreateButton);
+    c.Bind("union_out_button", &model.unionOutButton);
+    c.Bind("exit_tooltip", &model.exitTooltip);
+    c.Bind("label_line_px", &model.labelLinePx);
+    c.BindEventCallback("guild_info_button",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                m_PendingButton = arguments[0].Get<int>(-1);
+                        });
+    c.BindEventCallback("guild_info_select_union",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                SelectUnion(arguments[0].Get<int>(-1));
+                        });
+    c.BindEventCallback("guild_info_select_member",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() == 1)
+                                SelectMember(arguments[0].Get<int>(-1));
+                        });
 }
 
-void mu::ui::window::CGuildInfoWindow::ReloadRmlTheme()
+void mu::ui::window::CGuildInfoWindow::OnRmlReloaded()
 {
     m_ListsDirty = true;
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
+}
 
-    BuildRmlUi();
+void mu::ui::window::CGuildInfoWindow::BuildRmlUi()
+{
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CGuildInfoWindow::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // Layer depth 4.5: over the HUD like every panel the original opened.
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncContent();
 }
 
@@ -708,57 +692,57 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
         }
     }
 
-    GuildInfoRmlModel& model = m_RmlBinder.GetModel();
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::noGuild, "no_guild", noGuild);
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::tab, "tab", m_nCurrentTab);
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::unionShown, "union_shown", unionShown);
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::markCells, "mark_cells", std::move(markCells));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::hintTitle, "hint_title", std::move(hintTitle));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::hintLine1, "hint_line1", std::move(hintLine1));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::hintLine2, "hint_line2", std::move(hintLine2));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::hintLine3, "hint_line3", std::move(hintLine3));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::title, "title", std::move(title));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::guildName, "guild_name", std::move(guildName));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::tabInfo, "tab_info", std::move(tabInfo));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::tabMembers, "tab_members", std::move(tabMembers));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::tabUnion, "tab_union", std::move(tabUnion));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::noticeLabel, "notice_label", std::move(noticeLabel));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::created, "created", std::move(created));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::score, "score", std::move(score));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::memberCount, "member_count", std::move(memberCount));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::rival, "rival", std::move(rival));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::headerName, "header_name", std::move(headerName));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::headerPosition, "header_position", std::move(headerPosition));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::headerServer, "header_server", std::move(headerServer));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::headerUnionName, "header_union_name", std::move(headerUnionName));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::headerUnionMembers, "header_union_members",
+    GuildInfoRmlModel& model = m_RmlView.GetModel();
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::noGuild, "no_guild", noGuild);
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::tab, "tab", m_nCurrentTab);
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::unionShown, "union_shown", unionShown);
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::markCells, "mark_cells", std::move(markCells));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::hintTitle, "hint_title", std::move(hintTitle));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::hintLine1, "hint_line1", std::move(hintLine1));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::hintLine2, "hint_line2", std::move(hintLine2));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::hintLine3, "hint_line3", std::move(hintLine3));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::title, "title", std::move(title));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::guildName, "guild_name", std::move(guildName));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::tabInfo, "tab_info", std::move(tabInfo));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::tabMembers, "tab_members", std::move(tabMembers));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::tabUnion, "tab_union", std::move(tabUnion));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::noticeLabel, "notice_label", std::move(noticeLabel));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::created, "created", std::move(created));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::score, "score", std::move(score));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::memberCount, "member_count", std::move(memberCount));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::rival, "rival", std::move(rival));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::headerName, "header_name", std::move(headerName));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::headerPosition, "header_position", std::move(headerPosition));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::headerServer, "header_server", std::move(headerServer));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::headerUnionName, "header_union_name", std::move(headerUnionName));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::headerUnionMembers, "header_union_members",
               std::move(headerUnionMembers));
     SyncListContent();
     if (model.allianceLines != allianceLines)
     {
         model.allianceLines = std::move(allianceLines);
-        m_RmlBinder.MarkDirty("alliance_lines");
+        m_RmlView.MarkDirty("alliance_lines");
     }
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::guildOutButton, "guild_out_button", std::move(guildOutButton));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::getPositionButton, "get_position_button",
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::guildOutButton, "guild_out_button", std::move(guildOutButton));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::getPositionButton, "get_position_button",
               std::move(getPositionButton));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::freePositionButton, "free_position_button",
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::freePositionButton, "free_position_button",
               std::move(freePositionButton));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::getOutButton, "get_out_button", std::move(getOutButton));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::unionCreateButton, "union_create_button",
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::getOutButton, "get_out_button", std::move(getOutButton));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::unionCreateButton, "union_create_button",
               std::move(unionCreateButton));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::unionOutButton, "union_out_button", std::move(unionOutButton));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::exitTooltip, "exit_tooltip",
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::unionOutButton, "union_out_button", std::move(unionOutButton));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::exitTooltip, "exit_tooltip",
               StringUtils::WideToNarrow(I18N::Game::Close388));
 
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::labelLinePx, "label_line_px",
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::labelLinePx, "label_line_px",
               static_cast<float>(lineHeight) * transform.scaleY);
 }
 
 void mu::ui::window::CGuildInfoWindow::SyncListContent()
 {
-    const auto& model = m_RmlBinder.GetModel();
+    const auto& model = m_RmlView.GetModel();
     if (model.rootScale != m_ListScale || model.textPx != m_ListTextPx)
         m_ListsDirty = true;
     if (!m_ListsDirty)
@@ -771,9 +755,9 @@ void mu::ui::window::CGuildInfoWindow::SyncListContent()
     noticeRows.reserve(m_NoticeLines.size());
     for (const auto& text : m_NoticeLines)
         noticeRows.push_back({StringUtils::WideToNarrow(text.c_str())});
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::noticeRows, "notice_rows", std::move(noticeRows));
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::memberRows, "member_rows", BuildMemberRows());
-    SyncField(m_RmlBinder, &GuildInfoRmlModel::unionRows, "union_rows", BuildUnionRows());
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::noticeRows, "notice_rows", std::move(noticeRows));
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::memberRows, "member_rows", BuildMemberRows());
+    SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::unionRows, "union_rows", BuildUnionRows());
 }
 
 std::vector<mu::ui::window::GuildMemberRow> mu::ui::window::CGuildInfoWindow::BuildMemberRows() const
@@ -901,13 +885,13 @@ const mu::ui::window::CGuildInfoWindow::MemberEntry* mu::ui::window::CGuildInfoW
 void mu::ui::window::CGuildInfoWindow::SelectMember(int displayIndex)
 {
     m_ListsDirty = true;
-    const auto& rows = m_RmlBinder.GetModel().memberRows;
+    const auto& rows = m_RmlView.GetModel().memberRows;
     if (displayIndex < 0 || displayIndex >= static_cast<int>(rows.size()))
         return;
     m_SelectedMember = StringUtils::NarrowToWide(rows[displayIndex].name);
     if (SelectedMember() == nullptr)
         m_SelectedMember.clear();
-    m_RmlBinder.MarkDirty("member_rows");
+    m_RmlView.MarkDirty("member_rows");
 }
 
 void mu::ui::window::CGuildInfoWindow::UnionGuildClear()
@@ -932,13 +916,13 @@ const mu::ui::window::CGuildInfoWindow::UnionEntry* mu::ui::window::CGuildInfoWi
 void mu::ui::window::CGuildInfoWindow::SelectUnion(int displayIndex)
 {
     m_ListsDirty = true;
-    const auto& rows = m_RmlBinder.GetModel().unionRows;
+    const auto& rows = m_RmlView.GetModel().unionRows;
     if (displayIndex < 0 || displayIndex >= static_cast<int>(rows.size()))
         return;
     m_SelectedUnion = StringUtils::NarrowToWide(rows[displayIndex].name);
     if (SelectedUnion() == nullptr)
         m_SelectedUnion.clear();
-    m_RmlBinder.MarkDirty("union_rows");
+    m_RmlView.MarkDirty("union_rows");
 }
 
 void mu::ui::window::CGuildInfoWindow::NoticeClear()

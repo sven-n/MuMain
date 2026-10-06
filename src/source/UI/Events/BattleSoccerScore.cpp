@@ -92,7 +92,6 @@ bool mu::ui::window::CBattleSoccerScore::Create(CManager* pNewUIMng, int x, int 
     SetPos(x, y);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -101,13 +100,14 @@ bool mu::ui::window::CBattleSoccerScore::Create(CManager* pNewUIMng, int x, int 
 
 void mu::ui::window::CBattleSoccerScore::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 void mu::ui::window::CBattleSoccerScore::SetPos(int x, int y)
@@ -139,69 +139,52 @@ bool mu::ui::window::CBattleSoccerScore::Render()
     return true;
 }
 
-void mu::ui::window::CBattleSoccerScore::BuildRmlUi()
+void mu::ui::window::CBattleSoccerScore::BindRmlModel(Rml::DataModelConstructor& c, BattleSoccerScoreRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    c.Bind("scale_x", &model.scaleX);
+    c.Bind("scale_y", &model.scaleY);
+    c.Bind("inverse_scale_x", &model.inverseScaleX);
+    c.Bind("inverse_scale_y", &model.inverseScaleY);
+    c.Bind("bold_text_px", &model.boldTextPx);
+    c.Bind("panel_x", &model.panelX);
+    c.Bind("panel_y", &model.panelY);
 
-    const bool modelCreated = m_RmlBinder.Create(BoardContext(), "battle_soccer_score",
-                                                 [](Rml::DataModelConstructor& c, BattleSoccerScoreRmlModel& model)
-                                                 {
-                                                     c.Bind("scale_x", &model.scaleX);
-                                                     c.Bind("scale_y", &model.scaleY);
-                                                     c.Bind("inverse_scale_x", &model.inverseScaleX);
-                                                     c.Bind("inverse_scale_y", &model.inverseScaleY);
-                                                     c.Bind("bold_text_px", &model.boldTextPx);
-                                                     c.Bind("panel_x", &model.panelX);
-                                                     c.Bind("panel_y", &model.panelY);
-
-                                                     c.RegisterArray<std::vector<Rml::String>>();
-                                                     auto team = c.RegisterStruct<BattleSoccerTeamEntry>();
-                                                     team.RegisterMember("red", &BattleSoccerTeamEntry::red);
-                                                     team.RegisterMember("score", &BattleSoccerTeamEntry::score);
-                                                     team.RegisterMember("name", &BattleSoccerTeamEntry::name);
-                                                     team.RegisterMember("mark", &BattleSoccerTeamEntry::mark);
-                                                     c.RegisterArray<std::vector<BattleSoccerTeamEntry>>();
-                                                     c.Bind("teams", &model.teams);
-                                                 });
-
-    if (modelCreated)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(BoardContext(), "Data/Interface/RmlUi/battle_soccer_score.rml");
+    c.RegisterArray<std::vector<Rml::String>>();
+    auto team = c.RegisterStruct<BattleSoccerTeamEntry>();
+    team.RegisterMember("red", &BattleSoccerTeamEntry::red);
+    team.RegisterMember("score", &BattleSoccerTeamEntry::score);
+    team.RegisterMember("name", &BattleSoccerTeamEntry::name);
+    team.RegisterMember("mark", &BattleSoccerTeamEntry::mark);
+    c.RegisterArray<std::vector<BattleSoccerTeamEntry>>();
+    c.Bind("teams", &model.teams);
 }
 
-void mu::ui::window::CBattleSoccerScore::ReloadRmlTheme()
+void mu::ui::window::CBattleSoccerScore::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = BoardContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CBattleSoccerScore::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // Layer depth 1.8: behind every other document of the background context (see BoardContext()).
-    UI::RmlBridge::SyncDocumentVisibilityBehind(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityBehind(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
     // CManager scopes LayoutMode::HudFrame around this window: the bottom HUD's uniform scale, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    Sync(m_RmlBinder, &BattleSoccerScoreRmlModel::scaleX, "scale_x", transform.scaleX);
-    Sync(m_RmlBinder, &BattleSoccerScoreRmlModel::scaleY, "scale_y", transform.scaleY);
-    Sync(m_RmlBinder, &BattleSoccerScoreRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    Sync(m_RmlBinder, &BattleSoccerScoreRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
-    Sync(m_RmlBinder, &BattleSoccerScoreRmlModel::boldTextPx, "bold_text_px",
+    Sync(m_RmlView.Binder(), &BattleSoccerScoreRmlModel::scaleX, "scale_x", transform.scaleX);
+    Sync(m_RmlView.Binder(), &BattleSoccerScoreRmlModel::scaleY, "scale_y", transform.scaleY);
+    Sync(m_RmlView.Binder(), &BattleSoccerScoreRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
+    Sync(m_RmlView.Binder(), &BattleSoccerScoreRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
+    Sync(m_RmlView.Binder(), &BattleSoccerScoreRmlModel::boldTextPx, "bold_text_px",
          UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
-    Sync(m_RmlBinder, &BattleSoccerScoreRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
-    Sync(m_RmlBinder, &BattleSoccerScoreRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
+    Sync(m_RmlView.Binder(), &BattleSoccerScoreRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
+    Sync(m_RmlView.Binder(), &BattleSoccerScoreRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
     SyncTeams();
 }
 
@@ -227,11 +210,11 @@ void mu::ui::window::CBattleSoccerScore::SyncTeams()
                          MarkCells(FindGuildMark(SoccerTeamName[1]))});
     }
 
-    BattleSoccerScoreRmlModel& model = m_RmlBinder.GetModel();
+    BattleSoccerScoreRmlModel& model = m_RmlView.GetModel();
     if (SameTeams(model.teams, teams))
         return;
     model.teams = std::move(teams);
-    m_RmlBinder.MarkDirty("teams");
+    m_RmlView.MarkDirty("teams");
 }
 
 int mu::ui::window::CBattleSoccerScore::FindGuildMark(wchar_t* pszGuildName)

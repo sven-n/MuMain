@@ -10,7 +10,7 @@
 #include "UI/Events/CursedTempleUpdates.h"
 #include "UI/HUD/MainFrameWindow.h"
 #include "UI/Events/CursedTempleSystemRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -98,7 +98,6 @@ private:
 public:
     bool Render();
 
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();
@@ -170,8 +169,12 @@ private:
     WORD m_TutorialStepState;
     DWORD m_TutorialStepTime;
 
-    RmlModelBinder<CursedTempleSystemRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, CursedTempleSystemRmlModel& model);
+    // The original drew the HUD at layer depth 1.5, under nearly every panel: the document sits in the
+    // background context, behind its other documents.
+    UI::RmlBridge::ThemedView<CursedTempleSystemRmlModel> m_RmlView{"cursed_temple_system",
+        [this](Rml::DataModelConstructor& c, CursedTempleSystemRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/cursed_temple_system.rml", UI::RmlBridge::BackgroundOrMainContext}}};
 };
 
     inline

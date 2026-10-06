@@ -266,7 +266,6 @@ bool mu::ui::window::CCursedTempleSystem::Create(CManager* pNewUIMng, int x, int
     SetButtonInfo();
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -292,7 +291,6 @@ void mu::ui::window::CCursedTempleSystem::Initialize()
 
 void mu::ui::window::CCursedTempleSystem::Destroy()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
     UnloadImages();
 
     if (m_pNewUIMng)
@@ -767,14 +765,6 @@ namespace
 
 namespace
 {
-// The original drew the HUD at layer depth 1.5, under nearly every panel: the document sits in the
-// background context, behind its other documents.
-Rml::Context* CursedTempleContext()
-{
-    Rml::Context* context = RmlUiRuntime::Instance().GetBackgroundContext();
-    return context != nullptr ? context : RmlUiRuntime::Instance().GetContext();
-}
-
 // A file of Data/Interface, relative to cursed_temple_system.rml.
 Rml::String InterfaceImage(const std::string& file)
 {
@@ -846,61 +836,44 @@ void AddButton(std::vector<CursedTempleSpriteEntry>& sprites, CButton& button, c
 }
 } // namespace
 
-void mu::ui::window::CCursedTempleSystem::BuildRmlUi()
+void mu::ui::window::CCursedTempleSystem::BindRmlModel(Rml::DataModelConstructor& c, CursedTempleSystemRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    auto sprite = c.RegisterStruct<CursedTempleSpriteEntry>();
+    sprite.RegisterMember("left", &CursedTempleSpriteEntry::left);
+    sprite.RegisterMember("top", &CursedTempleSpriteEntry::top);
+    sprite.RegisterMember("width", &CursedTempleSpriteEntry::width);
+    sprite.RegisterMember("height", &CursedTempleSpriteEntry::height);
+    sprite.RegisterMember("src", &CursedTempleSpriteEntry::src);
+    sprite.RegisterMember("rect", &CursedTempleSpriteEntry::rect);
+    sprite.RegisterMember("opacity", &CursedTempleSpriteEntry::opacity);
+    c.RegisterArray<std::vector<CursedTempleSpriteEntry>>();
+    auto line = c.RegisterStruct<CursedTempleTextEntry>();
+    line.RegisterMember("text", &CursedTempleTextEntry::text);
+    line.RegisterMember("text_px", &CursedTempleTextEntry::textPx);
+    line.RegisterMember("title", &CursedTempleTextEntry::title);
+    c.RegisterArray<std::vector<CursedTempleTextEntry>>();
 
-    const bool modelCreated = m_RmlBinder.Create(CursedTempleContext(), "cursed_temple_system",
-                                                 [](Rml::DataModelConstructor& c, CursedTempleSystemRmlModel& model)
-                                                 {
-                                                     auto sprite = c.RegisterStruct<CursedTempleSpriteEntry>();
-                                                     sprite.RegisterMember("left", &CursedTempleSpriteEntry::left);
-                                                     sprite.RegisterMember("top", &CursedTempleSpriteEntry::top);
-                                                     sprite.RegisterMember("width", &CursedTempleSpriteEntry::width);
-                                                     sprite.RegisterMember("height", &CursedTempleSpriteEntry::height);
-                                                     sprite.RegisterMember("src", &CursedTempleSpriteEntry::src);
-                                                     sprite.RegisterMember("rect", &CursedTempleSpriteEntry::rect);
-                                                     sprite.RegisterMember("opacity", &CursedTempleSpriteEntry::opacity);
-                                                     c.RegisterArray<std::vector<CursedTempleSpriteEntry>>();
-                                                     auto line = c.RegisterStruct<CursedTempleTextEntry>();
-                                                     line.RegisterMember("text", &CursedTempleTextEntry::text);
-                                                     line.RegisterMember("text_px", &CursedTempleTextEntry::textPx);
-                                                     line.RegisterMember("title", &CursedTempleTextEntry::title);
-                                                     c.RegisterArray<std::vector<CursedTempleTextEntry>>();
-
-                                                     c.Bind("scale_x", &model.scaleX);
-                                                     c.Bind("scale_y", &model.scaleY);
-                                                     c.Bind("inverse_scale_x", &model.inverseScaleX);
-                                                     c.Bind("inverse_scale_y", &model.inverseScaleY);
-                                                     c.Bind("panels_shown", &model.panelsShown);
-                                                     c.Bind("score_shown", &model.scoreShown);
-                                                     c.Bind("skill_icon_src", &model.skillIconSrc);
-                                                     c.Bind("skill_icon_rect", &model.skillIconRect);
-                                                     c.Bind("allied_tens_src", &model.alliedTensSrc);
-                                                     c.Bind("allied_ones_src", &model.alliedOnesSrc);
-                                                     c.Bind("illusion_tens_src", &model.illusionTensSrc);
-                                                     c.Bind("illusion_ones_src", &model.illusionOnesSrc);
-                                                     c.Bind("allied_two_digits", &model.alliedTwoDigits);
-                                                     c.Bind("illusion_two_digits", &model.illusionTwoDigits);
-                                                     c.Bind("sprites", &model.sprites);
-                                                     c.Bind("tutorial_lines", &model.tutorialLines);
-                                                 });
-    if (modelCreated)
-        m_pRmlDoc =
-            UI::RmlBridge::LoadThemedDocument(CursedTempleContext(), "Data/Interface/RmlUi/cursed_temple_system.rml");
+    c.Bind("scale_x", &model.scaleX);
+    c.Bind("scale_y", &model.scaleY);
+    c.Bind("inverse_scale_x", &model.inverseScaleX);
+    c.Bind("inverse_scale_y", &model.inverseScaleY);
+    c.Bind("panels_shown", &model.panelsShown);
+    c.Bind("score_shown", &model.scoreShown);
+    c.Bind("skill_icon_src", &model.skillIconSrc);
+    c.Bind("skill_icon_rect", &model.skillIconRect);
+    c.Bind("allied_tens_src", &model.alliedTensSrc);
+    c.Bind("allied_ones_src", &model.alliedOnesSrc);
+    c.Bind("illusion_tens_src", &model.illusionTensSrc);
+    c.Bind("illusion_ones_src", &model.illusionOnesSrc);
+    c.Bind("allied_two_digits", &model.alliedTwoDigits);
+    c.Bind("illusion_two_digits", &model.illusionTwoDigits);
+    c.Bind("sprites", &model.sprites);
+    c.Bind("tutorial_lines", &model.tutorialLines);
 }
 
-void mu::ui::window::CCursedTempleSystem::ReloadRmlTheme()
+void mu::ui::window::CCursedTempleSystem::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = CursedTempleContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 // The original RenderSkill(): the current skill's icon (grey until enough kill points), the kill
@@ -914,9 +887,9 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
     float y = 258.f - 58.f;
     // The icon's own place is the theme's; which sheet and cell it shows is the current skill and
     // whether the hero has the kill points for it.
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::skillIconSrc, "skill_icon_src",
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::skillIconSrc, "skill_icon_src",
               InterfaceImage(m_SkillPoint >= MaxKillCount ? "newui_skill2.jpg" : "newui_non_skill2.jpg"));
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::skillIconRect, "skill_icon_rect",
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::skillIconRect, "skill_icon_rect",
               TexelRect(static_cast<float>((8 + (CursedTempleCurSkillType - 210)) * 20), 0.f, 20.f, 28.f));
     AddNumber<100>(sprites, {x + 55.f, y + 8.f}, MaxKillCount);
     AddNumber<100>(sprites, {x + 77.f, y + 8.f}, m_SkillPoint);
@@ -1085,15 +1058,15 @@ void mu::ui::window::CCursedTempleSystem::SyncScore()
 
     const bool alliedTwo = m_AlliedPoint / 10 != 0;
     const bool illusionTwo = m_IllusionPoint / 10 != 0;
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::alliedTwoDigits, "allied_two_digits", alliedTwo);
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::illusionTwoDigits, "illusion_two_digits", illusionTwo);
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::alliedTensSrc, "allied_tens_src",
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::alliedTwoDigits, "allied_two_digits", alliedTwo);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::illusionTwoDigits, "illusion_two_digits", illusionTwo);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::alliedTensSrc, "allied_tens_src",
               digit("allied", m_AlliedPoint / 10 % 10));
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::alliedOnesSrc, "allied_ones_src",
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::alliedOnesSrc, "allied_ones_src",
               digit("allied", m_AlliedPoint % 10));
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::illusionTensSrc, "illusion_tens_src",
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::illusionTensSrc, "illusion_tens_src",
               digit("illusion", m_IllusionPoint / 10 % 10));
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::illusionOnesSrc, "illusion_ones_src",
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::illusionOnesSrc, "illusion_ones_src",
               digit("illusion", m_IllusionPoint % 10));
 }
 
@@ -1145,7 +1118,7 @@ void mu::ui::window::CCursedTempleSystem::SyncTutorialStep(std::vector<CursedTem
 void mu::ui::window::CCursedTempleSystem::SyncView()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // The original's check for a map change out of the event without the event's own hide.
@@ -1153,7 +1126,7 @@ void mu::ui::window::CCursedTempleSystem::SyncView()
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
 
     const bool visible = IsVisible();
-    UI::RmlBridge::SyncDocumentVisibilityBehind(m_pRmlDoc, visible);
+    UI::RmlBridge::SyncDocumentVisibilityBehind(m_RmlView.Document(), visible);
     if (!visible)
         return;
 
@@ -1162,14 +1135,14 @@ void mu::ui::window::CCursedTempleSystem::SyncView()
     const bool panelsShown = !g_pCharacterInfoWindow->IsVisible() || !g_pMyInventory->IsVisible() ||
                              !g_pGuildInfoWindow->IsVisible() || !g_pWindowMgr->IsVisible() ||
                              !g_pPartyInfoWindow->IsVisible() || !g_pMyQuestInfoWindow->IsVisible();
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::panelsShown, "panels_shown", panelsShown);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::panelsShown, "panels_shown", panelsShown);
     if (panelsShown)
     {
         SyncGameTime(sprites);
         SyncMiniMap(sprites);
         SyncSkill(sprites);
     }
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::scoreShown, "score_shown", m_IsScoreEffect);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::scoreShown, "score_shown", m_IsScoreEffect);
     if (m_IsScoreEffect)
         SyncScore();
     std::vector<CursedTempleTextEntry> lines;
@@ -1177,13 +1150,13 @@ void mu::ui::window::CCursedTempleSystem::SyncView()
 
     // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    CursedTempleSystemRmlModel& model = m_RmlBinder.GetModel();
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::scaleX, "scale_x", transform.scaleX);
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::sprites, "sprites", std::move(sprites));
-    SyncField(m_RmlBinder, &CursedTempleSystemRmlModel::tutorialLines, "tutorial_lines", std::move(lines));
+    CursedTempleSystemRmlModel& model = m_RmlView.GetModel();
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::scaleX, "scale_x", transform.scaleX);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::scaleY, "scale_y", transform.scaleY);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::sprites, "sprites", std::move(sprites));
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::tutorialLines, "tutorial_lines", std::move(lines));
 }
 
 bool mu::ui::window::CCursedTempleSystem::Render()

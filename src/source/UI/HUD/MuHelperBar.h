@@ -3,7 +3,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml { class ElementDocument; }
 
@@ -46,7 +46,6 @@ namespace mu::ui::window
         // from CSystem::SyncMainSceneHudVisibility(), so leaving MAIN_SCENE still hides the doc.
         void SyncDocVisibility(bool sceneAllowsShow);
 
-        void ReloadRmlTheme();
 
         // Vestigial -- Update() reads Hero's position directly, never through this setter.
         void SetCurHeroPosition(int x, int y) {}
@@ -62,8 +61,11 @@ namespace mu::ui::window
             bool muHelperActive = false; // drives which of Start/Stop is shown
             Rml::String configTooltip, startTooltip, stopTooltip;
         };
-        RmlModelBinder<MuHelperBarRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, MuHelperBarRmlModel& model);
+        void OnRmlReloaded();
+        UI::RmlBridge::ThemedView<MuHelperBarRmlModel> m_RmlView{"mu_helper_bar",
+            [this](Rml::DataModelConstructor& c, MuHelperBarRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/mu_helper_bar.rml"}}, {.afterReload = [this] { OnRmlReloaded(); }}};
 
         bool m_bRmlConfigClicked = false;
         bool m_bRmlToggleClicked = false;

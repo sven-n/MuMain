@@ -6,7 +6,7 @@
 #include "UI/Inventory/MyInventory.h"
 #include "UI/Quests/MyQuestInfoWindow.h"
 #include "UI/Inventory/UnitedMarketPlaceRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -68,7 +68,6 @@ public:
     void SetRemainTime(int iTime);
     void LockEnterButton(BOOL bLock);
 
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();
@@ -76,8 +75,10 @@ private:
     bool BtnProcess();
     void RenderItem3D();
 
-    RmlModelBinder<UnitedMarketPlaceRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, UnitedMarketPlaceRmlModel& model);
+    UI::RmlBridge::ThemedView<UnitedMarketPlaceRmlModel> m_RmlView{"united_market_place",
+        [this](Rml::DataModelConstructor& c, UnitedMarketPlaceRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/united_market_place.rml"}}};
     bool m_PendingWarp = false;
     bool m_PendingExit = false;
 

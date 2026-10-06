@@ -6,7 +6,7 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Events/BattleSoccerScoreRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -45,7 +45,6 @@ public:
 
     float GetLayerDepth(); //. 1.8f
 
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();
@@ -54,8 +53,10 @@ private:
 
     int FindGuildMark(wchar_t* pszGuildName);
 
-    RmlModelBinder<BattleSoccerScoreRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, BattleSoccerScoreRmlModel& model);
+    UI::RmlBridge::ThemedView<BattleSoccerScoreRmlModel> m_RmlView{"battle_soccer_score",
+        [this](Rml::DataModelConstructor& c, BattleSoccerScoreRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/battle_soccer_score.rml", UI::RmlBridge::BackgroundOrMainContext}}};
 };
 } // namespace mu::ui::window
 

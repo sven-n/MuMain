@@ -60,7 +60,6 @@ bool mu::ui::window::CDuelWindow::Create(CManager* pNewUIMng, int x, int y)
     SetPos(x, y);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -69,13 +68,14 @@ bool mu::ui::window::CDuelWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CDuelWindow::Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    m_RmlView.Release();
 }
 
 void mu::ui::window::CDuelWindow::SetPos(int x, int y)
@@ -112,69 +112,52 @@ float mu::ui::window::CDuelWindow::GetLayerDepth()
     return 1.1f;
 }
 
-void mu::ui::window::CDuelWindow::BuildRmlUi()
+void mu::ui::window::CDuelWindow::BindRmlModel(Rml::DataModelConstructor& c, DuelWindowRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
-
-    const bool modelCreated = m_RmlBinder.Create(BoardContext(), "duel_window",
-                                                 [](Rml::DataModelConstructor& c, DuelWindowRmlModel& model)
-                                                 {
-                                                     c.Bind("scale_x", &model.scaleX);
-                                                     c.Bind("scale_y", &model.scaleY);
-                                                     c.Bind("inverse_scale_x", &model.inverseScaleX);
-                                                     c.Bind("inverse_scale_y", &model.inverseScaleY);
-                                                     c.Bind("bold_text_px", &model.boldTextPx);
-                                                     c.Bind("panel_x", &model.panelX);
-                                                     c.Bind("panel_y", &model.panelY);
-                                                     c.Bind("hero_name", &model.heroName);
-                                                     c.Bind("hero_score", &model.heroScore);
-                                                     c.Bind("enemy_name", &model.enemyName);
-                                                     c.Bind("enemy_score", &model.enemyScore);
-                                                 });
-
-    if (modelCreated)
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(BoardContext(), "Data/Interface/RmlUi/duel_window.rml");
+    c.Bind("scale_x", &model.scaleX);
+    c.Bind("scale_y", &model.scaleY);
+    c.Bind("inverse_scale_x", &model.inverseScaleX);
+    c.Bind("inverse_scale_y", &model.inverseScaleY);
+    c.Bind("bold_text_px", &model.boldTextPx);
+    c.Bind("panel_x", &model.panelX);
+    c.Bind("panel_y", &model.panelY);
+    c.Bind("hero_name", &model.heroName);
+    c.Bind("hero_score", &model.heroScore);
+    c.Bind("enemy_name", &model.enemyName);
+    c.Bind("enemy_score", &model.enemyScore);
 }
 
-void mu::ui::window::CDuelWindow::ReloadRmlTheme()
+void mu::ui::window::CDuelWindow::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = BoardContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CDuelWindow::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // Layer depth 1.1: behind every other document of the background context (see BoardContext()).
-    UI::RmlBridge::SyncDocumentVisibilityBehind(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityBehind(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
     // CManager scopes LayoutMode::HudFrame around this window: the bottom HUD's uniform scale, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    Sync(m_RmlBinder, &DuelWindowRmlModel::scaleX, "scale_x", transform.scaleX);
-    Sync(m_RmlBinder, &DuelWindowRmlModel::scaleY, "scale_y", transform.scaleY);
-    Sync(m_RmlBinder, &DuelWindowRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    Sync(m_RmlBinder, &DuelWindowRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
-    Sync(m_RmlBinder, &DuelWindowRmlModel::boldTextPx, "bold_text_px",
+    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::scaleX, "scale_x", transform.scaleX);
+    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::scaleY, "scale_y", transform.scaleY);
+    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
+    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
+    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::boldTextPx, "bold_text_px",
          UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
-    Sync(m_RmlBinder, &DuelWindowRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
-    Sync(m_RmlBinder, &DuelWindowRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
+    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
+    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
 
-    Sync(m_RmlBinder, &DuelWindowRmlModel::heroName, "hero_name",
+    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::heroName, "hero_name",
          Rml::String(StringUtils::WideToNarrow(g_DuelMgr.GetDuelPlayerID(DUEL_HERO))));
-    Sync(m_RmlBinder, &DuelWindowRmlModel::enemyName, "enemy_name",
+    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::enemyName, "enemy_name",
          Rml::String(StringUtils::WideToNarrow(g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY))));
-    Sync(m_RmlBinder, &DuelWindowRmlModel::heroScore, "hero_score", std::to_string(g_DuelMgr.GetScore(DUEL_HERO)));
-    Sync(m_RmlBinder, &DuelWindowRmlModel::enemyScore, "enemy_score", std::to_string(g_DuelMgr.GetScore(DUEL_ENEMY)));
+    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::heroScore, "hero_score", std::to_string(g_DuelMgr.GetScore(DUEL_HERO)));
+    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::enemyScore, "enemy_score", std::to_string(g_DuelMgr.GetScore(DUEL_ENEMY)));
 }

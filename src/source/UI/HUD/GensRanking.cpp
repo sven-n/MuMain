@@ -63,7 +63,6 @@ void CGensRanking::Init()
 
 void CGensRanking::Destroy()
 {
-    UI::RmlBridge::UnregisterForThemeReload(this);
 
     if (m_pNewUIMng)
     {
@@ -85,7 +84,6 @@ bool CGensRanking::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -135,7 +133,7 @@ bool CGensRanking::UpdateMouseEvent()
 
     float panelWidth = GENSRANKING_WIDTH;
     float panelHeight = GENSRANKING_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight))
             .Contains(MouseX, MouseY))
     {
@@ -338,81 +336,61 @@ int CGensRanking::GetImageIndex(BYTE rankIndex)
 
     return TITLENAME_END - rankIndex;
 }
-void CGensRanking::BuildRmlUi()
+void CGensRanking::BindRmlModel(Rml::DataModelConstructor& c, GensRankingRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
-
-    const bool modelCreated = m_RmlBinder.Create(
-        RmlUiRuntime::Instance().GetContext(), "gens_ranking",
-        [this](Rml::DataModelConstructor& c, GensRankingRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("root_scale_y", &model.rootScaleY);
-            c.Bind("text_px", &model.textPx);
-            c.Bind("mark_sprite", &model.markSprite);
-            auto lineType = c.RegisterStruct<GensLine>();
-            lineType.RegisterMember("text", &GensLine::text);
-            lineType.RegisterMember("text_px", &GensLine::textPx);
-            c.Bind("title", &model.title);
-            c.Bind("gens_label", &model.gensLabel);
-            c.Bind("gens_name", &model.gensName);
-            c.Bind("level_label", &model.levelLabel);
-            c.Bind("title_name", &model.titleName);
-            c.Bind("rank_label", &model.rankLabel);
-            c.Bind("rank_value", &model.rankValue);
-            c.Bind("contrib_label", &model.contribLabel);
-            c.Bind("contrib_value", &model.contribValue);
-            c.Bind("desc_label", &model.descLabel);
-            c.RegisterArray<std::vector<GensLine>>();
-            c.Bind("promo_lines", &model.promoLines);
-            c.Bind("desc_lines", &model.descLines);
-            c.Bind("desc_line_step", &model.descLineStep);
-            c.Bind("exit_tooltip", &model.exitTooltip);
-            c.BindEventCallback("gens_ranking_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                                { m_PendingExit = true; });
-        });
-    if (!modelCreated)
-        return;
-
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                  "Data/Interface/RmlUi/gens_ranking.rml");
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("root_scale_y", &model.rootScaleY);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("mark_sprite", &model.markSprite);
+    auto lineType = c.RegisterStruct<GensLine>();
+    lineType.RegisterMember("text", &GensLine::text);
+    lineType.RegisterMember("text_px", &GensLine::textPx);
+    c.Bind("title", &model.title);
+    c.Bind("gens_label", &model.gensLabel);
+    c.Bind("gens_name", &model.gensName);
+    c.Bind("level_label", &model.levelLabel);
+    c.Bind("title_name", &model.titleName);
+    c.Bind("rank_label", &model.rankLabel);
+    c.Bind("rank_value", &model.rankValue);
+    c.Bind("contrib_label", &model.contribLabel);
+    c.Bind("contrib_value", &model.contribValue);
+    c.Bind("desc_label", &model.descLabel);
+    c.RegisterArray<std::vector<GensLine>>();
+    c.Bind("promo_lines", &model.promoLines);
+    c.Bind("desc_lines", &model.descLines);
+    c.Bind("desc_line_step", &model.descLineStep);
+    c.Bind("exit_tooltip", &model.exitTooltip);
+    c.BindEventCallback("gens_ranking_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_PendingExit = true; });
 }
 
-void CGensRanking::ReloadRmlTheme()
+void CGensRanking::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
+    m_RmlView.Ensure();
 }
 
 void CGensRanking::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // Layer depth 4.2: over the HUD like every panel the original opened.
-    UI::RmlBridge::SyncDocumentVisibilityInFront(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    GensRankingRmlModel& model = m_RmlBinder.GetModel();
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    GensRankingRmlModel& model = m_RmlView.GetModel();
     const float scaleY = UI::Scaling::GetActiveTransform().scaleY;
     if (model.rootScaleY != scaleY)
     {
         model.rootScaleY = scaleY;
-        m_RmlBinder.MarkDirty("root_scale_y");
+        m_RmlView.MarkDirty("root_scale_y");
     }
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncContent();
 }
 
@@ -485,28 +463,28 @@ void CGensRanking::SyncContent()
         }
     }
 
-    GensRankingRmlModel& model = m_RmlBinder.GetModel();
-    SyncField(m_RmlBinder, &GensRankingRmlModel::title, "title", std::move(title));
-    SyncField(m_RmlBinder, &GensRankingRmlModel::gensLabel, "gens_label", std::move(gensLabel));
-    SyncField(m_RmlBinder, &GensRankingRmlModel::gensName, "gens_name", std::move(gensName));
-    SyncField(m_RmlBinder, &GensRankingRmlModel::levelLabel, "level_label", std::move(levelLabel));
-    SyncField(m_RmlBinder, &GensRankingRmlModel::titleName, "title_name", std::move(titleName));
-    SyncField(m_RmlBinder, &GensRankingRmlModel::rankLabel, "rank_label", std::move(rankLabel));
-    SyncField(m_RmlBinder, &GensRankingRmlModel::rankValue, "rank_value", std::move(rankValue));
-    SyncField(m_RmlBinder, &GensRankingRmlModel::contribLabel, "contrib_label", std::move(contribLabel));
-    SyncField(m_RmlBinder, &GensRankingRmlModel::contribValue, "contrib_value", std::move(contribValue));
-    SyncField(m_RmlBinder, &GensRankingRmlModel::descLabel, "desc_label", std::move(descLabel));
+    GensRankingRmlModel& model = m_RmlView.GetModel();
+    SyncField(m_RmlView.Binder(), &GensRankingRmlModel::title, "title", std::move(title));
+    SyncField(m_RmlView.Binder(), &GensRankingRmlModel::gensLabel, "gens_label", std::move(gensLabel));
+    SyncField(m_RmlView.Binder(), &GensRankingRmlModel::gensName, "gens_name", std::move(gensName));
+    SyncField(m_RmlView.Binder(), &GensRankingRmlModel::levelLabel, "level_label", std::move(levelLabel));
+    SyncField(m_RmlView.Binder(), &GensRankingRmlModel::titleName, "title_name", std::move(titleName));
+    SyncField(m_RmlView.Binder(), &GensRankingRmlModel::rankLabel, "rank_label", std::move(rankLabel));
+    SyncField(m_RmlView.Binder(), &GensRankingRmlModel::rankValue, "rank_value", std::move(rankValue));
+    SyncField(m_RmlView.Binder(), &GensRankingRmlModel::contribLabel, "contrib_label", std::move(contribLabel));
+    SyncField(m_RmlView.Binder(), &GensRankingRmlModel::contribValue, "contrib_value", std::move(contribValue));
+    SyncField(m_RmlView.Binder(), &GensRankingRmlModel::descLabel, "desc_label", std::move(descLabel));
     if (model.promoLines != promoLines)
     {
         model.promoLines = std::move(promoLines);
-        m_RmlBinder.MarkDirty("promo_lines");
+        m_RmlView.MarkDirty("promo_lines");
     }
     if (model.descLines != descLines)
     {
         model.descLines = std::move(descLines);
-        m_RmlBinder.MarkDirty("desc_lines");
+        m_RmlView.MarkDirty("desc_lines");
     }
-    SyncField(m_RmlBinder, &GensRankingRmlModel::descLineStep, "desc_line_step", descLineStep);
+    SyncField(m_RmlView.Binder(), &GensRankingRmlModel::descLineStep, "desc_line_step", descLineStep);
 
     // The original's RenderMark(): the rank's 50 x 69 cell of the family's mark sheet.
     Rml::String markSprite;
@@ -518,14 +496,14 @@ void CGensRanking::SyncContent()
     if (model.markSprite != markSprite)
     {
         model.markSprite = markSprite;
-        m_RmlBinder.MarkDirty("mark_sprite");
+        m_RmlView.MarkDirty("mark_sprite");
     }
 
     const Rml::String exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
     if (model.exitTooltip != exitTooltip)
     {
         model.exitTooltip = exitTooltip;
-        m_RmlBinder.MarkDirty("exit_tooltip");
+        m_RmlView.MarkDirty("exit_tooltip");
     }
 }
 #endif //PBG_ADD_GENSRANKING

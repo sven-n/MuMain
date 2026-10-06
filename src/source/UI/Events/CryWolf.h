@@ -7,7 +7,7 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Events/CryWolfRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -63,7 +63,6 @@ public:
     void SetTime(int iHour, int iMinute);
     void InitTime();
 
-    void ReloadRmlTheme();
 
 private:
     void LoadImages();
@@ -76,8 +75,12 @@ private:
     void SyncResult(CryWolfRmlModel& updated);
     void SyncHud(CryWolfRmlModel& updated);
 
-    RmlModelBinder<CryWolfRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, CryWolfRmlModel& model);
+    // The original drew the HUD at layer depth 10, over the inventory, the chat and the other panels:
+    // the document sits in the main context, pulled to the front when it is shown.
+    UI::RmlBridge::ThemedView<CryWolfRmlModel> m_RmlView{"crywolf",
+        [this](Rml::DataModelConstructor& c, CryWolfRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/crywolf.rml"}}};
 };
 }
 
