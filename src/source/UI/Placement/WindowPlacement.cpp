@@ -10,7 +10,7 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
-#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Scaling/UITransform.h"
 
 #include <RmlUi/Core/Context.h>
@@ -47,7 +47,6 @@ struct Entry
 };
 
 std::unordered_map<std::string, Entry> g_windows;
-Rml::ElementDocument* g_workspace = nullptr;
 bool g_namesChecked = false;
 UI::Scaling::Transform g_lastDock{};
 bool g_dirty = true;
@@ -57,13 +56,9 @@ unsigned int g_lastWidth = 0;
 unsigned int g_lastHeight = 0;
 float g_uncoveredLeft = 0.f;
 float g_uncoveredRight = 0.f;
-const int g_themeReloadToken = 0;
-
-void ReloadWorkspace()
+// A rebuilt workspace has new slots: every window is placed again.
+void OnWorkspaceReloaded()
 {
-    if (g_workspace != nullptr)
-        g_workspace->Close();
-    g_workspace = nullptr;
     g_namesChecked = false;
     for (auto& [name, entry] : g_windows)
     {
@@ -73,15 +68,13 @@ void ReloadWorkspace()
     Arrange();
 }
 
+// Never shown, so it is never drawn or hit; Arrange() lays it out itself.
+UI::RmlBridge::ThemedView<> g_workspaceView{{{"Data/Interface/RmlUi/workspace.rml"}},
+                                            {.afterReload = [] { OnWorkspaceReloaded(); }}};
+
 Rml::ElementDocument* Workspace()
 {
-    if (g_workspace != nullptr || !RmlUiRuntime::Instance().IsCreated())
-        return g_workspace;
-    // Never shown, so it is never drawn or hit; Arrange() lays it out itself.
-    g_workspace =
-        UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/workspace.rml");
-    UI::RmlBridge::RegisterForThemeReload(&g_themeReloadToken, ReloadWorkspace);
-    return g_workspace;
+    return g_workspaceView.Ensure() ? g_workspaceView.Document() : nullptr;
 }
 
 // A name the workspace uses but no window answers to does nothing, so say so once per workspace.
@@ -587,12 +580,12 @@ bool PanelSizeOf(std::uint32_t windowId, float& width, float& height)
 
 float UncoveredWorldLeft()
 {
-    return g_workspace != nullptr ? g_uncoveredLeft : 0.f;
+    return g_workspaceView.Document() != nullptr ? g_uncoveredLeft : 0.f;
 }
 
 float UncoveredWorldRight()
 {
-    return g_workspace != nullptr ? g_uncoveredRight : static_cast<float>(WindowWidth);
+    return g_workspaceView.Document() != nullptr ? g_uncoveredRight : static_cast<float>(WindowWidth);
 }
 
 bool InitialPosition(std::string_view slotName, float width, float height, float& x, float& y)
@@ -642,10 +635,7 @@ float UncoveredWorldRightIn(const UI::Scaling::Transform& transform)
 
 void Release()
 {
-    UI::RmlBridge::UnregisterForThemeReload(&g_themeReloadToken);
-    if (g_workspace != nullptr)
-        g_workspace->Close();
-    g_workspace = nullptr;
+    g_workspaceView.Release();
     g_windows.clear();
     g_dirty = true;
 }

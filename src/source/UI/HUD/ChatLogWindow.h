@@ -7,7 +7,7 @@
 #include "UI/Chat/MessageType.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/HUD/ChatInputBox.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #pragma warning(disable : 4786)
 #include <string>
@@ -187,8 +187,12 @@ namespace mu::ui::window
         void ApplyLogicalScroll();
         void SyncLogicalScrollFromView();
 
-        RmlModelBinder<ChatLogRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, ChatLogRmlModel& model);
+        void OnRmlReloaded();
+        UI::RmlBridge::ThemedView<ChatLogRmlModel> m_RmlView{"chat_log",
+            [this](Rml::DataModelConstructor& c, ChatLogRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/chat_log.rml"}},
+            {.afterReload = [this] { OnRmlReloaded(); }}};
         // Where Create() put the window, kept while the theme gives it no slot.
         POINT m_HomePos{};
         bool m_bLinesDirty = true;
@@ -204,7 +208,6 @@ namespace mu::ui::window
         bool m_bScrollRequest = false;
 
     public:
-        void ReloadRmlTheme();
 
         CChatLogWindow();
         ~CChatLogWindow() override;
@@ -324,8 +327,13 @@ namespace mu::ui::window
         void SyncNativeGeometry();
         void RebuildLineModel();
 
-        RmlModelBinder<SystemLogRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, SystemLogRmlModel& model);
+        void OnRmlBuilt();
+        void OnRmlReloaded();
+        UI::RmlBridge::ThemedView<SystemLogRmlModel> m_RmlView{"system_log",
+            [this](Rml::DataModelConstructor& c, SystemLogRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/system_log.rml"}},
+            {.afterBuild = [this] { OnRmlBuilt(); }, .afterReload = [this] { OnRmlReloaded(); }}};
         bool m_bLinesDirty = true;
         float m_LastPanelHeight = -1.f;
         void TrackPanelSize();
@@ -334,7 +342,6 @@ namespace mu::ui::window
         int GetCurrentRenderEndLine() const;
 
     public:
-        void ReloadRmlTheme();
 
         CSystemLogWindow();
         ~CSystemLogWindow() override;
