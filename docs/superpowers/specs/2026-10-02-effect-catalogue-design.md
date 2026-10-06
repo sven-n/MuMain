@@ -284,7 +284,7 @@ One PR each, small enough to check against the old code.
 | FX1.6 | Effect browser | FX1.1 | Read-only tool in MuEditor; values from FX1.2 on. Done, see the FX1.6 note. |
 | FX1.7a | Preview in the browser | FX1.6 | A 3D view in the details: the slot's model or texture, shown on nothing, a plane, a cube or an item. Editor code only. Done, see the FX1.7a note. |
 | FX1.7b | Preview in the world | FX1.6 | Creating the selected type in front of the hero in editor builds, with a SubType from the variants of its row or typed in. Done, see the FX1.7b note. |
-| FX1.7c | Live preview in the browser | FX1.7a, FX1.7b | Not for now, maybe later: moved to the possible follow-ups, with [its own document](2026-10-06-effect-live-preview-design.md). The objects of FX1.7b drawn in the browser's view on the chosen object instead of in the world. |
+| FX1.7c | Live preview in the browser | FX1.7a, FX1.7b | Not for now, maybe later: moved to the possible follow-ups, described in the [possible follow-up ideas](2026-10-06-possible-follow-up-ideas.md#fx17c-live-preview-in-the-browser). The objects of FX1.7b drawn in the browser's view on the chosen object instead of in the world. |
 
 **FX1.1 Names for all types.** The compiled list of symbols per kind (about
 640 lines), generated once by a script and kept by hand afterwards. The four
@@ -687,9 +687,9 @@ after FX1.7b: the world preview, with the Dev Editor's free camera and F12
 hiding the editor, shows the real effect, while FX1.7c would change six game
 render loops (in editor builds) to draw it in the browser's view instead. It
 is the first of the possible follow-ups at the end of this document; what it
-would take is in its own document,
-[2026-10-06-effect-live-preview-design.md](2026-10-06-effect-live-preview-design.md),
-to be extended when the work starts.
+would take is in the [possible follow-up
+ideas](2026-10-06-possible-follow-up-ideas.md#fx17c-live-preview-in-the-browser),
+to be extended into its own design when the work starts.
 
 ## Verification
 
@@ -888,16 +888,19 @@ Still to check and file upstream: the owner is used without a null check in
 
 ## Possible follow-ups
 
-Not planned for now; each is decided on its own, maybe later.
+Not planned for now; each is decided on its own, maybe later. They are
+described in the [possible follow-up
+ideas](2026-10-06-possible-follow-up-ideas.md#from-the-effect-catalogue-fx1).
 
-1. **FX1.7c Live preview in the browser.** The objects of the world preview
-   (FX1.7b) drawn in the browser's view, on the chosen object, instead of in
-   the world. Its own document:
-   [2026-10-06-effect-live-preview-design.md](2026-10-06-effect-live-preview-design.md).
-2. **The game view as an editor window.** The game's frame drawn into a
-   window of the editor: it would show the world preview inside the editor
-   and help the map editor and the other tools too. An editor change for all
-   tools, not part of FX1.
-3. **"Used by" from the code.** A generated index of the code's call sites
-   for "used by", besides the data users. The world preview's list of the
-   game's calls reads them from the sources at run time.
+1. [**FX1.7c Live preview in the
+   browser**](2026-10-06-possible-follow-up-ideas.md#fx17c-live-preview-in-the-browser):
+   the objects of the world preview (FX1.7b) drawn in the browser's view, on
+   the chosen object, instead of in the world.
+2. [**The game view as an editor
+   window**](2026-10-06-possible-follow-up-ideas.md#the-game-view-as-an-editor-window):
+   the game's frame drawn into a window of the editor, for the world
+   preview, the map editor and the other tools.
+3. [**"Used by" from the
+   code**](2026-10-06-possible-follow-up-ideas.md#used-by-from-the-code): a
+   generated index of the code's call sites for "used by", besides the data
+   users.
