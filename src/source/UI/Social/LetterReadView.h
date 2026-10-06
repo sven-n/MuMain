@@ -20,7 +20,7 @@ namespace UI::Social
 //
 // The foreground keeps window_shell's boxes -- the title rail still drags, #content still hosts the
 // buttons -- but drops its paint, so the portrait is never covered. Both documents are instanced
-// per window through LoadThemedDocument()'s placeholder overload, as rooms are.
+// per window through ThemedView's modelPlaceholder, as rooms are.
 class LetterReadView : public Rml::EventListener
 {
 public:

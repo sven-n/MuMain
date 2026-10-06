@@ -4,7 +4,7 @@
 #include <string_view>
 
 // The stacking order of every RmlUi document: the layer depth of the original window (or render
-// pass) the document replaces. LoadThemedDocument() sets it as the document's z-index. The original
+// pass) the document replaces. Loading a themed document sets it as its z-index. The original
 // drew its windows in ascending GetLayerDepth() order (CNewUIManager::Render()), then the notices,
 // the scene windows (CUIMng) and the reconnect dialog; RmlUi sorts a context's documents by z-index
 // and keeps show/focus order only among documents of equal depth, which reproduces that order in

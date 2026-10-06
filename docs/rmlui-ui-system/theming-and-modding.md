@@ -39,7 +39,8 @@ drop-a-folder operation.
 `GameConfig::GetRmlTheme()` and cached by `UI::RmlBridge::GetActiveThemeName()`. That cache is
 also live-mutable via `UI::RmlBridge::SetActiveThemeName()` — see
 ["Switching themes without relaunching"](#switching-themes-without-relaunching) below. Loading a
-window goes through `UI::RmlBridge::LoadThemedDocument(context, "Data/Interface/RmlUi/login.rml")`:
+window goes through its `ThemedView`, which hands `"Data/Interface/RmlUi/login.rml"` to
+`UI::RmlBridge::ThemedDocumentLoader::Load()`:
 
 1. It reads `login.rml`'s raw text once — the same file is shared, never duplicated per theme.
 2. It builds a synthetic source URL, `Data/Interface/RmlUi/themes/<name>/login.rml` — this path
@@ -60,7 +61,7 @@ a "modern" theme uses flat colors/vector shapes instead.
 
 ## Forking a theme's RML: the mechanism, and today's real examples
 
-`UI::RmlBridge::LoadThemedDocument()` ([`RmlTheme.cpp`](../../src/source/UI/RmlBridge/RmlTheme.cpp))
+`UI::RmlBridge::ThemedDocumentLoader::Load()` ([`RmlTheme.cpp`](../../src/source/UI/RmlBridge/RmlTheme.cpp))
 looks for `themes/<theme>/<name>.rml` first, falling back to the shared `<name>.rml` when no such
 file exists (for a window with no fork, one extra failed `ifstream` open). `modern` forks a
 few dozen documents; `themes/modern/*.rml` is the live list. Most of these exist so `modern`'s own `.modern-frame`/`.modern-frame-crimson`/`.title-glow` class vocabulary
@@ -218,7 +219,7 @@ game-asset pipeline everything else still depends on.
 
 Both built-in themes have a `tokens.ini` file (`[Tokens]` section, plain `name=value` lines) that a theme's own `.rcss`
 files reference via a `token(name)` marker instead of repeating a literal value everywhere it's
-used. `UI::RmlBridge::LoadThemedDocument()`'s `InlineTokenizedStylesheet()`/`SubstituteTokens()`
+used. The themed loader's `InlineTokenizedStylesheet()`/`SubstituteTokens()`
 (`RmlTheme.cpp`) resolve every `token(name)` against the ACTIVE theme's own `tokens.ini` before
 RmlUi ever sees the stylesheet text — this vendored RmlUi build has no `var()`/custom-property
 mechanism of its own, so this is plain regex text substitution, not a CSS feature. The mechanism

@@ -71,9 +71,7 @@ public:
     void RenderDialogBackgroundLayer();
 
     // Every RmlUi document meant to render via RenderBackgroundLayer() loads into this context
-    // instead of GetContext()'s "main" one (UI::RmlBridge::LoadThemedDocument already takes a
-    // Rml::Context* parameter, so no change needed there) -- e.g.
-    // LoadThemedDocument(RmlUiRuntime::Instance().GetBackgroundContext(), "...").
+    // instead of GetContext()'s "main" one: its ThemedView's document spec names it.
     Rml::Context* GetBackgroundContext() const { return m_BackgroundContext; }
 
     // A THIRD, separate background-only context -- exclusively for CGenericConfirmDialog's own

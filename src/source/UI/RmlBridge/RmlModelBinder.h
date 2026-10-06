@@ -72,7 +72,7 @@ public:
 
     // Undoes Create(): removes the named model from `context` and resets this binder to its
     // pre-Create() state so Create() can be called again (e.g. rebuilding against a new RmlUi
-    // theme -- see UI::RmlBridge::RegisterForThemeReload()). No-op if Create() was never called or
+    // theme -- see UI::RmlBridge::ThemedView). No-op if Create() was never called or
     // already undone. `context` must be the same context Create() was given; RmlUi's data models
     // are owned per-Context, not globally. A null `context` (RmlUi already released it) only
     // resets the binder.

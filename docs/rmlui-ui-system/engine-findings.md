@@ -21,10 +21,10 @@ around it. See [`STATUS.md`](STATUS.md) for migration status and
   rule provides one. **Check this first whenever a new element's box paints but its text doesn't**
   — that signature has been misread as a flex/decorator/layout bug for several rounds before.
 
-- **`LoadThemedDocument()`'s token substitution (`RmlTheme.cpp`) resolves each `<link href>`
+- **The themed loader's token substitution (`RmlTheme.cpp`) resolves each `<link href>`
   against `sourceUrl`'s directory** (always `themes/<theme>/`), not wherever the RML text came
   from, and substitutes every `<link>`, not just the first. A document may have a
-  `themes/<theme>/<name>.rml` override that `LoadThemedDocument()` prefers silently (`login`,
+  `themes/<theme>/<name>.rml` override that the loader prefers silently (`login`,
   `msg_win`, `main_frame`, `character_info`, `my_quest_info`, …) — **check for one before reading
   a document's markup from the shared top-level `.rml`.**
 
@@ -127,8 +127,8 @@ around it. See [`STATUS.md`](STATUS.md) for migration status and
   Only files loaded *as* a template are affected.
 
 - **A `<link>` inside a `<template>` file's head gets no `token(...)` substitution.**
-  `InlineTokenizedStylesheet()` rewrites the links of the document `LoadThemedDocument()`/
-  `CreateBackgroundDocument()` loads; RmlUi's `TemplateCache` reads template files directly. Link
+  `InlineTokenizedStylesheet()` rewrites the links of the document `ThemedDocumentLoader::Load()`
+  loads; RmlUi's `TemplateCache` reads template files directly. Link
   token-using stylesheets from the consuming document (`generic_confirm_dialog_bg.rml` links
   `base.rcss`); a template's own `.rcss` must be token-free (`window_shell*.rcss` are).
 

@@ -100,7 +100,7 @@ bool ThemedDocuments::Ensure()
 
     if (!m_Registered)
     {
-        RegisterForThemeReload(this, [this] { Reload(); }, [this] { return Document(); });
+        ThemeReloadRegistry::Register(this, [this] { Reload(); }, [this] { return Document(); });
         m_Registered = true;
     }
 
@@ -133,10 +133,10 @@ bool ThemedDocuments::Ensure()
         if (slot.document != nullptr)
             continue;
         slot.document = m_Options.modelPlaceholder.empty()
-                            ? LoadThemedDocument(contexts[i], slot.spec.path.c_str())
-                            : LoadThemedDocument(contexts[i], slot.spec.path.c_str(),
-                                                 "data-model=\"" + m_Options.modelPlaceholder + "\"",
-                                                 "data-model=\"" + m_ModelName + "\"");
+                            ? ThemedDocumentLoader::Load(contexts[i], slot.spec.path.c_str())
+                            : ThemedDocumentLoader::Load(contexts[i], slot.spec.path.c_str(),
+                                                         "data-model=\"" + m_Options.modelPlaceholder + "\"",
+                                                         "data-model=\"" + m_ModelName + "\"");
         if (slot.document == nullptr)
             return false;
         slot.context = contexts[i];
@@ -185,7 +185,7 @@ void ThemedDocuments::Release()
     ForgetModel(false);
     if (m_Registered)
     {
-        UnregisterForThemeReload(this);
+        ThemeReloadRegistry::Unregister(this);
         m_Registered = false;
     }
 }

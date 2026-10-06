@@ -261,8 +261,8 @@ reading them as RGB swaps red and blue.
 
 ## Theming
 
-`UI::RmlBridge` (`RmlTheme.h`): `LoadThemedDocument()` (the one entry point every migrated window
-uses instead of `Context::LoadDocument` directly — makes "add a theme" a drop-a-folder operation),
+`UI::RmlBridge` (`RmlTheme.h`): `ThemedDocumentLoader` (the one way a document is loaded, callable
+only from `ThemedView` — makes "add a theme" a drop-a-folder operation),
 `GetActiveThemeName()`, `ThemeUsesNativeTextSize()` (a declared theme capability,
 `architecture-principles.md` §30 — see `theming-and-modding.md` for the pattern to follow for any
 future capability flag). See `theming-and-modding.md`'s "Forking a theme's RML" section for the

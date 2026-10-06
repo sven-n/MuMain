@@ -117,8 +117,8 @@ both on a theme switch and tears them down; `component-catalog.md` has its optio
 
 ## Theming
 
-A theme is a **folder name** — adding one needs no recompile. `UI::RmlBridge::LoadThemedDocument()`
-(`UI/RmlBridge/RmlTheme.h/.cpp`) loads a window's `.rml` against a synthetic
+A theme is a **folder name** — adding one needs no recompile. A window's `ThemedView` loads its
+`.rml` (through `ThemedDocumentLoader`, `UI/RmlBridge/RmlTheme.h/.cpp`) against a synthetic
 `themes/<active-theme>/` URL, so its `<link href>` pulls that theme's `.rcss`; a theme can also
 fork the `.rml` itself (`themes/<theme>/<name>.rml`).
 

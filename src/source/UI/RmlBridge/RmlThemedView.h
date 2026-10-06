@@ -21,7 +21,7 @@ namespace UI::RmlBridge
 {
 struct ThemedDocumentSpec
 {
-    std::string path; // as LoadThemedDocument() takes it
+    std::string path; // under Data/Interface/RmlUi; the active theme's sheets apply
     // The context the document loads into; RmlUiRuntime's main context when empty. Null means not
     // yet: Ensure() waits.
     std::function<Rml::Context*()> context;

@@ -60,7 +60,7 @@ background/durability tint/drag highlight, which paint behind the equipped item'
 ## Stacking order
 
 Every document's `z-index` is the layer depth of the original window (or render pass) it
-replaces, from one table (`UI/RmlBridge/RmlStackingOrder.cpp`), set by `LoadThemedDocument()`.
+replaces, from one table (`UI/RmlBridge/RmlStackingOrder.cpp`), set when a themed document loads.
 The original drew its windows in ascending `GetLayerDepth()` order, then the notices, the scene
 windows, the login scene's message box and the reconnect dialog; RmlUi sorts a context's
 documents by `z-index` and keeps show/focus order only among equal depths, so

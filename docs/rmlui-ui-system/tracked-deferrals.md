@@ -10,20 +10,17 @@ Completed migrations belong in [migration-ledger.md](migration-ledger.md).
 What would otherwise grow with every new window, or break a principle in a way new code copies.
 Most are items of the integration seams below.
 
-1. **One owner for a window's document** (seams item 2): the last two owners move onto
-   `ThemedView`, and the loader and reload registry become internal to it, so no port after the
-   merge can copy the old lifetime boilerplate again.
-2. **Keyboard ownership in the runtime** (item 3), with the runtime's layering (item 5) in the same
+1. **Keyboard ownership in the runtime** (item 2), with the runtime's layering (item 4) in the same
    change. Every window with a text field copies the fake `HWND`, and a slip kills every hotkey;
    the layering fix keeps runtime-level fixes from reaching for `SceneFlag` and `GameConfig`.
-3. **No new background-context documents** (item 1): new native 3D goes into a `RenderTarget`, and
+2. **No new background-context documents** (item 1): new native 3D goes into a `RenderTarget`, and
    `OverlayRender`, which nothing uses, is deleted. Retiring the existing background contexts can
    follow the merge.
-4. **The tooltip measures its own document** (item 4), not the whole context twice a frame.
-5. **A display-scale change applies the `dp` ratio** (item 7). A bug against §9.
-6. **An unsubstituted design token is logged** (item 6): a sheet containing `token(` that was not
+3. **The tooltip measures its own document** (item 3), not the whole context twice a frame.
+4. **A display-scale change applies the `dp` ratio** (item 6). A bug against §9.
+5. **An unsubstituted design token is logged** (item 5): a sheet containing `token(` that was not
    inlined warns instead of drawing empty values. The `FileInterface` replacement can follow.
-7. **The RmlUi submodule pin is settled.** `.gitmodules` names `mikke89/RmlUi`, but `22282190`
+6. **The RmlUi submodule pin is settled.** `.gitmodules` names `mikke89/RmlUi`, but `22282190`
    exists only on `nitoygo/RmlUi`'s `integration/sdl-gpu-parity`, which carries the SDL_GPU
    renderer work. A fresh clone fetches it today only because GitHub serves objects across a fork
    network; if that branch is deleted or rewritten, main stops cloning. Upstream the renderer
@@ -149,38 +146,31 @@ against the library is where RmlUi meets the legacy UI. In order of value:
    `dialog_background`; move the inventory family's live items into render targets and retire
    `background` with its `*_bg.rml` documents. Trigger: the deletion now; the rest with the
    paperdoll row above, which waits on the same pass.
-2. **Two owners still hand-write their document's lifetime.** `UI::RmlBridge::ThemedView` holds
-   every other themed document with its model and theme-switch registration. The chat and system
-   logs (`ChatLogWindow.cpp`) and the workspace document (`WindowPlacement.cpp`) still load through
-   `LoadThemedDocument()` and register themselves. Direction: move both onto views, then make
-   `LoadThemedDocument()`, `CreateBackgroundDocument()` and the reload registry internal to
-   `RmlBridge`, so the compiler stops a new window from bypassing the view. Trigger: when the
-   logs' workspace change in progress lands.
-3. **Keyboard ownership is patched in five places.** The RmlUi behaviour is real (checked in its
+2. **Keyboard ownership is patched in five places.** The RmlUi behaviour is real (checked in its
    source): `ElementDocument::Hide()` gives focus back to the previous document's remembered field,
    and unloading a document clears focus without a blur, which leaves the typing flag set. The
    fixes are `ReleaseStrandedFieldFocus()`, the focus check in `IsTextInputActive()`, the blur in
    `ReloadAllThemedDocuments()`, the fake `HWND` in `CManager::UpdateKeyEvent()` with
    `ClaimKeyboardWhileTyping()`, and blurs in windows' hide paths. Direction: the runtime owns the
    rule and answers one query (the focused field and its document), which `CManager` uses instead
-   of the fake handle. Trigger: the next stuck-hotkey bug, or alongside 2.
-4. **`Tooltip::Show()` runs `Context::Update()` twice** to measure itself, every frame while
+   of the fake handle. Trigger: the next stuck-hotkey bug.
+3. **`Tooltip::Show()` runs `Context::Update()` twice** to measure itself, every frame while
    something is hovered: every data model and document in the main context updates, hover events
    dispatch, and all nine fields are marked changed without a change check. Direction: measure with
    the tooltip document's own `UpdateDocument()` and skip an unchanged config. Trigger: now; it is
    small.
-5. **`Render/RmlUi` depends on `UI/RmlBridge` and on game state.** The runtime includes the theme,
+4. **`Render/RmlUi` depends on `UI/RmlBridge` and on game state.** The runtime includes the theme,
    native-text and text-fit headers and reads `GameConfig` and `SceneFlag`; the render interface
    includes `RmlRenderTarget.h`. Direction: the runtime exposes hooks (before and after update, a
    texture-source resolver, the `dp` ratio) and `RmlBridge` registers the game's policy. Trigger:
-   with 3, which changes the runtime anyway.
-6. **Design tokens are inlined by regex.** `LoadThemedDocument()` rewrites `<link>` tags into
+   with 2, which changes the runtime anyway.
+5. **Design tokens are inlined by regex.** The themed loader rewrites `<link>` tags into
    `<style>` blocks, so tokenised sheets skip RmlUi's stylesheet cache and parse once per document,
    and a `<link>` with its attributes in another order is silently left unsubstituted. The need is
    real: this RmlUi has no `var()`. Direction: a `Rml::FileInterface` that substitutes tokens when
    it serves an `.rcss`, which can also resolve the per-theme `.rml` overrides. Trigger: a token
    found unsubstituted, or PR #983 (the counter-scale block below), whose `var()` replaces tokens.
-7. **A display-scale change leaves RmlUi's `dp` ratio stale.**
+6. **A display-scale change leaves RmlUi's `dp` ratio stale.**
    `SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED` updates the content scale `ViewportFitScale()` folds
    in, but nothing calls `RmlUiRuntime::OnResize()` until the next resize. A bug; fix it with the
    next change to `Winmain.cpp`'s event pump.

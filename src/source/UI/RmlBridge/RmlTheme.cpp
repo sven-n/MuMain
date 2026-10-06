@@ -264,13 +264,13 @@ namespace UI::RmlBridge
     }
     } // namespace
 
-    Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath)
+    Rml::ElementDocument* ThemedDocumentLoader::Load(Rml::Context* context, const char* documentPath)
     {
-        return LoadThemedDocument(context, documentPath, std::string(), std::string());
+        return Load(context, documentPath, std::string(), std::string());
     }
 
-    Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath,
-                                             const std::string& modelPlaceholder, const std::string& modelName)
+    Rml::ElementDocument* ThemedDocumentLoader::Load(Rml::Context* context, const char* documentPath,
+                                                     const std::string& modelPlaceholder, const std::string& modelName)
     {
         // documentPath's basename (the part after the last '/') is what the per-theme source URL
         // needs -- e.g. "Data/Interface/RmlUi/login.rml" -> "login.rml".
@@ -369,33 +369,18 @@ namespace UI::RmlBridge
                                  { document->RemoveProperty(Rml::PropertyId::Display); });
     }
 
-    Rml::ElementDocument* CreateBackgroundDocument(const char* documentPath)
-    {
-        return CreateBackgroundDocument(documentPath, RmlUiRuntime::Instance().GetBackgroundContext());
-    }
-
-    Rml::ElementDocument* CreateBackgroundDocument(const char* documentPath, Rml::Context* context)
-    {
-        if (!context)
-            return nullptr;
-
-        // Starts hidden -- see this function's own header comment (RmlTheme.h) for why an eager
-        // Show() here used to cause a real first-login-only flicker.
-        return LoadThemedDocument(context, documentPath);
-    }
-
     namespace
     {
         struct ThemeReloadEntry
         {
             const void* owner;
-            ThemeReloadCallback callback;
-            ThemeReloadDocument document;
+            ThemeReloadRegistry::Callback callback;
+            ThemeReloadRegistry::Document document;
         };
 
         // Never destroyed: an owner destroyed at exit after it (a static window) still unregisters.
         // In registration order, which owners without a document keep on a theme switch.
-        std::vector<ThemeReloadEntry>& ThemeReloadRegistry()
+        std::vector<ThemeReloadEntry>& Registry()
         {
             static auto* registry = new std::vector<ThemeReloadEntry>();
             return *registry;
@@ -403,7 +388,7 @@ namespace UI::RmlBridge
 
         std::vector<ThemeReloadEntry>::iterator FindThemeReloadEntry(const void* owner)
         {
-            auto& registry = ThemeReloadRegistry();
+            auto& registry = Registry();
             return std::find_if(registry.begin(), registry.end(),
                                 [owner](const ThemeReloadEntry& entry) { return entry.owner == owner; });
         }
@@ -427,7 +412,7 @@ namespace UI::RmlBridge
         // the bottom of their stacks up.
         std::vector<ThemeReloadEntry> ReloadOrder()
         {
-            std::vector<ThemeReloadEntry> entries = ThemeReloadRegistry();
+            std::vector<ThemeReloadEntry> entries = Registry();
             std::vector<size_t> slots;
             std::vector<std::pair<int, size_t>> stacked;
             for (size_t i = 0; i < entries.size(); ++i)
@@ -447,23 +432,23 @@ namespace UI::RmlBridge
         }
     }
 
-    void RegisterForThemeReload(const void* owner, ThemeReloadCallback callback, ThemeReloadDocument document)
+    void ThemeReloadRegistry::Register(const void* owner, Callback callback, Document document)
     {
         const auto entry = FindThemeReloadEntry(owner);
-        if (entry != ThemeReloadRegistry().end())
+        if (entry != Registry().end())
         {
             entry->callback = std::move(callback);
             entry->document = std::move(document);
         }
         else
-            ThemeReloadRegistry().push_back({owner, std::move(callback), std::move(document)});
+            Registry().push_back({owner, std::move(callback), std::move(document)});
     }
 
-    void UnregisterForThemeReload(const void* owner)
+    void ThemeReloadRegistry::Unregister(const void* owner)
     {
         const auto entry = FindThemeReloadEntry(owner);
-        if (entry != ThemeReloadRegistry().end())
-            ThemeReloadRegistry().erase(entry);
+        if (entry != Registry().end())
+            Registry().erase(entry);
     }
 
     void ReloadAllThemedDocuments()
