@@ -54,13 +54,12 @@ bool CStorageInventoryExt::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(INTERFACE_STORAGE_EXT, this);
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::VAULT, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15,
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::VAULT, g_pNewItemMng, this, x + 15,
                                              y + 36, 8, 15, MAX_SHOP_INVENTORY))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
-    m_pNewInventoryCtrl->DrawInDocument();
 
     SetPos(x, y);
     SetItemAutoMove(false);
@@ -196,7 +195,7 @@ void CStorageInventoryExt::SyncRmlModel()
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_Pos, 15, 36);
+        m_pNewInventoryCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_Pos, 15, 36);
     if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())
     {
         m_RmlView.GetModel().gridCells = m_pNewInventoryCtrl->Cells();

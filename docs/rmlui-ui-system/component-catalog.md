@@ -425,16 +425,21 @@ additive and multiplying modes leave it (`MuRendererSDLGpu.cpp`'s blend table), 
 premultiplied composite lands each one on whatever is behind the image as it would have on screen;
 an additive glow adds to the panel under it instead of painting a black box.
 
-**Item grids** (`UI/Inventory/ItemGridModel.h`, both themes' `item_grid.rcss`). A native
-`CInventoryCtrl` a window's document draws calls `DrawInDocument()`: its `Render()` then computes
-`Cells()` (each cell's tint, drop preview and stack count, from the native logic) instead of
-drawing, and the shared item camera stops drawing its items, which the window draws into its own
+**Item grids** (`UI/Inventory/ItemGridModel.h`, `ItemGridGeometry.h`, both themes'
+`item_grid.rcss`). A `CInventoryCtrl`'s `Render()` computes `Cells()` (each cell's tint, drop
+preview and stack count, from the native logic), and the window draws its items into its own
 `ItemCameraTarget` with `Render3D()`. Native 2D a drawer draws lands in the target too, where it
 would have on screen (`SetOffscreen2DRect()`), for a window's remaining effects. The window binds the cells (`RegisterItemGridCells()`) and
 its markup lays them out: `.item-grid` (cells, then the frame) at the grid's anchor, the window's
-`.item-view` image over it, then `.item-grid-counts` at the same place. The hit tests stay native,
-reading the anchor. `CMyInventory` is the worked example, with its equipment slots as
-`slot_states` classes on their anchors.
+`.item-view` image over it, then `.item-grid-counts` at the same place. The geometry is the
+theme's: `CInventoryCtrl::FollowGrid()` reads the grid's box and its first `.item-cell`'s margin
+box each frame into a `UI::Items::GridGeometry`, which the hit tests, the drop target, the items'
+boxes, the tooltip and the window's effects use. The pitch is one custom property per theme
+(`--item-cell`, the original's 20), and a window sizes each grid as `calc(N * var(--item-cell))`.
+A dragged item holds its pickup point in cells (`UI::Items::PickupAnchor`), so it targets a grid of
+another pitch correctly. `CMyInventory` is the worked example, with its equipment slots as
+`slot_states` classes on their anchors and each slot's `#slot_*_item` box where the equipped item
+draws and the pointer hits it.
 
 ## Native content above RmlUi
 

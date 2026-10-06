@@ -222,11 +222,11 @@ Both built-in themes have a `tokens.ini` file (`[Tokens]` section, plain `name=v
 files reference via a `token(name)` marker instead of repeating a literal value everywhere it's
 used. RmlUi follows each document's ordinary external `<link>` and loads the themed `.rcss`
 through the game's file interface. That interface resolves `token(name)` from the `tokens.ini`
-beside the stylesheet before RmlUi parses and caches it. This vendored RmlUi build has no
-`var()`/custom-property mechanism, so `token(name)` is plain text substitution, not a CSS
-feature. A new theme needs only its own files; it does not need a C++ change. The stylesheet
-cache is cleared when a theme is selected again, so editing theme files and reselecting that
-theme refreshes their values.
+beside the stylesheet before RmlUi parses and caches it: plain text substitution, not a CSS
+feature. CSS custom properties (`var()`) and `calc()` work too, for a value derived from another
+inside the theme (the item grids' `--item-cell`, `item_grid.rcss`). A new theme needs only its own
+files; it does not need a C++ change. The stylesheet cache is cleared when a theme is selected
+again, so editing theme files and reselecting that theme refreshes their values.
 
 If a stylesheet refers to a token absent from that theme's `[Tokens]` section, the client logs
 the token name and stylesheet path in `MuError.log`. The missing value still expands to an empty

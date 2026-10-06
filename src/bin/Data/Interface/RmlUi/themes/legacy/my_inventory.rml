@@ -19,18 +19,18 @@
 		<!-- The equipment slots, the item grid and the item-option tooltip: boxes the theme places
 		     (my_inventory.rcss); CMyInventory reads them each frame for its hit tests. A slot's class
 		     is its state (MyInventory.h's slot_states). -->
-		<div id="slot_helper" data-attr-class="'native-anchor equip-slot ' + slot_states[8]"><div class="equip-slot-tint"></div></div>
-		<div id="slot_helm" data-attr-class="'native-anchor equip-slot ' + slot_states[2]"><div class="equip-slot-tint"></div></div>
-		<div id="slot_wing" data-attr-class="'native-anchor equip-slot ' + slot_states[7]"><div class="equip-slot-tint"></div></div>
-		<div id="slot_weapon_left" data-attr-class="'native-anchor equip-slot ' + slot_states[1]"><div class="equip-slot-tint"></div></div>
-		<div id="slot_armor" data-attr-class="'native-anchor equip-slot ' + slot_states[3]"><div class="equip-slot-tint"></div></div>
-		<div id="slot_weapon_right" data-attr-class="'native-anchor equip-slot ' + slot_states[0]"><div class="equip-slot-tint"></div></div>
-		<div id="slot_gloves" data-attr-class="'native-anchor equip-slot ' + slot_states[5]"><div class="equip-slot-tint"></div></div>
-		<div id="slot_pants" data-attr-class="'native-anchor equip-slot ' + slot_states[4]"><div class="equip-slot-tint"></div></div>
-		<div id="slot_boots" data-attr-class="'native-anchor equip-slot ' + slot_states[6]"><div class="equip-slot-tint"></div></div>
-		<div id="slot_ring_left" data-attr-class="'native-anchor equip-slot ' + slot_states[11]"><div class="equip-slot-tint"></div></div>
-		<div id="slot_amulet" data-attr-class="'native-anchor equip-slot ' + slot_states[9]"><div class="equip-slot-tint"></div></div>
-		<div id="slot_ring_right" data-attr-class="'native-anchor equip-slot ' + slot_states[10]"><div class="equip-slot-tint"></div></div>
+		<div id="slot_helper" data-attr-class="'native-anchor equip-slot ' + slot_states[8]"><div id="slot_helper_item" class="equip-slot-item"></div></div>
+		<div id="slot_helm" data-attr-class="'native-anchor equip-slot ' + slot_states[2]"><div id="slot_helm_item" class="equip-slot-item"></div></div>
+		<div id="slot_wing" data-attr-class="'native-anchor equip-slot ' + slot_states[7]"><div id="slot_wing_item" class="equip-slot-item"></div></div>
+		<div id="slot_weapon_left" data-attr-class="'native-anchor equip-slot ' + slot_states[1]"><div id="slot_weapon_left_item" class="equip-slot-item"></div></div>
+		<div id="slot_armor" data-attr-class="'native-anchor equip-slot ' + slot_states[3]"><div id="slot_armor_item" class="equip-slot-item"></div></div>
+		<div id="slot_weapon_right" data-attr-class="'native-anchor equip-slot ' + slot_states[0]"><div id="slot_weapon_right_item" class="equip-slot-item"></div></div>
+		<div id="slot_gloves" data-attr-class="'native-anchor equip-slot ' + slot_states[5]"><div id="slot_gloves_item" class="equip-slot-item"></div></div>
+		<div id="slot_pants" data-attr-class="'native-anchor equip-slot ' + slot_states[4]"><div id="slot_pants_item" class="equip-slot-item"></div></div>
+		<div id="slot_boots" data-attr-class="'native-anchor equip-slot ' + slot_states[6]"><div id="slot_boots_item" class="equip-slot-item"></div></div>
+		<div id="slot_ring_left" data-attr-class="'native-anchor equip-slot ' + slot_states[11]"><div id="slot_ring_left_item" class="equip-slot-item"></div></div>
+		<div id="slot_amulet" data-attr-class="'native-anchor equip-slot ' + slot_states[9]"><div id="slot_amulet_item" class="equip-slot-item"></div></div>
+		<div id="slot_ring_right" data-attr-class="'native-anchor equip-slot ' + slot_states[10]"><div id="slot_ring_right_item" class="equip-slot-item"></div></div>
 		<!-- The inventory grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
 		<div id="item_grid" class="native-anchor item-grid">
 			<div class="item-grid-cells">

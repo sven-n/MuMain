@@ -227,7 +227,7 @@ plus [PR #989](https://github.com/mikke89/RmlUi/pull/989) (SDL_GPU renderer pari
 | `aspect-ratio` | Not a property | An explicit `width`/`height` |
 | `text-shadow` | Not a property | `font-effect: outline(...)` |
 | `:focus-visible` | Not supported (`:hover`/`:active`/`:focus` and structural selectors are) | `:focus` |
-| `calc()`, `min()`, `max()` | In the pin (upstream PR #983, carried on the fork), unused so far | Fixed `dp`/`px` values until tried |
+| `calc()`, `min()`, `max()` | In the pin (upstream PR #983, carried on the fork), built with `RMLUI_MATH_EXPRESSIONS` (`src/CMakeLists.txt`); the item grids size from a static `var(--item-cell)` | A custom property set from C++ at runtime is untried (the counter-scale block) |
 | `clamp()`, `minmax()` | Not registered | Fixed `dp`/`px` values |
 | `var(--x)` | Supported by 6.3, unused here | The project's `token(name)` (`theming-and-modding.md`) |
 | `backdrop-filter: blur()` | Works, over the game world too (frosted glass) | — |

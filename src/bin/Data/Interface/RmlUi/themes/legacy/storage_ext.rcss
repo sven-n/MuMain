@@ -57,7 +57,7 @@
 
 /* Native item grid: the first cell's top-left, in #panel's units. */
 .native-anchor { position: absolute; pointer-events: none; }
-#item_grid, #item_grid_counts { left: 15px; top: 36px; width: 160px; height: 300px; }
+#item_grid, #item_grid_counts { left: 15px; top: 36px; width: calc(8 * var(--item-cell)); height: calc(15 * var(--item-cell)); }
 
 /* The frame. */
 @spritesheet ext-bg-fill-sheet   { src: "../../../newui_msgbox_back.jpg";   ext-bg-fill:   0px 0px 190px 429px; }

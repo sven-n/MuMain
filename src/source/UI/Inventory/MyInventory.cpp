@@ -100,12 +100,11 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
     m_pNewUI3DRenderMng = pNewUI3DRenderMng;
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::INVENTORY, m_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 200, 8, 8, MAX_EQUIPMENT))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::INVENTORY, g_pNewItemMng, this, x + 15, y + 200, 8, 8, MAX_EQUIPMENT))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
-    m_pNewInventoryCtrl->DrawInDocument();
 
     m_ActionController.SetContext(this);
 
@@ -604,17 +603,22 @@ void CMyInventory::SyncNativeLayout()
             slot.width = static_cast<int>(std::lround(width));
             slot.height = static_cast<int>(std::lround(height));
         }
+
+        // The original's item box inside the slot until the theme's has laid out.
+        float itemX = static_cast<float>(slot.x + 1);
+        float itemY = static_cast<float>(slot.y);
+        float itemWidth = static_cast<float>(slot.width - 4);
+        float itemHeight = static_cast<float>(slot.height - 4);
+        const std::string itemId = std::string(anchor.id) + "_item";
+        UI::RmlBridge::RefreshLogicalAnchorRect(m_RmlView.Document(), "panel", itemId.c_str(), m_Pos, itemX, itemY,
+                                                itemWidth, itemHeight);
+        slot.itemX = static_cast<int>(std::lround(itemX));
+        slot.itemY = static_cast<int>(std::lround(itemY));
+        slot.itemWidth = static_cast<int>(std::lround(itemWidth));
+        slot.itemHeight = static_cast<int>(std::lround(itemHeight));
     }
 
-    float gridX = static_cast<float>(m_Pos.x + 15);
-    float gridY = static_cast<float>(m_Pos.y + 200);
-    if (UI::RmlBridge::RefreshLogicalAnchorPosition(m_RmlView.Document(), "panel", "item_grid", m_Pos, gridX, gridY))
-    {
-        const int x = static_cast<int>(std::lround(gridX));
-        const int y = static_cast<int>(std::lround(gridY));
-        if (m_pNewInventoryCtrl->GetPos().x != x || m_pNewInventoryCtrl->GetPos().y != y)
-            m_pNewInventoryCtrl->SetPos(x, y);
-    }
+    m_pNewInventoryCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_Pos, 15, 200);
 }
 
 const POINT& CMyInventory::GetPos() const
@@ -872,8 +876,8 @@ bool CMyInventory::Update()
         m_iPointedSlot = -1;
         for (int i = 0; i < MAX_EQUIPMENT_INDEX; i++)
         {
-            if (CheckMouseIn(m_EquipmentSlots[i].x + 1, m_EquipmentSlots[i].y,
-                m_EquipmentSlots[i].width - 4, m_EquipmentSlots[i].height - 4))
+            if (CheckMouseIn(m_EquipmentSlots[i].itemX, m_EquipmentSlots[i].itemY,
+                m_EquipmentSlots[i].itemWidth, m_EquipmentSlots[i].itemHeight))
             {
                 m_iPointedSlot = i;
                 break;
@@ -1056,18 +1060,18 @@ void CMyInventory::Render3D()
             float y = 0.f;
             if (i == EQUIPMENT_ARMOR)
             {
-                y = m_EquipmentSlots[i].y - 10.f;
+                y = m_EquipmentSlots[i].itemY - 10.f;
             }
             else
             {
-                y = m_EquipmentSlots[i].y;
+                y = m_EquipmentSlots[i].itemY;
             }
 
             RenderItem3D(
-                m_EquipmentSlots[i].x + 1,
+                m_EquipmentSlots[i].itemX,
                 y,
-                m_EquipmentSlots[i].width - 4,
-                m_EquipmentSlots[i].height - 4,
+                m_EquipmentSlots[i].itemWidth,
+                m_EquipmentSlots[i].itemHeight,
                 pEquippedItem->Type,
                 pEquippedItem->Level,
                 pEquippedItem->ExcellentFlags,

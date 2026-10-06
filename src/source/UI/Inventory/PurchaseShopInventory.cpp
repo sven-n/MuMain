@@ -46,12 +46,11 @@ bool mu::ui::window::CPurchaseShopInventory::Create(CManager* pNewUIMng, int x, 
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY, this);
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng, this, m_Pos.x + 16, m_Pos.y + 90, 8, 4, MAX_MY_INVENTORY_EX_INDEX))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewItemMng, this, m_Pos.x + 16, m_Pos.y + 90, 8, 4, MAX_MY_INVENTORY_EX_INDEX))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
-    m_pNewInventoryCtrl->DrawInDocument();
 
     m_pNewInventoryCtrl->SetToolTipType(TOOLTIP_TYPE_PURCHASE_SHOP);
     m_pNewInventoryCtrl->LockInventory();
@@ -264,7 +263,7 @@ void mu::ui::window::CPurchaseShopInventory::SyncRmlModel()
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_Pos, 16, 90);
+        m_pNewInventoryCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_Pos, 16, 90);
     if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())
     {
         m_RmlView.GetModel().gridCells = m_pNewInventoryCtrl->Cells();

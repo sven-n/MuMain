@@ -78,6 +78,8 @@ set(RMLUI_SAMPLES OFF CACHE BOOL "" FORCE)
 set(RMLUI_BACKEND "auto" CACHE STRING "" FORCE)
 set(RMLUI_LUA_BINDINGS OFF CACHE BOOL "" FORCE)
 set(RMLUI_INSTALL OFF CACHE BOOL "" FORCE)
+# calc(), min(), max() and clamp(): the themes size the item grids from their --item-cell pitch.
+set(RMLUI_MATH_EXPRESSIONS ON CACHE BOOL "" FORCE)
 add_subdirectory(ThirdParty/RmlUi EXCLUDE_FROM_ALL)
 
 # Determine architecture if CMAKE_SIZEOF_VOID_P isn't set

@@ -27,6 +27,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME item_grid_geometry_tests
+    SOURCES
+        test_item_grid_geometry.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Inventory/ItemGridGeometry.cpp
+)
+
+mu_add_test(
     NAME socket_list_selection_tests
     SOURCES
         test_socket_list_selection.cpp

@@ -234,8 +234,8 @@
 
 /* Native item grids: the first cell's top-left, in #panel's units. */
 .native-anchor { position: absolute; pointer-events: none; }
-#partner_grid, #partner_grid_counts { left: 16px; top: 68px; width: 160px; height: 80px; }
-#item_grid, #item_grid_counts { left: 16px; top: 274px; width: 160px; height: 80px; }
+#partner_grid, #partner_grid_counts { left: 16px; top: 68px; width: calc(8 * var(--item-cell)); height: calc(4 * var(--item-cell)); }
+#item_grid, #item_grid_counts { left: 16px; top: 274px; width: calc(8 * var(--item-cell)); height: calc(4 * var(--item-cell)); }
 
 /* The frame. */
 .bg-panel {

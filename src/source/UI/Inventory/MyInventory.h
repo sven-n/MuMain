@@ -74,6 +74,9 @@ namespace mu::ui::window
             int x, y;
             int width, height;
             DWORD dwBgImage;
+            // Where the equipped item draws and the pointer hits it: the theme's #<slot>_item.
+            int itemX, itemY;
+            int itemWidth, itemHeight;
         } EQUIPMENT_ITEM;
 
         CManager* m_pNewUIMng;

@@ -50,13 +50,12 @@ bool CInventoryExtension::Create(CManager* pNewUIMng, int x, int y)
         m_extension = new CInventoryCtrl();
 
         const int indexOffset = MAX_MY_INVENTORY_INDEX + i * MAX_INVENTORY_EXT_ONE;
-        if (false == m_extension->Create(STORAGE_TYPE::INVENTORY, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15,
+        if (false == m_extension->Create(STORAGE_TYPE::INVENTORY, g_pNewItemMng, this, x + 15,
                                          y + 45 + HEIGHT_PER_EXT * i, COLUMN_INVENTORY, ROW_INVENTORY_EXT, indexOffset))
         {
             SAFE_DELETE(m_extension);
             return false;
         }
-        m_extension->DrawInDocument();
 
         if (m_extension)
         {
@@ -264,13 +263,13 @@ void CInventoryExtension::SyncRmlModel()
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_extensions[0])
-        m_extensions[0]->FollowAnchor(m_RmlView.Document(), "item_grid_1", m_Pos, 15, 45);
+        m_extensions[0]->FollowGrid(m_RmlView.Document(), "item_grid_1", m_Pos, 15, 45);
     if (m_extensions[1])
-        m_extensions[1]->FollowAnchor(m_RmlView.Document(), "item_grid_2", m_Pos, 15, 132);
+        m_extensions[1]->FollowGrid(m_RmlView.Document(), "item_grid_2", m_Pos, 15, 132);
     if (m_extensions[2])
-        m_extensions[2]->FollowAnchor(m_RmlView.Document(), "item_grid_3", m_Pos, 15, 219);
+        m_extensions[2]->FollowGrid(m_RmlView.Document(), "item_grid_3", m_Pos, 15, 219);
     if (m_extensions[3])
-        m_extensions[3]->FollowAnchor(m_RmlView.Document(), "item_grid_4", m_Pos, 15, 306);
+        m_extensions[3]->FollowGrid(m_RmlView.Document(), "item_grid_4", m_Pos, 15, 306);
     if (m_extensions[0] && m_RmlView.GetModel().gridCells1 != m_extensions[0]->Cells())
     {
         m_RmlView.GetModel().gridCells1 = m_extensions[0]->Cells();

@@ -3,8 +3,9 @@
    newui_item_box square over every cell, the newui_item_table frame around the grid, the drop
    preview over the cells under the item on the cursor. The items are 3D, drawn into the window's
    .item-view image over all of it; the stack counts (.item-grid-counts) sit over the items.
-   Reference px under the window's root transform; a cell is 20 x 20. A window places and sizes
-   each grid by its id: width and height are its columns and rows times 20. */
+   Reference px under the window's root transform. The cell pitch is --item-cell, the original's
+   20; CInventoryCtrl::FollowGrid() reads it back for the hit tests and the items' boxes. A window
+   places and sizes each grid by its id: width and height are its columns and rows times it. */
 
 @spritesheet item-cell-sheet { src: "../../../newui_item_box.tga"; item-cell-art: 0px 0px 21px 21px; }
 @spritesheet ig-tl-sheet { src: "../../../newui_item_table01(L).tga"; ig-tl: 0px 0px 14px 14px; }
@@ -16,11 +17,13 @@
 @spritesheet ig-l-sheet { src: "../../../newui_item_table03(L).tga"; ig-l: 0px 0px 14px 1px; }
 @spritesheet ig-r-sheet { src: "../../../newui_item_table03(R).tga"; ig-r: 0px 0px 14px 1px; }
 
+body { --item-cell: 20px; }
+
 .item-grid, .item-grid-counts { position: absolute; pointer-events: none; }
 .item-grid-cells, .item-grid-counts { display: flex; flex-wrap: wrap; }
 .item-grid-cells { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 
-.item-cell, .item-count { position: relative; flex: 0 0 20px; width: 20px; height: 20px; }
+.item-cell, .item-count { position: relative; flex: 0 0 var(--item-cell); width: var(--item-cell); height: var(--item-cell); }
 /* The original's tints: translucent teal, then yellow, amber, orange and red with wear, and
    red-orange for an item that cannot be traded. */
 .item-cell.tint-normal { background-color: rgba(80, 128, 128, 153); }
@@ -29,9 +32,9 @@
 .item-cell.tint-durability-80 { background-color: rgba(255, 84, 0, 102); }
 .item-cell.tint-durability-100 { background-color: rgba(255, 0, 0, 102); }
 .item-cell.tint-untradeable { background-color: rgba(255, 51, 26, 102); }
-/* The square is 21 x 21 on a 20 pitch: each overlaps its neighbour by a pixel, as drawn. */
-.item-cell-art { position: absolute; left: 0; top: 0; width: 21px; height: 21px; decorator: image(item-cell-art); }
-.item-cell-drop { position: absolute; left: 0; top: 0; width: 20px; height: 20px; }
+/* The square is a pixel larger than the pitch: each overlaps its neighbour by a pixel, as drawn. */
+.item-cell-art { position: absolute; left: 0; top: 0; width: calc(var(--item-cell) + 1px); height: calc(var(--item-cell) + 1px); decorator: image(item-cell-art); }
+.item-cell-drop { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 .item-cell.drop-free .item-cell-drop { background-color: rgba(26, 102, 204, 102); }
 .item-cell.drop-blocked .item-cell-drop, .item-cell.drop-invalid .item-cell-drop { background-color: rgba(255, 51, 51, 102); }
 .item-cell.drop-valid .item-cell-drop { background-color: rgba(51, 102, 51, 102); }

@@ -109,12 +109,10 @@ void CLuckyItemWnd::RenderMixEffect()
                 const DWORD sparkleColor = RGBA(red, green, 51, 255);
                 float Rotate = (float)((int)(WorldTime) % 100) * 20.f;
                 float Scale = 5.f + (rand() % 10);
-                float x = m_pNewInventoryCtrl->GetPos().x +
-                    (m_pNewInventoryCtrl->GetItem(i)->x + w) * INVENTORY_SQUARE_WIDTH +
-                    (rand() % INVENTORY_SQUARE_WIDTH);
-                float y = m_pNewInventoryCtrl->GetPos().y +
-                    (m_pNewInventoryCtrl->GetItem(i)->y + h) * INVENTORY_SQUARE_WIDTH +
-                    (rand() % INVENTORY_SQUARE_WIDTH);
+                const UI::Items::GridRect cell = m_pNewInventoryCtrl->Geometry().CellsRect(
+                    m_pNewInventoryCtrl->GetItem(i)->x + w, m_pNewInventoryCtrl->GetItem(i)->y + h, 1, 1);
+                float x = cell.x + (rand() % (std::max)(1, static_cast<int>(cell.width)));
+                float y = cell.y + (rand() % (std::max)(1, static_cast<int>(cell.height)));
                 RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, 0, 0.f, 0.f, 1.f, 1.f, sparkleColor);
                 RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, Rotate, 0.f, 0.f, 1.f, 1.f, sparkleColor);
                 RenderBitmapRotate(BITMAP_SHINY + 1, x, y, Scale * 3.f, Scale * 3.f, Rotate,
@@ -185,12 +183,11 @@ bool CLuckyItemWnd::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_LUCKYITEMWND, this);
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::LUCKYITEM_TRADE, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 110, 8, 4))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::LUCKYITEM_TRADE, g_pNewItemMng, this, x + 15, y + 110, 8, 4))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
-    m_pNewInventoryCtrl->DrawInDocument();
     m_pNewInventoryCtrl->GetSquareColorNormal(m_fInvenClr);
     m_pNewInventoryCtrl->GetSquareColorWarning(m_fInvenClrWarning);
 
@@ -574,7 +571,7 @@ void CLuckyItemWnd::SyncRmlModel()
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_ptPos);
     UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_ptPos, 15, 110);
+        m_pNewInventoryCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_ptPos, 15, 110);
     if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())
     {
         m_RmlView.GetModel().gridCells = m_pNewInventoryCtrl->Cells();

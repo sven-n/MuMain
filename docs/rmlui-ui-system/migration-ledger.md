@@ -65,7 +65,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 
 | Component | Status | Shape | Note |
 |---|---|---|---|
-| `CMyInventory` | Done | Hybrid | One document: frame, equipment slots (`slot_states`), the item grid (`item_grid.rcss`), the equipped and grid items in a render target, stack counts. Hit tests stay native, on RCSS anchors |
+| `CMyInventory` | Done | Hybrid | One document: frame, equipment slots (`slot_states`), the item grid (`item_grid.rcss`), the equipped and grid items in a render target, stack counts. Hit tests stay native, on the theme's grid and slot geometry |
 | `CTrade`, `CStorageInventory`, `CStorageInventoryExt`, `CMixInventory`, `CNPCShop`, `CMyShopInventory`, `CPurchaseShopInventory`, `CInventoryExtension`, `CLuckyItemWnd` | Done | Hybrid | Same pattern, one document each. Their native 2D (trade's guild mark and warning arrows, the mix and lucky-item sparkles, the extension's locked-page art) draws into the window's render target with its items |
 | `CItemExplanationWindow`, `CSetItemExplanation` | Done | RmlUi-only 2D | `UI/Inventory/TipTextListView` |
 | `CUnitedMarketPlaceWindow` | Done | RmlUi-only 2D | Its 3D hook draws nothing |

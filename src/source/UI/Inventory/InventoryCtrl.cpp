@@ -14,19 +14,10 @@
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "UI/RmlBridge/RmlTooltip.h"
+
+#include <RmlUi/Core/ElementDocument.h>
 using namespace SEASON3B;
 using namespace mu::ui::window;
-
-namespace
-{
-constexpr float PickedItemOverlayAlpha = 0.4f;
-
-void SetInventorySquareColor(const vec3_t& color)
-{
-    SetRenderColor(static_cast<BYTE>(color[0] * 255.f), static_cast<BYTE>(color[1] * 255.f),
-                   static_cast<BYTE>(color[2] * 255.f), static_cast<BYTE>(PickedItemOverlayAlpha * 255.f));
-}
-}
 
 POINT UI::Items::Drag::PickupOffset(int itemLeft, int itemTop, int itemWidth, int itemHeight,
                                     int pointerX, int pointerY, bool preserveAnchor)
@@ -77,7 +68,6 @@ mu::ui::window::CPickedItem::CPickedItem()
     m_bShow = true;
     m_Pos.x = m_Pos.y = 0;
     m_Size.cx = m_Size.cy = 0;
-    m_PickupOffset.x = m_PickupOffset.y = 0;
 }
 
 mu::ui::window::CPickedItem::~CPickedItem()
@@ -98,15 +88,18 @@ bool mu::ui::window::CPickedItem::Create(CItemMng* pNewItemMng, CInventoryCtrl* 
         return false;
     }
 
-    const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pPickedItem->Type];
-    m_Size.cx = pItemAttr->Width * INVENTORY_SQUARE_WIDTH;
-    m_Size.cy = pItemAttr->Height * INVENTORY_SQUARE_HEIGHT;
+    // Sized by the grid it left, or the inventory's for an equipped item.
+    const CInventoryCtrl* sizing = SizingGrid();
+    m_Size = SizeIn(sizing);
     const bool hasGridAnchor = preservePickupAnchor && pSrc != nullptr;
-    const int itemLeft = hasGridAnchor ? pSrc->GetPos().x + pItem->x * INVENTORY_SQUARE_WIDTH : 0;
-    const int itemTop = hasGridAnchor ? pSrc->GetPos().y + pItem->y * INVENTORY_SQUARE_HEIGHT : 0;
-    m_PickupOffset = UI::Items::Drag::PickupOffset(itemLeft, itemTop, m_Size.cx, m_Size.cy,
-                                                   MouseX, MouseY, hasGridAnchor);
-    m_Pos = UI::Items::Drag::ItemTopLeft(MouseX, MouseY, m_PickupOffset);
+    const UI::Items::GridRect itemBox =
+        hasGridAnchor ? pSrc->Geometry().CellsRect(pItem->x, pItem->y, 1, 1) : UI::Items::GridRect{};
+    const POINT offset = UI::Items::Drag::PickupOffset(static_cast<int>(std::lround(itemBox.x)),
+                                                       static_cast<int>(std::lround(itemBox.y)), m_Size.cx,
+                                                       m_Size.cy, MouseX, MouseY, hasGridAnchor);
+    const UI::Items::GridGeometry geometry = sizing ? sizing->Geometry() : UI::Items::GridGeometry{};
+    m_Anchor = {offset.x / geometry.PitchX(), offset.y / geometry.PitchY()};
+    m_Pos = TopLeftIn(sizing, MouseX, MouseY);
 
     return true;
 }
@@ -118,7 +111,7 @@ void mu::ui::window::CPickedItem::Release()
     m_pNewItemMng = nullptr;
     m_pSrcInventory = nullptr;
     m_bShow = true;
-    m_PickupOffset.x = m_PickupOffset.y = 0;
+    m_Anchor = {};
 }
 
 CInventoryCtrl* mu::ui::window::CPickedItem::GetOwnerInventory() const
@@ -162,9 +155,31 @@ const SIZE& mu::ui::window::CPickedItem::GetSize() const
     return m_Size;
 }
 
-const POINT& mu::ui::window::CPickedItem::GetPickupOffset() const
+const CInventoryCtrl* mu::ui::window::CPickedItem::SizingGrid() const
 {
-    return m_PickupOffset;
+    if (m_pSrcInventory)
+        return m_pSrcInventory;
+    return g_pMyInventory ? g_pMyInventory->GetInventoryCtrl() : nullptr;
+}
+
+POINT mu::ui::window::CPickedItem::TopLeftIn(const CInventoryCtrl* grid, int pointerX, int pointerY) const
+{
+    const UI::Items::GridGeometry geometry = grid ? grid->Geometry() : UI::Items::GridGeometry{};
+    int left = 0;
+    int top = 0;
+    UI::Items::AnchoredTopLeft(static_cast<float>(pointerX), static_cast<float>(pointerY), m_Anchor,
+                               geometry.PitchX(), geometry.PitchY(), left, top);
+    return {left, top};
+}
+
+SIZE mu::ui::window::CPickedItem::SizeIn(const CInventoryCtrl* grid) const
+{
+    if (m_pPickedItem == nullptr)
+        return {0, 0};
+    const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pPickedItem->Type];
+    const UI::Items::GridGeometry geometry = grid ? grid->Geometry() : UI::Items::GridGeometry{};
+    const UI::Items::GridRect box = geometry.CellsRect(0, 0, pItemAttr->Width, pItemAttr->Height);
+    return {static_cast<LONG>(std::lround(box.width)), static_cast<LONG>(std::lround(box.height))};
 }
 
 void mu::ui::window::CPickedItem::GetRect(RECT& rcBox)
@@ -193,7 +208,7 @@ bool mu::ui::window::CPickedItem::GetTargetPos(CInventoryCtrl* pDest, int& iTarg
 {
     if (pDest != nullptr)
     {
-        const POINT itemTopLeft = UI::Items::Drag::ItemTopLeft(MouseX, MouseY, m_PickupOffset);
+        const POINT itemTopLeft = TopLeftIn(pDest, MouseX, MouseY);
 
         return pDest->GetSquarePosAtPt(itemTopLeft.x, itemTopLeft.y, iTargetColumnX, iTargetRowY);
     }
@@ -237,7 +252,7 @@ void mu::ui::window::CPickedItem::Render3D()
         const auto transform = UI::Scaling::GetActiveTransform();
         const int pointerX = static_cast<int>(std::floor(UI::Scaling::LogicalX(transform, g_fWindowMouseX)));
         const int pointerY = static_cast<int>(std::floor(UI::Scaling::LogicalY(transform, g_fWindowMouseY)));
-        m_Pos = UI::Items::Drag::ItemTopLeft(pointerX, pointerY, m_PickupOffset);
+        m_Pos = TopLeftIn(SizingGrid(), pointerX, pointerY);
         RenderItem3D(m_Pos.x, m_Pos.y, m_Size.cx, m_Size.cy, m_pPickedItem->Type, m_pPickedItem->Level,
                      m_pPickedItem->ExcellentFlags, m_pPickedItem->AncientDiscriminator, true);
     }
@@ -258,11 +273,9 @@ mu::ui::window::CInventoryCtrl::~CInventoryCtrl()
 
 void mu::ui::window::CInventoryCtrl::Init()
 {
-    m_pNew3DRenderMng = nullptr;
     m_pNewItemMng = nullptr;
     m_pOwner = nullptr;
-    m_Pos.x = m_Pos.y = 0;
-    m_Size.cx = m_Size.cy = 0;
+    m_Geometry = {};
     m_nColumn = m_nRow = 0;
     m_pdwItemCheckBox = nullptr;
     m_EventState = EVENT_NONE;
@@ -411,26 +424,21 @@ bool mu::ui::window::CInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
     return false;
 }
 
-bool mu::ui::window::CInventoryCtrl::Create(STORAGE_TYPE storageType, C3DRenderMng* pNew3DRenderMng,
-                                           CItemMng* pNewItemMng, CObject* pOwner, int x, int y, int nColumn,
+bool mu::ui::window::CInventoryCtrl::Create(STORAGE_TYPE storageType, CItemMng* pNewItemMng, CObject* pOwner,
+                                           int x, int y, int nColumn,
                                            int nRow, int nIndexOffset)
 {
     m_StorageType = storageType;
     m_nIndexOffset = nIndexOffset;
     if (m_pdwItemCheckBox || false == m_vecItem.empty())
         return false;
-    if (pNew3DRenderMng == nullptr || pNewItemMng == nullptr)
+    if (pNewItemMng == nullptr)
         return false;
-
-    m_pNew3DRenderMng = pNew3DRenderMng;
-    m_pNew3DRenderMng->Add3DRenderObj(this, INVENTORY_CAMERA_Z_ORDER);
 
     m_pNewItemMng = pNewItemMng;
     m_pOwner = pOwner;
-    m_Pos.x = x;
-    m_Pos.y = y;
-    m_Size.cx = nColumn * INVENTORY_SQUARE_WIDTH;
-    m_Size.cy = nRow * INVENTORY_SQUARE_HEIGHT;
+    m_Geometry = {static_cast<float>(x), static_cast<float>(y), UI::Items::GridGeometry::DefaultPitch,
+                  UI::Items::GridGeometry::DefaultPitch, nColumn, nRow};
     m_nColumn = nColumn;
     m_nRow = nRow;
     m_pdwItemCheckBox = new DWORD[nColumn * nRow];
@@ -447,16 +455,10 @@ bool mu::ui::window::CInventoryCtrl::Create(STORAGE_TYPE storageType, C3DRenderM
 }
 void mu::ui::window::CInventoryCtrl::Release()
 {
-    if (m_pNew3DRenderMng)
-        m_pNew3DRenderMng->DeleteUI2DEffectObject(UI2DEffectCallback);
-
     RemoveAllItems();
     UnloadImages();
 
     SAFE_DELETE(m_pdwItemCheckBox);
-
-    if (m_pNew3DRenderMng)
-        m_pNew3DRenderMng->Remove3DRenderObj(this);
 
     Init();
 }
@@ -967,10 +969,9 @@ bool mu::ui::window::CInventoryCtrl::UpdateMouseEvent()
             if ((pItem->Type == ITEM_DARK_HORSE_ITEM) || (pItem->Type == ITEM_DARK_RAVEN_ITEM))
             {
                 const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pToolTipItem->Type];
-                const int iTargetX = m_Pos.x + m_pToolTipItem->x * INVENTORY_SQUARE_WIDTH +
-                                     pItemAttr->Width * INVENTORY_SQUARE_WIDTH / 2;
-                const int iTargetY = m_Pos.y + m_pToolTipItem->y * INVENTORY_SQUARE_HEIGHT;
-                giPetManager::RequestPetInfo(iTargetX, iTargetY, pItem);
+                const UI::Items::GridRect box =
+                    m_Geometry.CellsRect(m_pToolTipItem->x, m_pToolTipItem->y, pItemAttr->Width, 1);
+                giPetManager::RequestPetInfo(static_cast<int>(box.x + box.width / 2), static_cast<int>(box.y), pItem);
             }
         }
     }
@@ -1095,13 +1096,6 @@ bool mu::ui::window::CInventoryCtrl::DropActsOn(ITEM* pPickItem, ITEM* pTargetIt
     return bSuccess;
 }
 
-void mu::ui::window::CInventoryCtrl::DrawInDocument()
-{
-    m_bDocumentDrawn = true;
-    if (m_pNew3DRenderMng)
-        m_pNew3DRenderMng->Remove3DRenderObj(this);
-}
-
 // Render()'s cell pass, as state: the tint under each item, the drop preview under the item on the
 // cursor, and each item's stack count.
 void mu::ui::window::CInventoryCtrl::UpdateCells()
@@ -1141,8 +1135,8 @@ void mu::ui::window::CInventoryCtrl::UpdateCells()
 
     // The picked item's own position is in its owner window's space; every placed window has its
     // own, so take the item's box from the pointer in this grid's space.
-    const POINT itemTopLeft = UI::Items::Drag::ItemTopLeft(MouseX, MouseY, ms_pPickedItem->GetPickupOffset());
-    const SIZE& pickedSize = ms_pPickedItem->GetSize();
+    const POINT itemTopLeft = ms_pPickedItem->TopLeftIn(this, MouseX, MouseY);
+    const SIZE pickedSize = ms_pPickedItem->SizeIn(this);
     RECT rcPickedItem{itemTopLeft.x, itemTopLeft.y, itemTopLeft.x + pickedSize.cx, itemTopLeft.y + pickedSize.cy};
     RECT rcInventory, rcIntersect;
     GetRect(rcInventory);
@@ -1153,15 +1147,7 @@ void mu::ui::window::CInventoryCtrl::UpdateCells()
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pPickItem->Type];
     int iColumnX = 0, iRowY = 0;
     int nItemColumn = pItemAttr->Width, nItemRow = pItemAttr->Height;
-    if (false == GetSquarePosAtPt(itemTopLeft.x, itemTopLeft.y, iColumnX, iRowY))
-    {
-        iColumnX = (itemTopLeft.x - rcInventory.left) / INVENTORY_SQUARE_WIDTH;
-        if (itemTopLeft.x - rcInventory.left < 0)
-            iColumnX -= 1;
-        iRowY = (itemTopLeft.y - rcInventory.top) / INVENTORY_SQUARE_HEIGHT;
-        if (itemTopLeft.y - rcInventory.top < 0)
-            iRowY -= 1;
-    }
+    m_Geometry.CellOf(static_cast<float>(itemTopLeft.x), static_cast<float>(itemTopLeft.y), iColumnX, iRowY);
 
     bool bWarning = false;
     if (iColumnX < 0 && iColumnX >= -nItemColumn)
@@ -1215,320 +1201,44 @@ void mu::ui::window::CInventoryCtrl::UpdateCells()
 
 void mu::ui::window::CInventoryCtrl::Render()
 {
-    if (m_bDocumentDrawn)
-    {
-        UpdateCells();
-        if (m_pToolTipItem && GetPickedItem() == nullptr)
-            RenderItemToolTip();
-        return;
-    }
-
-    int x, y;
-    for (y = 0; y < m_nRow; y++)
-    {
-        for (x = 0; x < m_nColumn; x++)
-        {
-            const int iCurSquareIndex = y * m_nColumn + x;
-
-            const DWORD slotKey = m_pdwItemCheckBox[iCurSquareIndex];
-            if (slotKey > 1)
-            {
-                EnableAlphaTest();
-
-                ITEM* pItem = FindItemByKey(slotKey);
-
-                if (pItem)
-                {
-                    if (CanChangeItemColorState(pItem) == true)
-                    {
-                        SetItemColorState(pItem);
-                    }
-
-                    // Durability/trade-warning tint -- without it the slot falls back to
-                    // RenderColor's translucent-black default, hiding the repair warning colors.
-                    unsigned int tintARGB = 0x99508080u; // NORMAL: translucent teal
-                    if (pItem->byColorState == ITEM_COLOR_DURABILITY_50)
-                    {
-                        tintARGB = 0x66FFFF00u; // yellow
-                    }
-                    else if (pItem->byColorState == ITEM_COLOR_DURABILITY_70)
-                    {
-                        tintARGB = 0x66FFA800u; // amber
-                    }
-                    else if (pItem->byColorState == ITEM_COLOR_DURABILITY_80)
-                    {
-                        tintARGB = 0x66FF5400u; // orange
-                    }
-                    else if (pItem->byColorState == ITEM_COLOR_DURABILITY_100)
-                    {
-                        tintARGB = 0x66FF0000u; // red — broken
-                    }
-                    else if (pItem->byColorState == ITEM_COLOR_TRADE_WARNING)
-                    {
-                        tintARGB = 0x66FF331Au; // red-orange — not tradeable
-                    }
-
-                    RenderColorQuadARGB(m_Pos.x + (x * INVENTORY_SQUARE_WIDTH), m_Pos.y + (y * INVENTORY_SQUARE_HEIGHT),
-                                        INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT, tintARGB);
-                }
-                else
-                {
-                    this->ClearSlotKey(slotKey);
-                    this->RequestInventoryRefresh();
-                }
-
-                EndRenderColor();
-            }
-
-            EnableAlphaTest();
-            RenderImage(IMAGE_ITEM_SQUARE, m_Pos.x + (x * INVENTORY_SQUARE_WIDTH),
-                        m_Pos.y + (y * INVENTORY_SQUARE_HEIGHT), 21, 21);
-        }
-    }
-
-    EnableAlphaTest();
-    RenderImage(IMAGE_ITEM_TABLE_TOP_LEFT, m_Pos.x - WND_LEFT_EDGE, m_Pos.y - WND_TOP_EDGE, 14, 14);
-    RenderImage(IMAGE_ITEM_TABLE_TOP_RIGHT, m_Pos.x + m_Size.cx - WND_RIGHT_EDGE, m_Pos.y - WND_TOP_EDGE, 14, 14);
-    RenderImage(IMAGE_ITEM_TABLE_BOTTOM_LEFT, m_Pos.x - WND_LEFT_EDGE, m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE, 14, 14);
-    RenderImage(IMAGE_ITEM_TABLE_BOTTOM_RIGHT, m_Pos.x + m_Size.cx - WND_RIGHT_EDGE,
-                m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE, 14, 14);
-
-    for (x = m_Pos.x - WND_LEFT_EDGE + 14; x < m_Pos.x + m_Size.cx - WND_RIGHT_EDGE; x++)
-    {
-        RenderImage(IMAGE_ITEM_TABLE_TOP_PIXEL, x, m_Pos.y - WND_TOP_EDGE, 1, 14);
-        RenderImage(IMAGE_ITEM_TABLE_BOTTOM_PIXEL, x, m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE, 1, 14);
-    }
-    for (y = m_Pos.y - WND_TOP_EDGE + 14; y < m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE; y++)
-    {
-        RenderImage(IMAGE_ITEM_TABLE_LEFT_PIXEL, m_Pos.x - WND_LEFT_EDGE, y, 14, 1);
-        RenderImage(IMAGE_ITEM_TABLE_RIGHT_PIXEL, m_Pos.x + m_Size.cx - WND_RIGHT_EDGE, y, 14, 1);
-    }
-
-    if (ms_pPickedItem)
-    {
-        const bool pickitemvisible = ms_pPickedItem->IsVisible();
-
-        if (pickitemvisible)
-        {
-            // The picked item's own position is in its owner window's space; every placed window
-            // has its own, so take the item's box from the pointer in this grid's space.
-            const POINT pickedTopLeft =
-                UI::Items::Drag::ItemTopLeft(MouseX, MouseY, ms_pPickedItem->GetPickupOffset());
-            const SIZE& pickedSize = ms_pPickedItem->GetSize();
-            RECT rcPickedItem{pickedTopLeft.x, pickedTopLeft.y, pickedTopLeft.x + pickedSize.cx,
-                              pickedTopLeft.y + pickedSize.cy};
-            RECT rcInventory, rcIntersect;
-            GetRect(rcInventory);
-
-            if (IntersectRect(&rcIntersect, &rcPickedItem, &rcInventory))
-            {
-                ITEM* pPickItem = ms_pPickedItem->GetItem();
-                const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pPickItem->Type];
-                const POINT itemTopLeft = UI::Items::Drag::ItemTopLeft(
-                    MouseX, MouseY, ms_pPickedItem->GetPickupOffset());
-                const int iPickedItemX = itemTopLeft.x;
-                const int iPickedItemY = itemTopLeft.y;
-
-                int iColumnX = 0, iRowY = 0;
-                int nItemColumn = pItemAttr->Width, nItemRow = pItemAttr->Height;
-                if (false == GetSquarePosAtPt(iPickedItemX, iPickedItemY, iColumnX, iRowY))
-                {
-                    iColumnX = ((iPickedItemX - rcInventory.left) / INVENTORY_SQUARE_WIDTH);
-
-                    if (iPickedItemX - rcInventory.left < 0)
-                        iColumnX = ((iPickedItemX - rcInventory.left) / INVENTORY_SQUARE_WIDTH) - 1;
-                    else
-                        iColumnX = (iPickedItemX - rcInventory.left) / INVENTORY_SQUARE_WIDTH;
-
-                    if (iPickedItemY - rcInventory.top < 0)
-                        iRowY = ((iPickedItemY - rcInventory.top) / INVENTORY_SQUARE_HEIGHT) - 1;
-                    else
-                        iRowY = (iPickedItemY - rcInventory.top) / INVENTORY_SQUARE_HEIGHT;
-                }
-
-                bool bWarning = false;
-                //. Clipping
-                if (iColumnX < 0 && iColumnX >= -nItemColumn)
-                {
-                    nItemColumn = nItemColumn + iColumnX;
-                    iColumnX = 0;
-                    bWarning = true;
-                }
-                if (iColumnX + nItemColumn > m_nColumn && iColumnX < m_nColumn)
-                {
-                    nItemColumn = m_nColumn - iColumnX;
-                    bWarning = true;
-                }
-                if (iRowY < 0 && iRowY >= -nItemRow)
-                {
-                    nItemRow = nItemRow + iRowY;
-                    iRowY = 0;
-                    bWarning = true;
-                }
-                if (iRowY + nItemRow > m_nRow && iRowY < m_nRow)
-                {
-                    nItemRow = m_nRow - iRowY;
-                    bWarning = true;
-                }
-
-                const int iDestPosX = m_Pos.x + iColumnX * INVENTORY_SQUARE_WIDTH;
-                const int iDestPosY = m_Pos.y + iRowY * INVENTORY_SQUARE_HEIGHT;
-                const int iDestWidth = nItemColumn * INVENTORY_SQUARE_WIDTH;
-                const int iDestHeight = nItemRow * INVENTORY_SQUARE_HEIGHT;
-
-                m_bCanPushItem = bWarning;
-
-                //. Rendering Routine
-                if (bWarning)
-                {
-                    EnableAlphaTest();
-                    SetSquareColorWarning(1.f, 0.2f, 0.2f);
-                    SetInventorySquareColor(m_afColorStateWarning);
-                    RenderColor(iDestPosX, iDestPosY, iDestWidth, iDestHeight);
-                    EndRenderColor();
-                }
-                else
-                {
-                    if (iColumnX >= 0 && iColumnX < m_nColumn && iRowY >= 0 && iRowY < m_nRow)
-                    {
-                        EnableAlphaTest();
-                        for (int y = 0; y < nItemRow; y++)
-                        {
-                            for (int x = 0; x < nItemColumn; x++)
-                            {
-                                const int iSquarePosX = iColumnX + x;
-                                const int iSquarePosY = iRowY + y;
-                                const int iCurSquareIndex = iSquarePosY * m_nColumn + iSquarePosX;
-                                if (m_pdwItemCheckBox[iCurSquareIndex] > 1)
-                                {
-                                    bool bSuccess = false;
-
-                                    ITEM* pTargetItem = FindItemByKey(m_pdwItemCheckBox[iCurSquareIndex]);
-                                    if (pTargetItem)
-                                    {
-                                        const int iType = pTargetItem->Type;
-                                        const int iDurability = pTargetItem->Durability;
-
-                                        if ((pPickItem->Type == ITEM_JEWEL_OF_BLESS) ||
-                                            (pPickItem->Type == ITEM_JEWEL_OF_SOUL))
-                                        {
-                                            bSuccess = CanUpgradeItem(pPickItem, pTargetItem);
-                                        }
-                                        else if (pPickItem->Type == ITEM_JEWEL_OF_HARMONY)
-                                        {
-                                            if (pTargetItem->Jewel_Of_Harmony_Option == 0)
-                                            {
-                                                const StrengthenItem strengthitem = g_pUIJewelHarmonyinfo->GetItemType(
-                                                    static_cast<int>(pTargetItem->Type));
-
-                                                if ((strengthitem != SI_None) &&
-                                                    (!g_SocketItemMgr.IsSocketItem(pTargetItem)) &&
-                                                    (pTargetItem->AncientDiscriminator > 0))
-                                                {
-                                                    bSuccess = true;
-                                                }
-                                            }
-                                        }
-                                        else if (pPickItem->Type == ITEM_LOWER_REFINE_STONE ||
-                                                 pPickItem->Type == ITEM_HIGHER_REFINE_STONE)
-                                        {
-                                            if (pTargetItem->Jewel_Of_Harmony_Option != 0)
-                                            {
-                                                bSuccess = true;
-                                            }
-                                        }
-
-                                        if (pPickItem->Type == ITEM_JEWEL_OF_BLESS && iType == ITEM_HORN_OF_FENRIR &&
-                                            iDurability != 255)
-                                        {
-                                            bSuccess = true;
-                                        }
-
-                                        if (bSuccess == false && m_pOwner == g_pMyInventory)
-                                        {
-                                            bSuccess = AreItemsStackable(pPickItem, pTargetItem);
-                                        }
-                                        if (Check_LuckyItem(pTargetItem->Type))
-                                        {
-                                            bSuccess = false;
-                                            if (pPickItem->Type == ITEM_POTION + 161)
-                                            {
-                                                if (pTargetItem->Jewel_Of_Harmony_Option == 0)
-                                                    bSuccess = true;
-                                            }
-                                            else if (pPickItem->Type == ITEM_POTION + 160)
-                                            {
-                                                if (pTargetItem->Durability > 0)
-                                                    bSuccess = true;
-                                            }
-                                        }
-                                    }
-
-                                    if (bSuccess)
-                                    {
-                                        SetSquareColorWarning(0.2f, 0.4f, 0.2f);
-                                    }
-                                    else
-                                    {
-                                        SetSquareColorWarning(1.f, 0.2f, 0.2f);
-                                    }
-
-                                    SetInventorySquareColor(m_afColorStateWarning);
-                                }
-                                else
-                                {
-                                    SetInventorySquareColor(m_afColorStateNormal);
-                                }
-                                RenderColor(m_Pos.x + (iSquarePosX * INVENTORY_SQUARE_WIDTH),
-                                            m_Pos.y + (iSquarePosY * INVENTORY_SQUARE_HEIGHT), INVENTORY_SQUARE_WIDTH,
-                                            INVENTORY_SQUARE_HEIGHT);
-                            }
-                        }
-                        EndRenderColor();
-                    }
-                }
-            }
-        }
-    }
-
-    const bool tooltipvisible = true;
-
-    if (m_pNew3DRenderMng)
-    {
-        m_pNew3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, RENDER_NUMBER_OF_ITEM,
-                                            0);
-        if (m_pToolTipItem && GetPickedItem() == nullptr)
-        {
-            if (tooltipvisible)
-            {
-                m_pNew3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this,
-                                                    RENDER_ITEM_TOOLTIP, 0);
-            }
-        }
-    }
+    UpdateCells();
+    if (m_pToolTipItem && GetPickedItem() == nullptr)
+        RenderItemToolTip();
 }
 
 void mu::ui::window::CInventoryCtrl::SetPos(int x, int y)
 {
-    m_Pos.x = x;
-    m_Pos.y = y;
+    m_Geometry = {static_cast<float>(x), static_cast<float>(y), m_Geometry.PitchX(), m_Geometry.PitchY(),
+                  m_Geometry.Columns(), m_Geometry.Rows()};
 }
 
-const POINT& mu::ui::window::CInventoryCtrl::GetPos() const
+POINT mu::ui::window::CInventoryCtrl::GetPos() const
 {
-    return m_Pos;
+    return {static_cast<LONG>(std::lround(m_Geometry.Left())), static_cast<LONG>(std::lround(m_Geometry.Top()))};
 }
 
-void mu::ui::window::CInventoryCtrl::FollowAnchor(Rml::ElementDocument* doc, const char* anchorId, const POINT& panelPos,
-                                  int offsetX, int offsetY)
+void mu::ui::window::CInventoryCtrl::FollowGrid(Rml::ElementDocument* doc, const char* gridId, const POINT& panelPos,
+                                                int offsetX, int offsetY)
 {
     float x = static_cast<float>(panelPos.x + offsetX);
     float y = static_cast<float>(panelPos.y + offsetY);
-    UI::RmlBridge::RefreshLogicalAnchorPosition(doc, "panel", anchorId, panelPos, x, y);
-    const int gridX = static_cast<int>(std::lround(x));
-    const int gridY = static_cast<int>(std::lround(y));
-    if (GetPos().x != gridX || GetPos().y != gridY)
-        SetPos(gridX, gridY);
+    UI::RmlBridge::RefreshLogicalAnchorPosition(doc, "panel", gridId, panelPos, x, y);
+
+    // A cell's margin box, so a theme may space its cells apart.
+    float pitchX = m_Geometry.PitchX();
+    float pitchY = m_Geometry.PitchY();
+    Rml::Element* grid = doc ? doc->GetElementById(gridId) : nullptr;
+    if (Rml::Element* cell = grid ? grid->QuerySelector(".item-cell") : nullptr)
+    {
+        const Rml::Vector2f size = cell->GetBox().GetSize(Rml::BoxArea::Margin);
+        if (size.x > 0.f && size.y > 0.f)
+        {
+            pitchX = size.x;
+            pitchY = size.y;
+        }
+    }
+
+    m_Geometry = {std::round(x), std::round(y), pitchX, pitchY, m_nColumn, m_nRow};
 }
 
 int mu::ui::window::CInventoryCtrl::GetNumberOfColumn() const
@@ -1543,10 +1253,11 @@ int mu::ui::window::CInventoryCtrl::GetNumberOfRow() const
 
 void mu::ui::window::CInventoryCtrl::GetRect(RECT& rcBox)
 {
-    rcBox.left = m_Pos.x;
-    rcBox.top = m_Pos.y;
-    rcBox.right = rcBox.left + m_Size.cx;
-    rcBox.bottom = rcBox.top + m_Size.cy;
+    const UI::Items::GridRect box = m_Geometry.Bounds();
+    rcBox.left = static_cast<LONG>(std::lround(box.x));
+    rcBox.top = static_cast<LONG>(std::lround(box.y));
+    rcBox.right = static_cast<LONG>(std::lround(box.x + box.width));
+    rcBox.bottom = static_cast<LONG>(std::lround(box.y + box.height));
 }
 
 CInventoryCtrl::EVENT_STATE mu::ui::window::CInventoryCtrl::GetEventState()
@@ -1606,16 +1317,7 @@ int mu::ui::window::CInventoryCtrl::GetIndexAtPt(int x, int y)
 
 bool mu::ui::window::CInventoryCtrl::GetSquarePosAtPt(int x, int y, int& iColumnX, int& iRowY)
 {
-    RECT rcBox;
-    GetRect(rcBox);
-
-    if (x < rcBox.left || x >= rcBox.right || y < rcBox.top || y >= rcBox.bottom)
-        return false;
-
-    iColumnX = (x - rcBox.left) / INVENTORY_SQUARE_WIDTH;
-    iRowY = (y - rcBox.top) / INVENTORY_SQUARE_HEIGHT;
-
-    return true;
+    return m_Geometry.CellAt(static_cast<float>(x), static_cast<float>(y), iColumnX, iRowY);
 }
 
 bool mu::ui::window::CInventoryCtrl::CheckSlot(int startIndex, int width, int height)
@@ -1666,12 +1368,7 @@ int CInventoryCtrl::GetIndex(int column, int row)
 
 bool mu::ui::window::CInventoryCtrl::CheckPtInRect(int x, int y)
 {
-    RECT rcSquare;
-    GetRect(rcSquare);
-
-    if (x < rcSquare.left || x >= rcSquare.right || y < rcSquare.top || y >= rcSquare.bottom)
-        return false;
-    return true;
+    return m_Geometry.Contains(static_cast<float>(x), static_cast<float>(y));
 }
 
 bool mu::ui::window::CInventoryCtrl::CheckRectInRect(const RECT& rcBox)
@@ -1754,75 +1451,18 @@ bool mu::ui::window::CInventoryCtrl::IsRepairMode()
     return m_bRepairMode;
 }
 
-void mu::ui::window::CInventoryCtrl::RenderNumberOfItem()
-{
-    EnableAlphaTest();
-    auto li = m_vecItem.begin();
-    for (; li != m_vecItem.end(); ++li)
-    {
-        const ITEM* pItem = (*li);
-        const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
-        const float x = m_Pos.x + (pItem->x * INVENTORY_SQUARE_WIDTH);
-        const float y = m_Pos.y + (pItem->y * INVENTORY_SQUARE_HEIGHT);
-        const float width = pItemAttr->Width * INVENTORY_SQUARE_WIDTH;
-        float height = pItemAttr->Height * INVENTORY_SQUARE_HEIGHT;
-
-        if (pItem->Type >= ITEM_POTION && pItem->Type <= ITEM_ANTIDOTE && pItem->Durability > 1)
-        {
-            mu::ui::window::RenderNumber(x + width - 6, y + 1, pItem->Durability);
-        }
-        else if (pItem->Type >= ITEM_JACK_OLANTERN_BLESSINGS && pItem->Type <= ITEM_JACK_OLANTERN_DRINK &&
-                 pItem->Durability > 1)
-        {
-            mu::ui::window::RenderNumber(x + width - 6, y + 1, pItem->Durability);
-        }
-        else if (pItem->Type >= ITEM_SMALL_SHIELD_POTION && pItem->Type <= ITEM_LARGE_COMPLEX_POTION &&
-                 pItem->Durability > 1)
-        {
-            mu::ui::window::RenderNumber(x + width - 6, y + 1, pItem->Durability);
-        }
-        else if (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71 && pItem->Durability > 1)
-        {
-            mu::ui::window::RenderNumber(x + width - 6, y + 1, pItem->Durability);
-        }
-        else if (pItem->Type == ITEM_POTION + 94 && pItem->Durability > 1)
-        {
-            mu::ui::window::RenderNumber(x + width - 6, y + 1, pItem->Durability);
-        }
-        else if (pItem->Type >= ITEM_POTION + 78 && pItem->Type <= ITEM_POTION + 82 && pItem->Durability > 1)
-        {
-            mu::ui::window::RenderNumber(x + width - 6, y + 1, pItem->Durability);
-        }
-        else if (pItem->Type >= ITEM_CHERRY_BLOSSOM_WINE && pItem->Type <= ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH &&
-                 pItem->Durability > 1)
-        {
-            mu::ui::window::RenderNumber(x + width - 6, y + 1, pItem->Durability);
-        }
-        else if (pItem->Type == ITEM_POTION + 133 && pItem->Durability > 1)
-        {
-            mu::ui::window::RenderNumber(x + width - 6, y + 1, pItem->Durability);
-        }
-        else if (COMGEM::isCompiledGem(pItem))
-        {
-            const int Level = pItem->Level;
-            mu::ui::window::RenderNumber(x + width - 6, y + 1, (Level + 1) * COMGEM::FIRST);
-        }
-    }
-    DisableAlphaBlend();
-}
-
 void mu::ui::window::CInventoryCtrl::RenderItemToolTip()
 {
     if (m_pToolTipItem)
     {
         const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pToolTipItem->Type];
-        const int iTargetX =
-            m_Pos.x + m_pToolTipItem->x * INVENTORY_SQUARE_WIDTH + pItemAttr->Width * INVENTORY_SQUARE_WIDTH / 2;
-        int iTargetY = m_Pos.y + m_pToolTipItem->y * INVENTORY_SQUARE_HEIGHT;
+        const UI::Items::GridRect box = m_Geometry.CellsRect(m_pToolTipItem->x, m_pToolTipItem->y, pItemAttr->Width, 1);
+        const int iTargetX = static_cast<int>(box.x + box.width / 2);
+        int iTargetY = static_cast<int>(box.y);
 
         if (pItemAttr->Height == 1)
         {
-            iTargetY += INVENTORY_SQUARE_HEIGHT / 2;
+            iTargetY += static_cast<int>(box.height / 2);
         }
 
         if (m_ToolTipType == TOOLTIP_TYPE_INVENTORY)
@@ -1845,18 +1485,6 @@ void mu::ui::window::CInventoryCtrl::RenderItemToolTip()
         {
             RenderItemInfo(iTargetX, iTargetY, m_pToolTipItem, false, m_ToolTipType);
         }
-    }
-}
-
-void mu::ui::window::CInventoryCtrl::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
-{
-    if (pClass)
-    {
-        auto* pInventoryCtrl = static_cast<CInventoryCtrl*>(pClass);
-        if (dwParamA == RENDER_NUMBER_OF_ITEM)
-            pInventoryCtrl->RenderNumberOfItem();
-        else if (dwParamA == RENDER_ITEM_TOOLTIP)
-            pInventoryCtrl->RenderItemToolTip();
     }
 }
 
@@ -1938,12 +1566,9 @@ void mu::ui::window::CInventoryCtrl::Render3D()
         const ITEM* pItem = (*li);
         const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
 
-        const float x = m_Pos.x + (pItem->x * INVENTORY_SQUARE_WIDTH);
-        const float y = m_Pos.y + (pItem->y * INVENTORY_SQUARE_HEIGHT);
-        const float width = pItemAttr->Width * INVENTORY_SQUARE_WIDTH;
-        const float height = pItemAttr->Height * INVENTORY_SQUARE_HEIGHT;
+        const UI::Items::GridRect box = m_Geometry.CellsRect(pItem->x, pItem->y, pItemAttr->Width, pItemAttr->Height);
 
-        RenderItem3D(x, y, width, height, pItem->Type, pItem->Level, pItem->ExcellentFlags, pItem->AncientDiscriminator,
+        RenderItem3D(box.x, box.y, box.width, box.height, pItem->Type, pItem->Level, pItem->ExcellentFlags, pItem->AncientDiscriminator,
                      false);
     }
 }

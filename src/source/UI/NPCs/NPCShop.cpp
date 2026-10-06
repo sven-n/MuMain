@@ -60,12 +60,11 @@ bool mu::ui::window::CNPCShop::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPCSHOP, this);
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 50, 8, 15))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewItemMng, this, x + 15, y + 50, 8, 15))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
-    m_pNewInventoryCtrl->DrawInDocument();
 
     if (m_pNewInventoryCtrl)
     {
@@ -300,7 +299,7 @@ void mu::ui::window::CNPCShop::SyncRmlModel()
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_Pos, 15, 50);
+        m_pNewInventoryCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_Pos, 15, 50);
     if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())
     {
         m_RmlView.GetModel().gridCells = m_pNewInventoryCtrl->Cells();

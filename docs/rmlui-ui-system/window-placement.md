@@ -255,7 +255,7 @@ hit boxes against C++ constants, and native parts at `m_Pos + constant`.
 | 1. RCSS only | character, party, pet, NPC dialogue, gate switch, MU Helper config | Done: the docked frame pins to `#panel`'s edges; counter-scaled leaves take `panel_width` (`SyncPanelWidth()`). |
 | 2. Plus hit box | guild info, guild make, command, command list, Blood Castle and Devil Square entry, catapult, lucky coin registration, lucky item | Done: hit boxes read `#panel`. Catapult and lucky item not checked in game. |
 | 3. Plus anchors | quest progress, quest log, NPC quest, castle, guard, gatekeeper, duel watch, MU Helper detail, United Marketplace | Done in code (RmlUi click targets, theme-placed). Siege NPC windows not checked in game. |
-| 4. Native grids | inventory, extension, vault, NPC shop, mix, trade, personal shops | Done: invisible `.native-anchor` boxes place the equipment slots, each grid's first cell (`CInventoryCtrl::FollowAnchor()`) and the option tooltip; cell size stays native. Legacy headings centre on `panel_width`; in-game checks pending. |
+| 4. Item grids | inventory, extension, vault, NPC shop, mix, trade, personal shops | Done: each grid's box and its `.item-cell` pitch (`--item-cell`, `CInventoryCtrl::FollowGrid()`), the equipment slots and their item boxes (`#slot_*_item`) and the option tooltip are the theme's; C++ hit-tests and draws the items in them. Legacy headings centre on `panel_width`. |
 | 5. Shared views | Gold Bowman (both), Doppelganger and Empire Guardian entry, lucky coin exchange | Each registers its document, so slots take the theme's size; native parts still need anchors. |
 
 ## Open questions

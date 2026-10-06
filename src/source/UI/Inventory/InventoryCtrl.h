@@ -5,6 +5,7 @@
 #pragma once
 
 #pragma warning(disable : 4786)
+#include "UI/Inventory/ItemGridGeometry.h"
 #include "UI/Inventory/ItemGridModel.h"
 #include <vector>
 
@@ -66,7 +67,10 @@ namespace mu::ui::window
         bool m_bShow;
         POINT m_Pos;
         SIZE m_Size;
-        POINT m_PickupOffset;
+        UI::Items::PickupAnchor m_Anchor;
+
+        // The grid whose pitch sizes the item: the one it left, else the inventory.
+        const CInventoryCtrl* SizingGrid() const;
 
     public:
         CPickedItem();
@@ -82,8 +86,11 @@ namespace mu::ui::window
 
         const POINT& GetPos() const;
         const SIZE& GetSize() const;
-        const POINT& GetPickupOffset() const;
         void GetRect(RECT& rcBox);
+        // The item's top-left in `grid`'s space, with the pointer at (pointerX, pointerY) there.
+        POINT TopLeftIn(const CInventoryCtrl* grid, int pointerX, int pointerY) const;
+        // The item's size in `grid`'s cells.
+        SIZE SizeIn(const CInventoryCtrl* grid) const;
 
         int GetSourceLinealPos();
         bool GetTargetPos(CInventoryCtrl* pDest, int& iTargetColumnX, int& iTargetRowY);
@@ -97,7 +104,7 @@ namespace mu::ui::window
         void Render3D();
     };
 
-    class CInventoryCtrl : public I3DRenderObj
+    class CInventoryCtrl
     {
     public:
         enum EVENT_STATE
@@ -126,30 +133,15 @@ namespace mu::ui::window
         };
 
     private:
-        enum
-        {
-            ITEM_SQUARE_WITH = 20,
-            ITEM_SQUARE_HEIGHT = 20,
-            WND_TOP_EDGE = 3,
-            WND_LEFT_EDGE = 4,
-            WND_BOTTOM_EDGE = 8,
-            WND_RIGHT_EDGE = 9,
-
-            RENDER_NUMBER_OF_ITEM = 1,
-            RENDER_ITEM_TOOLTIP = 2,
-        };
-
         typedef std::vector<ITEM*>	type_vec_item;
 
         static CPickedItem* ms_pPickedItem;
 
-        C3DRenderMng* m_pNew3DRenderMng;
         CItemMng* m_pNewItemMng;
         CObject* m_pOwner;
 
         type_vec_item	m_vecItem;
-        POINT	m_Pos;
-        SIZE	m_Size;
+        UI::Items::GridGeometry m_Geometry;
         STORAGE_TYPE m_StorageType;
         int	m_nColumn, m_nRow;
         /**
@@ -171,8 +163,6 @@ namespace mu::ui::window
 
         bool m_bCanPushItem;
 
-        // Set by a window whose document draws this grid (DrawInDocument()).
-        bool m_bDocumentDrawn = false;
         UI::Items::ItemGridCells m_Cells;
         void UpdateCells();
         // Whether dropping `pPickItem` on `pTargetItem` acts on it: Render()'s green cell.
@@ -198,7 +188,7 @@ namespace mu::ui::window
         CInventoryCtrl();
         virtual ~CInventoryCtrl();
 
-        bool Create(STORAGE_TYPE storageType, C3DRenderMng* pNew3DRenderMng, CItemMng* pNewItemMng, CObject* pOwner, int x, int y, int nColumn, int nRow, int nIndexOffset = 0);
+        bool Create(STORAGE_TYPE storageType, CItemMng* pNewItemMng, CObject* pOwner, int x, int y, int nColumn, int nRow, int nIndexOffset = 0);
         void Release();
 
         bool AddItem(int iLinealPos, std::span<const BYTE> pbyItemPacket);
@@ -242,21 +232,21 @@ namespace mu::ui::window
         bool UpdateMouseEvent();
         bool Update();
 
+        // The window's document draws the grid from Cells(), and the window draws its items
+        // (Render3D()) into its own render target; this updates the cells and the tooltip.
         void Render();
 
-        // The window's document draws this grid from Cells(), and the window draws its items
-        // (Render3D()) into its own render target: Render() then draws nothing, and the shared item
-        // camera no longer draws the items.
-        void DrawInDocument();
         // As of the last Render(); empty until then.
         const UI::Items::ItemGridCells& Cells() const { return m_Cells; }
 
         void SetPos(int x, int y);
-        const POINT& GetPos() const;
-        // Each frame: puts the grid's first cell where the theme draws `anchorId` in `doc`, or at
-        // `panelPos` + (`offsetX`, `offsetY`) (the original's place) until that has laid out.
-        void FollowAnchor(Rml::ElementDocument* doc, const char* anchorId, const POINT& panelPos, int offsetX,
-                          int offsetY);
+        POINT GetPos() const;
+        const UI::Items::GridGeometry& Geometry() const { return m_Geometry; }
+        // Each frame: the grid where the theme draws `gridId` in `doc`, its cell pitch that of the
+        // grid's .item-cell. Until that has laid out, the first cell sits at `panelPos` +
+        // (`offsetX`, `offsetY`), the original's place, and the pitch stays as it was.
+        void FollowGrid(Rml::ElementDocument* doc, const char* gridId, const POINT& panelPos, int offsetX,
+                        int offsetY);
         int GetNumberOfColumn() const;
         int GetNumberOfRow() const;
         void GetRect(RECT& rcBox);
@@ -271,7 +261,7 @@ namespace mu::ui::window
         EVENT_STATE GetEventState();
 
         CObject* GetOwner() const;
-        CObject* GetLayoutOwner() const override;
+        CObject* GetLayoutOwner() const;
         bool IsVisible() const;
         void ShowInventory();
         void HideInventory();
@@ -304,17 +294,14 @@ namespace mu::ui::window
         bool CanPushItem();
         bool CanUpgradeItem(ITEM* pSourceItem, ITEM* pTargetItem);
 
-        static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
-
         //. PickedItem Control Functions
         static CPickedItem* GetPickedItem();
         static bool CreatePickedItem(CInventoryCtrl* pSrc, ITEM* pItem, bool preservePickupAnchor = false);
         static void DeletePickedItem();
         static void BackupPickedItem();
 
-        //protected:
+        // The items, live 3D, where their cells are.
         void Render3D();
-        void RenderNumberOfItem();
         void RenderItemToolTip();
     };
 }

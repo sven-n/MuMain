@@ -114,13 +114,14 @@
    left and 4 from the right and bottom, as RenderEquippedItem() drew it; refused while the item on
    the cursor cannot go in. */
 .equip-slot.no-art { background-color: transparent; border-color: transparent; }
-.equip-slot-tint { position: absolute; left: 1px; top: 0; right: 3px; bottom: 4px; }
-.equip-slot.broken .equip-slot-tint, .equip-slot.unequipable .equip-slot-tint { background-color: rgba(255, 0, 0, 64); }
-.equip-slot.durability-20 .equip-slot-tint { background-color: rgba(255, 38, 0, 64); }
-.equip-slot.durability-30 .equip-slot-tint { background-color: rgba(255, 128, 0, 64); }
-.equip-slot.durability-50 .equip-slot-tint { background-color: rgba(255, 255, 0, 64); }
-.equip-slot.refused .equip-slot-tint { background-color: rgba(230, 26, 26, 102); }
-#item_grid, #item_grid_counts { left: 15px; top: 200px; width: 160px; height: 160px; }
+/* Where the equipped item draws and the pointer hits it (CMyInventory), tinted by the slot's state. */
+.equip-slot-item { position: absolute; left: 1px; top: 0; right: 3px; bottom: 4px; }
+.equip-slot.broken .equip-slot-item, .equip-slot.unequipable .equip-slot-item { background-color: rgba(255, 0, 0, 64); }
+.equip-slot.durability-20 .equip-slot-item { background-color: rgba(255, 38, 0, 64); }
+.equip-slot.durability-30 .equip-slot-item { background-color: rgba(255, 128, 0, 64); }
+.equip-slot.durability-50 .equip-slot-item { background-color: rgba(255, 255, 0, 64); }
+.equip-slot.refused .equip-slot-item { background-color: rgba(230, 26, 26, 102); }
+#item_grid, #item_grid_counts { left: 15px; top: 200px; width: calc(8 * var(--item-cell)); height: calc(8 * var(--item-cell)); }
 #option_tooltip_anchor { left: 95px; top: 40px; }
 
 /* The frame: values below are copied VERBATIM from sys_menu.rcss's #panel and base.rcss's

@@ -13,10 +13,8 @@ No code-health item is left.
 
 In order:
 
-1. [Native coordinates in the item windows](#native-coordinates-in-the-item-windows): their
-   pointing to RmlUi, then `dp`, retiring the root transform and counter-scaled text there.
-2. [One obvious component surface](#one-obvious-component-surface).
-3. [The counter-scale block](#the-counter-scale-block): settle the open question, then move it to
+1. [One obvious component surface](#one-obvious-component-surface).
+2. [The counter-scale block](#the-counter-scale-block): settle the open question, then move it to
    `calc()`.
 
 Waiting on their own triggers: the [accepted constraints](#accepted-as-it-stands-with-its-trigger)
@@ -26,23 +24,6 @@ Throughout: run targeted scale, theme and interaction checks with each change. T
 exists to prove the architecture, so its unchecked windows are not tracked. The `CObject` tier is
 accepted as the base ([building-new-ui.md](building-new-ui.md)'s "Accepted as the base"), and window
 placement is theme-owned ([window-placement.md](window-placement.md)).
-
-## Native coordinates in the item windows
-
-Native 3D reaches RmlUi only through render targets (`UI::RmlBridge::RenderTarget`; items through
-`UI::Items::ItemCameraTarget`), and every document is in the one context. What still ties the item
-windows to the original's reference coordinates is input: `CInventoryCtrl`, the paperdoll and
-`CInventoryActionController` hit-test in 640x480 units against the `.native-anchor` readback, and a
-grid's cell pitch is fixed at 20 (`INVENTORY_SQUARE_WIDTH`). That is why these windows keep
-`SyncRootTransform` and counter-scaled `.sharp-text`.
-
-**Direction.** Drive the grids' and slots' pointing from RmlUi events on their cells (`.item-cell`,
-`.equip-slot`), read the cell pitch from RCSS, then move the windows to `dp`; the counter-scale
-block shrinks with it. The shared item camera's last users are the native message boxes that show
-an item (`C3DItemCommonMsgBox`, the cash shop's buy boxes); the cash shop's own native widgets draw
-into its render target until its port ([one obvious component surface](#one-obvious-component-surface)).
-
-**Revisit when** an item window's layout or input is next touched.
 
 ## The counter-scale block
 
@@ -55,7 +36,8 @@ without a multiplied width, and the button labels and entry-window lines use the
 
 **The way out.** The pinned fork carries upstream PR #983 (`calc()`, `min()`, `max()`, and `var()`
 inside them), so `width: calc(220px * var(--root-scale))` with C++ setting `--root-scale` on `#panel`
-would move the whole class into RCSS. Unused so far.
+would move the whole class into RCSS. The item grids already size themselves with `calc()` over a
+static custom property.
 
 **Open question, to settle first:** whether a custom property set from C++ at runtime recomputes
 every `calc()` that depends on it, and at what cost when it changes (on a UI-scale change, not every
@@ -76,7 +58,11 @@ aliases or forwarding headers over mass renames. Done when every common UI conce
 implementation or a documented presentation-specific split, discoverable without knowing the
 codebase's history. Known gaps:
 
-- **`CInGameShop`** keeps the last native widgets alive; new code must not use them.
+- **`CInGameShop`** keeps the last native widgets alive; new code must not use them. They draw into
+  its render target until its port.
+- **The shared item camera** (`C3DRenderMng`) is left only to the native message boxes that show an
+  item (`C3DItemCommonMsgBox`, the cash shop's buy boxes); new code draws items through
+  `UI::Items::ItemCameraTarget`.
 - **`CBuffStrip` and `CMuHelperBar` hover tooltips** are their own CSS `:hover` mechanism (plain
   text, no per-line colour), not the shared tooltip, because they live in `dp` while every other
   caller anchors in reference pixels.

@@ -47,22 +47,20 @@ bool CTrade::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_TRADE, this);
 
     m_pYourInvenCtrl = new CInventoryCtrl;
-    if (false == m_pYourInvenCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng,
+    if (false == m_pYourInvenCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewItemMng,
         this, x + 16, y + 68, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
     {
         SAFE_DELETE(m_pYourInvenCtrl);
         return false;
     }
-    m_pYourInvenCtrl->DrawInDocument();
 
     m_pMyInvenCtrl = new CInventoryCtrl;
-    if (false == m_pMyInvenCtrl->Create(STORAGE_TYPE::TRADE, g_pNewUI3DRenderMng, g_pNewItemMng,
+    if (false == m_pMyInvenCtrl->Create(STORAGE_TYPE::TRADE, g_pNewItemMng,
         this, x + 16, y + 274, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
     {
         SAFE_DELETE(m_pMyInvenCtrl);
         return false;
     }
-    m_pMyInvenCtrl->DrawInDocument();
 
     SetPos(x, y);
 
@@ -337,19 +335,15 @@ void CTrade::RenderWarningArrow()
 
     int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
     ITEM* pYourItemObj;
-    float fX, fY;
-    POINT ptYourInvenCtrl = m_pYourInvenCtrl->GetPos();
-
     for (int i = 0; i < nYourItems; ++i)
     {
         pYourItemObj = m_pYourInvenCtrl->GetItem(i);
         if (ITEM_COLOR_TRADE_WARNING == pYourItemObj->byColorState)
         {
-            fX = (float)ptYourInvenCtrl.x
-                + (pYourItemObj->x * INVENTORY_SQUARE_WIDTH);
-            fY = (float)ptYourInvenCtrl.y
-                + (pYourItemObj->y * INVENTORY_SQUARE_WIDTH)
-                + sinf(WorldTime * 0.015f);
+            const UI::Items::GridRect cell =
+                m_pYourInvenCtrl->Geometry().CellsRect(pYourItemObj->x, pYourItemObj->y, 1, 1);
+            const float fX = cell.x;
+            const float fY = cell.y + sinf(WorldTime * 0.015f);
 
             const DWORD warningArrowColor = RGBA(0, 255, 255, 255);
             ::RenderColorBitmap(IMAGE_TRADE_WARNING_ARROW, fX, fY + 5, 24.f, 24.f,
@@ -381,9 +375,9 @@ void CTrade::SyncRmlModel()
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pYourInvenCtrl)
-        m_pYourInvenCtrl->FollowAnchor(m_RmlView.Document(), "partner_grid", m_Pos, 16, 68);
+        m_pYourInvenCtrl->FollowGrid(m_RmlView.Document(), "partner_grid", m_Pos, 16, 68);
     if (m_pMyInvenCtrl)
-        m_pMyInvenCtrl->FollowAnchor(m_RmlView.Document(), "item_grid", m_Pos, 16, 274);
+        m_pMyInvenCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_Pos, 16, 274);
     if (m_pYourInvenCtrl && m_RmlView.GetModel().partnerCells != m_pYourInvenCtrl->Cells())
     {
         m_RmlView.GetModel().partnerCells = m_pYourInvenCtrl->Cells();
@@ -482,16 +476,17 @@ void CTrade::SyncRmlModel()
     std::vector<TradeRmlModel::ItemWarningBadge> itemWarningBadges;
     if (m_pYourInvenCtrl)
     {
-        const POINT ptYourInvenCtrl = m_pYourInvenCtrl->GetPos();
         const int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
         for (int i = 0; i < nYourItems; ++i)
         {
             ITEM* pYourItemObj = m_pYourInvenCtrl->GetItem(i);
             if (ITEM_COLOR_TRADE_WARNING != pYourItemObj->byColorState) continue;
 
-            const float fX = (float)ptYourInvenCtrl.x + (pYourItemObj->x * INVENTORY_SQUARE_WIDTH);
-            const float fY = (float)ptYourInvenCtrl.y + (pYourItemObj->y * INVENTORY_SQUARE_WIDTH) + sinf(WorldTime * 0.015f);
-            const float fWidth = (float)((int)ItemAttribute[pYourItemObj->Type].Width * INVENTORY_SQUARE_WIDTH);
+            const UI::Items::GridRect box = m_pYourInvenCtrl->Geometry().CellsRect(
+                pYourItemObj->x, pYourItemObj->y, ItemAttribute[pYourItemObj->Type].Width, 1);
+            const float fX = box.x;
+            const float fY = box.y + sinf(WorldTime * 0.015f);
+            const float fWidth = box.width;
 
             itemWarningBadges.push_back({ fX - m_Pos.x, fY - m_Pos.y, fWidth });
         }
