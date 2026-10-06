@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "World/MapInfra/MapManager.h"
+#include "UI/Events/EventPreview.h"
 #include "UI/Events/ChaosCastleTime.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
@@ -87,7 +88,7 @@ bool CChaosCastleTime::Update()
         return true;
     }
 
-    if (gMapManager.InChaosCastle() == false)
+    if (gMapManager.InChaosCastle() == false && !UI::EventPreview::IsShowing(UI::EventPreview::Event::ChaosCastle))
     {
         Show(false);
     }

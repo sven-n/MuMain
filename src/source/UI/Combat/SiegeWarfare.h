@@ -73,6 +73,8 @@ public:
 
     void ClearGuildMemberLocation(void);
     void SetGuildMemberLocation(BYTE type, int x, int y);
+    // The variant `type` instead of the one the hero's guild status picks (UI::EventPreview).
+    void CreatePreviewMiniMapUI(SIEGEWAR_TYPE type);
     void SetTime(BYTE byHour, BYTE byMinute);
 
     void SetMapInfo(GuildCommander& data);

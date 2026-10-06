@@ -53,7 +53,7 @@ void SetCommanderMapInfo(std::uint8_t team, std::uint8_t x, std::uint8_t y, std:
 
 void ReplaceMemberLocations(std::span<const MapLocation> locations)
 {
-    if (g_pSiegeWarfare->GetCurSiegeWarType() != TYPE_GUILD_COMMANDER)
+    if (g_pSiegeWarfare->GetCurSiegeWarType() != mu::ui::window::CSiegeWarfare::SIEGEWAR_TYPE_COMMANDER)
         return;
 
     g_pSiegeWarfare->ClearGuildMemberLocation();
@@ -63,7 +63,7 @@ void ReplaceMemberLocations(std::span<const MapLocation> locations)
 
 void AddNpcLocations(std::span<const MapLocation> locations)
 {
-    if (g_pSiegeWarfare->GetCurSiegeWarType() != TYPE_GUILD_COMMANDER)
+    if (g_pSiegeWarfare->GetCurSiegeWarType() != mu::ui::window::CSiegeWarfare::SIEGEWAR_TYPE_COMMANDER)
         return;
 
     for (const MapLocation& location : locations)

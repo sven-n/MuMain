@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "UI/Events/CursedTempleResult.h"
+#include "UI/Events/EventPreview.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Widgets/UIBaseDef.h"
 #include "Audio/DSPlaySound.h"
@@ -121,6 +122,11 @@ void mu::ui::window::CCursedTempleResult::OpenningProcess()
 
 void mu::ui::window::CCursedTempleResult::ClosingProcess()
 {
+    if (UI::EventPreview::IsShowing(UI::EventPreview::Event::TempleResult))
+    {
+        UI::EventPreview::Stop();
+        return;
+    }
     SocketClient->ToGameServer()->SendIllusionTempleRewardRequest();
     ResetGameResultInfo();
 }

@@ -103,7 +103,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CBloodCastle`, `CChaosCastleTime`, `CEmpireGuardianTimer` | Done | `UI/Events/EventTimerView`; event-HUD slots, `LayoutMode::HudFrame` |
 | `CDoppelGangerFrame`, `CKanturuInfoWindow` | Done | Event-HUD slots, `LayoutMode::HudFrame` |
 | `CCursedTempleEnter`, `CCursedTempleResult`, `CCursedTempleSystem` | Done | Panel stage (enter, result); the Illusion Temple HUD places itself |
-| `CCryWolf` | Done; not seen | Renders only in the event (`tracked-deferrals.md`) |
+| `CCryWolf` | Done | Renders only in the event; seen through `$preview crywolf`/`crywolfresult` (`tracked-deferrals.md`) |
 | `CGoldBowmanWindow`, `CGoldBowmanLena`, `CExchangeLuckyCoin`, `CRegistrationLuckyCoin` | Done | `UI/Events/EventItemEntryView`; the registration coin stays native 3D |
 | `CKanturu2ndEnterNpc` | Done | Panel stage |
 

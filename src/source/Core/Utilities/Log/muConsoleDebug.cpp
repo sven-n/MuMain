@@ -23,6 +23,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Core/SceneUICoordinator.h"
+#include "UI/Events/EventPreview.h"
 #include "UI/Theme/ThemeSelection.h"
 #include "UI/Windows/RememberPasswordPrompt.h"
 #include "Core/Utilities/StringUtils.h"
@@ -203,6 +204,13 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         }
         g_pSystemLogBox->AddText((L"no such window: " + argument).c_str(),
                                  mu::ui::window::TYPE_ERROR_MESSAGE);
+        return true;
+    }
+
+    // "$preview <event>" fills an event window with sample data off its map; see EventPreview.h.
+    if (strCommand.compare(0, 8, L"$preview") == 0)
+    {
+        UI::EventPreview::HandleCommand(strCommand.size() > 9 ? strCommand.substr(9) : std::wstring());
         return true;
     }
 

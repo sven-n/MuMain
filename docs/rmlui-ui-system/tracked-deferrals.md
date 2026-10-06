@@ -7,8 +7,9 @@ is recorded where the code it changed is described.
 
 ## Before merging to main
 
-1. **The event windows nobody has seen in game** ([below](#implemented-but-not-seen)) are looked at,
-   with sample data fed to them locally where no server runs the event.
+1. **What the event previews showed** ([below](#seen-through-preview)): the Illusion Temple result's
+   columns, its own row and footer, and two HUDs that collide with the quick-command buttons or the
+   screen edge.
 
 ## After the merge
 
@@ -147,20 +148,23 @@ The ownership rollout moved layout out of C++ into the themes. What is left: win
 game, constraints accepted with a trigger, and the counter-scale block above. For new UI, follow
 [building-new-ui.md](building-new-ui.md)'s Ownership section.
 
-### Implemented but not seen
+### Seen through `$preview`
 
-Converted, built and linked, with no client-reachable state to validate against. A wrong position
-here surfaces only during the event.
+The event windows that draw only while a server runs their event are looked at with `$preview <event>`
+(`UI/Events/EventPreview.cpp`; `$preview` lists them, `$preview off` ends one). It fills a window
+through the setters its packets use and lets it draw off its map; the window sends nothing. Teleporting
+a game master to the map passes the map check but brings no event state, and the GM move does not
+create the siege minimap that a map join does. What the previews showed, in both themes unless noted:
 
-- **`CryWolf`**: its render gates on `M34CryWolf1st::IsCyrWolf1st()`, so `$win crywolf` opens the
-  window and nothing draws. The exp digits, the five altars, the notice's four lines and the clock's
-  state all moved unseen. The port also fixed altars being pushed only when they had something to
-  show, which shifted every later altar along the hill.
-- **`SiegeWarfare`**: renders only inside Battle Castle during a siege.
-- **The Illusion Temple result and HUD**, the Blood Castle and Chaos Castle timers, and the duel
-  spectator list (empty without spectators). The Temple HUD is the weakest: its draw order rests on
-  the regrouped pieces not overlapping on screen rather than on having been looked at.
+- **Illusion Temple result**: the camp, name, class and EXP columns overlap ("Dark Knigh87455");
+  modern draws the player's own row as an empty highlight; the footer text runs under the Close
+  button.
+- **Illusion Temple HUD**: the panel's top overlaps the quick-command buttons (modern).
+- **CryWolf battle HUD**: runs off the right edge of the screen.
+- **Siege commander HUD**: the member and NPC dots the preview sends fall outside the part of the map
+  it shows, so it is unconfirmed whether they draw where native drew them.
 
+The Blood Castle and Chaos Castle timers, the duel spectator list and the CryWolf result look right.
 The Battle Soccer score, the duel frame, the Empire Guardian timer and the Doppelganger frame draw
 outside their event (`$win soccer full`, `duel`, `empiretimer`, `doppelframe`) and were checked in
 both themes. Everything else in the rollout was verified in game, both themes, with the scale sweep.

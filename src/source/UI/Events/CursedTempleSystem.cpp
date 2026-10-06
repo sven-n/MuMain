@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include "UI/Events/CursedTempleSystem.h"
+#include "UI/Events/EventPreview.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Widgets/UIBaseDef.h"
@@ -1122,7 +1123,8 @@ void mu::ui::window::CCursedTempleSystem::SyncView()
         return;
 
     // The original's check for a map change out of the event without the event's own hide.
-    if (IsVisible() && gMapManager.IsCursedTemple() == false)
+    if (IsVisible() && gMapManager.IsCursedTemple() == false &&
+        !UI::EventPreview::IsShowing(UI::EventPreview::Event::Temple))
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
 
     const bool visible = IsVisible();

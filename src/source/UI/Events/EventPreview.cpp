@@ -1,0 +1,290 @@
+#include "stdafx.h"
+
+#include "UI/Events/EventPreview.h"
+
+#include "Engine/Object/ZzzCharacter.h"
+#include "GameLogic/Combat/DuelMgr.h"
+#include "UI/Core/WindowManager.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Events/BloodCastleTime.h"
+#include "UI/Events/ChaosCastleTime.h"
+#include "UI/Events/CursedTempleResult.h"
+#include "UI/Events/CursedTempleSystem.h"
+#include "UI/Events/CursedTempleUpdates.h"
+#include "UI/Events/CryWolf.h"
+#include "UI/Events/CryWolfUpdates.h"
+#include "UI/Combat/SiegeUpdates.h"
+#include "UI/Combat/SiegeWarfare.h"
+#include "World/GameMaps/GMBattleCastle.h"
+#include "World/GameMaps/GMCrywolf1st.h"
+
+#include <array>
+#include <string_view>
+
+// GMCrywolf1st.cpp's state, which the CryWolf window draws from.
+extern BYTE m_AltarState[5];
+extern bool View_Bal;
+extern char Suc_Or_Fail;
+extern char View_Suc_Or_Fail;
+extern int Dark_elf_Num;
+extern int Val_Hp;
+extern int Delay;
+extern int Add_Num;
+extern BYTE Rank;
+extern int Exp;
+extern CLASS_TYPE HeroClass[5];
+extern int HeroScore[5];
+extern wchar_t HeroName[5][MAX_USERNAME_SIZE + 1];
+extern BYTE m_CrywolfState;
+
+namespace UI::EventPreview
+{
+namespace
+{
+using mu::ui::window::CManager;
+
+Event s_Showing = Event::None;
+
+struct Entry
+{
+    std::wstring_view name;
+    Event event;
+    DWORD window;
+    std::wstring_view what;
+};
+
+constexpr std::array kEntries = {
+    Entry{L"bloodcastle", Event::BloodCastle, mu::ui::window::INTERFACE_BLOODCASTLE_TIME,
+          L"Blood Castle timer, 8:15 left, 23 of 40 monsters"},
+    Entry{L"chaoscastle", Event::ChaosCastle, mu::ui::window::INTERFACE_CHAOSCASTLE_TIME,
+          L"Chaos Castle timer, 3:42 left (imminent), 34 of 70 left"},
+    Entry{L"temple", Event::Temple, mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM,
+          L"Illusion Temple HUD, allied 3 : illusion 5, a relic carrier and two allies"},
+    Entry{L"templeresult", Event::TempleResult, mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT,
+          L"Illusion Temple result, allied win 7 : 5, three players a side"},
+    Entry{L"duelusers", Event::DuelSpectators, mu::ui::window::INTERFACE_DUELWATCH_USERLIST,
+          L"duel spectator list, five spectators"},
+    Entry{L"crywolf", Event::CryWolf, mu::ui::window::INTERFACE_CRYWOLF,
+          L"CryWolf battle HUD, altars in each state, Balgass at 62%, 12 minutes left"},
+    Entry{L"crywolfresult", Event::CryWolfResult, mu::ui::window::INTERFACE_CRYWOLF,
+          L"CryWolf result, success banner, rank and the hero list"},
+    Entry{L"siege", Event::Siege, mu::ui::window::INTERFACE_SIEGEWARFARE,
+          L"castle siege commander HUD, members, NPCs and two commands, 45 minutes left"},
+};
+
+void Log(const std::wstring& text, mu::ui::window::MESSAGE_TYPE type = mu::ui::window::TYPE_SYSTEM_MESSAGE)
+{
+    g_pSystemLogBox->AddText(text.c_str(), type);
+}
+
+// Shown and hidden without the window's opening or closing process, which may talk to the server.
+void SetWindowShown(DWORD window, bool shown)
+{
+    if (CManager* manager = g_pNewUISystem->GetNewUIManager())
+        manager->ShowInterface(window, shown);
+}
+
+void SeedBloodCastle()
+{
+    g_pBloodCastle->SetTime(8 * 60 + 15);
+    g_pBloodCastle->SetKillMonsterStatue(23, 40);
+}
+
+void SeedChaosCastle()
+{
+    g_pChaosCastleTime->SetTime(3 * 60 + 42);
+    g_pChaosCastleTime->SetKillMonsterStatue(34, 70);
+}
+
+void SeedTemple()
+{
+    g_pCursedTempleWindow->ResetCursedTempleSystemInfo();
+    const auto x = static_cast<std::uint8_t>(Hero->PositionX);
+    const auto y = static_cast<std::uint8_t>(Hero->PositionY);
+    const std::array party = {
+        UI::CursedTemple::PartyPosition{static_cast<std::uint16_t>(Hero->Key), 0, x, y},
+        UI::CursedTemple::PartyPosition{0x7001, 0, static_cast<std::uint8_t>(x + 8), static_cast<std::uint8_t>(y - 6)},
+        UI::CursedTemple::PartyPosition{0x7002, 0, static_cast<std::uint8_t>(x - 10), static_cast<std::uint8_t>(y + 4)},
+    };
+    UI::CursedTemple::MatchStatus status{};
+    status.remainingSeconds = 7 * 60 + 12;
+    status.relicHolderIndex = 0x7003;
+    status.relicX = static_cast<std::uint8_t>(x + 14);
+    status.relicY = static_cast<std::uint8_t>(y + 12);
+    status.alliedPoints = 3;
+    status.illusionPoints = 5;
+    status.localTeam = SEASON3A::eTeam_Allied;
+    status.party = party;
+    UI::CursedTemple::UpdateMatchStatus(status);
+    UI::CursedTemple::SetSkillPoints(25);
+}
+
+void SeedTempleResult()
+{
+    g_pCursedTempleResultWindow->ResetGameResultInfo();
+    g_pCursedTempleResultWindow->SetMyTeam(SEASON3A::eTeam_Allied);
+    const std::array players = {
+        UI::CursedTemple::PlayerResult{Hero->ID, 0, SEASON3A::eTeam_Allied, Hero->Class, 152340},
+        UI::CursedTemple::PlayerResult{L"Valkyrie", 0, SEASON3A::eTeam_Allied, CLASS_ELF, 98120},
+        UI::CursedTemple::PlayerResult{L"Ironclad", 0, SEASON3A::eTeam_Allied, CLASS_KNIGHT, 87455},
+        UI::CursedTemple::PlayerResult{L"Hexweaver", 0, SEASON3A::eTeam_Illusion, CLASS_SUMMONER, 64210},
+        UI::CursedTemple::PlayerResult{L"Duskblade", 0, SEASON3A::eTeam_Illusion, CLASS_DARK, 51980},
+        UI::CursedTemple::PlayerResult{L"Lordship", 0, SEASON3A::eTeam_Illusion, CLASS_DARK_LORD, 47330},
+    };
+    g_pCursedTempleResultWindow->SetResult({7, 5, players});
+}
+
+void SeedDuelSpectators()
+{
+    g_DuelMgr.RemoveAllDuelWatchUser();
+    for (const wchar_t* name : {L"Spectator", L"Valkyrie", L"Ironclad", L"Hexweaver", L"Duskblade"})
+        g_DuelMgr.AddDuelWatchUser(name);
+}
+
+void SeedCryWolf()
+{
+    M34CryWolf1st::CryWolfMVPInit();
+    m_CrywolfState = CRYWOLF_STATE_START;
+    // Each altar look: free and applying, contracted, contracted and applying, occupied.
+    const BYTE altars[5] = {0x02, 0x11, 0x12, 0x21, 0x52};
+    for (int i = 0; i < 5; ++i)
+        m_AltarState[i] = altars[i];
+    Dark_elf_Num = 4;
+    View_Bal = true;
+    Val_Hp = 62;
+    g_pCryWolfInterface->InitTime();
+    UI::CryWolf::SetCountdown(0, 12);
+}
+
+void SeedCryWolfResult()
+{
+    M34CryWolf1st::CryWolfMVPInit();
+    Suc_Or_Fail = 1;
+    View_Suc_Or_Fail = 1;
+    Add_Num = 11;
+    Delay = 0;
+    Rank = 2;
+    Exp = 1234567;
+    const wchar_t* names[5] = {L"Valkyrie", L"Ironclad", L"Hexweaver", L"Duskblade", L"Lordship"};
+    const CLASS_TYPE classes[5] = {CLASS_ELF, CLASS_KNIGHT, CLASS_SUMMONER, CLASS_DARK, CLASS_DARK_LORD};
+    for (int i = 0; i < 5; ++i)
+    {
+        HeroClass[i] = classes[i];
+        HeroScore[i] = 3200 - i * 450;
+        wcsncpy_s(HeroName[i], names[i], _TRUNCATE);
+    }
+}
+
+void SeedSiege()
+{
+    g_pSiegeWarfare->CreatePreviewMiniMapUI(mu::ui::window::CSiegeWarfare::SIEGEWAR_TYPE_COMMANDER);
+    battleCastle::SetBattleCastleStart(true);
+    UI::Siege::SetMatchTime(0, 45);
+    const std::array members = {
+        UI::Siege::MapLocation{0, 80, 120},  UI::Siege::MapLocation{0, 86, 126}, UI::Siege::MapLocation{0, 92, 118},
+        UI::Siege::MapLocation{0, 110, 150}, UI::Siege::MapLocation{0, 116, 158},
+    };
+    UI::Siege::ReplaceMemberLocations(members);
+    const std::array npcs = {UI::Siege::MapLocation{0, 90, 200}, UI::Siege::MapLocation{1, 120, 210}};
+    UI::Siege::AddNpcLocations(npcs);
+    UI::Siege::SetCommanderMapInfo(0, 100, 140, 0);
+    UI::Siege::SetCommanderMapInfo(1, 70, 180, 1);
+}
+
+void Seed(Event event)
+{
+    switch (event)
+    {
+    case Event::BloodCastle: SeedBloodCastle(); break;
+    case Event::ChaosCastle: SeedChaosCastle(); break;
+    case Event::Temple: SeedTemple(); break;
+    case Event::TempleResult: SeedTempleResult(); break;
+    case Event::DuelSpectators: SeedDuelSpectators(); break;
+    case Event::CryWolf: SeedCryWolf(); break;
+    case Event::CryWolfResult: SeedCryWolfResult(); break;
+    case Event::Siege: SeedSiege(); break;
+    default: break;
+    }
+}
+
+// Back to what the window holds off its event. A timer keeps its values: the event overwrites them.
+void Reset(Event event)
+{
+    switch (event)
+    {
+    case Event::Temple: g_pCursedTempleWindow->ResetCursedTempleSystemInfo(); break;
+    case Event::TempleResult: g_pCursedTempleResultWindow->ResetGameResultInfo(); break;
+    case Event::DuelSpectators: g_DuelMgr.RemoveAllDuelWatchUser(); break;
+    case Event::CryWolf:
+    case Event::CryWolfResult:
+        M34CryWolf1st::CryWolfMVPInit();
+        Suc_Or_Fail = -1;
+        break;
+    case Event::Siege:
+        battleCastle::SetBattleCastleStart(false);
+        UI::Siege::ResetMiniMap();
+        break;
+    default: break;
+    }
+}
+
+const Entry* Find(Event event)
+{
+    for (const Entry& entry : kEntries)
+    {
+        if (entry.event == event)
+            return &entry;
+    }
+    return nullptr;
+}
+
+void List()
+{
+    Log(L"$preview <event>, or $preview off. Sample data, drawn off the event's map:");
+    for (const Entry& entry : kEntries)
+        Log(std::wstring(entry.name) + L" - " + std::wstring(entry.what));
+}
+} // namespace
+
+bool IsShowing(Event event)
+{
+    return event != Event::None && s_Showing == event;
+}
+
+void Stop()
+{
+    const Entry* entry = Find(s_Showing);
+    if (entry == nullptr)
+        return;
+    // Hidden while still previewed, so its close sends nothing.
+    SetWindowShown(entry->window, false);
+    Reset(entry->event);
+    s_Showing = Event::None;
+}
+
+void HandleCommand(const std::wstring& argument)
+{
+    if (argument.empty() || argument == L"list")
+    {
+        List();
+        return;
+    }
+    if (argument == L"off")
+    {
+        Stop();
+        return;
+    }
+    for (const Entry& entry : kEntries)
+    {
+        if (argument != entry.name)
+            continue;
+        Stop();
+        s_Showing = entry.event;
+        Seed(entry.event);
+        SetWindowShown(entry.window, true);
+        Log(L"preview: " + std::wstring(entry.what) + L". $preview off ends it.");
+        return;
+    }
+    Log(L"no such preview: " + argument, mu::ui::window::TYPE_ERROR_MESSAGE);
+}
+} // namespace UI::EventPreview

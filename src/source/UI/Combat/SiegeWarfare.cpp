@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "UI/Combat/SiegeWarfare.h"
+#include "UI/Events/EventPreview.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Combat/SiegeWarCommander.h"
 #include "UI/Combat/SiegeWarSoldier.h"
@@ -114,7 +115,8 @@ bool mu::ui::window::CSiegeWarfare::Update()
         return true;
     }
 
-    if (gMapManager.InBattleCastle() && battleCastle::IsBattleCastleStart() == true)
+    if ((gMapManager.InBattleCastle() || UI::EventPreview::IsShowing(UI::EventPreview::Event::Siege)) &&
+        battleCastle::IsBattleCastleStart() == true)
     {
         m_iSecond = m_iSecond - (GetTickCount() - m_dwSyncTime);
         if (m_iSecond <= 0)
@@ -227,7 +229,8 @@ void mu::ui::window::CSiegeWarfare::SyncRmlModel()
         return;
 
     // The original drew the HUD only on the siege map (Render()).
-    const bool shown = IsVisible() && m_pSiegeWarUI != NULL && gMapManager.InBattleCastle();
+    const bool shown = IsVisible() && m_pSiegeWarUI != NULL &&
+                       (gMapManager.InBattleCastle() || UI::EventPreview::IsShowing(UI::EventPreview::Event::Siege));
     UI::RmlBridge::SyncDocumentVisibilityBehind(m_RmlView.Document(), shown);
     if (!shown)
         return;
@@ -352,6 +355,21 @@ bool mu::ui::window::CSiegeWarfare::CreateMiniMapUI()
     Show(true);
 
     return true;
+}
+
+void mu::ui::window::CSiegeWarfare::CreatePreviewMiniMapUI(SIEGEWAR_TYPE type)
+{
+    InitMiniMapUI();
+    switch (type)
+    {
+    case SIEGEWAR_TYPE_COMMANDER: m_pSiegeWarUI = new CSiegeWarCommander; break;
+    case SIEGEWAR_TYPE_SOLDIER: m_pSiegeWarUI = new CSiegeWarSoldier; break;
+    default: m_pSiegeWarUI = new CSiegeWarObserver; type = SIEGEWAR_TYPE_OBSERVER; break;
+    }
+    m_iCurSiegeWarType = type;
+    m_bCreated = type != SIEGEWAR_TYPE_OBSERVER;
+    m_pSiegeWarUI->Create(m_Pos.x, m_Pos.y);
+    Show(true);
 }
 
 void mu::ui::window::CSiegeWarfare::ClearGuildMemberLocation(void)

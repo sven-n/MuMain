@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "World/MapInfra/MapManager.h"
+#include "UI/Events/EventPreview.h"
 #include "UI/Events/BloodCastleTime.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
@@ -88,7 +89,8 @@ bool CBloodCastle::Update()
         return true;
     }
 
-    if ((g_csMatchInfo == NULL) || (gMapManager.InBloodCastle() == false))
+    if (((g_csMatchInfo == NULL) || (gMapManager.InBloodCastle() == false)) &&
+        !UI::EventPreview::IsShowing(UI::EventPreview::Event::BloodCastle))
     {
         Show(false);
     }
@@ -107,14 +109,15 @@ bool CBloodCastle::Render()
 void CBloodCastle::SyncView()
 {
     // The original's Render(): the kill count once a target was received, "Time left", the time.
-    const bool shown = IsVisible() && g_csMatchInfo != NULL;
+    const bool shown =
+        IsVisible() && (g_csMatchInfo != NULL || UI::EventPreview::IsShowing(UI::EventPreview::Event::BloodCastle));
     std::wstring kills;
     if (shown)
     {
-        if (m_iMaxKillMonster != MAX_KILL_MONSTER && g_csMatchInfo != NULL)
+        if (m_iMaxKillMonster != MAX_KILL_MONSTER)
         {
             wchar_t szText[256] = {};
-            if (g_csMatchInfo->GetMatchType() == 5)
+            if (g_csMatchInfo != NULL && g_csMatchInfo->GetMatchType() == 5)
                 mu_swprintf(szText, I18N::Game::MagicSkeletonDD, m_iKilledMonster, m_iMaxKillMonster);
             else
                 mu_swprintf(szText, I18N::Game::MonsterDD, m_iKilledMonster, m_iMaxKillMonster);

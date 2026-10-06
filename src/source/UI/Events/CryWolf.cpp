@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "UI/Events/CryWolf.h"
+#include "UI/Events/EventPreview.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
@@ -478,7 +479,9 @@ void mu::ui::window::CCryWolf::SyncView()
         return;
 
     CryWolfRmlModel updated;
-    const bool onMap = IsVisible() && M34CryWolf1st::IsCyrWolf1st();
+    const bool onMap = IsVisible() && (M34CryWolf1st::IsCyrWolf1st() ||
+                                       UI::EventPreview::IsShowing(UI::EventPreview::Event::CryWolf) ||
+                                       UI::EventPreview::IsShowing(UI::EventPreview::Event::CryWolfResult));
     if (onMap)
     {
         SyncResult(updated);
