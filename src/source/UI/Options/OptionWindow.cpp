@@ -231,178 +231,177 @@ bool mu::ui::window::COptionWindow::Create(CManager* pNewUIMng, int x, int y)
     if (RmlUiRuntime::Instance().IsCreated())
     {
         BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-    }
+        }
 
     Show(false);
     return true;
 }
 
-void mu::ui::window::COptionWindow::BuildRmlUi()
+void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "option_window",
-        [this](Rml::DataModelConstructor& c, OptionRmlModel& model)
+    c.Bind("positioned", &model.positioned);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+
+    c.Bind("has_title", &model.hasTitle);
+    c.Bind("title", &model.title);
+    c.Bind("close_label", &model.closeLabel);
+
+    c.Bind("active_tab", &model.activeTab);
+    c.Bind("tab_gameplay_label", &model.tabGameplayLabel);
+    c.Bind("tab_audio_label", &model.tabAudioLabel);
+    c.Bind("tab_video_label", &model.tabVideoLabel);
+    c.Bind("tab_graphics_label", &model.tabGraphicsLabel);
+    c.Bind("tab_ui_label", &model.tabUiLabel);
+    c.Bind("tab_general_label", &model.tabGeneralLabel);
+
+    c.Bind("open_dropdown", &model.openDropdown);
+
+    c.Bind("auto_attack", &model.autoAttack);
+    c.Bind("auto_attack_label", &model.autoAttackLabel);
+    c.Bind("whisper_sound", &model.whisperSound);
+    c.Bind("whisper_sound_label", &model.whisperSoundLabel);
+    c.Bind("slide_help", &model.slideHelp);
+    c.Bind("slide_help_label", &model.slideHelpLabel);
+    c.Bind("render_all_effects", &model.renderAllEffects);
+    c.Bind("render_all_effects_label", &model.renderAllEffectsLabel);
+    c.Bind("windowed_mode", &model.windowedMode);
+    c.Bind("windowed_mode_label", &model.windowedModeLabel);
+
+    c.Bind("sound_volume", &model.soundVolume);
+    c.Bind("sound_volume_label", &model.soundVolumeLabel);
+    c.Bind("music_volume", &model.musicVolume);
+    c.Bind("music_volume_label", &model.musicVolumeLabel);
+    c.Bind("render_level", &model.renderLevel);
+    c.Bind("render_level_label", &model.renderLevelLabel);
+
+    c.RegisterArray<std::vector<Rml::String>>();
+    c.Bind("resolution_labels", &model.resolutionLabels);
+    c.Bind("resolution_index", &model.resolutionIndex);
+    c.Bind("resolution_row_label", &model.resolutionRowLabel);
+    c.Bind("resolution_value_label", &model.resolutionValueLabel);
+    c.Bind("language_labels", &model.languageLabels);
+    c.Bind("language_index", &model.languageIndex);
+    c.Bind("language_row_label", &model.languageRowLabel);
+    c.Bind("language_value_label", &model.languageValueLabel);
+    c.Bind("font_labels", &model.fontLabels);
+    c.Bind("font_index", &model.fontIndex);
+    c.Bind("font_row_label", &model.fontRowLabel);
+    c.Bind("font_value_label", &model.fontValueLabel);
+
+    // Video tab additions.
+    c.Bind("vsync_enabled", &model.vsyncEnabled);
+    c.Bind("vsync_label", &model.vsyncLabel);
+    c.Bind("fps_cap_labels", &model.fpsCapLabels);
+    c.Bind("fps_cap_index", &model.fpsCapIndex);
+    c.Bind("fps_cap_row_label", &model.fpsCapRowLabel);
+    c.Bind("fps_cap_value_label", &model.fpsCapValueLabel);
+
+    // Graphics tab -- DXP-23's per-system effect-cost toggles.
+    c.Bind("disable_effects", &model.disableEffects);
+    c.Bind("disable_effects_label", &model.disableEffectsLabel);
+    c.Bind("disable_particles", &model.disableParticles);
+    c.Bind("disable_particles_label", &model.disableParticlesLabel);
+    c.Bind("disable_skill_effect_models", &model.disableSkillEffectModels);
+    c.Bind("disable_skill_effect_models_label", &model.disableSkillEffectModelsLabel);
+    c.Bind("disable_boids", &model.disableBoids);
+    c.Bind("disable_boids_label", &model.disableBoidsLabel);
+    c.Bind("disable_wing_shadow", &model.disableWingShadow);
+    c.Bind("disable_wing_shadow_label", &model.disableWingShadowLabel);
+
+    // Interface/UI tab.
+    c.Bind("show_fps_counter", &model.showFpsCounter);
+    c.Bind("show_fps_counter_label", &model.showFpsCounterLabel);
+    c.Bind("show_debug_info", &model.showDebugInfo);
+    c.Bind("show_debug_info_label", &model.showDebugInfoLabel);
+    c.Bind("theme_labels", &model.themeLabels);
+    c.Bind("theme_index", &model.themeIndex);
+    c.Bind("theme_row_label", &model.themeRowLabel);
+    c.Bind("theme_value_label", &model.themeValueLabel);
+    c.Bind("ui_scale_labels", &model.uiScaleLabels);
+    c.Bind("ui_scale_index", &model.uiScaleIndex);
+    c.Bind("ui_scale_row_label", &model.uiScaleRowLabel);
+    c.Bind("ui_scale_value_label", &model.uiScaleValueLabel);
+    c.Bind("ui_scale_tooltip", &model.uiScaleTooltip);
+
+    c.BindEventCallback("option_click_close",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
+
+    c.BindEventCallback("option_select_tab",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
         {
-            c.Bind("positioned", &model.positioned);
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-
-            c.Bind("has_title", &model.hasTitle);
-            c.Bind("title", &model.title);
-            c.Bind("close_label", &model.closeLabel);
-
-            c.Bind("active_tab", &model.activeTab);
-            c.Bind("tab_gameplay_label", &model.tabGameplayLabel);
-            c.Bind("tab_audio_label", &model.tabAudioLabel);
-            c.Bind("tab_video_label", &model.tabVideoLabel);
-            c.Bind("tab_graphics_label", &model.tabGraphicsLabel);
-            c.Bind("tab_ui_label", &model.tabUiLabel);
-            c.Bind("tab_general_label", &model.tabGeneralLabel);
-
-            c.Bind("open_dropdown", &model.openDropdown);
-
-            c.Bind("auto_attack", &model.autoAttack);
-            c.Bind("auto_attack_label", &model.autoAttackLabel);
-            c.Bind("whisper_sound", &model.whisperSound);
-            c.Bind("whisper_sound_label", &model.whisperSoundLabel);
-            c.Bind("slide_help", &model.slideHelp);
-            c.Bind("slide_help_label", &model.slideHelpLabel);
-            c.Bind("render_all_effects", &model.renderAllEffects);
-            c.Bind("render_all_effects_label", &model.renderAllEffectsLabel);
-            c.Bind("windowed_mode", &model.windowedMode);
-            c.Bind("windowed_mode_label", &model.windowedModeLabel);
-
-            c.Bind("sound_volume", &model.soundVolume);
-            c.Bind("sound_volume_label", &model.soundVolumeLabel);
-            c.Bind("music_volume", &model.musicVolume);
-            c.Bind("music_volume_label", &model.musicVolumeLabel);
-            c.Bind("render_level", &model.renderLevel);
-            c.Bind("render_level_label", &model.renderLevelLabel);
-
-            c.RegisterArray<std::vector<Rml::String>>();
-            c.Bind("resolution_labels", &model.resolutionLabels);
-            c.Bind("resolution_index", &model.resolutionIndex);
-            c.Bind("resolution_row_label", &model.resolutionRowLabel);
-            c.Bind("resolution_value_label", &model.resolutionValueLabel);
-            c.Bind("language_labels", &model.languageLabels);
-            c.Bind("language_index", &model.languageIndex);
-            c.Bind("language_row_label", &model.languageRowLabel);
-            c.Bind("language_value_label", &model.languageValueLabel);
-            c.Bind("font_labels", &model.fontLabels);
-            c.Bind("font_index", &model.fontIndex);
-            c.Bind("font_row_label", &model.fontRowLabel);
-            c.Bind("font_value_label", &model.fontValueLabel);
-
-            // Video tab additions.
-            c.Bind("vsync_enabled", &model.vsyncEnabled);
-            c.Bind("vsync_label", &model.vsyncLabel);
-            c.Bind("fps_cap_labels", &model.fpsCapLabels);
-            c.Bind("fps_cap_index", &model.fpsCapIndex);
-            c.Bind("fps_cap_row_label", &model.fpsCapRowLabel);
-            c.Bind("fps_cap_value_label", &model.fpsCapValueLabel);
-
-            // Graphics tab -- DXP-23's per-system effect-cost toggles.
-            c.Bind("disable_effects", &model.disableEffects);
-            c.Bind("disable_effects_label", &model.disableEffectsLabel);
-            c.Bind("disable_particles", &model.disableParticles);
-            c.Bind("disable_particles_label", &model.disableParticlesLabel);
-            c.Bind("disable_skill_effect_models", &model.disableSkillEffectModels);
-            c.Bind("disable_skill_effect_models_label", &model.disableSkillEffectModelsLabel);
-            c.Bind("disable_boids", &model.disableBoids);
-            c.Bind("disable_boids_label", &model.disableBoidsLabel);
-            c.Bind("disable_wing_shadow", &model.disableWingShadow);
-            c.Bind("disable_wing_shadow_label", &model.disableWingShadowLabel);
-
-            // Interface/UI tab.
-            c.Bind("show_fps_counter", &model.showFpsCounter);
-            c.Bind("show_fps_counter_label", &model.showFpsCounterLabel);
-            c.Bind("show_debug_info", &model.showDebugInfo);
-            c.Bind("show_debug_info_label", &model.showDebugInfoLabel);
-            c.Bind("theme_labels", &model.themeLabels);
-            c.Bind("theme_index", &model.themeIndex);
-            c.Bind("theme_row_label", &model.themeRowLabel);
-            c.Bind("theme_value_label", &model.themeValueLabel);
-            c.Bind("ui_scale_labels", &model.uiScaleLabels);
-            c.Bind("ui_scale_index", &model.uiScaleIndex);
-            c.Bind("ui_scale_row_label", &model.uiScaleRowLabel);
-            c.Bind("ui_scale_value_label", &model.uiScaleValueLabel);
-            c.Bind("ui_scale_tooltip", &model.uiScaleTooltip);
-
-            c.BindEventCallback("option_click_close",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
-
-            c.BindEventCallback("option_select_tab",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                {
-                    if (arguments.size() == 1)
-                        RmlClickSelectTab(arguments[0].Get<int>(-1));
-                });
-
-            c.BindEventCallback("option_toggle_auto_attack",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleAutoAttack(); });
-            c.BindEventCallback("option_toggle_whisper_sound",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleWhisperSound(); });
-            c.BindEventCallback("option_toggle_slide_help",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleSlideHelp(); });
-            c.BindEventCallback("option_toggle_render_all_effects",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRenderAllEffects(); });
-            c.BindEventCallback("option_toggle_windowed_mode",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleWindowedMode(); });
-
-            c.BindEventCallback("option_gauge",
-                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList& args)
-                {
-                    if (args.size() == 1)
-                        RmlGaugeEvent(ev, args[0].Get<int>(-1));
-                });
-            // .option-dropdown custom control (replaces the resolution/language/font/fps-cap/theme
-            // native <select>s, see model.openDropdown's own comment) -- one shared toggle callback
-            // and one shared option-click callback, dispatching by dropdownId rather than one pair
-            // of callbacks per dropdown.
-            c.BindEventCallback("option_toggle_dropdown",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                {
-                    if (arguments.size() == 1)
-                        RmlToggleDropdown(arguments[0].Get<int>(-1));
-                });
-            c.BindEventCallback("option_dropdown_option_click",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                {
-                    if (arguments.size() == 2)
-                        RmlDropdownOptionClick(arguments[0].Get<int>(-1), arguments[1].Get<int>(-1));
-                });
-
-            c.BindEventCallback("option_toggle_vsync",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleVsync(); });
-
-            c.BindEventCallback("option_toggle_disable_effects",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableEffects(); });
-            c.BindEventCallback("option_toggle_disable_particles",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableParticles(); });
-            c.BindEventCallback("option_toggle_disable_skill_effect_models",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableSkillEffectModels(); });
-            c.BindEventCallback("option_toggle_disable_boids",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableBoids(); });
-            c.BindEventCallback("option_toggle_disable_wing_shadow",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableWingShadow(); });
-
-            c.BindEventCallback("option_toggle_show_fps_counter",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleShowFpsCounter(); });
-            c.BindEventCallback("option_toggle_show_debug_info",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleShowDebugInfo(); });
-
+            if (arguments.size() == 1)
+                RmlClickSelectTab(arguments[0].Get<int>(-1));
         });
 
-    (void)modelCreated;
+    c.BindEventCallback("option_toggle_auto_attack",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleAutoAttack(); });
+    c.BindEventCallback("option_toggle_whisper_sound",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleWhisperSound(); });
+    c.BindEventCallback("option_toggle_slide_help",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleSlideHelp(); });
+    c.BindEventCallback("option_toggle_render_all_effects",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRenderAllEffects(); });
+    c.BindEventCallback("option_toggle_windowed_mode",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleWindowedMode(); });
 
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-        "Data/Interface/RmlUi/option_window.rml");
-    m_pPanelEl = m_pRmlDoc ? m_pRmlDoc->GetElementById("panel") : nullptr;
-    // Dragged by any part that is not a control (base.rcss blocks those; legacy shows no title to
-    // grab) for the session; the position is not saved.
-    if (m_pRmlDoc)
-        UI::RmlBridge::MakeDraggable(m_pRmlDoc, m_pRmlDoc, nullptr,
-                                     [this] { UI::RmlBridge::KeepInsideWindow(m_pRmlDoc); });
+    c.BindEventCallback("option_gauge",
+        [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList& args)
+        {
+            if (args.size() == 1)
+                RmlGaugeEvent(ev, args[0].Get<int>(-1));
+        });
+    // .option-dropdown custom control (replaces the resolution/language/font/fps-cap/theme
+    // native <select>s, see model.openDropdown's own comment) -- one shared toggle callback
+    // and one shared option-click callback, dispatching by dropdownId rather than one pair
+    // of callbacks per dropdown.
+    c.BindEventCallback("option_toggle_dropdown",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+        {
+            if (arguments.size() == 1)
+                RmlToggleDropdown(arguments[0].Get<int>(-1));
+        });
+    c.BindEventCallback("option_dropdown_option_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+        {
+            if (arguments.size() == 2)
+                RmlDropdownOptionClick(arguments[0].Get<int>(-1), arguments[1].Get<int>(-1));
+        });
+
+    c.BindEventCallback("option_toggle_vsync",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleVsync(); });
+
+    c.BindEventCallback("option_toggle_disable_effects",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableEffects(); });
+    c.BindEventCallback("option_toggle_disable_particles",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableParticles(); });
+    c.BindEventCallback("option_toggle_disable_skill_effect_models",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableSkillEffectModels(); });
+    c.BindEventCallback("option_toggle_disable_boids",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableBoids(); });
+    c.BindEventCallback("option_toggle_disable_wing_shadow",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableWingShadow(); });
+
+    c.BindEventCallback("option_toggle_show_fps_counter",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleShowFpsCounter(); });
+    c.BindEventCallback("option_toggle_show_debug_info",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleShowDebugInfo(); });
+
+}
+
+// Dragged by any part that is not a control (base.rcss blocks those; legacy shows no title to
+// grab) for the session; the position is not saved.
+void mu::ui::window::COptionWindow::OnRmlBuilt()
+{
+    Rml::ElementDocument* document = m_RmlView.Document();
+    m_pPanelEl = document->GetElementById("panel");
+    UI::RmlBridge::MakeDraggable(document, document, nullptr,
+                                 [document] { UI::RmlBridge::KeepInsideWindow(document); });
+}
+
+void mu::ui::window::COptionWindow::BuildRmlUi()
+{
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::COptionWindow::InitResolutionCombo()
@@ -439,16 +438,11 @@ void mu::ui::window::COptionWindow::Release()
 {
     UnloadImages();
 
-    if (m_pRmlDoc)
-    {
-        m_pRmlDoc->Close();
-        m_pRmlDoc = nullptr;
-    }
+    m_RmlView.Release();
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = NULL;
     }
 }
@@ -462,35 +456,10 @@ void mu::ui::window::COptionWindow::SetPos(int x, int y)
 void mu::ui::window::COptionWindow::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (bShow) m_pRmlDoc->Show();
-        else m_pRmlDoc->Hide();
-    }
-}
-
-void mu::ui::window::COptionWindow::ReloadRmlTheme()
-{
-    // Same shape CGenericMenuDialog::ReloadRmlTheme() already establishes -- needed here because
-    // this window's own UI Theme dropdown (Interface/UI tab) can trigger a theme switch from
-    // inside itself, and UI::RmlBridge::ReloadAllThemedDocuments() calls this registered callback
-    // the same as every other themed window's, this one included.
-    if (!m_pRmlDoc)
-        return;
-
-    const bool wasVisible = m_pRmlDoc->IsVisible();
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-    m_pPanelEl = nullptr;
-
-    BuildRmlUi();
-    if (wasVisible)
-    {
-        SyncRmlModel();
-        if (m_pRmlDoc)
-            m_pRmlDoc->Show();
+        if (bShow) m_RmlView.Document()->Show();
+        else m_RmlView.Document()->Hide();
     }
 }
 
@@ -508,13 +477,13 @@ bool mu::ui::window::COptionWindow::UpdateMouseEvent()
     // different coordinate space than this hit-test rect, and clicks fall through to
     // world/character movement instead.
     //
-    // Defensive re-fetch: m_pPanelEl should already be valid whenever m_pRmlDoc is (BuildRmlUi()
+    // Defensive re-fetch: m_pPanelEl should already be valid whenever m_RmlView.Document() is (OnRmlBuilt()
     // sets both together), but if it's ever out of sync -- e.g. a future change re-parents/renames
     // #panel without updating this cache -- silently returning "unclaimed" here would reopen this
     // exact click-through bug with no diagnostic trail. Re-resolving costs one GetElementById() at
     // most, only in that already-broken case.
-    if (!m_pPanelEl && m_pRmlDoc)
-        m_pPanelEl = m_pRmlDoc->GetElementById("panel");
+    if (!m_pPanelEl && m_RmlView.Document())
+        m_pPanelEl = m_RmlView.Document()->GetElementById("panel");
 
     if (m_pPanelEl)
     {
@@ -547,7 +516,7 @@ bool mu::ui::window::COptionWindow::UpdateKeyEvent()
 
 bool mu::ui::window::COptionWindow::Update()
 {
-    // Outside any RmlUi event dispatch -- safe to destroy/rebuild m_pRmlDoc here if a theme switch
+    // Outside any RmlUi event dispatch -- safe to destroy/rebuild m_RmlView.Document() here if a theme switch
     // was requested (see m_bPendingThemeSwitch's own comment), and to resize the window for a new
     // UI scale (m_bPendingUIScaleApply's own comment).
     ApplyPendingThemeSwitch();
@@ -559,7 +528,7 @@ bool mu::ui::window::COptionWindow::Update()
 
 void mu::ui::window::COptionWindow::ScrollOpenDropdownToSelection()
 {
-    if (!m_bScrollDropdownPending || !m_pRmlDoc)
+    if (!m_bScrollDropdownPending || !m_RmlView.Document())
         return;
     if (m_iOpenDropdown == -1)
     {
@@ -569,9 +538,9 @@ void mu::ui::window::COptionWindow::ScrollOpenDropdownToSelection()
 
     // The click that opened it runs before the data model shows the list: wait for a frame in
     // which the list is no longer hidden.
-    m_pRmlDoc->UpdateDocument();
+    m_RmlView.Document()->UpdateDocument();
     Rml::ElementList lists;
-    m_pRmlDoc->GetElementsByClassName(lists, "option-dropdown-list");
+    m_RmlView.Document()->GetElementsByClassName(lists, "option-dropdown-list");
     for (Rml::Element* list : lists)
     {
         if (list->IsClassSet("hidden"))
@@ -916,7 +885,7 @@ void mu::ui::window::COptionWindow::RmlThemeChanged(int index)
         return;
 
     // Deferred to Update() -- see m_bPendingThemeSwitch's own comment (OptionWindow.h) for why
-    // this can't run synchronously here: it would destroy m_pRmlDoc mid-dispatch of the very
+    // this can't run synchronously here: it would destroy m_RmlView.Document() mid-dispatch of the very
     // dropdown-option click event that called this (RmlDropdownOptionClick(), itself invoked from
     // a data-event-click on one of the option divs this document is about to unload).
     m_iPendingThemeIndex = index;
@@ -1199,18 +1168,18 @@ void mu::ui::window::COptionWindow::ApplyWindowModeToggle()
 
 void mu::ui::window::COptionWindow::SyncRmlModel()
 {
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     // Saturates rather than wrapping; only ever compared against kRmlSelectSettleFrames below.
     if (m_rmlSyncCount < 1000)
         ++m_rmlSyncCount;
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
 
     // Diffed first, matching MyQuestInfoWindow::SyncRmlModel()'s own ordering for its activeTab.
-    if (model.activeTab != m_iActiveTab) { model.activeTab = m_iActiveTab; m_RmlBinder.MarkDirty("active_tab"); }
-    if (model.openDropdown != m_iOpenDropdown) { model.openDropdown = m_iOpenDropdown; m_RmlBinder.MarkDirty("open_dropdown"); }
+    if (model.activeTab != m_iActiveTab) { model.activeTab = m_iActiveTab; m_RmlView.MarkDirty("active_tab"); }
+    if (model.openDropdown != m_iOpenDropdown) { model.openDropdown = m_iOpenDropdown; m_RmlView.MarkDirty("open_dropdown"); }
 
     // Re-fetched every sync, not just once at BuildRmlUi() time -- native re-rendered every one of
     // these from the live I18N::Game::* pointer every frame, so a language switch made from this
@@ -1221,7 +1190,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         if (field != narrow)
         {
             field = narrow;
-            m_RmlBinder.MarkDirty(fieldName);
+            m_RmlView.MarkDirty(fieldName);
         }
     };
     // .option-dropdown's own closed-state box shows this instead of a {{}} array-index expression
@@ -1234,7 +1203,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         if (field != value)
         {
             field = value;
-            m_RmlBinder.MarkDirty(fieldName);
+            m_RmlView.MarkDirty(fieldName);
         }
     };
     syncLabel(model.title, "title", I18N::Game::Option385);
@@ -1273,15 +1242,15 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     // positioned/root_x/root_y stay at their model defaults (false/0/0, see OptionRmlModel's own
     // comment): window_shell's `.center-both` CSS places the window, a drag moves it.
 
-    if (model.autoAttack != m_bAutoAttack) { model.autoAttack = m_bAutoAttack; m_RmlBinder.MarkDirty("auto_attack"); }
-    if (model.whisperSound != m_bWhisperSound) { model.whisperSound = m_bWhisperSound; m_RmlBinder.MarkDirty("whisper_sound"); }
-    if (model.slideHelp != m_bSlideHelp) { model.slideHelp = m_bSlideHelp; m_RmlBinder.MarkDirty("slide_help"); }
-    if (model.renderAllEffects != m_bRenderAllEffects) { model.renderAllEffects = m_bRenderAllEffects; m_RmlBinder.MarkDirty("render_all_effects"); }
-    if (model.windowedMode != m_bWindowedMode) { model.windowedMode = m_bWindowedMode; m_RmlBinder.MarkDirty("windowed_mode"); }
+    if (model.autoAttack != m_bAutoAttack) { model.autoAttack = m_bAutoAttack; m_RmlView.MarkDirty("auto_attack"); }
+    if (model.whisperSound != m_bWhisperSound) { model.whisperSound = m_bWhisperSound; m_RmlView.MarkDirty("whisper_sound"); }
+    if (model.slideHelp != m_bSlideHelp) { model.slideHelp = m_bSlideHelp; m_RmlView.MarkDirty("slide_help"); }
+    if (model.renderAllEffects != m_bRenderAllEffects) { model.renderAllEffects = m_bRenderAllEffects; m_RmlView.MarkDirty("render_all_effects"); }
+    if (model.windowedMode != m_bWindowedMode) { model.windowedMode = m_bWindowedMode; m_RmlView.MarkDirty("windowed_mode"); }
 
-    if (model.soundVolume != m_iVolumeLevel) { model.soundVolume = m_iVolumeLevel; m_RmlBinder.MarkDirty("sound_volume"); }
-    if (model.musicVolume != m_iMusicLevel) { model.musicVolume = m_iMusicLevel; m_RmlBinder.MarkDirty("music_volume"); }
-    if (model.renderLevel != m_iRenderLevel) { model.renderLevel = m_iRenderLevel; m_RmlBinder.MarkDirty("render_level"); }
+    if (model.soundVolume != m_iVolumeLevel) { model.soundVolume = m_iVolumeLevel; m_RmlView.MarkDirty("sound_volume"); }
+    if (model.musicVolume != m_iMusicLevel) { model.musicVolume = m_iMusicLevel; m_RmlView.MarkDirty("music_volume"); }
+    if (model.renderLevel != m_iRenderLevel) { model.renderLevel = m_iRenderLevel; m_RmlView.MarkDirty("render_level"); }
 
     std::vector<Rml::String> newResolutionLabels;
     newResolutionLabels.reserve(m_resolutionLabels.size());
@@ -1290,9 +1259,9 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     if (newResolutionLabels != model.resolutionLabels)
     {
         model.resolutionLabels = std::move(newResolutionLabels);
-        m_RmlBinder.MarkDirty("resolution_labels");
+        m_RmlView.MarkDirty("resolution_labels");
     }
-    if (model.resolutionIndex != m_iResolutionIndex) { model.resolutionIndex = m_iResolutionIndex; m_RmlBinder.MarkDirty("resolution_index"); }
+    if (model.resolutionIndex != m_iResolutionIndex) { model.resolutionIndex = m_iResolutionIndex; m_RmlView.MarkDirty("resolution_index"); }
     syncDropdownValue(model.resolutionValueLabel, "resolution_value_label", model.resolutionLabels, model.resolutionIndex);
 
     if (model.languageLabels.empty())
@@ -1300,9 +1269,9 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         model.languageLabels.reserve(s_NumLanguages);
         for (int i = 0; i < s_NumLanguages; ++i)
             model.languageLabels.push_back(StringUtils::WideToNarrow(s_Languages[i].label));
-        m_RmlBinder.MarkDirty("language_labels");
+        m_RmlView.MarkDirty("language_labels");
     }
-    if (model.languageIndex != m_iLanguageIndex) { model.languageIndex = m_iLanguageIndex; m_RmlBinder.MarkDirty("language_index"); }
+    if (model.languageIndex != m_iLanguageIndex) { model.languageIndex = m_iLanguageIndex; m_RmlView.MarkDirty("language_index"); }
     syncDropdownValue(model.languageValueLabel, "language_value_label", model.languageLabels, model.languageIndex);
 
     // Rebuilt every sync (not just once) so the localized "Default" entry follows a live language
@@ -1315,12 +1284,12 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     if (newFontLabels != model.fontLabels)
     {
         model.fontLabels = std::move(newFontLabels);
-        m_RmlBinder.MarkDirty("font_labels");
+        m_RmlView.MarkDirty("font_labels");
     }
-    if (model.fontIndex != m_iFontIndex) { model.fontIndex = m_iFontIndex; m_RmlBinder.MarkDirty("font_index"); }
+    if (model.fontIndex != m_iFontIndex) { model.fontIndex = m_iFontIndex; m_RmlView.MarkDirty("font_index"); }
     syncDropdownValue(model.fontValueLabel, "font_value_label", model.fontLabels, model.fontIndex);
 
-    if (model.vsyncEnabled != m_bVsyncEnabled) { model.vsyncEnabled = m_bVsyncEnabled; m_RmlBinder.MarkDirty("vsync_enabled"); }
+    if (model.vsyncEnabled != m_bVsyncEnabled) { model.vsyncEnabled = m_bVsyncEnabled; m_RmlView.MarkDirty("vsync_enabled"); }
 
     // Rebuilt every sync (not just once), same reasoning as font_labels' own "Default" entry --
     // the localized "Uncapped" entry needs to follow a live language switch.
@@ -1335,24 +1304,24 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     if (newFpsCapLabels != model.fpsCapLabels)
     {
         model.fpsCapLabels = std::move(newFpsCapLabels);
-        m_RmlBinder.MarkDirty("fps_cap_labels");
+        m_RmlView.MarkDirty("fps_cap_labels");
     }
-    if (model.fpsCapIndex != m_iFpsCapIndex) { model.fpsCapIndex = m_iFpsCapIndex; m_RmlBinder.MarkDirty("fps_cap_index"); }
+    if (model.fpsCapIndex != m_iFpsCapIndex) { model.fpsCapIndex = m_iFpsCapIndex; m_RmlView.MarkDirty("fps_cap_index"); }
     syncDropdownValue(model.fpsCapValueLabel, "fps_cap_value_label", model.fpsCapLabels, model.fpsCapIndex);
 
-    if (model.disableEffects != m_bDisableEffects) { model.disableEffects = m_bDisableEffects; m_RmlBinder.MarkDirty("disable_effects"); }
-    if (model.disableParticles != m_bDisableParticles) { model.disableParticles = m_bDisableParticles; m_RmlBinder.MarkDirty("disable_particles"); }
-    if (model.disableSkillEffectModels != m_bDisableSkillEffectModels) { model.disableSkillEffectModels = m_bDisableSkillEffectModels; m_RmlBinder.MarkDirty("disable_skill_effect_models"); }
-    if (model.disableBoids != m_bDisableBoids) { model.disableBoids = m_bDisableBoids; m_RmlBinder.MarkDirty("disable_boids"); }
-    if (model.disableWingShadow != m_bDisableWingShadow) { model.disableWingShadow = m_bDisableWingShadow; m_RmlBinder.MarkDirty("disable_wing_shadow"); }
+    if (model.disableEffects != m_bDisableEffects) { model.disableEffects = m_bDisableEffects; m_RmlView.MarkDirty("disable_effects"); }
+    if (model.disableParticles != m_bDisableParticles) { model.disableParticles = m_bDisableParticles; m_RmlView.MarkDirty("disable_particles"); }
+    if (model.disableSkillEffectModels != m_bDisableSkillEffectModels) { model.disableSkillEffectModels = m_bDisableSkillEffectModels; m_RmlView.MarkDirty("disable_skill_effect_models"); }
+    if (model.disableBoids != m_bDisableBoids) { model.disableBoids = m_bDisableBoids; m_RmlView.MarkDirty("disable_boids"); }
+    if (model.disableWingShadow != m_bDisableWingShadow) { model.disableWingShadow = m_bDisableWingShadow; m_RmlView.MarkDirty("disable_wing_shadow"); }
 
     // Read live, not from a member -- SetShowFpsCounter()/SetShowDebugInfo() (SceneManager.h) are
     // mutually exclusive, so this reflects either checkbox toggling the other one off immediately,
     // including when toggled via the $fpscounter/$details console commands instead of this window.
     const bool showFpsCounter = GetShowFpsCounter();
     const bool showDebugInfo = GetShowDebugInfo();
-    if (model.showFpsCounter != showFpsCounter) { model.showFpsCounter = showFpsCounter; m_RmlBinder.MarkDirty("show_fps_counter"); }
-    if (model.showDebugInfo != showDebugInfo) { model.showDebugInfo = showDebugInfo; m_RmlBinder.MarkDirty("show_debug_info"); }
+    if (model.showFpsCounter != showFpsCounter) { model.showFpsCounter = showFpsCounter; m_RmlView.MarkDirty("show_fps_counter"); }
+    if (model.showDebugInfo != showDebugInfo) { model.showDebugInfo = showDebugInfo; m_RmlView.MarkDirty("show_debug_info"); }
 
     // Rebuilt every sync, same reasoning as fps_cap_labels above -- also picks up a theme folder
     // added or removed while this window is open, no restart needed (DiscoverAvailableThemes()
@@ -1364,9 +1333,9 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     if (newThemeLabels != model.themeLabels)
     {
         model.themeLabels = std::move(newThemeLabels);
-        m_RmlBinder.MarkDirty("theme_labels");
+        m_RmlView.MarkDirty("theme_labels");
     }
-    if (model.themeIndex != m_iThemeIndex) { model.themeIndex = m_iThemeIndex; m_RmlBinder.MarkDirty("theme_index"); }
+    if (model.themeIndex != m_iThemeIndex) { model.themeIndex = m_iThemeIndex; m_RmlView.MarkDirty("theme_index"); }
     syncDropdownValue(model.themeValueLabel, "theme_value_label", model.themeLabels, model.themeIndex);
 
     // Built once -- unlike the font/fps-cap/theme lists, no entry is a localized word, so a live
@@ -1378,12 +1347,12 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         model.uiScaleLabels.reserve(choices.size());
         for (const int percent : choices)
             model.uiScaleLabels.push_back(StringUtils::WideToNarrow((std::to_wstring(percent) + L" %").c_str()));
-        m_RmlBinder.MarkDirty("ui_scale_labels");
+        m_RmlView.MarkDirty("ui_scale_labels");
     }
     if (model.uiScaleIndex != m_iUIScaleIndex)
     {
         model.uiScaleIndex = m_iUIScaleIndex;
-        m_RmlBinder.MarkDirty("ui_scale_index");
+        m_RmlView.MarkDirty("ui_scale_index");
     }
     syncDropdownValue(model.uiScaleValueLabel, "ui_scale_value_label", model.uiScaleLabels, model.uiScaleIndex);
 }

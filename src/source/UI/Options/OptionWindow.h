@@ -10,7 +10,7 @@
 
 #include "UI/Core/WindowManager.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml { class ElementDocument; class Element; class Event; }
 
@@ -70,11 +70,6 @@ namespace mu::ui::window
 
         void SetPos(int x, int y);
         void Show(bool bShow) override;
-        // Rebuilds m_pRmlDoc against whichever theme is now active -- needed because this window's
-        // own UI-Theme dropdown (Interface/UI tab) can switch the active theme from inside itself;
-        // registered with UI::RmlBridge::RegisterForThemeReload() in Create(), same as every other
-        // themed window.
-        void ReloadRmlTheme();
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -144,7 +139,7 @@ namespace mu::ui::window
         // Same deferral for the UI-scale row -- see m_bPendingUIScaleApply's own comment.
         void ApplyPendingUIScale();
 
-        // Invoked directly from RmlUi data-event-click/-change bindings (see BuildRmlUi()), not
+        // Invoked directly from RmlUi data-event-click/-change bindings (see BindRmlModel()), not
         // polled. RmlClickSelectTab first, matching MyQuestInfoWindow's own tab-callback ordering.
         void RmlClickSelectTab(int nTab);
         // Custom-dropdown mechanism (option_window.rml's own .option-dropdown family; RmlUi's
@@ -201,7 +196,7 @@ namespace mu::ui::window
             Rml::String closeLabel;
 
             // Tab state -- bound/diffed first, matching MyQuestInfoWindow's own convention for its
-            // own activeTab field (see BuildRmlUi()/SyncRmlModel()). 0=Gameplay, 1=Audio, 2=Video,
+            // own activeTab field (see BindRmlModel()/SyncRmlModel()). 0=Gameplay, 1=Audio, 2=Video,
             // 3=Graphics, 4=Interface/UI, 5=General.
             int activeTab = 0;
             Rml::String tabGameplayLabel;
@@ -299,9 +294,13 @@ namespace mu::ui::window
             // tooltips use).
             Rml::String uiScaleTooltip;
         };
-        RmlModelBinder<OptionRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
-        // Cached at BuildRmlUi() time -- UpdateMouseEvent()'s hit-test reads this element's own
+        void BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
+        void OnRmlBuilt();
+        UI::RmlBridge::ThemedView<OptionRmlModel> m_RmlView{"option_window",
+            [this](Rml::DataModelConstructor& c, OptionRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/option_window.rml"}},
+            {.afterBuild = [this] { OnRmlBuilt(); }, .beforeUnload = [this] { m_pPanelEl = nullptr; }}};
+        // Cached after every build -- UpdateMouseEvent()'s hit-test reads this element's own
         // live rendered position/size (GetAbsoluteOffset()/GetOffsetWidth()/GetOffsetHeight())
         // rather than approximating them from hardcoded dp constants, so the hit-test rect can
         // never drift from wherever `.center-both` (or a future positioned/dragged mode) actually
@@ -359,7 +358,7 @@ namespace mu::ui::window
         int m_iUIScaleIndex;
         // A theme switch destroys and rebuilds every registered RmlUi document (including this
         // window's own, via UI::RmlBridge::ReloadAllThemedDocuments()) -- doing that synchronously
-        // inside RmlThemeChanged() would tear down m_pRmlDoc while still unwinding through RmlUi's
+        // inside RmlThemeChanged() would tear down the document while still unwinding through RmlUi's
         // own event-dispatch call stack for the very "change" event that triggered it. Deferred
         // instead: RmlThemeChanged() only records the request; ApplyPendingThemeSwitch() (called
         // from Update(), outside any RmlUi event) performs it on the next tick.
@@ -370,7 +369,7 @@ namespace mu::ui::window
         // three contexts and pumps SDL while settling the window -- too much to run while still
         // unwinding through RmlUi's own dispatch of the option click that asked for it. Deferred to
         // Update() for the same reason m_bPendingThemeSwitch is, even though this path (unlike a
-        // theme switch) does not itself destroy m_pRmlDoc.
+        // theme switch) does not itself destroy the document.
         bool m_bPendingUIScaleApply = false;
         int m_iPendingUIScalePercent = 0;
 

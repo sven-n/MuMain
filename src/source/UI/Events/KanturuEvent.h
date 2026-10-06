@@ -10,7 +10,7 @@
 #include "UI/Events/KanturuEnterRmlModel.h"
 #include "UI/Events/KanturuUpdates.h"
 #include "UI/Events/KanturuInfoRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml
 {
@@ -44,7 +44,7 @@ public:
     virtual ~CKanturu2ndEnterNpc();
 
     bool Create(CManager* pNewUIMng, int x, int y);
-    Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+    Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     void Release();
 
     void SetPos(int x, int y);
@@ -56,7 +56,6 @@ public:
 
     float GetLayerDepth(); //. 10.1f
 
-    void ReloadRmlTheme();
 
     void SetNpcObject(OBJECT* pObj);
     bool IsNpcAnimation();
@@ -104,8 +103,10 @@ private:
     bool m_EnterLocked = false;
     bool m_RefreshLocked = false;
 
-    RmlModelBinder<KanturuEnterRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    void BindRmlModel(Rml::DataModelConstructor& c, KanturuEnterRmlModel& model);
+    UI::RmlBridge::ThemedView<KanturuEnterRmlModel> m_RmlView{"kanturu_enter",
+        [this](Rml::DataModelConstructor& c, KanturuEnterRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/kanturu_enter.rml"}}};
     bool m_PendingRefresh = false;
     bool m_PendingEnter = false;
     bool m_PendingClose = false;
@@ -145,7 +146,6 @@ public:
 
     void SetTime(int iTimeLimit);
 
-    void ReloadRmlTheme();
 
 private:
     void BuildRmlUi();
@@ -161,8 +161,11 @@ private:
 
     DWORD m_dwColonTime = 0; // the colon's last blink
     bool m_bColonVisible = true;
-    RmlModelBinder<KanturuInfoRmlModel> m_RmlBinder;
-    Rml::ElementDocument* m_pRmlDoc = nullptr;
+    static void BindRmlModel(Rml::DataModelConstructor& c, KanturuInfoRmlModel& model);
+    // The original drew the HUD under every panel (layer depth 1.92): the document sits in the
+    // background context, behind its other documents.
+    UI::RmlBridge::ThemedView<KanturuInfoRmlModel> m_RmlView{"kanturu_info", BindRmlModel,
+        {{"Data/Interface/RmlUi/kanturu_info.rml", UI::RmlBridge::BackgroundOrMainContext}}};
 };
 } // namespace mu::ui::window
 
