@@ -605,11 +605,18 @@ void BeginOpenglPhysical(int x, int y, int width, int height)
 {
     width = std::max(width, 1);
     height = std::max(height, 1);
+    SetRenderViewport(x, y, width, height);
+    BeginOpenglForTarget(width, height);
+}
+
+void BeginOpenglForTarget(int width, int height)
+{
+    width = std::max(width, 1);
+    height = std::max(height, 1);
 
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();
-    SetRenderViewport(x, y, width, height);
 
     // Calculate aspect ratio dynamically from viewport dimensions
     // This ensures camera adapts to window resizing (WM_SIZE updates WindowWidth/WindowHeight)

@@ -18,7 +18,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 |---|---|
 | `CLoginWin`, `CLoginMainWin`, `CSysMenuWin`, `CServerSelWin`, `CCharSelMainWin`, `CMsgWin` | RmlUi-only 2D; `CMsgWin` is the reference screen |
 | `RememberPasswordPrompt` | Free-function module (`UI::Login`); reference for a window with no reusable state |
-| `CCharMakeWin` | Hybrid: the character preview stays live 3D |
+| `CCharMakeWin` | RmlUi; the live 3D character preview is a `RenderTarget` image, so the dialog and its dimming backdrop cover the character info balloons |
 | `CCharInfoBalloonMng` | World-overlay reference |
 | `CCreditWin` | RmlUi-only 2D (`credit_win.rml`); illustrations as `@spritesheet` decorators |
 | `COptionWin` | `Deleted` — unreachable; the live options window is `COptionWindow` |

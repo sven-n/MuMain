@@ -111,7 +111,7 @@ anchor class, give it a `dp` size, done.
 | Centered prompts/messages | `.center-x` / `.center-y` / `.center-both` |
 | Backgrounds/bars meant to fill available space | `.stretch-x` / `.stretch-y` / `.stretch-both` — use only when the element is genuinely meant to grow with its container (an info bar between two buttons), not as a default |
 | Content whose position is a genuine live computed result (3D-projection, following a moving target) | Still fine to push from C++ every frame — `CCharInfoBalloonMng`'s balloons are the standing example. This isn't something the anchor-class system should be forced onto. |
-| A panel whose real screen position also drives an unrelated live 3D viewport in real pixels | Stays fixed `px`, not `dp` — `CCharMakeWin`'s `#panel` is the standing example: its real position feeds `RenderCreateCharacter()`'s `BeginOpengl()` call directly, a separate scale mechanism that isn't safe to grow via `dp` without also correctly rescaling. A documented, deliberate non-scaling exception, not a gap. |
+| A panel that shows live 3D | A `RenderTarget` image sized by its own box (`CCharMakeWin`'s `#preview`), so the panel can scale like any other. `char_make`'s `#panel` is still fixed `px`, as it was when its position fed a native viewport; moving it to `dp` needs nothing from the preview. |
 
 ## The "C++ pushes real pixels into RmlUi" pattern is retired everywhere except one documented exception
 
@@ -122,7 +122,7 @@ placement where no workspace slot or RCSS anchoring covers it, and keeping a nat
 fixed offsets by the ratio RmlUi's `dp` uses — `UI::Scaling::CompanionRatio(windowWidth,
 windowHeight)` (`UITransform.cpp`), the one implementation. Read `WindowWidth`/`WindowHeight`
 there, not `CInput`'s screen size, which went stale in more than one hand copy before this
-existed. `char_make`'s `#panel` is the one deliberate `px` exception (table above).
+existed. `char_make`'s `#panel` is still `px` (table above), though nothing requires it any more.
 
 ## Worked example: `CCharSelMainWin`'s retrofit
 

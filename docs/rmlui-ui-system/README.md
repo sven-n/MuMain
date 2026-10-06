@@ -82,7 +82,7 @@ flowchart TD
         dlgbg("At depth 10.9: flush, then dialog_background:<br/>the confirm dialog's panel")
         cam{{"3D cameras: the confirm dialog's item"}}
     end
-    rtt{{"Offscreen pass: RenderTarget drawers into textures:<br/>potions, letter portrait, event previews"}}
+    rtt{{"Offscreen pass: RenderTarget drawers into textures:<br/>potions, letter portrait, character creation, event previews"}}
     main("Pre-submit: the main context, every other document;<br/>render-target textures show here as images")
     post["Post-RmlUi pass: the cursor"]
     scene --> bg --> win --> dlgbg --> cam --> rtt --> main --> post

@@ -5,9 +5,12 @@
 	<link type="text/rcss" href="char_make.rcss"/>
 </head>
 <body data-model="char_make">
-	<!-- Character-creation dialog; #panel has no background so the live 3D preview shows through
-	     around its children. -->
+	<!-- Character-creation dialog. #backdrop dims the scene behind, its character info balloons
+	     included; #preview is the live 3D character, drawn by C++ into a render target and shown
+	     here under the rest of the panel. -->
+	<div id="backdrop"></div>
 	<div id="panel">
+		<img id="preview" class="awaiting-frame"/>
 		<!-- Decorative backdrops (modern only) -- siblings, not parents, so nesting doesn't shift the
 		     existing #panel-relative positions of the real content below. -->
 		<div id="attributes_panel" class="side-panel"></div>

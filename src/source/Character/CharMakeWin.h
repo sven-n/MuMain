@@ -9,6 +9,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "Render/Sprites/Sprite.h"
+#include "UI/RmlBridge/RmlRenderTarget.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 
 #include <vector>
@@ -23,27 +24,21 @@
 
 namespace Rml { class ElementDocument; }
 
-// The character-creation dialog. Unlike every other migrated window, this one has a genuine live
-// 3D preview (RenderCreateCharacter() -- calls BeginOpengl()/RenderCharacter()/EndOpengl()
-// directly, the same mechanism the login screen's 3D tour camera and the character-select scene's
-// own character rendering already use). That call runs during the normal per-frame legacy-2D-
-// content-recording phase -- RmlUi renders last in the frame regardless, so as long as the RmlUi
-// panel has no opaque background over the 410x335 preview viewport, the 3D content composites
-// correctly underneath the RmlUi chrome around it, the same trick the login screen's tour camera
-// relies on. All 2D chrome (job buttons, stat/description panels, the name-input frame, OK/Cancel)
-// renders via RmlUi; m_aJobState below holds only the checked/enabled state RmlUi's job-list
-// binding reads, no rendering or click-detection of its own.
+// The character-creation dialog. Its live 3D preview is drawn into a render target the document
+// shows as #preview (UI::RmlBridge::RenderTarget), so it stands at the dialog's own depth: the
+// character info balloons of the scene behind, a lower document, stay under it and under the
+// dialog's dimming backdrop. All 2D chrome (job buttons, stat/description panels, the name-input
+// frame, OK/Cancel) renders via RmlUi; m_aJobState below holds only the checked/enabled state
+// RmlUi's job-list binding reads, no rendering or click-detection of its own.
 //
 // The name field is a stock RmlUi <input> in the same document (see CharMakeRmlModel::charName), so
 // nothing about it is drawn natively and there is no post-RmlUi render seam for this window.
 //
-// m_sprBg is a real, visible full-screen dimming overlay, rendered first in Render() --
-// UpdateMouseEvent() unconditionally claims the click while shown, matching that genuine full-
-// screen-modal intent.
+// The document's #backdrop dims the whole screen; UpdateMouseEvent() unconditionally claims the
+// click while shown, matching that full-screen-modal intent.
 class CCharMakeWin : public mu::ui::window::CObject
 {
 protected:
-    CSprite m_sprBg;
     CSprite m_asprBack[CMW_SPR_MAX];
 
     // Checked/enabled state for each job button, read by SyncRmlModel() into RmlUi's "jobs"
@@ -110,7 +105,10 @@ protected:
 
     void SelectCreateCharacter();
     void UpdateCreateCharacter();
-    void RenderCreateCharacter();
+    // The target's drawer: the selected class's character, framed for `width` x `height`.
+    void RenderPreviewInto(std::uint32_t width, std::uint32_t height);
+    // Sizes the target to #preview and points #preview at it.
+    void SyncPreview();
 
 private:
     void OnRmlReloaded();
@@ -160,6 +158,10 @@ private:
 
     int m_nOriginX = 0;
     int m_nOriginY = 0;
+
+    // Last, so it is destroyed first and its drawer never runs against a half-destroyed window.
+    UI::RmlBridge::RenderTarget m_PreviewTarget{
+        [this](std::uint32_t width, std::uint32_t height) { RenderPreviewInto(width, height); }};
 
     void SelectJob(int classIndex);
     void SubmitCreateCharacter();

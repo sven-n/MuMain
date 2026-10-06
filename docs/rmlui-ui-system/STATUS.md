@@ -30,8 +30,8 @@ Every window is a `mu::ui::window::CObject` drawn by RmlUi in both themes, excep
   bars, ground items) through the world-label layer.
 
 **Stays native on purpose**: live 3D content (item grids, equipped items, item and character
-previews — `RenderTarget` can show one inside a document, as the potions, the letter portrait and
-the event previews do), the mouse cursor, developer overlays, and the equipment paperdoll's
+previews — `RenderTarget` can show one inside a document, as the potions, the letter portrait,
+the character-creation preview and the event previews do), the mouse cursor, developer overlays, and the equipment paperdoll's
 background/durability tint/drag highlight, which paint behind the equipped item's 3D icon
 (`tracked-deferrals.md`).
 

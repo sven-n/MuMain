@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <cwchar>
 #include <iterator>
@@ -148,15 +149,6 @@ void CCharMakeWin::Create()
 {
     Release();
 
-    CInput& rInput = CInput::Instance();
-
-    // Real, visible full-screen dimming overlay -- see this class's header comment for why this
-    // one (unlike CMsgWin/CSysMenuWin) genuinely needs to render. Mirrors CWin::Create()'s own
-    // default-nTexID=-1 path exactly (Win.cpp).
-    m_sprBg.Create(rInput.GetScreenWidth(), rInput.GetScreenHeight(), -1, 0, NULL, 0, 0, false);
-    m_sprBg.SetAlpha(128);
-    m_sprBg.SetColor(0, 0, 0);
-
     m_asprBack[CMW_SPR_STAT].Create(108, 80);
 
     m_asprBack[CMW_SPR_DESC].Create(454, 51);
@@ -251,7 +243,6 @@ void CCharMakeWin::Release()
 {
     for (int i = 0; i < CMW_SPR_MAX; ++i)
         m_asprBack[i].Release();
-    m_sprBg.Release();
 
     // See CLoginMainWin::PreRelease()'s identical comment.
     m_RmlView.Hide();
@@ -284,9 +275,8 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
     // RmlUi panel: only its own screen origin is still pushed here (genuine placement, same
     // carve-out as every other migrated window) -- width/height and every static child position
     // (stat_panel/desc_panel/input_frame/btn_ok/btn_cancel) moved to char_make.rcss (both themes),
-    // since none of those five ever actually varies at runtime. #panel stays fixed-px rather than
-    // joining the other migrated dialogs' dp auto-fit because the live 3D character-preview
-    // viewport below reads this window's own real unscaled origin (m_nOriginX/Y) directly.
+    // since none of those five ever actually varies at runtime. #panel is still fixed px; the
+    // preview no longer depends on that, since its render target takes #preview's own size.
     if (m_RmlView.Document())
     {
         if (Rml::Element* panel = m_RmlView.Document()->GetElementById("panel"))
@@ -301,7 +291,7 @@ void CCharMakeWin::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
 
-    m_sprBg.Show(bShow);
+    m_PreviewTarget.SetEnabled(bShow);
 
     for (int i = 0; i < CMW_SPR_MAX; ++i)
         m_asprBack[i].Show(bShow);
@@ -447,13 +437,7 @@ void CCharMakeWin::RequestCreateCharacter()
 
 bool CCharMakeWin::Render()
 {
-    // Real, visible dimming overlay -- see this class's header comment for why this one (unlike
-    // CMsgWin/CSysMenuWin) genuinely needs rendering, not just RmlUi bookkeeping.
-    m_sprBg.Render();
-
-    // The live 3D preview stays exactly as before -- see this class's header comment for why it
-    // composites correctly underneath RmlUi's later render pass without any changes here.
-    RenderCreateCharacter();
+    SyncPreview();
 
     // All 2D chrome (job buttons, stat/description panels, input frame, name field, OK/Cancel) now
     // renders via the RmlUi overlay -- see char_make.rml/.rcss. SyncRmlModel() is the only thing
@@ -540,8 +524,34 @@ void CCharMakeWin::UpdateCreateCharacter()
         SetAction(&CharacterView.Object, 0);
 }
 
-void CCharMakeWin::RenderCreateCharacter()
+void CCharMakeWin::SyncPreview()
 {
+    Rml::ElementDocument* document = m_RmlView.Document();
+    Rml::Element* preview = document ? document->GetElementById("preview") : nullptr;
+    if (!preview)
+        return;
+
+    // The image's own box in RmlUi pixels, which are physical ones: drawn at the size it is shown.
+    const auto size = preview->GetBox().GetSize(Rml::BoxArea::Content);
+    m_PreviewTarget.Resize(static_cast<std::uint32_t>(std::lround(size.x)),
+                           static_cast<std::uint32_t>(std::lround(size.y)));
+
+    // An <img> without a texture still draws its quad, untextured: invisible until the first frame,
+    // but still laid out, since the target takes its size from the box.
+    const Rml::String& source = m_PreviewTarget.Source();
+    preview->SetClass("awaiting-frame", source.empty());
+    if (!source.empty() && preview->GetAttribute<Rml::String>("src", "") != source)
+        preview->SetAttribute("src", source);
+}
+
+void CCharMakeWin::RenderPreviewInto(std::uint32_t width, std::uint32_t height)
+{
+    if (height == 0)
+        return;
+
+    // The scene camera is moved to frame the preview, and given back afterwards.
+    const CameraState sceneCamera = g_Camera;
+
     OBJECT* o = &CharacterView.Object;
     vec3_t Position, Angle;
 
@@ -551,12 +561,7 @@ void CCharMakeWin::RenderCreateCharacter()
     g_Camera.FOV = 10.f;
     MoveCharacterCamera(CharacterView.Object.Position, Position, Angle);
 
-    // Real pixels, not divided by g_fScreenRate_x/y -- BeginOpengl() rescales its arguments by
-    // *whatever transform is active when it runs* (ConvertPositionX/Y, ZzzOpenglUtil.cpp), same
-    // hazard as CMsgWin's resident-password gotcha. Render() (below) runs under this window's own
-    // LayoutMode::Legacy (identity) ScopedActiveTransform, so passing real pixels directly here is
-    // what keeps the viewport aligned with this window's actual position.
-    BeginOpengl(m_nOriginX, m_nOriginY, 410, 335);
+    BeginOpenglForTarget(static_cast<int>(width), static_cast<int>(height));
 
     const ClassRenderParameters params = GetRenderParameters(CharacterView.Class);
     if (params.overrideAngle)
@@ -571,7 +576,6 @@ void CCharMakeWin::RenderCreateCharacter()
 
     RenderCharacter(&CharacterView, o);
 
-    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
-
     EndOpengl();
+    g_Camera = sceneCamera;
 }

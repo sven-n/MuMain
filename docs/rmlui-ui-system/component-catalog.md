@@ -386,8 +386,9 @@ for its own drags, and those are ignored even though they bubble up to the handl
 `UI::RmlBridge::RenderTarget` (`UI/RmlBridge/RmlRenderTarget.h`/`.cpp`) — native drawing rendered
 into a texture a document shows like any other image, so it sits at its element's own depth: under
 a window that covers it, beneath the text and tooltips drawn over it. This is the default for live
-3D that belongs to one window. Consumers: the letter portrait (`CUIPhotoViewer`) and the item
-hotkeys (`CItemHotKey`).
+3D that belongs to one window. Consumers: the letter portrait (`CUIPhotoViewer`), the item
+hotkeys (`CItemHotKey`) and the character-creation preview (`CCharMakeWin`, a character with the
+scene camera saved and restored around it).
 
 **An inventory item into a target**: `CItemHotKey::RenderSlot()` is the recipe. Set up the item camera
 `C3DCamera::Render()` uses — identity view, 1° field of view — but crop its projection to a

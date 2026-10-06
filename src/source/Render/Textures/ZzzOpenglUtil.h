@@ -91,6 +91,9 @@ float ConvertPositionX(float x);
 float ConvertPositionY(float y);
 void BeginOpengl(int x = 0, int y = 0, int Width = REFERENCE_WIDTH, int Height = REFERENCE_HEIGHT);
 void BeginOpenglPhysical(int x, int y, int width, int height);
+// BeginOpenglPhysical() without the viewport, for a render target's drawer: the capture brings its
+// own viewport, the whole target.
+void BeginOpenglForTarget(int width, int height);
 void EndOpengl();
 
 // Perspective setup for item/3D-UI rendering. Sets g_Camera perspective state
