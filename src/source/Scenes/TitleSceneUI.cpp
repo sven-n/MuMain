@@ -10,7 +10,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
-#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Elements/ElementProgress.h>
 
@@ -38,11 +38,12 @@ namespace
 
     // Replaces CGaugeBar (the last consumer of that class -- see this file's own comment at
     // CreateSceneUI()'s gauge setup) -- free statics, not members, since TitleSceneUI has no
-    // owning class, same shape LoadingScene.cpp's own s_rmlLoadingDoc uses. s_pGaugeFill is cached
-    // once so RenderSceneUI() can call SetValue()/SetMax() directly -- no data-model binding
-    // needed, RmlUi's own <progress> element already owns that state.
-    Rml::ElementDocument* s_rmlDoc = nullptr;
+    // owning class. s_pGaugeFill is cached once so RenderSceneUI() can call SetValue()/SetMax()
+    // directly -- no data-model binding needed, RmlUi's own <progress> element already owns that
+    // state.
     Rml::ElementProgress* s_pGaugeFill = nullptr;
+    UI::RmlBridge::ThemedView<> s_view{{{"Data/Interface/RmlUi/title_scene.rml"}},
+                                       {.beforeUnload = [] { s_pGaugeFill = nullptr; }}};
 }
 
 void TitleSceneUI::CreateSceneUI()
@@ -103,32 +104,28 @@ void TitleSceneUI::CreateSceneUI()
     s_asprTitle[UIM_TS_121518].SetPosition(544, 60);
 
     // Loading bar, RmlUi's own <progress> element now (title_scene.rml/.rcss) -- was CGaugeBar,
-    // the last consumer of that class. IsCreated() guards against RmlUiRuntime not being up yet,
+    // the last consumer of that class. Ensure() waits for RmlUiRuntime to be up,
     // matching LoadingScene.cpp's own guard around its structurally identical sprite->RmlUi port.
-    if (RmlUiRuntime::Instance().IsCreated())
+    if (s_view.Ensure())
     {
-        s_rmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-            "Data/Interface/RmlUi/title_scene.rml");
-        if (s_rmlDoc)
-        {
-            s_rmlDoc->Show();
-            s_pGaugeFill = rmlui_dynamic_cast<Rml::ElementProgress*>(s_rmlDoc->GetElementById("gauge_fill"));
+        Rml::ElementDocument* document = s_view.Document();
+        document->Show();
+        s_pGaugeFill = rmlui_dynamic_cast<Rml::ElementProgress*>(document->GetElementById("gauge_fill"));
 
-            // Pushed as real px, not dp -- dp only matches this scene's still-native background
-            // sprites' own fScaleX/fScaleY (800x600-reference, independent per axis, unclamped)
-            // scaling at exactly the 640x480 reference size (RmlUi's dp unit is a different,
-            // uniform/clamped formula against a 640x480 reference -- confirmed live: the
-            // gauge only lined up at 640x480 before this, misplaced everywhere else). Recomputing
-            // the identical fScaleX/fScaleY math CGaugeBar::Create()/SetPosition() used keeps this
-            // pixel-exact with the sprites at any resolution, same reasoning login_main.rcss's own
-            // #panel comment gives for pushing its geometry from C++ instead of static dp.
-            if (s_pGaugeFill)
-            {
-                s_pGaugeFill->SetProperty("left", std::to_string(static_cast<int>(72 * fScaleX)) + "px");
-                s_pGaugeFill->SetProperty("top", std::to_string(static_cast<int>(540 * fScaleY)) + "px");
-                s_pGaugeFill->SetProperty("width", std::to_string(static_cast<int>(656 * fScaleX)) + "px");
-                s_pGaugeFill->SetProperty("height", std::to_string(static_cast<int>(15 * fScaleY)) + "px");
-            }
+        // Pushed as real px, not dp -- dp only matches this scene's still-native background
+        // sprites' own fScaleX/fScaleY (800x600-reference, independent per axis, unclamped)
+        // scaling at exactly the 640x480 reference size (RmlUi's dp unit is a different,
+        // uniform/clamped formula against a 640x480 reference -- confirmed live: the
+        // gauge only lined up at 640x480 before this, misplaced everywhere else). Recomputing
+        // the identical fScaleX/fScaleY math CGaugeBar::Create()/SetPosition() used keeps this
+        // pixel-exact with the sprites at any resolution, same reasoning login_main.rcss's own
+        // #panel comment gives for pushing its geometry from C++ instead of static dp.
+        if (s_pGaugeFill)
+        {
+            s_pGaugeFill->SetProperty("left", std::to_string(static_cast<int>(72 * fScaleX)) + "px");
+            s_pGaugeFill->SetProperty("top", std::to_string(static_cast<int>(540 * fScaleY)) + "px");
+            s_pGaugeFill->SetProperty("width", std::to_string(static_cast<int>(656 * fScaleX)) + "px");
+            s_pGaugeFill->SetProperty("height", std::to_string(static_cast<int>(15 * fScaleY)) + "px");
         }
     }
 
@@ -143,12 +140,7 @@ void TitleSceneUI::ReleaseSceneUI()
 {
     SAFE_DELETE_ARRAY(s_asprTitle);
 
-    s_pGaugeFill = nullptr;
-    if (s_rmlDoc)
-    {
-        s_rmlDoc->Close();
-        s_rmlDoc = nullptr;
-    }
+    s_view.Release();
 }
 
 void TitleSceneUI::RenderSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
