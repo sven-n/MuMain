@@ -228,6 +228,10 @@ feature. A new theme needs only its own files; it does not need a C++ change. Th
 cache is cleared when a theme is selected again, so editing theme files and reselecting that
 theme refreshes their values.
 
+If a stylesheet refers to a token absent from that theme's `[Tokens]` section, the client logs
+the token name and stylesheet path in `MuError.log`. The missing value still expands to an empty
+string. Add the key to `tokens.ini` and reselect the theme to reload the stylesheet.
+
 **What a token is for**: a *reusable, theme-level semantic choice* — the standard body text color,
 a shared muted/secondary text tier, the common tooltip backing, a shared accent/highlight, a
 warning/danger color, shared scrollbar track/thumb colors, a shared corner-radius. The test isn't

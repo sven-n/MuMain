@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <cwchar>
 #include <filesystem>
 #include <memory>
 #include <optional>
@@ -68,15 +69,24 @@ std::string NarrowAscii(const std::wstring& value)
     return result;
 }
 
-std::string ResolveToken(const std::wstring& iniPath, const std::string& tokenName)
+std::string ResolveToken(const std::wstring& iniPath, const std::string& tokenName,
+                         const std::string& stylesheetPath)
 {
+    constexpr wchar_t missingToken[] = L"__MU_THEME_TOKEN_NOT_FOUND__";
     wchar_t buffer[256] = {};
-    GetPrivateProfileStringW(L"Tokens", WidenAscii(tokenName).c_str(), L"", buffer,
+    GetPrivateProfileStringW(L"Tokens", WidenAscii(tokenName).c_str(), missingToken, buffer,
                              static_cast<DWORD>(std::size(buffer)), iniPath.c_str());
+    if (std::wcscmp(buffer, missingToken) == 0)
+    {
+        g_ErrorReport.Write(L"> [RmlTheme] Missing token '%hs' in stylesheet '%hs' (tokens.ini: '%ls').\r\n",
+                            tokenName.c_str(), stylesheetPath.c_str(), iniPath.c_str());
+        return {};
+    }
     return NarrowAscii(buffer);
 }
 
-std::string SubstituteTokens(const std::string& source, const std::string& themeDirectory)
+std::string SubstituteTokens(const std::string& source, const std::string& themeDirectory,
+                             const std::string& stylesheetPath)
 {
     static const std::regex tokenPattern(R"(token\(([a-zA-Z0-9_-]+)\))");
     const std::wstring iniPath = std::filesystem::absolute(std::filesystem::path(themeDirectory) / "tokens.ini").wstring();
@@ -92,7 +102,7 @@ std::string SubstituteTokens(const std::string& source, const std::string& theme
         const std::string name = match[1].str();
         auto [value, inserted] = values.try_emplace(name);
         if (inserted)
-            value->second = ResolveToken(iniPath, name);
+            value->second = ResolveToken(iniPath, name, stylesheetPath);
         result += value->second;
         lastEnd = static_cast<size_t>(match.position() + match.length());
     }
@@ -132,7 +142,7 @@ Rml::FileHandle ThemeFileInterface::Open(const Rml::String& path)
         }
         if (source->find("token(") != std::string::npos)
         {
-            file->contents = SubstituteTokens(*source, *theme);
+            file->contents = SubstituteTokens(*source, *theme, path);
             std::fclose(stream);
             file->stream = nullptr;
         }

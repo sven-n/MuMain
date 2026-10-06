@@ -11,9 +11,6 @@ What would otherwise grow with every new window, or break a principle in a way n
 Most are items of the integration seams below.
 
 1. **A display-scale change applies the `dp` ratio** (item 2). A bug against §9.
-2. **An undefined design token is logged**: `ThemeFileInterface` currently substitutes an empty
-   value when `token(name)` is missing from `tokens.ini`. Log the token name and sheet path so
-   theme authors can find the mistake.
 
 Also before merging, though not code health: the event windows nobody has seen in game (the
 ownership boundary's first list) are either looked at on a server that can run the events, or
