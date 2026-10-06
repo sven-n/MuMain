@@ -73,7 +73,6 @@ bool CMuHelperDetailWindow::Create(CManager* pNewUIMng, int x, int y)
     m_Pos.y = y;
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     ApplySavedConfig();
 
@@ -84,15 +83,10 @@ bool CMuHelperDetailWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void CMuHelperDetailWindow::Release()
 {
-    if (m_pRmlDoc)
-    {
-        m_pRmlDoc->Close();
-        m_pRmlDoc = nullptr;
-    }
+    m_RmlView.Release();
 
     if (m_pNewUIMng)
     {
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = nullptr;
     }
@@ -112,11 +106,11 @@ void CMuHelperDetailWindow::Show(bool bShow)
 
 void CMuHelperDetailWindow::BlurFocusedField()
 {
-    if (!m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+    if (!m_RmlView.Document() || !RmlUiRuntime::Instance().IsCreated())
         return;
 
     Rml::Element* focused = RmlUiRuntime::Instance().GetContext()->GetFocusElement();
-    if (focused != nullptr && focused->GetOwnerDocument() == m_pRmlDoc)
+    if (focused != nullptr && focused->GetOwnerDocument() == m_RmlView.Document())
         focused->Blur();
 }
 
@@ -124,7 +118,7 @@ bool CMuHelperDetailWindow::UpdateMouseEvent()
 {
     float panelWidth = static_cast<float>(WindowWidth);
     float panelHeight = static_cast<float>(WindowHeight);
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
 
     if (!WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return true;
@@ -183,7 +177,7 @@ bool CMuHelperDetailWindow::Update()
     // Without this, a focused buff-interval field swallows Escape: no window receives keys while an
     // RmlUi field has the focus unless it claims it. Native's own text box behaved the same; changed
     // deliberately so Escape closes the panel from inside the field too.
-    UI::RmlBridge::ClaimKeyboardWhileTyping(*this, m_pRmlDoc);
+    UI::RmlBridge::ClaimKeyboardWhileTyping(*this, m_RmlView.Document());
     return true;
 }
 
@@ -235,9 +229,9 @@ void CMuHelperDetailWindow::Toggle(int iPage)
 
         // Native reseeded the field on every open of a party page, discarding anything typed but
         // not saved. Kept.
-        MuHelperDetailRmlModel& model = m_RmlBinder.GetModel();
+        MuHelperDetailRmlModel& model = m_RmlView.GetModel();
         model.buffInterval = std::to_string(config.iBuffCastInterval);
-        m_RmlBinder.MarkDirty("buff_interval");
+        m_RmlView.MarkDirty("buff_interval");
     }
 
     Show(true);
@@ -249,7 +243,7 @@ void CMuHelperDetailWindow::Save()
 
     // The field only accepts digits as they are typed, but a paste bypasses that filter.
     const std::wstring interval =
-        StringUtils::NarrowToWide(UI::RmlBridge::KeepDigitsOnly(m_RmlBinder.GetModel().buffInterval));
+        StringUtils::NarrowToWide(UI::RmlBridge::KeepDigitsOnly(m_RmlView.GetModel().buffInterval));
     config.iBuffCastInterval = UI::MuHelper::ParseIntInput(interval.c_str());
 
     config.iPotionThreshold = m_iCurrentPotionThreshold * 10;
@@ -267,8 +261,8 @@ void CMuHelperDetailWindow::ApplySavedConfig()
     // Save writes the buff interval from the field on every page, but native only ever filled the
     // field on the party pages -- so saving from any other page first wrote back whatever it held,
     // an empty field parsing as 0. Keeping it filled from the staged value stops that.
-    m_RmlBinder.GetModel().buffInterval = std::to_string(config.iBuffCastInterval);
-    m_RmlBinder.MarkDirty("buff_interval");
+    m_RmlView.GetModel().buffInterval = std::to_string(config.iBuffCastInterval);
+    m_RmlView.MarkDirty("buff_interval");
 }
 
 // The config window's "Initialization" button.
@@ -282,8 +276,8 @@ void CMuHelperDetailWindow::InitConfig()
     config.bAutoHealParty = false;
     config.bBuffDurationParty = false;
 
-    m_RmlBinder.GetModel().buffInterval = std::to_string(config.iBuffCastInterval);
-    m_RmlBinder.MarkDirty("buff_interval");
+    m_RmlView.GetModel().buffInterval = std::to_string(config.iBuffCastInterval);
+    m_RmlView.MarkDirty("buff_interval");
 }
 
 // This panel's own "Initialization" button: resets only the page it is showing.
@@ -324,105 +318,95 @@ void CMuHelperDetailWindow::SetSubCondition(int index)
     bits = (bits & MUHELPER_SKILL_SUBCON_CLEAR) | SubConditionBits[index];
 }
 
-void CMuHelperDetailWindow::BuildRmlUi()
+void CMuHelperDetailWindow::BindRmlModel(Rml::DataModelConstructor& c, MuHelperDetailRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
 
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "mu_helper_detail",
-        [this](Rml::DataModelConstructor& c, MuHelperDetailRmlModel& model)
+    c.Bind("page", &model.page);
+    c.Bind("precon", &model.precon);
+    c.Bind("subcon", &model.subcon);
+    c.Bind("potion_level", &model.potionLevel);
+    c.Bind("heal_level", &model.healLevel);
+    c.Bind("party_heal_level", &model.partyHealLevel);
+    c.Bind("party_heal", &model.partyHeal);
+    c.Bind("party_duration", &model.partyDuration);
+    c.Bind("buff_interval", &model.buffInterval);
+
+    auto labels = c.RegisterStruct<MuHelperDetailLabels>();
+    labels.RegisterMember("title_activation", &MuHelperDetailLabels::titleActivation);
+    labels.RegisterMember("title_recovery", &MuHelperDetailLabels::titleRecovery);
+    labels.RegisterMember("title_party", &MuHelperDetailLabels::titleParty);
+    labels.RegisterMember("pane_precon", &MuHelperDetailLabels::panePreCon);
+    labels.RegisterMember("pane_subcon", &MuHelperDetailLabels::paneSubCon);
+    labels.RegisterMember("pane_auto_potion", &MuHelperDetailLabels::paneAutoPotion);
+    labels.RegisterMember("pane_auto_heal", &MuHelperDetailLabels::paneAutoHeal);
+    labels.RegisterMember("pane_drain_life", &MuHelperDetailLabels::paneDrainLife);
+    labels.RegisterMember("pane_buff_support", &MuHelperDetailLabels::paneBuffSupport);
+    labels.RegisterMember("pane_heal_support", &MuHelperDetailLabels::paneHealSupport);
+    labels.RegisterMember("hp_status", &MuHelperDetailLabels::hpStatus);
+    labels.RegisterMember("hp_status_party", &MuHelperDetailLabels::hpStatusParty);
+    labels.RegisterMember("precon_hunt_range", &MuHelperDetailLabels::preconHuntRange);
+    labels.RegisterMember("precon_attacking", &MuHelperDetailLabels::preconAttacking);
+    labels.RegisterMember("subcon_two", &MuHelperDetailLabels::subconTwo);
+    labels.RegisterMember("subcon_three", &MuHelperDetailLabels::subconThree);
+    labels.RegisterMember("subcon_four", &MuHelperDetailLabels::subconFour);
+    labels.RegisterMember("subcon_five", &MuHelperDetailLabels::subconFive);
+    labels.RegisterMember("party_heal", &MuHelperDetailLabels::partyHeal);
+    labels.RegisterMember("party_duration", &MuHelperDetailLabels::partyDuration);
+    labels.RegisterMember("time_space", &MuHelperDetailLabels::timeSpace);
+    labels.RegisterMember("save", &MuHelperDetailLabels::save);
+    labels.RegisterMember("init", &MuHelperDetailLabels::init);
+    labels.RegisterMember("close_tip", &MuHelperDetailLabels::closeTip);
+    c.Bind("labels", &model.labels);
+
+    c.BindEventCallback("muhelper_detail_precon",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
         {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-
-            c.Bind("page", &model.page);
-            c.Bind("precon", &model.precon);
-            c.Bind("subcon", &model.subcon);
-            c.Bind("potion_level", &model.potionLevel);
-            c.Bind("heal_level", &model.healLevel);
-            c.Bind("party_heal_level", &model.partyHealLevel);
-            c.Bind("party_heal", &model.partyHeal);
-            c.Bind("party_duration", &model.partyDuration);
-            c.Bind("buff_interval", &model.buffInterval);
-
-            auto labels = c.RegisterStruct<MuHelperDetailLabels>();
-            labels.RegisterMember("title_activation", &MuHelperDetailLabels::titleActivation);
-            labels.RegisterMember("title_recovery", &MuHelperDetailLabels::titleRecovery);
-            labels.RegisterMember("title_party", &MuHelperDetailLabels::titleParty);
-            labels.RegisterMember("pane_precon", &MuHelperDetailLabels::panePreCon);
-            labels.RegisterMember("pane_subcon", &MuHelperDetailLabels::paneSubCon);
-            labels.RegisterMember("pane_auto_potion", &MuHelperDetailLabels::paneAutoPotion);
-            labels.RegisterMember("pane_auto_heal", &MuHelperDetailLabels::paneAutoHeal);
-            labels.RegisterMember("pane_drain_life", &MuHelperDetailLabels::paneDrainLife);
-            labels.RegisterMember("pane_buff_support", &MuHelperDetailLabels::paneBuffSupport);
-            labels.RegisterMember("pane_heal_support", &MuHelperDetailLabels::paneHealSupport);
-            labels.RegisterMember("hp_status", &MuHelperDetailLabels::hpStatus);
-            labels.RegisterMember("hp_status_party", &MuHelperDetailLabels::hpStatusParty);
-            labels.RegisterMember("precon_hunt_range", &MuHelperDetailLabels::preconHuntRange);
-            labels.RegisterMember("precon_attacking", &MuHelperDetailLabels::preconAttacking);
-            labels.RegisterMember("subcon_two", &MuHelperDetailLabels::subconTwo);
-            labels.RegisterMember("subcon_three", &MuHelperDetailLabels::subconThree);
-            labels.RegisterMember("subcon_four", &MuHelperDetailLabels::subconFour);
-            labels.RegisterMember("subcon_five", &MuHelperDetailLabels::subconFive);
-            labels.RegisterMember("party_heal", &MuHelperDetailLabels::partyHeal);
-            labels.RegisterMember("party_duration", &MuHelperDetailLabels::partyDuration);
-            labels.RegisterMember("time_space", &MuHelperDetailLabels::timeSpace);
-            labels.RegisterMember("save", &MuHelperDetailLabels::save);
-            labels.RegisterMember("init", &MuHelperDetailLabels::init);
-            labels.RegisterMember("close_tip", &MuHelperDetailLabels::closeTip);
-            c.Bind("labels", &model.labels);
-
-            c.BindEventCallback("muhelper_detail_precon",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                {
-                    if (args.size() == 1)
-                        SetPreCondition(args[0].Get<int>(-1));
-                });
-            c.BindEventCallback("muhelper_detail_subcon",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                {
-                    if (args.size() == 1)
-                        SetSubCondition(args[0].Get<int>(-1));
-                });
-            c.BindEventCallback("muhelper_detail_gauge",
-                [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
-                {
-                    if (args.size() == 1)
-                        HandleGaugeEvent(event, args[0].Get<int>(-1));
-                });
-            c.BindEventCallback("muhelper_detail_party_heal",
-                [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                {
-                    ConfigData& config = UI::MuHelper::StagedConfig();
-                    config.bAutoHealParty = !config.bAutoHealParty;
-                });
-            c.BindEventCallback("muhelper_detail_party_duration",
-                [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                {
-                    ConfigData& config = UI::MuHelper::StagedConfig();
-                    config.bBuffDurationParty = !config.bBuffDurationParty;
-                });
-            c.BindEventCallback("muhelper_detail_save",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                {
-                    Save();
-                    g_pNewUISystem->Hide(INTERFACE_MUHELPER_EXT);
-                });
-            c.BindEventCallback("muhelper_detail_init",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { Reset(); });
-            c.BindEventCallback("muhelper_detail_close",
-                [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-                {
-                    g_pNewUISystem->Hide(INTERFACE_MUHELPER_EXT);
-                });
+            if (args.size() == 1)
+                SetPreCondition(args[0].Get<int>(-1));
+        });
+    c.BindEventCallback("muhelper_detail_subcon",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+        {
+            if (args.size() == 1)
+                SetSubCondition(args[0].Get<int>(-1));
+        });
+    c.BindEventCallback("muhelper_detail_gauge",
+        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+        {
+            if (args.size() == 1)
+                HandleGaugeEvent(event, args[0].Get<int>(-1));
+        });
+    c.BindEventCallback("muhelper_detail_party_heal",
+        [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            ConfigData& config = UI::MuHelper::StagedConfig();
+            config.bAutoHealParty = !config.bAutoHealParty;
+        });
+    c.BindEventCallback("muhelper_detail_party_duration",
+        [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            ConfigData& config = UI::MuHelper::StagedConfig();
+            config.bBuffDurationParty = !config.bBuffDurationParty;
+        });
+    c.BindEventCallback("muhelper_detail_save",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            Save();
+            g_pNewUISystem->Hide(INTERFACE_MUHELPER_EXT);
+        });
+    c.BindEventCallback("muhelper_detail_init",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { Reset(); });
+    c.BindEventCallback("muhelper_detail_close",
+        [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            g_pNewUISystem->Hide(INTERFACE_MUHELPER_EXT);
         });
 
-    if (!modelCreated)
-        return;
-
-    MuHelperDetailLabels& l = m_RmlBinder.GetModel().labels;
+    MuHelperDetailLabels& l = model.labels;
     l.titleActivation = Narrow(I18N::Game::ActivationSkill);
     l.titleRecovery = Narrow(I18N::Game::AutoRecovery);
     l.titleParty = Narrow(I18N::Game::Party);
@@ -447,59 +431,42 @@ void CMuHelperDetailWindow::BuildRmlUi()
     l.save = Narrow(I18N::Game::SaveSetting);
     l.init = Narrow(I18N::Game::Initialization);
     l.closeTip = Narrow(I18N::Game::Close388);
+}
 
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                  "Data/Interface/RmlUi/mu_helper_detail.rml");
-    if (!m_pRmlDoc)
-        return;
-
-    UI::RmlBridge::AttachNumericInputFilter(m_pRmlDoc);
+void CMuHelperDetailWindow::OnRmlBuilt()
+{
+    UI::RmlBridge::AttachNumericInputFilter(m_RmlView.Document());
     // Set from code so the limit can't drift per theme.
     for (const char* id : BuffIntervalFieldIds)
     {
-        if (Rml::Element* field = m_pRmlDoc->GetElementById(id))
+        if (Rml::Element* field = m_RmlView.Document()->GetElementById(id))
             field->SetAttribute("maxlength", UI::MuHelper::MaxNumberDigits);
     }
 }
 
-void CMuHelperDetailWindow::ReloadRmlTheme()
+void CMuHelperDetailWindow::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return; // never opened -- BuildRmlUi() picks up the new theme whenever it first is
-
-    // The field's typed value lives in the model, which Destroy() resets -- carry it across.
-    const Rml::String typed = m_RmlBinder.GetModel().buffInterval;
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-
-    m_RmlBinder.GetModel().buffInterval = typed;
-    m_RmlBinder.MarkDirty("buff_interval");
-    // Next frame's SyncRmlModel() self-corrects visibility and every other value.
+    m_RmlView.Ensure();
 }
 
 void CMuHelperDetailWindow::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
-    MuHelperDetailRmlModel& model = m_RmlBinder.GetModel();
+    MuHelperDetailRmlModel& model = m_RmlView.GetModel();
     const ConfigData& config = UI::MuHelper::StagedConfig();
 
 
-    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::page, "page", m_iCurrentPage);
+    SyncField(m_RmlView.Binder(), &MuHelperDetailRmlModel::page, "page", m_iCurrentPage);
 
     // The condition radios and the party checkboxes read the staged config live -- they write it
     // directly when clicked, so it is the one source of truth for what they show.
@@ -521,12 +488,12 @@ void CMuHelperDetailWindow::SyncRmlModel()
             }
         }
     }
-    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::precon, "precon", precon);
-    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::subcon, "subcon", subcon);
+    SyncField(m_RmlView.Binder(), &MuHelperDetailRmlModel::precon, "precon", precon);
+    SyncField(m_RmlView.Binder(), &MuHelperDetailRmlModel::subcon, "subcon", subcon);
 
-    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::potionLevel, "potion_level", m_iCurrentPotionThreshold);
-    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::healLevel, "heal_level", m_iCurrentHealThreshold);
-    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::partyHealLevel, "party_heal_level", m_iCurrentPartyHealThreshold);
-    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::partyHeal, "party_heal", config.bAutoHealParty);
-    SyncField(m_RmlBinder, &MuHelperDetailRmlModel::partyDuration, "party_duration", config.bBuffDurationParty);
+    SyncField(m_RmlView.Binder(), &MuHelperDetailRmlModel::potionLevel, "potion_level", m_iCurrentPotionThreshold);
+    SyncField(m_RmlView.Binder(), &MuHelperDetailRmlModel::healLevel, "heal_level", m_iCurrentHealThreshold);
+    SyncField(m_RmlView.Binder(), &MuHelperDetailRmlModel::partyHealLevel, "party_heal_level", m_iCurrentPartyHealThreshold);
+    SyncField(m_RmlView.Binder(), &MuHelperDetailRmlModel::partyHeal, "party_heal", config.bAutoHealParty);
+    SyncField(m_RmlView.Binder(), &MuHelperDetailRmlModel::partyDuration, "party_duration", config.bBuffDurationParty);
 }

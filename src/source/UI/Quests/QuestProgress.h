@@ -6,7 +6,7 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Quests/QuestProgressRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "GameLogic/Quests/QuestMng.h"
 #include "Core/Globals/_TextureIndex.h" // BITMAP_INTERFACE_QUEST_PROGRESS_BEGIN
 
@@ -52,7 +52,7 @@ namespace mu::ui::window
         CQuestProgress();
         virtual ~CQuestProgress();
         bool Create(CManager* pNewUIMng, int x, int y);
-        Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+        Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         void Release();
         void SetPos(int x, int y);
         void Show(bool bShow) override;
@@ -68,7 +68,6 @@ namespace mu::ui::window
         void SetContents(DWORD dwQuestIndex);
         void EnableCompleteBtn(bool bEnable);
 
-        void ReloadRmlTheme();
 
         // Invoked directly from RmlUi data-event-click bindings (see BuildRmlUi()), not polled.
         void RmlClickClose();
@@ -108,7 +107,9 @@ namespace mu::ui::window
         // rather than ported to RmlUi. See CMyQuestInfoWindow's own m_pSelectedRewardItem.
         ITEM* m_pSelectedRewardItem = nullptr;
 
-        RmlModelBinder<QuestProgressRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, QuestProgressRmlModel& model);
+        UI::RmlBridge::ThemedView<QuestProgressRmlModel> m_RmlView{"quest_progress",
+            [this](Rml::DataModelConstructor& c, QuestProgressRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/quest_progress.rml"}}};
     };
 }

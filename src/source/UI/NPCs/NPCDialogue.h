@@ -7,7 +7,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/NPCs/NPCDialogueRmlModel.h"
 #include "UI/NPCs/NpcDialogueUpdates.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "GameLogic/Quests/QuestMng.h"
 
 namespace Rml { class ElementDocument; }
@@ -72,15 +72,17 @@ namespace mu::ui::window
         bool	m_bCanClick;
         DWORD	m_dwContributePoint;
 
-        RmlModelBinder<NPCDialogueRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, NPCDialogueRmlModel& model);
+        UI::RmlBridge::ThemedView<NPCDialogueRmlModel> m_RmlView{"npc_dialogue",
+            [this](Rml::DataModelConstructor& c, NPCDialogueRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/npc_dialogue.rml"}}};
 
     public:
         CNPCDialogue();
         virtual ~CNPCDialogue();
 
         bool Create(CManager* pNewUIMng, int x, int y);
-        Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+        Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         void Release();
 
         void SetPos(int x, int y);
@@ -106,7 +108,6 @@ namespace mu::ui::window
         void ProcessGensSecessionReceive(UI::Npc::GensLeaveResult result);
         void ProcessGensRewardReceive(UI::Npc::GensRewardResult result);
 
-        void ReloadRmlTheme();
 
         // Invoked directly from RmlUi data-event-click bindings (see BuildRmlUi()), not polled.
         void RmlClickClose();

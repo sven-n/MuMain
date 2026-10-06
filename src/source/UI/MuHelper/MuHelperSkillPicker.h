@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <RmlUi/Core/Types.h>
 
@@ -59,7 +59,6 @@ namespace mu::ui::window
         bool Render() override;
         float GetLayerDepth() override;
 
-        void ReloadRmlTheme();
 
         void FilterByAttackSkills();
         void FilterByBuffSkills();
@@ -92,7 +91,9 @@ namespace mu::ui::window
         std::vector<Placement> m_placements;
         bool m_bEntriesDirty = true;
 
-        RmlModelBinder<MuHelperSkillPickerRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        static void BindRmlModel(Rml::DataModelConstructor& c, MuHelperSkillPickerRmlModel& model);
+        UI::RmlBridge::ThemedView<MuHelperSkillPickerRmlModel> m_RmlView{"mu_helper_skill_picker", BindRmlModel,
+            {{"Data/Interface/RmlUi/mu_helper_skill_picker.rml"}},
+            {.afterBuild = [this] { m_bEntriesDirty = true; }}};
     };
 }

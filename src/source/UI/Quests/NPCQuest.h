@@ -11,7 +11,8 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/Window3DRenderMng.h"
 #include "UI/Quests/NPCQuestRmlModel.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml { class ElementDocument; }
 
@@ -21,8 +22,8 @@ namespace Rml { class ElementDocument; }
 // established, just for multiple always-visible rows instead of one on-hover popup.
 //
 // Split into two RmlUi documents, unlike every 2D-only sibling this session: the frame chrome
-// (npc_quest_bg.rml, m_pRmlBgDoc) renders via RmlUiRuntime::GetBackgroundContext() so it paints
-// BEFORE the native 3D preview each frame, while the actual content (npc_quest.rml, m_pRmlDoc) stays
+// (npc_quest_bg.rml, m_RmlBgView) renders via RmlUiRuntime::GetBackgroundContext() so it paints
+// BEFORE the native 3D preview each frame, while the actual content (npc_quest.rml, m_RmlView) stays
 // on the main context, which always renders last (on top of the 3D preview, as intended). Same
 // mechanism CNPCShop/CMyInventory already use for their own live-3D icon grids.
 namespace mu::ui::window
@@ -45,8 +46,10 @@ namespace mu::ui::window
         // ProcessBtns() used to read the button's own current Lock() state.
         bool m_bCompleteEnabled = false;
 
-        RmlModelBinder<NPCQuestRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, NPCQuestRmlModel& model);
+        UI::RmlBridge::ThemedView<NPCQuestRmlModel> m_RmlView{"npc_quest",
+            [this](Rml::DataModelConstructor& c, NPCQuestRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/npc_quest.rml"}}};
 
         // The frame chrome must render behind the live-3D quest-item preview, but RmlUi's main
         // context always renders last -- so it goes through
@@ -57,8 +60,10 @@ namespace mu::ui::window
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         };
-        RmlModelBinder<NPCQuestBgRmlModel> m_BgRmlBinder;
-        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+        static void BindRmlBgModel(Rml::DataModelConstructor& c, NPCQuestBgRmlModel& model);
+        UI::RmlBridge::ThemedView<NPCQuestBgRmlModel> m_RmlBgView{"npc_quest_bg", BindRmlBgModel,
+            {{"Data/Interface/RmlUi/npc_quest_bg.rml",
+              [] { return RmlUiRuntime::Instance().GetBackgroundContext(); }}}};
 
     public:
         CNPCQuest();
@@ -83,7 +88,6 @@ namespace mu::ui::window
         void ProcessOpening();
         bool ProcessClosing();
 
-        void ReloadRmlTheme();
 
         // Invoked directly from RmlUi data-event-click bindings (see BuildRmlUi()), not polled.
         void RmlClickClose();

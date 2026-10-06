@@ -79,7 +79,6 @@ bool CNPCDialogue::Create(CManager* pNewUIMng, int x, int y)
     if (RmlUiRuntime::Instance().IsCreated())
     {
         BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     }
 
     m_nSelTextCount = 0;
@@ -90,96 +89,70 @@ bool CNPCDialogue::Create(CManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNPCDialogue::BuildRmlUi()
+void CNPCDialogue::BindRmlModel(Rml::DataModelConstructor& c, NPCDialogueRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "npc_dialogue",
-        [this](Rml::DataModelConstructor& c, NPCDialogueRmlModel& model)
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("panel_width", &model.panelWidth);
+    c.Bind("text_px", &model.textPx);
+
+    c.Bind("npc_name", &model.npcName);
+
+    auto textLine = c.RegisterStruct<NPCDialogueTextLine>();
+    textLine.RegisterMember("text", &NPCDialogueTextLine::text);
+    c.RegisterArray<std::vector<NPCDialogueTextLine>>();
+    c.Bind("npc_lines", &model.npcLines);
+
+    c.Bind("npc_prev_enabled", &model.npcPrevEnabled);
+    c.Bind("npc_next_enabled", &model.npcNextEnabled);
+
+    auto answer = c.RegisterStruct<NPCDialogueAnswerEntry>();
+    answer.RegisterMember("text", &NPCDialogueAnswerEntry::text);
+    answer.RegisterMember("index", &NPCDialogueAnswerEntry::index);
+    c.RegisterArray<std::vector<NPCDialogueAnswerEntry>>();
+    c.Bind("answers", &model.answers);
+
+    c.Bind("ans_prev_enabled", &model.ansPrevEnabled);
+    c.Bind("ans_next_enabled", &model.ansNextEnabled);
+    c.Bind("show_answers", &model.showAnswers);
+
+    c.Bind("show_contribute", &model.showContribute);
+    c.Bind("contribute_text", &model.contributeText);
+
+    c.Bind("exit_tooltip", &model.exitTooltip);
+
+    c.BindEventCallback("npcdialogue_click_close",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
+    c.BindEventCallback("npcdialogue_npc_prev_page",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickNpcPrevPage(); });
+    c.BindEventCallback("npcdialogue_npc_next_page",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickNpcNextPage(); });
+    c.BindEventCallback("npcdialogue_ans_prev_page",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickAnsPrevPage(); });
+    c.BindEventCallback("npcdialogue_ans_next_page",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickAnsNextPage(); });
+    c.BindEventCallback("npcdialogue_select_answer",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
         {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("panel_width", &model.panelWidth);
-            c.Bind("text_px", &model.textPx);
-
-            c.Bind("npc_name", &model.npcName);
-
-            auto textLine = c.RegisterStruct<NPCDialogueTextLine>();
-            textLine.RegisterMember("text", &NPCDialogueTextLine::text);
-            c.RegisterArray<std::vector<NPCDialogueTextLine>>();
-            c.Bind("npc_lines", &model.npcLines);
-
-            c.Bind("npc_prev_enabled", &model.npcPrevEnabled);
-            c.Bind("npc_next_enabled", &model.npcNextEnabled);
-
-            auto answer = c.RegisterStruct<NPCDialogueAnswerEntry>();
-            answer.RegisterMember("text", &NPCDialogueAnswerEntry::text);
-            answer.RegisterMember("index", &NPCDialogueAnswerEntry::index);
-            c.RegisterArray<std::vector<NPCDialogueAnswerEntry>>();
-            c.Bind("answers", &model.answers);
-
-            c.Bind("ans_prev_enabled", &model.ansPrevEnabled);
-            c.Bind("ans_next_enabled", &model.ansNextEnabled);
-            c.Bind("show_answers", &model.showAnswers);
-
-            c.Bind("show_contribute", &model.showContribute);
-            c.Bind("contribute_text", &model.contributeText);
-
-            c.Bind("exit_tooltip", &model.exitTooltip);
-
-            c.BindEventCallback("npcdialogue_click_close",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
-            c.BindEventCallback("npcdialogue_npc_prev_page",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickNpcPrevPage(); });
-            c.BindEventCallback("npcdialogue_npc_next_page",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickNpcNextPage(); });
-            c.BindEventCallback("npcdialogue_ans_prev_page",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickAnsPrevPage(); });
-            c.BindEventCallback("npcdialogue_ans_next_page",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickAnsNextPage(); });
-            c.BindEventCallback("npcdialogue_select_answer",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                {
-                    if (arguments.size() == 1)
-                        RmlClickSelectAnswer(arguments[0].Get<int>(-1));
-                });
+            if (arguments.size() == 1)
+                RmlClickSelectAnswer(arguments[0].Get<int>(-1));
         });
 
-    if (modelCreated)
-    {
-        m_RmlBinder.GetModel().exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
-    }
-
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-        "Data/Interface/RmlUi/npc_dialogue.rml");
+    model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
 }
 
-void CNPCDialogue::ReloadRmlTheme()
+void CNPCDialogue::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-    // The new document starts hidden; an open window shows it again.
-    if (m_pRmlDoc && IsVisible())
-        m_pRmlDoc->Show();
+    m_RmlView.Ensure();
 }
 
 void CNPCDialogue::Release()
 {
-    if (m_pRmlDoc)
-    {
-        m_pRmlDoc->Close();
-        m_pRmlDoc = nullptr;
-    }
+    m_RmlView.Release();
 
     if (m_pNewUIMng)
     {
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
@@ -194,10 +167,10 @@ void CNPCDialogue::SetPos(int x, int y)
 void CNPCDialogue::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (bShow) m_pRmlDoc->Show();
-        else m_pRmlDoc->Hide();
+        if (bShow) m_RmlView.Document()->Show();
+        else m_RmlView.Document()->Hide();
     }
 }
 
@@ -209,7 +182,7 @@ bool CNPCDialogue::UpdateMouseEvent()
 
     float panelWidth = ND_WIDTH;
     float panelHeight = ND_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return false;
@@ -304,7 +277,7 @@ void CNPCDialogue::ResolveDialogueWrapGeometry(float& npcWrapWidth, int& npcLine
     answerWrapWidth = 160.f;
     answerLinesPerPage = ND_SEL_TEXT_MAX_LINE_PER_PAGE;
 
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
     const auto transform = GetLayoutTransform();
@@ -316,8 +289,8 @@ void CNPCDialogue::ResolveDialogueWrapGeometry(float& npcWrapWidth, int& npcLine
     // rendering. The RmlUi container's box width is in #panel's own layout units (a transform does
     // not change box sizes), and its text is drawn at its own font-size there: scaling the width
     // by native text size / drawn text size gives the budget that fills the container.
-    Rml::Element* npcContainer = m_pRmlDoc->GetElementById("npc_lines_container");
-    Rml::Element* answerContainer = m_pRmlDoc->GetElementById("answers_container");
+    Rml::Element* npcContainer = m_RmlView.Document()->GetElementById("npc_lines_container");
+    Rml::Element* answerContainer = m_RmlView.Document()->GetElementById("answers_container");
     if (npcContainer)
         npcWrapWidth = NativeWrapWidth(*npcContainer, transform, npcWrapWidth);
     if (answerContainer)
@@ -351,7 +324,7 @@ void CNPCDialogue::ResolveDialogueWrapGeometry(float& npcWrapWidth, int& npcLine
     // decorative) divider further below.
     if (npcContainer)
     {
-        if (Rml::Element* npcBoundary = m_pRmlDoc->GetElementById("btn_npc_next"))
+        if (Rml::Element* npcBoundary = m_RmlView.Document()->GetElementById("btn_npc_next"))
         {
             const float availableHeightPx = npcBoundary->GetAbsoluteOffset().y - npcContainer->GetAbsoluteOffset().y;
             if (availableHeightPx > 0.0f)
@@ -360,7 +333,7 @@ void CNPCDialogue::ResolveDialogueWrapGeometry(float& npcWrapWidth, int& npcLine
     }
     if (answerContainer)
     {
-        if (Rml::Element* answerBoundary = m_pRmlDoc->GetElementById("btn_ans_next"))
+        if (Rml::Element* answerBoundary = m_RmlView.Document()->GetElementById("btn_ans_next"))
         {
             const float availableHeightPx = answerBoundary->GetAbsoluteOffset().y - answerContainer->GetAbsoluteOffset().y;
             if (availableHeightPx > 0.0f)
@@ -750,10 +723,10 @@ void CNPCDialogue::RmlClickSelectAnswer(int nIndex)
 
 void CNPCDialogue::SyncRmlModel()
 {
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
 
     const auto transform = UI::Scaling::GetActiveTransform();
     const float rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
@@ -763,15 +736,15 @@ void CNPCDialogue::SyncRmlModel()
         model.rootX = rootX;
         model.rootY = rootY;
         model.rootScale = transform.scaleX;
-        m_RmlBinder.MarkDirty("root_x");
-        m_RmlBinder.MarkDirty("root_y");
-        m_RmlBinder.MarkDirty("root_scale");
+        m_RmlView.MarkDirty("root_x");
+        m_RmlView.MarkDirty("root_y");
+        m_RmlView.MarkDirty("root_scale");
     }
-    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     model.npcName = StringUtils::WideToNarrow(g_QuestMng.GetNPCName());
-    m_RmlBinder.MarkDirty("npc_name");
+    m_RmlView.MarkDirty("npc_name");
 
     // Current page's up-to-m_nNpcLinesPerPage lines, already wrapped by SetCurNPCWords()'s
     // DivideStringByPixel() call -- bound as literal non-wrapping lines (see NPCDialogueRmlModel.h's
@@ -785,15 +758,15 @@ void CNPCDialogue::SyncRmlModel()
             break;
         model.npcLines.push_back({ StringUtils::WideToNarrow(line) });
     }
-    m_RmlBinder.MarkDirty("npc_lines");
+    m_RmlView.MarkDirty("npc_lines");
 
     model.npcPrevEnabled = (m_nSelNPCPage > 0);
     model.npcNextEnabled = (m_nSelNPCPage < m_nMaxNPCPage);
-    m_RmlBinder.MarkDirty("npc_prev_enabled");
-    m_RmlBinder.MarkDirty("npc_next_enabled");
+    m_RmlView.MarkDirty("npc_prev_enabled");
+    m_RmlView.MarkDirty("npc_next_enabled");
 
     model.showAnswers = (m_eLowerView == SEL_TEXTS_MODE);
-    m_RmlBinder.MarkDirty("show_answers");
+    m_RmlView.MarkDirty("show_answers");
 
     if (m_eLowerView == SEL_TEXTS_MODE)
     {
@@ -828,18 +801,18 @@ void CNPCDialogue::SyncRmlModel()
     {
         model.answers.clear();
     }
-    m_RmlBinder.MarkDirty("answers");
+    m_RmlView.MarkDirty("answers");
 
     model.ansPrevEnabled = (m_nSelSelTextPage > 0);
     model.ansNextEnabled = (m_nSelSelTextPage < m_nMaxSelTextPage);
-    m_RmlBinder.MarkDirty("ans_prev_enabled");
-    m_RmlBinder.MarkDirty("ans_next_enabled");
+    m_RmlView.MarkDirty("ans_prev_enabled");
+    m_RmlView.MarkDirty("ans_next_enabled");
 
     // Same gate RenderContributePoint() used natively.
     const bool showContribute = (543 == g_QuestMng.GetNPCIndex() && 1 == Hero->m_byGensInfluence)
         || (544 == g_QuestMng.GetNPCIndex() && 2 == Hero->m_byGensInfluence);
     model.showContribute = showContribute;
-    m_RmlBinder.MarkDirty("show_contribute");
+    m_RmlView.MarkDirty("show_contribute");
 
     if (showContribute)
     {
@@ -851,5 +824,5 @@ void CNPCDialogue::SyncRmlModel()
     {
         model.contributeText.clear();
     }
-    m_RmlBinder.MarkDirty("contribute_text");
+    m_RmlView.MarkDirty("contribute_text");
 }

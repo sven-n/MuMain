@@ -54,7 +54,6 @@ bool CQuestProgressByEtc::Create(CManager* pNewUIMng, int x, int y)
     if (RmlUiRuntime::Instance().IsCreated())
     {
         BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     }
 
     Show(false);
@@ -62,107 +61,81 @@ bool CQuestProgressByEtc::Create(CManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CQuestProgressByEtc::BuildRmlUi()
+void CQuestProgressByEtc::BindRmlModel(Rml::DataModelConstructor& c, QuestProgressRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "quest_progress_etc",
-        [this](Rml::DataModelConstructor& c, QuestProgressRmlModel& model)
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+
+    c.Bind("subject", &model.subject);
+    // No npc_name/player_name/player_words_text binding here -- quest_progress_etc.rml has
+    // no such elements at all (a structural difference, not a data toggle; see
+    // QuestProgressRmlModel.h's own comment).
+
+    auto textLine = c.RegisterStruct<QuestProgressTextLine>();
+    textLine.RegisterMember("text", &QuestProgressTextLine::text);
+    c.RegisterArray<std::vector<QuestProgressTextLine>>();
+    c.Bind("npc_lines", &model.npcLines);
+
+    c.Bind("prev_enabled", &model.prevEnabled);
+    c.Bind("next_enabled", &model.nextEnabled);
+    c.Bind("active_view", &model.activeView);
+
+    auto answer = c.RegisterStruct<QuestProgressAnswerEntry>();
+    answer.RegisterMember("text", &QuestProgressAnswerEntry::text);
+    answer.RegisterMember("index", &QuestProgressAnswerEntry::index);
+    c.RegisterArray<std::vector<QuestProgressAnswerEntry>>();
+    c.Bind("answers", &model.answers);
+
+    auto reward = c.RegisterStruct<UI::Quests::RewardModel::Entry>();
+    reward.RegisterMember("text", &UI::Quests::RewardModel::Entry::text);
+    reward.RegisterMember("style", &UI::Quests::RewardModel::Entry::style);
+    reward.RegisterMember("index", &UI::Quests::RewardModel::Entry::index);
+    reward.RegisterMember("clickable", &UI::Quests::RewardModel::Entry::clickable);
+    c.RegisterArray<std::vector<UI::Quests::RewardModel::Entry>>();
+    c.Bind("reward_rows", &model.rewardRows);
+
+    c.Bind("request_complete", &model.requestComplete);
+    c.Bind("ok_label", &model.okLabel);
+    c.Bind("exit_tooltip", &model.exitTooltip);
+
+    c.BindEventCallback("questprogressetc_click_close",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
+    c.BindEventCallback("questprogressetc_prev_page",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickPrevPage(); });
+    c.BindEventCallback("questprogressetc_next_page",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickNextPage(); });
+    c.BindEventCallback("questprogressetc_select_answer",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
         {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-
-            c.Bind("subject", &model.subject);
-            // No npc_name/player_name/player_words_text binding here -- quest_progress_etc.rml has
-            // no such elements at all (a structural difference, not a data toggle; see
-            // QuestProgressRmlModel.h's own comment).
-
-            auto textLine = c.RegisterStruct<QuestProgressTextLine>();
-            textLine.RegisterMember("text", &QuestProgressTextLine::text);
-            c.RegisterArray<std::vector<QuestProgressTextLine>>();
-            c.Bind("npc_lines", &model.npcLines);
-
-            c.Bind("prev_enabled", &model.prevEnabled);
-            c.Bind("next_enabled", &model.nextEnabled);
-            c.Bind("active_view", &model.activeView);
-
-            auto answer = c.RegisterStruct<QuestProgressAnswerEntry>();
-            answer.RegisterMember("text", &QuestProgressAnswerEntry::text);
-            answer.RegisterMember("index", &QuestProgressAnswerEntry::index);
-            c.RegisterArray<std::vector<QuestProgressAnswerEntry>>();
-            c.Bind("answers", &model.answers);
-
-            auto reward = c.RegisterStruct<UI::Quests::RewardModel::Entry>();
-            reward.RegisterMember("text", &UI::Quests::RewardModel::Entry::text);
-            reward.RegisterMember("style", &UI::Quests::RewardModel::Entry::style);
-            reward.RegisterMember("index", &UI::Quests::RewardModel::Entry::index);
-            reward.RegisterMember("clickable", &UI::Quests::RewardModel::Entry::clickable);
-            c.RegisterArray<std::vector<UI::Quests::RewardModel::Entry>>();
-            c.Bind("reward_rows", &model.rewardRows);
-
-            c.Bind("request_complete", &model.requestComplete);
-            c.Bind("ok_label", &model.okLabel);
-            c.Bind("exit_tooltip", &model.exitTooltip);
-
-            c.BindEventCallback("questprogressetc_click_close",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
-            c.BindEventCallback("questprogressetc_prev_page",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickPrevPage(); });
-            c.BindEventCallback("questprogressetc_next_page",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickNextPage(); });
-            c.BindEventCallback("questprogressetc_select_answer",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                {
-                    if (arguments.size() == 1)
-                        RmlClickSelectAnswer(arguments[0].Get<int>(-1));
-                });
-            c.BindEventCallback("questprogressetc_select_reward",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                {
-                    if (arguments.size() == 1)
-                        RmlClickSelectReward(arguments[0].Get<int>(-1));
-                });
-            c.BindEventCallback("questprogressetc_complete",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickComplete(); });
+            if (arguments.size() == 1)
+                RmlClickSelectAnswer(arguments[0].Get<int>(-1));
         });
+    c.BindEventCallback("questprogressetc_select_reward",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+        {
+            if (arguments.size() == 1)
+                RmlClickSelectReward(arguments[0].Get<int>(-1));
+        });
+    c.BindEventCallback("questprogressetc_complete",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickComplete(); });
 
-    if (modelCreated)
-    {
-        m_RmlBinder.GetModel().okLabel = StringUtils::WideToNarrow(I18N::Game::OK);
-        m_RmlBinder.GetModel().exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
-    }
-
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-        "Data/Interface/RmlUi/quest_progress_etc.rml");
+    model.okLabel = StringUtils::WideToNarrow(I18N::Game::OK);
+    model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
 }
 
-void CQuestProgressByEtc::ReloadRmlTheme()
+void CQuestProgressByEtc::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return;
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-    // The new document starts hidden; an open window shows it again.
-    if (m_pRmlDoc && IsVisible())
-        m_pRmlDoc->Show();
+    m_RmlView.Ensure();
 }
 
 void CQuestProgressByEtc::Release()
 {
-    if (m_pRmlDoc)
-    {
-        m_pRmlDoc->Close();
-        m_pRmlDoc = nullptr;
-    }
+    m_RmlView.Release();
 
     if (m_pNewUIMng)
     {
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
@@ -177,10 +150,10 @@ void CQuestProgressByEtc::SetPos(int x, int y)
 void CQuestProgressByEtc::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (bShow) m_pRmlDoc->Show();
-        else m_pRmlDoc->Hide();
+        if (bShow) m_RmlView.Document()->Show();
+        else m_RmlView.Document()->Hide();
     }
 }
 
@@ -191,7 +164,7 @@ bool CQuestProgressByEtc::UpdateMouseEvent()
 
     float panelWidth = QPE_WIDTH;
     float panelHeight = QPE_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return false;
@@ -231,7 +204,7 @@ bool CQuestProgressByEtc::Render()
         // reading it live means a theme can reposition the reward list without a C++ edit.
         float anchorX = static_cast<float>(m_Pos.x + 95);
         float anchorY = static_cast<float>(m_Pos.y + 360);
-        UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "panel", "reward_popup_anchor", m_Pos, anchorX, anchorY);
+        UI::RmlBridge::RefreshLogicalAnchorPosition(m_RmlView.Document(), "panel", "reward_popup_anchor", m_Pos, anchorX, anchorY);
         ::RenderItemInfo(static_cast<int>(anchorX), static_cast<int>(anchorY), m_pSelectedRewardItem, false, 0, true);
     }
 
@@ -389,10 +362,10 @@ void CQuestProgressByEtc::RmlClickComplete()
 
 void CQuestProgressByEtc::SyncRmlModel()
 {
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
 
     const auto transform = UI::Scaling::GetActiveTransform();
     const float rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
@@ -402,17 +375,17 @@ void CQuestProgressByEtc::SyncRmlModel()
         model.rootX = rootX;
         model.rootY = rootY;
         model.rootScale = transform.scaleX;
-        m_RmlBinder.MarkDirty("root_x");
-        m_RmlBinder.MarkDirty("root_y");
-        m_RmlBinder.MarkDirty("root_scale");
+        m_RmlView.MarkDirty("root_x");
+        m_RmlView.MarkDirty("root_y");
+        m_RmlView.MarkDirty("root_scale");
     }
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     if (0 == m_dwCurQuestIndex)
         return;
 
     model.subject = StringUtils::WideToNarrow(g_QuestMng.GetSubject(m_dwCurQuestIndex));
-    m_RmlBinder.MarkDirty("subject");
+    m_RmlView.MarkDirty("subject");
 
     model.npcLines.clear();
     for (int i = 0; i < QPE_NPC_MAX_LINE_PER_PAGE; ++i)
@@ -422,15 +395,15 @@ void CQuestProgressByEtc::SyncRmlModel()
             break;
         model.npcLines.push_back({ StringUtils::WideToNarrow(line) });
     }
-    m_RmlBinder.MarkDirty("npc_lines");
+    m_RmlView.MarkDirty("npc_lines");
 
     model.prevEnabled = (m_nSelNPCPage > 0);
     model.nextEnabled = (m_nSelNPCPage < m_nMaxNPCPage) || (m_eLowerView == NON_PLAYER_WORDS_MODE);
-    m_RmlBinder.MarkDirty("prev_enabled");
-    m_RmlBinder.MarkDirty("next_enabled");
+    m_RmlView.MarkDirty("prev_enabled");
+    m_RmlView.MarkDirty("next_enabled");
 
     model.activeView = static_cast<int>(m_eLowerView);
-    m_RmlBinder.MarkDirty("active_view");
+    m_RmlView.MarkDirty("active_view");
 
     if (m_eLowerView == PLAYER_WORDS_MODE)
     {
@@ -449,7 +422,7 @@ void CQuestProgressByEtc::SyncRmlModel()
     {
         model.answers.clear();
     }
-    m_RmlBinder.MarkDirty("answers");
+    m_RmlView.MarkDirty("answers");
 
     if (m_eLowerView == REQUEST_REWARD_MODE)
     {
@@ -461,11 +434,11 @@ void CQuestProgressByEtc::SyncRmlModel()
     {
         model.rewardRows.clear();
     }
-    m_RmlBinder.MarkDirty("reward_rows");
+    m_RmlView.MarkDirty("reward_rows");
 
     if (model.requestComplete != m_bRequestComplete)
     {
         model.requestComplete = m_bRequestComplete;
-        m_RmlBinder.MarkDirty("request_complete");
+        m_RmlView.MarkDirty("request_complete");
     }
 }

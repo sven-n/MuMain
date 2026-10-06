@@ -71,7 +71,6 @@ bool mu::ui::window::CMyQuestInfoWindow::Create(CManager* pNewUIMng, int x, int 
     if (RmlUiRuntime::Instance().IsCreated())
     {
         BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     }
 
     Show(false);
@@ -79,129 +78,103 @@ bool mu::ui::window::CMyQuestInfoWindow::Create(CManager* pNewUIMng, int x, int 
     return true;
 }
 
-void mu::ui::window::CMyQuestInfoWindow::BuildRmlUi()
+void mu::ui::window::CMyQuestInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, MyQuestInfoRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "my_quest_info",
-            [this](Rml::DataModelConstructor& c, MyQuestInfoRmlModel& model)
-            {
-                c.Bind("root_x", &model.rootX);
-                c.Bind("root_y", &model.rootY);
-                c.Bind("root_scale", &model.rootScale);
-                c.Bind("text_px", &model.textPx);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
 
-                c.Bind("active_tab", &model.activeTab);
-                c.Bind("tab_quest_label", &model.tabQuestLabel);
-                c.Bind("tab_jobchange_label", &model.tabJobChangeLabel);
-                c.Bind("tab_castletemple_label", &model.tabCastleTempleLabel);
+    c.Bind("active_tab", &model.activeTab);
+    c.Bind("tab_quest_label", &model.tabQuestLabel);
+    c.Bind("tab_jobchange_label", &model.tabJobChangeLabel);
+    c.Bind("tab_castletemple_label", &model.tabCastleTempleLabel);
 
-                c.Bind("quest_list_empty", &model.questListEmpty);
-                c.Bind("open_enabled", &model.openEnabled);
-                c.Bind("giveup_enabled", &model.giveupEnabled);
+    c.Bind("quest_list_empty", &model.questListEmpty);
+    c.Bind("open_enabled", &model.openEnabled);
+    c.Bind("giveup_enabled", &model.giveupEnabled);
 
-                c.Bind("open_tooltip", &model.openTooltip);
-                c.Bind("giveup_tooltip", &model.giveupTooltip);
-                c.Bind("exit_tooltip", &model.exitTooltip);
+    c.Bind("open_tooltip", &model.openTooltip);
+    c.Bind("giveup_tooltip", &model.giveupTooltip);
+    c.Bind("exit_tooltip", &model.exitTooltip);
 
-                auto textLine = c.RegisterStruct<TextLine>();
-                textLine.RegisterMember("text", &TextLine::text);
-                c.RegisterArray<std::vector<TextLine>>();
-                c.Bind("empty_quest_lines", &model.emptyQuestLines);
-                c.Bind("jobchange_lines", &model.jobChangeLines);
-                c.Bind("jobchange_state_lines", &model.jobChangeStateLines);
+    auto textLine = c.RegisterStruct<TextLine>();
+    textLine.RegisterMember("text", &TextLine::text);
+    c.RegisterArray<std::vector<TextLine>>();
+    c.Bind("empty_quest_lines", &model.emptyQuestLines);
+    c.Bind("jobchange_lines", &model.jobChangeLines);
+    c.Bind("jobchange_state_lines", &model.jobChangeStateLines);
 
-                auto quest = c.RegisterStruct<QuestEntry>();
-                quest.RegisterMember("text", &QuestEntry::text);
-                quest.RegisterMember("index", &QuestEntry::index);
-                quest.RegisterMember("selected", &QuestEntry::selected);
-                c.RegisterArray<std::vector<QuestEntry>>();
-                c.Bind("quests", &model.quests);
+    auto quest = c.RegisterStruct<QuestEntry>();
+    quest.RegisterMember("text", &QuestEntry::text);
+    quest.RegisterMember("index", &QuestEntry::index);
+    quest.RegisterMember("selected", &QuestEntry::selected);
+    c.RegisterArray<std::vector<QuestEntry>>();
+    c.Bind("quests", &model.quests);
 
-                auto content = c.RegisterStruct<ContentEntry>();
-                content.RegisterMember("text", &ContentEntry::text);
-                content.RegisterMember("style", &ContentEntry::style);
-                content.RegisterMember("index", &ContentEntry::index);
-                content.RegisterMember("clickable", &ContentEntry::clickable);
-                c.RegisterArray<std::vector<ContentEntry>>();
-                c.Bind("contents", &model.contents);
+    auto content = c.RegisterStruct<ContentEntry>();
+    content.RegisterMember("text", &ContentEntry::text);
+    content.RegisterMember("style", &ContentEntry::style);
+    content.RegisterMember("index", &ContentEntry::index);
+    content.RegisterMember("clickable", &ContentEntry::clickable);
+    c.RegisterArray<std::vector<ContentEntry>>();
+    c.Bind("contents", &model.contents);
 
-                c.Bind("jobchange_title", &model.jobChangeTitle);
-                c.Bind("castle_title", &model.castleTitle);
-                c.Bind("castle_line0", &model.castleLine0);
-                c.Bind("castle_line1", &model.castleLine1);
-                c.Bind("temple_title", &model.templeTitle);
-                c.Bind("temple_line0", &model.templeLine0);
-                c.Bind("temple_line1", &model.templeLine1);
+    c.Bind("jobchange_title", &model.jobChangeTitle);
+    c.Bind("castle_title", &model.castleTitle);
+    c.Bind("castle_line0", &model.castleLine0);
+    c.Bind("castle_line1", &model.castleLine1);
+    c.Bind("temple_title", &model.templeTitle);
+    c.Bind("temple_line0", &model.templeLine0);
+    c.Bind("temple_line1", &model.templeLine1);
 
-                c.BindEventCallback("myquest_select_tab",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                    {
-                        if (arguments.size() == 1)
-                            RmlClickSelectTab(arguments[0].Get<int>(-1));
-                    });
-                c.BindEventCallback("myquest_select_quest",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                    {
-                        if (arguments.size() == 1)
-                            RmlClickSelectQuest(arguments[0].Get<int>(-1));
-                    });
-                c.BindEventCallback("myquest_select_content",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                    {
-                        if (arguments.size() == 1)
-                            RmlClickSelectContent(arguments[0].Get<int>(-1));
-                    });
-                c.BindEventCallback("myquest_click_open",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOpen(); });
-                c.BindEventCallback("myquest_click_giveup",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickGiveUp(); });
-                c.BindEventCallback("myquest_click_exit",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExit(); });
-            });
-
-        if (modelCreated)
+    c.BindEventCallback("myquest_select_tab",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
         {
-            auto& model = m_RmlBinder.GetModel();
-            model.tabQuestLabel = StringUtils::WideToNarrow(I18N::Game::Quest);
-            model.tabJobChangeLabel = StringUtils::WideToNarrow(I18N::Game::ChangeClass);
-            model.tabCastleTempleLabel = StringUtils::WideToNarrow(I18N::Game::CastleTemple);
+            if (arguments.size() == 1)
+                RmlClickSelectTab(arguments[0].Get<int>(-1));
+        });
+    c.BindEventCallback("myquest_select_quest",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+        {
+            if (arguments.size() == 1)
+                RmlClickSelectQuest(arguments[0].Get<int>(-1));
+        });
+    c.BindEventCallback("myquest_select_content",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+        {
+            if (arguments.size() == 1)
+                RmlClickSelectContent(arguments[0].Get<int>(-1));
+        });
+    c.BindEventCallback("myquest_click_open",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOpen(); });
+    c.BindEventCallback("myquest_click_giveup",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickGiveUp(); });
+    c.BindEventCallback("myquest_click_exit",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExit(); });
 
-            model.openTooltip = StringUtils::WideToNarrow(I18N::Game::StartQuest);
-            model.giveupTooltip = StringUtils::WideToNarrow(I18N::Game::GiveUpQuest);
-            model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::Exit);
-        }
+    model.tabQuestLabel = StringUtils::WideToNarrow(I18N::Game::Quest);
+    model.tabJobChangeLabel = StringUtils::WideToNarrow(I18N::Game::ChangeClass);
+    model.tabCastleTempleLabel = StringUtils::WideToNarrow(I18N::Game::CastleTemple);
 
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-        "Data/Interface/RmlUi/my_quest_info.rml");
+    model.openTooltip = StringUtils::WideToNarrow(I18N::Game::StartQuest);
+    model.giveupTooltip = StringUtils::WideToNarrow(I18N::Game::GiveUpQuest);
+    model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::Exit);
 }
 
-void mu::ui::window::CMyQuestInfoWindow::ReloadRmlTheme()
+void mu::ui::window::CMyQuestInfoWindow::BuildRmlUi()
 {
-    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-    // The new document starts hidden; an open window shows it again.
-    if (m_pRmlDoc && IsVisible())
-        m_pRmlDoc->Show();
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CMyQuestInfoWindow::Release()
 {
     UnloadImages();
 
-    if (m_pRmlDoc)
-    {
-        m_pRmlDoc->Close();
-        m_pRmlDoc = nullptr;
-    }
+    m_RmlView.Release();
 
     if (m_pNewUIMng)
     {
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
@@ -216,10 +189,10 @@ void mu::ui::window::CMyQuestInfoWindow::SetPos(int x, int y)
 void mu::ui::window::CMyQuestInfoWindow::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (bShow) m_pRmlDoc->Show();
-        else m_pRmlDoc->Hide();
+        if (bShow) m_RmlView.Document()->Show();
+        else m_RmlView.Document()->Hide();
     }
 }
 
@@ -230,7 +203,7 @@ bool mu::ui::window::CMyQuestInfoWindow::UpdateMouseEvent()
 
     float panelWidth = MYQUESTINFO_WINDOW_WIDTH;
     float panelHeight = MYQUESTINFO_WINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return false;
@@ -280,7 +253,7 @@ bool mu::ui::window::CMyQuestInfoWindow::Render()
         // Pre-converting here too used to double-apply the transform.
         float anchorX = static_cast<float>(m_Pos.x + 95);
         float anchorY = static_cast<float>(m_Pos.y + 230);
-        UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "panel", "reward_popup_anchor", m_Pos, anchorX, anchorY);
+        UI::RmlBridge::RefreshLogicalAnchorPosition(m_RmlView.Document(), "panel", "reward_popup_anchor", m_Pos, anchorX, anchorY);
         ::RenderItemInfo(static_cast<int>(anchorX), static_cast<int>(anchorY), m_pSelectedRewardItem, false, 0, true);
     }
 
@@ -366,19 +339,19 @@ void mu::ui::window::CMyQuestInfoWindow::SetSelQuestRequestReward()
 
 void mu::ui::window::CMyQuestInfoWindow::QuestOpenBtnEnable(bool bEnable)
 {
-    if (m_RmlBinder.GetModel().openEnabled != bEnable)
+    if (m_RmlView.GetModel().openEnabled != bEnable)
     {
-        m_RmlBinder.GetModel().openEnabled = bEnable;
-        m_RmlBinder.MarkDirty("open_enabled");
+        m_RmlView.GetModel().openEnabled = bEnable;
+        m_RmlView.MarkDirty("open_enabled");
     }
 }
 
 void mu::ui::window::CMyQuestInfoWindow::QuestGiveUpBtnEnable(bool bEnable)
 {
-    if (m_RmlBinder.GetModel().giveupEnabled != bEnable)
+    if (m_RmlView.GetModel().giveupEnabled != bEnable)
     {
-        m_RmlBinder.GetModel().giveupEnabled = bEnable;
-        m_RmlBinder.MarkDirty("giveup_enabled");
+        m_RmlView.GetModel().giveupEnabled = bEnable;
+        m_RmlView.MarkDirty("giveup_enabled");
     }
 }
 
@@ -468,7 +441,7 @@ void mu::ui::window::CMyQuestInfoWindow::RmlClickSelectContent(int nContentIndex
 
 void mu::ui::window::CMyQuestInfoWindow::RmlClickOpen()
 {
-    if (!m_RmlBinder.GetModel().openEnabled)
+    if (!m_RmlView.GetModel().openEnabled)
         return;
     ::PlayBuffer(SOUND_CLICK01);
     g_pQuestProgressByEtc->SetContents(GetSelQuestIndex());
@@ -477,7 +450,7 @@ void mu::ui::window::CMyQuestInfoWindow::RmlClickOpen()
 
 void mu::ui::window::CMyQuestInfoWindow::RmlClickGiveUp()
 {
-    if (!m_RmlBinder.GetModel().giveupEnabled)
+    if (!m_RmlView.GetModel().giveupEnabled)
         return;
     ::PlayBuffer(SOUND_CLICK01);
 
@@ -504,15 +477,15 @@ void mu::ui::window::CMyQuestInfoWindow::RmlClickExit()
 
 void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
 {
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
 
     if (model.activeTab != static_cast<int>(m_eTabBtnIndex))
     {
         model.activeTab = static_cast<int>(m_eTabBtnIndex);
-        m_RmlBinder.MarkDirty("active_tab");
+        m_RmlView.MarkDirty("active_tab");
     }
 
     const auto transform = UI::Scaling::GetActiveTransform();
@@ -523,17 +496,17 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
         model.rootX = rootX;
         model.rootY = rootY;
         model.rootScale = transform.scaleX;
-        m_RmlBinder.MarkDirty("root_x");
-        m_RmlBinder.MarkDirty("root_y");
-        m_RmlBinder.MarkDirty("root_scale");
+        m_RmlView.MarkDirty("root_x");
+        m_RmlView.MarkDirty("root_y");
+        m_RmlView.MarkDirty("root_scale");
     }
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     const bool bEmpty = m_QuestIndices.empty();
     if (model.questListEmpty != bEmpty)
     {
         model.questListEmpty = bEmpty;
-        m_RmlBinder.MarkDirty("quest_list_empty");
+        m_RmlView.MarkDirty("quest_list_empty");
     }
 
     // Small lists, rebuilt and marked dirty unconditionally each sync (same as CreditWin/BuffStrip).
@@ -542,7 +515,7 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
     model.emptyQuestLines.clear();
     if (bEmpty)
         model.emptyQuestLines.push_back({StringUtils::WideToNarrow(I18N::Game::Lookup(2825))});
-    m_RmlBinder.MarkDirty("empty_quest_lines");
+    m_RmlView.MarkDirty("empty_quest_lines");
 
     model.quests.clear();
     wchar_t szInput[64];
@@ -556,7 +529,7 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
             dwQuestIndex == m_dwSelectedQuestIndex });
         ++i;
     }
-    m_RmlBinder.MarkDirty("quests");
+    m_RmlView.MarkDirty("quests");
 
     model.contents.clear();
     for (size_t rowIndex = 0; rowIndex < m_ContentRows.size(); ++rowIndex)
@@ -565,17 +538,17 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
             UI::Quests::RewardModel::ToEntry(m_ContentRows[rowIndex], static_cast<int>(rowIndex));
         model.contents.push_back({entry.text, entry.style, entry.index, entry.clickable});
     }
-    m_RmlBinder.MarkDirty("contents");
+    m_RmlView.MarkDirty("contents");
 
     model.jobChangeLines.clear();
     for (int j = 0; j < g_iNumLineMessageBoxCustom; ++j)
         model.jobChangeLines.push_back({ StringUtils::WideToNarrow(g_lpszMessageBoxCustom[j]) });
-    m_RmlBinder.MarkDirty("jobchange_lines");
+    m_RmlView.MarkDirty("jobchange_lines");
 
     if (model.jobChangeTitle.empty())
     {
         model.jobChangeTitle = StringUtils::WideToNarrow(g_csQuest.getQuestTitleWindow());
-        m_RmlBinder.MarkDirty("jobchange_title");
+        m_RmlView.MarkDirty("jobchange_title");
     }
 
     if (m_eTabBtnIndex == TAB_JOB_CHANGE)
@@ -589,7 +562,7 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
         // Any other state (QUEST_NONE/QUEST_NO/QUEST_ERROR) falls through to 930, matching the original.
 
         model.jobChangeStateLines = BuildTextLines(nStateTextIndex, 140);
-        m_RmlBinder.MarkDirty("jobchange_state_lines");
+        m_RmlView.MarkDirty("jobchange_state_lines");
     }
 
     if (m_eTabBtnIndex == TAB_CASTLE_TEMPLE)
@@ -601,17 +574,17 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
         model.castleLine0 = StringUtils::WideToNarrow(strText);
         mu_swprintf(strText, I18N::Game::YouMayEnterOnlyDTimesPerDay, 6);
         model.castleLine1 = StringUtils::WideToNarrow(strText);
-        m_RmlBinder.MarkDirty("castle_title");
-        m_RmlBinder.MarkDirty("castle_line0");
-        m_RmlBinder.MarkDirty("castle_line1");
+        m_RmlView.MarkDirty("castle_title");
+        m_RmlView.MarkDirty("castle_line0");
+        m_RmlView.MarkDirty("castle_line1");
 
         model.templeTitle = StringUtils::WideToNarrow(I18N::Game::IllusionTemple);
         mu_swprintf(strText, I18N::Game::EntranceIsAllowedForDTimes, g_csQuest.GetEventCount(3));
         model.templeLine0 = StringUtils::WideToNarrow(strText);
         mu_swprintf(strText, I18N::Game::YouMayEnterOnlyDTimesPerDay, 6);
         model.templeLine1 = StringUtils::WideToNarrow(strText);
-        m_RmlBinder.MarkDirty("temple_title");
-        m_RmlBinder.MarkDirty("temple_line0");
-        m_RmlBinder.MarkDirty("temple_line1");
+        m_RmlView.MarkDirty("temple_title");
+        m_RmlView.MarkDirty("temple_line0");
+        m_RmlView.MarkDirty("temple_line1");
     }
 }

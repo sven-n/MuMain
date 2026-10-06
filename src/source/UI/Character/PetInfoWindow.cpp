@@ -49,7 +49,6 @@ bool CPetInfoWindow::Create(CManager* pNewUIMng, int x, int y)
     if (RmlUiRuntime::Instance().IsCreated())
     {
         BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     }
 
     Show(false);
@@ -57,109 +56,83 @@ bool CPetInfoWindow::Create(CManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CPetInfoWindow::BuildRmlUi()
+void CPetInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, PetInfoRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "pet_info",
-            [this](Rml::DataModelConstructor& c, PetInfoRmlModel& model)
-            {
-                c.Bind("root_x", &model.rootX);
-                c.Bind("root_y", &model.rootY);
-                c.Bind("root_scale", &model.rootScale);
-                c.Bind("text_px", &model.textPx);
-                c.Bind("panel_width", &model.panelWidth);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("panel_width", &model.panelWidth);
 
-                c.Bind("active_tab", &model.activeTab);
-                c.Bind("window_title", &model.windowTitle);
-                c.Bind("tab_darkhorse_label", &model.tabDarkHorseLabel);
-                c.Bind("tab_darkspirit_label", &model.tabDarkSpiritLabel);
-                c.Bind("exit_tooltip", &model.exitTooltip);
+    c.Bind("active_tab", &model.activeTab);
+    c.Bind("window_title", &model.windowTitle);
+    c.Bind("tab_darkhorse_label", &model.tabDarkHorseLabel);
+    c.Bind("tab_darkspirit_label", &model.tabDarkSpiritLabel);
+    c.Bind("exit_tooltip", &model.exitTooltip);
 
-                c.Bind("dh_has_pet", &model.dhHasPet);
-                c.Bind("dh_no_pet_text", &model.dhNoPetText);
-                c.Bind("dh_level_text", &model.dhLevelText);
-                c.Bind("dh_life_text", &model.dhLifeText);
-                c.Bind("dh_hp_percent", &model.dhHpPercent);
-                c.Bind("dh_exp_text", &model.dhExpText);
-                c.Bind("dh_dmg_text", &model.dhDmgText);
-                c.Bind("dh_atkspeed_text", &model.dhAtkSpeedText);
+    c.Bind("dh_has_pet", &model.dhHasPet);
+    c.Bind("dh_no_pet_text", &model.dhNoPetText);
+    c.Bind("dh_level_text", &model.dhLevelText);
+    c.Bind("dh_life_text", &model.dhLifeText);
+    c.Bind("dh_hp_percent", &model.dhHpPercent);
+    c.Bind("dh_exp_text", &model.dhExpText);
+    c.Bind("dh_dmg_text", &model.dhDmgText);
+    c.Bind("dh_atkspeed_text", &model.dhAtkSpeedText);
 
-                c.Bind("ds_has_pet", &model.dsHasPet);
-                c.Bind("ds_no_pet_text", &model.dsNoPetText);
-                c.Bind("ds_level_text", &model.dsLevelText);
-                c.Bind("ds_life_text", &model.dsLifeText);
-                c.Bind("ds_hp_percent", &model.dsHpPercent);
-                c.Bind("ds_exp_text", &model.dsExpText);
-                c.Bind("ds_dmg_text", &model.dsDmgText);
-                c.Bind("ds_atkspeed_text", &model.dsAtkSpeedText);
-                c.Bind("ds_charisma_text", &model.dsCharismaText);
+    c.Bind("ds_has_pet", &model.dsHasPet);
+    c.Bind("ds_no_pet_text", &model.dsNoPetText);
+    c.Bind("ds_level_text", &model.dsLevelText);
+    c.Bind("ds_life_text", &model.dsLifeText);
+    c.Bind("ds_hp_percent", &model.dsHpPercent);
+    c.Bind("ds_exp_text", &model.dsExpText);
+    c.Bind("ds_dmg_text", &model.dsDmgText);
+    c.Bind("ds_atkspeed_text", &model.dsAtkSpeedText);
+    c.Bind("ds_charisma_text", &model.dsCharismaText);
 
-                c.Bind("commands_label", &model.commandsLabel);
-                c.Bind("skill_basicaction_label", &model.skillBasicActionLabel);
-                c.Bind("skill_randomattack_label", &model.skillRandomAttackLabel);
-                c.Bind("skill_attackwithowner_label", &model.skillAttackWithOwnerLabel);
-                c.Bind("skill_attacktarget_label", &model.skillAttackTargetLabel);
+    c.Bind("commands_label", &model.commandsLabel);
+    c.Bind("skill_basicaction_label", &model.skillBasicActionLabel);
+    c.Bind("skill_randomattack_label", &model.skillRandomAttackLabel);
+    c.Bind("skill_attackwithowner_label", &model.skillAttackWithOwnerLabel);
+    c.Bind("skill_attacktarget_label", &model.skillAttackTargetLabel);
 
-                c.BindEventCallback("petinfo_select_tab",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                    {
-                        if (arguments.size() == 1)
-                            RmlClickSelectTab(arguments[0].Get<int>(-1));
-                    });
-                c.BindEventCallback("petinfo_click_exit",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExit(); });
-            });
-
-        if (modelCreated)
+    c.BindEventCallback("petinfo_select_tab",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
         {
-            auto& model = m_RmlBinder.GetModel();
-            model.windowTitle = StringUtils::WideToNarrow(I18N::Game::Pet);
-            model.tabDarkHorseLabel = StringUtils::WideToNarrow(I18N::Game::DarkHorse);
-            model.tabDarkSpiritLabel = StringUtils::WideToNarrow(I18N::Game::DarkRaven);
-            model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
+            if (arguments.size() == 1)
+                RmlClickSelectTab(arguments[0].Get<int>(-1));
+        });
+    c.BindEventCallback("petinfo_click_exit",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExit(); });
 
-            wchar_t szText[256] = { 0, };
-            mu_swprintf(szText, I18N::Game::NoS, I18N::Game::DarkHorse);
-            model.dhNoPetText = StringUtils::WideToNarrow(szText);
-            model.dsNoPetText = StringUtils::WideToNarrow(I18N::Game::NoPet);
+    model.windowTitle = StringUtils::WideToNarrow(I18N::Game::Pet);
+    model.tabDarkHorseLabel = StringUtils::WideToNarrow(I18N::Game::DarkHorse);
+    model.tabDarkSpiritLabel = StringUtils::WideToNarrow(I18N::Game::DarkRaven);
+    model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
 
-            model.commandsLabel = StringUtils::WideToNarrow(I18N::Game::Commands);
-            model.skillBasicActionLabel = StringUtils::WideToNarrow(I18N::Game::BasicAction);
-            model.skillRandomAttackLabel = StringUtils::WideToNarrow(I18N::Game::RandomAutomaticAttack);
-            model.skillAttackWithOwnerLabel = StringUtils::WideToNarrow(I18N::Game::AttackWithOwner);
-            model.skillAttackTargetLabel = StringUtils::WideToNarrow(I18N::Game::AttackTarget);
-        }
+    wchar_t szText[256] = { 0, };
+    mu_swprintf(szText, I18N::Game::NoS, I18N::Game::DarkHorse);
+    model.dhNoPetText = StringUtils::WideToNarrow(szText);
+    model.dsNoPetText = StringUtils::WideToNarrow(I18N::Game::NoPet);
 
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-        "Data/Interface/RmlUi/pet_info.rml");
+    model.commandsLabel = StringUtils::WideToNarrow(I18N::Game::Commands);
+    model.skillBasicActionLabel = StringUtils::WideToNarrow(I18N::Game::BasicAction);
+    model.skillRandomAttackLabel = StringUtils::WideToNarrow(I18N::Game::RandomAutomaticAttack);
+    model.skillAttackWithOwnerLabel = StringUtils::WideToNarrow(I18N::Game::AttackWithOwner);
+    model.skillAttackTargetLabel = StringUtils::WideToNarrow(I18N::Game::AttackTarget);
 }
 
-void CPetInfoWindow::ReloadRmlTheme()
+void CPetInfoWindow::BuildRmlUi()
 {
-    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-    // The new document starts hidden; an open window shows it again.
-    if (m_pRmlDoc && IsVisible())
-        m_pRmlDoc->Show();
+    m_RmlView.Ensure();
 }
 
 void CPetInfoWindow::Release()
 {
-    if (m_pRmlDoc)
-    {
-        m_pRmlDoc->Close();
-        m_pRmlDoc = nullptr;
-    }
+    m_RmlView.Release();
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = NULL;
     }
 }
@@ -173,10 +146,10 @@ void CPetInfoWindow::SetPos(int x, int y)
 void CPetInfoWindow::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (bShow) m_pRmlDoc->Show();
-        else m_pRmlDoc->Hide();
+        if (bShow) m_RmlView.Document()->Show();
+        else m_RmlView.Document()->Hide();
     }
 }
 
@@ -185,7 +158,7 @@ bool CPetInfoWindow::UpdateMouseEvent()
     // RmlUi handles both close targets; the corner target follows the theme-sized panel edge.
     float panelWidth = PETINFOWINDOW_WIDTH;
     float panelHeight = PETINFOWINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return false;
@@ -229,12 +202,12 @@ void CPetInfoWindow::RmlClickSelectTab(int tab)
     if (tab != TAB_TYPE_DARKHORSE && tab != TAB_TYPE_DARKSPIRIT)
         return;
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
     if (model.activeTab == tab)
         return;
 
     model.activeTab = tab;
-    m_RmlBinder.MarkDirty("active_tab");
+    m_RmlView.MarkDirty("active_tab");
 }
 
 void CPetInfoWindow::RmlClickExit()
@@ -287,21 +260,21 @@ void CPetInfoWindow::CalcDamage(int iNumTapButton)
 
 void CPetInfoWindow::SyncRmlModel()
 {
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
     wchar_t szText[256] = { 0, };
 
     const auto transform = UI::Scaling::GetActiveTransform();
     model.rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
     model.rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
     model.rootScale = transform.scaleX;
-    m_RmlBinder.MarkDirty("root_x");
-    m_RmlBinder.MarkDirty("root_y");
-    m_RmlBinder.MarkDirty("root_scale");
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
-    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
+    m_RmlView.MarkDirty("root_x");
+    m_RmlView.MarkDirty("root_y");
+    m_RmlView.MarkDirty("root_scale");
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
+    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
 
     // Dark Horse tab
     {
@@ -310,7 +283,7 @@ void CPetInfoWindow::SyncRmlModel()
         if (model.dhHasPet != hasPet)
         {
             model.dhHasPet = hasPet;
-            m_RmlBinder.MarkDirty("dh_has_pet");
+            m_RmlView.MarkDirty("dh_has_pet");
         }
 
         if (hasPet)
@@ -319,26 +292,26 @@ void CPetInfoWindow::SyncRmlModel()
 
             mu_swprintf(szText, I18N::Game::LevelD, pPetInfo->m_wLevel);
             model.dhLevelText = StringUtils::WideToNarrow(szText);
-            m_RmlBinder.MarkDirty("dh_level_text");
+            m_RmlView.MarkDirty("dh_level_text");
 
             mu_swprintf(szText, I18N::Game::LifeDD, pPetInfo->m_wLife, 255);
             model.dhLifeText = StringUtils::WideToNarrow(szText);
-            m_RmlBinder.MarkDirty("dh_life_text");
+            m_RmlView.MarkDirty("dh_life_text");
 
             model.dhHpPercent = (std::min<int>(pPetInfo->m_wLife, 255) * 100.f) / 255.f;
-            m_RmlBinder.MarkDirty("dh_hp_percent");
+            m_RmlView.MarkDirty("dh_hp_percent");
 
             mu_swprintf(szText, I18N::Game::ExpDD, pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
             model.dhExpText = StringUtils::WideToNarrow(szText);
-            m_RmlBinder.MarkDirty("dh_exp_text");
+            m_RmlView.MarkDirty("dh_exp_text");
 
             mu_swprintf(szText, I18N::Game::DmgRateDDD, m_aiDamage[0], m_aiDamage[1], pPetInfo->m_wAttackSuccess);
             model.dhDmgText = StringUtils::WideToNarrow(szText);
-            m_RmlBinder.MarkDirty("dh_dmg_text");
+            m_RmlView.MarkDirty("dh_dmg_text");
 
             mu_swprintf(szText, I18N::Game::AttackSpeedD, pPetInfo->m_wAttackSpeed);
             model.dhAtkSpeedText = StringUtils::WideToNarrow(szText);
-            m_RmlBinder.MarkDirty("dh_atkspeed_text");
+            m_RmlView.MarkDirty("dh_atkspeed_text");
         }
     }
 
@@ -349,7 +322,7 @@ void CPetInfoWindow::SyncRmlModel()
         if (model.dsHasPet != hasPet)
         {
             model.dsHasPet = hasPet;
-            m_RmlBinder.MarkDirty("ds_has_pet");
+            m_RmlView.MarkDirty("ds_has_pet");
         }
 
         if (hasPet)
@@ -358,30 +331,30 @@ void CPetInfoWindow::SyncRmlModel()
 
             mu_swprintf(szText, I18N::Game::LevelD, pPetInfo->m_wLevel);
             model.dsLevelText = StringUtils::WideToNarrow(szText);
-            m_RmlBinder.MarkDirty("ds_level_text");
+            m_RmlView.MarkDirty("ds_level_text");
 
             mu_swprintf(szText, I18N::Game::LifeDD, pPetInfo->m_wLife, 255);
             model.dsLifeText = StringUtils::WideToNarrow(szText);
-            m_RmlBinder.MarkDirty("ds_life_text");
+            m_RmlView.MarkDirty("ds_life_text");
 
             model.dsHpPercent = (std::min<int>(pPetInfo->m_wLife, 255) * 100.f) / 255.f;
-            m_RmlBinder.MarkDirty("ds_hp_percent");
+            m_RmlView.MarkDirty("ds_hp_percent");
 
             mu_swprintf(szText, I18N::Game::ExpDD, pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
             model.dsExpText = StringUtils::WideToNarrow(szText);
-            m_RmlBinder.MarkDirty("ds_exp_text");
+            m_RmlView.MarkDirty("ds_exp_text");
 
             mu_swprintf(szText, I18N::Game::DmgRateDDD, m_aiDamage[0], m_aiDamage[1], pPetInfo->m_wAttackSuccess);
             model.dsDmgText = StringUtils::WideToNarrow(szText);
-            m_RmlBinder.MarkDirty("ds_dmg_text");
+            m_RmlView.MarkDirty("ds_dmg_text");
 
             mu_swprintf(szText, I18N::Game::AttackSpeedD, pPetInfo->m_wAttackSpeed);
             model.dsAtkSpeedText = StringUtils::WideToNarrow(szText);
-            m_RmlBinder.MarkDirty("ds_atkspeed_text");
+            m_RmlView.MarkDirty("ds_atkspeed_text");
 
             mu_swprintf(szText, I18N::Game::CharismaRequirementD, (185 + (pPetInfo->m_wLevel * 15)));
             model.dsCharismaText = StringUtils::WideToNarrow(szText);
-            m_RmlBinder.MarkDirty("ds_charisma_text");
+            m_RmlView.MarkDirty("ds_charisma_text");
         }
     }
 }

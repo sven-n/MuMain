@@ -2,7 +2,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/MuHelper/MuHelperShared.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <RmlUi/Core/Types.h>
 
@@ -119,7 +119,7 @@ namespace mu::ui::window
         ~CMuHelperConfigWindow() override;
 
         bool Create(CManager* pNewUIMng, int x, int y);
-        Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+        Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         void SetPos(int x, int y) { m_Pos = {x, y}; }
         void Release();
 
@@ -131,7 +131,6 @@ namespace mu::ui::window
         float GetKeyEventOrder() override;
         void Show(bool bShow) override;
 
-        void ReloadRmlTheme();
 
         // The settings the server sent, or the defaults (MainScene, on entering the game).
         void LoadSavedConfig(const MUHelper::ConfigData& config);
@@ -171,7 +170,13 @@ namespace mu::ui::window
         Rml::String m_selectedExtraItem;
         bool m_bExtraItemsDirty = true;
 
-        RmlModelBinder<MuHelperConfigRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, MuHelperConfigRmlModel& model);
+        // After every build: the field filters and limits the theme cannot set.
+        void OnRmlBuilt();
+
+        UI::RmlBridge::ThemedView<MuHelperConfigRmlModel> m_RmlView{"mu_helper_config",
+            [this](Rml::DataModelConstructor& c, MuHelperConfigRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/mu_helper_config.rml"}},
+            {.afterBuild = [this] { OnRmlBuilt(); }}};
     };
 }

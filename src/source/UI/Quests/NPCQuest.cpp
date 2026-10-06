@@ -67,7 +67,6 @@ bool CNPCQuest::Create(CManager* pNewUIMng,
     if (RmlUiRuntime::Instance().IsCreated())
     {
         BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     }
 
     Show(false);
@@ -75,127 +74,81 @@ bool CNPCQuest::Create(CManager* pNewUIMng,
     return true;
 }
 
-void CNPCQuest::BuildRmlUi()
+void CNPCQuest::BindRmlModel(Rml::DataModelConstructor& c, NPCQuestRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "npc_quest",
-        [this](Rml::DataModelConstructor& c, NPCQuestRmlModel& model)
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
+
+    c.Bind("npc_name", &model.npcName);
+    c.Bind("quest_title", &model.questTitle);
+    c.Bind("show_quest_title", &model.showQuestTitle);
+
+    c.Bind("show_conditions", &model.showConditions);
+    auto conditionRow = c.RegisterStruct<NPCQuestConditionRow>();
+    conditionRow.RegisterMember("text", &NPCQuestConditionRow::text);
+    conditionRow.RegisterMember("color", &NPCQuestConditionRow::color);
+    c.RegisterArray<std::vector<NPCQuestConditionRow>>();
+    c.Bind("conditions", &model.conditions);
+    c.Bind("complete_enabled", &model.completeEnabled);
+
+    c.Bind("show_cost", &model.showCost);
+    c.Bind("cost_amount", &model.costAmount);
+    c.Bind("cost_tier", &model.costTier);
+
+    auto textLine = c.RegisterStruct<NPCQuestTextLine>();
+    textLine.RegisterMember("text", &NPCQuestTextLine::text);
+    c.RegisterArray<std::vector<NPCQuestTextLine>>();
+    c.Bind("message_lines", &model.messageLines);
+
+    auto answer = c.RegisterStruct<NPCQuestAnswerEntry>();
+    answer.RegisterMember("text", &NPCQuestAnswerEntry::text);
+    answer.RegisterMember("index", &NPCQuestAnswerEntry::index);
+    c.RegisterArray<std::vector<NPCQuestAnswerEntry>>();
+    c.Bind("answers", &model.answers);
+
+    c.Bind("dialogue_top", &model.dialogueTop);
+    c.Bind("message_top", &model.messageTop);
+    c.Bind("answers_top", &model.answersTop);
+
+    c.Bind("complete_label", &model.completeLabel);
+    c.Bind("cost_label", &model.costLabel);
+    c.Bind("exit_tooltip", &model.exitTooltip);
+
+    c.BindEventCallback("npcquest_click_close",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
+    c.BindEventCallback("npcquest_select_answer",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
         {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("text_px", &model.textPx);
-
-            c.Bind("npc_name", &model.npcName);
-            c.Bind("quest_title", &model.questTitle);
-            c.Bind("show_quest_title", &model.showQuestTitle);
-
-            c.Bind("show_conditions", &model.showConditions);
-            auto conditionRow = c.RegisterStruct<NPCQuestConditionRow>();
-            conditionRow.RegisterMember("text", &NPCQuestConditionRow::text);
-            conditionRow.RegisterMember("color", &NPCQuestConditionRow::color);
-            c.RegisterArray<std::vector<NPCQuestConditionRow>>();
-            c.Bind("conditions", &model.conditions);
-            c.Bind("complete_enabled", &model.completeEnabled);
-
-            c.Bind("show_cost", &model.showCost);
-            c.Bind("cost_amount", &model.costAmount);
-            c.Bind("cost_tier", &model.costTier);
-
-            auto textLine = c.RegisterStruct<NPCQuestTextLine>();
-            textLine.RegisterMember("text", &NPCQuestTextLine::text);
-            c.RegisterArray<std::vector<NPCQuestTextLine>>();
-            c.Bind("message_lines", &model.messageLines);
-
-            auto answer = c.RegisterStruct<NPCQuestAnswerEntry>();
-            answer.RegisterMember("text", &NPCQuestAnswerEntry::text);
-            answer.RegisterMember("index", &NPCQuestAnswerEntry::index);
-            c.RegisterArray<std::vector<NPCQuestAnswerEntry>>();
-            c.Bind("answers", &model.answers);
-
-            c.Bind("dialogue_top", &model.dialogueTop);
-            c.Bind("message_top", &model.messageTop);
-            c.Bind("answers_top", &model.answersTop);
-
-            c.Bind("complete_label", &model.completeLabel);
-            c.Bind("cost_label", &model.costLabel);
-            c.Bind("exit_tooltip", &model.exitTooltip);
-
-            c.BindEventCallback("npcquest_click_close",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
-            c.BindEventCallback("npcquest_select_answer",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                {
-                    if (arguments.size() == 1)
-                        RmlClickAnswer(arguments[0].Get<int>(-1));
-                });
-            c.BindEventCallback("npcquest_complete",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickComplete(); });
+            if (arguments.size() == 1)
+                RmlClickAnswer(arguments[0].Get<int>(-1));
         });
+    c.BindEventCallback("npcquest_complete",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickComplete(); });
 
-    if (modelCreated)
-    {
-        m_RmlBinder.GetModel().completeLabel = StringUtils::WideToNarrow(I18N::Game::ProceedWithQuest);
-        m_RmlBinder.GetModel().costLabel = StringUtils::WideToNarrow(I18N::Game::Cost);
-        m_RmlBinder.GetModel().exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
-    }
-
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-        "Data/Interface/RmlUi/npc_quest.rml");
-
-    // Frame background panel uses the background context -- see NPCQuestBgRmlModel (NPCQuest.h).
-    if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-    {
-        const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "npc_quest_bg",
-            [](Rml::DataModelConstructor& c, NPCQuestBgRmlModel& model)
-            {
-                c.Bind("root_x", &model.rootX);
-                c.Bind("root_y", &model.rootY);
-                c.Bind("root_scale", &model.rootScale);
-            });
-        if (bgModelCreated)
-        {
-            m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/npc_quest_bg.rml");
-        }
-    }
+    model.completeLabel = StringUtils::WideToNarrow(I18N::Game::ProceedWithQuest);
+    model.costLabel = StringUtils::WideToNarrow(I18N::Game::Cost);
+    model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::Close388);
 }
 
-void CNPCQuest::ReloadRmlTheme()
+void CNPCQuest::BindRmlBgModel(Rml::DataModelConstructor& c, NPCQuestBgRmlModel& model)
 {
-    if (!m_pRmlDoc)
-        return;
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+}
 
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    if (m_pRmlBgDoc)
-    {
-        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
-        {
-            m_BgRmlBinder.Destroy(bgContext);
-            bgContext->UnloadDocument(m_pRmlBgDoc);
-        }
-        m_pRmlBgDoc = nullptr;
-    }
-
-    BuildRmlUi();
-    // Next frame's SyncRmlModel() self-corrects visibility for both docs.
+void CNPCQuest::BuildRmlUi()
+{
+    m_RmlView.Ensure();
+    m_RmlBgView.Ensure();
 }
 
 void CNPCQuest::Release()
 {
-    if (m_pRmlDoc)
-    {
-        m_pRmlDoc->Close();
-        m_pRmlDoc = nullptr;
-    }
-
-    if (m_pRmlBgDoc)
-    {
-        m_pRmlBgDoc->Close();
-        m_pRmlBgDoc = nullptr;
-    }
+    m_RmlView.Release();
+    m_RmlBgView.Release();
 
     if (m_pNewUI3DRenderMng)
     {
@@ -205,7 +158,6 @@ void CNPCQuest::Release()
 
     if (m_pNewUIMng)
     {
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
@@ -220,10 +172,10 @@ void CNPCQuest::SetPos(int x, int y)
 void CNPCQuest::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (bShow) m_pRmlDoc->Show();
-        else m_pRmlDoc->Hide();
+        if (bShow) m_RmlView.Document()->Show();
+        else m_RmlView.Document()->Hide();
     }
 }
 
@@ -234,11 +186,11 @@ bool CNPCQuest::UpdateMouseEvent()
         return false;
 
     // Frame chrome (and thus #panel's real size) lives in the background-context doc, not
-    // m_pRmlDoc -- see BuildRmlUi()'s own comment on the fg/bg split this window needs for its
+    // m_RmlView.Document() -- see BuildRmlUi()'s own comment on the fg/bg split this window needs for its
     // still-native live-3D quest-item preview.
     float panelWidth = NPCQUEST_WIDTH;
     float panelHeight = NPCQUEST_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlBgDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlBgView.Document(), "panel", panelWidth, panelHeight);
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return false;
@@ -293,9 +245,9 @@ void CNPCQuest::RenderItem3D()
     auto y = float(m_Pos.y + 235);
     float rowStep = 32.f;
 
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (Rml::Element* conditionsEl = m_pRmlDoc->GetElementById("conditions_anchor"))
+        if (Rml::Element* conditionsEl = m_RmlView.Document()->GetElementById("conditions_anchor"))
         {
             const auto transform = GetLayoutTransform();
             if (transform.scaleX > 0.0f && transform.scaleY > 0.0f)
@@ -313,7 +265,7 @@ void CNPCQuest::RenderItem3D()
                 // Only applied on a successful lookup: x/y are pre-seeded with the historical
                 // m_Pos+30/+235, which already has the 22/9 taken off.
                 float anchorX = 0.f, anchorY = 0.f;
-                if (UI::RmlBridge::RefreshLogicalAnchorPosition(m_pRmlDoc, "content_root",
+                if (UI::RmlBridge::RefreshLogicalAnchorPosition(m_RmlView.Document(), "content_root",
                                                                 "conditions_anchor", m_Pos,
                                                                 anchorX, anchorY))
                 {
@@ -499,18 +451,18 @@ void CNPCQuest::RmlClickComplete()
 
 void CNPCQuest::SyncRmlModel()
 {
-    if (m_pRmlBgDoc)
+    if (m_RmlBgView.Document())
     {
-        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
+        UI::RmlBridge::SyncRootTransform(m_RmlBgView.Binder(), m_Pos);
         // RenderBackgroundLayer() renders whatever's shown in the shared background context
         // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
-        UI::RmlBridge::SyncDocumentVisibility(m_pRmlBgDoc, IsVisible());
+        UI::RmlBridge::SyncDocumentVisibility(m_RmlBgView.Document(), IsVisible());
     }
 
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
 
     const auto transform = UI::Scaling::GetActiveTransform();
     const float rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
@@ -520,11 +472,11 @@ void CNPCQuest::SyncRmlModel()
         model.rootX = rootX;
         model.rootY = rootY;
         model.rootScale = transform.scaleX;
-        m_RmlBinder.MarkDirty("root_x");
-        m_RmlBinder.MarkDirty("root_y");
-        m_RmlBinder.MarkDirty("root_scale");
+        m_RmlView.MarkDirty("root_x");
+        m_RmlView.MarkDirty("root_y");
+        m_RmlView.MarkDirty("root_scale");
     }
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     const BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
     const BYTE byCurQuestState = g_csQuest.getQuestState2(int(byCurQuestIndex));
@@ -533,26 +485,26 @@ void CNPCQuest::SyncRmlModel()
         || Hero->Class == CLASS_RAGEFIGHTER) && bCheckNPC;
 
     model.npcName = StringUtils::WideToNarrow(bDarkNpcCheck ? g_csQuest.GetNPCName(2) : g_csQuest.GetNPCName(byCurQuestIndex));
-    m_RmlBinder.MarkDirty("npc_name");
+    m_RmlView.MarkDirty("npc_name");
 
     model.showQuestTitle = !bDarkNpcCheck;
-    m_RmlBinder.MarkDirty("show_quest_title");
+    m_RmlView.MarkDirty("show_quest_title");
     if (model.showQuestTitle)
     {
         model.questTitle = StringUtils::WideToNarrow(g_csQuest.getQuestTitle());
-        m_RmlBinder.MarkDirty("quest_title");
+        m_RmlView.MarkDirty("quest_title");
     }
 
     model.showConditions = (QUEST_ING == byCurQuestState);
-    m_RmlBinder.MarkDirty("show_conditions");
+    m_RmlView.MarkDirty("show_conditions");
     if (model.showConditions)
     {
         std::vector<NPCQuestConditionRow> rows;
         m_bCompleteEnabled = BuildConditionRows(rows);
         model.conditions = std::move(rows);
         model.completeEnabled = m_bCompleteEnabled;
-        m_RmlBinder.MarkDirty("conditions");
-        m_RmlBinder.MarkDirty("complete_enabled");
+        m_RmlView.MarkDirty("conditions");
+        m_RmlView.MarkDirty("complete_enabled");
     }
     else
     {
@@ -560,7 +512,7 @@ void CNPCQuest::SyncRmlModel()
     }
 
     model.showCost = (QUEST_NO == byCurQuestState);
-    m_RmlBinder.MarkDirty("show_cost");
+    m_RmlView.MarkDirty("show_cost");
     if (model.showCost)
     {
         wchar_t szTemp[128];
@@ -569,14 +521,14 @@ void CNPCQuest::SyncRmlModel()
 
         model.costTier = UI::RmlBridge::GoldTierKey(GameLogic::Items::ClassifyGoldAmount(g_csQuest.GetNeedZen()));
 
-        m_RmlBinder.MarkDirty("cost_amount");
-        m_RmlBinder.MarkDirty("cost_tier");
+        m_RmlView.MarkDirty("cost_amount");
+        m_RmlView.MarkDirty("cost_tier");
     }
 
     model.messageLines.clear();
     for (int i = 0; i < g_iNumLineMessageBoxCustom; ++i)
         model.messageLines.push_back({ StringUtils::WideToNarrow(g_lpszMessageBoxCustom[i]) });
-    m_RmlBinder.MarkDirty("message_lines");
+    m_RmlView.MarkDirty("message_lines");
 
     model.answers.clear();
     for (int j = 0; j < g_iNumAnswer; ++j)
@@ -585,7 +537,7 @@ void CNPCQuest::SyncRmlModel()
             break;
         model.answers.push_back({ StringUtils::WideToNarrow(g_lpszDialogAnswer[j][0]), j });
     }
-    m_RmlBinder.MarkDirty("answers");
+    m_RmlView.MarkDirty("answers");
 
     // Same vertical-centering formula RenderText() used natively; the QUEST_ING branch depends on
     // how many message+answer lines are present this instance (a real per-instance value), the other
@@ -599,7 +551,7 @@ void CNPCQuest::SyncRmlModel()
                            ? model.messageTop + static_cast<float>(g_iNumLineMessageBoxCustom) * kLineAdvance
                            : kAnswersAnchorTop;
     model.dialogueTop = questInProgress ? model.messageTop : kAnswersAnchorTop;
-    m_RmlBinder.MarkDirty("dialogue_top");
-    m_RmlBinder.MarkDirty("message_top");
-    m_RmlBinder.MarkDirty("answers_top");
+    m_RmlView.MarkDirty("dialogue_top");
+    m_RmlView.MarkDirty("message_top");
+    m_RmlView.MarkDirty("answers_top");
 }

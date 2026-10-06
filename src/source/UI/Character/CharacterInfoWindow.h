@@ -4,7 +4,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
 
@@ -71,7 +71,7 @@ namespace mu::ui::window
         bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
         void SetPos(int x, int y);
-        Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+        Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         void Show(bool bShow) override;
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -79,7 +79,6 @@ namespace mu::ui::window
         bool Render();
         float GetLayerDepth();	//. 5.1f
         void OpenningProcess();
-        void ReloadRmlTheme();
 
         // Invoked directly from RmlUi data-event-click bindings (see Create()), not polled.
         void RmlClickIncreaseStat(int stat);
@@ -155,8 +154,11 @@ namespace mu::ui::window
             // Set once at Create() -- static tooltip text, no per-frame update needed.
             Rml::String exitTooltip, questTooltip, petTooltip, masterLevelTooltip;
         };
-        RmlModelBinder<CharacterInfoRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+        void BindRmlModel(Rml::DataModelConstructor& c, CharacterInfoRmlModel& model);
+        UI::RmlBridge::ThemedView<CharacterInfoRmlModel> m_RmlView{"character_info",
+            [this](Rml::DataModelConstructor& c, CharacterInfoRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/character_info.rml"}}};
 
     private:
         CManager* m_pNewUIMng;

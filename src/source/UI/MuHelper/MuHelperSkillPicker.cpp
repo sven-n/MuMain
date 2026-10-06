@@ -32,7 +32,6 @@ bool CMuHelperSkillPicker::Create(CManager* pNewUIMng)
     m_pNewUIMng->AddUIObj(INTERFACE_MUHELPER_SKILL_LIST, this);
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     Show(false);
 
@@ -41,15 +40,10 @@ bool CMuHelperSkillPicker::Create(CManager* pNewUIMng)
 
 void CMuHelperSkillPicker::Release()
 {
-    if (m_pRmlDoc)
-    {
-        m_pRmlDoc->Close();
-        m_pRmlDoc = nullptr;
-    }
+    m_RmlView.Release();
 
     if (m_pNewUIMng)
     {
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = nullptr;
     }
@@ -185,65 +179,42 @@ int CMuHelperSkillPicker::SkillUnderMouse() const
     return -1;
 }
 
-void CMuHelperSkillPicker::BuildRmlUi()
+void CMuHelperSkillPicker::BindRmlModel(Rml::DataModelConstructor& c, MuHelperSkillPickerRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
 
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "mu_helper_skill_picker",
-        [](Rml::DataModelConstructor& c, MuHelperSkillPickerRmlModel& model)
-        {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-
-            auto entry = c.RegisterStruct<MuHelperSkillPickerEntry>();
-            entry.RegisterMember("left", &MuHelperSkillPickerEntry::left);
-            entry.RegisterMember("top", &MuHelperSkillPickerEntry::top);
-            entry.RegisterMember("decorator", &MuHelperSkillPickerEntry::decorator);
-            c.RegisterArray<std::vector<MuHelperSkillPickerEntry>>();
-            c.Bind("entries", &model.entries);
-        });
-
-    if (modelCreated)
-    {
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                      "Data/Interface/RmlUi/mu_helper_skill_picker.rml");
-        m_bEntriesDirty = true;
-    }
+    auto entry = c.RegisterStruct<MuHelperSkillPickerEntry>();
+    entry.RegisterMember("left", &MuHelperSkillPickerEntry::left);
+    entry.RegisterMember("top", &MuHelperSkillPickerEntry::top);
+    entry.RegisterMember("decorator", &MuHelperSkillPickerEntry::decorator);
+    c.RegisterArray<std::vector<MuHelperSkillPickerEntry>>();
+    c.Bind("entries", &model.entries);
 }
 
-void CMuHelperSkillPicker::ReloadRmlTheme()
+void CMuHelperSkillPicker::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return; // never opened -- BuildRmlUi() picks up the new theme whenever it first is
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-    // Next frame's SyncRmlModel() self-corrects visibility and republishes the entries.
+    m_RmlView.Ensure();
 }
 
 void CMuHelperSkillPicker::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, POINT{ 0, 0 });
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), POINT{ 0, 0 });
 
     if (!m_bEntriesDirty)
         return;
     m_bEntriesDirty = false;
 
-    MuHelperSkillPickerRmlModel& model = m_RmlBinder.GetModel();
+    MuHelperSkillPickerRmlModel& model = m_RmlView.GetModel();
     model.entries.clear();
     model.entries.reserve(m_placements.size());
     for (const Placement& p : m_placements)
@@ -254,7 +225,7 @@ void CMuHelperSkillPicker::SyncRmlModel()
         e.decorator = UI::MuHelper::SkillIconDecorator(p.skillType);
         model.entries.push_back(std::move(e));
     }
-    m_RmlBinder.MarkDirty("entries");
+    m_RmlView.MarkDirty("entries");
 }
 
 bool CMuHelperSkillPicker::IsAttackSkill(int iSkillType)

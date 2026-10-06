@@ -9,7 +9,7 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml { class ElementDocument; }
 
@@ -62,7 +62,7 @@ namespace mu::ui::window
         virtual ~CPartyInfoWindow();
 
         bool Create(CManager* pNewUIMng, int x, int y);
-        Rml::ElementDocument* GetFillDocument() const override { return m_pRmlDoc; }
+        Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         void Release();
 
         void SetPos(int x, int y);
@@ -86,7 +86,6 @@ namespace mu::ui::window
         void RmlClickExit();
         void RmlClickKickMember(int index);
 
-        void ReloadRmlTheme();
 
     private:
         void LoadImages();
@@ -127,8 +126,11 @@ namespace mu::ui::window
             Rml::String windowTitle;
             Rml::String exitTooltip;
         };
-        RmlModelBinder<PartyInfoRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+        void BindRmlModel(Rml::DataModelConstructor& c, PartyInfoRmlModel& model);
+        UI::RmlBridge::ThemedView<PartyInfoRmlModel> m_RmlView{"party_info",
+            [this](Rml::DataModelConstructor& c, PartyInfoRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/party_info.rml"}}};
 
     private:
         CManager* m_pNewUIMng;

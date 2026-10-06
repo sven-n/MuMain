@@ -80,10 +80,9 @@ bool CMuHelperConfigWindow::Create(CManager* pNewUIMng, int x, int y)
     m_Pos.y = y;
 
     BuildRmlUi();
-    UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
 
     const ConfigData& config = UI::MuHelper::StagedConfig();
-    MuHelperConfigRmlModel& model = m_RmlBinder.GetModel();
+    MuHelperConfigRmlModel& model = m_RmlView.GetModel();
     model.distanceTime = std::to_string(config.iMaxSecondsAway);
     model.skill2Delay = std::to_string(config.aiSkillInterval[1]);
     model.skill3Delay = std::to_string(config.aiSkillInterval[2]);
@@ -95,15 +94,10 @@ bool CMuHelperConfigWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void CMuHelperConfigWindow::Release()
 {
-    if (m_pRmlDoc)
-    {
-        m_pRmlDoc->Close();
-        m_pRmlDoc = nullptr;
-    }
+    m_RmlView.Release();
 
     if (m_pNewUIMng)
     {
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = nullptr;
     }
@@ -128,11 +122,11 @@ void CMuHelperConfigWindow::Show(bool bShow)
 
 void CMuHelperConfigWindow::BlurFocusedField()
 {
-    if (!m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
+    if (!m_RmlView.Document() || !RmlUiRuntime::Instance().IsCreated())
         return;
 
     Rml::Element* focused = RmlUiRuntime::Instance().GetContext()->GetFocusElement();
-    if (focused != nullptr && focused->GetOwnerDocument() == m_pRmlDoc)
+    if (focused != nullptr && focused->GetOwnerDocument() == m_RmlView.Document())
         focused->Blur();
 }
 
@@ -144,7 +138,7 @@ bool CMuHelperConfigWindow::UpdateMouseEvent()
 
     float panelWidth = static_cast<float>(WindowWidth);
     float panelHeight = static_cast<float>(WindowHeight);
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
 
     if (!WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return true;
@@ -174,7 +168,7 @@ bool CMuHelperConfigWindow::Update()
     SyncRmlModel();
 
     // So Escape still closes the window while one of its fields has the keyboard.
-    UI::RmlBridge::ClaimKeyboardWhileTyping(*this, m_pRmlDoc);
+    UI::RmlBridge::ClaimKeyboardWhileTyping(*this, m_RmlView.Document());
     return true;
 }
 
@@ -379,7 +373,7 @@ int CMuHelperConfigWindow::GetSkillIndex(int iSkill) const
 
 void CMuHelperConfigWindow::AddExtraItem()
 {
-    MuHelperConfigRmlModel& model = m_RmlBinder.GetModel();
+    MuHelperConfigRmlModel& model = m_RmlView.GetModel();
     if (model.itemName.empty())
         return;
 
@@ -388,7 +382,7 @@ void CMuHelperConfigWindow::AddExtraItem()
     m_selectedExtraItem = model.itemName;
 
     model.itemName.clear();
-    m_RmlBinder.MarkDirty("item_name");
+    m_RmlView.MarkDirty("item_name");
     m_bExtraItemsDirty = true;
 
     BlurFocusedField();
@@ -433,13 +427,13 @@ void CMuHelperConfigWindow::ApplyConfig()
         m_aiSelectedSkills[3 + i] = c.aiBuff[i] ? c.aiBuff[i] : -1;
     }
 
-    MuHelperConfigRmlModel& model = m_RmlBinder.GetModel();
+    MuHelperConfigRmlModel& model = m_RmlView.GetModel();
     model.distanceTime = std::to_string(c.iMaxSecondsAway);
     model.skill2Delay = std::to_string(c.aiSkillInterval[1]);
     model.skill3Delay = std::to_string(c.aiSkillInterval[2]);
-    m_RmlBinder.MarkDirty("distance_time");
-    m_RmlBinder.MarkDirty("skill2_delay");
-    m_RmlBinder.MarkDirty("skill3_delay");
+    m_RmlView.MarkDirty("distance_time");
+    m_RmlView.MarkDirty("skill2_delay");
+    m_RmlView.MarkDirty("skill3_delay");
 
     m_bExtraItemsDirty = true;
 }
@@ -503,7 +497,7 @@ void CMuHelperConfigWindow::InitConfig()
 void CMuHelperConfigWindow::SaveConfig()
 {
     ConfigData& c = UI::MuHelper::StagedConfig();
-    const MuHelperConfigRmlModel& model = m_RmlBinder.GetModel();
+    const MuHelperConfigRmlModel& model = m_RmlView.GetModel();
 
     // The fields only accept digits as they are typed, but a paste bypasses that filter.
     auto parse = [](const Rml::String& text)
@@ -524,188 +518,178 @@ void CMuHelperConfigWindow::SaveConfig()
     g_MuHelper.Save(c);
 }
 
-void CMuHelperConfigWindow::BuildRmlUi()
+void CMuHelperConfigWindow::BindRmlModel(Rml::DataModelConstructor& c, MuHelperConfigRmlModel& model)
 {
-    if (m_pRmlDoc || !RmlUiRuntime::Instance().IsCreated())
-        return;
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("panel_width", &model.panelWidth);
+    c.Bind("text_px", &model.textPx);
 
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "mu_helper_config",
-        [this](Rml::DataModelConstructor& c, MuHelperConfigRmlModel& model)
+    c.Bind("active_tab", &model.activeTab);
+    c.Bind("hunt_range", &model.huntRange);
+    c.Bind("pick_range", &model.pickRange);
+    c.Bind("raven_mode", &model.ravenMode);
+
+    auto features = c.RegisterStruct<MuHelperConfigFeatures>();
+    features.RegisterMember("skill3", &MuHelperConfigFeatures::skill3);
+    features.RegisterMember("combo", &MuHelperConfigFeatures::combo);
+    features.RegisterMember("pet", &MuHelperConfigFeatures::pet);
+    features.RegisterMember("party", &MuHelperConfigFeatures::party);
+    features.RegisterMember("auto_heal", &MuHelperConfigFeatures::autoHeal);
+    features.RegisterMember("drain_life", &MuHelperConfigFeatures::drainLife);
+    features.RegisterMember("potion_summoner", &MuHelperConfigFeatures::potionSummoner);
+    c.Bind("features", &model.features);
+
+    auto checks = c.RegisterStruct<MuHelperConfigChecks>();
+    checks.RegisterMember("potion", &MuHelperConfigChecks::potion);
+    checks.RegisterMember("long_distance", &MuHelperConfigChecks::longDistance);
+    checks.RegisterMember("orig_position", &MuHelperConfigChecks::origPosition);
+    checks.RegisterMember("skill2_delay", &MuHelperConfigChecks::skill2Delay);
+    checks.RegisterMember("skill2_condition", &MuHelperConfigChecks::skill2Condition);
+    checks.RegisterMember("skill3_delay", &MuHelperConfigChecks::skill3Delay);
+    checks.RegisterMember("skill3_condition", &MuHelperConfigChecks::skill3Condition);
+    checks.RegisterMember("combo", &MuHelperConfigChecks::combo);
+    checks.RegisterMember("fallback", &MuHelperConfigChecks::fallback);
+    checks.RegisterMember("buff_duration", &MuHelperConfigChecks::buffDuration);
+    checks.RegisterMember("use_pet", &MuHelperConfigChecks::usePet);
+    checks.RegisterMember("party", &MuHelperConfigChecks::party);
+    checks.RegisterMember("auto_heal", &MuHelperConfigChecks::autoHeal);
+    checks.RegisterMember("drain_life", &MuHelperConfigChecks::drainLife);
+    checks.RegisterMember("repair", &MuHelperConfigChecks::repair);
+    checks.RegisterMember("pick_all", &MuHelperConfigChecks::pickAll);
+    checks.RegisterMember("pick_selected", &MuHelperConfigChecks::pickSelected);
+    checks.RegisterMember("pick_jewel", &MuHelperConfigChecks::pickJewel);
+    checks.RegisterMember("pick_ancient", &MuHelperConfigChecks::pickAncient);
+    checks.RegisterMember("pick_zen", &MuHelperConfigChecks::pickZen);
+    checks.RegisterMember("pick_excellent", &MuHelperConfigChecks::pickExcellent);
+    checks.RegisterMember("pick_extra", &MuHelperConfigChecks::pickExtra);
+    checks.RegisterMember("auto_friend", &MuHelperConfigChecks::autoFriend);
+    checks.RegisterMember("auto_guild", &MuHelperConfigChecks::autoGuild);
+    checks.RegisterMember("auto_defend", &MuHelperConfigChecks::autoDefend);
+    c.Bind("checks", &model.checks);
+
+    auto slots = c.RegisterStruct<MuHelperSlotIcons>();
+    slots.RegisterMember("s0", &MuHelperSlotIcons::s0);
+    slots.RegisterMember("s1", &MuHelperSlotIcons::s1);
+    slots.RegisterMember("s2", &MuHelperSlotIcons::s2);
+    slots.RegisterMember("s3", &MuHelperSlotIcons::s3);
+    slots.RegisterMember("s4", &MuHelperSlotIcons::s4);
+    slots.RegisterMember("s5", &MuHelperSlotIcons::s5);
+    c.Bind("slots", &model.slots);
+
+    c.Bind("distance_time", &model.distanceTime);
+    c.Bind("skill2_delay", &model.skill2Delay);
+    c.Bind("skill3_delay", &model.skill3Delay);
+    c.Bind("item_name", &model.itemName);
+
+    auto item = c.RegisterStruct<MuHelperExtraItem>();
+    item.RegisterMember("name", &MuHelperExtraItem::name);
+    item.RegisterMember("selected", &MuHelperExtraItem::selected);
+    item.RegisterMember("index", &MuHelperExtraItem::index);
+    c.RegisterArray<std::vector<MuHelperExtraItem>>();
+    c.Bind("extra_items", &model.extraItems);
+
+    auto labels = c.RegisterStruct<MuHelperConfigLabels>();
+    labels.RegisterMember("title", &MuHelperConfigLabels::title);
+    labels.RegisterMember("tab_hunting", &MuHelperConfigLabels::tabHunting);
+    labels.RegisterMember("tab_obtaining", &MuHelperConfigLabels::tabObtaining);
+    labels.RegisterMember("tab_other", &MuHelperConfigLabels::tabOther);
+    labels.RegisterMember("range", &MuHelperConfigLabels::range);
+    labels.RegisterMember("distance", &MuHelperConfigLabels::distance);
+    labels.RegisterMember("basic_skill", &MuHelperConfigLabels::basicSkill);
+    labels.RegisterMember("activation_skill1", &MuHelperConfigLabels::activationSkill1);
+    labels.RegisterMember("activation_skill2", &MuHelperConfigLabels::activationSkill2);
+    labels.RegisterMember("seconds", &MuHelperConfigLabels::seconds);
+    labels.RegisterMember("extension_used", &MuHelperConfigLabels::extensionUsed);
+    labels.RegisterMember("extension_none", &MuHelperConfigLabels::extensionNone);
+    labels.RegisterMember("potion", &MuHelperConfigLabels::potion);
+    labels.RegisterMember("long_distance", &MuHelperConfigLabels::longDistance);
+    labels.RegisterMember("orig_position", &MuHelperConfigLabels::origPosition);
+    labels.RegisterMember("delay", &MuHelperConfigLabels::delay);
+    labels.RegisterMember("condition", &MuHelperConfigLabels::condition);
+    labels.RegisterMember("combo", &MuHelperConfigLabels::combo);
+    labels.RegisterMember("fallback", &MuHelperConfigLabels::fallback);
+    labels.RegisterMember("buff_duration", &MuHelperConfigLabels::buffDuration);
+    labels.RegisterMember("use_pet", &MuHelperConfigLabels::usePet);
+    labels.RegisterMember("party", &MuHelperConfigLabels::party);
+    labels.RegisterMember("auto_heal", &MuHelperConfigLabels::autoHeal);
+    labels.RegisterMember("drain_life", &MuHelperConfigLabels::drainLife);
+    labels.RegisterMember("raven_cease", &MuHelperConfigLabels::ravenCease);
+    labels.RegisterMember("raven_auto", &MuHelperConfigLabels::ravenAuto);
+    labels.RegisterMember("raven_together", &MuHelperConfigLabels::ravenTogether);
+    labels.RegisterMember("repair", &MuHelperConfigLabels::repair);
+    labels.RegisterMember("pick_all", &MuHelperConfigLabels::pickAll);
+    labels.RegisterMember("pick_selected", &MuHelperConfigLabels::pickSelected);
+    labels.RegisterMember("pick_jewel", &MuHelperConfigLabels::pickJewel);
+    labels.RegisterMember("pick_ancient", &MuHelperConfigLabels::pickAncient);
+    labels.RegisterMember("pick_zen", &MuHelperConfigLabels::pickZen);
+    labels.RegisterMember("pick_excellent", &MuHelperConfigLabels::pickExcellent);
+    labels.RegisterMember("pick_extra", &MuHelperConfigLabels::pickExtra);
+    labels.RegisterMember("auto_friend", &MuHelperConfigLabels::autoFriend);
+    labels.RegisterMember("auto_guild", &MuHelperConfigLabels::autoGuild);
+    labels.RegisterMember("auto_defend", &MuHelperConfigLabels::autoDefend);
+    labels.RegisterMember("setting", &MuHelperConfigLabels::setting);
+    labels.RegisterMember("add", &MuHelperConfigLabels::add);
+    labels.RegisterMember("remove", &MuHelperConfigLabels::remove);
+    labels.RegisterMember("save", &MuHelperConfigLabels::save);
+    labels.RegisterMember("init", &MuHelperConfigLabels::init);
+    labels.RegisterMember("close_tip", &MuHelperConfigLabels::closeTip);
+    c.Bind("labels", &model.labels);
+
+    c.BindEventCallback("muhelper_tab",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
         {
-            c.Bind("root_x", &model.rootX);
-            c.Bind("root_y", &model.rootY);
-            c.Bind("root_scale", &model.rootScale);
-            c.Bind("panel_width", &model.panelWidth);
-            c.Bind("text_px", &model.textPx);
-
-            c.Bind("active_tab", &model.activeTab);
-            c.Bind("hunt_range", &model.huntRange);
-            c.Bind("pick_range", &model.pickRange);
-            c.Bind("raven_mode", &model.ravenMode);
-
-            auto features = c.RegisterStruct<MuHelperConfigFeatures>();
-            features.RegisterMember("skill3", &MuHelperConfigFeatures::skill3);
-            features.RegisterMember("combo", &MuHelperConfigFeatures::combo);
-            features.RegisterMember("pet", &MuHelperConfigFeatures::pet);
-            features.RegisterMember("party", &MuHelperConfigFeatures::party);
-            features.RegisterMember("auto_heal", &MuHelperConfigFeatures::autoHeal);
-            features.RegisterMember("drain_life", &MuHelperConfigFeatures::drainLife);
-            features.RegisterMember("potion_summoner", &MuHelperConfigFeatures::potionSummoner);
-            c.Bind("features", &model.features);
-
-            auto checks = c.RegisterStruct<MuHelperConfigChecks>();
-            checks.RegisterMember("potion", &MuHelperConfigChecks::potion);
-            checks.RegisterMember("long_distance", &MuHelperConfigChecks::longDistance);
-            checks.RegisterMember("orig_position", &MuHelperConfigChecks::origPosition);
-            checks.RegisterMember("skill2_delay", &MuHelperConfigChecks::skill2Delay);
-            checks.RegisterMember("skill2_condition", &MuHelperConfigChecks::skill2Condition);
-            checks.RegisterMember("skill3_delay", &MuHelperConfigChecks::skill3Delay);
-            checks.RegisterMember("skill3_condition", &MuHelperConfigChecks::skill3Condition);
-            checks.RegisterMember("combo", &MuHelperConfigChecks::combo);
-            checks.RegisterMember("fallback", &MuHelperConfigChecks::fallback);
-            checks.RegisterMember("buff_duration", &MuHelperConfigChecks::buffDuration);
-            checks.RegisterMember("use_pet", &MuHelperConfigChecks::usePet);
-            checks.RegisterMember("party", &MuHelperConfigChecks::party);
-            checks.RegisterMember("auto_heal", &MuHelperConfigChecks::autoHeal);
-            checks.RegisterMember("drain_life", &MuHelperConfigChecks::drainLife);
-            checks.RegisterMember("repair", &MuHelperConfigChecks::repair);
-            checks.RegisterMember("pick_all", &MuHelperConfigChecks::pickAll);
-            checks.RegisterMember("pick_selected", &MuHelperConfigChecks::pickSelected);
-            checks.RegisterMember("pick_jewel", &MuHelperConfigChecks::pickJewel);
-            checks.RegisterMember("pick_ancient", &MuHelperConfigChecks::pickAncient);
-            checks.RegisterMember("pick_zen", &MuHelperConfigChecks::pickZen);
-            checks.RegisterMember("pick_excellent", &MuHelperConfigChecks::pickExcellent);
-            checks.RegisterMember("pick_extra", &MuHelperConfigChecks::pickExtra);
-            checks.RegisterMember("auto_friend", &MuHelperConfigChecks::autoFriend);
-            checks.RegisterMember("auto_guild", &MuHelperConfigChecks::autoGuild);
-            checks.RegisterMember("auto_defend", &MuHelperConfigChecks::autoDefend);
-            c.Bind("checks", &model.checks);
-
-            auto slots = c.RegisterStruct<MuHelperSlotIcons>();
-            slots.RegisterMember("s0", &MuHelperSlotIcons::s0);
-            slots.RegisterMember("s1", &MuHelperSlotIcons::s1);
-            slots.RegisterMember("s2", &MuHelperSlotIcons::s2);
-            slots.RegisterMember("s3", &MuHelperSlotIcons::s3);
-            slots.RegisterMember("s4", &MuHelperSlotIcons::s4);
-            slots.RegisterMember("s5", &MuHelperSlotIcons::s5);
-            c.Bind("slots", &model.slots);
-
-            c.Bind("distance_time", &model.distanceTime);
-            c.Bind("skill2_delay", &model.skill2Delay);
-            c.Bind("skill3_delay", &model.skill3Delay);
-            c.Bind("item_name", &model.itemName);
-
-            auto item = c.RegisterStruct<MuHelperExtraItem>();
-            item.RegisterMember("name", &MuHelperExtraItem::name);
-            item.RegisterMember("selected", &MuHelperExtraItem::selected);
-            item.RegisterMember("index", &MuHelperExtraItem::index);
-            c.RegisterArray<std::vector<MuHelperExtraItem>>();
-            c.Bind("extra_items", &model.extraItems);
-
-            auto labels = c.RegisterStruct<MuHelperConfigLabels>();
-            labels.RegisterMember("title", &MuHelperConfigLabels::title);
-            labels.RegisterMember("tab_hunting", &MuHelperConfigLabels::tabHunting);
-            labels.RegisterMember("tab_obtaining", &MuHelperConfigLabels::tabObtaining);
-            labels.RegisterMember("tab_other", &MuHelperConfigLabels::tabOther);
-            labels.RegisterMember("range", &MuHelperConfigLabels::range);
-            labels.RegisterMember("distance", &MuHelperConfigLabels::distance);
-            labels.RegisterMember("basic_skill", &MuHelperConfigLabels::basicSkill);
-            labels.RegisterMember("activation_skill1", &MuHelperConfigLabels::activationSkill1);
-            labels.RegisterMember("activation_skill2", &MuHelperConfigLabels::activationSkill2);
-            labels.RegisterMember("seconds", &MuHelperConfigLabels::seconds);
-            labels.RegisterMember("extension_used", &MuHelperConfigLabels::extensionUsed);
-            labels.RegisterMember("extension_none", &MuHelperConfigLabels::extensionNone);
-            labels.RegisterMember("potion", &MuHelperConfigLabels::potion);
-            labels.RegisterMember("long_distance", &MuHelperConfigLabels::longDistance);
-            labels.RegisterMember("orig_position", &MuHelperConfigLabels::origPosition);
-            labels.RegisterMember("delay", &MuHelperConfigLabels::delay);
-            labels.RegisterMember("condition", &MuHelperConfigLabels::condition);
-            labels.RegisterMember("combo", &MuHelperConfigLabels::combo);
-            labels.RegisterMember("fallback", &MuHelperConfigLabels::fallback);
-            labels.RegisterMember("buff_duration", &MuHelperConfigLabels::buffDuration);
-            labels.RegisterMember("use_pet", &MuHelperConfigLabels::usePet);
-            labels.RegisterMember("party", &MuHelperConfigLabels::party);
-            labels.RegisterMember("auto_heal", &MuHelperConfigLabels::autoHeal);
-            labels.RegisterMember("drain_life", &MuHelperConfigLabels::drainLife);
-            labels.RegisterMember("raven_cease", &MuHelperConfigLabels::ravenCease);
-            labels.RegisterMember("raven_auto", &MuHelperConfigLabels::ravenAuto);
-            labels.RegisterMember("raven_together", &MuHelperConfigLabels::ravenTogether);
-            labels.RegisterMember("repair", &MuHelperConfigLabels::repair);
-            labels.RegisterMember("pick_all", &MuHelperConfigLabels::pickAll);
-            labels.RegisterMember("pick_selected", &MuHelperConfigLabels::pickSelected);
-            labels.RegisterMember("pick_jewel", &MuHelperConfigLabels::pickJewel);
-            labels.RegisterMember("pick_ancient", &MuHelperConfigLabels::pickAncient);
-            labels.RegisterMember("pick_zen", &MuHelperConfigLabels::pickZen);
-            labels.RegisterMember("pick_excellent", &MuHelperConfigLabels::pickExcellent);
-            labels.RegisterMember("pick_extra", &MuHelperConfigLabels::pickExtra);
-            labels.RegisterMember("auto_friend", &MuHelperConfigLabels::autoFriend);
-            labels.RegisterMember("auto_guild", &MuHelperConfigLabels::autoGuild);
-            labels.RegisterMember("auto_defend", &MuHelperConfigLabels::autoDefend);
-            labels.RegisterMember("setting", &MuHelperConfigLabels::setting);
-            labels.RegisterMember("add", &MuHelperConfigLabels::add);
-            labels.RegisterMember("remove", &MuHelperConfigLabels::remove);
-            labels.RegisterMember("save", &MuHelperConfigLabels::save);
-            labels.RegisterMember("init", &MuHelperConfigLabels::init);
-            labels.RegisterMember("close_tip", &MuHelperConfigLabels::closeTip);
-            c.Bind("labels", &model.labels);
-
-            c.BindEventCallback("muhelper_tab",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                {
-                    if (args.size() == 1)
-                        SelectTab(args[0].Get<int>(-1));
-                });
-            c.BindEventCallback("muhelper_toggle",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                {
-                    if (args.size() == 1)
-                        OnToggle(args[0].Get<Rml::String>());
-                });
-            c.BindEventCallback("muhelper_raven_mode",
-                [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                {
-                    if (args.size() == 1)
-                        UI::MuHelper::StagedConfig().iDarkRavenMode = args[0].Get<int>(PET_ATTACK_CEASE);
-                });
-            c.BindEventCallback("muhelper_button",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                {
-                    if (args.size() == 1)
-                        OnButton(args[0].Get<Rml::String>());
-                });
-            c.BindEventCallback("muhelper_slot",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                {
-                    if (args.size() == 1)
-                        OnSlotClick(args[0].Get<int>(-1));
-                });
-            // Mouseup fires for every button; "button" == 1 is the right one, which clears a slot.
-            c.BindEventCallback("muhelper_slot_clear",
-                [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
-                {
-                    if (event.GetParameter<int>("button", -1) != 1 || args.size() != 1)
-                        return;
-                    OnSlotClear(args[0].Get<int>(-1));
-                });
-            c.BindEventCallback("muhelper_extra_select",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-                {
-                    if (args.size() != 1)
-                        return;
-                    const int index = args[0].Get<int>(-1);
-                    const auto& items = m_RmlBinder.GetModel().extraItems;
-                    if (index >= 0 && index < static_cast<int>(items.size()))
-                    {
-                        m_selectedExtraItem = items[index].name;
-                        m_bExtraItemsDirty = true;
-                    }
-                });
+            if (args.size() == 1)
+                SelectTab(args[0].Get<int>(-1));
+        });
+    c.BindEventCallback("muhelper_toggle",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+        {
+            if (args.size() == 1)
+                OnToggle(args[0].Get<Rml::String>());
+        });
+    c.BindEventCallback("muhelper_raven_mode",
+        [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+        {
+            if (args.size() == 1)
+                UI::MuHelper::StagedConfig().iDarkRavenMode = args[0].Get<int>(PET_ATTACK_CEASE);
+        });
+    c.BindEventCallback("muhelper_button",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+        {
+            if (args.size() == 1)
+                OnButton(args[0].Get<Rml::String>());
+        });
+    c.BindEventCallback("muhelper_slot",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+        {
+            if (args.size() == 1)
+                OnSlotClick(args[0].Get<int>(-1));
+        });
+    // Mouseup fires for every button; "button" == 1 is the right one, which clears a slot.
+    c.BindEventCallback("muhelper_slot_clear",
+        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+        {
+            if (event.GetParameter<int>("button", -1) != 1 || args.size() != 1)
+                return;
+            OnSlotClear(args[0].Get<int>(-1));
+        });
+    c.BindEventCallback("muhelper_extra_select",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+        {
+            if (args.size() != 1)
+                return;
+            const int index = args[0].Get<int>(-1);
+            const auto& items = m_RmlView.GetModel().extraItems;
+            if (index >= 0 && index < static_cast<int>(items.size()))
+            {
+                m_selectedExtraItem = items[index].name;
+                m_bExtraItemsDirty = true;
+            }
         });
 
-    if (!modelCreated)
-        return;
-
-    MuHelperConfigLabels& l = m_RmlBinder.GetModel().labels;
+    MuHelperConfigLabels& l = model.labels;
     l.title = Narrow(I18N::Game::OfficialMUHelper);
     l.tabHunting = Narrow(I18N::Game::Hunting);
     l.tabObtaining = Narrow(I18N::Game::Obtaining);
@@ -750,55 +734,31 @@ void CMuHelperConfigWindow::BuildRmlUi()
     l.save = Narrow(I18N::Game::SaveSetting);
     l.init = Narrow(I18N::Game::Initialization);
     l.closeTip = Narrow(I18N::Game::Close388);
+}
 
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                  "Data/Interface/RmlUi/mu_helper_config.rml");
-    if (!m_pRmlDoc)
-        return;
-
-    UI::RmlBridge::AttachNumericInputFilter(m_pRmlDoc);
+void CMuHelperConfigWindow::OnRmlBuilt()
+{
+    UI::RmlBridge::AttachNumericInputFilter(m_RmlView.Document());
     // Set from code so the limits can't drift per theme.
     for (const char* id : NumberFieldIds)
     {
-        if (Rml::Element* field = m_pRmlDoc->GetElementById(id))
+        if (Rml::Element* field = m_RmlView.Document()->GetElementById(id))
             field->SetAttribute("maxlength", UI::MuHelper::MaxNumberDigits);
     }
-    if (Rml::Element* field = m_pRmlDoc->GetElementById("item_name"))
+    if (Rml::Element* field = m_RmlView.Document()->GetElementById("item_name"))
         field->SetAttribute("maxlength", MAX_ITEM_NAME);
 
     m_bExtraItemsDirty = true;
 }
 
-void CMuHelperConfigWindow::ReloadRmlTheme()
+void CMuHelperConfigWindow::BuildRmlUi()
 {
-    if (!m_pRmlDoc)
-        return; // never opened -- BuildRmlUi() picks up the new theme whenever it first is
-
-    // The fields' typed values live in the model, which Destroy() resets -- carry them across.
-    const MuHelperConfigRmlModel typed = m_RmlBinder.GetModel();
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-
-    MuHelperConfigRmlModel& model = m_RmlBinder.GetModel();
-    model.distanceTime = typed.distanceTime;
-    model.skill2Delay = typed.skill2Delay;
-    model.skill3Delay = typed.skill3Delay;
-    model.itemName = typed.itemName;
-    m_RmlBinder.MarkDirty("distance_time");
-    m_RmlBinder.MarkDirty("skill2_delay");
-    m_RmlBinder.MarkDirty("skill3_delay");
-    m_RmlBinder.MarkDirty("item_name");
-    // Next frame's SyncRmlModel() self-corrects visibility and every other value.
+    m_RmlView.Ensure();
 }
 
 void CMuHelperConfigWindow::RebuildExtraItems()
 {
-    MuHelperConfigRmlModel& model = m_RmlBinder.GetModel();
+    MuHelperConfigRmlModel& model = m_RmlView.GetModel();
     const ConfigData& c = UI::MuHelper::StagedConfig();
 
     model.extraItems.clear();
@@ -814,31 +774,31 @@ void CMuHelperConfigWindow::RebuildExtraItems()
         item.index = index++;
         model.extraItems.push_back(std::move(item));
     }
-    m_RmlBinder.MarkDirty("extra_items");
+    m_RmlView.MarkDirty("extra_items");
 }
 
 void CMuHelperConfigWindow::SyncRmlModel()
 {
     BuildRmlUi();
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, IsVisible());
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlBinder, m_pRmlDoc);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
-    MuHelperConfigRmlModel& model = m_RmlBinder.GetModel();
+    MuHelperConfigRmlModel& model = m_RmlView.GetModel();
     const ConfigData& c = UI::MuHelper::StagedConfig();
 
 
-    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::activeTab, "active_tab", m_iCurrentOpenTab);
-    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::huntRange, "hunt_range", c.iHuntingRange);
-    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::pickRange, "pick_range", c.iObtainingRange);
-    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::ravenMode, "raven_mode", c.iDarkRavenMode);
+    SyncField(m_RmlView.Binder(), &MuHelperConfigRmlModel::activeTab, "active_tab", m_iCurrentOpenTab);
+    SyncField(m_RmlView.Binder(), &MuHelperConfigRmlModel::huntRange, "hunt_range", c.iHuntingRange);
+    SyncField(m_RmlView.Binder(), &MuHelperConfigRmlModel::pickRange, "pick_range", c.iObtainingRange);
+    SyncField(m_RmlView.Binder(), &MuHelperConfigRmlModel::ravenMode, "raven_mode", c.iDarkRavenMode);
 
     const UI::MuHelper::ClassFeatures f = UI::MuHelper::ResolveClassFeatures(BaseClass());
     MuHelperConfigFeatures features;
@@ -849,7 +809,7 @@ void CMuHelperConfigWindow::SyncRmlModel()
     features.autoHeal = f.autoHeal;
     features.drainLife = f.drainLife;
     features.potionSummoner = f.potionSummoner;
-    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::features, "features", features);
+    SyncField(m_RmlView.Binder(), &MuHelperConfigRmlModel::features, "features", features);
 
     MuHelperConfigChecks checks;
     checks.potion = c.bUseHealPotion;
@@ -877,7 +837,7 @@ void CMuHelperConfigWindow::SyncRmlModel()
     checks.autoFriend = c.bAutoAcceptFriend;
     checks.autoGuild = c.bAutoAcceptGuild;
     checks.autoDefend = c.bUseSelfDefense;
-    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::checks, "checks", checks);
+    SyncField(m_RmlView.Binder(), &MuHelperConfigRmlModel::checks, "checks", checks);
 
     MuHelperSlotIcons slots;
     slots.s0 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[0]);
@@ -886,7 +846,7 @@ void CMuHelperConfigWindow::SyncRmlModel()
     slots.s3 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[3]);
     slots.s4 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[4]);
     slots.s5 = UI::MuHelper::SkillIconDecorator(m_aiSelectedSkills[5]);
-    SyncField(m_RmlBinder, &MuHelperConfigRmlModel::slots, "slots", slots);
+    SyncField(m_RmlView.Binder(), &MuHelperConfigRmlModel::slots, "slots", slots);
 
     if (m_bExtraItemsDirty)
     {

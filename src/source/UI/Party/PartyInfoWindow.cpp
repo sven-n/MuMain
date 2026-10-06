@@ -51,7 +51,6 @@ bool CPartyInfoWindow::Create(CManager* pNewUIMng, int x, int y)
     if (RmlUiRuntime::Instance().IsCreated())
     {
         BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
     }
 
     Show(false);
@@ -59,97 +58,71 @@ bool CPartyInfoWindow::Create(CManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CPartyInfoWindow::BuildRmlUi()
+void CPartyInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, PartyInfoRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "party_info",
-            [this](Rml::DataModelConstructor& c, PartyInfoRmlModel& model)
-            {
-                c.Bind("root_x", &model.rootX);
-                c.Bind("root_y", &model.rootY);
-                c.Bind("root_scale", &model.rootScale);
-                c.Bind("text_px", &model.textPx);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
+    c.Bind("text_px", &model.textPx);
 
-                c.Bind("has_party", &model.hasParty);
-                c.Bind("window_title", &model.windowTitle);
-                c.Bind("exit_tooltip", &model.exitTooltip);
+    c.Bind("has_party", &model.hasParty);
+    c.Bind("window_title", &model.windowTitle);
+    c.Bind("exit_tooltip", &model.exitTooltip);
 
-                auto textLine = c.RegisterStruct<TextLine>();
-                textLine.RegisterMember("text", &TextLine::text);
-                c.RegisterArray<std::vector<TextLine>>();
-                c.Bind("empty_state_lines", &model.emptyStateLines);
+    auto textLine = c.RegisterStruct<TextLine>();
+    textLine.RegisterMember("text", &TextLine::text);
+    c.RegisterArray<std::vector<TextLine>>();
+    c.Bind("empty_state_lines", &model.emptyStateLines);
 
-                auto member = c.RegisterStruct<PartyMemberRow>();
-                member.RegisterMember("name", &PartyMemberRow::name);
-                member.RegisterMember("map_text", &PartyMemberRow::mapText);
-                member.RegisterMember("coord_text", &PartyMemberRow::coordText);
-                member.RegisterMember("hp_text", &PartyMemberRow::hpText);
-                member.RegisterMember("hp_percent", &PartyMemberRow::hpPercent);
-                member.RegisterMember("is_leader", &PartyMemberRow::isLeader);
-                member.RegisterMember("show_kick", &PartyMemberRow::showKick);
-                member.RegisterMember("index", &PartyMemberRow::index);
-                c.RegisterArray<std::vector<PartyMemberRow>>();
-                c.Bind("members", &model.members);
+    auto member = c.RegisterStruct<PartyMemberRow>();
+    member.RegisterMember("name", &PartyMemberRow::name);
+    member.RegisterMember("map_text", &PartyMemberRow::mapText);
+    member.RegisterMember("coord_text", &PartyMemberRow::coordText);
+    member.RegisterMember("hp_text", &PartyMemberRow::hpText);
+    member.RegisterMember("hp_percent", &PartyMemberRow::hpPercent);
+    member.RegisterMember("is_leader", &PartyMemberRow::isLeader);
+    member.RegisterMember("show_kick", &PartyMemberRow::showKick);
+    member.RegisterMember("index", &PartyMemberRow::index);
+    c.RegisterArray<std::vector<PartyMemberRow>>();
+    c.Bind("members", &model.members);
 
-                c.BindEventCallback("party_click_exit",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExit(); });
-                c.BindEventCallback("party_kick_member",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                    {
-                        if (arguments.size() == 1)
-                            RmlClickKickMember(arguments[0].Get<int>(-1));
-                    });
-            });
-
-        if (modelCreated)
+    c.BindEventCallback("party_click_exit",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExit(); });
+    c.BindEventCallback("party_kick_member",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
         {
-            auto& model = m_RmlBinder.GetModel();
-            model.windowTitle = StringUtils::WideToNarrow(I18N::Game::Party);
-            model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::ClosePartyWindowP);
+            if (arguments.size() == 1)
+                RmlClickKickMember(arguments[0].Get<int>(-1));
+        });
 
-            model.emptyStateLines = {
-                { StringUtils::WideToNarrow(I18N::Game::TypePartyWithTheMouseCursorOn) },
-                { StringUtils::WideToNarrow(I18N::Game::ThePlayerYouWouldLike) },
-                { StringUtils::WideToNarrow(I18N::Game::ToCreateAPartyWith) },
-                { StringUtils::WideToNarrow(I18N::Game::AndYouCanCreate) },
-                { StringUtils::WideToNarrow(I18N::Game::APartyWithThem) },
-                { StringUtils::WideToNarrow(I18N::Game::YouCanShareMoreExpWith) },
-                { StringUtils::WideToNarrow(I18N::Game::YourPartyMembersBasedOnLevel) },
-            };
-        }
+    model.windowTitle = StringUtils::WideToNarrow(I18N::Game::Party);
+    model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::ClosePartyWindowP);
 
-    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-        "Data/Interface/RmlUi/party_info.rml");
+    model.emptyStateLines = {
+        { StringUtils::WideToNarrow(I18N::Game::TypePartyWithTheMouseCursorOn) },
+        { StringUtils::WideToNarrow(I18N::Game::ThePlayerYouWouldLike) },
+        { StringUtils::WideToNarrow(I18N::Game::ToCreateAPartyWith) },
+        { StringUtils::WideToNarrow(I18N::Game::AndYouCanCreate) },
+        { StringUtils::WideToNarrow(I18N::Game::APartyWithThem) },
+        { StringUtils::WideToNarrow(I18N::Game::YouCanShareMoreExpWith) },
+        { StringUtils::WideToNarrow(I18N::Game::YourPartyMembersBasedOnLevel) },
+    };
 }
 
-void CPartyInfoWindow::ReloadRmlTheme()
+void CPartyInfoWindow::BuildRmlUi()
 {
-    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-
-    BuildRmlUi();
-    // The new document starts hidden; an open window shows it again.
-    if (m_pRmlDoc && IsVisible())
-        m_pRmlDoc->Show();
+    m_RmlView.Ensure();
 }
 
 void CPartyInfoWindow::Release()
 {
     UnloadImages();
 
-    if (m_pRmlDoc)
-    {
-        m_pRmlDoc->Close();
-        m_pRmlDoc = nullptr;
-    }
+    m_RmlView.Release();
 
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = NULL;
     }
 }
@@ -184,7 +157,7 @@ bool CPartyInfoWindow::UpdateMouseEvent()
 
     float panelWidth = PARTY_INFO_WINDOW_WIDTH;
     float panelHeight = PARTY_INFO_WINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_pRmlDoc, "panel", panelWidth, panelHeight);
+    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
         return false;
@@ -243,10 +216,10 @@ void CPartyInfoWindow::SetPos(int x, int y)
 void CPartyInfoWindow::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
-    if (m_pRmlDoc)
+    if (m_RmlView.Document())
     {
-        if (bShow) m_pRmlDoc->Show();
-        else m_pRmlDoc->Hide();
+        if (bShow) m_RmlView.Document()->Show();
+        else m_RmlView.Document()->Hide();
     }
 }
 
@@ -262,24 +235,24 @@ float CPartyInfoWindow::GetLayerDepth()
 
 void CPartyInfoWindow::SyncRmlModel()
 {
-    if (!m_pRmlDoc)
+    if (!m_RmlView.Document())
         return;
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
 
     const auto transform = UI::Scaling::GetActiveTransform();
     model.rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
     model.rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
     model.rootScale = transform.scaleX;
-    m_RmlBinder.MarkDirty("root_x");
-    m_RmlBinder.MarkDirty("root_y");
-    m_RmlBinder.MarkDirty("root_scale");
-    UI::RmlBridge::SyncNativeTextSize(m_RmlBinder);
+    m_RmlView.MarkDirty("root_x");
+    m_RmlView.MarkDirty("root_y");
+    m_RmlView.MarkDirty("root_scale");
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     if (model.hasParty != m_bParty)
     {
         model.hasParty = m_bParty;
-        m_RmlBinder.MarkDirty("has_party");
+        m_RmlView.MarkDirty("has_party");
     }
 
     if (!m_bParty)
@@ -312,7 +285,7 @@ void CPartyInfoWindow::SyncRmlModel()
     }
 
     model.members = std::move(members);
-    m_RmlBinder.MarkDirty("members");
+    m_RmlView.MarkDirty("members");
 }
 
 void CPartyInfoWindow::LoadImages()
