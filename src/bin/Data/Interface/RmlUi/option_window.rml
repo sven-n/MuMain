@@ -5,17 +5,9 @@
 	<link type="text/rcss" href="option_window.rcss"/>
 	<link type="text/template" href="window_shell.rml"/>
 </head>
-<!-- This .rml is shared by both themes (like login.rml) -- no per-theme markup override exists,
-     so LoadThemedDocument() (RmlTheme.cpp) falls back to this one file for either theme. Its own
-     <link href="option_window.rcss"> below still resolves per-theme though (against
-     LoadThemedDocument()'s sourceUrl, always themes/<theme>/) -- each theme needs a REAL copy of
-     that stylesheet at themes/<theme>/option_window.rcss, there is no equivalent "shared" fallback
-     for a <link>'s href the way there is for the .rml file itself. A root-level RCSS at this same
-     directory is never reachable by either theme, regardless of edits made there.
-     checkboxes/level gauges/selects use the same shared base.rcss primitives in both themes, no
-     structural fork of THIS file needed yet. If a theme-specific rendering workaround ever forces a
-     DOM difference (the way generic_menu_dialog.rml's modern fork needed an extra .gmd-btn-fill
-     div), fork this file at that point rather than pre-emptively.
+<!-- The legacy theme's settings window. The modern theme has its own full-screen markup at
+     themes/modern/option_window.rml, on the same data model and events; keep the two in step
+     when a setting is added.
 
      Every row uses the same two-column shape (label, then control), .option-row-label first in
      each row's own markup order -- including the checkbox rows, which put the label BEFORE

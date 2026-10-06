@@ -1,272 +1,362 @@
-/* Modern theme's option (settings) window content -- frame/header/positioning come from
-   window_shell.rcss; this file only lays out the rows spliced into its #content slot.
+/* Modern theme's settings screen (themes/modern/option_window.rml): a full-screen glass overlay.
+   The world shows through a softly blurred, darkened scrim; the pane of rows sits on frosted glass,
+   blurred harder and lit from the top. Every gradient and blur has a plain translucent
+   background-color under it, so the screen still reads as glass on a renderer without them. */
 
-   #panel is a genuine real-dp size, NOT native COptionWindow's own reference-resolution rect
-   (190x419) -- this template assumes no resolution-based rescaling, so copying native's
-   reference-pixel constants here would produce a wildly oversized panel once combined with
-   window_shell's own chrome. Unlike the legacy theme's sprite-art chrome, this theme's frame is
-   plain CSS gradients/borders with no fixed source-art width to match, so it doesn't need to
-   match the legacy #panel's own width (230dp, locked to its sprite chrome's real size) -- 320dp
-   here so the control column below can start nearer the row's own center, not just "wide enough";
-   window_shell's own existing 14dp/side content margins are already generous, no override needed
-   the way legacy's 32dp/side shared margin needed one. Positioning is pure CSS (.center-both) now
-   that dragging is off, so this file alone owns the panel's size -- nothing else mirrors it.
-
-   Height (294dp) mirrors legacy's own sizing math for the same reason: sized for the tallest tab
-   (Graphics, 6 checkbox rows: 6*24dp=144dp, at the 18dp row height below + 6dp margin-bottom) plus
-   the tab bar (~42dp: 26dp height + 8dp margin-top + 8dp margin-bottom, the margin-top clearing
-   the header rail's own box-shadow bleed) and the always-visible close button block (~38dp),
-   inside window_shell.rcss's own titled-panel insets here (10dp top + padding-top 40dp + 16dp
-   bottom = 66dp): 144+42+38+66=290dp minimum, +4dp buffer. Content splits across tabs, so only
-   one tab's rows need to fit at a time. */
 #panel {
-	width: 320dp;
-	height: 294dp;
-}
-
-/* One row of tab buttons -- flex layout. Same "forged-metal" gradient+box-shadow recipe as
-   base.rcss's own .btn/.btn:hover, minus .btn's own fixed position:absolute/width/height so these
-   can flex-size instead.
-
-   font-family must be set explicitly on this rule -- unlike legacy (which sets one document-wide
-   default on #panel), this theme has no fallback; every other piece of visible text in this
-   document (the window title, row labels, selects, .btn itself) explicitly declares its own
-   font-family, and without it here this button's text renders in RmlUi's unstyled default font
-   instead. */
-.option-tab-row {
-	display: flex;
+	position: absolute;
+	left: 0;
+	top: 0;
 	width: 100%;
-	height: 26dp;
-	margin-top: 8dp;
-	margin-bottom: 8dp;
-	background-color: token(surface-panel);
-	border-radius: token(radius-sm)dp;
-}
-/* flex-basis auto: the tabs share the row by label width, so "Gameplay" is not clipped. */
-.option-tab-btn {
-	flex: 1 1 auto;
-	margin: 0 1.5dp;
-	height: 26dp;
-	line-height: 26dp;
-	text-align: center;
-	cursor: pointer;
+	height: 100%;
 	pointer-events: auto;
 	font-family: "token(font-body)";
-	font-size: 10dp;
-	color: token(text-secondary);
-	background-color: #13140f;
-	decorator: linear-gradient(to bottom,
-		rgba(255, 255, 255, 10),
-		transparent 45%),
-		linear-gradient(to bottom, #26251d, #13140f 58%, #0a0b09);
-	border-width: 1dp;
-	border-color: #4a4738;
-	border-radius: token(radius-sm)dp;
-	box-shadow:
-		inset 0 1dp 0 rgba(232, 215, 168, 14),
-		inset 0 -1dp 0 #000000,
-		0 1dp 2dp rgba(0, 0, 0, 153);
-}
-.option-tab-btn:hover {
-	color: token(accent-gold-hover);
-	border-color: #776646;
-	decorator: linear-gradient(to bottom,
-		rgba(255, 255, 255, 13),
-		transparent 45%),
-		linear-gradient(to bottom, #302b1f, #18160f 58%, #0c0c09);
-}
-/* Active: warm gold-metal shade (same bevel technique, .btn-ok's inverted-light-source-free
-   approach, just gold instead of crimson) so the selected tab reads as a distinct, different
-   metal, not just a recolored idle button. */
-.option-tab-btn.active-tab {
-	color: #171006;
-	background-color: token(accent-gold);
-	border-color: token(accent-gold-hover);
-	decorator: linear-gradient(to bottom,
-		rgba(255, 241, 199, 30),
-		transparent 45%),
-		linear-gradient(to bottom, token(accent-gold-hover), token(accent-gold) 58%, #6b5220);
-	box-shadow:
-		inset 0 1dp 0 rgba(255, 245, 214, 60),
-		inset 0 -1dp 0 rgba(0, 0, 0, 120),
-		0 1dp 3dp rgba(0, 0, 0, 153);
+	color: token(text-primary);
+	background-color: rgba(4, 6, 9, 150);
+	backdrop-filter: blur(3dp);
+	decorator: radial-gradient(ellipse, rgba(4, 6, 9, 0) 35%, rgba(2, 3, 5, 140) 100%);
 }
 
-/* Each tab's row group -- a flex column of its own, same as #content itself, so its own rows
-   still stack top-to-bottom once spliced in. Needs the .hidden override below: this file loads
-   after base.rcss, so its own display:flex would otherwise tie with (and silently beat) base.rcss's
-   global .hidden{display:none} at equal specificity, leaving a "hidden" tab visibly rendered --
-   the exact bug window_shell.rcss's own .window-shell-header-rail.hidden rule already fixed once
-   for its header rail; same fix, same reason. */
-.option-tab-panel {
+.opt-shell {
+	position: absolute;
+	left: 5%;
+	right: 5%;
+	top: 6%;
+	bottom: 6%;
 	display: flex;
 	flex-direction: column;
-	width: 100%;
-}
-.option-tab-panel.hidden {
-	display: none;
 }
 
-/* Each settings row is a small flex line inside window_shell's own flex-column #content -- native
-   used fixed per-row px offsets; this reproduces the same top-to-bottom order via normal flow
-   instead, keeping row order traceable from the markup rather than from literal numbers. */
-.option-row {
-	position: relative;
-	width: 100%;
+/* Header: the screen title on a gold rule, the close button at the far right. */
+.opt-header {
+	flex: 0 0 auto;
 	display: flex;
 	align-items: center;
-	flex-shrink: 0;
-	margin-bottom: 6dp;
+	height: 52dp;
+	border-bottom: 1dp rgba(255, 255, 255, 40);
 }
-.option-checkbox-row {
-	height: 18dp;
+.opt-title {
+	flex: 1 1 auto;
+	padding-left: 14dp;
+	border-left: 3dp token(accent-gold);
+	font-size: 24dp;
+	font-weight: bold;
+	letter-spacing: 4dp;
+	text-transform: uppercase;
+	color: token(text-primary);
+}
+.opt-close {
+	position: relative;
+	flex: 0 0 auto;
+	width: 34dp;
+	height: 34dp;
 	cursor: pointer;
-	pointer-events: auto;
+	border-radius: 4dp;
 }
-/* Not base.rcss's own .checkbox-label -- that's position:absolute, glyph-first (built for
-   login.rml's standalone checkboxes), which doesn't line up with a column of sibling rows. This
-   row uses .option-row-label (below) instead, label-first in the markup, same as every other row
-   type -- see option_window.rml's own comment. */
-.checkbox-box {
-	flex-shrink: 0;
+.opt-close:hover {
+	background-color: rgba(255, 255, 255, 22);
 }
-/* Checkmark is a single 6x3 box with a left+bottom border rotated -45deg, same technique
-   login.rcss's own modern checkbox already proves -- positioned against .checkbox-box itself
-   (its containing block), unaffected by where that box sits within the row. */
-.checkbox-tick {
-	display: none;
+.opt-close-bar {
 	position: absolute;
-	left: 2dp;
-	top: 1dp;
-	width: 6dp;
-	height: 3dp;
-	border-left: 2dp #171006;
-	border-bottom: 2dp #171006;
-	transform: rotate(-45deg);
+	left: 7dp;
+	top: 16dp;
+	width: 20dp;
+	height: 2dp;
+	background-color: token(text-secondary);
 }
-.checkbox-box.checked .checkbox-tick {
-	display: block;
+.opt-close-bar-a { transform: rotate(45deg); }
+.opt-close-bar-b { transform: rotate(-45deg); }
+.opt-close:hover .opt-close-bar {
+	background-color: token(accent-gold-hover);
 }
 
-/* 148dp -- alongside the 9dp->10dp font bump (see #panel's own comment on why). Puts the control
-   column's own start near the row's horizontal center (well width 292dp: 320dp panel - 14dp*2
-   margins) instead
-   of flush against the label. The two longest labels in this window were also shortened in
-   Game.en.resx (see legacy's own copy of this comment) -- kept in sync across both themes even
-   though modern's own wider well needed it less. New control width: 292-148=144dp. */
-.option-row-label {
-	width: 148dp;
-	flex-shrink: 0;
+.opt-body {
+	flex: 1 1 0;
+	display: flex;
+	margin-top: 20dp;
+	min-height: 0;
+}
+
+/* Category rail. The active category carries a gold edge and a wash that fades to the right. */
+.opt-nav {
+	flex: 0 0 auto;
+	width: 200dp;
+	margin-right: 20dp;
+}
+.opt-nav-item {
+	display: block;
+	height: 42dp;
+	line-height: 42dp;
+	margin-bottom: 4dp;
+	padding-left: 16dp;
+	border-left: 3dp rgba(255, 255, 255, 0);
+	border-radius: 0 4dp 4dp 0;
+	cursor: pointer;
 	white-space: nowrap;
-	font-family: "token(font-body)";
-	font-size: 10dp;
+	font-size: 13dp;
+	letter-spacing: 1.5dp;
+	text-transform: uppercase;
 	color: token(text-secondary);
 }
-
-.option-select-row,
-.option-gauge-row {
-	height: 20dp;
+.opt-nav-item:hover {
+	color: token(text-primary);
+	background-color: rgba(255, 255, 255, 16);
+}
+.opt-nav-item.active-tab {
+	color: token(accent-gold-hover);
+	border-left-color: token(accent-gold);
+	background-color: rgba(196, 154, 60, 30);
+	decorator: linear-gradient(to right, rgba(196, 154, 60, 70), rgba(196, 154, 60, 0));
 }
 
-/* Volume and effect-limit gauges: base.rcss's .level-gauge beside the label. */
-.option-gauge {
+/* The glass pane: a cool translucent fill, a sheen across the top, a brighter top edge. */
+.opt-pane {
 	position: relative;
-	width: 124dp;
-	height: 12dp;
+	flex: 1 1 0;
+	padding: 22dp 28dp;
+	background-color: rgba(22, 26, 32, 140);
+	backdrop-filter: blur(12dp);
+	decorator: linear-gradient(to bottom, rgba(255, 255, 255, 20), rgba(255, 255, 255, 0) 30%);
+	border: 1dp rgba(255, 255, 255, 46);
+	border-top-color: rgba(255, 255, 255, 80);
+	border-radius: 6dp;
+	box-shadow:
+		inset 0 1dp 0 rgba(255, 255, 255, 30),
+		0 12dp 32dp rgba(0, 0, 0, 140);
 }
-.option-gauge .level-gauge-fill {
+
+/* .hidden ties with this rule's display at equal specificity, so it is restated. */
+.opt-page {
+	display: block;
+	max-width: 760dp;
+}
+.opt-page.hidden {
+	display: none;
+}
+.opt-page-title {
+	padding-bottom: 10dp;
+	margin-bottom: 6dp;
+	border-bottom: 1dp rgba(255, 255, 255, 30);
+	font-size: 17dp;
+	font-weight: bold;
+	letter-spacing: 2dp;
+	text-transform: uppercase;
+	color: token(text-primary);
+}
+
+/* A setting: label on the left, its control in a fixed column on the right. pointer-events on the
+   row gives every row a hover, not only the clickable ones. */
+.opt-row {
+	position: relative;
+	display: flex;
+	align-items: center;
+	height: 44dp;
+	padding: 0 12dp;
+	border-bottom: 1dp rgba(255, 255, 255, 14);
+	pointer-events: auto;
+}
+.opt-row:hover {
+	background-color: rgba(255, 255, 255, 12);
+}
+.opt-toggle-row {
+	cursor: pointer;
+}
+.opt-label {
+	flex: 1 1 0;
+	margin-right: 16dp;
+	overflow: hidden;
+	white-space: nowrap;
+	font-size: 12dp;
+	color: token(text-primary);
+}
+/* The control column takes a share of the row, so long labels keep their room on a narrow screen. */
+.opt-control {
+	position: relative;
+	flex: 0 0 auto;
+	width: 46%;
+	max-width: 280dp;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+/* Toggle switch, driven by the same checked flags the legacy checkboxes use. */
+.opt-toggle {
+	position: relative;
+	width: 40dp;
+	height: 20dp;
+	border: 1dp rgba(255, 255, 255, 60);
+	border-radius: 11dp;
+	background-color: rgba(255, 255, 255, 26);
+	box-shadow: inset 0 1dp 3dp rgba(0, 0, 0, 120);
+	transition: background-color 0.12s quadratic-out;
+}
+.opt-toggle-knob {
+	position: absolute;
+	left: 2dp;
+	top: 2dp;
+	width: 16dp;
+	height: 16dp;
+	border-radius: 8dp;
+	background-color: token(text-primary);
+	box-shadow: 0 1dp 2dp rgba(0, 0, 0, 150);
+	transition: left 0.12s quadratic-out;
+}
+.opt-toggle.checked {
+	background-color: rgba(196, 154, 60, 210);
+	border-color: token(accent-gold-hover);
+}
+.opt-toggle.checked .opt-toggle-knob {
+	left: 22dp;
+	background-color: #fff8e6;
+}
+.opt-toggle-row:hover .opt-toggle {
+	border-color: rgba(255, 255, 255, 110);
+}
+.opt-toggle-row:hover .opt-toggle.checked {
+	border-color: #f0d79a;
+}
+
+/* Sliders: base.rcss's level gauge as a thin rounded track with a glowing gold fill and a thumb
+   at the fill's end. The hit area reaches past the track so a thin bar is still easy to grab. */
+.opt-slider {
+	position: relative;
+	flex: 1 1 0;
+	height: 6dp;
+	border-width: 0;
+	border-radius: 3dp;
+	background-color: rgba(255, 255, 255, 34);
+}
+.opt-slider .level-gauge-fill {
 	left: 0;
 	top: 0;
 	bottom: 0;
+	border-radius: 3dp;
+	background-color: token(accent-gold);
+	decorator: linear-gradient(to right, #8f6922, token(accent-gold-hover));
+	box-shadow: 0 0 6dp rgba(226, 193, 109, 110);
 }
-.option-gauge-hit {
+.opt-slider-thumb {
+	position: absolute;
+	right: -7dp;
+	top: -4dp;
+	width: 14dp;
+	height: 14dp;
+	border-radius: 7dp;
+	background-color: #fff8e6;
+	box-shadow: 0 0 0 3dp rgba(196, 154, 60, 90), 0 1dp 3dp rgba(0, 0, 0, 160);
+}
+.opt-slider-step {
+	position: absolute;
+	top: -2dp;
+	bottom: -2dp;
+	width: 2dp;
+	margin-left: -1dp;
+	background-color: rgba(14, 17, 22, 220);
+}
+.opt-slider-step-1 { left: 20%; }
+.opt-slider-step-2 { left: 40%; }
+.opt-slider-step-3 { left: 60%; }
+.opt-slider-step-4 { left: 80%; }
+.opt-slider-hit {
 	left: -8dp;
-	right: 0;
+	right: -8dp;
+	top: -10dp;
+	bottom: -10dp;
+}
+.opt-value {
+	flex: 0 0 auto;
+	width: 48dp;
+	margin-left: 14dp;
+	text-align: right;
+	white-space: nowrap;
+	font-size: 12dp;
+	color: token(accent-gold-hover);
 }
 
-/* Custom dropdown -- NOT RmlUi's native <select>/<option> (WidgetDropDown). That was tried first
-   and never reliably worked in this engine: the widget's own generated
-   selectvalue/selectbox/selectarrow sub-elements need CSS this
-   theme never fully gave them (no `position` set programmatically the way WidgetSlider forces
-   `drag` on its own sub-elements), and even once styled, option clicks still didn't reliably reach
-   this window's own change callback. This reuses the exact data-for/data-class/data-event-click
-   mechanism .option-tab-btn above already proves reliable, plus a single shared
-   model.openDropdown field (OptionWindow.h) so opening one dropdown closes any other automatically
-   -- no separate exclusivity logic needed. position:relative so .option-dropdown-list's own
-   position:absolute (below) resolves against ITS box. */
+/* Dropdowns. The list is near-opaque so its entries stay legible over the scene. z-index 1 keeps
+   an open list above the rows after it. */
 .option-dropdown {
 	position: relative;
-	flex-grow: 1;
-	height: 18dp;
+	width: 100%;
+	height: 30dp;
 }
 .option-dropdown-value {
 	display: block;
+	position: relative;
+	box-sizing: border-box;
 	width: 100%;
-	height: 100%;
-	padding: 0 4dp;
-	line-height: 18dp;
+	height: 30dp;
+	line-height: 28dp;
+	padding: 0 32dp 0 12dp;
 	white-space: nowrap;
 	overflow: hidden;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: rgba(0, 0, 0, 140);
-	border-width: 1dp;
-	border-color: token(border-frame);
-	border-radius: token(radius-sm)dp;
-	color: token(text-secondary);
-	font-family: "token(font-body)";
-	font-size: 10dp;
+	font-size: 12dp;
+	color: token(text-primary);
+	background-color: rgba(255, 255, 255, 18);
+	border: 1dp rgba(255, 255, 255, 56);
+	border-radius: 4dp;
 }
-/* Floating popup -- top:100% (not a hardcoded dp offset) so it always sits flush under the value
-   box regardless of that row's own height. max-height+overflow-y:auto caps a long list
-   (Resolution has ~25 entries) with a real scrollbar instead of growing past the panel. Needs the
-   .hidden override below: this file loads after base.rcss, so its own display:block would
-   otherwise tie with (and silently beat) base.rcss's global .hidden{display:none} at equal
-   specificity -- same cascade-tie bug .option-tab-panel's own comment already covers.
-
-   z-index:1 -- without it, this absolutely-positioned popup paints/hit-tests at its own plain DOM
-   position among .option-row siblings, i.e. BEHIND whichever row comes later in markup order (an
-   .option-row without its own z-index just participates in normal top-to-bottom paint order, same
-   as any other sibling): a dropdown opened above a lower row would render behind it, and clicking
-   an option that visually overlaps a checkbox row would trigger that checkbox instead.
-   RmlUi's own native <select> (WidgetDropDown.cpp) sets this same 1 on its generated
-   selectbox for the identical reason -- this is the custom-dropdown equivalent of that. */
+.option-dropdown-value:hover {
+	background-color: rgba(255, 255, 255, 28);
+	border-color: rgba(255, 255, 255, 110);
+}
+.option-dropdown-value.open {
+	border-color: token(accent-gold);
+}
+.opt-caret {
+	position: absolute;
+	right: 13dp;
+	top: 9dp;
+	width: 6dp;
+	height: 6dp;
+	border-right: 2dp token(text-secondary);
+	border-bottom: 2dp token(text-secondary);
+	transform: rotate(45deg);
+}
+.option-dropdown-value.open .opt-caret {
+	top: 13dp;
+	transform: rotate(-135deg);
+	border-color: token(accent-gold-hover);
+}
 .option-dropdown-list {
 	display: block;
 	position: absolute;
+	box-sizing: border-box;
 	left: 0;
 	top: 100%;
 	width: 100%;
-	max-height: 90dp;
+	max-height: 220dp;
+	margin-top: 4dp;
+	padding: 4dp 0;
 	overflow-y: auto;
 	z-index: 1;
-	background-color: #0c0d0a;
-	border-width: 1dp;
-	border-color: token(border-frame);
 	pointer-events: auto;
+	background-color: rgba(16, 19, 24, 242);
+	border: 1dp rgba(255, 255, 255, 60);
+	border-radius: 4dp;
+	box-shadow: 0 10dp 24dp rgba(0, 0, 0, 170);
 }
 .option-dropdown-list.hidden {
 	display: none;
 }
-/* Explicit scrollbar sizing, same reasoning generic_confirm_dialog.rcss's own .gcd-text-col
-   comment already gives for its own overflow:auto well -- an unstyled scrollbarvertical isn't
-   just visually wrong, its own (also unstyled) hit-test area can cover most/all of the option
-   row's width instead of a slim strip at the edge, silently swallowing clicks meant for the
-   option text beneath it as a scrollbar drag instead. Arrow buttons collapsed to 0, same
-   drag/click-only affordance as every other scrollbar in this codebase. */
+/* A sized scrollbar; unstyled, its hit area can cover the entries and swallow their clicks. */
 .option-dropdown-list scrollbarvertical {
 	width: 6dp;
-	margin: 0;
+	margin: 0 2dp 0 0;
 }
 .option-dropdown-list scrollbarvertical slidertrack {
-	background-color: token(metal-rail-dark);
+	background-color: rgba(255, 255, 255, 0);
 }
 .option-dropdown-list scrollbarvertical sliderbar {
-	background-color: token(metal-edge);
+	background-color: rgba(255, 255, 255, 60);
+	border-radius: 3dp;
 }
 .option-dropdown-list scrollbarvertical sliderbar:hover,
 .option-dropdown-list scrollbarvertical sliderbar:active {
-	background-color: token(metal-highlight);
+	background-color: rgba(255, 255, 255, 120);
 }
 .option-dropdown-list scrollbarvertical sliderarrowdec,
 .option-dropdown-list scrollbarvertical sliderarrowinc {
@@ -275,67 +365,93 @@
 }
 .option-dropdown-option {
 	display: block;
-	width: 100%;
-	padding: 2dp 4dp;
+	height: 28dp;
+	line-height: 28dp;
+	padding: 0 12dp;
 	white-space: nowrap;
 	cursor: pointer;
 	pointer-events: auto;
+	font-size: 12dp;
 	color: token(text-secondary);
-	font-family: "token(font-body)";
-	font-size: 10dp;
 }
 .option-dropdown-option:hover {
-	color: token(accent-gold-hover);
-	background-color: token(surface-panel);
+	color: token(text-primary);
+	background-color: rgba(255, 255, 255, 20);
 }
 .option-dropdown-option.selected {
-	color: token(text-warm);
-	background-color: token(accent-steel);
+	color: token(accent-gold-hover);
+	background-color: rgba(196, 154, 60, 44);
 }
 
-/* Hover tooltip for a row whose label can't explain itself (the UI Scale row). Only geometry and
-   visibility here: the element also carries base.rcss's shared `.tooltip` class, which supplies
-   this theme's tooltip fill, border, radius, colour and font family.
-
-   pointer-events must be stated on the ROW: base.rcss's `body { pointer-events: none; }` reaches
-   every element that doesn't opt back in, and an .option-select-row (unlike .option-checkbox-row)
-   doesn't otherwise need it -- without it, hovering the label area produces no :hover and the tip
-   appears only over the dropdown box. The tip stays pointer-events:none so it can't eat the hover
-   showing it.
-
-   The tip sits below the row (top:100%) with that row's list flipped above it (bottom:100%), the
-   reverse of every other row here, because this is the last row of its tab and a 9-entry list
-   opening downwards covers the panel's bottom edge and its close button. Wrapping is left at the
-   default with no fixed height, since the sentence is longer than one line at this width. z-index
-   2 keeps the tip over an open list (z-index 1). */
-.option-row-tipped {
-	pointer-events: auto;
-}
-.option-row-tip {
+/* The UI Scale row explains itself in a tip under the row on hover; its list opens upwards so the
+   two do not collide. */
+.opt-row-tip {
 	display: none;
 	position: absolute;
-	left: 0;
+	left: 12dp;
 	top: 100%;
-	width: 240dp;
+	width: 360dp;
+	margin-top: 4dp;
+	padding: 8dp 10dp;
 	z-index: 2;
-	padding: 4dp 6dp;
-	font-size: 9dp;
 	pointer-events: none;
+	font-size: 11dp;
+	color: token(text-secondary);
+	background-color: rgba(16, 19, 24, 242);
+	border: 1dp rgba(255, 255, 255, 60);
+	border-radius: 4dp;
 }
-.option-row-tipped:hover .option-row-tip {
+.opt-row-tipped:hover .opt-row-tip {
 	display: block;
 }
-.option-row-tipped .option-dropdown-list {
+.opt-row-tipped .option-dropdown-list {
 	top: auto;
 	bottom: 100%;
+	margin-top: 0;
+	margin-bottom: 4dp;
 }
 
-/* The close button sits at the bottom of #content, which window_shell.rcss gives a fixed box
-   (left/right/top/bottom all set), so this stays put as the active tab's row count changes.
-   bottom:0 lands on the same line the shell's own footer occupies; left:50% plus the transform
-   centres it the way .center-both does. */
-.option-close-btn {
-	left: 50%;
-	bottom: 0;
-	transform: translateX(-50%);
+/* Footer: a keycap hint for the close action. */
+.opt-footer {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	height: 48dp;
+	margin-top: 16dp;
+	border-top: 1dp rgba(255, 255, 255, 30);
+}
+.opt-footer-action {
+	display: flex;
+	align-items: center;
+	padding: 6dp 10dp;
+	cursor: pointer;
+	border-radius: 4dp;
+}
+.opt-footer-action:hover {
+	background-color: rgba(255, 255, 255, 18);
+}
+.opt-keycap {
+	height: 21dp;
+	line-height: 21dp;
+	padding: 0 8dp;
+	margin-right: 10dp;
+	font-size: 11dp;
+	font-weight: bold;
+	color: token(text-primary);
+	background-color: rgba(255, 255, 255, 22);
+	border: 1dp rgba(255, 255, 255, 90);
+	border-bottom-width: 2dp;
+	border-radius: 3dp;
+}
+.opt-footer-label {
+	height: 24dp;
+	line-height: 25dp;
+	font-size: 13dp;
+	letter-spacing: 1.5dp;
+	text-transform: uppercase;
+	color: token(text-primary);
+}
+.opt-footer-action:hover .opt-footer-label {
+	color: token(accent-gold-hover);
 }

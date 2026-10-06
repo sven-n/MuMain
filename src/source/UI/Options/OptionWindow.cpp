@@ -390,11 +390,14 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
 }
 
 // Dragged by any part that is not a control (base.rcss blocks those; legacy shows no title to
-// grab) for the session; the position is not saved.
+// grab) for the session; the position is not saved. A theme whose panel fills the screen marks it
+// `fullscreen`, and there is nothing to drag.
 void mu::ui::window::COptionWindow::OnRmlBuilt()
 {
     Rml::ElementDocument* document = m_RmlView.Document();
     m_pPanelEl = document->GetElementById("panel");
+    if (m_pPanelEl && m_pPanelEl->IsClassSet("fullscreen"))
+        return;
     UI::RmlBridge::MakeDraggable(document, document, nullptr,
                                  [document] { UI::RmlBridge::KeepInsideWindow(document); });
 }

@@ -136,10 +136,12 @@ constexpr DocumentPlacement Placements[] = {
     {"cursed_temple_result.rml", 10.2f, MainScene},
     {"cursed_temple_enter.rml", 10.3f, MainScene},
     {"window_menu.rml", 10.4f, MainScene},
-    {"option_window.rml", 10.5f, MainScene},
     {"main_frame.rml", 10.6f, MainScene},
     {"command_window.rml", 10.65f, MainScene}, // UI::Layout::ForegroundPanelLayerDepth
     {"chat_command.rml", 10.65f, MainScene},
+    // The original drew it at 10.5, under the HUD; the modern theme's settings screen covers the
+    // whole screen, HUD included. Still under the tooltips and message boxes.
+    {"option_window.rml", 10.67f, MainScene},
     // The original drew each tooltip at its owner's depth (item tooltips at 5.5), where the
     // chat log, the friends window, the full map and the HUD hid its rows: an original
     // defect. Every tooltip draws above the windows instead, still under the message boxes.
