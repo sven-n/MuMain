@@ -69,15 +69,11 @@ bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MAINFRAME, this);
 
-    UI::RmlBridge::RegisterWorkspaceDocument("main_hud", [this] { return m_pRmlDoc; }, "hud_layout");
-    UI::RmlBridge::RegisterWorkspaceDocument("top_bar", [this] { return m_pRmlTopDoc; }, "buttons_top");
+    UI::RmlBridge::RegisterWorkspaceDocument("main_hud", [this] { return m_RmlView.Document(); }, "hud_layout");
+    UI::RmlBridge::RegisterWorkspaceDocument("top_bar", [this] { return m_RmlView.Document(1); }, "buttons_top");
 
-    // Guarded so the doc/model are created once, even though Create() re-runs on resolution change.
-    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        BuildRmlUi();
-        UI::RmlBridge::RegisterForThemeReload(this, [this] { ReloadRmlTheme(); });
-    }
+    // Builds once; Create() re-runs on resolution change.
+    BuildRmlUi();
 
     Show(true);
 
@@ -120,206 +116,183 @@ SlotBox SlotBoxInReference(Rml::Element* element)
 }
 } // namespace
 
-void mu::ui::window::CMainFrameWindow::BuildRmlUi()
+void mu::ui::window::CMainFrameWindow::BindRmlModel(Rml::DataModelConstructor& c, MainFrameRmlModel& model)
 {
-    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "main_frame",
-            [this](Rml::DataModelConstructor& c, MainFrameRmlModel& model)
-            {
-                c.Bind("hint_px", &model.hintPx);
+    c.Bind("hint_px", &model.hintPx);
 
-                c.Bind("hp_fraction", &model.hpFraction);
-                c.Bind("mp_fraction", &model.mpFraction);
-                c.Bind("ag_fraction", &model.agFraction);
-                c.Bind("sd_fraction", &model.sdFraction);
-                c.Bind("hp_text", &model.hpText);
-                c.Bind("mp_text", &model.mpText);
-                c.Bind("ag_text", &model.agText);
-                c.Bind("sd_text", &model.sdText);
-                c.Bind("hp_current_text", &model.hpCurrentText);
-                c.Bind("mp_current_text", &model.mpCurrentText);
-                c.Bind("ag_current_text", &model.agCurrentText);
-                c.Bind("sd_current_text", &model.sdCurrentText);
-                c.Bind("hp_tooltip", &model.hpTooltip);
-                c.Bind("mp_tooltip", &model.mpTooltip);
-                c.Bind("ag_tooltip", &model.agTooltip);
-                c.Bind("sd_tooltip", &model.sdTooltip);
-                c.Bind("poisoned", &model.poisoned);
+    c.Bind("hp_fraction", &model.hpFraction);
+    c.Bind("mp_fraction", &model.mpFraction);
+    c.Bind("ag_fraction", &model.agFraction);
+    c.Bind("sd_fraction", &model.sdFraction);
+    c.Bind("hp_text", &model.hpText);
+    c.Bind("mp_text", &model.mpText);
+    c.Bind("ag_text", &model.agText);
+    c.Bind("sd_text", &model.sdText);
+    c.Bind("hp_current_text", &model.hpCurrentText);
+    c.Bind("mp_current_text", &model.mpCurrentText);
+    c.Bind("ag_current_text", &model.agCurrentText);
+    c.Bind("sd_current_text", &model.sdCurrentText);
+    c.Bind("hp_tooltip", &model.hpTooltip);
+    c.Bind("mp_tooltip", &model.mpTooltip);
+    c.Bind("ag_tooltip", &model.agTooltip);
+    c.Bind("sd_tooltip", &model.sdTooltip);
+    c.Bind("poisoned", &model.poisoned);
 
-                c.Bind("exp_fraction", &model.expFraction);
-                c.Bind("exp_digit", &model.expDigit);
-                c.Bind("exp_tooltip", &model.expTooltip);
+    c.Bind("exp_fraction", &model.expFraction);
+    c.Bind("exp_digit", &model.expDigit);
+    c.Bind("exp_tooltip", &model.expTooltip);
 
-                c.Bind("cshop_open", &model.cShopOpen);
-                c.Bind("chainfo_open", &model.chaInfoOpen);
-                c.Bind("myinven_open", &model.myInvenOpen);
-                c.Bind("friend_open", &model.friendOpen);
-                c.Bind("window_open", &model.windowOpen);
-                c.Bind("cshop_tooltip", &model.cShopTooltip);
-                c.Bind("chainfo_tooltip", &model.chaInfoTooltip);
-                c.Bind("myinven_tooltip", &model.myInvenTooltip);
-                c.Bind("friend_tooltip", &model.friendTooltip);
-                c.Bind("window_tooltip", &model.windowTooltip);
+    c.Bind("cshop_open", &model.cShopOpen);
+    c.Bind("chainfo_open", &model.chaInfoOpen);
+    c.Bind("myinven_open", &model.myInvenOpen);
+    c.Bind("friend_open", &model.friendOpen);
+    c.Bind("window_open", &model.windowOpen);
+    c.Bind("cshop_tooltip", &model.cShopTooltip);
+    c.Bind("chainfo_tooltip", &model.chaInfoTooltip);
+    c.Bind("myinven_tooltip", &model.myInvenTooltip);
+    c.Bind("friend_tooltip", &model.friendTooltip);
+    c.Bind("window_tooltip", &model.windowTooltip);
 
-                c.Bind("chainfo_alert", &model.chaInfoAlert);
-                c.Bind("friend_alert", &model.friendAlert);
+    c.Bind("chainfo_alert", &model.chaInfoAlert);
+    c.Bind("friend_alert", &model.friendAlert);
 
-                c.Bind("skill_slot_0_selected", &model.skillSlot0Selected);
-                c.Bind("skill_slot_1_selected", &model.skillSlot1Selected);
-                c.Bind("skill_slot_2_selected", &model.skillSlot2Selected);
-                c.Bind("skill_slot_3_selected", &model.skillSlot3Selected);
-                c.Bind("skill_slot_4_selected", &model.skillSlot4Selected);
+    c.Bind("skill_slot_0_selected", &model.skillSlot0Selected);
+    c.Bind("skill_slot_1_selected", &model.skillSlot1Selected);
+    c.Bind("skill_slot_2_selected", &model.skillSlot2Selected);
+    c.Bind("skill_slot_3_selected", &model.skillSlot3Selected);
+    c.Bind("skill_slot_4_selected", &model.skillSlot4Selected);
 
-                c.Bind("skill_slot_0_hotkey", &model.skillSlot0Hotkey);
-                c.Bind("skill_slot_1_hotkey", &model.skillSlot1Hotkey);
-                c.Bind("skill_slot_2_hotkey", &model.skillSlot2Hotkey);
-                c.Bind("skill_slot_3_hotkey", &model.skillSlot3Hotkey);
-                c.Bind("skill_slot_4_hotkey", &model.skillSlot4Hotkey);
+    c.Bind("skill_slot_0_hotkey", &model.skillSlot0Hotkey);
+    c.Bind("skill_slot_1_hotkey", &model.skillSlot1Hotkey);
+    c.Bind("skill_slot_2_hotkey", &model.skillSlot2Hotkey);
+    c.Bind("skill_slot_3_hotkey", &model.skillSlot3Hotkey);
+    c.Bind("skill_slot_4_hotkey", &model.skillSlot4Hotkey);
 
-                c.Bind("skill_slot_0_icon", &model.skillSlot0Icon);
-                c.Bind("skill_slot_1_icon", &model.skillSlot1Icon);
-                c.Bind("skill_slot_2_icon", &model.skillSlot2Icon);
-                c.Bind("skill_slot_3_icon", &model.skillSlot3Icon);
-                c.Bind("skill_slot_4_icon", &model.skillSlot4Icon);
-                c.Bind("current_skill_icon", &model.currentSkillIcon);
-                c.Bind("current_skill_hotkey", &model.currentSkillHotkey);
+    c.Bind("skill_slot_0_icon", &model.skillSlot0Icon);
+    c.Bind("skill_slot_1_icon", &model.skillSlot1Icon);
+    c.Bind("skill_slot_2_icon", &model.skillSlot2Icon);
+    c.Bind("skill_slot_3_icon", &model.skillSlot3Icon);
+    c.Bind("skill_slot_4_icon", &model.skillSlot4Icon);
+    c.Bind("current_skill_icon", &model.currentSkillIcon);
+    c.Bind("current_skill_hotkey", &model.currentSkillHotkey);
 
-                // Skill list cooldown bindings -- see MainFrameRmlModel::skillGridOpen's own
-                // header comment.
-                c.Bind("skill_slot_0_cooldown", &model.skillSlot0Cooldown);
-                c.Bind("skill_slot_1_cooldown", &model.skillSlot1Cooldown);
-                c.Bind("skill_slot_2_cooldown", &model.skillSlot2Cooldown);
-                c.Bind("skill_slot_3_cooldown", &model.skillSlot3Cooldown);
-                c.Bind("skill_slot_4_cooldown", &model.skillSlot4Cooldown);
-                c.Bind("current_skill_cooldown", &model.currentSkillCooldown);
+    // Skill list cooldown bindings -- see MainFrameRmlModel::skillGridOpen's own
+    // header comment.
+    c.Bind("skill_slot_0_cooldown", &model.skillSlot0Cooldown);
+    c.Bind("skill_slot_1_cooldown", &model.skillSlot1Cooldown);
+    c.Bind("skill_slot_2_cooldown", &model.skillSlot2Cooldown);
+    c.Bind("skill_slot_3_cooldown", &model.skillSlot3Cooldown);
+    c.Bind("skill_slot_4_cooldown", &model.skillSlot4Cooldown);
+    c.Bind("current_skill_cooldown", &model.currentSkillCooldown);
 
-                // See CCharMakeWin::BuildRmlUi()'s comment on why this must re-run in full every
-                // call, including from ReloadRmlTheme() -- no guard here.
-                auto skillCell = c.RegisterStruct<SkillCellEntry>();
-                skillCell.RegisterMember("left", &SkillCellEntry::left);
-                skillCell.RegisterMember("top", &SkillCellEntry::top);
-                skillCell.RegisterMember("skill_index", &SkillCellEntry::skillIndex);
-                skillCell.RegisterMember("is_pet", &SkillCellEntry::isPet);
-                skillCell.RegisterMember("is_current", &SkillCellEntry::isCurrent);
-                skillCell.RegisterMember("cooldown_fraction", &SkillCellEntry::cooldownFraction);
-                skillCell.RegisterMember("icon", &SkillCellEntry::icon);
-                skillCell.RegisterMember("hotkey", &SkillCellEntry::hotkey);
-                c.RegisterArray<std::vector<SkillCellEntry>>();
+    // See CCharMakeWin::BindRmlModel()'s comment on why this must re-run in full every
+    // call, including on a theme switch -- no guard here.
+    auto skillCell = c.RegisterStruct<SkillCellEntry>();
+    skillCell.RegisterMember("left", &SkillCellEntry::left);
+    skillCell.RegisterMember("top", &SkillCellEntry::top);
+    skillCell.RegisterMember("skill_index", &SkillCellEntry::skillIndex);
+    skillCell.RegisterMember("is_pet", &SkillCellEntry::isPet);
+    skillCell.RegisterMember("is_current", &SkillCellEntry::isCurrent);
+    skillCell.RegisterMember("cooldown_fraction", &SkillCellEntry::cooldownFraction);
+    skillCell.RegisterMember("icon", &SkillCellEntry::icon);
+    skillCell.RegisterMember("hotkey", &SkillCellEntry::hotkey);
+    c.RegisterArray<std::vector<SkillCellEntry>>();
 
-                c.Bind("skill_grid_open", &model.skillGridOpen);
-                c.Bind("skill_list_up", &model.skillListUp);
-                c.Bind("skill_grid_cells", &model.skillGridCells);
-                c.Bind("pet_skill_cells", &model.petSkillCells);
+    c.Bind("skill_grid_open", &model.skillGridOpen);
+    c.Bind("skill_list_up", &model.skillListUp);
+    c.Bind("skill_grid_cells", &model.skillGridCells);
+    c.Bind("pet_skill_cells", &model.petSkillCells);
 
-                // Skill list click/hover bindings route into CSkillList (g_pSkillList has no RmlUi
-                // doc of its own). Args are literal ints in RML (e.g. skill_hotkey_click(0)) or the
-                // cell's skill_index for data-for'd lists; Variant::Get<int>() resolves either.
-                c.BindEventCallback("skill_hotkey_click",
-                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnHotkeySlotClick(args.empty() ? 0 : args[0].Get<int>()); });
-                c.BindEventCallback("skill_hotkey_hover",
-                                    [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
-                                    {
-                                        const SlotBox slot = SlotBoxInReference(event.GetCurrentElement());
-                                        g_pSkillList->OnHotkeySlotHover(args.empty() ? 0 : args[0].Get<int>(),
-                                                                        slot.left, slot.top);
-                                    });
-                c.BindEventCallback("skill_current_click",
-                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pSkillList->OnCurrentSkillClick(); });
-                c.BindEventCallback("skill_current_hover",
-                                    [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
-                                    {
-                                        // The slot box is the icon plus the theme's even inset.
-                                        const SlotBox slot = SlotBoxInReference(event.GetCurrentElement());
-                                        g_pSkillList->OnCurrentSkillHover(
-                                            slot.left + (slot.width - kSkillIconWidth) / 2.f,
-                                            slot.top + (slot.height - kSkillIconHeight) / 2.f);
-                                    });
-                c.BindEventCallback("skill_grid_click",
-                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnGridCellClick(args.empty() ? -1 : args[0].Get<int>()); });
-                c.BindEventCallback("skill_grid_hover",
-                                    [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
-                                    {
-                                        const SlotBox cell = SlotBoxInReference(event.GetCurrentElement());
-                                        g_pSkillList->OnGridCellHover(args.empty() ? -1 : args[0].Get<int>(),
-                                                                      cell.left, cell.top);
-                                    });
-                c.BindEventCallback("skill_pet_click",
-                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnPetCellClick(args.empty() ? -1 : args[0].Get<int>()); });
-                c.BindEventCallback("skill_pet_hover",
-                                    [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
-                                    {
-                                        const SlotBox cell = SlotBoxInReference(event.GetCurrentElement());
-                                        g_pSkillList->OnPetCellHover(args.empty() ? -1 : args[0].Get<int>(),
-                                                                     cell.left, cell.top);
-                                    });
-                c.BindEventCallback("skill_unhover",
-                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pSkillList->OnUnhover(); });
+    // Skill list click/hover bindings route into CSkillList (g_pSkillList has no RmlUi
+    // doc of its own). Args are literal ints in RML (e.g. skill_hotkey_click(0)) or the
+    // cell's skill_index for data-for'd lists; Variant::Get<int>() resolves either.
+    c.BindEventCallback("skill_hotkey_click",
+        [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnHotkeySlotClick(args.empty() ? 0 : args[0].Get<int>()); });
+    c.BindEventCallback("skill_hotkey_hover",
+                        [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+                        {
+                            const SlotBox slot = SlotBoxInReference(event.GetCurrentElement());
+                            g_pSkillList->OnHotkeySlotHover(args.empty() ? 0 : args[0].Get<int>(),
+                                                            slot.left, slot.top);
+                        });
+    c.BindEventCallback("skill_current_click",
+        [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pSkillList->OnCurrentSkillClick(); });
+    c.BindEventCallback("skill_current_hover",
+                        [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
+                        {
+                            // The slot box is the icon plus the theme's even inset.
+                            const SlotBox slot = SlotBoxInReference(event.GetCurrentElement());
+                            g_pSkillList->OnCurrentSkillHover(
+                                slot.left + (slot.width - kSkillIconWidth) / 2.f,
+                                slot.top + (slot.height - kSkillIconHeight) / 2.f);
+                        });
+    c.BindEventCallback("skill_grid_click",
+        [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnGridCellClick(args.empty() ? -1 : args[0].Get<int>()); });
+    c.BindEventCallback("skill_grid_hover",
+                        [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+                        {
+                            const SlotBox cell = SlotBoxInReference(event.GetCurrentElement());
+                            g_pSkillList->OnGridCellHover(args.empty() ? -1 : args[0].Get<int>(),
+                                                          cell.left, cell.top);
+                        });
+    c.BindEventCallback("skill_pet_click",
+        [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnPetCellClick(args.empty() ? -1 : args[0].Get<int>()); });
+    c.BindEventCallback("skill_pet_hover",
+                        [](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+                        {
+                            const SlotBox cell = SlotBoxInReference(event.GetCurrentElement());
+                            g_pSkillList->OnPetCellHover(args.empty() ? -1 : args[0].Get<int>(),
+                                                         cell.left, cell.top);
+                        });
+    c.BindEventCallback("skill_unhover",
+        [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pSkillList->OnUnhover(); });
 
-                // Item hotkey chrome (#item_slots hover/stack-count/right-click). m_ItemHotKey is
-                // a member, so these lambdas capture [this] directly.
-                c.Bind("item_slot_0_hovered", &model.itemSlot0Hovered);
-                c.Bind("item_slot_1_hovered", &model.itemSlot1Hovered);
-                c.Bind("item_slot_2_hovered", &model.itemSlot2Hovered);
-                c.Bind("item_slot_3_hovered", &model.itemSlot3Hovered);
-                c.Bind("item_slot_0_count", &model.itemSlot0Count);
-                c.Bind("item_slot_1_count", &model.itemSlot1Count);
-                c.Bind("item_slot_2_count", &model.itemSlot2Count);
-                c.Bind("item_slot_3_count", &model.itemSlot3Count);
+    // Item hotkey chrome (#item_slots hover/stack-count/right-click). m_ItemHotKey is
+    // a member, so these lambdas capture [this] directly.
+    c.Bind("item_slot_0_hovered", &model.itemSlot0Hovered);
+    c.Bind("item_slot_1_hovered", &model.itemSlot1Hovered);
+    c.Bind("item_slot_2_hovered", &model.itemSlot2Hovered);
+    c.Bind("item_slot_3_hovered", &model.itemSlot3Hovered);
+    c.Bind("item_slot_0_count", &model.itemSlot0Count);
+    c.Bind("item_slot_1_count", &model.itemSlot1Count);
+    c.Bind("item_slot_2_count", &model.itemSlot2Count);
+    c.Bind("item_slot_3_count", &model.itemSlot3Count);
 
-                c.BindEventCallback("item_hotkey_hover",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { m_ItemHotKey.OnHotkeySlotHover(args.empty() ? 0 : args[0].Get<int>()); });
-                c.BindEventCallback("item_hotkey_unhover",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { m_ItemHotKey.OnUnhover(); });
-                // Uses data-event-mouseup, not data-event-click -- RmlUi's Context only dispatches
-                // Click for the left button. Mouseup fires for any button; "button" param == 1 means right-click.
-                c.BindEventCallback("item_hotkey_rightclick",
-                    [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
-                    {
-                        if (event.GetParameter<int>("button", -1) != 1) return;
-                        m_ItemHotKey.OnHotkeySlotRightClick(args.empty() ? 0 : args[0].Get<int>());
-                    });
-
-                c.BindEventCallback("mainframe_cshop_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCShop(); });
-                c.BindEventCallback("mainframe_chainfo_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickChaInfo(); });
-                c.BindEventCallback("mainframe_myinven_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickMyInven(); });
-                c.BindEventCallback("mainframe_friend_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickFriend(); });
-                c.BindEventCallback("mainframe_window_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickWindow(); });
-            });
-
-        if (modelCreated)
+    c.BindEventCallback("item_hotkey_hover",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { m_ItemHotKey.OnHotkeySlotHover(args.empty() ? 0 : args[0].Get<int>()); });
+    c.BindEventCallback("item_hotkey_unhover",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { m_ItemHotKey.OnUnhover(); });
+    // Uses data-event-mouseup, not data-event-click -- RmlUi's Context only dispatches
+    // Click for the left button. Mouseup fires for any button; "button" param == 1 means right-click.
+    c.BindEventCallback("item_hotkey_rightclick",
+        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
         {
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/main_frame.rml");
-            if (m_pRmlDoc)
-                m_pRmlTopDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-                                                                 "Data/Interface/RmlUi/main_frame_top.rml");
-        }
+            if (event.GetParameter<int>("button", -1) != 1) return;
+            m_ItemHotKey.OnHotkeySlotRightClick(args.empty() ? 0 : args[0].Get<int>());
+        });
 
-        // Not Show()n here -- Create() runs before SceneFlag reaches MAIN_SCENE; an eager Show()
-        // here let the HUD flash once before the first scene gate check. Left hidden;
-        // SyncDocVisibility() shows it once the gate allows it.
+    c.BindEventCallback("mainframe_cshop_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCShop(); });
+    c.BindEventCallback("mainframe_chainfo_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickChaInfo(); });
+    c.BindEventCallback("mainframe_myinven_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickMyInven(); });
+    c.BindEventCallback("mainframe_friend_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickFriend(); });
+    c.BindEventCallback("mainframe_window_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickWindow(); });
 }
 
-void mu::ui::window::CMainFrameWindow::ReloadRmlTheme()
+void mu::ui::window::CMainFrameWindow::OnRmlReloaded()
 {
-    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
-
-    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
-    m_RmlBinder.Destroy(context);
-    context->UnloadDocument(m_pRmlDoc);
-    m_pRmlDoc = nullptr;
-    if (m_pRmlTopDoc)
-    {
-        context->UnloadDocument(m_pRmlTopDoc);
-        m_pRmlTopDoc = nullptr;
-    }
-
-    BuildRmlUi();
     UI::Placement::Invalidate();
-    // Next frame's Update()/SyncDocVisibility() self-corrects live state/visibility for both docs.
+}
+
+// Not shown here: Create() runs before SceneFlag reaches MAIN_SCENE, and an eager Show() let the
+// HUD flash once before the first scene gate check. SyncDocVisibility() shows it.
+void mu::ui::window::CMainFrameWindow::BuildRmlUi()
+{
+    m_RmlView.Ensure();
 }
 
 void mu::ui::window::CMainFrameWindow::Release()
@@ -331,15 +304,10 @@ void mu::ui::window::CMainFrameWindow::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
-        UI::RmlBridge::UnregisterForThemeReload(this);
         m_pNewUIMng = NULL;
     }
 
-    // Hide directly since RmlUi renders last in the frame regardless of scene (see CMuHelperBar::Release()).
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
-    if (m_pRmlTopDoc)
-        m_pRmlTopDoc->Hide();
+    m_RmlView.Release();
 }
 
 // Everything this window shows is in main_frame.rml; SyncRmlModel() feeds it from Update().
@@ -355,11 +323,11 @@ bool mu::ui::window::CMainFrameWindow::IsVisible() const
 
 bool mu::ui::window::CMainFrameWindow::IsMouseOverHud() const
 {
-    if (m_pRmlDoc == nullptr || !m_pRmlDoc->IsVisible())
+    if (m_RmlView.Document() == nullptr || !m_RmlView.Document()->IsVisible())
         return false;
-    Rml::Context* context = m_pRmlDoc->GetContext();
+    Rml::Context* context = m_RmlView.Document()->GetContext();
     Rml::Element* hover = context ? context->GetHoverElement() : nullptr;
-    return hover != nullptr && hover != m_pRmlDoc && hover->GetOwnerDocument() == m_pRmlDoc;
+    return hover != nullptr && hover != m_RmlView.Document() && hover->GetOwnerDocument() == m_RmlView.Document();
 }
 
 // RenderRightFrame()/RenderExperienceBackground()/RenderLifeMana()/RenderGuageAG()/RenderGuageSD()/
@@ -487,33 +455,33 @@ bool mu::ui::window::CMainFrameWindow::Update()
 
 void mu::ui::window::CMainFrameWindow::SyncRmlModel()
 {
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
-    auto& model = m_RmlBinder.GetModel();
+    auto& model = m_RmlView.GetModel();
 
     // --- HP/MP/AG/SD/EXP: fraction/text/tooltip helper, mirrors CMuHelperBar's syncLabel() ---
     auto syncFloat = [this](float MainFrameRmlModel::* field, const char* boundName, float value)
     {
-        if (m_RmlBinder.GetModel().*field != value)
+        if (m_RmlView.GetModel().*field != value)
         {
-            m_RmlBinder.GetModel().*field = value;
-            m_RmlBinder.MarkDirty(boundName);
+            m_RmlView.GetModel().*field = value;
+            m_RmlView.MarkDirty(boundName);
         }
     };
     auto syncBool = [this](bool MainFrameRmlModel::* field, const char* boundName, bool value)
     {
-        if (m_RmlBinder.GetModel().*field != value)
+        if (m_RmlView.GetModel().*field != value)
         {
-            m_RmlBinder.GetModel().*field = value;
-            m_RmlBinder.MarkDirty(boundName);
+            m_RmlView.GetModel().*field = value;
+            m_RmlView.MarkDirty(boundName);
         }
     };
     auto syncText = [this](Rml::String MainFrameRmlModel::* field, const char* boundName, const Rml::String& value)
     {
-        if (m_RmlBinder.GetModel().*field != value)
+        if (m_RmlView.GetModel().*field != value)
         {
-            m_RmlBinder.GetModel().*field = value;
-            m_RmlBinder.MarkDirty(boundName);
+            m_RmlView.GetModel().*field = value;
+            m_RmlView.MarkDirty(boundName);
         }
     };
     auto syncWide = [&](Rml::String MainFrameRmlModel::* field, const char* boundName, const wchar_t* text)
@@ -523,9 +491,9 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
 
     {
         syncFloat(&MainFrameRmlModel::hintPx, "hint_px",
-                  UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, HudReferenceTransform(m_pRmlDoc)));
+                  UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, HudReferenceTransform(m_RmlView.Document())));
 
-        m_ItemHotKey.SyncSlotIcons(m_pRmlDoc);
+        m_ItemHotKey.SyncSlotIcons(m_RmlView.Document());
     }
 
     // HP/MP -- legacy RenderLifeMana(). fLife/fMana there are the EMPTY fraction; store filled.
@@ -776,8 +744,8 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
     {
         model.skillGridCells = g_pSkillList->GetGridSnapshot();
         model.petSkillCells = g_pSkillList->GetPetSnapshot();
-        m_RmlBinder.MarkDirty("skill_grid_cells");
-        m_RmlBinder.MarkDirty("pet_skill_cells");
+        m_RmlView.MarkDirty("skill_grid_cells");
+        m_RmlView.MarkDirty("pet_skill_cells");
     }
 
     // Shared skill tooltip: one hover target queued at a time (QueueTooltip()/OnUnhover()).
@@ -795,7 +763,7 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
             // GetTooltipAnchorX/Y() are in HudReferenceTransform()'s units -- NOT the ambient
             // UI::Scaling::GetActiveTransform(), which during this window's Update() is
             // LayoutMode::Hud (ScreenOverlayTransform).
-            const auto skillTooltipTransform = HudReferenceTransform(m_pRmlDoc);
+            const auto skillTooltipTransform = HudReferenceTransform(m_RmlView.Document());
             // The native box ends below its anchor (G2); measured with the native text renderer
             // under the tooltip's own transform.
             float bottomBelowAnchor = 0.f;
@@ -914,45 +882,45 @@ void mu::ui::window::CMainFrameWindow::SetGetExp(__int64 dwGetExp)
 void mu::ui::window::CMainFrameWindow::SetBtnState(int iBtnType, bool bStateDown)
 {
     // Sets a bound "open" model boolean; main_frame.rcss selects the panel-open sprite rect when true.
-    if (!m_pRmlDoc) return;
+    if (!m_RmlView.Document()) return;
 
     switch (iBtnType)
     {
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
     case MAINFRAME_BTN_PARTCHARGE:
-        if (m_RmlBinder.GetModel().cShopOpen != bStateDown)
+        if (m_RmlView.GetModel().cShopOpen != bStateDown)
         {
-            m_RmlBinder.GetModel().cShopOpen = bStateDown;
-            m_RmlBinder.MarkDirty("cshop_open");
+            m_RmlView.GetModel().cShopOpen = bStateDown;
+            m_RmlView.MarkDirty("cshop_open");
         }
         break;
 #endif //defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
     case MAINFRAME_BTN_CHAINFO:
-        if (m_RmlBinder.GetModel().chaInfoOpen != bStateDown)
+        if (m_RmlView.GetModel().chaInfoOpen != bStateDown)
         {
-            m_RmlBinder.GetModel().chaInfoOpen = bStateDown;
-            m_RmlBinder.MarkDirty("chainfo_open");
+            m_RmlView.GetModel().chaInfoOpen = bStateDown;
+            m_RmlView.MarkDirty("chainfo_open");
         }
         break;
     case MAINFRAME_BTN_MYINVEN:
-        if (m_RmlBinder.GetModel().myInvenOpen != bStateDown)
+        if (m_RmlView.GetModel().myInvenOpen != bStateDown)
         {
-            m_RmlBinder.GetModel().myInvenOpen = bStateDown;
-            m_RmlBinder.MarkDirty("myinven_open");
+            m_RmlView.GetModel().myInvenOpen = bStateDown;
+            m_RmlView.MarkDirty("myinven_open");
         }
         break;
     case MAINFRAME_BTN_FRIEND:
-        if (m_RmlBinder.GetModel().friendOpen != bStateDown)
+        if (m_RmlView.GetModel().friendOpen != bStateDown)
         {
-            m_RmlBinder.GetModel().friendOpen = bStateDown;
-            m_RmlBinder.MarkDirty("friend_open");
+            m_RmlView.GetModel().friendOpen = bStateDown;
+            m_RmlView.MarkDirty("friend_open");
         }
         break;
     case MAINFRAME_BTN_WINDOW:
-        if (m_RmlBinder.GetModel().windowOpen != bStateDown)
+        if (m_RmlView.GetModel().windowOpen != bStateDown)
         {
-            m_RmlBinder.GetModel().windowOpen = bStateDown;
-            m_RmlBinder.MarkDirty("window_open");
+            m_RmlView.GetModel().windowOpen = bStateDown;
+            m_RmlView.MarkDirty("window_open");
         }
         break;
     }
@@ -962,7 +930,7 @@ void mu::ui::window::CMainFrameWindow::SyncDocVisibility(bool sceneAllowsShow)
 {
     const bool show = IsVisible() && sceneAllowsShow;
 
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlDoc, show);
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), show);
     m_ItemHotKey.SetSlotIconsShown(show);
-    UI::RmlBridge::SyncDocumentVisibility(m_pRmlTopDoc, show);
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(1), show);
 }

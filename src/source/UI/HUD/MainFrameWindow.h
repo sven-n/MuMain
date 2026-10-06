@@ -9,7 +9,7 @@
 #include "UI/Core/WindowObject.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Core/Window3DRenderMng.h"
-#include "UI/RmlBridge/RmlModelBinder.h"
+#include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/HUD/ItemHotKey.h"
 #include "UI/HUD/SkillList.h"
 
@@ -58,7 +58,6 @@ namespace mu::ui::window
         // placed it -- so world clicks there don't go through.
         bool IsMouseOverHud() const;
 
-        void ReloadRmlTheme();
 
         float GetLayerDepth();		// 10.2f
         float GetKeyEventOrder();	// 7.f
@@ -181,12 +180,15 @@ namespace mu::ui::window
             bool itemSlot0Hovered = false, itemSlot1Hovered = false, itemSlot2Hovered = false, itemSlot3Hovered = false;
             Rml::String itemSlot0Count, itemSlot1Count, itemSlot2Count, itemSlot3Count;
         };
-        RmlModelBinder<MainFrameRmlModel> m_RmlBinder;
-        Rml::ElementDocument* m_pRmlDoc = nullptr;
-        // A theme's top-right button row (main_frame_top.rml, modern only), bound to m_RmlBinder's
-        // model: a document of its own so it stacks under the windows docked over that corner
-        // while the bars stay over them (RmlStackingOrder.cpp).
-        Rml::ElementDocument* m_pRmlTopDoc = nullptr;
+        void BindRmlModel(Rml::DataModelConstructor& c, MainFrameRmlModel& model);
+        void OnRmlReloaded();
+        // The HUD, and its top-right button row on the same model: a document of its own so it
+        // stacks under the windows docked over that corner while the bars stay over them
+        // (RmlStackingOrder.cpp).
+        UI::RmlBridge::ThemedView<MainFrameRmlModel> m_RmlView{"main_frame",
+            [this](Rml::DataModelConstructor& c, MainFrameRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/main_frame.rml"}, {"Data/Interface/RmlUi/main_frame_top.rml"}},
+            {.afterReload = [this] { OnRmlReloaded(); }}};
 
         bool m_bRmlCShopClicked = false;
         bool m_bRmlChaInfoClicked = false;
