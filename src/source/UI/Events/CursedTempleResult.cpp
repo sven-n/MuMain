@@ -239,6 +239,11 @@ void mu::ui::window::CCursedTempleResult::BindRmlModel(Rml::DataModelConstructor
     lineType.RegisterMember("text_px", &CursedTempleResultLine::textPx);
     c.Bind("hero_list_label", &model.heroListLabel);
     c.Bind("column_header", &model.columnHeader);
+    c.Bind("camp_label", &model.campLabel);
+    c.Bind("character_label", &model.characterLabel);
+    c.Bind("class_label", &model.classLabel);
+    c.Bind("exp_label", &model.expLabel);
+    c.Bind("point_label", &model.pointLabel);
     c.Bind("reward_hint", &model.rewardHint);
     auto resultRow = c.RegisterStruct<CursedTempleResultRow>();
     resultRow.RegisterMember("team", &CursedTempleResultRow::team);
@@ -335,6 +340,11 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
     mu_swprintf(Text, L"  %ls           %ls        %ls     %ls    %ls", I18N::Game::Camp, I18N::Game::Character,
                 I18N::Game::Class, I18N::Game::EXP, I18N::Game::Point);
     updated.columnHeader = line(Text);
+    updated.campLabel = StringUtils::WideToNarrow(I18N::Game::Camp);
+    updated.characterLabel = StringUtils::WideToNarrow(I18N::Game::Character);
+    updated.classLabel = StringUtils::WideToNarrow(I18N::Game::Class);
+    updated.expLabel = StringUtils::WideToNarrow(I18N::Game::EXP);
+    updated.pointLabel = StringUtils::WideToNarrow(I18N::Game::Point);
     updated.alliedRows.clear();
     updated.illusionRows.clear();
     addRows(m_AlliedTeamGameResult, updated.alliedRows);
@@ -350,6 +360,11 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
     SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::bannerAlpha, "banner_alpha", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::heroListLabel, "hero_list_label", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::columnHeader, "column_header", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::campLabel, "camp_label", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::characterLabel, "character_label", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::classLabel, "class_label", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::expLabel, "exp_label", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::pointLabel, "point_label", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::rewardHint, "reward_hint", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::alliedRows, "allied_rows", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::illusionRows, "illusion_rows", updated);

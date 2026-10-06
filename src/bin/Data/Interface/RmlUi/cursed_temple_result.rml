@@ -32,6 +32,17 @@
 		<span id="ct_column_header" class="sharp-text result-line" data-style-width="(230 * root_scale) + 'px'"
 		      data-style-font-size="column_header.text_px + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{column_header.text}}</span>
+		<!-- The same headings over each column, for a theme that lays the columns out itself. -->
+		<span class="sharp-text column-label label-team" data-style-font-size="text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{camp_label}}</span>
+		<span class="sharp-text column-label label-name" data-style-font-size="text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{character_label}}</span>
+		<span class="sharp-text column-label label-class-name" data-style-font-size="text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{class_label}}</span>
+		<span class="sharp-text column-label label-added-exp" data-style-font-size="text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{exp_label}}</span>
+		<span class="sharp-text column-label label-point" data-style-font-size="text_px + 'px'"
+		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{point_label}}</span>
 		<span id="ct_reward_hint" class="sharp-text result-line" data-style-width="(230 * root_scale) + 'px'"
 		      data-style-font-size="reward_hint.text_px + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{reward_hint.text}}</span>
@@ -39,7 +50,7 @@
 		<!-- The two teams' rows. The theme puts each block on its own row and colours it; a long
 		     name runs into the next cell, as it did. -->
 		<div class="result-rows rows-allied">
-			<div class="result-row" data-for="r : allied_rows">
+			<div class="result-row" data-for="r : allied_rows" data-class-hero="r.hero">
 				<div class="hero-row" data-if="r.hero" data-style-height="(line_height_px / root_scale) + 'px'"></div>
 				<span class="sharp-text result-cell cell-team" data-style-font-size="text_px + 'px'"
 				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.team}}</span>
@@ -54,7 +65,7 @@
 			</div>
 		</div>
 		<div class="result-rows rows-illusion">
-			<div class="result-row" data-for="r : illusion_rows">
+			<div class="result-row" data-for="r : illusion_rows" data-class-hero="r.hero">
 				<div class="hero-row" data-if="r.hero" data-style-height="(line_height_px / root_scale) + 'px'"></div>
 				<span class="sharp-text result-cell cell-team" data-style-font-size="text_px + 'px'"
 				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{r.team}}</span>

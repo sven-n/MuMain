@@ -39,6 +39,8 @@ struct CursedTempleResultRmlModel
 
     CursedTempleResultLine heroListLabel;
     CursedTempleResultLine columnHeader;
+    // The same headings one by one, for a theme that places each over its own column.
+    Rml::String campLabel, characterLabel, classLabel, expLabel, pointLabel;
     CursedTempleResultLine rewardHint;
     // The two teams' rows, each block starting at its own row in the theme.
     std::vector<CursedTempleResultRow> alliedRows;

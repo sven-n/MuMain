@@ -66,7 +66,9 @@
 .result-line { position: absolute; left: 0; text-align: center; }
 #ct_hero_list { top: 13px; }
 #ct_column_header { top: 38px; }
-#ct_reward_hint { top: 245px; }
+/* RenderText()'s notice sits 55 above the window's bottom, the Close button 37. */
+#ct_reward_hint { top: 227px; }
+.column-label { display: none; }
 .frame-middles .frame-middle:nth-child(1) { top: 67px; }
 .frame-middles .frame-middle:nth-child(2) { top: 82px; }
 .frame-middles .frame-middle:nth-child(3) { top: 97px; }

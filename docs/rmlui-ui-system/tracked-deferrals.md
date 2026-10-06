@@ -7,9 +7,9 @@ is recorded where the code it changed is described.
 
 ## Before merging to main
 
-1. **What the event previews showed** ([below](#seen-through-preview)): the Illusion Temple result's
-   columns, its own row and footer, and two HUDs that collide with the quick-command buttons or the
-   screen edge.
+1. **Two event HUDs at the original's fixed positions** ([below](#seen-through-preview)): the
+   Illusion Temple HUD and the CryWolf battle HUD do not follow the theme's placement, so they collide
+   with what it moved or run off the screen edge.
 
 ## After the merge
 
@@ -156,10 +156,10 @@ through the setters its packets use and lets it draw off its map; the window sen
 a game master to the map passes the map check but brings no event state, and the GM move does not
 create the siege minimap that a map join does. What the previews showed, in both themes unless noted:
 
-- **Illusion Temple result**: the camp, name, class and EXP columns overlap ("Dark Knigh87455");
-  modern draws the player's own row as an empty highlight; the footer text runs under the Close
-  button.
-- **Illusion Temple HUD**: the panel's top overlaps the quick-command buttons (modern).
+- **Illusion Temple result**: the original's columns are too narrow for the English strings, and
+  legacy keeps them; modern lays out its own table.
+- **Illusion Temple HUD**: its top overlaps the worn-equipment icons, which the theme's dock
+  transform moves below the top bar while the HUD keeps the original's position.
 - **CryWolf battle HUD**: runs off the right edge of the screen.
 - **Siege commander HUD**: the member and NPC dots the preview sends fall outside the part of the map
   it shows, so it is unconfirmed whether they draw where native drew them.

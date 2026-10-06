@@ -1,6 +1,8 @@
 /* Modern theme for CCursedTempleResult: the modern panel surface instead of the message-box art,
    a modern Close button, the hero's row in the steel accent; the banner art stays. Geometry is
-   the legacy one (reference px under the Dialog transform). */
+   reference px under the Dialog transform. The original's columns were laid out for strings far
+   shorter than the English ones and overlap; modern drops the camp column (each team's block has
+   its own place and colour), gives the name and class room, and right-aligns the numbers. */
 
 @spritesheet result-success-sheet { src: "../../../illusion_success.tga"; result-success: 0px 0px 351px 115px; }
 @spritesheet result-failure-sheet { src: "../../../illusion_failure.tga"; result-failure: 0px 0px 351px 115px; }
@@ -50,7 +52,7 @@
 .result-line { position: absolute; left: 0; text-align: center; }
 #ct_hero_list { top: 13px; }
 #ct_column_header { top: 38px; }
-#ct_reward_hint { top: 245px; }
+#ct_reward_hint { top: 227px; }
 .frame-middles .frame-middle:nth-child(1) { top: 67px; }
 .frame-middles .frame-middle:nth-child(2) { top: 82px; }
 .frame-middles .frame-middle:nth-child(3) { top: 97px; }
@@ -81,14 +83,18 @@
 .rows-allied .result-row { margin-top: 65px; }
 .rows-illusion .result-row { margin-top: 140px; }
 .result-cell { position: absolute; top: 0; }
-.cell-team { left: 5px; }
-.cell-name { left: 56px; }
-.cell-class-name { left: 106px; }
-.cell-added-exp { left: 150px; }
-.cell-point { left: 190px; }
+#ct_column_header, .cell-team, .label-team { display: none; }
+.column-label { position: absolute; top: 38px; }
+.cell-name, .label-name { left: 10px; }
+.cell-class-name, .label-class-name { left: 74px; }
+/* Anchored by the right edge: the counter-scale turns about it, so no width has to arrive
+   pre-multiplied. */
+.cell-added-exp, .label-added-exp { right: 36px; transform-origin: right top; text-align: right; }
+.cell-point, .label-point { right: 10px; transform-origin: right top; text-align: right; }
 .hero-row { top: 0; }
+.result-row.hero .result-cell { color: token(text-primary); }
 
-#ct_hero_list, #ct_column_header { color: token(accent-gold); }
+#ct_hero_list, .column-label { color: token(accent-gold); }
 #ct_reward_hint { color: token(semantic-danger); }
 .rows-allied .result-cell { color: token(accent-steel); }
 .rows-illusion .result-cell { color: token(accent-gold); }
