@@ -10,8 +10,18 @@
      ids/data-model/event-callback names in sync with ../../generic_menu_dialog.rml.
 
      Frame/border/header chrome now lives entirely in window_shell.rml (see its own comment) --
-     this document supplies only its own content, spliced into that template's #content slot. -->
-<body template="window_shell" data-model="generic_menu_dialog">
+     this document supplies only its own content, spliced into that template's #content slot.
+
+     The in-game system menu (is_system_menu) fills the screen instead, like the options screen:
+     its own heading and close action, the buttons as a list (generic_menu_dialog.rcss). -->
+<body template="window_shell" data-model="generic_menu_dialog" data-class-system-menu="is_system_menu">
+	<div class="gmd-sys-header" data-class-hidden="!is_system_menu">
+		<div class="gmd-sys-title">{{system_menu_label}}</div>
+		<div class="gmd-sys-close" data-event-click="gmd_cancel">
+			<div class="gmd-sys-close-bar gmd-sys-close-bar-a"></div>
+			<div class="gmd-sys-close-bar gmd-sys-close-bar-b"></div>
+		</div>
+	</div>
 	<div class="gmd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
 	<!-- See ../../generic_menu_dialog.rml's own comment for why there's no explicit column count
 	     -- .gmd-button-row's own flex-wrap derives it from content. -->
@@ -20,7 +30,8 @@
 		     -- proven pattern, see ../../generic_menu_dialog.rml's own comment. gmd-button-cell
 		     wraps each button with its own optional description lines -- see
 		     ../../generic_menu_dialog.rml's own comment for why (nested data-for). -->
-		<div class="gmd-button-cell" data-for="button : buttons" data-class-compact="button.compact" data-class-has-lines="button.has_lines" data-class-cols-2="button.cols2">
+		<div class="gmd-button-cell" data-for="button : buttons" data-class-compact="button.compact" data-class-has-lines="button.has_lines" data-class-cols-2="button.cols2"
+		     data-class-dismiss="button.dismiss">
 			<div class="gmd-line" data-for="line : button.lines" data-class-bold="line.bold">{{line.text}}</div>
 			<div class="btn gmd-btn" data-class-compact="button.compact" data-class-cols-2="button.cols2" data-class-disabled="!button.enabled"
 			     data-event-click="gmd_button_click(it_index)">
@@ -31,6 +42,11 @@
 				<div class="gmd-btn-label">{{button.label}}</div>
 				<span class="gmd-tooltip" data-class-hidden="!button.has_tooltip">{{button.tooltip}}</span>
 			</div>
+		</div>
+	</div>
+	<div class="gmd-sys-footer" data-class-hidden="!is_system_menu">
+		<div class="gmd-sys-footer-action" data-event-click="gmd_cancel">
+			<span class="gmd-sys-keycap">Esc</span><span class="gmd-sys-footer-label">{{close_label}}</span>
 		</div>
 	</div>
 </body>

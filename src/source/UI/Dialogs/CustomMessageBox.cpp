@@ -578,6 +578,7 @@ void mu::ui::window::ShowSystemMenuDialog()
     GenericMenuConfig::MenuButton btnCancel;
     btnCancel.label = I18N::Game::Cancel;
     // No onClick -- native's own CancelBtnDown has no side effect beyond closing the box.
+    btnCancel.dismiss = true;
     cfg.buttons.push_back(std::move(btnCancel));
 
     g_pGenericMenuDialog->Show(std::move(cfg));

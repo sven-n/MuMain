@@ -80,7 +80,8 @@ around it. See [`STATUS.md`](STATUS.md) for migration status and
   context's base layer as a copy of the swapchain, which already holds the scene and anything an
   earlier context drew, and writes the layer back at the end, so a backdrop has the scene to read.
   Before that the base layer started empty and was blended onto the scene afterwards, and a
-  backdrop blurred nothing. The modern options screen uses it (`option_window.rcss`). A full-screen
+  backdrop blurred nothing. The modern options screen and system menu use it (`option_window.rcss`,
+`generic_menu_dialog.rcss`). A full-screen
   backdrop blur costs a blur pass every frame it is visible.
 
 - **`decorator: image(...)` does not stretch a sprite rect to a box of a different size;
@@ -237,6 +238,7 @@ plus [PR #989](https://github.com/mikke89/RmlUi/pull/989) (SDL_GPU renderer pari
 | `clamp()`, `minmax()` | Not registered | Fixed `dp`/`px` values |
 | `var(--x)` | Supported by 6.3, unused here | The project's `token(name)` (`theming-and-modding.md`) |
 | `backdrop-filter: blur()` | Works, over the game world too (frosted glass) | — |
+| `@media (max-height: …dp)`, `(max-width: …dp)` | Works; a `dp` length resolves at the context's dp ratio, so a query tracks the UI scale too (the modern options screen's and system menu's compact layouts) | — |
 | `filter: blur()`/`drop-shadow()`, `mask-image` | Unverified | — |
 | `filter: brightness()`/`contrast()` | Works (`my_inventory.rcss`'s `.inv-btn:hover`) | — |
 | `box-shadow` | Works: inset, outset, blur, comma-separated; `rgba()` alpha is 0–255 | — |

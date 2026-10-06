@@ -161,6 +161,10 @@
 .opt-toggle-row {
 	cursor: pointer;
 }
+/* A toggle needs only its own width; the label keeps the rest. */
+.opt-toggle-row .opt-control {
+	width: auto;
+}
 .opt-label {
 	flex: 1 1 0;
 	margin-right: 16dp;
@@ -454,4 +458,32 @@
 }
 .opt-footer-action:hover .opt-footer-label {
 	color: token(accent-gold-hover);
+}
+
+/* A short screen (a small window or a large UI scale): tighter margins, header, rail and rows, so
+   the longest page still fits under the header and above the footer. */
+@media (max-height: 560dp) {
+	.opt-shell { left: 4%; right: 4%; top: 3%; bottom: 3%; }
+	.opt-header { height: 40dp; }
+	.opt-title { font-size: 18dp; letter-spacing: 3dp; }
+	.opt-close { width: 30dp; height: 30dp; }
+	.opt-close-bar { left: 5dp; top: 14dp; }
+	.opt-body { margin-top: 10dp; }
+	.opt-nav-item { height: 32dp; line-height: 32dp; margin-bottom: 2dp; }
+	.opt-pane { padding: 12dp 16dp; }
+	.opt-page-title { padding-bottom: 6dp; margin-bottom: 4dp; font-size: 14dp; }
+	.opt-row { height: 34dp; }
+	.opt-footer { height: 36dp; margin-top: 8dp; }
+}
+/* A narrow screen gives the rail less width and the rows more. */
+@media (max-width: 760dp) {
+	.opt-nav { width: 140dp; margin-right: 12dp; }
+	.opt-nav-item { padding-left: 10dp; letter-spacing: 1dp; }
+	.opt-control { width: 44%; }
+	.opt-toggle-row .opt-control { width: auto; }
+	.opt-label { white-space: normal; line-height: 14dp; }
+}
+/* Smaller still, the page scrolls rather than run under the footer. */
+@media (max-height: 380dp) {
+	.opt-pane { overflow-y: auto; }
 }

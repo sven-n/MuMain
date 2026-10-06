@@ -366,7 +366,10 @@ buttons as theme-placed: the appointment box's four buttons are placed by `messa
 different content) — a reentrant pattern proven by the Trainer menu pair, the Gem Integration
 jewel-type→mix-amount flow, and Elpis's text-only variant; `GenericMenuDialog.h`'s own header
 documents why this is safe (buttons always close on click, so there's no `KeepOpen()`-style veto
-to interact with).
+to interact with). `GenericMenuConfig::systemMenu` marks the in-game system menu (`system-menu` on
+`#panel`): legacy lays it out like the native box, modern fills the screen like the options screen,
+with a heading and close action of its own (`system_menu_label`, `close_label`, `gmd_cancel`, the
+same as Esc), so it leaves out the button marked `MenuButton::dismiss` (Cancel).
 
 ## Dragging
 

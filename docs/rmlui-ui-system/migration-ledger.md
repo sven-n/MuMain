@@ -111,7 +111,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 
 | Component | Status | Note |
 |---|---|---|
-| `COptionWindow` | Done | Legacy: `window_shell`, six tabs, custom `data-for` dropdowns (`engine-findings.md`: no native `<select>`), level gauges for sound, music and effect limit; drags (`window-placement.md`). Modern: its own full-screen markup on the same model, a category rail and a frosted glass pane (`backdrop-filter`), toggle switches and sliders; above the HUD (stacking depth 10.67), not draggable |
+| `COptionWindow` | Done | Legacy: `window_shell`, six tabs, custom `data-for` dropdowns (`engine-findings.md`: no native `<select>`), level gauges for sound, music and effect limit; drags (`window-placement.md`). Modern: its own full-screen markup on the same model, a category rail and a frosted glass pane (`backdrop-filter`), toggle switches and sliders, a compact layout on a short or narrow screen (`@media` in `dp`); above the HUD (stacking depth 10.67), not draggable. The in-game system menu opens it from a full-screen menu in the same style (`CGenericMenuDialog`'s system menu) |
 | `CChatCommandWindow` | Done | Its value field is an `<input>` claiming RmlUi's text-input identity while focused |
 
 **Not ledgered**: `C3DCamera`, `CGroup` (`CManager` plumbing); `CTextBox`, `CSlideWindow`,

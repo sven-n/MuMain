@@ -63,6 +63,8 @@ namespace mu::ui::window
             bool narrow = false;            // MSGBOX_BTN_EMPTY_WIDTH (108) instead of the menus'
                                             // usual + 20 (CGemIntegrationMsgBox)
             bool linesBelow = false;        // `lines` sit under the button (CTrainerRecoverMsgBox)
+            bool dismiss = false;           // only closes the menu, as Esc does; a theme with a
+                                            // close action of its own may leave it out
             std::function<void()> onClick;  // fires, then the dialog closes -- every native
                                             // button in this family destroys its own box on click,
                                             // none need a KeepOpen()-style veto
@@ -165,11 +167,15 @@ namespace mu::ui::window
             float nativeButtonGap = 0.f; // native-placed lines above the button: lines end to button
             bool narrow = false;
             bool linesBelow = false;
+            bool dismiss = false;
         };
         struct GenericMenuRmlModel
         {
             bool hasTitle = false;
             bool isSystemMenu = false; // GenericMenuConfig::systemMenu
+            // For a theme that gives the system menu its own heading and a close action.
+            Rml::String systemMenuLabel;
+            Rml::String closeLabel;
             bool highlightTitle = false;
             float nativeTop = 0.f; // GenericMenuConfig::nativeFrame, in reference pixels
             float nativeHeight = 0.f;

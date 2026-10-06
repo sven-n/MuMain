@@ -173,3 +173,199 @@
 .gmd-btn:hover .gmd-tooltip.hidden {
 	display: none;
 }
+
+/* The in-game system menu fills the screen like the options screen: the world under the same
+   blurred, darkened scrim, the heading on a gold rule, the choices as a list, and a keycap hint for
+   closing. The header and footer close it, so its dismiss button (Cancel) is left out. The shell's
+   frame and edge are switched off, its groove becomes a cover that blocks dragging (the document
+   is draggable as a dialog), and its well holds the screen at the options screen's insets. */
+#panel.system-menu {
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	transform: none;
+	border-width: 0;
+	background-color: rgba(4, 6, 9, 150);
+	backdrop-filter: blur(3dp);
+	decorator: radial-gradient(ellipse, rgba(4, 6, 9, 0) 35%, rgba(2, 3, 5, 140) 100%);
+}
+#panel.system-menu .modern-shell-edge {
+	display: none;
+}
+#panel.system-menu .modern-groove {
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	border-width: 0;
+	box-shadow: none;
+	pointer-events: auto;
+	drag: block;
+}
+#panel.system-menu .window-shell-content {
+	left: 5%;
+	right: 5%;
+	top: 6%;
+	bottom: 6%;
+	padding: 0;
+	drag: block;
+	justify-content: flex-start;
+	align-items: stretch;
+	background-color: transparent;
+	decorator: none;
+	border-width: 0;
+	box-shadow: none;
+}
+
+.gmd-sys-header {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	height: 52dp;
+	border-bottom: 1dp rgba(255, 255, 255, 40);
+}
+.gmd-sys-title {
+	flex: 1 1 auto;
+	padding-left: 14dp;
+	border-left: 3dp token(accent-gold);
+	font-size: 24dp;
+	font-weight: bold;
+	letter-spacing: 4dp;
+	text-transform: uppercase;
+	color: token(text-primary);
+}
+.gmd-sys-close {
+	position: relative;
+	flex: 0 0 auto;
+	width: 34dp;
+	height: 34dp;
+	cursor: pointer;
+	border-radius: 4dp;
+	pointer-events: auto;
+}
+.gmd-sys-close:hover {
+	background-color: rgba(255, 255, 255, 22);
+}
+.gmd-sys-close-bar {
+	position: absolute;
+	left: 7dp;
+	top: 16dp;
+	width: 20dp;
+	height: 2dp;
+	background-color: token(text-secondary);
+}
+.gmd-sys-close-bar-a { transform: rotate(45deg); }
+.gmd-sys-close-bar-b { transform: rotate(-45deg); }
+.gmd-sys-close:hover .gmd-sys-close-bar {
+	background-color: token(accent-gold-hover);
+}
+
+/* The buttons come in native order (exit first, options last); the list reverses it so leaving the
+   game is at the bottom. */
+#panel.system-menu .gmd-button-row {
+	flex: 1 1 0;
+	flex-direction: column-reverse;
+	flex-wrap: nowrap;
+	justify-content: center;
+	align-items: flex-start;
+	min-height: 0;
+	max-height: none;
+	overflow: visible;
+}
+#panel.system-menu .gmd-button-cell {
+	width: 320dp;
+	margin: 0 0 6dp 0;
+	align-items: stretch;
+}
+#panel.system-menu .gmd-button-cell.dismiss {
+	display: none;
+}
+#panel.system-menu .gmd-btn {
+	box-sizing: border-box;
+	width: 100%;
+	height: 48dp;
+	line-height: 48dp;
+	padding-left: 20dp;
+	text-align: left;
+	font-size: 15dp;
+	letter-spacing: 2dp;
+	text-transform: uppercase;
+	color: token(text-secondary);
+	background-color: rgba(255, 255, 255, 0);
+	decorator: none;
+	border-width: 0 0 0 3dp;
+	border-color: rgba(255, 255, 255, 0);
+	border-radius: 0 4dp 4dp 0;
+	box-shadow: none;
+}
+#panel.system-menu .gmd-btn:hover {
+	color: token(accent-gold-hover);
+	border-left-color: token(accent-gold);
+	background-color: rgba(196, 154, 60, 30);
+	decorator: linear-gradient(to right, rgba(196, 154, 60, 70), rgba(196, 154, 60, 0));
+}
+#panel.system-menu .gmd-btn:active {
+	transform: none;
+	box-shadow: none;
+	background-color: rgba(196, 154, 60, 60);
+}
+
+.gmd-sys-footer {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	height: 48dp;
+	border-top: 1dp rgba(255, 255, 255, 30);
+}
+.gmd-sys-footer-action {
+	display: flex;
+	align-items: center;
+	padding: 6dp 10dp;
+	cursor: pointer;
+	border-radius: 4dp;
+	pointer-events: auto;
+}
+.gmd-sys-footer-action:hover {
+	background-color: rgba(255, 255, 255, 18);
+}
+.gmd-sys-keycap {
+	height: 21dp;
+	line-height: 21dp;
+	padding: 0 8dp;
+	margin-right: 10dp;
+	font-size: 11dp;
+	font-weight: bold;
+	color: token(text-primary);
+	background-color: rgba(255, 255, 255, 22);
+	border: 1dp rgba(255, 255, 255, 90);
+	border-bottom-width: 2dp;
+	border-radius: 3dp;
+}
+.gmd-sys-footer-label {
+	height: 24dp;
+	line-height: 25dp;
+	font-size: 13dp;
+	letter-spacing: 1.5dp;
+	text-transform: uppercase;
+	color: token(text-primary);
+}
+.gmd-sys-footer-action:hover .gmd-sys-footer-label {
+	color: token(accent-gold-hover);
+}
+/* .hidden ties with the display rules above at equal specificity, so it is restated. */
+.gmd-sys-header.hidden,
+.gmd-sys-footer.hidden {
+	display: none;
+}
+
+/* A short screen (a small window or a large UI scale) tightens the heading and the list. */
+@media (max-height: 560dp) {
+	#panel.system-menu .window-shell-content { left: 4%; right: 4%; top: 3%; bottom: 3%; }
+	.gmd-sys-header { height: 40dp; }
+	.gmd-sys-title { font-size: 18dp; letter-spacing: 3dp; }
+	#panel.system-menu .gmd-button-cell { width: 260dp; margin-bottom: 4dp; }
+	#panel.system-menu .gmd-btn { height: 36dp; line-height: 36dp; font-size: 13dp; }
+	.gmd-sys-footer { height: 36dp; }
+}

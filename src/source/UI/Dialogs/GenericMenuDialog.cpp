@@ -7,6 +7,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Core/Globals/_enum.h"
 #include "Core/Utilities/StringUtils.h"
+#include "I18N/All.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/WindowManager.h" // CManager::AddUIObj
@@ -59,6 +60,7 @@ void CGenericMenuDialog::BindRmlModel(Rml::DataModelConstructor& c, GenericMenuR
     button.RegisterMember("native_button_gap", &MenuButtonEntry::nativeButtonGap);
     button.RegisterMember("narrow", &MenuButtonEntry::narrow);
     button.RegisterMember("lines_below", &MenuButtonEntry::linesBelow);
+    button.RegisterMember("dismiss", &MenuButtonEntry::dismiss);
     c.RegisterArray<std::vector<MenuButtonEntry>>();
     c.Bind("buttons", &model.buttons);
 
@@ -73,6 +75,8 @@ void CGenericMenuDialog::BindRmlModel(Rml::DataModelConstructor& c, GenericMenuR
     c.Bind("native_divider_top", &model.nativeDividerTop);
     c.Bind("canvas_top", &model.canvasTop);
     c.Bind("title", &model.title);
+    c.Bind("system_menu_label", &model.systemMenuLabel);
+    c.Bind("close_label", &model.closeLabel);
 
     // window_shell's positioning extension -- unused here: the theme centres this dialog
     // and the player may drag it (see MakeDraggable() below).
@@ -92,6 +96,14 @@ void CGenericMenuDialog::BindRmlModel(Rml::DataModelConstructor& c, GenericMenuR
             if (!m_Active.buttons[index].enabled) return;
             m_bButtonClicked = true;
             m_iClickedButtonIndex = index;
+        });
+    // A close action outside the button list: the same as Esc.
+    c.BindEventCallback("gmd_cancel",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            if (!m_bActive) return;
+            m_bButtonClicked = true;
+            m_iClickedButtonIndex = -1;
         });
 }
 
@@ -296,6 +308,16 @@ void CGenericMenuDialog::SyncRmlModel()
         model.isSystemMenu = isSystemMenu;
         m_RmlView.MarkDirty("is_system_menu");
     }
+    const auto syncLabel = [this](Rml::String& field, const char* boundName, const wchar_t* text)
+    {
+        const std::string utf8 = StringUtils::WideToNarrow(text);
+        if (field == utf8)
+            return;
+        field = utf8;
+        m_RmlView.MarkDirty(boundName);
+    };
+    syncLabel(model.systemMenuLabel, "system_menu_label", I18N::Game::SystemMenu);
+    syncLabel(model.closeLabel, "close_label", I18N::Game::Close);
     SyncNativeFrame();
     const std::string title = StringUtils::WideToNarrow(m_Active.title.c_str());
     if (model.title != title)
@@ -335,6 +357,7 @@ void CGenericMenuDialog::SyncRmlModel()
         entry.nativeTop = static_cast<float>(button.nativeTop);
         entry.narrow = button.narrow;
         entry.linesBelow = button.linesBelow;
+        entry.dismiss = button.dismiss;
         const float lineAdvance = static_cast<float>(m_Active.nativeFrame.lineAdvance);
         if (button.nativeTop > 0 && button.nativeLinesTop > 0 && lineAdvance > 0.f && !button.linesBelow)
         {
@@ -354,7 +377,7 @@ void CGenericMenuDialog::SyncRmlModel()
         buttonsChanged = a.label != b.label || a.tooltip != b.tooltip || a.hasTooltip != b.hasTooltip ||
                          a.enabled != b.enabled || a.compact != b.compact || a.cols2 != b.cols2 ||
                          a.nativeTop != b.nativeTop || a.nativeButtonGap != b.nativeButtonGap || a.narrow != b.narrow ||
-                         a.linesBelow != b.linesBelow || a.lines.size() != b.lines.size();
+                         a.linesBelow != b.linesBelow || a.dismiss != b.dismiss || a.lines.size() != b.lines.size();
         for (size_t j = 0; j < a.lines.size() && !buttonsChanged; ++j)
             buttonsChanged = !SameLine(a.lines[j], b.lines[j]);
     }
