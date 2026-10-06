@@ -671,15 +671,18 @@ void CUIPhotoViewer::SetID(const wchar_t* pszID)
 
 extern bool EquipmentSuccess;
 
-BOOL CUIPhotoViewer::DoMouseAction()
+void CUIPhotoViewer::DoAction(BOOL bMessageOnly)
 {
+    if (bMessageOnly)
+        return;
+
     if (m_bIsWebzenMail == TRUE)
     {
         if (CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight) == TRUE)
         {
             MouseOnWindow = true;
         }
-        return TRUE;
+        return;
     }
 
     if (m_bUpdatePlayer == TRUE && EquipmentSuccess == true)
@@ -689,7 +692,7 @@ BOOL CUIPhotoViewer::DoMouseAction()
 
     m_PhotoChar.EtcPart = Hero->EtcPart;
 
-    if (CheckOption(UIPHOTOVIEWER_CANCONTROL))
+    if (m_bCanControl)
     {
         // Only the wheel is still read here. Every press-driven control -- turning, the reset and
         // the "?" toggle -- moved to UI::Social::PhotoViewerControl, because a press over the
@@ -709,7 +712,7 @@ BOOL CUIPhotoViewer::DoMouseAction()
     }
     else
     {
-        if (GetState() == UISTATE_NORMAL && CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight) == TRUE)
+        if (CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight) == TRUE)
         {
             MouseOnWindow = true;
             if (MouseLButtonPush)
@@ -719,13 +722,14 @@ BOOL CUIPhotoViewer::DoMouseAction()
             }
         }
     }
-    return TRUE;
 }
 
 void CUIPhotoViewer::SetSlot(int iPos_x, int iPos_y, int iWidth, int iHeight)
 {
-    SetPosition(iPos_x, iPos_y);
-    SetSize(iWidth, iHeight);
+    m_iPos_x = iPos_x;
+    m_iPos_y = iPos_y;
+    m_iWidth = iWidth;
+    m_iHeight = iHeight;
 }
 
 void CUIPhotoViewer::TurnBy(float degrees)

@@ -5,7 +5,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"
 #include "Audio/DSPlaySound.h"
-#include "UI/Social/SocialWindowCore.h"
+#include "UI/Social/SocialWindowBase.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 

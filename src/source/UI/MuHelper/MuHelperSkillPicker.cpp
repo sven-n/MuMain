@@ -10,7 +10,7 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/Social/SocialWindowCore.h"
+#include "UI/Social/SocialWindowBase.h"
 
 #include <RmlUi/Core/ElementDocument.h>
 

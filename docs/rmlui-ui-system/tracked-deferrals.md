@@ -12,9 +12,8 @@ workspace places the docks, the centred panels, the HUD shell, the chat and the 
 The modern theme exists to prove the architecture, so its unchecked windows are not tracked;
 the Cursed Temple result panel needs a finished event to check.
 
-Run targeted scale/theme/interaction validation alongside each change. The residual Social
-base remains lower-priority structural work; the `CObject` tier is accepted as the base
-([building-new-ui.md](building-new-ui.md)'s "Accepted as the base").
+Run targeted scale/theme/interaction validation alongside each change. The `CObject` tier is
+accepted as the base ([building-new-ui.md](building-new-ui.md)'s "Accepted as the base").
 
 ## Pilots to revisit when the relevant phase arrives
 
@@ -37,24 +36,14 @@ Done when every common UI concern has one canonical implementation or an explici
 presentation-specific split, discoverable without knowing the codebase's history. Retiring the
 last native widget consumers (`CInGameShop`) is part of it.
 
-## Tracked deferral: `CUIBaseWindow`/`CUIPhotoViewer` still derive from `CUIControl`
+## Tracked deferral: the F5 friend menu
 
-All that is left of the `CUIControl` family: its widgets are deleted and the windows that kept it
-alive are RmlUi documents (`migration-ledger.md`'s "`CUIControl` list family" section).
-`UI/Social/SocialWindowCore.h` contains `CUIControl`, its `CUIMessage` queue, the `UISTATES`/`UI_MESSAGE_ENUM` enums,
-`g_dwActiveUIID`/`g_dwMouseUseUIID`, and the `GUILDLIST_TEXT`/`LETTERLIST_TEXT` records. Two classes
-derive from it, both in `UI/Social/`: `CUIBaseWindow` and `CUIPhotoViewer`. What they take from it
-is real, not vestigial -- identity, parent id, state, geometry, options, and the message queue
-`CUIWindowMgr` runs the family through.
-
-Removing the base would require preserving its identity/state/message contracts in
-the social manager and portrait implementation. The base already lives beside its
-users in UI/Social. Revisit dissolution only if work on those contracts justifies it;
-file relocation is not an outstanding retirement step.
-
-A few dead enumerators sit inside otherwise-live enums (`UISTATE_SCROLL`, `UISTATE_DISABLE`,
-`UI_MESSAGE_NULL`, `UI_MESSAGE_TEXTINPUT`, the four list-message values). Cosmetic, deliberately
-left.
+The original listed the open chat and letter windows above the HUD's friend button: F5 opened it and
+cycled through them, and Enter or a click brought one forward. It has shown nothing since the friend
+family moved to RmlUi, because nothing drew it or ran its input, and that native drawing and input
+are deleted. `CUIFriendMenu` keeps the model: the window list, the new-chat and new-mail alerts,
+`ShowMenu()`/`HideMenu()`. The friend window's Window List tab lists the same windows. To decide:
+port it as a small RmlUi popup, or retire F5 in favour of the tab.
 
 ## Tracked deferral: audit where ports steered away from the original UI
 

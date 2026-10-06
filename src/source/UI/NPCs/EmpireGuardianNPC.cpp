@@ -8,7 +8,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include "Audio/DSPlaySound.h"
-#include "UI/Social/SocialWindowCore.h"
+#include "UI/Social/SocialWindowBase.h"
 #include "Render/Text/CUIRenderText.h"
 #include "Render/Text/TextWrap.h"
 

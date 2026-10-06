@@ -17,7 +17,7 @@ sits.
 | Toolkit | Base class(es) | Real home | Status |
 |---|---|---|---|
 | Sprite widgets | *(none left)* | — | **Closed.** `CWin`/`CWinEx`, `CGaugeBar` and `CSlider` are deleted; the sprite `::CButton` has no production consumer (still covered by `tests/ui/test_ui_scaling.cpp`). Nothing to add a consumer to. |
-| `CUIControl` family | `CUIControl : CUIMessage`, `CUIBaseWindow`, `CUIWindowMgr`, `CUIPhotoViewer` | `UI/Social/SocialWindowCore.h` | **Retired down to its base.** Every widget in it is deleted. What survives is the base and its UI-message plumbing under the friend/mail/chat family, kept only for position/state/message bookkeeping; see `tracked-deferrals.md`. |
+| Friend/mail/chat base | `CUIBaseWindow`, `CUIWindowMgr` (both over `CUIMessage`) | `UI/Social/SocialWindowBase.h` | **The family's own base, nothing more.** The `CUIControl` toolkit it came from is deleted, widgets and base alike. What survives is the identity, parent, state, geometry and message queue `CUIWindowMgr` runs the friend/mail/chat windows through. |
 | `mu::ui::window` tier | `CObject : IObject`, `CManager`, `CButton`/`CRadioButton`/`CRadioGroupButton`/`CCheckBox`/`CComboBox`/`CScrollBar`/`CTextBox` | `UI/Core/{WindowObject,WindowManager}.h`, `UI/Widgets/Window/*.h` | **`CObject`/`CManager` are the base for all new work.** The widget family is for native-only content. |
 
 ## Shape of the kit
@@ -282,10 +282,10 @@ forwards into it. The windows themselves are RmlUi documents — the shell, each
 letter — and `SocialWindowManager.cpp` keeps the manager that arranges them, the UI-message queue
 they talk over, and the native `CUIPhotoViewer` that draws a letter's sender.
 
-- `CUIBaseWindow`/`CUIPhotoViewer` still derive from `CUIControl`, the only reason
-  `SocialWindowCore.h` exists. Taking them off that base finishes the toolkit retirement
-  (`tracked-deferrals.md`).
-- Don't `#include` `SocialWindowCore.h` without needing a symbol it declares.
+- `CUIBaseWindow` (`SocialWindowBase.h`) is the family's own base: no drawing and no input of its
+  own, since each window's RmlUi view drags, maximises and closes it. `CUIPhotoViewer` is a plain
+  class its letter's document places.
+- Don't `#include` `SocialWindowBase.h` without needing a symbol it declares.
 
 ## Cross-references
 

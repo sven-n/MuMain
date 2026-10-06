@@ -5,7 +5,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Social/SocialWindowCore.h"   // UISTATES
+#include "UI/Social/SocialWindowBase.h"   // UISTATES
 #include "Guild/GuildMakeRmlModel.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/RmlBridge/RmlModelBinder.h"

@@ -135,13 +135,14 @@ other places for single confirmations. What remains of the native family:
 
 Native message boxes are not draggable (`window-placement.md` section 8).
 
-## `CUIControl` list family (`UI/Social/SocialWindowCore.h`)
+## `CUIControl` list family (deleted)
 
 Retired. `CUITextListBox<T>` and every instantiation (quest, guild, union, notice, socket, unmix,
 siege guild, chat, letter, window and friend lists, the MU Helper's extra-item list, the cash
 shop's three lists, the unused move-command list), `CUITextInputBox`, `CUIButton` and the rest are
-deleted; their hosts bind `data-for` lists in `.scroll-pane`s. What remains is `CUIControl` and its
-message queue under `CUIBaseWindow`/`CUIPhotoViewer` (`tracked-deferrals.md`). Not checked in game
+deleted; their hosts bind `data-for` lists in `.scroll-pane`s. `CUIControl` itself is gone too:
+`CUIBaseWindow` (`UI/Social/SocialWindowBase.h`) carries what the friend/mail/chat windows use, and
+`CUIPhotoViewer` stands on its own. Not checked in game
 since the change: the socket list (mix), the guild info lists, Lahap's unmix list, the guard's two
 siege lists, the cash shop lists.
 

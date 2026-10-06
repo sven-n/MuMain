@@ -784,7 +784,9 @@ void RenderWindowHLine(float pos_x, float pos_y, float width)
     RenderColor(pos_x, pos_y + 1, width, 3.0f);
 }
 
-CUIBaseWindow::CUIBaseWindow()
+DWORD CreateUIID();
+
+CUIBaseWindow::CUIBaseWindow() : m_dwUIID(CreateUIID())
 {
     memset(&m_WorkMessage, 0, sizeof(UI_MESSAGE));
     m_bHaveTextBox = FALSE;

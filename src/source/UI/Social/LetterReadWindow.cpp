@@ -28,8 +28,7 @@ void CUILetterReadWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     // Native added the portrait's own 120 to its 250x182 before anything was laid out.
     SetSize(250 + 120, 182);
     m_Photo.Init(0);
-    m_Photo.SetOption(UIPHOTOVIEWER_CANCONTROL);
-    m_Photo.SetParentUIID(GetUIID());
+    m_Photo.SetCanControl(true);
     m_View->Build();
 }
 

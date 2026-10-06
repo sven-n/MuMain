@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/Widgets/Window/ComboBox.h"
-#include "UI/Social/SocialWindowCore.h"  // for g_pRenderText macro
+#include "UI/Social/SocialWindowBase.h"  // for g_pRenderText macro
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
 

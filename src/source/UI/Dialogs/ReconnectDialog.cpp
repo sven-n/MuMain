@@ -5,7 +5,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h" // RenderColor, BeginBitmap/EndBitmap, Mouse*
 #include <vector>
 #include "Render/Sprites/GlobalBitmap.h"     // Bitmaps (texture-loaded check)
-#include "UI/Social/SocialWindowCore.h"            // g_pRenderText, CheckMouseIn, RT3_SORT_CENTER
+#include "UI/Social/SocialWindowBase.h"            // g_pRenderText, CheckMouseIn, RT3_SORT_CENTER
 #include "UI/Core/WindowCommon.h"            // mu::ui::window::RenderImage
 #include "UI/Dialogs/MessageBox.h"// CMessageBoxMng::IMAGE_MSGBOX_*
 #include "App/Platform/Windows/Winmain.h"        // g_hFont, g_hFontBold

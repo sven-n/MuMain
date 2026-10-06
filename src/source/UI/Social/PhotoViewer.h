@@ -6,15 +6,13 @@
 // PhotoViewerControl sizes the target, drives the gestures and mirrors this viewer's state into the
 // document, because a press over a panel never reaches the legacy mouse globals.
 
-#include "UI/Social/SocialWindowCore.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "UI/RmlBridge/RmlRenderTarget.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 
-const int UIPHOTOVIEWER_CANCONTROL = 1;
-
-class CUIPhotoViewer : public CUIControl
+class CUIPhotoViewer
 {
 public:
     CUIPhotoViewer();
@@ -61,7 +59,11 @@ public:
         m_bIsWebzenMail = bFlag;
     }
 
-    virtual BOOL DoMouseAction();
+    // Once a frame from the letter window: the wheel zoom over the well, and the player's own
+    // look while it shows the player.
+    void DoAction(BOOL bMessageOnly = FALSE);
+    // A letter the player can turn, zoom and ask help on (the reader's and the writer's).
+    void SetCanControl(bool canControl) { m_bCanControl = canControl; }
 
     // What the letter's #photo_image shows; PhotoViewerControl sizes it to that element.
     UI::RmlBridge::RenderTarget& Target() { return m_Target; }
@@ -83,6 +85,12 @@ protected:
     void RenderInto(std::uint32_t width, std::uint32_t height);
     void RenderPhotoCharacter(float aspect);
     int SetPhotoPose(int iCurrentAni, int iMoveDir = 0);
+
+protected:
+    // The well, in the owner's own coordinates (SetSlot()).
+    int m_iPos_x = 0, m_iPos_y = 0;
+    int m_iWidth = 0, m_iHeight = 0;
+    bool m_bCanControl = false;
 
 protected:
     CHARACTER m_PhotoChar;
