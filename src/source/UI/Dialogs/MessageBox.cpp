@@ -134,7 +134,7 @@ void mu::ui::window::CMessageBoxBase::RenderMsgBackColor(bool _bRender)
             | (toByte(m_vColor[1]) << 8)
             | toByte(m_vColor[2]);
         RenderColorQuadARGB(0.0f, 0.0f, static_cast<float>(REFERENCE_WIDTH),
-                            UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), color);
+                            UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), color);
 
         DisableAlphaBlend();
         EnableAlphaTest();

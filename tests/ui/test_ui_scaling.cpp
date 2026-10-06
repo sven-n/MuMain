@@ -722,14 +722,15 @@ TEST_CASE("floating windows keep uniform scale across the full viewport [ui][sca
     CHECK(UI::Scaling::PositionY(transform, static_cast<float>(bounds.height)) <= 2160.0f);
 }
 
-TEST_CASE("screen coverage follows the capped HUD boundary [ui][scaling]")
+// A HUD narrower than the window leaves a strip beside it; a full-screen overlay (a map's weather, a
+// message box's dim) stopped at the HUD's top left that strip unlit below 100 % UI scale.
+TEST_CASE("screen overlays cover the whole window [ui][scaling]")
 {
     const auto screen = UI::Scaling::ScreenOverlayTransform(3840, 2160);
-    const float screenHeight = UI::Scaling::ScreenOverlayContentHeight(3840, 2160);
+    const float screenHeight = UI::Scaling::ScreenOverlayFullHeight(3840, 2160);
 
-    CHECK(screenHeight == doctest::Approx(457.333333f));
-    CHECK(UI::Scaling::SizeY(screen, screenHeight) == doctest::Approx(2058.0f));
-    CHECK(UI::Scaling::ScreenOverlayContentHeight(640, 480) == doctest::Approx(429.0f));
+    CHECK(UI::Scaling::SizeY(screen, screenHeight) == doctest::Approx(2160.0f));
+    CHECK(UI::Scaling::ScreenOverlayFullHeight(640, 480) == doctest::Approx(480.0f));
     CHECK(UI::Scaling::FloatingWorkspaceContentHeight(3840, 2160) == doctest::Approx(914.666667f));
 }
 

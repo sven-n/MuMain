@@ -224,12 +224,10 @@ UI::Scaling::Viewport UI::Scaling::FloatingWorkspaceBounds(int windowWidth, int 
     };
 }
 
-float UI::Scaling::ScreenOverlayContentHeight(int windowWidth, int windowHeight)
+float UI::Scaling::ScreenOverlayFullHeight(int windowWidth, int windowHeight)
 {
     const Transform transform = ScreenOverlayTransform(windowWidth, windowHeight);
-    const float physicalHeight =
-        static_cast<float>(windowHeight) - kHudFrameHeight * BottomHudScale(windowWidth, windowHeight);
-    return physicalHeight / transform.scaleY;
+    return static_cast<float>(windowHeight) / transform.scaleY;
 }
 
 float UI::Scaling::FloatingWorkspaceContentHeight(int windowWidth, int windowHeight)
