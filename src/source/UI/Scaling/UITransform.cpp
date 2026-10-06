@@ -150,7 +150,7 @@ float UI::Scaling::ViewportFitScale(int windowWidth, int windowHeight, float max
 // (a CUITextInputBox, or a CButton scaled to match a dp-sized RmlUi sibling) kept in sync with a
 // migrated window's now-RCSS-owned layout -- must scale its own fixed reference-pixel offsets by,
 // to stay pixel-for-pixel aligned with the RmlUi element it's shadowing. Same composition
-// RmlUiRuntime.cpp's ApplyUIScale() uses for RmlUi's own dp ratio (UIScalePercent x
+// RmlUiRuntime::RefreshScale() uses for RmlUi's own dp ratio (UIScalePercent x
 // ViewportFitScale(MaximumPanelScale)) -- the single shared implementation, used by
 // CharSelMainWin.cpp's GetUIScaleRatio(), LoginMainWin.cpp, and LoginWin.cpp's
 // LoginUIScaleRatio(). Don't hand-copy this formula per window: a hand-copy risks reintroducing

@@ -25,13 +25,23 @@ namespace
 
 // SetDensityIndependentPixelRatio() sets an absolute ratio, so re-applying it on every resize
 // cannot drift.
-void RmlUiRuntime::ApplyUIScale(Rml::Context* context, int windowWidth, int windowHeight)
+void RmlUiRuntime::ApplyScale(std::span<Rml::Context* const> contexts, const RmlUiRuntimeHooks& hooks)
 {
-    if (!context)
-        return;
-    context->SetDensityIndependentPixelRatio(m_Hooks.dpRatio ? m_Hooks.dpRatio(windowWidth, windowHeight) : 1.f);
-    if (m_Hooks.afterScale)
-        m_Hooks.afterScale(context);
+    for (Rml::Context* context : contexts)
+    {
+        if (!context)
+            continue;
+        const Rml::Vector2i size = context->GetDimensions();
+        context->SetDensityIndependentPixelRatio(hooks.dpRatio ? hooks.dpRatio(size.x, size.y) : 1.f);
+        if (hooks.afterScale)
+            hooks.afterScale(context);
+    }
+}
+
+void RmlUiRuntime::RefreshScale()
+{
+    Rml::Context* const contexts[] = {m_Context, m_BackgroundContext, m_DialogBackgroundContext};
+    ApplyScale(contexts, m_Hooks);
 }
 
 void RmlUiRuntime::AfterUpdate(Rml::Context* context)
@@ -126,19 +136,17 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     Rml::LoadFontFace("fonts/Cousine-Regular.ttf");
 
     m_Context = Rml::CreateContext("main", Rml::Vector2i(windowWidth, windowHeight));
-    ApplyUIScale(m_Context, windowWidth, windowHeight);
 
     // See m_BackgroundContext's own comment (RmlUiRuntime.h) -- a second, independent context,
     // same dimensions/scale as "main", named distinctly so RmlUi's own context registry and any
     // future debug tooling can tell them apart.
     m_BackgroundContext = Rml::CreateContext("background", Rml::Vector2i(windowWidth, windowHeight));
-    ApplyUIScale(m_BackgroundContext, windowWidth, windowHeight);
 
     // See GetDialogBackgroundContext()'s own comment -- a third context, exclusively for
     // CGenericConfirmDialog's own panel, rendered at a different point in the frame than
     // m_BackgroundContext's own documents.
     m_DialogBackgroundContext = Rml::CreateContext("dialog_background", Rml::Vector2i(windowWidth, windowHeight));
-    ApplyUIScale(m_DialogBackgroundContext, windowWidth, windowHeight);
+    RefreshScale();
 
     // Renders once per frame, after this frame's game content is recorded onto the command
     // buffer but before it's submitted -- see SetPreSubmitCallback's own comment (MuRenderer.h)
@@ -197,20 +205,12 @@ void RmlUiRuntime::Destroy()
 void RmlUiRuntime::OnResize(int windowWidth, int windowHeight)
 {
     if (!m_Context) return;
-    m_Context->SetDimensions(Rml::Vector2i(windowWidth, windowHeight));
-    ApplyUIScale(m_Context, windowWidth, windowHeight);
-
-    if (m_BackgroundContext)
+    for (Rml::Context* context : {m_Context, m_BackgroundContext, m_DialogBackgroundContext})
     {
-        m_BackgroundContext->SetDimensions(Rml::Vector2i(windowWidth, windowHeight));
-        ApplyUIScale(m_BackgroundContext, windowWidth, windowHeight);
+        if (context)
+            context->SetDimensions(Rml::Vector2i(windowWidth, windowHeight));
     }
-
-    if (m_DialogBackgroundContext)
-    {
-        m_DialogBackgroundContext->SetDimensions(Rml::Vector2i(windowWidth, windowHeight));
-        ApplyUIScale(m_DialogBackgroundContext, windowWidth, windowHeight);
-    }
+    RefreshScale();
 }
 
 void RmlUiRuntime::Update()

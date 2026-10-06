@@ -7,14 +7,9 @@ Completed migrations belong in [migration-ledger.md](migration-ledger.md).
 
 ### Before merging to main
 
-What would otherwise grow with every new window, or break a principle in a way new code copies.
-Most are items of the integration seams below.
-
-1. **A display-scale change applies the `dp` ratio** (item 2). A bug against §9.
-
-Also before merging, though not code health: the event windows nobody has seen in game (the
-ownership boundary's first list) are either looked at on a server that can run the events, or
-named as unseen in the pull request.
+No code-health item is left. The event windows nobody has seen in game (the ownership boundary's
+first list) are either looked at on a server that can run the events, or named as unseen in the
+pull request.
 
 ### After the merge
 
@@ -133,10 +128,6 @@ against the library is where RmlUi meets the legacy UI. In order of value:
    retire `dialog_background`; move the inventory family's live items into render targets and
    retire `background` with its `*_bg.rml` documents, taking each out of the test's list. Trigger:
    the paperdoll row above, which waits on the same pass.
-2. **A display-scale change leaves RmlUi's `dp` ratio stale.**
-   `SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED` updates the content scale `ViewportFitScale()` folds
-   in, but nothing calls `RmlUiRuntime::OnResize()` until the next resize. A bug; fix it with the
-   next change to `Winmain.cpp`'s event pump.
 
 The root transform and its counter-scaled text (`SyncRootTransform`, `.sharp-text`, the panel
 readback) belong to 1: they are needed while a window shares reference coordinates with native

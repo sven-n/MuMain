@@ -5,6 +5,7 @@
 #include <RmlUi/Core/Context.h>
 #include <functional>
 #include <memory>
+#include <span>
 
 class RmlUiRenderInterface;
 class RmlUiSystemInterface;
@@ -55,6 +56,11 @@ public:
     bool IsCreated() const { return m_Context != nullptr; }
 
     void OnResize(int windowWidth, int windowHeight);
+    // Applies the dp ratio again at each context's current size, for a scale input that changed
+    // without a resize: the OS display scale. No-op before Create().
+    void RefreshScale();
+    // What RefreshScale() does to each non-null context in `contexts`.
+    static void ApplyScale(std::span<Rml::Context* const> contexts, const RmlUiRuntimeHooks& hooks);
 
     void Update();
     void Render();
@@ -169,7 +175,6 @@ private:
     // Unlinks text fields that documents still remember as focused after the focus moved on, so
     // ElementDocument::Hide() can't hand the keyboard back to one. See the .cpp.
     void ReleaseStrandedFieldFocus();
-    void ApplyUIScale(Rml::Context* context, int windowWidth, int windowHeight);
     void AfterUpdate(Rml::Context* context);
 
     RmlUiRuntimeHooks m_Hooks;

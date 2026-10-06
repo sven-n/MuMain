@@ -60,9 +60,12 @@ follows wherever a theme places the parts. Two axes exist, and both systems now 
 - **`WindowContentScale`** (`UI::Scaling::GetWindowContentScale()`/`SetWindowContentScale()`) — an
   OS display-scale/pixel-density correction factor (`ContentScaleFromMetrics()` =
   `SDL_GetWindowDisplayScale() / SDL_GetWindowPixelDensity()`), refreshed at startup and on
-  `SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED` (`Winmain.cpp`). Folded into `UI::Scaling`'s clamp
-  *bounds* (both min and max multiplied by it, widening the auto-scale's own headroom), and into
-  RmlUi's `dp` ratio via `RmlUiRuntime.cpp`'s `ApplyUIScale()`.
+  `SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED` (`Winmain.cpp`). Folded into `UI::Scaling`'s upper
+  clamp bound (widening the auto-scale's own headroom), and into RmlUi's `dp` ratio through
+  `RmlUiRuntime::RefreshScale()`. A change with the window's size unchanged (moving it to a display
+  with another scale) reloads the native fonts, reapplies the `dp` ratio to all three contexts and
+  re-places the theme's windows (`HandleContentScaleChange()`); a resize does the same through
+  `OnResize()`.
 
 **The two axes are applied differently, deliberately.** `UIScalePercent` is a direct user dial, so
 everywhere it's folded into `UI::Scaling` it's a **post-clamp** multiplier — at a window size where

@@ -92,7 +92,7 @@ public:
 
             // Write in dp, not raw px -- px doesn't scale with UIScalePercent and would
             // drift from every dp-authored sibling. Divide by the same ratio
-            // RmlUiRuntime::ApplyUIScale() sets on the context.
+            // RmlUiRuntime::RefreshScale() sets on the context.
             const float dpRatio = m_Panel->GetOwnerDocument()->GetContext()->GetDensityIndependentPixelRatio();
             const float newLeftDp = dpRatio > 0.0f ? newLeftPx / dpRatio : newLeftPx;
             const float newTopDp = dpRatio > 0.0f ? newTopPx / dpRatio : newTopPx;

@@ -79,6 +79,7 @@
 #include "Core/Time/Timer.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Core/SceneUICoordinator.h"
+#include "UI/Placement/WindowPlacement.h"
 #include "Character/CharMakeWin.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/SysMenuWin.h"
@@ -1088,6 +1089,18 @@ void HandleMouseButton(const SDL_Event& e)
     }
 }
 
+// The OS content scale feeds native font sizes, RmlUi's dp ratio and every scale the theme's
+// window placement and the login/character scenes derive from it. The window keeps its size.
+void HandleContentScaleChange()
+{
+    if (!RefreshWindowContentScale())
+        return;
+    ReinitializeFonts();
+    RmlUiRuntime::Instance().RefreshScale();
+    UI::Placement::Invalidate();
+    CSceneUICoordinator::Instance().RepositionSceneUI();
+}
+
 void HandleWindowResize(int width, int height)
 {
     if (width <= 0 || height <= 0)
@@ -1415,8 +1428,7 @@ MSG MainLoop()
                 HandleWindowResize(event.window.data1, event.window.data2);
                 break;
             case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
-                if (RefreshWindowContentScale())
-                    ReinitializeFonts();
+                HandleContentScaleChange();
                 break;
             case SDL_EVENT_WINDOW_FOCUS_GAINED:
                 HandleFocusChange(true);
