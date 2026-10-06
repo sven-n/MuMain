@@ -239,6 +239,20 @@ table.
 - `UI/HUD/ChatInputBox.h` is the complete chat-input window, not a reusable text-entry widget.
   `UI/HUD/SlideWindow.h` similarly owns the notice window beside its SlideTicker.
 
+## Accepted as the base: the `CObject` tier
+
+Every window is a `mu::ui::window::CObject` owned by `CManager`, registered by hand in
+`WindowSystem.cpp` (creation, `INTERFACE_*` id, its `g_p*` macro) and in `UILayoutPolicy.cpp` (its
+layout mode). That machinery is kept as it is, by decision: the migration never needed it to
+change. An RmlUi document is something a `CObject` owns, and slots, fill placement and the layout
+modes plugged into it without trouble. Replacing it would touch every window and every caller of
+the lookups for no change a player sees.
+
+Revisit when a concrete need appears that this machinery cannot meet. The cheapest step then is
+self-registration: each window declaring its id, name and layout mode once, in place of the hand-kept
+lists. Typed lookups in place of the `g_p*` macros, and the lifecycle moving onto the documents,
+each stand alone after that.
+
 ## Kept out of the UI kit on purpose
 
 Domain logic a component may call into, but which never moves into a generic UI type:

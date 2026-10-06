@@ -12,8 +12,9 @@ workspace places the docks, the centred panels, the HUD shell, the chat and the 
 The modern theme exists to prove the architecture, so its unchecked windows are not tracked;
 the Cursed Temple result panel needs a finished event to check.
 
-Run targeted scale/theme/interaction validation alongside each change. The CObject
-registry and residual Social base remain lower-priority structural work.
+Run targeted scale/theme/interaction validation alongside each change. The residual Social
+base remains lower-priority structural work; the `CObject` tier is accepted as the base
+([building-new-ui.md](building-new-ui.md)'s "Accepted as the base").
 
 ## Pilots to revisit when the relevant phase arrives
 
@@ -27,14 +28,6 @@ one of the trigger initiatives on the right.
 |---|---|---|
 | `CMyInventory` (equipment paperdoll — `RenderEquippedItem()`, still fully native) | Background sprite, durability tint, and drag-compatibility highlight all paint *behind* the equipped item's live 3D icon today (native paint order); RmlUi's main context always composites last, so a straight port would paint them *in front of* instead — a real regression, not a straight port (deliberately skipped for this reason). | A background-context consolidation pass makes this mechanism reliable enough to trust with more per-frame-varying, class-conditional content, **or** the equipment grid gets its own future chrome pass anyway and folds this in at the same time — whichever comes first. If pursued alone, the static background sprite (no gameplay-state binding) is the only piece with a reasonable cost/value ratio on its own. |
 | HUD circular glass-orb + wrapping arc gauges (reference visual study, not yet built) | The modern theme retinted `main_frame.rcss`'s rectangular HP/MP/AG/SD bars rather than rebuilding them as circular orbs/arcs — that's a structural rebuild (new markup, new `CMainFrameWindow` C++ binding shape, new tooltip anchors), not a retint, and touches live combat UI. Two RmlUi-native techniques were confirmed viable for it (`<progress direction="clockwise">` for the arcs, which needs a `fill-image` — see `engine-findings.md`; layered `radial-gradient` for the orb liquid) but not used yet. | A dedicated pass scoped just to this, once explicitly prioritized. Low priority: the modern theme exists to prove the architecture. |
-
-## Tracked deferral: C++ adapter classes still on the `mu::ui::window::CObject` tier
-
-The CObject/CManager lifecycle and `INTERFACE_*` lookup plus `g_p*` macros still
-require shared per-window registration. Revisit when concrete extension or lifecycle
-requirements justify changing that shared machinery. Migration coverage is sufficient
-to study existing examples; a replacement is not required merely because these
-adapters retain their established base.
 
 ## Tracked deferral: one obvious component surface
 
