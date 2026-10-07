@@ -110,11 +110,10 @@ namespace CfgDefaults
     // [CfgMinUIScalePercent, CfgMaxUIScalePercent].
     inline constexpr int CfgDefaultUIScalePercent = 100;
 
-    // Bounds GameConfig::SetUIScalePercent() clamps to. The floor is a usability limit, not a
-    // technical one: below 50% the options window's own rows are too small to click the setting
-    // back up. The ceiling is the point past which a small window cannot show a full panel.
-    inline constexpr int CfgMinUIScalePercent = 50;
-    inline constexpr int CfgMaxUIScalePercent = 300;
+    // Bounds GameConfig clamps to, on load and on set. Below 75% text gets too small to read;
+    // above 150% a docked panel no longer fits a small window.
+    inline constexpr int CfgMinUIScalePercent = 75;
+    inline constexpr int CfgMaxUIScalePercent = 150;
 
     // Legacy config compatibility only. SDL GPU ignores this key and default.
     inline constexpr bool CfgDefaultCoreProfile = true;

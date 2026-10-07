@@ -106,12 +106,9 @@ int UI::Options::FindClosestDisplayResolutionIndex(const std::vector<DisplayReso
 
 const std::vector<int>& UI::Options::UIScalePercentChoices()
 {
-    // Ascending; 100 (the default) is deliberately one of them so "back to normal" is a single
-    // click. The floor matches GameConfig's own clamp (CfgMinUIScalePercent) -- below it the
-    // options window's own rows get too small to click the setting back up. The ceiling stops at
-    // 200 rather than the clamp's 300: past 200 the window no longer fits on a 1280x720 client,
-    // which is the smallest size the resolution row offers on a typical display.
-    static const std::vector<int> choices = {50, 60, 70, 80, 90, 100, 125, 150, 200};
+    // Ascending, spanning GameConfig's clamp (CfgMinUIScalePercent..CfgMaxUIScalePercent); 100 (the
+    // default) is one of them so "back to normal" is a single click.
+    static const std::vector<int> choices = {75, 80, 90, 100, 125, 150};
     return choices;
 }
 

@@ -21,10 +21,11 @@ user-controlled UI scale, and it's now wired up: `GameConfig::GetUIScalePercent(
 `OnResize()` (`Render/RmlUi/RmlUiRuntime.cpp`).
 
 The setting has an in-game control: **Options window → UI tab → "UI Scale"**, a dropdown over a
-fixed ladder (50/60/70/80/90/100/125/150/200 %) with a hover tooltip saying what the percentage
+fixed ladder (75/80/90/100/125/150 %) with a hover tooltip saying what the percentage
 multiplies. Picking a value writes `GameConfig::SetUIScalePercent()` (clamped to
-`CfgMinUIScalePercent`..`CfgMaxUIScalePercent`, i.e. 50–300 — a hand-edited `config.ini` may sit
-between two offered steps, and the row then shows the nearest one), saves, and re-applies the scale
+`CfgMinUIScalePercent`..`CfgMaxUIScalePercent`, i.e. 75–150, which loading `config.ini` applies
+too — a hand-edited value may sit between two offered steps, and the row then shows the nearest
+one), saves, and re-applies the scale
 by resizing the window to the size it already has (`MuApplyWindowResolution(WindowWidth,
 WindowHeight, windowed)`): nothing recomputes the ratio on its own, but every resolution-dependent
 system — all three contexts' `dp` ratio, `UI::Scaling`'s active transform, the workspace,
@@ -182,7 +183,9 @@ bug — and its three callers were corrected with it.
 A window's native bookkeeping and its RCSS agree trivially at scale 1.0 and can disagree at every
 other scale, so a window whose hit box or anchors come from live RCSS (the callers of
 `RefreshLogicalPanelSize()`/`RefreshLogicalAnchorPosition()` — grep for the current list) is
-checked at **50 %** and **200 %** (Options → UI → UI scale, applies live), in both themes:
+checked at **75 %** and **150 %** (Options → UI → UI scale, applies live), in both themes. Check
+the larger scale in a larger window (1280x720 or 1920x1080): 100 % already fills 1024x768, so a
+docked panel above it runs off a small window and its far edges cannot be clicked:
 
 1. **Click every interactive element**, and for item grids at least one cell in each **corner** —
    a proportional error leaves the top-left working and fails the far edges.

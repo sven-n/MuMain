@@ -179,9 +179,9 @@ TEST_CASE("UI scale options offer an ascending ladder around the default [ui][op
     CHECK(std::adjacent_find(choices.begin(), choices.end()) == choices.end());
     // The default must be selectable, or "back to normal" would not be reachable from the row.
     CHECK(std::find(choices.begin(), choices.end(), CfgDefaults::CfgDefaultUIScalePercent) != choices.end());
-    // Never offers a value the config setter would clamp away.
-    CHECK(choices.front() >= CfgDefaults::CfgMinUIScalePercent);
-    CHECK(choices.back() <= CfgDefaults::CfgMaxUIScalePercent);
+    // Spans exactly what the config setter allows: nothing it would clamp away, both ends reachable.
+    CHECK(choices.front() == CfgDefaults::CfgMinUIScalePercent);
+    CHECK(choices.back() == CfgDefaults::CfgMaxUIScalePercent);
 
     // A config.ini value between two offered steps shows the nearer one, out-of-range values the
     // nearest end; exact values map to themselves.
