@@ -72,6 +72,11 @@ both themes. Everything else in the rollout was verified in game, both themes, w
 - **The event timers' text box** (Blood Castle, Chaos Castle, Empire Guardian): its left and width
   are `EventTimerView`'s caller constants, because the shrink-to-box text measurement needs the
   width. Trigger: a theme wanting another box, which means reading the width back off RCSS.
+- **`CCryWolf`'s sprites**: `SyncResult()` and `SyncHud()` choose the image files and texel
+  rectangles (the 12x12 altar art, the 15x19 experience digits), and `crywolf.rml` binds `src` and
+  `rect` from them. A theme can hide or rearrange that art, not replace it. Trigger: a theme wanting
+  other event art, which means naming the sprite states in the model and leaving files and rects to
+  the theme.
 - **`CGenericMenuDialog`'s native frame**: each menu's caller describes the native box it replaces
   (`GenericMenuConfig::nativeFrame`), and legacy binds those heights and tops to reproduce it; modern
   flows the menu and ignores them. Trigger: a theme wanting its own layout for one menu, which

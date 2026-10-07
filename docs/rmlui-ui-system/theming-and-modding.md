@@ -289,8 +289,10 @@ coordinate into `dp`.
 
 ### Panel position vs. element layout vs. draggability — three different owners
 
-- **Layout of elements *within* the panel** — fully expressed in RCSS, exactly what a theme
-  controls.
+- **Layout of elements *within* the panel** — expressed in RCSS, which the theme controls. A few
+  windows still take an image file or texel rect from C++ (CryWolf's event art; see
+  [tracked-deferrals.md](tracked-deferrals.md#accepted-as-it-stands-with-its-trigger)), so a theme
+  can rearrange that art but not replace it.
 - **Where windows and HUD parts go** — the theme's `workspace.rml`/`workspace.rcss`: regions and
   one slot per window or HUD part, laid out in RCSS; the game places each open window on its slot
   ([window-placement.md](window-placement.md)). What a theme can do there:
