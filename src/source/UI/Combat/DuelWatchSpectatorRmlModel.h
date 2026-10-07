@@ -42,20 +42,14 @@ struct DuelWatchFrameRmlModel
     std::vector<DuelWatchGaugeEntry> gauges;
 };
 
-// One spectator's box in the list (CDuelWatchUserListWindow).
-struct DuelWatchSpectatorEntry
-{
-    Rml::String name;
-    float top = 0.f; // the box's top, reference px
-};
-
+// The spectator list (CDuelWatchUserListWindow).
 struct DuelWatchSpectatorsRmlModel
 {
     float scaleX = 1.f, scaleY = 1.f;
 
-    float panelX = 0.f;  // the list's left edge, reference px (m_Pos.x)
-    float textPx = 0.f;  // the native normal text size, physical px
-    float textTop = 0.f; // the name's top in its box, reference px
-    std::vector<DuelWatchSpectatorEntry> spectators;
+    // The list's bottom-left corner, reference px (m_Pos).
+    float panelX = 0.f, panelY = 0.f;
+    float textPx = 0.f; // the native normal text size, physical px
+    std::vector<Rml::String> spectators; // the first one on top
 };
 } // namespace mu::ui::window

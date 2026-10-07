@@ -10,7 +10,6 @@
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "Render/Text/CUIRenderText.h"
 
 #include <RmlUi/Core/ElementDocument.h>
 
@@ -108,12 +107,9 @@ void CDuelWatchUserListWindow::BindRmlModel(Rml::DataModelConstructor& c, DuelWa
     c.Bind("scale_x", &model.scaleX);
     c.Bind("scale_y", &model.scaleY);
     c.Bind("panel_x", &model.panelX);
+    c.Bind("panel_y", &model.panelY);
     c.Bind("text_px", &model.textPx);
-    c.Bind("text_top", &model.textTop);
-    auto spectator = c.RegisterStruct<DuelWatchSpectatorEntry>();
-    spectator.RegisterMember("name", &DuelWatchSpectatorEntry::name);
-    spectator.RegisterMember("top", &DuelWatchSpectatorEntry::top);
-    c.RegisterArray<std::vector<DuelWatchSpectatorEntry>>();
+    c.RegisterArray<std::vector<Rml::String>>();
     c.Bind("spectators", &model.spectators);
 }
 
@@ -137,31 +133,17 @@ void CDuelWatchUserListWindow::SyncView()
     SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::scaleX, "scale_x", transform.scaleX);
     SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::scaleY, "scale_y", transform.scaleY);
     SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
+    SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
     SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::textPx, "text_px",
               UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform));
 
-    // The original's Render(): a 57 x 17 box per spectator, 18 apart upwards from m_Pos.y, the
-    // first name in the top box; each name centred on the box, (17 - font height) / 2 + 1 whole
-    // units down.
-    g_pRenderText->SetFont(g_hFont);
-    const long fontHeight = static_cast<long>(g_pRenderText->MeasureText(L"Q", 1).cy);
-    SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::textTop, "text_top",
-              static_cast<float>((17 - fontHeight) / 2 + 1));
-
     const int count = g_DuelMgr.GetDuelWatchUserCount();
-    std::vector<DuelWatchSpectatorEntry> spectators;
+    std::vector<Rml::String> spectators;
     spectators.reserve(static_cast<size_t>(std::max(0, count)));
     for (int i = 0; i < count; ++i)
-    {
-        spectators.push_back({StringUtils::WideToNarrow(g_DuelMgr.GetDuelWatchUser(i)),
-                              static_cast<float>(m_Pos.y - 18 * count + 18 * i)});
-    }
+        spectators.push_back(StringUtils::WideToNarrow(g_DuelMgr.GetDuelWatchUser(i)));
     DuelWatchSpectatorsRmlModel& model = m_RmlView.GetModel();
-    const bool same = model.spectators.size() == spectators.size() &&
-                      std::equal(model.spectators.begin(), model.spectators.end(), spectators.begin(),
-                                 [](const DuelWatchSpectatorEntry& a, const DuelWatchSpectatorEntry& b)
-                                 { return a.name == b.name && a.top == b.top; });
-    if (!same)
+    if (model.spectators != spectators)
     {
         model.spectators = std::move(spectators);
         m_RmlView.MarkDirty("spectators");
