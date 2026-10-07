@@ -76,11 +76,9 @@
 		     -- the inventory-family reference windows just place .modern-icon-btn-px buttons
 		     directly on the frame surface, no separate raised footer strip. -->
 		<div id="btn_quest_open" class="quest-btn quest-btn-open" data-class-hidden="active_tab != 0"
-		     data-class-locked="!open_enabled" data-event-click="myquest_click_open"></div>
-		<span class="tooltip tooltip-open">{{open_tooltip}}</span>
+		     data-class-locked="!open_enabled" data-event-click="myquest_click_open" data-attr-data-hint="open_tooltip"></div>
 		<div id="btn_quest_giveup" class="quest-btn quest-btn-giveup" data-class-hidden="active_tab != 0"
-		     data-class-locked="!giveup_enabled" data-event-click="myquest_click_giveup"></div>
-		<span class="tooltip tooltip-giveup">{{giveup_tooltip}}</span>
+		     data-class-locked="!giveup_enabled" data-event-click="myquest_click_giveup" data-attr-data-hint="giveup_tooltip"></div>
 
 		<!-- Job-change tab -->
 		<div class="jobchange-tab" data-class-hidden="active_tab != 1">
@@ -105,10 +103,9 @@
 
 		<!-- Exit uses base.rcss's shared .modern-icon-btn-px/.modern-icon-btn-glyph-px family --
 		     same primitive every other window in this family uses for its corner buttons. -->
-		<div id="btn_exit" class="modern-icon-btn-px quest-btn-exit" data-event-click="myquest_click_exit">
+		<div id="btn_exit" class="modern-icon-btn-px quest-btn-exit" data-event-click="myquest_click_exit" data-attr-data-hint="exit_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
 	</div>
 </body>
 </rml>

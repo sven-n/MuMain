@@ -101,13 +101,9 @@
 			<div class="checkbox-box" data-class-checked="my_confirm_checked"></div>
 		</div>
 
-		<div id="btn_exit" class="trade-btn trade-btn-exit" data-event-click="trade_exit_click"></div>
-		<span class="sharp-text tooltip tooltip-exit"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{close_tooltip}}</span></span>
+		<div id="btn_exit" class="trade-btn trade-btn-exit" data-event-click="trade_exit_click" data-attr-data-hint="close_tooltip"></div>
 
-		<div id="btn_zen" class="trade-btn trade-btn-zen" data-event-click="trade_zen_click"></div>
-		<span class="sharp-text tooltip tooltip-zen"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{zen_tooltip}}</span></span>
+		<div id="btn_zen" class="trade-btn trade-btn-zen" data-event-click="trade_zen_click" data-attr-data-hint="zen_tooltip"></div>
 
 		<span id="warning_label" class="sharp-text warning-label" data-style-opacity="warning_opacity"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{warning_label}}</span>

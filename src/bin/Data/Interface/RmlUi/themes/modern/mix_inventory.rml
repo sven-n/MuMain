@@ -85,10 +85,9 @@
 		</div>
 
 		<div id="btn_mix" class="modern-icon-btn-px mix-btn-mix" data-class-hidden="!mix_visible"
-		     data-class-locked="mix_locked" data-event-click="mix_inventory_mix_click">
+		     data-class-locked="mix_locked" data-event-click="mix_inventory_mix_click" data-attr-data-hint="mix_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#8644;</span>
 		</div>
-		<span class="tooltip tooltip-mix">{{mix_tooltip}}</span>
 	</div>
 </body>
 </rml>

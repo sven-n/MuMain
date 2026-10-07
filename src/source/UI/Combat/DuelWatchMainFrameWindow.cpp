@@ -10,7 +10,6 @@
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/RmlBridge/RmlTooltip.h"
 #include "Render/Text/CUIRenderText.h"
 
 #include <RmlUi/Core/ElementDocument.h>
@@ -124,9 +123,6 @@ bool CDuelWatchMainFrameWindow::Create(CManager* pNewUIMng)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DUELWATCH_MAINFRAME, this);
 
-    m_ExitTooltip.SetText(&I18N::Game::DuelFinished);
-    m_ExitTooltip.SetAnchorAbove(true);
-
     BuildRmlUi();
 
     Show(false);
@@ -136,8 +132,6 @@ bool CDuelWatchMainFrameWindow::Create(CManager* pNewUIMng)
 
 void CDuelWatchMainFrameWindow::Release()
 {
-    UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
-
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
@@ -198,7 +192,6 @@ void CDuelWatchMainFrameWindow::OpeningProcess()
 void CDuelWatchMainFrameWindow::ClosingProcess()
 {
     m_bHasHPReceived = FALSE;
-    UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
 }
 
 float CDuelWatchMainFrameWindow::GetLayerDepth()
@@ -213,6 +206,7 @@ void CDuelWatchMainFrameWindow::BindRmlModel(Rml::DataModelConstructor& c, DuelW
     c.Bind("inverse_scale_x", &model.inverseScaleX);
     c.Bind("inverse_scale_y", &model.inverseScaleY);
     c.Bind("watching", &model.watching);
+    c.Bind("exit_hint", &model.exitHint);
     auto name = c.RegisterStruct<DuelWatchNameEntry>();
     name.RegisterMember("text", &DuelWatchNameEntry::text);
     name.RegisterMember("text_px", &DuelWatchNameEntry::textPx);
@@ -296,10 +290,7 @@ void CDuelWatchMainFrameWindow::SyncView()
 
     UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
-    {
-        UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
         return;
-    }
 
     // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
@@ -308,8 +299,8 @@ void CDuelWatchMainFrameWindow::SyncView()
     SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
     SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
 
-    m_ExitTooltip.Render(static_cast<int>(kExitX), static_cast<int>(kExitY), static_cast<int>(kExitWidth),
-                         static_cast<int>(kExitHeight));
+    SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::exitHint, "exit_hint",
+              StringUtils::WideToNarrow(I18N::Game::DuelFinished));
 
     const bool watching = g_DuelMgr.GetCurrentChannel() != -1;
     SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::watching, "watching", watching);

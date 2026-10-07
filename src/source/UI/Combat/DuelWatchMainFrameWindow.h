@@ -1,8 +1,6 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/Window/Tooltip.h"
-#include "UI/Widgets/Window/Tooltip.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Inventory/MyInventory.h"
@@ -38,7 +36,6 @@ public:
 private:
     CManager* m_pNewUIMng;
 
-    CTooltip m_ExitTooltip;
     bool m_PendingExit = false;
 
     BOOL m_bHasHPReceived; // HP 초기상태인가

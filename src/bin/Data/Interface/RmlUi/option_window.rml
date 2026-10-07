@@ -222,16 +222,9 @@
 				</div>
 			</div>
 		</div>
-		<!-- UI Scale -- this row's label can't say what the percentage multiplies, so it carries a
-		     hover tooltip: .option-row-tip, a plain sibling span shown by an RCSS `:hover` rule, the
-		     same declarative mechanism main_frame.rcss's gauge tooltips use (no C++ hover callback is
-		     needed, unlike CMainFrameWindow's skill tooltip, whose content is per-skill data). It also
-		     carries the shared `.tooltip` class, which is a real tooltip shell in the modern theme's
-		     base.rcss; the legacy theme has no such shell and supplies the whole look from its own
-		     option_window.rcss. The span sits after .option-dropdown so it paints above an open list,
-		     and, this being the last row of its tab, the list opens upwards while the tip sits below
-		     the row (both themes' option_window.rcss). -->
-		<div class="option-row option-select-row option-row-tipped">
+		<!-- UI Scale -- this row's label can't say what the percentage multiplies, so the row carries
+		     a hint. -->
+		<div class="option-row option-select-row option-row-tipped" data-attr-data-hint="ui_scale_tooltip">
 			<span class="option-row-label">{{ui_scale_row_label}}</span>
 			<div class="option-dropdown">
 				<div class="option-dropdown-value" data-event-click="option_toggle_dropdown(5)">{{ui_scale_value_label}}</div>
@@ -241,7 +234,6 @@
 					     data-event-click="option_dropdown_option_click(5, it_index)">{{label}}</div>
 				</div>
 			</div>
-			<span class="tooltip option-row-tip">{{ui_scale_tooltip}}</span>
 		</div>
 	</div>
 

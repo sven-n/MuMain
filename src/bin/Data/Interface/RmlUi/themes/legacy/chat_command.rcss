@@ -35,10 +35,6 @@
 #btn_right { left: 104px; }
 .cc-label { left: 0; text-align: center; color: #ffffff; }
 
-/* docked_panel_frame.rcss's exit tooltip, hidden until hovered (.sharp-text above shows it). */
-.tooltip { display: none; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }
-
 /* Every row below is on the original's own grid: CONTENT_TOP, one ROW_HEIGHT apart. */
 .cc-page, .cc-rows { position: static; }
 .cc-title, .cc-line, .cc-cell, .cc-row-line, .cc-param-label, .cc-param-value, .cc-remove-mark {

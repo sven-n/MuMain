@@ -2,7 +2,6 @@
 #pragma once
 #include "UI/Core/WindowManager.h"
 #include "UI/Events/EventItemEntryView.h"
-#include "UI/Widgets/Window/Tooltip.h"
 
 namespace mu::ui::window
 {
@@ -52,12 +51,9 @@ public:
 
 private:
     void SyncView();
-    void HideTooltips();
     void Render3D();
 
     EventItemEntryView m_View{"gold_bowman_lena", "Data/Interface/RmlUi/gold_bowman_lena.rml"};
-    CTooltip m_RegisterTooltip;
-    CTooltip m_ExitTooltip;
 };
 
     inline

@@ -1,5 +1,5 @@
 /* Shared frame for the PanelColumnX()-docked single-document window family: character_info,
-   my_quest_info, pet_info, party_info. Their #panel/frame sprites/exit button/tooltip shape are
+   my_quest_info, pet_info, party_info. Their #panel/frame sprites/exit button are
    byte-identical (confirmed by diffing all four before this file existed) -- link this BEFORE the
    window's own .rcss and keep only genuinely window-specific content there. */
 
@@ -83,34 +83,6 @@
 	decorator: image(docked-exit-btn);
 }
 #btn_exit:hover { filter: brightness(1.25); }
-
-/* Button hints, CNewUIButton::Render() with a top-positioned tooltip: one line in a black 180/255
-   box as wide as the text + 6, its bottom 2 above the button and its centre 3 right of the
-   button's. The .tooltip row is a transparent 110-wide strip (content centre at left + 4 + 55),
-   anchored by its bottom edge (padding-bottom 2 = the gap above the button); its inner
-   .tooltip-text span carries the box. A sharp-text row binds its width, padding and the span's
-   padding in the RML (physical pixels) and scales back around its bottom edge. */
-.tooltip {
-	display: none;
-	position: absolute;
-	bottom: 37px; /* 429 - 392 */
-	width: 110px;
-	white-space: nowrap;
-	color: token(text-primary);
-	padding: 2px 4px;
-	font-size: 1em;
-	text-align: center;
-	pointer-events: none;
-	z-index: 1;
-}
-.tooltip.sharp-text { text-align: center; transform-origin: left bottom; }
-.tooltip-text {
-	padding: 0 3px;
-	background-color: rgba(0, 0, 0, 180);
-}
-/* A button's hint row starts at its left edge + 18 + 3 - 59. */
-.tooltip-exit { left: -25px; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 /* A theme's data-fit="fill" slot sizes #panel (class fill-placement), its border included. */
 #panel.fill-placement { box-sizing: border-box; }

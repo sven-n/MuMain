@@ -44,9 +44,6 @@
 	pointer-events: auto;
 }
 #btn_exit:hover { border-color: token(accent-steel-hover); }
-.tooltip { display: none; top: 365px; }
-.tooltip-exit { left: -24px; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 /* The question's three lines. The table draws no frame here; the panel surface is the table. */
 #gs_line_1 { top: 50px; }

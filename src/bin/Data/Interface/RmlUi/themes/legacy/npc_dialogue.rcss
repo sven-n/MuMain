@@ -1,4 +1,4 @@
-/* Legacy theme for CNPCDialogue -- #panel/frame sprites/exit button/tooltip shape come from
+/* Legacy theme for CNPCDialogue -- #panel/frame sprites/exit button come from
    docked_panel_frame.rcss (linked before this file), same family as character_info/my_quest_info/
    pet_info/party_info/quest_progress. Coordinates below are plain reference px, not dp.
 

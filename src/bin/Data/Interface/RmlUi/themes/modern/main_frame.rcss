@@ -5,8 +5,7 @@
    slot-like element one consistent look. #item_slots/#skill_slots take .slot-frame only: the
    strip's own segments (#item_band_fill, #skill_band_fill) already back them. */
 
-/* The original art, the bottom button row, and the readout and hint variants this theme
-   doesn't use. */
+/* The original art, the bottom button row, and the readout variant this theme doesn't use. */
 .frame-art, .exp-frame, #buttons, .gauge-num.value-current {
 	display: none;
 }
@@ -45,8 +44,8 @@
 }
 
 /* HP/SD left column, MP/AG right column. pointer-events:auto is required -- these would
-   otherwise inherit body's `none` (base.rcss's pointer-events trap) and the :hover tooltips
-   below could never fire. */
+   otherwise inherit body's `none` (base.rcss's pointer-events trap) and their hints could
+   never show. */
 .gauge-slot {
 	position: absolute;
 	pointer-events: auto;
@@ -135,48 +134,10 @@
 }
 #bar_ag .gauge-num, #bar_sd .gauge-num { font-size: 7dp; }
 
-/* Tooltips sit in their part's .hint-layer, not inside their trigger, so their containing block
-   is wide -- this build's shrink-to-fit width hard-clamps to the containing block.
-   Explicit width given (shrink-to-fit alone still isn't reliable). `transform: translateX(-50%)`
-   is avoided for centering: per TransformUtilities.cpp, `%` in a transform resolves against the
-   element's own border-box, which for a `display:none`-until-:hover element isn't reliably known
-   at the moment display flips, producing a stale/zero-width translate. A precomputed static
-   `left` (anchor minus half the fixed width) is used instead. */
-.tooltip {
-	display: none;
-	position: absolute;
-	width: 160dp;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	border: 1dp token(border-frame);
-	color: #ffffff;
-	padding: 2dp 4dp;
-	border-radius: token(radius-sm)dp;
-	font-family: "token(font-body)";
-	font-size: 11dp;
-	pointer-events: none;
-}
 /* left = original anchor (bar center) minus half the fixed 160px width, replacing
    translateX(-50%) -- see the comment above for why. */
-/* Room for the hints: an auto-width box can't grow past its containing block. */
-.hint-layer { position: absolute; left: 0dp; top: 0dp; width: 640dp; height: 0dp; pointer-events: none; }
-.hint-layer .tooltip-hp, .hint-layer .tooltip-sd { left: -18dp; top: -27dp; bottom: auto; } /* anchor 70px */
-.hint-layer .tooltip-mp, .hint-layer .tooltip-ag { left: -19dp; top: -27dp; bottom: auto; } /* anchor 571px */
-#bar_hp:hover ~ .hint-layer .tooltip-hp.scaled-hint,
-#bar_sd:hover ~ .hint-layer .tooltip-sd.scaled-hint,
-#bar_ag:hover ~ .hint-layer .tooltip-ag.scaled-hint,
-#bar_mp:hover ~ .hint-layer .tooltip-mp.scaled-hint,
-#exp:hover .scaled-hint {
-	display: block;
-	z-index: 1;
-}
-/* Do NOT add a `.hint-layer .tooltip { bottom: ... }` rule here -- same specificity as the
-   .tooltip-hp/-sd/-mp/-ag rules above, so declared after them it wins the tie and overrides their
-   `bottom: auto`, leaving a top+bottom-constrained box with no height set (handled ungracefully
-   by this engine). */
 
-/* EXP across the whole strip. pointer-events:auto is required so #exp:hover .tooltip below can
-   fire. */
+/* EXP across the whole strip. pointer-events:auto is required so its hint can show. */
 #exp { pointer-events: auto; }
 #exp_track {
 	position: absolute;
@@ -204,12 +165,6 @@
 	font-family: "token(font-body)";
 	font-size: 7dp;
 	pointer-events: none;
-}
-/* left is a precomputed centered value, not left:50%+translateX(-50%) -- same reason as the
-   .tooltip-hp etc. rules above. */
-.exp-tooltip {
-	bottom: 12dp;
-	left: 240dp;
 }
 
 /* Item-hotkey (potion) and skill-icon slots, with no border or fill of their own: the strip's

@@ -14,7 +14,7 @@
 	     Text leaves render at the native text renderer's size: text_px is the physical size the
 	     native client draws at for the active transform (it grows more slowly than the panel), and
 	     1 / root_scale cancels #panel's scale so the glyphs are rasterised at that size instead of
-	     being enlarged -- the same technique as main_frame.rml's bar tooltips. Positions and box
+	     being enlarged. Positions and box
 	     widths stay in reference px; each leaf's transform-origin (character_info.rcss) keeps it
 	     anchored to the edge or centre its text is aligned to. -->
 	<div id="panel" data-model="character_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
@@ -101,29 +101,13 @@
 		     data-event-click="chainfo_increase_stat(4)"></div>
 
 		<!-- Bottom action row: shared close button plus Quest/Pet/Master-Level shortcuts. -->
-		<div id="btn_exit" class="info-btn info-btn-exit" data-event-click="chainfo_click_exit">
+		<div id="btn_exit" class="info-btn info-btn-exit" data-event-click="chainfo_click_exit" data-attr-data-hint="exit_tooltip">
 			<span class="btn-exit-label">×</span>
 		</div>
-		<span class="sharp-text tooltip tooltip-exit"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
-		      data-style-width="(110 * root_scale) + 'px'"
-		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
-		<div id="btn_quest" class="info-btn info-btn-quest" data-event-click="chainfo_click_quest"></div>
-		<span class="sharp-text tooltip tooltip-quest"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
-		      data-style-width="(110 * root_scale) + 'px'"
-		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{quest_tooltip}}</span></span>
-		<div id="btn_pet" class="info-btn info-btn-pet" data-event-click="chainfo_click_pet"></div>
-		<span class="sharp-text tooltip tooltip-pet"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
-		      data-style-width="(110 * root_scale) + 'px'"
-		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{pet_tooltip}}</span></span>
+		<div id="btn_quest" class="info-btn info-btn-quest" data-event-click="chainfo_click_quest" data-attr-data-hint="quest_tooltip"></div>
+		<div id="btn_pet" class="info-btn info-btn-pet" data-event-click="chainfo_click_pet" data-attr-data-hint="pet_tooltip"></div>
 		<div id="btn_masterlevel" class="info-btn info-btn-masterlevel" data-class-locked="!master_level_enabled"
-		     data-event-click="chainfo_click_masterlevel"></div>
-		<span class="sharp-text tooltip tooltip-masterlevel"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
-		      data-style-width="(110 * root_scale) + 'px'"
-		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{masterlevel_tooltip}}</span></span>
+		     data-event-click="chainfo_click_masterlevel" data-attr-data-hint="masterlevel_tooltip"></div>
 		<div id="frame_corner_close" data-event-click="chainfo_click_exit"></div>
 	</div>
 </body>

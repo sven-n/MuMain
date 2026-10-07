@@ -51,7 +51,6 @@ void CGenericMenuDialog::BindRmlModel(Rml::DataModelConstructor& c, GenericMenuR
     // the top-level `lines` -- per-button description text, rendered directly above that
     // button rather than lumped into the shared summary (see MenuButton::lines).
     button.RegisterMember("lines", &MenuButtonEntry::lines);
-    button.RegisterMember("has_tooltip", &MenuButtonEntry::hasTooltip);
     button.RegisterMember("has_lines", &MenuButtonEntry::hasLines);
     button.RegisterMember("enabled", &MenuButtonEntry::enabled);
     button.RegisterMember("compact", &MenuButtonEntry::compact);
@@ -349,7 +348,6 @@ void CGenericMenuDialog::SyncRmlModel()
         entry.lines.reserve(button.lines.size());
         for (const auto& line : button.lines)
             entry.lines.push_back(ToLineEntry(line));
-        entry.hasTooltip = !button.tooltip.empty();
         entry.hasLines = !button.lines.empty();
         entry.enabled = button.enabled;
         entry.compact = button.compact;
@@ -374,7 +372,7 @@ void CGenericMenuDialog::SyncRmlModel()
     {
         const auto& a = newButtons[i];
         const auto& b = model.buttons[i];
-        buttonsChanged = a.label != b.label || a.tooltip != b.tooltip || a.hasTooltip != b.hasTooltip ||
+        buttonsChanged = a.label != b.label || a.tooltip != b.tooltip ||
                          a.enabled != b.enabled || a.compact != b.compact || a.cols2 != b.cols2 ||
                          a.nativeTop != b.nativeTop || a.nativeButtonGap != b.nativeButtonGap || a.narrow != b.narrow ||
                          a.linesBelow != b.linesBelow || a.dismiss != b.dismiss || a.lines.size() != b.lines.size();

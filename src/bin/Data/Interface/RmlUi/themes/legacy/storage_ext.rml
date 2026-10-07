@@ -38,9 +38,7 @@
 		<span class="sharp-text" id="title"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{title}}</span>
 
-		<div id="btn_exit" class="ext-btn" data-event-click="storage_ext_exit_click"></div>
-		<span class="sharp-text tooltip tooltip-exit"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
+		<div id="btn_exit" class="ext-btn" data-event-click="storage_ext_exit_click" data-attr-data-hint="exit_tooltip"></div>
 	</div>
 </body>
 </rml>

@@ -1,5 +1,5 @@
 /* CNPCQuest (themes/modern/npc_quest.rml). docked_panel_frame.rcss (linked first) supplies #panel,
-   the shell-edge/groove/header-rail classes, #btn_exit and .tooltip; #panel is the frame inside
+   the shell-edge/groove/header-rail classes and #btn_exit; #panel is the frame inside
    #content_root, the document's positioning root. Divider/Zen-banner sprites reuse legacy's own assets (theme-local
    duplication), same reasoning every sibling this session uses -- window-specific art with no
    generic modern equivalent. */
@@ -137,7 +137,3 @@
    13px left every sibling this session uses, matching the legacy #btn_exit box exactly. */
 .nq-btn-exit { left: 13px; }
 
-/* Tooltip: shared shape from docked_panel_frame.rcss, position/offset are per-window. */
-.tooltip { top: 365px; }
-.tooltip-exit { left: -24px; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }

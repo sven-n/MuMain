@@ -69,8 +69,6 @@
 
 .cp-label { left: 0; color: #ffffff; }
 .locked .cp-label { color: #646464; }
-.tooltip { display: none; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 /* The two modes' own target areas (kAttackAreas / kDefenseAreas). A label is centred on its
    button, where C++ used to measure the text and halve the remainder. */

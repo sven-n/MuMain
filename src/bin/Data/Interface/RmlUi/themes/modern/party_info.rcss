@@ -145,5 +145,3 @@
    left offset only. */
 .party-btn-exit { left: 13px; }
 
-.tooltip { top: 365px; }
-.tooltip-exit { left: -24px; }

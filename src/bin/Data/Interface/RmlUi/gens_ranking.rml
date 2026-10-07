@@ -96,11 +96,7 @@
 			</div>
 		</div>
 
-		<div id="btn_exit" data-event-click="gens_ranking_exit"></div>
-		<span class="sharp-text tooltip tooltip-exit"
-		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'" data-style-font-size="text_px + 'px'"
-		      data-style-width="(110 * root_scale) + 'px'"
-		      data-style-padding="(2 * root_scale_y) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
+		<div id="btn_exit" data-event-click="gens_ranking_exit" data-attr-data-hint="exit_tooltip"></div>
 	</div>
 </body>
 </rml>

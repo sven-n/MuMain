@@ -58,34 +58,6 @@
 .stor-btn-lock.locked-mode { color: token(accent-gold-hover); border-color: token(border-hover); }
 .stor-btn-expand { left: 138px; }
 
-.tooltip {
-	display: none;
-	position: absolute;
-	top: 376px;
-	width: 120px;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	border: 1px token(border-frame);
-	color: token(text-primary);
-	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "token(font-body)";
-	font-size: 11px;
-	pointer-events: none;
-	z-index: 1;
-}
-.tooltip-insert { left: -27px; }
-.tooltip-take   { left: 15px; }
-.tooltip-lock   { left: 55px; }
-.tooltip-expand { left: 96px; }
-
-#btn_insert:hover ~ .tooltip-insert,
-#btn_take:hover ~ .tooltip-take,
-#btn_lock:hover ~ .tooltip-lock,
-#btn_expand:hover ~ .tooltip-expand {
-	display: block;
-}
-
 /* Native item grid: the first cell's top-left, in #panel's units. */
 .native-anchor { position: absolute; pointer-events: none; }
 #item_grid, #item_grid_counts { left: 15px; top: 36px; width: calc(8 * var(--item-cell)); height: calc(15 * var(--item-cell)); }

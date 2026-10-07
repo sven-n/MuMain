@@ -35,7 +35,7 @@
 
 		<div class="entry-buttons">
 			<div class="entry-btn" data-for="b, i : buttons" data-class-locked="b.locked"
-			     data-event-click="item_entry_press(i)">
+			     data-event-click="item_entry_press(i)" data-attr-data-hint="b.hint">
 				<span class="sharp-text sharp-middle sharp-centre entry-label" data-if="b.label != ''"
 				      data-style-font-size="(b.bold ? bold_text_px : text_px) + 'px'"
 				      data-style-line-height="b.label_line_px + 'px'"

@@ -8,7 +8,6 @@
 
 #include "Core/Utilities/StringUtils.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/RmlBridge/RmlTooltip.h"
 
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -22,9 +21,7 @@ using namespace mu::ui::window;
 
 namespace
 {
-// The original's exit button (newui_exit_00, CButton at (13, 392), 36 x 29).
-constexpr float kExitX = 13.f;
-constexpr float kExitY = 392.f;
+// The original's exit button (newui_exit_00, 36 x 29).
 constexpr float kExitWidth = 36.f;
 constexpr float kExitHeight = 29.f;
 
@@ -59,9 +56,6 @@ bool CGoldBowmanWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    m_ExitTooltip.SetText(&I18N::Game::Close388);
-    m_ExitTooltip.SetAnchorAbove(true);
-
     // A new document's field is unfocused (a theme switch rebuilds it).
     m_View.SetAfterBuild([this] { m_SerialFocusPending = IsVisible(); });
     m_View.Build();
@@ -74,7 +68,6 @@ bool CGoldBowmanWindow::Create(CManager* pNewUIMng, int x, int y)
 void CGoldBowmanWindow::Release()
 {
     m_View.Release();
-    UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
 
     if (m_pNewUIMng)
     {
@@ -107,7 +100,6 @@ void CGoldBowmanWindow::ClosingProcess()
     ZeroMemory(g_strGiftName, sizeof(g_strGiftName));
     ClearSerialField();
     m_SerialFocusPending = false;
-    UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
     SocketClient->ToGameServer()->SendEventChipExitDialog();
 }
 
@@ -241,17 +233,15 @@ void CGoldBowmanWindow::SyncView()
             texts.push_back({g_strGiftName, width});
         m_View.SetTexts(std::move(texts));
 
-        m_View.SetButtons({{I18N::Game::LuckyNumberRegistered, false, MSGBOX_BTN_EMPTY_WIDTH,
-                            MSGBOX_BTN_EMPTY_HEIGHT},
-                           {L"", false, kExitWidth, kExitHeight}});
+        m_View.SetButtons({{.label = I18N::Game::LuckyNumberRegistered,
+                            .width = MSGBOX_BTN_EMPTY_WIDTH,
+                            .height = MSGBOX_BTN_EMPTY_HEIGHT},
+                           {.width = kExitWidth, .height = kExitHeight, .hint = I18N::Game::Close388}});
     }
     m_View.Sync(IsVisible(), m_Pos);
 
     if (!IsVisible())
-    {
-        UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
         return;
-    }
 
     Rml::Element* field = GetSerialField();
     if (field == nullptr)
@@ -274,11 +264,7 @@ bool CGoldBowmanWindow::TakesTypingFrom(const Rml::ElementDocument* document) co
 
 bool CGoldBowmanWindow::Render()
 {
-    // Nothing native left: the frame, the texts, the field and the buttons are RmlUi. The exit
-    // button's hover tooltip (the shared RmlUi one) is shown from here, where the original's
-    // CButton::Render() showed it, after the hover checks of the windows under it.
-    m_ExitTooltip.Render(m_Pos.x + static_cast<int>(kExitX), m_Pos.y + static_cast<int>(kExitY),
-                         static_cast<int>(kExitWidth), static_cast<int>(kExitHeight));
+    // Nothing native left: the frame, the texts, the field and the buttons are RmlUi.
     return true;
 }
 

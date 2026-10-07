@@ -46,20 +46,6 @@
 .cib-btn-size    { left: 230dp; }
 .cib-btn-alpha   { left: 257dp; }
 
-#tooltip {
-	position: absolute;
-	top: -16dp;
-	transform: translateX(-50%);
-	white-space: nowrap;
-	padding: 1dp 4dp;
-	background-color: token(surface-tooltip);
-	color: token(text-primary);
-	border-radius: token(radius-sm)px;
-	font-size: 11dp;
-	pointer-events: none;
-	z-index: 1;
-}
-
 .cib-whisper-field {
 	position: absolute;
 	left: 5dp;

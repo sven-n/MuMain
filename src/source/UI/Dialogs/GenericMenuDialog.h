@@ -158,7 +158,6 @@ namespace mu::ui::window
             Rml::String label;
             Rml::String tooltip;
             std::vector<LineEntry> lines;
-            bool hasTooltip = false;
             bool hasLines = false;  // toggles .gmd-button-cell's extra bottom margin (RCSS)
             bool enabled = true;
             bool compact = false;

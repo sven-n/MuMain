@@ -34,6 +34,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME tooltip_placement_tests
+    SOURCES
+        test_tooltip_placement.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/RmlBridge/RmlTooltipPlacement.cpp
+)
+
+mu_add_test(
     NAME socket_list_selection_tests
     SOURCES
         test_socket_list_selection.cpp

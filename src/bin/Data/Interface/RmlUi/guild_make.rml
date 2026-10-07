@@ -34,11 +34,7 @@
 				      data-style-line-height="label_line_px + 'px'"
 				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{make_text}}</span>
 			</div>
-			<div id="btn_exit" data-event-click="guild_make_button(3)"></div>
-			<span class="sharp-text tooltip tooltip-exit"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
-			      data-style-width="(110 * root_scale) + 'px'"
-			      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
+			<div id="btn_exit" data-event-click="guild_make_button(3)" data-attr-data-hint="exit_tooltip"></div>
 		</div>
 
 		<div data-if="page == 1">

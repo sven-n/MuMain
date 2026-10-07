@@ -51,8 +51,8 @@
 		</div>
 		<div id="option_tooltip_anchor" class="native-anchor"></div>
 		<!-- Text leaves marked native-text render at the native text renderer's size: text_px is the
-		     physical size, and 1 / root_scale cancels #panel's scale so glyphs rasterise at it (same
-		     technique as main_frame.rml's bar tooltips). #title stays full size as the drag handle. -->
+		     physical size, and 1 / root_scale cancels #panel's scale so glyphs rasterise at it. #title
+		     stays full size as the drag handle. -->
 		<div id="title"><span class="native-text title-text" data-style-font-size="text_px + 'px'"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title}}</span></div>
 
@@ -65,24 +65,16 @@
 		      data-style-font-size="text_px + 'px'"
 		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{gold_text}}</span>
 
-		<div id="btn_exit" class="inv-btn inv-btn-exit" data-event-click="my_inventory_exit_click"></div>
-		<div class="sharp-text tooltip tooltip-exit" data-style-font-size="text_px + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-width="(160 * root_scale) + 'px'"><span data-style-padding="'0 ' + (2 * root_scale) + 'px'">{{exit_tooltip}}</span></div>
+		<div id="btn_exit" class="inv-btn inv-btn-exit" data-event-click="my_inventory_exit_click" data-attr-data-hint="exit_tooltip"></div>
 
 		<div id="btn_repair" class="inv-btn inv-btn-repair" data-class-hidden="!repair_visible"
-		     data-event-click="my_inventory_repair_click"></div>
-		<div class="sharp-text tooltip tooltip-repair" data-style-font-size="text_px + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-width="(160 * root_scale) + 'px'"><span data-style-padding="'0 ' + (2 * root_scale) + 'px'">{{repair_tooltip}}</span></div>
+		     data-event-click="my_inventory_repair_click" data-attr-data-hint="repair_tooltip"></div>
 
 		<div id="btn_myshop" class="inv-btn inv-btn-myshop" data-class-hidden="!myshop_visible"
 		     data-class-close-mode="!myshop_mode_open" data-class-locked="myshop_locked"
-		     data-event-click="my_inventory_myshop_click"></div>
-		<div class="sharp-text tooltip tooltip-myshop" data-style-font-size="text_px + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-width="(160 * root_scale) + 'px'"><span data-style-padding="'0 ' + (2 * root_scale) + 'px'">{{myshop_tooltip}}</span></div>
+		     data-event-click="my_inventory_myshop_click" data-attr-data-hint="myshop_tooltip"></div>
 
-		<div id="btn_expand" class="inv-btn inv-btn-expand" data-event-click="my_inventory_expand_click"></div>
-		<div class="sharp-text tooltip tooltip-expand" data-style-font-size="text_px + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-width="(160 * root_scale) + 'px'"><span data-style-padding="'0 ' + (2 * root_scale) + 'px'">{{expand_tooltip}}</span></div>
+		<div id="btn_expand" class="inv-btn inv-btn-expand" data-event-click="my_inventory_expand_click" data-attr-data-hint="expand_tooltip"></div>
 
 		<!-- Set/Socket option header: one centred line with both labels at the same size (the native
 		     client shrank each label into its own narrow box, so a long label came out smaller -- not

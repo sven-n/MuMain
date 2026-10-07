@@ -13,7 +13,6 @@
 #include "InGameShopSystem.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Inventory/ItemCameraTarget.h"
-#include "UI/RmlBridge/RmlElementTooltip.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "GameShop/StorageItemSelection.h"
 
@@ -149,8 +148,6 @@ private:
     UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); }, this};
 
     // The gift, charge, refresh and close buttons' hints.
-    UI::RmlBridge::ElementTooltip m_Hint;
-    void SyncHint();
 
     struct RadioEntry
     {
@@ -199,6 +196,7 @@ private:
         std::vector<StorageRow> storageRows;
         Rml::String storagePage, storageTotalPages;
         Rml::String buyLabel, useLabel, itemNameLabel, durationLabel;
+        Rml::String giftHint, chargeHint, refreshHint, closeHint;
         Rml::String bannerSrc;
         bool bannerLinked = false;
         Rml::String scriptVersion, bannerVersion;

@@ -37,6 +37,7 @@ struct DuelWatchFrameRmlModel
 
     // A watched channel: the names, score marks and gauges; the frame and the exit button always.
     bool watching = false;
+    Rml::String exitHint;
     DuelWatchNameEntry heroName, enemyName;
     std::vector<float> scoreMarks; // the marks' left edges, reference px
     std::vector<DuelWatchGaugeEntry> gauges;

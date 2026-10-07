@@ -130,10 +130,9 @@
 		<div id="btn_save" class="mh-btn-igs modern-btn-px" data-event-click="muhelper_button('save')"></div><span id="btn_save_label" class="mh-text mh-center mh-btn-label mh-btn-label-igs">{{labels.save}}</span>
 		<div id="btn_init" class="mh-btn-igs modern-btn-px" data-event-click="muhelper_button('init')"></div><span id="btn_init_label" class="mh-text mh-center mh-btn-label mh-btn-label-igs">{{labels.init}}</span>
 
-		<div id="btn_exit" class="modern-icon-btn-px" data-event-click="muhelper_button('close')">
+		<div id="btn_exit" class="modern-icon-btn-px" data-event-click="muhelper_button('close')" data-attr-data-hint="labels.close_tip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{labels.close_tip}}</span>
 	</div>
 </body>
 </rml>

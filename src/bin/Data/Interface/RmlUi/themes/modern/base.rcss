@@ -416,50 +416,6 @@ body {
 	decorator: radial-gradient(ellipse, rgba(230, 195, 140, 110), rgba(125, 25, 15, 130) 55%, transparent 88%);
 }
 
-/* Shared tooltip shell -- every window's single-line discoverability tooltip applies this
-   directly. .tooltip__name/-type/-rule/-stat/-bonus below are structured-content primitives (a
-   name/type/divider/stat-rows/bonus-line item tooltip) not consumed by any window yet, laid down
-   so a future one doesn't get invented ad hoc. */
-.tooltip {
-	background-color: token(surface-tooltip);
-	border: 1dp token(border-frame);
-	border-radius: token(radius-sm)dp;
-	color: token(text-primary);
-	font-family: "token(font-body)";
-}
-.tooltip__name {
-	color: token(accent-gold-hover);
-	font-weight: bold;
-	font-family: "token(font-body)";
-}
-.tooltip__type {
-	margin-top: 2dp;
-	color: token(text-secondary);
-	font-family: "token(font-body)";
-	text-transform: uppercase;
-}
-.tooltip__rule {
-	display: block;
-	height: 1dp;
-	margin: 6dp 0;
-	background-color: token(border-recessed);
-}
-.tooltip__stat {
-	display: flex;
-	justify-content: space-between;
-	color: token(text-secondary);
-	font-family: "token(font-body)";
-}
-.tooltip__stat strong {
-	color: token(text-primary);
-	font-weight: bold;
-}
-.tooltip__bonus {
-	margin-top: 6dp;
-	color: token(semantic-success);
-	font-family: "token(font-body)";
-}
-
 /* Shared item-slot primitives -- generalized from main_frame.rcss's .slot-frame/.slot-fill/
    .selected so any future slot-based UI has a ready-made look. main_frame.rcss keeps its own
    class names (bound from C++/RML) but is retinted to match these exactly. */
@@ -643,7 +599,6 @@ input, select, textarea, .btn, [data-event-click] { drag: block; }
 	height: 0;
 	pointer-events: none;
 }
-
 
 /* ============================================================================
    Forged-dialog construction

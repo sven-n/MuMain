@@ -75,9 +75,7 @@ flat backing elements legacy has no use for. Hand-syncing two copies of the HUD 
 moved or removed part a two-file edit. The shared `main_frame.rml` now carries every part either
 theme uses, and each theme's `main_frame.rcss` hides the others (`display: none`). Where the two
 themes bind different values to the same spot, the markup carries both variants and each theme
-shows one: a gauge's readout as `.value-current` or `.value-full`, its hint as `.native-hint`
-(native text size, counter-scaled through bound inline styles a theme's RCSS cannot override) or
-`.scaled-hint`. The document is also split into parts (`.hud-part`: the strip backing, each
+shows one: a gauge's readout as `.value-current` or `.value-full`. The document is also split into parts (`.hud-part`: the strip backing, each
 gauge group, EXP, buttons, item hotkeys, skill row, skill list), each placed by its own rule in
 the theme's `main_frame.rcss` with its contents laid out from its own corner, so a theme moves
 or hides a part without touching the others. The skill list's grid fans out from its part's box,
@@ -308,6 +306,9 @@ coordinate into `dp`.
 - **The panel's own position on screen** for a window without a slot — its own RCSS anchoring
   (`.center-both`, `position: absolute; right: 0; bottom: 0;`, …), or, for the few that follow
   the pointer or a target (help, item explanations, quick command, tooltips), C++.
+- **A button's hint** — markup: `data-hint` (or a bound `data-attr-data-hint`) on the element. The
+  shared tooltip places it and `tooltip.rcss` styles it, so a fork that moves or adds a button
+  keeps its hint with no C++.
 - **Draggability** — `UI::RmlBridge::MakeDraggable()`, wired per window in C++; RCSS has no
   "make this draggable" property. Which windows drag is decided in
   [window-placement.md](window-placement.md) section 8.

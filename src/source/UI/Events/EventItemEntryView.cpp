@@ -49,6 +49,7 @@ void mu::ui::window::EventItemEntryView::BindModel(Rml::DataModelConstructor& c,
     button.RegisterMember("locked", &EventItemEntryButtonEntry::locked);
     button.RegisterMember("bold", &EventItemEntryButtonEntry::bold);
     button.RegisterMember("label_line_px", &EventItemEntryButtonEntry::labelLinePx);
+    button.RegisterMember("hint", &EventItemEntryButtonEntry::hint);
     c.RegisterArray<std::vector<EventItemEntryButtonEntry>>();
     c.Bind("buttons", &model.buttons);
 
@@ -139,6 +140,7 @@ void mu::ui::window::EventItemEntryView::SyncButtons()
         entry.locked = button.locked;
         entry.bold = button.bold;
         entry.labelLinePx = static_cast<float>(lineHeight) * transform.scaleY;
+        entry.hint = StringUtils::WideToNarrow(button.hint.c_str());
         entries.push_back(std::move(entry));
     }
     if (model.buttons == entries)

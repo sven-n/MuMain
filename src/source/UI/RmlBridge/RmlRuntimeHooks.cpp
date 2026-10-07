@@ -4,6 +4,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
+#include "UI/RmlBridge/RmlDocumentHints.h"
 #include "UI/RmlBridge/RmlNativeText.h"
 #include "UI/RmlBridge/RmlNativeTextFit.h"
 #include "UI/RmlBridge/RmlRenderTarget.h"
@@ -28,7 +29,12 @@ void InstallRuntimeHooks()
     hooks.afterScale = [](Rml::Context* context) { ApplyNativeTextSize(context); };
     hooks.afterCreate = [] { UI::Diagnostics::Initialize(); };
     hooks.beforeDestroy = [] { UI::Diagnostics::Release(); };
-    hooks.beforeUpdate = [] { SuspendMainSceneDocumentsOutsideMainScene(); };
+    hooks.beforeUpdate = []
+    {
+        SuspendMainSceneDocumentsOutsideMainScene();
+        if (Rml::Context* context = RmlUiRuntime::Instance().GetContext())
+            DocumentHints::Update(*context);
+    };
     hooks.afterUpdate = [](Rml::Context* context) { FitNativeTextToBoxes(context); };
     hooks.createFileInterface = [] { return std::make_unique<ThemeFileInterface>(); };
     hooks.resolveTexture = [](const Rml::String& source, void*& texture, int& width, int& height)

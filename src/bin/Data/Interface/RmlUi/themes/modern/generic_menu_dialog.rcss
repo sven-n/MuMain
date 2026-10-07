@@ -115,7 +115,7 @@
 /* Lives on this separate, childless sibling rather than directly on .gmd-btn.cols-2 -- a
    bordered/backgrounded element that also has children renders an incomplete, non-closed box in
    this engine (same finding server_select.rcss's own .server-row documents);
-   .gmd-btn always has a child (.gmd-tooltip below), so the fill has to live on a sibling instead.
+   .gmd-btn always has a child (.gmd-btn-label), so the fill has to live on a sibling instead.
    No decorator override needed here (modern's .btn decorator is a procedural gradient, not an
    image sprite), just the border/background this class needs on its own. */
 .gmd-btn.cols-2 .gmd-btn-fill {
@@ -142,37 +142,6 @@
 .gmd-btn.cols-2 .gmd-btn-label { padding: 4dp 2dp; }
 /* .btn.disabled (base.rcss) already gives the exact look a disabled menu button needs --
    data-class-disabled="!button.enabled" just toggles that existing class, no new rule needed. */
-
-/* Static per-button hint text -- same reasoning as legacy's own copy of this rule (known at
-   Show() time, so a plain :hover reveal suffices, no need for the heavier C++-positioned tooltip
-   panel main_frame.rml's own skill tooltip uses). */
-.gmd-tooltip {
-	display: none;
-	position: absolute;
-	left: 50%;
-	bottom: 100%;
-	margin-bottom: 4dp;
-	transform: translateX(-50%);
-	width: 140dp;
-	white-space: normal;
-	text-align: center;
-	font-size: 10dp;
-	font-weight: normal;
-	color: token(text-primary);
-	background-color: token(surface-tooltip);
-	border: 1dp token(border-frame);
-	padding: 3dp 6dp;
-	pointer-events: none;
-}
-.gmd-btn:hover .gmd-tooltip {
-	display: block;
-}
-/* Guards against a hover-reveal when there's no tooltip text -- matches the hover rule above's
-   own specificity so this later declaration wins the cascade tie; see legacy's own copy of this
-   rule for why not !important (unsupported by this engine's stylesheet parser). */
-.gmd-btn:hover .gmd-tooltip.hidden {
-	display: none;
-}
 
 /* The in-game system menu fills the screen like the options screen: the world under the same
    blurred, darkened scrim, the heading on a gold rule, the choices as a list, and a keycap hint for

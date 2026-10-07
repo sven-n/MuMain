@@ -54,8 +54,6 @@
 #btn_toggle:active { decorator: image(gs-btn-down); }
 .gs-label { left: 0; color: #ffffff; }
 #btn_exit { top: 391px; }
-.tooltip { display: none; bottom: 38px; } /* 429 - 391 */
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 /* The question's three lines and the table's frame, in the places the original drew them. */
 #gs_line_1 { top: 50px; }

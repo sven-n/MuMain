@@ -81,8 +81,6 @@
 .gi-btn:hover { decorator: image(gi-btn-over); }
 .gi-btn:active { decorator: image(gi-btn-down); }
 .gi-label { left: 0; text-align: center; color: #ffffff; }
-.tooltip { display: none; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 /* Every piece below came out of a style attribute in the shared RML, which the inline-property
    rule made un-overridable. The geometry is the original's own Render_*() walk. */

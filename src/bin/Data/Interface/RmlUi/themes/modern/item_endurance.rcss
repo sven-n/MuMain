@@ -54,11 +54,20 @@ body {
 .pet-name { display: inline-block; white-space: nowrap; color: #ffffff; }
 #arrows { display: inline-block; white-space: nowrap; color: rgb(255, 160, 0); background-color: rgba(0, 0, 0, 180); }
 
-.tooltip { display: inline-block; white-space: nowrap; font-weight: bold; background-color: rgba(0, 0, 0, 128); }
-.tooltip--half { color: rgb(255, 255, 0); }
-.tooltip--third { color: rgb(255, 168, 0); }
-.tooltip--fifth { color: rgb(255, 83, 0); }
-.tooltip--zero { color: rgb(255, 0, 0); }
+.durability-tip {
+	display: inline-block;
+	white-space: nowrap;
+	font-weight: bold;
+	font-family: "token(font-body)";
+	color: token(text-primary);
+	background-color: rgba(0, 0, 0, 128);
+	border: 1dp token(border-frame);
+	border-radius: token(radius-sm)dp;
+}
+.durability-tip--half { color: rgb(255, 255, 0); }
+.durability-tip--third { color: rgb(255, 168, 0); }
+.durability-tip--fifth { color: rgb(255, 83, 0); }
+.durability-tip--zero { color: rgb(255, 0, 0); }
 
 /* The icon column: two cells per column, filling downwards then leftwards, as the original's own
    counter stepped them. Its start is bound -- the column is right-anchored to the screen. */

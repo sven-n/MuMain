@@ -50,10 +50,9 @@
 		     stays centered regardless of #panel's runtime width -- top:380px matches the native
 		     `m_ptPos.y + 380` offset exactly (LuckyItemWnd.cpp), fixed from the panel's TOP. -->
 		<div id="btn_mix" class="modern-icon-btn-px lucky-btn-mix" data-class-hidden="!mix_visible"
-		     data-event-click="lucky_item_mix_click">
+		     data-event-click="lucky_item_mix_click" data-attr-data-hint="mix_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#8644;</span>
 		</div>
-		<span class="tooltip tooltip-mix">{{mix_tooltip}}</span>
 
 		<!-- Former Render_Frame()'s m_sText[]/AddText() result/description block. -->
 		<div id="text_lines">

@@ -20,7 +20,6 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/RmlBridge/RmlTooltip.h"
 #include "Render/Text/CUIRenderText.h"
 
 #include <RmlUi/Core/ElementDocument.h>
@@ -35,11 +34,6 @@ using namespace mu::ui::window;
 
 namespace
 {
-// The original's close button (m_BtnExit): (640 - 27, 3), 30 x 25 reference units.
-constexpr int kCloseX = REFERENCE_WIDTH - 27;
-constexpr int kCloseY = 3;
-constexpr int kCloseWidth = 30;
-constexpr int kCloseHeight = 25;
 // The part of the screen the original's mouse handler kept to itself.
 constexpr int kMapAreaHeight = 430;
 // Marker sizes, physical px (RenderPointRotate() never scaled them).
@@ -115,9 +109,6 @@ bool mu::ui::window::CMiniMap::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MINI_MAP, this);
 
-    m_ExitTooltip.SetText(&I18N::Game::Close388);
-    m_ExitTooltip.SetAnchorAbove(true);
-
     SetPos(x, y);
     m_bSuccess = false;
 
@@ -127,7 +118,6 @@ bool mu::ui::window::CMiniMap::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CMiniMap::ClosingProcess()
 {
-    UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
@@ -143,8 +133,6 @@ void mu::ui::window::CMiniMap::OpenningProcess()
 
 void mu::ui::window::CMiniMap::Release()
 {
-    UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
-
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
@@ -290,6 +278,7 @@ void mu::ui::window::CMiniMap::BindRmlModel(Rml::DataModelConstructor& c, MiniMa
     c.Bind("scale_x", &model.scaleX);
     c.Bind("scale_y", &model.scaleY);
     c.Bind("text_px", &model.textPx);
+    c.Bind("close_hint", &model.closeHint);
 
     auto clip = c.RegisterStruct<MiniMapClipEntry>();
     clip.RegisterMember("left", &MiniMapClipEntry::left);
@@ -343,16 +332,12 @@ void mu::ui::window::CMiniMap::SyncRmlModel()
     UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), visible);
 
     if (!visible)
-    {
-        UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
         return;
-    }
 
     SyncScreen();
     SyncClips();
     SyncMap();
     SyncHint();
-    m_ExitTooltip.Render(kCloseX, kCloseY, kCloseWidth, kCloseHeight);
 }
 
 void mu::ui::window::CMiniMap::SyncScreen()
@@ -362,6 +347,7 @@ void mu::ui::window::CMiniMap::SyncScreen()
     Sync(m_RmlView.Binder(), &MiniMapRmlModel::scaleX, "scale_x", transform.scaleX);
     Sync(m_RmlView.Binder(), &MiniMapRmlModel::scaleY, "scale_y", transform.scaleY);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
+    Sync(m_RmlView.Binder(), &MiniMapRmlModel::closeHint, "close_hint", StringUtils::WideToNarrow(I18N::Game::Close388));
 
     // The border tiles depend on the screen alone: rebuilt when it changes, or when a theme reload
     // left the model empty.

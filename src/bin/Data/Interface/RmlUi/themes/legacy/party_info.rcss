@@ -1,4 +1,4 @@
-/* Legacy theme for CPartyInfoWindow -- #panel/frame sprites/exit button/tooltip shape/group-box
+/* Legacy theme for CPartyInfoWindow -- #panel/frame sprites/exit button/group-box
    corner-and-fill shape are shared with character_info/my_quest_info/pet_info via
    docked_panel_frame.rcss (linked in party_info.rml before this file) -- only window-specific
    content lives here now. This window's own top piece is newui_item_back01.tga, not back04.tga

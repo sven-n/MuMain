@@ -47,10 +47,9 @@
 			     data-event-click="npcquest_select_answer(a.index)">{{a.text}}</div>
 		</div>
 
-		<div id="btn_exit" class="modern-icon-btn-px nq-btn-exit" data-event-click="npcquest_click_close">
+		<div id="btn_exit" class="modern-icon-btn-px nq-btn-exit" data-event-click="npcquest_click_close" data-attr-data-hint="exit_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
 	</div>
 </body>
 </rml>

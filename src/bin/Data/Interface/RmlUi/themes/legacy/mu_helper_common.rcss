@@ -10,8 +10,6 @@
 
 /* The docked family's exit sits at (13, 392); the MU Helper's at (20, 388). */
 #btn_exit { left: 20px; top: 388px; }
-.tooltip { bottom: 41px; } /* 429 - 388 */
-.tooltip-exit { left: -18px; }
 
 .mh-text {
 	display: block;

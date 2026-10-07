@@ -1,4 +1,4 @@
-/* Legacy theme for CPetInfoWindow -- #panel/frame sprites/exit button/tooltip shape/group-box
+/* Legacy theme for CPetInfoWindow -- #panel/frame sprites/exit button/group-box
    corner-and-fill shape are shared with character_info/my_quest_info/party_info via
    docked_panel_frame.rcss (linked in pet_info.rml before this file) -- only window-specific content
    lives here now. Coordinates below are plain reference px, matching that shared convention. */

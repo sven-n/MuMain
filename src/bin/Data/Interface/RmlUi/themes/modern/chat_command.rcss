@@ -34,9 +34,6 @@
 	pointer-events: auto;
 }
 #btn_exit:hover { border-color: token(accent-steel-hover); }
-.tooltip { display: none; top: 365px; }
-.tooltip-exit { left: -24px; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 /* Every row below is on the original's own grid: CONTENT_TOP, one ROW_HEIGHT apart. */
 .cc-page, .cc-rows { position: static; }

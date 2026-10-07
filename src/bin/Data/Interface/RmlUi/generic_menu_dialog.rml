@@ -69,12 +69,11 @@
 			<div class="btn gmd-btn" data-class-compact="button.compact" data-class-cols-2="button.cols2" data-class-disabled="!button.enabled"
 			     data-class-narrow="button.narrow"
 			     data-style-margin-top="button.native_button_gap > 0 ? button.native_button_gap + 'dp' : '0dp'"
-			     data-event-click="gmd_button_click(it_index)">
+			     data-event-click="gmd_button_click(it_index)" data-attr-data-hint="button.tooltip">
 				<!-- Label text lives in its own element rather than raw text directly in
 				     .gmd-btn -- see generic_menu_dialog.rcss's own .gmd-btn.cols-2 comment
 				     for why (a decorator change, not a markup requirement of its own). -->
 				<div class="gmd-btn-label">{{button.label}}</div>
-				<span class="gmd-tooltip" data-class-hidden="!button.has_tooltip">{{button.tooltip}}</span>
 			</div>
 		</div>
 	</div>

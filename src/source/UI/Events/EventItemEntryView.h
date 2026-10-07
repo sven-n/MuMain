@@ -45,6 +45,8 @@ public:
         float width = 53.f; // newui_btn_empty_very_small
         float height = 23.f;
         bool bold = false;
+        // Shown while the pointer is over the button (data-hint); empty for none.
+        std::wstring hint;
     };
 
     EventItemEntryView(const char* modelName, const char* documentPath);

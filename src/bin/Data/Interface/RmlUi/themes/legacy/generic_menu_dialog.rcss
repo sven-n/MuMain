@@ -237,8 +237,7 @@
 /* Text lives in its own element (not raw text directly in .gmd-btn) purely so a decorator change
    here doesn't require touching the shared markup structure again; no stacking-order concerns
    remain now that there's no separate absolutely-positioned fill sibling to compete with (an
-   element's own decorator always paints before its children are rendered, same reason
-   .gmd-tooltip's own background already sits visibly on top of its ancestor .gmd-btn's paint). */
+   element's own decorator always paints before its children are rendered). */
 .gmd-btn-label {
 	display: block;
 	width: 100%;
@@ -247,40 +246,6 @@
 .gmd-btn.cols-2 .gmd-btn-label { padding: 4dp 2dp; white-space: normal; }
 /* .btn.disabled (base.rcss) already gives the exact look a disabled menu button needs --
    data-class-disabled="!button.enabled" just toggles that existing class, no new rule needed. */
-
-/* Static per-button hint text -- known at Show() time, so a plain :hover reveal is enough (no
-   need for the heavier C++-positioned tooltip panel main_frame.rml's own skill tooltip uses,
-   which exists for dynamically-positioned content this doesn't have). Child of .gmd-btn (not a
-   hand-authored sibling like my_inventory.rcss's own tooltips) since this is a data-for-repeated
-   button, so a descendant combinator is used instead of that file's `~` sibling one. */
-.gmd-tooltip {
-	display: none;
-	position: absolute;
-	left: 50%;
-	bottom: 100%;
-	margin-bottom: 4dp;
-	transform: translateX(-50%);
-	width: 140dp;
-	white-space: normal;
-	text-align: center;
-	font-size: 1rem;
-	font-weight: normal;
-	color: token(text-primary);
-	background-color: token(surface-recessed);
-	border: 1dp token(border-inner);
-	padding: 3dp 6dp;
-	pointer-events: none;
-}
-.gmd-btn:hover .gmd-tooltip {
-	display: block;
-}
-/* Guards against a hover-reveal when there's no tooltip text at all -- matches the hover rule
-   above's own specificity (3 classes each) so this later declaration wins the cascade tie
-   instead of losing to it outright, same convention every other .hidden cascade-tie fix in this
-   codebase uses (no !important -- confirmed unsupported by this engine's stylesheet parser). */
-.gmd-btn:hover .gmd-tooltip.hidden {
-	display: none;
-}
 
 /* GenericMenuConfig::highlightTitle: native's highlight orange (CChaosMixMenuMsgBox's title). */
 #panel.highlight-title .window-shell-header-title { color: #ff8000; }

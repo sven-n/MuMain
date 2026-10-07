@@ -41,13 +41,9 @@
 			</div>
 		</div>
 
-		<div id="btn_exit" class="modern-icon-btn-px cmd-btn-exit" data-event-click="command_exit">
+		<div id="btn_exit" class="modern-icon-btn-px cmd-btn-exit" data-event-click="command_exit" data-attr-data-hint="exit_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
-		<span class="sharp-text tooltip tooltip-exit"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
-		      data-style-width="(110 * root_scale) + 'px'"
-		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'">{{exit_tooltip}}</span>
 
 		<div id="target" data-if="target_visible" data-class-out-of-range="!target_in_range"
 		     data-style-left="target_left + 'px'" data-style-top="target_top + 'px'">

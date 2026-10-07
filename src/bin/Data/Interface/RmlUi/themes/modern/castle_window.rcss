@@ -22,7 +22,6 @@
 .cw-tab-label { color: token(text-muted); }
 .cw-tab.selected .cw-tab-label { color: token(text-primary); }
 
-
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
 
 .cw-btn {
@@ -68,9 +67,6 @@
 	pointer-events: auto;
 }
 #btn_exit:hover { border-color: token(accent-steel-hover); }
-.tooltip { display: none; top: 365px; }
-.tooltip-exit { left: -24px; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 /* The window's own text. Each line is named, so the theme decides where it sits, what colour it
    is and how it is aligned; only its width and font size stay bound for the counter-scale. */

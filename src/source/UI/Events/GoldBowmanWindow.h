@@ -2,7 +2,6 @@
 #pragma once
 #include "UI/Core/WindowManager.h"
 #include "UI/Events/EventItemEntryView.h"
-#include "UI/Widgets/Window/Tooltip.h"
 
 namespace Rml
 {
@@ -63,7 +62,6 @@ private:
     Rml::Element* GetSerialField() const;
 
     EventItemEntryView m_View{"gold_bowman", "Data/Interface/RmlUi/gold_bowman.rml"};
-    CTooltip m_ExitTooltip;
     // The field takes the focus once the document shows it, as the original's GiveFocus() did.
     bool m_SerialFocusPending = false;
 };

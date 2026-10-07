@@ -55,7 +55,6 @@ void mu::ui::window::CChatInputBox::Init()
     m_iCurChatHistory = 0;
     m_iCurWhisperIDHistory = 0;
 
-    m_iTooltipType = INPUT_TOOLTIP_NOTHING;
     m_iInputMsgType = INPUT_CHAT_MESSAGE;
     m_bBlockWhisper = false;
     m_bShowSystemMessages = true;
@@ -505,9 +504,8 @@ void mu::ui::window::CChatInputBox::BindRmlModel(Rml::DataModelConstructor& c, C
     c.Bind("show_chat_log", &model.showChatLog);
     c.Bind("show_frame", &model.showFrame);
     c.Bind("whisper_send", &model.whisperSend);
-    c.Bind("tooltip_index", &model.tooltipIndex);
-    c.Bind("tooltip_left", &model.tooltipLeft);
-    c.Bind("tooltip_text", &model.tooltipText);
+    for (size_t i = 0; i < model.buttonHints.size(); ++i)
+        c.Bind("hint_" + std::to_string(i), &model.buttonHints[i]);
 
     c.BindEventCallback("chat_set_type",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
@@ -571,12 +569,6 @@ void mu::ui::window::CChatInputBox::BindRmlModel(Rml::DataModelConstructor& c, C
             m_pNewUIChatLogWnd->SetBackAlphaAuto();
             PlayBuffer(SOUND_CLICK01);
         });
-
-    c.BindEventCallback("chat_tooltip",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
-        {
-            m_iTooltipType = args.empty() ? INPUT_TOOLTIP_NOTHING : args[0].Get<int>(-1);
-        });
 }
 
 void mu::ui::window::CChatInputBox::OnRmlReloaded()
@@ -624,30 +616,15 @@ void mu::ui::window::CChatInputBox::SyncRmlModel()
         m_RmlView.MarkDirty("input_msg_type");
     }
 
-    if (model.tooltipIndex != m_iTooltipType)
+    // Native's string table for the buttons' hints (RenderTooltip()).
+    static constexpr int kHintText[10] = {1681, 1682, 1683, 3321, 1684, 1685, 750, 1686, 751, 752};
+    for (size_t i = 0; i < model.buttonHints.size(); ++i)
     {
-        model.tooltipIndex = m_iTooltipType;
-        m_RmlView.MarkDirty("tooltip_index");
-
-        if (m_iTooltipType != INPUT_TOOLTIP_NOTHING)
+        Rml::String hint = StringUtils::WideToNarrow(I18N::Game::Lookup(kHintText[i]));
+        if (model.buttonHints[i] != hint)
         {
-            // Native's own string table and x formula (RenderTooltip()), kept verbatim -- the
-            // formula's own group stepping is /3, which does not match the button row's /4
-            // grouping, but it is what ships, so it is reproduced rather than "corrected".
-            static const int iTextIndex[10] = {
-                1681, 1682, 1683, 3321,
-                1684, 1685, 750, 1686, 751, 752 };
-            if (m_iTooltipType >= 0 && m_iTooltipType < 10)
-            {
-                model.tooltipText = StringUtils::WideToNarrow(I18N::Game::Lookup(iTextIndex[m_iTooltipType]));
-                m_RmlView.MarkDirty("tooltip_text");
-
-                // Native then subtracted half the measured text width; the RCSS centres on this
-                // point instead, so no measurement is needed here.
-                model.tooltipLeft = (float)m_iTooltipType * BUTTON_WIDTH
-                                  + (float)(m_iTooltipType / 3) * GROUP_SEPARATING_WIDTH + 10.0f;
-                m_RmlView.MarkDirty("tooltip_left");
-            }
+            model.buttonHints[i] = std::move(hint);
+            m_RmlView.MarkDirty("hint_" + std::to_string(i));
         }
     }
 }

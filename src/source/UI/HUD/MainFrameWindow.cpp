@@ -118,7 +118,6 @@ SlotBox SlotBoxInReference(Rml::Element* element)
 
 void mu::ui::window::CMainFrameWindow::BindRmlModel(Rml::DataModelConstructor& c, MainFrameRmlModel& model)
 {
-    c.Bind("hint_px", &model.hintPx);
 
     c.Bind("hp_fraction", &model.hpFraction);
     c.Bind("mp_fraction", &model.mpFraction);
@@ -489,12 +488,7 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
         syncText(field, boundName, StringUtils::WideToNarrow(text));
     };
 
-    {
-        syncFloat(&MainFrameRmlModel::hintPx, "hint_px",
-                  UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, HudReferenceTransform(m_RmlView.Document())));
-
-        m_ItemHotKey.SyncSlotIcons(m_RmlView.Document());
-    }
+    m_ItemHotKey.SyncSlotIcons(m_RmlView.Document());
 
     // HP/MP -- legacy RenderLifeMana(). fLife/fMana there are the EMPTY fraction; store filled.
     DWORD wLifeMax, wLife, wManaMax, wMana;

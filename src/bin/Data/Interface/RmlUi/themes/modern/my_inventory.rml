@@ -70,28 +70,24 @@
 		</div>
 		<span id="gold_text" class="modern-wallet-value-px">{{gold_text}}</span>
 
-		<div id="btn_exit" class="modern-icon-btn-px inv-btn-exit" data-event-click="my_inventory_exit_click">
+		<div id="btn_exit" class="modern-icon-btn-px inv-btn-exit" data-event-click="my_inventory_exit_click" data-attr-data-hint="exit_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
 
 		<div id="btn_repair" class="modern-icon-btn-px inv-btn-repair" data-class-hidden="!repair_visible"
-		     data-event-click="my_inventory_repair_click">
+		     data-event-click="my_inventory_repair_click" data-attr-data-hint="repair_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#9099;</span>
 		</div>
-		<span class="tooltip tooltip-repair">{{repair_tooltip}}</span>
 
 		<div id="btn_myshop" class="modern-icon-btn-px inv-btn-myshop" data-class-hidden="!myshop_visible"
 		     data-class-close-mode="!myshop_mode_open" data-class-locked="myshop_locked"
-		     data-event-click="my_inventory_myshop_click">
+		     data-event-click="my_inventory_myshop_click" data-attr-data-hint="myshop_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#9635;</span>
 		</div>
-		<span class="tooltip tooltip-myshop">{{myshop_tooltip}}</span>
 
-		<div id="btn_expand" class="modern-icon-btn-px inv-btn-expand" data-event-click="my_inventory_expand_click">
+		<div id="btn_expand" class="modern-icon-btn-px inv-btn-expand" data-event-click="my_inventory_expand_click" data-attr-data-hint="expand_tooltip">
 			<span class="modern-icon-btn-glyph-px">+</span>
 		</div>
-		<span class="tooltip tooltip-expand">{{expand_tooltip}}</span>
 
 		<!-- Set/Socket option header labels, each spanning half of #panel's width to match the
 		     former native hover-rect split. -->

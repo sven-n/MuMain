@@ -44,7 +44,6 @@
 .t-edge-left { width: 14px; decorator: image(gd-edge-left); }
 .t-edge-right { width: 14px; decorator: image(gd-edge-right); }
 
-
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
 
 /* RenderFrame() and the pages drew every one of these in (220, 220, 220). */
@@ -85,8 +84,6 @@
 .gd-btn.locked .gd-label { color: #646464; }
 
 #btn_exit { top: 391px; pointer-events: auto; }
-.tooltip { display: none; bottom: 38px; } /* 429 - 391 */
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 /* The guild list's frame, placed here rather than inline in the shared RML. The main box is
    shorter when the summary row is present, which is what `.with-footer` says. */

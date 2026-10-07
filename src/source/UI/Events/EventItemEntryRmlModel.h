@@ -28,6 +28,7 @@ struct EventItemEntryButtonEntry
     // CButton::Render(): height / 2 - h / 2 whole units down, the label font's line height in
     // physical px. Both follow the button's own height, so they stay per button.
     float labelLinePx = 0.f;
+    Rml::String hint;
 
     bool operator==(const EventItemEntryButtonEntry&) const = default;
 };

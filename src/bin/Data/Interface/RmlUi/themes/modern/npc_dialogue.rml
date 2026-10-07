@@ -47,10 +47,9 @@
 		<div id="btn_ans_next" class="nd-btn-r nd-btn-ans" data-class-locked="!ans_next_enabled"
 		     data-event-click="npcdialogue_ans_next_page"></div>
 
-		<div id="btn_exit" class="modern-icon-btn-px nd-btn-exit" data-event-click="npcdialogue_click_close">
+		<div id="btn_exit" class="modern-icon-btn-px nd-btn-exit" data-event-click="npcdialogue_click_close" data-attr-data-hint="exit_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
 	</div>
 </body>
 </rml>

@@ -1,6 +1,6 @@
 /* Legacy theme for CMyQuestInfoWindow, retiring its last CUIControl-family pieces
-   (CUICurQuestListBox, CUIQuestContentsListBox, CButton x3). #panel/frame sprites/exit button/
-   tooltip shape are shared with character_info/pet_info/party_info via docked_panel_frame.rcss
+   (CUICurQuestListBox, CUIQuestContentsListBox, CButton x3). #panel/frame sprites/exit button
+   are shared with character_info/pet_info/party_info via docked_panel_frame.rcss
    (linked in my_quest_info.rml before this file) -- only window-specific content lives here now.
    Coordinates below are plain reference px, not dp.
 
@@ -165,14 +165,6 @@
 /* Exit is a common close button -- legacy's sprite already has its own "X" baked in, so the
    shared label span is redundant. */
 .btn-exit-label { display: none; }
-
-.tooltip-open   { left: 12px; }
-.tooltip-giveup { left: 49px; }
-
-#btn_quest_open:hover ~ .tooltip-open,
-#btn_quest_giveup:hover ~ .tooltip-giveup {
-	display: block;
-}
 
 .jobchange-title {
 	display: block;

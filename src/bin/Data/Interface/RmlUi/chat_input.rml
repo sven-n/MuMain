@@ -12,45 +12,30 @@
 	<div id="panel">
 		<!-- Input target: normal / party / guild / gens. Exactly one is lit at a time. -->
 		<div id="btn_type_0" class="cib-btn cib-btn-normal" data-class-on="input_msg_type == 0"
-		     data-event-click="chat_set_type(0)"
-		     data-event-mouseover="chat_tooltip(0)" data-event-mouseout="chat_tooltip(-1)"></div>
+		     data-event-click="chat_set_type(0)" data-attr-data-hint="hint_0"></div>
 		<div id="btn_type_1" class="cib-btn cib-btn-party" data-class-on="input_msg_type == 1"
-		     data-event-click="chat_set_type(1)"
-		     data-event-mouseover="chat_tooltip(1)" data-event-mouseout="chat_tooltip(-1)"></div>
+		     data-event-click="chat_set_type(1)" data-attr-data-hint="hint_1"></div>
 		<div id="btn_type_2" class="cib-btn cib-btn-guild" data-class-on="input_msg_type == 2"
-		     data-event-click="chat_set_type(2)"
-		     data-event-mouseover="chat_tooltip(2)" data-event-mouseout="chat_tooltip(-1)"></div>
+		     data-event-click="chat_set_type(2)" data-attr-data-hint="hint_2"></div>
 		<div id="btn_type_3" class="cib-btn cib-btn-gens" data-class-on="input_msg_type == 3"
-		     data-event-click="chat_set_type(3)"
-		     data-event-mouseover="chat_tooltip(3)" data-event-mouseout="chat_tooltip(-1)"></div>
+		     data-event-click="chat_set_type(3)" data-attr-data-hint="hint_3"></div>
 
 		<!-- Independent toggles. -->
 		<div id="btn_whisper" class="cib-btn cib-btn-whisper" data-class-on="block_whisper"
-		     data-event-click="chat_toggle_whisper_block"
-		     data-event-mouseover="chat_tooltip(4)" data-event-mouseout="chat_tooltip(-1)"></div>
+		     data-event-click="chat_toggle_whisper_block" data-attr-data-hint="hint_4"></div>
 		<div id="btn_system" class="cib-btn cib-btn-system" data-class-on="show_system"
-		     data-event-click="chat_toggle_system"
-		     data-event-mouseover="chat_tooltip(5)" data-event-mouseout="chat_tooltip(-1)"></div>
+		     data-event-click="chat_toggle_system" data-attr-data-hint="hint_5"></div>
 		<div id="btn_chatlog" class="cib-btn cib-btn-chatlog" data-class-on="show_chat_log"
-		     data-event-click="chat_toggle_chatlog"
-		     data-event-mouseover="chat_tooltip(6)" data-event-mouseout="chat_tooltip(-1)"></div>
+		     data-event-click="chat_toggle_chatlog" data-attr-data-hint="hint_6"></div>
 		<div id="btn_frame" class="cib-btn cib-btn-frame" data-class-on="show_frame"
-		     data-event-click="chat_toggle_frame"
-		     data-event-mouseover="chat_tooltip(7)" data-event-mouseout="chat_tooltip(-1)"></div>
+		     data-event-click="chat_toggle_frame" data-attr-data-hint="hint_7"></div>
 
 		<!-- These two only exist while the chat log frame is shown, matching native, which renders
 		     them from inside its own IsShowFrame() branch. -->
 		<div id="btn_size" class="cib-btn cib-btn-size on" data-class-hidden="!show_frame"
-		     data-event-click="chat_size_step"
-		     data-event-mouseover="chat_tooltip(8)" data-event-mouseout="chat_tooltip(-1)"></div>
+		     data-event-click="chat_size_step" data-attr-data-hint="hint_8"></div>
 		<div id="btn_transparency" class="cib-btn cib-btn-alpha on" data-class-hidden="!show_frame"
-		     data-event-click="chat_alpha_step"
-		     data-event-mouseover="chat_tooltip(9)" data-event-mouseout="chat_tooltip(-1)"></div>
-
-		<!-- One tooltip, positioned from the hovered button's index using native's own formula
-		     (see CChatInputBox::RenderTooltip) rather than ten sibling elements. -->
-		<span id="tooltip" data-class-hidden="tooltip_index &lt; 0"
-		      data-style-left="tooltip_left + 'dp'">{{tooltip_text}}</span>
+		     data-event-click="chat_alpha_step" data-attr-data-hint="hint_9"></div>
 
 		<!-- Whisper target, then the message itself. Tab moves between them: that is RmlUi's own
 		     built-in document navigation, which replaces native's SetTabTarget() pairing. -->

@@ -56,22 +56,19 @@
 		<input id="shop_title" type="text" class="text-field my-shop-title-field"
 		       data-value="shop_title"/>
 
-		<div id="btn_exit" class="modern-icon-btn-px shop-btn-exit" data-event-click="my_shop_exit_click">
+		<div id="btn_exit" class="modern-icon-btn-px shop-btn-exit" data-event-click="my_shop_exit_click" data-attr-data-hint="exit_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
 
 		<div id="btn_open" class="modern-icon-btn-px shop-btn-open" data-class-locked="open_locked"
-		     data-event-click="my_shop_open_click">
+		     data-event-click="my_shop_open_click" data-attr-data-hint="open_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#10003;</span>
 		</div>
-		<span class="tooltip tooltip-open">{{open_tooltip}}</span>
 
 		<div id="btn_close" class="modern-icon-btn-px shop-btn-close" data-class-locked="close_locked"
-		     data-event-click="my_shop_close_click">
+		     data-event-click="my_shop_close_click" data-attr-data-hint="close_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#9632;</span>
 		</div>
-		<span class="tooltip tooltip-close">{{close_tooltip}}</span>
 
 		<!-- Former RenderTextInfo() -- fixed instructional text at the same reference-pixel offsets
 		     the native RenderText() calls used, static except still_opening's visibility. Colors are

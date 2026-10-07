@@ -13,8 +13,7 @@ No code-health item is left.
 
 In order:
 
-1. [One obvious component surface](#one-obvious-component-surface).
-2. [The counter-scale block](#the-counter-scale-block): settle the open question, then move it to
+1. [The counter-scale block](#the-counter-scale-block): settle the open question, then move it to
    `calc()`.
 
 Waiting on their own triggers: the [accepted constraints](#accepted-as-it-stands-with-its-trigger)
@@ -50,19 +49,6 @@ class. Upstream merging #983 only removes the dependency on the fork. The owners
 its model. `message_top` is per instance (native centres the message-plus-answer block by its line
 count), and legacy's separate `answers_top` exists because flow does not stack counter-scaled text
 layers, so a declarative version needs another bound number or the markup duplicated per quest state.
-
-## One obvious component surface
-
-A developer should meet one component family, not historical header boundaries: compatibility
-aliases or forwarding headers over mass renames. Done when every common UI concern has one canonical
-implementation or a documented presentation-specific split, discoverable without knowing the
-codebase's history. Known gaps:
-
-- **Hover hints, two mechanisms.** Item, skill, buff and button tooltips are the shared tooltip
-  (`UI::RmlBridge::Tooltip`; for a document element, `ElementTooltip`). The static button hints
-  inside RmlUi windows are still base.rcss's `.tooltip`, a sibling span shown on `:hover`: about 160
-  of them across 60 documents, plain text, not clamped to the screen. Each moves with two event
-  attributes and its text in the window's hint lookup, as `CMuHelperBar` did.
 
 ## The C++ ↔ RML/RCSS ownership boundary
 

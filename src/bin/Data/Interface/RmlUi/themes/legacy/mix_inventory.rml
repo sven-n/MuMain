@@ -104,9 +104,7 @@
 		</div>
 
 		<div id="btn_mix" class="mix-btn" data-class-hidden="!mix_visible" data-class-locked="mix_locked"
-		     data-event-click="mix_inventory_mix_click"></div>
-		<span class="sharp-text tooltip tooltip-mix"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{mix_tooltip}}</span></span>
+		     data-event-click="mix_inventory_mix_click" data-attr-data-hint="mix_tooltip"></div>
 	</div>
 </body>
 </rml>

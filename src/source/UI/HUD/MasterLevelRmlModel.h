@@ -37,6 +37,7 @@ struct MasterLevelRmlModel
     Rml::String columnText0;
     Rml::String columnText1;
     Rml::String columnText2;
+    Rml::String closeHint;
 
     std::vector<MasterLevelNodeEntry> nodes;
 };

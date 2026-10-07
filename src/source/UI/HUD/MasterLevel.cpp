@@ -35,23 +35,14 @@ namespace
     // re-shown this frame is never clobbered by another's Hide().
     const int kNodeHintOwner = 0;
     const int kExperienceHintOwner = 0;
-    const int kCloseHintOwner = 0;
 
     // Where the original anchored its hints, reference px: the node hint under the icon's left
-    // edge (above it for the lower ranks), the EXP hint under the label, the close button's
-    // CTooltip centred under the 13x14 button at (611, 9).
+    // edge (above it for the lower ranks), the EXP hint under the label.
     constexpr int kIconOffsetX = 8;
     constexpr int kNodeHintBelowIcon = 33;
     constexpr int kNodeHintFlipTop = 300;
     constexpr float kExperienceHintX = 466.0f;
     constexpr float kExperienceHintY = 26.0f;
-    constexpr int kCloseX = 611;
-    constexpr int kCloseY = 9;
-    constexpr int kCloseWidth = 13;
-    constexpr int kCloseHeight = 14;
-    constexpr int kCloseHintGap = 2;
-    constexpr int kCloseHintCenterX = kCloseX + kCloseWidth / 2;
-    constexpr int kCloseHintTop = kCloseY + kCloseHeight + kCloseHintGap;
 
     // The tree's own rectangle: 640 wide, down to the bottom of its 428-high background art.
     constexpr int kTreeHeight = 428;
@@ -522,6 +513,7 @@ void mu::ui::window::CMasterLevel::BindRmlModel(Rml::DataModelConstructor& c, Ma
     c.Bind("text_px", &model.textPx);
 
     c.Bind("class_name_text", &model.classNameText);
+    c.Bind("close_hint", &model.closeHint);
     c.Bind("master_level_text", &model.masterLevelText);
     c.Bind("level_point_text", &model.levelPointText);
     c.Bind("experience_text", &model.experienceText);
@@ -560,12 +552,6 @@ void mu::ui::window::CMasterLevel::BindRmlModel(Rml::DataModelConstructor& c, Ma
                         {
                             if (arguments.size() == 1)
                                 m_bExperienceHovered = arguments[0].Get<int>(0) != 0;
-                        });
-    c.BindEventCallback("master_close_hover",
-                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                        {
-                            if (arguments.size() == 1)
-                                m_bCloseHovered = arguments[0].Get<int>(0) != 0;
                         });
     c.BindEventCallback("master_close", [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                         { g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MASTER_LEVEL); });
@@ -646,6 +632,8 @@ void mu::ui::window::CMasterLevel::SyncHeaderTexts()
 
     SyncString(m_RmlView.Binder(), &MasterLevelRmlModel::classNameText, "class_name_text",
                StringUtils::WideToNarrow(I18N::Game::Lookup(this->ClassNameTextIndex)));
+    SyncString(m_RmlView.Binder(), &MasterLevelRmlModel::closeHint, "close_hint",
+               StringUtils::WideToNarrow(I18N::Game::Close388));
 
     mu_swprintf(buffer, I18N::Game::MasterLevelD, Master_Level_Data.nMLevel);
     SyncString(m_RmlView.Binder(), &MasterLevelRmlModel::masterLevelText, "master_level_text",
@@ -746,11 +734,6 @@ void mu::ui::window::CMasterLevel::SyncHints()
         ShowExperienceHint();
     else
         UI::RmlBridge::Tooltip::Hide(&kExperienceHintOwner);
-
-    if (m_bCloseHovered)
-        ShowCloseHint();
-    else
-        UI::RmlBridge::Tooltip::Hide(&kCloseHintOwner);
 }
 
 void mu::ui::window::CMasterLevel::ResetHints()
@@ -759,10 +742,8 @@ void mu::ui::window::CMasterLevel::ResetHints()
     m_HoveredNodeId = -1;
     m_PressedNodeId = -1;
     m_bExperienceHovered = false;
-    m_bCloseHovered = false;
     UI::RmlBridge::Tooltip::Hide(&kNodeHintOwner);
     UI::RmlBridge::Tooltip::Hide(&kExperienceHintOwner);
-    UI::RmlBridge::Tooltip::Hide(&kCloseHintOwner);
 }
 
 void mu::ui::window::CMasterLevel::ShowExperienceHint()
@@ -779,21 +760,6 @@ void mu::ui::window::CMasterLevel::ShowExperienceHint()
         UI::Scaling::PositionX(activeTransform, kExperienceHintX),
         UI::Scaling::PositionY(activeTransform, kExperienceHintY),
         UI::Tooltip::Placement::Below, &kExperienceHintOwner);
-}
-
-void mu::ui::window::CMasterLevel::ShowCloseHint()
-{
-    // The CTooltip the native close button carried: one centred line under the button.
-    const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-    UI::RmlBridge::Tooltip::Config config;
-    UI::RmlBridge::Tooltip::Line line;
-    line.text = StringUtils::WideToNarrow(I18N::Game::Close388);
-    config.lines.push_back(std::move(line));
-    config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(kCloseHintCenterX));
-    config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(kCloseHintTop));
-    config.centerHorizontally = true;
-    config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center;
-    UI::RmlBridge::Tooltip::Show(config, &kCloseHintOwner);
 }
 
 bool mu::ui::window::CMasterLevel::ShowNodeHint(int nodeId)

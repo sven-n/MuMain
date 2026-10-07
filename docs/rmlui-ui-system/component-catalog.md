@@ -498,15 +498,33 @@ Migrated onto it: the item/pet tooltip (`RenderItemInfo()`/`RenderRepairInfo()`,
 unchanged, only what happens internally moved), the skill-hotkey tooltip (`MainFrameWindow.cpp` —
 `g_pSkillList`'s own hover slot), the inventory Set/Socket option tooltip (`MyInventory.cpp` — its
 old embedded RmlUi implementation was deleted outright, not left running as a second mechanism),
-two smaller hover tooltips (`MasterLevel.cpp`, `CursedTempleSystem.cpp`), the buff strip and the
-MU Helper bar, and the cash shop's icon and close buttons.
+two smaller hover tooltips (`MasterLevel.cpp`, `CursedTempleSystem.cpp`) and the buff strip.
 
-**For an element of a document**: `UI::RmlBridge::ElementTooltip` (`RmlElementTooltip.h`). The
-element forwards `data-event-mouseover="x_hover(i)"` / `data-event-mouseout="x_leave"` to the
-window's model, which calls `Enter()` / `Leave()`; each frame the window passes the hovered
-element's lines to `Show()`, which anchors the tooltip to the element's drawn box, so it follows
-`dp` layout and transforms alike (`CBuffStrip`, `CMuHelperBar`, `CInGameShop`). `Leave()` counts
-only the element's own mouseout: a child's bubbles to it while the element is still hovered.
+**A static hint on an element of a document** is markup: `data-hint="text"` on the element, or
+`data-attr-data-hint="x"` for text the model binds. `UI::RmlBridge::DocumentHints`
+(`RmlDocumentHints.h`) shows it with no per-window code: once a frame, before the context updates,
+it finds the hovered element's nearest ancestor with a non-empty `data-hint` and shows that as a
+`Box::ButtonHint`, anchored to the element's drawn box with `CTooltip`'s geometry
+(`RmlTooltipPlacement.h`: centred 3 units right of the element, 2 units off it). It goes above the
+element, below it when there is no room above, and then starts under the cursor sprite, which
+hangs below the point it marks. Its unit is the panel's root transform scale for a document laid out
+in reference px, and the `dp` ratio (times the workspace slot's scale for a `workspace-placed` part)
+for a `dp` document, so the legacy theme's native text size follows each window. Polling the
+hovered element leaves nothing to unregister: a hidden document, a theme switch or a moved panel
+just stops matching. The element needs `pointer-events` (a decorative bar or row may have to opt
+back in). Every button and bar hint in the RmlUi windows is one; `EventItemEntryView`'s buttons
+take theirs from `Button::hint`.
+
+**A hint built from game state** (lines, colours or values per frame) uses
+`UI::RmlBridge::ElementTooltip` (`RmlElementTooltip.h`). The element forwards
+`data-event-mouseover="x_hover(i)"` / `data-event-mouseout="x_leave"` to the window's model, which
+calls `Enter()` / `Leave()`; each frame the window passes the hovered element's lines to `Show()`,
+which anchors the tooltip to the element's drawn box (`CBuffStrip`). `Leave()` counts only the
+element's own mouseout: a child's bubbles to it while the element is still hovered.
+
+**Placement.** `Config::flipAnchorY` is where a tooltip grows the other way when it does not fit on
+its own side of the anchor (a button hint: the button's other edge); without it, `Show()` only
+shifts the tooltip back on screen. `CTooltip` and `DocumentHints` both set it.
 
 **Owners.** Every caller passes an owner token, and hides only its own. The item information
 tooltip's is `UI::Tooltip::ItemInfoOwner()` (`LegacyTextListTooltip.h`), the default of
@@ -538,9 +556,7 @@ tool and has no RmlUi dependency to pull in. `ToRmlBridgeLines()` converts a res
 `SiegeWarBase.cpp`'s guild-skill tooltip build a `Config` from it. `Render()` has no callers and is
 kept on purpose; the MU Helper skill picker shows no hover tooltip, as native never did.
 
-**Deliberately not on this primitive**: the static button hints inside RmlUi windows (base.rcss's
-`.tooltip`, a sibling shown on `:hover`) — see `tracked-deferrals.md`'s component-surface entry.
-`HelpWindow.cpp`/`ItemExplanationWindow.cpp` stay on native `RenderTipTextList()` on purpose: they render unconditionally while their own window
+**Deliberately not on this primitive**: `HelpWindow.cpp`/`ItemExplanationWindow.cpp` stay on native `RenderTipTextList()` on purpose: they render unconditionally while their own window
 is open rather than on hover, so they don't fit this primitive's owner-token model (the newest
 `Show()` always wins, which assumes a momentary, naturally mutually-exclusive hover tooltip) — a
 second, non-competing primitive for them was scoped and rejected as not worth duplicating most of

@@ -45,10 +45,9 @@
 			</div>
 		</div>
 
-		<div id="btn_exit" class="modern-icon-btn-px storext-btn-exit" data-event-click="storage_ext_exit_click">
+		<div id="btn_exit" class="modern-icon-btn-px storext-btn-exit" data-event-click="storage_ext_exit_click" data-attr-data-hint="exit_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
 	</div>
 </body>
 </rml>

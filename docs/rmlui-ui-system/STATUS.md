@@ -87,8 +87,9 @@ a new port inherits them:
 - **Scroll thumb.** The legacy `.scroll-pane` thumb is the native 15x30 knob, not a proportional
   bar; a list the original scrolled one row per wheel notch takes `mousescroll` itself
   (`CMoveCommandWindow::RmlWheelList()`), since RmlUi scrolls 80 dp per notch.
-- **Button hover text.** `CTooltip` uses the shared tooltip's `Config::Box::ButtonHint`
-  (unframed, 2 units off its rect); the framed box is for `RenderTipTextList()`.
+- **Button hover text.** A document's `data-hint` and a native button's `CTooltip` both use the
+  shared tooltip's `Config::Box::ButtonHint` (unframed, 2 units off the button, the other side
+  when there is no room); the framed box is for `RenderTipTextList()`.
 - **Hangul.** NanumGothic is a fallback face, so Korean game text draws in any family.
 - **Alpha test.** Art the original drew under `EnableAlphaTest()` (reference 0.25) stays invisible
   while its fade is below a quarter (the Illusion Temple banner).

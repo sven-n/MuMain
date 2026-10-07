@@ -11,7 +11,7 @@
      already-ported CQuestProgress/CQuestProgressByEtc. Two independently paginated lists share this
      one document: npc_lines (top) and answers (bottom, sourced from either GetNPCDlgAnswer() or
      quest-list-mode's quest subjects -- see NPCDialogueRmlModel.h's own comment). #panel/frame
-     sprites/exit button/tooltip shape come from docked_panel_frame.rcss, same family as
+     sprites/exit button come from docked_panel_frame.rcss, same family as
      character_info/my_quest_info/pet_info/party_info/quest_progress. -->
 <body>
 	<div id="panel" data-model="npc_dialogue" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
@@ -56,13 +56,9 @@
 		<div id="btn_ans_next" class="nd-btn-r nd-btn-ans" data-class-locked="!ans_next_enabled"
 		     data-event-click="npcdialogue_ans_next_page"></div>
 
-		<div id="btn_exit" data-event-click="npcdialogue_click_close">
+		<div id="btn_exit" data-event-click="npcdialogue_click_close" data-attr-data-hint="exit_tooltip">
 			<span class="btn-exit-label">×</span>
 		</div>
-		<span class="sharp-text tooltip tooltip-exit"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
-		      data-style-width="(110 * root_scale) + 'px'"
-		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
 	</div>
 </body>
 </rml>

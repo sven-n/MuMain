@@ -39,7 +39,7 @@
 				<div class="corner corner-bl"></div>
 				<div class="corner corner-br"></div>
 				<div class="hit"></div>
-				<div class="close" data-event-click="minimap_close"></div>
+				<div class="close" data-event-click="minimap_close" data-attr-data-hint="close_hint"></div>
 			</div>
 			<div class="hint" data-if="hint_visible" data-style-left="hint_left + 'px'" data-style-top="hint_top + 'px'"
 			     data-style-width="hint_width + 'px'" data-style-height="hint_height + 'px'">

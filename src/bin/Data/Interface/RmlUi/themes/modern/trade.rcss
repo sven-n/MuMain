@@ -154,29 +154,6 @@
 .trade-btn-exit { left: 13px;  color: #d59b79; border-color: #5c382b; }
 .trade-btn-zen  { left: 104px; }
 
-.tooltip {
-	display: none;
-	position: absolute;
-	top: 376px;
-	width: 120px;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	border: 1px token(border-frame);
-	color: token(text-primary);
-	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "token(font-body)";
-	font-size: 11px;
-	pointer-events: none;
-	z-index: 1;
-}
-.tooltip-exit { left: -20px; }
-.tooltip-zen  { left: 60px; }
-#btn_exit:hover ~ .tooltip-exit,
-#btn_zen:hover ~ .tooltip-zen {
-	display: block;
-}
-
 /* Warning/notice help text -- squeezed into the 22px gap between the your-side confirm checkbox
    and the divider (198..220), same reasoning as every other px value in this file: the grids around
    it are fixed, so this band is what's left. "Warning" blinks via warning_opacity (C++ mirrors the

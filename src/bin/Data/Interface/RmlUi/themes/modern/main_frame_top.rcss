@@ -60,34 +60,3 @@
 	pointer-events: none;
 }
 
-/* Same translateX(-50%)-on-display:none-toggle bug as the tooltips above -- explicit width and a
-   precomputed static `left` instead of a transform. */
-.tooltip-top {
-	display: none;
-	position: absolute;
-	top: 28dp;
-	width: 100dp;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	border: 1dp token(border-frame);
-	color: #ffffff;
-	padding: 2dp 4dp;
-	border-radius: token(radius-sm)dp;
-	font-family: "token(font-body)";
-	font-size: 11dp;
-	pointer-events: none;
-}
-/* left = button center minus half the tooltip's width. */
-#tooltip_cshop_top    { left: -22dp; } /* button center 28dp */
-#tooltip_chainfo_top  { left: 28dp;  } /* button center 78dp */
-#tooltip_myinven_top  { left: 78dp;  } /* button center 128dp */
-#tooltip_friend_top   { left: 128dp; } /* button center 178dp */
-#tooltip_window_top   { left: 178dp; } /* button center 228dp */
-#btn_cshop_top:hover ~ #tooltip_cshop_top,
-#btn_chainfo_top:hover ~ #tooltip_chainfo_top,
-#btn_myinven_top:hover ~ #tooltip_myinven_top,
-#btn_friend_top:hover ~ #tooltip_friend_top,
-#btn_window_top:hover ~ #tooltip_window_top {
-	display: block;
-	z-index: 1;
-}

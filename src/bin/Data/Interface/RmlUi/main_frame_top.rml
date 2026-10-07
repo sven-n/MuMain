@@ -13,28 +13,23 @@
 	     all here (root cause unknown), flex sidesteps it. -->
 	<div id="top_right_row" class="anchor-top-left">
 		<div id="buttons_top">
-			<div id="btn_cshop_top" class="frame-btn-top" data-class-open="cshop_open" data-event-click="mainframe_cshop_click">
+			<div id="btn_cshop_top" class="frame-btn-top" data-class-open="cshop_open" data-event-click="mainframe_cshop_click" data-attr-data-hint="cshop_tooltip">
 				<span>SHOP</span>
 			</div>
-			<span class="tooltip-top" id="tooltip_cshop_top">{{cshop_tooltip}}</span>
-			<div id="btn_chainfo_top" class="frame-btn-top" data-class-open="chainfo_open" data-event-click="mainframe_chainfo_click">
+			<div id="btn_chainfo_top" class="frame-btn-top" data-class-open="chainfo_open" data-event-click="mainframe_chainfo_click" data-attr-data-hint="chainfo_tooltip">
 				<span>CHAR</span>
 				<div class="alert-dot-top" data-class-hidden="!chainfo_alert"></div>
 			</div>
-			<span class="tooltip-top" id="tooltip_chainfo_top">{{chainfo_tooltip}}</span>
-			<div id="btn_myinven_top" class="frame-btn-top" data-class-open="myinven_open" data-event-click="mainframe_myinven_click">
+			<div id="btn_myinven_top" class="frame-btn-top" data-class-open="myinven_open" data-event-click="mainframe_myinven_click" data-attr-data-hint="myinven_tooltip">
 				<span>INV</span>
 			</div>
-			<span class="tooltip-top" id="tooltip_myinven_top">{{myinven_tooltip}}</span>
-			<div id="btn_friend_top" class="frame-btn-top" data-class-open="friend_open" data-event-click="mainframe_friend_click">
+			<div id="btn_friend_top" class="frame-btn-top" data-class-open="friend_open" data-event-click="mainframe_friend_click" data-attr-data-hint="friend_tooltip">
 				<span>FRIEND</span>
 				<div class="alert-dot-top" data-class-hidden="!friend_alert"></div>
 			</div>
-			<span class="tooltip-top" id="tooltip_friend_top">{{friend_tooltip}}</span>
-			<div id="btn_window_top" class="frame-btn-top" data-class-open="window_open" data-event-click="mainframe_window_click">
+			<div id="btn_window_top" class="frame-btn-top" data-class-open="window_open" data-event-click="mainframe_window_click" data-attr-data-hint="window_tooltip">
 				<span>MENU</span>
 			</div>
-			<span class="tooltip-top" id="tooltip_window_top">{{window_tooltip}}</span>
 		</div>
 	</div>
 </body>

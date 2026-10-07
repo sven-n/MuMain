@@ -45,10 +45,9 @@
 			</div>
 		</div>
 
-		<div id="btn_exit" class="modern-icon-btn-px party-btn-exit" data-event-click="party_click_exit">
+		<div id="btn_exit" class="modern-icon-btn-px party-btn-exit" data-event-click="party_click_exit" data-attr-data-hint="exit_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
 	</div>
 </body>
 </rml>

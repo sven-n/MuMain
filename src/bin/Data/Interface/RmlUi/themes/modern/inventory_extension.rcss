@@ -28,25 +28,6 @@
 	border-color: #5c382b;
 }
 
-.tooltip {
-	display: none;
-	position: absolute;
-	top: 376px;
-	left: 40px;
-	width: 120px;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	border: 1px token(border-frame);
-	color: token(text-primary);
-	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "token(font-body)";
-	font-size: 11px;
-	pointer-events: none;
-	z-index: 1;
-}
-#btn_exit:hover ~ .tooltip-exit { display: block; }
-
 /* Locked (not-yet-purchased) page badge -- vector tile instead of legacy's raster lock-number
    sprite, matching this theme's forged-metal chrome language (same dimmed-tile idea as
    base.rcss's .modern-icon-btn-px.locked). Footprint matches the native placeholder area this

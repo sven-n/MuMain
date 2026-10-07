@@ -13,8 +13,6 @@
 
 /* The MU Helper's close sits beside its Save/Initialization row, not at the docked family's 13. */
 #btn_exit { left: 20px; top: 388px; }
-.tooltip { top: 361px; }
-.tooltip-exit { left: -17px; }
 
 .mh-text {
 	display: block;

@@ -7,6 +7,7 @@
 #include "UI/RmlBridge/RmlThemedView.h"
 
 #pragma warning(disable : 4786)
+#include <array>
 #include <string>
 #include <vector>
 
@@ -36,9 +37,8 @@ namespace mu::ui::window
         bool showFrame = false;
         bool whisperSend = true;
 
-        int tooltipIndex = -1;  // INPUT_TOOLTIP_* of the hovered button, or -1
-        float tooltipLeft = 0.0f;
-        Rml::String tooltipText;
+        // The buttons' hints, in the button row's order.
+        std::array<Rml::String, 10> buttonHints;
     };
 
     class CChatInputBox : public CObject
@@ -60,31 +60,7 @@ namespace mu::ui::window
             INPUT_GENS_MESSAGE,
         };
 
-        enum INPUT_TOOLTIP_TYPE
-        {
-            INPUT_TOOLTIP_NOTHING = -1,
-
-            INPUT_TOOLTIP_NORMAL,
-            INPUT_TOOLTIP_PARTY,
-            INPUT_TOOLTIP_GUILD,
-            INPUT_TOOLTIP_GENS,
-
-            INPUT_TOOLTIP_WHISPER,
-            INPUT_TOOLTIP_SYSTEM,
-            INPUT_TOOLTIP_CHAT,
-
-            INPUT_TOOLTIP_FRAME,
-            INPUT_TOOLTIP_SIZE,
-            INPUT_TOOLTIP_TRANSPARENCY,
-        };
-
     private:
-        // Both survive the port only because RenderTooltip()'s x formula, reproduced verbatim
-        // in SyncRmlModel(), is expressed in them.
-        static constexpr float BUTTON_WIDTH = 27.0f;
-
-        static constexpr float GROUP_SEPARATING_WIDTH = 6.0f;
-
         typedef std::wstring type_string;
         typedef std::vector<type_string>	type_vec_history;
 
@@ -101,7 +77,6 @@ namespace mu::ui::window
 
         int m_iCurChatHistory, m_iCurWhisperIDHistory;
 
-        int m_iTooltipType;
         int m_iInputMsgType;
         bool m_bBlockWhisper;
         bool m_bShowSystemMessages;

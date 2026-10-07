@@ -45,7 +45,7 @@
 	</div>
 	<div class="text-row" data-if="tooltip != ''" data-style-left="(tooltip_centre_x - 300) + 'px'"
 	     data-style-top="tooltip_top + 'px'">
-		<span data-attr-class="'tooltip tooltip--' + tooltip_band" data-style-font-size="bold_text_px + 'px'"
+		<span data-attr-class="'durability-tip durability-tip--' + tooltip_band" data-style-font-size="bold_text_px + 'px'"
 		      data-style-line-height="bold_line_height_px + 'px'">{{tooltip}}</span>
 	</div>
 </body>

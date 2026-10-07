@@ -95,10 +95,9 @@
 			</div>
 		</div>
 
-		<div id="btn_exit" class="modern-icon-btn-px ext-btn-exit" data-event-click="inventory_extension_exit_click">
+		<div id="btn_exit" class="modern-icon-btn-px ext-btn-exit" data-event-click="inventory_extension_exit_click" data-attr-data-hint="exit_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
 
 		<!-- Locked (not-yet-purchased) pages -- vector badge instead of legacy's raster lock
 		     glyph, matching this theme's forged-metal chrome language. Table/empty-slot backing

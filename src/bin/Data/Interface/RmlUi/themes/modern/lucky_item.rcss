@@ -37,29 +37,6 @@
 	border-color: #5c382b;
 }
 
-.tooltip {
-	display: none;
-	position: absolute;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	border: 1px token(border-frame);
-	color: token(text-primary);
-	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "token(font-body)";
-	font-size: 11px;
-	pointer-events: none;
-	z-index: 1;
-}
-.tooltip-mix {
-	top: 364px;
-	left: 50%;
-	width: 120px;
-	margin-left: -60px;
-	text-align: center;
-}
-#btn_mix:hover ~ .tooltip-mix { display: block; }
-
 /* Former Render_Frame()'s m_sText[]/AddText() text loop. left:10/right:10 (rather than a fixed
    width) follows #panel's theme width minus 20px. top:208px matches the native `m_ptPos.y + 18 + 190` baseline. Each line
    is a fixed 11px-tall block (matching the native loop's `11.0f * i` per-slot spacing) so blank

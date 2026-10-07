@@ -57,30 +57,26 @@
 		<span id="fee_label" class="stor-fee-label-px">{{fee_label}}</span>
 		<span id="fee_value" class="modern-wallet-value-px">{{fee_value}}</span>
 
-		<div id="btn_insert" class="modern-icon-btn-px stor-btn-insert" data-event-click="storage_insert_click">
+		<div id="btn_insert" class="modern-icon-btn-px stor-btn-insert" data-event-click="storage_insert_click" data-attr-data-hint="insert_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#8595;</span>
 		</div>
-		<span class="tooltip tooltip-insert">{{insert_tooltip}}</span>
 
-		<div id="btn_take" class="modern-icon-btn-px stor-btn-take" data-event-click="storage_take_click">
+		<div id="btn_take" class="modern-icon-btn-px stor-btn-take" data-event-click="storage_take_click" data-attr-data-hint="take_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#8593;</span>
 		</div>
-		<span class="tooltip tooltip-take">{{take_tooltip}}</span>
 
 		<!-- Lock icon toggle mirrors my_inventory.rml's .inv-btn-myshop/data-class-close-mode --
 		     modern doesn't have distinct open/closed art, so only the accent recolors (see
 		     storage.rcss's .stor-btn-lock.locked-mode), same as myshop's own modern treatment. -->
 		<div id="btn_lock" class="modern-icon-btn-px stor-btn-lock" data-class-locked-mode="storage_locked"
-		     data-event-click="storage_lock_click">
+		     data-event-click="storage_lock_click" data-attr-data-hint="lock_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#9679;</span>
 		</div>
-		<span class="tooltip tooltip-lock">{{lock_tooltip}}</span>
 
 		<div id="btn_expand" class="modern-icon-btn-px stor-btn-expand" data-class-hidden="!expand_visible"
-		     data-event-click="storage_expand_click">
+		     data-event-click="storage_expand_click" data-attr-data-hint="expand_tooltip">
 			<span class="modern-icon-btn-glyph-px">+</span>
 		</div>
-		<span class="tooltip tooltip-expand">{{expand_tooltip}}</span>
 	</div>
 </body>
 </rml>

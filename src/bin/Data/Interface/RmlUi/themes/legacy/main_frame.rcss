@@ -2,7 +2,7 @@
    fills use real legacy gauge textures; numeric readouts are plain text; buttons use their sheet's
    own hover frame, as native does. */
 
-/* The modern theme's flat backing, and the readout and hint variants this theme doesn't use. */
+/* The modern theme's flat backing, and the readout variant this theme doesn't use. */
 #gauge_fill_left, #gauge_fill_right, #item_band_fill, #skill_band_fill, #gauge_frame,
 .gauge-num.value-full {
 	display: none;
@@ -42,7 +42,7 @@
 @spritesheet mainframe-highlight-sheet { src: "../../../newui_menu02-03.jpg"; mainframe-skill-list-highlight: 0px 0px 160px 40px; }
 #skill_list_highlight { position: absolute; left: 0dp; top: 0dp; width: 160dp; height: 40dp; pointer-events: none; decorator: image(mainframe-skill-list-highlight); }
 /* pointer-events:auto required -- otherwise these inherit body's none (base.rcss), and
-   #bar_hp:hover ~ .tooltip-hp etc. below could never fire. */
+   the gauges' hints could never show. */
 .gauge-slot {
 	position: absolute;
 	pointer-events: auto;
@@ -51,8 +51,6 @@
 #bar_sd   { left: 46dp; top: 0dp; width: 16dp; height: 39dp; }
 #bar_ag   { left: 0dp;  top: 0dp; width: 16dp; height: 39dp; }
 #bar_mp   { left: 17dp; top: 1dp; width: 45dp; height: 39dp; }
-/* Room for the hints: an auto-width box can't grow past its containing block. */
-.hint-layer { position: absolute; left: 0dp; top: 0dp; width: 640dp; height: 0dp; pointer-events: none; }
 
 /* Fills bottom-up (height = filled fraction), revealing the bottom of the art at its fixed size
    while the level drops -- the original moved its quad's top and its texture rows down together.
@@ -106,38 +104,6 @@
 #bar_mp .gauge-num { left: -20dp; }
 #bar_sd .gauge-num { left: -35dp; top: 31dp; }
 #bar_ag .gauge-num { left: -40.5dp; top: 31dp; }
-
-/* Sibling hints avoid the trigger's narrow shrink-to-fit bounds. The RML font-size binding
-   (hint_px: the original's native text size) is in screen pixels, so the hint's own spacing
-   stays in px too.
-   Use content width and stable edge anchors, not a hidden box's percentage transform. */
-.tooltip {
-	display: none;
-	position: absolute;
-	width: auto;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	color: token(text-primary);
-	padding: 1px 2px;
-	border-radius: 0dp;
-	font-family: "DejaVu Sans";
-	font-size: 10dp;
-	pointer-events: none;
-}
-.tooltip-hp { left: 0dp; }
-.tooltip-sd { left: 26dp; }
-.tooltip-ag { left: -20dp; }
-.tooltip-mp { left: 17dp; }
-#bar_hp:hover ~ .hint-layer .tooltip-hp.native-hint,
-#bar_sd:hover ~ .hint-layer .tooltip-sd.native-hint,
-#bar_ag:hover ~ .hint-layer .tooltip-ag.native-hint,
-#bar_mp:hover ~ .hint-layer .tooltip-mp.native-hint,
-#exp:hover .native-hint {
-	display: block;
-	z-index: 1;
-}
-/* All four gauge hints share one row, 13 above the gauges' tops. */
-.tooltip-hp, .tooltip-sd, .tooltip-ag, .tooltip-mp { top: -13dp; }
 
 /* Buttons, next to the mana gauge. */
 @spritesheet mainframe-btn-cshop-sheet   { src: "../../../partCharge1/newui_menu_Bt05.jpg"; mainframe-btn-cshop-normal: 0px 0px 30px 41px; mainframe-btn-cshop-hover: 0px 41px 30px 41px; mainframe-btn-cshop-open: 0px 82px 30px 41px; }
@@ -290,21 +256,6 @@
 #btn_window   { left: 121dp; decorator: image(mainframe-btn-window-normal); }
 #btn_window.open   { decorator: image(mainframe-btn-window-open); }
 
-#buttons .tooltip { top: -11dp; }
-.tooltip-cshop    { left: -18dp; }
-.tooltip-chainfo  { left: 18dp; }
-.tooltip-myinven  { left: 45dp; }
-.tooltip-friend   { right: 178dp; }
-.tooltip-window   { right: 148dp; }
-#btn_cshop:hover ~ .tooltip-cshop,
-#btn_chainfo:hover ~ .tooltip-chainfo,
-#btn_myinven:hover ~ .tooltip-myinven,
-#btn_friend:hover ~ .tooltip-friend,
-#btn_window:hover ~ .tooltip-window {
-	display: block;
-	z-index: 1;
-}
-
 /* Char-info quest-alert / friend mail-chat-alert blink dot. */
 .alert-dot {
 	position: absolute;
@@ -317,7 +268,7 @@
 	pointer-events: none;
 }
 
-/* EXP across the whole strip; pointer-events:auto so #exp:hover .tooltip below can fire. */
+/* EXP across the whole strip; pointer-events:auto so its hint can show. */
 #exp { pointer-events: auto; }
 /* Original menu artwork's bottom strip, independent of the progress fill. */
 @spritesheet mainframe-menu01-sheet { src: "../../../newui_menu01.jpg"; mainframe-frame-left: 0px 0px 256px 41px; mainframe-exp-left: 0px 41px 256px 10px; }
@@ -354,11 +305,6 @@
 	font-size: 12dp;
 	line-height: 12dp;
 	pointer-events: none;
-}
-/* EXP shares the gauge hint row; #exp starts at reference y=470. */
-.exp-tooltip {
-	top: -52dp;
-	left: 280dp;
 }
 
 /* The pet's four commands, in the row the original drew them in. */

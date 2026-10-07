@@ -90,9 +90,6 @@
 	pointer-events: auto;
 }
 #btn_exit:hover { border-color: token(accent-steel-hover); }
-.tooltip { display: none; top: 365px; }
-.tooltip-exit { left: -24px; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 /* The rank strip and the description box, piece by piece. */
 .fill-strip { left: 16px; top: 252px; width: 52px; height: 20px; }

@@ -29,81 +29,61 @@
 	</div>
 
 	<!-- Each gauge carries its readout twice, current value (.value-current) and current/max
-	     (.value-full), and each hint twice: .native-hint renders at the original's text size,
-	     .scaled-hint scales with the HUD. A theme shows one of each. The hints sit in a
-	     .hint-layer the theme sizes wider than the gauges: this RmlUi build clamps an
-	     auto-width box to its containing block. -->
+	     (.value-full); a theme shows one. -->
 	<div id="gauges_left" class="hud-part">
-		<div id="bar_hp" class="gauge-slot slot-frame slot-fill">
+		<div id="bar_hp" class="gauge-slot slot-frame slot-fill" data-attr-data-hint="hp_tooltip">
 			<div id="bar_hp_fill" class="gauge-fill gauge-fill-hp gauge-fill-vertical" data-class-poisoned="poisoned" data-style-height="hp_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-hp gauge-fill-horizontal" data-class-poisoned="poisoned" data-style-width="hp_fraction * 100 + '%'"></div>
 			<span class="gauge-num value-current">{{hp_current_text}}</span>
 			<span class="gauge-num value-full">{{hp_text}}</span>
 		</div>
-		<div id="bar_sd" class="gauge-slot slot-frame slot-fill">
+		<div id="bar_sd" class="gauge-slot slot-frame slot-fill" data-attr-data-hint="sd_tooltip">
 			<div class="gauge-fill gauge-fill-sd gauge-fill-vertical" data-style-height="sd_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-sd gauge-fill-horizontal" data-style-width="sd_fraction * 100 + '%'"></div>
 			<span class="gauge-num value-current">{{sd_current_text}}</span>
 			<span class="gauge-num value-full">{{sd_text}}</span>
 		</div>
-		<div class="hint-layer">
-			<span class="tooltip tooltip-hp native-hint" data-style-font-size="hint_px + 'px'">{{hp_tooltip}}</span>
-			<span class="tooltip tooltip-hp scaled-hint">{{hp_tooltip}}</span>
-			<span class="tooltip tooltip-sd native-hint" data-style-font-size="hint_px + 'px'">{{sd_tooltip}}</span>
-			<span class="tooltip tooltip-sd scaled-hint">{{sd_tooltip}}</span>
-		</div>
 	</div>
 	<div id="gauges_right" class="hud-part">
-		<div id="bar_ag" class="gauge-slot slot-frame slot-fill">
+		<div id="bar_ag" class="gauge-slot slot-frame slot-fill" data-attr-data-hint="ag_tooltip">
 			<div class="gauge-fill gauge-fill-ag gauge-fill-vertical" data-style-height="ag_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-ag gauge-fill-horizontal" data-style-width="ag_fraction * 100 + '%'"></div>
 			<span class="gauge-num value-current">{{ag_current_text}}</span>
 			<span class="gauge-num value-full">{{ag_text}}</span>
 		</div>
-		<div id="bar_mp" class="gauge-slot slot-frame slot-fill">
+		<div id="bar_mp" class="gauge-slot slot-frame slot-fill" data-attr-data-hint="mp_tooltip">
 			<div class="gauge-fill gauge-fill-mp gauge-fill-vertical" data-style-height="mp_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-mp gauge-fill-horizontal" data-style-width="mp_fraction * 100 + '%'"></div>
 			<span class="gauge-num value-current">{{mp_current_text}}</span>
 			<span class="gauge-num value-full">{{mp_text}}</span>
-		</div>
-		<div class="hint-layer">
-			<span class="tooltip tooltip-ag native-hint" data-style-font-size="hint_px + 'px'">{{ag_tooltip}}</span>
-			<span class="tooltip tooltip-ag scaled-hint">{{ag_tooltip}}</span>
-			<span class="tooltip tooltip-mp native-hint" data-style-font-size="hint_px + 'px'">{{mp_tooltip}}</span>
-			<span class="tooltip tooltip-mp scaled-hint">{{mp_tooltip}}</span>
 		</div>
 	</div>
 
 	<!-- The original's bottom button row. A theme that puts these buttons elsewhere hides it (the
 	     modern theme's are in main_frame_top.rml). -->
 	<div id="buttons" class="hud-part">
-		<div id="btn_cshop" class="frame-btn slot-frame slot-fill" data-class-open="cshop_open" data-event-click="mainframe_cshop_click">
+		<div id="btn_cshop" class="frame-btn slot-frame slot-fill" data-class-open="cshop_open" data-event-click="mainframe_cshop_click" data-attr-data-hint="cshop_tooltip">
 			<span class="btn-icon-label">SHOP</span>
 		</div>
-		<span class="tooltip tooltip-cshop" data-style-font-size="hint_px + 'px'">{{cshop_tooltip}}</span>
-		<div id="btn_chainfo" class="frame-btn slot-frame slot-fill" data-class-open="chainfo_open" data-event-click="mainframe_chainfo_click">
+		<div id="btn_chainfo" class="frame-btn slot-frame slot-fill" data-class-open="chainfo_open" data-event-click="mainframe_chainfo_click" data-attr-data-hint="chainfo_tooltip">
 			<span class="btn-icon-label">CHAR</span>
 			<div class="alert-dot" data-class-hidden="!chainfo_alert"></div>
 		</div>
-		<span class="tooltip tooltip-chainfo" data-style-font-size="hint_px + 'px'">{{chainfo_tooltip}}</span>
-		<div id="btn_myinven" class="frame-btn slot-frame slot-fill" data-class-open="myinven_open" data-event-click="mainframe_myinven_click">
+		<div id="btn_myinven" class="frame-btn slot-frame slot-fill" data-class-open="myinven_open" data-event-click="mainframe_myinven_click" data-attr-data-hint="myinven_tooltip">
 			<span class="btn-icon-label">INV</span>
 		</div>
-		<span class="tooltip tooltip-myinven" data-style-font-size="hint_px + 'px'">{{myinven_tooltip}}</span>
-		<div id="btn_friend" class="frame-btn slot-frame slot-fill" data-class-open="friend_open" data-event-click="mainframe_friend_click">
+		<div id="btn_friend" class="frame-btn slot-frame slot-fill" data-class-open="friend_open" data-event-click="mainframe_friend_click" data-attr-data-hint="friend_tooltip">
 			<span class="btn-icon-label">FRIEND</span>
 			<div class="alert-dot" data-class-hidden="!friend_alert"></div>
 		</div>
-		<span class="tooltip tooltip-friend" data-style-font-size="hint_px + 'px'">{{friend_tooltip}}</span>
-		<div id="btn_window" class="frame-btn slot-frame slot-fill" data-class-open="window_open" data-event-click="mainframe_window_click">
+		<div id="btn_window" class="frame-btn slot-frame slot-fill" data-class-open="window_open" data-event-click="mainframe_window_click" data-attr-data-hint="window_tooltip">
 			<span class="btn-icon-label">MENU</span>
 		</div>
-		<span class="tooltip tooltip-window" data-style-font-size="hint_px + 'px'">{{window_tooltip}}</span>
 	</div>
 
 	<!-- EXP bar, with the original art's bottom strip behind it (.exp-frame). exp_fraction is
 	     progress within the current decile, not overall level. -->
-	<div id="exp" class="hud-part">
+	<div id="exp" class="hud-part" data-attr-data-hint="exp_tooltip">
 		<div id="exp_frame_left" class="exp-frame"></div>
 		<div id="exp_frame_middle" class="exp-frame"></div>
 		<div id="exp_frame_right" class="exp-frame"></div>
@@ -111,8 +91,6 @@
 			<div id="exp_fill" data-style-width="exp_fraction * 100 + '%'"></div>
 		</div>
 		<span id="exp_digit">{{exp_digit}}</span>
-		<span class="tooltip exp-tooltip native-hint" data-style-font-size="hint_px + 'px'">{{exp_tooltip}}</span>
-		<span class="tooltip exp-tooltip scaled-hint">{{exp_tooltip}}</span>
 	</div>
 
 	<!-- Item hotkeys: hover highlight, stack count, right-click-to-use, and the icon -- the item's

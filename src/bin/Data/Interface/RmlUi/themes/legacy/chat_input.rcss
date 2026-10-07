@@ -71,22 +71,6 @@
    implements (engine-findings.md). */
 .cib-btn:active { filter: brightness(0.75); }
 
-/* Sits above the bar. left is bound from C++ using native's own index formula, and the element
-   centres itself on that point -- native did the centring by subtracting half the measured text
-   width, which CSS does without needing the measurement. */
-#tooltip {
-	position: absolute;
-	top: -15dp;
-	transform: translateX(-50%);
-	white-space: nowrap;
-	padding: 0 3dp;
-	background-color: rgba(0, 0, 0, 180);
-	color: rgb(255, 255, 255);
-	font-size: 11dp;
-	pointer-events: none;
-	z-index: 1;
-}
-
 .cib-whisper-field {
 	position: absolute;
 	left: 5dp;

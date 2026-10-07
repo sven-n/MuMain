@@ -5,11 +5,9 @@
 #include "UI/HUD/MainFrameWindow.h"
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Tooltip.h"
 #include "UI/HUD/MiniMapLayout.h"
 #include "UI/HUD/MiniMapRmlModel.h"
 #include "UI/RmlBridge/RmlThemedView.h"
-#include "UI/Widgets/Window/Tooltip.h"
 
 #include <string>
 
@@ -65,8 +63,6 @@ private:
 
     // The world folder (e.g. L"World1") whose mini_map texture the document shows.
     std::wstring m_WorldName;
-    // m_BtnExit's hint ("Close", above the button).
-    CTooltip m_ExitTooltip;
 
     void BindRmlModel(Rml::DataModelConstructor& c, MiniMapRmlModel& model);
     UI::RmlBridge::ThemedView<MiniMapRmlModel> m_RmlView{"mini_map",

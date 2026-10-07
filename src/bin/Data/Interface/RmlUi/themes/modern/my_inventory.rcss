@@ -35,40 +35,12 @@
    family (generalized from this window's own original recipe -- see that file's comment) at their
    default geometry, which already matches this window exactly. Only per-instance specifics stay
    here: each button's own left offset, the exit button's warm-red accent, myshop's close-mode
-   accent, and the hover-hint tooltip positions. */
+   accent. */
 .inv-btn-exit   { left: 15px;  color: #d59b79; border-color: #5c382b; }
 .inv-btn-repair { left: 56px;  }
 .inv-btn-myshop { left: 97px;  }
 .inv-btn-myshop.close-mode { color: token(accent-gold-hover); border-color: token(border-hover); }
 .inv-btn-expand { left: 138px; }
-
-.tooltip {
-	display: none;
-	position: absolute;
-	top: 376px;
-	width: 120px;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	border: 1px token(border-frame);
-	color: token(text-primary);
-	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "token(font-body)";
-	font-size: 11px;
-	pointer-events: none;
-	z-index: 1;
-}
-.tooltip-exit   { left: -27px; }
-.tooltip-repair { left: 15px; }
-.tooltip-myshop { left: 55px; }
-.tooltip-expand { left: 96px; }
-
-#btn_exit:hover ~ .tooltip-exit,
-#btn_repair:hover ~ .tooltip-repair,
-#btn_myshop:hover ~ .tooltip-myshop,
-#btn_expand:hover ~ .tooltip-expand {
-	display: block;
-}
 
 /* Set/Socket option header labels -- gray/yellow match legacy since they're semantic
    (active vs. inactive), not part of modern's chrome palette. */
@@ -88,7 +60,6 @@
 .option-label.active { color: #ffcc1a; }
 .option-label-set { left: 0; }
 .option-label-socket { left: 95px; }
-
 
 /* Native equipment slots, item grid and item-option tooltip: where CMyInventory places them, in
    #panel's units. A slot's box is its hit and drop area; the grid's top-left is its first cell;

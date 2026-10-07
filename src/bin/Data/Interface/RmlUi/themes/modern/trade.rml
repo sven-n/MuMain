@@ -108,15 +108,13 @@
 			<span class="confirm-glyph">&#10003;</span>
 		</div>
 
-		<div id="btn_exit" class="modern-icon-btn-px trade-btn-exit" data-event-click="trade_exit_click">
+		<div id="btn_exit" class="modern-icon-btn-px trade-btn-exit" data-event-click="trade_exit_click" data-attr-data-hint="close_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{close_tooltip}}</span>
 
-		<div id="btn_zen" class="modern-icon-btn-px trade-btn-zen" data-event-click="trade_zen_click">
+		<div id="btn_zen" class="modern-icon-btn-px trade-btn-zen" data-event-click="trade_zen_click" data-attr-data-hint="zen_tooltip">
 			<span class="modern-icon-btn-glyph-px">$</span>
 		</div>
-		<span class="tooltip tooltip-zen">{{zen_tooltip}}</span>
 
 		<span id="warning_label" class="warning-label" data-style-opacity="warning_opacity">{{warning_label}}</span>
 		<span id="notice_line1" class="notice-line notice-line1">{{notice_line1}}</span>

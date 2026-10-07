@@ -43,9 +43,6 @@
 	pointer-events: auto;
 }
 #btn_exit:hover { border-color: token(accent-steel-hover); }
-.tooltip { display: none; top: 365px; }
-.tooltip-exit { left: -24px; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 /* The two modes' own target areas (kAttackAreas / kDefenseAreas). A label is centred on its
    button, where C++ used to measure the text and halve the remainder. */

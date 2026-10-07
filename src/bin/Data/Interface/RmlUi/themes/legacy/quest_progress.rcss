@@ -1,6 +1,6 @@
 /* Legacy theme for CQuestProgress/CQuestProgressByEtc -- shared by both windows' own documents
    (quest_progress.rml/quest_progress_etc.rml, see either file's header comment for why two .rml
-   files link one .rcss). #panel/frame sprites/exit button/tooltip shape come from
+   files link one .rcss). #panel/frame sprites/exit button come from
    docked_panel_frame.rcss (linked before this file), same family as character_info/my_quest_info/
    pet_info/party_info. Coordinates below are plain reference px, not dp.
 

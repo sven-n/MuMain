@@ -99,8 +99,6 @@
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
 #btn_exit { pointer-events: auto; }
-.tooltip { display: none; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 /* The rank strip and the description box, piece by piece. */
 .fill-strip { left: 16px; top: 252px; width: 52px; height: 20px; }

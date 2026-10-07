@@ -140,7 +140,6 @@ private:
     int m_PressedNodeId = -1;
     int m_HoveredNodeId = -1;
     bool m_bExperienceHovered = false;
-    bool m_bCloseHovered = false;
 
     void SetPos();
     int SetDivideString(wchar_t* text, int isItemTollTip, int TextNum, int iTextColor, int iTextBold, bool isPercent);
@@ -174,7 +173,6 @@ private:
     bool ShowNodeHint(int nodeId);
     int BuildNodeHintLines(const _MASTER_SKILLTREE_DATA& skillData, const _MASTER_SKILL_TOOLTIP& tooltip);
     void ShowExperienceHint();
-    void ShowCloseHint();
 };
 }
 

@@ -91,23 +91,19 @@
 		<!-- Bottom action row: same bordered forged-metal square buttons as CMyInventory's
 		     Exit/Repair/My Shop/Expand (base.rcss's .modern-icon-btn-px), not a flat exit button
 		     plus legacy-sprite icons -- keeps this row visually part of the same family. -->
-		<div id="btn_exit" class="modern-icon-btn-px chainfo-btn-exit" data-event-click="chainfo_click_exit">
+		<div id="btn_exit" class="modern-icon-btn-px chainfo-btn-exit" data-event-click="chainfo_click_exit" data-attr-data-hint="exit_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
-		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
-		<div id="btn_quest" class="modern-icon-btn-px chainfo-btn-quest" data-event-click="chainfo_click_quest">
+		<div id="btn_quest" class="modern-icon-btn-px chainfo-btn-quest" data-event-click="chainfo_click_quest" data-attr-data-hint="quest_tooltip">
 			<span class="modern-icon-btn-glyph-px">Q</span>
 		</div>
-		<span class="tooltip tooltip-quest">{{quest_tooltip}}</span>
-		<div id="btn_pet" class="modern-icon-btn-px chainfo-btn-pet" data-event-click="chainfo_click_pet">
+		<div id="btn_pet" class="modern-icon-btn-px chainfo-btn-pet" data-event-click="chainfo_click_pet" data-attr-data-hint="pet_tooltip">
 			<span class="modern-icon-btn-glyph-px">P</span>
 		</div>
-		<span class="tooltip tooltip-pet">{{pet_tooltip}}</span>
 		<div id="btn_masterlevel" class="modern-icon-btn-px chainfo-btn-masterlevel" data-class-locked="!master_level_enabled"
-		     data-event-click="chainfo_click_masterlevel">
+		     data-event-click="chainfo_click_masterlevel" data-attr-data-hint="masterlevel_tooltip">
 			<span class="modern-icon-btn-glyph-px">M</span>
 		</div>
-		<span class="tooltip tooltip-masterlevel">{{masterlevel_tooltip}}</span>
 		<div id="frame_corner_close" data-event-click="chainfo_click_exit"></div>
 	</div>
 </body>

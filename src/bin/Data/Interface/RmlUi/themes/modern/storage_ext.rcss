@@ -30,25 +30,6 @@
 	border-color: #5c382b;
 }
 
-.tooltip {
-	display: none;
-	position: absolute;
-	top: 376px;
-	left: 40px;
-	width: 120px;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	border: 1px token(border-frame);
-	color: token(text-primary);
-	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "token(font-body)";
-	font-size: 11px;
-	pointer-events: none;
-	z-index: 1;
-}
-#btn_exit:hover ~ .tooltip-exit { display: block; }
-
 /* Native item grid: the first cell's top-left, in #panel's units. */
 .native-anchor { position: absolute; pointer-events: none; }
 #item_grid, #item_grid_counts { left: 15px; top: 36px; width: calc(8 * var(--item-cell)); height: calc(15 * var(--item-cell)); }

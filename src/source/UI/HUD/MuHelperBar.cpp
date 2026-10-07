@@ -10,6 +10,7 @@
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlWorkspaceParticipant.h"
 #include "UI/Placement/WindowPlacement.h"
@@ -60,19 +61,14 @@ void CMuHelperBar::BindRmlModel(Rml::DataModelConstructor& c, MuHelperBarRmlMode
 {
     c.Bind("position_text", &model.positionText);
     c.Bind("mu_helper_active", &model.muHelperActive);
+    c.Bind("config_hint", &model.configHint);
+    c.Bind("start_hint", &model.startHint);
+    c.Bind("stop_hint", &model.stopHint);
 
     c.BindEventCallback("mu_helper_config_click",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickConfig(); });
     c.BindEventCallback("mu_helper_toggle_click",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickToggle(); });
-    c.BindEventCallback("mu_helper_hint",
-        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
-        {
-            if (!args.empty())
-                m_Hint.Enter(event, args[0].Get<int>(-1));
-        });
-    c.BindEventCallback("mu_helper_hint_leave",
-        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&) { m_Hint.Leave(event); });
 }
 
 void CMuHelperBar::OnRmlReloaded()
@@ -166,26 +162,12 @@ void CMuHelperBar::SyncRmlModel()
         m_RmlView.MarkDirty("mu_helper_active");
     }
 
-    SyncHint();
-}
-
-void CMuHelperBar::SyncHint()
-{
-    const wchar_t* text = nullptr;
-    switch (m_Hint.Hovered())
-    {
-    case 0: text = I18N::Game::OfficialMUHelperSetting; break;
-    case 1: text = I18N::Game::StartOfficialMUHelper; break;
-    case 2: text = I18N::Game::StopOfficialMUHelper; break;
-    default: m_Hint.Hide(); return;
-    }
-    // A button's hint, 2 of the button's 13 units below it.
-    UI::RmlBridge::ElementTooltip::Placement placement;
-    placement.anchorAt = 15.f / 13.f;
-    placement.box = UI::RmlBridge::Tooltip::Config::Box::ButtonHint;
-    UI::RmlBridge::Tooltip::Line line;
-    line.text = StringUtils::WideToNarrow(text);
-    m_Hint.Show({std::move(line)}, placement);
+    SyncField(m_RmlView.Binder(), &MuHelperBarRmlModel::configHint, "config_hint",
+              StringUtils::WideToNarrow(I18N::Game::OfficialMUHelperSetting));
+    SyncField(m_RmlView.Binder(), &MuHelperBarRmlModel::startHint, "start_hint",
+              StringUtils::WideToNarrow(I18N::Game::StartOfficialMUHelper));
+    SyncField(m_RmlView.Binder(), &MuHelperBarRmlModel::stopHint, "stop_hint",
+              StringUtils::WideToNarrow(I18N::Game::StopOfficialMUHelper));
 }
 
 float CMuHelperBar::GetLayerDepth()

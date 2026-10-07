@@ -11,8 +11,8 @@
 	     with its catch-up effect bar while it moves), their score marks and their names. A
 	     LayoutMode::Hud window, so .screen is the 640x480 reference screen stretched W/640 x H/480
 	     like the original; the names take their native size and cancel the stretch. Only the
-	     exit button takes pointer events: its click is queued with duel_watch_exit, C++ keeps its
-	     tooltip and sends the channel quit request. -->
+	     exit button takes pointer events: its click is queued with duel_watch_exit, C++ sends the
+	     channel quit request. -->
 	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
 		<div id="back1"></div>
 		<div id="back2"></div>
@@ -29,7 +29,7 @@
 			      data-style-width="(55 * scale_x) + 'px'"
 			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{enemy_name.text}}</span>
 		</div>
-		<div id="exit" data-event-click="duel_watch_exit"></div>
+		<div id="exit" data-event-click="duel_watch_exit" data-attr-data-hint="exit_hint"></div>
 	</div>
 </body>
 </rml>

@@ -39,8 +39,7 @@
 			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{node.level_text}}</span>
 		</div>
 
-		<div id="close" data-event-click="master_close"
-		     data-event-mouseover="master_close_hover(1)" data-event-mouseout="master_close_hover(0)"></div>
+		<div id="close" data-event-click="master_close" data-attr-data-hint="close_hint"></div>
 
 		<span id="class_name" class="text head-text" data-style-font-size="text_px + 'px'"
 		      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{class_name_text}}</span>

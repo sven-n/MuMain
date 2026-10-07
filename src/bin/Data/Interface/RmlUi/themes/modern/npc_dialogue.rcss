@@ -79,8 +79,3 @@
    13px left quest_progress.rcss's own .qp-btn-exit uses, matching the legacy #btn_exit box exactly. */
 .nd-btn-exit { left: 13px; }
 
-/* Tooltip: shared shape from docked_panel_frame.rcss, position/offset are per-window -- same
-   coordinates as quest_progress.rcss's own #btn_exit (13,392,36,29 legacy box), reused here as-is. */
-.tooltip { top: 365px; }
-.tooltip-exit { left: -24px; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }

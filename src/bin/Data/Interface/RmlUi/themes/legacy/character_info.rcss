@@ -1,7 +1,7 @@
 /* Legacy theme for CCharacterInfoWindow -- a plain CManager-tier window (no C3DRenderMng, no
    live-3D icon, no CUITextInputBox), so unlike the inventory family it needed no background-
    context split: 100% of its chrome/text/buttons move straight to #panel's own foreground
-   document. #panel's frame (fill/top/left/right/bottom sprites, exit button, tooltip shape) is
+   document. #panel's frame (fill/top/left/right/bottom sprites, exit button) is
    shared with my_quest_info/pet_info/party_info via docked_panel_frame.rcss (linked below) -- only
    window-specific content lives here now. Coordinates below are plain reference px, not dp, same
    convention as my_quest_info.rcss.
@@ -170,16 +170,6 @@
    same convention as my_quest_info.rcss. */
 .btn-exit-label { display: none; }
 
-.tooltip-quest { left: 12px; }
-.tooltip-pet { left: 49px; }
-.tooltip-masterlevel { left: 86px; }
-
-#btn_quest:hover ~ .tooltip-quest,
-#btn_pet:hover ~ .tooltip-pet,
-#btn_masterlevel:hover ~ .tooltip-masterlevel {
-	display: block;
-}
-
 /* data-class-hidden on display:block leaves: base.rcss's .hidden has the same specificity as the
    leaf rules above and loses to them, so it is repeated here with the leaf class. */
 .levelup-point-text.hidden, .attr-label.hidden, .attr-value.hidden { display: none; }
@@ -193,7 +183,6 @@
 #name.pk-4 { color: rgb(255, 150, 60); }
 #name.pk-5 { color: rgb(255, 80, 30); }
 #name.pk-6 { color: rgb(255, 0, 0); }
-
 
 /* Where an attribute's total comes from, from the model's *_value_source. The original coloured
    the value for each of the three; the base colour lives on .attr-value/.attr-label above. */

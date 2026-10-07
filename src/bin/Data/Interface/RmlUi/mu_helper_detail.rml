@@ -194,11 +194,7 @@
 		<div id="btn_init" class="mh-btn-igs" data-event-click="muhelper_detail_init"></div>
 		<span class="sharp-text mh-text mh-center mh-btn-label mh-btn-label-igs" id="btn_init_label" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-width="(52 * root_scale) + 'px'" data-style-height="(26 * root_scale) + 'px'" data-style-line-height="(26 * root_scale) + 'px'">{{labels.init}}</span>
 
-		<div id="btn_exit" data-event-click="muhelper_detail_close"></div>
-		<span class="sharp-text tooltip tooltip-exit"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
-		      data-style-width="(110 * root_scale) + 'px'"
-		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{labels.close_tip}}</span></span>
+		<div id="btn_exit" data-event-click="muhelper_detail_close" data-attr-data-hint="labels.close_tip"></div>
 	</div>
 </body>
 </rml>

@@ -35,11 +35,7 @@
 			</div>
 		</div>
 
-		<div id="btn_exit" data-event-click="command_exit"></div>
-		<span class="sharp-text tooltip tooltip-exit"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
-		      data-style-width="(110 * root_scale) + 'px'"
-		      data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{exit_tooltip}}</span></span>
+		<div id="btn_exit" data-event-click="command_exit" data-attr-data-hint="exit_tooltip"></div>
 
 		<div id="target" data-if="target_visible" data-class-out-of-range="!target_in_range"
 		     data-style-left="target_left + 'px'" data-style-top="target_top + 'px'">

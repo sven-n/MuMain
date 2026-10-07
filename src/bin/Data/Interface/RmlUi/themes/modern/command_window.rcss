@@ -66,6 +66,3 @@
 
 /* Exit: base.rcss's shared .modern-icon-btn-px family, this window's own left offset only. */
 .cmd-btn-exit { left: 13px; }
-.tooltip { top: 365px; }
-.tooltip-exit { left: -24px; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }

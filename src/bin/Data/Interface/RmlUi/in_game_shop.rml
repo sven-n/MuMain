@@ -74,12 +74,9 @@
 				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{w.value}}</span>
 			</div>
 		</div>
-		<div id="igs_gift" class="igs-icon-btn" data-event-click="igs_gift"
-		     data-event-mouseover="igs_hint(0)" data-event-mouseout="igs_hint_leave"></div>
-		<div id="igs_charge" class="igs-icon-btn" data-event-click="igs_charge"
-		     data-event-mouseover="igs_hint(1)" data-event-mouseout="igs_hint_leave"></div>
-		<div id="igs_refresh" class="igs-icon-btn" data-event-click="igs_refresh"
-		     data-event-mouseover="igs_hint(2)" data-event-mouseout="igs_hint_leave"></div>
+		<div id="igs_gift" class="igs-icon-btn" data-event-click="igs_gift" data-attr-data-hint="gift_hint"></div>
+		<div id="igs_charge" class="igs-icon-btn" data-event-click="igs_charge" data-attr-data-hint="charge_hint"></div>
+		<div id="igs_refresh" class="igs-icon-btn" data-event-click="igs_refresh" data-attr-data-hint="refresh_hint"></div>
 
 		<!-- RenderImage() drew the banner's top-left 153 x 63 texels, not the whole texture. -->
 		<img id="igs_banner" data-if="banner_src != ''" data-attr-src="banner_src" rect="0 0 153 63"
@@ -135,8 +132,7 @@
 			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{use_label}}</span>
 		</div>
 
-		<div id="igs_close" data-event-click="igs_close"
-		     data-event-mouseover="igs_hint(3)" data-event-mouseout="igs_hint_leave"></div>
+		<div id="igs_close" data-event-click="igs_close" data-attr-data-hint="close_hint"></div>
 
 		<!-- The loaded script and banner versions (developer builds, FOR_WORK). -->
 		<div id="igs_versions" data-if="script_version != ''">

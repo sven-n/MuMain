@@ -33,32 +33,6 @@
 .shop-btn-open  { left: 53px; }
 .shop-btn-close { left: 93px; }
 
-.tooltip {
-	display: none;
-	position: absolute;
-	top: 376px;
-	width: 120px;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	border: 1px token(border-frame);
-	color: token(text-primary);
-	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "token(font-body)";
-	font-size: 11px;
-	pointer-events: none;
-	z-index: 1;
-}
-.tooltip-exit  { left: -27px; }
-.tooltip-open  { left: 12px; }
-.tooltip-close { left: 52px; }
-
-#btn_exit:hover ~ .tooltip-exit,
-#btn_open:hover ~ .tooltip-open,
-#btn_close:hover ~ .tooltip-close {
-	display: block;
-}
-
 /* Former RenderTextInfo() -- same reference-pixel offsets the native RenderText() calls used. */
 .myshop-line {
 	position: absolute;

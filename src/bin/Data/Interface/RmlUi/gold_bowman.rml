@@ -13,7 +13,7 @@
 	     field's back (UI/Events/EventItemEntryView.h).
 	     root_x/root_y/root_scale come from the dock transform; everything inside is reference px;
 	     text is .sharp-text at the native size, counter-scaled out of the panel. C++ focuses the
-	     field on opening and reads it for the request, keeps the exit tooltip, the corner close,
+	     field on opening and reads it for the request, keeps the corner close,
 	     Escape and the requests; a click is queued with item_entry_press. -->
 	<div id="panel" data-model="gold_bowman" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
@@ -36,7 +36,7 @@
 
 		<div class="entry-buttons">
 			<div class="entry-btn" data-for="b, i : buttons" data-class-locked="b.locked"
-			     data-event-click="item_entry_press(i)">
+			     data-event-click="item_entry_press(i)" data-attr-data-hint="b.hint">
 				<span class="sharp-text sharp-middle sharp-centre entry-label" data-if="b.label != ''"
 				      data-style-font-size="(b.bold ? bold_text_px : text_px) + 'px'"
 				      data-style-line-height="b.label_line_px + 'px'"

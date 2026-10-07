@@ -65,7 +65,6 @@
 .cw-tab-label { color: #b5b5b5; }
 .cw-tab.selected .cw-tab-label { color: #ffffff; }
 
-
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
 
 .cw-btn { display: block; position: absolute; width: 53px; height: 23px; decorator: image(cw-btn-up); pointer-events: auto; }
@@ -88,8 +87,6 @@
 .tax-down:active { decorator: image(cw-dn-down); }
 
 #btn_exit { top: 391px; pointer-events: auto; }
-.tooltip { display: none; bottom: 38px; } /* 429 - 391 */
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 /* The window's own text. Each line is named, so the theme decides where it sits, what colour it
    is and how it is aligned; only its width and font size stay bound for the counter-scale. */

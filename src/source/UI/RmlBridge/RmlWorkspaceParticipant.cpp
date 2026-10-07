@@ -46,7 +46,7 @@ void RegisterWorkspaceDocument(std::string_view name, std::function<Rml::Element
         auto* element = root();
         if (element == nullptr)
             return;
-        element->SetClass("workspace-placed", box != nullptr);
+        element->SetClass(WorkspacePlacedClass, box != nullptr);
         if (box == nullptr)
         {
             element->RemoveProperty(Rml::PropertyId::Left);

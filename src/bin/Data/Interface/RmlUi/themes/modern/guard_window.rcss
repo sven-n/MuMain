@@ -16,7 +16,6 @@
 .t-edge-top, .t-edge-bottom { position: absolute; width: 161px; height: 1px; margin-top: 6px; background-color: token(border-frame); }
 .t-edge-left, .t-edge-right { position: absolute; width: 1px; margin-left: 6px; background-color: token(border-frame); }
 
-
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; transform-origin: left top; }
 
 .gd-heading { color: token(text-primary); }
@@ -77,9 +76,6 @@
 	pointer-events: auto;
 }
 #btn_exit:hover { border-color: token(accent-steel-hover); }
-.tooltip { display: none; top: 365px; }
-.tooltip-exit { left: -24px; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 /* The guild list's frame, placed here rather than inline in the shared RML. The main box is
    shorter when the summary row is present, which is what `.with-footer` says. */

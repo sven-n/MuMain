@@ -112,11 +112,6 @@ namespace mu::ui::window
 
         struct MainFrameRmlModel
         {
-            // The original's gauge and button hint text size in real pixels: RenderTipText() under
-            // the HUD's scale, which grows about half as fast as the bars. The HUD itself is sized
-            // in dp by main_frame.rcss.
-            float hintPx = 0.f;
-
             float hpFraction = 0.f, mpFraction = 0.f, agFraction = 0.f, sdFraction = 0.f;
             Rml::String hpText, mpText, agText, sdText;
 

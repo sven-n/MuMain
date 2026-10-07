@@ -77,25 +77,6 @@
 	border-color: #5c382b;
 }
 
-.tooltip {
-	display: none;
-	position: absolute;
-	top: 376px;
-	left: 40px;
-	width: 120px;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	border: 1px token(border-frame);
-	color: token(text-primary);
-	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "token(font-body)";
-	font-size: 11px;
-	pointer-events: none;
-	z-index: 1;
-}
-#btn_mix:hover ~ .tooltip-mix { display: block; }
-
 .mix-recipe { color: token(semantic-danger); }
 .mix-recipe.ready { color: token(accent-gold); }
 .mix-success { color: token(text-secondary); }

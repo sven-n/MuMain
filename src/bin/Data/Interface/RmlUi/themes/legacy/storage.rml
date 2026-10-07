@@ -49,23 +49,15 @@
 		<span class="sharp-text sharp-right" id="fee_value"
 		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{fee_value}}</span>
 
-		<div id="btn_insert" class="stor-btn stor-btn-insert" data-event-click="storage_insert_click"></div>
-		<span class="sharp-text tooltip tooltip-insert"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{insert_tooltip}}</span></span>
+		<div id="btn_insert" class="stor-btn stor-btn-insert" data-event-click="storage_insert_click" data-attr-data-hint="insert_tooltip"></div>
 
-		<div id="btn_take" class="stor-btn stor-btn-take" data-event-click="storage_take_click"></div>
-		<span class="sharp-text tooltip tooltip-take"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{take_tooltip}}</span></span>
+		<div id="btn_take" class="stor-btn stor-btn-take" data-event-click="storage_take_click" data-attr-data-hint="take_tooltip"></div>
 
 		<div id="btn_lock" class="stor-btn stor-btn-lock" data-class-locked-mode="storage_locked"
-		     data-event-click="storage_lock_click"></div>
-		<span class="sharp-text tooltip tooltip-lock"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{lock_tooltip}}</span></span>
+		     data-event-click="storage_lock_click" data-attr-data-hint="lock_tooltip"></div>
 
 		<div id="btn_expand" class="stor-btn stor-btn-expand" data-class-hidden="!expand_visible"
-		     data-event-click="storage_expand_click"></div>
-		<span class="sharp-text tooltip tooltip-expand"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(120 * root_scale) + 'px'" data-style-padding="(2 * root_scale) + 'px ' + (4 * root_scale) + 'px'"><span class="tooltip-text" data-style-padding="'0 ' + (3 * root_scale) + 'px'">{{expand_tooltip}}</span></span>
+		     data-event-click="storage_expand_click" data-attr-data-hint="expand_tooltip"></div>
 	</div>
 </body>
 </rml>

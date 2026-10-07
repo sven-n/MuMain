@@ -88,7 +88,6 @@ void CInGameShop::Init()
 
 void CInGameShop::Release()
 {
-    m_Hint.Hide();
     m_ItemTarget.Disable();
     m_RmlView.Release();
 
@@ -158,6 +157,10 @@ void CInGameShop::BindRmlModel(Rml::DataModelConstructor& c, InGameShopRmlModel&
     c.Bind("storage_page", &model.storagePage);
     c.Bind("storage_total_pages", &model.storageTotalPages);
     c.Bind("buy_label", &model.buyLabel);
+    c.Bind("gift_hint", &model.giftHint);
+    c.Bind("charge_hint", &model.chargeHint);
+    c.Bind("refresh_hint", &model.refreshHint);
+    c.Bind("close_hint", &model.closeHint);
     c.Bind("use_label", &model.useLabel);
     c.Bind("item_name_label", &model.itemNameLabel);
     c.Bind("duration_label", &model.durationLabel);
@@ -233,14 +236,6 @@ void CInGameShop::BindRmlModel(Rml::DataModelConstructor& c, InGameShopRmlModel&
                             if (args.size() == 1 && m_StorageItems.SelectRow(args[0].Get<int>(-1)))
                                 m_StorageRowsDirty = true;
                         });
-    c.BindEventCallback("igs_hint",
-                        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
-                        {
-                            if (args.size() == 1)
-                                m_Hint.Enter(event, args[0].Get<int>(-1));
-                        });
-    c.BindEventCallback("igs_hint_leave",
-                        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&) { m_Hint.Leave(event); });
 }
 
 void CInGameShop::SyncRmlModel()
@@ -250,10 +245,7 @@ void CInGameShop::SyncRmlModel()
         return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
-    {
-        m_Hint.Hide();
         return;
-    }
     auto& binder = m_RmlView.Binder();
     UI::RmlBridge::SyncRootTransform(binder, m_Pos);
     UI::RmlBridge::SyncNativeTextSize(binder);
@@ -312,6 +304,10 @@ void CInGameShop::SyncRmlModel()
     SyncField(binder, &InGameShopRmlModel::storageTotalPages, "storage_total_pages", std::to_string(m_iStorageTotalPage));
 
     SyncField(binder, &InGameShopRmlModel::buyLabel, "buy_label", Narrow(I18N::Game::Buy1124));
+    SyncField(binder, &InGameShopRmlModel::giftHint, "gift_hint", Narrow(I18N::Game::SendWCoin));
+    SyncField(binder, &InGameShopRmlModel::chargeHint, "charge_hint", Narrow(I18N::Game::RechargeWCoin));
+    SyncField(binder, &InGameShopRmlModel::refreshHint, "refresh_hint", Narrow(I18N::Game::UpdateInformation));
+    SyncField(binder, &InGameShopRmlModel::closeHint, "close_hint", Narrow(I18N::Game::Close388));
     SyncField(binder, &InGameShopRmlModel::useLabel, "use_label", Narrow(I18N::Game::Use));
     SyncField(binder, &InGameShopRmlModel::itemNameLabel, "item_name_label", Narrow(I18N::Game::ItemName));
     SyncField(binder, &InGameShopRmlModel::durationLabel, "duration_label", Narrow(I18N::Game::Duration));
@@ -327,32 +323,6 @@ void CInGameShop::SyncRmlModel()
     mu_swprintf(text, L"Banner Ver. %d.%d.%d", version.Zone, version.year, version.yearId);
     SyncField(binder, &InGameShopRmlModel::bannerVersion, "banner_version", Narrow(text));
 #endif // FOR_WORK
-
-    SyncHint();
-}
-
-void CInGameShop::SyncHint()
-{
-    const wchar_t* text = nullptr;
-    UI::RmlBridge::ElementTooltip::Placement placement;
-    placement.box = UI::RmlBridge::Tooltip::Config::Box::ButtonHint;
-    // A button's hint 2 units below it; the close button's 2 above it.
-    placement.anchorAt = 27.f / 25.f;
-    switch (m_Hint.Hovered())
-    {
-    case 0: text = I18N::Game::SendWCoin; break;
-    case 1: text = I18N::Game::RechargeWCoin; break;
-    case 2: text = I18N::Game::UpdateInformation; break;
-    case 3:
-        text = I18N::Game::Close388;
-        placement.anchor = UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft;
-        placement.anchorAt = -2.f / 29.f;
-        break;
-    default: m_Hint.Hide(); return;
-    }
-    UI::RmlBridge::Tooltip::Line line;
-    line.text = Narrow(text);
-    m_Hint.Show({std::move(line)}, placement);
 }
 
 void CInGameShop::SyncStorageRows()
@@ -613,7 +583,6 @@ void CInGameShop::ClosingProcess()
 {
     PlayBuffer(SOUND_CLICK01);
     m_StorageBox = IGS_SAFEKEEPING_LISTBOX;
-    m_Hint.Hide();
     m_PendingActions.clear();
     ClearAllStorageItem();
 }

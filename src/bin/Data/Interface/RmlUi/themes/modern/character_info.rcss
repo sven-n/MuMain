@@ -6,9 +6,7 @@
    all come from docked_panel_frame.rcss, shared with the other three -- only genuinely
    window-specific content stays here. */
 
-/* Right-hand pieces are pinned to #panel's edges, so they follow a wider or filled panel. The
-   hints sit above the bottom-pinned action row once the panel is no longer 429 tall. */
-#panel.fill-placement .tooltip { top: auto; bottom: 37px; }
+/* Right-hand pieces are pinned to #panel's edges, so they follow a wider or filled panel. */
 
 #name, #classname, #servername {
 	position: absolute;
@@ -129,21 +127,6 @@
 .chainfo-btn-pet         { left: 95px; }
 .chainfo-btn-masterlevel { left: 136px; }
 
-/* .tooltip's shared shape lives in docked_panel_frame.rcss -- this window's own action row sits a
-   touch lower than the others', hence its own top override. */
-.tooltip { top: 376px; }
-.tooltip-exit        { left: -24px; }
-.tooltip-quest       { left: 14px; }
-.tooltip-pet         { left: 55px; }
-.tooltip-masterlevel { left: 92px; }
-
-#btn_exit:hover ~ .tooltip-exit,
-#btn_quest:hover ~ .tooltip-quest,
-#btn_pet:hover ~ .tooltip-pet,
-#btn_masterlevel:hover ~ .tooltip-masterlevel {
-	display: block;
-}
-
 /* Outlaw level, from the model's pk_level -- the original's UI::Chat::SetPlayerColor() palette,
    which used to arrive as a colour string C++ built. #name's own colour is the fallback. */
 #name.pk-0 { color: rgb(150, 255, 240); }
@@ -153,7 +136,6 @@
 #name.pk-4 { color: rgb(255, 150, 60); }
 #name.pk-5 { color: rgb(255, 80, 30); }
 #name.pk-6 { color: rgb(255, 0, 0); }
-
 
 /* Where an attribute's total comes from, from the model's *_value_source. The original coloured
    the value for each of the three; the base colour lives on .attr-value above. */

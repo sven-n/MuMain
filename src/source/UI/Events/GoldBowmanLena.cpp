@@ -10,19 +10,13 @@
 #include "Camera/CameraProjection.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/RmlBridge/RmlTooltip.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
 namespace
 {
-// The original's CButtons: Register (newui_btn_empty, 108 x 29) at (45, 285) and the exit button
-// (newui_exit_00, 36 x 29) at (13, 392), both with a tooltip above them.
-constexpr float kRegisterX = 45.f;
-constexpr float kRegisterY = 285.f;
-constexpr float kExitX = 13.f;
-constexpr float kExitY = 392.f;
+// The original's exit button (newui_exit_00, 36 x 29).
 constexpr float kExitWidth = 36.f;
 constexpr float kExitHeight = 29.f;
 
@@ -55,11 +49,6 @@ bool CGoldBowmanLena::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    m_RegisterTooltip.SetText(&I18N::Game::RegisteringRena);
-    m_RegisterTooltip.SetAnchorAbove(true);
-    m_ExitTooltip.SetText(&I18N::Game::Close388);
-    m_ExitTooltip.SetAnchorAbove(true);
-
     m_View.SetItemDrawer([this] { Render3D(); }, this);
     m_View.Build();
 
@@ -71,13 +60,6 @@ bool CGoldBowmanLena::Create(CManager* pNewUIMng, int x, int y)
 void CGoldBowmanLena::Release()
 {
     m_View.Release();
-    HideTooltips();
-}
-
-void CGoldBowmanLena::HideTooltips()
-{
-    UI::RmlBridge::Tooltip::Hide(&m_RegisterTooltip);
-    UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
 }
 
 void CGoldBowmanLena::OpeningProcess()
@@ -86,7 +68,6 @@ void CGoldBowmanLena::OpeningProcess()
 
 void CGoldBowmanLena::ClosingProcess()
 {
-    HideTooltips();
     g_bEventChipDialogEnable = 0;
     g_shEventChipCount = 0;
     SocketClient->ToGameServer()->SendEventChipExitDialog();
@@ -188,23 +169,17 @@ void CGoldBowmanLena::SyncView()
             texts.push_back({Formatted(I18N::Game::Lookup(703 + j)), width});
         m_View.SetTexts(std::move(texts));
 
-        m_View.SetButtons({{I18N::Game::RegisteringRena, false, MSGBOX_BTN_EMPTY_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT},
-                           {L"", false, kExitWidth, kExitHeight}});
+        m_View.SetButtons({{.label = I18N::Game::RegisteringRena,
+                            .width = MSGBOX_BTN_EMPTY_WIDTH,
+                            .height = MSGBOX_BTN_EMPTY_HEIGHT,
+                            .hint = I18N::Game::RegisteringRena},
+                           {.width = kExitWidth, .height = kExitHeight, .hint = I18N::Game::Close388}});
     }
     m_View.Sync(IsVisible(), m_Pos);
-
-    if (!IsVisible())
-        HideTooltips();
 }
 
 bool CGoldBowmanLena::Render()
 {
-    // The buttons' hover tooltips (the shared RmlUi one), shown from here as the original's
-    // CButton::Render() showed them, after the hover checks of the windows under it.
-    m_RegisterTooltip.Render(m_Pos.x + static_cast<int>(kRegisterX), m_Pos.y + static_cast<int>(kRegisterY),
-                             static_cast<int>(MSGBOX_BTN_EMPTY_WIDTH), static_cast<int>(MSGBOX_BTN_EMPTY_HEIGHT));
-    m_ExitTooltip.Render(m_Pos.x + static_cast<int>(kExitX), m_Pos.y + static_cast<int>(kExitY),
-                         static_cast<int>(kExitWidth), static_cast<int>(kExitHeight));
     return true;
 }
 

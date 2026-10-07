@@ -19,6 +19,9 @@ struct WorkspaceDocumentOptions
     std::function<void(const UI::Placement::PlacementParticipant::Box*)> placed;
 };
 
+// The class a placed root carries; its transform then scales its dp layout to the slot.
+inline constexpr const char* WorkspacePlacedClass = "workspace-placed";
+
 // Registers a dp-sized root as a content-sized workspace participant. The getter follows reloads.
 void RegisterWorkspaceDocument(std::string_view name, std::function<Rml::ElementDocument*()> document,
                                const char* rootId, WorkspaceDocumentOptions options = {});

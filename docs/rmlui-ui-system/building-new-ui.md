@@ -6,7 +6,7 @@ first for the philosophy; this doc is the concrete C++ object-layer answer (`com
 covers the parallel RmlUi/RCSS layer).
 
 For anything with a visible presentation, RmlUi + `base.rcss`'s shared classes (`.btn`,
-`.checkbox-box`, `.tooltip`, `.text-field`) is canonical. The `mu::ui::window` widget family
+`.checkbox-box`, `.text-field`, `data-hint`) is canonical. The `mu::ui::window` widget family
 (`UI/Widgets/Window/*.h`) is a **transitional bridge for content that must stay native** — live
 3D-camera content, world-anchored overlays, or a documented native companion — not an alternative
 to RmlUi for ordinary 2D chrome. "Shape of the kit" below has the reasoning and where the line
@@ -91,8 +91,10 @@ Three permanent shapes, following that boundary:
    (`UI/Core/WindowCommon.h`); `CInput::Instance()` only for the login/character-select family's
    real-pixel needs (double-click, left-hand swap, raw cursor).
 8. **Load documents through a `UI::RmlBridge::ThemedView`**; theme-specific behaviour is a
-   `theme.ini` capability, never a theme-name branch. Tooltips use `UI::RmlBridge::Tooltip` or the
-   `.tooltip` RCSS convention, never a new per-window `RenderTooltip()`.
+   `theme.ini` capability, never a theme-name branch. A static hint is `data-hint` on the
+   element (`UI::RmlBridge::DocumentHints`); one built from game state uses
+   `UI::RmlBridge::Tooltip` (`ElementTooltip` for an element of a document). Never a new per-window
+   `RenderTooltip()` or a CSS `:hover` hint.
 9. **Deprecated families get no new call sites, features or subclasses**, and no new native
    button implementation.
 

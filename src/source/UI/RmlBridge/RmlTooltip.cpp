@@ -4,6 +4,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlTooltipPlacement.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 
@@ -291,13 +292,20 @@ namespace UI::RmlBridge::Tooltip
             // RenderTipTextList() draws its 1-unit frame around the box it anchored.
             const Rml::Vector2f size = measured.size;
             float left = config.centerHorizontally ? (config.anchorX - size.x * 0.5f) : (config.anchorX - measured.frameTopLeft.x);
-            float top = (config.anchor == AnchorPoint::AboveLeft) ? (config.anchorY - size.y + measured.frameBottom)
-                                                                  : (config.anchorY - measured.frameTopLeft.y);
+            const bool above = (config.anchor == AnchorPoint::AboveLeft);
+            // The anchors as the panel's border box edges: above meets its bottom, below its top.
+            const auto edge = [&](float anchorY, bool growsUp)
+            { return growsUp ? anchorY + measured.frameBottom : anchorY - measured.frameTopLeft.y; };
+            std::optional<float> flipEdge;
+            if (config.flipAnchorY)
+                flipEdge = edge(*config.flipAnchorY, !above);
+            const float top = TooltipPlacement::Top(edge(config.anchorY, above), above,
+                                                    flipEdge ? &*flipEdge : nullptr, size.y,
+                                                    static_cast<float>(viewport.y));
 
-            // Clamp on all four sides to the real viewport (this document has no parent transform),
+            // Clamped on all four sides to the real viewport (this document has no parent transform),
             // not REFERENCE_WIDTH/HEIGHT. Wider or taller than the viewport sticks to its left/top.
             left = std::max(0.0f, std::min(left, static_cast<float>(viewport.x) - size.x));
-            top = std::max(0.0f, std::min(top, static_cast<float>(viewport.y) - size.y));
             return {left, top};
         }
     }

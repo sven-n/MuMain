@@ -56,8 +56,6 @@
 #btn_next { left: 110px; }
 .gm-label { left: 0; text-align: center; color: #ffffff; }
 #btn_exit { pointer-events: auto; }
-.tooltip { display: none; }
-#btn_exit:hover ~ .tooltip-exit { display: block; }
 
 #name_back { position: absolute; left: 45px; top: 60px; width: 108px; height: 23px; decorator: image(gm-name-back); }
 #name_field {

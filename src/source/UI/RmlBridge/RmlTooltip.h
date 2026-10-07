@@ -98,6 +98,9 @@ namespace UI::RmlBridge::Tooltip
         float anchorX = 0.0f;
         float anchorY = 0.0f;
         AnchorPoint anchor = AnchorPoint::BelowLeft;
+        // Where the tooltip grows the other way from when it does not fit on `anchor`'s side (a
+        // button hint: the button's other edge). Without it, it is only shifted back on screen.
+        std::optional<float> flipAnchorY;
 
         // True: anchorX is the tooltip's horizontal CENTER (matches RenderTipTextList()'s own
         // `sx - fWidth/2` centering -- the item tooltip's existing behavior, anchored under/over
@@ -139,7 +142,7 @@ namespace UI::RmlBridge::Tooltip
 
     // Show()'s edge-clamping always wins over `anchor`/`centerHorizontally`'s preferred direction:
     // if growing the requested way would run off the top/bottom/left/right of the real viewport,
-    // Show() flips/shifts it back on screen instead. A caller never needs its own clamping math --
+    // Show() flips it to `flipAnchorY` when given and it fits there, else shifts it back on screen. A caller never needs its own clamping math --
     // this is exactly the gap the four prior mechanisms with partial (horizontal-only, or none)
     // clamping left open.
 

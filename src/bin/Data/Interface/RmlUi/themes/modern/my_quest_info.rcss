@@ -136,7 +136,7 @@
 }
 /* Same brightness-filter hover used uniformly on these sprite-backed buttons. */
 .quest-btn:hover { filter: brightness(1.25); }
-/* No pointer-events:none here -- that would block :hover (and the tooltip) while locked, which
+/* No pointer-events:none here -- that would block :hover (and the hint) while locked, which
    is the default state until a quest is selected. */
 .quest-btn.locked { filter: brightness(0.6); }
 
@@ -147,18 +147,6 @@
    as every other window's corner buttons) -- only this window's own left offset needed on top of
    its defaults (top:392px, 37x26, hover/locked states all included). */
 .quest-btn-exit { left: 13px; }
-
-/* Tooltips: siblings of their trigger button, shared shape from docked_panel_frame.rcss. */
-.tooltip { top: 365px; }
-.tooltip-exit   { left: -24px; }
-.tooltip-open   { left: 13px; }
-.tooltip-giveup { left: 50px; }
-
-#btn_exit:hover ~ .tooltip-exit,
-#btn_quest_open:hover ~ .tooltip-open,
-#btn_quest_giveup:hover ~ .tooltip-giveup {
-	display: block;
-}
 
 .jobchange-title {
 	display: block;
