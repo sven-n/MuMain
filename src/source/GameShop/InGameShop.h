@@ -1,4 +1,3 @@
-
 #if !defined(AFX_NEWUIINGAMESHOP_H__AE3CE531_70BE_4CBB_9938_0D80B26F21A8__INCLUDED_)
 #define AFX_NEWUIINGAMESHOP_H__AE3CE531_70BE_4CBB_9938_0D80B26F21A8__INCLUDED_
 
@@ -9,19 +8,19 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/MessageBox.h"
-#include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "Engine/Object/ZzzInventory.h"
-#include "Render/Sprites/Sprite.h"
 #include "InGameShopSystem.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Inventory/ItemCameraTarget.h"
+#include "UI/RmlBridge/RmlElementTooltip.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "GameShop/StorageItemSelection.h"
 
 #include <RmlUi/Core/Types.h>
 
+#include <functional>
+#include <string>
 #include <vector>
 
 namespace Rml
@@ -31,6 +30,9 @@ class ElementDocument;
 
 namespace mu::ui::window
 {
+// The cash shop. in_game_shop.rml draws it; C++ keeps its state (the selected zone, category and
+// storage box, the storage pages) and every request it sends, and draws the page's live 3D
+// package items into the document.
 class CInGameShop : public CObject
 {
 public:
@@ -41,136 +43,18 @@ public:
         IGS_TOTAL_LISTBOX,
     };
 
-    enum IMAGE_LIST
-    {
-        IMAGE_IGS_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN, // newui_exit_00.tga (36, 58) - 2BtState
-        IMAGE_IGS_BACK = BITMAP_INGAMESHOP_FRAME,                         // Ingame_shopback.jpg (640, 429)
-        IMAGE_IGS_CATEGORY_BTN,                                           // Ingame_Bt01.tga (73, 81) - 3BtState
-        IMAGE_IGS_CATEGORY_DECO_MIDDLE,                                   // Ingame_Deco_Center.tga (6, 8)
-        IMAGE_IGS_CATEGORY_DECO_DOWN,                                     // Ingame_Deco_Dn.tga (47, 100)
-        IMAGE_IGS_LEFT_TAB,                                               // Ingame_Tab01.tga (49, 21)
-        IMAGE_IGS_RIGHT_TAB,                                              // Ingame_Tab02.tga (49, 21)
-        IMAGE_IGS_ZONE_BTN,                                               // Ingame_Tab_Up.tga (76, 46) - 2BtState
-        IMAGE_IGS_ITEMGIFT_BTN,                                           // Ingame_Bt_Gift.tga (25, 75) - 3BtState
-        IMAGE_IGS_CASHGIFT_BTN,                                           // Ingame_Bt_Cash.tga (25, 75) - 3BtState
-        IMAGE_IGS_REFRESH_BTN,                                            // Ingame_Bt_Reset.tga (25, 75) - 3BtState
-        IMAGE_IGS_VIEWDETAIL_BTN,                                         // Ingame_Bt_Bt03.tga (52, 78) - 3BtState
-        IMAGE_IGS_ITEMBOX_LOGO,                                           // Ingame_Itembox_logo.tga (57, 57)
-        IMAGE_IGS_PAGE_LEFT,                                              // Ingame_Bt_page_L.tga (20, 69) - 3BtState
-        IMAGE_IGS_PAGE_RIGHT,                                             // Ingame_Bt_page_R.tga (20, 69) - 3BtState
-        IMAGE_IGS_STORAGE_PAGE,                                           // IGS_Storage_Page.tga (80, 30)
-        IMAGE_IGS_STORAGE_PAGE_LEFT,  // IGS_Storage_Page_Left.tga (20, 22) - 3BtState
-        IMAGE_IGS_STORAGE_PAGE_RIGHT, // IGS_Storage_Page_Right.tga (20, 22) - 3BtState
-        IMAGE_IGS_BANNER = BITMAP_INGAMESHOP_BANNER
-    };
-
 private:
-    enum INGAMESHOP_TEXT_INFO
+    enum
     {
-        TEXT_IGS_CHAR_NAME_POS_X = 498,
-        TEXT_IGS_CHAR_NAME_POS_Y = 23,
-        TEXT_IGS_CHAR_NAME_WIDTH = 122,
-        TEXT_IGS_CASH_POS_X = 498,
-        TEXT_IGS_CASH_POS_Y = 50,
-        TEXT_IGS_CASH_WIDTH = 130,
-        TEXT_IGS_MILEAGE_POS_Y = 65,
-        TEXT_IGS_POINT_POS_Y = 80,
-        TEXT_IGS_STORAGE_NAME_POS_X = 492,
-        TEXT_IGS_STORAGE_NAME_POS_Y = 233,
-        TEXT_IGS_STORAGE_NAME_WIDTH = 96,
-        TEXT_IGS_STORAGE_TIME_POS_X = 592,
-        TEXT_IGS_STORAGE_TIME_WIDTH = 34,
-        TEXT_IGS_PAGE_POS_X = 251,
-        TEXT_IGS_PAGE_POS_Y = 404,
-        TEXT_IGS_STORAGE_PAGE_INFO_POS_X = 518,
-        TEXT_IGS_STORAGE_PAGE_INFO_POS_Y = 376,
-    };
-
-    enum INGAMESHOP_IMAGES_POS
-    {
-        IMAGE_IGS_EXIT_BTN_POS_X = 484, // Exit Button
-        IMAGE_IGS_EXIT_BTN_POS_Y = 392,
-        IMAGE_IGS_BACK_POS_X = 0, // InGameShop Back
-        IMAGE_IGS_BACK_POS_Y = 0,
-        IMAGE_IGS_CATEGORY_BTN_POS_X = 13, // Category Button
-        IMAGE_IGS_CATEGORY_BTN_POS_Y = 31,
-        IMAGE_IGS_CATEGORY_BTN_DISTANCE = 6,
-        IMAGE_IGS_TAB_BTN_POS_X = 486, // Tab Button
-        IMAGE_IGS_TAB_BTN_POS_Y = 208,
-        IMAGE_IGS_TAB_BTN_DISTANCE = -2,
-        IMAGE_IGS_ZONE_BTN_POS_X = 95, // Zone Button
-        IMAGE_IGS_ZONE_BTN_POS_Y = 0,
-        IMAGE_IGS_VIEWDETAIL_BTN_POS_X = 162, // View Detail Button
-        IMAGE_IGS_VIEWDETAIL_BTN_POS_Y = 126,
-        IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X = 122,
-        IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y = 121,
-        IMAGE_IGS_ITEMGIFT_BTN_POS_X = 519, // Item Gift Button
-        IMAGE_IGS_CASHGIFT_BTN_POS_X = 546, // Cash Gift Button
-        IMAGE_IGS_REFRESH_BTN_POS_X = 573,  // Refresh Button
-        IMAGE_IGS_ICON_BTN_POS_Y = 94,
-        IMAGE_IGS_USE_BTN_POS_X = 572,
-        IMAGE_IGS_USE_BTN_POS_Y = 396,
-        IMAGE_IGS_ITEMBOX_LOGO_POS_X = 128,
-        IMAGE_IGS_ITEMBOX_LOGO_POS_Y = 52,
-        IMAGE_IGS_PAGE_LEFT_POS_X = 231,  // Page Left Button
-        IMAGE_IGS_PAGE_RIGHT_POS_X = 307, // Page Right Button
-        IMAGE_IGS_PAGE_BUTTON_POS_Y = 397,
-        IMAGE_IGS_BANNER_POS_X = 482, // Banner
-        IMAGE_IGS_BANNER_POS_Y = 133,
-        IMAGE_IGS_STORAGE_PAGE_POS_X = 518, // Storage Page
-        IMAGE_IGS_STORAGE_PAGE_POS_Y = 366,
-        IMAGE_IGS_STORAGE_PAGE_LEFT_POS_X = 512,  // Storage Page Left
-        IMAGE_IGS_STORAGE_PAGE_RIGHT_POS_X = 586, // Storage Page Right
-        IMAGE_IGS_STORAGE_PAGE_BTN_POS_Y = 372,
-    };
-
-    enum INGAMESHOP_IMAGES_SIZE
-    {
-        IMAGE_IGS_EXIT_BTN_WIDTH = 36, // Exit Button
-        IMAGE_IGS_EXIT_BTN_HEIGHT = 29,
-        IMAGE_IGS_BACK_WIDTH = 640, // InGameShop Back
-        IMAGE_IGS_BACK_HEIGHT = 429,
-        IMAGE_IGS_CATEGORY_BTN_WIDTH = 73, // Category Button
-        IMAGE_IGS_CATEGORY_BTN_HEIGHT = 27,
-        IMAGE_IGS_CATEGORY_DECO_MIDDLE_WIDTH = 4, // Category Deco Middle
-        IMAGE_IGS_CATEGORY_DECO_MIDDLE_HEIGHT = 8,
-        IMAGE_IGS_CATEGORY_DECO_DOWN_WIDTH = 47, // Category Deco Down
-        IMAGE_IGS_CATEGORY_DECO_DOWN_HEIGHT = 100,
-        IMAGE_IGS_TAB_BTN_WIDTH = 49, // Tab Button
-        IMAGE_IGS_TAB_BTN_HEIGHT = 20,
-        IMAGE_IGS_ZONE_BTN_WIDTH = 76, // Zone Button
-        IMAGE_IGS_ZONE_BTN_HEIGHT = 23,
-        IMAGE_IGS_VIEWDETAIL_BTN_WIDTH = 52, // View Detail Button
-        IMAGE_IGS_VIEWDETAIL_BTN_HEIGHT = 26,
-        IMAGE_IGS_ICON_BTN_WIDTH = 25,
-        IMAGE_IGS_ICON_BTN_HEIGHT = 25,
-        IMAGE_IGS_ITEMBOX_LOGO_SIZE = 57,
-        IMAGE_IGS_PAGE_BTN_WIDTH = 20, // Page
-        IMAGE_IGS_PAGE_BTN_HEIGHT = 23,
-        IMAGE_IGS_BANNER_WIDTH = 153, // Banner
-        IMAGE_IGS_BANNER_HEIGHT = 63,
-        IMGAE_IGS_STORAGE_PAGE_WIDTH = 80, // Storage Page
-        IMGAE_IGS_STORAGE_PAGE_HEIGHT = 30,
-        IMGAE_IGS_STORAGE_PAGE_BTN_WIDTH = 20, // Storage Page Btn
-        IMGAE_IGS_STORAGE_PAGE_BTN_HEIGHT = 22,
-    };
-
-    enum INGAMESHOP_DISPLAY_ITEMS
-    {
-        IGS_WIDTH_POS_X = 129,
-        IGS_HEIGHT_POS_Y = 59,
-        IGS_SIZE_WIDTH = 60,
-        IGS_SIZE_HEIGHT = 49,
+        IGS_PANEL_WIDTH = 640,
+        IGS_PANEL_HEIGHT = 429,
         IGS_NUM_ITEMS_WIDTH = 3,
-        IGS_NUM_ITEMS_HEIGHT = 3,
-        IGS_PACKAGE_NAME_POS_X = 105,
-        IGS_PACKAGE_NAME_POS_Y = 40,
-        IGS_PACKAGE_NAME_WIDTH = 104,
-        IGS_PACKAGE_PRICE_POS_Y = 60,
-        IGS_ITEMRENDER_POS_X_STANDAD = 102,
-        IGS_ITEMRENDER_POS_WIDTH = 108,
-        IGS_ITEMRENDER_POS_Y_STANDAD = 51,
-        IGS_ITEMRENDER_POS_HEIGHT = 58,
+        IGS_PACKAGE_PITCH_X = 122,
+        IGS_PACKAGE_PITCH_Y = 121,
+        IGS_ITEMRENDER_POS_X = 102,
+        IGS_ITEMRENDER_POS_Y = 51,
+        IGS_ITEMRENDER_WIDTH = 108,
+        IGS_ITEMRENDER_HEIGHT = 58,
         IGS_STORAGE_TOTAL_ITEM_PER_PAGE = 9,
     };
 
@@ -190,20 +74,9 @@ public:
     bool Update();
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();
-    bool BtnProcess();
-    void SetBtnInfo();
     float GetLayerDepth()
     {
         return 10.08f;
-    }
-
-    bool GetItemRotation()
-    {
-        return m_ItemAngle;
-    }
-    void SetItemRotation(bool _bInput)
-    {
-        m_ItemAngle = _bInput;
     }
 
     void OpeningProcess();
@@ -232,59 +105,28 @@ public:
     void InitBanner(wchar_t* pszFileName, wchar_t* pszBannerURL);
     void ReleaseBanner();
 
-    void SetRateScale(int _ItemType);
-    float GetRateScale()
-    {
-        return m_fRate_Scale;
-    }
-    void SetConvertInvenCoord(WORD _ItemType, float _Width, float _Height);
-    POINT GetConvertPos()
-    {
-        return m_fRePos;
-    }
-    POINT GetConvertSize()
-    {
-        return m_fReSize;
-    }
-    bool IsInGameShopRect(float _x, float _y);
-
-private:
-    float m_fRate_Scale;
-    POINT m_fRePos;
-    POINT m_fReSize;
-
 private:
     void Init();
-    void LoadImages();
-    void UnloadImages();
-    void RenderFrame();
-    void RenderTexts();
-    void RenderButtons();
-    void RenderListBox();
 
-    void RenderBanner();
-    bool UpdateBanner();
+    // The document's controls. Each runs on the next Update(), where the native buttons ran.
+    void SelectZone(int index);
+    void SelectCategory(int index);
+    void SelectStorageBox(int index);
+    void BuyPackage(int index);
+    void UseStorageItem();
+    void Close();
+    // A previewed shop ($preview igs) sends nothing.
+    bool SendsRequests() const;
 
-private:
     CManager* m_pNewUIMng;
     POINT m_Pos;
-    bool m_ItemAngle;
 
-    CRadioGroupButton m_ZoneButton;
-    CRadioGroupButton m_CategoryButton;
-    CRadioGroupButton m_ListBoxTabButton;
-    CButton m_ViewDetailButton[INGAMESHOP_DISPLAY_ITEMLIST_SIZE];
-    CButton m_CashGiftButton;
-    CButton m_CashChargeButton;
-    CButton m_CashRefreshButton;
-    CButton m_UseButton;
-    CButton m_PrevButton;
-    CButton m_NextButton;
-    CButton m_CloseButton;
-    CButton m_StoragePrevButton;
-    CButton m_StorageNextButton;
+    int m_SelectedZone = 0;
+    int m_SelectedCategory = 0;
+    int m_StorageBox = IGS_SAFEKEEPING_LISTBOX;
 
-    bool m_bLoadBanner;
+    // The banner as the document loads it (relative to it), and where a click on it goes.
+    std::string m_BannerSource;
     bool m_bBannerLink;
     wchar_t m_szBannerURL[INTERNET_MAX_URL_LENGTH];
 
@@ -299,12 +141,40 @@ private:
 
     GameShop::StorageItemSelection m_StorageItems;
 
-    // Everything native the shop still draws -- its decoration, buttons, texts, banner, list box,
-    // then the 3x3 package grid's live 3D items -- into the document's #igs_view, over the backdrop
-    // and under the storage list.
-    void RenderNative();
-    UI::Items::ItemCameraTarget m_NativeTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderNative(); }, this};
+    std::vector<std::function<void()>> m_PendingActions;
 
+    // The page's packages, live 3D, into #igs_items under the 2-degree camera the shop always drew
+    // them with.
+    void RenderItems();
+    UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); }, this};
+
+    // The gift, charge, refresh and close buttons' hints.
+    UI::RmlBridge::ElementTooltip m_Hint;
+    void SyncHint();
+
+    struct RadioEntry
+    {
+        Rml::String name;
+        bool selected = false;
+        bool last = false;
+
+        bool operator==(const RadioEntry&) const = default;
+    };
+    struct PackageEntry
+    {
+        Rml::String name;
+        Rml::String price;
+        bool shown = false;
+
+        bool operator==(const PackageEntry&) const = default;
+    };
+    struct WalletEntry
+    {
+        Rml::String label;
+        Rml::String value;
+
+        bool operator==(const WalletEntry&) const = default;
+    };
     // One row of the storage / gift list. Where it sits is the theme's; only what it says and
     // whether it is the picked row travel through the model.
     struct StorageRow
@@ -319,7 +189,19 @@ private:
     {
         float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         float textPx = 0.f;
+        Rml::String characterName;
+        std::vector<WalletEntry> wallet;
+        std::vector<RadioEntry> zones;
+        std::vector<RadioEntry> categories;
+        std::vector<PackageEntry> packages;
+        Rml::String page, totalPages;
+        std::vector<RadioEntry> storageTabs;
         std::vector<StorageRow> storageRows;
+        Rml::String storagePage, storageTotalPages;
+        Rml::String buyLabel, useLabel, itemNameLabel, durationLabel;
+        Rml::String bannerSrc;
+        bool bannerLinked = false;
+        Rml::String scriptVersion, bannerVersion;
     };
     void BindRmlModel(Rml::DataModelConstructor& c, InGameShopRmlModel& model);
     UI::RmlBridge::ThemedView<InGameShopRmlModel> m_RmlView{"in_game_shop",
@@ -327,7 +209,6 @@ private:
         {{"Data/Interface/RmlUi/in_game_shop.rml"}}};
     bool m_StorageRowsDirty = true;
 
-    void BuildRmlUi();
     void SyncRmlModel();
     void SyncStorageRows();
 };

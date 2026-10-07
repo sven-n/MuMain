@@ -68,7 +68,7 @@ CMixInventory::~CMixInventory() { Release(); }
 
 bool CMixInventory::Create(CManager* pNewUIMng, int x, int y)
 {
-    if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng || NULL == g_pNewItemMng)
+    if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;

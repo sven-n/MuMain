@@ -1,4 +1,3 @@
-
 #if !defined(AFX_MSGBOXIGSBUYPACKAGEITEM_H__42A6E746_9439_4E71_9C86_7CDF5F96AFE3__INCLUDED_)
 #define AFX_MSGBOXIGSBUYPACKAGEITEM_H__42A6E746_9439_4E71_9C86_7CDF5F96AFE3__INCLUDED_
 
@@ -8,59 +7,30 @@
 
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Dialogs/CommonMessageBox.h"
-#include "UI/Widgets/Window/Button.h"
+#include "GameShop/IgsDialogModel.h"
 #include "GameShop/ShopListManager/ShopPackage.h"
-
+#include "UI/Inventory/ItemCameraTarget.h"
+#include "UI/RmlBridge/RmlThemedView.h"
+#include "UI/Scaling/UITransform.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
-
-#include "UI/RmlBridge/RmlThemedView.h"
 
 #include <RmlUi/Core/Types.h>
 
 #include <string>
 #include <vector>
 
-namespace Rml
+// A package of one price, from the cash shop's Buy: igs_buy_package.rml draws it, the package's
+// live 3D item included; its buttons send this box's own events.
+class CMsgBoxIGSBuyPackageItem : public CMessageBoxBase
 {
-class ElementDocument;
-}
-
-class CMsgBoxIGSBuyPackageItem : public CMessageBoxBase, public I3DRenderObj
-{
-public:
-    enum IMAGE_IGS_BUY_PACKAGE_ITEM
+    enum
     {
-        IMAGE_IGS_FRAME = BITMAP_IGS_MSGBOX_BUY_PACKAGE_ITEM,
-        IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON,
-    };
-
-    enum IMAGESIZE_IGS_BUY_PACKAGE_ITEM
-    {
-        IMAGE_IGS_WINDOW_WIDTH = 640,
-        IMAGE_IGS_WINDOW_HEIGHT = 429,
-        IMAGE_IGS_FRAME_WIDTH = 198,
-        IMAGE_IGS_FRAME_HEIGHT = 291,
-        IMAGE_IGS_BTN_WIDTH = 52,
-        IMAGE_IGS_BTN_HEIGHT = 26,
-    };
-
-    enum IGS_BUY_PACKAGE_ITEM_POS
-    {
-        IGS_BTN_BUY_POS_X = 18,
-        IGS_BTN_PRESENT_POS_X = 74,
-        IGS_BTN_CANCEL_POS_X = 130,
-        IGS_BTN_POS_Y = 253,
-        IGS_TEXT_TITLE_POS_Y = 10,
-        IGS_TEXT_NAME_POS_X = 5,
-        IGS_TEXT_NAME_POS_Y = 100,
-        IGS_TEXT_NAME_WIDTH = 196,
-        IGS_TEXT_PRICE_POS_X = 118,
-        IGS_TEXT_PRICE_POX_Y = 229,
-        IGS_TEXT_PRICE_WIDTH = 66,
-        IGS_LISTBOX_POS_X = 14,
-        IGS_LISTBOX_POS_Y = 216,
+        IGS_WINDOW_WIDTH = 640,
+        IGS_WINDOW_HEIGHT = 429,
+        IGS_FRAME_WIDTH = 198,
+        IGS_FRAME_HEIGHT = 291,
         IGS_LISTBOX_WIDTH = 158,
         IGS_3DITEM_POS_X = 50,
         IGS_3DITEM_POS_Y = 34,
@@ -77,42 +47,17 @@ public:
     bool Update();
     bool Render();
 
-    bool IsVisible() const;
-
-    void Render3D();
-
     void Initialize(CShopPackage* pPackage);
 
-    static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT BuyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT PresentBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
 private:
     void SetAddCallbackFunc();
-    void SetButtonInfo();
-    void RenderFrame();
-    void RenderTexts();
-    void RenderButtons();
+    void RenderItem();
 
-    void CreateListBox();
-    void RenderListBox();
-    void ListBoxDoAction();
-    void ReleaseListBox();
-
-#ifdef LEM_FIX_WARNINGMSG_BUYITEM
-    bool Add_WarningMsgBuyItem(int _nItemIndex);
-#endif // LEM_FIX_WARNINGMSG_BUYITEM
-
-    void LoadImages();
-    void UnloadImages();
-
-private:
-    CMessageBoxButton m_BtnBuy;
-    CMessageBoxButton m_BtnPresent;
-    CMessageBoxButton m_BtnCancel;
-    // The description, one wrapped line per entry, in arrival order. igs_buy_package.rml
-    // draws them and RmlUi owns the scrolling.
+    // The description, one wrapped line per entry, in arrival order. RmlUi owns the scrolling.
     std::vector<std::wstring> m_DescriptionLines;
 
     struct DescriptionLine
@@ -124,20 +69,28 @@ private:
     {
         float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         float textPx = 0.f;
+        Rml::String title, name, price;
         std::vector<DescriptionLine> descriptionLines;
+        std::vector<GameShop::DialogButton> buttons;
+        std::vector<Rml::String> debugLines;
     };
     void BindRmlModel(Rml::DataModelConstructor& c, BuyPackageRmlModel& model);
     UI::RmlBridge::ThemedView<BuyPackageRmlModel> m_RmlView{"igs_buy_package",
         [this](Rml::DataModelConstructor& c, BuyPackageRmlModel& model) { BindRmlModel(c, model); },
         {{"Data/Interface/RmlUi/igs_buy_package.rml"}}};
+    int m_PressedButton = -1;
+    // The message box manager's layout, which the item is drawn in.
+    UI::Scaling::Transform m_Layout{};
+    UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItem(); },
+                                             [this] { return m_Layout; }};
 
-    void BuildRmlUi();
     void SyncRmlModel();
 
     int m_iPackageSeq;
     int m_iDisplaySeq;
     WORD m_wItemCode;
     int m_iCashType;
+    bool m_bGiftEnabled = false;
 
     wchar_t m_szPackageName[MAX_TEXT_LENGTH];
     wchar_t m_szPrice[MAX_TEXT_LENGTH];

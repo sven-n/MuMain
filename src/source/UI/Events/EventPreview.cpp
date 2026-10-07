@@ -4,6 +4,8 @@
 
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Combat/DuelMgr.h"
+#include "GameShop/InGameShop.h"
+#include "GameShop/InGameShopSystem.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Events/BloodCastleTime.h"
@@ -70,6 +72,8 @@ constexpr std::array kEntries = {
           L"CryWolf result, success banner, rank and the hero list"},
     Entry{L"siege", Event::Siege, mu::ui::window::INTERFACE_SIEGEWARFARE,
           L"castle siege commander HUD, members, NPCs and two commands, 45 minutes left"},
+    Entry{L"igs", Event::CashShop, mu::ui::window::INTERFACE_INGAMESHOP,
+          L"cash shop from the local script and banner, storage and gift box filled"},
 };
 
 void Log(const std::wstring& text, mu::ui::window::MESSAGE_TYPE type = mu::ui::window::TYPE_SYSTEM_MESSAGE)
@@ -191,6 +195,28 @@ void SeedSiege()
     UI::Siege::SetCommanderMapInfo(1, 70, 180, 1);
 }
 
+// The script and banner versions shipped under Data/InGameShopScript and Data/InGameShopBanner; the
+// loader deletes a version whose files fail to load, so these must be ones that are there.
+void SeedCashShop()
+{
+    g_InGameShopSystem->SetScriptVersion(512, 2012, 84);
+    g_InGameShopSystem->ScriptDownload();
+    g_InGameShopSystem->SetBannerVersion(583, 2011, 1);
+    if (g_InGameShopSystem->BannerDownload())
+        g_pInGameShop->InitBanner(g_InGameShopSystem->GetBannerFileName(), g_InGameShopSystem->GetBannerURL());
+    g_pInGameShop->OpeningProcess();
+
+    // Two pages of storage: W Coin, items and a gift, the rows the server's list would send.
+    g_pInGameShop->InitStorage(12, 9, 2, 1);
+    for (int i = 0; i < 9; ++i)
+    {
+        if (i % 3 == 0)
+            g_pInGameShop->AddStorageItem(100 + i, i, 1, 0, 0, 500 * (i + 1), L'C');
+        else
+            g_pInGameShop->AddStorageItem(100 + i, i, 1, 3, 0, 0, L'P');
+    }
+}
+
 void Seed(Event event)
 {
     switch (event)
@@ -203,6 +229,7 @@ void Seed(Event event)
     case Event::CryWolf: SeedCryWolf(); break;
     case Event::CryWolfResult: SeedCryWolfResult(); break;
     case Event::Siege: SeedSiege(); break;
+    case Event::CashShop: SeedCashShop(); break;
     default: break;
     }
 }
@@ -224,6 +251,7 @@ void Reset(Event event)
         battleCastle::SetBattleCastleStart(false);
         UI::Siege::ResetMiniMap();
         break;
+    case Event::CashShop: g_pInGameShop->ClearAllStorageItem(); break;
     default: break;
     }
 }

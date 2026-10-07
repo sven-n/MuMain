@@ -79,12 +79,11 @@ flowchart TD
     scene["World and legacy 2D"]
     subgraph loop["CManager::Render(): windows in layer-depth order"]
         win{{"Each window's native Render(): state for its document,<br/>what little still draws natively"}}
-        cam{{"3D cameras: the native message boxes' items"}}
     end
     rtt{{"Offscreen pass: RenderTarget drawers into textures:<br/>the item windows' items and effects, the cash shop, potions,<br/>letter portrait, character creation, item previews, the item on the cursor"}}
     main("Pre-submit: the one RmlUi context, every document;<br/>render-target textures show here as images")
     post["Post-RmlUi pass: the cursor"]
-    scene --> win --> cam --> rtt --> main --> post
+    scene --> win --> rtt --> main --> post
 ```
 
 A flush draws what has been recorded so far (`FlushRenderCommands()`), so a context rendered right

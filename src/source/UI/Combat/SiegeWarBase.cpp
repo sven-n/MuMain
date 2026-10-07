@@ -446,16 +446,16 @@ void mu::ui::window::CSiegeWarBase::FillSkill(SiegeWarfareRmlModel& model)
             // STRP_BOTTOMCENTER's old native meaning: grow upward from sy (see RenderTipTextList()).
             config.anchor = UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft;
             config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RenderTipTextList()'s own default (RT3_SORT_CENTER).
-            UI::RmlBridge::Tooltip::Show(config);
+            UI::RmlBridge::Tooltip::Show(config, this);
         }
         else
         {
-            UI::RmlBridge::Tooltip::Hide();
+            UI::RmlBridge::Tooltip::Hide(this);
         }
     }
     else
     {
-        UI::RmlBridge::Tooltip::Hide();
+        UI::RmlBridge::Tooltip::Hide(this);
     }
 }
 

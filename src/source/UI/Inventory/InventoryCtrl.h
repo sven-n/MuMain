@@ -9,7 +9,7 @@
 #include "UI/Inventory/ItemGridModel.h"
 #include <vector>
 
-#include "UI/Core/Window3DRenderMng.h"
+#include "UI/Core/WindowManager.h"
 #include <span>
 #include "Render/Textures/ZzzTexture.h"
 

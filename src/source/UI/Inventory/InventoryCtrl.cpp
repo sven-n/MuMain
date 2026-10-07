@@ -14,6 +14,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "UI/RmlBridge/RmlTooltip.h"
+#include "UI/Tooltip/LegacyTextListTooltip.h"
 
 #include <RmlUi/Core/ElementDocument.h>
 using namespace SEASON3B;
@@ -1429,7 +1430,7 @@ void mu::ui::window::CInventoryCtrl::DeleteItemToolTip()
         g_pNewItemMng->DeleteItem(m_pToolTipItem);
         m_pToolTipItem = nullptr;
     }
-    UI::RmlBridge::Tooltip::Hide();
+    UI::Tooltip::HideLegacyTextList();
 }
 
 void mu::ui::window::CInventoryCtrl::SetRepairMode(bool bRepair)

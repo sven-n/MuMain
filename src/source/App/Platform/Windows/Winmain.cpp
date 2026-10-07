@@ -1767,12 +1767,6 @@ void UpdateResolutionDependentSystems()
     CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio, g_Camera.ViewNear,
                                        g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
 
-    // Update all 3D UI camera dimensions for proper item rendering
-    if (g_pNewUI3DRenderMng)
-    {
-        g_pNewUI3DRenderMng->UpdateAllCameraDimensions(WindowWidth, WindowHeight);
-    }
-
     // Reposition old-style CWin-based UI for the current scene. Without this,
     // login/character-scene info boxes stay anchored to the old screen size
     // until the player re-enters the scene.

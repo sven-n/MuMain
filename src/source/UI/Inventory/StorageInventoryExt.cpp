@@ -45,7 +45,7 @@ CStorageInventoryExt::~CStorageInventoryExt()
 
 bool CStorageInventoryExt::Create(CManager* pNewUIMng, int x, int y)
 {
-    if (nullptr == pNewUIMng || nullptr == g_pNewUI3DRenderMng || nullptr == g_pNewItemMng)
+    if (nullptr == pNewUIMng || nullptr == g_pNewItemMng)
     {
         return false;
     }

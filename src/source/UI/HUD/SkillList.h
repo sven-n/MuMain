@@ -2,8 +2,8 @@
 
 #include <vector>
 
+#include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowObject.h"
-#include "UI/Core/Window3DRenderMng.h"
 #include "Render/Textures/ZzzTexture.h"
 #include <RmlUi/Core/Types.h>
 
@@ -55,7 +55,7 @@ namespace mu::ui::window
         CSkillList();
         virtual ~CSkillList();
 
-        bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
         bool UpdateMouseEvent();
@@ -151,7 +151,6 @@ namespace mu::ui::window
 
     private:
         CManager* m_pNewUIMng;
-        C3DRenderMng* m_pNewUI3DRenderMng;
 
         bool m_bHotKeySkillListUp;
         int m_iHotKeySkillType[SKILLHOTKEY_COUNT];

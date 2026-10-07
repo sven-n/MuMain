@@ -39,7 +39,7 @@ CTrade::~CTrade()
 
 bool CTrade::Create(CManager* pNewUIMng, int x, int y)
 {
-    if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng
+    if (NULL == pNewUIMng
         || NULL == g_pNewItemMng)
         return false;
 

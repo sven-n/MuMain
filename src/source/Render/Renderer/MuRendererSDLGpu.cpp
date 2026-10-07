@@ -2595,9 +2595,8 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // UI-embedded 3D previews (CUIPhotoViewer, CharMakeWin, NewUIInGameShop,
-    // NewUIGoldBowmanLena, NewUIRegistrationLuckyCoin, NewUI3DRenderMng) call
-    // SetRenderViewport(...) shrinks the GPU
+    // UI-embedded 3D previews (CUIPhotoViewer, CharMakeWin, UI::Items::ItemCameraTarget)
+    // call SetRenderViewport(...) shrinks the GPU
     // viewport around the preview region, then set a narrow-FOV projection.
     // The classic OpenGL backend honored this via glViewport; without a real
     // override here the base-class no-op leaves the 2D-pass full-swapchain

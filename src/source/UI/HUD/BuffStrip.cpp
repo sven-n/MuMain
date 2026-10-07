@@ -11,7 +11,6 @@
 #include "UI/Placement/WindowPlacement.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
-#include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/Dialogs/ConfirmRequest.h"
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/StringUtils.h"
@@ -164,52 +163,40 @@ namespace
         }
     }
 
-    std::wstring JoinLines(std::list<std::wstring>::const_iterator first, std::list<std::wstring>::const_iterator last)
+    // The original's tooltip rows (RenderBuffTooltip()): the buff's name in bold blue, its
+    // description lines, then the remaining duration in purple if it has one.
+    std::vector<UI::RmlBridge::Tooltip::Line> BuildTooltip(eBuffState buff)
     {
-        std::wstring combined;
-        for (auto it = first; it != last; ++it)
-        {
-            if (!combined.empty())
-                combined += L"\n";
-            combined += *it;
-        }
-        return combined;
-    }
-
-    // The original's tooltip rows (RenderBuffTooltip()): the first line is the buff's name, then
-    // its description lines, then the remaining duration if it has one.
-    struct TooltipTexts
-    {
-        Rml::String title, body, duration, combined;
-    };
-
-    TooltipTexts BuildTooltip(eBuffState buff)
-    {
-        TooltipTexts entry;
+        using UI::RmlBridge::Tooltip::LineColor;
+        std::vector<UI::RmlBridge::Tooltip::Line> lines;
         std::list<std::wstring> tooltipinfo;
         g_BuffToolTipString(tooltipinfo, buff);
+        bool first = true;
+        for (const std::wstring& text : tooltipinfo)
+        {
+            UI::RmlBridge::Tooltip::Line line;
+            line.text = StringUtils::WideToNarrow(text.c_str());
+            if (first)
+            {
+                line.color = LineColor::Blue;
+                line.bold = true;
+            }
+            first = false;
+            lines.push_back(std::move(line));
+        }
 
         std::wstring bufftime;
         g_BuffStringTime(buff, bufftime);
-        std::wstring duration;
         if (!bufftime.empty())
         {
             wchar_t durLine[128] = {};
             mu_swprintf(durLine, I18N::Game::DurationPeriodS, bufftime.c_str());
-            duration = durLine;
+            UI::RmlBridge::Tooltip::Line line;
+            line.text = StringUtils::WideToNarrow(durLine);
+            line.color = LineColor::Purple;
+            lines.push_back(std::move(line));
         }
-
-        const auto body = tooltipinfo.empty() ? tooltipinfo.cend() : std::next(tooltipinfo.cbegin());
-        entry.title = tooltipinfo.empty() ? Rml::String() : StringUtils::WideToNarrow(tooltipinfo.front().c_str());
-        entry.body = StringUtils::WideToNarrow(JoinLines(body, tooltipinfo.cend()).c_str());
-        entry.duration = StringUtils::WideToNarrow(duration.c_str());
-
-        // One plain newline-joined block, for a theme that draws it as one.
-        std::wstring combined = JoinLines(tooltipinfo.cbegin(), tooltipinfo.cend());
-        if (!duration.empty())
-            combined += (combined.empty() ? L"" : L"\n") + duration;
-        entry.combined = StringUtils::WideToNarrow(combined.c_str());
-        return entry;
+        return lines;
     }
 }
 
@@ -250,10 +237,6 @@ void CBuffStrip::BindRmlModel(Rml::DataModelConstructor& c, BuffStripRmlModel& m
     // call, including on a theme switch -- no guard here.
     auto buff = c.RegisterStruct<BuffEntry>();
     buff.RegisterMember("decorator", &BuffEntry::decorator);
-    buff.RegisterMember("tooltip", &BuffEntry::tooltip);
-    buff.RegisterMember("tooltip_title", &BuffEntry::tooltipTitle);
-    buff.RegisterMember("tooltip_body", &BuffEntry::tooltipBody);
-    buff.RegisterMember("tooltip_duration", &BuffEntry::tooltipDuration);
     c.RegisterArray<std::vector<BuffEntry>>();
 
     c.BindEventCallback("buff_cancel",
@@ -263,11 +246,18 @@ void CBuffStrip::BindRmlModel(Rml::DataModelConstructor& c, BuffStripRmlModel& m
                 return;
             OnBuffRightClick(args[0].Get<int>());
         });
+    c.BindEventCallback("buff_hover",
+        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+        {
+            if (!args.empty())
+                m_Tooltip.Enter(event, args[0].Get<int>(-1));
+        });
+    c.BindEventCallback("buff_leave",
+        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&) { m_Tooltip.Leave(event); });
 
     c.Bind("buffs", &model.buffs);
     c.Bind("strip_slot_left", &model.stripSlotLeft);
     c.Bind("strip_slot_width", &model.stripSlotWidth);
-    c.Bind("tooltip_line_px", &model.tooltipLinePx);
 }
 
 void CBuffStrip::BuildRmlUi()
@@ -335,36 +325,26 @@ void CBuffStrip::SyncRmlModel()
         BuffEntry entry;
 
         entry.decorator = BuildIconDecorator(buff);
-        TooltipTexts tooltip = BuildTooltip(buff);
-        entry.tooltip = std::move(tooltip.combined);
-        entry.tooltipTitle = std::move(tooltip.title);
-        entry.tooltipBody = std::move(tooltip.body);
-        entry.tooltipDuration = std::move(tooltip.duration);
-
         model.buffs.push_back(entry);
     }
 
     m_RmlView.MarkDirty("buffs");
     SyncStripSlot();
-    SyncTooltipLineHeight();
+    SyncTooltip();
 }
 
-void CBuffStrip::SyncTooltipLineHeight()
+void CBuffStrip::SyncTooltip()
 {
-    constexpr float kNativeRowAdvance = 1.1f;
-    const auto transform = GetLayoutTransform();
-    float lineHeight = 0.0f;
+    const int slot = m_Tooltip.Hovered();
+    if (slot < 0 || slot >= static_cast<int>(m_ShownBuffs.size()))
     {
-        const UI::Scaling::ScopedActiveTransform measureScope(transform);
-        lineHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal));
-    }
-    const float advance = lineHeight * transform.scaleY * kNativeRowAdvance;
-
-    auto& model = m_RmlView.GetModel();
-    if (model.tooltipLinePx == advance)
+        m_Tooltip.Hide();
         return;
-    model.tooltipLinePx = advance;
-    m_RmlView.MarkDirty("tooltip_line_px");
+    }
+    // Native RenderTipTextList() hung the box from the icon's centre, 20 of its 28 units down.
+    UI::RmlBridge::ElementTooltip::Placement placement;
+    placement.anchorAt = 20.f / 28.f;
+    m_Tooltip.Show(BuildTooltip(static_cast<eBuffState>(m_ShownBuffs[slot])), placement);
 }
 
 void CBuffStrip::SyncStripSlot()

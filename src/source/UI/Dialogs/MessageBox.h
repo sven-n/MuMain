@@ -115,9 +115,6 @@ namespace mu::ui::window
         bool	m_bCanMove;
 
         type_map_callback	m_mapCallbacks;
-
-        float m_fOpacityAlpha;
-        vec3_t m_vColor;
     public:
         CMessageBoxBase();
         virtual ~CMessageBoxBase();
@@ -145,11 +142,6 @@ namespace mu::ui::window
 
         void SendEvent(CMessageBoxBase* pOwner, DWORD dwEvent);
         void SendEvent(CMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam);
-        void RenderMsgBackColor(bool _bRender = false);
-        void SetMsgBackOpacity(float _fAlpha = 0.5f);
-        const float& GetMsgBackOpacity() const { return m_fOpacityAlpha; }
-        void SetMsgBackColor(vec3_t _vColor = NULL);
-        const vec3_t& GetMsgBackColor() const { return m_vColor; }
     };
 
     class CMessageBoxFactory

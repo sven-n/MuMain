@@ -8,7 +8,7 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Dialogs/MessageBox.h"
-#include "UI/Core/Window3DRenderMng.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/Inventory/InventoryActionController.h"
 #include "GameLogic/Items/IInventoryActionContext.h"
 #include "UI/RmlBridge/RmlThemedView.h"
@@ -80,7 +80,6 @@ namespace mu::ui::window
         } EQUIPMENT_ITEM;
 
         CManager* m_pNewUIMng;
-        C3DRenderMng* m_pNewUI3DRenderMng;
         CInventoryCtrl* m_pNewInventoryCtrl;
         CInventoryActionController m_ActionController;
         POINT m_Pos;
@@ -150,7 +149,7 @@ namespace mu::ui::window
         CMyInventory();
         virtual ~CMyInventory();
 
-        bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         bool EquipItem(int iIndex, std::span<const BYTE> pbyItemPacket);

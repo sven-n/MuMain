@@ -5,7 +5,7 @@
 #pragma once
 
 #include "UI/Dialogs/MessageBox.h"
-#include "UI/Core/Window3DRenderMng.h"
+#include "UI/Core/WindowManager.h"
 
 namespace mu::ui::window
 {
@@ -180,61 +180,6 @@ namespace mu::ui::window
         void RenderButtons();
 
         DWORD m_dwType;
-        type_vector_msgdata m_MsgDataList;
-
-        // button
-        CMessageBoxButton m_BtnOk;
-        CMessageBoxButton m_BtnCancel;
-    };
-
-    //////////////////////////////////////////////////////////////////////////
-
-    class C3DItemCommonMsgBox : public CMessageBoxBase, public I3DRenderObj
-    {
-        static constexpr float MSGBOX_TEXT_MAXWIDTH_3DITEM = 120.0f;
-        static constexpr float MSGBOX_TEXT_LEFT_BLANK_3DITEM = 60.0f;
-        static constexpr float MSGBOX_3DITEM_WIDTH = 40.0f;
-        static constexpr float MSGBOX_3DITEM_HEIGHT = 40.0f;
-    public:
-        C3DItemCommonMsgBox();
-        ~C3DItemCommonMsgBox();
-
-        DWORD GetType();
-
-        bool Create(DWORD dwType, float fPriority = 3.f);
-        bool Create(DWORD dwType, const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL, float fPriority = 3.f);
-        void Release();
-
-        void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
-
-        void Set3DItem(ITEM* pItem);
-        void SetItemValue(int iValue);
-        int GetItemValue();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT Close(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-        bool Update();
-        bool Render();
-        void Render3D();
-
-        bool IsVisible() const;
-
-    private:
-        void SetAddCallbackFunc();
-        int SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType);
-
-        void SetButtonInfo();
-        void AddButtonBlank(int iAddLine);
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        DWORD m_dwType;
-        ITEM m_Item;
-        int m_iItemValue;
-
         type_vector_msgdata m_MsgDataList;
 
         // button

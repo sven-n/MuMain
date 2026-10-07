@@ -1,19 +1,123 @@
-/* The cash shop's storage / gift list. The window is screen-space at the full reference area, so
-   #panel carries no offset of its own; the pane counter-scales out of the root transform the way
-   every other dense list does, so its text stays at the native renderer's physical size. */
+/* The cash shop as CInGameShop drew it: Ingame_shopback.jpg, the zone tabs, category buttons and
+   their decoration, the 3x3 package boxes, the player's balances and buttons, the banner, and the
+   storage / gift list. Reference px under the window's root transform; text counter-scales out of
+   it (.sharp-text) so it rasterises at the native renderer's size. */
 
 #panel {
 	position: absolute;
 	transform-origin: left top;
 	width: 640px;
 	height: 429px;
+	font-family: "token(font-body)";
 	pointer-events: none;
 }
 
-/* CInGameShop::RenderFrame()'s backdrop, then the image C++ draws the rest of the shop into. */
 @spritesheet igs-bg-back-sheet { src: "../../../InGameShop/Ingame_shopback.jpg"; igs-bg-back: 0px 0px 640px 429px; }
+@spritesheet igs-zone-sheet { src: "../../../InGameShop/Ingame_Tab_Up.tga"; igs-zone-up: 0px 0px 76px 23px; igs-zone-down: 0px 23px 76px 23px; }
+@spritesheet igs-category-sheet { src: "../../../InGameShop/Ingame_Bt01.tga"; igs-category-up: 0px 0px 73px 27px; igs-category-down: 0px 54px 73px 27px; }
+@spritesheet igs-deco-middle-sheet { src: "../../../InGameShop/Ingame_Deco_Center.tga"; igs-deco-middle: 0px 0px 4px 8px; }
+@spritesheet igs-deco-down-sheet { src: "../../../InGameShop/Ingame_Deco_Dn.tga"; igs-deco-down: 0px 0px 47px 100px; }
+@spritesheet igs-tab-left-sheet { src: "../../../InGameShop/ingame_Tab01.tga"; igs-tab-left: 0px 0px 49px 20px; }
+@spritesheet igs-tab-right-sheet { src: "../../../InGameShop/ingame_Tab02.tga"; igs-tab-right: 0px 0px 49px 20px; }
+@spritesheet igs-logo-sheet { src: "../../../InGameShop/Ingame_Itembox_logo.tga"; igs-logo: 0px 0px 57px 57px; }
+@spritesheet igs-gift-sheet { src: "../../../InGameShop/Ingame_Bt_Gift.tga"; igs-gift-up: 0px 0px 25px 25px; igs-gift-over: 0px 25px 25px 25px; igs-gift-down: 0px 50px 25px 25px; }
+@spritesheet igs-charge-sheet { src: "../../../InGameShop/Ingame_Bt_Cash.tga"; igs-charge-up: 0px 0px 25px 25px; igs-charge-over: 0px 25px 25px 25px; igs-charge-down: 0px 50px 25px 25px; }
+@spritesheet igs-refresh-sheet { src: "../../../InGameShop/Ingame_Bt_Reset.tga"; igs-refresh-up: 0px 0px 25px 25px; igs-refresh-over: 0px 25px 25px 25px; igs-refresh-down: 0px 50px 25px 25px; }
+@spritesheet igs-page-left-sheet { src: "../../../InGameShop/ingame_Bt_page_L.tga"; igs-page-left-up: 0px 0px 20px 23px; igs-page-left-over: 0px 23px 20px 23px; igs-page-left-down: 0px 46px 20px 23px; }
+@spritesheet igs-page-right-sheet { src: "../../../InGameShop/ingame_Bt_page_R.tga"; igs-page-right-up: 0px 0px 20px 23px; igs-page-right-over: 0px 23px 20px 23px; igs-page-right-down: 0px 46px 20px 23px; }
+@spritesheet igs-storage-page-sheet { src: "../../../InGameShop/IGS_Storage_Page.tga"; igs-storage-page: 0px 0px 80px 30px; }
+@spritesheet igs-storage-left-sheet { src: "../../../InGameShop/IGS_Storage_Page_Left.tga"; igs-storage-left-up: 0px 0px 20px 22px; igs-storage-left-over: 0px 22px 20px 22px; igs-storage-left-down: 0px 44px 20px 22px; }
+@spritesheet igs-storage-right-sheet { src: "../../../InGameShop/IGS_Storage_Page_Right.tga"; igs-storage-right-up: 0px 0px 20px 22px; igs-storage-right-over: 0px 22px 20px 22px; igs-storage-right-down: 0px 44px 20px 22px; }
+@spritesheet igs-exit-sheet { src: "../../../newui_exit_00.tga"; igs-exit-up: 0px 0px 36px 29px; igs-exit-down: 0px 29px 36px 29px; }
+
 .bg-back { position: absolute; left: 0; top: 0; width: 640px; height: 429px; decorator: image(igs-bg-back); }
-#igs_view { position: absolute; left: 0; top: 0; width: 640px; height: 429px; }
+#igs_items { position: absolute; left: 0; top: 0; width: 640px; height: 429px; pointer-events: none; }
+
+/* Radio labels: grey, white when selected (CRadioButton::ChangeFrame()). */
+.igs-zone-label, .igs-category-label, .igs-storage-tab-label { color: #b5b5b5; }
+.selected .igs-zone-label, .selected .igs-category-label, .selected .igs-storage-tab-label { color: #ffffff; }
+.igs-zone-label, .igs-category-label { font-weight: bold; }
+
+/* The zones: 76 x 23 tabs a unit apart from (95, 0). */
+#igs_zones { position: absolute; left: 95px; top: 0; display: flex; pointer-events: none; }
+.igs-zone { position: relative; flex: 0 0 76px; width: 76px; height: 23px; margin-right: 1px; decorator: image(igs-zone-up); pointer-events: auto; }
+.igs-zone.selected { decorator: image(igs-zone-down); }
+
+/* The categories: 73 x 27 buttons 6 apart from (13, 31), the 4 x 8 link under each but the last
+   at its centre, and the 47 x 100 ornament from the panel's left edge 10 above the last's top. */
+#igs_categories { position: absolute; left: 13px; top: 31px; width: 73px; pointer-events: none; }
+.igs-category { position: relative; display: block; width: 73px; height: 27px; margin-bottom: 6px; decorator: image(igs-category-up); pointer-events: auto; }
+.igs-category.selected { decorator: image(igs-category-down); }
+.igs-category.selected .igs-category-label { margin-left: -999px; margin-top: 1px; }
+.igs-category-deco { position: absolute; left: 34px; top: 26px; width: 4px; height: 8px; decorator: image(igs-deco-middle); }
+.igs-category.last .igs-category-deco { display: none; }
+.igs-categories-end { position: relative; display: block; left: -13px; margin-top: -43px; width: 47px; height: 100px; decorator: image(igs-deco-down); }
+
+/* The packages: 122 x 121 cells from the panel's corner; in each the name and price across 104 from
+   (105, 40) and (105, 113), the Buy button at (162, 126), or the empty box's logo at (128, 52). */
+#igs_packages { position: absolute; left: 0; top: 0; width: 366px; display: flex; flex-wrap: wrap; pointer-events: none; }
+.igs-package { position: relative; flex: 0 0 122px; width: 122px; height: 121px; }
+/* The box itself is the backdrop's art. */
+.igs-package-card { display: none; }
+.igs-package-logo { display: none; position: absolute; left: 128px; top: 52px; width: 57px; height: 57px; decorator: image(igs-logo); }
+.igs-package.empty .igs-package-logo { display: block; }
+.igs-package-name, .igs-package-price { position: absolute; left: 105px; width: 104px; height: 1px; }
+.igs-package-name { top: 40px; color: #ffffff; }
+.igs-package-price { top: 113px; color: #ffeea1; }
+.igs-buy { left: 162px; top: 126px; }
+
+.igs-page-btn { position: absolute; top: 397px; width: 20px; height: 23px; pointer-events: auto; }
+#igs_page_prev { left: 231px; decorator: image(igs-page-left-up); }
+#igs_page_prev:hover { decorator: image(igs-page-left-over); }
+#igs_page_prev:active { decorator: image(igs-page-left-down); }
+#igs_page_next { left: 307px; decorator: image(igs-page-right-up); }
+#igs_page_next:hover { decorator: image(igs-page-right-over); }
+#igs_page_next:active { decorator: image(igs-page-right-down); }
+
+/* "current / total" in bold: the current page right-aligned to the slash, the total after it. */
+.igs-page-numbers { position: absolute; left: 0; width: 640px; height: 1px; color: #ffffff; font-weight: bold; }
+.igs-page-numbers .sharp-right { transform-origin: right top; }
+#igs_page { top: 404px; }
+#igs_page .igs-page-current { right: 369px; }
+#igs_page .igs-page-slash { left: 277px; }
+#igs_page .igs-page-total { left: 287px; }
+#igs_storage_page { top: 376px; }
+#igs_storage_page .igs-page-current { right: 90px; }
+#igs_storage_page .igs-page-slash { left: 556px; }
+#igs_storage_page .igs-page-total { left: 566px; }
+
+/* The player: the name in bold centred over 122 from (498, 23), then three balance rows from
+   (498, 50) 15 apart, each value right-aligned to 622. */
+#igs_character { position: absolute; left: 498px; top: 23px; width: 122px; height: 1px; color: #ffffff; font-weight: bold; }
+#igs_wallet { position: absolute; left: 0; top: 50px; width: 640px; }
+.igs-wallet-row { position: relative; display: block; height: 15px; color: #ffeea1; }
+.igs-wallet-label { left: 498px; }
+.igs-wallet-value { right: 18px; transform-origin: right top; }
+
+.igs-icon-btn { position: absolute; top: 94px; width: 25px; height: 25px; pointer-events: auto; }
+#igs_gift { left: 519px; decorator: image(igs-gift-up); }
+#igs_gift:hover { decorator: image(igs-gift-over); }
+#igs_gift:active { decorator: image(igs-gift-down); }
+#igs_charge { left: 546px; decorator: image(igs-charge-up); }
+#igs_charge:hover { decorator: image(igs-charge-over); }
+#igs_charge:active { decorator: image(igs-charge-down); }
+#igs_refresh { left: 573px; decorator: image(igs-refresh-up); }
+#igs_refresh:hover { decorator: image(igs-refresh-over); }
+#igs_refresh:active { decorator: image(igs-refresh-down); }
+
+#igs_banner { position: absolute; left: 482px; top: 133px; width: 153px; height: 63px; pointer-events: none; }
+#igs_banner.linked { pointer-events: auto; }
+
+/* The storage and gift tabs: 49 x 20 from (486, 208), overlapping by 2; only the selected one has
+   art (Ingame_Tab01 for the storage, Ingame_Tab02 for the gift box). */
+#igs_storage_tabs { position: absolute; left: 486px; top: 208px; display: flex; pointer-events: none; }
+.igs-storage-tab { position: relative; flex: 0 0 49px; width: 49px; height: 20px; margin-right: -2px; pointer-events: auto; }
+.igs-storage-tab.selected { decorator: image(igs-tab-left); }
+.igs-storage-tab.selected.gift { decorator: image(igs-tab-right); }
+
+.igs-storage-header { position: absolute; top: 233px; height: 1px; color: #ffffff; font-weight: bold; }
+#igs_storage_header_name { left: 492px; width: 96px; }
+#igs_storage_header_period { left: 592px; width: 34px; }
 
 /* Native put the box at (490, 360) in left-down coordinates, 146 x 115 -- so its top edge is
    360 - 115. The height here is the 9 rows it actually drew. */
@@ -24,17 +128,33 @@
 	transform-origin: left top;
 	/* Native drew the track at every list length. */
 	overflow: hidden scroll;
+	pointer-events: auto;
 }
-
 /* display: block is explicit: a data-for <div> is inline without it in this build and every row
    lands on the same line. */
 .igs-row { position: relative; display: block; pointer-events: auto; }
 .igs-row-back { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 .igs-row.selected .igs-row-back { background-color: rgb(106, 97, 88); }
-
 .igs-cell { position: absolute; top: 0; white-space: nowrap; }
 /* CUIInGameShopListBox::RenderDataLine(): the name in 98 units from the row's left, the period
    right-aligned at +102 across 33. As fractions of the row's own bound width they need no
    binding and hold at every scale. */
 .igs-cell-name   { left: 0; width: 74.809%; }
 .igs-cell-period { right: 0; width: 25.191%; text-align: right; }
+
+#igs_storage_page_back { position: absolute; left: 518px; top: 366px; width: 80px; height: 30px; decorator: image(igs-storage-page); }
+.igs-storage-page-btn { position: absolute; top: 369px; width: 20px; height: 22px; pointer-events: auto; }
+#igs_storage_prev { left: 500px; decorator: image(igs-storage-left-up); }
+#igs_storage_prev:hover { decorator: image(igs-storage-left-over); }
+#igs_storage_prev:active { decorator: image(igs-storage-left-down); }
+#igs_storage_next { left: 596px; decorator: image(igs-storage-right-up); }
+#igs_storage_next:hover { decorator: image(igs-storage-right-over); }
+#igs_storage_next:active { decorator: image(igs-storage-right-down); }
+#igs_use { left: 572px; top: 396px; }
+
+/* newui_exit_00: up, and the pressed frame while held. */
+#igs_close { position: absolute; left: 484px; top: 392px; width: 36px; height: 29px; decorator: image(igs-exit-up); pointer-events: auto; }
+#igs_close:active { decorator: image(igs-exit-down); }
+
+#igs_versions { position: absolute; left: 12px; top: 396px; color: rgb(210, 180, 230); }
+#igs_versions .igs-version-banner { top: 12px; }

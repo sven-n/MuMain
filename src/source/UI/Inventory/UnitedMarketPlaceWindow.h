@@ -1,7 +1,6 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/Window/Button.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
 #include "UI/Quests/MyQuestInfoWindow.h"
@@ -17,7 +16,7 @@ namespace mu::ui::window
 {
 // Julia's market warp service. united_market_place.rml draws it; C++ keeps the texts, the Warp
 // button's lock, the corner close, Escape and the warp request.
-class CUnitedMarketPlaceWindow : public CObject, public I3DRenderObj
+class CUnitedMarketPlaceWindow : public CObject
 {
 public:
     enum IMAGE_LIST
@@ -40,14 +39,13 @@ private:
     };
 
     CManager* m_pNewUIMng;
-    C3DRenderMng* m_pNewUI3DRenderMng;
     POINT m_Pos;
 
 public:
     CUnitedMarketPlaceWindow();
     virtual ~CUnitedMarketPlaceWindow();
 
-    bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y);
+    bool Create(CManager* pNewUIMng, int x, int y);
     void Release();
 
     void SetPos(int x, int y);
@@ -56,7 +54,6 @@ public:
     bool UpdateKeyEvent();
     bool Update();
     bool Render();
-    void Render3D();
 
     bool IsVisible() const;
 
@@ -73,7 +70,6 @@ private:
     void BuildRmlUi();
     void SyncRmlModel();
     bool BtnProcess();
-    void RenderItem3D();
 
     void BindRmlModel(Rml::DataModelConstructor& c, UnitedMarketPlaceRmlModel& model);
     UI::RmlBridge::ThemedView<UnitedMarketPlaceRmlModel> m_RmlView{"united_market_place",

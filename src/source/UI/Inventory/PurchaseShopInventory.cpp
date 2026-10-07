@@ -37,7 +37,7 @@ mu::ui::window::CPurchaseShopInventory::~CPurchaseShopInventory()
 
 bool mu::ui::window::CPurchaseShopInventory::Create(CManager* pNewUIMng, int x, int y)
 {
-    if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng || NULL == g_pNewItemMng)
+    if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
 
     SetPos(x, y);

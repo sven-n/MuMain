@@ -7,9 +7,9 @@ numbers refer to [`architecture-principles.md`](architecture-principles.md). Per
 
 ## What's migrated
 
-Every window is a `mu::ui::window::CObject` drawn by RmlUi in both themes, except
-**`CInGameShop`** (partial, unscheduled — OpenMU has no cash shop; see its ledger row). The
-`CWin` toolkit, the sprite widgets and the `CUIControl` toolkit are deleted. Families:
+Every window is a `mu::ui::window::CObject` drawn by RmlUi in both themes. The `CWin` toolkit,
+the sprite widgets, the `CUIControl` toolkit and the shared item camera (`C3DRenderMng`) are
+deleted. Families:
 
 - **Login and character select** — login, server select, character select and creation, the
   system menu, the credits, message boxes, the remember-password prompt, character balloons.

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "UI/Core/WindowManager.h"
+#include "UI/RmlBridge/RmlElementTooltip.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 
 #include <vector>
@@ -52,12 +53,6 @@ namespace mu::ui::window
             // before ClosePositionedElements() places such children) -- don't retry a clipped-atlas
             // approach; named @spritesheet rects are the working mechanism.
             Rml::String decorator;
-            Rml::String tooltip;
-            // The same tooltip split like the original's (RenderBuffTooltip()): the name (blue,
-            // bold), the description lines, and the remaining duration (purple; empty if none).
-            Rml::String tooltipTitle;
-            Rml::String tooltipBody;
-            Rml::String tooltipDuration;
         };
         struct BuffStripRmlModel
         {
@@ -66,9 +61,6 @@ namespace mu::ui::window
             // the strip's own stretched HUD space. Data a theme may follow, not a placement.
             float stripSlotLeft = 0.0f;
             float stripSlotWidth = 0.0f;
-            // Native tooltip row advance in real pixels: RenderTipTextList() steps 1.1 text
-            // heights of the native renderer per line.
-            float tooltipLinePx = 0.0f;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, BuffStripRmlModel& model);
         UI::RmlBridge::ThemedView<BuffStripRmlModel> m_RmlView{"buff_strip",
@@ -79,10 +71,12 @@ namespace mu::ui::window
 
         // The buffs shown, in slot order, for mapping a slot's event back to its buff.
         std::vector<int> m_ShownBuffs;
+        // The hovered slot's buff, in the shared tooltip.
+        UI::RmlBridge::ElementTooltip m_Tooltip;
+        void SyncTooltip();
 
         void SyncRmlModel();
         void OnBuffRightClick(int slot);
         void SyncStripSlot();
-        void SyncTooltipLineHeight();
     };
 }

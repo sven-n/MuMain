@@ -30,8 +30,8 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | Component | Status | Shape | Note |
 |---|---|---|---|
 | `CMainFrameWindow` (+ `CSkillList`, `CItemHotKey`) | Done | Hybrid | One shared `main_frame.rml` in `dp`, its parts placed by each theme's RCSS; one workspace slot (`window-placement.md`). Skill icons are sprites (`ResolveSkillIcon()`, `skill_icons.rcss`); potions are native 3D in render targets their slots show |
-| `CBuffStrip` | Done | RmlUi-only 2D | The `data-for` pilot. Right-clicking Infinity Arrow or Swell of Magic Power asks to cancel it, as native did. Legacy has native's per-line-coloured tooltip; modern keeps a plain one by choice |
-| `CMuHelperBar` | Done | RmlUi-only 2D | Header slot |
+| `CBuffStrip` | Done | RmlUi-only 2D | The `data-for` pilot. Right-clicking Infinity Arrow or Swell of Magic Power asks to cancel it, as native did. The hover tooltip is the shared one, name, description and duration in native's colours (`ElementTooltip`) |
+| `CMuHelperBar` | Done | RmlUi-only 2D | Header slot; its buttons' hints are the shared tooltip |
 | `CHotKey` | Nothing to port | — | Handles hotkeys, draws nothing. Not `CItemHotKey` |
 | `CGensRanking` | Done | RmlUi-only 2D | Reward text keeps native wrapping and measured row pitch; RmlUi owns scrolling and the scrollbar (drag and scale checked in game) |
 | `CCommandWindow` | Done | RmlUi-only 2D | Right-docked; the twelve `CButton`s are gone. C++ keeps the armed command, its right-click run and the corner-close hit test |
@@ -69,7 +69,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CTrade`, `CStorageInventory`, `CStorageInventoryExt`, `CMixInventory`, `CNPCShop`, `CMyShopInventory`, `CPurchaseShopInventory`, `CInventoryExtension`, `CLuckyItemWnd` | Done | Hybrid | Same pattern, one document each. Their native 2D (trade's guild mark and warning arrows, the mix and lucky-item sparkles, the extension's locked-page art) draws into the window's render target with its items |
 | `CItemExplanationWindow`, `CSetItemExplanation` | Done | RmlUi-only 2D | `UI/Inventory/TipTextListView` |
 | `CUnitedMarketPlaceWindow` | Done | RmlUi-only 2D | Its 3D hook draws nothing |
-| `CInGameShop` | Partial | — | **Unscheduled, not permanently native.** OpenMU has no cash shop, which gates verification, not the port. Done: the backdrop, the storage/gift list and two `MsgBoxIGS*` list dialogs. Still native, drawn into the document's `#igs_view` render target with the 3D package items: frame decoration, 11 `CButton`s, 3 `CRadioGroupButton` columns, texts, banner, paging; and `MsgBoxIGSSendGift`'s two text fields. Its sub-dialogs are the last native consumers of the `mu::ui::window` widgets |
+| `CInGameShop` | Done | Hybrid | `in_game_shop.rml`: zones, categories, the package page with its live 3D items (a render target at the original's 2° field of view), balances, banner, storage and gift boxes. Its dialogs (`igs_buy_package`, `igs_buy_select`, `igs_send_gift`) are documents too, over a dimmed screen. `$preview igs` fills it from the shipped script and banner without a server; buying, gifting and using storage items are unchecked until a server supports the cash shop, and their requests are unchanged |
 
 ### Quests and NPCs
 
@@ -114,7 +114,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `COptionWindow` | Done | Legacy: `window_shell`, six tabs, custom `data-for` dropdowns (`engine-findings.md`: no native `<select>`), level gauges for sound, music and effect limit; drags (`window-placement.md`). Modern: its own full-screen markup on the same model, a category rail and a frosted glass pane (`backdrop-filter`), toggle switches and sliders, a compact layout on a short or narrow screen (`@media` in `dp`); above the HUD (stacking depth 10.67), not draggable. The in-game system menu opens it from a full-screen menu in the same style (`CGenericMenuDialog`'s system menu) |
 | `CChatCommandWindow` | Done | Its value field is an `<input>` claiming RmlUi's text-input identity while focused |
 
-**Not ledgered**: `C3DCamera`, `CGroup` (`CManager` plumbing); `CTextBox`, `CSlideWindow`,
+**Not ledgered**: `CGroup` (`CManager` plumbing); `CTextBox`, `CSlideWindow`,
 `CScrollBar` (native widgets that retire with their hosts); `CMessageBoxMng` (the dialog
 family's manager).
 
@@ -131,7 +131,7 @@ other places for single confirmations. What remains of the native family:
 | `CBloodCastleResultMsgBoxLayout`, `CDevilSquareRankMsgBoxLayout`, `CChaosCastleResultMsgBoxLayout` | Done | `MessageBoxView`; texts from each match's `CollectMatchResult()` |
 | `CProgressMsgBox` layouts (crown switch, seal register, crown defence) and `CCursedTempleProgressMsgBox` layouts | Done | `MessageBoxView` with frame and progress bar |
 | `CQuestCountLimitMsgBoxLayout` | Compiled out | Its only creator is under `ASG_ADD_TIME_LIMIT_QUEST`, not defined |
-| `C3DItemCommonMsgBox` | With `CInGameShop` | Only user: the cash shop's `MsgBoxIGSStorageItemInfo` |
+| `C3DItemCommonMsgBox` | Deleted | No users left; item dialogs are `CGenericConfirmDialog` with `item3D` |
 
 Native message boxes are not draggable (`window-placement.md` section 8).
 

@@ -15,6 +15,7 @@
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDialogCanvas.h"
 #include "UI/RmlBridge/RmlDraggable.h"
+#include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlNumericInputFilter.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
@@ -450,7 +451,7 @@ void CGenericConfirmDialog::RenderItem3DInto(const Rml::Vector2f&, const Rml::Ve
     Rml::ElementDocument* document = m_RmlView.Document();
     Rml::Element* slot = document ? document->GetElementById("gcd_item3d_slot") : nullptr;
     Rml::Vector2f offset, size;
-    if (!m_bActive || !m_Active.item3D || !slot || !UI::Items::DrawnContentBox(*slot, offset, size))
+    if (!m_bActive || !m_Active.item3D || !slot || !UI::RmlBridge::DrawnContentBox(*slot, offset, size))
         return;
     const ITEM& item = *m_Active.item3D;
     RenderItem3D(offset.x, offset.y, size.x, size.y, item.Type, item.Level, item.ExcellentFlags, item.AncientDiscriminator,

@@ -1,15 +1,34 @@
-/* The recipient and message fields in the cash shop's gift dialog. The frame, texts and buttons
-   around them are still native -- only the two CUITextInputBox controls moved. Each field
-   counter-scales out of the dialog's root transform so its text stays at the native renderer's
-   physical size, the same way igs_buy_select.rcss's list pane does. */
+/* The cash shop's gift dialog (CMsgBoxIGSSendGift) on ingame_gift_back01: the title, the gift's
+   name, price and duration in gold, the recipient field on its name box with the gift icon, the
+   message field, the notice and OK and Cancel. Reference px under the dialog's root transform;
+   each field counter-scales out of it so its text stays at the native renderer's size. */
 
 #panel {
 	position: absolute;
 	transform-origin: left top;
 	width: 210px;
 	height: 267px;
+	font-family: "token(font-body)";
 	pointer-events: none;
 }
+
+@spritesheet igs-gift-back-sheet { src: "../../../InGameShop/ingame_gift_back01.tga"; igs-gift-back: 0px 0px 210px 267px; }
+@spritesheet igs-gift-icon-sheet { src: "../../../InGameShop/ingame_gift_icon.tga"; igs-gift-icon: 0px 0px 17px 19px; }
+@spritesheet igs-gift-namebox-sheet { src: "../../../InGameShop/ingame_gift_namebox.tga"; igs-gift-namebox: 0px 0px 76px 17px; }
+.igs-dialog-frame { position: absolute; left: 0; top: 0; width: 210px; height: 267px; decorator: image(igs-gift-back); }
+.igs-gift-icon { position: absolute; left: 10px; top: 82px; width: 17px; height: 19px; decorator: image(igs-gift-icon); }
+.igs-gift-namebox { position: absolute; left: 118px; top: 82px; width: 76px; height: 17px; decorator: image(igs-gift-namebox); }
+
+.igs-dialog-line { position: absolute; left: 0; width: 210px; height: 1px; font-weight: bold; }
+#igs_title { top: 10px; color: #ffffff; }
+/* Name, price and duration 12 apart from (30, 38). */
+#igs_item_info { position: absolute; left: 30px; top: 38px; width: 143px; color: rgb(247, 186, 0); }
+.igs-item-info-line { position: relative; display: block; height: 12px; }
+#igs_recipient_label { left: 28px; top: 87px; color: #ffffff; font-weight: bold; }
+#igs_message_label { top: 110px; color: #000000; }
+/* The notice centred, its lines 10 apart from 205. */
+#igs_notice { position: absolute; left: 0; top: 205px; width: 210px; color: #ffffff; }
+.igs-notice-line { position: relative; display: block; height: 10px; }
 
 .igs-field {
 	position: absolute;
@@ -35,3 +54,11 @@
 	background-color: transparent;
 	color: rgb(255, 230, 210);
 }
+
+/* OK and Cancel at (35, 230) and (122, 230). */
+.igs-dialog-buttons { position: absolute; left: 35px; top: 230px; display: flex; pointer-events: none; }
+.igs-dialog-buttons .igs-btn { position: relative; flex: 0 0 52px; margin-right: 35px; }
+
+/* Developer builds (FOR_WORK): the gift's sequence numbers in red right of the dialog. */
+.igs-debug { position: absolute; left: 210px; top: 10px; color: rgb(255, 0, 0); }
+.igs-debug-line { position: relative; display: block; height: 10px; }

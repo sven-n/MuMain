@@ -44,6 +44,7 @@ extern bool SelectFlag;
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTooltip.h"
+#include "UI/Tooltip/LegacyTextListTooltip.h"
 #include "UI/Inventory/ItemOptionTooltipModel.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Core/Utilities/StringUtils.h"
@@ -66,7 +67,6 @@ using namespace mu::ui::window;
 CMyInventory::CMyInventory()
 {
     m_pNewUIMng = nullptr;
-    m_pNewUI3DRenderMng = nullptr;
     m_pNewInventoryCtrl = nullptr;
     m_Pos.x = m_Pos.y = 0;
 
@@ -86,9 +86,9 @@ CMyInventory::~CMyInventory()
     Release();
 }
 
-bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y)
+bool CMyInventory::Create(CManager* pNewUIMng, int x, int y)
 {
-    if (nullptr == pNewUIMng || nullptr == pNewUI3DRenderMng || nullptr == g_pNewItemMng)
+    if (nullptr == pNewUIMng || nullptr == g_pNewItemMng)
         return false;
 
     // A saved user-dragged position overrides the caller's default x/y before anything else uses them.
@@ -96,8 +96,6 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(INTERFACE_INVENTORY, this);
-
-    m_pNewUI3DRenderMng = pNewUI3DRenderMng;
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
     if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::INVENTORY, g_pNewItemMng, this, x + 15, y + 200, 8, 8, MAX_EQUIPMENT))
@@ -249,7 +247,6 @@ void CMyInventory::Release()
 
     SAFE_DELETE(m_pNewInventoryCtrl);
 
-    m_pNewUI3DRenderMng = nullptr;
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
@@ -886,7 +883,7 @@ bool CMyInventory::Update()
 
         if (m_iPointedSlot == -1)
         {
-            UI::RmlBridge::Tooltip::Hide();
+            UI::Tooltip::HideLegacyTextList();
         }
     }
 
@@ -1025,14 +1022,11 @@ void CMyInventory::SyncRmlModel()
         config.centerHorizontally = true;
         config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center;
         config.fixedWidth = model.setOptionHovered ? kSetOptionTooltipWidth : kSocketOptionTooltipWidth;
-        // Ownerless (like the item-slot tooltip elsewhere in this class): hovering a Set/Socket
-        // label and hovering an equipment slot are mutually exclusive by mouse position, so there's
-        // no real simultaneous competitor for the shared tooltip here.
-        UI::RmlBridge::Tooltip::Show(config);
+        UI::RmlBridge::Tooltip::Show(config, this);
     }
     else
     {
-        UI::RmlBridge::Tooltip::Hide();
+        UI::RmlBridge::Tooltip::Hide(this);
     }
 }
 

@@ -139,9 +139,6 @@ CSystem::~CSystem()
 bool CSystem::Create()
 {
     m_pNewUIMng = new CManager;
-    m_pNewUI3DRenderMng = new C3DRenderMng;
-    if (false == m_pNewUI3DRenderMng->Create(m_pNewUIMng))
-        return false;
 
     m_pNewChatLogWindow = new CChatLogWindow;
     if (false == m_pNewChatLogWindow->Create(m_pNewUIMng, 0, 480 - 50 - 47, 6))
@@ -185,7 +182,6 @@ void CSystem::Release()
     SAFE_DELETE(m_pNewOptionWindow);
     SAFE_DELETE(m_pNewChatLogWindow);
     SAFE_DELETE(m_pNewSystemLogWindow);
-    SAFE_DELETE(m_pNewUI3DRenderMng);
 
     m_pNewUIMng->RemoveAllUIObjs();
 
@@ -231,7 +227,7 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewSkillList = new CSkillList;
-    if (m_pNewSkillList->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
+    if (m_pNewSkillList->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewFriendWindow = new CFriendWindow;
@@ -239,7 +235,7 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewMyInventory = new CMyInventory;
-    if (false == m_pNewMyInventory->Create(m_pNewUIMng, m_pNewUI3DRenderMng, PanelColumnX(1), 0))
+    if (false == m_pNewMyInventory->Create(m_pNewUIMng, PanelColumnX(1), 0))
         return false;
 
     m_pNewMyInventoryExt = new CInventoryExtension;
@@ -489,7 +485,7 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewDuelWatchMainFrameWindow = new CDuelWatchMainFrameWindow;
-    if (m_pNewDuelWatchMainFrameWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
+    if (m_pNewDuelWatchMainFrameWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewDuelWatchUserListWindow = new CDuelWatchUserListWindow;
@@ -541,7 +537,7 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewUnitedMarketPlaceWindow = new CUnitedMarketPlaceWindow;
-    if (m_pNewUnitedMarketPlaceWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng, PanelColumnX(1), 0) == false)
+    if (m_pNewUnitedMarketPlaceWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewUILuckyItemWnd = new CLuckyItemWnd;
@@ -1866,11 +1862,6 @@ bool CSystem::Render()
 CManager* CSystem::GetNewUIManager() const
 {
     return m_pNewUIMng;
-}
-
-C3DRenderMng* CSystem::GetNewUI3DRenderMng() const
-{
-    return m_pNewUI3DRenderMng;
 }
 
 CHotKey* CSystem::GetNewUIHotKey() const

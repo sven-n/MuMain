@@ -17,7 +17,6 @@
 #include "UI/HUD/CommandWindow.h"
 #include "UI/HUD/MoveCommandWindow.h"
 #include "UI/Inventory/InventoryCtrl.h"
-#include "UI/Core/Window3DRenderMng.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/NPCs/NPCShop.h"
 #include "UI/Options/OptionWindow.h"
@@ -30,36 +29,6 @@ using mu::ui::window::CCommandWindow;
 
 namespace
 {
-class Recording3DObject final : public mu::ui::window::I3DRenderObj
-{
-public:
-    explicit Recording3DObject(mu::ui::window::CObject* owner)
-        : m_owner(owner)
-    {
-    }
-
-    void Render3D() override
-    {
-        mouseX = MouseX;
-        mouseY = MouseY;
-    }
-
-    bool IsVisible() const override { return true; }
-    mu::ui::window::CObject* GetLayoutOwner() const override { return m_owner; }
-
-    int mouseX = -1;
-    int mouseY = -1;
-
-private:
-    mu::ui::window::CObject* m_owner;
-};
-
-class Test3DCamera final : public mu::ui::window::C3DCamera
-{
-public:
-    using C3DCamera::Render3D;
-};
-
 class RecordingUIObject final : public mu::ui::window::CObject
 {
 public:
@@ -479,48 +448,6 @@ TEST_CASE("resized character button rectangle is its click rectangle [ui][scalin
     CHECK_FALSE(button.PtInSprite(207, 260));
 
     WindowHeight = previousHeight;
-}
-
-TEST_CASE("3D item rendering uses its owner layout for hover input [ui][scaling]")
-{
-    const unsigned int previousWidth = WindowWidth;
-    const unsigned int previousHeight = WindowHeight;
-    const int previousMouseX = MouseX;
-    const int previousMouseY = MouseY;
-    const float previousWindowMouseX = g_fWindowMouseX;
-    const float previousWindowMouseY = g_fWindowMouseY;
-    const auto previousTransform = UI::Scaling::GetActiveTransform();
-
-    WindowWidth = 1920;
-    WindowHeight = 1080;
-    g_fWindowMouseX = 1605.0f;
-    g_fWindowMouseY = 456.0f;
-    UI::Scaling::SetActiveTransform(UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight));
-    MouseX = 546;
-    MouseY = 228;
-
-    CCommandWindow owner;
-    owner.SetLayoutMode(UI::Scaling::LayoutMode::DockRight);
-    Recording3DObject object(&owner);
-    Test3DCamera camera;
-    camera.Add3DRenderObj(&object);
-
-    camera.Render3D();
-
-    CHECK(object.mouseX == 500);
-    CHECK(object.mouseY == 200);
-    CHECK(MouseX == 546);
-    CHECK(MouseY == 228);
-    CHECK(UI::Scaling::GetActiveTransform().scaleX == doctest::Approx(3.0f));
-    CHECK(UI::Scaling::GetActiveTransform().offsetX == doctest::Approx(0.0f));
-
-    UI::Scaling::SetActiveTransform(previousTransform);
-    WindowWidth = previousWidth;
-    WindowHeight = previousHeight;
-    MouseX = previousMouseX;
-    MouseY = previousMouseY;
-    g_fWindowMouseX = previousWindowMouseX;
-    g_fWindowMouseY = previousWindowMouseY;
 }
 
 TEST_CASE("managed rendering uses its layout mouse coordinates [ui][scaling]")

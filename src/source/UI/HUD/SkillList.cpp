@@ -56,15 +56,13 @@ mu::ui::window::CSkillList::~CSkillList()
     Release();
 }
 
-bool mu::ui::window::CSkillList::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng)
+bool mu::ui::window::CSkillList::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_SKILL_LIST, this);
-
-    m_pNewUI3DRenderMng = pNewUI3DRenderMng;
 
     LoadImages();
 

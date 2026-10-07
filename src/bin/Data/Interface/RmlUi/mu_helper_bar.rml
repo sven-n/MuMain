@@ -12,21 +12,20 @@
 		<div id="seg_c"></div>
 		<div id="text">{{position_text}}</div>
 
-		<!-- Tooltips are siblings of their trigger button, not children -- see .tooltip in
-		     mu_helper_bar.rcss for the containing-block clamping bug this avoids. -->
-		<div id="btn_config" class="mu-btn" data-event-click="mu_helper_config_click">
+		<!-- Each button's hint is the shared tooltip (CMuHelperBar::SyncHint()). -->
+		<div id="btn_config" class="mu-btn" data-event-click="mu_helper_config_click"
+		     data-event-mouseover="mu_helper_hint(0)" data-event-mouseout="mu_helper_hint_leave">
 			<div class="dot"></div>
 		</div>
-		<span class="tooltip tooltip-config">{{config_tooltip}}</span>
 		<!-- Start/Stop share one screen position, mutually exclusive by mu_helper_active. -->
-		<div id="btn_start" class="mu-btn" data-class-hidden="mu_helper_active" data-event-click="mu_helper_toggle_click">
+		<div id="btn_start" class="mu-btn" data-class-hidden="mu_helper_active" data-event-click="mu_helper_toggle_click"
+		     data-event-mouseover="mu_helper_hint(1)" data-event-mouseout="mu_helper_hint_leave">
 			<div class="dot"></div>
 		</div>
-		<span class="tooltip tooltip-start">{{start_tooltip}}</span>
-		<div id="btn_stop" class="mu-btn" data-class-hidden="!mu_helper_active" data-event-click="mu_helper_toggle_click">
+		<div id="btn_stop" class="mu-btn" data-class-hidden="!mu_helper_active" data-event-click="mu_helper_toggle_click"
+		     data-event-mouseover="mu_helper_hint(2)" data-event-mouseout="mu_helper_hint_leave">
 			<div class="dot"></div>
 		</div>
-		<span class="tooltip tooltip-stop">{{stop_tooltip}}</span>
 	</div>
 </body>
 </rml>

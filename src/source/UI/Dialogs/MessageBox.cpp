@@ -28,8 +28,6 @@ bool mu::ui::window::CMessageBoxBase::Create(int x, int y, int width, int height
     SetPos(x, y);
     SetSize(width, height);
     m_fPriority = fPriority;
-    m_fOpacityAlpha = 0.5f;
-    Vector(0.0f, 0.0f, 0.0f, m_vColor);
     return true;
 }
 
@@ -116,46 +114,6 @@ void mu::ui::window::CMessageBoxBase::SendEvent(CMessageBoxBase* pOwner, DWORD d
 void mu::ui::window::CMessageBoxBase::SendEvent(CMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam)
 {
     CMessageBoxMng::GetInstance()->SendEvent(pOwner, dwEvent, xParam);
-}
-
-void mu::ui::window::CMessageBoxBase::RenderMsgBackColor(bool _bRender)
-{
-    if (_bRender)
-    {
-        UI::Scaling::ScopedActiveTransform layout(
-            UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight));
-        EnableAlphaTest();
-        const auto toByte = [](float value)
-        {
-            return static_cast<unsigned int>(std::clamp(value, 0.f, 1.f) * 255.f);
-        };
-        const unsigned int color = (toByte(m_fOpacityAlpha) << 24)
-            | (toByte(m_vColor[0]) << 16)
-            | (toByte(m_vColor[1]) << 8)
-            | toByte(m_vColor[2]);
-        RenderColorQuadARGB(0.0f, 0.0f, static_cast<float>(REFERENCE_WIDTH),
-                            UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), color);
-
-        DisableAlphaBlend();
-        EnableAlphaTest();
-    }
-}
-
-void mu::ui::window::CMessageBoxBase::SetMsgBackOpacity(float _fAlpha)
-{
-    m_fOpacityAlpha = _fAlpha;
-}
-
-void mu::ui::window::CMessageBoxBase::SetMsgBackColor(vec3_t _vColor)
-{
-    if (!_vColor)
-    {
-        Vector(0.0f, 0.0f, 0.0f, m_vColor);
-    }
-    else
-    {
-        VectorCopy(_vColor, m_vColor);
-    }
 }
 
 mu::ui::window::CMessageBoxMng::CMessageBoxMng() : m_pNewUIMng(NULL), m_pMsgBoxFactory(NULL)

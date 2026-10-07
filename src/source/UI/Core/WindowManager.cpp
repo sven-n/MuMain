@@ -3,7 +3,6 @@
 #include "UI/Core/UILayoutPolicy.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
-#include "UI/Core/Window3DRenderMng.h" // INFORMATION_CAMERA_Z_ORDER, see Render()'s own comment
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

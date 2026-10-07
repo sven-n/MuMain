@@ -176,7 +176,7 @@ void CLuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE>
 
 bool CLuckyItemWnd::Create(CManager* pNewUIMng, int x, int y)
 {
-    if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng || NULL == g_pNewItemMng)
+    if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;

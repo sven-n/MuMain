@@ -18,7 +18,7 @@ sits.
 |---|---|---|---|
 | Sprite widgets | *(none left)* | — | **Closed.** `CWin`/`CWinEx`, `CGaugeBar` and `CSlider` are deleted; the sprite `::CButton` has no production consumer (still covered by `tests/ui/test_ui_scaling.cpp`). Nothing to add a consumer to. |
 | Friend/mail/chat base | `CUIBaseWindow`, `CUIWindowMgr` (both over `CUIMessage`) | `UI/Social/SocialWindowBase.h` | **The family's own base, nothing more.** The `CUIControl` toolkit it came from is deleted, widgets and base alike. What survives is the identity, parent, state, geometry and message queue `CUIWindowMgr` runs the friend/mail/chat windows through. |
-| `mu::ui::window` tier | `CObject : IObject`, `CManager`, `CButton`/`CRadioButton`/`CRadioGroupButton`/`CCheckBox`/`CComboBox`/`CScrollBar`/`CTextBox` | `UI/Core/{WindowObject,WindowManager}.h`, `UI/Widgets/Window/*.h` | **`CObject`/`CManager` are the base for all new work.** The widget family is for native-only content. |
+| `mu::ui::window` tier | `CObject : IObject`, `CManager`, `CButton`/`CComboBox`/`CScrollBar`/`CTextBox` | `UI/Core/{WindowObject,WindowManager}.h`, `UI/Widgets/Window/*.h` | **`CObject`/`CManager` are the base for all new work.** The widget family is for native-only content. |
 
 ## Shape of the kit
 
@@ -223,8 +223,6 @@ table.
 | Need | Use | Header | Don't confuse with |
 |---|---|---|---|
 | Button | `mu::ui::window::CButton` | `UI/Widgets/Window/Button.h` | `::CButton` (sprite toolkit, closed) — two unrelated classes, same bare name, disambiguated by namespace |
-| Radio button | `mu::ui::window::CRadioButton` (+ `CRadioGroupButton` to coordinate a set) | `UI/Widgets/Window/Button.h` | — |
-| Checkbox | `mu::ui::window::CCheckBox` | `UI/Widgets/Window/Button.h` | — |
 | Dropdown | `mu::ui::window::CComboBox` | `UI/Widgets/Window/ComboBox.h` | Deliberately base-less (see its header) — don't force it onto `CObject` |
 | Scroll bar | `mu::ui::window::CScrollBar` | `UI/Widgets/Window/ScrollBar.h` | — |
 | Multi-line read-only text | `mu::ui::window::CTextBox` | `UI/Widgets/Window/TextBox.h` | — |

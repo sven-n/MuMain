@@ -384,14 +384,16 @@ hotkeys (`CItemHotKey`) and the character-creation preview (`CCharMakeWin`, a ch
 scene camera saved and restored around it).
 
 **Inventory items into a target**: `UI::Items::ItemCameraTarget` (`UI/Inventory/ItemCameraTarget.h`).
-Its drawer runs under the item camera `C3DCamera::Render()` uses — identity view, 1° field of view
-over the whole window — with the projection cropped to the image's drawn box, so each
+Its drawer runs under the item camera the original drew UI items with — identity view, 1° field
+of view over the whole window (`SetFieldOfView()` for the cash shop's 2°) — with the projection
+cropped to the image's drawn box, so each
 `RenderItem3D()` call lands in the texture exactly where it would have landed on screen, every
 per-item offset and angle included. The drawer keeps its own coordinates: window pixels by
-default, or a window's layout space when constructed with that `CObject`, as `C3DCamera` drew it.
+default, or a window's layout space when constructed with that `CObject` (or a transform source:
+the cash shop's message boxes pass the message box layout).
 `Sync(image, enabled)` once a frame sizes the target to the image's drawn box (through any
 transform on it or its ancestors, which `GetAbsoluteOffset()` leaves out;
-`UI::Items::DrawnContentBox()` does the same for any element), points its `src` at the target and
+`UI::RmlBridge::DrawnContentBox()`, `RmlElementBox.h`, does the same for any element), points its `src` at the target and
 keeps it invisible until the first frame. It brackets the drawer with `SaveCameraPerspective()`/
 `RestoreCameraPerspective()`: item rendering overwrites `g_Camera` and moves `MousePosition`, the
 origin of the ray picking casts, and leaving it moved stops click-to-move. A model may reach past
@@ -496,7 +498,21 @@ Migrated onto it: the item/pet tooltip (`RenderItemInfo()`/`RenderRepairInfo()`,
 unchanged, only what happens internally moved), the skill-hotkey tooltip (`MainFrameWindow.cpp` —
 `g_pSkillList`'s own hover slot), the inventory Set/Socket option tooltip (`MyInventory.cpp` — its
 old embedded RmlUi implementation was deleted outright, not left running as a second mechanism),
-and two smaller hover tooltips (`MasterLevel.cpp`, `CursedTempleSystem.cpp`).
+two smaller hover tooltips (`MasterLevel.cpp`, `CursedTempleSystem.cpp`), the buff strip and the
+MU Helper bar, and the cash shop's icon and close buttons.
+
+**For an element of a document**: `UI::RmlBridge::ElementTooltip` (`RmlElementTooltip.h`). The
+element forwards `data-event-mouseover="x_hover(i)"` / `data-event-mouseout="x_leave"` to the
+window's model, which calls `Enter()` / `Leave()`; each frame the window passes the hovered
+element's lines to `Show()`, which anchors the tooltip to the element's drawn box, so it follows
+`dp` layout and transforms alike (`CBuffStrip`, `CMuHelperBar`, `CInGameShop`). `Leave()` counts
+only the element's own mouseout: a child's bubbles to it while the element is still hovered.
+
+**Owners.** Every caller passes an owner token, and hides only its own. The item information
+tooltip's is `UI::Tooltip::ItemInfoOwner()` (`LegacyTextListTooltip.h`), the default of
+`ShowLegacyTextList()` / `HideLegacyTextList()`: a window that stops showing an item hides that and
+nothing else. An ownerless `Hide()` would hide any caller's tooltip, which is how the inventory
+once cleared every hint while it was open.
 
 **Legacy theme layout.** The legacy theme overrides `tooltip.rml`
 (`themes/legacy/tooltip.rml`) to follow the original `RenderTipTextList()`:
@@ -522,11 +538,9 @@ tool and has no RmlUi dependency to pull in. `ToRmlBridgeLines()` converts a res
 `SiegeWarBase.cpp`'s guild-skill tooltip build a `Config` from it. `Render()` has no callers and is
 kept on purpose; the MU Helper skill picker shows no hover tooltip, as native never did.
 
-**Deliberately not on this primitive**: `CBuffStrip`/`CMuHelperBar`'s own hover tooltip is still a
-separate, CSS-only `:hover` mechanism (plain text, no per-line color) — deferred because it lives
-in a `dp`-based coordinate system, unlike every other caller's reference-pixel one; see
-`tracked-deferrals.md`'s component-surface entry. `HelpWindow.cpp`/`ItemExplanationWindow.cpp` also
-stay on native `RenderTipTextList()` on purpose: they render unconditionally while their own window
+**Deliberately not on this primitive**: the static button hints inside RmlUi windows (base.rcss's
+`.tooltip`, a sibling shown on `:hover`) — see `tracked-deferrals.md`'s component-surface entry.
+`HelpWindow.cpp`/`ItemExplanationWindow.cpp` stay on native `RenderTipTextList()` on purpose: they render unconditionally while their own window
 is open rather than on hover, so they don't fit this primitive's owner-token model (the newest
 `Show()` always wins, which assumes a momentary, naturally mutually-exclusive hover tooltip) — a
 second, non-competing primitive for them was scoped and rejected as not worth duplicating most of
@@ -598,7 +612,7 @@ convention): an `int active_tab` model field, one `.tab-btn` per tab with
 content wrapped in a panel with `data-class-hidden="active_tab != N"`. `RmlClickSelectTab(int)` is
 the C++-side handler name convention. Legacy theme swaps a sprite decorator on `.active`
 (`my_quest_info.rcss`'s `.tab-btn-quest.active { decorator: image(myquest-tab-small); }` — real
-sprite-art tabs, one CRadioGroupButton frame per state); modern swaps a flat
+sprite-art tabs, one frame per state); modern swaps a flat
 `background-color: token(accent-steel)` instead (no sprite art needed). Start from
 `my_quest_info.rml`/`.rcss` (3 tabs, plain content panels) or `pet_info.rml`/`.rcss` (2 tabs, sprite-
 based tab art) rather than inventing the mechanism again.

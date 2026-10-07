@@ -1,10 +1,10 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/Window/Button.h"
+#include "UI/Widgets/Window/Tooltip.h"
 #include "UI/Widgets/Window/Tooltip.h"
 #include "UI/Dialogs/MessageBox.h"
-#include "UI/Core/Window3DRenderMng.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/Inventory/MyInventory.h"
 #include "UI/Combat/DuelWatchSpectatorRmlModel.h"
 #include "UI/RmlBridge/RmlThemedView.h"
@@ -19,7 +19,7 @@ namespace mu::ui::window
 // The spectator's duel frame, in the main frame's place while the duel-watch buff is on.
 // duel_watch_frame.rml draws it; C++ keeps the gauge animation, the exit tooltip and the
 // channel quit request.
-class CDuelWatchMainFrameWindow : public CObject, public I3DRenderObj
+class CDuelWatchMainFrameWindow : public CObject
 {
 public:
     enum IMAGE_LIST
@@ -37,7 +37,6 @@ public:
 
 private:
     CManager* m_pNewUIMng;
-    C3DRenderMng* m_pNewUI3DRenderMng;
 
     CTooltip m_ExitTooltip;
     bool m_PendingExit = false;
@@ -65,7 +64,7 @@ public:
     CDuelWatchMainFrameWindow();
     virtual ~CDuelWatchMainFrameWindow();
 
-    bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng);
+    bool Create(CManager* pNewUIMng);
     void Release();
 
     void SetPos(int x, int y);
@@ -74,7 +73,6 @@ public:
     bool UpdateKeyEvent();
     bool Update();
     bool Render();
-    void Render3D();
 
     bool IsVisible() const;
 

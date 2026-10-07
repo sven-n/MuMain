@@ -1,15 +1,27 @@
-/* The recipient and message fields in the cash shop's gift dialog. The frame, texts and buttons
-   around them are still native -- only the two CUITextInputBox controls moved. Each field
-   counter-scales out of the dialog's root transform so its text stays at the native renderer's
-   physical size, the same way igs_buy_select.rcss's list pane does. */
+/* Modern theme for the cash shop's gift dialog (CMsgBoxIGSSendGift): legacy's layout on a flat
+   panel, the fields recessed. Reference px under the dialog's root transform; each field
+   counter-scales out of it. */
 
 #panel {
 	position: absolute;
 	transform-origin: left top;
 	width: 210px;
 	height: 267px;
+	font-family: "token(font-body)";
 	pointer-events: none;
 }
+
+.igs-dialog-frame { position: absolute; left: 0; top: 0; width: 210px; height: 267px; background-color: token(surface-panel); border: 1px token(border-frame); border-radius: token(radius-md)px; }
+.igs-gift-icon, .igs-gift-namebox { display: none; }
+
+.igs-dialog-line { position: absolute; left: 0; width: 210px; height: 1px; font-weight: bold; }
+#igs_title { top: 10px; color: token(text-primary); }
+#igs_item_info { position: absolute; left: 30px; top: 38px; width: 143px; color: token(accent-gold); }
+.igs-item-info-line { position: relative; display: block; height: 12px; }
+#igs_recipient_label { left: 28px; top: 87px; color: token(text-primary); font-weight: bold; }
+#igs_message_label { top: 110px; color: token(text-secondary); }
+#igs_notice { position: absolute; left: 0; top: 205px; width: 210px; color: token(text-muted); }
+.igs-notice-line { position: relative; display: block; height: 10px; }
 
 .igs-field {
 	position: absolute;
@@ -22,8 +34,14 @@
 }
 .igs-field:focus { border-color: token(border-selected); }
 
-/* Native's own IGS_ID_INPUT_TEXT_POS_X / _POS_Y, over the ID box art at (118, 82). */
+/* Native's own IGS_ID_INPUT_TEXT_POS_X / _POS_Y. */
 #igs_gift_id { left: 120px; top: 87px; }
 
 /* IGS_MESSAGE_INPUT_TEXT_POS_X / _POS_Y. */
 #igs_gift_message { left: 22px; top: 126px; }
+
+.igs-dialog-buttons { position: absolute; left: 35px; top: 230px; display: flex; pointer-events: none; }
+.igs-dialog-buttons .igs-btn { position: relative; flex: 0 0 52px; margin-right: 35px; }
+
+.igs-debug { position: absolute; left: 210px; top: 10px; color: token(semantic-danger); }
+.igs-debug-line { position: relative; display: block; height: 10px; }

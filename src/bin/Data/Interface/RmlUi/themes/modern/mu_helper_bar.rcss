@@ -65,34 +65,3 @@
 #btn_config .dot { background-color: token(semantic-neutral); }
 #btn_start .dot  { background-color: token(semantic-success); }
 #btn_stop .dot   { background-color: token(semantic-danger); }
-
-/* Siblings of .mu-btn, not nested children -- this build's shrink-to-fit width hard-clamps to the
-   containing block, so nesting inside an 18dp button would clamp the tooltip to ~18dp regardless
-   of text length. Given an explicit width and a precomputed static `left` instead of
-   `translateX(-50%)`, since `%` in a transform resolves against the element's own border-box,
-   which isn't reliably available right when `display` flips from none to block on :hover. */
-.tooltip {
-	display: none;
-	position: absolute;
-	top: 18dp;
-	width: 100dp;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	border: 1dp token(border-frame);
-	color: token(text-primary);
-	padding: 2dp 4dp;
-	border-radius: token(radius-sm)dp;
-	font-family: "token(font-body)";
-	font-size: 11dp;
-	pointer-events: none;
-}
-/* left = button center minus half the tooltip's width. */
-.tooltip-config { left: 112dp; } /* button center 162dp */
-.tooltip-start,
-.tooltip-stop   { left: 130dp; } /* button center 180dp */
-#btn_config:hover ~ .tooltip-config,
-#btn_start:hover ~ .tooltip-start,
-#btn_stop:hover ~ .tooltip-stop {
-	display: block;
-	z-index: 1;
-}

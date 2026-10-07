@@ -181,7 +181,7 @@ CStorageInventory::~CStorageInventory()
 
 bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
 {
-    if (nullptr == pNewUIMng || nullptr == g_pNewUI3DRenderMng
+    if (nullptr == pNewUIMng
         || nullptr == g_pNewItemMng)
         return false;
 

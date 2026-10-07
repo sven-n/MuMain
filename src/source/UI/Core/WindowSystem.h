@@ -4,7 +4,6 @@
 #pragma once
 
 #include "UI/Core/WindowManager.h"
-#include "UI/Core/Window3DRenderMng.h"
 #include "UI/HUD/HotKey.h"
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/HUD/SlideWindow.h"
@@ -93,7 +92,6 @@ namespace mu::ui::window
     class CSystem
     {
         CManager* m_pNewUIMng;
-        C3DRenderMng* m_pNewUI3DRenderMng;
         CHotKey* m_pNewUIHotKey;
         bool m_mouseInputCaptured = false;
 
@@ -130,7 +128,6 @@ namespace mu::ui::window
         void SyncMainSceneHudVisibility();
 
         CManager* GetNewUIManager() const;
-        C3DRenderMng* GetNewUI3DRenderMng() const;
         CHotKey* GetNewUIHotKey() const;
 
         bool IsImpossibleSendMoveInterface();
@@ -326,7 +323,6 @@ namespace mu::ui::window
 
 #define g_pNewUISystem mu::ui::window::CSystem::GetInstance()
 #define g_pNewUIMng mu::ui::window::CSystem::GetInstance()->GetNewUIManager()
-#define g_pNewUI3DRenderMng mu::ui::window::CSystem::GetInstance()->GetNewUI3DRenderMng()
 #define g_pNewUIHotKey mu::ui::window::CSystem::GetInstance()->GetNewUIHotKey()
 #define g_pNewItemMng mu::ui::window::CSystem::GetInstance()->GetUI_NewItemMng()
 #define g_pChatInputBox mu::ui::window::CSystem::GetInstance()->GetUI_NewChatInputBox()

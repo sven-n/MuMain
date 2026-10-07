@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "I18N/All.h"
-#include "Render/Text/CUIRenderText.h"
 
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 #include "App/Platform/Windows/iexplorer.h"
@@ -14,17 +13,18 @@
 #include "MsgBoxIGSGiftStorageItemInfo.h"
 #include "World/MapInfra/MapManager.h"
 #include "Audio/DSPlaySound.h"
-#include "Camera/CameraProjection.h"
-#include "Render/Renderer/MuRenderer.h"
 #include "UI/Core/WindowCommon.h"
-#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/Events/EventPreview.h"
 #include "Core/Utilities/StringUtils.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
-#include "UI/RmlBridge/RmlTheme.h"
-#include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
+
+#include <algorithm>
+#include <cwctype>
+#include <filesystem>
 
 static_assert(GameShop::kStorageTextLength == MAX_TEXT_LENGTH);
 static_assert(GameShop::kStorageUserNameSize == MAX_USERNAME_SIZE);
@@ -32,6 +32,35 @@ static_assert(GameShop::kStorageMessageSize == MAX_GIFT_MESSAGE_SIZE);
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+namespace
+{
+Rml::String Narrow(const wchar_t* text)
+{
+    return StringUtils::WideToNarrow(text ? text : L"");
+}
+
+std::vector<Rml::String> Names(const type_listName& names)
+{
+    std::vector<Rml::String> result;
+    for (const std::wstring& name : names)
+        result.push_back(Narrow(name.c_str()));
+    return result;
+}
+
+// The banner as an <img> source: RmlUi reads a leading '/' as the working directory, which the
+// banners download under (Data/InGameShopBanner), whichever theme folder the document came from.
+std::string BannerSource(const wchar_t* path)
+{
+    std::wstring generic = std::filesystem::path(path).generic_wstring();
+    std::wstring lower = generic;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::towlower);
+    const size_t folder = lower.find(L"/ingameshopbanner/");
+    if (folder == std::wstring::npos)
+        return {};
+    return "/Data" + StringUtils::WideToNarrow(generic.substr(folder).c_str());
+}
+} // namespace
 
 CInGameShop::CInGameShop()
 {
@@ -45,9 +74,9 @@ CInGameShop::~CInGameShop()
 
 void CInGameShop::Init()
 {
-    m_ItemAngle = false;
-    m_bLoadBanner = false;
+    m_pNewUIMng = nullptr;
     m_bBannerLink = false;
+    m_szBannerURL[0] = L'\0';
     m_iStorageTotalItemCnt = 0;
     m_iStorageCurrentPageItemCnt = 0;
     m_iStorageTotalPage = 0;
@@ -59,10 +88,9 @@ void CInGameShop::Init()
 
 void CInGameShop::Release()
 {
-    m_NativeTarget.Disable();
+    m_Hint.Hide();
+    m_ItemTarget.Disable();
     m_RmlView.Release();
-
-    UnloadImages();
 
     ReleaseBanner();
 
@@ -84,10 +112,9 @@ bool CInGameShop::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_INGAMESHOP, this);
 
     SetPos(x, y);
-    LoadImages();
-    SetBtnInfo();
-    BuildRmlUi();
-    Show(false);	//visible()을 flase로
+    m_ItemTarget.SetFieldOfView(2.f);
+    m_RmlView.Ensure();
+    Show(false);
 
     return true;
 }
@@ -98,34 +125,234 @@ void CInGameShop::BindRmlModel(Rml::DataModelConstructor& c, InGameShopRmlModel&
     c.Bind("root_y", &model.rootY);
     c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
+
+    auto radio = c.RegisterStruct<RadioEntry>();
+    radio.RegisterMember("name", &RadioEntry::name);
+    radio.RegisterMember("selected", &RadioEntry::selected);
+    radio.RegisterMember("last", &RadioEntry::last);
+    c.RegisterArray<std::vector<RadioEntry>>();
+    auto package = c.RegisterStruct<PackageEntry>();
+    package.RegisterMember("name", &PackageEntry::name);
+    package.RegisterMember("price", &PackageEntry::price);
+    package.RegisterMember("shown", &PackageEntry::shown);
+    c.RegisterArray<std::vector<PackageEntry>>();
+    auto wallet = c.RegisterStruct<WalletEntry>();
+    wallet.RegisterMember("label", &WalletEntry::label);
+    wallet.RegisterMember("value", &WalletEntry::value);
+    c.RegisterArray<std::vector<WalletEntry>>();
     auto row = c.RegisterStruct<StorageRow>();
     row.RegisterMember("name", &StorageRow::name);
     row.RegisterMember("period", &StorageRow::period);
     row.RegisterMember("selected", &StorageRow::selected);
     c.RegisterArray<std::vector<StorageRow>>();
+
+    c.Bind("character_name", &model.characterName);
+    c.Bind("wallet", &model.wallet);
+    c.Bind("zones", &model.zones);
+    c.Bind("categories", &model.categories);
+    c.Bind("packages", &model.packages);
+    c.Bind("page", &model.page);
+    c.Bind("total_pages", &model.totalPages);
+    c.Bind("storage_tabs", &model.storageTabs);
     c.Bind("storage_rows", &model.storageRows);
+    c.Bind("storage_page", &model.storagePage);
+    c.Bind("storage_total_pages", &model.storageTotalPages);
+    c.Bind("buy_label", &model.buyLabel);
+    c.Bind("use_label", &model.useLabel);
+    c.Bind("item_name_label", &model.itemNameLabel);
+    c.Bind("duration_label", &model.durationLabel);
+    c.Bind("banner_src", &model.bannerSrc);
+    c.Bind("banner_linked", &model.bannerLinked);
+    c.Bind("script_version", &model.scriptVersion);
+    c.Bind("banner_version", &model.bannerVersion);
+
+    const auto queue = [this](std::function<void()> action) { m_PendingActions.push_back(std::move(action)); };
+    const auto indexed = [queue](void (CInGameShop::*method)(int), CInGameShop* self)
+    {
+        return [queue, method, self](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+        {
+            if (args.size() == 1)
+                queue([self, method, index = args[0].Get<int>(-1)] { (self->*method)(index); });
+        };
+    };
+    c.BindEventCallback("igs_zone", indexed(&CInGameShop::SelectZone, this));
+    c.BindEventCallback("igs_category", indexed(&CInGameShop::SelectCategory, this));
+    c.BindEventCallback("igs_storage_tab", indexed(&CInGameShop::SelectStorageBox, this));
+    c.BindEventCallback("igs_buy", indexed(&CInGameShop::BuyPackage, this));
+    c.BindEventCallback("igs_page",
+                        [queue](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                        {
+                            if (args.size() != 1)
+                                return;
+                            const bool next = args[0].Get<int>(0) > 0;
+                            queue([next] { next ? g_InGameShopSystem->NextPage() : g_InGameShopSystem->PrePage(); });
+                        });
+    c.BindEventCallback("igs_storage_page",
+                        [this, queue](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                        {
+                            if (args.size() != 1)
+                                return;
+                            const bool next = args[0].Get<int>(0) > 0;
+                            queue([this, next] { next ? StorageNextPage() : StoragePrevPage(); });
+                        });
+    c.BindEventCallback("igs_gift",
+                        [queue](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        {
+                            queue([] { CreateOkMessageBoxWithTitle(I18N::Game::RestrictedFunction, I18N::Game::ThisFunctionIsNotSupportedIn); });
+                        });
+    c.BindEventCallback("igs_charge",
+                        [queue](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        {
+                            queue([] { CreateOkMessageBoxWithTitle(I18N::Game::RestrictedFunction, I18N::Game::ThisFunctionIsNotSupportedIn); });
+                        });
+    c.BindEventCallback("igs_refresh",
+                        [this, queue](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        {
+                            queue([this]
+                                  {
+                                      if (SendsRequests())
+                                          SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
+                                  });
+                        });
+    c.BindEventCallback("igs_use",
+                        [this, queue](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { queue([this] { UseStorageItem(); }); });
+    c.BindEventCallback("igs_close",
+                        [this, queue](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { queue([this] { Close(); }); });
+    c.BindEventCallback("igs_banner",
+                        [this, queue](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        {
+                            queue([this]
+                                  {
+                                      if (m_bBannerLink && !m_BannerSource.empty())
+                                          leaf::OpenExplorer(m_szBannerURL);
+                                  });
+                        });
     c.BindEventCallback("igs_select_storage",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
                         {
                             if (args.size() == 1 && m_StorageItems.SelectRow(args[0].Get<int>(-1)))
                                 m_StorageRowsDirty = true;
                         });
-}
-
-void CInGameShop::BuildRmlUi()
-{
-    m_RmlView.Ensure();
+    c.BindEventCallback("igs_hint",
+                        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+                        {
+                            if (args.size() == 1)
+                                m_Hint.Enter(event, args[0].Get<int>(-1));
+                        });
+    c.BindEventCallback("igs_hint_leave",
+                        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&) { m_Hint.Leave(event); });
 }
 
 void CInGameShop::SyncRmlModel()
 {
-    m_NativeTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("igs_view") : nullptr, IsVisible());
+    m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("igs_items") : nullptr, IsVisible());
     if (!m_RmlView.Document())
         return;
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
-    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
-    SyncStorageRows();
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
+    if (!IsVisible())
+    {
+        m_Hint.Hide();
+        return;
+    }
+    auto& binder = m_RmlView.Binder();
+    UI::RmlBridge::SyncRootTransform(binder, m_Pos);
+    UI::RmlBridge::SyncNativeTextSize(binder);
+
+    SyncField(binder, &InGameShopRmlModel::characterName, "character_name", Narrow(Hero->ID));
+
+    // RenderTexts(): "My W Coin :" and the rest, each with its balance.
+    std::vector<WalletEntry> wallet;
+    const auto addBalance = [&wallet](const wchar_t* format, double amount, int decimals)
+    {
+        wchar_t label[MAX_TEXT_LENGTH] = {};
+        wchar_t value[MAX_TEXT_LENGTH] = {};
+        mu_swprintf(label, format, L"");
+        ConvertGold(amount, value, decimals);
+        wallet.push_back({Narrow(label), Narrow(value)});
+    };
+    addBalance(I18N::Game::MyWCoinS, g_InGameShopSystem->GetCashCreditCard(), 0);
+    addBalance(I18N::Game::MyWCoinPS, g_InGameShopSystem->GetCashPrepaid(), 0);
+    addBalance(I18N::Game::GoblinPointsS, g_InGameShopSystem->GetTotalMileage(), 1);
+    SyncField(binder, &InGameShopRmlModel::wallet, "wallet", std::move(wallet));
+
+    const auto radio = [](const std::vector<Rml::String>& names, int selected)
+    {
+        std::vector<RadioEntry> entries;
+        for (size_t i = 0; i < names.size(); ++i)
+            entries.push_back({names[i], static_cast<int>(i) == selected, i + 1 == names.size()});
+        return entries;
+    };
+    std::vector<Rml::String> zoneNames;
+    if (g_InGameShopSystem->GetSizeZones() > 0)
+        zoneNames = Names(g_InGameShopSystem->GetZoneName());
+    SyncField(binder, &InGameShopRmlModel::zones, "zones", radio(zoneNames, m_SelectedZone));
+    std::vector<Rml::String> categoryNames;
+    if (g_InGameShopSystem->GetSizeCategoriesAsSelectedZone() > 0)
+        categoryNames = Names(g_InGameShopSystem->GetCategoryName());
+    SyncField(binder, &InGameShopRmlModel::categories, "categories", radio(categoryNames, m_SelectedCategory));
+
+    std::vector<PackageEntry> packages(INGAMESHOP_DISPLAY_ITEMLIST_SIZE);
+    for (int i = 0; i < g_InGameShopSystem->GetSizePackageAsDisplayPackage() && i < INGAMESHOP_DISPLAY_ITEMLIST_SIZE; ++i)
+    {
+        CShopPackage* pPackage = g_InGameShopSystem->GetDisplayPackage(i);
+        wchar_t value[MAX_TEXT_LENGTH] = {};
+        wchar_t price[MAX_TEXT_LENGTH] = {};
+        ConvertGold(pPackage->Price, value);
+        mu_swprintf(price, L"%ls %ls", value, pPackage->PricUnitName);
+        packages[i] = {Narrow(pPackage->PackageProductName), Narrow(price), true};
+    }
+    SyncField(binder, &InGameShopRmlModel::packages, "packages", std::move(packages));
+    SyncField(binder, &InGameShopRmlModel::page, "page", std::to_string(g_InGameShopSystem->GetSelectPage()));
+    SyncField(binder, &InGameShopRmlModel::totalPages, "total_pages", std::to_string(g_InGameShopSystem->GetTotalPages()));
+
+    SyncField(binder, &InGameShopRmlModel::storageTabs, "storage_tabs",
+              radio({Narrow(I18N::Game::Storage), Narrow(I18N::Game::GiftInventory)}, m_StorageBox));
+    SyncStorageRows();
+    SyncField(binder, &InGameShopRmlModel::storagePage, "storage_page", std::to_string(m_iStorageCurrentPage));
+    SyncField(binder, &InGameShopRmlModel::storageTotalPages, "storage_total_pages", std::to_string(m_iStorageTotalPage));
+
+    SyncField(binder, &InGameShopRmlModel::buyLabel, "buy_label", Narrow(I18N::Game::Buy1124));
+    SyncField(binder, &InGameShopRmlModel::useLabel, "use_label", Narrow(I18N::Game::Use));
+    SyncField(binder, &InGameShopRmlModel::itemNameLabel, "item_name_label", Narrow(I18N::Game::ItemName));
+    SyncField(binder, &InGameShopRmlModel::durationLabel, "duration_label", Narrow(I18N::Game::Duration));
+    SyncField(binder, &InGameShopRmlModel::bannerSrc, "banner_src", Rml::String(m_BannerSource));
+    SyncField(binder, &InGameShopRmlModel::bannerLinked, "banner_linked", m_bBannerLink);
+
+#ifdef FOR_WORK
+    wchar_t text[MAX_TEXT_LENGTH] = {};
+    CListVersionInfo version = g_InGameShopSystem->GetCurrentScriptVer();
+    mu_swprintf(text, L"Script Ver. %d.%d.%d", version.Zone, version.year, version.yearId);
+    SyncField(binder, &InGameShopRmlModel::scriptVersion, "script_version", Narrow(text));
+    version = g_InGameShopSystem->GetCurrentBannerVer();
+    mu_swprintf(text, L"Banner Ver. %d.%d.%d", version.Zone, version.year, version.yearId);
+    SyncField(binder, &InGameShopRmlModel::bannerVersion, "banner_version", Narrow(text));
+#endif // FOR_WORK
+
+    SyncHint();
+}
+
+void CInGameShop::SyncHint()
+{
+    const wchar_t* text = nullptr;
+    UI::RmlBridge::ElementTooltip::Placement placement;
+    placement.box = UI::RmlBridge::Tooltip::Config::Box::ButtonHint;
+    // A button's hint 2 units below it; the close button's 2 above it.
+    placement.anchorAt = 27.f / 25.f;
+    switch (m_Hint.Hovered())
+    {
+    case 0: text = I18N::Game::SendWCoin; break;
+    case 1: text = I18N::Game::RechargeWCoin; break;
+    case 2: text = I18N::Game::UpdateInformation; break;
+    case 3:
+        text = I18N::Game::Close388;
+        placement.anchor = UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft;
+        placement.anchorAt = -2.f / 29.f;
+        break;
+    default: m_Hint.Hide(); return;
+    }
+    UI::RmlBridge::Tooltip::Line line;
+    line.text = Narrow(text);
+    m_Hint.Show({std::move(line)}, placement);
 }
 
 void CInGameShop::SyncStorageRows()
@@ -167,449 +394,118 @@ bool CInGameShop::Render()
     return true;
 }
 
-// Into #igs_view (m_NativeTarget), in this window's layout space, under the 2-degree camera the
-// package items always had.
-void CInGameShop::RenderNative()
+// Into #igs_items, in this window's layout space.
+void CInGameShop::RenderItems()
 {
-    DisableDepthTest();
-    EnableAlphaTest();
-    RenderFrame();
-    RenderButtons();
-    RenderTexts();
-    RenderBanner();
-    RenderListBox();
-    DisableAlphaBlend();
-
-    EnableDepthTest();
-    EnableDepthMask();
-    for (int i = 0; i < g_InGameShopSystem->GetSizePackageAsDisplayPackage(); i++)
+    for (int i = 0; i < g_InGameShopSystem->GetSizePackageAsDisplayPackage() && i < INGAMESHOP_DISPLAY_ITEMLIST_SIZE; i++)
     {
-        int iPosX = IGS_ITEMRENDER_POS_X_STANDAD + (IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X * (i % IGS_NUM_ITEMS_WIDTH));
-        int iPosY = IGS_ITEMRENDER_POS_Y_STANDAD + (IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y * (i / IGS_NUM_ITEMS_HEIGHT));
-        RenderItem3D(iPosX, iPosY, IGS_ITEMRENDER_POS_WIDTH, IGS_ITEMRENDER_POS_HEIGHT, g_InGameShopSystem->GetPackageItemCode(i), 0, 0, 0, true);
+        const int x = m_Pos.x + IGS_ITEMRENDER_POS_X + IGS_PACKAGE_PITCH_X * (i % IGS_NUM_ITEMS_WIDTH);
+        const int y = m_Pos.y + IGS_ITEMRENDER_POS_Y + IGS_PACKAGE_PITCH_Y * (i / IGS_NUM_ITEMS_WIDTH);
+        RenderItem3D(x, y, IGS_ITEMRENDER_WIDTH, IGS_ITEMRENDER_HEIGHT, g_InGameShopSystem->GetPackageItemCode(i), 0, 0, 0, true);
     }
 }
 
-void CInGameShop::RenderFrame()
+bool CInGameShop::SendsRequests() const
 {
-    // The flat backdrop is in_game_shop.rml's, under #igs_view.
+    return !UI::EventPreview::IsShowing(UI::EventPreview::Event::CashShop);
+}
 
-    int iSizeCategory = g_InGameShopSystem->GetSizeCategoriesAsSelectedZone();
+void CInGameShop::SelectZone(int index)
+{
+    if (!g_InGameShopSystem->IsRequestEventPackge() || index < 0 || index >= g_InGameShopSystem->GetSizeZones() ||
+        index == m_SelectedZone)
+        return;
+    m_SelectedZone = index;
+    g_InGameShopSystem->SelectZone(index);
+    InitCategoryBtn();
+    g_InGameShopSystem->SelectCategory(m_SelectedCategory);
+}
 
-    if (iSizeCategory < 0)
+void CInGameShop::SelectCategory(int index)
+{
+    if (!g_InGameShopSystem->IsRequestEventPackge() || index < 0 ||
+        index >= g_InGameShopSystem->GetSizeCategoriesAsSelectedZone() || index == m_SelectedCategory)
+        return;
+    m_SelectedCategory = index;
+    g_InGameShopSystem->SelectCategory(index);
+}
+
+void CInGameShop::SelectStorageBox(int index)
+{
+    if (index < 0 || index >= IGS_TOTAL_LISTBOX || index == m_StorageBox)
+        return;
+    m_StorageBox = index;
+    m_iSelectedStorageItemIndex = 0;
+    m_bRequestCurrentPage = true;
+    if (SendsRequests())
+        SocketClient->ToGameServer()->SendCashShopStorageListRequest(1, GetCurrentStorageCode());
+}
+
+void CInGameShop::BuyPackage(int index)
+{
+    if (index < 0 || index >= g_InGameShopSystem->GetSizePackageAsDisplayPackage())
+        return;
+    CShopPackage* pPackage = g_InGameShopSystem->GetDisplayPackage(index);
+    if (pPackage->PriceCount == 1)
+    {
+        CMsgBoxIGSBuyPackageItem* pMsgBox = NULL;
+        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxBuyPackageItemLayout), &pMsgBox);
+        pMsgBox->Initialize(pPackage);
+    }
+    else if (pPackage->PriceCount > 1)
+    {
+        CMsgBoxIGSBuySelectItem* pMsgBox = NULL;
+        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSBuySelectItemLayout), &pMsgBox);
+        pMsgBox->Initialize(pPackage);
+    }
+}
+
+void CInGameShop::UseStorageItem()
+{
+    if (m_StorageItems.Empty())
+    {
+        CreateOkMessageBoxWithTitle(I18N::Game::Error, I18N::Game::ThereIsNoUsableItem);
+        return;
+    }
+
+    const GameShop::StorageItem* pSelectItem = m_StorageItems.Selected();
+    if (pSelectItem == nullptr)
         return;
 
-    // Category Deco Middle Render
-    POINT CategoryDecoMiddlePos;
-    CategoryDecoMiddlePos.x = m_CategoryButton.GetPos(0).x + (IMAGE_IGS_CATEGORY_BTN_WIDTH / 2) - (IMAGE_IGS_CATEGORY_DECO_MIDDLE_WIDTH / 2);
-
-    for (int i = 0; i < iSizeCategory - 1; i++)
+    if (m_StorageBox == IGS_SAFEKEEPING_LISTBOX)
     {
-        CategoryDecoMiddlePos.y = m_CategoryButton.GetPos(i).y + IMAGE_IGS_CATEGORY_BTN_HEIGHT - 1;
-
-        RenderImage(IMAGE_IGS_CATEGORY_DECO_MIDDLE, CategoryDecoMiddlePos.x, CategoryDecoMiddlePos.y, IMAGE_IGS_CATEGORY_DECO_MIDDLE_WIDTH, IMAGE_IGS_CATEGORY_DECO_MIDDLE_HEIGHT);
+        ShowIGSStorageItemInfoDialog(pSelectItem->m_iStorageSeq, pSelectItem->m_iStorageItemSeq, pSelectItem->m_wItemCode, static_cast<char>(pSelectItem->m_szType),
+            pSelectItem->m_szName, pSelectItem->m_szNum, pSelectItem->m_szPeriod);
     }
-
-    // Category Deco Down Render
-    RenderImage(IMAGE_IGS_CATEGORY_DECO_DOWN, m_Pos.x, m_CategoryButton.GetPos(iSizeCategory - 1).y - 10, IMAGE_IGS_CATEGORY_DECO_DOWN_WIDTH, IMAGE_IGS_CATEGORY_DECO_DOWN_HEIGHT);
-
-    for (int cnt = g_InGameShopSystem->GetSizePackageAsDisplayPackage(); cnt < INGAMESHOP_DISPLAY_ITEMLIST_SIZE; cnt++)
+    else if (m_StorageBox == IGS_PRESENTBOX_LISTBOX)
     {
-        RenderImage(IMAGE_IGS_ITEMBOX_LOGO, m_Pos.x + IMAGE_IGS_ITEMBOX_LOGO_POS_X + ((cnt % IGS_NUM_ITEMS_WIDTH) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X), m_Pos.y + IMAGE_IGS_ITEMBOX_LOGO_POS_Y + ((cnt / IGS_NUM_ITEMS_HEIGHT) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y), IMAGE_IGS_ITEMBOX_LOGO_SIZE, IMAGE_IGS_ITEMBOX_LOGO_SIZE);
+        ShowIGSGiftStorageItemInfoDialog(pSelectItem->m_iStorageSeq, pSelectItem->m_iStorageItemSeq, pSelectItem->m_wItemCode,
+            pSelectItem->m_szType, pSelectItem->m_szSendUserName, pSelectItem->m_szMessage,
+            pSelectItem->m_szName, pSelectItem->m_szNum, pSelectItem->m_szPeriod);
     }
-
-    RenderImage(IMAGE_IGS_STORAGE_PAGE, m_Pos.x + IMAGE_IGS_STORAGE_PAGE_POS_X, m_Pos.y + IMAGE_IGS_STORAGE_PAGE_POS_Y, IMGAE_IGS_STORAGE_PAGE_WIDTH, IMGAE_IGS_STORAGE_PAGE_HEIGHT);
 }
 
-void CInGameShop::RenderTexts()
-{
-    wchar_t szText[256] = { 0, };
-    wchar_t szValue[256] = { 0, };
-
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, Hero->ID);
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_CHAR_NAME_POS_X, m_Pos.y + TEXT_IGS_CHAR_NAME_POS_Y, szText, TEXT_IGS_CHAR_NAME_WIDTH, 0, RT3_SORT_CENTER);
-    g_pRenderText->SetFont(g_hFont);
-
-    // Display Item
-    for (int i = 0; i < g_InGameShopSystem->GetSizePackageAsDisplayPackage(); i++)
-    {
-        CShopPackage* pPackage = g_InGameShopSystem->GetDisplayPackage(i);
-        // Package
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(m_Pos.x + IGS_PACKAGE_NAME_POS_X + ((i % IGS_NUM_ITEMS_WIDTH) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X), m_Pos.y + IGS_PACKAGE_NAME_POS_Y + ((i / IGS_NUM_ITEMS_HEIGHT) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y), pPackage->PackageProductName, IGS_PACKAGE_NAME_WIDTH, 0, RT3_SORT_CENTER);
-        // Package
-        ConvertGold(pPackage->Price, szValue);
-        mu_swprintf(szText, L"%ls %ls", szValue, pPackage->PricUnitName);
-        g_pRenderText->SetTextColor(255, 238, 161, 255);
-        g_pRenderText->RenderText(m_Pos.x + IGS_PACKAGE_NAME_POS_X + ((i % IGS_NUM_ITEMS_WIDTH) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X), m_Pos.y + IGS_PACKAGE_PRICE_POS_Y + 53 + ((i / IGS_NUM_ITEMS_HEIGHT) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y), szText, IGS_PACKAGE_NAME_WIDTH, 0, RT3_SORT_CENTER);
-    }
-    g_pRenderText->SetTextColor(255, 238, 161, 255);
-
-    //CreditCard
-    ConvertGold(g_InGameShopSystem->GetCashCreditCard(), szValue);
-    mu_swprintf(szText, I18N::Game::MyWCoinS, L"");
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_CASH_POS_X, m_Pos.y + TEXT_IGS_CASH_POS_Y, szText, TEXT_IGS_CASH_WIDTH, 0, RT3_SORT_LEFT);
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_CASH_POS_X + 50, m_Pos.y + TEXT_IGS_CASH_POS_Y, szValue, TEXT_IGS_CASH_WIDTH - 56, 0, RT3_SORT_RIGHT);
-
-    //Prepaid
-    ConvertGold(g_InGameShopSystem->GetCashPrepaid(), szValue);
-    mu_swprintf(szText, I18N::Game::MyWCoinPS, L"");
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_CASH_POS_X, m_Pos.y + TEXT_IGS_MILEAGE_POS_Y, szText, TEXT_IGS_CASH_WIDTH, 0, RT3_SORT_LEFT);
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_CASH_POS_X + 50, m_Pos.y + TEXT_IGS_MILEAGE_POS_Y, szValue, TEXT_IGS_CASH_WIDTH - 56, 0, RT3_SORT_RIGHT);
-
-    ConvertGold(g_InGameShopSystem->GetTotalMileage(), szValue, 1);
-    mu_swprintf(szText, I18N::Game::GoblinPointsS, L"");
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_CASH_POS_X, m_Pos.y + TEXT_IGS_POINT_POS_Y, szText, TEXT_IGS_CASH_WIDTH, 0, RT3_SORT_LEFT);
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_CASH_POS_X + 50, m_Pos.y + TEXT_IGS_POINT_POS_Y, szValue, TEXT_IGS_CASH_WIDTH - 56, 0, RT3_SORT_RIGHT);
-
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_STORAGE_NAME_POS_X, m_Pos.y + TEXT_IGS_STORAGE_NAME_POS_Y, I18N::Game::ItemName, TEXT_IGS_STORAGE_NAME_WIDTH, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_STORAGE_TIME_POS_X, m_Pos.y + TEXT_IGS_STORAGE_NAME_POS_Y, I18N::Game::Duration, TEXT_IGS_STORAGE_TIME_WIDTH, 0, RT3_SORT_CENTER);
-
-    // Page Info
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_PAGE_POS_X + 23, m_Pos.y + TEXT_IGS_PAGE_POS_Y, L"/", 10, 0, RT3_SORT_CENTER);
-
-    mu_swprintf(szText, L"%d", g_InGameShopSystem->GetSelectPage());
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_PAGE_POS_X + 5, m_Pos.y + TEXT_IGS_PAGE_POS_Y, szText, 15, 0, RT3_SORT_RIGHT);
-
-    mu_swprintf(szText, L"%d", g_InGameShopSystem->GetTotalPages());
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_PAGE_POS_X + 36, m_Pos.y + TEXT_IGS_PAGE_POS_Y, szText, 15, 0, RT3_SORT_LEFT);
-
-    // Storage Page Info
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_STORAGE_PAGE_INFO_POS_X + 35, m_Pos.y + TEXT_IGS_STORAGE_PAGE_INFO_POS_Y, L"/", 10, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, L"%d", m_iStorageCurrentPage);
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_STORAGE_PAGE_INFO_POS_X + 12, m_Pos.y + TEXT_IGS_STORAGE_PAGE_INFO_POS_Y, szText, 20, 0, RT3_SORT_RIGHT);
-    mu_swprintf(szText, L"%d", m_iStorageTotalPage);
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_STORAGE_PAGE_INFO_POS_X + 48, m_Pos.y + TEXT_IGS_STORAGE_PAGE_INFO_POS_Y, szText, 20, 0, RT3_SORT_LEFT);
-
-#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-#ifdef FOR_WORK
-    g_pRenderText->SetTextColor(210, 180, 230, 255);
-    g_pRenderText->SetFont(g_hFont);
-
-    // Script Version Info
-    CListVersionInfo ScriptVer;
-    ScriptVer = g_InGameShopSystem->GetCurrentScriptVer();
-    mu_swprintf(szText, L"Script Ver. %d.%d.%d", ScriptVer.Zone, ScriptVer.year, ScriptVer.yearId);
-    g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + 396, szText, 150, 0, RT3_SORT_LEFT);
-
-    ScriptVer = g_InGameShopSystem->GetCurrentBannerVer();
-    mu_swprintf(szText, L"Banner Ver. %d.%d.%d", ScriptVer.Zone, ScriptVer.year, ScriptVer.yearId);
-    g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + 408, szText, 150, 0, RT3_SORT_LEFT);
-#endif // FOR_WORK
-#endif //KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-}
-
-void CInGameShop::RenderButtons()
-{
-    m_ZoneButton.Render();
-    m_CategoryButton.Render();
-    m_ListBoxTabButton.Render();
-
-    for (int i = 0; i < g_InGameShopSystem->GetSizePackageAsDisplayPackage(); i++)
-    {
-        m_ViewDetailButton[i].Render();
-    }
-
-    m_CashGiftButton.Render();
-    m_CashChargeButton.Render();
-    m_CashRefreshButton.Render();
-    m_UseButton.Render();
-    m_PrevButton.Render();
-    m_NextButton.Render();
-    m_StoragePrevButton.Render();
-    m_StorageNextButton.Render();
-    m_CloseButton.Render();
-}
-
-void CInGameShop::RenderListBox()
-{
-    // in_game_shop.rml draws the storage rows.
-}
-
-bool CInGameShop::IsInGameShopRect(float _x, float _y)
+void CInGameShop::Close()
 {
     if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP))
-        return false;
-
-    RECT _TempRT;
-
-    _TempRT.top = 0;
-    _TempRT.bottom = IMAGE_IGS_BACK_HEIGHT;
-    _TempRT.left = 0;
-    _TempRT.right = IMAGE_IGS_BACK_WIDTH;
-
-    if (_x >= _TempRT.left && _x < _TempRT.right && _y < _TempRT.bottom && _y >= _TempRT.top)
-        return true;
-    else
-        return false;
-
-    return false;
-}
-
-void CInGameShop::SetConvertInvenCoord(WORD _ItemType, float _Width, float _Height)
-{
-    ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[_ItemType];
-    float _TempWidth = pItemAttr->Width * 20.0f;
-    float _TempHeight = pItemAttr->Height * 20.0f;
-    float _fCoodX = 0, _fCoodY = 0;
-
-    if (_ItemType == ITEM_WING_OF_STORM)
-    {
-        _fCoodY = 5.0f;
-    }
-
-    else if (pItemAttr->Height >= 4)
-    {
-        _fCoodY = -10.0f;
-    }
-
-    m_fRePos.x = (_Width / 2) - (_TempWidth / 2) + _fCoodX;
-    m_fRePos.y = (_Height / 2) - (_TempHeight / 2) + _fCoodY;
-    m_fReSize.x = _TempWidth;
-    m_fReSize.y = _TempHeight;
-}
-void CInGameShop::SetRateScale(int _ItemType)
-{
-    const float _fRate_Value = 0.703f;
-    ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[_ItemType];
-
-    if (_ItemType == ITEM_WING_OF_STORM)
-    {
-        m_fRate_Scale = _fRate_Value * 0.7f;
-    }
-    else if (_ItemType == ITEM_DIVINE_STAFF_OF_ARCHANGEL)
-    {
-        m_fRate_Scale = _fRate_Value * 0.7f;
-    }
-    else if (_ItemType >= ITEM_HELPER + 117 && _ItemType <= ITEM_HELPER + 120)
-    {
-        m_fRate_Scale = _fRate_Value * 1.6f;
-    }
-    else if (pItemAttr->Height >= 4)
-    {
-        m_fRate_Scale = _fRate_Value * 0.7f;
-    }
-    else
-    {
-        m_fRate_Scale = _fRate_Value;
-    }
-}
-
-bool CInGameShop::BtnProcess()
-{
-    if (g_InGameShopSystem->IsRequestEventPackge() == true)
-    {
-        if (m_ZoneButton.UpdateMouseEvent() != -1)
-        {
-            g_InGameShopSystem->SelectZone(m_ZoneButton.GetCurButtonIndex());
-            InitCategoryBtn();
-            g_InGameShopSystem->SelectCategory(m_CategoryButton.GetCurButtonIndex());
-            return true;
-        }
-
-        if (m_CategoryButton.UpdateMouseEvent() != -1)
-        {
-            g_InGameShopSystem->SelectCategory(m_CategoryButton.GetCurButtonIndex());
-            return true;
-        }
-    }
-
-    if (m_ListBoxTabButton.UpdateMouseEvent() != -1)
-    {
-        char szCode = GetCurrentStorageCode();
-        m_iSelectedStorageItemIndex = 0;
-        m_bRequestCurrentPage = true;
-        SocketClient->ToGameServer()->SendCashShopStorageListRequest(1, szCode);
-        return true;
-    }
-
-    for (int i = 0; i < g_InGameShopSystem->GetSizePackageAsDisplayPackage(); i++)
-    {
-        if (m_ViewDetailButton[i].UpdateMouseEvent())
-        {
-            CShopPackage* pPackage = g_InGameShopSystem->GetDisplayPackage(i);
-
-            if (pPackage->PriceCount == 1)
-            {
-                CMsgBoxIGSBuyPackageItem* pMsgBox = NULL;
-                CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxBuyPackageItemLayout), &pMsgBox);
-                pMsgBox->Initialize(pPackage);
-            }
-            else if (pPackage->PriceCount > 1)
-            {
-                CMsgBoxIGSBuySelectItem* pMsgBox = NULL;
-                CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSBuySelectItemLayout), &pMsgBox);
-                pMsgBox->Initialize(pPackage);
-            }
-
-            return true;
-        }
-    }
-
-    if (m_CashGiftButton.UpdateMouseEvent() == true)
-    {
-        CreateOkMessageBoxWithTitle(I18N::Game::RestrictedFunction, I18N::Game::ThisFunctionIsNotSupportedIn);
-        return true;
-    }
-
-    if (m_CashChargeButton.UpdateMouseEvent() == true)
-    {
-        CreateOkMessageBoxWithTitle(I18N::Game::RestrictedFunction, I18N::Game::ThisFunctionIsNotSupportedIn);
-        return true;
-    }
-
-    if (m_CashRefreshButton.UpdateMouseEvent() == true)
-    {
-        SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
-
-        return true;
-    }
-
-    if (m_UseButton.UpdateMouseEvent() == true)
-    {
-        if (m_StorageItems.Empty())
-        {
-            CreateOkMessageBoxWithTitle(I18N::Game::Error, I18N::Game::ThereIsNoUsableItem);
-            return true;
-        }
-
-        int iStorageIndex = m_ListBoxTabButton.GetCurButtonIndex();
-
-        const GameShop::StorageItem* pSelectItem = m_StorageItems.Selected();
-
-        if (iStorageIndex == IGS_SAFEKEEPING_LISTBOX)					// 보관함
-        {
-            ShowIGSStorageItemInfoDialog(pSelectItem->m_iStorageSeq, pSelectItem->m_iStorageItemSeq, pSelectItem->m_wItemCode, static_cast<char>(pSelectItem->m_szType),
-                pSelectItem->m_szName, pSelectItem->m_szNum, pSelectItem->m_szPeriod);
-        }
-        else if (iStorageIndex == IGS_PRESENTBOX_LISTBOX)				// 선물 보관함
-        {
-            ShowIGSGiftStorageItemInfoDialog(pSelectItem->m_iStorageSeq, pSelectItem->m_iStorageItemSeq, pSelectItem->m_wItemCode,
-                pSelectItem->m_szType, pSelectItem->m_szSendUserName, pSelectItem->m_szMessage,
-                pSelectItem->m_szName, pSelectItem->m_szNum, pSelectItem->m_szPeriod);
-        }
-        return true;
-    }
-
-    // Prev Button
-    if (m_PrevButton.UpdateMouseEvent())
-    {
-        g_InGameShopSystem->PrePage();
-        return true;
-    }
-
-    // Next Button
-    if (m_NextButton.UpdateMouseEvent())
-    {
-        g_InGameShopSystem->NextPage();
-        return true;
-    }
-
-    // Storage Prev Button
-    if (m_StoragePrevButton.UpdateMouseEvent())
-    {
-        StoragePrevPage();
-        return true;
-    }
-
-    // Next Button
-    if (m_StorageNextButton.UpdateMouseEvent())
-    {
-        StorageNextPage();
-        return true;
-    }
-
-    if (m_CloseButton.UpdateMouseEvent() == true)
-    {
-        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP) == true)
-        {
-            SocketClient->ToGameServer()->SendCashShopOpenState(1);
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INGAMESHOP);
-
-            return true;
-        }
-        return false;
-    }
-
-    return false;
-}
-
-void CInGameShop::SetBtnInfo()
-{
-    m_CloseButton.ChangeButtonImgState(true, IMAGE_IGS_EXIT_BTN, false);
-    m_CloseButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_EXIT_BTN_POS_X, m_Pos.y + IMAGE_IGS_EXIT_BTN_POS_Y, IMAGE_IGS_EXIT_BTN_WIDTH, IMAGE_IGS_EXIT_BTN_HEIGHT);
-    m_CloseButton.ChangeToolTipText(&I18N::Game::Close388, true);
-    m_ListBoxTabButton.CreateRadioGroup(IGS_TOTAL_LISTBOX, IMAGE_IGS_LEFT_TAB);
-    m_ListBoxTabButton.ChangeRadioButtonInfo(true, m_Pos.x + IMAGE_IGS_TAB_BTN_POS_X, m_Pos.y + IMAGE_IGS_TAB_BTN_POS_Y, IMAGE_IGS_TAB_BTN_WIDTH, IMAGE_IGS_TAB_BTN_HEIGHT, IMAGE_IGS_TAB_BTN_DISTANCE);
-    m_ListBoxTabButton.ChangeButtonState(mu::ui::window::BUTTON_STATE_DOWN, 0);
-    m_ListBoxTabButton.ChangeButtonState(IGS_SAFEKEEPING_LISTBOX, BITMAP_UNKNOWN, mu::ui::window::BUTTON_STATE_UP, 0);
-    m_ListBoxTabButton.ChangeButtonState(IGS_PRESENTBOX_LISTBOX, BITMAP_UNKNOWN, mu::ui::window::BUTTON_STATE_UP, 0);
-    m_ListBoxTabButton.ChangeButtonState(IGS_PRESENTBOX_LISTBOX, IMAGE_IGS_RIGHT_TAB, mu::ui::window::BUTTON_STATE_DOWN, 0);
-
-   std::wstring strText;
-    std::list<std::wstring> TextList;
-    strText = I18N::Game::Storage;
-    TextList.push_back(strText);
-    strText = I18N::Game::GiftInventory;
-    TextList.push_back(strText);
-
-    m_ListBoxTabButton.ChangeRadioText(TextList);
-    m_ListBoxTabButton.ChangeFrame(IGS_SAFEKEEPING_LISTBOX);
-
-    for (int i = 0; i < INGAMESHOP_DISPLAY_ITEMLIST_SIZE; i++)
-    {
-        m_ViewDetailButton[i].ChangeButtonImgState(true, IMAGE_IGS_VIEWDETAIL_BTN, true, false, true);
-        m_ViewDetailButton[i].ChangeButtonInfo(IMAGE_IGS_VIEWDETAIL_BTN_POS_X + ((i % IGS_NUM_ITEMS_WIDTH) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X), IMAGE_IGS_VIEWDETAIL_BTN_POS_Y + ((i / IGS_NUM_ITEMS_HEIGHT) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y), IMAGE_IGS_VIEWDETAIL_BTN_WIDTH, IMAGE_IGS_VIEWDETAIL_BTN_HEIGHT);
-        m_ViewDetailButton[i].MoveTextPos(0, -1);
-        m_ViewDetailButton[i].ChangeText(&I18N::Game::Buy1124);
-    }
-
-    m_CashGiftButton.ChangeButtonImgState(true, IMAGE_IGS_ITEMGIFT_BTN, true);
-    m_CashGiftButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_ITEMGIFT_BTN_POS_X, m_Pos.y + IMAGE_IGS_ICON_BTN_POS_Y, IMAGE_IGS_ICON_BTN_WIDTH, IMAGE_IGS_ICON_BTN_HEIGHT);
-    m_CashGiftButton.ChangeToolTipText(&I18N::Game::SendWCoin);
-    m_CashChargeButton.ChangeButtonImgState(true, IMAGE_IGS_CASHGIFT_BTN, true);
-    m_CashChargeButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_CASHGIFT_BTN_POS_X, m_Pos.y + IMAGE_IGS_ICON_BTN_POS_Y, IMAGE_IGS_ICON_BTN_WIDTH, IMAGE_IGS_ICON_BTN_HEIGHT);
-    m_CashChargeButton.ChangeToolTipText(&I18N::Game::RechargeWCoin);
-
-    m_CashRefreshButton.ChangeButtonImgState(true, IMAGE_IGS_REFRESH_BTN, true);
-    m_CashRefreshButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_REFRESH_BTN_POS_X, m_Pos.y + IMAGE_IGS_ICON_BTN_POS_Y, IMAGE_IGS_ICON_BTN_WIDTH, IMAGE_IGS_ICON_BTN_HEIGHT);
-    m_CashRefreshButton.ChangeToolTipText(&I18N::Game::UpdateInformation);
-
-    m_UseButton.ChangeButtonImgState(true, IMAGE_IGS_VIEWDETAIL_BTN, true, false, true);
-    m_UseButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_USE_BTN_POS_X, m_Pos.y + IMAGE_IGS_USE_BTN_POS_Y, IMAGE_IGS_VIEWDETAIL_BTN_WIDTH, IMAGE_IGS_VIEWDETAIL_BTN_HEIGHT);
-    m_UseButton.MoveTextPos(0, -1);
-    m_UseButton.ChangeText(&I18N::Game::Use);
-
-    m_PrevButton.ChangeButtonImgState(true, IMAGE_IGS_PAGE_LEFT, true);
-    m_PrevButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_PAGE_LEFT_POS_X, m_Pos.y + IMAGE_IGS_PAGE_BUTTON_POS_Y, IMAGE_IGS_PAGE_BTN_WIDTH, IMAGE_IGS_PAGE_BTN_HEIGHT);
-
-    // next
-    m_NextButton.ChangeButtonImgState(true, IMAGE_IGS_PAGE_RIGHT, true);
-    m_NextButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_PAGE_RIGHT_POS_X, m_Pos.y + IMAGE_IGS_PAGE_BUTTON_POS_Y, IMAGE_IGS_PAGE_BTN_WIDTH, IMAGE_IGS_PAGE_BTN_HEIGHT);
-
-    // Storage Page prev
-    m_StoragePrevButton.ChangeButtonImgState(true, IMAGE_IGS_STORAGE_PAGE_LEFT, true);
-    m_StoragePrevButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_STORAGE_PAGE_LEFT_POS_X - 12, m_Pos.y + IMAGE_IGS_STORAGE_PAGE_BTN_POS_Y - 3, IMGAE_IGS_STORAGE_PAGE_BTN_WIDTH, IMGAE_IGS_STORAGE_PAGE_BTN_HEIGHT);
-
-    // Storage Page next
-    m_StorageNextButton.ChangeButtonImgState(true, IMAGE_IGS_STORAGE_PAGE_RIGHT, true);
-    m_StorageNextButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_STORAGE_PAGE_RIGHT_POS_X + 10, m_Pos.y + IMAGE_IGS_STORAGE_PAGE_BTN_POS_Y - 3, IMGAE_IGS_STORAGE_PAGE_BTN_WIDTH, IMGAE_IGS_STORAGE_PAGE_BTN_HEIGHT);
+        return;
+    if (SendsRequests())
+        SocketClient->ToGameServer()->SendCashShopOpenState(1);
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INGAMESHOP);
 }
 
 bool CInGameShop::Update()
 {
+    // The document's clicks, in the order they came, where the native buttons ran.
+    std::vector<std::function<void()>> actions;
+    actions.swap(m_PendingActions);
+    if (IsVisible())
+    {
+        for (const auto& action : actions)
+            action();
+    }
+
     SyncRmlModel();
-
-    if (IsVisible() == false)
-        return true;
-
     return true;
 }
 
@@ -618,28 +514,15 @@ bool CInGameShop::UpdateMouseEvent()
     if (IsVisible() == false)
         return true;
 
-    if (BtnProcess())
-        return false;
-
-    if (UpdateBanner())
-        return false;
-
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, IMAGE_IGS_BACK_WIDTH, IMAGE_IGS_BACK_HEIGHT).Contains(MouseX, MouseY))
+    // Nothing under the shop takes the pointer.
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, IGS_PANEL_WIDTH, IGS_PANEL_HEIGHT).Contains(MouseX, MouseY))
     {
-
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {
             MouseRButton = false;
             MouseRButtonPop = false;
             MouseRButtonPush = false;
-            return false;
         }
-
-        if (mu::ui::window::IsNone(VK_LBUTTON) == false)
-        {
-            return false;
-        }
-
         return false;
     }
 
@@ -652,9 +535,7 @@ bool CInGameShop::UpdateKeyEvent()
     {
         if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            SocketClient->ToGameServer()->SendCashShopOpenState(1);
-            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INGAMESHOP);
-
+            Close();
             return false;
         }
     }
@@ -699,52 +580,21 @@ void CInGameShop::InitBanner(wchar_t* pszFileName, wchar_t* pszBannerURL)
     if (pszFileName == NULL)
         return;
 
-    if (pszBannerURL[0] != '#')
-    {
-        m_bBannerLink = true;
-    }
+    m_bBannerLink = pszBannerURL != NULL && pszBannerURL[0] != '#';
 
+    // The downloaded .jpg becomes the .OZJ the game's image loader reads.
     if (Bitmaps.Convert_Format(pszFileName) == false)
         return;
 
-    if (LoadBitmap(pszFileName, IMAGE_IGS_BANNER, GL_LINEAR, GL_CLAMP, true, true) == true)
-    {
-        m_bLoadBanner = true;
-
-        wcscpy(m_szBannerURL, pszBannerURL);
-    }
-}
-
-void CInGameShop::RenderBanner()
-{
-    if (m_bLoadBanner == false)
-        return;
-
-    RenderImage(IMAGE_IGS_BANNER, IMAGE_IGS_BANNER_POS_X, IMAGE_IGS_BANNER_POS_Y, IMAGE_IGS_BANNER_WIDTH, IMAGE_IGS_BANNER_HEIGHT);
-}
-
-bool CInGameShop::UpdateBanner()
-{
-    if (m_bLoadBanner == false || m_bBannerLink == false)
-        return false;
-
-    if ((mu::ui::window::IsPress(VK_LBUTTON))
-        && (mu::ui::window::CheckMouseIn(IMAGE_IGS_BANNER_POS_X, IMAGE_IGS_BANNER_POS_Y, IMAGE_IGS_BANNER_WIDTH, IMAGE_IGS_BANNER_HEIGHT)))
-    {
-        leaf::OpenExplorer(m_szBannerURL);
-        return true;
-    }
-    return false;
+    m_BannerSource = BannerSource(pszFileName);
+    if (pszBannerURL != NULL)
+        wcsncpy_s(m_szBannerURL, pszBannerURL, _TRUNCATE);
 }
 
 void CInGameShop::ReleaseBanner()
 {
-    if (m_bLoadBanner == false)
-        return;
-
-    DeleteBitmap(IMAGE_IGS_BANNER);
-
-    m_bLoadBanner = false;
+    m_BannerSource.clear();
+    m_bBannerLink = false;
 }
 
 void CInGameShop::OpeningProcess()
@@ -762,39 +612,22 @@ void CInGameShop::OpeningProcess()
 void CInGameShop::ClosingProcess()
 {
     PlayBuffer(SOUND_CLICK01);
-    m_ListBoxTabButton.ChangeFrame(IGS_SAFEKEEPING_LISTBOX);
+    m_StorageBox = IGS_SAFEKEEPING_LISTBOX;
+    m_Hint.Hide();
+    m_PendingActions.clear();
     ClearAllStorageItem();
 }
 
+// The zone tabs and the category column follow the shop system's lists (SyncRmlModel()); these
+// reset the selection to the first, as the native radio groups did when rebuilt.
 void CInGameShop::InitZoneBtn()
 {
-    m_ZoneButton.UnRegisterRadioButton();
-
-    if (g_InGameShopSystem->GetSizeZones() == 0)
-        return;
-
-    m_ZoneButton.UnRegisterRadioButton();
-    m_ZoneButton.CreateRadioGroup(g_InGameShopSystem->GetSizeZones(), IMAGE_IGS_ZONE_BTN);
-    m_ZoneButton.ChangeRadioButtonInfo(true, m_Pos.x + IMAGE_IGS_ZONE_BTN_POS_X, m_Pos.y + IMAGE_IGS_ZONE_BTN_POS_Y, IMAGE_IGS_ZONE_BTN_WIDTH, IMAGE_IGS_ZONE_BTN_HEIGHT);
-    m_ZoneButton.SetFont(g_hFontBold);
-    m_ZoneButton.ChangeRadioText(g_InGameShopSystem->GetZoneName());
-    m_ZoneButton.ChangeFrame(0);
+    m_SelectedZone = 0;
 }
 
 void CInGameShop::InitCategoryBtn()
 {
-    m_CategoryButton.UnRegisterRadioButton();
-
-    if (g_InGameShopSystem->GetSizeCategoriesAsSelectedZone() == 0)
-        return;
-
-    m_CategoryButton.UnRegisterRadioButton();
-    m_CategoryButton.CreateRadioGroup(g_InGameShopSystem->GetSizeCategoriesAsSelectedZone(), IMAGE_IGS_CATEGORY_BTN, true);
-    m_CategoryButton.ChangeRadioButtonInfo(false, m_Pos.x + IMAGE_IGS_CATEGORY_BTN_POS_X, m_Pos.y + IMAGE_IGS_CATEGORY_BTN_POS_Y, IMAGE_IGS_CATEGORY_BTN_WIDTH, IMAGE_IGS_CATEGORY_BTN_HEIGHT, IMAGE_IGS_CATEGORY_BTN_DISTANCE);
-    m_CategoryButton.ChangeButtonState(mu::ui::window::BUTTON_STATE_DOWN, 2);
-    m_CategoryButton.SetFont(g_hFontBold);
-    m_CategoryButton.ChangeRadioText(g_InGameShopSystem->GetCategoryName());
-    m_CategoryButton.ChangeFrame(0);
+    m_SelectedCategory = 0;
 }
 
 void CInGameShop::AddStorageItem(int iStorageSeq, int iStorageItemSeq, int iStorageGroupCode, int iProductSeq, int iPriceSeq, int iCashPoint, wchar_t chItemType, wchar_t* pszUserName /* = NULL */, wchar_t* pszMessage /* = NULL */)
@@ -980,7 +813,7 @@ void CInGameShop::InitStorage(int iTotalItemCnt, int iCurrentPageItemCnt, int iT
 char CInGameShop::GetCurrentStorageCode()
 {
     char szCode;
-    switch (m_ListBoxTabButton.GetCurButtonIndex())
+    switch (m_StorageBox)
     {
     case IGS_SAFEKEEPING_LISTBOX:
         szCode = 'S';
@@ -1044,50 +877,6 @@ void CInGameShop::UpdateStorageItemList()
         m_iSelectedStorageItemIndex = iSelectLineIndex;
         SocketClient->ToGameServer()->SendCashShopStorageListRequest(m_iStorageCurrentPage, szCode);
     }
-}
-
-void CInGameShop::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_IGS_EXIT_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\Ingame_shopback.jpg", IMAGE_IGS_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt01.tga", IMAGE_IGS_CATEGORY_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\Ingame_Deco_Center.tga", IMAGE_IGS_CATEGORY_DECO_MIDDLE, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\Ingame_Deco_Dn.tga", IMAGE_IGS_CATEGORY_DECO_DOWN, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\ingame_Tab01.tga", IMAGE_IGS_LEFT_TAB, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\ingame_Tab02.tga", IMAGE_IGS_RIGHT_TAB, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\Ingame_Tab_Up.tga", IMAGE_IGS_ZONE_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt_Gift.tga", IMAGE_IGS_ITEMGIFT_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt_Cash.tga", IMAGE_IGS_CASHGIFT_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt_Reset.tga", IMAGE_IGS_REFRESH_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_VIEWDETAIL_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\Ingame_Itembox_logo.tga", IMAGE_IGS_ITEMBOX_LOGO, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\ingame_Bt_page_L.tga", IMAGE_IGS_PAGE_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\ingame_Bt_page_R.tga", IMAGE_IGS_PAGE_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\IGS_Storage_Page.tga", IMAGE_IGS_STORAGE_PAGE, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\IGS_Storage_Page_Left.tga", IMAGE_IGS_STORAGE_PAGE_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\IGS_Storage_Page_Right.tga", IMAGE_IGS_STORAGE_PAGE_RIGHT, GL_LINEAR);
-}
-
-void CInGameShop::UnloadImages()
-{
-    DeleteBitmap(IMAGE_IGS_EXIT_BTN);
-    DeleteBitmap(IMAGE_IGS_BACK);
-    DeleteBitmap(IMAGE_IGS_CATEGORY_BTN);
-    DeleteBitmap(IMAGE_IGS_CATEGORY_DECO_MIDDLE);
-    DeleteBitmap(IMAGE_IGS_CATEGORY_DECO_DOWN);
-    DeleteBitmap(IMAGE_IGS_LEFT_TAB);
-    DeleteBitmap(IMAGE_IGS_RIGHT_TAB);
-    DeleteBitmap(IMAGE_IGS_ZONE_BTN);
-    DeleteBitmap(IMAGE_IGS_ITEMGIFT_BTN);
-    DeleteBitmap(IMAGE_IGS_CASHGIFT_BTN);
-    DeleteBitmap(IMAGE_IGS_REFRESH_BTN);
-    DeleteBitmap(IMAGE_IGS_VIEWDETAIL_BTN);
-    DeleteBitmap(IMAGE_IGS_ITEMBOX_LOGO);
-    DeleteBitmap(IMAGE_IGS_PAGE_LEFT);
-    DeleteBitmap(IMAGE_IGS_PAGE_RIGHT);
-    DeleteBitmap(IMAGE_IGS_STORAGE_PAGE);
-    DeleteBitmap(IMAGE_IGS_STORAGE_PAGE_LEFT);
-    DeleteBitmap(IMAGE_IGS_STORAGE_PAGE_RIGHT);
 }
 
 #endif //PBG_ADD_INGAMESHOP_UI_ITEMSHOP

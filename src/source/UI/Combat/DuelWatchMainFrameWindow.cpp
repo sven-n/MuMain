@@ -95,7 +95,6 @@ void StepBar(std::vector<DuelWatchGaugeEntry>& gauges, float& shown, float rate,
 CDuelWatchMainFrameWindow::CDuelWatchMainFrameWindow()
 {
     m_pNewUIMng = NULL;
-    m_pNewUI3DRenderMng = nullptr;
 
     m_bHasHPReceived = FALSE;
     m_fPrevHPRate1 = 0;
@@ -117,16 +116,13 @@ CDuelWatchMainFrameWindow::~CDuelWatchMainFrameWindow()
     Release();
 }
 
-bool CDuelWatchMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng)
+bool CDuelWatchMainFrameWindow::Create(CManager* pNewUIMng)
 {
-    if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng)
+    if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DUELWATCH_MAINFRAME, this);
-
-    m_pNewUI3DRenderMng = pNewUI3DRenderMng;
-    m_pNewUI3DRenderMng->Add3DRenderObj(this, ITEMHOTKEYNUMBER_CAMERA_Z_ORDER);
 
     m_ExitTooltip.SetText(&I18N::Game::DuelFinished);
     m_ExitTooltip.SetAnchorAbove(true);
@@ -141,12 +137,6 @@ bool CDuelWatchMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI
 void CDuelWatchMainFrameWindow::Release()
 {
     UI::RmlBridge::Tooltip::Hide(&m_ExitTooltip);
-
-    if (m_pNewUI3DRenderMng)
-    {
-        m_pNewUI3DRenderMng->Remove3DRenderObj(this);
-        m_pNewUI3DRenderMng = NULL;
-    }
 
     if (m_pNewUIMng)
     {
@@ -193,8 +183,6 @@ bool CDuelWatchMainFrameWindow::Render()
     // are RmlUi (SyncView()). Kept because CObject requires the override.
     return true;
 }
-
-void CDuelWatchMainFrameWindow::Render3D() {}
 
 bool CDuelWatchMainFrameWindow::IsVisible() const
 {

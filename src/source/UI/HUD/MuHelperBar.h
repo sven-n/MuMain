@@ -3,6 +3,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
+#include "UI/RmlBridge/RmlElementTooltip.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 
 namespace Rml { class ElementDocument; }
@@ -59,7 +60,6 @@ namespace mu::ui::window
         {
             Rml::String positionText;   // "MapName (x, y)"
             bool muHelperActive = false; // drives which of Start/Stop is shown
-            Rml::String configTooltip, startTooltip, stopTooltip;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, MuHelperBarRmlModel& model);
         void OnRmlReloaded();
@@ -69,6 +69,10 @@ namespace mu::ui::window
 
         bool m_bRmlConfigClicked = false;
         bool m_bRmlToggleClicked = false;
+
+        // The hovered button's hint (0 config, 1 start, 2 stop), in the shared tooltip.
+        UI::RmlBridge::ElementTooltip m_Hint;
+        void SyncHint();
 
         void SyncRmlModel();
         void BuildRmlUi();

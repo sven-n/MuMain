@@ -58,14 +58,11 @@ aliases or forwarding headers over mass renames. Done when every common UI conce
 implementation or a documented presentation-specific split, discoverable without knowing the
 codebase's history. Known gaps:
 
-- **`CInGameShop`** keeps the last native widgets alive; new code must not use them. They draw into
-  its render target until its port.
-- **The shared item camera** (`C3DRenderMng`) is left only to the native message boxes that show an
-  item (`C3DItemCommonMsgBox`, the cash shop's buy boxes); new code draws items through
-  `UI::Items::ItemCameraTarget`.
-- **`CBuffStrip` and `CMuHelperBar` hover tooltips** are their own CSS `:hover` mechanism (plain
-  text, no per-line colour), not the shared tooltip, because they live in `dp` while every other
-  caller anchors in reference pixels.
+- **Hover hints, two mechanisms.** Item, skill, buff and button tooltips are the shared tooltip
+  (`UI::RmlBridge::Tooltip`; for a document element, `ElementTooltip`). The static button hints
+  inside RmlUi windows are still base.rcss's `.tooltip`, a sibling span shown on `:hover`: about 160
+  of them across 60 documents, plain text, not clamped to the screen. Each moves with two event
+  attributes and its text in the window's hint lookup, as `CMuHelperBar` did.
 
 ## The C++ ↔ RML/RCSS ownership boundary
 

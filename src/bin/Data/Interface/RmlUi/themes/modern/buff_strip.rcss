@@ -1,5 +1,5 @@
 /* Modern theme for the active-buff icon strip -- same icon atlas as legacy, only the per-icon
-   border/radius and tooltip box styling differ. */
+   border/radius differs. The hover hint is the shared tooltip's (tooltip.rcss). */
 
 /* Centred on the screen whatever the docks leave free: fixed ignores #strip_slot. */
 #strip_slot { pointer-events: none; }
@@ -227,24 +227,4 @@
 	atlas2-87: 140px 224px 20px 28px;
 	atlas2-88: 160px 224px 20px 28px;
 	atlas2-89: 180px 224px 20px 28px;
-}
-
-.tooltip {
-	display: none;
-	position: absolute;
-	top: 32dp;
-	left: 0dp;
-	width: 160dp;
-	white-space: pre-line;
-	background-color: token(surface-tooltip);
-	border: 1dp token(border-frame);
-	color: token(text-primary);
-	padding: 3dp 5dp;
-	border-radius: token(radius-sm)dp;
-	font-family: "token(font-body)";
-	font-size: 11dp;
-	pointer-events: none;
-}
-.buff-slot:hover .tooltip-plain {
-	display: block;
 }

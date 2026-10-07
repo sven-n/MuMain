@@ -63,6 +63,12 @@ std::vector<UI::RmlBridge::Tooltip::Line> BuildLines(int lineCount)
 }
 } // namespace
 
+const void* ItemInfoOwner()
+{
+    static const char token = 0;
+    return &token;
+}
+
 void ShowLegacyTextList(int lineCount, float anchorX, float anchorY, Placement placement, const void* owner)
 {
     UI::RmlBridge::Tooltip::Config config;

@@ -19,6 +19,7 @@
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
+#include "UI/Tooltip/LegacyTextListTooltip.h"
 
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -234,7 +235,7 @@ bool mu::ui::window::CMyQuestInfoWindow::Update()
     // or the window itself hidden -- make sure the persistent tooltip document doesn't linger.
     if (IsVisible() && !(m_eTabBtnIndex == TAB_QUEST && m_pSelectedRewardItem))
     {
-        UI::RmlBridge::Tooltip::Hide();
+        UI::Tooltip::HideLegacyTextList();
     }
 
     return true;

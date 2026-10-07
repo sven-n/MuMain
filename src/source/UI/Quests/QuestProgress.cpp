@@ -14,6 +14,7 @@
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
+#include "UI/Tooltip/LegacyTextListTooltip.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Engine/Object/ZzzInventory.h" // ::RenderItemInfo
 #include "Network/Server/WSclient.h"    // QUEST_REQUEST_ITEM / QUEST_REWARD_ITEM
@@ -195,7 +196,7 @@ bool CQuestProgress::Update()
     // wouldn't be (re)shown this frame, make sure the persistent shared tooltip doesn't linger --
     // same pattern CMyQuestInfoWindow's own Update() already uses.
     if (IsVisible() && !(m_eLowerView == REQUEST_REWARD_MODE && m_pSelectedRewardItem))
-        UI::RmlBridge::Tooltip::Hide();
+        UI::Tooltip::HideLegacyTextList();
 
     return true;
 }

@@ -2,9 +2,9 @@
 
 #include <string>
 
-// Developer previews of the event windows that only draw while their event runs on a server:
-// `$preview <event>` fills a window with sample values through the setters the server's packets use
-// and lets it draw off its map; `$preview off` resets that state and hides it again. A previewed
+// Developer previews of the windows that only draw while a server drives them (the event windows,
+// the cash shop): `$preview <event>` fills a window with sample values through the setters the
+// server's packets use and lets it draw off its map; `$preview off` resets that state and hides it again. A previewed
 // window sends nothing to the server.
 namespace UI::EventPreview
 {
@@ -19,6 +19,7 @@ enum class Event
     CryWolf,
     CryWolfResult,
     Siege,
+    CashShop,
 };
 
 // True while `event` is previewed: its window may draw off its map, and its close sends nothing.

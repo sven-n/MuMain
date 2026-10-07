@@ -234,7 +234,7 @@ mu::ui::window::CMyShopInventory::~CMyShopInventory()
 
 bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
 {
-    if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng || NULL == g_pNewItemMng)
+    if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;

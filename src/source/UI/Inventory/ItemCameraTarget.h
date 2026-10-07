@@ -26,10 +26,6 @@ class CObject;
 // are in, through the transform it was built with.
 namespace UI::Items
 {
-// `element`'s content box where it is drawn, in window pixels: through every transform on it and
-// its ancestors, which GetAbsoluteOffset() leaves out. False while it has no area.
-bool DrawnContentBox(Rml::Element& element, Rml::Vector2f& offset, Rml::Vector2f& size);
-
 class ItemCameraTarget
 {
 public:
@@ -39,7 +35,7 @@ public:
 
     // `transform` gives the space the drawer's rectangles are in; window pixels when empty.
     explicit ItemCameraTarget(Drawer drawer, TransformSource transform = {});
-    // The rectangles are in `owner`'s layout space, as C3DCamera drew its objects.
+    // The rectangles are in `owner`'s layout space.
     ItemCameraTarget(Drawer drawer, const mu::ui::window::CObject* owner);
 
     // Once a frame: sizes the target to `image`'s box, shows it there and points its src at the

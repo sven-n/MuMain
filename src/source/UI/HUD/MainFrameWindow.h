@@ -8,7 +8,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "UI/Core/Window3DRenderMng.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/HUD/ItemHotKey.h"
 #include "UI/HUD/SkillList.h"

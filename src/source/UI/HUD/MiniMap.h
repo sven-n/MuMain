@@ -5,7 +5,7 @@
 #include "UI/HUD/MainFrameWindow.h"
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
+#include "UI/Widgets/Window/Tooltip.h"
 #include "UI/HUD/MiniMapLayout.h"
 #include "UI/HUD/MiniMapRmlModel.h"
 #include "UI/RmlBridge/RmlThemedView.h"

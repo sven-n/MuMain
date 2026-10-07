@@ -6,7 +6,7 @@ namespace mu::ui::window
 {
     // Hover tooltip attachable to any native widget or bare rect; owns no position of its own --
     // Render() takes the anchor rect each frame and draws only if the mouse is within it.
-    // For anything with an RmlUi presentation, use base.rcss's `.tooltip` convention instead.
+    // For an element of an RmlUi document, use UI::RmlBridge::ElementTooltip (RmlElementTooltip.h).
     class CTooltip
     {
     public:

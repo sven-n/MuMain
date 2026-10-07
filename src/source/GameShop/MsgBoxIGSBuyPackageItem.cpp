@@ -1,4 +1,3 @@
-
 #include "stdafx.h"
 #include "I18N/All.h"
 #include "Render/Text/CUIRenderText.h"
@@ -7,8 +6,6 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlSyncField.h"
-#include "UI/RmlBridge/RmlTheme.h"
-#include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ElementDocument.h>
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -45,22 +42,11 @@ CMsgBoxIGSBuyPackageItem::~CMsgBoxIGSBuyPackageItem()
 
 bool CMsgBoxIGSBuyPackageItem::Create(float fPriority)
 {
-    LoadImages();
-
     SetAddCallbackFunc();
 
-    CMessageBoxBase::Create((IMAGE_IGS_WINDOW_WIDTH / 2) - (IMAGE_IGS_FRAME_WIDTH / 2), (IMAGE_IGS_WINDOW_HEIGHT / 2) - (IMAGE_IGS_FRAME_HEIGHT / 2), IMAGE_IGS_FRAME_WIDTH, IMAGE_IGS_FRAME_HEIGHT, fPriority);
+    CMessageBoxBase::Create((IGS_WINDOW_WIDTH / 2) - (IGS_FRAME_WIDTH / 2), (IGS_WINDOW_HEIGHT / 2) - (IGS_FRAME_HEIGHT / 2), IGS_FRAME_WIDTH, IGS_FRAME_HEIGHT, fPriority);
 
-    if (g_pNewUI3DRenderMng)
-    {
-        g_pNewUI3DRenderMng->Add3DRenderObj(this);
-    }
-
-    BuildRmlUi();
-
-    CreateListBox();
-    SetButtonInfo();
-    SetMsgBackOpacity();
+    m_RmlView.Ensure();
     return true;
 }
 
@@ -74,14 +60,7 @@ void CMsgBoxIGSBuyPackageItem::Initialize(CShopPackage* pPackage)
     m_iDisplaySeq = pPackage->ProductDisplaySeq;
     m_iCashType = pPackage->CashType;
 
-    if (pPackage->GiftFlag == 184)
-    {
-        m_BtnPresent.SetEnable(true);
-    }
-    else
-    {
-        m_BtnPresent.SetEnable(false);
-    }
+    m_bGiftEnabled = (pPackage->GiftFlag == 184);
 
     wcsncpy(m_szPackageName, pPackage->PackageProductName, MAX_TEXT_LENGTH);
     ConvertGold(pPackage->Price, szText);
@@ -118,114 +97,37 @@ void CMsgBoxIGSBuyPackageItem::Initialize(CShopPackage* pPackage)
 
 void CMsgBoxIGSBuyPackageItem::Release()
 {
+    m_ItemTarget.Disable();
     m_RmlView.Release();
-
     CMessageBoxBase::Release();
-
-    if (g_pNewUI3DRenderMng)
-        g_pNewUI3DRenderMng->Remove3DRenderObj(this);
-
-    ReleaseListBox();
-
-    UnloadImages();
+    m_DescriptionLines.clear();
 }
 
 bool CMsgBoxIGSBuyPackageItem::Update()
 {
-    m_BtnBuy.Update();
-    m_BtnCancel.Update();
-    m_BtnPresent.Update();
-    ListBoxDoAction();
+    m_Layout = UI::Scaling::GetActiveTransform();
+
+    // Buy, Gift, Cancel: the events the native buttons sent.
+    static constexpr DWORD kButtonEvents[] = {MSGBOX_EVENT_USER_COMMON_OK, MSGBOX_EVENT_USER_CUSTOM_INGAMESHOP_PRESENT,
+                                              MSGBOX_EVENT_USER_COMMON_CANCEL};
+    const int pressed = std::exchange(m_PressedButton, -1);
+    if (pressed >= 0 && pressed < static_cast<int>(std::size(kButtonEvents)) && (pressed != 1 || m_bGiftEnabled))
+    {
+        g_MessageBox->SendEvent(this, kButtonEvents[pressed]);
+        return true;
+    }
+
     SyncRmlModel();
     return true;
 }
 
 bool CMsgBoxIGSBuyPackageItem::Render()
 {
-    EnableAlphaTest();
-    RenderMsgBackColor(true);
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    RenderListBox();
-    DisableAlphaBlend();
     return true;
 }
 
-void CMsgBoxIGSBuyPackageItem::RenderFrame()
-{
-    RenderImage(IMAGE_IGS_FRAME, GetPos().x, GetPos().y, IMAGE_IGS_FRAME_WIDTH, IMAGE_IGS_FRAME_HEIGHT);
-}
-
-bool CMsgBoxIGSBuyPackageItem::IsVisible() const
-{
-    return true;
-}
-
-void CMsgBoxIGSBuyPackageItem::SetButtonInfo()
-{
-    m_BtnBuy.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_BUY_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
-    m_BtnBuy.MoveTextPos(-1, -1);
-    m_BtnBuy.SetText(I18N::Game::Buy1124);
-
-    m_BtnPresent.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_PRESENT_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
-    m_BtnPresent.MoveTextPos(-1, -1);
-    m_BtnPresent.SetText(I18N::Game::Gift);
-
-    m_BtnCancel.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_CANCEL_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
-    m_BtnCancel.MoveTextPos(-1, -1);
-    m_BtnCancel.SetText(I18N::Game::Cancel);
-}
-
-void CMsgBoxIGSBuyPackageItem::RenderTexts()
-{
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_TITLE_POS_Y, I18N::Game::Shop, IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetTextColor(247, 186, 0, 255);
-
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_NAME_POS_Y, m_szPackageName, IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetFont(g_hFont);
-
-    g_pRenderText->SetTextColor(255, 238, 161, 255);
-
-    g_pRenderText->RenderText(GetPos().x + IGS_TEXT_PRICE_POS_X, GetPos().y + IGS_TEXT_PRICE_POX_Y, m_szPrice, IGS_TEXT_PRICE_WIDTH, 0, RT3_SORT_RIGHT);
-
-#ifdef FOR_WORK
-    wchar_t szText[256] = { '\0', };
-    g_pRenderText->SetTextColor(255, 0, 0, 255);
-    if (m_wItemCode == 65535)
-    {
-        mu_swprintf(szText, L"Package item information is not available.");
-    }
-    else
-    {
-        mu_swprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
-    }
-    g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 10, szText, 200, 0, RT3_SORT_LEFT);
-    mu_swprintf(szText, L"Package Seq : %d", m_iPackageSeq);
-    g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 20, szText, 200, 0, RT3_SORT_LEFT);
-    mu_swprintf(szText, L"Display Seq : %d", m_iDisplaySeq);
-    g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 30, szText, 200, 0, RT3_SORT_LEFT);
-    mu_swprintf(szText, L"Price Seq : 0");
-    g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 40, szText, 200, 0, RT3_SORT_LEFT);
-    mu_swprintf(szText, L"CashType : %d", m_iCashType);
-    g_pRenderText->RenderText(GetPos().x + IMAGE_IGS_FRAME_WIDTH, GetPos().y + 50, szText, 200, 0, RT3_SORT_LEFT);
-#endif // FOR_WORK
-}
-
-void CMsgBoxIGSBuyPackageItem::RenderButtons()
-{
-    m_BtnBuy.Render();
-    m_BtnPresent.Render();
-    m_BtnCancel.Render();
-}
-
-void CMsgBoxIGSBuyPackageItem::Render3D()
+// Into #igs_item, in the message box layout.
+void CMsgBoxIGSBuyPackageItem::RenderItem()
 {
     if (m_wItemCode == 65535)
         return;
@@ -235,36 +137,9 @@ void CMsgBoxIGSBuyPackageItem::Render3D()
 
 void CMsgBoxIGSBuyPackageItem::SetAddCallbackFunc()
 {
-    AddCallbackFunc(CMsgBoxIGSBuyPackageItem::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
     AddCallbackFunc(CMsgBoxIGSBuyPackageItem::BuyBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     AddCallbackFunc(CMsgBoxIGSBuyPackageItem::PresentBtnDown, MSGBOX_EVENT_USER_CUSTOM_INGAMESHOP_PRESENT);
     AddCallbackFunc(CMsgBoxIGSBuyPackageItem::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-CALLBACK_RESULT CMsgBoxIGSBuyPackageItem::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSBuyPackageItem*>(pOwner);
-    if (pOwnMsgBox)
-    {
-        if (pOwnMsgBox->m_BtnBuy.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_OK);
-            return CALLBACK_BREAK;
-        }
-
-        if (pOwnMsgBox->m_BtnPresent.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_INGAMESHOP_PRESENT);
-            return CALLBACK_BREAK;
-        }
-
-        if (pOwnMsgBox->m_BtnCancel.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
-    return CALLBACK_CONTINUE;
 }
 
 CALLBACK_RESULT CMsgBoxIGSBuyPackageItem::BuyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
@@ -300,69 +175,65 @@ CALLBACK_RESULT CMsgBoxIGSBuyPackageItem::CancelBtnDown(class CMessageBoxBase* p
     return CALLBACK_BREAK;
 }
 
-void CMsgBoxIGSBuyPackageItem::LoadImages()
-{
-    LoadBitmap(L"Interface\\InGameShop\\Ingame_pack_back01.tga", IMAGE_IGS_FRAME, GL_LINEAR);
-    LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR);
-}
-
-void CMsgBoxIGSBuyPackageItem::UnloadImages()
-{
-    DeleteBitmap(IMAGE_IGS_FRAME);
-    DeleteBitmap(IMAGE_IGS_BUTTON);
-}
-
-void CMsgBoxIGSBuyPackageItem::CreateListBox()
-{
-    // Where the description sits is igs_buy_package.rcss's now.
-}
-
-void CMsgBoxIGSBuyPackageItem::RenderListBox()
-{
-    // igs_buy_package.rml draws the description.
-}
-
-void CMsgBoxIGSBuyPackageItem::ListBoxDoAction()
-{
-    // RmlUi owns the wheel and the scrollbar drag.
-}
-
-void CMsgBoxIGSBuyPackageItem::ReleaseListBox()
-{
-    m_DescriptionLines.clear();
-}
-
 void CMsgBoxIGSBuyPackageItem::BindRmlModel(Rml::DataModelConstructor& c, BuyPackageRmlModel& model)
 {
     c.Bind("root_x", &model.rootX);
     c.Bind("root_y", &model.rootY);
     c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
+    c.Bind("title", &model.title);
+    c.Bind("name", &model.name);
+    c.Bind("price", &model.price);
     auto line = c.RegisterStruct<DescriptionLine>();
     line.RegisterMember("text", &DescriptionLine::text);
     c.RegisterArray<std::vector<DescriptionLine>>();
     c.Bind("description_lines", &model.descriptionLines);
-}
-
-void CMsgBoxIGSBuyPackageItem::BuildRmlUi()
-{
-    m_RmlView.Ensure();
+    GameShop::BindDialogCommon(c, model, m_PressedButton);
 }
 
 void CMsgBoxIGSBuyPackageItem::SyncRmlModel()
 {
+    m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("igs_item") : nullptr, true);
     if (!m_RmlView.Document())
         return;
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), GetPos());
-    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
+    auto& binder = m_RmlView.Binder();
+    UI::RmlBridge::SyncRootTransform(binder, GetPos());
+    UI::RmlBridge::SyncNativeTextSize(binder);
+
+    SyncField(binder, &BuyPackageRmlModel::title, "title", StringUtils::WideToNarrow(I18N::Game::Shop));
+    SyncField(binder, &BuyPackageRmlModel::name, "name", StringUtils::WideToNarrow(m_szPackageName));
+    SyncField(binder, &BuyPackageRmlModel::price, "price", StringUtils::WideToNarrow(m_szPrice));
 
     std::vector<DescriptionLine> lines;
     lines.reserve(m_DescriptionLines.size());
     for (const std::wstring& text : m_DescriptionLines)
         lines.push_back({StringUtils::WideToNarrow(text.c_str())});
-    SyncField(m_RmlView.Binder(), &BuyPackageRmlModel::descriptionLines, "description_lines", std::move(lines));
+    SyncField(binder, &BuyPackageRmlModel::descriptionLines, "description_lines", std::move(lines));
 
-    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
+    SyncField(binder, &BuyPackageRmlModel::buttons, "buttons",
+              std::vector<GameShop::DialogButton>{{StringUtils::WideToNarrow(I18N::Game::Buy1124), true},
+                                                  {StringUtils::WideToNarrow(I18N::Game::Gift), m_bGiftEnabled},
+                                                  {StringUtils::WideToNarrow(I18N::Game::Cancel), true}});
+
+    std::vector<Rml::String> debugLines;
+#ifdef FOR_WORK
+    wchar_t szText[256] = { '\0', };
+    if (m_wItemCode == 65535)
+        mu_swprintf(szText, L"Package item information is not available.");
+    else
+        mu_swprintf(szText, L"ItemCode : %d (%d, %d)", m_wItemCode, m_wItemCode / MAX_ITEM_INDEX, m_wItemCode % MAX_ITEM_INDEX);
+    debugLines.push_back(StringUtils::WideToNarrow(szText));
+    mu_swprintf(szText, L"Package Seq : %d", m_iPackageSeq);
+    debugLines.push_back(StringUtils::WideToNarrow(szText));
+    mu_swprintf(szText, L"Display Seq : %d", m_iDisplaySeq);
+    debugLines.push_back(StringUtils::WideToNarrow(szText));
+    debugLines.push_back("Price Seq : 0");
+    mu_swprintf(szText, L"CashType : %d", m_iCashType);
+    debugLines.push_back(StringUtils::WideToNarrow(szText));
+#endif // FOR_WORK
+    SyncField(binder, &BuyPackageRmlModel::debugLines, "debug_lines", std::move(debugLines));
+
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), true);
 }
 
 bool CMsgBoxBuyPackageItemLayout::SetLayout()

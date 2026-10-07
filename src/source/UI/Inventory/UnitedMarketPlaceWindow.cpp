@@ -33,7 +33,6 @@ using namespace mu::ui::window;
 CUnitedMarketPlaceWindow::CUnitedMarketPlaceWindow()
 {
     m_pNewUIMng = NULL;
-    m_pNewUI3DRenderMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_iRemainTime = 0;
     m_bIsEnterButtonLocked = FALSE;
@@ -44,16 +43,13 @@ CUnitedMarketPlaceWindow::~CUnitedMarketPlaceWindow()
     Release();
 }
 
-bool CUnitedMarketPlaceWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y)
+bool CUnitedMarketPlaceWindow::Create(CManager* pNewUIMng, int x, int y)
 {
-    if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng || NULL == g_pNewItemMng)
+    if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA, this);
-
-    m_pNewUI3DRenderMng = pNewUI3DRenderMng;
-    m_pNewUI3DRenderMng->Add3DRenderObj(this, INVENTORY_CAMERA_Z_ORDER);
 
     SetPos(x, y);
 
@@ -67,12 +63,6 @@ bool CUnitedMarketPlaceWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3
 
 void CUnitedMarketPlaceWindow::Release()
 {
-
-    if (m_pNewUI3DRenderMng)
-    {
-        m_pNewUI3DRenderMng->Remove3DRenderObj(this);
-        m_pNewUI3DRenderMng = NULL;
-    }
 
     if (m_pNewUIMng)
     {
@@ -154,21 +144,6 @@ bool CUnitedMarketPlaceWindow::Render()
     // Nothing native left: the frame, the texts and the buttons are RmlUi. Kept because CObject
     // requires the override.
     return true;
-}
-
-void CUnitedMarketPlaceWindow::Render3D()
-{
-    //RenderItem3D();
-}
-
-void CUnitedMarketPlaceWindow::RenderItem3D()
-{
-    // 	POINT ptOrigin = { m_Pos.x, m_Pos.y+50 };
-    //
-    // 	int nItemType = (14*MAX_ITEM_INDEX)+111;
-    //     int nItemLevel = 0;
-    //
-    // 	::RenderItem3D(ptOrigin.x+(190-20)/2, ptOrigin.y+75, 20.f, 27, nItemType, nItemLevel<<3, 0, 0, false);
 }
 
 void CUnitedMarketPlaceWindow::OpeningProcess()

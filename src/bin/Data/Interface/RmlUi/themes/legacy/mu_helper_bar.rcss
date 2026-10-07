@@ -117,29 +117,3 @@
 .dot {
 	display: none;
 }
-
-/* Content-sized sibling hints sit below the bar, clear of its button artwork.
-   Stable left anchors avoid percentage transforms on initially hidden boxes. */
-.tooltip {
-	display: none;
-	position: absolute;
-	top: 24dp;
-	width: auto;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	color: token(text-primary);
-	padding: 1px 2px;
-	border-radius: 0px;
-	font-family: "DejaVu Sans";
-	font-size: 1rem;
-	pointer-events: none;
-}
-.tooltip-config { left: 90dp; }
-.tooltip-start,
-.tooltip-stop   { left: 113dp; }
-#btn_config:hover ~ .tooltip-config,
-#btn_start:hover ~ .tooltip-start,
-#btn_stop:hover ~ .tooltip-stop {
-	display: block;
-	z-index: 1;
-}

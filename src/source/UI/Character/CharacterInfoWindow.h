@@ -11,7 +11,7 @@
 namespace Rml { class ElementDocument; }
 
 // Fully RmlUi-based (#panel, character_info.rml/.rcss) -- no permanently-native content (no live
-// 3D icon, no CUITextInputBox), unlike the C3DRenderMng-tier inventory family it shares frame
+// 3D icon, no CUITextInputBox), unlike the inventory family it shares frame
 // assets with.
 namespace mu::ui::window
 {

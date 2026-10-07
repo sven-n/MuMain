@@ -215,6 +215,15 @@ around it. See [`STATUS.md`](STATUS.md) for migration status and
   object picking. A native item renderer that doesn't restore it leaves every ground click missing.
   `SaveCameraPerspective()`/`RestoreCameraPerspective()` cover it.
 
+- **An `<img>` source resolves against the document's own file, which may be a theme folder's.**
+  A forked document loads from `themes/<theme>/`, so `../` counts differ by theme. A leading `/`
+  reads from the working directory (`SystemInterface::JoinPath`): the cash shop's banner is
+  `/Data/InGameShopBanner/...`.
+
+- **`mouseover`/`mouseout` reach every element entering or leaving the hover chain, and bubble.**
+  A listener on a parent also hears its children's; the parent's own `mouseout` is the one whose
+  target is the parent (`UI::RmlBridge::ElementTooltip::Leave()`).
+
 ## CSS features this build lacks, and what to use instead
 
 For translating a browser mockup or ordinary CSS into a theme. The vendored RmlUi is upstream 6.3
