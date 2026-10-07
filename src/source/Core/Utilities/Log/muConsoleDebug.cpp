@@ -243,7 +243,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     {
         int group = ITEM_GROUP_SWORD, index = 5, level = 9;
         if (strCommand.size() > 13)
-            swscanf_s(strCommand.c_str() + 13, L"%d %d %d", &group, &index, &level);
+            swscanf(strCommand.c_str() + 13, L"%d %d %d", &group, &index, &level);
         mu::ui::window::GenericDialogConfig cfg;
         ITEM item{};
         item.Type = static_cast<short>(group * MAX_ITEM_INDEX + index);
