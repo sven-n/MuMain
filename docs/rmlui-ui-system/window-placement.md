@@ -69,8 +69,9 @@ part, inside **regions** the theme defines with ordinary RCSS:
 - **Chat**: a `chat-stack` overlay region on the content area's bottom-left stacks `chat_log` on
   `chat_input` (the log overlaps by 1 dp, as the original drew them).
 - **Event HUDs**: an `event-hud` region, the original's 640x480 frame standing on the HUD (1 dp per
-  unit), so a theme writes the original coordinates; anchoring it right keeps them in the screen's
-  corner on wide screens. Eight use it (Blood Castle and Chaos Castle timers, battle soccer, duel,
+  unit), so a theme writes the original coordinates. Both themes centre it like the HUD
+  (`left: 50%; margin-left: -320dp`), so they keep their places beside the HUD at any UI scale and
+  width. Eight use it (Blood Castle and Chaos Castle timers, battle soccer, duel,
   Kanturu info, Empire Guardian timer, Doppelganger frame, duel spectator list — whose slot is its
   bottom-left corner, growing upward). Crywolf, castle siege and the Cursed Temple event screen
   place themselves.
@@ -231,7 +232,7 @@ Each was tried by editing only a theme's workspace/RCSS on runtime copies, click
   in a column in `main_frame_top.rcss` (`#buttons_top` 56x124 dp, each button's `top`). Docks pack
   against the bar; the uncovered world, durability icons and item buttons move left of it.
 - **Chat on the right** (modern). `.chat-stack { left: auto; right: 0; align-items: flex-end; }`.
-- **Event HUDs in the screen's corner** (modern, 1920x1080). `.event-hud { left: auto; right: 0; }`.
+- **Event HUDs in the screen's corner** (modern, 1920x1080). `.event-hud { left: auto; right: 0; margin-left: 0; }`.
 - **HUD at the top** (both). Move the `main_hud` slot into `#shell_header`; docks and chat follow
   the content area down to the screen's bottom edge.
 - **Character info filled** (both) at 22–35 % width and UI scale 80–100 %; pet info at 35 %; the

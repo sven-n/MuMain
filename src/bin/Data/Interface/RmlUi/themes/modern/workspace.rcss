@@ -71,11 +71,12 @@ body {
 .chat-stack .slot[data-window="chat_log"] { margin-bottom: -1dp; }
 
 /* The event HUDs: the original's 640x480 frame standing on the HUD (1dp is one of its units, its
-   top 429 units above the HUD), each at the original's place in it. Anchor it right instead
-   to keep them in the screen's corner on wide screens. The spectator list's slot is its
-   bottom-left corner; the list grows upwards. */
+   top 429 units above the HUD), each at the original's place in it. Centred like the HUD, so they
+   keep their places beside it at any UI scale. The spectator list's slot is its bottom-left
+   corner; the list grows upwards. */
 .event-hud {
-	left: 0;
+	left: 50%;
+	margin-left: -320dp;
 	bottom: 0;
 	width: 640dp;
 	height: 429dp;
