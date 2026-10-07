@@ -126,8 +126,6 @@ private:
     void WrapDescriptionOfSelected();
     // How many wrapped description lines fit; a long description yields space to the parameters.
     int GetVisibleDescriptionLineCount() const;
-    int GetParameterTop() const;
-    int GetActionTop() const;
     bool HasLeftButton() const
     {
         return m_page != PAGE_COMMANDS;

@@ -10,14 +10,13 @@
 	     then one page -- the commands, the selected command's description and parameters (each
 	     value in a dark box; a typed value in the value field), or the saved templates -- and the
 	     left / right buttons and the exit button. root_x/root_y/root_scale come from the dock
-	     transform, and #panel's height is the dock's. Every row below is placed by the theme; what
-	     stays bound is where the parameter and action groups start, which follows how many
-	     description lines and parameters there are. A row is its own hit target. C++ keeps the
-	     pages, the values, the wheel, the keys and the commands; a click is queued with
+	     transform. The rows of a page stack in flow, so the parameters and the actions follow
+	     however many description lines and parameters there are. A row is its own hit target. C++
+	     keeps the pages, the values, the wheel, the keys and the commands; a click is queued with
 	     chat_command_hit(action, index), chat_command_left, chat_command_right or
 	     chat_command_exit. -->
 	<div id="panel" data-model="chat_command" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-height="window_height + 'px'" data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
@@ -39,24 +38,24 @@
 		</div>
 
 		<div class="cc-page" data-if="page == 1">
-			<div class="cc-rows cc-description">
-				<span class="sharp-text cc-row-line" data-for="l : description_lines" data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
+			<div class="cc-line-box" data-for="l : description_lines">
+				<span class="sharp-text cc-row-line" data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
 			</div>
 
-			<div class="cc-parameters" data-style-top="parameter_top + 'px'">
+			<!-- Every parameter has a value field; only the edited one's shows, and the window
+			     finds it by the parameter's position. -->
+			<div class="cc-parameters">
 				<div class="cc-parameter" data-for="p, i : parameters">
 					<span class="sharp-text cc-param-label" data-class-missing="p.missing" data-style-font-size="p.label_text_px + 'px'">{{p.label}}</span>
 					<div class="cc-value-box" data-if="!p.edited" data-event-click="chat_command_hit(2, i)"></div>
 					<span class="sharp-text cc-param-value" data-if="!p.edited" data-class-placeholder="p.placeholder" data-style-font-size="p.value_text_px + 'px'">{{p.value}}</span>
 					<div class="cc-value-box" data-if="p.edited"></div>
+					<input data-if="p.edited" data-value="edit_value" type="text" class="text-field sharp-text cc-value-field"
+					       data-style-font-size="text_px + 'px'"/>
 				</div>
 			</div>
 
-			<input id="value_field" data-value="edit_value" type="text" class="text-field sharp-text cc-value-field"
-			       data-class-editing="editing" data-style-top="edit_top + 'px'"
-			       data-style-font-size="text_px + 'px'"/>
-
-			<div class="cc-actions" data-style-top="action_top + 'px'">
+			<div class="cc-actions">
 				<div class="cc-row cc-action" data-event-click="chat_command_hit(3, 0)">
 					<span class="sharp-text cc-cell"
 					      data-style-font-size="favourite_action.text_px + 'px'">{{favourite_action.text}}</span>

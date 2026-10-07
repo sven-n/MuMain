@@ -18,7 +18,6 @@ buff_strip.rml: per-frame data -- #strip_slot is the box the original gave the s
 castle_window.rml: a map item's bars are lengths, RenderCastleItem()'s own gauge widths. The tab positions are in each theme's RCSS
 chaos_castle_time.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
 char_info_balloon.rml: per-frame data -- world-projected balloon positions, per frame
-chat_command.rml: per-frame data -- the window grows with how many commands are listed, and the rows below the list follow that height
 chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
 command_window.rml: per-frame data -- target marker follows the selected command
 crywolf.rml: per-frame data -- the success/failure banner and the rank label slide in and out, Balgass's health and the statue's shield are gauge lengths (the shield shortens from its left, so its left moves with it), and the clock's digit runs are centred on their own x so a digit's left depends on how many digits the value has

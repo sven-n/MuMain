@@ -402,7 +402,7 @@ void mu::ui::window::CChatCommandWindow::BeginEditingParameter(size_t parameterI
     SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::editValue, "edit_value",
               Rml::String(StringUtils::WideToNarrow(m_parameterValues[parameterIndex].c_str())));
 
-    // The field takes the focus once the document shows it at its new place (SyncRmlModel());
+    // The parameter's own field takes the focus on the next SyncRmlModel();
     // Update() then claims RmlUi's text-input identity so Escape and Enter still reach this window.
     m_valueFieldFocusPending = true;
 }
@@ -420,13 +420,13 @@ void mu::ui::window::CChatCommandWindow::CommitEditedValue()
 void mu::ui::window::CChatCommandWindow::StopEditing()
 {
     CommitEditedValue();
-    m_editedParameter = -1;
-    m_valueFieldFocusPending = false;
     if (Rml::Element* field = GetValueField())
     {
         field->SetAttribute("value", Rml::String());
         field->Blur();
     }
+    m_editedParameter = -1;
+    m_valueFieldFocusPending = false;
 
 }
 
@@ -467,18 +467,6 @@ int mu::ui::window::CChatCommandWindow::GetVisibleDescriptionLineCount() const
     const auto available = CONTENT_BOTTOM - CONTENT_TOP - reserved;
     const auto fitting = std::max(0, available / ROW_HEIGHT);
     return std::min(fitting, static_cast<int>(m_descriptionLines.size()));
-}
-
-int mu::ui::window::CChatCommandWindow::GetParameterTop() const
-{
-    return m_Pos.y + CONTENT_TOP + (GetVisibleDescriptionLineCount() + 1) * ROW_HEIGHT;
-}
-
-int mu::ui::window::CChatCommandWindow::GetActionTop() const
-{
-    const auto* command = GetSelectedCommand();
-    const auto parameterCount = (command == nullptr) ? 0 : static_cast<int>(command->Parameters.size());
-    return GetParameterTop() + parameterCount * PARAMETER_HEIGHT + ROW_HEIGHT;
 }
 
 bool mu::ui::window::CChatCommandWindow::UpdateMouseEvent()
@@ -676,13 +664,22 @@ bool mu::ui::window::CChatCommandWindow::Render()
 
 Rml::Element* mu::ui::window::CChatCommandWindow::GetValueField() const
 {
-    return m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("value_field") : nullptr;
+    Rml::ElementDocument* document = m_RmlView.Document();
+    if (document == nullptr || m_editedParameter < 0)
+        return nullptr;
+
+    // Every parameter row has a field (see chat_command.rml); the edited row's is the one shown.
+    Rml::ElementList rows;
+    document->QuerySelectorAll(rows, ".cc-parameter");
+    if (static_cast<size_t>(m_editedParameter) >= rows.size())
+        return nullptr;
+    return rows[m_editedParameter]->QuerySelector("input");
 }
 
 std::wstring mu::ui::window::CChatCommandWindow::ReadValueField() const
 {
-    // No element lookup: the value lives in the model, and the element only exists while the field
-    // is shown at its parameter. Its one caller already guards on m_editedParameter.
+    // No element lookup: the value lives in the model. Its one caller already guards on
+    // m_editedParameter.
     return StringUtils::NarrowToWide(m_RmlView.GetModel().editValue);
 }
 
@@ -692,7 +689,6 @@ void mu::ui::window::CChatCommandWindow::BindRmlModel(Rml::DataModelConstructor&
     c.Bind("root_y", &model.rootY);
     c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
-    c.Bind("window_height", &model.windowHeight);
 
     auto lineType = c.RegisterStruct<ChatCommandLine>();
     lineType.RegisterMember("text", &ChatCommandLine::text);
@@ -720,11 +716,7 @@ void mu::ui::window::CChatCommandWindow::BindRmlModel(Rml::DataModelConstructor&
     parameter.RegisterMember("edited", &ChatCommandParameterRow::edited);
     c.RegisterArray<std::vector<ChatCommandParameterRow>>();
     c.Bind("parameters", &model.parameters);
-    c.Bind("parameter_top", &model.parameterTop);
-    c.Bind("action_top", &model.actionTop);
     c.Bind("page", &model.page);
-    c.Bind("editing", &model.editing);
-    c.Bind("edit_top", &model.editTop);
     c.Bind("edit_value", &model.editValue);
     c.Bind("has_left_button", &model.hasLeftButton);
     c.Bind("has_right_button", &model.hasRightButton);
@@ -796,9 +788,8 @@ void mu::ui::window::CChatCommandWindow::SyncValueField()
                   UI::RmlBridge::KeepDigitsOnly(m_RmlView.GetModel().editValue));
     }
 
-    // The field exists only while it is shown at its parameter (see chat_command.rml); focus it
-    // once it does.
-    if (m_valueFieldFocusPending && m_RmlView.Document()->IsVisible() && m_RmlView.GetModel().editing)
+    // Focus the edited parameter's field once its row exists.
+    if (m_valueFieldFocusPending && m_RmlView.Document()->IsVisible())
     {
         field->Focus();
         if (field->IsPseudoClassSet("focus"))
@@ -838,10 +829,6 @@ void mu::ui::window::CChatCommandWindow::SyncContent()
     std::vector<ChatCommandLine> templateRows;
     std::vector<ChatCommandParameterRow> parameters;
     ChatCommandLine favouriteAction, saveAction;
-    float parameterTop = 0.f;
-    float actionTop = 0.f;
-    bool editing = false;
-    float editTop = 0.f;
 
     if (m_page == PAGE_COMMANDS)
     {
@@ -875,8 +862,6 @@ void mu::ui::window::CChatCommandWindow::SyncContent()
             for (int index = 0; index < descriptionCount; ++index)
                 descriptionLines.push_back(line(m_descriptionLines[index].c_str(), CONTENT_WIDTH));
 
-            parameterTop = static_cast<float>(GetParameterTop() - m_Pos.y);
-            actionTop = static_cast<float>(GetActionTop() - m_Pos.y);
             for (size_t i = 0; i < command->Parameters.size(); ++i)
             {
                 const auto& parameter = command->Parameters[i];
@@ -892,12 +877,7 @@ void mu::ui::window::CChatCommandWindow::SyncContent()
                 entry.labelTextPx = labelLine.textPx;
                 entry.missing = parameter.IsRequired && value.empty();
                 entry.edited = m_editedParameter == static_cast<int>(i);
-                if (entry.edited)
-                {
-                    editing = true;
-                    editTop = parameterTop + static_cast<float>(i) * PARAMETER_HEIGHT + ROW_HEIGHT + 1;
-                }
-                else
+                if (!entry.edited)
                 {
                     entry.placeholder = value.empty();
                     const ChatCommandLine valueLine =
@@ -930,16 +910,11 @@ void mu::ui::window::CChatCommandWindow::SyncContent()
     }
 
     ChatCommandRmlModel& model = m_RmlView.GetModel();
-    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::windowHeight, "window_height", static_cast<float>(WindowHeight));
     SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::page, "page", static_cast<int>(m_page));
     SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::title, "title", std::move(title));
     SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::emptyMessage, "empty_message", std::move(emptyMessage));
     SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::favouriteAction, "favourite_action", std::move(favouriteAction));
     SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::saveAction, "save_action", std::move(saveAction));
-    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::parameterTop, "parameter_top", parameterTop);
-    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::actionTop, "action_top", actionTop);
-    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::editing, "editing", editing);
-    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::editTop, "edit_top", editTop);
     if (model.commandRows != commandRows)
     {
         model.commandRows = std::move(commandRows);
