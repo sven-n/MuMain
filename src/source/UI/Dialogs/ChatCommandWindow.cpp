@@ -512,13 +512,16 @@ bool mu::ui::window::CChatCommandWindow::UpdateMouseEvent()
 
 void mu::ui::window::CChatCommandWindow::HandleHit(ChatCommandAction action, int index)
 {
+    // The document only holds the visible rows of the command and template lists.
+    const int listIndex = m_scrollOffset + index;
+
     switch (action)
     {
     case ChatCommandAction::PickCommand:
-        if (GetCommandAt(index) != nullptr)
+        if (GetCommandAt(listIndex) != nullptr)
         {
             PlayBuffer(SOUND_CLICK01);
-            PickCommand(index);
+            PickCommand(listIndex);
         }
         break;
 
@@ -549,14 +552,15 @@ void mu::ui::window::CChatCommandWindow::HandleHit(ChatCommandAction action, int
         break;
 
     case ChatCommandAction::ExecuteTemplate:
-        ExecuteTemplate(static_cast<size_t>(index));
+        ExecuteTemplate(static_cast<size_t>(listIndex));
         break;
 
     case ChatCommandAction::RemoveTemplate:
-        if (index >= 0 && static_cast<size_t>(index) < m_templates.size())
+        if (listIndex >= 0 && static_cast<size_t>(listIndex) < m_templates.size())
         {
-            GameLogic::Commands::Templates::RemoveAt(static_cast<size_t>(index));
+            GameLogic::Commands::Templates::RemoveAt(static_cast<size_t>(listIndex));
             m_templates = GameLogic::Commands::Templates::GetAll();
+            m_scrollOffset = std::max(0, std::min(m_scrollOffset, GetScrollableRowCount() - VISIBLE_ROWS));
             PlayBuffer(SOUND_CLICK01);
         }
         break;
