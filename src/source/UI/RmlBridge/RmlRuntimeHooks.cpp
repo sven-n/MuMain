@@ -9,6 +9,7 @@
 #include "UI/RmlBridge/RmlNativeTextFit.h"
 #include "UI/RmlBridge/RmlRenderTarget.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/RmlBridge/ThemeFileInterface.h"
 #include "UI/Scaling/UITransform.h"
 
@@ -32,6 +33,7 @@ void InstallRuntimeHooks()
     hooks.beforeUpdate = []
     {
         SuspendMainSceneDocumentsOutsideMainScene();
+        Tooltip::ExpireUnrefreshed();
         if (Rml::Context* context = RmlUiRuntime::Instance().GetContext())
             DocumentHints::Update(*context);
     };

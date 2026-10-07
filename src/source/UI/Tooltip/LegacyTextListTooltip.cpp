@@ -79,6 +79,8 @@ void ShowLegacyTextList(int lineCount, float anchorX, float anchorY, Placement p
     config.anchor = placement == Placement::Above ? UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft
                                                    : UI::RmlBridge::Tooltip::AnchorPoint::BelowLeft;
     config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center;
+    // Every item information tooltip is drawn from its window's Render() while the item is hovered.
+    config.refreshEachFrame = owner == ItemInfoOwner();
     UI::RmlBridge::Tooltip::Show(config, owner);
 }
 

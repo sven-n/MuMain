@@ -138,6 +138,11 @@ namespace UI::RmlBridge::Tooltip
         // UI::Scaling::GetActiveTransform() (the skill-hotkey tooltip's dp-ratio reference frame).
         // Show() takes the native text size and row metrics from it.
         std::optional<UI::Scaling::Transform> transform;
+
+        // For a tooltip shown from a per-frame render while its element is hovered: it hides on the
+        // first frame nothing shows it again, so it goes when the window that drew it closes, or
+        // stops drawing it, without a Hide() of its own on that path.
+        bool refreshEachFrame = false;
     };
 
     // Show()'s edge-clamping always wins over `anchor`/`centerHorizontally`'s preferred direction:
@@ -170,4 +175,8 @@ namespace UI::RmlBridge::Tooltip
     // Hides the shared tooltip document -- but only if `owner` matches the current owner (or
     // either is nullptr). No-op if it was never built, already hidden, or owned by someone else.
     void Hide(Owner owner = nullptr);
+
+    // Once a frame, after the native UI has rendered: hides a `refreshEachFrame` tooltip that was not
+    // shown again since the last call.
+    void ExpireUnrefreshed();
 }

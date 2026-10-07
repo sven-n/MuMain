@@ -116,6 +116,9 @@ namespace UI::RmlBridge::Tooltip
         }
 
         Owner s_CurrentOwner = nullptr;
+        // The showing tooltip's refreshEachFrame, and whether Show() ran since ExpireUnrefreshed().
+        bool s_RefreshEachFrame = false;
+        bool s_Refreshed = false;
 
         // #tooltip_panel as last measured: its border box and the frame edges the anchor sits inside.
         struct Measurement
@@ -319,6 +322,8 @@ namespace UI::RmlBridge::Tooltip
             return;
 
         s_CurrentOwner = owner;
+        s_RefreshEachFrame = config.refreshEachFrame;
+        s_Refreshed = true;
 
         TooltipRmlModel next;
         next.lines.reserve(config.lines.size());
@@ -366,5 +371,13 @@ namespace UI::RmlBridge::Tooltip
             return;
         s_View.Document()->Hide();
         s_CurrentOwner = nullptr;
+    }
+
+    void ExpireUnrefreshed()
+    {
+        Rml::ElementDocument* document = s_View.Document();
+        if (document && document->IsVisible() && s_RefreshEachFrame && !s_Refreshed)
+            Hide(s_CurrentOwner);
+        s_Refreshed = false;
     }
 }
