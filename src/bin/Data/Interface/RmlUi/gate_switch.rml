@@ -13,24 +13,16 @@
 	     panel. C++ keeps the gate state and the request; a click is queued with
 	     gate_switch_toggle / gate_switch_exit. -->
 	<div id="panel" data-model="gate_switch" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span class="sharp-text" id="title" data-style-font-size="title_px + 'px'"
-		      data-style-width="(160 * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title}}</span>
-		<div class="sharp-text gs-line" id="gs_line_1" data-style-font-size="bold_text_px + 'px'"
-		     data-style-width="(300 * root_scale) + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line1}}</div>
-		<div class="sharp-text gs-line" id="gs_line_2" data-style-font-size="bold_text_px + 'px'"
-		     data-style-width="(300 * root_scale) + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line2}}</div>
-		<div class="sharp-text gs-line" id="gs_line_3" data-style-font-size="bold_text_px + 'px'"
-		     data-style-width="(300 * root_scale) + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'"><span class="gs-warning">{{warning}}</span></div>
+		<span class="sharp-text" id="title" data-style-font-size="title_px + 'px'">{{title}}</span>
+		<div class="sharp-text gs-line" id="gs_line_1" data-style-font-size="bold_text_px + 'px'">{{line1}}</div>
+		<div class="sharp-text gs-line" id="gs_line_2" data-style-font-size="bold_text_px + 'px'">{{line2}}</div>
+		<div class="sharp-text gs-line" id="gs_line_3" data-style-font-size="bold_text_px + 'px'"><span class="gs-warning">{{warning}}</span></div>
 
 		<!-- The table's frame: one shape, each theme placing its own edges. -->
 		<div class="t-corner t-tl"></div>
@@ -45,9 +37,7 @@
 
 		<div id="btn_toggle" data-event-click="gate_switch_toggle">
 			<span class="sharp-text sharp-middle gs-label" data-style-font-size="text_px + 'px'"
-			      data-style-width="(108 * root_scale) + 'px'"
-			      data-style-line-height="label_line_px + 'px'"
-			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{button_text}}</span>
+			      data-style-line-height="label_line_px + 'px'">{{button_text}}</span>
 		</div>
 
 		<div id="btn_exit" data-event-click="gate_switch_exit" data-attr-data-hint="exit_tooltip"></div>

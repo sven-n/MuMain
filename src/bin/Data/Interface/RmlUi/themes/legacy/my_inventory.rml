@@ -9,7 +9,7 @@
 	<!-- CMyInventory (MyInventory.h): the frame, the equipment slots, the item grid, the items
 	     C++ draws live into #item_view, the stack counts, the title, gold and buttons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<!-- CMyInventory::RenderFrame()'s five pieces. -->
 		<div class="bg-fill"></div>
 		<div class="bg-top"></div>
@@ -46,24 +46,22 @@
 		<!-- The equipped and the grid's items, live 3D drawn by C++ over the slots and the cells. -->
 		<img id="item_view" class="item-view"/>
 		<div id="item_grid_counts" class="item-grid-counts">
-			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text" data-if="c.count != ''"
-			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
 		<div id="option_tooltip_anchor" class="native-anchor"></div>
 		<!-- Text leaves marked native-text render at the native text renderer's size: text_px is the
-		     physical size, and 1 / root_scale cancels #panel's scale so glyphs rasterise at it. #title
+		     physical size, and .counter-scaled cancels #panel's scale so glyphs rasterise at it. #title
 		     stays full size as the drag handle. -->
-		<div id="title"><span class="native-text title-text" data-style-font-size="text_px + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title}}</span></div>
+		<div id="title"><span class="native-text title-text counter-scaled" data-style-font-size="text_px + 'px'">{{title}}</span></div>
 
 		<div id="gold_bg"></div>
-		<span id="gold_text" class="native-text gold-amount"
+		<span id="gold_text" class="native-text gold-amount counter-scaled"
 		      data-class-gold-base="gold_tier == 'base'"
 		      data-class-gold-hundred-thousand="gold_tier == 'hundred-thousand'"
 		      data-class-gold-million="gold_tier == 'million'"
 		      data-class-gold-ten-million="gold_tier == 'ten-million'"
-		      data-style-font-size="text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{gold_text}}</span>
+		      data-style-font-size="text_px + 'px'">{{gold_text}}</span>
 
 		<div id="btn_exit" class="inv-btn inv-btn-exit" data-event-click="my_inventory_exit_click" data-attr-data-hint="exit_tooltip"></div>
 
@@ -79,8 +77,7 @@
 		<!-- Set/Socket option header: one centred line with both labels at the same size (the native
 		     client shrank each label into its own narrow box, so a long label came out smaller -- not
 		     reproduced). Hover areas stay the former native half-width split, as empty boxes. -->
-		<div class="option-labels native-text" data-style-font-size="text_px + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+		<div class="option-labels native-text counter-scaled" data-style-font-size="text_px + 'px'">
 			<span class="option-label" data-class-active="set_option_active">{{set_option_label}}</span>
 			<span class="option-label" data-class-active="socket_option_active">{{socket_option_label}}</span>
 		</div>

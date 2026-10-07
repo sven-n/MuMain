@@ -40,7 +40,6 @@ struct CursedTempleSystemRmlModel
     // The Hud layout's W/640 x H/480 stretch (UI::Scaling::GetActiveTransform() while CManager
     // runs the window) and its inverse for the counter-scaled text leaves.
     float scaleX = 1.f, scaleY = 1.f;
-    float inverseScaleX = 1.f, inverseScaleY = 1.f;
 
     // The time, the minimap and the skill panel are hidden together when every panel the original
     // checked is open; the score effect shows for a while after a team scores.

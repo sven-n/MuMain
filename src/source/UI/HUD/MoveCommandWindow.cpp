@@ -484,7 +484,6 @@ void mu::ui::window::CMoveCommandWindow::BindRmlModel(Rml::DataModelConstructor&
     c.Bind("text_px", &model.textPx);
 
     c.Bind("panel_height", &model.panelHeight);
-    c.Bind("panel_width", &model.panelWidth);
     c.Bind("list_height", &model.listHeight);
     c.Bind("list_tail", &model.listTail);
     c.Bind("list_width", &model.listWidth);
@@ -587,7 +586,6 @@ void mu::ui::window::CMoveCommandWindow::SyncRmlModel()
     syncFloat(&MoveCommandRmlModel::rowWidth, "row_width", rowWidth);
     syncFloat(&MoveCommandRmlModel::rowHeight, "row_height", rowHeight);
     syncFloat(&MoveCommandRmlModel::closeTop, "close_top", closeTop);
-    syncFloat(&MoveCommandRmlModel::panelWidth, "panel_width", static_cast<float>(m_layout.windowWidth));
 
     SettingCanMoveMap();
     RebuildRowModel();

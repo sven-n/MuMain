@@ -15,23 +15,20 @@
 	     it, the corner close hit test and Escape; a button click is queued with command_press. The
 	     target box follows the pointer while a command is armed over a player. -->
 	<div id="panel" data-model="command_window" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
 		<span class="sharp-text" id="title" data-style-font-size="title_text_px + 'px'"
-		      data-style-line-height="title_line_px + 'px'" data-style-width="(72 * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title_text}}</span>
+		      data-style-line-height="title_line_px + 'px'">{{title_text}}</span>
 
 		<div id="buttons">
 			<div class="cmd-btn" data-for="b : buttons" data-class-selected="b.selected"
 			     data-event-click="command_press(b.index)">
 				<span class="sharp-text sharp-middle cmd-label"
-				      data-style-font-size="b.label_text_px + 'px'" data-style-line-height="b.label_line_px + 'px'"
-				      data-style-width="(108 * root_scale) + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'"><span class="native-fit">{{b.label}}</span></span>
+				      data-style-font-size="b.label_text_px + 'px'" data-style-line-height="b.label_line_px + 'px'"><span class="native-fit">{{b.label}}</span></span>
 			</div>
 		</div>
 
@@ -39,9 +36,7 @@
 
 		<div id="target" data-if="target_visible" data-class-out-of-range="!target_in_range"
 		     data-style-left="target_left + 'px'" data-style-top="target_top + 'px'">
-			<span class="sharp-text" id="target_name" data-style-font-size="big_text_px + 'px'"
-			      data-style-width="(128 * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{target_name}}</span>
+			<span class="sharp-text" id="target_name" data-style-font-size="big_text_px + 'px'">{{target_name}}</span>
 		</div>
 	</div>
 </body>

@@ -215,8 +215,6 @@ void mu::ui::window::CCryWolf::BindRmlModel(Rml::DataModelConstructor& c, CryWol
 
     c.Bind("scale_x", &model.scaleX);
     c.Bind("scale_y", &model.scaleY);
-    c.Bind("inverse_scale_x", &model.inverseScaleX);
-    c.Bind("inverse_scale_y", &model.inverseScaleY);
     c.Bind("normal_text_px", &model.normalTextPx);
     c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("bold_line_px", &model.boldLinePx);
@@ -497,8 +495,6 @@ void mu::ui::window::CCryWolf::SyncView()
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     updated.scaleX = transform.scaleX;
     updated.scaleY = transform.scaleY;
-    updated.inverseScaleX = 1.0f / transform.scaleX;
-    updated.inverseScaleY = 1.0f / transform.scaleY;
     updated.normalTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
     updated.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
     updated.boldLinePx =
@@ -507,8 +503,6 @@ void mu::ui::window::CCryWolf::SyncView()
     CryWolfRmlModel& model = m_RmlView.GetModel();
     SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::scaleX, "scale_x", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::scaleY, "scale_y", updated);
-    SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::inverseScaleX, "inverse_scale_x", updated);
-    SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::inverseScaleY, "inverse_scale_y", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::normalTextPx, "normal_text_px", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::boldTextPx, "bold_text_px", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::boldLinePx, "bold_line_px", updated);

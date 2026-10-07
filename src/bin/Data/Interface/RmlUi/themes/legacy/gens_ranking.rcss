@@ -150,3 +150,19 @@
 .gr-line, .gr-promo-line, .gr-desc-text { color: #ffffff; }
 #gr_gens_label { color: rgb(246, 209, 73); }
 #gr_rank_label, #gr_contrib_label, #gr_desc_label { color: rgb(230, 230, 0); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#gr_title { width: calc(190px * var(--root-scale)); }
+#gr_gens_label { width: calc(190px * var(--root-scale)); }
+#gr_gens_name { width: calc(190px * var(--root-scale)); }
+#gr_level_label { width: calc(190px * var(--root-scale)); }
+#gr_title_name { width: calc(174px * var(--root-scale)); }
+#gr_rank_label { width: calc(74px * var(--root-scale)); }
+#gr_rank_value { width: calc(170px * var(--root-scale)); }
+#gr_contrib_label { width: calc(74px * var(--root-scale)); }
+#gr_contrib_value { width: calc(170px * var(--root-scale)); }
+#gr_desc_label { width: calc(58px * var(--root-scale)); }
+.gr-promo-line { width: calc(180px * var(--root-scale)); }
+.gr-desc.scroll-pane { width: calc(165px * var(--root-scale)); height: calc(96px * var(--root-scale-y)); }
+.gr-desc-line { width: calc(150px * var(--root-scale)); }
+.gr-desc-text { width: calc(150px * var(--root-scale)); }

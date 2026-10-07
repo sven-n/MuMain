@@ -128,3 +128,7 @@
 
 /* A theme's data-fit="fill" slot sizes #panel (class fill-placement), its border included. */
 #panel.fill-placement { box-sizing: border-box; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
+#close_label { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }

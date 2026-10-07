@@ -77,3 +77,8 @@
 	pointer-events: none;
 }
 #target.out-of-range #target_name { color: #ff0000; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(72px * var(--root-scale)); }
+.cmd-label { width: calc(108px * var(--root-scale)); }
+#target_name { width: calc(128px * var(--root-scale)); }

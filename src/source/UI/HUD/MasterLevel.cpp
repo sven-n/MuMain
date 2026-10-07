@@ -508,8 +508,6 @@ void mu::ui::window::CMasterLevel::BindRmlModel(Rml::DataModelConstructor& c, Ma
 {
     c.Bind("scale_x", &model.scaleX);
     c.Bind("scale_y", &model.scaleY);
-    c.Bind("inverse_scale_x", &model.inverseScaleX);
-    c.Bind("inverse_scale_y", &model.inverseScaleY);
     c.Bind("text_px", &model.textPx);
 
     c.Bind("class_name_text", &model.classNameText);
@@ -621,8 +619,6 @@ void mu::ui::window::CMasterLevel::SyncTransform()
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::scaleX, "scale_x", transform.scaleX);
     SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 }
 

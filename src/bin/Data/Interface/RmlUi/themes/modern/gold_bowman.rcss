@@ -29,3 +29,6 @@
 	border: 1px token(border-frame);
 	border-radius: token(radius-sm)px;
 }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#serial_field { width: calc(200px * var(--root-scale)); height: calc(14px * var(--root-scale)); line-height: calc(14px * var(--root-scale)); }

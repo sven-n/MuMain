@@ -68,3 +68,7 @@
 .frame-middles .frame-middle:nth-child(8) { top: 172px; }
 .frame-middles .frame-middle:nth-child(9) { top: 187px; }
 .frame-middles .frame-middle:nth-child(10) { top: 202px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.kanturu-line { width: calc(230px * var(--root-scale)); }
+.kanturu-label { width: calc(53px * var(--root-scale)); }

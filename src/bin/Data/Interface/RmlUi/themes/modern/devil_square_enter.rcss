@@ -15,3 +15,8 @@
 .entry-btn:nth-child(5) { top: 287px; }
 .entry-btn:nth-child(6) { top: 320px; }
 .entry-btn:nth-child(7) { top: 353px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(72px * var(--root-scale)); }
+.entry-line { width: calc(100% * var(--root-scale)); }
+.entry-label { width: calc(180px * var(--root-scale)); }

@@ -10,7 +10,7 @@
 	     fixed font. Real pixels, like the original (Legacy layout: root_scale stays 1). C++ keeps
 	     the lines; nothing here is interactive. -->
 	<div id="panel" data-model="server_msg" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div id="centre" data-style-height="(side_height + 6) + 'px'"></div>
 		<div id="top"></div>
 		<div id="bottom" data-style-top="(side_height + 6) + 'px'"></div>
@@ -19,8 +19,7 @@
 		<!-- The message lines, counted inside their own container so the theme can place them. -->
 		<div class="server-lines">
 			<span class="sharp-text server-line" data-for="line : lines"
-			      data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line}}</span>
+			      data-style-font-size="text_px + 'px'">{{line}}</span>
 		</div>
 	</div>
 </body>

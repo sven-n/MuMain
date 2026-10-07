@@ -65,3 +65,7 @@ body { pointer-events: none; }
 /* Each fighter's name on its own side, centred on 55 units as RenderText() centred it. */
 #name_hero { left: 240px; }
 #name_enemy { left: 345px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#name_hero { width: calc(55px * var(--root-scale)); }
+#name_enemy { width: calc(55px * var(--root-scale)); }

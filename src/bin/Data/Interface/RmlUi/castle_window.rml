@@ -9,28 +9,25 @@
 	<!-- The Senatus (CCastleWindow), docked right: the title, the Castle Gate / Guardian Statue /
 	     Tax / Store tabs and the tab's page. RmlUi handles tab and map-icon clicks.
 	     root_x/root_y/root_scale come from the dock transform; every position and size below is
-	     the theme's, except the bars' lengths. A .sharp-text layer's own
-	     width and font size stay bound: it is laid out in physical pixels and counter-scaled out of
-	     the panel (base.rcss). A button click is queued with senatus_button(n). -->
+	     the theme's, except the bars' lengths. A .sharp-text layer's font
+	     size stays bound: it is laid out in physical pixels and counter-scaled out of the panel
+	     (base.rcss). A button click is queued with senatus_button(n). -->
 	<div id="panel" data-model="castle_window" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span id="heading" class="sharp-text cw-heading" data-style-width="(160 * root_scale) + 'px'"
-		      data-style-font-size="title.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title.text}}</span>
+		<span id="heading" class="sharp-text cw-heading"
+		      data-style-font-size="title.text_px + 'px'">{{title.text}}</span>
 
 		<!-- Long tab labels can overflow their 40px tab as in the original client. -->
 		<div class="cw-tabs">
 			<div class="cw-tab" data-for="t, i : tabs" data-class-selected="t.selected"
 			     data-event-click="senatus_tab(i)">
 				<span class="sharp-text sharp-middle cw-tab-label"
-				      data-style-width="(40 * root_scale) + 'px'"
-				      data-style-font-size="t.text_px + 'px'" data-style-line-height="line_height_px + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
+				      data-style-font-size="t.text_px + 'px'" data-style-line-height="line_height_px + 'px'">{{t.label}}</span>
 			</div>
 		</div>
 
@@ -43,9 +40,8 @@
 				<div class="t-left"></div><div class="t-right"></div><div class="t-bottom-inner"></div>
 				<div class="t-bl"></div><div class="t-br"></div><div class="t-bottom"></div>
 			</div>
-			<span id="map_title" class="sharp-text cw-line" data-style-width="(190 * root_scale) + 'px'"
-			      data-style-font-size="map_title.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{map_title.text}}</span>
+			<span id="map_title" class="sharp-text cw-line"
+			      data-style-font-size="map_title.text_px + 'px'">{{map_title.text}}</span>
 
 			<div class="cw-item" data-for="it, i : map_items" data-class-statue="it.statue"
 			     data-class-current="it.current" data-class-item-0="i == 0"
@@ -74,60 +70,48 @@
 			</div>
 
 			<div class="cw-standing" data-if="item_live">
-				<span id="stat_hp" class="sharp-text cw-stat" data-style-font-size="stat_hp.text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{stat_hp.text}}</span>
-				<span id="stat_defense" class="sharp-text cw-stat" data-style-font-size="stat_defense.text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{stat_defense.text}}</span>
+				<span id="stat_hp" class="sharp-text cw-stat" data-style-font-size="stat_hp.text_px + 'px'">{{stat_hp.text}}</span>
+				<span id="stat_defense" class="sharp-text cw-stat" data-style-font-size="stat_defense.text_px + 'px'">{{stat_defense.text}}</span>
 				<span id="stat_recover" class="sharp-text cw-stat" data-if="statue_page"
-				      data-style-font-size="stat_recover.text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{stat_recover.text}}</span>
+				      data-style-font-size="stat_recover.text_px + 'px'">{{stat_recover.text}}</span>
 
 				<div class="cw-table table-improve">
 					<div class="t-tl"></div><div class="t-tr"></div><div class="t-top"></div><div class="t-fill"></div>
 					<div class="t-left"></div><div class="t-right"></div><div class="t-bottom-inner"></div>
 					<div class="t-bl"></div><div class="t-br"></div><div class="t-bottom"></div>
 				</div>
-				<span id="improve_title" class="sharp-text cw-line" data-style-width="(190 * root_scale) + 'px'"
-				      data-style-font-size="improve_title.text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{improve_title.text}}</span>
-				<span id="next_hp" class="sharp-text cw-stat" data-style-font-size="next_hp.text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{next_hp.text}}</span>
-				<span id="next_defense" class="sharp-text cw-stat" data-style-font-size="next_defense.text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{next_defense.text}}</span>
+				<span id="improve_title" class="sharp-text cw-line"
+				      data-style-font-size="improve_title.text_px + 'px'">{{improve_title.text}}</span>
+				<span id="next_hp" class="sharp-text cw-stat" data-style-font-size="next_hp.text_px + 'px'">{{next_hp.text}}</span>
+				<span id="next_defense" class="sharp-text cw-stat" data-style-font-size="next_defense.text_px + 'px'">{{next_defense.text}}</span>
 				<span id="next_recover" class="sharp-text cw-stat" data-if="statue_page"
-				      data-style-font-size="next_recover.text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{next_recover.text}}</span>
+				      data-style-font-size="next_recover.text_px + 'px'">{{next_recover.text}}</span>
 			</div>
 
 			<div id="btn_buy" class="cw-btn" data-if="buy_button.shown" data-class-locked="buy_button.locked"
 			     data-event-click="senatus_button(0)">
 				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
-				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{buy_button.label}}</span>
+				      data-style-line-height="line_height_px + 'px'">{{buy_button.label}}</span>
 			</div>
 			<div id="btn_repair" class="cw-btn" data-if="repair_button.shown" data-class-locked="repair_button.locked"
 			     data-event-click="senatus_button(1)">
 				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
-				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{repair_button.label}}</span>
+				      data-style-line-height="line_height_px + 'px'">{{repair_button.label}}</span>
 			</div>
 			<div id="btn_hp" class="cw-btn" data-if="hp_button.shown" data-class-locked="hp_button.locked"
 			     data-event-click="senatus_button(2)">
 				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
-				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{hp_button.label}}</span>
+				      data-style-line-height="line_height_px + 'px'">{{hp_button.label}}</span>
 			</div>
 			<div id="btn_defense" class="cw-btn" data-if="defense_button.shown" data-class-locked="defense_button.locked"
 			     data-event-click="senatus_button(3)">
 				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
-				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{defense_button.label}}</span>
+				      data-style-line-height="line_height_px + 'px'">{{defense_button.label}}</span>
 			</div>
 			<div id="btn_recover" class="cw-btn" data-if="recover_button.shown" data-class-locked="recover_button.locked"
 			     data-event-click="senatus_button(4)">
 				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
-				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{recover_button.label}}</span>
+				      data-style-line-height="line_height_px + 'px'">{{recover_button.label}}</span>
 			</div>
 		</div>
 
@@ -142,62 +126,45 @@
 				<div class="t-bl"></div><div class="t-br"></div><div class="t-bottom"></div>
 			</div>
 			<div class="tax-divider"></div>
-			<span id="tax_title" class="sharp-text cw-line" data-style-width="(190 * root_scale) + 'px'"
-			      data-style-font-size="tax_title.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{tax_title.text}}</span>
-			<span id="chaos_rate" class="sharp-text cw-line" data-style-width="(175 * root_scale) + 'px'"
-			      data-style-font-size="chaos_rate.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{chaos_rate.text}}</span>
-			<span id="store_rate" class="sharp-text cw-line" data-style-width="(175 * root_scale) + 'px'"
-			      data-style-font-size="store_rate.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{store_rate.text}}</span>
+			<span id="tax_title" class="sharp-text cw-line"
+			      data-style-font-size="tax_title.text_px + 'px'">{{tax_title.text}}</span>
+			<span id="chaos_rate" class="sharp-text cw-line"
+			      data-style-font-size="chaos_rate.text_px + 'px'">{{chaos_rate.text}}</span>
+			<span id="store_rate" class="sharp-text cw-line"
+			      data-style-font-size="store_rate.text_px + 'px'">{{store_rate.text}}</span>
 
-			<span id="tax_note_1" class="sharp-text cw-note" data-style-width="(160 * root_scale) + 'px'"
-			      data-style-font-size="note1.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{note1.text}}</span>
-			<span id="tax_note_2" class="sharp-text cw-note" data-style-width="(160 * root_scale) + 'px'"
-			      data-style-font-size="note2.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{note2.text}}</span>
-			<span id="tax_note_3" class="sharp-text cw-note" data-style-width="(160 * root_scale) + 'px'"
-			      data-style-font-size="note3.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{note3.text}}</span>
+			<span id="tax_note_1" class="sharp-text cw-note"
+			      data-style-font-size="note1.text_px + 'px'">{{note1.text}}</span>
+			<span id="tax_note_2" class="sharp-text cw-note"
+			      data-style-font-size="note2.text_px + 'px'">{{note2.text}}</span>
+			<span id="tax_note_3" class="sharp-text cw-note"
+			      data-style-font-size="note3.text_px + 'px'">{{note3.text}}</span>
 
-			<span id="tax_rule_1" class="sharp-text cw-rule" data-style-width="(160 * root_scale) + 'px'"
-			      data-style-font-size="rule1.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{rule1.text}}</span>
-			<span id="tax_rule_2" class="sharp-text cw-rule" data-style-width="(160 * root_scale) + 'px'"
-			      data-style-font-size="rule2.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{rule2.text}}</span>
-			<span id="tax_rule_3" class="sharp-text cw-rule" data-style-width="(160 * root_scale) + 'px'"
-			      data-style-font-size="rule3.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{rule3.text}}</span>
-			<span id="tax_rule_4" class="sharp-text cw-rule" data-style-width="(160 * root_scale) + 'px'"
-			      data-style-font-size="rule4.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{rule4.text}}</span>
-			<span id="tax_rule_5" class="sharp-text cw-rule" data-style-width="(160 * root_scale) + 'px'"
-			      data-style-font-size="rule5.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{rule5.text}}</span>
-			<span id="tax_rule_6" class="sharp-text cw-rule" data-style-width="(160 * root_scale) + 'px'"
-			      data-style-font-size="rule6.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{rule6.text}}</span>
+			<span id="tax_rule_1" class="sharp-text cw-rule"
+			      data-style-font-size="rule1.text_px + 'px'">{{rule1.text}}</span>
+			<span id="tax_rule_2" class="sharp-text cw-rule"
+			      data-style-font-size="rule2.text_px + 'px'">{{rule2.text}}</span>
+			<span id="tax_rule_3" class="sharp-text cw-rule"
+			      data-style-font-size="rule3.text_px + 'px'">{{rule3.text}}</span>
+			<span id="tax_rule_4" class="sharp-text cw-rule"
+			      data-style-font-size="rule4.text_px + 'px'">{{rule4.text}}</span>
+			<span id="tax_rule_5" class="sharp-text cw-rule"
+			      data-style-font-size="rule5.text_px + 'px'">{{rule5.text}}</span>
+			<span id="tax_rule_6" class="sharp-text cw-rule"
+			      data-style-font-size="rule6.text_px + 'px'">{{rule6.text}}</span>
 
 			<div class="cw-separator"></div>
 			<div class="cw-money"></div>
-			<span id="zen_label" class="sharp-text cw-money-text" data-style-font-size="zen_label.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{zen_label.text}}</span>
+			<span id="zen_label" class="sharp-text cw-money-text" data-style-font-size="zen_label.text_px + 'px'">{{zen_label.text}}</span>
 			<span id="castle_money" class="sharp-text sharp-right cw-money-text"
-			      data-style-font-size="castle_money.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{castle_money.text}}</span>
+			      data-style-font-size="castle_money.text_px + 'px'">{{castle_money.text}}</span>
 
-			<span id="tax_footer_1" class="sharp-text cw-rule" data-style-width="(160 * root_scale) + 'px'"
-			      data-style-font-size="footer1.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{footer1.text}}</span>
-			<span id="tax_footer_2" class="sharp-text cw-rule" data-style-width="(160 * root_scale) + 'px'"
-			      data-style-font-size="footer2.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{footer2.text}}</span>
-			<span id="tax_footer_3" class="sharp-text cw-rule" data-style-width="(160 * root_scale) + 'px'"
-			      data-style-font-size="footer3.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{footer3.text}}</span>
+			<span id="tax_footer_1" class="sharp-text cw-rule"
+			      data-style-font-size="footer1.text_px + 'px'">{{footer1.text}}</span>
+			<span id="tax_footer_2" class="sharp-text cw-rule"
+			      data-style-font-size="footer2.text_px + 'px'">{{footer2.text}}</span>
+			<span id="tax_footer_3" class="sharp-text cw-rule"
+			      data-style-font-size="footer3.text_px + 'px'">{{footer3.text}}</span>
 
 			<div id="tax_chaos_up" class="tax-btn tax-up" data-event-click="senatus_button(7)"></div>
 			<div id="tax_chaos_down" class="tax-btn tax-down" data-event-click="senatus_button(8)"></div>
@@ -207,14 +174,12 @@
 			<div id="btn_apply" class="cw-btn" data-if="apply_button.shown" data-class-locked="apply_button.locked"
 			     data-event-click="senatus_button(5)">
 				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
-				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{apply_button.label}}</span>
+				      data-style-line-height="line_height_px + 'px'">{{apply_button.label}}</span>
 			</div>
 			<div id="btn_withdraw" class="cw-btn" data-if="withdraw_button.shown"
 			     data-class-locked="withdraw_button.locked" data-event-click="senatus_button(6)">
 				<span class="sharp-text sharp-middle cw-label" data-style-font-size="text_px + 'px'"
-				      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{withdraw_button.label}}</span>
+				      data-style-line-height="line_height_px + 'px'">{{withdraw_button.label}}</span>
 			</div>
 		</div>
 

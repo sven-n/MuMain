@@ -10,21 +10,19 @@
 	     request; this draws it, and its clicks come back through the igs_* events. The 3x3 package
 	     grid's items are live 3D, drawn by C++ into #igs_items. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="bg-back"></div>
 
 		<!-- The sales zones across the top, the categories of the selected zone down the left. -->
 		<div id="igs_zones">
 			<div class="igs-zone" data-for="z, i : zones" data-class-selected="z.selected" data-event-click="igs_zone(i)">
-				<span class="sharp-text sharp-middle sharp-centre igs-zone-label" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{z.name}}</span>
+				<span class="sharp-text sharp-middle sharp-centre igs-zone-label" data-style-font-size="text_px + 'px'">{{z.name}}</span>
 			</div>
 		</div>
 		<div id="igs_categories">
 			<div class="igs-category" data-for="c, i : categories" data-class-selected="c.selected" data-event-click="igs_category(i)">
 				<div class="igs-category-deco"></div>
-				<span class="sharp-text sharp-middle sharp-centre igs-category-label" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{c.name}}</span>
+				<span class="sharp-text sharp-middle sharp-centre igs-category-label" data-style-font-size="text_px + 'px'">{{c.name}}</span>
 			</div>
 			<div class="igs-categories-end" data-if="categories.size > 0"></div>
 		</div>
@@ -35,16 +33,13 @@
 				<div class="igs-package-card"></div>
 				<div class="igs-package-logo"></div>
 				<div class="igs-package-name" data-if="p.shown">
-					<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'"
-					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{p.name}}</span>
+					<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{p.name}}</span>
 				</div>
 				<div class="igs-package-price" data-if="p.shown">
-					<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'"
-					      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{p.price}}</span>
+					<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{p.price}}</span>
 				</div>
 				<div class="igs-btn igs-buy" data-if="p.shown" data-event-click="igs_buy(i)">
-					<span class="sharp-text sharp-middle sharp-centre igs-btn-label" data-style-font-size="text_px + 'px'"
-					      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{buy_label}}</span>
+					<span class="sharp-text sharp-middle sharp-centre igs-btn-label" data-style-font-size="text_px + 'px'">{{buy_label}}</span>
 				</div>
 			</div>
 		</div>
@@ -52,26 +47,20 @@
 
 		<div id="igs_page_prev" class="igs-page-btn" data-event-click="igs_page(-1)"></div>
 		<div id="igs_page" class="igs-page-numbers">
-			<span class="sharp-text sharp-right igs-page-current" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{page}}</span>
-			<span class="sharp-text igs-page-slash" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">/</span>
-			<span class="sharp-text igs-page-total" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{total_pages}}</span>
+			<span class="sharp-text sharp-right igs-page-current" data-style-font-size="text_px + 'px'">{{page}}</span>
+			<span class="sharp-text igs-page-slash" data-style-font-size="text_px + 'px'">/</span>
+			<span class="sharp-text igs-page-total" data-style-font-size="text_px + 'px'">{{total_pages}}</span>
 		</div>
 		<div id="igs_page_next" class="igs-page-btn" data-event-click="igs_page(1)"></div>
 
 		<!-- The player: name, balances, and the gift, charge and refresh buttons. -->
 		<div id="igs_character">
-			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{character_name}}</span>
+			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{character_name}}</span>
 		</div>
 		<div id="igs_wallet">
 			<div class="igs-wallet-row" data-for="w : wallet">
-				<span class="sharp-text igs-wallet-label" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{w.label}}</span>
-				<span class="sharp-text sharp-right igs-wallet-value" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{w.value}}</span>
+				<span class="sharp-text igs-wallet-label" data-style-font-size="text_px + 'px'">{{w.label}}</span>
+				<span class="sharp-text sharp-right igs-wallet-value" data-style-font-size="text_px + 'px'">{{w.value}}</span>
 			</div>
 		</div>
 		<div id="igs_gift" class="igs-icon-btn" data-event-click="igs_gift" data-attr-data-hint="gift_hint"></div>
@@ -86,28 +75,20 @@
 		<div id="igs_storage_tabs">
 			<div class="igs-storage-tab" data-for="t, i : storage_tabs" data-class-selected="t.selected" data-class-gift="i == 1"
 			     data-event-click="igs_storage_tab(i)">
-				<span class="sharp-text sharp-middle sharp-centre igs-storage-tab-label" data-style-font-size="text_px + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{t.name}}</span>
+				<span class="sharp-text sharp-middle sharp-centre igs-storage-tab-label" data-style-font-size="text_px + 'px'">{{t.name}}</span>
 			</div>
 		</div>
 		<div id="igs_storage_header_name" class="igs-storage-header">
-			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{item_name_label}}</span>
+			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{item_name_label}}</span>
 		</div>
 		<div id="igs_storage_header_period" class="igs-storage-header">
-			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{duration_label}}</span>
+			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{duration_label}}</span>
 		</div>
 		<!-- 9 rows of 13 units, the native box's own m_iNumRenderLine times its line step. -->
-		<div id="igs_storage_list" class="scroll-pane igs-pane"
-		     data-style-font-size="text_px + 'px'"
-		     data-style-width="(146 * root_scale) + 'px'"
-		     data-style-height="(117 * root_scale) + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+		<div id="igs_storage_list" class="scroll-pane igs-pane counter-scaled"
+		     data-style-font-size="text_px + 'px'">
 			<div class="igs-row" data-for="r : storage_rows"
 			     data-class-selected="r.selected"
-			     data-style-width="(131 * root_scale) + 'px'"
-			     data-style-height="(13 * root_scale) + 'px'"
 			     data-event-click="igs_select_storage(it_index)">
 				<!-- A backgrounded element with children paints an unclosed box in this build,
 				     so the selected-row backdrop is a childless leaf (engine-findings.md). -->
@@ -119,27 +100,21 @@
 		<div id="igs_storage_page_back"></div>
 		<div id="igs_storage_prev" class="igs-storage-page-btn" data-event-click="igs_storage_page(-1)"></div>
 		<div id="igs_storage_page" class="igs-page-numbers">
-			<span class="sharp-text sharp-right igs-page-current" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{storage_page}}</span>
-			<span class="sharp-text igs-page-slash" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">/</span>
-			<span class="sharp-text igs-page-total" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{storage_total_pages}}</span>
+			<span class="sharp-text sharp-right igs-page-current" data-style-font-size="text_px + 'px'">{{storage_page}}</span>
+			<span class="sharp-text igs-page-slash" data-style-font-size="text_px + 'px'">/</span>
+			<span class="sharp-text igs-page-total" data-style-font-size="text_px + 'px'">{{storage_total_pages}}</span>
 		</div>
 		<div id="igs_storage_next" class="igs-storage-page-btn" data-event-click="igs_storage_page(1)"></div>
 		<div id="igs_use" class="igs-btn" data-event-click="igs_use">
-			<span class="sharp-text sharp-middle sharp-centre igs-btn-label" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{use_label}}</span>
+			<span class="sharp-text sharp-middle sharp-centre igs-btn-label" data-style-font-size="text_px + 'px'">{{use_label}}</span>
 		</div>
 
 		<div id="igs_close" data-event-click="igs_close" data-attr-data-hint="close_hint"></div>
 
 		<!-- The loaded script and banner versions (developer builds, FOR_WORK). -->
 		<div id="igs_versions" data-if="script_version != ''">
-			<span class="sharp-text" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{script_version}}</span>
-			<span class="sharp-text igs-version-banner" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{banner_version}}</span>
+			<span class="sharp-text" data-style-font-size="text_px + 'px'">{{script_version}}</span>
+			<span class="sharp-text igs-version-banner" data-style-font-size="text_px + 'px'">{{banner_version}}</span>
 		</div>
 	</div>
 </body>

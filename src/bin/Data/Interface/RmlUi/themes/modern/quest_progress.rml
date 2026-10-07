@@ -12,7 +12,7 @@
      event-callback names in sync with ../../quest_progress.rml. -->
 <body>
 	<div id="panel" data-model="quest_progress" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="modern-shell-edge"></div>
 		<div class="modern-groove"></div>
 

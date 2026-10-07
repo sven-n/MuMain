@@ -14,32 +14,25 @@
 	     The grid and palette take no pointer events: the window paints the mark with its native
 	     hit tests, as the original did. A button click is queued with guild_make_button(n). -->
 	<div id="panel" data-model="guild_make" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span class="sharp-text gm-centred" id="title" data-style-font-size="title_px + 'px'"
-		      data-style-width="(panel_width * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title_text}}</span>
+		<span class="sharp-text gm-centred" id="title" data-style-font-size="title_px + 'px'">{{title_text}}</span>
 
 		<div data-if="page == 0">
-			<span class="sharp-text gm-centred" id="info" data-style-font-size="info_px + 'px'"
-			      data-style-width="(panel_width * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{info_text}}</span>
+			<span class="sharp-text gm-centred" id="info" data-style-font-size="info_px + 'px'">{{info_text}}</span>
 			<div class="gm-btn gm-btn-big" id="btn_make" data-event-click="guild_make_button(0)">
 				<span class="sharp-text sharp-middle gm-label" data-style-font-size="text_px + 'px'"
-				      data-style-width="(108 * root_scale) + 'px'"
-				      data-style-line-height="label_line_px + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{make_text}}</span>
+				      data-style-line-height="label_line_px + 'px'">{{make_text}}</span>
 			</div>
 			<div id="btn_exit" data-event-click="guild_make_button(3)" data-attr-data-hint="exit_tooltip"></div>
 		</div>
 
 		<div data-if="page == 1">
-			<span class="sharp-text" id="name_label" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{name_text}}</span>
+			<span class="sharp-text" id="name_label" data-style-font-size="text_px + 'px'">{{name_text}}</span>
 			<div id="name_back"></div>
 			<div class="gold-rect" id="mark_rect"><div class="gold-h"></div><div class="gold-h gold-h-end"></div><div class="gold-v"></div><div class="gold-v gold-v-end"></div></div>
 			<!-- The mark grid and the palette: each set has its own container so the theme can
@@ -66,41 +59,31 @@
 					<div class="gm-cross gm-cross-b" data-if="selected.empty"></div>
 				</div>
 			</div>
-			<span class="sharp-text gm-hint gm-hint-1" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{palette_hint_1}}</span>
-			<span class="sharp-text gm-hint gm-hint-2" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{palette_hint_2}}</span>
+			<span class="sharp-text gm-hint gm-hint-1" data-style-font-size="text_px + 'px'">{{palette_hint_1}}</span>
+			<span class="sharp-text gm-hint gm-hint-2" data-style-font-size="text_px + 'px'">{{palette_hint_2}}</span>
 		</div>
 
 		<div data-if="page == 2">
 			<div class="gold-rect" id="result_rect"><div class="gold-h"></div><div class="gold-h gold-h-end"></div><div class="gold-v"></div><div class="gold-v gold-v-end"></div></div>
 			<div id="result_mark"><div class="mark-cell" data-for="m : mark_cells" data-style-background-color="m"></div></div>
-			<span class="sharp-text gm-centred" id="result" data-style-font-size="result_px + 'px'"
-			      data-style-width="(panel_width * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{result_text}}</span>
+			<span class="sharp-text gm-centred" id="result" data-style-font-size="result_px + 'px'">{{result_text}}</span>
 		</div>
 
 		<div data-if="page != 0">
 			<div class="gm-btn gm-btn-small" id="btn_back" data-event-click="guild_make_button(1)">
 				<span class="sharp-text sharp-middle gm-label" data-style-font-size="text_px + 'px'"
-				      data-style-width="(64 * root_scale) + 'px'"
-				      data-style-line-height="label_line_px + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{back_text}}</span>
+				      data-style-line-height="label_line_px + 'px'">{{back_text}}</span>
 			</div>
 			<div class="gm-btn gm-btn-small" id="btn_next" data-event-click="guild_make_button(2)">
 				<span class="sharp-text sharp-middle gm-label" data-style-font-size="text_px + 'px'"
-				      data-style-width="(64 * root_scale) + 'px'"
-				      data-style-line-height="label_line_px + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{next_text}}</span>
+				      data-style-line-height="label_line_px + 'px'">{{next_text}}</span>
 			</div>
 		</div>
 
 		<!-- The name field, outside the page blocks so it keeps its element (and its typed value)
 		     across page changes; shown on page 1 only. -->
 		<input id="name_field" type="text" class="text-field sharp-text" maxlength="8" data-value="guild_name" data-class-shown="page == 1"
-		       data-style-font-size="text_px + 'px'" data-style-width="(200 * root_scale) + 'px'"
-		       data-style-height="(14 * root_scale) + 'px'" data-style-line-height="(14 * root_scale) + 'px'"
-		       data-style-transform="'scale(' + (1 / root_scale) + ')'"/>
+		       data-style-font-size="text_px + 'px'"/>
 	</div>
 </body>
 </rml>

@@ -18,7 +18,7 @@
 
 #guild_mark { position: absolute; left: 74px; top: 106px; width: 39px; height: 39px; }
 .mark-cell { float: left; width: 4.875px; height: 4.875px; }
-.line-mark { position: absolute; width: 8px; height: 8px; }
+.line-mark { position: absolute; width: calc(8px * var(--root-scale)); height: calc(8px * var(--root-scale)); }
 .line-mark-cell { float: left; width: 1px; height: 1px; }
 
 .s-top, .s-bottom { display: none; }
@@ -243,3 +243,27 @@
 
 .cell-union-name { left: 10.884%; }
 .cell-union-count { right: 3.401%; text-align: right; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#gi_hint_title { width: calc(100% * var(--root-scale)); }
+#gi_title { width: calc(100% * var(--root-scale)); }
+#gi_name { width: calc(120px * var(--root-scale)); }
+#gi_tab_info { width: calc(56px * var(--root-scale)); }
+#gi_tab_members { width: calc(56px * var(--root-scale)); }
+#gi_tab_union { width: calc(56px * var(--root-scale)); }
+#gi_notice_label { width: calc(40px * var(--root-scale)); }
+#gi_created { width: calc(40px * var(--root-scale)); }
+#gi_score { width: calc(80px * var(--root-scale)); }
+#gi_member_count { width: calc(80px * var(--root-scale)); }
+#gi_notice_list { width: calc(161px * var(--root-scale)); height: calc(80px * var(--root-scale)); }
+.gi-pane-row { width: calc(146px * var(--root-scale)); height: calc(13px * var(--root-scale)); }
+.gi-label { width: calc(64px * var(--root-scale)); }
+#gi_hdr_name { width: calc(40px * var(--root-scale)); }
+#gi_hdr_position { width: calc(40px * var(--root-scale)); }
+#gi_hdr_server { width: calc(40px * var(--root-scale)); }
+#gi_member_list { width: calc(164px * var(--root-scale)); height: calc(234px * var(--root-scale)); }
+.gi-pane-row.gi-member-row { width: calc(149px * var(--root-scale)); height: calc(13px * var(--root-scale)); }
+#gi_hdr_union_name { width: calc(40px * var(--root-scale)); }
+#gi_hdr_union_members { width: calc(40px * var(--root-scale)); }
+#gi_union_list { width: calc(162px * var(--root-scale)); height: calc(78px * var(--root-scale)); }
+.gi-pane-row.gi-union-row { width: calc(147px * var(--root-scale)); height: calc(13px * var(--root-scale)); }

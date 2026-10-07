@@ -49,8 +49,20 @@ Modern has `.modern-btn-px` (and `.modern-checkbox-px` for checkboxes), the same
 reference `px` with no size of its own; the MU Helper windows use both.
 
 A counter-scaled button label (`.sharp-text`) centres itself on its button with `.sharp-middle`,
-and `.sharp-centre` when the theme rather than C++ gives its width (`base.rcss`, both themes;
-`engine-findings.md` has why). Its RML transform starts with `translateY(-50%)`.
+and `.sharp-centre` when the theme gives no width (`base.rcss`, both themes; `engine-findings.md`
+has why).
+
+## Counter-scaled text
+
+Text inside a panel scaled by `transform: scale(root_scale)` is drawn sharp by laying it out in
+physical pixels and cancelling the panel's scale. `#panel` binds the scale as a custom property,
+`data-style---root-scale="root_scale"`, beside its transform; base.rcss's `.sharp-text` (origin top
+left) and `.counter-scaled` (the element's own origin) apply `scale(calc(1 / var(--root-scale)))`.
+The layer's own lengths are physical, so the theme states them as reference px times the scale:
+`#title { width: calc(160px * var(--root-scale)); }`, or `calc(100% * var(--root-scale))` for the
+width of the box it sits in. Only its font size (the native text size) stays bound. A panel that
+stretches per axis (a Hud layout's `#screen`, `gens_ranking`) also binds `--root-scale-y`, and its
+layers take `.counter-scaled-xy`.
 
 ## Checkbox
 
@@ -197,8 +209,9 @@ scrollbar element and RmlUi sizes `slidertrack` itself.
   scrollbar. Use a one-shot latch consumed on the frame after the content changed.
 
 **Inside a `transform: scale(root_scale)` panel**, the pane has to counter-scale itself out of that
-transform (`transform: scale(1 / root_scale)` with `transform-origin: left top`, its own `width`/
-`height` bound as `value * root_scale` px) — `CMoveCommandWindow`'s `#list` is the reference. Two
+transform (`.counter-scaled` with `transform-origin: left top`, its own `width`/`height` as
+`calc(Npx * var(--root-scale))`; Counter-scaled text above) — `guard_window`'s lists are the
+reference. Two
 things follow, both non-obvious:
 
 - **The net render transform at the pane is identity**, so its contents are laid out in real

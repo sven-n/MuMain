@@ -16,24 +16,20 @@
 	     while the dock transform grows to 2.25x, so a reference-px font-size would be ~55% too
 	     large at high resolutions and show a third fewer rows. #head and #list therefore counter-
 	     scale themselves out of #panel (the my_quest_info.rml technique) and size their own boxes
-	     in root_scale-multiplied px; everything inside them is then laid out at the native text's
+	     in --root-scale-multiplied px; everything inside them is then laid out at the native text's
 	     real size. Column positions inside those boxes are percentages, so they need no binding of
 	     their own and stay put at every scale. -->
 	<div id="panel" data-model="move_command"
 	     data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-height="panel_height + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 
-		<span id="title"
-		      data-style-font-size="text_px + 'px'"
-		      data-style-width="(panel_width * root_scale) + 'px'"
-		      data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title_text}}</span>
+		<span class="counter-scaled" id="title"
+		      data-style-font-size="text_px + 'px'">{{title_text}}</span>
 
-		<div id="head"
+		<div class="counter-scaled" id="head"
 		     data-style-font-size="text_px + 'px'"
-		     data-style-width="(row_width * root_scale) + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+		     data-style-width="(row_width * root_scale) + 'px'">
 			<span class="col col-strife">{{head_strife}}</span>
 			<span class="col col-map">{{head_map}}</span>
 			<span class="col col-level">{{head_level}}</span>
@@ -43,12 +39,11 @@
 		<!-- base.rcss's .scroll-pane: RmlUi owns the scroll position, the wheel and the scrollbar
 		     drag, replacing the hand-rolled thumb/track math this window used to carry. -->
 		<!-- no-scroll: every row fits, so the original drew its thumb disabled (MaximumScrollOffset). -->
-		<div id="list" class="scroll-pane" data-event-mousescroll="movecommand_wheel"
+		<div id="list" class="scroll-pane counter-scaled" data-event-mousescroll="movecommand_wheel"
 		     data-class-no-scroll="rows.size * row_height + list_tail <= list_height + 0.5"
 		     data-style-font-size="text_px + 'px'"
 		     data-style-width="(list_width * root_scale) + 'px'"
-		     data-style-height="(list_height * root_scale) + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+		     data-style-height="(list_height * root_scale) + 'px'">
 			<!-- The row is narrower than the pane, and explicitly sized rather than 100%, for two
 			     separate reasons: the spare lane on the right is where the scrollbar lives (a
 			     full-width row sits under the handle and swallows the drag), and a percentage
@@ -73,11 +68,8 @@
 		     data-style-top="close_top + 'px'"
 		     data-style-height="row_height + 'px'"
 		     data-event-click="movecommand_close">
-			<span id="close_label"
-			      data-style-font-size="text_px + 'px'"
-			      data-style-width="((panel_width - 4) * root_scale) + 'px'"
-			      data-style-margin-left="((panel_width - 4) / 2 - (panel_width - 4) / 2 * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{close_text}}</span>
+			<span class="counter-scaled" id="close_label"
+			      data-style-font-size="text_px + 'px'">{{close_text}}</span>
 		</div>
 	</div>
 </body>

@@ -14,23 +14,21 @@
 	     native size, counter-scaled out of the panel. C++ keeps the level check, the corner close,
 	     Escape and the entry request; a click is queued with entry_press / entry_exit. -->
 	<div id="panel" data-model="devil_square_enter" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
 		<span class="sharp-text" id="title" data-style-font-size="title_text_px + 'px'"
-		      data-style-line-height="title_line_px + 'px'" data-style-width="(72 * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title_text}}</span>
+		      data-style-line-height="title_line_px + 'px'">{{title_text}}</span>
 
 		<!-- The rows each of these lands on are the theme's: this window's own .rcss gives one
 		     :nth-child rule per row. Each repeated set has its own container so the count starts
 		     at the first line / first button. -->
 		<div class="entry-lines">
 			<span class="sharp-text entry-line" data-for="line : lines"
-			      data-style-font-size="line.text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line.text}}</span>
+			      data-style-font-size="line.text_px + 'px'">{{line.text}}</span>
 		</div>
 
 		<div class="entry-buttons">
@@ -38,9 +36,7 @@
 			     data-event-click="entry_press(i)">
 				<span class="sharp-text sharp-middle entry-label"
 				      data-style-font-size="button_label_text_px + 'px'"
-				      data-style-line-height="button_label_line_px + 'px'"
-				      data-style-width="(180 * root_scale) + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+				      data-style-line-height="button_label_line_px + 'px'">{{b.label}}</span>
 			</div>
 		</div>
 

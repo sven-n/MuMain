@@ -51,3 +51,8 @@
 .market-line:nth-child(5) { top: 140px; }
 .market-line:nth-child(6) { top: 160px; }
 .market-line:nth-child(7) { top: 180px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(160px * var(--root-scale)); }
+.market-line { width: calc(190px * var(--root-scale)); }
+#warp_label { width: calc(53px * var(--root-scale)); }

@@ -32,8 +32,6 @@ void BindTimerModel(Rml::DataModelConstructor& c, EventTimerRmlModel& model)
 {
     c.Bind("scale_x", &model.scaleX);
     c.Bind("scale_y", &model.scaleY);
-    c.Bind("inverse_scale_x", &model.inverseScaleX);
-    c.Bind("inverse_scale_y", &model.inverseScaleY);
     c.Bind("panel_x", &model.panelX);
     c.Bind("panel_y", &model.panelY);
     c.Bind("box_left", &model.boxLeft);
@@ -75,8 +73,6 @@ void mu::ui::window::EventTimerView::Sync(bool visible, const POINT& pos, const 
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncField(m_View.Binder(), &EventTimerRmlModel::scaleX, "scale_x", transform.scaleX);
     SyncField(m_View.Binder(), &EventTimerRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncField(m_View.Binder(), &EventTimerRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    SyncField(m_View.Binder(), &EventTimerRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
     SyncField(m_View.Binder(), &EventTimerRmlModel::panelX, "panel_x", static_cast<float>(pos.x));
     SyncField(m_View.Binder(), &EventTimerRmlModel::panelY, "panel_y", static_cast<float>(pos.y));
 

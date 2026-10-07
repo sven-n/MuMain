@@ -23,7 +23,7 @@
 	position: absolute;
 	left: 0;
 	top: 12px;
-	width: 190px;
+	width: calc(190px * var(--root-scale));
 	text-align: center;
 	color: token(text-title);
 	font-weight: bold;
@@ -35,7 +35,7 @@
 	position: absolute;
 	left: 0;
 	top: 27px;
-	width: 190px;
+	width: calc(190px * var(--root-scale));
 	text-align: center;
 	color: token(accent-teal);
 	font-weight: bold; /* native g_hFontBold, like the title, NPC and player names */
@@ -56,7 +56,7 @@
 	position: absolute;
 	left: 13px;
 	top: 66px;
-	width: 164px;
+	width: calc(164px * var(--root-scale));
 }
 #panel.qp-etc .qp-npc-lines { top: 59px; }
 .qp-line {
@@ -114,7 +114,7 @@
 	position: absolute;
 	left: 13px;
 	top: 222px;
-	width: 164px;
+	width: calc(164px * var(--root-scale));
 }
 #panel.qp-etc .qp-answers { top: 207px; }
 .qp-player-words {
@@ -144,8 +144,8 @@
 	position: absolute;
 	left: 9px;
 	top: 205px;
-	width: 174px;
-	height: 150px;
+	width: calc(174px * var(--root-scale));
+	height: calc(150px * var(--root-scale));
 	overflow: auto hidden;
 }
 
@@ -205,3 +205,12 @@
 .qp-reward-row.row-requirement-unmet { color: #ff1e1e; }
 .qp-reward-row.row-reward            { color: #dfbf67; }
 .qp-reward-row.row-random-reward     { color: #6767df; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.qp-npc-name { width: calc(164px * var(--root-scale)); }
+.qp-npc-lines { line-height: calc(15px * var(--root-scale)); }
+.qp-player-name { width: calc(164px * var(--root-scale)); }
+.qp-answers { line-height: calc(15px * var(--root-scale)); }
+.qp-player-words { margin-bottom: calc(15px * var(--root-scale)); }
+.qp-reward-row { padding: calc(1px * var(--root-scale)) calc(4px * var(--root-scale)); }
+#btn_complete { width: calc(108px * var(--root-scale)); height: calc(29px * var(--root-scale)); line-height: calc(29px * var(--root-scale)); }

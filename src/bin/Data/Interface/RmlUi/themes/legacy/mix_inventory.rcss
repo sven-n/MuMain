@@ -15,7 +15,7 @@
 	position: absolute;
 	left: 0;
 	top: 13px;
-	width: 190px;
+	width: calc(100% * var(--root-scale));
 	text-align: center;
 	color: #dcdcdc;
 	font-weight: bold;
@@ -28,7 +28,7 @@
 	position: absolute;
 	left: 15px;
 	top: 25px;
-	width: 160px;
+	width: calc(160px * var(--root-scale));
 	white-space: nowrap;
 	text-align: center;
 	color: #dcdcdc;
@@ -46,9 +46,9 @@
 	position: absolute;
 	left: 15px;
 	top: 49px;
-	width: 160px;
+	width: calc(160px * var(--root-scale));
 }
-/* Row heights (10px, 20px wide) are bound in mix_inventory.rml: .mix-head is a text layer. */
+/* .mix-head is a text layer: its row heights are physical (end of file). */
 .mix-row {
 	display: block;
 	white-space: nowrap;
@@ -59,29 +59,32 @@
 .mix-row.hidden { display: none; }
 .mix-text { background-color: rgba(40, 40, 40, 128); }
 
-/* Prediction / source checklist / status (fixed top 203, 15px rows -- 10 in the socket mixes, bound
-   in mix_inventory.rml --, wrapping like native's CutStr() at ~156px), then the advice after one
+/* Prediction / source checklist / status (fixed top 203, 15px rows -- 10 in the socket mixes --,
+   wrapping like native's CutStr() at ~156px), then the advice after one
    blank row. */
 .mix-list {
 	position: absolute;
 	left: 15px;
 	top: 203px;
-	width: 156px;
+	width: calc(156px * var(--root-scale));
+	line-height: calc(15px * var(--root-scale));
 }
+.mix-list.socket-prompt { line-height: calc(10px * var(--root-scale)); }
 .mix-list.hidden, .mix-head.hidden, .mix-descriptions.hidden { display: none; }
 .mix-list-line {
 	display: block;
-	line-height: inherit; /* 15px (socket mixes 10px), bound on the .mix-list text layer */
+	line-height: inherit;
 	font-weight: bold;
 	font-size: 1em;
 	color: #dcdcdc;
 }
 .mix-list-line.hidden { display: none; }
 /* Native cuts only the prediction and source lines (CutStr); status and advice run on. */
-/* One native line each, cut at the frame's inner edge (x 182, width bound in mix_inventory.rml):
+/* One native line each, cut at the frame's inner edge (x 182):
    nothing covers what native runs on past its frame. */
 .mix-unwrapped { white-space: nowrap; overflow: hidden; }
-.mix-advice { display: block; } /* margin-top 15px, bound (text layer) */
+.mix-advice { display: block; margin-top: calc(15px * var(--root-scale)); }
+.mix-advice.socket-prompt { margin-top: calc(10px * var(--root-scale)); }
 
 /* RenderMixDescriptions(): each line at its own native top (d.top), centred in 160px at x=15 or
    left-aligned from x=5, no band, shrunk to fit its box like native (d.fit, as a transform on
@@ -97,20 +100,20 @@
 .mix-description {
 	position: absolute;
 	left: 5px;   /* native's 160 box at x=15, widened to the frame around the same centre (95): */
-	width: 180px; /* the fit still targets 160 (MixInventory.cpp), the cut is at the frame */
+	width: calc(180px * var(--root-scale)); /* the fit still targets 160 (MixInventory.cpp), the cut is at the frame */
 	text-align: center;
 	white-space: nowrap;
 	overflow: hidden;
 	font-weight: bold;
 	font-size: 1em;
 }
-.mix-description.left { left: 5px; width: 180px; text-align: left; }
+.mix-description.left { left: 5px; width: calc(180px * var(--root-scale)); text-align: left; }
 
 .mix-socket-prompt {
 	position: absolute;
 	left: 15px;
 	top: 280px;
-	width: 160px;
+	width: calc(160px * var(--root-scale));
 	text-align: center;
 	color: #c8c8c8;
 	font-weight: bold;
@@ -206,3 +209,12 @@
 .bg-left   { left: 0;    top: 64px; width: 21px;  height: 320px; decorator: image(mix-bg-left); }
 .bg-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(mix-bg-right); }
 .bg-bottom { left: 0;    top: 384px; width: 190px; height: 45px; decorator: image(mix-bg-bottom); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { margin-left: calc(50% - 50% * var(--root-scale)); }
+.mix-row { height: calc(10px * var(--root-scale)); }
+.mix-row.mix-row-wide { height: calc(20px * var(--root-scale)); }
+.mix-row.mix-row-wide.mix-required-zen { height: calc(20px * var(--root-scale)); }
+.mix-list-line.mix-unwrapped { width: calc(167px * var(--root-scale)); }
+#socket_list { width: calc(160px * var(--root-scale)); height: calc(65px * var(--root-scale)); }
+.socket-row { width: calc(148px * var(--root-scale)); height: calc(13px * var(--root-scale)); }

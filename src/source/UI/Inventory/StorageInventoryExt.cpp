@@ -78,7 +78,6 @@ void CStorageInventoryExt::BindRmlModel(Rml::DataModelConstructor& c, StorageExt
     c.Bind("root_scale", &model.rootScale);
     UI::Items::RegisterItemGridCells(c);
     c.Bind("grid_cells", &model.gridCells);
-    c.Bind("panel_width", &model.panelWidth);
     c.Bind("text_px", &model.textPx);
     c.Bind("title", &model.title);
     c.Bind("exit_tooltip", &model.exitTooltip);
@@ -193,7 +192,6 @@ void CStorageInventoryExt::SyncRmlModel()
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_Pos, 15, 36);
     if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())

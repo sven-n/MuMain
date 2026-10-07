@@ -10,7 +10,7 @@
 	     #item_view, the stack counts, title, Mix button, recipe-result content and the socket list
 	     box (SyncMixContentModel(), SyncSocketListModel(), MixInventory.cpp). -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<!-- The frame. -->
 		<div class="bg-fill"></div>
@@ -33,8 +33,8 @@
 		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
 		<img id="item_view" class="item-view"/>
 		<div id="item_grid_counts" class="item-grid-counts">
-			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text" data-if="c.count != ''"
-			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
 		<!-- Text laid out where native RenderFrame()/RenderMixDescriptions() drew it: the title a
 		     little lower when there is no tax line, the recipe block at 49, the prediction/source/
@@ -43,60 +43,47 @@
 		     application's wrapped prediction and sources (seven rows, eight at 800x600) end at the
 		     socket prompt at 280 instead of running into it and the socket list, as they do in the
 		     original. -->
-		<span class="sharp-text" id="title" data-class-low="!show_tax_rate"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{title}}</span>
+		<span class="sharp-text" id="title" data-class-low="!show_tax_rate" data-style-font-size="text_px + 'px'">{{title}}</span>
 
-		<div class="mix-tax-rate sharp-text" data-class-hidden="!show_tax_rate"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'">
+		<div class="mix-tax-rate sharp-text" data-class-hidden="!show_tax_rate" data-style-font-size="text_px + 'px'">
 			<div class="mix-fit" data-style-transform="'scale(' + tax_rate_fit + ')'">{{tax_rate_text}}</div>
 		</div>
 
-		<div class="mix-head sharp-text" data-class-hidden="!show_recipe"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'">
-			<div class="mix-row" data-style-height="(10 * root_scale) + 'px'"><span class="mix-text mix-recipe" data-class-ready="recipe_ready">{{recipe_line1}}</span></div>
-			<div class="mix-row" data-style-height="(10 * root_scale) + 'px'"><span class="mix-text mix-recipe" data-class-ready="recipe_ready"
+		<div class="mix-head sharp-text" data-class-hidden="!show_recipe" data-style-font-size="text_px + 'px'">
+			<div class="mix-row"><span class="mix-text mix-recipe" data-class-ready="recipe_ready">{{recipe_line1}}</span></div>
+			<div class="mix-row"><span class="mix-text mix-recipe" data-class-ready="recipe_ready"
 			     data-class-hidden="!show_recipe_line2">{{recipe_line2}}</span></div>
-			<div class="mix-row mix-row-wide" data-class-hidden="!show_success_rate"
-			     data-style-height="(20 * root_scale) + 'px'"><span class="mix-text mix-success" data-class-boosted="success_boosted">{{success_rate_text}}</span></div>
+			<div class="mix-row mix-row-wide" data-class-hidden="!show_success_rate"><span class="mix-text mix-success" data-class-boosted="success_boosted">{{success_rate_text}}</span></div>
 			<!-- Native leaves the recipe colour set for the zen line unless a success line reset it. -->
-			<div class="mix-row mix-row-wide mix-required-zen" data-class-hidden="!show_required_zen"
-			     data-style-height="(20 * root_scale) + 'px'"><span
+			<div class="mix-row mix-row-wide mix-required-zen" data-class-hidden="!show_required_zen"><span
 			     class="mix-text mix-zen" data-class-after-success="show_success_rate"
 			     data-class-ready="recipe_ready">{{required_zen_text}}</span></div>
 		</div>
 
-		<div class="mix-list sharp-text" data-class-hidden="!show_recipe"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(156 * root_scale) + 'px'" data-style-line-height="((show_socket_prompt ? 10 : 15) * root_scale) + 'px'">
+		<div class="mix-list sharp-text" data-class-hidden="!show_recipe" data-style-font-size="text_px + 'px'" data-class-socket-prompt="show_socket_prompt">
 			<div class="mix-list-line mix-prediction" data-class-hidden="!show_prediction"><span
 			     class="mix-text">{{prediction_text}}</span></div>
 			<div class="mix-list-line" data-for="s : source_lines"><span class="mix-text mix-kind" data-class-missing="s.kind == 'missing'" data-class-partial="s.kind == 'partial'" data-class-ready="s.kind == 'ready'" data-class-normal="s.kind == 'normal'" data-class-warning="s.kind == 'warning'" data-class-loss="s.kind == 'loss'" data-class-dim="s.kind == 'dim'">{{s.text}}</span></div>
-			<div class="mix-list-line mix-unwrapped" data-style-width="(167 * root_scale) + 'px'" data-for="s : status_lines"><span class="mix-text mix-kind" data-class-missing="s.kind == 'missing'" data-class-partial="s.kind == 'partial'" data-class-ready="s.kind == 'ready'" data-class-normal="s.kind == 'normal'" data-class-warning="s.kind == 'warning'" data-class-loss="s.kind == 'loss'" data-class-dim="s.kind == 'dim'">{{s.text}}</span></div>
-			<div class="mix-advice" data-style-margin-top="((show_socket_prompt ? 10 : 15) * root_scale) + 'px'">
-				<div class="mix-list-line mix-unwrapped" data-style-width="(167 * root_scale) + 'px'" data-for="a : advice_lines"><span class="mix-text mix-kind" data-class-missing="a.kind == 'missing'" data-class-partial="a.kind == 'partial'" data-class-ready="a.kind == 'ready'" data-class-normal="a.kind == 'normal'" data-class-warning="a.kind == 'warning'" data-class-loss="a.kind == 'loss'" data-class-dim="a.kind == 'dim'">{{a.text}}</span></div>
+			<div class="mix-list-line mix-unwrapped" data-for="s : status_lines"><span class="mix-text mix-kind" data-class-missing="s.kind == 'missing'" data-class-partial="s.kind == 'partial'" data-class-ready="s.kind == 'ready'" data-class-normal="s.kind == 'normal'" data-class-warning="s.kind == 'warning'" data-class-loss="s.kind == 'loss'" data-class-dim="s.kind == 'dim'">{{s.text}}</span></div>
+			<div class="mix-advice" data-class-socket-prompt="show_socket_prompt">
+				<div class="mix-list-line mix-unwrapped" data-for="a : advice_lines"><span class="mix-text mix-kind" data-class-missing="a.kind == 'missing'" data-class-partial="a.kind == 'partial'" data-class-ready="a.kind == 'ready'" data-class-normal="a.kind == 'normal'" data-class-warning="a.kind == 'warning'" data-class-loss="a.kind == 'loss'" data-class-dim="a.kind == 'dim'">{{a.text}}</span></div>
 			</div>
 		</div>
 
 		<div class="mix-descriptions" data-class-hidden="!show_recipe"
 		     data-class-lowered="descriptions_lowered">
 			<div class="mix-description sharp-text" data-for="d : description_lines"
-			     data-class-left="d.align_left" data-class-row-0="d.row == 0" data-class-row-1="d.row == 1" data-class-row-2="d.row == 2" data-class-row-3="d.row == 3" data-class-row-4="d.row == 4" data-class-row-5="d.row == 5" data-class-row-6="d.row == 6" data-class-row-7="d.row == 7" data-class-row-8="d.row == 8" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
-			     data-style-width="((d.align_left ? 180 : 160) * root_scale) + 'px'">
+			     data-class-left="d.align_left" data-class-row-0="d.row == 0" data-class-row-1="d.row == 1" data-class-row-2="d.row == 2" data-class-row-3="d.row == 3" data-class-row-4="d.row == 4" data-class-row-5="d.row == 5" data-class-row-6="d.row == 6" data-class-row-7="d.row == 7" data-class-row-8="d.row == 8" data-style-font-size="text_px + 'px'">
 				<div class="mix-fit mix-kind" data-class-missing="d.kind == 'missing'" data-class-partial="d.kind == 'partial'" data-class-ready="d.kind == 'ready'" data-class-normal="d.kind == 'normal'" data-class-warning="d.kind == 'warning'" data-class-loss="d.kind == 'loss'" data-class-dim="d.kind == 'dim'" data-style-transform="'scale(' + d.fit + ')'">{{d.text}}</div>
 			</div>
 		</div>
 
-		<div class="sharp-text mix-socket-prompt" data-class-hidden="!show_recipe || !show_socket_prompt"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(160 * root_scale) + 'px'">{{socket_prompt_text}}</div>
+		<div class="sharp-text mix-socket-prompt" data-class-hidden="!show_recipe || !show_socket_prompt" data-style-font-size="text_px + 'px'">{{socket_prompt_text}}</div>
 
 		<div class="socket-list-box" data-if="show_socket_list"></div>
-		<div id="socket_list" class="scroll-pane" data-if="show_socket_list"
-		     data-style-width="(160 * root_scale) + 'px'"
-		     data-style-height="(65 * root_scale) + 'px'"
-		     data-style-font-size="text_px + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+		<div id="socket_list" class="scroll-pane counter-scaled" data-if="show_socket_list"
+		     data-style-font-size="text_px + 'px'">
 			<div class="socket-row" data-for="l : socket_lines" data-class-selected="l.selected"
-			     data-style-width="(148 * root_scale) + 'px'"
-			     data-style-height="(13 * root_scale) + 'px'"
 			     data-event-click="mix_inventory_select_socket(l.index)">
 				<div class="socket-row-back"></div>
 				<span class="socket-line-text">{{l.text}}</span>

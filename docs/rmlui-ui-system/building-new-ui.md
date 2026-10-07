@@ -164,7 +164,9 @@ set its own container and let the theme address them with `:nth-child` (`engine-
    positions, projected world labels) — nothing else. `Tools/check_rml_bound_geometry.py` enforces
    this at build time: a document binding `left`/`top`/`right`/`bottom`/`width`/`height` needs a line
    in `Tools/rml_bound_geometry_allowlist.txt` saying why, and expressions reading only
-   `root_x`/`root_y`/`root_scale` are exempt. **If that check sends you here, the answer is almost
+   `root_x`/`root_y`/`root_scale` are exempt. A number multiplied by `root_scale` fails it
+   outright: a counter-scaled layer's lengths are `calc(Npx * var(--root-scale))` in RCSS
+   (`component-catalog.md`'s Counter-scaled text). **If that check sends you here, the answer is almost
    always RCSS** — the allowlist is for geometry that genuinely varies per frame, not for a
    coordinate that was easier to push from C++.
 3. **If you are writing `a / 2 - b / 2` or `y += stripHeight`, you are writing RCSS in C++.**

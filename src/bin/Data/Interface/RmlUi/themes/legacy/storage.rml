@@ -9,7 +9,7 @@
 	<!-- CStorageInventory (StorageInventory.h): the frame, the item grid, the items C++ draws live
 	     into #item_view, the stack counts, title, money and buttons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<!-- The frame. -->
 		<div class="bg-fill"></div>
@@ -32,22 +32,19 @@
 		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
 		<img id="item_view" class="item-view"/>
 		<div id="item_grid_counts" class="item-grid-counts">
-			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text" data-if="c.count != ''"
-			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
-		<span class="sharp-text" id="title" data-class-locked="title_locked"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{title}}</span>
+		<span class="sharp-text" id="title" data-class-locked="title_locked" data-style-font-size="text_px + 'px'">{{title}}</span>
 
 		<div id="money_bg"></div>
-		<span id="zen_text" class="sharp-text sharp-right gold-amount" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		<span id="zen_text" class="sharp-text sharp-right gold-amount" data-style-font-size="text_px + 'px'"
 		      data-class-gold-base="zen_tier == 'base'"
 		      data-class-gold-hundred-thousand="zen_tier == 'hundred-thousand'"
 		      data-class-gold-million="zen_tier == 'million'"
 		      data-class-gold-ten-million="zen_tier == 'ten-million'">{{zen_text}}</span>
-		<span class="sharp-text" id="fee_label"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{fee_label}}</span>
-		<span class="sharp-text sharp-right" id="fee_value"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{fee_value}}</span>
+		<span class="sharp-text" id="fee_label" data-style-font-size="text_px + 'px'">{{fee_label}}</span>
+		<span class="sharp-text sharp-right" id="fee_value" data-style-font-size="text_px + 'px'">{{fee_value}}</span>
 
 		<div id="btn_insert" class="stor-btn stor-btn-insert" data-event-click="storage_insert_click" data-attr-data-hint="insert_tooltip"></div>
 

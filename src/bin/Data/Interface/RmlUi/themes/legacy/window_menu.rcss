@@ -65,6 +65,9 @@
 	position: absolute;
 	left: 0;
 	top: 0;
+	/* The row's width under the stretch, which the label cancels, so centring matches the
+	   original's RT3_SORT_CENTER. */
+	width: calc(112px * var(--root-scale));
 	transform-origin: left top;
 	text-align: center;
 	white-space: nowrap;

@@ -46,3 +46,13 @@
 /* Footer. Labels centred on their button (mu_helper_common.rcss lifts them one unit). */
 #btn_save, #btn_save_label { left: 120px; top: 388px; }
 #btn_init, #btn_init_label { left: 65px;  top: 388px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.mh-text.mh-center.mh-bold.mh-title { width: calc(190px * var(--root-scale)); }
+#gauge_potion_label { width: calc(124px * var(--root-scale)); }
+#gauge_heal_label { width: calc(124px * var(--root-scale)); }
+#buff_interval { width: calc(17px * var(--root-scale)); height: calc(12px * var(--root-scale)); }
+#gauge_party_heal_label { width: calc(124px * var(--root-scale)); }
+#buff_interval_elf { width: calc(17px * var(--root-scale)); height: calc(12px * var(--root-scale)); }
+#btn_save_label { width: calc(52px * var(--root-scale)); height: calc(26px * var(--root-scale)); line-height: calc(26px * var(--root-scale)); }
+#btn_init_label { width: calc(52px * var(--root-scale)); height: calc(26px * var(--root-scale)); line-height: calc(26px * var(--root-scale)); }

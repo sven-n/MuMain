@@ -10,12 +10,13 @@
 	     the family, title, ranking and contribution, the description box with the rewards text
 	     and its scroll bar, the exit button. The reward lines keep native wrapping, while RmlUi
 	     owns the scroll position and thumb. root_x/root_y/root_scale come from the dock
-	     transform; every position and size below is the theme's. A .sharp-text layer's own width
-	     and font size stay bound: it is laid out in physical pixels and counter-scaled out of the
-	     panel (base.rcss). The window's layout is Hud (the original stretched it per axis):
+	     transform; every position and size below is the theme's. A .sharp-text layer's font size
+	     stays bound: it is laid out in physical pixels and counter-scaled out of the panel
+	     (base.rcss). The window's layout is Hud (the original stretched it per axis):
 	     root_scale is x, root_scale_y is y. -->
 	<div id="panel" data-model="gens_ranking" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ', ' + root_scale_y + ')'">
+	     data-style-transform="'scale(' + root_scale + ', ' + root_scale_y + ')'"
+	     data-style---root-scale="root_scale" data-style---root-scale-y="root_scale_y">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
@@ -43,55 +44,40 @@
 		<div class="text-back text-back-level"></div>
 		<div class="text-back text-back-rank"></div>
 
-		<span id="gr_title" class="sharp-text gr-line" data-style-width="(190 * root_scale) + 'px'"
-		      data-style-font-size="title.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{title.text}}</span>
-		<span id="gr_gens_label" class="sharp-text gr-line" data-style-width="(190 * root_scale) + 'px'"
-		      data-style-font-size="gens_label.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{gens_label.text}}</span>
-		<span id="gr_gens_name" class="sharp-text gr-line" data-style-width="(190 * root_scale) + 'px'"
-		      data-style-font-size="gens_name.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{gens_name.text}}</span>
-		<span id="gr_level_label" class="sharp-text gr-line" data-style-width="(190 * root_scale) + 'px'"
-		      data-style-font-size="level_label.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{level_label.text}}</span>
-		<span id="gr_title_name" class="sharp-text gr-line" data-style-width="(174 * root_scale) + 'px'"
-		      data-style-font-size="title_name.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{title_name.text}}</span>
-		<span id="gr_rank_label" class="sharp-text gr-line" data-style-width="(74 * root_scale) + 'px'"
-		      data-style-font-size="rank_label.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{rank_label.text}}</span>
-		<span id="gr_rank_value" class="sharp-text gr-line" data-style-width="(170 * root_scale) + 'px'"
-		      data-style-font-size="rank_value.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{rank_value.text}}</span>
-		<span id="gr_contrib_label" class="sharp-text gr-line" data-style-width="(74 * root_scale) + 'px'"
-		      data-style-font-size="contrib_label.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{contrib_label.text}}</span>
-		<span id="gr_contrib_value" class="sharp-text gr-line" data-style-width="(170 * root_scale) + 'px'"
-		      data-style-font-size="contrib_value.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{contrib_value.text}}</span>
-		<span id="gr_desc_label" class="sharp-text gr-line" data-style-width="(58 * root_scale) + 'px'"
-		      data-style-font-size="desc_label.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{desc_label.text}}</span>
+		<span id="gr_title" class="sharp-text gr-line counter-scaled-xy"
+		      data-style-font-size="title.text_px + 'px'">{{title.text}}</span>
+		<span id="gr_gens_label" class="sharp-text gr-line counter-scaled-xy"
+		      data-style-font-size="gens_label.text_px + 'px'">{{gens_label.text}}</span>
+		<span id="gr_gens_name" class="sharp-text gr-line counter-scaled-xy"
+		      data-style-font-size="gens_name.text_px + 'px'">{{gens_name.text}}</span>
+		<span id="gr_level_label" class="sharp-text gr-line counter-scaled-xy"
+		      data-style-font-size="level_label.text_px + 'px'">{{level_label.text}}</span>
+		<span id="gr_title_name" class="sharp-text gr-line counter-scaled-xy"
+		      data-style-font-size="title_name.text_px + 'px'">{{title_name.text}}</span>
+		<span id="gr_rank_label" class="sharp-text gr-line counter-scaled-xy"
+		      data-style-font-size="rank_label.text_px + 'px'">{{rank_label.text}}</span>
+		<span id="gr_rank_value" class="sharp-text gr-line counter-scaled-xy"
+		      data-style-font-size="rank_value.text_px + 'px'">{{rank_value.text}}</span>
+		<span id="gr_contrib_label" class="sharp-text gr-line counter-scaled-xy"
+		      data-style-font-size="contrib_label.text_px + 'px'">{{contrib_label.text}}</span>
+		<span id="gr_contrib_value" class="sharp-text gr-line counter-scaled-xy"
+		      data-style-font-size="contrib_value.text_px + 'px'">{{contrib_value.text}}</span>
+		<span id="gr_desc_label" class="sharp-text gr-line counter-scaled-xy"
+		      data-style-font-size="desc_label.text_px + 'px'">{{desc_label.text}}</span>
 
 		<!-- The promotion note, present only while there is a next rank: the theme gives the group
 		     its own rows (gens_ranking.rcss). -->
 		<div class="gr-promo">
-			<span class="sharp-text gr-promo-line" data-for="l : promo_lines" data-style-width="(180 * root_scale) + 'px'"
-			      data-style-font-size="l.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">{{l.text}}</span>
+			<span class="sharp-text gr-promo-line counter-scaled-xy" data-for="l : promo_lines"
+			      data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
 		</div>
 
 		<!-- Counter-scale the pane to physical pixels like other docked scroll lists.
 		     Block rows establish scroll height; RmlUi owns the scrollbar and its drag. -->
-		<div class="gr-desc scroll-pane"
-		     data-style-width="(165 * root_scale) + 'px'"
-		     data-style-height="(96 * root_scale_y) + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ', ' + (1 / root_scale_y) + ')'">
+		<div class="gr-desc scroll-pane counter-scaled-xy">
 			<div class="gr-desc-line" data-for="l : desc_lines"
-			     data-style-width="(150 * root_scale) + 'px'"
 			     data-style-height="(desc_line_step * root_scale_y) + 'px'">
-				<span class="gr-desc-text" data-style-width="(150 * root_scale) + 'px'"
+				<span class="gr-desc-text"
 				      data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
 			</div>
 		</div>

@@ -172,3 +172,10 @@
 .gm-palette .gm-cell:nth-child(14) { left: 115px; top: 280px; }
 .gm-palette .gm-cell:nth-child(15) { left: 135px; top: 280px; }
 .gm-palette .gm-cell:nth-child(16) { left: 155px; top: 280px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(100% * var(--root-scale)); }
+#info { width: calc(100% * var(--root-scale)); }
+.gm-label { width: calc(64px * var(--root-scale)); }
+#result { width: calc(100% * var(--root-scale)); }
+#name_field { width: calc(200px * var(--root-scale)); height: calc(14px * var(--root-scale)); line-height: calc(14px * var(--root-scale)); }

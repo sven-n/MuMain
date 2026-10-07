@@ -91,3 +91,8 @@
 .t-bl { left: 12px; top: 223px; }
 .t-br { left: 166px; top: 223px; }
 .t-edge-bottom { left: 25px; top: 223px; width: 141px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.cp-title { width: calc(100% * var(--root-scale)); }
+.cp-line { width: calc(100% * var(--root-scale)); }
+#btn_fire .cp-label { width: calc(108px * var(--root-scale)); }

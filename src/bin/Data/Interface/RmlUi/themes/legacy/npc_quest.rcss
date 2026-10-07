@@ -37,7 +37,7 @@
 	position: absolute;
 	left: 0;
 	top: 16px;
-	width: 190px;
+	width: calc(190px * var(--root-scale));
 	text-align: center;
 	color: token(accent-cyan); /* native g_hFont, not bold */
 	font-size: 1em;
@@ -51,7 +51,7 @@
 	position: absolute;
 	left: 0;
 	top: 29px;
-	width: 190px;
+	width: calc(190px * var(--root-scale));
 	text-align: center;
 	color: #c8dcff;
 	font-size: 1em;
@@ -142,7 +142,7 @@
 .nq-dialogue {
 	position: absolute;
 	left: 0;
-	width: 190px;
+	width: calc(190px * var(--root-scale));
 	text-align: center;
 }
 /* Native advances every message and answer line 18 reference px and never wraps them. */
@@ -171,3 +171,9 @@
 /* Exit is a common close button -- legacy's sprite already has its own "X" baked in, so the shared
    label span is redundant (same convention every sibling this session uses). */
 .btn-exit-label { display: none; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#conditions_anchor { width: calc(128px * var(--root-scale)); line-height: calc(32px * var(--root-scale)); }
+#btn_complete { width: calc(108px * var(--root-scale)); height: calc(29px * var(--root-scale)); line-height: calc(29px * var(--root-scale)); }
+.nq-cost-amount.gold-amount { width: calc(150px * var(--root-scale)); }
+.nq-dialogue { line-height: calc(18px * var(--root-scale)); }

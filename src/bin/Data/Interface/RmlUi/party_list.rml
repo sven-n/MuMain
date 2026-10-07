@@ -12,7 +12,7 @@
 	     leave buttons do (party_leave). The names are .sharp-text leaves at the native size, shrunk
 	     to their box like the original's (name_text_px). -->
 	<div id="panel" data-model="party_list" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="card" data-for="card : cards" data-class-leader="card.leader" data-class-absent="card.absent"
 		     data-class-defense="card.defense_buff" data-class-selected="card.selected">
 			<div class="card-fill"></div>
@@ -20,8 +20,7 @@
 			<div class="card-select"></div>
 			<div class="card-back"></div>
 			<div class="card-flag"></div>
-			<span class="sharp-text card-name" data-style-font-size="card.name_text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{card.name}}</span>
+			<span class="sharp-text card-name" data-style-font-size="card.name_text_px + 'px'">{{card.name}}</span>
 			<div class="card-health" data-style-width="card.health_length + 'px'"></div>
 			<div class="card-leave" data-if="card.show_leave" data-event-click="party_leave(card.index)"></div>
 		</div>

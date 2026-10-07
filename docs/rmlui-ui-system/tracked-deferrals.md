@@ -11,12 +11,7 @@ No code-health item is left.
 
 ## After the merge
 
-In order:
-
-1. [The counter-scale block](#the-counter-scale-block): settle the open question, then move it to
-   `calc()`.
-
-Waiting on their own triggers: the [accepted constraints](#accepted-as-it-stands-with-its-trigger)
+None open. Waiting on their own triggers: the [accepted constraints](#accepted-as-it-stands-with-its-trigger)
 and the [modern HUD orbs](#modern-theme-studies).
 
 Throughout: run targeted scale, theme and interaction checks with each change. The modern theme
@@ -24,36 +19,10 @@ exists to prove the architecture, so its unchecked windows are not tracked. The 
 accepted as the base ([building-new-ui.md](building-new-ui.md)'s "Accepted as the base"), and window
 placement is theme-owned ([window-placement.md](window-placement.md)).
 
-## The counter-scale block
-
-A `.sharp-text` layer cancels `#panel`'s scale so glyphs rasterise sharp, so its layout width must
-arrive pre-multiplied: `data-style-width="(220 * root_scale) + 'px'"`. A stylesheet cannot multiply
-in this RmlUi without `calc()`, so the width travels through the data model, which is the inline
-geometry the bound-geometry guard flags. Several allowlist entries share this constraint. Centred
-text is the exception: `.sharp-middle` and `.sharp-centre` (`engine-findings.md`) centre a layer
-without a multiplied width, and the button labels and entry-window lines use them.
-
-**The way out.** The pinned fork carries upstream PR #983 (`calc()`, `min()`, `max()`, and `var()`
-inside them), so `width: calc(220px * var(--root-scale))` with C++ setting `--root-scale` on `#panel`
-would move the whole class into RCSS. The item grids already size themselves with `calc()` over a
-static custom property.
-
-**Open question, to settle first:** whether a custom property set from C++ at runtime recomputes
-every `calc()` that depends on it, and at what cost when it changes (on a UI-scale change, not every
-frame; measure in RelWithDebInfo, borrowing the PR's `Tests/Source/Benchmarks/Calculation.cpp`).
-The PR's tests cover invalidation behind `var()` for font-size changes only.
-
-**Revisit when** a counter-scaled window is next touched: settle the question on it, then move the
-class. Upstream merging #983 only removes the dependency on the fork. The ownership boundary's
-`MessageBoxView` entry waits on this, and so does `CNPCQuest`: its message and answer tops stay in
-its model. `message_top` is per instance (native centres the message-plus-answer block by its line
-count), and legacy's separate `answers_top` exists because flow does not stack counter-scaled text
-layers, so a declarative version needs another bound number or the markup duplicated per quest state.
-
 ## The C++ ↔ RML/RCSS ownership boundary
 
 The ownership rollout moved layout out of C++ into the themes. What is left: windows not yet seen in
-game, constraints accepted with a trigger, and the counter-scale block above. For new UI, follow
+game and constraints accepted with a trigger. For new UI, follow
 [building-new-ui.md](building-new-ui.md)'s Ownership section.
 
 ### Seen through `$preview`
@@ -84,7 +53,12 @@ both themes. Everything else in the rollout was verified in game, both themes, w
   hit-test it. Trigger: retiring the native `CButton`s.
 - **`MessageBoxView`**: every text line is centred by measurement and stacked by measured height,
   and a box's buttons come from its own `CMessageBoxButton`s. A box whose buttons were literals names
-  its kind and the theme places them (`CGuild_ToPerson_Position`). Trigger: the counter-scale block.
+  its kind and the theme places them (`CGuild_ToPerson_Position`). Trigger: a theme wanting its own
+  box layout. A line could centre with `.sharp-centre`, but counter-scaled lines do not stack in
+  flow, so their heights stay measured.
+- **`CNPCQuest`'s message and answer tops**: the block is centred by its line count, per quest
+  state, and legacy places the answers under it with a second top for the same flow reason.
+  Trigger: a theme wanting another arrangement.
 - **`Notices`**: physical px with no root transform, its transform taken ambiently. Trigger: that
   HUD gaining a reference-px space.
 - **`MiniMap`**: no reference-px space exists; the art is turned 45° in physical px.
@@ -110,7 +84,7 @@ both themes. Everything else in the rollout was verified in game, both themes, w
 
 The rest of the allowlist, reviewed entry by entry: per-frame data (gauges, things that follow the
 pointer or scroll, windows that grow with their content, projected markers), counts the server does
-not bound, text measured the way the native renderer measured it, and the counter-scale block.
+not bound, and text measured the way the native renderer measured it.
 `root_x`/`root_y` and `panel_x`/`panel_y` stay apart: the first is the physical origin of a root
 scaled uniformly by `root_scale`, the second a reference-unit position inside a stretched `.screen`.
 

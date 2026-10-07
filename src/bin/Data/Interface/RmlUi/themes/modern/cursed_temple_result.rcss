@@ -87,8 +87,7 @@
 .column-label { position: absolute; top: 38px; }
 .cell-name, .label-name { left: 10px; }
 .cell-class-name, .label-class-name { left: 74px; }
-/* Anchored by the right edge: the counter-scale turns about it, so no width has to arrive
-   pre-multiplied. */
+/* Anchored by the right edge: the counter-scale turns about it, so it needs no width. */
 .cell-added-exp, .label-added-exp { right: 36px; transform-origin: right top; text-align: right; }
 .cell-point, .label-point { right: 10px; transform-origin: right top; text-align: right; }
 .hero-row { top: 0; }
@@ -98,3 +97,9 @@
 #ct_reward_hint { color: token(semantic-danger); }
 .rows-allied .result-cell { color: token(accent-steel); }
 .rows-illusion .result-cell { color: token(accent-gold); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#ct_hero_list { width: calc(230px * var(--root-scale)); }
+#ct_column_header { width: calc(230px * var(--root-scale)); }
+#ct_reward_hint { width: calc(230px * var(--root-scale)); }
+.result-label { width: calc(54px * var(--root-scale)); }

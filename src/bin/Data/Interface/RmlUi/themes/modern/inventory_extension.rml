@@ -10,7 +10,7 @@
 	     locked pages' art and the items C++ draws live into #item_view, the stack counts, title and
 	     exit button. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<!-- The frame. -->
 		<div class="bg-panel">
 			<div class="inv-shell-edge"></div>
@@ -72,20 +72,20 @@
 		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
 		<img id="item_view" class="item-view"/>
 		<div id="item_grid_1_counts" class="item-grid-counts">
-			<div class="item-count" data-for="c : grid_cells_1"><span class="item-count-text" data-if="c.count != ''"
-			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+			<div class="item-count" data-for="c : grid_cells_1"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
 		<div id="item_grid_2_counts" class="item-grid-counts">
-			<div class="item-count" data-for="c : grid_cells_2"><span class="item-count-text" data-if="c.count != ''"
-			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+			<div class="item-count" data-for="c : grid_cells_2"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
 		<div id="item_grid_3_counts" class="item-grid-counts">
-			<div class="item-count" data-for="c : grid_cells_3"><span class="item-count-text" data-if="c.count != ''"
-			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+			<div class="item-count" data-for="c : grid_cells_3"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
 		<div id="item_grid_4_counts" class="item-grid-counts">
-			<div class="item-count" data-for="c : grid_cells_4"><span class="item-count-text" data-if="c.count != ''"
-			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+			<div class="item-count" data-for="c : grid_cells_4"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
 		<!-- Header rail: `-px` since #panel carries transform:scale(root_scale) (base.rcss). -->
 		<div class="modern-header-rail-px ext-header-rail">

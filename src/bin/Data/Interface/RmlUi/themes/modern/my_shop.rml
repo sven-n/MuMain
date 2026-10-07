@@ -9,7 +9,7 @@
 	<!-- CMyShopInventory (MyShopInventory.h): the frame, the item grid, the items C++ draws live into
 	     #item_view, the stack counts, title, shop-name field and Open/Close/Exit buttons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<!-- The frame. -->
 		<div class="bg-panel">
 			<div class="inv-shell-edge"></div>
@@ -34,8 +34,8 @@
 		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
 		<img id="item_view" class="item-view"/>
 		<div id="item_grid_counts" class="item-grid-counts">
-			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text" data-if="c.count != ''"
-			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
 		<!-- Header rail: no top/height override needed -- the shared default already clears this
 		     window's grid budget (`m_Pos.y + 90`, the widest in the family). -->

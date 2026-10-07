@@ -128,8 +128,6 @@ void CDoppelGangerFrame::BindRmlModel(Rml::DataModelConstructor& c, DoppelGanger
 {
     c.Bind("scale_x", &model.scaleX);
     c.Bind("scale_y", &model.scaleY);
-    c.Bind("inverse_scale_x", &model.inverseScaleX);
-    c.Bind("inverse_scale_y", &model.inverseScaleY);
     c.Bind("panel_x", &model.panelX);
     c.Bind("panel_y", &model.panelY);
     auto text = c.RegisterStruct<DoppelGangerFrameTextEntry>();
@@ -190,8 +188,6 @@ void CDoppelGangerFrame::SyncView()
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncField(m_RmlView.Binder(), &DoppelGangerFrameRmlModel::scaleX, "scale_x", transform.scaleX);
     SyncField(m_RmlView.Binder(), &DoppelGangerFrameRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncField(m_RmlView.Binder(), &DoppelGangerFrameRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    SyncField(m_RmlView.Binder(), &DoppelGangerFrameRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
     SyncField(m_RmlView.Binder(), &DoppelGangerFrameRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
     SyncField(m_RmlView.Binder(), &DoppelGangerFrameRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
 

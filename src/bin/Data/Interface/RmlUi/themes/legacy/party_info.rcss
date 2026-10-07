@@ -19,7 +19,7 @@
 	position: absolute;
 	left: 60px;
 	top: 12px;
-	width: 72px;
+	width: calc(72px * var(--root-scale));
 	text-align: center;
 	color: token(text-primary);
 	font-weight: bold;
@@ -30,14 +30,15 @@
 .party-empty-msg {
 	position: absolute;
 	left: 20px;
-	top: 57.5px; /* native glyph tops from y+60, 15 apart, with 5 more before the 4th line
-	                (bound in party_info.rml); our 15px rows centre the glyphs */
-	width: 160px;
+	top: 57.5px; /* native glyph tops from y+60, 15 apart, with 5 more before the 4th line;
+	                our 15px rows centre the glyphs */
+	width: calc(160px * var(--root-scale));
 	color: token(text-primary);
 	font-size: 1em;
 	text-align: left;
 }
-.party-empty-msg span { display: block; line-height: inherit; } /* 15px, bound in party_info.rml */
+.party-empty-msg span { display: block; line-height: inherit; }
+.party-empty-msg span.paragraph { margin-top: calc(5px * var(--root-scale)); }
 
 .party-list { position: absolute; left: 10px; top: 40px; width: 170px; }
 .party-row { position: relative; display: block; width: 170px; height: 71px; }
@@ -63,7 +64,7 @@
 	position: absolute;
 	left: 0;
 	top: 8px;
-	width: 70px;
+	width: calc(70px * var(--root-scale));
 	text-align: center;
 	font-weight: bold;
 	font-size: 1em;
@@ -86,7 +87,7 @@
 	position: absolute;
 	left: 10px;
 	top: 26px;
-	width: 70px;
+	width: calc(70px * var(--root-scale));
 	text-align: left;
 	font-size: 1em;
 	color: rgba(194, 194, 194, 255);
@@ -97,7 +98,7 @@
 	position: absolute;
 	left: 85px;
 	top: 26px;
-	width: 60px;
+	width: calc(60px * var(--root-scale));
 	text-align: left;
 	font-size: 1em;
 	color: rgba(194, 194, 194, 255);
@@ -127,7 +128,7 @@
 	position: absolute;
 	left: 88px;
 	top: 51px;
-	width: 70px;
+	width: calc(70px * var(--root-scale));
 	text-align: right;
 	font-size: 1em;
 	color: token(text-primary);
@@ -144,3 +145,6 @@
 	pointer-events: auto;
 }
 .party-kick-btn:hover { filter: brightness(1.25); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.party-empty-msg { line-height: calc(15px * var(--root-scale)); }

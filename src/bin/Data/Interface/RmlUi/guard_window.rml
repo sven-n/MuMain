@@ -11,80 +11,62 @@
 	     list's frame, backdrops, lines and scroll bar. RmlUi handles the tabs and list rows;
 	     the scroll thumb still uses the existing list interaction.
 	     root_x/root_y/root_scale come from the dock transform; every position and size below is
-	     the theme's. A .sharp-text layer's own width and font size stay bound: it is laid out in
-	     physical pixels and counter-scaled out of the panel (base.rcss). A button click is queued
+	     the theme's. A .sharp-text layer's font size stays bound: it is laid out in physical
+	     pixels and counter-scaled out of the panel (base.rcss). A button click is queued
 	     with guard_button(n). -->
 	<div id="panel" data-model="guard_window" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span id="heading" class="sharp-text gd-heading" data-style-width="(160 * root_scale) + 'px'"
-		      data-style-font-size="title.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title.text}}</span>
-		<span id="owner_master" class="sharp-text gd-owner" data-style-width="(190 * root_scale) + 'px'"
-		      data-style-font-size="owner_master.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{owner_master.text}}</span>
-		<span id="owner_guild" class="sharp-text gd-owner" data-style-width="(190 * root_scale) + 'px'"
-		      data-style-font-size="owner_guild.text_px + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{owner_guild.text}}</span>
+		<span id="heading" class="sharp-text gd-heading"
+		      data-style-font-size="title.text_px + 'px'">{{title.text}}</span>
+		<span id="owner_master" class="sharp-text gd-owner"
+		      data-style-font-size="owner_master.text_px + 'px'">{{owner_master.text}}</span>
+		<span id="owner_guild" class="sharp-text gd-owner"
+		      data-style-font-size="owner_guild.text_px + 'px'">{{owner_guild.text}}</span>
 
 		<div class="gd-tabs">
 			<div class="gd-tab" data-for="t, i : tabs" data-class-selected="t.selected"
 			     data-event-click="guard_tab(i)">
 				<span class="sharp-text sharp-middle gd-tab-label"
-				      data-style-width="(56 * root_scale) + 'px'"
-				      data-style-font-size="text_px + 'px'" data-style-line-height="line_height_px + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{t.label}}</span>
+				      data-style-font-size="text_px + 'px'" data-style-line-height="line_height_px + 'px'">{{t.label}}</span>
 			</div>
 		</div>
 
 		<!-- One page per tab. Each line is named and placed by the theme; C++ fills only the page
 		     on screen, so a hidden page's lines keep whatever they last said. -->
 		<div class="gd-page" data-if="active_tab == 0">
-			<span id="status_start" class="sharp-text gd-line" data-style-width="(190 * root_scale) + 'px'"
-			      data-style-font-size="status_start.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{status_start.text}}</span>
-			<span id="status_end" class="sharp-text gd-line" data-style-width="(190 * root_scale) + 'px'"
-			      data-style-font-size="status_end.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{status_end.text}}</span>
-			<span id="status_period" class="sharp-text gd-line" data-style-width="(190 * root_scale) + 'px'"
-			      data-style-font-size="status_period.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{status_period.text}}</span>
-			<span id="status_expected_label" class="sharp-text gd-line" data-style-width="(190 * root_scale) + 'px'"
-			      data-style-font-size="status_expected_label.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{status_expected_label.text}}</span>
-			<span id="status_expected_time" class="sharp-text gd-line" data-style-width="(190 * root_scale) + 'px'"
-			      data-style-font-size="status_expected_time.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{status_expected_time.text}}</span>
-			<span id="status_next_stage" class="sharp-text gd-line" data-style-width="(190 * root_scale) + 'px'"
-			      data-style-font-size="status_next_stage.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{status_next_stage.text}}</span>
+			<span id="status_start" class="sharp-text gd-line"
+			      data-style-font-size="status_start.text_px + 'px'">{{status_start.text}}</span>
+			<span id="status_end" class="sharp-text gd-line"
+			      data-style-font-size="status_end.text_px + 'px'">{{status_end.text}}</span>
+			<span id="status_period" class="sharp-text gd-line"
+			      data-style-font-size="status_period.text_px + 'px'">{{status_period.text}}</span>
+			<span id="status_expected_label" class="sharp-text gd-line"
+			      data-style-font-size="status_expected_label.text_px + 'px'">{{status_expected_label.text}}</span>
+			<span id="status_expected_time" class="sharp-text gd-line"
+			      data-style-font-size="status_expected_time.text_px + 'px'">{{status_expected_time.text}}</span>
+			<span id="status_next_stage" class="sharp-text gd-line"
+			      data-style-font-size="status_next_stage.text_px + 'px'">{{status_next_stage.text}}</span>
 		</div>
 
 		<div class="gd-page" data-if="active_tab == 1">
 			<span id="register_message" class="sharp-text gd-line" data-class-bold="register_bold"
-			      data-style-width="(190 * root_scale) + 'px'"
-			      data-style-font-size="register_message.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{register_message.text}}</span>
+			      data-style-font-size="register_message.text_px + 'px'">{{register_message.text}}</span>
 			<span id="register_message2" class="sharp-text gd-line" data-class-bold="register_bold"
-			      data-style-width="(190 * root_scale) + 'px'"
-			      data-style-font-size="register_message2.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{register_message2.text}}</span>
-			<span id="register_acquired" class="sharp-text gd-line" data-style-width="(190 * root_scale) + 'px'"
-			      data-style-font-size="register_acquired.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{register_acquired.text}}</span>
-			<span id="register_registered" class="sharp-text gd-line" data-style-width="(190 * root_scale) + 'px'"
-			      data-style-font-size="register_registered.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{register_registered.text}}</span>
+			      data-style-font-size="register_message2.text_px + 'px'">{{register_message2.text}}</span>
+			<span id="register_acquired" class="sharp-text gd-line"
+			      data-style-font-size="register_acquired.text_px + 'px'">{{register_acquired.text}}</span>
+			<span id="register_registered" class="sharp-text gd-line"
+			      data-style-font-size="register_registered.text_px + 'px'">{{register_registered.text}}</span>
 		</div>
 
 		<div class="gd-page" data-if="active_tab == 2">
-			<span id="list_message" class="sharp-text gd-line" data-style-width="(190 * root_scale) + 'px'"
-			      data-style-font-size="list_message.text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{list_message.text}}</span>
+			<span id="list_message" class="sharp-text gd-line"
+			      data-style-font-size="list_message.text_px + 'px'">{{list_message.text}}</span>
 		</div>
 
 		<!-- The guild list's frame and backdrop. One shape; `with-footer` shortens the main box
@@ -104,19 +86,13 @@
 		</div>
 
 		<div class="gd-list gd-list-declare" data-if="list_kind == 1">
-			<span class="sharp-text gd-header hdr-name" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_name}}</span>
-			<span class="sharp-text gd-header hdr-mark-count" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_mark_count}}</span>
-			<span class="sharp-text gd-header hdr-state" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_state}}</span>
-			<span class="sharp-text gd-header hdr-order" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_order}}</span>
-            <div id="guard_declare_list" class="scroll-pane gd-scroll-pane"
-                 data-style-width="160 * root_scale + 'px'" data-style-height="235 * root_scale + 'px'"
-                 data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">
+			<span class="sharp-text gd-header hdr-name" data-style-font-size="text_px + 'px'">{{header_name}}</span>
+			<span class="sharp-text gd-header hdr-mark-count" data-style-font-size="text_px + 'px'">{{header_mark_count}}</span>
+			<span class="sharp-text gd-header hdr-state" data-style-font-size="text_px + 'px'">{{header_state}}</span>
+			<span class="sharp-text gd-header hdr-order" data-style-font-size="text_px + 'px'">{{header_order}}</span>
+            <div id="guard_declare_list" class="scroll-pane gd-scroll-pane counter-scaled"
+                 data-style-font-size="text_px + 'px'">
                 <div class="gd-row" data-for="r : declare_rows" data-class-selected="r.selected"
-                     data-style-width="148 * root_scale + 'px'" data-style-height="13 * root_scale + 'px'"
                      data-event-click="guard_declare_select(r.name)">
                     <div class="gd-row-back"></div>
                     <span class="gd-cell cell-name">{{r.name}}</span>
@@ -129,17 +105,12 @@
 
 		<!-- The guilds taking part in the siege, and the summary row for the selected one. -->
 		<div class="gd-list gd-list-siege" data-if="list_kind == 2">
-			<span class="sharp-text gd-header hdr-name" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_name}}</span>
-			<span class="sharp-text gd-header hdr-side" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_side}}</span>
-			<span class="sharp-text gd-header hdr-involvement" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{header_involvement}}</span>
-            <div id="guard_siege_list" class="scroll-pane gd-scroll-pane"
-                 data-style-width="160 * root_scale + 'px'" data-style-height="195 * root_scale + 'px'"
-                 data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">
+			<span class="sharp-text gd-header hdr-name" data-style-font-size="text_px + 'px'">{{header_name}}</span>
+			<span class="sharp-text gd-header hdr-side" data-style-font-size="text_px + 'px'">{{header_side}}</span>
+			<span class="sharp-text gd-header hdr-involvement" data-style-font-size="text_px + 'px'">{{header_involvement}}</span>
+            <div id="guard_siege_list" class="scroll-pane gd-scroll-pane counter-scaled"
+                 data-style-font-size="text_px + 'px'">
                 <div class="gd-row" data-for="r : siege_rows" data-class-selected="r.selected" data-class-defending="r.defending"
-                     data-style-width="148 * root_scale + 'px'" data-style-height="13 * root_scale + 'px'"
                      data-event-click="guard_siege_select(r.name)">
                     <div class="gd-row-back"></div>
                     <span class="gd-cell cell-name">{{r.name}}</span>
@@ -147,29 +118,24 @@
                     <span class="gd-cell cell-involvement">{{r.involvement}}</span>
                 </div>
             </div>
-			<span class="sharp-text gd-header score-label" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{score_label}}</span>
-			<span class="sharp-text gd-cell score-value" data-style-font-size="text_px + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{score_value}}</span>
+			<span class="sharp-text gd-header score-label" data-style-font-size="text_px + 'px'">{{score_label}}</span>
+			<span class="sharp-text gd-cell score-value" data-style-font-size="text_px + 'px'">{{score_value}}</span>
 		</div>
 
 		<div id="btn_proclaim" class="gd-btn" data-if="proclaim_button.shown"
 		     data-class-locked="proclaim_button.locked" data-event-click="guard_button(0)">
 			<span class="sharp-text sharp-middle gd-label" data-style-font-size="text_px + 'px'"
-			      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{proclaim_button.label}}</span>
+			      data-style-line-height="line_height_px + 'px'">{{proclaim_button.label}}</span>
 		</div>
 		<div id="btn_register" class="gd-btn" data-if="register_button.shown"
 		     data-class-locked="register_button.locked" data-event-click="guard_button(1)">
 			<span class="sharp-text sharp-middle gd-label" data-style-font-size="text_px + 'px'"
-			      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{register_button.label}}</span>
+			      data-style-line-height="line_height_px + 'px'">{{register_button.label}}</span>
 		</div>
 		<div id="btn_give_up" class="gd-btn" data-if="give_up_button.shown"
 		     data-class-locked="give_up_button.locked" data-event-click="guard_button(2)">
 			<span class="sharp-text sharp-middle gd-label" data-style-font-size="text_px + 'px'"
-			      data-style-line-height="line_height_px + 'px'" data-style-width="(53 * root_scale) + 'px'"
-			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{give_up_button.label}}</span>
+			      data-style-line-height="line_height_px + 'px'">{{give_up_button.label}}</span>
 		</div>
 
 		<div id="btn_exit" data-event-click="guard_button(3)" data-attr-data-hint="exit_tooltip"></div>

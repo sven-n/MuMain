@@ -14,7 +14,7 @@
 	position: absolute;
 	left: 0;
 	top: 15px;
-	width: 190px;
+	width: calc(100% * var(--root-scale));
 	text-align: center;
 	/* Native draws it in the normal font, 0xFF49B0FF -- an ABGR DWORD, i.e. (255,176,73). */
 	color: #ffb049;
@@ -37,7 +37,7 @@
 	position: absolute;
 	left: 0;
 	top: 58px;
-	width: 190px;
+	width: calc(100% * var(--root-scale));
 	text-align: center;
 	color: #00ff00;
 	font-weight: bold;
@@ -46,8 +46,7 @@
 }
 
 /* Static warning notice below the grid -- same seven lines/colors/offsets as the old
-   RenderTextInfo() (PurchaseShopInventory.cpp). Each line is cut at the frame's inner edge (x 182,
-   width bound in purchase_shop.rml): native runs a long line on under the inventory, which covers
+   RenderTextInfo() (PurchaseShopInventory.cpp). Each line is cut at the frame's inner edge (x 182): native runs a long line on under the inventory, which covers
    it; here nothing covers it. */
 .warning-label, .warning-label-2 {
 	position: absolute;
@@ -111,3 +110,15 @@
 .bg-left   { left: 0;    top: 64px; width: 21px;  height: 320px; decorator: image(pshop-bg-left); }
 .bg-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(pshop-bg-right); }
 .bg-bottom { left: 0;    top: 384px; width: 190px; height: 45px; decorator: image(pshop-bg-bottom); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { margin-left: calc(50% - 50% * var(--root-scale)); }
+#shop_owner_text { margin-left: calc(50% - 50% * var(--root-scale)); }
+.warning-label { width: calc(152px * var(--root-scale)); }
+.warning-line.line-1 { width: calc(152px * var(--root-scale)); }
+.warning-line.line-2 { width: calc(152px * var(--root-scale)); }
+.warning-line.line-3 { width: calc(152px * var(--root-scale)); }
+.warning-line.line-4 { width: calc(152px * var(--root-scale)); }
+.warning-line.line-5 { width: calc(152px * var(--root-scale)); }
+.warning-label-2.line-6 { width: calc(152px * var(--root-scale)); }
+.warning-label-2.line-7 { width: calc(152px * var(--root-scale)); }

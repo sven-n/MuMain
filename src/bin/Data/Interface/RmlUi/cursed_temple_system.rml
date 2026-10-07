@@ -14,7 +14,7 @@
 	     frames. Text does not stretch: it takes the native size and cancels the stretch. In the
 	     background context, behind its other documents (the original drew it under nearly every
 	     panel). Takes no pointer events: the buttons' input stays native. -->
-	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'" data-style---root-scale="scale_x" data-style---root-scale-y="scale_y">
 		<!-- The panel chrome, hidden together when every window the original checked is open. The
 		     theme may move the corner part with #corner's left and top, in the screen's 640x480
 		     units; C++ reads that offset back and moves its own sprites and buttons the same way. -->
@@ -50,9 +50,8 @@
 		     data-style-opacity="s.opacity"/>
 
 		<div class="tutorial">
-			<span class="tutorial-line" data-for="l : tutorial_lines" data-class-title="l.title"
-			      data-style-font-size="l.text_px + 'px'"
-			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{l.text}}</span>
+			<span class="tutorial-line counter-scaled-xy" data-for="l : tutorial_lines" data-class-title="l.title"
+			      data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
 		</div>
 	</div>
 </body>

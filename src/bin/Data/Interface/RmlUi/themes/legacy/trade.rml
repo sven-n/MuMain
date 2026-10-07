@@ -13,7 +13,7 @@
 	     positioned per-frame from C++ since it tracks a live, variable-length set of flagged item
 	     grid cells. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<!-- The frame. -->
 		<div class="bg-fill"></div>
@@ -49,22 +49,19 @@
 		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
 		<img id="item_view" class="item-view"/>
 		<div id="partner_grid_counts" class="item-grid-counts">
-			<div class="item-count" data-for="c : partner_cells"><span class="item-count-text" data-if="c.count != ''"
-			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+			<div class="item-count" data-for="c : partner_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
 		<div id="item_grid_counts" class="item-grid-counts">
-			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text" data-if="c.count != ''"
-			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
-		<span class="sharp-text" id="title"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{title}}</span>
+		<span class="sharp-text" id="title" data-style-font-size="text_px + 'px'">{{title}}</span>
 
 		<div id="your_nick_bg" class="nick-bg nick-bg-your"></div>
-		<span id="your_guild_name" class="sharp-text guild-name" data-class-hidden="!your_guild_visible"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{your_guild_name}}</span>
-		<span id="your_id_text" class="sharp-text id-text id-text-your"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="(2 * text_px) + 'px'">{{your_id_text}}</span>
-		<span id="your_level_text" class="sharp-text level-text" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'"
+		<span id="your_guild_name" class="sharp-text guild-name" data-class-hidden="!your_guild_visible" data-style-font-size="text_px + 'px'">{{your_guild_name}}</span>
+		<span id="your_id_text" class="sharp-text id-text id-text-your" data-style-font-size="(2 * text_px) + 'px'">{{your_id_text}}</span>
+		<span id="your_level_text" class="sharp-text level-text" data-style-font-size="text_px + 'px'"
 		      data-class-level-bucket-10="your_level_bucket == 10"
 		      data-class-level-bucket-50="your_level_bucket == 50"
 		      data-class-level-bucket-100="your_level_bucket == 100"
@@ -73,7 +70,7 @@
 		      data-class-level-bucket-400="your_level_bucket == 400">{{your_level_text}}</span>
 
 		<div id="your_gold_bg" class="gold-bg gold-bg-your"></div>
-		<span id="your_gold_text" class="sharp-text gold-text gold-text-your gold-amount" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(159 * root_scale) + 'px'"
+		<span id="your_gold_text" class="sharp-text gold-text gold-text-your gold-amount" data-style-font-size="text_px + 'px'"
 		      data-class-gold-base="your_gold_tier == 'base'"
 		      data-class-gold-hundred-thousand="your_gold_tier == 'hundred-thousand'"
 		      data-class-gold-million="your_gold_tier == 'million'"
@@ -86,11 +83,10 @@
 		<div id="divider"></div>
 
 		<div id="my_nick_bg" class="nick-bg nick-bg-my"></div>
-		<span id="my_id_text" class="sharp-text id-text id-text-my"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{my_id_text}}</span>
+		<span id="my_id_text" class="sharp-text id-text id-text-my" data-style-font-size="text_px + 'px'">{{my_id_text}}</span>
 
 		<div id="my_gold_bg" class="gold-bg gold-bg-my"></div>
-		<span id="my_gold_text" class="sharp-text gold-text gold-text-my gold-amount" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(159 * root_scale) + 'px'"
+		<span id="my_gold_text" class="sharp-text gold-text gold-text-my gold-amount" data-style-font-size="text_px + 'px'"
 		      data-class-gold-base="my_gold_tier == 'base'"
 		      data-class-gold-hundred-thousand="my_gold_tier == 'hundred-thousand'"
 		      data-class-gold-million="my_gold_tier == 'million'"
@@ -105,19 +101,14 @@
 
 		<div id="btn_zen" class="trade-btn trade-btn-zen" data-event-click="trade_zen_click" data-attr-data-hint="zen_tooltip"></div>
 
-		<span id="warning_label" class="sharp-text warning-label" data-style-opacity="warning_opacity"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{warning_label}}</span>
-		<span id="notice_line1" class="sharp-text notice-line notice-line1"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{notice_line1}}</span>
-		<span id="notice_line2" class="sharp-text notice-line notice-line2"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{notice_line2}}</span>
-		<span id="notice_line3" class="sharp-text notice-line notice-line3"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{notice_line3}}</span>
+		<span id="warning_label" class="sharp-text warning-label" data-style-opacity="warning_opacity" data-style-font-size="text_px + 'px'">{{warning_label}}</span>
+		<span id="notice_line1" class="sharp-text notice-line notice-line1" data-style-font-size="text_px + 'px'">{{notice_line1}}</span>
+		<span id="notice_line2" class="sharp-text notice-line notice-line2" data-style-font-size="text_px + 'px'">{{notice_line2}}</span>
+		<span id="notice_line3" class="sharp-text notice-line notice-line3" data-style-font-size="text_px + 'px'">{{notice_line3}}</span>
 
 		<!-- Former RenderWarningArrow()'s "Warning" text badge, one per flagged item. -->
 		<div class="sharp-text item-warning-badge" data-for="w : item_warning_badges"
-		     data-style-left="w.x + 'px'" data-style-top="w.y + 'px'" data-style-width="(w.width * root_scale) + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'">{{item_warning_text}}</div>
+		     data-style-left="w.x + 'px'" data-style-top="w.y + 'px'" data-style-width="(w.width * root_scale) + 'px'" data-style-font-size="text_px + 'px'">{{item_warning_text}}</div>
 	</div>
 </body>
 </rml>

@@ -45,3 +45,7 @@
 
 .igs-debug { position: absolute; left: 210px; top: 10px; color: token(semantic-danger); }
 .igs-debug-line { position: relative; display: block; height: 10px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#igs_gift_id { width: calc(200px * var(--root-scale)); height: calc(14px * var(--root-scale)); }
+#igs_gift_message { width: calc(170px * var(--root-scale)); height: calc(65px * var(--root-scale)); }

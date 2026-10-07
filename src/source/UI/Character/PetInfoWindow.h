@@ -66,7 +66,6 @@ namespace mu::ui::window
             // sourced from UI::Scaling::GetActiveTransform(), same convention as character_info.
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
-            float panelWidth = 190.f; // #panel's width (SyncPanelWidth())
 
             int activeTab = TAB_TYPE_DARKHORSE;
             Rml::String windowTitle;

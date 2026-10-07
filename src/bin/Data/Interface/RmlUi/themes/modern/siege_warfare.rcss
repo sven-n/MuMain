@@ -96,3 +96,8 @@ body { pointer-events: none; }
 /* The battle skill's icon: reddened until the hero has the kills it needs. */
 #skill_icon { image-color: #ffffff; }
 #skill_icon.unaffordable { image-color: rgb(255, 127, 127); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#time { width: calc(134px * var(--root-scale)); }
+.team .button-label { width: calc(26px * var(--root-scale)); line-height: calc(22px * var(--root-scale-y)); }
+#alpha_button .button-label { width: calc(38px * var(--root-scale)); line-height: calc(23px * var(--root-scale-y)); }

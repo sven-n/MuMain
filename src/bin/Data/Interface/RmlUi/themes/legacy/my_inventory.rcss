@@ -28,8 +28,8 @@
 	font-family: "token(font-body)";
 }
 
-/* Text rendered at the native text renderer's size: font-size and a 1 / root_scale transform come
-   from the RML (see my_inventory.rml), so these leaves lay out in physical pixels and scale back
+/* Text rendered at the native text renderer's size: font-size comes from the RML and .counter-scaled
+   cancels the panel's scale (see my_inventory.rml), so these leaves lay out in physical pixels and scale back
    around the edge their text is aligned to. */
 .native-text { white-space: nowrap; pointer-events: none; }
 

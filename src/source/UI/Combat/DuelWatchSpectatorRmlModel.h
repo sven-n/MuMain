@@ -33,7 +33,6 @@ struct DuelWatchFrameRmlModel
 {
     // The Hud layout's W/640 x H/480 stretch and its inverse for the counter-scaled names.
     float scaleX = 1.f, scaleY = 1.f;
-    float inverseScaleX = 1.f, inverseScaleY = 1.f;
 
     // A watched channel: the names, score marks and gauges; the frame and the exit button always.
     bool watching = false;
@@ -53,7 +52,6 @@ struct DuelWatchSpectatorEntry
 struct DuelWatchSpectatorsRmlModel
 {
     float scaleX = 1.f, scaleY = 1.f;
-    float inverseScaleX = 1.f, inverseScaleY = 1.f;
 
     float panelX = 0.f;  // the list's left edge, reference px (m_Pos.x)
     float textPx = 0.f;  // the native normal text size, physical px

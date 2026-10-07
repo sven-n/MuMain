@@ -62,7 +62,6 @@ namespace mu::ui::window
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
-            float panelWidth = 190.f;
             Rml::String title;
             Rml::String mixTooltip;
             bool mixVisible = true;

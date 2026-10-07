@@ -27,6 +27,7 @@
 	text-align: left;
 }
 .party-empty-msg span { display: block; line-height: 15px; }
+.party-empty-msg span.paragraph { margin-top: calc(5px * var(--root-scale)); }
 
 .party-list { position: absolute; left: 10px; top: 40px; width: 170px; }
 .party-row { position: relative; display: block; width: 170px; height: 71px; }

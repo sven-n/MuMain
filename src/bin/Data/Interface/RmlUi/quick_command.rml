@@ -12,7 +12,7 @@
 	     transform, everything inside is reference px, and the text is a .sharp-text layer at the
 	     native size, counter-scaled out of the panel. -->
 	<div id="panel" data-model="quick_command" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div id="back"></div>
 		<div id="frame_up"></div>
 		<div class="frame-middle frame-middle-1"></div>
@@ -25,15 +25,11 @@
 		<div class="line line-3"></div>
 		<div class="line line-4"></div>
 
-		<span class="sharp-text" id="name" data-style-font-size="bold_text_px + 'px'"
-		      data-style-width="(112 * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{target_name}}</span>
+		<span class="sharp-text" id="name" data-style-font-size="bold_text_px + 'px'">{{target_name}}</span>
 
 		<div id="rows">
 			<div class="quick-row" data-for="row : rows" data-class-selected="row.selected">
-				<span class="sharp-text quick-label" data-style-font-size="text_px + 'px'"
-				      data-style-width="(112 * root_scale) + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{row.label}}</span>
+				<span class="sharp-text quick-label" data-style-font-size="text_px + 'px'">{{row.label}}</span>
 				<div class="arrow arrow-left"></div>
 				<div class="arrow arrow-right"></div>
 			</div>

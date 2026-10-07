@@ -35,3 +35,6 @@ body { pointer-events: none; }
 	font-family: "token(font-body)";
 	color: #ffffff;
 }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.name { width: calc(57px * var(--root-scale)); }

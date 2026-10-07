@@ -189,3 +189,7 @@
 #igs_storage_page_back { decorator: none; background-color: token(surface-recessed); border: 1px token(border-inner); border-radius: token(radius-sm)px; }
 
 #igs_versions { color: token(text-muted); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#igs_storage_list { width: calc(146px * var(--root-scale)); height: calc(117px * var(--root-scale)); }
+.igs-row { width: calc(131px * var(--root-scale)); height: calc(13px * var(--root-scale)); }

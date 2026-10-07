@@ -22,7 +22,7 @@
 .gd-owner, .gd-line { color: token(text-secondary); }
 
 /* The window's own text. Each line is named, so the theme decides where it sits, what colour it
-   is and how it is aligned; only its width and font size stay bound for the counter-scale. */
+   is and how it is aligned; only its font size stays bound. Its width is reference px times --root-scale. */
 .gd-heading, .gd-owner, .gd-line { left: 0; text-align: center; }
 .gd-heading { left: 15px; top: 13px; font-weight: bold; }
 .gd-owner { font-weight: bold; }
@@ -127,3 +127,24 @@
 .gd-row.defending .gd-row-back { background-color: token(surface-raised); }
 .gd-row.selected .gd-row-back { background-color: token(accent-steel); }
 .gd-row.selected .gd-cell { color: token(text-primary); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#heading { width: calc(160px * var(--root-scale)); }
+#owner_master { width: calc(190px * var(--root-scale)); }
+#owner_guild { width: calc(190px * var(--root-scale)); }
+.gd-tab-label { width: calc(56px * var(--root-scale)); }
+#status_start { width: calc(190px * var(--root-scale)); }
+#status_end { width: calc(190px * var(--root-scale)); }
+#status_period { width: calc(190px * var(--root-scale)); }
+#status_expected_label { width: calc(190px * var(--root-scale)); }
+#status_expected_time { width: calc(190px * var(--root-scale)); }
+#status_next_stage { width: calc(190px * var(--root-scale)); }
+#register_message { width: calc(190px * var(--root-scale)); }
+#register_message2 { width: calc(190px * var(--root-scale)); }
+#register_acquired { width: calc(190px * var(--root-scale)); }
+#register_registered { width: calc(190px * var(--root-scale)); }
+#list_message { width: calc(190px * var(--root-scale)); }
+#guard_declare_list { width: calc(160px * var(--root-scale)); height: calc(235px * var(--root-scale)); }
+.gd-row { width: calc(148px * var(--root-scale)); height: calc(13px * var(--root-scale)); }
+#guard_siege_list { width: calc(160px * var(--root-scale)); height: calc(195px * var(--root-scale)); }
+.gd-label { width: calc(53px * var(--root-scale)); }

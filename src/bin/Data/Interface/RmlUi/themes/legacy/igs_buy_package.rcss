@@ -49,3 +49,7 @@
 /* Developer builds (FOR_WORK): the package's sequence numbers in red right of the dialog. */
 .igs-debug { position: absolute; left: 198px; top: 10px; color: rgb(255, 0, 0); }
 .igs-debug-line { position: relative; display: block; height: 10px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#igs_package_info { width: calc(175px * var(--root-scale)); height: calc(91px * var(--root-scale)); }
+.igs-line { width: calc(160px * var(--root-scale)); height: calc(13px * var(--root-scale)); }

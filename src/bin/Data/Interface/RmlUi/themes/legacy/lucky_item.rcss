@@ -92,3 +92,7 @@
 .bg-left   { left: 0; top: 64px; bottom: 45px; width: 21px; decorator: image(lucky-bg-left); }
 .bg-right  { right: 0; top: 64px; bottom: 45px; width: 21px; decorator: image(lucky-bg-right); }
 .bg-bottom { left: 0; bottom: 0; right: 0; height: 45px; decorator: image(lucky-bg-bottom); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(100% * var(--root-scale)); }
+#text_lines { width: calc((100% - 20px) * var(--root-scale)); line-height: calc(11px * var(--root-scale)); }

@@ -10,7 +10,7 @@
 	     draws live into #item_view, the stack counts, title, subtitle strip, warning text and exit
 	     button. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<!-- The frame. -->
 		<div class="bg-fill"></div>
@@ -33,35 +33,25 @@
 		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
 		<img id="item_view" class="item-view"/>
 		<div id="item_grid_counts" class="item-grid-counts">
-			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text" data-if="c.count != ''"
-			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
-		<span class="sharp-text" id="title"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{title}}</span>
+		<span class="sharp-text" id="title" data-style-font-size="text_px + 'px'">{{title}}</span>
 
 		<!-- Reproduces IMAGE_MYSHOPINVENTORY_EDIT (newui_Box_openTitle.tga), the same sprite
 		     CMyShopInventory's own subject strip uses -- here purely decorative behind the
 		     shop-owner's (read-only) name, not a live text-input widget. -->
 		<div class="shop-title-strip"></div>
-		<span class="sharp-text" id="shop_owner_text"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'">{{shop_owner_text}}</span>
+		<span class="sharp-text" id="shop_owner_text" data-style-font-size="text_px + 'px'">{{shop_owner_text}}</span>
 
-		<span class="sharp-text warning-label"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{warning_label}}</span>
-		<span class="sharp-text warning-line line-1"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{selling_price_line}}</span>
-		<span class="sharp-text warning-line line-2"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{verify_line}}</span>
-		<span class="sharp-text warning-line line-3"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{already_in_store_line}}</span>
-		<span class="sharp-text warning-line line-4"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{cancel_purchased_line}}</span>
-		<span class="sharp-text warning-line line-5"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{cant_be_returned_line}}</span>
-		<span class="sharp-text warning-label-2 line-6"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{all_item_trading_line}}</span>
-		<span class="sharp-text warning-label-2 line-7"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(152 * root_scale) + 'px'">{{zen_only_line}}</span>
+		<span class="sharp-text warning-label" data-style-font-size="text_px + 'px'">{{warning_label}}</span>
+		<span class="sharp-text warning-line line-1" data-style-font-size="text_px + 'px'">{{selling_price_line}}</span>
+		<span class="sharp-text warning-line line-2" data-style-font-size="text_px + 'px'">{{verify_line}}</span>
+		<span class="sharp-text warning-line line-3" data-style-font-size="text_px + 'px'">{{already_in_store_line}}</span>
+		<span class="sharp-text warning-line line-4" data-style-font-size="text_px + 'px'">{{cancel_purchased_line}}</span>
+		<span class="sharp-text warning-line line-5" data-style-font-size="text_px + 'px'">{{cant_be_returned_line}}</span>
+		<span class="sharp-text warning-label-2 line-6" data-style-font-size="text_px + 'px'">{{all_item_trading_line}}</span>
+		<span class="sharp-text warning-label-2 line-7" data-style-font-size="text_px + 'px'">{{zen_only_line}}</span>
 
 		<div id="btn_exit" class="shop-btn-exit" data-event-click="purchase_shop_exit_click"></div>
 	</div>

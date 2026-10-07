@@ -864,8 +864,6 @@ void mu::ui::window::CCursedTempleSystem::BindRmlModel(Rml::DataModelConstructor
 
     c.Bind("scale_x", &model.scaleX);
     c.Bind("scale_y", &model.scaleY);
-    c.Bind("inverse_scale_x", &model.inverseScaleX);
-    c.Bind("inverse_scale_y", &model.inverseScaleY);
     c.Bind("panels_shown", &model.panelsShown);
     c.Bind("score_shown", &model.scoreShown);
     c.Bind("skill_icon_src", &model.skillIconSrc);
@@ -1168,8 +1166,6 @@ void mu::ui::window::CCursedTempleSystem::SyncView()
     CursedTempleSystemRmlModel& model = m_RmlView.GetModel();
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::scaleX, "scale_x", transform.scaleX);
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::sprites, "sprites", std::move(sprites));
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::tutorialLines, "tutorial_lines", std::move(lines));
 }

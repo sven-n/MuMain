@@ -15,7 +15,7 @@
 @spritesheet nd-line-sheet  { src: "../../../newui_myquest_Line.tga"; nd-line-img: 0px 0px 188px 21px; }
 @spritesheet nd-contribute-sheet { src: "../../../Gens_point.tga"; nd-contribute-img: 0px 0px 168px 18px; }
 
-/* Text layers (.sharp-text, base.rcss) are bound in npc_dialogue.rml. */
+/* Text layers: .sharp-text, base.rcss. */
 
 /* NPC name doubles as this window's title -- dynamic (g_QuestMng.GetNPCName()), unlike the other
    docked windows' own static #title text. */
@@ -23,7 +23,7 @@
 	position: absolute;
 	left: 0;
 	top: 12px;
-	width: 190px;
+	width: calc(100% * var(--root-scale));
 	text-align: center;
 	color: token(accent-cyan);
 	font-weight: bold;
@@ -102,3 +102,8 @@
 /* Exit is a common close button -- legacy's sprite already has its own "X" baked in, so the shared
    label span is redundant (same convention quest_progress.rcss's own .btn-exit-label uses). */
 .btn-exit-label { display: none; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.nd-contribute { width: calc(168px * var(--root-scale)); line-height: calc(18px * var(--root-scale)); }
+#npc_lines_container { width: calc(160px * var(--root-scale)); line-height: calc(15px * var(--root-scale)); }
+#answers_container { width: calc(160px * var(--root-scale)); line-height: calc(15px * var(--root-scale)); }

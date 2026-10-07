@@ -12,7 +12,7 @@
 	     .screen is that screen stretched W/640 x H/480 like the original. Text does not stretch: it
 	     takes the native size and cancels the stretch. Takes no pointer events. An image whose src is
 	     bound also binds its rect: RmlUi drops a static rect when it first loads an empty src. -->
-	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'" data-style---root-scale="scale_x" data-style---root-scale-y="scale_y">
 		<div id="result" data-if="result_visible">
 			<img id="banner" data-attr-src="banner_src" data-attr-rect="'0 0 328 93'"
 			     data-style-left="banner_left + 'px'" data-style-opacity="banner_opacity"/>
@@ -35,14 +35,10 @@
 			     data-attr-src="a.src" data-attr-rect="a.rect"/></div>
 			<img id="dark_elf_icon" data-attr-src="dark_elf_icon_src" data-attr-rect="'0 0 14 14'"/>
 			<img id="plate" src="../../../t_main-New.tga" rect="0 0 104 36"/>
-			<span class="hud-text" id="dark_elf_text" data-style-font-size="normal_text_px + 'px'"
-			      data-style-width="(200 * scale_x) + 'px'"
-			      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{dark_elf_text}}</span>
+			<span class="hud-text counter-scaled-xy" id="dark_elf_text" data-style-font-size="normal_text_px + 'px'">{{dark_elf_text}}</span>
 			<div data-if="balgass_visible">
 				<img id="balgass_icon" src="../../../in_main_icon_bal1.tga" rect="0 0 14 14"/>
-				<span class="hud-text" id="balgass_text" data-style-font-size="normal_text_px + 'px'"
-				      data-style-width="(200 * scale_x) + 'px'"
-				      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{balgass_text}}</span>
+				<span class="hud-text counter-scaled-xy" id="balgass_text" data-style-font-size="normal_text_px + 'px'">{{balgass_text}}</span>
 				<img id="balgass_bar" src="../../../in_bar2.jpg" data-attr-rect="balgass_bar_rect"
 				     data-style-width="balgass_bar_width + 'px'"/>
 			</div>
@@ -54,9 +50,8 @@
 			     data-style-width="statue_bar_width + 'px'"/>
 			<!-- The notice's four lines, the first its heading; the theme places and colours them. -->
 			<div class="notices">
-				<span class="notice" data-for="n : notices" data-class-heading="n.heading"
-				      data-style-font-size="bold_text_px + 'px'" data-style-line-height="bold_line_px + 'px'"
-				      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{n.text}}</span>
+				<span class="notice counter-scaled-xy" data-for="n : notices" data-class-heading="n.heading"
+				      data-style-font-size="bold_text_px + 'px'" data-style-line-height="bold_line_px + 'px'">{{n.text}}</span>
 			</div>
 		</div>
 	</div>

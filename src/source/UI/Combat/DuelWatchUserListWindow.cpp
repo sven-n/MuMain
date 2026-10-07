@@ -107,8 +107,6 @@ void CDuelWatchUserListWindow::BindRmlModel(Rml::DataModelConstructor& c, DuelWa
 {
     c.Bind("scale_x", &model.scaleX);
     c.Bind("scale_y", &model.scaleY);
-    c.Bind("inverse_scale_x", &model.inverseScaleX);
-    c.Bind("inverse_scale_y", &model.inverseScaleY);
     c.Bind("panel_x", &model.panelX);
     c.Bind("text_px", &model.textPx);
     c.Bind("text_top", &model.textTop);
@@ -138,8 +136,6 @@ void CDuelWatchUserListWindow::SyncView()
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::scaleX, "scale_x", transform.scaleX);
     SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
     SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
     SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::textPx, "text_px",
               UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform));

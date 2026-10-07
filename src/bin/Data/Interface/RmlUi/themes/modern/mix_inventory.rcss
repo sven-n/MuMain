@@ -182,3 +182,7 @@
 		token(metal-warm-edge) 70%,
 		transparent);
 }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#socket_list { width: calc(160px * var(--root-scale)); height: calc(65px * var(--root-scale)); font-size: calc(11px * var(--root-scale)); }
+.socket-row { width: calc(148px * var(--root-scale)); height: calc(13px * var(--root-scale)); }

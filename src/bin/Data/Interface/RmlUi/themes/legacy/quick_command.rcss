@@ -73,3 +73,7 @@
 .line-2 { top: 74px; }
 .line-3 { top: 93px; }
 .line-4 { top: 112px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#name { width: calc(112px * var(--root-scale)); }
+.quick-label { width: calc(112px * var(--root-scale)); }

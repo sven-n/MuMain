@@ -11,7 +11,7 @@
 	     docked_panel_frame.rcss. Keep ids/data-model/event-callback names in sync with
 	     ../../party_info.rml. -->
 	<div id="panel" data-model="party_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="modern-shell-edge"></div>
 		<div class="modern-groove"></div>
 

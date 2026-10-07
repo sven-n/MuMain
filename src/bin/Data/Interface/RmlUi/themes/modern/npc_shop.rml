@@ -11,7 +11,7 @@
 	     here -- this window's close affordance is the generic frame-corner "X" hit-test
 	     (BtnProcess()'s HandleFrameCornerClose() call). -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<!-- The frame. -->
 		<div class="bg-panel">
 			<div class="inv-shell-edge"></div>
@@ -36,8 +36,8 @@
 		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
 		<img id="item_view" class="item-view"/>
 		<div id="item_grid_counts" class="item-grid-counts">
-			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text" data-if="c.count != ''"
-			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
 		<!-- Header rail: text centered (RT3_SORT_CENTER), and sized for a two-line title+tax-rate
 		     block, unlike the single-title reference windows. -->

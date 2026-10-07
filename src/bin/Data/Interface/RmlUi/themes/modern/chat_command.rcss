@@ -112,3 +112,15 @@
 	background-color: transparent;
 	pointer-events: auto;
 }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#cc_title { width: calc(100% * var(--root-scale)); }
+#cc_empty { width: calc(146px * var(--root-scale)); }
+.cc-cell { width: calc(146px * var(--root-scale)); }
+.cc-row-line { width: calc(146px * var(--root-scale)); }
+.cc-param-label { width: calc(146px * var(--root-scale)); }
+.cc-param-value { width: calc(142px * var(--root-scale)); }
+#value_field { width: calc(142px * var(--root-scale)); height: calc(14px * var(--root-scale)); line-height: calc(14px * var(--root-scale)); }
+.cc-cell.cc-template-label { width: calc(131px * var(--root-scale)); }
+.cc-remove-mark { width: calc(15px * var(--root-scale)); }
+.cc-label { width: calc(64px * var(--root-scale)); }

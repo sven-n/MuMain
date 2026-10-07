@@ -13,20 +13,17 @@
      the two windows (NPC-line/button top offsets, the answers block's top). -->
 <body>
 	<div id="panel" class="qp-etc" data-model="quest_progress_etc" data-style-left="root_x + 'px'"
-	     data-style-top="root_y + 'px'" data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-top="root_y + 'px'" data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span class="sharp-text" id="title"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">Quest</span>
-		<div class="sharp-text qp-subject"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">{{subject}}</div>
+		<span class="sharp-text" id="title" data-style-font-size="text_px + 'px'">Quest</span>
+		<div class="sharp-text qp-subject" data-style-font-size="text_px + 'px'">{{subject}}</div>
 
-		<div class="sharp-text qp-npc-lines"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(164 * root_scale) + 'px'" data-style-line-height="(15 * root_scale) + 'px'">
+		<div class="sharp-text qp-npc-lines" data-style-font-size="text_px + 'px'">
 			<span class="qp-line" data-for="l : npc_lines">{{l.text}}</span>
 		</div>
 
@@ -37,17 +34,14 @@
 
 		<div class="qp-divider"></div>
 
-		<div class="sharp-text qp-answers" data-class-hidden="active_view != 1"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(164 * root_scale) + 'px'" data-style-line-height="(15 * root_scale) + 'px'">
+		<div class="sharp-text qp-answers" data-class-hidden="active_view != 1" data-style-font-size="text_px + 'px'">
 			<div class="qp-answer-row" data-for="a : answers"
 			     data-event-click="questprogressetc_select_answer(a.index)">{{a.text}}</div>
 		</div>
 
 		<div class="qp-reward" data-class-hidden="active_view != 2">
-			<div class="sharp-text qp-reward-list"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(174 * root_scale) + 'px'" data-style-height="(150 * root_scale) + 'px'">
+			<div class="sharp-text qp-reward-list" data-style-font-size="text_px + 'px'">
 				<span class="qp-reward-row" data-for="r : reward_rows"
-				      data-style-padding="(1 * root_scale) + 'px ' + (4 * root_scale) + 'px'"
 				      data-class-clickable="r.clickable"
 				      data-class-row-heading="r.style == 'heading'"
 				      data-class-row-requirement="r.style == 'requirement'"
@@ -61,7 +55,7 @@
 			     m_Pos+95,+360 offset. .qp-reward has zero left/top of its own, so this resolves to
 			     the same panel-relative coordinates the old offset did. -->
 			<div id="reward_popup_anchor" class="qp-popup-anchor"></div>
-			<div id="btn_complete" class="sharp-text qp-btn-complete" data-class-disabled="!request_complete" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(108 * root_scale) + 'px'" data-style-height="(29 * root_scale) + 'px'" data-style-line-height="(29 * root_scale) + 'px'"
+			<div id="btn_complete" class="sharp-text qp-btn-complete" data-class-disabled="!request_complete" data-style-font-size="text_px + 'px'"
 			     data-event-click="questprogressetc_complete">{{ok_label}}</div>
 		</div>
 

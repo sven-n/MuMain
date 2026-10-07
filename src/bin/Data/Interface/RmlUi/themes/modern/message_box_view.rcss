@@ -51,3 +51,7 @@
 .guild-appoint .box-placed .box-btn:nth-child(2) { left: 57px; top: 57px; width: 114px; }
 .guild-appoint .box-placed .box-btn:nth-child(3) { left: 48px; top: 127px; }
 .guild-appoint .box-placed .box-btn:nth-child(4) { left: 112px; top: 127px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#list { width: calc(180px * var(--root-scale)); height: calc(109px * var(--root-scale)); }
+.list-row { width: calc(168px * var(--root-scale)); height: calc(13px * var(--root-scale)); }

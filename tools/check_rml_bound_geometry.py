@@ -33,11 +33,15 @@ inventory rather than an implicit one.
 
 Deliberately allowed everywhere, unlisted: expressions that reference only the root
 transform (`root_x`, `root_y`, `root_scale`, and the older `panel_x`/`panel_y` spelling
-of the same `m_Pos` placement) and `panel_width`. That set *is* the scaling bridge -- the
-panel's own placement and the `.sharp-text` counter-scale -- and is not something a theme
-should be overriding. `panel_width` is the theme's own `#panel` width read back
-(SyncPanelWidth), so a counter-scaled leaf as wide as the panel follows whatever width the
-theme chose. Everything else needs a line in the allowlist.
+of the same `m_Pos` placement). That set *is* the scaling bridge -- the panel's own
+placement -- and is not something a theme should be overriding. Everything else needs a
+line in the allowlist.
+
+Never allowed, listed or not: a number scaled by `root_scale` (or a Hud stretch's
+`scale_x`/`scale_y`) in any bound style, such as `(160 * root_scale) + 'px'` or
+`scale(1 / root_scale)`. That is a counter-scaled layer's length or transform, which the
+theme states in RCSS: `calc(160px * var(--root-scale))`, and base.rcss's `.sharp-text` /
+`.counter-scaled`.
 
 Also deliberately narrow: this checks the four box offsets and the two sizes only. A
 bound `color`, `decorator` or `font-size` has the same override problem, but those are
@@ -71,7 +75,11 @@ STRING_LITERAL_RE = re.compile(r"'[^']*'|\"[^\"]*\"")
 # The scaling bridge: a document may place and counter-scale itself without being listed.
 # panel_x/panel_y are the same m_Pos placement under an older name, used by the windows that
 # place themselves without a root scale; one spelling should win, which is a separate tidy-up.
-ROOT_TRANSFORM_FIELDS = {"root_x", "root_y", "root_scale", "panel_x", "panel_y", "panel_width"}
+ROOT_TRANSFORM_FIELDS = {"root_x", "root_y", "root_scale", "panel_x", "panel_y"}
+
+# Any bound style, and a numeric literal outside its string literals.
+STYLE_BINDING_RE = re.compile(r'data-style-([\w-]+)\s*=\s*"([^"]*)"')
+NUMBER_RE = re.compile(r"(?<![\w.])\d+(?:\.\d+)?")
 
 
 def bound_fields(expression):
@@ -91,6 +99,16 @@ def offending_fields(text):
         found |= bound_fields(expression) - ROOT_TRANSFORM_FIELDS
     for declarations in STYLE_ATTRIBUTE_RE.findall(text):
         found |= {"style=" + name for name in STYLE_GEOMETRY_RE.findall(declarations)}
+    return found
+
+
+def scaled_literals(text):
+    """Bound styles that scale a number by the root scale: lengths the theme should state."""
+    found = []
+    for name, expression in STYLE_BINDING_RE.findall(text):
+        code = STRING_LITERAL_RE.sub(" ", expression)
+        if re.search(r"\b(root_scale(_y)?|scale_[xy])\b", code) and NUMBER_RE.search(code):
+            found.append("%s=\"%s\"" % (name, expression))
     return found
 
 
@@ -139,9 +157,12 @@ def main():
 
     unlisted = []
     listed_and_binding = {}
+    scaled = []
     for document in documents:
         relative = document.relative_to(asset_root).as_posix()
-        fields = offending_fields(document.read_text(encoding="utf-8", errors="replace"))
+        text = document.read_text(encoding="utf-8", errors="replace")
+        scaled += [(relative, binding) for binding in scaled_literals(text)]
+        fields = offending_fields(text)
         if not fields:
             continue
         if relative in allowlist:
@@ -164,6 +185,16 @@ def main():
             "RML inline-geometry guard: %d allowlist entr%s no longer needed, delete: %s"
             % (len(stale), "y is" if len(stale) == 1 else "ies are", ", ".join(stale))
         )
+
+    if scaled:
+        sys.stderr.write(
+            "RML inline-geometry guard: %d binding(s) scale a number by root_scale. A counter-scaled "
+            "layer's lengths belong\nin RCSS as calc(Npx * var(--root-scale)), and its transform is "
+            "base.rcss's .sharp-text / .counter-scaled.\n\n" % len(scaled)
+        )
+        for relative, binding in scaled:
+            sys.stderr.write("  %s -> %s\n" % (relative, binding))
+        return 1
 
     if unlisted:
         sys.stderr.write(

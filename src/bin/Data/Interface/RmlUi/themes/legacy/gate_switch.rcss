@@ -67,3 +67,10 @@
 .t-bl { left: 12px; top: 282px; }
 .t-br { left: 166px; top: 282px; }
 .t-edge-bottom { left: 25px; top: 282px; width: 141px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(160px * var(--root-scale)); }
+#gs_line_1 { width: calc(300px * var(--root-scale)); }
+#gs_line_2 { width: calc(300px * var(--root-scale)); }
+#gs_line_3 { width: calc(300px * var(--root-scale)); }
+.gs-label { width: calc(108px * var(--root-scale)); }

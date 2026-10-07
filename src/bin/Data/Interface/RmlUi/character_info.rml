@@ -13,25 +13,25 @@
 
 	     Text leaves render at the native text renderer's size: text_px is the physical size the
 	     native client draws at for the active transform (it grows more slowly than the panel), and
-	     1 / root_scale cancels #panel's scale so the glyphs are rasterised at that size instead of
+	     .counter-scaled cancels #panel's scale so the glyphs are rasterised at that size instead of
 	     being enlarged. Positions and box
 	     widths stay in reference px; each leaf's transform-origin (character_info.rcss) keeps it
 	     anchored to the edge or centre its text is aligned to. -->
 	<div id="panel" data-model="character_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<!-- The header leaves centre in a box as wide as #panel (panel_width): counter-scaled, it must
-		     be root_scale times wider (and shifted back by half the growth), or a long server name
-		     wraps instead of staying centred on one line. -->
-		<span id="name" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'" data-class-pk-0="pk_level == 0" data-class-pk-1="pk_level == 1" data-class-pk-2="pk_level == 2" data-class-pk-3="pk_level == 3" data-class-pk-4="pk_level == 4" data-class-pk-5="pk_level == 5" data-class-pk-6="pk_level >= 6" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{name_text}}</span>
+		<!-- The header leaves centre in a box as wide as #panel: counter-scaled, it must be
+		     --root-scale times wider and shifted back by half the growth (character_info.rcss), or a
+		     long server name wraps instead of staying centred on one line. -->
+		<span class="counter-scaled" id="name" data-class-pk-0="pk_level == 0" data-class-pk-1="pk_level == 1" data-class-pk-2="pk_level == 2" data-class-pk-3="pk_level == 3" data-class-pk-4="pk_level == 4" data-class-pk-5="pk_level == 5" data-class-pk-6="pk_level >= 6" data-style-font-size="text_px + 'px'">{{name_text}}</span>
 		<!-- Class name and server name crossfade in place (legacy's sine-wave alpha blend
 		     between the two, RenderSubjectTexts()) -- two stacked spans, opacity-driven. -->
-		<span id="classname" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'" data-style-opacity="classname_opacity" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{classname_text}}</span>
-		<span id="servername" data-style-width="(panel_width * root_scale) + 'px'" data-style-margin-left="(panel_width / 2 - panel_width / 2 * root_scale) + 'px'" data-style-opacity="servername_opacity" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{servername_text}}</span>
+		<span class="counter-scaled" id="classname" data-style-opacity="classname_opacity" data-style-font-size="text_px + 'px'">{{classname_text}}</span>
+		<span class="counter-scaled" id="servername" data-style-opacity="servername_opacity" data-style-font-size="text_px + 'px'">{{servername_text}}</span>
 
 		<!-- Summary backdrop: the original's 8-piece frame (RenderFrame()) -- translucent fill, 4
 		     corner sprites, 1px-wide edge sprites stretched across each edge, and the separator
@@ -47,56 +47,56 @@
 		<div class="summary-edge edge-separator"></div>
 		<div class="summary-edge edge-left"></div>
 		<div class="summary-edge edge-right"></div>
-		<span class="level-text" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{level_text}}</span>
-		<span class="levelup-point-text" data-class-hidden="!can_level_up" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{levelup_point_text}}</span>
-		<span class="exp-text" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{exp_text}}</span>
-		<span class="point-probability-text" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{point_probability_text}}</span>
-		<span class="point-text" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{point_text}}</span>
+		<span class="level-text counter-scaled" data-style-font-size="text_px + 'px'">{{level_text}}</span>
+		<span class="levelup-point-text counter-scaled" data-class-hidden="!can_level_up" data-style-font-size="text_px + 'px'">{{levelup_point_text}}</span>
+		<span class="exp-text counter-scaled" data-style-font-size="text_px + 'px'">{{exp_text}}</span>
+		<span class="point-probability-text counter-scaled" data-style-font-size="text_px + 'px'">{{point_probability_text}}</span>
+		<span class="point-text counter-scaled" data-style-font-size="text_px + 'px'">{{point_text}}</span>
 
 		<!-- STR row -->
 		<div class="attr-textbox attr-textbox-str"></div>
-		<span class="attr-label attr-label-str" data-class-attr-potion="str_value_source == 'potion'" data-class-attr-boosted="str_value_source == 'boosted'" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{str_label}}</span>
-		<span class="attr-value attr-value-str" data-class-attr-potion="str_value_source == 'potion'" data-class-attr-boosted="str_value_source == 'boosted'" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{str_value_text}}</span>
-		<div class="attr-lines attr-lines-str" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">
-			<span data-for="line : str_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'" data-style-height="13 * root_scale + 'px'">{{line.text}}</span>
+		<span class="attr-label attr-label-str counter-scaled" data-class-attr-potion="str_value_source == 'potion'" data-class-attr-boosted="str_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{str_label}}</span>
+		<span class="attr-value attr-value-str counter-scaled" data-class-attr-potion="str_value_source == 'potion'" data-class-attr-boosted="str_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{str_value_text}}</span>
+		<div class="attr-lines attr-lines-str counter-scaled" data-style-font-size="text_px + 'px'">
+			<span data-for="line : str_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
 		</div>
 		<div class="stat-btn stat-btn-str" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(0)"></div>
 
 		<!-- AGI row -->
 		<div class="attr-textbox attr-textbox-agi"></div>
-		<span class="attr-label attr-label-agi" data-class-attr-potion="agi_value_source == 'potion'" data-class-attr-boosted="agi_value_source == 'boosted'" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{agi_label}}</span>
-		<span class="attr-value attr-value-agi" data-class-attr-potion="agi_value_source == 'potion'" data-class-attr-boosted="agi_value_source == 'boosted'" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{agi_value_text}}</span>
-		<div class="attr-lines attr-lines-agi" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">
-			<span data-for="line : agi_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'" data-style-height="13 * root_scale + 'px'">{{line.text}}</span>
+		<span class="attr-label attr-label-agi counter-scaled" data-class-attr-potion="agi_value_source == 'potion'" data-class-attr-boosted="agi_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{agi_label}}</span>
+		<span class="attr-value attr-value-agi counter-scaled" data-class-attr-potion="agi_value_source == 'potion'" data-class-attr-boosted="agi_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{agi_value_text}}</span>
+		<div class="attr-lines attr-lines-agi counter-scaled" data-style-font-size="text_px + 'px'">
+			<span data-for="line : agi_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
 		</div>
 		<div class="stat-btn stat-btn-agi" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(1)"></div>
 
 		<!-- VIT row -->
 		<div class="attr-textbox attr-textbox-vit"></div>
-		<span class="attr-label attr-label-vit" data-class-attr-potion="vit_value_source == 'potion'" data-class-attr-boosted="vit_value_source == 'boosted'" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{vit_label}}</span>
-		<span class="attr-value attr-value-vit" data-class-attr-potion="vit_value_source == 'potion'" data-class-attr-boosted="vit_value_source == 'boosted'" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{vit_value_text}}</span>
-		<div class="attr-lines attr-lines-vit" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">
-			<span data-for="line : vit_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'" data-style-height="13 * root_scale + 'px'">{{line.text}}</span>
+		<span class="attr-label attr-label-vit counter-scaled" data-class-attr-potion="vit_value_source == 'potion'" data-class-attr-boosted="vit_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{vit_label}}</span>
+		<span class="attr-value attr-value-vit counter-scaled" data-class-attr-potion="vit_value_source == 'potion'" data-class-attr-boosted="vit_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{vit_value_text}}</span>
+		<div class="attr-lines attr-lines-vit counter-scaled" data-style-font-size="text_px + 'px'">
+			<span data-for="line : vit_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
 		</div>
 		<div class="stat-btn stat-btn-vit" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(2)"></div>
 
 		<!-- ENE row -->
 		<div class="attr-textbox attr-textbox-ene"></div>
-		<span class="attr-label attr-label-ene" data-class-attr-potion="ene_value_source == 'potion'" data-class-attr-boosted="ene_value_source == 'boosted'" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{ene_label}}</span>
-		<span class="attr-value attr-value-ene" data-class-attr-potion="ene_value_source == 'potion'" data-class-attr-boosted="ene_value_source == 'boosted'" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{ene_value_text}}</span>
-		<div class="attr-lines attr-lines-ene" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">
-			<span data-for="line : ene_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'" data-style-height="13 * root_scale + 'px'">{{line.text}}</span>
+		<span class="attr-label attr-label-ene counter-scaled" data-class-attr-potion="ene_value_source == 'potion'" data-class-attr-boosted="ene_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{ene_label}}</span>
+		<span class="attr-value attr-value-ene counter-scaled" data-class-attr-potion="ene_value_source == 'potion'" data-class-attr-boosted="ene_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{ene_value_text}}</span>
+		<div class="attr-lines attr-lines-ene counter-scaled" data-style-font-size="text_px + 'px'">
+			<span data-for="line : ene_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
 		</div>
 		<div class="stat-btn stat-btn-ene" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(3)"></div>
 
 		<!-- CMD row -- Dark Lord only. -->
 		<div class="attr-textbox attr-textbox-cmd" data-class-hidden="!show_charisma"></div>
-		<span class="attr-label attr-label-cmd" data-class-hidden="!show_charisma" data-class-attr-potion="cmd_value_source == 'potion'" data-class-attr-boosted="cmd_value_source == 'boosted'" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{cmd_label}}</span>
-		<span class="attr-value attr-value-cmd" data-class-hidden="!show_charisma" data-class-attr-potion="cmd_value_source == 'potion'" data-class-attr-boosted="cmd_value_source == 'boosted'" data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{cmd_value_text}}</span>
+		<span class="attr-label attr-label-cmd counter-scaled" data-class-hidden="!show_charisma" data-class-attr-potion="cmd_value_source == 'potion'" data-class-attr-boosted="cmd_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{cmd_label}}</span>
+		<span class="attr-value attr-value-cmd counter-scaled" data-class-hidden="!show_charisma" data-class-attr-potion="cmd_value_source == 'potion'" data-class-attr-boosted="cmd_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{cmd_value_text}}</span>
 		<div class="stat-btn stat-btn-cmd" data-class-hidden="!can_level_up || !show_charisma"
 		     data-event-click="chainfo_increase_stat(4)"></div>
 

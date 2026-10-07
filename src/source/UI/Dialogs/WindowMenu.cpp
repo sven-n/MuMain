@@ -170,8 +170,6 @@ void mu::ui::window::CWindowMenu::BindRmlModel(Rml::DataModelConstructor& c, Win
 {
     c.Bind("scale_x", &model.scaleX);
     c.Bind("scale_y", &model.scaleY);
-    c.Bind("inverse_scale_x", &model.inverseScaleX);
-    c.Bind("inverse_scale_y", &model.inverseScaleY);
     c.Bind("text_px", &model.textPx);
 
     auto row = c.RegisterStruct<WindowMenuRowEntry>();
@@ -217,8 +215,6 @@ void mu::ui::window::CWindowMenu::SyncTransform()
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncFloat(m_RmlView.Binder(), &WindowMenuRmlModel::scaleX, "scale_x", transform.scaleX);
     SyncFloat(m_RmlView.Binder(), &WindowMenuRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncFloat(m_RmlView.Binder(), &WindowMenuRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    SyncFloat(m_RmlView.Binder(), &WindowMenuRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 }
 

@@ -10,7 +10,7 @@
      names in sync with ../../npc_quest.rml. -->
 <body>
 	<div id="content_root" data-model="npc_quest" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div id="panel">
 			<div class="modern-shell-edge"></div>
 			<div class="modern-groove"></div>

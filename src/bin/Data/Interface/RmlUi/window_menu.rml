@@ -11,13 +11,13 @@
 	     reference point inside it.
 
 	     Text does not stretch: each label takes the native text renderer's physical size (text_px)
-	     and cancels the stretch with the inverse one, so its glyphs rasterise at the original's
-	     size. The label box is the row's full width times the stretch, so text-align: center
-	     centres it on the row as the original's RT3_SORT_CENTER did.
+	     and cancels the stretch (--root-scale, --root-scale-y; window_menu.rcss), so its glyphs
+	     rasterise at the original's size.
 
 	     A row click runs the row's action from C++ (windowmenu_select); the hover highlight and
 	     arrows are the row's own :hover. -->
-	<div id="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'">
+	<div id="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'"
+	     data-style---root-scale="scale_x" data-style---root-scale-y="scale_y">
 		<div id="panel">
 			<div id="back"></div>
 			<div id="frame_up"></div>
@@ -27,9 +27,7 @@
 
 			<div id="rows">
 				<div class="menu-row" data-for="row : rows" data-event-click="windowmenu_select(row.index)">
-					<span class="menu-label" data-style-font-size="text_px + 'px'"
-					      data-style-width="(112 * scale_x) + 'px'"
-					      data-style-transform="'scale(' + inverse_scale_x + ', ' + inverse_scale_y + ')'">{{row.label}}</span>
+					<span class="menu-label counter-scaled-xy" data-style-font-size="text_px + 'px'">{{row.label}}</span>
 					<div class="arrow arrow-left"></div>
 					<div class="arrow arrow-right"></div>
 				</div>

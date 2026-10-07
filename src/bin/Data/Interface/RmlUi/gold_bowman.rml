@@ -16,7 +16,7 @@
 	     field on opening and reads it for the request, keeps the corner close,
 	     Escape and the requests; a click is queued with item_entry_press. -->
 	<div id="panel" data-model="gold_bowman" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<!-- The docked frame. -->
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
@@ -29,8 +29,7 @@
 		<div class="entry-texts">
 			<div class="entry-text" data-for="t : texts">
 				<span class="sharp-text sharp-centre"
-				      data-style-font-size="t.text_px + 'px'"
-				      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{t.text}}</span>
+				      data-style-font-size="t.text_px + 'px'">{{t.text}}</span>
 			</div>
 		</div>
 
@@ -39,15 +38,12 @@
 			     data-event-click="item_entry_press(i)" data-attr-data-hint="b.hint">
 				<span class="sharp-text sharp-middle sharp-centre entry-label" data-if="b.label != ''"
 				      data-style-font-size="(b.bold ? bold_text_px : text_px) + 'px'"
-				      data-style-line-height="b.label_line_px + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{b.label}}</span>
+				      data-style-line-height="b.label_line_px + 'px'">{{b.label}}</span>
 			</div>
 		</div>
 
 		<input id="serial_field" data-value="input_value" type="text" class="text-field sharp-text" maxlength="12"
-		       data-style-font-size="text_px + 'px'" data-style-width="(200 * root_scale) + 'px'"
-		       data-style-height="(14 * root_scale) + 'px'" data-style-line-height="(14 * root_scale) + 'px'"
-		       data-style-transform="'scale(' + (1 / root_scale) + ')'"/>
+		       data-style-font-size="text_px + 'px'"/>
 	</div>
 </body>
 </rml>

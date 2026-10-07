@@ -16,7 +16,7 @@
 	position: absolute;
 	left: 0;
 	top: 11px; /* native y+12 (glyph top) */
-	width: 190px;
+	width: calc(100% * var(--root-scale));
 	text-align: center;
 	color: token(text-label);
 	font-weight: bold;
@@ -26,7 +26,7 @@
 	position: absolute;
 	left: 0;
 	top: 26px; /* native y+27 */
-	width: 190px;
+	width: calc(100% * var(--root-scale));
 	text-align: center;
 	color: token(text-label);
 	font-weight: bold;
@@ -97,3 +97,7 @@
 .bg-left   { left: 0;    top: 64px; width: 21px;  height: 320px; decorator: image(shop-bg-left); }
 .bg-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(shop-bg-right); }
 .bg-bottom { left: 0;    top: 384px; width: 190px; height: 45px; decorator: image(shop-bg-bottom); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { margin-left: calc(50% - 50% * var(--root-scale)); }
+#tax_rate { margin-left: calc(50% - 50% * var(--root-scale)); }

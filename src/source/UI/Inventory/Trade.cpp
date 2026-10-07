@@ -87,7 +87,6 @@ void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
     UI::Items::RegisterItemGridCells(c);
     c.Bind("partner_cells", &model.partnerCells);
     c.Bind("grid_cells", &model.gridCells);
-    c.Bind("panel_width", &model.panelWidth);
     c.Bind("text_px", &model.textPx);
 
     c.Bind("title", &model.title);
@@ -373,7 +372,6 @@ void CTrade::SyncRmlModel()
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pYourInvenCtrl)
         m_pYourInvenCtrl->FollowGrid(m_RmlView.Document(), "partner_grid", m_Pos, 16, 68);
     if (m_pMyInvenCtrl)

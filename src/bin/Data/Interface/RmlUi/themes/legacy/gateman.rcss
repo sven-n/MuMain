@@ -57,7 +57,7 @@
 #btn_exit { top: 391px; pointer-events: auto; }
 
 /* The window's own text. Each line is named, so the theme decides where it sits, what colour it
-   is and how it is aligned; only its width and font size stay bound for the counter-scale. */
+   is and how it is aligned; only its font size stays bound. Its width is reference px times --root-scale. */
 .gk-page { position: static; }
 .gk-heading, .gk-line { text-align: center; }
 .gk-heading { left: 15px; top: 13px; font-weight: bold; }
@@ -96,3 +96,23 @@
 /* RenderGuestMode() reddened the fee the hero cannot pay. */
 #guest_fee { color: rgb(255, 255, 100); }
 #guest_fee.unaffordable { color: rgb(255, 100, 50); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#heading { width: calc(160px * var(--root-scale)); }
+#restriction { width: calc(190px * var(--root-scale)); }
+#members_1 { width: calc(190px * var(--root-scale)); }
+#members_2 { width: calc(190px * var(--root-scale)); }
+#members_3 { width: calc(190px * var(--root-scale)); }
+#fee_setting_label { width: calc(190px * var(--root-scale)); }
+#fee_range { width: calc(190px * var(--root-scale)); }
+#fee_range_for { width: calc(190px * var(--root-scale)); }
+#fee_increment { width: calc(190px * var(--root-scale)); }
+#member_question { width: calc(190px * var(--root-scale)); }
+#guest_fee { width: calc(190px * var(--root-scale)); }
+#guest_pay_prompt { width: calc(190px * var(--root-scale)); }
+#guest_question { width: calc(190px * var(--root-scale)); }
+#denied_1 { width: calc(190px * var(--root-scale)); }
+#denied_2 { width: calc(190px * var(--root-scale)); }
+#denied_3 { width: calc(190px * var(--root-scale)); }
+#denied_4 { width: calc(190px * var(--root-scale)); }
+.gk-label { width: calc(53px * var(--root-scale)); }

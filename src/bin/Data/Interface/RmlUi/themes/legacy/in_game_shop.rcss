@@ -158,3 +158,7 @@
 
 #igs_versions { position: absolute; left: 12px; top: 396px; color: rgb(210, 180, 230); }
 #igs_versions .igs-version-banner { top: 12px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#igs_storage_list { width: calc(146px * var(--root-scale)); height: calc(117px * var(--root-scale)); }
+.igs-row { width: calc(131px * var(--root-scale)); height: calc(13px * var(--root-scale)); }

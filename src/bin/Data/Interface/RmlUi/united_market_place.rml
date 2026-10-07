@@ -13,27 +13,22 @@
 	     C++ keeps the texts, the button lock, the corner close, Escape and the warp request; a
 	     click is queued with market_warp / market_exit. -->
 	<div id="panel" data-model="united_market_place" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span class="sharp-text" id="title" data-style-font-size="bold_text_px + 'px'"
-		      data-style-width="(160 * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title}}</span>
+		<span class="sharp-text" id="title" data-style-font-size="bold_text_px + 'px'">{{title}}</span>
 		<!-- The seven description slots; the theme gives each its own row. -->
 		<div class="market-lines">
 			<span class="sharp-text market-line" data-for="line : lines"
-			      data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line}}</span>
+			      data-style-font-size="text_px + 'px'">{{line}}</span>
 		</div>
 
 		<div id="warp" data-class-locked="warp_locked" data-event-click="market_warp">
 			<span class="sharp-text sharp-middle" id="warp_label" data-style-font-size="text_px + 'px'"
-			      data-style-width="(53 * root_scale) + 'px'"
-				      data-style-line-height="label_line_px + 'px'"
-			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{warp_text}}</span>
+				      data-style-line-height="label_line_px + 'px'">{{warp_text}}</span>
 		</div>
 
 		<div id="btn_exit" data-event-click="market_exit" data-attr-data-hint="exit_tooltip"></div>

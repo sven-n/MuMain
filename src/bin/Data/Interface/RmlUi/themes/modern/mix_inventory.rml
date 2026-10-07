@@ -10,7 +10,7 @@
 	     #item_view, the stack counts, title, Mix button, recipe-result content and the socket list
 	     box (SyncMixContentModel(), SyncSocketListModel(), MixInventory.cpp). -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<!-- The frame. -->
 		<div class="bg-panel">
 			<div class="inv-shell-edge"></div>
@@ -35,8 +35,8 @@
 		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
 		<img id="item_view" class="item-view"/>
 		<div id="item_grid_counts" class="item-grid-counts">
-			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text" data-if="c.count != ''"
-			     data-style-font-size="text_px + 'px'" data-style-transform="'scale(' + (1 / root_scale) + ')'">{{c.count}}</span></div>
+			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
 		<!-- Same header composition as MyInventory/StorageExt (base.rcss's .modern-header-rail
 		     family, -px variant since #panel carries transform:scale(root_scale)). -->
@@ -70,14 +70,8 @@
 		</div>
 
 		<div class="socket-list-box" data-if="show_socket_list"></div>
-		<div id="socket_list" class="scroll-pane" data-if="show_socket_list"
-		     data-style-width="(160 * root_scale) + 'px'"
-		     data-style-height="(65 * root_scale) + 'px'"
-		     data-style-font-size="11 * root_scale + 'px'"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'">
+		<div id="socket_list" class="scroll-pane counter-scaled" data-if="show_socket_list">
 			<div class="socket-row" data-for="l : socket_lines" data-class-selected="l.selected"
-			     data-style-width="(148 * root_scale) + 'px'"
-			     data-style-height="(13 * root_scale) + 'px'"
 			     data-event-click="mix_inventory_select_socket(l.index)">
 				<div class="socket-row-back"></div>
 				<span class="socket-line-text">{{l.text}}</span>

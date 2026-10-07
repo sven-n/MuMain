@@ -194,3 +194,12 @@
 .attr-lines span { color: #ffffff; }
 .attr-lines span.boosted { color: rgb(100, 150, 255); }
 .attr-lines span.buffed { color: rgb(255, 0, 240); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#name { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
+#classname { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
+#servername { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
+.attr-lines.attr-lines-str span { height: calc(13px * var(--root-scale)); }
+.attr-lines.attr-lines-agi span { height: calc(13px * var(--root-scale)); }
+.attr-lines.attr-lines-vit span { height: calc(13px * var(--root-scale)); }
+.attr-lines.attr-lines-ene span { height: calc(13px * var(--root-scale)); }

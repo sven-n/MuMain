@@ -41,3 +41,8 @@ body { pointer-events: none; }
 .frame-text { color: token(accent-gold); }
 #dg_passed.passed-one { color: token(accent-gold-hover); }
 #dg_passed.passed-several { color: token(semantic-danger); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#dg_passed { width: calc(110px * var(--root-scale)); }
+#dg_time_label { width: calc(110px * var(--root-scale)); }
+#dg_time { width: calc(110px * var(--root-scale)); }

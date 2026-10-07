@@ -215,7 +215,6 @@ void CLuckyItemWnd::BindRmlModel(Rml::DataModelConstructor& c, LuckyItemRmlModel
     UI::Items::RegisterItemGridCells(c);
     c.Bind("grid_cells", &model.gridCells);
     c.Bind("text_px", &model.textPx);
-    c.Bind("panel_width", &model.panelWidth);
     c.Bind("title", &model.title);
     c.Bind("mix_tooltip", &model.mixTooltip);
     c.Bind("mix_visible", &model.mixVisible);
@@ -569,7 +568,6 @@ void CLuckyItemWnd::SyncRmlModel()
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_ptPos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_ptPos, 15, 110);
     if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())

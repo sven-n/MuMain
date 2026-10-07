@@ -69,7 +69,7 @@
 #btn_exit:hover { border-color: token(accent-steel-hover); }
 
 /* The window's own text. Each line is named, so the theme decides where it sits, what colour it
-   is and how it is aligned; only its width and font size stay bound for the counter-scale. */
+   is and how it is aligned; only its font size stays bound. Its width is reference px times --root-scale. */
 .cw-page, .cw-standing { position: static; }
 .cw-heading, .cw-line, .cw-note, .cw-rule { text-align: center; }
 .cw-heading { left: 15px; top: 13px; font-weight: bold; }
@@ -204,3 +204,25 @@
 .bar-defense { background-color: token(semantic-success); }
 .bar-recover { background-color: token(accent-gold); }
 .bar-edge { background-color: token(border-frame); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#heading { width: calc(160px * var(--root-scale)); }
+.cw-tab-label { width: calc(40px * var(--root-scale)); }
+#map_title { width: calc(190px * var(--root-scale)); }
+#improve_title { width: calc(190px * var(--root-scale)); }
+.cw-label { width: calc(53px * var(--root-scale)); }
+#tax_title { width: calc(190px * var(--root-scale)); }
+#chaos_rate { width: calc(175px * var(--root-scale)); }
+#store_rate { width: calc(175px * var(--root-scale)); }
+#tax_note_1 { width: calc(160px * var(--root-scale)); }
+#tax_note_2 { width: calc(160px * var(--root-scale)); }
+#tax_note_3 { width: calc(160px * var(--root-scale)); }
+#tax_rule_1 { width: calc(160px * var(--root-scale)); }
+#tax_rule_2 { width: calc(160px * var(--root-scale)); }
+#tax_rule_3 { width: calc(160px * var(--root-scale)); }
+#tax_rule_4 { width: calc(160px * var(--root-scale)); }
+#tax_rule_5 { width: calc(160px * var(--root-scale)); }
+#tax_rule_6 { width: calc(160px * var(--root-scale)); }
+#tax_footer_1 { width: calc(160px * var(--root-scale)); }
+#tax_footer_2 { width: calc(160px * var(--root-scale)); }
+#tax_footer_3 { width: calc(160px * var(--root-scale)); }

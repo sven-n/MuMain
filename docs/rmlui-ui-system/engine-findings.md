@@ -50,8 +50,8 @@ around it. See [`STATUS.md`](STATUS.md) for migration status and
   including one shipping its own copy of the document. This is what makes C++-side presentation a
   capability loss rather than an untidiness, and it is the reason `building-new-ui.md`'s ownership
   rules treat "bind only what actually varies with data" as a hard rule. The root transform
-  (`root_x`/`root_y`/`root_scale`) and the `.sharp-text` counter-scale are the accepted exceptions:
-  both are the scaling bridge itself, which no theme should be overriding.
+  (`root_x`/`root_y`/`root_scale`, and `--root-scale` beside it) is the accepted exception: it is
+  the scaling bridge itself, which no theme should be overriding.
   **A plain `style="left: 16px"` attribute in the markup is the same inline property** — the same
   dictionary, written by the parser instead of by a data view, and easier to miss because it reads
   as ordinary authoring. `Tools/check_rml_bound_geometry.py` checks both forms.
@@ -236,9 +236,9 @@ plus [PR #989](https://github.com/mikke89/RmlUi/pull/989) (SDL_GPU renderer pari
 | `aspect-ratio` | Not a property | An explicit `width`/`height` |
 | `text-shadow` | Not a property | `font-effect: outline(...)` |
 | `:focus-visible` | Not supported (`:hover`/`:active`/`:focus` and structural selectors are) | `:focus` |
-| `calc()`, `min()`, `max()` | In the pin (upstream PR #983, carried on the fork), built with `RMLUI_MATH_EXPRESSIONS` (`src/CMakeLists.txt`); the item grids size from a static `var(--item-cell)` | A custom property set from C++ at runtime is untried (the counter-scale block) |
+| `calc()`, `min()`, `max()` | In the pin (upstream PR #983, carried on the fork), built with `RMLUI_MATH_EXPRESSIONS` (`src/CMakeLists.txt`); the item grids size from a static `var(--item-cell)`, counter-scaled layers from a bound `--root-scale` | A custom property set at runtime (`SetProperty("--x")` or a `data-style---x` binding) recomputes every `calc()` under it, in lengths, percentages and transforms; one change over 500 layers costs the same as the equivalent data bindings (`tests/ui/test_rml_counter_scale.cpp`) |
 | `clamp()`, `minmax()` | Not registered | Fixed `dp`/`px` values |
-| `var(--x)` | Supported by 6.3, unused here | The project's `token(name)` (`theming-and-modding.md`) |
+| `var(--x)` | Supported by 6.3; used for lengths (`--item-cell`, `--root-scale`) | Colours and fonts: the project's `token(name)` (`theming-and-modding.md`) |
 | `backdrop-filter: blur()` | Works, over the game world too (frosted glass) | — |
 | `@media (max-height: …dp)`, `(max-width: …dp)` | Works; a `dp` length resolves at the context's dp ratio, so a query tracks the UI scale too (the modern options screen's and system menu's compact layouts) | — |
 | `filter: blur()`/`drop-shadow()`, `mask-image` | Unverified | — |

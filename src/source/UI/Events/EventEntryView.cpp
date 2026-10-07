@@ -35,7 +35,6 @@ void mu::ui::window::EventEntryView::BindModel(Rml::DataModelConstructor& c, Eve
     c.Bind("root_x", &model.rootX);
     c.Bind("root_y", &model.rootY);
     c.Bind("root_scale", &model.rootScale);
-    c.Bind("panel_width", &model.panelWidth);
     c.Bind("text_px", &model.textPx);
     c.Bind("title_text_px", &model.titleTextPx);
     c.Bind("title_line_px", &model.titleLinePx);
@@ -109,7 +108,6 @@ void mu::ui::window::EventEntryView::Sync(bool visible, const POINT& pos)
         return;
 
     UI::RmlBridge::SyncRootTransform(m_View.Binder(), pos);
-    UI::RmlBridge::SyncPanelWidth(m_View.Binder(), m_View.Document());
     UI::RmlBridge::SyncNativeTextSize(m_View.Binder());
     SyncTextSizes();
 }

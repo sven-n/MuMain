@@ -164,8 +164,6 @@ void mu::ui::window::CSiegeWarfare::BindRmlModel(Rml::DataModelConstructor& c, S
 {
     c.Bind("scale_x", &model.scaleX);
     c.Bind("scale_y", &model.scaleY);
-    c.Bind("inverse_scale_x", &model.inverseScaleX);
-    c.Bind("inverse_scale_y", &model.inverseScaleY);
     c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("big_text_px", &model.bigTextPx);
     c.Bind("frame_x", &model.frameX);
@@ -240,8 +238,6 @@ void mu::ui::window::CSiegeWarfare::SyncRmlModel()
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     next.scaleX = transform.scaleX;
     next.scaleY = transform.scaleY;
-    next.inverseScaleX = 1.0f / transform.scaleX;
-    next.inverseScaleY = 1.0f / transform.scaleY;
     next.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
     next.bigTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Big, transform);
     m_pSiegeWarUI->FillRmlModel(next);
@@ -253,8 +249,6 @@ void mu::ui::window::CSiegeWarfare::ApplyRmlModel(const SiegeWarfareRmlModel& ne
     SiegeWarfareRmlModel& model = m_RmlView.GetModel();
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::scaleX, "scale_x", next.scaleX);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::scaleY, "scale_y", next.scaleY);
-    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::inverseScaleX, "inverse_scale_x", next.inverseScaleX);
-    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::inverseScaleY, "inverse_scale_y", next.inverseScaleY);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::boldTextPx, "bold_text_px", next.boldTextPx);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::bigTextPx, "big_text_px", next.bigTextPx);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::frameX, "frame_x", next.frameX);

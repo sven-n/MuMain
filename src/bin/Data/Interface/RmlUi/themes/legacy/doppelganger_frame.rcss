@@ -46,3 +46,8 @@ body { pointer-events: none; }
 .frame-text { color: rgb(255, 150, 0); }
 #dg_passed.passed-one { color: rgb(255, 70, 0); }
 #dg_passed.passed-several { color: rgb(255, 0, 0); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#dg_passed { width: calc(110px * var(--root-scale)); }
+#dg_time_label { width: calc(110px * var(--root-scale)); }
+#dg_time { width: calc(110px * var(--root-scale)); }

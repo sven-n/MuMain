@@ -13,18 +13,16 @@
 	     out of the panel. C++ keeps the area and the fire request; a click is queued with
 	     catapult_area(n), catapult_fire or catapult_exit. -->
 	<div id="panel" data-model="catapult" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span class="sharp-text cp-title" data-style-font-size="title_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{title}}</span>
+		<span class="sharp-text cp-title" data-style-font-size="title_px + 'px'">{{title}}</span>
 		<div class="cp-lines">
 			<span class="sharp-text cp-line" data-for="l : lines"
-			      data-style-font-size="l.text_px + 'px'" data-style-width="(panel_width * root_scale) + 'px'"
-			      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{l.text}}</span>
+			      data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
 		</div>
 
 		<!-- The target table's frame: one shape, each theme placing its own edges. -->
@@ -43,15 +41,13 @@
 			<div class="cp-area" data-for="a : areas" data-class-big="a.big" data-class-locked="a.locked"
 			     data-event-click="catapult_area(a.index)">
 				<span class="sharp-text sharp-middle cp-label cp-area-label" data-style-font-size="a.label_px + 'px'"
-				      data-style-line-height="line_height_px + 'px'"
-				      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{a.label}}</span>
+				      data-style-line-height="line_height_px + 'px'">{{a.label}}</span>
 			</div>
 		</div>
 
 		<div id="btn_fire" data-class-locked="fire_locked" data-event-click="catapult_fire">
 			<span class="sharp-text sharp-middle cp-label" data-style-font-size="text_px + 'px'"
-			      data-style-line-height="line_height_px + 'px'" data-style-width="(108 * root_scale) + 'px'"
-			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{fire_text}}</span>
+			      data-style-line-height="line_height_px + 'px'">{{fire_text}}</span>
 		</div>
 
 		<div id="btn_exit" data-event-click="catapult_exit" data-attr-data-hint="exit_tooltip"></div>

@@ -110,3 +110,9 @@
 #ct_reward_hint { color: rgb(255, 0, 0); }
 .rows-allied .result-cell { color: rgb(100, 178, 251); }
 .rows-illusion .result-cell { color: rgb(254, 214, 55); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#ct_hero_list { width: calc(230px * var(--root-scale)); }
+#ct_column_header { width: calc(230px * var(--root-scale)); }
+#ct_reward_hint { width: calc(230px * var(--root-scale)); }
+.result-label { width: calc(54px * var(--root-scale)); }

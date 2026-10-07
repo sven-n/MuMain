@@ -16,7 +16,7 @@
 	     decorator -- the only way to crop an atlas in this build. -->
 	<div id="panel" data-model="mu_helper_skill_picker"
 	     data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="mhsp-entry slot slot--filled" data-for="e : entries"
 		     data-style-left="e.left + 'px'" data-style-top="e.top + 'px'">
 			<div class="mhsp-icon" data-style-decorator="e.decorator"></div>

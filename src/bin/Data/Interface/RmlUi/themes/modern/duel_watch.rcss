@@ -45,3 +45,13 @@
 .room:nth-child(2) { top: 90px; }
 .room:nth-child(3) { top: 180px; }
 .room:nth-child(4) { top: 270px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(160px * var(--root-scale)); }
+#subtitle { width: calc(190px * var(--root-scale)); }
+.room-heading { width: calc(190px * var(--root-scale)); }
+.room-vs { width: calc(190px * var(--root-scale)); }
+.room-player.room-player-1 { width: calc(70px * var(--root-scale)); }
+.room-player.room-player-2 { width: calc(70px * var(--root-scale)); }
+.room-empty { width: calc(190px * var(--root-scale)); }
+.watch-label { width: calc(53px * var(--root-scale)); }

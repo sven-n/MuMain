@@ -30,7 +30,6 @@ struct EventEntryRmlModel
 {
     // Right-docked window -- UI::Scaling::GetActiveTransform() while CManager runs it.
     float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-    float panelWidth = 190.f;
     float textPx = 0.f; // native normal text size in physical px (RmlRootTransform.h)
     // The title, bold, shrunk to its 72-unit box like the original's, on the native line height.
     float titleTextPx = 0.f;

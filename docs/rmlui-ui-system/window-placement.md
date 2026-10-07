@@ -252,7 +252,7 @@ hit boxes against C++ constants, and native parts at `m_Pos + constant`.
 
 | Tier | Windows | State |
 |---|---|---|
-| 1. RCSS only | character, party, pet, NPC dialogue, gate switch, MU Helper config | Done: the docked frame pins to `#panel`'s edges; counter-scaled leaves take `panel_width` (`SyncPanelWidth()`). |
+| 1. RCSS only | character, party, pet, NPC dialogue, gate switch, MU Helper config | Done: the docked frame pins to `#panel`'s edges; a counter-scaled leaf as wide as the panel is `calc(100% * var(--root-scale))`. |
 | 2. Plus hit box | guild info, guild make, command, command list, Blood Castle and Devil Square entry, catapult, lucky coin registration, lucky item | Done: hit boxes read `#panel`. Catapult and lucky item not checked in game. |
 | 3. Plus anchors | quest progress, quest log, NPC quest, castle, guard, gatekeeper, duel watch, MU Helper detail, United Marketplace | Done in code (RmlUi click targets, theme-placed). Siege NPC windows not checked in game. |
 | 4. Item grids | inventory, extension, vault, NPC shop, mix, trade, personal shops | Done: each grid's box and its `.item-cell` pitch (`--item-cell`, `CInventoryCtrl::FollowGrid()`), the equipment slots and their item boxes (`#slot_*_item`) and the option tooltip are the theme's; C++ hit-tests and draws the items in them. Legacy headings centre on `panel_width`. |

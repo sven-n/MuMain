@@ -93,3 +93,7 @@ img { position: absolute; }
 /* The clock reddens while Balgass is on the field. */
 .timer-digit { image-color: #ffffff; }
 .timer-digit.urgent { image-color: rgb(255, 77, 77); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#dark_elf_text { width: calc(200px * var(--root-scale)); }
+#balgass_text { width: calc(200px * var(--root-scale)); }

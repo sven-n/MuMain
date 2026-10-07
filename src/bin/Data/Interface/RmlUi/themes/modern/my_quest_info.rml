@@ -12,7 +12,7 @@
 	     CCharacterInfoWindow/CPetInfoWindow/CPartyInfoWindow so all four read as one family.
 	     Keep ids/data-model/event-callback names in sync with ../../my_quest_info.rml. -->
 	<div id="panel" data-model="my_quest_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div class="modern-shell-edge"></div>
 		<div class="modern-groove"></div>
 

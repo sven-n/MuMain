@@ -80,3 +80,11 @@
 #btn_enter { left: 30px; }
 #btn_close { left: 145px; }
 .temple-label { left: 0; color: #ffffff; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(230px * var(--root-scale)); }
+#ct_temple { width: calc(220px * var(--root-scale)); }
+.temple-line { width: calc(220px * var(--root-scale)); }
+#ct_members { width: calc(220px * var(--root-scale)); }
+#ct_notice { width: calc(230px * var(--root-scale)); }
+.temple-label { width: calc(54px * var(--root-scale)); }

@@ -12,7 +12,7 @@
 	     button locks, the equipment checks, Escape and the requests; a click is queued with
 	     kanturu_refresh / kanturu_enter / kanturu_close. -->
 	<div id="panel" data-model="kanturu_enter" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'">
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div id="back"></div>
 		<div id="frame_top"></div>
 		<div class="frame-middles"><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div></div>
@@ -22,27 +22,19 @@
 		<span class="sharp-text kanturu-line" data-for="line : lines"
 		      data-class-tone-subject="line.kind == 'subject'" data-class-tone-state="line.kind == 'state'"
 		      data-class-tone-note="line.kind == 'note'"
-		      data-style-top="line.top + 'px'" data-style-font-size="line.text_px + 'px'"
-		      data-style-width="(230 * root_scale) + 'px'"
-		      data-style-transform="'scale(' + (1 / root_scale) + ')'">{{line.text}}</span>
+		      data-style-top="line.top + 'px'" data-style-font-size="line.text_px + 'px'">{{line.text}}</span>
 
 		<div class="kanturu-btn" id="btn_refresh" data-class-locked="refresh_locked" data-event-click="kanturu_refresh">
 			<span class="sharp-text sharp-middle kanturu-label" data-style-font-size="text_px + 'px'"
-			      data-style-width="(53 * root_scale) + 'px'"
-			      data-style-line-height="label_line_px + 'px'"
-			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{refresh_text}}</span>
+			      data-style-line-height="label_line_px + 'px'">{{refresh_text}}</span>
 		</div>
 		<div class="kanturu-btn" id="btn_enter" data-class-locked="enter_locked" data-event-click="kanturu_enter">
 			<span class="sharp-text sharp-middle kanturu-label" data-style-font-size="text_px + 'px'"
-			      data-style-width="(53 * root_scale) + 'px'"
-			      data-style-line-height="label_line_px + 'px'"
-			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{enter_text}}</span>
+			      data-style-line-height="label_line_px + 'px'">{{enter_text}}</span>
 		</div>
 		<div class="kanturu-btn" id="btn_close" data-event-click="kanturu_close">
 			<span class="sharp-text sharp-middle kanturu-label" data-style-font-size="text_px + 'px'"
-			      data-style-width="(53 * root_scale) + 'px'"
-			      data-style-line-height="label_line_px + 'px'"
-			      data-style-transform="'translateY(-50%) scale(' + (1 / root_scale) + ')'">{{close_text}}</span>
+			      data-style-line-height="label_line_px + 'px'">{{close_text}}</span>
 		</div>
 	</div>
 </body>

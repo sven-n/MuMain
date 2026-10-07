@@ -9,9 +9,7 @@
 # Format: <path relative to the RmlUi asset root>: <why>. Keep the entries sorted, below this header.
 #
 # "per-frame data" means the geometry is the state itself (a gauge, something following the pointer
-# or a projected point, a count the server does not bound). "counter-scale bridge" means a
-# .sharp-text layer's width or top arrives pre-multiplied because a stylesheet cannot multiply
-# (tracked-deferrals.md's counter-scale block). Sharpen a reason when its document changes what it
+# or a projected point, a count the server does not bound). Sharpen a reason when its document changes what it
 # binds (--review prints each reason beside its bound fields), and delete the line when the
 # document stops binding geometry; the checker prints entries that are no longer needed.
 
@@ -21,7 +19,6 @@ castle_window.rml: a map item's bars are lengths, RenderCastleItem()'s own gauge
 chaos_castle_time.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
 char_info_balloon.rml: per-frame data -- world-projected balloon positions, per frame
 chat_command.rml: per-frame data -- the window grows with how many commands are listed, and the rows below the list follow that height
-chat_input.rml: per-frame data -- tooltip offset follows the hovered button
 chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
 command_window.rml: per-frame data -- target marker follows the selected command
 crywolf.rml: per-frame data -- the success/failure banner and the rank label slide in and out, Balgass's health and the statue's shield are gauge lengths (the shield shortens from its left, so its left moves with it), and the clock's digit runs are centred on their own x so a digit's left depends on how many digits the value has
@@ -34,7 +31,7 @@ duel_watch_spectators.rml: the spectator boxes stack upwards from the frame, and
 empire_guardian_timer.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
 generic_confirm_dialog.rml: per-frame data -- the timed confirm's progress bar is a fraction of its countdown
 generic_menu_dialog.rml: the native box each menu replaces, as its caller describes it (GenericMenuConfig::nativeFrame): the frame height and the text, divider and button tops differ per menu, and legacy reproduces them; a theme that flows the menu ignores them, as modern does
-gens_ranking.rml: counter-scale bridge -- the description's native line step and the vertical root scale its .sharp-text layer cancels; the scroll pane is RmlUi-owned
+gens_ranking.rml: per-frame data -- a description line's height is its native line step, which follows the text, under the vertical stretch the scroll pane cancels; the scroll pane is RmlUi-owned
 item_endurance.rml: per-frame data -- the hovered item's tooltip follows the mouse (clamped to the screen edge); the pet bars are lengths from their health; the left column is a flow whose rows depend on whether the elf's arrow line is shown and which frames exist, and its names are screen-converted physical px; the icon column's start is right-anchored to the live screen width, which is the window's to decide -- the pack inside it is the theme's
 item_explanation.rml: per-frame data -- placed against the hovered item
 kanturu_enter.rml: the subject's and state texts' lines sit where SeparateTextIntoLines() put them -- each group starts under however many lines the one before it wrapped to, so the stacking is derived from the text, not a table the theme could hold
@@ -47,7 +44,7 @@ move_command.rml: per-frame data -- panel height follows the row count
 mu_helper_detail.rml: per-frame data -- the three gauges' fill levels
 mu_helper_skill_picker.rml: per-frame data -- fan-out is data-driven; recorded as the per-frame carve-out at port time
 notices.rml: a screen-converted document: it carries no root transform, and every position is physical px put through the transform the native text used, which UI::Notices::Render() takes ambiently rather than inside a known layout scope. Each row is deliberately sized 2 * PositionX(320) wide from x 0 so its centre lands on the original's centre whatever the transform's offset is, and the text centres in it. Moving the 300 + 13-a-line table into RCSS means giving this document a reference-px space and a stretch, which is a coordinate-space change on an unverified transform, not this rollout's edit
-npc_quest.rml: counter-scale bridge -- the message and answer tops (tracked-deferrals.md's counter-scale block)
+npc_quest.rml: the message block is centred by its line count, per quest state, and the answers start below it: flow does not stack counter-scaled text layers, so both tops are numbers
 party_info.rml: per-frame data -- each member's health bar is a fraction
 party_list.rml: per-frame data -- each card's health bar is a length from the member's health
 pet_info.rml: per-frame data -- the pets' health bars are fractions
@@ -59,18 +56,16 @@ siege_warfare.rml: the hero, the other characters' dots and each command's icon 
 slide_notice.rml: per-frame data -- the ticker scrolls right to left every frame, so the text's left and the band's fading height are its state, not a layout a theme could own
 themes/legacy/chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
 themes/legacy/help_window.rml: per-frame data -- native renderer geometry for the page it still measures
-themes/legacy/mix_inventory.rml: counter-scale bridge -- a recipe line's .sharp-text width (180 or 160 by its alignment) pre-multiplied by root_scale
 themes/legacy/system_log.rml: per-frame data -- native renderer geometry for the lines it still measures
 themes/legacy/tooltip.rml: per-frame data -- tooltip is placed against the pointer
-themes/legacy/trade.rml: counter-scale bridge -- counter-scaled text layers
+themes/legacy/trade.rml: per-frame data -- an item warning badge sits on its item's slot and is as wide as the item
 themes/legacy/window_shell.rml: the shell's own placement: a window the player drags and the game remembers (the friend, letter and chat windows) puts its top-left at root_x/root_y, in physical px
 themes/modern/command_window.rml: per-frame data -- target marker follows the selected command
 themes/modern/generic_confirm_dialog.rml: per-frame data -- the timed confirm's progress bar is a fraction of its countdown
 themes/modern/mu_helper_detail.rml: per-frame data -- the three gauges' fill levels
-themes/modern/npc_quest.rml: counter-scale bridge -- the message and answer tops (tracked-deferrals.md's counter-scale block)
+themes/modern/npc_quest.rml: the dialogue block is centred by its line count, per quest state
 themes/modern/party_info.rml: per-frame data -- each member's health bar is a fraction
 themes/modern/pet_info.rml: per-frame data -- the pets' health bars are fractions
-themes/modern/trade.rml: counter-scale bridge -- counter-scaled text layers
+themes/modern/trade.rml: per-frame data -- an item warning badge sits on its item's slot and is as wide as the item
 themes/modern/window_shell.rml: the shell's own placement: a window the player drags and the game remembers (the friend, letter and chat windows) puts its top-left at root_x/root_y, in physical px
 tooltip.rml: per-frame data -- tooltip is placed against the pointer
-window_menu.rml: counter-scale bridge -- each .sharp-text row's own width under the HUD stretch

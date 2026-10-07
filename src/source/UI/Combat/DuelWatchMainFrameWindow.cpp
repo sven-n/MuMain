@@ -203,8 +203,6 @@ void CDuelWatchMainFrameWindow::BindRmlModel(Rml::DataModelConstructor& c, DuelW
 {
     c.Bind("scale_x", &model.scaleX);
     c.Bind("scale_y", &model.scaleY);
-    c.Bind("inverse_scale_x", &model.inverseScaleX);
-    c.Bind("inverse_scale_y", &model.inverseScaleY);
     c.Bind("watching", &model.watching);
     c.Bind("exit_hint", &model.exitHint);
     auto name = c.RegisterStruct<DuelWatchNameEntry>();
@@ -296,8 +294,6 @@ void CDuelWatchMainFrameWindow::SyncView()
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::scaleX, "scale_x", transform.scaleX);
     SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
 
     SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::exitHint, "exit_hint",
               StringUtils::WideToNarrow(I18N::Game::DuelFinished));

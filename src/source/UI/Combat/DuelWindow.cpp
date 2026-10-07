@@ -106,8 +106,6 @@ void mu::ui::window::CDuelWindow::BindRmlModel(Rml::DataModelConstructor& c, Due
 {
     c.Bind("scale_x", &model.scaleX);
     c.Bind("scale_y", &model.scaleY);
-    c.Bind("inverse_scale_x", &model.inverseScaleX);
-    c.Bind("inverse_scale_y", &model.inverseScaleY);
     c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("panel_x", &model.panelX);
     c.Bind("panel_y", &model.panelY);
@@ -137,8 +135,6 @@ void mu::ui::window::CDuelWindow::SyncRmlModel()
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     Sync(m_RmlView.Binder(), &DuelWindowRmlModel::scaleX, "scale_x", transform.scaleX);
     Sync(m_RmlView.Binder(), &DuelWindowRmlModel::scaleY, "scale_y", transform.scaleY);
-    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::inverseScaleX, "inverse_scale_x", 1.0f / transform.scaleX);
-    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::inverseScaleY, "inverse_scale_y", 1.0f / transform.scaleY);
     Sync(m_RmlView.Binder(), &DuelWindowRmlModel::boldTextPx, "bold_text_px",
          UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
     Sync(m_RmlView.Binder(), &DuelWindowRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));

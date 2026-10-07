@@ -126,16 +126,18 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
   `justify-content: flex-end` (which pushes the earliest lines out of the scroll area); per-line
   backgrounds need `align-items: flex-start`.
 - **A `.scroll-pane` inside a `transform: scale()` panel counter-scales itself out**
-  (`scale(1 / root_scale)`, box bound as `value * root_scale` px), with rows at an explicit bound
+  (`.counter-scaled`, its box `calc(Npx * var(--root-scale))` in RCSS), with rows at an explicit
   width, not `100%` (`component-catalog.md`).
+- **A counter-scaled layer's lengths are RCSS**: `#panel` binds `--root-scale`, base.rcss's
+  `.sharp-text` / `.counter-scaled` cancel it, and the theme writes `width: calc(160px *
+  var(--root-scale))`. A number multiplied by `root_scale` in RML fails the bound-geometry guard.
 - **`MeasureText()` returns reference units**, not pixels; `RenderText()` shrinks text wider than
   its box — use `NativeTextPixelSizeInBox()` per text. Text the native renderer draws small is laid
   out at `CachedFontPointSize()` and scaled down (the login scene lines).
 - **`overflow: hidden` does not clip under a panel's `transform: scale()`**; crop a bar with
   `decorator: image(<sprite> scale-none left top)` on an element of the shown width, or an
   untransformed box with `clip: always`.
-- **Centre a counter-scaled label in RCSS**, not by a C++-measured top or a width multiplied by
-  the root scale: `.sharp-middle` centres it on its button's height and `.sharp-centre` on its
+- **Centre a counter-scaled label in RCSS**, not by a C++-measured top: `.sharp-middle` centres it on its button's height and `.sharp-centre` on its
   parent's width (`engine-findings.md`).
 - **Draw a window in the scale its slot is sized in.** The event HUDs were placed in the HUD's
   UI-scaled units but drawn in the original's W/640 x H/480 stretch, so at 90 % they outgrew their

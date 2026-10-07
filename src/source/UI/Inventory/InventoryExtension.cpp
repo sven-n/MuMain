@@ -91,7 +91,6 @@ void CInventoryExtension::BindRmlModel(Rml::DataModelConstructor& c, InventoryEx
     c.Bind("grid_cells_2", &model.gridCells2);
     c.Bind("grid_cells_3", &model.gridCells3);
     c.Bind("grid_cells_4", &model.gridCells4);
-    c.Bind("panel_width", &model.panelWidth);
     c.Bind("text_px", &model.textPx);
     c.Bind("title", &model.title);
     c.Bind("exit_tooltip", &model.exitTooltip);
@@ -261,7 +260,6 @@ void CInventoryExtension::SyncRmlModel()
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     if (m_extensions[0])
         m_extensions[0]->FollowGrid(m_RmlView.Document(), "item_grid_1", m_Pos, 15, 45);
     if (m_extensions[1])

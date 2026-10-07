@@ -62,7 +62,6 @@ void CPetInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, PetInfoRmlModel&
     c.Bind("root_y", &model.rootY);
     c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
-    c.Bind("panel_width", &model.panelWidth);
 
     c.Bind("active_tab", &model.activeTab);
     c.Bind("window_title", &model.windowTitle);
@@ -274,7 +273,6 @@ void CPetInfoWindow::SyncRmlModel()
     m_RmlView.MarkDirty("root_y");
     m_RmlView.MarkDirty("root_scale");
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
-    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
 
     // Dark Horse tab
     {

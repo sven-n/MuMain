@@ -20,7 +20,7 @@
 	position: absolute;
 	left: 0;
 	top: 12px;
-	width: 190px;
+	width: calc(190px * var(--root-scale));
 	text-align: center;
 	color: token(text-title);
 	font-weight: bold;
@@ -70,11 +70,11 @@
 .quest-empty-msg {
 	position: absolute;
 	left: 14px;
-	top: 32px; /* native glyph tops at y+96, 18 apart (bound in my_quest_info.rml); tab at y+60 */
+	top: 32px; /* native glyph tops at y+96, 18 apart; tab at y+60 */
 	/* To the panel's inner edge (x 180, like .party-empty-msg), not native's 140 wrap width: the
 	   original draws its line past 140 when the text grows (800x600, 1280x720). The text is one
 	   line (MyQuestInfoWindow.cpp) and wraps here only when it would leave the frame. */
-	width: 157px;
+	width: calc(157px * var(--root-scale));
 	color: token(text-heading);
 	font-weight: bold;
 	font-size: 1em;
@@ -86,12 +86,11 @@
 	position: absolute;
 	left: 0;
 	top: 0;
-	width: 172px;
-	height: 100px;
+	width: calc(172px * var(--root-scale));
+	height: calc(100px * var(--root-scale));
 	overflow: auto hidden;
 }
-/* Inside the .quest-list text layer (physical px): height, line height and padding are bound in
-   my_quest_info.rml (18px, 18px, 4px times root_scale). */
+/* Inside the .quest-list text layer: lengths are physical (end of file). */
 .quest-row {
 	display: block;
 	width: 100%;
@@ -119,8 +118,8 @@
 	position: absolute;
 	left: 0;
 	top: 121px;
-	width: 172px;
-	height: 199px;
+	width: calc(172px * var(--root-scale));
+	height: calc(199px * var(--root-scale));
 	overflow: auto hidden;
 }
 
@@ -137,7 +136,7 @@
 #reward_popup_anchor { left: 95px; top: 230px; }
 .quest-content-row {
 	display: block;
-	width: 100%; /* padding 1px 4px, bound in my_quest_info.rml (text layer) */
+	width: 100%;
 	font-size: 1em;
 	color: token(text-info);
 }
@@ -169,11 +168,11 @@
 .jobchange-title {
 	display: block;
 	text-align: center;
-	width: 172px;
+	width: calc(172px * var(--root-scale));
 	color: token(accent-teal);
 	font-weight: bold;
 	font-size: 1em;
-	/* Text layers (line heights bound in my_quest_info.rml): native title at y+58, contents from
+	/* Text layers: native title at y+58, contents from
 	   y+76 in 16px rows; the tab starts at y+60. */
 	position: absolute;
 	top: -3px;
@@ -227,3 +226,16 @@
 .quest-content-row.row-requirement-unmet { color: #ff1e1e; }
 .quest-content-row.row-reward            { color: #dfbf67; }
 .quest-content-row.row-random-reward     { color: #6767df; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#tab_quest { width: calc(48px * var(--root-scale)); height: calc(22px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
+#tab_jobchange { width: calc(48px * var(--root-scale)); height: calc(22px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
+#tab_castletemple { width: calc(72px * var(--root-scale)); height: calc(22px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
+.quest-empty-msg { line-height: calc(18px * var(--root-scale)); }
+.quest-row { height: calc(18px * var(--root-scale)); line-height: calc(18px * var(--root-scale)); padding-left: calc(4px * var(--root-scale)); }
+.quest-content-row { padding: calc(1px * var(--root-scale)) calc(4px * var(--root-scale)); }
+.jobchange-title { line-height: calc(16px * var(--root-scale)); }
+.jobchange-contents { width: calc(172px * var(--root-scale)); line-height: calc(16px * var(--root-scale)); }
+.jobchange-state { width: calc(158px * var(--root-scale)); line-height: calc(18px * var(--root-scale)); }
+.castle-block { width: calc(172px * var(--root-scale)); line-height: calc(20px * var(--root-scale)); }
+.temple-block { width: calc(172px * var(--root-scale)); line-height: calc(20px * var(--root-scale)); }

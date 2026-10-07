@@ -114,3 +114,23 @@
 /* --- Footer ------------------------------------------------------------------------------------ */
 #btn_save, #btn_save_label { left: 120px; top: 388px; }
 #btn_init, #btn_init_label { left: 65px;  top: 388px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(100% * var(--root-scale)); }
+#tab_0_label { width: calc(56px * var(--root-scale)); height: calc(22px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
+#tab_1_label { width: calc(56px * var(--root-scale)); height: calc(22px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
+#tab_2_label { width: calc(56px * var(--root-scale)); height: calc(22px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
+#btn_potion_setting_label { width: calc(38px * var(--root-scale)); height: calc(24px * var(--root-scale)); line-height: calc(24px * var(--root-scale)); }
+#distance_time { width: calc(17px * var(--root-scale)); height: calc(12px * var(--root-scale)); }
+#skill2_delay { width: calc(17px * var(--root-scale)); height: calc(12px * var(--root-scale)); }
+#btn_skill2_setting_label { width: calc(38px * var(--root-scale)); height: calc(24px * var(--root-scale)); line-height: calc(24px * var(--root-scale)); }
+#skill3_delay { width: calc(17px * var(--root-scale)); height: calc(12px * var(--root-scale)); }
+#btn_skill3_setting_label { width: calc(38px * var(--root-scale)); height: calc(24px * var(--root-scale)); line-height: calc(24px * var(--root-scale)); }
+#btn_party_setting_label { width: calc(38px * var(--root-scale)); height: calc(24px * var(--root-scale)); line-height: calc(24px * var(--root-scale)); }
+#item_name { width: calc(88px * var(--root-scale)); height: calc(12px * var(--root-scale)); }
+#btn_add_item_label { width: calc(38px * var(--root-scale)); height: calc(24px * var(--root-scale)); line-height: calc(24px * var(--root-scale)); }
+#extra_list { width: calc(160px * var(--root-scale)); height: calc(70px * var(--root-scale)); }
+.mh-extra-row { height: calc(13px * var(--root-scale)); padding: calc(3px * var(--root-scale)) 0 0 calc(8px * var(--root-scale)); }
+#btn_delete_item_label { width: calc(38px * var(--root-scale)); height: calc(24px * var(--root-scale)); line-height: calc(24px * var(--root-scale)); }
+#btn_save_label { width: calc(52px * var(--root-scale)); height: calc(26px * var(--root-scale)); line-height: calc(26px * var(--root-scale)); }
+#btn_init_label { width: calc(52px * var(--root-scale)); height: calc(26px * var(--root-scale)); line-height: calc(26px * var(--root-scale)); }

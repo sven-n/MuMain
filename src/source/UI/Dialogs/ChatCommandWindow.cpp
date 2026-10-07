@@ -687,7 +687,6 @@ void mu::ui::window::CChatCommandWindow::BindRmlModel(Rml::DataModelConstructor&
     c.Bind("root_x", &model.rootX);
     c.Bind("root_y", &model.rootY);
     c.Bind("root_scale", &model.rootScale);
-    c.Bind("panel_width", &model.panelWidth);
     c.Bind("text_px", &model.textPx);
     c.Bind("window_height", &model.windowHeight);
 
@@ -772,7 +771,6 @@ void mu::ui::window::CChatCommandWindow::SyncRmlModel()
         return;
 
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
-    UI::RmlBridge::SyncPanelWidth(m_RmlView.Binder(), m_RmlView.Document());
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncContent();
     SyncValueField();

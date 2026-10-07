@@ -55,3 +55,8 @@
 .cp-areas.defense .cp-area:nth-child(1) { left: 18px; top: 125px; }
 .cp-areas.defense .cp-area:nth-child(2) { left: 97px; top: 125px; }
 .cp-areas.defense .cp-area:nth-child(3) { left: 56px; top: 179px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.cp-title { width: calc(100% * var(--root-scale)); }
+.cp-line { width: calc(100% * var(--root-scale)); }
+#btn_fire .cp-label { width: calc(108px * var(--root-scale)); }

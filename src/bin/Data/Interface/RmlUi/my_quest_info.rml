@@ -9,35 +9,31 @@
 	<!-- Movable, non-HUD window: root_x/root_y/root_scale come from
 	     UI::Scaling::GetActiveTransform(), not RmlUi's dp auto-fit -- same as my_inventory.rml's #panel. -->
 	<div id="panel" data-model="my_quest_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'"
+	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale"
 	     data-style-font-size="(text_px / root_scale) + 'px'">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
-		<span class="sharp-text" id="title"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(190 * root_scale) + 'px'">Quest</span>
+		<span class="sharp-text" id="title" data-style-font-size="text_px + 'px'">Quest</span>
 
 		<div class="tab-row">
-			<div id="tab_quest" class="sharp-text tab-btn tab-btn-quest" data-class-active="active_tab == 0" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(48 * root_scale) + 'px'" data-style-height="(22 * root_scale) + 'px'" data-style-line-height="(22 * root_scale) + 'px'"
+			<div id="tab_quest" class="sharp-text tab-btn tab-btn-quest" data-class-active="active_tab == 0" data-style-font-size="text_px + 'px'"
 			     data-event-click="myquest_select_tab(0)">{{tab_quest_label}}</div>
-			<div id="tab_jobchange" class="sharp-text tab-btn tab-btn-jobchange" data-class-active="active_tab == 1" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(48 * root_scale) + 'px'" data-style-height="(22 * root_scale) + 'px'" data-style-line-height="(22 * root_scale) + 'px'"
+			<div id="tab_jobchange" class="sharp-text tab-btn tab-btn-jobchange" data-class-active="active_tab == 1" data-style-font-size="text_px + 'px'"
 			     data-event-click="myquest_select_tab(1)">{{tab_jobchange_label}}</div>
-			<div id="tab_castletemple" class="sharp-text tab-btn tab-btn-castletemple" data-class-active="active_tab == 2" data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(72 * root_scale) + 'px'" data-style-height="(22 * root_scale) + 'px'" data-style-line-height="(22 * root_scale) + 'px'"
+			<div id="tab_castletemple" class="sharp-text tab-btn tab-btn-castletemple" data-class-active="active_tab == 2" data-style-font-size="text_px + 'px'"
 			     data-event-click="myquest_select_tab(2)">{{tab_castletemple_label}}</div>
 		</div>
 
 		<!-- Quest tab -->
 		<div class="quest-tab" data-class-hidden="active_tab != 0">
-			<div class="sharp-text quest-empty-msg" data-class-hidden="!quest_list_empty"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(157 * root_scale) + 'px'" data-style-line-height="(18 * root_scale) + 'px'">
+			<div class="sharp-text quest-empty-msg" data-class-hidden="!quest_list_empty" data-style-font-size="text_px + 'px'">
 				<span data-for="line : empty_quest_lines">{{line.text}}</span>
 			</div>
-			<div class="sharp-text quest-list" data-class-hidden="quest_list_empty"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(172 * root_scale) + 'px'" data-style-height="(100 * root_scale) + 'px'">
+			<div class="sharp-text quest-list" data-class-hidden="quest_list_empty" data-style-font-size="text_px + 'px'">
 				<div class="quest-row" data-for="q : quests" data-class-selected="q.selected"
-				     data-style-height="(18 * root_scale) + 'px'" data-style-line-height="(18 * root_scale) + 'px'" data-style-padding-left="(4 * root_scale) + 'px'"
 				     data-event-click="myquest_select_quest(q.index)">{{q.text}}</div>
 			</div>
 
@@ -45,10 +41,8 @@
 			     stretching it to fill would warp it vertically (RenderQuestInfo draws it at fixed size). -->
 			<div class="quest-divider"></div>
 
-			<div class="sharp-text quest-contents"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(172 * root_scale) + 'px'" data-style-height="(199 * root_scale) + 'px'">
+			<div class="sharp-text quest-contents" data-style-font-size="text_px + 'px'">
 				<span class="quest-content-row" data-for="c : contents"
-				      data-style-padding="(1 * root_scale) + 'px ' + (4 * root_scale) + 'px'"
 				      data-class-clickable="c.clickable"
 				      data-class-row-subject="c.style == 'subject'"
 				      data-class-row-summary="c.style == 'summary'"
@@ -75,29 +69,24 @@
 
 		<!-- Job-change tab -->
 		<div class="jobchange-tab" data-class-hidden="active_tab != 1">
-			<div class="sharp-text jobchange-title"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(172 * root_scale) + 'px'" data-style-line-height="(16 * root_scale) + 'px'">{{jobchange_title}}</div>
-			<div class="sharp-text jobchange-contents"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(172 * root_scale) + 'px'" data-style-line-height="(16 * root_scale) + 'px'">
+			<div class="sharp-text jobchange-title" data-style-font-size="text_px + 'px'">{{jobchange_title}}</div>
+			<div class="sharp-text jobchange-contents" data-style-font-size="text_px + 'px'">
 				<span data-for="line : jobchange_lines">{{line.text}}</span>
 			</div>
 			<div class="quest-divider jobchange-divider"></div>
-			<div class="sharp-text jobchange-state"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(158 * root_scale) + 'px'" data-style-line-height="(18 * root_scale) + 'px'">
+			<div class="sharp-text jobchange-state" data-style-font-size="text_px + 'px'">
 				<span data-for="line : jobchange_state_lines">{{line.text}}</span>
 			</div>
 		</div>
 
 		<!-- Castle/Temple tab -->
 		<div class="castletemple-tab" data-class-hidden="active_tab != 2">
-			<div class="sharp-text castle-block"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(172 * root_scale) + 'px'" data-style-line-height="(20 * root_scale) + 'px'">
+			<div class="sharp-text castle-block" data-style-font-size="text_px + 'px'">
 				<div class="castle-title">{{castle_title}}</div>
 				<div class="castle-line">{{castle_line0}}</div>
 				<div class="castle-line">{{castle_line1}}</div>
 			</div>
-			<div class="sharp-text temple-block"
-		     data-style-transform="'scale(' + (1 / root_scale) + ')'" data-style-font-size="text_px + 'px'" data-style-width="(172 * root_scale) + 'px'" data-style-line-height="(20 * root_scale) + 'px'">
+			<div class="sharp-text temple-block" data-style-font-size="text_px + 'px'">
 				<div class="temple-title">{{temple_title}}</div>
 				<div class="temple-line">{{temple_line0}}</div>
 				<div class="temple-line">{{temple_line1}}</div>
