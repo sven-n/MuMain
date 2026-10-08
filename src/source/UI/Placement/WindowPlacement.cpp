@@ -457,7 +457,7 @@ static void RestoreUnslotted(const Rml::ElementList& slots)
             std::any_of(slots.begin(), slots.end(), [&](Rml::Element* slot) { return EntryFor(slot) == &entry; });
         if (!hasSlot)
         {
-            window->SetLayoutMode(UI::Layout::ForInterface(entry.windowId));
+            window->LeaveSlot(UI::Layout::ForInterface(entry.windowId));
             entry.placed = false;
         }
     }
@@ -523,7 +523,10 @@ void Update()
     for (const auto& [name, entry] : g_windows)
     {
         if (const mu::ui::window::CObject* window = entry.getWindow ? entry.getWindow() : nullptr)
+        {
             window->SyncFillPlacement();
+            window->SyncSlotPlacement();
+        }
     }
 }
 

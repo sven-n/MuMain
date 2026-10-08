@@ -34,6 +34,7 @@ namespace mu::ui::window
         UI::Scaling::LayoutMode m_layoutMode;
         UI::Scaling::Transform m_slotTransform{1.f, 1.f, 0.f, 0.f, 1.f};
         UI::RmlBridge::FillPlacementSize m_fillSize;
+        UI::RmlBridge::SlotPlacement m_slotPlacement;
     public:
         CObject()
             : m_hRelatedWnd(nullptr), m_bRender(true), m_bUpdate(true), m_bActive(true),
@@ -66,13 +67,27 @@ namespace mu::ui::window
         // The smallest size a fill slot may give this window, in its layout units; without one the
         // window's content size.
         virtual bool GetFillMinimumSize(float&, float&) const { return false; }
+        // A window drawn by a document whose #panel the workspace places: a slot gives the panel its
+        // position and scale, so the window binds neither.
+        virtual Rml::ElementDocument* GetPlacedDocument() const { return nullptr; }
         // The workspace places this window: its logical space is `transform`, with (0, 0) at the
         // slot's top-left.
         void PlaceInSlot(const UI::Scaling::Transform& transform)
         {
             m_layoutMode = UI::Scaling::LayoutMode::Slot;
             m_slotTransform = transform;
+            if (m_slotPlacement.Set(transform.offsetX, transform.offsetY, transform.scaleX))
+                m_slotPlacement.Apply(GetPlacedDocument(), "panel");
         }
+        // The theme gives this window no slot any more: it returns to `mode`.
+        void LeaveSlot(UI::Scaling::LayoutMode mode)
+        {
+            m_layoutMode = mode;
+            if (m_slotPlacement.Set(0.f, 0.f, 0.f))
+                m_slotPlacement.Apply(GetPlacedDocument(), "panel");
+        }
+        // Once a frame: gives a document rebuilt since (a theme switch) its slot placement again.
+        void SyncSlotPlacement() const { m_slotPlacement.Sync(GetPlacedDocument(), "panel"); }
         // The transform this window's logical coordinates map through to screen pixels.
         UI::Scaling::Transform GetLayoutTransform() const
         {

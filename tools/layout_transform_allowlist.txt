@@ -14,7 +14,7 @@ Guild/GuildInfoWindow.cpp: 7
 Guild/GuildMakeWindow.cpp: 5
 Render/Text/CUIRenderTextSDLTtf.cpp: 1
 Scenes/LoginSceneOverlay.cpp: 1
-UI/Character/CharacterInfoWindow.cpp: 4
+UI/Character/CharacterInfoWindow.cpp: 1
 UI/Character/PetInfoWindow.cpp: 3
 UI/Combat/CastleWindow.cpp: 5
 UI/Combat/DuelWatchMainFrameWindow.cpp: 2

@@ -72,6 +72,7 @@ namespace mu::ui::window
         void Release();
         void SetPos(int x, int y);
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         void Show(bool bShow) override;
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -113,9 +114,6 @@ namespace mu::ui::window
 
         struct CharacterInfoRmlModel
         {
-            // Movable window (SetPos(), collision-shuffled by PanelColumnX), not HUD-anchored --
-            // sourced from UI::Scaling::GetActiveTransform(), same convention as my_quest_info.
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // UI::RmlBridge::SyncNativeTextSize()
 
             bool canLevelUp = false;   // CharacterAttribute->LevelUpPoint > 0

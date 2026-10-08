@@ -103,6 +103,11 @@ theme reload, a HUD part shown or hidden, the chat log resizing) call `Invalidat
   Everything that maps window coordinates reads `GetLayoutTransform()`, so `CManager` hit-testing,
   native grids, 3D icons and `SyncRootTransform()`'s `root_*` follow the slot unchanged. Without a
   slot a window returns to its `UILayoutPolicy` mode.
+- **Placed documents**: a window that returns its document from `CObject::GetPlacedDocument()` has
+  its `#panel` placed by the slot itself (`UI::RmlBridge::SlotPlacement`): `left`/`top`, a scale
+  transform and `--root-scale`, inline, with the `slot-placed` class, and given again to a document
+  a theme switch rebuilt. Its model binds no `root_*`. Such a window needs a slot in every theme;
+  `CCharacterInfoWindow` is the first.
 - **HUD documents**: `UI::RmlBridge::RegisterWorkspaceDocument(name, docGetter, rootId, options)`
   adapts a document root to a `PlacementParticipant` (visible/measure/place callbacks) — placed by
   `left`/`top` and a scale transform; the `workspace-placed` class lets the theme drop the part's

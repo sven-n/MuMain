@@ -231,6 +231,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME rml_slot_placement_tests
+    SOURCES
+        test_rml_slot_placement.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
     NAME rml_runtime_scale_tests
     SOURCES
         test_rml_runtime_scale.cpp

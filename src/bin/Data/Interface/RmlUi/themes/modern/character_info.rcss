@@ -6,6 +6,9 @@
    all come from docked_panel_frame.rcss, shared with the other three -- only genuinely
    window-specific content stays here. */
 
+/* The panel takes the pointer, so clicks on it never reach the world or the windows below. */
+#panel { pointer-events: auto; }
+
 /* Right-hand pieces are pinned to #panel's edges, so they follow a wider or filled panel. */
 
 #name, #classname, #servername {

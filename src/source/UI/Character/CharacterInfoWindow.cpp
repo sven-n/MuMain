@@ -20,7 +20,7 @@
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlSyncField.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
@@ -120,10 +120,6 @@ bool mu::ui::window::CCharacterInfoWindow::Create(CManager* pNewUIMng, int x, in
 
 void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, CharacterInfoRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
-
     model.textPx =
         UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, UI::Scaling::GetActiveTransform());
     c.Bind("text_px", &model.textPx);
@@ -242,17 +238,8 @@ void mu::ui::window::CCharacterInfoWindow::Show(bool bShow)
 
 bool mu::ui::window::CCharacterInfoWindow::UpdateMouseEvent()
 {
-    // RmlUi handles both close targets; the corner target follows the theme-sized panel edge.
-    // #panel's own live RCSS size is the source of truth -- CHAINFO_WINDOW_WIDTH/HEIGHT only cover
-    // the first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
-    float panelWidth = CHAINFO_WINDOW_WIDTH;
-    float panelHeight = CHAINFO_WINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    // RmlUi handles both close targets; over the panel, the windows below get no mouse.
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool mu::ui::window::CCharacterInfoWindow::UpdateKeyEvent()
@@ -422,7 +409,6 @@ void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
 
     auto& model = m_RmlView.GetModel();
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::canLevelUp, "can_level_up", CharacterAttribute->LevelUpPoint > 0);

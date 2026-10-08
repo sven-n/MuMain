@@ -6,10 +6,8 @@
 	<link type="text/rcss" href="character_info.rcss"/>
 </head>
 <body>
-	<!-- Movable, non-HUD window: root_x/root_y/root_scale come from
-	     UI::Scaling::GetActiveTransform(), not RmlUi's dp auto-fit -- same convention as
-	     my_quest_info.rml's #panel (this window is collision-shuffled between the same
-	     PanelColumnX() slots).
+	<!-- The workspace slot places #panel and sets its scale and --root-scale
+	     (CObject::GetPlacedDocument()); the panel lays out in reference px.
 
 	     Text leaves render at the native text renderer's size: text_px is the physical size the
 	     native client draws at for the active transform (it grows more slowly than the panel), and
@@ -17,8 +15,7 @@
 	     being enlarged. Positions and box
 	     widths stay in reference px; each leaf's transform-origin (character_info.rcss) keeps it
 	     anchored to the edge or centre its text is aligned to. -->
-	<div id="panel" data-model="character_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="character_info">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>

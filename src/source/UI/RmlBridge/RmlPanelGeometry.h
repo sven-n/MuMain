@@ -77,4 +77,21 @@ namespace UI::RmlBridge
         // Applies a non-zero size again to a document that lost it (rebuilt by a theme switch).
         void Sync(Rml::ElementDocument* doc, const char* panelId) const;
     };
+
+    // Where a workspace slot puts a window's panel (CObject::GetPlacedDocument()): the slot's
+    // top-left in screen pixels and its region's scale. Set inline on the panel, with the scale also
+    // as --root-scale for the counter-scaled layers; a zero scale means not placed.
+    struct SlotPlacement
+    {
+        float left = 0.f;
+        float top = 0.f;
+        float scale = 0.f;
+
+        // Returns whether the placement changed.
+        bool Set(float newLeft, float newTop, float newScale);
+        // Places `panelId` in `doc` and sets its "slot-placed" class, or clears both while unplaced.
+        void Apply(Rml::ElementDocument* doc, const char* panelId) const;
+        // Applies the placement again to a document that lost it (rebuilt by a theme switch).
+        void Sync(Rml::ElementDocument* doc, const char* panelId) const;
+    };
 }

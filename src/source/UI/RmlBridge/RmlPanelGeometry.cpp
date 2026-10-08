@@ -8,6 +8,8 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Types.h>
 
+#include <string>
+
 bool UI::RmlBridge::RefreshLogicalPanelSize(Rml::ElementDocument* doc, const char* panelId, float& width, float& height)
 {
     if (!doc)
@@ -69,6 +71,50 @@ void UI::RmlBridge::FillPlacementSize::Sync(Rml::ElementDocument* doc, const cha
         return;
     Rml::Element* panel = doc->GetElementById(panelId);
     if (panel != nullptr && !panel->IsClassSet("fill-placement"))
+        Apply(doc, panelId);
+}
+
+bool UI::RmlBridge::SlotPlacement::Set(float newLeft, float newTop, float newScale)
+{
+    if (left == newLeft && top == newTop && scale == newScale)
+        return false;
+    left = newLeft;
+    top = newTop;
+    scale = newScale;
+    return true;
+}
+
+void UI::RmlBridge::SlotPlacement::Apply(Rml::ElementDocument* doc, const char* panelId) const
+{
+    Rml::Element* panel = doc != nullptr ? doc->GetElementById(panelId) : nullptr;
+    if (panel == nullptr)
+        return;
+
+    const bool placed = scale > 0.f;
+    panel->SetClass("slot-placed", placed);
+    if (placed)
+    {
+        const std::string scaleText = std::to_string(scale);
+        panel->SetProperty(Rml::PropertyId::Left, Rml::Property(left, Rml::Unit::PX));
+        panel->SetProperty(Rml::PropertyId::Top, Rml::Property(top, Rml::Unit::PX));
+        panel->SetProperty("transform", "scale(" + scaleText + ")");
+        panel->SetProperty("--root-scale", scaleText);
+    }
+    else
+    {
+        panel->RemoveProperty(Rml::PropertyId::Left);
+        panel->RemoveProperty(Rml::PropertyId::Top);
+        panel->RemoveProperty("transform");
+        panel->RemoveProperty("--root-scale");
+    }
+}
+
+void UI::RmlBridge::SlotPlacement::Sync(Rml::ElementDocument* doc, const char* panelId) const
+{
+    if (scale <= 0.f || doc == nullptr)
+        return;
+    Rml::Element* panel = doc->GetElementById(panelId);
+    if (panel != nullptr && !panel->IsClassSet("slot-placed"))
         Apply(doc, panelId);
 }
 

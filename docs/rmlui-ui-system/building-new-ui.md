@@ -106,10 +106,11 @@ Three permanent shapes, following that boundary:
 
 - **`Render()` draws nothing** and returns `true`; RmlUi renders the document in its own pass.
 - **`UpdateMouseEvent()` claims the panel**, so a click on it doesn't also reach windows below or
-  the world: read the live RCSS size with `UI::RmlBridge::RefreshLogicalPanelSize()` and return
-  `false` while the cursor is inside `WindowGeometry(m_Pos, size)` (`CCharacterInfoWindow` is the
-  shape). RmlUi does the actual hit-testing of buttons and fields. Test it at a non-100 % UI scale
-  (`layout-and-scaling.md`'s scale sweep).
+  the world: the theme gives `#panel` `pointer-events: auto`, so RmlUi takes clicks on it, and the
+  window returns `!UI::RmlBridge::IsPointerOver(document)` (`RmlPointer.h`), which needs no units
+  (`CCharacterInfoWindow` is the shape). Older windows still test `MouseX`/`MouseY` against
+  `WindowGeometry(m_Pos, RefreshLogicalPanelSize())`; a window with native content under its panel
+  keeps that until the content moves to physical pixels, because RmlUi would take its clicks too.
 - **`UpdateKeyEvent()`** keeps only real key behaviour (Esc to close, hotkeys).
 - **A `UI::RmlBridge::ThemedView` member owns the documents and the model**
   (`UI/RmlBridge/RmlThemedView.h`): the model's binding function, the document paths and any
