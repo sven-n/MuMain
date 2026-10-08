@@ -119,7 +119,7 @@ void CChaosCastleTime::SyncView()
         }
     }
     // the theme's colours, the time turning imminent under five minutes.
-    m_View.Sync(shown, m_Pos, {kills, "normal"}, {I18N::Game::TimeLeft, "normal"},
+    m_View.Sync(shown, {kills, "normal"}, {I18N::Game::TimeLeft, "normal"},
                 {m_szTime, m_iTimeState == CC_TIME_STATE_IMMINENCE ? "imminent" : "normal"});
 }
 

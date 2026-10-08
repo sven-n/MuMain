@@ -7,15 +7,14 @@
 <body data-model="duel_watch_spectators">
 	<!-- The spectators of the watched duel (CDuelWatchUserListWindow), shown with the spectator
 	     frame: a 57 x 17 box per name, 18 apart, stacked upwards from the window's position (the
-	     list's bottom-left corner; the first name on top). A LayoutMode::HudFrame window, so
-	     .screen carries the bottom HUD's uniform scale; the names take their native size and cancel
-	     it. Takes no pointer events (C++ keeps the pointer over the boxes from the world). -->
-	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'" data-style---root-scale="scale_x" data-style---root-scale-y="scale_y">
-		<div class="anchor" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
+	     list's bottom-left corner; the first name on top). Its workspace slot places #panel
+	     there at the bottom HUD's scale; the names take their native size and cancel it. Takes no pointer events (C++ keeps the pointer over the boxes from the world). -->
+	<div class="screen">
+		<div id="panel" class="anchor">
 			<div class="stack">
 				<div class="slot" data-for="name : spectators">
 					<div class="box"></div>
-					<span class="name counter-scaled-xy" data-style-font-size="text_px + 'px'">{{name}}</span>
+					<span class="name counter-scaled" data-style-font-size="text_px + 'px'">{{name}}</span>
 				</div>
 			</div>
 		</div>

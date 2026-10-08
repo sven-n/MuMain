@@ -17,13 +17,7 @@ struct BattleSoccerTeamEntry
 
 struct BattleSoccerScoreRmlModel
 {
-    // The HudFrame layout's scale (UI::Scaling::GetActiveTransform() while CManager
-    // runs this window) and its inverse for the counter-scaled text leaves.
-    float scaleX = 1.f, scaleY = 1.f;
     float boldTextPx = 0.f; // native bold text size in physical px
-
-    // The window's top-left, reference px (CBattleSoccerScore::m_Pos).
-    float panelX = 0.f, panelY = 0.f;
 
     // Top line first; empty when neither a guild war nor a spectated match is on.
     std::vector<BattleSoccerTeamEntry> teams;

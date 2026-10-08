@@ -629,7 +629,7 @@ bool CSystem::LoadMainSceneInterface()
                             int homeX, int homeY)
     {
         UI::Placement::RegisterHudWindow(
-            slotName, windowId,
+            slotName, windowId, [&window]() -> CObject* { return window; },
             [&window](int x, int y)
             {
                 if (window != nullptr)

@@ -30,10 +30,6 @@ float TextPxInBox(UI::Scaling::FontRole role, HFONT font, const UI::Scaling::Tra
 
 void BindTimerModel(Rml::DataModelConstructor& c, EventTimerRmlModel& model)
 {
-    c.Bind("scale_x", &model.scaleX);
-    c.Bind("scale_y", &model.scaleY);
-    c.Bind("panel_x", &model.panelX);
-    c.Bind("panel_y", &model.panelY);
     c.Bind("box_left", &model.boxLeft);
     c.Bind("box_width", &model.boxWidth);
     c.Bind("kills_text", &model.killsText);
@@ -58,7 +54,7 @@ void mu::ui::window::EventTimerView::Build()
     m_View.Ensure();
 }
 
-void mu::ui::window::EventTimerView::Sync(bool visible, const POINT& pos, const Line& first, const Line& second,
+void mu::ui::window::EventTimerView::Sync(bool visible, const Line& first, const Line& second,
                                           const Line& time, float boxLeft, float boxWidth)
 {
     Build();
@@ -71,10 +67,6 @@ void mu::ui::window::EventTimerView::Sync(bool visible, const POINT& pos, const 
 
     // CManager scopes LayoutMode::HudFrame around the window: the bottom HUD's uniform scale, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    SyncField(m_View.Binder(), &EventTimerRmlModel::scaleX, "scale_x", transform.scaleX);
-    SyncField(m_View.Binder(), &EventTimerRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncField(m_View.Binder(), &EventTimerRmlModel::panelX, "panel_x", static_cast<float>(pos.x));
-    SyncField(m_View.Binder(), &EventTimerRmlModel::panelY, "panel_y", static_cast<float>(pos.y));
 
     SyncField(m_View.Binder(), &EventTimerRmlModel::boxLeft, "box_left", boxLeft);
     SyncField(m_View.Binder(), &EventTimerRmlModel::boxWidth, "box_width", boxWidth);

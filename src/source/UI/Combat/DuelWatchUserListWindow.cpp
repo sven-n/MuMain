@@ -104,10 +104,6 @@ float CDuelWatchUserListWindow::GetLayerDepth()
 
 void CDuelWatchUserListWindow::BindRmlModel(Rml::DataModelConstructor& c, DuelWatchSpectatorsRmlModel& model)
 {
-    c.Bind("scale_x", &model.scaleX);
-    c.Bind("scale_y", &model.scaleY);
-    c.Bind("panel_x", &model.panelX);
-    c.Bind("panel_y", &model.panelY);
     c.Bind("text_px", &model.textPx);
     c.RegisterArray<std::vector<Rml::String>>();
     c.Bind("spectators", &model.spectators);
@@ -130,10 +126,6 @@ void CDuelWatchUserListWindow::SyncView()
 
     // CManager scopes LayoutMode::HudFrame around the window: the bottom HUD's uniform scale, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::scaleX, "scale_x", transform.scaleX);
-    SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
-    SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
     SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::textPx, "text_px",
               UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform));
 

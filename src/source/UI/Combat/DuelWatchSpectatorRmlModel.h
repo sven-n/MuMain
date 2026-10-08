@@ -31,11 +31,6 @@ struct DuelWatchNameEntry
 // The spectator frame (CDuelWatchMainFrameWindow).
 struct DuelWatchFrameRmlModel
 {
-    // The bottom HUD's uniform scale (LayoutMode::HudFrame), cancelled by the counter-scaled names.
-    float scaleX = 1.f, scaleY = 1.f;
-    // The HUD's top-left, reference px (m_Pos).
-    float panelX = 0.f, panelY = 0.f;
-
     // A watched channel: the names, score marks and gauges; the frame and the exit button always.
     bool watching = false;
     Rml::String exitHint;
@@ -48,10 +43,6 @@ struct DuelWatchFrameRmlModel
 // The spectator list (CDuelWatchUserListWindow).
 struct DuelWatchSpectatorsRmlModel
 {
-    float scaleX = 1.f, scaleY = 1.f;
-
-    // The list's bottom-left corner, reference px (m_Pos).
-    float panelX = 0.f, panelY = 0.f;
     float textPx = 0.f; // the native normal text size, physical px
     std::vector<Rml::String> spectators; // the first one on top
 };

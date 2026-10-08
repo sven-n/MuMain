@@ -35,13 +35,6 @@ struct DoppelGangerFrameMarkerEntry
 
 struct DoppelGangerFrameRmlModel
 {
-    // The HudFrame layout's scale (UI::Scaling::GetActiveTransform() while CManager
-    // runs the window) and its inverse for the counter-scaled text leaves.
-    float scaleX = 1.f, scaleY = 1.f;
-
-    // The frame's top-left, reference px (m_Pos).
-    float panelX = 0.f, panelY = 0.f;
-
     DoppelGangerFrameTextEntry passedLine, timeLabel, timeLine;
     // How many monsters have got through: "none", "one", "several". The original reddened the
     // line as they did; the theme owns that now.

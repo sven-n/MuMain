@@ -40,3 +40,9 @@ body { pointer-events: none; }
 .timer-text.closing { color: rgb(255, 70, 0); }
 .timer-text.imminent { color: rgb(255, 32, 32); }
 .timer-text.expiring { color: rgb(255, 0, 0); }
+
+/* Each line's box, in the panel's reference px, counter-scaled with the line. */
+.timer-text { width: calc(var(--box-width) * var(--root-scale)); }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }

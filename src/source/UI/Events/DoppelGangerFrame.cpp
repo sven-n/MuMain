@@ -126,10 +126,6 @@ DoppelGangerFrameBarEntry BarPiece(const char* src, float fill)
 
 void CDoppelGangerFrame::BindRmlModel(Rml::DataModelConstructor& c, DoppelGangerFrameRmlModel& model)
 {
-    c.Bind("scale_x", &model.scaleX);
-    c.Bind("scale_y", &model.scaleY);
-    c.Bind("panel_x", &model.panelX);
-    c.Bind("panel_y", &model.panelY);
     auto text = c.RegisterStruct<DoppelGangerFrameTextEntry>();
     text.RegisterMember("text", &DoppelGangerFrameTextEntry::text);
     text.RegisterMember("text_px", &DoppelGangerFrameTextEntry::textPx);
@@ -186,10 +182,6 @@ void CDoppelGangerFrame::SyncView()
 
     // CManager scopes LayoutMode::HudFrame around the window: the bottom HUD's uniform scale, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    SyncField(m_RmlView.Binder(), &DoppelGangerFrameRmlModel::scaleX, "scale_x", transform.scaleX);
-    SyncField(m_RmlView.Binder(), &DoppelGangerFrameRmlModel::scaleY, "scale_y", transform.scaleY);
-    SyncField(m_RmlView.Binder(), &DoppelGangerFrameRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
-    SyncField(m_RmlView.Binder(), &DoppelGangerFrameRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
 
     // The original's texts: the monsters that passed (orange, red-orange after one, red after two),
     // "Time left" and the time, each centred on 110 units and shrunk to them; the themes place

@@ -78,7 +78,13 @@ namespace mu::ui::window
         {
             m_layoutMode = UI::Scaling::LayoutMode::Slot;
             m_slotTransform = transform;
-            if (m_slotPlacement.Set(transform.offsetX, transform.offsetY, transform.scaleX))
+            PlaceDocument(transform.offsetX, transform.offsetY, transform.scaleX);
+        }
+        // Places the document's root at `left`/`top` (screen pixels) and `scale`, leaving the
+        // window's own layout mode alone (a HUD part keeps its HUD space).
+        void PlaceDocument(float left, float top, float scale)
+        {
+            if (m_slotPlacement.Set(left, top, scale))
                 m_slotPlacement.Apply(GetPlacedDocument(), PlacedRootId());
         }
         // The theme gives this window no slot any more: it returns to `mode`.

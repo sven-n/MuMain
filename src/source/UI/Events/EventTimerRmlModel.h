@@ -9,13 +9,6 @@ namespace mu::ui::window
 // line carries how pressing it is (EventTimerView::Line::state), which the theme colours.
 struct EventTimerRmlModel
 {
-    // The HudFrame layout's scale (UI::Scaling::GetActiveTransform() while CManager
-    // runs the window) and its inverse for the counter-scaled text leaves.
-    float scaleX = 1.f, scaleY = 1.f;
-
-    // The window's top-left, reference px (m_Pos).
-    float panelX = 0.f, panelY = 0.f;
-
     // The box every line is centred on, reference px from the frame's left.
     float boxLeft = 0.f, boxWidth = 124.f;
 

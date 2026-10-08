@@ -34,3 +34,6 @@ body { pointer-events: none; }
    of its x. */
 #minutes .digit { left: calc(35px - var(--n) * 4.2px + var(--i) * 6.72px); }
 #seconds .digit { left: calc(65px - var(--n) * 4.2px + var(--i) * 6.72px); }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }

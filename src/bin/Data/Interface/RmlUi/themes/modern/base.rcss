@@ -581,6 +581,7 @@ input, select, textarea, .btn, [data-event-click] { drag: block; }
    clicks on it never reach the world or the windows below. */
 #panel.slot-placed, #content_root.slot-placed {
 	pointer-events: auto;
+	transform-origin: left top;
 	left: var(--slot-left);
 	top: var(--slot-top);
 	transform: scale(var(--root-scale));

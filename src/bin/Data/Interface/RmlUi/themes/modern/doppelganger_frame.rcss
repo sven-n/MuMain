@@ -46,3 +46,6 @@ body { pointer-events: none; }
 #dg_passed { width: calc(110px * var(--root-scale)); }
 #dg_time_label { width: calc(110px * var(--root-scale)); }
 #dg_time { width: calc(110px * var(--root-scale)); }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }

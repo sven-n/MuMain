@@ -6,17 +6,16 @@
 </head>
 <body data-model="kanturu_info">
 	<!-- The Kanturu boss-battle HUD (CKanturuInfoWindow): the frame, the characters and the monsters
-	     (or the boss) left, and the time left in newui_number1 digits with a blinking colon. A
-	     LayoutMode::HudFrame window, so .screen carries the bottom HUD's uniform scale and #panel sits
-	     at the window's reference position. Text does not scale: it takes the native bold size and
+	     (or the boss) left, and the time left in newui_number1 digits with a blinking colon. Its
+	     workspace slot places #panel at the bottom HUD's scale. Text does not scale: it takes the native bold size and
 	     cancels the scale. In the background context, behind its other documents (the original drew it
 	     under every panel). Takes no pointer events. -->
-	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'" data-style---root-scale="scale_x" data-style---root-scale-y="scale_y">
-		<div id="panel" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
+	<div class="screen">
+		<div id="panel">
 			<div id="back"></div>
-			<span class="info-text counter-scaled-xy" id="users" data-style-font-size="bold_text_px + 'px'">{{users_text}}</span>
-			<span class="info-text counter-scaled-xy" id="monsters" data-style-font-size="bold_text_px + 'px'">{{monsters_text}}</span>
-			<span class="info-text counter-scaled-xy" id="colon" data-if="colon_visible" data-style-font-size="bold_text_px + 'px'">:</span>
+			<span class="info-text counter-scaled" id="users" data-style-font-size="bold_text_px + 'px'">{{users_text}}</span>
+			<span class="info-text counter-scaled" id="monsters" data-style-font-size="bold_text_px + 'px'">{{monsters_text}}</span>
+			<span class="info-text counter-scaled" id="colon" data-if="colon_visible" data-style-font-size="bold_text_px + 'px'">:</span>
 			<!-- Each run's digits; the theme centres a run from its digit count and index. -->
 			<div class="run" id="minutes" data-style---n="minute_digits.size">
 				<img class="digit" src="../../../newui_number1.tga" data-for="cell, i : minute_digits"

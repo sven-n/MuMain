@@ -104,11 +104,7 @@ float mu::ui::window::CDuelWindow::GetLayerDepth()
 
 void mu::ui::window::CDuelWindow::BindRmlModel(Rml::DataModelConstructor& c, DuelWindowRmlModel& model)
 {
-    c.Bind("scale_x", &model.scaleX);
-    c.Bind("scale_y", &model.scaleY);
     c.Bind("bold_text_px", &model.boldTextPx);
-    c.Bind("panel_x", &model.panelX);
-    c.Bind("panel_y", &model.panelY);
     c.Bind("hero_name", &model.heroName);
     c.Bind("hero_score", &model.heroScore);
     c.Bind("enemy_name", &model.enemyName);
@@ -133,12 +129,8 @@ void mu::ui::window::CDuelWindow::SyncRmlModel()
 
     // CManager scopes LayoutMode::HudFrame around this window: the bottom HUD's uniform scale, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::scaleX, "scale_x", transform.scaleX);
-    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::scaleY, "scale_y", transform.scaleY);
     Sync(m_RmlView.Binder(), &DuelWindowRmlModel::boldTextPx, "bold_text_px",
          UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
-    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
-    Sync(m_RmlView.Binder(), &DuelWindowRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
 
     Sync(m_RmlView.Binder(), &DuelWindowRmlModel::heroName, "hero_name",
          Rml::String(StringUtils::WideToNarrow(g_DuelMgr.GetDuelPlayerID(DUEL_HERO))));

@@ -6,23 +6,22 @@
 </head>
 <body data-model="blood_castle_time">
 	<!-- The Blood Castle time (CBloodCastle) HUD above the bottom HUD's right end
-	     (UI/Events/EventTimerView.h): the frame, the kill count, "Time left" and the time. A
-	     LayoutMode::HudFrame window, so .screen carries the bottom HUD's uniform scale and #panel sits
-	     at the window's reference position. Text does not scale: each line takes its native size, in
+	     (UI/Events/EventTimerView.h): the frame, the kill count, "Time left" and the time. Its
+	     workspace slot places #panel at the bottom HUD's scale. Text does not scale: each line takes its native size, in
 	     its bound colour, centred on its bound box and shrunk to it like the original's, and cancels
 	     the scale. Takes no pointer events. -->
-	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'" data-style---root-scale="scale_x" data-style---root-scale-y="scale_y">
-		<div id="panel" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
+	<div class="screen">
+		<div id="panel">
 			<div id="back"></div>
-			<span class="timer-text counter-scaled-xy" id="kills" data-if="kills_text != ''" data-class-plain="kills_state == 'plain'" data-class-standby="kills_state == 'standby'" data-class-normal="kills_state == 'normal'" data-class-closing="kills_state == 'closing'" data-class-imminent="kills_state == 'imminent'" data-class-expiring="kills_state == 'expiring'"
+			<span class="timer-text counter-scaled" id="kills" data-if="kills_text != ''" data-class-plain="kills_state == 'plain'" data-class-standby="kills_state == 'standby'" data-class-normal="kills_state == 'normal'" data-class-closing="kills_state == 'closing'" data-class-imminent="kills_state == 'imminent'" data-class-expiring="kills_state == 'expiring'"
 			      data-style-left="box_left + 'px'" data-style-font-size="kills_text_px + 'px'"
-			      data-style-width="(box_width * scale_x) + 'px'">{{kills_text}}</span>
-			<span class="timer-text counter-scaled-xy" id="time_left" data-if="time_left_text != ''" data-class-plain="time_left_state == 'plain'" data-class-standby="time_left_state == 'standby'" data-class-normal="time_left_state == 'normal'" data-class-closing="time_left_state == 'closing'" data-class-imminent="time_left_state == 'imminent'" data-class-expiring="time_left_state == 'expiring'"
+			      data-style---box-width="box_width + 'px'">{{kills_text}}</span>
+			<span class="timer-text counter-scaled" id="time_left" data-if="time_left_text != ''" data-class-plain="time_left_state == 'plain'" data-class-standby="time_left_state == 'standby'" data-class-normal="time_left_state == 'normal'" data-class-closing="time_left_state == 'closing'" data-class-imminent="time_left_state == 'imminent'" data-class-expiring="time_left_state == 'expiring'"
 			      data-style-left="box_left + 'px'" data-style-font-size="time_left_text_px + 'px'"
-			      data-style-width="(box_width * scale_x) + 'px'">{{time_left_text}}</span>
-			<span class="timer-text counter-scaled-xy" id="time" data-class-plain="time_state == 'plain'" data-class-standby="time_state == 'standby'" data-class-normal="time_state == 'normal'" data-class-closing="time_state == 'closing'" data-class-imminent="time_state == 'imminent'" data-class-expiring="time_state == 'expiring'"
+			      data-style---box-width="box_width + 'px'">{{time_left_text}}</span>
+			<span class="timer-text counter-scaled" id="time" data-class-plain="time_state == 'plain'" data-class-standby="time_state == 'standby'" data-class-normal="time_state == 'normal'" data-class-closing="time_state == 'closing'" data-class-imminent="time_state == 'imminent'" data-class-expiring="time_state == 'expiring'"
 			      data-style-left="box_left + 'px'" data-style-font-size="time_text_px + 'px'"
-			      data-style-width="(box_width * scale_x) + 'px'">{{time_text}}</span>
+			      data-style---box-width="box_width + 'px'">{{time_text}}</span>
 		</div>
 	</div>
 </body>

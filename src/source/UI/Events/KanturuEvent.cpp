@@ -698,11 +698,7 @@ void SyncInfoField(RmlModelBinder<mu::ui::window::KanturuInfoRmlModel>& binder,
 
 void mu::ui::window::CKanturuInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, KanturuInfoRmlModel& model)
 {
-    c.Bind("scale_x", &model.scaleX);
-    c.Bind("scale_y", &model.scaleY);
     c.Bind("bold_text_px", &model.boldTextPx);
-    c.Bind("panel_x", &model.panelX);
-    c.Bind("panel_y", &model.panelY);
     c.Bind("users_text", &model.usersText);
     c.Bind("monsters_text", &model.monstersText);
     c.Bind("colon_visible", &model.colonVisible);
@@ -728,12 +724,8 @@ void mu::ui::window::CKanturuInfoWindow::SyncView()
 
     // CManager scopes LayoutMode::HudFrame around the window: the bottom HUD's uniform scale, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    SyncInfoField(m_RmlView.Binder(), &KanturuInfoRmlModel::scaleX, "scale_x", transform.scaleX);
-    SyncInfoField(m_RmlView.Binder(), &KanturuInfoRmlModel::scaleY, "scale_y", transform.scaleY);
     SyncInfoField(m_RmlView.Binder(), &KanturuInfoRmlModel::boldTextPx, "bold_text_px",
                   UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
-    SyncInfoField(m_RmlView.Binder(), &KanturuInfoRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
-    SyncInfoField(m_RmlView.Binder(), &KanturuInfoRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
 
     // The original's RenderInfo(): the characters, then the monsters or, while Maya fights, the boss.
     wchar_t strText[256];

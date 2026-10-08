@@ -32,3 +32,6 @@ body { pointer-events: none; }
 .duel-text.enemy { color: #ff1919; top: 56px; }
 #hero_name, #enemy_name { left: 55px; }
 #hero_score, #enemy_score { left: 31px; }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }

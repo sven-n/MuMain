@@ -45,4 +45,7 @@ body { pointer-events: none; }
 }
 
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
-.name { width: calc(57px * var(--root-scale)); line-height: calc(17px * var(--root-scale-y)); }
+.name { width: calc(57px * var(--root-scale)); line-height: calc(17px * var(--root-scale)); }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }

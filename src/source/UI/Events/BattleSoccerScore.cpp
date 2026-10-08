@@ -131,11 +131,7 @@ bool mu::ui::window::CBattleSoccerScore::Render()
 
 void mu::ui::window::CBattleSoccerScore::BindRmlModel(Rml::DataModelConstructor& c, BattleSoccerScoreRmlModel& model)
 {
-    c.Bind("scale_x", &model.scaleX);
-    c.Bind("scale_y", &model.scaleY);
     c.Bind("bold_text_px", &model.boldTextPx);
-    c.Bind("panel_x", &model.panelX);
-    c.Bind("panel_y", &model.panelY);
 
     c.RegisterArray<std::vector<Rml::String>>();
     auto team = c.RegisterStruct<BattleSoccerTeamEntry>();
@@ -165,12 +161,8 @@ void mu::ui::window::CBattleSoccerScore::SyncRmlModel()
 
     // CManager scopes LayoutMode::HudFrame around this window: the bottom HUD's uniform scale, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    Sync(m_RmlView.Binder(), &BattleSoccerScoreRmlModel::scaleX, "scale_x", transform.scaleX);
-    Sync(m_RmlView.Binder(), &BattleSoccerScoreRmlModel::scaleY, "scale_y", transform.scaleY);
     Sync(m_RmlView.Binder(), &BattleSoccerScoreRmlModel::boldTextPx, "bold_text_px",
          UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
-    Sync(m_RmlView.Binder(), &BattleSoccerScoreRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
-    Sync(m_RmlView.Binder(), &BattleSoccerScoreRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
     SyncTeams();
 }
 

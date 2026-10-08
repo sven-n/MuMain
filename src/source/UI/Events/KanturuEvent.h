@@ -138,6 +138,7 @@ public:
     void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
+    Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     bool UpdateKeyEvent();
     bool Update();
     bool Render();

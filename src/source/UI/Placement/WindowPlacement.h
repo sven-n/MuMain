@@ -48,10 +48,11 @@ void CloseForOpening(std::uint32_t windowId);
 bool InitialPosition(std::string_view slotName, float width, float height, float& x, float& y);
 
 // A window drawn from its own position in HUD space (LayoutMode::HudFrame) takes its place from a slot:
-// the slot's box, sized width x height HUD units, becomes its position. Without a slot it returns
+// the slot's box, sized width x height HUD units, becomes its position, and its placed document's
+// root (CObject::GetPlacedDocument()) is put there at the HUD's scale. Without a slot both return
 // to (homeX, homeY).
-void RegisterHudWindow(std::string_view name, std::uint32_t windowId, SetPosition setPosition, float width,
-                       float height, int homeX, int homeY);
+void RegisterHudWindow(std::string_view name, std::uint32_t windowId, GetWindow getWindow, SetPosition setPosition,
+                       float width, float height, int homeX, int homeY);
 
 // Re-places every open component now. Call after a window opens or closes.
 void Arrange();

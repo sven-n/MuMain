@@ -20,6 +20,8 @@ namespace mu::ui::window
 class EventTimerView
 {
 public:
+    // The document the workspace places (CObject::GetPlacedDocument()).
+    Rml::ElementDocument* Document() const { return m_View.Document(); }
     EventTimerView(const char* modelName, const char* documentPath);
 
     void Build();
@@ -37,7 +39,7 @@ public:
 
     // Per frame, inside the window's CManager transform scope. Every line is centred on the box
     // (reference px from the frame's left) and shrunk to its width.
-    void Sync(bool visible, const POINT& pos, const Line& first, const Line& second, const Line& time,
+    void Sync(bool visible, const Line& first, const Line& second, const Line& time,
               float boxLeft = 0.f, float boxWidth = 124.f);
 
 private:

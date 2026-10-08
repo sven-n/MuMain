@@ -40,3 +40,6 @@ body { pointer-events: none; }
 .teams { position: static; }
 .team:nth-child(1) { top: 33px; }
 .team:nth-child(2) { top: 55px; }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }
