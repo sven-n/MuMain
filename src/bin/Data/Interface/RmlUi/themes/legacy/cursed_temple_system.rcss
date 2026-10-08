@@ -6,12 +6,6 @@
 body { pointer-events: none; }
 
 .screen {
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 640px;
-	height: 480px;
-	transform-origin: left top;
 	pointer-events: none;
 	font-family: "token(font-body)";
 }

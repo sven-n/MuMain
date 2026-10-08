@@ -506,9 +506,6 @@ void mu::ui::window::CMasterLevel::UnloadImages()
 
 void mu::ui::window::CMasterLevel::BindRmlModel(Rml::DataModelConstructor& c, MasterLevelRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
 
     c.Bind("class_name_text", &model.classNameText);
@@ -614,11 +611,6 @@ void mu::ui::window::CMasterLevel::SyncBackgroundVisibility(bool visible)
 
 void mu::ui::window::CMasterLevel::SyncTransform()
 {
-    // CManager scopes the HUD board around the window: the bottom HUD's scale, centred like it.
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::rootX, "root_x", transform.offsetX);
-    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::rootY, "root_y", transform.offsetY);
-    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::rootScale, "root_scale", transform.scaleX);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 }
 

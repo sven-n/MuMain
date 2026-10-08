@@ -38,7 +38,6 @@ UI/Dialogs/HelpWindow.cpp: 1
 UI/Dialogs/MessageBox.cpp: 6
 UI/Dialogs/MessageBoxView.cpp: 2
 UI/Dialogs/ReconnectDialog.cpp: 3
-UI/Dialogs/WindowMenu.cpp: 1
 UI/Events/BattleSoccerScore.cpp: 1
 UI/Events/BloodCastleTime.cpp: 1
 UI/Events/CatapultWindow.cpp: 1
@@ -46,7 +45,7 @@ UI/Events/ChaosCastleTime.cpp: 1
 UI/Events/CryWolf.cpp: 1
 UI/Events/CursedTempleEnter.cpp: 1
 UI/Events/CursedTempleResult.cpp: 1
-UI/Events/CursedTempleSystem.cpp: 7
+UI/Events/CursedTempleSystem.cpp: 6
 UI/Events/DoppelGangerFrame.cpp: 1
 UI/Events/EventEntryView.cpp: 1
 UI/Events/EventItemEntryView.cpp: 2
@@ -60,7 +59,7 @@ UI/HUD/CommandWindow.cpp: 1
 UI/HUD/GensRanking.cpp: 1
 UI/HUD/HotKey.cpp: 1
 UI/HUD/MainFrameWindow.cpp: 1
-UI/HUD/MasterLevel.cpp: 5
+UI/HUD/MasterLevel.cpp: 4
 UI/HUD/MiniMap.cpp: 4
 UI/HUD/MoveCommandWindow.cpp: 5
 UI/HUD/Notices.cpp: 1

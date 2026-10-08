@@ -162,9 +162,6 @@ bool mu::ui::window::CSiegeWarfare::Render()
 
 void mu::ui::window::CSiegeWarfare::BindRmlModel(Rml::DataModelConstructor& c, SiegeWarfareRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("big_text_px", &model.bigTextPx);
     c.Bind("frame_x", &model.frameX);
@@ -237,9 +234,6 @@ void mu::ui::window::CSiegeWarfare::SyncRmlModel()
     // CManager scopes the HUD board around the window: the bottom HUD's scale, centred like it.
     SiegeWarfareRmlModel& next = m_NextRmlModel;
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    next.rootX = transform.offsetX;
-    next.rootY = transform.offsetY;
-    next.rootScale = transform.scaleX;
     next.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
     next.bigTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Big, transform);
     m_pSiegeWarUI->FillRmlModel(next);
@@ -249,9 +243,6 @@ void mu::ui::window::CSiegeWarfare::SyncRmlModel()
 void mu::ui::window::CSiegeWarfare::ApplyRmlModel(const SiegeWarfareRmlModel& next)
 {
     SiegeWarfareRmlModel& model = m_RmlView.GetModel();
-    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::rootX, "root_x", next.rootX);
-    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::rootY, "root_y", next.rootY);
-    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::rootScale, "root_scale", next.rootScale);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::boldTextPx, "bold_text_px", next.boldTextPx);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::bigTextPx, "big_text_px", next.bigTextPx);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::frameX, "frame_x", next.frameX);

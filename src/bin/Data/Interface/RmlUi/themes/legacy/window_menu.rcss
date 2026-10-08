@@ -14,12 +14,6 @@
 @spritesheet wmenu-arrow-right-sheet { src: "../../../newui_arrow(R).tga"; wmenu-arrow-right: 0px 0px 6px 9px; }
 
 #screen {
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 640px;
-	height: 480px;
-	transform-origin: left top;
 	pointer-events: none;
 }
 

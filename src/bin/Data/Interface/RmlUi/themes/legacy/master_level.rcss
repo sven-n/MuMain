@@ -32,7 +32,6 @@
 	top: 0;
 	width: 640px;
 	height: 428px;
-	transform-origin: left top;
 	font-family: "token(font-body)";
 	pointer-events: auto;
 }

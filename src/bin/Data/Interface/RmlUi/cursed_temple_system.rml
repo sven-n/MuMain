@@ -14,7 +14,7 @@
 	     takes the native size and cancels the scale. In the
 	     background context, behind its other documents (the original drew it under nearly every
 	     panel). Takes no pointer events: the buttons' input stays native. -->
-	<div class="screen" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'" data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div class="screen hud-board">
 		<!-- The panel chrome, hidden together when every window the original checked is open. The
 		     theme may move the corner part with #corner's left and top, in the screen's 640x480
 		     units; C++ reads that offset back and moves its own sprites and buttons the same way. -->

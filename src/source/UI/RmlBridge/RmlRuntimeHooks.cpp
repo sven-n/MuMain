@@ -8,6 +8,7 @@
 #include "UI/RmlBridge/RmlNativeText.h"
 #include "UI/RmlBridge/RmlNativeTextFit.h"
 #include "UI/RmlBridge/RmlRenderTarget.h"
+#include "UI/RmlBridge/RmlScaleInputs.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/RmlBridge/ThemeFileInterface.h"
@@ -27,7 +28,11 @@ void InstallRuntimeHooks()
         const float percent = static_cast<float>(GameConfig::GetInstance().GetUIScalePercent());
         return percent / 100.f * UI::Scaling::ViewportFitScale(windowWidth, windowHeight, UI::Scaling::MaximumPanelScale);
     };
-    hooks.afterScale = [](Rml::Context* context) { ApplyNativeTextSize(context); };
+    hooks.afterScale = [](Rml::Context* context)
+    {
+        ApplyScaleInputs(context);
+        ApplyNativeTextSize(context);
+    };
     hooks.afterCreate = [] { UI::Diagnostics::Initialize(); };
     hooks.beforeDestroy = [] { UI::Diagnostics::Release(); };
     hooks.beforeUpdate = []

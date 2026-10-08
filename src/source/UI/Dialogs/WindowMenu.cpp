@@ -168,9 +168,6 @@ void mu::ui::window::CWindowMenu::RunMenuEntry(int entry)
 
 void mu::ui::window::CWindowMenu::BindRmlModel(Rml::DataModelConstructor& c, WindowMenuRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
 
     auto row = c.RegisterStruct<WindowMenuRowEntry>();
@@ -212,11 +209,6 @@ void mu::ui::window::CWindowMenu::SyncRmlModel()
 
 void mu::ui::window::CWindowMenu::SyncTransform()
 {
-    // CManager scopes the HUD board around the window: the bottom HUD's scale, centred like it.
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    SyncFloat(m_RmlView.Binder(), &WindowMenuRmlModel::rootX, "root_x", transform.offsetX);
-    SyncFloat(m_RmlView.Binder(), &WindowMenuRmlModel::rootY, "root_y", transform.offsetY);
-    SyncFloat(m_RmlView.Binder(), &WindowMenuRmlModel::rootScale, "root_scale", transform.scaleX);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 }
 

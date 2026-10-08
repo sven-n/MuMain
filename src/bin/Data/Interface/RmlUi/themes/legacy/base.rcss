@@ -330,6 +330,15 @@ body {
 /* A press on a control never drags the window around it: RmlUi starts a drag from the nearest
    ancestor with `drag` set, and the control's click would still fire on release. */
 input, select, textarea, .btn, [data-event-click] { drag: block; }
+/* The original 640x480 screen, at a scale composed from the scale inputs (RmlScaleInputs.h): a
+   .stage is centred on the window at the UI scale, as the original centred its NPC panels and
+   dialogs; a .hud-board stands on the window's bottom, centred like the HUD, at the HUD's scale.
+   Children lay out in its reference px, and --root-scale is its scale. */
+.stage, .hud-board { position: absolute; left: 50%; width: 640px; height: 480px; margin-left: -320px; }
+.stage { top: 50%; margin-top: -240px; transform-origin: center; transform: scale(var(--ui-scale));
+         --root-scale: var(--ui-scale); }
+.hud-board { bottom: 0; transform-origin: center bottom; transform: scale(var(--hud-scale));
+             --root-scale: var(--hud-scale); }
 /* A panel a workspace slot places (CObject::GetPlacedDocument()): the slot's top-left and its
    region's scale arrive as variables; the theme decides how they apply. It takes the pointer, so
    clicks on it never reach the world or the windows below. */

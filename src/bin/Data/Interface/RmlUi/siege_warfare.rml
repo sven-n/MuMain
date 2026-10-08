@@ -15,7 +15,7 @@
 	     the other characters' dots). C++ keeps the state and the input (the buttons hit-test
 	     natively and report their up / over / down row); the document takes no pointer events.
 	     Image paths are relative to themes/<theme>/, where the themed document is loaded from. -->
-	<div class="screen" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'" data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div class="screen hud-board">
 		<div id="frame" data-style-left="frame_x + 'px'" data-style-top="frame_y + 'px'" data-style-opacity="alpha">
 			<img id="map" src="../../../../World31/Map1.jpg" data-attr-rect="map_rect"/>
 			<div id="frame_art"></div>

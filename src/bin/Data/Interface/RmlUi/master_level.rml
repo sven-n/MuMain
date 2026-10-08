@@ -19,38 +19,40 @@
 	     in tree order, so later nodes paint over the arrows of earlier ones; then the close button
 	     and the header text. The black the original's padded background leaves below the tree is
 	     master_level_band.rml, under the bottom HUD. -->
-	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'" data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
-		<div id="back_left"></div>
-		<div id="back_right"></div>
+	<div class="hud-board">
+		<div id="panel">
+			<div id="back_left"></div>
+			<div id="back_right"></div>
 
-		<!-- Each node where it is in the tree: its group's column, its slot in its rank, and the
-		     rank. The theme turns that into a position; the id is what the hint reads back. -->
-		<div data-for="node : nodes" data-attr-id="'node_' + node.id"
-		     data-attr-class="'node column-' + node.column + ' slot-' + node.slot + ' rank-' + node.rank + (node.usable ? '' : ' locked')">
-			<div class="node-box"></div>
-			<!-- The icon is the hit area, as native's 20x28 CheckMouseIn(). A press acts on
-			     mousedown, native's IsPress(). -->
-			<div class="node-icon" data-style-decorator="node.icon"
-			     data-event-mousedown="master_node_press(node.id)"
-			     data-event-mouseover="master_node_hover(node.id)"
-			     data-event-mouseout="master_node_hover(-1)"></div>
-			<div data-attr-class="'node-arrow arrow-' + node.arrow"></div>
-			<span class="text node-level counter-scaled" data-style-font-size="text_px + 'px'">{{node.level_text}}</span>
+			<!-- Each node where it is in the tree: its group's column, its slot in its rank, and the
+			     rank. The theme turns that into a position; the id is what the hint reads back. -->
+			<div data-for="node : nodes" data-attr-id="'node_' + node.id"
+			     data-attr-class="'node column-' + node.column + ' slot-' + node.slot + ' rank-' + node.rank + (node.usable ? '' : ' locked')">
+				<div class="node-box"></div>
+				<!-- The icon is the hit area, as native's 20x28 CheckMouseIn(). A press acts on
+				     mousedown, native's IsPress(). -->
+				<div class="node-icon" data-style-decorator="node.icon"
+				     data-event-mousedown="master_node_press(node.id)"
+				     data-event-mouseover="master_node_hover(node.id)"
+				     data-event-mouseout="master_node_hover(-1)"></div>
+				<div data-attr-class="'node-arrow arrow-' + node.arrow"></div>
+				<span class="text node-level counter-scaled" data-style-font-size="text_px + 'px'">{{node.level_text}}</span>
+			</div>
+
+			<div id="close" data-event-click="master_close" data-attr-data-hint="close_hint"></div>
+
+			<span id="class_name" class="text head-text counter-scaled" data-style-font-size="text_px + 'px'">{{class_name_text}}</span>
+			<span id="master_level" class="text head-text counter-scaled" data-style-font-size="text_px + 'px'">{{master_level_text}}</span>
+			<span id="level_point" class="text head-text counter-scaled" data-style-font-size="text_px + 'px'">{{level_point_text}}</span>
+			<span id="experience" class="text head-text counter-scaled" data-style-font-size="text_px + 'px'">{{experience_text}}</span>
+			<!-- The master experience hint's hover area, native's CheckMouseIn(458, 11, 81, 10). -->
+			<div id="experience_area"
+			     data-event-mouseover="master_experience_hover(1)" data-event-mouseout="master_experience_hover(0)"></div>
+
+			<span id="column_0" class="text column-text counter-scaled" data-style-font-size="text_px + 'px'">{{column_text_0}}</span>
+			<span id="column_1" class="text column-text counter-scaled" data-style-font-size="text_px + 'px'">{{column_text_1}}</span>
+			<span id="column_2" class="text column-text counter-scaled" data-style-font-size="text_px + 'px'">{{column_text_2}}</span>
 		</div>
-
-		<div id="close" data-event-click="master_close" data-attr-data-hint="close_hint"></div>
-
-		<span id="class_name" class="text head-text counter-scaled" data-style-font-size="text_px + 'px'">{{class_name_text}}</span>
-		<span id="master_level" class="text head-text counter-scaled" data-style-font-size="text_px + 'px'">{{master_level_text}}</span>
-		<span id="level_point" class="text head-text counter-scaled" data-style-font-size="text_px + 'px'">{{level_point_text}}</span>
-		<span id="experience" class="text head-text counter-scaled" data-style-font-size="text_px + 'px'">{{experience_text}}</span>
-		<!-- The master experience hint's hover area, native's CheckMouseIn(458, 11, 81, 10). -->
-		<div id="experience_area"
-		     data-event-mouseover="master_experience_hover(1)" data-event-mouseout="master_experience_hover(0)"></div>
-
-		<span id="column_0" class="text column-text counter-scaled" data-style-font-size="text_px + 'px'">{{column_text_0}}</span>
-		<span id="column_1" class="text column-text counter-scaled" data-style-font-size="text_px + 'px'">{{column_text_1}}</span>
-		<span id="column_2" class="text column-text counter-scaled" data-style-font-size="text_px + 'px'">{{column_text_2}}</span>
 	</div>
 </body>
 </rml>

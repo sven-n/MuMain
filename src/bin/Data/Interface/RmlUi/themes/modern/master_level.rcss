@@ -20,7 +20,6 @@
 	top: 0;
 	width: 640px;
 	height: 428px;
-	transform-origin: left top;
 	background-color: token(surface-deep);
 	decorator: linear-gradient(to bottom, token(surface-panel) 0%, token(surface-deep) 100%);
 	border-width: 0 0 1px 0;

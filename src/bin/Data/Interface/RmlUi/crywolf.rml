@@ -12,7 +12,7 @@
 	     .screen is that screen at the bottom HUD's scale, centred like the HUD. Text takes the
 	     native size and cancels the scale. Takes no pointer events. An image whose src is
 	     bound also binds its rect: RmlUi drops a static rect when it first loads an empty src. -->
-	<div class="screen" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'" data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div class="screen hud-board">
 		<div id="result" data-if="result_visible">
 			<img id="banner" data-attr-src="banner_src" data-attr-rect="'0 0 328 93'"
 			     data-style-left="banner_left + 'px'" data-style-opacity="banner_opacity"/>

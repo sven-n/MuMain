@@ -43,9 +43,6 @@ struct SiegeWarButtonEntry
 
 struct SiegeWarfareRmlModel
 {
-    // The HUD board (LayoutMode::HudBoard while CManager runs the window): the 640x480 frame's
-    // offset in physical px and its one scale, cancelled by the counter-scaled text leaves.
-    float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
     float boldTextPx = 0.f, bigTextPx = 0.f; // native text sizes in physical px
 
     float frameX = 0.f, frameY = 0.f; // the mini map frame's top-left, reference px

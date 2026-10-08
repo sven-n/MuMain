@@ -14,8 +14,7 @@
 
 	     A row click runs the row's action from C++ (windowmenu_select); the hover highlight and
 	     arrows are the row's own :hover. -->
-	<div id="screen" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="screen" class="hud-board">
 		<div id="panel">
 			<div id="back"></div>
 			<div id="frame_up"></div>
