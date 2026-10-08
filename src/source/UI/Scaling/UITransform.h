@@ -95,6 +95,9 @@ namespace UI::Scaling
     Viewport FullReferenceViewport();
     Transform LegacyUiTransform(int windowWidth, int windowHeight);
     Transform PanelTransform(int windowWidth, int windowHeight);
+    // The one scale native text grows by, whatever a window's layout: the UI scale (the panel
+    // scale, RmlUi's dp ratio). Every layout's transform carries it as its typographyScale.
+    float TypographyScale(int windowWidth, int windowHeight);
     float ViewportFitScale(int windowWidth, int windowHeight, float maximumScale);
     float CompanionRatio(int windowWidth, int windowHeight);
     float BottomHudScale(int windowWidth, int windowHeight);
@@ -123,6 +126,8 @@ namespace UI::Scaling
     // Physical pixel size the native text renderer draws `role` text at under `transform` -- what a
     // legacy-theme RmlUi text element must use to match it, independent of the panel's own scale.
     float NativeTextPixelSize(FontRole role, const Transform& transform);
+    // The same at TypographyScale(), which every layout shares: no window's transform needed.
+    float NativeTextPixelSize(FontRole role, int windowWidth, int windowHeight);
     // NativeTextPixelSize() for a text drawn into a box (RenderText() with a box width): the
     // renderer shrinks a text wider than its box to fit it, down to the role's minimum size.
     // `measuredWidth` is the text's unconstrained width and `boxWidth` the box's, both in the

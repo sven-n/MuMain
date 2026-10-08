@@ -58,7 +58,8 @@ FontPointRange GetFontPointRange(UI::Scaling::FontRole role)
 UI::Scaling::Transform BottomHudTransform(int windowWidth, int windowHeight, float offsetX)
 {
     const float scale = UI::Scaling::BottomHudScale(windowWidth, windowHeight);
-    return {scale, scale, offsetX, static_cast<float>(windowHeight) - kReferenceHeight * scale, scale};
+    return {scale, scale, offsetX, static_cast<float>(windowHeight) - kReferenceHeight * scale,
+            UI::Scaling::TypographyScale(windowWidth, windowHeight)};
 }
 
 int RoundedBottomHudTop(int windowWidth, int windowHeight)
@@ -78,19 +79,18 @@ UI::Scaling::Transform DockTransform(int windowWidth, int windowHeight)
     const float scale = CappedUniformScale(windowWidth, windowHeight, kMaximumDockScale);
     const float offsetY = static_cast<float>(RoundedBottomHudTop(windowWidth, windowHeight))
                           - UI::Scaling::DockLogicalBottom * scale;
-    return {scale, scale, 0.0f, offsetY, scale};
+    return {scale, scale, 0.0f, offsetY, UI::Scaling::TypographyScale(windowWidth, windowHeight)};
 }
 }
 
 UI::Scaling::Transform UI::Scaling::ScreenOverlayTransform(int windowWidth, int windowHeight)
 {
-    const float scaleY = static_cast<float>(windowHeight) / kReferenceHeight;
     return {
         static_cast<float>(windowWidth) / kReferenceWidth,
-        scaleY,
+        static_cast<float>(windowHeight) / kReferenceHeight,
         0.0f,
         0.0f,
-        scaleY,
+        TypographyScale(windowWidth, windowHeight),
     };
 }
 
@@ -114,8 +114,13 @@ UI::Scaling::Transform UI::Scaling::PanelTransform(int windowWidth, int windowHe
         scale,
         (static_cast<float>(windowWidth) - kReferenceWidth * scale) * 0.5f,
         (static_cast<float>(windowHeight) - kReferenceHeight * scale) * 0.5f,
-        scale,
+        TypographyScale(windowWidth, windowHeight),
     };
+}
+
+float UI::Scaling::TypographyScale(int windowWidth, int windowHeight)
+{
+    return CappedUniformScale(windowWidth, windowHeight, MaximumPanelScale);
 }
 
 // Pure geometry + WindowContentScale, deliberately NOT including UIScalePercent -- every caller
@@ -191,7 +196,7 @@ UI::Scaling::Transform UI::Scaling::DockRightTransform(int windowWidth, int wind
 UI::Scaling::Transform UI::Scaling::FloatingWorkspaceTransform(int windowWidth, int windowHeight)
 {
     const float scale = CappedUniformScale(windowWidth, windowHeight, kMaximumDockScale);
-    return {scale, scale, 0.0f, 0.0f, scale};
+    return {scale, scale, 0.0f, 0.0f, TypographyScale(windowWidth, windowHeight)};
 }
 
 UI::Scaling::Viewport UI::Scaling::FloatingWorkspaceBounds(int windowWidth, int windowHeight)
@@ -240,7 +245,7 @@ UI::Scaling::Transform UI::Scaling::TransformForLayout(LayoutMode mode, int wind
     if (mode == LayoutMode::HudFrame)
     {
         const float scale = BottomHudScale(windowWidth, windowHeight);
-        return {scale, scale, 0.0f, 0.0f, scale};
+        return {scale, scale, 0.0f, 0.0f, TypographyScale(windowWidth, windowHeight)};
     }
     if (mode == LayoutMode::HudBoard)
         return HudBoardTransform(windowWidth, windowHeight);
@@ -315,6 +320,11 @@ float UI::Scaling::NativeTextPixelSize(FontRole role, const Transform& transform
     // FontPointSize() / MaximumFontPointSize() of that (FontScaleForBounds() without a box).
     return static_cast<float>(CachedFontPointSize(role)) * static_cast<float>(FontPointSize(role, transform)) /
            static_cast<float>(MaximumFontPointSize(role));
+}
+
+float UI::Scaling::NativeTextPixelSize(FontRole role, int windowWidth, int windowHeight)
+{
+    return NativeTextPixelSize(role, Transform{1.0f, 1.0f, 0.0f, 0.0f, TypographyScale(windowWidth, windowHeight)});
 }
 
 float UI::Scaling::NativeTextPixelSizeInBox(FontRole role, const Transform& transform, float measuredWidth,

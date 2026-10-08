@@ -4,6 +4,9 @@
 
 #include "UI/Scaling/UITransform.h"
 
+extern unsigned int WindowWidth;
+extern unsigned int WindowHeight;
+
 // Shared "root transform" sync for every RmlUi window whose position tracks a native, legacy-
 // reference-space POINT (a movable/HUD window overlaying live 3D content) rather than a static/
 // centered dialog scaled purely by the RmlUi context's own density-independent-pixel ratio -- see
@@ -45,8 +48,9 @@ namespace UI::RmlBridge
     // character_info.rml's header comment. `Model` must expose `float textPx` bound to "text_px".
     template <typename Model> void SyncNativeTextSize(RmlModelBinder<Model>& binder)
     {
-        const float textPx =
-            UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, UI::Scaling::GetActiveTransform());
+        const float textPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal,
+                                                              static_cast<int>(WindowWidth),
+                                                              static_cast<int>(WindowHeight));
         Model& model = binder.GetModel();
         if (model.textPx == textPx)
             return;

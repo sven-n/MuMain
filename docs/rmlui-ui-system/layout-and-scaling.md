@@ -111,6 +111,11 @@ only says which units their native code works in.
 A new fixed-place HUD window takes `HudBoard`, not `ScreenOverlay`: the stretched screen ignores the
 UI scale and distorts on wide screens.
 
+Native text size is the same in every mode except `Pixels`: each transform carries
+`UI::Scaling::TypographyScale()`, the UI scale capped like the panels (RmlUi's dp ratio). A window
+asks `NativeTextPixelSize(role, WindowWidth, WindowHeight)` for it, with no transform;
+`SyncNativeTextSize()` does.
+
 ## Anchor/sizing utility classes (`base.rcss`)
 
 Both themes' `base.rcss` define an identical set of pure-layout utility classes (no visual styling

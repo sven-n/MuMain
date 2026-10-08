@@ -3,6 +3,7 @@
 #include <doctest.h>
 
 #include <algorithm>
+#include <utility>
 
 #include "Character/CharSelMainWin.h"
 #include "Core/Input/Input.h"
@@ -831,14 +832,36 @@ TEST_CASE("layout typography grows gradually and fits bounded controls [ui][scal
     CHECK(UI::Scaling::FontScaleForBounds(FontRole::Normal, dialog, 160.0f, 20.0f, 100.0f, 30.0f)
           == doctest::Approx(11.0f / 16.0f));
 
+    // Text grows with the UI scale, capped like the panels, not with the dock's larger cap or the
+    // stretched screen.
     const auto dock = UI::Scaling::DockRightTransform(1920, 1080);
-    CHECK(UI::Scaling::FontPointSize(FontRole::Normal, dock) == 16);
-    CHECK(UI::Scaling::FontPointSize(FontRole::Big, dock) == 32);
-    CHECK(UI::Scaling::FontPointSize(FontRole::Fixed, dock) == 18);
+    CHECK(UI::Scaling::FontPointSize(FontRole::Normal, dock) == 15);
+    CHECK(UI::Scaling::FontPointSize(FontRole::Big, dock) == 30);
+    CHECK(UI::Scaling::FontPointSize(FontRole::Fixed, dock) == 17);
 
     const auto fourK = UI::Scaling::ScreenOverlayTransform(3840, 2160);
-    CHECK(UI::Scaling::FontPointSize(FontRole::Normal, fourK) == 16);
-    CHECK(UI::Scaling::FontPointSize(FontRole::Big, fourK) == 32);
-    CHECK(UI::Scaling::FontPointSize(FontRole::Fixed, fourK) == 18);
+    CHECK(UI::Scaling::FontPointSize(FontRole::Normal, fourK) == 15);
+    CHECK(UI::Scaling::FontPointSize(FontRole::Big, fourK) == 30);
+    CHECK(UI::Scaling::FontPointSize(FontRole::Fixed, fourK) == 17);
+}
+
+TEST_CASE("every layout sizes native text by the one typography scale [ui][scaling]")
+{
+    using UI::Scaling::LayoutMode;
+    for (const auto [width, height] : {std::pair{1024, 768}, std::pair{1280, 720}, std::pair{1920, 1080},
+                                       std::pair{3840, 2160}})
+    {
+        const float typography = UI::Scaling::TypographyScale(width, height);
+        CHECK(typography == doctest::Approx(UI::Scaling::PanelTransform(width, height).scaleX));
+        for (const LayoutMode mode : {LayoutMode::Stage, LayoutMode::HudBoard, LayoutMode::HudFrame,
+                                      LayoutMode::DockLeft, LayoutMode::DockRight, LayoutMode::FloatingWorkspace,
+                                      LayoutMode::ScreenOverlay})
+        {
+            const auto transform = UI::Scaling::TransformForLayout(mode, width, height);
+            CHECK(transform.typographyScale == doctest::Approx(typography));
+            CHECK(UI::Scaling::NativeTextPixelSize(FontRole::Normal, transform)
+                  == doctest::Approx(UI::Scaling::NativeTextPixelSize(FontRole::Normal, width, height)));
+        }
+    }
 }
 

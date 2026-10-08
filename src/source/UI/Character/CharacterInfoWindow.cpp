@@ -120,8 +120,8 @@ bool mu::ui::window::CCharacterInfoWindow::Create(CManager* pNewUIMng, int x, in
 
 void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, CharacterInfoRmlModel& model)
 {
-    model.textPx =
-        UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, UI::Scaling::GetActiveTransform());
+    model.textPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, static_cast<int>(WindowWidth),
+                                                    static_cast<int>(WindowHeight));
     c.Bind("text_px", &model.textPx);
 
     c.Bind("can_level_up", &model.canLevelUp);

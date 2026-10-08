@@ -421,7 +421,8 @@ static void PlaceSlots(const Rml::ElementList& slots, const UI::Scaling::Transfo
         }
         if (window == nullptr)
             continue;
-        const UI::Scaling::Transform transform{scale, scale, offset.x, offset.y, scale};
+        const UI::Scaling::Transform transform{scale, scale, offset.x, offset.y,
+                                               UI::Scaling::TypographyScale(WindowWidth, WindowHeight)};
         window->PlaceInSlot(transform);
         if (slot->IsClassSet("fill"))
         {
