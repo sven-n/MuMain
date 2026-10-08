@@ -20,6 +20,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -134,15 +135,7 @@ void mu::ui::window::CCursedTempleResult::ClosingProcess()
 bool mu::ui::window::CCursedTempleResult::UpdateMouseEvent()
 {
     // The Close button is RmlUi's (see Update()); the window keeps the pointer.
-    float panelWidth = CURSEDTEMPLE_RESULT_WINDOW_WIDTH;
-    float panelHeight = CURSEDTEMPLE_RESULT_WINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-    {
-        return false;
-    }
-
-    return true;
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool mu::ui::window::CCursedTempleResult::UpdateKeyEvent()
@@ -229,9 +222,6 @@ void mu::ui::window::CCursedTempleResult::SetResult(const UI::CursedTemple::Matc
 
 void mu::ui::window::CCursedTempleResult::BindRmlModel(Rml::DataModelConstructor& c, CursedTempleResultRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     c.Bind("line_height_px", &model.lineHeightPx);
     auto lineType = c.RegisterStruct<CursedTempleResultLine>();
@@ -258,7 +248,6 @@ void mu::ui::window::CCursedTempleResult::BindRmlModel(Rml::DataModelConstructor
     c.Bind("close_text", &model.closeText);
     c.Bind("label_line_px", &model.labelLinePx);
     c.Bind("banner", &model.banner);
-    c.Bind("banner_left", &model.bannerLeft);
     c.Bind("banner_alpha", &model.bannerAlpha);
     c.BindEventCallback("result_close", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                         { m_PendingClose = true; });
@@ -280,7 +269,6 @@ void mu::ui::window::CCursedTempleResult::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncTexts();
 }
@@ -301,10 +289,6 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
     // quarter.
     constexpr float kAlphaTestReference = 0.25f;
     updated.banner = m_WinState;
-    float panelWidth = CURSEDTEMPLE_RESULT_WINDOW_WIDTH;
-    float panelHeight = CURSEDTEMPLE_RESULT_WINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    updated.bannerLeft = (panelWidth - 360.f) / 2.f;
     const float fade = std::clamp(m_ResultEffectAlph, 0.f, 1.f);
     updated.bannerAlpha = fade > kAlphaTestReference ? fade : 0.f;
 
@@ -356,7 +340,6 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
     SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::labelLinePx, "label_line_px", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::closeText, "close_text", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::banner, "banner", updated);
-    SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::bannerLeft, "banner_left", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::bannerAlpha, "banner_alpha", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::heroListLabel, "hero_list_label", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CursedTempleResultRmlModel::columnHeader, "column_header", updated);

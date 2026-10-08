@@ -9,8 +9,9 @@
 	<!-- The chat command window (CChatCommandWindow), docked right, full dock height: the title,
 	     then one page -- the commands, the selected command's description and parameters (each
 	     value in a dark box; a typed value in the value field), or the saved templates -- and the
-	     left / right buttons and the exit button. the workspace slot places and scales #panel. The rows of a page stack in flow, so the parameters and the actions follow
-	     however many description lines and parameters there are. A row is its own hit target. C++
+	     left / right buttons and the exit button. The workspace slot places and scales #panel. The
+	     rows of a page stack in flow, so the parameters and the actions follow however many
+	     description lines and parameters there are. A row is its own hit target. C++
 	     keeps the pages, the values, the wheel, the keys and the commands; a click is queued with
 	     chat_command_hit(action, index), chat_command_left, chat_command_right or
 	     chat_command_exit. -->

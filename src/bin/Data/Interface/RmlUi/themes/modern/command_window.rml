@@ -11,9 +11,8 @@
 	     data-model and event names in sync with ../../command_window.rml.
 
 	     The command window (CCommandWindow, D): twelve buttons that arm a command for the next
-	     right-click on a player, docked right. the workspace slot places and scales #panel
-	     (UI::Scaling::GetActiveTransform()), as party_info.rml's #panel does; everything inside is
-	     reference px. Text is a .sharp-text layer: native size, counter-scaled out of the panel.
+	     right-click on a player, docked right. The workspace slot places and scales #panel;
+	     everything inside is reference px. Text is a .sharp-text layer: native size, counter-scaled out of the panel.
 
 	     C++ keeps the armed command (`selected`, drawn pressed and bold), the right-click that runs
 	     it, Escape; a button click is queued with command_press. The

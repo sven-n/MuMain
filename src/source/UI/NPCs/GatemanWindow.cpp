@@ -22,6 +22,7 @@
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
@@ -85,20 +86,7 @@ void CGatemanWindow::SetPos(int x, int y)
 
 bool CGatemanWindow::UpdateMouseEvent()
 {
-    if (true == BtnProcess())
-        return false;
-
-    // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
-    float panelWidth = INVENTORY_WIDTH;
-    float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
-                                      static_cast<int>(panelHeight))
-            .Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool CGatemanWindow::UpdateKeyEvent()
@@ -169,14 +157,6 @@ float CGatemanWindow::GetLayerDepth()
     return 5.0f;
 }
 
-bool CGatemanWindow::BtnProcess()
-{
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GATEKEEPER);
-
-    return false;
-}
-
 void CGatemanWindow::UpdateGuildMasterMode(GATEMAN_BUTTON button)
 {
     if (button == GATEMAN_BUTTON_SET)
@@ -231,9 +211,6 @@ void CGatemanWindow::UpdateGuestMode(GATEMAN_BUTTON button)
 
 void CGatemanWindow::BindRmlModel(Rml::DataModelConstructor& c, GatemanRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     c.Bind("line_height_px", &model.lineHeightPx);
     auto lineType = c.RegisterStruct<GatemanLine>();
@@ -296,7 +273,6 @@ void CGatemanWindow::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncContent();
 }

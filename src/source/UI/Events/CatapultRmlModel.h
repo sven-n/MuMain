@@ -27,8 +27,6 @@ struct CatapultLineEntry
 
 struct CatapultRmlModel
 {
-    // Right-docked window -- UI::Scaling::GetActiveTransform() while CManager runs it.
-    float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
     // CCatapultWindow::CATAPULT_ATTACK or _DEFENSE: the two have different target areas,
     // and the theme lays each set out.
     int mode = 0;

@@ -55,6 +55,7 @@ public:
 
     bool Create(CManager* pNewUIMng, int x, int y);
     Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
+    Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     void Release();
 
     void SetPos(int x, int y);
@@ -71,7 +72,6 @@ public:
 
 
 private:
-    bool BtnProcess();
 
     void UpdateGuildMasterMode(GATEMAN_BUTTON button);
     void UpdateGuildMemeberMode(GATEMAN_BUTTON button);

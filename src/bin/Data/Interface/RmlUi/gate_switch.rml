@@ -8,12 +8,11 @@
 <body>
 	<!-- The castle gate switch (CGateSwitchWindow), docked right: the title, the three lines (the
 	     warning on a red text box), the gate picture (closed or open) in its table, Open / Close
-	     and the exit button. root_x/root_y/root_scale come from the dock transform; everything
+	     and the exit button. The workspace slot places and scales #panel; everything
 	     inside is reference px; text is .sharp-text at the native size, counter-scaled out of the
 	     panel. C++ keeps the gate state and the request; a click is queued with
 	     gate_switch_toggle / gate_switch_exit. -->
-	<div id="panel" data-model="gate_switch" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="gate_switch">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
@@ -41,6 +40,7 @@
 		</div>
 
 		<div id="btn_exit" data-event-click="gate_switch_exit" data-attr-data-hint="exit_tooltip"></div>
+		<div id="frame_corner_close" data-event-click="gate_switch_exit"></div>
 	</div>
 </body>
 </rml>

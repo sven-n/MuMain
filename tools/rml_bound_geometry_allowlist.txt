@@ -22,8 +22,6 @@ char_info_balloon.rml: per-frame data -- world-projected balloon positions, per 
 chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
 command_window.rml: per-frame data -- target marker follows the selected command
 crywolf.rml: per-frame data -- the success/failure banner and the rank label slide in and out, Balgass's health and the statue's shield are gauge lengths (the shield shortens from its left, so its left moves with it)
-cursed_temple_enter.rml: the hero band's height from the live line height
-cursed_temple_result.rml: the hero row's height from the live line height, and the victory/defeat banner's slide-in
 cursed_temple_system.rml: per-frame data -- the mini map's projected markers and the three native buttons, whose box comes off the live CButton that hit-tests them
 doppelganger_frame.rml: per-frame data -- the monsters' gauge is a length from m_fMonsterGauge, stacked in pieces as monsters get through; the Ice Walker's and each party member's marker is their own position along the path (59 + 167 * position)
 duel_watch_frame.rml: the health and shield gauges are lengths from the fighters' rates, and the left fighter's bars are right-aligned so their left moves with the rate too (the plan's gauge carve-out)

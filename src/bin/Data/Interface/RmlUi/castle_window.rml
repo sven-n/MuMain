@@ -8,7 +8,7 @@
 <body>
 	<!-- The Senatus (CCastleWindow), docked right: the title, the Castle Gate / Guardian Statue /
 	     Tax / Store tabs and the tab's page. RmlUi handles tab and map-icon clicks.
-	     the workspace slot places and scales #panel; every position and size below is
+	     The workspace slot places and scales #panel; every position and size below is
 	     the theme's, except the bars' lengths. A .sharp-text layer's font
 	     size stays bound: it is laid out in physical pixels and counter-scaled out of the panel
 	     (base.rcss). A button click is queued with senatus_button(n). -->

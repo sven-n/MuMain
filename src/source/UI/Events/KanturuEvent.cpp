@@ -5,6 +5,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "I18N/All.h"
@@ -107,15 +108,7 @@ void mu::ui::window::CKanturu2ndEnterNpc::SetPos(int x, int y)
 bool mu::ui::window::CKanturu2ndEnterNpc::UpdateMouseEvent()
 {
     // The Refresh, Enter and Close buttons are RmlUi's (see Update()); the window keeps the pointer.
-    float panelWidth = KANTURU2ND_ENTER_WINDOW_WIDTH;
-    float panelHeight = KANTURU2ND_ENTER_WINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-    {
-        return false;
-    }
-
-    return true;
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool mu::ui::window::CKanturu2ndEnterNpc::UpdateKeyEvent()
@@ -506,9 +499,6 @@ void mu::ui::window::CKanturu2ndEnterNpc::ProcessEnter()
 
 void mu::ui::window::CKanturu2ndEnterNpc::BindRmlModel(Rml::DataModelConstructor& c, KanturuEnterRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     auto line = c.RegisterStruct<KanturuEnterLineEntry>();
     line.RegisterMember("text", &KanturuEnterLineEntry::text);
@@ -547,7 +537,6 @@ void mu::ui::window::CKanturu2ndEnterNpc::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncContent();
 }

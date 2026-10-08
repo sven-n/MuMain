@@ -65,6 +65,7 @@ namespace mu::ui::window
 
         bool Create(CManager* pNewUIMng, int x, int y);
         Rml::ElementDocument* GetFillDocument() const override { return m_View.Document(); }
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_View.Document(); }
         void Release();
 
         void SetPos(int x, int y);
@@ -74,7 +75,6 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        bool BtnProcess();
 
         float GetLayerDepth();	//. 4.1f
 

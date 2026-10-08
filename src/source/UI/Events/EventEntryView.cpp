@@ -8,7 +8,7 @@
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/Text/CUIRenderText.h"
@@ -32,9 +32,6 @@ mu::ui::window::EventEntryView::EventEntryView(const char* modelName, const char
 
 void mu::ui::window::EventEntryView::BindModel(Rml::DataModelConstructor& c, EventEntryRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     c.Bind("title_text_px", &model.titleTextPx);
     c.Bind("title_line_px", &model.titleLinePx);
@@ -91,12 +88,12 @@ void mu::ui::window::EventEntryView::SetContent(const wchar_t* title, const std:
     m_View.MarkDirty("buttons");
 }
 
-bool mu::ui::window::EventEntryView::PanelSize(float& width, float& height) const
+bool mu::ui::window::EventEntryView::IsPointerOver() const
 {
-    return UI::RmlBridge::RefreshLogicalPanelSize(m_View.Document(), "panel", width, height);
+    return UI::RmlBridge::IsPointerOver(m_View.Document());
 }
 
-void mu::ui::window::EventEntryView::Sync(bool visible, const POINT& pos)
+void mu::ui::window::EventEntryView::Sync(bool visible)
 {
     Build();
     if (!m_View.Document())
@@ -107,7 +104,6 @@ void mu::ui::window::EventEntryView::Sync(bool visible, const POINT& pos)
     if (!visible)
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_View.Binder(), pos);
     UI::RmlBridge::SyncNativeTextSize(m_View.Binder());
     SyncTextSizes();
 }

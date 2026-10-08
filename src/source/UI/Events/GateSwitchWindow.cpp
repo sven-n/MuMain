@@ -14,6 +14,7 @@
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -73,20 +74,7 @@ void CGateSwitchWindow::SetPos(int x, int y)
 bool CGateSwitchWindow::UpdateMouseEvent()
 {
     // The Open / Close and exit buttons are RmlUi's (see Update()).
-    if (true == BtnProcess())
-        return false;
-
-    // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
-    float panelWidth = INVENTORY_WIDTH;
-    float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
-                                      static_cast<int>(panelHeight))
-            .Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool CGateSwitchWindow::UpdateKeyEvent()
@@ -144,19 +132,8 @@ float CGateSwitchWindow::GetLayerDepth()
     return 5.0f;
 }
 
-bool CGateSwitchWindow::BtnProcess()
-{
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GATESWITCH);
-
-    return false;
-}
-
 void CGateSwitchWindow::BindRmlModel(Rml::DataModelConstructor& c, GateSwitchRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("title", &model.title);
@@ -190,7 +167,6 @@ void CGateSwitchWindow::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     // The original's RenderFrame() and Render(): the title bold (220, 220, 220) in its 160-unit

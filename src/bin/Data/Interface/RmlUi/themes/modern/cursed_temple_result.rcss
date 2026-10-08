@@ -21,7 +21,7 @@
 #back, #frame_top, .frame-middle, #frame_bottom { display: none; }
 .line { position: absolute; left: 10px; width: 210px; height: 1px; margin-top: 10px; background-color: token(border-frame); }
 
-.result-banner { position: absolute; top: -110px; width: 351px; height: 115px; pointer-events: none; }
+.result-banner { position: absolute; left: calc(50% - 180px); top: -110px; width: 351px; height: 115px; pointer-events: none; }
 .result-banner.success { decorator: image(result-success); }
 .result-banner.failure { decorator: image(result-failure); }
 
@@ -103,3 +103,6 @@
 #ct_column_header { width: calc(230px * var(--root-scale)); }
 #ct_reward_hint { width: calc(230px * var(--root-scale)); }
 .result-label { width: calc(54px * var(--root-scale)); }
+
+/* The native line height, counter-scaled out of the panel. */
+.hero-row { height: calc(var(--line-height) / var(--root-scale)); }

@@ -38,11 +38,10 @@ public:
                     const std::vector<Button>& buttons);
 
     // Per frame, inside the window's CManager transform scope.
-    void Sync(bool visible, const POINT& pos);
+    void Sync(bool visible);
 
-    // The theme's #panel size in the window's layout units; false (outputs untouched) before the
-    // document has laid out.
-    bool PanelSize(float& width, float& height) const;
+    // The pointer is over what the document draws (UI::RmlBridge::IsPointerOver()).
+    bool IsPointerOver() const;
     Rml::ElementDocument* Document() const { return m_View.Document(); }
 
     // A click RmlUi reported since the last call: an enabled level button's index (else -1), the

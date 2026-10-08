@@ -8,7 +8,7 @@
 <body>
 	<!-- Doorkeeper Titus's colosseum list (CDuelWatchWindow), docked right: four colosseums, each
 	     with its duel (or "No duel on.") and a Watch button, enabled only for a duel open to
-	     spectators. the workspace slot places and scales #panel; everything inside is
+	     spectators. The workspace slot places and scales #panel; everything inside is
 	     reference px; text is .sharp-text at the native size, counter-scaled out of the panel.
 	     C++ keeps the rooms (g_DuelMgr), Escape and the join request; a Watch
 	     click is queued with duelwatch_join. -->

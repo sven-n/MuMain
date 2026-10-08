@@ -8,12 +8,11 @@
 	<!-- The Illusion Temple result window (CCursedTempleResult): a message-box frame with the
 	     "Hero List" title, the column headings, the MU Alliance rows from y 65 and the Illusion
 	     Sorcery rows from y 140 (the hero's on a red text box), the reward notice, Close, and the
-	     victory / defeat banner fading in above the window. Dialog layout: root_x/root_y/root_scale
-	     come from the Dialog transform; everything inside is reference px; text is .sharp-text at
-	     the native size, counter-scaled out of the panel. C++ keeps the result packet, Escape and
+	     victory / defeat banner fading in above the window. The workspace slot places and scales
+	     #panel; everything inside is reference px; text is .sharp-text at the native size,
+	     counter-scaled out of the panel. C++ keeps the result packet, Escape and
 	     the reward request; a click is queued with result_close. -->
-	<div id="panel" data-model="cursed_temple_result" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="cursed_temple_result">
 		<div id="back"></div>
 		<div id="frame_top"></div>
 		<div class="frame-middles"><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div></div>
@@ -21,9 +20,9 @@
 		<div class="line line-lower"></div>
 		<div class="line line-upper"></div>
 
-		<div class="result-banner success" data-if="banner == 1" data-style-left="banner_left + 'px'"
+		<div class="result-banner success" data-if="banner == 1"
 		     data-style-opacity="banner_alpha"></div>
-		<div class="result-banner failure" data-if="banner == 2" data-style-left="banner_left + 'px'"
+		<div class="result-banner failure" data-if="banner == 2"
 		     data-style-opacity="banner_alpha"></div>
 
 		<span id="ct_hero_list" class="sharp-text result-line"
@@ -43,7 +42,7 @@
 		     name runs into the next cell, as it did. -->
 		<div class="result-rows rows-allied">
 			<div class="result-row" data-for="r : allied_rows" data-class-hero="r.hero">
-				<div class="hero-row" data-if="r.hero" data-style-height="(line_height_px / root_scale) + 'px'"></div>
+				<div class="hero-row" data-if="r.hero" data-style---line-height="line_height_px + 'px'"></div>
 				<span class="sharp-text result-cell cell-team" data-style-font-size="text_px + 'px'">{{r.team}}</span>
 				<span class="sharp-text result-cell cell-name" data-style-font-size="text_px + 'px'">{{r.name}}</span>
 				<span class="sharp-text result-cell cell-class-name" data-style-font-size="text_px + 'px'">{{r.class_name}}</span>
@@ -53,7 +52,7 @@
 		</div>
 		<div class="result-rows rows-illusion">
 			<div class="result-row" data-for="r : illusion_rows" data-class-hero="r.hero">
-				<div class="hero-row" data-if="r.hero" data-style-height="(line_height_px / root_scale) + 'px'"></div>
+				<div class="hero-row" data-if="r.hero" data-style---line-height="line_height_px + 'px'"></div>
 				<span class="sharp-text result-cell cell-team" data-style-font-size="text_px + 'px'">{{r.team}}</span>
 				<span class="sharp-text result-cell cell-name" data-style-font-size="text_px + 'px'">{{r.name}}</span>
 				<span class="sharp-text result-cell cell-class-name" data-style-font-size="text_px + 'px'">{{r.class_name}}</span>

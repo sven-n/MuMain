@@ -73,3 +73,6 @@
 #ct_members { width: calc(220px * var(--root-scale)); }
 #ct_notice { width: calc(230px * var(--root-scale)); }
 .temple-label { width: calc(54px * var(--root-scale)); }
+
+/* The native line height, counter-scaled out of the panel. */
+.band-hero { height: calc(var(--line-height) / var(--root-scale)); }

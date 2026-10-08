@@ -92,17 +92,7 @@ void CEnterBloodCastle::SetPos(int x, int y)
 // UpdateMouseEvent
 bool CEnterBloodCastle::UpdateMouseEvent()
 {
-    if (true == BtnProcess())
-        return false;
-
-    float panelWidth = static_cast<float>(ENTERBC_BASE_WINDOW_WIDTH);
-    float panelHeight = static_cast<float>(ENTERBC_BASE_WINDOW_HEIGHT);
-    m_View.PanelSize(panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
-                                       static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    return !m_View.IsPointerOver();
 }
 
 //---------------------------------------------------------------------------------------------
@@ -154,7 +144,7 @@ int CEnterBloodCastle::CheckLimitLV(int iIndex)
 
 bool CEnterBloodCastle::Update()
 {
-    m_View.Sync(IsVisible(), m_Pos);
+    m_View.Sync(IsVisible());
 
     // Clicks RmlUi reported: the exit button hides the window, the enabled level button asks the
     // server to enter that level band (the original's BtnProcess()).
@@ -181,16 +171,6 @@ bool CEnterBloodCastle::Render()
     // Nothing native left: the frame, the texts and the buttons are RmlUi. Kept because CObject
     // requires the override.
     return true;
-}
-
-bool CEnterBloodCastle::BtnProcess()
-{
-    // Top-right corner close "X" (shared frame). Hides + swallows the click. The exit and level
-    // buttons are RmlUi's (see Update()).
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_BLOODCASTLE))
-        return true;
-
-    return false;
 }
 
 float CEnterBloodCastle::GetLayerDepth()

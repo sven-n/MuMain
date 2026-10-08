@@ -32,8 +32,6 @@ struct CursedTempleResultRow
 
 struct CursedTempleResultRmlModel
 {
-    // Dialog layout -- UI::Scaling::GetActiveTransform() while CManager runs this window.
-    float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
     float textPx = 0.f;       // native normal text size in physical px (RmlRootTransform.h)
     float lineHeightPx = 0.f; // native normal line height, physical px (the hero row's height)
 
@@ -51,7 +49,6 @@ struct CursedTempleResultRmlModel
 
     // The victory / defeat banner fading in above the window: 0 none, 1 success, 2 failure.
     int banner = 0;
-    float bannerLeft = 0.f; // reference px in the panel
     float bannerAlpha = 0.f;
 };
 } // namespace mu::ui::window

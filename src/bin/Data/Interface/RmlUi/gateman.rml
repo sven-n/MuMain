@@ -8,13 +8,12 @@
 <body>
 	<!-- The castle gatekeeper (CGatemanWindow), docked right: the guest, guild member or guild
 	     master page. For the master: the public toggle, the fee backdrop
-	     and the fee arrows. root_x/root_y/root_scale come from the dock transform; every position
+	     and the fee arrows. The workspace slot places and scales #panel; every position
 	     and size below is the theme's. A .sharp-text layer's font size stays bound: it is laid
 	     out in physical pixels and counter-scaled out of the panel (base.rcss). C++ keeps
 	     the gatekeeper state and every request; a click is queued with gateman_button(n). -->
 	<div id="panel" data-model="gateman" data-class-master="page == 1"
-	     data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	    >
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
@@ -90,6 +89,7 @@
 		</div>
 
 		<div id="btn_exit" data-event-click="gateman_button(4)" data-attr-data-hint="exit_tooltip"></div>
+		<div id="frame_corner_close" data-event-click="gateman_button(4)"></div>
 	</div>
 </body>
 </rml>

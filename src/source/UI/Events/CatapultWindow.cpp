@@ -15,6 +15,7 @@
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/Text/CUIRenderText.h"
 
@@ -104,17 +105,7 @@ void mu::ui::window::CCatapultWindow::SetPos(int x, int y)
 
 bool mu::ui::window::CCatapultWindow::UpdateMouseEvent()
 {
-    if (BtnProcess() == true)
-        return false;
-
-    float panelWidth = kPanelFallbackWidth;
-    float panelHeight = kPanelFallbackHeight;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
-                                       static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool mu::ui::window::CCatapultWindow::UpdateKeyEvent()
@@ -283,22 +274,9 @@ void mu::ui::window::CCatapultWindow::GetCameraPos(vec3_t& vPos)
     }
 }
 
-bool mu::ui::window::CCatapultWindow::BtnProcess()
-{
-    // Top-right corner close "X" (shared frame). Hides + swallows the click. The area, Shoot and
-    // exit buttons are RmlUi's (see Update()).
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_CATAPULT))
-        return true;
-
-    return false;
-}
-
 void mu::ui::window::CCatapultWindow::BindRmlModel(Rml::DataModelConstructor& c, CatapultRmlModel& model)
 {
     c.Bind("mode", &model.mode);
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     c.Bind("line_height_px", &model.lineHeightPx);
     c.Bind("title", &model.title);
@@ -347,7 +325,6 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();

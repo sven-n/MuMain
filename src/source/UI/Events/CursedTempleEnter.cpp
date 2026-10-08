@@ -18,6 +18,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -164,15 +165,7 @@ bool mu::ui::window::CCursedTempleEnter::CheckInventory(BYTE& itempos, int enter
 bool mu::ui::window::CCursedTempleEnter::UpdateMouseEvent()
 {
     // The Enter and Close buttons are RmlUi's (see Update()); the window keeps the pointer.
-    float panelWidth = CURSEDTEMPLE_ENTER_WINDOW_WIDTH;
-    float panelHeight = CURSEDTEMPLE_ENTER_WINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-    {
-        return false;
-    }
-
-    return true;
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool mu::ui::window::CCursedTempleEnter::UpdateKeyEvent()
@@ -244,9 +237,6 @@ void mu::ui::window::CCursedTempleEnter::SetEntryCounts(std::span<const std::uin
 
 void mu::ui::window::CCursedTempleEnter::BindRmlModel(Rml::DataModelConstructor& c, CursedTempleEnterRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("line_height_px", &model.lineHeightPx);
@@ -289,7 +279,6 @@ void mu::ui::window::CCursedTempleEnter::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncLines();
 }
