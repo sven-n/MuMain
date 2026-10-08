@@ -7,6 +7,7 @@
 #include "Core/Platform/PathResolve.h"
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <cwchar>
 #include <string>
