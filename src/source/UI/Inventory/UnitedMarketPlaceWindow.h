@@ -51,6 +51,7 @@ public:
     void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
+    Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     bool UpdateKeyEvent();
     bool Update();
     bool Render();
@@ -69,7 +70,6 @@ public:
 private:
     void BuildRmlUi();
     void SyncRmlModel();
-    bool BtnProcess();
 
     void BindRmlModel(Rml::DataModelConstructor& c, UnitedMarketPlaceRmlModel& model);
     UI::RmlBridge::ThemedView<UnitedMarketPlaceRmlModel> m_RmlView{"united_market_place",

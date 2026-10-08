@@ -82,7 +82,7 @@ UI/Inventory/StorageInventoryExt.cpp: 4
 UI/Inventory/TipTextListLayout.cpp: 1
 UI/Inventory/TipTextListView.cpp: 2
 UI/Inventory/Trade.cpp: 4
-UI/Inventory/UnitedMarketPlaceWindow.cpp: 6
+UI/Inventory/UnitedMarketPlaceWindow.cpp: 2
 UI/MuHelper/MuHelperSkillPicker.cpp: 2
 UI/NPCs/GatemanWindow.cpp: 1
 UI/NPCs/NPCDialogue.cpp: 7

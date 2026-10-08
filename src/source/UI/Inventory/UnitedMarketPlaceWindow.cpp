@@ -19,6 +19,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -81,20 +82,7 @@ void CUnitedMarketPlaceWindow::SetPos(int x, int y)
 
 bool CUnitedMarketPlaceWindow::UpdateMouseEvent()
 {
-    if (true == BtnProcess())
-        return false;
-
-    // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
-    float panelWidth = INVENTORY_WIDTH;
-    float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
-                                      static_cast<int>(panelHeight))
-            .Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool CUnitedMarketPlaceWindow::UpdateKeyEvent()
@@ -164,14 +152,6 @@ float CUnitedMarketPlaceWindow::GetLayerDepth()
 
 
 
-bool CUnitedMarketPlaceWindow::BtnProcess()
-{
-    // Top-right corner close "X" (shared frame): hides + swallows the click. The Warp and exit
-    // buttons are RmlUi's (see Update()).
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
-    return false;
-}
-
 void CUnitedMarketPlaceWindow::SetRemainTime(int iTime)
 {
     m_iRemainTime = iTime;
@@ -188,9 +168,6 @@ void CUnitedMarketPlaceWindow::LockEnterButton(BOOL bLock)
 
 void CUnitedMarketPlaceWindow::BindRmlModel(Rml::DataModelConstructor& c, UnitedMarketPlaceRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("title", &model.title);
@@ -225,7 +202,6 @@ void CUnitedMarketPlaceWindow::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     // The button label's line height: the native line height in physical px.
