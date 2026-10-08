@@ -1,4 +1,4 @@
-/* Modern theme for CMasterLevel -- the master skill tree. Same stretched reference layout as the
+/* Modern theme for CMasterLevel -- the master skill tree. Same reference layout as the
    legacy theme (master_level.rml): the tree is a map of fixed node positions, so the geometry is
    content, not chrome. The chrome is modern's: forged-panel surfaces in place of the painted
    background, one recessed well behind the columns, bordered node sockets and a crimson close button.

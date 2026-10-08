@@ -10,8 +10,8 @@
    buttons (30 x 22, icons at (8, 5), (8, 3) and (10, 5)); the chosen command follows the pointer
    (number at (-13, -6), icon at (-8, -8)). The battle-skill frame (128 x 53) sits at (x + 26,
    y - 53): the skill's 20 x 28 cell at (26, 21), the kills at (78, 28) and (97, 28) in the big
-   font, the scroll buttons (15 x 13) at (48, 21) and (48, 36). Reference px under .screen's
-   W/640 x H/480 stretch (see siege_warfare.rml). */
+   font, the scroll buttons (15 x 13) at (48, 21) and (48, 36). Reference px on .screen's
+   HUD board (see siege_warfare.rml). */
 
 @spritesheet sw-frame-sheet { src: "../../../newui_SW_Minimap_Frame.tga"; sw-frame: 0px 0px 154px 162px; }
 @spritesheet sw-time-sheet { src: "../../../newui_SW_Time_Frame.tga"; sw-time: 0px 0px 134px 37px; }
@@ -129,5 +129,5 @@ body { pointer-events: none; }
 
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
 #time { width: calc(134px * var(--root-scale)); }
-.team .button-label { width: calc(26px * var(--root-scale)); line-height: calc(22px * var(--root-scale-y)); }
-#alpha_button .button-label { width: calc(38px * var(--root-scale)); line-height: calc(23px * var(--root-scale-y)); }
+.team .button-label { width: calc(26px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
+#alpha_button .button-label { width: calc(38px * var(--root-scale)); line-height: calc(23px * var(--root-scale)); }

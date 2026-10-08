@@ -7,7 +7,7 @@
      The original stretches its 428-high background art from power-of-two textures without
      cropping, so the texture's black padding covers the screen from reference y 428 down, with
      the HUD drawn over it. Shown behind the tree (CMasterLevel::SyncBackgroundVisibility()). No
-     data model: the band is a fixed fraction of the screen. -->
+     data model: the band is the HUD board's strip below the tree, in dp (the HUD's scale). -->
 <body>
 	<div id="band"></div>
 </body>

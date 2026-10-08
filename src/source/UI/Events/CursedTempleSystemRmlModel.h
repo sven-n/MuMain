@@ -37,9 +37,9 @@ struct CursedTempleTextEntry
 
 struct CursedTempleSystemRmlModel
 {
-    // The Hud layout's W/640 x H/480 stretch (UI::Scaling::GetActiveTransform() while CManager
-    // runs the window) and its inverse for the counter-scaled text leaves.
-    float scaleX = 1.f, scaleY = 1.f;
+    // The HUD board (LayoutMode::HudCenter while CManager runs the window): the 640x480 frame's
+    // offset in physical px and its one scale, cancelled by the counter-scaled text leaves.
+    float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
 
     // The time, the minimap and the skill panel are hidden together when every panel the original
     // checked is open; the score effect shows for a while after a team scores.

@@ -2,7 +2,7 @@
    RenderArrow(): the message-box fill, the command frame (top, four middle tiles, bottom), the
    five separator lines, six white labels, and on the hovered row a yellow label with the two
    arrows. Every coordinate is the original's, in reference px relative to the menu's top-left
-   (528, 284) -- #screen carries the W/640 x H/480 stretch, see window_menu.rml. Sprite rectangles
+   (528, 284) -- #screen carries the HUD board's scale, see window_menu.rml. Sprite rectangles
    are the texels each RenderImage()/RenderBitmap() call covered. */
 
 @spritesheet wmenu-back-sheet { src: "../../../newui_msgbox_back.jpg"; wmenu-back: 0px 0px 112px 145px; }
@@ -65,7 +65,7 @@
 	position: absolute;
 	left: 0;
 	top: 0;
-	/* The row's width under the stretch, which the label cancels, so centring matches the
+	/* The row's width under the scale, which the label cancels, so centring matches the
 	   original's RT3_SORT_CENTER. */
 	width: calc(112px * var(--root-scale));
 	transform-origin: left top;

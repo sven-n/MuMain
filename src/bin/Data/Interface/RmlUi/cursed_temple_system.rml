@@ -6,14 +6,15 @@
 </head>
 <body data-model="cursed_temple_system">
 	<!-- The Illusion Temple HUD (CCursedTempleSystem): the time, the mini map with its markers and
-	     transparency button, the skill panel, the score effect and the tutorial step. A
-	     LayoutMode::Hud window drawn at fixed 640x480 reference positions, so .screen is that screen
-	     stretched W/640 x H/480 like the original. The frames, the score banners and every row's
+	     transparency button, the skill panel, the score effect and the tutorial step. Drawn on the
+	     HUD board at the original's 640x480 reference positions: .screen is that screen at the
+	     bottom HUD's scale, centred like the HUD. The frames, the score banners and every row's
 	     place are the theme's; C++ lists only what it has to place itself -- the projected mini-map
-	     markers and the native buttons -- in the original's drawing order, over the frames. Text does not stretch: it takes the native size and cancels the stretch. In the
+	     markers and the native buttons -- in the original's drawing order, over the frames. Text
+	     takes the native size and cancels the scale. In the
 	     background context, behind its other documents (the original drew it under nearly every
 	     panel). Takes no pointer events: the buttons' input stays native. -->
-	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'" data-style---root-scale="scale_x" data-style---root-scale-y="scale_y">
+	<div class="screen" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'" data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<!-- The panel chrome, hidden together when every window the original checked is open. The
 		     theme may move the corner part with #corner's left and top, in the screen's 640x480
 		     units; C++ reads that offset back and moves its own sprites and buttons the same way. -->
@@ -87,7 +88,7 @@
 		     data-style-opacity="s.opacity"/>
 
 		<div class="tutorial">
-			<span class="tutorial-line counter-scaled-xy" data-for="l : tutorial_lines" data-class-title="l.title"
+			<span class="tutorial-line counter-scaled" data-for="l : tutorial_lines" data-class-title="l.title"
 			      data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
 		</div>
 	</div>

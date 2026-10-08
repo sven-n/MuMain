@@ -58,8 +58,6 @@ public:
 
     void OpenningProcess();
     void ClosingProcess();
-    float ConvertX(float x);
-    float ConvertY(float y);
     void SetTime(int iHour, int iMinute);
     void InitTime();
 

@@ -1,7 +1,7 @@
 /* Legacy theme for CCursedTempleSystem, reproducing its Render() at the 640x480 reference positions
-   under .screen's W/640 x H/480 stretch: the frames, the score effect's banners and digits and the
-   tutorial step's rows are here; C++ still places the projected mini-map markers, the digit runs
-   and the native buttons, which it lists in the original's order. */
+   on .screen's HUD board: the frames, the score effect's banners and digits, the digit runs and
+   the tutorial step's rows are here; C++ still places the projected mini-map markers and the
+   native buttons, which it lists in the original's order. */
 
 body { pointer-events: none; }
 

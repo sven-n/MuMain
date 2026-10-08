@@ -60,22 +60,24 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
         return LayoutMode::HudFrame;
 
     case INTERFACE_CHATINPUTBOX:
-    case INTERFACE_WINDOW_MENU:
     case INTERFACE_CHATLOGWINDOW:
     case INTERFACE_SLIDEWINDOW:
     case INTERFACE_MU_HELPER_BAR:
-    case INTERFACE_CRYWOLF:
-    case INTERFACE_SIEGEWARFARE:
     case INTERFACE_MAINFRAME:
     case INTERFACE_BUFF_WINDOW:
-    case INTERFACE_MASTER_LEVEL:
     case INTERFACE_MINI_MAP:
     case INTERFACE_HOTKEY:
     case INTERFACE_SYSTEMLOGWINDOW:
-    case INTERFACE_CURSEDTEMPLE_GAMESYSTEM:
         return LayoutMode::Hud;
 
+    // The original's 640x480 screen at the bottom HUD's scale, centred like it: the fixed-place
+    // windows that stand on or open from the HUD.
     case INTERFACE_SKILL_LIST:
+    case INTERFACE_WINDOW_MENU:
+    case INTERFACE_CRYWOLF:
+    case INTERFACE_SIEGEWARFARE:
+    case INTERFACE_MASTER_LEVEL:
+    case INTERFACE_CURSEDTEMPLE_GAMESYSTEM:
         return LayoutMode::HudCenter;
 
     case INTERFACE_PARTY:

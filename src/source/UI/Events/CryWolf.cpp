@@ -198,8 +198,9 @@ void mu::ui::window::CCryWolf::BindRmlModel(Rml::DataModelConstructor& c, CryWol
     notice.RegisterMember("heading", &CryWolfNoticeEntry::heading);
     c.RegisterArray<std::vector<CryWolfNoticeEntry>>();
 
-    c.Bind("scale_x", &model.scaleX);
-    c.Bind("scale_y", &model.scaleY);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
     c.Bind("normal_text_px", &model.normalTextPx);
     c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("bold_line_px", &model.boldLinePx);
@@ -471,18 +472,20 @@ void mu::ui::window::CCryWolf::SyncView()
     if (!visible)
         return;
 
-    // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
+    // CManager scopes the HUD board around the window: the bottom HUD's scale, centred like it.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    updated.scaleX = transform.scaleX;
-    updated.scaleY = transform.scaleY;
+    updated.rootX = transform.offsetX;
+    updated.rootY = transform.offsetY;
+    updated.rootScale = transform.scaleX;
     updated.normalTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
     updated.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
     updated.boldLinePx =
         static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold)) * transform.scaleY;
 
     CryWolfRmlModel& model = m_RmlView.GetModel();
-    SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::scaleX, "scale_x", updated);
-    SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::scaleY, "scale_y", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::rootX, "root_x", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::rootY, "root_y", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::rootScale, "root_scale", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::normalTextPx, "normal_text_px", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::boldTextPx, "bold_text_px", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::boldLinePx, "bold_line_px", updated);
@@ -522,16 +525,6 @@ void mu::ui::window::CCryWolf::SyncView()
         model.notices = std::move(updated.notices);
         m_RmlView.MarkDirty("notices");
     }
-}
-
-float mu::ui::window::CCryWolf::ConvertX(float x)
-{
-    return x * (float)WindowWidth / (float)REFERENCE_WIDTH;
-}
-
-float mu::ui::window::CCryWolf::ConvertY(float y)
-{
-    return y * (float)WindowHeight / (float)REFERENCE_HEIGHT;
 }
 
 bool mu::ui::window::CCryWolf::Render(int Posx, int Posy, int nPosx, int nPosy, float u, float v, float su, float sv, int Index, bool Scale, bool StartScale, float Alpha)

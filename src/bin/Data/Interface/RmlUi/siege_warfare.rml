@@ -8,25 +8,25 @@
 	<!-- The castle siege HUD on the Valley of Loren (CSiegeWarfare): the mini map in its frame with
 	     the transparency button and the time frame, the dots of the hero and of everyone in view,
 	     the teams' commands and, for a commander, the team and command buttons; a guild master /
-	     battle master gets the battle-skill frame above it. A LayoutMode::Hud window, so .screen is
-	     the 640x480 reference screen stretched W/640 x H/480 like the original; every position is
-	     the original's, in reference px. Text does not stretch: each value takes the native text
-	     size and cancels the stretch. The transparency value fades what the original faded (not
+	     battle master gets the battle-skill frame above it. Drawn on the HUD board: .screen is the
+	     640x480 reference screen at the bottom HUD's scale, centred like the HUD; every position
+	     is the original's, in reference px. Each text value takes the native text size and
+	     cancels the scale. The transparency value fades what the original faded (not
 	     the other characters' dots). C++ keeps the state and the input (the buttons hit-test
 	     natively and report their up / over / down row); the document takes no pointer events.
 	     Image paths are relative to themes/<theme>/, where the themed document is loaded from. -->
-	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'" data-style---root-scale="scale_x" data-style---root-scale-y="scale_y">
+	<div class="screen" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'" data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div id="frame" data-style-left="frame_x + 'px'" data-style-top="frame_y + 'px'" data-style-opacity="alpha">
 			<img id="map" src="../../../../World31/Map1.jpg" data-attr-rect="map_rect"/>
 			<div id="frame_art"></div>
 			<div id="time_frame"></div>
-			<span id="time" class="text big counter-scaled-xy" data-if="time_visible" data-style-font-size="big_text_px + 'px'">{{time_text}}</span>
+			<span id="time" class="text big counter-scaled" data-if="time_visible" data-style-font-size="big_text_px + 'px'">{{time_text}}</span>
 		</div>
 
 		<div class="dot" data-for="dot : dots" data-style-left="dot.left + 'px'" data-style-top="dot.top + 'px'"></div>
 
 		<div class="cursor" data-if="cursor_visible" data-style-left="cursor_left + 'px'" data-style-top="cursor_top + 'px'">
-			<span class="text bold cursor-team counter-scaled-xy" data-style-font-size="bold_text_px + 'px'">{{cursor_team}}</span>
+			<span class="text bold cursor-team counter-scaled" data-style-font-size="bold_text_px + 'px'">{{cursor_team}}</span>
 			<img class="cursor-icon attack" src="../../../i_attack.tga" data-if="cursor_command == 0"/>
 			<img class="cursor-icon defence" src="../../../i_defense.tga" data-if="cursor_command == 1"/>
 			<img class="cursor-icon wait" src="../../../i_wait.tga" data-if="cursor_command == 2"/>
@@ -34,7 +34,7 @@
 
 		<div class="command" data-for="c : commands" data-style-left="c.left + 'px'" data-style-top="c.top + 'px'"
 		     data-style-opacity="alpha">
-			<span class="text bold command-team counter-scaled-xy" data-style-color="c.color" data-style-font-size="bold_text_px + 'px'">{{c.team}}</span>
+			<span class="text bold command-team counter-scaled" data-style-color="c.color" data-style-font-size="bold_text_px + 'px'">{{c.team}}</span>
 			<img class="command-icon" src="../../../i_attack.tga" rect="0 0 12 12" data-if="c.command == 0" data-style-image-color="c.color"/>
 			<img class="command-icon" src="../../../i_defense.tga" rect="0 0 17 14" data-if="c.command == 1" data-style-image-color="c.color"/>
 			<img class="command-icon" src="../../../i_wait.tga" rect="0 0 10 11" data-if="c.command == 2" data-style-image-color="c.color"/>
@@ -42,7 +42,7 @@
 
 		<div class="team" data-for="t : teams" data-style-left="t.left + 'px'" data-style-top="t.top + 'px'"
 		     data-class-over="t.frame == 1" data-class-down="t.frame == 2" data-style-opacity="alpha">
-			<span class="text bold button-label counter-scaled-xy" data-style-font-size="bold_text_px + 'px'">{{t.label}}</span>
+			<span class="text bold button-label counter-scaled" data-style-font-size="bold_text_px + 'px'">{{t.label}}</span>
 		</div>
 
 		<div class="order" data-for="o, i : orders" data-style-left="o.left + 'px'" data-style-top="o.top + 'px'">
@@ -60,15 +60,15 @@
 			<!-- The icon reddens until the hero has the kills the skill needs; the theme owns both. -->
 			<img id="skill_icon" src="../../../newui_skill2.jpg" data-attr-rect="skill_rect"
 			     data-class-unaffordable="!skill_affordable"/>
-			<span class="text big kills kills-needed counter-scaled-xy" data-style-font-size="big_text_px + 'px'">{{kills_needed}}</span>
-			<span class="text big kills kills-now counter-scaled-xy" data-style-font-size="big_text_px + 'px'">{{kills}}</span>
+			<span class="text big kills kills-needed counter-scaled" data-style-font-size="big_text_px + 'px'">{{kills_needed}}</span>
+			<span class="text big kills kills-now counter-scaled" data-style-font-size="big_text_px + 'px'">{{kills}}</span>
 			<div class="scroll scroll-up" data-class-over="scroll_up_frame == 1" data-class-down="scroll_up_frame == 2"></div>
 			<div class="scroll scroll-down" data-class-over="scroll_down_frame == 1" data-class-down="scroll_down_frame == 2"></div>
 		</div>
 
 		<div id="alpha_button" data-style-left="(frame_x + 58) + 'px'" data-style-top="(frame_y + 4) + 'px'"
 		     data-class-over="alpha_frame == 1" data-class-down="alpha_frame == 2" data-style-opacity="alpha">
-			<span class="text bold button-label counter-scaled-xy" data-style-font-size="bold_text_px + 'px'">{{alpha_label}}</span>
+			<span class="text bold button-label counter-scaled" data-style-font-size="bold_text_px + 'px'">{{alpha_label}}</span>
 		</div>
 	</div>
 </body>

@@ -829,8 +829,9 @@ void mu::ui::window::CCursedTempleSystem::BindRmlModel(Rml::DataModelConstructor
     line.RegisterMember("title", &CursedTempleTextEntry::title);
     c.RegisterArray<std::vector<CursedTempleTextEntry>>();
 
-    c.Bind("scale_x", &model.scaleX);
-    c.Bind("scale_y", &model.scaleY);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
     c.Bind("panels_shown", &model.panelsShown);
     c.Bind("score_shown", &model.scoreShown);
     c.Bind("skill_icon_src", &model.skillIconSrc);
@@ -1135,11 +1136,12 @@ void mu::ui::window::CCursedTempleSystem::SyncView()
     std::vector<CursedTempleTextEntry> lines;
     SyncTutorialStep(lines);
 
-    // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
+    // CManager scopes the HUD board around the window: the bottom HUD's scale, centred like it.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     CursedTempleSystemRmlModel& model = m_RmlView.GetModel();
-    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::scaleX, "scale_x", transform.scaleX);
-    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::scaleY, "scale_y", transform.scaleY);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::rootX, "root_x", transform.offsetX);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::rootY, "root_y", transform.offsetY);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::rootScale, "root_scale", transform.scaleX);
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::sprites, "sprites", std::move(sprites));
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::tutorialLines, "tutorial_lines", std::move(lines));
 }

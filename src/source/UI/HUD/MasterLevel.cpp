@@ -506,8 +506,9 @@ void mu::ui::window::CMasterLevel::UnloadImages()
 
 void mu::ui::window::CMasterLevel::BindRmlModel(Rml::DataModelConstructor& c, MasterLevelRmlModel& model)
 {
-    c.Bind("scale_x", &model.scaleX);
-    c.Bind("scale_y", &model.scaleY);
+    c.Bind("root_x", &model.rootX);
+    c.Bind("root_y", &model.rootY);
+    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
 
     c.Bind("class_name_text", &model.classNameText);
@@ -613,12 +614,11 @@ void mu::ui::window::CMasterLevel::SyncBackgroundVisibility(bool visible)
 
 void mu::ui::window::CMasterLevel::SyncTransform()
 {
-    // CManager scopes LayoutMode::Hud around this window: W/640 x H/480, no offset. The inverse is
-    // pushed rather than computed in the markup so each text leaf's transform stays a plain
-    // binding.
+    // CManager scopes the HUD board around the window: the bottom HUD's scale, centred like it.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::scaleX, "scale_x", transform.scaleX);
-    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::scaleY, "scale_y", transform.scaleY);
+    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::rootX, "root_x", transform.offsetX);
+    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::rootY, "root_y", transform.offsetY);
+    SyncFloat(m_RmlView.Binder(), &MasterLevelRmlModel::rootScale, "root_scale", transform.scaleX);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 }
 

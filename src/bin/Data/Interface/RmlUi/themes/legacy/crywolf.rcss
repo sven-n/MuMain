@@ -1,5 +1,5 @@
-/* Legacy theme for CCryWolf, reproducing its Render() at the 640x480 reference positions under
-   .screen's W/640 x H/480 stretch: the result banner (329 x 94) at y 50, the rank table (196 x 141)
+/* Legacy theme for CCryWolf, reproducing its Render() at the 640x480 reference positions on
+   .screen's HUD board: the result banner (329 x 94) at y 50, the rank table (196 x 141)
    at (230, 150), the rank label (110 x 28) at y 188 and the letter (29 x 28) at (370, 188), the
    experience label (60 x 19) at (229, 235) and nine 15 x 19 digits from x 289; the battle panel
    in_main-New (122 x 119) at (518, 278), the altars (13 x 13), the dark elf icon (15 x 15) at

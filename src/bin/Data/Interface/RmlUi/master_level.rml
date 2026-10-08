@@ -6,11 +6,11 @@
 	<link type="text/rcss" href="master_level.rcss"/>
 </head>
 <body data-model="master_level">
-	<!-- The master skill tree (CMasterLevel). A LayoutMode::Hud window drawn over the whole 640x480
-	     reference screen, stretched W/640 x H/480 exactly like the original (non-uniform at wide
-	     sizes), so #panel is authored in plain reference px and carries that stretch.
+	<!-- The master skill tree (CMasterLevel), drawn on the HUD board: the 640x480 reference
+	     screen at the bottom HUD's scale, centred like the HUD, so the 428-unit tree stands on the
+	     HUD. #panel is authored in plain reference px and carries that scale.
 
-	     Text does not stretch: every text leaf takes the native text renderer's physical size
+	     Text does not scale: every text leaf takes the native text renderer's physical size
 	     (text_px) and cancels #panel's scale with the inverse one, so its glyphs rasterise at the
 	     original's size; transform-origin: left top keeps each leaf on the reference point the
 	     original drew its text at (all of them left-aligned).
@@ -19,7 +19,7 @@
 	     in tree order, so later nodes paint over the arrows of earlier ones; then the close button
 	     and the header text. The black the original's padded background leaves below the tree is
 	     master_level_band.rml, under the bottom HUD. -->
-	<div id="panel" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'" data-style---root-scale="scale_x" data-style---root-scale-y="scale_y">
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'" data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
 		<div id="back_left"></div>
 		<div id="back_right"></div>
 
@@ -35,22 +35,22 @@
 			     data-event-mouseover="master_node_hover(node.id)"
 			     data-event-mouseout="master_node_hover(-1)"></div>
 			<div data-attr-class="'node-arrow arrow-' + node.arrow"></div>
-			<span class="text node-level counter-scaled-xy" data-style-font-size="text_px + 'px'">{{node.level_text}}</span>
+			<span class="text node-level counter-scaled" data-style-font-size="text_px + 'px'">{{node.level_text}}</span>
 		</div>
 
 		<div id="close" data-event-click="master_close" data-attr-data-hint="close_hint"></div>
 
-		<span id="class_name" class="text head-text counter-scaled-xy" data-style-font-size="text_px + 'px'">{{class_name_text}}</span>
-		<span id="master_level" class="text head-text counter-scaled-xy" data-style-font-size="text_px + 'px'">{{master_level_text}}</span>
-		<span id="level_point" class="text head-text counter-scaled-xy" data-style-font-size="text_px + 'px'">{{level_point_text}}</span>
-		<span id="experience" class="text head-text counter-scaled-xy" data-style-font-size="text_px + 'px'">{{experience_text}}</span>
+		<span id="class_name" class="text head-text counter-scaled" data-style-font-size="text_px + 'px'">{{class_name_text}}</span>
+		<span id="master_level" class="text head-text counter-scaled" data-style-font-size="text_px + 'px'">{{master_level_text}}</span>
+		<span id="level_point" class="text head-text counter-scaled" data-style-font-size="text_px + 'px'">{{level_point_text}}</span>
+		<span id="experience" class="text head-text counter-scaled" data-style-font-size="text_px + 'px'">{{experience_text}}</span>
 		<!-- The master experience hint's hover area, native's CheckMouseIn(458, 11, 81, 10). -->
 		<div id="experience_area"
 		     data-event-mouseover="master_experience_hover(1)" data-event-mouseout="master_experience_hover(0)"></div>
 
-		<span id="column_0" class="text column-text counter-scaled-xy" data-style-font-size="text_px + 'px'">{{column_text_0}}</span>
-		<span id="column_1" class="text column-text counter-scaled-xy" data-style-font-size="text_px + 'px'">{{column_text_1}}</span>
-		<span id="column_2" class="text column-text counter-scaled-xy" data-style-font-size="text_px + 'px'">{{column_text_2}}</span>
+		<span id="column_0" class="text column-text counter-scaled" data-style-font-size="text_px + 'px'">{{column_text_0}}</span>
+		<span id="column_1" class="text column-text counter-scaled" data-style-font-size="text_px + 'px'">{{column_text_1}}</span>
+		<span id="column_2" class="text column-text counter-scaled" data-style-font-size="text_px + 'px'">{{column_text_2}}</span>
 	</div>
 </body>
 </rml>

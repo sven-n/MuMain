@@ -1,7 +1,7 @@
 /* Legacy theme for CMasterLevel -- the master skill tree, reproducing the original's Render():
    the two background textures, per node the box, the lit or grey icon, the arrow and the level,
    the close button and the header text. Every coordinate is the original's, in reference px
-   (#panel carries the W/640 x H/480 stretch, see master_level.rml). Sprite rectangles are texels
+   (#panel carries the HUD board's scale, see master_level.rml). Sprite rectangles are texels
    of the power-of-two textures the engine loads (a 50x38 box inside a 64x64 texture): each covers
    exactly the UV rectangle the original drew. Icons come from master_skill_icons.rcss. */
 
