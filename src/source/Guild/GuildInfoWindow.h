@@ -108,6 +108,7 @@ namespace mu::ui::window
 
         bool Create(CManager* pNewUIMng, int x, int y);
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         void Release();
 
         void SetPos(int x, int y);
@@ -151,7 +152,7 @@ namespace mu::ui::window
 
 
     private:
-        bool Check_Mouse(int mx, int my);
+        void SelectTab(int tab);
         bool Check_Btn(int button);
 
         int GetGuildMemberIndex(const wchar_t* szName);

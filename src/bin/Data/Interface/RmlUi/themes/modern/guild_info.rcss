@@ -267,3 +267,9 @@
 #gi_hdr_union_members { width: calc(40px * var(--root-scale)); }
 #gi_union_list { width: calc(162px * var(--root-scale)); height: calc(78px * var(--root-scale)); }
 .gi-pane-row.gi-union-row { width: calc(147px * var(--root-scale)); height: calc(13px * var(--root-scale)); }
+
+/* The tabs' hit areas (guild_info_tab): the original's columns, 56 wide from x 12, over the top 90. */
+.gi-tab-hit { position: absolute; top: 0; width: 56px; height: 90px; pointer-events: auto; cursor: pointer; }
+#gi_tab_hit_0 { left: 12px; }
+#gi_tab_hit_1 { left: 68px; }
+#gi_tab_hit_2 { left: 124px; }

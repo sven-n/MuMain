@@ -9,12 +9,11 @@
 	<!-- The guild master's guild creation window (CGuildMakeWindow), docked right, one of three
 	     pages: the question and Create Guild (page 0); the name field, the 8 x 8 mark editor, its
 	     palette and the selected colour, Back / Next (page 1); the finished mark and name, Back /
-	     Next (page 2). root_x/root_y/root_scale come from the dock transform; everything inside is
+	     Next (page 2). The workspace slot places and scales #panel; everything inside is
 	     reference px; text is .sharp-text at the native size, counter-scaled out of the panel.
-	     The grid and palette take no pointer events: the window paints the mark with its native
-	     hit tests, as the original did. A button click is queued with guild_make_button(n). -->
-	<div id="panel" data-model="guild_make" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	     A grid cell paints with guild_mark_paint(cell), a palette cell picks with
+	     guild_mark_color(colour); a button click is queued with guild_make_button(n). -->
+	<div id="panel" data-model="guild_make">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
@@ -38,7 +37,8 @@
 			<!-- The mark grid and the palette: each set has its own container so the theme can
 			     count its cells from the first one. -->
 			<div class="gm-grid">
-				<div class="gm-cell gm-cell-13" data-for="c : cells">
+				<div class="gm-cell gm-cell-13" data-for="c : cells" data-event-mousedown="guild_mark_paint(it_index)"
+				     data-event-mouseover="guild_mark_paint(it_index)">
 					<div class="gm-fill" data-style-background-color="c.color">
 						<div class="gm-cross gm-cross-a" data-if="c.empty"></div>
 						<div class="gm-cross gm-cross-b" data-if="c.empty"></div>
@@ -46,7 +46,7 @@
 				</div>
 			</div>
 			<div class="gm-palette">
-				<div class="gm-cell gm-cell-18" data-for="c : palette">
+				<div class="gm-cell gm-cell-18" data-for="c : palette" data-event-mousedown="guild_mark_color(it_index)">
 					<div class="gm-fill" data-style-background-color="c.color">
 						<div class="gm-cross gm-cross-a" data-if="c.empty"></div>
 						<div class="gm-cross gm-cross-b" data-if="c.empty"></div>
@@ -84,6 +84,7 @@
 		     across page changes; shown on page 1 only. -->
 		<input id="name_field" type="text" class="text-field sharp-text" maxlength="8" data-value="guild_name" data-class-shown="page == 1"
 		       data-style-font-size="text_px + 'px'"/>
+		<div id="frame_corner_close" data-event-click="guild_make_button(3)"></div>
 	</div>
 </body>
 </rml>

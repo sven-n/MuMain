@@ -3,6 +3,7 @@
 #include "GuildInfoWindow.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
@@ -168,35 +169,8 @@ void mu::ui::window::CGuildInfoWindow::SetPos(int x, int y)
 
 bool mu::ui::window::CGuildInfoWindow::UpdateMouseEvent()
 {
-    bool ret = true;
-
-    if (mu::ui::window::IsPress(VK_LBUTTON))
-    {
-        ret = Check_Mouse(MouseX, MouseY);
-        if (ret == false)
-        {
-            PlayBuffer(SOUND_CLICK01);
-        }
-    }
-
-    // Top-right corner close "X" (shared frame): hides + swallows the click. The buttons are
-    // RmlUi's (see Update()).
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GUILDINFO))
-    {
-        m_EventState = EVENT_NONE;
-        return false;
-    }
-
-    float panelWidth = static_cast<float>(GUILDINFO_WIDTH);
-    float panelHeight = static_cast<float>(GUILDINFO_HEIGHT);
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
-                                       static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-    {
-        return false;
-    }
-
-    return ret;
+    // The tabs, the buttons, the lists and the corner close are RmlUi's (see Update()).
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool mu::ui::window::CGuildInfoWindow::Check_Btn(int button)
@@ -367,42 +341,24 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn(int button)
     return true;
 }
 
-bool mu::ui::window::CGuildInfoWindow::Check_Mouse(int mx, int my)
+void mu::ui::window::CGuildInfoWindow::SelectTab(int tab)
 {
-    if (mx > m_Pos.x && mx < (m_Pos.x + GUILDINFO_WIDTH) && my > m_Pos.y && my < (m_Pos.y + GUILDINFO_HEIGHT))
+    m_nCurrentTab = tab;
+    switch (m_nCurrentTab)
     {
-        for (int i = 0; i < 3; i++)
+    case static_cast<int>(GuildConstants::GuildTab::INFO):
+        break;
+    case static_cast<int>(GuildConstants::GuildTab::MEMBERS):
+        SocketClient->ToGameServer()->SendGuildListRequest();
+        break;
+    case static_cast<int>(GuildConstants::GuildTab::UNION):
+        if (m_bRequestUnionList == false && GuildMark[Hero->GuildMarkIndex].UnionName[0] != 0)
         {
-            int Tab_Pos = i * 56;
-            if (mx > (m_Pos.x + 12 + Tab_Pos) && mx < (m_Pos.x + 12 + Tab_Pos + 56) && my > m_Pos.y && my < (m_Pos.y + 90))
-            {
-                m_nCurrentTab = i;
-                switch (m_nCurrentTab)
-                {
-                case static_cast<int>(GuildConstants::GuildTab::INFO):
-                    break;
-                case static_cast<int>(GuildConstants::GuildTab::MEMBERS):
-                {
-                    SocketClient->ToGameServer()->SendGuildListRequest();
-                }
-                break;
-                case static_cast<int>(GuildConstants::GuildTab::UNION):
-                {
-                    if (m_bRequestUnionList == false
-                        && GuildMark[Hero->GuildMarkIndex].UnionName[0] != 0)
-                    {
-                        SocketClient->ToGameServer()->SendRequestAllianceList();
-                        m_bRequestUnionList = true;
-                    }
-                }
-                break;
-                }
-                return false;
-            }
+            SocketClient->ToGameServer()->SendRequestAllianceList();
+            m_bRequestUnionList = true;
         }
+        break;
     }
-    // Both lists are RmlUi scroll panes now and own their own thumbs.
-    return true;
 }
 
 bool mu::ui::window::CGuildInfoWindow::UpdateKeyEvent()
@@ -443,9 +399,6 @@ bool mu::ui::window::CGuildInfoWindow::Render()
 
 void mu::ui::window::CGuildInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, GuildInfoRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     c.Bind("no_guild", &model.noGuild);
     c.Bind("tab", &model.tab);
@@ -515,6 +468,17 @@ void mu::ui::window::CGuildInfoWindow::BindRmlModel(Rml::DataModelConstructor& c
                             if (arguments.size() == 1)
                                 m_PendingButton = arguments[0].Get<int>(-1);
                         });
+    c.BindEventCallback("guild_info_tab",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        {
+                            if (arguments.size() != 1)
+                                return;
+                            const int tab = arguments[0].Get<int>(-1);
+                            if (tab < 0 || tab >= 3)
+                                return;
+                            SelectTab(tab);
+                            PlayBuffer(SOUND_CLICK01);
+                        });
     c.BindEventCallback("guild_info_select_union",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
                         {
@@ -550,7 +514,6 @@ void mu::ui::window::CGuildInfoWindow::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncContent();
 }
@@ -741,11 +704,12 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
 void mu::ui::window::CGuildInfoWindow::SyncListContent()
 {
     const auto& model = m_RmlView.GetModel();
-    if (model.rootScale != m_ListScale || model.textPx != m_ListTextPx)
+    const float listScale = GetLayoutTransform().scaleX;
+    if (listScale != m_ListScale || model.textPx != m_ListTextPx)
         m_ListsDirty = true;
     if (!m_ListsDirty)
         return;
-    m_ListScale = model.rootScale;
+    m_ListScale = listScale;
     m_ListTextPx = model.textPx;
     m_ListsDirty = false;
 

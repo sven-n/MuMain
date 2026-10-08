@@ -10,8 +10,8 @@ GameShop/InGameShop.cpp: 2
 GameShop/MsgBoxIGSBuyPackageItem.cpp: 2
 GameShop/MsgBoxIGSBuySelectItem.cpp: 2
 GameShop/MsgBoxIGSSendGift.cpp: 1
-Guild/GuildInfoWindow.cpp: 7
-Guild/GuildMakeWindow.cpp: 5
+Guild/GuildInfoWindow.cpp: 4
+Guild/GuildMakeWindow.cpp: 1
 Render/Text/CUIRenderTextSDLTtf.cpp: 1
 Scenes/LoginSceneOverlay.cpp: 1
 UI/Combat/CastleWindow.cpp: 1

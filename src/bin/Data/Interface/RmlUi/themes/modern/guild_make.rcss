@@ -179,3 +179,6 @@
 .gm-label { width: calc(64px * var(--root-scale)); }
 #result { width: calc(100% * var(--root-scale)); }
 #name_field { width: calc(200px * var(--root-scale)); height: calc(14px * var(--root-scale)); line-height: calc(14px * var(--root-scale)); }
+
+/* The mark grid's and the palette's cells take the pointer (guild_mark_paint, guild_mark_color). */
+.gm-grid .gm-cell, .gm-palette .gm-cell { pointer-events: auto; cursor: pointer; }

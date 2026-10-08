@@ -9,13 +9,11 @@
 	<!-- The guild window (CGuildInfoWindow), docked right: the no-guild hint, or the Guild, Members
 	     and Alliance tabs. Every position and size below is the theme's; C++ keeps the native list
 	     controls for their data, scrolling and line clicks, so a list row's own top follows their
-	     scroll position and the scroll thumb its offset. The tabs, the lines and the thumb are
-	     hit-tested natively, so #panel leaves the pointer alone outside the buttons.
-	     root_x/root_y/root_scale come from the dock transform; a .sharp-text layer's own width and
+	     scroll position and the scroll thumb its offset. The workspace slot places and scales
+	     #panel; a .sharp-text layer's own width and
 	     font size stay bound for the counter-scale (base.rcss). A button click is queued with
 	     guild_info_button(n). -->
-	<div id="panel" data-model="guild_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="guild_info">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
@@ -38,6 +36,10 @@
 		      data-style-font-size="hint_line3.text_px + 'px'">{{hint_line3.text}}</span>
 		</div>
 
+		<!-- The tabs' hit areas: the original's 56-unit columns over the top 90 units. -->
+		<div class="gi-tab-hit" id="gi_tab_hit_0" data-event-mousedown="guild_info_tab(0)"></div>
+		<div class="gi-tab-hit" id="gi_tab_hit_1" data-event-mousedown="guild_info_tab(1)"></div>
+		<div class="gi-tab-hit" id="gi_tab_hit_2" data-event-mousedown="guild_info_tab(2)"></div>
 		<!-- The header every tab shares. -->
 		<div class="gi-page" data-if="!no_guild">
 		<span id="gi_title" class="sharp-text gi-line"
@@ -204,6 +206,7 @@
 		</div>
 
 		<div id="btn_exit" data-event-click="guild_info_button(6)" data-attr-data-hint="exit_tooltip"></div>
+		<div id="frame_corner_close" data-event-click="guild_info_button(6)"></div>
 	</div>
 </body>
 </rml>

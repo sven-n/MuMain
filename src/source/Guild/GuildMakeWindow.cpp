@@ -3,6 +3,8 @@
 #include "GuildMakeWindow.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "Core/Input/KeyState.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "Audio/DSPlaySound.h"
@@ -53,45 +55,6 @@ namespace
         }
 
         return FALSE;
-    }
-
-    void UpdateEditGuildMark(int iPos_x, int iPos_y)
-    {
-        int i, j;
-        float x, y;
-        Hero->Object.Angle[2] = 90.f + 22.5f;
-        for (i = 0; i < 8; ++i)
-        {
-            for (j = 0; j < 8; ++j)
-            {
-                x = iPos_x + j * 15 + 50;
-                y = iPos_y + i * 15 + 100;
-                if (MouseX >= x && MouseX < x + 15 && MouseY >= y && MouseY < y + 15)
-                {
-                    if (MouseLButton)
-                        GuildMark[MARK_EDIT].Mark[i * 8 + j] = SelectMarkColor;
-                    if (MouseRButton)
-                        GuildMark[MARK_EDIT].Mark[i * 8 + j] = 0;
-                }
-            }
-        }
-        for (i = 0; i < 2; ++i)
-        {
-            for (j = 0; j < 8; ++j)
-            {
-                x = iPos_x + j * 20 + 15;
-                y = iPos_y + i * 20 + 260;
-                if (MouseX >= x && MouseX < x + 20 && MouseY >= y && MouseY < y + 20)
-                {
-                    if (MouseLButtonPush)
-                    {
-                        MouseLButtonPush = FALSE;
-                        PlayBuffer(SOUND_CLICK01);
-                        SelectMarkColor = i * 8 + j;
-                    }
-                }
-            }
-        }
     }
 
     // RenderGuildColor()'s cell: RenderColorQuadARGB() reads MarkColor[] (built for the mark
@@ -365,24 +328,14 @@ bool CGuildMakeWindow::UpdateMouseEvent()
         return true;
     }
 
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPCGUILDMASTER))
-    {
-        return false;
-    }
-
-    // The buttons are RmlUi's (see Update()); the mark is still painted by the native hit tests
-    // on its grid and palette, which guild_make.rml leaves to the pointer.
+    // The hero faces the camera while the player draws the mark.
     if (m_GuildMakeState == GUILDMAKE_MARK)
     {
-        UpdateEditGuildMark(m_Pos.x, m_Pos.y);
+        Hero->Object.Angle[2] = 90.f + 22.5f;
     }
 
-    float panelWidth = static_cast<float>(GUILDMAKE_WIDTH);
-    float panelHeight = static_cast<float>(GUILDMAKE_HEIGHT);
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
-                                       static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
+    // The buttons, the mark grid, the palette and the corner close are RmlUi's (see Update()).
+    if (UI::RmlBridge::IsPointerOver(m_RmlView.Document()))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {
@@ -406,9 +359,6 @@ bool CGuildMakeWindow::Render()
 
 void CGuildMakeWindow::BindRmlModel(Rml::DataModelConstructor& c, GuildMakeRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     c.Bind("page", &model.page);
     c.Bind("title_text", &model.titleText);
@@ -435,6 +385,34 @@ void CGuildMakeWindow::BindRmlModel(Rml::DataModelConstructor& c, GuildMakeRmlMo
     c.Bind("selected", &model.selected);
     c.RegisterArray<std::vector<Rml::String>>();
     c.Bind("mark_cells", &model.markCells);
+    // A cell paints with the selected colour under the left button and clears under the right,
+    // on the press and then on every cell the pointer enters while the button stays down.
+    c.BindEventCallback("guild_mark_paint",
+        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& arguments)
+        {
+            if (arguments.size() != 1 || m_GuildMakeState != GUILDMAKE_MARK)
+                return;
+            const int cell = arguments[0].Get<int>(-1);
+            if (cell < 0 || cell >= 64)
+                return;
+            const bool press = event.GetId() == Rml::EventId::Mousedown;
+            const int button = press ? event.GetParameter<int>("button", -1) : -1;
+            if (button == 0 || (!press && Core::Input::IsKeyDown(VK_LBUTTON)))
+                GuildMark[MARK_EDIT].Mark[cell] = static_cast<BYTE>(SelectMarkColor);
+            else if (button == 1 || (!press && Core::Input::IsKeyDown(VK_RBUTTON)))
+                GuildMark[MARK_EDIT].Mark[cell] = 0;
+        });
+    c.BindEventCallback("guild_mark_color",
+        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& arguments)
+        {
+            if (arguments.size() != 1 || event.GetParameter<int>("button", -1) != 0)
+                return;
+            const int color = arguments[0].Get<int>(-1);
+            if (color < 0 || color >= 16)
+                return;
+            SelectMarkColor = color;
+            PlayBuffer(SOUND_CLICK01);
+        });
     c.BindEventCallback("guild_make_button",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
                         {
@@ -466,7 +444,6 @@ void CGuildMakeWindow::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncContent();
 
