@@ -187,6 +187,10 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
   `COptionWindow`, `CServerSelWin`, `CMsgWin`, `CCharSelMainWin`, `CCharMakeWin`, `CLoginWin`)
   have not been audited for native draws that still assume a fixed resolution (the mode's own
   comment cites `CCreditWin`'s 800x600 assumption).
+- **Layout still decided per window in C++** (§1, §16). Every window runs inside its layout mode's
+  transform, and code reading it places documents, hit-tests the pointer and sizes native text in
+  that window's units. `tools/check_layout_transform_users.py` counts those uses and lets the count
+  only shrink: 417 uses in 123 files when the guard landed. Zero retires the per-window transform.
 
 ## Upstream sync log
 

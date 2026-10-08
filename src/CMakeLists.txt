@@ -975,6 +975,17 @@ add_custom_target(CheckRmlBoundGeometry ALL
 )
 add_dependencies(Main CheckRmlBoundGeometry)
 
+# No OUTPUT means this target is always considered out-of-date and re-runs every build. See
+# tools/check_layout_transform_users.py's own docstring for what it counts and why.
+add_custom_target(CheckLayoutTransformUsers ALL
+  COMMAND "${Python3_EXECUTABLE}" "${REPO_ROOT}/tools/check_layout_transform_users.py"
+          --source-root "${CMAKE_CURRENT_SOURCE_DIR}/source"
+          --allowlist "${REPO_ROOT}/tools/layout_transform_allowlist.txt"
+  COMMENT "Checking per-window layout transform users (the count may only shrink)"
+  VERBATIM
+)
+add_dependencies(Main CheckLayoutTransformUsers)
+
 # MinGW (32-bit or 64-bit) cross-toolchains: link against the Windows/OpenGL
 # system libraries so that gl*, wgl*, Imm*, timeGetTime, etc. resolve.
 # For turbojpeg and wzAudio we link against the logically named libraries,
