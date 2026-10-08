@@ -565,6 +565,13 @@ body {
 /* A press on a control never drags the window around it: RmlUi starts a drag from the nearest
    ancestor with `drag` set, and the control's click would still fire on release. */
 input, select, textarea, .btn, [data-event-click] { drag: block; }
+/* A panel a workspace slot places (CObject::GetPlacedDocument()): the slot's top-left and its
+   region's scale arrive as variables; the theme decides how they apply. */
+#panel.slot-placed {
+	left: var(--slot-left);
+	top: var(--slot-top);
+	transform: scale(var(--root-scale));
+}
 /* A centred panel the player dragged: left/top place it (UI::RmlBridge::MakeDraggable()). */
 .center-both.dragged { transform: none; }
 

@@ -94,17 +94,14 @@ void UI::RmlBridge::SlotPlacement::Apply(Rml::ElementDocument* doc, const char* 
     panel->SetClass("slot-placed", placed);
     if (placed)
     {
-        const std::string scaleText = std::to_string(scale);
-        panel->SetProperty(Rml::PropertyId::Left, Rml::Property(left, Rml::Unit::PX));
-        panel->SetProperty(Rml::PropertyId::Top, Rml::Property(top, Rml::Unit::PX));
-        panel->SetProperty("transform", "scale(" + scaleText + ")");
-        panel->SetProperty("--root-scale", scaleText);
+        panel->SetProperty("--slot-left", std::to_string(left) + "px");
+        panel->SetProperty("--slot-top", std::to_string(top) + "px");
+        panel->SetProperty("--root-scale", std::to_string(scale));
     }
     else
     {
-        panel->RemoveProperty(Rml::PropertyId::Left);
-        panel->RemoveProperty(Rml::PropertyId::Top);
-        panel->RemoveProperty("transform");
+        panel->RemoveProperty("--slot-left");
+        panel->RemoveProperty("--slot-top");
         panel->RemoveProperty("--root-scale");
     }
 }

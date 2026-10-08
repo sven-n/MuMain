@@ -48,6 +48,7 @@ public:
 body { width: 100%; height: 100%; pointer-events: none; }
 #panel { position: absolute; width: 190px; height: 429px; transform-origin: left top; )") +
                                    panelStyle + R"( }
+#panel.slot-placed { left: var(--slot-left); top: var(--slot-top); transform: scale(var(--root-scale)); }
 #wide { position: absolute; width: calc(190px * var(--root-scale, 1)); height: 10px; }
 </style></head><body><div id="panel"><div id="wide"/></div></body></rml>)";
         Rml::ElementDocument* document = context->LoadDocumentFromMemory(markup);

@@ -98,14 +98,14 @@
 		     data-event-click="chainfo_increase_stat(4)"></div>
 
 		<!-- Bottom action row: shared close button plus Quest/Pet/Master-Level shortcuts. -->
-		<div id="btn_exit" class="info-btn info-btn-exit" data-event-click="chainfo_click_exit" data-attr-data-hint="exit_tooltip">
+		<div id="btn_exit" class="info-btn info-btn-exit" data-event-click="window_close" data-attr-data-hint="exit_tooltip">
 			<span class="btn-exit-label">×</span>
 		</div>
 		<div id="btn_quest" class="info-btn info-btn-quest" data-event-click="chainfo_click_quest" data-attr-data-hint="quest_tooltip"></div>
 		<div id="btn_pet" class="info-btn info-btn-pet" data-event-click="chainfo_click_pet" data-attr-data-hint="pet_tooltip"></div>
 		<div id="btn_masterlevel" class="info-btn info-btn-masterlevel" data-class-locked="!master_level_enabled"
 		     data-event-click="chainfo_click_masterlevel" data-attr-data-hint="masterlevel_tooltip"></div>
-		<div id="frame_corner_close" data-event-click="chainfo_click_exit"></div>
+		<div id="frame_corner_close" data-event-click="window_close"></div>
 	</div>
 </body>
 </rml>

@@ -104,10 +104,12 @@ theme reload, a HUD part shown or hidden, the chat log resizing) call `Invalidat
   native grids, 3D icons and `SyncRootTransform()`'s `root_*` follow the slot unchanged. Without a
   slot a window returns to its `UILayoutPolicy` mode.
 - **Placed documents**: a window that returns its document from `CObject::GetPlacedDocument()` has
-  its `#panel` placed by the slot itself (`UI::RmlBridge::SlotPlacement`): `left`/`top`, a scale
-  transform and `--root-scale`, inline, with the `slot-placed` class, and given again to a document
-  a theme switch rebuilt. Its model binds no `root_*`. Such a window needs a slot in every theme;
-  `CCharacterInfoWindow` is the first.
+  its `#panel` placed by the slot itself (`UI::RmlBridge::SlotPlacement`): the slot's top-left and
+  its region's scale arrive as `--slot-left`, `--slot-top` and `--root-scale` with the `slot-placed`
+  class, given again to a document a theme switch rebuilt, and `base.rcss`'s `#panel.slot-placed`
+  applies them, so a theme may place the panel otherwise. Its model binds no `root_*`. Such a window
+  needs a slot in every theme; `CCharacterInfoWindow` is the first. The corner X and exit buttons
+  close it with `data-event-click="window_close"` (`UI::RmlBridge::BindWindowClose()`).
 - **HUD documents**: `UI::RmlBridge::RegisterWorkspaceDocument(name, docGetter, rootId, options)`
   adapts a document root to a `PlacementParticipant` (visible/measure/place callbacks) — placed by
   `left`/`top` and a scale transform; the `workspace-placed` class lets the theme drop the part's

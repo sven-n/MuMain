@@ -21,6 +21,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
@@ -178,8 +179,7 @@ void mu::ui::window::CCharacterInfoWindow::BindRmlModel(Rml::DataModelConstructo
             if (arguments.size() == 1)
                 RmlClickIncreaseStat(arguments[0].Get<int>(-1));
         });
-    c.BindEventCallback("chainfo_click_exit",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExit(); });
+    UI::RmlBridge::BindWindowClose(c, mu::ui::window::INTERFACE_CHARACTER);
     c.BindEventCallback("chainfo_click_quest",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickQuest(); });
     c.BindEventCallback("chainfo_click_pet",
@@ -313,11 +313,6 @@ void mu::ui::window::CCharacterInfoWindow::RmlClickIncreaseStat(int stat)
 
     SocketClient->ToGameServer()->SendIncreaseCharacterStatPoint(static_cast<CharacterStatAttribute>(stat));
     PlayBuffer(SOUND_CLICK01);
-}
-
-void mu::ui::window::CCharacterInfoWindow::RmlClickExit()
-{
-    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CHARACTER);
 }
 
 void mu::ui::window::CCharacterInfoWindow::RmlClickQuest()

@@ -83,7 +83,6 @@ namespace mu::ui::window
 
         // Invoked directly from RmlUi data-event-click bindings (see Create()), not polled.
         void RmlClickIncreaseStat(int stat);
-        void RmlClickExit();
         void RmlClickQuest();
         void RmlClickPet();
         void RmlClickMasterLevel();

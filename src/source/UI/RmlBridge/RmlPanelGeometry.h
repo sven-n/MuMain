@@ -79,8 +79,9 @@ namespace UI::RmlBridge
     };
 
     // Where a workspace slot puts a window's panel (CObject::GetPlacedDocument()): the slot's
-    // top-left in screen pixels and its region's scale. Set inline on the panel, with the scale also
-    // as --root-scale for the counter-scaled layers; a zero scale means not placed.
+    // top-left in screen pixels and its region's scale, given to the panel as --slot-left,
+    // --slot-top and --root-scale with the "slot-placed" class. base.rcss's #panel.slot-placed
+    // applies them, so a theme can place the panel otherwise. A zero scale means not placed.
     struct SlotPlacement
     {
         float left = 0.f;

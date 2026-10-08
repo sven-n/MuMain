@@ -90,7 +90,7 @@
 		<!-- Bottom action row: same bordered forged-metal square buttons as CMyInventory's
 		     Exit/Repair/My Shop/Expand (base.rcss's .modern-icon-btn-px), not a flat exit button
 		     plus legacy-sprite icons -- keeps this row visually part of the same family. -->
-		<div id="btn_exit" class="modern-icon-btn-px chainfo-btn-exit" data-event-click="chainfo_click_exit" data-attr-data-hint="exit_tooltip">
+		<div id="btn_exit" class="modern-icon-btn-px chainfo-btn-exit" data-event-click="window_close" data-attr-data-hint="exit_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
 		<div id="btn_quest" class="modern-icon-btn-px chainfo-btn-quest" data-event-click="chainfo_click_quest" data-attr-data-hint="quest_tooltip">
@@ -103,7 +103,7 @@
 		     data-event-click="chainfo_click_masterlevel" data-attr-data-hint="masterlevel_tooltip">
 			<span class="modern-icon-btn-glyph-px">M</span>
 		</div>
-		<div id="frame_corner_close" data-event-click="chainfo_click_exit"></div>
+		<div id="frame_corner_close" data-event-click="window_close"></div>
 	</div>
 </body>
 </rml>
