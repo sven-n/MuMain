@@ -31,9 +31,6 @@ namespace mu::ui::window
 
     struct QuestProgressRmlModel
     {
-        // Movable, non-HUD window -- sourced from UI::Scaling::GetActiveTransform(), same
-        // convention as CMyQuestInfoWindow's own root_x/root_y/root_scale.
-        float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
         Rml::String subject;

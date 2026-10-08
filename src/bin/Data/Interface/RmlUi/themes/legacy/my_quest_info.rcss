@@ -239,3 +239,6 @@
 .jobchange-state { width: calc(158px * var(--root-scale)); line-height: calc(18px * var(--root-scale)); }
 .castle-block { width: calc(172px * var(--root-scale)); line-height: calc(20px * var(--root-scale)); }
 .temple-block { width: calc(172px * var(--root-scale)); line-height: calc(20px * var(--root-scale)); }
+
+/* The native text size, counter-scaled out of the panel's scale. */
+#panel { font-size: calc(var(--text-px) / var(--root-scale)); }

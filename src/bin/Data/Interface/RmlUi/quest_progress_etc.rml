@@ -12,9 +12,8 @@
      quest_progress.rcss uses to override the handful of pixel values that genuinely differ between
      the two windows (NPC-line/button top offsets, the answers block's top). -->
 <body>
-	<div id="panel" class="qp-etc" data-model="quest_progress_etc" data-style-left="root_x + 'px'"
-	     data-style-top="root_y + 'px'" data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale"
-	     data-style-font-size="(text_px / root_scale) + 'px'">
+	<div id="panel" class="qp-etc" data-model="quest_progress_etc"
+	     data-style---text-px="text_px + 'px'">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
@@ -62,6 +61,7 @@
 		<div id="btn_exit" class="qp-btn-exit" data-event-click="questprogressetc_click_close" data-attr-data-hint="exit_tooltip">
 			<span class="btn-exit-label">×</span>
 		</div>
+		<div id="frame_corner_close" data-event-click="questprogressetc_click_close"></div>
 	</div>
 </body>
 </rml>

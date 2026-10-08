@@ -17,6 +17,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/Tooltip/LegacyTextListTooltip.h"
@@ -81,9 +82,6 @@ bool mu::ui::window::CMyQuestInfoWindow::Create(CManager* pNewUIMng, int x, int 
 
 void mu::ui::window::CMyQuestInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, MyQuestInfoRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
 
     c.Bind("active_tab", &model.activeTab);
@@ -199,17 +197,7 @@ void mu::ui::window::CMyQuestInfoWindow::Show(bool bShow)
 
 bool mu::ui::window::CMyQuestInfoWindow::UpdateMouseEvent()
 {
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_MYQUEST))
-        return false;
-
-    float panelWidth = MYQUESTINFO_WINDOW_WIDTH;
-    float panelHeight = MYQUESTINFO_WINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool mu::ui::window::CMyQuestInfoWindow::UpdateKeyEvent()
@@ -489,18 +477,6 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
         m_RmlView.MarkDirty("active_tab");
     }
 
-    const auto transform = UI::Scaling::GetActiveTransform();
-    const float rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
-    const float rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
-    if (model.rootX != rootX || model.rootY != rootY || model.rootScale != transform.scaleX)
-    {
-        model.rootX = rootX;
-        model.rootY = rootY;
-        model.rootScale = transform.scaleX;
-        m_RmlView.MarkDirty("root_x");
-        m_RmlView.MarkDirty("root_y");
-        m_RmlView.MarkDirty("root_scale");
-    }
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     const bool bEmpty = m_QuestIndices.empty();

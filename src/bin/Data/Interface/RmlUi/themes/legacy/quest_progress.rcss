@@ -214,3 +214,6 @@
 .qp-player-words { margin-bottom: calc(15px * var(--root-scale)); }
 .qp-reward-row { padding: calc(1px * var(--root-scale)) calc(4px * var(--root-scale)); }
 #btn_complete { width: calc(108px * var(--root-scale)); height: calc(29px * var(--root-scale)); line-height: calc(29px * var(--root-scale)); }
+
+/* The native text size, counter-scaled out of the panel's scale. */
+#panel { font-size: calc(var(--text-px) / var(--root-scale)); }

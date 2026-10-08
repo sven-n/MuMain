@@ -53,6 +53,7 @@ namespace mu::ui::window
         virtual ~CQuestProgress();
         bool Create(CManager* pNewUIMng, int x, int y);
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         void Release();
         void SetPos(int x, int y);
         void Show(bool bShow) override;

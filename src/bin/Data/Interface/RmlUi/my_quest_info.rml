@@ -6,11 +6,9 @@
 	<link type="text/rcss" href="my_quest_info.rcss"/>
 </head>
 <body>
-	<!-- Movable, non-HUD window: root_x/root_y/root_scale come from
-	     UI::Scaling::GetActiveTransform(), not RmlUi's dp auto-fit -- same as my_inventory.rml's #panel. -->
-	<div id="panel" data-model="my_quest_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale"
-	     data-style-font-size="(text_px / root_scale) + 'px'">
+	<!-- The workspace slot places #panel and sets its scale (CObject::GetPlacedDocument()). -->
+	<div id="panel" data-model="my_quest_info"
+	     data-style---text-px="text_px + 'px'">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
@@ -99,6 +97,7 @@
 		<div id="btn_exit" class="quest-btn quest-btn-exit" data-event-click="myquest_click_exit" data-attr-data-hint="exit_tooltip">
 			<span class="btn-exit-label">×</span>
 		</div>
+		<div id="frame_corner_close" data-event-click="myquest_click_exit"></div>
 	</div>
 </body>
 </rml>

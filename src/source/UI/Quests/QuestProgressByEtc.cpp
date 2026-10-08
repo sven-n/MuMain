@@ -12,6 +12,7 @@
 #include "UI/Scaling/UITransform.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/Tooltip/LegacyTextListTooltip.h"
@@ -64,9 +65,6 @@ bool CQuestProgressByEtc::Create(CManager* pNewUIMng, int x, int y)
 
 void CQuestProgressByEtc::BindRmlModel(Rml::DataModelConstructor& c, QuestProgressRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
 
     c.Bind("subject", &model.subject);
@@ -160,17 +158,7 @@ void CQuestProgressByEtc::Show(bool bShow)
 
 bool CQuestProgressByEtc::UpdateMouseEvent()
 {
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
-        return false;
-
-    float panelWidth = QPE_WIDTH;
-    float panelHeight = QPE_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool CQuestProgressByEtc::UpdateKeyEvent()
@@ -368,18 +356,6 @@ void CQuestProgressByEtc::SyncRmlModel()
 
     auto& model = m_RmlView.GetModel();
 
-    const auto transform = UI::Scaling::GetActiveTransform();
-    const float rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
-    const float rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
-    if (model.rootX != rootX || model.rootY != rootY || model.rootScale != transform.scaleX)
-    {
-        model.rootX = rootX;
-        model.rootY = rootY;
-        model.rootScale = transform.scaleX;
-        m_RmlView.MarkDirty("root_x");
-        m_RmlView.MarkDirty("root_y");
-        m_RmlView.MarkDirty("root_scale");
-    }
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     if (0 == m_dwCurQuestIndex)

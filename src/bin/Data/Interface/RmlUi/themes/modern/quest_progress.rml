@@ -11,8 +11,7 @@
      shared with character_info/my_quest_info/pet_info/party_info. Keep ids/data-model/
      event-callback names in sync with ../../quest_progress.rml. -->
 <body>
-	<div id="panel" data-model="quest_progress" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="quest_progress">
 		<div class="modern-shell-edge"></div>
 		<div class="modern-groove"></div>
 
@@ -64,6 +63,7 @@
 		<div id="btn_exit" class="modern-icon-btn-px qp-btn-exit" data-event-click="questprogress_click_close" data-attr-data-hint="exit_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
+		<div id="frame_corner_close" data-event-click="questprogress_click_close"></div>
 	</div>
 </body>
 </rml>
