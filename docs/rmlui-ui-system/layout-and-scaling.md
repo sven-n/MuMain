@@ -89,6 +89,21 @@ diverge there. Confirm on real high-DPI hardware before trusting that path in pl
 See `engine-findings.md`'s font-family inheritance finding before assuming a new element's
 invisible text is a layout bug — it's the single most-recurring gotcha in this doc set.
 
+## Scale inputs and reference screens
+
+`UI::RmlBridge::ApplyScaleInputs()` (`RmlScaleInputs.h`) sets, on every context's root element
+whenever its size or UI scale changes, the scales a theme composes from: `--ui-scale` (the dp
+ratio: panels and native text), `--hud-scale`, `--dock-scale` and `--overlay-scale-x/-y` (the
+stretched screen). Every document inherits them. `base.rcss` builds two reference screens on them,
+each 640×480 reference px with its scale as `--root-scale`:
+
+- `.stage`: centred on the window at `--ui-scale`, as the original centred NPC panels and dialogs.
+- `.hud-board`: standing on the window's bottom, centred like the HUD, at `--hud-scale` (CryWolf,
+  the Illusion Temple and siege HUDs, the window menu, the master tree).
+
+A window whose document uses one binds no position or scale; the window's layout mode still gives
+its native code the same space until the per-window transforms are retired.
+
 ## Layout modes
 
 `UI::Layout::ForInterface()` (`UILayoutPolicy.cpp`) gives every `CObject` window a
