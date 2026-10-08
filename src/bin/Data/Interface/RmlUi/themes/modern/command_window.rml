@@ -11,15 +11,14 @@
 	     data-model and event names in sync with ../../command_window.rml.
 
 	     The command window (CCommandWindow, D): twelve buttons that arm a command for the next
-	     right-click on a player, docked right. root_x/root_y/root_scale come from the dock transform
+	     right-click on a player, docked right. the workspace slot places and scales #panel
 	     (UI::Scaling::GetActiveTransform()), as party_info.rml's #panel does; everything inside is
 	     reference px. Text is a .sharp-text layer: native size, counter-scaled out of the panel.
 
 	     C++ keeps the armed command (`selected`, drawn pressed and bold), the right-click that runs
-	     it, the corner close hit test and Escape; a button click is queued with command_press. The
+	     it, Escape; a button click is queued with command_press. The
 	     target box follows the pointer while a command is armed over a player. -->
-	<div id="panel" data-model="command_window" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="command_window">
 		<div class="modern-shell-edge"></div>
 		<div class="modern-groove"></div>
 		<div class="modern-header-rail-px docked-header-rail-fill">
@@ -46,6 +45,7 @@
 		     data-style-left="target_left + 'px'" data-style-top="target_top + 'px'">
 			<span class="sharp-text" id="target_name" data-style-font-size="big_text_px + 'px'">{{target_name}}</span>
 		</div>
+		<div id="frame_corner_close" data-event-click="command_exit"></div>
 	</div>
 </body>
 </rml>

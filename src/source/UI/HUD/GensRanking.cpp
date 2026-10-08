@@ -7,6 +7,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 
 #include "Core/Utilities/StringUtils.h"
 #include "Core/Utilities/UsefulDef.h"
@@ -128,14 +129,7 @@ bool CGensRanking::UpdateMouseEvent()
     if (!g_pNewUISystem->IsVisible(INTERFACE_GENSRANKING))
         return true;
 
-    if (BtnProcess())
-        return false;
-
-    float panelWidth = GENSRANKING_WIDTH;
-    float panelHeight = GENSRANKING_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight))
-            .Contains(MouseX, MouseY))
+    if (UI::RmlBridge::IsPointerOver(m_RmlView.Document()))
     {
         // The pane consumes its wheel event; keep the same notch from reaching the camera.
         MouseWheel = 0;
@@ -163,16 +157,6 @@ bool CGensRanking::UpdateKeyEvent()
         }
     }
     return true;
-}
-
-bool CGensRanking::BtnProcess()
-{
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    // The exit button is RmlUi's (see Update()).
-    if (g_pNewUISystem->HandleFrameCornerClose(GetPos(), INTERFACE_GENSRANKING))
-        return false;
-
-    return false;
 }
 
 void CGensRanking::OpenningProcess()
@@ -338,10 +322,6 @@ int CGensRanking::GetImageIndex(BYTE rankIndex)
 }
 void CGensRanking::BindRmlModel(Rml::DataModelConstructor& c, GensRankingRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
-    c.Bind("root_scale_y", &model.rootScaleY);
     c.Bind("text_px", &model.textPx);
     c.Bind("mark_sprite", &model.markSprite);
     auto lineType = c.RegisterStruct<GensLine>();
@@ -382,14 +362,6 @@ void CGensRanking::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
-    GensRankingRmlModel& model = m_RmlView.GetModel();
-    const float scaleY = UI::Scaling::GetActiveTransform().scaleY;
-    if (model.rootScaleY != scaleY)
-    {
-        model.rootScaleY = scaleY;
-        m_RmlView.MarkDirty("root_scale_y");
-    }
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncContent();
 }

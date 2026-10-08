@@ -84,6 +84,7 @@ public:
     void SetPos(int x, int y);
 
     bool UpdateMouseEvent() override;
+    Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     bool UpdateKeyEvent() override;
     bool Update() override;
     // Escape and Enter while a parameter's value is being typed.

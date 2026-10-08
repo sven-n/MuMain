@@ -14,12 +14,12 @@ Guild/GuildInfoWindow.cpp: 7
 Guild/GuildMakeWindow.cpp: 5
 Render/Text/CUIRenderTextSDLTtf.cpp: 1
 Scenes/LoginSceneOverlay.cpp: 1
-UI/Combat/CastleWindow.cpp: 5
+UI/Combat/CastleWindow.cpp: 1
 UI/Combat/DuelWatchMainFrameWindow.cpp: 2
 UI/Combat/DuelWatchUserListWindow.cpp: 2
-UI/Combat/DuelWatchWindow.cpp: 6
+UI/Combat/DuelWatchWindow.cpp: 2
 UI/Combat/DuelWindow.cpp: 1
-UI/Combat/GuardWindow.cpp: 5
+UI/Combat/GuardWindow.cpp: 1
 UI/Combat/SiegeWarBase.cpp: 6
 UI/Combat/SiegeWarCommander.cpp: 1
 UI/Combat/SiegeWarfare.cpp: 1
@@ -31,7 +31,7 @@ UI/Core/WindowManager.cpp: 10
 UI/Core/WindowObject.h: 6
 UI/Core/WindowSystem.cpp: 4
 UI/Core/WindowSystem.h: 2
-UI/Dialogs/ChatCommandWindow.cpp: 5
+UI/Dialogs/ChatCommandWindow.cpp: 1
 UI/Dialogs/CommonMessageBox.cpp: 1
 UI/Dialogs/CustomMessageBox.cpp: 1
 UI/Dialogs/HelpWindow.cpp: 1
@@ -63,8 +63,8 @@ UI/Events/RegistrationLuckyCoin.cpp: 2
 UI/HUD/BuffStrip.cpp: 1
 UI/HUD/ChatInputBox.cpp: 3
 UI/HUD/ChatLogWindow.cpp: 9
-UI/HUD/CommandWindow.cpp: 5
-UI/HUD/GensRanking.cpp: 6
+UI/HUD/CommandWindow.cpp: 1
+UI/HUD/GensRanking.cpp: 1
 UI/HUD/HotKey.cpp: 1
 UI/HUD/MainFrameWindow.cpp: 1
 UI/HUD/MasterLevel.cpp: 5

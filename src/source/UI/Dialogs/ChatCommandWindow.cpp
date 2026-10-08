@@ -4,6 +4,7 @@
 
 #include "UI/Dialogs/ChatCommandWindow.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 
 #include "Audio/DSPlaySound.h"
 #include "Core/Text/TextLineWrap.h"
@@ -471,21 +472,10 @@ int mu::ui::window::CChatCommandWindow::GetVisibleDescriptionLineCount() const
 
 bool mu::ui::window::CChatCommandWindow::UpdateMouseEvent()
 {
-    // The rows, the value fields, the buttons and the exit button are RmlUi's (see Update()).
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_COMMAND_LIST))
-    {
-        PlayBuffer(SOUND_CLICK01);
-        return false;
-    }
-
-    float panelWidth = static_cast<float>(WINDOW_WIDTH);
-    float panelHeight = static_cast<float>(WINDOW_HEIGHT);
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (!mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
-                                        static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-    {
+    // The rows, the value fields, the buttons, the exit button and the corner close are RmlUi's
+    // (see Update()).
+    if (!UI::RmlBridge::IsPointerOver(m_RmlView.Document()))
         return true;
-    }
 
     const auto hiddenRows = GetScrollableRowCount() - VISIBLE_ROWS;
     if (MouseWheel != 0 && hiddenRows > 0)
@@ -685,9 +675,6 @@ std::wstring mu::ui::window::CChatCommandWindow::ReadValueField() const
 
 void mu::ui::window::CChatCommandWindow::BindRmlModel(Rml::DataModelConstructor& c, ChatCommandRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
 
     auto lineType = c.RegisterStruct<ChatCommandLine>();
@@ -766,7 +753,6 @@ void mu::ui::window::CChatCommandWindow::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncContent();
     SyncValueField();

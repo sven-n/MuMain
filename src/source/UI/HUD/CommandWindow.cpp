@@ -4,6 +4,7 @@
 
 #include "UI/HUD/CommandWindow.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
@@ -120,19 +121,8 @@ void mu::ui::window::CCommandWindow::PressCommandButton(int command)
 
 bool mu::ui::window::CCommandWindow::UpdateMouseEvent()
 {
-    // Top-right corner close "X" (shared frame): hides + swallows the click. The buttons and the
-    // exit button are RmlUi's.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_COMMAND))
-    {
-        PlayBuffer(SOUND_CLICK01);
-        return false;
-    }
-
-    float panelWidth = static_cast<float>(COMMAND_WINDOW_WIDTH);
-    float panelHeight = static_cast<float>(COMMAND_WINDOW_HEIGHT);
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
-                                       static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
+    // The buttons, the exit button and the corner close are RmlUi's.
+    if (UI::RmlBridge::IsPointerOver(m_RmlView.Document()))
     {
         SetMouseCursor(CURSOR_NORMAL);
         return false;
@@ -184,9 +174,6 @@ bool mu::ui::window::CCommandWindow::Render()
 
 void mu::ui::window::CCommandWindow::BindRmlModel(Rml::DataModelConstructor& c, CommandWindowRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     c.Bind("big_text_px", &model.bigTextPx);
     c.Bind("title_text_px", &model.titleTextPx);
@@ -246,7 +233,6 @@ void mu::ui::window::CCommandWindow::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::bigTextPx, "big_text_px",

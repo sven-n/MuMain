@@ -163,6 +163,6 @@
 #gr_contrib_value { width: calc(170px * var(--root-scale)); }
 #gr_desc_label { width: calc(58px * var(--root-scale)); }
 .gr-promo-line { width: calc(180px * var(--root-scale)); }
-.gr-desc.scroll-pane { width: calc(165px * var(--root-scale)); height: calc(96px * var(--root-scale-y)); }
-.gr-desc-line { width: calc(150px * var(--root-scale)); }
+.gr-desc.scroll-pane { width: calc(165px * var(--root-scale)); height: calc(96px * var(--root-scale)); }
+.gr-desc-line { width: calc(150px * var(--root-scale)); height: calc(var(--line-step) * var(--root-scale)); }
 .gr-desc-text { width: calc(150px * var(--root-scale)); }

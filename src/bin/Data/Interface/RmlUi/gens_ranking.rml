@@ -9,14 +9,11 @@
 	<!-- The Gens ranking window (CGensRanking), docked right: the family mark on its rank back,
 	     the family, title, ranking and contribution, the description box with the rewards text
 	     and its scroll bar, the exit button. The reward lines keep native wrapping, while RmlUi
-	     owns the scroll position and thumb. root_x/root_y/root_scale come from the dock
-	     transform; every position and size below is the theme's. A .sharp-text layer's font size
+	     owns the scroll position and thumb. The workspace slot places and scales #panel; every
+	     position and size below is the theme's. A .sharp-text layer's font size
 	     stays bound: it is laid out in physical pixels and counter-scaled out of the panel
-	     (base.rcss). The window's layout is Hud (the original stretched it per axis):
-	     root_scale is x, root_scale_y is y. -->
-	<div id="panel" data-model="gens_ranking" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ', ' + root_scale_y + ')'"
-	     data-style---root-scale="root_scale" data-style---root-scale-y="root_scale_y">
+	     (base.rcss). -->
+	<div id="panel" data-model="gens_ranking">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
@@ -74,15 +71,16 @@
 
 		<!-- Counter-scale the pane to physical pixels like other docked scroll lists.
 		     Block rows establish scroll height; RmlUi owns the scrollbar and its drag. -->
-		<div class="gr-desc scroll-pane counter-scaled-xy">
+		<div class="gr-desc scroll-pane counter-scaled">
 			<div class="gr-desc-line" data-for="l : desc_lines"
-			     data-style-height="(desc_line_step * root_scale_y) + 'px'">
+			     data-style---line-step="desc_line_step + 'px'">
 				<span class="gr-desc-text"
 				      data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
 			</div>
 		</div>
 
 		<div id="btn_exit" data-event-click="gens_ranking_exit" data-attr-data-hint="exit_tooltip"></div>
+		<div id="frame_corner_close" data-event-click="gens_ranking_exit"></div>
 	</div>
 </body>
 </rml>

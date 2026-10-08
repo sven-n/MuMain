@@ -18,10 +18,6 @@ struct GensLine
 
 struct GensRankingRmlModel
 {
-    // Right-docked window -- UI::Scaling::GetActiveTransform() while CManager runs it. Its layout
-    // mode is Hud (ScreenOverlayTransform): the original drew it stretched per axis, so rootScale
-    // (x) and rootScaleY differ on a window that is not 4:3.
-    float rootX = 0.f, rootY = 0.f, rootScale = 1.f, rootScaleY = 1.f;
     float textPx = 0.f; // native normal text size in physical px (RmlRootTransform.h)
 
     // The family mark: "d" (Duprian) or "v" (Vanert) and the rank's cell 0..13, empty for none.
