@@ -16,7 +16,8 @@
 	border-radius: token(radius-sm)px;
 	font-family: "token(font-body)";
 	font-size: 1rem;
-	pointer-events: none;
+	/* The bar takes the pointer, so a click on it never walks the character. */
+	pointer-events: auto;
 }
 
 /* Unlike legacy, the resting state is drawn here -- there is no background art underneath to

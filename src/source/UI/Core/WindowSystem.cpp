@@ -211,7 +211,7 @@ bool CSystem::LoadMainSceneInterface()
 
     m_pNewChatInputBox = new CChatInputBox;
 
-    if (false == m_pNewChatInputBox->Create(m_pNewUIMng, m_pNewChatLogWindow, m_pNewSystemLogWindow, 0, 480 - 51 - 47))
+    if (false == m_pNewChatInputBox->Create(m_pNewUIMng, m_pNewChatLogWindow, m_pNewSystemLogWindow))
     {
         return false;
     }

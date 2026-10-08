@@ -70,8 +70,6 @@ namespace mu::ui::window
         CManager* m_pNewUIMng;
         CChatLogWindow* m_pNewUIChatLogWnd;
         CSystemLogWindow* m_pNewUISystemLogWnd;
-        POINT	m_WndPos{};
-        SIZE	m_WndSize{};
 
         type_vec_history	m_vecChatHistory, m_vecWhsprIDHistory;
 
@@ -103,8 +101,6 @@ namespace mu::ui::window
         UI::RmlBridge::ThemedView<ChatInputRmlModel> m_RmlView{"chat_input",
             [this](Rml::DataModelConstructor& c, ChatInputRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/chat_input.rml"}}, {.afterReload = [this] { OnRmlReloaded(); }}};
-        // Where Create() put the box, kept while the theme gives it no slot.
-        POINT m_HomePos{};
         // Set by OpenningProcess(), consumed once the document is actually visible. CSystem::Show()
         // runs OpenningProcess() BEFORE ShowInterface(), so IsVisible() is still false there and
         // focusing the field at that point lands on a hidden document and is lost. It also has to
@@ -118,12 +114,9 @@ namespace mu::ui::window
 
         bool Create(CManager* pNewUIMng,
             CChatLogWindow* pNewUIChatLogWnd,
-            CSystemLogWindow* pNewUISystemLogWnd,
-            int x,
-            int y);
+            CSystemLogWindow* pNewUISystemLogWnd);
         void Release();
 
-        void SetWndPos(int x, int y);
 
 
         bool HaveFocus();

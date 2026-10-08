@@ -28,7 +28,8 @@
 	decorator: image(cib-back);
 	font-family: "token(font-body)";
 	font-size: 1rem;
-	pointer-events: none;
+	/* The bar takes the pointer, so a click on it never walks the character. */
+	pointer-events: auto;
 }
 
 /* The hit area always exists; only the lit sprite is conditional, because the background art

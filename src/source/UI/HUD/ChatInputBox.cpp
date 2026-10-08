@@ -8,6 +8,7 @@
 #include "UI/Social/SocialWindowBase.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlWorkspaceParticipant.h"
 #include "UI/Placement/WindowPlacement.h"
 #include "UI/Scaling/UITransform.h"
@@ -48,10 +49,6 @@ void mu::ui::window::CChatInputBox::Init()
     m_pNewUIMng = nullptr;
     m_pNewUIChatLogWnd = nullptr;
     m_pNewUISystemLogWnd = nullptr;
-    m_WndPos = {};
-    m_WndSize = {};
-    m_WndPos.x = m_WndPos.y = 0;
-    m_WndSize.cx = m_WndSize.cy = 0;
     m_iCurChatHistory = 0;
     m_iCurWhisperIDHistory = 0;
 
@@ -67,9 +64,7 @@ void mu::ui::window::CChatInputBox::Init()
 bool mu::ui::window::CChatInputBox::Create(
     CManager* pNewUIMng,
     CChatLogWindow* pNewUIChatLogWnd,
-    CSystemLogWindow* pNewUISystemLogWnd,
-    int x,
-    int y)
+    CSystemLogWindow* pNewUISystemLogWnd)
 {
     Release();
 
@@ -81,25 +76,12 @@ bool mu::ui::window::CChatInputBox::Create(
 
     m_pNewUIChatLogWnd = pNewUIChatLogWnd;
     m_pNewUISystemLogWnd = pNewUISystemLogWnd;
-    SetWndPos(x, y);
-    m_HomePos = m_WndPos;
 
-    // A theme slot moves the box; the native hit test follows it in HUD space. The slot stays
-    // while the box is hidden, so the log above it does not drop when typing ends.
+    // A theme slot moves the box. The slot stays while the box is hidden, so the log above it does
+    // not drop when typing ends.
     UI::RmlBridge::WorkspaceDocumentOptions options;
     options.placedWhileHidden = true;
     options.measure = [] { return UI::Placement::PlacementParticipant::Size{CHATBOX_WIDTH, CHATBOX_HEIGHT}; };
-    options.placed = [this](const UI::Placement::PlacementParticipant::Box* box)
-    {
-        if (box == nullptr)
-        {
-            SetWndPos(m_HomePos.x, m_HomePos.y);
-            return;
-        }
-        const auto hud = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::HudFrame, WindowWidth, WindowHeight);
-        SetWndPos(static_cast<int>(std::lround((box->left - hud.offsetX) / hud.scaleX)),
-                  static_cast<int>(std::lround((box->top - hud.offsetY) / hud.scaleY)));
-    };
     UI::RmlBridge::RegisterWorkspaceDocument("chat_input", [this] { return m_RmlView.Document(); }, "panel", std::move(options));
 
     // Both text fields, their tab pairing, their colours/limits and every button's hit box now
@@ -123,14 +105,6 @@ void mu::ui::window::CChatInputBox::Release()
     Init();
 
     m_RmlView.Release();
-}
-
-void mu::ui::window::CChatInputBox::SetWndPos(int x, int y)
-{
-    // Still tracked for the native hit test in UpdateMouseEvent(); the fields position themselves
-    // from RCSS now.
-    m_WndPos.x = x; m_WndPos.y = y;
-    m_WndSize.cx = CHATBOX_WIDTH; m_WndSize.cy = CHATBOX_HEIGHT;
 }
 
 void mu::ui::window::CChatInputBox::SetInputMsgType(int iInputMsgType)
@@ -209,13 +183,12 @@ bool mu::ui::window::CChatInputBox::UpdateMouseEvent()
         return true;
     }
 
-    // Every button hit test, the hover tooltip and the whole button row moved to chat_input.rml's
-    // own elements (data-event-click / data-event-mouseover). What is left is the two things RmlUi
-    // has no part in: retargeting a whisper from a right-click elsewhere on screen, and claiming
-    // the bar's own rectangle so a click on it does not fall through to the world.
+    // The buttons, the fields and the bar itself are RmlUi's (the bar takes the pointer, so a click
+    // on it does not fall through to the world). What is left is retargeting a whisper from a
+    // right-click elsewhere on screen.
     UpdateWhisperTargetFromRightClick();
 
-    return !mu::ui::window::WindowGeometry(m_WndPos.x, m_WndPos.y, m_WndSize.cx, m_WndSize.cy).Contains(MouseX, MouseY);
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
