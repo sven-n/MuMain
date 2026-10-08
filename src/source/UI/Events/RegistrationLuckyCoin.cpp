@@ -38,6 +38,7 @@ namespace mu::ui::window
                     RenderLuckyCoin();
             },
             this);
+        m_View.SetWindowId(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION);
         m_View.Build();
         Show(false);
         return true;
@@ -77,7 +78,7 @@ namespace mu::ui::window
                                {I18N::Game::Close388, false, MSGBOX_BTN_EMPTY_SMALL_WIDTH,
                                 MSGBOX_BTN_EMPTY_HEIGHT, true}});
         }
-        m_View.Sync(IsVisible(), m_Pos);
+        m_View.Sync(IsVisible());
     }
 
     // Into the document's #entry_item, under the item camera EventItemEntryView sets up.
@@ -87,16 +88,6 @@ namespace mu::ui::window
         RenderItem3D(GetPos().x - 20.f, GetPos().y + 50.f, LUCKYCOIN_REG_WIDTH, LUCKYCOIN_REG_HEIGHT, m_CoinItem->Type,
                      m_CoinItem->Level, 0, 0, true);
         SetItemRotation(false);
-    }
-
-    bool CRegistrationLuckyCoin::BtnProcess()
-    {
-        // Top-right corner close "X" (shared frame): hides + swallows the click. The Register and
-        // Close buttons are RmlUi's (see Update()).
-        if (g_pNewUISystem->HandleFrameCornerClose(GetPos(), mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION))
-            return false;
-
-        return false;
     }
 
     bool CRegistrationLuckyCoin::Update()
@@ -127,16 +118,7 @@ namespace mu::ui::window
             return true;
         }
 
-        if (BtnProcess() == true)
-        {
-            return false;
-        }
-
-        float panelWidth = static_cast<float>(LUCKYCOIN_REG_WIDTH);
-        float panelHeight = static_cast<float>(LUCKYCOIN_REG_HEIGHT);
-        m_View.RefreshPanelSize(panelWidth, panelHeight);
-        if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
-                                           static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
+        if (m_View.IsPointerOver())
         {
             if (mu::ui::window::IsPress(VK_RBUTTON))
             {

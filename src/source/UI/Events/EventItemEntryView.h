@@ -4,6 +4,7 @@
 #include "UI/Inventory/ItemCameraTarget.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -65,7 +66,7 @@ public:
     void SetButtons(const std::vector<Button>& buttons);
 
     // Per frame, inside the window's CManager transform scope.
-    void Sync(bool visible, const POINT& pos);
+    void Sync(bool visible);
 
     // A click RmlUi reported since the last call: an unlocked button's index, else -1.
     int TakePressedButton();
@@ -78,10 +79,12 @@ public:
     const Rml::String& InputValue() const;
     void SetInputValue(const Rml::String& value);
 
-    // #panel's own live RCSS size, for the owner's native hit test. Leaves both alone when the
-    // document isn't up or laid out yet, so seed them with the window's own fallback constants
-    // (UI::RmlBridge::RefreshLogicalPanelSize()'s convention, which this forwards to).
-    void RefreshPanelSize(float& width, float& height) const;
+    // The pointer is over what the document draws (UI::RmlBridge::IsPointerOver()).
+    bool IsPointerOver() const;
+    // The document the workspace places (CObject::GetPlacedDocument()).
+    Rml::ElementDocument* Document() const { return m_View.Document(); }
+    // The window the markup's window_close event (the corner X) hides.
+    void SetWindowId(std::uint32_t windowId) { m_WindowId = windowId; }
 
 private:
     void BindModel(Rml::DataModelConstructor& c, EventItemEntryRmlModel& model);
@@ -93,5 +96,6 @@ private:
     std::vector<Button> m_Buttons;
     int m_PressedButton = -1;
     std::unique_ptr<UI::Items::ItemCameraTarget> m_ItemTarget;
+    std::uint32_t m_WindowId = 0;
 };
 } // namespace mu::ui::window

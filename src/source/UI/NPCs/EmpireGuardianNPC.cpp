@@ -38,6 +38,7 @@ bool CEmpireGuardianNPC::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
+    m_View.SetWindowId(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
     m_View.Build();
 
     Show(false);
@@ -64,13 +65,7 @@ void CEmpireGuardianNPC::SetPos(int x, int y)
 
 bool CEmpireGuardianNPC::UpdateMouseEvent()
 {
-    if (true == BtnProcess())
-        return false;
-
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, NPC_WINDOW_WIDTH, NPC_WINDOW_HEIGHT).Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    return !m_View.IsPointerOver();
 }
 
 bool CEmpireGuardianNPC::UpdateKeyEvent()
@@ -150,16 +145,7 @@ void CEmpireGuardianNPC::SyncView()
 
         m_View.SetButtons({{I18N::Game::Enter, false}, {I18N::Game::Close388, false}});
     }
-    m_View.Sync(IsVisible(), m_Pos);
-}
-
-bool CEmpireGuardianNPC::BtnProcess()
-{
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    // The Enter and Close buttons are RmlUi's (see Update()).
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
-
-    return false;
+    m_View.Sync(IsVisible());
 }
 
 float CEmpireGuardianNPC::GetLayerDepth()

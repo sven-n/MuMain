@@ -44,6 +44,7 @@ public:
     const POINT& GetPos();
 
     bool UpdateMouseEvent();
+    Rml::ElementDocument* GetPlacedDocument() const override { return m_View.Document(); }
     bool UpdateKeyEvent();
     bool Update();
     bool TakesTypingFrom(const Rml::ElementDocument* document) const override;

@@ -10,11 +10,10 @@
 <body>
 	<!-- Delgado's lucky coin registration (CRegistrationLuckyCoin), docked right: its texts and buttons over the
 	     docked frame and the live 3D coin (UI/Events/EventItemEntryView.h).
-	     root_x/root_y/root_scale come from the dock transform; everything inside is reference px;
+	     the workspace slot places and scales #panel; everything inside is reference px;
 	     text is .sharp-text at the native size, counter-scaled out of the panel. C++ keeps the
 	     corner close, Escape, the locks and the requests; a click is queued with item_entry_press. -->
-	<div id="panel" data-model="lucky_coin_registration" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="lucky_coin_registration">
 		<!-- The docked frame. -->
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
@@ -40,6 +39,7 @@
 				      data-style-line-height="b.label_line_px + 'px'">{{b.label}}</span>
 			</div>
 		</div>
+		<div id="frame_corner_close" data-event-click="window_close"></div>
 	</div>
 </body>
 </rml>

@@ -11,12 +11,11 @@
 	<!-- The Golden Archer's lucky number registration (CGoldBowmanWindow), docked right: its texts,
 	     the 12-character number field, Register and the exit button, over the docked frame and the
 	     field's back (UI/Events/EventItemEntryView.h).
-	     root_x/root_y/root_scale come from the dock transform; everything inside is reference px;
+	     the workspace slot places and scales #panel; everything inside is reference px;
 	     text is .sharp-text at the native size, counter-scaled out of the panel. C++ focuses the
 	     field on opening and reads it for the request, keeps the corner close,
 	     Escape and the requests; a click is queued with item_entry_press. -->
-	<div id="panel" data-model="gold_bowman" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="gold_bowman">
 		<!-- The docked frame. -->
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
@@ -44,6 +43,7 @@
 
 		<input id="serial_field" data-value="input_value" type="text" class="text-field sharp-text" maxlength="12"
 		       data-style-font-size="text_px + 'px'"/>
+		<div id="frame_corner_close" data-event-click="window_close"></div>
 	</div>
 </body>
 </rml>

@@ -45,6 +45,7 @@ bool CDoppelGangerWindow::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
+    m_View.SetWindowId(mu::ui::window::INTERFACE_DOPPELGANGER_NPC);
     m_View.Build();
 
     Show(false);
@@ -71,20 +72,7 @@ void CDoppelGangerWindow::SetPos(int x, int y)
 
 bool CDoppelGangerWindow::UpdateMouseEvent()
 {
-    if (true == BtnProcess())
-        return false;
-
-    // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
-    float panelWidth = INVENTORY_WIDTH;
-    float panelHeight = INVENTORY_HEIGHT;
-    m_View.RefreshPanelSize(panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
-                                      static_cast<int>(panelHeight))
-            .Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    return !m_View.IsPointerOver();
 }
 
 bool CDoppelGangerWindow::UpdateKeyEvent()
@@ -165,7 +153,7 @@ void CDoppelGangerWindow::SyncView()
 
         m_View.SetButtons({{I18N::Game::Enter, m_bIsEnterButtonLocked == TRUE}, {I18N::Game::Close388, false}});
     }
-    m_View.Sync(IsVisible(), m_Pos);
+    m_View.Sync(IsVisible());
 }
 
 void CDoppelGangerWindow::RenderItem3D()
@@ -191,15 +179,6 @@ void CDoppelGangerWindow::ClosingProcess()
 float CDoppelGangerWindow::GetLayerDepth()
 {
     return 5.0f;
-}
-
-bool CDoppelGangerWindow::BtnProcess()
-{
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    // The Enter and Close buttons are RmlUi's (see Update()).
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_DOPPELGANGER_NPC);
-
-    return false;
 }
 
 void CDoppelGangerWindow::SetRemainTime(int iTime)

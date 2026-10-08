@@ -43,11 +43,11 @@ public:
     void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
+    Rml::ElementDocument* GetPlacedDocument() const override { return m_View.Document(); }
     bool UpdateKeyEvent();
     bool Update();
     bool Render();
 
-    bool BtnProcess();
 
     float GetLayerDepth(); //. 4.2f
 

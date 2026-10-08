@@ -34,6 +34,7 @@ bool CExchangeLuckyCoin::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
+    m_View.SetWindowId(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN);
     m_View.Build();
 
     Show(false);
@@ -60,13 +61,7 @@ void CExchangeLuckyCoin::SetPos(int x, int y)
 
 bool CExchangeLuckyCoin::UpdateMouseEvent()
 {
-    if (true == BtnProcess())
-        return false;
-
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, EXCHANGE_LUCKYCOIN_WINDOW_HEIGHT).Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    return !m_View.IsPointerOver();
 }
 
 bool CExchangeLuckyCoin::UpdateKeyEvent()
@@ -136,17 +131,7 @@ void CExchangeLuckyCoin::SyncView()
         buttons.push_back({I18N::Game::Close388, false, MSGBOX_BTN_EMPTY_SMALL_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT});
         m_View.SetButtons(buttons);
     }
-    m_View.Sync(IsVisible(), m_Pos);
-}
-
-bool CExchangeLuckyCoin::BtnProcess()
-{
-    // Top-right corner close "X" (shared frame). Hides + swallows the click. The exchange and
-    // Close buttons are RmlUi's (see Update()).
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN))
-        return true;
-
-    return false;
+    m_View.Sync(IsVisible());
 }
 
 float CExchangeLuckyCoin::GetLayerDepth()

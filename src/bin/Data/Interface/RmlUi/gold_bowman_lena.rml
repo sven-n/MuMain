@@ -10,12 +10,11 @@
 <body>
 	<!-- The Golden Archer's Rena registration (CGoldBowmanLena), docked right: its texts with the
 	     collected and registered counts, Register and the exit button, over the docked frame and the
-	     two live 3D Rena (UI/Events/EventItemEntryView.h). root_x/root_y/root_scale come from the dock transform;
+	     two live 3D Rena (UI/Events/EventItemEntryView.h). the workspace slot places and scales #panel;
 	     everything inside is reference px; text is .sharp-text at the native size, counter-scaled
 	     out of the panel. C++ keeps the corner close, Escape and the requests;
 	     a click is queued with item_entry_press. -->
-	<div id="panel" data-model="gold_bowman_lena" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="gold_bowman_lena">
 		<!-- The docked frame. -->
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
@@ -41,6 +40,7 @@
 				      data-style-line-height="b.label_line_px + 'px'">{{b.label}}</span>
 			</div>
 		</div>
+		<div id="frame_corner_close" data-event-click="window_close"></div>
 	</div>
 </body>
 </rml>

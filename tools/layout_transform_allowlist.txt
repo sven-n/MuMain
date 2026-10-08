@@ -48,16 +48,11 @@ UI/Events/CursedTempleEnter.cpp: 1
 UI/Events/CursedTempleResult.cpp: 1
 UI/Events/CursedTempleSystem.cpp: 7
 UI/Events/DoppelGangerFrame.cpp: 1
-UI/Events/DoppelGangerWindow.cpp: 2
 UI/Events/EventEntryView.cpp: 1
-UI/Events/EventItemEntryView.cpp: 4
+UI/Events/EventItemEntryView.cpp: 2
 UI/Events/EventTimerView.cpp: 1
-UI/Events/ExchangeLuckyCoin.cpp: 2
 UI/Events/GateSwitchWindow.cpp: 1
-UI/Events/GoldBowmanLena.cpp: 2
-UI/Events/GoldBowmanWindow.cpp: 2
 UI/Events/KanturuEvent.cpp: 2
-UI/Events/RegistrationLuckyCoin.cpp: 2
 UI/HUD/BuffStrip.cpp: 1
 UI/HUD/ChatInputBox.cpp: 3
 UI/HUD/ChatLogWindow.cpp: 9
@@ -89,7 +84,6 @@ UI/Inventory/TipTextListView.cpp: 2
 UI/Inventory/Trade.cpp: 4
 UI/Inventory/UnitedMarketPlaceWindow.cpp: 6
 UI/MuHelper/MuHelperSkillPicker.cpp: 2
-UI/NPCs/EmpireGuardianNPC.cpp: 2
 UI/NPCs/GatemanWindow.cpp: 1
 UI/NPCs/NPCDialogue.cpp: 11
 UI/NPCs/NPCShop.cpp: 4

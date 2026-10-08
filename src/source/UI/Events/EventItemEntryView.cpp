@@ -7,7 +7,8 @@
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/Text/CUIRenderText.h"
@@ -31,9 +32,11 @@ void mu::ui::window::EventItemEntryView::SetItemDrawer(std::function<void()> dra
 
 void mu::ui::window::EventItemEntryView::BindModel(Rml::DataModelConstructor& c, EventItemEntryRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
+    c.BindEventCallback("window_close", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        {
+                            if (m_WindowId != 0 && g_pNewUISystem != nullptr)
+                                g_pNewUISystem->Hide(m_WindowId);
+                        });
     c.Bind("text_px", &model.textPx);
     c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("input_value", &model.inputValue);
@@ -76,7 +79,7 @@ void mu::ui::window::EventItemEntryView::SetButtons(const std::vector<Button>& b
     m_Buttons = buttons;
 }
 
-void mu::ui::window::EventItemEntryView::Sync(bool visible, const POINT& pos)
+void mu::ui::window::EventItemEntryView::Sync(bool visible)
 {
     Build();
     if (!m_View.Document())
@@ -89,7 +92,6 @@ void mu::ui::window::EventItemEntryView::Sync(bool visible, const POINT& pos)
     if (!visible)
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_View.Binder(), pos);
     UI::RmlBridge::SyncNativeTextSize(m_View.Binder());
     SyncTexts();
     SyncButtons();
@@ -173,7 +175,7 @@ void mu::ui::window::EventItemEntryView::SetInputValue(const Rml::String& value)
     SyncField(m_View.Binder(), &EventItemEntryRmlModel::inputValue, "input_value", Rml::String(value));
 }
 
-void mu::ui::window::EventItemEntryView::RefreshPanelSize(float& width, float& height) const
+bool mu::ui::window::EventItemEntryView::IsPointerOver() const
 {
-    UI::RmlBridge::RefreshLogicalPanelSize(m_View.Document(), "panel", width, height);
+    return UI::RmlBridge::IsPointerOver(m_View.Document());
 }

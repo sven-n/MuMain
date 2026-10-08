@@ -35,8 +35,8 @@ public:
     bool Render();
     bool Update();
     bool UpdateMouseEvent();
+    Rml::ElementDocument* GetPlacedDocument() const override { return m_View.Document(); }
     bool UpdateKeyEvent();
-    bool BtnProcess();
 
     float GetLayerDepth()
     {

@@ -32,6 +32,7 @@ public:
     void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
+    Rml::ElementDocument* GetPlacedDocument() const override { return m_View.Document(); }
     bool UpdateKeyEvent();
     bool Update();
     bool Render();
@@ -47,7 +48,6 @@ public:
     void LockEnterButton(BOOL bLock);
 
 private:
-    bool BtnProcess();
     void RenderItem3D();
     void SyncView();
 
