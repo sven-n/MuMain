@@ -590,12 +590,13 @@ TEST_CASE("legacy UI preserves logical input and world-overlay coordinates [ui][
 TEST_CASE("interface policy selects viewport dock and dialog layouts [ui][scaling]")
 {
     using UI::Scaling::LayoutMode;
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MAINFRAME) == LayoutMode::Hud);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MAINFRAME) == LayoutMode::HudFrame);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_SKILL_LIST) == LayoutMode::HudCenter);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_CRYWOLF) == LayoutMode::HudCenter);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_WINDOW_MENU) == LayoutMode::HudCenter);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MASTER_LEVEL) == LayoutMode::HudCenter);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_HOTKEY) == LayoutMode::Hud);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_HOTKEY) == LayoutMode::HudFrame);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MINI_MAP) == LayoutMode::Hud);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE) == LayoutMode::HudFrame);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_ITEM_ENDURANCE_INFO) == LayoutMode::DockRight);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_PARTY_INFO_WINDOW) == LayoutMode::DockRight);

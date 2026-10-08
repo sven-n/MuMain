@@ -98,9 +98,10 @@ bool mu::ui::window::CHotKey::UpdateMouseEvent()
 
             if (fDistance < 300.f)
             {
-                int x, y;
-                x = MouseX + 10;
-                y = MouseY - 50;
+                // In the quick command's own layout units, which are not this window's.
+                const UI::Scaling::Transform menu = g_pQuickCommand->GetLayoutTransform();
+                int x = static_cast<int>(UI::Scaling::LogicalX(menu, g_fWindowMouseX)) + 10;
+                int y = static_cast<int>(UI::Scaling::LogicalY(menu, g_fWindowMouseY)) - 50;
                 if (y < 0)
                 {
                     y = 0;

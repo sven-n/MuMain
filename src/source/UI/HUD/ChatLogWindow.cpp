@@ -78,7 +78,7 @@ bool mu::ui::window::CChatLogWindow::Create(CManager* pNewUIMng, int x, int y, i
             SetPosition(m_HomePos.x, m_HomePos.y);
             return;
         }
-        const auto hud = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Hud, WindowWidth, WindowHeight);
+        const auto hud = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::HudFrame, WindowWidth, WindowHeight);
         SetPosition(static_cast<int>(std::lround((box->left - hud.offsetX) / hud.scaleX)),
                     static_cast<int>(std::lround((box->top + box->height - hud.offsetY) / hud.scaleY)));
     };
@@ -543,13 +543,15 @@ bool mu::ui::window::CChatLogWindow::UpdateMouseEvent()
     // Native's own stepping, unchanged: the screen is divided into 3-line bands above and below
     // the handle's resting position, and the pointer's band picks the new line count.
     const LONG resizeTop = (LONG)(m_WndPos.y - m_WndSize.cy - RESIZING_BTN_HEIGHT);
+    // The bands span the whole screen, as the original's did on its 640-unit screen.
+    const int bandWidth = static_cast<int>(std::ceil(static_cast<float>(WindowWidth) / GetLayoutTransform().scaleX));
     const int nTopSections = (15 - (int)GetNumberOfShowingLines()) / 3;
     const int nBottomSections = ((int)GetNumberOfShowingLines() - 3) / 3;
 
     for (int i = 0; i < nTopSections; i++)
     {
         if (mu::ui::window::CheckMouseIn(0, resizeTop - RESIZING_BTN_HEIGHT - ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3 * 2),
-            REFERENCE_WIDTH, SCROLL_MIDDLE_PART_HEIGHT * 3 + RESIZING_BTN_HEIGHT))
+            bandWidth, SCROLL_MIDDLE_PART_HEIGHT * 3 + RESIZING_BTN_HEIGHT))
         {
             SetNumberOfShowingLines((int)GetNumberOfShowingLines() + (i + 1) * 3);
             return false;
@@ -558,19 +560,19 @@ bool mu::ui::window::CChatLogWindow::UpdateMouseEvent()
     for (int i = 0; i < nBottomSections; i++)
     {
         if (mu::ui::window::CheckMouseIn(0, resizeTop + RESIZING_BTN_HEIGHT + ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3),
-            REFERENCE_WIDTH, RESIZING_BTN_HEIGHT + SCROLL_MIDDLE_PART_HEIGHT * 3))
+            bandWidth, RESIZING_BTN_HEIGHT + SCROLL_MIDDLE_PART_HEIGHT * 3))
         {
             SetNumberOfShowingLines((int)GetNumberOfShowingLines() - (i + 1) * 3);
             return false;
         }
     }
-    if (mu::ui::window::CheckMouseIn(0, 0, REFERENCE_WIDTH,
+    if (mu::ui::window::CheckMouseIn(0, 0, bandWidth,
         m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 15 + RESIZING_BTN_HEIGHT + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2)))
     {
         SetNumberOfShowingLines(15);
     }
     if (mu::ui::window::CheckMouseIn(0, m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2),
-        REFERENCE_WIDTH, SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2))
+        bandWidth, SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2))
     {
         SetNumberOfShowingLines(3);
     }

@@ -96,7 +96,7 @@ bool mu::ui::window::CChatInputBox::Create(
             SetWndPos(m_HomePos.x, m_HomePos.y);
             return;
         }
-        const auto hud = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Hud, WindowWidth, WindowHeight);
+        const auto hud = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::HudFrame, WindowWidth, WindowHeight);
         SetWndPos(static_cast<int>(std::lround((box->left - hud.offsetX) / hud.scaleX)),
                   static_cast<int>(std::lround((box->top - hud.offsetY) / hud.scaleY)));
     };

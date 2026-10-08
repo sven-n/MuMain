@@ -350,8 +350,8 @@ void CBuffStrip::SyncTooltip()
 void CBuffStrip::SyncStripSlot()
 {
     // Native CNewUIBuffWindow::SetPos(): a 200-unit row centred in the width the docked panels
-    // leave free, in its own stretched HUD space; here, centred between the uncovered world's
-    // edges, so a dock on either side moves it.
+    // leave free, at the HUD's scale; here, centred between the uncovered world's edges, so a
+    // dock on either side moves it.
     constexpr float kNativeRowWidth = 200.0f;
     const auto hud = GetLayoutTransform();
     const float freeLeft = UI::Placement::UncoveredWorldLeftIn(hud);

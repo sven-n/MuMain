@@ -755,8 +755,7 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
             UI::RmlBridge::Tooltip::Config config;
             config.lines = UI::Skills::Tooltip::ToRmlBridgeLines(tooltipModel);
             // GetTooltipAnchorX/Y() are in HudReferenceTransform()'s units -- NOT the ambient
-            // UI::Scaling::GetActiveTransform(), which during this window's Update() is
-            // LayoutMode::Hud (ScreenOverlayTransform).
+            // UI::Scaling::GetActiveTransform() of this window's Update().
             const auto skillTooltipTransform = HudReferenceTransform(m_RmlView.Document());
             // The native box ends below its anchor (G2); measured with the native text renderer
             // under the tooltip's own transform.

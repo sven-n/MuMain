@@ -6,8 +6,8 @@
 </head>
 <body class="native-text" data-model="buff_strip">
 	<!-- Buff icon strip; #panel wraps the slots into rows (buff_strip.rcss). #strip_slot is the box
-	     the original gave the strip: centred in the screen width the docked panels leave free, in
-	     its stretched HUD space, so it moves as docks open. A theme places #panel in it, or ignores
+	     the original gave the strip: centred in the screen width the docked panels leave free, at
+	     the HUD's scale, so it moves as docks open. A theme places #panel in it, or ignores
 	     it with position: fixed. -->
 	<div id="strip_slot" data-style-left="strip_slot_left + 'px'" data-style-width="strip_slot_width + 'px'">
 		<div id="panel">

@@ -57,17 +57,19 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_DUELWATCH_MAINFRAME:
     case INTERFACE_DOPPELGANGER_FRAME:
     case INTERFACE_EMPIREGUARDIAN_TIMER:
-        return LayoutMode::HudFrame;
-
+    // The bottom HUD's parts and the chat, which the workspace places at the HUD's scale.
     case INTERFACE_CHATINPUTBOX:
     case INTERFACE_CHATLOGWINDOW:
-    case INTERFACE_SLIDEWINDOW:
     case INTERFACE_MU_HELPER_BAR:
     case INTERFACE_MAINFRAME:
     case INTERFACE_BUFF_WINDOW:
-    case INTERFACE_MINI_MAP:
     case INTERFACE_HOTKEY:
     case INTERFACE_SYSTEMLOGWINDOW:
+        return LayoutMode::HudFrame;
+
+    // Drawn over the whole screen: the notice band and the full map.
+    case INTERFACE_SLIDEWINDOW:
+    case INTERFACE_MINI_MAP:
         return LayoutMode::Hud;
 
     // The original's 640x480 screen at the bottom HUD's scale, centred like it: the fixed-place
