@@ -95,7 +95,6 @@ bool mu::ui::window::CCryWolf::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
     BuildRmlUi();
     return true;
 }
@@ -123,7 +122,6 @@ void mu::ui::window::CCryWolf::OpenningProcess()
 void mu::ui::window::CCryWolf::Release()
 {
     m_RmlView.Release();
-    UnloadImages();
 
     if (m_pNewUIMng)
     {
@@ -527,15 +525,6 @@ void mu::ui::window::CCryWolf::SyncView()
     }
 }
 
-bool mu::ui::window::CCryWolf::Render(int Posx, int Posy, int nPosx, int nPosy, float u, float v, float su, float sv, int Index, bool Scale, bool StartScale, float Alpha)
-{
-    const BYTE alpha = static_cast<BYTE>(std::clamp(Alpha, 0.f, 1.f) * 255.f);
-    RenderImage(IMAGE_MVP_INTERFACE + Index, Posx, Posy, nPosx, nPosy, u, v, su, sv,
-        RGBA(255, 255, 255, alpha));
-
-    return true;
-}
-
 void mu::ui::window::CCryWolf::SetTime(int iHour, int iMinute)
 {
     m_iHour = iHour;
@@ -563,100 +552,3 @@ void mu::ui::window::CCryWolf::InitTime()
     m_dwSyncTime = GetTickCount();
 }
 
-void mu::ui::window::CCryWolf::LoadImages()
-{
-    LoadBitmap(L"Interface\\in_bar.tga", IMAGE_MVP_INTERFACE, GL_LINEAR);
-    LoadBitmap(L"Interface\\in_bar2.jpg", IMAGE_MVP_INTERFACE + 1, GL_LINEAR);
-    LoadBitmap(L"Interface\\in_deco.tga", IMAGE_MVP_INTERFACE + 2, GL_LINEAR);
-    LoadBitmap(L"Interface\\in_main-New.tga", IMAGE_MVP_INTERFACE + 3, GL_LINEAR);
-    LoadBitmap(L"Interface\\in_main_icon_bal1.tga", IMAGE_MVP_INTERFACE + 4, GL_LINEAR);
-    LoadBitmap(L"Interface\\in_main_icon_dl1.tga", IMAGE_MVP_INTERFACE + 5, GL_LINEAR);
-    LoadBitmap(L"Interface\\in_main_icon_dl2.tga", IMAGE_MVP_INTERFACE + 6, GL_LINEAR);
-    LoadBitmap(L"Interface\\in_main_number1.tga", IMAGE_MVP_INTERFACE + 7, GL_LINEAR);
-    LoadBitmap(L"Interface\\in_main_number2.tga", IMAGE_MVP_INTERFACE + 8, GL_LINEAR);
-    LoadBitmap(L"Interface\\in_main2-New.tga", IMAGE_MVP_INTERFACE + 9, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_failure.tga", IMAGE_MVP_INTERFACE + 10, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_success.tga", IMAGE_MVP_INTERFACE + 11, GL_LINEAR);
-    LoadBitmap(L"Interface\\t_main-New.tga", IMAGE_MVP_INTERFACE + 12, GL_LINEAR);
-    LoadBitmap(L"Interface\\m_b_no1.tga", IMAGE_MVP_INTERFACE + 13, GL_LINEAR);
-    LoadBitmap(L"Interface\\m_b_no2.tga", IMAGE_MVP_INTERFACE + 14, GL_LINEAR);
-    LoadBitmap(L"Interface\\m_b_no3.tga", IMAGE_MVP_INTERFACE + 15, GL_LINEAR);
-    LoadBitmap(L"Interface\\m_b_ok1.tga", IMAGE_MVP_INTERFACE + 16, GL_LINEAR);
-    LoadBitmap(L"Interface\\m_b_ok2.tga", IMAGE_MVP_INTERFACE + 17, GL_LINEAR);
-    LoadBitmap(L"Interface\\m_b_ok3.tga", IMAGE_MVP_INTERFACE + 18, GL_LINEAR);
-    LoadBitmap(L"Interface\\m_b_yes1.tga", IMAGE_MVP_INTERFACE + 19, GL_LINEAR);
-    LoadBitmap(L"Interface\\m_b_yes2.tga", IMAGE_MVP_INTERFACE + 20, GL_LINEAR);
-    LoadBitmap(L"Interface\\m_b_yes3.tga", IMAGE_MVP_INTERFACE + 21, GL_LINEAR);
-    LoadBitmap(L"Interface\\m_main.tga", IMAGE_MVP_INTERFACE + 22, GL_LINEAR);
-    LoadBitmap(L"Interface\\in_main_number1_1.tga", IMAGE_MVP_INTERFACE + 23, GL_LINEAR);
-    LoadBitmap(L"Interface\\in_main_number2_1.tga", IMAGE_MVP_INTERFACE + 24, GL_LINEAR);
-    LoadBitmap(L"Interface\\in_main_number0_2.tga", IMAGE_MVP_INTERFACE + 25, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_table.tga", IMAGE_MVP_INTERFACE + 26, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_rank.tga", IMAGE_MVP_INTERFACE + 27, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_D.tga", IMAGE_MVP_INTERFACE + 28, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_C.tga", IMAGE_MVP_INTERFACE + 29, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_B.tga", IMAGE_MVP_INTERFACE + 30, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_A.tga", IMAGE_MVP_INTERFACE + 31, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_S.tga", IMAGE_MVP_INTERFACE + 32, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_0.tga", IMAGE_MVP_INTERFACE + 33, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_1.tga", IMAGE_MVP_INTERFACE + 34, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_2.tga", IMAGE_MVP_INTERFACE + 35, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_3.tga", IMAGE_MVP_INTERFACE + 36, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_4.tga", IMAGE_MVP_INTERFACE + 37, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_5.tga", IMAGE_MVP_INTERFACE + 38, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_6.tga", IMAGE_MVP_INTERFACE + 39, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_7.tga", IMAGE_MVP_INTERFACE + 40, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_8.tga", IMAGE_MVP_INTERFACE + 41, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_9.tga", IMAGE_MVP_INTERFACE + 42, GL_LINEAR);
-    LoadBitmap(L"Interface\\icon_Rank_exp.tga", IMAGE_MVP_INTERFACE + 43, GL_LINEAR);
-    LoadBitmap(L"Interface\\m_main_rank.tga", IMAGE_MVP_INTERFACE + 44, GL_LINEAR);
-}
-
-void mu::ui::window::CCryWolf::UnloadImages()
-{
-    DeleteBitmap(IMAGE_MVP_INTERFACE);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 1);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 2);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 3);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 4);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 5);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 6);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 7);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 8);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 9);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 10);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 11);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 12);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 13);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 14);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 15);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 16);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 17);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 18);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 19);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 20);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 21);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 22);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 23);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 24);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 25);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 26);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 27);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 28);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 29);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 30);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 31);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 32);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 33);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 34);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 35);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 36);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 37);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 38);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 39);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 40);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 41);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 42);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 43);
-    DeleteBitmap(IMAGE_MVP_INTERFACE + 44);
-}

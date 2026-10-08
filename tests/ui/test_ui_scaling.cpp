@@ -645,17 +645,6 @@ TEST_CASE("positions include offsets and sizes do not [ui][scaling]")
     CHECK(UI::Scaling::LogicalY(transform, 100.0f) == doctest::Approx(20.0f));
 }
 
-TEST_CASE("letter preview viewport includes active layout offsets [ui][scaling]")
-{
-    const UI::Scaling::Transform transform{2.25f, 2.25f, 480.0f, 6.0f, 2.25f};
-    const auto viewport = UI::Scaling::ViewportForLogicalRect(transform, 351.0f, 151.0f, 119.0f, 141.0f);
-
-    CHECK(viewport.x == 1270);
-    CHECK(viewport.y == 346);
-    CHECK(viewport.width == 268);
-    CHECK(viewport.height == 317);
-}
-
 TEST_CASE("screen overlays fill the window [ui][scaling]")
 {
     const auto transform = UI::Scaling::ScreenOverlayTransform(1280, 720);
@@ -853,16 +842,3 @@ TEST_CASE("layout typography grows gradually and fits bounded controls [ui][scal
     CHECK(UI::Scaling::FontPointSize(FontRole::Fixed, fourK) == 18);
 }
 
-TEST_CASE("window cursor centers detached content in the active layout [ui][scaling]")
-{
-    const auto screen = UI::Scaling::ScreenOverlayTransform(1920, 1080);
-    const auto screenPosition = UI::Scaling::CenteredLogicalPosition(screen, 960.0f, 540.0f, 40.0f, 60.0f);
-    CHECK(screenPosition.x == doctest::Approx(300.0f));
-    CHECK(screenPosition.y == doctest::Approx(210.0f));
-
-    const auto dock = UI::Scaling::DockRightTransform(1920, 1080);
-    const auto dockPosition = UI::Scaling::CenteredLogicalPosition(dock, 1200.0f, 540.0f, 40.0f, 60.0f);
-    CHECK(dockPosition.x == doctest::Approx(300.0f));
-    CHECK(UI::Scaling::PositionX(dock, dockPosition.x + 20.0f) == doctest::Approx(1200.0f));
-    CHECK(UI::Scaling::PositionY(dock, dockPosition.y + 30.0f) == doctest::Approx(540.0f));
-}

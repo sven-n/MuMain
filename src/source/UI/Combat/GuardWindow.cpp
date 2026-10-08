@@ -481,8 +481,6 @@ void CGuardWindow::SyncRmlModel()
 void CGuardWindow::SyncContent()
 {
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    const float x0 = static_cast<float>(m_Pos.x);
-    const float y0 = static_cast<float>(m_Pos.y);
 
     // One of the window's own lines: the document places it, so only what it says and the size
     // the native renderer would have shrunk it to for its box travel through the model.

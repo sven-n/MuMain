@@ -3739,10 +3739,8 @@ void RenderInterface(bool Render)
 
     g_pUIMapName->Render();		// rozy
 
-    //	M34CryWolf1st::Render_Mvp_Interface();
     if (!overlaysRecorded)
         M39Kanturu3rd::RenderKanturu3rdinterface();
-    //	M34CryWolf1st::Sub_Interface();
 }
 
 void RenderOutSides()

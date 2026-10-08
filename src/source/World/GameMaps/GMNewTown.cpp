@@ -24,11 +24,8 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-bool GMNewTown::m_bCharacterSceneCheckMouse = false;
-
 GMNewTown::GMNewTown()
 {
-    m_bCharacterSceneCheckMouse = false;
 }
 
 GMNewTown::~GMNewTown()
@@ -1270,26 +1267,3 @@ bool GMNewTown::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObject)
     return false;
 }
 
-bool GMNewTown::CharacterSceneCheckMouse(OBJECT* pObj)
-{
-    m_bCharacterSceneCheckMouse = false;
-    if (CheckMouseIn(480, 90, 30, 20) == true)
-    {
-        m_bCharacterSceneCheckMouse = true;
-        SetAction(pObj, 2);
-        return true;
-    }
-    else if (CheckMouseIn(485, 110, 50, 50) == true)
-    {
-        m_bCharacterSceneCheckMouse = true;
-        SetAction(pObj, 0);
-        return true;
-    }
-
-    return false;
-}
-
-bool GMNewTown::IsCheckMouseIn()
-{
-    return m_bCharacterSceneCheckMouse;
-}

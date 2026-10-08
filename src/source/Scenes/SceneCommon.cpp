@@ -160,19 +160,6 @@ bool CheckName()
 // UI Utility Functions
 ///////////////////////////////////////////////////////////////////////////////
 
-BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
-{
-    if (mu::ui::window::CheckMouseIn((REFERENCE_WIDTH - 120) / 2, 30 + iOptionPos_y, 120, 22) && MouseLButtonPush)
-    {
-        MouseLButtonPush = false;
-        MouseUpdateTime = 0;
-        MouseUpdateTimeMax = 6;
-        if (bPlayClickSound == TRUE) PlayBuffer(SOUND_CLICK01);
-        return TRUE;
-    }
-    return FALSE;
-}
-
 // SeparateTextIntoLines lives in src/source/Core/Text/TextLineWrap.cpp so it can be
 // unit-tested without dragging in the full scene/UI translation unit.
 

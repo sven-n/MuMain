@@ -87,7 +87,6 @@ namespace mu::ui::window
         bool CanLeave(int member) const;
 
         bool SelectCharacterInPartyList(PARTY_t* pMember);
-        void RenderPartyHPOnHead();
     };
 }
 

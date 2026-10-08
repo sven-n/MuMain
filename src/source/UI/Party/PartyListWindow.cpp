@@ -310,59 +310,6 @@ void CPartyListWindow::SyncCards(const UI::Scaling::Transform& transform)
     m_RmlView.MarkDirty("cards");
 }
 
-void mu::ui::window::CPartyListWindow::RenderPartyHPOnHead()
-{
-    if (PartyNumber <= 0)
-        return;
-
-    float   Width = 38.f;
-    wchar_t    Text[100];
-
-    for (int j = 0; j < PartyNumber; ++j)
-    {
-        PARTY_t* p = &Party[j];
-
-        if (p->index <= -1) continue;
-
-        CHARACTER* c = &CharactersClient[p->index];
-        OBJECT* o = &c->Object;
-        vec3_t      Position;
-        int         ScreenX, ScreenY;
-
-        Vector(o->Position[0], o->Position[1], o->Position[2] + o->BoundingBoxMax[2] + 100.f, Position);
-
-        BeginOpengl();
-        CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
-        EndOpengl();
-
-        ScreenX -= (int)(Width / 2);
-
-        if ((MouseX >= ScreenX && MouseX < ScreenX + Width && MouseY >= ScreenY - 2 && MouseY < ScreenY + 6))
-        {
-            mu_swprintf(Text, L"HP : %d0%%", p->stepHP);
-            g_pRenderText->SetTextColor(255, 230, 210, 255);
-            g_pRenderText->RenderText(ScreenX, ScreenY - 6, Text);
-        }
-
-        EnableAlphaTest();
-        RenderColorQuadARGB((float)(ScreenX + 1), (float)(ScreenY + 1), Width + 4.f, 5.f, 0x80000000u);
-
-        EnableAlphaBlend();
-        RenderColorQuadARGB((float)ScreenX, (float)ScreenY, Width + 4.f, 5.f, 0xFF330000u);
-        RenderColorQuadARGB((float)(ScreenX + 2), (float)(ScreenY + 2), Width, 1.f, 0xFF320A00u);
-
-        int stepHP = std::min<int>(10, p->stepHP);
-
-        for (int k = 0; k < stepHP; ++k)
-        {
-            RenderColorQuadARGB((float)(ScreenX + 2 + (k * 4)), (float)(ScreenY + 2), 3.f, 2.f,
-                0xFFFA0A00u);
-        }
-        DisableAlphaBlend();
-    }
-    DisableAlphaBlend();
-}
-
 float CPartyListWindow::GetLayerDepth()
 {
     return 5.4f;

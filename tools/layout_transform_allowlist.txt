@@ -14,7 +14,6 @@ Guild/GuildInfoWindow.cpp: 7
 Guild/GuildMakeWindow.cpp: 5
 Render/Text/CUIRenderTextSDLTtf.cpp: 1
 Scenes/LoginSceneOverlay.cpp: 1
-Scenes/SceneCommon.cpp: 1
 UI/Character/CharacterInfoWindow.cpp: 4
 UI/Character/PetInfoWindow.cpp: 3
 UI/Combat/CastleWindow.cpp: 5
@@ -116,7 +115,7 @@ UI/RmlBridge/RmlRootTransform.h: 3
 UI/RmlBridge/RmlTooltip.cpp: 2
 UI/Social/ChatRoomWindow.cpp: 1
 UI/Social/FriendShellWindow.cpp: 1
-UI/Social/FriendWindow.cpp: 3
+UI/Social/FriendWindow.cpp: 2
 UI/Social/LetterReadWindow.cpp: 1
 UI/Social/LetterWriteWindow.cpp: 1
 UI/Social/PhotoViewer.cpp: 4
@@ -126,4 +125,3 @@ UI/Widgets/Window/ComboBox.cpp: 7
 UI/Widgets/Window/ScrollBar.cpp: 2
 UI/Widgets/Window/Tooltip.cpp: 3
 UI/Windows/ServerMsgWin.cpp: 2
-World/GameMaps/GMNewTown.cpp: 2

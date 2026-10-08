@@ -33,16 +33,12 @@ namespace M34CryWolf1st {		//. 크라이울프 점령지
     bool IsCryWolf1stMVPStatePeace();
     void CheckCryWolf1stMVPAltarfInfo(int StatueHP, BYTE AltarState1, BYTE AltarState2, BYTE AltarState3, BYTE AltarState4, BYTE AltarState5);
     void CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfState);
-    bool Render_Mvp_Interface();
     void DisableCryWolfNPC();
     void EnableCryWolfNPC();
     void DoTankerFireFixStartPosition(int SourceX, int SourceY, int PositionX, int PositionY);
 
     void Check_AltarState(int Num, int State);
     void Set_Message_Box(int Str, int Num, int Key, int ObjNum = -1);
-    void Sub_Interface();
-    void MoveMvp_Interface();
-    void Set_Hp(int State);
     void Set_Val_Hp(int State);
     void Set_BossMonster(int Val_Hp, int Dl_Num);
     void SetTime(BYTE byHour, BYTE byMinute);

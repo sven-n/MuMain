@@ -18,16 +18,9 @@ namespace mu::ui::window
 {
 // The Crywolf HUD: the battle panel (altars, dark elves, Balgass, the time, the statue's
 // shield), the ready-state notice and the end-of-battle result. crywolf.rml draws it; C++ keeps
-// the state, the animations and the result dialog. The native images stay loaded for
-// M34CryWolf1st's unused Render_Mvp_Interface(), which still draws through Render(...).
+// the state, the animations and the result dialog.
 class CCryWolf : public CObject
 {
-public:
-    enum IMAGE_LIST
-    {
-        IMAGE_MVP_INTERFACE = BITMAP_INTERFACE_CRYWOLF_BEGIN,
-    };
-
 private:
     CManager* m_pNewUIMng;
     POINT m_Pos;
@@ -51,8 +44,6 @@ public:
     bool UpdateKeyEvent();
     bool Update();
     bool Render();
-    bool Render(int Posx, int Posy, int nPosx, int nPosy, float u, float v, float su, float sv, int Index,
-                bool Scale = false, bool StartScale = false, float Alpha = 1.f);
 
     float GetLayerDepth(); //. 10.0f
 
@@ -63,9 +54,6 @@ public:
 
 
 private:
-    void LoadImages();
-    void UnloadImages();
-
     void BuildRmlUi();
     // Advances the result's animation and the time, like the original's Render() did each
     // frame, and syncs crywolf.rml.
