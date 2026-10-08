@@ -66,6 +66,8 @@ constexpr std::array kEntries = {
           L"Illusion Temple result, allied win 7 : 5, three players a side"},
     Entry{L"duelusers", Event::DuelSpectators, mu::ui::window::INTERFACE_DUELWATCH_USERLIST,
           L"duel spectator list, five spectators"},
+    Entry{L"duelwatch", Event::DuelWatch, mu::ui::window::INTERFACE_DUELWATCH_MAINFRAME,
+          L"watched duel frame, 3 : 5, both fighters hurt, five spectators"},
     Entry{L"crywolf", Event::CryWolf, mu::ui::window::INTERFACE_CRYWOLF,
           L"CryWolf battle HUD, altars in each state, Balgass at 62%, 12 minutes left"},
     Entry{L"crywolfresult", Event::CryWolfResult, mu::ui::window::INTERFACE_CRYWOLF,
@@ -143,6 +145,41 @@ void SeedDuelSpectators()
     g_DuelMgr.RemoveAllDuelWatchUser();
     for (const wchar_t* name : {L"Spectator", L"Valkyrie", L"Ironclad", L"Hexweaver", L"Duskblade"})
         g_DuelMgr.AddDuelWatchUser(name);
+}
+
+// The watched duel's frame takes the main HUD's place, as the duel-watch buff shows it.
+void SeedDuelWatch()
+{
+    g_DuelMgr.SetCurrentChannel(0);
+    g_DuelMgr.SetDuelPlayer(DUEL_HERO, 0, L"Valkyrie");
+    g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, 0, L"Ironclad");
+    g_DuelMgr.SetScore(DUEL_HERO, 3);
+    g_DuelMgr.SetScore(DUEL_ENEMY, 5);
+    g_DuelMgr.SetHP(DUEL_HERO, 80);
+    g_DuelMgr.SetHP(DUEL_ENEMY, 45);
+    g_DuelMgr.SetSD(DUEL_HERO, 60);
+    g_DuelMgr.SetSD(DUEL_ENEMY, 20);
+    g_DuelMgr.SetFighterRegenerated(TRUE);
+    SeedDuelSpectators();
+    SetWindowShown(mu::ui::window::INTERFACE_MAINFRAME, false);
+    SetWindowShown(mu::ui::window::INTERFACE_BUFF_WINDOW, false);
+    SetWindowShown(mu::ui::window::INTERFACE_DUELWATCH_USERLIST, true);
+}
+
+void ResetDuelWatch()
+{
+    SetWindowShown(mu::ui::window::INTERFACE_DUELWATCH_USERLIST, false);
+    SetWindowShown(mu::ui::window::INTERFACE_MAINFRAME, true);
+    SetWindowShown(mu::ui::window::INTERFACE_BUFF_WINDOW, true);
+    g_DuelMgr.RemoveAllDuelWatchUser();
+    for (int player = DUEL_HERO; player < MAX_DUEL_PLAYERS; ++player)
+    {
+        g_DuelMgr.SetDuelPlayer(player, 0, L"");
+        g_DuelMgr.SetScore(player, 0);
+        g_DuelMgr.SetHP(player, 0);
+        g_DuelMgr.SetSD(player, 0);
+    }
+    g_DuelMgr.SetCurrentChannel(-1);
 }
 
 void SeedCryWolf()
@@ -226,6 +263,7 @@ void Seed(Event event)
     case Event::Temple: SeedTemple(); break;
     case Event::TempleResult: SeedTempleResult(); break;
     case Event::DuelSpectators: SeedDuelSpectators(); break;
+    case Event::DuelWatch: SeedDuelWatch(); break;
     case Event::CryWolf: SeedCryWolf(); break;
     case Event::CryWolfResult: SeedCryWolfResult(); break;
     case Event::Siege: SeedSiege(); break;
@@ -242,6 +280,7 @@ void Reset(Event event)
     case Event::Temple: g_pCursedTempleWindow->ResetCursedTempleSystemInfo(); break;
     case Event::TempleResult: g_pCursedTempleResultWindow->ResetGameResultInfo(); break;
     case Event::DuelSpectators: g_DuelMgr.RemoveAllDuelWatchUser(); break;
+    case Event::DuelWatch: ResetDuelWatch(); break;
     case Event::CryWolf:
     case Event::CryWolfResult:
         M34CryWolf1st::CryWolfMVPInit();

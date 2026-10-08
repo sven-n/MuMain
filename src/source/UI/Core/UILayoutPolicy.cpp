@@ -54,6 +54,7 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_BATTLE_SOCCER_SCORE:
     case INTERFACE_DUEL_WINDOW:
     case INTERFACE_DUELWATCH_USERLIST:
+    case INTERFACE_DUELWATCH_MAINFRAME:
     case INTERFACE_DOPPELGANGER_FRAME:
     case INTERFACE_EMPIREGUARDIAN_TIMER:
         return LayoutMode::HudFrame;
@@ -68,7 +69,6 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_MAINFRAME:
     case INTERFACE_BUFF_WINDOW:
     case INTERFACE_MASTER_LEVEL:
-    case INTERFACE_DUELWATCH_MAINFRAME:
     case INTERFACE_MINI_MAP:
     case INTERFACE_HOTKEY:
     case INTERFACE_SYSTEMLOGWINDOW:

@@ -35,6 +35,7 @@ part, inside **regions** the theme defines with ordinary RCSS:
     </div>
     <div id="shell_footer" class="region" data-scale="hud" data-participation="reserve">
       <div class="slot" data-window="main_hud"></div>
+      <div class="slot" data-window="duel_watch_hud"></div>
     </div>
   </div>
   <div class="region panel-stage">…</div>           <!-- centred on the whole screen -->
@@ -62,6 +63,10 @@ part, inside **regions** the theme defines with ordinary RCSS:
   bar, sized by each theme) is the `main_hud` footer slot. Its parts may overflow the box (the
   skill list does); only the box is reserved. The full-screen map clips around
   `UI::Placement::SlotBox("main_hud")`.
+- **The duel watcher's HUD** (`duel_watch_hud`, `duel_watch_frame.rml`, 640x51) is a second footer
+  slot. The duel-watch buff hides the main HUD and shows it, so the footer reserves whichever is
+  open, and the docks and event HUDs stand on it the same way. It draws in `LayoutMode::HudFrame`
+  like the event HUDs.
 - **Header**: the MU Helper bar (`mu_helper_bar`, left) and the modern theme's menu buttons
   (`top_bar`, `main_frame_top.rml`, pushed right by `margin-left: auto`). Legacy hides the top
   bar, so its slot collapses. Modern keeps the header at least 25 dp tall so it stays steady while

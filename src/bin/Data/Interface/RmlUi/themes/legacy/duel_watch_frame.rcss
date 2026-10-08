@@ -1,10 +1,10 @@
 /* Legacy theme for CDuelWatchMainFrameWindow, reproducing its Render(): menu_pk_01 (256 x 51) at
-   (0, 429), menu_pk_02 (128 x 51) at (256, 429), menu_pk_03 (256 x 51) at (384, 429); the gauge
-   pieces where C++ places them (their textures unscaled from texel 0, the left health bar
-   mirrored); a score mark (menu_pk_bt02, 16 x 17) per point at y 460; the names centred on 55
-   units at y 465 in the bold font, white; the exit button newui_exit_00 (36 x 29) at (604, 451),
-   registered without an over image, so hovering keeps the up row and pressing shows the second.
-   Reference px under .screen's W/640 x H/480 stretch. */
+   0, menu_pk_02 (128 x 51) at 256, menu_pk_03 (256 x 51) at 384; the gauge pieces where C++ places
+   them (their textures unscaled from texel 0, the left health bar mirrored); a score mark
+   (menu_pk_bt02, 16 x 17) per point at y 31; the names centred on 55 units at y 36 in the bold
+   font, white; the exit button newui_exit_00 (36 x 29) at (604, 22), registered without an over
+   image, so hovering keeps the up row and pressing shows the second. Reference px inside the
+   640 x 51 #panel (the original's y 429 is its top), under .screen's uniform HUD scale. */
 
 @spritesheet dwf-back1-sheet { src: "../../../menu_pk_01.jpg"; dwf-back1: 0px 0px 256px 51px; }
 @spritesheet dwf-back2-sheet { src: "../../../menu_pk_02.jpg"; dwf-back2: 0px 0px 128px 51px; }
@@ -29,20 +29,30 @@ body { pointer-events: none; }
 	pointer-events: none;
 }
 
-#back1 { position: absolute; left: 0; top: 429px; width: 256px; height: 51px; decorator: image(dwf-back1); }
-#back2 { position: absolute; left: 256px; top: 429px; width: 128px; height: 51px; decorator: image(dwf-back2); }
-#back3 { position: absolute; left: 384px; top: 429px; width: 256px; height: 51px; decorator: image(dwf-back3); }
+/* The HUD itself, at its workspace slot. */
+#panel { position: absolute; width: 640px; height: 51px; }
 
-#fight { position: absolute; left: 0; top: 0; width: 640px; height: 480px; }
+#back1 { position: absolute; left: 0; top: 0; width: 256px; height: 51px; decorator: image(dwf-back1); }
+#back2 { position: absolute; left: 256px; top: 0; width: 128px; height: 51px; decorator: image(dwf-back2); }
+#back3 { position: absolute; left: 384px; top: 0; width: 256px; height: 51px; decorator: image(dwf-back3); }
+
+#fight { position: absolute; left: 0; top: 0; width: 640px; height: 51px; }
 .gauge { position: absolute; }
 .gauge.mirrored { transform: scale(-1, 1); }
 
-.score { position: absolute; top: 460px; width: 16px; height: 17px; decorator: image(dwf-score); }
+/* A mark per point, 17 apart: the left fighter's from x 57 rightwards, the right one's from x 566
+   leftwards. */
+.score-row { display: flex; position: absolute; top: 31px; height: 17px; }
+#score_hero { left: 57px; flex-direction: row; }
+#score_enemy { right: 58px; flex-direction: row-reverse; }
+.score { flex: 0 0 auto; width: 16px; height: 17px; decorator: image(dwf-score); }
+#score_hero .score { margin-right: 1px; }
+#score_enemy .score { margin-left: 1px; }
 
 .name {
 	display: block;
 	position: absolute;
-	top: 465px;
+	top: 36px;
 	transform-origin: left top;
 	white-space: nowrap;
 	text-align: center;
@@ -54,7 +64,7 @@ body { pointer-events: none; }
 #exit {
 	position: absolute;
 	left: 604px;
-	top: 451px;
+	top: 22px;
 	width: 36px;
 	height: 29px;
 	decorator: image(dwf-exit-up);

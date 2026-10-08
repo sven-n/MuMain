@@ -14,7 +14,7 @@ class ElementDocument;
 
 namespace mu::ui::window
 {
-// The spectator's duel frame, in the main frame's place while the duel-watch buff is on.
+// The spectator's duel HUD, in the main HUD's place while the duel-watch buff is on.
 // duel_watch_frame.rml draws it; C++ keeps the gauge animation, the exit tooltip and the
 // channel quit request.
 class CDuelWatchMainFrameWindow : public CObject
@@ -35,6 +35,7 @@ public:
 
 private:
     CManager* m_pNewUIMng;
+    POINT m_Pos{0, 0}; // the HUD's top-left, HudFrame units (its workspace slot)
 
     bool m_PendingExit = false;
 

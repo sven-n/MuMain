@@ -645,6 +645,8 @@ bool CSystem::LoadMainSceneInterface()
     hudSlot(INTERFACE_EMPIREGUARDIAN_TIMER, "empire_guardian_timer", m_pNewEmpireGuardianTimer, 124.f, 81.f, 507, 342);
     hudSlot(INTERFACE_DOPPELGANGER_FRAME, "doppelganger_frame", m_pNewDoppelGangerFrame, 227.f, 87.f, 640 - 227,
             480 - 51 - 87);
+    // The duel watcher's HUD replaces the main HUD; home is the original's bottom edge.
+    hudSlot(INTERFACE_DUELWATCH_MAINFRAME, "duel_watch_hud", m_pNewDuelWatchMainFrameWindow, 640.f, 51.f, 0, 480 - 51);
     // Its position is the list's bottom-left corner; the spectators stack upwards from it.
     hudSlot(INTERFACE_DUELWATCH_USERLIST, "duel_watch_users", m_pNewDuelWatchUserListWindow, 57.f, 0.f, 640 - 57,
             480 - 51);

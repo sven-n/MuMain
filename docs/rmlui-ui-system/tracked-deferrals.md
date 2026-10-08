@@ -62,8 +62,6 @@ both themes. Everything else in the rollout was verified in game, both themes, w
 - **`Notices`**: physical px with no root transform, its transform taken ambiently. Trigger: that
   HUD gaining a reference-px space.
 - **`MiniMap`**: no reference-px space exists; the art is turned 45° in physical px.
-- **Unbounded server-driven counts**: the duel spectator list, siege score marks. No `:nth-child`
-  table covers a count the client does not bound.
 - **Computed fan-outs**: `MainFrameWindow`'s zig-zag skill grid and `MuHelperSkillPicker`'s, both
   positioned from an ordinal among what the player actually has.
 - **A new siege command's pulse**: `rgb(255, pulse, pulse)` welds the theme's red to a per-frame
@@ -88,8 +86,9 @@ both themes. Everything else in the rollout was verified in game, both themes, w
 ### Deliberately not on this list
 
 The rest of the allowlist, reviewed entry by entry: per-frame data (gauges, things that follow the
-pointer or scroll, windows that grow with their content, projected markers), counts the server does
-not bound, and text measured the way the native renderer measured it.
+pointer or scroll, windows that grow with their content, projected markers) and text measured the
+way the native renderer measured it. A list the server does not bound is not a reason: it flows in
+RCSS, as the duel spectators and score marks do.
 `root_x`/`root_y` and `panel_x`/`panel_y` stay apart: the first is the physical origin of a root
 scaled uniformly by `root_scale`, the second a reference-unit position inside a stretched `.screen`.
 

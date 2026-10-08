@@ -4,6 +4,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "I18N/All.h"
+#include "UI/Events/EventPreview.h"
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -22,11 +23,12 @@ using namespace mu::ui::window;
 
 namespace
 {
-// The original's exit button (newui_exit_00, a CButton at (640 - 36, 480 - 29), 36 x 29).
-constexpr float kExitX = REFERENCE_WIDTH - 36.f;
-constexpr float kExitY = REFERENCE_HEIGHT - 29.f;
-constexpr float kExitWidth = 36.f;
-constexpr float kExitHeight = 29.f;
+// The original's exit button (newui_exit_00, a CButton at the HUD's right end, 36 x 29, flush
+// with its bottom), relative to the 640 x 51 HUD.
+constexpr int kExitX = 640 - 36;
+constexpr int kExitY = 51 - 29;
+constexpr int kExitWidth = 36;
+constexpr int kExitHeight = 29;
 
 // The bar textures, relative to the themed document.
 constexpr const char* kHpGauge = "../../../menu_pk_hp03(bar2).jpg";
@@ -46,24 +48,24 @@ DuelWatchGaugeEntry Gauge(const char* src, float sourceWidth, float sourceHeight
 // 235 * rate texels (6 rows) mirrored onto it.
 DuelWatchGaugeEntry HeroHp(const char* src, float rate)
 {
-    return Gauge(src, 235.f * rate, 6.f, 60 + 236.f * (1.f - rate), 440.f, 236.f * rate, 7.f, true);
+    return Gauge(src, 235.f * rate, 6.f, 60 + 236.f * (1.f - rate), 11.f, 236.f * rate, 7.f, true);
 }
 
 // The right fighter's health bar: from x 344, the texture's first 236 * rate texels, unscaled.
 DuelWatchGaugeEntry EnemyHp(const char* src, float rate)
 {
-    return Gauge(src, 236.f * rate, 7.f, 580.f - 236.f, 440.f, 236.f * rate, 7.f, false);
+    return Gauge(src, 236.f * rate, 7.f, 580.f - 236.f, 11.f, 236.f * rate, 7.f, false);
 }
 
 // The shield bars: right-aligned on 154 units from x 142, or from x 344; unscaled texels.
 DuelWatchGaugeEntry HeroSd(const char* src, float rate)
 {
-    return Gauge(src, 154.f * rate, 4.f, 142 + 154.f * (1.f - rate), 450.f, 154.f * rate, 4.f, false);
+    return Gauge(src, 154.f * rate, 4.f, 142 + 154.f * (1.f - rate), 21.f, 154.f * rate, 4.f, false);
 }
 
 DuelWatchGaugeEntry EnemySd(const char* src, float rate)
 {
-    return Gauge(src, 154.f * rate, 4.f, 344.f, 450.f, 154.f * rate, 4.f, false);
+    return Gauge(src, 154.f * rate, 4.f, 344.f, 21.f, 154.f * rate, 4.f, false);
 }
 
 // One bar's step of the original's catch-up: `shown` moves towards `rate` by `step`; while it
@@ -141,12 +143,17 @@ void CDuelWatchMainFrameWindow::Release()
     m_RmlView.Release();
 }
 
+void CDuelWatchMainFrameWindow::SetPos(int x, int y)
+{
+    m_Pos.x = x;
+    m_Pos.y = y;
+}
+
 bool CDuelWatchMainFrameWindow::UpdateMouseEvent()
 {
     // The exit button's click is RmlUi's (duel_watch_exit); the pointer on it goes to nothing
     // behind the frame.
-    if (CheckMouseIn(static_cast<int>(kExitX), static_cast<int>(kExitY), static_cast<int>(kExitWidth),
-                     static_cast<int>(kExitHeight)))
+    if (CheckMouseIn(m_Pos.x + kExitX, m_Pos.y + kExitY, kExitWidth, kExitHeight))
         return false;
     return true;
 }
@@ -163,7 +170,12 @@ bool CDuelWatchMainFrameWindow::Update()
     if (m_PendingExit)
     {
         m_PendingExit = false;
-        if (IsVisible() && g_DuelMgr.GetCurrentChannel() >= 0)
+        // A preview's exit ends the preview; nothing goes to the server.
+        if (UI::EventPreview::IsShowing(UI::EventPreview::Event::DuelWatch))
+        {
+            UI::EventPreview::Stop();
+        }
+        else if (IsVisible() && g_DuelMgr.GetCurrentChannel() >= 0)
         {
             SocketClient->ToGameServer()->SendDuelChannelQuitRequest();
         }
@@ -203,6 +215,8 @@ void CDuelWatchMainFrameWindow::BindRmlModel(Rml::DataModelConstructor& c, DuelW
 {
     c.Bind("scale_x", &model.scaleX);
     c.Bind("scale_y", &model.scaleY);
+    c.Bind("panel_x", &model.panelX);
+    c.Bind("panel_y", &model.panelY);
     c.Bind("watching", &model.watching);
     c.Bind("exit_hint", &model.exitHint);
     auto name = c.RegisterStruct<DuelWatchNameEntry>();
@@ -210,8 +224,9 @@ void CDuelWatchMainFrameWindow::BindRmlModel(Rml::DataModelConstructor& c, DuelW
     name.RegisterMember("text_px", &DuelWatchNameEntry::textPx);
     c.Bind("hero_name", &model.heroName);
     c.Bind("enemy_name", &model.enemyName);
-    c.RegisterArray<std::vector<float>>();
-    c.Bind("score_marks", &model.scoreMarks);
+    c.RegisterArray<std::vector<int>>();
+    c.Bind("hero_marks", &model.heroMarks);
+    c.Bind("enemy_marks", &model.enemyMarks);
     auto gauge = c.RegisterStruct<DuelWatchGaugeEntry>();
     gauge.RegisterMember("src", &DuelWatchGaugeEntry::src);
     gauge.RegisterMember("rect", &DuelWatchGaugeEntry::rect);
@@ -290,10 +305,12 @@ void CDuelWatchMainFrameWindow::SyncView()
     if (!IsVisible())
         return;
 
-    // CManager scopes LayoutMode::Hud around the window: W/640 x H/480, no offset.
+    // CManager scopes LayoutMode::HudFrame around the window: the bottom HUD's uniform scale, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::scaleX, "scale_x", transform.scaleX);
     SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::scaleY, "scale_y", transform.scaleY);
+    SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::panelX, "panel_x", static_cast<float>(m_Pos.x));
+    SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::panelY, "panel_y", static_cast<float>(m_Pos.y));
 
     SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::exitHint, "exit_hint",
               StringUtils::WideToNarrow(I18N::Game::DuelFinished));
@@ -317,19 +334,18 @@ void CDuelWatchMainFrameWindow::SyncView()
     SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::enemyName, "enemy_name", name(DUEL_ENEMY));
     DuelWatchFrameRmlModel& model = m_RmlView.GetModel();
 
-    // A mark per point: the left fighter's from x 57 rightwards, the right one's from x 566 leftwards.
-    std::vector<float> scoreMarks;
-    scoreMarks.reserve(
-        static_cast<size_t>(std::max(0, g_DuelMgr.GetScore(DUEL_HERO) + g_DuelMgr.GetScore(DUEL_ENEMY))));
-    for (int i = 0; i < g_DuelMgr.GetScore(DUEL_HERO); ++i)
-        scoreMarks.push_back(57.f + 17.f * static_cast<float>(i));
-    for (int i = 0; i < g_DuelMgr.GetScore(DUEL_ENEMY); ++i)
-        scoreMarks.push_back(REFERENCE_WIDTH - 74.f - 17.f * static_cast<float>(i));
-    if (model.scoreMarks != scoreMarks)
+    // A mark per point.
+    const auto syncMarks = [&](std::vector<int> DuelWatchFrameRmlModel::*marks, const char* name, int score)
     {
-        model.scoreMarks = std::move(scoreMarks);
-        m_RmlView.MarkDirty("score_marks");
-    }
+        const size_t count = static_cast<size_t>(std::max(0, score));
+        if ((model.*marks).size() != count)
+        {
+            (model.*marks).assign(count, 0);
+            m_RmlView.MarkDirty(name);
+        }
+    };
+    syncMarks(&DuelWatchFrameRmlModel::heroMarks, "hero_marks", g_DuelMgr.GetScore(DUEL_HERO));
+    syncMarks(&DuelWatchFrameRmlModel::enemyMarks, "enemy_marks", g_DuelMgr.GetScore(DUEL_ENEMY));
 
     std::vector<DuelWatchGaugeEntry> gauges = StepGauges();
     const bool sameGauges = model.gauges.size() == gauges.size() &&

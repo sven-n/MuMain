@@ -31,14 +31,17 @@ struct DuelWatchNameEntry
 // The spectator frame (CDuelWatchMainFrameWindow).
 struct DuelWatchFrameRmlModel
 {
-    // The Hud layout's W/640 x H/480 stretch and its inverse for the counter-scaled names.
+    // The bottom HUD's uniform scale (LayoutMode::HudFrame), cancelled by the counter-scaled names.
     float scaleX = 1.f, scaleY = 1.f;
+    // The HUD's top-left, reference px (m_Pos).
+    float panelX = 0.f, panelY = 0.f;
 
     // A watched channel: the names, score marks and gauges; the frame and the exit button always.
     bool watching = false;
     Rml::String exitHint;
     DuelWatchNameEntry heroName, enemyName;
-    std::vector<float> scoreMarks; // the marks' left edges, reference px
+    // One entry per point; only the count matters, the theme lays out the marks.
+    std::vector<int> heroMarks, enemyMarks;
     std::vector<DuelWatchGaugeEntry> gauges;
 };
 

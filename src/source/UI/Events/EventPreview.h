@@ -16,6 +16,7 @@ enum class Event
     Temple,
     TempleResult,
     DuelSpectators,
+    DuelWatch,
     CryWolf,
     CryWolfResult,
     Siege,

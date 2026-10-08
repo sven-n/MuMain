@@ -22,9 +22,12 @@ body { pointer-events: none; }
 	pointer-events: none;
 }
 
+/* The HUD itself, at its workspace slot. */
+#panel { position: absolute; width: 640px; height: 51px; }
+
 #back1, #back2, #back3 {
 	position: absolute;
-	top: 429px;
+	top: 0;
 	height: 51px;
 	background-color: token(surface-panel);
 }
@@ -32,16 +35,23 @@ body { pointer-events: none; }
 #back2 { left: 256px; width: 128px; border: 1px token(border-frame); border-left-width: 0; border-right-width: 0; }
 #back3 { left: 384px; width: 256px; border: 1px token(border-frame); border-left-width: 0; }
 
-#fight { position: absolute; left: 0; top: 0; width: 640px; height: 480px; }
+#fight { position: absolute; left: 0; top: 0; width: 640px; height: 51px; }
 .gauge { position: absolute; }
 .gauge.mirrored { transform: scale(-1, 1); }
 
-.score { position: absolute; top: 460px; width: 16px; height: 17px; decorator: image(dwf-score); }
+/* A mark per point, 17 apart: the left fighter's from x 57 rightwards, the right one's from x 566
+   leftwards. */
+.score-row { display: flex; position: absolute; top: 31px; height: 17px; }
+#score_hero { left: 57px; flex-direction: row; }
+#score_enemy { right: 58px; flex-direction: row-reverse; }
+.score { flex: 0 0 auto; width: 16px; height: 17px; decorator: image(dwf-score); }
+#score_hero .score { margin-right: 1px; }
+#score_enemy .score { margin-left: 1px; }
 
 .name {
 	display: block;
 	position: absolute;
-	top: 465px;
+	top: 36px;
 	transform-origin: left top;
 	white-space: nowrap;
 	text-align: center;
@@ -53,7 +63,7 @@ body { pointer-events: none; }
 #exit {
 	position: absolute;
 	left: 604px;
-	top: 451px;
+	top: 22px;
 	width: 36px;
 	height: 29px;
 	decorator: image(dwf-exit-up);

@@ -111,6 +111,8 @@
 		</div>
 		<div id="shell_footer" class="region shell-region" data-scale="hud" data-participation="reserve">
 			<div class="slot" data-window="main_hud"></div>
+			<!-- The duel watcher's HUD, shown in the main HUD's place. -->
+			<div class="slot" data-window="duel_watch_hud"></div>
 		</div>
 	</div>
 	<!-- The original's centred NPC panels, on the 640x480 stage it centred them on (outside the
