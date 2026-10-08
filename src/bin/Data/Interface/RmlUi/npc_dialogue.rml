@@ -14,9 +14,8 @@
      sprites/exit button come from docked_panel_frame.rcss, same family as
      character_info/my_quest_info/pet_info/party_info/quest_progress. -->
 <body>
-	<div id="panel" data-model="npc_dialogue" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale"
-	     data-style-font-size="(text_px / root_scale) + 'px'">
+	<div id="panel" data-model="npc_dialogue"
+	     data-style---text-px="text_px + 'px'">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
@@ -56,6 +55,7 @@
 		<div id="btn_exit" data-event-click="npcdialogue_click_close" data-attr-data-hint="exit_tooltip">
 			<span class="btn-exit-label">×</span>
 		</div>
+		<div id="frame_corner_close" data-event-click="npcdialogue_click_close"></div>
 	</div>
 </body>
 </rml>

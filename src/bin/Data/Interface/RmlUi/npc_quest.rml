@@ -13,9 +13,8 @@
      #content_root is the positioning root; the frame is #panel inside it, then the item preview,
      then every element below at its own absolute position in npc_quest.rcss. -->
 <body>
-	<div id="content_root" data-model="npc_quest" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale"
-	     data-style-font-size="(text_px / root_scale) + 'px'">
+	<div id="content_root" data-model="npc_quest"
+	     data-style---text-px="text_px + 'px'">
 		<div id="panel">
 			<div class="frame-piece frame-top"></div>
 			<div class="frame-piece frame-left"></div>
@@ -61,6 +60,7 @@
 		<div id="btn_exit" data-event-click="npcquest_click_close" data-attr-data-hint="exit_tooltip">
 			<span class="btn-exit-label">×</span>
 		</div>
+		<div id="frame_corner_close" data-event-click="npcquest_click_close"></div>
 	</div>
 </body>
 </rml>

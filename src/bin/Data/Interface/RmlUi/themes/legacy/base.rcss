@@ -333,7 +333,7 @@ input, select, textarea, .btn, [data-event-click] { drag: block; }
 /* A panel a workspace slot places (CObject::GetPlacedDocument()): the slot's top-left and its
    region's scale arrive as variables; the theme decides how they apply. It takes the pointer, so
    clicks on it never reach the world or the windows below. */
-#panel.slot-placed {
+#panel.slot-placed, #content_root.slot-placed {
 	pointer-events: auto;
 	left: var(--slot-left);
 	top: var(--slot-top);

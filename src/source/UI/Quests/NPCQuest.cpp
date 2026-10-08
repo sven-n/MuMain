@@ -15,6 +15,7 @@
 #include "UI/Scaling/UITransform.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlStyleKeys.h"
@@ -70,9 +71,6 @@ bool CNPCQuest::Create(CManager* pNewUIMng, int x, int y)
 
 void CNPCQuest::BindRmlModel(Rml::DataModelConstructor& c, NPCQuestRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
 
     c.Bind("npc_name", &model.npcName);
@@ -161,18 +159,7 @@ void CNPCQuest::Show(bool bShow)
 
 bool CNPCQuest::UpdateMouseEvent()
 {
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPCQUEST))
-        return false;
-
-    float panelWidth = NPCQUEST_WIDTH;
-    float panelHeight = NPCQUEST_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool CNPCQuest::UpdateKeyEvent()
@@ -426,18 +413,6 @@ void CNPCQuest::SyncRmlModel()
 
     auto& model = m_RmlView.GetModel();
 
-    const auto transform = UI::Scaling::GetActiveTransform();
-    const float rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
-    const float rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
-    if (model.rootX != rootX || model.rootY != rootY || model.rootScale != transform.scaleX)
-    {
-        model.rootX = rootX;
-        model.rootY = rootY;
-        model.rootScale = transform.scaleX;
-        m_RmlView.MarkDirty("root_x");
-        m_RmlView.MarkDirty("root_y");
-        m_RmlView.MarkDirty("root_scale");
-    }
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     const BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();

@@ -85,13 +85,13 @@ UI/Inventory/Trade.cpp: 4
 UI/Inventory/UnitedMarketPlaceWindow.cpp: 6
 UI/MuHelper/MuHelperSkillPicker.cpp: 2
 UI/NPCs/GatemanWindow.cpp: 1
-UI/NPCs/NPCDialogue.cpp: 11
+UI/NPCs/NPCDialogue.cpp: 7
 UI/NPCs/NPCShop.cpp: 4
 UI/Options/OptionWindow.cpp: 1
 UI/Party/PartyListWindow.cpp: 5
 UI/Placement/WindowPlacement.cpp: 6
 UI/Quests/MyQuestInfoWindow.cpp: 1
-UI/Quests/NPCQuest.cpp: 6
+UI/Quests/NPCQuest.cpp: 2
 UI/Quests/QuestProgress.cpp: 1
 UI/Quests/QuestProgressByEtc.cpp: 1
 UI/RmlBridge/RmlDocumentHints.cpp: 1

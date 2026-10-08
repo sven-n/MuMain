@@ -177,3 +177,6 @@
 #btn_complete { width: calc(108px * var(--root-scale)); height: calc(29px * var(--root-scale)); line-height: calc(29px * var(--root-scale)); }
 .nq-cost-amount.gold-amount { width: calc(150px * var(--root-scale)); }
 .nq-dialogue { line-height: calc(18px * var(--root-scale)); }
+
+/* The native text size, counter-scaled out of the placed root's scale. */
+#content_root { font-size: calc(var(--text-px) / var(--root-scale)); }

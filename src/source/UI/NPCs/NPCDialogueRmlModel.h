@@ -22,9 +22,6 @@ namespace mu::ui::window
 
     struct NPCDialogueRmlModel
     {
-        float rootX = 0.f;
-        float rootY = 0.f;
-        float rootScale = 1.f;
         float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
         Rml::String npcName;

@@ -107,3 +107,6 @@
 .nd-contribute { width: calc(168px * var(--root-scale)); line-height: calc(18px * var(--root-scale)); }
 #npc_lines_container { width: calc(160px * var(--root-scale)); line-height: calc(15px * var(--root-scale)); }
 #answers_container { width: calc(160px * var(--root-scale)); line-height: calc(15px * var(--root-scale)); }
+
+/* The native text size, counter-scaled out of the placed root's scale. */
+#panel { font-size: calc(var(--text-px) / var(--root-scale)); }

@@ -70,6 +70,8 @@ namespace mu::ui::window
         // A window drawn by a document whose #panel the workspace places: a slot gives the panel its
         // position and scale, so the window binds neither.
         virtual Rml::ElementDocument* GetPlacedDocument() const { return nullptr; }
+        // The id of the element the slot places in that document.
+        virtual const char* PlacedRootId() const { return "panel"; }
         // The workspace places this window: its logical space is `transform`, with (0, 0) at the
         // slot's top-left.
         void PlaceInSlot(const UI::Scaling::Transform& transform)
@@ -77,17 +79,17 @@ namespace mu::ui::window
             m_layoutMode = UI::Scaling::LayoutMode::Slot;
             m_slotTransform = transform;
             if (m_slotPlacement.Set(transform.offsetX, transform.offsetY, transform.scaleX))
-                m_slotPlacement.Apply(GetPlacedDocument(), "panel");
+                m_slotPlacement.Apply(GetPlacedDocument(), PlacedRootId());
         }
         // The theme gives this window no slot any more: it returns to `mode`.
         void LeaveSlot(UI::Scaling::LayoutMode mode)
         {
             m_layoutMode = mode;
             if (m_slotPlacement.Set(0.f, 0.f, 0.f))
-                m_slotPlacement.Apply(GetPlacedDocument(), "panel");
+                m_slotPlacement.Apply(GetPlacedDocument(), PlacedRootId());
         }
         // Once a frame: gives a document rebuilt since (a theme switch) its slot placement again.
-        void SyncSlotPlacement() const { m_slotPlacement.Sync(GetPlacedDocument(), "panel"); }
+        void SyncSlotPlacement() const { m_slotPlacement.Sync(GetPlacedDocument(), PlacedRootId()); }
         // The transform this window's logical coordinates map through to screen pixels.
         UI::Scaling::Transform GetLayoutTransform() const
         {
