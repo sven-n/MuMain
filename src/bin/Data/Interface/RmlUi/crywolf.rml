@@ -42,9 +42,20 @@
 				<img id="balgass_bar" src="../../../in_bar2.jpg" data-attr-rect="balgass_bar_rect"
 				     data-style-width="balgass_bar_width + 'px'"/>
 			</div>
-			<img class="timer-digit" data-for="d : timer_digits" data-attr-src="d.src" data-attr-rect="d.rect"
-			     data-style-left="d.left + 'px'" data-style-top="d.top + 'px'"
+			<!-- The clock: a leading zero below ten, then each run's digits, which the theme centres
+			     from the run's digit count and each digit's index. -->
+			<img class="timer-digit" id="minute_pad" data-if="minute_pad" src="../../../FontTest.tga" rect="0 0 16 16"
 			     data-class-urgent="timer_urgent"/>
+			<div class="timer-run" id="minutes" data-style---n="minute_digits.size">
+				<img class="timer-digit" src="../../../FontTest.tga" data-for="cell, i : minute_digits"
+				     data-attr-rect="cell" data-style---i="i" data-class-urgent="timer_urgent"/>
+			</div>
+			<img class="timer-digit" id="second_pad" data-if="second_pad" src="../../../FontTest.tga" rect="0 0 16 16"
+			     data-class-urgent="timer_urgent"/>
+			<div class="timer-run" id="seconds" data-style---n="second_digits.size">
+				<img class="timer-digit" src="../../../FontTest.tga" data-for="cell, i : second_digits"
+				     data-attr-rect="cell" data-style---i="i" data-class-urgent="timer_urgent"/>
+			</div>
 			<img id="statue_bar" data-if="statue_bar_width > 0" src="../../../in_main2-New.tga"
 			     data-attr-rect="statue_bar_rect" data-style-left="statue_bar_left + 'px'"
 			     data-style-width="statue_bar_width + 'px'"/>

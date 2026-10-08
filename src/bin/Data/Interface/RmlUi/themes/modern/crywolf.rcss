@@ -29,7 +29,13 @@ img { position: absolute; }
 #plate { left: 538px; top: 392px; width: 104px; height: 37px; }
 #balgass_icon { left: 623px; top: 379px; width: 15px; height: 15px; }
 #balgass_bar { left: 548px; top: 388px; height: 8px; }
-.timer-digit { width: 14px; height: 14px; }
+.timer-digit { top: 402px; width: 14px; height: 14px; }
+/* RenderNumber2D(): 14-unit digits 9.8 apart, a run starting half its digit count's width left of
+   its x; the leading zeros are one-digit runs on x 570 and 597. */
+#minute_pad { left: 563px; }
+#second_pad { left: 590px; }
+#minutes .timer-digit { left: calc(580px - var(--n) * 7px + var(--i) * 9.8px); }
+#seconds .timer-digit { left: calc(607px - var(--n) * 7px + var(--i) * 9.8px); }
 #statue_bar { top: 323px; height: 30px; }
 
 .hud-text {

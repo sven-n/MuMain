@@ -29,3 +29,8 @@ body { pointer-events: none; }
 #colon { left: 48px; top: 57px; }
 
 .digit { position: absolute; top: 55px; width: 8.4px; height: 11.2px; }
+.digit.blank { visibility: hidden; }
+/* RenderNumber(): 8.4-unit digits 6.72 apart, the run starting half its digit count's width left
+   of its x. */
+#minutes .digit { left: calc(35px - var(--n) * 4.2px + var(--i) * 6.72px); }
+#seconds .digit { left: calc(65px - var(--n) * 4.2px + var(--i) * 6.72px); }

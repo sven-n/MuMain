@@ -106,7 +106,7 @@ private:
     void BuildRmlUi();
     // Builds the HUD's images and texts in the original Render()'s order and syncs the document.
     void SyncView();
-    void SyncGameTime(std::vector<CursedTempleSpriteEntry>& sprites);
+    void SyncGameTime();
     void SyncMiniMap(std::vector<CursedTempleSpriteEntry>& sprites);
     void SyncSkill(std::vector<CursedTempleSpriteEntry>& sprites);
     void SyncScore();

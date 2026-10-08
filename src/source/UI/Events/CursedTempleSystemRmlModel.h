@@ -57,6 +57,13 @@ struct CursedTempleSystemRmlModel
     bool alliedTwoDigits = false;
     bool illusionTwoDigits = false;
 
+    // The digit runs' cells (UI::RmlBridge::DigitCells): the time (newui_number1), the mini map's
+    // transparency and the teams' points (FontTest), and the skill's kill points needed and held
+    // (newui_number1).
+    std::vector<Rml::String> minuteDigits, secondDigits;
+    std::vector<Rml::String> alphaDigits, alliedDigits, illusionDigits;
+    std::vector<Rml::String> killsNeededDigits, killsDigits;
+
     std::vector<CursedTempleSpriteEntry> sprites;
     std::vector<CursedTempleTextEntry> tutorialLines;
 };

@@ -10,8 +10,7 @@
 	     LayoutMode::Hud window drawn at fixed 640x480 reference positions, so .screen is that screen
 	     stretched W/640 x H/480 like the original. The frames, the score banners and every row's
 	     place are the theme's; C++ lists only what it has to place itself -- the projected mini-map
-	     markers, the digit runs and the native buttons -- in the original's drawing order, under the
-	     frames. Text does not stretch: it takes the native size and cancels the stretch. In the
+	     markers and the native buttons -- in the original's drawing order, over the frames. Text does not stretch: it takes the native size and cancels the stretch. In the
 	     background context, behind its other documents (the original drew it under nearly every
 	     panel). Takes no pointer events: the buttons' input stays native. -->
 	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'" data-style---root-scale="scale_x" data-style---root-scale-y="scale_y">
@@ -26,6 +25,44 @@
 			<div id="mini_map"></div>
 			<div id="mini_map_frame"></div>
 			<img id="skill_icon" data-attr-src="skill_icon_src" data-attr-rect="skill_icon_rect"/>
+			<!-- The digit runs; the theme centres each from its digit count and each digit's index.
+			     The original drew the time twice over itself. -->
+			<div class="ct-run ct-time-minutes" data-style---n="minute_digits.size">
+				<img class="ct-digit" src="../../../newui_number1.tga" data-for="cell, i : minute_digits"
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+			</div>
+			<div class="ct-run ct-time-seconds" data-style---n="second_digits.size">
+				<img class="ct-digit" src="../../../newui_number1.tga" data-for="cell, i : second_digits"
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+			</div>
+			<div class="ct-run ct-time-minutes" data-style---n="minute_digits.size">
+				<img class="ct-digit" src="../../../newui_number1.tga" data-for="cell, i : minute_digits"
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+			</div>
+			<div class="ct-run ct-time-seconds" data-style---n="second_digits.size">
+				<img class="ct-digit" src="../../../newui_number1.tga" data-for="cell, i : second_digits"
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+			</div>
+			<div class="ct-run" id="ct_alpha" data-style---n="alpha_digits.size">
+				<img class="ct-digit" src="../../../FontTest.tga" data-for="cell, i : alpha_digits"
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+			</div>
+			<div class="ct-run" id="ct_allied" data-style---n="allied_digits.size">
+				<img class="ct-digit" src="../../../FontTest.tga" data-for="cell, i : allied_digits"
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+			</div>
+			<div class="ct-run" id="ct_illusion" data-style---n="illusion_digits.size">
+				<img class="ct-digit" src="../../../FontTest.tga" data-for="cell, i : illusion_digits"
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+			</div>
+			<div class="ct-run" id="ct_kills_needed" data-style---n="kills_needed_digits.size">
+				<img class="ct-digit" src="../../../newui_number1.tga" data-for="cell, i : kills_needed_digits"
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+			</div>
+			<div class="ct-run" id="ct_kills" data-style---n="kills_digits.size">
+				<img class="ct-digit" src="../../../newui_number1.tga" data-for="cell, i : kills_digits"
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+			</div>
 		</div>
 		</div>
 

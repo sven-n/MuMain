@@ -21,10 +21,10 @@ chaos_castle_time.rml: the text box's left and width are EventTimerView's caller
 char_info_balloon.rml: per-frame data -- world-projected balloon positions, per frame
 chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
 command_window.rml: per-frame data -- target marker follows the selected command
-crywolf.rml: per-frame data -- the success/failure banner and the rank label slide in and out, Balgass's health and the statue's shield are gauge lengths (the shield shortens from its left, so its left moves with it), and the clock's digit runs are centred on their own x so a digit's left depends on how many digits the value has
+crywolf.rml: per-frame data -- the success/failure banner and the rank label slide in and out, Balgass's health and the statue's shield are gauge lengths (the shield shortens from its left, so its left moves with it)
 cursed_temple_enter.rml: the hero band's height from the live line height
 cursed_temple_result.rml: the hero row's height from the live line height, and the victory/defeat banner's slide-in
-cursed_temple_system.rml: per-frame data -- the mini map's projected markers, the digit runs (packed by how many digits the value has) and the three native buttons, whose box comes off the live CButton that hit-tests them
+cursed_temple_system.rml: per-frame data -- the mini map's projected markers and the three native buttons, whose box comes off the live CButton that hit-tests them
 doppelganger_frame.rml: per-frame data -- the monsters' gauge is a length from m_fMonsterGauge, stacked in pieces as monsters get through; the Ice Walker's and each party member's marker is their own position along the path (59 + 167 * position)
 duel_watch_frame.rml: the health and shield gauges are lengths from the fighters' rates, and the left fighter's bars are right-aligned so their left moves with the rate too (the plan's gauge carve-out)
 empire_guardian_timer.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
@@ -34,7 +34,6 @@ gens_ranking.rml: per-frame data -- a description line's height is its native li
 item_endurance.rml: per-frame data -- the hovered item's tooltip follows the mouse (clamped to the screen edge); the pet bars are lengths from their health; the left column is a flow whose rows depend on whether the elf's arrow line is shown and which frames exist, and its names are screen-converted physical px; the icon column's start is right-anchored to the live screen width, which is the window's to decide -- the pack inside it is the theme's
 item_explanation.rml: per-frame data -- placed against the hovered item
 kanturu_enter.rml: the subject's and state texts' lines sit where SeparateTextIntoLines() put them -- each group starts under however many lines the one before it wrapped to, so the stacking is derived from the text, not a table the theme could hold
-kanturu_info.rml: per-frame data -- RenderNumber() centres each digit run on its x, so a digit's left depends on how many digits the minute or second has
 login_scene.rml: per-frame data -- scene sprites scale on their own 800x600 formula, not dp
 main_frame.rml: per-frame data -- the health/mana/SD/AG gauges and every cooldown wipe are fractions, and the expanded skill grid's cells come from RebuildGridSnapshot()'s zig-zag, whose position is computed from a cell's ordinal among the skills actually learned (the same accepted computed fan-out as MuHelperSkillPicker's).
 message_box_view.rml: every line is centred by measurement (centre - MeasureText().cx / 2) and stacked by measured height, so its geometry genuinely varies per frame; the buttons come from the box's own CMessageBoxButtons (a box with literal positions names its kind and the theme places them instead), the frame and progress bar follow the box size, and its jewel list preserves native text metrics in a counter-scaled RmlUi scroll pane

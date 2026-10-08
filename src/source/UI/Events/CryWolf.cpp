@@ -16,6 +16,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
+#include "UI/RmlBridge/RmlDigitCells.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -172,37 +173,21 @@ Rml::String TexelRect(float x, float y, float width, float height)
     return Rml::CreateString("%g %g %g %g", x, y, width, height);
 }
 
-// RenderNumber2D(x, y, number, 14, 14): FontTest's 16 x 16 texel digit cells, 14 x 14 reference
-// px, centred on x and 9.8 px apart.
-void AddTimerDigits(std::vector<CryWolfSpriteEntry>& digits, const Rml::Vector2f& centre, int number)
+// RenderNumber2D(x, y, number, 14, 14)'s FontTest cells: the clock's minutes or seconds with the
+// leading zero the original drew below ten.
+void SetClock(CryWolfRmlModel& model, int minute, int second)
 {
-    const std::string text = std::to_string(std::max(number, 0));
-    float left = centre.x - 14.f * static_cast<float>(text.size()) / 2;
-    for (const char digit : text)
-    {
-        digits.push_back({left, centre.y, InterfaceImage("FontTest.tga"),
-                          TexelRect(static_cast<float>((digit - '0') * 16), 0.f, 16.f, 16.f)});
-        left += 14.f * 0.7f;
-    }
-}
-
-bool SameSprites(const std::vector<CryWolfSpriteEntry>& a, const std::vector<CryWolfSpriteEntry>& b)
-{
-    return a.size() == b.size() &&
-           std::equal(a.begin(), a.end(), b.begin(), [](const CryWolfSpriteEntry& l, const CryWolfSpriteEntry& r)
-                      { return l.left == r.left && l.top == r.top && l.src == r.src && l.rect == r.rect; });
+    model.minutePad = minute < 10;
+    model.minuteDigits = UI::RmlBridge::DigitCells(std::max(minute, 0), 16.f, 16.f);
+    model.secondPad = second < 10;
+    model.secondDigits = UI::RmlBridge::DigitCells(std::max(second, 0), 16.f, 16.f);
 }
 
 } // namespace
 
 void mu::ui::window::CCryWolf::BindRmlModel(Rml::DataModelConstructor& c, CryWolfRmlModel& model)
 {
-    auto sprite = c.RegisterStruct<CryWolfSpriteEntry>();
-    sprite.RegisterMember("left", &CryWolfSpriteEntry::left);
-    sprite.RegisterMember("top", &CryWolfSpriteEntry::top);
-    sprite.RegisterMember("src", &CryWolfSpriteEntry::src);
-    sprite.RegisterMember("rect", &CryWolfSpriteEntry::rect);
-    c.RegisterArray<std::vector<CryWolfSpriteEntry>>();
+    c.RegisterArray<std::vector<Rml::String>>();
     auto image = c.RegisterStruct<CryWolfImageEntry>();
     image.RegisterMember("shown", &CryWolfImageEntry::shown);
     image.RegisterMember("src", &CryWolfImageEntry::src);
@@ -234,7 +219,10 @@ void mu::ui::window::CCryWolf::BindRmlModel(Rml::DataModelConstructor& c, CryWol
     c.Bind("balgass_text", &model.balgassText);
     c.Bind("balgass_bar_width", &model.balgassBarWidth);
     c.Bind("balgass_bar_rect", &model.balgassBarRect);
-    c.Bind("timer_digits", &model.timerDigits);
+    c.Bind("minute_pad", &model.minutePad);
+    c.Bind("minute_digits", &model.minuteDigits);
+    c.Bind("second_pad", &model.secondPad);
+    c.Bind("second_digits", &model.secondDigits);
     c.Bind("timer_urgent", &model.timerUrgent);
     c.Bind("statue_bar_left", &model.statueBarLeft);
     c.Bind("statue_bar_width", &model.statueBarWidth);
@@ -429,12 +417,7 @@ void mu::ui::window::CCryWolf::SyncHud(CryWolfRmlModel& updated)
         // The original drew a negative second count (a minus sign's garbage cell) when no new time
         // arrived in time; the seconds stop at 0 here.
         const int seconds = std::max(m_iSecond, 0) / 1000;
-        if (m_iMinute < 10)
-            AddTimerDigits(updated.timerDigits, {570.f, 402.f}, 0);
-        AddTimerDigits(updated.timerDigits, {580.f, 402.f}, m_iMinute);
-        if (seconds < 10)
-            AddTimerDigits(updated.timerDigits, {597.f, 402.f}, 0);
-        AddTimerDigits(updated.timerDigits, {607.f, 402.f}, seconds);
+        SetClock(updated, m_iMinute, seconds);
 
         if (m_iMinute <= 0 && m_iSecond <= 0)
         {
@@ -446,10 +429,7 @@ void mu::ui::window::CCryWolf::SyncHud(CryWolfRmlModel& updated)
     else
     {
         updated.timerUrgent = false;
-        AddTimerDigits(updated.timerDigits, {570.f, 402.f}, 0);
-        AddTimerDigits(updated.timerDigits, {580.f, 402.f}, 0);
-        AddTimerDigits(updated.timerDigits, {597.f, 402.f}, 0);
-        AddTimerDigits(updated.timerDigits, {607.f, 402.f}, 0);
+        SetClock(updated, 0, 0);
     }
 
     // The statue's shield: the bar's right part, shortened from the left as the shield drops.
@@ -524,14 +504,10 @@ void mu::ui::window::CCryWolf::SyncView()
     SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::statueBarLeft, "statue_bar_left", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::statueBarWidth, "statue_bar_width", updated);
     SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::statueBarRect, "statue_bar_rect", updated);
-    auto syncSprites = [&](std::vector<CryWolfSpriteEntry> CryWolfRmlModel::* field, const char* name)
-    {
-        if (SameSprites(model.*field, updated.*field))
-            return;
-        model.*field = std::move(updated.*field);
-        m_RmlView.MarkDirty(name);
-    };
-    syncSprites(&CryWolfRmlModel::timerDigits, "timer_digits");
+    SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::minutePad, "minute_pad", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::minuteDigits, "minute_digits", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::secondPad, "second_pad", updated);
+    SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::secondDigits, "second_digits", updated);
     auto syncImages = [&](std::vector<CryWolfImageEntry> CryWolfRmlModel::* field, const char* name)
     {
         if (model.*field == updated.*field)

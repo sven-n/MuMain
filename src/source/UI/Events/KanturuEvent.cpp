@@ -17,6 +17,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlSyncField.h"
+#include "UI/RmlBridge/RmlDigitCells.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -704,23 +705,6 @@ void SyncInfoField(RmlModelBinder<mu::ui::window::KanturuInfoRmlModel>& binder,
     binder.MarkDirty(name);
 }
 
-// RenderNumber(x, y, number, 1.f): 8.4-unit digits centred on x, 6.72 units apart.
-void AddNumberDigits(std::vector<mu::ui::window::KanturuInfoDigitEntry>& digits, float x, int number)
-{
-    const std::string text = std::to_string(number);
-    const float width = 12.f * 0.7f;
-    float left = x - width * static_cast<float>(text.size()) / 2;
-    for (const char digit : text)
-    {
-        if (digit < '0' || digit > '9')
-        {
-            left += width * 0.8f; // a minus sign: the original drew the cell before '0'
-            continue;
-        }
-        digits.push_back({left, std::to_string((digit - '0') * 12) + " 0 12 14"});
-        left += width * 0.8f;
-    }
-}
 } // namespace
 
 void mu::ui::window::CKanturuInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, KanturuInfoRmlModel& model)
@@ -733,11 +717,9 @@ void mu::ui::window::CKanturuInfoWindow::BindRmlModel(Rml::DataModelConstructor&
     c.Bind("users_text", &model.usersText);
     c.Bind("monsters_text", &model.monstersText);
     c.Bind("colon_visible", &model.colonVisible);
-    auto digit = c.RegisterStruct<KanturuInfoDigitEntry>();
-    digit.RegisterMember("left", &KanturuInfoDigitEntry::left);
-    digit.RegisterMember("rect", &KanturuInfoDigitEntry::rect);
-    c.RegisterArray<std::vector<KanturuInfoDigitEntry>>();
-    c.Bind("digits", &model.digits);
+    c.RegisterArray<std::vector<Rml::String>>();
+    c.Bind("minute_digits", &model.minuteDigits);
+    c.Bind("second_digits", &model.secondDigits);
 }
 
 void mu::ui::window::CKanturuInfoWindow::BuildRmlUi()
@@ -794,19 +776,11 @@ void mu::ui::window::CKanturuInfoWindow::SyncView()
     }
     SyncInfoField(m_RmlView.Binder(), &KanturuInfoRmlModel::colonVisible, "colon_visible", m_bColonVisible);
 
-    std::vector<KanturuInfoDigitEntry> digits;
-    AddNumberDigits(digits, 35.f, m_iMinute);
-    AddNumberDigits(digits, 65.f, iSecond);
-    auto& model = m_RmlView.GetModel();
-    const bool same = model.digits.size() == digits.size() &&
-                      std::equal(model.digits.begin(), model.digits.end(), digits.begin(),
-                                 [](const KanturuInfoDigitEntry& a, const KanturuInfoDigitEntry& b)
-                                 { return a.left == b.left && a.rect == b.rect; });
-    if (!same)
-    {
-        model.digits = std::move(digits);
-        m_RmlView.MarkDirty("digits");
-    }
+    // RenderNumber()'s newui_number1 cells; the theme lays out each run.
+    SyncInfoField(m_RmlView.Binder(), &KanturuInfoRmlModel::minuteDigits, "minute_digits",
+                  UI::RmlBridge::DigitCells(m_iMinute, 12.f, 14.f));
+    SyncInfoField(m_RmlView.Binder(), &KanturuInfoRmlModel::secondDigits, "second_digits",
+                  UI::RmlBridge::DigitCells(iSecond, 12.f, 14.f));
 }
 
 float mu::ui::window::CKanturuInfoWindow::GetLayerDepth()

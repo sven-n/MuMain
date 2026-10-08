@@ -48,6 +48,22 @@ body { pointer-events: none; }
 #mini_map { position: absolute; left: 512px; top: 263px; width: 128px; height: 128px; decorator: image(ct-minmap); }
 #mini_map_frame { position: absolute; left: 512px; top: 232px; width: 128px; height: 165px;
                   decorator: image(ct-minmap-frame); }
+
+/* The digit runs, each starting half its digit count's width left of its x: RenderNumber() at
+   scale 1 (8.4-unit digits 6.72 apart) and 1.1 (9.6-unit digits 7.68 apart) in newui_number1,
+   RenderNumber2D() in FontTest (8-unit digits 5.6 apart). */
+.ct-digit { position: absolute; }
+.ct-digit.blank { visibility: hidden; }
+.ct-time-minutes .ct-digit, .ct-time-seconds .ct-digit { top: 404.5px; width: 9.6px; height: 12.8px; }
+.ct-time-minutes .ct-digit { left: calc(559.5px - var(--n) * 4.8px + var(--i) * 7.68px); }
+.ct-time-seconds .ct-digit { left: calc(594.5px - var(--n) * 4.8px + var(--i) * 7.68px); }
+#ct_alpha .ct-digit, #ct_allied .ct-digit, #ct_illusion .ct-digit { top: 246px; width: 8px; height: 8px; }
+#ct_alpha .ct-digit { left: calc(532px - var(--n) * 4px + var(--i) * 5.6px); }
+#ct_allied .ct-digit { left: calc(583px - var(--n) * 4px + var(--i) * 5.6px); }
+#ct_illusion .ct-digit { left: calc(627px - var(--n) * 4px + var(--i) * 5.6px); }
+#ct_kills_needed .ct-digit, #ct_kills .ct-digit { top: 208px; width: 8.4px; height: 11.2px; }
+#ct_kills_needed .ct-digit { left: calc(594px - var(--n) * 4.2px + var(--i) * 6.72px); }
+#ct_kills .ct-digit { left: calc(616px - var(--n) * 4.2px + var(--i) * 6.72px); }
 #skill_icon { position: absolute; left: 539px; top: 200px; width: 20px; height: 28px; }
 
 /* The score effect's banners and digits. */

@@ -18,8 +18,15 @@
 			<span class="info-text counter-scaled-xy" id="users" data-style-font-size="bold_text_px + 'px'">{{users_text}}</span>
 			<span class="info-text counter-scaled-xy" id="monsters" data-style-font-size="bold_text_px + 'px'">{{monsters_text}}</span>
 			<span class="info-text counter-scaled-xy" id="colon" data-if="colon_visible" data-style-font-size="bold_text_px + 'px'">:</span>
-			<img class="digit" src="../../../newui_number1.tga" data-for="d : digits" data-attr-rect="d.rect"
-			     data-style-left="d.left + 'px'"/>
+			<!-- Each run's digits; the theme centres a run from its digit count and index. -->
+			<div class="run" id="minutes" data-style---n="minute_digits.size">
+				<img class="digit" src="../../../newui_number1.tga" data-for="cell, i : minute_digits"
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+			</div>
+			<div class="run" id="seconds" data-style---n="second_digits.size">
+				<img class="digit" src="../../../newui_number1.tga" data-for="cell, i : second_digits"
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+			</div>
 		</div>
 	</div>
 </body>

@@ -6,17 +6,6 @@
 
 namespace mu::ui::window
 {
-// One image of the Crywolf HUD the window has to place itself: a timer digit, whose run
-// RenderNumber() centres on its own x so the left depends on how many digits the value has.
-// `src` is relative to crywolf.rml and `rect` its texel cell.
-struct CryWolfSpriteEntry
-{
-    float left = 0.f;
-    float top = 0.f;
-    Rml::String src;
-    Rml::String rect;
-};
-
 // One image of the HUD that sits where the theme puts it: an altar of the five, or one of the
 // nine experience digits. An altar with no contract state shows nothing, and the five are always
 // all five so a theme can count them.
@@ -68,7 +57,11 @@ struct CryWolfRmlModel
     Rml::String balgassText;
     float balgassBarWidth = 0.f;
     Rml::String balgassBarRect;
-    std::vector<CryWolfSpriteEntry> timerDigits;
+    // The clock's FontTest cells (UI::RmlBridge::DigitCells), each with a leading zero below ten.
+    bool minutePad = true;
+    std::vector<Rml::String> minuteDigits;
+    bool secondPad = true;
+    std::vector<Rml::String> secondDigits;
     // Balgass on the field, which the original reddened the clock for.
     bool timerUrgent = false;
     float statueBarLeft = 0.f;

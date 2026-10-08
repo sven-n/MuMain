@@ -29,6 +29,7 @@
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlDigitCells.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -791,40 +792,6 @@ void AddSprite(std::vector<CursedTempleSpriteEntry>& sprites, const Rml::Vector4
     sprites.push_back({box.x, box.y, box.z, box.w, InterfaceImage(file), rect, opacity});
 }
 
-// RenderNumber(x, y, number, scale): newui_number1's 12 x 14 texel digits, 12 x 16 units times
-// (scale - 0.3), centred on x and 0.8 of a digit apart.
-template <int ScalePercent>
-void AddNumber(std::vector<CursedTempleSpriteEntry>& sprites, const Rml::Vector2f& centre, int number)
-{
-    constexpr float scale = static_cast<float>(ScalePercent) / 100.f;
-    const float width = 12.f * (scale - 0.3f);
-    const float height = 16.f * (scale - 0.3f);
-    const std::string text = std::to_string(number);
-    float left = centre.x - width * static_cast<float>(text.size()) / 2;
-    for (const char digit : text)
-    {
-        if (digit >= '0' && digit <= '9')
-            AddSprite(sprites, {left, centre.y, width, height}, "newui_number1.tga",
-                      TexelRect(static_cast<float>((digit - '0') * 12), 0.f, 12.f, 14.f));
-        left += width * 0.8f;
-    }
-}
-
-// RenderNumber2D(x, y, number, 8, 8): FontTest's 16 x 16 texel digit cells, 8 x 8 units, centred on
-// x and 5.6 units apart.
-void AddNumber2D(std::vector<CursedTempleSpriteEntry>& sprites, const Rml::Vector2f& centre, int number)
-{
-    const std::string text = std::to_string(number);
-    float left = centre.x - 8.f * static_cast<float>(text.size()) / 2;
-    for (const char digit : text)
-    {
-        if (digit >= '0' && digit <= '9')
-            AddSprite(sprites, {left, centre.y, 8.f, 8.f}, "FontTest.tga",
-                      TexelRect(static_cast<float>((digit - '0') * 16), 0.f, 16.f, 16.f));
-        left += 8.f * 0.7f;
-    }
-}
-
 // A CButton registered with ChangeButtonImgState(true, image, true): its up, over and down frames
 // stacked vertically, drawn in the button's colour.
 void AddButton(std::vector<CursedTempleSpriteEntry>& sprites, CButton& button, const std::string& file, float alpha)
@@ -874,6 +841,14 @@ void mu::ui::window::CCursedTempleSystem::BindRmlModel(Rml::DataModelConstructor
     c.Bind("illusion_ones_src", &model.illusionOnesSrc);
     c.Bind("allied_two_digits", &model.alliedTwoDigits);
     c.Bind("illusion_two_digits", &model.illusionTwoDigits);
+    c.RegisterArray<std::vector<Rml::String>>();
+    c.Bind("minute_digits", &model.minuteDigits);
+    c.Bind("second_digits", &model.secondDigits);
+    c.Bind("alpha_digits", &model.alphaDigits);
+    c.Bind("allied_digits", &model.alliedDigits);
+    c.Bind("illusion_digits", &model.illusionDigits);
+    c.Bind("kills_needed_digits", &model.killsNeededDigits);
+    c.Bind("kills_digits", &model.killsDigits);
     c.Bind("sprites", &model.sprites);
     c.Bind("tutorial_lines", &model.tutorialLines);
 }
@@ -899,8 +874,10 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
               InterfaceImage(m_SkillPoint >= MaxKillCount ? "newui_skill2.jpg" : "newui_non_skill2.jpg"));
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::skillIconRect, "skill_icon_rect",
               TexelRect(static_cast<float>((8 + (CursedTempleCurSkillType - 210)) * 20), 0.f, 20.f, 28.f));
-    AddNumber<100>(sprites, {x + 55.f, y + 8.f}, MaxKillCount);
-    AddNumber<100>(sprites, {x + 77.f, y + 8.f}, m_SkillPoint);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::killsNeededDigits, "kills_needed_digits",
+              UI::RmlBridge::DigitCells(MaxKillCount, 12.f, 14.f));
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::killsDigits, "kills_digits",
+              UI::RmlBridge::DigitCells(m_SkillPoint, 12.f, 14.f));
 
     m_Button[CURSEDTEMPLERESULT_SKILLUP].SetPos(static_cast<int>(512 + 50 + corner.x), static_cast<int>(201 + corner.y));
     m_Button[CURSEDTEMPLERESULT_SKILLUP].ChangeAlpha(m_Alph);
@@ -984,18 +961,12 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
 }
 
 // The original RenderGameTime(): the frame, the colon dot, the minutes and the seconds.
-void mu::ui::window::CCursedTempleSystem::SyncGameTime(std::vector<CursedTempleSpriteEntry>& sprites)
+void mu::ui::window::CCursedTempleSystem::SyncGameTime()
 {
-    const int minute = static_cast<int>(m_EventMapTime / 60);
-    const int second = static_cast<int>(m_EventMapTime % 60);
-    const Rml::Vector2f corner = CornerOffset();
-    const float x = 507.5f + (134.f / 2) + corner.x;
-    const float y = 404.5f + corner.y;
-    // The original drew the digits twice over each other.
-    AddNumber<110>(sprites, {x - 15.f, y}, minute);
-    AddNumber<110>(sprites, {x + 20.f, y}, second);
-    AddNumber<110>(sprites, {x - 15.f, y}, minute);
-    AddNumber<110>(sprites, {x + 20.f, y}, second);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::minuteDigits, "minute_digits",
+              UI::RmlBridge::DigitCells(static_cast<int>(m_EventMapTime / 60), 12.f, 14.f));
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::secondDigits, "second_digits",
+              UI::RmlBridge::DigitCells(static_cast<int>(m_EventMapTime % 60), 12.f, 14.f));
 }
 
 // The original RenderMiniMap(): the skill panel's frame, the map and its frame, the fixed NPC and
@@ -1055,9 +1026,12 @@ void mu::ui::window::CCursedTempleSystem::SyncMiniMap(std::vector<CursedTempleSp
     AddSprite(sprites, {hero_x - 4, hero_y - 4, 11.f, 11.f}, "newui_ctminmap_Hero.tga",
               TexelRect(0.f, 0.f, 11.f, 11.f));
 
-    AddNumber2D(sprites, {517.f + 15.f + corner.x, 246.f + corner.y}, static_cast<int>(m_Alph * 100));
-    AddNumber2D(sprites, {517.f + 66.f + corner.x, 246.f + corner.y}, m_AlliedPoint);
-    AddNumber2D(sprites, {517.f + 110.f + corner.x, 246.f + corner.y}, m_IllusionPoint);
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::alphaDigits, "alpha_digits",
+              UI::RmlBridge::DigitCells(static_cast<int>(m_Alph * 100), 16.f, 16.f));
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::alliedDigits, "allied_digits",
+              UI::RmlBridge::DigitCells(m_AlliedPoint, 16.f, 16.f));
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::illusionDigits, "illusion_digits",
+              UI::RmlBridge::DigitCells(m_IllusionPoint, 16.f, 16.f));
 }
 
 // The original RenderScore(): the two teams' points in big digits between their banners, shown for
@@ -1151,7 +1125,7 @@ void mu::ui::window::CCursedTempleSystem::SyncView()
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::panelsShown, "panels_shown", panelsShown);
     if (panelsShown)
     {
-        SyncGameTime(sprites);
+        SyncGameTime();
         SyncMiniMap(sprites);
         SyncSkill(sprites);
     }

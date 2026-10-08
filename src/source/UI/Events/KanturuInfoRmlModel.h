@@ -6,14 +6,6 @@
 
 namespace mu::ui::window
 {
-// One RenderNumber() digit: newui_number1's 12 x 14 texel cell at `rect`, drawn 8.4 x 11.2
-// reference px at `left` (the original's scale 1: 12 x 16 texel units times 0.7).
-struct KanturuInfoDigitEntry
-{
-    float left = 0.f; // reference px in the frame
-    Rml::String rect; // "digit*12 0 12 14"
-};
-
 struct KanturuInfoRmlModel
 {
     // The Hud layout's W/640 x H/480 stretch (UI::Scaling::GetActiveTransform() while CManager
@@ -27,6 +19,8 @@ struct KanturuInfoRmlModel
     Rml::String usersText;
     Rml::String monstersText;
     bool colonVisible = true; // the minute:second colon blinks every half second
-    std::vector<KanturuInfoDigitEntry> digits;
+    // The minutes' and the seconds' newui_number1 cells (UI::RmlBridge::DigitCells).
+    std::vector<Rml::String> minuteDigits;
+    std::vector<Rml::String> secondDigits;
 };
 } // namespace mu::ui::window
