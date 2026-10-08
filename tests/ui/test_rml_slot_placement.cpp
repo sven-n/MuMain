@@ -45,12 +45,12 @@ public:
         // The docked panels' shape: reference px, scaled from its top-left; a counter-scaled layer
         // as wide as the panel at any scale.
         const std::string markup = std::string(R"(<rml><head><style>
-body { width: 100%; height: 100%; pointer-events: none; }
+body { width: 100%; height: 100%; pointer-events: none; --root-scale: 1; }
 #panel { position: absolute; width: 190px; height: 429px; transform-origin: left top; )") +
                                    panelStyle + R"( }
 #panel.slot-placed { left: var(--slot-left); top: var(--slot-top); transform: scale(var(--root-scale)); }
-#panel { font-size: calc(var(--text-px, 12px) / var(--root-scale, 1)); }
-#wide { position: absolute; width: calc(190px * var(--root-scale, 1)); height: 10px; }
+#panel { font-size: calc(var(--text-px, 12px) / var(--root-scale)); }
+#wide { position: absolute; width: calc(190px * var(--root-scale)); height: 10px; }
 </style></head><body><div id="panel"><div id="wide"/></div></body></rml>)";
         Rml::ElementDocument* document = context->LoadDocumentFromMemory(markup);
         REQUIRE(document != nullptr);
@@ -172,7 +172,25 @@ TEST_CASE("the pointer is over a document only where it takes pointer events [ui
     document->Hide();
     fixture.Refresh();
     CHECK_FALSE(UI::RmlBridge::IsPointerOver(document));
-    CHECK_FALSE(UI::RmlBridge::IsPointerOver(nullptr));
+    CHECK_FALSE(UI::RmlBridge::IsPointerOver(static_cast<Rml::ElementDocument*>(nullptr)));
+}
+
+TEST_CASE("the pointer is over an element while RmlUi hovers it or a descendant [ui][placement]")
+{
+    Fixture fixture;
+    Rml::ElementDocument* document = fixture.Load("pointer-events: auto;");
+    Rml::Element* panel = document->GetElementById("panel");
+    Rml::Element* wide = document->GetElementById("wide");
+
+    fixture.context->ProcessMouseMove(5, 5, 0);
+    CHECK(UI::RmlBridge::IsPointerOver(panel));
+    CHECK(UI::RmlBridge::IsPointerOver(wide));
+
+    fixture.context->ProcessMouseMove(5, 300, 0);
+    CHECK(UI::RmlBridge::IsPointerOver(panel));
+    CHECK_FALSE(UI::RmlBridge::IsPointerOver(wide));
+
+    CHECK_FALSE(UI::RmlBridge::IsPointerOver(static_cast<Rml::Element*>(nullptr)));
 }
 
 TEST_CASE("a panel that takes no pointer events never holds the pointer [ui][placement]")

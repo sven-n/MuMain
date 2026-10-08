@@ -67,6 +67,8 @@ body {
 	height: 100%;
 	margin: 0;
 	pointer-events: none;
+	/* A panel's scale before anything places it; a placed panel sets its own. */
+	--root-scale: 1;
 }
 
 /* Full-screen dim overlay for modal-style windows (SysMenuWin/OptionWin). */
