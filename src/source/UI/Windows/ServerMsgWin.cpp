@@ -134,7 +134,7 @@ void CServerMsgWin::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    // LayoutMode::Legacy keeps the transform identity here: real pixels, as the original drew.
+    // LayoutMode::Pixels keeps the transform identity here: real pixels, as the original drew.
     UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_ptPos);
     ServerMsgRmlModel& model = m_RmlView.GetModel();
     const float textPx =

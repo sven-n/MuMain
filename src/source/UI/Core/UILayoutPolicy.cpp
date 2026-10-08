@@ -31,15 +31,15 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     // different coordinate space than that hit-test rect, so it almost never matched and clicks
     // fell through to the world underneath -- found live (see OptionWindow.cpp's own history).
     case INTERFACE_OPTION:
-        return LayoutMode::Legacy;
+        return LayoutMode::Pixels;
 
     case INTERFACE_NAME_WINDOW:
     case INTERFACE_ITEM_TOOLTIP:
-    // Must be WorldOverlay, not Legacy: CCharInfoBalloon::Render() scales its WorldToScreen()
-    // position by g_fScreenRate_x/y, which Legacy leaves at 1.0 -- using Legacy here once made
+    // Must be ScreenOverlay, not Pixels: CCharInfoBalloon::Render() scales its WorldToScreen()
+    // position by g_fScreenRate_x/y, which Pixels leaves at 1.0 -- using Pixels here once made
     // balloons drift at any resolution other than 640x480 (found via live testing).
     case INTERFACE_CHAR_INFO_BALLOON:
-        return LayoutMode::WorldOverlay;
+        return LayoutMode::ScreenOverlay;
 
     case INTERFACE_MOVEMAP:
         return LayoutMode::DockLeft;
@@ -70,7 +70,7 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     // Drawn over the whole screen: the notice band and the full map.
     case INTERFACE_SLIDEWINDOW:
     case INTERFACE_MINI_MAP:
-        return LayoutMode::Hud;
+        return LayoutMode::ScreenOverlay;
 
     // The original's 640x480 screen at the bottom HUD's scale, centred like it: the fixed-place
     // windows that stand on or open from the HUD.
@@ -80,7 +80,7 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_SIEGEWARFARE:
     case INTERFACE_MASTER_LEVEL:
     case INTERFACE_CURSEDTEMPLE_GAMESYSTEM:
-        return LayoutMode::HudCenter;
+        return LayoutMode::HudBoard;
 
     case INTERFACE_PARTY:
     case INTERFACE_MYQUEST:
@@ -128,6 +128,6 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
         return LayoutMode::DockRight;
 
     default:
-        return LayoutMode::Dialog;
+        return LayoutMode::Stage;
     }
 }

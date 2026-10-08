@@ -89,6 +89,28 @@ diverge there. Confirm on real high-DPI hardware before trusting that path in pl
 See `engine-findings.md`'s font-family inheritance finding before assuming a new element's
 invisible text is a layout bug — it's the single most-recurring gotcha in this doc set.
 
+## Layout modes
+
+`UI::Layout::ForInterface()` (`UILayoutPolicy.cpp`) gives every `CObject` window a
+`UI::Scaling::LayoutMode`: where its 640×480 reference units land and at what scale. `CManager`
+scopes that transform around the window's update, input and render, and remaps `MouseX`/`MouseY`
+into its units. Windows the workspace places take their position from their slot; the mode then
+only says which units their native code works in.
+
+| Mode | Scale | Origin | For |
+|---|---|---|---|
+| `Stage` (default) | panel, uniform | the original screen centred on the window | NPC panels, dialogs |
+| `HudBoard` | the HUD's, uniform | the original screen centred like the HUD, on the window's bottom | fixed-place windows on or from the HUD: CryWolf, the Illusion Temple, siege, the window menu, the master tree, the skill list |
+| `HudFrame` | the HUD's, uniform | none: the workspace slot | the event HUDs, the duel HUD, the bottom HUD's parts, the chat |
+| `DockLeft` / `DockRight` | dock, uniform | standing on the HUD | the docked panels |
+| `FloatingWorkspace` | dock, uniform | none: the window's own position | the friend list |
+| `ScreenOverlay` | W/640 × H/480, no UI scale | the whole window | what must cover the screen or follow the world: the notice band, the full map, names and balloons |
+| `Pixels` | identity | real pixels | windows that compute screen pixels themselves |
+| `Slot` | the slot's transform | the slot | windows placed with `CObject::PlaceInSlot()` |
+
+A new fixed-place HUD window takes `HudBoard`, not `ScreenOverlay`: the stretched screen ignores the
+UI scale and distorts on wide screens.
+
 ## Anchor/sizing utility classes (`base.rcss`)
 
 Both themes' `base.rcss` define an identical set of pure-layout utility classes (no visual styling
@@ -199,7 +221,7 @@ Sites that read RmlUi geometry without converting it are each correct for their 
 (screen-px slot box divided by the dp ratio, `SlotBoxInReference()`), `CNPCDialogue` (a
 difference of two offsets over a pitch: units cancel), `RmlTooltip` (no root transform, scale
 pre-multiplied in C++), `COptionWindow` (screen-px rect against `MouseX/MouseY`, safe only
-because `INTERFACE_OPTION` is `LayoutMode::Legacy`). "Does this need a conversion?" has no single
+because `INTERFACE_OPTION` is `LayoutMode::Pixels`). "Does this need a conversion?" has no single
 answer — check which kind a document is.
 
 Not covered by the sweep: resolution (scale is the sharper probe; `PanelTransform` derives scale

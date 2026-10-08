@@ -267,7 +267,7 @@ Domain logic a component may call into, but which never moves into a generic UI 
   closes the personal shop purchase window"); don't merge it into `CManager`.
 - **Skill-tooltip content** (`UI::Skills::Tooltip::BuildModelForSlot`) — rendering uses the shared
   tooltip; deciding what a skill tooltip says stays domain logic.
-- **3D-camera and world-space rendering** (`Window3DRenderMng`/`I3DRenderObj`, `WorldOverlay`) —
+- **3D-camera and world-space rendering** (`Window3DRenderMng`/`I3DRenderObj`, `ScreenOverlay`) —
   the boundary above.
 
 ## Driving `CSprite` from native code

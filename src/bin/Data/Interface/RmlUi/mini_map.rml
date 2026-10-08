@@ -7,8 +7,8 @@
 <body data-model="mini_map">
 	<!-- The full-screen mini map (CMiniMap, Tab or the window menu's Map row). The original drew it
 	     in physical pixels: the map texture and its markers turned 45 degrees around the window
-	     centre (RenderBitRotate/RenderPointRotate), the frame under the Hud layout's W/640 x H/480
-	     stretch. C++ builds every turned quad as a CSS matrix() in physical px (MiniMapLayout.h);
+	     centre (RenderBitRotate/RenderPointRotate), the frame under the ScreenOverlay layout's W/640 x
+	     H/480 stretch. C++ builds every turned quad as a CSS matrix() in physical px (MiniMapLayout.h);
 	     .screen carries the stretch for the frame, the hero arrow and the close button.
 
 	     The native bottom HUD art still draws before this context and the original drew the HUD

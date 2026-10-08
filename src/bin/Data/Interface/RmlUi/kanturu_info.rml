@@ -5,13 +5,12 @@
 	<link type="text/rcss" href="kanturu_info.rcss"/>
 </head>
 <body data-model="kanturu_info">
-	<!-- The Kanturu boss-battle HUD (CKanturuInfoWindow): the frame, the characters and the
-	     monsters (or the boss) left, and the time left in newui_number1 digits with a blinking
-	     colon. A LayoutMode::Hud window, so .screen is the 640x480 reference screen stretched
-	     W/640 x H/480 like the original and #panel sits at the window's reference position. Text
-	     does not stretch: it takes the native bold size and cancels the stretch. In the background
-	     context, behind its other documents (the original drew it under every panel). Takes no
-	     pointer events. -->
+	<!-- The Kanturu boss-battle HUD (CKanturuInfoWindow): the frame, the characters and the monsters
+	     (or the boss) left, and the time left in newui_number1 digits with a blinking colon. A
+	     LayoutMode::HudFrame window, so .screen carries the bottom HUD's uniform scale and #panel sits
+	     at the window's reference position. Text does not scale: it takes the native bold size and
+	     cancels the scale. In the background context, behind its other documents (the original drew it
+	     under every panel). Takes no pointer events. -->
 	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'" data-style---root-scale="scale_x" data-style---root-scale-y="scale_y">
 		<div id="panel" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
 			<div id="back"></div>

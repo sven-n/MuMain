@@ -215,10 +215,10 @@ in their slots; dragging a window out of its slot is not planned.
 
 ## 9. `LayoutMode`
 
-Slotted windows use `Slot` while placed. `Legacy` (scene windows in real pixels) and
-`WorldOverlay` (world-anchored labels) stay. The `Hud*`, `Dock*`, `FloatingWorkspace` and
-`Dialog` rows of `UILayoutPolicy.cpp` remain for windows without slots; `DockTransform()`'s fixed
-HUD height only serves unslotted docked windows and the saved-position conversion.
+Slotted windows use `Slot` while placed, or `HudFrame` for the HUD-scale parts. The full list is in
+[layout-and-scaling.md](layout-and-scaling.md#layout-modes). `Dock*`, `FloatingWorkspace` and
+`Stage` also serve windows without slots; `DockTransform()`'s fixed HUD height only serves
+unslotted docked windows and the saved-position conversion.
 
 ## Theme recipes (verified in game)
 

@@ -26,7 +26,7 @@ UI::Scaling::Transform PickedItemTransform()
     CPickedItem* picked = CInventoryCtrl::GetPickedItem();
     if (mu::ui::window::CObject* owner = picked ? picked->GetLayoutOwner() : nullptr)
         return owner->GetLayoutTransform();
-    return UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Dialog, static_cast<int>(WindowWidth),
+    return UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Stage, static_cast<int>(WindowWidth),
                                            static_cast<int>(WindowHeight));
 }
 

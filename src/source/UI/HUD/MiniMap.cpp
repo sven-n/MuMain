@@ -342,7 +342,7 @@ void mu::ui::window::CMiniMap::SyncRmlModel()
 
 void mu::ui::window::CMiniMap::SyncScreen()
 {
-    // CManager scopes LayoutMode::Hud around this window: W/640 x H/480, no offset.
+    // CManager scopes LayoutMode::ScreenOverlay around this window: W/640 x H/480, no offset.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     Sync(m_RmlView.Binder(), &MiniMapRmlModel::scaleX, "scale_x", transform.scaleX);
     Sync(m_RmlView.Binder(), &MiniMapRmlModel::scaleY, "scale_y", transform.scaleY);

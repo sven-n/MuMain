@@ -167,7 +167,7 @@ float UI::Scaling::BottomHudScale(int windowWidth, int windowHeight)
     return ViewportFitScale(windowWidth, windowHeight, kMaximumHudScale) * UIScalePercentMultiplier();
 }
 
-UI::Scaling::Transform UI::Scaling::BottomHudCenterTransform(int windowWidth, int windowHeight)
+UI::Scaling::Transform UI::Scaling::HudBoardTransform(int windowWidth, int windowHeight)
 {
     const float scale = BottomHudScale(windowWidth, windowHeight);
     return BottomHudTransform(windowWidth, windowHeight,
@@ -233,17 +233,17 @@ float UI::Scaling::WorldViewportAspect(int windowWidth, int windowHeight, bool t
 
 UI::Scaling::Transform UI::Scaling::TransformForLayout(LayoutMode mode, int windowWidth, int windowHeight)
 {
-    if (mode == LayoutMode::Legacy)
+    if (mode == LayoutMode::Pixels)
         return {1.0f, 1.0f, 0.0f, 0.0f, 1.0f};
-    if (mode == LayoutMode::Hud || mode == LayoutMode::WorldOverlay)
+    if (mode == LayoutMode::ScreenOverlay)
         return ScreenOverlayTransform(windowWidth, windowHeight);
     if (mode == LayoutMode::HudFrame)
     {
         const float scale = BottomHudScale(windowWidth, windowHeight);
         return {scale, scale, 0.0f, 0.0f, scale};
     }
-    if (mode == LayoutMode::HudCenter)
-        return BottomHudCenterTransform(windowWidth, windowHeight);
+    if (mode == LayoutMode::HudBoard)
+        return HudBoardTransform(windowWidth, windowHeight);
     if (mode == LayoutMode::DockLeft)
         return DockLeftTransform(windowWidth, windowHeight);
     if (mode == LayoutMode::DockRight)
@@ -358,9 +358,9 @@ float UI::Scaling::FitTextPixelSizeToWidth(float textPx, float measuredWidth, fl
 float UI::Scaling::SceneWindowScale(int windowWidth, int windowHeight)
 {
     const float textPx =
-        NativeTextPixelSize(FontRole::Normal, TransformForLayout(LayoutMode::Dialog, windowWidth, windowHeight));
+        NativeTextPixelSize(FontRole::Normal, TransformForLayout(LayoutMode::Stage, windowWidth, windowHeight));
     const float referenceTextPx =
-        NativeTextPixelSize(FontRole::Normal, TransformForLayout(LayoutMode::Dialog, 1024, 768));
+        NativeTextPixelSize(FontRole::Normal, TransformForLayout(LayoutMode::Stage, 1024, 768));
     return TextGrowthScale(textPx, referenceTextPx);
 }
 

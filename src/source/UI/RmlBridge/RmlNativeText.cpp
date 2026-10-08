@@ -33,7 +33,7 @@ void ApplyNativeTextSize(Rml::ElementDocument* document)
         return;
 
     const Rml::Vector2i window = document->GetContext()->GetDimensions();
-    const auto transform = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Dialog, window.x, window.y);
+    const auto transform = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Stage, window.x, window.y);
     const float textPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
     const bool sceneWindow = document->IsClassSet(kSceneWindowScaleClass);
     if (sceneWindow || document->IsClassSet(kSceneBarScaleClass))

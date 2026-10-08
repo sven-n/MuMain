@@ -472,8 +472,8 @@ bool mu::ui::window::COptionWindow::UpdateMouseEvent()
     // Read the panel's own live rendered position/size straight from RmlUi rather than
     // approximating them from hardcoded dp constants -- a hardcoded guess drifts from wherever
     // `.center-both`/window_shell actually puts the panel. INTERFACE_OPTION must map to
-    // LayoutMode::Legacy (identity transform) in UILayoutPolicy.cpp's table, not the default
-    // LayoutMode::Dialog (640x480-reference rescale) -- otherwise MouseX/MouseY is remapped into a
+    // LayoutMode::Pixels (identity transform) in UILayoutPolicy.cpp's table, not the default
+    // LayoutMode::Stage (640x480-reference rescale) -- otherwise MouseX/MouseY is remapped into a
     // different coordinate space than this hit-test rect, and clicks fall through to
     // world/character movement instead.
     //

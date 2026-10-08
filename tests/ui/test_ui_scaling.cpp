@@ -98,7 +98,7 @@ TEST_CASE("dialogs scale with the viewport and stop at a readable cap [ui][scali
 
 TEST_CASE("HUD fills the viewport while dialogs stay capped [ui][scaling]")
 {
-    const auto hud = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Hud, 1920, 1080);
+    const auto hud = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::ScreenOverlay, 1920, 1080);
     CHECK(UI::Scaling::PositionX(hud, 640.0f) == doctest::Approx(1920.0f));
     CHECK(UI::Scaling::PositionY(hud, 480.0f) == doctest::Approx(1080.0f));
 
@@ -108,7 +108,7 @@ TEST_CASE("HUD fills the viewport while dialogs stay capped [ui][scaling]")
     CHECK(frame.offsetX == doctest::Approx(0.0f));
     CHECK(frame.offsetY == doctest::Approx(0.0f));
 
-    const auto dialog = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Dialog, 1920, 1080);
+    const auto dialog = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Stage, 1920, 1080);
     CHECK(dialog.scaleX == doctest::Approx(2.0f));
     CHECK(dialog.offsetX == doctest::Approx(320.0f));
     CHECK(dialog.offsetY == doctest::Approx(60.0f));
@@ -500,13 +500,13 @@ TEST_CASE("map splash centers in physical window pixels [ui][scaling]")
 
 TEST_CASE("the HUD board reconstructs the bottom HUD at 640x480 and 1024x768 [ui][scaling]")
 {
-    const auto reference = UI::Scaling::BottomHudCenterTransform(640, 480);
+    const auto reference = UI::Scaling::HudBoardTransform(640, 480);
     CHECK(reference.scaleX == doctest::Approx(1.0f));
     CHECK(reference.offsetX == doctest::Approx(0.0f));
     CHECK(UI::Scaling::PositionX(reference, 152.0f) == doctest::Approx(152.0f));
     CHECK(UI::Scaling::PositionX(reference, 488.0f) == doctest::Approx(488.0f));
 
-    const auto center = UI::Scaling::BottomHudCenterTransform(1024, 768);
+    const auto center = UI::Scaling::HudBoardTransform(1024, 768);
     CHECK(center.scaleX == doctest::Approx(1.6f));
     CHECK(UI::Scaling::PositionX(center, 152.0f) == doctest::Approx(243.2f));
     CHECK(UI::Scaling::PositionX(center, 488.0f) == doctest::Approx(780.8f));
@@ -514,13 +514,13 @@ TEST_CASE("the HUD board reconstructs the bottom HUD at 640x480 and 1024x768 [ui
 
 TEST_CASE("the HUD board centres on wide screens and caps at 2x [ui][scaling]")
 {
-    const auto hdCenter = UI::Scaling::BottomHudCenterTransform(1280, 720);
+    const auto hdCenter = UI::Scaling::HudBoardTransform(1280, 720);
     CHECK(hdCenter.scaleX == doctest::Approx(1.5f));
     CHECK(UI::Scaling::PositionX(hdCenter, 152.0f) == doctest::Approx(388.0f));
     CHECK(UI::Scaling::PositionX(hdCenter, 320.0f) == doctest::Approx(640.0f));
     CHECK(UI::Scaling::PositionX(hdCenter, 488.0f) == doctest::Approx(892.0f));
 
-    const auto wideCenter = UI::Scaling::BottomHudCenterTransform(1920, 1200);
+    const auto wideCenter = UI::Scaling::HudBoardTransform(1920, 1200);
     CHECK(wideCenter.scaleX == doctest::Approx(2.0f));
     CHECK(UI::Scaling::PositionX(wideCenter, 320.0f) == doctest::Approx(960.0f));
     CHECK(UI::Scaling::PositionY(wideCenter, 429.0f) == doctest::Approx(1098.0f));
@@ -528,7 +528,7 @@ TEST_CASE("the HUD board centres on wide screens and caps at 2x [ui][scaling]")
 
 TEST_CASE("the HUD board round trips window positions [ui][scaling]")
 {
-    const auto center = UI::Scaling::BottomHudCenterTransform(1920, 1200);
+    const auto center = UI::Scaling::HudBoardTransform(1920, 1200);
     CHECK(UI::Scaling::LogicalX(center, UI::Scaling::PositionX(center, 320.0f)) == doctest::Approx(320.0f));
     CHECK(UI::Scaling::LogicalY(center, UI::Scaling::PositionY(center, 450.0f)) == doctest::Approx(450.0f));
 }
@@ -591,20 +591,20 @@ TEST_CASE("interface policy selects viewport dock and dialog layouts [ui][scalin
 {
     using UI::Scaling::LayoutMode;
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MAINFRAME) == LayoutMode::HudFrame);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_SKILL_LIST) == LayoutMode::HudCenter);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_CRYWOLF) == LayoutMode::HudCenter);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_WINDOW_MENU) == LayoutMode::HudCenter);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MASTER_LEVEL) == LayoutMode::HudCenter);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_SKILL_LIST) == LayoutMode::HudBoard);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_CRYWOLF) == LayoutMode::HudBoard);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_WINDOW_MENU) == LayoutMode::HudBoard);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MASTER_LEVEL) == LayoutMode::HudBoard);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_HOTKEY) == LayoutMode::HudFrame);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MINI_MAP) == LayoutMode::Hud);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MINI_MAP) == LayoutMode::ScreenOverlay);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE) == LayoutMode::HudFrame);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_ITEM_ENDURANCE_INFO) == LayoutMode::DockRight);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_PARTY_INFO_WINDOW) == LayoutMode::DockRight);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_INVENTORY) == LayoutMode::DockRight);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MOVEMAP) == LayoutMode::DockLeft);
     CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_FRIEND) == LayoutMode::FloatingWorkspace);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MESSAGEBOX) == LayoutMode::Dialog);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_NAME_WINDOW) == LayoutMode::WorldOverlay);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MESSAGEBOX) == LayoutMode::Stage);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_NAME_WINDOW) == LayoutMode::ScreenOverlay);
 }
 
 TEST_CASE("floating windows keep uniform scale across the full viewport [ui][scaling]")

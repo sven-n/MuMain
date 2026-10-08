@@ -5,13 +5,12 @@
 	<link type="text/rcss" href="event_timer.rcss"/>
 </head>
 <body data-model="empire_guardian_timer">
-	<!-- The Imperial Guardian timer (CEmpireGuardianTimer) HUD above the bottom HUD's right end (UI/Events/EventTimerView.h): the frame,
-	     the kill count, "Time left" and the time. A LayoutMode::Hud window, so .screen is the
-	     640x480 reference screen stretched W/640 x H/480 like the original and #panel sits at the
-	     window's reference position. Text does not stretch: each line takes its native size,
-	     in its bound colour, centred on its bound box and
-	     shrunk to it like the original's, and cancels the stretch. Takes no
-	     pointer events. -->
+	<!-- The Imperial Guardian timer (CEmpireGuardianTimer) HUD above the bottom HUD's right end
+	     (UI/Events/EventTimerView.h): the frame, the kill count, "Time left" and the time. A
+	     LayoutMode::HudFrame window, so .screen carries the bottom HUD's uniform scale and #panel sits
+	     at the window's reference position. Text does not scale: each line takes its native size, in
+	     its bound colour, centred on its bound box and shrunk to it like the original's, and cancels
+	     the scale. Takes no pointer events. -->
 	<div class="screen" data-style-transform="'scale(' + scale_x + ', ' + scale_y + ')'" data-style---root-scale="scale_x" data-style---root-scale-y="scale_y">
 		<div id="panel" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
 			<div id="back"></div>

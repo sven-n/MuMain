@@ -37,7 +37,7 @@ namespace mu::ui::window
     public:
         CObject()
             : m_hRelatedWnd(nullptr), m_bRender(true), m_bUpdate(true), m_bActive(true),
-              m_layoutMode(UI::Scaling::LayoutMode::Dialog)
+              m_layoutMode(UI::Scaling::LayoutMode::Stage)
         {
         }
         virtual ~CObject() {}

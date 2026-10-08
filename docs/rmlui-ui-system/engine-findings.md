@@ -259,9 +259,9 @@ plus [PR #989](https://github.com/mikke89/RmlUi/pull/989) (SDL_GPU renderer pari
 
 - **`CManager::AddUIObj(dwKey, obj)` overwrites the object's `LayoutMode`** with
   `UI::Layout::ForInterface(dwKey)`. `UILayoutPolicy.cpp`'s table is the authority; a key without
-  a `case` falls through to `LayoutMode::Dialog`, a real resolution-scaled transform.
+  a `case` falls through to `LayoutMode::Stage`, a real resolution-scaled transform.
 
-- **Real-pixel rendering needs `LayoutMode::Legacy`**, the only identity transform.
+- **Real-pixel rendering needs `LayoutMode::Pixels`**, the only identity transform.
   `CManager::UpdateMouseEvent()` remaps the global `MouseX`/`MouseY` through the active transform,
   and text rendering reads `UI::Scaling::GetActiveTransform()`; `CSprite::Render()` reads the
   transform's offset but not its scale.

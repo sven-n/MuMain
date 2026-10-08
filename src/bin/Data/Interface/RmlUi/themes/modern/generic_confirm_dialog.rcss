@@ -4,7 +4,7 @@
    at their own full size. */
 
 /* #panel is centered via .center-both, not a GetProperty()-read-back calc. dp throughout: a
-   LayoutMode::Dialog window (no transform:scale(root_scale)), not one of the root_scale-tracking
+   LayoutMode::Stage window (no transform:scale(root_scale)), not one of the root_scale-tracking
    inventory-family windows. Height is 160dp + 18dp for the header rail's own full 38dp height
    (.gcd-body's own top/bottom stay the same, so this increase becomes exactly the content area's
    own gain). */

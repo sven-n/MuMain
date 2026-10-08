@@ -183,7 +183,7 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
 - **Validation covers the UI-scale axis only** (`layout-and-scaling.md`'s scale sweep);
   resolution, drag state across a scale change, and theme change while open are uncovered, and
   are left to whoever touches each window rather than tracked.
-- **`LayoutMode::Legacy` windows** (`CCreditWin`, `CLoginMainWin`, `CSysMenuWin`,
+- **`LayoutMode::Pixels` windows** (`CCreditWin`, `CLoginMainWin`, `CSysMenuWin`,
   `COptionWindow`, `CServerSelWin`, `CMsgWin`, `CCharSelMainWin`, `CCharMakeWin`, `CLoginWin`)
   have not been audited for native draws that still assume a fixed resolution (the mode's own
   comment cites `CCreditWin`'s 800x600 assumption).

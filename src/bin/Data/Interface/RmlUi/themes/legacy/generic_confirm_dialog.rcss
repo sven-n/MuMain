@@ -1,7 +1,7 @@
 /* Legacy theme for the generic confirm dialog: CCommonMessageBox's sprite composite.
 
    #panel is placed like native's box (see #panel below, overriding the markup's .center-both);
-   every dimension is dp -- a LayoutMode::Dialog window (no transform:scale(root_scale)), not one
+   every dimension is dp -- a LayoutMode::Stage window (no transform:scale(root_scale)), not one
    of the root_scale-tracking inventory-family windows -- and text is rem (native text size,
    RmlNativeText.h). */
 #panel {

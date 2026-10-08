@@ -44,7 +44,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CMasterLevel` | Done | RmlUi-only 2D | `MasterSkillTreeLayout`, `master_skill_icons.rcss`; its learn confirm is `CGenericConfirmDialog` |
 | `CMuHelperConfigWindow`, `CMuHelperDetailWindow`, `CMuHelperSkillPicker` (were `CUIMuHelper`, `CMuHelperExt`, `CMuHelperSkillList`) | Done | RmlUi-only 2D | `UI/MuHelper/`; docked config and detail on the `character_info` recipe, a borderless picker whose fan-out stays in C++. Class-specific controls from `UI::MuHelper::ResolveClassFeatures()` bound as flags. Detail thresholds are level gauges (`component-catalog.md`). Deliberate behaviour changes: pick-all and pick-selected exclude each other, ticking a skill's Condition fills an empty radio group, Esc closes from a focused field, the extra-item list is always sorted |
 | `CHelpWindow` | Done | RmlUi-only 2D | Shown unfocused, in front (`SyncDocumentVisibilityInFront()`) |
-| `CWindowMenu` | Done | RmlUi-only 2D | `LayoutMode::Hud`; row clicks queued and run from `Update()` |
+| `CWindowMenu` | Done | RmlUi-only 2D | `LayoutMode::HudBoard`; row clicks queued and run from `Update()` |
 | `CPartyListWindow` | Done | RmlUi-only 2D | The HUD mini list (not `CPartyInfoWindow`); C++ keeps the hovered card `Selection.cpp` reads |
 | `CItemEnduranceInfo` | Done | RmlUi-only 2D | Durability icons (edge-following), pet HP frame, arrow/summon lines; hit tests in C++ |
 
@@ -59,7 +59,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CFriendWindow` | Done | Hybrid | `UI/Social/`: shell (`friend_shell.rml`), one document per chat room and letter; the letter portrait is live 3D in a render target, driven by `UI::Social::PhotoViewerControl`. `CUIWindowMgr` still arranges them (`building-new-ui.md`). The original's F5 menu of open windows is retired: the shell's Window List tab lists them |
 | `CGuildMakeWindow` | Done | RmlUi-only 2D | |
 | `CGuildInfoWindow` | Done | RmlUi-only 2D | Three RmlUi-scrolled lists; the tab highlight is placed by RCSS. Checked in game: the tabs and the members list |
-| `CServerMsgWin` | Done | RmlUi-only 2D | Real pixels (`LayoutMode::Legacy`), fixed face (Cousine) |
+| `CServerMsgWin` | Done | RmlUi-only 2D | Real pixels (`LayoutMode::Pixels`), fixed face (Cousine) |
 
 ### Inventory, shops, trade
 
