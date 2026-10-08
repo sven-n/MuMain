@@ -51,10 +51,7 @@ namespace UI::Scaling
         // An event HUD standing on the bottom HUD (the workspace's event-hud region): the HUD's
         // own uniform, UI-scaled scale, no offset, so it is drawn at the size its slot was given.
         HudFrame,
-        HudLeft,
         HudCenter,
-        HudRight,
-        HudExperience,
         DockLeft,
         DockRight,
         FloatingWorkspace,
@@ -97,10 +94,7 @@ namespace UI::Scaling
     float ViewportFitScale(int windowWidth, int windowHeight, float maximumScale);
     float CompanionRatio(int windowWidth, int windowHeight);
     float BottomHudScale(int windowWidth, int windowHeight);
-    Transform BottomHudLeftTransform(int windowWidth, int windowHeight);
     Transform BottomHudCenterTransform(int windowWidth, int windowHeight);
-    Transform BottomHudRightTransform(int windowWidth, int windowHeight);
-    Transform BottomHudExperienceTransform(int windowWidth, int windowHeight);
     Transform DockLeftTransform(int windowWidth, int windowHeight);
     Transform DockRightTransform(int windowWidth, int windowHeight);
     Transform FloatingWorkspaceTransform(int windowWidth, int windowHeight);
