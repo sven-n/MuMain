@@ -16,9 +16,6 @@ namespace Rml
 //     siblings. Route onMove/onDragEnd back through the panel's own position-binding rather than
 //     leaving RmlUi's property write as the only source of truth, so a `px`-authored panel still
 //     round-trips correctly.
-//   - Persist position in `onDragEnd` via GameConfig::Get/SetWindowPosition(), as an
-//     anchor-relative logical position (not a raw device-pixel pair), so it survives
-//     resolution/UI-scale changes.
 //   - A window with a real Type-2 companion object (e.g. CUITextInputBox) must rescale it in
 //     OnPanelMoved by the same ratio RmlUi's dp uses (GameConfig::GetUIScalePercent() x
 //     UI::Scaling::ViewportFitScale(), see LoginWin.cpp's LoginUIScaleRatio()), or it drifts from

@@ -291,31 +291,6 @@ void GameConfig::SetUIScalePercent(int percent)
     m_uiScalePercent = std::clamp(percent, CfgDefaults::CfgMinUIScalePercent, CfgDefaults::CfgMaxUIScalePercent);
 }
 
-bool GameConfig::GetWindowPosition(const std::wstring& windowId, int& outX, int& outY) const
-{
-    using namespace CfgSections;
-    using namespace CfgKeys;
-
-    const std::wstring prefix = CfgKeyWindowPositionPrefix + windowId + L".";
-    if (!ReadBool(CfgSectionUI, (prefix + L"HasOverride").c_str(), false))
-        return false;
-
-    outX = ReadInt(CfgSectionUI, (prefix + L"X").c_str(), 0);
-    outY = ReadInt(CfgSectionUI, (prefix + L"Y").c_str(), 0);
-    return true;
-}
-
-void GameConfig::SetWindowPosition(const std::wstring& windowId, int x, int y)
-{
-    using namespace CfgSections;
-    using namespace CfgKeys;
-
-    const std::wstring prefix = CfgKeyWindowPositionPrefix + windowId + L".";
-    WriteInt(CfgSectionUI, (prefix + L"X").c_str(), x);
-    WriteInt(CfgSectionUI, (prefix + L"Y").c_str(), y);
-    WriteBool(CfgSectionUI, (prefix + L"HasOverride").c_str(), true);
-}
-
 void GameConfig::SetEncryptedUsername(const std::wstring& encryptedUsername)
 {
     m_encryptedUsername = encryptedUsername;

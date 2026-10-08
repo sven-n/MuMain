@@ -3,7 +3,6 @@
 
 #include "UI/Placement/WindowPlacement.h"
 
-#include "Data/GameConfig/GameConfig.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "UI/Core/UILayoutPolicy.h"
@@ -165,34 +164,6 @@ Rml::Vector2f PanelSize(const Entry& entry)
         return size;
     }
     return fallback;
-}
-
-// A saved user position keeps a dragged window where the player put it while it is the first
-// open window of its region; behind another window it rejoins the region's flow. Saved positions
-// are in the original docked windows' space.
-bool SavedPosition(Rml::Element* slot, POINT& position)
-{
-    const std::string key = slot->GetAttribute<Rml::String>("data-saved-position", "");
-    if (key.empty())
-        return false;
-    int x = 0;
-    int y = 0;
-    if (!GameConfig::GetInstance().GetWindowPosition(std::wstring(key.begin(), key.end()), x, y))
-        return false;
-    position = {x, y};
-    return true;
-}
-
-bool IsFirstOpenSlot(Rml::Element* slot)
-{
-    Rml::Element* region = slot->GetParentNode();
-    for (int i = 0; region != nullptr && i < region->GetNumChildren(); ++i)
-    {
-        Rml::Element* sibling = region->GetChild(i);
-        if (sibling->IsClassSet("open"))
-            return sibling == slot;
-    }
-    return false;
 }
 
 }
@@ -458,15 +429,7 @@ static void PlaceSlots(const Rml::ElementList& slots, const UI::Scaling::Transfo
             window->SetFillPlacementSize(size.x / scale, size.y / scale);
         }
 
-        POINT position{};
-        POINT saved{};
-        if (IsFirstOpenSlot(slot) && SavedPosition(slot, saved))
-        {
-            position.x = std::lround(
-                UI::Scaling::LogicalX(transform, UI::Scaling::PositionX(dock, static_cast<float>(saved.x))));
-            position.y = std::lround(
-                UI::Scaling::LogicalY(transform, UI::Scaling::PositionY(dock, static_cast<float>(saved.y))));
-        }
+        const POINT position{};
 
         // Only on change: a window dragged while behind another keeps its offset in the slot
         // until the arrangement itself changes.

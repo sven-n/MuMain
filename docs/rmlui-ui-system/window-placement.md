@@ -210,15 +210,15 @@ in their slots; dragging a window out of its slot is not planned.
   (`KeepInsideWindow()`). A menu or confirmation opens centred each time
   (`ResetDraggedPosition()`); the confirm dialog's chrome documents follow its panel.
 - The native message boxes (`CMessageBoxBase` family) are not draggable.
-- The inventory keeps its saved drag position (`data-saved-position`), used while it is the first
-  open window of its region; behind another window it takes its slot.
+- The inventory drags by its title. The position lasts until the workspace places it again (another
+  window opens or closes in its region); positions are not saved across sessions.
 
 ## 9. `LayoutMode`
 
 Slotted windows use `Slot` while placed, or `HudFrame` for the HUD-scale parts. The full list is in
 [layout-and-scaling.md](layout-and-scaling.md#layout-modes). `Dock*`, `FloatingWorkspace` and
 `Stage` also serve windows without slots; `DockTransform()`'s fixed HUD height only serves
-unslotted docked windows and the saved-position conversion.
+unslotted docked windows.
 
 ## Theme recipes (verified in game)
 
@@ -228,8 +228,7 @@ Each was tried by editing only a theme's workspace/RCSS on runtime copies, click
   second region styled like `.dock-right` with `flex-direction: row` and no `right`; drop the
   cross-side `data-closes` (inventory/quest log, extension/character).
 - **Centre stage** (legacy). Put the inventory family in a region with `display: flex;
-  justify-content: center; align-items: center` filling `#safe_area`; remove the inventory's
-  `data-saved-position`, or the saved position wins.
+  justify-content: center; align-items: center` filling `#safe_area`.
 - **Composed row** (legacy). Make `#safe_area` a flex row of left dock, centre (`flex: 1 1 auto`)
   and right dock, regions `position: relative`, in that markup order — centred windows then use
   the space the docks leave instead of overlapping them on a narrow screen.

@@ -46,7 +46,6 @@ extern bool SelectFlag;
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/Tooltip/LegacyTextListTooltip.h"
 #include "UI/Inventory/ItemOptionTooltipModel.h"
-#include "Data/GameConfig/GameConfig.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
@@ -90,9 +89,6 @@ bool CMyInventory::Create(CManager* pNewUIMng, int x, int y)
 {
     if (nullptr == pNewUIMng || nullptr == g_pNewItemMng)
         return false;
-
-    // A saved user-dragged position overrides the caller's default x/y before anything else uses them.
-    GameConfig::GetInstance().GetWindowPosition(L"my_inventory", x, y);
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(INTERFACE_INVENTORY, this);
@@ -202,7 +198,7 @@ void CMyInventory::BindRmlModel(Rml::DataModelConstructor& c, MyInventoryRmlMode
 // #title is the drag handle (MakeDraggable). onMove reads this window's own layout transform
 // instead of the ambient active one, since this callback fires from RmlUi's own event
 // processing, outside this window's ScopedActiveTransform scope. SetPos() keeps the native
-// paperdoll/grid in sync automatically.
+// paperdoll/grid in sync automatically. The position lasts until the workspace places it again.
 void CMyInventory::OnRmlBuilt()
 {
     Rml::Element* panelEl = m_RmlView.Document()->GetElementById("panel");
@@ -216,18 +212,6 @@ void CMyInventory::OnRmlBuilt()
                 const int newX = static_cast<int>(std::lround(UI::Scaling::LogicalX(transform, newLeftPx)));
                 const int newY = static_cast<int>(std::lround(UI::Scaling::LogicalY(transform, newTopPx)));
                 SetPos(newX, newY);
-            },
-            [this]()
-            {
-                // Saved in the original docked windows' space, wherever the workspace placed
-                // the inventory.
-                const auto from = GetLayoutTransform();
-                const auto dock = UI::Scaling::DockRightTransform(WindowWidth, WindowHeight);
-                const int savedX = static_cast<int>(std::lround(
-                    UI::Scaling::LogicalX(dock, UI::Scaling::PositionX(from, static_cast<float>(m_Pos.x)))));
-                const int savedY = static_cast<int>(std::lround(
-                    UI::Scaling::LogicalY(dock, UI::Scaling::PositionY(from, static_cast<float>(m_Pos.y)))));
-                GameConfig::GetInstance().SetWindowPosition(L"my_inventory", savedX, savedY);
             });
     }
 }

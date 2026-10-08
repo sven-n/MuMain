@@ -382,8 +382,7 @@ whole-panel handle opt out with `drag: block` (both `base.rcss` set it on
 `input, select, textarea, .btn, [data-event-click]`). Helpers for transform-centred dialogs:
 `ResetDraggedPosition()` (re-centre on open), `KeepInsideWindow()` (pull back a panel dropped
 partly off screen); the `dragged` class drops `.center-both`'s transform (`engine-findings.md`).
-Persistence, where wanted, is `GameConfig::GetWindowPosition`/`SetWindowPosition` (the inventory
-only). Who drags is decided in `window-placement.md` section 8. Only drags of the handle itself move
+Drag positions are not saved; they last for the session. Who drags is decided in `window-placement.md` section 8. Only drags of the handle itself move
 the panel: a control inside it with its own `drag` (a level gauge's hit area) is the drag element
 for its own drags, and those are ignored even though they bubble up to the handle.
 
