@@ -13,8 +13,7 @@
 	     its PanelColumnX neighbours use, with plain px text that scales with the panel like theirs.
 	     Same layout, ids, model fields and event names as ../../mu_helper_config.rml; keep them in
 	     step. -->
-	<div id="panel" data-model="mu_helper_config" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="mu_helper_config">
 		<div class="modern-shell-edge"></div>
 		<div class="modern-groove"></div>
 		<div class="modern-header-rail-px docked-header-rail-fill">
@@ -130,6 +129,7 @@
 		<div id="btn_save" class="mh-btn-igs modern-btn-px" data-event-click="muhelper_button('save')"></div><span id="btn_save_label" class="mh-text mh-center mh-btn-label mh-btn-label-igs">{{labels.save}}</span>
 		<div id="btn_init" class="mh-btn-igs modern-btn-px" data-event-click="muhelper_button('init')"></div><span id="btn_init_label" class="mh-text mh-center mh-btn-label mh-btn-label-igs">{{labels.init}}</span>
 
+		<div id="frame_corner_close" data-event-click="muhelper_button('close')"></div>
 		<div id="btn_exit" class="modern-icon-btn-px" data-event-click="muhelper_button('close')" data-attr-data-hint="labels.close_tip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>

@@ -14,7 +14,6 @@ Guild/GuildInfoWindow.cpp: 7
 Guild/GuildMakeWindow.cpp: 5
 Render/Text/CUIRenderTextSDLTtf.cpp: 1
 Scenes/LoginSceneOverlay.cpp: 1
-UI/Character/PetInfoWindow.cpp: 3
 UI/Combat/CastleWindow.cpp: 5
 UI/Combat/DuelWatchMainFrameWindow.cpp: 2
 UI/Combat/DuelWatchUserListWindow.cpp: 2
@@ -91,15 +90,12 @@ UI/Inventory/TipTextListLayout.cpp: 1
 UI/Inventory/TipTextListView.cpp: 2
 UI/Inventory/Trade.cpp: 4
 UI/Inventory/UnitedMarketPlaceWindow.cpp: 6
-UI/MuHelper/MuHelperConfigWindow.cpp: 5
-UI/MuHelper/MuHelperDetailWindow.cpp: 3
 UI/MuHelper/MuHelperSkillPicker.cpp: 2
 UI/NPCs/EmpireGuardianNPC.cpp: 2
 UI/NPCs/GatemanWindow.cpp: 5
 UI/NPCs/NPCDialogue.cpp: 11
 UI/NPCs/NPCShop.cpp: 4
 UI/Options/OptionWindow.cpp: 1
-UI/Party/PartyInfoWindow.cpp: 4
 UI/Party/PartyListWindow.cpp: 5
 UI/Placement/WindowPlacement.cpp: 6
 UI/Quests/MyQuestInfoWindow.cpp: 5

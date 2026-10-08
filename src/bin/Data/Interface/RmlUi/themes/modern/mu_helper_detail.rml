@@ -11,8 +11,7 @@
 	     header rail its PanelColumnX neighbours use (party_info, character_info), with plain px text
 	     that scales with the panel like theirs. Same layout, ids, model fields and event names as
 	     ../../mu_helper_detail.rml; keep them in step. -->
-	<div id="panel" data-model="mu_helper_detail" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="mu_helper_detail">
 		<div class="modern-shell-edge"></div>
 		<div class="modern-groove"></div>
 		<div class="modern-header-rail-px docked-header-rail-fill">

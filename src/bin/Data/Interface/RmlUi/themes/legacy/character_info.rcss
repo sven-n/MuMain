@@ -29,9 +29,6 @@
 
 .frame-top { decorator: image(docked-bg-top-a); }
 
-/* The panel takes the pointer, so clicks on it never reach the world or the windows below. */
-#panel { pointer-events: auto; }
-
 /* Right-hand pieces and the action row are pinned to #panel's edges (the original's places in a
    190x429 panel), so they follow a wider or filled panel; the content stays at the top. */
 

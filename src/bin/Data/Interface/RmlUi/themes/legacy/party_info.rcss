@@ -148,3 +148,6 @@
 
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
 .party-empty-msg { line-height: calc(15px * var(--root-scale)); }
+
+/* The native text size, counter-scaled out of the panel's scale. */
+#panel { font-size: calc(var(--text-px) / var(--root-scale)); }

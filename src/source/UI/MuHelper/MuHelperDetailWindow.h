@@ -30,9 +30,6 @@ namespace mu::ui::window
 
     struct MuHelperDetailRmlModel
     {
-        // Docked-right window -- sourced from UI::Scaling::GetActiveTransform(), which CManager
-        // scopes to LayoutMode::DockRight around every call into this window.
-        float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
         int page = -1;       // EMuHelperDetailPage
@@ -70,6 +67,7 @@ namespace mu::ui::window
 
         bool Create(CManager* pNewUIMng, int x, int y);
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         void SetPos(int x, int y) { m_Pos = {x, y}; }
         void Release();
 

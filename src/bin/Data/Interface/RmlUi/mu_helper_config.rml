@@ -18,8 +18,7 @@
 
 	     Which class-specific controls show is `features`, resolved in C++
 	     (UI::MuHelper::ResolveClassFeatures) -- a game rule, so it never lives in a theme. -->
-	<div id="panel" data-model="mu_helper_config" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="mu_helper_config">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>
@@ -134,6 +133,7 @@
 		<div id="btn_init" class="mh-btn-igs" data-event-click="muhelper_button('init')"></div><span id="btn_init_label" class="sharp-text mh-text mh-center mh-btn-label mh-btn-label-igs" data-style-font-size="text_px + 'px'">{{labels.init}}</span>
 
 		<div id="btn_exit" data-event-click="muhelper_button('close')" data-attr-data-hint="labels.close_tip"></div>
+		<div id="frame_corner_close" data-event-click="muhelper_button('close')"></div>
 	</div>
 </body>
 </rml>

@@ -7,7 +7,8 @@
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Scaling/UITransform.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Core/Utilities/StringUtils.h"
@@ -58,9 +59,6 @@ bool CPetInfoWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void CPetInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, PetInfoRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
 
     c.Bind("active_tab", &model.activeTab);
@@ -100,8 +98,7 @@ void CPetInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, PetInfoRmlModel&
             if (arguments.size() == 1)
                 RmlClickSelectTab(arguments[0].Get<int>(-1));
         });
-    c.BindEventCallback("petinfo_click_exit",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExit(); });
+    UI::RmlBridge::BindWindowClose(c, mu::ui::window::INTERFACE_PET);
 
     model.windowTitle = StringUtils::WideToNarrow(I18N::Game::Pet);
     model.tabDarkHorseLabel = StringUtils::WideToNarrow(I18N::Game::DarkHorse);
@@ -154,15 +151,8 @@ void CPetInfoWindow::Show(bool bShow)
 
 bool CPetInfoWindow::UpdateMouseEvent()
 {
-    // RmlUi handles both close targets; the corner target follows the theme-sized panel edge.
-    float panelWidth = PETINFOWINDOW_WIDTH;
-    float panelHeight = PETINFOWINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    // RmlUi handles both close targets; over the panel, the windows below get no mouse.
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool CPetInfoWindow::UpdateKeyEvent()
@@ -207,11 +197,6 @@ void CPetInfoWindow::RmlClickSelectTab(int tab)
 
     model.activeTab = tab;
     m_RmlView.MarkDirty("active_tab");
-}
-
-void CPetInfoWindow::RmlClickExit()
-{
-    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PET);
 }
 
 void CPetInfoWindow::CalcDamage(int iNumTapButton)
@@ -265,13 +250,6 @@ void CPetInfoWindow::SyncRmlModel()
     auto& model = m_RmlView.GetModel();
     wchar_t szText[256] = { 0, };
 
-    const auto transform = UI::Scaling::GetActiveTransform();
-    model.rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
-    model.rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
-    model.rootScale = transform.scaleX;
-    m_RmlView.MarkDirty("root_x");
-    m_RmlView.MarkDirty("root_y");
-    m_RmlView.MarkDirty("root_scale");
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     // Dark Horse tab

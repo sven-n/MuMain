@@ -10,8 +10,7 @@
 	     exit-button family as CCharacterInfoWindow/CMyQuestInfoWindow/CPetInfoWindow, via
 	     docked_panel_frame.rcss. Keep ids/data-model/event-callback names in sync with
 	     ../../party_info.rml. -->
-	<div id="panel" data-model="party_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="party_info">
 		<div class="modern-shell-edge"></div>
 		<div class="modern-groove"></div>
 
@@ -45,9 +44,10 @@
 			</div>
 		</div>
 
-		<div id="btn_exit" class="modern-icon-btn-px party-btn-exit" data-event-click="party_click_exit" data-attr-data-hint="exit_tooltip">
+		<div id="btn_exit" class="modern-icon-btn-px party-btn-exit" data-event-click="window_close" data-attr-data-hint="exit_tooltip">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>
+		<div id="frame_corner_close" data-event-click="window_close"></div>
 	</div>
 </body>
 </rml>

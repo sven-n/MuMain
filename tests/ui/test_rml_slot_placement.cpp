@@ -49,6 +49,7 @@ body { width: 100%; height: 100%; pointer-events: none; }
 #panel { position: absolute; width: 190px; height: 429px; transform-origin: left top; )") +
                                    panelStyle + R"( }
 #panel.slot-placed { left: var(--slot-left); top: var(--slot-top); transform: scale(var(--root-scale)); }
+#panel { font-size: calc(var(--text-px, 12px) / var(--root-scale, 1)); }
 #wide { position: absolute; width: calc(190px * var(--root-scale, 1)); height: 10px; }
 </style></head><body><div id="panel"><div id="wide"/></div></body></rml>)";
         Rml::ElementDocument* document = context->LoadDocumentFromMemory(markup);
@@ -106,6 +107,19 @@ TEST_CASE("a slot placement puts the panel at the slot, at the region's scale [u
     CHECK(size.x == doctest::Approx(190.f));
     CHECK_FALSE(document->GetElementById("panel")->IsClassSet("slot-placed"));
     CHECK(document->GetElementById("wide")->GetBox().GetSize().x == doctest::Approx(190.f));
+}
+
+TEST_CASE("a placed panel's font size divides the native text size by its scale [ui][placement]")
+{
+    Fixture fixture;
+    Rml::ElementDocument* document = fixture.Load();
+    Rml::Element* panel = document->GetElementById("panel");
+    panel->SetProperty("--text-px", "20px");
+    UI::RmlBridge::SlotPlacement placement;
+    placement.Set(0.f, 0.f, 2.f);
+    placement.Apply(document, "panel");
+    fixture.Refresh();
+    CHECK(panel->GetComputedValues().font_size() == doctest::Approx(10.f));
 }
 
 TEST_CASE("a rebuilt document gets its slot placement again [ui][placement]")

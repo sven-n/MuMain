@@ -214,3 +214,6 @@
 .skill-label.skill-label-1 { width: calc(100px * var(--root-scale)); }
 .skill-label.skill-label-2 { width: calc(100px * var(--root-scale)); }
 .skill-label.skill-label-3 { width: calc(100px * var(--root-scale)); }
+
+/* The native text size, counter-scaled out of the panel's scale. */
+#panel { font-size: calc(var(--text-px) / var(--root-scale)); }

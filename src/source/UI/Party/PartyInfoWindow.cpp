@@ -6,7 +6,8 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Scaling/UITransform.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -60,9 +61,6 @@ bool CPartyInfoWindow::Create(CManager* pNewUIMng, int x, int y)
 
 void CPartyInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, PartyInfoRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
 
     c.Bind("has_party", &model.hasParty);
@@ -86,8 +84,7 @@ void CPartyInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, PartyInfoRmlMo
     c.RegisterArray<std::vector<PartyMemberRow>>();
     c.Bind("members", &model.members);
 
-    c.BindEventCallback("party_click_exit",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExit(); });
+    UI::RmlBridge::BindWindowClose(c, mu::ui::window::INTERFACE_PARTY);
     c.BindEventCallback("party_kick_member",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
         {
@@ -136,11 +133,6 @@ void CPartyInfoWindow::ClosingProcess()
 {
 }
 
-void CPartyInfoWindow::RmlClickExit()
-{
-    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PARTY);
-}
-
 void CPartyInfoWindow::RmlClickKickMember(int index)
 {
     if (index < 0 || index >= PartyNumber)
@@ -151,18 +143,8 @@ void CPartyInfoWindow::RmlClickKickMember(int index)
 
 bool CPartyInfoWindow::UpdateMouseEvent()
 {
-    // Top-right corner close "X" (shared frame). Hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_PARTY))
-        return false;
-
-    float panelWidth = PARTY_INFO_WINDOW_WIDTH;
-    float panelHeight = PARTY_INFO_WINDOW_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-        return false;
-
-    return true;
+    // RmlUi handles both close targets; over the panel, the windows below get no mouse.
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool CPartyInfoWindow::UpdateKeyEvent()
@@ -240,13 +222,6 @@ void CPartyInfoWindow::SyncRmlModel()
 
     auto& model = m_RmlView.GetModel();
 
-    const auto transform = UI::Scaling::GetActiveTransform();
-    model.rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
-    model.rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
-    model.rootScale = transform.scaleX;
-    m_RmlView.MarkDirty("root_x");
-    m_RmlView.MarkDirty("root_y");
-    m_RmlView.MarkDirty("root_scale");
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     if (model.hasParty != m_bParty)

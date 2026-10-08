@@ -39,6 +39,7 @@ namespace mu::ui::window
         void SetPos(int x, int y);
         void Show(bool bShow) override;
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -52,7 +53,6 @@ namespace mu::ui::window
 
         // Invoked directly from RmlUi data-event-click bindings (see Create()), not polled.
         void RmlClickSelectTab(int tab);
-        void RmlClickExit();
 
 
     private:
@@ -62,9 +62,6 @@ namespace mu::ui::window
 
         struct PetInfoRmlModel
         {
-            // Movable window (SetPos(), collision-shuffled by PanelColumnX), not HUD-anchored --
-            // sourced from UI::Scaling::GetActiveTransform(), same convention as character_info.
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
             int activeTab = TAB_TYPE_DARKHORSE;

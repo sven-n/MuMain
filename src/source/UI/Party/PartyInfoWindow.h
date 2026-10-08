@@ -63,6 +63,7 @@ namespace mu::ui::window
 
         bool Create(CManager* pNewUIMng, int x, int y);
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         void Release();
 
         void SetPos(int x, int y);
@@ -83,7 +84,6 @@ namespace mu::ui::window
         void SetParty(bool bParty);
 
         // Invoked directly from RmlUi data-event-click bindings (see Create()), not polled.
-        void RmlClickExit();
         void RmlClickKickMember(int index);
 
 
@@ -112,9 +112,6 @@ namespace mu::ui::window
 
         struct PartyInfoRmlModel
         {
-            // Movable window (SetPos(), collision-shuffled by PanelColumnX), not HUD-anchored --
-            // sourced from UI::Scaling::GetActiveTransform(), same convention as character_info.
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
             bool hasParty = false;

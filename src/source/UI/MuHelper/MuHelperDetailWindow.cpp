@@ -12,7 +12,7 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlLevelGauge.h"
 #include "UI/RmlBridge/RmlNumericInputFilter.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
@@ -115,14 +115,7 @@ void CMuHelperDetailWindow::BlurFocusedField()
 
 bool CMuHelperDetailWindow::UpdateMouseEvent()
 {
-    float panelWidth = static_cast<float>(WindowWidth);
-    float panelHeight = static_cast<float>(WindowHeight);
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-
-    if (!WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
-        return true;
-
-    return false;
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 void CMuHelperDetailWindow::HandleGaugeEvent(Rml::Event& event, int gauge)
@@ -314,9 +307,6 @@ void CMuHelperDetailWindow::SetSubCondition(int index)
 
 void CMuHelperDetailWindow::BindRmlModel(Rml::DataModelConstructor& c, MuHelperDetailRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
 
     c.Bind("page", &model.page);
@@ -453,7 +443,6 @@ void CMuHelperDetailWindow::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     MuHelperDetailRmlModel& model = m_RmlView.GetModel();

@@ -15,7 +15,8 @@
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlNumericInputFilter.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
@@ -39,7 +40,6 @@ namespace
 
     // The extra-item list's own reference rect (mu_helper_config.rcss). The wheel is only claimed
     // over it, as native's list did -- elsewhere over the panel it still reaches the camera.
-    constexpr int ExtraListLeft = 20, ExtraListTop = 238, ExtraListWidth = 160, ExtraListHeight = 70;
 
     Rml::String Narrow(const wchar_t* text) { return StringUtils::WideToNarrow(text); }
 
@@ -131,22 +131,13 @@ void CMuHelperConfigWindow::BlurFocusedField()
 
 bool CMuHelperConfigWindow::UpdateMouseEvent()
 {
-    // The frame's corner "X" -- the docked family's shared hit rect, native's own 169/7/13/12.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_MUHELPER))
-        return false;
-
-    float panelWidth = static_cast<float>(WindowWidth);
-    float panelHeight = static_cast<float>(WindowHeight);
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-
-    if (!WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
+    Rml::ElementDocument* document = m_RmlView.Document();
+    if (!UI::RmlBridge::IsPointerOver(document))
         return true;
 
-    if (m_iCurrentOpenTab == 1
-        && WindowGeometry(m_Pos.x + ExtraListLeft, m_Pos.y + ExtraListTop, ExtraListWidth, ExtraListHeight).Contains(MouseX, MouseY))
-    {
+    // The wheel scrolls the extra-item list, not the camera.
+    if (m_iCurrentOpenTab == 1 && UI::RmlBridge::IsPointerOver(document->GetElementById("extra_list")))
         MouseWheel = 0;
-    }
 
     return false;
 }
@@ -516,9 +507,6 @@ void CMuHelperConfigWindow::SaveConfig()
 
 void CMuHelperConfigWindow::BindRmlModel(Rml::DataModelConstructor& c, MuHelperConfigRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
 
     c.Bind("active_tab", &model.activeTab);
@@ -782,7 +770,6 @@ void CMuHelperConfigWindow::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     MuHelperConfigRmlModel& model = m_RmlView.GetModel();

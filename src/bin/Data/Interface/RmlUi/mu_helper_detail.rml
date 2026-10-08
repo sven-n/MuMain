@@ -18,8 +18,7 @@
 	     The four tabbed panes are laid out once by geometry rather than once per page -- each carries
 	     the header of every page it appears on, and shows only the current one's. The gauges draw
 	     here and receive input through their own RmlUi hit areas. -->
-	<div id="panel" data-model="mu_helper_detail" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="mu_helper_detail">
 		<div class="frame-piece frame-top"></div>
 		<div class="frame-piece frame-left"></div>
 		<div class="frame-piece frame-right"></div>

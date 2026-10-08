@@ -12,3 +12,18 @@ bool UI::RmlBridge::IsPointerOver(Rml::ElementDocument* document)
     const Rml::Element* hover = context != nullptr ? context->GetHoverElement() : nullptr;
     return hover != nullptr && hover != document && hover->GetOwnerDocument() == document;
 }
+
+bool UI::RmlBridge::IsPointerOver(Rml::Element* element)
+{
+    Rml::ElementDocument* document = element != nullptr ? element->GetOwnerDocument() : nullptr;
+    if (document == nullptr || !document->IsVisible())
+        return false;
+    Rml::Context* context = document->GetContext();
+    for (Rml::Element* hover = context != nullptr ? context->GetHoverElement() : nullptr; hover != nullptr;
+         hover = hover->GetParentNode())
+    {
+        if (hover == element)
+            return true;
+    }
+    return false;
+}
