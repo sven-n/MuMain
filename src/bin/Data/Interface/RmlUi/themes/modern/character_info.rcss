@@ -115,7 +115,7 @@
 }
 .stat-btn:hover { color: token(accent-gold-hover); border-color: token(border-hover); }
 /* data-class-hidden: base.rcss's .hidden has this rule's specificity and loses to its display. */
-.stat-btn.hidden { display: none; }
+.stat-btn.hidden, .levelup-point-text.hidden, .attr-label.hidden, .attr-value.hidden { display: none; }
 .stat-btn-str { top: 122px; }
 .stat-btn-agi { top: 177px; }
 .stat-btn-vit { top: 242px; }
