@@ -622,12 +622,8 @@ bool CTrade::ProcessBtns()
     if (m_nMyTradeWait > 0)
         --m_nMyTradeWait;
 
-    // Top-right corner close "X" baked into the frame art: hides + swallows the click. Same
-    // hit-box g_pNewUISystem->HandleFrameCornerClose() uses elsewhere (WindowSystem.cpp), kept
-    // inline here rather than refactored, matching this window's pre-existing shape -- the real
-    // Close/Zen-input buttons are now handled by RmlUi's data-event-click (see Create()).
-    if (mu::ui::window::IsPress(VK_LBUTTON)
-        && CheckMouseIn(m_Pos.x + 169, m_Pos.y + 7, 13, 12))
+    // Top-right corner close "X" baked into the frame art cancels the trade, like Close.
+    if (g_pNewUISystem->ConsumeFrameCornerClick(m_Pos, mu::ui::window::INTERFACE_TRADE))
     {
         ::PlayBuffer(SOUND_CLICK01);
         ProcessCloseBtn();

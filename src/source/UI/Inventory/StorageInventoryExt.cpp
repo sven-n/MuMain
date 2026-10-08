@@ -364,9 +364,12 @@ bool CStorageInventoryExt::ProcessMyInvenItemAutoMove(CInventoryCtrl* sourceCtrl
 
 bool CStorageInventoryExt::ProcessBtns() const
 {
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_STORAGE))
+    // Top-right corner close "X" (shared frame) closes the storage, this page with it.
+    if (g_pNewUISystem->ConsumeFrameCornerClick(m_Pos, INTERFACE_STORAGE_EXT))
+    {
+        g_pNewUISystem->Hide(INTERFACE_STORAGE);
         return true;
+    }
 
     return false;
 }

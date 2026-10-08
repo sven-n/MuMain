@@ -236,7 +236,7 @@ void SlideLane::SlideMove()
 
 void SlideLane::ComputeSpeed()
 {
-    if (mu::ui::window::CheckMouseIn(0, m_iPos_y - 3, WindowWidth, m_iFontHeight + 6) == FALSE)
+    if (mu::ui::window::CheckMouseIn(0, m_iPos_y - 3, REFERENCE_WIDTH, m_iFontHeight + 6) == FALSE)
     {
         m_fMoveAccel = 1.0f;
     }

@@ -479,7 +479,7 @@ bool mu::ui::window::CChatCommandWindow::UpdateMouseEvent()
     }
 
     float panelWidth = static_cast<float>(WINDOW_WIDTH);
-    float panelHeight = static_cast<float>(WindowHeight);
+    float panelHeight = static_cast<float>(WINDOW_HEIGHT);
     UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
     if (!mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth),
                                         static_cast<int>(panelHeight)).Contains(MouseX, MouseY))

@@ -31,6 +31,7 @@ class CChatCommandWindow : public CObject
     enum eWINDOW_SIZE
     {
         WINDOW_WIDTH = 190,
+        WINDOW_HEIGHT = 432,
         FRAME_TOP_HEIGHT = 64,
         FRAME_SIDE_WIDTH = 21,
         FRAME_BOTTOM_HEIGHT = 45,

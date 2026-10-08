@@ -31,8 +31,8 @@ UI/Core/WindowCommon.cpp: 1
 UI/Core/WindowCommon.h: 1
 UI/Core/WindowManager.cpp: 10
 UI/Core/WindowObject.h: 6
-UI/Core/WindowSystem.cpp: 2
-UI/Core/WindowSystem.h: 1
+UI/Core/WindowSystem.cpp: 4
+UI/Core/WindowSystem.h: 2
 UI/Dialogs/ChatCommandWindow.cpp: 5
 UI/Dialogs/CommonMessageBox.cpp: 1
 UI/Dialogs/CustomMessageBox.cpp: 1

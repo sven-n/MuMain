@@ -37,6 +37,7 @@ PATTERNS = [
     r"\bRefreshLogicalAnchorPosition\b",
     r"\bRefreshLogicalAnchorRect\b",
     r"\bHandleFrameCornerClose\b",
+    r"\bConsumeFrameCornerClick\b",
     r"\bContains\(\s*MouseX\b",
     r"\bCheckMouseIn\b",
     r"\bLayoutMode::",
