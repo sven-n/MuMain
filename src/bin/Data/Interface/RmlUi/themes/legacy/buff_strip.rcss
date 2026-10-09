@@ -192,7 +192,15 @@
 }
 
 /* The strip starts at the original's left edge: the left of #strip_slot (buff_strip.rml). */
-#strip_slot { position: absolute; top: 0dp; height: 0dp; pointer-events: none; }
+/* The original's 200-unit box at the HUD's scale, centred in the width the docks leave free. */
+#strip_slot {
+	position: absolute;
+	top: 0dp;
+	width: calc(200px * var(--hud-scale, 1));
+	left: calc((var(--world-left, 0px) + var(--world-right, 0px)) / 2 - 100px * var(--hud-scale, 1));
+	height: 0dp;
+	pointer-events: none;
+}
 /* 8 slots per row, as native's own counters produced: 8 x 20dp + 7 x 5dp fits 200dp, a 9th does
    not. Row pitch is the slot height plus the same gap. */
 #panel {

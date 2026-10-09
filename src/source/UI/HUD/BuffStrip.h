@@ -57,10 +57,6 @@ namespace mu::ui::window
         struct BuffStripRmlModel
         {
             std::vector<BuffEntry> buffs;
-            // The original's strip box in real pixels: 200-unit rows centred on the free width, in
-            // the strip's own stretched HUD space. Data a theme may follow, not a placement.
-            float stripSlotLeft = 0.0f;
-            float stripSlotWidth = 0.0f;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, BuffStripRmlModel& model);
         UI::RmlBridge::ThemedView<BuffStripRmlModel> m_RmlView{"buff_strip",
@@ -77,6 +73,5 @@ namespace mu::ui::window
 
         void SyncRmlModel();
         void OnBuffRightClick(int slot);
-        void SyncStripSlot();
     };
 }

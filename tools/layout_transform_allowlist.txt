@@ -52,7 +52,6 @@ UI/Events/EventItemEntryView.cpp: 2
 UI/Events/EventTimerView.cpp: 1
 UI/Events/GateSwitchWindow.cpp: 1
 UI/Events/KanturuEvent.cpp: 2
-UI/HUD/BuffStrip.cpp: 1
 UI/HUD/ChatLogWindow.cpp: 2
 UI/HUD/CommandWindow.cpp: 1
 UI/HUD/GensRanking.cpp: 1

@@ -120,3 +120,28 @@ TEST_CASE("the scale inputs follow a resized context [ui][scale-inputs]")
     CHECK(size.x == doctest::Approx(640.f * panel.scaleX));
     CHECK(offset.x == doctest::Approx(panel.offsetX));
 }
+
+TEST_CASE("a theme centres a box between the uncovered world's edges [ui][scale-inputs]")
+{
+    Fixture fixture({1920, 1080});
+    Rml::Element* root = fixture.context->GetRootElement();
+    root->SetProperty("--world-left", "400px");
+    root->SetProperty("--world-right", "1500px");
+    Rml::ElementDocument* document = fixture.context->LoadDocumentFromMemory(R"(<rml><head><style>
+body { width: 100%; height: 100%; }
+#strip { position: absolute; top: 0; height: 10px; width: calc(200px * var(--hud-scale));
+         left: calc((var(--world-left) + var(--world-right)) / 2 - 100px * var(--hud-scale)); }
+</style></head><body><div id="strip"/></body></rml>)");
+    REQUIRE(document != nullptr);
+    document->Show();
+    fixture.context->Update();
+
+    const float hud = UI::Scaling::BottomHudScale(1920, 1080);
+    Rml::Element* strip = document->GetElementById("strip");
+    CHECK(strip->GetBox().GetSize().x == doctest::Approx(200.f * hud));
+    CHECK(strip->GetAbsoluteLeft() == doctest::Approx(950.f - 100.f * hud));
+
+    root->SetProperty("--world-right", "1920px");
+    fixture.context->Update();
+    CHECK(strip->GetAbsoluteLeft() == doctest::Approx(1160.f - 100.f * hud));
+}

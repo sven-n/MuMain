@@ -256,8 +256,6 @@ void CBuffStrip::BindRmlModel(Rml::DataModelConstructor& c, BuffStripRmlModel& m
         [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&) { m_Tooltip.Leave(event); });
 
     c.Bind("buffs", &model.buffs);
-    c.Bind("strip_slot_left", &model.stripSlotLeft);
-    c.Bind("strip_slot_width", &model.stripSlotWidth);
 }
 
 void CBuffStrip::BuildRmlUi()
@@ -329,7 +327,6 @@ void CBuffStrip::SyncRmlModel()
     }
 
     m_RmlView.MarkDirty("buffs");
-    SyncStripSlot();
     SyncTooltip();
 }
 
@@ -345,27 +342,6 @@ void CBuffStrip::SyncTooltip()
     UI::RmlBridge::ElementTooltip::Placement placement;
     placement.anchorAt = 20.f / 28.f;
     m_Tooltip.Show(BuildTooltip(static_cast<eBuffState>(m_ShownBuffs[slot])), placement);
-}
-
-void CBuffStrip::SyncStripSlot()
-{
-    // Native CNewUIBuffWindow::SetPos(): a 200-unit row centred in the width the docked panels
-    // leave free, at the HUD's scale; here, centred between the uncovered world's edges, so a
-    // dock on either side moves it.
-    constexpr float kNativeRowWidth = 200.0f;
-    const auto hud = GetLayoutTransform();
-    const float freeLeft = UI::Placement::UncoveredWorldLeftIn(hud);
-    const float freeRight = UI::Placement::UncoveredWorldRightIn(hud);
-    const float left = UI::Scaling::PositionX(hud, (freeLeft + freeRight - kNativeRowWidth) * 0.5f);
-    const float width = kNativeRowWidth * hud.scaleX;
-
-    auto& model = m_RmlView.GetModel();
-    if (model.stripSlotLeft == left && model.stripSlotWidth == width)
-        return;
-    model.stripSlotLeft = left;
-    model.stripSlotWidth = width;
-    m_RmlView.MarkDirty("strip_slot_left");
-    m_RmlView.MarkDirty("strip_slot_width");
 }
 
 void CBuffStrip::OnBuffRightClick(int slot)

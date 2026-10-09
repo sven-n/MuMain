@@ -15,7 +15,6 @@
 # needed.
 
 blood_castle_time.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
-buff_strip.rml: per-frame data -- #strip_slot is the box the original gave the strip for the width the open docks leave free; a theme may follow it or ignore it
 castle_window.rml: a map item's bars are lengths, RenderCastleItem()'s own gauge widths. The tab positions are in each theme's RCSS
 chaos_castle_time.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
 char_info_balloon.rml: per-frame data -- world-projected balloon positions, per frame

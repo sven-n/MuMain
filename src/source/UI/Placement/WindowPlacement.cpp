@@ -391,6 +391,13 @@ static void UpdateUncoveredArea(Rml::ElementDocument* workspace, const Rml::Elem
         else
             g_uncoveredLeft = std::max(g_uncoveredLeft, group.right);
     }
+
+    // The theme centres HUD widgets in the uncovered world from these (buff_strip.rcss).
+    if (Rml::Element* root = workspace->GetContext() != nullptr ? workspace->GetContext()->GetRootElement() : nullptr)
+    {
+        root->SetProperty("--world-left", std::to_string(g_uncoveredLeft) + "px");
+        root->SetProperty("--world-right", std::to_string(g_uncoveredRight) + "px");
+    }
 }
 
 static void PlaceSlots(const Rml::ElementList& slots, const UI::Scaling::Transform& dock)
