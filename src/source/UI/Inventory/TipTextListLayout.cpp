@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/Inventory/TipTextListLayout.h"
 
 #include "Engine/Object/ZzzInventory.h"

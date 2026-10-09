@@ -27,7 +27,7 @@ struct GatemanActionButton
 
 struct GatemanRmlModel
 {
-    float textPx = 0.f; // native normal text size in physical px (RmlRootTransform.h)
+    float textPx = 0.f; // native normal text size in physical px (RmlNativeTextSize.h)
     float lineHeightPx = 0.f;
 
     // Which page the gatekeeper shows: 0 none, 1 the guild master's, 2 a guild member's,

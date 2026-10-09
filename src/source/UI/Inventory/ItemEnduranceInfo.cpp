@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlPointer.h"
-#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/Inventory/ItemEnduranceInfo.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Placement/WindowPlacement.h"

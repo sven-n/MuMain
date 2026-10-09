@@ -5,7 +5,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
-#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include <RmlUi/Core/ElementDocument.h>
 

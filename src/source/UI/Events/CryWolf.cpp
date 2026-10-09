@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/Events/CryWolf.h"
 #include "UI/Events/EventPreview.h"
 #include "UI/Core/WindowSystem.h"

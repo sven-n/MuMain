@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "UI/RmlBridge/RmlPointer.h"
-#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/Combat/DuelWatchMainFrameWindow.h"
 #include "UI/Core/WindowSystem.h"
 #include "GameLogic/Combat/DuelMgr.h"

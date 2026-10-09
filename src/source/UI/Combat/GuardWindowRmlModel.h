@@ -62,7 +62,7 @@ struct GuardTabEntry
 
 struct GuardWindowRmlModel
 {
-    float textPx = 0.f; // native normal text size in physical px (RmlRootTransform.h)
+    float textPx = 0.f; // native normal text size in physical px (RmlNativeTextSize.h)
     float lineHeightPx = 0.f;
 
     int activeTab = 0; // CGuardWindow::CURR_OPEN_TAB_BUTTON -- which page the document shows.

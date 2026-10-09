@@ -31,7 +31,7 @@ namespace mu::ui::window
 
         struct InventoryExtensionRmlModel
         {
-            float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
+            float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
             Rml::String title;
             Rml::String exitTooltip;
             std::vector<LockedExtPageEntry> lockedPages;

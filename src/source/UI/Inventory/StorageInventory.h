@@ -45,7 +45,7 @@ namespace mu::ui::window
         // icons are live 3D model renders (same reasoning as CMyInventory/CStorageInventoryExt).
         struct StorageRmlModel
         {
-            float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
+            float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
 
             Rml::String title;
             bool titleLocked = false; // legacy-only red/gray title color toggle -- see SyncRmlModel()

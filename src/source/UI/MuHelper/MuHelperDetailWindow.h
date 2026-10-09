@@ -30,7 +30,7 @@ namespace mu::ui::window
 
     struct MuHelperDetailRmlModel
     {
-        float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
+        float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
 
         int page = -1;       // EMuHelperDetailPage
         int precon = -1;     // 0 = monster within hunting range, 1 = monster attacking me

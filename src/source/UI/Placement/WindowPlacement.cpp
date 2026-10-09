@@ -150,17 +150,23 @@ Rml::Vector2f PanelSize(const Entry& entry)
         const std::string& url = document->GetSourceURL();
         if (url.size() < suffix.size() || url.compare(url.size() - suffix.size(), suffix.size(), suffix) != 0)
             continue;
-        Rml::Vector2f size = fallback;
-        if (!UI::RmlBridge::RefreshLogicalPanelSize(document, "panel", size.x, size.y))
+        // The panel's layout box: its own units, before the scale a slot gives it.
+        const auto panelSize = [document]() -> Rml::Vector2f
+        {
+            Rml::Element* panel = document->GetElementById("panel");
+            return panel != nullptr ? panel->GetBox().GetSize(Rml::BoxArea::Border) : Rml::Vector2f{};
+        };
+        Rml::Vector2f size = panelSize();
+        if (size.x <= 0.f || size.y <= 0.f)
         {
             // Never shown yet: lay it out once to learn its size.
             {
                 FRAME_PROFILE(UILayout);
                 document->UpdateDocument();
             }
-            UI::RmlBridge::RefreshLogicalPanelSize(document, "panel", size.x, size.y);
+            size = panelSize();
         }
-        return size;
+        return size.x > 0.f && size.y > 0.f ? size : fallback;
     }
     return fallback;
 }

@@ -60,7 +60,7 @@ struct ChatCommandRmlModel
     // here rather than in the element's attribute.
     Rml::String editValue;
 
-    float textPx = 0.f; // native normal text size in physical px (RmlRootTransform.h)
+    float textPx = 0.f; // native normal text size in physical px (RmlNativeTextSize.h)
 
     int page = 0; // CChatCommandWindow's PAGE_*
     ChatCommandLine title;

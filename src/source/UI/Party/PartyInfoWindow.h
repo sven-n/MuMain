@@ -112,7 +112,7 @@ namespace mu::ui::window
 
         struct PartyInfoRmlModel
         {
-            float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
+            float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
 
             bool hasParty = false;
             std::vector<TextLine> emptyStateLines;

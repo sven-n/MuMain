@@ -68,7 +68,7 @@ namespace mu::ui::window
         // below) -- see SyncRmlModel().
         struct TradeRmlModel
         {
-            float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
+            float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
             float bigTextPx = 0.f; // the big font's, for the partner's name
 
             Rml::String title;

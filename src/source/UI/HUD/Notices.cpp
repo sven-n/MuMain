@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Core/Text/TextLineWrap.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
-#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/HUD/Notices.h"
 
 #include "App/Platform/Windows/Winmain.h"    // g_hFontBold

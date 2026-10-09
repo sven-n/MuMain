@@ -39,7 +39,7 @@ struct EventItemEntryRmlModel
     // Two-way through data-value, so the typed text lives here rather than in the element.
     Rml::String inputValue;
 
-    float textPx = 0.f;     // native normal text size in physical px (RmlRootTransform.h)
+    float textPx = 0.f;     // native normal text size in physical px (RmlNativeTextSize.h)
     float boldTextPx = 0.f; // native bold text size, for a bold button label
 
     std::vector<EventItemEntryTextEntry> texts;

@@ -2,7 +2,7 @@
 #include "I18N/All.h"
 
 #include "Render/Text/CUIRenderTextSDLTtf.h"
-#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"

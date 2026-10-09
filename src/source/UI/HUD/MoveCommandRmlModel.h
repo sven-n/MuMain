@@ -25,7 +25,7 @@ namespace mu::ui::window
 
     struct MoveCommandRmlModel
     {
-        float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
+        float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
 
         // Reference-space geometry CalculateLayout() derives from the dock height and the measured
         // row height; #panel and its children are authored in the same reference units.

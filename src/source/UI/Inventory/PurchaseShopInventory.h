@@ -72,7 +72,7 @@ namespace mu::ui::window
         // CMyShopInventory/CStorageInventoryExt).
         struct PurchaseShopRmlModel
         {
-            float textPx = 0.f;         // native text size in physical px (RmlRootTransform.h)
+            float textPx = 0.f;         // native text size in physical px (RmlNativeTextSize.h)
             Rml::String title;			// static "Personal Store" label
             Rml::String shopOwnerText;	// dynamic shop-owner name (m_TitleText, via ChangeTitleText())
             Rml::String warningLabel;

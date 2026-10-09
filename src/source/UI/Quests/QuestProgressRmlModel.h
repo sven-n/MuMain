@@ -31,7 +31,7 @@ namespace mu::ui::window
 
     struct QuestProgressRmlModel
     {
-        float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
+        float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
 
         Rml::String subject;
 

@@ -37,7 +37,7 @@ namespace mu::ui::window
         // model renders (same reasoning as CMyInventory/CStorageInventoryExt).
         struct MyShopRmlModel
         {
-            float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
+            float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
             Rml::String title;
 
             // The editable shop name, two-way bound to my_shop.rml's <input data-value="shop_title">.

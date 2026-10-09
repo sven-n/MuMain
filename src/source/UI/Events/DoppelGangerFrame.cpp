@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/Events/DoppelGangerFrame.h"
 #include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"

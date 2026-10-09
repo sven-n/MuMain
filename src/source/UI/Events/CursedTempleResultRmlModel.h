@@ -32,7 +32,7 @@ struct CursedTempleResultRow
 
 struct CursedTempleResultRmlModel
 {
-    float textPx = 0.f;       // native normal text size in physical px (RmlRootTransform.h)
+    float textPx = 0.f;       // native normal text size in physical px (RmlNativeTextSize.h)
     float lineHeightPx = 0.f; // native normal line height, physical px (the hero row's height)
 
     CursedTempleResultLine heroListLabel;

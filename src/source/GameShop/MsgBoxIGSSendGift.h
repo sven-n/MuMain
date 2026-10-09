@@ -6,7 +6,7 @@
 #include "GameShop/IgsDialogModel.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlThemedView.h"
-#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlNativeTextSize.h"
 
 #include <RmlUi/Core/Types.h>
 

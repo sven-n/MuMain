@@ -21,7 +21,7 @@ struct DuelWatchRoomEntry
 
 struct DuelWatchRmlModel
 {
-    float textPx = 0.f;     // native normal text size in physical px (RmlRootTransform.h)
+    float textPx = 0.f;     // native normal text size in physical px (RmlNativeTextSize.h)
     float boldTextPx = 0.f; // native bold text size
 
     Rml::String title;      // Doorkeeper Titus

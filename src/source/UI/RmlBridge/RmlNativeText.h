@@ -15,7 +15,7 @@ class ElementDocument;
 // the native text renderer's size (UI::Scaling::NativeTextPixelSize), and its
 // RCSS sizes text in `rem` -- 1rem is the original's text size at every resolution and UI scale.
 // For `dp` documents only: a document inside a transform: scale(root_scale) panel would scale the
-// root size a second time; those counter-scale text leaves instead (RmlRootTransform.h).
+// root size a second time; those counter-scale text leaves instead (RmlNativeTextSize.h).
 //
 // Scene windows the original drew at fixed pixels (login form and buttons, server list, system
 // menu) opt in with `class="scene-window-scale"` on their <body> instead: the root font-size is then

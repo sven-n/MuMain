@@ -77,7 +77,7 @@ namespace mu::ui::window
 
     struct MuHelperConfigRmlModel
     {
-        float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
+        float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
 
         int activeTab = 0;
         int huntRange = 0;

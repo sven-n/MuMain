@@ -29,7 +29,7 @@ struct CursedTempleEnterBand
 
 struct CursedTempleEnterRmlModel
 {
-    float textPx = 0.f;       // native normal text size in physical px (RmlRootTransform.h)
+    float textPx = 0.f;       // native normal text size in physical px (RmlNativeTextSize.h)
     float boldTextPx = 0.f;   // native bold text size
     float lineHeightPx = 0.f; // native normal line height, physical px (the hero band's height)
 

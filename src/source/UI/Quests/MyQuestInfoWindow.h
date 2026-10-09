@@ -129,7 +129,7 @@ namespace mu::ui::window
 
         struct MyQuestInfoRmlModel
         {
-            float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
+            float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
 
             int activeTab = TAB_QUEST;
             Rml::String tabQuestLabel, tabJobChangeLabel, tabCastleTempleLabel;

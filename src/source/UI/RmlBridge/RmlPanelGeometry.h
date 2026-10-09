@@ -5,58 +5,10 @@ namespace Rml
     class ElementDocument;
 }
 
-// Lets native hit-testing (WindowGeometry, CManager::UpdateMouseEvent()) follow a theme's actual
-// panel size instead of a hardcoded width/height literal duplicated per window. Two independent
-// families use this today: the docked-family windows (character_info/pet_info/party_info/
-// my_quest_info/quest_progress/quest_progress_etc/npc_dialogue/npc_quest) whose #panel comes from
-// docked_panel_frame.rcss, and the inventory-family windows (my_inventory/trade/storage/
-// storage_ext/mix_inventory/npc_shop/my_shop/purchase_shop/inventory_extension) whose #panel is
-// each window's own frame. Same function either way.
+// Where a window's panel goes: the size a fill slot gives it and the place a workspace slot or the
+// stage gives it, applied to its document as properties the theme reads.
 namespace UI::RmlBridge
 {
-    // Looks up `panelId` in `doc` and reads its live resolved border-box size, which is already in
-    // the logical/reference-space units WindowGeometry/MouseX/MouseY use: every #panel read here is
-    // sized in plain `px` and scaled only at paint time, by `transform: scale(root_scale)` (see
-    // SyncRootTransform, RmlRootTransform.h). RmlUi's layout box ignores a render-time transform,
-    // so no scale conversion applies -- dividing by the active transform here shrinks the hit box
-    // by that scale, which at the usual capped 2.0 leaves only the panel's top-left quarter
-    // clickable and walks the character on every click outside it. (RmlTooltip.cpp's own
-    // #tooltip_panel read genuinely is in screen pixels, but only because that document carries no
-    // root transform and its C++ pre-multiplies the scale into the width it sets -- not a
-    // precedent for this family.)
-    //
-    // Leaves `width`/`height` unchanged and returns false if `doc` is null, `panelId` isn't found,
-    // the active transform is degenerate, or the element hasn't been laid out yet (zero size --
-    // e.g. the first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next Update()
-    // pass resolves layout; see CharMakeWin.cpp's own comment on this same one-frame-stale
-    // tradeoff). Callers should pre-seed width/height with a sane fallback (typically the window's
-    // own historical hardcoded constant) rather than treating a false return as an error.
-    bool RefreshLogicalPanelSize(Rml::ElementDocument* doc, const char* panelId, float& width, float& height);
-
-    // Gives `anchorId`'s position in the logical/reference-space units a native renderer expects
-    // (m_Pos, ::RenderItemInfo()/::RenderItem3D()'s own x/y contract), as `panelPos` plus the
-    // anchor's own offset inside `panelId`. Both the theme's declared offset and `panelPos` are
-    // already reference-space, so nothing is converted -- see RefreshLogicalPanelSize() above for
-    // why a scale conversion is wrong for this document family.
-    //
-    // The delta against `#panel` is what makes that true: an anchor's raw GetAbsoluteOffset() is
-    // mixed-space (the panel's own left/top were pre-multiplied by the scale in SyncRootTransform,
-    // the anchor's offset inside it was not), so un-mapping the whole sum through the transform
-    // divides the child half and drags the result toward the panel's top-left. Take the delta, add
-    // the caller's own position; don't reintroduce a transform here.
-    //
-    // Leaves `x`/`y` unchanged and returns false if `doc` is null or either id isn't found. Callers
-    // should pre-seed x/y with the window's own historical hardcoded offset as a fallback, same
-    // convention as RefreshLogicalPanelSize() above.
-    bool RefreshLogicalAnchorPosition(Rml::ElementDocument* doc, const char* panelId,
-        const char* anchorId, const POINT& panelPos, float& x, float& y);
-
-    // RefreshLogicalAnchorPosition() plus the anchor's own size: a native rectangle (a hit area,
-    // a slot) wherever the theme draws `anchorId`. Leaves the outputs unchanged and returns false
-    // until the anchor exists and has a size.
-    bool RefreshLogicalAnchorRect(Rml::ElementDocument* doc, const char* panelId, const char* anchorId,
-        const POINT& panelPos, float& x, float& y, float& width, float& height);
-
     // The size a theme's data-fit="fill" slot gives a window (CObject::SetFillPlacementSize()), in
     // the panel's reference units; zero while the window is content-sized.
     struct FillPlacementSize

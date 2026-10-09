@@ -60,7 +60,7 @@ namespace mu::ui::window
         };
         struct LuckyItemRmlModel
         {
-            float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
+            float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
             Rml::String title;
             Rml::String mixTooltip;
             bool mixVisible = true;
