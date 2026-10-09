@@ -1,5 +1,5 @@
-/* Legacy theme for CInventoryExtension's chrome (frame/title/exit button). #panel's left/top/
-   scale come live from C++ (SyncRmlModel()), so coordinates below are plain reference px, not dp. */
+/* Legacy theme for CInventoryExtension's chrome (frame/title/exit button). The workspace places
+   #panel (its slot's left/top/scale), so coordinates below are plain reference px, not dp. */
 
 #panel {
 	position: absolute;
@@ -34,36 +34,50 @@
 .ext-btn:hover { filter: brightness(1.25); }
 
 /* Locked-page numbered lock glyph -- one file per number (not a packed atlas), each sheet is the
-   whole 25x28 source image. `left`/`width`/`height` match RenderImage(IMAGE_EXTENSION_NO.., x+85,
-   ..., 25, 28) (InventoryExtension.cpp); `top` comes per-instance from C++ (page.top). */
+   whole 25x28 source image, at the original's 85,71 (74,29 within its page). */
 @spritesheet ext-lock-1-sheet { src: "../../../newui_item_add_marking_no01.tga"; ext-lock-1: 0px 0px 25px 28px; }
 @spritesheet ext-lock-2-sheet { src: "../../../newui_item_add_marking_no02.tga"; ext-lock-2: 0px 0px 25px 28px; }
 @spritesheet ext-lock-3-sheet { src: "../../../newui_item_add_marking_no03.tga"; ext-lock-3: 0px 0px 25px 28px; }
 @spritesheet ext-lock-4-sheet { src: "../../../newui_item_add_marking_no04.tga"; ext-lock-4: 0px 0px 25px 28px; }
 
+/* A locked page's table and empty-slot art: the original's 173x87 and 161x81 from each image's
+   top-left. */
+@spritesheet ext-table-sheet { src: "../../../newui_item_add_table.tga"; ext-table: 0px 0px 173px 87px; }
+@spritesheet ext-empty-sheet { src: "../../../newui_item_add_marking_non.jpg"; ext-empty: 0px 0px 161px 81px; }
+.ext-locked-empty {
+	position: absolute;
+	left: 4px;
+	top: 3px;
+	width: 161px;
+	height: 81px;
+	pointer-events: none;
+	decorator: image(ext-empty);
+}
+
 .ext-locked-page {
 	position: absolute;
-	left: 85px;
-	width: 25px;
-	height: 28px;
+	left: 11px;
+	width: 173px;
+	height: 87px;
 	pointer-events: none;
+	decorator: image(ext-table);
 }
 .ext-locked-icon {
 	position: absolute;
-	left: 0;
-	top: 0;
+	left: 74px;
+	top: 29px;
 	width: 25px;
 	height: 28px;
 	pointer-events: none;
 	/* decorator set per-instance via data-style-decorator (inventory_extension.rml). */
 }
 
-/* Each locked page's own row (71 + HEIGHT_PER_EXT per page) and its marking. The pages shown are
+/* Each locked page's own row (42 + 87 per page) and its marking. The pages shown are
    sparse, so a row is identified by which page it is rather than by its place in the list. */
-.ext-locked-page.page-1 { top: 71px; }
-.ext-locked-page.page-2 { top: 158px; }
-.ext-locked-page.page-3 { top: 245px; }
-.ext-locked-page.page-4 { top: 332px; }
+.ext-locked-page.page-1 { top: 42px; }
+.ext-locked-page.page-2 { top: 129px; }
+.ext-locked-page.page-3 { top: 216px; }
+.ext-locked-page.page-4 { top: 303px; }
 .page-1 .ext-locked-icon { decorator: image(ext-lock-1); }
 .page-2 .ext-locked-icon { decorator: image(ext-lock-2); }
 .page-3 .ext-locked-icon { decorator: image(ext-lock-3); }
@@ -96,3 +110,8 @@
 
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
 #title { margin-left: calc(50% - 50% * var(--root-scale)); }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }
+#panel { font-size: calc(var(--text-px, 12px) / var(--root-scale)); }

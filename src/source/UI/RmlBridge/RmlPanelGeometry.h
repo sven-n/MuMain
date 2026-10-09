@@ -94,5 +94,7 @@ namespace UI::RmlBridge
         void Apply(Rml::ElementDocument* doc, const char* panelId) const;
         // Applies the placement again to a document that lost it (rebuilt by a theme switch).
         void Sync(Rml::ElementDocument* doc, const char* panelId) const;
+        // Returns a panel the player dragged (MakeDraggable()) to where its slot puts it.
+        static void ResetDrag(Rml::ElementDocument* doc, const char* panelId);
     };
 }

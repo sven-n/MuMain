@@ -430,6 +430,8 @@ static void PlaceSlots(const Rml::ElementList& slots, const UI::Scaling::Transfo
             continue;
         const UI::Scaling::Transform transform{scale, scale, offset.x, offset.y,
                                                UI::Scaling::TypographyScale(WindowWidth, WindowHeight)};
+        if (!entry->placed)
+            window->ResetSlotDrag();
         window->PlaceInSlot(transform);
         if (slot->IsClassSet("fill"))
         {
@@ -536,20 +538,6 @@ void Update()
             window->SyncSlotPlacement();
         }
     }
-}
-
-bool PanelSizeOf(std::uint32_t windowId, float& width, float& height)
-{
-    for (const auto& [name, entry] : g_windows)
-    {
-        if (entry.windowId != windowId || entry.document.empty())
-            continue;
-        const Rml::Vector2f size = PanelSize(entry);
-        width = size.x;
-        height = size.y;
-        return true;
-    }
-    return false;
 }
 
 float UncoveredWorldLeft()

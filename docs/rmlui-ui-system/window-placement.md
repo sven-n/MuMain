@@ -129,7 +129,7 @@ theme reload, a HUD part shown or hidden, the chat log resizing) call `Invalidat
 - **`data-fit="fill"`**: the window takes the slot's size; never less than its content size (or
   its `GetFillMinimumSize()`). A window opts in by returning its document from
   `CObject::GetFillDocument()`, using `UI::RmlBridge::FillPlacementSize`, and a top-right
-  `#frame_corner_close` element instead of the native fixed-offset `HandleFrameCornerClose()`. A
+  `#frame_corner_close` element (base.rcss), so its close follows the filled panel. A
   window without fill support falls back to content and logs a warning.
 
 24 windows can fill: the docked RmlUi windows (character, pet, party, guild info and make,

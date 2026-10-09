@@ -12,7 +12,7 @@
 
 /* Header uses base.rcss's .modern-header-rail-px/.modern-joint-px/.modern-header-text-px/
    .modern-header-title-px family -- the px companions of SysMenu's own
-   dp-based classes (see base.rcss's comment on that class family for why a root_scale-driven
+   dp-based classes (see base.rcss's comment on that class family for why a scaled
    #panel like this one needs the px variants, not the dp originals).
 
    top:7 matches SysMenu's own rail top exactly (so .modern-joint-px's rivet sits at the same -1px
@@ -191,3 +191,7 @@
 		token(metal-warm-edge) 70%,
 		transparent);
 }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }

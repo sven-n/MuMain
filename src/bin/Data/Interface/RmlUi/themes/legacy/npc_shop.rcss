@@ -1,7 +1,6 @@
 /* Legacy theme for CNPCShop's chrome (frame/title/tax-rate line/repair buttons/repair-money
-   strip). #panel's left/top/scale come live from C++ (SyncRmlModel()), so coordinates below are
-   plain reference px, not dp. No exit button -- see npc_shop.rml's own comment; the frame-corner
-   close "X" stays native. Button/text positions match NPCShop.cpp's former RenderTexts()/
+   strip). The workspace places #panel (its slot's left/top/scale), so coordinates below are
+   plain reference px, not dp. No exit button -- the frame's corner "X" closes it. Button/text positions match NPCShop.cpp's former RenderTexts()/
    SetButtonInfo()/RenderRepairMoney() constants. */
 
 #panel {
@@ -101,3 +100,8 @@
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
 #title { margin-left: calc(50% - 50% * var(--root-scale)); }
 #tax_rate { margin-left: calc(50% - 50% * var(--root-scale)); }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }
+#panel { font-size: calc(var(--text-px, 12px) / var(--root-scale)); }

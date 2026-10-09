@@ -9,9 +9,8 @@
 	<!-- CInventoryExtension (InventoryExtension.h): the frame, the four extension grids, the
 	     locked pages' art and the items C++ draws live into #item_view, the stack counts, title and
 	     exit button. -->
-	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale"
-	     data-style-font-size="(text_px / root_scale) + 'px'">
+	<div id="panel" data-style---text-px="text_px + 'px'">
+		<div id="frame_corner_close" data-event-click="window_close"></div>
 		<!-- The frame. -->
 		<div class="bg-fill"></div>
 		<div class="bg-top"></div>
@@ -89,12 +88,11 @@
 
 		<div id="btn_exit" class="ext-btn" data-event-click="inventory_extension_exit_click" data-attr-data-hint="exit_tooltip"></div>
 
-		<!-- Locked (not-yet-purchased) pages' numbered lock glyph -- flat decorative overlay,
-		     no live 3D content underneath. Table/empty-slot backing art behind this stays native
-		     (InventoryExtension.cpp's RenderFrame()). -->
+		<!-- Locked (not-yet-purchased) pages: the page's table, its empty slots and its number. -->
 		<div class="ext-locked-page" data-for="page : locked_pages"
 		     data-class-page-1="page.number == 1" data-class-page-2="page.number == 2"
 		     data-class-page-3="page.number == 3" data-class-page-4="page.number == 4">
+			<div class="ext-locked-empty"></div>
 			<div class="ext-locked-icon"></div>
 		</div>
 	</div>

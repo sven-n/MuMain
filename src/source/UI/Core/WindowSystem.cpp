@@ -1787,37 +1787,6 @@ bool CSystem::CheckKeyUse()
     return false;
 }
 
-bool CSystem::HandleFrameCornerClose(const POINT& winPos, DWORD dwKey)
-{
-    if (!ConsumeFrameCornerClick(winPos, dwKey))
-        return false;
-    Hide(dwKey);
-    return true;
-}
-
-bool CSystem::ConsumeFrameCornerClick(const POINT& winPos, DWORD dwKey)
-{
-    // Hit-box of the close "X" glyph in the shared frame: 21 in from the panel's right edge (169 in
-    // the original 190-wide panel), so it follows a theme-sized panel.
-    constexpr int RIGHT_INSET = 21, Y_OFFSET = 7, WIDTH = 13, HEIGHT = 12;
-    if (!IsPress(VK_LBUTTON))
-        return false;
-
-    float panelWidth = 190.f;
-    float panelHeight = 429.f;
-    UI::Placement::PanelSizeOf(dwKey, panelWidth, panelHeight);
-    const int xOffset = static_cast<int>(std::lround(panelWidth)) - RIGHT_INSET;
-    if (CheckMouseIn(winPos.x + xOffset, winPos.y + Y_OFFSET, WIDTH, HEIGHT))
-    {
-        // World movement reads MouseLButtonPush directly, so clear it or the click walks the character.
-        MouseLButton = false;
-        MouseLButtonPop = false;
-        MouseLButtonPush = false;
-        return true;
-    }
-    return false;
-}
-
 bool CSystem::Update()
 {
     // Before any window syncs its document: see ResumeMainSceneDocuments().

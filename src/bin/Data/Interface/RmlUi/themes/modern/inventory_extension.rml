@@ -9,8 +9,8 @@
 	<!-- CInventoryExtension (InventoryExtension.h): the frame, the four extension grids, the
 	     locked pages' art and the items C++ draws live into #item_view, the stack counts, title and
 	     exit button. -->
-	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-style---text-px="text_px + 'px'">
+		<div id="frame_corner_close" data-event-click="window_close"></div>
 		<!-- The frame. -->
 		<div class="bg-panel">
 			<div class="inv-shell-edge"></div>
@@ -100,11 +100,11 @@
 		</div>
 
 		<!-- Locked (not-yet-purchased) pages -- vector badge instead of legacy's raster lock
-		     glyph, matching this theme's forged-metal chrome language. Table/empty-slot backing
-		     art behind this stays native (InventoryExtension.cpp's RenderFrame()). -->
+		     glyph, matching this theme's forged-metal chrome language, on the page's table art. -->
 		<div class="ext-locked-page" data-for="page : locked_pages"
 		     data-class-page-1="page.number == 1" data-class-page-2="page.number == 2"
 		     data-class-page-3="page.number == 3" data-class-page-4="page.number == 4">
+			<div class="ext-locked-empty"></div>
 			<div class="ext-locked-badge">{{page.number}}</div>
 		</div>
 	</div>

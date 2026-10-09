@@ -61,22 +61,15 @@ namespace mu::ui::window
         };
 
     private:
-        // Pre-layout fallback only -- WindowGeometry's real hit-box comes from #panel's own live
-        // RCSS size (UI::RmlBridge::RefreshLogicalPanelSize(), read at each call site), not these
-        // constants. Used solely to seed that call before RmlUi's first layout pass has run
-        // (Create()/Show(true)/a theme switch's first frame); never referenced by the native
-        // paperdoll/grid rendering, which has its own separate, still-native offset.
-        static constexpr float INVENTORY_WIDTH  = 190.0f;
-        static constexpr float INVENTORY_HEIGHT = 429.0f;
 
         typedef struct tagEQUIPMENT_ITEM
         {
-            int x, y;
-            int width, height;
+            // The theme's slot and its #<slot>_item, where they are drawn (window pixels).
+            float x, y;
+            float width, height;
             DWORD dwBgImage;
-            // Where the equipped item draws and the pointer hits it: the theme's #<slot>_item.
-            int itemX, itemY;
-            int itemWidth, itemHeight;
+            float itemX, itemY;
+            float itemWidth, itemHeight;
         } EQUIPMENT_ITEM;
 
         CManager* m_pNewUIMng;
@@ -101,7 +94,6 @@ namespace mu::ui::window
         {
             // Shared transform group for this document, sourced from UI::Scaling::GetActiveTransform()
             // since this window is movable (SetPos()), not HUD-anchored.
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // UI::RmlBridge::SyncNativeTextSize()
 
             Rml::String title;
@@ -170,7 +162,6 @@ namespace mu::ui::window
         void SetPos(int x, int y);
         // Moves the equipment slots and item grid to where the theme draws their anchors.
         void SyncNativeLayout();
-        const POINT& GetPos() const;
 
         void SetRepairMode(bool bRepair);
 
@@ -182,6 +173,7 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         void Render3D();
 
         bool IsVisible() const;
@@ -238,6 +230,8 @@ namespace mu::ui::window
         void UnloadImages();
 
         bool EquipmentWindowProcess();
+        // The pointer over the drawn panel.
+        bool IsPointerOverPanel() const;
         bool InventoryProcess() const;
         bool WindowProcess();
 
@@ -247,7 +241,7 @@ namespace mu::ui::window
 
         // The equipped and the grid's items, into the document's #item_view. Last, so it is
         // destroyed first.
-        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { Render3D(); }, this};
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { Render3D(); }};
     };
 
 } // namespace mu::ui::window

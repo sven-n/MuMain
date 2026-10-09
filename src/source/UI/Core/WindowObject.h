@@ -94,6 +94,8 @@ namespace mu::ui::window
             if (m_slotPlacement.Set(0.f, 0.f, 0.f))
                 m_slotPlacement.Apply(GetPlacedDocument(), PlacedRootId());
         }
+        // The workspace opens this window's slot again: a drag the player made ends.
+        void ResetSlotDrag() const { UI::RmlBridge::SlotPlacement::ResetDrag(GetPlacedDocument(), PlacedRootId()); }
         // Once a frame: gives a document rebuilt since (a theme switch) its slot placement again.
         void SyncSlotPlacement() const { m_slotPlacement.Sync(GetPlacedDocument(), PlacedRootId()); }
         // The transform this window's logical coordinates map through to screen pixels.

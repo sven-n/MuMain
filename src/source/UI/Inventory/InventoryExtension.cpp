@@ -3,8 +3,8 @@
 #include "I18N/All.h"
 
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlWindowClose.h"
 
 // RmlUi migration -- see this class's header comment.
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -66,7 +66,6 @@ bool CInventoryExtension::Create(CManager* pNewUIMng, int x, int y)
     }
 
     SetPos(x, y);
-    LoadImages();
 
     BuildRmlUi();
 
@@ -83,9 +82,7 @@ void CInventoryExtension::BindRmlModel(Rml::DataModelConstructor& c, InventoryEx
     lockedPage.RegisterMember("number", &LockedExtPageEntry::number);
     c.RegisterArray<std::vector<LockedExtPageEntry>>();
 
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
+    UI::RmlBridge::BindWindowClose(c, INTERFACE_INVENTORY_EXT);
     UI::Items::RegisterItemGridCells(c);
     c.Bind("grid_cells_1", &model.gridCells1);
     c.Bind("grid_cells_2", &model.gridCells2);
@@ -111,7 +108,6 @@ void CInventoryExtension::BuildRmlUi()
 void CInventoryExtension::Release()
 {
     m_ItemTarget.Disable();
-    UnloadImages();
 
     for (auto extension : m_extensions)
     {
@@ -138,10 +134,6 @@ void CInventoryExtension::SetPos(int x, int y)
 
 bool CInventoryExtension::UpdateMouseEvent()
 {
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_INVENTORY_EXT))
-        return false;
-
     for (int i = 0; i < CharacterAttribute->InventoryExtensions; i++)
     {
         if (const auto m_extension = m_extensions[i])
@@ -158,12 +150,7 @@ bool CInventoryExtension::UpdateMouseEvent()
         }
     }
 
-    // #panel's own live RCSS size is the source of truth -- WIDTH/HEIGHT only cover the first
-    // frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
-    float panelWidth = WIDTH;
-    float panelHeight = HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
+    if (IsPointerOverPanel())
     {
         if (IsPress(VK_RBUTTON))
         {
@@ -182,14 +169,17 @@ bool CInventoryExtension::UpdateMouseEvent()
     return true;
 }
 
+bool CInventoryExtension::IsPointerOverPanel()
+{
+    // #panel takes no pointer events, so the grids' clicks stay native; its drawn box still holds
+    // the pointer.
+    Rml::ElementDocument* document = m_RmlView.Document();
+    return UI::RmlBridge::IsPointerWithin(document != nullptr ? document->GetElementById("panel") : nullptr);
+}
+
 bool CInventoryExtension::InventoryProcess()
 {
-    // #panel's own live RCSS size is the source of truth -- WIDTH/HEIGHT only cover the first
-    // frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
-    float panelWidth = WIDTH;
-    float panelHeight = HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (!mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
+    if (!IsPointerOverPanel())
     {
         return false;
     }
@@ -239,35 +229,20 @@ bool CInventoryExtension::Render()
     return true;
 }
 
-void CInventoryExtension::RenderFrame() const
-{
-    const auto x = static_cast<float>(m_Pos.x);
-    const auto y = static_cast<float>(m_Pos.y);
-
-    // Locked (not-yet-purchased) pages' table/empty-slot backing art only -- the outer frame and
-    // the numbered lock glyph on top of it moved to RmlUi (see this class's header comment).
-    for (int i = MAX_INVENTORY_EXT_COUNT - 1; i >= CharacterAttribute->InventoryExtensions; --i)
-    {
-        RenderImage(IMAGE_EXTENSION_TABLE, x + 11, y + 42 + i * HEIGHT_PER_EXT, 173, HEIGHT_PER_EXT);
-        RenderImage(IMAGE_EXTENSION_EMPTY, x + 15, y + 45 + i * HEIGHT_PER_EXT, 161, HEIGHT_PER_EXT - (EXT_BORDER * 2));
-    }
-}
-
 void CInventoryExtension::SyncRmlModel()
 {
     m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     if (m_extensions[0])
-        m_extensions[0]->FollowGrid(m_RmlView.Document(), "item_grid_1", m_Pos, 15, 45);
+        m_extensions[0]->FollowGridPx(m_RmlView.Document(), "item_grid_1");
     if (m_extensions[1])
-        m_extensions[1]->FollowGrid(m_RmlView.Document(), "item_grid_2", m_Pos, 15, 132);
+        m_extensions[1]->FollowGridPx(m_RmlView.Document(), "item_grid_2");
     if (m_extensions[2])
-        m_extensions[2]->FollowGrid(m_RmlView.Document(), "item_grid_3", m_Pos, 15, 219);
+        m_extensions[2]->FollowGridPx(m_RmlView.Document(), "item_grid_3");
     if (m_extensions[3])
-        m_extensions[3]->FollowGrid(m_RmlView.Document(), "item_grid_4", m_Pos, 15, 306);
+        m_extensions[3]->FollowGridPx(m_RmlView.Document(), "item_grid_4");
     if (m_extensions[0] && m_RmlView.GetModel().gridCells1 != m_extensions[0]->Cells())
     {
         m_RmlView.GetModel().gridCells1 = m_extensions[0]->Cells();
@@ -300,7 +275,7 @@ void CInventoryExtension::SyncRmlModel()
     syncWide(&InventoryExtensionRmlModel::title, "title", I18N::Game::ExpandedInventory);
     syncWide(&InventoryExtensionRmlModel::exitTooltip, "exit_tooltip", I18N::Game::Close388);
 
-    // Locked-page lock glyph list -- rebuilt unconditionally every call, same "rebuild every
+    // Locked-page list -- rebuilt unconditionally every call, same "rebuild every
     // frame" convention as CBuffStrip's buff list (list is tiny: at most MAX_INVENTORY_EXT_COUNT
     // entries). Reflects CharacterAttribute->InventoryExtensions, the purchased-page count.
     model.lockedPages.clear();
@@ -321,21 +296,6 @@ void CInventoryExtension::SyncRmlModel()
 float CInventoryExtension::GetLayerDepth()
 {
     return 4.55;
-}
-
-void CInventoryExtension::LoadImages()
-{
-    // Frame/exit-button art moved to RmlUi (inventory_extension.rcss).
-    // Numbered lock glyphs moved to RmlUi too -- only the locked page's table/empty-slot backing
-    // art stays native (see this class's header comment).
-    LoadBitmap(L"Interface\\newui_item_add_marking_non.jpg", IMAGE_EXTENSION_EMPTY, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_add_table.tga", IMAGE_EXTENSION_TABLE, GL_LINEAR);
-}
-
-void CInventoryExtension::UnloadImages()
-{
-    DeleteBitmap(IMAGE_EXTENSION_EMPTY);
-    DeleteBitmap(IMAGE_EXTENSION_TABLE);
 }
 
 CInventoryCtrl* CInventoryExtension::TryGetExtensionByInventoryIndex(int iIndex) const
@@ -442,15 +402,9 @@ CInventoryCtrl* CInventoryExtension::GetOwnerOf(const CPickedItem* pPickedItem) 
     return nullptr;
 }
 
-// Into #item_view (m_ItemTarget), in this window's layout space: the locked extensions' art, then
-// the items.
+// Into #item_view (m_ItemTarget), in window pixels (the grids' FollowGridPx()): the items.
 void CInventoryExtension::RenderItems()
 {
-    DisableDepthTest();
-    EnableAlphaTest();
-    RenderFrame();
-    DisableAlphaBlend();
-    EnableDepthTest();
     if (m_extensions[0] && m_extensions[0]->IsVisible())
         m_extensions[0]->Render3D();
     if (m_extensions[1] && m_extensions[1]->IsVisible())

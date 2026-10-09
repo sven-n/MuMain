@@ -1,8 +1,7 @@
 /* Modern theme for CNPCShop's chrome -- header/repair-buttons/repair-money strip are vector
    forged-metal chrome (matching Login/SysMenu/MyInventory/Storage Ext's forged-dialog language).
-   Inventory grid stays fully native (sprite art + live 3D icons), same as legacy -- no RmlUi
-   involvement there. No exit button -- see npc_shop.rml's own comment; the frame-corner close "X"
-   stays native. */
+   The grid's items stay live 3D, drawn by C++. No exit button -- the frame's corner "X" closes
+   it. */
 
 #panel {
 	position: absolute;
@@ -153,3 +152,7 @@
 		token(metal-warm-edge) 70%,
 		transparent);
 }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }

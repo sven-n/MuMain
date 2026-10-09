@@ -292,21 +292,23 @@ TEST_CASE("inventory consumes picked-item presses before world input [ui][invent
     CHECK_FALSE(UI::Items::Drag::ShouldConsumePanelPress(false, true));
 }
 
-TEST_CASE("store window consumes passive hover before world selection [ui][store]")
+// The shop holds the pointer by its drawn panel (RmlPointer's IsPointWithin(), tested with the
+// slot placement); a shop with no panel drawn leaves it to the world.
+TEST_CASE("store window without a drawn panel leaves the pointer to the world [ui][store]")
 {
-    const int previousMouseX = MouseX;
-    const int previousMouseY = MouseY;
-    MouseX = 100;
-    MouseY = 200;
+    const float previousX = g_fWindowMouseX;
+    const float previousY = g_fWindowMouseY;
+    g_fWindowMouseX = 100.f;
+    g_fWindowMouseY = 200.f;
 
     {
         mu::ui::window::CNPCShop shop;
         shop.SetSellingItem(true);
-        CHECK_FALSE(shop.UpdateMouseEvent());
+        CHECK(shop.UpdateMouseEvent());
     }
 
-    MouseX = previousMouseX;
-    MouseY = previousMouseY;
+    g_fWindowMouseX = previousX;
+    g_fWindowMouseY = previousY;
 }
 
 TEST_CASE("right dock anchors existing panel columns to the viewport edge [ui][scaling]")

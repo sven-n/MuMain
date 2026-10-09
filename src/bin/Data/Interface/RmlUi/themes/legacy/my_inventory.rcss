@@ -1,6 +1,6 @@
 /* Legacy theme for CMyInventory: RenderFrame()'s five-piece frame, the equipment slots'
-   newui_item_* art, the item grid (item_grid.rcss), title, gold and buttons. #panel's left/top/scale
-   come live from C++ (SyncRmlModel()), so coordinates below are plain reference px, not dp. Button
+   newui_item_* art, the item grid (item_grid.rcss), title, gold and buttons. The workspace places
+   #panel (its slot's left/top/scale), so coordinates below are plain reference px, not dp. Button
    icons/positions match CMyInventory::SetButtonInfo()'s former constants. */
 
 @spritesheet inv-bg-fill-sheet  { src: "../../../newui_msgbox_back.jpg";  inv-bg-fill:   0px 0px 190px 429px; }
@@ -181,3 +181,7 @@
 .equip-slot.refused .equip-slot-item { background-color: rgba(230, 26, 26, 102); }
 #item_grid, #item_grid_counts { left: 15px; top: 200px; width: calc(8 * var(--item-cell)); height: calc(8 * var(--item-cell)); }
 #option_tooltip_anchor { left: 95px; top: 40px; }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }

@@ -66,14 +66,3 @@
 
 /* A theme's data-fit="fill" slot sizes #panel (class fill-placement), its border included. */
 #panel.fill-placement { box-sizing: border-box; }
-/* The frame's corner close (the original's 13x12 at 169,7), pinned to #panel's top-right corner;
-   each window's markup adds it with its own close event. */
-#frame_corner_close {
-	position: absolute;
-	top: 7px;
-	right: 8px;
-	width: 13px;
-	height: 12px;
-	cursor: pointer;
-	pointer-events: auto;
-}

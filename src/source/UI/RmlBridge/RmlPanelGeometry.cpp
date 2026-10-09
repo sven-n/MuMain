@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "RmlPanelGeometry.h"
+#include "RmlDraggable.h"
 
 #include "UI/Scaling/UITransform.h"
 
@@ -90,6 +91,8 @@ void UI::RmlBridge::SlotPlacement::Apply(Rml::ElementDocument* doc, const char* 
     if (panel == nullptr)
         return;
 
+    // A new place takes over from where the player dragged it.
+    ResetDrag(doc, panelId);
     const bool placed = scale > 0.f;
     panel->SetClass("slot-placed", placed);
     if (placed)
@@ -113,6 +116,13 @@ void UI::RmlBridge::SlotPlacement::Sync(Rml::ElementDocument* doc, const char* p
     Rml::Element* panel = doc->GetElementById(panelId);
     if (panel != nullptr && !panel->IsClassSet("slot-placed"))
         Apply(doc, panelId);
+}
+
+void UI::RmlBridge::SlotPlacement::ResetDrag(Rml::ElementDocument* doc, const char* panelId)
+{
+    Rml::Element* panel = doc != nullptr ? doc->GetElementById(panelId) : nullptr;
+    if (panel != nullptr && panel->IsClassSet("dragged"))
+        ResetDraggedPosition(panel);
 }
 
 bool UI::RmlBridge::RefreshLogicalAnchorRect(Rml::ElementDocument* doc, const char* panelId, const char* anchorId,

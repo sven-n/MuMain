@@ -322,8 +322,7 @@ bool CTrade::DrawnPanel(Rml::Vector2f& offset, float& scale)
     Rml::Vector2f size;
     if (element == nullptr || !UI::RmlBridge::DrawnContentBox(*element, offset, size))
         return false;
-    const float layoutWidth = element->GetBox().GetSize(Rml::BoxArea::Content).x;
-    scale = layoutWidth > 0.f ? size.x / layoutWidth : 1.f;
+    scale = UI::RmlBridge::DrawnScale(*element);
     return true;
 }
 

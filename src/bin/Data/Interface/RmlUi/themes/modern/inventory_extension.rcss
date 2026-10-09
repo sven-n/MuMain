@@ -1,7 +1,6 @@
 /* Modern theme for CInventoryExtension's chrome -- header/exit-button are vector forged-metal
-   chrome (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language). Extension
-   grids stay fully native (sprite art + live 3D icons), same as legacy -- no RmlUi involvement
-   there. */
+   chrome (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language). The grids'
+   items stay live 3D, drawn by C++. */
 
 #panel {
 	position: absolute;
@@ -30,20 +29,34 @@
 
 /* Locked (not-yet-purchased) page badge -- vector tile instead of legacy's raster lock-number
    sprite, matching this theme's forged-metal chrome language (same dimmed-tile idea as
-   base.rcss's .modern-icon-btn-px.locked). Footprint matches the native placeholder area this
-   overlays (RenderImage(IMAGE_EXTENSION_NO.., x+85, ..., 25, 28) in InventoryExtension.cpp) so it
-   lines up with the still-native table/empty-slot backing art around it. */
+   base.rcss's .modern-icon-btn-px.locked). Footprint and place match legacy's 25x28 lock
+   glyph on its page's table art. */
+/* A locked page's table and empty-slot art: the original's 173x87 and 161x81 from each image's
+   top-left. */
+@spritesheet ext-table-sheet { src: "../../../newui_item_add_table.tga"; ext-table: 0px 0px 173px 87px; }
+@spritesheet ext-empty-sheet { src: "../../../newui_item_add_marking_non.jpg"; ext-empty: 0px 0px 161px 81px; }
+.ext-locked-empty {
+	position: absolute;
+	left: 4px;
+	top: 3px;
+	width: 161px;
+	height: 81px;
+	pointer-events: none;
+	decorator: image(ext-empty);
+}
+
 .ext-locked-page {
 	position: absolute;
-	left: 85px;
-	width: 25px;
-	height: 28px;
+	left: 11px;
+	width: 173px;
+	height: 87px;
 	pointer-events: none;
+	decorator: image(ext-table);
 }
 .ext-locked-badge {
 	position: absolute;
-	left: 0;
-	top: 0;
+	left: 74px;
+	top: 29px;
 	width: 25px;
 	height: 28px;
 	text-align: center;
@@ -62,12 +75,12 @@
 	pointer-events: none;
 }
 
-/* Each locked page's own row (71 + HEIGHT_PER_EXT per page). The pages shown are sparse, so a row
+/* Each locked page's own row (42 + 87 per page). The pages shown are sparse, so a row
    is identified by which page it is rather than by its place in the list. */
-.ext-locked-page.page-1 { top: 71px; }
-.ext-locked-page.page-2 { top: 158px; }
-.ext-locked-page.page-3 { top: 245px; }
-.ext-locked-page.page-4 { top: 332px; }
+.ext-locked-page.page-1 { top: 42px; }
+.ext-locked-page.page-2 { top: 129px; }
+.ext-locked-page.page-3 { top: 216px; }
+.ext-locked-page.page-4 { top: 303px; }
 
 /* Native item grids: the first cell's top-left, in #panel's units. */
 .native-anchor { position: absolute; pointer-events: none; }
@@ -165,3 +178,7 @@
 		token(metal-warm-edge) 70%,
 		transparent);
 }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }

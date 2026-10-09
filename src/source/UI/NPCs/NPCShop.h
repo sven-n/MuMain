@@ -29,16 +29,6 @@ namespace mu::ui::window
         };
 
     private:
-        // NPCSHOP_WIDTH/HEIGHT below are a pre-layout fallback only -- WindowGeometry's real
-        // hit-box comes from #panel's own live RCSS size (UI::RmlBridge::RefreshLogicalPanelSize(),
-        // read at WindowProcess()'s call site), seeded with these only for the first frame before
-        // RmlUi's layout has run. Never referenced by the native shop-grid rendering, which has its
-        // own separate offset.
-        enum
-        {
-            NPCSHOP_WIDTH = 190,
-            NPCSHOP_HEIGHT = 429,
-        };
 
         CManager* m_pNewUIMng;
         CInventoryCtrl* m_pNewInventoryCtrl;
@@ -55,12 +45,9 @@ namespace mu::ui::window
 
         // Window frame/title/tax-rate line/repair buttons/repair-money strip are RmlUi; the
         // inventory grid stays native since its icons are live 3D model renders (same reasoning
-        // as CMyInventory/CStorageInventoryExt). This window has no dedicated native exit button --
-        // its corner-close "X" is the generic frame-corner hit-test (BtnProcess()'s
-        // HandleFrameCornerClose() call), left untouched by this migration.
+        // as CMyInventory/CStorageInventoryExt).
         struct NPCShopRmlModel
         {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
             Rml::String title;
@@ -85,8 +72,7 @@ namespace mu::ui::window
 
         // The grids' items, into the document's #item_view.
         void RenderItems();
-        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
-                                                 this};
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); }};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -104,6 +90,7 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
 
         float GetLayerDepth();	//. 2.5f
 
@@ -136,7 +123,6 @@ namespace mu::ui::window
         void Init();
 
         bool InventoryProcess();
-        bool BtnProcess();
         bool WindowProcess();
     };
 }

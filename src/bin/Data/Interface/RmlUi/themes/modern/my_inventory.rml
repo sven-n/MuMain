@@ -8,8 +8,8 @@
 <body data-model="my_inventory">
 	<!-- CMyInventory (MyInventory.h): the frame, the equipment slots, the item grid, the items
 	     C++ draws live into #item_view, the stack counts, the title, gold and buttons. -->
-	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-style---text-px="text_px + 'px'">
+		<div id="frame_corner_close" data-event-click="window_close"></div>
 		<div class="bg-panel">
 			<div class="inv-shell-edge"></div>
 			<div class="inv-groove"></div>
@@ -51,7 +51,7 @@
 			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
 		<div id="option_tooltip_anchor" class="native-anchor"></div>
-		<!-- Header rail: `-px` variants since #panel carries transform:scale(root_scale) (see
+		<!-- Header rail: `-px` variants since #panel carries its placement's scale (see
 		     base.rcss). Fill/accent are the frame's .rail-fill/.rail-accent above. -->
 		<div class="modern-header-rail-px inv-header-rail">
 			<div class="modern-joint-px"></div>

@@ -504,12 +504,7 @@ void CMixInventory::SyncSocketListModel()
 float CMixInventory::DrawnPanelScale()
 {
     Rml::Element* panel = m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr;
-    Rml::Vector2f offset;
-    Rml::Vector2f size;
-    if (panel == nullptr || !UI::RmlBridge::DrawnContentBox(*panel, offset, size))
-        return 1.f;
-    const float layoutWidth = panel->GetBox().GetSize(Rml::BoxArea::Content).x;
-    return layoutWidth > 0.f ? size.x / layoutWidth : 1.f;
+    return panel != nullptr ? UI::RmlBridge::DrawnScale(*panel) : 1.f;
 }
 
 void CMixInventory::SyncMixContentModel()

@@ -110,13 +110,6 @@ namespace mu::ui::window
         void Toggle(DWORD dwKey);	//. Show <-> Hide
         void HideAll();
 
-        // Shared handler for the item-frame's top-right close glyph: hides dwKey on click and
-        // swallows the mouse so it doesn't fall through to the world.
-        bool HandleFrameCornerClose(const POINT& winPos, DWORD dwKey);
-        // The click half of HandleFrameCornerClose(), for a window that closes itself its own way:
-        // true, with the click consumed, when it landed on the X of dwKey's panel at winPos.
-        bool ConsumeFrameCornerClick(const POINT& winPos, DWORD dwKey);
-
         void Enable(DWORD dwKey);
         void Disable(DWORD dwKey);
 

@@ -1091,3 +1091,18 @@ input, select, textarea, .btn, [data-event-click] { drag: block; }
 .effect-gauge .level-gauge-fill.level-3 { width: 60%; }
 .effect-gauge .level-gauge-fill.level-4 { width: 80%; }
 .effect-gauge .level-gauge-fill.level-5 { width: 100%; }
+
+/* The frame's corner close: an unstyled hit box over the close "X" the frame art draws at the
+   panel's top-right (its circle spans about 166-182 x 4-20 of the original 190-wide panel), a
+   little larger than the circle so it is easy to hit, and above the panel's other parts (a title
+   bar that is also a drag handle). Each window's markup adds it with its own close event. */
+#frame_corner_close {
+	position: absolute;
+	top: 1px;
+	right: 3px;
+	width: 24px;
+	height: 22px;
+	cursor: pointer;
+	pointer-events: auto;
+	z-index: 1;
+}

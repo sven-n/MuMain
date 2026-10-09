@@ -5,8 +5,8 @@
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -86,9 +86,12 @@ bool mu::ui::window::CNPCShop::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CNPCShop::BindRmlModel(Rml::DataModelConstructor& c, NPCShopRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
+    // The frame's corner close; a sale in flight keeps the shop open.
+    UI::RmlBridge::BindWindowClose(c, [this]
+        {
+            if (!m_bSellingItem)
+                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCSHOP);
+        });
     UI::Items::RegisterItemGridCells(c);
     c.Bind("grid_cells", &model.gridCells);
     c.Bind("text_px", &model.textPx);
@@ -207,11 +210,6 @@ bool mu::ui::window::CNPCShop::UpdateMouseEvent()
         }
     }
 
-    if (BtnProcess() == true)
-    {
-        return false;
-    }
-
     if (WindowProcess())
         return false;
 
@@ -220,12 +218,10 @@ bool mu::ui::window::CNPCShop::UpdateMouseEvent()
 
 bool mu::ui::window::CNPCShop::WindowProcess()
 {
-    // #panel's own live RCSS size is the source of truth -- NPCSHOP_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/ReloadRmlTheme(), before RmlUi's next layout pass.
-    float panelWidth = NPCSHOP_WIDTH;
-    float panelHeight = NPCSHOP_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    return mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY);
+    // #panel takes no pointer events, so the grid's clicks stay native; its drawn box still holds
+    // the pointer.
+    Rml::ElementDocument* document = m_RmlView.Document();
+    return UI::RmlBridge::IsPointerWithin(document != nullptr ? document->GetElementById("panel") : nullptr);
 }
 
 bool mu::ui::window::CNPCShop::UpdateKeyEvent()
@@ -295,9 +291,8 @@ void mu::ui::window::CNPCShop::SyncRmlModel()
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_Pos, 15, 50);
+        m_pNewInventoryCtrl->FollowGridPx(m_RmlView.Document(), "item_grid");
     if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())
     {
         m_RmlView.GetModel().gridCells = m_pNewInventoryCtrl->Cells();
@@ -445,18 +440,6 @@ bool mu::ui::window::CNPCShop::InventoryProcess()
     return false;
 }
 
-bool mu::ui::window::CNPCShop::BtnProcess()
-{
-    // Top-right corner close "X" (shared frame): hides + swallows the click. The Repair/Repair-All
-    // buttons are handled by RmlUi's data-event-click (see Create()).
-    if (m_bSellingItem == false && g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPCSHOP))
-    {
-        return true;
-    }
-
-    return false;
-}
-
 void mu::ui::window::CNPCShop::DeleteAllItems()
 {
     if (m_pNewInventoryCtrl)
@@ -565,7 +548,7 @@ bool mu::ui::window::CNPCShop::IsSellingItem()
     return m_bSellingItem;
 }
 
-// Into #item_view (m_ItemTarget), in this window's layout space.
+// Into #item_view (m_ItemTarget), in window pixels (the grid's FollowGridPx()).
 void mu::ui::window::CNPCShop::RenderItems()
 {
     if (m_pNewInventoryCtrl && m_pNewInventoryCtrl->IsVisible())
