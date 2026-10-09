@@ -211,7 +211,6 @@
 .bg-bottom { left: 0;    top: 384px; width: 190px; height: 45px; decorator: image(mix-bg-bottom); }
 
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
-#title { margin-left: calc(50% - 50% * var(--root-scale)); }
 .mix-row { height: calc(10px * var(--root-scale)); }
 .mix-row.mix-row-wide { height: calc(20px * var(--root-scale)); }
 .mix-row.mix-row-wide.mix-required-zen { height: calc(20px * var(--root-scale)); }

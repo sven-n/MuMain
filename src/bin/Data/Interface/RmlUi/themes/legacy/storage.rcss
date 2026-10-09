@@ -114,9 +114,6 @@
 .bg-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(stor-bg-right); }
 .bg-bottom { left: 0;    top: 384px; width: 190px; height: 45px; decorator: image(stor-bg-bottom); }
 
-/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
-#title { margin-left: calc(50% - 50% * var(--root-scale)); }
-
 /* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
    controls take their own. */
 #panel.slot-placed { pointer-events: none; }
