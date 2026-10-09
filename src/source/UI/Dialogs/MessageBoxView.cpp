@@ -8,7 +8,6 @@
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/Text/CUIRenderText.h"
@@ -184,15 +183,13 @@ void mu::ui::window::MessageBoxView::Destroy()
     m_View.Release();
 }
 
-void mu::ui::window::MessageBoxView::Sync(const POINT& pos, const std::vector<Line>& lines,
-                                          const std::vector<Button>& buttons)
+void mu::ui::window::MessageBoxView::Sync(const std::vector<Line>& lines, const std::vector<Button>& buttons)
 {
     if (!m_View.Document())
         return;
 
     // Message boxes draw over every window: in front of the other documents.
     UI::RmlBridge::SyncDocumentVisibilityInFront(m_View.Document(), true);
-    UI::RmlBridge::PlaceOnStage(m_Placement, m_View.Document(), "panel", pos);
     UI::RmlBridge::SyncNativeTextSize(m_View.Binder());
 
     MessageBoxViewRmlModel& model = m_View.GetModel();

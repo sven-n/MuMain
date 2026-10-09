@@ -1,7 +1,6 @@
 #pragma once
 
 #include "UI/Dialogs/MessageBoxViewRmlModel.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 
 #include <string>
@@ -66,8 +65,9 @@ public:
     void SetProgress(float top, float fraction);
     void Destroy();
 
-    // Per frame, inside the message box manager's transform scope.
-    void Sync(const POINT& pos, const std::vector<Line>& lines, const std::vector<Button>& buttons);
+    // Per frame: the lines and buttons in reference px from the box's top-left. The theme places
+    // the box on the stage by its kind.
+    void Sync(const std::vector<Line>& lines, const std::vector<Button>& buttons);
     // The box's list, or none (nullptr); call with Sync().
     void SyncList(const List* list);
 
@@ -87,8 +87,6 @@ private:
     void BindModel(Rml::DataModelConstructor& c, MessageBoxViewRmlModel& model);
     void BindList(Rml::DataModelConstructor& constructor, MessageBoxViewRmlModel& model);
     UI::RmlBridge::ThemedView<MessageBoxViewRmlModel> m_View;
-    // Where the box stands on the stage (UI::RmlBridge::PlaceOnStage()).
-    UI::RmlBridge::SlotPlacement m_Placement;
     int m_PressedButton = -1;
     int m_PressedListRow = -1;
 };

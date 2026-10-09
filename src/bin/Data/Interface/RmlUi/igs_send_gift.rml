@@ -10,40 +10,42 @@
 	     message fields with their labels, the notice, and OK and Cancel. The fields counter-scale
 	     out of the dialog's root transform so their text stays at the native renderer's size. -->
 	<div class="igs-dim"></div>
-	<div id="panel">
-		<div class="igs-dialog-frame"></div>
-		<div class="igs-gift-icon"></div>
-		<div class="igs-gift-namebox"></div>
-		<div id="igs_title" class="igs-dialog-line">
-			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{title}}</span>
-		</div>
-		<div id="igs_item_info">
-			<div class="igs-item-info-line" data-for="d : item_lines">
-				<span class="sharp-text" data-style-font-size="text_px + 'px'">{{d}}</span>
+	<div id="stage" class="stage">
+		<div id="panel">
+			<div class="igs-dialog-frame"></div>
+			<div class="igs-gift-icon"></div>
+			<div class="igs-gift-namebox"></div>
+			<div id="igs_title" class="igs-dialog-line">
+				<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{title}}</span>
 			</div>
-		</div>
-		<span id="igs_recipient_label" class="sharp-text" data-style-font-size="text_px + 'px'">{{recipient_label}}</span>
-		<input id="igs_gift_id" type="text" class="text-field igs-field counter-scaled" data-value="recipient"
-		       maxlength="10"
-		       data-style-font-size="text_px + 'px'"/>
-		<div id="igs_message_label" class="igs-dialog-line">
-			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{message_label}}</span>
-		</div>
-		<textarea id="igs_gift_message" class="text-field igs-field igs-field-multiline counter-scaled" data-value="message"
-		          data-style-font-size="text_px + 'px'"></textarea>
-		<div id="igs_notice">
-			<div class="igs-notice-line" data-for="d : notice_lines">
-				<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{d}}</span>
+			<div id="igs_item_info">
+				<div class="igs-item-info-line" data-for="d : item_lines">
+					<span class="sharp-text" data-style-font-size="text_px + 'px'">{{d}}</span>
+				</div>
 			</div>
-		</div>
-		<div class="igs-dialog-buttons">
-			<div class="igs-btn" data-for="b, i : buttons" data-class-disabled="!b.enabled" data-event-click="igs_dialog_button(i)">
-				<span class="sharp-text sharp-middle sharp-centre igs-btn-label" data-style-font-size="text_px + 'px'">{{b.label}}</span>
+			<span id="igs_recipient_label" class="sharp-text" data-style-font-size="text_px + 'px'">{{recipient_label}}</span>
+			<input id="igs_gift_id" type="text" class="text-field igs-field counter-scaled" data-value="recipient"
+			       maxlength="10"
+			       data-style-font-size="text_px + 'px'"/>
+			<div id="igs_message_label" class="igs-dialog-line">
+				<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{message_label}}</span>
 			</div>
-		</div>
-		<div class="igs-debug">
-			<div class="igs-debug-line" data-for="d : debug_lines">
-				<span class="sharp-text" data-style-font-size="text_px + 'px'">{{d}}</span>
+			<textarea id="igs_gift_message" class="text-field igs-field igs-field-multiline counter-scaled" data-value="message"
+			          data-style-font-size="text_px + 'px'"></textarea>
+			<div id="igs_notice">
+				<div class="igs-notice-line" data-for="d : notice_lines">
+					<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{d}}</span>
+				</div>
+			</div>
+			<div class="igs-dialog-buttons">
+				<div class="igs-btn" data-for="b, i : buttons" data-class-disabled="!b.enabled" data-event-click="igs_dialog_button(i)">
+					<span class="sharp-text sharp-middle sharp-centre igs-btn-label" data-style-font-size="text_px + 'px'">{{b.label}}</span>
+				</div>
+			</div>
+			<div class="igs-debug">
+				<div class="igs-debug-line" data-for="d : debug_lines">
+					<span class="sharp-text" data-style-font-size="text_px + 'px'">{{d}}</span>
+				</div>
 			</div>
 		</div>
 	</div>

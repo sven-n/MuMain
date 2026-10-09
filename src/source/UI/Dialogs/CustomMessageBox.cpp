@@ -63,7 +63,7 @@ int AppendWrappedMessageLines(const std::wstring& text, BYTE fontType, int maxWi
 // The event result boxes' MessageBoxView: the texts RenderMatchResult() draws, placed as
 // RenderText() places them (RT3_WRITE_CENTER centred on x, RT3_SORT_CENTER centred in a box the
 // text fits into), and the OK button's newui_button_ok art.
-void SyncMatchResultView(MessageBoxView& view, const POINT& pos, CMessageBoxButton& ok)
+void SyncMatchResultView(MessageBoxView& view, CMessageBoxButton& ok)
 {
     std::vector<MatchResultText> texts;
     matchEvent::CollectResult(texts);
@@ -90,20 +90,19 @@ void SyncMatchResultView(MessageBoxView& view, const POINT& pos, CMessageBoxButt
             if (fittedPx != UI::RmlBridge::NativeTextPx(role))
                 textPx = fittedPx;
         }
-        lines.push_back({text.text, left - static_cast<float>(pos.x), static_cast<float>(text.y - pos.y), bold,
-                         text.color, textPx});
+        lines.push_back({text.text, left, static_cast<float>(text.y), bold, text.color, textPx});
     }
 
-    MessageBoxView::Button button{L"OK", ok.GetPosX() - pos.x, ok.GetPosY() - pos.y, ok.GetWidth(), ok.GetHeight()};
+    MessageBoxView::Button button{L"OK", ok.GetPosX(), ok.GetPosY(), ok.GetWidth(), ok.GetHeight()};
     button.okArt = true;
-    view.Sync(pos, lines, {button});
+    view.Sync(lines, {button});
 }
 
 // A progress notice's MessageBoxView (CProgressMsgBox, CCursedTempleProgressMsgBox): their
 // RenderFrame() -- a middle strip per line past two, the back 10 units short --, RenderTexts() --
 // each line centred on the box from y 35, one line height + 4 apart -- and RenderProgress() -- the
 // elapsed fraction, 50 units above the box's bottom.
-void SyncProgressView(MessageBoxView& view, const POINT& pos, const SIZE& size, const type_vector_msgdata& messages,
+void SyncProgressView(MessageBoxView& view, const SIZE& size, const type_vector_msgdata& messages,
                       DWORD startTime, DWORD elapseTime)
 {
     const int middles = messages.size() > 2 ? static_cast<int>(messages.size()) - 2 : 0;
@@ -124,7 +123,7 @@ void SyncProgressView(MessageBoxView& view, const POINT& pos, const SIZE& size, 
 
     const float fraction = static_cast<float>(timeGetTime() - startTime) / static_cast<float>(elapseTime);
     view.SetProgress(static_cast<float>(size.cy) - 50.f, fraction);
-    view.Sync(pos, lines, {});
+    view.Sync(lines, {});
 }
 
 // A click on the OK button RmlUi reported, sent as the box's OK event.
@@ -151,17 +150,15 @@ mu::ui::window::CGemIntegrationDisjointMsgBox::~CGemIntegrationDisjointMsgBox()
 
 bool mu::ui::window::CGemIntegrationDisjointMsgBox::Create(float fPriority)
 {
-    int x, y, width, height;
+    int width, height;
 
     SetAddCallbackFunc();
 
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 100;
     width = MSGBOX_WIDTH;
     m_iMiddleFrameCount = 1;
     height = MSGBOX_TOP_HEIGHT + (m_iMiddleFrameCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(width, height, fPriority);
 
     AddMsg(I18N::Game::DismantleJewel, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
     SetButtonInfo();
@@ -227,15 +224,14 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::SyncView()
     }
 
     // RenderButtons() then RenderGemList(): Close, then Dissolve (grey until a line is selected).
-    const POINT pos = GetPos();
-    auto button = [&pos](CMessageBoxButton& btn, const wchar_t* label)
+    auto button = [](CMessageBoxButton& btn, const wchar_t* label)
     {
-        return MessageBoxView::Button{label,          btn.GetPosX() - pos.x, btn.GetPosY() - pos.y,
-                                      btn.GetWidth(), btn.GetHeight(),       btn.IsEnabled()};
+        return MessageBoxView::Button{label,          btn.GetPosX(),   btn.GetPosY(),
+                                      btn.GetWidth(), btn.GetHeight(), btn.IsEnabled()};
     };
     const std::vector<MessageBoxView::Button> buttons = {button(m_BtnCancel, I18N::Game::Close388),
                                                          button(m_BtnDisjoint, I18N::Game::Disband)};
-    m_View.Sync(pos, lines, buttons);
+    m_View.Sync(lines, buttons);
 
     SyncGemList();
 }
@@ -277,7 +273,7 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::ChangeMiddleFrameSmall()
 
     SetSize(GetSize().cx, height);
 
-    m_BtnCancel.SetPos(m_BtnCancel.GetPosX(), GetPos().y + 80);
+    m_BtnCancel.SetPos(m_BtnCancel.GetPosX(), 80);
 
     m_BtnDisjoint.SetEnable(false);
 }
@@ -291,9 +287,9 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::ChangeMiddleFrameBig()
 
     SetSize(GetSize().cx, height);
 
-    m_BtnCancel.SetPos(m_BtnCancel.GetPosX(), GetPos().y + GetSize().cy - 50);
+    m_BtnCancel.SetPos(m_BtnCancel.GetPosX(), GetSize().cy - 50);
 
-    m_BtnDisjoint.SetPos(m_BtnDisjoint.GetPosX(), GetPos().y + GetSize().cy - 85);
+    m_BtnDisjoint.SetPos(m_BtnDisjoint.GetPosX(), GetSize().cy - 85);
 }
 
 void mu::ui::window::CGemIntegrationDisjointMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
@@ -418,12 +414,12 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::SetButtonInfo()
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + 40;
+    x = msgboxhalfwidth - btnhalfwidth;
+    y = 40;
     m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnCancel.SetText(I18N::Game::Close388);
 
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
+    x = msgboxhalfwidth - btnhalfwidth;
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     m_BtnDisjoint.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnDisjoint.SetText(I18N::Game::Disband);
@@ -566,15 +562,13 @@ bool mu::ui::window::CBloodCastleResultMsgBox::Create(float fPriority)
 
     AddCallbackFunc(mu::ui::window::CBloodCastleResultMsgBox::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 100;
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(width, height, fPriority);
 
-    x = GetPos().x + (GetSize().cx / 2) - (MSGBOX_BTN_WIDTH / 2);
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
+    x = (GetSize().cx / 2) - (MSGBOX_BTN_WIDTH / 2);
+    y = GetSize().cy - (MSGBOX_BTN_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     width = MSGBOX_BTN_WIDTH;
     height = MSGBOX_BTN_HEIGHT;
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -600,7 +594,7 @@ bool mu::ui::window::CBloodCastleResultMsgBox::Update()
         return true;
 
     if (m_View.IsShown())
-        SyncMatchResultView(m_View, GetPos(), m_BtnOk);
+        SyncMatchResultView(m_View, m_BtnOk);
     return true;
 }
 
@@ -632,16 +626,14 @@ bool mu::ui::window::CDevilSquareRankMsgBox::Create(float fPriority)
 
     AddCallbackFunc(mu::ui::window::CDevilSquareRankMsgBox::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 60;
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT1 * MSGBOX_MIDDLE_HEIGHT)
         + (MIDDLE_COUNT2 * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_LINE_HEIGHT + MSGBOX_BOTTOM_HEIGHT;
 
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(width, height, fPriority);
 
-    x = GetPos().x + (GetSize().cx / 2) - (MSGBOX_BTN_WIDTH / 2);
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
+    x = (GetSize().cx / 2) - (MSGBOX_BTN_WIDTH / 2);
+    y = GetSize().cy - (MSGBOX_BTN_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     width = MSGBOX_BTN_WIDTH;
     height = MSGBOX_BTN_HEIGHT;
     m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
@@ -649,7 +641,7 @@ bool mu::ui::window::CDevilSquareRankMsgBox::Create(float fPriority)
     // RenderFrame(): 11 middle strips, the divider, 3 more, and the table's four rules.
     const auto middles = static_cast<int>(MIDDLE_COUNT1 + MIDDLE_COUNT2);
     const float backHeight = static_cast<float>(GetSize().cy) - MSGBOX_BACK_BLANK_HEIGHT;
-    m_View.Create(middles, backHeight);
+    m_View.Create(middles, backHeight, "devil-square-rank");
     m_View.SetFrame(middles, backHeight, static_cast<int>(MIDDLE_COUNT1));
     m_View.SetSeparators({75.f, 93.f, 255.f, 273.f});
 
@@ -667,10 +659,8 @@ bool mu::ui::window::CDevilSquareRankMsgBox::Update()
     if (TakeMatchResultOk(m_View, this))
         return true;
 
-    matchEvent::SetPosition(GetPos().x, GetPos().y);
-
     if (m_View.IsShown())
-        SyncMatchResultView(m_View, GetPos(), m_BtnOk);
+        SyncMatchResultView(m_View, m_BtnOk);
     return true;
 }
 
@@ -702,15 +692,13 @@ bool mu::ui::window::CChaosCastleResultMsgBox::Create(float fPriority)
 
     AddCallbackFunc(mu::ui::window::CChaosCastleResultMsgBox::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 100;
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(width, height, fPriority);
 
-    x = GetPos().x + (GetSize().cx / 2) - (MSGBOX_BTN_WIDTH / 2);
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
+    x = (GetSize().cx / 2) - (MSGBOX_BTN_WIDTH / 2);
+    y = GetSize().cy - (MSGBOX_BTN_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     width = MSGBOX_BTN_WIDTH;
     height = MSGBOX_BTN_HEIGHT;
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -736,7 +724,7 @@ bool mu::ui::window::CChaosCastleResultMsgBox::Update()
         return true;
 
     if (m_View.IsShown())
-        SyncMatchResultView(m_View, GetPos(), m_BtnOk);
+        SyncMatchResultView(m_View, m_BtnOk);
     return true;
 }
 
@@ -832,14 +820,12 @@ mu::ui::window::CProgressMsgBox::~CProgressMsgBox()
 
 bool mu::ui::window::CProgressMsgBox::Create(DWORD dwElapseTime, float fPriority)
 {
-    int x, y, width, height;
+    int width, height;
 
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 100;
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + MSGBOX_BOTTOM_HEIGHT;
 
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(width, height, fPriority);
 
     SetAddCallbackFunc();
     m_View.Create(0, static_cast<float>(height) - MSGBOX_BACK_BLANK_HEIGHT);
@@ -925,7 +911,7 @@ bool mu::ui::window::CProgressMsgBox::Render()
 
 void mu::ui::window::CProgressMsgBox::SyncView()
 {
-    SyncProgressView(m_View, GetPos(), GetSize(), m_MsgDataList, m_dwStartTime, m_dwElapseTime);
+    SyncProgressView(m_View, GetSize(), m_MsgDataList, m_dwStartTime, m_dwElapseTime);
 }
 
 CALLBACK_RESULT mu::ui::window::CProgressMsgBox::ClosingProcess(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
@@ -950,14 +936,12 @@ mu::ui::window::CCursedTempleProgressMsgBox::~CCursedTempleProgressMsgBox()
 
 bool mu::ui::window::CCursedTempleProgressMsgBox::Create(DWORD dwElapseTime, float fPriority)
 {
-    int x, y, width, height;
+    int width, height;
 
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 100;
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + MSGBOX_BOTTOM_HEIGHT;
 
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(width, height, fPriority);
 
     SetAddCallbackFunc();
     m_View.Create(0, static_cast<float>(height) - MSGBOX_BACK_BLANK_HEIGHT);
@@ -1037,7 +1021,7 @@ bool mu::ui::window::CCursedTempleProgressMsgBox::Update()
 
 void mu::ui::window::CCursedTempleProgressMsgBox::SyncView()
 {
-    SyncProgressView(m_View, GetPos(), GetSize(), m_MsgDataList, m_dwStartTime, m_dwElapseTime);
+    SyncProgressView(m_View, GetSize(), m_MsgDataList, m_dwStartTime, m_dwElapseTime);
 }
 
 void mu::ui::window::CCursedTempleProgressMsgBox::SetNpcIndex(DWORD dwIndex)
@@ -1812,16 +1796,14 @@ mu::ui::window::CGuild_ToPerson_Position::~CGuild_ToPerson_Position()
 
 bool mu::ui::window::CGuild_ToPerson_Position::Create(float fPriority)
 {
-    int x, y, width, height;
+    int width, height;
 
     SetAddCallbackFunc();
 
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 100;
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(width, height, fPriority);
 
     // The original's RenderFrame(): five middle strips, the back 75 units shorter than the box.
     m_View.Create(5, static_cast<float>(height) - MSGBOX_BACK_BLANK_HEIGHT - 75, "guild-appoint");
@@ -1889,7 +1871,7 @@ bool mu::ui::window::CGuild_ToPerson_Position::Update()
         placed(I18N::Game::OK),
         placed(I18N::Game::Close388),
     };
-    m_View.Sync(GetPos(), lines, buttons);
+    m_View.Sync(lines, buttons);
 
     return true;
 }

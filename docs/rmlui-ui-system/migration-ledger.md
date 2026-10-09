@@ -128,12 +128,14 @@ other places for single confirmations. What remains of the native family:
 |---|---|---|
 | `CGuild_ToPerson_Position` | Done | RmlUi through `UI/Dialogs/MessageBoxView`; its buttons are placed by the theme (the box's kind) |
 | `CGemIntegrationDisjointMsgBox` | Done; not checked in game | `MessageBoxView` with a scrolling jewel list; stale items rejected again at confirmation |
-| `CBloodCastleResultMsgBoxLayout`, `CDevilSquareRankMsgBoxLayout`, `CChaosCastleResultMsgBoxLayout` | Done | `MessageBoxView`; texts from each match's `CollectMatchResult()` |
-| `CProgressMsgBox` layouts (crown switch, seal register, crown defence) and `CCursedTempleProgressMsgBox` layouts | Done | `MessageBoxView` with frame and progress bar |
+| `CBloodCastleResultMsgBoxLayout`, `CDevilSquareRankMsgBoxLayout`, `CChaosCastleResultMsgBoxLayout` | Done | `MessageBoxView`; texts from each match's `CollectMatchResult()`, from the box's top-left; `$preview bcresult`, `ccresult`, `dsrank` |
+| `CProgressMsgBox` layouts (crown switch, seal register, crown defence) and `CCursedTempleProgressMsgBox` layouts | Done | `MessageBoxView` with frame and progress bar; `$preview switchbox` |
 | `CQuestCountLimitMsgBoxLayout` | Compiled out | Its only creator is under `ASG_ADD_TIME_LIMIT_QUEST`, not defined |
 | `C3DItemCommonMsgBox` | Deleted | No users left; item dialogs are `CGenericConfirmDialog` with `item3D` |
 
-Native message boxes are not draggable (`window-placement.md` section 8).
+Native message boxes are not draggable (`window-placement.md` section 8). Each box's theme places it
+on the `.stage` by its kind (`message_box_view.rcss`, the cash shop's `igs_*.rcss`); C++ gives only its
+size and what is inside it, from its top-left.
 
 ## `CUIControl` list family (deleted)
 

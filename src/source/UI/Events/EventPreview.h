@@ -22,6 +22,10 @@ enum class Event
     Siege,
     CashShop,
     HudStatus,
+    BloodCastleResult,
+    ChaosCastleResult,
+    DevilSquareRank,
+    CrownSwitchBox,
 };
 
 // True while `event` is previewed: its window may draw off its map, and its close sends nothing.

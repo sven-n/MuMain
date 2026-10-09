@@ -68,7 +68,6 @@ void CSBaseMatch::clearMatchInfo(void)
     m_iMatchTime = -1;
     m_iMaxKillMonster = -1;
     m_iKillMonster = -1;
-    SetPosition(REFERENCE_WIDTH - 230 / 2, 100);
 }
 
 bool CSBaseMatch::getEqualMonster(int addV)
@@ -97,7 +96,6 @@ void CSBaseMatch::SetMatchInfo(const std::uint8_t byType, const int iMaxTime, co
     m_iMatchTime = iTime;
     m_iMaxKillMonster = iMaxMonster;
     m_iKillMonster = iKillMonster;
-    SetPosition(REFERENCE_WIDTH - 230 / 2, 100);
 }
 
 std::wstring CSBaseMatch::CountdownText(void)
@@ -152,12 +150,6 @@ std::wstring CSBaseMatch::CountdownText(void)
     return lpszStr;
 }
 
-void CSBaseMatch::SetPosition(int ix, int iy)
-{
-    m_PosResult.x = ix;
-    m_PosResult.y = iy;
-}
-
 void CSDevilSquareMatch::SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success)
 {
     if (iNumDevilRank >= 200)
@@ -184,38 +176,16 @@ void CSDevilSquareMatch::SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE d
     return;
 }
 
-void RenderMatchResultTexts(const std::vector<MatchResultText>& texts)
-{
-    for (const MatchResultText& text : texts)
-    {
-        if (text.font == MatchResultText::Font::Normal)
-            g_pRenderText->SetFont(g_hFont);
-        else if (text.font == MatchResultText::Font::Bold)
-            g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->SetTextColor(text.color);
-        g_pRenderText->RenderText(text.x, text.y, text.text.c_str(), text.boxWidth, text.boxHeight, text.sort);
-    }
-}
-
-void CSDevilSquareMatch::RenderMatchResult(void)
-{
-    g_pRenderText->SetBgColor(0);
-
-    std::vector<MatchResultText> texts;
-    CollectMatchResult(texts);
-    RenderMatchResultTexts(texts);
-}
-
 void CSDevilSquareMatch::CollectMatchResult(std::vector<MatchResultText>& texts) const
 {
-    int xPos[6] = { m_PosResult.x, };
+    int xPos[6] = { 0, };
     xPos[1] = xPos[0] + 15;
     xPos[2] = xPos[1] + 15;
     xPos[3] = xPos[2] + 60;
     xPos[4] = xPos[3] + 50;
     xPos[5] = xPos[4] + 38;
 
-    int yPos = m_PosResult.y + 40;
+    int yPos = 40;
 
     wchar_t lpszStr[256] { 0 };
     // The font is the one left set (the original sets none).
@@ -235,7 +205,7 @@ void CSDevilSquareMatch::CollectMatchResult(std::vector<MatchResultText>& texts)
     add(xPos[2], yPos, I18N::Game::Rank, green, xPos[3] - xPos[1], RT3_SORT_CENTER);
     add(xPos[3], yPos, I18N::Game::Point, green, xPos[4] - xPos[3], RT3_SORT_CENTER);
     add(xPos[4], yPos, I18N::Game::EXP, green, xPos[5] - xPos[4], RT3_SORT_CENTER);
-    add(xPos[5], yPos, I18N::Game::Reward, green, (REFERENCE_WIDTH - 230) / 2 + 210 - xPos[5], RT3_SORT_CENTER);
+    add(xPos[5], yPos, I18N::Game::Reward, green, 210 - xPos[5], RT3_SORT_CENTER);
     yPos += 20;
 
     int yStartPos = yPos;
@@ -287,11 +257,6 @@ void CCursedTempleMatch::SetMatchResult(const int iNumDevilRank, const int iMyRa
 }
 
 void CCursedTempleMatch::RenderMatchTimes()
-{
-    return;
-}
-
-void CCursedTempleMatch::RenderMatchResult()
 {
     return;
 }

@@ -13,8 +13,9 @@
 
 using MatchClock = std::chrono::steady_clock;
 
-// One text of an event's result box, as RenderMatchResult() draws it: RenderText(x, y, text,
-// boxWidth, boxHeight, sort) in reference units, in its font (or the one left set) and colour.
+// One text of an event's result box, as the original's RenderMatchResult() drew it: RenderText(x,
+// y, text, boxWidth, boxHeight, sort) in reference units from the box's top-left, in its font (or
+// the one left set) and colour.
 struct MatchResultText
 {
     enum class Font
@@ -34,9 +35,6 @@ struct MatchResultText
     DWORD color = 0; // RGBA()
 };
 
-// Draws the texts natively (g_pRenderText), in order.
-void RenderMatchResultTexts(const std::vector<MatchResultText>& texts);
-
 class CSBaseMatch
 {
 protected:
@@ -53,9 +51,6 @@ protected:
     int         m_iNumResult;
     int         m_iMyResult;
     MatchResult m_MatchResult[11];
-
-    // As clearMatchInfo() sets it: a result before any state is placed as in a running event.
-    POINT m_PosResult{REFERENCE_WIDTH - 230 / 2, 100};
 
     bool    getEqualMonster(int addV);
 
@@ -86,7 +81,6 @@ public:
     int		GetNumMustKillMonster() { return m_iMaxKillMonster; }
     int		GetNumKillMonster() { return m_iKillMonster; }
 
-    void	SetPosition(int ix, int iy);
     void    StartMatchCountDown(int iType);
     void    SetMatchInfo(std::uint8_t byType, int iMaxTime, int iTime, int iMaxMonster = 0, int iKillMonster = 0);
 
@@ -96,8 +90,7 @@ public:
 
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data) = 0;
     virtual void    SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success = false) = 0;
-    virtual void    RenderMatchResult(void) = 0;
-    // The texts RenderMatchResult() draws (none for an event without a result box).
+    // The texts of the event's result box (none for an event without one).
     virtual void CollectMatchResult(std::vector<MatchResultText>& texts) const {}
 };
 
@@ -113,7 +106,6 @@ public:
 
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data);
     virtual void    SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success = false);
-    virtual void    RenderMatchResult(void);
     virtual void CollectMatchResult(std::vector<MatchResultText>& texts) const;
 };
 
@@ -129,7 +121,6 @@ public:
 
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data);
     virtual void    SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success = false);
-    virtual void    RenderMatchResult(void);
 };
 
 class CDoppelGangerMatch : public CSBaseMatch
@@ -144,7 +135,6 @@ public:
 
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data) {}
     virtual void    SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success = false) {}
-    virtual void    RenderMatchResult(void) {}
 };
 
 #endif// __CSEVENT_MATCH_H__

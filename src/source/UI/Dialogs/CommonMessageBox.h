@@ -21,9 +21,6 @@ namespace mu::ui::window
         MSGBOX_FONT_BOLD,
     };
 
-    static constexpr float SCREEN_WIDTH = (float)REFERENCE_WIDTH;
-    static constexpr float SCREEN_HEIGHT = (float)REFERENCE_HEIGHT;
-
     static constexpr float MSGBOX_WIDTH = 230.0f;
     static constexpr float MSGBOX_TOP_HEIGHT = 67.0f;
     static constexpr float MSGBOX_BOTTOM_HEIGHT = 50.0f;

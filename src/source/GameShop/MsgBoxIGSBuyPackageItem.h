@@ -10,7 +10,6 @@
 #include "GameShop/IgsDialogModel.h"
 #include "GameShop/ShopListManager/ShopPackage.h"
 #include "UI/Inventory/ItemCameraTarget.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Scaling/UITransform.h"
 
@@ -28,8 +27,6 @@ class CMsgBoxIGSBuyPackageItem : public CMessageBoxBase
 {
     enum
     {
-        IGS_WINDOW_WIDTH = 640,
-        IGS_WINDOW_HEIGHT = 429,
         IGS_FRAME_WIDTH = 198,
         IGS_FRAME_HEIGHT = 291,
         IGS_LISTBOX_WIDTH = 158,
@@ -79,8 +76,6 @@ private:
         [this](Rml::DataModelConstructor& c, BuyPackageRmlModel& model) { BindRmlModel(c, model); },
         {{"Data/Interface/RmlUi/igs_buy_package.rml"}}};
     int m_PressedButton = -1;
-    // Where the dialog stands on the stage (UI::RmlBridge::PlaceOnStage()).
-    UI::RmlBridge::SlotPlacement m_Placement;
     UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItem(); }};
 
     void SyncRmlModel();

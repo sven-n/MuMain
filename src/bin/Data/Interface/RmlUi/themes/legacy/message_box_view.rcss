@@ -21,7 +21,11 @@
 	box-btn-down: 0px 58px 64px 29px;
 }
 
-#panel { position: absolute; transform-origin: left top; width: 230px; font-family: "token(font-body)"; pointer-events: auto; }
+/* The original's boxes: centred on the 640x480 stage, the top at 100 (the Devil Square ranking at
+   60). */
+#stage { pointer-events: none; }
+#panel { position: absolute; left: 205px; top: 100px; width: 230px; font-family: "token(font-body)"; pointer-events: auto; }
+#panel.devil-square-rank { top: 60px; }
 #back { position: absolute; left: 0; top: 2px; width: 222px; decorator: image(box-back); }
 /* The frame stacks by flow: the cap, then one element per strip C++ reported, then the foot. Their
    heights are this theme's sprite heights and live only here -- C++ used to add them up itself. */

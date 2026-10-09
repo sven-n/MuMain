@@ -3,9 +3,12 @@
    message field, the notice and OK and Cancel. Reference px under the dialog's root transform;
    each field counter-scales out of it so its text stays at the native renderer's size. */
 
+/* Centred on the cash shop's 640 x 429 area of the stage, 210 x 267. */
+#stage { pointer-events: none; }
 #panel {
 	position: absolute;
-	transform-origin: left top;
+	left: 215px;
+	top: 81px;
 	width: 210px;
 	height: 267px;
 	font-family: "token(font-body)";

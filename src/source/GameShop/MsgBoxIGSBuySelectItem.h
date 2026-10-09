@@ -14,7 +14,6 @@ using namespace mu::ui::window;
 
 #include "GameShop/BuyOptionSelection.h"
 #include "UI/Inventory/ItemCameraTarget.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Scaling/UITransform.h"
 
@@ -33,8 +32,6 @@ public:
 private:
     enum
     {
-        IGS_WINDOW_WIDTH = 640,
-        IGS_WINDOW_HEIGHT = 429,
         IGS_FRAME_WIDTH = 215,
         IGS_FRAME_HEIGHT = 346,
         IGS_TEXT_DISCRIPTION_WIDTH = 185,
@@ -84,8 +81,6 @@ private:
         [this](Rml::DataModelConstructor& c, BuySelectRmlModel& model) { BindRmlModel(c, model); },
         {{"Data/Interface/RmlUi/igs_buy_select.rml"}}};
     int m_PressedButton = -1;
-    // Where the dialog stands on the stage (UI::RmlBridge::PlaceOnStage()).
-    UI::RmlBridge::SlotPlacement m_Placement;
     UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItem(); }};
 
     void SyncRmlModel();

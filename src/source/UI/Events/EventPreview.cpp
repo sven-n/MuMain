@@ -17,6 +17,7 @@
 #include "UI/Events/CryWolf.h"
 #include "UI/Events/CryWolfUpdates.h"
 #include "UI/Combat/SiegeUpdates.h"
+#include "UI/Dialogs/MessageBox.h"
 #include "UI/Combat/SiegeWarfare.h"
 #include "World/GameMaps/GMBattleCastle.h"
 #include "World/GameMaps/GMCrywolf1st.h"
@@ -85,6 +86,10 @@ constexpr std::array kEntries = {
     Entry{L"status", Event::HudStatus, kNoWindow,
           L"HUD status texts, both crown switches held (shown at the switches, Valley of Loren 150-200, "
           L"180-230), a macro cooldown and the Blood Castle entry countdown"},
+    Entry{L"bcresult", Event::BloodCastleResult, kNoWindow, L"Blood Castle result box, quest completed"},
+    Entry{L"ccresult", Event::ChaosCastleResult, kNoWindow, L"Chaos Castle result box, quest failed"},
+    Entry{L"dsrank", Event::DevilSquareRank, kNoWindow, L"Devil Square ranking box, five players, the hero third"},
+    Entry{L"switchbox", Event::CrownSwitchBox, kNoWindow, L"crown switch progress box, another guild pushing it"},
 };
 
 void Log(const std::wstring& text, mu::ui::window::MESSAGE_TYPE type = mu::ui::window::TYPE_SYSTEM_MESSAGE)
@@ -243,8 +248,61 @@ void SeedSiege()
     UI::Siege::SetCommanderMapInfo(1, 70, 180, 1);
 }
 
-// The entry countdown runs on the map's match; off an event map the preview lends one.
+// The entry countdown and the result boxes run on the map's match; off an event map the preview
+// lends one.
 bool s_LentMatch = false;
+
+template <typename Match>
+void LendMatch()
+{
+    if (matchEvent::g_csMatchInfo != nullptr && !s_LentMatch)
+        return;
+    matchEvent::DeleteEventMatch();
+    matchEvent::g_csMatchInfo = new Match;
+    s_LentMatch = true;
+}
+
+void ReturnMatch()
+{
+    if (s_LentMatch)
+        matchEvent::DeleteEventMatch();
+    s_LentMatch = false;
+}
+
+MatchResult SampleResult(const char* name, DWORD score, DWORD exp, DWORD zen)
+{
+    MatchResult result{};
+    strncpy_s(reinterpret_cast<char*>(result.m_lpID), sizeof(result.m_lpID), name, _TRUNCATE);
+    result.m_iScore = score;
+    result.m_dwExp = exp;
+    result.m_iZen = zen;
+    return result;
+}
+
+void SeedBloodCastleResult()
+{
+    LendMatch<SEASON3B::CNewBloodCastleSystem>();
+    const MatchResult result = SampleResult("testgmDk", 1200, 350000, 250000);
+    matchEvent::SetMatchResult(255, 0, const_cast<MatchResult*>(&result), 1);
+}
+
+void SeedChaosCastleResult()
+{
+    LendMatch<SEASON3B::CNewChaosCastleSystem>();
+    const MatchResult result = SampleResult("testgmDk", 23, 180000, 4);
+    matchEvent::SetMatchResult(254, 0, const_cast<MatchResult*>(&result), 0);
+}
+
+void SeedDevilSquareRank()
+{
+    LendMatch<CSDevilSquareMatch>();
+    MatchResult results[5] = {
+        SampleResult("Valkyrie", 9800, 120000, 50000), SampleResult("Ironclad", 8700, 110000, 40000),
+        SampleResult("testgmDk", 7600, 100000, 30000), SampleResult("Hexweaver", 5400, 80000, 20000),
+        SampleResult("Duskblade", 3200, 60000, 10000),
+    };
+    matchEvent::SetMatchResult(5, 3, results);
+}
 
 void SeedHudStatus()
 {
@@ -258,11 +316,7 @@ void SeedHudStatus()
         wcsncpy_s(Switch_Info[i].m_szUserName, holders[i][1], _TRUNCATE);
     }
     LastMacroTime = GetTickCount64();
-    if (matchEvent::g_csMatchInfo == nullptr)
-    {
-        matchEvent::g_csMatchInfo = new CSDevilSquareMatch;
-        s_LentMatch = true;
-    }
+    LendMatch<CSDevilSquareMatch>();
     matchEvent::StartMatchCountDown(TYPE_MATCH_CASTLE_ENTER_CLOSE);
 }
 
@@ -303,6 +357,10 @@ void Seed(Event event)
     case Event::Siege: SeedSiege(); break;
     case Event::CashShop: SeedCashShop(); break;
     case Event::HudStatus: SeedHudStatus(); break;
+    case Event::BloodCastleResult: SeedBloodCastleResult(); break;
+    case Event::ChaosCastleResult: SeedChaosCastleResult(); break;
+    case Event::DevilSquareRank: SeedDevilSquareRank(); break;
+    case Event::CrownSwitchBox: UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::SwitchActivatedByOther, L"Ironclad", L"Ravens", 30000); break;
     default: break;
     }
 }
@@ -330,9 +388,14 @@ void Reset(Event event)
         Delete_Switch();
         LastMacroTime = 0;
         matchEvent::StartMatchCountDown(TYPE_MATCH_NONE);
-        if (s_LentMatch)
-            matchEvent::DeleteEventMatch();
-        s_LentMatch = false;
+        ReturnMatch();
+        break;
+    case Event::BloodCastleResult:
+    case Event::ChaosCastleResult:
+    case Event::DevilSquareRank:
+    case Event::CrownSwitchBox:
+        g_MessageBox->PopAllMessageBoxes();
+        ReturnMatch();
         break;
     default: break;
     }

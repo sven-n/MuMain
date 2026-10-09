@@ -2,9 +2,12 @@
    the title, the package's item, its name in gold, the scrolling description, the price and the
    three buttons. Reference px under the dialog's root transform. */
 
+/* Centred on the cash shop's 640 x 429 area of the stage, 198 x 291. */
+#stage { pointer-events: none; }
 #panel {
 	position: absolute;
-	transform-origin: left top;
+	left: 221px;
+	top: 69px;
 	width: 198px;
 	height: 291px;
 	font-family: "token(font-body)";

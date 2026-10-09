@@ -106,7 +106,6 @@ namespace mu::ui::window
     {
         typedef std::map<DWORD, EVENT_CALLBACK>	type_map_callback;
 
-        POINT	m_Pos;
         SIZE	m_Size;
         float	m_fPriority;
         bool	m_bCanMove;
@@ -116,12 +115,11 @@ namespace mu::ui::window
         CMessageBoxBase();
         virtual ~CMessageBoxBase();
 
-        virtual bool Create(int x, int y, int width, int height, float fPriority = 3.f);
+        // The box's size in reference px; its theme places it.
+        virtual bool Create(int width, int height, float fPriority = 3.f);
         virtual void Release();
 
-        virtual void SetPos(int x, int y);
         void SetSize(int width, int height);
-        const POINT& GetPos();
         const SIZE& GetSize();
         void SetCanMove(bool bCanMove);
         bool CanMove();

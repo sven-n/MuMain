@@ -4,7 +4,6 @@
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "GameShop/IgsDialogModel.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 
@@ -23,8 +22,6 @@ class CMsgBoxIGSSendGift : public CMessageBoxBase
 public:
     enum
     {
-        IGS_WINDOW_WIDTH = 640,
-        IGS_WINDOW_HEIGHT = 429,
         IGS_FRAME_WIDTH = 210,
         IGS_FRAME_HEIGHT = 267,
         IGS_TEXT_NOTICE_WIDTH = 170,
@@ -80,8 +77,6 @@ private:
     void SyncRmlModel();
     bool FieldHasFocus(const char* id) const;
     int m_PressedButton = -1;
-    // Where the dialog stands on the stage (UI::RmlBridge::PlaceOnStage()).
-    UI::RmlBridge::SlotPlacement m_Placement;
 
     int m_iPackageSeq;
     int m_iDisplaySeq;

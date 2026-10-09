@@ -123,22 +123,10 @@ void CNewBloodCastleSystem::RenderMatchTimes(void)
     }
 }
 
-void CNewBloodCastleSystem::RenderMatchResult(void)
-{
-    EnableAlphaTest();
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    std::vector<MatchResultText> texts;
-    CollectMatchResult(texts);
-    RenderMatchResultTexts(texts);
-
-    DisableAlphaBlend();
-}
-
 void CNewBloodCastleSystem::CollectMatchResult(std::vector<MatchResultText>& texts) const
 {
-    int x = REFERENCE_WIDTH / 2;
-    int yPos = m_PosResult.y + 40;
+    int x = static_cast<int>(mu::ui::window::MSGBOX_WIDTH) / 2;
+    int yPos = 40;
     wchar_t lpszStr[256] = {};
 
     auto add = [&texts, x](int y, const wchar_t* text, MatchResultText::Font font, DWORD color)

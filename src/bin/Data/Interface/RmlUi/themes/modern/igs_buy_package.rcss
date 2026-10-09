@@ -1,9 +1,12 @@
 /* Modern theme for the cash shop's one-price package dialog (CMsgBoxIGSBuyPackageItem): legacy's
    layout on a flat panel. Reference px under the dialog's root transform. */
 
+/* Centred on the cash shop's 640 x 429 area of the stage, 198 x 291. */
+#stage { pointer-events: none; }
 #panel {
 	position: absolute;
-	transform-origin: left top;
+	left: 221px;
+	top: 69px;
 	width: 198px;
 	height: 291px;
 	font-family: "token(font-body)";

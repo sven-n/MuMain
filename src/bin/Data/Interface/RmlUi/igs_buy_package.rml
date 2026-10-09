@@ -9,30 +9,32 @@
 	<!-- CMsgBoxIGSBuyPackageItem: a package of one price. The title, the package's live 3D item C++
 	     draws into #igs_item, its name, description and price, and Buy, Gift and Cancel. -->
 	<div class="igs-dim"></div>
-	<div id="panel">
-		<div class="igs-dialog-frame"></div>
-		<img id="igs_item"/>
-		<div id="igs_item_box"></div>
-		<div id="igs_title" class="igs-dialog-line">
-			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{title}}</span>
-		</div>
-		<div id="igs_name" class="igs-dialog-line">
-			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{name}}</span>
-		</div>
-		<!-- 7 rows of 13 units, the native box's own m_iNumRenderLine times its line step. -->
-		<div id="igs_package_info" class="scroll-pane igs-pane counter-scaled"
-		     data-style-font-size="text_px + 'px'">
-			<div class="igs-line" data-for="l : description_lines">{{l.text}}</div>
-		</div>
-		<span id="igs_price" class="sharp-text sharp-right" data-style-font-size="text_px + 'px'">{{price}}</span>
-		<div class="igs-dialog-buttons">
-			<div class="igs-btn" data-for="b, i : buttons" data-class-disabled="!b.enabled" data-event-click="igs_dialog_button(i)">
-				<span class="sharp-text sharp-middle sharp-centre igs-btn-label" data-style-font-size="text_px + 'px'">{{b.label}}</span>
+	<div id="stage" class="stage">
+		<div id="panel">
+			<div class="igs-dialog-frame"></div>
+			<img id="igs_item"/>
+			<div id="igs_item_box"></div>
+			<div id="igs_title" class="igs-dialog-line">
+				<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{title}}</span>
 			</div>
-		</div>
-		<div class="igs-debug">
-			<div class="igs-debug-line" data-for="d : debug_lines">
-				<span class="sharp-text" data-style-font-size="text_px + 'px'">{{d}}</span>
+			<div id="igs_name" class="igs-dialog-line">
+				<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{name}}</span>
+			</div>
+			<!-- 7 rows of 13 units, the native box's own m_iNumRenderLine times its line step. -->
+			<div id="igs_package_info" class="scroll-pane igs-pane counter-scaled"
+			     data-style-font-size="text_px + 'px'">
+				<div class="igs-line" data-for="l : description_lines">{{l.text}}</div>
+			</div>
+			<span id="igs_price" class="sharp-text sharp-right" data-style-font-size="text_px + 'px'">{{price}}</span>
+			<div class="igs-dialog-buttons">
+				<div class="igs-btn" data-for="b, i : buttons" data-class-disabled="!b.enabled" data-event-click="igs_dialog_button(i)">
+					<span class="sharp-text sharp-middle sharp-centre igs-btn-label" data-style-font-size="text_px + 'px'">{{b.label}}</span>
+				</div>
+			</div>
+			<div class="igs-debug">
+				<div class="igs-debug-line" data-for="d : debug_lines">
+					<span class="sharp-text" data-style-font-size="text_px + 'px'">{{d}}</span>
+				</div>
 			</div>
 		</div>
 	</div>

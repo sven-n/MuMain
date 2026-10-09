@@ -47,7 +47,7 @@ bool CMsgBoxIGSBuySelectItem::Create(float fPriority)
 {
     SetAddCallbackFunc();
 
-    CMessageBoxBase::Create((IGS_WINDOW_WIDTH / 2) - (IGS_FRAME_WIDTH / 2), (IGS_WINDOW_HEIGHT / 2) - (IGS_FRAME_HEIGHT / 2), IGS_FRAME_WIDTH, IGS_FRAME_HEIGHT, fPriority);
+    CMessageBoxBase::Create(IGS_FRAME_WIDTH, IGS_FRAME_HEIGHT, fPriority);
 
     m_RmlView.Ensure();
     return true;
@@ -144,7 +144,6 @@ void CMsgBoxIGSBuySelectItem::SyncRmlModel()
     if (!m_RmlView.Document())
         return;
     auto& binder = m_RmlView.Binder();
-    UI::RmlBridge::PlaceOnStage(m_Placement, m_RmlView.Document(), "panel", GetPos());
     UI::RmlBridge::SyncNativeTextSize(binder);
 
     SyncField(binder, &BuySelectRmlModel::title, "title", StringUtils::WideToNarrow(I18N::Game::Shop));

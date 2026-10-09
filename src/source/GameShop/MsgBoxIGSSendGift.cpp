@@ -49,9 +49,7 @@ bool CMsgBoxIGSSendGift::Create(float fPriority)
 {
     SetAddCallbackFunc();
 
-    CMessageBoxBase::Create((IGS_WINDOW_WIDTH / 2) - (IGS_FRAME_WIDTH / 2),
-        (IGS_WINDOW_HEIGHT / 2) - (IGS_FRAME_HEIGHT / 2),
-        IGS_FRAME_WIDTH, IGS_FRAME_HEIGHT, fPriority);
+    CMessageBoxBase::Create(IGS_FRAME_WIDTH, IGS_FRAME_HEIGHT, fPriority);
 
     InitInputBox();
 
@@ -189,7 +187,6 @@ void CMsgBoxIGSSendGift::SyncRmlModel()
     if (!m_RmlView.Document())
         return;
     auto& binder = m_RmlView.Binder();
-    UI::RmlBridge::PlaceOnStage(m_Placement, m_RmlView.Document(), "panel", GetPos());
     UI::RmlBridge::SyncNativeTextSize(binder);
 
     const auto narrow = [](const wchar_t* text) { return StringUtils::WideToNarrow(text); };

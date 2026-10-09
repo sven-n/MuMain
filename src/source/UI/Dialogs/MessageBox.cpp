@@ -23,9 +23,8 @@ mu::ui::window::CMessageBoxBase::~CMessageBoxBase()
     Release();
 }
 
-bool mu::ui::window::CMessageBoxBase::Create(int x, int y, int width, int height, float fPriority/* = 3.f*/)
+bool mu::ui::window::CMessageBoxBase::Create(int width, int height, float fPriority/* = 3.f*/)
 {
-    SetPos(x, y);
     SetSize(width, height);
     m_fPriority = fPriority;
     return true;
@@ -33,7 +32,6 @@ bool mu::ui::window::CMessageBoxBase::Create(int x, int y, int width, int height
 
 void mu::ui::window::CMessageBoxBase::Release()
 {
-    m_Pos.x = m_Pos.y = 0;
     m_Size.cx = m_Size.cy = 0;
     m_fPriority = 0.f;
     m_bCanMove = false;
@@ -41,21 +39,10 @@ void mu::ui::window::CMessageBoxBase::Release()
     RemoveAllCallbackFuncs();
 }
 
-void mu::ui::window::CMessageBoxBase::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
-}
-
 void mu::ui::window::CMessageBoxBase::SetSize(int width, int height)
 {
     m_Size.cx = width;
     m_Size.cy = height;
-}
-
-const POINT& mu::ui::window::CMessageBoxBase::GetPos()
-{
-    return m_Pos;
 }
 
 const SIZE& mu::ui::window::CMessageBoxBase::GetSize()
