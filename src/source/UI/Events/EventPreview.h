@@ -21,6 +21,7 @@ enum class Event
     CryWolfResult,
     Siege,
     CashShop,
+    HudStatus,
 };
 
 // True while `event` is previewed: its window may draw off its map, and its close sends nothing.

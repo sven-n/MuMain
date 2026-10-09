@@ -100,13 +100,11 @@ void CSBaseMatch::SetMatchInfo(const std::uint8_t byType, const int iMaxTime, co
     SetPosition(REFERENCE_WIDTH - 230 / 2, 100);
 }
 
-void CSBaseMatch::RenderTime(void)
+std::wstring CSBaseMatch::CountdownText(void)
 {
-    float x, y;
-
     if (m_iMatchCountDownType <= TYPE_MATCH_NONE || m_iMatchCountDownType >= TYPE_MATCH_END)
     {
-        return;
+        return {};
     }
 
     const auto now = MatchClock::now();
@@ -114,16 +112,8 @@ void CSBaseMatch::RenderTime(void)
     if (elapsedSeconds >= kMatchCountdownDuration)
     {
         m_iMatchCountDownType = TYPE_MATCH_NONE;
-        return;
+        return {};
     }
-
-    DisableAlphaBlend();
-    EnableAlphaTest(false);
-
-    x = 10.0f;
-    y = (float)REFERENCE_HEIGHT - 70.0f;
-    g_pRenderText->SetTextColor(128, 128, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 128);
 
     const int remainingSeconds = static_cast<int>((kMatchCountdownDuration - elapsedSeconds).count());
     wchar_t lpszStr[256]{0};
@@ -159,32 +149,7 @@ void CSBaseMatch::RenderTime(void)
         WriteWide(lpszStr, I18N::Game::Lookup(textNum), remainingSeconds);
     }
 
-    g_pRenderText->RenderText(REFERENCE_WIDTH / 2, static_cast<int>(y), lpszStr, 0, 0, RT3_WRITE_CENTER);
-}
-
-void CSBaseMatch::renderOnlyTime(float x, float y, int MatchTime)
-{
-    wchar_t lpszStr[256]{0};
-    const int iMinute = MatchTime / 60;
-    const int iSecondTime = MatchTime - (iMinute * 60);
-
-    WriteWide(lpszStr, L" %.2d :", iMinute);
-
-    if (iSecondTime >= 0)
-    {
-        AppendWide(lpszStr, L" %.2d", iSecondTime);
-    }
-
-    if (iMinute < 5)
-    {
-        g_pRenderText->SetTextColor(255, 32, 32, 255);
-    }
-    if (iMinute < 15)
-    {
-        AppendWide(lpszStr, L": %.2d", static_cast<int>(WorldTime) % 60);
-    }
-    g_pRenderText->SetFont(g_hFontBig);
-    g_pRenderText->RenderText(static_cast<int>(x), static_cast<int>(y), lpszStr, 0, 0, RT3_WRITE_CENTER);
+    return lpszStr;
 }
 
 void CSBaseMatch::SetPosition(int ix, int iy)

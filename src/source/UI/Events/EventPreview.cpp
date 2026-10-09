@@ -6,6 +6,7 @@
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameShop/InGameShop.h"
 #include "GameShop/InGameShopSystem.h"
+#include "GameLogic/Events/MatchEvent.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Events/BloodCastleTime.h"
@@ -38,6 +39,8 @@ extern CLASS_TYPE HeroClass[5];
 extern int HeroScore[5];
 extern wchar_t HeroName[5][MAX_USERNAME_SIZE + 1];
 extern BYTE m_CrywolfState;
+// ZzzInterface.cpp: when the last chat macro went out.
+extern uint64_t LastMacroTime;
 
 namespace UI::EventPreview
 {
@@ -46,6 +49,9 @@ namespace
 using mu::ui::window::CManager;
 
 Event s_Showing = Event::None;
+
+// An entry with no window of its own: its texts show wherever the game draws them.
+constexpr DWORD kNoWindow = 0xFFFFFFFF;
 
 struct Entry
 {
@@ -76,6 +82,9 @@ constexpr std::array kEntries = {
           L"castle siege commander HUD, members, NPCs and two commands, 45 minutes left"},
     Entry{L"igs", Event::CashShop, mu::ui::window::INTERFACE_INGAMESHOP,
           L"cash shop from the local script and banner, storage and gift box filled"},
+    Entry{L"status", Event::HudStatus, kNoWindow,
+          L"HUD status texts, both crown switches held (shown at the switches, Valley of Loren 150-200, "
+          L"180-230), a macro cooldown and the Blood Castle entry countdown"},
 };
 
 void Log(const std::wstring& text, mu::ui::window::MESSAGE_TYPE type = mu::ui::window::TYPE_SYSTEM_MESSAGE)
@@ -86,6 +95,8 @@ void Log(const std::wstring& text, mu::ui::window::MESSAGE_TYPE type = mu::ui::w
 // Shown and hidden without the window's opening or closing process, which may talk to the server.
 void SetWindowShown(DWORD window, bool shown)
 {
+    if (window == kNoWindow)
+        return;
     if (CManager* manager = g_pNewUISystem->GetNewUIManager())
         manager->ShowInterface(window, shown);
 }
@@ -232,6 +243,29 @@ void SeedSiege()
     UI::Siege::SetCommanderMapInfo(1, 70, 180, 1);
 }
 
+// The entry countdown runs on the map's match; off an event map the preview lends one.
+bool s_LentMatch = false;
+
+void SeedHudStatus()
+{
+    Delete_Switch();
+    Switch_Info = new CROWN_SWITCH_INFO[2];
+    const wchar_t* holders[2][2] = {{L"Lionheart", L"Valkyrie"}, {L"Ravens", L"Ironclad"}};
+    for (int i = 0; i < 2; ++i)
+    {
+        Switch_Info[i].m_bySwitchState = 1;
+        wcsncpy_s(Switch_Info[i].m_szGuildName, holders[i][0], _TRUNCATE);
+        wcsncpy_s(Switch_Info[i].m_szUserName, holders[i][1], _TRUNCATE);
+    }
+    LastMacroTime = GetTickCount64();
+    if (matchEvent::g_csMatchInfo == nullptr)
+    {
+        matchEvent::g_csMatchInfo = new CSDevilSquareMatch;
+        s_LentMatch = true;
+    }
+    matchEvent::StartMatchCountDown(TYPE_MATCH_CASTLE_ENTER_CLOSE);
+}
+
 // The script and banner versions shipped under Data/InGameShopScript and Data/InGameShopBanner; the
 // loader deletes a version whose files fail to load, so these must be ones that are there.
 void SeedCashShop()
@@ -268,6 +302,7 @@ void Seed(Event event)
     case Event::CryWolfResult: SeedCryWolfResult(); break;
     case Event::Siege: SeedSiege(); break;
     case Event::CashShop: SeedCashShop(); break;
+    case Event::HudStatus: SeedHudStatus(); break;
     default: break;
     }
 }
@@ -291,6 +326,14 @@ void Reset(Event event)
         UI::Siege::ResetMiniMap();
         break;
     case Event::CashShop: g_pInGameShop->ClearAllStorageItem(); break;
+    case Event::HudStatus:
+        Delete_Switch();
+        LastMacroTime = 0;
+        matchEvent::StartMatchCountDown(TYPE_MATCH_NONE);
+        if (s_LentMatch)
+            matchEvent::DeleteEventMatch();
+        s_LentMatch = false;
+        break;
     default: break;
     }
 }

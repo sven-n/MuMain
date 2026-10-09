@@ -59,7 +59,6 @@ protected:
 
     bool    getEqualMonster(int addV);
 
-    void    renderOnlyTime(float x, float y, int MatchTime);
 
 public:
     CSBaseMatch()
@@ -91,7 +90,8 @@ public:
     void    StartMatchCountDown(int iType);
     void    SetMatchInfo(std::uint8_t byType, int iMaxTime, int iTime, int iMaxMonster = 0, int iKillMonster = 0);
 
-    void    RenderTime(void);
+    // The entry countdown's line while one runs (30 seconds from StartMatchCountDown()), else empty.
+    std::wstring CountdownText(void);
     virtual void    RenderMatchTimes(void) = 0;
 
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data) = 0;

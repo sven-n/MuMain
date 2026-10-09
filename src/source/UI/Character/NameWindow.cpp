@@ -15,6 +15,7 @@
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraState.h"
 #include "UI/Combat/MonsterHealthBar.h"
+#include "UI/HUD/HudStatus.h"
 #include "World/GameMaps/GMBattleCastle.h"
 #include "World/GameMaps/GMHellas.h"
 #include "World/GameMaps/GM_Kanturu_3rd.h"
@@ -110,6 +111,7 @@ bool mu::ui::window::CNameWindow::Create(CManager* pNewUIMng)
 void mu::ui::window::CNameWindow::Release()
 {
     m_labelLayer.Release();
+    m_statusTexts.Release();
 
     if (m_pNewUIMng)
     {
@@ -147,11 +149,16 @@ void mu::ui::window::CNameWindow::Show(bool bShow)
 {
     CObject::Show(bShow);
     if (!bShow)
+    {
         m_labelLayer.Hide();
+        m_statusTexts.Hide();
+    }
 }
 
 void mu::ui::window::CNameWindow::PrepareFrame()
 {
+    m_statusTexts.Sync(IsVisible(), g_Camera.TopViewEnable == false);
+
     // Recorded before the windows render, with this frame's camera and selection; the document
     // sits under every window, as the original's depth-1.0 window did.
     if (!m_labelLayer.Create())
@@ -169,7 +176,6 @@ void mu::ui::window::CNameWindow::PrepareFrame()
         if (g_Camera.TopViewEnable == false)
         {
             RenderPartyHP();
-            RenderSwichState();
             battleCastle::RenderBuildTimes();
             M39Kanturu3rd::RenderKanturu3rdinterface();
         }
@@ -196,7 +202,6 @@ void mu::ui::window::CNameWindow::RenderLabels()
     const UI::Scaling::ScopedScreenStretch screen(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     EnableAlphaTest();
     RenderName();
-    RenderTimes();
     matchEvent::RenderMatchTimes();
     UI::Chat::RenderBooleans();
     RenderMonsterHealthBars();

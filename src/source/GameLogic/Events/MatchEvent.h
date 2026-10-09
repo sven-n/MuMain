@@ -44,12 +44,13 @@ namespace matchEvent
             g_csMatchInfo->SetMatchGameCommand(data);
         }
     }
-    inline  void    RenderTime(void)
+    inline  std::wstring CountdownText(void)
     {
         if (g_csMatchInfo != NULL)
         {
-            g_csMatchInfo->RenderTime();
+            return g_csMatchInfo->CountdownText();
         }
+        return {};
     }
     inline  void    RenderMatchTimes(void)
     {

@@ -3693,10 +3693,8 @@ void RenderBar(float x, float y, float Width, float Height, float Bar, bool Disa
     DisableAlphaBlend();
 }
 
-void RenderSwichState()
+void CollectCrownSwitchLines(std::wstring (&lines)[2])
 {
-    wchar_t Buff[300];
-
     if (Switch_Info == NULL)
         return;
 
@@ -3713,11 +3711,9 @@ void RenderSwichState()
     {
         if (Switch_Info[i].m_bySwitchState > 0)
         {
+            wchar_t Buff[300];
             mu_swprintf(Buff, L"%ls%d / %ls / %ls", I18N::Game::CrownSwitch, i + 1, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
-            g_pRenderText->SetFont(g_hFont);
-            g_pRenderText->SetTextColor(255, 255, 255, 255);
-            g_pRenderText->SetBgColor(0);
-            g_pRenderText->RenderText(0, REFERENCE_HEIGHT - 85 + (i * 15), Buff, REFERENCE_WIDTH, 0, RT3_SORT_CENTER);
+            lines[i] = Buff;
         }
     }
 }
@@ -3733,7 +3729,6 @@ void RenderInterface(bool Render)
     if (!overlaysRecorded)
     {
         RenderPartyHP();
-        RenderSwichState();
         battleCastle::RenderBuildTimes();
     }
 
@@ -4053,26 +4048,15 @@ void RenderPartyHP()
 }
 
 
-void RenderTimes()
+bool MacroCooldownFraction(float& fraction)
 {
     const uint64_t currentTickCount = GetTickCount64();
-    if (LastMacroTime > currentTickCount - MacroCooldownMs)
-    {
-        constexpr float width = 50;
-        constexpr float height = 2;
-        constexpr int y = REFERENCE_HEIGHT - 48 - 40;
-        const float x = (static_cast<float>(GetScreenLeft() + GetScreenWidth()) - width) / 2.0f;
+    if (LastMacroTime <= currentTickCount - MacroCooldownMs)
+        return false;
 
-        const uint64_t remainingMacroCooldownTime = MacroCooldownMs - (currentTickCount - LastMacroTime);
-        const float progressValue = static_cast<float>(remainingMacroCooldownTime) / MacroCooldownMs * width;
-
-        EnableAlphaTest();
-        g_pRenderText->RenderText(static_cast<int>(x), y, L"Macro Time");
-        RenderBar(x, y + 12, width, height, (float)progressValue);
-    }
-
-
-    matchEvent::RenderTime();
+    const uint64_t remainingMacroCooldownTime = MacroCooldownMs - (currentTickCount - LastMacroTime);
+    fraction = static_cast<float>(remainingMacroCooldownTime) / MacroCooldownMs;
+    return true;
 }
 
 extern int g_iKeyPadEnable;

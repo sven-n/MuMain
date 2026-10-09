@@ -152,7 +152,8 @@ siege lists, the cash shop lists.
 |---|---|---|
 | Centre-screen notices | `UI::Notices::Render()` | Done: `notices.rml`, above every document but the tooltip |
 | Map name banner | `CUIMapName::Render()` | Done: `map_name.rml`, behind every window |
-| Party HP bars over heads, Kanturu result banner, siege crown switch lines and build-time bars, Hellas object labels | `RenderPartyHP()`, `M39Kanturu3rd::RenderKanturu3rdinterface()`, `RenderSwichState()`, `battleCastle::RenderBuildTimes()`, `RenderObjectDescription()` | Done: recorded by the world-label layer |
+| Party HP bars over heads, Kanturu result banner, siege build-time bars, Hellas object labels | `RenderPartyHP()`, `M39Kanturu3rd::RenderKanturu3rdinterface()`, `battleCastle::RenderBuildTimes()`, `RenderObjectDescription()` | Done: recorded by the world-label layer |
+| Siege crown switch lines, macro cooldown, event entry countdown | `RenderSwichState()`, `RenderTimes()`, `CSBaseMatch::RenderTime()` | Done: `hud_status.rml` on the HUD board (`UI::Hud::StatusTexts`); `$preview status` |
 | Reconnect dialog | `UI::Reconnect::RenderDialog()` | Done: `reconnect_dialog.rml`, above every document |
 | Login scene logo and lines | `NewRenderLogInScene()` | Done: `login_scene.rml` (`Scenes::LoginOverlay`) |
 | Loading screen art | `LoadingScene()` | Done: `loading.rml` |

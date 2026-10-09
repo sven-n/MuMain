@@ -162,7 +162,7 @@ on). A full-screen overlay region can stay unmarked so nothing shifts under it.
 
 - `GetScreenWidth()`/`GetScreenLeft()` (`ZzzInventory.cpp`) return
   `UI::Placement::UncoveredWorldRight()`/`Left()` in the 640-wide HUD space: pet HP bars, shop
-  titles, the macro cooldown bar, endurance tooltips and centred HUD text read them.
+  titles, endurance tooltips and centred HUD text read them.
 - HUD widgets read `UncoveredWorldLeftIn()`/`RightIn()` in their own layout every frame.
 - Neither area changes the rendered game viewport. `HeroX` (the hero's facing centre) still uses
   the right edge only — a mismatch that predates this work, left for a gameplay pass.
