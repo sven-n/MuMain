@@ -85,7 +85,6 @@ void mu::ui::window::TipTextListView::Sync(bool visible, const TipTextListRecord
         return;
 
     UI::RmlBridge::SyncRootTransform(m_View.Binder(), POINT{0, 0});
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
 
     std::vector<TipTextListBoxEntry> boxes;
     for (const TipTextListRecord::Box& box : record.boxes)
@@ -102,10 +101,9 @@ void mu::ui::window::TipTextListView::Sync(bool visible, const TipTextListRecord
         const int measured = g_pRenderText->MeasureText(line.text.c_str(), static_cast<int>(line.text.size())).cx;
         const auto role = line.bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
         const int align = line.sort == RT3_SORT_CENTER ? 1 : line.sort == RT3_SORT_RIGHT ? 2 : 0;
-        lines.push_back(
-            {StringUtils::WideToNarrow(line.text.c_str()), line.x, line.y, line.boxWidth,
-             UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), line.boxWidth), align,
-             line.bold, UI::RmlBridge::RgbaToCss(line.color)});
+        lines.push_back({StringUtils::WideToNarrow(line.text.c_str()), line.x, line.y, line.boxWidth,
+                         UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(measured), line.boxWidth), align,
+                         line.bold, UI::RmlBridge::RgbaToCss(line.color)});
     }
 
     TipTextListRmlModel& model = m_View.GetModel();

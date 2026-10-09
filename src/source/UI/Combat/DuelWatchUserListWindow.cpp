@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Combat/DuelWatchUserListWindow.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
@@ -124,10 +125,8 @@ void CDuelWatchUserListWindow::SyncView()
     if (!IsVisible())
         return;
 
-    // CManager scopes LayoutMode::HudFrame around the window: the bottom HUD's uniform scale, no offset.
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncField(m_RmlView.Binder(), &DuelWatchSpectatorsRmlModel::textPx, "text_px",
-              UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform));
+              UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal));
 
     const int count = g_DuelMgr.GetDuelWatchUserCount();
     std::vector<Rml::String> spectators;

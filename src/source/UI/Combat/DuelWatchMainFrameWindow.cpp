@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Combat/DuelWatchMainFrameWindow.h"
 #include "UI/Core/WindowSystem.h"
 #include "GameLogic/Combat/DuelMgr.h"
@@ -301,8 +302,6 @@ void CDuelWatchMainFrameWindow::SyncView()
     if (!IsVisible())
         return;
 
-    // CManager scopes LayoutMode::HudFrame around the window: the bottom HUD's uniform scale, no offset.
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
 
     SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::exitHint, "exit_hint",
               StringUtils::WideToNarrow(I18N::Game::DuelFinished));
@@ -318,9 +317,9 @@ void CDuelWatchMainFrameWindow::SyncView()
     {
         const wchar_t* text = g_DuelMgr.GetDuelPlayerID(player);
         const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-        return DuelWatchNameEntry{StringUtils::WideToNarrow(text),
-                                  UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Bold, transform,
-                                                                        static_cast<float>(width), 55.f)};
+        return DuelWatchNameEntry{
+            StringUtils::WideToNarrow(text),
+            UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Bold, static_cast<float>(width), 55.f)};
     };
     SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::heroName, "hero_name", name(DUEL_HERO));
     SyncField(m_RmlView.Binder(), &DuelWatchFrameRmlModel::enemyName, "enemy_name", name(DUEL_ENEMY));

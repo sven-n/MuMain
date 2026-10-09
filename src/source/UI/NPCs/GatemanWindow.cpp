@@ -290,10 +290,8 @@ void CGatemanWindow::SyncContent()
         g_pRenderText->SetFont(boldFont ? g_hFontBold : g_hFont);
         const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
         const auto role = boldFont ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
-        const float px =
-            boxWidth > 0.f
-                ? UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), boxWidth)
-                : UI::Scaling::NativeTextPixelSize(role, transform);
+        const float px = boxWidth > 0.f ? UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(measured), boxWidth)
+                                        : UI::RmlBridge::NativeTextPx(role);
         return {StringUtils::WideToNarrow(text), px};
     };
     // A page's line: the original's 190-unit centring box.

@@ -236,7 +236,7 @@ void mu::ui::window::CCommandWindow::SyncRmlModel()
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::bigTextPx, "big_text_px",
-              UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Big, transform));
+              UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Big));
     SyncTitle(transform);
 
     SyncButtons(transform);

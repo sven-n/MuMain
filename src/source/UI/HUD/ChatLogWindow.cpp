@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "I18N/All.h"
 
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"
@@ -744,8 +745,7 @@ void mu::ui::window::CChatLogWindow::SyncNativeLineGeometry()
             m_RmlView.MarkDirty(name);
         }
     };
-    syncFloat(&ChatLogRmlModel::textPx, "text_px",
-              UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform));
+    syncFloat(&ChatLogRmlModel::textPx, "text_px", UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal));
     syncFloat(&ChatLogRmlModel::linePx, "line_px", UI::Scaling::SizeY(transform, static_cast<float>(textHeight)));
     syncFloat(&ChatLogRmlModel::rowPx, "row_px", SCROLL_MIDDLE_PART_HEIGHT * dpRatio);
 }
@@ -1313,8 +1313,7 @@ void mu::ui::window::CSystemLogWindow::SyncNativeGeometry()
     };
     syncFloat(&SystemLogRmlModel::rowPx, "row_px", UI::Scaling::SizeY(transform, static_cast<float>(rowHeight)));
     syncFloat(&SystemLogRmlModel::linePx, "line_px", UI::Scaling::SizeY(transform, static_cast<float>(textHeight)));
-    syncFloat(&SystemLogRmlModel::textPx, "text_px",
-              UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform));
+    syncFloat(&SystemLogRmlModel::textPx, "text_px", UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal));
 }
 
 void mu::ui::window::CSystemLogWindow::RebuildLineModel()

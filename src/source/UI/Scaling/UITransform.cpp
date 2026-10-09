@@ -334,6 +334,13 @@ float UI::Scaling::NativeTextPixelSizeInBox(FontRole role, const Transform& tran
                                    MinimumTextPixelSize(role));
 }
 
+float UI::Scaling::NativeTextPixelSizeInBox(FontRole role, int windowWidth, int windowHeight, float measuredWidth,
+                                            float boxWidth)
+{
+    return FitTextPixelSizeToWidth(NativeTextPixelSize(role, windowWidth, windowHeight), measuredWidth, boxWidth,
+                                   MinimumTextPixelSize(role));
+}
+
 float UI::Scaling::MinimumTextPixelSize(FontRole role)
 {
     return static_cast<float>(CachedFontPointSize(role)) * static_cast<float>(MinimumFontPointSize(role)) /

@@ -30,6 +30,8 @@ public:
     // The logical height MeasureText() reports for one line of `role` text under the active
     // transform, without selecting a font on any instance.
     static int LineHeight(UI::Scaling::FontRole role);
+    // One line of `role` text in screen pixels: the same for every window.
+    static float LineHeightPx(UI::Scaling::FontRole role);
 
     void RenderText(int x, int y, const wchar_t* text, int boxWidth = 0, int boxHeight = 0, int sort = RT3_SORT_LEFT,
                     OUT SIZE* textSize = nullptr) override;

@@ -368,7 +368,6 @@ void CGensRanking::SyncRmlModel()
 
 void CGensRanking::SyncContent()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
 
     // One of the window's own lines: the document places it, so only what it says and the size the
     // native renderer would have shrunk it to for its box travel through the model.
@@ -380,7 +379,7 @@ void CGensRanking::SyncContent()
         const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
         const auto role = boldFont ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
         return {StringUtils::WideToNarrow(text),
-                UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), boxWidth)};
+                UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(measured), boxWidth)};
     };
 
     // The original's RenderTexts().

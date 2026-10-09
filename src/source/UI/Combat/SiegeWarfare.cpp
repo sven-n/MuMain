@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Combat/SiegeWarfare.h"
 #include "UI/Events/EventPreview.h"
 #include "UI/Core/WindowSystem.h"
@@ -233,9 +234,8 @@ void mu::ui::window::CSiegeWarfare::SyncRmlModel()
 
     // CManager scopes the HUD board around the window: the bottom HUD's scale, centred like it.
     SiegeWarfareRmlModel& next = m_NextRmlModel;
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    next.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
-    next.bigTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Big, transform);
+    next.boldTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
+    next.bigTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Big);
     m_pSiegeWarUI->FillRmlModel(next);
     ApplyRmlModel(next);
 }

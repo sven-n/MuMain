@@ -19,6 +19,18 @@ extern unsigned int WindowHeight;
 // dirty, it doesn't touch anything else in the model.
 namespace UI::RmlBridge
 {
+// Native text size in screen pixels at the one typography scale, whatever the window's layout.
+inline float NativeTextPx(UI::Scaling::FontRole role)
+{
+    return UI::Scaling::NativeTextPixelSize(role, static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+}
+// The same for a text drawn into a box, shrunk to fit it (UI::Scaling::NativeTextPixelSizeInBox()).
+inline float NativeTextPxInBox(UI::Scaling::FontRole role, float measuredWidth, float boxWidth)
+{
+    return UI::Scaling::NativeTextPixelSizeInBox(role, static_cast<int>(WindowWidth), static_cast<int>(WindowHeight),
+                                                 measuredWidth, boxWidth);
+}
+
     template <typename Model>
     void SyncRootTransform(RmlModelBinder<Model>& binder, const POINT& pos)
     {

@@ -99,7 +99,6 @@ void mu::ui::window::EventItemEntryView::Sync(bool visible)
 
 void mu::ui::window::EventItemEntryView::SyncTexts()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     EventItemEntryRmlModel& model = m_View.GetModel();
 
     // RenderText(x, y, text, width, 0, RT3_SORT_CENTER): shrunk to its box if wider.
@@ -109,9 +108,8 @@ void mu::ui::window::EventItemEntryView::SyncTexts()
         const UI::Scaling::FontRole role = text.bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
         g_pRenderText->SetFont(text.bold ? g_hFontBold : g_hFont);
         const int width = g_pRenderText->MeasureText(text.text.c_str(), static_cast<int>(text.text.size())).cx;
-        texts.push_back(
-            {StringUtils::WideToNarrow(text.text.c_str()),
-             UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), text.width)});
+        texts.push_back({StringUtils::WideToNarrow(text.text.c_str()),
+                         UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(width), text.width)});
     }
     if (model.texts == texts)
         return;
@@ -124,7 +122,7 @@ void mu::ui::window::EventItemEntryView::SyncButtons()
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     EventItemEntryRmlModel& model = m_View.GetModel();
 
-    const float boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
+    const float boldTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
     if (model.boldTextPx != boldTextPx)
     {
         model.boldTextPx = boldTextPx;

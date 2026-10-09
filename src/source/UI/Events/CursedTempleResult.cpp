@@ -277,7 +277,7 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
 {
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     CursedTempleResultRmlModel updated = m_RmlView.GetModel();
-    const float textPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
+    const float textPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal);
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     updated.lineHeightPx = static_cast<float>(lineHeight) * transform.scaleY;
     updated.labelLinePx = updated.lineHeightPx;

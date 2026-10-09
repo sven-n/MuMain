@@ -722,10 +722,8 @@ void mu::ui::window::CKanturuInfoWindow::SyncView()
     if (!IsVisible())
         return;
 
-    // CManager scopes LayoutMode::HudFrame around the window: the bottom HUD's uniform scale, no offset.
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncInfoField(m_RmlView.Binder(), &KanturuInfoRmlModel::boldTextPx, "bold_text_px",
-                  UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
+                  UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold));
 
     // The original's RenderInfo(): the characters, then the monsters or, while Maya fights, the boss.
     wchar_t strText[256];

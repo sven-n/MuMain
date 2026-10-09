@@ -179,10 +179,9 @@ void CGateSwitchWindow::SyncRmlModel()
         g_pRenderText->MeasureText(I18N::Game::CastleGateSwitch, static_cast<int>(wcslen(I18N::Game::CastleGateSwitch)))
             .cx;
     SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::boldTextPx, "bold_text_px",
-         UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
+              UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold));
     SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::titlePx, "title_px",
-         UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Bold, transform, static_cast<float>(titleWidth),
-                                               160.f));
+              UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Bold, static_cast<float>(titleWidth), 160.f));
     SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::title, "title", StringUtils::WideToNarrow(I18N::Game::CastleGateSwitch));
     SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::line1, "line1", StringUtils::WideToNarrow(I18N::Game::CanCommandToOpenOrClose));
     SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::line2, "line2", StringUtils::WideToNarrow(I18N::Game::TheCastleGateInFront));

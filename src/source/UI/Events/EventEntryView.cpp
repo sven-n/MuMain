@@ -117,13 +117,12 @@ void mu::ui::window::EventEntryView::SyncTextSizes()
     // top staying at y + 12.
     g_pRenderText->SetFont(g_hFontBold);
     const int titleWidth = g_pRenderText->MeasureText(m_Title.c_str(), static_cast<int>(m_Title.size())).cx;
-    const float boldPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
-    const float titlePx = UI::Scaling::NativeTextPixelSizeInBox(
-        UI::Scaling::FontRole::Bold, transform, static_cast<float>(titleWidth), static_cast<float>(kTitleBoxWidth));
+    const float boldPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
+    const float titlePx = UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Bold, static_cast<float>(titleWidth),
+                                                           static_cast<float>(kTitleBoxWidth));
     SyncField(m_View.Binder(), &EventEntryRmlModel::titleTextPx, "title_text_px", titlePx);
     SyncField(m_View.Binder(), &EventEntryRmlModel::titleLinePx, "title_line_px",
-              static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold)) * transform.scaleY *
-                  (titlePx / boldPx));
+              CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Bold) * (titlePx / boldPx));
 
     // The description lines: the normal font, each shrunk to the 190-unit box if wider.
     g_pRenderText->SetFont(g_hFont);
@@ -132,8 +131,8 @@ void mu::ui::window::EventEntryView::SyncTextSizes()
     {
         const std::wstring& text = m_LineTexts[i];
         const int width = g_pRenderText->MeasureText(text.c_str(), static_cast<int>(text.size())).cx;
-        const float px = UI::Scaling::NativeTextPixelSizeInBox(
-            UI::Scaling::FontRole::Normal, transform, static_cast<float>(width), static_cast<float>(kLineBoxWidth));
+        const float px = UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Normal, static_cast<float>(width),
+                                                          static_cast<float>(kLineBoxWidth));
         if (model.lines[i].textPx != px)
         {
             model.lines[i].textPx = px;

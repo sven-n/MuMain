@@ -533,10 +533,8 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
         g_pRenderText->SetFont(boldFont ? g_hFontBold : g_hFont);
         const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
         const auto role = boldFont ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
-        const float px =
-            boxWidth > 0.f
-                ? UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), boxWidth)
-                : UI::Scaling::NativeTextPixelSize(role, transform);
+        const float px = boxWidth > 0.f ? UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(measured), boxWidth)
+                                        : UI::RmlBridge::NativeTextPx(role);
         return {StringUtils::WideToNarrow(text), px};
     };
     const bool noGuild = Hero->GuildStatus == G_NONE;
@@ -724,14 +722,12 @@ void mu::ui::window::CGuildInfoWindow::SyncListContent()
 
 std::vector<mu::ui::window::GuildMemberRow> mu::ui::window::CGuildInfoWindow::BuildMemberRows() const
 {
-    const auto transform = UI::Scaling::GetActiveTransform();
     // A list cell's own shrink box, for the two cells that had one.
     auto cellPx = [&](const wchar_t* text, float boxWidth)
     {
         g_pRenderText->SetFont(g_hFont);
         const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-        return UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
-                                                     static_cast<float>(measured), boxWidth);
+        return UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Normal, static_cast<float>(measured), boxWidth);
     };
 
     std::vector<GuildMemberRow> memberRows;
@@ -775,7 +771,6 @@ float mu::ui::window::CGuildInfoWindow::GetLayerDepth()
 std::vector<mu::ui::window::GuildUnionRow> mu::ui::window::CGuildInfoWindow::BuildUnionRows() const
 {
     constexpr float kMemberCountBoxWidth = 60.f;
-    const auto transform = UI::Scaling::GetActiveTransform();
     std::vector<GuildUnionRow> rows;
     rows.reserve(m_Unions.size());
     g_pRenderText->SetFont(g_hFont);
@@ -786,8 +781,8 @@ std::vector<mu::ui::window::GuildUnionRow> mu::ui::window::CGuildInfoWindow::Bui
         GuildUnionRow row;
         row.name = StringUtils::WideToNarrow(entry.name.c_str());
         row.memberCount = StringUtils::WideToNarrow(count.c_str());
-        row.countTextPx = UI::Scaling::NativeTextPixelSizeInBox(
-            UI::Scaling::FontRole::Normal, transform, static_cast<float>(measured), kMemberCountBoxWidth);
+        row.countTextPx = UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Normal, static_cast<float>(measured),
+                                                           kMemberCountBoxWidth);
         row.markCells = MarkCells(entry.mark);
         row.selected = entry.name == m_SelectedUnion;
         rows.push_back(std::move(row));

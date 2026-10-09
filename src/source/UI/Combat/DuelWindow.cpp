@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Combat/DuelWindow.h"
 #include "GameLogic/Combat/DuelMgr.h"
 
@@ -127,10 +128,8 @@ void mu::ui::window::CDuelWindow::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    // CManager scopes LayoutMode::HudFrame around this window: the bottom HUD's uniform scale, no offset.
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     Sync(m_RmlView.Binder(), &DuelWindowRmlModel::boldTextPx, "bold_text_px",
-         UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
+         UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold));
 
     Sync(m_RmlView.Binder(), &DuelWindowRmlModel::heroName, "hero_name",
          Rml::String(StringUtils::WideToNarrow(g_DuelMgr.GetDuelPlayerID(DUEL_HERO))));

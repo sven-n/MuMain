@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Events/CryWolf.h"
 #include "UI/Events/EventPreview.h"
 #include "UI/Core/WindowSystem.h"
@@ -467,12 +468,9 @@ void mu::ui::window::CCryWolf::SyncView()
     if (!visible)
         return;
 
-    // The native text sizes; the theme places the HUD board (base.rcss's .hud-board).
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    updated.normalTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
-    updated.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
-    updated.boldLinePx =
-        static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold)) * transform.scaleY;
+    updated.normalTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal);
+    updated.boldTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
+    updated.boldLinePx = CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Bold);
 
     CryWolfRmlModel& model = m_RmlView.GetModel();
     SyncFieldFrom(m_RmlView.Binder(), &CryWolfRmlModel::normalTextPx, "normal_text_px", updated);

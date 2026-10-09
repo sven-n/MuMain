@@ -468,7 +468,7 @@ void CGuardWindow::SyncContent()
         const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
         const auto role = boldFont ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
         return {StringUtils::WideToNarrow(text),
-                UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), boxWidth)};
+                UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(measured), boxWidth)};
     };
     // A page's line: the original's 190-unit centring box.
     auto pageLine = [&](const wchar_t* text, bool boldFont = false) { return line(text, boldFont, 190.f); };

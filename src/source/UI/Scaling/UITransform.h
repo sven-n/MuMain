@@ -133,6 +133,9 @@ namespace UI::Scaling
     // `measuredWidth` is the text's unconstrained width and `boxWidth` the box's, both in the
     // transform's logical units (what MeasureText() returns).
     float NativeTextPixelSizeInBox(FontRole role, const Transform& transform, float measuredWidth, float boxWidth);
+    // The same at TypographyScale(), which every layout shares.
+    float NativeTextPixelSizeInBox(FontRole role, int windowWidth, int windowHeight, float measuredWidth,
+                                   float boxWidth);
     // Physical pixel size of the renderer's smallest `role` text (MinimumFontPointSize()).
     float MinimumTextPixelSize(FontRole role);
     // The box rule behind NativeTextPixelSizeInBox() for any text size: `textPx` scaled by

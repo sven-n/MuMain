@@ -232,7 +232,7 @@ void CDuelWatchWindow::SyncRmlModel()
     }
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncField(m_RmlView.Binder(), &DuelWatchRmlModel::boldTextPx, "bold_text_px",
-              UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
+              UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold));
     SyncField(m_RmlView.Binder(), &DuelWatchRmlModel::subtitlePx, "subtitle_px",
               TextPxInBox(UI::Scaling::FontRole::Bold, transform, I18N::Game::SelectAnColosseumYouDLikeToWatch, 190));
 

@@ -797,8 +797,7 @@ void mu::ui::window::CChatCommandWindow::SyncContent()
         const int measured = MeasureInReferenceUnits(text, wcslen(text));
         const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
         return {StringUtils::WideToNarrow(text),
-                UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured),
-                                                      static_cast<float>(width))};
+                UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(measured), static_cast<float>(width))};
     };
 
     // The original's RenderTitle().

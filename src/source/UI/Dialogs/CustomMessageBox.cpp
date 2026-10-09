@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Dialogs/GenericMenuDialog.h"
@@ -87,7 +88,7 @@ void SyncMatchResultView(MessageBoxView& view, const POINT& pos, CMessageBoxButt
             const float fittedPx = UI::Scaling::NativeTextPixelSizeInBounds(
                 role, transform, static_cast<float>(size.cx), static_cast<float>(size.cy),
                 static_cast<float>(text.boxWidth), static_cast<float>(text.boxHeight));
-            if (fittedPx != UI::Scaling::NativeTextPixelSize(role, transform))
+            if (fittedPx != UI::RmlBridge::NativeTextPx(role))
                 textPx = fittedPx;
         }
         lines.push_back({text.text, left - static_cast<float>(pos.x), static_cast<float>(text.y - pos.y), bold,

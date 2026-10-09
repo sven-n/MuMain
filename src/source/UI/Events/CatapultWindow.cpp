@@ -334,8 +334,7 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
     {
         g_pRenderText->SetFont(g_hFontBold);
         const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-        return UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Bold, transform, static_cast<float>(width),
-                                                     190.f);
+        return UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Bold, static_cast<float>(width), 190.f);
     };
 
     // The original's RenderTexts(): the side's title and the three lines, bold (220, 220, 220).
@@ -374,11 +373,10 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
         const int height = a.big ? 47 : 36;
         g_pRenderText->SetFont(g_hFont);
         const int measured = g_pRenderText->MeasureText(*a.label, static_cast<int>(wcslen(*a.label))).cx;
-        areas.push_back(
-            {StringUtils::WideToNarrow(*a.label), static_cast<int>(i), a.big,
-             static_cast<int>(i) == m_iAreaIndex,
-             UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
-                                                   static_cast<float>(measured), static_cast<float>(width))});
+        areas.push_back({StringUtils::WideToNarrow(*a.label), static_cast<int>(i), a.big,
+                         static_cast<int>(i) == m_iAreaIndex,
+                         UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Normal, static_cast<float>(measured),
+                                                          static_cast<float>(width))});
     }
     SyncField(m_RmlView.Binder(), &CatapultRmlModel::mode, "mode", static_cast<int>(m_iType));
     const bool sameAreas = model.areas.size() == areas.size() &&

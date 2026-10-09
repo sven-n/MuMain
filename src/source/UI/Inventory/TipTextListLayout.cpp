@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Inventory/TipTextListLayout.h"
 
 #include "Engine/Object/ZzzInventory.h"
@@ -27,9 +28,8 @@ SIZE MeasureInBox(const wchar_t* text, bool bold, float box)
     if (box > 0 && size.cx > box)
     {
         const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
-        const auto transform = UI::Scaling::GetActiveTransform();
-        const float ratio = UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(size.cx), box) /
-                            UI::Scaling::NativeTextPixelSize(role, transform);
+        const float ratio = UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(size.cx), box) /
+                            UI::RmlBridge::NativeTextPx(role);
         size.cx = static_cast<LONG>(std::lround(static_cast<float>(size.cx) * ratio));
         size.cy = static_cast<LONG>(std::lround(static_cast<float>(size.cy) * ratio));
     }

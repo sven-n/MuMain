@@ -192,9 +192,8 @@ void mu::ui::window::MessageBoxView::Sync(const POINT& pos, const std::vector<Li
     UI::RmlBridge::SyncRootTransform(m_View.Binder(), pos);
     UI::RmlBridge::SyncNativeTextSize(m_View.Binder());
 
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     MessageBoxViewRmlModel& model = m_View.GetModel();
-    const float boldPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
+    const float boldPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
     if (model.boldTextPx != boldPx)
     {
         model.boldTextPx = boldPx;

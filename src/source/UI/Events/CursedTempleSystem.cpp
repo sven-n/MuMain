@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Events/CursedTempleSystem.h"
 #include "UI/Events/EventPreview.h"
 #include "UI/Dialogs/CommonMessageBox.h"
@@ -1084,7 +1085,6 @@ void mu::ui::window::CCursedTempleSystem::SyncTutorialStep(std::vector<CursedTem
         texts[4] = I18N::Game::ThereAre4TypesOfSkills;
     }
 
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     g_pRenderText->SetFont(g_hFont);
     for (int j = 0; j < 5; ++j)
     {
@@ -1092,10 +1092,10 @@ void mu::ui::window::CCursedTempleSystem::SyncTutorialStep(std::vector<CursedTem
             continue;
         const std::wstring text = texts[j];
         const int width = g_pRenderText->MeasureText(text.c_str(), static_cast<int>(text.size())).cx;
-        lines.push_back({StringUtils::WideToNarrow(text.c_str()),
-                         UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
-                                                               static_cast<float>(width), 300.f),
-                         j == 0});
+        lines.push_back(
+            {StringUtils::WideToNarrow(text.c_str()),
+             UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Normal, static_cast<float>(width), 300.f),
+             j == 0});
     }
 }
 

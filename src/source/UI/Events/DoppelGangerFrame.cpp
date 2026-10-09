@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Events/DoppelGangerFrame.h"
 #include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"
@@ -180,8 +181,6 @@ void CDoppelGangerFrame::SyncView()
 
     StepGauges();
 
-    // CManager scopes LayoutMode::HudFrame around the window: the bottom HUD's uniform scale, no offset.
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
 
     // The original's texts: the monsters that passed (orange, red-orange after one, red after two),
     // "Time left" and the time, each centred on 110 units and shrunk to them; the themes place
@@ -191,9 +190,8 @@ void CDoppelGangerFrame::SyncView()
         const auto role = big ? UI::Scaling::FontRole::Big : UI::Scaling::FontRole::Normal;
         g_pRenderText->SetFont(big ? g_hFontBig : g_hFont);
         const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-        return DoppelGangerFrameTextEntry{
-            StringUtils::WideToNarrow(text),
-            UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), 110.f)};
+        return DoppelGangerFrameTextEntry{StringUtils::WideToNarrow(text),
+                                          UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(width), 110.f)};
     };
     const char* passedState = "none";
     if (m_iEnteredMonsters == 1)

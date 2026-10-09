@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Inventory/ItemEnduranceInfo.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Placement/WindowPlacement.h"
@@ -1057,7 +1058,7 @@ void mu::ui::window::CItemEnduranceInfo::SyncTooltip()
 
     g_pRenderText->SetFont(g_hFontBold);
     SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::boldTextPx, "bold_text_px",
-                           UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
+                           UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold));
     SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::boldLineHeightPx, "bold_line_height_px",
                            static_cast<float>(g_pRenderText->MeasureText(L"Q", 1).cy) * transform.scaleY);
 

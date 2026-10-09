@@ -629,10 +629,8 @@ void CCastleWindow::SyncContent()
         g_pRenderText->SetFont(boldFont ? g_hFontBold : g_hFont);
         const int measured = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
         const auto role = boldFont ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
-        const float px =
-            boxWidth > 0.f
-                ? UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(measured), boxWidth)
-                : UI::Scaling::NativeTextPixelSize(role, transform);
+        const float px = boxWidth > 0.f ? UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(measured), boxWidth)
+                                        : UI::RmlBridge::NativeTextPx(role);
         return {StringUtils::WideToNarrow(text), px};
     };
     wchar_t szTemp[256] = {};
@@ -649,10 +647,10 @@ void CCastleWindow::SyncContent()
     for (int i = 0; i < 4; ++i)
     {
         const SIZE size = g_pRenderText->MeasureText(tabLabels[i], static_cast<int>(wcslen(tabLabels[i])));
-        tabs.push_back({StringUtils::WideToNarrow(tabLabels[i]),
-                        UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
-                                                              static_cast<float>(size.cx), 40.f),
-                        i == m_iNumCurOpenTab});
+        tabs.push_back(
+            {StringUtils::WideToNarrow(tabLabels[i]),
+             UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Normal, static_cast<float>(size.cx), 40.f),
+             i == m_iNumCurOpenTab});
     }
 
     std::vector<CastleMapItem> mapItems;

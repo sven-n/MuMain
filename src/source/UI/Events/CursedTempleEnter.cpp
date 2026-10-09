@@ -287,7 +287,7 @@ void mu::ui::window::CCursedTempleEnter::SyncLines()
 {
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     CursedTempleEnterRmlModel updated = m_RmlView.GetModel();
-    updated.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
+    updated.boldTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
     const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     updated.lineHeightPx = static_cast<float>(lineHeight) * transform.scaleY;
     updated.labelLinePx = updated.lineHeightPx;

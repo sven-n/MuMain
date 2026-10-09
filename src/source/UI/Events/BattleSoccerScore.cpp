@@ -3,6 +3,7 @@
 //*****************************************************************************
 
 #include "stdafx.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Events/BattleSoccerScore.h"
 #include "Network/Server/WSclient.h"
 #include "Render/Models/ZzzBMD.h"
@@ -159,10 +160,8 @@ void mu::ui::window::CBattleSoccerScore::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    // CManager scopes LayoutMode::HudFrame around this window: the bottom HUD's uniform scale, no offset.
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     Sync(m_RmlView.Binder(), &BattleSoccerScoreRmlModel::boldTextPx, "bold_text_px",
-         UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform));
+         UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold));
     SyncTeams();
 }
 
