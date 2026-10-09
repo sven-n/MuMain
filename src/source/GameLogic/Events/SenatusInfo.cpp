@@ -283,10 +283,11 @@ void CSenatusInfo::DoWithdrawAction(DWORD dwMoney)
 
 void CSenatusInfo::SetNPCInfo(LPPMSG_NPCDBLIST pInfo)
 {
-    if (pInfo->iNpcNumber == GATENPC_NUMBER)
-        memcpy(&m_GateInfo[pInfo->iNpcIndex - 1], pInfo, sizeof(PMSG_NPCDBLIST));
-    if (pInfo->iNpcNumber == STATUENPC_NUMBER)
-        memcpy(&m_StatueInfo[pInfo->iNpcIndex - 1], pInfo, sizeof(PMSG_NPCDBLIST));
+    const int index = pInfo->iNpcIndex - 1;
+    if (pInfo->iNpcNumber == GATENPC_NUMBER && index >= 0 && index < static_cast<int>(std::size(m_GateInfo)))
+        memcpy(&m_GateInfo[index], pInfo, sizeof(PMSG_NPCDBLIST));
+    if (pInfo->iNpcNumber == STATUENPC_NUMBER && index >= 0 && index < static_cast<int>(std::size(m_StatueInfo)))
+        memcpy(&m_StatueInfo[index], pInfo, sizeof(PMSG_NPCDBLIST));
 }
 
 LPPMSG_NPCDBLIST CSenatusInfo::GetNPCInfo(int iNpcNumber, int iNpcIndex)

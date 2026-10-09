@@ -11211,7 +11211,7 @@ void ReceiveHuntZoneEnter(const BYTE* ReceiveBuffer)
     }
 }
 
-void ReceiveBCNPCList(const BYTE* ReceiveBuffer)
+void ReceiveBCNPCList(const BYTE* ReceiveBuffer, int Size)
 {
     auto Data = (LPPMSG_ANS_NPCDBLIST)ReceiveBuffer;
     int Offset = sizeof(PMSG_ANS_NPCDBLIST);
@@ -11223,7 +11223,8 @@ void ReceiveBCNPCList(const BYTE* ReceiveBuffer)
         break;
     case 1:
     {
-        for (int i = 0; i < Data->iCount; ++i)
+        // The count is the server's; never read past the packet.
+        for (int i = 0; i < Data->iCount && Offset + static_cast<int>(sizeof(PMSG_NPCDBLIST)) <= Size; ++i)
         {
             auto pNpcInfo = (LPPMSG_NPCDBLIST)(ReceiveBuffer + Offset);
             g_SenatusInfo.SetNPCInfo(pNpcInfo);
@@ -14326,7 +14327,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
     break;
 
     case 0xB3:
-        ReceiveBCNPCList(ReceiveBuffer);
+        ReceiveBCNPCList(ReceiveBuffer, Size);
         break;
     case 0xB4:
         ReceiveBCDeclareGuildList(ReceiveBuffer);
