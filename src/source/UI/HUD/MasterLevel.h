@@ -109,10 +109,6 @@ public:
     float GetLayerDepth() override;
 
 private:
-    int PosX;
-    int PosY;
-    int width;
-    int height;
 
     int CategoryPoint[MAX_MASTER_SKILL_CATEGORY];
     int skillPoint[MAX_MASTER_SKILL_CATEGORY][MAX_MASTER_TREE_RANK];
@@ -141,7 +137,6 @@ private:
     int m_HoveredNodeId = -1;
     bool m_bExperienceHovered = false;
 
-    void SetPos();
     int SetDivideString(wchar_t* text, int isItemTollTip, int TextNum, int iTextColor, int iTextBold, bool isPercent);
     void LoadImages();
     void UnloadImages();

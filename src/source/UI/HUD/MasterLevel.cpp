@@ -4,7 +4,7 @@
 #include "GameLogic/Items/CSItemOption.h"
 #include "UI/Social/SocialWindowBase.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/HUD/MasterLevel.h"
 #include "UI/HUD/Skills/MasterSkillTreeLayout.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
@@ -43,9 +43,6 @@ namespace
     constexpr int kNodeHintFlipTop = 300;
     constexpr float kExperienceHintX = 466.0f;
     constexpr float kExperienceHintY = 26.0f;
-
-    // The tree's own rectangle: 640 wide, down to the bottom of its 428-high background art.
-    constexpr int kTreeHeight = 428;
 
     template <typename Model>
     void SyncString(RmlModelBinder<Model>& binder, Rml::String Model::* field, const char* name, Rml::String value)
@@ -105,7 +102,6 @@ bool mu::ui::window::CMasterLevel::Create(CManager* pNewUIMng)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MASTER_LEVEL, this);
 
-    this->SetPos();
 
     this->LoadImages();
 
@@ -126,14 +122,6 @@ void mu::ui::window::CMasterLevel::Release()
 
     m_RmlView.Release();
     m_RmlBgView.Release();
-}
-
-void mu::ui::window::CMasterLevel::SetPos()
-{
-    this->PosX = 0;
-    this->PosY = 0;
-    this->width = REFERENCE_WIDTH;
-    this->height = kTreeHeight;
 }
 
 void mu::ui::window::CMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
@@ -460,14 +448,9 @@ bool mu::ui::window::CMasterLevel::Update()
 
 bool mu::ui::window::CMasterLevel::UpdateMouseEvent()
 {
-    // Node presses, hints and the close button are RmlUi events now. What is left is claiming the
-    // tree's own rectangle, so a click on it never reaches a window or the world underneath.
-    if (mu::ui::window::WindowGeometry(this->PosX, this->PosY, this->width, this->height).Contains(MouseX, MouseY) == true)
-    {
-        return false;
-    }
-
-    return true;
+    // Node presses, hints and the close button are RmlUi events; over the tree (#panel takes the
+    // pointer), a click never reaches a window or the world underneath.
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool mu::ui::window::CMasterLevel::UpdateKeyEvent()
