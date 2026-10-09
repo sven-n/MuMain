@@ -222,15 +222,14 @@
 .gmd-btn.compact:active { decorator: image(msgbox-btn-empty-small-active); }
 /* GenericMenuConfig::columns == 2 -- see .gmd-button-cell.cols-2 above for the width math (decorators
    don't consume box-model space like border/padding do, so this matches the cell exactly, no
-   subtraction needed). height switches to auto (with a min-height floor so a short 1-line label
-   still looks like a normal button) since a long jewel name (e.g. "Higher Refining Stone") needs
-   to wrap onto 2 lines at this width -- .btn's own fixed height:30dp/line-height:30dp assumes a
-   single line and would otherwise let the second line spill silently past the button's own box.
-   Idle/hover/active decorators are inherited unchanged from the base .gmd-btn rules above. */
+   subtraction needed). Every button keeps the art's 29dp height: a long jewel name (e.g. "Higher
+   Refining Stone") wraps onto a second line set close under the first, the label centred in the
+   button. Idle/hover/active decorators are inherited unchanged from the base .gmd-btn rules above. */
 .gmd-btn.cols-2 {
 	width: 76dp;
-	height: auto;
-	min-height: 30dp;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	line-height: normal;
 	white-space: normal;
 }
@@ -243,7 +242,7 @@
 	width: 100%;
 	white-space: nowrap; /* native draws a label on one line, even past the art's edge */
 }
-.gmd-btn.cols-2 .gmd-btn-label { padding: 4dp 2dp; white-space: normal; }
+.gmd-btn.cols-2 .gmd-btn-label { padding: 0 2dp; line-height: 1.0; white-space: normal; }
 /* .btn.disabled (base.rcss) already gives the exact look a disabled menu button needs --
    data-class-disabled="!button.enabled" just toggles that existing class, no new rule needed. */
 
