@@ -12970,6 +12970,12 @@
   <data name="ChatCommandsUnknownCommand" xml:space="preserve">
     <value>This command is not available anymore.</value>
   </data>
+  <data name="ChatCommandsValueOutOfRange" xml:space="preserve">
+    <value>Please correct the values marked in red first.</value>
+  </data>
+  <data name="ChatCommandsOwnValue" xml:space="preserve">
+    <value>mine</value>
+  </data>
   <data name="KeepFlightEquipmentInIcarus" xml:space="preserve">
     <value>In Icarus you cannot take off your last wings or flying mount.</value>
   </data>
