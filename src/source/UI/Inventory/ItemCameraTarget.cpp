@@ -9,16 +9,10 @@
 #include "Camera/CameraProjection.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "UI/Core/WindowObject.h"
 
 UI::Items::ItemCameraTarget::ItemCameraTarget(Drawer drawer, TransformSource transform)
     : m_drawer(std::move(drawer)), m_transform(std::move(transform)),
       m_target([this](std::uint32_t width, std::uint32_t height) { Render(width, height); })
-{
-}
-
-UI::Items::ItemCameraTarget::ItemCameraTarget(Drawer drawer, const mu::ui::window::CObject* owner)
-    : ItemCameraTarget(std::move(drawer), [owner] { return owner->GetLayoutTransform(); })
 {
 }
 

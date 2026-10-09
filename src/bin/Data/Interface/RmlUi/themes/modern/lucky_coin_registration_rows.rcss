@@ -14,3 +14,6 @@
 
 .entry-btn:nth-child(2) { left: 63px; top: 360px; width: 64px; height: 29px; }
 .entry-btn:nth-child(2) .entry-label { font-weight: bold; }
+
+/* Where C++ draws the live 3D preview: the original's place and size. */
+.entry-item-box { position: absolute; left: -20px; top: 50px; width: 190px; height: 429px; pointer-events: none; }

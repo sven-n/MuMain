@@ -13,11 +13,6 @@ namespace Rml
 class Element;
 }
 
-namespace mu::ui::window
-{
-class CObject;
-}
-
 // Live 3D items shown through an <img>: the drawer runs under the item camera the original drew
 // every UI item with (an identity view at a 1-degree field of view over the whole window), its
 // projection cropped to the image's box, so each RenderItem3D() call lands in the target exactly
@@ -35,8 +30,6 @@ public:
 
     // `transform` gives the space the drawer's rectangles are in; window pixels when empty.
     explicit ItemCameraTarget(Drawer drawer, TransformSource transform = {});
-    // The rectangles are in `owner`'s layout space.
-    ItemCameraTarget(Drawer drawer, const mu::ui::window::CObject* owner);
 
     // Once a frame: sizes the target to `image`'s box, shows it there and points its src at the
     // target. Null or disabled stops the drawing; the image is invisible while it has no frame.

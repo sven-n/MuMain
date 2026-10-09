@@ -34,7 +34,7 @@ bool CEmpireGuardianNPC::Create(CManager* pNewUIMng, int x, int y)
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC, this);
-    m_View.SetItemDrawer([this] { RenderItem3D(); }, this);
+    m_View.SetItemDrawer([this](int, const Rml::Vector2f& offset, const Rml::Vector2f& size) { RenderItem3D(offset, size); });
 
     SetPos(x, y);
 
@@ -161,12 +161,10 @@ void CEmpireGuardianNPC::ClosingProcess()
 {
 }
 
-void CEmpireGuardianNPC::RenderItem3D()
+// Into the theme's .entry-item-box (the original's 20x27 centred at y 50 + 70).
+void CEmpireGuardianNPC::RenderItem3D(const Rml::Vector2f& offset, const Rml::Vector2f& size)
 {
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
-
     int nItemType = ITEM_GAIONS_ORDER;
     int nItemLevel = 0;
-
-    ::RenderItem3D(ptOrigin.x + (190 - 20) / 2, ptOrigin.y + 70, 20.0f, 27.0f, nItemType, nItemLevel, 0, 0, false);
+    ::RenderItem3D(offset.x, offset.y, size.x, size.y, nItemType, nItemLevel, 0, 0, false);
 }

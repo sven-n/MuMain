@@ -52,9 +52,10 @@ public:
 
     EventItemEntryView(const char* modelName, const char* documentPath);
 
-    // The live preview: `draw` runs once a frame into the document's #entry_item, its
-    // RenderItem3D() rectangles in `owner`'s layout space, as the shared item camera drew them.
-    void SetItemDrawer(std::function<void()> draw, const CObject* owner);
+    // The live preview, into the document's #entry_item once a frame: `draw` runs once per
+    // .entry-item-box the theme places, with its index and its drawn rectangle in window pixels.
+    using ItemDrawer = std::function<void(int index, const Rml::Vector2f& offset, const Rml::Vector2f& size)>;
+    void SetItemDrawer(ItemDrawer draw);
 
     void Build();
     // Unloads the document; from the window's own Release().

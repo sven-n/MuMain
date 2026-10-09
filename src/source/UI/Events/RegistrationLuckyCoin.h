@@ -72,7 +72,7 @@ public:
 
 private:
     void SyncView();
-    void RenderLuckyCoin();
+    void RenderLuckyCoin(const Rml::Vector2f& offset, const Rml::Vector2f& size);
 
 private:
     CManager* m_pNewUIMng;

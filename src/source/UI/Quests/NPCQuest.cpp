@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "UI/Quests/NPCQuest.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Quests/DialogStructure.h"
 #include "I18N/All.h"
@@ -13,6 +12,7 @@
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlPointer.h"
@@ -189,6 +189,9 @@ bool CNPCQuest::Render()
     return true;
 }
 
+// Into #item_view (m_ItemTarget), in window pixels: each item condition's icon beside its row of
+// #conditions_anchor, 22 left of and 9 above the row's text at the panel's drawn scale, as the
+// original drew it beside its own text.
 void CNPCQuest::RenderItem3D()
 {
     BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
@@ -197,64 +200,17 @@ void CNPCQuest::RenderItem3D()
     if (QUEST_ING != byCurQuestState)
         return;
 
-    // #conditions_anchor (npc_quest.rml) and its own live child-row height replace a hardcoded
-    // m_Pos+235 origin / 32px step -- the RmlUi-rendered condition ROW TEXT lives in these exact
-    // rows, so reading their real geometry (instead of duplicating npc_quest.rcss's
-    // .nq-condition-row height in C++) is what keeps this still-native item-icon preview aligned
-    // with them across a theme change, rather than only by both themes happening to agree today.
-    auto x = float(m_Pos.x + 30);
-    auto y = float(m_Pos.y + 235);
-    float rowStep = 32.f;
-
-    if (m_RmlView.Document())
-    {
-        if (Rml::Element* conditionsEl = m_RmlView.Document()->GetElementById("conditions_anchor"))
-        {
-            const auto transform = GetLayoutTransform();
-            if (transform.scaleX > 0.0f && transform.scaleY > 0.0f)
-            {
-                // Icon sits 22px left / 9px above the row's own text origin -- a native rendering
-                // choice, not theme geometry, so it stays a fixed offset from whatever the anchor's
-                // live position resolves to.
-                //
-                // Goes through the #content_root delta rather than converting the anchor's raw
-                // GetAbsoluteOffset(): that offset is mixed-space (the root's left/top were
-                // pre-multiplied by the scale, the anchor's own 52/244 inside it were not, and
-                // .sharp-text keeps a layer's POSITION in panel units even though its lengths are
-                // physical), so mapping the whole sum back through the transform divides the child
-                // half -- m_Pos + 52/scale where m_Pos + 52 is wanted.
-                // Only applied on a successful lookup: x/y are pre-seeded with the historical
-                // m_Pos+30/+235, which already has the 22/9 taken off.
-                float anchorX = 0.f, anchorY = 0.f;
-                if (UI::RmlBridge::RefreshLogicalAnchorPosition(m_RmlView.Document(), "content_root",
-                                                                "conditions_anchor", m_Pos,
-                                                                anchorX, anchorY))
-                {
-                    x = anchorX - 22.f;
-                    y = anchorY - 9.f;
-                }
-
-                // A row's box height is in the panel's own (logical) units -- a transform does not
-                // change box sizes -- unless a theme lays the rows out in physical pixels inside a
-                // counter-scaled text layer (legacy .sharp-text): then it is divided back. Lengths
-                // genuinely are physical there, unlike the position above.
-                if (Rml::Element* firstRow = conditionsEl->GetChild(0))
-                {
-                    float rowHeight = firstRow->GetBox().GetSize(Rml::BoxArea::Border).y;
-                    if (conditionsEl->GetComputedValues().has_local_transform())
-                        rowHeight /= transform.scaleY;
-                    if (rowHeight > 0.0f)
-                        rowStep = rowHeight;
-                }
-            }
-        }
-    }
-
-    const float Height = 27.f;
+    Rml::ElementDocument* document = m_RmlView.Document();
+    Rml::Element* root = document != nullptr ? document->GetElementById("content_root") : nullptr;
+    Rml::Element* conditions = document != nullptr ? document->GetElementById("conditions_anchor") : nullptr;
+    if (root == nullptr || conditions == nullptr)
+        return;
+    const float scale = UI::RmlBridge::DrawnScale(*root);
 
     QUEST_ATTRIBUTE* pQuest = g_csQuest.GetCurQuestAttribute();
     int nClass = gCharacterManager.GetBaseClass(Hero->Class);
 
+    int row = 0;
     for (int i = 0; i < pQuest->shQuestConditionNum; ++i)
     {
         if (!pQuest->QuestAct[i].byRequestClass[nClass])
@@ -262,14 +218,18 @@ void CNPCQuest::RenderItem3D()
 
         if (QUEST_ITEM == pQuest->QuestAct[i].byQuestType)
         {
+            Rml::Element* rowElement = conditions->GetChild(row++);
+            Rml::Vector2f origin;
+            if (rowElement == nullptr || !UI::RmlBridge::DrawnTopLeft(*rowElement, origin))
+                break;
+
             int nItemType = (pQuest->QuestAct[i].wItemType * MAX_ITEM_INDEX)
                 + pQuest->QuestAct[i].byItemSubType;
 
             int nItemLevel = pQuest->QuestAct[i].byItemLevel;
 
-            ::RenderItem3D(x, y, 20.f, Height, nItemType, nItemLevel, 0, 0, false);
-
-            y += rowStep;
+            ::RenderItem3D(origin.x - 22.f * scale, origin.y - 9.f * scale, 20.f * scale, 27.f * scale, nItemType,
+                           nItemLevel, 0, 0, false);
         }
     }
 }

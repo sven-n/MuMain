@@ -22,3 +22,6 @@
 .entry-btn:nth-child(2):hover { decorator: image(coin-btn-small-over); }
 .entry-btn:nth-child(2):active { decorator: image(coin-btn-small-down); }
 .entry-btn:nth-child(2).locked, .entry-btn:nth-child(2).locked:hover, .entry-btn:nth-child(2).locked:active { decorator: image(coin-btn-small-up); image-color: #ffffff; }
+
+/* Where C++ draws the live 3D preview: the original's place and size. */
+.entry-item-box { position: absolute; left: -20px; top: 50px; width: 190px; height: 429px; pointer-events: none; }

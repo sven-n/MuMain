@@ -29,3 +29,6 @@
 /* The bold lines' boxes are 110 wide, the party warning's 200. */
 .entry-text:nth-child(1), .entry-text:nth-child(6), .entry-text:nth-child(7) { width: 110px; }
 .entry-text:nth-child(n+8) { width: 200px; }
+
+/* Where C++ draws the live 3D preview: the original's place and size. */
+.entry-item-box { position: absolute; left: 85px; top: 120px; width: 20px; height: 27px; pointer-events: none; }

@@ -48,7 +48,7 @@ public:
     void LockEnterButton(BOOL bLock);
 
 private:
-    void RenderItem3D();
+    void RenderItem3D(const Rml::Vector2f& offset, const Rml::Vector2f& size);
     void SyncView();
 
     int m_iRemainTime;

@@ -49,7 +49,7 @@ bool CGoldBowmanLena::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    m_View.SetItemDrawer([this] { Render3D(); }, this);
+    m_View.SetItemDrawer([this](int, const Rml::Vector2f& offset, const Rml::Vector2f& size) { Render3D(offset, size); });
     m_View.SetWindowId(mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA);
     m_View.Build();
 
@@ -177,19 +177,11 @@ float CGoldBowmanLena::GetLayerDepth()	// 3.4f
     return 3.4f;
 }
 
-// Into the document's #entry_item, under the item camera EventItemEntryView sets up. The original
-// drew the two Rena at (640 - 120, 200) from its column-one place at x 450: 70 into the panel.
-void CGoldBowmanLena::Render3D()
+// A Rena into each of the theme's two .entry-item-box. The original drew them at (640 - 120, 200)
+// and 42 below from its column-one place at x 450: 70 into the panel.
+void CGoldBowmanLena::Render3D(const Rml::Vector2f& offset, const Rml::Vector2f& size)
 {
     EnableAlphaTest();
     DisableAlphaBlend();
-
-    int Type = ITEM_POTION + 21;
-    int Level = 0;
-    float x = static_cast<float>(m_Pos.x) + 70.f;
-    float y = static_cast<float>(m_Pos.y) + 200.f;
-    float Width = (float)ItemAttribute[Type].Width * INVENTORY_SCALE;
-    float Height = (float)ItemAttribute[Type].Height * INVENTORY_SCALE;
-    RenderItem3D(x, y, Width, Height, Type, Level, 0, 0, false);
-    RenderItem3D(x, y + 42, Width, Height, Type, Level, 0, 0, false);
+    RenderItem3D(offset.x, offset.y, size.x, size.y, ITEM_POTION + 21, 0, 0, 0, false);
 }

@@ -84,8 +84,7 @@ namespace mu::ui::window
 
         void RenderItem3D();
         // Last, so it is destroyed first.
-        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItem3D(); },
-                                                 this};
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItem3D(); }};
     };
 }
 

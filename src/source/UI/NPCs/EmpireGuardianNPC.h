@@ -47,7 +47,7 @@ public:
     void ClosingProcess();
 
 private:
-    void RenderItem3D();
+    void RenderItem3D(const Rml::Vector2f& offset, const Rml::Vector2f& size);
     void SyncView();
 };
 }

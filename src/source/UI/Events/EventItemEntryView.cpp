@@ -7,6 +7,7 @@
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlPointer.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
@@ -24,10 +25,24 @@ mu::ui::window::EventItemEntryView::EventItemEntryView(const char* modelName, co
 {
 }
 
-void mu::ui::window::EventItemEntryView::SetItemDrawer(std::function<void()> draw, const CObject* owner)
+void mu::ui::window::EventItemEntryView::SetItemDrawer(ItemDrawer draw)
 {
     m_ItemTarget = std::make_unique<UI::Items::ItemCameraTarget>(
-        [draw = std::move(draw)](const Rml::Vector2f&, const Rml::Vector2f&) { draw(); }, owner);
+        [this, draw = std::move(draw)](const Rml::Vector2f&, const Rml::Vector2f&)
+        {
+            Rml::ElementDocument* document = m_View.Document();
+            if (document == nullptr)
+                return;
+            Rml::ElementList boxes;
+            document->QuerySelectorAll(boxes, ".entry-item-box");
+            for (int i = 0; i < static_cast<int>(boxes.size()); ++i)
+            {
+                Rml::Vector2f offset;
+                Rml::Vector2f size;
+                if (UI::RmlBridge::DrawnBox(*boxes[i], Rml::BoxArea::Border, offset, size))
+                    draw(i, offset, size);
+            }
+        });
 }
 
 void mu::ui::window::EventItemEntryView::BindModel(Rml::DataModelConstructor& c, EventItemEntryRmlModel& model)

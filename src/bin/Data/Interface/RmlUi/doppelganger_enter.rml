@@ -21,6 +21,7 @@
 		<div class="entry-line"></div>
 		<!-- The live 3D preview, drawn by C++ at its original place over the frame. -->
 		<img id="entry_item" class="entry-item"/>
+		<div id="entry_item_box" class="entry-item-box"></div>
 		<!-- The rows these land on are the theme's: this document's own _rows.rcss gives one
 		     :nth-child rule per line and per button. Each repeated set has its own container so
 		     the count starts at the first one. -->

@@ -41,7 +41,7 @@ bool CDoppelGangerWindow::Create(CManager* pNewUIMng, int x, int y)
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DOPPELGANGER_NPC, this);
-    m_View.SetItemDrawer([this] { RenderItem3D(); }, this);
+    m_View.SetItemDrawer([this](int, const Rml::Vector2f& offset, const Rml::Vector2f& size) { RenderItem3D(offset, size); });
 
     SetPos(x, y);
 
@@ -156,14 +156,12 @@ void CDoppelGangerWindow::SyncView()
     m_View.Sync(IsVisible());
 }
 
-void CDoppelGangerWindow::RenderItem3D()
+// Into the theme's .entry-item-box (the original's 20x27 centred at y 50 + 75).
+void CDoppelGangerWindow::RenderItem3D(const Rml::Vector2f& offset, const Rml::Vector2f& size)
 {
-    POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
-
     int nItemType = (14 * MAX_ITEM_INDEX) + 111;
     int nItemLevel = 0;
-
-    ::RenderItem3D(ptOrigin.x + (190 - 20) / 2, ptOrigin.y + 75, 20.f, 27, nItemType, nItemLevel, 0, 0, false);
+    ::RenderItem3D(offset.x, offset.y, size.x, size.y, nItemType, nItemLevel, 0, 0, false);
 }
 
 void CDoppelGangerWindow::OpeningProcess()

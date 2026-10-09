@@ -52,7 +52,7 @@ public:
 
 private:
     void SyncView();
-    void Render3D();
+    void Render3D(const Rml::Vector2f& offset, const Rml::Vector2f& size);
 
     EventItemEntryView m_View{"gold_bowman_lena", "Data/Interface/RmlUi/gold_bowman_lena.rml"};
 };

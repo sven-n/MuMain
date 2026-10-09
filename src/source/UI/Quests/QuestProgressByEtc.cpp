@@ -10,6 +10,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlPointer.h"
@@ -189,12 +190,11 @@ bool CQuestProgressByEtc::Render()
 {
     if (m_eLowerView == REQUEST_REWARD_MODE && m_pSelectedRewardItem)
     {
-        // #reward_popup_anchor (quest_progress_etc.rml) replaces a hardcoded m_Pos+95,+360 offset --
-        // reading it live means a theme can reposition the reward list without a C++ edit.
-        float anchorX = static_cast<float>(m_Pos.x + 95);
-        float anchorY = static_cast<float>(m_Pos.y + 360);
-        UI::RmlBridge::RefreshLogicalAnchorPosition(m_RmlView.Document(), "panel", "reward_popup_anchor", m_Pos, anchorX, anchorY);
-        ::RenderItemInfo(static_cast<int>(anchorX), static_cast<int>(anchorY), m_pSelectedRewardItem, false, 0, true);
+        // At the theme's #reward_popup_anchor (quest_progress_etc.rml), where it is drawn.
+        Rml::Element* anchor = m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("reward_popup_anchor") : nullptr;
+        Rml::Vector2f point;
+        if (anchor != nullptr && UI::RmlBridge::DrawnTopLeft(*anchor, point))
+            ::RenderItemInfoAtPx(point.x, point.y, m_pSelectedRewardItem, false, 0, true);
     }
 
     return true;

@@ -31,16 +31,12 @@ UI/HUD/MainFrameWindow.cpp: 1
 UI/HUD/MasterLevel.cpp: 3
 UI/Inventory/CursorItemLayer.cpp: 3
 UI/Inventory/InventoryCtrl.cpp: 2
-UI/Inventory/ItemCameraTarget.cpp: 2
+UI/Inventory/ItemCameraTarget.cpp: 1
 UI/Inventory/ItemEnduranceInfo.cpp: 12
 UI/Inventory/TipTextListView.cpp: 1
 UI/MuHelper/MuHelperSkillPicker.cpp: 2
 UI/NPCs/NPCDialogue.cpp: 7
 UI/Placement/WindowPlacement.cpp: 6
-UI/Quests/MyQuestInfoWindow.cpp: 1
-UI/Quests/NPCQuest.cpp: 2
-UI/Quests/QuestProgress.cpp: 1
-UI/Quests/QuestProgressByEtc.cpp: 1
 UI/RmlBridge/RmlDocumentHints.cpp: 1
 UI/RmlBridge/RmlNativeText.cpp: 2
 UI/RmlBridge/RmlPanelGeometry.cpp: 5

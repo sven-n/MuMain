@@ -25,3 +25,6 @@
 
 /* The name's box is 160 wide. */
 .entry-text:nth-child(1) { width: 160px; }
+
+/* Where C++ draws the live 3D preview: the original's place and size. */
+.entry-item-box { position: absolute; left: 85px; top: 125px; width: 20px; height: 27px; pointer-events: none; }

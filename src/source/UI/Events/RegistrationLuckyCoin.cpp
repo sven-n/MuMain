@@ -32,12 +32,11 @@ namespace mu::ui::window
 
         SetPos(x, y);
         m_View.SetItemDrawer(
-            [this]
+            [this](int, const Rml::Vector2f& offset, const Rml::Vector2f& size)
             {
                 if (m_CoinItem)
-                    RenderLuckyCoin();
-            },
-            this);
+                    RenderLuckyCoin(offset, size);
+            });
         m_View.SetWindowId(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION);
         m_View.Build();
         Show(false);
@@ -81,12 +80,11 @@ namespace mu::ui::window
         m_View.Sync(IsVisible());
     }
 
-    // Into the document's #entry_item, under the item camera EventItemEntryView sets up.
-    void CRegistrationLuckyCoin::RenderLuckyCoin()
+    // Into the theme's .entry-item-box (the original's panel-sized box, 20 left and 50 down).
+    void CRegistrationLuckyCoin::RenderLuckyCoin(const Rml::Vector2f& offset, const Rml::Vector2f& size)
     {
         SetItemRotation(true);
-        RenderItem3D(GetPos().x - 20.f, GetPos().y + 50.f, LUCKYCOIN_REG_WIDTH, LUCKYCOIN_REG_HEIGHT, m_CoinItem->Type,
-                     m_CoinItem->Level, 0, 0, true);
+        RenderItem3D(offset.x, offset.y, size.x, size.y, m_CoinItem->Type, m_CoinItem->Level, 0, 0, true);
         SetItemRotation(false);
     }
 
