@@ -61,8 +61,6 @@ namespace mu::ui::window
     int IsPurchaseShop();
 #define g_IsPurchaseShop mu::ui::window::IsPurchaseShop()
 
-    bool CheckMouseIn(int x, int y, int width, int height);
-
     void RenderImage(GLuint uiImageType, float x, float y, float width, float height);
     void RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv);
     void RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv, DWORD color);

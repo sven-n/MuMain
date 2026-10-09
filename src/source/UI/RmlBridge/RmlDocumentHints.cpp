@@ -82,8 +82,11 @@ void Update(Rml::Context& context)
     config.anchorX = anchor.x;
     // Above first: the pointer's sprite hangs below the point it marks and would cover a hint
     // below. Pushed below (a button at the top of the screen), it starts under the sprite.
-    const float cursorBottom = UI::Scaling::PositionY(UI::Scaling::GetActiveTransform(),
-                                                      static_cast<float>(MouseY) + kCursorBottomUnits);
+    // The cursor sprite is drawn in the original's screen stretched over the window.
+    const float cursorBottom =
+        g_fWindowMouseY + UI::Scaling::SizeY(UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth),
+                                                                                 static_cast<int>(WindowHeight)),
+                                             kCursorBottomUnits);
     config.anchor = Tooltip::AnchorPoint::AboveLeft;
     config.anchorY = anchor.aboveY;
     config.flipAnchorY = std::max(anchor.belowY, cursorBottom);

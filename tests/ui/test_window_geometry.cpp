@@ -40,7 +40,7 @@ TEST_CASE("WindowGeometry construction and SetBounds agree on the resulting rect
     CheckSameBounds(viaSetters);
 }
 
-TEST_CASE("WindowGeometry Contains is half-open, matching CheckMouseIn's own convention")
+TEST_CASE("WindowGeometry Contains is half-open")
 {
     WindowGeometry geometry(10, 20, 100, 40);
 

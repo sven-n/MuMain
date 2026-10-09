@@ -180,7 +180,8 @@ void mu::ui::window::CHelpWindow::SyncRmlModel()
     if (!visible)
         return;
 
-    RebuildPageModel(UI::Scaling::GetActiveTransform());
+    // The original's 640x480 screen, centred at the UI scale.
+    RebuildPageModel(UI::Scaling::PanelTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight)));
 }
 
 void mu::ui::window::CHelpWindow::RebuildPageModel(const UI::Scaling::Transform& transform)

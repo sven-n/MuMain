@@ -29,13 +29,11 @@ namespace
 constexpr int kRoomCount = 4;
 
 // RenderText() shrinks a text wider than its box to fit it: the size it drew `text` at.
-float TextPxInBox(UI::Scaling::FontRole role, const UI::Scaling::Transform& transform, const wchar_t* text,
-                  int boxWidth)
+float TextPxInBox(UI::Scaling::FontRole role, const wchar_t* text, int boxWidth)
 {
     g_pRenderText->SetFont(role == UI::Scaling::FontRole::Bold ? g_hFontBold : g_hFont);
     const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-    return UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width),
-                                                 static_cast<float>(boxWidth));
+    return UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(width), static_cast<float>(boxWidth));
 }
 
 } // namespace
@@ -229,11 +227,10 @@ void CDuelWatchWindow::SyncRmlModel()
             m_RmlView.MarkDirty("label_line_px");
         }
     }
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncField(m_RmlView.Binder(), &DuelWatchRmlModel::boldTextPx, "bold_text_px",
               UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold));
     SyncField(m_RmlView.Binder(), &DuelWatchRmlModel::subtitlePx, "subtitle_px",
-              TextPxInBox(UI::Scaling::FontRole::Bold, transform, I18N::Game::SelectAnColosseumYouDLikeToWatch, 190));
+              TextPxInBox(UI::Scaling::FontRole::Bold, I18N::Game::SelectAnColosseumYouDLikeToWatch, 190));
 
     DuelWatchRmlModel& model = m_RmlView.GetModel();
     bool changed = false;
@@ -245,8 +242,8 @@ void CDuelWatchWindow::SyncRmlModel()
         const wchar_t* name2 = running ? g_DuelMgr.GetDuelChannelUserID2(room.index) : L"";
         Rml::String player1 = StringUtils::WideToNarrow(name1);
         Rml::String player2 = StringUtils::WideToNarrow(name2);
-        const float player1Px = TextPxInBox(UI::Scaling::FontRole::Normal, transform, name1, 70);
-        const float player2Px = TextPxInBox(UI::Scaling::FontRole::Normal, transform, name2, 70);
+        const float player1Px = TextPxInBox(UI::Scaling::FontRole::Normal, name1, 70);
+        const float player2Px = TextPxInBox(UI::Scaling::FontRole::Normal, name2, 70);
         if (room.running != running || room.joinable != joinable || room.player1 != player1 ||
             room.player2 != player2 || room.player1Px != player1Px || room.player2Px != player2Px)
         {

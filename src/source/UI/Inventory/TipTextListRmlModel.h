@@ -33,8 +33,6 @@ struct TipTextListLineEntry
 
 struct TipTextListRmlModel
 {
-    // The window's layout -- UI::Scaling::GetActiveTransform() while CManager runs it.
-    float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
     std::vector<TipTextListBoxEntry> boxes;
     std::vector<TipTextListLineEntry> lines;
 };

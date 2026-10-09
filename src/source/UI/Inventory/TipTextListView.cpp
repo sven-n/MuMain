@@ -38,9 +38,6 @@ bool SameLine(const TipTextListLineEntry& a, const TipTextListLineEntry& b)
 
 void BindTipTextListModel(Rml::DataModelConstructor& c, TipTextListRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     auto box = c.RegisterStruct<TipTextListBoxEntry>();
     box.RegisterMember("left", &TipTextListBoxEntry::left);
     box.RegisterMember("top", &TipTextListBoxEntry::top);
@@ -83,8 +80,6 @@ void mu::ui::window::TipTextListView::Sync(bool visible, const TipTextListRecord
     UI::RmlBridge::SyncDocumentVisibilityInFront(m_View.Document(), visible);
     if (!visible)
         return;
-
-    UI::RmlBridge::SyncRootTransform(m_View.Binder(), POINT{0, 0});
 
     std::vector<TipTextListBoxEntry> boxes;
     for (const TipTextListRecord::Box& box : record.boxes)

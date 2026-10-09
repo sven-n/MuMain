@@ -58,13 +58,6 @@ int mu::ui::window::IsPurchaseShop()
     return -1;
 }
 
-bool mu::ui::window::CheckMouseIn(int x, int y, int width, int height)
-{
-    if (MouseX >= x && MouseX < x + width && MouseY >= y && MouseY < y + height)
-        return true;
-    return false;
-}
-
 void mu::ui::window::RenderImage(GLuint uiImageType, float x, float y, float width, float height)
 {
     BITMAP_t* pImage = &Bitmaps[uiImageType];

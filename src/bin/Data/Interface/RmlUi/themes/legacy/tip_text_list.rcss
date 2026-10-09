@@ -2,9 +2,12 @@
    the boxes in their bound colours (the black frame, the black fill at 0.8, the dark text boxes)
    and the lines in their bound colours, left / centred / right in their boxes. Reference px. */
 
-#panel { position: absolute; transform-origin: left top; width: 640px; height: 480px; font-family: "token(font-body)"; pointer-events: none; }
+/* #panel is a .stage (base.rcss): the original's 640x480 screen, centred at the UI scale. */
+#panel { font-family: "token(font-body)"; pointer-events: none; }
 .tip-box { position: absolute; }
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+/* A line's box is reference px; the line itself is laid out in physical px (.sharp-text). */
+.tip-line { --line-width: 0px; width: calc(var(--line-width) * var(--root-scale)); }
 .tip-line.centred { text-align: center; }
 .tip-line.right { text-align: right; }
 .tip-line.bold { font-weight: bold; }

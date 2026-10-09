@@ -6,19 +6,11 @@
 
 Engine/Object/ZzzInventory.cpp: 1
 Render/Text/CUIRenderTextSDLTtf.cpp: 2
-UI/Combat/DuelWatchWindow.cpp: 1
 UI/Core/SceneUICoordinator.cpp: 1
 UI/Core/UILayoutPolicy.cpp: 9
-UI/Core/WindowCommon.cpp: 1
-UI/Core/WindowCommon.h: 1
 UI/Core/WindowManager.cpp: 10
 UI/Core/WindowObject.h: 6
-UI/Dialogs/HelpWindow.cpp: 1
-UI/HUD/ChatLogWindow.cpp: 1
-UI/HUD/MainFrameWindow.cpp: 1
-UI/Inventory/TipTextListView.cpp: 1
 UI/Placement/WindowPlacement.cpp: 6
-UI/RmlBridge/RmlDocumentHints.cpp: 1
 UI/RmlBridge/RmlNativeText.cpp: 2
 UI/RmlBridge/RmlPanelGeometry.cpp: 5
 UI/RmlBridge/RmlPanelGeometry.h: 3

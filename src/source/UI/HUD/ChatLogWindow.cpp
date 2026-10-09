@@ -1294,10 +1294,14 @@ void mu::ui::window::CSystemLogWindow::TrackPanelSize()
 // Retain the legacy font metrics; the workspace now owns the message area's origin.
 void mu::ui::window::CSystemLogWindow::SyncNativeGeometry()
 {
-    const auto transform = UI::Scaling::GetActiveTransform();
-    g_pRenderText->SetFont(g_hFont);
-    const int textHeight = g_pRenderText->MeasureText(L"Q", 1).cy;
-    const int rowHeight = std::max(1, static_cast<int>(static_cast<float>(textHeight) * 1.2f));
+    // Measured in window pixels.
+    float textHeight = 0.f;
+    {
+        const UI::Scaling::ScopedWindowPixels pixels(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+        g_pRenderText->SetFont(g_hFont);
+        textHeight = static_cast<float>(g_pRenderText->MeasureText(L"Q", 1).cy);
+    }
+    const float rowHeight = std::max(1.f, textHeight * 1.2f);
 
     SystemLogRmlModel& model = m_RmlView.GetModel();
     auto syncFloat = [&](float SystemLogRmlModel::* field, const char* name, float value)
@@ -1309,8 +1313,8 @@ void mu::ui::window::CSystemLogWindow::SyncNativeGeometry()
             UI::Placement::Invalidate();
         }
     };
-    syncFloat(&SystemLogRmlModel::rowPx, "row_px", UI::Scaling::SizeY(transform, static_cast<float>(rowHeight)));
-    syncFloat(&SystemLogRmlModel::linePx, "line_px", UI::Scaling::SizeY(transform, static_cast<float>(textHeight)));
+    syncFloat(&SystemLogRmlModel::rowPx, "row_px", rowHeight);
+    syncFloat(&SystemLogRmlModel::linePx, "line_px", textHeight);
     syncFloat(&SystemLogRmlModel::textPx, "text_px", UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal));
 }
 

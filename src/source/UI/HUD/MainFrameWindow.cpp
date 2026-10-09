@@ -754,19 +754,19 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
         {
             UI::RmlBridge::Tooltip::Config config;
             config.lines = UI::Skills::Tooltip::ToRmlBridgeLines(tooltipModel);
-            // GetTooltipAnchorX/Y() are in HudReferenceTransform()'s units -- NOT the ambient
-            // UI::Scaling::GetActiveTransform() of this window's Update().
+            // GetTooltipAnchorX/Y() are in HudReferenceTransform()'s units.
             const auto skillTooltipTransform = HudReferenceTransform(m_RmlView.Document());
             // The native box ends below its anchor (G2); measured with the native text renderer
-            // under the tooltip's own transform.
-            float bottomBelowAnchor = 0.f;
+            // in window pixels.
+            float bottomBelowAnchorPx = 0.f;
             {
-                UI::Scaling::ScopedActiveTransform measure(skillTooltipTransform);
-                bottomBelowAnchor = UI::Skills::Tooltip::NativeBoxBottomBelowAnchor(tooltipModel);
+                const UI::Scaling::ScopedWindowPixels pixels(static_cast<int>(WindowWidth),
+                                                             static_cast<int>(WindowHeight));
+                bottomBelowAnchorPx = UI::Skills::Tooltip::NativeBoxBottomBelowAnchor(tooltipModel);
             }
             config.anchorX = UI::Scaling::PositionX(skillTooltipTransform, g_pSkillList->GetTooltipAnchorX());
             config.anchorY =
-                UI::Scaling::PositionY(skillTooltipTransform, g_pSkillList->GetTooltipAnchorY() + bottomBelowAnchor);
+                UI::Scaling::PositionY(skillTooltipTransform, g_pSkillList->GetTooltipAnchorY()) + bottomBelowAnchorPx;
             // The old #skill_tooltip's CSS (`transform: translateY(-100%)`) always grew upward,
             // unconditionally -- AboveLeft matches that; Show()'s own clamping now also covers the
             // horizontal/lower-edge cases that CSS-only transform never did.
