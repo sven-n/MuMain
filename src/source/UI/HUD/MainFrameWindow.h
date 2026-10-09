@@ -123,9 +123,7 @@ namespace mu::ui::window
             bool poisoned = false; // true -> HP fill swaps red to green (eDeBuff_Poison)
 
             // expFraction is progress within the current 10%-of-level decile (0..1), not overall
-            // level progress; expDigit (0-9) is that decile number. Position comes from the shared
-            // bars transform group, spanning x=0 to x=640 (not the full window width the legacy
-            // band used).
+            // level progress; expDigit (0-9) is that decile number.
             float expFraction = 0.f;
             Rml::String expDigit;
             Rml::String expTooltip;

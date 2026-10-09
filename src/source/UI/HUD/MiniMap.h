@@ -32,7 +32,6 @@ public:
     bool Create(CManager* pNewUIMng);
     void Release();
 
-    // Kept for RenderPointRotate() (ZzzOpenglUtil.cpp), which no longer has a caller.
     void SetBtnPos(int Num, float x, float y, float nx, float ny);
 
     bool UpdateMouseEvent();

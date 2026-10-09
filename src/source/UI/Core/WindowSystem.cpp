@@ -115,9 +115,6 @@ CSystem::CSystem()
     m_pNewEmpireGuardianNPC = nullptr;
     m_pNewEmpireGuardianTimer = nullptr;
     m_pNewMiniMap = nullptr;
-#ifdef PBG_MOD_STAMINA_UI
-    m_pNewUIStamina = NULL;
-#endif //PBG_MOD_STAMINA_UI
 #ifdef PBG_ADD_GENSRANKING
     m_pNewGensRanking = nullptr;
 #endif //PBG_ADD_GENSRANKING
@@ -519,12 +516,6 @@ bool CSystem::LoadMainSceneInterface()
     if (m_pNewEmpireGuardianTimer->Create(m_pNewUIMng) == false)
         return false;
 
-#ifdef PBG_MOD_STAMINA_UI
-    m_pNewUIStamina = new CNewUIStamina;
-    if (m_pNewUIStamina->Create(m_pNewUIMng, 640, 480) == false)
-        return false;
-#endif //PBG_MOD_STAMINA_UI
-
     m_pNewGensRanking = new CGensRanking;
     if (m_pNewGensRanking->Create(m_pNewUIMng) == false)
         return false;
@@ -716,9 +707,6 @@ void CSystem::UnloadMainSceneInterface()
     SAFE_DELETE(m_pNewEmpireGuardianTimer);
     SAFE_DELETE(m_pNewMiniMap);
     SAFE_DELETE(m_pNewItemMng);
-#ifdef PBG_MOD_STAMINA_UI
-    SAFE_DELETE(m_pNewUIStamina);
-#endif //PBG_MOD_STAMINA_UI
     SAFE_DELETE(m_pNewGensRanking);
     SAFE_DELETE(m_pNewUnitedMarketPlaceWindow);
 #ifdef LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
@@ -1583,9 +1571,6 @@ void CSystem::HideAllGroupA()
         INTERFACE_QUEST_PROGRESS,
         INTERFACE_QUEST_PROGRESS_ETC,
         INTERFACE_EMPIREGUARDIAN_NPC,
-#ifdef PBG_MOD_STAMINA_UI
-        mu::ui::window::INTERFACE_STAMINA_GAUGE,
-#endif //PBG_MOD_STAMINA_UI
 #ifdef PBG_ADD_GENSRANKING
         INTERFACE_GENSRANKING,
 #endif //PBG_ADD_GENSRANKING
@@ -1636,9 +1621,6 @@ void CSystem::HideAllGroupB()
         INTERFACE_QUEST_PROGRESS,
         INTERFACE_QUEST_PROGRESS_ETC,
         INTERFACE_EMPIREGUARDIAN_NPC,
-#ifdef PBG_MOD_STAMINA_UI
-        mu::ui::window::INTERFACE_STAMINA_GAUGE,
-#endif //PBG_MOD_STAMINA_UI
 #ifdef PBG_ADD_GENSRANKING
         INTERFACE_GENSRANKING,
 #endif //PBG_ADD_GENSRANKING
@@ -2381,12 +2363,6 @@ CEmpireGuardianTimer* CSystem::GetUI_pNewEmpireGuardianTimer() const
     return m_pNewEmpireGuardianTimer;
 }
 
-#ifdef PBG_MOD_STAMINA_UI
-CNewUIStamina* mu::ui::window::CSystem::GetUI_pNewUIStamina() const
-{
-    return m_pNewUIStamina;
-}
-#endif //PBG_MOD_STAMINA_UI
 
 #ifdef PBG_ADD_GENSRANKING
 CGensRanking* CSystem::GetUI_NewGensRanking() const

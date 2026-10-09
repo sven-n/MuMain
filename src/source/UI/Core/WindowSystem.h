@@ -395,9 +395,6 @@ namespace mu::ui::window
 #define g_pEmpireGuardianNPC mu::ui::window::CSystem::GetInstance()->GetUI_pNewEmpireGuardianNPC()
 #define g_pEmpireGuardianTimer mu::ui::window::CSystem::GetInstance()->GetUI_pNewEmpireGuardianTimer()
 #define g_pNewUIMiniMap mu::ui::window::CSystem::GetInstance()->GetUI_pNewUIMiniMap()
-#ifdef PBG_MOD_STAMINA_UI
-#define g_pNewUIStamina mu::ui::window::CSystem::GetInstance()->GetUI_pNewUIStamina()
-#endif //PBG_MOD_STAMINA_UI
 #define g_pNewUIGensRanking mu::ui::window::CSystem::GetInstance()->GetUI_NewGensRanking()
 #define g_pLuckyItemWnd	mu::ui::window::CSystem::GetInstance()->Get_pNewUILuckyItemWnd()
 #define g_pMuHelperConfig mu::ui::window::CSystem::GetInstance()->GetUI_MuHelperConfig()

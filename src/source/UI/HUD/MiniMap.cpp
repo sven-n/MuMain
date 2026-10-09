@@ -36,7 +36,7 @@ namespace
 {
 // The part of the screen the original's mouse handler kept to itself.
 constexpr int kMapAreaHeight = 430;
-// Marker sizes, physical px (RenderPointRotate() never scaled them).
+// Marker sizes, physical px (the original never scaled them).
 constexpr float kNpcSize = 15.f;
 constexpr float kPortalSize = 30.f;
 // The side border tiles: 35 x 6 reference units, 20 down each side, turned a quarter.
@@ -432,7 +432,7 @@ void mu::ui::window::CMiniMap::SyncMap()
                                     length, UI::MiniMap::MapRotation, portal);
         if (!MarkerDrawn(data))
             continue;
-        // RenderPointRotate() stored the name hint's box of every marker it drew.
+        // The original stored the name hint's box of every marker it drew.
         SetBtnPos(i, marker.hitBox[0], marker.hitBox[1], marker.hitBox[2], marker.hitBox[3]);
         markers.push_back({portal, size, MatrixText(UI::MiniMap::ElementToQuad(marker.quad, size, size))});
     }

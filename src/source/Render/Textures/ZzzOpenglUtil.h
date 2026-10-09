@@ -139,7 +139,6 @@ void RenderColorBitmap(int Texture, float x, float y, float Width, float Height,
 void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Angle, float u = 0.f,
     float v = 0.f, float uWidth = 1.f, float vHeight = 1.f, unsigned int color = 0xFFFFFFFFu);
 void RenderBitRotate(int Texture, float x, float y, float Width, float Height, float Rotate);
-void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHeight, float x, float y, float Width, float Height, float Rotate, float Rotate_Loc, float uWidth, float vHeight, int Num = -1);
 void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f);
 void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Height);
 void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth,

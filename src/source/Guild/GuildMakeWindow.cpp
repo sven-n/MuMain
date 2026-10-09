@@ -57,7 +57,7 @@ namespace
         return FALSE;
     }
 
-    // RenderGuildColor()'s cell: RenderColorQuadARGB() reads MarkColor[] (built for the mark
+    // The native editor's cell: RenderColorQuadARGB() read MarkColor[] (built for the mark
     // texture, red in the low byte) as ARGB, so the editor shows red and blue swapped -- the
     // original's own look, kept. Index 0 is the black cell with a grey cross.
     mu::ui::window::GuildMakeCellEntry EditorCell(int index)

@@ -29,9 +29,6 @@ namespace mu::ui::window
     private:
         // The space every window's callbacks run in: what MeasureText() and native 2D drawing use.
         UnitsFor m_unitsFor = &UI::Scaling::TypographyUnitsTransform;
-#ifdef PBG_MOD_STAMINA_UI
-        int m_nShowUICnt;
-#endif //PBG_MOD_STAMINA_UI
 
     public:
         CManager();
@@ -69,9 +66,6 @@ namespace mu::ui::window
         void ShowAllInterfaces(bool bShow = true);
         void EnableAllInterfaces(bool bEnable = true);
 
-#ifdef PBG_MOD_STAMINA_UI
-        int GetShowUICnt();
-#endif //PBG_MOD_STAMINA_UI
 
     protected:
         static bool CompareLayerDepth(IObject* pObj1, IObject* pObj2);

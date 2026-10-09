@@ -10,9 +10,6 @@ mu::ui::window::CManager::CManager()
 {
     m_pActiveMouseUIObj = NULL;
     m_pActiveKeyUIObj = NULL;
-#ifdef PBG_MOD_STAMINA_UI
-    m_nShowUICnt = 0;
-#endif // PBG_MOD_STAMINA_UI
 }
 
 void mu::ui::window::CManager::SetUnits(UnitsFor unitsFor)
@@ -319,16 +316,3 @@ bool mu::ui::window::CManager::CompareKeyEventOrder(IObject* pObj1, IObject* pOb
     return pObj1->GetKeyEventOrder() > pObj2->GetKeyEventOrder();
 }
 
-#ifdef PBG_MOD_STAMINA_UI
-int mu::ui::window::CManager::GetShowUICnt()
-{
-    int m_nShowUICnt = 0;
-    // How many of certain interfaces are open
-    for (int i = INTERFACE_PARTY; i < INTERFACE_CHARACTER + 1; ++i)
-    {
-        if (IsInterfaceVisible(i))
-            m_nShowUICnt++;
-    }
-    return m_nShowUICnt;
-}
-#endif // PBG_MOD_STAMINA_UI

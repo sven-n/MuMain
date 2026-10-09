@@ -138,12 +138,6 @@ void CDuelWatchMainFrameWindow::Release()
     m_RmlView.Release();
 }
 
-void CDuelWatchMainFrameWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
-}
-
 bool CDuelWatchMainFrameWindow::UpdateMouseEvent()
 {
     // The exit button's click is RmlUi's (duel_watch_exit); the pointer on it goes to nothing

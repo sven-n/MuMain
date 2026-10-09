@@ -104,7 +104,6 @@ extern ITEM g_PersonalShopInven[MAX_PERSONALSHOP_INVEN];
 extern ITEM g_PersonalShopBackup[MAX_PERSONALSHOP_INVEN];
 extern bool g_bEnablePersonalShop;
 extern int g_iPShopWndType;
-extern POINT g_ptPersonalShop;
 extern int g_iPersonalShopMsgType;
 extern wchar_t g_szPersonalShopTitle[MAX_SHOPTITLE + 1];
 extern CHARACTER g_PersonalShopSeller;
@@ -165,11 +164,8 @@ void OpenPersonalShop(int iType);
 void ClosePersonalShop();
 void ClearPersonalShop();
 bool IsExistUndecidedPrice();
-void OpenPersonalShopMsgWnd(int iMsgType);
-bool IsCorrectShopTitle(const wchar_t* szShopTitle);
 
 void CreateGuildMark(int nMarkIndex, bool blend = true);
-void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index);
 void CreateCastleMark(int Type, BYTE* buffer = NULL, bool blend = true);
 
 namespace UI::Items

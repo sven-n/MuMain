@@ -4,8 +4,8 @@
 #include <string>
 
 // Geometry and presentation rules of the master skill tree (CMasterLevel), free of any game state
-// so they can be unit-tested. Every position is in the tree's own 640x480 reference space: the
-// window is drawn over the whole reference screen and stretched W/640 x H/480 like the original.
+// so they can be unit-tested. Every position is in the tree's own 640x480 reference space, the
+// .hud-board the themes draw it on.
 namespace UI::Skills::MasterTree
 {
 inline constexpr int kColumnCount = 3;
