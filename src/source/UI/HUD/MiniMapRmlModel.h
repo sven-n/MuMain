@@ -25,9 +25,6 @@ struct MiniMapMarkerEntry
 
 struct MiniMapRmlModel
 {
-    // The Hud layout's W/640 x H/480 stretch (UI::Scaling::GetActiveTransform() while CManager
-    // runs this window).
-    float scaleX = 1.f, scaleY = 1.f;
     float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
     std::vector<MiniMapClipEntry> clips;

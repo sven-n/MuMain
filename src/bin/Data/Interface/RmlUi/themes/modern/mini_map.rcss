@@ -27,7 +27,7 @@ body { pointer-events: none; }
 	pointer-events: none;
 }
 
-/* The Hud stretch: reference px, scaled from the window's top-left. */
+/* The screen's stretch: reference px, scaled from the window's top-left. */
 .screen {
 	position: absolute;
 	left: 0;
@@ -35,6 +35,7 @@ body { pointer-events: none; }
 	width: 640px;
 	height: 480px;
 	transform-origin: left top;
+	transform: scale(var(--overlay-scale-x), var(--overlay-scale-y));
 	pointer-events: none;
 }
 

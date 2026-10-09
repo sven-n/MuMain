@@ -64,9 +64,15 @@ Rml::String MatrixText(const UI::MiniMap::CssMatrix& m)
     return buffer;
 }
 
+// The original drew the map under the screen overlay's W/640 x H/480 stretch.
+UI::Scaling::Transform OverlayTransform()
+{
+    return UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+}
+
 UI::MiniMap::Screen CurrentScreen()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    const UI::Scaling::Transform transform = OverlayTransform();
     return {static_cast<float>(WindowWidth),
             static_cast<float>(WindowHeight),
             transform.scaleX,
@@ -268,15 +274,13 @@ bool mu::ui::window::CMiniMap::UpdateMouseEvent()
 {
     // The close button's click is RmlUi's (minimap_close); like the original, the pointer over the
     // top 430 rows goes to nothing behind the map.
-    if (CheckMouseIn(0, 0, REFERENCE_WIDTH, kMapAreaHeight))
-        return false;
-    return true;
+    const UI::Scaling::Transform overlay = OverlayTransform();
+    const float pointerY = UI::Scaling::LogicalY(overlay, g_fWindowMouseY);
+    return !(pointerY >= 0.f && pointerY < static_cast<float>(kMapAreaHeight));
 }
 
 void mu::ui::window::CMiniMap::BindRmlModel(Rml::DataModelConstructor& c, MiniMapRmlModel& model)
 {
-    c.Bind("scale_x", &model.scaleX);
-    c.Bind("scale_y", &model.scaleY);
     c.Bind("text_px", &model.textPx);
     c.Bind("close_hint", &model.closeHint);
 
@@ -342,10 +346,6 @@ void mu::ui::window::CMiniMap::SyncRmlModel()
 
 void mu::ui::window::CMiniMap::SyncScreen()
 {
-    // CManager scopes LayoutMode::ScreenOverlay around this window: W/640 x H/480, no offset.
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-    Sync(m_RmlView.Binder(), &MiniMapRmlModel::scaleX, "scale_x", transform.scaleX);
-    Sync(m_RmlView.Binder(), &MiniMapRmlModel::scaleY, "scale_y", transform.scaleY);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     Sync(m_RmlView.Binder(), &MiniMapRmlModel::closeHint, "close_hint", StringUtils::WideToNarrow(I18N::Game::Close388));
 
@@ -464,12 +464,15 @@ void mu::ui::window::CMiniMap::SyncHint()
     bool found = false;
     std::wstring name;
     float left = 0.f, top = 0.f, width = 0.f, height = 0.f;
+    const UI::Scaling::Transform transform = OverlayTransform();
+    const float pointerX = UI::Scaling::LogicalX(transform, g_fWindowMouseX);
+    const float pointerY = UI::Scaling::LogicalY(transform, g_fWindowMouseY);
     for (int i = 0; i < MAX_MINI_MAP_DATA && !found; i++)
     {
         if (m_Mini_Map_Data[i].Kind <= 0)
             break;
         const float* box = m_Btn_Loc[i];
-        if (MouseX > box[0] && MouseX < (box[0] + box[2]) && MouseY > box[1] && MouseY < (box[1] + box[3]))
+        if (pointerX > box[0] && pointerX < (box[0] + box[2]) && pointerY > box[1] && pointerY < (box[1] + box[3]))
         {
             found = true;
             name = m_Mini_Map_Data[i].Name;
@@ -478,7 +481,6 @@ void mu::ui::window::CMiniMap::SyncHint()
             // The original's int / float mix: the text half-width in whole units.
             const int x = static_cast<int>(box[0] + ((box[2] / 2) - static_cast<float>(size.cx / 2)));
             const int y = static_cast<int>(box[1] - static_cast<float>(size.cy + 2));
-            const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
             left = UI::Scaling::PositionX(transform, static_cast<float>(x));
             top = UI::Scaling::PositionY(transform, static_cast<float>(y));
             width = UI::Scaling::SizeX(transform, static_cast<float>(size.cx + 6));
