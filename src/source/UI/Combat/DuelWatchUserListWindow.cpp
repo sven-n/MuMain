@@ -1,9 +1,9 @@
 
 #include "stdafx.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Combat/DuelWatchUserListWindow.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
 #include "GameLogic/Combat/DuelMgr.h"
 
 #include "Core/Utilities/StringUtils.h"
@@ -67,10 +67,9 @@ bool CDuelWatchUserListWindow::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    POINT ptSize = {57, 17};
-    POINT ptOrigin = {m_Pos.x, m_Pos.y - (ptSize.y + 1) * g_DuelMgr.GetDuelWatchUserCount()};
-
-    if (mu::ui::window::WindowGeometry(ptOrigin.x, ptOrigin.y, ptSize.x, (ptSize.y + 1) * g_DuelMgr.GetDuelWatchUserCount() + 10).Contains(MouseX, MouseY))
+    // The list takes no pointer events, but its names still hold the pointer, as the original's did.
+    Rml::ElementDocument* document = m_RmlView.Document();
+    if (document != nullptr && UI::RmlBridge::IsPointerWithin(document->QuerySelector("#panel .stack")))
         return false;
 
     return true;

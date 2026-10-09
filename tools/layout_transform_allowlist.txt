@@ -14,8 +14,6 @@ Guild/GuildInfoWindow.cpp: 1
 Guild/GuildMakeWindow.cpp: 1
 Render/Text/CUIRenderTextSDLTtf.cpp: 2
 Scenes/LoginSceneOverlay.cpp: 1
-UI/Combat/DuelWatchMainFrameWindow.cpp: 1
-UI/Combat/DuelWatchUserListWindow.cpp: 1
 UI/Combat/DuelWatchWindow.cpp: 1
 UI/Combat/SiegeWarBase.cpp: 6
 UI/Combat/SiegeWarCommander.cpp: 1
@@ -33,8 +31,6 @@ UI/Dialogs/HelpWindow.cpp: 1
 UI/Dialogs/MessageBox.cpp: 6
 UI/Dialogs/MessageBoxView.cpp: 1
 UI/Dialogs/ReconnectDialog.cpp: 3
-UI/Events/BloodCastleTime.cpp: 1
-UI/Events/ChaosCastleTime.cpp: 1
 UI/Events/CursedTempleSystem.cpp: 5
 UI/HUD/ChatLogWindow.cpp: 1
 UI/HUD/MainFrameWindow.cpp: 1

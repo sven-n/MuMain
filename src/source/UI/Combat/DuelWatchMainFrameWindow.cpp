@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Combat/DuelWatchMainFrameWindow.h"
 #include "UI/Core/WindowSystem.h"
@@ -24,13 +25,6 @@ using namespace mu::ui::window;
 
 namespace
 {
-// The original's exit button (newui_exit_00, a CButton at the HUD's right end, 36 x 29, flush
-// with its bottom), relative to the 640 x 51 HUD.
-constexpr int kExitX = 640 - 36;
-constexpr int kExitY = 51 - 29;
-constexpr int kExitWidth = 36;
-constexpr int kExitHeight = 29;
-
 // The bar textures, relative to the themed document.
 constexpr const char* kHpGauge = "../../../menu_pk_hp03(bar2).jpg";
 constexpr const char* kSdGauge = "../../../menu_pk_sd03(bar2).jpg";
@@ -154,7 +148,8 @@ bool CDuelWatchMainFrameWindow::UpdateMouseEvent()
 {
     // The exit button's click is RmlUi's (duel_watch_exit); the pointer on it goes to nothing
     // behind the frame.
-    if (CheckMouseIn(m_Pos.x + kExitX, m_Pos.y + kExitY, kExitWidth, kExitHeight))
+    if (UI::RmlBridge::IsPointerOver(m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("exit")
+                                                                       : nullptr))
         return false;
     return true;
 }

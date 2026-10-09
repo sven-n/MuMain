@@ -200,3 +200,26 @@ TEST_CASE("a panel that takes no pointer events never holds the pointer [ui][pla
     fixture.context->ProcessMouseMove(50, 50, 0);
     CHECK_FALSE(UI::RmlBridge::IsPointerOver(document));
 }
+
+TEST_CASE("a point is within an element's drawn box, transforms included, pointer events or not [ui][placement]")
+{
+    Fixture fixture;
+    Rml::ElementDocument* document = fixture.Load();
+    UI::RmlBridge::SlotPlacement placement;
+    placement.Set(1300.f, 40.f, 2.f);
+    placement.Apply(document, "panel");
+    fixture.Refresh();
+    Rml::Element* panel = document->GetElementById("panel");
+
+    // The panel takes no pointer events, so RmlUi never hovers it; its drawn box still counts.
+    fixture.context->ProcessMouseMove(1300 + 300, 40 + 700, 0);
+    CHECK_FALSE(UI::RmlBridge::IsPointerOver(panel));
+    CHECK(UI::RmlBridge::IsPointWithin(panel, {1300.f + 300.f, 40.f + 700.f}));
+    CHECK_FALSE(UI::RmlBridge::IsPointWithin(panel, {1300.f + 390.f, 40.f}));
+    CHECK_FALSE(UI::RmlBridge::IsPointWithin(panel, {1290.f, 100.f}));
+
+    document->Hide();
+    fixture.Refresh();
+    CHECK_FALSE(UI::RmlBridge::IsPointWithin(panel, {1310.f, 50.f}));
+    CHECK_FALSE(UI::RmlBridge::IsPointWithin(nullptr, {0.f, 0.f}));
+}

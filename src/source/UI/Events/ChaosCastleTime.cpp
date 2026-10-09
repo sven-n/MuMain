@@ -4,10 +4,11 @@
 #include "UI/Events/EventPreview.h"
 #include "UI/Events/ChaosCastleTime.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
 #include "GameLogic/Events/MatchEvent.h"
 #include "I18N/All.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include <RmlUi/Core/ElementDocument.h>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -69,7 +70,8 @@ bool CChaosCastleTime::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, CHAOSCASTLE_TIME_WINDOW_WIDTH, CHAOSCASTLE_TIME_WINDOW_HEIGHT).Contains(MouseX, MouseY))
+    // The timer takes no pointer events, but its box still holds the pointer, as the original's did.
+    if (UI::RmlBridge::IsPointerWithin(m_View.Document() != nullptr ? m_View.Document()->GetElementById("panel") : nullptr))
         return false;
 
     return true;

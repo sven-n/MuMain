@@ -1,5 +1,7 @@
 #pragma once
 
+#include <RmlUi/Core/Types.h>
+
 namespace Rml
 {
 class Element;
@@ -15,4 +17,10 @@ namespace UI::RmlBridge
 bool IsPointerOver(Rml::ElementDocument* document);
 // True while RmlUi hovers `element` or one of its descendants, in a visible document.
 bool IsPointerOver(Rml::Element* element);
+// True while `point` (window pixels) lies inside `element`'s drawn border box, its transforms
+// included, in a visible document -- also where the element takes no pointer events (a HUD part the
+// world stays clickable through, whose own rectangle still holds the pointer).
+bool IsPointWithin(Rml::Element* element, Rml::Vector2f point);
+// IsPointWithin() at the game's pointer.
+bool IsPointerWithin(Rml::Element* element);
 } // namespace UI::RmlBridge
