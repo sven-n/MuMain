@@ -207,6 +207,31 @@ TEST_CASE("UI scale percent clamps to the supported range [config][ui]")
     config.SetUIScalePercent(previous);
 }
 
+TEST_CASE("UI scale percent grows the UI only as far as the original screen fits [config][ui][scaling]")
+{
+    auto& config = GameConfig::GetInstance();
+    const int previous = config.GetUIScalePercent();
+
+    // 1920x1080 holds the 640x480 screen at 2.25: 125 % and 150 % stop there.
+    for (int percent : {125, 150})
+    {
+        config.SetUIScalePercent(percent);
+        CHECK(UI::Scaling::TypographyScale(1920, 1080) == doctest::Approx(2.25f));
+        CHECK(UI::Scaling::PanelTransform(1920, 1080).offsetY == doctest::Approx(0.f));
+        CHECK(UI::Scaling::DockRightTransform(1920, 1080).scaleX == doctest::Approx(2.25f));
+        CHECK(UI::Scaling::BottomHudScale(1920, 1080) == doctest::Approx(2.25f));
+    }
+    // 1280x720 at 125 %: 1.5 x 1.25 would overflow; the window holds 1.5.
+    config.SetUIScalePercent(125);
+    CHECK(UI::Scaling::TypographyScale(1280, 720) == doctest::Approx(1.5f));
+    // Below 100 % nothing is capped.
+    config.SetUIScalePercent(75);
+    CHECK(UI::Scaling::TypographyScale(1280, 720) == doctest::Approx(1.125f));
+    CHECK(UI::Scaling::BottomHudScale(1920, 1080) == doctest::Approx(1.5f));
+
+    config.SetUIScalePercent(previous);
+}
+
 TEST_CASE("VSync preference defaults on and remains mutable [config][render]")
 {
     CHECK(CfgDefaults::CfgDefaultVSync);

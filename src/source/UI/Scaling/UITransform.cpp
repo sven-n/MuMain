@@ -30,11 +30,8 @@ float g_windowContentScale = 1.0f;
 
 // GameConfig::GetUIScalePercent() is an in-memory singleton read (no disk I/O per call, unlike
 // the SDL queries GetWindowContentScale() caches), so this reads it directly rather than adding a
-// second cached global.
-// Applied post-clamp everywhere it's used (see BottomHudScale/CappedUniformScale below), unlike
-// GetWindowContentScale()'s clamp-bound fold: a direct user dial needs a proportional, visible
-// effect at every window size, including ones where the auto-scale already sits at its ceiling --
-// folding it into the clamp bounds instead would silently defeat the setting there.
+// second cached global. Applied after the fit scale's own ceiling (WithUIScalePercent()), so it still
+// grows the UI where the auto-fit already sits at that ceiling, up to what the window holds.
 float UIScalePercentMultiplier()
 {
     return static_cast<float>(GameConfig::GetInstance().GetUIScalePercent()) / 100.0f;
@@ -62,9 +59,20 @@ int RoundedBottomHudTop(int windowWidth, int windowHeight)
     return std::max(static_cast<int>(std::lround(hudTop)), 1);
 }
 
+// The player's UI scale on top of a fit scale, grown only as far as the original 640x480 screen
+// still fits the window: a centred panel or a dock standing on the HUD is never cut off. Never
+// below the fit scale itself, so a window smaller than the reference keeps its floor.
+float WithUIScalePercent(int windowWidth, int windowHeight, float fitScale)
+{
+    const float fitsWindow = std::min(static_cast<float>(windowWidth) / kReferenceWidth,
+                                      static_cast<float>(windowHeight) / kReferenceHeight);
+    return std::min(fitScale * UIScalePercentMultiplier(), std::max(fitScale, fitsWindow));
+}
+
 float CappedUniformScale(int windowWidth, int windowHeight, float maximumScale)
 {
-    return UI::Scaling::ViewportFitScale(windowWidth, windowHeight, maximumScale) * UIScalePercentMultiplier();
+    return WithUIScalePercent(windowWidth, windowHeight,
+                              UI::Scaling::ViewportFitScale(windowWidth, windowHeight, maximumScale));
 }
 
 UI::Scaling::Transform DockTransform(int windowWidth, int windowHeight)
@@ -162,7 +170,7 @@ float UI::Scaling::CompanionRatio(int windowWidth, int windowHeight)
 
 float UI::Scaling::BottomHudScale(int windowWidth, int windowHeight)
 {
-    return ViewportFitScale(windowWidth, windowHeight, kMaximumHudScale) * UIScalePercentMultiplier();
+    return WithUIScalePercent(windowWidth, windowHeight, ViewportFitScale(windowWidth, windowHeight, kMaximumHudScale));
 }
 
 UI::Scaling::Transform UI::Scaling::DockRightTransform(int windowWidth, int windowHeight)

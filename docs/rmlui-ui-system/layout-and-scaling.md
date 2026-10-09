@@ -123,7 +123,10 @@ No window has a layout of its own any more: C++ places no document and remaps no
 
 The scale inputs come from the same functions as before: `PanelTransform()`'s panel scale and
 `TypographyScale()` (both capped at 2.0), `BottomHudScale()` and the dock scale
-(`DockRightTransform()`, capped at 2.25). Native text size is `NativeTextPixelSize(role,
+(`DockRightTransform()`, capped at 2.25). The player's UI scale multiplies each after its cap, but
+never past the scale at which the original 640x480 screen still fits the window
+(`WithUIScalePercent()`): a centred panel, or a dock standing on the HUD, is never cut off, and above
+100 % a window that 100 % already fills does not grow. Native text size is `NativeTextPixelSize(role,
 WindowWidth, WindowHeight)`, at the one typography scale; `RmlNativeTextSize.h` wraps it.
 
 ## Anchor/sizing utility classes (`base.rcss`)

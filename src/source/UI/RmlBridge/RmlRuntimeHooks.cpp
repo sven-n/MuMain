@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "UI/RmlBridge/RmlRuntimeHooks.h"
 
-#include "Data/GameConfig/GameConfig.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
 #include "UI/RmlBridge/RmlDocumentHints.h"
@@ -20,14 +19,9 @@ void InstallRuntimeHooks()
 {
     RmlUiRuntimeHooks hooks;
 
-    // The player's UI scale times the fit to the window, composed as UI::Scaling's native
-    // transforms compose them. ViewportFitScale() already folds in the OS display scale; multiplying
-    // GetWindowContentScale() in again would count it twice.
+    // The panel scale, so dp and the native transforms grow and stop growing together.
     hooks.dpRatio = [](int windowWidth, int windowHeight)
-    {
-        const float percent = static_cast<float>(GameConfig::GetInstance().GetUIScalePercent());
-        return percent / 100.f * UI::Scaling::ViewportFitScale(windowWidth, windowHeight, UI::Scaling::MaximumPanelScale);
-    };
+    { return UI::Scaling::TypographyScale(windowWidth, windowHeight); };
     hooks.afterScale = [](Rml::Context* context)
     {
         ApplyScaleInputs(context);

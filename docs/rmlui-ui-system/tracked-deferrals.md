@@ -11,11 +11,6 @@ No code-health item is left.
 
 ## After the merge
 
-- **Stage and dock scales overflow short windows.** Above 100% UI scale on a 720 px tall window, a
-  `.stage` panel (the item help table, NPC dialogs) is taller than the window: it stays centred, so
-  its top and bottom are cut off. The legacy dock overflows the top the same way. Fix: cap each
-  scale input at the scale that still fits its region, so the UI scale setting can only grow the UI
-  as far as the window holds it.
 - **Party list bounds.** At 720p and about 110% or more the list rises above the screen in both
   themes, and in modern it overlaps the top bar at 100%. Keep it between the top bar and the HUD.
 - **Legacy trade overlaps.** The Warning, notice and confirm texts overlap; an RCSS fix.
