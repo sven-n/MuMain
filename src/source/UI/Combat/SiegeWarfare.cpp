@@ -170,7 +170,6 @@ void mu::ui::window::CSiegeWarfare::BindRmlModel(Rml::DataModelConstructor& c, S
     c.Bind("alpha", &model.alpha);
     c.Bind("map_rect", &model.mapRect);
     c.Bind("alpha_label", &model.alphaLabel);
-    c.Bind("alpha_frame", &model.alphaFrame);
     c.Bind("time_visible", &model.timeVisible);
     c.Bind("time_text", &model.timeText);
 
@@ -196,13 +195,31 @@ void mu::ui::window::CSiegeWarfare::BindRmlModel(Rml::DataModelConstructor& c, S
     c.Bind("skill_affordable", &model.skillAffordable);
     c.Bind("kills_needed", &model.killsNeeded);
     c.Bind("kills", &model.kills);
-    c.Bind("scroll_up_frame", &model.scrollUpFrame);
-    c.Bind("scroll_down_frame", &model.scrollDownFrame);
 
     auto button = c.RegisterStruct<SiegeWarButtonEntry>();
     button.RegisterMember("left", &SiegeWarButtonEntry::left);
     button.RegisterMember("top", &SiegeWarButtonEntry::top);
-    button.RegisterMember("frame", &SiegeWarButtonEntry::frame);
+    button.RegisterMember("selected", &SiegeWarButtonEntry::selected);
+
+    // The HUD's buttons; a click on one never reaches the world.
+    c.BindEventCallback("siege_alpha_click", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { if (m_pSiegeWarUI) m_pSiegeWarUI->ToggleAlpha(); });
+    c.BindEventCallback("siege_scale_click", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { if (m_pSiegeWarUI) m_pSiegeWarUI->ToggleMiniMapScale(); });
+    c.BindEventCallback("siege_scroll_up_click", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { if (m_pSiegeWarUI) m_pSiegeWarUI->ScrollSkillUp(); });
+    c.BindEventCallback("siege_scroll_down_click", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { if (m_pSiegeWarUI) m_pSiegeWarUI->ScrollSkillDown(); });
+    c.BindEventCallback("siege_team_click", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                        {
+                            if (m_pSiegeWarUI && args.size() == 1)
+                                m_pSiegeWarUI->OnTeamClick(args[0].Get<int>(-1));
+                        });
+    c.BindEventCallback("siege_order_click", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                        {
+                            if (m_pSiegeWarUI && args.size() == 1)
+                                m_pSiegeWarUI->OnOrderClick(args[0].Get<int>(-1));
+                        });
     button.RegisterMember("label", &SiegeWarButtonEntry::label);
     c.RegisterArray<std::vector<SiegeWarButtonEntry>>();
     c.Bind("teams", &model.teams);
@@ -232,8 +249,8 @@ void mu::ui::window::CSiegeWarfare::SyncRmlModel()
     if (!shown)
         return;
 
-    // CManager scopes the HUD board around the window: the bottom HUD's scale, centred like it.
     SiegeWarfareRmlModel& next = m_NextRmlModel;
+    m_pSiegeWarUI->SetDocument(m_RmlView.Document());
     next.boldTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
     next.bigTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Big);
     m_pSiegeWarUI->FillRmlModel(next);
@@ -250,7 +267,6 @@ void mu::ui::window::CSiegeWarfare::ApplyRmlModel(const SiegeWarfareRmlModel& ne
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::alpha, "alpha", next.alpha);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::mapRect, "map_rect", next.mapRect);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::alphaLabel, "alpha_label", next.alphaLabel);
-    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::alphaFrame, "alpha_frame", next.alphaFrame);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::timeVisible, "time_visible", next.timeVisible);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::timeText, "time_text", next.timeText);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::dots, "dots", next.dots);
@@ -262,8 +278,6 @@ void mu::ui::window::CSiegeWarfare::ApplyRmlModel(const SiegeWarfareRmlModel& ne
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::skillAffordable, "skill_affordable", next.skillAffordable);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::killsNeeded, "kills_needed", next.killsNeeded);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::kills, "kills", next.kills);
-    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::scrollUpFrame, "scroll_up_frame", next.scrollUpFrame);
-    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::scrollDownFrame, "scroll_down_frame", next.scrollDownFrame);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::teams, "teams", next.teams);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::orders, "orders", next.orders);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::cursorVisible, "cursor_visible", next.cursorVisible);

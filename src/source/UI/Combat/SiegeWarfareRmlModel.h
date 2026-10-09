@@ -31,11 +31,11 @@ struct SiegeWarCommandEntry
 };
 
 // One of the commander's buttons: the seven team buttons, and the three command buttons beside
-// the chosen team. frame is the sprite row (0 up, 1 over, 2 down or chosen).
+// the chosen team. A chosen team shows its pressed art.
 struct SiegeWarButtonEntry
 {
     float left = 0.f, top = 0.f;
-    int frame = 0;
+    bool selected = false;
     Rml::String label;
 
     bool operator==(const SiegeWarButtonEntry&) const = default;
@@ -49,7 +49,6 @@ struct SiegeWarfareRmlModel
     float alpha = 1.f;                // the transparency button's value (0.5 .. 1)
     Rml::String mapRect;              // the shown part of World31/Map1, texture px "x y w h"
     Rml::String alphaLabel;
-    int alphaFrame = 0;
 
     bool timeVisible = false; // the siege's remaining time, only while a siege runs
     Rml::String timeText;
@@ -64,7 +63,6 @@ struct SiegeWarfareRmlModel
     // Whether the hero has the kills the skill needs: the original reddened the icon until then.
     bool skillAffordable = false;
     Rml::String killsNeeded, kills;
-    int scrollUpFrame = 0, scrollDownFrame = 0;
 
     // The commander's team and command buttons, and the chosen command under the pointer.
     std::vector<SiegeWarButtonEntry> teams;

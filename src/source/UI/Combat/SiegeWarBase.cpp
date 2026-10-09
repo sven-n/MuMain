@@ -12,7 +12,9 @@ using namespace mu::ui::window;
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "UI/HUD/Skills/SkillTooltip.h"
-#include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlElementBox.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include <RmlUi/Core/ElementDocument.h>
 #include "Core/Utilities/StringUtils.h"
 
 namespace
@@ -23,21 +25,6 @@ BYTE ToColorByte(float value)
 }
 
 } // namespace
-
-// The sprite row a CButton registered with ChangeButtonImgState(true, image, true) shows: up,
-// over, down stacked top to bottom.
-int mu::ui::window::ButtonFrame(CButton& button)
-{
-    switch (button.GetBTState())
-    {
-    case BUTTON_STATE_OVER:
-        return 1;
-    case BUTTON_STATE_DOWN:
-        return 2;
-    default:
-        return 0;
-    }
-}
 
 mu::ui::window::CSiegeWarBase::CSiegeWarBase()
 {
@@ -53,15 +40,7 @@ mu::ui::window::CSiegeWarBase::CSiegeWarBase()
 
     memset(&m_MiniMapFramePos, 0, sizeof(POINT));
     memset(&m_MiniMapPos, 0, sizeof(POINT));
-    memset(&m_TimeUIPos, 0, sizeof(POINT));
     memset(&m_SkillFramePos, 0, sizeof(POINT));
-    memset(&m_BtnSkillScrollUpPos, 0, sizeof(POINT));
-    memset(&m_BtnSkillScrollDnPos, 0, sizeof(POINT));
-    memset(&m_SkillIconPos, 0, sizeof(POINT));
-    memset(&m_UseSkillDestKillPos, 0, sizeof(POINT));
-    memset(&m_CurKillCountPos, 0, sizeof(POINT));
-    memset(&m_BtnAlphaPos, 0, sizeof(POINT));
-    memset(&m_SkillTooltipPos, 0, sizeof(POINT));
 
     memset(&m_HeroPosInWorld, 0, sizeof(POINT));
     memset(&m_HeroPosInMiniMap, 0, sizeof(POINT));
@@ -78,10 +57,6 @@ bool mu::ui::window::CSiegeWarBase::Create(int x, int y)
 
     if (!OnCreate(x, y))
         return false;
-
-    // The buttons only hit-test and keep their up / over / down state here; siege_warfare.rml
-    // draws them.
-    m_BtnAlpha.ChangeButtonInfo(m_BtnAlphaPos.x, m_BtnAlphaPos.y, BTN_ALPHA_WIDTH, BTN_ALPHA_HEIGHT);
 
     if (battleCastle::IsBattleCastleStart() == true)
     {
@@ -130,7 +105,6 @@ void mu::ui::window::CSiegeWarBase::FillRmlModel(SiegeWarfareRmlModel& model)
                     std::to_string(128 * m_iMiniMapScale) + " " + std::to_string(128 * m_iMiniMapScale);
 
     model.alphaLabel = std::to_string(static_cast<int>(m_fMiniMapAlpha * 100.5f));
-    model.alphaFrame = ButtonFrame(m_BtnAlpha);
 
     // The remaining time, only while a siege runs; the colon never blinks (m_bSecond stays true
     // in the original too).
@@ -177,10 +151,6 @@ bool mu::ui::window::CSiegeWarBase::InitBattleSkill()
     {
         return false;
     }
-
-    m_BtnSkillScroll[0].ChangeButtonInfo(m_BtnSkillScrollUpPos.x, m_BtnSkillScrollUpPos.y, SKILL_BTN_SCROLL_WIDTH,
-                                         SKILL_BTN_SCROLL_HEIGHT);
-    m_BtnSkillScroll[1].ChangeButtonInfo(m_BtnSkillScrollDnPos.x, m_BtnSkillScrollDnPos.y, SKILL_BTN_SCROLL_WIDTH, SKILL_BTN_SCROLL_HEIGHT);
 
     switch (Hero->GuildStatus)
     {
@@ -252,23 +222,17 @@ bool mu::ui::window::CSiegeWarBase::UpdateMouseEvent()
     if (BtnProcess())
         return false;
 
-    if (CheckMouseIn(m_MiniMapFramePos.x, m_MiniMapFramePos.y, MINIMAP_FRAME_WIDTH, MINIMAP_FRAME_HEIGHT)
-        || CheckMouseIn(m_TimeUIPos.x, m_TimeUIPos.y, TIME_FRAME_WIDTH, TIME_FRAME_HEIGHT))
+    // The frames hold the pointer by where they are drawn; the skill's icon shows its tooltip.
+    if (UI::RmlBridge::IsPointerWithin(Element("frame_art")) || UI::RmlBridge::IsPointerWithin(Element("time_frame")))
         return false;
 
     if (m_bRenderSkillUI == true)
     {
-        if (CheckMouseIn(m_SkillIconPos.x, m_SkillIconPos.y, SKILL_ICON_WIDTH, SKILL_ICON_HEIGHT))
-        {
-            m_bRenderToolTip = true;
+        m_bRenderToolTip = UI::RmlBridge::IsPointerWithin(Element("skill_icon"));
+        if (m_bRenderToolTip)
             return false;
-        }
-        else
-        {
-            m_bRenderToolTip = false;
-        }
 
-        if (CheckMouseIn(m_SkillFramePos.x, m_SkillFramePos.y, BATTLESKILL_FRAME_WIDTH, BATTLESKILL_FRAME_HEIGHT))
+        if (UI::RmlBridge::IsPointerWithin(Element("skill_frame")))
             return false;
     }
 
@@ -283,47 +247,11 @@ bool mu::ui::window::CSiegeWarBase::UpdateKeyEvent()
     return true;
 }
 
+// The wheel scrolls the battle skill wherever the pointer is; the buttons are the document's.
 bool mu::ui::window::CSiegeWarBase::BtnProcess()
 {
-    POINT ptScaleBtn = { m_MiniMapFramePos.x + 134, m_MiniMapFramePos.y + 7 };
-
-    if (m_BtnAlpha.UpdateMouseEvent())
-    {
-        if (m_fMiniMapAlpha <= 0.5f)
-        {
-            m_fMiniMapAlpha = 1.f;
-        }
-        else
-        {
-            m_fMiniMapAlpha = m_fMiniMapAlpha - 0.1f;
-        }
-
-        return true;
-    }
-
-    if (mu::ui::window::IsPress(VK_LBUTTON) && CheckMouseIn(ptScaleBtn.x, ptScaleBtn.y, 13, 12))
-    {
-        if (m_iMiniMapScale == 1)
-            m_iMiniMapScale = 2;
-        else
-            m_iMiniMapScale = 1;
-
-        return true;
-    }
-
     if (m_bRenderSkillUI == true)
     {
-        if (m_BtnSkillScroll[0].UpdateMouseEvent())
-        {
-            SetSkillScrollUp();
-            return true;
-        }
-        if (m_BtnSkillScroll[1].UpdateMouseEvent())
-        {
-            SetSkillScrollDn();
-            return true;
-        }
-
         if (MouseWheel > 0)
         {
             SetSkillScrollUp();
@@ -339,6 +267,36 @@ bool mu::ui::window::CSiegeWarBase::BtnProcess()
     }
 
     return false;
+}
+
+void mu::ui::window::CSiegeWarBase::ToggleAlpha()
+{
+    if (m_fMiniMapAlpha <= 0.5f)
+        m_fMiniMapAlpha = 1.f;
+    else
+        m_fMiniMapAlpha = m_fMiniMapAlpha - 0.1f;
+}
+
+void mu::ui::window::CSiegeWarBase::ToggleMiniMapScale()
+{
+    m_iMiniMapScale = m_iMiniMapScale == 1 ? 2 : 1;
+}
+
+void mu::ui::window::CSiegeWarBase::ScrollSkillUp()
+{
+    if (m_bRenderSkillUI)
+        SetSkillScrollUp();
+}
+
+void mu::ui::window::CSiegeWarBase::ScrollSkillDown()
+{
+    if (m_bRenderSkillUI)
+        SetSkillScrollDn();
+}
+
+Rml::Element* mu::ui::window::CSiegeWarBase::Element(const char* id) const
+{
+    return m_Document != nullptr ? m_Document->GetElementById(id) : nullptr;
 }
 
 void mu::ui::window::CSiegeWarBase::UpdateBuffState()
@@ -430,8 +388,6 @@ void mu::ui::window::CSiegeWarBase::FillSkill(SiegeWarfareRmlModel& model)
     model.skillAffordable = Hero->GuildMasterKillCount >= killsNeeded;
     model.killsNeeded = std::to_string(killsNeeded);
     model.kills = std::to_string(Hero->GuildMasterKillCount);
-    model.scrollUpFrame = ButtonFrame(m_BtnSkillScroll[0]);
-    model.scrollDownFrame = ButtonFrame(m_BtnSkillScroll[1]);
 
     if (m_bRenderToolTip == true)
     {
@@ -440,9 +396,15 @@ void mu::ui::window::CSiegeWarBase::FillSkill(SiegeWarfareRmlModel& model)
         {
             UI::RmlBridge::Tooltip::Config config;
             config.lines = UI::Skills::Tooltip::ToRmlBridgeLines(tooltipModel);
-            const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-            config.anchorX = UI::Scaling::PositionX(activeTransform, static_cast<float>(m_SkillTooltipPos.x));
-            config.anchorY = UI::Scaling::PositionY(activeTransform, static_cast<float>(m_SkillTooltipPos.y));
+            // The original's (30, 16) in the skill frame, where the frame is drawn.
+            Rml::Element* frame = Element("skill");
+            Rml::Vector2f origin;
+            if (frame != nullptr && UI::RmlBridge::DrawnTopLeft(*frame, origin))
+            {
+                const float scale = UI::RmlBridge::DrawnScale(*frame);
+                config.anchorX = origin.x + 30.f * scale;
+                config.anchorY = origin.y + 16.f * scale;
+            }
             // STRP_BOTTOMCENTER's old native meaning: grow upward from sy (see RenderTipTextList()).
             config.anchor = UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft;
             config.textAlign = UI::RmlBridge::Tooltip::Config::TextAlign::Center; // RenderTipTextList()'s own default (RT3_SORT_CENTER).
@@ -467,26 +429,8 @@ void mu::ui::window::CSiegeWarBase::SetPos(int x, int y)
     m_MiniMapFramePos.y = y;
     m_MiniMapPos.x = m_MiniMapFramePos.x + 25;
     m_MiniMapPos.y = m_MiniMapFramePos.y + 28;
-    m_TimeUIPos.x = m_MiniMapFramePos.x + 20;
-    m_TimeUIPos.y = m_MiniMapFramePos.y + MINIMAP_FRAME_HEIGHT - 4;
     m_SkillFramePos.x = x + 26;
     m_SkillFramePos.y = y - BATTLESKILL_FRAME_HEIGHT;
-    m_BtnSkillScrollUpPos.x = m_SkillFramePos.x + 48;
-    m_BtnSkillScrollUpPos.y = m_SkillFramePos.y + 21;
-    m_BtnSkillScrollDnPos.x = m_BtnSkillScrollUpPos.x;
-    m_BtnSkillScrollDnPos.y = m_BtnSkillScrollUpPos.y + 15;
-    m_SkillIconPos.x = m_SkillFramePos.x + 25;
-    m_SkillIconPos.y = m_SkillFramePos.y + 21;
-    m_UseSkillDestKillPos.x = m_SkillFramePos.x + 78;
-    m_UseSkillDestKillPos.y = m_SkillFramePos.y + 28;
-    m_CurKillCountPos.x = m_SkillFramePos.x + 97;
-    m_CurKillCountPos.y = m_UseSkillDestKillPos.y;
-    m_BtnAlphaPos.x = m_MiniMapFramePos.x + 58;
-    m_BtnAlphaPos.y = m_MiniMapFramePos.y + 4;
-
-    m_SkillTooltipPos.y = m_SkillFramePos.y + 16;
-    m_SkillTooltipPos.x = m_SkillFramePos.x + 30;
-
     OnSetPos(x, y);
 }
 

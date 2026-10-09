@@ -31,8 +31,6 @@ namespace mu::ui::window
         POINT			m_BtnCommandGroupPos;
         POINT			m_BtnCommandPos;
 
-        CButton	m_BtnCommandGroup[MAX_COMMANDGROUP];
-        CButton	m_BtnCommand[MINIMAP_CMD_MAX];
 
         int				m_iCurSelectBtnGroup;
         int				m_iCurSelectBtnCommand;
@@ -52,11 +50,12 @@ namespace mu::ui::window
         virtual bool OnUpdateMouseEvent();
         virtual bool OnUpdateKeyEvent();
         virtual bool OnBtnProcess();
+        void OnTeamClick(int team) override;
+        void OnOrderClick(int order) override;
         virtual void OnSetPos(int x, int y);
 
         void OnFillRmlModel(SiegeWarfareRmlModel& model) override;
 
-        void InitCmdGroupBtn();
 
         void FillCharacterDots(SiegeWarfareRmlModel& model);
         void FillGuildMemberDots(SiegeWarfareRmlModel& model);

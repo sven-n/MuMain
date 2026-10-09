@@ -23,4 +23,8 @@ bool IsPointerOver(Rml::Element* element);
 bool IsPointWithin(Rml::Element* element, Rml::Vector2f point);
 // IsPointWithin() at the game's pointer.
 bool IsPointerWithin(Rml::Element* element);
+// The game's pointer in `element`'s own layout units, from its border box's top-left, through every
+// transform on it and its ancestors -- where on a map or a board the pointer is. False while the
+// element is not drawn.
+bool PointerIn(Rml::Element* element, Rml::Vector2f& local);
 } // namespace UI::RmlBridge

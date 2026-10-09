@@ -11,8 +11,6 @@ Guild/GuildMakeWindow.cpp: 1
 Render/Text/CUIRenderTextSDLTtf.cpp: 2
 Scenes/LoginSceneOverlay.cpp: 1
 UI/Combat/DuelWatchWindow.cpp: 1
-UI/Combat/SiegeWarBase.cpp: 6
-UI/Combat/SiegeWarCommander.cpp: 1
 UI/Core/SceneUICoordinator.cpp: 1
 UI/Core/UILayoutPolicy.cpp: 9
 UI/Core/WindowCommon.cpp: 1

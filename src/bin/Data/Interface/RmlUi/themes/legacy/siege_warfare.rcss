@@ -88,13 +88,13 @@ body { pointer-events: none; }
 .cursor-icon.wait { width: 11px; height: 12px; }
 
 .team { position: absolute; width: 26px; height: 22px; decorator: image(sw-team-up); }
-.team.over { decorator: image(sw-team-over); }
-.team.down { decorator: image(sw-team-down); }
+.team:hover { decorator: image(sw-team-over); }
+.team:active, .team.selected { decorator: image(sw-team-down); }
 
 .order { position: absolute; width: 30px; height: 22px; }
 .order-button { position: absolute; left: 0; top: 0; width: 30px; height: 22px; decorator: image(sw-order-up); }
-.order-button.over { decorator: image(sw-order-over); }
-.order-button.down { decorator: image(sw-order-down); }
+.order-button:hover { decorator: image(sw-order-over); }
+.order-button:active { decorator: image(sw-order-down); }
 .order-icon { position: absolute; }
 .order-icon.attack { left: 8px; top: 5px; width: 13px; height: 13px; decorator: image(sw-attack); }
 .order-icon.defence { left: 8px; top: 3px; width: 18px; height: 15px; decorator: image(sw-defence); }
@@ -107,15 +107,15 @@ body { pointer-events: none; }
 .kills-now { left: 97px; top: 28px; }
 .scroll { position: absolute; left: 48px; width: 15px; height: 13px; }
 .scroll-up { top: 21px; decorator: image(sw-scroll-up-up); }
-.scroll-up.over { decorator: image(sw-scroll-up-over); }
-.scroll-up.down { decorator: image(sw-scroll-up-down); }
+.scroll-up:hover { decorator: image(sw-scroll-up-over); }
+.scroll-up:active { decorator: image(sw-scroll-up-down); }
 .scroll-down { top: 36px; decorator: image(sw-scroll-down-up); }
-.scroll-down.over { decorator: image(sw-scroll-down-over); }
-.scroll-down.down { decorator: image(sw-scroll-down-down); }
+.scroll-down:hover { decorator: image(sw-scroll-down-over); }
+.scroll-down:active { decorator: image(sw-scroll-down-down); }
 
 #alpha_button { position: absolute; width: 38px; height: 23px; decorator: image(sw-alpha-up); }
-#alpha_button.over { decorator: image(sw-alpha-over); }
-#alpha_button.down { decorator: image(sw-alpha-down); }
+#alpha_button:hover { decorator: image(sw-alpha-over); }
+#alpha_button:active { decorator: image(sw-alpha-down); }
 
 /* The battle skill's icon: reddened until the hero has the kills it needs. */
 #skill_icon { image-color: #ffffff; }
@@ -125,3 +125,8 @@ body { pointer-events: none; }
 #time { width: calc(134px * var(--root-scale)); }
 .team .button-label { width: calc(26px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
 #alpha_button .button-label { width: calc(38px * var(--root-scale)); line-height: calc(23px * var(--root-scale)); }
+
+/* The buttons take the pointer: a click on one is the HUD's, never the world's. The map's zoom
+   button is the frame art's own, so it draws nothing of its own. */
+.team, .order-button, .scroll, #alpha_button, #scale_button { pointer-events: auto; cursor: pointer; }
+#scale_button { position: absolute; left: 134px; top: 7px; width: 13px; height: 12px; }

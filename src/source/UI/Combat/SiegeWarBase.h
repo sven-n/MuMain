@@ -6,13 +6,17 @@
 
 #define MAX_COMMANDGROUP ( 7 )
 
-#include "UI/Widgets/Window/Button.h"
 #include "UI/HUD/MainFrameWindow.h"
 #include "UI/Combat/SiegeWarfareRmlModel.h"
 
+namespace Rml
+{
+class Element;
+class ElementDocument;
+}
+
 namespace mu::ui::window
 {
-int ButtonFrame(CButton& button);
 
 class CSiegeWarBase
 {
@@ -46,15 +50,7 @@ public:
 protected:
     POINT m_MiniMapFramePos;
     POINT m_MiniMapPos;
-    POINT m_TimeUIPos;
     POINT m_SkillFramePos;
-    POINT m_BtnSkillScrollUpPos;
-    POINT m_BtnSkillScrollDnPos;
-    POINT m_SkillIconPos;
-    POINT m_UseSkillDestKillPos;
-    POINT m_CurKillCountPos;
-    POINT m_BtnAlphaPos;
-    POINT m_SkillTooltipPos;
 
     POINT m_HeroPosInWorld;
     POINT m_HeroPosInMiniMap;
@@ -76,8 +72,8 @@ protected:
     DWORD m_dwBuffState;
 
     GuildCommander m_CmdBuffer[MAX_COMMANDGROUP];
-    CButton m_BtnSkillScroll[2];
-    CButton m_BtnAlpha;
+    // The HUD's document (CSiegeWarfare's): the HUD hit-tests its drawn elements.
+    Rml::ElementDocument* m_Document = nullptr;
 
     std::list<int> m_listBattleSkill;
     std::list<int>::iterator m_iterCurBattleSkill;
@@ -100,6 +96,8 @@ protected:
 
     // A point of the world (tile x, y) on the mini map, reference px.
     POINT MiniMapPoint(int x, int y) const;
+    // An element of the HUD's document, or null.
+    Rml::Element* Element(const char* id) const;
     void FillCommands(SiegeWarfareRmlModel& model);
 
 public:
@@ -119,6 +117,16 @@ public:
 
     bool InitBattleSkill();
     void ReleaseBattleSkill();
+
+    void SetDocument(Rml::ElementDocument* document) { m_Document = document; }
+    // The document's buttons (siege_warfare.rml): the transparency, the map's zoom, the battle
+    // skill's scroll, and the commander's team and command buttons.
+    void ToggleAlpha();
+    void ToggleMiniMapScale();
+    void ScrollSkillUp();
+    void ScrollSkillDown();
+    virtual void OnTeamClick(int team) {}
+    virtual void OnOrderClick(int order) {}
 
 private:
     bool BtnProcess();

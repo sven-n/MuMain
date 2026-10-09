@@ -12,14 +12,16 @@
 	     640x480 reference screen at the bottom HUD's scale, centred like the HUD; every position
 	     is the original's, in reference px. Each text value takes the native text size and
 	     cancels the scale. The transparency value fades what the original faded (not
-	     the other characters' dots). C++ keeps the state and the input (the buttons hit-test
-	     natively and report their up / over / down row); the document takes no pointer events.
+	     the other characters' dots). The buttons take the pointer and report their clicks; C++
+	     keeps the state and hit-tests the frames, the skill icon and the map where they are drawn.
 	     Image paths are relative to themes/<theme>/, where the themed document is loaded from. -->
-	<div class="screen hud-board">
+	<div id="screen" class="screen hud-board">
 		<div id="frame" data-style-left="frame_x + 'px'" data-style-top="frame_y + 'px'" data-style-opacity="alpha">
 			<img id="map" src="../../../../World31/Map1.jpg" data-attr-rect="map_rect"/>
 			<div id="frame_art"></div>
 			<div id="time_frame"></div>
+			<!-- The map's zoom: the frame art's own button, 13 x 12 at (134, 7). -->
+			<div id="scale_button" data-event-click="siege_scale_click"></div>
 			<span id="time" class="text big counter-scaled" data-if="time_visible" data-style-font-size="big_text_px + 'px'">{{time_text}}</span>
 		</div>
 
@@ -41,12 +43,12 @@
 		</div>
 
 		<div class="team" data-for="t : teams" data-style-left="t.left + 'px'" data-style-top="t.top + 'px'"
-		     data-class-over="t.frame == 1" data-class-down="t.frame == 2" data-style-opacity="alpha">
+		     data-class-selected="t.selected" data-style-opacity="alpha" data-event-click="siege_team_click(it_index)">
 			<span class="text bold button-label counter-scaled" data-style-font-size="bold_text_px + 'px'">{{t.label}}</span>
 		</div>
 
 		<div class="order" data-for="o, i : orders" data-style-left="o.left + 'px'" data-style-top="o.top + 'px'">
-			<div class="order-button" data-class-over="o.frame == 1" data-class-down="o.frame == 2" data-style-opacity="alpha"></div>
+			<div class="order-button" data-style-opacity="alpha" data-event-click="siege_order_click(i)"></div>
 			<div class="order-icon attack" data-if="i == 0"></div>
 			<div class="order-icon defence" data-if="i == 1"></div>
 			<div class="order-icon wait" data-if="i == 2"></div>
@@ -62,12 +64,12 @@
 			     data-class-unaffordable="!skill_affordable"/>
 			<span class="text big kills kills-needed counter-scaled" data-style-font-size="big_text_px + 'px'">{{kills_needed}}</span>
 			<span class="text big kills kills-now counter-scaled" data-style-font-size="big_text_px + 'px'">{{kills}}</span>
-			<div class="scroll scroll-up" data-class-over="scroll_up_frame == 1" data-class-down="scroll_up_frame == 2"></div>
-			<div class="scroll scroll-down" data-class-over="scroll_down_frame == 1" data-class-down="scroll_down_frame == 2"></div>
+			<div class="scroll scroll-up" data-event-click="siege_scroll_up_click"></div>
+			<div class="scroll scroll-down" data-event-click="siege_scroll_down_click"></div>
 		</div>
 
 		<div id="alpha_button" data-style-left="(frame_x + 58) + 'px'" data-style-top="(frame_y + 4) + 'px'"
-		     data-class-over="alpha_frame == 1" data-class-down="alpha_frame == 2" data-style-opacity="alpha">
+		     data-style-opacity="alpha" data-event-click="siege_alpha_click">
 			<span class="text bold button-label counter-scaled" data-style-font-size="bold_text_px + 'px'">{{alpha_label}}</span>
 		</div>
 	</div>

@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include "UI/Combat/SiegeWarCommander.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/Social/SocialWindowBase.h"
 #include "Render/Textures/ZzzTexture.h"
 
@@ -25,7 +26,6 @@ mu::ui::window::CSiegeWarCommander::~CSiegeWarCommander() {}
 
 bool mu::ui::window::CSiegeWarCommander::OnCreate(int x, int y)
 {
-    InitCmdGroupBtn();
     return true;
 }
 
@@ -50,8 +50,11 @@ void mu::ui::window::CSiegeWarCommander::OnFillRmlModel(SiegeWarfareRmlModel& mo
     model.cursorVisible = m_iCurSelectBtnGroup != -1 && m_iCurSelectBtnCommand != -1 && m_bMouseInMiniMap;
     if (model.cursorVisible)
     {
-        model.cursorLeft = static_cast<float>(MouseX);
-        model.cursorTop = static_cast<float>(MouseY);
+        // The pointer on the HUD board (#screen), whose reference px the document places in.
+        Rml::Vector2f pointer;
+        UI::RmlBridge::PointerIn(Element("screen"), pointer);
+        model.cursorLeft = pointer.x;
+        model.cursorTop = pointer.y;
         model.cursorCommand = m_iCurSelectBtnCommand;
         model.cursorTeam = std::to_string(m_iCurSelectBtnGroup + 1);
     }
@@ -64,34 +67,27 @@ void mu::ui::window::CSiegeWarCommander::OnFillRmlModel(SiegeWarfareRmlModel& mo
 
 bool mu::ui::window::CSiegeWarCommander::OnUpdateMouseEvent()
 {
-    if (OnBtnProcess())
+    // Where on the drawn map the pointer is, in its 128 reference px; a chosen command lands there.
+    Rml::Vector2f local;
+    m_bMouseInMiniMap = UI::RmlBridge::PointerIn(Element("map"), local) && local.x >= 0.f && local.y >= 0.f &&
+                        local.x < 128.f && local.y < 128.f;
+    if (m_bMouseInMiniMap && mu::ui::window::IsPress(VK_LBUTTON) && m_iCurSelectBtnCommand != -1)
+    {
+        GuildCommander SelectCmd;
+        memset(&SelectCmd, 0, sizeof(GuildCommander));
+
+        SelectCmd.byTeam = m_iCurSelectBtnGroup;
+        SelectCmd.byCmd = m_iCurSelectBtnCommand;
+        SelectCmd.byX = static_cast<BYTE>((static_cast<int>(local.x) + m_MiniMapScaleOffset.x) * m_iMiniMapScale);
+        SelectCmd.byY = static_cast<BYTE>(256 - (static_cast<int>(local.y) + m_MiniMapScaleOffset.y) * m_iMiniMapScale);
+        SelectCmd.byLifeTime = 100;
+
+        SocketClient->ToGameServer()->SendCastleGuildCommand(SelectCmd.byTeam, SelectCmd.byX, SelectCmd.byY,
+                                                             SelectCmd.byCmd);
+
+        m_iCurSelectBtnCommand = -1;
+
         return false;
-
-    if (CheckMouseIn(m_MiniMapPos.x, m_MiniMapPos.y, 128, 128))
-    {
-        if (mu::ui::window::IsPress(VK_LBUTTON) && m_iCurSelectBtnCommand != -1)
-        {
-            GuildCommander SelectCmd;
-            memset(&SelectCmd, 0, sizeof(GuildCommander));
-
-            SelectCmd.byTeam = m_iCurSelectBtnGroup;
-            SelectCmd.byCmd = m_iCurSelectBtnCommand;
-            SelectCmd.byX = (MouseX + m_MiniMapScaleOffset.x - m_MiniMapPos.x) * m_iMiniMapScale;
-            SelectCmd.byY = 256 - (MouseY + m_MiniMapScaleOffset.y - m_MiniMapPos.y) * m_iMiniMapScale;
-            SelectCmd.byLifeTime = 100;
-
-            SocketClient->ToGameServer()->SendCastleGuildCommand(SelectCmd.byTeam, SelectCmd.byX, SelectCmd.byY,
-                                                                 SelectCmd.byCmd);
-
-            m_iCurSelectBtnCommand = -1;
-
-            return false;
-        }
-        m_bMouseInMiniMap = true;
-    }
-    else
-    {
-        m_bMouseInMiniMap = false;
     }
 
     return true;
@@ -102,53 +98,32 @@ bool mu::ui::window::CSiegeWarCommander::OnUpdateKeyEvent()
     return true;
 }
 
+// The team and command buttons are the document's (OnTeamClick(), OnOrderClick()).
 bool mu::ui::window::CSiegeWarCommander::OnBtnProcess()
 {
-    for (int i = 0; i < MAX_COMMANDGROUP; i++)
-    {
-        if (m_BtnCommandGroup[i].UpdateMouseEvent())
-        {
-            // A chosen team's button shows its down row (FillTeamButtons()).
-            m_iCurSelectBtnGroup = m_iCurSelectBtnGroup == i ? -1 : i;
-
-            m_iCurSelectBtnCommand = -1;
-
-            return true;
-        }
-    }
-
-    if (m_iCurSelectBtnGroup != -1 && m_iCurSelectBtnCommand == -1)
-    {
-        for (int j = 0; j < MINIMAP_CMD_MAX; j++)
-        {
-            if (m_BtnCommand[j].UpdateMouseEvent())
-            {
-                m_iCurSelectBtnCommand = j;
-
-                return true;
-            }
-        }
-    }
-
     return false;
+}
+
+// A team's button chooses that team, or lets go of it; its command buttons then show.
+void mu::ui::window::CSiegeWarCommander::OnTeamClick(int team)
+{
+    if (team < 0 || team >= MAX_COMMANDGROUP)
+        return;
+    m_iCurSelectBtnGroup = m_iCurSelectBtnGroup == team ? -1 : team;
+    m_iCurSelectBtnCommand = -1;
+}
+
+// A command for the chosen team, placed with the next click on the map.
+void mu::ui::window::CSiegeWarCommander::OnOrderClick(int order)
+{
+    if (m_iCurSelectBtnGroup != -1 && m_iCurSelectBtnCommand == -1 && order >= 0 && order < MINIMAP_CMD_MAX)
+        m_iCurSelectBtnCommand = order;
 }
 
 void mu::ui::window::CSiegeWarCommander::OnSetPos(int x, int y)
 {
     m_BtnCommandGroupPos.x = x;
     m_BtnCommandGroupPos.y = y + 5;
-}
-
-void mu::ui::window::CSiegeWarCommander::InitCmdGroupBtn()
-{
-    // The buttons only hit-test and keep their up / over / down state here; siege_warfare.rml
-    // draws them.
-    for (int i = 0; i < MAX_COMMANDGROUP; i++)
-    {
-        m_BtnCommandGroup[i].ChangeButtonInfo(m_BtnCommandGroupPos.x,
-                                              m_BtnCommandGroupPos.y + i * MINIMAP_BTN_GROUP_HEIGHT,
-                                              MINIMAP_BTN_GROUP_WIDTH, MINIMAP_BTN_GROUP_HEIGHT);
-    }
 }
 
 // Everyone in view except those with the siege side's buff, as a dot (the original's
@@ -188,25 +163,21 @@ void mu::ui::window::CSiegeWarCommander::FillTeamButtons(SiegeWarfareRmlModel& m
 {
     for (int i = 0; i < MAX_COMMANDGROUP; i++)
     {
-        CButton& button = m_BtnCommandGroup[i];
-        model.teams.push_back({static_cast<float>(button.GetPos().x), static_cast<float>(button.GetPos().y),
-                               i == m_iCurSelectBtnGroup ? 2 : ButtonFrame(button), std::to_string(i + 1)});
+        model.teams.push_back({static_cast<float>(m_BtnCommandGroupPos.x),
+                               static_cast<float>(m_BtnCommandGroupPos.y + i * MINIMAP_BTN_GROUP_HEIGHT),
+                               i == m_iCurSelectBtnGroup, std::to_string(i + 1)});
     }
 }
 
 // The three command buttons beside the chosen team (teams 6 and 7 share team 5's row, as in the
-// original's RenderCmdBtn()); they hit-test where they were last shown.
+// original's RenderCmdBtn()).
 void mu::ui::window::CSiegeWarCommander::FillCommandButtons(SiegeWarfareRmlModel& model)
 {
     const int row = std::min(m_iCurSelectBtnGroup, 4);
     for (int i = 0; i < MINIMAP_CMD_MAX; i++)
     {
-        CButton& button = m_BtnCommand[i];
-        button.ChangeButtonInfo(m_BtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH,
-                                m_BtnCommandGroupPos.y + (row + i) * MINIMAP_BTN_GROUP_HEIGHT,
-                                MINIMAP_BTN_COMMAND_WIDTH, MINIMAP_BTN_COMMAND_HEIGHT);
-        model.orders.push_back(
-            {static_cast<float>(button.GetPos().x), static_cast<float>(button.GetPos().y), ButtonFrame(button), {}});
+        model.orders.push_back({static_cast<float>(m_BtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH),
+                                static_cast<float>(m_BtnCommandGroupPos.y + (row + i) * MINIMAP_BTN_GROUP_HEIGHT), false, {}});
     }
 }
 
