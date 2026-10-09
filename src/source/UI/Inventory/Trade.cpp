@@ -19,6 +19,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/Scaling/UITransform.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
@@ -91,6 +92,7 @@ void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
     c.Bind("partner_cells", &model.partnerCells);
     c.Bind("grid_cells", &model.gridCells);
     c.Bind("text_px", &model.textPx);
+    c.Bind("big_text_px", &model.bigTextPx);
 
     c.Bind("title", &model.title);
 
@@ -408,6 +410,8 @@ void CTrade::SyncRmlModel()
         m_RmlView.MarkDirty("grid_cells");
     }
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
+    SyncField(m_RmlView.Binder(), &TradeRmlModel::bigTextPx, "big_text_px",
+              UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Big));
 
     auto syncBool = [this](bool TradeRmlModel::* field, const char* boundName, bool value)
     {

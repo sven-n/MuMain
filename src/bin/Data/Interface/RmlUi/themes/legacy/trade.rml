@@ -59,7 +59,7 @@
 
 		<div id="your_nick_bg" class="nick-bg nick-bg-your"></div>
 		<span id="your_guild_name" class="sharp-text guild-name" data-class-hidden="!your_guild_visible" data-style-font-size="text_px + 'px'">{{your_guild_name}}</span>
-		<span id="your_id_text" class="sharp-text id-text id-text-your" data-style-font-size="(2 * text_px) + 'px'">{{your_id_text}}</span>
+		<span id="your_id_text" class="sharp-text id-text id-text-your" data-style-font-size="big_text_px + 'px'"><span class="native-fit">{{your_id_text}}</span></span>
 		<span id="your_level_text" class="sharp-text level-text" data-style-font-size="text_px + 'px'"
 		      data-class-level-bucket-10="your_level_bucket == 10"
 		      data-class-level-bucket-50="your_level_bucket == 50"

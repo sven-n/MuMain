@@ -48,7 +48,9 @@
 }
 
 .id-text { position: absolute; color: token(text-info); white-space: nowrap; pointer-events: none; }
-.id-text-your { left: 32px; top: 43px; font-weight: bold; } /* native g_hFontBig: twice the normal point size, bound in trade.rml (text layer) */
+/* native g_hFontBig: its size, big_text_px, bound in trade.rml (text layer); a long name shrinks to
+   end before "Lv." at 134. */
+.id-text-your { left: 32px; top: 43px; width: calc(98px * var(--root-scale)); font-weight: bold; }
 .id-text-my   { left: 20px; top: 253px; font-size: 1em; font-weight: bold; }
 
 .guild-name {
