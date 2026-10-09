@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "UI/Options/OptionWindow.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Audio/DSPlaySound.h"
 #include "Data/GameConfig/GameConfig.h"
@@ -465,38 +465,13 @@ void mu::ui::window::COptionWindow::Show(bool bShow)
 
 bool mu::ui::window::COptionWindow::UpdateMouseEvent()
 {
-    // RmlUi's #panel owns all hit-testing for its own controls now; just claim the rest of the
-    // window's own screen rect so a click here doesn't fall through to the world/scene behind it
-    // -- this window isn't modal (unlike CGenericMenuDialog's UpdateMouseEvent(), which just
-    // returns !IsVisible()), so a real rect is needed rather than blocking every click outright.
-    // Read the panel's own live rendered position/size straight from RmlUi rather than
-    // approximating them from hardcoded dp constants -- a hardcoded guess drifts from wherever
-    // `.center-both`/window_shell actually puts the panel. INTERFACE_OPTION must map to
-    // LayoutMode::Pixels (identity transform) in UILayoutPolicy.cpp's table, not the default
-    // LayoutMode::Stage (640x480-reference rescale) -- otherwise MouseX/MouseY is remapped into a
-    // different coordinate space than this hit-test rect, and clicks fall through to
-    // world/character movement instead.
-    //
-    // Defensive re-fetch: m_pPanelEl should already be valid whenever m_RmlView.Document() is (OnRmlBuilt()
-    // sets both together), but if it's ever out of sync -- e.g. a future change re-parents/renames
-    // #panel without updating this cache -- silently returning "unclaimed" here would reopen this
-    // exact click-through bug with no diagnostic trail. Re-resolving costs one GetElementById() at
-    // most, only in that already-broken case.
+    // RmlUi's #panel owns the hit-testing of its controls; over the panel (the dragged document in
+    // legacy, a full-screen layer in modern), a click never falls through to the world or the scene
+    // behind it. The window isn't modal, so the rest of the screen stays the world's.
     if (!m_pPanelEl && m_RmlView.Document())
         m_pPanelEl = m_RmlView.Document()->GetElementById("panel");
 
-    if (m_pPanelEl)
-    {
-        // Where the panel is drawn: its centring transform included, or its dragged place.
-        Rml::Rectanglef drawn;
-        if (Rml::ElementUtilities::GetBoundingBox(drawn, m_pPanelEl, Rml::BoxArea::Border)
-            && mu::ui::window::WindowGeometry(static_cast<int>(drawn.Left()), static_cast<int>(drawn.Top()),
-                                              static_cast<int>(drawn.Width()), static_cast<int>(drawn.Height()))
-                   .Contains(MouseX, MouseY))
-            return false;
-    }
-
-    return true;
+    return !UI::RmlBridge::IsPointerOver(m_pPanelEl);
 }
 
 bool mu::ui::window::COptionWindow::UpdateKeyEvent()
