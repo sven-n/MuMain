@@ -120,6 +120,8 @@ bool mu::ui::window::CSlideWindow::UpdateKeyEvent()
 }
 bool mu::ui::window::CSlideWindow::Update()
 {
+    // The band spans the original's screen stretched over the window; its text is measured there.
+    const UI::Scaling::ScopedScreenStretch screen(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     m_pSlideMgr->ManageSlide();
     SyncRmlModel();
 

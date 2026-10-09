@@ -81,7 +81,8 @@ namespace UI::RmlBridge::Tooltip
         // as RenderTipTextList() uses), not from RmlUi's font metrics, which round differently.
         void ApplyNativeMetrics(TooltipRmlModel& model, const Config& config)
         {
-            const UI::Scaling::Transform transform = config.transform.value_or(UI::Scaling::GetActiveTransform());
+            const UI::Scaling::Transform transform = config.transform.value_or(UI::Scaling::TypographyUnitsTransform(
+                static_cast<int>(WindowWidth), static_cast<int>(WindowHeight)));
             model.centerText = (config.textAlign == Config::TextAlign::Center);
             model.fixedWidthPx = config.fixedWidth * transform.scaleX;
             model.textPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);

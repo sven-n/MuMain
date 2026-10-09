@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include "UI/Scaling/UITransform.h"
 #include "UI/Chat/Chat.h"
 #include "UI/Character/NameWindow.h"
 #include "Render/Models/ZzzBMD.h"
@@ -167,6 +168,8 @@ void mu::ui::window::CNameWindow::PrepareFrame()
 
     m_labelLayer.BeginFrame();
     {
+        // Everything here stands over the world, in the original's screen stretched over the window.
+        const UI::Scaling::ScopedScreenStretch screen(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
         Render::Renderer::Overlay2DRecordScope record(&m_labelLayer);
         // The main scene's overlays first, in its order: the original drew the Kalima object
         // labels and then RenderInterface()'s overlays (top view off only) before this window's
@@ -198,6 +201,8 @@ bool mu::ui::window::CNameWindow::Render()
 
 void mu::ui::window::CNameWindow::RenderLabels()
 {
+    // Names and bars stand over the characters, in the original's screen stretched over the window.
+    const UI::Scaling::ScopedScreenStretch screen(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     EnableAlphaTest();
     RenderName();
     RenderTimes();

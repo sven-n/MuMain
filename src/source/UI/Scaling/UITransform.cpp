@@ -337,6 +337,17 @@ UI::Scaling::ScopedWindowPixels::ScopedWindowPixels(int windowWidth, int windowH
 {
 }
 
+UI::Scaling::Transform UI::Scaling::TypographyUnitsTransform(int windowWidth, int windowHeight)
+{
+    const float scale = TypographyScale(windowWidth, windowHeight);
+    return {scale, scale, 0.0f, 0.0f, scale};
+}
+
+UI::Scaling::ScopedScreenStretch::ScopedScreenStretch(int windowWidth, int windowHeight)
+    : m_scope(ScreenOverlayTransform(windowWidth, windowHeight), true)
+{
+}
+
 float UI::Scaling::NativeTextPixelSizeInBox(FontRole role, const Transform& transform, float measuredWidth,
                                             float boxWidth)
 {

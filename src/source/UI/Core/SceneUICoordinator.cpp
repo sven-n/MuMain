@@ -26,7 +26,12 @@
 #include "Network/Server/ServerListManager.h"
 #include "UI/Scaling/UITransform.h"
 
-CSceneUICoordinator::CSceneUICoordinator() {}
+CSceneUICoordinator::CSceneUICoordinator()
+{
+    // The login and character scenes' windows measure and draw as the original did there: the
+    // original screen stretched over the window, text at its own size.
+    m_NewStyleMng.SetUnits(&UI::Scaling::LegacyUiTransform);
+}
 
 CSceneUICoordinator::~CSceneUICoordinator() {}
 
@@ -243,12 +248,7 @@ void CSceneUICoordinator::Render()
     if (UIM_SCENE_NONE == m_nScene)
         return;
 
-    const auto previousTransform = UI::Scaling::GetActiveTransform();
-    UI::Scaling::SetActiveTransform(UI::Scaling::LegacyUiTransform(WindowWidth, WindowHeight));
-
     m_NewStyleMng.Render();
-
-    UI::Scaling::SetActiveTransform(previousTransform);
 }
 
 void CSceneUICoordinator::PopUpMsgWin(int nMsgCode, wchar_t* pszMsg)

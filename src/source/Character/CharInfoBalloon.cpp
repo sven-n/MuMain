@@ -14,6 +14,7 @@
 #include <cwchar>
 
 #include "Camera/CameraProjection.h"
+#include "UI/Scaling/UITransform.h"
 
 namespace
 {
@@ -117,10 +118,11 @@ void CCharInfoBalloon::Render()
     int nPosX, nPosY;
     CameraProjection::WorldToScreen(g_Camera, afPos, &nPosX, &nPosY);
 
-    CSprite::SetPosition(
-        int(nPosX * g_fScreenRate_x),
-        int(nPosY * g_fScreenRate_y)
-    );
+    // WorldToScreen() reports the original's screen stretched over the window.
+    const UI::Scaling::Transform screen =
+        UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+    CSprite::SetPosition(static_cast<int>(UI::Scaling::SizeX(screen, static_cast<float>(nPosX))),
+                         static_cast<int>(UI::Scaling::SizeY(screen, static_cast<float>(nPosY))));
 }
 
 void CCharInfoBalloon::SetInfo()

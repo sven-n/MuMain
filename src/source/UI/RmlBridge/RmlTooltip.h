@@ -134,9 +134,8 @@ namespace UI::RmlBridge::Tooltip
         };
         Box box = Box::TipTextList;
 
-        // The transform the caller converted its anchor with, when it is not the ambient
-        // UI::Scaling::GetActiveTransform() (the skill-hotkey tooltip's dp-ratio reference frame).
-        // Show() takes the native text size and row metrics from it.
+        // The units the native box metrics (padding, border, row heights) are in, when they are not
+        // the UI's typography units (the skill-hotkey tooltip's dp-ratio reference frame).
         std::optional<UI::Scaling::Transform> transform;
 
         // For a tooltip shown from a per-frame render while its element is hovered: it hides on the

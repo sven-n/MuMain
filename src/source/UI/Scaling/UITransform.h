@@ -103,7 +103,22 @@ namespace UI::Scaling
         ScopedActiveTransform m_scope;
     };
 
+    // The original's screen stretched over the window: native code that draws over the world (name
+    // labels, character balloons, the notice band) runs under it.
+    class ScopedScreenStretch
+    {
+    public:
+        ScopedScreenStretch(int windowWidth, int windowHeight);
+
+    private:
+        ScopedActiveTransform m_scope;
+    };
+
     Transform WindowPixelTransform(int windowWidth, int windowHeight);
+    // Uniform units of the UI scale, from the window's top-left: the windows' measuring space
+    // (CManager), so MeasureText() reports a panel's reference px wherever the panel stands at the
+    // UI scale.
+    Transform TypographyUnitsTransform(int windowWidth, int windowHeight);
     Transform ScreenOverlayTransform(int windowWidth, int windowHeight);
     Viewport FullReferenceViewport();
     Transform LegacyUiTransform(int windowWidth, int windowHeight);

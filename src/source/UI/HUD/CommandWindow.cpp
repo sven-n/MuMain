@@ -292,11 +292,13 @@ void mu::ui::window::CCommandWindow::SyncTarget()
     if (!visible)
         return;
 
-    // MouseX/MouseY are in this window's dock space while CManager runs it, like m_Pos.
-    SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::targetLeft, "target_left",
-              static_cast<float>(MouseX + kTargetBoxOffset - m_Pos.x));
-    SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::targetTop, "target_top",
-              static_cast<float>(MouseY + kTargetBoxOffset - m_Pos.y));
+    // Beside the pointer, in the panel's own units.
+    Rml::Vector2f pointer;
+    Rml::ElementDocument* document = m_RmlView.Document();
+    if (document == nullptr || !UI::RmlBridge::PointerIn(document->GetElementById("panel"), pointer))
+        return;
+    SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::targetLeft, "target_left", pointer.x + kTargetBoxOffset);
+    SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::targetTop, "target_top", pointer.y + kTargetBoxOffset);
     SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::targetName, "target_name",
               Rml::String(StringUtils::WideToNarrow(target->ID)));
     SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::targetInRange, "target_in_range", m_bCanCommand);

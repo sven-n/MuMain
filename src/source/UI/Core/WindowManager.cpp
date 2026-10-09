@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "UI/Core/WindowManager.h"
-#include "UI/Core/UILayoutPolicy.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 
@@ -16,6 +15,16 @@ mu::ui::window::CManager::CManager()
 #endif // PBG_MOD_STAMINA_UI
 }
 
+void mu::ui::window::CManager::SetUnits(UnitsFor unitsFor)
+{
+    m_unitsFor = unitsFor;
+}
+
+UI::Scaling::Transform mu::ui::window::CManager::MeasuringUnits() const
+{
+    return m_unitsFor(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+}
+
 mu::ui::window::CManager::~CManager()
 {
     RemoveAllUIObjs();
@@ -26,7 +35,6 @@ void mu::ui::window::CManager::AddUIObj(DWORD dwKey, CObject* pUIObj)
     auto mi = m_mapUI.find(dwKey);
     if (mi == m_mapUI.end())
     {
-        pUIObj->SetLayoutMode(UI::Layout::ForInterface(dwKey));
         m_vecUI.push_back(pUIObj);
         m_mapUI.insert(type_map_uibase::value_type(dwKey, pUIObj));
     }
@@ -116,6 +124,7 @@ CObject* mu::ui::window::CManager::FindUIObjByRelatedWnd(HWND hWnd) const
 
 bool mu::ui::window::CManager::UpdateMouseEvent()
 {
+    const UI::Scaling::ScopedActiveTransform units(MeasuringUnits());
     m_pActiveMouseUIObj = NULL;
 
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepthReverse);
@@ -128,13 +137,7 @@ bool mu::ui::window::CManager::UpdateMouseEvent()
         if ((*vi)->IsVisible())
         {
             CObject* obj_backup = (*vi);
-            bool bResult;
-            {
-                const auto transform =
-                    (*vi)->GetLayoutTransform();
-                UI::Scaling::ScopedActiveTransform layout(transform, true);
-                bResult = (*vi)->UpdateMouseEvent();
-            }
+            const bool bResult = (*vi)->UpdateMouseEvent();
 
             auto vi2 = std::find(vecUI.begin(), vecUI.end(), obj_backup);
             if (vi2 != vecUI.end())
@@ -159,6 +162,7 @@ bool mu::ui::window::CManager::UpdateMouseEvent()
 
 bool mu::ui::window::CManager::UpdateKeyEvent()
 {
+    const UI::Scaling::ScopedActiveTransform units(MeasuringUnits());
     m_pActiveKeyUIObj = NULL;
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareKeyEventOrder);
 
@@ -181,13 +185,7 @@ bool mu::ui::window::CManager::UpdateKeyEvent()
         const bool receives = typingIn != nullptr ? (*vi)->TakesTypingFrom(typingIn) : hFocus == hRelatedWnd;
         if ((*vi)->IsEnabled() && receives)
         {
-            bool result;
-            {
-                const auto transform =
-                    (*vi)->GetLayoutTransform();
-                UI::Scaling::ScopedActiveTransform layout(transform, true);
-                result = (*vi)->UpdateKeyEvent();
-            }
+            const bool result = (*vi)->UpdateKeyEvent();
             if (false == result)
             {
                 m_pActiveKeyUIObj = (*vi);
@@ -200,6 +198,7 @@ bool mu::ui::window::CManager::UpdateKeyEvent()
 
 bool mu::ui::window::CManager::Update()
 {
+    const UI::Scaling::ScopedActiveTransform units(MeasuringUnits());
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
 
     auto vi = m_vecUI.begin();
@@ -207,13 +206,7 @@ bool mu::ui::window::CManager::Update()
     {
         if ((*vi)->IsEnabled())
         {
-            bool result;
-            {
-                const auto transform =
-                    (*vi)->GetLayoutTransform();
-                UI::Scaling::ScopedActiveTransform layout(transform, true);
-                result = (*vi)->Update();
-            }
+            const bool result = (*vi)->Update();
             if (false == result)
             {
                 return false; //. stop calling Update functions
@@ -226,6 +219,7 @@ bool mu::ui::window::CManager::Update()
 
 bool mu::ui::window::CManager::Render()
 {
+    const UI::Scaling::ScopedActiveTransform units(MeasuringUnits());
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
     auto vecUI = m_vecUI;
 
@@ -233,8 +227,6 @@ bool mu::ui::window::CManager::Render()
     {
         if (!object->IsVisible())
             continue;
-        const auto transform = object->GetLayoutTransform();
-        UI::Scaling::ScopedActiveTransform layout(transform, true);
         object->PrepareFrame();
     }
 
@@ -243,8 +235,6 @@ bool mu::ui::window::CManager::Render()
     {
         if ((*vi)->IsVisible())
         {
-            const auto transform = (*vi)->GetLayoutTransform();
-            UI::Scaling::ScopedActiveTransform layout(transform, true);
             (*vi)->Render();
         }
     }

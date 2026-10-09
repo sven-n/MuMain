@@ -465,6 +465,8 @@ void mu::ui::window::CMiniMap::SyncHint()
     std::wstring name;
     float left = 0.f, top = 0.f, width = 0.f, height = 0.f;
     const UI::Scaling::Transform transform = OverlayTransform();
+    // The names are measured in that stretch too.
+    const UI::Scaling::ScopedScreenStretch screen(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     const float pointerX = UI::Scaling::LogicalX(transform, g_fWindowMouseX);
     const float pointerY = UI::Scaling::LogicalY(transform, g_fWindowMouseY);
     for (int i = 0; i < MAX_MINI_MAP_DATA && !found; i++)

@@ -37,6 +37,7 @@ public:
     {
         renderMouseX = MouseX;
         renderMouseY = MouseY;
+        renderTransform = UI::Scaling::GetActiveTransform();
         return true;
     }
 
@@ -47,6 +48,7 @@ public:
 
     int renderMouseX = -1;
     int renderMouseY = -1;
+    UI::Scaling::Transform renderTransform{};
 };
 }
 
@@ -453,7 +455,7 @@ TEST_CASE("resized character button rectangle is its click rectangle [ui][scalin
     WindowHeight = previousHeight;
 }
 
-TEST_CASE("managed rendering uses its layout mouse coordinates [ui][scaling]")
+TEST_CASE("managed windows run in the manager's units and leave the pointer alone [ui][scaling]")
 {
     const unsigned int previousWidth = WindowWidth;
     const unsigned int previousHeight = WindowHeight;
@@ -477,10 +479,12 @@ TEST_CASE("managed rendering uses its layout mouse coordinates [ui][scaling]")
 
     manager.Render();
 
-    CHECK(object.renderMouseX == 500);
-    CHECK(object.renderMouseY == 200);
-    CHECK(MouseX == 535);
-    CHECK(MouseY == 202);
+    const float typography = UI::Scaling::TypographyScale(WindowWidth, WindowHeight);
+    CHECK(object.renderMouseX == 535);
+    CHECK(object.renderMouseY == 202);
+    CHECK(object.renderTransform.scaleX == doctest::Approx(typography));
+    CHECK(object.renderTransform.scaleY == doctest::Approx(typography));
+    CHECK(object.renderTransform.offsetX == doctest::Approx(0.0f));
     CHECK(UI::Scaling::GetActiveTransform().scaleX == doctest::Approx(3.0f));
     CHECK(UI::Scaling::GetActiveTransform().offsetX == doctest::Approx(0.0f));
 

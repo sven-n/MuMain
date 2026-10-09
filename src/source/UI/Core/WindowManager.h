@@ -22,6 +22,13 @@ namespace mu::ui::window
         type_map_uibase		m_mapUI;		//. for managing
 
         CObject* m_pActiveMouseUIObj, * m_pActiveKeyUIObj;
+
+    public:
+        using UnitsFor = UI::Scaling::Transform (*)(int windowWidth, int windowHeight);
+
+    private:
+        // The space every window's callbacks run in: what MeasureText() and native 2D drawing use.
+        UnitsFor m_unitsFor = &UI::Scaling::TypographyUnitsTransform;
 #ifdef PBG_MOD_STAMINA_UI
         int m_nShowUICnt;
 #endif //PBG_MOD_STAMINA_UI
@@ -36,6 +43,10 @@ namespace mu::ui::window
         void RemoveAllUIObjs();
 
         void ReleaseAllUIObj();
+
+        // The windows' measuring space (TypographyUnitsTransform() unless the owner sets one).
+        void SetUnits(UnitsFor unitsFor);
+        UI::Scaling::Transform MeasuringUnits() const;
 
         CObject* FindUIObj(DWORD dwKey);
         CObject* FindUIObjByRelatedWnd(HWND hWnd) const;
