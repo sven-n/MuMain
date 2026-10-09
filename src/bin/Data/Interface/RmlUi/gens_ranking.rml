@@ -41,31 +41,31 @@
 		<div class="text-back text-back-level"></div>
 		<div class="text-back text-back-rank"></div>
 
-		<span id="gr_title" class="sharp-text gr-line counter-scaled-xy"
+		<span id="gr_title" class="sharp-text gr-line"
 		      data-style-font-size="title.text_px + 'px'">{{title.text}}</span>
-		<span id="gr_gens_label" class="sharp-text gr-line counter-scaled-xy"
+		<span id="gr_gens_label" class="sharp-text gr-line"
 		      data-style-font-size="gens_label.text_px + 'px'">{{gens_label.text}}</span>
-		<span id="gr_gens_name" class="sharp-text gr-line counter-scaled-xy"
+		<span id="gr_gens_name" class="sharp-text gr-line"
 		      data-style-font-size="gens_name.text_px + 'px'">{{gens_name.text}}</span>
-		<span id="gr_level_label" class="sharp-text gr-line counter-scaled-xy"
+		<span id="gr_level_label" class="sharp-text gr-line"
 		      data-style-font-size="level_label.text_px + 'px'">{{level_label.text}}</span>
-		<span id="gr_title_name" class="sharp-text gr-line counter-scaled-xy"
+		<span id="gr_title_name" class="sharp-text gr-line"
 		      data-style-font-size="title_name.text_px + 'px'">{{title_name.text}}</span>
-		<span id="gr_rank_label" class="sharp-text gr-line counter-scaled-xy"
+		<span id="gr_rank_label" class="sharp-text gr-line"
 		      data-style-font-size="rank_label.text_px + 'px'">{{rank_label.text}}</span>
-		<span id="gr_rank_value" class="sharp-text gr-line counter-scaled-xy"
+		<span id="gr_rank_value" class="sharp-text gr-line"
 		      data-style-font-size="rank_value.text_px + 'px'">{{rank_value.text}}</span>
-		<span id="gr_contrib_label" class="sharp-text gr-line counter-scaled-xy"
+		<span id="gr_contrib_label" class="sharp-text gr-line"
 		      data-style-font-size="contrib_label.text_px + 'px'">{{contrib_label.text}}</span>
-		<span id="gr_contrib_value" class="sharp-text gr-line counter-scaled-xy"
+		<span id="gr_contrib_value" class="sharp-text gr-line"
 		      data-style-font-size="contrib_value.text_px + 'px'">{{contrib_value.text}}</span>
-		<span id="gr_desc_label" class="sharp-text gr-line counter-scaled-xy"
+		<span id="gr_desc_label" class="sharp-text gr-line"
 		      data-style-font-size="desc_label.text_px + 'px'">{{desc_label.text}}</span>
 
 		<!-- The promotion note, present only while there is a next rank: the theme gives the group
 		     its own rows (gens_ranking.rcss). -->
 		<div class="gr-promo">
-			<span class="sharp-text gr-promo-line counter-scaled-xy" data-for="l : promo_lines"
+			<span class="sharp-text gr-promo-line" data-for="l : promo_lines"
 			      data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
 		</div>
 
