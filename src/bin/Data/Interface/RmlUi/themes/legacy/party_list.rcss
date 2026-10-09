@@ -3,7 +3,7 @@
    (0xB3666666) tint over it, the card art (newui_party_back), the leader's flag, the name, the
    health bar (the left part of newui_party_hpbar, one tenth per health step) and the leave button.
    The fills are RenderColorQuadARGB()'s genuine ARGB words; the name colours are the RGBA() values
-   the original passed. Reference px inside #panel (the dock transform). */
+   the original passed. Reference px inside #panel (at the dock's scale). */
 
 @spritesheet plist-back-sheet { src: "../../../newui_party_back.tga"; plist-back: 0px 0px 77px 23px; }
 @spritesheet plist-flag-sheet { src: "../../../newui_party_flag.tga"; plist-flag: 0px 0px 9px 10px; }
@@ -71,3 +71,14 @@
 	pointer-events: auto;
 }
 .card-leave:active { decorator: image(plist-leave-down); }
+
+/* Right-aligned to the world the open windows leave uncovered, two dock units clear of it, 14 dock
+   units below the dock's top (the bottom HUD's top less the dock's 432 units). */
+#panel {
+	left: calc(var(--world-right, 100%) - 79px * var(--dock-scale, 1));
+	top: calc(100% - 51px * var(--hud-scale, 1) - 418px * var(--dock-scale, 1));
+	transform: scale(var(--dock-scale, 1));
+	--root-scale: var(--dock-scale, 1);
+}
+/* A card takes the pointer: its hover is the skill target, and a click on it never walks. */
+.card { pointer-events: auto; }

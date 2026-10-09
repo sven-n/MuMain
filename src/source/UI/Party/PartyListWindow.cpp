@@ -4,7 +4,6 @@
 
 #include "UI/Party/PartyListWindow.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
 
 #include "Engine/Object/ZzzInventory.h"
 #include "Character/CharacterManager.h"
@@ -15,13 +14,14 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Party/PartyListLayout.h"
-#include "UI/Placement/WindowPlacement.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/Text/CUIRenderText.h"
 
 #include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -29,7 +29,6 @@ using namespace mu::ui::window;
 CPartyListWindow::CPartyListWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_bActive = false;
     m_iVal = UI::Party::List::CardSpacing;
     m_iSelectedCharacter = -1;
@@ -46,15 +45,13 @@ CPartyListWindow::~CPartyListWindow()
     Release();
 }
 
-bool CPartyListWindow::Create(CManager* pNewUIMng, int x, int y)
+bool CPartyListWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_PARTY_INFO_WINDOW, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -73,19 +70,6 @@ void CPartyListWindow::Release()
     }
 
     m_RmlView.Release();
-}
-
-void CPartyListWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
-}
-
-// Right-aligned to the world the open windows leave uncovered, in this window's own units.
-void CPartyListWindow::FollowUncoveredWorld()
-{
-    const float right = UI::Placement::UncoveredWorldRightIn(GetLayoutTransform());
-    m_Pos.x = static_cast<int>(std::lround(right)) - (PARTY_LIST_WINDOW_WIDTH + 2);
 }
 
 int CPartyListWindow::GetSelectedCharacter()
@@ -120,10 +104,8 @@ bool CPartyListWindow::BtnProcess()
 
     for (int i = 0; i < PartyNumber; i++)
     {
-        int iVal = i * m_iVal;
-
-        // The leave buttons are RmlUi's (party_leave); the card hover stays here.
-        if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y + iVal, PARTY_LIST_WINDOW_WIDTH, PARTY_LIST_WINDOW_HEIGHT).Contains(MouseX, MouseY))
+        // The card under the pointer, from the document's hover (party_hover).
+        if (i == m_HoveredCard)
         {
             m_iSelectedCharacter = i;
 
@@ -146,23 +128,13 @@ bool CPartyListWindow::BtnProcess()
 
 bool CPartyListWindow::UpdateMouseEvent()
 {
-    FollowUncoveredWorld();
     if (!m_bActive)
         return true;
 
     if (true == BtnProcess())
         return false;
 
-    if (PartyNumber > 0)
-    {
-        int iHeight = (PARTY_LIST_WINDOW_HEIGHT * PartyNumber) + (4 * (PartyNumber - 1));
-        if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, PARTY_LIST_WINDOW_WIDTH, iHeight).Contains(MouseX, MouseY))
-        {
-            return false;
-        }
-    }
-
-    return true;
+    return !(PartyNumber > 0 && UI::RmlBridge::IsPointerOver(m_RmlView.Document()));
 }
 
 bool CPartyListWindow::UpdateKeyEvent()
@@ -172,7 +144,6 @@ bool CPartyListWindow::UpdateKeyEvent()
 
 bool CPartyListWindow::Update()
 {
-    FollowUncoveredWorld();
     if (m_PendingLeave >= 0)
     {
         const int member = m_PendingLeave;
@@ -215,10 +186,6 @@ bool CPartyListWindow::CanLeave(int member) const
 
 void CPartyListWindow::BindRmlModel(Rml::DataModelConstructor& c, PartyListRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
-
     auto card = c.RegisterStruct<PartyListCardEntry>();
     card.RegisterMember("name", &PartyListCardEntry::name);
     card.RegisterMember("name_text_px", &PartyListCardEntry::nameTextPx);
@@ -238,6 +205,16 @@ void CPartyListWindow::BindRmlModel(Rml::DataModelConstructor& c, PartyListRmlMo
                             if (arguments.size() == 1)
                                 m_PendingLeave = arguments[0].Get<int>(-1);
                         });
+    c.BindEventCallback("party_hover",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        { m_HoveredCard = arguments.size() == 1 ? arguments[0].Get<int>(-1) : -1; });
+    // Only the card's own mouseout: one bubbling up from a part of it leaves the card hovered.
+    c.BindEventCallback("party_unhover",
+                        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
+                        {
+                            if (event.GetTargetElement() == event.GetCurrentElement())
+                                m_HoveredCard = -1;
+                        });
 }
 
 void CPartyListWindow::BuildRmlUi()
@@ -256,11 +233,10 @@ void CPartyListWindow::SyncRmlModel()
     if (!visible)
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
-    SyncCards(UI::Scaling::GetActiveTransform());
+    SyncCards();
 }
 
-void CPartyListWindow::SyncCards(const UI::Scaling::Transform& transform)
+void CPartyListWindow::SyncCards()
 {
     using namespace UI::Party::List;
 
@@ -287,8 +263,7 @@ void CPartyListWindow::SyncCards(const UI::Scaling::Transform& transform)
 
         const float nameBox = static_cast<float>(card.leader ? LeaderNameBoxWidth : MemberNameBoxWidth);
         const float nameWidth = static_cast<float>(g_pRenderText->MeasureText(member.Name, lstrlen(member.Name)).cx);
-        card.nameTextPx =
-            UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform, nameWidth, nameBox);
+        card.nameTextPx = UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Normal, nameWidth, nameBox);
 
         cards.push_back(std::move(card));
     }

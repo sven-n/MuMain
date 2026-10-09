@@ -23,9 +23,6 @@ struct PartyListCardEntry
 
 struct PartyListRmlModel
 {
-    // Right-docked -- UI::Scaling::GetActiveTransform() while CManager runs this window.
-    float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
-
     std::vector<PartyListCardEntry> cards;
 };
 } // namespace mu::ui::window

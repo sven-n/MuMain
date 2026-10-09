@@ -70,7 +70,6 @@ UI/MuHelper/MuHelperSkillPicker.cpp: 2
 UI/NPCs/GatemanWindow.cpp: 1
 UI/NPCs/NPCDialogue.cpp: 7
 UI/NPCs/NPCShop.cpp: 4
-UI/Party/PartyListWindow.cpp: 5
 UI/Placement/WindowPlacement.cpp: 6
 UI/Quests/MyQuestInfoWindow.cpp: 1
 UI/Quests/NPCQuest.cpp: 2

@@ -37,7 +37,6 @@ namespace mu::ui::window
 
     private:
         CManager* m_pNewUIMng;
-        POINT						m_Pos;
 
         int							m_iPartyListBGColor[MAX_PARTYS];		// 파티리스트 배경칼라
         bool						m_bPartyMemberoutofSight[MAX_PARTYS];	// 파티원이 내 캐릭터의 시야 밖에 있는가
@@ -54,15 +53,15 @@ namespace mu::ui::window
         // A leave button press, queued by RmlUi's click and run from Update(), outside RmlUi's
         // own event dispatch.
         int m_PendingLeave = -1;
+        // The card under the pointer (the document's party_hover), -1 for none.
+        int m_HoveredCard = -1;
 
     public:
         CPartyListWindow();
         virtual ~CPartyListWindow();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
-
-        void SetPos(int x, int y);
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -80,10 +79,9 @@ namespace mu::ui::window
         void SetListBGColor();
 
     private:
-        void FollowUncoveredWorld();
         void BuildRmlUi();
         void SyncRmlModel();
-        void SyncCards(const UI::Scaling::Transform& transform);
+        void SyncCards();
         bool CanLeave(int member) const;
 
         bool SelectCharacterInPartyList(PARTY_t* pMember);

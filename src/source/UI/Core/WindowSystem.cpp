@@ -309,7 +309,7 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewPartyListWindow = new CPartyListWindow;
-    if (m_pNewPartyListWindow->Create(m_pNewUIMng, 640 - 79, 14) == false)
+    if (m_pNewPartyListWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewNPCQuest = new CNPCQuest;
