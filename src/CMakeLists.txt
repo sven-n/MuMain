@@ -84,6 +84,16 @@ option(ENABLE_EDITOR "Enable editor features for admin builds" OFF)
 # not exist in the binary (enforced by the control_socket_leak test).
 option(ENABLE_CONTROL_SOCKET "Developer control socket for scripted clients (never for player builds)" OFF)
 
+# Discord Rich Presence (docs/discord.md): shows the player's state in their
+# Discord profile through the local Discord app's IPC pipe. A player feature,
+# on by default; Android and iOS have no Discord app to talk to. When OFF,
+# nothing under source/Integration/Discord/ is compiled and the options window
+# has no Discord setting.
+option(ENABLE_DISCORD "Discord Rich Presence through the local Discord app" ON)
+if(ANDROID OR IOS)
+  set(ENABLE_DISCORD OFF CACHE BOOL "Discord Rich Presence through the local Discord app" FORCE)
+endif()
+
 # In-game tests (docs/in-game-tests.md): publishes the tester, which plays test
 # scenarios with the client through the control socket, next to Main, and adds
 # the InGameTests / InGameTestsGui targets. Developers only, like the socket.
@@ -149,6 +159,12 @@ if(NOT ENABLE_CONTROL_SOCKET)
   # The injector is the control socket's hands; its header compiles the two
   # calls the rest of the client makes to nothing.
   list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Input[/\\]SyntheticInput\\.cpp$")
+endif()
+
+# The rich presence header (Integration/Discord/RichPresence.h) compiles to a
+# no-op without MU_ENABLE_DISCORD, so the call sites need no conditionals.
+if(NOT ENABLE_DISCORD)
+  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Integration[/\\]Discord[/\\]")
 endif()
 
 # Add MuEditor sources when editor is enabled
@@ -579,6 +595,7 @@ target_compile_definitions(MuClient PUBLIC
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>
   $<$<BOOL:${ENABLE_EDITOR}>:_EDITOR>  # Editor features for admin builds
   $<$<BOOL:${ENABLE_CONTROL_SOCKET}>:MU_ENABLE_CONTROL_SOCKET>  # Developer control socket
+  $<$<BOOL:${ENABLE_DISCORD}>:MU_ENABLE_DISCORD>  # Discord Rich Presence
 )
 
 # The effect browser lists the game's create calls of a type, read from the
