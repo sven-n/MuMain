@@ -4,7 +4,6 @@
 
 #include "UI/Inventory/LuckyItemWnd.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Render/Models/ZzzBMD.h"
@@ -22,7 +21,9 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlWindowClose.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 
@@ -108,9 +109,10 @@ void CLuckyItemWnd::RenderMixEffect()
                 const BYTE green = static_cast<BYTE>((rand() % 4 + 4) * 0.1f * 255.f);
                 const DWORD sparkleColor = RGBA(red, green, 51, 255);
                 float Rotate = (float)((int)(WorldTime) % 100) * 20.f;
-                float Scale = 5.f + (rand() % 10);
                 const UI::Items::GridRect cell = m_pNewInventoryCtrl->Geometry().CellsRect(
                     m_pNewInventoryCtrl->GetItem(i)->x + w, m_pNewInventoryCtrl->GetItem(i)->y + h, 1, 1);
+                // The original's sizes, for its 20-unit cell, at the cell's drawn size.
+                float Scale = (5.f + (rand() % 10)) * cell.width / 20.f;
                 float x = cell.x + (rand() % (std::max)(1, static_cast<int>(cell.width)));
                 float y = cell.y + (rand() % (std::max)(1, static_cast<int>(cell.height)));
                 RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, 0, 0.f, 0.f, 1.f, 1.f, sparkleColor);
@@ -209,9 +211,7 @@ bool CLuckyItemWnd::Create(CManager* pNewUIMng, int x, int y)
 
 void CLuckyItemWnd::BindRmlModel(Rml::DataModelConstructor& c, LuckyItemRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
+    UI::RmlBridge::BindWindowClose(c, mu::ui::window::INTERFACE_LUCKYITEMWND);
     UI::Items::RegisterItemGridCells(c);
     c.Bind("grid_cells", &model.gridCells);
     c.Bind("text_px", &model.textPx);
@@ -512,16 +512,13 @@ bool CLuckyItemWnd::UpdateMouseEvent(void)
         return false;
     Process_InventoryCtrl();
 
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_ptPos, mu::ui::window::INTERFACE_LUCKYITEMWND);
-
     // Mix button click is handled by the RmlUi "lucky_item_mix_click" event callback (see
     // Create()), which calls Process_BTN_Action() directly -- not polled here.
 
-    float panelWidth = 190.f;
-    float panelHeight = 429.f;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_ptPos.x, m_ptPos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
+    // #panel takes no pointer events, so the grid's clicks stay native; its drawn box still holds
+    // the pointer.
+    Rml::ElementDocument* document = m_RmlView.Document();
+    if (UI::RmlBridge::IsPointerWithin(document != nullptr ? document->GetElementById("panel") : nullptr))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {
@@ -567,9 +564,8 @@ void CLuckyItemWnd::SyncRmlModel()
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_ptPos);
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_ptPos, 15, 110);
+        m_pNewInventoryCtrl->FollowGridPx(m_RmlView.Document(), "item_grid");
     if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())
     {
         m_RmlView.GetModel().gridCells = m_pNewInventoryCtrl->Cells();
@@ -637,7 +633,7 @@ float CLuckyItemWnd::GetLayerDepth(void)
     return 3.4f;
 }
 
-// Into #item_view (m_ItemTarget), in this window's layout space.
+// Into #item_view (m_ItemTarget), in window pixels (the grid's FollowGridPx()).
 void CLuckyItemWnd::RenderItems()
 {
     if (m_pNewInventoryCtrl && m_pNewInventoryCtrl->IsVisible())

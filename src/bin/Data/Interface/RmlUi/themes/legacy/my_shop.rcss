@@ -1,5 +1,5 @@
 /* Legacy theme for CMyShopInventory's chrome (frame/title/shop-name field/Open-Close-Exit buttons).
-   #panel's left/top/scale come live from C++ (SyncRmlModel()), so coordinates below are plain
+   The workspace places #panel (its slot's left/top/scale), so coordinates below are plain
    reference px, not dp. */
 
 #panel {
@@ -129,3 +129,10 @@
 #cant_be_returned_line { width: calc(152px * var(--root-scale)); }
 #all_item_trading_line { width: calc(152px * var(--root-scale)); }
 #can_only_be_done_using_zen_line { width: calc(152px * var(--root-scale)); }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }
+/* The frame's corner close (the original's 13x12 at 169,7). */
+#frame_corner_close { position: absolute; top: 7px; right: 8px; width: 13px; height: 12px; cursor: pointer; pointer-events: auto; }
+#panel { font-size: calc(var(--text-px, 12px) / var(--root-scale)); }

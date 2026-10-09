@@ -123,3 +123,9 @@
 		token(metal-warm-edge) 70%,
 		transparent);
 }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }
+/* The frame's corner close (the original's 13x12 at 169,7). */
+#frame_corner_close { position: absolute; top: 7px; right: 8px; width: 13px; height: 12px; cursor: pointer; pointer-events: auto; }

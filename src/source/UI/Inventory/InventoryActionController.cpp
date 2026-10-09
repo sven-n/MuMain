@@ -205,7 +205,7 @@ bool CInventoryActionController::HandleSellToNPC(CInventoryCtrl* targetControl) 
         return false;
     }
 
-    if (!targetControl->CheckPtInRect(MouseX, MouseY))
+    if (!targetControl->ContainsPointer())
     {
         return false;
     }
@@ -215,7 +215,7 @@ bool CInventoryActionController::HandleSellToNPC(CInventoryCtrl* targetControl) 
         return false;
     }
 
-    ITEM* pItem = targetControl->FindItemAtPt(MouseX, MouseY);
+    ITEM* pItem = targetControl->FindItemAtPointer();
     if (pItem == nullptr)
     {
         return false;
@@ -306,7 +306,7 @@ bool CInventoryActionController::HandleInventoryRightClickActions(CInventoryCtrl
         return TryTransferBetweenInventorySections(targetControl);
     }
 
-    ITEM* pItem = targetControl->FindItemAtPt(MouseX, MouseY);
+    ITEM* pItem = targetControl->FindItemAtPointer();
     if (pItem == nullptr)
     {
         return false;
@@ -486,7 +486,7 @@ bool CInventoryActionController::TryDropItem(CInventoryCtrl* targetControl, ITEM
 
 bool CInventoryActionController::RepairItemAtMousePoint(CInventoryCtrl* targetControl) const
 {
-    ITEM* pItem = targetControl->FindItemAtPt(MouseX, MouseY);
+    ITEM* pItem = targetControl->FindItemAtPointer();
     if (pItem == nullptr)
     {
         return true;
@@ -1124,7 +1124,7 @@ bool CInventoryActionController::TryTransferBetweenInventorySections(CInventoryC
         return false;
     }
 
-    ITEM* pItem = sourceControl->FindItemAtPt(MouseX, MouseY);
+    ITEM* pItem = sourceControl->FindItemAtPointer();
     if (pItem == nullptr)
     {
         return false;

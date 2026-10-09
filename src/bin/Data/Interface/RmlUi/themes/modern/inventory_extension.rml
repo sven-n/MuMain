@@ -87,7 +87,7 @@
 			<div class="item-count" data-for="c : grid_cells_4"><span class="item-count-text counter-scaled" data-if="c.count != ''"
 			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
-		<!-- Header rail: `-px` since #panel carries transform:scale(root_scale) (base.rcss). -->
+		<!-- Header rail: `-px` since #panel carries its placement's scale. -->
 		<div class="modern-header-rail-px ext-header-rail">
 			<div class="modern-joint-px"></div>
 			<div class="modern-header-text-px">

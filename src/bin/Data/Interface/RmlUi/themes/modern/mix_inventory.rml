@@ -9,8 +9,8 @@
 	<!-- CMixInventory: the frame, the item grid, the items and the mix sparkle C++ draws live into
 	     #item_view, the stack counts, title, Mix button, recipe-result content and the socket list
 	     box (SyncMixContentModel(), SyncSocketListModel(), MixInventory.cpp). -->
-	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-style---text-px="text_px + 'px'">
+		<div id="frame_corner_close" data-event-click="window_close"></div>
 		<!-- The frame. -->
 		<div class="bg-panel">
 			<div class="inv-shell-edge"></div>
@@ -39,7 +39,7 @@
 			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
 		<!-- Same header composition as MyInventory/StorageExt (base.rcss's .modern-header-rail
-		     family, -px variant since #panel carries transform:scale(root_scale)). -->
+		     family, -px variant since #panel carries its placement's scale). -->
 		<div class="modern-header-rail-px mix-header-rail">
 			<div class="modern-joint-px"></div>
 			<div class="modern-header-text-px">

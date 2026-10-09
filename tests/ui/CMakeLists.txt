@@ -239,6 +239,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME item_grid_px_tests
+    SOURCES
+        test_item_grid_px.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
     NAME rml_scale_inputs_tests
     SOURCES
         test_rml_scale_inputs.cpp

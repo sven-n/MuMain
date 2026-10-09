@@ -15,6 +15,7 @@
 
 namespace Rml
 {
+    class Element;
     class ElementDocument;
 }
 
@@ -29,6 +30,15 @@ namespace UI::Items::Drag
 namespace UI::Items::Grid
 {
     bool Fits(int startIndex, int itemWidth, int itemHeight, int columnCount, int rowCount);
+}
+
+namespace UI::Items
+{
+    // The grid `grid` is drawn as, in window pixels, transforms included: its content box's origin
+    // and its first .item-cell's margin box as the pitch. False until it has laid out; a grid
+    // without cells keeps `fallbackPitchX`/`Y` (already in pixels).
+    bool DrawnGridGeometry(Rml::Element* grid, int columns, int rows, float fallbackPitchX, float fallbackPitchY,
+                           GridGeometry& geometry);
 }
 
 namespace mu::ui::window
@@ -102,6 +112,8 @@ namespace mu::ui::window
         void HidePickedItem();
 
         void Render3D();
+        // Whether the item is placed and drawn in window pixels: its sizing grid's space.
+        bool UsesPixels() const;
     };
 
     class CInventoryCtrl
@@ -142,6 +154,8 @@ namespace mu::ui::window
 
         type_vec_item	m_vecItem;
         UI::Items::GridGeometry m_Geometry;
+        // m_Geometry is in window pixels (FollowGridPx()), not the owner's layout units.
+        bool m_bPixels = false;
         STORAGE_TYPE m_StorageType;
         int	m_nColumn, m_nRow;
         /**
@@ -247,6 +261,18 @@ namespace mu::ui::window
         // (`offsetX`, `offsetY`), the original's place, and the pitch stays as it was.
         void FollowGrid(Rml::ElementDocument* doc, const char* gridId, const POINT& panelPos, int offsetX,
                         int offsetY);
+        // Each frame, in window pixels: the grid where the theme draws `gridId` in `doc`, transforms
+        // included, its pitch that of its .item-cell. The grid's geometry, hit tests and tooltips and
+        // the item picked from it are then in window pixels, so its window draws its items
+        // (Render3D()) into a target without a layout transform.
+        void FollowGridPx(Rml::ElementDocument* doc, const char* gridId);
+        bool UsesPixels() const { return m_bPixels; }
+        // The pointer in this grid's space: window pixels for a pixel grid, else the active window's
+        // MouseX/MouseY.
+        POINT PointerPos() const;
+        bool ContainsPointer();
+        ITEM* FindItemAtPointer();
+        int GetIndexAtPointer();
         int GetNumberOfColumn() const;
         int GetNumberOfRow() const;
         void GetRect(RECT& rcBox);

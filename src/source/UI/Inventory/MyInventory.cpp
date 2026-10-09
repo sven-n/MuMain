@@ -827,7 +827,7 @@ bool CMyInventory::UpdateKeyEvent()
 
         if (iHotKey != -1)
         {
-            const ITEM* pItem = m_pNewInventoryCtrl->FindItemAtPt(MouseX, MouseY);
+            const ITEM* pItem = m_pNewInventoryCtrl->FindItemAtPointer();
             if (pItem == nullptr)
             {
                 return false;

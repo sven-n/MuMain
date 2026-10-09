@@ -196,7 +196,7 @@ bool CInventoryExtension::InventoryProcess()
 
     for (auto* extension : m_extensions)
     {
-        if (extension->CheckPtInRect(MouseX, MouseY))
+        if (extension->ContainsPointer())
         {
             return g_pMyInventory->HandleInventoryActions(extension);
         }

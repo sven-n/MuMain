@@ -27,12 +27,6 @@ namespace mu::ui::window
         };
 
     private:
-        // Pre-layout fallback only -- WindowGeometry's real hit-box comes from #panel's own live
-        // RCSS size (UI::RmlBridge::RefreshLogicalPanelSize(), read at the UpdateMouseEvent() call
-        // site), seeded with these only for the first frame before RmlUi's layout has run. Never
-        // referenced by the native mix-grid rendering, which has its own separate offset.
-        static constexpr float INVENTORY_WIDTH = 190.0f;
-        static constexpr float INVENTORY_HEIGHT = 429.0f;
 
         CManager* m_pNewUIMng;
         CInventoryCtrl* m_pNewInventoryCtrl;
@@ -74,7 +68,6 @@ namespace mu::ui::window
         };
         struct MixInventoryRmlModel
         {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
             Rml::String title;
             bool mixVisible = true;
@@ -127,8 +120,7 @@ namespace mu::ui::window
 
         // The grids' items, into the document's #item_view.
         void RenderItems();
-        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
-                                                 this};
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); }};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -160,6 +152,9 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
+        // The pointer over the drawn panel.
+        bool IsPointerOverPanel();
 
         float GetLayerDepth();	//. 3.4f
 
@@ -169,13 +164,14 @@ namespace mu::ui::window
     private:
 
         bool InventoryProcess();
-        bool BtnProcess();
 
         bool AutoMoveItem(CInventoryCtrl* srcCtrl, STORAGE_TYPE srcType,
             CInventoryCtrl* dstCtrl, STORAGE_TYPE dstType, bool requireMixSource);
 
         // Former RenderFrame()/RenderMixDescriptions() native text -- see its own comment
         // (MixInventory.cpp) for the full per-field translation.
+        // #panel\'s drawn size over its laid-out size: the scale its placement gives it.
+        float DrawnPanelScale();
         void SyncMixContentModel();
         void SyncSocketListModel();
         bool RefreshSocketOptions();

@@ -4,7 +4,7 @@
 # count (or delete its line) when work removes uses; the build fails when a count grows or a new
 # file appears. Regenerate with --write after removing uses, and check the diff only shrinks.
 
-Engine/Object/ZzzInventory.cpp: 3
+Engine/Object/ZzzInventory.cpp: 4
 GameLogic/Pets/GIPetManager.cpp: 1
 GameShop/InGameShop.cpp: 2
 GameShop/MsgBoxIGSBuyPackageItem.cpp: 2
@@ -40,15 +40,8 @@ UI/Inventory/InventoryCtrl.cpp: 2
 UI/Inventory/InventoryExtension.cpp: 6
 UI/Inventory/ItemCameraTarget.cpp: 2
 UI/Inventory/ItemEnduranceInfo.cpp: 12
-UI/Inventory/LuckyItemWnd.cpp: 4
-UI/Inventory/MixInventory.cpp: 6
 UI/Inventory/MyInventory.cpp: 15
-UI/Inventory/MyShopInventory.cpp: 8
-UI/Inventory/PurchaseShopInventory.cpp: 4
-UI/Inventory/StorageInventory.cpp: 4
-UI/Inventory/StorageInventoryExt.cpp: 4
 UI/Inventory/TipTextListView.cpp: 1
-UI/Inventory/Trade.cpp: 4
 UI/MuHelper/MuHelperSkillPicker.cpp: 2
 UI/NPCs/NPCDialogue.cpp: 7
 UI/NPCs/NPCShop.cpp: 4

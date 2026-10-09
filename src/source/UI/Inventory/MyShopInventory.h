@@ -27,16 +27,6 @@ namespace mu::ui::window
         };
 
     private:
-        // INVENTORY_WIDTH/HEIGHT below are a pre-layout fallback only -- WindowGeometry's real
-        // hit-box comes from #panel's own live RCSS size (UI::RmlBridge::RefreshLogicalPanelSize(),
-        // read at each of MyShopInventoryProcess()/UpdateMouseEvent()/WindowProcess()'s own call
-        // sites), seeded with these only for the first frame before RmlUi's layout has run. Never
-        // referenced by the native shop-grid rendering, which has its own separate offset.
-        enum
-        {
-            INVENTORY_WIDTH = 190,
-            INVENTORY_HEIGHT = 429,
-        };
 
         CManager* m_pNewUIMng;
         CInventoryCtrl* m_pNewInventoryCtrl;
@@ -47,7 +37,6 @@ namespace mu::ui::window
         // model renders (same reasoning as CMyInventory/CStorageInventoryExt).
         struct MyShopRmlModel
         {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
             Rml::String title;
 
@@ -94,7 +83,7 @@ namespace mu::ui::window
         // The grids' items, into the document's #item_view.
         void RenderItems();
         UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
-                                                 this};
+                                                 };
 
         // Mirrors the old CButton array's Lock()/tooltip-text state (OpenButtonLock()/UnLock(),
         // ChangePersonal()) now that the buttons themselves are RmlUi-owned.
@@ -116,6 +105,7 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         void ClosingProcess();
         float GetLayerDepth();	//. 3.2f
 
@@ -146,6 +136,8 @@ namespace mu::ui::window
         void DeleteAllItems();
 
     private:
+        // The pointer over the drawn panel.
+        bool IsPointerOverPanel();
         bool MyShopInventoryProcess();
         bool WindowProcess();
 

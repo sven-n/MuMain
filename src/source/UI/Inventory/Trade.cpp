@@ -4,8 +4,9 @@
 
 #include "UI/Inventory/Trade.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlElementBox.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 
@@ -81,9 +82,11 @@ bool CTrade::Create(CManager* pNewUIMng, int x, int y)
 
 void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
+    UI::RmlBridge::BindWindowClose(c, [this]
+                                 {
+                                     ::PlayBuffer(SOUND_CLICK01);
+                                     ProcessCloseBtn();
+                                 });
     UI::Items::RegisterItemGridCells(c);
     c.Bind("partner_cells", &model.partnerCells);
     c.Bind("grid_cells", &model.gridCells);
@@ -224,6 +227,14 @@ void CTrade::SetPos(int x, int y)
     m_Pos.y = y;
 }
 
+bool CTrade::IsPointerOverPanel()
+{
+    // #panel takes no pointer events, so the grid's clicks stay native; its drawn box still holds
+    // the pointer.
+    Rml::ElementDocument* document = m_RmlView.Document();
+    return UI::RmlBridge::IsPointerWithin(document != nullptr ? document->GetElementById("panel") : nullptr);
+}
+
 bool CTrade::UpdateMouseEvent()
 {
     if ((m_pYourInvenCtrl && false == m_pYourInvenCtrl->UpdateMouseEvent())
@@ -245,12 +256,7 @@ bool CTrade::UpdateMouseEvent()
     if (ProcessBtns())
         return false;
 
-    // #panel's own live RCSS size is the source of truth -- TRADE_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
-    float panelWidth = TRADE_WIDTH;
-    float panelHeight = TRADE_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
+    if (IsPointerOverPanel())
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {
@@ -310,14 +316,29 @@ bool CTrade::Render()
 // your_guild_name/your_guild_visible); the two don't overlap (name sits above the icon), so mixing
 // a native icon with an RmlUi label here is safe, same as MyInventory mixing its native paperdoll
 // with RmlUi frame text at the same m_Pos-relative coordinates.
+bool CTrade::DrawnPanel(Rml::Vector2f& offset, float& scale)
+{
+    Rml::Element* element = m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr;
+    Rml::Vector2f size;
+    if (element == nullptr || !UI::RmlBridge::DrawnContentBox(*element, offset, size))
+        return false;
+    const float layoutWidth = element->GetBox().GetSize(Rml::BoxArea::Content).x;
+    scale = layoutWidth > 0.f ? size.x / layoutWidth : 1.f;
+    return true;
+}
+
 void CTrade::RenderGuildMark()
 {
     for (int i = 0; i < MAX_MARKS; ++i)
     {
         if (GuildMark[i].Key != -1 && GuildMark[i].Key == m_nYourGuildType)
         {
+            Rml::Vector2f panel;
+            float scale = 1.f;
+            if (!DrawnPanel(panel, scale))
+                return;
             ::CreateGuildMark(i, false);
-            ::RenderBitmap(BITMAP_GUILD, (float)m_Pos.x + 15, (float)m_Pos.y + 42, 16, 16);
+            ::RenderBitmap(BITMAP_GUILD, panel.x + 15.f * scale, panel.y + 42.f * scale, 16.f * scale, 16.f * scale);
             break;
         }
     }
@@ -341,11 +362,13 @@ void CTrade::RenderWarningArrow()
         {
             const UI::Items::GridRect cell =
                 m_pYourInvenCtrl->Geometry().CellsRect(pYourItemObj->x, pYourItemObj->y, 1, 1);
+            // The original's sizes, for its 20-unit cell, at the cell's drawn size.
+            const float unit = cell.width / 20.f;
             const float fX = cell.x;
-            const float fY = cell.y + sinf(WorldTime * 0.015f);
+            const float fY = cell.y + sinf(WorldTime * 0.015f) * unit;
 
             const DWORD warningArrowColor = RGBA(0, 255, 255, 255);
-            ::RenderColorBitmap(IMAGE_TRADE_WARNING_ARROW, fX, fY + 5, 24.f, 24.f,
+            ::RenderColorBitmap(IMAGE_TRADE_WARNING_ARROW, fX, fY + 5.f * unit, 24.f * unit, 24.f * unit,
                 0.f, 0.4f, 1.f, 1.f, warningArrowColor);
         }
     }
@@ -371,11 +394,10 @@ void CTrade::SyncRmlModel()
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     if (m_pYourInvenCtrl)
-        m_pYourInvenCtrl->FollowGrid(m_RmlView.Document(), "partner_grid", m_Pos, 16, 68);
+        m_pYourInvenCtrl->FollowGridPx(m_RmlView.Document(), "partner_grid");
     if (m_pMyInvenCtrl)
-        m_pMyInvenCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_Pos, 16, 274);
+        m_pMyInvenCtrl->FollowGridPx(m_RmlView.Document(), "item_grid");
     if (m_pYourInvenCtrl && m_RmlView.GetModel().partnerCells != m_pYourInvenCtrl->Cells())
     {
         m_RmlView.GetModel().partnerCells = m_pYourInvenCtrl->Cells();
@@ -468,11 +490,13 @@ void CTrade::SyncRmlModel()
     syncWide(&TradeRmlModel::itemWarningText, "item_warning_text", I18N::Game::Warning);
 
     // Former RenderWarningArrow()'s "Warning" text badge, one per your-side item flagged
-    // ITEM_COLOR_TRADE_WARNING. Coordinates are panel-relative (subtracting m_Pos), matching the
-    // same sinf() wobble the native arrow glyph still animates with, since #panel is itself
-    // positioned at root_x/root_y (m_Pos) -- see RenderWarningArrow() for the native arrow.
+    // ITEM_COLOR_TRADE_WARNING. The grid is in window pixels; the badges are #panel-relative
+    // reference px, with the same sinf() wobble the native arrow glyph still animates with -- see
+    // RenderWarningArrow() for the native arrow.
     std::vector<TradeRmlModel::ItemWarningBadge> itemWarningBadges;
-    if (m_pYourInvenCtrl)
+    Rml::Vector2f panel;
+    float scale = 1.f;
+    if (m_pYourInvenCtrl && DrawnPanel(panel, scale))
     {
         const int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
         for (int i = 0; i < nYourItems; ++i)
@@ -482,11 +506,11 @@ void CTrade::SyncRmlModel()
 
             const UI::Items::GridRect box = m_pYourInvenCtrl->Geometry().CellsRect(
                 pYourItemObj->x, pYourItemObj->y, ItemAttribute[pYourItemObj->Type].Width, 1);
-            const float fX = box.x;
-            const float fY = box.y + sinf(WorldTime * 0.015f);
-            const float fWidth = box.width;
+            const float fX = (box.x - panel.x) / scale;
+            const float fY = (box.y - panel.y) / scale + sinf(WorldTime * 0.015f);
+            const float fWidth = box.width / scale;
 
-            itemWarningBadges.push_back({ fX - m_Pos.x, fY - m_Pos.y, fWidth });
+            itemWarningBadges.push_back({ fX, fY, fWidth });
         }
     }
     if (m_RmlView.GetModel().itemWarningBadges != itemWarningBadges)
@@ -622,14 +646,6 @@ bool CTrade::ProcessBtns()
     if (m_nMyTradeWait > 0)
         --m_nMyTradeWait;
 
-    // Top-right corner close "X" baked into the frame art cancels the trade, like Close.
-    if (g_pNewUISystem->ConsumeFrameCornerClick(m_Pos, mu::ui::window::INTERFACE_TRADE))
-    {
-        ::PlayBuffer(SOUND_CLICK01);
-        ProcessCloseBtn();
-        return true;
-    }
-
     return false;
 }
 
@@ -687,8 +703,8 @@ void CTrade::ProcessToReceiveTradeResult(UI::Trade::RequestReply reply, const UI
 
         InitTradeInfo();
 
-        int x = 260 * MouseX / REFERENCE_WIDTH;
-        SetCursorPos(x * WindowWidth / REFERENCE_WIDTH, MouseY * WindowHeight / REFERENCE_HEIGHT);
+        // The original's pointer jump, 260/640 of the way along its own x.
+        SetCursorPos(static_cast<int>(g_fWindowMouseX * 260.f / REFERENCE_WIDTH), static_cast<int>(g_fWindowMouseY));
 
         wchar_t szTempID[MAX_USERNAME_SIZE + 1]{ };
         wcsncpy(szTempID, std::wstring(partner.name).c_str(), MAX_USERNAME_SIZE);
@@ -915,7 +931,7 @@ int mu::ui::window::CTrade::GetPointedItemIndexYourInven()
     return m_pYourInvenCtrl->GetPointedSquareIndex();
 }
 
-// Into #item_view (m_ItemTarget), in this window's layout space: the partner's guild mark under
+// Into #item_view (m_ItemTarget), in window pixels (the grids' FollowGridPx()): the partner's guild mark under
 // the items, the warning arrows over them.
 void CTrade::RenderItems()
 {

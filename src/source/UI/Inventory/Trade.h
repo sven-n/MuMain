@@ -32,15 +32,8 @@ namespace mu::ui::window
         };
 
     private:
-        // TRADE_WIDTH/HEIGHT below are a pre-layout fallback only -- WindowGeometry's real hit-box
-        // comes from #panel's own live RCSS size (UI::RmlBridge::RefreshLogicalPanelSize(), read at
-        // its UpdateMouseEvent() call site), seeded with these only for the first frame before
-        // RmlUi's layout has run. Never referenced by the native trade-grid rendering, which has
-        // its own separate, still-native offset.
         enum
         {
-            TRADE_WIDTH = 190,
-            TRADE_HEIGHT = 429,
             COLUMN_TRADE_INVEN = 8,
             ROW_TRADE_INVEN = 4,
             MAX_TRADE_INVEN = COLUMN_TRADE_INVEN * ROW_TRADE_INVEN,
@@ -75,7 +68,6 @@ namespace mu::ui::window
         // below) -- see SyncRmlModel().
         struct TradeRmlModel
         {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
             Rml::String title;
@@ -126,8 +118,7 @@ namespace mu::ui::window
 
         // The grids' items, into the document's #item_view.
         void RenderItems();
-        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
-                                                 this};
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); }};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -145,6 +136,9 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
+        // The pointer over the drawn panel.
+        bool IsPointerOverPanel();
 
         float GetLayerDepth();	//. 2.1f
 
@@ -188,6 +182,8 @@ namespace mu::ui::window
         void LoadImages();
         void UnloadImages();
 
+        // #panel's drawn top-left (window pixels) and the scale its placement gives it.
+        bool DrawnPanel(Rml::Vector2f& offset, float& scale);
         void RenderGuildMark();
         void RenderWarningArrow();
 

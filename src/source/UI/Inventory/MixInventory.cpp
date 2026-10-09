@@ -2,8 +2,9 @@
 #include "stdafx.h"
 #include "UI/Inventory/MixInventory.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlElementBox.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Core/WindowCommon.h" // ShowChaosMixMenuDialog
@@ -96,9 +97,7 @@ bool CMixInventory::Create(CManager* pNewUIMng, int x, int y)
 
 void CMixInventory::BindRmlModel(Rml::DataModelConstructor& c, MixInventoryRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
+    UI::RmlBridge::BindWindowClose(c, mu::ui::window::INTERFACE_MIXINVENTORY);
     UI::Items::RegisterItemGridCells(c);
     c.Bind("grid_cells", &model.gridCells);
     c.Bind("text_px", &model.textPx);
@@ -296,6 +295,14 @@ void CMixInventory::SetPos(int x, int y)
     m_pNewInventoryCtrl->SetPos(x + 15, y + 110);
 }
 
+bool CMixInventory::IsPointerOverPanel()
+{
+    // #panel takes no pointer events, so the grid's clicks stay native; its drawn box still holds
+    // the pointer.
+    Rml::ElementDocument* document = m_RmlView.Document();
+    return UI::RmlBridge::IsPointerWithin(document != nullptr ? document->GetElementById("panel") : nullptr);
+}
+
 bool CMixInventory::UpdateMouseEvent()
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->UpdateMouseEvent())
@@ -304,15 +311,8 @@ bool CMixInventory::UpdateMouseEvent()
     if (true == InventoryProcess())
         return false;
 
-    if (true == BtnProcess())
-        return false;
 
-    // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
-    float panelWidth = INVENTORY_WIDTH;
-    float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
+    if (IsPointerOverPanel())
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {
@@ -363,9 +363,8 @@ void CMixInventory::SyncRmlModel()
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_Pos, 15, 110);
+        m_pNewInventoryCtrl->FollowGridPx(m_RmlView.Document(), "item_grid");
     if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())
     {
         m_RmlView.GetModel().gridCells = m_pNewInventoryCtrl->Cells();
@@ -502,12 +501,15 @@ void CMixInventory::SyncSocketListModel()
     }
 }
 
-bool CMixInventory::BtnProcess()
+float CMixInventory::DrawnPanelScale()
 {
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_MIXINVENTORY);
-
-    return false;
+    Rml::Element* panel = m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr;
+    Rml::Vector2f offset;
+    Rml::Vector2f size;
+    if (panel == nullptr || !UI::RmlBridge::DrawnContentBox(*panel, offset, size))
+        return 1.f;
+    const float layoutWidth = panel->GetBox().GetSize(Rml::BoxArea::Content).x;
+    return layoutWidth > 0.f ? size.x / layoutWidth : 1.f;
 }
 
 void CMixInventory::SyncMixContentModel()
@@ -516,14 +518,14 @@ void CMixInventory::SyncMixContentModel()
         return;
 
     // The bold title measures lines in the window's own text font (the theme sizes it 1em). A
-    // counter-scaled title (legacy .sharp-text) measures in physical pixels.
+    // counter-scaled title (legacy .sharp-text) measures in physical pixels: the panel's drawn
+    // scale converts them.
     Rml::Element* fitProbe = m_RmlView.Document()->GetElementById("title");
     float probeUnitsPerLayoutUnit = 1.f;
     if (fitProbe != nullptr && fitProbe->GetComputedValues().has_local_transform())
-        probeUnitsPerLayoutUnit = GetLayoutTransform().scaleX;
-    const auto layout = GetLayoutTransform();
-    const float minimumFit = static_cast<float>(UI::Scaling::MinimumFontPointSize(UI::Scaling::FontRole::Normal)) /
-                             static_cast<float>(UI::Scaling::FontPointSize(UI::Scaling::FontRole::Normal, layout));
+        probeUnitsPerLayoutUnit = DrawnPanelScale();
+    const float minimumFit = UI::Scaling::MinimumTextPixelSize(UI::Scaling::FontRole::Normal) /
+                             UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal);
     auto& model = m_RmlView.GetModel();
     auto syncWide = [&](Rml::String MixInventoryRmlModel::* field, const char* boundName, const wchar_t* text)
     {
@@ -1079,7 +1081,7 @@ bool CMixInventory::AutoMoveItem(CInventoryCtrl* srcCtrl, STORAGE_TYPE srcType,
     if (srcCtrl == nullptr || dstCtrl == nullptr || GetMixState() != MIX_READY)
         return false;
 
-    ITEM* pItemObj = srcCtrl->FindItemAtPt(MouseX, MouseY);
+    ITEM* pItemObj = srcCtrl->FindItemAtPointer();
     if (pItemObj == nullptr)
         return false;
 
@@ -1176,9 +1178,10 @@ void CMixInventory::RenderMixEffect()
                 const BYTE green = static_cast<BYTE>((rand() % 4 + 4) * 0.1f * 255.f);
                 const DWORD sparkleColor = RGBA(red, green, 51, 255);
                 float Rotate = (float)((int)(WorldTime) % 100) * 20.f;
-                float Scale = 5.f + (rand() % 10);
                 const UI::Items::GridRect cell = m_pNewInventoryCtrl->Geometry().CellsRect(
                     m_pNewInventoryCtrl->GetItem(i)->x + w, m_pNewInventoryCtrl->GetItem(i)->y + h, 1, 1);
+                // The original's sizes, for its 20-unit cell, at the cell's drawn size.
+                float Scale = (5.f + (rand() % 10)) * cell.width / 20.f;
                 float x = cell.x + (rand() % (std::max)(1, static_cast<int>(cell.width)));
                 float y = cell.y + (rand() % (std::max)(1, static_cast<int>(cell.height)));
                 RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, 0, 0.f, 0.f, 1.f, 1.f, sparkleColor);
@@ -1198,7 +1201,7 @@ int mu::ui::window::CMixInventory::GetPointedItemIndex()
     return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }
 
-// Into #item_view (m_ItemTarget), in this window's layout space.
+// Into #item_view (m_ItemTarget), in window pixels (the grids' FollowGridPx()).
 void CMixInventory::RenderItems()
 {
     if (m_pNewInventoryCtrl && m_pNewInventoryCtrl->IsVisible())

@@ -60,7 +60,6 @@ namespace mu::ui::window
         };
         struct LuckyItemRmlModel
         {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
             Rml::String title;
             Rml::String mixTooltip;
@@ -81,8 +80,7 @@ namespace mu::ui::window
 
         // The grids' items, into the document's #item_view.
         void RenderItems();
-        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
-                                                 this};
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); }};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -120,6 +118,7 @@ namespace mu::ui::window
         bool	UpdateKeyEvent();
         bool	Update();
         bool	Render();
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         float	GetLayerDepth();	//. 3.4f
 
         __inline void	SetAct(eLUCKYITEMTYPE _eAct) { m_eType = _eAct; }

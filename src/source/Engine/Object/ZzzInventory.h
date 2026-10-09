@@ -188,6 +188,10 @@ std::wstring GetItemDisplayName(ITEM* pItem);
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
 void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
 void RenderRepairInfo(int sz, int sy, ITEM* ip, bool Sell);
+// The same anchored in window pixels: their layout runs in the screen's 640x480 stretch, the space
+// the original computed it in, whichever window asks.
+void RenderItemInfoAtPx(float x, float y, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
+void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell);
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum = 0, int iRenderPoint = STRP_NONE);
 void RequireClass(ITEM_ATTRIBUTE* p);
 bool IsRequireClassRenderItem(const short sType);

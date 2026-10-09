@@ -8,8 +8,8 @@
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
-#include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -210,9 +210,7 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
 
 void CStorageInventory::BindRmlModel(Rml::DataModelConstructor& c, StorageRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
+    UI::RmlBridge::BindWindowClose(c, INTERFACE_STORAGE);
     UI::Items::RegisterItemGridCells(c);
     c.Bind("grid_cells", &model.gridCells);
     c.Bind("text_px", &model.textPx);
@@ -378,6 +376,14 @@ void CStorageInventory::SetPos(int x, int y)
     }
 }
 
+bool CStorageInventory::IsPointerOverPanel()
+{
+    // #panel takes no pointer events, so the grid's clicks stay native; its drawn box still holds
+    // the pointer.
+    Rml::ElementDocument* document = m_RmlView.Document();
+    return UI::RmlBridge::IsPointerWithin(document != nullptr ? document->GetElementById("panel") : nullptr);
+}
+
 bool CStorageInventory::UpdateMouseEvent()
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->UpdateMouseEvent())
@@ -385,15 +391,7 @@ bool CStorageInventory::UpdateMouseEvent()
 
     ProcessInventoryCtrl();
 
-    if (ProcessBtns())
-        return false;
-
-    // #panel's own live RCSS size is the source of truth -- STORAGE_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
-    float panelWidth = STORAGE_WIDTH;
-    float panelHeight = STORAGE_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
+    if (IsPointerOverPanel())
     {
         if (IsPress(VK_RBUTTON))
         {
@@ -462,9 +460,8 @@ void CStorageInventory::SyncRmlModel()
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_Pos, 15, 36);
+        m_pNewInventoryCtrl->FollowGridPx(m_RmlView.Document(), "item_grid");
     if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())
     {
         m_RmlView.GetModel().gridCells = m_pNewInventoryCtrl->Cells();
@@ -621,7 +618,7 @@ void CStorageInventory::ProcessStorageItemAutoMove()
     if (IsItemAutoMove())
         return;
 
-    ITEM* pItemObj = m_pNewInventoryCtrl->FindItemAtPt(MouseX, MouseY);
+    ITEM* pItemObj = m_pNewInventoryCtrl->FindItemAtPointer();
     if (pItemObj)
     {
         int nDstIndex = g_pMyInventory->FindEmptySlotIncludingExtensions(pItemObj);
@@ -661,7 +658,7 @@ bool CStorageInventory::ProcessMyInvenItemAutoMove(CInventoryCtrl* sourceCtrl)
         return false;
     }
 
-    if (const auto pItemObj = sourceCtrl->FindItemAtPt(MouseX, MouseY))
+    if (const auto pItemObj = sourceCtrl->FindItemAtPointer())
     {
         if (pItemObj->Type == ITEM_WIZARDS_RING)
             return false;
@@ -724,29 +721,20 @@ void CStorageInventory::SendRequestItemToStorage(ITEM* pItemObj, int nInvenIndex
     }
 }
 
-bool CStorageInventory::ProcessBtns()
-{
-    // Top-right corner close "X" (shared frame): hides + swallows the click. The 4 real buttons
-    // are handled by RmlUi's data-event-click (see Create()).
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_STORAGE))
-        return true;
-
-    return false;
-}
-
 void CStorageInventory::SetItemAutoMove(bool bItemAutoMove, int nSourceInvenIndex)
 {
     m_bItemAutoMove = bItemAutoMove;
 
     if (bItemAutoMove)
     {
-        m_nBackupMouseX = MouseX;
-        m_nBackupMouseY = MouseY;
+        // The cells under the pointer now, in each grid's own space, for the server's answer.
+        m_nBackupStorageCell = m_pNewInventoryCtrl->GetIndexAtPointer();
+        m_nBackupInventoryCell = g_pMyInventory->GetInventoryCtrl()->GetIndexAtPointer();
         m_nBackupSourceInvenIndex = nSourceInvenIndex;
     }
     else
     {
-        m_nBackupMouseX = m_nBackupMouseY = 0;
+        m_nBackupStorageCell = m_nBackupInventoryCell = -1;
         m_nBackupSourceInvenIndex = -1;
     }
 }
@@ -824,8 +812,7 @@ void CStorageInventory::ProcessToReceiveStorageStatus(UI::Storage::VaultStatus s
 
                 if (IsItemAutoMove())
                 {
-                    pItemObj = m_pNewInventoryCtrl->FindItemAtPt(
-                        m_nBackupMouseX, m_nBackupMouseY);
+                    pItemObj = m_pNewInventoryCtrl->FindItem(m_nBackupStorageCell);
                     nStorageIndex
                         = pItemObj->y * m_pNewInventoryCtrl->GetNumberOfColumn()
                         + pItemObj->x;
@@ -873,7 +860,7 @@ void CStorageInventory::ProcessToReceiveStorageItems(int nIndex, std::span<const
             else
             {
                 CInventoryCtrl* pMyInvenCtrl = g_pMyInventory->GetInventoryCtrl();
-                ITEM* pItemObj = pMyInvenCtrl->FindItemAtPt(m_nBackupMouseX, m_nBackupMouseY);
+                ITEM* pItemObj = pMyInvenCtrl->FindItem(m_nBackupInventoryCell);
                 g_pMyInventory->GetInventoryCtrl()->RemoveItem(pItemObj);
             }
 
@@ -891,7 +878,7 @@ void CStorageInventory::ProcessStorageItemAutoMoveSuccess()
 
     if (IsItemAutoMove())
     {
-        ITEM* pItemObj = m_pNewInventoryCtrl->FindItemAtPt(m_nBackupMouseX, m_nBackupMouseY);
+        ITEM* pItemObj = m_pNewInventoryCtrl->FindItem(m_nBackupStorageCell);
         m_pNewInventoryCtrl->RemoveItem(pItemObj);
 
         SetItemAutoMove(false);
@@ -912,7 +899,7 @@ int CStorageInventory::GetPointedItemIndex()
     return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }
 
-// Into #item_view (m_ItemTarget), in this window's layout space.
+// Into #item_view (m_ItemTarget), in window pixels (the grids' FollowGridPx()).
 void CStorageInventory::RenderItems()
 {
     if (m_pNewInventoryCtrl && m_pNewInventoryCtrl->IsVisible())

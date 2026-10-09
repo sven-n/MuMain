@@ -18,16 +18,6 @@ namespace mu::ui::window
     class CPurchaseShopInventory : public CObject
     {
     private:
-        // INVENTORY_WIDTH/HEIGHT below are a pre-layout fallback only -- WindowGeometry's real
-        // hit-box comes from #panel's own live RCSS size (UI::RmlBridge::RefreshLogicalPanelSize(),
-        // read at WindowProcess()'s call site), seeded with these only for the first frame before
-        // RmlUi's layout has run. Never referenced by the native purchase-grid rendering, which has
-        // its own separate offset.
-        enum
-        {
-            INVENTORY_WIDTH = 190,
-            INVENTORY_HEIGHT = 429,
-        };
 
     public:
         CPurchaseShopInventory();
@@ -40,6 +30,9 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
+        // The pointer over the drawn panel.
+        bool IsPointerOverPanel();
 
         void ClosingProcess();
 
@@ -79,7 +72,6 @@ namespace mu::ui::window
         // CMyShopInventory/CStorageInventoryExt).
         struct PurchaseShopRmlModel
         {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f;         // native text size in physical px (RmlRootTransform.h)
             Rml::String title;			// static "Personal Store" label
             Rml::String shopOwnerText;	// dynamic shop-owner name (m_TitleText, via ChangeTitleText())
@@ -101,8 +93,7 @@ namespace mu::ui::window
 
         // The grids' items, into the document's #item_view.
         void RenderItems();
-        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
-                                                 this};
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); }};
 
         void BuildRmlUi();
         void SyncRmlModel();

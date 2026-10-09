@@ -5921,6 +5921,30 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
         UI::Scaling::PositionY(activeTransform, static_cast<float>(sy)));
 }
 
+namespace
+{
+// Runs `render` with the anchor (x, y) in window pixels converted into the screen's 640x480
+// stretch, which it then runs under.
+template <typename Render> void InScreenSpace(float x, float y, Render render)
+{
+    const UI::Scaling::Transform screen =
+        UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+    const UI::Scaling::ScopedActiveTransform scope(screen);
+    render(static_cast<int>(std::lround(UI::Scaling::LogicalX(screen, x))),
+           static_cast<int>(std::lround(UI::Scaling::LogicalY(screen, y))));
+}
+} // namespace
+
+void RenderItemInfoAtPx(float x, float y, ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
+{
+    InScreenSpace(x, y, [&](int sx, int sy) { RenderItemInfo(sx, sy, ip, Sell, Inventype, bItemTextListBoxUse); });
+}
+
+void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell)
+{
+    InScreenSpace(x, y, [&](int sx, int sy) { RenderRepairInfo(sx, sy, ip, Sell); });
+}
+
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
 {
     int AttackDamageMin;

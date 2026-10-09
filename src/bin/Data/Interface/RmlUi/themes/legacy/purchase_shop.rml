@@ -9,9 +9,8 @@
 	<!-- CPurchaseShopInventory (PurchaseShopInventory.h): the frame, the item grid, the items C++
 	     draws live into #item_view, the stack counts, title, subtitle strip, warning text and exit
 	     button. -->
-	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale"
-	     data-style-font-size="(text_px / root_scale) + 'px'">
+	<div id="panel" data-style---text-px="text_px + 'px'">
+		<div id="frame_corner_close" data-event-click="window_close"></div>
 		<!-- The frame. -->
 		<div class="bg-fill"></div>
 		<div class="bg-top"></div>

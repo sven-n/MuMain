@@ -3,8 +3,8 @@
 #include "UI/Inventory/MyShopInventory.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Core/WindowCommon.h" // g_IsPurchaseShop
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -262,9 +262,7 @@ bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CMyShopInventory::BindRmlModel(Rml::DataModelConstructor& c, MyShopRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
+    UI::RmlBridge::BindWindowClose(c, mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
     UI::Items::RegisterItemGridCells(c);
     c.Bind("grid_cells", &model.gridCells);
     c.Bind("text_px", &model.textPx);
@@ -514,14 +512,17 @@ bool mu::ui::window::CMyShopInventory::UpdateKeyEvent()
     return true;
 }
 
+bool mu::ui::window::CMyShopInventory::IsPointerOverPanel()
+{
+    // #panel takes no pointer events, so the grid's clicks stay native; its drawn box still holds
+    // the pointer.
+    Rml::ElementDocument* document = m_RmlView.Document();
+    return UI::RmlBridge::IsPointerWithin(document != nullptr ? document->GetElementById("panel") : nullptr);
+}
+
 bool mu::ui::window::CMyShopInventory::MyShopInventoryProcess()
 {
-    // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
-    float panelWidth = INVENTORY_WIDTH;
-    float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY) == false)
+    if (IsPointerOverPanel() == false)
     {
         return false;
     }
@@ -604,7 +605,7 @@ bool mu::ui::window::CMyShopInventory::MyShopInventoryProcess()
         MouseRButtonPop = false;
         MouseRButtonPush = false;
 
-        int iCurSquareIndex = m_pNewInventoryCtrl->GetIndexAtPt(MouseX, MouseY);
+        int iCurSquareIndex = m_pNewInventoryCtrl->GetIndexAtPointer();
 
         if (iCurSquareIndex != -1)
         {
@@ -631,20 +632,9 @@ bool mu::ui::window::CMyShopInventory::UpdateMouseEvent()
         return false;
     }
 
-    // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
-    float panelWidth = INVENTORY_WIDTH;
-    float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY))
+    if (IsPointerOverPanel())
     {
         if (MyShopInventoryProcess() == true)
-        {
-            return false;
-        }
-
-        // Top-right corner close "X" (shared frame): hides + swallows the click.
-        if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_MYSHOP_INVENTORY))
         {
             return false;
         }
@@ -669,12 +659,7 @@ bool mu::ui::window::CMyShopInventory::UpdateMouseEvent()
 
 bool mu::ui::window::CMyShopInventory::WindowProcess()
 {
-    // #panel's own live RCSS size is the source of truth -- INVENTORY_WIDTH/HEIGHT only cover the
-    // first frame after Create()/Show(true)/a theme switch, before RmlUi's next layout pass.
-    float panelWidth = INVENTORY_WIDTH;
-    float panelHeight = INVENTORY_HEIGHT;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, static_cast<int>(panelWidth), static_cast<int>(panelHeight)).Contains(MouseX, MouseY) == false)
+    if (IsPointerOverPanel() == false)
     {
         return false;
     }
@@ -706,9 +691,8 @@ void mu::ui::window::CMyShopInventory::SyncRmlModel()
     if (!m_RmlView.Document()) return;
     UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     if (m_pNewInventoryCtrl)
-        m_pNewInventoryCtrl->FollowGrid(m_RmlView.Document(), "item_grid", m_Pos, 16, 90);
+        m_pNewInventoryCtrl->FollowGridPx(m_RmlView.Document(), "item_grid");
     if (m_pNewInventoryCtrl && m_RmlView.GetModel().gridCells != m_pNewInventoryCtrl->Cells())
     {
         m_RmlView.GetModel().gridCells = m_pNewInventoryCtrl->Cells();
@@ -791,7 +775,7 @@ void mu::ui::window::CMyShopInventory::SetInputValueTextBox(bool bIsEnable)
     m_bIsEnableInputValueTextBox = bIsEnable;
 }
 
-// Into #item_view (m_ItemTarget), in this window's layout space.
+// Into #item_view (m_ItemTarget), in window pixels (the grid's FollowGridPx()).
 void mu::ui::window::CMyShopInventory::RenderItems()
 {
     if (m_pNewInventoryCtrl && m_pNewInventoryCtrl->IsVisible())

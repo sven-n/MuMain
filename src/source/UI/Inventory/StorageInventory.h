@@ -23,12 +23,6 @@ namespace mu::ui::window
     class CStorageInventory : public CObject
     {
     private:
-        // Pre-layout fallback only -- WindowGeometry's real hit-box comes from #panel's own live
-        // RCSS size (UI::RmlBridge::RefreshLogicalPanelSize(), read at the UpdateMouseEvent() call
-        // site), seeded with these only for the first frame before RmlUi's layout has run. Never
-        // referenced by the native storage-grid rendering, which has its own separate offset.
-        static constexpr float STORAGE_WIDTH = 190.0f;
-        static constexpr float STORAGE_HEIGHT = 429.0f;
 
         CManager* m_pNewUIMng;
         POINT					m_Pos;
@@ -38,8 +32,9 @@ namespace mu::ui::window
         bool					m_bCorrectPassword;
 
         bool					m_bItemAutoMove;
-        int						m_nBackupMouseX;
-        int						m_nBackupMouseY;
+        // The storage and inventory cells under the pointer when an auto-move was asked.
+        int m_nBackupStorageCell = -1;
+        int m_nBackupInventoryCell = -1;
 
         bool					m_bTakeZen;
         int						m_nBackupTakeZen;
@@ -50,7 +45,6 @@ namespace mu::ui::window
         // icons are live 3D model renders (same reasoning as CMyInventory/CStorageInventoryExt).
         struct StorageRmlModel
         {
-            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
             float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
             Rml::String title;
@@ -79,8 +73,7 @@ namespace mu::ui::window
 
         // The grids' items, into the document's #item_view.
         void RenderItems();
-        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
-                                                 this};
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); }};
 
         void BuildRmlUi();
         void SyncRmlModel();
@@ -98,6 +91,9 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
+        // The pointer over the drawn panel.
+        bool IsPointerOverPanel();
 
         float GetLayerDepth();	//. 2.2f
 
@@ -141,7 +137,6 @@ namespace mu::ui::window
         int GetBackupInvenIndex() { return m_nBackupInvenIndex; }
 
         void ProcessInventoryCtrl();
-        bool ProcessBtns();
         void ProcessStorageItemAutoMove();
     };
 }

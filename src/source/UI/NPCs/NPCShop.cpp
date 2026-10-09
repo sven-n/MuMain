@@ -153,9 +153,9 @@ bool mu::ui::window::CNPCShop::UpdateMouseEvent()
             return false;
         }
 
-        if (m_pNewInventoryCtrl->CheckPtInRect(MouseX, MouseY) == true)
+        if (m_pNewInventoryCtrl->ContainsPointer() == true)
         {
-            ITEM* pItem = m_pNewInventoryCtrl->FindItemAtPt(MouseX, MouseY);
+            ITEM* pItem = m_pNewInventoryCtrl->FindItemAtPointer();
 
             if ((m_bIsNPCShopOpen == true) && (pItem) && (mu::ui::window::IsRelease(VK_LBUTTON)))
             {
@@ -374,7 +374,7 @@ bool mu::ui::window::CNPCShop::InventoryProcess()
     if (IsSellingBan(pItem))	m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
     else	m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
 
-    if (mu::ui::window::IsRelease(VK_LBUTTON) == true && m_pNewInventoryCtrl->CheckPtInRect(MouseX, MouseY) == true && m_bSellingItem == false)
+    if (mu::ui::window::IsRelease(VK_LBUTTON) == true && m_pNewInventoryCtrl->ContainsPointer() == true && m_bSellingItem == false)
     {
         if (CharacterMachine->Gold + ItemValue(pItem) > 2000000000)
         {

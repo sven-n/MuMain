@@ -12,9 +12,8 @@
 	     live into #item_view. The arrow's "Warning" text badge (item_warning_badges below) is
 	     positioned per-frame from C++ since it tracks a live, variable-length set of flagged item
 	     grid cells. -->
-	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale"
-	     data-style-font-size="(text_px / root_scale) + 'px'">
+	<div id="panel" data-style---text-px="text_px + 'px'">
+		<div id="frame_corner_close" data-event-click="window_close"></div>
 		<!-- The frame. -->
 		<div class="bg-fill"></div>
 		<div class="bg-top"></div>
@@ -108,7 +107,7 @@
 
 		<!-- Former RenderWarningArrow()'s "Warning" text badge, one per flagged item. -->
 		<div class="sharp-text item-warning-badge" data-for="w : item_warning_badges"
-		     data-style-left="w.x + 'px'" data-style-top="w.y + 'px'" data-style-width="(w.width * root_scale) + 'px'" data-style-font-size="text_px + 'px'">{{item_warning_text}}</div>
+		     data-style-left="w.x + 'px'" data-style-top="w.y + 'px'" data-style---badge-width="w.width + 'px'" data-style-font-size="text_px + 'px'">{{item_warning_text}}</div>
 	</div>
 </body>
 </rml>
