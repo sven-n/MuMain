@@ -5,11 +5,6 @@ namespace Rml
     class ElementDocument;
 }
 
-namespace UI::Scaling
-{
-    enum class LayoutMode;
-}
-
 // Lets native hit-testing (WindowGeometry, CManager::UpdateMouseEvent()) follow a theme's actual
 // panel size instead of a hardcoded width/height literal duplicated per window. Two independent
 // families use this today: the docked-family windows (character_info/pet_info/party_info/

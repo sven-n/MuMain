@@ -45,37 +45,6 @@ namespace UI::Scaling
         Fixed,
     };
 
-    // Where a window's 640x480 reference units land on the screen, and at what scale. Every scale
-    // but ScreenOverlay's and Pixels' is uniform and follows the UI scale.
-    enum class LayoutMode
-    {
-        // The original screen centred on the whole window at the panel scale: NPC panels and
-        // dialogs (the default).
-        Stage,
-        // The original screen at the bottom HUD's scale, centred like the HUD and standing on the
-        // window's bottom: the fixed-place windows that stand on or open from the HUD.
-        HudBoard,
-        // A part placed by the workspace at the HUD's scale (the event HUDs, the bottom HUD's
-        // parts, the chat): no offset, so it is drawn at the size its slot was given.
-        HudFrame,
-        // The docked panels, standing on the HUD at the dock scale; the workspace packs them.
-        DockLeft,
-        DockRight,
-        // A window that keeps its own position, at the dock scale (the friend list).
-        FloatingWorkspace,
-        // The original screen stretched over the whole window (W/640 x H/480, no UI scale): what
-        // must cover the screen or follow the world -- the notice band, the full map, names and
-        // balloons over characters.
-        ScreenOverlay,
-        // Real screen pixels: a window whose own rendering already computes them (its own scale
-        // against whatever resolution it assumes, e.g. CCreditWin's 800x600). Any other mode would
-        // rescale it twice and remap MouseX/MouseY into the wrong space.
-        Pixels,
-        // Placed by the theme's workspace: the window's own transform maps it onto its slot
-        // (CObject::PlaceInSlot()). TransformForLayout() cannot know it.
-        Slot,
-    };
-
     class ScopedActiveTransform
     {
     public:
@@ -129,8 +98,6 @@ namespace UI::Scaling
     float ViewportFitScale(int windowWidth, int windowHeight, float maximumScale);
     float CompanionRatio(int windowWidth, int windowHeight);
     float BottomHudScale(int windowWidth, int windowHeight);
-    Transform HudBoardTransform(int windowWidth, int windowHeight);
-    Transform DockLeftTransform(int windowWidth, int windowHeight);
     Transform DockRightTransform(int windowWidth, int windowHeight);
     Transform FloatingWorkspaceTransform(int windowWidth, int windowHeight);
     Viewport FloatingWorkspaceBounds(int windowWidth, int windowHeight);
@@ -140,7 +107,6 @@ namespace UI::Scaling
     float FloatingWorkspaceContentHeight(int windowWidth, int windowHeight);
     Viewport WorldViewport(int windowWidth, int windowHeight, bool topViewEnabled);
     float WorldViewportAspect(int windowWidth, int windowHeight, bool topViewEnabled);
-    Transform TransformForLayout(LayoutMode mode, int windowWidth, int windowHeight);
     float PositionX(const Transform& transform, float x);
     float PositionY(const Transform& transform, float y);
     float SizeX(const Transform& transform, float width);
@@ -172,7 +138,7 @@ namespace UI::Scaling
     float FitTextPixelSizeToWidth(float textPx, float measuredWidth, float boxWidth, float minimumPx);
     // How much a window the original drew at fixed pixels (login form, server list, system menu,
     // login/character scene buttons) grows in the legacy theme: as much as the native dialog text
-    // (NativeTextPixelSize(), LayoutMode::Stage) has grown against its size at 1024x768, never
+    // (NativeTextPixelSize()) has grown against its size at 1024x768, never
     // below 1 -- the original's own size up to 1280x720, larger only where the text is larger.
     float SceneWindowScale(int windowWidth, int windowHeight);
     // The rule behind SceneWindowScale() for any text size: textPx / referenceTextPx, not below 1.

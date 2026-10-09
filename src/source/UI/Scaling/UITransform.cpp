@@ -55,13 +55,6 @@ FontPointRange GetFontPointRange(UI::Scaling::FontRole role)
     return {kNormalFontPointSize, kMaximumNormalFontPointSize};
 }
 
-UI::Scaling::Transform BottomHudTransform(int windowWidth, int windowHeight, float offsetX)
-{
-    const float scale = UI::Scaling::BottomHudScale(windowWidth, windowHeight);
-    return {scale, scale, offsetX, static_cast<float>(windowHeight) - kReferenceHeight * scale,
-            UI::Scaling::TypographyScale(windowWidth, windowHeight)};
-}
-
 int RoundedBottomHudTop(int windowWidth, int windowHeight)
 {
     const float hudTop =
@@ -172,20 +165,6 @@ float UI::Scaling::BottomHudScale(int windowWidth, int windowHeight)
     return ViewportFitScale(windowWidth, windowHeight, kMaximumHudScale) * UIScalePercentMultiplier();
 }
 
-UI::Scaling::Transform UI::Scaling::HudBoardTransform(int windowWidth, int windowHeight)
-{
-    const float scale = BottomHudScale(windowWidth, windowHeight);
-    return BottomHudTransform(windowWidth, windowHeight,
-                              static_cast<float>(windowWidth) * 0.5f - 320.0f * scale);
-}
-
-UI::Scaling::Transform UI::Scaling::DockLeftTransform(int windowWidth, int windowHeight)
-{
-    Transform transform = DockTransform(windowWidth, windowHeight);
-    transform.offsetX = 0.0f;
-    return transform;
-}
-
 UI::Scaling::Transform UI::Scaling::DockRightTransform(int windowWidth, int windowHeight)
 {
     Transform transform = DockTransform(windowWidth, windowHeight);
@@ -234,28 +213,6 @@ float UI::Scaling::WorldViewportAspect(int windowWidth, int windowHeight, bool t
 {
     const Viewport viewport = WorldViewport(windowWidth, windowHeight, topViewEnabled);
     return static_cast<float>(viewport.width) / viewport.height;
-}
-
-UI::Scaling::Transform UI::Scaling::TransformForLayout(LayoutMode mode, int windowWidth, int windowHeight)
-{
-    if (mode == LayoutMode::Pixels)
-        return {1.0f, 1.0f, 0.0f, 0.0f, 1.0f};
-    if (mode == LayoutMode::ScreenOverlay)
-        return ScreenOverlayTransform(windowWidth, windowHeight);
-    if (mode == LayoutMode::HudFrame)
-    {
-        const float scale = BottomHudScale(windowWidth, windowHeight);
-        return {scale, scale, 0.0f, 0.0f, TypographyScale(windowWidth, windowHeight)};
-    }
-    if (mode == LayoutMode::HudBoard)
-        return HudBoardTransform(windowWidth, windowHeight);
-    if (mode == LayoutMode::DockLeft)
-        return DockLeftTransform(windowWidth, windowHeight);
-    if (mode == LayoutMode::DockRight)
-        return DockRightTransform(windowWidth, windowHeight);
-    if (mode == LayoutMode::FloatingWorkspace)
-        return FloatingWorkspaceTransform(windowWidth, windowHeight);
-    return PanelTransform(windowWidth, windowHeight);
 }
 
 float UI::Scaling::PositionX(const Transform& transform, float x)
@@ -378,10 +335,8 @@ float UI::Scaling::FitTextPixelSizeToWidth(float textPx, float measuredWidth, fl
 
 float UI::Scaling::SceneWindowScale(int windowWidth, int windowHeight)
 {
-    const float textPx =
-        NativeTextPixelSize(FontRole::Normal, TransformForLayout(LayoutMode::Stage, windowWidth, windowHeight));
-    const float referenceTextPx =
-        NativeTextPixelSize(FontRole::Normal, TransformForLayout(LayoutMode::Stage, 1024, 768));
+    const float textPx = NativeTextPixelSize(FontRole::Normal, windowWidth, windowHeight);
+    const float referenceTextPx = NativeTextPixelSize(FontRole::Normal, 1024, 768);
     return TextGrowthScale(textPx, referenceTextPx);
 }
 

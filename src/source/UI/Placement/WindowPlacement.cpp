@@ -5,7 +5,6 @@
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "UI/Core/UILayoutPolicy.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
@@ -188,22 +187,20 @@ void UnregisterParticipant(std::string_view name)
     Invalidate();
 }
 
-void RegisterHudWindow(std::string_view name, std::uint32_t windowId, GetWindow getWindow, SetPosition setPosition,
-                       float width, float height, int homeX, int homeY)
+void RegisterHudWindow(std::string_view name, std::uint32_t windowId, GetWindow getWindow, float width, float height)
 {
     PlacementParticipant participant;
     participant.visible = [windowId] { return g_pNewUISystem != nullptr && g_pNewUISystem->IsVisible(windowId); };
     participant.measure = [width, height] { return PlacementParticipant::Size{width, height}; };
-    participant.place = [getWindow, setPosition, homeX, homeY](const PlacementParticipant::Box* box)
+    participant.place = [getWindow](const PlacementParticipant::Box* box)
     {
-        const auto hud =
-            UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::HudFrame, WindowWidth, WindowHeight);
-        const float left = box != nullptr ? box->left : UI::Scaling::PositionX(hud, static_cast<float>(homeX));
-        const float top = box != nullptr ? box->top : UI::Scaling::PositionY(hud, static_cast<float>(homeY));
-        setPosition(static_cast<int>(std::lround(UI::Scaling::LogicalX(hud, left))),
-                    static_cast<int>(std::lround(UI::Scaling::LogicalY(hud, top))));
-        if (mu::ui::window::CObject* window = getWindow ? getWindow() : nullptr)
-            window->PlaceDocument(left, top, box != nullptr ? box->scale : hud.scaleX);
+        mu::ui::window::CObject* window = getWindow ? getWindow() : nullptr;
+        if (window == nullptr)
+            return;
+        if (box != nullptr)
+            window->PlaceDocument(box->left, box->top, box->scale);
+        else
+            window->ClearPlacement();
     };
     RegisterParticipant(name, std::move(participant));
     g_windows[std::string(name)].getWindow = std::move(getWindow);
@@ -402,8 +399,8 @@ static void UpdateUncoveredArea(Rml::ElementDocument* workspace, const Rml::Elem
 
 static void PlaceSlots(const Rml::ElementList& slots, const UI::Scaling::Transform& dock)
 {
-    // Each open window's logical space becomes its slot: (0, 0) at the slot's top-left, at the
-    // region's scale.
+    // Each open window's document goes to its slot: its root at the slot's top-left, at the region's
+    // scale.
     for (Rml::Element* slot : slots)
     {
         Entry* entry = EntryFor(slot);
@@ -428,11 +425,9 @@ static void PlaceSlots(const Rml::ElementList& slots, const UI::Scaling::Transfo
         }
         if (window == nullptr)
             continue;
-        const UI::Scaling::Transform transform{scale, scale, offset.x, offset.y,
-                                               UI::Scaling::TypographyScale(WindowWidth, WindowHeight)};
         if (!entry->placed)
             window->ResetSlotDrag();
-        window->PlaceInSlot(transform);
+        window->PlaceInWorkspace(offset.x, offset.y, scale);
         if (slot->IsClassSet("fill"))
         {
             const Rml::Vector2f size = slot->GetBox().GetSize(Rml::BoxArea::Border);
@@ -461,13 +456,13 @@ static void RestoreUnslotted(const Rml::ElementList& slots)
         if (entry.participant.place && !entry.hasBox)
             entry.participant.place(nullptr);
         mu::ui::window::CObject* window = entry.getWindow ? entry.getWindow() : nullptr;
-        if (window == nullptr || window->GetLayoutMode() != UI::Scaling::LayoutMode::Slot)
+        if (window == nullptr || !window->IsInWorkspace())
             continue;
         const bool hasSlot =
             std::any_of(slots.begin(), slots.end(), [&](Rml::Element* slot) { return EntryFor(slot) == &entry; });
         if (!hasSlot)
         {
-            window->LeaveSlot(UI::Layout::ForInterface(entry.windowId));
+            window->LeaveWorkspace();
             entry.placed = false;
         }
     }

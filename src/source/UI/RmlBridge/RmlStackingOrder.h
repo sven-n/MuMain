@@ -11,6 +11,9 @@
 // See docs/rmlui-ui-system/STATUS.md, "Stacking order".
 namespace UI::RmlBridge
 {
+// The panels that stand over the HUD and its logs (the command windows).
+inline constexpr float ForegroundPanelLayerDepth = 10.65f;
+
 // The scene whose windows a document belongs to. The original drew CNewUIManager's windows only in
 // the main scene, a document renders in every scene: outside the main scene the main-scene
 // documents are suspended (RmlTheme.h, SuspendMainSceneDocumentsOutsideMainScene()). The login,

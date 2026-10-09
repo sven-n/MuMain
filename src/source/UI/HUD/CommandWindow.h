@@ -5,8 +5,8 @@
 #pragma once
 
 #include "UI/Core/WindowManager.h"
-#include "UI/Core/UILayoutPolicy.h"
 #include "UI/HUD/CommandWindowRmlModel.h"
+#include "UI/RmlBridge/RmlStackingOrder.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Scaling/UITransform.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -21,7 +21,7 @@ namespace mu::ui::window
     class CCommandWindow : public CObject
     {
     public:
-        static constexpr float LayerDepth = UI::Layout::ForegroundPanelLayerDepth;
+        static constexpr float LayerDepth = UI::RmlBridge::ForegroundPanelLayerDepth;
 
         enum eCOMMAND_WINDOW_SIZE
         {

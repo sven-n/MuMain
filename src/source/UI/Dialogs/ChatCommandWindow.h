@@ -3,8 +3,8 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
-#include "UI/Core/UILayoutPolicy.h"
 #include "UI/Dialogs/ChatCommandRmlModel.h"
+#include "UI/RmlBridge/RmlStackingOrder.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Scaling/UITransform.h"
 #include "GameLogic/Commands/ChatCommandCatalog.h"
@@ -72,7 +72,7 @@ class CChatCommandWindow : public CObject
     };
 
 public:
-    static constexpr float LayerDepth = UI::Layout::ForegroundPanelLayerDepth;
+    static constexpr float LayerDepth = UI::RmlBridge::ForegroundPanelLayerDepth;
     static constexpr int WindowHeight = UI::Scaling::DockLogicalBottom;
 
     CChatCommandWindow();

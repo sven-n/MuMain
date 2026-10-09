@@ -31,14 +31,12 @@ namespace mu::ui::window
         HWND m_hRelatedWnd;
         bool m_bRender, m_bUpdate;
         bool m_bActive;
-        UI::Scaling::LayoutMode m_layoutMode;
-        UI::Scaling::Transform m_slotTransform{1.f, 1.f, 0.f, 0.f, 1.f};
+        bool m_inWorkspace = false;
         UI::RmlBridge::FillPlacementSize m_fillSize;
         UI::RmlBridge::SlotPlacement m_slotPlacement;
     public:
         CObject()
-            : m_hRelatedWnd(nullptr), m_bRender(true), m_bUpdate(true), m_bActive(true),
-              m_layoutMode(UI::Scaling::LayoutMode::Stage)
+            : m_hRelatedWnd(nullptr), m_bRender(true), m_bUpdate(true), m_bActive(true)
         {
         }
         virtual ~CObject() {}
@@ -51,8 +49,6 @@ namespace mu::ui::window
         // While the player types in a RmlUi field, keys go only to the window that claims the
         // field's document; every other window's keys and hotkeys wait (CManager::UpdateKeyEvent()).
         virtual bool TakesTypingFrom(const Rml::ElementDocument* document) const { return false; }
-        void SetLayoutMode(UI::Scaling::LayoutMode mode) { m_layoutMode = mode; }
-        UI::Scaling::LayoutMode GetLayoutMode() const { return m_layoutMode; }
         // A window drawn wholly by RmlUi whose hit box reads its #panel returns that document: a
         // theme's data-fit="fill" slot then sizes the #panel. How the content fills it is the theme's.
         virtual Rml::ElementDocument* GetFillDocument() const { return nullptr; }
@@ -72,25 +68,29 @@ namespace mu::ui::window
         virtual Rml::ElementDocument* GetPlacedDocument() const { return nullptr; }
         // The id of the element the slot places in that document.
         virtual const char* PlacedRootId() const { return "panel"; }
-        // The workspace places this window: its logical space is `transform`, with (0, 0) at the
-        // slot's top-left.
-        void PlaceInSlot(const UI::Scaling::Transform& transform)
+        // The workspace places this window in a slot: its document's root at the slot's top-left
+        // (screen pixels), at the slot's scale.
+        void PlaceInWorkspace(float left, float top, float scale)
         {
-            m_layoutMode = UI::Scaling::LayoutMode::Slot;
-            m_slotTransform = transform;
-            PlaceDocument(transform.offsetX, transform.offsetY, transform.scaleX);
+            m_inWorkspace = true;
+            PlaceDocument(left, top, scale);
         }
-        // Places the document's root at `left`/`top` (screen pixels) and `scale`, leaving the
-        // window's own layout mode alone (a HUD part keeps its HUD space).
+        bool IsInWorkspace() const { return m_inWorkspace; }
+        // Places the document's root at `left`/`top` (screen pixels) and `scale`.
         void PlaceDocument(float left, float top, float scale)
         {
             if (m_slotPlacement.Set(left, top, scale))
                 m_slotPlacement.Apply(GetPlacedDocument(), PlacedRootId());
         }
-        // The theme gives this window no slot any more: it returns to `mode`.
-        void LeaveSlot(UI::Scaling::LayoutMode mode)
+        // The theme gives this window no slot any more: its document goes back to the theme's own
+        // placement for it.
+        void LeaveWorkspace()
         {
-            m_layoutMode = mode;
+            m_inWorkspace = false;
+            ClearPlacement();
+        }
+        void ClearPlacement()
+        {
             if (m_slotPlacement.Set(0.f, 0.f, 0.f))
                 m_slotPlacement.Apply(GetPlacedDocument(), PlacedRootId());
         }
@@ -98,14 +98,6 @@ namespace mu::ui::window
         void ResetSlotDrag() const { UI::RmlBridge::SlotPlacement::ResetDrag(GetPlacedDocument(), PlacedRootId()); }
         // Once a frame: gives a document rebuilt since (a theme switch) its slot placement again.
         void SyncSlotPlacement() const { m_slotPlacement.Sync(GetPlacedDocument(), PlacedRootId()); }
-        // The transform this window's logical coordinates map through to screen pixels.
-        UI::Scaling::Transform GetLayoutTransform() const
-        {
-            if (m_layoutMode == UI::Scaling::LayoutMode::Slot)
-                return m_slotTransform;
-            return UI::Scaling::TransformForLayout(m_layoutMode, static_cast<int>(WindowWidth),
-                                                   static_cast<int>(WindowHeight));
-        }
 
         // Virtual so a window needing more than a flag flip on show/hide (e.g. toggling its own
         // sprites) still runs correctly through CManager's generic CObject*/IObject* dispatch.

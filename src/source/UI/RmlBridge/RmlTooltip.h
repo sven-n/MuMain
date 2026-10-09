@@ -81,20 +81,8 @@ namespace UI::RmlBridge::Tooltip
     {
         std::vector<Line> lines;
 
-        // Real screen-pixel anchor -- already converted by the CALLER using whichever transform
-        // actually applies to its own coordinate's origin (usually
-        // UI::Scaling::PositionX/Y(UI::Scaling::GetActiveTransform(), refX/refY), the same
-        // conversion CharacterInfoWindow/PartyInfoWindow/PetInfoWindow/MyQuestInfoWindow already do
-        // for their own root_x/root_y). Show() does NOT apply any transform of its own -- it used
-        // to, via the ambient UI::Scaling::GetActiveTransform(), but that's wrong for a caller whose
-        // anchor is meaningful only through a DIFFERENT transform than whatever's ambient in its own
-        // scope (e.g. the skill-hotkey tooltip: its anchor is relative to MainFrameWindow's own
-        // reference frame (the screen scaled by the dp ratio), but
-        // MainFrameWindow's own ambient GetLayoutMode() resolves to a completely different formula --
-        // see MainFrameWindow.cpp's own comment). Pushing the conversion out to each caller means
-        // every caller picks the transform that's actually correct for its own anchor, instead of
-        // this shared primitive guessing at "whatever's active right now." Not a live cursor
-        // position and not `dp`.
+        // The anchor in window pixels: the caller converts it from whatever space its own point is
+        // in (a drawn element's box, a projected world point). Show() applies no transform.
         float anchorX = 0.0f;
         float anchorY = 0.0f;
         AnchorPoint anchor = AnchorPoint::BelowLeft;

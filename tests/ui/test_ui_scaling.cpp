@@ -21,7 +21,6 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/NPCs/NPCShop.h"
 #include "UI/Options/OptionWindow.h"
-#include "UI/Core/UILayoutPolicy.h"
 #include "UI/Scaling/UITransform.h"
 #include "UI/Widgets/Button.h"
 
@@ -101,17 +100,13 @@ TEST_CASE("dialogs scale with the viewport and stop at a readable cap [ui][scali
 
 TEST_CASE("HUD fills the viewport while dialogs stay capped [ui][scaling]")
 {
-    const auto hud = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::ScreenOverlay, 1920, 1080);
+    const auto hud = UI::Scaling::ScreenOverlayTransform(1920, 1080);
     CHECK(UI::Scaling::PositionX(hud, 640.0f) == doctest::Approx(1920.0f));
     CHECK(UI::Scaling::PositionY(hud, 480.0f) == doctest::Approx(1080.0f));
 
-    const auto frame = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::HudFrame, 1920, 1080);
-    CHECK(frame.scaleX == doctest::Approx(UI::Scaling::BottomHudScale(1920, 1080)));
-    CHECK(frame.scaleY == doctest::Approx(frame.scaleX));
-    CHECK(frame.offsetX == doctest::Approx(0.0f));
-    CHECK(frame.offsetY == doctest::Approx(0.0f));
+    CHECK(UI::Scaling::BottomHudScale(1920, 1080) == doctest::Approx(2.0f));
 
-    const auto dialog = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Stage, 1920, 1080);
+    const auto dialog = UI::Scaling::PanelTransform(1920, 1080);
     CHECK(dialog.scaleX == doctest::Approx(2.0f));
     CHECK(dialog.offsetX == doctest::Approx(320.0f));
     CHECK(dialog.offsetY == doctest::Approx(60.0f));
@@ -119,16 +114,16 @@ TEST_CASE("HUD fills the viewport while dialogs stay capped [ui][scaling]")
 
 TEST_CASE("docks use a moderate large-screen cap without changing dialogs [ui][scaling]")
 {
-    const auto smallDock = UI::Scaling::DockLeftTransform(1280, 720);
+    const auto smallDock = UI::Scaling::DockRightTransform(1280, 720);
     CHECK(smallDock.scaleX == doctest::Approx(1.5f));
     CHECK(smallDock.scaleY == doctest::Approx(1.5f));
 
-    const auto fullHdDock = UI::Scaling::DockLeftTransform(1920, 1080);
+    const auto fullHdDock = UI::Scaling::DockRightTransform(1920, 1080);
     CHECK(fullHdDock.scaleX == doctest::Approx(2.25f));
     CHECK(fullHdDock.scaleY == doctest::Approx(2.25f));
     CHECK(UI::Scaling::PositionY(fullHdDock, UI::Scaling::DockLogicalBottom) == doctest::Approx(978.0f));
 
-    const auto fourKDock = UI::Scaling::DockLeftTransform(3840, 2160);
+    const auto fourKDock = UI::Scaling::DockRightTransform(3840, 2160);
     CHECK(fourKDock.scaleX == doctest::Approx(2.25f));
     CHECK(fourKDock.scaleY == doctest::Approx(2.25f));
 
@@ -321,26 +316,6 @@ TEST_CASE("right dock anchors existing panel columns to the viewport edge [ui][s
     CHECK(UI::Scaling::LogicalX(dock, 1492.5f) == doctest::Approx(450.0f));
 }
 
-TEST_CASE("right-side status overlays stay adjacent to right-docked panels [ui][scaling]")
-{
-    using UI::Scaling::LayoutMode;
-    for (const auto interfaceKey : {mu::ui::window::INTERFACE_ITEM_ENDURANCE_INFO, mu::ui::window::INTERFACE_PARTY_INFO_WINDOW})
-    {
-        const auto overlayMode = UI::Layout::ForInterface(interfaceKey);
-        CHECK(overlayMode == LayoutMode::DockRight);
-
-        for (const auto [width, height] : {std::pair{640, 480}, std::pair{1920, 1080}, std::pair{3840, 2160}})
-        {
-            const auto overlay = UI::Scaling::TransformForLayout(overlayMode, width, height);
-            const auto panel = UI::Scaling::DockRightTransform(width, height);
-            const float overlayRight = UI::Scaling::PositionX(overlay, 448.0f);
-            const float panelLeft = UI::Scaling::PositionX(panel, 450.0f);
-
-            CHECK(panelLeft - overlayRight == doctest::Approx(UI::Scaling::SizeX(panel, 2.0f)));
-        }
-    }
-}
-
 TEST_CASE("docked command window ends at the bottom HUD top [ui][scaling]")
 {
     CHECK(UI::Scaling::PositionY(
@@ -360,11 +335,11 @@ TEST_CASE("command windows render between HUD and modal layers [ui][scaling]")
     CCommandWindow commandWindow;
     mu::ui::window::CChatCommandWindow commandListWindow;
 
-    CHECK(UI::Layout::ForegroundPanelLayerDepth > 10.6f);
-    CHECK(UI::Layout::ForegroundPanelLayerDepth < 10.7f);
-    CHECK(commandWindow.GetLayerDepth() == doctest::Approx(UI::Layout::ForegroundPanelLayerDepth));
+    CHECK(UI::RmlBridge::ForegroundPanelLayerDepth > 10.6f);
+    CHECK(UI::RmlBridge::ForegroundPanelLayerDepth < 10.7f);
+    CHECK(commandWindow.GetLayerDepth() == doctest::Approx(UI::RmlBridge::ForegroundPanelLayerDepth));
     CHECK(commandListWindow.GetLayerDepth()
-          == doctest::Approx(UI::Layout::ForegroundPanelLayerDepth));
+          == doctest::Approx(UI::RmlBridge::ForegroundPanelLayerDepth));
 }
 
 TEST_CASE("input screen bounds accept only positive resize dimensions [ui][scaling]")
@@ -505,54 +480,19 @@ TEST_CASE("map splash centers in physical window pixels [ui][scaling]")
     CHECK(UI::MapName::PhysicalLeft(1920) == doctest::Approx(877.0f));
 }
 
-TEST_CASE("the HUD board reconstructs the bottom HUD at 640x480 and 1024x768 [ui][scaling]")
-{
-    const auto reference = UI::Scaling::HudBoardTransform(640, 480);
-    CHECK(reference.scaleX == doctest::Approx(1.0f));
-    CHECK(reference.offsetX == doctest::Approx(0.0f));
-    CHECK(UI::Scaling::PositionX(reference, 152.0f) == doctest::Approx(152.0f));
-    CHECK(UI::Scaling::PositionX(reference, 488.0f) == doctest::Approx(488.0f));
-
-    const auto center = UI::Scaling::HudBoardTransform(1024, 768);
-    CHECK(center.scaleX == doctest::Approx(1.6f));
-    CHECK(UI::Scaling::PositionX(center, 152.0f) == doctest::Approx(243.2f));
-    CHECK(UI::Scaling::PositionX(center, 488.0f) == doctest::Approx(780.8f));
-}
-
-TEST_CASE("the HUD board centres on wide screens and caps at 2x [ui][scaling]")
-{
-    const auto hdCenter = UI::Scaling::HudBoardTransform(1280, 720);
-    CHECK(hdCenter.scaleX == doctest::Approx(1.5f));
-    CHECK(UI::Scaling::PositionX(hdCenter, 152.0f) == doctest::Approx(388.0f));
-    CHECK(UI::Scaling::PositionX(hdCenter, 320.0f) == doctest::Approx(640.0f));
-    CHECK(UI::Scaling::PositionX(hdCenter, 488.0f) == doctest::Approx(892.0f));
-
-    const auto wideCenter = UI::Scaling::HudBoardTransform(1920, 1200);
-    CHECK(wideCenter.scaleX == doctest::Approx(2.0f));
-    CHECK(UI::Scaling::PositionX(wideCenter, 320.0f) == doctest::Approx(960.0f));
-    CHECK(UI::Scaling::PositionY(wideCenter, 429.0f) == doctest::Approx(1098.0f));
-}
-
-TEST_CASE("the HUD board round trips window positions [ui][scaling]")
-{
-    const auto center = UI::Scaling::HudBoardTransform(1920, 1200);
-    CHECK(UI::Scaling::LogicalX(center, UI::Scaling::PositionX(center, 320.0f)) == doctest::Approx(320.0f));
-    CHECK(UI::Scaling::LogicalY(center, UI::Scaling::PositionY(center, 450.0f)) == doctest::Approx(450.0f));
-}
-
 TEST_CASE("world viewport spans the window while docks remain at the rounded HUD top [ui][scaling]")
 {
     const auto hd = UI::Scaling::WorldViewport(1280, 720, false);
     CHECK(hd.width == 1280);
     CHECK(hd.height == 720);
     CHECK(UI::Scaling::WorldViewportAspect(1280, 720, false) == doctest::Approx(1280.0f / 720.0f));
-    const auto hdDock = UI::Scaling::DockLeftTransform(1280, 720);
+    const auto hdDock = UI::Scaling::DockRightTransform(1280, 720);
     CHECK(UI::Scaling::PositionY(hdDock, 432.0f) == doctest::Approx(644.0f));
 
     const auto sxga = UI::Scaling::WorldViewport(1280, 1024, false);
     CHECK(sxga.width == 1280);
     CHECK(sxga.height == 1024);
-    const auto sxgaDock = UI::Scaling::DockLeftTransform(1280, 1024);
+    const auto sxgaDock = UI::Scaling::DockRightTransform(1280, 1024);
     CHECK(UI::Scaling::PositionY(sxgaDock, 432.0f) == doctest::Approx(922.0f));
 
     const auto topView = UI::Scaling::WorldViewport(1920, 1200, true);
@@ -592,26 +532,6 @@ TEST_CASE("legacy UI preserves logical input and world-overlay coordinates [ui][
     CHECK(UI::Scaling::SizeY(legacy, 13.0f) == doctest::Approx(19.5f));
     CHECK(UI::Scaling::FontPointSize(FontRole::Normal, legacy) == 11);
     CHECK(UI::Scaling::FontPointSize(FontRole::Fixed, legacy) == 13);
-}
-
-TEST_CASE("interface policy selects viewport dock and dialog layouts [ui][scaling]")
-{
-    using UI::Scaling::LayoutMode;
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MAINFRAME) == LayoutMode::HudFrame);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_SKILL_LIST) == LayoutMode::HudBoard);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_CRYWOLF) == LayoutMode::HudBoard);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_WINDOW_MENU) == LayoutMode::HudBoard);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MASTER_LEVEL) == LayoutMode::HudBoard);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_HOTKEY) == LayoutMode::HudFrame);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MINI_MAP) == LayoutMode::ScreenOverlay);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE) == LayoutMode::HudFrame);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_ITEM_ENDURANCE_INFO) == LayoutMode::DockRight);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_PARTY_INFO_WINDOW) == LayoutMode::DockRight);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_INVENTORY) == LayoutMode::DockRight);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MOVEMAP) == LayoutMode::DockLeft);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_FRIEND) == LayoutMode::FloatingWorkspace);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MESSAGEBOX) == LayoutMode::Stage);
-    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_NAME_WINDOW) == LayoutMode::ScreenOverlay);
 }
 
 TEST_CASE("floating windows keep uniform scale across the full viewport [ui][scaling]")
@@ -851,19 +771,18 @@ TEST_CASE("layout typography grows gradually and fits bounded controls [ui][scal
     CHECK(UI::Scaling::FontPointSize(FontRole::Fixed, fourK) == 17);
 }
 
-TEST_CASE("every layout sizes native text by the one typography scale [ui][scaling]")
+TEST_CASE("every transform sizes native text by the one typography scale [ui][scaling]")
 {
-    using UI::Scaling::LayoutMode;
     for (const auto [width, height] : {std::pair{1024, 768}, std::pair{1280, 720}, std::pair{1920, 1080},
                                        std::pair{3840, 2160}})
     {
         const float typography = UI::Scaling::TypographyScale(width, height);
         CHECK(typography == doctest::Approx(UI::Scaling::PanelTransform(width, height).scaleX));
-        for (const LayoutMode mode : {LayoutMode::Stage, LayoutMode::HudBoard, LayoutMode::HudFrame,
-                                      LayoutMode::DockLeft, LayoutMode::DockRight, LayoutMode::FloatingWorkspace,
-                                      LayoutMode::ScreenOverlay})
+        for (const auto& transform :
+             {UI::Scaling::PanelTransform(width, height), UI::Scaling::DockRightTransform(width, height),
+              UI::Scaling::FloatingWorkspaceTransform(width, height), UI::Scaling::ScreenOverlayTransform(width, height),
+              UI::Scaling::TypographyUnitsTransform(width, height)})
         {
-            const auto transform = UI::Scaling::TransformForLayout(mode, width, height);
             CHECK(transform.typographyScale == doctest::Approx(typography));
             CHECK(UI::Scaling::NativeTextPixelSize(FontRole::Normal, transform)
                   == doctest::Approx(UI::Scaling::NativeTextPixelSize(FontRole::Normal, width, height)));

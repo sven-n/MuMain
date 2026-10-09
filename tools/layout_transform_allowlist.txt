@@ -6,11 +6,8 @@
 
 Engine/Object/ZzzInventory.cpp: 1
 Render/Text/CUIRenderTextSDLTtf.cpp: 2
-UI/Core/UILayoutPolicy.cpp: 9
 UI/Core/WindowManager.cpp: 4
-UI/Core/WindowObject.h: 6
-UI/Placement/WindowPlacement.cpp: 6
-UI/RmlBridge/RmlNativeText.cpp: 2
+UI/Placement/WindowPlacement.cpp: 2
 UI/RmlBridge/RmlPanelGeometry.cpp: 5
 UI/RmlBridge/RmlPanelGeometry.h: 3
 UI/RmlBridge/RmlRootTransform.h: 2

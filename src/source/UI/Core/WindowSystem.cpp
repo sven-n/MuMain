@@ -626,33 +626,22 @@ bool CSystem::LoadMainSceneInterface()
     slot(INTERFACE_INGAMESHOP, "in_game_shop", m_pNewInGameShop, "in_game_shop.rml");
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
-    // Event HUDs drawn from their own HUD-space position; sizes are each window's own constants,
-    // homes the positions created above.
-    const auto hudSlot = [](DWORD windowId, const char* slotName, auto*& window, float width, float height,
-                            int homeX, int homeY)
+    // Event HUDs the workspace places; sizes are each window's own constants, in HUD units.
+    const auto hudSlot = [](DWORD windowId, const char* slotName, auto*& window, float width, float height)
     {
-        UI::Placement::RegisterHudWindow(
-            slotName, windowId, [&window]() -> CObject* { return window; },
-            [&window](int x, int y)
-            {
-                if (window != nullptr)
-                    window->SetPos(x, y);
-            },
-            width, height, homeX, homeY);
+        UI::Placement::RegisterHudWindow(slotName, windowId, [&window]() -> CObject* { return window; }, width, height);
     };
-    hudSlot(INTERFACE_BLOODCASTLE_TIME, "blood_castle_time", m_pNewBloodCastle, 124.f, 81.f, 640 - 127, 480 - 132);
-    hudSlot(INTERFACE_CHAOSCASTLE_TIME, "chaos_castle_time", m_pNewChaosCastleTime, 124.f, 81.f, 640 - 127, 480 - 132);
-    hudSlot(INTERFACE_BATTLE_SOCCER_SCORE, "battle_soccer", m_pNewBattleSoccerScore, 131.f, 70.f, 509, 359);
-    hudSlot(INTERFACE_DUEL_WINDOW, "duel", m_pNewDuelWindow, 131.f, 70.f, 509, 359);
-    hudSlot(INTERFACE_KANTURU_INFO, "kanturu_info", m_pNewKanturuInfoWindow, 99.f, 78.f, 541, 351);
-    hudSlot(INTERFACE_EMPIREGUARDIAN_TIMER, "empire_guardian_timer", m_pNewEmpireGuardianTimer, 124.f, 81.f, 507, 342);
-    hudSlot(INTERFACE_DOPPELGANGER_FRAME, "doppelganger_frame", m_pNewDoppelGangerFrame, 227.f, 87.f, 640 - 227,
-            480 - 51 - 87);
-    // The duel watcher's HUD replaces the main HUD; home is the original's bottom edge.
-    hudSlot(INTERFACE_DUELWATCH_MAINFRAME, "duel_watch_hud", m_pNewDuelWatchMainFrameWindow, 640.f, 51.f, 0, 480 - 51);
-    // Its position is the list's bottom-left corner; the spectators stack upwards from it.
-    hudSlot(INTERFACE_DUELWATCH_USERLIST, "duel_watch_users", m_pNewDuelWatchUserListWindow, 57.f, 0.f, 640 - 57,
-            480 - 51);
+    hudSlot(INTERFACE_BLOODCASTLE_TIME, "blood_castle_time", m_pNewBloodCastle, 124.f, 81.f);
+    hudSlot(INTERFACE_CHAOSCASTLE_TIME, "chaos_castle_time", m_pNewChaosCastleTime, 124.f, 81.f);
+    hudSlot(INTERFACE_BATTLE_SOCCER_SCORE, "battle_soccer", m_pNewBattleSoccerScore, 131.f, 70.f);
+    hudSlot(INTERFACE_DUEL_WINDOW, "duel", m_pNewDuelWindow, 131.f, 70.f);
+    hudSlot(INTERFACE_KANTURU_INFO, "kanturu_info", m_pNewKanturuInfoWindow, 99.f, 78.f);
+    hudSlot(INTERFACE_EMPIREGUARDIAN_TIMER, "empire_guardian_timer", m_pNewEmpireGuardianTimer, 124.f, 81.f);
+    hudSlot(INTERFACE_DOPPELGANGER_FRAME, "doppelganger_frame", m_pNewDoppelGangerFrame, 227.f, 87.f);
+    // The duel watcher's HUD replaces the main HUD.
+    hudSlot(INTERFACE_DUELWATCH_MAINFRAME, "duel_watch_hud", m_pNewDuelWatchMainFrameWindow, 640.f, 51.f);
+    // Its slot is the list's bottom-left corner; the spectators stack upwards from it.
+    hudSlot(INTERFACE_DUELWATCH_USERLIST, "duel_watch_users", m_pNewDuelWatchUserListWindow, 57.f, 0.f);
     // Named only in data-closes.
     UI::Placement::RegisterName(INTERFACE_MUHELPER_SKILL_LIST, "mu_helper_skill_list");
     // Places itself; its slot is only where it first opens (UI::Placement::InitialPosition()).

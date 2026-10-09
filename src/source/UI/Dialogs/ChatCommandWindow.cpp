@@ -748,7 +748,7 @@ void mu::ui::window::CChatCommandWindow::SyncRmlModel()
     if (!m_RmlView.Document())
         return;
 
-    // Layer depth UI::Layout::ForegroundPanelLayerDepth: over the HUD and its logs.
+    // Layer depth UI::RmlBridge::ForegroundPanelLayerDepth: over the HUD and its logs.
     UI::RmlBridge::SyncDocumentVisibilityInFront(m_RmlView.Document(), IsVisible());
     if (!IsVisible())
         return;

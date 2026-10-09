@@ -84,7 +84,6 @@ CCreditWin::CCreditWin()
     , m_aeTextState{}
     , m_textElapsed(DurationMs::zero())
 {
-	// Layout mode is set by CManager::AddUIObj() via UI::Layout::ForInterface(), not here.
 }
 
 CCreditWin::~CCreditWin()

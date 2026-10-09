@@ -12,7 +12,7 @@ class ElementDocument;
 //
 // A theme declares it (theme.ini [Capabilities] NativeTextSize=1) and a document opts in with
 // `class="native-text"` on its <body> (inert in other themes): its root font-size is then set to
-// the native text renderer's size (UI::Scaling::NativeTextPixelSize, LayoutMode::Stage), and its
+// the native text renderer's size (UI::Scaling::NativeTextPixelSize), and its
 // RCSS sizes text in `rem` -- 1rem is the original's text size at every resolution and UI scale.
 // For `dp` documents only: a document inside a transform: scale(root_scale) panel would scale the
 // root size a second time; those counter-scale text leaves instead (RmlRootTransform.h).

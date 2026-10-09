@@ -120,7 +120,7 @@ constexpr DocumentPlacement Placements[] = {
     {"cursed_temple_enter.rml", 10.3f, MainScene},
     {"window_menu.rml", 10.4f, MainScene},
     {"main_frame.rml", 10.6f, MainScene},
-    {"command_window.rml", 10.65f, MainScene}, // UI::Layout::ForegroundPanelLayerDepth
+    {"command_window.rml", 10.65f, MainScene}, // UI::RmlBridge::ForegroundPanelLayerDepth
     {"chat_command.rml", 10.65f, MainScene},
     // The original drew it at 10.5, under the HUD; the modern theme's settings screen covers the
     // whole screen, HUD included. Still under the tooltips and message boxes.

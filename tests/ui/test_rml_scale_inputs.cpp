@@ -96,13 +96,14 @@ TEST_CASE("a HUD board stands on the window's bottom at the HUD's scale [ui][sca
 {
     Fixture fixture({1920, 1080});
     Rml::ElementDocument* document = fixture.Load("hud-board");
-    const auto board = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::HudBoard, 1920, 1080);
+    // The original screen at the HUD's scale, centred, standing on the window's bottom.
+    const float scale = UI::Scaling::BottomHudScale(1920, 1080);
 
     Rml::Vector2f offset, size;
     Drawn(document, offset, size);
-    CHECK(size.x == doctest::Approx(640.f * board.scaleX));
-    CHECK(offset.x == doctest::Approx(board.offsetX));
-    CHECK(offset.y == doctest::Approx(board.offsetY));
+    CHECK(size.x == doctest::Approx(640.f * scale));
+    CHECK(offset.x == doctest::Approx(1920.f / 2.f - 320.f * scale));
+    CHECK(offset.y == doctest::Approx(1080.f - 480.f * scale));
 }
 
 TEST_CASE("the scale inputs follow a resized context [ui][scale-inputs]")

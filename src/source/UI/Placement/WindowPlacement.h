@@ -18,7 +18,7 @@ struct Transform;
 
 // Places windows where the active theme's workspace.rml puts their slots. Each theme lays out
 // regions and slots in RML/RCSS; this lays the workspace out, reads back each open window's slot
-// and maps the window onto it (LayoutMode::Slot).
+// and places the window's document there.
 namespace UI::Placement
 {
 void RegisterParticipant(std::string_view name, PlacementParticipant participant);
@@ -33,7 +33,7 @@ using SetPosition = std::function<void(int x, int y)>;
 
 // `slotName` is the slot's data-window value. `document` is the window's RML file (for example
 // "character_info.rml"), whose #panel sizes a content slot; without one the slot takes the docked
-// windows' size. A window with no slot in the workspace keeps its own layout mode and position.
+// windows' size. A window with no slot in the workspace keeps the theme's own placement.
 void RegisterWindow(std::uint32_t windowId, std::string_view slotName, GetWindow getWindow, SetPosition setPosition,
                     const char* document = nullptr);
 // A window that can only be named in data-closes.
@@ -47,12 +47,10 @@ void CloseForOpening(std::uint32_t windowId);
 // pixels), as the window's first position. False when the theme has no such slot.
 bool InitialPosition(std::string_view slotName, float width, float height, float& x, float& y);
 
-// A window drawn from its own position in HUD space (LayoutMode::HudFrame) takes its place from a slot:
-// the slot's box, sized width x height HUD units, becomes its position, and its placed document's
-// root (CObject::GetPlacedDocument()) is put there at the HUD's scale. Without a slot both return
-// to (homeX, homeY).
-void RegisterHudWindow(std::string_view name, std::uint32_t windowId, GetWindow getWindow, SetPosition setPosition,
-                       float width, float height, int homeX, int homeY);
+// A HUD part the workspace places: its slot, sized width x height HUD units, puts its placed
+// document's root (CObject::GetPlacedDocument()) there at the HUD's scale. Without a slot the theme's
+// own placement for the document holds.
+void RegisterHudWindow(std::string_view name, std::uint32_t windowId, GetWindow getWindow, float width, float height);
 
 // Re-places every open component now. Call after a window opens or closes.
 void Arrange();

@@ -107,7 +107,7 @@ namespace mu::ui::window
     // Reusable RmlUi menu dialog -- one document/model, one instance, shown with different
     // GenericMenuConfig content per call. Sibling to CGenericConfirmDialog (UI/Dialogs/
     // GenericConfirmDialog.h): same single-active-instance-plus-queue shape, same dp-unit
-    // LayoutMode::Stage panel, same per-theme RCSS fork convention -- but no foreground/
+    // centred panel, same per-theme RCSS fork convention -- but no foreground/
     // background document split (that split exists solely to solve item3D's compositing-order
     // problem; no native consumer of this primitive uses item3D), no native text-input widget
     // seam, no 3D render pass.
