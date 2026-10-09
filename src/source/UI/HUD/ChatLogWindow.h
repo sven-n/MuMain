@@ -183,8 +183,6 @@ namespace mu::ui::window
             [this](Rml::DataModelConstructor& c, ChatLogRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/chat_log.rml"}},
             {.afterReload = [this] { OnRmlReloaded(); }}};
-        // The bottom edge Create() gave the window, HUD units, kept while the theme gives it no slot.
-        float m_HomeBottom = 0.f;
         // The log's bottom edge (screen pixels) and scale where it is placed; the resize bands
         // measure from them.
         float m_PanelBottomPx = 0.f;
@@ -206,7 +204,7 @@ namespace mu::ui::window
         CChatLogWindow();
         ~CChatLogWindow() override;
 
-        bool Create(CManager* pNewUIMng, int x, int y, int nShowingLines = 6);
+        bool Create(CManager* pNewUIMng, int nShowingLines = 6);
         void Release();
 
         void AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType = TYPE_ALL_MESSAGE);

@@ -28,7 +28,8 @@ namespace mu::ui::window
         };
 
     private:
-        POINT			m_BtnCommandGroupPos;
+        // The team buttons\' column, from the frame\'s top-left.
+        static constexpr POINT kBtnCommandGroupPos{0, 5};
         POINT			m_BtnCommandPos;
 
 
@@ -43,7 +44,7 @@ namespace mu::ui::window
         virtual ~CSiegeWarCommander();
 
     private:
-        virtual bool OnCreate(int x, int y);
+        virtual bool OnCreate();
         virtual bool OnUpdate();
         virtual void OnRelease();
 
@@ -52,8 +53,6 @@ namespace mu::ui::window
         virtual bool OnBtnProcess();
         void OnTeamClick(int team) override;
         void OnOrderClick(int order) override;
-        virtual void OnSetPos(int x, int y);
-
         void OnFillRmlModel(SiegeWarfareRmlModel& model) override;
 
 

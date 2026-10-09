@@ -37,7 +37,9 @@ body { pointer-events: none; }
 .text.bold { font-weight: bold; }
 .button-label { left: 0; top: 0; text-align: center; }
 
-#frame { position: absolute; width: 154px; height: 162px; }
+/* The frame's top-left on the HUD board: right of the HUD's centre, above the bar. */
+#siege_hud { position: absolute; left: 486px; top: 234px; width: 0; height: 0; }
+#frame { position: absolute; left: 0; top: 0; width: 154px; height: 162px; }
 #map { position: absolute; left: 25px; top: 28px; width: 128px; height: 128px; }
 #frame_art { position: absolute; left: 24px; top: 27px; width: 130px; height: 130px; border: 1px token(border-frame); }
 #time_frame { position: absolute; left: 20px; top: 158px; width: 134px; height: 37px; background-color: token(surface-panel); border: 1px token(border-frame); border-radius: token(radius-sm); }
@@ -70,7 +72,7 @@ body { pointer-events: none; }
 .order-icon.defence { left: 8px; top: 3px; width: 18px; height: 15px; decorator: image(sw-defence); }
 .order-icon.wait { left: 10px; top: 5px; width: 11px; height: 12px; decorator: image(sw-wait); }
 
-#skill { position: absolute; width: 128px; height: 53px; }
+#skill { position: absolute; left: 26px; top: -53px; width: 128px; height: 53px; }
 #skill_frame { position: absolute; left: 0; top: 0; width: 128px; height: 53px; decorator: image(sw-skill); }
 #skill_icon { position: absolute; left: 26px; top: 21px; width: 20px; height: 28px; }
 .kills-needed { left: 78px; top: 28px; }
@@ -83,7 +85,7 @@ body { pointer-events: none; }
 .scroll-down:hover { decorator: image(sw-scroll-down-over); }
 .scroll-down:active { decorator: image(sw-scroll-down-down); }
 
-#alpha_button { position: absolute; width: 38px; height: 23px; background-color: token(surface-raised); border: 1px token(border-frame); border-radius: token(radius-sm); }
+#alpha_button { position: absolute; left: 58px; top: 4px; width: 38px; height: 23px; background-color: token(surface-raised); border: 1px token(border-frame); border-radius: token(radius-sm); }
 #alpha_button:hover { background-color: token(accent-steel-hover); }
 #alpha_button:active { background-color: token(surface-recessed); }
 

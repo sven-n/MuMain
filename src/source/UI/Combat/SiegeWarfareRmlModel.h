@@ -6,8 +6,8 @@
 
 namespace mu::ui::window
 {
-// A 3 x 3 dot on the siege mini map, reference px on the 640 x 480 screen (not clipped to the
-// map, like the original's RenderColor()).
+// A 3 x 3 dot on the siege mini map, reference px from the frame's top-left (not clipped to the
+// map, like the original's RenderColor()). Every position of the model is from that corner.
 struct SiegeWarDotEntry
 {
     float left = 0.f, top = 0.f;
@@ -45,7 +45,6 @@ struct SiegeWarfareRmlModel
 {
     float boldTextPx = 0.f, bigTextPx = 0.f; // native text sizes in physical px
 
-    float frameX = 0.f, frameY = 0.f; // the mini map frame's top-left, reference px
     float alpha = 1.f;                // the transparency button's value (0.5 .. 1)
     Rml::String mapRect;              // the shown part of World31/Map1, texture px "x y w h"
     Rml::String alphaLabel;

@@ -131,7 +131,7 @@ bool CSystem::Create()
     m_pNewUIMng = new CManager;
 
     m_pNewChatLogWindow = new CChatLogWindow;
-    if (false == m_pNewChatLogWindow->Create(m_pNewUIMng, 0, 480 - 50 - 47, 6))
+    if (false == m_pNewChatLogWindow->Create(m_pNewUIMng, 6))
         return false;
 
     m_pNewSystemLogWindow = new CSystemLogWindow;
@@ -411,7 +411,7 @@ bool CSystem::LoadMainSceneInterface()
     }
 
     m_pNewSiegeWarfare = new CSiegeWarfare;
-    if (m_pNewSiegeWarfare->Create(m_pNewUIMng, 486, 234) == false)
+    if (m_pNewSiegeWarfare->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewItemEnduranceInfo = new CItemEnduranceInfo;

@@ -12,7 +12,7 @@ CSiegeWarObserver::CSiegeWarObserver() {}
 
 CSiegeWarObserver::~CSiegeWarObserver() {}
 
-bool mu::ui::window::CSiegeWarObserver::OnCreate(int x, int y)
+bool mu::ui::window::CSiegeWarObserver::OnCreate()
 {
     return true;
 }
@@ -23,8 +23,6 @@ bool mu::ui::window::CSiegeWarObserver::OnUpdate()
 {
     return true;
 }
-
-void mu::ui::window::CSiegeWarObserver::OnSetPos(int x, int y) {}
 
 // Everyone else in view, as a dot (the original's RenderCharPosInMiniMap()).
 void mu::ui::window::CSiegeWarObserver::OnFillRmlModel(SiegeWarfareRmlModel& model)

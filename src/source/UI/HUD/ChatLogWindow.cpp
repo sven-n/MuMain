@@ -55,7 +55,7 @@ void mu::ui::window::CChatLogWindow::Init()
 
 }
 
-bool mu::ui::window::CChatLogWindow::Create(CManager* pNewUIMng, int x, int y, int nShowingLines /* = 6 */)
+bool mu::ui::window::CChatLogWindow::Create(CManager* pNewUIMng, int nShowingLines /* = 6 */)
 {
     Release();
 
@@ -64,17 +64,21 @@ bool mu::ui::window::CChatLogWindow::Create(CManager* pNewUIMng, int x, int y, i
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CHATLOGWINDOW, this);
-    m_HomeBottom = static_cast<float>(y);
     SetNumberOfShowingLines(nShowingLines);
 
     // A theme slot moves the log; the resize bands measure from its bottom edge, at its scale.
+    // Without a slot the log stands on the HUD.
     UI::RmlBridge::WorkspaceDocumentOptions options;
     options.measure = [this] { return UI::Placement::PlacementParticipant::Size{WND_WIDTH, static_cast<float>(m_WndSize.cy)}; };
     options.placed = [this](const UI::Placement::PlacementParticipant::Box* box)
     {
         const float hudScale = UI::Scaling::BottomHudScale(WindowWidth, WindowHeight);
         m_PanelScale = box != nullptr ? box->scale : hudScale;
-        m_PanelBottomPx = box != nullptr ? box->top + box->height : m_HomeBottom * hudScale;
+        UI::Placement::PlacementParticipant::Box hud;
+        if (box != nullptr)
+            m_PanelBottomPx = box->top + box->height;
+        else
+            m_PanelBottomPx = UI::Placement::SlotBox("main_hud", hud) ? hud.top : static_cast<float>(WindowHeight);
     };
     UI::RmlBridge::RegisterWorkspaceDocument("chat_log", [this] { return m_RmlView.Document(); }, "panel", std::move(options));
     // No LoadImages() any more: every sprite this window used is referenced by chat_log.rcss and

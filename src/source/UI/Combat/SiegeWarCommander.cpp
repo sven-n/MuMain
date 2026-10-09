@@ -12,7 +12,6 @@ using namespace mu::ui::window;
 
 mu::ui::window::CSiegeWarCommander::CSiegeWarCommander()
 {
-    memset(&m_BtnCommandGroupPos, 0, sizeof(POINT));
     memset(&m_BtnCommandPos, 0, sizeof(POINT));
 
     m_iCurSelectBtnGroup = -1;
@@ -24,7 +23,7 @@ mu::ui::window::CSiegeWarCommander::CSiegeWarCommander()
 
 mu::ui::window::CSiegeWarCommander::~CSiegeWarCommander() {}
 
-bool mu::ui::window::CSiegeWarCommander::OnCreate(int x, int y)
+bool mu::ui::window::CSiegeWarCommander::OnCreate()
 {
     return true;
 }
@@ -50,9 +49,10 @@ void mu::ui::window::CSiegeWarCommander::OnFillRmlModel(SiegeWarfareRmlModel& mo
     model.cursorVisible = m_iCurSelectBtnGroup != -1 && m_iCurSelectBtnCommand != -1 && m_bMouseInMiniMap;
     if (model.cursorVisible)
     {
-        // The pointer on the HUD board (#screen), whose reference px the document places in.
+        // The pointer from the frame's top-left (#siege_hud), whose reference px the document
+        // places in.
         Rml::Vector2f pointer;
-        UI::RmlBridge::PointerIn(Element("screen"), pointer);
+        UI::RmlBridge::PointerIn(Element("siege_hud"), pointer);
         model.cursorLeft = pointer.x;
         model.cursorTop = pointer.y;
         model.cursorCommand = m_iCurSelectBtnCommand;
@@ -120,12 +120,6 @@ void mu::ui::window::CSiegeWarCommander::OnOrderClick(int order)
         m_iCurSelectBtnCommand = order;
 }
 
-void mu::ui::window::CSiegeWarCommander::OnSetPos(int x, int y)
-{
-    m_BtnCommandGroupPos.x = x;
-    m_BtnCommandGroupPos.y = y + 5;
-}
-
 // Everyone in view except those with the siege side's buff, as a dot (the original's
 // RenderCharPosInMiniMap(); its per-kind colour branches were empty).
 void mu::ui::window::CSiegeWarCommander::FillCharacterDots(SiegeWarfareRmlModel& model)
@@ -152,8 +146,8 @@ void mu::ui::window::CSiegeWarCommander::FillGuildMemberDots(SiegeWarfareRmlMode
     for (const VisibleUnitLocation& unit : m_vGuildMemberLocationBuffer)
     {
         const POINT pos = MiniMapPoint(unit.x, unit.y);
-        if (pos.x < m_MiniMapPos.x || pos.x > m_MiniMapPos.x + 128 || pos.y < m_MiniMapPos.y ||
-            pos.y > m_MiniMapPos.y + 128)
+        if (pos.x < kMiniMapPos.x || pos.x > kMiniMapPos.x + 128 || pos.y < kMiniMapPos.y ||
+            pos.y > kMiniMapPos.y + 128)
             continue;
         model.dots.push_back({static_cast<float>(pos.x), static_cast<float>(pos.y)});
     }
@@ -163,8 +157,8 @@ void mu::ui::window::CSiegeWarCommander::FillTeamButtons(SiegeWarfareRmlModel& m
 {
     for (int i = 0; i < MAX_COMMANDGROUP; i++)
     {
-        model.teams.push_back({static_cast<float>(m_BtnCommandGroupPos.x),
-                               static_cast<float>(m_BtnCommandGroupPos.y + i * MINIMAP_BTN_GROUP_HEIGHT),
+        model.teams.push_back({static_cast<float>(kBtnCommandGroupPos.x),
+                               static_cast<float>(kBtnCommandGroupPos.y + i * MINIMAP_BTN_GROUP_HEIGHT),
                                i == m_iCurSelectBtnGroup, std::to_string(i + 1)});
     }
 }
@@ -176,8 +170,8 @@ void mu::ui::window::CSiegeWarCommander::FillCommandButtons(SiegeWarfareRmlModel
     const int row = std::min(m_iCurSelectBtnGroup, 4);
     for (int i = 0; i < MINIMAP_CMD_MAX; i++)
     {
-        model.orders.push_back({static_cast<float>(m_BtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH),
-                                static_cast<float>(m_BtnCommandGroupPos.y + (row + i) * MINIMAP_BTN_GROUP_HEIGHT), false, {}});
+        model.orders.push_back({static_cast<float>(kBtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH),
+                                static_cast<float>(kBtnCommandGroupPos.y + (row + i) * MINIMAP_BTN_GROUP_HEIGHT), false, {}});
     }
 }
 

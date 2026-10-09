@@ -38,10 +38,6 @@ mu::ui::window::CSiegeWarBase::CSiegeWarBase()
     m_bRenderSkillUI = false;
     m_bRenderToolTip = false;
 
-    memset(&m_MiniMapFramePos, 0, sizeof(POINT));
-    memset(&m_MiniMapPos, 0, sizeof(POINT));
-    memset(&m_SkillFramePos, 0, sizeof(POINT));
-
     memset(&m_HeroPosInWorld, 0, sizeof(POINT));
     memset(&m_HeroPosInMiniMap, 0, sizeof(POINT));
     memset(&m_MiniMapScaleOffset, 0, sizeof(POINT));
@@ -51,11 +47,9 @@ mu::ui::window::CSiegeWarBase::~CSiegeWarBase()
 {
 }
 
-bool mu::ui::window::CSiegeWarBase::Create(int x, int y)
+bool mu::ui::window::CSiegeWarBase::Create()
 {
-    SetPos(x, y);
-
-    if (!OnCreate(x, y))
+    if (!OnCreate())
         return false;
 
     if (battleCastle::IsBattleCastleStart() == true)
@@ -94,8 +88,6 @@ bool mu::ui::window::CSiegeWarBase::Update()
 
 void mu::ui::window::CSiegeWarBase::FillRmlModel(SiegeWarfareRmlModel& model)
 {
-    model.frameX = static_cast<float>(m_MiniMapFramePos.x);
-    model.frameY = static_cast<float>(m_MiniMapFramePos.y);
     model.alpha = m_fMiniMapAlpha;
 
     // RenderBitmap(IMAGE_MINIMAP, ..., 128 x 128, u = offset / (256 / scale), width 0.5 * scale):
@@ -331,8 +323,8 @@ void mu::ui::window::CSiegeWarBase::UpdateHeroPos()
     m_MiniMapScaleOffset.x = std::max<int>((m_HeroPosInWorld.x - (64 * m_iMiniMapScale)), 0);
     m_MiniMapScaleOffset.y = std::min<int>(std::max<int>((m_HeroPosInWorld.y - (64 * m_iMiniMapScale)), 0), 128);
 
-    m_HeroPosInMiniMap.x = m_HeroPosInWorld.x - m_MiniMapScaleOffset.x + m_MiniMapPos.x;
-    m_HeroPosInMiniMap.y = m_HeroPosInWorld.y - m_MiniMapScaleOffset.y + m_MiniMapPos.y;
+    m_HeroPosInMiniMap.x = m_HeroPosInWorld.x - m_MiniMapScaleOffset.x + kMiniMapPos.x;
+    m_HeroPosInMiniMap.y = m_HeroPosInWorld.y - m_MiniMapScaleOffset.y + kMiniMapPos.y;
 
     m_fMiniMapTexU = (float)(m_MiniMapScaleOffset.x) / (256.f / (float)m_iMiniMapScale);
     m_fMiniMapTexV = (float)(m_MiniMapScaleOffset.y) / (256.f / (float)m_iMiniMapScale);
@@ -340,8 +332,8 @@ void mu::ui::window::CSiegeWarBase::UpdateHeroPos()
 
 POINT mu::ui::window::CSiegeWarBase::MiniMapPoint(int x, int y) const
 {
-    return {x / m_iMiniMapScale - m_MiniMapScaleOffset.x + m_MiniMapPos.x,
-            (256 - y) / m_iMiniMapScale - m_MiniMapScaleOffset.y + m_MiniMapPos.y};
+    return {x / m_iMiniMapScale - m_MiniMapScaleOffset.x + kMiniMapPos.x,
+            (256 - y) / m_iMiniMapScale - m_MiniMapScaleOffset.y + kMiniMapPos.y};
 }
 
 void mu::ui::window::CSiegeWarBase::FillCommands(SiegeWarfareRmlModel& model)
@@ -353,8 +345,8 @@ void mu::ui::window::CSiegeWarBase::FillCommands(SiegeWarfareRmlModel& model)
             continue;
 
         const POINT pos = MiniMapPoint(command.byX, command.byY);
-        if (pos.x < m_MiniMapPos.x || pos.x > m_MiniMapPos.x + 128 || pos.y < m_MiniMapPos.y ||
-            pos.y > m_MiniMapPos.y + 128)
+        if (pos.x < kMiniMapPos.x || pos.x > kMiniMapPos.x + 128 || pos.y < kMiniMapPos.y ||
+            pos.y > kMiniMapPos.y + 128)
             continue;
 
         // A new command pulses: green and blue follow 1 + sin(lifetime * 0.2), clamped.
@@ -419,19 +411,6 @@ void mu::ui::window::CSiegeWarBase::FillSkill(SiegeWarfareRmlModel& model)
     {
         UI::RmlBridge::Tooltip::Hide(this);
     }
-}
-
-//---------------------------------------------------------------------------------------------
-// SetPos
-void mu::ui::window::CSiegeWarBase::SetPos(int x, int y)
-{
-    m_MiniMapFramePos.x = x;
-    m_MiniMapFramePos.y = y;
-    m_MiniMapPos.x = m_MiniMapFramePos.x + 25;
-    m_MiniMapPos.y = m_MiniMapFramePos.y + 28;
-    m_SkillFramePos.x = x + 26;
-    m_SkillFramePos.y = y - BATTLESKILL_FRAME_HEIGHT;
-    OnSetPos(x, y);
 }
 
 void  mu::ui::window::CSiegeWarBase::SetTime(int iHour, int iMinute)

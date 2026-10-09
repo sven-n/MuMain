@@ -37,7 +37,6 @@ mu::ui::window::CSiegeWarfare::CSiegeWarfare()
 
     m_bCreated = true;
 
-    memset(&m_Pos, 0, sizeof(POINT));
 }
 
 mu::ui::window::CSiegeWarfare::~CSiegeWarfare()
@@ -45,7 +44,7 @@ mu::ui::window::CSiegeWarfare::~CSiegeWarfare()
     Release();
 }
 
-bool mu::ui::window::CSiegeWarfare::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CSiegeWarfare::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -56,8 +55,6 @@ bool mu::ui::window::CSiegeWarfare::Create(CManager* pNewUIMng, int x, int y)
     BuildRmlUi();
 
     Show(true);
-
-    SetPos(x, y);
 
     return true;
 }
@@ -78,12 +75,6 @@ void mu::ui::window::CSiegeWarfare::Release()
     }
 
     m_RmlView.Release();
-}
-
-void mu::ui::window::CSiegeWarfare::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool mu::ui::window::CSiegeWarfare::UpdateMouseEvent()
@@ -165,8 +156,6 @@ void mu::ui::window::CSiegeWarfare::BindRmlModel(Rml::DataModelConstructor& c, S
 {
     c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("big_text_px", &model.bigTextPx);
-    c.Bind("frame_x", &model.frameX);
-    c.Bind("frame_y", &model.frameY);
     c.Bind("alpha", &model.alpha);
     c.Bind("map_rect", &model.mapRect);
     c.Bind("alpha_label", &model.alphaLabel);
@@ -262,8 +251,6 @@ void mu::ui::window::CSiegeWarfare::ApplyRmlModel(const SiegeWarfareRmlModel& ne
     SiegeWarfareRmlModel& model = m_RmlView.GetModel();
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::boldTextPx, "bold_text_px", next.boldTextPx);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::bigTextPx, "big_text_px", next.bigTextPx);
-    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::frameX, "frame_x", next.frameX);
-    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::frameY, "frame_y", next.frameY);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::alpha, "alpha", next.alpha);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::mapRect, "map_rect", next.mapRect);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::alphaLabel, "alpha_label", next.alphaLabel);
@@ -353,7 +340,7 @@ bool mu::ui::window::CSiegeWarfare::CreateMiniMapUI()
     }break;
     }
 
-    m_pSiegeWarUI->Create(m_Pos.x, m_Pos.y);
+    m_pSiegeWarUI->Create();
     Show(true);
 
     return true;
@@ -370,7 +357,7 @@ void mu::ui::window::CSiegeWarfare::CreatePreviewMiniMapUI(SIEGEWAR_TYPE type)
     }
     m_iCurSiegeWarType = type;
     m_bCreated = type != SIEGEWAR_TYPE_OBSERVER;
-    m_pSiegeWarUI->Create(m_Pos.x, m_Pos.y);
+    m_pSiegeWarUI->Create();
     Show(true);
 }
 

@@ -33,7 +33,6 @@ public:
 
 private:
     CManager* m_pNewUIMng;
-    POINT m_Pos;
 
     CSiegeWarBase* m_pSiegeWarUI;
     short m_sGuildMarkIndex;
@@ -51,13 +50,11 @@ public:
     CSiegeWarfare();
     virtual ~CSiegeWarfare();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     bool CreateMiniMapUI();
     void InitMiniMapUI();
     void SetGuildData(const CHARACTER* pCharacter);
     void Release();
-
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();

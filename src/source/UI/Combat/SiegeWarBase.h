@@ -48,9 +48,8 @@ public:
     };
 
 protected:
-    POINT m_MiniMapFramePos;
-    POINT m_MiniMapPos;
-    POINT m_SkillFramePos;
+    // The map's top-left in the frame (siege_warfare.rml's #siege_hud), reference px.
+    static constexpr POINT kMiniMapPos{25, 28};
 
     POINT m_HeroPosInWorld;
     POINT m_HeroPosInMiniMap;
@@ -83,25 +82,24 @@ public:
     virtual ~CSiegeWarBase();
 
 protected:
-    virtual bool OnCreate(int x, int y) = 0;
+    virtual bool OnCreate() = 0;
     virtual bool OnUpdate() = 0;
     virtual void OnRelease() = 0;
     virtual bool OnUpdateMouseEvent() = 0;
     virtual bool OnUpdateKeyEvent() = 0;
     virtual bool OnBtnProcess() = 0;
-    virtual void OnSetPos(int x, int y) = 0;
     // The variant's own parts of the picture (dots, commands, the commander's buttons), in
     // the original's OnRender() order.
     virtual void OnFillRmlModel(SiegeWarfareRmlModel& model) = 0;
 
-    // A point of the world (tile x, y) on the mini map, reference px.
+    // A point of the world (tile x, y) on the mini map, reference px from the frame's top-left.
     POINT MiniMapPoint(int x, int y) const;
     // An element of the HUD's document, or null.
     Rml::Element* Element(const char* id) const;
     void FillCommands(SiegeWarfareRmlModel& model);
 
 public:
-    bool Create(int x, int y);
+    bool Create();
     bool Update();
     // Everything the original's Render() drew, for siege_warfare.rml; also shows or hides
     // the battle skill's tooltip as the original's RenderSkillIcon() did.
@@ -110,7 +108,6 @@ public:
 
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();
-    void SetPos(int x, int y);
     void SetTime(int iHour, int iMinute);
     void SetMapInfo(GuildCommander& data);
     void SetRenderSkillUI(bool bRenderSkillUI);

@@ -1,5 +1,5 @@
 /* Legacy theme for CSiegeWarfare, reproducing the original CSiegeWarBase::Render() and its
-   variants' OnRender(): from the frame's top-left (x, y) the 128 x 128 map at (25, 28), the
+   variants' OnRender(): from the frame's top-left (486, 234) the 128 x 128 map at (25, 28), the
    154 x 162 frame over it, the 134 x 37 time frame at (20, 158) with the big-font time centred
    10 below its top, the transparency button (38 x 23, up / over / down rows) at (58, 4) with its
    value centred in bold, and the 3 x 3 hero dot (255, 255, 0). The other characters' dots are the
@@ -8,8 +8,8 @@
    and its icon (the image's first (w - 1) x (h - 1) texels, as RenderColorBitmap()'s power-of-two
    UVs cut it) drawn 11 x 11 at (-7, -7). The commander's team buttons (26 x 22) and command
    buttons (30 x 22, icons at (8, 5), (8, 3) and (10, 5)); the chosen command follows the pointer
-   (number at (-13, -6), icon at (-8, -8)). The battle-skill frame (128 x 53) sits at (x + 26,
-   y - 53): the skill's 20 x 28 cell at (26, 21), the kills at (78, 28) and (97, 28) in the big
+   (number at (-13, -6), icon at (-8, -8)). The battle-skill frame (128 x 53) sits at (26,
+   -53): the skill's 20 x 28 cell at (26, 21), the kills at (78, 28) and (97, 28) in the big
    font, the scroll buttons (15 x 13) at (48, 21) and (48, 36). Reference px on .screen's
    HUD board (see siege_warfare.rml). */
 
@@ -67,7 +67,9 @@ body { pointer-events: none; }
 .text.bold { font-weight: bold; }
 .button-label { left: 0; top: 0; text-align: center; }
 
-#frame { position: absolute; width: 154px; height: 162px; }
+/* The frame's top-left on the HUD board: right of the HUD's centre, above the bar. */
+#siege_hud { position: absolute; left: 486px; top: 234px; width: 0; height: 0; }
+#frame { position: absolute; left: 0; top: 0; width: 154px; height: 162px; }
 #map { position: absolute; left: 25px; top: 28px; width: 128px; height: 128px; }
 #frame_art { position: absolute; left: 0; top: 0; width: 154px; height: 162px; decorator: image(sw-frame); }
 #time_frame { position: absolute; left: 20px; top: 158px; width: 134px; height: 37px; decorator: image(sw-time); }
@@ -100,7 +102,7 @@ body { pointer-events: none; }
 .order-icon.defence { left: 8px; top: 3px; width: 18px; height: 15px; decorator: image(sw-defence); }
 .order-icon.wait { left: 10px; top: 5px; width: 11px; height: 12px; decorator: image(sw-wait); }
 
-#skill { position: absolute; width: 128px; height: 53px; }
+#skill { position: absolute; left: 26px; top: -53px; width: 128px; height: 53px; }
 #skill_frame { position: absolute; left: 0; top: 0; width: 128px; height: 53px; decorator: image(sw-skill); }
 #skill_icon { position: absolute; left: 26px; top: 21px; width: 20px; height: 28px; }
 .kills-needed { left: 78px; top: 28px; }
@@ -113,7 +115,7 @@ body { pointer-events: none; }
 .scroll-down:hover { decorator: image(sw-scroll-down-over); }
 .scroll-down:active { decorator: image(sw-scroll-down-down); }
 
-#alpha_button { position: absolute; width: 38px; height: 23px; decorator: image(sw-alpha-up); }
+#alpha_button { position: absolute; left: 58px; top: 4px; width: 38px; height: 23px; decorator: image(sw-alpha-up); }
 #alpha_button:hover { decorator: image(sw-alpha-over); }
 #alpha_button:active { decorator: image(sw-alpha-down); }
 

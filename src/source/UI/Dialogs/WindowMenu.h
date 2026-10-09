@@ -29,11 +29,6 @@ public:
         MENU_GENS,
         MENU_MAX_INDEX,
     };
-    enum
-    {
-        STANDARD_POS_X = REFERENCE_WIDTH - 112,
-        STANDARD_POS_Y = REFERENCE_HEIGHT - 156,
-    };
 
 public:
     CWindowMenu();

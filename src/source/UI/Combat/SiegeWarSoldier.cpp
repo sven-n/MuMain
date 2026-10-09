@@ -18,7 +18,7 @@ CSiegeWarSoldier::~CSiegeWarSoldier() {}
 
 //---------------------------------------------------------------------------------------------
 // OnCreate
-bool mu::ui::window::CSiegeWarSoldier::OnCreate(int x, int y)
+bool mu::ui::window::CSiegeWarSoldier::OnCreate()
 {
     return true;
 }
@@ -33,8 +33,6 @@ bool mu::ui::window::CSiegeWarSoldier::OnUpdate()
 {
     return true;
 }
-
-void mu::ui::window::CSiegeWarSoldier::OnSetPos(int x, int y) {}
 
 // Everyone else in view, as a dot, then the teams' commands (the original's OnRender(): its
 // per-kind colour branches were empty, so every dot takes the same colour).
