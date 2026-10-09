@@ -20,6 +20,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 
+#include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ComputedValues.h>
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -343,7 +344,23 @@ void CGenericConfirmDialog::ApplyInputFieldConfig(const Rml::String& value)
 
     // This dialog opens with FocusFlag::Document, so the field needs an explicit focus rather than
     // an autofocus attribute -- the attribute would also fight the keypad mode, which shares the row.
-    field->Focus();
+    m_bFocusInput = true;
+    FocusInputWhenShown();
+}
+
+void CGenericConfirmDialog::FocusInputWhenShown()
+{
+    if (!m_bFocusInput)
+        return;
+    Rml::ElementDocument* document = m_RmlView.Document();
+    Rml::Element* field = document != nullptr ? document->GetElementById("gcd_input") : nullptr;
+    if (field == nullptr || !m_Active.input || m_Active.input->mode != GenericDialogConfig::InputField::Mode::Text)
+    {
+        m_bFocusInput = false;
+        return;
+    }
+    if (field->Focus() && document->GetContext() != nullptr && document->GetContext()->GetFocusElement() == field)
+        m_bFocusInput = false;
 }
 
 void CGenericConfirmDialog::UpdateProgress()
@@ -384,6 +401,7 @@ bool CGenericConfirmDialog::Update()
     }
 
     SyncCanvasTop();
+    FocusInputWhenShown();
 
     if (m_Active.progress)
     {

@@ -189,6 +189,9 @@ namespace mu::ui::window
         // `value`: the initial text on Show(), the typed text on a theme reload. This dialog is
         // shared, so the field is reconfigured on every Show().
         void ApplyInputFieldConfig(const Rml::String& value);
+        // Focuses the text field once it is shown: it is hidden until the model update that shows
+        // its row has run, and a hidden element cannot take the focus.
+        void FocusInputWhenShown();
         Rml::String InitialInputText() const;
         void SyncCanvasTop();
 
@@ -288,6 +291,7 @@ namespace mu::ui::window
         DialogId m_ActiveId = 0;
         GenericDialogConfig m_Active;
         bool m_bActive = false;
+        bool m_bFocusInput = false;
 
         // item3D, at #gcd_item3d's place and size. Last, so it is destroyed first.
         UI::Items::ItemCameraTarget m_Item3DTarget{
