@@ -14,7 +14,6 @@
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
-#include "UI/Scaling/UITransform.h"
 
 #include "Render/Effects/ZzzEffect.h"
 #include "UI/Social/SocialWindowBase.h"
@@ -98,15 +97,7 @@ bool mu::ui::window::CHotKey::UpdateMouseEvent()
 
             if (fDistance < 300.f)
             {
-                // In the quick command's own layout units, which are not this window's.
-                const UI::Scaling::Transform menu = g_pQuickCommand->GetLayoutTransform();
-                int x = static_cast<int>(UI::Scaling::LogicalX(menu, g_fWindowMouseX)) + 10;
-                int y = static_cast<int>(UI::Scaling::LogicalY(menu, g_fWindowMouseY)) - 50;
-                if (y < 0)
-                {
-                    y = 0;
-                }
-                g_pQuickCommand->OpenQuickCommand(pCha->ID, SelectedCharacter, x, y);
+                g_pQuickCommand->OpenQuickCommand(pCha->ID, SelectedCharacter);
             }
             else
             {

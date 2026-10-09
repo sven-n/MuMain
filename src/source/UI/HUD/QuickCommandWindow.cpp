@@ -2,13 +2,13 @@
 #include "stdafx.h"
 #include "UI/HUD/QuickCommandWindow.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
 
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
@@ -28,10 +28,6 @@ constexpr int kQuickCommandTextIds[kQuickCommandCount] = {943, 1124, 944, 948, 9
 mu::ui::window::CQuickCommandWindow::CQuickCommandWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = 0;
-    m_Pos.y = 0;
-
-    m_iSelectedIndex = -1;
     m_iSelectedCharacterIndex = -1;
 }
 
@@ -40,15 +36,13 @@ mu::ui::window::CQuickCommandWindow::~CQuickCommandWindow()
     Release();
 }
 
-bool mu::ui::window::CQuickCommandWindow::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CQuickCommandWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_QUICK_COMMAND, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -69,12 +63,6 @@ void mu::ui::window::CQuickCommandWindow::Release()
     m_RmlView.Release();
 }
 
-void mu::ui::window::CQuickCommandWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
-}
-
 bool mu::ui::window::CQuickCommandWindow::UpdateMouseEvent()
 {
     if (m_iSelectedCharacterIndex < 0)
@@ -82,87 +70,44 @@ bool mu::ui::window::CQuickCommandWindow::UpdateMouseEvent()
         return true;
     }
 
-    POINT pt = {m_Pos.x, m_Pos.y + 38};
-
-    for (int i = 0; i < kQuickCommandCount; ++i)
+    // The rows are the document's (quick_command_run); a click anywhere else closes the menu.
+    const bool overMenu = UI::RmlBridge::IsPointerOver(m_RmlView.Document());
+    if (!overMenu && mu::ui::window::IsRelease(VK_LBUTTON))
     {
-        if (CheckMouseIn(pt.x, pt.y, 112, 19) == true)
-        {
-            m_iSelectedIndex = i;
-            break;
-        }
-
-        pt.y += 20.f;
-    }
-
-    if (m_iSelectedIndex > -1 && mu::ui::window::IsRelease(VK_LBUTTON))
-    {
-        switch (m_iSelectedIndex)
-        {
-        case 0:
-        {
-            CHARACTER* pCha = &CharactersClient[m_iSelectedCharacterIndex];
-            g_pCommandWindow->CommandTrade(pCha);
-            CloseQuickCommand();
-
-            return false;
-        }
-        break;
-        case 1:
-        {
-            CHARACTER* pCha = &CharactersClient[m_iSelectedCharacterIndex];
-            g_pCommandWindow->CommandPurchase(pCha);
-            CloseQuickCommand();
-
-            return false;
-        }
-        break;
-        case 2:
-        {
-            CHARACTER* pCha = &CharactersClient[m_iSelectedCharacterIndex];
-            g_pCommandWindow->CommandParty(pCha->Key);
-            CloseQuickCommand();
-
-            return false;
-        }
-        break;
-        case 3:
-        {
-            g_pCommandWindow->CommandFollow(m_iSelectedCharacterIndex);
-            CloseQuickCommand();
-
-            return false;
-        }
-        break;
-        case 4:
-        {
-            CHARACTER* pCha = &CharactersClient[m_iSelectedCharacterIndex];
-            g_pCommandWindow->CommandDual(pCha);
-            CloseQuickCommand();
-
-            return false;
-        }
-        break;
-        }
-    }
-
-    if (CheckMouseIn(m_Pos.x, m_Pos.y + 30, 112, 110) == false)
-    {
-        m_iSelectedIndex = -1;
-
-        if (mu::ui::window::IsRelease(VK_LBUTTON))
-        {
-            CloseQuickCommand();
-            return false;
-        }
-    }
-
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, 112, 140).Contains(MouseX, MouseY))
-    {
+        CloseQuickCommand();
         return false;
     }
 
-    return true;
+    return !overMenu;
+}
+
+void mu::ui::window::CQuickCommandWindow::RunCommand(int index)
+{
+    if (m_iSelectedCharacterIndex < 0)
+        return;
+
+    CHARACTER* pCha = &CharactersClient[m_iSelectedCharacterIndex];
+    switch (index)
+    {
+    case 0:
+        g_pCommandWindow->CommandTrade(pCha);
+        break;
+    case 1:
+        g_pCommandWindow->CommandPurchase(pCha);
+        break;
+    case 2:
+        g_pCommandWindow->CommandParty(pCha->Key);
+        break;
+    case 3:
+        g_pCommandWindow->CommandFollow(m_iSelectedCharacterIndex);
+        break;
+    case 4:
+        g_pCommandWindow->CommandDual(pCha);
+        break;
+    default:
+        return;
+    }
+    CloseQuickCommand();
 }
 
 bool mu::ui::window::CQuickCommandWindow::UpdateKeyEvent()
@@ -212,29 +157,30 @@ bool mu::ui::window::CQuickCommandWindow::Update()
 
 bool mu::ui::window::CQuickCommandWindow::Render()
 {
-    // Nothing native left: frame, name, rows and arrows are RmlUi. The hover index and the
-    // clicks stay native (UpdateMouseEvent()), so the document only mirrors them.
+    // Nothing native left: frame, name, rows, hover and clicks are RmlUi.
     return true;
 }
 
 void mu::ui::window::CQuickCommandWindow::BindRmlModel(Rml::DataModelConstructor& c, QuickCommandRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("target_name", &model.targetName);
 
     auto row = c.RegisterStruct<QuickCommandRowEntry>();
     row.RegisterMember("label", &QuickCommandRowEntry::label);
-    row.RegisterMember("selected", &QuickCommandRowEntry::selected);
     c.RegisterArray<std::vector<QuickCommandRowEntry>>();
     c.Bind("rows", &model.rows);
+    c.BindEventCallback("quick_command_run",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+        {
+            if (!args.empty())
+                RunCommand(args[0].Get<int>(-1));
+        });
 
     model.rows.clear();
     for (int i = 0; i < kQuickCommandCount; ++i)
-        model.rows.push_back({StringUtils::WideToNarrow(I18N::Game::Lookup(kQuickCommandTextIds[i])), false});
+        model.rows.push_back({StringUtils::WideToNarrow(I18N::Game::Lookup(kQuickCommandTextIds[i]))});
 }
 
 void mu::ui::window::CQuickCommandWindow::BuildRmlUi()
@@ -254,12 +200,11 @@ void mu::ui::window::CQuickCommandWindow::SyncRmlModel()
     if (!visible)
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
+    SyncSlotPlacement();
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     QuickCommandRmlModel& model = m_RmlView.GetModel();
-    const float boldTextPx =
-        UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, UI::Scaling::GetActiveTransform());
+    const float boldTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
     if (model.boldTextPx != boldTextPx)
     {
         model.boldTextPx = boldTextPx;
@@ -272,22 +217,6 @@ void mu::ui::window::CQuickCommandWindow::SyncRmlModel()
         model.targetName = targetName;
         m_RmlView.MarkDirty("target_name");
     }
-
-    SyncRows();
-}
-
-void mu::ui::window::CQuickCommandWindow::SyncRows()
-{
-    QuickCommandRmlModel& model = m_RmlView.GetModel();
-    bool changed = false;
-    for (int i = 0; i < static_cast<int>(model.rows.size()); ++i)
-    {
-        const bool selected = i == m_iSelectedIndex;
-        changed = changed || model.rows[i].selected != selected;
-        model.rows[i].selected = selected;
-    }
-    if (changed)
-        m_RmlView.MarkDirty("rows");
 }
 
 float mu::ui::window::CQuickCommandWindow::GetLayerDepth()
@@ -302,23 +231,24 @@ float mu::ui::window::CQuickCommandWindow::GetKeyEventOrder()
 
 void mu::ui::window::CQuickCommandWindow::OpenningProcess()
 {
-    m_iSelectedIndex = -1;
     m_iSelectedCharacterIndex = -1;
 }
 
 void mu::ui::window::CQuickCommandWindow::ClosingProcess()
 {
-    m_iSelectedIndex = -1;
     m_iSelectedCharacterIndex = -1;
 }
 
-void mu::ui::window::CQuickCommandWindow::OpenQuickCommand(const wchar_t* strID, int iIndex, int x, int y)
+void mu::ui::window::CQuickCommandWindow::OpenQuickCommand(const wchar_t* strID, int iIndex)
 {
     g_pNewUISystem->Show(mu::ui::window::INTERFACE_QUICK_COMMAND);
 
     SetID(strID);
     SetSelectedCharacterIndex(iIndex);
-    SetPos(x, y);
+
+    // Beside the pointer, as the original: 10 units right of it and 50 above, never off the top.
+    const float scale = UI::Scaling::TypographyScale(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+    PlaceDocument(g_fWindowMouseX + 10.f * scale, (std::max)(g_fWindowMouseY - 50.f * scale, 0.f), scale);
 }
 
 void mu::ui::window::CQuickCommandWindow::CloseQuickCommand()

@@ -23,22 +23,22 @@ namespace mu::ui::window
         CQuickCommandWindow();
         virtual ~CQuickCommandWindow();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
-
-        void SetPos(int x, int y);
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
 
         float GetLayerDepth();	//. 2.0f
         float GetKeyEventOrder();	// 10.f;
 
         void OpenningProcess();
         void ClosingProcess();
-        void OpenQuickCommand(const wchar_t* strID, int iIndex, int x, int y);
+        // Opens the menu on that player, beside the pointer.
+        void OpenQuickCommand(const wchar_t* strID, int iIndex);
         void CloseQuickCommand();
         void SetID(const wchar_t* strID);
         void SetSelectedCharacterIndex(int iIndex);
@@ -46,13 +46,11 @@ namespace mu::ui::window
     private:
         void BuildRmlUi();
         void SyncRmlModel();
-        void SyncRows();
+        void RunCommand(int index);
 
     private:
         CManager* m_pNewUIMng;
-        POINT			m_Pos;
 
-        int m_iSelectedIndex;
         wchar_t m_strID[32];
         int m_iSelectedCharacterIndex;
 

@@ -398,7 +398,7 @@ bool CSystem::LoadMainSceneInterface()
     }
 
     m_pNewQuickCommandWindow = new CQuickCommandWindow;
-    if (m_pNewQuickCommandWindow->Create(m_pNewUIMng, 0, 0) == false)
+    if (m_pNewQuickCommandWindow->Create(m_pNewUIMng) == false)
     {
         return false;
     }

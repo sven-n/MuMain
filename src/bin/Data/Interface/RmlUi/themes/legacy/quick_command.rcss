@@ -2,7 +2,7 @@
    RenderContents()/RenderArrow(): the message-box fill (112x140), the quick-command frame top,
    three middle tiles and a 5-unit one, the bottom piece, four separator lines, the player's name
    in bold green and five white rows, the hovered one yellow with the two arrows. Reference px
-   relative to the menu's top-left (#panel carries the Dialog transform). */
+   relative to the menu's top-left (#panel is placed at the UI scale). */
 
 @spritesheet qcmd-back-sheet { src: "../../../newui_msgbox_back.jpg"; qcmd-back: 0px 0px 112px 140px; }
 @spritesheet qcmd-up-sheet { src: "../../../newui_commamd04.tga"; qcmd-up: 0px 0px 112px 45px; }
@@ -23,7 +23,6 @@
 	width: 112px;
 	height: 140px;
 	font-family: "token(font-body)";
-	pointer-events: none;
 }
 
 #back { position: absolute; left: 0; top: 0; width: 112px; height: 140px; decorator: image(qcmd-back); }
@@ -57,11 +56,11 @@
 	white-space: nowrap;
 	color: #ffffff;
 }
-.quick-row.selected .quick-label { color: #ffff00; }
+.quick-row:hover .quick-label { color: #ffff00; }
 .arrow { display: none; position: absolute; top: 0; width: 6px; height: 9px; }
 .arrow-left { left: 16px; decorator: image(qcmd-arrow-left); }
 .arrow-right { left: 90px; decorator: image(qcmd-arrow-right); }
-.quick-row.selected .arrow { display: block; }
+.quick-row:hover .arrow { display: block; }
 
 /* The frame's own middle bands and its separator lines, so a theme can move them -- they were
    style attributes, which are inline properties no theme can override. */

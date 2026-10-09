@@ -1,7 +1,7 @@
 /* Modern theme for CQuickCommandWindow: the same menu at the same place, on the modern panel
    surface instead of the command frame art; the player's name in the warm title colour, the
-   hovered row in the gold accent. Geometry is the legacy one (reference px under the Dialog
-   transform, see quick_command.rml). */
+   hovered row in the gold accent. Geometry is the legacy one (reference px under the UI
+   scale, see quick_command.rml). */
 
 #panel {
 	position: absolute;
@@ -12,7 +12,6 @@
 	background-color: token(surface-panel);
 	border: 1px token(border-frame);
 	border-radius: token(radius-sm)px;
-	pointer-events: none;
 }
 
 #back, #frame_up, .frame-middle, #frame_down, .arrow { display: none; }
@@ -31,7 +30,7 @@
 
 #rows { position: absolute; left: 0; top: 43px; width: 112px; }
 .quick-row { display: block; position: relative; width: 112px; height: 19px; }
-.quick-row.selected { background-color: token(surface-raised); }
+.quick-row:hover { background-color: token(surface-raised); }
 .quick-label {
 	display: block;
 	position: absolute;
@@ -41,7 +40,7 @@
 	white-space: nowrap;
 	color: token(text-primary);
 }
-.quick-row.selected .quick-label { color: token(accent-gold-hover); }
+.quick-row:hover .quick-label { color: token(accent-gold-hover); }
 
 /* The frame's own middle bands and its separator lines, so a theme can move them -- they were
    style attributes, which are inline properties no theme can override. */
