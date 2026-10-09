@@ -41,7 +41,6 @@ using namespace mu::ui::window;
 CNPCQuest::CNPCQuest()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
 }
 
 CNPCQuest::~CNPCQuest()
@@ -49,15 +48,13 @@ CNPCQuest::~CNPCQuest()
     Release();
 }
 
-bool CNPCQuest::Create(CManager* pNewUIMng, int x, int y)
+bool CNPCQuest::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPCQUEST, this);
-
-    SetPos(x, y);
 
     if (RmlUiRuntime::Instance().IsCreated())
     {
@@ -139,12 +136,6 @@ void CNPCQuest::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void CNPCQuest::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 void CNPCQuest::Show(bool bShow)

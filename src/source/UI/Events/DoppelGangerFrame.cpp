@@ -24,7 +24,6 @@ using namespace mu::ui::window;
 CDoppelGangerFrame::CDoppelGangerFrame()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_iEnteredMonsters = 0;
     m_iMaxMonsters = 0;
     m_fMonsterGauge = 0.0f;
@@ -41,15 +40,13 @@ CDoppelGangerFrame::~CDoppelGangerFrame()
     Release();
 }
 
-bool CDoppelGangerFrame::Create(CManager* pNewUIMng, int x, int y)
+bool CDoppelGangerFrame::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -68,12 +65,6 @@ void CDoppelGangerFrame::Release()
     }
 
     m_RmlView.Release();
-}
-
-void CDoppelGangerFrame::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CDoppelGangerFrame::UpdateMouseEvent()

@@ -89,7 +89,6 @@ namespace
 mu::ui::window::CCharacterInfoWindow::CCharacterInfoWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
 }
 
 mu::ui::window::CCharacterInfoWindow::~CCharacterInfoWindow()
@@ -97,15 +96,13 @@ mu::ui::window::CCharacterInfoWindow::~CCharacterInfoWindow()
     Release();
 }
 
-bool mu::ui::window::CCharacterInfoWindow::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CCharacterInfoWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CHARACTER, this);
-
-    SetPos(x, y);
 
     LoadImages();
 
@@ -218,12 +215,6 @@ void mu::ui::window::CCharacterInfoWindow::Release()
         m_pNewUIMng = NULL;
     }
 
-}
-
-void mu::ui::window::CCharacterInfoWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 void mu::ui::window::CCharacterInfoWindow::Show(bool bShow)

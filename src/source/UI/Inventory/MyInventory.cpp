@@ -92,7 +92,6 @@ CMyInventory::CMyInventory()
 {
     m_pNewUIMng = nullptr;
     m_pNewInventoryCtrl = nullptr;
-    m_Pos.x = m_Pos.y = 0;
 
     memset(&m_EquipmentSlots, 0, sizeof(EQUIPMENT_ITEM) * MAX_EQUIPMENT_INDEX);
     m_iPointedSlot = -1;
@@ -110,7 +109,7 @@ CMyInventory::~CMyInventory()
     Release();
 }
 
-bool CMyInventory::Create(CManager* pNewUIMng, int x, int y)
+bool CMyInventory::Create(CManager* pNewUIMng)
 {
     if (nullptr == pNewUIMng || nullptr == g_pNewItemMng)
         return false;
@@ -119,15 +118,13 @@ bool CMyInventory::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(INTERFACE_INVENTORY, this);
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::INVENTORY, g_pNewItemMng, this, x + 15, y + 200, 8, 8, MAX_EQUIPMENT))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::INVENTORY, g_pNewItemMng, this, 8, 8, MAX_EQUIPMENT))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
 
     m_ActionController.SetContext(this);
-
-    SetPos(x, y);
     LoadImages();
     SetEquipmentSlotInfo();
 
@@ -547,16 +544,6 @@ void CMyInventory::DeleteAllItems() const
 {
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->RemoveAllItems();
-}
-
-void CMyInventory::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
-
-    SetEquipmentSlotInfo();
-
-    SyncNativeLayout();
 }
 
 // The paperdoll's slots and their items' boxes where the theme draws them, in window pixels.

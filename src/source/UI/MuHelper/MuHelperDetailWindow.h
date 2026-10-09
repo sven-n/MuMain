@@ -65,10 +65,9 @@ namespace mu::ui::window
         CMuHelperDetailWindow();
         ~CMuHelperDetailWindow() override;
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
-        void SetPos(int x, int y) { m_Pos = {x, y}; }
         void Release();
 
         bool UpdateMouseEvent() override;
@@ -84,7 +83,6 @@ namespace mu::ui::window
         float GetLayerDepth() override;
         float GetKeyEventOrder() override;
         void Show(bool bShow) override;
-
 
         // Opens `iPage`, or closes the panel if it is already showing that page.
         void Toggle(int iPage);
@@ -106,7 +104,6 @@ namespace mu::ui::window
         void BlurFocusedField();
 
         CManager* m_pNewUIMng = nullptr;
-        POINT m_Pos{};
 
         int m_iCurrentPage = -1;
         int m_iCurrentPotionThreshold = 0;

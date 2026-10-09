@@ -34,7 +34,6 @@ CStorageInventoryExt::CStorageInventoryExt()
 {
     m_pNewUIMng = nullptr;
     m_pNewInventoryCtrl = nullptr;
-    m_Pos.x = m_Pos.y = 0;
     m_nBackupSourceInvenIndex = -1;
 }
 
@@ -43,7 +42,7 @@ CStorageInventoryExt::~CStorageInventoryExt()
     Release();
 }
 
-bool CStorageInventoryExt::Create(CManager* pNewUIMng, int x, int y)
+bool CStorageInventoryExt::Create(CManager* pNewUIMng)
 {
     if (nullptr == pNewUIMng || nullptr == g_pNewItemMng)
     {
@@ -54,14 +53,11 @@ bool CStorageInventoryExt::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(INTERFACE_STORAGE_EXT, this);
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::VAULT, g_pNewItemMng, this, x + 15,
-                                             y + 36, 8, 15, MAX_SHOP_INVENTORY))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::VAULT, g_pNewItemMng, this, 8, 15, MAX_SHOP_INVENTORY))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
-
-    SetPos(x, y);
     SetItemAutoMove(false);
 
     BuildRmlUi();
@@ -104,12 +100,6 @@ void CStorageInventoryExt::Release()
     }
 
     m_RmlView.Release();
-}
-
-void CStorageInventoryExt::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CStorageInventoryExt::IsPointerOverPanel()

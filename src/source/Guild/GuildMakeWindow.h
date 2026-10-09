@@ -57,7 +57,7 @@ namespace mu::ui::window
         CGuildMakeWindow();
         virtual ~CGuildMakeWindow();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         void Release();
@@ -77,7 +77,6 @@ namespace mu::ui::window
     public:
         bool Render();
 
-
     private:
         void BuildRmlUi();
         void SyncRmlModel();
@@ -86,8 +85,6 @@ namespace mu::ui::window
         void ReadNameField(wchar_t* text, int length) const;
 
     public:
-        void SetPos(int x, int y);
-        const POINT& GetPos();
         float GetLayerDepth();	//. 4.4f
 
     private:
@@ -97,7 +94,6 @@ namespace mu::ui::window
     private:
         CManager* m_pNewUIMng;
 
-        POINT					m_Pos;
         GUILDMAKE_STATE			m_GuildMakeState;
 
         // The name field (the original's CUITextInputBox): shown on the mark page only.
@@ -111,18 +107,6 @@ namespace mu::ui::window
             {.afterReload = [this] { OnRmlReloaded(); }}};
         GUILDMAKE_BUTTON m_PendingButton = GUILDMAKEBUTTON_NONE;
     };
-
-    inline
-        void CGuildMakeWindow::SetPos(int x, int y)
-    {
-        m_Pos.x = x; m_Pos.y = y;
-    }
-
-    inline
-        const POINT& CGuildMakeWindow::GetPos()
-    {
-        return m_Pos;
-    }
 }
 
 #endif // !defined(AFX_NEWUIGUILDMAKEWINDOW_H__68B0DE4B_7E07_4928_B8CF_2F7A6A15EEBD__INCLUDED_)

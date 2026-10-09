@@ -16,10 +16,9 @@ namespace mu::ui::window
         CNameWindow();
         virtual ~CNameWindow();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
-        void SetPos(int x, int y);
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -45,7 +44,7 @@ namespace mu::ui::window
         UI::Character::WorldLabelLayer m_labelLayer;
 
         CManager* m_pNewUIMng;		// UI manager
-        POINT m_Pos;					// window position
+
 
         bool m_bShowItemName;
         bool m_bShowMonsterHealthBar;

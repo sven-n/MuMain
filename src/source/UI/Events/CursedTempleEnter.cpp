@@ -31,7 +31,6 @@
 
 #include <RmlUi/Core/ElementDocument.h>
 
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -54,15 +53,13 @@ namespace
     }
 }
 
-bool mu::ui::window::CCursedTempleEnter::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CCursedTempleEnter::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CURSEDTEMPLE_NPC, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -93,7 +90,6 @@ void mu::ui::window::CCursedTempleEnter::Destroy()
         m_pNewUIMng = NULL;
     }
 }
-
 
 bool mu::ui::window::CCursedTempleEnter::CheckEnterLevel(int& enterlevel)
 {
@@ -210,15 +206,12 @@ bool mu::ui::window::CCursedTempleEnter::Update()
     return true;
 }
 
-
-
 bool mu::ui::window::CCursedTempleEnter::Render()
 {
     // Nothing native left: the frame, the texts and the buttons are RmlUi. Kept because CObject
     // requires the override.
     return true;
 }
-
 
 //ServerMessage
 void mu::ui::window::CCursedTempleEnter::SetEntryOffer(std::uint8_t remainingTime, std::uint8_t entryCount)

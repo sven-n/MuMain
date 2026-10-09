@@ -17,10 +17,9 @@ public:
     CSetItemExplanation();
     virtual ~CSetItemExplanation();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();
@@ -39,7 +38,7 @@ private:
     void RecordTable(TipTextListRecord& record);
 
     CManager* m_pNewUIMng;
-    POINT m_Pos;
+
     TipTextListView m_View{"set_item_explanation", "Data/Interface/RmlUi/set_item_explanation.rml"};
 };
 } // namespace mu::ui::window

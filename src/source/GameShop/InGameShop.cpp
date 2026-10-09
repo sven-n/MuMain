@@ -103,15 +103,13 @@ void CInGameShop::Release()
     ClearAllStorageItem();
 }
 
-bool CInGameShop::Create(CManager* pNewUIMng, int x, int y)
+bool CInGameShop::Create(CManager* pNewUIMng)
 {
     if (pNewUIMng == NULL)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_INGAMESHOP, this);
-
-    SetPos(x, y);
     m_ItemTarget.SetFieldOfView(2.f);
     m_RmlView.Ensure();
     Show(false);
@@ -348,12 +346,6 @@ void CInGameShop::SyncStorageRows()
         ++index;
     }
     SyncField(m_RmlView.Binder(), &InGameShopRmlModel::storageRows, "storage_rows", std::move(rows));
-}
-
-void CInGameShop::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CInGameShop::Render()

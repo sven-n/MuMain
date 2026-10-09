@@ -63,7 +63,7 @@ public:
     CCursedTempleSystem();
     virtual ~CCursedTempleSystem();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
 
 private:
     void LoadImages();
@@ -90,7 +90,6 @@ private:
 public:
     bool Render();
 
-
 private:
     void BuildRmlUi();
     // Builds the HUD's images and texts in the original Render()'s order and syncs the document.
@@ -102,11 +101,9 @@ private:
     void SyncTutorialStep(std::vector<CursedTempleTextEntry>& lines);
 
 public:
-    const POINT& GetPos() const;
     float GetLayerDepth(); //. 1.5f
 
 public:
-    void SetPos(int x, int y);
     void ResetCursedTempleSystemInfo();
     void StartScoreEffect();
     void StartTutorialStep();
@@ -128,7 +125,6 @@ private:
 
 private:
     CManager* m_pNewUIMng;
-    POINT m_Pos;
     // EventTime
     DWORD m_EventMapTime; // Total event time
     // MiniMap
@@ -169,21 +165,9 @@ private:
 };
 
     inline
-        const POINT& CCursedTempleSystem::GetPos() const
-    {
-        return m_Pos;
-    }
-
-    inline
         float CCursedTempleSystem::GetLayerDepth()	//. 1.5f
     {
         return 1.5f;
-    }
-
-    inline
-        void CCursedTempleSystem::SetPos(int x, int y)
-    {
-        m_Pos.x = x; m_Pos.y = y;
     }
 };
 

@@ -36,7 +36,6 @@ void SyncFloat(RmlModelBinder<Model>& binder, float Model::* field, const char* 
 mu::ui::window::CWindowMenu::CWindowMenu()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
 }
 
 mu::ui::window::CWindowMenu::~CWindowMenu()
@@ -44,15 +43,13 @@ mu::ui::window::CWindowMenu::~CWindowMenu()
     Release();
 }
 
-bool mu::ui::window::CWindowMenu::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CWindowMenu::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_WINDOW_MENU, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -71,14 +68,6 @@ void mu::ui::window::CWindowMenu::Release()
     }
 
     m_RmlView.Release();
-}
-
-void mu::ui::window::CWindowMenu::SetPos(int x, int y)
-{
-    // Fixed above the bottom HUD's right end, whatever the caller asks for. window_menu.rcss
-    // places #panel at the same reference point.
-    m_Pos.x = STANDARD_POS_X;
-    m_Pos.y = STANDARD_POS_Y - (20 * (MENU_MAX_INDEX - 4));
 }
 
 bool mu::ui::window::CWindowMenu::UpdateMouseEvent()

@@ -56,21 +56,18 @@ Rml::String ArgbToCss(unsigned int argb)
 CCastleWindow::CCastleWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_iNumCurOpenTab = TAB_GATE_MANAGING;
     m_iCurrMsgBoxRequest = CASTLE_MSGREQ_NULL;
 }
 CCastleWindow::~CCastleWindow() { Release(); }
 
-bool CCastleWindow::Create(CManager* pNewUIMng, int x, int y)
+bool CCastleWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_SENATUS, this);
-
-    SetPos(x, y);
 
     SetCurOpenTab(m_iNumCurOpenTab);
 
@@ -91,12 +88,6 @@ void CCastleWindow::Release()
     }
 
     m_RmlView.Release();
-}
-
-void CCastleWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 // The page and the tab highlight read the same value.

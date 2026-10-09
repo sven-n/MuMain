@@ -107,15 +107,13 @@ mu::ui::window::CMiniMap::~CMiniMap()
     Release();
 }
 
-bool mu::ui::window::CMiniMap::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CMiniMap::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MINI_MAP, this);
-
-    SetPos(x, y);
     m_bSuccess = false;
 
     BuildRmlUi();
@@ -146,11 +144,6 @@ void mu::ui::window::CMiniMap::Release()
     }
 
     m_RmlView.Release();
-}
-
-void mu::ui::window::CMiniMap::SetPos(int x, int y)
-{
-    // Full screen; mini_map.rcss places the close button at the original's (640 - 27, 3).
 }
 
 void mu::ui::window::CMiniMap::SetBtnPos(int Num, float x, float y, float nx, float ny)

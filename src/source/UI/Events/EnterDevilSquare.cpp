@@ -20,7 +20,6 @@ using namespace mu::ui::window;
 CEnterDevilSquare::CEnterDevilSquare() : m_View("devil_square_enter", "Data/Interface/RmlUi/devil_square_enter.rml")
 {
     m_pNewUIMng = NULL;
-    memset(&m_Pos, 0, sizeof(POINT));
 
     m_iNumActiveBtn = 1;
 
@@ -46,15 +45,13 @@ CEnterDevilSquare::~CEnterDevilSquare()
     Release();
 }
 
-bool CEnterDevilSquare::Create(CManager* pNewUIMng, int x, int y)
+bool CEnterDevilSquare::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DEVILSQUARE, this);
-
-    SetPos(x, y);
 
     m_View.Build();
 
@@ -72,12 +69,6 @@ void CEnterDevilSquare::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void CEnterDevilSquare::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CEnterDevilSquare::UpdateMouseEvent()

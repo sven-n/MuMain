@@ -29,12 +29,11 @@ void Invalidate();
 bool SlotBox(std::string_view name, PlacementParticipant::Box& box);
 
 using GetWindow = std::function<mu::ui::window::CObject*()>;
-using SetPosition = std::function<void(int x, int y)>;
 
 // `slotName` is the slot's data-window value. `document` is the window's RML file (for example
 // "character_info.rml"), whose #panel sizes a content slot; without one the slot takes the docked
 // windows' size. A window with no slot in the workspace keeps the theme's own placement.
-void RegisterWindow(std::uint32_t windowId, std::string_view slotName, GetWindow getWindow, SetPosition setPosition,
+void RegisterWindow(std::uint32_t windowId, std::string_view slotName, GetWindow getWindow,
                     const char* document = nullptr);
 // A window that can only be named in data-closes.
 void RegisterName(std::uint32_t windowId, std::string_view name);

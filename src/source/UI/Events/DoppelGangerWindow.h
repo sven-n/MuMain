@@ -18,7 +18,7 @@ private:
     };
 
     CManager* m_pNewUIMng;
-    POINT m_Pos;
+
 
     EventItemEntryView m_View{"doppelganger_enter", "Data/Interface/RmlUi/doppelganger_enter.rml"};
 
@@ -26,10 +26,9 @@ public:
     CDoppelGangerWindow();
     virtual ~CDoppelGangerWindow();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     Rml::ElementDocument* GetPlacedDocument() const override { return m_View.Document(); }

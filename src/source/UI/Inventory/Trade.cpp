@@ -31,7 +31,6 @@ CTrade::CTrade()
 {
     m_pNewUIMng = NULL;
     m_pYourInvenCtrl = m_pMyInvenCtrl = NULL;
-    m_Pos.x = m_Pos.y = 0;
 }
 
 CTrade::~CTrade()
@@ -39,7 +38,7 @@ CTrade::~CTrade()
     Release();
 }
 
-bool CTrade::Create(CManager* pNewUIMng, int x, int y)
+bool CTrade::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng
         || NULL == g_pNewItemMng)
@@ -49,22 +48,18 @@ bool CTrade::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_TRADE, this);
 
     m_pYourInvenCtrl = new CInventoryCtrl;
-    if (false == m_pYourInvenCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewItemMng,
-        this, x + 16, y + 68, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
+    if (false == m_pYourInvenCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewItemMng, this, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
     {
         SAFE_DELETE(m_pYourInvenCtrl);
         return false;
     }
 
     m_pMyInvenCtrl = new CInventoryCtrl;
-    if (false == m_pMyInvenCtrl->Create(STORAGE_TYPE::TRADE, g_pNewItemMng,
-        this, x + 16, y + 274, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
+    if (false == m_pMyInvenCtrl->Create(STORAGE_TYPE::TRADE, g_pNewItemMng, this, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
     {
         SAFE_DELETE(m_pMyInvenCtrl);
         return false;
     }
-
-    SetPos(x, y);
 
     LoadImages();
 
@@ -221,12 +216,6 @@ void CTrade::Release()
     }
 
     m_RmlView.Release();
-}
-
-void CTrade::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CTrade::IsPointerOverPanel()

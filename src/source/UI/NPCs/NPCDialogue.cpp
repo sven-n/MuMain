@@ -35,7 +35,6 @@ using namespace mu::ui::window;
 CNPCDialogue::CNPCDialogue()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_dwContributePoint = 0;
 
     // Update()/SyncRmlModel() runs every frame regardless of visibility (same as CQuestProgress's
@@ -68,15 +67,13 @@ CNPCDialogue::~CNPCDialogue()
     Release();
 }
 
-bool CNPCDialogue::Create(CManager* pNewUIMng, int x, int y)
+bool CNPCDialogue::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPC_DIALOGUE, this);
-
-    SetPos(x, y);
 
     if (RmlUiRuntime::Instance().IsCreated())
     {
@@ -154,12 +151,6 @@ void CNPCDialogue::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void CNPCDialogue::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 void CNPCDialogue::Show(bool bShow)

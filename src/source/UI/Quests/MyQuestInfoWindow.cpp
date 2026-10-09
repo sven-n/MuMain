@@ -51,7 +51,6 @@ std::vector<mu::ui::window::CMyQuestInfoWindow::TextLine> mu::ui::window::CMyQue
 mu::ui::window::CMyQuestInfoWindow::CMyQuestInfoWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
 }
 
 mu::ui::window::CMyQuestInfoWindow::~CMyQuestInfoWindow()
@@ -59,15 +58,13 @@ mu::ui::window::CMyQuestInfoWindow::~CMyQuestInfoWindow()
     Release();
 }
 
-bool mu::ui::window::CMyQuestInfoWindow::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CMyQuestInfoWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MYQUEST, this);
-
-    SetPos(x, y);
     LoadImages();
     m_eTabBtnIndex = TAB_QUEST;
 
@@ -178,12 +175,6 @@ void mu::ui::window::CMyQuestInfoWindow::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void mu::ui::window::CMyQuestInfoWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 void mu::ui::window::CMyQuestInfoWindow::Show(bool bShow)

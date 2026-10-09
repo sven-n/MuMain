@@ -209,7 +209,7 @@ CBuffStrip::~CBuffStrip()
     Release();
 }
 
-bool CBuffStrip::Create(CManager* pNewUIMng, int x, int y)
+bool CBuffStrip::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;

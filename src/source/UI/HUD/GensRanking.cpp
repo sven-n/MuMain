@@ -46,9 +46,6 @@ void CGensRanking::Init()
     m_nContribution = 0;
     memset(m_szRanking, 0, sizeof(m_szRanking));
 
-    m_Pos.x = 0;
-    m_Pos.y = 0;
-
     memset(m_szGensTeam, 0, sizeof(m_szGensTeam));
 
     m_byGensInfluence = GENSTYPE_NONE;
@@ -72,7 +69,7 @@ void CGensRanking::Destroy()
     }
 }
 
-bool CGensRanking::Create(CManager* pNewUIMng, int x, int y)
+bool CGensRanking::Create(CManager* pNewUIMng)
 {
     if (pNewUIMng == NULL)
         return false;
@@ -81,22 +78,13 @@ bool CGensRanking::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(INTERFACE_GENSRANKING, this);
 
     m_pTextBox = new CTextBox();
-    m_pTextBox->Create(x, y, 200, 110);
+    m_pTextBox->Create(0, 0, 200, 110);
 
-    SetPos(x, y);
     BuildRmlUi();
 
     Show(false);
 
     return true;
-}
-
-void CGensRanking::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
-    if (m_pTextBox)
-        m_pTextBox->SetPos(x + 20, y + 280, 150, 110);
 }
 
 bool CGensRanking::Render()

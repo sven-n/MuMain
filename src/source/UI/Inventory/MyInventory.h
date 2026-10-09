@@ -75,7 +75,7 @@ namespace mu::ui::window
         CManager* m_pNewUIMng;
         CInventoryCtrl* m_pNewInventoryCtrl;
         CInventoryActionController m_ActionController;
-        POINT m_Pos;
+
 
         EQUIPMENT_ITEM m_EquipmentSlots[MAX_EQUIPMENT_INDEX];
         int	m_iPointedSlot;
@@ -141,7 +141,7 @@ namespace mu::ui::window
         CMyInventory();
         virtual ~CMyInventory();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
         bool EquipItem(int iIndex, std::span<const BYTE> pbyItemPacket);
@@ -159,7 +159,6 @@ namespace mu::ui::window
         void DeleteItem(int iIndex) const;
         void DeleteAllItems() const;
 
-        void SetPos(int x, int y);
         // Moves the equipment slots and item grid to where the theme draws their anchors.
         void SyncNativeLayout();
 

@@ -18,7 +18,6 @@ using namespace mu::ui::window;
 CEmpireGuardianNPC::CEmpireGuardianNPC()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_bCanClick = true;
 }
 
@@ -27,7 +26,7 @@ CEmpireGuardianNPC::~CEmpireGuardianNPC()
     Release();
 }
 
-bool CEmpireGuardianNPC::Create(CManager* pNewUIMng, int x, int y)
+bool CEmpireGuardianNPC::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
@@ -35,8 +34,6 @@ bool CEmpireGuardianNPC::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC, this);
     m_View.SetItemDrawer([this](int, const Rml::Vector2f& offset, const Rml::Vector2f& size) { RenderItem3D(offset, size); });
-
-    SetPos(x, y);
 
     m_View.SetWindowId(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
     m_View.Build();
@@ -55,12 +52,6 @@ void CEmpireGuardianNPC::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void CEmpireGuardianNPC::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CEmpireGuardianNPC::UpdateMouseEvent()

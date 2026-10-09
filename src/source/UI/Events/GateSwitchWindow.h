@@ -28,7 +28,7 @@ private:
     };
 
     CManager* m_pNewUIMng;
-    POINT m_Pos;
+
 
     void BindRmlModel(Rml::DataModelConstructor& c, GateSwitchRmlModel& model);
     UI::RmlBridge::ThemedView<GateSwitchRmlModel> m_RmlView{"gate_switch",
@@ -41,12 +41,11 @@ public:
     CGateSwitchWindow();
     virtual ~CGateSwitchWindow();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();

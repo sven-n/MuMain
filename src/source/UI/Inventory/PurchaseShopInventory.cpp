@@ -26,7 +26,6 @@ using namespace mu::ui::window;
 
 mu::ui::window::CPurchaseShopInventory::CPurchaseShopInventory() : m_pNewUIMng(NULL), m_pNewInventoryCtrl(NULL)
 {
-    m_Pos.x = m_Pos.y = 0;
     m_ShopCharacterIndex = -1;
 }
 
@@ -35,18 +34,16 @@ mu::ui::window::CPurchaseShopInventory::~CPurchaseShopInventory()
     Release();
 }
 
-bool mu::ui::window::CPurchaseShopInventory::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CPurchaseShopInventory::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
-
-    SetPos(x, y);
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY, this);
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewItemMng, this, m_Pos.x + 16, m_Pos.y + 90, 8, 4, MAX_MY_INVENTORY_EX_INDEX))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewItemMng, this, 8, 4, MAX_MY_INVENTORY_EX_INDEX))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;

@@ -22,10 +22,9 @@ public:
     CHelpWindow();
     virtual ~CHelpWindow();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();
@@ -48,7 +47,7 @@ private:
     void RebuildPageModel(const UI::Scaling::Transform& transform);
 
     CManager* m_pNewUIMng;
-    POINT m_Pos;
+
 
     int m_iIndex;
 

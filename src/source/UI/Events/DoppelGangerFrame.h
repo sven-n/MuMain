@@ -36,7 +36,7 @@ private:
     };
 
     CManager* m_pNewUIMng;
-    POINT m_Pos;
+
 
     typedef struct _PARTY_POSITION
     {
@@ -48,10 +48,9 @@ public:
     CDoppelGangerFrame();
     virtual ~CDoppelGangerFrame();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }

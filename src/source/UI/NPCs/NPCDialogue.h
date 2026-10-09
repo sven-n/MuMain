@@ -39,7 +39,7 @@ namespace mu::ui::window
         };
 
         CManager* m_pNewUIMng;
-        POINT				m_Pos;
+
 
         wchar_t	m_aszNPCWords[ND_NPC_LINE_MAX][ND_WORDS_ROW_MAX];
         int		m_nSelNPCPage;
@@ -81,11 +81,10 @@ namespace mu::ui::window
         CNPCDialogue();
         virtual ~CNPCDialogue();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         void Release();
 
-        void SetPos(int x, int y);
         void Show(bool bShow) override;
 
         bool UpdateMouseEvent();

@@ -26,17 +26,13 @@ private:
 
 public:
     CManager* m_pNewUIMng;
-    POINT m_Pos;
 
 public:
     CGoldBowmanLena();
     virtual ~CGoldBowmanLena();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
-
-    void SetPos(int x, int y);
-    const POINT& GetPos();
 
     bool UpdateMouseEvent();
     Rml::ElementDocument* GetPlacedDocument() const override { return m_View.Document(); }
@@ -56,16 +52,4 @@ private:
 
     EventItemEntryView m_View{"gold_bowman_lena", "Data/Interface/RmlUi/gold_bowman_lena.rml"};
 };
-
-    inline
-        void CGoldBowmanLena::SetPos(int x, int y)
-    {
-        m_Pos.x = x; m_Pos.y = y;
-    }
-
-    inline
-        const POINT& CGoldBowmanLena::GetPos()
-    {
-        return m_Pos;
-    }
 };

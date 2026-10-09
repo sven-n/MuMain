@@ -20,7 +20,7 @@ namespace mu::ui::window
 
         CManager* m_pNewUIMng;
         CInventoryCtrl* m_extensions[MAX_INVENTORY_EXT_COUNT];
-        POINT m_Pos;
+
 
         // The grids stay native (live 3D items); a locked (not-yet-purchased) page is flat art the
         // theme draws, one entry per locked page.
@@ -57,10 +57,9 @@ namespace mu::ui::window
         CInventoryExtension();
         virtual ~CInventoryExtension();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
-        void SetPos(int x, int y);
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();

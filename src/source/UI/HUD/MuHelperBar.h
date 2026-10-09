@@ -25,11 +25,10 @@ namespace mu::ui::window
         CMuHelperBar();
         virtual ~CMuHelperBar();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
         // Vestigial -- RmlUi/CSS owns this widget's position now (mu_helper_bar.rcss). No-op kept for API compatibility.
-        void SetPos(int x, int y) {}
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();

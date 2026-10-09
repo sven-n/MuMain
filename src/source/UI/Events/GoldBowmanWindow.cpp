@@ -37,7 +37,6 @@ std::wstring Formatted(const wchar_t* format)
 CGoldBowmanWindow::CGoldBowmanWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     ZeroMemory(g_strGiftName, sizeof(g_strGiftName));
 }
 
@@ -46,15 +45,13 @@ CGoldBowmanWindow::~CGoldBowmanWindow()
     Release();
 }
 
-bool CGoldBowmanWindow::Create(CManager* pNewUIMng, int x, int y)
+bool CGoldBowmanWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_GOLD_BOWMAN, this);
-
-    SetPos(x, y);
 
     // A new document's field is unfocused (a theme switch rebuilds it).
     m_View.SetAfterBuild([this] { m_SerialFocusPending = IsVisible(); });

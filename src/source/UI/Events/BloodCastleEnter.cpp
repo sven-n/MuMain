@@ -20,7 +20,6 @@ using namespace mu::ui::window;
 CEnterBloodCastle::CEnterBloodCastle() : m_View("blood_castle_enter", "Data/Interface/RmlUi/blood_castle_enter.rml")
 {
     m_pNewUIMng = NULL;
-    memset(&m_Pos, 0, sizeof(POINT));
 
     m_iNumActiveBtn = 1;
 
@@ -50,15 +49,13 @@ CEnterBloodCastle::~CEnterBloodCastle()
 
 //---------------------------------------------------------------------------------------------
 // Create
-bool CEnterBloodCastle::Create(CManager* pNewUIMng, int x, int y)
+bool CEnterBloodCastle::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_BLOODCASTLE, this);
-
-    SetPos(x, y);
 
     m_View.Build();
 
@@ -82,12 +79,6 @@ void CEnterBloodCastle::Release()
 
 //---------------------------------------------------------------------------------------------
 // SetPos
-void CEnterBloodCastle::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
-}
-
 //---------------------------------------------------------------------------------------------
 // UpdateMouseEvent
 bool CEnterBloodCastle::UpdateMouseEvent()

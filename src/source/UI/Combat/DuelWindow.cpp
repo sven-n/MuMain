@@ -32,7 +32,6 @@ void Sync(RmlModelBinder<Model>& binder, T Model::* field, const char* name, T v
 mu::ui::window::CDuelWindow::CDuelWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
 }
 
 mu::ui::window::CDuelWindow::~CDuelWindow()
@@ -40,15 +39,13 @@ mu::ui::window::CDuelWindow::~CDuelWindow()
     Release();
 }
 
-bool mu::ui::window::CDuelWindow::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CDuelWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DUEL_WINDOW, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -67,12 +64,6 @@ void mu::ui::window::CDuelWindow::Release()
     }
 
     m_RmlView.Release();
-}
-
-void mu::ui::window::CDuelWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool mu::ui::window::CDuelWindow::UpdateMouseEvent()

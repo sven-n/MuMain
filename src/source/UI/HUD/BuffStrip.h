@@ -19,11 +19,10 @@ namespace mu::ui::window
         CBuffStrip();
         virtual ~CBuffStrip();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
         // Vestigial -- RmlUi/CSS owns this widget's position now (.center-x in buff_strip.rml).
-        void SetPos(int x, int y) {}
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();

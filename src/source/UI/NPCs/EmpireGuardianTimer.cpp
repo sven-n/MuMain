@@ -10,7 +10,6 @@ using namespace mu::ui::window;
 CEmpireGuardianTimer::CEmpireGuardianTimer()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_dTime = 600000;
     m_iType = 1;
     m_iDay = EG_MONDAY;//EG_DAY_MAP_LIST::EG_MONDAY;
@@ -23,15 +22,13 @@ CEmpireGuardianTimer::~CEmpireGuardianTimer()
     Release();
 }
 
-bool CEmpireGuardianTimer::Create(CManager* pNewUIMng, int x, int y)
+bool CEmpireGuardianTimer::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_EMPIREGUARDIAN_TIMER, this);
-
-    SetPos(x, y);
 
     m_View.Build();
 
@@ -49,12 +46,6 @@ void CEmpireGuardianTimer::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void CEmpireGuardianTimer::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CEmpireGuardianTimer::UpdateMouseEvent()

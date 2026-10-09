@@ -65,10 +65,9 @@ namespace mu::ui::window
         COptionWindow();
         virtual ~COptionWindow();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
-        void SetPos(int x, int y);
         void Show(bool bShow) override;
 
         bool UpdateMouseEvent();
@@ -309,7 +308,7 @@ namespace mu::ui::window
 
     private:
         CManager* m_pNewUIMng;
-        POINT						m_Pos;
+
 
         bool m_bAutoAttack;
         bool m_bWhisperSound;

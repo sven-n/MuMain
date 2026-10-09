@@ -197,7 +197,7 @@ namespace mu::ui::window
         CInventoryCtrl();
         virtual ~CInventoryCtrl();
 
-        bool Create(STORAGE_TYPE storageType, CItemMng* pNewItemMng, CObject* pOwner, int x, int y, int nColumn, int nRow, int nIndexOffset = 0);
+        bool Create(STORAGE_TYPE storageType, CItemMng* pNewItemMng, CObject* pOwner, int nColumn, int nRow, int nIndexOffset = 0);
         void Release();
 
         bool AddItem(int iLinealPos, std::span<const BYTE> pbyItemPacket);

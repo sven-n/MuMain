@@ -39,10 +39,9 @@ public:
     CWindowMenu();
     virtual ~CWindowMenu();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();
@@ -66,7 +65,7 @@ private:
 
 private:
     CManager* m_pNewUIMng;
-    POINT m_Pos;
+
 
     void BindRmlModel(Rml::DataModelConstructor& c, WindowMenuRmlModel& model);
     UI::RmlBridge::ThemedView<WindowMenuRmlModel> m_RmlView{"window_menu",

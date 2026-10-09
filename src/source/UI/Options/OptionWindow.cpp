@@ -171,8 +171,6 @@ static const int s_NumFpsCapValues = sizeof(s_FpsCapValues) / sizeof(s_FpsCapVal
 mu::ui::window::COptionWindow::COptionWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = 0;
-    m_Pos.y = 0;
 
     m_bAutoAttack = true;
     m_bWhisperSound = false;
@@ -206,17 +204,10 @@ mu::ui::window::COptionWindow::~COptionWindow()
     Release();
 }
 
-bool mu::ui::window::COptionWindow::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::COptionWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
-
-    // x/y from the caller are WindowSystem.cpp's old reference-resolution constant
-    // ((640/2)-(190/2), 5) -- meaningless now that this window is centered by window_shell's own
-    // `.center-both` CSS, the same as every other window_shell consumer. Kept as a parameter only
-    // for call-site compatibility.
-    (void)x;
-    (void)y;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_OPTION, this);
@@ -445,12 +436,6 @@ void mu::ui::window::COptionWindow::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void mu::ui::window::COptionWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 void mu::ui::window::COptionWindow::Show(bool bShow)

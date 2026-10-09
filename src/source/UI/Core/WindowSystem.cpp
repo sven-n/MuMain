@@ -18,14 +18,6 @@ using namespace mu::ui::window;
 
 namespace
 {
-    constexpr int kLayoutBaseX = 640;
-    constexpr int kLayoutPanelWidth = 190;
-
-    constexpr int PanelColumnX(int columns)
-    {
-        return kLayoutBaseX - (kLayoutPanelWidth * columns);
-    }
-
     bool IsHeroPositionLayoutInterface(DWORD dwKey)
     {
         switch (dwKey)
@@ -145,11 +137,11 @@ bool CSystem::Create()
         return false;
 
     m_pNewSystemLogWindow = new CSystemLogWindow;
-    if (false == m_pNewSystemLogWindow->Create(m_pNewUIMng, 0, 80))
+    if (false == m_pNewSystemLogWindow->Create(m_pNewUIMng))
         return false;
 
     m_pNewOptionWindow = new COptionWindow;
-    if (m_pNewOptionWindow->Create(m_pNewUIMng, (640 / 2) - (190 / 2), 5) == false)
+    if (m_pNewOptionWindow->Create(m_pNewUIMng) == false)
     {
         return false;
     }
@@ -191,7 +183,7 @@ void CSystem::Release()
 bool CSystem::CreateChatCommandWindow()
 {
     m_pNewChatCommandWindow = new CChatCommandWindow;
-    if (m_pNewChatCommandWindow->Create(m_pNewUIMng, PanelColumnX(1), 0))
+    if (m_pNewChatCommandWindow->Create(m_pNewUIMng))
     {
         return true;
     }
@@ -235,77 +227,77 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewMyInventory = new CMyInventory;
-    if (false == m_pNewMyInventory->Create(m_pNewUIMng, PanelColumnX(1), 0))
+    if (false == m_pNewMyInventory->Create(m_pNewUIMng))
         return false;
 
     m_pNewMyInventoryExt = new CInventoryExtension;
-    if (false == m_pNewMyInventoryExt->Create(m_pNewUIMng, PanelColumnX(2), 0))
+    if (false == m_pNewMyInventoryExt->Create(m_pNewUIMng))
         return false;
 
     m_pNewNPCShop = new CNPCShop;
-    if (false == m_pNewNPCShop->Create(m_pNewUIMng, CNPCShop::NPCSHOP_POS_X, CNPCShop::NPCSHOP_POS_Y))
+    if (false == m_pNewNPCShop->Create(m_pNewUIMng))
         return false;
 
     m_pNewPetInfoWindow = new CPetInfoWindow;
-    if (false == m_pNewPetInfoWindow->Create(m_pNewUIMng, PanelColumnX(2), 0))
+    if (false == m_pNewPetInfoWindow->Create(m_pNewUIMng))
         return false;
 
     m_pNewMixInventory = new CMixInventory;
-    if (m_pNewMixInventory->Create(m_pNewUIMng, 260, 0) == false)
+    if (m_pNewMixInventory->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewCastleWindow = new CCastleWindow;
-    if (m_pNewCastleWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewCastleWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewGuardWindow = new CGuardWindow;
-    if (m_pNewGuardWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewGuardWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewGatemanWindow = new CGatemanWindow;
-    if (m_pNewGatemanWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewGatemanWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewGateSwitchWindow = new CGateSwitchWindow;
-    if (m_pNewGateSwitchWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewGateSwitchWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewStorageInventory = new CStorageInventory;
-    if (m_pNewStorageInventory->Create(m_pNewUIMng, 260, 0) == false)
+    if (m_pNewStorageInventory->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewStorageInventoryExt = new CStorageInventoryExt;
-    if (m_pNewStorageInventoryExt->Create(m_pNewUIMng, 260 - 190, 0) == false)
+    if (m_pNewStorageInventoryExt->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewGuildInfoWindow = new CGuildInfoWindow;
-    if (m_pNewGuildInfoWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewGuildInfoWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewGuildMakeWindow = new CGuildMakeWindow;
-    if (m_pNewGuildMakeWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewGuildMakeWindow->Create(m_pNewUIMng) == false)
         return false;
 
     CreatePersonalItemTable();
 
     m_pNewMyShopInventory = new CMyShopInventory;
-    if (m_pNewMyShopInventory->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
+    if (m_pNewMyShopInventory->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewPurchaseShopInventory = new CPurchaseShopInventory;
-    if (m_pNewPurchaseShopInventory->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
+    if (m_pNewPurchaseShopInventory->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewCharacterInfoWindow = new CCharacterInfoWindow;
-    if (m_pNewCharacterInfoWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewCharacterInfoWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewMyQuestInfoWindow = new CMyQuestInfoWindow;
-    if (m_pNewMyQuestInfoWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewMyQuestInfoWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewPartyInfoWindow = new CPartyInfoWindow;
-    if (m_pNewPartyInfoWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewPartyInfoWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewPartyListWindow = new CPartyListWindow;
@@ -313,63 +305,63 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewNPCQuest = new CNPCQuest;
-    if (m_pNewNPCQuest->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewNPCQuest->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewEnterBloodCastle = new CEnterBloodCastle;
-    if (m_pNewEnterBloodCastle->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewEnterBloodCastle->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewEnterDevilSquare = new CEnterDevilSquare;
-    if (m_pNewEnterDevilSquare->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewEnterDevilSquare->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewBloodCastle = new CBloodCastle;
-    if (m_pNewBloodCastle->Create(m_pNewUIMng, 640 - 127, 480 - 132) == false)
+    if (m_pNewBloodCastle->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewTrade = new CTrade;
-    if (m_pNewTrade->Create(m_pNewUIMng, 260, 0) == false)
+    if (m_pNewTrade->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewKanturu2ndEnterNpc = new CKanturu2ndEnterNpc;
-    if (m_pNewKanturu2ndEnterNpc->Create(m_pNewUIMng, (640 / 2) - (230 / 2), 20) == false)
+    if (m_pNewKanturu2ndEnterNpc->Create(m_pNewUIMng) == false)
     {
         return false;
     }
 
     m_pNewKanturuInfoWindow = new CKanturuInfoWindow;
-    if (m_pNewKanturuInfoWindow->Create(m_pNewUIMng, 541, 351) == false)
+    if (m_pNewKanturuInfoWindow->Create(m_pNewUIMng) == false)
     {
         return false;
     }
 
     m_pNewChaosCastleTime = new CChaosCastleTime;
-    if (m_pNewChaosCastleTime->Create(m_pNewUIMng, 640 - 127, 480 - 132) == false)
+    if (m_pNewChaosCastleTime->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewBattleSoccerScore = new CBattleSoccerScore;
-    if (m_pNewBattleSoccerScore->Create(m_pNewUIMng, 509, 359) == false)
+    if (m_pNewBattleSoccerScore->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewCommandWindow = new CCommandWindow;
-    if (m_pNewCommandWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewCommandWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewCatapultWindow = new CCatapultWindow;
-    if (m_pNewCatapultWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewCatapultWindow->Create(m_pNewUIMng) == false)
     {
         return false;
     }
 
     m_pNewWindowMenu = new CWindowMenu;
-    if (m_pNewWindowMenu->Create(m_pNewUIMng, 640 - 112, 480 - 171) == false)
+    if (m_pNewWindowMenu->Create(m_pNewUIMng) == false)
     {
         return false;
     }
 
     m_pMuHelperBar = new CMuHelperBar;
-    if (m_pMuHelperBar->Create(m_pNewUIMng, 0, 0) == false)
+    if (m_pMuHelperBar->Create(m_pNewUIMng) == false)
     {
         return false;
     }
@@ -380,19 +372,19 @@ bool CSystem::LoadMainSceneInterface()
     }
 
     m_pNewHelpWindow = new CHelpWindow;
-    if (m_pNewHelpWindow->Create(m_pNewUIMng, 0, 0) == false)
+    if (m_pNewHelpWindow->Create(m_pNewUIMng) == false)
     {
         return false;
     }
 
     m_pNewItemExplanationWindow = new CItemExplanationWindow;
-    if (m_pNewItemExplanationWindow->Create(m_pNewUIMng, 0, 0) == false)
+    if (m_pNewItemExplanationWindow->Create(m_pNewUIMng) == false)
     {
         return false;
     }
 
     m_pNewSetItemExplanation = new CSetItemExplanation;
-    if (m_pNewSetItemExplanation->Create(m_pNewUIMng, 0, 0) == false)
+    if (m_pNewSetItemExplanation->Create(m_pNewUIMng) == false)
     {
         return false;
     }
@@ -409,13 +401,13 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewDuelWindow = new CDuelWindow;
-    if (m_pNewDuelWindow->Create(m_pNewUIMng, 509, 359) == false)
+    if (m_pNewDuelWindow->Create(m_pNewUIMng) == false)
     {
         return false;
     }
 
     m_pNewNameWindow = new CNameWindow;
-    if (m_pNewNameWindow->Create(m_pNewUIMng, 0, 0) == false)
+    if (m_pNewNameWindow->Create(m_pNewUIMng) == false)
     {
         return false;
     }
@@ -431,29 +423,29 @@ bool CSystem::LoadMainSceneInterface()
     }
 
     m_pBuffStrip = new CBuffStrip;
-    if (m_pBuffStrip->Create(m_pNewUIMng, 220, 15) == false)
+    if (m_pBuffStrip->Create(m_pNewUIMng) == false)
     {
         return false;
     }
 
     m_pNewCursedTempleEnterWindow = new CCursedTempleEnter;
-    if (m_pNewCursedTempleEnterWindow->Create(m_pNewUIMng, 640 / 2 - 230 / 2, 80) == false)
+    if (m_pNewCursedTempleEnterWindow->Create(m_pNewUIMng) == false)
     {
         return false;
     }
     m_pNewCursedTempleWindow = new CCursedTempleSystem;
-    if (m_pNewCursedTempleWindow->Create(m_pNewUIMng, 0, 0) == false)
+    if (m_pNewCursedTempleWindow->Create(m_pNewUIMng) == false)
     {
         return false;
     }
     m_pNewCursedTempleResultWindow = new CCursedTempleResult;
-    if (m_pNewCursedTempleResultWindow->Create(m_pNewUIMng, 640 / 2 - 230 / 2, 120) == false)
+    if (m_pNewCursedTempleResultWindow->Create(m_pNewUIMng) == false)
     {
         return false;
     }
 
     m_pNewCryWolfInterface = new CCryWolf;
-    if (m_pNewCryWolfInterface->Create(m_pNewUIMng, 0, 0) == false)
+    if (m_pNewCryWolfInterface->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewMaster_Level_Interface = new CMasterLevel;
@@ -461,27 +453,27 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewMiniMap = new CMiniMap;
-    if (m_pNewMiniMap->Create(m_pNewUIMng, 0, 0) == false)
+    if (m_pNewMiniMap->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewGoldBowman = new CGoldBowmanWindow;
-    if (m_pNewGoldBowman->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewGoldBowman->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewGoldBowmanLena = new CGoldBowmanLena;
-    if (m_pNewGoldBowmanLena->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewGoldBowmanLena->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewLuckyCoinRegistration = new CRegistrationLuckyCoin;
-    if (m_pNewLuckyCoinRegistration->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
+    if (m_pNewLuckyCoinRegistration->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewExchangeLuckyCoinWindow = new CExchangeLuckyCoin;
-    if (m_pNewExchangeLuckyCoinWindow->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
+    if (m_pNewExchangeLuckyCoinWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewDuelWatchWindow = new CDuelWatchWindow;
-    if (m_pNewDuelWatchWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewDuelWatchWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewDuelWatchMainFrameWindow = new CDuelWatchMainFrameWindow;
@@ -489,41 +481,41 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewDuelWatchUserListWindow = new CDuelWatchUserListWindow;
-    if (m_pNewDuelWatchUserListWindow->Create(m_pNewUIMng, 640 - 57, 480 - 51) == false)
+    if (m_pNewDuelWatchUserListWindow->Create(m_pNewUIMng) == false)
         return false;
 
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
     m_pNewInGameShop = new CInGameShop;
-    if (m_pNewInGameShop->Create(m_pNewUIMng, 0, 0) == false)
+    if (m_pNewInGameShop->Create(m_pNewUIMng) == false)
         return false;
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
     m_pNewDoppelGangerWindow = new CDoppelGangerWindow;
-    if (m_pNewDoppelGangerWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewDoppelGangerWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewDoppelGangerFrame = new CDoppelGangerFrame;
-    if (m_pNewDoppelGangerFrame->Create(m_pNewUIMng, 640 - 227, 480 - 51 - 87) == false)
+    if (m_pNewDoppelGangerFrame->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewNPCDialogue = new CNPCDialogue;
-    if (m_pNewNPCDialogue->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewNPCDialogue->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewQuestProgress = new CQuestProgress;
-    if (m_pNewQuestProgress->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewQuestProgress->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewQuestProgressByEtc = new CQuestProgressByEtc;
-    if (m_pNewQuestProgressByEtc->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewQuestProgressByEtc->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewEmpireGuardianNPC = new CEmpireGuardianNPC;
-    if (m_pNewEmpireGuardianNPC->Create(m_pNewUIMng, 450, 0) == false)
+    if (m_pNewEmpireGuardianNPC->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewEmpireGuardianTimer = new CEmpireGuardianTimer;
-    if (m_pNewEmpireGuardianTimer->Create(m_pNewUIMng, 507, 342) == false)
+    if (m_pNewEmpireGuardianTimer->Create(m_pNewUIMng) == false)
         return false;
 
 #ifdef PBG_MOD_STAMINA_UI
@@ -533,15 +525,15 @@ bool CSystem::LoadMainSceneInterface()
 #endif //PBG_MOD_STAMINA_UI
 
     m_pNewGensRanking = new CGensRanking;
-    if (m_pNewGensRanking->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewGensRanking->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewUnitedMarketPlaceWindow = new CUnitedMarketPlaceWindow;
-    if (m_pNewUnitedMarketPlaceWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pNewUnitedMarketPlaceWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewUILuckyItemWnd = new CLuckyItemWnd;
-    if (m_pNewUILuckyItemWnd->Create(m_pNewUIMng, 260, 0) == false)
+    if (m_pNewUILuckyItemWnd->Create(m_pNewUIMng) == false)
         return false;
 
     m_pGenericConfirmDialog = new CGenericConfirmDialog;
@@ -553,11 +545,11 @@ bool CSystem::LoadMainSceneInterface()
     g_pGenericMenuDialog = m_pGenericMenuDialog;
 
     m_pMuHelperConfig = new CMuHelperConfigWindow;
-    if (m_pMuHelperConfig->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    if (m_pMuHelperConfig->Create(m_pNewUIMng) == false)
         return false;
 
     m_pMuHelperDetail = new CMuHelperDetailWindow;
-    if (m_pMuHelperDetail->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
+    if (m_pMuHelperDetail->Create(m_pNewUIMng) == false)
         return false;
 
     m_pMuHelperSkillPicker = new CMuHelperSkillPicker;
@@ -565,17 +557,10 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     // Windows the theme's workspace places. The members are re-created per main scene, so each
-    // setter reads the member when it runs.
+    // getter reads the member when it runs.
     const auto slot = [](DWORD windowId, const char* slotName, auto*& window, const char* document = nullptr)
     {
-        UI::Placement::RegisterWindow(
-            windowId, slotName, [&window]() -> CObject* { return window; },
-            [&window](int x, int y)
-            {
-                if (window != nullptr)
-                    window->SetPos(x, y);
-            },
-            document);
+        UI::Placement::RegisterWindow(windowId, slotName, [&window]() -> CObject* { return window; }, document);
     };
     slot(INTERFACE_CHARACTER, "character", m_pNewCharacterInfoWindow, "character_info.rml");
     slot(INTERFACE_MUHELPER, "mu_helper", m_pMuHelperConfig, "mu_helper_config.rml");

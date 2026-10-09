@@ -27,15 +27,13 @@ CDuelWatchUserListWindow::~CDuelWatchUserListWindow()
     Release();
 }
 
-bool CDuelWatchUserListWindow::Create(CManager* pNewUIMng, int x, int y)
+bool CDuelWatchUserListWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DUELWATCH_USERLIST, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -54,12 +52,6 @@ void CDuelWatchUserListWindow::Release()
     }
 
     m_RmlView.Release();
-}
-
-void CDuelWatchUserListWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CDuelWatchUserListWindow::UpdateMouseEvent()

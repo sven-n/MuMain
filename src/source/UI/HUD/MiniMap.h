@@ -29,10 +29,9 @@ public:
     CMiniMap();
     virtual ~CMiniMap();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
 
-    void SetPos(int x, int y);
     // Kept for RenderPointRotate() (ZzzOpenglUtil.cpp), which no longer has a caller.
     void SetBtnPos(int Num, float x, float y, float nx, float ny);
 

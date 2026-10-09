@@ -25,7 +25,7 @@ namespace mu::ui::window
     private:
 
         CManager* m_pNewUIMng;
-        POINT					m_Pos;
+
         CInventoryCtrl* m_pNewInventoryCtrl;
 
         bool					m_bLock;
@@ -82,10 +82,9 @@ namespace mu::ui::window
         CStorageInventory();
         virtual ~CStorageInventory();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
-        void SetPos(int x, int y);
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();

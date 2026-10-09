@@ -48,8 +48,6 @@ float MeasureLogicalWidth(const std::wstring& text, bool bold)
 mu::ui::window::CHelpWindow::CHelpWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = 0;
-    m_Pos.y = 0;
 
     m_iIndex = 0;
 }
@@ -59,15 +57,13 @@ mu::ui::window::CHelpWindow::~CHelpWindow()
     Release();
 }
 
-bool mu::ui::window::CHelpWindow::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CHelpWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_HELP, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -86,12 +82,6 @@ void mu::ui::window::CHelpWindow::Release()
     }
 
     m_RmlView.Release();
-}
-
-void mu::ui::window::CHelpWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool mu::ui::window::CHelpWindow::UpdateMouseEvent()

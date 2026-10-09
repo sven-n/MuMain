@@ -32,7 +32,7 @@ namespace mu::ui::window
 
         CManager* m_pNewUIMng;
         CInventoryCtrl* m_pNewInventoryCtrl;
-        POINT m_Pos;
+
 
         DWORD m_dwShopState;
         int m_iTaxRate;
@@ -81,10 +81,9 @@ namespace mu::ui::window
         CNPCShop();
         virtual ~CNPCShop();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
-        void SetPos(int x, int y);
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();

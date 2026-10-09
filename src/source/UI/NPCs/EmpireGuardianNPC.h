@@ -20,7 +20,6 @@ private:
 
     CManager* m_pNewUIMng;
 
-    POINT m_Pos;
     EventItemEntryView m_View{"empire_guardian_enter", "Data/Interface/RmlUi/empire_guardian_enter.rml"};
     bool m_bCanClick;
 
@@ -28,10 +27,9 @@ public:
     CEmpireGuardianNPC();
     virtual ~CEmpireGuardianNPC();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     Rml::ElementDocument* GetPlacedDocument() const override { return m_View.Document(); }

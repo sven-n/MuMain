@@ -307,7 +307,6 @@ namespace mu::ui::window
 
         type_vector_msgs	m_vecAllMsgs;
 
-        POINT	m_WndPos;
         SIZE	m_WndSize;
         int		m_nShowingLines;
 
@@ -342,10 +341,9 @@ namespace mu::ui::window
         CSystemLogWindow();
         ~CSystemLogWindow() override;
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
-        void SetPosition(int x, int y);
         void AddText(const type_string& strText, MESSAGE_TYPE MsgType);
 
         void ClearAll();

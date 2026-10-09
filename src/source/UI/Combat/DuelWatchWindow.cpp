@@ -41,7 +41,6 @@ float TextPxInBox(UI::Scaling::FontRole role, const wchar_t* text, int boxWidth)
 CDuelWatchWindow::CDuelWatchWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
 }
 
 CDuelWatchWindow::~CDuelWatchWindow()
@@ -49,15 +48,13 @@ CDuelWatchWindow::~CDuelWatchWindow()
     Release();
 }
 
-bool CDuelWatchWindow::Create(CManager* pNewUIMng, int x, int y)
+bool CDuelWatchWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DUELWATCH, this);
-
-    SetPos(x, y);
 
     for (int i = 0; i < kRoomCount; ++i)
         m_bChannelEnable[i] = FALSE;
@@ -79,12 +76,6 @@ void CDuelWatchWindow::Release()
     }
 
     m_RmlView.Release();
-}
-
-void CDuelWatchWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CDuelWatchWindow::UpdateMouseEvent()

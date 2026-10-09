@@ -24,7 +24,6 @@ using namespace mu::ui::window;
 CDoppelGangerWindow::CDoppelGangerWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_iRemainTime = 0;
     m_bIsEnterButtonLocked = FALSE;
 }
@@ -34,7 +33,7 @@ CDoppelGangerWindow::~CDoppelGangerWindow()
     Release();
 }
 
-bool CDoppelGangerWindow::Create(CManager* pNewUIMng, int x, int y)
+bool CDoppelGangerWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
@@ -42,8 +41,6 @@ bool CDoppelGangerWindow::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DOPPELGANGER_NPC, this);
     m_View.SetItemDrawer([this](int, const Rml::Vector2f& offset, const Rml::Vector2f& size) { RenderItem3D(offset, size); });
-
-    SetPos(x, y);
 
     m_View.SetWindowId(mu::ui::window::INTERFACE_DOPPELGANGER_NPC);
     m_View.Build();
@@ -62,12 +59,6 @@ void CDoppelGangerWindow::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void CDoppelGangerWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CDoppelGangerWindow::UpdateMouseEvent()

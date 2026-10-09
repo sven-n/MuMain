@@ -51,7 +51,7 @@ private:
     };
 
     CManager* m_pNewUIMng;
-    POINT m_Pos;
+
 
     // The current page and highlight share this value. RmlUi owns the tab hit targets.
     int m_iNumCurOpenTab; // ���� �����ִ� �ǹ�ư��ȣ
@@ -99,12 +99,11 @@ public:
     CGuardWindow();
     virtual ~CGuardWindow();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();

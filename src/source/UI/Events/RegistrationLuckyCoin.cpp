@@ -22,7 +22,7 @@ namespace mu::ui::window
         Release();
     }
 
-    bool CRegistrationLuckyCoin::Create(CManager* pNewUIMng, int x, int y)
+    bool CRegistrationLuckyCoin::Create(CManager* pNewUIMng)
     {
         if (pNewUIMng == NULL)
             return false;
@@ -30,7 +30,6 @@ namespace mu::ui::window
         m_pNewUIMng = pNewUIMng;
         m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION, this);
 
-        SetPos(x, y);
         m_View.SetItemDrawer(
             [this](int, const Rml::Vector2f& offset, const Rml::Vector2f& size)
             {
@@ -41,12 +40,6 @@ namespace mu::ui::window
         m_View.Build();
         Show(false);
         return true;
-    }
-
-    void CRegistrationLuckyCoin::SetPos(int x, int y)
-    {
-        m_Pos.x = x;
-        m_Pos.y = y;
     }
 
     bool CRegistrationLuckyCoin::Render()

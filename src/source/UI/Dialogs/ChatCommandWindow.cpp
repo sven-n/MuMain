@@ -72,8 +72,6 @@ int MeasureInReferenceUnits(const wchar_t* text, size_t length)
 mu::ui::window::CChatCommandWindow::CChatCommandWindow()
 {
     m_pNewUIMng = nullptr;
-    m_Pos.x = 0;
-    m_Pos.y = 0;
     m_page = PAGE_COMMANDS;
     m_selectedRow = -1;
     m_scrollOffset = 0;
@@ -85,7 +83,7 @@ mu::ui::window::CChatCommandWindow::~CChatCommandWindow()
     Release();
 }
 
-bool mu::ui::window::CChatCommandWindow::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CChatCommandWindow::Create(CManager* pNewUIMng)
 {
     if (pNewUIMng == nullptr)
     {
@@ -94,8 +92,6 @@ bool mu::ui::window::CChatCommandWindow::Create(CManager* pNewUIMng, int x, int 
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_COMMAND_LIST, this);
-
-    SetPos(x, y);
     BuildRmlUi();
     Show(false);
 
@@ -112,12 +108,6 @@ void mu::ui::window::CChatCommandWindow::Release()
     }
 
     m_RmlView.Release();
-}
-
-void mu::ui::window::CChatCommandWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 float mu::ui::window::CChatCommandWindow::GetLayerDepth()

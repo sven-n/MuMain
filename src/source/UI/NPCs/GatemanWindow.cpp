@@ -41,7 +41,6 @@ using namespace mu::ui::window;
 CGatemanWindow::CGatemanWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
 }
 
 CGatemanWindow::~CGatemanWindow()
@@ -49,15 +48,13 @@ CGatemanWindow::~CGatemanWindow()
     Release();
 }
 
-bool CGatemanWindow::Create(CManager* pNewUIMng, int x, int y)
+bool CGatemanWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_GATEKEEPER, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -76,12 +73,6 @@ void CGatemanWindow::Release()
     }
 
     m_RmlView.Release();
-}
-
-void CGatemanWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CGatemanWindow::UpdateMouseEvent()

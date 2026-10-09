@@ -59,7 +59,6 @@ namespace mu::ui::window
         EVENT_STATE				m_EventState;
 
         CManager* m_pNewUIMng;
-        POINT					m_Pos;
         int						m_nCurrentTab;
         int						m_Tot_Notice;
 
@@ -106,12 +105,10 @@ namespace mu::ui::window
         CGuildInfoWindow();
         virtual ~CGuildInfoWindow();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         void Release();
-
-        void SetPos(int x, int y);
 
         // The highlighted member, or nullptr when the selection no longer names a live row.
         const MemberEntry* SelectedMember() const;
@@ -149,7 +146,6 @@ namespace mu::ui::window
     public:
         void ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType,
             BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL);
-
 
     private:
         void SelectTab(int tab);

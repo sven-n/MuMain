@@ -33,7 +33,6 @@ struct Entry
 {
     std::uint32_t windowId = 0;
     GetWindow getWindow;
-    SetPosition setPosition;
     std::string document;
     PlacementParticipant participant;
     PlacementParticipant::Box box;
@@ -41,7 +40,6 @@ struct Entry
     bool lastVisible = false;
     bool placed = false;
     bool warnedUnsupportedFill = false;
-    POINT lastPosition{};
 };
 
 std::unordered_map<std::string, Entry> g_windows;
@@ -221,14 +219,12 @@ bool SlotBox(std::string_view name, PlacementParticipant::Box& box)
     return true;
 }
 
-void RegisterWindow(std::uint32_t windowId, std::string_view slotName, GetWindow getWindow, SetPosition setPosition,
-                    const char* document)
+void RegisterWindow(std::uint32_t windowId, std::string_view slotName, GetWindow getWindow, const char* document)
 {
     Entry& entry = g_windows[std::string(slotName)];
     entry = {};
     entry.windowId = windowId;
     entry.getWindow = std::move(getWindow);
-    entry.setPosition = std::move(setPosition);
     entry.document = document != nullptr ? document : "";
 }
 
@@ -439,17 +435,7 @@ static void PlaceSlots(const Rml::ElementList& slots, const UI::Scaling::Transfo
             const Rml::Vector2f size = slot->GetBox().GetSize(Rml::BoxArea::Border);
             window->SetFillPlacementSize(size.x / scale, size.y / scale);
         }
-
-        const POINT position{};
-
-        // Only on change: a window dragged while behind another keeps its offset in the slot
-        // until the arrangement itself changes.
-        if (entry->placed && entry->lastPosition.x == position.x && entry->lastPosition.y == position.y)
-            continue;
         entry->placed = true;
-        entry->lastPosition = position;
-        if (entry->setPosition)
-            entry->setPosition(position.x, position.y);
     }
 
 }

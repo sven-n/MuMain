@@ -75,7 +75,6 @@ int FindGuildMarkSlot()
 CGuardWindow::CGuardWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_iNumCurOpenTab = TAB_SIEGE_INFO;
 }
 
@@ -84,15 +83,13 @@ CGuardWindow::~CGuardWindow()
     Release();
 }
 
-bool CGuardWindow::Create(CManager* pNewUIMng, int x, int y)
+bool CGuardWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_GUARDSMAN, this);
-
-    SetPos(x, y);
 
     SetCurOpenTab(m_iNumCurOpenTab);
 
@@ -112,12 +109,6 @@ void CGuardWindow::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void CGuardWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 // The page and the tab highlight read the same value.

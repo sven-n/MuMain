@@ -65,7 +65,6 @@ public:
 private:
     void Init();
     void Destroy();
-    POINT m_Pos;
 
     FLOAT m_fBooleanSize;
 
@@ -96,21 +95,14 @@ public:
     CGensRanking();
     virtual ~CGensRanking();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
-    void SetPos(int x, int y);
-    const POINT& GetPos()
-    {
-        return m_Pos;
-    }
-
     bool Render();
 
     bool Update();
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();
-
 
     void OpenningProcess();
     void ClosingProcess();

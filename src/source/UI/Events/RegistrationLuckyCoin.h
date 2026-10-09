@@ -24,13 +24,7 @@ public:
     CRegistrationLuckyCoin();
     virtual ~CRegistrationLuckyCoin();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
-
-    void SetPos(int x, int y);
-    const POINT& GetPos()
-    {
-        return m_Pos;
-    }
+    bool Create(CManager* pNewUIMng);
 
     bool Render();
     bool Update();
@@ -76,7 +70,6 @@ private:
 
 private:
     CManager* m_pNewUIMng;
-    POINT m_Pos;
     ITEM* m_CoinItem;
     bool m_ItemAngle;
     int m_RegistCount;

@@ -67,16 +67,13 @@ CMuHelperConfigWindow::~CMuHelperConfigWindow()
     Release();
 }
 
-bool CMuHelperConfigWindow::Create(CManager* pNewUIMng, int x, int y)
+bool CMuHelperConfigWindow::Create(CManager* pNewUIMng)
 {
     if (pNewUIMng == nullptr)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(INTERFACE_MUHELPER, this);
-
-    m_Pos.x = x;
-    m_Pos.y = y;
 
     BuildRmlUi();
 
@@ -774,7 +771,6 @@ void CMuHelperConfigWindow::SyncRmlModel()
 
     MuHelperConfigRmlModel& model = m_RmlView.GetModel();
     const ConfigData& c = UI::MuHelper::StagedConfig();
-
 
     SyncField(m_RmlView.Binder(), &MuHelperConfigRmlModel::activeTab, "active_tab", m_iCurrentOpenTab);
     SyncField(m_RmlView.Binder(), &MuHelperConfigRmlModel::huntRange, "hunt_range", c.iHuntingRange);

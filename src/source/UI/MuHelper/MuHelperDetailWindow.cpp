@@ -60,16 +60,13 @@ CMuHelperDetailWindow::~CMuHelperDetailWindow()
     Release();
 }
 
-bool CMuHelperDetailWindow::Create(CManager* pNewUIMng, int x, int y)
+bool CMuHelperDetailWindow::Create(CManager* pNewUIMng)
 {
     if (pNewUIMng == nullptr)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(INTERFACE_MUHELPER_EXT, this);
-
-    m_Pos.x = x;
-    m_Pos.y = y;
 
     BuildRmlUi();
 
@@ -447,7 +444,6 @@ void CMuHelperDetailWindow::SyncRmlModel()
 
     MuHelperDetailRmlModel& model = m_RmlView.GetModel();
     const ConfigData& config = UI::MuHelper::StagedConfig();
-
 
     SyncField(m_RmlView.Binder(), &MuHelperDetailRmlModel::page, "page", m_iCurrentPage);
 

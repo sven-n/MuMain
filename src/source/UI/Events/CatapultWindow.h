@@ -31,12 +31,11 @@ public:
     CCatapultWindow();
     virtual ~CCatapultWindow();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();
@@ -61,7 +60,7 @@ private:
 
 private:
     CManager* m_pNewUIMng;
-    POINT m_Pos;
+
 
     // The chosen target area (the original's CCatapultGroupButton index), -1 for none; Shoot
     // is locked until one is chosen.

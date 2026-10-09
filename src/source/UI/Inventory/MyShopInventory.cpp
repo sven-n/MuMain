@@ -221,7 +221,6 @@ mu::ui::window::CMyShopInventory::CMyShopInventory() : m_SourceIndex(-1), m_Targ
 {
     m_pNewUIMng = NULL;
     m_pNewInventoryCtrl = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_bIsEnableInputValueTextBox = false;
     m_bOpenLocked = false;
     m_bOpenApplyTooltip = false;
@@ -232,7 +231,7 @@ mu::ui::window::CMyShopInventory::~CMyShopInventory()
     Release();
 }
 
-bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
@@ -240,10 +239,8 @@ bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MYSHOP_INVENTORY, this);
 
-    SetPos(x, y);
-
     m_pNewInventoryCtrl = new CInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::MYSHOP, g_pNewItemMng, this, m_Pos.x + 16, m_Pos.y + 90, 8, 4, MAX_MY_INVENTORY_EX_INDEX))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::MYSHOP, g_pNewItemMng, this, 8, 4, MAX_MY_INVENTORY_EX_INDEX))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
@@ -379,12 +376,6 @@ void mu::ui::window::CMyShopInventory::Release()
     }
 
     m_RmlView.Release();
-}
-
-void mu::ui::window::CMyShopInventory::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 // Caps the <input>'s own edit buffer at the same length the native CUITextInputBox was given

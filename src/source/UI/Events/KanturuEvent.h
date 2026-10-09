@@ -43,12 +43,10 @@ public:
     CKanturu2ndEnterNpc();
     virtual ~CKanturu2ndEnterNpc();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     void Release();
-
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();
@@ -56,7 +54,6 @@ public:
     bool Render();
 
     float GetLayerDepth(); //. 10.1f
-
 
     void SetNpcObject(OBJECT* pObj);
     bool IsNpcAnimation();
@@ -83,7 +80,6 @@ private:
 
 private:
     CManager* m_pNewUIMng;
-    POINT m_Pos;
 
     BYTE m_byState;
 
@@ -132,10 +128,8 @@ public:
     CKanturuInfoWindow();
     virtual ~CKanturuInfoWindow();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
-
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
@@ -148,14 +142,12 @@ public:
 
     void SetTime(int iTimeLimit);
 
-
 private:
     void BuildRmlUi();
     void SyncView();
 
 private:
     CManager* m_pNewUIMng;
-    POINT m_Pos;
 
     int m_iMinute;
     int m_iSecond;

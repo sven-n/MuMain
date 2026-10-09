@@ -90,7 +90,6 @@ std::vector<Rml::String> MarkCells(const BYTE* mark)
         cells.push_back(Guild::MarkPalette::CellColor(mark[i]));
     return cells;
 }
-
 } // namespace
 
 int mu::ui::window::CGuildInfoWindow::GetGuildMemberIndex(const wchar_t* szName)
@@ -107,7 +106,6 @@ int mu::ui::window::CGuildInfoWindow::GetGuildMemberIndex(const wchar_t* szName)
 mu::ui::window::CGuildInfoWindow::CGuildInfoWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_nCurrentTab = static_cast<int>(GuildConstants::GuildTab::MEMBERS);
     m_EventState = EVENT_NONE;
     m_Tot_Notice = 0;
@@ -120,15 +118,13 @@ mu::ui::window::CGuildInfoWindow::~CGuildInfoWindow()
     Release();
 }
 
-bool mu::ui::window::CGuildInfoWindow::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CGuildInfoWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_GUILDINFO, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -159,12 +155,6 @@ void mu::ui::window::CGuildInfoWindow::Release()
     }
 
     m_RmlView.Release();
-}
-
-void mu::ui::window::CGuildInfoWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool mu::ui::window::CGuildInfoWindow::UpdateMouseEvent()
@@ -520,8 +510,6 @@ void mu::ui::window::CGuildInfoWindow::SyncRmlModel()
 
 void mu::ui::window::CGuildInfoWindow::SyncContent()
 {
-    const float x0 = static_cast<float>(m_Pos.x);
-    const float y0 = static_cast<float>(m_Pos.y);
 
     // One of the window's own lines: the document places it, so only what it says and the size the
     // native renderer would have shrunk it to for its box travel through the model.
@@ -623,7 +611,6 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
             {
                 headerUnionName = line(I18N::Game::NAME, false, 40.f);
                 headerUnionMembers = line(I18N::Game::Members, false, 40.f);
-
 
                 unionCreateButton = {StringUtils::WideToNarrow(I18N::Game::DisbandAlliance), true};
                 unionOutButton = {StringUtils::WideToNarrow(I18N::Game::DisbandGuildAlliance), true};

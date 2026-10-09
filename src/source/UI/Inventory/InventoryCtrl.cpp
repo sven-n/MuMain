@@ -422,8 +422,7 @@ bool mu::ui::window::CInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
 }
 
 bool mu::ui::window::CInventoryCtrl::Create(STORAGE_TYPE storageType, CItemMng* pNewItemMng, CObject* pOwner,
-                                           int x, int y, int nColumn,
-                                           int nRow, int nIndexOffset)
+                                           int nColumn, int nRow, int nIndexOffset)
 {
     m_StorageType = storageType;
     m_nIndexOffset = nIndexOffset;
@@ -434,8 +433,8 @@ bool mu::ui::window::CInventoryCtrl::Create(STORAGE_TYPE storageType, CItemMng* 
 
     m_pNewItemMng = pNewItemMng;
     m_pOwner = pOwner;
-    m_Geometry = {static_cast<float>(x), static_cast<float>(y), UI::Items::GridGeometry::DefaultPitch,
-                  UI::Items::GridGeometry::DefaultPitch, nColumn, nRow};
+    // Where the grid is drawn comes from its element (FollowGridPx()).
+    m_Geometry = {0.f, 0.f, UI::Items::GridGeometry::DefaultPitch, UI::Items::GridGeometry::DefaultPitch, nColumn, nRow};
     m_nColumn = nColumn;
     m_nRow = nRow;
     m_pdwItemCheckBox = new DWORD[nColumn * nRow];

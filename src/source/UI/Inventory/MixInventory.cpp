@@ -61,13 +61,12 @@ CMixInventory::CMixInventory()
 {
     m_pNewUIMng = NULL;
     m_pNewInventoryCtrl = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_iMixState = MIX_READY;
     m_iMixEffectTimer = 0;
 }
 CMixInventory::~CMixInventory() { Release(); }
 
-bool CMixInventory::Create(CManager* pNewUIMng, int x, int y)
+bool CMixInventory::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
@@ -76,13 +75,11 @@ bool CMixInventory::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MIXINVENTORY, this);
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::CHAOS_MIX, g_pNewItemMng, this, x + 15, y + 110, 8, 4))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::CHAOS_MIX, g_pNewItemMng, this, 8, 4))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
-
-    SetPos(x, y);
 
 
     m_pNewInventoryCtrl->GetSquareColorNormal(m_fInventoryColor);
@@ -285,13 +282,6 @@ bool CMixInventory::ClosingProcess()
     g_pMixInventory->DeleteAllItems();
     g_MixRecipeMgr.ClearCheckRecipeResult();
     return true;
-}
-
-void CMixInventory::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
-
 }
 
 bool CMixInventory::IsPointerOverPanel()

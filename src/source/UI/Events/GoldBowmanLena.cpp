@@ -38,7 +38,7 @@ CGoldBowmanLena::~CGoldBowmanLena()
     Release();
 }
 
-bool CGoldBowmanLena::Create(CManager* pNewUIMng, int x, int y)
+bool CGoldBowmanLena::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng) {
         return false;
@@ -46,8 +46,6 @@ bool CGoldBowmanLena::Create(CManager* pNewUIMng, int x, int y)
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA, this);
-
-    SetPos(x, y);
 
     m_View.SetItemDrawer([this](int, const Rml::Vector2f& offset, const Rml::Vector2f& size) { Render3D(offset, size); });
     m_View.SetWindowId(mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA);

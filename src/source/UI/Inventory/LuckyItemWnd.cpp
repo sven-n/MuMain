@@ -176,7 +176,7 @@ void CLuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE>
     m_eWndAction = eLuckyItem_None;
 }
 
-bool CLuckyItemWnd::Create(CManager* pNewUIMng, int x, int y)
+bool CLuckyItemWnd::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
@@ -185,15 +185,13 @@ bool CLuckyItemWnd::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_LUCKYITEMWND, this);
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::LUCKYITEM_TRADE, g_pNewItemMng, this, x + 15, y + 110, 8, 4))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::LUCKYITEM_TRADE, g_pNewItemMng, this, 8, 4))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
     m_pNewInventoryCtrl->GetSquareColorNormal(m_fInvenClr);
     m_pNewInventoryCtrl->GetSquareColorWarning(m_fInvenClrWarning);
-
-    SetPos(x, y);
 
     for (int i = 0; i < LUCKYITEMMAXLINE; i++)
     {

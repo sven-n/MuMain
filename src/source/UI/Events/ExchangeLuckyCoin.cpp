@@ -16,7 +16,6 @@ using namespace mu::ui::window;
 CExchangeLuckyCoin::CExchangeLuckyCoin()
 {
     m_pNewUIMng = NULL;
-    memset(&m_Pos, 0, sizeof(POINT));
 }
 
 CExchangeLuckyCoin::~CExchangeLuckyCoin()
@@ -24,15 +23,13 @@ CExchangeLuckyCoin::~CExchangeLuckyCoin()
     Release();
 }
 
-bool CExchangeLuckyCoin::Create(CManager* pNewUIMng, int x, int y)
+bool CExchangeLuckyCoin::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN, this);
-
-    SetPos(x, y);
 
     m_View.SetWindowId(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN);
     m_View.Build();
@@ -51,12 +48,6 @@ void CExchangeLuckyCoin::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void CExchangeLuckyCoin::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CExchangeLuckyCoin::UpdateMouseEvent()

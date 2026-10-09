@@ -40,7 +40,7 @@ namespace mu::ui::window
         };
 
         CManager* m_pNewUIMng;            // UI Manager
-        POINT          m_Pos;                  // Window position
+
         CInventoryCtrl* m_pYourInvenCtrl; // Other player's item control
         CInventoryCtrl* m_pMyInvenCtrl;   // My item control
         ITEM           m_aYourInvenBackUp[MAX_TRADE_INVEN]; // Other player's item backup
@@ -128,10 +128,9 @@ namespace mu::ui::window
         CTrade();
         virtual ~CTrade();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
-        void SetPos(int x, int y);
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();

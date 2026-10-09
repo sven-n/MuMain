@@ -27,16 +27,15 @@ private:
     };
 
     CManager* m_pNewUIMng; // UI 매니저.
-    POINT m_Pos;                // 창의 위치.
+
 
 public:
     CBattleSoccerScore();
     virtual ~CBattleSoccerScore();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }

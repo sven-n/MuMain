@@ -30,7 +30,7 @@ namespace mu::ui::window
 
         CManager* m_pNewUIMng;
         CInventoryCtrl* m_pNewInventoryCtrl;
-        POINT m_Pos;
+
 
         // Window frame/title/shop-title field/Open-Close-Exit buttons/instructional text (former
         // RenderTextInfo()) are RmlUi; the inventory grid stays native since its icons are live 3D
@@ -97,9 +97,9 @@ namespace mu::ui::window
     public:
         CMyShopInventory();
         virtual ~CMyShopInventory();
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
-        void SetPos(int x, int y);
+
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();

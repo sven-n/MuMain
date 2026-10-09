@@ -170,7 +170,6 @@ CStorageInventory::CStorageInventory()
 {
     m_pNewUIMng = nullptr;
     m_pNewInventoryCtrl = nullptr;
-    m_Pos.x = m_Pos.y = 0;
     m_nBackupSourceInvenIndex = -1;
 }
 
@@ -179,7 +178,7 @@ CStorageInventory::~CStorageInventory()
     Release();
 }
 
-bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
+bool CStorageInventory::Create(CManager* pNewUIMng)
 {
     if (nullptr == pNewUIMng
         || nullptr == g_pNewItemMng)
@@ -189,13 +188,11 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(INTERFACE_STORAGE, this);
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::VAULT, g_pNewItemMng, this, x + 15, y + 36, 8, 15))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::VAULT, g_pNewItemMng, this, 8, 15))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
     }
-
-    SetPos(x, y);
 
     m_bLock = false;
     SetItemAutoMove(false);
@@ -364,15 +361,6 @@ void CStorageInventory::Release()
     }
 
     m_RmlView.Release();
-}
-
-void CStorageInventory::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
-    if (m_pNewInventoryCtrl)
-    {
-    }
 }
 
 bool CStorageInventory::IsPointerOverPanel()

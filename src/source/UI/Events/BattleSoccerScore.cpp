@@ -64,7 +64,6 @@ bool SameTeams(const std::vector<BattleSoccerTeamEntry>& a, const std::vector<Ba
 mu::ui::window::CBattleSoccerScore::CBattleSoccerScore()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
 }
 
 mu::ui::window::CBattleSoccerScore::~CBattleSoccerScore()
@@ -72,15 +71,13 @@ mu::ui::window::CBattleSoccerScore::~CBattleSoccerScore()
     Release();
 }
 
-bool mu::ui::window::CBattleSoccerScore::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CBattleSoccerScore::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -99,12 +96,6 @@ void mu::ui::window::CBattleSoccerScore::Release()
     }
 
     m_RmlView.Release();
-}
-
-void mu::ui::window::CBattleSoccerScore::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool mu::ui::window::CBattleSoccerScore::UpdateMouseEvent()

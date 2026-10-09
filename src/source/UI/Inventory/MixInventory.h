@@ -30,7 +30,7 @@ namespace mu::ui::window
 
         CManager* m_pNewUIMng;
         CInventoryCtrl* m_pNewInventoryCtrl;
-        POINT m_Pos;
+
 
         int m_iMixState;
         int m_iMixEffectTimer;
@@ -129,7 +129,7 @@ namespace mu::ui::window
         CMixInventory();
         virtual ~CMixInventory();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
         bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket);
@@ -146,7 +146,6 @@ namespace mu::ui::window
 
         int GetPointedItemIndex();
 
-        void SetPos(int x, int y);
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();

@@ -49,7 +49,6 @@ const wchar_t* const* const kCommandLabels[COMMAND_END] = {
 mu::ui::window::CCommandWindow::CCommandWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_iCurSelectCommand = COMMAND_NONE;
     m_iCurMouseCursor = CURSOR_NORMAL;
     m_bSelectedChar = false;
@@ -61,15 +60,13 @@ mu::ui::window::CCommandWindow::~CCommandWindow()
     Release();
 }
 
-bool mu::ui::window::CCommandWindow::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CCommandWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_COMMAND, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -302,12 +299,6 @@ void mu::ui::window::CCommandWindow::SyncTarget()
     SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::targetName, "target_name",
               Rml::String(StringUtils::WideToNarrow(target->ID)));
     SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::targetInRange, "target_in_range", m_bCanCommand);
-}
-
-void mu::ui::window::CCommandWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 float mu::ui::window::CCommandWindow::GetLayerDepth()

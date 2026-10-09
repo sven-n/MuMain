@@ -110,7 +110,7 @@ namespace mu::ui::window
         bool	Check_LuckyItem_InWnd(void);
 
         // Virtual overrides
-        bool	Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void	Release(void);
         void	OpeningProcess(void);
         bool	ClosingProcess(void);

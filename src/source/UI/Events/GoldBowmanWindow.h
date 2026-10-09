@@ -31,17 +31,13 @@ private:
 
 public:
     CManager* m_pNewUIMng;
-    POINT m_Pos;
 
 public:
     CGoldBowmanWindow();
     virtual ~CGoldBowmanWindow();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
-
-    void SetPos(int x, int y);
-    const POINT& GetPos();
 
     bool UpdateMouseEvent();
     Rml::ElementDocument* GetPlacedDocument() const override { return m_View.Document(); }
@@ -66,16 +62,4 @@ private:
     // The field takes the focus once the document shows it, as the original's GiveFocus() did.
     bool m_SerialFocusPending = false;
 };
-
-    inline
-        void CGoldBowmanWindow::SetPos(int x, int y)
-    {
-        m_Pos.x = x; m_Pos.y = y;
-    }
-
-    inline
-        const POINT& CGoldBowmanWindow::GetPos()
-    {
-        return m_Pos;
-    }
 };

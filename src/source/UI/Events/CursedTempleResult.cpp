@@ -50,15 +50,13 @@ float TextPxInBox(const wchar_t* text, float boxWidth)
 }
 } // namespace
 
-bool mu::ui::window::CCursedTempleResult::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CCursedTempleResult::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 

@@ -44,7 +44,6 @@ float KanturuTextPxInBox(UI::Scaling::FontRole role, const wchar_t* text, float 
 mu::ui::window::CKanturu2ndEnterNpc::CKanturu2ndEnterNpc()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_pNpcObject = NULL;
     m_dwRefreshTime = 0;
     m_dwRefreshButtonGapTime = 0;
@@ -70,15 +69,13 @@ void mu::ui::window::CKanturu2ndEnterNpc::Initialize()
     }
 }
 
-bool mu::ui::window::CKanturu2ndEnterNpc::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CKanturu2ndEnterNpc::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -96,12 +93,6 @@ void mu::ui::window::CKanturu2ndEnterNpc::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void mu::ui::window::CKanturu2ndEnterNpc::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool mu::ui::window::CKanturu2ndEnterNpc::UpdateMouseEvent()
@@ -601,7 +592,6 @@ void mu::ui::window::CKanturu2ndEnterNpc::SyncContent()
 mu::ui::window::CKanturuInfoWindow::CKanturuInfoWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
 
     m_iMinute = 0;
     m_iSecond = 0;
@@ -613,15 +603,13 @@ mu::ui::window::CKanturuInfoWindow::~CKanturuInfoWindow()
     Release();
 }
 
-bool mu::ui::window::CKanturuInfoWindow::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CKanturuInfoWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_KANTURU_INFO, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -639,12 +627,6 @@ void mu::ui::window::CKanturuInfoWindow::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void mu::ui::window::CKanturuInfoWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool mu::ui::window::CKanturuInfoWindow::UpdateMouseEvent()
@@ -690,7 +672,6 @@ void SyncInfoField(RmlModelBinder<mu::ui::window::KanturuInfoRmlModel>& binder,
     model.*field = std::move(value);
     binder.MarkDirty(name);
 }
-
 } // namespace
 
 void mu::ui::window::CKanturuInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, KanturuInfoRmlModel& model)

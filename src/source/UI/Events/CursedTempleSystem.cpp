@@ -258,16 +258,13 @@ namespace
     }
 };
 
-bool mu::ui::window::CCursedTempleSystem::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CCursedTempleSystem::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM, this);
-
-    SetPos(x, y);
-
 
     BuildRmlUi();
 
@@ -475,8 +472,6 @@ SEASON3A::eCursedTempleTeam mu::ui::window::CCursedTempleSystem::GetMyTeam()
 {
     return m_MyTeam;
 }
-
-
 
 bool mu::ui::window::CCursedTempleSystem::CheckInventoryHolyItem(CHARACTER* c)
 {
@@ -749,7 +744,6 @@ void AddSprite(std::vector<CursedTempleSpriteEntry>& sprites, const Rml::Vector4
 {
     sprites.push_back({box.x, box.y, box.z, box.w, InterfaceImage(file), rect, opacity});
 }
-
 } // namespace
 
 void mu::ui::window::CCursedTempleSystem::BindRmlModel(Rml::DataModelConstructor& c, CursedTempleSystemRmlModel& model)

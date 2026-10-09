@@ -29,10 +29,9 @@ public:
     CDuelWindow();
     virtual ~CDuelWindow();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
@@ -48,7 +47,7 @@ private:
     void SyncRmlModel();
 
     CManager* m_pNewUIMng;
-    POINT m_Pos;
+
 
     void BindRmlModel(Rml::DataModelConstructor& c, DuelWindowRmlModel& model);
     UI::RmlBridge::ThemedView<DuelWindowRmlModel> m_RmlView{"duel_window",

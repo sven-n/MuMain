@@ -23,7 +23,7 @@ class CCryWolf : public CObject
 {
 private:
     CManager* m_pNewUIMng;
-    POINT m_Pos;
+
     int m_iHour;
     int m_iMinute;
     int m_iSecond;
@@ -35,10 +35,9 @@ public:
     CCryWolf();
     virtual ~CCryWolf();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();

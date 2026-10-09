@@ -33,7 +33,7 @@ namespace mu::ui::window
 
     private:
         CManager* m_pNewUIMng;
-        POINT						m_Pos;
+
 
         int							m_iCurSelectCommand;
         int							m_iCurMouseCursor;
@@ -52,12 +52,11 @@ namespace mu::ui::window
         CCommandWindow();
         virtual ~CCommandWindow();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         void Release();
 
-        void SetPos(int x, int y);
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();

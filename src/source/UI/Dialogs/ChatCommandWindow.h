@@ -78,10 +78,9 @@ public:
     CChatCommandWindow();
     ~CChatCommandWindow() override;
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent() override;
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
@@ -149,7 +148,7 @@ private:
 
 private:
     CManager* m_pNewUIMng;
-    POINT m_Pos;
+
 
     ePAGE m_page;
     std::vector<int> m_commandOrder;

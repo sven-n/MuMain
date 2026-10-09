@@ -18,8 +18,6 @@ using namespace mu::ui::window;
 mu::ui::window::CSetItemExplanation::CSetItemExplanation()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = 0;
-    m_Pos.y = 0;
 }
 
 mu::ui::window::CSetItemExplanation::~CSetItemExplanation()
@@ -27,15 +25,13 @@ mu::ui::window::CSetItemExplanation::~CSetItemExplanation()
     Release();
 }
 
-bool mu::ui::window::CSetItemExplanation::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CSetItemExplanation::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_SETITEM_EXPLANATION, this);
-
-    SetPos(x, y);
 
     m_View.Build();
 
@@ -52,12 +48,6 @@ void mu::ui::window::CSetItemExplanation::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void mu::ui::window::CSetItemExplanation::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool mu::ui::window::CSetItemExplanation::UpdateMouseEvent()

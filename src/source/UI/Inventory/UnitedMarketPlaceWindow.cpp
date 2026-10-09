@@ -34,7 +34,6 @@ using namespace mu::ui::window;
 CUnitedMarketPlaceWindow::CUnitedMarketPlaceWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_iRemainTime = 0;
     m_bIsEnterButtonLocked = FALSE;
 }
@@ -44,15 +43,13 @@ CUnitedMarketPlaceWindow::~CUnitedMarketPlaceWindow()
     Release();
 }
 
-bool CUnitedMarketPlaceWindow::Create(CManager* pNewUIMng, int x, int y)
+bool CUnitedMarketPlaceWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -72,12 +69,6 @@ void CUnitedMarketPlaceWindow::Release()
     }
 
     m_RmlView.Release();
-}
-
-void CUnitedMarketPlaceWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CUnitedMarketPlaceWindow::UpdateMouseEvent()

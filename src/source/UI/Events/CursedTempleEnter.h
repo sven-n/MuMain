@@ -37,7 +37,7 @@ public:
     CCursedTempleEnter();
     virtual ~CCursedTempleEnter();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
 
@@ -54,17 +54,14 @@ public:
 public:
     bool Render();
 
-
 private:
     void BuildRmlUi();
     void SyncRmlModel();
     void SyncLines();
 
 public:
-    void SetPos(int x, int y);
 
 public:
-    const POINT& GetPos() const;
     float GetLayerDepth(); //. 5.0f
 
 public:
@@ -77,7 +74,6 @@ private:
 
 private:
     CManager* m_pNewUIMng;
-    POINT m_Pos;
     void BindRmlModel(Rml::DataModelConstructor& c, CursedTempleEnterRmlModel& model);
     UI::RmlBridge::ThemedView<CursedTempleEnterRmlModel> m_RmlView{"cursed_temple_enter",
         [this](Rml::DataModelConstructor& c, CursedTempleEnterRmlModel& model) { BindRmlModel(c, model); },
@@ -92,18 +88,6 @@ private:
         float CCursedTempleEnter::GetLayerDepth()
     {
         return 10.3;
-    }
-
-    inline
-        void CCursedTempleEnter::SetPos(int x, int y)
-    {
-        m_Pos.x = x; m_Pos.y = y;
-    }
-
-    inline
-        const POINT& CCursedTempleEnter::GetPos() const
-    {
-        return m_Pos;
     }
 };
 

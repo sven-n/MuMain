@@ -97,7 +97,7 @@ namespace mu::ui::window
         MuHelperConfigLabels labels;
     };
 
-    // The MU Helper's configuration window (the bot's settings), docked in PanelColumnX(1): three
+    // The MU Helper's configuration window (the bot's settings), docked in the first column: three
     // tabs -- hunting, item pick-up, other -- over one staged copy of the settings
     // (UI::MuHelper::StagedConfig()), pushed to the bot and the server by Save.
     //
@@ -114,10 +114,9 @@ namespace mu::ui::window
         CMuHelperConfigWindow();
         ~CMuHelperConfigWindow() override;
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
-        void SetPos(int x, int y) { m_Pos = {x, y}; }
         void Release();
 
         bool UpdateMouseEvent() override;
@@ -132,7 +131,6 @@ namespace mu::ui::window
         float GetLayerDepth() override;
         float GetKeyEventOrder() override;
         void Show(bool bShow) override;
-
 
         // The settings the server sent, or the defaults (MainScene, on entering the game).
         void LoadSavedConfig(const MUHelper::ConfigData& config);
@@ -164,7 +162,6 @@ namespace mu::ui::window
         void BlurFocusedField();
 
         CManager* m_pNewUIMng = nullptr;
-        POINT m_Pos{};
 
         int m_iCurrentOpenTab = 0;
         int m_iSelectedSkillSlot = 0;

@@ -27,7 +27,6 @@ using namespace mu::ui::window;
 CPartyInfoWindow::CPartyInfoWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_bParty = false;
     m_iSelectedCharID = -1;
 }
@@ -37,15 +36,13 @@ CPartyInfoWindow::~CPartyInfoWindow()
     Release();
 }
 
-bool CPartyInfoWindow::Create(CManager* pNewUIMng, int x, int y)
+bool CPartyInfoWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_PARTY, this);
-
-    SetPos(x, y);
 
     LoadImages();
 
@@ -187,12 +184,6 @@ bool CPartyInfoWindow::LeaveParty(const int iIndex)
     SetParty(false);
 
     return true;
-}
-
-void CPartyInfoWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 void CPartyInfoWindow::Show(bool bShow)

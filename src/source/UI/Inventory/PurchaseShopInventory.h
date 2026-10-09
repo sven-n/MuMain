@@ -23,9 +23,8 @@ namespace mu::ui::window
         CPurchaseShopInventory();
         virtual ~CPurchaseShopInventory();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
-        void SetPos(int x, int y);
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();
@@ -62,7 +61,6 @@ namespace mu::ui::window
     private:
         CManager* m_pNewUIMng;
         CInventoryCtrl* m_pNewInventoryCtrl;
-        POINT					m_Pos;
         int						m_ShopCharacterIndex;
        std::wstring		m_TitleText;
         int						m_SourceIndex;
@@ -98,12 +96,6 @@ namespace mu::ui::window
         void BuildRmlUi();
         void SyncRmlModel();
     };
-
-    inline
-        void CPurchaseShopInventory::SetPos(int x, int y)
-    {
-        m_Pos.x = x; m_Pos.y = y;
-    }
 
     inline
         void CPurchaseShopInventory::ChangeShopCharacterIndex(int index)

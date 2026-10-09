@@ -42,7 +42,6 @@ void mu::ui::window::CNPCShop::Init()
 {
     m_pNewUIMng = NULL;
     m_pNewInventoryCtrl = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_dwShopState = SHOP_STATE_BUYNSELL;
     m_iTaxRate = 0;
     m_bRepairShop = false;
@@ -51,7 +50,7 @@ void mu::ui::window::CNPCShop::Init()
     m_bSellingItem = false;
 }
 
-bool mu::ui::window::CNPCShop::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNPCShop::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
@@ -60,7 +59,7 @@ bool mu::ui::window::CNPCShop::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPCSHOP, this);
 
     m_pNewInventoryCtrl = new CInventoryCtrl;
-    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewItemMng, this, x + 15, y + 50, 8, 15))
+    if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewItemMng, this, 8, 15))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
         return false;
@@ -70,8 +69,6 @@ bool mu::ui::window::CNPCShop::Create(CManager* pNewUIMng, int x, int y)
     {
         m_pNewInventoryCtrl->SetToolTipType(TOOLTIP_TYPE_NPC_SHOP);
     }
-
-    SetPos(x, y);
 
     // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
     if (!m_RmlView.Document() && RmlUiRuntime::Instance().IsCreated())
@@ -132,13 +129,6 @@ void mu::ui::window::CNPCShop::Release()
     }
 
     m_RmlView.Release();
-}
-
-void mu::ui::window::CNPCShop::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
-
 }
 
 bool mu::ui::window::CNPCShop::UpdateMouseEvent()

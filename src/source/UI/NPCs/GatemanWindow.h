@@ -40,7 +40,7 @@ private:
     };
 
     CManager* m_pNewUIMng;
-    POINT m_Pos;
+
 
     void BindRmlModel(Rml::DataModelConstructor& c, GatemanRmlModel& model);
     UI::RmlBridge::ThemedView<GatemanRmlModel> m_RmlView{"gateman",
@@ -53,12 +53,11 @@ public:
     CGatemanWindow();
     virtual ~CGatemanWindow();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     void Release();
 
-    void SetPos(int x, int y);
 
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();

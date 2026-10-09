@@ -58,7 +58,6 @@ const CatapultArea kDefenseAreas[] = {
 mu::ui::window::CCatapultWindow::CCatapultWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
 
     OpenningProcess();
 }
@@ -68,15 +67,13 @@ mu::ui::window::CCatapultWindow::~CCatapultWindow()
     Release();
 }
 
-bool mu::ui::window::CCatapultWindow::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CCatapultWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CATAPULT, this);
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -95,12 +92,6 @@ void mu::ui::window::CCatapultWindow::Release()
     }
 
     m_RmlView.Release();
-}
-
-void mu::ui::window::CCatapultWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool mu::ui::window::CCatapultWindow::UpdateMouseEvent()

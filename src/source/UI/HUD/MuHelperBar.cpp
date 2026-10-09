@@ -34,7 +34,7 @@ CMuHelperBar::~CMuHelperBar()
 
 //---------------------------------------------------------------------------------------------
 // Create
-bool CMuHelperBar::Create(CManager* pNewUIMng, int x, int y)
+bool CMuHelperBar::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;

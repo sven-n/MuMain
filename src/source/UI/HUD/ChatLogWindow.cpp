@@ -1095,7 +1095,6 @@ mu::ui::window::CSystemLogWindow::~CSystemLogWindow()
 void mu::ui::window::CSystemLogWindow::Init()
 {
     m_pNewUIMng = nullptr;
-    m_WndPos.x = m_WndPos.y = 0;
     m_WndSize.cx = WND_WIDTH; m_WndSize.cy = 0;
     m_nShowingLines = 6;
     m_iCurrentRenderEndLine = -1;
@@ -1104,7 +1103,7 @@ void mu::ui::window::CSystemLogWindow::Init()
 }
 
 
-bool mu::ui::window::CSystemLogWindow::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CSystemLogWindow::Create(CManager* pNewUIMng)
 {
     Release();
 
@@ -1113,8 +1112,6 @@ bool mu::ui::window::CSystemLogWindow::Create(CManager* pNewUIMng, int x, int y)
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_SYSTEMLOGWINDOW, this);
-    m_WndPos.x = x;
-    m_WndPos.y = y;
     UI::RmlBridge::WorkspaceDocumentOptions options;
     options.placedWhileHidden = true;
     UI::RmlBridge::RegisterWorkspaceDocument("system_log", [this] { return m_RmlView.Document(); }, "panel", std::move(options));
@@ -1134,12 +1131,6 @@ void mu::ui::window::CSystemLogWindow::Release()
     }
 
     Init();
-}
-
-void mu::ui::window::CSystemLogWindow::SetPosition(int x, int y)
-{
-    m_WndPos.x = x;
-    m_WndPos.y = y;
 }
 
 void mu::ui::window::CSystemLogWindow::AddText(const type_string& strText, MESSAGE_TYPE MsgType)

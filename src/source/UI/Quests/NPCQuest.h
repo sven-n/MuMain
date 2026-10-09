@@ -30,7 +30,7 @@ namespace mu::ui::window
         };
 
         CManager* m_pNewUIMng;
-        POINT					m_Pos;
+
 
         // Mirrors the native Lock()/UnLock() state RenderItemMobText()'s return value drove every
         // frame -- computed fresh in SyncRmlModel(), read by RmlClickComplete() the same way
@@ -46,10 +46,9 @@ namespace mu::ui::window
         CNPCQuest();
         virtual ~CNPCQuest();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
-        void SetPos(int x, int y);
         void Show(bool bShow) override;
 
         bool UpdateMouseEvent();

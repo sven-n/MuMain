@@ -17,7 +17,6 @@ using namespace matchEvent;
 CBloodCastle::CBloodCastle()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_iTime = 0;
     // The original left the text unset until the first time packet: shown before it, it drew
     // whatever the buffer held.
@@ -32,15 +31,13 @@ CBloodCastle::~CBloodCastle()
     Release();
 }
 
-bool CBloodCastle::Create(CManager* pNewUIMng, int x, int y)
+bool CBloodCastle::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_BLOODCASTLE_TIME, this);
-
-    SetPos(x, y);
 
     m_View.Build();
 
@@ -58,12 +55,6 @@ void CBloodCastle::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void CBloodCastle::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CBloodCastle::UpdateMouseEvent()

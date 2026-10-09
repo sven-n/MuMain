@@ -90,14 +90,13 @@ CGuildMakeWindow::~CGuildMakeWindow()
     Release();
 }
 
-bool CGuildMakeWindow::Create(CManager* pNewUIMng, int x, int y)
+bool CGuildMakeWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPCGUILDMASTER, this);
-    SetPos(x, y);
 
     BuildRmlUi();
 

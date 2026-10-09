@@ -68,9 +68,9 @@ namespace mu::ui::window
     public:
         CCharacterInfoWindow();
         virtual ~CCharacterInfoWindow();
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
-        void SetPos(int x, int y);
+
         Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
         Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
         void Show(bool bShow) override;
@@ -158,6 +158,6 @@ namespace mu::ui::window
 
     private:
         CManager* m_pNewUIMng;
-        POINT m_Pos;
+
     };
 }

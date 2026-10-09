@@ -52,9 +52,8 @@ public:
     CInGameShop();
     virtual ~CInGameShop();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
 
-    void SetPos(int x, int y);
     bool Render();
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     bool Update();
@@ -105,7 +104,7 @@ private:
     bool SendsRequests() const;
 
     CManager* m_pNewUIMng;
-    POINT m_Pos;
+
 
     int m_SelectedZone = 0;
     int m_SelectedCategory = 0;

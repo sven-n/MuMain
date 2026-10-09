@@ -32,10 +32,9 @@ CInventoryExtension::~CInventoryExtension()
 void CInventoryExtension::Init()
 {
     m_pNewUIMng = nullptr;
-    m_Pos.x = m_Pos.y = 0;
 }
 
-bool CInventoryExtension::Create(CManager* pNewUIMng, int x, int y)
+bool CInventoryExtension::Create(CManager* pNewUIMng)
 {
     if (nullptr == pNewUIMng || nullptr == g_pNewItemMng)
         return false;
@@ -50,8 +49,7 @@ bool CInventoryExtension::Create(CManager* pNewUIMng, int x, int y)
         m_extension = new CInventoryCtrl();
 
         const int indexOffset = MAX_MY_INVENTORY_INDEX + i * MAX_INVENTORY_EXT_ONE;
-        if (false == m_extension->Create(STORAGE_TYPE::INVENTORY, g_pNewItemMng, this, x + 15,
-                                         y + 45 + HEIGHT_PER_EXT * i, COLUMN_INVENTORY, ROW_INVENTORY_EXT, indexOffset))
+        if (false == m_extension->Create(STORAGE_TYPE::INVENTORY, g_pNewItemMng, this, COLUMN_INVENTORY, ROW_INVENTORY_EXT, indexOffset))
         {
             SAFE_DELETE(m_extension);
             return false;
@@ -64,8 +62,6 @@ bool CInventoryExtension::Create(CManager* pNewUIMng, int x, int y)
 
         i++;
     }
-
-    SetPos(x, y);
 
     BuildRmlUi();
 
@@ -124,12 +120,6 @@ void CInventoryExtension::Release()
     }
 
     m_RmlView.Release();
-}
-
-void CInventoryExtension::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 bool CInventoryExtension::UpdateMouseEvent()

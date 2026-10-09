@@ -36,7 +36,6 @@ using namespace mu::ui::window;
 CQuestProgressByEtc::CQuestProgressByEtc()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
 }
 
 CQuestProgressByEtc::~CQuestProgressByEtc()
@@ -44,15 +43,13 @@ CQuestProgressByEtc::~CQuestProgressByEtc()
     Release();
 }
 
-bool CQuestProgressByEtc::Create(CManager* pNewUIMng, int x, int y)
+bool CQuestProgressByEtc::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC, this);
-
-    SetPos(x, y);
 
     if (RmlUiRuntime::Instance().IsCreated())
     {
@@ -139,12 +136,6 @@ void CQuestProgressByEtc::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
-
-void CQuestProgressByEtc::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
 }
 
 void CQuestProgressByEtc::Show(bool bShow)

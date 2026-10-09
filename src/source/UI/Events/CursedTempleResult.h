@@ -46,7 +46,7 @@ public:
     CCursedTempleResult();
     virtual ~CCursedTempleResult();
 
-    bool Create(CManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng);
     Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
     Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
 
@@ -65,18 +65,15 @@ private:
 public:
     bool Render();
 
-
 private:
     void BuildRmlUi();
     void SyncRmlModel();
     void SyncTexts();
 
 public:
-    const POINT& GetPos() const;
     float GetLayerDepth(); //. 5.0f
 
 public:
-    void SetPos(int x, int y);
     void SetMyTeam(SEASON3A::eCursedTempleTeam myteam);
 
 public:
@@ -96,7 +93,6 @@ private:
 
 private:
     CManager* m_pNewUIMng;
-    POINT m_Pos;
     void BindRmlModel(Rml::DataModelConstructor& c, CursedTempleResultRmlModel& model);
     UI::RmlBridge::ThemedView<CursedTempleResultRmlModel> m_RmlView{"cursed_temple_result",
         [this](Rml::DataModelConstructor& c, CursedTempleResultRmlModel& model) { BindRmlModel(c, model); },
@@ -111,21 +107,9 @@ private:
 };
 
     inline
-        void CCursedTempleResult::SetPos(int x, int y)
-    {
-        m_Pos.x = x; m_Pos.y = y;
-    }
-
-    inline
         void CCursedTempleResult::SetMyTeam(SEASON3A::eCursedTempleTeam myteam)
     {
         m_MyTeam = myteam;
-    }
-
-    inline
-        const POINT& CCursedTempleResult::GetPos() const
-    {
-        return m_Pos;
     }
 
     inline
