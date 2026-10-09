@@ -70,26 +70,26 @@ body {
 }
 .chat-stack .slot[data-window="chat_log"] { margin-bottom: -1dp; }
 
-/* The event HUDs: the original's 640x480 frame standing on the HUD (1dp is one of its units, its
-   top 429 units above the HUD), each at the original's place in it. Centred like the HUD, so they
-   keep their places beside it at any UI scale. The spectator list's slot is its bottom-left
-   corner; the list grows upwards. */
+/* The event HUDs: the original's 640x480 frame standing on the HUD, in its units (one unit is
+   --hud-scale px), its top 429 units above the HUD, each at the original's place in it. Centred
+   like the HUD, so they keep their places beside it at any UI scale. The spectator list's slot is
+   its bottom-left corner; the list grows upwards. */
 .event-hud {
 	left: 50%;
-	margin-left: -320dp;
+	margin-left: calc(-320px * var(--hud-scale));
 	bottom: 0;
-	width: 640dp;
-	height: 429dp;
+	width: calc(640px * var(--hud-scale));
+	height: calc(429px * var(--hud-scale));
 }
 .event-hud .slot { position: absolute; }
 .event-hud .slot[data-window="blood_castle_time"],
-.event-hud .slot[data-window="chaos_castle_time"] { left: 513dp; top: 348dp; }
+.event-hud .slot[data-window="chaos_castle_time"] { left: calc(513px * var(--hud-scale)); top: calc(348px * var(--hud-scale)); }
 .event-hud .slot[data-window="battle_soccer"],
-.event-hud .slot[data-window="duel"] { left: 509dp; top: 359dp; }
-.event-hud .slot[data-window="kanturu_info"] { left: 541dp; top: 351dp; }
-.event-hud .slot[data-window="empire_guardian_timer"] { left: 507dp; top: 342dp; }
-.event-hud .slot[data-window="doppelganger_frame"] { left: 413dp; top: 342dp; }
-.event-hud .slot[data-window="duel_watch_users"] { left: 583dp; top: 429dp; }
+.event-hud .slot[data-window="duel"] { left: calc(509px * var(--hud-scale)); top: calc(359px * var(--hud-scale)); }
+.event-hud .slot[data-window="kanturu_info"] { left: calc(541px * var(--hud-scale)); top: calc(351px * var(--hud-scale)); }
+.event-hud .slot[data-window="empire_guardian_timer"] { left: calc(507px * var(--hud-scale)); top: calc(342px * var(--hud-scale)); }
+.event-hud .slot[data-window="doppelganger_frame"] { left: calc(413px * var(--hud-scale)); top: calc(342px * var(--hud-scale)); }
+.event-hud .slot[data-window="duel_watch_users"] { left: calc(583px * var(--hud-scale)); top: calc(429px * var(--hud-scale)); }
 
 /* Where a free window (the friend list) first opens: the bottom-right corner above the HUD. */
 .free-bottom-right {

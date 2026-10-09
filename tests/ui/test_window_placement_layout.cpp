@@ -131,6 +131,8 @@ TEST_CASE("The header's corners and the docks the content area caps [ui][window-
     REQUIRE(context != nullptr);
     constexpr float Scale = 1.6f;
     context->SetDensityIndependentPixelRatio(Scale);
+    // The HUD's scale, as UI::RmlBridge::ApplyScaleInputs() gives every context.
+    context->GetRootElement()->SetProperty("--hud-scale", std::to_string(Scale));
     for (const char* theme : {"legacy", "modern"})
     {
         CAPTURE(theme);
