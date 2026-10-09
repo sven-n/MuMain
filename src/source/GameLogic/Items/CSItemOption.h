@@ -175,9 +175,8 @@ public:
 
     void    ClearOptionHelper(void) { m_byRenderOptionList = 0; }
     void    CheckRenderOptionHelper(const wchar_t* FilterName);
-    void    RenderOptionHelper(void);
-    // The set's option table RenderOptionHelper() draws, written to the TextList globals without
-    // drawing (CSetItemExplanation draws it through RmlUi); returns the line count, 0 for none.
+    // The set's option table, written to the TextList globals without drawing (CSetItemExplanation
+    // draws it through RmlUi); returns the line count, 0 for none.
     int BuildOptionHelperTextList();
 
     bool IsAncientSetEquipped() const { return m_SetSearchResultCount > 0; }

@@ -565,11 +565,10 @@ tool and has no RmlUi dependency to pull in. `ToRmlBridgeLines()` converts a res
 `SiegeWarBase.cpp`'s guild-skill tooltip build a `Config` from it. `Render()` has no callers and is
 kept on purpose; the MU Helper skill picker shows no hover tooltip, as native never did.
 
-**Deliberately not on this primitive**: `HelpWindow.cpp`/`ItemExplanationWindow.cpp` stay on native `RenderTipTextList()` on purpose: they render unconditionally while their own window
-is open rather than on hover, so they don't fit this primitive's owner-token model (the newest
-`Show()` always wins, which assumes a momentary, naturally mutually-exclusive hover tooltip) — a
-second, non-competing primitive for them was scoped and rejected as not worth duplicating most of
-this primitive's positioning/clamping logic for two low-traffic windows.
+**Deliberately not on this primitive**: the help window and the item explanation draw their tables
+in their own documents on the `.stage` (`help_window.rml`, `item_explanation.rml`). They stay shown
+while their window is open rather than on hover, which does not fit this primitive's owner-token
+model (the newest `Show()` always wins).
 
 ## Skill icons
 

@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <iterator>
 
-// RenderOptionHelper()'s table (CSItemOption.cpp), line for line, without its RenderTipTextList().
+// The original RenderOptionHelper()'s table, line for line, without its RenderTipTextList().
 int CSItemOption::BuildOptionHelperTextList()
 {
     if (m_byRenderOptionList == 0)

@@ -344,42 +344,6 @@ static std::uint8_t g_tabBar = 0;
         }
     }
 
-    bool RenderPetCmdInfo(int sx, int sy, int Type)
-    {
-        if (Type < AT_PET_COMMAND_DEFAULT || Type >= AT_PET_COMMAND_END) return false;
-
-        int  TextNum = 0;
-        int  SkipNum = 0;
-
-        if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
-        {
-            int cmdType = Type - AT_PET_COMMAND_DEFAULT;
-
-            TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true;
-            mu_swprintf(TextList[TextNum], I18N::Game::Lookup(1219 + cmdType)); TextNum++; SkipNum++;
-
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-            switch (cmdType)
-            {
-            case PET_CMD_DEFAULT: mu_swprintf(TextList[TextNum], I18N::Game::FollowAroundTheCharacter); TextNum++; SkipNum++; break;
-            case PET_CMD_RANDOM: mu_swprintf(TextList[TextNum], I18N::Game::AttackAnyMonstersAroundTheCharacter); TextNum++; SkipNum++; break;
-            case PET_CMD_OWNER: mu_swprintf(TextList[TextNum], I18N::Game::AttackTheMonsterTogetherWithTheCharacter); TextNum++; SkipNum++; break;
-            case PET_CMD_TARGET: mu_swprintf(TextList[TextNum], I18N::Game::AttackTheMonsterSelectedByTheCharacter); TextNum++; SkipNum++; break;
-            }
-
-            g_pRenderText->SetFont(TextBold[0] ? g_hFontBold : g_hFont);
-            const SIZE TextSize = g_pRenderText->MeasureText(L"Q", 1);
-            int Height = (TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2;
-            sy -= Height;
-
-            RenderTipTextList(sx, sy, TextNum, 0);
-            return true;
-        }
-        return false;
-    }
-
     bool BuildPetCmdTooltipModel(int Type, UI::Skills::Tooltip::Model& outModel)
     {
         if (Type < AT_PET_COMMAND_DEFAULT || Type >= AT_PET_COMMAND_END) return false;
@@ -390,10 +354,9 @@ static std::uint8_t g_tabBar = 0;
 
         const int cmdType = Type - AT_PET_COMMAND_DEFAULT;
 
-        // Mirrors RenderPetCmdInfo()'s own TextNum/SkipNum bookkeeping exactly -- every line here
-        // (including the two blanks AND the body line) increments SkipNum in the original, so
-        // outModel.skipCount must match 1:1 or Render()'s own height math (still used by this
-        // model's other consumers, RenderTipTextList via BuildModelForSlot) would drift.
+        // The original's TextNum/SkipNum bookkeeping exactly -- every line here (including the two
+        // blanks AND the body line) incremented SkipNum, so outModel.skipCount must match 1:1 or
+        // Render()'s own height math would drift.
         auto pushLine = [&outModel](const wchar_t* text, LineColor color, bool bold, bool blank)
         {
             if (outModel.count >= UI::Skills::Tooltip::MAX_TOOLTIP_LINES) return;
