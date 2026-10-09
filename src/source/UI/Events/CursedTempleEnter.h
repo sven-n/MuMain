@@ -7,7 +7,6 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/MessageBox.h"
-#include "UI/Widgets/Window/Button.h"
 #include "UI/Events/CursedTempleEnterRmlModel.h"
 #include "UI/Events/CursedTempleUpdates.h"
 #include "UI/RmlBridge/RmlThemedView.h"

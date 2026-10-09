@@ -6,7 +6,6 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Dialogs/MessageBox.h"
-#include "UI/Widgets/Window/Button.h"
 #include "UI/Events/CursedTempleUpdates.h"
 #include "UI/HUD/MainFrameWindow.h"
 #include "UI/Events/CursedTempleSystemRmlModel.h"

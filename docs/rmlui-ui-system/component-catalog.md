@@ -505,9 +505,7 @@ content, its native metrics or the `dp` ratio changed (one context update to cre
 the tooltip document's own layout), and otherwise only places the measured panel at the anchor.
 
 Migrated onto it: the item/pet tooltip (`RenderItemInfo()`/`RenderRepairInfo()`,
-`Engine/Object/ZzzInventory.cpp`), the generic button tooltip (`CTooltip`,
-`UI/Widgets/Window/Tooltip.h`/`.cpp` — `CButton`'s existing `ChangeToolTipText()` forwarding is
-unchanged, only what happens internally moved), the skill-hotkey tooltip (`MainFrameWindow.cpp` —
+`Engine/Object/ZzzInventory.cpp`), the skill-hotkey tooltip (`MainFrameWindow.cpp` —
 `g_pSkillList`'s own hover slot), the inventory Set/Socket option tooltip (`MyInventory.cpp` — its
 old embedded RmlUi implementation was deleted outright, not left running as a second mechanism),
 two smaller hover tooltips (`MasterLevel.cpp`, `CursedTempleSystem.cpp`) and the buff strip.
@@ -516,7 +514,7 @@ two smaller hover tooltips (`MasterLevel.cpp`, `CursedTempleSystem.cpp`) and the
 `data-attr-data-hint="x"` for text the model binds. `UI::RmlBridge::DocumentHints`
 (`RmlDocumentHints.h`) shows it with no per-window code: once a frame, before the context updates,
 it finds the hovered element's nearest ancestor with a non-empty `data-hint` and shows that as a
-`Box::ButtonHint`, anchored to the element's drawn box with `CTooltip`'s geometry
+`Box::ButtonHint`, anchored to the element's drawn box with the native button hint's geometry
 (`RmlTooltipPlacement.h`: centred 3 units right of the element, 2 units off it). It goes above the
 element, below it when there is no room above, and then starts under the cursor sprite, which
 hangs below the point it marks. Its unit is the panel's root transform scale for a document laid out
@@ -536,7 +534,7 @@ element's own mouseout: a child's bubbles to it while the element is still hover
 
 **Placement.** `Config::flipAnchorY` is where a tooltip grows the other way when it does not fit on
 its own side of the anchor (a button hint: the button's other edge); without it, `Show()` only
-shifts the tooltip back on screen. `CTooltip` and `DocumentHints` both set it.
+shifts the tooltip back on screen. `DocumentHints` sets it.
 
 **Owners.** Every caller passes an owner token, and hides only its own. The item information
 tooltip's is `UI::Tooltip::ItemInfoOwner()` (`LegacyTextListTooltip.h`), the default of

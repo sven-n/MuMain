@@ -38,8 +38,4 @@ UI/Social/LetterReadWindow.cpp: 1
 UI/Social/LetterWriteWindow.cpp: 1
 UI/Social/PhotoViewer.cpp: 4
 UI/Social/SocialWindowManager.cpp: 1
-UI/Widgets/Window/Button.cpp: 2
-UI/Widgets/Window/ComboBox.cpp: 7
-UI/Widgets/Window/ScrollBar.cpp: 2
-UI/Widgets/Window/Tooltip.cpp: 3
 UI/Windows/ServerMsgWin.cpp: 2
