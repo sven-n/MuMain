@@ -154,6 +154,21 @@ void UI::TipTextList::Record(TipTextListRecord& record, int sx, int sy, int text
     }
 }
 
+float UI::TipTextList::LineTop(int sy, int index)
+{
+    float y = static_cast<float>(sy);
+    for (int i = 0; i < index && TextList[i][0] != 0x00; ++i)
+    {
+        g_pRenderText->SetFont(TextBold[i] ? g_hFontBold : g_hFont);
+        const bool halfLine = TextList[i][0] == 0x0a;
+        const bool spacer = halfLine || (TextList[i][0] == ' ' && TextList[i][1] == 0x00);
+        const wchar_t* measured = spacer ? L"Q" : TextList[i];
+        const float height = static_cast<float>(g_pRenderText->MeasureText(measured, static_cast<int>(wcslen(measured))).cy);
+        y += (halfLine ? height / 2.0f : height) * 1.1f;
+    }
+    return y;
+}
+
 // RenderHelpCategory() (ZzzInventory.cpp): the column's heading, right-aligned, with the
 // background its call left on (RenderTipTextList()'s default).
 void UI::TipTextList::RecordHelpCategory(TipTextListRecord& record, int columnType, int x, int y)

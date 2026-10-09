@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include "UI/Inventory/ItemExplanationWindow.h"
+#include <cmath>
 #include "UI/Core/WindowSystem.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -109,8 +110,6 @@ void mu::ui::window::CItemExplanationWindow::RecordTable(TipTextListRecord& reco
     // window on its first frame (and would have written the table through the references).
 
     int iInfoWidth = 0;
-    int iLabelHeight = 0;
-    int iDataHeight = 0;
 
     // The original knew only these four window widths; any other left iInfoWidth 0 and divided
     // by it below (never reached there: the window hid itself first). Other widths take the
@@ -123,23 +122,15 @@ void mu::ui::window::CItemExplanationWindow::RecordTable(TipTextListRecord& reco
     {
     case REFERENCE_WIDTH:
         iInfoWidth = 90;
-        iLabelHeight = 38;
-        iDataHeight = 52;
         break;
     case 800:
         iInfoWidth = 90;
-        iLabelHeight = 33;
-        iDataHeight = 47;
         break;
     case 1024:
         iInfoWidth = 103;
-        iLabelHeight = 28;
-        iDataHeight = 40;
         break;
     case 1280:
         iInfoWidth = 123;
-        iLabelHeight = 22;
-        iDataHeight = 32;
         break;
     }
 
@@ -261,7 +252,7 @@ void mu::ui::window::CItemExplanationWindow::RecordTable(TipTextListRecord& reco
     }
 
     int iInfoNum = (WindowWidth <= 800 ? 46 : 51);
-    memset(TextList[TextNum], ' ', iInfoNum);
+    wmemset(TextList[TextNum], L' ', iInfoNum);
     TextList[TextNum][iInfoNum] = '\0';
     TextListColor[TextNum] = TEXT_COLOR_WHITE;
     TextBold[TextNum] = false;
@@ -301,6 +292,10 @@ void mu::ui::window::CItemExplanationWindow::RecordTable(TipTextListRecord& reco
     mu_swprintf(TextList[TextNum], L"\n");
     TextNum++;
     UI::TipTextList::Record(record, 1, 1, TextNum, iInfoWidth, RT3_SORT_CENTER, STRP_NONE, true);
+    // The column headings on the blank row under the item's name, the values from the spacer row
+    // down, as the original's per-resolution offsets placed them for its own text size.
+    const int iLabelHeight = static_cast<int>(std::lround(UI::TipTextList::LineTop(1, 4)));
+    const int iDataHeight = static_cast<int>(std::lround(UI::TipTextList::LineTop(1, 6)));
 
     TextNum = 0;
 

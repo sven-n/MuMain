@@ -42,6 +42,9 @@ namespace UI::TipTextList
 void Record(TipTextListRecord& record, int sx, int sy, int textNum, int tab, int sort, int renderPoint,
             bool useBackground);
 
+// Where Record() puts the top of line `index` of the TextList globals for a table starting at `sy`.
+float LineTop(int sy, int index);
+
 // RenderHelpCategory() / RenderHelpLine() (the item help table's columns), recorded the same way.
 void RecordHelpCategory(TipTextListRecord& record, int columnType, int x, int y);
 void RecordHelpLine(TipTextListRecord& record, int columnType, const wchar_t* printStyle, int& tabSpace,
