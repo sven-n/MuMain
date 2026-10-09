@@ -9,6 +9,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/Text/CUIRenderText.h"
 
@@ -21,22 +22,11 @@ using namespace mu::ui::window;
 
 namespace
 {
-// RenderTipTextList(1, 1, ...): the box's left edge is clamped to logical 0 and its top is 1.
-constexpr float kBoxLeft = 0.f;
-constexpr float kBoxTop = 1.f;
-// Its text box is the widest line plus 2 units, inside 1 unit of padding and a 1-unit frame.
+// RenderTipTextList()'s text box is the widest line plus 2 units.
 constexpr float kTextBoxSlackUnits = 2.f;
-constexpr float kPaddingUnits = 1.f;
-constexpr float kBorderUnits = 1.f;
 // Each row advances 1.1 text heights; a "\n" row half of that.
 constexpr float kRowAdvance = 1.1f;
 constexpr float kHalfSpacerFraction = 0.5f;
-
-bool SameTransform(const UI::Scaling::Transform& a, const UI::Scaling::Transform& b)
-{
-    return a.scaleX == b.scaleX && a.scaleY == b.scaleY && a.offsetX == b.offsetX && a.offsetY == b.offsetY &&
-           a.typographyScale == b.typographyScale;
-}
 
 float MeasureLogicalWidth(const std::wstring& text, bool bold)
 {
@@ -130,11 +120,7 @@ bool mu::ui::window::CHelpWindow::Render()
 
 void mu::ui::window::CHelpWindow::BindRmlModel(Rml::DataModelConstructor& c, HelpWindowRmlModel& model)
 {
-    c.Bind("panel_x", &model.panelX);
-    c.Bind("panel_y", &model.panelY);
     c.Bind("content_width", &model.contentWidth);
-    c.Bind("padding_px", &model.paddingPx);
-    c.Bind("border_px", &model.borderPx);
     c.Bind("text_px", &model.textPx);
     c.Bind("bold_text_px", &model.boldTextPx);
 
@@ -170,17 +156,17 @@ void mu::ui::window::CHelpWindow::SyncRmlModel()
     if (!visible)
         return;
 
-    // The original's 640x480 screen, centred at the UI scale.
-    RebuildPageModel(UI::Scaling::PanelTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight)));
+    RebuildPageModel();
 }
 
-void mu::ui::window::CHelpWindow::RebuildPageModel(const UI::Scaling::Transform& transform)
+void mu::ui::window::CHelpWindow::RebuildPageModel()
 {
-    if (m_BuiltPage == m_iIndex && SameTransform(m_BuiltTransform, transform))
+    const float textPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal);
+    if (m_BuiltPage == m_iIndex && m_BuiltTextPx == textPx)
         return;
 
     m_BuiltPage = m_iIndex;
-    m_BuiltTransform = transform;
+    m_BuiltTextPx = textPx;
 
     const std::vector<UI::Help::PageLine> page = UI::Help::BuildPage(m_iIndex);
     const float normalHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal));
@@ -197,7 +183,7 @@ void mu::ui::window::CHelpWindow::RebuildPageModel(const UI::Scaling::Transform&
         entry.heading = pageLine.heading;
         entry.halfSpacer = pageLine.halfSpacer;
 
-        const float rowHeight = (pageLine.heading ? boldHeight : normalHeight) * transform.scaleY;
+        const float rowHeight = pageLine.heading ? boldHeight : normalHeight;
         const float advance = rowHeight * kRowAdvance;
         if (pageLine.halfSpacer)
         {
@@ -213,16 +199,11 @@ void mu::ui::window::CHelpWindow::RebuildPageModel(const UI::Scaling::Transform&
         model.lines.push_back(std::move(entry));
     }
 
-    model.borderPx = kBorderUnits * transform.scaleX;
-    model.paddingPx = kPaddingUnits * transform.scaleX;
-    model.contentWidth = (widestLine + kTextBoxSlackUnits) * transform.scaleX;
-    model.panelX = UI::Scaling::PositionX(transform, kBoxLeft) - model.borderPx;
-    model.panelY = UI::Scaling::PositionY(transform, kBoxTop) - model.borderPx;
-    model.textPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
-    model.boldTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
+    model.contentWidth = widestLine + kTextBoxSlackUnits;
+    model.textPx = textPx;
+    model.boldTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
 
-    for (const char* field :
-         {"lines", "panel_x", "panel_y", "content_width", "padding_px", "border_px", "text_px", "bold_text_px"})
+    for (const char* field : {"lines", "content_width", "text_px", "bold_text_px"})
         m_RmlView.MarkDirty(field);
 }
 

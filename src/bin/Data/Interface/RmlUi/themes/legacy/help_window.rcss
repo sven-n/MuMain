@@ -1,27 +1,42 @@
 /* Legacy theme for CHelpWindow -- RenderTipTextList() with its background, as the original drew
-   the help pages: black at 80% opacity inside a 1-unit opaque black frame, no vertical padding,
-   white rows and a blue bold heading (TEXT_COLOR_BLUE, 128/179/255), centred in the text box
-   (RT3_SORT_CENTER). Box, frame, padding, text sizes and row metrics are bound in physical px
-   (themes/legacy/help_window.rml). */
+   the help pages: black at 80% opacity inside a 1-unit opaque black frame, one unit of padding
+   each side and none above or below, white rows and a blue bold heading (TEXT_COLOR_BLUE,
+   128/179/255), centred in the text box (RT3_SORT_CENTER). Reference px on the .stage. */
 
+#panel { pointer-events: none; }
+
+/* RenderTipTextList(1, 1, ...): the text box's left edge at 0 and its top at 1, inside the frame. */
 #help_panel {
 	position: absolute;
-	pointer-events: none;
+	left: -1px;
+	top: 0px;
+	--text-width: 0px;
+	width: var(--text-width);
+	padding: 0px 1px;
+	border: 1px #000000;
 	background-color: rgba(0, 0, 0, 204);
-	border-color: #000000;
-	padding-top: 0;
-	padding-bottom: 0;
 }
 
 /* display:block required -- RmlUi's default `display` is inline, even for a <div>. */
 .help-line {
 	display: block;
-	color: #ffffff;
-	text-align: center;
+	position: relative;
+	--row-height: 0px;
+}
+/* The row is reference px; its text is laid out in physical px (.sharp-text). */
+.help-text {
+	display: block;
+	position: absolute;
 	white-space: nowrap;
+	left: 0px;
+	top: 0px;
+	width: calc(var(--text-width) * var(--root-scale));
+	line-height: calc(var(--row-height) * var(--root-scale));
+	text-align: center;
+	color: #ffffff;
 	font-family: "token(font-body)";
 }
-.help-line.heading {
+.help-line.heading .help-text {
 	color: #80b3ff;
 	font-weight: bold;
 }

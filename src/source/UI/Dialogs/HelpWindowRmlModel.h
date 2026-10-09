@@ -7,7 +7,7 @@
 namespace mu::ui::window
 {
 // One row of the open help page. Row heights and gaps are the native text renderer's, in
-// physical px (RenderTipTextList(): a row is one text height, the next starts 1.1 heights
+// reference px (RenderTipTextList(): a row is one text height, the next starts 1.1 heights
 // below it, a half spacer takes half of that).
 struct HelpLineEntry
 {
@@ -18,16 +18,11 @@ struct HelpLineEntry
     float gapPx = 0.f;
 };
 
-// Everything is physical px: the document carries no transform of its own. The box is where
-// RenderTipTextList(1, 1, ...) put it under the Dialog layout: a text box two units wider than
-// the widest line, one unit of padding each side, framed by a 1-unit border.
+// The page sits on the theme's .stage: lengths are reference px, the text sizes physical px.
+// RenderTipTextList()'s text box is two units wider than the widest line.
 struct HelpWindowRmlModel
 {
-    float panelX = 0.f; // the panel's border box
-    float panelY = 0.f;
     float contentWidth = 0.f;
-    float paddingPx = 0.f;
-    float borderPx = 0.f;
     float textPx = 0.f;
     float boldTextPx = 0.f;
 

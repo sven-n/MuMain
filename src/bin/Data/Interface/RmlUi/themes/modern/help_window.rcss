@@ -1,33 +1,41 @@
 /* Modern theme for CHelpWindow -- the key and chat help pages in the modern tooltip's surface
    (themes/modern/tooltip.rcss): same fill, frame, radius and text tokens. The box keeps the
-   original's place (C++ binds its top-left in physical px) and sizes its own width and rows. */
+   original's place and row metrics; reference px on the .stage. */
+
+#panel { pointer-events: none; }
 
 #help_panel {
 	position: absolute;
-	pointer-events: none;
-	width: 240dp;
+	left: 0px;
+	top: 1px;
+	--text-width: 0px;
+	width: var(--text-width);
+	padding: 3px 5px;
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
 	background-color: token(surface-tooltip);
-	border: 1dp token(border-frame);
-	border-radius: token(radius-sm)dp;
-	padding: 3dp 5dp;
 }
 
 /* display:block required -- RmlUi's default `display` is inline, even for a <div>. */
 .help-line {
 	display: block;
-	color: token(text-primary);
-	text-align: center;
-	white-space: nowrap;
-	min-height: 1.2em;
-	line-height: 1.2em;
-	font-family: "token(font-body)";
-	font-size: 11dp;
+	position: relative;
+	--row-height: 0px;
 }
-.help-line.heading {
+/* The row is reference px; its text is laid out in physical px (.sharp-text). */
+.help-text {
+	display: block;
+	position: absolute;
+	white-space: nowrap;
+	left: 0px;
+	top: 0px;
+	width: calc(var(--text-width) * var(--root-scale));
+	line-height: calc(var(--row-height) * var(--root-scale));
+	text-align: center;
+	color: token(text-primary);
+	font-family: "token(font-body)";
+}
+.help-line.heading .help-text {
 	color: token(text-warm);
 	font-weight: bold;
-}
-.help-line.half-spacer {
-	min-height: 0.6em;
-	height: 0.6em;
 }

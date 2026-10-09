@@ -7,7 +7,6 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/HelpWindowRmlModel.h"
 #include "UI/RmlBridge/RmlThemedView.h"
-#include "UI/Scaling/UITransform.h"
 
 namespace Rml
 {
@@ -42,9 +41,9 @@ public:
 private:
     void BuildRmlUi();
     void SyncRmlModel();
-    // Rebuilds the rows and the box when the page or the Dialog transform changed since the last
-    // build: the text is measured with the native renderer, so it is not redone every frame.
-    void RebuildPageModel(const UI::Scaling::Transform& transform);
+    // Rebuilds the rows when the page or the text size changed since the last build: the text is
+    // measured with the native renderer, so it is not redone every frame.
+    void RebuildPageModel();
 
     CManager* m_pNewUIMng;
 
@@ -57,7 +56,7 @@ private:
         [this](Rml::DataModelConstructor& c, HelpWindowRmlModel& model) { BindRmlModel(c, model); },
         {{"Data/Interface/RmlUi/help_window.rml"}}, {.afterReload = [this] { OnRmlReloaded(); }}};
     int m_BuiltPage = -1;
-    UI::Scaling::Transform m_BuiltTransform{};
+    float m_BuiltTextPx = 0.f;
 };
 } // namespace mu::ui::window
 

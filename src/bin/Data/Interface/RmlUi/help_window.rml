@@ -4,16 +4,20 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="help_window.rcss"/>
 </head>
-<!-- The F1 help window (CHelpWindow): the key page, then the chat page. C++ builds the rows
-     (text, heading flag, half-height spacers) and places the box where the original's
-     RenderTipTextList(1, 1, ...) put it under the Dialog layout, in physical px -- this document
-     carries no transform of its own. The legacy theme overrides this markup to take the original's
-     native row metrics and text sizes as well (themes/legacy/help_window.rml). -->
+<!-- The F1 help window (CHelpWindow): the key page, then the chat page, as RenderTipTextList()
+     laid them out. #panel is the original's screen (.stage); the box and the rows are reference
+     px, the rows' heights and gaps the native renderer's. Text is .sharp-text at the native size,
+     counter-scaled out of the stage. -->
 <body data-model="help_window">
-	<div id="help_panel" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
-		<div class="help-line" data-for="line : lines"
-		     data-class-heading="line.heading" data-class-half-spacer="line.half_spacer"
-		>{{line.text}}</div>
+	<div id="panel" class="stage">
+		<div id="help_panel" data-style---text-width="content_width + 'px'">
+			<div class="help-line" data-for="line : lines"
+			     data-class-heading="line.heading" data-class-half-spacer="line.half_spacer"
+			     data-style-height="line.height_px + 'px'" data-style-margin-bottom="line.gap_px + 'px'"
+			     data-style---row-height="line.height_px + 'px'"
+			><span class="sharp-text help-text" data-if="!line.half_spacer"
+			       data-style-font-size="(line.heading ? bold_text_px : text_px) + 'px'">{{line.text}}</span></div>
+		</div>
 	</div>
 </body>
 </rml>

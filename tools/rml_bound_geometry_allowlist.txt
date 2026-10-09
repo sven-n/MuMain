@@ -49,7 +49,7 @@ set_item_explanation.rml: per-frame data -- placed against the hovered item
 siege_warfare.rml: the hero, the other characters' dots and each command's icon sit at their projected map points; the pointer's chosen command follows the mouse; the team and command buttons' boxes come off the live CButtons that hit-test them, and the command buttons are repositioned every frame to the chosen team's row -- native is authoritative for their layout and their hit test, so this runs in the accepted direction
 slide_notice.rml: per-frame data -- the ticker scrolls right to left every frame, so the text's left and the band's fading height are its state, not a layout a theme could own
 themes/legacy/chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
-themes/legacy/help_window.rml: per-frame data -- native renderer geometry for the page it still measures
+help_window.rml: per-row data -- each row's height and gap are the native renderer's line metrics for the page it measures
 themes/legacy/system_log.rml: per-frame data -- native renderer geometry for the lines it still measures
 themes/legacy/tooltip.rml: per-frame data -- tooltip is placed against the pointer
 themes/legacy/trade.rml: per-frame data -- an item warning badge sits on its item's slot and is as wide as the item
