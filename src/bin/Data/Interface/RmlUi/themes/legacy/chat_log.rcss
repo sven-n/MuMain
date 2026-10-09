@@ -57,6 +57,7 @@
 	height: 10dp;
 	decorator: image(chat-resize);
 	cursor: move;
+	drag: drag;
 	pointer-events: auto;
 }
 #resize_handle:active { filter: brightness(0.7); }

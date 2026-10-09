@@ -121,14 +121,6 @@ namespace mu::ui::window
         static constexpr float SCROLL_TOP_BOTTOM_PART_HEIGHT = 3.0f;
         static constexpr float SCROLL_MIDDLE_PART_HEIGHT = 15.0f;
         static constexpr float CLIENT_WIDTH = WND_WIDTH - SCROLL_BAR_WIDTH * 2.0f - (WND_LEFT_RIGHT_EDGE * 2.0f);
-        // Only the resize drag is still a C++ interaction; hover, wheel and scrollbar dragging
-        // all belong to RmlUi now, so the states that tracked them are gone.
-        enum EVENT_STATE
-        {
-            EVENT_NONE = 0,
-            EVENT_RESIZING_BTN_DOWN,
-        };
-
         typedef std::wstring type_string;
         typedef std::vector<CMessageText*>	type_vector_msgs;
         typedef std::vector<type_string>	type_vector_filters;
@@ -147,7 +139,6 @@ namespace mu::ui::window
         type_vector_msgs	m_vecGMMsgs;
         type_vector_filters	m_vecFilters;
 
-        POINT	m_WndPos;
         SIZE	m_WndSize;
         int		m_nShowingLines;
 
@@ -157,7 +148,6 @@ namespace mu::ui::window
         int		m_iCurrentRenderEndLine;
         float	m_fBackAlpha;
 
-        EVENT_STATE			m_EventState;
 
         bool m_bShowFrame;
 
@@ -193,8 +183,12 @@ namespace mu::ui::window
             [this](Rml::DataModelConstructor& c, ChatLogRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/chat_log.rml"}},
             {.afterReload = [this] { OnRmlReloaded(); }}};
-        // Where Create() put the window, kept while the theme gives it no slot.
-        POINT m_HomePos{};
+        // The bottom edge Create() gave the window, HUD units, kept while the theme gives it no slot.
+        float m_HomeBottom = 0.f;
+        // The log's bottom edge (screen pixels) and scale where it is placed; the resize bands
+        // measure from them.
+        float m_PanelBottomPx = 0.f;
+        float m_PanelScale = 0.f;
         bool m_bLinesDirty = true;
         bool m_bFollowTail = true;
         // One-shot, set when the line list changes and consumed on the next frame once RmlUi has
@@ -215,7 +209,6 @@ namespace mu::ui::window
         bool Create(CManager* pNewUIMng, int x, int y, int nShowingLines = 6);
         void Release();
 
-        void SetPosition(int x, int y);
         void AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType = TYPE_ALL_MESSAGE);
         void RemoveFrontLine(MESSAGE_TYPE MsgType);
         void Clear(MESSAGE_TYPE MsgType);
@@ -247,6 +240,9 @@ namespace mu::ui::window
         bool IsShowFrame();
 
         bool UpdateMouseEvent() override;
+        // Native's 3-line resize steps for the pointer's height (screen pixels) while #resize_handle
+        // is dragged.
+        void ResizeToPointer(float pointerYPx);
         bool UpdateKeyEvent() override;
         bool Update() override;
         // Hides the document outside the main scene (CSystem::SyncMainSceneHudVisibility()): the

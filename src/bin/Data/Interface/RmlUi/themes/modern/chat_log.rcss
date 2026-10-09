@@ -48,6 +48,7 @@
 	background-color: token(metal-rail-dark);
 	border-radius: token(radius-sm)px;
 	cursor: move;
+	drag: drag;
 	pointer-events: auto;
 }
 #resize_handle:hover { background-color: token(metal-edge); }

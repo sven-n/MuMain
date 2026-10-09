@@ -40,13 +40,11 @@ mu::ui::window::CChatLogWindow::~CChatLogWindow()
 void mu::ui::window::CChatLogWindow::Init()
 {
     m_pNewUIMng = nullptr;
-    m_WndPos.x = m_WndPos.y = 0;
     m_WndSize.cx = WND_WIDTH; m_WndSize.cy = 0;
     m_nShowingLines = 6;
     m_iCurrentRenderEndLine = -1;
     m_fBackAlpha = 0.6f;
 
-    m_EventState = EVENT_NONE;
 
     m_bShowFrame = false;
 
@@ -64,23 +62,17 @@ bool mu::ui::window::CChatLogWindow::Create(CManager* pNewUIMng, int x, int y, i
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CHATLOGWINDOW, this);
-    m_WndPos.x = x; m_WndPos.y = y;
-    m_HomePos = m_WndPos;
+    m_HomeBottom = static_cast<float>(y);
     SetNumberOfShowingLines(nShowingLines);
 
-    // A theme slot moves the log; its native bottom edge (the resize bands) follows it in HUD space.
+    // A theme slot moves the log; the resize bands measure from its bottom edge, at its scale.
     UI::RmlBridge::WorkspaceDocumentOptions options;
     options.measure = [this] { return UI::Placement::PlacementParticipant::Size{WND_WIDTH, static_cast<float>(m_WndSize.cy)}; };
     options.placed = [this](const UI::Placement::PlacementParticipant::Box* box)
     {
-        if (box == nullptr)
-        {
-            SetPosition(m_HomePos.x, m_HomePos.y);
-            return;
-        }
-        const auto hud = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::HudFrame, WindowWidth, WindowHeight);
-        SetPosition(static_cast<int>(std::lround((box->left - hud.offsetX) / hud.scaleX)),
-                    static_cast<int>(std::lround((box->top + box->height - hud.offsetY) / hud.scaleY)));
+        const float hudScale = UI::Scaling::BottomHudScale(WindowWidth, WindowHeight);
+        m_PanelScale = box != nullptr ? box->scale : hudScale;
+        m_PanelBottomPx = box != nullptr ? box->top + box->height : m_HomeBottom * hudScale;
     };
     UI::RmlBridge::RegisterWorkspaceDocument("chat_log", [this] { return m_RmlView.Document(); }, "panel", std::move(options));
     // No LoadImages() any more: every sprite this window used is referenced by chat_log.rcss and
@@ -104,12 +96,6 @@ void mu::ui::window::CChatLogWindow::Release()
     }
 
     Init();
-}
-
-void mu::ui::window::CChatLogWindow::SetPosition(int x, int y)
-{
-    m_WndPos.x = x;
-    m_WndPos.y = y;
 }
 
 void mu::ui::window::CChatLogWindow::AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType /*= TYPE_ALL_MESSAGE*/)
@@ -518,65 +504,55 @@ bool mu::ui::window::CChatLogWindow::IsShowFrame()
 
 bool mu::ui::window::CChatLogWindow::UpdateMouseEvent()
 {
-    // Almost everything this used to do now belongs to RmlUi: the mouse wheel, the scrollbar drag
-    // and the per-line hover/right-click hit test are all handled by #lines (base.rcss's
-    // .scroll-pane) and the line elements themselves. What survives is the part RmlUi has no
-    // concept of -- native's 3-line-step window resize, which is driven by the pointer's absolute
-    // Y against the whole screen, not by any element's own box.
+    // Everything this used to do belongs to RmlUi now: the wheel, the scrollbar and the per-line
+    // hit tests are #lines' (base.rcss's .scroll-pane), and the resize is a drag on #resize_handle
+    // (ResizeToPointer()).
+    return true;
+}
 
+void mu::ui::window::CChatLogWindow::ResizeToPointer(float pointerYPx)
+{
     if (!m_bShowFrame)
-    {
-        m_EventState = EVENT_NONE;
-        return true;
-    }
-
-    if (m_EventState != EVENT_RESIZING_BTN_DOWN)
-        return true;
-
-    // Armed by #resize_handle's data-event-mousedown (chat_resize_begin).
-    if (false == MouseLButtonPush || true == MouseLButtonPop)
-    {
-        m_EventState = EVENT_NONE;
-        return true;
-    }
+        return;
 
     // Native's own stepping, unchanged: the screen is divided into 3-line bands above and below
-    // the handle's resting position, and the pointer's band picks the new line count.
-    const LONG resizeTop = (LONG)(m_WndPos.y - m_WndSize.cy - RESIZING_BTN_HEIGHT);
-    // The bands span the whole screen, as the original's did on its 640-unit screen.
-    const int bandWidth = static_cast<int>(std::ceil(static_cast<float>(WindowWidth) / GetLayoutTransform().scaleX));
+    // the handle's resting position, and the pointer's band picks the new line count. The bands
+    // span the whole screen, so only the pointer's height counts; both are in the log's own units.
+    const float scale = m_PanelScale > 0.f ? m_PanelScale : 1.f;
+    const float bottom = m_PanelBottomPx / scale;
+    const float pointerY = pointerYPx / scale;
+    const auto inBand = [pointerY](float top, float height) { return pointerY >= top && pointerY < top + height; };
+    const float resizeTop = bottom - static_cast<float>(m_WndSize.cy) - RESIZING_BTN_HEIGHT;
     const int nTopSections = (15 - (int)GetNumberOfShowingLines()) / 3;
     const int nBottomSections = ((int)GetNumberOfShowingLines() - 3) / 3;
 
     for (int i = 0; i < nTopSections; i++)
     {
-        if (mu::ui::window::CheckMouseIn(0, resizeTop - RESIZING_BTN_HEIGHT - ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3 * 2),
-            bandWidth, SCROLL_MIDDLE_PART_HEIGHT * 3 + RESIZING_BTN_HEIGHT))
+        if (inBand(resizeTop - RESIZING_BTN_HEIGHT - ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3 * 2),
+                   SCROLL_MIDDLE_PART_HEIGHT * 3 + RESIZING_BTN_HEIGHT))
         {
             SetNumberOfShowingLines((int)GetNumberOfShowingLines() + (i + 1) * 3);
-            return false;
+            return;
         }
     }
     for (int i = 0; i < nBottomSections; i++)
     {
-        if (mu::ui::window::CheckMouseIn(0, resizeTop + RESIZING_BTN_HEIGHT + ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3),
-            bandWidth, RESIZING_BTN_HEIGHT + SCROLL_MIDDLE_PART_HEIGHT * 3))
+        if (inBand(resizeTop + RESIZING_BTN_HEIGHT + ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3),
+                   RESIZING_BTN_HEIGHT + SCROLL_MIDDLE_PART_HEIGHT * 3))
         {
             SetNumberOfShowingLines((int)GetNumberOfShowingLines() - (i + 1) * 3);
-            return false;
+            return;
         }
     }
-    if (mu::ui::window::CheckMouseIn(0, 0, bandWidth,
-        m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 15 + RESIZING_BTN_HEIGHT + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2)))
+    if (inBand(0.f, bottom - (SCROLL_MIDDLE_PART_HEIGHT * 15 + RESIZING_BTN_HEIGHT + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2)))
     {
         SetNumberOfShowingLines(15);
     }
-    if (mu::ui::window::CheckMouseIn(0, m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2),
-        bandWidth, SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2))
+    if (inBand(bottom - (SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2),
+               SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2))
     {
         SetNumberOfShowingLines(3);
     }
-    return false;
 }
 
 bool mu::ui::window::CChatLogWindow::UpdateKeyEvent()
@@ -645,11 +621,9 @@ void mu::ui::window::CChatLogWindow::BindRmlModel(Rml::DataModelConstructor& c, 
     // Drag the handle above the window to resize it in native's own 3-line steps. The
     // stepping stays in UpdateMouseEvent() where the pointer's absolute Y already lives;
     // this only arms it.
-    c.BindEventCallback("chat_resize_begin",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
-        {
-            m_EventState = EVENT_RESIZING_BTN_DOWN;
-        });
+    c.BindEventCallback("chat_resize_drag",
+        [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
+        { ResizeToPointer(event.GetParameter<float>("mouse_y", 0.f)); });
 }
 
 void mu::ui::window::CChatLogWindow::OnRmlReloaded()

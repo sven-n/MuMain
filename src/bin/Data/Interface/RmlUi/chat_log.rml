@@ -17,7 +17,7 @@
 		<!-- Drag to resize in 3-line steps; only exists with the frame shown, matching native. -->
 		<div id="backdrop" data-style-opacity="back_alpha"></div>
 		<div id="resize_handle" data-class-hidden="!show_frame"
-		     data-event-mousedown="chat_resize_begin"></div>
+		     data-event-drag="chat_resize_drag"></div>
 
 		<div id="lines" class="scroll-pane" data-style-height="client_height + 'dp'">
 			<!-- data-attr-class replaces the whole class attribute, so every class this line needs
