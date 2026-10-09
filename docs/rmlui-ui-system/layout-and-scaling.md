@@ -42,8 +42,7 @@ that's fine; retrofit to `dp` opportunistically, not as a forced mass-edit.
 ## Two scaling systems, cross-wired onto both axes
 
 A second, older scaling system also exists: `UI::Scaling` (`UITransform.cpp`), a window-size-driven
-auto-scale (`BottomHudScale`, `CappedUniformScale` → `PanelTransform`/`DockTransform`/
-`FloatingWorkspaceTransform`), clamped to a fixed range per layout kind. The ramp between the
+auto-scale (`BottomHudScale`, `CappedUniformScale` → `PanelTransform`/`DockTransform`), clamped to a fixed range per layout kind. The ramp between the
 640×480 reference (1.0×) and each ceiling is **linear** — `ViewportFitScale()` is
 `clamp(min(w/640, h/480), 1, ceiling)`, the same formula the original client used — so at
 `UIScalePercent=100` a migrated window lands on exactly the pixels the legacy one did at every

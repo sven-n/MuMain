@@ -191,9 +191,6 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
 - **The login scene's windows** (`CCreditWin`, `CLoginMainWin`, `CSysMenuWin`, `COptionWindow`,
   `CServerSelWin`, `CMsgWin`, `CCharSelMainWin`, `CCharMakeWin`, `CLoginWin`) have not been
   audited for native draws that still assume a fixed resolution (`CCreditWin` assumes 800x600).
-- **The friend family still keeps native positions** for `CUIWindowMgr` in
-  `FloatingWorkspaceTransform()` units, mirrored from its dragged documents
-  (`tracked-deferrals.md`).
 
 ## Upstream sync log
 

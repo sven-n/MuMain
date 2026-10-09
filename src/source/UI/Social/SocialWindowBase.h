@@ -132,6 +132,17 @@ public:
     {
         return m_iPos_y;
     }
+    // Where CUIWindowMgr::AddWindow() asked for this window before keeping it above the HUD: the
+    // next window cascades from it, wherever the clamp or its document then put it.
+    void SetCascadePosition(int iPos_x, int iPos_y)
+    {
+        m_iCascadePos_x = iPos_x;
+        m_iCascadePos_y = iPos_y;
+    }
+    bool IsCascadedAt(int iPos_x, int iPos_y) const
+    {
+        return m_iCascadePos_x == iPos_x && m_iCascadePos_y == iPos_y;
+    }
     void SetSize(int iWidth, int iHeight)
     {
         m_iWidth = iWidth;
@@ -215,6 +226,7 @@ protected:
     DWORD m_dwParentUIID = 0;
     int m_iState = UISTATE_NORMAL;
     int m_iPos_x = 0, m_iPos_y = 0;
+    int m_iCascadePos_x = -1, m_iCascadePos_y = -1;
     int m_iWidth = 100, m_iHeight = 100;
     std::wstring m_strTitle;
     std::wstring m_returnText;

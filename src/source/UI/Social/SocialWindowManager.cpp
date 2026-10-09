@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "UI/Social/SocialWindowManager.h"
 #include "UI/Social/FriendWindowViews.h"
+#include "UI/Social/SocialWorkspace.h"
 #include "Core/Time/FrameTimerScheduler.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -173,17 +174,17 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
 
     if (iWindowType != UIWNDTYPE_FRIENDMAIN && !(iOption & UIADDWND_FORCEPOSITION))
     {
-        const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
+        const int workspaceWidth = UI::Social::WorkspaceWidth();
+        const int workspaceHeight = UI::Social::WorkspaceHeight();
         for (m_WindowMapIter = m_WindowMap.begin(); m_WindowMapIter != m_WindowMap.end(); ++m_WindowMapIter)
         {
-            if (m_WindowMapIter->second->GetPosition_x() == iPos_x &&
-                m_WindowMapIter->second->GetPosition_y() == iPos_y)
+            if (m_WindowMapIter->second->IsCascadedAt(iPos_x, iPos_y))
             {
-                if (iPos_x + pbw->GetWidth() + 20 <= bounds.width)
+                if (iPos_x + pbw->GetWidth() + 20 <= workspaceWidth)
                     iPos_x += 20;
-                if (iPos_y + pbw->GetHeight() + 20 <= bounds.height)
+                if (iPos_y + pbw->GetHeight() + 20 <= workspaceHeight)
                     iPos_y += 20;
-                if (iPos_x + pbw->GetWidth() + 20 > bounds.width && iPos_y + pbw->GetHeight() + 20 > bounds.height)
+                if (iPos_x + pbw->GetWidth() + 20 > workspaceWidth && iPos_y + pbw->GetHeight() + 20 > workspaceHeight)
                 {
                     if (iPos_y % 10 == 9)
                     {
@@ -195,11 +196,11 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
                 m_WindowMapIter = m_WindowMap.begin();
             }
         }
+        pbw->SetCascadePosition(iPos_x, iPos_y);
 
         // The default place (0, 332) and the cascade put a window's lower part under the bottom
         // HUD, where its buttons cannot be reached (an original defect): keep it above the HUD.
-        const int contentHeight =
-            static_cast<int>(UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight));
+        const int contentHeight = UI::Social::FreeAreaBottom();
         if (iPos_y + pbw->GetHeight() > contentHeight)
             iPos_y = std::max(contentHeight - pbw->GetHeight(), 0);
     }
@@ -376,10 +377,7 @@ void CUIWindowMgr::HideAllWindow(BOOL bHide, BOOL bMainClose)
         int iHideSize = m_HideWindowList.size();
         if (iHideSize - iCount > 0)
         {
-            const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
-            const int contentHeight =
-                static_cast<int>(UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight));
-            OpenMainWnd(bounds.width - 250, contentHeight - 170);
+            OpenMainWnd(UI::Social::WorkspaceWidth() - 250, UI::Social::FreeAreaBottom() - 170);
         }
         if (iCount > 0 && GetTopNotMainWindowUIID() > 0)
         {

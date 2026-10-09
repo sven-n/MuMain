@@ -478,8 +478,7 @@ anything, it is already broken; check it.
 
 The slot takes `pointer-events: auto`, mousedown starts the gesture, and mousemove/mouseup are
 listened for on the **document** so a drag leaving the slot keeps tracking. Deltas convert RmlUi px
-to native reference px through `FloatingWorkspaceTransform().scaleX`, the same ratio that places the
-viewer, so the feel holds at any UI scale.
+to dp (`UI::Social::DpRatio()`), so the feel holds at any UI scale.
 
 ## Tooltip
 

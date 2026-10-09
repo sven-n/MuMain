@@ -8,6 +8,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Scenes/SceneCore.h"
 #include "UI/Placement/WindowPlacement.h"
+#include "UI/Social/SocialWorkspace.h"
 #include "UI/Inventory/CursorItemLayer.h"
 
 // Defined in Winmain.cpp; only ever declared at file scope (see MainScene.cpp).
@@ -759,10 +760,7 @@ void CSystem::Show(DWORD dwKey)
     {
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_FRIEND, true);
 
-        const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
-        const int contentHeight =
-            static_cast<int>(UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight));
-        m_pNewFriendWindow->OpenMainWnd(bounds.width - 250, contentHeight - 170);
+        m_pNewFriendWindow->OpenMainWnd(UI::Social::WorkspaceWidth() - 250, UI::Social::FreeAreaBottom() - 170);
     }
     else if (dwKey == INTERFACE_INVENTORY)
     {

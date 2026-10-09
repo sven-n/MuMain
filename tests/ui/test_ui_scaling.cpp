@@ -11,6 +11,7 @@
 #include "Core/Globals/_enum.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
+#include "UI/Social/SocialWorkspace.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "UI/Social/SocialWindowBase.h"
 #include "UI/HUD/UIMapName.h"
@@ -538,19 +539,22 @@ TEST_CASE("legacy UI preserves logical input and world-overlay coordinates [ui][
     CHECK(UI::Scaling::FontPointSize(FontRole::Fixed, legacy) == 13);
 }
 
-TEST_CASE("floating windows keep uniform scale across the full viewport [ui][scaling]")
+TEST_CASE("the friend family keeps its windows in dp, above a bottom HUD [ui][scaling][social]")
 {
-    const auto transform = UI::Scaling::FloatingWorkspaceTransform(3840, 2160);
-    const auto bounds = UI::Scaling::FloatingWorkspaceBounds(3840, 2160);
+    const unsigned int previousWidth = WindowWidth;
+    const unsigned int previousHeight = WindowHeight;
+    WindowWidth = 1920;
+    WindowHeight = 1080;
 
-    CHECK(transform.scaleX == doctest::Approx(2.25f));
-    CHECK(transform.scaleY == doctest::Approx(2.25f));
-    CHECK(transform.offsetX == doctest::Approx(0.0f));
-    CHECK(transform.offsetY == doctest::Approx(0.0f));
-    CHECK(bounds.width == 1706);
-    CHECK(bounds.height == 960);
-    CHECK(UI::Scaling::PositionX(transform, static_cast<float>(bounds.width)) <= 3840.0f);
-    CHECK(UI::Scaling::PositionY(transform, static_cast<float>(bounds.height)) <= 2160.0f);
+    CHECK(UI::Social::DpRatio() == doctest::Approx(UI::Scaling::TypographyScale(1920, 1080)));
+    CHECK(UI::Social::WorkspaceWidth() == static_cast<int>(1920 / UI::Social::DpRatio()));
+    CHECK(UI::Social::WorkspaceHeight() == static_cast<int>(1080 / UI::Social::DpRatio()));
+    // No workspace document: nothing stands at the bottom, so the whole window is free.
+    CHECK(UI::Social::FreeAreaBottomPx() == doctest::Approx(1080.f));
+    CHECK(UI::Social::FreeAreaBottom() == UI::Social::WorkspaceHeight());
+
+    WindowWidth = previousWidth;
+    WindowHeight = previousHeight;
 }
 
 // A HUD narrower than the window leaves a strip beside it; a full-screen overlay (a map's weather, a
@@ -562,7 +566,6 @@ TEST_CASE("screen overlays cover the whole window [ui][scaling]")
 
     CHECK(UI::Scaling::SizeY(screen, screenHeight) == doctest::Approx(2160.0f));
     CHECK(UI::Scaling::ScreenOverlayFullHeight(640, 480) == doctest::Approx(480.0f));
-    CHECK(UI::Scaling::FloatingWorkspaceContentHeight(3840, 2160) == doctest::Approx(914.666667f));
 }
 
 TEST_CASE("positions include offsets and sizes do not [ui][scaling]")
@@ -784,8 +787,7 @@ TEST_CASE("every transform sizes native text by the one typography scale [ui][sc
         CHECK(typography == doctest::Approx(UI::Scaling::PanelTransform(width, height).scaleX));
         for (const auto& transform :
              {UI::Scaling::PanelTransform(width, height), UI::Scaling::DockRightTransform(width, height),
-              UI::Scaling::FloatingWorkspaceTransform(width, height), UI::Scaling::ScreenOverlayTransform(width, height),
-              UI::Scaling::TypographyUnitsTransform(width, height)})
+              UI::Scaling::ScreenOverlayTransform(width, height), UI::Scaling::TypographyUnitsTransform(width, height)})
         {
             CHECK(transform.typographyScale == doctest::Approx(typography));
             CHECK(UI::Scaling::NativeTextPixelSize(FontRole::Normal, transform)

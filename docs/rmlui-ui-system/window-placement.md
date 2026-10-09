@@ -208,7 +208,9 @@ in their slots; dragging a window out of its slot is not planned.
 
 - The friend list, chat rooms and letters drag through `UI::RmlBridge::MakeDraggable()` and
   bounce back on screen. The friend list asks its `friends` slot only where it first opens
-  (`InitialPosition()`); the chat and letter windows keep the friend manager's cascade.
+  (`InitialPosition()`); the chat and letter windows keep the friend manager's cascade. The manager keeps every
+  friend-family position and size in dp (`UI/Social/SocialWorkspace.h`), the units the documents
+  lay out in, and keeps new windows above a bottom HUD; positions follow the UI scale.
 - The options window, the generic menu dialog (the system menu among them) and the generic confirm
   dialog drag by any part that is not a control (`base.rcss` gives
   `input, select, textarea, .btn, [data-event-click]` `drag: block`), stay where they were dropped

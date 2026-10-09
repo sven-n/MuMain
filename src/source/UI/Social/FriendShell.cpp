@@ -2,13 +2,13 @@
 #include "UI/Social/FriendShell.h"
 
 #include "UI/Social/FriendWindow.h"
+#include "UI/Social/SocialWorkspace.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Placement/WindowPlacement.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlDraggable.h"
 #include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Render/Text/TextWrap.h"
 #include "Core/Utilities/StringUtils.h"
@@ -191,12 +191,10 @@ void FriendShell::SyncGeometry()
         return;
     m_Left = panel->GetAbsoluteLeft() / scale;
     m_Top = panel->GetAbsoluteTop() / scale;
-    const auto native = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight);
-    const float ratio = scale / native.scaleX;
-    m_Owner.SetPosition(static_cast<int>(m_Left * ratio), static_cast<int>(m_Top * ratio));
-    m_Owner.SetSize(static_cast<int>(m_Width * ratio), static_cast<int>(m_Height * ratio));
-    m_Owner.SetBackPosition(m_Maximized, static_cast<int>(m_RestoreRect[1] * ratio),
-                           static_cast<int>(m_RestoreRect[3] * ratio));
+    m_Owner.SetPosition(static_cast<int>(m_Left), static_cast<int>(m_Top));
+    m_Owner.SetSize(static_cast<int>(m_Width), static_cast<int>(m_Height));
+    m_Owner.SetBackPosition(m_Maximized, static_cast<int>(m_RestoreRect[1]),
+                           static_cast<int>(m_RestoreRect[3]));
 }
 
 void FriendShell::SyncWorkspace()
@@ -204,8 +202,7 @@ void FriendShell::SyncWorkspace()
     auto* context = m_View.Document()->GetContext();
     const auto viewport = context->GetDimensions();
     const float scale = context->GetDensityIndependentPixelRatio();
-    const float height = UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight) *
-                         UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight).scaleY;
+    const float height = FreeAreaBottomPx();
     auto& model = m_View.GetModel();
     if (model.workspaceHeight == height && m_Viewport == viewport && m_DpRatio == scale)
         return;

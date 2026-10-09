@@ -99,12 +99,9 @@ namespace UI::Scaling
     float CompanionRatio(int windowWidth, int windowHeight);
     float BottomHudScale(int windowWidth, int windowHeight);
     Transform DockRightTransform(int windowWidth, int windowHeight);
-    Transform FloatingWorkspaceTransform(int windowWidth, int windowHeight);
-    Viewport FloatingWorkspaceBounds(int windowWidth, int windowHeight);
     // The whole window's height in ScreenOverlayTransform()'s units: a map's weather or a screen dim
     // covers the strip beside a HUD narrower than the window too, and the HUD draws over the rest.
     float ScreenOverlayFullHeight(int windowWidth, int windowHeight);
-    float FloatingWorkspaceContentHeight(int windowWidth, int windowHeight);
     Viewport WorldViewport(int windowWidth, int windowHeight, bool topViewEnabled);
     float WorldViewportAspect(int windowWidth, int windowHeight, bool topViewEnabled);
     float PositionX(const Transform& transform, float x);

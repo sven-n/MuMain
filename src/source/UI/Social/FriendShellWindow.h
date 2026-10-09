@@ -34,7 +34,5 @@ protected:
     BOOL HandleMessage() override;
 
 private:
-    float SemanticScaleRatio() const;
-
     std::unique_ptr<UI::Social::FriendShell> m_Shell;
 };

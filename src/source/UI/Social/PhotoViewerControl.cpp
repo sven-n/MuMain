@@ -3,7 +3,7 @@
 
 #include "UI/Social/PhotoViewer.h"
 #include "UI/RmlBridge/RmlTooltip.h"
-#include "UI/Scaling/UITransform.h"
+#include "UI/Social/SocialWorkspace.h"
 #include "Core/Utilities/StringUtils.h"
 #include "I18N/All.h"
 
@@ -21,13 +21,12 @@ constexpr const char* HelpId = "photo_help";
 // A letter from Webzen shows its logo where a sender would stand.
 constexpr const char* WebzenLogo = "/Data/Local/Webzenlogo.jpg";
 
-// RmlUi reports the cursor in its own pixels; the viewer thinks in native reference pixels, the
-// same conversion LetterReadView::SyncPhoto() uses to place it. Turning by the converted delta
-// keeps a drag feeling identical at every UI scale.
-float ToNativePixels(float rmlPixels)
+// RmlUi reports the cursor in screen pixels; turning by the delta in dp keeps a drag feeling
+// identical at every UI scale.
+float ToDp(float rmlPixels)
 {
-    const auto native = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight);
-    return native.scaleX > 0 ? rmlPixels / native.scaleX : rmlPixels;
+    const float ratio = UI::Social::DpRatio();
+    return ratio > 0 ? rmlPixels / ratio : rmlPixels;
 }
 } // namespace
 
@@ -133,7 +132,6 @@ void PhotoViewerControl::SyncHelp()
     config.anchorY = slot->GetAbsoluteTop() + size.y;
     config.anchor = UI::RmlBridge::Tooltip::AnchorPoint::AboveLeft;
     config.centerHorizontally = true;
-    config.transform = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight);
     UI::RmlBridge::Tooltip::Show(config, this);
 }
 
@@ -173,7 +171,7 @@ void PhotoViewerControl::ProcessEvent(Rml::Event& event)
         if (!m_Turning)
             return;
         const float x = event.GetParameter<float>("mouse_x", 0.0f);
-        m_Viewer->TurnBy(ToNativePixels(x - m_LastX));
+        m_Viewer->TurnBy(ToDp(x - m_LastX));
         m_LastX = x;
         return;
     }

@@ -2,12 +2,12 @@
 #include "UI/Social/LetterWriteView.h"
 
 #include "UI/Social/SocialWindowManager.h"
+#include "UI/Social/SocialWorkspace.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlDraggable.h"
 #include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Core/Utilities/StringUtils.h"
 #include "I18N/All.h"
@@ -320,10 +320,8 @@ void LetterWriteView::SyncGeometry()
         return;
     m_Left = panel->GetAbsoluteLeft() / scale;
     m_Top = panel->GetAbsoluteTop() / scale;
-    const auto native = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight);
-    const float ratio = scale / native.scaleX;
-    m_Owner.SetPosition(static_cast<int>(m_Left * ratio), static_cast<int>(m_Top * ratio));
-    m_Owner.SetSize(static_cast<int>(m_Width * ratio), static_cast<int>(m_Height * ratio));
+    m_Owner.SetPosition(static_cast<int>(m_Left), static_cast<int>(m_Top));
+    m_Owner.SetSize(static_cast<int>(m_Width), static_cast<int>(m_Height));
 }
 
 void LetterWriteView::SyncWorkspace()
@@ -331,8 +329,7 @@ void LetterWriteView::SyncWorkspace()
     auto* context = m_View.Document()->GetContext();
     const auto viewport = context->GetDimensions();
     const float scale = context->GetDensityIndependentPixelRatio();
-    const float height = UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight) *
-                         UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight).scaleY;
+    const float height = FreeAreaBottomPx();
     auto& model = m_View.GetModel();
     if (model.workspaceHeight == height && m_Viewport == viewport && m_DpRatio == scale)
         return;
@@ -398,12 +395,8 @@ void LetterWriteView::RestoreLayout(float x, float y, float width, float height,
 
 void LetterWriteView::PlaceAtRest()
 {
-    const float scale = m_View.Document()->GetContext()->GetDensityIndependentPixelRatio();
-    if (scale <= 0)
-        return;
-    const float ratio = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight).scaleX / scale;
-    m_Left = m_Owner.GetPosition_x() * ratio;
-    m_Top = m_Owner.GetPosition_y() * ratio;
+    m_Left = m_Owner.GetPosition_x();
+    m_Top = m_Owner.GetPosition_y();
 }
 
 void LetterWriteView::Maximize()
