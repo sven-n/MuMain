@@ -56,6 +56,8 @@ window writes to these sections:
 - `[ConnectionSettings]`
 - `[Camera]` - orbital wheel-zoom radius (`Zoom`). **New in this PR**, the
   only key the camera rework added.
+- `[Discord]` - the **Discord** setting (`Presence`: `On`, `HideDetails`,
+  `Off`) and the server's Discord application; see [`discord.md`](discord.md).
 
 Missing keys fall back to compile-time defaults from
 `src/source/Data/GameConfig/GameConfigConstants.h`. If `config.ini` doesn't exist,

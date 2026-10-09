@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include "Integration/Discord/PresenceMode.h"
 #include "UI/NewUI/NewUIManager.h"
 #include "UI/NewUI/Inventory/NewUIMyInventory.h"
 #include "UI/NewUI/Widgets/NewUIComboBox.h"
@@ -129,6 +130,10 @@ namespace SEASON3B
         CNewUIComboBox m_LanguageCombo;
         CNewUIComboBox m_FontCombo;
 
+        int m_iDiscordPresenceIndex;
+        const wchar_t* m_discordPresenceLabels[Integration::Discord::PresenceModes.size()] = {};
+        CNewUIComboBox m_DiscordPresenceCombo;
+
         void ApplyResolution();
         int FindCurrentResolutionIndex();
         void InitResolutionCombo();
@@ -142,6 +147,11 @@ namespace SEASON3B
         void ApplyFont();
         int FindCurrentFontIndex();
         void InitFontCombo();
+
+        void ApplyDiscordPresence();
+        int FindCurrentDiscordPresenceIndex();
+        void InitDiscordPresenceCombo();
+        void RenderDiscordPresenceRow();
     };
 }
 

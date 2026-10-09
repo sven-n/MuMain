@@ -10,6 +10,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Audio/AudioPlayer.h"
+#include "Integration/Discord/RichPresence.h"
 #include <algorithm>
 #include <cstring>
 #include "I18N/All.h"
@@ -195,6 +196,36 @@ namespace
     constexpr int FONT_COMBO_WIDTH   = 148;
     constexpr int FONT_COMBO_HEIGHT  = 16;
     constexpr int FONT_COMBO_MAX_VISIBLE = 5;
+
+    // Discord presence row, below Windowed mode. Only builds with the
+    // presence have it; the window grows by the row and the Close button
+    // moves down with it.
+    constexpr int DISCORD_ROW_HEIGHT = Integration::Discord::RichPresence::IsAvailable ? 50 : 0;
+    constexpr int DISCORD_LABEL_Y_LOCAL = 400;
+    constexpr int DISCORD_COMBO_X_LOCAL = 22;
+    constexpr int DISCORD_COMBO_Y_LOCAL = 413;
+    constexpr int DISCORD_COMBO_WIDTH = 148;
+    constexpr int DISCORD_COMBO_HEIGHT = 16;
+
+    const wchar_t* DiscordPresenceLabel(Integration::Discord::PresenceMode mode)
+    {
+        switch (mode)
+        {
+        case Integration::Discord::PresenceMode::HideDetails:
+            return I18N::Game::DiscordPresenceHideDetails;
+        case Integration::Discord::PresenceMode::Off:
+            return I18N::Game::DiscordPresenceOff;
+        case Integration::Discord::PresenceMode::On:
+        default:
+            return I18N::Game::DiscordPresenceOn;
+        }
+    }
+
+    constexpr int WINDOW_WIDTH = 190;
+    constexpr int WINDOW_HEIGHT = 419 + DISCORD_ROW_HEIGHT;
+    constexpr int CLOSE_BUTTON_Y_LOCAL = 388 + DISCORD_ROW_HEIGHT;
+    // Height of one middle slat of the frame (see RenderFrame).
+    constexpr int FRAME_SLAT_HEIGHT = 10;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -218,6 +249,7 @@ SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
     m_iLanguageIndex = FindCurrentLanguageIndex();
     m_iFontIndex = FindCurrentFontIndex();
+    m_iDiscordPresenceIndex = FindCurrentDiscordPresenceIndex();
 }
 
 SEASON3B::CNewUIOptionWindow::~CNewUIOptionWindow()
@@ -238,6 +270,7 @@ bool SEASON3B::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x, int y
     InitResolutionCombo();
     InitLanguageCombo();
     InitFontCombo();
+    InitDiscordPresenceCombo();
     Show(false);
     return true;
 }
@@ -305,11 +338,24 @@ void SEASON3B::CNewUIOptionWindow::InitFontCombo()
         FONT_COMBO_MAX_VISIBLE);
 }
 
+// Rebuilt on every opening so the labels follow a live language switch.
+void SEASON3B::CNewUIOptionWindow::InitDiscordPresenceCombo()
+{
+    for (std::size_t i = 0; i < Integration::Discord::PresenceModes.size(); ++i)
+    {
+        m_discordPresenceLabels[i] = DiscordPresenceLabel(Integration::Discord::PresenceModes[i]);
+    }
+    m_iDiscordPresenceIndex = FindCurrentDiscordPresenceIndex();
+    m_DiscordPresenceCombo.Setup(m_Pos.x + DISCORD_COMBO_X_LOCAL, m_Pos.y + DISCORD_COMBO_Y_LOCAL, DISCORD_COMBO_WIDTH,
+                                 DISCORD_COMBO_HEIGHT, m_discordPresenceLabels,
+                                 static_cast<int>(Integration::Discord::PresenceModes.size()), m_iDiscordPresenceIndex);
+}
+
 void SEASON3B::CNewUIOptionWindow::SetButtonInfo()
 {
     m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnClose.ChangeButtonImgState(true, IMAGE_OPTION_BTN_CLOSE, true);
-    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + 388, 54, 30);
+    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + CLOSE_BUTTON_Y_LOCAL, 54, 30);
     m_BtnClose.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
@@ -332,6 +378,7 @@ void SEASON3B::CNewUIOptionWindow::SetPos(int x, int y)
     m_ResolutionCombo.SetPos(m_Pos.x + RES_COMBO_X_LOCAL, m_Pos.y + RES_COMBO_Y_LOCAL);
     m_LanguageCombo.SetPos(m_Pos.x + LANG_COMBO_X_LOCAL, m_Pos.y + LANG_COMBO_Y_LOCAL);
     m_FontCombo.SetPos(m_Pos.x + FONT_COMBO_X_LOCAL, m_Pos.y + FONT_COMBO_Y_LOCAL);
+    m_DiscordPresenceCombo.SetPos(m_Pos.x + DISCORD_COMBO_X_LOCAL, m_Pos.y + DISCORD_COMBO_Y_LOCAL);
 }
 
 bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
@@ -364,14 +411,18 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
     // through to the Close button or a checkbox behind the dropdown.
     struct ComboSlot { CNewUIComboBox* combo; int* index; void (CNewUIOptionWindow::*apply)(); };
     const ComboSlot slots[] = {
-        { &m_ResolutionCombo, &m_iResolutionIndex, &CNewUIOptionWindow::ApplyResolution },
-        { &m_LanguageCombo,   &m_iLanguageIndex,   &CNewUIOptionWindow::ApplyLanguage   },
-        { &m_FontCombo,       &m_iFontIndex,       &CNewUIOptionWindow::ApplyFont        },
+        {&m_ResolutionCombo, &m_iResolutionIndex, &CNewUIOptionWindow::ApplyResolution},
+        {&m_LanguageCombo, &m_iLanguageIndex, &CNewUIOptionWindow::ApplyLanguage},
+        {&m_FontCombo, &m_iFontIndex, &CNewUIOptionWindow::ApplyFont},
+        {&m_DiscordPresenceCombo, &m_iDiscordPresenceIndex, &CNewUIOptionWindow::ApplyDiscordPresence},
     };
+    // The Discord combo is last, so a build without the presence leaves it out.
+    constexpr int slotCount = Integration::Discord::RichPresence::IsAvailable ? 4 : 3;
     for (int pass = 0; pass < 2; ++pass)   // pass 0 = open combo (on top), pass 1 = closed
     {
-        for (const ComboSlot& s : slots)
+        for (int slot = 0; slot < slotCount; ++slot)
         {
+            const ComboSlot& s = slots[slot];
             const bool wasOpen = s.combo->IsOpen();
             if (wasOpen != (pass == 0))
                 continue;
@@ -418,7 +469,7 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
 
     // Combo box already processed at the top. Just consume clicks inside the
     // option window itself so they don't fall through to the world.
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 419))
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WINDOW_HEIGHT))
         return false;
 
     return true;
@@ -576,6 +627,7 @@ void SEASON3B::CNewUIOptionWindow::OpenningProcess()
     m_iFontIndex = FindCurrentFontIndex();
     m_FontCombo.SetSelectedIndex(m_iFontIndex);
     m_FontCombo.Close();
+    InitDiscordPresenceCombo();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
 }
 
@@ -584,6 +636,7 @@ void SEASON3B::CNewUIOptionWindow::ClosingProcess()
     m_ResolutionCombo.Close();
     m_LanguageCombo.Close();
     m_FontCombo.Close();
+    m_DiscordPresenceCombo.Close();
 }
 
 void SEASON3B::CNewUIOptionWindow::LoadImages()
@@ -627,8 +680,9 @@ void SEASON3B::CNewUIOptionWindow::RenderFrame()
     y = m_Pos.y;
     // Frame is composed of: 64px top + N*10px middle slats + 45px bottom. The
     // slat count is tuned so the frame reaches the Close button (Y 388) plus the
-    // bottom border, after the Font/Language/Resolution/Windowed rows.
-    constexpr int SLAT_COUNT = 30;
+    // bottom border, after the Font/Language/Resolution/Windowed rows, and grows
+    // by the Discord row where there is one.
+    constexpr int SLAT_COUNT = 30 + DISCORD_ROW_HEIGHT / FRAME_SLAT_HEIGHT;
     constexpr float FRAME_HEIGHT = 64.f + SLAT_COUNT * 10.f + 45.f;
     RenderImage(IMAGE_OPTION_FRAME_BACK, x, y, 190.f, FRAME_HEIGHT);
     RenderImage(IMAGE_OPTION_FRAME_UP, x, y, 190.f, 64.f);
@@ -705,6 +759,19 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
     y += 39.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Windowed Mode
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 361, I18N::Game::WindowedMode);
+
+    RenderDiscordPresenceRow();
+}
+
+void SEASON3B::CNewUIOptionWindow::RenderDiscordPresenceRow()
+{
+    if constexpr (!Integration::Discord::RichPresence::IsAvailable)
+    {
+        return;
+    }
+
+    RenderImage(IMAGE_OPTION_POINT, m_Pos.x + 20.f, m_Pos.y + DISCORD_LABEL_Y_LOCAL - 2.f, 10.f, 10.f);
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + DISCORD_LABEL_Y_LOCAL, I18N::Game::DiscordPresence);
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderButtons()
@@ -788,9 +855,18 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
     // physically below an open one would draw its closed field on top of
     // that open dropdown's list (since they overlap in screen space when
     // the upper one expands downward).
-    CNewUIComboBox* combos[] = { &m_ResolutionCombo, &m_LanguageCombo, &m_FontCombo };
-    for (auto* c : combos) if (!c->IsOpen()) c->Render();
-    for (auto* c : combos) if (c->IsOpen())  c->Render();
+    CNewUIComboBox* combos[] = {&m_ResolutionCombo, &m_LanguageCombo, &m_FontCombo, &m_DiscordPresenceCombo};
+    constexpr int comboCount = Integration::Discord::RichPresence::IsAvailable ? 4 : 3;
+    for (int pass = 0; pass < 2; ++pass) // pass 0 = closed combos, pass 1 = the open one on top
+    {
+        for (int i = 0; i < comboCount; ++i)
+        {
+            if (combos[i]->IsOpen() == (pass == 1))
+            {
+                combos[i]->Render();
+            }
+        }
+    }
 }
 
 void SEASON3B::CNewUIOptionWindow::SetAutoAttack(bool bAuto)
@@ -909,6 +985,30 @@ void SEASON3B::CNewUIOptionWindow::ApplyFont()
     // Recreate the GDI fonts from config so the change takes effect live.
     ReinitializeFonts();
     GameConfig::GetInstance().Save();
+}
+
+int SEASON3B::CNewUIOptionWindow::FindCurrentDiscordPresenceIndex()
+{
+    using namespace Integration::Discord;
+    const PresenceMode current = ParsePresenceMode(GameConfig::GetInstance().GetDiscordPresence());
+    for (std::size_t i = 0; i < PresenceModes.size(); ++i)
+    {
+        if (PresenceModes[i] == current)
+            return static_cast<int>(i);
+    }
+    return 0;
+}
+
+void SEASON3B::CNewUIOptionWindow::ApplyDiscordPresence()
+{
+    using namespace Integration::Discord;
+    const wchar_t* name = PresenceModeName(PresenceModes[m_iDiscordPresenceIndex]);
+    if (GameConfig::GetInstance().GetDiscordPresence() == name)
+        return;
+
+    GameConfig::GetInstance().SetDiscordPresence(name);
+    GameConfig::GetInstance().Save();
+    RichPresence::Instance().Reconfigure();
 }
 
 void SEASON3B::CNewUIOptionWindow::ApplyResolution()
