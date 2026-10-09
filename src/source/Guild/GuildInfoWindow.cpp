@@ -520,7 +520,6 @@ void mu::ui::window::CGuildInfoWindow::SyncRmlModel()
 
 void mu::ui::window::CGuildInfoWindow::SyncContent()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     const float x0 = static_cast<float>(m_Pos.x);
     const float y0 = static_cast<float>(m_Pos.y);
 
@@ -694,9 +693,8 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
     SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::exitTooltip, "exit_tooltip",
               StringUtils::WideToNarrow(I18N::Game::Close388));
 
-    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     SyncField(m_RmlView.Binder(), &GuildInfoRmlModel::labelLinePx, "label_line_px",
-              static_cast<float>(lineHeight) * transform.scaleY);
+              CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal));
 }
 
 void mu::ui::window::CGuildInfoWindow::SyncListContent()

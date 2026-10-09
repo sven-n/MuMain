@@ -172,7 +172,6 @@ void CGateSwitchWindow::SyncRmlModel()
     // The original's RenderFrame() and Render(): the title bold (220, 220, 220) in its 160-unit
     // box; the three lines in the font and colour RenderFrame() left set (bold, (220, 220, 220)),
     // each centred on x 95, the warning on a (160, 0, 0) text box; Open or Close by the gate state.
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     GateSwitchRmlModel& model = m_RmlView.GetModel();
     g_pRenderText->SetFont(g_hFontBold);
     const int titleWidth =
@@ -191,7 +190,6 @@ void CGateSwitchWindow::SyncRmlModel()
     SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::gateOpened, "gate_opened", opened);
     SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::buttonText, "button_text",
          StringUtils::WideToNarrow(opened ? I18N::Game::Close388 : I18N::Game::Open1107));
-    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::labelLinePx, "label_line_px", static_cast<float>(lineHeight) * transform.scaleY);
+    SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::labelLinePx, "label_line_px", CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal));
     SyncField(m_RmlView.Binder(), &GateSwitchRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }

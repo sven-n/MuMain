@@ -221,8 +221,7 @@ void CDuelWatchWindow::SyncRmlModel()
 
     // The button label's line height: the native line height in physical px.
     {
-        const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-        const float labelLinePx = static_cast<float>(lineHeight) * UI::Scaling::GetActiveTransform().scaleY;
+        const float labelLinePx = CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal);
         auto& labelModel = m_RmlView.GetModel();
         if (labelModel.labelLinePx != labelLinePx)
         {

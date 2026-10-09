@@ -119,7 +119,6 @@ void mu::ui::window::EventItemEntryView::SyncTexts()
 
 void mu::ui::window::EventItemEntryView::SyncButtons()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     EventItemEntryRmlModel& model = m_View.GetModel();
 
     const float boldTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
@@ -133,13 +132,12 @@ void mu::ui::window::EventItemEntryView::SyncButtons()
     for (std::size_t i = 0; i < m_Buttons.size(); ++i)
     {
         const Button& button = m_Buttons[i];
-        const int lineHeight =
-            CUIRenderTextSDLTtf::LineHeight(button.bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal);
         EventItemEntryButtonEntry entry;
         entry.label = StringUtils::WideToNarrow(button.label.c_str());
         entry.locked = button.locked;
         entry.bold = button.bold;
-        entry.labelLinePx = static_cast<float>(lineHeight) * transform.scaleY;
+        entry.labelLinePx =
+            CUIRenderTextSDLTtf::LineHeightPx(button.bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal);
         entry.hint = StringUtils::WideToNarrow(button.hint.c_str());
         entries.push_back(std::move(entry));
     }

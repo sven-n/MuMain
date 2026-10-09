@@ -785,7 +785,6 @@ void mu::ui::window::CChatCommandWindow::SyncValueField()
 
 void mu::ui::window::CChatCommandWindow::SyncContent()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
 
     // One of the window's own lines: the document places it, so only what it says and the size the
     // native renderer would have shrunk it to for its box travel through the model.
@@ -929,7 +928,6 @@ void mu::ui::window::CChatCommandWindow::SyncContent()
     SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::rightText, "right_text",
               StringUtils::WideToNarrow(m_page == PAGE_COMMANDS ? I18N::Game::ChatCommandsTemplates
                                                                 : I18N::Game::ChatCommandsExecute));
-    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::labelLinePx, "label_line_px",
-              static_cast<float>(lineHeight) * transform.scaleY);
+              CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal));
 }

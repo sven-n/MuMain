@@ -206,8 +206,7 @@ void CUnitedMarketPlaceWindow::SyncRmlModel()
 
     // The button label's line height: the native line height in physical px.
     {
-        const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-        const float labelLinePx = static_cast<float>(lineHeight) * UI::Scaling::GetActiveTransform().scaleY;
+        const float labelLinePx = CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal);
         auto& labelModel = m_RmlView.GetModel();
         if (labelModel.labelLinePx != labelLinePx)
         {
@@ -216,8 +215,7 @@ void CUnitedMarketPlaceWindow::SyncRmlModel()
         }
     }
     UnitedMarketPlaceRmlModel& model = m_RmlView.GetModel();
-    const float boldPx =
-        UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, UI::Scaling::GetActiveTransform());
+    const float boldPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
     if (model.boldTextPx != boldPx)
     {
         model.boldTextPx = boldPx;

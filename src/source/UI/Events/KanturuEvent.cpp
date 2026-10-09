@@ -33,12 +33,11 @@
 namespace
 {
 // RenderText() shrinks a text wider than its box to fit it: the size it drew `text` at.
-float KanturuTextPxInBox(UI::Scaling::FontRole role, const UI::Scaling::Transform& transform, const wchar_t* text,
-                         float boxWidth)
+float KanturuTextPxInBox(UI::Scaling::FontRole role, const wchar_t* text, float boxWidth)
 {
     g_pRenderText->SetFont(role == UI::Scaling::FontRole::Bold ? g_hFontBold : g_hFont);
     const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-    return UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), boxWidth);
+    return UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(width), boxWidth);
 }
 } // namespace
 
@@ -543,10 +542,8 @@ void mu::ui::window::CKanturu2ndEnterNpc::SyncRmlModel()
 
 void mu::ui::window::CKanturu2ndEnterNpc::SyncContent()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     KanturuEnterRmlModel updated = m_RmlView.GetModel();
-    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    updated.labelLinePx = static_cast<float>(lineHeight) * transform.scaleY;
+    updated.labelLinePx = CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal);
     updated.refreshText = StringUtils::WideToNarrow(I18N::Game::Refresh);
     updated.enterText = StringUtils::WideToNarrow(I18N::Game::Enter);
     updated.closeText = StringUtils::WideToNarrow(I18N::Game::Close388);
@@ -563,7 +560,7 @@ void mu::ui::window::CKanturu2ndEnterNpc::SyncContent()
         const auto role = std::strcmp(kind, "subject") == 0 ? UI::Scaling::FontRole::Bold
                                                             : UI::Scaling::FontRole::Normal;
         updated.lines.push_back({StringUtils::WideToNarrow(text), top,
-                                 KanturuTextPxInBox(role, transform, text, KANTURU2ND_ENTER_WINDOW_WIDTH), kind});
+                                 KanturuTextPxInBox(role, text, KANTURU2ND_ENTER_WINDOW_WIDTH), kind});
     };
     float textY = 30.f;
     wchar_t separated[3][52] = {};

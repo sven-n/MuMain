@@ -279,7 +279,6 @@ void CGatemanWindow::SyncRmlModel()
 
 void CGatemanWindow::SyncContent()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
 
     // One of the window's own lines: the document places it, so only what it says and the size the
     // native renderer would have shrunk it to for its box travel through the model.
@@ -395,7 +394,6 @@ void CGatemanWindow::SyncContent()
     SyncField(m_RmlView.Binder(), &GatemanRmlModel::page, "page", page);
     SyncField(m_RmlView.Binder(), &GatemanRmlModel::isPublic, "is_public", g_pUIGateKeeper->IsPublic() == TRUE);
     SyncField(m_RmlView.Binder(), &GatemanRmlModel::guestCanAfford, "guest_can_afford", guestCanAfford);
-    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    SyncField(m_RmlView.Binder(), &GatemanRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
+    SyncField(m_RmlView.Binder(), &GatemanRmlModel::lineHeightPx, "line_height_px", CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal));
     SyncField(m_RmlView.Binder(), &GatemanRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }

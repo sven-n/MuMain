@@ -7,6 +7,7 @@
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/Text/CUIRenderText.h"
@@ -18,14 +19,13 @@ using namespace mu::ui::window;
 namespace
 {
 // RenderText(x, y, text, boxWidth, 0, RT3_SORT_CENTER) in `font`: the size it drew `text` at.
-float TextPxInBox(UI::Scaling::FontRole role, HFONT font, const UI::Scaling::Transform& transform,
-                  const std::wstring& text, float boxWidth)
+float TextPxInBox(UI::Scaling::FontRole role, HFONT font, const std::wstring& text, float boxWidth)
 {
     if (text.empty())
         return 0.f;
     g_pRenderText->SetFont(font);
     const int width = g_pRenderText->MeasureText(text.c_str(), static_cast<int>(text.size())).cx;
-    return UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), boxWidth);
+    return UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(width), boxWidth);
 }
 
 void BindTimerModel(Rml::DataModelConstructor& c, EventTimerRmlModel& model)
@@ -65,8 +65,6 @@ void mu::ui::window::EventTimerView::Sync(bool visible, const Line& first, const
     if (!visible)
         return;
 
-    // CManager scopes LayoutMode::HudFrame around the window: the bottom HUD's uniform scale, no offset.
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
 
     SyncField(m_View.Binder(), &EventTimerRmlModel::boxLeft, "box_left", boxLeft);
     SyncField(m_View.Binder(), &EventTimerRmlModel::boxWidth, "box_width", boxWidth);
@@ -75,7 +73,7 @@ void mu::ui::window::EventTimerView::Sync(bool visible, const Line& first, const
                         const char* pxName, Rml::String EventTimerRmlModel::* state, const char* stateName)
     {
         SyncField(m_View.Binder(), text, textName, StringUtils::WideToNarrow(line.text.c_str()));
-        SyncField(m_View.Binder(), px, pxName, TextPxInBox(role, font, transform, line.text, boxWidth));
+        SyncField(m_View.Binder(), px, pxName, TextPxInBox(role, font, line.text, boxWidth));
         SyncField(m_View.Binder(), state, stateName, Rml::String(line.state));
     };
     syncLine(first, UI::Scaling::FontRole::Normal, g_hFont, &EventTimerRmlModel::killsText, "kills_text",

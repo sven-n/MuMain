@@ -234,36 +234,34 @@ void mu::ui::window::CCommandWindow::SyncRmlModel()
         return;
 
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::bigTextPx, "big_text_px",
               UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Big));
-    SyncTitle(transform);
+    SyncTitle();
 
-    SyncButtons(transform);
+    SyncButtons();
     SyncTarget();
 }
 
-void mu::ui::window::CCommandWindow::SyncTitle(const UI::Scaling::Transform& transform)
+void mu::ui::window::CCommandWindow::SyncTitle()
 {
     g_pRenderText->SetFont(g_hFontBold);
     const int titleWidth = g_pRenderText->MeasureText(I18N::Game::CommandWindow, lstrlen(I18N::Game::CommandWindow)).cx;
-    const float titlePx = UI::Scaling::NativeTextPixelSizeInBox(
-        UI::Scaling::FontRole::Bold, transform, static_cast<float>(titleWidth), static_cast<float>(kTitleBoxWidth));
+    const float titlePx = UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Bold, static_cast<float>(titleWidth),
+                                                           static_cast<float>(kTitleBoxWidth));
     // The shrunk text's box shrinks with it: its top stays at y + 12.
-    const float shrink = titlePx / UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
+    const float shrink = titlePx / UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
     SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::titleTextPx, "title_text_px", titlePx);
     SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::titleLinePx, "title_line_px",
-              static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold)) * transform.scaleY *
-                  shrink);
+              CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Bold) * shrink);
 }
 
-void mu::ui::window::CCommandWindow::SyncButtons(const UI::Scaling::Transform& transform)
+void mu::ui::window::CCommandWindow::SyncButtons()
 {
     // CButton::Render(): the label, bold when selected, centred on its button.
-    const int normalHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    const int boldHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold);
-    const float normalPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, transform);
-    const float boldPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Bold, transform);
+    const float normalHeight = CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal);
+    const float boldHeight = CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Bold);
+    const float normalPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal);
+    const float boldPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
 
     CommandWindowRmlModel& model = m_RmlView.GetModel();
     bool changed = false;
@@ -271,8 +269,7 @@ void mu::ui::window::CCommandWindow::SyncButtons(const UI::Scaling::Transform& t
     {
         CommandButtonEntry updated = button;
         updated.selected = button.index == m_iCurSelectCommand;
-        const int textHeight = updated.selected ? boldHeight : normalHeight;
-        updated.labelLinePx = static_cast<float>(textHeight) * transform.scaleY;
+        updated.labelLinePx = updated.selected ? boldHeight : normalHeight;
         updated.labelTextPx = updated.selected ? boldPx : normalPx;
 
         changed = changed || updated.selected != button.selected ||

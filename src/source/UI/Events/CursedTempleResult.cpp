@@ -42,12 +42,11 @@ using namespace mu::ui::window;
 namespace
 {
 // RenderText() shrinks a text wider than its box to fit it: the size it drew `text` at.
-float TextPxInBox(const UI::Scaling::Transform& transform, const wchar_t* text, float boxWidth)
+float TextPxInBox(const wchar_t* text, float boxWidth)
 {
     g_pRenderText->SetFont(g_hFont);
     const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-    return UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform, static_cast<float>(width),
-                                                 boxWidth);
+    return UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Normal, static_cast<float>(width), boxWidth);
 }
 } // namespace
 
@@ -275,11 +274,9 @@ void mu::ui::window::CCursedTempleResult::SyncRmlModel()
 
 void mu::ui::window::CCursedTempleResult::SyncTexts()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     CursedTempleResultRmlModel updated = m_RmlView.GetModel();
     const float textPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal);
-    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    updated.lineHeightPx = static_cast<float>(lineHeight) * transform.scaleY;
+    updated.lineHeightPx = CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal);
     updated.labelLinePx = updated.lineHeightPx;
     updated.closeText = StringUtils::WideToNarrow(I18N::Game::Close388);
 
@@ -298,7 +295,7 @@ void mu::ui::window::CCursedTempleResult::SyncTexts()
     auto line = [&](const wchar_t* text)
     {
         return CursedTempleResultLine{StringUtils::WideToNarrow(text),
-                                      TextPxInBox(transform, text, CURSEDTEMPLE_RESULT_WINDOW_WIDTH)};
+                                      TextPxInBox(text, CURSEDTEMPLE_RESULT_WINDOW_WIDTH)};
     };
     auto addRows = [&](const CT_GameResult_list& results, std::vector<CursedTempleResultRow>& rows)
     {

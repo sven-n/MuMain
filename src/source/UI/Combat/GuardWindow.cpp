@@ -456,7 +456,6 @@ void CGuardWindow::SyncRmlModel()
 
 void CGuardWindow::SyncContent()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
 
     // One of the window's own lines: the document places it, so only what it says and the size
     // the native renderer would have shrunk it to for its box travel through the model.
@@ -701,8 +700,7 @@ void CGuardWindow::SyncContent()
     SyncField(m_RmlView.Binder(), &GuardWindowRmlModel::scoreLabel, "score_label",
               StringUtils::WideToNarrow(I18N::Game::Score));
     SyncGuildLists();
-    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    SyncField(m_RmlView.Binder(), &GuardWindowRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
+    SyncField(m_RmlView.Binder(), &GuardWindowRmlModel::lineHeightPx, "line_height_px", CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal));
     SyncField(m_RmlView.Binder(), &GuardWindowRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }
 

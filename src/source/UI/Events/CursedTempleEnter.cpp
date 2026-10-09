@@ -46,12 +46,11 @@ namespace
     const int EnterMaxLevel[EnterLevelCount] = { 270, 320, 350, 380, 400 };
 
     // RenderText() shrinks a text wider than its box to fit it: the size it drew `text` at.
-    float TextPxInBox(UI::Scaling::FontRole role, const UI::Scaling::Transform& transform, const wchar_t* text,
-                      float boxWidth)
+    float TextPxInBox(UI::Scaling::FontRole role, const wchar_t* text, float boxWidth)
     {
         g_pRenderText->SetFont(role == UI::Scaling::FontRole::Bold ? g_hFontBold : g_hFont);
         const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-        return UI::Scaling::NativeTextPixelSizeInBox(role, transform, static_cast<float>(width), boxWidth);
+        return UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(width), boxWidth);
     }
 }
 
@@ -285,11 +284,9 @@ void mu::ui::window::CCursedTempleEnter::SyncRmlModel()
 
 void mu::ui::window::CCursedTempleEnter::SyncLines()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     CursedTempleEnterRmlModel updated = m_RmlView.GetModel();
     updated.boldTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
-    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    updated.lineHeightPx = static_cast<float>(lineHeight) * transform.scaleY;
+    updated.lineHeightPx = CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal);
     updated.labelLinePx = updated.lineHeightPx;
     updated.title = StringUtils::WideToNarrow(I18N::Game::DoYouWishToGoToTheIllusionTemple);
     updated.enterText = StringUtils::WideToNarrow(I18N::Game::Enter);
@@ -301,7 +298,7 @@ void mu::ui::window::CCursedTempleEnter::SyncLines()
     auto makeLine = [&](const wchar_t* text, float boxWidth) -> CursedTempleEnterLine
     {
         return {StringUtils::WideToNarrow(text),
-                TextPxInBox(UI::Scaling::FontRole::Normal, transform, text, boxWidth)};
+                TextPxInBox(UI::Scaling::FontRole::Normal, text, boxWidth)};
     };
     const float lineBox = CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10;
     updated.bands.clear();

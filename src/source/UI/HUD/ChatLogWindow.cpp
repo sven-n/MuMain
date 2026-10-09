@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "I18N/All.h"
 
+#include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Core/WindowManager.h"
@@ -727,13 +728,10 @@ void mu::ui::window::CChatLogWindow::SyncRmlModel()
 }
 
 // Native's RenderMessages(): each line drawn with RenderText() at the native text size, its
-// background as tall as the measured text (MeasureText("Q").cy, logical), one line every
+// background as tall as the text's line height, one line every
 // SCROLL_MIDDLE_PART_HEIGHT; the row pitch follows the well, which is sized in dp.
 void mu::ui::window::CChatLogWindow::SyncNativeLineGeometry()
 {
-    const auto transform = UI::Scaling::GetActiveTransform();
-    g_pRenderText->SetFont(g_hFont);
-    const int textHeight = g_pRenderText->MeasureText(L"Q", 1).cy;
     const float dpRatio = RmlUiRuntime::Instance().GetContext()->GetDensityIndependentPixelRatio();
 
     ChatLogRmlModel& model = m_RmlView.GetModel();
@@ -746,7 +744,7 @@ void mu::ui::window::CChatLogWindow::SyncNativeLineGeometry()
         }
     };
     syncFloat(&ChatLogRmlModel::textPx, "text_px", UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal));
-    syncFloat(&ChatLogRmlModel::linePx, "line_px", UI::Scaling::SizeY(transform, static_cast<float>(textHeight)));
+    syncFloat(&ChatLogRmlModel::linePx, "line_px", CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal));
     syncFloat(&ChatLogRmlModel::rowPx, "row_px", SCROLL_MIDDLE_PART_HEIGHT * dpRatio);
 }
 

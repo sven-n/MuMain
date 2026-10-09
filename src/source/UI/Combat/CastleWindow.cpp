@@ -618,7 +618,6 @@ void CCastleWindow::SyncRmlModel()
 
 void CCastleWindow::SyncContent()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
 
     // One of the window's own lines: the document places it, so only what it says and the size the
     // native renderer would have shrunk it to for its box travel through the model.
@@ -846,8 +845,7 @@ void CCastleWindow::SyncContent()
     SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::footer3, "footer3", std::move(footer3));
     SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::applyButton, "apply_button", std::move(applyButton));
     SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::withdrawButton, "withdraw_button", std::move(withdrawButton));
-    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
+    SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::lineHeightPx, "line_height_px", CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal));
     SyncField(m_RmlView.Binder(), &CastleWindowRmlModel::exitTooltip, "exit_tooltip", StringUtils::WideToNarrow(I18N::Game::Close388));
 }
 

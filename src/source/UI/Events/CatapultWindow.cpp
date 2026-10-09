@@ -327,7 +327,6 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
 
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     CatapultRmlModel& model = m_RmlView.GetModel();
     // RenderText() in a 190-unit box, bold: shrunk to it when wider.
     auto boldPxIn = [&](const wchar_t* text)
@@ -359,8 +358,7 @@ void mu::ui::window::CCatapultWindow::SyncRmlModel()
     }
 
     // The buttons' labels in the normal font, centred on their buttons by the theme.
-    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
-    SyncField(m_RmlView.Binder(), &CatapultRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineHeight) * transform.scaleY);
+    SyncField(m_RmlView.Binder(), &CatapultRmlModel::lineHeightPx, "line_height_px", CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal));
     std::vector<CatapultAreaEntry> areas;
     const std::span<const CatapultArea> sideAreas =
         m_iType == CATAPULT_ATTACK    ? std::span<const CatapultArea>(kAttackAreas)

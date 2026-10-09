@@ -110,7 +110,6 @@ void mu::ui::window::EventEntryView::Sync(bool visible)
 
 void mu::ui::window::EventEntryView::SyncTextSizes()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     EventEntryRmlModel& model = m_View.GetModel();
 
     // RenderText(x + 60, y + 12, title, 72, 0, RT3_SORT_CENTER), bold: shrunk to fit its box, its
@@ -144,9 +143,8 @@ void mu::ui::window::EventEntryView::SyncTextSizes()
 
     // CButton::Render(): the bold label, centred on its button -- the same for every button, so
     // it is the model's, not each entry's.
-    const int boldHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold);
     SyncField(m_View.Binder(), &EventEntryRmlModel::buttonLabelLinePx, "button_label_line_px",
-              static_cast<float>(boldHeight) * transform.scaleY);
+              CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Bold));
     SyncField(m_View.Binder(), &EventEntryRmlModel::buttonLabelTextPx, "button_label_text_px", boldPx);
 }
 
