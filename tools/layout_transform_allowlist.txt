@@ -19,11 +19,7 @@ UI/Core/WindowCommon.cpp: 1
 UI/Core/WindowCommon.h: 1
 UI/Core/WindowManager.cpp: 10
 UI/Core/WindowObject.h: 6
-UI/Dialogs/CommonMessageBox.cpp: 1
-UI/Dialogs/CustomMessageBox.cpp: 1
 UI/Dialogs/HelpWindow.cpp: 1
-UI/Dialogs/MessageBox.cpp: 6
-UI/Dialogs/MessageBoxView.cpp: 1
 UI/Dialogs/ReconnectDialog.cpp: 3
 UI/Events/CursedTempleSystem.cpp: 5
 UI/HUD/ChatLogWindow.cpp: 1

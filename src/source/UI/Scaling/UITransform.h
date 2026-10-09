@@ -154,7 +154,7 @@ namespace UI::Scaling
     float SceneBarScale(int windowWidth, int windowHeight);
     // The same for a box with a height too (RenderText() with a box height the text is taller than,
     // e.g. the Devil Square rank headers' height of 3): the smaller of the two fits, down to the minimum.
-    float NativeTextPixelSizeInBounds(FontRole role, const Transform& transform, float measuredWidth,
+    float NativeTextPixelSizeInBounds(FontRole role, int windowWidth, int windowHeight, float measuredWidth,
                                       float measuredHeight, float boxWidth, float boxHeight);
     float FontScaleForBounds(FontRole role, const Transform& transform, float measuredWidth, float measuredHeight,
                              float boxWidth, float boxHeight);

@@ -10,6 +10,8 @@
 #include <string>
 #include <queue>
 
+namespace Rml { class Element; }
+
 namespace mu::ui::window
 {
     enum CALLBACK_RESULT
@@ -25,11 +27,6 @@ namespace mu::ui::window
     {
         MSGBOX_EVENT_NONE = 0,
         MSGBOX_EVENT_DESTROY,
-        MSGBOX_EVENT_MOUSE_HOVER,
-        MSGBOX_EVENT_MOUSE_LBUTTON_DOWN,
-        MSGBOX_EVENT_MOUSE_LBUTTON_UP,
-        MSGBOX_EVENT_MOUSE_RBUTTON_DOWN,
-        MSGBOX_EVENT_MOUSE_RBUTTON_UP,
         MSGBOX_EVENT_PRESSKEY_ESC,
         MSGBOX_EVENT_PRESSKEY_RETURN,
         MSGBOX_EVENT_USER_DEFINE = 0x0F00,
@@ -139,6 +136,8 @@ namespace mu::ui::window
 
         virtual bool Update() = 0;
         virtual bool Render() = 0;
+        // The box's drawn panel in its document: the pointer over it is over the box.
+        virtual Rml::Element* GetPanel() const = 0;
 
         void SendEvent(CMessageBoxBase* pOwner, DWORD dwEvent);
         void SendEvent(CMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam);
@@ -238,14 +237,6 @@ namespace mu::ui::window
             const leaf::xstreambuf& GetParam() const { return m_xParam; }
         };
 
-        enum EVENT_STATE
-        {
-            EVENT_NONE = 0,
-            EVENT_WND_MOUSE_HOVER,
-            EVENT_WND_MOUSE_LBUTTON_DOWN,
-            EVENT_WND_MOUSE_RBUTTON_DOWN,
-        };
-
         typedef std::vector<CMessageBoxBase*> type_vector_msgbox;
         typedef std::queue<CEvent*>	type_queue_event;
 
@@ -253,7 +244,6 @@ namespace mu::ui::window
         CMessageBoxFactory* m_pMsgBoxFactory;
         type_vector_msgbox			m_vecMsgBoxes;
         type_queue_event			m_queueEvents;
-        EVENT_STATE					m_EventState;
 
     public:
         enum IMAGE_LIST

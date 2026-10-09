@@ -378,10 +378,10 @@ float UI::Scaling::SceneBarScale(int windowWidth, int windowHeight)
                       1.0f, 2.0f);
 }
 
-float UI::Scaling::NativeTextPixelSizeInBounds(FontRole role, const Transform& transform, float measuredWidth,
+float UI::Scaling::NativeTextPixelSizeInBounds(FontRole role, int windowWidth, int windowHeight, float measuredWidth,
                                                float measuredHeight, float boxWidth, float boxHeight)
 {
-    const float textPx = NativeTextPixelSize(role, transform);
+    const float textPx = NativeTextPixelSize(role, windowWidth, windowHeight);
     float fit = 1.0f;
     if (boxWidth > 0.0f && measuredWidth > boxWidth)
         fit = std::min(fit, boxWidth / measuredWidth);

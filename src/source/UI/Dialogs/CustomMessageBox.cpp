@@ -84,10 +84,9 @@ void SyncMatchResultView(MessageBoxView& view, const POINT& pos, CMessageBoxButt
         if (text.boxWidth > 0 || text.boxHeight > 0)
         {
             const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
-            const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-            const float fittedPx = UI::Scaling::NativeTextPixelSizeInBounds(
-                role, transform, static_cast<float>(size.cx), static_cast<float>(size.cy),
-                static_cast<float>(text.boxWidth), static_cast<float>(text.boxHeight));
+            const float fittedPx = UI::RmlBridge::NativeTextPxInBounds(
+                role, static_cast<float>(size.cx), static_cast<float>(size.cy), static_cast<float>(text.boxWidth),
+                static_cast<float>(text.boxHeight));
             if (fittedPx != UI::RmlBridge::NativeTextPx(role))
                 textPx = fittedPx;
         }
@@ -308,42 +307,10 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::AddMsg(const type_string& st
 
 void mu::ui::window::CGemIntegrationDisjointMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
     AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::BlessingBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_BLESSING);
     AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::SoulBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_SOUL);
     AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::DisjointBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_DISJOINT);
     AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CGemIntegrationDisjointMsgBox*>(pOwner);
-    // With the RmlUi view its buttons report the clicks (Update()).
-    if (pMsgBox && !pMsgBox->m_View.IsShown())
-    {
-        if (pMsgBox->m_BtnBlessing.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_BLESSING);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnSoul.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_SOUL);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnDisjoint.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_DISJOINT);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnCancel.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
 }
 
 CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
@@ -597,7 +564,6 @@ bool mu::ui::window::CBloodCastleResultMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
-    AddCallbackFunc(mu::ui::window::CBloodCastleResultMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
     AddCallbackFunc(mu::ui::window::CBloodCastleResultMsgBox::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
     x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
@@ -633,8 +599,6 @@ bool mu::ui::window::CBloodCastleResultMsgBox::Update()
     if (TakeMatchResultOk(m_View, this))
         return true;
 
-    m_BtnOk.Update();
-
     if (m_View.IsShown())
         SyncMatchResultView(m_View, GetPos(), m_BtnOk);
     return true;
@@ -642,52 +606,8 @@ bool mu::ui::window::CBloodCastleResultMsgBox::Update()
 
 bool mu::ui::window::CBloodCastleResultMsgBox::Render()
 {
-    if (m_View.IsShown())
-        return true;
-
-    EnableAlphaTest();
-    RenderFrame();
-    m_BtnOk.Render();
-    EnableAlphaBlend();
-    matchEvent::RenderResult();
-    DisableAlphaBlend();
+    // Nothing native left: MessageBoxView draws the box. Kept because the base requires it.
     return true;
-}
-
-void mu::ui::window::CBloodCastleResultMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < MIDDLE_COUNT; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-CALLBACK_RESULT mu::ui::window::CBloodCastleResultMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CBloodCastleResultMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        if (pMsgBox->m_BtnOk.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_OK);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
 }
 
 CALLBACK_RESULT mu::ui::window::CBloodCastleResultMsgBox::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
@@ -710,7 +630,6 @@ bool mu::ui::window::CDevilSquareRankMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
-    AddCallbackFunc(mu::ui::window::CDevilSquareRankMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
     AddCallbackFunc(mu::ui::window::CDevilSquareRankMsgBox::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
     x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
@@ -748,7 +667,6 @@ bool mu::ui::window::CDevilSquareRankMsgBox::Update()
     if (TakeMatchResultOk(m_View, this))
         return true;
 
-    m_BtnOk.Update();
     matchEvent::SetPosition(GetPos().x, GetPos().y);
 
     if (m_View.IsShown())
@@ -758,32 +676,8 @@ bool mu::ui::window::CDevilSquareRankMsgBox::Update()
 
 bool mu::ui::window::CDevilSquareRankMsgBox::Render()
 {
-    if (m_View.IsShown())
-        return true;
-
-    EnableAlphaTest();
-    RenderFrame();
-    m_BtnOk.Render();
-    EnableAlphaBlend();
-    matchEvent::RenderResult();
-    DisableAlphaBlend();
-
+    // Nothing native left: MessageBoxView draws the box. Kept because the base requires it.
     return true;
-}
-
-CALLBACK_RESULT mu::ui::window::CDevilSquareRankMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CDevilSquareRankMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        if (pMsgBox->m_BtnOk.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_OK);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
 }
 
 CALLBACK_RESULT mu::ui::window::CDevilSquareRankMsgBox::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
@@ -792,51 +686,6 @@ CALLBACK_RESULT mu::ui::window::CDevilSquareRankMsgBox::OkBtnDown(class CMessage
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
     return CALLBACK_BREAK;
-}
-
-void mu::ui::window::CDevilSquareRankMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < MIDDLE_COUNT1; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_LINE_WIDTH; height = MSGBOX_LINE_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
-    y += height;
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-
-    for (int i = 0; i < MIDDLE_COUNT2; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-
-    x = GetPos().x + 13; y = GetPos().y + 75; width = MSGBOX_SEPARATE_LINE_WIDTH; height = MSGBOX_SEPARATE_LINE_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
-
-    x = GetPos().x + 13; y = GetPos().y + 93; width = MSGBOX_SEPARATE_LINE_WIDTH; height = MSGBOX_SEPARATE_LINE_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
-
-    x = GetPos().x + 13; y = GetPos().y + 255; width = MSGBOX_SEPARATE_LINE_WIDTH; height = MSGBOX_SEPARATE_LINE_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
-
-    x = GetPos().x + 13; y = GetPos().y + 273; width = MSGBOX_SEPARATE_LINE_WIDTH; height = MSGBOX_SEPARATE_LINE_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
 }
 
 mu::ui::window::CChaosCastleResultMsgBox::CChaosCastleResultMsgBox()
@@ -851,7 +700,6 @@ bool mu::ui::window::CChaosCastleResultMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
-    AddCallbackFunc(mu::ui::window::CChaosCastleResultMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
     AddCallbackFunc(mu::ui::window::CChaosCastleResultMsgBox::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
     x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
@@ -887,8 +735,6 @@ bool mu::ui::window::CChaosCastleResultMsgBox::Update()
     if (TakeMatchResultOk(m_View, this))
         return true;
 
-    m_BtnOk.Update();
-
     if (m_View.IsShown())
         SyncMatchResultView(m_View, GetPos(), m_BtnOk);
     return true;
@@ -896,31 +742,8 @@ bool mu::ui::window::CChaosCastleResultMsgBox::Update()
 
 bool mu::ui::window::CChaosCastleResultMsgBox::Render()
 {
-    if (m_View.IsShown())
-        return true;
-
-    EnableAlphaTest();
-    RenderFrame();
-    m_BtnOk.Render();
-    EnableAlphaBlend();
-    matchEvent::RenderResult();
-    DisableAlphaBlend();
+    // Nothing native left: MessageBoxView draws the box. Kept because the base requires it.
     return true;
-}
-
-CALLBACK_RESULT mu::ui::window::CChaosCastleResultMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CChaosCastleResultMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        if (pMsgBox->m_BtnOk.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_OK);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
 }
 
 CALLBACK_RESULT mu::ui::window::CChaosCastleResultMsgBox::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
@@ -928,27 +751,6 @@ CALLBACK_RESULT mu::ui::window::CChaosCastleResultMsgBox::OkBtnDown(class CMessa
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
     return CALLBACK_BREAK;
-}
-
-void mu::ui::window::CChaosCastleResultMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < MIDDLE_COUNT; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1274,88 +1076,8 @@ CALLBACK_RESULT mu::ui::window::CCursedTempleProgressMsgBox::CompleteProcess(cla
 
 bool mu::ui::window::CCursedTempleProgressMsgBox::Render()
 {
-    // MessageBoxView draws the box (SyncView()); natively only without its document.
-    if (m_View.IsShown())
-        return true;
-
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderProgress();
-    DisableAlphaBlend();
+    // Nothing native left: MessageBoxView draws the box. Kept because the base requires it.
     return true;
-}
-
-void mu::ui::window::CCursedTempleProgressMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    if (m_MsgDataList.size() > 2)
-    {
-        int iCount = m_MsgDataList.size() - 2;
-        for (int i = 0; i < iCount; ++i)
-        {
-            RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-            y += height;
-        }
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CCursedTempleProgressMsgBox::RenderTexts()
-{
-    
-
-    float x, y;
-
-    x = GetPos().x; y = GetPos().y + MSGBOX_TEXT_TOP_BLANK;
-    auto vi = m_MsgDataList.begin();
-    for (; vi != m_MsgDataList.end(); vi++)
-    {
-        g_pRenderText->SetTextColor((*vi)->dwColor);
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        switch ((*vi)->byFontType)
-        {
-        case MSGBOX_FONT_NORMAL:
-            g_pRenderText->SetFont(g_hFont);
-            break;
-        case MSGBOX_FONT_BOLD:
-            g_pRenderText->SetFont(g_hFontBold);
-            break;
-        }
-
-        const SIZE TextSize = g_pRenderText->MeasureText(
-            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
-        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
-        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
-
-        x = GetPos().x + (MSGBOX_WIDTH / 2) - (TextExtentWidth / 2);
-        g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
-        y += (TextExtentHeight + 4);
-    }
-}
-
-void mu::ui::window::CCursedTempleProgressMsgBox::RenderProgress()
-{
-    DWORD dwTime = timeGetTime();
-    float fProgress = (float)(dwTime - m_dwStartTime) / m_dwElapseTime;
-
-    float x, y;
-    x = GetPos().x + MSGBOX_WIDTH / 2 - 160.f / 2;
-    y = GetPos().y + GetSize().cy - 50.f;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BG, x, y, 160.f, 18.f);
-    x += 5.f;
-    y += 5.f;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BAR, x, y, 150.f * fProgress, 8.f);
 }
 
 bool mu::ui::window::CCursedTempleProgressMsgBox::CheckHeroAction()

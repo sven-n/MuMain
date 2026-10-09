@@ -45,6 +45,10 @@ public:
     void Release();
     bool Update();
     bool Render();
+    Rml::Element* GetPanel() const override
+    {
+        return m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr;
+    }
 
     void Initialize(CShopPackage* pPackage);
 

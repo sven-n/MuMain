@@ -31,6 +31,14 @@ inline float NativeTextPxInBox(UI::Scaling::FontRole role, float measuredWidth, 
                                                  measuredWidth, boxWidth);
 }
 
+// The same for a box with a height too (UI::Scaling::NativeTextPixelSizeInBounds()).
+inline float NativeTextPxInBounds(UI::Scaling::FontRole role, float measuredWidth, float measuredHeight, float boxWidth,
+                                  float boxHeight)
+{
+    return UI::Scaling::NativeTextPixelSizeInBounds(role, static_cast<int>(WindowWidth), static_cast<int>(WindowHeight),
+                                                    measuredWidth, measuredHeight, boxWidth, boxHeight);
+}
+
     template <typename Model>
     void SyncRootTransform(RmlModelBinder<Model>& binder, const POINT& pos)
     {

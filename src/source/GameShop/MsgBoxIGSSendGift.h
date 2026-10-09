@@ -39,6 +39,10 @@ public:
 
     bool Update();
     bool Render();
+    Rml::Element* GetPanel() const override
+    {
+        return m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr;
+    }
 
     void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, const wchar_t* pszName,
                     const wchar_t* pszPrice, const wchar_t* pszPeriod);

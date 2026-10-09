@@ -7,13 +7,11 @@
 <body>
 	<!-- A native message box drawn by RmlUi (UI/Dialogs/MessageBoxView.h): the box art, its text
 	     lines, its buttons or its progress bar. The box keeps its callbacks; a click is queued with
-	     message_box_button(n). #panel carries the box's kind as its class, for a theme that places a
-	     kind's own buttons (placed_buttons); the rest arrive with their box. root_x/root_y/root_scale come from the message box manager's
-	     layout; everything inside is reference px; text is .sharp-text at the native size,
-	     counter-scaled out of the panel. -->
-	<div id="panel" data-model="message_box_view" data-attr-class="kind"
-	     data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	     message_box_button(n). #panel carries the box's kind as a class, for a theme that places a
+	     kind's own buttons (placed_buttons); the rest arrive with their box. The box stands where the
+	     original drew it on the 640x480 stage (PlaceOnStage()); everything inside is reference px;
+	     text is .sharp-text at the native size, counter-scaled out of the panel. -->
+	<div id="panel" data-model="message_box_view" data-class-guild-appoint="kind == 'guild-appoint'">
 		<div id="back" data-style-height="back_height + 'px'"></div>
 		<!-- The frame's strips stack in flow inside #frame; only their order comes from C++. -->
 		<div id="frame">

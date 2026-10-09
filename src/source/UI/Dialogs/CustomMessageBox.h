@@ -22,8 +22,8 @@ public:
 
     bool Update();
     bool Render();
+    Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
-    static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT DisjointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -68,12 +68,11 @@ private:
 
         bool Update();
         bool Render();
+        Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
-        void RenderFrame();
 
         CMessageBoxButton m_BtnOk;
         MessageBoxView m_View; // draws the box (SyncMatchResultView()); native only without it
@@ -92,12 +91,11 @@ private:
 
         bool Update();
         bool Render();
+        Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
-        void RenderFrame();
 
         CMessageBoxButton m_BtnOk;
         MessageBoxView m_View; // draws the box (SyncMatchResultView()); native only without it
@@ -115,12 +113,11 @@ private:
 
         bool Update();
         bool Render();
+        Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
-        void RenderFrame();
 
         CMessageBoxButton m_BtnOk;
         MessageBoxView m_View; // draws the box (SyncMatchResultView()); native only without it
@@ -146,6 +143,7 @@ private:
 
         bool Update();
         bool Render();
+        Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
         static CALLBACK_RESULT ClosingProcess(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
@@ -177,6 +175,7 @@ private:
 
         bool Update();
         bool Render();
+        Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
         void SetNpcIndex(DWORD dwIndex);
         DWORD GetNpcIndex();
@@ -188,9 +187,6 @@ private:
         void SetAddCallbackFunc();
         int SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType);
 
-        void RenderFrame();
-        void RenderTexts();
-        void RenderProgress();
 
         bool CheckHeroAction();
         void SyncView();
@@ -236,6 +232,7 @@ private:
         void Release();
         bool Update();
         bool Render();
+        Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
         static CALLBACK_RESULT BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
         static CALLBACK_RESULT SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);

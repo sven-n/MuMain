@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UI/Dialogs/MessageBoxViewRmlModel.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 
 #include <string>
@@ -76,6 +77,9 @@ public:
         return m_View.Document() != nullptr;
     }
 
+    // #panel, or null without the document.
+    Rml::Element* Panel() const;
+
     int TakePressedButton();
     int TakePressedListRow();
 
@@ -83,6 +87,8 @@ private:
     void BindModel(Rml::DataModelConstructor& c, MessageBoxViewRmlModel& model);
     void BindList(Rml::DataModelConstructor& constructor, MessageBoxViewRmlModel& model);
     UI::RmlBridge::ThemedView<MessageBoxViewRmlModel> m_View;
+    // Where the box stands on the stage (UI::RmlBridge::PlaceOnStage()).
+    UI::RmlBridge::SlotPlacement m_Placement;
     int m_PressedButton = -1;
     int m_PressedListRow = -1;
 };

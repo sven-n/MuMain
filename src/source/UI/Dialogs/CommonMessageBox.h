@@ -67,16 +67,11 @@ namespace mu::ui::window
     typedef std::vector<MSGBOX_TEXTDATA*> type_vector_msgdata;
     typedef std::wstring type_string;
 
+    // Where a message box's button stands and what it says, in the box's stage units; the box's
+    // view draws it and reports its clicks.
     class CMessageBoxButton
     {
     public:
-        enum EVENT_STATE
-        {
-            EVENT_NONE = 0,
-            EVENT_BTN_HOVER,
-            EVENT_BTN_DOWN,
-        };
-
         enum BTN_SIZE_TYPE
         {
             MSGBOX_BTN_CUSTOM = 0,
@@ -89,7 +84,6 @@ namespace mu::ui::window
         CMessageBoxButton();
         ~CMessageBoxButton();
 
-        bool IsMouseIn();
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
         void SetInfo(DWORD dwTexType, float x, float y, float width, float height, DWORD dwSizeType = MSGBOX_BTN_CUSTOM, bool bClickEffect = false);
         void MoveTextPos(int iX, int iY);
@@ -111,12 +105,6 @@ namespace mu::ui::window
         float GetWidth() { return m_width; }
         float GetHeight() { return m_height; }
 
-        void ClearEventState() { m_EventState = EVENT_NONE; }
-        EVENT_STATE GetEventState() { return m_EventState; }
-
-        virtual void Update();
-        virtual void Render();
-
     private:
         bool m_bEnable;
 
@@ -132,69 +120,7 @@ namespace mu::ui::window
         int		m_iMoveTextPosY;
         bool	m_bClickEffect;
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-
-        EVENT_STATE m_EventState;
     };
-
-    class CCommonMessageBox : public CMessageBoxBase
-    {
-    public:
-        CCommonMessageBox();
-        ~CCommonMessageBox();
-
-        DWORD GetType();
-
-        bool Create(DWORD dwType, float fPriority = 3.f);
-        bool Create(DWORD dwType, const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL, float fPriority = 3.f);
-
-        void SetPos(int x, int y);
-
-        void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT Close(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-        bool Update();
-        bool Render();
-
-        void LockOkButton();
-#ifdef PBG_ADD_NAMETOPMSGBOX
-    protected:
-#else //PBG_ADD_NAMETOPMSGBOX
-    private:
-#endif //PBG_ADD_NAMETOPMSGBOX
-        void SetAddCallbackFunc();
-#ifdef PBG_ADD_NAMETOPMSGBOX
-        int SeparateText(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL, int _TextSize = MSGBOX_TEXT_MAXWIDTH);
-#else //PBG_ADD_NAMETOPMSGBOX
-        int SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType);
-#endif //PBG_ADD_NAMETOPMSGBOX
-        void SetButtonInfo();
-        void AddButtonBlank(int iAddLine);
-#ifdef PBG_ADD_NAMETOPMSGBOX
-        void AddButtonBlank(int iAddLine, int _iImgSize);
-#endif //PBG_ADD_NAMETOPMSGBOX
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        DWORD m_dwType;
-        type_vector_msgdata m_MsgDataList;
-
-        // button
-        CMessageBoxButton m_BtnOk;
-        CMessageBoxButton m_BtnCancel;
-    };
-
-#ifdef ASG_ADD_TIME_LIMIT_QUEST
-    class CQuestCountLimitMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-#endif	// ASG_ADD_TIME_LIMIT_QUEST
 
     // CHighValueItemCheckMsgBoxLayout, CUseFruitMsgBoxLayout, CUsePartChargeFruitMsgBoxLayout,
     // CPersonalShopItemBuyMsgBoxLayout, CGambleBuyMsgBoxLayout, CPersonalShopItemValueCheckMsgBoxLayout

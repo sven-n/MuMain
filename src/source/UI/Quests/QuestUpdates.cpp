@@ -8,7 +8,8 @@
 #include "UI/Quests/QuestProgress.h"
 #include "UI/Quests/QuestProgressByEtc.h"
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
-#include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
+#include "I18N/All.h"
 #endif
 
 namespace UI::Quest
@@ -29,7 +30,13 @@ void RefreshSelectedQuestReward()
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
 void ShowQuestCountLimit()
 {
-    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CQuestCountLimitMsgBoxLayout));
+    mu::ui::window::GenericDialogConfig cfg;
+    cfg.lines = {{I18N::Game::YouCannotAcceptAnyMoreQuest, false},
+                 {I18N::Game::YouCanProceedMaximum10Quests, false},
+                 {I18N::Game::AtTheSameTime, false},
+                 {I18N::Game::YouNeedToClearAtLeast1QuestTo, false},
+                 {I18N::Game::AcceptThisOne, false}};
+    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 }
 #endif
 }

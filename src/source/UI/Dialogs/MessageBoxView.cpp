@@ -8,6 +8,7 @@
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlColor.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/Text/CUIRenderText.h"
@@ -49,9 +50,6 @@ mu::ui::window::MessageBoxView::~MessageBoxView()
 
 void mu::ui::window::MessageBoxView::BindModel(Rml::DataModelConstructor& c, MessageBoxViewRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("kind", &model.kind);
     c.Bind("text_px", &model.textPx);
     c.Bind("bold_text_px", &model.boldTextPx);
@@ -174,6 +172,11 @@ void mu::ui::window::MessageBoxView::SetProgress(float top, float fraction)
     }
 }
 
+Rml::Element* mu::ui::window::MessageBoxView::Panel() const
+{
+    return m_View.Document() != nullptr ? m_View.Document()->GetElementById("panel") : nullptr;
+}
+
 void mu::ui::window::MessageBoxView::Destroy()
 {
     m_PressedButton = -1;
@@ -189,7 +192,7 @@ void mu::ui::window::MessageBoxView::Sync(const POINT& pos, const std::vector<Li
 
     // Message boxes draw over every window: in front of the other documents.
     UI::RmlBridge::SyncDocumentVisibilityInFront(m_View.Document(), true);
-    UI::RmlBridge::SyncRootTransform(m_View.Binder(), pos);
+    UI::RmlBridge::PlaceOnStage(m_Placement, m_View.Document(), "panel", pos);
     UI::RmlBridge::SyncNativeTextSize(m_View.Binder());
 
     MessageBoxViewRmlModel& model = m_View.GetModel();

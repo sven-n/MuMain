@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "UI/Dialogs/MessageBox.h"	// self
 #include "UI/Core/WindowManager.h"
-#include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
@@ -168,75 +168,13 @@ bool mu::ui::window::CMessageBoxMng::UpdateMouseEvent()
     if (vi == m_vecMsgBoxes.end())
         return true;
 
+    // The top box's document reports its buttons. A box that cannot move takes every press; one
+    // that can takes the presses over its drawn panel, so they never reach the world.
     CMessageBoxBase* pCurMsgBox = (*vi);
-
-    if (m_EventState == EVENT_NONE && false == MouseLButtonPush &&
-        mu::ui::window::WindowGeometry(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
-            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy).Contains(MouseX, MouseY))
-    {
-        SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_HOVER);
-        m_EventState = EVENT_WND_MOUSE_HOVER;
-    }
-    else if (m_EventState == EVENT_WND_MOUSE_HOVER && false == MouseLButtonPush &&
-        false == mu::ui::window::WindowGeometry(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
-            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy).Contains(MouseX, MouseY))
-    {
-        m_EventState = EVENT_NONE;
-    }
-    else if (m_EventState == EVENT_WND_MOUSE_HOVER && MouseLButtonPush &&
-        mu::ui::window::WindowGeometry(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
-            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy).Contains(MouseX, MouseY))
-    {
-        SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_LBUTTON_DOWN);
-        m_EventState = EVENT_WND_MOUSE_LBUTTON_DOWN;
-
-        return false;
-    }
-    else if (m_EventState == EVENT_WND_MOUSE_LBUTTON_DOWN)
-    {
-        if (false == MouseLButtonPush && mu::ui::window::WindowGeometry(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
-            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy).Contains(MouseX, MouseY))
-        {
-            SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-            m_EventState = EVENT_NONE;
-
-            return false;
-        }
-        else if (false == MouseLButtonPush || true == MouseLButtonPop)
-        {
-            m_EventState = EVENT_NONE;
-        }
-    }
-    else if (m_EventState == EVENT_WND_MOUSE_HOVER && MouseRButtonPush &&
-        mu::ui::window::WindowGeometry(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
-            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy).Contains(MouseX, MouseY))
-    {
-        SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_RBUTTON_DOWN);
-        m_EventState = EVENT_WND_MOUSE_RBUTTON_DOWN;
-
-        return false;
-    }
-    else if (m_EventState == EVENT_WND_MOUSE_RBUTTON_DOWN)
-    {
-        if (false == MouseRButtonPush && mu::ui::window::WindowGeometry(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
-            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy).Contains(MouseX, MouseY))
-        {
-            SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_RBUTTON_UP);
-            m_EventState = EVENT_NONE;
-
-            return false;
-        }
-        else if (false == MouseRButtonPush || true == MouseRButtonPop)
-        {
-            m_EventState = EVENT_NONE;
-        }
-    }
-
     if (pCurMsgBox->CanMove() == false)
-    {
         return false;
-    }
-
+    if ((MouseLButtonPush || MouseRButtonPush) && UI::RmlBridge::IsPointerWithin(pCurMsgBox->GetPanel()))
+        return false;
     return true;
 }
 

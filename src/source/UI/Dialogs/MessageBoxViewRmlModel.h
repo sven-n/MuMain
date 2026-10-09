@@ -48,8 +48,6 @@ struct MessageBoxViewStripEntry
 
 struct MessageBoxViewRmlModel
 {
-    // The message box manager's layout -- UI::Scaling::GetActiveTransform() while it runs.
-    float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
     // The box's kind, #panel's class: a theme places that kind's placedButtons. Empty for most.
     Rml::String kind;
     float textPx = 0.f;     // native normal text size in physical px
