@@ -6,11 +6,9 @@
 
 namespace mu::ui::window
 {
-// One image of the Illusion Temple HUD that the window itself has to place: the minimap's
-// projected markers, the digit runs (packed by how many digits the value has) and the three
-// native buttons, whose box comes off the live CButton that hit-tests them. `src` is relative to
-// cursed_temple_system.rml, `rect` its texel cell, the box reference px on the 640x480 screen, and
-// `opacity` the transparency the player toggled. The HUD's own frames are the theme's.
+// One marker of the Illusion Temple HUD's mini map, which the window projects itself: `src` is
+// relative to cursed_temple_system.rml, `rect` its texel cell, the box reference px from the
+// projection's origin (#mini_map_markers). The HUD's own frames and buttons are the theme's.
 struct CursedTempleSpriteEntry
 {
     float left = 0.f;
@@ -42,6 +40,8 @@ struct CursedTempleSystemRmlModel
     // checked is open; the score effect shows for a while after a team scores.
     bool panelsShown = false;
     bool scoreShown = false;
+    // The panels' buttons' opacity: the transparency the player toggled.
+    float alpha = 1.f;
 
     // The current skill's icon: greyed until the hero has the kill points for it.
     Rml::String skillIconSrc;

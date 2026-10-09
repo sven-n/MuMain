@@ -60,14 +60,6 @@ public:
         IMAGE_NON_SKILL2 = CSkillList::IMAGE_NON_SKILL2,
     };
 
-    enum
-    {
-        CURSEDTEMPLERESULT_ALPH = 0,
-        CURSEDTEMPLERESULT_SKILLUP,
-        CURSEDTEMPLERESULT_SKILLDOWN,
-        CURSEDTEMPLERESULT_MAXBUTTONCOUNT,
-    };
-
 public:
     CCursedTempleSystem();
     virtual ~CCursedTempleSystem();
@@ -77,10 +69,8 @@ public:
 private:
     void LoadImages();
     void UnloadImages();
-    void SetButtonInfo();
     // How far the theme moved the corner part (the time, the mini map, the skill panel) from the
     // original's place, in HUD units: #corner's offset in the stretched screen.
-    Rml::Vector2f CornerOffset() const;
 
 public:
     bool UpdateMouseEvent();
@@ -108,7 +98,7 @@ private:
     void SyncView();
     void SyncGameTime();
     void SyncMiniMap(std::vector<CursedTempleSpriteEntry>& sprites);
-    void SyncSkill(std::vector<CursedTempleSpriteEntry>& sprites);
+    void SyncSkill();
     void SyncScore();
     void SyncTutorialStep(std::vector<CursedTempleTextEntry>& lines);
 
@@ -140,7 +130,6 @@ private:
 private:
     CManager* m_pNewUIMng;
     POINT m_Pos;
-    CButton m_Button[CURSEDTEMPLERESULT_MAXBUTTONCOUNT];
     // EventTime
     DWORD m_EventMapTime; // Total event time
     // MiniMap

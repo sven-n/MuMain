@@ -1,7 +1,7 @@
 /* Legacy theme for CCursedTempleSystem, reproducing its Render() at the 640x480 reference positions
    on .screen's HUD board: the frames, the score effect's banners and digits, the digit runs and
-   the tutorial step's rows are here; C++ still places the projected mini-map markers and the
-   native buttons, which it lists in the original's order. */
+   the tutorial step's rows and the buttons are here; C++ still places the projected mini-map
+   markers. */
 
 body { pointer-events: none; }
 
@@ -11,6 +11,8 @@ body { pointer-events: none; }
 }
 
 .sprite { position: absolute; }
+/* The mini map's markers: C++ projects them from the original's (464, 299). */
+#mini_map_markers { position: absolute; left: 464px; top: 299px; }
 
 .tutorial-line {
 	display: block;
@@ -59,6 +61,47 @@ body { pointer-events: none; }
 #ct_kills_needed .ct-digit { left: calc(594px - var(--n) * 4.2px + var(--i) * 6.72px); }
 #ct_kills .ct-digit { left: calc(616px - var(--n) * 4.2px + var(--i) * 6.72px); }
 #skill_icon { position: absolute; left: 539px; top: 200px; width: 20px; height: 28px; }
+
+/* The panels' area, which holds the pointer, and the skill panel's hover zones (the original's
+   18 x 24 boxes over the skill, the kill points it needs and the ones the hero has). */
+#ct_hud_area { position: absolute; left: 512px; top: 179px; width: 128px; height: 255px; }
+.ct-hint { position: absolute; top: 203px; width: 18px; height: 24px; }
+#ct_hint_skill { left: 540px; }
+#ct_hint_kills_needed { left: 595px; }
+#ct_hint_kills { left: 617px; }
+
+/* The buttons: the original's art, its up, over and down frames stacked. */
+@spritesheet ct-alpha-btn-sheet
+{
+	src: "../../../newui_Bt_clearness_illusion.jpg";
+	ct-alpha-btn-up: 0px 0px 38px 24px;
+	ct-alpha-btn-over: 0px 24px 38px 24px;
+	ct-alpha-btn-down: 0px 48px 38px 24px;
+}
+@spritesheet ct-skill-up-btn-sheet
+{
+	src: "../../../newui_ctskillup.jpg";
+	ct-skill-up-btn-up: 0px 0px 15px 13px;
+	ct-skill-up-btn-over: 0px 13px 15px 13px;
+	ct-skill-up-btn-down: 0px 26px 15px 13px;
+}
+@spritesheet ct-skill-down-btn-sheet
+{
+	src: "../../../newui_ctskilldown.jpg";
+	ct-skill-down-btn-up: 0px 0px 15px 13px;
+	ct-skill-down-btn-over: 0px 13px 15px 13px;
+	ct-skill-down-btn-down: 0px 26px 15px 13px;
+}
+.ct-btn { position: absolute; cursor: pointer; pointer-events: auto; }
+#ct_btn_alpha { left: 513px; top: 238px; width: 38px; height: 24px; decorator: image(ct-alpha-btn-up); }
+#ct_btn_alpha:hover { decorator: image(ct-alpha-btn-over); }
+#ct_btn_alpha:active { decorator: image(ct-alpha-btn-down); }
+#ct_btn_skill_up { left: 562px; top: 201px; width: 15px; height: 13px; decorator: image(ct-skill-up-btn-up); }
+#ct_btn_skill_up:hover { decorator: image(ct-skill-up-btn-over); }
+#ct_btn_skill_up:active { decorator: image(ct-skill-up-btn-down); }
+#ct_btn_skill_down { left: 562px; top: 214px; width: 15px; height: 13px; decorator: image(ct-skill-down-btn-up); }
+#ct_btn_skill_down:hover { decorator: image(ct-skill-down-btn-over); }
+#ct_btn_skill_down:active { decorator: image(ct-skill-down-btn-down); }
 
 /* The score effect's banners and digits. */
 @spritesheet ct-score-colon-sheet { src: "../../../newui_ctscorevs1.tga"; ct-score-colon: 0px 0px 20px 45px; }

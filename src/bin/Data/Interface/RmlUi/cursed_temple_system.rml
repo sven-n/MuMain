@@ -8,16 +8,15 @@
 	<!-- The Illusion Temple HUD (CCursedTempleSystem): the time, the mini map with its markers and
 	     transparency button, the skill panel, the score effect and the tutorial step. Drawn on the
 	     HUD board at the original's 640x480 reference positions: .screen is that screen at the
-	     bottom HUD's scale, centred like the HUD. The frames, the score banners and every row's
-	     place are the theme's; C++ lists only what it has to place itself -- the projected mini-map
-	     markers and the native buttons -- in the original's drawing order, over the frames. Text
-	     takes the native size and cancels the scale. In the
-	     background context, behind its other documents (the original drew it under nearly every
-	     panel). Takes no pointer events: the buttons' input stays native. -->
+	     bottom HUD's scale, centred like the HUD. The frames, the buttons, the score banners and
+	     every row's place are the theme's; C++ lists only the projected mini-map markers. Text takes
+	     the native size and cancels the scale. Behind the other documents (the original drew it
+	     under nearly every panel). Only the buttons take pointer events; C++ hit-tests the panels'
+	     area and the skill panel's hover zones by where they are drawn. -->
 	<div class="screen hud-board">
 		<!-- The panel chrome, hidden together when every window the original checked is open. The
 		     theme may move the corner part with #corner's left and top, in the screen's 640x480
-		     units; C++ reads that offset back and moves its own sprites and buttons the same way. -->
+		     units; everything in it moves along. -->
 		<div id="corner">
 		<div class="panels" data-if="panels_shown">
 			<div id="game_time_frame"></div>
@@ -26,6 +25,22 @@
 			<div id="mini_map"></div>
 			<div id="mini_map_frame"></div>
 			<img id="skill_icon" data-attr-src="skill_icon_src" data-attr-rect="skill_icon_rect"/>
+			<!-- The mini map's markers, at the projection's origin. -->
+			<div id="mini_map_markers">
+				<img class="sprite" data-for="s : sprites" data-attr-src="s.src" data-attr-rect="s.rect"
+				     data-style-left="s.left + 'px'" data-style-top="s.top + 'px'"
+				     data-style-width="s.width + 'px'" data-style-height="s.height + 'px'"
+				     data-style-opacity="s.opacity"/>
+			</div>
+			<!-- The panels' area, which holds the pointer; the skill panel's hover zones (the skill,
+			     the kill points it needs, the ones the hero has); the buttons. -->
+			<div id="ct_hud_area"></div>
+			<div id="ct_hint_skill" class="ct-hint"></div>
+			<div id="ct_hint_kills_needed" class="ct-hint"></div>
+			<div id="ct_hint_kills" class="ct-hint"></div>
+			<div id="ct_btn_alpha" class="ct-btn" data-style-opacity="alpha" data-event-click="ct_alpha_click"></div>
+			<div id="ct_btn_skill_up" class="ct-btn" data-style-opacity="alpha" data-event-click="ct_skill_up_click"></div>
+			<div id="ct_btn_skill_down" class="ct-btn" data-style-opacity="alpha" data-event-click="ct_skill_down_click"></div>
 			<!-- The digit runs; the theme centres each from its digit count and each digit's index.
 			     The original drew the time twice over itself. -->
 			<div class="ct-run ct-time-minutes" data-style---n="minute_digits.size">
@@ -81,11 +96,6 @@
 			<div id="score_left_banner"></div>
 			<div id="score_right_banner"></div>
 		</div>
-
-		<img class="sprite" data-for="s : sprites" data-attr-src="s.src" data-attr-rect="s.rect"
-		     data-style-left="s.left + 'px'" data-style-top="s.top + 'px'"
-		     data-style-width="s.width + 'px'" data-style-height="s.height + 'px'"
-		     data-style-opacity="s.opacity"/>
 
 		<div class="tutorial">
 			<span class="tutorial-line counter-scaled" data-for="l : tutorial_lines" data-class-title="l.title"

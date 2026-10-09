@@ -21,7 +21,6 @@ UI/Core/WindowManager.cpp: 10
 UI/Core/WindowObject.h: 6
 UI/Dialogs/HelpWindow.cpp: 1
 UI/Dialogs/ReconnectDialog.cpp: 3
-UI/Events/CursedTempleSystem.cpp: 5
 UI/HUD/ChatLogWindow.cpp: 1
 UI/HUD/MainFrameWindow.cpp: 1
 UI/HUD/MasterLevel.cpp: 3

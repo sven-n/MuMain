@@ -1,5 +1,7 @@
 ﻿
 #include "stdafx.h"
+#include "UI/RmlBridge/RmlElementBox.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Events/CursedTempleSystem.h"
 #include "UI/Events/EventPreview.h"
@@ -76,19 +78,19 @@ namespace
     };
     //#endif //_DEBUG
 
-    float MiniMapPos(float pointX, float pointY, float scale, int aXis, const Rml::Vector2f& offset)
+    // A tile's place on the mini map, in reference px from the projection's origin (the original's
+    // (464, 299) on the screen; the theme places #mini_map_markers there).
+    float MiniMapPos(float pointX, float pointY, float scale, int aXis)
     {
-        float minmapframeposX = 464.f + offset.x, minmapframeposY = 299.f + offset.y;
-
         if (aXis == AXIS_X)
         {
             float ridY = posY[6] - pointY;
-            return ((pointX - ridY) / scale) + minmapframeposX;
+            return (pointX - ridY) / scale;
         }
         else
         {
             float ridX = posX[6] - pointX;
-            return (((125 - (pointY + ridX))) / scale) + minmapframeposY;
+            return ((125 - (pointY + ridX))) / scale;
         }
     }
 
@@ -266,7 +268,6 @@ bool mu::ui::window::CCursedTempleSystem::Create(CManager* pNewUIMng, int x, int
 
     SetPos(x, y);
 
-    SetButtonInfo();
 
     BuildRmlUi();
 
@@ -475,24 +476,7 @@ SEASON3A::eCursedTempleTeam mu::ui::window::CCursedTempleSystem::GetMyTeam()
     return m_MyTeam;
 }
 
-Rml::Vector2f mu::ui::window::CCursedTempleSystem::CornerOffset() const
-{
-    Rml::ElementDocument* document = m_RmlView.Document();
-    Rml::Element* corner = document ? document->GetElementById("corner") : nullptr;
-    return corner ? Rml::Vector2f(corner->GetOffsetLeft(), corner->GetOffsetTop()) : Rml::Vector2f(0.f, 0.f);
-}
 
-void mu::ui::window::CCursedTempleSystem::SetButtonInfo()
-{
-    m_Button[CURSEDTEMPLERESULT_ALPH].ChangeButtonImgState(true, IMAGE_CURSEDTEMPLESYSTEM_MINIMAPALPBTN, true);
-    m_Button[CURSEDTEMPLERESULT_ALPH].ChangeButtonInfo(513, 238, 38, 24);
-
-    m_Button[CURSEDTEMPLERESULT_SKILLUP].ChangeButtonImgState(true, IMAGE_CURSEDTEMPLESYSTEM_SKILLUPBT, true);
-    m_Button[CURSEDTEMPLERESULT_SKILLUP].ChangeButtonInfo(0, 0, 15, 13);
-
-    m_Button[CURSEDTEMPLERESULT_SKILLDOWN].ChangeButtonImgState(true, IMAGE_CURSEDTEMPLESYSTEM_SKILLDOWNBT, true);
-    m_Button[CURSEDTEMPLERESULT_SKILLDOWN].ChangeButtonInfo(0, 0, 15, 13);
-}
 
 bool mu::ui::window::CCursedTempleSystem::CheckInventoryHolyItem(CHARACTER* c)
 {
@@ -643,49 +627,27 @@ bool mu::ui::window::CCursedTempleSystem::IsCursedTempleSkillKey(DWORD selectcha
 
 bool mu::ui::window::CCursedTempleSystem::UpdateMouseEvent()
 {
-    if (m_Button[CURSEDTEMPLERESULT_ALPH].UpdateMouseEvent())
-    {
-        if (m_Alph != 1.0f)
-        {
-            m_Alph = 1.0f;
-        }
-        else
-        {
-            m_Alph = 0.51f;
-        }
-
-        return false;
-    }
-
-    if (MouseWheel >= 1 || m_Button[CURSEDTEMPLERESULT_SKILLUP].UpdateMouseEvent())
+    // The wheel steps the skill wherever the pointer is; the buttons are the document's
+    // (ct_alpha_click, ct_skill_up_click, ct_skill_down_click).
+    if (MouseWheel >= 1)
     {
         if (CheckHeroSkillType())
-        {
             Hero->m_CursedTempleCurSkill += 1;
-        }
-
         MouseWheel = 0;
-
         return false;
     }
-
-    if (MouseWheel <= -1 || m_Button[CURSEDTEMPLERESULT_SKILLDOWN].UpdateMouseEvent())
+    if (MouseWheel <= -1)
     {
         if (CheckHeroSkillType(1))
-        {
             Hero->m_CursedTempleCurSkill -= 1;
-        }
-
         MouseWheel = 0;
-
         return false;
     }
 
-    const Rml::Vector2f corner = CornerOffset();
-    if (CheckMouseIn(static_cast<int>(512 + corner.x), static_cast<int>(232.f - 53.f + corner.y), 128, 255))
-    {
+    // The panels hold the pointer by their drawn area.
+    Rml::ElementDocument* document = m_RmlView.Document();
+    if (document != nullptr && UI::RmlBridge::IsPointerWithin(document->GetElementById("ct_hud_area")))
         return false;
-    }
 
     return true;
 }
@@ -762,15 +724,10 @@ bool mu::ui::window::CCursedTempleSystem::Update()
 namespace
 {
     // Shared by RenderSkill()'s three hover tooltips below -- each builds TextList/TextListColor
-    // the legacy way first, then hands off here instead of calling RenderTipTextList() directly.
-    void ShowSkillHoverTooltip(float sx, float sy, int textNum)
+    // the legacy way first, then hands off here; (x, y) in window pixels.
+    void ShowSkillHoverTooltip(float x, float y, int textNum)
     {
-        const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-        UI::Tooltip::ShowLegacyTextList(
-            textNum,
-            UI::Scaling::PositionX(activeTransform, sx),
-            UI::Scaling::PositionY(activeTransform, sy),
-            UI::Tooltip::Placement::Below, &kSkillHoverTooltipOwner);
+        UI::Tooltip::ShowLegacyTextList(textNum, x, y, UI::Tooltip::Placement::Below, &kSkillHoverTooltipOwner);
     }
 }
 
@@ -793,24 +750,6 @@ void AddSprite(std::vector<CursedTempleSpriteEntry>& sprites, const Rml::Vector4
     sprites.push_back({box.x, box.y, box.z, box.w, InterfaceImage(file), rect, opacity});
 }
 
-// A CButton registered with ChangeButtonImgState(true, image, true): its up, over and down frames
-// stacked vertically, drawn in the button's colour.
-void AddButton(std::vector<CursedTempleSpriteEntry>& sprites, CButton& button, const std::string& file, float alpha)
-{
-    const POINT& pos = button.GetPos();
-    const POINT& size = button.GetSize();
-    int frame = 0;
-    if (button.GetBTState() == BUTTON_STATE_OVER)
-        frame = 1;
-    else if (button.GetBTState() == BUTTON_STATE_DOWN)
-        frame = 2;
-    AddSprite(
-        sprites,
-        {static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(size.x), static_cast<float>(size.y)},
-        file,
-        TexelRect(0.f, static_cast<float>(frame * size.y), static_cast<float>(size.x), static_cast<float>(size.y)),
-        alpha);
-}
 } // namespace
 
 void mu::ui::window::CCursedTempleSystem::BindRmlModel(Rml::DataModelConstructor& c, CursedTempleSystemRmlModel& model)
@@ -849,6 +788,20 @@ void mu::ui::window::CCursedTempleSystem::BindRmlModel(Rml::DataModelConstructor
     c.Bind("kills_needed_digits", &model.killsNeededDigits);
     c.Bind("kills_digits", &model.killsDigits);
     c.Bind("sprites", &model.sprites);
+    c.Bind("alpha", &model.alpha);
+    // The original's transparency button: the panels' buttons half see-through, or opaque again.
+    c.BindEventCallback("ct_alpha_click", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { m_Alph = m_Alph != 1.0f ? 1.0f : 0.51f; });
+    c.BindEventCallback("ct_skill_up_click", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        {
+                            if (CheckHeroSkillType())
+                                Hero->m_CursedTempleCurSkill += 1;
+                        });
+    c.BindEventCallback("ct_skill_down_click", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        {
+                            if (CheckHeroSkillType(1))
+                                Hero->m_CursedTempleCurSkill -= 1;
+                        });
     c.Bind("tutorial_lines", &model.tutorialLines);
 }
 
@@ -859,14 +812,11 @@ void mu::ui::window::CCursedTempleSystem::BuildRmlUi()
 
 // The original RenderSkill(): the current skill's icon (grey until enough kill points), the kill
 // points it needs and has, the skill up and down buttons, and the three hover tooltips.
-void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpriteEntry>& sprites)
+void mu::ui::window::CCursedTempleSystem::SyncSkill()
 {
     const int CursedTempleCurSkillType = Hero->m_CursedTempleCurSkill;
     const int MaxKillCount = SkillAttribute[CursedTempleCurSkillType].KillCount;
 
-    const Rml::Vector2f corner = CornerOffset();
-    float x = 512.f + 27.f + corner.x;
-    float y = 258.f - 58.f + corner.y;
     // The icon's own place is the theme's; which sheet and cell it shows is the current skill and
     // whether the hero has the kill points for it.
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::skillIconSrc, "skill_icon_src",
@@ -878,20 +828,21 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::killsDigits, "kills_digits",
               UI::RmlBridge::DigitCells(m_SkillPoint, 12.f, 14.f));
 
-    m_Button[CURSEDTEMPLERESULT_SKILLUP].SetPos(static_cast<int>(512 + 50 + corner.x), static_cast<int>(201 + corner.y));
-    m_Button[CURSEDTEMPLERESULT_SKILLUP].ChangeAlpha(m_Alph);
-    AddButton(sprites, m_Button[CURSEDTEMPLERESULT_SKILLUP], "newui_ctskillup.jpg", m_Alph);
-    m_Button[CURSEDTEMPLERESULT_SKILLDOWN].SetPos(static_cast<int>(512 + 50 + corner.x),
-                                                 static_cast<int>(203 + 11 + corner.y));
-    m_Button[CURSEDTEMPLERESULT_SKILLDOWN].ChangeAlpha(m_Alph);
-    AddButton(sprites, m_Button[CURSEDTEMPLERESULT_SKILLDOWN], "newui_ctskilldown.jpg", m_Alph);
+    // The theme's hover zones (#ct_hint_*): a tooltip shows 20 units above the hovered one.
+    Rml::ElementDocument* document = m_RmlView.Document();
+    Rml::Vector2f anchor;
+    const auto hovered = [&](const char* id)
+    {
+        Rml::Element* zone = document != nullptr ? document->GetElementById(id) : nullptr;
+        Rml::Vector2f point;
+        if (!UI::RmlBridge::IsPointerWithin(zone) || !UI::RmlBridge::DrawnTopLeft(*zone, point))
+            return false;
+        anchor = {point.x, point.y - 20.f * UI::RmlBridge::DrawnScale(*zone)};
+        return true;
+    };
 
     bool anyTooltipHovered = false;
-    constexpr float Width = 18;
-    constexpr float Height = 24;
-    x = 512.f + 28 + corner.x;
-    y = 258.f - 55.f + corner.y;
-    if (CheckMouseIn(static_cast<int>(x), static_cast<int>(y), static_cast<int>(Width), static_cast<int>(Height)))
+    if (hovered("ct_hint_skill"))
     {
         anyTooltipHovered = true;
         TextNum = 0;
@@ -914,11 +865,10 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE;
         TextNum++;
 
-        ShowSkillHoverTooltip(x, y - 20, TextNum);
+        ShowSkillHoverTooltip(anchor.x, anchor.y, TextNum);
     }
 
-    x = 512.f + 28 + 55 + corner.x;
-    if (CheckMouseIn(static_cast<int>(x), static_cast<int>(y), static_cast<int>(Width), static_cast<int>(Height)))
+    if (hovered("ct_hint_kills_needed"))
     {
         anyTooltipHovered = true;
         TextNum = 0;
@@ -932,11 +882,10 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 
-        ShowSkillHoverTooltip(x, y - 20, TextNum);
+        ShowSkillHoverTooltip(anchor.x, anchor.y, TextNum);
     }
 
-    x = 512.f + 28 + 77 + corner.x;
-    if (CheckMouseIn(static_cast<int>(x), static_cast<int>(y), static_cast<int>(Width), static_cast<int>(Height)))
+    if (hovered("ct_hint_kills"))
     {
         anyTooltipHovered = true;
         TextNum = 0;
@@ -950,7 +899,7 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill(std::vector<CursedTempleSpri
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 
-        ShowSkillHoverTooltip(x, y - 20, TextNum);
+        ShowSkillHoverTooltip(anchor.x, anchor.y, TextNum);
     }
 
     if (!anyTooltipHovered)
@@ -974,13 +923,12 @@ void mu::ui::window::CCursedTempleSystem::SyncGameTime()
 void mu::ui::window::CCursedTempleSystem::SyncMiniMap(std::vector<CursedTempleSpriteEntry>& sprites)
 {
     m_Scale = 1.56f;
-    const Rml::Vector2f corner = CornerOffset();
 
     const auto marker = [&](float tileX, float tileY, const Rml::Vector2f& size, const char* file)
     {
         AddSprite(
             sprites,
-            {MiniMapPos(tileX, tileY, m_Scale, AXIS_X, corner), MiniMapPos(tileX, tileY, m_Scale, AXIS_Y, corner), size.x, size.y},
+            {MiniMapPos(tileX, tileY, m_Scale, AXIS_X), MiniMapPos(tileX, tileY, m_Scale, AXIS_Y), size.x, size.y},
             file, TexelRect(0.f, 0.f, size.x, size.y));
     };
     marker(138, 44, {9.f, 9.f}, "newui_ctminmap_TeamB_npc.tga");
@@ -997,8 +945,8 @@ void mu::ui::window::CCursedTempleSystem::SyncMiniMap(std::vector<CursedTempleSp
 
         if (p->userIndex != Hero->Key && p->userIndex != m_HolyItemPlayerIndex)
         {
-            const float pcX = MiniMapPos(p->x, p->y, m_Scale, AXIS_X, corner);
-            const float pcY = MiniMapPos(p->x, p->y, m_Scale, AXIS_Y, corner);
+            const float pcX = MiniMapPos(p->x, p->y, m_Scale, AXIS_X);
+            const float pcY = MiniMapPos(p->x, p->y, m_Scale, AXIS_Y);
             AddSprite(sprites, {pcX - 3.f, pcY - 3.f, 7.f, 7.f},
                       m_MyTeam == SEASON3A::eTeam_Allied ? "newui_ctminmap_TeamB_member.tga"
                                                          : "newui_ctminmap_TeamA_member.tga",
@@ -1008,20 +956,16 @@ void mu::ui::window::CCursedTempleSystem::SyncMiniMap(std::vector<CursedTempleSp
 
     if (m_HolyItemPlayerIndex != 0xffff && m_HolyItemPlayerIndex != Hero->Key)
     {
-        const float holypcX = MiniMapPos(m_HolyItemPlayerPosX, m_HolyItemPlayerPosY, m_Scale, AXIS_X, corner);
-        const float holypcY = MiniMapPos(m_HolyItemPlayerPosX, m_HolyItemPlayerPosY, m_Scale, AXIS_Y, corner);
+        const float holypcX = MiniMapPos(m_HolyItemPlayerPosX, m_HolyItemPlayerPosY, m_Scale, AXIS_X);
+        const float holypcY = MiniMapPos(m_HolyItemPlayerPosX, m_HolyItemPlayerPosY, m_Scale, AXIS_Y);
         AddSprite(sprites, {holypcX - 5.f, holypcY - 5.f, 14.f, 14.f}, "newui_ctminmap_Relic.tga",
                   TexelRect(0.f, 0.f, 14.f, 14.f));
     }
 
-    m_Button[CURSEDTEMPLERESULT_ALPH].SetPos(static_cast<int>(513 + corner.x), static_cast<int>(238 + corner.y));
-    m_Button[CURSEDTEMPLERESULT_ALPH].ChangeAlpha(m_Alph);
-    AddButton(sprites, m_Button[CURSEDTEMPLERESULT_ALPH], "newui_Bt_clearness_illusion.jpg", m_Alph);
-
     const auto heroX = static_cast<float>(Hero->PositionX);
     const auto heroY = static_cast<float>(Hero->PositionY);
-    const float hero_x = MiniMapPos(heroX, heroY, m_Scale, AXIS_X, corner);
-    const float hero_y = MiniMapPos(heroX, heroY, m_Scale, AXIS_Y, corner);
+    const float hero_x = MiniMapPos(heroX, heroY, m_Scale, AXIS_X);
+    const float hero_y = MiniMapPos(heroX, heroY, m_Scale, AXIS_Y);
     AddSprite(sprites, {hero_x - 4, hero_y - 4, 11.f, 11.f}, "newui_ctminmap_Hero.tga",
               TexelRect(0.f, 0.f, 11.f, 11.f));
 
@@ -1125,8 +1069,9 @@ void mu::ui::window::CCursedTempleSystem::SyncView()
     {
         SyncGameTime();
         SyncMiniMap(sprites);
-        SyncSkill(sprites);
+        SyncSkill();
     }
+    SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::alpha, "alpha", m_Alph);
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::scoreShown, "score_shown", m_IsScoreEffect);
     if (m_IsScoreEffect)
         SyncScore();
