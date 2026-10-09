@@ -638,7 +638,7 @@ static std::uint8_t g_tabBar = 0;
         return gold;
     }
 
-    bool RenderPetItemInfo(int sx, int sy, ITEM* pItem, int iInvenType)
+    bool RenderPetItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* pItem, int iInvenType)
     {
         PET_INFO* pPetInfo = GetPetInfo(pItem);
 
@@ -810,11 +810,8 @@ static std::uint8_t g_tabBar = 0;
             sy -= Height;
         }
 
-        const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-        UI::Tooltip::ShowLegacyTextList(
-            TextNum,
-            UI::Scaling::PositionX(activeTransform, static_cast<float>(sx)),
-            UI::Scaling::PositionY(activeTransform, static_cast<float>(sy)));
+        UI::Tooltip::ShowLegacyTextList(TextNum, UI::Scaling::PositionX(screen, static_cast<float>(sx)),
+                                        UI::Scaling::PositionY(screen, static_cast<float>(sy)));
         return true;
     }
 }

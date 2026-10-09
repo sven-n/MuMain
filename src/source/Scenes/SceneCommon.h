@@ -123,7 +123,6 @@ int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int i
 void SetEffectVolumeLevel(int level);
 
 // Rendering utilities
-void RenderInfomation3D();
 void RenderInfomation();
 BOOL ShowCheckBox(int num, int index, int message);
 

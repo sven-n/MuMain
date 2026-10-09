@@ -2109,7 +2109,7 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
 
         debouncedPetInfoRequest.invoke();
 
-        giPetManager::RenderPetItemInfo(sx, sy, ip, Inventype);
+        giPetManager::RenderPetItemInfo(screen, sx, sy, ip, Inventype);
         return;
     }
 
@@ -9698,8 +9698,9 @@ static void RenderItem3DAt(float sx, float sy, float Width, float Height, int Ty
 
 void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool PickUp)
 {
-    RenderItem3DAt(sx, sy, Width, Height, Type, Level, excellentFlags, ancientDiscriminator, PickUp,
-                   mu::ui::window::CheckMouseIn(sx, sy, Width, Height));
+    const bool hovered = g_fWindowMouseX >= sx && g_fWindowMouseX < sx + Width && g_fWindowMouseY >= sy &&
+                         g_fWindowMouseY < sy + Height;
+    RenderItem3DAt(sx, sy, Width, Height, Type, Level, excellentFlags, ancientDiscriminator, PickUp, hovered);
 }
 
 void RenderItem3DWithHover(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags,

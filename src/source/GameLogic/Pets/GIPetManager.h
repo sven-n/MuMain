@@ -10,6 +10,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "CSPetSystem.h"
 #include "UI/HUD/Skills/SkillTooltipModel.h"
+#include "UI/Scaling/UITransform.h"
 
 namespace giPetManager
 {
@@ -29,7 +30,8 @@ namespace giPetManager
     void SetPetItemConvert(ITEM* ip, PET_INFO* pPetInfo);
     std::uint32_t GetPetItemValue(PET_INFO* pPetInfo);
     bool RequestPetInfo(int sx, int sy, ITEM* pItem);
-    bool RenderPetItemInfo(int sx, int sy, ITEM* pItem, int iInvenType);
+    // (sx, sy) in the screen's 640x480 stretch, `screen`.
+    bool RenderPetItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* pItem, int iInvenType);
 
     bool    SelectPetCommand(void);
     void    MovePetCommand(CHARACTER* c);
