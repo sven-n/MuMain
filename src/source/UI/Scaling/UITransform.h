@@ -91,6 +91,19 @@ namespace UI::Scaling
         bool m_restoreMouse;
     };
 
+    // Window pixels at the UI's typography scale: native code that works in pixels runs under it, so
+    // its RenderItem3D() rectangles are window pixels and MeasureText() reports window pixels at
+    // the native text size.
+    class ScopedWindowPixels
+    {
+    public:
+        ScopedWindowPixels(int windowWidth, int windowHeight);
+
+    private:
+        ScopedActiveTransform m_scope;
+    };
+
+    Transform WindowPixelTransform(int windowWidth, int windowHeight);
     Transform ScreenOverlayTransform(int windowWidth, int windowHeight);
     Viewport FullReferenceViewport();
     Transform LegacyUiTransform(int windowWidth, int windowHeight);

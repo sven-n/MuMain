@@ -324,7 +324,17 @@ float UI::Scaling::NativeTextPixelSize(FontRole role, const Transform& transform
 
 float UI::Scaling::NativeTextPixelSize(FontRole role, int windowWidth, int windowHeight)
 {
-    return NativeTextPixelSize(role, Transform{1.0f, 1.0f, 0.0f, 0.0f, TypographyScale(windowWidth, windowHeight)});
+    return NativeTextPixelSize(role, WindowPixelTransform(windowWidth, windowHeight));
+}
+
+UI::Scaling::Transform UI::Scaling::WindowPixelTransform(int windowWidth, int windowHeight)
+{
+    return {1.0f, 1.0f, 0.0f, 0.0f, TypographyScale(windowWidth, windowHeight)};
+}
+
+UI::Scaling::ScopedWindowPixels::ScopedWindowPixels(int windowWidth, int windowHeight)
+    : m_scope(WindowPixelTransform(windowWidth, windowHeight), true)
+{
 }
 
 float UI::Scaling::NativeTextPixelSizeInBox(FontRole role, const Transform& transform, float measuredWidth,

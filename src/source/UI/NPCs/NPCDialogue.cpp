@@ -11,6 +11,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlPointer.h"
@@ -240,65 +241,65 @@ void CNPCDialogue::SetContents(DWORD dwDlgIndex)
 
 namespace
 {
-// Wrap budget, in native logical units, for text drawn inside `container` (see
-// ResolveDialogueWrapGeometry()); `fallback` when the container is not laid out yet.
-float NativeWrapWidth(Rml::Element& container, const UI::Scaling::Transform& panelTransform, float fallback)
+// Wrap budget for native text measured in window pixels at the native text size (DivideStringByPixel()
+// under ScopedWindowPixels) to fill `container`: its width at the native size of its font. Whatever
+// scales the container scales its width and its font alike, so its laid-out sizes give the ratio.
+// `fallback` while the container is not laid out yet.
+float NativeWrapWidth(Rml::Element& container, float fallback)
 {
-    const float nativeTextPx = UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, panelTransform);
-    const float width = container.GetBox().GetSize(Rml::BoxArea::Border).x;
-    // A counter-scaled container (legacy .sharp-text) is laid out in physical pixels: its
-    // width and font-size are both multiplied by the panel scale, so the ratio is unchanged.
-    const float drawnTextPx = container.GetComputedValues().font_size() * panelTransform.scaleX;
-    if (width <= 0.0f || drawnTextPx <= 0.0f)
+    const float width = container.GetBox().GetSize(Rml::BoxArea::Content).x;
+    const float fontPx = container.GetComputedValues().font_size();
+    if (width <= 0.0f || fontPx <= 0.0f)
         return fallback;
-    return width * nativeTextPx / drawnTextPx;
+    return width * UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal) / fontPx;
+}
+
+// `element`'s drawn top, in window pixels; false while it is not drawn.
+bool DrawnTop(Rml::Element* element, float& top)
+{
+    Rml::Vector2f point;
+    if (element == nullptr || !UI::RmlBridge::DrawnTopLeft(*element, point))
+        return false;
+    top = point.y;
+    return true;
 }
 } // namespace
 
 void CNPCDialogue::ResolveDialogueWrapGeometry(float& npcWrapWidth, int& npcLinesPerPage,
     float& answerWrapWidth, int& answerLinesPerPage) const
 {
-    npcWrapWidth = 160.f;
+    // The original's 160-unit text width, in window pixels, until the document has laid out.
+    const float typography =
+        UI::Scaling::TypographyScale(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+    npcWrapWidth = 160.f * typography;
     npcLinesPerPage = ND_NPC_MAX_LINE_PER_PAGE;
-    answerWrapWidth = 160.f;
+    answerWrapWidth = 160.f * typography;
     answerLinesPerPage = ND_SEL_TEXT_MAX_LINE_PER_PAGE;
 
     if (!m_RmlView.Document())
         return;
 
-    const auto transform = GetLayoutTransform();
-    if (transform.scaleX <= 0.0f || transform.scaleY <= 0.0f)
-        return;
-
-    // DivideStringByPixel() wraps using g_pRenderText's own native pixel metrics (in this window's
-    // logical units, at the native text size), a different measurement system than RmlUi's font
-    // rendering. The RmlUi container's box width is in #panel's own layout units (a transform does
-    // not change box sizes), and its text is drawn at its own font-size there: scaling the width
-    // by native text size / drawn text size gives the budget that fills the container.
+    // Native text wraps in window pixels at the native size; the lines per page come from the
+    // drawn line pitch and the drawn room to each area's pager.
     Rml::Element* npcContainer = m_RmlView.Document()->GetElementById("npc_lines_container");
     Rml::Element* answerContainer = m_RmlView.Document()->GetElementById("answers_container");
     if (npcContainer)
-        npcWrapWidth = NativeWrapWidth(*npcContainer, transform, npcWrapWidth);
+        npcWrapWidth = NativeWrapWidth(*npcContainer, npcWrapWidth);
     if (answerContainer)
-        answerWrapWidth = NativeWrapWidth(*answerContainer, transform, answerWrapWidth);
+        answerWrapWidth = NativeWrapWidth(*answerContainer, answerWrapWidth);
 
-    // One physical text line's real rendered height -- shared below by both the NPC-words area and
-    // the answers area (both use the same font-size in npc_dialogue.rcss), sampled from .nd-line
-    // specifically because it's always exactly one physical line (white-space:nowrap); an
-    // .nd-answer-row can be several physical lines joined by '\n' (SyncRmlModel()'s own comment),
-    // so its own box height isn't a reliable single-line measurement. Only ever populated from
-    // whatever's currently bound -- empty on the very first call this session, before
-    // SetContents() has ever run once (this window always has NPC words whenever it's open, so
-    // every call after the first one finds a real line here).
+    // One physical text line's drawn height -- shared by both areas (the same font-size in
+    // npc_dialogue.rcss), sampled from .nd-line because it is always exactly one physical line
+    // (white-space:nowrap); an .nd-answer-row can be several lines joined by '\n'. Empty on the
+    // very first call this session, before SetContents() has run once.
     float linePitchPx = 0.f;
     if (npcContainer)
     {
-        if (Rml::Element* firstLine = npcContainer->GetChild(0))
-            linePitchPx = firstLine->GetBox().GetSize(Rml::BoxArea::Border).y;
-        // A theme may lay the text out in physical pixels and scale it back (a counter-scaled
-        // layer, legacy's .sharp-text): its line pitch is then in those units, not #panel's.
-        if (npcContainer->GetComputedValues().has_local_transform())
-            linePitchPx /= transform.scaleX;
+        Rml::Vector2f offset;
+        Rml::Vector2f size;
+        Rml::Element* firstLine = npcContainer->GetChild(0);
+        if (firstLine != nullptr && UI::RmlBridge::DrawnBox(*firstLine, Rml::BoxArea::Border, offset, size))
+            linePitchPx = size.y;
     }
 
     if (linePitchPx <= 0.0f)
@@ -310,21 +311,17 @@ void CNPCDialogue::ResolveDialogueWrapGeometry(float& npcWrapWidth, int& npcLine
     // decorative) divider further below.
     if (npcContainer)
     {
-        if (Rml::Element* npcBoundary = m_RmlView.Document()->GetElementById("btn_npc_next"))
-        {
-            const float availableHeightPx = npcBoundary->GetAbsoluteOffset().y - npcContainer->GetAbsoluteOffset().y;
-            if (availableHeightPx > 0.0f)
-                npcLinesPerPage = std::max(1, static_cast<int>(availableHeightPx / linePitchPx));
-        }
+        float boundaryTop = 0.f, containerTop = 0.f;
+        if (DrawnTop(m_RmlView.Document()->GetElementById("btn_npc_next"), boundaryTop) &&
+            DrawnTop(npcContainer, containerTop) && boundaryTop > containerTop)
+            npcLinesPerPage = std::max(1, static_cast<int>((boundaryTop - containerTop) / linePitchPx));
     }
     if (answerContainer)
     {
-        if (Rml::Element* answerBoundary = m_RmlView.Document()->GetElementById("btn_ans_next"))
-        {
-            const float availableHeightPx = answerBoundary->GetAbsoluteOffset().y - answerContainer->GetAbsoluteOffset().y;
-            if (availableHeightPx > 0.0f)
-                answerLinesPerPage = std::max(1, static_cast<int>(availableHeightPx / linePitchPx));
-        }
+        float boundaryTop = 0.f, containerTop = 0.f;
+        if (DrawnTop(m_RmlView.Document()->GetElementById("btn_ans_next"), boundaryTop) &&
+            DrawnTop(answerContainer, containerTop) && boundaryTop > containerTop)
+            answerLinesPerPage = std::max(1, static_cast<int>((boundaryTop - containerTop) / linePitchPx));
     }
 }
 
@@ -339,10 +336,8 @@ void CNPCDialogue::SetCurNPCWords(int nQuestListCount)
     else
         pszSrc = g_QuestMng.GetNPCDlgNPCWords(m_dwCurDlgIndex);
 
-    // Wrap in this window's own layout space: the budget below is in its logical units, and there
-    // MeasureText() reports the width the text is drawn at (the native text size).
-    const UI::Scaling::ScopedActiveTransform wrapSpace(
-        GetLayoutTransform());
+    // Wrap in window pixels: the budget below is in them, at the native text size.
+    const UI::Scaling::ScopedWindowPixels wrapSpace(WindowWidth, WindowHeight);
     float npcWrapWidth, answerWrapWidth;
     int npcLinesPerPage, answerLinesPerPage;
     ResolveDialogueWrapGeometry(npcWrapWidth, npcLinesPerPage, answerWrapWidth, answerLinesPerPage);
@@ -370,10 +365,8 @@ void CNPCDialogue::SetCurSelTexts()
 
     g_pRenderText->SetFont(g_hFont);
 
-    // Wrap in this window's own layout space: the budget below is in its logical units, and there
-    // MeasureText() reports the width the text is drawn at (the native text size).
-    const UI::Scaling::ScopedActiveTransform wrapSpace(
-        GetLayoutTransform());
+    // Wrap in window pixels: the budget below is in them, at the native text size.
+    const UI::Scaling::ScopedWindowPixels wrapSpace(WindowWidth, WindowHeight);
     float npcWrapWidth, answerWrapWidth;
     int npcLinesPerPage, answerLinesPerPage;
     ResolveDialogueWrapGeometry(npcWrapWidth, npcLinesPerPage, answerWrapWidth, answerLinesPerPage);
@@ -441,10 +434,8 @@ void CNPCDialogue::SetQuestListText(std::span<const std::uint32_t> questIndices)
     ::memset(m_aszSelTexts[0], 0, sizeof(wchar_t) * ND_SEL_TEXT_LINE_MAX * ND_WORDS_ROW_MAX);
     ::memset(m_anSelTextLine, 0, sizeof(int) * (ND_QUEST_INDEX_MAX_COUNT + 1));
 
-    // Wrap in this window's own layout space: the budget below is in its logical units, and there
-    // MeasureText() reports the width the text is drawn at (the native text size).
-    const UI::Scaling::ScopedActiveTransform wrapSpace(
-        GetLayoutTransform());
+    // Wrap in window pixels: the budget below is in them, at the native text size.
+    const UI::Scaling::ScopedWindowPixels wrapSpace(WindowWidth, WindowHeight);
     float npcWrapWidth, answerWrapWidth;
     int npcLinesPerPage, answerLinesPerPage;
     ResolveDialogueWrapGeometry(npcWrapWidth, npcLinesPerPage, answerWrapWidth, answerLinesPerPage);

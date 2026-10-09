@@ -55,8 +55,7 @@ void UI::Items::ItemCameraTarget::Render(std::uint32_t width, std::uint32_t heig
     // gluPerspective2() and the identity view overwrite g_Camera, which picking reads.
     SaveCameraPerspective();
     {
-        // RenderItem3D() maps its rectangle through the active transform: window pixels map as they are.
-        const UI::Scaling::ScopedActiveTransform layout(UI::Scaling::Transform{1.f, 1.f, 0.f, 0.f, 1.f}, true);
+        const UI::Scaling::ScopedWindowPixels pixels(WindowWidth, WindowHeight);
 
         auto& renderer = mu::GetRenderer();
         renderer.SetMatrixMode(GL_PROJECTION);
