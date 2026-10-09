@@ -60,22 +60,20 @@ namespace mu::ui::window
 
     private:
         CManager* m_pNewUIMng;
-        POINT						m_UIStartPos;
-        int							m_iTextEndPosX;
-        POINT						m_ItemDurUIStartPos;
 
         int							m_iCurArrowType;
         int							m_iItemDurImageIndex[MAX_EQUIPMENT];
         int							m_iTooltipIndex;
+        // The equipment slot of each icon synced, in document order (UpdateMouseEvent()).
+        std::vector<int> m_IconSlots;
 
     public:
         CItemEnduranceInfo();
         virtual ~CItemEnduranceInfo();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
-        void SetPos(int x, int y);
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -94,23 +92,10 @@ namespace mu::ui::window
 
     private:
         // Right-aligns the durability icons to the world the open windows leave uncovered.
-        void FollowUncoveredWorld();
-        void LoadImages();
-        void UnloadImages();
 
         void InitImageIndex();
 
-        void RenderLeft();
-        void RenderRight();
 
-        void RenderHPUI(int iX, int iY, wchar_t* pszName, int iLife, int iMaxLife = 255, bool bWarning = false);
-        void RenderTooltip(int iX, int iY, const ITEM* pItem, const DWORD& dwTextColor);
-        //void RenderItemDurIcon( int iImageIndex, int iX, int iY, int iWidth, int iHeight, DWORD dwColor, wchar_t* pszName );
-        bool RenderEquipedHelperLife(int iX, int iY);
-        bool RenderEquipedPetLife(int iX, int iY);
-        bool RenderSummonMonsterLife(int iX, int iY);
-        bool RenderNumArrow(int iX, int iY);
-        bool RenderItemEndurance(int ix, int iY);
 
         // The HUD in RmlUi (item_endurance.rml): main context, behind its other documents (the
         // original drew it at layer depth 3.5, under the panels). Render() fills it; the native

@@ -425,7 +425,7 @@ bool CSystem::LoadMainSceneInterface()
         return false;
 
     m_pNewItemEnduranceInfo = new CItemEnduranceInfo;
-    if (m_pNewItemEnduranceInfo->Create(m_pNewUIMng, 2, 26) == false)
+    if (m_pNewItemEnduranceInfo->Create(m_pNewUIMng) == false)
     {
         return false;
     }
