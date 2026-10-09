@@ -63,7 +63,6 @@ protected:
 
 public:
     void Init();
-    POINT RenderWindowBase(int nHeight, int nOriginY = -1);
     bool PressKey(int nKey);
     bool IsInputEnable();
     void UpdateInput();

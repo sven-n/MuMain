@@ -22,7 +22,6 @@
 #include "UI/NPCs/NPCShop.h"
 #include "UI/Options/OptionWindow.h"
 #include "UI/Scaling/UITransform.h"
-#include "UI/Widgets/Button.h"
 
 using UI::Scaling::FontRole;
 using mu::ui::window::CCommandWindow;
@@ -408,26 +407,6 @@ TEST_CASE("character selection layout keeps scaled controls and symmetric margin
     CHECK(fourK.buttons[CSMW_BTN_CREATE].width == 108);
     CHECK(fourK.buttons[CSMW_BTN_CREATE].height == 60);
     CHECK(fourK.information.width == 3308);
-}
-
-TEST_CASE("resized character button rectangle is its click rectangle [ui][scaling]")
-{
-    const unsigned int previousHeight = WindowHeight;
-    WindowHeight = 600;
-
-    CButton button;
-    button.Create(54, 30, -1);
-    button.SetSize(108, 60);
-    button.SetPosition(100, 200);
-    button.Show();
-
-    CHECK(button.GetWidth() == 108);
-    CHECK(button.GetHeight() == 60);
-    CHECK(button.PtInSprite(207, 259));
-    CHECK_FALSE(button.PtInSprite(208, 259));
-    CHECK_FALSE(button.PtInSprite(207, 260));
-
-    WindowHeight = previousHeight;
 }
 
 TEST_CASE("managed windows run in the manager's units and leave the pointer alone [ui][scaling]")

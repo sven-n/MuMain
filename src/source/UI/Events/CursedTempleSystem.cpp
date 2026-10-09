@@ -235,27 +235,6 @@ namespace
         }
         return false;
     }
-
-    void DrawText(wchar_t* text, int textposx, int textposy, DWORD textcolor, DWORD textbackcolor, int textsort, float fontboxwidth, bool isbold)
-    {
-        if (isbold)
-        {
-            g_pRenderText->SetFont(g_hFontBold);
-        }
-        else
-        {
-            g_pRenderText->SetFont(g_hFont);
-        }
-
-        DWORD backuptextcolor = g_pRenderText->GetTextColor();
-        DWORD backuptextbackcolor = g_pRenderText->GetBgColor();
-
-        g_pRenderText->SetTextColor(textcolor);
-        g_pRenderText->SetBgColor(textbackcolor);
-        g_pRenderText->RenderText(textposx, textposy, text, fontboxwidth, 0, textsort);
-        g_pRenderText->SetTextColor(backuptextcolor);
-        g_pRenderText->SetBgColor(backuptextbackcolor);
-    }
 };
 
 bool mu::ui::window::CCursedTempleSystem::Create(CManager* pNewUIMng)

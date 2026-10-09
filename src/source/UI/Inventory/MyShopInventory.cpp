@@ -16,28 +16,9 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlNativeTextSize.h"
 #include "Core/Utilities/StringUtils.h"
-#include "Render/Text/CUIRenderText.h"
 #include <RmlUi/Core/ElementDocument.h>
 
 const int iMAX_SHOPTITLE_MULTI = 26;
-
-namespace
-{
-    void RenderText(const wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort, HFONT hFont = g_hFont)
-    {
-        g_pRenderText->SetFont(hFont);
-
-        DWORD backuptextcolor = g_pRenderText->GetTextColor();
-        DWORD backuptextbackcolor = g_pRenderText->GetBgColor();
-
-        g_pRenderText->SetTextColor(color);
-        g_pRenderText->SetBgColor(backcolor);
-        g_pRenderText->RenderText(x, y, text, sx, sy, sort);
-
-        g_pRenderText->SetTextColor(backuptextcolor);
-        g_pRenderText->SetBgColor(backuptextbackcolor);
-    }
-};
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

@@ -80,53 +80,6 @@ void CUIManager::Init()
     ClearPersonalShop();
 }
 
-POINT CUIManager::RenderWindowBase(int nHeight, int nOriginY)
-{
-    int nWidth = 213;
-
-    EnableAlphaBlend3();
-    constexpr float WindowAlpha = 0.8f;
-
-    float fPosX = 320 - nWidth / 2;
-    float fPosY;
-    if (nOriginY == -1)
-    {
-        fPosY = 130 - nHeight / 2;
-        if (fPosY < 40.0f)		fPosY = 40.0f;
-    }
-    else
-        fPosY = nOriginY;
-    POINT ptPos = { static_cast<LONG>(fPosX), static_cast<LONG>(fPosY) };
-
-    RenderBitmap(BITMAP_INTERFACE + 22, fPosX, fPosY, nWidth, 5, 0.f, 0.f,
-        nWidth / 256.f, 5.f / 8.f, true, true, WindowAlpha);
-    fPosY += 5;
-
-    int nBodyHeight = nHeight - 10;
-    int nPatternCount = nBodyHeight / 40;
-    for (int i = 0; i < nPatternCount; ++i)
-    {
-        RenderBitmap(BITMAP_INTERFACE + 21, fPosX, fPosY, nWidth, 40, 0.f, 0.f,
-            nWidth / 256.f, 40.f / 64.f, true, true, WindowAlpha);
-        fPosY += 40;
-    }
-
-    if (nBodyHeight > nPatternCount * 40)
-    {
-        float fRate = (float)(nBodyHeight - nPatternCount * 40) / 40.0f;
-        RenderBitmap(BITMAP_INTERFACE + 21, fPosX, fPosY, nWidth, 40 * fRate, 0.f, 0.f,
-            nWidth / 256.f, (40.f / 64.f) * fRate, true, true, WindowAlpha);
-        fPosY += 40 * fRate;
-    }
-
-    RenderBitmap(BITMAP_INTERFACE + 22, fPosX, fPosY, nWidth, 5, 0.f, 0.f,
-        nWidth / 256.f, 5.f / 8.f, true, true, WindowAlpha);
-
-    DisableAlphaBlend();
-
-    return ptPos;
-}
-
 bool CUIManager::PressKey(int nKey)
 {
     return false;
