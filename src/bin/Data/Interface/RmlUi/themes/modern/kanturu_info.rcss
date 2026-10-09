@@ -37,3 +37,6 @@ body { pointer-events: none; }
 
 /* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
 #panel.slot-placed { pointer-events: none; }
+
+/* The data-for template row has no index of its own; it inherits this one. */
+.run { --i: 0; }
