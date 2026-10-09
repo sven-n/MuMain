@@ -27,16 +27,6 @@ namespace mu::ui::window
     {
         float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
 
-        // Reference-space geometry CalculateLayout() derives from the dock height and the measured
-        // row height; #panel and its children are authored in the same reference units.
-        float panelHeight = 0.f;
-        float listHeight = 0.f;
-        float listTail = 0.f; // listHeight modulo rowHeight
-        float listWidth = 0.f;
-        float rowWidth = 0.f;
-        float rowHeight = 0.f;
-        float closeTop = 0.f;
-
         std::vector<MoveCommandRowEntry> rows;
 
         // Set once at BuildRmlUi() time -- static I18N strings, same "set once after modelCreated"

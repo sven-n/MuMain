@@ -17,7 +17,6 @@
 #include "UI/HUD/UIMapName.h"
 #include "UI/Dialogs/ChatCommandWindow.h"
 #include "UI/HUD/CommandWindow.h"
-#include "UI/HUD/MoveCommandWindow.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/NPCs/NPCShop.h"
@@ -49,34 +48,6 @@ public:
     int renderMouseY = -1;
     UI::Scaling::Transform renderTransform{};
 };
-}
-
-TEST_CASE("teleport layout uses stable width and fits above the dock [ui][scaling]")
-{
-    const auto layout = UI::MoveCommand::CalculateLayout(1, 14);
-    CHECK(layout.windowWidth == 230);
-    CHECK(layout.visibleRows == 26);
-    CHECK(layout.windowHeight == 424);
-    CHECK(layout.listTop == 39);
-    CHECK(layout.closeTop == 405);
-    CHECK(1 + layout.windowHeight <= UI::Scaling::DockLogicalBottom);
-}
-
-TEST_CASE("teleport layout takes a theme slot's height and width [ui][scaling]")
-{
-    const auto layout = UI::MoveCommand::CalculateLayout(0, 14, 200, 300);
-    CHECK(layout.windowWidth == 300);
-    CHECK(layout.visibleRows == 10);
-    CHECK(layout.windowHeight == 200);
-    CHECK(layout.listTop == 38);
-    CHECK(layout.closeTop == 180);
-}
-
-TEST_CASE("teleport width is independent of measured row height [ui][scaling]")
-{
-    CHECK(UI::MoveCommand::CalculateLayout(1, 12).windowWidth == 230);
-    CHECK(UI::MoveCommand::CalculateLayout(1, 14).windowWidth == 230);
-    CHECK(UI::MoveCommand::CalculateLayout(1, 18).windowWidth == 230);
 }
 
 TEST_CASE("dialogs scale with the viewport and stop at a readable cap [ui][scaling]")

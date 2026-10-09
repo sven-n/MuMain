@@ -395,7 +395,7 @@ bool CSystem::LoadMainSceneInterface()
 
     m_pNewMoveCommandWindow = new CMoveCommandWindow;
 
-    if (m_pNewMoveCommandWindow->Create(m_pNewUIMng, 1, 1) == false)
+    if (m_pNewMoveCommandWindow->Create(m_pNewUIMng) == false)
         return false;
 
     m_pNewDuelWindow = new CDuelWindow;

@@ -17,7 +17,6 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlPointer.h"
 #include "Core/Utilities/StringUtils.h"
-#include "Render/Text/CUIRenderTextSDLTtf.h"
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
@@ -29,7 +28,8 @@ using namespace mu::ui::window;
 namespace
 {
     constexpr int MapNameCount = 6;
-    constexpr int kDefaultRowHeight = 14;
+    // The fill slot's smallest panel: the header, the close bar and three rows.
+    constexpr float kFillMinimumHeight = 102.f;
 
     const std::wstring MapName[MapNameCount] =
     {
@@ -58,8 +58,6 @@ namespace
 CMoveCommandWindow::CMoveCommandWindow()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
-    m_iRealFontHeight = kDefaultRowHeight;
     m_dwMoveCommandKey = 0;
 
 }
@@ -69,7 +67,7 @@ CMoveCommandWindow::~CMoveCommandWindow()
     Release();
 }
 
-bool mu::ui::window::CMoveCommandWindow::Create(CManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CMoveCommandWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -77,7 +75,7 @@ bool mu::ui::window::CMoveCommandWindow::Create(CManager* pNewUIMng, int x, int 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MOVEMAP, this);
 
-    SetPos(x, y);
+    RefreshData();
 
     BuildRmlUi();
 
@@ -98,44 +96,9 @@ void mu::ui::window::CMoveCommandWindow::Release()
     m_RmlView.Release();
 }
 
-void mu::ui::window::CMoveCommandWindow::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
-
-    RefreshDataAndLayout();
-}
-
-void mu::ui::window::CMoveCommandWindow::RefreshDataAndLayout()
+void mu::ui::window::CMoveCommandWindow::RefreshData()
 {
     m_listMoveInfoData = CMoveCommandData::GetInstance()->GetMoveCommandDatalist();
-    RefreshLayoutMetrics();
-}
-
-void mu::ui::window::CMoveCommandWindow::RefreshLayoutMetrics()
-{
-    // The text's line height in the screen's 480-unit height, as native measured it, plus 2. The
-    // font grows more slowly than the window, so in these units the rows SHRINK as the resolution
-    // rises and more of them fit -- native's own behaviour, and the reason this is re-measured.
-    const float lineHeightPx = CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal);
-    const int measuredFontHeight =
-        WindowHeight > 0 ? static_cast<int>(std::lround(lineHeightPx * 480.f / static_cast<float>(WindowHeight))) : 0;
-    m_iRealFontHeight = measuredFontHeight > 0 ? measuredFontHeight + 2 : kDefaultRowHeight;
-
-    // The theme's panel width; a fill slot's height less the panel's own border.
-    float contentWidth = static_cast<float>(UI::MoveCommand::kWindowWidth);
-    float frameHeight = 0.f;
-    if (Rml::Element* panel = m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr)
-    {
-        const Rml::Box& box = panel->GetBox();
-        if (box.GetSize(Rml::BoxArea::Content).x > 0.f)
-            contentWidth = box.GetSize(Rml::BoxArea::Content).x;
-        frameHeight = box.GetSize(Rml::BoxArea::Border).y - box.GetSize(Rml::BoxArea::Content).y;
-    }
-    const int availableHeight = m_FillHeight > 0.f ? static_cast<int>(m_FillHeight - frameHeight) : -1;
-    m_layout = UI::MoveCommand::CalculateLayout(m_Pos.y, m_iRealFontHeight, availableHeight,
-                                                static_cast<int>(std::lround(contentWidth)));
-
 }
 
 void mu::ui::window::CMoveCommandWindow::SetFillPlacementSize(float width, float height)
@@ -144,24 +107,23 @@ void mu::ui::window::CMoveCommandWindow::SetFillPlacementSize(float width, float
         return;
     m_FillWidth = width;
     m_FillHeight = height;
-    ApplyFillWidth();
-    RefreshLayoutMetrics();
+    ApplyFillSize();
 }
 
 bool mu::ui::window::CMoveCommandWindow::GetFillMinimumSize(float& width, float& height) const
 {
-    // Its content width, and the chrome with three rows: the rows follow the height it is given.
+    // Its content width, and the chrome with three rows: the list takes the height it is given.
     width = static_cast<float>(UI::MoveCommand::kWindowWidth);
     if (Rml::Element* panel = m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr)
     {
         if (panel->GetBox().GetSize(Rml::BoxArea::Border).x > 0.f)
             width = panel->GetBox().GetSize(Rml::BoxArea::Border).x;
     }
-    height = static_cast<float>(UI::MoveCommand::kFixedChromeHeight + 3 * m_iRealFontHeight);
+    height = kFillMinimumHeight;
     return true;
 }
 
-void mu::ui::window::CMoveCommandWindow::ApplyFillWidth()
+void mu::ui::window::CMoveCommandWindow::ApplyFillSize()
 {
     Rml::Element* panel = m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr;
     if (panel == nullptr)
@@ -169,9 +131,15 @@ void mu::ui::window::CMoveCommandWindow::ApplyFillWidth()
     const bool fill = m_FillWidth > 0.f && m_FillHeight > 0.f;
     panel->SetClass("fill-placement", fill);
     if (fill)
+    {
         panel->SetProperty(Rml::PropertyId::Width, Rml::Property(m_FillWidth, Rml::Unit::PX));
+        panel->SetProperty(Rml::PropertyId::Height, Rml::Property(m_FillHeight, Rml::Unit::PX));
+    }
     else
+    {
         panel->RemoveProperty(Rml::PropertyId::Width);
+        panel->RemoveProperty(Rml::PropertyId::Height);
+    }
     m_RmlView.Document()->UpdateDocument();
 }
 
@@ -376,21 +344,18 @@ void mu::ui::window::CMoveCommandWindow::SettingCanMoveMap()
 
 void mu::ui::window::CMoveCommandWindow::RmlWheelList(Rml::Event& event)
 {
-    // The list is laid out at the text's real size: a row is its reference height at the list's
-    // own scale.
+    // One row per notch: a row's height in the list's own (text-sized) layout.
     Rml::Element* list = event.GetCurrentElement();
-    const MoveCommandRmlModel& model = m_RmlView.GetModel();
-    if (list == nullptr || model.listHeight <= 0.f)
-        return;
-    const float rowStep = model.rowHeight * list->GetBox().GetSize(Rml::BoxArea::Content).y / model.listHeight;
+    Rml::Element* row = list != nullptr && list->GetNumChildren() > 0 ? list->GetChild(0) : nullptr;
+    const float rowStep = row != nullptr ? row->GetBox().GetSize(Rml::BoxArea::Border).y : 0.f;
     if (rowStep <= 0.f)
         return;
 
     // Stopping the event keeps RmlUi from scrolling the list itself.
     event.StopPropagation();
     const float notches = event.GetParameter("wheel_delta_y", 0.f);
-    const float row = std::round(list->GetScrollTop() / rowStep) + notches;
-    list->SetScrollTop(row * rowStep);
+    const float rowIndex = std::round(list->GetScrollTop() / rowStep) + notches;
+    list->SetScrollTop(rowIndex * rowStep);
 }
 
 void mu::ui::window::CMoveCommandWindow::RmlClickWarp(int row)
@@ -468,14 +433,6 @@ void mu::ui::window::CMoveCommandWindow::BindRmlModel(Rml::DataModelConstructor&
 {
     c.Bind("text_px", &model.textPx);
 
-    c.Bind("panel_height", &model.panelHeight);
-    c.Bind("list_height", &model.listHeight);
-    c.Bind("list_tail", &model.listTail);
-    c.Bind("list_width", &model.listWidth);
-    c.Bind("row_width", &model.rowWidth);
-    c.Bind("row_height", &model.rowHeight);
-    c.Bind("close_top", &model.closeTop);
-
     auto row = c.RegisterStruct<MoveCommandRowEntry>();
     row.RegisterMember("strife_text", &MoveCommandRowEntry::strifeText);
     row.RegisterMember("map_name", &MoveCommandRowEntry::mapName);
@@ -519,7 +476,7 @@ void mu::ui::window::CMoveCommandWindow::BindRmlModel(Rml::DataModelConstructor&
 
 void mu::ui::window::CMoveCommandWindow::OnRmlBuilt()
 {
-    ApplyFillWidth();
+    ApplyFillSize();
 }
 
 void mu::ui::window::CMoveCommandWindow::BuildRmlUi()
@@ -539,40 +496,12 @@ void mu::ui::window::CMoveCommandWindow::SyncRmlModel()
 
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
-    // Re-measured every frame, not just on open: the row height and therefore the whole window's
-    // height follow the window size, which a resolution change moves under an already-open window.
-    RefreshLayoutMetrics();
-
-    MoveCommandRmlModel& model = m_RmlView.GetModel();
-
-    // The list area is what is left of the panel once the header block above and the close bar
-    // below it are taken out -- native's own kListOffsetY and closeTop, restated as a height.
-    const float panelHeight = static_cast<float>(m_layout.windowHeight);
-    const float listHeight = static_cast<float>(m_layout.closeTop - m_layout.listTop);
-    // The rows and the scrollbar get separate lanes, as native drew them: rows run to panel+210
-    // (windowWidth - 22, its own hit-box inset) and the scroll well sits beyond that, ending at
-    // panel+227 -- the same right inset the close bar uses (windowWidth - 5). A row spanning the
-    // whole pane would sit underneath the scrollbar and swallow the drag.
-    const float rowWidth = static_cast<float>(m_layout.windowWidth - 22);
-    const float listWidth = static_cast<float>(m_layout.windowWidth - 5);
-    const float rowHeight = static_cast<float>(m_iRealFontHeight);
-    const float closeTop = static_cast<float>(m_layout.closeTop - m_Pos.y);
-
-    auto syncFloat = [&](float MoveCommandRmlModel::* field, const char* name, float value)
-    {
-        if (model.*field != value) { model.*field = value; m_RmlView.MarkDirty(name); }
-    };
-
-    syncFloat(&MoveCommandRmlModel::panelHeight, "panel_height", panelHeight);
-    syncFloat(&MoveCommandRmlModel::listHeight, "list_height", listHeight);
-    syncFloat(&MoveCommandRmlModel::listTail, "list_tail", rowHeight > 0.f ? std::fmod(listHeight, rowHeight) : 0.f);
-    syncFloat(&MoveCommandRmlModel::listWidth, "list_width", listWidth);
-    syncFloat(&MoveCommandRmlModel::rowWidth, "row_width", rowWidth);
-    syncFloat(&MoveCommandRmlModel::rowHeight, "row_height", rowHeight);
-    syncFloat(&MoveCommandRmlModel::closeTop, "close_top", closeTop);
-
     SettingCanMoveMap();
     RebuildRowModel();
+
+    // With every row in view the original drew its thumb disabled.
+    if (Rml::Element* list = m_RmlView.Document()->GetElementById("list"))
+        list->SetClass("no-scroll", list->GetScrollHeight() <= list->GetClientHeight() + 0.5f);
 
     if (m_bRewindPending)
     {
@@ -644,7 +573,7 @@ void mu::ui::window::CMoveCommandWindow::RebuildRowModel()
 
 void mu::ui::window::CMoveCommandWindow::OpenningProcess()
 {
-    RefreshDataAndLayout();
+    RefreshData();
     SetStrifeMap();
     SettingCanMoveMap();
 

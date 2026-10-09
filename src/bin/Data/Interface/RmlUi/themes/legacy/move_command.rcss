@@ -9,10 +9,12 @@
    frame art of its own -- native drew a flat translucent rectangle, nothing more -- so there is no
    sprite chrome here and nothing to share with docked_panel_frame.rcss. */
 
+/* The dock's height less its top unit (the original's window started at y 1). */
 #panel {
 	position: absolute;
 	transform-origin: left top;
 	width: 230px;
+	height: 431px;
 	/* RenderFrame()'s window fill, 0xCC000000. */
 	background-color: rgba(0, 0, 0, 204);
 	font-family: "token(font-body)";
@@ -50,11 +52,18 @@
    it is already laid out in real pixels -- a scrollbar sized in reference units would be the one
    part of this window that grew with the panel while its neighbours did not. It follows the
    player's UI-scale setting instead, same as every other .scroll-pane consumer. */
-#list {
+/* Between the header (native's kListOffsetY) and the close bar. */
+#list_box {
 	position: absolute;
 	left: 2px;
-	/* Native's kListOffsetY. */
+	right: 3px;
 	top: 38px;
+	bottom: 22px;
+}
+#list {
+	position: absolute;
+	left: 0;
+	top: 0;
 	transform-origin: left top;
 	/* Native drew the track at every list length, also when every row fits (large windows). */
 	overflow: hidden scroll;
@@ -83,6 +92,8 @@
 	color: rgb(164, 39, 17);
 	pointer-events: auto;
 }
+/* A row is its text's line height plus 2 reference px, as native's rows were. */
+.mc-strut { display: inline; }
 .mc-row.can-move { color: rgb(255, 255, 255); }
 
 /* Each cell reproduces RT3_WRITE_CENTER exactly: native passed no box width, so the text renderer
@@ -118,33 +129,20 @@
 	position: absolute;
 	left: 2px;
 	right: 3px;
+	bottom: 6px;
+	height: 16px;
 	background-color: rgb(153, 0, 0);
 	pointer-events: auto;
 	cursor: pointer;
 }
-#close_label {
-	display: block;
-	position: absolute;
-	left: 0;
-	top: 1px;
-	text-align: center;
-	transform-origin: center top;
-	color: rgb(255, 255, 255);
-}
-
-/* The leftover part of a row at the end of the list, so it scrolls in whole rows; its height is
-   what the list's own height leaves over. */
-.list-tail { display: block; }
+#close_label { position: absolute; white-space: nowrap; color: rgb(255, 255, 255); }
 
 /* A theme's data-fit="fill" slot sizes #panel (class fill-placement), its border included. */
 #panel.fill-placement { box-sizing: border-box; }
 
-/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. The rows
+   leave 17 reference px at the pane's right for the scrollbar; #head spans the rows' width. */
 #title { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
-#close_label { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
-/* The list's lengths (move_command.rml binds them in reference px on #panel). */
-#panel { --row-w: 0px; --row-h: 0px; --list-w: 0px; --list-h: 0px; --list-tail: 0px; }
-#head { width: calc(var(--row-w) * var(--root-scale)); }
-#list { width: calc(var(--list-w) * var(--root-scale)); height: calc(var(--list-h) * var(--root-scale)); }
-.mc-row { width: calc(var(--row-w) * var(--root-scale)); height: calc(var(--row-h) * var(--root-scale)); }
-.list-tail { height: calc(var(--list-tail) * var(--root-scale)); }
+#head { width: calc(100% * var(--root-scale) - 22px * var(--root-scale)); }
+#list { width: calc(100% * var(--root-scale)); height: calc(100% * var(--root-scale)); }
+.mc-row { width: calc(100% - 17px * var(--root-scale)); padding-bottom: calc(2px * var(--root-scale)); }

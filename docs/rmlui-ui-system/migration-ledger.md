@@ -36,7 +36,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CGensRanking` | Done | RmlUi-only 2D | Reward text keeps native wrapping and measured row pitch; RmlUi owns scrolling and the scrollbar (drag and scale checked in game) |
 | `CCommandWindow` | Done | RmlUi-only 2D | Right-docked; the twelve `CButton`s are gone. C++ keeps the armed command, its right-click run and the corner-close hit test |
 | `CQuickCommandWindow` | Done | RmlUi-only 2D | Render-only: placement, hover index and clicks stay native (the control socket reads the hover index) |
-| `CMoveCommandWindow` | Done | RmlUi-only 2D | Left-docked `/move` list; `.scroll-pane` replaced its hand-rolled scrollbar. `UI::MoveCommand::CalculateLayout()` keeps the dock-derived height. Counter-scaled pane reference (`component-catalog.md`) |
+| `CMoveCommandWindow` | Done | RmlUi-only 2D | Left-docked `/move` list; `.scroll-pane` replaced its hand-rolled scrollbar. The theme sizes the panel and lays the list out between the header and the close bar; a row is its text's height. Counter-scaled pane reference (`component-catalog.md`) |
 | `CChatLogWindow` | Done | RmlUi-only 2D | All 200 lines in the DOM, `.scroll-pane`, `data-attr-class` per line. C++ keeps messages, filters, the 3-line resize and the pointed-line hit test; `AddText()` callers unchanged |
 | `CSystemLogWindow` | Done | RmlUi-only 2D | Grows downward from a static origin, two colours, no interaction (`pointer-events: none`); shares `ChatLogLineEntry` |
 | `CChatInputBox` | Done | RmlUi-only 2D | Bar art, ten buttons, tooltip and both fields (`<input>` + `.text-field`, document Tab navigation). C++ keeps history, sending and keys |

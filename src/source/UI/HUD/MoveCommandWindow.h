@@ -1,7 +1,5 @@
 #pragma once
 
-#include <algorithm>
-
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "Network/MoveCommandData.h"
@@ -17,40 +15,8 @@ namespace Rml
 
 namespace UI::MoveCommand
 {
-    // Reference-space geometry, all of it derived from the dock height rather than fixed: the
-    // window starts at windowY and grows down to a whole number of rows short of the dock's own
-    // bottom edge, which is where the bottom HUD frame begins.
-    struct Layout
-    {
-        int windowWidth;
-        int windowHeight;
-        int visibleRows;
-        int listTop;
-        int closeTop;
-    };
-
+    // The panel's width when no theme slot sizes it; the theme lays out the rest.
     constexpr int kWindowWidth = 230;
-    constexpr int kFixedChromeHeight = 60;
-
-    // `availableHeight` is the height a theme's fill slot gives the window; without one, the dock
-    // height below windowY. `windowWidth` is the theme's panel width.
-    inline Layout CalculateLayout(int windowY, int rowHeight, int availableHeight = -1,
-                                  int windowWidth = kWindowWidth)
-    {
-        constexpr int kListOffsetY = 38;
-        constexpr int kCloseBottomGap = 6;
-
-        const int safeRowHeight = std::max(rowHeight, 1);
-        if (availableHeight < 0)
-            availableHeight = UI::Scaling::DockLogicalBottom - windowY;
-        const int visibleRows = std::max(1, (availableHeight - kFixedChromeHeight) / safeRowHeight);
-        const int windowHeight = kFixedChromeHeight + visibleRows * safeRowHeight;
-        const int listTop = windowY + kListOffsetY;
-        const int closeTop = windowY + windowHeight - safeRowHeight - kCloseBottomGap;
-        // The close bar's own left inset (2) and width (230 - 5) are fixed, so they live in RCSS
-        // with the rest of the static geometry rather than being computed and pushed from here.
-        return { windowWidth, windowHeight, visibleRows, listTop, closeTop };
-    }
 }
 
 namespace mu::ui::window
@@ -61,10 +27,7 @@ namespace mu::ui::window
 
         //$$AUTO_BUILD_LINE_ SHUFFLE_BEGIN
         CManager* m_pNewUIMng;
-        POINT						m_Pos;
-        int							m_iRealFontHeight;
         std::list<SEASON3B::CMoveCommandData::MOVEINFODATA*>	m_listMoveInfoData;
-        UI::MoveCommand::Layout		m_layout{};
         DWORD						m_dwMoveCommandKey;
 
         void BindRmlModel(Rml::DataModelConstructor& c, MoveCommandRmlModel& model);
@@ -83,10 +46,9 @@ namespace mu::ui::window
         CMoveCommandWindow();
         virtual ~CMoveCommandWindow();
 
-        bool Create(CManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
-        void SetPos(int x, int y);
         bool SupportsFillPlacement() const override { return true; }
         void SetFillPlacementSize(float width, float height) override;
         bool GetFillMinimumSize(float& width, float& height) const override;
@@ -122,12 +84,9 @@ namespace mu::ui::window
         SEASON3B::CMoveCommandData::MOVEINFODATA* FindMoveInfo(const wchar_t* pszMapName);
         void SetStrifeMap();
         void SettingCanMoveMap();
-        void RefreshDataAndLayout();
-        // The font-derived row height and everything CalculateLayout() derives from it, without
-        // re-copying the warp list itself.
-        void RefreshLayoutMetrics();
-        // Gives #panel a fill slot's width (its height is the layout's whole rows).
-        void ApplyFillWidth();
+        void RefreshData();
+        // Gives #panel a fill slot's size.
+        void ApplyFillSize();
 
         void BuildRmlUi();
         void SyncRmlModel();
