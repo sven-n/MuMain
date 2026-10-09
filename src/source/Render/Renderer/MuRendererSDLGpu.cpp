@@ -877,6 +877,13 @@ static SDL_GPUShader* s_vertShaderSkinned = nullptr; // skinned_textured.vert
 static SDL_GPUTexture* s_depthTexture = nullptr;
 static Uint32 s_depthW = 0u;
 static Uint32 s_depthH = 0u;
+// Ordinary frames render here rather than into the swapchain: SDL creates swapchain textures
+// without SAMPLER usage, so they can't be a blit source, and the RmlUi backend reads the frame
+// back to composite over it. Blitted to the swapchain at the end of EndFrame().
+static SDL_GPUTexture* s_mainColorTarget = nullptr;
+static Uint32 s_mainColorW = 0u;
+static Uint32 s_mainColorH = 0u;
+static SDL_GPUTextureFormat s_mainColorFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
 static SDL_FColor s_clearColor{0.0f, 0.0f, 0.0f, 1.0f};
 
 // Isolated offscreen render captures. A capture batches a sub-range of s_renderCmds -
@@ -1156,6 +1163,11 @@ static void ResolveFrameColorTarget()
             }
         }
         s_pendingFrameCaptureTextureId = 0u;
+    }
+
+    if (!s_frameColorTarget)
+    {
+        s_frameColorTarget = s_mainColorTarget;
     }
 }
 static std::unordered_set<std::uint32_t> s_ownedTextureIds;
@@ -1717,6 +1729,14 @@ public:
             s_depthW = 0u;
             s_depthH = 0u;
         }
+        if (s_mainColorTarget)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_mainColorTarget);
+            s_mainColorTarget = nullptr;
+            s_mainColorW = 0u;
+            s_mainColorH = 0u;
+            s_mainColorFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
+        }
         if (s_offscreenDepthTexture)
         {
             SDL_ReleaseGPUTexture(s_device, s_offscreenDepthTexture);
@@ -1852,6 +1872,7 @@ public:
         // Ensure depth texture matches swapchain dimensions.
         // Recreates on first frame or when window is resized.
         CreateOrResizeDepthTexture(s_swapW, s_swapH);
+        CreateOrResizeMainColorTarget(s_swapW, s_swapH);
 
         ResolveFrameColorTarget();
 
@@ -2267,6 +2288,7 @@ public:
 
         SDL_GPUTexture* const frameColorTexture = s_frameReadbackTexture    ? s_frameReadbackTexture
                                                   : reconnectCaptureTexture ? reconnectCaptureTexture
+                                                  : s_mainColorTarget       ? s_mainColorTarget
                                                                             : s_swapchainTexture;
 
         const bool chosenLate = frameColorTexture != targetChosenAtBegin;
@@ -4816,6 +4838,61 @@ private:
 
         s_depthW = width;
         s_depthH = height;
+        return true;
+    }
+
+    // Must match the swapchain's format: every replay pipeline is built against it. If that format
+    // can't be sampled, no target is made and frames fall back to the swapchain directly.
+    static bool CreateOrResizeMainColorTarget(Uint32 width, Uint32 height)
+    {
+        if (width == 0 || height == 0)
+        {
+            return false;
+        }
+
+        const SDL_GPUTextureFormat format = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
+        if (s_mainColorTarget && s_mainColorW == width && s_mainColorH == height && s_mainColorFormat == format)
+        {
+            return true;
+        }
+
+        if (s_mainColorTarget)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_mainColorTarget);
+            s_mainColorTarget = nullptr;
+        }
+        s_mainColorW = 0u;
+        s_mainColorH = 0u;
+        s_mainColorFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
+
+        constexpr SDL_GPUTextureUsageFlags usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
+        if (format == SDL_GPU_TEXTUREFORMAT_INVALID ||
+            !SDL_GPUTextureSupportsFormat(s_device, format, SDL_GPU_TEXTURETYPE_2D, usage))
+        {
+            return false;
+        }
+
+        SDL_GPUTextureCreateInfo colorInfo{};
+        colorInfo.type = SDL_GPU_TEXTURETYPE_2D;
+        colorInfo.format = format;
+        colorInfo.width = width;
+        colorInfo.height = height;
+        colorInfo.layer_count_or_depth = 1;
+        colorInfo.num_levels = 1;
+        colorInfo.sample_count = SDL_GPU_SAMPLECOUNT_1;
+        colorInfo.usage = usage;
+
+        s_mainColorTarget = SDL_CreateGPUTexture(s_device, &colorInfo);
+        if (!s_mainColorTarget)
+        {
+            mu::log::Get("render")->error("SDL_gpu -- main color target creation failed ({}x{}): {}", width, height,
+                                          SDL_GetError());
+            return false;
+        }
+
+        s_mainColorW = width;
+        s_mainColorH = height;
+        s_mainColorFormat = format;
         return true;
     }
 
