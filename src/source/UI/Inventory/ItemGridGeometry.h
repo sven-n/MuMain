@@ -1,7 +1,7 @@
 #pragma once
 
-// Where an item grid's cells are, in its window's logical units: the theme's .item-grid box and
-// .item-cell pitch (CInventoryCtrl::FollowGrid()), or the original's 20-unit cells until the
+// Where an item grid's cells are, in window pixels: the theme's .item-grid box and
+// .item-cell pitch (CInventoryCtrl::FollowGridPx()), or the original's 20-unit cells until the
 // document has laid out.
 namespace UI::Items
 {

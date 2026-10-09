@@ -139,7 +139,6 @@ void mu::ui::window::CNPCShop::SetPos(int x, int y)
     m_Pos.x = x;
     m_Pos.y = y;
 
-    m_pNewInventoryCtrl->SetPos(x + 15, y + 50);
 }
 
 bool mu::ui::window::CNPCShop::UpdateMouseEvent()

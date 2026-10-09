@@ -107,13 +107,10 @@ namespace mu::ui::window
         int GetTargetLinealPos(CInventoryCtrl* pDest);
 
         bool IsVisible() const;
-        CObject* GetLayoutOwner() const;
         void ShowPickedItem();
         void HidePickedItem();
 
         void Render3D();
-        // Whether the item is placed and drawn in window pixels: its sizing grid's space.
-        bool UsesPixels() const;
     };
 
     class CInventoryCtrl
@@ -154,8 +151,6 @@ namespace mu::ui::window
 
         type_vec_item	m_vecItem;
         UI::Items::GridGeometry m_Geometry;
-        // m_Geometry is in window pixels (FollowGridPx()), not the owner's layout units.
-        bool m_bPixels = false;
         STORAGE_TYPE m_StorageType;
         int	m_nColumn, m_nRow;
         /**
@@ -253,23 +248,14 @@ namespace mu::ui::window
         // As of the last Render(); empty until then.
         const UI::Items::ItemGridCells& Cells() const { return m_Cells; }
 
-        void SetPos(int x, int y);
-        POINT GetPos() const;
         const UI::Items::GridGeometry& Geometry() const { return m_Geometry; }
-        // Each frame: the grid where the theme draws `gridId` in `doc`, its cell pitch that of the
-        // grid's .item-cell. Until that has laid out, the first cell sits at `panelPos` +
-        // (`offsetX`, `offsetY`), the original's place, and the pitch stays as it was.
-        void FollowGrid(Rml::ElementDocument* doc, const char* gridId, const POINT& panelPos, int offsetX,
-                        int offsetY);
         // Each frame, in window pixels: the grid where the theme draws `gridId` in `doc`, transforms
         // included, its pitch that of its .item-cell. The grid's geometry, hit tests and tooltips and
-        // the item picked from it are then in window pixels, so its window draws its items
+        // the item picked from it are in window pixels, so its window draws its items
         // (Render3D()) into a target without a layout transform.
         void FollowGridPx(Rml::ElementDocument* doc, const char* gridId);
-        bool UsesPixels() const { return m_bPixels; }
-        // The pointer in this grid's space: window pixels for a pixel grid, else the active window's
-        // MouseX/MouseY.
-        POINT PointerPos() const;
+        // The pointer, in the window pixels every grid is in.
+        static POINT PointerPos();
         bool ContainsPointer();
         ITEM* FindItemAtPointer();
         int GetIndexAtPointer();
@@ -287,7 +273,6 @@ namespace mu::ui::window
         EVENT_STATE GetEventState();
 
         CObject* GetOwner() const;
-        CObject* GetLayoutOwner() const;
         bool IsVisible() const;
         void ShowInventory();
         void HideInventory();

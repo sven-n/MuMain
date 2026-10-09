@@ -173,7 +173,7 @@ namespace mu::ui::window
         // CQuestProgress/CQuestProgressByEtc use for their own reward list.
         std::vector<UI::Quests::RewardModel::RowData> m_ContentRows;
 
-        // Selected reward-item's info popup -- still native-rendered every frame (::RenderItemInfo())
+        // Selected reward-item's info popup -- still native-rendered every frame (::RenderItemInfoAtPx())
         // rather than ported to RmlUi. Anchored near the panel, not at the exact row Y.
         ITEM* m_pSelectedRewardItem = nullptr;
     };

@@ -96,7 +96,7 @@ bool mu::ui::window::CPickedItem::Create(CItemMng* pNewItemMng, CInventoryCtrl* 
     const bool hasGridAnchor = preservePickupAnchor && pSrc != nullptr;
     const UI::Items::GridRect itemBox =
         hasGridAnchor ? pSrc->Geometry().CellsRect(pItem->x, pItem->y, 1, 1) : UI::Items::GridRect{};
-    const POINT pointer = sizing ? sizing->PointerPos() : POINT{MouseX, MouseY};
+    const POINT pointer = CInventoryCtrl::PointerPos();
     const POINT offset = UI::Items::Drag::PickupOffset(static_cast<int>(std::lround(itemBox.x)),
                                                        static_cast<int>(std::lround(itemBox.y)), m_Size.cx,
                                                        m_Size.cy, pointer.x, pointer.y, hasGridAnchor);
@@ -234,11 +234,6 @@ bool mu::ui::window::CPickedItem::IsVisible() const
     return m_bShow;
 }
 
-CObject* mu::ui::window::CPickedItem::GetLayoutOwner() const
-{
-    return m_pSrcInventory ? m_pSrcInventory->GetOwner() : nullptr;
-}
-
 void mu::ui::window::CPickedItem::ShowPickedItem()
 {
     m_bShow = true;
@@ -253,28 +248,11 @@ void mu::ui::window::CPickedItem::Render3D()
 {
     if (m_pPickedItem && m_pPickedItem->Type >= 0)
     {
-        const CInventoryCtrl* sizing = SizingGrid();
-        POINT pointer{};
-        if (sizing != nullptr && sizing->UsesPixels())
-        {
-            pointer = sizing->PointerPos();
-        }
-        else
-        {
-            const auto transform = UI::Scaling::GetActiveTransform();
-            pointer.x = static_cast<LONG>(std::floor(UI::Scaling::LogicalX(transform, g_fWindowMouseX)));
-            pointer.y = static_cast<LONG>(std::floor(UI::Scaling::LogicalY(transform, g_fWindowMouseY)));
-        }
-        m_Pos = TopLeftIn(sizing, pointer.x, pointer.y);
+        const POINT pointer = CInventoryCtrl::PointerPos();
+        m_Pos = TopLeftIn(SizingGrid(), pointer.x, pointer.y);
         RenderItem3D(m_Pos.x, m_Pos.y, m_Size.cx, m_Size.cy, m_pPickedItem->Type, m_pPickedItem->Level,
                      m_pPickedItem->ExcellentFlags, m_pPickedItem->AncientDiscriminator, true);
     }
-}
-
-bool mu::ui::window::CPickedItem::UsesPixels() const
-{
-    const CInventoryCtrl* sizing = SizingGrid();
-    return sizing != nullptr && sizing->UsesPixels();
 }
 
 CPickedItem* mu::ui::window::CInventoryCtrl::ms_pPickedItem = nullptr;
@@ -1226,44 +1204,6 @@ void mu::ui::window::CInventoryCtrl::Render()
         RenderItemToolTip();
 }
 
-void mu::ui::window::CInventoryCtrl::SetPos(int x, int y)
-{
-    // A pixel grid follows its document (FollowGridPx()), not its window's layout units.
-    if (m_bPixels)
-        return;
-    m_Geometry = {static_cast<float>(x), static_cast<float>(y), m_Geometry.PitchX(), m_Geometry.PitchY(),
-                  m_Geometry.Columns(), m_Geometry.Rows()};
-}
-
-POINT mu::ui::window::CInventoryCtrl::GetPos() const
-{
-    return {static_cast<LONG>(std::lround(m_Geometry.Left())), static_cast<LONG>(std::lround(m_Geometry.Top()))};
-}
-
-void mu::ui::window::CInventoryCtrl::FollowGrid(Rml::ElementDocument* doc, const char* gridId, const POINT& panelPos,
-                                                int offsetX, int offsetY)
-{
-    float x = static_cast<float>(panelPos.x + offsetX);
-    float y = static_cast<float>(panelPos.y + offsetY);
-    UI::RmlBridge::RefreshLogicalAnchorPosition(doc, "panel", gridId, panelPos, x, y);
-
-    // A cell's margin box, so a theme may space its cells apart.
-    float pitchX = m_Geometry.PitchX();
-    float pitchY = m_Geometry.PitchY();
-    Rml::Element* grid = doc ? doc->GetElementById(gridId) : nullptr;
-    if (Rml::Element* cell = grid ? grid->QuerySelector(".item-cell") : nullptr)
-    {
-        const Rml::Vector2f size = cell->GetBox().GetSize(Rml::BoxArea::Margin);
-        if (size.x > 0.f && size.y > 0.f)
-        {
-            pitchX = size.x;
-            pitchY = size.y;
-        }
-    }
-
-    m_Geometry = {std::round(x), std::round(y), pitchX, pitchY, m_nColumn, m_nRow};
-}
-
 bool UI::Items::DrawnGridGeometry(Rml::Element* grid, int columns, int rows, float fallbackPitchX,
                                   float fallbackPitchY, GridGeometry& geometry)
 {
@@ -1297,15 +1237,12 @@ void mu::ui::window::CInventoryCtrl::FollowGridPx(Rml::ElementDocument* doc, con
     if (!UI::Items::DrawnGridGeometry(doc ? doc->GetElementById(gridId) : nullptr, m_nColumn, m_nRow,
                                       m_Geometry.PitchX(), m_Geometry.PitchY(), geometry))
         return;
-    m_bPixels = true;
     m_Geometry = geometry;
 }
 
-POINT mu::ui::window::CInventoryCtrl::PointerPos() const
+POINT mu::ui::window::CInventoryCtrl::PointerPos()
 {
-    if (m_bPixels)
-        return {static_cast<LONG>(std::floor(g_fWindowMouseX)), static_cast<LONG>(std::floor(g_fWindowMouseY))};
-    return {MouseX, MouseY};
+    return {static_cast<LONG>(std::floor(g_fWindowMouseX)), static_cast<LONG>(std::floor(g_fWindowMouseY))};
 }
 
 bool mu::ui::window::CInventoryCtrl::ContainsPointer()
@@ -1351,11 +1288,6 @@ CInventoryCtrl::EVENT_STATE mu::ui::window::CInventoryCtrl::GetEventState()
 }
 
 CObject* mu::ui::window::CInventoryCtrl::GetOwner() const
-{
-    return m_pOwner;
-}
-
-CObject* mu::ui::window::CInventoryCtrl::GetLayoutOwner() const
 {
     return m_pOwner;
 }
@@ -1552,11 +1484,8 @@ void mu::ui::window::CInventoryCtrl::RenderItemToolTip()
 
         const auto itemInfo = [&](bool sell, int inventype)
         {
-            if (m_bPixels)
-                RenderItemInfoAtPx(static_cast<float>(iTargetX), static_cast<float>(iTargetY), m_pToolTipItem, sell,
-                                   inventype);
-            else
-                RenderItemInfo(iTargetX, iTargetY, m_pToolTipItem, sell, inventype);
+            RenderItemInfoAtPx(static_cast<float>(iTargetX), static_cast<float>(iTargetY), m_pToolTipItem, sell,
+                               inventype);
         };
         if (m_ToolTipType == TOOLTIP_TYPE_INVENTORY)
         {
@@ -1564,10 +1493,7 @@ void mu::ui::window::CInventoryCtrl::RenderItemToolTip()
         }
         else if (m_ToolTipType == TOOLTIP_TYPE_REPAIR)
         {
-            if (m_bPixels)
-                RenderRepairInfoAtPx(static_cast<float>(iTargetX), static_cast<float>(iTargetY), m_pToolTipItem, false);
-            else
-                RenderRepairInfo(iTargetX, iTargetY, m_pToolTipItem, false);
+            RenderRepairInfoAtPx(static_cast<float>(iTargetX), static_cast<float>(iTargetY), m_pToolTipItem, false);
         }
         else if (m_ToolTipType == TOOLTIP_TYPE_NPC_SHOP)
         {

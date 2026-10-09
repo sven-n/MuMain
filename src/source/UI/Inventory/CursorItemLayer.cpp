@@ -19,19 +19,6 @@ CPickedItem* ShownPickedItem()
     return picked && picked->IsVisible() && picked->GetItem() ? picked : nullptr;
 }
 
-// The space CPickedItem::Render3D() places the item in: window pixels for a pixel grid's item, else
-// its source window's, as the shared item camera drew it, else the camera's own Dialog transform.
-UI::Scaling::Transform PickedItemTransform()
-{
-    CPickedItem* picked = CInventoryCtrl::GetPickedItem();
-    if (picked != nullptr && picked->UsesPixels())
-        return {1.f, 1.f, 0.f, 0.f, 1.f};
-    if (mu::ui::window::CObject* owner = picked ? picked->GetLayoutOwner() : nullptr)
-        return owner->GetLayoutTransform();
-    return UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Stage, static_cast<int>(WindowWidth),
-                                           static_cast<int>(WindowHeight));
-}
-
 struct CursorItemLayer
 {
     UI::RmlBridge::ThemedView<> view{{{"Data/Interface/RmlUi/cursor_item.rml"}},
@@ -40,8 +27,7 @@ struct CursorItemLayer
                                        {
                                            if (CPickedItem* picked = ShownPickedItem())
                                                picked->Render3D();
-                                       },
-                                       PickedItemTransform};
+                                       }};
 };
 
 // Outlives static destruction order: released explicitly while RmlUi is still up.

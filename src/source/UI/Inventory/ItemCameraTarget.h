@@ -17,8 +17,7 @@ class Element;
 // every UI item with (an identity view at a 1-degree field of view over the whole window), its
 // projection cropped to the image's box, so each RenderItem3D() call lands in the target exactly
 // where it would have landed on screen; native 2D the drawer draws (with the depth test off) maps
-// the same way. The drawer keeps its own coordinates: whatever space its RenderItem3D() rectangles
-// are in, through the transform it was built with.
+// the same way. The drawer's RenderItem3D() rectangles are in window pixels.
 namespace UI::Items
 {
 class ItemCameraTarget
@@ -26,10 +25,8 @@ class ItemCameraTarget
 public:
     // Gets the image's box in window pixels, for a drawer that frames one item to fill it.
     using Drawer = std::function<void(const Rml::Vector2f& offset, const Rml::Vector2f& size)>;
-    using TransformSource = std::function<UI::Scaling::Transform()>;
-
-    // `transform` gives the space the drawer's rectangles are in; window pixels when empty.
-    explicit ItemCameraTarget(Drawer drawer, TransformSource transform = {});
+    // The drawer's rectangles are in window pixels.
+    explicit ItemCameraTarget(Drawer drawer);
 
     // Once a frame: sizes the target to `image`'s box, shows it there and points its src at the
     // target. Null or disabled stops the drawing; the image is invisible while it has no frame.
@@ -43,7 +40,6 @@ private:
     void Render(std::uint32_t width, std::uint32_t height);
 
     Drawer m_drawer;
-    TransformSource m_transform;
     float m_fieldOfView = 1.f;
     // The image's box in window pixels as of the last Sync().
     Rml::Vector2f m_offset{0.f, 0.f};

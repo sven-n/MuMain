@@ -372,7 +372,6 @@ void CStorageInventory::SetPos(int x, int y)
     m_Pos.y = y;
     if (m_pNewInventoryCtrl)
     {
-        m_pNewInventoryCtrl->SetPos(x + 15, y + 36);
     }
 }
 

@@ -2053,7 +2053,9 @@ void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int 
     }
 }
 
-void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
+// (sx, sy) in the screen's 640x480 stretch, `screen`.
+static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell, int Inventype,
+                           bool bItemTextListBoxUse)
 {
     // Unconditional: the early returns below (and the pet-item delegation further down, which
     // renders its own tooltip via giPetManager::RenderPetItemInfo() instead) used to mean "this
@@ -5602,20 +5604,16 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
 
     if (isrendertooltip)
     {
-        // sx/sy are reference-pixel, in the same space as this window's own m_Pos-based root_x/root_y
-        // conversion (CharacterInfoWindow.cpp etc.) -- convert through the ambient transform here,
-        // at the call site, rather than inside the shared tooltip (see RmlTooltip.h's comment for
-        // why: a shared primitive can't safely guess which transform applies to a given caller).
-        const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
         UI::Tooltip::ShowLegacyTextList(
             TextNum,
-            UI::Scaling::PositionX(activeTransform, static_cast<float>(sx)),
-            UI::Scaling::PositionY(activeTransform, static_cast<float>(sy)),
+            UI::Scaling::PositionX(screen, static_cast<float>(sx)),
+            UI::Scaling::PositionY(screen, static_cast<float>(sy)),
             bItemTextListBoxUse ? UI::Tooltip::Placement::Above : UI::Tooltip::Placement::Below);
     }
 }
 
-void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
+// (sx, sy) in the screen's 640x480 stretch, `screen`.
+static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell)
 {
     // Unconditional: the many early returns below used to mean "this frame draws nothing" under
     // the old per-frame native draw, which was already equivalent to "hidden" for that item type.
@@ -5914,35 +5912,36 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
     else
         sy += p->Height * INVENTORY_SCALE;
 
-    const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
     UI::Tooltip::ShowLegacyTextList(
         TextNum,
-        UI::Scaling::PositionX(activeTransform, static_cast<float>(sx)),
-        UI::Scaling::PositionY(activeTransform, static_cast<float>(sy)));
+        UI::Scaling::PositionX(screen, static_cast<float>(sx)),
+        UI::Scaling::PositionY(screen, static_cast<float>(sy)));
 }
 
 namespace
 {
 // Runs `render` with the anchor (x, y) in window pixels converted into the screen's 640x480
-// stretch, which it then runs under.
+// stretch, which it then runs under (its text is measured there).
 template <typename Render> void InScreenSpace(float x, float y, Render render)
 {
     const UI::Scaling::Transform screen =
         UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     const UI::Scaling::ScopedActiveTransform scope(screen);
-    render(static_cast<int>(std::lround(UI::Scaling::LogicalX(screen, x))),
+    render(screen, static_cast<int>(std::lround(UI::Scaling::LogicalX(screen, x))),
            static_cast<int>(std::lround(UI::Scaling::LogicalY(screen, y))));
 }
 } // namespace
 
 void RenderItemInfoAtPx(float x, float y, ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
 {
-    InScreenSpace(x, y, [&](int sx, int sy) { RenderItemInfo(sx, sy, ip, Sell, Inventype, bItemTextListBoxUse); });
+    InScreenSpace(x, y, [&](const UI::Scaling::Transform& screen, int sx, int sy)
+                  { RenderItemInfo(screen, sx, sy, ip, Sell, Inventype, bItemTextListBoxUse); });
 }
 
 void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell)
 {
-    InScreenSpace(x, y, [&](int sx, int sy) { RenderRepairInfo(sx, sy, ip, Sell); });
+    InScreenSpace(x, y, [&](const UI::Scaling::Transform& screen, int sx, int sy)
+                  { RenderRepairInfo(screen, sx, sy, ip, Sell); });
 }
 
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)

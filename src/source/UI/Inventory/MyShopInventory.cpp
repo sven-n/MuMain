@@ -385,11 +385,6 @@ void mu::ui::window::CMyShopInventory::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
-
-    if (m_pNewInventoryCtrl)
-    {
-        m_pNewInventoryCtrl->SetPos(m_Pos.x + 16, m_Pos.y + 90);
-    }
 }
 
 // Caps the <input>'s own edit buffer at the same length the native CUITextInputBox was given

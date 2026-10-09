@@ -104,7 +104,7 @@ namespace mu::ui::window
         // same split CMyQuestInfoWindow's own m_ContentRows/RewardModel::Entry uses.
         std::vector<UI::Quests::RewardModel::RowData> m_RewardRows;
 
-        // Selected reward-item's info popup -- still native-rendered every frame (::RenderItemInfo())
+        // Selected reward-item's info popup -- still native-rendered every frame (::RenderItemInfoAtPx())
         // rather than ported to RmlUi. See CMyQuestInfoWindow's own m_pSelectedRewardItem.
         ITEM* m_pSelectedRewardItem = nullptr;
 

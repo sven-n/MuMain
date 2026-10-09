@@ -556,7 +556,6 @@ void CMyInventory::SetPos(int x, int y)
 
     SetEquipmentSlotInfo();
 
-    m_pNewInventoryCtrl->SetPos(x + 15, y + 200);
     SyncNativeLayout();
 }
 
