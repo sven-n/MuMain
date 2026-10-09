@@ -4,12 +4,8 @@
 # count (or delete its line) when work removes uses; the build fails when a count grows or a new
 # file appears. Regenerate with --write after removing uses, and check the diff only shrinks.
 
-Engine/Object/ZzzInventory.cpp: 2
-GameLogic/Pets/GIPetManager.cpp: 1
-Guild/GuildInfoWindow.cpp: 1
-Guild/GuildMakeWindow.cpp: 1
+Engine/Object/ZzzInventory.cpp: 1
 Render/Text/CUIRenderTextSDLTtf.cpp: 2
-Scenes/LoginSceneOverlay.cpp: 1
 UI/Combat/DuelWatchWindow.cpp: 1
 UI/Core/SceneUICoordinator.cpp: 1
 UI/Core/UILayoutPolicy.cpp: 9
@@ -18,12 +14,9 @@ UI/Core/WindowCommon.h: 1
 UI/Core/WindowManager.cpp: 10
 UI/Core/WindowObject.h: 6
 UI/Dialogs/HelpWindow.cpp: 1
-UI/Dialogs/ReconnectDialog.cpp: 3
 UI/HUD/ChatLogWindow.cpp: 1
 UI/HUD/MainFrameWindow.cpp: 1
-UI/HUD/MasterLevel.cpp: 3
 UI/Inventory/TipTextListView.cpp: 1
-UI/MuHelper/MuHelperSkillPicker.cpp: 2
 UI/Placement/WindowPlacement.cpp: 6
 UI/RmlBridge/RmlDocumentHints.cpp: 1
 UI/RmlBridge/RmlNativeText.cpp: 2
@@ -38,4 +31,3 @@ UI/Social/LetterReadWindow.cpp: 1
 UI/Social/LetterWriteWindow.cpp: 1
 UI/Social/PhotoViewer.cpp: 4
 UI/Social/SocialWindowManager.cpp: 1
-UI/Windows/ServerMsgWin.cpp: 2

@@ -7,10 +7,9 @@
 <body>
 	<!-- The character list's server message window (CServerMsgWin): the frame (translucent centre,
 	     top and bottom strips, side pieces as tall as the line count) and up to five lines in the
-	     fixed font. Real pixels, like the original (Legacy layout: root_scale stays 1). C++ keeps
+	     fixed font. Real pixels, like the original. C++ keeps
 	     the lines; nothing here is interactive. -->
-	<div id="panel" data-model="server_msg" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel" data-model="server_msg" data-style-left="panel_x + 'px'" data-style-top="panel_y + 'px'">
 		<div id="centre" data-style-height="(side_height + 6) + 'px'"></div>
 		<div id="top"></div>
 		<div id="bottom" data-style-top="(side_height + 6) + 'px'"></div>

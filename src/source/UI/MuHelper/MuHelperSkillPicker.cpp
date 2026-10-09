@@ -8,7 +8,9 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/MuHelper/MuHelperShared.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
-#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlElementBox.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Social/SocialWindowBase.h"
 
@@ -51,20 +53,8 @@ void CMuHelperSkillPicker::Release()
 
 bool CMuHelperSkillPicker::UpdateMouseEvent()
 {
-    const int skillType = SkillUnderMouse();
-
-    // Only the icons claim the mouse. Everywhere else passes through -- to the world, so the
-    // character can still move while the flyout is open, and to the config window, which is how a
-    // second click on the same slot reaches it and closes the flyout.
-    if (skillType == -1)
-        return true;
-
-    if (IsRelease(VK_LBUTTON))
-    {
-        g_pMuHelperConfig->AssignSkill(skillType);
-        Show(false);
-    }
-    return false;
+    // Only the icons take the pointer; everywhere else passes through.
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
 }
 
 bool CMuHelperSkillPicker::UpdateKeyEvent()
@@ -142,7 +132,7 @@ void CMuHelperSkillPicker::PrepareSkillsToRender()
 // space). This is a genuinely computed layout, not a static one, which is why it stays in C++.
 void CMuHelperSkillPicker::LayoutPlacements()
 {
-    const float startX = static_cast<float>(REFERENCE_WIDTH) - 190.f - BoxWidth;
+    const float startX = -BoxWidth;
     const float startY = m_bFilterByAttackSkills ? 171.f : 293.f;
     const int itemsPerColumn = m_bFilterByAttackSkills ? 10 : 5;
 
@@ -166,24 +156,19 @@ void CMuHelperSkillPicker::LayoutPlacements()
     m_bEntriesDirty = true;
 }
 
-// The same rects the icons are drawn at, in the reference space MouseX/MouseY are already mapped
-// into for this window -- no read-back from RmlUi, so no transform conversion anywhere.
-int CMuHelperSkillPicker::SkillUnderMouse() const
+void CMuHelperSkillPicker::Pick(int index)
 {
-    for (const Placement& p : m_placements)
-    {
-        if (CheckMouseIn(static_cast<int>(p.left), static_cast<int>(p.top),
-                         static_cast<int>(BoxWidth), static_cast<int>(BoxHeight)))
-            return p.skillType;
-    }
-    return -1;
+    if (!IsVisible() || index < 0 || index >= static_cast<int>(m_placements.size()))
+        return;
+    g_pMuHelperConfig->AssignSkill(m_placements[static_cast<size_t>(index)].skillType);
+    Show(false);
 }
 
 void CMuHelperSkillPicker::BindRmlModel(Rml::DataModelConstructor& c, MuHelperSkillPickerRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
+    c.Bind("origin_x", &model.originX);
+    c.Bind("origin_y", &model.originY);
+    c.Bind("scale", &model.scale);
 
     auto entry = c.RegisterStruct<MuHelperSkillPickerEntry>();
     entry.RegisterMember("left", &MuHelperSkillPickerEntry::left);
@@ -191,6 +176,11 @@ void CMuHelperSkillPicker::BindRmlModel(Rml::DataModelConstructor& c, MuHelperSk
     entry.RegisterMember("decorator", &MuHelperSkillPickerEntry::decorator);
     c.RegisterArray<std::vector<MuHelperSkillPickerEntry>>();
     c.Bind("entries", &model.entries);
+    c.BindEventCallback("mhsp_pick", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+                        {
+                            if (args.size() == 1)
+                                Pick(args[0].Get<int>(-1));
+                        });
 }
 
 void CMuHelperSkillPicker::BuildRmlUi()
@@ -208,7 +198,7 @@ void CMuHelperSkillPicker::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), POINT{ 0, 0 });
+    SyncOrigin();
 
     if (!m_bEntriesDirty)
         return;
@@ -226,6 +216,19 @@ void CMuHelperSkillPicker::SyncRmlModel()
         model.entries.push_back(std::move(e));
     }
     m_RmlView.MarkDirty("entries");
+}
+
+// The flyout follows the config window wherever the workspace placed or the player dragged it.
+void CMuHelperSkillPicker::SyncOrigin()
+{
+    Rml::ElementDocument* config = g_pMuHelperConfig ? g_pMuHelperConfig->GetPlacedDocument() : nullptr;
+    Rml::Element* panel = config ? config->GetElementById("panel") : nullptr;
+    Rml::Vector2f origin;
+    if (panel == nullptr || !UI::RmlBridge::DrawnTopLeft(*panel, origin))
+        return;
+    SyncField(m_RmlView.Binder(), &MuHelperSkillPickerRmlModel::originX, "origin_x", origin.x);
+    SyncField(m_RmlView.Binder(), &MuHelperSkillPickerRmlModel::originY, "origin_y", origin.y);
+    SyncField(m_RmlView.Binder(), &MuHelperSkillPickerRmlModel::scale, "scale", UI::RmlBridge::DrawnScale(*panel));
 }
 
 bool CMuHelperSkillPicker::IsAttackSkill(int iSkillType)

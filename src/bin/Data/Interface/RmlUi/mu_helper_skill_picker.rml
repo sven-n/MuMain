@@ -7,18 +7,18 @@
 	<link type="text/rcss" href="mu_helper_skill_picker.rcss"/>
 </head>
 <body>
-	<!-- The flyout beside the MU Helper config window's attack/buff slots. Docked-right like its
-	     owner, so #panel carries the same root transform, anchored at the dock's own origin: every
-	     entry's left/top is native's reference-space fan-out position, computed in C++
-	     (CMuHelperSkillPicker::LayoutPlacements()) because it is a genuinely computed layout.
+	<!-- The flyout beside the MU Helper config window's attack/buff slots. #panel sits on the config
+	     window's drawn top left at its scale, so every entry's left/top is native's fan-out position
+	     from that window's own corner, computed in C++ (CMuHelperSkillPicker::LayoutPlacements())
+	     because it is a genuinely computed layout.
 
 	     Each icon is one named cell of a generated skill atlas (skill_icons.rcss, master_skill_icons.rcss), bound as a whole
 	     decorator -- the only way to crop an atlas in this build. -->
 	<div id="panel" data-model="mu_helper_skill_picker"
-	     data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	     data-style-left="origin_x + 'px'" data-style-top="origin_y + 'px'"
+	     data-style-transform="'scale(' + scale + ')'" data-style---root-scale="scale">
 		<div class="mhsp-entry slot slot--filled" data-for="e : entries"
-		     data-style-left="e.left + 'px'" data-style-top="e.top + 'px'">
+		     data-style-left="e.left + 'px'" data-style-top="e.top + 'px'" data-event-click="mhsp_pick(it_index)">
 			<div class="mhsp-icon" data-style-decorator="e.decorator"></div>
 		</div>
 	</div>

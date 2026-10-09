@@ -11,7 +11,8 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
-#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/RmlBridge/RmlSyncField.h"
+#include "UI/Scaling/UITransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include <RmlUi/Core/ElementDocument.h>
@@ -109,9 +110,8 @@ bool CServerMsgWin::Update()
 
 void CServerMsgWin::BindRmlModel(Rml::DataModelConstructor& c, ServerMsgRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
+    c.Bind("panel_x", &model.panelX);
+    c.Bind("panel_y", &model.panelY);
     c.Bind("text_px", &model.textPx);
     c.Bind("side_height", &model.sideHeight);
     c.RegisterArray<std::vector<Rml::String>>();
@@ -134,16 +134,14 @@ void CServerMsgWin::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    // LayoutMode::Pixels keeps the transform identity here: real pixels, as the original drew.
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_ptPos);
+    // Real pixels, as the original drew; the text at the scene windows' size (LegacyUiTransform()).
+    SyncField(m_RmlView.Binder(), &ServerMsgRmlModel::panelX, "panel_x", static_cast<float>(m_ptPos.x));
+    SyncField(m_RmlView.Binder(), &ServerMsgRmlModel::panelY, "panel_y", static_cast<float>(m_ptPos.y));
+    SyncField(m_RmlView.Binder(), &ServerMsgRmlModel::textPx, "text_px",
+              UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Fixed,
+                                               UI::Scaling::LegacyUiTransform(static_cast<int>(WindowWidth),
+                                                                              static_cast<int>(WindowHeight))));
     ServerMsgRmlModel& model = m_RmlView.GetModel();
-    const float textPx =
-        UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Fixed, UI::Scaling::GetActiveTransform());
-    if (model.textPx != textPx)
-    {
-        model.textPx = textPx;
-        m_RmlView.MarkDirty("text_px");
-    }
     const float sideHeight = static_cast<float>(kSideStepHeight * m_nBgSideNow);
     if (model.sideHeight != sideHeight)
     {

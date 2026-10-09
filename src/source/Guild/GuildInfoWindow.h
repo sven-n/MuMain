@@ -94,7 +94,7 @@ namespace mu::ui::window
         std::vector<UnionEntry>     m_Unions;
         std::wstring                m_SelectedUnion;
         bool m_ListsDirty = true;
-        float m_ListScale = -1.f;
+        SIZE m_ListWindowSize{};
         float m_ListTextPx = -1.f;
         ServerMessageInfo		    m_MessageInfo;
 

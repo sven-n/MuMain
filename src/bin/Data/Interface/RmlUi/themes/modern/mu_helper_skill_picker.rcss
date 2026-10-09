@@ -1,6 +1,6 @@
 /* Modern theme for CMuHelperSkillPicker -- each entry is base.rcss's shared .slot/.slot--filled
    rather than native's newui_skillbox art. The skill icons themselves are game art and identical in
-   both themes (skill_icons.rcss). Plain reference px: #panel carries transform: scale(root_scale). */
+   both themes (skill_icons.rcss). Plain reference px: #panel carries the config window's scale. */
 
 /* Above the docked MU Helper documents by the stacking table (5.2 over 3.4), so RmlUi's own hit
    test stops at the flyout rather than reaching a control underneath it. */
@@ -18,7 +18,7 @@ body {
 	position: absolute;
 	width: 32px;
 	height: 38px;
-	/* base.rcss sizes .slot's border in dp; this panel is px scaled by root_scale, where dp would
+	/* base.rcss sizes .slot's border in dp; this panel is px scaled by the config window's scale, where dp would
 	   scale twice. border-box keeps each entry on native's 32x38 pitch instead of growing by the
 	   border and overlapping its neighbours. */
 	border-width: 1px;

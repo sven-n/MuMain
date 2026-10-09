@@ -72,12 +72,11 @@ namespace
     }
 
     // RenderText() shrinks a text wider than its box to fit it: the size it drew `text` at.
-    float TextPxInBox(const UI::Scaling::Transform& transform, const wchar_t* text, float boxWidth)
+    float TextPxInBox(const wchar_t* text, float boxWidth)
     {
         g_pRenderText->SetFont(g_hFont);
         const int width = g_pRenderText->MeasureText(text, static_cast<int>(wcslen(text))).cx;
-        return UI::Scaling::NativeTextPixelSizeInBox(UI::Scaling::FontRole::Normal, transform,
-                                                     static_cast<float>(width), boxWidth);
+        return UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Normal, static_cast<float>(width), boxWidth);
     }
 };
 
@@ -460,14 +459,13 @@ void CGuildMakeWindow::SyncRmlModel()
 
 void CGuildMakeWindow::SyncContent()
 {
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     SyncField(m_RmlView.Binder(), &GuildMakeRmlModel::page, "page", static_cast<int>(m_GuildMakeState));
     SyncField(m_RmlView.Binder(), &GuildMakeRmlModel::titleText, "title_text", StringUtils::WideToNarrow(I18N::Game::Guild));
-    SyncField(m_RmlView.Binder(), &GuildMakeRmlModel::titlePx, "title_px", TextPxInBox(transform, I18N::Game::Guild, 190.f));
+    SyncField(m_RmlView.Binder(), &GuildMakeRmlModel::titlePx, "title_px", TextPxInBox(I18N::Game::Guild, 190.f));
     SyncField(m_RmlView.Binder(), &GuildMakeRmlModel::infoText, "info_text",
               StringUtils::WideToNarrow(I18N::Game::DoYouWishToBeTheGuildMaster));
     SyncField(m_RmlView.Binder(), &GuildMakeRmlModel::infoPx, "info_px",
-              TextPxInBox(transform, I18N::Game::DoYouWishToBeTheGuildMaster, 190.f));
+              TextPxInBox(I18N::Game::DoYouWishToBeTheGuildMaster, 190.f));
     SyncField(m_RmlView.Binder(), &GuildMakeRmlModel::makeText, "make_text",
               StringUtils::WideToNarrow(I18N::Game::CreateGuild));
     SyncField(m_RmlView.Binder(), &GuildMakeRmlModel::backText, "back_text", StringUtils::WideToNarrow(I18N::Game::Back));
@@ -482,11 +480,10 @@ void CGuildMakeWindow::SyncContent()
     wchar_t result[100] = {};
     mu_swprintf(result, L"%ls : %ls", I18N::Game::NAME, GuildMark[MARK_EDIT].GuildName);
     SyncField(m_RmlView.Binder(), &GuildMakeRmlModel::resultText, "result_text", StringUtils::WideToNarrow(result));
-    SyncField(m_RmlView.Binder(), &GuildMakeRmlModel::resultPx, "result_px", TextPxInBox(transform, result, 190.f));
+    SyncField(m_RmlView.Binder(), &GuildMakeRmlModel::resultPx, "result_px", TextPxInBox(result, 190.f));
 
-    const int lineHeight = CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal);
     SyncField(m_RmlView.Binder(), &GuildMakeRmlModel::labelLinePx, "label_line_px",
-              static_cast<float>(lineHeight) * transform.scaleY);
+              CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal));
 
     if (m_GuildMakeState == GUILDMAKE_INFO)
         return;

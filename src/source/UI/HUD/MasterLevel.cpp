@@ -21,7 +21,7 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/Tooltip/LegacyTextListTooltip.h"
 #include <RmlUi/Core/ElementDocument.h>
@@ -41,8 +41,9 @@ namespace
     constexpr int kIconOffsetX = 8;
     constexpr int kNodeHintBelowIcon = 33;
     constexpr int kNodeHintFlipTop = 300;
-    constexpr float kExperienceHintX = 466.0f;
-    constexpr float kExperienceHintY = 26.0f;
+    // From the experience area's top left: the original's (466, 26) against its (458, 11).
+    constexpr float kExperienceHintX = 8.0f;
+    constexpr float kExperienceHintY = 15.0f;
 
     template <typename Model>
     void SyncString(RmlModelBinder<Model>& binder, Rml::String Model::* field, const char* name, Rml::String value)
@@ -725,12 +726,13 @@ void mu::ui::window::CMasterLevel::ShowExperienceHint()
     mu_swprintf(TextList[0], L"%I64d / %I64d", Master_Level_Data.lMasterLevel_Experince,
                 Master_Level_Data.lNext_MasterLevel_Experince);
 
-    const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-    UI::Tooltip::ShowLegacyTextList(
-        1,
-        UI::Scaling::PositionX(activeTransform, kExperienceHintX),
-        UI::Scaling::PositionY(activeTransform, kExperienceHintY),
-        UI::Tooltip::Placement::Below, &kExperienceHintOwner);
+    Rml::Element* area = m_RmlView.Document() ? m_RmlView.Document()->GetElementById("experience_area") : nullptr;
+    Rml::Vector2f origin;
+    if (area == nullptr || !UI::RmlBridge::DrawnTopLeft(*area, origin))
+        return;
+    const float scale = UI::RmlBridge::DrawnScale(*area);
+    UI::Tooltip::ShowLegacyTextList(1, origin.x + kExperienceHintX * scale, origin.y + kExperienceHintY * scale,
+                                    UI::Tooltip::Placement::Below, &kExperienceHintOwner);
 }
 
 bool mu::ui::window::CMasterLevel::ShowNodeHint(int nodeId)
@@ -745,23 +747,21 @@ bool mu::ui::window::CMasterLevel::ShowNodeHint(int nodeId)
 
     const int lineCount = this->BuildNodeHintLines(it->second, tooltip->second);
 
-    // The theme places the node, so the hint reads the hovered one's own box back; the grid the
-    // original drew it on is the first-frame fallback, the same convention as the panel sizes.
-    const auto position =
-        UI::Skills::MasterTree::NodeBoxPosition(it->second.Group, UI::Skills::MasterTree::SlotInRank(it->second.Index),
-                                                SkillAttribute[it->second.Skill].SkillRank);
-    float nodeLeft = static_cast<float>(position.left);
-    float nodeTop = static_cast<float>(position.top);
-    const std::string nodeElementId = "node_" + std::to_string(nodeId);
-    UI::RmlBridge::RefreshLogicalAnchorPosition(m_RmlView.Document(), "panel", nodeElementId.c_str(), POINT{0, 0}, nodeLeft,
-                                                nodeTop);
-    const UI::Scaling::Transform activeTransform = UI::Scaling::GetActiveTransform();
-    UI::Tooltip::ShowLegacyTextList(
-        lineCount,
-        UI::Scaling::PositionX(activeTransform, nodeLeft + kIconOffsetX),
-        UI::Scaling::PositionY(activeTransform, nodeTop + kNodeHintBelowIcon),
-        nodeTop > kNodeHintFlipTop ? UI::Tooltip::Placement::Above : UI::Tooltip::Placement::Below,
-        &kNodeHintOwner);
+    // The theme places the node: the hint hangs from the hovered one's drawn box, and goes above
+    // it in the tree's lower part.
+    Rml::ElementDocument* document = m_RmlView.Document();
+    Rml::Element* node = document ? document->GetElementById("node_" + std::to_string(nodeId)) : nullptr;
+    Rml::Element* panel = document ? document->GetElementById("panel") : nullptr;
+    Rml::Vector2f nodeOrigin, panelOrigin;
+    if (node == nullptr || panel == nullptr || !UI::RmlBridge::DrawnTopLeft(*node, nodeOrigin) ||
+        !UI::RmlBridge::DrawnTopLeft(*panel, panelOrigin))
+        return false;
+    const float scale = UI::RmlBridge::DrawnScale(*node);
+    const bool lowerPart = scale > 0.f && (nodeOrigin.y - panelOrigin.y) / scale > kNodeHintFlipTop;
+    UI::Tooltip::ShowLegacyTextList(lineCount, nodeOrigin.x + kIconOffsetX * scale,
+                                    nodeOrigin.y + kNodeHintBelowIcon * scale,
+                                    lowerPart ? UI::Tooltip::Placement::Above : UI::Tooltip::Placement::Below,
+                                    &kNodeHintOwner);
     return true;
 }
 

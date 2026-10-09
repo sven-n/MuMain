@@ -100,7 +100,9 @@ bool Render(bool tourMode, float logoAlpha, const wchar_t* copyright, const wcha
 
     UI::RmlBridge::SyncDocumentVisibilityBehind(s_view.Document(), true);
 
-    const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
+    // The original's 640x480 screen stretched over the window.
+    const UI::Scaling::Transform transform =
+        UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
 
     // The logo: RenderColorBitmap() at (320 - 102.4, 25), 204.8 x 102.4, the glow first.
     SyncField(s_view.Binder(), &LoginSceneRmlModel::logoVisible, "logo_visible", tourMode);

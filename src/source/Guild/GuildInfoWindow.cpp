@@ -700,12 +700,12 @@ void mu::ui::window::CGuildInfoWindow::SyncContent()
 void mu::ui::window::CGuildInfoWindow::SyncListContent()
 {
     const auto& model = m_RmlView.GetModel();
-    const float listScale = GetLayoutTransform().scaleX;
-    if (listScale != m_ListScale || model.textPx != m_ListTextPx)
+    const SIZE windowSize{static_cast<LONG>(WindowWidth), static_cast<LONG>(WindowHeight)};
+    if (windowSize.cx != m_ListWindowSize.cx || windowSize.cy != m_ListWindowSize.cy || model.textPx != m_ListTextPx)
         m_ListsDirty = true;
     if (!m_ListsDirty)
         return;
-    m_ListScale = listScale;
+    m_ListWindowSize = windowSize;
     m_ListTextPx = model.textPx;
     m_ListsDirty = false;
 
