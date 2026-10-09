@@ -14,6 +14,20 @@ No code-health item is left.
 - **Party list bounds.** At 720p and about 110% or more the list rises above the screen in both
   themes, and in modern it overlaps the top bar at 100%. Keep it between the top bar and the HUD.
 - **Legacy trade overlaps.** The Warning, notice and confirm texts overlap; an RCSS fix.
+- **Friend family native positions.** The friend list, chat rooms and letters still mirror their
+  dragged documents into `FloatingWorkspaceTransform()` units for `CUIWindowMgr`, the last use of a
+  per-window layout space. Nothing hit-tests with them; they serve the new-window cascade, the
+  above-HUD clamp, the friend list's remembered place and size, the next letter's place and the
+  views' first placement. Store them in RmlUi dp instead, so every conversion ratio is 1: cascade
+  bounds from the context size, the clamp from the workspace's HUD top. Then delete
+  `FloatingWorkspaceTransform`/`Bounds`/`ContentHeight`, the views' ratio code and
+  `CUIFriendWindow::SemanticScaleRatio()`. Positions then follow the UI scale, as docked windows
+  do. Check drag, a cascade of chat windows, maximize and restore, reopening the friend list, and a
+  scale change with windows open.
+- **Native text floor at small scales.** Native text never drops below 11 pt times the OS display
+  scale, so at 75 % on 1024x768 fixed-length lines run past small docked windows (Blood Castle and
+  Devil Square entry, MU Helper, the shop warning). Let the text follow the panel scale down, or
+  fit those lines to their boxes.
 
 Waiting on their own triggers: the [accepted constraints](#accepted-as-it-stands-with-its-trigger)
 and the [modern HUD orbs](#modern-theme-studies).
