@@ -68,7 +68,8 @@ void mu::ui::window::CSlideWindow::SyncRmlModel()
     const UI::HUD::SlideDisplay d = m_pSlideMgr->Display();
     auto& model = m_RmlView.GetModel();
 
-    const auto transform = UI::Scaling::GetActiveTransform();
+    // The ticker runs in the screen's W/640 x H/480 stretch, scaled by its height.
+    const auto transform = UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     SyncField(m_RmlView.Binder(), &SlideNoticeRmlModel::rootScale, "root_scale", transform.scaleY);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 

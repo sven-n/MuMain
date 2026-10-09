@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Core/Text/TextLineWrap.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/HUD/Notices.h"
 
@@ -136,13 +137,13 @@ namespace UI::Notices
         if (!visible)
             return;
 
-        const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
-        g_pRenderText->SetFont(g_hFontBold);
-        const SIZE lineSize = g_pRenderText->MeasureText(L"Q", 1);
+        // The original drew them under the screen's W/640 x H/480 stretch.
+        const UI::Scaling::Transform transform = UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
         SyncField(s_view.Binder(), &NoticesRmlModel::rowWidth, "row_width", 2.f * UI::Scaling::PositionX(transform, 320.f));
         SyncField(s_view.Binder(), &NoticesRmlModel::textPx, "text_px",
                   UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold));
-        SyncField(s_view.Binder(), &NoticesRmlModel::lineHeightPx, "line_height_px", static_cast<float>(lineSize.cy) * transform.scaleY);
+        SyncField(s_view.Binder(), &NoticesRmlModel::lineHeightPx, "line_height_px",
+                  CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Bold));
 
         std::vector<NoticeLineEntry> lines;
         for (int i = 0; i < MAX_NOTICE; i++)

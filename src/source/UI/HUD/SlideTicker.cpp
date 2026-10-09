@@ -236,7 +236,9 @@ void SlideLane::SlideMove()
 
 void SlideLane::ComputeSpeed()
 {
-    if (mu::ui::window::CheckMouseIn(0, m_iPos_y - 3, REFERENCE_WIDTH, m_iFontHeight + 6) == FALSE)
+    // The pointer over the lane's band (the screen's 480-unit height) slows the text down.
+    const float pointerY = UI::Scaling::LogicalY(UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight)), g_fWindowMouseY);
+    if (!(pointerY >= static_cast<float>(m_iPos_y - 3) && pointerY < static_cast<float>(m_iPos_y + m_iFontHeight + 3)))
     {
         m_fMoveAccel = 1.0f;
     }
