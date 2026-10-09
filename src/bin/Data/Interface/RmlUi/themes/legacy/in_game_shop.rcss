@@ -57,6 +57,8 @@
    (105, 40) and (105, 113), the Buy button at (162, 126), or the empty box's logo at (128, 52). */
 #igs_packages { position: absolute; left: 0; top: 0; width: 366px; display: flex; flex-wrap: wrap; pointer-events: none; }
 .igs-package { position: relative; flex: 0 0 122px; width: 122px; height: 121px; }
+/* Where C++ draws the package's live 3D item (the original's 108x58 at 102,51 of each box). */
+.igs-package-item { position: absolute; left: 102px; top: 51px; width: 108px; height: 58px; pointer-events: none; }
 /* The box itself is the backdrop's art. */
 .igs-package-card { display: none; }
 .igs-package-logo { display: none; position: absolute; left: 128px; top: 52px; width: 57px; height: 57px; decorator: image(igs-logo); }

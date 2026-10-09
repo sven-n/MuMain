@@ -45,15 +45,6 @@ public:
 private:
     enum
     {
-        IGS_PANEL_WIDTH = 640,
-        IGS_PANEL_HEIGHT = 429,
-        IGS_NUM_ITEMS_WIDTH = 3,
-        IGS_PACKAGE_PITCH_X = 122,
-        IGS_PACKAGE_PITCH_Y = 121,
-        IGS_ITEMRENDER_POS_X = 102,
-        IGS_ITEMRENDER_POS_Y = 51,
-        IGS_ITEMRENDER_WIDTH = 108,
-        IGS_ITEMRENDER_HEIGHT = 58,
         IGS_STORAGE_TOTAL_ITEM_PER_PAGE = 9,
     };
 
@@ -64,12 +55,8 @@ public:
     bool Create(CManager* pNewUIMng, int x, int y);
 
     void SetPos(int x, int y);
-    const POINT& GetPos()
-    {
-        return m_Pos;
-    }
-
     bool Render();
+    Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
     bool Update();
     bool UpdateMouseEvent();
     bool UpdateKeyEvent();
@@ -145,7 +132,7 @@ private:
     // The page's packages, live 3D, into #igs_items under the 2-degree camera the shop always drew
     // them with.
     void RenderItems();
-    UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); }, this};
+    UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); }};
 
     // The gift, charge, refresh and close buttons' hints.
 
@@ -184,7 +171,6 @@ private:
     };
     struct InGameShopRmlModel
     {
-        float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         float textPx = 0.f;
         Rml::String characterName;
         std::vector<WalletEntry> wallet;

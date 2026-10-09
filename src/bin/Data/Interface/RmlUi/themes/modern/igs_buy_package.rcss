@@ -12,6 +12,8 @@
 
 .igs-dialog-frame { position: absolute; left: 0; top: 0; width: 198px; height: 291px; background-color: token(surface-panel); border: 1px token(border-frame); border-radius: token(radius-md)px; }
 #igs_item { position: absolute; left: 0; top: 0; width: 198px; height: 291px; pointer-events: none; }
+/* Where C++ draws the live 3D item (the original's 96x60 at 50,34). */
+#igs_item_box { position: absolute; left: 50px; top: 34px; width: 96px; height: 60px; pointer-events: none; }
 
 .igs-dialog-line { position: absolute; left: 0; width: 198px; height: 1px; font-weight: bold; }
 #igs_title { top: 10px; color: token(text-primary); }

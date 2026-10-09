@@ -118,6 +118,16 @@ void UI::RmlBridge::SlotPlacement::Sync(Rml::ElementDocument* doc, const char* p
         Apply(doc, panelId);
 }
 
+void UI::RmlBridge::PlaceOnStage(SlotPlacement& placement, Rml::ElementDocument* doc, const char* panelId,
+                                 const POINT& stagePos)
+{
+    const auto stage = UI::Scaling::PanelTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+    if (placement.Set(stage.offsetX + stagePos.x * stage.scaleX, stage.offsetY + stagePos.y * stage.scaleY, stage.scaleX))
+        placement.Apply(doc, panelId);
+    else
+        placement.Sync(doc, panelId);
+}
+
 void UI::RmlBridge::SlotPlacement::ResetDrag(Rml::ElementDocument* doc, const char* panelId)
 {
     Rml::Element* panel = doc != nullptr ? doc->GetElementById(panelId) : nullptr;

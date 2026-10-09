@@ -14,6 +14,7 @@ using namespace mu::ui::window;
 
 #include "GameShop/BuyOptionSelection.h"
 #include "UI/Inventory/ItemCameraTarget.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/Scaling/UITransform.h"
 
@@ -37,10 +38,6 @@ private:
         IGS_FRAME_WIDTH = 215,
         IGS_FRAME_HEIGHT = 346,
         IGS_TEXT_DISCRIPTION_WIDTH = 185,
-        IGS_3DITEM_POS_X = 60,
-        IGS_3DITEM_POS_Y = 33,
-        IGS_3DITEM_WIDTH = 96,
-        IGS_3DITEM_HEIGHT = 60,
     };
 
 public:
@@ -71,7 +68,6 @@ private:
     };
     struct BuySelectRmlModel
     {
-        float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         float textPx = 0.f;
         Rml::String title, name, price;
         std::vector<Rml::String> descriptionLines;
@@ -84,10 +80,9 @@ private:
         [this](Rml::DataModelConstructor& c, BuySelectRmlModel& model) { BindRmlModel(c, model); },
         {{"Data/Interface/RmlUi/igs_buy_select.rml"}}};
     int m_PressedButton = -1;
-    // The message box manager's layout, which the item is drawn in.
-    UI::Scaling::Transform m_Layout{};
-    UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItem(); },
-                                             [this] { return m_Layout; }};
+    // Where the dialog stands on the stage (UI::RmlBridge::PlaceOnStage()).
+    UI::RmlBridge::SlotPlacement m_Placement;
+    UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItem(); }};
 
     void SyncRmlModel();
 

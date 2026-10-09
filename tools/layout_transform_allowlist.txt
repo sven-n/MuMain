@@ -6,10 +6,6 @@
 
 Engine/Object/ZzzInventory.cpp: 4
 GameLogic/Pets/GIPetManager.cpp: 1
-GameShop/InGameShop.cpp: 2
-GameShop/MsgBoxIGSBuyPackageItem.cpp: 2
-GameShop/MsgBoxIGSBuySelectItem.cpp: 2
-GameShop/MsgBoxIGSSendGift.cpp: 1
 Guild/GuildInfoWindow.cpp: 1
 Guild/GuildMakeWindow.cpp: 1
 Render/Text/CUIRenderTextSDLTtf.cpp: 2

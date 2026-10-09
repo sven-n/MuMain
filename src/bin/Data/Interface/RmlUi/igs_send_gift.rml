@@ -10,8 +10,7 @@
 	     message fields with their labels, the notice, and OK and Cancel. The fields counter-scale
 	     out of the dialog's root transform so their text stays at the native renderer's size. -->
 	<div class="igs-dim"></div>
-	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel">
 		<div class="igs-dialog-frame"></div>
 		<div class="igs-gift-icon"></div>
 		<div class="igs-gift-namebox"></div>

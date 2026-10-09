@@ -16,6 +16,8 @@
 @spritesheet igs-select-back-sheet { src: "../../../InGameShop/Ingame_pack_back03.tga"; igs-select-back: 0px 0px 215px 346px; }
 .igs-dialog-frame { position: absolute; left: 0; top: 0; width: 215px; height: 346px; decorator: image(igs-select-back); }
 #igs_item { position: absolute; left: 0; top: 0; width: 215px; height: 346px; pointer-events: none; }
+/* Where C++ draws the live 3D item (the original's 96x60 at 60,33). */
+#igs_item_box { position: absolute; left: 60px; top: 33px; width: 96px; height: 60px; pointer-events: none; }
 
 .igs-dialog-line { position: absolute; left: 0; width: 215px; height: 1px; font-weight: bold; }
 #igs_title { top: 10px; color: #ffffff; }

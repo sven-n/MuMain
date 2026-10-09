@@ -5,7 +5,8 @@
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 #include "App/Platform/Windows/iexplorer.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
+#include "UI/RmlBridge/RmlElementBox.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "InGameShop.h"
 #include "MsgBoxIGSBuyPackageItem.h"
 #include "MsgBoxIGSBuySelectItem.h"
@@ -120,9 +121,6 @@ bool CInGameShop::Create(CManager* pNewUIMng, int x, int y)
 
 void CInGameShop::BindRmlModel(Rml::DataModelConstructor& c, InGameShopRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
 
     auto radio = c.RegisterStruct<RadioEntry>();
@@ -247,7 +245,6 @@ void CInGameShop::SyncRmlModel()
     if (!IsVisible())
         return;
     auto& binder = m_RmlView.Binder();
-    UI::RmlBridge::SyncRootTransform(binder, m_Pos);
     UI::RmlBridge::SyncNativeTextSize(binder);
 
     SyncField(binder, &InGameShopRmlModel::characterName, "character_name", Narrow(Hero->ID));
@@ -364,14 +361,22 @@ bool CInGameShop::Render()
     return true;
 }
 
-// Into #igs_items, in this window's layout space.
+// Into #igs_items, in window pixels: each shown package's item in its card's .igs-package-item.
 void CInGameShop::RenderItems()
 {
-    for (int i = 0; i < g_InGameShopSystem->GetSizePackageAsDisplayPackage() && i < INGAMESHOP_DISPLAY_ITEMLIST_SIZE; i++)
+    Rml::ElementDocument* document = m_RmlView.Document();
+    if (document == nullptr)
+        return;
+    Rml::ElementList boxes;
+    document->QuerySelectorAll(boxes, ".igs-package-item");
+    const int count = std::min({g_InGameShopSystem->GetSizePackageAsDisplayPackage(),
+                                static_cast<int>(INGAMESHOP_DISPLAY_ITEMLIST_SIZE), static_cast<int>(boxes.size())});
+    for (int i = 0; i < count; i++)
     {
-        const int x = m_Pos.x + IGS_ITEMRENDER_POS_X + IGS_PACKAGE_PITCH_X * (i % IGS_NUM_ITEMS_WIDTH);
-        const int y = m_Pos.y + IGS_ITEMRENDER_POS_Y + IGS_PACKAGE_PITCH_Y * (i / IGS_NUM_ITEMS_WIDTH);
-        RenderItem3D(x, y, IGS_ITEMRENDER_WIDTH, IGS_ITEMRENDER_HEIGHT, g_InGameShopSystem->GetPackageItemCode(i), 0, 0, 0, true);
+        Rml::Vector2f offset;
+        Rml::Vector2f size;
+        if (UI::RmlBridge::DrawnBox(*boxes[i], Rml::BoxArea::Border, offset, size))
+            RenderItem3D(offset.x, offset.y, size.x, size.y, g_InGameShopSystem->GetPackageItemCode(i), 0, 0, 0, true);
     }
 }
 
@@ -484,8 +489,9 @@ bool CInGameShop::UpdateMouseEvent()
     if (IsVisible() == false)
         return true;
 
-    // Nothing under the shop takes the pointer.
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, IGS_PANEL_WIDTH, IGS_PANEL_HEIGHT).Contains(MouseX, MouseY))
+    // Nothing under the shop takes the pointer: its drawn panel holds it.
+    Rml::ElementDocument* document = m_RmlView.Document();
+    if (UI::RmlBridge::IsPointerWithin(document != nullptr ? document->GetElementById("panel") : nullptr))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {

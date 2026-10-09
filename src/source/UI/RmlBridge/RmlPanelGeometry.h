@@ -97,4 +97,8 @@ namespace UI::RmlBridge
         // Returns a panel the player dragged (MakeDraggable()) to where its slot puts it.
         static void ResetDrag(Rml::ElementDocument* doc, const char* panelId);
     };
+
+    // Places `panelId` where a centred dialog (a message box) stood: at `stagePos` on the original's
+    // 640x480 stage, centred on the screen at the panel scale. Call once a frame.
+    void PlaceOnStage(SlotPlacement& placement, Rml::ElementDocument* doc, const char* panelId, const POINT& stagePos);
 }

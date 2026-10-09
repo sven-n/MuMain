@@ -9,8 +9,7 @@
 	<!-- CInGameShop (GameShop/InGameShop.h): the cash shop. C++ keeps the shop's state and every
 	     request; this draws it, and its clicks come back through the igs_* events. The 3x3 package
 	     grid's items are live 3D, drawn by C++ into #igs_items. -->
-	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel">
 		<div class="bg-back"></div>
 
 		<!-- The sales zones across the top, the categories of the selected zone down the left. -->
@@ -32,6 +31,7 @@
 			<div class="igs-package" data-for="p, i : packages" data-class-empty="!p.shown">
 				<div class="igs-package-card"></div>
 				<div class="igs-package-logo"></div>
+				<div class="igs-package-item"></div>
 				<div class="igs-package-name" data-if="p.shown">
 					<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{p.name}}</span>
 				</div>

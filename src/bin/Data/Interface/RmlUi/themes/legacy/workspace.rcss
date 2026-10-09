@@ -109,6 +109,7 @@ body {
 .panel-stage .slot[data-window="kanturu_entry"] { margin-top: 20dp; }
 .panel-stage .slot[data-window="cursed_temple_entry"] { margin-top: 80dp; }
 .panel-stage .slot[data-window="cursed_temple_result"] { margin-top: 120dp; }
+.panel-stage .slot[data-window="in_game_shop"] { margin-top: 0; }
 
 /* Passive overlays share a column. The six-line message area never collapses between messages. */
 .diagnostics-stack {

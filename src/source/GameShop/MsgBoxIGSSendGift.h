@@ -4,6 +4,7 @@
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "GameShop/IgsDialogModel.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 
@@ -58,7 +59,6 @@ private:
     // igs_send_gift.rml: the dialog, with the recipient and the message as its fields.
     struct SendGiftRmlModel
     {
-        float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         float textPx = 0.f;
         Rml::String recipient;
         Rml::String message;
@@ -76,6 +76,8 @@ private:
     void SyncRmlModel();
     bool FieldHasFocus(const char* id) const;
     int m_PressedButton = -1;
+    // Where the dialog stands on the stage (UI::RmlBridge::PlaceOnStage()).
+    UI::RmlBridge::SlotPlacement m_Placement;
 
     int m_iPackageSeq;
     int m_iDisplaySeq;

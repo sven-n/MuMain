@@ -82,8 +82,7 @@ namespace mu::ui::window
 
         // The grids' items, into the document's #item_view.
         void RenderItems();
-        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); },
-                                                 };
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); }};
 
         // Mirrors the old CButton array's Lock()/tooltip-text state (OpenButtonLock()/UnLock(),
         // ChangePersonal()) now that the buttons themselves are RmlUi-owned.

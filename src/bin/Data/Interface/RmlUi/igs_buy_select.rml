@@ -10,10 +10,10 @@
 	     3D item C++ draws into #igs_item, the package's name and description, the options to pick
 	     from, the picked one's price, and Buy, Gift and Cancel. -->
 	<div class="igs-dim"></div>
-	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
-	     data-style-transform="'scale(' + root_scale + ')'" data-style---root-scale="root_scale">
+	<div id="panel">
 		<div class="igs-dialog-frame"></div>
 		<img id="igs_item"/>
+		<div id="igs_item_box"></div>
 		<div id="igs_title" class="igs-dialog-line">
 			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{title}}</span>
 		</div>

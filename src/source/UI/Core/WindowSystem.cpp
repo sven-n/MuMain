@@ -622,6 +622,9 @@ bool CSystem::LoadMainSceneInterface()
     slot(INTERFACE_CURSEDTEMPLE_NPC, "cursed_temple_entry", m_pNewCursedTempleEnterWindow, "cursed_temple_enter.rml");
     slot(INTERFACE_CURSEDTEMPLE_RESULT, "cursed_temple_result", m_pNewCursedTempleResultWindow,
          "cursed_temple_result.rml");
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+    slot(INTERFACE_INGAMESHOP, "in_game_shop", m_pNewInGameShop, "in_game_shop.rml");
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
     // Event HUDs drawn from their own HUD-space position; sizes are each window's own constants,
     // homes the positions created above.

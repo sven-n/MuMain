@@ -4,6 +4,7 @@
 #include "Render/Text/CUIRenderText.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Core/Utilities/StringUtils.h"
+#include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlSyncField.h"
@@ -92,8 +93,6 @@ void CMsgBoxIGSBuySelectItem::Release()
 
 bool CMsgBoxIGSBuySelectItem::Update()
 {
-    m_Layout = UI::Scaling::GetActiveTransform();
-
     // Buy, Gift, Cancel: the events the native buttons sent.
     static constexpr DWORD kButtonEvents[] = {MSGBOX_EVENT_USER_COMMON_OK, MSGBOX_EVENT_USER_CUSTOM_INGAMESHOP_PRESENT,
                                               MSGBOX_EVENT_USER_COMMON_CANCEL};
@@ -120,9 +119,6 @@ bool CMsgBoxIGSBuySelectItem::Update()
 
 void CMsgBoxIGSBuySelectItem::BindRmlModel(Rml::DataModelConstructor& c, BuySelectRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     auto row = c.RegisterStruct<OptionRow>();
     row.RegisterMember("name", &OptionRow::name);
@@ -148,7 +144,7 @@ void CMsgBoxIGSBuySelectItem::SyncRmlModel()
     if (!m_RmlView.Document())
         return;
     auto& binder = m_RmlView.Binder();
-    UI::RmlBridge::SyncRootTransform(binder, GetPos());
+    UI::RmlBridge::PlaceOnStage(m_Placement, m_RmlView.Document(), "panel", GetPos());
     UI::RmlBridge::SyncNativeTextSize(binder);
 
     SyncField(binder, &BuySelectRmlModel::title, "title", StringUtils::WideToNarrow(I18N::Game::Shop));
@@ -203,13 +199,17 @@ bool CMsgBoxIGSBuySelectItem::Render()
     return true;
 }
 
-// Into #igs_item, in the message box layout.
+// Into #igs_item, in window pixels: at the theme's #igs_item_box.
 void CMsgBoxIGSBuySelectItem::RenderItem()
 {
     if (m_wItemCode == 65535)
         return;
 
-    RenderItem3D(GetPos().x + IGS_3DITEM_POS_X, GetPos().y + IGS_3DITEM_POS_Y, IGS_3DITEM_WIDTH, IGS_3DITEM_HEIGHT, m_wItemCode, 0, 0, 0, true);
+    Rml::Element* itemBox = m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("igs_item_box") : nullptr;
+    Rml::Vector2f offset;
+    Rml::Vector2f size;
+    if (itemBox != nullptr && UI::RmlBridge::DrawnBox(*itemBox, Rml::BoxArea::Border, offset, size))
+        RenderItem3D(offset.x, offset.y, size.x, size.y, m_wItemCode, 0, 0, 0, true);
 }
 
 void CMsgBoxIGSBuySelectItem::SetAddCallbackFunc()

@@ -173,9 +173,6 @@ bool CMsgBoxIGSSendGift::FieldHasFocus(const char* id) const
 
 void CMsgBoxIGSSendGift::BindRmlModel(Rml::DataModelConstructor& c, SendGiftRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
     c.Bind("recipient", &model.recipient);
     c.Bind("message", &model.message);
@@ -192,7 +189,7 @@ void CMsgBoxIGSSendGift::SyncRmlModel()
     if (!m_RmlView.Document())
         return;
     auto& binder = m_RmlView.Binder();
-    UI::RmlBridge::SyncRootTransform(binder, GetPos());
+    UI::RmlBridge::PlaceOnStage(m_Placement, m_RmlView.Document(), "panel", GetPos());
     UI::RmlBridge::SyncNativeTextSize(binder);
 
     const auto narrow = [](const wchar_t* text) { return StringUtils::WideToNarrow(text); };

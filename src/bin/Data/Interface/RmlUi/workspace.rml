@@ -120,6 +120,7 @@
 		<div class="slot" data-window="kanturu_entry"></div>
 		<div class="slot" data-window="cursed_temple_entry"></div>
 		<div class="slot" data-window="cursed_temple_result"></div>
+		<div class="slot" data-window="in_game_shop"></div>
 	</div>
 </body>
 </rml>
