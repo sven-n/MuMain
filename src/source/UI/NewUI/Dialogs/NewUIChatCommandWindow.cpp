@@ -10,6 +10,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Core/Text/TextLineWrap.h"
 #include "GameLogic/Commands/ChatCommandFavourites.h"
+#include "GameLogic/Commands/ChatCommandValueLookup.h"
 #include "UI/NewUI/NewUISystem.h"
 
 #include <algorithm>
@@ -21,6 +22,7 @@ using GameLogic::Commands::ChatCommandCatalog;
 using GameLogic::Commands::ChatCommandParameter;
 using GameLogic::Commands::ChatCommandParameterType;
 using GameLogic::Commands::ChatCommandTemplate;
+namespace ValueLookup = GameLogic::Commands::ValueLookup;
 
 namespace
 {
@@ -30,6 +32,9 @@ constexpr const wchar_t* FavouriteMarker = L"* ";
 // What tells the player that a command wants something filled in. The names
 // of the parameters don't fit next to the command at this width.
 constexpr const wchar_t* ParameterMarker = L" ...";
+// A range is only shown when it's between 0 and this. One as wide as that of a
+// 32-bit number tells the player nothing and doesn't fit the box anyway.
+constexpr int64_t LargestShownRangeMaximum = 65535;
 
 struct TextColor
 {
@@ -264,6 +269,13 @@ void SEASON3B::CNewUIChatCommandWindow::PickCommand(int row)
     }
 
     m_parameterValues.resize(command->Parameters.size());
+    m_valueNames.assign(command->Parameters.size(), std::wstring());
+    m_placeholders.clear();
+    for (const auto& parameter : command->Parameters)
+    {
+        m_placeholders.push_back(GetPlaceholder(parameter));
+    }
+
     ShowPage(PAGE_PARAMETERS);
 }
 
@@ -278,6 +290,25 @@ bool SEASON3B::CNewUIChatCommandWindow::AreRequiredValuesSet() const
     for (size_t i = 0; i < command->Parameters.size(); ++i)
     {
         if (command->Parameters[i].IsRequired && m_parameterValues[i].empty())
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool SEASON3B::CNewUIChatCommandWindow::AreValuesAccepted() const
+{
+    const auto* command = GetSelectedCommand();
+    if (command == nullptr)
+    {
+        return false;
+    }
+
+    for (size_t i = 0; i < command->Parameters.size(); ++i)
+    {
+        if (!command->Parameters[i].Accepts(m_parameterValues[i]))
         {
             return false;
         }
@@ -301,6 +332,12 @@ void SEASON3B::CNewUIChatCommandWindow::ExecuteSelectedCommand()
     if (!AreRequiredValuesSet())
     {
         g_pSystemLogBox->AddText(I18N::Game::ChatCommandsFillRequired, SEASON3B::TYPE_ERROR_MESSAGE);
+        return;
+    }
+
+    if (!AreValuesAccepted())
+    {
+        g_pSystemLogBox->AddText(I18N::Game::ChatCommandsValueOutOfRange, SEASON3B::TYPE_ERROR_MESSAGE);
         return;
     }
 
@@ -432,6 +469,64 @@ void SEASON3B::CNewUIChatCommandWindow::CycleParameterValue(size_t parameterInde
     // One step past the last value clears it again, which is how an optional
     // parameter is left out.
     m_parameterValues[parameterIndex] = (next >= values.size()) ? std::wstring() : values[next];
+    RefreshValueNames();
+}
+
+std::wstring SEASON3B::CNewUIChatCommandWindow::GetPlaceholder(const ChatCommandParameter& parameter)
+{
+    if (!parameter.ValidValues.empty())
+    {
+        return parameter.ValidValues;
+    }
+
+    const bool isSmallRange =
+        parameter.HasRange && parameter.Minimum >= 0 && parameter.Maximum <= LargestShownRangeMaximum;
+    if (!isSmallRange)
+    {
+        return {};
+    }
+
+    return std::to_wstring(parameter.Minimum) + L" - " + std::to_wstring(parameter.Maximum);
+}
+
+void SEASON3B::CNewUIChatCommandWindow::FillOwnValue(size_t parameterIndex)
+{
+    // A field which is being edited would overwrite the value once it's left.
+    StopEditing();
+
+    const auto* command = GetSelectedCommand();
+    if (command == nullptr || parameterIndex >= command->Parameters.size())
+    {
+        return;
+    }
+
+    // There may be nothing to fill in, e.g. the guild of a character without one.
+    auto value = ValueLookup::GetOwnValue(command->Parameters[parameterIndex]);
+    if (value.empty())
+    {
+        return;
+    }
+
+    m_parameterValues[parameterIndex] = std::move(value);
+    RefreshValueNames();
+}
+
+void SEASON3B::CNewUIChatCommandWindow::RefreshValueNames()
+{
+    m_valueNames.assign(m_parameterValues.size(), std::wstring());
+
+    const auto* command = GetSelectedCommand();
+    if (command == nullptr)
+    {
+        return;
+    }
+
+    // All of them, because one value can name what another one refers to,
+    // like the group of an item number.
+    for (size_t i = 0; i < m_valueNames.size(); ++i)
+    {
+        m_valueNames[i] = ValueLookup::DescribeValue(*command, i, m_parameterValues);
+    }
 }
 
 void SEASON3B::CNewUIChatCommandWindow::BeginEditingParameter(size_t parameterIndex)
@@ -473,6 +568,7 @@ void SEASON3B::CNewUIChatCommandWindow::CommitEditedValue()
     wchar_t text[MAX_TEXT_LENGTH] = {0};
     m_pValueInput->GetText(text, MAX_TEXT_LENGTH);
     m_parameterValues[m_editedParameter] = text;
+    RefreshValueNames();
 }
 
 void SEASON3B::CNewUIChatCommandWindow::StopEditing()
@@ -634,24 +730,10 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateParameterPageMouseEvent()
 
     for (size_t i = 0; i < command->Parameters.size(); ++i)
     {
-        const auto valueY = GetParameterTop() + static_cast<int>(i) * PARAMETER_HEIGHT + ROW_HEIGHT;
-        if (!CheckMouseIn(m_Pos.x + CONTENT_LEFT, valueY, CONTENT_WIDTH, VALUE_HEIGHT) || !IsRelease(VK_LBUTTON))
+        if (UpdateParameterMouseEvent(i))
         {
-            continue;
+            return true;
         }
-
-        if (IsPickedFromList(command->Parameters[i]))
-        {
-            StopEditing();
-            CycleParameterValue(i);
-        }
-        else
-        {
-            BeginEditingParameter(i);
-        }
-
-        PlayBuffer(SOUND_CLICK01);
-        return true;
     }
 
     const auto actionTop = GetActionTop();
@@ -669,6 +751,43 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateParameterPageMouseEvent()
     }
 
     return false;
+}
+
+bool SEASON3B::CNewUIChatCommandWindow::UpdateParameterMouseEvent(size_t parameterIndex)
+{
+    const auto* command = GetSelectedCommand();
+    if (command == nullptr || parameterIndex >= command->Parameters.size() || !IsRelease(VK_LBUTTON))
+    {
+        return false;
+    }
+
+    const auto& parameter = command->Parameters[parameterIndex];
+    const auto nameY = GetParameterTop() + static_cast<int>(parameterIndex) * PARAMETER_HEIGHT;
+    const auto ownValueX = m_Pos.x + CONTENT_LEFT + CONTENT_WIDTH - OWN_VALUE_WIDTH;
+    if (ValueLookup::HasOwnValue(parameter) && CheckMouseIn(ownValueX, nameY, OWN_VALUE_WIDTH, ROW_HEIGHT))
+    {
+        FillOwnValue(parameterIndex);
+        PlayBuffer(SOUND_CLICK01);
+        return true;
+    }
+
+    if (!CheckMouseIn(m_Pos.x + CONTENT_LEFT, nameY + ROW_HEIGHT, CONTENT_WIDTH, VALUE_HEIGHT))
+    {
+        return false;
+    }
+
+    if (IsPickedFromList(parameter))
+    {
+        StopEditing();
+        CycleParameterValue(parameterIndex);
+    }
+    else
+    {
+        BeginEditingParameter(parameterIndex);
+    }
+
+    PlayBuffer(SOUND_CLICK01);
+    return true;
 }
 
 bool SEASON3B::CNewUIChatCommandWindow::UpdateTemplatePageMouseEvent()
@@ -930,10 +1049,11 @@ void SEASON3B::CNewUIChatCommandWindow::RenderParameter(size_t parameterIndex, i
     const auto& parameter = command->Parameters[parameterIndex];
     const auto& value = m_parameterValues[parameterIndex];
 
-    // A required parameter without a value is what keeps the command from being
-    // sent, so it's the one to point at.
+    // A required parameter without a value, or a value the server would reject,
+    // is what keeps the command from being sent, so it's the one to point at.
     const bool isMissing = parameter.IsRequired && value.empty();
-    UseTextColor(isMissing ? MissingValueColor : NormalColor);
+    const bool needsCorrection = isMissing || !parameter.Accepts(value);
+    UseTextColor(needsCorrection ? MissingValueColor : NormalColor);
 
     std::wstring label = parameter.Name;
     if (parameter.IsRequired)
@@ -941,7 +1061,15 @@ void SEASON3B::CNewUIChatCommandWindow::RenderParameter(size_t parameterIndex, i
         label += L" *";
     }
 
-    RenderLine(m_Pos.x + CONTENT_LEFT, y, label.c_str(), CONTENT_WIDTH);
+    const bool hasOwnValue = ValueLookup::HasOwnValue(parameter);
+    RenderLine(m_Pos.x + CONTENT_LEFT, y, label.c_str(), CONTENT_WIDTH - (hasOwnValue ? OWN_VALUE_WIDTH : 0));
+
+    if (hasOwnValue)
+    {
+        UseTextColor(ActionColor);
+        RenderLine(m_Pos.x + CONTENT_LEFT + CONTENT_WIDTH - OWN_VALUE_WIDTH, y, I18N::Game::ChatCommandsOwnValue,
+                   OWN_VALUE_WIDTH, 0, RT3_SORT_RIGHT);
+    }
 
     RenderValueBackground(m_Pos.x + CONTENT_LEFT, y + ROW_HEIGHT, CONTENT_WIDTH, VALUE_HEIGHT);
 
@@ -951,9 +1079,30 @@ void SEASON3B::CNewUIChatCommandWindow::RenderParameter(size_t parameterIndex, i
         return;
     }
 
-    UseTextColor(value.empty() ? DescriptionColor : NormalColor);
-    const auto* shown = value.empty() ? parameter.ValidValues.c_str() : value.c_str();
-    RenderLine(m_Pos.x + CONTENT_LEFT + 2, y + ROW_HEIGHT + 1, shown, CONTENT_WIDTH - 4);
+    RenderParameterValue(parameterIndex, y + ROW_HEIGHT + 1);
+}
+
+void SEASON3B::CNewUIChatCommandWindow::RenderParameterValue(size_t parameterIndex, int y)
+{
+    const auto& value = m_parameterValues[parameterIndex];
+    const auto textX = m_Pos.x + CONTENT_LEFT + 2;
+    const auto textWidth = CONTENT_WIDTH - 4;
+
+    if (value.empty())
+    {
+        UseTextColor(DescriptionColor);
+        RenderLine(textX, y, m_placeholders[parameterIndex].c_str(), textWidth);
+        return;
+    }
+
+    UseTextColor(NormalColor);
+    RenderLine(textX, y, value.c_str(), textWidth);
+
+    // The name of what the number refers to goes right of it, so that both can
+    // be read at once.
+    UseTextColor(DescriptionColor);
+    RenderLine(textX + NUMBER_VALUE_WIDTH, y, m_valueNames[parameterIndex].c_str(), textWidth - NUMBER_VALUE_WIDTH, 0,
+               RT3_SORT_RIGHT);
 }
 
 void SEASON3B::CNewUIChatCommandWindow::RenderTemplatePage()

@@ -73,6 +73,12 @@ class CNewUIChatCommandWindow : public CNewUIObj
         VALUE_HEIGHT = 16,
         // A parameter takes its name, the box with its value, and a gap.
         PARAMETER_HEIGHT = ROW_HEIGHT + VALUE_HEIGHT + 4,
+        // The part at the right of the name which takes the value of the own
+        // character, e.g. its position for a coordinate.
+        OWN_VALUE_WIDTH = 50,
+        // The values which have a name are numbers, which take no more than
+        // this. The name is shown right of it.
+        NUMBER_VALUE_WIDTH = 36,
     };
 
     // What the window shows. There is no scrolling between the pages: the
@@ -129,7 +135,15 @@ private:
     void StopEditing();
     static bool IsPickedFromList(const GameLogic::Commands::ChatCommandParameter& parameter);
     static std::vector<std::wstring> SplitValidValues(const std::wstring& validValues);
+    // What an empty box shows: the accepted values, or the accepted range when
+    // it's small enough to tell the player something.
+    static std::wstring GetPlaceholder(const GameLogic::Commands::ChatCommandParameter& parameter);
+    void FillOwnValue(size_t parameterIndex);
+    // The names behind the values only change with the values, so they are
+    // looked up then instead of every frame.
+    void RefreshValueNames();
     bool AreRequiredValuesSet() const;
+    bool AreValuesAccepted() const;
 
     void InitButtons();
     void LoadImages();
@@ -155,6 +169,7 @@ private:
 
     bool UpdateCommandPageMouseEvent();
     bool UpdateParameterPageMouseEvent();
+    bool UpdateParameterMouseEvent(size_t parameterIndex);
     bool UpdateTemplatePageMouseEvent();
 
     void RenderBaseWindow();
@@ -162,6 +177,7 @@ private:
     void RenderCommandPage();
     void RenderParameterPage();
     void RenderParameter(size_t parameterIndex, int y);
+    void RenderParameterValue(size_t parameterIndex, int y);
     void RenderTemplatePage();
 
 private:
@@ -175,6 +191,9 @@ private:
 
     // The value of every parameter of the selected command, in its order.
     std::vector<std::wstring> m_parameterValues;
+    // What the values refer to, e.g. the name of a map, in the same order.
+    std::vector<std::wstring> m_valueNames;
+    std::vector<std::wstring> m_placeholders;
     std::vector<std::wstring> m_descriptionLines;
     // One box is enough: it is moved onto whichever parameter is edited.
     std::unique_ptr<CUITextInputBox> m_pValueInput;

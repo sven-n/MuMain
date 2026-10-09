@@ -12967,6 +12967,12 @@
   <data name="ChatCommandsUnknownCommand" xml:space="preserve">
     <value>Dieser Befehl ist nicht mehr verfügbar.</value>
   </data>
+  <data name="ChatCommandsValueOutOfRange" xml:space="preserve">
+    <value>Bitte korrigieren Sie zuerst die rot markierten Werte.</value>
+  </data>
+  <data name="ChatCommandsOwnValue" xml:space="preserve">
+    <value>meine</value>
+  </data>
   <data name="KeepFlightEquipmentInIcarus" xml:space="preserve">
     <value>In Ikarus können Sie Ihre letzten Flügel oder Ihr letztes fliegendes Reittier nicht ablegen.</value>
   </data>
