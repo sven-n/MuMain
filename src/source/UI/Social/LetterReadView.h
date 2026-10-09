@@ -24,6 +24,9 @@ public:
     bool Sync(bool shown);
     void PullToFront();
     void ProcessActions();
+    // The pointer is over the window as drawn, so it is the window's, not the world's.
+    bool PointerOver() const;
+    bool PointerOverPhoto() const;
 
     void SetLetter(const wchar_t* sender, const wchar_t* date, const wchar_t* time, const wchar_t* body);
     void RestoreLayout(float x, float y, float width, float height, bool resize = false);

@@ -6,6 +6,7 @@
 #include "UI/Placement/WindowPlacement.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlDraggable.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -477,6 +478,11 @@ void FriendShell::ProcessEvent(Rml::Event& event)
         m_View.GetModel().maximized = false;
         m_View.MarkDirty("maximized");
     }
+}
+
+bool FriendShell::PointerOver() const
+{
+    return UI::RmlBridge::IsPointerOver(m_View.Document());
 }
 
 void FriendShell::ProcessActions()

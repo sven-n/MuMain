@@ -10,6 +10,7 @@ public:
     void Init(const wchar_t* title, DWORD parent = 0) override;
     void Refresh() override;
     BOOL DoAction(BOOL messageOnly = FALSE) override;
+    bool PointerOver() const;
     void Maximize() override;
     void Reset();
     void Close();

@@ -5,6 +5,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlDraggable.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -232,19 +233,9 @@ void LetterWriteView::SyncPhoto()
     if (!slot)
         return;
     m_PhotoControl.Attach(m_View.Document(), m_Owner.m_Photo);
-    const float scale = m_View.Document()->GetContext()->GetDensityIndependentPixelRatio();
-    const auto native = UI::Scaling::FloatingWorkspaceTransform(WindowWidth, WindowHeight);
-    if (scale <= 0 || native.scaleX <= 0)
-        return;
     // Until the panel has settled its slot is still where window_shell centred it.
     if (!m_Settled)
         return;
-    const float ratio = scale / native.scaleX;
-    const auto size = slot->GetBox().GetSize(Rml::BoxArea::Border);
-    m_Owner.m_Photo.SetSlot(static_cast<int>(slot->GetAbsoluteLeft() / scale * ratio),
-                            static_cast<int>(slot->GetAbsoluteTop() / scale * ratio),
-                            static_cast<int>(size.x / scale * ratio),
-                            static_cast<int>(size.y / scale * ratio));
     m_PhotoControl.Sync();
 }
 
@@ -265,6 +256,17 @@ void LetterWriteView::ProcessEvent(Rml::Event& event)
         m_View.GetModel().maximized = false;
         m_View.MarkDirty("maximized");
     }
+}
+
+bool LetterWriteView::PointerOverPhoto() const
+{
+    Rml::ElementDocument* document = m_View.Document();
+    return m_Settled && document && UI::RmlBridge::IsPointerWithin(document->GetElementById("photo_slot"));
+}
+
+bool LetterWriteView::PointerOver() const
+{
+    return UI::RmlBridge::IsPointerOver(m_View.Document());
 }
 
 void LetterWriteView::ProcessActions()

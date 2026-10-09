@@ -24,6 +24,9 @@ public:
     bool Sync(bool shown);
     void PullToFront();
     void ProcessActions();
+    // The pointer is over the window as drawn, so it is the window's, not the world's.
+    bool PointerOver() const;
+    bool PointerOverPhoto() const;
 
     void SetMailto(const wchar_t* text);
     void SetSubject(const wchar_t* text);

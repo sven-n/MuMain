@@ -31,7 +31,6 @@
 #include "Render/Text/TextWrap.h"
 #include "Core/Input/ImeInput.h"
 
-using mu::ui::window::CheckMouseIn;   // WindowCommon.h
 
 
 extern int	 g_iChatInputType;

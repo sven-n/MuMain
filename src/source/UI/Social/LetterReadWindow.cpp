@@ -51,9 +51,10 @@ BOOL CUILetterReadWindow::DoAction(BOOL messageOnly)
     {
         m_View->ProcessActions();
         m_Photo.SetShowType(2);
+        m_Photo.SetPointerOver(m_View->PointerOverPhoto());
         m_Photo.DoAction(messageOnly);
         if (g_dwMouseUseUIID == 0 && (g_dwActiveUIID == 0 || g_dwActiveUIID == GetUIID()) &&
-            mu::ui::window::CheckMouseIn(GetPosition_x(), GetPosition_y(), GetWidth(), GetHeight()))
+            m_View->PointerOver())
             g_dwMouseUseUIID = GetUIID();
     }
     return FALSE;

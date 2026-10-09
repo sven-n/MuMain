@@ -24,10 +24,3 @@ UI/RmlBridge/RmlPanelGeometry.cpp: 5
 UI/RmlBridge/RmlPanelGeometry.h: 3
 UI/RmlBridge/RmlRootTransform.h: 2
 UI/RmlBridge/RmlTooltip.cpp: 2
-UI/Social/ChatRoomWindow.cpp: 1
-UI/Social/FriendShellWindow.cpp: 1
-UI/Social/FriendWindow.cpp: 2
-UI/Social/LetterReadWindow.cpp: 1
-UI/Social/LetterWriteWindow.cpp: 1
-UI/Social/PhotoViewer.cpp: 4
-UI/Social/SocialWindowManager.cpp: 1

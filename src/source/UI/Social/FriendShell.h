@@ -19,6 +19,8 @@ public:
     bool Sync(bool shown);
     void PullToFront();
     void ProcessActions();
+    // The pointer is over the window as drawn, so it is the window's, not the world's.
+    bool PointerOver() const;
     void RefreshFriends();
     void RefreshLetters();
     void AddWindow(DWORD id, const wchar_t* title);

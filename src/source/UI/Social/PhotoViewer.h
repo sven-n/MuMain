@@ -70,9 +70,9 @@ public:
     bool IsHelpShown() const { return m_bHelpEnable != FALSE; }
     bool IsWebzenMail() const { return m_bIsWebzenMail != FALSE; }
 
-    // Where the well is, in the owner's own coordinates -- for the wheel, which never passes
-    // through RmlUi and is still read here natively.
-    void SetSlot(int iPos_x, int iPos_y, int iWidth, int iHeight);
+    // Whether the pointer is over the well as drawn -- for the wheel, which never passes through
+    // RmlUi and is still read here natively. Set by the owner before DoAction().
+    void SetPointerOver(bool pointerOver);
 
     // Driven by UI::Social::PhotoViewerControl, which owns these gestures while the viewer stands
     // behind an RmlUi document and the native press never arrives. See its header.
@@ -87,9 +87,7 @@ protected:
     int SetPhotoPose(int iCurrentAni, int iMoveDir = 0);
 
 protected:
-    // The well, in the owner's own coordinates (SetSlot()).
-    int m_iPos_x = 0, m_iPos_y = 0;
-    int m_iWidth = 0, m_iHeight = 0;
+    bool m_bPointerOver = false;
     bool m_bCanControl = false;
 
 protected:

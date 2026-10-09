@@ -25,8 +25,6 @@
 #include "I18N/All.h"
 #include <algorithm>
 
-using mu::ui::window::CheckMouseIn;   // WindowCommon.h
-
 extern int gix, giy;
 extern void MoveCharacter(CHARACTER* c, OBJECT* o);
 extern void MoveCharacterVisual(CHARACTER* c, OBJECT* o);
@@ -678,7 +676,7 @@ void CUIPhotoViewer::DoAction(BOOL bMessageOnly)
 
     if (m_bIsWebzenMail == TRUE)
     {
-        if (CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight) == TRUE)
+        if (m_bPointerOver)
         {
             MouseOnWindow = true;
         }
@@ -697,7 +695,7 @@ void CUIPhotoViewer::DoAction(BOOL bMessageOnly)
         // Only the wheel is still read here. Every press-driven control -- turning, the reset and
         // the "?" toggle -- moved to UI::Social::PhotoViewerControl, because a press over the
         // letter's own document never sets MouseLButtonPush at all; see that header.
-        if (CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight) == TRUE)
+        if (m_bPointerOver)
         {
             MouseOnWindow = true;
             if (MouseWheel != 0)
@@ -712,7 +710,7 @@ void CUIPhotoViewer::DoAction(BOOL bMessageOnly)
     }
     else
     {
-        if (CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight) == TRUE)
+        if (m_bPointerOver)
         {
             MouseOnWindow = true;
             if (MouseLButtonPush)
@@ -724,12 +722,9 @@ void CUIPhotoViewer::DoAction(BOOL bMessageOnly)
     }
 }
 
-void CUIPhotoViewer::SetSlot(int iPos_x, int iPos_y, int iWidth, int iHeight)
+void CUIPhotoViewer::SetPointerOver(bool pointerOver)
 {
-    m_iPos_x = iPos_x;
-    m_iPos_y = iPos_y;
-    m_iWidth = iWidth;
-    m_iHeight = iHeight;
+    m_bPointerOver = pointerOver;
 }
 
 void CUIPhotoViewer::TurnBy(float degrees)

@@ -9,7 +9,6 @@
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 
-using mu::ui::window::CheckMouseIn;   // WindowCommon.h
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -83,11 +82,8 @@ bool mu::ui::window::CFriendWindow::UpdateMouseEvent()
         CUIFriendWindow* pMainWnd = m_pFriendWindowMgr->GetFriendMainWindow();
         if (pMainWnd)
         {
-            if (CheckMouseIn(pMainWnd->GetPosition_x(), pMainWnd->GetPosition_y(), pMainWnd->GetWidth(),
-                             pMainWnd->GetHeight()) == true)
-            {
+            if (pMainWnd->PointerOver())
                 return false;
-            }
             if (g_dwActiveUIID != 0 || g_dwMouseUseUIID != 0)
             {
                 return false;

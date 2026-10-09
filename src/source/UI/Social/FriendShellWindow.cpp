@@ -23,6 +23,11 @@ void CUIFriendWindow::Refresh()
     RefreshLetterList();
 }
 
+bool CUIFriendWindow::PointerOver() const
+{
+    return m_Shell && m_Shell->PointerOver();
+}
+
 BOOL CUIFriendWindow::DoAction(BOOL messageOnly)
 {
     while (!m_MessageList.empty())
@@ -34,7 +39,7 @@ BOOL CUIFriendWindow::DoAction(BOOL messageOnly)
     {
         m_Shell->ProcessActions();
         if (g_dwMouseUseUIID == 0 && (g_dwActiveUIID == 0 || g_dwActiveUIID == GetUIID()) &&
-            mu::ui::window::CheckMouseIn(GetPosition_x(), GetPosition_y(), GetWidth(), GetHeight()))
+            m_Shell->PointerOver())
             g_dwMouseUseUIID = GetUIID();
     }
     return FALSE;

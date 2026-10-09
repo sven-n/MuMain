@@ -27,6 +27,8 @@ public:
     bool Sync(bool shown);
     void PullToFront();
     void ProcessActions();
+    // The pointer is over the window as drawn, so it is the window's, not the world's.
+    bool PointerOver() const;
 
     // Mirror room-owned participants into the presentation model.
     void AddPal(const wchar_t* name, BYTE number);
