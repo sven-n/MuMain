@@ -25,9 +25,6 @@ namespace mu::ui::window
 
     struct MoveCommandRmlModel
     {
-        // Left-docked window -- sourced from UI::Scaling::GetActiveTransform(), which CManager
-        // scopes to LayoutMode::DockLeft around every call into this window.
-        float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
         float textPx = 0.f; // native text size in physical px (RmlRootTransform.h)
 
         // Reference-space geometry CalculateLayout() derives from the dock height and the measured

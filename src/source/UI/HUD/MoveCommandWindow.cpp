@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "UI/HUD/MoveCommandWindow.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Core/WindowGeometry.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "Core/Utilities/KeyGenerator.h"
 #include "Network/Server/ServerListManager.h"
@@ -16,9 +15,9 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
-#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/RmlBridge/RmlPointer.h"
 #include "Core/Utilities/StringUtils.h"
-#include "Render/Text/CUIRenderText.h"
+#include "Render/Text/CUIRenderTextSDLTtf.h"
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
@@ -63,7 +62,6 @@ CMoveCommandWindow::CMoveCommandWindow()
     m_iRealFontHeight = kDefaultRowHeight;
     m_dwMoveCommandKey = 0;
 
-    memset(&m_MapNameUISize, 0, sizeof(POINT));
 }
 
 CMoveCommandWindow::~CMoveCommandWindow()
@@ -116,20 +114,12 @@ void mu::ui::window::CMoveCommandWindow::RefreshDataAndLayout()
 
 void mu::ui::window::CMoveCommandWindow::RefreshLayoutMetrics()
 {
-    // MeasureText() reports logical/reference units (it divides the active transform out --
-    // CUIRenderTextSDLTtf.cpp), which is the space the whole layout below is authored in. The
-    // physical font grows more slowly than the dock transform does, so the row height in these
-    // units SHRINKS as the resolution rises and more rows fit -- native's own behaviour, and the
-    // reason this is re-measured rather than fixed.
-    // Measured under the screen overlay transform, not this window's DockLeft one: native measured
-    // only at open/SetPos, from the Hud-mode hot key/window menu or outside any window, all of
-    // which run under ScreenOverlayTransform(). The two part where the dock scale is capped
-    // (2560x1440: 2.25 against 3.0), and measuring under the dock gave rows about 22.6 px apart
-    // there instead of native's 18.
-    const UI::Scaling::ScopedActiveTransform measureScope(
-        UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight)));
-    g_pRenderText->SetFont(g_hFont);
-    const int measuredFontHeight = g_pRenderText->MeasureText(L"Q", 1).cy;
+    // The text's line height in the screen's 480-unit height, as native measured it, plus 2. The
+    // font grows more slowly than the window, so in these units the rows SHRINK as the resolution
+    // rises and more of them fit -- native's own behaviour, and the reason this is re-measured.
+    const float lineHeightPx = CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal);
+    const int measuredFontHeight =
+        WindowHeight > 0 ? static_cast<int>(std::lround(lineHeightPx * 480.f / static_cast<float>(WindowHeight))) : 0;
     m_iRealFontHeight = measuredFontHeight > 0 ? measuredFontHeight + 2 : kDefaultRowHeight;
 
     // The theme's panel width; a fill slot's height less the panel's own border.
@@ -146,8 +136,6 @@ void mu::ui::window::CMoveCommandWindow::RefreshLayoutMetrics()
     m_layout = UI::MoveCommand::CalculateLayout(m_Pos.y, m_iRealFontHeight, availableHeight,
                                                 static_cast<int>(std::lround(contentWidth)));
 
-    m_MapNameUISize.x = m_layout.windowWidth;
-    m_MapNameUISize.y = m_layout.windowHeight;
 }
 
 void mu::ui::window::CMoveCommandWindow::SetFillPlacementSize(float width, float height)
@@ -163,10 +151,12 @@ void mu::ui::window::CMoveCommandWindow::SetFillPlacementSize(float width, float
 bool mu::ui::window::CMoveCommandWindow::GetFillMinimumSize(float& width, float& height) const
 {
     // Its content width, and the chrome with three rows: the rows follow the height it is given.
-    float panelWidth = static_cast<float>(UI::MoveCommand::kWindowWidth);
-    float panelHeight = 0.f;
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    width = panelWidth;
+    width = static_cast<float>(UI::MoveCommand::kWindowWidth);
+    if (Rml::Element* panel = m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr)
+    {
+        if (panel->GetBox().GetSize(Rml::BoxArea::Border).x > 0.f)
+            width = panel->GetBox().GetSize(Rml::BoxArea::Border).x;
+    }
     height = static_cast<float>(UI::MoveCommand::kFixedChromeHeight + 3 * m_iRealFontHeight);
     return true;
 }
@@ -386,10 +376,14 @@ void mu::ui::window::CMoveCommandWindow::SettingCanMoveMap()
 
 void mu::ui::window::CMoveCommandWindow::RmlWheelList(Rml::Event& event)
 {
+    // The list is laid out at the text's real size: a row is its reference height at the list's
+    // own scale.
     Rml::Element* list = event.GetCurrentElement();
     const MoveCommandRmlModel& model = m_RmlView.GetModel();
-    const float rowStep = model.rowHeight * model.rootScale;
-    if (list == nullptr || rowStep <= 0.f)
+    if (list == nullptr || model.listHeight <= 0.f)
+        return;
+    const float rowStep = model.rowHeight * list->GetBox().GetSize(Rml::BoxArea::Content).y / model.listHeight;
+    if (rowStep <= 0.f)
         return;
 
     // Stopping the event keeps RmlUi from scrolling the list itself.
@@ -426,15 +420,9 @@ void mu::ui::window::CMoveCommandWindow::RmlClickWarp(int row)
 bool mu::ui::window::CMoveCommandWindow::UpdateMouseEvent()
 {
     // Row hover, row clicks, the close bar and the scrollbar are all RmlUi's now. What is left is
-    // the two things it has no part in: the picked-item backup, and claiming the panel's own
-    // rectangle so a click on it doesn't fall through to the world.
-    float panelWidth = static_cast<float>(m_layout.windowWidth);
-    float panelHeight = static_cast<float>(m_layout.windowHeight);
-    UI::RmlBridge::RefreshLogicalPanelSize(m_RmlView.Document(), "panel", panelWidth, panelHeight);
-    m_MapNameUISize.x = static_cast<LONG>(panelWidth);
-    m_MapNameUISize.y = static_cast<LONG>(panelHeight);
-
-    if (!mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, m_MapNameUISize.x, m_MapNameUISize.y).Contains(MouseX, MouseY))
+    // the two things it has no part in: the picked-item backup, and claiming the panel so a click
+    // on it doesn't fall through to the world.
+    if (!UI::RmlBridge::IsPointerOver(m_RmlView.Document()))
         return true;
 
     if (IsPress(VK_LBUTTON))
@@ -478,9 +466,6 @@ bool mu::ui::window::CMoveCommandWindow::Render()
 
 void mu::ui::window::CMoveCommandWindow::BindRmlModel(Rml::DataModelConstructor& c, MoveCommandRmlModel& model)
 {
-    c.Bind("root_x", &model.rootX);
-    c.Bind("root_y", &model.rootY);
-    c.Bind("root_scale", &model.rootScale);
     c.Bind("text_px", &model.textPx);
 
     c.Bind("panel_height", &model.panelHeight);
@@ -552,7 +537,6 @@ void mu::ui::window::CMoveCommandWindow::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncRootTransform(m_RmlView.Binder(), m_Pos);
     UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
 
     // Re-measured every frame, not just on open: the row height and therefore the whole window's

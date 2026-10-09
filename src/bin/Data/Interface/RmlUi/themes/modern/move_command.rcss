@@ -7,7 +7,7 @@
    rail, and this is a slim full-height rail whose native form had no frame art at all -- one flat
    translucent rectangle. Same material, smaller construction.
 
-   Coordinates are plain reference px, not dp: #panel carries transform: scale(root_scale) (see
+   Coordinates are plain reference px, not dp: #panel is placed at its slot's scale (see
    move_command.rml's header comment). Row/cell colours come from what C++ binds as MEANING
    (can_move, level_unmet, zen_unmet), never from a colour pushed in from C++. */
 
@@ -132,3 +132,9 @@
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
 #title { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
 #close_label { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
+/* The list's lengths (move_command.rml binds them in reference px on #panel). */
+#panel { --row-w: 0px; --row-h: 0px; --list-w: 0px; --list-h: 0px; --list-tail: 0px; }
+#head { width: calc(var(--row-w) * var(--root-scale)); }
+#list { width: calc(var(--list-w) * var(--root-scale)); height: calc(var(--list-h) * var(--root-scale)); }
+.mc-row { width: calc(var(--row-w) * var(--root-scale)); height: calc(var(--row-h) * var(--root-scale)); }
+.list-tail { height: calc(var(--list-tail) * var(--root-scale)); }

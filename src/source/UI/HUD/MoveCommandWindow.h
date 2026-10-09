@@ -64,7 +64,6 @@ namespace mu::ui::window
         POINT						m_Pos;
         int							m_iRealFontHeight;
         std::list<SEASON3B::CMoveCommandData::MOVEINFODATA*>	m_listMoveInfoData;
-        POINT						m_MapNameUISize;
         UI::MoveCommand::Layout		m_layout{};
         DWORD						m_dwMoveCommandKey;
 
@@ -96,6 +95,7 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
 
 
         virtual void OpenningProcess();

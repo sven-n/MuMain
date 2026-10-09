@@ -4,7 +4,7 @@
    genuine ARGB word (ZzzOpenglUtil.cpp), so 0xCC000000 is black at alpha 204 and 0xFF990000 is
    opaque #990000 -- not the A<<24|B<<16|G<<8|R packing the engine's *text* colours use.
 
-   Coordinates are plain reference px, not dp: #panel carries transform: scale(root_scale) (see
+   Coordinates are plain reference px, not dp: #panel is placed at its slot's scale (see
    move_command.rml's header comment for why this window is authored that way). This window has no
    frame art of its own -- native drew a flat translucent rectangle, nothing more -- so there is no
    sprite chrome here and nothing to share with docked_panel_frame.rcss. */
@@ -142,3 +142,9 @@
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
 #title { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
 #close_label { width: calc(100% * var(--root-scale)); margin-left: calc(50% - 50% * var(--root-scale)); }
+/* The list's lengths (move_command.rml binds them in reference px on #panel). */
+#panel { --row-w: 0px; --row-h: 0px; --list-w: 0px; --list-h: 0px; --list-tail: 0px; }
+#head { width: calc(var(--row-w) * var(--root-scale)); }
+#list { width: calc(var(--list-w) * var(--root-scale)); height: calc(var(--list-h) * var(--root-scale)); }
+.mc-row { width: calc(var(--row-w) * var(--root-scale)); height: calc(var(--row-h) * var(--root-scale)); }
+.list-tail { height: calc(var(--list-tail) * var(--root-scale)); }
