@@ -7,7 +7,7 @@
 	<link type="text/rcss" href="mu_helper_detail.rcss"/>
 </head>
 <body>
-	<!-- The MU Helper's detail panel (CMuHelperDetailWindow), docked in PanelColumnX(2) beside the
+	<!-- The MU Helper's detail panel (CMuHelperDetailWindow), docked in the second right-hand column beside the
 	     config window. `page` is EMuHelperDetailPage: 2/3 a skill's activation condition, 4/5/6 the
 	     elf / summoner / standard recovery thresholds, 7/8 the standard / elf party support. Every
 	     position is native's own m_Pos + K from the native Render(), in reference px under the root

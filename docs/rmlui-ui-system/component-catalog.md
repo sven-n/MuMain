@@ -14,8 +14,8 @@ Every window is a `mu::ui::window::CObject` owning one or more RmlUi documents. 
   `CStorageInventoryExt`, `CMixInventory`, `CNPCShop`, `CMyShopInventory`,
   `CPurchaseShopInventory`, `CInventoryExtension`, `CLuckyItemWnd`). One document each: the frame,
   the item grids ("Item grids" below), an `ItemCameraTarget` image the window draws its items and
-  remaining native effects into, the stack counts, titles, buttons and text (`SyncRootTransform()`,
-  since the grids still hit-test in reference coordinates).
+  remaining native effects into, the stack counts, titles, buttons and text; the grids follow the
+  drawn `#panel`.
 
 Visual frame primitives are theme-specific, not shared (correct per §15 — presentation is the
 theme's job, not the component's):
@@ -26,13 +26,13 @@ theme's job, not the component's):
 - `legacy`: `themes/legacy/base.rcss`'s sprite-based 3-part `.panel-cap-top`/`.panel-cap-bottom`/
   `.panel-middle`.
 
-A second, narrower shared frame exists for one specific window family: the `PanelColumnX()`-docked,
+A second, narrower shared frame exists for one specific window family: the right-docked,
 single-document windows that visually read as one group on screen —
 `character_info`, `my_quest_info`, `pet_info`, `party_info` today. Their `#panel`/frame sprites/exit
 button/tooltip shape/group-box corner-and-fill technique (legacy) and forged-dialog panel gradient/
 shell-edge/groove/header-rail (modern) are byte-identical, so they link a shared
 `docked_panel_frame.rcss` (both themes) instead of each re-declaring it, so windows docked side by
-side read as one family (STATUS.md's checklist item 7). **A new window joining this same `PanelColumnX` dock group should link this partial too**,
+side read as one family (STATUS.md's checklist item 7). **A new window joining this same right-dock group should link this partial too**,
 not copy-paste a fifth version — check its current window list before assuming it doesn't apply.
 `CMyInventory` and the other item windows keep frames of their own.
 
@@ -242,7 +242,7 @@ identical class names and behavior in each.
 `RmlModelBinder<T>` (`UI/RmlBridge/RmlModelBinder.h`) owns the `Model` instance and its
 `Rml::DataModelHandle`, and exposes `MarkDirty()` so packet-handler/action-controller code doesn't
 need to know RmlUi's binding API. Windows reach it through their `ThemedView` (below):
-`GetModel()`, `MarkDirty()`, and `Binder()` for the `SyncField`/`SyncRootTransform` helpers.
+`GetModel()`, `MarkDirty()`, and `Binder()` for the `SyncField` helpers.
 
 ## Semantic colours
 

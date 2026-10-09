@@ -16,7 +16,7 @@ sits.
 
 | Toolkit | Base class(es) | Real home | Status |
 |---|---|---|---|
-| Sprite widgets | *(none left)* | — | **Closed.** `CWin`/`CWinEx`, `CGaugeBar` and `CSlider` are deleted; the sprite `::CButton` has no production consumer (still covered by `tests/ui/test_ui_scaling.cpp`). Nothing to add a consumer to. |
+| Sprite widgets | *(none left)* | — | **Closed.** `CWin`/`CWinEx`, `CGaugeBar`, `CSlider` and the sprite `CButton` are deleted. |
 | Friend/mail/chat base | `CUIBaseWindow`, `CUIWindowMgr` (both over `CUIMessage`) | `UI/Social/SocialWindowBase.h` | **The family's own base, nothing more.** The `CUIControl` toolkit it came from is deleted, widgets and base alike. What survives is the identity, parent, state, geometry and message queue `CUIWindowMgr` runs the friend/mail/chat windows through. |
 | `mu::ui::window` tier | `CObject : IObject`, `CManager`, `CTextBox` | `UI/Core/{WindowObject,WindowManager}.h`, `UI/Widgets/Window/*.h` | **`CObject`/`CManager` are the base for all new work.** The widget family is for native-only content. |
 
@@ -24,7 +24,7 @@ sits.
 
 ```
 1. UI Runtime     — CObject / CManager (lifecycle, dispatch, depth/key order, show/enable)
-2. UI Geometry    — UI::Scaling::UITransform / UILayoutPolicy, the opt-in WindowGeometry,
+2. UI Geometry    — UI::Scaling::UITransform (scale inputs, measuring units),
                     and the theme's workspace (window-placement.md)
 3. UI Components  — RmlUi + base.rcss components; the mu::ui::window widgets only for
                     content that stays native
@@ -38,10 +38,11 @@ sits.
   (composition) and calls `Contains()` from its own `UpdateMouseEvent()`; per-row or per-tab
   sub-rects stay inline. `CObject`'s shown/active split (`UpdateWhileShown()`/
   `UpdateWhileActive()`) is the same opt-in shape.
-- **`CManager` provides only a coordinate space.** Its dispatch wraps every `Update()`/`Render()`/
-  `UpdateMouseEvent()`/`UpdateKeyEvent()` in a `ScopedActiveTransform` from `GetLayoutMode()`, and
-  is topmost-first, consume-and-stop (`UpdateMouseEvent()` returns `false` only to consume).
-  `UI::Scaling` (seven `LayoutMode`s) is the one coordinate-transform layer.
+- **`CManager` provides only measuring units.** Its dispatch runs every pass (`Update()`/
+  `Render()`/`UpdateMouseEvent()`/`UpdateKeyEvent()`) under one `ScopedActiveTransform` of
+  `MeasuringUnits()` and leaves the pointer alone; it is topmost-first, consume-and-stop
+  (`UpdateMouseEvent()` returns `false` only to consume). Placement is the theme's
+  ([layout-and-scaling.md](layout-and-scaling.md#units-and-placement)).
 - **Input**: `CInput` is built on `CNewKeyInput` (its keyboard queries forward to the
   `IsPress`/`IsRelease` free functions) — one root sampler plus a façade scoped to login and
   character select, whose mouse state is stale elsewhere. RmlUi's own events drive RmlUi elements
@@ -84,9 +85,9 @@ Three permanent shapes, following that boundary:
 5. **Wrapping a big legacy subsystem instead of writing one?** Put a thin `CObject` adapter in
    front that forwards into it, rather than reimplementing it or inventing a second manager.
    `CFriendWindow` (owns and forwards to `CUIWindowMgr`) is the template.
-6. **Coordinates go through `UI::Scaling`.** No second `g_fScreenRate_x`-style global or
-   hand-rolled reference scale; add a `LayoutMode` case if none fits (and a `UILayoutPolicy.cpp`
-   case for the new `INTERFACE_*` key — `AddUIObj()` overwrites the window's own mode).
+6. **Scales come from `UI::Scaling`; placement from the theme.** No second
+   `g_fScreenRate_x`-style global or hand-rolled reference scale, and no position from C++: a
+   new window's document takes `.stage`, `.hud-board` or a workspace slot.
 7. **Widget-level polling goes through `mu::ui::window::IsPress`/`IsRelease`/`IsNone`/`IsRepeat`**
    (`UI/Core/WindowCommon.h`); `CInput::Instance()` only for the login/character-select family's
    real-pixel needs (double-click, left-hand swap, raw cursor).
@@ -108,9 +109,8 @@ Three permanent shapes, following that boundary:
 - **`UpdateMouseEvent()` claims the panel**, so a click on it doesn't also reach windows below or
   the world: the theme gives `#panel` `pointer-events: auto`, so RmlUi takes clicks on it, and the
   window returns `!UI::RmlBridge::IsPointerOver(document)` (`RmlPointer.h`), which needs no units
-  (`CCharacterInfoWindow` is the shape). Older windows still test `MouseX`/`MouseY` against
-  `WindowGeometry(m_Pos, RefreshLogicalPanelSize())`; a window with native content under its panel
-  keeps that until the content moves to physical pixels, because RmlUi would take its clicks too.
+  (`CCharacterInfoWindow` is the shape). A window with native content under its panel tests that
+  content's own element with `IsPointerWithin()` or `PointerIn()` instead.
 - **`UpdateKeyEvent()`** keeps only real key behaviour (Esc to close, hotkeys).
 - **A `UI::RmlBridge::ThemedView` member owns the documents and the model**
   (`UI/RmlBridge/RmlThemedView.h`): the model's binding function, the document paths and any
@@ -172,10 +172,9 @@ set its own container and let the theme address them with `:nth-child` (`engine-
    coordinate that was easier to push from C++.
 3. **If you are writing `a / 2 - b / 2` or `y += stripHeight`, you are writing RCSS in C++.**
    Centering and stacking are what the layout engine is for.
-4. **A constant that appears in both C++ and RCSS is a bug waiting.** Author it in RCSS and read it
-   back with `UI::RmlBridge::RefreshLogicalPanelSize()` / `RefreshLogicalAnchorPosition()`
-   (`RmlBridge/RmlPanelGeometry.h`). That applies to a native companion widget's own size too, not
-   just a panel's.
+4. **A constant that appears in both C++ and RCSS is a bug waiting.** Author it in RCSS and ask
+   the drawn element (`RmlPointer.h`, or its box) from C++. That applies to native content's own
+   size too, not just a panel's.
 5. **Do not transcribe the native `Render()` into a list of `{text, x, y, width, align, bold,
    color}`.** That turns the model into a draw list and the document into a replayer, and it takes
    every one of these rules down with it. Reverse-engineer the layout intent
@@ -234,8 +233,6 @@ table.
 
 ## Namespaces and look-alike names
 
-- `::CButton` is the closed sprite implementation; `mu::ui::window::CButton` is the native
-  companion. Qualify where both are visible.
 - `MUHelper::CMuHelper` is the bot engine; `CMuHelperConfigWindow`/`CMuHelperDetailWindow`/
   `CMuHelperSkillPicker` (`UI/MuHelper/`) are its settings UI.
 - `UI/HUD/ChatInputBox.h` is the complete chat-input window, not a reusable text-entry widget.
@@ -244,14 +241,13 @@ table.
 ## Accepted as the base: the `CObject` tier
 
 Every window is a `mu::ui::window::CObject` owned by `CManager`, registered by hand in
-`WindowSystem.cpp` (creation, `INTERFACE_*` id, its `g_p*` macro) and in `UILayoutPolicy.cpp` (its
-layout mode). That machinery is kept as it is, by decision: the migration never needed it to
-change. An RmlUi document is something a `CObject` owns, and slots, fill placement and the layout
-modes plugged into it without trouble. Replacing it would touch every window and every caller of
-the lookups for no change a player sees.
+`WindowSystem.cpp` (creation, `INTERFACE_*` id, its `g_p*` macro). That machinery is kept as it
+is, by decision: the migration never needed it to change. An RmlUi document is something a
+`CObject` owns, and slots and fill placement plugged into it without trouble. Replacing it would
+touch every window and every caller of the lookups for no change a player sees.
 
 Revisit when a concrete need appears that this machinery cannot meet. The cheapest step then is
-self-registration: each window declaring its id, name and layout mode once, in place of the hand-kept
+self-registration: each window declaring its id and name once, in place of the hand-kept
 lists. Typed lookups in place of the `g_p*` macros, and the lifecycle moving onto the documents,
 each stand alone after that.
 

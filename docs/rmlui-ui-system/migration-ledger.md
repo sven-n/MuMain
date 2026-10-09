@@ -44,7 +44,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CMasterLevel` | Done | RmlUi-only 2D | `MasterSkillTreeLayout`, `master_skill_icons.rcss`; its learn confirm is `CGenericConfirmDialog` |
 | `CMuHelperConfigWindow`, `CMuHelperDetailWindow`, `CMuHelperSkillPicker` (were `CUIMuHelper`, `CMuHelperExt`, `CMuHelperSkillList`) | Done | RmlUi-only 2D | `UI/MuHelper/`; docked config and detail on the `character_info` recipe, a borderless picker whose fan-out stays in C++. Class-specific controls from `UI::MuHelper::ResolveClassFeatures()` bound as flags. Detail thresholds are level gauges (`component-catalog.md`). Deliberate behaviour changes: pick-all and pick-selected exclude each other, ticking a skill's Condition fills an empty radio group, Esc closes from a focused field, the extra-item list is always sorted |
 | `CHelpWindow` | Done | RmlUi-only 2D | Shown unfocused, in front (`SyncDocumentVisibilityInFront()`) |
-| `CWindowMenu` | Done | RmlUi-only 2D | `LayoutMode::HudBoard`; row clicks queued and run from `Update()` |
+| `CWindowMenu` | Done | RmlUi-only 2D | On the `.hud-board`; row clicks queued and run from `Update()` |
 | `CPartyListWindow` | Done | RmlUi-only 2D | The HUD mini list (not `CPartyInfoWindow`); C++ keeps the hovered card `Selection.cpp` reads |
 | `CItemEnduranceInfo` | Done | RmlUi-only 2D | Durability icons (edge-following), pet HP frame, arrow/summon lines; hit tests in C++ |
 
@@ -59,7 +59,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CFriendWindow` | Done | Hybrid | `UI/Social/`: shell (`friend_shell.rml`), one document per chat room and letter; the letter portrait is live 3D in a render target, driven by `UI::Social::PhotoViewerControl`. `CUIWindowMgr` still arranges them (`building-new-ui.md`). The original's F5 menu of open windows is retired: the shell's Window List tab lists them |
 | `CGuildMakeWindow` | Done | RmlUi-only 2D | |
 | `CGuildInfoWindow` | Done | RmlUi-only 2D | Three RmlUi-scrolled lists; the tab highlight is placed by RCSS. Checked in game: the tabs and the members list |
-| `CServerMsgWin` | Done | RmlUi-only 2D | Real pixels (`LayoutMode::Pixels`), fixed face (Cousine) |
+| `CServerMsgWin` | Done | RmlUi-only 2D | Real pixels, text at the login scene's size (`LegacyUiTransform()`), fixed face (Cousine) |
 
 ### Inventory, shops, trade
 
@@ -90,9 +90,9 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CGuardWindow` | Done | RmlUi-only 2D | Guild lists; tab positions in RCSS |
 | `CGateSwitchWindow`, `CCatapultWindow` | Done | RmlUi-only 2D | Right-docked; catapult not checked in game |
 | `CSiegeWarfare` | Done | RmlUi-only 2D | Drawn under every panel (its stacking depth); buttons still hit-test natively |
-| `CDuelWindow`, `CBattleSoccerScore` | Done | RmlUi-only 2D | Under every panel; event-HUD slots, drawn at the HUD's scale (`LayoutMode::HudFrame`) |
+| `CDuelWindow`, `CBattleSoccerScore` | Done | RmlUi-only 2D | Under every panel; event-HUD slots, drawn at the HUD's scale |
 | `CDuelWatchWindow` | Done | RmlUi-only 2D | Right-docked |
-| `CDuelWatchUserListWindow` | Done | RmlUi-only 2D | Event-HUD slot (bottom-left corner, grows upward), `LayoutMode::HudFrame` |
+| `CDuelWatchUserListWindow` | Done | RmlUi-only 2D | Event-HUD slot (bottom-left corner, grows upward), at the HUD's scale |
 | `CDuelWatchMainFrameWindow` | Done | RmlUi-only 2D | Replaces the main frame while spectating; catch-up bars stepped in `Update()` |
 
 ### Events
@@ -100,8 +100,8 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | Component | Status | Note |
 |---|---|---|
 | `CEnterBloodCastle`, `CEnterDevilSquare` | Done | `UI/Events/EventEntryView` (`event_entry.rcss`), rows by `:nth-child` |
-| `CBloodCastle`, `CChaosCastleTime`, `CEmpireGuardianTimer` | Done | `UI/Events/EventTimerView`; event-HUD slots, `LayoutMode::HudFrame` |
-| `CDoppelGangerFrame`, `CKanturuInfoWindow` | Done | Event-HUD slots, `LayoutMode::HudFrame` |
+| `CBloodCastle`, `CChaosCastleTime`, `CEmpireGuardianTimer` | Done | `UI/Events/EventTimerView`; event-HUD slots at the HUD's scale |
+| `CDoppelGangerFrame`, `CKanturuInfoWindow` | Done | Event-HUD slots at the HUD's scale |
 | `CCursedTempleEnter`, `CCursedTempleResult`, `CCursedTempleSystem` | Done | Panel stage (enter, result); the Illusion Temple HUD places itself |
 | `CCryWolf` | Done | Renders only in the event; seen through `$preview crywolf`/`crywolfresult` (`tracked-deferrals.md`) |
 | `CGoldBowmanWindow`, `CGoldBowmanLena`, `CExchangeLuckyCoin`, `CRegistrationLuckyCoin` | Done | `UI/Events/EventItemEntryView`; the Rena and the registration coin draw into its render target. The Rena now follow the panel (the original drew them at a fixed screen x) |

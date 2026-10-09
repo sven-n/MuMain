@@ -105,7 +105,7 @@ around it. See [`STATUS.md`](STATUS.md) for migration status and
   too (for a stack growing away from its anchor) but not yet proved at runtime.
 
 - **`data-attr-id` on a `data-for` clone gives each row a real id that `GetElementById()` finds**,
-  so C++ can read a repeated row's live geometry back (`RefreshLogicalAnchorPosition`) instead of
+  so C++ can read a repeated row's live geometry back instead of
   binding its position — `master_level.rml` anchors its skill hint on the hovered node this way.
 
 - **RCSS comments don't nest, and a broken one in a shared file corrupts every document that links
@@ -248,7 +248,7 @@ plus [PR #989](https://github.com/mikke89/RmlUi/pull/989) (SDL_GPU renderer pari
 | `transform: rotate()` | Works (`base.rcss`'s `.modern-joint`, the checkbox tick) | — |
 | A circular progress arc | No CSS equivalent | `<progress direction="clockwise">` — real arc geometry, **but only with a `fill-image` set**: without a texture a circular direction renders as an unclipped rectangle (`ElementProgress::GenerateGeometry()`). For a flat look, segment `<div>`s |
 
-## `CObject`/`CManager`/`LayoutMode`
+## `CObject`/`CManager`
 
 - **`CManager::CompareKeyEventOrder` sorts DESCENDING: the highest `GetKeyEventOrder()` runs
   first**, and `CManager::UpdateKeyEvent()` stops at the first object returning `false`. A modal
@@ -257,14 +257,10 @@ plus [PR #989](https://github.com/mikke89/RmlUi/pull/989) (SDL_GPU renderer pari
   new dialog primitive the same. Don't "fix" the comparator — every override is calibrated to it —
   and don't trust a comment that says lower runs first.
 
-- **`CManager::AddUIObj(dwKey, obj)` overwrites the object's `LayoutMode`** with
-  `UI::Layout::ForInterface(dwKey)`. `UILayoutPolicy.cpp`'s table is the authority; a key without
-  a `case` falls through to `LayoutMode::Stage`, a real resolution-scaled transform.
-
-- **Real-pixel rendering needs `LayoutMode::Pixels`**, the only identity transform.
-  `CManager::UpdateMouseEvent()` remaps the global `MouseX`/`MouseY` through the active transform,
-  and text rendering reads `UI::Scaling::GetActiveTransform()`; `CSprite::Render()` reads the
-  transform's offset but not its scale.
+- **Native drawing and `MeasureText()` follow the active transform**, which `CManager` sets to its
+  measuring units for every pass; `CSprite::Render()` reads the transform's offset but not its
+  scale. Real pixels need `ScopedWindowPixels`, the stretched screen `ScopedScreenStretch`.
+  `MouseX`/`MouseY` are never remapped.
 
 - **A native widget that reads the active transform at render time can end up double-scaled** if
   its position was divided by a different transform when set. Store real pixels and render inside

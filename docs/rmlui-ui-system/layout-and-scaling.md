@@ -101,35 +101,30 @@ each 640×480 reference px with its scale as `--root-scale`:
 - `.hud-board`: standing on the window's bottom, centred like the HUD, at `--hud-scale` (CryWolf,
   the Illusion Temple and siege HUDs, the window menu, the master tree).
 
-A window whose document uses one binds no position or scale; the window's layout mode still gives
-its native code the same space until the per-window transforms are retired.
+A window whose document uses one binds no position or scale.
 
-## Layout modes
+## Units and placement
 
-`UI::Layout::ForInterface()` (`UILayoutPolicy.cpp`) gives every `CObject` window a
-`UI::Scaling::LayoutMode`: where its 640×480 reference units land and at what scale. `CManager`
-scopes that transform around the window's update, input and render, and remaps `MouseX`/`MouseY`
-into its units. Windows the workspace places take their position from their slot; the mode then
-only says which units their native code works in.
+No window has a layout of its own any more: C++ places no document and remaps no pointer.
 
-| Mode | Scale | Origin | For |
-|---|---|---|---|
-| `Stage` (default) | panel, uniform | the original screen centred on the window | NPC panels, dialogs |
-| `HudBoard` | the HUD's, uniform | the original screen centred like the HUD, on the window's bottom | fixed-place windows on or from the HUD: CryWolf, the Illusion Temple, siege, the window menu, the master tree, the skill list |
-| `HudFrame` | the HUD's, uniform | none: the workspace slot | the event HUDs, the duel HUD, the bottom HUD's parts, the chat |
-| `DockLeft` / `DockRight` | dock, uniform | standing on the HUD | the docked panels |
-| `FloatingWorkspace` | dock, uniform | none: the window's own position | the friend list |
-| `ScreenOverlay` | W/640 × H/480, no UI scale | the whole window | what must cover the screen or follow the world: the notice band, the full map, names and balloons |
-| `Pixels` | identity | real pixels | windows that compute screen pixels themselves |
-| `Slot` | the slot's transform | the slot | windows placed with `CObject::PlaceInSlot()` |
+- **Placement** is the theme's: a `.stage` or `.hud-board` class, a workspace slot
+  (`CObject::PlaceInWorkspace()`, [window-placement.md](window-placement.md)), or a document's own
+  RCSS anchors.
+- **Measuring units**: `CManager` runs every window's update, input and render passes under one
+  transform, `MeasuringUnits()`, so `MeasureText()` and native 2D drawing agree on one space. The
+  game's manager uses `UI::Scaling::TypographyUnitsTransform()` (uniform, at the UI scale, from
+  the window's top-left), so a measured width is a panel's reference px wherever the panel stands.
+  The login scenes' manager sets `LegacyUiTransform()` with `SetUnits()`.
+- **Pointer**: windows hit-test their documents through RmlUi (`RmlPointer.h`), in screen pixels;
+  native code that needs pixels reads `g_fWindowMouseX/Y` or runs under `ScopedWindowPixels`.
+- **World overlays** (name labels, balloons, HP bars over characters, the notice band, the minimap
+  hint) draw under `ScopedScreenStretch`: the original's screen stretched over the window, with no
+  UI scale, so they follow the world on any aspect ratio.
 
-A new fixed-place HUD window takes `HudBoard`, not `ScreenOverlay`: the stretched screen ignores the
-UI scale and distorts on wide screens.
-
-Native text size is the same in every mode except `Pixels`: each transform carries
-`UI::Scaling::TypographyScale()`, the UI scale capped like the panels (RmlUi's dp ratio). A window
-asks `NativeTextPixelSize(role, WindowWidth, WindowHeight)` for it, with no transform;
-`SyncNativeTextSize()` does.
+The scale inputs come from the same functions as before: `PanelTransform()`'s panel scale and
+`TypographyScale()` (both capped at 2.0), `BottomHudScale()` and the dock scale
+(`DockRightTransform()`, capped at 2.25). Native text size is `NativeTextPixelSize(role,
+WindowWidth, WindowHeight)`, at the one typography scale; `RmlNativeTextSize.h` wraps it.
 
 ## Anchor/sizing utility classes (`base.rcss`)
 
@@ -195,37 +190,23 @@ positions those objects must be derived from the *same* math as the CSS, not jus
 at the reference resolution" — verify by actually clicking through create/delete/connect-style
 flows post-retrofit at more than one resolution, not just eyeballing a screenshot.
 
-## Reading a live RCSS box back into native hit-test space
+## Hit testing a document
 
-`UI::RmlBridge::RefreshLogicalPanelSize()` (`RmlPanelGeometry.h`) is how a native `WindowGeometry`
-hit box follows its theme's own `#panel` instead of a hardcoded constant. **Its result needs no
-scale conversion, and applying one is a bug.** Every `#panel` it reads is sized in plain `px` and
-scaled only at paint time, by `transform: scale(root_scale)` (`SyncRootTransform`); RmlUi's layout
-box ignores a render-time transform, so `GetBox()` already returns reference-space extents. An
-earlier version divided by the active transform, which shrank each hit box by the UI scale — at the
-usual capped 2.0 only the panel's top-left quarter stayed clickable, and every click outside it fell
-through to the world, walking the character (which in the vault's case also closed the window). It
-hit all 17 call sites: the 9 inventory-family windows and the 8 docked-family ones.
+A window asks RmlUi whether the pointer is over its document or one of its elements
+(`UI::RmlBridge::IsPointerOver()`, `IsPointerWithin()`, `PointerIn()` for a local point). Those
+answer in screen pixels against the drawn boxes, whatever transform a theme puts on `#panel`, so no
+window converts a box between RmlUi and native space.
 
-The trap is that `px` in an RmlUi document means different things depending on whether the scale
-lives in a `transform` or was pre-multiplied in C++ before being handed to RCSS. `RmlTooltip.cpp`'s
-`#tooltip_panel` read genuinely *is* in screen pixels — that document carries no root transform and
-its C++ pre-multiplies the scale into the width it sets. Don't generalize from one to the other;
-check which of the two a document is before converting anything read out of its boxes.
-
-The same asymmetry applies within a single element tree, and `RefreshLogicalAnchorPosition()` had
-exactly this defect before it was fixed: `GetAbsoluteOffset()` returns `root_x + childLocalOffset`,
-where `root_x` was pre-multiplied by the scale but the child's own offset was not, so un-mapping the
-whole sum through the transform wrongly divided the child half. It now takes the child's offset as a
-**delta against `#panel`** and adds the caller's own position — a signature that cannot express the
-bug — and its three callers were corrected with it.
+Where native code still reads a box (the workspace's content-fit size, a hint anchored to an
+element), check which kind the document is first. A `#panel` scaled by `transform:
+scale(var(--root-scale))` reports reference px from `GetBox()`, since RmlUi's layout box ignores a
+render-time transform; an unscaled document in `dp` reports screen px. Converting the first as if
+it were the second shrank every docked hit box by the UI scale once.
 
 ### Checking it: the scale sweep
 
 A window's native bookkeeping and its RCSS agree trivially at scale 1.0 and can disagree at every
-other scale, so a window whose hit box or anchors come from live RCSS (the callers of
-`RefreshLogicalPanelSize()`/`RefreshLogicalAnchorPosition()` — grep for the current list) is
-checked at **75 %** and **150 %** (Options → UI → UI scale, applies live), in both themes. Check
+other scale, so a window whose hit box, anchors or native content come from live RCSS is checked at **75 %** and **150 %** (Options → UI → UI scale, applies live), in both themes. Check
 the larger scale in a larger window (1280x720 or 1920x1080): 100 % already fills 1024x768, so a
 docked panel above it runs off a small window and its far edges cannot be clicked:
 
@@ -236,14 +217,6 @@ docked panel above it runs off a small window and its far edges cannot be clicke
 3. **Hover anything with a tooltip or popup**; it must sit on its element, not be pulled toward
    the panel's top-left (the anchor-readback failure).
 
-Sites that read RmlUi geometry without converting it are each correct for their own reason:
-`CGenericConfirmDialog` (`dp` panel, no root transform: its box is screen px), `CMainFrameWindow`
-(screen-px slot box divided by the dp ratio, `SlotBoxInReference()`), `CNPCDialogue` (a
-difference of two offsets over a pitch: units cancel), `RmlTooltip` (no root transform, scale
-pre-multiplied in C++), `COptionWindow` (screen-px rect against `MouseX/MouseY`, safe only
-because `INTERFACE_OPTION` is `LayoutMode::Pixels`). "Does this need a conversion?" has no single
-answer — check which kind a document is.
-
 Not covered by the sweep: resolution (scale is the sharper probe; `PanelTransform` derives scale
 from resolution), drag state across a scale or theme change, and a theme change while a window is
 open. These are not tracked: whoever touches a window checks them for it.
@@ -252,6 +225,3 @@ open. These are not tracked: whoever touches a window checks them for it.
 
 - An automated multi-resolution visual-regression test; keep doing manual spot-checks per
   window until one exists.
-- Whether `::CButton` (no production consumer) and `mu::ui::window::CButton` should merge. Each
-  is in its own namespace; porting a window retires whichever it used, so this only matters for
-  the shrinking native population.

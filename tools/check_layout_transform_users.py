@@ -1,23 +1,20 @@
 #!/usr/bin/env python3
-"""Per-window layout transform guard.
+"""Active transform guard.
 
-The window manager runs every window inside its own layout transform
-(`ScopedActiveTransform(GetLayoutTransform(), true)`), which rescales `MouseX`/`MouseY`
-and the native text metrics into that window's 640x480 units. Code that reads that
-transform places documents, hit-tests the pointer or measures text in units only the
-window's layout mode defines -- layout decided in C++ instead of the theme. The plan is
-to move every such use onto theme-owned placement, RmlUi hover and physical pixels, and
-then delete the per-window transform.
+Windows no longer run in a layout of their own: the theme places their documents, RmlUi
+hit-tests them in screen pixels, and native text is measured in the window manager's one
+measuring space. What remains of the ambient `UI::Scaling` transform is infrastructure:
+the manager's measuring scope, the text renderer reading it, the inventory's screen scope
+and the tooltip's metric scope. Window code that scopes or reads the transform again would
+bring back layout decided in C++.
 
-This script freezes the population while that happens: it counts, per file under
-src/source, the calls listed in PATTERNS (comments ignored), and compares them with
-layout_transform_allowlist.txt. A file whose count grows, or a new file that starts
-using one, fails the build. A file whose count dropped is printed so its entry can be
-lowered; the allowlist may only shrink. Its total is the progress metric.
+This script keeps it that way: it counts, per file under src/source, the calls listed in
+PATTERNS (comments ignored), and compares them with layout_transform_allowlist.txt. A file
+whose count grows, or a new file that starts using one, fails the build. A file whose
+count dropped is printed so its entry can be lowered; the allowlist may only shrink.
 
 Not counted: the transform's own implementation (EXEMPT_PREFIXES) and the world-space
-users that keep the stretched screen transform when the per-window one is gone
-(EXEMPT_FILES).
+users of the stretched screen (EXEMPT_FILES).
 
 Usage: python3 check_layout_transform_users.py [--source-root DIR] [--allowlist FILE]
                                                [--summary] [--write]
@@ -29,20 +26,9 @@ import re
 import sys
 
 PATTERNS = [
-    r"\bSyncRootTransform\b",
     r"\bGetActiveTransform\b",
-    r"\bGetLayoutTransform\b",
-    r"\bTransformForLayout\b",
-    r"\bRefreshLogicalPanelSize\b",
-    r"\bRefreshLogicalAnchorPosition\b",
-    r"\bRefreshLogicalAnchorRect\b",
-    r"\bHandleFrameCornerClose\b",
-    r"\bConsumeFrameCornerClick\b",
-    r"\bContains\(\s*MouseX\b",
-    r"\bCheckMouseIn\b",
-    r"\bLayoutMode::",
-    r"\bPlaceInSlot\b",
     r"\bScopedActiveTransform\b",
+    r"\bContains\(\s*MouseX\b",
 ]
 PATTERN_RE = re.compile("|".join(PATTERNS))
 

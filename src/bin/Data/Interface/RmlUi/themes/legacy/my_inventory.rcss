@@ -113,7 +113,7 @@
 .option-label.active { color: #ffcc19; }
 .option-label + .option-label { margin-left: 0.3em; }
 
-/* Hover areas -- each spans half of #panel's width, the former native CheckMouseIn() split. */
+/* Hover areas -- each spans half of #panel's width, the original's hover split. */
 .option-hover {
 	position: absolute;
 	top: 20px;

@@ -9,7 +9,7 @@
 	<!-- Modern theme's own copy of CCharacterInfoWindow's frame -- matches CMyInventory's own
 	     forged-dialog chrome (shell-edge/groove/gradient panel, rail-with-rivet header, bordered
 	     square icon buttons) rather than the generic .modern-frame/.modern-frame-crimson treatment,
-	     since this window docks in the same PanelColumnX() row as CMyInventory/CMyQuestInfoWindow/
+	     since this window docks in the same right-dock row as CMyInventory/CMyQuestInfoWindow/
 	     CPetInfoWindow/CPartyInfoWindow and is meant to read as the same visual family, not a
 	     one-off -- all four now share this exact shell via docked_panel_frame.rcss (#panel's own
 	     gradient/border/box-shadow, and .docked-header-rail-fill/.docked-rail-accent below); this

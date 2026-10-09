@@ -29,6 +29,11 @@ deleted. Families:
 - **Events, siege, duel, NPC windows** and the event HUDs; **world labels** (names, balloons,
   bars, ground items) through the world-label layer.
 
+**Placement is the theme's.** No window has a layout of its own: documents sit on `.stage`,
+`.hud-board` or a workspace slot, RmlUi hit-tests them, and `CManager` gives native code one
+measuring space (`layout-and-scaling.md`'s "Units and placement"). Only infrastructure may touch
+the active transform; `tools/check_layout_transform_users.py` keeps it to that.
+
 **Stays native on purpose**: live 3D content (item grids, equipped items, item and character
 previews — `RenderTarget` can show one inside a document, as the potions, the letter portrait,
 the character-creation preview and the event previews do), the mouse cursor, developer overlays, and the equipment paperdoll's
@@ -141,7 +146,7 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
   parent's width (`engine-findings.md`).
 - **Draw a window in the scale its slot is sized in.** The event HUDs were placed in the HUD's
   UI-scaled units but drawn in the original's W/640 x H/480 stretch, so at 90 % they outgrew their
-  slots; `LayoutMode::HudFrame` is the HUD's own scale.
+  slots; they now draw at the HUD's own scale.
 - **Data expressions have no unary minus**: bind `-x` from C++.
 - **Class-specific controls are one tested C++ table bound as flags**
   (`UI::MuHelper::ResolveClassFeatures()`), never RCSS — the themes cannot disagree.
@@ -183,14 +188,11 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
 - **Validation covers the UI-scale axis only** (`layout-and-scaling.md`'s scale sweep);
   resolution, drag state across a scale change, and theme change while open are uncovered, and
   are left to whoever touches each window rather than tracked.
-- **`LayoutMode::Pixels` windows** (`CCreditWin`, `CLoginMainWin`, `CSysMenuWin`,
-  `COptionWindow`, `CServerSelWin`, `CMsgWin`, `CCharSelMainWin`, `CCharMakeWin`, `CLoginWin`)
-  have not been audited for native draws that still assume a fixed resolution (the mode's own
-  comment cites `CCreditWin`'s 800x600 assumption).
-- **Layout still decided per window in C++** (§1, §16). Every window runs inside its layout mode's
-  transform, and code reading it places documents, hit-tests the pointer and sizes native text in
-  that window's units. `tools/check_layout_transform_users.py` counts those uses and lets the count
-  only shrink: 417 uses in 123 files when the guard landed. Zero retires the per-window transform.
+- **The login scene's windows** (`CCreditWin`, `CLoginMainWin`, `CSysMenuWin`, `COptionWindow`,
+  `CServerSelWin`, `CMsgWin`, `CCharSelMainWin`, `CCharMakeWin`, `CLoginWin`) have not been
+  audited for native draws that still assume a fixed resolution (`CCreditWin` assumes 800x600).
+- **The friend family still keeps native positions** for `CUIWindowMgr` in
+  `FloatingWorkspaceTransform()` units, mirrored from its dragged documents.
 
 ## Upstream sync log
 

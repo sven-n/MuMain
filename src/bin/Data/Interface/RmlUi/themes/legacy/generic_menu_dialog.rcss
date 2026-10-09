@@ -4,8 +4,8 @@
    shared with any future consumer -- not exclusive to this dialog (see that file's own comment).
    This file supplies only this document's own content layout (lines/buttons), not the shell.
 
-   #panel is placed like native's menu boxes (see #panel below); dp throughout (LayoutMode::Stage
-   window, same category as generic_confirm_dialog.rcss), text in rem (RmlNativeText.h). 230dp
+   #panel is placed like native's menu boxes (see #panel below); dp throughout (no
+   transform:scale(root_scale), like generic_confirm_dialog.rcss), text in rem (RmlNativeText.h). 230dp
    matches native's own MSGBOX_WIDTH and generic_confirm_dialog.rcss's own panel width. The height
    follows the content, as native's per-menu fixed heights were sized to theirs. */
 #panel {

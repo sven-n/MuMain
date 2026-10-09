@@ -981,7 +981,7 @@ add_custom_target(CheckLayoutTransformUsers ALL
   COMMAND "${Python3_EXECUTABLE}" "${REPO_ROOT}/tools/check_layout_transform_users.py"
           --source-root "${CMAKE_CURRENT_SOURCE_DIR}/source"
           --allowlist "${REPO_ROOT}/tools/layout_transform_allowlist.txt"
-  COMMENT "Checking per-window layout transform users (the count may only shrink)"
+  COMMENT "Checking active UI transform users (the count may only shrink)"
   VERBATIM
 )
 add_dependencies(Main CheckLayoutTransformUsers)

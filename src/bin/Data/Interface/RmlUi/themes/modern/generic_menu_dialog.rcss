@@ -6,7 +6,7 @@
    proves the same chrome on a plain, non-dialog window). This file supplies only this document's
    own content layout (lines/buttons), not the shell. */
 
-/* #panel is centered via .center-both, dp throughout (LayoutMode::Stage window). Same 230dp
+/* #panel is centered via .center-both, dp throughout (no transform:scale(root_scale)). Same 230dp
    width and 260dp height as legacy's own copy, for visual consistency between the two themes and
    with generic_confirm_dialog's own panel width. */
 #panel {

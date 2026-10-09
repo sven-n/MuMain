@@ -8,7 +8,7 @@
 <body>
 	<!-- Modern theme's own copy of CPetInfoWindow's frame -- same forged-dialog shell/header-rail/
 	     exit-button family as CCharacterInfoWindow/CMyQuestInfoWindow/CPartyInfoWindow (this window
-	     docks in the same PanelColumnX() slots and should read as the same family), via
+	     docks in the same right-hand slots and should read as the same family), via
 	     docked_panel_frame.rcss. Title stays an independent centered span rather than sitting inside
 	     .modern-header-text-px, same convention character_info.rml's own #name uses -- both have a
 	     single centered title, unlike my_quest_info's left-aligned one. Keep ids/data-model/

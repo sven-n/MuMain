@@ -8,7 +8,7 @@
 </head>
 <body>
 	<!-- Modern theme's own copy of CMuHelperDetailWindow's panel -- the forged-dialog shell and
-	     header rail its PanelColumnX neighbours use (party_info, character_info), with plain px text
+	     header rail its right-dock neighbours use (party_info, character_info), with plain px text
 	     that scales with the panel like theirs. Same layout, ids, model fields and event names as
 	     ../../mu_helper_detail.rml; keep them in step. -->
 	<div id="panel" data-model="mu_helper_detail">

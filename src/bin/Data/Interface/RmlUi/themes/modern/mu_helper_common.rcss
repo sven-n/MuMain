@@ -1,5 +1,5 @@
 /* Modern pieces the MU Helper config window and its detail panel share. The shell, groove and
-   header rail come from docked_panel_frame.rcss and base.rcss, as for every PanelColumnX neighbour
+   header rail come from docked_panel_frame.rcss and base.rcss, as for every right-dock neighbour
    (party_info, character_info); this file states the MU Helper's own controls in the same
    forged-metal language. Plain reference px -- #panel carries transform: scale(root_scale), and
    modern text scales with it like its neighbours' does, so nothing here is counter-scaled. */

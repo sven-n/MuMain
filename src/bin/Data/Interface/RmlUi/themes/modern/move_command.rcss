@@ -1,7 +1,7 @@
 /* Modern theme for CMoveCommandWindow -- the left-docked warp list.
 
-   This window is the only LayoutMode::DockLeft screen in the game, so it has no PanelColumnX dock
-   neighbours to match; what it does sit beside, always, is main_frame's bottom HUD. It therefore
+   This window is the only left-docked screen in the game, so it has no dock neighbours to
+   match; what it does sit beside, always, is main_frame's bottom HUD. It therefore
    borrows docked_panel_frame.rcss's forged-panel vocabulary (gradient body, border-frame edge,
    inset shell highlight) without linking it: that partial is a 190x429 dialog frame with a header
    rail, and this is a slim full-height rail whose native form had no frame art at all -- one flat

@@ -65,8 +65,7 @@ part, inside **regions** the theme defines with ordinary RCSS:
   `UI::Placement::SlotBox("main_hud")`.
 - **The duel watcher's HUD** (`duel_watch_hud`, `duel_watch_frame.rml`, 640x51) is a second footer
   slot. The duel-watch buff hides the main HUD and shows it, so the footer reserves whichever is
-  open, and the docks and event HUDs stand on it the same way. It draws in `LayoutMode::HudFrame`
-  like the event HUDs.
+  open, and the docks and event HUDs stand on it the same way. It is placed like the event HUDs.
 - **Header**: the MU Helper bar (`mu_helper_bar`, left) and the modern theme's menu buttons
   (`top_bar`, `main_frame_top.rml`, pushed right by `margin-left: auto`). Legacy hides the top
   bar, so its slot collapses. Modern keeps the header at least 25 dp tall so it stays steady while
@@ -98,11 +97,11 @@ theme reload, a HUD part shown or hidden, the chat log resizing) call `Invalidat
 `Update()` re-places once before the frame's windows update.
 
 **Participants.**
-- **Windows** (`CObject`): a placed window's layout mode becomes `LayoutMode::Slot` — its logical
-  space is the slot, (0, 0) at the slot's top-left, at the region's scale (`PlaceInSlot()`).
-  Everything that maps window coordinates reads `GetLayoutTransform()`, so `CManager` hit-testing,
-  native grids, 3D icons and `SyncRootTransform()`'s `root_*` follow the slot unchanged. Without a
-  slot a window returns to its `UILayoutPolicy` mode.
+- **Windows** (`CObject`): the workspace calls `PlaceInWorkspace(left, top, scale)` with the
+  slot's top-left in screen pixels and its region's scale; `IsInWorkspace()` says whether it is
+  placed. A window the theme gives no slot any more gets `LeaveWorkspace()`, and its document goes
+  back to the theme's own placement. Native grids and 3D icons follow the drawn `#panel`, so they
+  move with the slot unchanged.
 - **Placed documents**: a window that returns its document from `CObject::GetPlacedDocument()` has
   its `#panel` placed by the slot itself (`UI::RmlBridge::SlotPlacement`): the slot's top-left and
   its region's scale arrive as `--slot-left`, `--slot-top` and `--root-scale` with the `slot-placed`
@@ -115,17 +114,17 @@ theme reload, a HUD part shown or hidden, the chat log resizing) call `Invalidat
   `left`/`top` and a scale transform; the `workspace-placed` class lets the theme drop the part's
   own positioning. Options: `measure` (the owner's own numbers, so a resize is measured before
   RmlUi applies the model), `placedWhileHidden`, and a `placed` callback.
-- **HUD-space windows** (the chat, the event HUDs): `UI::Placement::RegisterHudWindow()` converts
-  the slot box to a HUD-space `m_Pos`/`m_WndPos`, so native hit tests keep working in HUD space.
-  The event HUDs draw in `LayoutMode::HudFrame`, the bottom HUD's own uniform, UI-scaled scale, the
-  same one their region sizes slots in; the original's W/640 x H/480 stretch left out the UI scale,
-  so at 90 % a frame came out bigger than its slot and ran under the HUD.
+- **HUD-space windows** (the chat, the event HUDs): `UI::Placement::RegisterHudWindow(name, id,
+  getWindow, width, height)` places the window's document from the slot box at the region's
+  scale, or clears its placement without a slot. The event HUDs' region sizes slots at the bottom
+  HUD's scale; the original's W/640 x H/480 stretch left out the UI scale, so at 90 % a frame came
+  out bigger than its slot and ran under the HUD.
 - Without a slot, `place(nullptr)` restores the component's own placement.
 
 ## 4. Slot sizing: content or fill
 
-- **`data-fit="content"`** (default): the slot takes the window's `#panel` size
-  (`RefreshLogicalPanelSize()`) times the region's scale.
+- **`data-fit="content"`** (default): the slot takes the window's `#panel` layout box (reference
+  px) times the region's scale.
 - **`data-fit="fill"`**: the window takes the slot's size; never less than its content size (or
   its `GetFillMinimumSize()`). A window opts in by returning its document from
   `CObject::GetFillDocument()`, using `UI::RmlBridge::FillPlacementSize`, and a top-right
@@ -219,13 +218,6 @@ in their slots; dragging a window out of its slot is not planned.
 - The native message boxes (`CMessageBoxBase` family) are not draggable.
 - The inventory drags by its title. The position lasts until the workspace places it again (another
   window opens or closes in its region); positions are not saved across sessions.
-
-## 9. `LayoutMode`
-
-Slotted windows use `Slot` while placed, or `HudFrame` for the HUD-scale parts. The full list is in
-[layout-and-scaling.md](layout-and-scaling.md#layout-modes). `Dock*`, `FloatingWorkspace` and
-`Stage` also serve windows without slots; `DockTransform()`'s fixed HUD height only serves
-unslotted docked windows.
 
 ## Theme recipes (verified in game)
 

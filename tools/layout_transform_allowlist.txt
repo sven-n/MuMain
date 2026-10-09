@@ -1,4 +1,4 @@
-# Files still using the per-window layout transform, with how many uses each may have.
+# The infrastructure allowed to scope or read the active UI transform, with how many uses each may have.
 #
 # Read tools/check_layout_transform_users.py's docstring first. A file may only go down: lower its
 # count (or delete its line) when work removes uses; the build fails when a count grows or a new

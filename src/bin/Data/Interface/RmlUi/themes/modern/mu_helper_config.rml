@@ -10,7 +10,7 @@
 </head>
 <body>
 	<!-- Modern theme's own copy of CMuHelperConfigWindow -- the forged-dialog shell and header rail
-	     its PanelColumnX neighbours use, with plain px text that scales with the panel like theirs.
+	     its right-dock neighbours use, with plain px text that scales with the panel like theirs.
 	     Same layout, ids, model fields and event names as ../../mu_helper_config.rml; keep them in
 	     step. -->
 	<div id="panel" data-model="mu_helper_config">

@@ -1,6 +1,6 @@
-/* Shared forged-dialog frame for the PanelColumnX()-docked single-document window family:
+/* Shared forged-dialog frame for the right-docked single-document window family:
    character_info, my_quest_info, pet_info, party_info -- all read as one visual family on screen
-   (same PanelColumnX() docking slots), so their modern-theme chrome should match, not diverge by
+   (same right-hand docking slots), so their modern-theme chrome should match, not diverge by
    window. Link this BEFORE the window's own .rcss.
 
    Reuses base.rcss's already-shared .modern-shell-edge/.modern-groove/.modern-header-rail-px/

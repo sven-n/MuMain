@@ -1,4 +1,4 @@
-/* Shared frame for the PanelColumnX()-docked single-document window family: character_info,
+/* Shared frame for the right-docked single-document window family: character_info,
    my_quest_info, pet_info, party_info. Their #panel/frame sprites/exit button are
    byte-identical (confirmed by diffing all four before this file existed) -- link this BEFORE the
    window's own .rcss and keep only genuinely window-specific content there. */

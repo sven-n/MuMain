@@ -9,7 +9,7 @@
 	<link type="text/rcss" href="mu_helper_config.rcss"/>
 </head>
 <body>
-	<!-- The MU Helper's configuration window (CMuHelperConfigWindow), docked in PanelColumnX(1).
+	<!-- The MU Helper's configuration window (CMuHelperConfigWindow), docked in the first right-hand column.
 	     Three tabs over one staged copy of the bot's settings. Every position is native's own
 	     m_Pos + K from the draw and registration calls it replaces, in reference px under the root
 	     transform; text leaves are .sharp-text layers at the native text size (character_info.rml).
