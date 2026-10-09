@@ -33,6 +33,8 @@ constexpr DocumentPlacement Placements[] = {
     // Never drawn: it only lays out where windows go.
     {"workspace.rml", BeforeWindowsDepth, AnyScene},
     {"map_name.rml", BeforeWindowsDepth, MainScene},
+    // A guild war's or battle soccer's time and result (RenderTournamentInterface()).
+    {"match_status.rml", BeforeWindowsDepth, MainScene},
     {"buff_strip.rml", 0.95f, MainScene},
     {"world_labels.rml", 1.0f, MainScene},
     // The status texts over the world above the HUD, drawn with the name labels.

@@ -90,6 +90,7 @@ constexpr std::array kEntries = {
     Entry{L"ccresult", Event::ChaosCastleResult, kNoWindow, L"Chaos Castle result box, quest failed"},
     Entry{L"dsrank", Event::DevilSquareRank, kNoWindow, L"Devil Square ranking box, five players, the hero third"},
     Entry{L"switchbox", Event::CrownSwitchBox, kNoWindow, L"crown switch progress box, another guild pushing it"},
+    Entry{L"guildwar", Event::GuildWar, kNoWindow, L"guild war time, 0:42 left, and its result, 3 : 5 lost"},
 };
 
 void Log(const std::wstring& text, mu::ui::window::MESSAGE_TYPE type = mu::ui::window::TYPE_SYSTEM_MESSAGE)
@@ -293,6 +294,17 @@ void SeedChaosCastleResult()
     matchEvent::SetMatchResult(254, 0, const_cast<MatchResult*>(&result), 0);
 }
 
+void SeedGuildWar()
+{
+    g_wtMatchTimeLeft.m_Type = 1;
+    g_wtMatchTimeLeft.m_Time = 42;
+    g_wtMatchResult.Clear();
+    wcsncpy_s(g_wtMatchResult.m_MatchTeamName1, L"Lionheart", _TRUNCATE);
+    wcsncpy_s(g_wtMatchResult.m_MatchTeamName2, L"Ravens", _TRUNCATE);
+    g_wtMatchResult.m_Score1 = 3;
+    g_wtMatchResult.m_Score2 = 5;
+}
+
 void SeedDevilSquareRank()
 {
     LendMatch<CSDevilSquareMatch>();
@@ -360,6 +372,7 @@ void Seed(Event event)
     case Event::BloodCastleResult: SeedBloodCastleResult(); break;
     case Event::ChaosCastleResult: SeedChaosCastleResult(); break;
     case Event::DevilSquareRank: SeedDevilSquareRank(); break;
+    case Event::GuildWar: SeedGuildWar(); break;
     case Event::CrownSwitchBox: UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::SwitchActivatedByOther, L"Ironclad", L"Ravens", 30000); break;
     default: break;
     }
@@ -389,6 +402,10 @@ void Reset(Event event)
         LastMacroTime = 0;
         matchEvent::StartMatchCountDown(TYPE_MATCH_NONE);
         ReturnMatch();
+        break;
+    case Event::GuildWar:
+        g_wtMatchResult.Clear();
+        g_wtMatchTimeLeft.m_Time = 0;
         break;
     case Event::BloodCastleResult:
     case Event::ChaosCastleResult:

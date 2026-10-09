@@ -14,6 +14,15 @@
 
 namespace UI::Hud
 {
+float UncoveredWorldCentreOnHudBoard()
+{
+    // The HUD board stands centred on the window's bottom at the HUD's scale.
+    const float width = static_cast<float>(WindowWidth);
+    const float scale = UI::Scaling::BottomHudScale(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+    const float centrePx = 0.5f * (UI::Placement::UncoveredWorldLeft() + UI::Placement::UncoveredWorldRight());
+    return (centrePx - (0.5f * width - 320.f * scale)) / scale;
+}
+
 void StatusTexts::BindModel(Rml::DataModelConstructor& c, HudStatusRmlModel& model)
 {
     c.Bind("text_px", &model.textPx);
@@ -53,14 +62,7 @@ void StatusTexts::Sync(bool visible, bool worldOverlays)
     SyncField(binder, &HudStatusRmlModel::macroVisible, "macro_visible", macroVisible);
     SyncField(binder, &HudStatusRmlModel::macroFraction, "macro_fraction", macroVisible ? macroFraction : 0.f);
     if (macroVisible)
-    {
-        // The HUD board stands centred on the window's bottom at the HUD's scale.
-        const float width = static_cast<float>(WindowWidth);
-        const float scale = UI::Scaling::BottomHudScale(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
-        const float centrePx = 0.5f * (UI::Placement::UncoveredWorldLeft() + UI::Placement::UncoveredWorldRight());
-        SyncField(binder, &HudStatusRmlModel::worldCentre, "world_centre",
-                  (centrePx - (0.5f * width - 320.f * scale)) / scale);
-    }
+        SyncField(binder, &HudStatusRmlModel::worldCentre, "world_centre", UncoveredWorldCentreOnHudBoard());
 
     SyncField(binder, &HudStatusRmlModel::countdown, "countdown",
               Rml::String(StringUtils::WideToNarrow(matchEvent::CountdownText().c_str())));

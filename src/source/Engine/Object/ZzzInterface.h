@@ -102,9 +102,9 @@ bool CheckAttack();
 bool CheckAttack_Fenrir(CHARACTER* c);
 int	 getTargetCharacterKey(CHARACTER* c, int selected);
 
-void MoveTournamentInterface();
+// A battle soccer goal's flare around the scoring team (GUILD_WAR_EVENT only).
+void MoveBattleSoccerGoalEffect();
 void MoveBattleSoccerEffect(CHARACTER* c);
-void RenderTournamentInterface();
 
 void GetTime(DWORD time, std::wstring& timeText, bool isSecond = true);
 

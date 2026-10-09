@@ -7,6 +7,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Character/WorldLabelLayer.h"
 #include "UI/HUD/HudStatus.h"
+#include "UI/HUD/MatchStatus.h"
 
 namespace mu::ui::window
 {
@@ -44,6 +45,7 @@ namespace mu::ui::window
 
         UI::Character::WorldLabelLayer m_labelLayer;
         UI::Hud::StatusTexts m_statusTexts;
+        UI::Hud::MatchStatus m_matchStatus;
 
         CManager* m_pNewUIMng;		// UI manager
 

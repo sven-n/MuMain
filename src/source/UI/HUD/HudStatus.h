@@ -5,6 +5,9 @@
 
 namespace UI::Hud
 {
+// The centre of the world the open docks leave uncovered, in the HUD board's reference px.
+float UncoveredWorldCentreOnHudBoard();
+
 // The status texts the original drew over the world above the HUD: the crown switch lines, the
 // macro cooldown and an event's entry countdown. One document on the HUD board; the game state
 // fills it once a frame.

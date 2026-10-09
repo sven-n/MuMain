@@ -160,6 +160,6 @@ siege lists, the cash shop lists.
 | Login scene logo and lines | `NewRenderLogInScene()` | Done: `login_scene.rml` (`Scenes::LoginOverlay`) |
 | Loading screen art | `LoadingScene()` | Done: `loading.rml` |
 | Photo viewer help text | — | Done: the shared tooltip |
-| Tournament countdown | `RenderTournamentInterface()` | Left native: OpenMU never sends its packets |
+| Guild war / battle soccer time and result | `RenderTournamentInterface()` | Done: `match_status.rml` (`UI::Hud::MatchStatus`), the countdown on the HUD board and the result on the `.stage`; OpenMU never sends its packets, so it is seen through `$preview guildwar` |
 | Mouse cursor | `RenderCursor()` | Stays native: drawn after RmlUi |
 | FPS counter, debug info, GL stats, IME/whisper debug text | `SceneManager.cpp`, `ImeInput.cpp`, `Whisper.cpp` | Stays native: developer overlays |

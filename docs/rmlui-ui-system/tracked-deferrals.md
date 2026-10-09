@@ -52,7 +52,8 @@ create the siege minimap that a map join does. What the previews showed, in both
 
 The Blood Castle and Chaos Castle timers, the duel spectator list, the CryWolf result and the HUD
 status texts (`$preview status`; the crown switch lines show only at the switches) and the event
-result and progress boxes (`$preview bcresult`, `ccresult`, `dsrank`, `switchbox`) look right.
+result and progress boxes (`$preview bcresult`, `ccresult`, `dsrank`, `switchbox`) and the guild war
+time and result (`$preview guildwar`) look right.
 The Battle Soccer score, the duel frame, the Empire Guardian timer and the Doppelganger frame draw
 outside their event (`$win soccer full`, `duel`, `empiretimer`, `doppelframe`) and were checked in
 both themes. Everything else in the rollout was verified in game, both themes, with the scale sweep.

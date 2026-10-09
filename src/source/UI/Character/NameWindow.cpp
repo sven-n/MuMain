@@ -112,6 +112,7 @@ void mu::ui::window::CNameWindow::Release()
 {
     m_labelLayer.Release();
     m_statusTexts.Release();
+    m_matchStatus.Release();
 
     if (m_pNewUIMng)
     {
@@ -152,12 +153,14 @@ void mu::ui::window::CNameWindow::Show(bool bShow)
     {
         m_labelLayer.Hide();
         m_statusTexts.Hide();
+        m_matchStatus.Hide();
     }
 }
 
 void mu::ui::window::CNameWindow::PrepareFrame()
 {
     m_statusTexts.Sync(IsVisible(), g_Camera.TopViewEnable == false);
+    m_matchStatus.Sync(IsVisible());
 
     // Recorded before the windows render, with this frame's camera and selection; the document
     // sits under every window, as the original's depth-1.0 window did.

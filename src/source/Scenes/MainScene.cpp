@@ -247,7 +247,7 @@ static void UpdateUIAndInput()
     }
 
     MoveInterface();
-    MoveTournamentInterface();
+    MoveBattleSoccerGoalEffect();
 
     if (ErrorMessage != MESSAGE_LOG_OUT)
         g_pUIManager->UpdateInput();
@@ -619,7 +619,6 @@ static void RenderMainSceneUI()
     {
         RenderInterface(true);
     }
-    RenderTournamentInterface();
     EndBitmap();
 
     g_pPartyManager->Render();
