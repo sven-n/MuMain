@@ -480,7 +480,7 @@ void PacketFunctions_ClientToServer::SendCastleSiegeTaxInfoRequest()
     dotnet_SendCastleSiegeTaxInfoRequest(this->GetHandle());
 }
 
-void PacketFunctions_ClientToServer::SendCastleSiegeTaxChangeRequest(BYTE taxType, uint32_t taxRate)
+void PacketFunctions_ClientToServer::SendCastleSiegeTaxChangeRequest(CastleSiegeTaxType taxType, uint32_t taxValue)
 {
     static const auto dotnet_SendCastleSiegeTaxChangeRequest = LoadManagedSymbol<::SendCastleSiegeTaxChangeRequest>("SendCastleSiegeTaxChangeRequest");
     if (!dotnet_SendCastleSiegeTaxChangeRequest)
@@ -488,7 +488,7 @@ void PacketFunctions_ClientToServer::SendCastleSiegeTaxChangeRequest(BYTE taxTyp
         return;
     }
 
-    dotnet_SendCastleSiegeTaxChangeRequest(this->GetHandle(), taxType, taxRate);
+    dotnet_SendCastleSiegeTaxChangeRequest(this->GetHandle(), taxType, taxValue);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeTaxMoneyWithdraw(uint32_t amount)
@@ -502,7 +502,7 @@ void PacketFunctions_ClientToServer::SendCastleSiegeTaxMoneyWithdraw(uint32_t am
     dotnet_SendCastleSiegeTaxMoneyWithdraw(this->GetHandle(), amount);
 }
 
-void PacketFunctions_ClientToServer::SendToggleCastleGateRequest(BYTE closeState, uint16_t gateId)
+void PacketFunctions_ClientToServer::SendToggleCastleGateRequest(BYTE isOpen, uint16_t gateId)
 {
     static const auto dotnet_SendToggleCastleGateRequest = LoadManagedSymbol<::SendToggleCastleGateRequest>("SendToggleCastleGateRequest");
     if (!dotnet_SendToggleCastleGateRequest)
@@ -510,10 +510,10 @@ void PacketFunctions_ClientToServer::SendToggleCastleGateRequest(BYTE closeState
         return;
     }
 
-    dotnet_SendToggleCastleGateRequest(this->GetHandle(), closeState, gateId);
+    dotnet_SendToggleCastleGateRequest(this->GetHandle(), isOpen, gateId);
 }
 
-void PacketFunctions_ClientToServer::SendCastleGuildCommand(BYTE team, BYTE positionX, BYTE positionY, BYTE command)
+void PacketFunctions_ClientToServer::SendCastleGuildCommand(BYTE team, BYTE positionX, BYTE positionY, CastleSiegeGuildCommandType command)
 {
     static const auto dotnet_SendCastleGuildCommand = LoadManagedSymbol<::SendCastleGuildCommand>("SendCastleGuildCommand");
     if (!dotnet_SendCastleGuildCommand)
@@ -2128,4 +2128,37 @@ void PacketFunctions_ClientToServer::SendChatCommandListRequest()
     }
 
     dotnet_SendChatCommandListRequest(this->GetHandle());
+}
+
+void PacketFunctions_ClientToServer::SendDiscordIntegrationInfoRequest()
+{
+    static const auto dotnet_SendDiscordIntegrationInfoRequest = LoadManagedSymbol<::SendDiscordIntegrationInfoRequest>("SendDiscordIntegrationInfoRequest");
+    if (!dotnet_SendDiscordIntegrationInfoRequest)
+    {
+        return;
+    }
+
+    dotnet_SendDiscordIntegrationInfoRequest(this->GetHandle());
+}
+
+void PacketFunctions_ClientToServer::SendDiscordLinkCodeRequest()
+{
+    static const auto dotnet_SendDiscordLinkCodeRequest = LoadManagedSymbol<::SendDiscordLinkCodeRequest>("SendDiscordLinkCodeRequest");
+    if (!dotnet_SendDiscordLinkCodeRequest)
+    {
+        return;
+    }
+
+    dotnet_SendDiscordLinkCodeRequest(this->GetHandle());
+}
+
+void PacketFunctions_ClientToServer::SendDiscordUnlinkRequest()
+{
+    static const auto dotnet_SendDiscordUnlinkRequest = LoadManagedSymbol<::SendDiscordUnlinkRequest>("SendDiscordUnlinkRequest");
+    if (!dotnet_SendDiscordUnlinkRequest)
+    {
+        return;
+    }
+
+    dotnet_SendDiscordUnlinkRequest(this->GetHandle());
 }

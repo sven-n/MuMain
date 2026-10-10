@@ -514,13 +514,13 @@ public:
     /// <summary>
     /// Sends a CastleSiegeTaxChangeRequest to this connection.
     /// </summary>
-    /// <param name="taxType">0=Undefined, 1=ChaosMachine, 2 = Normal, 3 = EntranceFeeLandOfTrials</param>
-    /// <param name="taxRate">The tax rate.</param>
+    /// <param name="taxType">The tax type.</param>
+    /// <param name="taxValue">The percentage rate for shop and Chaos Machine taxes, or the entrance fee amount for the hunting zone.</param>
     /// <remarks>
     /// Is sent by the client when: The guild master wants to change the tax rate in the castle npc.
     /// Causes reaction on server side: The server changes the tax rates accordingly.
     /// </remarks>
-    void SendCastleSiegeTaxChangeRequest(BYTE taxType, uint32_t taxRate);
+    void SendCastleSiegeTaxChangeRequest(CastleSiegeTaxType taxType, uint32_t taxValue);
 
     /// <summary>
     /// Sends a CastleSiegeTaxMoneyWithdraw to this connection.
@@ -535,13 +535,13 @@ public:
     /// <summary>
     /// Sends a ToggleCastleGateRequest to this connection.
     /// </summary>
-    /// <param name="closeState">The close state.</param>
+    /// <param name="isOpen">The is open.</param>
     /// <param name="gateId">The gate id.</param>
     /// <remarks>
     /// Is sent by the client when: The guild member of the castle owner wants to toggle the gate switch.
     /// Causes reaction on server side: The castle gate is getting opened or closed.
     /// </remarks>
-    void SendToggleCastleGateRequest(BYTE closeState, uint16_t gateId);
+    void SendToggleCastleGateRequest(BYTE isOpen, uint16_t gateId);
 
     /// <summary>
     /// Sends a CastleGuildCommand to this connection.
@@ -549,12 +549,12 @@ public:
     /// <param name="team">Team Number 0 to 7.</param>
     /// <param name="positionX">The position x.</param>
     /// <param name="positionY">The position y.</param>
-    /// <param name="command">0 = Attack, 1 = Defend, 2 = Wait</param>
+    /// <param name="command">The command.</param>
     /// <remarks>
     /// Is sent by the client when: The guild master sent a command to his guild during the castle siege event.
     /// Causes reaction on server side: The command is shown on the mini map of the guild members.
     /// </remarks>
-    void SendCastleGuildCommand(BYTE team, BYTE positionX, BYTE positionY, BYTE command);
+    void SendCastleGuildCommand(BYTE team, BYTE positionX, BYTE positionY, CastleSiegeGuildCommandType command);
 
     /// <summary>
     /// Sends a CastleSiegeHuntingZoneEntranceSetting to this connection.
@@ -2080,4 +2080,31 @@ public:
     /// Causes reaction on server side: The server sends an AvailableChatCommand message for each available chat command.
     /// </remarks>
     void SendChatCommandListRequest();
+
+    /// <summary>
+    /// Sends a DiscordIntegrationInfoRequest to this connection.
+    /// </summary>
+    /// <remarks>
+    /// Is sent by the client when: A client which supports the Discord integration requests how the server is connected to Discord. It's usually sent after the character entered the game world, and again when the player opens a Discord dialog. By sending it, the client also announces that it understands the ExternalChatMessage.
+    /// Causes reaction on server side: The server sends a DiscordIntegrationInfo message, and from then on sends messages which were written in Discord as ExternalChatMessage.
+    /// </remarks>
+    void SendDiscordIntegrationInfoRequest();
+
+    /// <summary>
+    /// Sends a DiscordLinkCodeRequest to this connection.
+    /// </summary>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to link the account to a Discord user, e.g. with a button of a Discord dialog.
+    /// Causes reaction on server side: The server creates a one-time code and sends it with a DiscordLinkCode message. The player enters the code in Discord to complete the link.
+    /// </remarks>
+    void SendDiscordLinkCodeRequest();
+
+    /// <summary>
+    /// Sends a DiscordUnlinkRequest to this connection.
+    /// </summary>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to remove the link of the account to a Discord user.
+    /// Causes reaction on server side: The server removes the link and sends an updated DiscordIntegrationInfo message.
+    /// </remarks>
+    void SendDiscordUnlinkRequest();
 };

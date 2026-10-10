@@ -88,8 +88,8 @@ bool SEASON3B::CNewUISiegeWarCommander::OnUpdateMouseEvent()
             SelectCmd.byY = 256 - (MouseY + m_MiniMapScaleOffset.y - m_MiniMapPos.y) * m_iMiniMapScale;
             SelectCmd.byLifeTime = 100;
 
-            SocketClient->ToGameServer()->SendCastleGuildCommand(SelectCmd.byTeam, SelectCmd.byX, SelectCmd.byY,
-                                                                 SelectCmd.byCmd);
+            SocketClient->ToGameServer()->SendCastleGuildCommand(
+                SelectCmd.byTeam, SelectCmd.byX, SelectCmd.byY, static_cast<CastleSiegeGuildCommandType>(SelectCmd.byCmd));
 
             m_iCurSelectBtnCommand = -1;
 
