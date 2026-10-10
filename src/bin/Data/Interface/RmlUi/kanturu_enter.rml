@@ -17,11 +17,13 @@
 		<div class="frame-middles"><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div><div class="frame-middle"></div></div>
 		<div id="frame_bottom"></div>
 
-		<!-- The lines sit where the wrapping put them; what each one is, the theme styles. -->
-		<span class="sharp-text kanturu-line" data-for="line : lines"
-		      data-class-tone-subject="line.kind == 'subject'" data-class-tone-state="line.kind == 'state'"
-		      data-class-tone-note="line.kind == 'note'"
-		      data-style-top="line.top + 'px'" data-style-font-size="line.text_px + 'px'">{{line.text}}</span>
+		<!-- The wrapped lines, stacked by the theme; what each one is, the theme styles. -->
+		<div id="kanturu_lines" class="sharp-text sharp-flow">
+			<div class="kanturu-line" data-for="line : lines"
+			     data-class-tone-subject="line.kind == 'subject'" data-class-tone-state="line.kind == 'state'"
+			     data-class-tone-note="line.kind == 'note'" data-class-group-start="line.group_start"
+			     data-style-font-size="line.text_px + 'px'">{{line.text}}</div>
+		</div>
 
 		<div class="kanturu-btn" id="btn_refresh" data-class-locked="refresh_locked" data-event-click="kanturu_refresh">
 			<span class="sharp-text sharp-middle kanturu-label" data-style-font-size="text_px + 'px'"

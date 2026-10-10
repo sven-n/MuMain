@@ -6,17 +6,15 @@
 
 namespace UI::ItemEndurance
 {
-// One pet / summon HP frame of the left column: its top in reference px from the column's top, the
-// drawn part of the health bar and the name.
+// One pet / summon HP frame of the left column: the drawn part of the health bar and the name.
 struct PetFrameEntry
 {
-    float top = 0.f;
     float barWidth = 0.f;
     Rml::String name;
 
     bool operator==(const PetFrameEntry& other) const
     {
-        return top == other.top && barWidth == other.barWidth && name == other.name;
+        return barWidth == other.barWidth && name == other.name;
     }
 };
 

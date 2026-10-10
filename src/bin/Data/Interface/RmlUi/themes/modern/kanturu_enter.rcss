@@ -15,7 +15,12 @@
 #back, #frame_top, .frame-middle, #frame_bottom { display: none; }
 
 .sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
-.kanturu-line { left: 0; color: token(text-warm); }
+/* The original's RenderTexts(): lines 12 apart from 30, the state texts 20 below the subject and
+   15 between two of them. */
+#kanturu_lines { left: 0; top: 30px; --flow-w: 230px; }
+.kanturu-line { display: block; height: calc(12px * var(--root-scale)); white-space: nowrap; color: token(text-warm); }
+.kanturu-line.tone-state.group-start { margin-top: calc(20px * var(--root-scale)); }
+.kanturu-line.tone-note.group-start { margin-top: calc(15px * var(--root-scale)); }
 .kanturu-line.tone-subject { font-weight: bold; }
 .kanturu-line.tone-state { color: #91f161; }
 .kanturu-line.tone-note { color: token(text-primary); }
@@ -54,5 +59,4 @@
 .frame-middles .frame-middle:nth-child(10) { top: 202px; }
 
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
-.kanturu-line { width: calc(230px * var(--root-scale)); }
 .kanturu-label { width: calc(53px * var(--root-scale)); }

@@ -17,10 +17,21 @@
 }
 
 /* display:block required -- RmlUi's default `display` is inline, even for a <div>. */
+/* RenderTipTextList()'s rows: one line height, the next row 1.1 of them below; a half spacer
+   takes half of that advance. */
 .help-line {
 	display: block;
 	position: relative;
-	--row-height: 0px;
+	height: var(--line-height, 0px);
+	margin-bottom: calc(var(--line-height, 0px) * 0.1);
+}
+.help-line.heading {
+	height: var(--bold-line-height, 0px);
+	margin-bottom: calc(var(--bold-line-height, 0px) * 0.1);
+}
+.help-line.half-spacer {
+	height: calc(var(--line-height, 0px) * 0.55);
+	margin-bottom: 0px;
 }
 /* The row is reference px; its text is laid out in physical px (.sharp-text). */
 .help-text {
@@ -30,12 +41,13 @@
 	left: 0px;
 	top: 0px;
 	width: calc(var(--text-width) * var(--root-scale));
-	line-height: calc(var(--row-height) * var(--root-scale));
+	line-height: calc(var(--line-height, 0px) * var(--root-scale));
 	text-align: center;
 	color: token(text-primary);
 	font-family: "token(font-body)";
 }
 .help-line.heading .help-text {
+	line-height: calc(var(--bold-line-height, 0px) * var(--root-scale));
 	color: token(text-warm);
 	font-weight: bold;
 }

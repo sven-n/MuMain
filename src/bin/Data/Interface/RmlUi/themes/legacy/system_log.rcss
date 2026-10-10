@@ -31,10 +31,14 @@
 
 /* No padding: native's background quad is exactly the measured text (RenderText() without a box).
    Position, pitch, height and text size come from system_log.rml's bindings. */
+/* A line is the native renderer's line height, and the next starts a row pitch below it. */
 .syslog-line {
 	display: block;
 	white-space: nowrap;
 	position: relative;
+	height: var(--line-px, 0px);
+	line-height: var(--line-px, 0px);
+	margin-bottom: calc(var(--row-px, 0px) - var(--line-px, 0px));
 }
 /* RenderMessages() drew each line's own quad in black at the user's transparency; the colour is
    the theme's, the transparency the player's. A backgrounded element with children paints an

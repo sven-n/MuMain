@@ -112,10 +112,14 @@
    Text size, height and the 15-unit row pitch come from chat_log.rml's bindings. flex-shrink 0:
    with an explicit height, a flex item would otherwise shrink to fit a full well and the rows
    would crowd together instead of scrolling. */
+/* A line is the native renderer's line height, and the next starts a row pitch below it. */
 .chat-line {
 	display: block;
 	white-space: nowrap;
 	flex-shrink: 0;
+	height: var(--line-px, 0px);
+	line-height: var(--line-px, 0px);
+	margin-bottom: calc(var(--row-px, 0px) - var(--line-px, 0px));
 }
 
 /* Per-type colours -- native's SetBgColor/SetTextColor pairs, verbatim. */

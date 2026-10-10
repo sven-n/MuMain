@@ -492,7 +492,7 @@ void mu::ui::window::CKanturu2ndEnterNpc::BindRmlModel(Rml::DataModelConstructor
     c.Bind("text_px", &model.textPx);
     auto line = c.RegisterStruct<KanturuEnterLineEntry>();
     line.RegisterMember("text", &KanturuEnterLineEntry::text);
-    line.RegisterMember("top", &KanturuEnterLineEntry::top);
+    line.RegisterMember("group_start", &KanturuEnterLineEntry::groupStart);
     line.RegisterMember("text_px", &KanturuEnterLineEntry::textPx);
     line.RegisterMember("kind", &KanturuEnterLineEntry::kind);
     c.RegisterArray<std::vector<KanturuEnterLineEntry>>();
@@ -541,37 +541,27 @@ void mu::ui::window::CKanturu2ndEnterNpc::SyncContent()
     updated.refreshLocked = m_RefreshLocked;
     updated.enterLocked = m_EnterLocked;
 
-    // The original's RenderTexts(): the subject bold, split into lines of 52 characters, 12 units
-    // apart from y 30; 20 units below it the state texts, the first in green, the others bright
-    // yellow, 15 units between two texts.
+    // The original's RenderTexts(): the subject bold, split into lines of 52 characters, then the
+    // state texts, the first in green, the others bright yellow. The theme stacks and spaces them.
     updated.lines.clear();
-    auto addLine = [&](const wchar_t* text, float top, const char* kind)
+    auto addLine = [&](const wchar_t* text, bool groupStart, const char* kind)
     {
         // The subject is the one the original drew bold, so it is the one measured in that font.
         const auto role = std::strcmp(kind, "subject") == 0 ? UI::Scaling::FontRole::Bold
                                                             : UI::Scaling::FontRole::Normal;
-        updated.lines.push_back({StringUtils::WideToNarrow(text), top,
+        updated.lines.push_back({StringUtils::WideToNarrow(text), groupStart,
                                  KanturuTextPxInBox(role, text, KANTURU2ND_ENTER_WINDOW_WIDTH), kind});
     };
-    float textY = 30.f;
     wchar_t separated[3][52] = {};
     int lineCount = SeparateTextIntoLines(m_strSubject, separated[0], 3, 52);
     for (int i = 0; i < lineCount; i++)
-    {
-        addLine(separated[i], textY, "subject");
-        textY += 12.f;
-    }
-    textY += 20.f;
+        addLine(separated[i], i == 0, "subject");
     for (int i = 0; i < m_iStateTextNum; i++)
     {
         ZeroMemory(separated, sizeof(separated));
         lineCount = SeparateTextIntoLines(m_strStateText[i], separated[0], 3, 52);
         for (int j = 0; j < lineCount; j++)
-        {
-            addLine(separated[j], textY, i == 0 ? "state" : "note");
-            textY += 12.f;
-        }
-        textY += 15.f;
+            addLine(separated[j], j == 0, i == 0 ? "state" : "note");
     }
 
     KanturuEnterRmlModel& model = m_RmlView.GetModel();

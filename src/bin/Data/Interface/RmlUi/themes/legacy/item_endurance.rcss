@@ -48,7 +48,8 @@ body {
 	transform: scale(var(--dock-scale, 1));
 }
 
-.pet { position: absolute; left: 0; width: 57px; height: 23px; }
+/* The original's stack: the elf's arrow line 11 high, then the frames 24 apart. */
+.pet { position: relative; width: 57px; height: 23px; margin-bottom: 1px; }
 .pet-fill { position: absolute; left: 2px; top: 2px; width: 53px; height: 13px; background-color: rgba(0, 0, 0, 179); }
 .pet-frame { position: absolute; left: 0; top: 0; width: 57px; height: 23px; decorator: image(endurance-pet-back); }
 /* An <img> whose source rect is its width (item_endurance.rml): the texture's left part, unstretched. */
@@ -73,7 +74,7 @@ body {
 .icon-tint--zero { background-color: rgba(255, 0, 0, 128); }
 
 .text-row { position: absolute; width: 600px; text-align: center; white-space: nowrap; pointer-events: none; }
-#arrows_row { position: absolute; left: 0; top: 0; white-space: nowrap; pointer-events: none; }
+#arrows_row { height: 11px; white-space: nowrap; pointer-events: none; }
 
 /* The name centred on the frame, 5 below its top. */
 .pet-name-box { position: absolute; left: 0; top: 5px; width: 57px; height: 0; }

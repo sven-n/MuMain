@@ -33,6 +33,23 @@ body {
 }
 .tt-line.bold { font-weight: bold; }
 
+/* RenderTipTextList()'s rows: one line height tall, the next row 1.1 of them below; a spacer row
+   takes that whole advance, a half spacer half of it. */
+.tt-line {
+	height: var(--line-px, 0px);
+	line-height: var(--line-px, 0px);
+	margin-bottom: calc(var(--line-px, 0px) * 0.1);
+}
+.tt-line.bold {
+	height: var(--bold-line-px, 0px);
+	line-height: var(--bold-line-px, 0px);
+	margin-bottom: calc(var(--bold-line-px, 0px) * 0.1);
+}
+.tt-line.tt-full-spacer { height: calc(var(--line-px, 0px) * 1.1); margin-bottom: 0px; }
+.tt-line.tt-half-spacer { height: calc(var(--line-px, 0px) * 0.55); margin-bottom: 0px; }
+.tt-line.bold.tt-full-spacer { height: calc(var(--bold-line-px, 0px) * 1.1); }
+.tt-line.bold.tt-half-spacer { height: calc(var(--bold-line-px, 0px) * 0.55); }
+
 /* config.textAlign == Center (RmlTooltip.h) -- matches RenderTipTextList()'s own default
    RT3_SORT_CENTER (item/pet tooltips) and CTooltip::Render()'s own RT3_SORT_CENTER (button
    tooltip). Targeted at .tt-line directly rather than relying on inherited text-align from

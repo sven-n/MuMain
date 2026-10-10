@@ -32,11 +32,9 @@ duel_watch_frame.rml: state -- the health and shield gauges are lengths from the
 empire_guardian_timer.rml: debt -- the text box's left is EventTimerView's caller constant, not a theme's; C++ also uses the width for its shrink-to-box measurement, which can read the width back off the element instead
 generic_confirm_dialog.rml: state -- the timed confirm's progress bar is a fraction of its countdown
 generic_menu_dialog.rml: debt -- the native box each menu replaces, as its caller describes it (GenericMenuConfig::nativeFrame): the frame height and the text, divider and button tops differ per menu, and legacy reproduces them from bound numbers; a menu kind the theme places would replace them
-help_window.rml: debt -- each row's height and gap are the native renderer's line metrics for the page it measures, bound per row; one bound font metric and a spacer class would let the rows flow
 hud_status.rml: state -- the macro cooldown's bar is a gauge length, the fraction of the cooldown left, and the cooldown centres on the world the open docks leave uncovered
-item_endurance.rml: debt -- the pet frames sit at C++ tops (the arrow line, then 24 apart), a fixed stack that can flow; the hovered item's tooltip follows the mouse and the pet bars are lengths from their health (state)
+item_endurance.rml: state -- the hovered item's tooltip follows the mouse (clamped to the screen edge) and the pet bars are lengths from their health
 item_explanation.rml: debt -- each box and line sits where RenderTipTextList() recorded it, so the table's stacking and widths are measured in C++; the table's placement against the hovered item is state
-kanturu_enter.rml: debt -- the subject's and state texts' lines sit where SeparateTextIntoLines() put them -- each group starts under however many lines the one before it wrapped to, stacking that flow inside one counter-scaled box would do
 login_scene.rml: debt -- the scene sprites and text scale on the login scene's own 800x600 formula, not the stage's
 main_frame.rml: debt -- the expanded skill grid's cells come from RebuildGridSnapshot()'s zig-zag, a position computed from the cell's ordinal among the skills learned; the health/mana/SD/AG gauges and every cooldown wipe are fractions (state)
 match_status.rml: state -- the countdown centres on the world the open docks leave uncovered
@@ -54,9 +52,8 @@ server_select.rml: state -- gauge width is the server load
 set_item_explanation.rml: debt -- each box and line sits where RenderTipTextList() recorded it, so the table's stacking and widths are measured in C++; the table's placement against the hovered item is state
 siege_warfare.rml: debt -- the team buttons' and the command buttons' boxes are C++ constants, the command buttons moved every frame to the chosen team's row; the hero, the dots and each command's icon at their projected map points and the pointer's command are state
 slide_notice.rml: state -- the ticker scrolls right to left every frame, so the text's left and the band's fading height are its state, not a layout a theme could own
-themes/legacy/chat_log.rml: debt -- each line's height and gap are native line metrics bound as geometry, where one bound font metric would let the theme size the rows; panel and well heights follow the user resize, in dp (state)
-themes/legacy/system_log.rml: debt -- each line's height and gap are native line metrics bound as geometry, where one bound font metric would let the theme size the rows
-themes/legacy/tooltip.rml: debt -- each line's height and gap are native line metrics bound as geometry; the tooltip's placement against the pointer is state
+themes/legacy/chat_log.rml: state -- panel and well heights follow the user resize, in dp
+themes/legacy/tooltip.rml: state -- tooltip is placed against the pointer
 themes/legacy/trade.rml: state -- an item warning badge sits on its item's slot and is as wide as the item
 themes/legacy/window_shell.rml: state -- the shell's own placement: a window the player drags and the game remembers (the friend, letter and chat windows) puts its top-left at root_x/root_y, in physical px
 themes/modern/command_window.rml: state -- target marker follows the selected command

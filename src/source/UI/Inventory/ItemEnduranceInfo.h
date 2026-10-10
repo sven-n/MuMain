@@ -37,12 +37,7 @@ namespace mu::ui::window
 
         enum IMAGE_SIZE
         {
-            PETHP_FRAME_WIDTH = 57,
-            PETHP_FRAME_HEIGHT = 23,
             PETHP_BAR_WIDTH = 49,
-            PETHP_BAR_HEIGHT = 3,
-            ITEM_DUR_WIDTH = 23,
-            ITEM_DUR_HEIGHT = 23,
         };
 
         enum ITEM_DUR_ARROW_TYPE
@@ -50,12 +45,6 @@ namespace mu::ui::window
             ARROWTYPE_NONE = -1,
             ARROWTYPE_BOW = ITEM_BOW + 15,
             ARROWTYPE_CROSSBOW = ITEM_BOW + 7,
-        };
-
-        enum
-        {
-            UI_INTERVAL_HEIGHT = 1,
-            UI_INTERVAL_WIDTH = 2,
         };
 
     private:

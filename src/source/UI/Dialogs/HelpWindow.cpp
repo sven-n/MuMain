@@ -24,9 +24,6 @@ namespace
 {
 // RenderTipTextList()'s text box is the widest line plus 2 units.
 constexpr float kTextBoxSlackUnits = 2.f;
-// Each row advances 1.1 text heights; a "\n" row half of that.
-constexpr float kRowAdvance = 1.1f;
-constexpr float kHalfSpacerFraction = 0.5f;
 
 float MeasureLogicalWidth(const std::wstring& text, bool bold)
 {
@@ -123,13 +120,13 @@ void mu::ui::window::CHelpWindow::BindRmlModel(Rml::DataModelConstructor& c, Hel
     c.Bind("content_width", &model.contentWidth);
     c.Bind("text_px", &model.textPx);
     c.Bind("bold_text_px", &model.boldTextPx);
+    c.Bind("line_height", &model.lineHeight);
+    c.Bind("bold_line_height", &model.boldLineHeight);
 
     auto line = c.RegisterStruct<HelpLineEntry>();
     line.RegisterMember("text", &HelpLineEntry::text);
     line.RegisterMember("heading", &HelpLineEntry::heading);
     line.RegisterMember("half_spacer", &HelpLineEntry::halfSpacer);
-    line.RegisterMember("height_px", &HelpLineEntry::heightPx);
-    line.RegisterMember("gap_px", &HelpLineEntry::gapPx);
     c.RegisterArray<std::vector<HelpLineEntry>>();
     c.Bind("lines", &model.lines);
 }
@@ -169,8 +166,6 @@ void mu::ui::window::CHelpWindow::RebuildPageModel()
     m_BuiltTextPx = textPx;
 
     const std::vector<UI::Help::PageLine> page = UI::Help::BuildPage(m_iIndex);
-    const float normalHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal));
-    const float boldHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold));
 
     HelpWindowRmlModel& model = m_RmlView.GetModel();
     model.lines.clear();
@@ -182,18 +177,9 @@ void mu::ui::window::CHelpWindow::RebuildPageModel()
         HelpLineEntry entry;
         entry.heading = pageLine.heading;
         entry.halfSpacer = pageLine.halfSpacer;
-
-        const float rowHeight = pageLine.heading ? boldHeight : normalHeight;
-        const float advance = rowHeight * kRowAdvance;
-        if (pageLine.halfSpacer)
-        {
-            entry.heightPx = advance * kHalfSpacerFraction;
-        }
-        else
+        if (!pageLine.halfSpacer)
         {
             entry.text = StringUtils::WideToNarrow(pageLine.text.c_str());
-            entry.heightPx = rowHeight;
-            entry.gapPx = advance - rowHeight;
             widestLine = std::max(widestLine, MeasureLogicalWidth(pageLine.text, pageLine.heading));
         }
         model.lines.push_back(std::move(entry));
@@ -202,8 +188,10 @@ void mu::ui::window::CHelpWindow::RebuildPageModel()
     model.contentWidth = widestLine + kTextBoxSlackUnits;
     model.textPx = textPx;
     model.boldTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
+    model.lineHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal));
+    model.boldLineHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold));
 
-    for (const char* field : {"lines", "content_width", "text_px", "bold_text_px"})
+    for (const char* field : {"lines", "content_width", "text_px", "bold_text_px", "line_height", "bold_line_height"})
         m_RmlView.MarkDirty(field);
 }
 

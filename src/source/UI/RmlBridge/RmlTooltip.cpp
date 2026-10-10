@@ -45,9 +45,6 @@ namespace UI::RmlBridge::Tooltip
             bool bold = false;
             bool isHalfSpacer = false;
             bool isFullSpacer = false;
-            // The native row box and the space to the next row (NativeMetrics()).
-            float heightPx = 0.0f;
-            float gapPx = 0.0f;
 
             bool operator==(const TooltipLineEntry&) const = default;
         };
@@ -64,14 +61,15 @@ namespace UI::RmlBridge::Tooltip
             float borderPx = 0.0f;
             float paddingPx = 0.0f;
             float fixedWidthPx = 0.0f;
+            // The native renderer's line heights, which the theme spaces the rows from.
+            float lineHeightPx = 0.0f;
+            float boldLineHeightPx = 0.0f;
             bool buttonHint = false;
         };
 
-        // RenderTipTextList() (ZzzInventory.cpp) layout: each row is one text height tall and the
-        // next row starts 1.1 heights below it (a half spacer: half a height), the box is the
-        // widest line plus 4 units (2 per side) with no vertical padding, framed by a 1-unit border.
-        constexpr float kNativeRowAdvance = 1.1f;
-        constexpr float kNativeHalfSpacerFraction = 0.5f;
+        // RenderTipTextList() (ZzzInventory.cpp) layout: the box is the widest line plus 4 units
+        // (2 per side) with no vertical padding, framed by a 1-unit border. The rows' spacing is the
+        // theme's.
         constexpr float kNativePaddingUnits = 2.0f;
         constexpr float kNativeBorderUnits = 1.0f;
         // A button's hover text (CNewUIButton::Render()): a box 6 units wider than the text, no frame.
@@ -91,29 +89,11 @@ namespace UI::RmlBridge::Tooltip
             model.paddingPx = (model.buttonHint ? kButtonHintPaddingUnits : kNativePaddingUnits) * transform.scaleX;
 
             // The native line height follows the active transform: measure under the chosen one.
-            float normalHeight = 0.0f;
-            float boldHeight = 0.0f;
-            {
-                const UI::Scaling::ScopedActiveTransform measureScope(transform);
-                normalHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal));
-                boldHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold));
-            }
-
-            for (TooltipLineEntry& line : model.lines)
-            {
-                const float rowHeight = (line.bold ? boldHeight : normalHeight) * transform.scaleY;
-                const float advance = rowHeight * kNativeRowAdvance;
-                if (line.isHalfSpacer || line.isFullSpacer)
-                {
-                    line.heightPx = line.isHalfSpacer ? advance * kNativeHalfSpacerFraction : advance;
-                    line.gapPx = 0.0f;
-                }
-                else
-                {
-                    line.heightPx = rowHeight;
-                    line.gapPx = advance - rowHeight;
-                }
-            }
+            const UI::Scaling::ScopedActiveTransform measureScope(transform);
+            model.lineHeightPx =
+                static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal)) * transform.scaleY;
+            model.boldLineHeightPx =
+                static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold)) * transform.scaleY;
         }
 
         Owner s_CurrentOwner = nullptr;
@@ -156,8 +136,6 @@ namespace UI::RmlBridge::Tooltip
             line.RegisterMember("bold", &TooltipLineEntry::bold);
             line.RegisterMember("is_half_spacer", &TooltipLineEntry::isHalfSpacer);
             line.RegisterMember("is_full_spacer", &TooltipLineEntry::isFullSpacer);
-            line.RegisterMember("height_px", &TooltipLineEntry::heightPx);
-            line.RegisterMember("gap_px", &TooltipLineEntry::gapPx);
             c.RegisterArray<std::vector<TooltipLineEntry>>();
 
             c.Bind("lines", &model.lines);
@@ -168,6 +146,8 @@ namespace UI::RmlBridge::Tooltip
             c.Bind("border_px", &model.borderPx);
             c.Bind("padding_px", &model.paddingPx);
             c.Bind("fixed_width_px", &model.fixedWidthPx);
+            c.Bind("line_height_px", &model.lineHeightPx);
+            c.Bind("bold_line_height_px", &model.boldLineHeightPx);
             c.Bind("button_hint", &model.buttonHint);
         }
 
@@ -231,6 +211,8 @@ namespace UI::RmlBridge::Tooltip
             assign(model.borderPx, next.borderPx, "border_px");
             assign(model.paddingPx, next.paddingPx, "padding_px");
             assign(model.fixedWidthPx, next.fixedWidthPx, "fixed_width_px");
+            assign(model.lineHeightPx, next.lineHeightPx, "line_height_px");
+            assign(model.boldLineHeightPx, next.boldLineHeightPx, "bold_line_height_px");
             assign(model.buttonHint, next.buttonHint, "button_hint");
             return changed;
         }

@@ -8,13 +8,11 @@
      row pitch, each line's background height and the text size are the
      native renderer's, computed in C++ (CSystemLogWindow::SyncNativeGeometry()) in physical px. -->
 <body data-model="system_log">
-	<div id="panel" data-style-font-size="text_px + 'px'">
+	<div id="panel" data-style-font-size="text_px + 'px'"
+	     data-style---line-px="line_px + 'px'" data-style---row-px="row_px + 'px'">
 		<div data-for="line : lines"
 		     data-attr-class="'syslog-line syslog-line--' + line.kind" data-class-empty="line.text == ''"
-		     data-style-font-size="text_px + 'px'"
-		     data-style-height="line_px + 'px'" data-style-line-height="line_px + 'px'"
-		     data-style-margin-bottom="(row_px - line_px) + 'px'"
-		     ><div data-if="line.text != ''" class="syslog-back" data-style-opacity="back_alpha"></div><span class="syslog-text">{{line.text}}</span></div>
+		     data-style-font-size="text_px + 'px'"><div data-if="line.text != ''" class="syslog-back" data-style-opacity="back_alpha"></div><span class="syslog-text">{{line.text}}</span></div>
 	</div>
 </body>
 </rml>

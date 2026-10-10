@@ -13,8 +13,8 @@ namespace mu::ui::window
 struct KanturuEnterLineEntry
 {
     Rml::String text;
-    float top = 0.f;    // reference px in the panel
-    float textPx = 0.f; // physical px
+    bool groupStart = false; // the first line of a text, which the theme spaces from the one before
+    float textPx = 0.f;      // physical px
     // What the line is: "subject", "state" for the first state text, "note" for the rest. Each
     // theme gives it a weight and a colour; the original drew the subject bold.
     Rml::String kind;

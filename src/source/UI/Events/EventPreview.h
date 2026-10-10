@@ -27,6 +27,7 @@ enum class Event
     DevilSquareRank,
     CrownSwitchBox,
     GuildWar,
+    KanturuEntry,
 };
 
 // True while `event` is previewed: its window may draw off its map, and its close sends nothing.

@@ -18,7 +18,7 @@
 				<span id="arrows" class="counter-scaled-xy" data-style-font-size="text_px + 'px'"
 				      data-style-line-height="line_height_px + 'px'">{{arrows}}</span>
 			</div>
-			<div class="pet" data-for="pet : pets" data-style-top="pet.top + 'px'">
+			<div class="pet" data-for="pet : pets">
 				<div class="pet-fill"></div>
 				<div class="pet-frame"></div>
 				<!-- The bar shows the texture's left part, it does not stretch it (RenderImage() with a

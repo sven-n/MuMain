@@ -14,12 +14,11 @@
 		<div id="resize_handle" data-class-hidden="!show_frame"
 		     data-event-drag="chat_resize_drag"></div>
 
-		<div id="lines" class="scroll-pane" data-style-height="client_height + 'dp'">
+		<div id="lines" class="scroll-pane" data-style-height="client_height + 'dp'"
+		     data-style---line-px="line_px + 'px'" data-style---row-px="row_px + 'px'">
 			<div data-for="line : lines"
 			     data-attr-class="'chat-line chat-line--' + line.kind + (line.has_id ? ' chat-line--has-id' : '') + (it_index == pointed_index ? ' chat-line--pointed' : '')"
-			     data-style-font-size="text_px + 'px'"
-			     data-style-height="line_px + 'px'" data-style-line-height="line_px + 'px'"
-			     data-style-margin-bottom="(row_px - line_px) + 'px'">{{line.text}}</div>
+			     data-style-font-size="text_px + 'px'">{{line.text}}</div>
 		</div>
 	</div>
 </body>

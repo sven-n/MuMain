@@ -334,7 +334,6 @@ void mu::ui::window::CItemEnduranceInfo::BindRmlModel(Rml::DataModelConstructor&
     c.Bind("arrows", &model.arrows);
 
     auto pet = c.RegisterStruct<PetFrameEntry>();
-    pet.RegisterMember("top", &PetFrameEntry::top);
     pet.RegisterMember("bar_width", &PetFrameEntry::barWidth);
     pet.RegisterMember("name", &PetFrameEntry::name);
     c.RegisterArray<std::vector<PetFrameEntry>>();
@@ -372,9 +371,9 @@ void mu::ui::window::CItemEnduranceInfo::SyncView()
 }
 
 // The original's RenderLeft(): the elf's arrow count line (11 high), then the HP frames of the
-// equipped helper, the dark lord's raven and the elf's summon, 24 apart. The theme places the
-// column (the original's (2, 26) in the screen's stretch); the tops here are from its top. Each
-// frame: the fill, the frame art, the bar (life / max of 49 texels) and the name.
+// equipped helper, the dark lord's raven and the elf's summon, 24 apart. The theme places and stacks
+// the column (the original's (2, 26) in the screen's stretch). Each frame: the fill, the frame art,
+// the bar (life / max of 49 texels) and the name.
 void mu::ui::window::CItemEnduranceInfo::SyncLeftColumn()
 {
     using namespace UI::ItemEndurance;
@@ -383,7 +382,6 @@ void mu::ui::window::CItemEnduranceInfo::SyncLeftColumn()
     SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::lineHeightPx, "line_height_px",
                            CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Normal));
 
-    int iNextPosY = 0;
     wchar_t szText[256] = {};
 
     Rml::String arrows;
@@ -391,7 +389,6 @@ void mu::ui::window::CItemEnduranceInfo::SyncLeftColumn()
         ArrowCountText(m_iCurArrowType, ARROWTYPE_BOW, ARROWTYPE_CROSSBOW, szText))
     {
         arrows = StringUtils::WideToNarrow(szText);
-        iNextPosY += (UI_INTERVAL_HEIGHT + 10);
     }
     SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::arrows, "arrows", std::move(arrows));
 
@@ -399,11 +396,9 @@ void mu::ui::window::CItemEnduranceInfo::SyncLeftColumn()
     const auto addFrame = [&](const wchar_t* name, int life, int maxLife)
     {
         PetFrameEntry frame;
-        frame.top = static_cast<float>(iNextPosY);
         frame.barWidth = (static_cast<float>(life) / static_cast<float>(maxLife)) * static_cast<float>(PETHP_BAR_WIDTH);
         frame.name = StringUtils::WideToNarrow(name);
         pets.push_back(std::move(frame));
-        iNextPosY += (static_cast<int>(UI_INTERVAL_HEIGHT) + PETHP_FRAME_HEIGHT);
     };
 
     if (HasHelperLifeFrame())

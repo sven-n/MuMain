@@ -16,6 +16,7 @@
 #include "UI/Events/CursedTempleUpdates.h"
 #include "UI/Events/CryWolf.h"
 #include "UI/Events/CryWolfUpdates.h"
+#include "UI/Events/KanturuEvent.h"
 #include "UI/Combat/SiegeUpdates.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Combat/SiegeWarfare.h"
@@ -91,6 +92,8 @@ constexpr std::array kEntries = {
     Entry{L"dsrank", Event::DevilSquareRank, kNoWindow, L"Devil Square ranking box, five players, the hero third"},
     Entry{L"switchbox", Event::CrownSwitchBox, kNoWindow, L"crown switch progress box, another guild pushing it"},
     Entry{L"guildwar", Event::GuildWar, kNoWindow, L"guild war time, 0:42 left, and its result, 3 : 5 lost"},
+    Entry{L"kanturu", Event::KanturuEntry, mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC,
+          L"Kanturu entry window, the tower open: its subject and two state texts"},
 };
 
 void Log(const std::wstring& text, mu::ui::window::MESSAGE_TYPE type = mu::ui::window::TYPE_SYSTEM_MESSAGE)
@@ -373,6 +376,10 @@ void Seed(Event event)
     case Event::ChaosCastleResult: SeedChaosCastleResult(); break;
     case Event::DevilSquareRank: SeedDevilSquareRank(); break;
     case Event::GuildWar: SeedGuildWar(); break;
+    case Event::KanturuEntry:
+        g_pKanturu2ndEnterNpc->ReceiveKanturu3rdInfo(UI::Kanturu::Stage::Tower,
+                                                     UI::Kanturu::Detail::TowerRevitalization, true, 0, 7200);
+        break;
     case Event::CrownSwitchBox: UI::Siege::ShowCrownNotice(UI::Siege::CrownNotice::SwitchActivatedByOther, L"Ironclad", L"Ravens", 30000); break;
     default: break;
     }
