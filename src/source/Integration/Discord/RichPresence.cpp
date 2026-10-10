@@ -3,6 +3,7 @@
 
 #include "Core/Text/Utf8.h"
 #include "Data/GameConfig/GameConfig.h"
+#include "GameLogic/Discord/ServerIntegration.h"
 #include "Integration/Discord/GameStateReader.h"
 #include "Integration/Discord/PresenceMode.h"
 #include "Integration/Discord/PresenceText.h"
@@ -60,10 +61,11 @@ void RichPresence::Refresh()
         return;
     }
 
-    const GameConfig& config = GameConfig::GetInstance();
-    const PresenceImages images{Core::Text::ToUtf8(config.GetDiscordLargeImageKey().c_str()),
-                                Core::Text::ToUtf8(config.GetDiscordSmallImageKey().c_str())};
-    Activity activity = DescribePresence(*snapshot, ParsePresenceMode(config.GetDiscordPresence()), images);
+    const auto& server = GameLogic::Discord::ServerIntegration::Instance();
+    const PresenceImages images{Core::Text::ToUtf8(server.RichPresenceLargeImageKey().c_str()),
+                                Core::Text::ToUtf8(server.RichPresenceSmallImageKey().c_str())};
+    const PresenceMode mode = ParsePresenceMode(GameConfig::GetInstance().GetDiscordPresence());
+    Activity activity = DescribePresence(*snapshot, mode, images);
     activity.startTimestamp = SceneStartTimestamp(snapshot->scene);
     if (m_published == activity)
     {
@@ -76,9 +78,10 @@ void RichPresence::Refresh()
 
 bool RichPresence::MatchConfiguration()
 {
-    const GameConfig& config = GameConfig::GetInstance();
-    const std::string applicationId = Core::Text::ToUtf8(config.GetDiscordApplicationId().c_str());
-    const bool enabled = ParsePresenceMode(config.GetDiscordPresence()) != PresenceMode::Off;
+    // The server's application wins over the one in config.ini.
+    const auto& server = GameLogic::Discord::ServerIntegration::Instance();
+    const std::string applicationId = Core::Text::ToUtf8(server.RichPresenceApplicationId().c_str());
+    const bool enabled = ParsePresenceMode(GameConfig::GetInstance().GetDiscordPresence()) != PresenceMode::Off;
     if (!enabled || applicationId.empty())
     {
         Stop();

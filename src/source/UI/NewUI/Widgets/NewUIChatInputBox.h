@@ -115,7 +115,6 @@ namespace SEASON3B
         bool m_bShowSystemMessages;
         bool m_bShowChatLog;
         bool m_bWhisperSend;
-        bool m_bShowMessageElseNormal;
 
         CNewUIButton m_BtnSize;
         CNewUIButton m_BtnTransparency;

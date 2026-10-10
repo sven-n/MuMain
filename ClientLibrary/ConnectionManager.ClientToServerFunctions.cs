@@ -1570,14 +1570,14 @@ public unsafe partial class ConnectionManager
     /// Sends a <see cref="CastleSiegeTaxChangeRequest" /> to this connection.
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
-    /// <param name="taxType">0=Undefined, 1=ChaosMachine, 2 = Normal, 3 = EntranceFeeLandOfTrials</param>
-    /// <param name="taxRate">The tax rate.</param>
+    /// <param name="taxType">The tax type.</param>
+    /// <param name="taxValue">The percentage rate for shop and Chaos Machine taxes, or the entrance fee amount for the hunting zone.</param>
     /// <remarks>
     /// Is sent by the client when: The guild master wants to change the tax rate in the castle npc.
     /// Causes reaction on server side: The server changes the tax rates accordingly.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendCastleSiegeTaxChangeRequest")]
-    public static void SendCastleSiegeTaxChangeRequest(int handle, byte @taxType, uint @taxRate)
+    public static void SendCastleSiegeTaxChangeRequest(int handle, CastleSiegeTaxType @taxType, uint @taxValue)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -1591,7 +1591,7 @@ public unsafe partial class ConnectionManager
                 var length = CastleSiegeTaxChangeRequestRef.Length;
                 var packet = new CastleSiegeTaxChangeRequestRef(pipeWriter.GetSpan(length)[..length]);
                 packet.TaxType = @taxType;
-                packet.TaxRate = @taxRate;
+                packet.TaxValue = @taxValue;
 
                 return length;
             });
@@ -1640,14 +1640,14 @@ public unsafe partial class ConnectionManager
     /// Sends a <see cref="ToggleCastleGateRequest" /> to this connection.
     /// </summary>
     /// <param name="handle">The handle of the connection.</param>
-    /// <param name="closeState">The close state.</param>
+    /// <param name="isOpen">The is open.</param>
     /// <param name="gateId">The gate id.</param>
     /// <remarks>
     /// Is sent by the client when: The guild member of the castle owner wants to toggle the gate switch.
     /// Causes reaction on server side: The castle gate is getting opened or closed.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendToggleCastleGateRequest")]
-    public static void SendToggleCastleGateRequest(int handle, byte @closeState, ushort @gateId)
+    public static void SendToggleCastleGateRequest(int handle, byte @isOpen, ushort @gateId)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -1660,7 +1660,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = ToggleCastleGateRequestRef.Length;
                 var packet = new ToggleCastleGateRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.CloseState = @closeState == 1;
+                packet.IsOpen = @isOpen == 1;
                 packet.GateId = @gateId;
 
                 return length;
@@ -1679,13 +1679,13 @@ public unsafe partial class ConnectionManager
     /// <param name="team">Team Number 0 to 7.</param>
     /// <param name="positionX">The position x.</param>
     /// <param name="positionY">The position y.</param>
-    /// <param name="command">0 = Attack, 1 = Defend, 2 = Wait</param>
+    /// <param name="command">The command.</param>
     /// <remarks>
     /// Is sent by the client when: The guild master sent a command to his guild during the castle siege event.
     /// Causes reaction on server side: The command is shown on the mini map of the guild members.
     /// </remarks>
     [UnmanagedCallersOnly(EntryPoint = "SendCastleGuildCommand")]
-    public static void SendCastleGuildCommand(int handle, byte @team, byte @positionX, byte @positionY, byte @command)
+    public static void SendCastleGuildCommand(int handle, byte @team, byte @positionX, byte @positionY, CastleSiegeGuildCommandType @command)
     {
         if (!Connections.TryGetValue(handle, out var connection))
         {
@@ -6746,6 +6746,99 @@ public unsafe partial class ConnectionManager
             {
                 var length = ChatCommandListRequestRef.Length;
                 var packet = new ChatCommandListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="DiscordIntegrationInfoRequest" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: A client which supports the Discord integration requests how the server is connected to Discord. It's usually sent after the character entered the game world, and again when the player opens a Discord dialog. By sending it, the client also announces that it understands the ExternalChatMessage.
+    /// Causes reaction on server side: The server sends a DiscordIntegrationInfo message, and from then on sends messages which were written in Discord as ExternalChatMessage.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendDiscordIntegrationInfoRequest")]
+    public static void SendDiscordIntegrationInfoRequest(int handle)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DiscordIntegrationInfoRequestRef.Length;
+                var packet = new DiscordIntegrationInfoRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="DiscordLinkCodeRequest" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to link the account to a Discord user, e.g. with a button of a Discord dialog.
+    /// Causes reaction on server side: The server creates a one-time code and sends it with a DiscordLinkCode message. The player enters the code in Discord to complete the link.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendDiscordLinkCodeRequest")]
+    public static void SendDiscordLinkCodeRequest(int handle)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DiscordLinkCodeRequestRef.Length;
+                var packet = new DiscordLinkCodeRequestRef(pipeWriter.GetSpan(length)[..length]);
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    /// <summary>
+    /// Sends a <see cref="DiscordUnlinkRequest" /> to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to remove the link of the account to a Discord user.
+    /// Causes reaction on server side: The server removes the link and sends an updated DiscordIntegrationInfo message.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "SendDiscordUnlinkRequest")]
+    public static void SendDiscordUnlinkRequest(int handle)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                var length = DiscordUnlinkRequestRef.Length;
+                var packet = new DiscordUnlinkRequestRef(pipeWriter.GetSpan(length)[..length]);
                 return length;
             });
         }

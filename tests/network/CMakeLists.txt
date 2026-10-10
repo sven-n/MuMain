@@ -74,6 +74,17 @@ if(ENABLE_DISCORD)
     )
 endif()
 
+# The Discord integration messages pull in client globals defined in
+# Winmain.cpp (through the chat log), so it is linked here.
+mu_add_test(
+    NAME test_discord_packets
+    SOURCES
+        test_discord_packets.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
 mu_add_test(
     NAME test_chat_command_catalog
     SOURCES

@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "App/Control/ControlTaps.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "GameLogic/Discord/ServerIntegration.h"
+#include "Network/Discord/DiscordMessageHandler.h"
+#include "UI/Chat/ExternalChat.h"
 #include "UI/Chat/Chat.h"
 #include <memory>
 #include "UI/Legacy/UIManager.h"
@@ -1258,6 +1261,10 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     GameLogic::Commands::Catalog().Reset();
     GameLogic::Commands::Catalog().RequestOnce();
 
+    // Servers with the Discord integration answer with how they're connected.
+    GameLogic::Discord::ServerIntegration::Instance().Forget();
+    GameLogic::Discord::ServerIntegration::Instance().Request();
+
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer]");
 
     return (TRUE);
@@ -1873,12 +1880,23 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
         {
             for (int i = 0; i < messageSize - 2; i++)
                 Text[i] = Text[i + 2];
+            if (UI::Chat::External::IsBridgedSender(ID))
+            {
+                // Recorded for the control socket as a Discord line instead.
+                UI::Chat::External::ShowBridged(UI::Chat::External::Scope::Alliance, ID, Text);
+                return;
+            }
             g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_UNION_MESSAGE);
         }
         else if (Text[0] == L'@')
         {
             for (int i = 0; i < messageSize - 1; i++)
                 Text[i] = Text[i + 1];
+            if (UI::Chat::External::IsBridgedSender(ID))
+            {
+                UI::Chat::External::ShowBridged(UI::Chat::External::Scope::Guild, ID, Text);
+                return;
+            }
             g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_GUILD_MESSAGE);
         }
         else if (Text[0] == L'$')
@@ -14104,14 +14122,16 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
         break;
     case 0xF5:
     {
-        // The chat commands which are available to this player. It's only sent
-        // by servers which know the request, so an unknown sub code is no error.
+        // Opt-in messages of OpenMU: the chat commands and the Discord
+        // integration. They're only sent by servers which know the requests,
+        // so an unknown sub code is no error.
         const auto subcode = bIsC1C3 ? ReceiveBuffer[3] : ReceiveBuffer[4];
         if (subcode == 0x01)
         {
             GameLogic::Commands::Catalog().AddFromPacket(ReceiveBuffer, Size);
         }
-        else
+        else if (!Network::Discord::HandleMessage(subcode,
+                                                  std::span<const BYTE>(ReceiveBuffer, static_cast<size_t>(Size))))
         {
             g_ConsoleDebug->Write(MCD_RECEIVE, L"Recv [0xF5][0x%02x] (unknown)", subcode);
         }
