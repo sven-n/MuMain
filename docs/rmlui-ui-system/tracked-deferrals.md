@@ -114,7 +114,9 @@ per-axis scale `dp` cannot reproduce; it ends when those sprites port, and nothi
 It requires a reason in `tools/rml_bound_geometry_allowlist.txt` for every non-exempt geometry
 binding; root placement and scaling expressions are exempt. `--review` compares each reason with the
 fields it actually binds: an entry can still be required after its description has gone stale, so
-update the reason when a port changes what a document binds.
+update the reason when a port changes what a document binds. Each entry is tagged `state` (the geometry is the
+data) or `debt` (layout C++ owns that a theme should); `--review` ends with the debt count, which
+only goes down.
 
 Allowlist totals are not defect counts, and passing the guard establishes documented exceptions, not
 runtime correctness. The guard covers the four box offsets and the two sizes only: a bound `color`,

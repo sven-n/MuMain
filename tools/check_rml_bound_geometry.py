@@ -29,7 +29,9 @@ a cleanup (architecture-principles.md §26). It freezes it: every document that 
 geometry today is listed, with a reason, in rml_bound_geometry_allowlist.txt, and a
 document that starts binding geometry without being listed fails the build. New work
 therefore cannot quietly join the second population, and the list is a reviewed
-inventory rather than an implicit one.
+inventory rather than an implicit one. Each entry is tagged `state` (the geometry is the
+data: a gauge, a pointer- or world-following element, a user resize) or `debt` (layout C++
+owns that a theme should), so the debt is counted rather than mixed in with the rest.
 
 Deliberately allowed everywhere, unlisted: expressions that reference only the root
 transform (`root_x`, `root_y`, `root_scale`, and the older `panel_x`/`panel_y` spelling
@@ -112,23 +114,31 @@ def scaled_literals(text):
     return found
 
 
+TAGS = ("state", "debt")
+
+
 def read_allowlist(path):
-    """{relative posix path: reason}. Blank lines and # comments ignored."""
+    """({relative posix path: (tag, reason)}, number of malformed lines). Blank lines and
+    # comments ignored."""
     entries = {}
+    malformed = 0
     if not path.is_file():
-        return entries
+        return entries, malformed
     for line_number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
-        if ":" not in line:
+        name, _, rest = line.partition(":")
+        tag, separator, reason = rest.partition("--")
+        if not separator or tag.strip() not in TAGS or not reason.strip():
             sys.stderr.write(
-                "%s:%d: expected '<path>: <reason>', got %r\n" % (path, line_number, raw)
+                "%s:%d: expected '<path>: state -- <why>' or '<path>: debt -- <why>', got %r\n"
+                % (path, line_number, raw)
             )
+            malformed += 1
             continue
-        name, reason = line.split(":", 1)
-        entries[name.strip()] = reason.strip()
-    return entries
+        entries[name.strip()] = (tag.strip(), reason.strip())
+    return entries, malformed
 
 
 def main():
@@ -152,7 +162,7 @@ def main():
         sys.stderr.write("asset root not found: %s\n" % asset_root)
         return 1
 
-    allowlist = read_allowlist(pathlib.Path(args.allowlist))
+    allowlist, malformed = read_allowlist(pathlib.Path(args.allowlist))
     documents = sorted(asset_root.rglob("*.rml"))
 
     unlisted = []
@@ -171,11 +181,19 @@ def main():
             unlisted.append((relative, sorted(fields)))
 
     if args.review:
-        for relative, fields in sorted(listed_and_binding.items()):
-            print("%s\n  binds:  %s\n  reason: %s\n" % (relative, ", ".join(fields), allowlist[relative]))
+        for tag in TAGS:
+            for relative, fields in sorted(listed_and_binding.items()):
+                if allowlist[relative][0] == tag:
+                    print("%s [%s]\n  binds:  %s\n  reason: %s\n"
+                          % (relative, tag, ", ".join(fields), allowlist[relative][1]))
         for relative, fields in unlisted:
             print("%s\n  binds:  %s\n  reason: -- NOT LISTED --\n" % (relative, ", ".join(fields)))
+        debt = sorted(r for r in listed_and_binding if allowlist[r][0] == "debt")
+        print("%d state, %d debt: %s" % (len(listed_and_binding) - len(debt), len(debt), ", ".join(debt)))
         return 0
+
+    if malformed:
+        return 1
 
     stale = sorted(set(allowlist) - set(listed_and_binding))
     if stale:
@@ -212,9 +230,10 @@ def main():
             sys.stderr.write("  %s -> %s\n" % (relative, ", ".join(fields)))
         return 1
 
+    debt = sum(1 for r in listed_and_binding if allowlist[r][0] == "debt")
     print(
-        "RML inline-geometry guard: OK (%d .rml checked, %d allowlisted)"
-        % (len(documents), len(listed_and_binding))
+        "RML inline-geometry guard: OK (%d .rml checked, %d allowlisted, %d of them debt)"
+        % (len(documents), len(listed_and_binding), debt)
     )
     return 0
 

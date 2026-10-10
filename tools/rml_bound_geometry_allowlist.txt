@@ -6,61 +6,66 @@
 # that set, not to bless it -- a document binding geometry without a line here fails the build,
 # so new work cannot quietly join it.
 #
-# Format: <path relative to the RmlUi asset root>: <why>. Keep the entries sorted, below this header.
+# Format: <path relative to the RmlUi asset root>: <tag> -- <why>. Keep the entries sorted.
 #
-# "per-frame data" means the geometry is the state itself (a gauge, something following the pointer
-# or a projected point). A list of any length flows in RCSS instead. Sharpen a reason when its
-# document changes what it binds (--review prints each reason beside its bound fields), and delete
-# the line when the document stops binding geometry; the checker prints entries that are no longer
-# needed.
+#   state -- the geometry is the state itself: a gauge's length, something following the pointer
+#            or a projected point, a size the user dragged. A theme has nothing to own here.
+#   debt  -- C++ computes layout a theme should own (a stack, a placement, a measured centre).
+#            The reason says which part; when the document also binds state, so does the reason.
+#            --review counts these, and the count only goes down.
+#
+# A list of any length flows in RCSS instead. Sharpen a reason when its document changes what it
+# binds (--review prints each reason beside its bound fields), retag debt as state once only the
+# state is left, and delete the line when the document stops binding geometry; the checker prints
+# entries that are no longer needed.
 
-blood_castle_time.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
-castle_window.rml: a map item's bars are lengths, RenderCastleItem()'s own gauge widths. The tab positions are in each theme's RCSS
-chaos_castle_time.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
-char_info_balloon.rml: per-frame data -- world-projected balloon positions, per frame
-chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
-command_window.rml: per-frame data -- target marker follows the selected command
-crywolf.rml: per-frame data -- the success/failure banner and the rank label slide in and out, Balgass's health and the statue's shield are gauge lengths (the shield shortens from its left, so its left moves with it)
-cursed_temple_system.rml: per-frame data -- the mini map's projected markers and the three native buttons, whose box comes off the live CButton that hit-tests them
-doppelganger_frame.rml: per-frame data -- the monsters' gauge is a length from m_fMonsterGauge, stacked in pieces as monsters get through; the Ice Walker's and each party member's marker is their own position along the path (59 + 167 * position)
-duel_watch_frame.rml: the health and shield gauges are lengths from the fighters' rates, and the left fighter's bars are right-aligned so their left moves with the rate too (the plan's gauge carve-out)
-empire_guardian_timer.rml: the text box's left and width are EventTimerView's caller constants, not a theme's: C++ needs the width because the shrink-to-box measurement uses it, so the number would have to be read back off RCSS for the theme to own the box. Same shape as kLayoutPanelWidth
-generic_confirm_dialog.rml: per-frame data -- the timed confirm's progress bar is a fraction of its countdown
-generic_menu_dialog.rml: the native box each menu replaces, as its caller describes it (GenericMenuConfig::nativeFrame): the frame height and the text, divider and button tops differ per menu, and legacy reproduces them; a theme that flows the menu ignores them, as modern does
-hud_status.rml: per-frame data -- the macro cooldown's bar is a gauge length, the fraction of the cooldown left, and the cooldown centres on the world the open docks leave uncovered
-item_endurance.rml: per-frame data -- the hovered item's tooltip follows the mouse (clamped to the screen edge); the pet bars are lengths from their health; the left column is a flow whose rows depend on whether the elf's arrow line is shown and which frames exist, and its names are screen-converted physical px; the icon column's start is right-anchored to the live screen width, which is the window's to decide -- the pack inside it is the theme's
-item_explanation.rml: per-frame data -- placed against the hovered item
-kanturu_enter.rml: the subject's and state texts' lines sit where SeparateTextIntoLines() put them -- each group starts under however many lines the one before it wrapped to, so the stacking is derived from the text, not a table the theme could hold
-login_scene.rml: per-frame data -- scene sprites scale on their own 800x600 formula, not dp
-main_frame.rml: per-frame data -- the health/mana/SD/AG gauges and every cooldown wipe are fractions, and the expanded skill grid's cells come from RebuildGridSnapshot()'s zig-zag, whose position is computed from a cell's ordinal among the skills actually learned (the same accepted computed fan-out as MuHelperSkillPicker's).
-match_status.rml: per-frame data -- the countdown centres on the world the open docks leave uncovered
-message_box_view.rml: every line is centred by measurement (centre - MeasureText().cx / 2) and stacked by measured height, so its geometry genuinely varies per frame; the buttons come from the box's own CMessageBoxButtons (a box with literal positions names its kind and the theme places them instead), the frame and progress bar follow the box size, and its jewel list preserves native text metrics in a counter-scaled RmlUi scroll pane
-mini_map.rml: per-frame data -- each .clip is a region of the window the map may paint in, carved around the native bottom HUD's band from the live window size, with .world offsetting its copy of the picture back to window coordinates; a marker's size and turned quad are its own; the location hint is sized to its measured text and placed where the pointer is. The map's own art is turned 45 degrees in physical px (MiniMapLayout.h), which is why this document has no reference-px space for a theme to work in
-mu_helper_detail.rml: per-frame data -- the three gauges' fill levels
-mu_helper_skill_picker.rml: per-frame data -- fan-out is data-driven; recorded as the per-frame carve-out at port time
-notices.rml: a screen-converted document: it carries no root transform, and every position is physical px put through the transform the native text used, which UI::Notices::Render() takes ambiently rather than inside a known layout scope. Each row is deliberately sized 2 * PositionX(320) wide from x 0 so its centre lands on the original's centre whatever the transform's offset is, and the text centres in it. Moving the 300 + 13-a-line table into RCSS means giving this document a reference-px space and a stretch, which is a coordinate-space change on an unverified transform, not this rollout's edit
-npc_quest.rml: the message block is centred by its line count, per quest state, and the answers start below it: flow does not stack counter-scaled text layers, so both tops are numbers
-party_info.rml: per-frame data -- each member's health bar is a fraction
-party_list.rml: per-frame data -- each card's health bar is a length from the member's health
-pet_info.rml: per-frame data -- the pets' health bars are fractions
-reconnect_dialog.rml: per-frame data -- the progress bar's fill is the reconnect's own progress fraction
-server_msg.rml: per-frame data -- the window's sides grow with the message as it is typed out (kSideStepHeight * m_nBgSideNow), and the centre and bottom pieces follow that height
-server_select.rml: per-frame data -- gauge width is the server load
-set_item_explanation.rml: per-frame data -- placed against the hovered item
-siege_warfare.rml: the hero, the other characters' dots and each command's icon sit at their projected map points; the pointer's chosen command follows the mouse; the team and command buttons' boxes come off the live CButtons that hit-test them, and the command buttons are repositioned every frame to the chosen team's row -- native is authoritative for their layout and their hit test, so this runs in the accepted direction
-slide_notice.rml: per-frame data -- the ticker scrolls right to left every frame, so the text's left and the band's fading height are its state, not a layout a theme could own
-themes/legacy/chat_log.rml: per-frame data -- panel and well heights follow the user resize, in dp
-help_window.rml: per-row data -- each row's height and gap are the native renderer's line metrics for the page it measures
-themes/legacy/system_log.rml: per-frame data -- native renderer geometry for the lines it still measures
-themes/legacy/tooltip.rml: per-frame data -- tooltip is placed against the pointer
-themes/legacy/trade.rml: per-frame data -- an item warning badge sits on its item's slot and is as wide as the item
-themes/legacy/window_shell.rml: the shell's own placement: a window the player drags and the game remembers (the friend, letter and chat windows) puts its top-left at root_x/root_y, in physical px
-themes/modern/command_window.rml: per-frame data -- target marker follows the selected command
-themes/modern/generic_confirm_dialog.rml: per-frame data -- the timed confirm's progress bar is a fraction of its countdown
-themes/modern/mu_helper_detail.rml: per-frame data -- the three gauges' fill levels
-themes/modern/npc_quest.rml: the dialogue block is centred by its line count, per quest state
-themes/modern/party_info.rml: per-frame data -- each member's health bar is a fraction
-themes/modern/pet_info.rml: per-frame data -- the pets' health bars are fractions
-themes/modern/trade.rml: per-frame data -- an item warning badge sits on its item's slot and is as wide as the item
-themes/modern/window_shell.rml: the shell's own placement: a window the player drags and the game remembers (the friend, letter and chat windows) puts its top-left at root_x/root_y, in physical px
-tooltip.rml: per-frame data -- tooltip is placed against the pointer
+blood_castle_time.rml: debt -- the text box's left is EventTimerView's caller constant, not a theme's; C++ also uses the width for its shrink-to-box measurement, which can read the width back off the element instead
+castle_window.rml: state -- a map item's bars are lengths, RenderCastleItem()'s own gauge widths. The tab positions are in each theme's RCSS
+chaos_castle_time.rml: debt -- the text box's left is EventTimerView's caller constant, not a theme's; C++ also uses the width for its shrink-to-box measurement, which can read the width back off the element instead
+char_info_balloon.rml: state -- world-projected balloon positions, per frame
+chat_log.rml: state -- panel and well heights follow the user resize, in dp
+command_window.rml: state -- target marker follows the selected command
+crywolf.rml: state -- the success/failure banner and the rank label slide in and out, Balgass's health and the statue's shield are gauge lengths (the shield shortens from its left, so its left moves with it)
+cursed_temple_system.rml: state -- the mini map's markers sit at their projected points, each with its own sprite size; the buttons are the theme's
+doppelganger_frame.rml: state -- the monsters' gauge is a length from m_fMonsterGauge, stacked in pieces as monsters get through; the Ice Walker's and each party member's marker is their own position along the path (59 + 167 * position)
+duel_watch_frame.rml: state -- the health and shield gauges are lengths from the fighters' rates, and the left fighter's bars are right-aligned so their left moves with the rate too (the plan's gauge carve-out)
+empire_guardian_timer.rml: debt -- the text box's left is EventTimerView's caller constant, not a theme's; C++ also uses the width for its shrink-to-box measurement, which can read the width back off the element instead
+generic_confirm_dialog.rml: state -- the timed confirm's progress bar is a fraction of its countdown
+generic_menu_dialog.rml: debt -- the native box each menu replaces, as its caller describes it (GenericMenuConfig::nativeFrame): the frame height and the text, divider and button tops differ per menu, and legacy reproduces them from bound numbers; a menu kind the theme places would replace them
+help_window.rml: debt -- each row's height and gap are the native renderer's line metrics for the page it measures, bound per row; one bound font metric and a spacer class would let the rows flow
+hud_status.rml: state -- the macro cooldown's bar is a gauge length, the fraction of the cooldown left, and the cooldown centres on the world the open docks leave uncovered
+item_endurance.rml: debt -- the pet frames sit at C++ tops (the arrow line, then 24 apart), a fixed stack that can flow; the hovered item's tooltip follows the mouse and the pet bars are lengths from their health (state)
+item_explanation.rml: debt -- each box and line sits where RenderTipTextList() recorded it, so the table's stacking and widths are measured in C++; the table's placement against the hovered item is state
+kanturu_enter.rml: debt -- the subject's and state texts' lines sit where SeparateTextIntoLines() put them -- each group starts under however many lines the one before it wrapped to, stacking that flow inside one counter-scaled box would do
+login_scene.rml: debt -- the scene sprites and text scale on the login scene's own 800x600 formula, not the stage's
+main_frame.rml: debt -- the expanded skill grid's cells come from RebuildGridSnapshot()'s zig-zag, a position computed from the cell's ordinal among the skills learned; the health/mana/SD/AG gauges and every cooldown wipe are fractions (state)
+match_status.rml: state -- the countdown centres on the world the open docks leave uncovered
+message_box_view.rml: debt -- every line is centred by measurement (centre - MeasureText().cx / 2) and stacked by measured height, the buttons come from the box's own CMessageBoxButtons, and the frame follows the box size; the progress bar is a gauge (state)
+mini_map.rml: state -- each .clip is a region of the window the map may paint in, carved around the native bottom HUD's band from the live window size, with .world offsetting its copy of the picture back to window coordinates; a marker's size and turned quad are its own; the location hint is sized to its measured text and placed where the pointer is. The map's own art is turned 45 degrees in physical px (MiniMapLayout.h), which is why this document has no reference-px space for a theme to work in
+mu_helper_detail.rml: state -- the three gauges' fill levels
+mu_helper_skill_picker.rml: state -- the fan-out is anchored to the clicked slot and its entries are placed by how many skills there are
+notices.rml: debt -- a screen-converted document: no root transform, every position is physical px put through the transform the native text used, rows 2 * PositionX(320) wide so the text centres; the 300 + 13-a-line table belongs on the HUD board in RCSS
+npc_quest.rml: debt -- the message block is centred by its line count, per quest state, and the answers start below it: both tops are numbers because counter-scaled text layers do not stack in flow
+party_info.rml: state -- each member's health bar is a fraction
+party_list.rml: state -- each card's health bar is a length from the member's health
+pet_info.rml: state -- the pets' health bars are fractions
+reconnect_dialog.rml: state -- the progress bar's fill is the reconnect's own progress fraction
+server_msg.rml: state -- the window's sides grow with the message as it is typed out (kSideStepHeight * m_nBgSideNow), and the centre and bottom pieces follow that height
+server_select.rml: state -- gauge width is the server load
+set_item_explanation.rml: debt -- each box and line sits where RenderTipTextList() recorded it, so the table's stacking and widths are measured in C++; the table's placement against the hovered item is state
+siege_warfare.rml: debt -- the team buttons' and the command buttons' boxes are C++ constants, the command buttons moved every frame to the chosen team's row; the hero, the dots and each command's icon at their projected map points and the pointer's command are state
+slide_notice.rml: state -- the ticker scrolls right to left every frame, so the text's left and the band's fading height are its state, not a layout a theme could own
+themes/legacy/chat_log.rml: debt -- each line's height and gap are native line metrics bound as geometry, where one bound font metric would let the theme size the rows; panel and well heights follow the user resize, in dp (state)
+themes/legacy/system_log.rml: debt -- each line's height and gap are native line metrics bound as geometry, where one bound font metric would let the theme size the rows
+themes/legacy/tooltip.rml: debt -- each line's height and gap are native line metrics bound as geometry; the tooltip's placement against the pointer is state
+themes/legacy/trade.rml: state -- an item warning badge sits on its item's slot and is as wide as the item
+themes/legacy/window_shell.rml: state -- the shell's own placement: a window the player drags and the game remembers (the friend, letter and chat windows) puts its top-left at root_x/root_y, in physical px
+themes/modern/command_window.rml: state -- target marker follows the selected command
+themes/modern/generic_confirm_dialog.rml: state -- the timed confirm's progress bar is a fraction of its countdown
+themes/modern/mu_helper_detail.rml: state -- the three gauges' fill levels
+themes/modern/npc_quest.rml: debt -- the dialogue block is centred by its line count, per quest state
+themes/modern/party_info.rml: state -- each member's health bar is a fraction
+themes/modern/pet_info.rml: state -- the pets' health bars are fractions
+themes/modern/trade.rml: state -- an item warning badge sits on its item's slot and is as wide as the item
+themes/modern/window_shell.rml: state -- the shell's own placement: a window the player drags and the game remembers (the friend, letter and chat windows) puts its top-left at root_x/root_y, in physical px
+tooltip.rml: state -- tooltip is placed against the pointer
