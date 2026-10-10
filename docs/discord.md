@@ -1,4 +1,4 @@
-# Discord Rich Presence
+# Discord
 
 While the game runs, your Discord profile can show what you are doing in it:
 
@@ -10,13 +10,18 @@ In Blood Castle 5 · Party 3/5
 ```
 
 The client talks to the Discord app running on the same computer. Nothing is
-sent anywhere else, no Discord account is linked, and the game never waits on
-Discord: when Discord isn't running, nothing happens, and when it is started
-later, the presence appears within a few seconds.
+sent anywhere else, and the game never waits on Discord: when Discord isn't
+running, nothing happens, and when it is started later, the presence appears
+within a few seconds.
 
 > Requires the Discord desktop app and a server that set up a Discord
 > application (see [For server operators](#for-server-operators)). Without an
-> application id in `config.ini` the presence stays off.
+> application id - from the server or in `config.ini` - the presence stays off.
+
+Servers with a Discord integration, like OpenMU, offer more: a button to
+[join their Discord](#joining-the-servers-discord), a dialog to
+[link your account](#linking-your-account), and
+[messages from Discord](#messages-from-discord) shown as such.
 
 ---
 
@@ -50,12 +55,37 @@ The setting applies immediately and is stored in `config.ini`.
 
 ## Joining the server's Discord
 
-When the server has a Discord, the options window shows a **Join** button next
-to the Discord setting. It opens the server's invite in the Discord app, or in
-the browser when Discord isn't installed.
+When the server has a Discord, the options window shows a button next to the
+Discord setting: **Join** opens the server's invite in the Discord app, or in
+the browser when Discord isn't installed. On a server with a Discord
+integration the button says **Discord...** and opens the
+[account dialog](#linking-your-account), which has the **Join** button.
 
 Only real Discord invite links are opened (`https://discord.gg/...` or
 `https://discord.com/invite/...`); with anything else the button is not shown.
+
+## Linking your account
+
+Linking your game account to your Discord user lets you write into your guild
+chat from Discord, as your character. On a server with a Discord integration,
+**Discord...** in the options window opens a dialog that shows whether your
+account is linked, and which of your chats are mirrored to Discord.
+
+1. Click **Link**. The dialog shows a one-time code like `ABCD-EFGH` and how
+   long it is valid. The code is already in the clipboard; **Copy** copies it
+   again.
+2. In Discord, enter `/link ABCD-EFGH` (paste the code).
+
+**Unlink** removes the link again. The chat command `/discord` does the same
+without the dialog: `/discord link`, `/discord unlink`.
+
+### Mirrored guild chat
+
+When the chat of your guild is mirrored to a Discord channel, the guild window
+says *Guild chat mirrored to Discord* under the guild name; the alliance tab
+does the same for the alliance chat. What you write there can be read in
+Discord. A guild master whose chat isn't mirrored is told how to do it: with
+`/guildchat` in Discord.
 
 ## Messages from Discord
 
@@ -63,11 +93,10 @@ Only real Discord invite links are opened (`https://discord.gg/...` or
 > alliance chat can be bound to Discord channels).
 
 A message written in a Discord channel that the server bridges into the game
-appears in the chat of its scope - guild or alliance - with that chat's
-colours. Its sender is shown as `[Discord] <name>`: with OpenMU's bridge the
-name is the character the Discord user is linked to (OpenMU sends it as
-`@<name>`, which no character can be called). A server that sends the Discord
-name itself can show it with up to 32 characters.
+appears in the chat of its scope - guild, alliance or world - with that chat's
+colours. Its sender is shown as `[Discord] <name>`, with a name that isn't
+limited to a character's length. With OpenMU, the name is the character the
+Discord user is linked to.
 
 - Discord users are not characters: right-clicking their line does not start a
   whisper, and they are not added to your whisper list.
@@ -107,8 +136,10 @@ InviteUrl=https://discord.gg/yourcode
 | `SmallImageKey` | Key of the small image, shown at the corner of the large one. Its tooltip is the character's class. Empty: no image. |
 | `InviteUrl`     | Invite link to your Discord server, opened by the **Join** button. Empty: no button. |
 
-A later client version will be able to take these values from the server
-instead, so they don't have to be shipped in `config.ini`.
+A server with a Discord integration can send these values to the client
+instead (OpenMU: the feature plugin *Discord integration of the client*); then
+they don't have to be shipped in `config.ini`. The server's values win; the
+ones in `config.ini` are used when the server sends none.
 
 ## Platforms and builds
 

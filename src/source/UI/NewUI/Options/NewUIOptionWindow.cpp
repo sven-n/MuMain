@@ -10,7 +10,9 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Audio/AudioPlayer.h"
+#include "GameLogic/Discord/ServerIntegration.h"
 #include "Integration/Discord/Invite.h"
+#include "UI/NewUI/Dialogs/DiscordMsgBox.h"
 #include "Integration/Discord/RichPresence.h"
 #include <algorithm>
 #include <cstring>
@@ -277,7 +279,7 @@ bool SEASON3B::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x, int y
     InitLanguageCombo();
     InitFontCombo();
     InitDiscordPresenceCombo();
-    ReadDiscordInvite();
+    UpdateDiscordButton();
     Show(false);
     return true;
 }
@@ -366,10 +368,9 @@ void SEASON3B::CNewUIOptionWindow::SetButtonInfo()
     m_BtnClose.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 
-    m_BtnDiscordJoin.ChangeButtonImgState(true, IMAGE_OPTION_BTN_SMALL, true);
-    m_BtnDiscordJoin.ChangeButtonInfo(m_Pos.x + DISCORD_JOIN_X_LOCAL, m_Pos.y + DISCORD_JOIN_Y_LOCAL,
-                                      DISCORD_JOIN_WIDTH, DISCORD_JOIN_HEIGHT);
-    m_BtnDiscordJoin.ChangeText(&I18N::Game::DiscordJoin);
+    m_BtnDiscord.ChangeButtonImgState(true, IMAGE_OPTION_BTN_SMALL, true);
+    m_BtnDiscord.ChangeButtonInfo(m_Pos.x + DISCORD_JOIN_X_LOCAL, m_Pos.y + DISCORD_JOIN_Y_LOCAL, DISCORD_JOIN_WIDTH,
+                                  DISCORD_JOIN_HEIGHT);
 }
 
 void SEASON3B::CNewUIOptionWindow::Release()
@@ -457,9 +458,9 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
         }
     }
 
-    if (m_bHasDiscordInvite && m_BtnDiscordJoin.UpdateMouseEvent())
+    if (m_discordButtonAction != DiscordButtonAction::None && m_BtnDiscord.UpdateMouseEvent())
     {
-        Integration::Discord::Invite::Open(GameConfig::GetInstance().GetDiscordInviteUrl());
+        OnDiscordButton();
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
@@ -647,7 +648,7 @@ void SEASON3B::CNewUIOptionWindow::OpenningProcess()
     m_FontCombo.SetSelectedIndex(m_iFontIndex);
     m_FontCombo.Close();
     InitDiscordPresenceCombo();
-    ReadDiscordInvite();
+    UpdateDiscordButton();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
 }
 
@@ -793,17 +794,41 @@ void SEASON3B::CNewUIOptionWindow::RenderDiscordPresenceRow()
     RenderImage(IMAGE_OPTION_POINT, m_Pos.x + 20.f, m_Pos.y + DISCORD_LABEL_Y_LOCAL - 2.f, 10.f, 10.f);
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + DISCORD_LABEL_Y_LOCAL, I18N::Game::DiscordPresence);
 
-    if (m_bHasDiscordInvite)
+    if (m_discordButtonAction != DiscordButtonAction::None)
     {
-        m_BtnDiscordJoin.Render();
+        m_BtnDiscord.Render();
     }
 }
 
-// The Join button is only offered for a valid invite link, so a typo in
-// config.ini shows no button rather than one that does nothing.
-void SEASON3B::CNewUIOptionWindow::ReadDiscordInvite()
+// Read on opening. The Join button is only offered for a valid invite link,
+// so a typo in config.ini shows no button rather than one that does nothing.
+void SEASON3B::CNewUIOptionWindow::UpdateDiscordButton()
 {
-    m_bHasDiscordInvite = Integration::Discord::Invite::IsInviteUrl(GameConfig::GetInstance().GetDiscordInviteUrl());
+    const auto& server = GameLogic::Discord::ServerIntegration::Instance();
+    if (server.IsAvailable())
+    {
+        m_discordButtonAction = DiscordButtonAction::Account;
+        m_BtnDiscord.ChangeText(&I18N::Game::DiscordAccount);
+    }
+    else if (Integration::Discord::Invite::IsInviteUrl(server.InviteUrl()))
+    {
+        m_discordButtonAction = DiscordButtonAction::Join;
+        m_BtnDiscord.ChangeText(&I18N::Game::DiscordJoin);
+    }
+    else
+    {
+        m_discordButtonAction = DiscordButtonAction::None;
+    }
+}
+
+void SEASON3B::CNewUIOptionWindow::OnDiscordButton()
+{
+    if (m_discordButtonAction == DiscordButtonAction::Account)
+    {
+        UI::Discord::ShowAccount();
+        return;
+    }
+    Integration::Discord::Invite::Open(GameLogic::Discord::ServerIntegration::Instance().InviteUrl());
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderButtons()

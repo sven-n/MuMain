@@ -89,7 +89,8 @@ bool SEASON3B::CNewUISiegeWarCommander::OnUpdateMouseEvent()
             SelectCmd.byLifeTime = 100;
 
             SocketClient->ToGameServer()->SendCastleGuildCommand(
-                SelectCmd.byTeam, SelectCmd.byX, SelectCmd.byY, static_cast<CastleSiegeGuildCommandType>(SelectCmd.byCmd));
+                SelectCmd.byTeam, SelectCmd.byX, SelectCmd.byY,
+                static_cast<CastleSiegeGuildCommandType>(SelectCmd.byCmd));
 
             m_iCurSelectBtnCommand = -1;
 

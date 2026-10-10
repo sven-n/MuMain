@@ -13159,4 +13159,49 @@
   <data name="DiscordJoin" xml:space="preserve">
     <value>Join</value>
   </data>
+  <data name="DiscordAccount" xml:space="preserve">
+    <value>Discord...</value>
+  </data>
+  <data name="DiscordLinkedAs" xml:space="preserve">
+    <value>Linked to Discord as %ls.</value>
+  </data>
+  <data name="DiscordNotLinked" xml:space="preserve">
+    <value>Your account isn't linked to Discord.</value>
+  </data>
+  <data name="DiscordLink" xml:space="preserve">
+    <value>Link</value>
+  </data>
+  <data name="DiscordUnlink" xml:space="preserve">
+    <value>Unlink</value>
+  </data>
+  <data name="DiscordCopy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="DiscordLinkCodeTitle" xml:space="preserve">
+    <value>Your link code:</value>
+  </data>
+  <data name="DiscordLinkCodeHint" xml:space="preserve">
+    <value>Enter /link %ls in Discord</value>
+  </data>
+  <data name="DiscordLinkCodeValidity" xml:space="preserve">
+    <value>within %d minutes.</value>
+  </data>
+  <data name="DiscordLinkCodeCopied" xml:space="preserve">
+    <value>The code is in the clipboard.</value>
+  </data>
+  <data name="DiscordLinkNotAvailable" xml:space="preserve">
+    <value>Linking to Discord isn't available on this server.</value>
+  </data>
+  <data name="DiscordGuildChatMirrored" xml:space="preserve">
+    <value>Guild chat mirrored to Discord</value>
+  </data>
+  <data name="DiscordAllianceChatMirrored" xml:space="preserve">
+    <value>Alliance chat mirrored to Discord</value>
+  </data>
+  <data name="DiscordWorldChatMirrored" xml:space="preserve">
+    <value>World chat mirrored to Discord</value>
+  </data>
+  <data name="DiscordGuildBindHint" xml:space="preserve">
+    <value>Mirror it with /guildchat in Discord</value>
+  </data>
 </root>

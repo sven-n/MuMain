@@ -13156,4 +13156,49 @@
   <data name="DiscordJoin" xml:space="preserve">
     <value>Beitreten</value>
   </data>
+  <data name="DiscordAccount" xml:space="preserve">
+    <value>Discord...</value>
+  </data>
+  <data name="DiscordLinkedAs" xml:space="preserve">
+    <value>Mit Discord verknüpft als %ls.</value>
+  </data>
+  <data name="DiscordNotLinked" xml:space="preserve">
+    <value>Dein Konto ist nicht mit Discord verknüpft.</value>
+  </data>
+  <data name="DiscordLink" xml:space="preserve">
+    <value>Verknüpfen</value>
+  </data>
+  <data name="DiscordUnlink" xml:space="preserve">
+    <value>Lösen</value>
+  </data>
+  <data name="DiscordCopy" xml:space="preserve">
+    <value>Kopieren</value>
+  </data>
+  <data name="DiscordLinkCodeTitle" xml:space="preserve">
+    <value>Dein Verknüpfungscode:</value>
+  </data>
+  <data name="DiscordLinkCodeHint" xml:space="preserve">
+    <value>Gib in Discord /link %ls ein,</value>
+  </data>
+  <data name="DiscordLinkCodeValidity" xml:space="preserve">
+    <value>innerhalb von %d Minuten.</value>
+  </data>
+  <data name="DiscordLinkCodeCopied" xml:space="preserve">
+    <value>Der Code ist in der Zwischenablage.</value>
+  </data>
+  <data name="DiscordLinkNotAvailable" xml:space="preserve">
+    <value>Die Verknüpfung mit Discord ist auf diesem Server nicht verfügbar.</value>
+  </data>
+  <data name="DiscordGuildChatMirrored" xml:space="preserve">
+    <value>Gildenchat wird nach Discord gespiegelt</value>
+  </data>
+  <data name="DiscordAllianceChatMirrored" xml:space="preserve">
+    <value>Allianzchat wird nach Discord gespiegelt</value>
+  </data>
+  <data name="DiscordWorldChatMirrored" xml:space="preserve">
+    <value>Weltchat wird nach Discord gespiegelt</value>
+  </data>
+  <data name="DiscordGuildBindHint" xml:space="preserve">
+    <value>Spiegeln mit /guildchat in Discord</value>
+  </data>
 </root>

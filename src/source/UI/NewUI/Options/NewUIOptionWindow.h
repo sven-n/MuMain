@@ -134,9 +134,16 @@ namespace SEASON3B
         int m_iDiscordPresenceIndex;
         const wchar_t* m_discordPresenceLabels[Integration::Discord::PresenceModes.size()] = {};
         CNewUIComboBox m_DiscordPresenceCombo;
-        CNewUIButton m_BtnDiscordJoin;
-        // Whether config.ini holds a valid invite link; read on opening.
-        bool m_bHasDiscordInvite = false;
+        // What the Discord button does: nothing (hidden), open the invite, or
+        // open the account dialog when the server has the Discord integration.
+        enum class DiscordButtonAction
+        {
+            None,
+            Join,
+            Account,
+        };
+        CNewUIButton m_BtnDiscord;
+        DiscordButtonAction m_discordButtonAction = DiscordButtonAction::None;
 
         void ApplyResolution();
         int FindCurrentResolutionIndex();
@@ -156,7 +163,8 @@ namespace SEASON3B
         int FindCurrentDiscordPresenceIndex();
         void InitDiscordPresenceCombo();
         void RenderDiscordPresenceRow();
-        void ReadDiscordInvite();
+        void UpdateDiscordButton();
+        void OnDiscordButton();
     };
 }
 
