@@ -19,8 +19,6 @@ namespace mu::ui::window
     // One skill the player can assign, placed where native's fan-out put it.
     struct MuHelperSkillPickerEntry
     {
-        float left = 0.f;       // reference px, from the config window's top left
-        float top = 0.f;
         Rml::String decorator;  // "image(skill-icon-skill2-lit-3-8)" -- see UI::MuHelper::SkillIconDecorator()
     };
 
@@ -28,6 +26,9 @@ namespace mu::ui::window
     {
         // The config window's drawn top left and scale, in window pixels: the flyout hangs off it.
         float originX = 0.f, originY = 0.f, scale = 1.f;
+        // Whether an attack slot opened the flyout (else a buff slot): the theme fans the entries
+        // out from that slot's row.
+        bool attack = false;
         std::vector<MuHelperSkillPickerEntry> entries;
     };
 
@@ -41,8 +42,6 @@ namespace mu::ui::window
     class CMuHelperSkillPicker : public CObject
     {
     public:
-        static constexpr float BoxWidth = 32.f;
-        static constexpr float BoxHeight = 38.f;
 
         CMuHelperSkillPicker();
         ~CMuHelperSkillPicker() override;
@@ -61,15 +60,7 @@ namespace mu::ui::window
         void FilterByBuffSkills();
 
     private:
-        struct Placement
-        {
-            int skillType = 0;
-            float left = 0.f;
-            float top = 0.f;
-        };
-
         void PrepareSkillsToRender();
-        void LayoutPlacements();
         void Pick(int index);
 
         static bool IsAttackSkill(int iSkillType);
@@ -86,7 +77,6 @@ namespace mu::ui::window
         bool m_bFilterByAttackSkills = false;
         bool m_bFilterByBuffSkills = false;
         std::vector<int> m_aiSkillsToRender;
-        std::vector<Placement> m_placements;
         bool m_bEntriesDirty = true;
 
         void BindRmlModel(Rml::DataModelConstructor& c, MuHelperSkillPickerRmlModel& model);

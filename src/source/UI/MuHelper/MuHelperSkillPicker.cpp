@@ -123,44 +123,14 @@ void CMuHelperSkillPicker::PrepareSkillsToRender()
         }
     }
 
-    LayoutPlacements();
-}
-
-// Native's fan-out, unchanged: columns grow right to left from just outside the config window's own
-// left edge, and within a column the entries alternate above and below the row of the slot that
-// opened the flyout -- attack slots sit at y=171, buff slots at y=293 (config window reference
-// space). This is a genuinely computed layout, not a static one, which is why it stays in C++.
-void CMuHelperSkillPicker::LayoutPlacements()
-{
-    const float startX = -BoxWidth;
-    const float startY = m_bFilterByAttackSkills ? 171.f : 293.f;
-    const int itemsPerColumn = m_bFilterByAttackSkills ? 10 : 5;
-
-    m_placements.clear();
-    m_placements.reserve(m_aiSkillsToRender.size());
-
-    for (size_t i = 0; i < m_aiSkillsToRender.size(); ++i)
-    {
-        const int col = static_cast<int>(i) / itemsPerColumn;
-        const int rowInColumn = static_cast<int>(i) % itemsPerColumn;
-        const int offset = (rowInColumn + 1) / 2;
-        const bool above = (rowInColumn % 2 == 0);
-
-        Placement p;
-        p.skillType = m_aiSkillsToRender[i];
-        p.left = startX - col * BoxWidth;
-        p.top = above ? startY - offset * BoxHeight : startY + offset * BoxHeight;
-        m_placements.push_back(p);
-    }
-
     m_bEntriesDirty = true;
 }
 
 void CMuHelperSkillPicker::Pick(int index)
 {
-    if (!IsVisible() || index < 0 || index >= static_cast<int>(m_placements.size()))
+    if (!IsVisible() || index < 0 || index >= static_cast<int>(m_aiSkillsToRender.size()))
         return;
-    g_pMuHelperConfig->AssignSkill(m_placements[static_cast<size_t>(index)].skillType);
+    g_pMuHelperConfig->AssignSkill(m_aiSkillsToRender[static_cast<size_t>(index)]);
     Show(false);
 }
 
@@ -169,10 +139,9 @@ void CMuHelperSkillPicker::BindRmlModel(Rml::DataModelConstructor& c, MuHelperSk
     c.Bind("origin_x", &model.originX);
     c.Bind("origin_y", &model.originY);
     c.Bind("scale", &model.scale);
+    c.Bind("attack", &model.attack);
 
     auto entry = c.RegisterStruct<MuHelperSkillPickerEntry>();
-    entry.RegisterMember("left", &MuHelperSkillPickerEntry::left);
-    entry.RegisterMember("top", &MuHelperSkillPickerEntry::top);
     entry.RegisterMember("decorator", &MuHelperSkillPickerEntry::decorator);
     c.RegisterArray<std::vector<MuHelperSkillPickerEntry>>();
     c.Bind("entries", &model.entries);
@@ -205,16 +174,12 @@ void CMuHelperSkillPicker::SyncRmlModel()
     m_bEntriesDirty = false;
 
     MuHelperSkillPickerRmlModel& model = m_RmlView.GetModel();
+    model.attack = m_bFilterByAttackSkills;
+    m_RmlView.MarkDirty("attack");
     model.entries.clear();
-    model.entries.reserve(m_placements.size());
-    for (const Placement& p : m_placements)
-    {
-        MuHelperSkillPickerEntry e;
-        e.left = p.left;
-        e.top = p.top;
-        e.decorator = UI::MuHelper::SkillIconDecorator(p.skillType);
-        model.entries.push_back(std::move(e));
-    }
+    model.entries.reserve(m_aiSkillsToRender.size());
+    for (const int skillType : m_aiSkillsToRender)
+        model.entries.push_back({UI::MuHelper::SkillIconDecorator(skillType)});
     m_RmlView.MarkDirty("entries");
 }
 
