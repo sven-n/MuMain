@@ -139,11 +139,24 @@
 	font-size: 1em;
 }
 
-.nq-dialogue {
+/* Native centred the message and answer lines on a band of NUM_LINE_CMB (7) lines from 66, 18
+   apart. With no quest in progress it drew the answers at 250 instead, but still centred the
+   messages as if the answers followed them: the padding keeps that room. */
+#nq_dialogue {
 	position: absolute;
 	left: 0;
-	width: calc(190px * var(--root-scale));
+	top: 66px;
+	--flow-w: 190px;
+	--flow-h: 126px;
+	box-sizing: border-box;
 	text-align: center;
+}
+#nq_dialogue.answers-anchored { padding-bottom: calc(var(--answer-lines, 0) * 18px * var(--root-scale)); }
+#nq_dialogue.answers-anchored .nq-answers {
+	position: absolute;
+	left: 0;
+	top: calc(184px * var(--root-scale));
+	width: 100%;
 }
 /* Native advances every message and answer line 18 reference px and never wraps them. */
 .nq-message-line {
@@ -176,7 +189,7 @@
 #conditions_anchor { width: calc(128px * var(--root-scale)); line-height: calc(32px * var(--root-scale)); }
 #btn_complete { width: calc(108px * var(--root-scale)); height: calc(29px * var(--root-scale)); line-height: calc(29px * var(--root-scale)); }
 .nq-cost-amount.gold-amount { width: calc(150px * var(--root-scale)); }
-.nq-dialogue { line-height: calc(18px * var(--root-scale)); }
+#nq_dialogue { line-height: calc(18px * var(--root-scale)); }
 
 /* The native text size, counter-scaled out of the placed root's scale. */
 #content_root { font-size: calc(var(--text-px) / var(--root-scale)); }

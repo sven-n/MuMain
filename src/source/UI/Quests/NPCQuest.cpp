@@ -97,10 +97,6 @@ void CNPCQuest::BindRmlModel(Rml::DataModelConstructor& c, NPCQuestRmlModel& mod
     c.RegisterArray<std::vector<NPCQuestAnswerEntry>>();
     c.Bind("answers", &model.answers);
 
-    c.Bind("dialogue_top", &model.dialogueTop);
-    c.Bind("message_top", &model.messageTop);
-    c.Bind("answers_top", &model.answersTop);
-
     c.Bind("complete_label", &model.completeLabel);
     c.Bind("cost_label", &model.costLabel);
     c.Bind("exit_tooltip", &model.exitTooltip);
@@ -426,20 +422,4 @@ void CNPCQuest::SyncRmlModel()
         model.answers.push_back({ StringUtils::WideToNarrow(g_lpszDialogAnswer[j][0]), j });
     }
     m_RmlView.MarkDirty("answers");
-
-    // Same vertical-centering formula RenderText() used natively; the QUEST_ING branch depends on
-    // how many message+answer lines are present this instance (a real per-instance value), the other
-    // branch is a fixed lower anchor (room for the cost banner above it).
-    constexpr float kLineAdvance = 18.f;
-    constexpr float kAnswersAnchorTop = 250.f;
-    const int iTotalLine = g_iNumLineMessageBoxCustom + g_iNumAnswer;
-    model.messageTop = 66.f + static_cast<float>(NUM_LINE_CMB - iTotalLine) * kLineAdvance / 2.f;
-    const bool questInProgress = QUEST_ING == byCurQuestState;
-    model.answersTop = questInProgress
-                           ? model.messageTop + static_cast<float>(g_iNumLineMessageBoxCustom) * kLineAdvance
-                           : kAnswersAnchorTop;
-    model.dialogueTop = questInProgress ? model.messageTop : kAnswersAnchorTop;
-    m_RmlView.MarkDirty("dialogue_top");
-    m_RmlView.MarkDirty("message_top");
-    m_RmlView.MarkDirty("answers_top");
 }

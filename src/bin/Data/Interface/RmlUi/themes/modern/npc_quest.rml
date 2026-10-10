@@ -40,10 +40,14 @@
 			      data-class-gold-ten-million="cost_tier == 'ten-million'">{{cost_amount}}</span>
 		</div>
 
-		<div class="nq-dialogue" data-style-top="dialogue_top + 'px'">
+		<!-- The messages and the answers, centred together on the dialogue band; with no quest in
+		     progress the block starts at the anchor under the cost banner. -->
+		<div id="nq_dialogue" data-class-answers-anchored="!show_conditions">
 			<span class="nq-message-line" data-for="m : message_lines">{{m.text}}</span>
-			<div class="nq-answer-row" data-for="a : answers"
-			     data-event-click="npcquest_select_answer(a.index)">{{a.text}}</div>
+			<div class="nq-answers">
+				<div class="nq-answer-row" data-for="a : answers"
+				     data-event-click="npcquest_select_answer(a.index)">{{a.text}}</div>
+			</div>
 		</div>
 
 		<div id="btn_exit" class="modern-icon-btn-px nq-btn-exit" data-event-click="npcquest_click_close" data-attr-data-hint="exit_tooltip">

@@ -47,14 +47,16 @@
 			      data-class-gold-ten-million="cost_tier == 'ten-million'">{{cost_amount}}</span>
 		</div>
 
-		<!-- Messages and answers are positioned separately, as native draws them (message_top /
-		     answers_top, NPCQuestRmlModel.h). -->
-		<div class="sharp-text nq-dialogue" data-style-top="message_top + 'px'" data-style-font-size="text_px + 'px'">
+		<!-- The messages and the answers, centred together on the dialogue band. With no quest in
+		     progress the answers drop to their anchor under the cost banner, and the messages keep the
+		     room the answers would have taken (--answer-lines). -->
+		<div id="nq_dialogue" class="sharp-text sharp-flow centred" data-style-font-size="text_px + 'px'"
+		     data-class-answers-anchored="!show_conditions" data-style---answer-lines="answers.size">
 			<span class="nq-message-line" data-for="m : message_lines">{{m.text}}</span>
-		</div>
-		<div class="sharp-text nq-dialogue" data-style-top="answers_top + 'px'" data-style-font-size="text_px + 'px'">
-			<div class="nq-answer-row" data-for="a : answers"
-			     data-event-click="npcquest_select_answer(a.index)">{{a.text}}</div>
+			<div class="nq-answers">
+				<div class="nq-answer-row" data-for="a : answers"
+				     data-event-click="npcquest_select_answer(a.index)">{{a.text}}</div>
+			</div>
 		</div>
 
 		<div id="btn_exit" data-event-click="npcquest_click_close" data-attr-data-hint="exit_tooltip">

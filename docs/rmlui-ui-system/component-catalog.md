@@ -64,6 +64,12 @@ width of the box it sits in. Only its font size (the native text size) stays bou
 stretches per axis (a Hud layout's `#screen`, `gens_ranking`) also binds `--root-scale-y`, and its
 layers take `.counter-scaled-xy`.
 
+Sibling counter-scaled layers do not stack in flow (each keeps its physical size in layout), so
+text that stacks goes inside **one** layer: `.sharp-text.sharp-flow`, sized in reference px by
+`--flow-w` (and `--flow-h`), with its lines flowing inside at the native size. `.centred` makes it a
+flex column that centres the lines on its height, however many there are, so C++ binds no tops
+(`npc_quest`'s dialogue band).
+
 ## Checkbox
 
 `.checkbox-row`/`.checkbox-box`/`.checkbox-box.checked`/`.checkbox-label`, both themes' `base.rcss`

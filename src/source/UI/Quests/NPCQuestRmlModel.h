@@ -42,18 +42,6 @@ namespace mu::ui::window
         std::vector<NPCQuestAnswerEntry> answers;    // g_lpszDialogAnswer (NUM_LINE_DA == 1 in this
                                                       // build, so each answer is already one line)
 
-        // Top offset (reference px, relative to #panel) of the message+answer container -- a real
-        // per-instance computed value (native's own vertical-centering formula depends on how many
-        // lines are present this instance), not a static CSS number. See SyncRmlModel()'s own comment
-        // for the exact formula (mirrors the native `yPos` computation byte-for-byte).
-        float dialogueTop = 66.f;
-
-        // The same formula split the way native draws it: the message lines always start at the
-        // centred messageTop, and only the answers move -- right below the messages while a quest
-        // is in progress, otherwise to the fixed answersTop anchor (reference px, like above).
-        float messageTop = 66.f;
-        float answersTop = 250.f;
-
         // Set once at BuildRmlUi() time (I18N::Game::ProceedWithQuest/Cost/Close388).
         Rml::String completeLabel;
         Rml::String costLabel;

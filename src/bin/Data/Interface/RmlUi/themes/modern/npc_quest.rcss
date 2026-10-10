@@ -110,12 +110,20 @@
 	font-size: 12px;
 }
 
-.nq-dialogue {
+/* The dialogue band: the lines centred on it while a quest is in progress, otherwise from the
+   anchor under the cost banner. */
+#nq_dialogue {
 	position: absolute;
 	left: 0;
+	top: 66px;
 	width: 190px;
+	height: 126px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 	text-align: center;
 }
+#nq_dialogue.answers-anchored { top: 250px; height: auto; justify-content: flex-start; }
 .nq-message-line {
 	display: block;
 	color: token(text-primary);

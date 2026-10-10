@@ -183,6 +183,17 @@ body {
    centre, so the text stays centred on the box at any panel scale. */
 .sharp-text.sharp-centre { left: 50%; width: 2000px; margin-left: -1000px; text-align: center; transform-origin: center top; }
 .sharp-text.sharp-centre.sharp-middle { transform-origin: center center; }
+/* Text that stacks: one counter-scaled layer whose lines flow inside it at the native size, so
+   C++ hands out no tops. The theme sizes it in reference px through --flow-w (and --flow-h for
+   .centred); everything inside is physical px. .centred centres the lines on the box's height,
+   however many there are. */
+.sharp-text.sharp-flow { width: calc(var(--flow-w, 0px) * var(--root-scale, 1)); }
+.sharp-text.sharp-flow.centred {
+	height: calc(var(--flow-h, 0px) * var(--root-scale, 1));
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
 
 /* Text the original drew with a box width (RenderText()'s box): one line across its parent's
    content box, shrunk by the bridge when it is wider (RmlNativeTextFit.h). Wrap the text in it

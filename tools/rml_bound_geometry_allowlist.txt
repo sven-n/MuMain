@@ -45,7 +45,6 @@ mini_map.rml: state -- each .clip is a region of the window the map may paint in
 mu_helper_detail.rml: state -- the three gauges' fill levels
 mu_helper_skill_picker.rml: state -- the fan-out is anchored to the clicked slot and its entries are placed by how many skills there are
 notices.rml: debt -- a screen-converted document: no root transform, every position is physical px put through the transform the native text used, rows 2 * PositionX(320) wide so the text centres; the 300 + 13-a-line table belongs on the HUD board in RCSS
-npc_quest.rml: debt -- the message block is centred by its line count, per quest state, and the answers start below it: both tops are numbers because counter-scaled text layers do not stack in flow
 party_info.rml: state -- each member's health bar is a fraction
 party_list.rml: state -- each card's health bar is a length from the member's health
 pet_info.rml: state -- the pets' health bars are fractions
@@ -63,7 +62,6 @@ themes/legacy/window_shell.rml: state -- the shell's own placement: a window the
 themes/modern/command_window.rml: state -- target marker follows the selected command
 themes/modern/generic_confirm_dialog.rml: state -- the timed confirm's progress bar is a fraction of its countdown
 themes/modern/mu_helper_detail.rml: state -- the three gauges' fill levels
-themes/modern/npc_quest.rml: debt -- the dialogue block is centred by its line count, per quest state
 themes/modern/party_info.rml: state -- each member's health bar is a fraction
 themes/modern/pet_info.rml: state -- the pets' health bars are fractions
 themes/modern/trade.rml: state -- an item warning badge sits on its item's slot and is as wide as the item
