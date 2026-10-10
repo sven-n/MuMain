@@ -27,6 +27,9 @@ namespace SEASON3B
         TYPE_UNION_MESSAGE,
         TYPE_GENS_MESSAGE,
         TYPE_GM_MESSAGE,
+        // A view, not a message type: the messages from Discord. Each of them
+        // keeps the type of its scope (guild, alliance, chat) for its colours.
+        TYPE_DISCORD_MESSAGE,
 
         NUMBER_OF_TYPES,
         TYPE_UNKNOWN = 0xFFFFFFFF
@@ -40,12 +43,13 @@ namespace SEASON3B
         type_string	m_strID, m_strText;
         MESSAGE_TYPE m_MsgType;
         DWORD m_dwIndentSize;
+        bool m_bExternal;
 
     public:
-        TMessageText() : m_MsgType(TYPE_UNKNOWN), m_dwIndentSize(0) {}
+        TMessageText() : m_MsgType(TYPE_UNKNOWN), m_dwIndentSize(0), m_bExternal(false) {}
         ~TMessageText() { Release(); }
 
-        bool Create(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType)
+        bool Create(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, bool bExternal = false)
         {
             if (MsgType >= NUMBER_OF_TYPES)
                 return false;
@@ -53,6 +57,7 @@ namespace SEASON3B
             m_strID = strID;
             m_strText = strText;
             m_MsgType = MsgType;
+            m_bExternal = bExternal;
 
             return true;
         }
@@ -61,11 +66,18 @@ namespace SEASON3B
             m_strID.resize(0);
             m_strText.resize(0);
             m_MsgType = TYPE_UNKNOWN;
+            m_bExternal = false;
         }
 
         const type_string& GetID() const { return m_strID; }
         const type_string& GetText() const { return m_strText; }
         MESSAGE_TYPE GetType() const { return m_MsgType; }
+        // Written outside the game (in Discord): its sender is no character,
+        // so it can't be whispered.
+        bool IsExternal() const
+        {
+            return m_bExternal;
+        }
     };
 
     typedef TMessageText<wchar_t> CMessageText;
@@ -124,6 +136,7 @@ namespace SEASON3B
         type_vector_msgs	m_VecSystemMsgs;
         type_vector_msgs	m_vecErrorMsgs;
         type_vector_msgs	m_vecGMMsgs;
+        type_vector_msgs m_vecDiscordMsgs;
         type_vector_filters	m_vecFilters;
 
         POINT	m_WndPos, m_ScrollBtnPos;
@@ -159,6 +172,9 @@ namespace SEASON3B
 
         void SetPosition(int x, int y);
         void AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType = TYPE_ALL_MESSAGE);
+        // A message written outside the game, in the given scope's type. It is
+        // also listed in the TYPE_DISCORD_MESSAGE view.
+        void AddExternalText(const type_string& strSender, const type_string& strText, MESSAGE_TYPE MsgType);
         void RemoveFrontLine(MESSAGE_TYPE MsgType);
         void Clear(MESSAGE_TYPE MsgType);
         void ClearAll();
@@ -167,6 +183,9 @@ namespace SEASON3B
         MESSAGE_TYPE GetCurrentMsgType() const;
 
         void ChangeMessage(MESSAGE_TYPE MsgType);
+        // The view F2 switches to from the current one: all, whispers, and
+        // Discord once a message from Discord has arrived.
+        MESSAGE_TYPE GetNextView() const;
 
         void ShowChatLog();
         void HideChatLog();
@@ -201,7 +220,16 @@ namespace SEASON3B
 
     protected:
         type_vector_msgs* GetMsgs(MESSAGE_TYPE MsgType);
-        void ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType);
+        void AddTextToViews(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType,
+                            MESSAGE_TYPE ErrMsgType, bool bExternal);
+        void ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType,
+                            MESSAGE_TYPE ErrMsgType, bool bExternal);
+        void AppendMessage(type_vector_msgs* pvecMsgs, const type_string& strID, const type_string& strText,
+                           MESSAGE_TYPE MsgType, bool bExternal);
+        // The view a message is copied to besides its own and "all": the
+        // error's origin, or the Discord view. Null for none.
+        type_vector_msgs* GetSecondaryMsgs(MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType, bool bExternal);
+        bool IsInCurrentView(MESSAGE_TYPE MsgType, bool bExternal) const;
 
         void SeparateText(IN const type_string& strID, IN const type_string& strText, MESSAGE_TYPE MsgType,
                           OUT type_string& strText1, OUT type_string& strText2);
