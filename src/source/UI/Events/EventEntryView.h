@@ -15,7 +15,7 @@ namespace mu::ui::window
 {
 // The RmlUi side of the right-docked event entry windows that share the original's layout
 // (CEnterBloodCastle, CEnterDevilSquare): the docked frame, a bold title, description lines, a
-// column of 180 x 29 level buttons of which one is enabled, the exit button. Each window owns one,
+// column of level buttons of which one is enabled, the exit button. Each window owns one,
 // with its own document and data model; the window keeps its data, its hit tests and requests.
 class EventEntryView
 {
@@ -32,8 +32,7 @@ public:
     // Unloads the document; from the window's own Release().
     void Release() { m_View.Release(); }
 
-    // The static content, set when the window opens. Where the lines and buttons land is the
-    // theme's: each window's own .rcss gives its rows (event_entry.rcss).
+    // Complete translated content, set when the window opens. The theme owns its layout.
     void SetContent(const wchar_t* title, const std::vector<std::wstring>& lines,
                     const std::vector<Button>& buttons);
 
@@ -54,8 +53,6 @@ private:
     void SyncTextSizes();
 
     UI::RmlBridge::ThemedView<EventEntryRmlModel> m_View;
-    std::wstring m_Title;
-    std::vector<std::wstring> m_LineTexts;
     int m_PressedButton = -1;
     bool m_ExitPressed = false;
 };

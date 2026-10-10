@@ -1,65 +1,89 @@
-/* Legacy theme for the right-docked event entry windows (CEnterBloodCastle, CEnterDevilSquare),
-   reproducing their Render(): the docked_panel_frame.rcss frame (linked first; newui_item_back01
-   top), the bold white title in its 72-unit box at (60, 12), the description lines in the normal
-   font centred on 190 units from x 3, the 180 x 29 level buttons (newui_btn_empty_big: up, over,
-   down) with bold labels -- grey (150, 150, 150) and never hovered while locked, white on the
-   hero's band -- and the exit button. Coordinates are reference px inside #panel. */
-
-@spritesheet entry-btn-sheet
-{
-	src: "../../../newui_btn_empty_big.tga";
-	entry-btn-up: 0px 0px 180px 29px;
-	entry-btn-over: 0px 29px 180px 29px;
-	entry-btn-down: 0px 58px 180px 29px;
+/* Preserve the original frame and level-button art. Complete prose and level labels
+   wrap in separate bounded panes instead of painting across fixed rows. */
+@spritesheet entry-btn-sheet {
+    src: "../../../newui_btn_empty_big.tga";
+    entry-btn-up: 0px 0px 180px 29px;
+    entry-btn-over: 0px 29px 180px 29px;
+    entry-btn-down: 0px 58px 180px 29px;
 }
-
 .frame-top { decorator: image(docked-bg-top-b); }
 #panel { pointer-events: auto; }
 
 #title {
-	display: block;
-	position: absolute;
-	left: 60px;
-	top: 12px;
-	text-align: center;
-	white-space: nowrap;
-	color: #ffffff;
-	font-weight: bold;
-	pointer-events: none;
+    display: block;
+    position: absolute;
+    left: 8px;
+    top: 12px;
+    --flow-w: 154px;
+    font-weight: bold;
+    line-height: 1.1;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    pointer-events: none;
 }
 
-.entry-lines, .entry-buttons { position: static; }
-
+.entry-lines, .entry-buttons {
+    position: absolute;
+    left: 6px;
+    --flow-w: 178px;
+}
+.entry-lines {
+    top: 55px;
+    line-height: 1.1;
+    text-align: center;
+}
 .entry-line {
-	display: block;
-	position: absolute;
-	left: 3px;
-	text-align: center;
-	white-space: nowrap;
-	color: #ffffff;
-	pointer-events: none;
+    display: block;
+    white-space: normal;
+    word-break: break-word;
+    pointer-events: none;
 }
+.entry-line + .entry-line { margin-top: 0.25em; }
 
+.entry-buttons {
+    font-weight: bold;
+    line-height: 1.1;
+}
 .entry-btn {
-	display: block;
-	position: absolute;
-	left: 6px;
-	width: 180px;
-	height: 29px;
-	decorator: image(entry-btn-up);
-	pointer-events: auto;
+    display: block;
+    position: relative;
+    box-sizing: border-box;
+    min-height: calc(29px * var(--root-scale));
+    padding: calc(6px * var(--root-scale)) calc(4px * var(--root-scale));
+    pointer-events: auto;
 }
-.entry-btn.enabled:hover { decorator: image(entry-btn-over); }
-.entry-btn.enabled:active { decorator: image(entry-btn-down); }
-
+.entry-btn + .entry-btn { margin-top: calc(4px * var(--root-scale)); }
+.entry-btn-art {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+}
 .entry-label {
-	display: block;
-	position: absolute;
-	left: 0;
-	text-align: center;
-	white-space: nowrap;
-	font-weight: bold;
-	color: #969696;
-	pointer-events: none;
+    display: block;
+    position: relative;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    pointer-events: none;
 }
+
+/* The pane is already physical-sized. Its descendants must not counter-scale again. */
+.entry-lines scrollbarvertical, .entry-buttons scrollbarvertical {
+    width: calc(15px * var(--root-scale));
+}
+.entry-lines scrollbarvertical sliderbar, .entry-buttons scrollbarvertical sliderbar {
+    height: calc(30px * var(--root-scale));
+}
+
+#title, .entry-line { color: #ffffff; }
+.entry-btn-art { decorator: image(entry-btn-up); }
+.entry-btn.enabled:hover .entry-btn-art { decorator: image(entry-btn-over); }
+.entry-btn.enabled:active .entry-btn-art { decorator: image(entry-btn-down); }
+.entry-label { color: #969696; }
 .entry-btn.enabled .entry-label { color: #ffffff; }
+
+.entry-exit-glyph { display: none; }

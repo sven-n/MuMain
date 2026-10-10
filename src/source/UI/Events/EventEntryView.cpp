@@ -4,25 +4,14 @@
 
 #include "I18N/All.h"
 #include "Core/Utilities/StringUtils.h"
-#include "Render/RmlUi/RmlUiRuntime.h"
-#include "Render/Text/CUIRenderTextSDLTtf.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlPointer.h"
 #include "UI/RmlBridge/RmlNativeTextSize.h"
-#include "UI/RmlBridge/RmlTheme.h"
-#include "Render/Text/CUIRenderText.h"
 
 #include <RmlUi/Core/ElementDocument.h>
 
 using namespace mu::ui::window;
-
-namespace
-{
-constexpr int kTitleBoxWidth = 72;
-constexpr int kLineBoxWidth = 190;
-
-} // namespace
 
 mu::ui::window::EventEntryView::EventEntryView(const char* modelName, const char* documentPath)
     : m_View(modelName, [this](Rml::DataModelConstructor& c, EventEntryRmlModel& model) { BindModel(c, model); },
@@ -33,16 +22,12 @@ mu::ui::window::EventEntryView::EventEntryView(const char* modelName, const char
 void mu::ui::window::EventEntryView::BindModel(Rml::DataModelConstructor& c, EventEntryRmlModel& model)
 {
     c.Bind("text_px", &model.textPx);
-    c.Bind("title_text_px", &model.titleTextPx);
-    c.Bind("title_line_px", &model.titleLinePx);
-    c.Bind("button_label_line_px", &model.buttonLabelLinePx);
-    c.Bind("button_label_text_px", &model.buttonLabelTextPx);
+    c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("title_text", &model.titleText);
     c.Bind("exit_tooltip", &model.exitTooltip);
 
     auto line = c.RegisterStruct<EventEntryLineEntry>();
     line.RegisterMember("text", &EventEntryLineEntry::text);
-    line.RegisterMember("text_px", &EventEntryLineEntry::textPx);
     c.RegisterArray<std::vector<EventEntryLineEntry>>();
     c.Bind("lines", &model.lines);
 
@@ -72,14 +57,11 @@ void mu::ui::window::EventEntryView::SetContent(const wchar_t* title, const std:
                                                 const std::vector<Button>& buttons)
 {
     Build();
-    m_Title = title != nullptr ? title : L"";
-    m_LineTexts = lines;
-
     EventEntryRmlModel& model = m_View.GetModel();
-    model.titleText = StringUtils::WideToNarrow(m_Title.c_str());
+    model.titleText = StringUtils::WideToNarrow(title != nullptr ? title : L"");
     model.lines.clear();
     for (const std::wstring& text : lines)
-        model.lines.push_back({StringUtils::WideToNarrow(text.c_str()), 0.f});
+        model.lines.push_back({StringUtils::WideToNarrow(text.c_str())});
     model.buttons.clear();
     for (const Button& button : buttons)
         model.buttons.push_back({StringUtils::WideToNarrow(button.label.c_str()), button.enabled});
@@ -104,48 +86,15 @@ void mu::ui::window::EventEntryView::Sync(bool visible)
     if (!visible)
         return;
 
-    UI::RmlBridge::SyncNativeTextSize(m_View.Binder());
     SyncTextSizes();
 }
 
 void mu::ui::window::EventEntryView::SyncTextSizes()
 {
-    EventEntryRmlModel& model = m_View.GetModel();
-
-    // RenderText(x + 60, y + 12, title, 72, 0, RT3_SORT_CENTER), bold: shrunk to fit its box, its
-    // top staying at y + 12.
-    g_pRenderText->SetFont(g_hFontBold);
-    const int titleWidth = g_pRenderText->MeasureText(m_Title.c_str(), static_cast<int>(m_Title.size())).cx;
-    const float boldPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
-    const float titlePx = UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Bold, static_cast<float>(titleWidth),
-                                                           static_cast<float>(kTitleBoxWidth));
-    SyncField(m_View.Binder(), &EventEntryRmlModel::titleTextPx, "title_text_px", titlePx);
-    SyncField(m_View.Binder(), &EventEntryRmlModel::titleLinePx, "title_line_px",
-              CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Bold) * (titlePx / boldPx));
-
-    // The description lines: the normal font, each shrunk to the 190-unit box if wider.
-    g_pRenderText->SetFont(g_hFont);
-    bool linesChanged = false;
-    for (std::size_t i = 0; i < model.lines.size() && i < m_LineTexts.size(); ++i)
-    {
-        const std::wstring& text = m_LineTexts[i];
-        const int width = g_pRenderText->MeasureText(text.c_str(), static_cast<int>(text.size())).cx;
-        const float px = UI::RmlBridge::NativeTextPxInBox(UI::Scaling::FontRole::Normal, static_cast<float>(width),
-                                                          static_cast<float>(kLineBoxWidth));
-        if (model.lines[i].textPx != px)
-        {
-            model.lines[i].textPx = px;
-            linesChanged = true;
-        }
-    }
-    if (linesChanged)
-        m_View.MarkDirty("lines");
-
-    // CButton::Render(): the bold label, centred on its button -- the same for every button, so
-    // it is the model's, not each entry's.
-    SyncField(m_View.Binder(), &EventEntryRmlModel::buttonLabelLinePx, "button_label_line_px",
-              CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Bold));
-    SyncField(m_View.Binder(), &EventEntryRmlModel::buttonLabelTextPx, "button_label_text_px", boldPx);
+    SyncField(m_View.Binder(), &EventEntryRmlModel::textPx, "text_px",
+              UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal));
+    SyncField(m_View.Binder(), &EventEntryRmlModel::boldTextPx, "bold_text_px",
+              UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold));
 }
 
 int mu::ui::window::EventEntryView::TakePressedButton()

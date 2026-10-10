@@ -6,12 +6,10 @@
 
 namespace mu::ui::window
 {
-// A line of the entry window's description. Which row it lands on is the theme's
-// (event_entry.rcss and each window's own :nth-child table).
+// A complete translated fragment. The theme wraps and scrolls the description.
 struct EventEntryLineEntry
 {
     Rml::String text;
-    float textPx = 0.f; // the native size, shrunk to the 190-unit box like the original's
 
     bool operator==(const EventEntryLineEntry&) const = default;
 };
@@ -28,14 +26,9 @@ struct EventEntryButtonEntry
 
 struct EventEntryRmlModel
 {
-    float textPx = 0.f; // native normal text size in physical px (RmlNativeTextSize.h)
-    // The title, bold, shrunk to its 72-unit box like the original's, on the native line height.
-    float titleTextPx = 0.f;
-    float titleLinePx = 0.f;
-    // Every button's label sits the same way -- CButton::Render() derives it from the font, not
-    // from which button it is.
-    float buttonLabelLinePx = 0.f;
-    float buttonLabelTextPx = 0.f;
+    // Native-size compatibility metrics; the theme owns wrapping and all box dimensions.
+    float textPx = 0.f;
+    float boldTextPx = 0.f;
 
     Rml::String titleText;
     Rml::String exitTooltip;

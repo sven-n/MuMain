@@ -1,57 +1,87 @@
-/* Modern theme for the right-docked event entry windows (CEnterBloodCastle, CEnterDevilSquare):
-   docked_panel_frame.rcss's forged panel (linked first), the level buttons as modern buttons, the
-   hero's band in the steel accent and the locked ones dimmed. Geometry is the legacy one
-   (reference px under the dock transform). */
-
+/* Modern event entry: theme-owned wrapping regions and forged level buttons. */
 #panel { pointer-events: auto; }
 
 #title {
-	display: block;
-	position: absolute;
-	left: 60px;
-	top: 12px;
-	text-align: center;
-	white-space: nowrap;
-	color: token(text-warm);
-	font-weight: bold;
-	pointer-events: none;
+    display: block;
+    position: absolute;
+    left: 8px;
+    top: 12px;
+    --flow-w: 154px;
+    font-weight: bold;
+    line-height: 1.1;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    pointer-events: none;
 }
 
-.entry-lines, .entry-buttons { position: static; }
-
+.entry-lines, .entry-buttons {
+    position: absolute;
+    left: 6px;
+    --flow-w: 178px;
+}
+.entry-lines {
+    top: 55px;
+    line-height: 1.1;
+    text-align: center;
+}
 .entry-line {
-	display: block;
-	position: absolute;
-	left: 3px;
-	text-align: center;
-	white-space: nowrap;
-	color: token(text-primary);
-	pointer-events: none;
+    display: block;
+    white-space: normal;
+    word-break: break-word;
+    pointer-events: none;
 }
+.entry-line + .entry-line { margin-top: 0.25em; }
 
+.entry-buttons {
+    font-weight: bold;
+    line-height: 1.1;
+}
 .entry-btn {
-	display: block;
-	position: absolute;
-	left: 6px;
-	width: 180px;
-	height: 28px;
-	background-color: token(surface-recessed);
-	border: 1px token(border-frame);
-	border-radius: token(radius-sm)px;
-	pointer-events: auto;
+    display: block;
+    position: relative;
+    box-sizing: border-box;
+    min-height: calc(29px * var(--root-scale));
+    padding: calc(6px * var(--root-scale)) calc(4px * var(--root-scale));
+    pointer-events: auto;
 }
-.entry-btn.enabled { background-color: token(surface-raised); }
-.entry-btn.enabled:hover { border-color: token(accent-steel-hover); }
-.entry-btn.enabled:active { background-color: token(surface-recessed); }
-
+.entry-btn + .entry-btn { margin-top: calc(4px * var(--root-scale)); }
+.entry-btn-art {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+}
 .entry-label {
-	display: block;
-	position: absolute;
-	left: 0;
-	text-align: center;
-	white-space: nowrap;
-	font-weight: bold;
-	color: token(text-muted);
-	pointer-events: none;
+    display: block;
+    position: relative;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    pointer-events: none;
 }
+
+/* The pane is already physical-sized. Its descendants must not counter-scale again. */
+.entry-lines scrollbarvertical, .entry-buttons scrollbarvertical {
+    width: calc(15px * var(--root-scale));
+}
+.entry-lines scrollbarvertical sliderbar, .entry-buttons scrollbarvertical sliderbar {
+    height: calc(30px * var(--root-scale));
+}
+
+#title { color: token(text-warm); }
+.entry-line { color: token(text-primary); }
+.entry-btn-art {
+    background-color: token(surface-recessed);
+    border: 1px token(border-frame);
+    border-radius: token(radius-sm)px;
+}
+.entry-btn.enabled .entry-btn-art { background-color: token(surface-raised); }
+.entry-btn.enabled:hover .entry-btn-art { border-color: token(accent-steel-hover); }
+.entry-btn.enabled:active .entry-btn-art { background-color: token(surface-recessed); }
+.entry-label { color: token(text-muted); }
 .entry-btn.enabled .entry-label { color: token(text-primary); }
+
+#btn_exit { left: 13px; }

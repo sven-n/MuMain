@@ -45,6 +45,107 @@ does not establish a full resolution, localization or OS display-scale sweep. Re
 successfully with runtime assets staged; syntax, contract-drift, bound-geometry and active-transform
 guards passed, along with 28 contract fixtures and both layout test cases (2,905 assertions).
 
+## Small-scale text baseline
+
+2026-10-10: rollout 2, step 1 from [tracked-deferrals.md](tracked-deferrals.md) completed.
+The diagnostic loads the real RML/RCSS and bundled fonts, supplies text from the current C++
+model assignments and resource strings, and measures projected glyph meshes. Its 570 scenarios
+cover both themes, English/German/Spanish/Polish/Russian, and 1x/1.5x/2x OS display scale at
+1024x768 / 75% UI scale. MU Helper covers all three tabs for Dark Knight, Dark Wizard, Elf,
+Dark Lord and Summoner, using the game's class-feature rules. Missing translated resource keys
+use the same English fallback as the generated game resources.
+
+| Window | Legacy scenarios with defects | Modern scenarios with defects |
+|---|---:|---:|
+| Blood Castle entry | 15/15 | 15/15 |
+| Devil Square entry | 15/15 | 15/15 |
+| Seller personal shop | 15/15 | 12/15 |
+| Buyer personal shop | 15/15 | 12/15 |
+| MU Helper config | 225/225 | 225/225 |
+
+The event titles and several descriptions/level labels exceed their assigned boxes. Blood
+Castle descriptions can intersect the first level button; Devil Square's fixed description
+rows can intersect one another. Legacy shop notices are clipped horizontally, and fixed notice
+rows in both themes fail with longer strings. MU Helper reproduces label/field and label/label
+collisions, including Original Position/Distance, Distance/numeric entry and adjacent skill
+headers. These describe the initial baseline before the event-entry follow-up below.
+
+At this configuration, normal native text is 12/16.5/22 physical pixels for 1x/1.5x/2x OS scale.
+Its existing minimum is 11/16.5/22 respectively, checked against the unchanged 11–16 point policy.
+The Blood Castle character split retained the complete descriptions in these five locales;
+the observed problems are geometry rather than lost source text. Other languages are not covered.
+
+To rerun in a configured Windows developer shell:
+
+```powershell
+cmake -S . -B out/build/windows-x64 -DBUILD_TESTING=ON
+cmake --build out/build/windows-x64 --config RelWithDebInfo --target rml_text_layout_tests
+ctest --test-dir out/build/windows-x64 -C RelWithDebInfo -R rml_text_layout_baseline --output-on-failure
+```
+
+The output directory is `out/build/windows-x64/text-layout-baseline/`. `scenarios.csv` records
+the configuration, native size/minimum, source completeness and defect count. `text-lines.csv`
+records every measured line, its glyph bounds, element box, available width, clipping/overflow/
+collision reason and a colliding neighbour's bounds. Prepared RML files preserve the supplied
+strings for inspection. Auto-sized, overflow-visible spans are checked against neighbours and
+the panel rather than being falsely rejected for having a zero-width element box.
+
+The initial baseline test required defects in all five windows and checked fixture integrity
+and the font floor. The current runner requires the fixed event windows to pass containment,
+source-completeness and scrolling checks while continuing to report the shop/helper defects.
+Event font inputs now use the unchanged native sizing policy directly; the replaced SDL_ttf
+measurement fixture was removed. Custom font selections, live model synchronization, actual
+entry requests and visual readability still require in-game validation.
+
+Contract, syntax, bound-geometry and active-transform guards passed, as did all 28 contract
+fixtures, the party/trade regressions and 42 scaling test cases. The diagnostic and client
+RelWithDebInfo x64 builds passed; the final client build was incremental because this step changes
+test coverage and documentation. The prior `BUILD_TESTING=OFF` configuration was restored after
+validation, and all 385 staged RML/RCSS/INI assets match their source files. The deferral remains
+open for the remaining implementation and in-game validation.
+
+## Event entry text follow-up
+
+2026-10-10: rollout 2, step 2 implemented; in-game confirmation pending. Blood Castle displays
+the complete translated paragraph, and Devil Square displays all six complete fragments in
+their original order. Both themes wrap descriptions inside a bounded pane above the level list.
+Scrollbars appear when needed, and wheel/drag scrolling makes the remaining prose reachable.
+Titles use the header's available width without covering the corner close target.
+
+Level labels wrap at the retained native font size. The list scrolls when taller labels need
+more room, keeping every level band reachable and the footer outside the scroll regions.
+This intentionally replaces fixed row spacing while preserving the legacy frame/button art,
+grey locked bands, enabled-band hover and entry actions. Legacy button art stretches to each
+wrapped row. Modern uses its own button styling and now shows a footer exit icon. Exit and
+Escape keep their existing close actions. The native readability minimum is unchanged; no new
+fitting feature was needed. Replaced per-line fitting fields, text caches and native width/
+line-height measurements were removed.
+
+The runner covers 930 scenarios: 420 event cases plus the 510 remaining shop/helper baseline
+cases. Event geometry passes in both themes for English, German, Spanish, Polish and Russian:
+1024x768 / 75%, and 1280x720 and 1920x1080 / 100, 125 and 150%, each at 1x, 1.5x and 2x OS
+display scale. Checks cover complete wrapped text, unchanged native font sizes/minimum,
+non-overlapping header/description/list/footer regions, visible scroll affordances when needed,
+the end of each scroll region, and hover access to every level button after scrolling. The glyph
+audit measures all lines for horizontal clipping and only compares painted content for collisions;
+vertical clipping inside an accessible scroll pane is intentional. The rerun command remains the
+one above. Headless checks do not establish visual readability or server-side entry behaviour.
+
+In-game checks before signing off this pilot:
+
+- In both themes, open Blood Castle and Devil Square at 1024x768 / 75%; check the full description,
+  title, wrapped level labels and separation between descriptions, buttons and exit controls.
+- Wheel and drag each scrollbar to both ends. Verify the last description fragment and every
+  level band remain reachable, with no clicks passing through to the world.
+- Verify locked bands stay grey and cannot enter, the eligible band highlights and requests
+  entry, and the footer exit, corner close target and Escape close the window.
+- Change theme, resolution and UI scale while shown; check 100/125/150% at 1280x720 and
+  1920x1080. Check a longer translation and 1.5x/2x OS scale where available, including legacy
+  stretched button art and modern footer icon visibility.
+
+Personal-shop notices are the next rollout step; MU Helper remains after that. Rollout 2 stays
+open until its remaining fixes and in-game checks are complete.
+
 ## Login and character select
 
 All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `CObject` owned by
@@ -135,7 +236,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 
 | Component | Status | Note |
 |---|---|---|
-| `CEnterBloodCastle`, `CEnterDevilSquare` | Done | `UI/Events/EventEntryView` (`event_entry.rcss`), rows by `:nth-child` |
+| `CEnterBloodCastle`, `CEnterDevilSquare` | Done | `UI/Events/EventEntryView` (`event_entry.rcss`); descriptions and level labels wrap in bounded scroll regions; rollout-2 follow-up awaiting in-game confirmation |
 | `CBloodCastle`, `CChaosCastleTime`, `CEmpireGuardianTimer` | Done | `UI/Events/EventTimerView`; event-HUD slots at the HUD's scale |
 | `CDoppelGangerFrame`, `CKanturuInfoWindow` | Done | Event-HUD slots at the HUD's scale |
 | `CCursedTempleEnter`, `CCursedTempleResult`, `CCursedTempleSystem` | Done | Panel stage (enter, result); the Illusion Temple HUD places itself |

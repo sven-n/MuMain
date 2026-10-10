@@ -8,7 +8,6 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
-#include "Core/Text/TextLineWrap.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include <string>
@@ -200,7 +199,7 @@ void CEnterDevilSquare::ClosingProcess()
 
 void CEnterDevilSquare::SetViewContent(const std::vector<EventEntryView::Button>& buttons)
 {
-    // Six description lines.
+    // Keep all six translated fragments in their original order.
     const std::vector<std::wstring> lines = {
         I18N::Game::YouVeBeenGivenAChanceToProveYourBravery,
         I18N::Game::NoOneHasEverEnteredTheDevilSquareYet,

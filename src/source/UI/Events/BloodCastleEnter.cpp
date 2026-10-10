@@ -8,7 +8,6 @@
 
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
-#include "Core/Text/TextLineWrap.h"
 #include "UI/RmlBridge/RmlTheme.h"
 
 #include <string>
@@ -206,13 +205,6 @@ void CEnterBloodCastle::ClosingProcess()
 
 void CEnterBloodCastle::SetViewContent(const std::vector<EventEntryView::Button>& buttons)
 {
-    // The description, cut into lines of at most MAX_LENGTH_CMB characters.
-    wchar_t txtline[NUM_LINE_CMB][MAX_LENGTH_CMB] = {0};
-    const int tl =
-        SeparateTextIntoLines(I18N::Game::YourWillToHelpTheArchangel, txtline[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
-    std::vector<std::wstring> lines;
-    for (int j = 0; j < tl; ++j)
-        lines.emplace_back(txtline[j]);
-
+    const std::vector<std::wstring> lines = {I18N::Game::YourWillToHelpTheArchangel};
     m_View.SetContent(I18N::Game::MessengerOfArchangel, lines, buttons);
 }

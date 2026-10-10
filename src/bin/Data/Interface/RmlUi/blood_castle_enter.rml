@@ -1,46 +1,39 @@
 <rml>
 <head>
-	<title>Blood Castle entry (CEnterBloodCastle)</title>
-	<link type="text/rcss" href="base.rcss"/>
-	<link type="text/rcss" href="docked_panel_frame.rcss"/>
-	<link type="text/rcss" href="event_entry.rcss"/>
-	<link type="text/rcss" href="blood_castle_enter.rcss"/>
+    <title>Blood Castle entry</title>
+    <link type="text/rcss" href="base.rcss"/>
+    <link type="text/rcss" href="docked_panel_frame.rcss"/>
+    <link type="text/rcss" href="event_entry.rcss"/>
+    <link type="text/rcss" href="blood_castle_enter.rcss"/>
 </head>
 <body>
-	<!-- The Blood Castle entry (CEnterBloodCastle) window, docked right: the title, the description lines, one button per level
-	     band (only the hero's is enabled) and the exit button. Shared shape with the other event
-	     entry windows (UI/Events/EventEntryView.h, event_entry.rcss). The workspace slot
-	     places and scales #panel; everything inside is reference px; text is .sharp-text at the
-	     native size, counter-scaled out of the panel. C++ keeps the level check,
-	     Escape and the entry request; a click is queued with entry_press / entry_exit. -->
-	<div id="panel" data-model="blood_castle_enter">
-		<div class="frame-piece frame-top"></div>
-		<div class="frame-piece frame-left"></div>
-		<div class="frame-piece frame-right"></div>
-		<div class="frame-piece frame-bottom"></div>
+    <!-- The workspace places the frame. Each text pane counter-scales once; its children
+         flow at the native readable size. The theme bounds descriptions and level lists
+         independently, keeping the exit controls outside both scroll regions. -->
+    <div id="panel" data-model="blood_castle_enter">
+        <div class="frame-piece frame-top"></div>
+        <div class="frame-piece frame-left"></div>
+        <div class="frame-piece frame-right"></div>
+        <div class="frame-piece frame-bottom"></div>
 
-		<span class="sharp-text" id="title" data-style-font-size="title_text_px + 'px'"
-		      data-style-line-height="title_line_px + 'px'">{{title_text}}</span>
+        <span class="sharp-text sharp-flow" id="title" data-style-font-size="bold_text_px + 'px'">{{title_text}}</span>
 
-		<!-- The rows each of these lands on are the theme's: this window's own .rcss gives one
-		     :nth-child rule per row. Each repeated set has its own container so the count starts
-		     at the first line / first button. -->
-		<div class="entry-lines">
-			<span class="sharp-text entry-line" data-for="line : lines"
-			      data-style-font-size="line.text_px + 'px'">{{line.text}}</span>
-		</div>
+        <div class="sharp-text sharp-flow scroll-pane entry-lines" id="entry_description" data-style-font-size="text_px + 'px'">
+            <span class="entry-line" data-for="line : lines">{{line.text}}</span>
+        </div>
 
-		<div class="entry-buttons">
-			<div class="entry-btn" data-for="b, i : buttons" data-class-enabled="b.enabled"
-			     data-event-click="entry_press(i)">
-				<span class="sharp-text sharp-middle entry-label"
-				      data-style-font-size="button_label_text_px + 'px'"
-				      data-style-line-height="button_label_line_px + 'px'">{{b.label}}</span>
-			</div>
-		</div>
+        <div class="sharp-text sharp-flow scroll-pane entry-buttons" id="entry_levels" data-style-font-size="bold_text_px + 'px'">
+            <div class="entry-btn" data-for="b, i : buttons" data-class-enabled="b.enabled"
+                 data-event-click="entry_press(i)">
+                <div class="entry-btn-art"></div>
+                <span class="entry-label">{{b.label}}</span>
+            </div>
+        </div>
 
-		<div id="btn_exit" data-event-click="entry_exit" data-attr-data-hint="exit_tooltip"></div>
-		<div id="frame_corner_close" data-event-click="entry_exit"></div>
-	</div>
+        <div id="btn_exit" class="modern-icon-btn-px" data-event-click="entry_exit" data-attr-data-hint="exit_tooltip">
+            <span class="modern-icon-btn-glyph-px entry-exit-glyph">&#215;</span>
+        </div>
+        <div id="frame_corner_close" data-event-click="entry_exit"></div>
+    </div>
 </body>
 </rml>

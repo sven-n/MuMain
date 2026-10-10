@@ -308,3 +308,27 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
+
+add_executable(rml_text_layout_tests
+    test_rml_text_layout.cpp
+    RmlTextLayoutAudit.cpp
+    RmlLayoutFixture.cpp
+    ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+)
+target_link_libraries(rml_text_layout_tests PRIVATE mu_test_main MuClient)
+target_include_directories(rml_text_layout_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
+if(MSVC)
+    target_compile_options(rml_text_layout_tests PRIVATE /utf-8)
+endif()
+add_test(
+    NAME rml_text_layout_baseline
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/prepare_rml_text_layout.py"
+        --repo "${CMAKE_SOURCE_DIR}"
+        --generated "${CMAKE_BINARY_DIR}/Generated"
+        --executable "$<TARGET_FILE:rml_text_layout_tests>"
+        --output "${CMAKE_BINARY_DIR}/text-layout-baseline"
+)
+target_compile_definitions(rml_text_layout_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+)
