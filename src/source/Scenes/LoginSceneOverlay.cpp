@@ -30,18 +30,12 @@ namespace
 struct LoginSceneRmlModel
 {
     bool logoVisible = false;
-    float logoLeft = 0.f;
-    float logoTop = 0.f;
-    float logoWidth = 0.f;
-    float logoHeight = 0.f;
     float logoLevel = 0.f;
     Rml::String logoColor;
     float glowLevel = 0.f;
     float textPx = 0.f;       // the font's cached size, which the native renderer rasterises at
     float fontScale = 1.f;    // the native size / textPx: the lines are scaled down by it
     float lineHeightPx = 0.f; // before the scale
-    float lineTop = 0.f;
-    float splitX = 0.f;
     Rml::String copyright;
     Rml::String rights;
     Rml::String version;
@@ -50,18 +44,12 @@ struct LoginSceneRmlModel
 void BindModel(Rml::DataModelConstructor& c, LoginSceneRmlModel& model)
 {
     c.Bind("logo_visible", &model.logoVisible);
-    c.Bind("logo_left", &model.logoLeft);
-    c.Bind("logo_top", &model.logoTop);
-    c.Bind("logo_width", &model.logoWidth);
-    c.Bind("logo_height", &model.logoHeight);
     c.Bind("logo_level", &model.logoLevel);
     c.Bind("logo_color", &model.logoColor);
     c.Bind("glow_level", &model.glowLevel);
     c.Bind("text_px", &model.textPx);
     c.Bind("font_scale", &model.fontScale);
     c.Bind("line_height_px", &model.lineHeightPx);
-    c.Bind("line_top", &model.lineTop);
-    c.Bind("split_x", &model.splitX);
     c.Bind("copyright", &model.copyright);
     c.Bind("rights", &model.rights);
     c.Bind("version", &model.version);
@@ -104,17 +92,10 @@ bool Render(bool tourMode, float logoAlpha, const wchar_t* copyright, const wcha
     const UI::Scaling::Transform transform =
         UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
 
-    // The logo: RenderColorBitmap() at (320 - 102.4, 25), 204.8 x 102.4, the glow first.
+    // The logo, its glow first; the theme places it.
     SyncField(s_view.Binder(), &LoginSceneRmlModel::logoVisible, "logo_visible", tourMode);
     if (tourMode)
     {
-        constexpr float logoWidth = 256.0f * 0.8f;
-        constexpr float logoHeight = 128.0f * 0.8f;
-        SyncField(s_view.Binder(), &LoginSceneRmlModel::logoLeft, "logo_left",
-                  UI::Scaling::PositionX(transform, 320.0f - logoWidth / 2));
-        SyncField(s_view.Binder(), &LoginSceneRmlModel::logoTop, "logo_top", UI::Scaling::PositionY(transform, 25.0f));
-        SyncField(s_view.Binder(), &LoginSceneRmlModel::logoWidth, "logo_width", UI::Scaling::SizeX(transform, logoWidth));
-        SyncField(s_view.Binder(), &LoginSceneRmlModel::logoHeight, "logo_height", UI::Scaling::SizeY(transform, logoHeight));
         SyncField(s_view.Binder(), &LoginSceneRmlModel::glowLevel, "glow_level", Level(logoAlpha - 0.3f));
         const float logoLevel = Level(logoAlpha);
         // The colour follows the level; formatted only when the fade moves it.
@@ -128,9 +109,9 @@ bool Render(bool tourMode, float logoAlpha, const wchar_t* copyright, const wcha
         SyncField(s_view.Binder(), &LoginSceneRmlModel::logoLevel, "logo_level", logoLevel);
     }
 
-    // The lines: RenderText() at (335 - width, 480 - height - 1), (335, ...) and (0, ...). The
-    // native renderer rasterises at the cached size and scales the glyphs down to the native size;
-    // text laid out at that size directly comes out wider (hinting), so the lines do the same.
+    // The lines, which the theme places. The native renderer rasterises at the cached size and
+    // scales the glyphs down to the native size; text laid out at that size directly comes out
+    // wider (hinting), so the lines do the same.
     g_pRenderText->SetFont(g_hFont);
     const SIZE lineSize = g_pRenderText->MeasureText(L"Q", 1);
     const float cachedPx = static_cast<float>(UI::Scaling::CachedFontPointSize(UI::Scaling::FontRole::Normal));
@@ -139,9 +120,6 @@ bool Render(bool tourMode, float logoAlpha, const wchar_t* copyright, const wcha
     SyncField(s_view.Binder(), &LoginSceneRmlModel::fontScale, "font_scale", fontScale);
     SyncField(s_view.Binder(), &LoginSceneRmlModel::lineHeightPx, "line_height_px",
               static_cast<float>(lineSize.cy) * transform.scaleY / fontScale);
-    SyncField(s_view.Binder(), &LoginSceneRmlModel::lineTop, "line_top",
-              UI::Scaling::PositionY(transform, static_cast<float>(REFERENCE_HEIGHT - lineSize.cy - 1)));
-    SyncField(s_view.Binder(), &LoginSceneRmlModel::splitX, "split_x", UI::Scaling::PositionX(transform, 335.0f));
     SyncText(&LoginSceneRmlModel::copyright, "copyright", copyright, s_copyrightSource);
     SyncText(&LoginSceneRmlModel::rights, "rights", rights, s_rightsSource);
     SyncText(&LoginSceneRmlModel::version, "version", version, s_versionSource);

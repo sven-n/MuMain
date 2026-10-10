@@ -31,7 +31,6 @@ generic_confirm_dialog.rml: state -- the timed confirm's progress bar is a fract
 hud_status.rml: state -- the macro cooldown's bar is a gauge length, the fraction of the cooldown left, and the cooldown centres on the world the open docks leave uncovered
 item_endurance.rml: state -- the hovered item's tooltip follows the mouse (clamped to the screen edge) and the pet bars are lengths from their health
 item_explanation.rml: debt -- each box and line sits where RenderTipTextList() recorded it, so the table's stacking and widths are measured in C++; the table's placement against the hovered item is state
-login_scene.rml: debt -- the scene sprites and text scale on the login scene's own 800x600 formula, not the stage's
 main_frame.rml: debt -- the expanded skill grid's cells come from RebuildGridSnapshot()'s zig-zag, a position computed from the cell's ordinal among the skills learned; the health/mana/SD/AG gauges and every cooldown wipe are fractions (state)
 match_status.rml: state -- the countdown centres on the world the open docks leave uncovered
 message_box_view.rml: state -- the progress bar is a gauge length, the fraction of the wait elapsed
