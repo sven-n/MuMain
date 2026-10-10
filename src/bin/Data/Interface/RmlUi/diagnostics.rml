@@ -11,6 +11,7 @@
             <div class="title">FPS {{fps | fixed}}</div>
             <div data-if="details">
                 <div class="metric"><span class="label">Average</span><span class="value">{{average_fps | fixed}}</span><span class="label">1% low</span><span class="value">{{low_fps | fixed}}</span></div>
+                <div class="metric"><span class="label">Slowest</span><span class="value">{{slowest_fps | fixed}}</span></div>
                 <div class="metric"><span class="label">Frame</span><span class="value">{{frame_ms | fixed}} ms</span><span class="label">CPU</span><span class="value">{{cpu | fixed}}%</span></div>
                 <div class="metric"><span class="label">SDL GPU</span><span class="value">{{driver}}</span><span class="label">VSync</span><span class="value">{{vsync}}</span></div>
                 <div class="heading">CPU time (ms)</div>
@@ -25,6 +26,7 @@
                 </div>
                 <div class="note">Frame history, 0–33.3 ms</div>
                 <div class="note">Completed frame; inclusive timings overlap.</div>
+                <div class="info-line" data-for="line : info">{{line}}</div>
             </div>
         </div>
         <div id="counters" class="section" data-if="counters">

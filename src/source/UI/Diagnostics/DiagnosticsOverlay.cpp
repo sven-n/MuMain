@@ -40,12 +40,15 @@ void RegisterModel(Rml::DataModelConstructor& constructor, DiagnosticsModel& mod
     row.RegisterMember("vertex_kb", &DiagnosticsModel::PassRow::vertexKB);
     constructor.RegisterArray<Rml::Vector<DiagnosticsModel::PassRow>>();
     constructor.RegisterArray<Rml::Vector<float>>();
+    constructor.RegisterArray<Rml::Vector<Rml::String>>();
     constructor.Bind("details", &model.details);
     constructor.Bind("counters", &model.counters);
     constructor.Bind("fps_only", &model.fpsOnly);
     constructor.Bind("fps", &model.fps);
     constructor.Bind("average_fps", &model.averageFps);
     constructor.Bind("low_fps", &model.lowFps);
+    constructor.Bind("slowest_fps", &model.slowestFps);
+    constructor.Bind("info", &model.info);
     constructor.Bind("frame_ms", &model.frameMs);
     constructor.Bind("cpu", &model.cpu);
     constructor.Bind("vsync", &model.vsync);
@@ -142,6 +145,8 @@ void UpdateSummary(DiagnosticsModel& model, const FrameSummary& summary)
     model.fps = summary.fps;
     model.averageFps = summary.averageFps;
     model.lowFps = summary.lowFps;
+    model.slowestFps = summary.slowestFps;
+    model.info.assign(summary.info.begin(), summary.info.end());
     model.frameMs = summary.frameMs;
     model.cpu = summary.cpu;
     model.vsync = summary.vsync;
@@ -178,11 +183,11 @@ void Update(const FrameSummary& summary)
         if (summary.counters)
             UpdateCounters(model);
         static constexpr const char* Fields[] = {
-            "details", "counters", "fps_only", "fps", "average_fps", "low_fps", "frame_ms", "cpu", "vsync",
+            "details", "counters", "fps_only", "fps", "average_fps", "low_fps", "slowest_fps", "frame_ms", "cpu", "vsync",
             "driver", "ui_update", "ui_render", "rml_update", "rml_render", "renderer_begin", "renderer_end",
             "submit", "requested", "submitted", "textures_uploaded", "glyphs_uploaded", "pipeline_binds",
             "sampler_binds", "vertex_uniforms", "fragment_uniforms", "merged_2d", "skin_gpu",
-            "skin_cpu_ineligible", "skin_failed", "batch_draws", "vertices_per_batch", "passes", "history"};
+            "skin_cpu_ineligible", "skin_failed", "batch_draws", "vertices_per_batch", "passes", "history", "info"};
         for (const char* field : Fields)
             g_view->MarkDirty(field);
         g_nextRefresh = now + RefreshInterval;

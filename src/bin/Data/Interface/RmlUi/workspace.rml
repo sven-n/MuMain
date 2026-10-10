@@ -23,8 +23,10 @@
 	     slots in a data-covers-world region narrow the world area HUD widgets centre in. A window
 	     that moves itself (the friend list) only asks its slot where it first opens; the player's
 	     moves win after that. -->
-    <div class="region diagnostics-stack" data-scale="hud" data-participation="overlay">
+    <div class="region system-log-stack" data-scale="hud" data-participation="overlay">
         <div class="slot" data-window="system_log"></div>
+    </div>
+    <div class="region diagnostics-corner" data-scale="hud" data-participation="overlay">
         <div class="slot" data-window="diagnostics"></div>
     </div>
 	<div id="workspace_shell">

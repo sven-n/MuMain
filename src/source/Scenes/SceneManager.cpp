@@ -5,6 +5,8 @@
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
+#include <cstdio>
+#include <string>
 #include <vector>
 #include <algorithm>
 #include <numeric>
@@ -15,6 +17,7 @@
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/PlatformInfo.h"
+#include "Core/Text/Utf8.h"
 #include "Render/Text/CUIRenderText.h"
 
 //=============================================================================
@@ -56,6 +59,7 @@ FrameTimingState g_frameTiming;
 #include "App/Platform/Windows/Winmain.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
+#include "Camera/CameraConfig.h"
 #include "Camera/CameraProjection.h"
 #include "Scenes/SceneNames.h"
 
@@ -147,7 +151,6 @@ static float s_frameTimesMs[FRAME_HISTORY_SIZE] = {};
 static int s_frameIndex = 0;
 static int s_frameCount = 0;
 static double s_lastFrameTime = 0.0;
-static double s_highestFps = 0.0;
 
 // Percentile stats (updated periodically)
 static float s_avgFps = 0.0f;
@@ -161,7 +164,6 @@ void ResetFrameStats()
     s_frameIndex = 0;
     s_frameCount = 0;
     s_lastFrameTime = 0.0;
-    s_highestFps = 0.0;
     s_avgFps = 0.0f;
     s_onePercentLow = 0.0f;
     s_slowestFrameFps = 0.0f;
@@ -178,9 +180,6 @@ static void UpdateFrameStats()
         s_frameTimesMs[s_frameIndex] = static_cast<float>(dt);
         s_frameIndex = (s_frameIndex + 1) % FRAME_HISTORY_SIZE;
         if (s_frameCount < FRAME_HISTORY_SIZE) s_frameCount++;
-
-        double instantaneousFps = 1000.0 / dt;
-        if (instantaneousFps > s_highestFps) s_highestFps = instantaneousFps;
     }
     s_lastFrameTime = now;
 
@@ -639,6 +638,82 @@ static void RestartFrameStatsOnSceneChange()
     s_statsScene = SceneFlag;
 }
 
+// Which binary runs where: one line each for the build and the OS.
+static void AddBuildLines(std::vector<std::string>& lines)
+{
+    constexpr const char* kBuildType =
+#if defined(_DEBUG) || defined(DEBUG)
+        "Debug";
+#else
+        "Release";
+#endif
+    constexpr const char* kEditor =
+#ifdef _EDITOR
+        "Editor";
+#else
+        "NoEditor";
+#endif
+    constexpr const char* kCompiler =
+#if defined(__MINGW32__) || defined(__MINGW64__)
+        "MinGW";
+#elif defined(__clang__)
+        "Clang";
+#elif defined(_MSC_VER)
+        "MSVC";
+#elif defined(__GNUC__)
+        "GCC";
+#else
+        "Unknown";
+#endif
+    constexpr const char* kArch =
+#if defined(_WIN64) || defined(__x86_64__) || defined(__aarch64__)
+        "x64";
+#else
+        "x86";
+#endif
+    char line[160];
+    std::snprintf(line, sizeof(line), "Build: %s %s %s %s  %s %s", kBuildType, kEditor, kCompiler, kArch, __DATE__,
+                  __TIME__);
+    lines.emplace_back(line);
+    lines.push_back("OS: " + Core::Text::ToUtf8(Core::Platform::GetOSVersionString().c_str()));
+}
+
+// The active camera: mode, field of view, angle, distances and culling planes.
+static void AddCameraLines(std::vector<std::string>& lines)
+{
+    const CameraManager& cameraManager = CameraManager::Instance();
+    char line[160];
+    std::snprintf(line, sizeof(line), "Camera: %s (F9 switches)", CameraModeToString(cameraManager.GetCurrentMode()));
+    lines.emplace_back(line);
+
+    const ICamera* camera = cameraManager.GetActiveCamera();
+    if (camera == nullptr)
+        return;
+
+    const CameraConfig& config = camera->GetConfig();
+    // config.hFov is the width at the 4:3 reference aspect; wider windows see more to the sides.
+    const float shownHorizontalFov = VFovToHFov(g_Camera.FOV, CameraProjection::WorldAspectRatio());
+    std::snprintf(line, sizeof(line), "Field of view: %.1f wide, %.1f tall (%.1f at 4:3)", shownHorizontalFov,
+                  g_Camera.FOV, config.hFov);
+    lines.emplace_back(line);
+    std::snprintf(line, sizeof(line), "Camera angle: x %.1f, y %.1f, z %.1f", g_Camera.Angle[0], g_Camera.Angle[1],
+                  g_Camera.Angle[2]);
+    lines.emplace_back(line);
+    std::snprintf(line, sizeof(line), "View distance: %.0f   Terrain range: %.0f", g_Camera.ViewFar,
+                  config.terrainCullRange);
+    lines.emplace_back(line);
+    // In game the cameras draw as far as they cull; the login screen draws less than it culls.
+    if (std::lround(config.farPlane) == std::lround(g_Camera.ViewFar))
+        std::snprintf(line, sizeof(line), "Culling planes: near %.0f, far = view distance", config.nearPlane);
+    else
+        std::snprintf(line, sizeof(line), "Culling planes: near %.0f, far %.0f", config.nearPlane, config.farPlane);
+    lines.emplace_back(line);
+
+    wchar_t state[128];
+    if (camera->DescribeState(state, std::size(state)))
+        lines.push_back(Core::Text::ToUtf8(state));
+}
+
 static void UpdateDiagnostics()
 {
     if (g_bShowDebugInfo)
@@ -653,6 +728,12 @@ static void UpdateDiagnostics()
     summary.fps = FPS_AVG;
     summary.averageFps = s_avgFps;
     summary.lowFps = s_onePercentLow;
+    summary.slowestFps = s_slowestFrameFps;
+    if (g_bShowDebugInfo)
+    {
+        AddBuildLines(summary.info);
+        AddCameraLines(summary.info);
+    }
     constexpr double MillisecondsPerSecond = 1000.0;
     summary.frameMs = s_avgFps > 0 ? MillisecondsPerSecond / s_avgFps : 0;
     summary.cpu = CPU_AVG;

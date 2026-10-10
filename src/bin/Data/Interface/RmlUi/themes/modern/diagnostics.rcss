@@ -1,15 +1,14 @@
 /* The performance overlays ($fps, $details, $glstats). The workspace places this passive panel
-   below the system-message area. Every row is a block of its own: RmlUi lays elements out inline
+   at the top-left corner; $glstats sits to the right of $details. Every row is a block of its own: RmlUi lays elements out inline
    unless a sheet says otherwise. */
 body { pointer-events: none; }
 #panel {
     position: absolute;
     left: 4dp;
     top: 4dp;
-    width: 630dp;
     max-width: 98vw;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: flex-start;
     font-family: "token(font-body)";
     font-size: 9dp;
@@ -19,15 +18,17 @@ body { pointer-events: none; }
 #panel.workspace-placed { transform-origin: left top; }
 #panel div { display: block; }
 
-.section { position: relative; padding: 6dp 8dp 7dp 8dp; margin-right: 6dp; margin-bottom: 6dp; }
+.section { position: relative; flex: 0 0 auto; padding: 6dp 8dp 7dp 8dp; margin-right: 6dp; margin-bottom: 6dp; }
 .section > div { position: relative; }
 .section > .section-back { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
-#summary { width: 196dp; }
+#summary { min-width: 196dp; }
 #summary.fps-only { width: auto; }
 
 .title { font-size: 10dp; line-height: 15dp; font-weight: bold; margin-bottom: 2dp; }
 .heading { font-weight: bold; margin-top: 5dp; }
 .note { margin-top: 2dp; }
+/* Build, OS and camera, one line each, after the notes. */
+.info-line { display: block; margin-top: 2dp; white-space: nowrap; }
 
 /* A label and a value, twice, or a label and two values: columns that fill the summary's 180dp so
    the rows line up. */

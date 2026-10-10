@@ -111,12 +111,13 @@ body {
 .panel-stage .slot[data-window="cursed_temple_result"] { margin-top: 120dp; }
 .panel-stage .slot[data-window="in_game_shop"] { margin-top: 0; }
 
-/* Passive overlays share a column. The six-line message area never collapses between messages. */
-.diagnostics-stack {
+/* The six-line message area; it never collapses between messages. */
+.system-log-stack {
     left: 4dp;
     top: 84dp;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
 }
-.diagnostics-stack .slot[data-window="diagnostics"] { margin-top: 6dp; }
+/* The performance overlays start at the top-left corner, over the HUD's corner widgets. */
+.diagnostics-corner { left: 0; top: 0; }

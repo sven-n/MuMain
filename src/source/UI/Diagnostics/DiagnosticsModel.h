@@ -21,6 +21,7 @@ struct DiagnosticsModel
     double fps = 0;
     double averageFps = 0;
     double lowFps = 0;
+    double slowestFps = 0;
     double frameMs = 0;
     double cpu = 0;
     bool vsync = false;
@@ -48,5 +49,6 @@ struct DiagnosticsModel
     float verticesPerBatch = 0;
     Rml::Vector<PassRow> passes;
     Rml::Vector<float> history;
+    Rml::Vector<Rml::String> info;
 };
 }
