@@ -231,6 +231,7 @@ plus [PR #989](https://github.com/mikke89/RmlUi/pull/989) (SDL_GPU renderer pari
 
 | CSS feature | On this engine | Use instead |
 |---|---|---|
+| `display: table` with auto columns | Lays out, but inside a shrink-to-fit box (an absolute box with `width: auto`) the columns do not size to their content and overlap | Columns as `inline-block`s of one-row-tall cells (`item_help.rcss`'s levels table) |
 | `display: grid` | Not a `display` keyword (only `none`/`block`/`inline`/`inline-block`/`flow-root`/`flex`/`inline-flex`/`table*`) | Flexbox |
 | `::before`/`::after`, `content:` | No `content` property, no generated pseudo-elements | A real child element in the `.rml` |
 | `aspect-ratio` | Not a property | An explicit `width`/`height` |

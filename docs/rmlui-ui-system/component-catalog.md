@@ -369,13 +369,17 @@ dialog. Proven on 13 real dialogs (`migration-ledger.md`'s Dialog family table h
 list) — the two remaining "multi-option menu" classes (`CGuild_ToPerson_Position`,
 `CGemIntegrationDisjointMsgBox`) stay message boxes drawn by `MessageBoxView` because their shape
 doesn't fit this primitive's plain "click closes" model (simultaneous radio-select, an embedded
-jewel list). A `MessageBoxView` box can name its kind, which becomes `#panel`'s class, and mark
-buttons as theme-placed: the appointment box's four buttons are placed by `message_box_view.rcss`. Several consumers chain a second `Show()` from inside a button's own
+jewel list). Every `MessageBoxView` box names its kind (`#panel`'s `data-kind`) and reports its
+lines by role (`message`, `reward`, a ranking table's `row`...); `message_box_view.rcss` places the
+box, stacks the lines and places the buttons by kind. Several consumers chain a second `Show()` from inside a button's own
 `onClick` — closing this menu and immediately opening a different one (or the same one with
 different content) — a reentrant pattern proven by the Trainer menu pair, the Gem Integration
 jewel-type→mix-amount flow, and Elpis's text-only variant; `GenericMenuDialog.h`'s own header
 documents why this is safe (buttons always close on click, so there's no `KeepOpen()`-style veto
-to interact with). `GenericMenuConfig::systemMenu` marks the in-game system menu (`system-menu` on
+to interact with). `GenericMenuConfig::kind` names the native box a menu replaces (`npc-menu`,
+`chaos-mix`, `elpis`...); legacy reproduces each box's frame, text and button offsets by kind
+(`#panel[data-kind]`), modern flows the menu. `$dialog menu <name>` opens one without its NPC.
+`GenericMenuConfig::systemMenu` marks the in-game system menu (`system-menu` on
 `#panel`): legacy lays it out like the native box, modern fills the screen like the options screen,
 with a heading and close action of its own (`system_menu_label`, `close_label`, `gmd_cancel`, the
 same as Esc), so it leaves out the button marked `MenuButton::dismiss` (Cancel).

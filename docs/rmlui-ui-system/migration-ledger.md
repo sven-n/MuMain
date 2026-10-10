@@ -67,7 +67,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 |---|---|---|---|
 | `CMyInventory` | Done | Hybrid | One document: frame, equipment slots (`slot_states`), the item grid (`item_grid.rcss`), the equipped and grid items in a render target, stack counts. Hit tests stay native, on the theme's grid and slot geometry |
 | `CTrade`, `CStorageInventory`, `CStorageInventoryExt`, `CMixInventory`, `CNPCShop`, `CMyShopInventory`, `CPurchaseShopInventory`, `CInventoryExtension`, `CLuckyItemWnd` | Done | Hybrid | Same pattern, one document each. Their native 2D (trade's guild mark and warning arrows, the mix and lucky-item sparkles, the extension's locked-page art) draws into the window's render target with its items |
-| `CItemExplanationWindow`, `CSetItemExplanation` | Done | RmlUi-only 2D | `UI/Inventory/TipTextListView` |
+| `CItemExplanationWindow`, `CSetItemExplanation` | Done | RmlUi-only 2D | `UI/Inventory/ItemHelpView`: lines and the levels table as data, laid out by `item_help.rcss` |
 | `CUnitedMarketPlaceWindow` | Done | RmlUi-only 2D | Its 3D hook draws nothing |
 | `CInGameShop` | Done | Hybrid | `in_game_shop.rml`: zones, categories, the package page with its live 3D items (a render target at the original's 2° field of view), balances, banner, storage and gift boxes. Its dialogs (`igs_buy_package`, `igs_buy_select`, `igs_send_gift`) are documents too, over a dimmed screen. `$preview igs` fills it from the shipped script and banner without a server; buying, gifting and using storage items are unchecked until a server supports the cash shop, and their requests are unchanged |
 
@@ -77,7 +77,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 |---|---|---|---|
 | `CMyQuestInfoWindow` | Done | RmlUi-only 2D | `data-for` list reference; tab reference |
 | `CQuestProgress`, `CQuestProgressByEtc` | Done | RmlUi-only 2D | Share `quest_progress.rcss` (`#panel.qp-etc` modifier) and `UI::Quests::RewardModel`; 7-line pagination kept; reward preview is click, not hover |
-| `CNPCQuest` | Done | Hybrid | `npc_quest.rml`: the frame, the live 3D condition items in a render target (`#nq_item`), the content. Message/answer tops stay in the model (`tracked-deferrals.md`) |
+| `CNPCQuest` | Done | Hybrid | `npc_quest.rml`: the frame, the live 3D condition items in a render target (`#nq_item`), the content. The dialogue flows in one `.sharp-flow`, centred by the theme |
 | `CNPCDialogue` | Done | RmlUi-only 2D | Two paged lists in one document; Gens flows native logic synced into the model |
 | `CGatemanWindow` | Done | RmlUi-only 2D | Guest, staff and master pages |
 | `CEmpireGuardianNPC`, `CDoppelGangerWindow` | Done | Hybrid | `UI/Events/EventItemEntryView`: one document, the 3D preview in a render target (`#entry_item`) |
@@ -89,7 +89,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CCastleWindow` | Done | RmlUi-only 2D | Senatus: gate, statue and tax pages; tab positions in RCSS |
 | `CGuardWindow` | Done | RmlUi-only 2D | Guild lists; tab positions in RCSS |
 | `CGateSwitchWindow`, `CCatapultWindow` | Done | RmlUi-only 2D | Right-docked; catapult not checked in game |
-| `CSiegeWarfare` | Done | RmlUi-only 2D | Drawn under every panel (its stacking depth); buttons still hit-test natively |
+| `CSiegeWarfare` | Done | RmlUi-only 2D | Drawn under every panel (its stacking depth); the theme lays out the team and command buttons |
 | `CDuelWindow`, `CBattleSoccerScore` | Done | RmlUi-only 2D | Under every panel; event-HUD slots, drawn at the HUD's scale |
 | `CDuelWatchWindow` | Done | RmlUi-only 2D | Right-docked |
 | `CDuelWatchUserListWindow` | Done | RmlUi-only 2D | Event-HUD slot (bottom-left corner, grows upward), at the HUD's scale |
