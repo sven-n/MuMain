@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Integration/Discord/GameStateReader.h"
+#include "Integration/Discord/WideFormat.h"
 
 #include "Character/CharacterManager.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -22,13 +23,9 @@ using Integration::Discord::PresenceSnapshot;
 constexpr int MasterBloodCastleLevel = 8;
 constexpr int MasterChaosCastleLevel = 7;
 
-constexpr std::size_t LocationBufferLength = 128;
-
 std::wstring EventWithLevel(const wchar_t* eventName, int level)
 {
-    wchar_t text[LocationBufferLength]{};
-    mu_swprintf_s(text, LocationBufferLength, I18N::Game::DiscordEventLevel, eventName, level);
-    return text;
+    return Integration::Discord::FormatWide(I18N::Game::DiscordEventLevel, eventName, level);
 }
 
 // Events with numbered levels. Zero for any other map.

@@ -18,7 +18,9 @@ enum class PresenceMode : std::uint8_t
 inline constexpr std::array<PresenceMode, 3> PresenceModes = {PresenceMode::On, PresenceMode::HideDetails,
                                                               PresenceMode::Off};
 
-inline constexpr PresenceMode DefaultPresenceMode = PresenceMode::On;
+// What a player gets without choosing: that they play and where, but not the
+// character's level and class - those are published only on request.
+inline constexpr PresenceMode DefaultPresenceMode = PresenceMode::HideDetails;
 
 // The value written to config.ini.
 [[nodiscard]] constexpr const wchar_t* PresenceModeName(PresenceMode mode)

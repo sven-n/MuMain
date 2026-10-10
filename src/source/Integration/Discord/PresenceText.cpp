@@ -2,31 +2,26 @@
 #include "Integration/Discord/PresenceText.h"
 
 #include "Core/Text/Utf8.h"
+#include "Integration/Discord/WideFormat.h"
 
 #include "I18N/All.h"
 
 namespace
 {
+using Integration::Discord::FormatWide;
 using Integration::Discord::PresenceMode;
 using Integration::Discord::PresenceSnapshot;
 
-constexpr std::size_t LineBufferLength = 128;
 constexpr const wchar_t* PartSeparator = L" · "; // " · "
 
 std::wstring CharacterLine(const PresenceSnapshot& snapshot)
 {
-    wchar_t line[LineBufferLength]{};
     if (snapshot.masterLevel > 0)
     {
-        mu_swprintf_s(line, LineBufferLength, I18N::Game::DiscordCharacterMasterLevel, snapshot.level,
-                      snapshot.masterLevel, snapshot.className.c_str());
+        return FormatWide(I18N::Game::DiscordCharacterMasterLevel, snapshot.level, snapshot.masterLevel,
+                          snapshot.className.c_str());
     }
-    else
-    {
-        mu_swprintf_s(line, LineBufferLength, I18N::Game::DiscordCharacterLevel, snapshot.level,
-                      snapshot.className.c_str());
-    }
-    return line;
+    return FormatWide(I18N::Game::DiscordCharacterLevel, snapshot.level, snapshot.className.c_str());
 }
 
 std::wstring LocationText(const PresenceSnapshot& snapshot)
@@ -36,9 +31,7 @@ std::wstring LocationText(const PresenceSnapshot& snapshot)
         return snapshot.location;
     }
 
-    wchar_t text[LineBufferLength]{};
-    mu_swprintf_s(text, LineBufferLength, I18N::Game::DiscordInEvent, snapshot.location.c_str());
-    return text;
+    return FormatWide(I18N::Game::DiscordInEvent, snapshot.location.c_str());
 }
 
 std::wstring LocationLine(const PresenceSnapshot& snapshot)
@@ -49,9 +42,7 @@ std::wstring LocationLine(const PresenceSnapshot& snapshot)
         return line;
     }
 
-    wchar_t party[LineBufferLength]{};
-    mu_swprintf_s(party, LineBufferLength, I18N::Game::DiscordParty, snapshot.partyMembers, snapshot.partyCapacity);
-    return line + PartSeparator + party;
+    return line + PartSeparator + FormatWide(I18N::Game::DiscordParty, snapshot.partyMembers, snapshot.partyCapacity);
 }
 
 void DescribeWorld(Integration::Discord::Activity& activity, const PresenceSnapshot& snapshot, PresenceMode mode)
