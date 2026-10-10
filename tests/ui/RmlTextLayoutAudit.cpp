@@ -121,13 +121,21 @@ Bounds ClipBox(Rml::Element& element)
     return {point.x, point.y, point.x + size.x, point.y + size.y};
 }
 
-std::string ClipReason(Rml::Element& text, const Bounds& ink)
+std::string ClipReason(Rml::Element& text, Bounds ink)
 {
     for (auto* parent = text.GetParentNode(); parent != nullptr; parent = parent->GetParentNode())
     {
         const Bounds clip = ClipBox(*parent);
         const auto& style = parent->GetComputedValues();
-        if (style.overflow_x() != Rml::Style::Overflow::Visible &&
+        // A marquee clips its own line on purpose and scrolls the rest into view on hover.
+        const bool marquee = parent->IsClassSet("marquee");
+        if (marquee)
+        {
+            // What lies beyond it is never drawn, so the boxes outside only see its visible part.
+            ink.left = std::max(ink.left, clip.left);
+            ink.right = std::min(ink.right, clip.right);
+        }
+        if (!marquee && style.overflow_x() != Rml::Style::Overflow::Visible &&
             (ink.left < clip.left - PixelTolerance || ink.right > clip.right + PixelTolerance))
             return "clip-x:" + Name(*parent);
         // Vertical scrolling intentionally clips offscreen lines; reachability is checked separately.
@@ -210,7 +218,7 @@ bool ExplicitOverflow(Rml::Element& label, const Bounds& box, const Bounds& ink)
 {
     const auto& style = label.GetComputedValues();
     // Auto-sized, overflow-visible spans can legitimately have a zero-width layout box.
-    const bool horizontal = style.width().type != Rml::Style::LengthPercentageAuto::Auto &&
+    const bool horizontal = !label.IsClassSet("marquee") && style.width().type != Rml::Style::LengthPercentageAuto::Auto &&
         (ink.left < box.left - PixelTolerance || ink.right > box.right + PixelTolerance);
     const bool vertical = style.height().type != Rml::Style::LengthPercentageAuto::Auto &&
         (ink.top < box.top - PixelTolerance || ink.bottom > box.bottom + PixelTolerance);
@@ -258,6 +266,7 @@ void UI::Tests::RmlTextLayoutAudit::InspectText(Rml::ElementText& text, Rml::Ele
         {
             ++m_Failures[scenario.window];
             ++m_ElementFailures[{scenario.window, Name(*label)}];
+            ++m_ThemeFailures[{scenario.theme, scenario.window}];
         }
         WriteScenario(m_Lines, scenario);
         m_Lines << ',' << Csv(Name(*label)) << ',' << index++ << ',' << text.GetComputedValues().font_size()
@@ -310,6 +319,12 @@ size_t UI::Tests::RmlTextLayoutAudit::FailureCount(const std::string& window, co
 {
     const auto it = m_ElementFailures.find({window, element});
     return it == m_ElementFailures.end() ? 0 : it->second;
+}
+
+size_t UI::Tests::RmlTextLayoutAudit::ThemeFailureCount(const std::string& theme, const std::string& window) const
+{
+    const auto it = m_ThemeFailures.find({theme, window});
+    return it == m_ThemeFailures.end() ? 0 : it->second;
 }
 
 void UI::Tests::RmlTextLayoutAudit::Finish(size_t expectedScenarios)

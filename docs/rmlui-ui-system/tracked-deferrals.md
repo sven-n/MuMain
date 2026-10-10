@@ -198,12 +198,15 @@ checks were confirmed on 2026-10-10. See [migration-ledger.md](migration-ledger.
 Step 3 implemented on 2026-10-10: both personal-shop views flow their notices in a bounded,
 scrollable pane; only the legacy title's compact fit remains for step 5. See
 [migration-ledger.md](migration-ledger.md#personal-shop-notice-follow-up).
+Step 4 implemented on 2026-10-10, differently per theme: legacy keeps native's positions with
+marquee labels; modern flows in a wider window. See
+[migration-ledger.md](migration-ledger.md#mu-helper-label-follow-up).
 
 | Group | Initial failing cases (before its layout fix) | Change / remaining plan |
 |---|---|---|
 | Blood Castle entry | Character-count splitting, fitting against fixed 72/190-unit boxes, and absolute description/button rows caused overflow and overlap. | Implemented: complete paragraph in a bounded wrapping pane, wrapping title and level labels, and scrollable level list when needed. Confirmed in game. |
 | Devil Square entry | Six translated fragments occupied fixed rows in `event_entry.rcss` / `devil_square_enter.rcss`. | Implemented: all six fragments flow in order inside the description pane. Enabled/locked bands, entry requests and exit actions are preserved. Confirmed in game. |
-| MU Helper config | Legacy binds native-size text on narrow labels; both themes use tightly packed checkbox, numeric-field and Setting-button positions. | Give labels explicit available widths and reflow the affected rows in all three tabs. Verify class-dependent layouts, including Summoner recovery and Dark Lord raven controls. |
+| MU Helper config | Legacy binds native-size text on narrow labels; both themes use tightly packed checkbox, numeric-field and Setting-button positions. | Implemented. Legacy: native positions, each label one line in native's room before the next control, ending in `..` and scrolling on hover (marquee); its taller-text row overlaps at 1.5x/2x stay reported. Modern: a flowed column of native's groups, 240 units wide, labels wrapping; audit-clean. Class variants and Save/Initialization still need in-game checks. |
 | Personal-shop warnings | Legacy `my_shop` and `purchase_shop` use fixed notice rows with `white-space: nowrap` and `overflow: hidden`. Modern has its own typography but retains fixed warning offsets. | Implemented: each row wraps in native's three groups inside one bounded, scrollable pane shared by both views (`shop_notice.rcss`). Warning emphasis, grids, name entry and controls kept. The legacy title still touches the close target in de/es/ru at 1.5x/2x (step 5). |
 
 Implementation order, with one focused change per concern:
@@ -226,7 +229,7 @@ Implementation order, with one focused change per concern:
    Reserve room between the item grid/status and bottom controls, remove notice clipping, and
    keep every warning and Zen-only statement reachable. Use a bounded scroll pane only where
    the full text cannot fit at the retained readable size.
-4. **Fix MU Helper labels.** Adjust label/control relationships and wrapping first, covering
+4. **Fix MU Helper labels — implemented.** Adjust label/control relationships and wrapping first, covering
    Hunting, Obtaining and Other tabs and class-specific hidden controls. Keep numeric fields,
    skill slots, item-name entry and footer buttons aligned and clickable. Preserve save/reset
    and class-feature behaviour.

@@ -115,7 +115,9 @@ void CheckScrollPane(RmlLayoutFixture& fixture, Rml::Element& pane)
     pane.SetScrollTop(pane.GetScrollHeight());
     fixture.Refresh();
     const float bottom = pane.GetAbsoluteOffset(Rml::BoxArea::Content).y + pane.GetClientHeight();
-    auto* last = pane.GetChild(pane.GetNumChildren() - 1);
+    Rml::Element* last = nullptr;
+    for (int i = pane.GetNumChildren() - 1; i >= 0 && last == nullptr; --i)
+        if (pane.GetChild(i)->IsVisible()) last = pane.GetChild(i);
     REQUIRE(last != nullptr);
     CHECK(last->GetAbsoluteOffset(Rml::BoxArea::Border).y + last->GetBox().GetSize(Rml::BoxArea::Border).y
           <= bottom + PixelTolerance);
@@ -197,6 +199,21 @@ void CheckShop(RmlLayoutFixture& fixture, Rml::ElementDocument& document)
     CheckScrollPane(fixture, *notice);
 }
 
+void CheckHelper(RmlLayoutFixture& fixture, Rml::ElementDocument& document)
+{
+    auto* body = document.GetElementById("mhc_body");
+    auto* footer = document.GetElementById("mhc_footer");
+    REQUIRE(body != nullptr);
+    REQUIRE(footer != nullptr);
+    Rml::Vector2f panelPosition, panelSize, bodyPosition, bodySize, footerPosition, footerSize;
+    REQUIRE(UI::RmlBridge::DrawnBox(*document.GetElementById("panel"), Rml::BoxArea::Border, panelPosition, panelSize));
+    REQUIRE(UI::RmlBridge::DrawnBox(*body, Rml::BoxArea::Border, bodyPosition, bodySize));
+    REQUIRE(UI::RmlBridge::DrawnBox(*footer, Rml::BoxArea::Border, footerPosition, footerSize));
+    CHECK(bodyPosition.y + bodySize.y <= footerPosition.y + PixelTolerance);
+    CHECK(footerPosition.y + footerSize.y <= panelPosition.y + panelSize.y + PixelTolerance);
+    CheckScrollPane(fixture, *body);
+}
+
 void RunScenario(RmlLayoutFixture& fixture, RmlTextLayoutAudit& audit, const std::string& markup,
                  const RmlTextLayoutAudit::Scenario& scenario, int character)
 {
@@ -218,6 +235,8 @@ void RunScenario(RmlLayoutFixture& fixture, RmlTextLayoutAudit& audit, const std
     fixture.Refresh();
     if (scenario.window.ends_with("_enter")) CheckEvent(fixture, *document, scenario.window);
     if (scenario.window.ends_with("_shop")) CheckShop(fixture, *document);
+    // Modern flows the MU Helper; legacy keeps native's positions.
+    if (scenario.window == "mu_helper_config" && scenario.theme == "modern") CheckHelper(fixture, *document);
     const float expectedFloor = UI::Scaling::CachedFontPointSize(UI::Scaling::FontRole::Normal) * NormalMinimum / NormalMaximum;
     CHECK(UI::Scaling::MinimumTextPixelSize(UI::Scaling::FontRole::Normal) == doctest::Approx(expectedFloor));
     audit.Inspect(*document, scenario);
@@ -268,7 +287,7 @@ void RunDocument(RmlLayoutFixture& fixture, RmlTextLayoutAudit& audit,
 }
 } // namespace
 
-TEST_CASE("rollout 2 contains event and shop text and records remaining small-scale defects [ui][text-layout]")
+TEST_CASE("rollout 2 contains event, shop and MU Helper text and records remaining small-scale defects [ui][text-layout]")
 {
     const char* directory = std::getenv("MU_RML_TEXT_LAYOUT_CASES");
     REQUIRE_MESSAGE(directory != nullptr, "Run this diagnostic through prepare_rml_text_layout.py or CTest.");
@@ -297,5 +316,8 @@ TEST_CASE("rollout 2 contains event and shop text and records remaining small-sc
     for (const char* window : {"my_shop", "purchase_shop"})
         CHECK_MESSAGE(audit.FailureCount(window) == audit.FailureCount(window, "#title"), window,
                       " must contain every notice line.");
-    CHECK_MESSAGE(audit.FailureCount("mu_helper_config") > 0, "mu_helper_config must reproduce the remaining baseline defects.");
+    // Legacy's MU Helper keeps native's positions, its labels clipped to native's room (marquee);
+    // what still collides at large text sizes is reported, not required away.
+    CHECK_MESSAGE(audit.ThemeFailureCount("modern", "mu_helper_config") == 0,
+                  "modern mu_helper_config must contain every visible text line.");
 }

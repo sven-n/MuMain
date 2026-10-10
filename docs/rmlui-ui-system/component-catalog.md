@@ -70,6 +70,14 @@ text that stacks goes inside **one** layer: `.sharp-text.sharp-flow`, sized in r
 flex column that centres the lines on its height, however many there are, so C++ binds no tops
 (`npc_quest`'s dialogue band).
 
+**Marquee label** (`class="marquee"`, base.rcss; `UI/RmlBridge/RmlMarquee.h`): one line in a
+constricted box the theme sizes. Text wider than the box shows as much as fits followed by `..`;
+while the pointer is within the box, the full text scrolls to its end and back. The text is the
+element's first child, so the class goes on the element holding `{{...}}`. It tests the box, not
+hover, so a label laid over a button and letting clicks through still marquees. Use it where the
+layout must keep its positions (legacy `mu_helper_config`); prose that may take more lines wraps or
+scrolls instead. The text-layout audit accepts its clipping and checks only its visible part.
+
 ## Checkbox
 
 `.checkbox-row`/`.checkbox-box`/`.checkbox-box.checked`/`.checkbox-label`, both themes' `base.rcss`

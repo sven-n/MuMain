@@ -116,7 +116,8 @@
 #btn_init, #btn_init_label { left: 65px;  top: 388px; }
 
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
-#title { width: calc(100% * var(--root-scale)); }
+/* Between the frame's top corners, clear of the close button. */
+#title { left: 28px; width: calc(134px * var(--root-scale)); }
 #tab_0_label { width: calc(56px * var(--root-scale)); height: calc(22px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
 #tab_1_label { width: calc(56px * var(--root-scale)); height: calc(22px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
 #tab_2_label { width: calc(56px * var(--root-scale)); height: calc(22px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
@@ -134,3 +135,27 @@
 #btn_delete_item_label { width: calc(38px * var(--root-scale)); height: calc(24px * var(--root-scale)); line-height: calc(24px * var(--root-scale)); }
 #btn_save_label { width: calc(52px * var(--root-scale)); height: calc(26px * var(--root-scale)); line-height: calc(26px * var(--root-scale)); }
 #btn_init_label { width: calc(52px * var(--root-scale)); height: calc(26px * var(--root-scale)); line-height: calc(26px * var(--root-scale)); }
+
+/* Every label keeps one line in the room native left it: from where native drew it to the next
+   control, or to its box's inner edge. Longer text ends in ".." and scrolls on hover
+   (base.rcss .marquee, RmlMarquee.h). The tab and button labels already have their boxes. */
+#h_range_label, #o_range_label { width: calc(38px * var(--root-scale)); }
+#cb_potion .checkbox-label, #cb_auto_heal .checkbox-label, #cb_drain_life .checkbox-label { width: calc(37px * var(--root-scale)); }
+#cb_long_distance .checkbox-label, #cb_use_pet .checkbox-label, #cb_fallback .checkbox-label,
+#cb_buff_duration .checkbox-label, #cb_auto_friend .checkbox-label, #cb_auto_guild .checkbox-label,
+#cb_auto_defend .checkbox-label { width: calc(137px * var(--root-scale)); }
+#cb_orig_position .checkbox-label, #cb_repair .checkbox-label { width: calc(76px * var(--root-scale)); }
+#distance_label, #cb_skill2_delay .checkbox-label, #cb_skill3_delay .checkbox-label { width: calc(30px * var(--root-scale)); }
+#distance_unit, #skill2_unit, #skill3_unit { width: calc(12px * var(--root-scale)); }
+#cb_skill2_condition .checkbox-label, #cb_skill3_condition .checkbox-label { width: calc(22px * var(--root-scale)); }
+#basic_skill_label { width: calc(41px * var(--root-scale)); }
+#activation1_label, #activation2_label { width: calc(35px * var(--root-scale)); }
+#cb_combo .checkbox-label, #cb_party .checkbox-label { width: calc(27px * var(--root-scale)); }
+#rb_raven_cease .checkbox-label { width: calc(61px * var(--root-scale)); }
+#rb_raven_auto .checkbox-label { width: calc(48px * var(--root-scale)); }
+#rb_raven_together .checkbox-label { width: calc(125px * var(--root-scale)); }
+#cb_pick_all .checkbox-label, #cb_pick_selected .checkbox-label { width: calc(138px * var(--root-scale)); }
+#cb_pick_jewel .checkbox-label, #cb_pick_zen .checkbox-label { width: calc(47px * var(--root-scale)); }
+#cb_pick_ancient .checkbox-label, #cb_pick_excellent .checkbox-label { width: calc(70px * var(--root-scale)); }
+#cb_pick_extra .checkbox-label { width: calc(94px * var(--root-scale)); }
+#extension_used, #extension_none { width: calc(151px * var(--root-scale)); }

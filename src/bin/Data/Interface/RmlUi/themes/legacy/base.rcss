@@ -200,6 +200,12 @@ body {
    inside the element that has the box and the font size. */
 .native-fit { display: block; white-space: nowrap; }
 
+/* A label kept to one line in a constricted box: clipped at the box, scrolled to show the rest
+   while the pointer is over it (RmlMarquee.h). Overflowing text starts at the left edge.
+   Give it the box's width (or max-width) where it is placed. */
+.marquee { display: block; white-space: nowrap; overflow: hidden; }
+.marquee.marquee-overflow { text-align: left; }
+
 /* Scrolling content pane. Apply to whatever element owns the scrollable content; RmlUi then
    generates the scrollbar itself as real child elements, styled below.
 

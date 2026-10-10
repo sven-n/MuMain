@@ -158,8 +158,32 @@ and Russian at 1.5x/2x: compact-label fitting, step 5. Seen in game, both shops 
 at 1280x720 / 100% and legacy at 1920x1080 / 150%, through `$win myshop` / `$win purchaseshop`;
 an opened store's "Still opening", a real purchase and theme changes while shown are unchecked.
 
-MU Helper labels are the next rollout step. Rollout 2 stays open until its remaining fixes and
-in-game checks are complete.
+## MU Helper label follow-up
+
+2026-10-10: rollout 2, step 4 implemented, with a different answer per theme.
+
+Legacy keeps native's control positions. Every label is one line, no wider than native left it
+before the next control (or its box's inner edge): 37 units for the recovery checks before their
+Setting button, 41 for Basic Skill, 22 for Con, and so on. Longer text shows as much as fits with
+`..`, and the whole text scrolls while the pointer is over it (the new marquee label,
+[component-catalog.md](component-catalog.md#counter-scaled-text)). The title sits between the
+frame's corners, clear of the close target. Where taller text meets the next row (1.5x/2x OS
+scale, and a one-pixel slot-heading overlap in German, Polish and Russian at 1x) native's spacing
+is kept and the audit reports it rather than requiring it away.
+
+Modern flows instead: under its header, the tabs, one scroll pane of native's group boxes and the
+footer form one column. Each box starts at native's height and grows; labels wrap; the Setting
+buttons grow to their labels. The window is 240 units wide rather than 190, and the dock takes its
+slot from `#panel`, so the detail window moves over with it. Ids, model fields and events are
+unchanged; no C++ changed besides the marquee pass.
+
+The audit runs the helper's 450 scenarios per theme: modern is clean, legacy's remaining lines
+are the overlaps above. The marquee was confirmed in game by the user (legacy, 1280x720 / 100%).
+Class variants (Dark Lord raven, Elf and Summoner recovery, party), Save/Initialization and the
+skill picker beside the wider modern window still need in-game checks.
+
+Bounded fitting for the remaining compact labels (shop titles) is the next rollout step. Rollout 2
+stays open until its remaining fixes and in-game checks are complete.
 
 ## Login and character select
 

@@ -470,6 +470,10 @@ body {
 	background-color: token(accent-gold);
 }
 
+/* A label kept to one line in a constricted box -- see legacy/base.rcss's copy. */
+.marquee { display: block; white-space: nowrap; overflow: hidden; }
+.marquee.marquee-overflow { text-align: left; }
+
 /* Scrolling content pane -- see legacy/base.rcss's copy for the two engine requirements baked in
    here (the `hidden auto` shorthand order, and why pointer-events must be opted back in). The
    container half is identical in both themes by design; only the scrollbar chrome below differs.

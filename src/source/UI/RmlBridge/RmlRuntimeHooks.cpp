@@ -4,6 +4,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Diagnostics/DiagnosticsOverlay.h"
 #include "UI/RmlBridge/RmlDocumentHints.h"
+#include "UI/RmlBridge/RmlMarquee.h"
 #include "UI/RmlBridge/RmlNativeText.h"
 #include "UI/RmlBridge/RmlNativeTextFit.h"
 #include "UI/RmlBridge/RmlRenderTarget.h"
@@ -36,7 +37,11 @@ void InstallRuntimeHooks()
         if (Rml::Context* context = RmlUiRuntime::Instance().GetContext())
             DocumentHints::Update(*context);
     };
-    hooks.afterUpdate = [](Rml::Context* context) { FitNativeTextToBoxes(context); };
+    hooks.afterUpdate = [](Rml::Context* context)
+    {
+        FitNativeTextToBoxes(context);
+        UpdateMarquees(context);
+    };
     hooks.createFileInterface = [] { return std::make_unique<ThemeFileInterface>(); };
     hooks.resolveTexture = [](const Rml::String& source, void*& texture, int& width, int& height)
     {

@@ -25,6 +25,7 @@ public:
     size_t FailureCount(const std::string& window) const;
     // Failing lines of one element, by the name text-lines.csv records.
     size_t FailureCount(const std::string& window, const std::string& element) const;
+    size_t ThemeFailureCount(const std::string& theme, const std::string& window) const;
 
 private:
     void InspectText(Rml::ElementText& text, Rml::Element& panel,
@@ -33,6 +34,7 @@ private:
     std::ofstream m_Scenarios;
     std::map<std::string, size_t> m_Failures;
     std::map<std::pair<std::string, std::string>, size_t> m_ElementFailures;
+    std::map<std::pair<std::string, std::string>, size_t> m_ThemeFailures;
     size_t m_ScenarioCount = 0;
 };
 } // namespace UI::Tests

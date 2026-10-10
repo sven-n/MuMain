@@ -1,8 +1,8 @@
 """Run the rollout-2 diagnostic against real markup and translated resources.
 
 This supplies presentation state without opening networked game windows. Fixed
-event and shop notice layouts must pass geometry checks; remaining title/helper defects
-are reported.
+event, shop notice and MU Helper layouts must pass geometry checks; remaining shop
+title defects are reported.
 """
 
 import argparse
