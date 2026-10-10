@@ -201,6 +201,10 @@ scrollable pane; only the legacy title's compact fit remains for step 5. See
 Step 4 implemented on 2026-10-10, differently per theme: legacy keeps native's positions with
 marquee labels; modern flows in a wider window. See
 [migration-ledger.md](migration-ledger.md#mu-helper-label-follow-up).
+Steps 5 and 6 completed on 2026-10-10: the remaining compact labels (the legacy shop titles) became
+marquee labels rather than a new fitting minimum, and the full suite, guards and build passed. What
+keeps this rollout open is the in-game checks below. See
+[migration-ledger.md](migration-ledger.md#compact-labels-and-validation).
 
 | Group | Initial failing cases (before its layout fix) | Change / remaining plan |
 |---|---|---|
@@ -233,7 +237,10 @@ Implementation order, with one focused change per concern:
    Hunting, Obtaining and Other tabs and class-specific hidden controls. Keep numeric fields,
    skill slots, item-name entry and footer buttons aligned and clickable. Preserve save/reset
    and class-feature behaviour.
-5. **Add bounded fitting only for demonstrated remaining compact labels.** Extend the existing
+5. **Add bounded fitting only for demonstrated remaining compact labels — completed with marquee
+   labels instead.** The only remaining compact labels were the legacy shop titles; one line in a
+   box clear of the close target, ending in `..` and scrolling on hover, needed no lower font
+   minimum. The plan as first written: extend the existing
    `.native-fit` pass if a title or button label still cannot fit after layout changes. Opt-in
    belongs to the theme; expose an explicit minimum through a parsed RCSS property, defaulting
    to the existing role minimum. Choose the reduced minimum from the failing fixtures and
@@ -242,7 +249,7 @@ Implementation order, with one focused change per concern:
    wrapping or scrolling. The pass reads the actual content box, never a new C++ window width
    constant, never enlarges text, and restores inherited sizing when fitting is unnecessary.
    Preserve existing `NativeTextSize` capability gating and avoid theme-name branches.
-6. **Validate and build.** Extend `test_ui_scaling.cpp` if minimum/fitting calculations change;
+6. **Validate and build — completed.** Extend `test_ui_scaling.cpp` if minimum/fitting calculations change;
    add RmlUi coverage for real document text bounds, neighbouring controls and any new fitting
    property. Test unchanged default floors, opt-in limits, font rounding, unchanged-input cache
    reuse, and invalidation after text, width, inherited size, font/style or minimum changes.

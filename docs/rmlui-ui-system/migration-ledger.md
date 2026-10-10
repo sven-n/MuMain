@@ -182,8 +182,19 @@ are the overlaps above. The marquee was confirmed in game by the user (legacy, 1
 Class variants (Dark Lord raven, Elf and Summoner recovery, party), Save/Initialization and the
 skill picker beside the wider modern window still need in-game checks.
 
-Bounded fitting for the remaining compact labels (shop titles) is the next rollout step. Rollout 2
-stays open until its remaining fixes and in-game checks are complete.
+## Compact labels and validation
+
+2026-10-10: rollout 2, steps 5 and 6 completed. The last compact labels, the legacy shop titles,
+are marquee labels between the frame's top corners, so no font minimum changed and `.native-fit`
+gained no new property. `.native-fit`'s capability switch was checked: the client reads `theme.ini`
+relative to its working directory, so the pass runs in game; the headless audit runs from elsewhere
+and does not exercise it.
+
+Every window in the audit is clean except legacy's MU Helper (719 lines, its native spacing under
+taller text). All 363 tests passed with `BUILD_TESTING=ON`; syntax, contract-drift, bound-geometry,
+active-transform and state-wrapper guards passed; RelWithDebInfo x64 rebuilt with assets staged.
+Rollout 2 stays open for its in-game checks: an opened store's "Still opening", a purchase, the
+MU Helper's class variants, Save/Initialization and the skill picker beside the wider modern window.
 
 ## Login and character select
 

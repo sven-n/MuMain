@@ -10,11 +10,13 @@
 	font-family: "token(font-body)";
 }
 
+/* Between the frame's top corners, clear of the close button; a longer title ends in ".." and
+   scrolls on hover (base.rcss .marquee). */
 #title {
 	position: absolute;
-	left: 0;
+	left: 28px;
 	top: 15px;
-	width: calc(100% * var(--root-scale));
+	width: calc(134px * var(--root-scale));
 	text-align: center;
 	/* Native draws it in the normal font, 0xFF49B0FF -- an ABGR DWORD, i.e. (255,176,73). */
 	color: #ffb049;

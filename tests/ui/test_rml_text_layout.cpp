@@ -312,10 +312,8 @@ TEST_CASE("rollout 2 contains event, shop and MU Helper text and records remaini
     audit.Finish(ExpectedScenarios);
     for (const char* window : {"blood_castle_enter", "devil_square_enter"})
         CHECK_MESSAGE(audit.FailureCount(window) == 0, window, " must contain every visible text line.");
-    // The shop titles are compact labels left to bounded fitting; every notice line must fit.
     for (const char* window : {"my_shop", "purchase_shop"})
-        CHECK_MESSAGE(audit.FailureCount(window) == audit.FailureCount(window, "#title"), window,
-                      " must contain every notice line.");
+        CHECK_MESSAGE(audit.FailureCount(window) == 0, window, " must contain every visible text line.");
     // Legacy's MU Helper keeps native's positions, its labels clipped to native's room (marquee);
     // what still collides at large text sizes is reported, not required away.
     CHECK_MESSAGE(audit.ThemeFailureCount("modern", "mu_helper_config") == 0,

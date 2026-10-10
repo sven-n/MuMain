@@ -35,7 +35,7 @@
 			<div class="item-count" data-for="c : grid_cells"><span class="item-count-text counter-scaled" data-if="c.count != ''"
 			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
 		</div>
-		<span class="sharp-text" id="title" data-style-font-size="text_px + 'px'">{{title}}</span>
+		<span class="sharp-text marquee" id="title" data-style-font-size="text_px + 'px'">{{title}}</span>
 
 		<!-- Shop name. Stock RmlUi <input>: it owns the edit buffer, caret, selection and IME, and
 		     two-way binds the committed value to MyShopRmlModel::shopTitle. Deliberately NOT
