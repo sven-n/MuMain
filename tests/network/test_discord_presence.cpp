@@ -12,6 +12,7 @@
 #include "Integration/Discord/PresenceMode.h"
 #include "Integration/Discord/PresenceText.h"
 #include "Integration/Discord/RpcCommands.h"
+#include "Integration/Discord/WideFormat.h"
 
 #include "json.hpp"
 
@@ -160,6 +161,19 @@ TEST_CASE("Discord presence mode round-trips through its config value [discord]"
         CHECK(ParsePresenceMode(PresenceModeName(mode)) == mode);
     }
     CHECK(ParsePresenceMode(L"typo") == DefaultPresenceMode);
+}
+
+TEST_CASE("Discord presence hides the character unless the player asks for it [discord]")
+{
+    CHECK(DefaultPresenceMode == PresenceMode::HideDetails);
+}
+
+TEST_CASE("Discord presence formats translated texts of any length [discord]")
+{
+    const std::wstring longName(300, L'x');
+    const std::wstring text = FormatWide(L"In %ls", longName.c_str());
+    CHECK(text == L"In " + longName);
+    CHECK(FormatWide(L"Party %d/%d", 3, 5) == L"Party 3/5");
 }
 
 TEST_CASE("Discord presence shows character, location and party [discord]")
