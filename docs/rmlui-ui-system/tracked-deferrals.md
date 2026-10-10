@@ -195,13 +195,16 @@ Step 2 implemented on 2026-10-10: both event entry windows now wrap complete des
 bounded scroll panes, with wrapping level labels and a separate scrollable level list when
 needed. The native font floor is unchanged. Automated event geometry passes; in-game checks
 remain pending. See [migration-ledger.md](migration-ledger.md#event-entry-text-follow-up).
+Step 3 implemented on 2026-10-10: both personal-shop views flow their notices in a bounded,
+scrollable pane; only the legacy title's compact fit remains for step 5. See
+[migration-ledger.md](migration-ledger.md#personal-shop-notice-follow-up).
 
 | Group | Initial failing cases (before its layout fix) | Change / remaining plan |
 |---|---|---|
 | Blood Castle entry | Character-count splitting, fitting against fixed 72/190-unit boxes, and absolute description/button rows caused overflow and overlap. | Implemented: complete paragraph in a bounded wrapping pane, wrapping title and level labels, and scrollable level list when needed. In-game confirmation pending. |
 | Devil Square entry | Six translated fragments occupied fixed rows in `event_entry.rcss` / `devil_square_enter.rcss`. | Implemented: all six fragments flow in order inside the description pane. Enabled/locked bands, entry requests and exit actions are preserved. In-game confirmation pending. |
 | MU Helper config | Legacy binds native-size text on narrow labels; both themes use tightly packed checkbox, numeric-field and Setting-button positions. | Give labels explicit available widths and reflow the affected rows in all three tabs. Verify class-dependent layouts, including Summoner recovery and Dark Lord raven controls. |
-| Personal-shop warnings | Legacy `my_shop` and `purchase_shop` use fixed notice rows with `white-space: nowrap` and `overflow: hidden`. Modern has its own typography but retains fixed warning offsets. | Replace clipped, independent notice rows with bounded wrapping groups in both seller and buyer views. Keep warning emphasis, full translated text, native grids, name entry and shop controls. |
+| Personal-shop warnings | Legacy `my_shop` and `purchase_shop` use fixed notice rows with `white-space: nowrap` and `overflow: hidden`. Modern has its own typography but retains fixed warning offsets. | Implemented: each row wraps in native's three groups inside one bounded, scrollable pane shared by both views (`shop_notice.rcss`). Warning emphasis, grids, name entry and controls kept. The legacy title still touches the close target in de/es/ru at 1.5x/2x (step 5). |
 
 Implementation order, with one focused change per concern:
 
@@ -219,7 +222,7 @@ Implementation order, with one focused change per concern:
    The pilot also wraps level labels and scrolls their list when needed; reducing the native
    minimum or extending `.native-fit` was unnecessary. The modern footer now has a visible exit
    button using the shared modern icon-button styling.
-3. **Fix personal-shop notices.** Apply the flow pattern to both `my_shop` and `purchase_shop`.
+3. **Fix personal-shop notices — implemented.** Apply the flow pattern to both `my_shop` and `purchase_shop`.
    Reserve room between the item grid/status and bottom controls, remove notice clipping, and
    keep every warning and Zen-only statement reachable. Use a bounded scroll pane only where
    the full text cannot fit at the retained readable size.

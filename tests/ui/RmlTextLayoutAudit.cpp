@@ -113,11 +113,19 @@ bool OwnControl(Rml::Element& label, Rml::Element& control)
     return !control.GetId().empty() && label.GetId() == control.GetId() + "_label";
 }
 
+// The box RmlUi clips an overflowing element's children to (its padding box unless changed).
+Bounds ClipBox(Rml::Element& element)
+{
+    Rml::Vector2f point, size;
+    UI::RmlBridge::DrawnBox(element, element.GetClipArea(), point, size);
+    return {point.x, point.y, point.x + size.x, point.y + size.y};
+}
+
 std::string ClipReason(Rml::Element& text, const Bounds& ink)
 {
     for (auto* parent = text.GetParentNode(); parent != nullptr; parent = parent->GetParentNode())
     {
-        const Bounds clip = Box(*parent);
+        const Bounds clip = ClipBox(*parent);
         const auto& style = parent->GetComputedValues();
         if (style.overflow_x() != Rml::Style::Overflow::Visible &&
             (ink.left < clip.left - PixelTolerance || ink.right > clip.right + PixelTolerance))
@@ -134,7 +142,7 @@ Bounds PaintedBounds(Rml::Element& element, Bounds bounds)
 {
     for (auto* parent = element.GetParentNode(); parent != nullptr; parent = parent->GetParentNode())
     {
-        const Bounds clip = Box(*parent);
+        const Bounds clip = ClipBox(*parent);
         const auto& style = parent->GetComputedValues();
         if (style.overflow_x() != Rml::Style::Overflow::Visible)
         {
@@ -247,7 +255,10 @@ void UI::Tests::RmlTextLayoutAudit::InspectText(Rml::ElementText& text, Rml::Ele
         if (painted.right > painted.left && painted.bottom > painted.top && !Contains(panelBox, painted))
             AddReason(reason, "panel-overflow");
         if (!reason.empty())
+        {
             ++m_Failures[scenario.window];
+            ++m_ElementFailures[{scenario.window, Name(*label)}];
+        }
         WriteScenario(m_Lines, scenario);
         m_Lines << ',' << Csv(Name(*label)) << ',' << index++ << ',' << text.GetComputedValues().font_size()
             << ',' << text.GetComputedValues().font_size() * UI::RmlBridge::DrawnScale(text) << ',';
@@ -293,6 +304,12 @@ size_t UI::Tests::RmlTextLayoutAudit::FailureCount(const std::string& window) co
 {
     const auto it = m_Failures.find(window);
     return it == m_Failures.end() ? 0 : it->second;
+}
+
+size_t UI::Tests::RmlTextLayoutAudit::FailureCount(const std::string& window, const std::string& element) const
+{
+    const auto it = m_ElementFailures.find({window, element});
+    return it == m_ElementFailures.end() ? 0 : it->second;
 }
 
 void UI::Tests::RmlTextLayoutAudit::Finish(size_t expectedScenarios)

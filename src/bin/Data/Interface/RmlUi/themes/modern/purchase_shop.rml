@@ -4,6 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="item_grid.rcss"/>
 	<link type="text/rcss" href="purchase_shop.rcss"/>
+	<link type="text/rcss" href="shop_notice.rcss"/>
 </head>
 <body data-model="purchase_shop">
 	<!-- CPurchaseShopInventory (PurchaseShopInventory.h): the frame, the item grid, the items C++
@@ -53,14 +54,22 @@
 			<span id="shop_owner_text" class="pshop-title-strip-text">{{shop_owner_text}}</span>
 		</div>
 
-		<span class="warning-label">{{warning_label}}</span>
-		<span class="warning-line line-1">{{selling_price_line}}</span>
-		<span class="warning-line line-2">{{verify_line}}</span>
-		<span class="warning-line line-3">{{already_in_store_line}}</span>
-		<span class="warning-line line-4">{{cancel_purchased_line}}</span>
-		<span class="warning-line line-5">{{cant_be_returned_line}}</span>
-		<span class="warning-label-2 line-6">{{all_item_trading_line}}</span>
-		<span class="warning-label-2 line-7">{{zen_only_line}}</span>
+		<div id="shop_notice" class="scroll-pane shop-notice">
+			<div class="notice-group">
+				<div class="notice-line notice-warning warning-label">{{warning_label}}</div>
+			</div>
+			<div class="notice-group warning-line">
+				<div class="notice-line">{{selling_price_line}}</div>
+				<div class="notice-line">{{verify_line}}</div>
+				<div class="notice-line">{{already_in_store_line}}</div>
+				<div class="notice-line">{{cancel_purchased_line}}</div>
+				<div class="notice-line">{{cant_be_returned_line}}</div>
+			</div>
+			<div class="notice-group notice-warning warning-label">
+				<div class="notice-line">{{all_item_trading_line}}</div>
+				<div class="notice-line">{{zen_only_line}}</div>
+			</div>
+		</div>
 
 		<div id="btn_exit" class="modern-icon-btn-px pshop-btn-exit" data-event-click="purchase_shop_exit_click">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>

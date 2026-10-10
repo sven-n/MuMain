@@ -24,7 +24,7 @@ constexpr int SmallPercent = 75;
 constexpr float NormalMinimum = 11.f;
 constexpr float NormalMaximum = 16.f;
 constexpr int ExpectedDocuments = 50;
-constexpr size_t ExpectedScenarios = 930;
+constexpr size_t ExpectedScenarios = 1290;
 constexpr float PixelTolerance = 1.f;
 constexpr size_t BloodLevelCount = 8;
 constexpr size_t DevilLevelCount = 7;
@@ -177,6 +177,26 @@ void CheckEvent(RmlLayoutFixture& fixture, Rml::ElementDocument& document, const
     CheckLevelAccess(fixture, *levels);
 }
 
+void CheckShop(RmlLayoutFixture& fixture, Rml::ElementDocument& document)
+{
+    auto* notice = document.GetElementById("shop_notice");
+    REQUIRE(notice != nullptr);
+    Rml::ElementList lines;
+    notice->QuerySelectorAll(lines, ".notice-line");
+    CHECK(lines.size() == 8);
+    Rml::Vector2f noticePosition, noticeSize, exitPosition, exitSize;
+    REQUIRE(UI::RmlBridge::DrawnBox(*notice, Rml::BoxArea::Border, noticePosition, noticeSize));
+    REQUIRE(UI::RmlBridge::DrawnBox(*document.GetElementById("btn_exit"), Rml::BoxArea::Border, exitPosition, exitSize));
+    CHECK(noticePosition.y + noticeSize.y <= exitPosition.y + PixelTolerance);
+    if (auto* opening = document.GetElementById("still_opening_line"))
+    {
+        Rml::Vector2f openingPosition, openingSize;
+        REQUIRE(UI::RmlBridge::DrawnBox(*opening, Rml::BoxArea::Border, openingPosition, openingSize));
+        CHECK(openingPosition.y + openingSize.y <= noticePosition.y + PixelTolerance);
+    }
+    CheckScrollPane(fixture, *notice);
+}
+
 void RunScenario(RmlLayoutFixture& fixture, RmlTextLayoutAudit& audit, const std::string& markup,
                  const RmlTextLayoutAudit::Scenario& scenario, int character)
 {
@@ -197,6 +217,7 @@ void RunScenario(RmlLayoutFixture& fixture, RmlTextLayoutAudit& audit, const std
     ApplyNativeSizes(*document, viewport);
     fixture.Refresh();
     if (scenario.window.ends_with("_enter")) CheckEvent(fixture, *document, scenario.window);
+    if (scenario.window.ends_with("_shop")) CheckShop(fixture, *document);
     const float expectedFloor = UI::Scaling::CachedFontPointSize(UI::Scaling::FontRole::Normal) * NormalMinimum / NormalMaximum;
     CHECK(UI::Scaling::MinimumTextPixelSize(UI::Scaling::FontRole::Normal) == doctest::Approx(expectedFloor));
     audit.Inspect(*document, scenario);
@@ -204,7 +225,7 @@ void RunScenario(RmlLayoutFixture& fixture, RmlTextLayoutAudit& audit, const std
     fixture.Refresh();
 }
 
-void RunEventDocument(RmlLayoutFixture& fixture, RmlTextLayoutAudit& audit,
+void RunSweep(RmlLayoutFixture& fixture, RmlTextLayoutAudit& audit,
                       RmlTextLayoutAudit::Scenario scenario, const std::string& markup)
 {
     for (Rml::Vector2i viewport : {SmallViewport, Rml::Vector2i{1280, 720}, Rml::Vector2i{1920, 1080}})
@@ -223,9 +244,9 @@ void RunEventDocument(RmlLayoutFixture& fixture, RmlTextLayoutAudit& audit,
 void RunDocument(RmlLayoutFixture& fixture, RmlTextLayoutAudit& audit,
                  RmlTextLayoutAudit::Scenario scenario, const std::string& markup)
 {
-    if (scenario.window.ends_with("_enter"))
+    if (scenario.window.ends_with("_enter") || scenario.window.ends_with("_shop"))
     {
-        RunEventDocument(fixture, audit, scenario, markup);
+        RunSweep(fixture, audit, scenario, markup);
         return;
     }
     const bool helper = scenario.window == "mu_helper_config";
@@ -247,7 +268,7 @@ void RunDocument(RmlLayoutFixture& fixture, RmlTextLayoutAudit& audit,
 }
 } // namespace
 
-TEST_CASE("rollout 2 contains event text and records remaining small-scale defects [ui][text-layout]")
+TEST_CASE("rollout 2 contains event and shop text and records remaining small-scale defects [ui][text-layout]")
 {
     const char* directory = std::getenv("MU_RML_TEXT_LAYOUT_CASES");
     REQUIRE_MESSAGE(directory != nullptr, "Run this diagnostic through prepare_rml_text_layout.py or CTest.");
@@ -272,6 +293,9 @@ TEST_CASE("rollout 2 contains event text and records remaining small-scale defec
     audit.Finish(ExpectedScenarios);
     for (const char* window : {"blood_castle_enter", "devil_square_enter"})
         CHECK_MESSAGE(audit.FailureCount(window) == 0, window, " must contain every visible text line.");
-    for (const char* window : {"my_shop", "purchase_shop", "mu_helper_config"})
-        CHECK_MESSAGE(audit.FailureCount(window) > 0, window, " must reproduce the remaining baseline defects.");
+    // The shop titles are compact labels left to bounded fitting; every notice line must fit.
+    for (const char* window : {"my_shop", "purchase_shop"})
+        CHECK_MESSAGE(audit.FailureCount(window) == audit.FailureCount(window, "#title"), window,
+                      " must contain every notice line.");
+    CHECK_MESSAGE(audit.FailureCount("mu_helper_config") > 0, "mu_helper_config must reproduce the remaining baseline defects.");
 }

@@ -64,36 +64,10 @@
 .shop-btn-open  { left: 53px; decorator: image(shop-btn-open); }
 .shop-btn-close { left: 93px; decorator: image(shop-btn-close); }
 
-/* Former RenderTextInfo() -- same reference-pixel offsets the native RenderText() calls used. */
-.myshop-line {
-	position: absolute;
-	left: 30px;
-	font-family: "token(font-body)";
-	font-size: 1em;
-	white-space: nowrap; /* one native line each */
-	/* Cut at the frame's inner edge (x 182): native runs a long line
-	   on under the inventory, which covers it; here nothing covers it. */
-	overflow: hidden;
-}
-.myshop-line-still-opening {
-	left: 0;
-	top: 200px;
-	width: 190px;
-	text-align: center;
-	color: #d78a00;
-	font-weight: bold;
-}
-.myshop-line-warning { color: #ff2d2f; font-weight: bold; }
+/* Former RenderTextInfo()'s colours; shop_notice.rcss lays the notice out. */
+.myshop-line-still-opening { color: #d78a00; }
+.myshop-line-warning { color: #ff2d2f; }
 .myshop-line-info { color: token(text-notice); }
-
-#warning_line { top: 230px; }
-#selling_price_line { top: 250px; }
-#please_verify_line { top: 262px; }
-#already_in_store_line { top: 274px; }
-#cancel_sold_line { top: 286px; }
-#cant_be_returned_line { top: 298px; }
-#all_item_trading_line { top: 320px; }
-#can_only_be_done_using_zen_line { top: 332px; }
 
 /* Native item grid: the first cell's top-left, in #panel's units. */
 .native-anchor { position: absolute; pointer-events: none; }
@@ -119,15 +93,6 @@
 
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
 #shop_title { width: calc(169px * var(--root-scale)); height: calc(26px * var(--root-scale)); padding: calc(6px * var(--root-scale)) calc(6px * var(--root-scale)) 0 calc(38px * var(--root-scale)); }
-#still_opening_line { width: calc(100% * var(--root-scale)); }
-#warning_line { width: calc(152px * var(--root-scale)); }
-#selling_price_line { width: calc(152px * var(--root-scale)); }
-#please_verify_line { width: calc(152px * var(--root-scale)); }
-#already_in_store_line { width: calc(152px * var(--root-scale)); }
-#cancel_sold_line { width: calc(152px * var(--root-scale)); }
-#cant_be_returned_line { width: calc(152px * var(--root-scale)); }
-#all_item_trading_line { width: calc(152px * var(--root-scale)); }
-#can_only_be_done_using_zen_line { width: calc(152px * var(--root-scale)); }
 
 /* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
    controls take their own. */

@@ -4,6 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="item_grid.rcss"/>
 	<link type="text/rcss" href="purchase_shop.rcss"/>
+	<link type="text/rcss" href="shop_notice.rcss"/>
 </head>
 <body data-model="purchase_shop">
 	<!-- CPurchaseShopInventory (PurchaseShopInventory.h): the frame, the item grid, the items C++
@@ -43,14 +44,22 @@
 		<div class="shop-title-strip"></div>
 		<span class="sharp-text" id="shop_owner_text" data-style-font-size="text_px + 'px'">{{shop_owner_text}}</span>
 
-		<span class="sharp-text warning-label" data-style-font-size="text_px + 'px'">{{warning_label}}</span>
-		<span class="sharp-text warning-line line-1" data-style-font-size="text_px + 'px'">{{selling_price_line}}</span>
-		<span class="sharp-text warning-line line-2" data-style-font-size="text_px + 'px'">{{verify_line}}</span>
-		<span class="sharp-text warning-line line-3" data-style-font-size="text_px + 'px'">{{already_in_store_line}}</span>
-		<span class="sharp-text warning-line line-4" data-style-font-size="text_px + 'px'">{{cancel_purchased_line}}</span>
-		<span class="sharp-text warning-line line-5" data-style-font-size="text_px + 'px'">{{cant_be_returned_line}}</span>
-		<span class="sharp-text warning-label-2 line-6" data-style-font-size="text_px + 'px'">{{all_item_trading_line}}</span>
-		<span class="sharp-text warning-label-2 line-7" data-style-font-size="text_px + 'px'">{{zen_only_line}}</span>
+		<div id="shop_notice" class="sharp-text sharp-flow scroll-pane shop-notice" data-style-font-size="text_px + 'px'">
+			<div class="notice-group">
+				<div class="notice-line notice-warning warning-label">{{warning_label}}</div>
+			</div>
+			<div class="notice-group warning-line">
+				<div class="notice-line">{{selling_price_line}}</div>
+				<div class="notice-line">{{verify_line}}</div>
+				<div class="notice-line">{{already_in_store_line}}</div>
+				<div class="notice-line">{{cancel_purchased_line}}</div>
+				<div class="notice-line">{{cant_be_returned_line}}</div>
+			</div>
+			<div class="notice-group notice-warning warning-label">
+				<div class="notice-line">{{all_item_trading_line}}</div>
+				<div class="notice-line">{{zen_only_line}}</div>
+			</div>
+		</div>
 
 		<div id="btn_exit" class="shop-btn-exit" data-event-click="purchase_shop_exit_click"></div>
 	</div>

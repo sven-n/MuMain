@@ -58,35 +58,10 @@
 	pointer-events: none;
 }
 
-/* Static warning notice below the grid -- semantic red/gold match legacy exactly (meaning, not
-   theme palette), same convention as my_inventory.rcss's tt-line colors. */
-.warning-label, .warning-label-2 {
-	position: absolute;
-	left: 30px;
-	color: #ff2d2f;
-	font-weight: bold;
-	font-family: "token(font-body)";
-	font-size: 12px;
-	white-space: nowrap;
-	pointer-events: none;
-}
-.warning-label { top: 230px; }
-.warning-line {
-	position: absolute;
-	left: 30px;
-	color: #f7ce4d;
-	font-family: "token(font-body)";
-	font-size: 12px;
-	white-space: nowrap;
-	pointer-events: none;
-}
-.line-1 { top: 250px; }
-.line-2 { top: 262px; }
-.line-3 { top: 274px; }
-.line-4 { top: 286px; }
-.line-5 { top: 298px; }
-.line-6 { top: 320px; }
-.line-7 { top: 332px; }
+/* Static warning notice -- semantic red/gold match legacy exactly (meaning, not theme palette),
+   same convention as my_inventory.rcss's tt-line colors. shop_notice.rcss lays it out. */
+.warning-label { color: #ff2d2f; }
+.warning-line { color: #f7ce4d; }
 
 /* Single exit button, centered: (190-37)/2. */
 .pshop-btn-exit {

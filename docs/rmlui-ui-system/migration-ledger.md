@@ -143,8 +143,28 @@ In-game checks before signing off this pilot:
   1920x1080. Check a longer translation and 1.5x/2x OS scale where available, including legacy
   stretched button art and modern footer icon visibility.
 
-Personal-shop notices are the next rollout step; MU Helper remains after that. Rollout 2 stays
-open until its remaining fixes and in-game checks are complete.
+## Personal-shop notice follow-up
+
+2026-10-10: rollout 2, step 3 implemented. The seller (`my_shop`) and buyer (`purchase_shop`)
+notices no longer use fixed, clipped rows. Each native row is its own wrapping block, kept in
+native's three groups (the warning heading, the five notice rows, the two-row Zen-only warning),
+inside one bounded pane between the item grid and the buttons; `shop_notice.rcss` in each theme
+lays it out for both windows, and each window's stylesheet keeps its own colours. Text that does
+not fit scrolls. "Still opening" sits in its own band above the pane, with room for two lines.
+Legacy's buyer title and shop-owner name lost a `margin-left` centring term that misplaced them
+at every UI scale but 75%.
+
+The runner now covers 1290 scenarios; the shops run the event sweep (420 cases). Every notice
+line passes containment in both themes, five languages and 1x/1.5x/2x OS scale, the pane ends
+above the buttons and below "Still opening", and its last group is reachable by scrolling. The
+audit now clips at each element's RmlUi clip area (the padding box) rather than its content box.
+Remaining shop defects are the legacy title touching the corner close target in German, Spanish
+and Russian at 1.5x/2x: compact-label fitting, step 5. Seen in game, both shops in both themes
+at 1280x720 / 100% and legacy at 1920x1080 / 150%, through `$win myshop` / `$win purchaseshop`;
+an opened store's "Still opening", a real purchase and theme changes while shown are unchecked.
+
+MU Helper labels are the next rollout step. Rollout 2 stays open until its remaining fixes and
+in-game checks are complete.
 
 ## Login and character select
 

@@ -23,6 +23,8 @@ public:
     void Inspect(Rml::ElementDocument& document, const Scenario& scenario);
     void Finish(size_t expectedScenarios);
     size_t FailureCount(const std::string& window) const;
+    // Failing lines of one element, by the name text-lines.csv records.
+    size_t FailureCount(const std::string& window, const std::string& element) const;
 
 private:
     void InspectText(Rml::ElementText& text, Rml::Element& panel,
@@ -30,6 +32,7 @@ private:
     std::ofstream m_Lines;
     std::ofstream m_Scenarios;
     std::map<std::string, size_t> m_Failures;
+    std::map<std::pair<std::string, std::string>, size_t> m_ElementFailures;
     size_t m_ScenarioCount = 0;
 };
 } // namespace UI::Tests

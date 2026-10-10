@@ -4,6 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="item_grid.rcss"/>
 	<link type="text/rcss" href="my_shop.rcss"/>
+	<link type="text/rcss" href="shop_notice.rcss"/>
 </head>
 <body data-model="my_shop">
 	<!-- CMyShopInventory (MyShopInventory.h): the frame, the item grid, the items C++ draws live into
@@ -55,18 +56,27 @@
 		<div id="btn_close" class="shop-btn shop-btn-close" data-class-locked="close_locked"
 		     data-event-click="my_shop_close_click" data-attr-data-hint="close_tooltip"></div>
 
-		<!-- Former RenderTextInfo() -- fixed instructional text at the same reference-pixel offsets
-		     the native RenderText() calls used, static except still_opening's visibility. Colors are
-		     plain RCSS (myshop-line-* classes), not data-bound -- fixed decorative constants. -->
-		<div id="still_opening_line" class="sharp-text myshop-line myshop-line-still-opening" data-class-hidden="!show_still_opening" data-style-font-size="text_px + 'px'">{{still_opening_text}}</div>
-		<div id="warning_line" class="sharp-text myshop-line myshop-line-warning" data-style-font-size="text_px + 'px'">{{warning_text}}</div>
-		<div id="selling_price_line" class="sharp-text myshop-line myshop-line-info" data-style-font-size="text_px + 'px'">{{selling_price_text}}</div>
-		<div id="please_verify_line" class="sharp-text myshop-line myshop-line-info" data-style-font-size="text_px + 'px'">{{please_verify_text}}</div>
-		<div id="already_in_store_line" class="sharp-text myshop-line myshop-line-info" data-style-font-size="text_px + 'px'">{{already_in_store_text}}</div>
-		<div id="cancel_sold_line" class="sharp-text myshop-line myshop-line-info" data-style-font-size="text_px + 'px'">{{cancel_sold_text}}</div>
-		<div id="cant_be_returned_line" class="sharp-text myshop-line myshop-line-info" data-style-font-size="text_px + 'px'">{{cant_be_returned_text}}</div>
-		<div id="all_item_trading_line" class="sharp-text myshop-line myshop-line-warning" data-style-font-size="text_px + 'px'">{{all_item_trading_text}}</div>
-		<div id="can_only_be_done_using_zen_line" class="sharp-text myshop-line myshop-line-warning" data-style-font-size="text_px + 'px'">{{can_only_be_done_using_zen_text}}</div>
+		<!-- Former RenderTextInfo(): native's rows, each a block that wraps, in its three
+		     groups inside one bounded pane (shop_notice.rcss). -->
+		<div data-class-hidden="!show_still_opening">
+			<div id="still_opening_line" class="sharp-text sharp-flow centred shop-still-opening myshop-line-still-opening" data-style-font-size="text_px + 'px'"><span class="notice-line">{{still_opening_text}}</span></div>
+		</div>
+		<div id="shop_notice" class="sharp-text sharp-flow scroll-pane shop-notice" data-style-font-size="text_px + 'px'">
+			<div class="notice-group">
+				<div id="warning_line" class="notice-line notice-warning myshop-line-warning">{{warning_text}}</div>
+			</div>
+			<div class="notice-group myshop-line-info">
+				<div id="selling_price_line" class="notice-line">{{selling_price_text}}</div>
+				<div id="please_verify_line" class="notice-line">{{please_verify_text}}</div>
+				<div id="already_in_store_line" class="notice-line">{{already_in_store_text}}</div>
+				<div id="cancel_sold_line" class="notice-line">{{cancel_sold_text}}</div>
+				<div id="cant_be_returned_line" class="notice-line">{{cant_be_returned_text}}</div>
+			</div>
+			<div class="notice-group notice-warning myshop-line-warning">
+				<div id="all_item_trading_line" class="notice-line">{{all_item_trading_text}}</div>
+				<div id="can_only_be_done_using_zen_line" class="notice-line">{{can_only_be_done_using_zen_text}}</div>
+			</div>
+		</div>
 	</div>
 </body>
 </rml>
