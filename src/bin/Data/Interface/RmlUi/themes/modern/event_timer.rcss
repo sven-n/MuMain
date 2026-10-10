@@ -35,8 +35,10 @@ body { pointer-events: none; }
 .timer-text.imminent { color: token(semantic-danger); }
 .timer-text.expiring { color: token(semantic-danger); }
 
-/* Each line's box, in the panel's reference px, counter-scaled with the line. */
-.timer-text { width: calc(var(--box-width) * var(--root-scale)); }
+/* Each line's box, in the panel's reference px, counter-scaled with the line: the frame's width,
+   or the Imperial Guardian's 110 centred on it. */
+.timer-text { --box-width: 124px; width: calc(var(--box-width) * var(--root-scale)); }
+#panel.empire-guardian .timer-text { left: 7px; --box-width: 110px; }
 
 /* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
 #panel.slot-placed { pointer-events: none; }

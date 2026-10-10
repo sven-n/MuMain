@@ -19,9 +19,7 @@
 # state is left, and delete the line when the document stops binding geometry; the checker prints
 # entries that are no longer needed.
 
-blood_castle_time.rml: debt -- the text box's left is EventTimerView's caller constant, not a theme's; C++ also uses the width for its shrink-to-box measurement, which can read the width back off the element instead
 castle_window.rml: state -- a map item's bars are lengths, RenderCastleItem()'s own gauge widths. The tab positions are in each theme's RCSS
-chaos_castle_time.rml: debt -- the text box's left is EventTimerView's caller constant, not a theme's; C++ also uses the width for its shrink-to-box measurement, which can read the width back off the element instead
 char_info_balloon.rml: state -- world-projected balloon positions, per frame
 chat_log.rml: state -- panel and well heights follow the user resize, in dp
 command_window.rml: state -- target marker follows the selected command
@@ -29,7 +27,6 @@ crywolf.rml: state -- the success/failure banner and the rank label slide in and
 cursed_temple_system.rml: state -- the mini map's markers sit at their projected points, each with its own sprite size; the buttons are the theme's
 doppelganger_frame.rml: state -- the monsters' gauge is a length from m_fMonsterGauge, stacked in pieces as monsters get through; the Ice Walker's and each party member's marker is their own position along the path (59 + 167 * position)
 duel_watch_frame.rml: state -- the health and shield gauges are lengths from the fighters' rates, and the left fighter's bars are right-aligned so their left moves with the rate too (the plan's gauge carve-out)
-empire_guardian_timer.rml: debt -- the text box's left is EventTimerView's caller constant, not a theme's; C++ also uses the width for its shrink-to-box measurement, which can read the width back off the element instead
 generic_confirm_dialog.rml: state -- the timed confirm's progress bar is a fraction of its countdown
 generic_menu_dialog.rml: debt -- the native box each menu replaces, as its caller describes it (GenericMenuConfig::nativeFrame): the frame height and the text, divider and button tops differ per menu, and legacy reproduces them from bound numbers; a menu kind the theme places would replace them
 hud_status.rml: state -- the macro cooldown's bar is a gauge length, the fraction of the cooldown left, and the cooldown centres on the world the open docks leave uncovered

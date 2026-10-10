@@ -9,17 +9,14 @@ namespace mu::ui::window
 // line carries how pressing it is (EventTimerView::Line::state), which the theme colours.
 struct EventTimerRmlModel
 {
-    // The box every line is centred on, reference px from the frame's left.
-    float boxLeft = 0.f, boxWidth = 124.f;
+    float textPx = 0.f; // the native text sizes in physical px
+    float bigTextPx = 0.f;
 
     Rml::String killsText; // the first line; empty: not drawn
-    float killsTextPx = 0.f;
     Rml::String killsState;
     Rml::String timeLeftText;
-    float timeLeftTextPx = 0.f;
     Rml::String timeLeftState;
     Rml::String timeText;
-    float timeTextPx = 0.f;
     Rml::String timeState;
 };
 } // namespace mu::ui::window

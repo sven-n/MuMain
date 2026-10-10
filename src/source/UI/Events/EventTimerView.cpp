@@ -18,28 +18,15 @@ using namespace mu::ui::window;
 
 namespace
 {
-// RenderText(x, y, text, boxWidth, 0, RT3_SORT_CENTER) in `font`: the size it drew `text` at.
-float TextPxInBox(UI::Scaling::FontRole role, HFONT font, const std::wstring& text, float boxWidth)
-{
-    if (text.empty())
-        return 0.f;
-    g_pRenderText->SetFont(font);
-    const int width = g_pRenderText->MeasureText(text.c_str(), static_cast<int>(text.size())).cx;
-    return UI::RmlBridge::NativeTextPxInBox(role, static_cast<float>(width), boxWidth);
-}
-
 void BindTimerModel(Rml::DataModelConstructor& c, EventTimerRmlModel& model)
 {
-    c.Bind("box_left", &model.boxLeft);
-    c.Bind("box_width", &model.boxWidth);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("big_text_px", &model.bigTextPx);
     c.Bind("kills_text", &model.killsText);
-    c.Bind("kills_text_px", &model.killsTextPx);
     c.Bind("kills_state", &model.killsState);
     c.Bind("time_left_text", &model.timeLeftText);
-    c.Bind("time_left_text_px", &model.timeLeftTextPx);
     c.Bind("time_left_state", &model.timeLeftState);
     c.Bind("time_text", &model.timeText);
-    c.Bind("time_text_px", &model.timeTextPx);
     c.Bind("time_state", &model.timeState);
 }
 } // namespace
@@ -54,8 +41,7 @@ void mu::ui::window::EventTimerView::Build()
     m_View.Ensure();
 }
 
-void mu::ui::window::EventTimerView::Sync(bool visible, const Line& first, const Line& second,
-                                          const Line& time, float boxLeft, float boxWidth)
+void mu::ui::window::EventTimerView::Sync(bool visible, const Line& first, const Line& second, const Line& time)
 {
     Build();
     if (!m_View.Document())
@@ -66,21 +52,18 @@ void mu::ui::window::EventTimerView::Sync(bool visible, const Line& first, const
         return;
 
 
-    SyncField(m_View.Binder(), &EventTimerRmlModel::boxLeft, "box_left", boxLeft);
-    SyncField(m_View.Binder(), &EventTimerRmlModel::boxWidth, "box_width", boxWidth);
-    auto syncLine = [&](const Line& line, UI::Scaling::FontRole role, HFONT font,
-                        Rml::String EventTimerRmlModel::* text, const char* textName, float EventTimerRmlModel::* px,
-                        const char* pxName, Rml::String EventTimerRmlModel::* state, const char* stateName)
+    SyncField(m_View.Binder(), &EventTimerRmlModel::textPx, "text_px",
+              UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Normal));
+    SyncField(m_View.Binder(), &EventTimerRmlModel::bigTextPx, "big_text_px",
+              UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Big));
+    auto syncLine = [&](const Line& line, Rml::String EventTimerRmlModel::* text, const char* textName,
+                        Rml::String EventTimerRmlModel::* state, const char* stateName)
     {
         SyncField(m_View.Binder(), text, textName, StringUtils::WideToNarrow(line.text.c_str()));
-        SyncField(m_View.Binder(), px, pxName, TextPxInBox(role, font, line.text, boxWidth));
         SyncField(m_View.Binder(), state, stateName, Rml::String(line.state));
     };
-    syncLine(first, UI::Scaling::FontRole::Normal, g_hFont, &EventTimerRmlModel::killsText, "kills_text",
-             &EventTimerRmlModel::killsTextPx, "kills_text_px", &EventTimerRmlModel::killsState, "kills_state");
-    syncLine(second, UI::Scaling::FontRole::Normal, g_hFont, &EventTimerRmlModel::timeLeftText, "time_left_text",
-             &EventTimerRmlModel::timeLeftTextPx, "time_left_text_px", &EventTimerRmlModel::timeLeftState,
+    syncLine(first, &EventTimerRmlModel::killsText, "kills_text", &EventTimerRmlModel::killsState, "kills_state");
+    syncLine(second, &EventTimerRmlModel::timeLeftText, "time_left_text", &EventTimerRmlModel::timeLeftState,
              "time_left_state");
-    syncLine(time, UI::Scaling::FontRole::Big, g_hFontBig, &EventTimerRmlModel::timeText, "time_text",
-             &EventTimerRmlModel::timeTextPx, "time_text_px", &EventTimerRmlModel::timeState, "time_state");
+    syncLine(time, &EventTimerRmlModel::timeText, "time_text", &EventTimerRmlModel::timeState, "time_state");
 }

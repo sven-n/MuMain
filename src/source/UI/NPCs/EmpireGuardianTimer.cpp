@@ -115,7 +115,7 @@ void CEmpireGuardianTimer::SyncView()
         mu_swprintf(szText, L"%.2d:%.2d(%d)", iMinute, iSecond % 60, m_iMonsterCount);
         time = {szText, timeState};
     }
-    m_View.Sync(IsVisible(), round, caption, time, TIMER_WINDOW_WIDTH / 2.f - 55.f, 110.f);
+    m_View.Sync(IsVisible(), round, caption, time);
 }
 
 bool CEmpireGuardianTimer::BtnProcess()

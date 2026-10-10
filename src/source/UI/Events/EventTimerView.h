@@ -37,10 +37,9 @@ public:
         const char* state = "normal";
     };
 
-    // Per frame, inside the window's CManager transform scope. Every line is centred on the box
-    // (reference px from the frame's left) and shrunk to its width.
-    void Sync(bool visible, const Line& first, const Line& second, const Line& time,
-              float boxLeft = 0.f, float boxWidth = 124.f);
+    // Per frame, inside the window's CManager transform scope. The theme centres every line on
+    // its box and shrinks it to the box's width (.native-fit).
+    void Sync(bool visible, const Line& first, const Line& second, const Line& time);
 
 private:
     UI::RmlBridge::ThemedView<EventTimerRmlModel> m_View;
