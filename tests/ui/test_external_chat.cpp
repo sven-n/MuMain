@@ -32,6 +32,14 @@ TEST_CASE("External chat keeps a Discord name longer than a character's, up to i
     CHECK(SenderLabel(Source::Discord, longName) == L"[Discord] " + longName.substr(0, MaxDisplayNameLength));
 }
 
+TEST_CASE("External chat recognises senders bridged from Discord by their prefix [ui][chat]")
+{
+    CHECK(IsBridgedSender(L"@Hero"));
+    CHECK_FALSE(IsBridgedSender(L"Hero"));
+    CHECK_FALSE(IsBridgedSender(L"@"));
+    CHECK_FALSE(IsBridgedSender(L""));
+}
+
 TEST_CASE("External chat takes the colours of its scope [ui][chat]")
 {
     CHECK(ScopeMessageType(Scope::Guild) == SEASON3B::TYPE_GUILD_MESSAGE);

@@ -50,4 +50,16 @@ struct Message
 
 // Shows the message in the chat log, in its scope and in the Discord view.
 void Show(const Message& message);
+
+// OpenMU's chat bridge (MUnique/OpenMU#1161) sends messages written in Discord
+// through the ordinary guild and alliance chat, as the linked character with
+// this prefix. Character names can't contain it, so a sender with it is a
+// Discord user and not a character.
+inline constexpr wchar_t BridgedSenderPrefix = L'@';
+
+[[nodiscard]] bool IsBridgedSender(std::wstring_view sender);
+
+// Shows a guild or alliance chat line of a bridged sender as a message from
+// Discord, named after the character without the prefix.
+void ShowBridged(Scope scope, std::wstring_view sender, std::wstring_view text);
 } // namespace UI::Chat::External

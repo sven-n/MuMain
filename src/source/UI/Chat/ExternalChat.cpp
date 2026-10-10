@@ -56,4 +56,19 @@ void Show(const Message& message)
     g_pChatListBox->AddExternalText(sender, text, ScopeMessageType(message.scope));
     App::Control::Events::RecordChatLine(sender.c_str(), text.c_str(), DiscordChatKind);
 }
+
+bool IsBridgedSender(std::wstring_view sender)
+{
+    return sender.size() > 1 && sender.front() == BridgedSenderPrefix;
+}
+
+void ShowBridged(Scope scope, std::wstring_view sender, std::wstring_view text)
+{
+    Message message;
+    message.source = Source::Discord;
+    message.scope = scope;
+    message.displayName = std::wstring(sender.substr(1));
+    message.text = std::wstring(text);
+    Show(message);
+}
 } // namespace UI::Chat::External
