@@ -29,6 +29,8 @@
     display: block;
     white-space: normal;
     word-break: break-word;
+    /* A line that fills the pane keeps its glyphs' side bearings inside the pane's clip. */
+    padding: 0 2px;
     pointer-events: none;
 }
 .entry-line + .entry-line { margin-top: 0.25em; }
