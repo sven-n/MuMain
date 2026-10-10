@@ -8,7 +8,7 @@
 // drew its windows in ascending GetLayerDepth() order (CNewUIManager::Render()), then the notices,
 // the scene windows (CUIMng) and the reconnect dialog; RmlUi sorts a context's documents by z-index
 // and keeps show/focus order only among documents of equal depth, which reproduces that order.
-// See docs/rmlui-ui-system/STATUS.md, "Stacking order".
+// See docs/rmlui-ui-system/building-new-ui.md, "Stacking order".
 namespace UI::RmlBridge
 {
 // The panels that stand over the HUD and its logs (the command windows).

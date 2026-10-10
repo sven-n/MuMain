@@ -4,8 +4,8 @@
 other doc in this directory.** Everything else in `docs/rmlui-ui-system/` is either an
 implementation of these principles on this specific codebase (`building-new-ui.md` for the C++ UI
 kit, `layout-and-scaling.md`, `theming-and-modding.md`, `window-placement.md`), or a
-status/reference report against all of the above (`STATUS.md`, `engine-findings.md`,
-`tracked-deferrals.md`). None of them repeat the reasoning here — if
+reference report against all of the above (`README.md`, `engine-findings.md`,
+`migration-ledger.md`). None of them repeat the reasoning here — if
 something below and something elsewhere in this directory ever seem to disagree, this file wins; go
 fix the other file.
 
@@ -14,7 +14,7 @@ migration's success criterion: not "the old UI now renders through RmlUi" but "a
 maintainable, resolution-independent UI framework." It is written to stand on its own —
 it does not assume familiarity with this repository's specific classes or history, only with
 RmlUi/RCSS in general. **This file changes rarely and should stay stable; project-specific status
-(what's done, what's still a gap, known open conflicts) belongs in `STATUS.md`, not here.**
+(what's done, what's still a gap) belongs in `README.md`'s "Known limits", not here.**
 
 ---
 
@@ -377,7 +377,8 @@ filled backgrounds instead of borders"), never on the theme's **name** (`GetActi
 same behavior, and coupling behavior to an identity string is exactly the kind of hidden,
 undiscoverable dependency §18–19's override system is meant to prevent. A theme wanting
 non-default C++ behavior should be **stating** that want (a manifest property, a data flag), not
-being **recognized by name**. See `STATUS.md` for known current violations of this rule.
+being **recognized by name**. `theme.ini`'s `[Capabilities]` is that statement here
+(`theming-and-modding.md`).
 
 ## 31. The Legacy Theme Is Not an Exemption From the Architecture
 
@@ -436,5 +437,5 @@ code, C++ presentation state machines, or historical framework abstractions RmlU
 
 ---
 
-**Next**: [`STATUS.md`](STATUS.md) for what's implemented against this document today and the
-known gaps.
+**Next**: [`README.md`](README.md) for what is built against this document and its known limits,
+then [`building-new-ui.md`](building-new-ui.md) before writing a window.

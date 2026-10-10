@@ -140,8 +140,7 @@ Three permanent shapes, following that boundary:
 ## Ownership: what the C++ side of a window may own
 
 `architecture-principles.md` §1 states the split; this section is the concrete test to apply while
-writing, derived from an ownership audit of the migrated windows (findings and affected screens in
-[`tracked-deferrals.md`](tracked-deferrals.md)'s ownership-boundary entry). The audit found game
+writing, derived from an ownership audit of the migrated windows. The audit found game
 behaviour well contained in C++ and presentation widely leaked out of RCSS — so these rules are
 about the second direction, which is where new code actually goes wrong.
 
@@ -214,6 +213,194 @@ and each theme binds the one it wants — no theme-name check anywhere (§30, §
 tabbed, both with a native control retained underneath. The first binds *only* its root transform
 and places ~65 controls by id in RCSS; the second binds its every label position, size, alignment,
 weight and colour, and its RCSS can change almost nothing. Copy the first.
+
+### What may still bind geometry
+
+The documents that still bind geometry, each with a `<!-- bound-geometry: <why> -->` marker: per-frame data (gauges, things that follow the
+pointer or scroll, windows that grow with their content, projected markers) and text measured the
+way the native renderer measured it. A list the server does not bound is not a reason: it flows in
+RCSS, as the duel spectators and score marks do.
+`root_x`/`root_y` and `panel_x`/`panel_y` stay apart: the first is the physical origin of a root
+scaled uniformly by `root_scale`, the second a reference-unit position inside a stretched `.screen`.
+
+`.sharp-text` counter-scaled tops, `MiniMap`/`WorldLabelLayer` marker coordinates, and
+`TitleSceneUI`'s loading bar are justified hybrids, recorded in the README's Known limits.
+
+Passing the guards establishes documented exceptions, not runtime correctness. The bound-geometry
+guard covers the four box offsets and the two sizes only: a bound `color`, `decorator` or
+`font-size` has the same override problem but is a judgement call per case, while a bound static
+coordinate is nearly always layout that belongs in RCSS. Widen it when a bound colour bites. The
+active UI transform has its own guard: `tools/check_layout_transform_users.py` keeps it to the
+infrastructure (the window manager's measuring scope, the text renderer, the inventory's screen
+scope, the tooltip's metric scope, each listed in the script with its reason).
+
+## Checklist for every new port (principles §27's workflow, condensed)
+
+1. **Layout intent traces to the original code's computed behaviour**, not its literal
+   default-case numbers (§2–3) — `buff_strip.rml`'s header derives `x = (iScreenWidth - 200) / 2`
+   from `SetPos()`'s four hardcoded pairs.
+2. Uses the `dp` anchor/stretch/center classes (`layout-and-scaling.md`) or a workspace slot
+   (`window-placement.md`) instead of C++-pushed rects, unless the position is genuinely per-frame.
+   A bound per-frame offset uses the unit of the sibling static CSS (`dp` ≠ `px`).
+3. Deliberate aspect-ratio/resolution behaviour: fixed, edge-anchored, centred or stretched (§7–8).
+4. C++ owns state, binding, events and game behaviour; RCSS owns layout, sizing and position
+   (§1, §16; `building-new-ui.md`'s ownership rules).
+5. The C++ class and the RmlUi assets are named for what the component is, renamed at port time
+   (§12).
+6. Both themes in the same pass. A rendering technique new to the port is verified at runtime
+   (`engine-findings.md`).
+7. Reuses existing primitives (`component-catalog.md`). For the modern theme, match the windows it
+   appears **beside** on screen (its dock group), not its nearest technical sibling; a docked
+   panel links `docked_panel_frame.rcss`.
+8. A new document gets its original window's layer depth in the stacking table (below).
+9. A window whose native hit box comes from live RCSS is clicked through at a non-100 % UI scale
+   (`layout-and-scaling.md`'s scale sweep).
+
+## Stacking order
+
+Every document's `z-index` is the layer depth of the original window (or render pass) it
+replaces, from one table (`UI/RmlBridge/RmlStackingOrder.cpp`), set when a themed document loads.
+The original drew its windows in ascending `GetLayerDepth()` order, then the notices, the scene
+windows, the login scene's message box and the reconnect dialog; RmlUi sorts a context's
+documents by `z-index` and keeps show/focus order only among equal depths, so
+`SyncDocumentVisibilityInFront()`/`Behind()` and focus only order documents of one depth. Passes
+outside the window list: object descriptions
+and the map name 0.5, notices 20, scene windows 30 (balloons 29, the remember-password prompt 31),
+loading and title screens 40, reconnect dialog 50. The shared tooltip is 10.69, above every window
+and under the message boxes (10.7): the original drew each tooltip at its owner's depth, where the
+chat log, the friends window and the HUD hid its rows. The top-right button row (the modern
+theme's choice) is its own document (`main_frame_top.rml`, 1.05: over the names, under every
+window, which dock over that corner). Native parts (item grids, 3D items) keep the native order
+and stay under the main context. `rml_stacking_order_tests` checks that every document the sources
+name has an entry.
+
+## Legacy parity rules
+
+Differences to the original found by the paired comparison suites and fixed in shared places, so
+a new port inherits them:
+
+- **Scene gate.** A window `CSystem` updates only in the main scene still has a live document in
+  every scene. Its stacking-table entry marks it a main-scene document, and every such document is
+  suspended outside the main scene (`SuspendMainSceneDocumentsOutsideMainScene()`). The HUD's
+  documents also wait for the world to load (`CSystem::SyncMainSceneHudVisibility()`).
+- **Scroll thumb.** The legacy `.scroll-pane` thumb is the native 15x30 knob, not a proportional
+  bar; a list the original scrolled one row per wheel notch takes `mousescroll` itself
+  (`CMoveCommandWindow::RmlWheelList()`), since RmlUi scrolls 80 dp per notch.
+- **Button hover text.** A document's `data-hint` and a native button's `CTooltip` both use the
+  shared tooltip's `Config::Box::ButtonHint` (unframed, 2 units off the button, the other side
+  when there is no room); the framed box is for `RenderTipTextList()`.
+- **Hangul.** NanumGothic is a fallback face, so Korean game text draws in any family.
+- **Alpha test.** Art the original drew under `EnableAlphaTest()` (reference 0.25) stays invisible
+  while its fade is below a quarter (the Illusion Temple banner).
+- **Scene windows re-created per visit.** A `Create()` that resets model fields must mark them
+  dirty (the login fields) and reset what the original reset (the server list's chosen group).
+
+## Lessons from shipped ports
+
+Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porting patterns.
+
+**Input and focus**
+
+- **A text field's window claims the field's document.** While the player types,
+  `CManager::UpdateKeyEvent()` gives keys only to the window whose `TakesTypingFrom()` accepts the
+  focused field's document (`RmlUiRuntime::GetTypingDocument()`); the chat line, chat command,
+  Gold Bowman, MU Helper and friend windows claim theirs, or Enter/Escape never arrive.
+- **Focus, scroll pins and scroll rewinds are one-shot latches**, done once on the frame after the
+  view caught up — never per frame (that steals focus and kills the scrollbar). `CSystem::Show()`
+  runs `OpenningProcess()` before `ShowInterface()`, so arm there and consume in the sync.
+- **A native window behind an RmlUi document never sees a mouse press**
+  (`ProcessMouseButtonDown` consumes it while anything is hovered), though the wheel still reaches
+  it. Drive the gesture from the document (`UI::Social::PhotoViewerControl`).
+- **`UpdateMouseEvent()` returns `false` only to consume.** `CManager` stops dispatching at the
+  first `false`; a "not for me" guard must return `true` (an inventory guard once ate every drop
+  into the trade grid).
+- **A port can drop a side effect that was covering a bug** — `CUIMuHelper::Show()` released a
+  dead startup input box's focus, and without it every hotkey stayed suspended. Look for what a
+  removed call was hiding.
+
+**Layout and text**
+
+- **Click-through.** `IsMouseOverUI()` is true over any hovered `pointer-events: auto` element, so a
+  scroll pane over the world is a wall; the chat log's lines are `pointer-events: none` with the
+  scrollbar opted back in at every level, and hover/right-click moved to C++.
+- **Bottom-up lists**: a flex column with `margin-top: auto` on the first item, not
+  `justify-content: flex-end` (which pushes the earliest lines out of the scroll area); per-line
+  backgrounds need `align-items: flex-start`.
+- **A `.scroll-pane` inside a `transform: scale()` panel counter-scales itself out**
+  (`.counter-scaled`, its box `calc(Npx * var(--root-scale))` in RCSS), with rows at an explicit
+  width, not `100%` (`component-catalog.md`).
+- **A counter-scaled layer's lengths are RCSS**: `#panel` binds `--root-scale`, base.rcss's
+  `.sharp-text` / `.counter-scaled` cancel it, and the theme writes `width: calc(160px *
+  var(--root-scale))`. A number multiplied by `root_scale` in RML fails the bound-geometry guard.
+- **A label in a constricted box** that must keep native's position is a `.marquee`: one line,
+  `..` when longer, the whole text scrolling on hover (`RmlMarquee.h`). Text that may take more
+  lines wraps in a flow or a scroll pane instead (`event_entry`, `shop_notice.rcss`).
+- **`MeasureText()` returns reference units**, not pixels; `RenderText()` shrinks text wider than
+  its box — use `NativeTextPixelSizeInBox()` per text. Text the native renderer draws small is laid
+  out at `CachedFontPointSize()` and scaled down (the login scene lines).
+- **`overflow: hidden` does not clip under a panel's `transform: scale()`**; crop a bar with
+  `decorator: image(<sprite> scale-none left top)` on an element of the shown width, or an
+  untransformed box with `clip: always`.
+- **Centre a counter-scaled label in RCSS**, not by a C++-measured top: `.sharp-middle` centres it on its button's height and `.sharp-centre` on its
+  parent's width (`engine-findings.md`).
+- **Draw a window in the scale its slot is sized in.** The event HUDs were placed in the HUD's
+  UI-scaled units but drawn in the original's W/640 x H/480 stretch, so at 90 % they outgrew their
+  slots; they now draw at the HUD's own scale.
+- **Data expressions have no unary minus**: bind `-x` from C++.
+- **Class-specific controls are one tested C++ table bound as flags**
+  (`UI::MuHelper::ResolveClassFeatures()`), never RCSS — the themes cannot disagree.
+
+**Drawing**
+
+- **A window the original drew under every panel** (siege HUD, duel and battle-soccer boards)
+  takes its low depth from the stacking table; **one with a live 3D preview** draws it into a render
+  target in its own document (`UI::Items::ItemCameraTarget`, `UI/Events/EventItemEntryView`).
+- **Native 3D inside a document** goes through `UI::RmlBridge::RenderTarget`, so it z-orders with
+  the windows around it.
+- **World-anchored or shared legacy drawing** goes through the world-label layer's
+  `Overlay2DRecordScope`, which records `RenderText()`/`RenderColorQuadARGB()`/`RenderBitmap()`
+  and replays them into pooled elements; `CObject::PrepareFrame()` records them before any window
+  renders.
+- **`EnableAlphaBlend()` is additive** (ONE, ONE): `decorator: additive-fill(<colour>)` /
+  `additive-image(<colour> <image>)`.
+- **Textures are premultiplied on load** (`RmlUiRenderInterface::LoadTexture`).
+- **A texture cut by UVs, padded by the loader, or drawn mirrored** is an `<img rect="x y w h">` in
+  texels (mirrored: `transform: scale(-1, 1)`).
+- **A quad rotated in physical pixels** is a CSS `matrix()` built from three corners
+  (`UI/HUD/MiniMapLayout`).
+- **Image paths** in a themed document resolve from the theme folder (`../../../../Logo/…`); an
+  absolute `/Interface/…` path misses `Data` and draws a white quad.
+- **Animations the original stepped in `Render()`** move to `Update()`.
+- **One document and model per instance** (chat rooms, letters) through `ThemedView`'s
+  `modelPlaceholder` and `SetModelName()`.
+- **A block-scope `extern` inside `mu::ui::window`** declares a namespace member, not the global.
+- **Windows the original never showed** can carry latent crashes; exercise every size.
+
+## Event windows outside their event: `$preview`
+
+The event windows that draw only while a server runs their event are looked at with `$preview <event>`
+(`UI/Events/EventPreview.cpp`; `$preview` lists them, `$preview off` ends one). It fills a window
+through the setters its packets use and lets it draw off its map; the window sends nothing. Teleporting
+a game master to the map passes the map check but brings no event state, and the GM move does not
+create the siege minimap that a map join does. A preview is not a live event.
+
+- **Illusion Temple HUD**: its corner part (time, mini map, skill panel) is `#corner` in
+  `cursed_temple_system.rml`; a theme moves it with `left`/`top`, and C++ reads the offset back to
+  place its markers, digits, buttons and hit tests. Modern moves it left of the worn-equipment icons.
+  Its three hover tooltips show in both themes (native's kill-point zones start at each number's
+  centre, kept).
+- **Siege commander HUD**: `$preview siege` seeds members, NPCs and commands against the hero's
+  zoom-1 crop -- inside, on each edge and just outside -- so both zooms' clipping is exercised.
+
+The Blood Castle and Chaos Castle timers, the duel spectator list, the CryWolf result and the HUD
+status texts (`$preview status`; the crown switch lines show only at the switches) and the event
+result and progress boxes (`$preview bcresult`, `ccresult`, `dsrank`, `switchbox`) and the guild war
+time and result (`$preview guildwar`) look right. `$preview kanturu` fills the Kanturu entry window
+and `$preview notices` the centre-screen notices; `$dialog menu <name>` opens an NPC menu without its
+NPC.
+The Battle Soccer score, the duel frame, the Empire Guardian timer and the Doppelganger frame draw
+outside their event (`$win soccer full`, `duel`, `empiretimer`, `doppelframe`) and were checked in
+both themes.
 
 ## Naming
 
@@ -296,5 +483,5 @@ they talk over, and the native `CUIPhotoViewer` that draws a letter's sender.
   axis to this doc's C++ object layer.
 - [`engine-findings.md`](engine-findings.md) — why the Ownership rules are hard rules, and the
   engine quirks a port runs into.
-- [`tracked-deferrals.md`](tracked-deferrals.md) — the ownership-boundary entry: which shipped
-  windows already violate those rules.
+- [`README.md`](README.md)'s Known limits — the windows that keep a recorded exception to those
+  rules, each with its trigger.

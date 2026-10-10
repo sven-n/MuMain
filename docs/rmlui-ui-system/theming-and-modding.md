@@ -266,8 +266,7 @@ no real call site backing it (invented for taxonomy-completeness alone) doesn't 
   specific sprite composition (`server_select.rcss`'s own button-tint overlays) is the same
   category — asset-specific, not a theme palette lever.
 - **Structural geometry** — panel width/height, row height, pixel offsets, icon pitch, spritesheet
-  rects, native-companion-synchronized positions (anything documented in
-  [`tracked-deferrals.md`](tracked-deferrals.md) as a themeability-coupling gap). A value becoming
+  rects, native-companion-synchronized positions (anything [`README.md`](README.md)'s Known limits records as an exception). A value becoming
   `token(foo)` does not make duplicated geometry architecturally themeable — that requires actually
   deriving the position live (or, where that's currently impractical, an explicit pinned
   cross-reference comment on both sides). Tokens are a color/typography/radius mechanism, not a substitute
@@ -303,7 +302,7 @@ coordinate into `dp`.
 
 - **Layout of elements *within* the panel** — expressed in RCSS, which the theme controls. A few
   windows still take an image file or texel rect from C++ (CryWolf's event art; see
-  [tracked-deferrals.md](tracked-deferrals.md#accepted-as-it-stands-with-its-trigger)), so a theme
+  [README.md](README.md#known-limits)), so a theme
   can rearrange that art but not replace it.
 - **Where windows and HUD parts go** — the theme's `workspace.rml`/`workspace.rcss`: regions and
   one slot per window or HUD part, laid out in RCSS; the game places each open window on its slot

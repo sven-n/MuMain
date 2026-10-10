@@ -1,67 +1,11 @@
-# Legacy UI Component Migration Ledger
+# Legacy UI Class Map
 
-One row per legacy UI class, so "is `X` done?" has a single place to check. Update the row in the
-same commit as any port — a stale row reads as a confident false negative. Shapes are
-`building-new-ui.md`'s reference shapes (RmlUi-only 2D, Hybrid RmlUi/native 3D, World-overlay).
+Where each original UI class went, one row each, for the old names that still turn up in code,
+history and upstream discussion. Shapes are `building-new-ui.md`'s reference shapes (RmlUi-only
+2D, Hybrid RmlUi/native 3D, World-overlay). Update a row when the class it names changes.
 
-Statuses: `Done` / `Partial` / `Not started` / `Stays native` (a deliberate permanent decision) /
-`Deleted` (dead code removed). **`Done` means ported and signed off**: `legacy` follows the
-original as closely as was practical, and further parity tuning is left to contributors rather
-than tracked.
-
-## Small-scale text and event validation
-
-2026-10-10, signed off by the user on 2026-10-11. One focused commit per concern.
-
-**Contract guard.** `tools/check_rml_rcss_drift.py` had stopped discovering anything. It now reads
-each window's literal document declarations, reusable views and per-instance models, checks every
-theme's variant for the ids and callbacks C++ needs (111 documents, 222 theme variants), and fails
-on zero discovery; 28 fixtures (`tests/ui/test_rml_contracts.py`) cover it. Missing modern NPC and
-quest hooks were restored and unread model fields removed. Running it and its exception markers:
-[theming-and-modding.md](theming-and-modding.md).
-
-**Party and trade.** The party list clears the reserved header and keeps all five cards above the
-bottom HUD in both themes; the placement service publishes the workspace's top and bottom for it.
-Legacy trade's warning and notice flow as one paragraph around the partner's confirmation. Covered
-by `tests/ui/test_rml_party_trade_layout.cpp`; confirmed in game.
-
-**Small-scale text.** Normal native text has a minimum (11 points times the OS display scale), so at
-1024x768 / 75% fixed rows ran past small docked windows. The minimum is unchanged; each window
-instead lays its text out to fit:
-
-- *Blood Castle / Devil Square entry*: the description is one wrapping paragraph in a scroll pane,
-  level labels wrap and centre on their bands, the level list scrolls when needed; modern gained a
-  footer exit button.
-- *Personal shops* (seller and buyer): native's notice rows wrap in their three groups inside one
-  bounded pane between the grid and the buttons (`shop_notice.rcss` per theme); legacy's titles sit
-  between the frame's corners.
-- *MU Helper config*: legacy keeps native's positions, each label one line in the room native left
-  before the next control; modern flows its groups in one scrolling column, 240 units wide.
-- Where legacy keeps native positions (MU Helper, shop titles, the Illusion Temple result table), a
-  longer label is a **marquee**: it ends in `..` and scrolls on hover
-  ([component-catalog.md](component-catalog.md#counter-scaled-text)).
-
-The headless audit (`tests/ui/test_rml_text_layout.cpp`) loads the real documents, fonts and five
-translations and measures every drawn line for clipping and overlap: the event and shop windows
-across 1024x768 / 75% and 1280x720 / 1920x1080 at 100-150%, the MU Helper at 1024x768 / 75% for
-five classes and three tabs, each at 1x / 1.5x / 2x OS scale. Everything passes except legacy's MU
-Helper, whose native row spacing still meets taller text at 1.5x / 2x; that is reported, by choice.
-Re-run it in a configured developer shell:
-
-```powershell
-cmake -S . -B out/build/windows-x64 -DBUILD_TESTING=ON
-cmake --build out/build/windows-x64 --config RelWithDebInfo --target rml_text_layout_tests
-ctest --test-dir out/build/windows-x64 -C RelWithDebInfo -R rml_text_layout_baseline --output-on-failure
-```
-
-Results land in `out/build/windows-x64/text-layout-baseline/` (`scenarios.csv`, `text-lines.csv`).
-
-**Event validation, through `$preview`.** Illusion Temple: the three skill-panel tooltips show in both
-themes and follow skill changes; one hovered when the HUD hid stayed on screen, and now goes with
-it. The legacy result table overlapped even in English; it keeps native's columns with a heading per
-column and marquee cells. Siege: the preview seeds markers inside, on the edges of and outside the
-hero's zoom-1 crop; measured at both zooms in both themes, they land where expected. A live siege
-and temple event remain unchecked.
+Statuses: `Done` (ported: `legacy` follows the original as closely as was practical) /
+`Stays native` (a deliberate permanent decision) / `Deleted` (dead code removed).
 
 ## Login and character select
 
@@ -157,7 +101,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CBloodCastle`, `CChaosCastleTime`, `CEmpireGuardianTimer` | Done | `UI/Events/EventTimerView`; event-HUD slots at the HUD's scale |
 | `CDoppelGangerFrame`, `CKanturuInfoWindow` | Done | Event-HUD slots at the HUD's scale |
 | `CCursedTempleEnter`, `CCursedTempleResult`, `CCursedTempleSystem` | Done | Panel stage (enter, result); the Illusion Temple HUD places itself |
-| `CCryWolf` | Done | Renders only in the event; seen through `$preview crywolf`/`crywolfresult` (`tracked-deferrals.md`) |
+| `CCryWolf` | Done | Renders only in the event; seen through `$preview crywolf`/`crywolfresult`; its art is chosen in C++ (`README.md`'s Known limits) |
 | `CGoldBowmanWindow`, `CGoldBowmanLena`, `CExchangeLuckyCoin`, `CRegistrationLuckyCoin` | Done | `UI/Events/EventItemEntryView`; the Rena and the registration coin draw into its render target. The Rena now follow the panel (the original drew them at a fixed screen x) |
 | `CKanturu2ndEnterNpc` | Done | Panel stage |
 

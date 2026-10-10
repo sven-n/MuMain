@@ -1,19 +1,58 @@
 # RmlUi UI System
 
 > **Start with [`architecture-principles.md`](architecture-principles.md)** — the governing
-> policy for this migration (layout intent, responsive/scalable/themeable/moddable design). This
-> README and every other doc here implement or report status against it; none of them repeat its
-> reasoning. Check [`STATUS.md`](STATUS.md) for what's actually done and known gaps.
+> policy (layout intent, responsive/scalable/themeable/moddable design). Every other doc here
+> implements it; none of them repeat its reasoning.
 
 How [RmlUi](https://github.com/mikke89/RmlUi) (HTML/CSS-driven UI middleware) is integrated into
 this client's SDL_GPU renderer, and what's worth knowing before building or porting a window.
 
 ## Why this exists
 
-The client's game UI had no layout engine, retained scene graph or data-binding layer. RmlUi is
-the long-term replacement, adopted window by window with old and new coexisting rather than a
-big-bang rewrite. Every window is now a `mu::ui::window::CObject` (the older `CWin` toolkit is
-deleted); see [`migration-ledger.md`](migration-ledger.md) for each window's status.
+The client's game UI had no layout engine, retained scene graph or data-binding layer. RmlUi
+replaced it window by window, old and new coexisting until the last native window went.
+
+## What is RmlUi, and what stays native
+
+Every window is a `mu::ui::window::CObject` drawn by RmlUi in both themes; the `CWin` toolkit,
+the sprite widgets, the `CUIControl` toolkit and the shared item camera (`C3DRenderMng`) are
+deleted. That covers the login and character-select scene, the HUD (one theme-placed unit in the
+workspace), the inventory family, the docked panels, the dialogs and options, the social windows,
+the event, siege, duel and NPC windows, and the world labels (names, balloons, bars, ground items)
+through the world-label layer. [`migration-ledger.md`](migration-ledger.md) maps each original
+class to what replaced it.
+
+**Placement is the theme's.** No window has a layout of its own: documents sit on `.stage`,
+`.hud-board` or a workspace slot, RmlUi hit-tests them, and `CManager` gives native code one
+measuring space ([`layout-and-scaling.md`](layout-and-scaling.md)'s "Units and placement"). Only
+infrastructure may touch the active transform; `tools/check_layout_transform_users.py` keeps it to
+that.
+
+**Stays native on purpose**: live 3D content (item grids, equipped items, item and character
+previews — a `RenderTarget` shows one inside a document, as the potions, the letter portrait, the
+character-creation preview and the event previews do), the mouse cursor, developer overlays, and
+the equipment paperdoll's background, durability tint and drag highlight, which paint behind the
+equipped item's 3D icon.
+
+## Known limits
+
+Each stays as it is until its trigger fires.
+
+- **No user-override layer or theme inheritance** (principles §18–19). Themes are two directories
+  selected by name. A third first-party theme is ruled out; `modern`'s divergence and the contract
+  guard cover the coupling concern (§25, §28). Trigger: the mod-support requirement is prioritised.
+- **Validation is uneven across windows.** Headless layout tests cover resolution and OS display
+  scale for the party list, trade, event entry, the personal shops and the MU Helper; other
+  windows have the UI-scale sweep ([`layout-and-scaling.md`](layout-and-scaling.md)). Drag state
+  across a scale change and theme changes while open are checked when a window is touched.
+- **`MiniMap` lays out in physical pixels**: its art turns 45° with no reference-px space
+  (`UI/HUD/MiniMapLayout.cpp`). Trigger: a map redesign needing theme-owned map geometry.
+- **A new siege command's pulse** binds `rgb(255, pulse, pulse)`: RCSS cannot mix a bound fraction
+  into a colour. Trigger: a theme wanting another pulse palette.
+- **`CCryWolf` picks its sprite files and texel rects in C++** (`SyncResult()`, `SyncHud()`); a theme
+  can hide or rearrange that art, not replace it. Trigger: a theme wanting other event art.
+- **The title scene's loading bar** is pushed in real `px`, because its background is still native
+  sprites on an 800x600 per-axis scale `dp` cannot reproduce. It ends when those sprites port.
 
 ## Where code goes
 
@@ -45,10 +84,8 @@ The runtime renders, updates and routes input; the game adds the rest through
   modding constraints.
 - **[Engine Findings](engine-findings.md)** — empirical gotchas of this RmlUi build and the
   `CObject`/`CManager` machinery. Check before assuming a bug is new.
-- **[Migration Ledger](migration-ledger.md)** — per-class migration status; check here for "is
-  `X` done?".
-- **[Tracked Deferrals](tracked-deferrals.md)** — what's known-incomplete, and the pilots to
-  revisit.
+- **[Migration Ledger](migration-ledger.md)** — where each original window class went; check
+  here for "what replaced `X`?".
 
 ## Renderer integration: SDL_GPU
 

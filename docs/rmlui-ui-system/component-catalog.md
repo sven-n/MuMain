@@ -32,7 +32,7 @@ single-document windows that visually read as one group on screen —
 button/tooltip shape/group-box corner-and-fill technique (legacy) and forged-dialog panel gradient/
 shell-edge/groove/header-rail (modern) are byte-identical, so they link a shared
 `docked_panel_frame.rcss` (both themes) instead of each re-declaring it, so windows docked side by
-side read as one family (STATUS.md's checklist item 7). **A new window joining this same right-dock group should link this partial too**,
+side read as one family (`building-new-ui.md`'s port checklist, item 7). **A new window joining this same right-dock group should link this partial too**,
 not copy-paste a fifth version — check its current window list before assuming it doesn't apply.
 `CMyInventory` and the other item windows keep frames of their own.
 
@@ -279,7 +279,7 @@ its model -- so the theme could not restyle a stat or an outlaw level, and moder
 an inline property and inline beats every stylesheet rule in this build (`engine-findings.md`).
 Note what is *not* on this list: that window's derived-stat rows still carry `line.color`, because
 they are a transcribed display list rather than a value with a meaning -- see
-`tracked-deferrals.md`'s ownership-boundary entry for that distinction.
+`building-new-ui.md`'s Ownership rule 5 for that distinction.
 
 Do not unpack the engine's packed text colours into CSS: they are `A<<24 | B<<16 | G<<8 | R`, and
 reading them as RGB swaps red and blue.

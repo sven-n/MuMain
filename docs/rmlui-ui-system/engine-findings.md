@@ -2,8 +2,8 @@
 
 Empirical facts about *this specific codebase and engine build*, not general policy. Most are
 RmlUi quirks of the vendored build; the last section covers the `CObject`/`CManager` machinery
-around it. See [`STATUS.md`](STATUS.md) for migration status and
-[`tracked-deferrals.md`](tracked-deferrals.md) for open work.
+around it. Porting patterns are in [`building-new-ui.md`](building-new-ui.md); known limits in
+[`README.md`](README.md).
 
 ## RmlUi build
 

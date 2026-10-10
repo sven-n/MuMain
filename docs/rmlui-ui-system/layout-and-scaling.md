@@ -223,7 +223,27 @@ Not covered by the sweep: resolution (scale is the sharper probe; `PanelTransfor
 from resolution), drag state across a scale or theme change, and a theme change while a window is
 open. These are not tracked: whoever touches a window checks them for it.
 
+### The headless text-layout audit
+
+`tests/ui/test_rml_text_layout.cpp` loads the real documents, bundled fonts and five translations
+(English, German, Spanish, Polish, Russian) in a headless RmlUi context and measures every drawn
+line for clipping, overlap and leaving its panel. It covers the event entry windows and both
+personal shops across 1024x768 / 75% and 1280x720 / 1920x1080 at 100-150%, and the MU Helper at
+1024x768 / 75% for five classes and three tabs, each at 1x, 1.5x and 2x OS display scale. Legacy's
+MU Helper keeps native's row spacing and is reported rather than required to pass.
+`test_rml_party_trade_layout.cpp` checks the party list and legacy trade from 800x600 to 3440x1440.
+Re-run the audit in a configured developer shell:
+
+```powershell
+cmake -S . -B out/build/windows-x64 -DBUILD_TESTING=ON
+cmake --build out/build/windows-x64 --config RelWithDebInfo --target rml_text_layout_tests
+ctest --test-dir out/build/windows-x64 -C RelWithDebInfo -R rml_text_layout_baseline --output-on-failure
+```
+
+Results land in `out/build/windows-x64/text-layout-baseline/` (`scenarios.csv`, `text-lines.csv`).
+A window joins it by adding its document to `prepare_rml_text_layout.py`.
+
 ## Deferred (not part of this policy yet)
 
-- An automated multi-resolution visual-regression test; keep doing manual spot-checks per
-  window until one exists.
+- An automated multi-resolution check for every window; the text-layout audit above covers five,
+  so keep doing manual spot-checks for the rest.

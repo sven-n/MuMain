@@ -145,6 +145,19 @@ chrome. States change brightness, contrast, background or border — never shape
 - The tooltip's `tt-*` line colours and the inventory's Set/Socket option colours — game data,
   identical to `legacy`.
 
+## Studies and limits
+
+- **HUD orbs and arc gauges.** The modern HUD retints the rectangular HP/MP/AG/SD bars rather than
+  rebuilding them as orbs. `CMainFrameWindow` already exposes the resource fractions, both readout
+  variants, poison state and hint strings, so this is markup and RCSS work. Two techniques are
+  confirmed viable: `<progress direction="clockwise">` for the arcs (needs a `fill-image`;
+  `engine-findings.md`) and layered `radial-gradient` for the orb liquid. Prototype one orb and one
+  arc first, check empty/partial/full, poison, readouts, hover hints, scale and rendering cost,
+  and recheck the workspace HUD bounds if the silhouette grows above the strip.
+- **The options screen below 380dp tall** scrolls its page, and an open dropdown can be clipped by
+  the pane; it takes a large UI scale in a small window. Trigger: inaccessible choices in a
+  supported configuration; try bounded popup sizing first, then an outside-pane popup.
+
 ## Rules for changes
 
 - Every new colour or border traces to a token here; add the token (to `tokens.ini` and this file)
