@@ -155,8 +155,9 @@
 #gr_desc_label { width: calc(58px * var(--root-scale)); }
 .gr-promo-line { width: calc(180px * var(--root-scale)); }
 .gr-desc.scroll-pane { width: calc(165px * var(--root-scale)); height: calc(96px * var(--root-scale)); }
-.gr-desc-line { width: calc(150px * var(--root-scale)); height: calc(var(--line-step) * var(--root-scale)); }
+/* CTextBox's row pitch: a line height + 2. */
+.gr-desc-line { width: calc(150px * var(--root-scale)); height: calc((var(--line-height) + 2px) * var(--root-scale)); }
 .gr-desc-text { width: calc(150px * var(--root-scale)); }
 
 /* The data-for template row has no step of its own; it inherits this one. */
-.gr-desc { --line-step: 0px; }
+.gr-desc { --line-height: 0px; }

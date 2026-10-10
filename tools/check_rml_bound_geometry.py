@@ -35,7 +35,7 @@ owns that a theme should), so the debt is counted rather than mixed in with the 
 
 Deliberately allowed everywhere, unlisted: expressions that reference only the root
 transform (`root_x`, `root_y`, `root_scale`, and the older `panel_x`/`panel_y` spelling
-of the same `m_Pos` placement). That set *is* the scaling bridge -- the panel's own
+of the same `m_Pos` placement, and a dialog's `canvas_top`). That set *is* the scaling bridge -- the panel's own
 placement -- and is not something a theme should be overriding. Everything else needs a
 line in the allowlist.
 
@@ -44,6 +44,11 @@ Never allowed, listed or not: a number scaled by `root_scale` (or a Hud stretch'
 `scale(1 / root_scale)`. That is a counter-scaled layer's length or transform, which the
 theme states in RCSS: `calc(160px * var(--root-scale))`, and base.rcss's `.sharp-text` /
 `.counter-scaled`.
+
+A custom property bound with a length unit (`data-style---w="width + 'px'"`) is checked
+the same way: the theme's calc() makes it a box, so it is the same geometry by another
+route. The native text metrics (`--text-px`, `--line-px`, `--line-height`, ...) are exempt,
+as `text_px` is for a font size; an index, a count or a fraction carries no unit and is data.
 
 Also deliberately narrow: this checks the four box offsets and the two sizes only. A
 bound `color`, `decorator` or `font-size` has the same override problem, but those are
@@ -77,7 +82,14 @@ STRING_LITERAL_RE = re.compile(r"'[^']*'|\"[^\"]*\"")
 # The scaling bridge: a document may place and counter-scale itself without being listed.
 # panel_x/panel_y are the same m_Pos placement under an older name, used by the windows that
 # place themselves without a root scale; one spelling should win, which is a separate tidy-up.
-ROOT_TRANSFORM_FIELDS = {"root_x", "root_y", "root_scale", "panel_x", "panel_y"}
+ROOT_TRANSFORM_FIELDS = {"root_x", "root_y", "root_scale", "panel_x", "panel_y", "canvas_top"}
+
+# A custom property bound with a length unit is geometry too -- the theme's calc() turns it into a
+# box -- unless it is a native text metric, which a theme sizes rows from the way it sizes text
+# from text_px. An index, a count or a fraction carries no unit and is data.
+CUSTOM_PROPERTY_BINDING_RE = re.compile(r'data-style---([\w-]+)\s*=\s*"([^"]*)"')
+LENGTH_UNIT_RE = re.compile(r"'(?:px|dp|%)'")
+NATIVE_METRIC_PROPERTIES = {"text-px", "line-px", "bold-line-px", "row-px", "line-height", "bold-line-height"}
 
 # Any bound style, and a numeric literal outside its string literals.
 STYLE_BINDING_RE = re.compile(r'data-style-([\w-]+)\s*=\s*"([^"]*)"')
@@ -99,6 +111,9 @@ def offending_fields(text):
     found = set()
     for _property, expression in GEOMETRY_BINDING_RE.findall(text):
         found |= bound_fields(expression) - ROOT_TRANSFORM_FIELDS
+    for name, expression in CUSTOM_PROPERTY_BINDING_RE.findall(text):
+        if name not in NATIVE_METRIC_PROPERTIES and LENGTH_UNIT_RE.search(expression):
+            found |= bound_fields(expression) - ROOT_TRANSFORM_FIELDS
     for declarations in STYLE_ATTRIBUTE_RE.findall(text):
         found |= {"style=" + name for name in STYLE_GEOMETRY_RE.findall(declarations)}
     return found

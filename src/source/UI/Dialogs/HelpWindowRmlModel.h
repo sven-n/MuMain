@@ -14,12 +14,10 @@ struct HelpLineEntry
     bool halfSpacer = false;
 };
 
-// The page sits on the theme's .stage: lengths are reference px, the text sizes physical px.
-// RenderTipTextList()'s text box is two units wider than the widest line. The line heights are
-// the native renderer's, in reference px.
+// The page sits on the theme's .stage: the text sizes are physical px, the line heights the native
+// renderer's, in reference px.
 struct HelpWindowRmlModel
 {
-    float contentWidth = 0.f;
     float textPx = 0.f;
     float boldTextPx = 0.f;
     float lineHeight = 0.f;

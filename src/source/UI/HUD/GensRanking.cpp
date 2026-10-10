@@ -328,7 +328,7 @@ void CGensRanking::BindRmlModel(Rml::DataModelConstructor& c, GensRankingRmlMode
     c.RegisterArray<std::vector<GensLine>>();
     c.Bind("promo_lines", &model.promoLines);
     c.Bind("desc_lines", &model.descLines);
-    c.Bind("desc_line_step", &model.descLineStep);
+    c.Bind("desc_line_height", &model.descLineHeight);
     c.Bind("exit_tooltip", &model.exitTooltip);
     c.BindEventCallback("gens_ranking_exit", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                         { m_PendingExit = true; });
@@ -406,14 +406,14 @@ void CGensRanking::SyncContent()
 
     // Keep CTextBox's original wrapping and measured row pitch. RmlUi scrolls all rows.
     std::vector<GensLine> descLines;
-    float descLineStep = 0.f;
+    float descLineHeight = 0.f;
     if (m_pTextBox)
     {
         m_pTextBox->ClearText();
         m_pTextBox->AddText(I18N::Game::GensRankingRewardsAreGivenOut);
         m_pTextBox->AddText(I18N::Game::GensRankingRewardsCanBeClaimed);
         g_pRenderText->SetFont(g_hFont);
-        descLineStep = static_cast<float>(g_pRenderText->MeasureText(L"A", 1).cy + 2);
+        descLineHeight = static_cast<float>(g_pRenderText->MeasureText(L"A", 1).cy);
         descLines.reserve(m_pTextBox->GetMaxLine());
         for (int i = 0; i < m_pTextBox->GetMaxLine(); ++i)
         {
@@ -443,7 +443,7 @@ void CGensRanking::SyncContent()
         model.descLines = std::move(descLines);
         m_RmlView.MarkDirty("desc_lines");
     }
-    SyncField(m_RmlView.Binder(), &GensRankingRmlModel::descLineStep, "desc_line_step", descLineStep);
+    SyncField(m_RmlView.Binder(), &GensRankingRmlModel::descLineHeight, "desc_line_height", descLineHeight);
 
     // The original's RenderMark(): the rank's 50 x 69 cell of the family's mark sheet.
     Rml::String markSprite;

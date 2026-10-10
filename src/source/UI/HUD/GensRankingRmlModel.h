@@ -41,7 +41,7 @@ struct GensRankingRmlModel
     // All CTextBox-wrapped lines. RmlUi owns their scroll position; the pitch remains the
     // native renderer's measured text height + 2.
     std::vector<GensLine> descLines;
-    float descLineStep = 0.f;
+    float descLineHeight = 0.f;
 
     Rml::String exitTooltip;
 };

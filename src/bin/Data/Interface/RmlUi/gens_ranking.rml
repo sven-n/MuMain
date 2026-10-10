@@ -73,7 +73,7 @@
 		     Block rows establish scroll height; RmlUi owns the scrollbar and its drag. -->
 		<div class="gr-desc scroll-pane counter-scaled">
 			<div class="gr-desc-line" data-for="l : desc_lines"
-			     data-style---line-step="desc_line_step + 'px'">
+			     data-style---line-height="desc_line_height + 'px'">
 				<span class="gr-desc-text"
 				      data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
 			</div>

@@ -5,43 +5,36 @@
 
 #panel { pointer-events: none; }
 
-/* RenderTipTextList(1, 1, ...): the text box's left edge at 0 and its top at 1, inside the frame. */
+/* RenderTipTextList(1, 1, ...): the frame's top-left at (-1, 0), the text box inside it as wide as
+   the widest line plus 2, centring the lines. */
 #help_panel {
 	position: absolute;
 	left: -1px;
 	top: 0px;
-	--text-width: 0px;
-	width: var(--text-width);
-	padding: 0px 1px;
-	border: 1px #000000;
+	padding: 0px calc(2px * var(--root-scale));
+	border-width: calc(1px * var(--root-scale));
+	border-color: #000000;
 	background-color: rgba(0, 0, 0, 204);
 }
 
-/* display:block required -- RmlUi's default `display` is inline, even for a <div>. */
 /* RenderTipTextList()'s rows: one line height, the next row 1.1 of them below; a half spacer
-   takes half of that advance. */
+   takes half of that advance. Physical px, in the counter-scaled box. */
 .help-line {
 	display: block;
-	position: relative;
-	height: var(--line-height, 0px);
-	margin-bottom: calc(var(--line-height, 0px) * 0.1);
+	height: calc(var(--line-height, 0px) * var(--root-scale));
+	margin-bottom: calc(var(--line-height, 0px) * 0.1 * var(--root-scale));
 }
 .help-line.heading {
-	height: var(--bold-line-height, 0px);
-	margin-bottom: calc(var(--bold-line-height, 0px) * 0.1);
+	height: calc(var(--bold-line-height, 0px) * var(--root-scale));
+	margin-bottom: calc(var(--bold-line-height, 0px) * 0.1 * var(--root-scale));
 }
 .help-line.half-spacer {
-	height: calc(var(--line-height, 0px) * 0.55);
+	height: calc(var(--line-height, 0px) * 0.55 * var(--root-scale));
 	margin-bottom: 0px;
 }
-/* The row is reference px; its text is laid out in physical px (.sharp-text). */
 .help-text {
 	display: block;
-	position: absolute;
 	white-space: nowrap;
-	left: 0px;
-	top: 0px;
-	width: calc(var(--text-width) * var(--root-scale));
 	line-height: calc(var(--line-height, 0px) * var(--root-scale));
 	text-align: center;
 	color: #ffffff;

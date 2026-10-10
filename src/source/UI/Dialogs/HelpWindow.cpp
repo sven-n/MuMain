@@ -20,18 +20,6 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-namespace
-{
-// RenderTipTextList()'s text box is the widest line plus 2 units.
-constexpr float kTextBoxSlackUnits = 2.f;
-
-float MeasureLogicalWidth(const std::wstring& text, bool bold)
-{
-    g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
-    return static_cast<float>(g_pRenderText->MeasureText(text.c_str(), static_cast<int>(text.size())).cx);
-}
-} // namespace
-
 mu::ui::window::CHelpWindow::CHelpWindow()
 {
     m_pNewUIMng = NULL;
@@ -117,7 +105,6 @@ bool mu::ui::window::CHelpWindow::Render()
 
 void mu::ui::window::CHelpWindow::BindRmlModel(Rml::DataModelConstructor& c, HelpWindowRmlModel& model)
 {
-    c.Bind("content_width", &model.contentWidth);
     c.Bind("text_px", &model.textPx);
     c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("line_height", &model.lineHeight);
@@ -171,27 +158,22 @@ void mu::ui::window::CHelpWindow::RebuildPageModel()
     model.lines.clear();
     model.lines.reserve(page.size());
 
-    float widestLine = 0.f;
     for (const UI::Help::PageLine& pageLine : page)
     {
         HelpLineEntry entry;
         entry.heading = pageLine.heading;
         entry.halfSpacer = pageLine.halfSpacer;
         if (!pageLine.halfSpacer)
-        {
             entry.text = StringUtils::WideToNarrow(pageLine.text.c_str());
-            widestLine = std::max(widestLine, MeasureLogicalWidth(pageLine.text, pageLine.heading));
-        }
         model.lines.push_back(std::move(entry));
     }
 
-    model.contentWidth = widestLine + kTextBoxSlackUnits;
     model.textPx = textPx;
     model.boldTextPx = UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold);
     model.lineHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Normal));
     model.boldLineHeight = static_cast<float>(CUIRenderTextSDLTtf::LineHeight(UI::Scaling::FontRole::Bold));
 
-    for (const char* field : {"lines", "content_width", "text_px", "bold_text_px", "line_height", "bold_line_height"})
+    for (const char* field : {"lines", "text_px", "bold_text_px", "line_height", "bold_line_height"})
         m_RmlView.MarkDirty(field);
 }
 
