@@ -144,9 +144,33 @@ TEST_CASE(
     CHECK(server.LinkedUserName() == L"sven");
     CHECK(server.IsGuildChatBridged());
 
-    // Without a connection nothing is sent; the old answer is gone anyway.
+    // Asking again keeps the answer until the new one arrives (without a
+    // connection nothing is sent).
     server.Request();
+    CHECK(server.IsAccountLinked());
+
+    // Entering the world forgets it, in case the new server doesn't answer.
+    server.Forget();
     CHECK_FALSE(server.IsAvailable());
     CHECK_FALSE(server.IsAccountLinked());
     CHECK_FALSE(server.IsGuildChatBridged());
+}
+
+TEST_CASE("Discord server: only a Discord application id is taken from the server [network][discord]")
+{
+    using GameLogic::Discord::ServerIntegration;
+    CHECK(ServerIntegration::IsApplicationId(L"123456789012345678"));
+    CHECK(ServerIntegration::IsApplicationId(L"12345678901234567"));
+    CHECK_FALSE(ServerIntegration::IsApplicationId(L"1234567890123456"));
+    CHECK_FALSE(ServerIntegration::IsApplicationId(L"123456789012345678901"));
+    CHECK_FALSE(ServerIntegration::IsApplicationId(L"12345678901234567a"));
+    CHECK_FALSE(ServerIntegration::IsApplicationId(L""));
+
+    auto info = ParseIntegrationInfo(IntegrationInfoPacket());
+    REQUIRE(info.has_value());
+    info->richPresenceApplicationId = L"not-an-id";
+    auto& server = ServerIntegration::Instance();
+    server.Apply(*info);
+    CHECK(server.RichPresenceApplicationId() != L"not-an-id");
+    server.Forget();
 }

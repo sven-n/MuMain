@@ -4,6 +4,8 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Network/Server/WSclient.h"
 
+#include <algorithm>
+
 namespace
 {
 std::wstring ServerValueOr(const std::optional<Network::Discord::IntegrationInfo>& info,
@@ -25,9 +27,13 @@ ServerIntegration& ServerIntegration::Instance()
     return instance;
 }
 
-void ServerIntegration::Request()
+void ServerIntegration::Forget()
 {
     m_info.reset();
+}
+
+void ServerIntegration::Request()
+{
     if (SocketClient != nullptr)
     {
         SocketClient->ToGameServer()->SendDiscordIntegrationInfoRequest();
@@ -52,8 +58,22 @@ std::wstring ServerIntegration::InviteUrl() const
 
 std::wstring ServerIntegration::RichPresenceApplicationId() const
 {
-    return ServerValueOr(m_info, &Network::Discord::IntegrationInfo::richPresenceApplicationId,
-                         GameConfig::GetInstance().GetDiscordApplicationId());
+    if (m_info.has_value() && IsApplicationId(m_info->richPresenceApplicationId))
+    {
+        return m_info->richPresenceApplicationId;
+    }
+    return GameConfig::GetInstance().GetDiscordApplicationId();
+}
+
+bool ServerIntegration::IsApplicationId(std::wstring_view id)
+{
+    constexpr std::size_t MinSnowflakeLength = 17;
+    constexpr std::size_t MaxSnowflakeLength = 20;
+    if (id.size() < MinSnowflakeLength || id.size() > MaxSnowflakeLength)
+    {
+        return false;
+    }
+    return std::all_of(id.begin(), id.end(), [](wchar_t character) { return character >= L'0' && character <= L'9'; });
 }
 
 std::wstring ServerIntegration::RichPresenceLargeImageKey() const

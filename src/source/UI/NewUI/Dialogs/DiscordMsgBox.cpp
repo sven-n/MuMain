@@ -287,6 +287,9 @@ namespace UI::Discord
 {
 void ShowAccount()
 {
+    // Shows what is known and asks again, so the next opening reflects a link
+    // made in Discord meanwhile.
+    GameLogic::Discord::ServerIntegration::Instance().Request();
     SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDiscordAccountMsgBoxLayout));
 }
 

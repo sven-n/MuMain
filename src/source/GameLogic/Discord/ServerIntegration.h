@@ -11,6 +11,7 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 
 namespace GameLogic::Discord
 {
@@ -19,8 +20,13 @@ class ServerIntegration
 public:
     [[nodiscard]] static ServerIntegration& Instance();
 
-    // Forgets what the previous character was told and asks the server.
-    // Servers without the Discord integration don't answer.
+    // Forgets what the server told; on entering the world, so nothing of a
+    // previous server is left over when the new one doesn't answer.
+    void Forget();
+
+    // Asks the server, keeping its previous answer until the new one arrives,
+    // so a refresh doesn't show "not linked" for a round trip. Servers
+    // without the Discord integration don't answer.
     void Request();
 
     // Takes the server's answer.
@@ -32,6 +38,9 @@ public:
 
     // The server's value, else the one of config.ini.
     [[nodiscard]] std::wstring InviteUrl() const;
+    // Only a Discord application id (a snowflake: 17 to 20 digits) is taken
+    // from the server; anything else falls back to config.ini, so a server
+    // can't hand the handshake something that isn't one.
     [[nodiscard]] std::wstring RichPresenceApplicationId() const;
     [[nodiscard]] std::wstring RichPresenceLargeImageKey() const;
     [[nodiscard]] std::wstring RichPresenceSmallImageKey() const;
@@ -46,6 +55,8 @@ public:
     // Account link, from the account dialog.
     void RequestLinkCode() const;
     void RequestUnlink() const;
+
+    [[nodiscard]] static bool IsApplicationId(std::wstring_view id);
 
 private:
     std::optional<Network::Discord::IntegrationInfo> m_info;

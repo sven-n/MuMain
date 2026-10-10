@@ -1262,6 +1262,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     GameLogic::Commands::Catalog().RequestOnce();
 
     // Servers with the Discord integration answer with how they're connected.
+    GameLogic::Discord::ServerIntegration::Instance().Forget();
     GameLogic::Discord::ServerIntegration::Instance().Request();
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer]");
