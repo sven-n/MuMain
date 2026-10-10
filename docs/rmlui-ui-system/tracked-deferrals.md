@@ -20,9 +20,9 @@ Paths below are relative to `src/bin/Data/Interface/RmlUi/` for assets and `src/
 | Item | Current disposition | Evidence and next action |
 |---|---|---|
 | Native text floor | Open defect; shared policy needs care | `UI/Scaling/UITransform.cpp` keeps the normal role's minimum at 11 and clamps fitting to the role minimum. `UI/RmlBridge/RmlNativeTextFit.cpp` uses that same floor; adding `.native-fit` alone cannot fix text already at the minimum. Address in rollout 2. |
-| Illusion Temple result columns | Retained legacy limitation | `themes/legacy/cursed_temple_result.rcss` keeps closely spaced, absolute columns; modern has its own table layout. Revisit with a localization/readability pass; retain the legacy visual identity rather than treating narrow English columns as a requirement. |
+| Illusion Temple result columns | Resolved 2026-10-10 | Even English overlapped in legacy (team into name, class into EXP, the heading and reward note past the frame). Legacy now keeps native's column offsets with one heading per column, each cell a marquee label in its column's room (`..`, scrolling on hover), and the reward note inside the frame. Modern's table is unchanged. |
 | Illusion Temple hover tooltips | Verified 2026-10-10 (preview), one defect fixed | All three zones show their tooltips in both themes at 100% and 150%, after a theme switch while shown, and follow a skill change. A tooltip hovered when the HUD hid (`$preview off`) stayed on screen; `SyncView()` now hides it on every path that skips `SyncSkill()`. Native's kill-point zones start at each number's centre; kept. A live event is unchecked. |
-| Siege member/NPC dots | Unresolved validation | `UI/Events/EventPreview.cpp` still seeds fixed map positions. `CSiegeWarCommander::FillGuildMemberDots()` clips against the current map view; sample points outside that view cannot establish correctness. Improve the fixture and verify in rollout 3. |
+| Siege member/NPC dots | Verified 2026-10-10 (preview) | `$preview siege` now seeds members, NPCs and both commands against the hero's zoom-1 crop: inside, on each edge, and just outside. Measured in both themes at 100% and 150%: edge points land on the map's edges (under the frame, as natively), outside points are not drawn at zoom 1 and land where expected at zoom 2, and the commands sit at their points. A real siege join is unchecked. |
 | MiniMap physical-pixel geometry | Accepted constraint | `UI/HUD/MiniMapLayout.cpp` still computes rotated quads in window pixels. Keep the exception until a map transform/layout redesign is scoped. |
 | Siege command pulse colour | Accepted ownership constraint | `SiegeWarCommandEntry::color` and `siege_warfare.rml` still bind the combined colour to text and images. Revisit when a theme needs another pulse palette or a suitable presentation mechanism is available. |
 | CryWolf sprite selection | Accepted ownership constraint | `CCryWolf::SyncResult()` / `SyncHud()` still select files and texel rectangles bound by `crywolf.rml`. Revisit when alternate event art is requested. |
@@ -278,7 +278,10 @@ Record implementation and build results in the ledger, leaving this deferral ope
 in-game checks are confirmed. A configuration requiring unreadably small text returns to layout
 or scrolling; clipping or an unbounded font reduction does not count as a fix.
 
-### 3. Close the event validation gaps
+### 3. Close the event validation gaps — completed in preview
+
+All three items were verified or fixed on 2026-10-10 (rows above); the live-event checks below
+remain open because no siege or temple could be run.
 
 - **Illusion Temple:** use `$preview temple` / `$preview templeresult` to check all three hover
   zones, skill changes, moved corner anchors and tooltip cleanup. Trace the missing hints before

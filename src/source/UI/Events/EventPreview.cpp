@@ -24,6 +24,7 @@
 #include "World/GameMaps/GMBattleCastle.h"
 #include "World/GameMaps/GMCrywolf1st.h"
 
+#include <algorithm>
 #include <array>
 #include <string_view>
 
@@ -243,15 +244,30 @@ void SeedSiege()
     g_pSiegeWarfare->CreatePreviewMiniMapUI(mu::ui::window::CSiegeWarfare::SIEGEWAR_TYPE_COMMANDER);
     battleCastle::SetBattleCastleStart(true);
     UI::Siege::SetMatchTime(0, 45);
+
+    // Placed against the crop the map shows at zoom 1 (CSiegeWarBase's 128 squares around the
+    // hero): some well inside, some on its edges, and some just outside, which only zoom 2 (the
+    // whole field) shows.
+    const int left = std::max(Hero->PositionX - 64, 0);
+    const int bottom = 256 - std::min(std::max(256 - Hero->PositionY - 64, 0), 128) - 128;
+    const int right = left + 127;
+    const int top = bottom + 127;
+    const int centreX = left + 64;
+    const int centreY = bottom + 64;
+    const auto at = [](std::uint8_t type, int x, int y)
+    { return UI::Siege::MapLocation{type, std::clamp(x, 0, 255), std::clamp(y, 0, 255)}; };
     const std::array members = {
-        UI::Siege::MapLocation{0, 80, 120},  UI::Siege::MapLocation{0, 86, 126}, UI::Siege::MapLocation{0, 92, 118},
-        UI::Siege::MapLocation{0, 110, 150}, UI::Siege::MapLocation{0, 116, 158},
+        at(0, centreX - 10, centreY + 6), at(0, centreX - 4, centreY + 12), at(0, centreX + 2, centreY + 4),
+        at(0, left + 1, centreY),         at(0, right, centreY),            at(0, centreX, top),
+        at(0, right + 12, centreY),       at(0, centreX, bottom - 12),
     };
     UI::Siege::ReplaceMemberLocations(members);
-    const std::array npcs = {UI::Siege::MapLocation{0, 90, 200}, UI::Siege::MapLocation{1, 120, 210}};
+    const std::array npcs = {at(0, centreX + 20, centreY - 20), at(1, centreX - 24, centreY - 30),
+                             at(1, left - 12, centreY - 10)};
     UI::Siege::AddNpcLocations(npcs);
-    UI::Siege::SetCommanderMapInfo(0, 100, 140, 0);
-    UI::Siege::SetCommanderMapInfo(1, 70, 180, 1);
+    UI::Siege::SetCommanderMapInfo(0, static_cast<std::uint8_t>(centreX + 12), static_cast<std::uint8_t>(centreY + 20), 0);
+    UI::Siege::SetCommanderMapInfo(1, static_cast<std::uint8_t>(std::clamp(right - 2, 0, 255)),
+                                   static_cast<std::uint8_t>(centreY - 40), 1);
 }
 
 // The entry countdown and the result boxes run on the map's match; off an event map the preview
