@@ -15,6 +15,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
+#include "GameLogic/Discord/ServerIntegration.h"
 
 #include "Character/CharacterManager.h"
 
@@ -504,6 +505,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
     mu_swprintf(Text, L"%ls ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, Text, 120, 0, RT3_SORT_CENTER);
 
+    RenderDiscordNotice();
 
     mu_swprintf(Text, I18N::Game::Guild);
     RenderText(Text, m_Pos.x + 13 + (static_cast<int>(GuildConstants::GuildTab::INFO) * GuildConstants::UILayout::TAB_WIDTH),
@@ -726,6 +728,41 @@ void SEASON3B::CNewUIGuildInfoWindow::RenderScrollBar()
     RenderImage(IMAGE_GUILDINFO_SCROLLBAR_ON, m_Pos.x + 166, 125 + m_Loc, 15, 30);
 
     m_GuildMember.Scrolling(Line);
+}
+
+// Under the guild name: whether the chat of the open tab is mirrored to
+// Discord - which is also the notice that it leaves the game. A guild master
+// whose chat isn't mirrored is told how to do it; the binding itself happens
+// in Discord.
+void SEASON3B::CNewUIGuildInfoWindow::RenderDiscordNotice()
+{
+    constexpr int NoticeOffsetY = 62;
+    constexpr int WindowWidth = 190;
+    const DWORD noticeColor = RGBA(114, 137, 218, 255); // Discord's blurple
+
+    const auto& server = GameLogic::Discord::ServerIntegration::Instance();
+    const wchar_t* notice = nullptr;
+    if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::UNION))
+    {
+        notice = server.IsAllianceChatBridged() ? I18N::Game::DiscordAllianceChatMirrored : nullptr;
+    }
+    else if (server.IsGuildChatBridged())
+    {
+        notice = I18N::Game::DiscordGuildChatMirrored;
+    }
+    else if (Hero->GuildStatus == G_MASTER && server.IsAvailable())
+    {
+        notice = I18N::Game::DiscordGuildBindHint;
+    }
+
+    if (notice == nullptr)
+    {
+        return;
+    }
+    g_pRenderText->SetFont(g_hFont);
+    g_pRenderText->SetTextColor(noticeColor);
+    g_pRenderText->SetBgColor(0);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + NoticeOffsetY, notice, WindowWidth, 0, RT3_SORT_CENTER);
 }
 
 void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_Info()

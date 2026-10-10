@@ -168,6 +168,7 @@ namespace SEASON3B
         void RenderScrollBar();
         void Render_Guild_History();
         void Render_Text();
+        void RenderDiscordNotice();
     };
 
     inline
