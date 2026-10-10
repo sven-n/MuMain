@@ -81,6 +81,8 @@ part, inside **regions** the theme defines with ordinary RCSS:
   place themselves.
 - **Edge-followers**: the buff row, party list and item durability need no slot; they follow the
   uncovered area (section 5) every frame, so they move with docks and reserved side regions.
+  The party list also clears the reserved header in both themes, keeping the complete five-member
+  list above the bottom HUD when its preferred dock offset would reach above the content area.
 
 ## 3. The placement service
 

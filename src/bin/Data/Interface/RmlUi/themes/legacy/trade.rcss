@@ -40,9 +40,10 @@
 #divider {
 	position: absolute;
 	left: 1px;
-	top: 220px;
+	/* A thin separator leaves the notice band room to wrap before the lower nickname strip. */
+	top: 241px;
 	width: 188px;
-	height: 21px;
+	height: 2px;
 	decorator: image(trade-line-image);
 	pointer-events: none;
 }
@@ -108,8 +109,19 @@
 }
 .checkbox-box.checked { decorator: image(trade-confirm-checked); }
 
-/* Other player's confirmation -- display-only, matches ProcessBtns() never hit-testing it. */
-.confirm-your { left: 146px; top: 186px; cursor: default; pointer-events: none; }
+/* The display-only confirmation floats in the physical-pixel text layer. Its dimensions and
+   margins follow the panel scale, keeping the sprite at (146, 186) while text wraps around it. */
+.confirm-your {
+	position: static;
+	float: right;
+	width: calc(36px * var(--root-scale));
+	height: calc(29px * var(--root-scale));
+	margin-left: calc(6px * var(--root-scale));
+	margin-top: calc(9px * var(--root-scale));
+	cursor: default;
+	pointer-events: none;
+}
+.confirm-your .checkbox-box { width: 100%; height: 100%; }
 /* My own confirmation -- clickable (trade_my_confirm_click). While m_nMyTradeWait > 0 the original
    drew the sprite multiplied by RGBA(255, 0, 0, 255) (CNewUITrade::RenderBackImage()); image-color
    multiplies the image decorator the same way. */
@@ -130,30 +142,25 @@
 .trade-btn-exit { left: 13px;  decorator: image(trade-btn-exit); }
 .trade-btn-zen  { left: 104px; decorator: image(trade-btn-zen); }
 
-/* Warning/notice help text block above "my confirm" -- "Warning" blinks via warning_opacity
-   (C++ mirrors the old sin(WorldTime)-based alpha pulse); the rest is a fixed warm hint color. */
-.warning-label {
+/* One counter-scaled flow keeps the warning and translated notice fragments apart. The native
+   font size is applied once; child lines wrap in physical pixels without fixed row offsets. */
+#trade_help {
 	position: absolute;
-	left: 20px;
-	top: 185px;
+	left: 16px;
+	top: 177px;
+	--flow-w: 166px;
+	line-height: 1.05;
+	white-space: normal;
+	pointer-events: none;
+}
+.warning-label {
+	display: inline-block;
 	color: #d20000;
 	font-weight: bold;
-	font-size: 1em;
-	white-space: nowrap;
-	pointer-events: none;
 }
 .notice-line {
-	position: absolute;
-	left: 20px;
 	color: token(text-hint);
-	font-weight: bold;
-	font-size: 1em;
-	white-space: nowrap;
-	pointer-events: none;
 }
-.notice-line1 { left: 45px; top: 185px; }
-.notice-line2 { top: 200px; }
-.notice-line3 { top: 215px; }
 
 /* Former RenderWarningArrow()'s "Warning" text badge -- left/top/width come live from C++ per
    entry (item_warning_badges), since they track a live, variable-length set of flagged item grid

@@ -346,6 +346,21 @@ static Rml::ElementList PrepareSlots(Rml::ElementDocument* workspace, const UI::
     return slots;
 }
 
+static void PublishWorkspaceBounds(Rml::ElementDocument* workspace, Rml::Element* content)
+{
+    Rml::Element* root = workspace->GetContext() != nullptr ? workspace->GetContext()->GetRootElement() : nullptr;
+    if (root == nullptr)
+        return;
+
+    const float top = content != nullptr ? content->GetAbsoluteOffset(Rml::BoxArea::Border).y : 0.f;
+    const float bottom = content != nullptr ? top + content->GetBox().GetSize(Rml::BoxArea::Border).y
+                                           : static_cast<float>(WindowHeight);
+    root->SetProperty("--world-left", std::to_string(g_uncoveredLeft) + "px");
+    root->SetProperty("--world-right", std::to_string(g_uncoveredRight) + "px");
+    root->SetProperty("--workspace-top", std::to_string(top) + "px");
+    root->SetProperty("--workspace-bottom", std::to_string(bottom) + "px");
+}
+
 static void UpdateUncoveredArea(Rml::ElementDocument* workspace, const Rml::ElementList& slots)
 {
     // Open slots in a covering region narrow the world from the content area's edge they pack
@@ -391,12 +406,7 @@ static void UpdateUncoveredArea(Rml::ElementDocument* workspace, const Rml::Elem
             g_uncoveredLeft = std::max(g_uncoveredLeft, group.right);
     }
 
-    // The theme centres HUD widgets in the uncovered world from these (buff_strip.rcss).
-    if (Rml::Element* root = workspace->GetContext() != nullptr ? workspace->GetContext()->GetRootElement() : nullptr)
-    {
-        root->SetProperty("--world-left", std::to_string(g_uncoveredLeft) + "px");
-        root->SetProperty("--world-right", std::to_string(g_uncoveredRight) + "px");
-    }
+    PublishWorkspaceBounds(workspace, content);
 }
 
 static void PlaceSlots(const Rml::ElementList& slots, const UI::Scaling::Transform& dock)

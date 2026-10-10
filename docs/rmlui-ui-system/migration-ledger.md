@@ -27,6 +27,24 @@ hooks have not been checked in a running client.
 
 For running/reviewing the guard and its limits, see [theming-and-modding.md](theming-and-modding.md).
 
+## Party and trade layout follow-up
+
+2026-10-10: rollout 1 from [tracked-deferrals.md](tracked-deferrals.md) completed after the user
+confirmed the fixes working in game. The party HUD in both themes clears the reserved header and
+keeps all five cards above the bottom HUD while following open docks. Legacy trade's warning
+and notice form one wrapping paragraph around the partner's confirmation. Its divider is thinner
+and sits above the lower nickname strip, giving translations more room; grid and confirmation
+positions are preserved.
+
+Headless RmlUi tests load the real theme assets and bundled font. Party bounds and hover targets
+pass at 800x600, 1280x720, 1920x1080 and 3440x1440 at 75/100/125/150%, with docks open and
+closed. Legacy trade fits English, German, Spanish, Polish and Russian notices at 1024x768 at
+the same scales, with no text intersecting the partner's confirmation. These checks use 1x OS
+display scale. The user's in-game confirmation did not include per-configuration results, so it
+does not establish a full resolution, localization or OS display-scale sweep. RelWithDebInfo x64 rebuilt
+successfully with runtime assets staged; syntax, contract-drift, bound-geometry and active-transform
+guards passed, along with 28 contract fixtures and both layout test cases (2,905 assertions).
+
 ## Login and character select
 
 All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `CObject` owned by

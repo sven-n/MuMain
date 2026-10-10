@@ -72,11 +72,11 @@
 }
 .card-leave:active { decorator: image(plist-leave-down); }
 
-/* Right-aligned to the world the open windows leave uncovered, two dock units clear of it, 14 dock
-   units below the dock's top (the bottom HUD's top less the dock's 432 units). */
+/* Keep the dock's preferred offset where it fits; the workspace's top edge clears the shell
+   header. All five cards fit below this anchor at the supported viewport and scale settings. */
 #panel {
 	left: calc(var(--world-right, 100%) - 79px * var(--dock-scale, 1));
-	top: calc(100% - 51px * var(--hud-scale, 1) - 418px * var(--dock-scale, 1));
+	top: max(calc(var(--workspace-top, 0px) + 14px * var(--dock-scale, 1)), calc(var(--workspace-bottom, 100%) - 418px * var(--dock-scale, 1)));
 	transform: scale(var(--dock-scale, 1));
 	--root-scale: var(--dock-scale, 1);
 }

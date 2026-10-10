@@ -244,6 +244,20 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME rml_party_trade_layout_tests
+    SOURCES
+        test_rml_party_trade_layout.cpp
+        RmlLayoutFixture.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(rml_party_trade_layout_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+    MU_LOCALIZATION_DIR="${CMAKE_SOURCE_DIR}/src/Localization"
+)
+
+mu_add_test(
     NAME item_grid_px_tests
     SOURCES
         test_item_grid_px.cpp

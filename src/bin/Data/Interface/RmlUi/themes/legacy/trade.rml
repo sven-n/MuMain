@@ -76,10 +76,6 @@
 		      data-class-gold-million="your_gold_tier == 'million'"
 		      data-class-gold-ten-million="your_gold_tier == 'ten-million'">{{your_gold_text}}</span>
 
-		<div id="your_confirm" class="checkbox-row confirm-your">
-			<div class="checkbox-box" data-class-checked="your_confirm_checked"></div>
-		</div>
-
 		<div id="divider"></div>
 
 		<div id="my_nick_bg" class="nick-bg nick-bg-my"></div>
@@ -101,10 +97,15 @@
 
 		<div id="btn_zen" class="trade-btn trade-btn-zen" data-event-click="trade_zen_click" data-attr-data-hint="zen_tooltip"></div>
 
-		<span id="warning_label" class="sharp-text warning-label" data-style-opacity="warning_opacity" data-style-font-size="text_px + 'px'">{{warning_label}}</span>
-		<span id="notice_line1" class="sharp-text notice-line notice-line1" data-style-font-size="text_px + 'px'">{{notice_line1}}</span>
-		<span id="notice_line2" class="sharp-text notice-line notice-line2" data-style-font-size="text_px + 'px'">{{notice_line2}}</span>
-		<span id="notice_line3" class="sharp-text notice-line notice-line3" data-style-font-size="text_px + 'px'">{{notice_line3}}</span>
+		<div id="trade_help" class="sharp-text sharp-flow" data-style-font-size="text_px + 'px'">
+			<div id="your_confirm" class="checkbox-row confirm-your">
+				<div class="checkbox-box" data-class-checked="your_confirm_checked"></div>
+			</div>
+			<span id="warning_label" class="warning-label" data-style-opacity="warning_opacity">{{warning_label}}</span>
+			<span id="notice_line1" class="notice-line">{{notice_line1}}</span>
+			<span id="notice_line2" class="notice-line">{{notice_line2}}</span>
+			<span id="notice_line3" class="notice-line">{{notice_line3}}</span>
+		</div>
 
 		<!-- Former RenderWarningArrow()'s "Warning" text badge, one per flagged item. -->
 		<div class="sharp-text item-warning-badge" data-for="w : item_warning_badges"
