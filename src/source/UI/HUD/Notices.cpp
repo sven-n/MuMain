@@ -43,13 +43,11 @@ namespace
 
     void BindModel(Rml::DataModelConstructor& c, UI::Notices::NoticesRmlModel& model)
     {
-        c.Bind("row_width", &model.rowWidth);
         c.Bind("text_px", &model.textPx);
         c.Bind("line_height_px", &model.lineHeightPx);
         auto line = c.RegisterStruct<UI::Notices::NoticeLineEntry>();
         line.RegisterMember("text", &UI::Notices::NoticeLineEntry::text);
         line.RegisterMember("kind", &UI::Notices::NoticeLineEntry::kind);
-        line.RegisterMember("top", &UI::Notices::NoticeLineEntry::top);
         c.RegisterArray<std::vector<UI::Notices::NoticeLineEntry>>();
         c.Bind("lines", &model.lines);
     }
@@ -130,34 +128,38 @@ namespace UI::Notices
     {
 
     // The original's per-line draw: RenderText(320, 300 + i * 13) centred, bold, on a
-    // half-transparent black box sized to the text; empty lines draw nothing.
+    // half-transparent black box sized to the text; empty lines draw nothing. The theme stacks
+    // the rows.
     void SyncView(bool visible)
     {
         UI::RmlBridge::SyncDocumentVisibility(s_view.Document(), visible);
         if (!visible)
             return;
 
-        // The original drew them under the screen's W/640 x H/480 stretch.
-        const UI::Scaling::Transform transform = UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
-        SyncField(s_view.Binder(), &NoticesRmlModel::rowWidth, "row_width", 2.f * UI::Scaling::PositionX(transform, 320.f));
         SyncField(s_view.Binder(), &NoticesRmlModel::textPx, "text_px",
                   UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Bold));
         SyncField(s_view.Binder(), &NoticesRmlModel::lineHeightPx, "line_height_px",
                   CUIRenderTextSDLTtf::LineHeightPx(UI::Scaling::FontRole::Bold));
 
         std::vector<NoticeLineEntry> lines;
+        int shown = 0;
         for (int i = 0; i < MAX_NOTICE; i++)
         {
+            if (s_notices[i].Text[0] != L'\0')
+                shown = i + 1;
+        }
+        for (int i = 0; i < shown; i++)
+        {
             const Notice& n = s_notices[i];
-            if (n.Text[0] == L'\0')
-                continue;
             NoticeLineEntry line;
-            line.text = StringUtils::WideToNarrow(n.Text);
-            if (n.Color == 0)
-                line.kind = (int)s_blinkPhase % 10 < 5 ? "gold-dim" : "gold";
-            else
-                line.kind = "green";
-            line.top = UI::Scaling::PositionY(transform, static_cast<float>(300 + i * 13));
+            if (n.Text[0] != L'\0')
+            {
+                line.text = StringUtils::WideToNarrow(n.Text);
+                if (n.Color == 0)
+                    line.kind = (int)s_blinkPhase % 10 < 5 ? "gold-dim" : "gold";
+                else
+                    line.kind = "green";
+            }
             lines.push_back(std::move(line));
         }
         SyncField(s_view.Binder(), &NoticesRmlModel::lines, "lines", std::move(lines));

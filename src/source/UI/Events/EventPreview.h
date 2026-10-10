@@ -28,6 +28,7 @@ enum class Event
     CrownSwitchBox,
     GuildWar,
     KanturuEntry,
+    Notices,
 };
 
 // True while `event` is previewed: its window may draw off its map, and its close sends nothing.

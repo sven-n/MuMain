@@ -39,7 +39,6 @@ message_box_view.rml: debt -- every line is centred by measurement (centre - Mea
 mini_map.rml: state -- each .clip is a region of the window the map may paint in, carved around the native bottom HUD's band from the live window size, with .world offsetting its copy of the picture back to window coordinates; a marker's size and turned quad are its own; the location hint is sized to its measured text and placed where the pointer is. The map's own art is turned 45 degrees in physical px (MiniMapLayout.h), which is why this document has no reference-px space for a theme to work in
 mu_helper_detail.rml: state -- the three gauges' fill levels
 mu_helper_skill_picker.rml: state -- the fan-out is anchored to the clicked slot and its entries are placed by how many skills there are
-notices.rml: debt -- a screen-converted document: no root transform, every position is physical px put through the transform the native text used, rows 2 * PositionX(320) wide so the text centres; the 300 + 13-a-line table belongs on the HUD board in RCSS
 party_info.rml: state -- each member's health bar is a fraction
 party_list.rml: state -- each card's health bar is a length from the member's health
 pet_info.rml: state -- the pets' health bars are fractions

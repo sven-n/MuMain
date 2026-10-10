@@ -3,24 +3,27 @@
    and 255 every five animation frames, the green one (colour 1) does not. Above every window
    (stacking table): the original drew the notices after every window. */
 
-body {
-	position: absolute;
-	left: 0;
-	top: 0;
-	pointer-events: none;
-	font-family: "token(font-body)";
-}
+body { pointer-events: none; }
+#board { pointer-events: none; font-family: "token(font-body)"; }
 
-.notice-row {
+/* The original's RenderText(320, 300 + i * 13): the rows 13 apart from 300, centred on 320. */
+#notice_lines {
 	position: absolute;
 	left: 0;
+	top: 300px;
+	--flow-w: 640px;
 	text-align: center;
+}
+.notice-row {
+	display: block;
+	height: calc(13px * var(--root-scale));
+	line-height: var(--line-px, 0px);
 	white-space: nowrap;
-	pointer-events: none;
 }
 
 .notice-text {
 	display: inline-block;
+	vertical-align: top;
 	font-weight: bold;
 	white-space: nowrap;
 	background-color: rgba(0, 0, 0, 128);

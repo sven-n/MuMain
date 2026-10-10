@@ -6,24 +6,18 @@
 
 namespace UI::Notices
 {
-// One drawn notice line: its text, its colour class and its top edge in physical px.
+// One notice row: its text and its colour class. An empty row keeps its place in the stack.
 struct NoticeLineEntry
 {
     Rml::String text;
-    Rml::String kind; // "gold", "gold-dim" (the blink's half-alpha phase) or "green"
-    float top = 0.f;
+    Rml::String kind; // "gold", "gold-dim" (the blink's half-alpha phase), "green", or "" when empty
 
-    bool operator==(const NoticeLineEntry& other) const
-    {
-        return top == other.top && kind == other.kind && text == other.text;
-    }
+    bool operator==(const NoticeLineEntry& other) const = default;
 };
 
 struct NoticesRmlModel
 {
-    // Physical px: the rows span 0..rowWidth so their centre is the original's x 320; the native
-    // bold text size and line height.
-    float rowWidth = 0.f;
+    // The native bold text size and line height, physical px.
     float textPx = 0.f;
     float lineHeightPx = 0.f;
     std::vector<NoticeLineEntry> lines;
