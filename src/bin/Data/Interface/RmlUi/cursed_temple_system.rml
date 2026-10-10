@@ -1,4 +1,6 @@
 <rml>
+	<!-- bound-geometry: the mini map's markers sit at their projected points, each with its own sprite
+	     size; the buttons are the theme's -->
 <head>
 	<title>Illusion Temple HUD (CCursedTempleSystem)</title>
 	<link type="text/rcss" href="base.rcss"/>

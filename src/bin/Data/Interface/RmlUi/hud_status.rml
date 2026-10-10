@@ -1,4 +1,6 @@
 <rml>
+	<!-- bound-geometry: the macro cooldown's bar is a gauge length, the fraction of the cooldown left,
+	     and the cooldown centres on the world the open docks leave uncovered -->
 <head>
 	<title>HUD Status</title>
 	<link type="text/rcss" href="base.rcss"/>

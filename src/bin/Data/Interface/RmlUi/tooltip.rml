@@ -1,4 +1,5 @@
 <rml>
+	<!-- bound-geometry: tooltip is placed against the pointer -->
 <head>
 	<title>Tooltip</title>
 	<link type="text/rcss" href="base.rcss"/>

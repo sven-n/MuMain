@@ -1,4 +1,6 @@
 <rml>
+	<!-- bound-geometry: the window's sides grow with the message as it is typed out (kSideStepHeight *
+	     m_nBgSideNow), and the centre and bottom pieces follow that height -->
 <head>
 	<title>Server Message</title>
 	<link type="text/rcss" href="base.rcss"/>

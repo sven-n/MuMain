@@ -1,4 +1,6 @@
 <rml>
+	<!-- bound-geometry: the flyout hangs off the config window's drawn top-left and scale, which the
+	     player drags; its entries are the theme's -->
 <head>
 	<title>MU Helper Skill Picker</title>
 	<link type="text/rcss" href="base.rcss"/>

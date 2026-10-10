@@ -1,4 +1,5 @@
 <rml>
+	<!-- bound-geometry: the progress bar is a gauge length, the fraction of the wait elapsed -->
 <head>
 	<title>Message Box</title>
 	<link type="text/rcss" href="base.rcss"/>

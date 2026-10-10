@@ -24,22 +24,20 @@ populations of document that are indistinguishable from the outside:
     layout arrives as bound coordinates and an RCSS edit does nothing
     (e.g. guard_window.rml).
 
-This script does NOT try to shrink the second set -- retrofitting it is a re-port, not
-a cleanup (architecture-principles.md §26). It freezes it: every document that binds
-geometry today is listed, with a reason, in rml_bound_geometry_allowlist.txt, and a
-document that starts binding geometry without being listed fails the build. New work
-therefore cannot quietly join the second population, and the list is a reviewed
-inventory rather than an implicit one. Each entry is tagged `state` (the geometry is the
-data: a gauge, a pointer- or world-following element, a user resize) or `debt` (layout C++
-owns that a theme should), so the debt is counted rather than mixed in with the rest.
+A document may bind geometry only when the geometry is the state itself -- a gauge's
+length, something following the pointer or a projected point, a size the user dragged --
+and it says so where it does it: a `<!-- bound-geometry: <why> -->` comment in the
+document. A document that binds geometry without one fails the build, so new work cannot
+quietly push layout from C++, and the reason sits beside the bindings it explains. A
+marker on a document that no longer binds geometry fails too: delete it.
 
 Deliberately allowed everywhere, unlisted: expressions that reference only the root
 transform (`root_x`, `root_y`, `root_scale`, and the older `panel_x`/`panel_y` spelling
 of the same `m_Pos` placement, and a dialog's `canvas_top`). That set *is* the scaling bridge -- the panel's own
-placement -- and is not something a theme should be overriding. Everything else needs a
-line in the allowlist.
+placement -- and is not something a theme should be overriding. Everything else needs the
+document's marker.
 
-Never allowed, listed or not: a number scaled by `root_scale` (or a Hud stretch's
+Never allowed, marked or not: a number scaled by `root_scale` (or a Hud stretch's
 `scale_x`/`scale_y`) in any bound style, such as `(160 * root_scale) + 'px'` or
 `scale(1 / root_scale)`. That is a counter-scaled layer's length or transform, which the
 theme states in RCSS: `calc(160px * var(--root-scale))`, and base.rcss's `.sharp-text` /
@@ -56,8 +54,8 @@ a judgement call per case (a per-frame fade, a native text metric), whereas a bo
 static coordinate is nearly always layout that belongs in RCSS. Widen it when a bound
 colour actually bites, not speculatively.
 
-Usage: python3 check_rml_bound_geometry.py [--asset-root DIR] [--allowlist FILE]
-Exit code 0 = clean, 1 = an unlisted document binds geometry (printed to stderr).
+Usage: python3 check_rml_bound_geometry.py [--asset-root DIR] [--review]
+Exit code 0 = clean, 1 = an unmarked document binds geometry, or a marker is stale (stderr).
 """
 import argparse
 import pathlib
@@ -129,46 +127,26 @@ def scaled_literals(text):
     return found
 
 
-TAGS = ("state", "debt")
+# The marker a document gives its reason in: <!-- bound-geometry: <why> -->.
+MARKER_RE = re.compile(r"<!--\s*bound-geometry:\s*(.*?)\s*-->", re.S)
 
 
-def read_allowlist(path):
-    """({relative posix path: (tag, reason)}, number of malformed lines). Blank lines and
-    # comments ignored."""
-    entries = {}
-    malformed = 0
-    if not path.is_file():
-        return entries, malformed
-    for line_number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        name, _, rest = line.partition(":")
-        tag, separator, reason = rest.partition("--")
-        if not separator or tag.strip() not in TAGS or not reason.strip():
-            sys.stderr.write(
-                "%s:%d: expected '<path>: state -- <why>' or '<path>: debt -- <why>', got %r\n"
-                % (path, line_number, raw)
-            )
-            malformed += 1
-            continue
-        entries[name.strip()] = (tag.strip(), reason.strip())
-    return entries, malformed
+def marker_reason(text):
+    """The document's bound-geometry reason, one line, or None."""
+    match = MARKER_RE.search(text)
+    return " ".join(match.group(1).split()) if match else None
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--asset-root", default="src/bin/Data/Interface/RmlUi")
     parser.add_argument(
-        "--allowlist", default=str(pathlib.Path(__file__).with_name("rml_bound_geometry_allowlist.txt"))
-    )
-    parser.add_argument(
         "--review",
         action="store_true",
-        help="print every listed document with the fields it actually binds, beside its reason, "
-        "and exit 0. An entry whose reason does not describe those fields has gone stale: the "
-        "document can keep needing its entry while the reason stops being true, which the "
-        "unneeded-entry report cannot catch.",
+        help="print every marked document with the fields it actually binds, beside its reason, "
+        "and exit 0. A reason that does not describe those fields has gone stale: the document "
+        "can keep needing its marker while the reason stops being true, which the stale-marker "
+        "check cannot catch.",
     )
     args = parser.parse_args()
 
@@ -177,47 +155,42 @@ def main():
         sys.stderr.write("asset root not found: %s\n" % asset_root)
         return 1
 
-    allowlist, malformed = read_allowlist(pathlib.Path(args.allowlist))
     documents = sorted(asset_root.rglob("*.rml"))
 
-    unlisted = []
-    listed_and_binding = {}
+    unmarked = []
+    marked = {}
+    stale = []
     scaled = []
     for document in documents:
         relative = document.relative_to(asset_root).as_posix()
         text = document.read_text(encoding="utf-8", errors="replace")
         scaled += [(relative, binding) for binding in scaled_literals(text)]
         fields = offending_fields(text)
+        reason = marker_reason(text)
         if not fields:
+            if reason is not None:
+                stale.append(relative)
             continue
-        if relative in allowlist:
-            listed_and_binding[relative] = sorted(fields)
+        if reason:
+            marked[relative] = (sorted(fields), reason)
         else:
-            unlisted.append((relative, sorted(fields)))
+            unmarked.append((relative, sorted(fields)))
 
     if args.review:
-        for tag in TAGS:
-            for relative, fields in sorted(listed_and_binding.items()):
-                if allowlist[relative][0] == tag:
-                    print("%s [%s]\n  binds:  %s\n  reason: %s\n"
-                          % (relative, tag, ", ".join(fields), allowlist[relative][1]))
-        for relative, fields in unlisted:
-            print("%s\n  binds:  %s\n  reason: -- NOT LISTED --\n" % (relative, ", ".join(fields)))
-        debt = sorted(r for r in listed_and_binding if allowlist[r][0] == "debt")
-        print("%d state, %d debt: %s" % (len(listed_and_binding) - len(debt), len(debt), ", ".join(debt)))
+        for relative, (fields, reason) in sorted(marked.items()):
+            print("%s\n  binds:  %s\n  reason: %s\n" % (relative, ", ".join(fields), reason))
+        for relative, fields in unmarked:
+            print("%s\n  binds:  %s\n  reason: -- NOT MARKED --\n" % (relative, ", ".join(fields)))
+        print("%d marked, %d unmarked" % (len(marked), len(unmarked)))
         return 0
 
-    if malformed:
-        return 1
-
-    stale = sorted(set(allowlist) - set(listed_and_binding))
+    failed = False
     if stale:
-        # Good news, not a failure: these documents stopped binding geometry. Printed every
-        # build so the inventory shrinks as work lands instead of quietly over-covering.
-        print(
-            "RML inline-geometry guard: %d allowlist entr%s no longer needed, delete: %s"
-            % (len(stale), "y is" if len(stale) == 1 else "ies are", ", ".join(stale))
+        sys.stderr.write(
+            "RML inline-geometry guard: %d document(s) keep a bound-geometry marker but bind no "
+            "geometry any more; delete the marker: %s\n\n" % (len(stale), ", ".join(stale))
         )
+        failed = True
 
     if scaled:
         sys.stderr.write(
@@ -227,29 +200,26 @@ def main():
         )
         for relative, binding in scaled:
             sys.stderr.write("  %s -> %s\n" % (relative, binding))
-        return 1
+        failed = True
 
-    if unlisted:
+    if unmarked:
         sys.stderr.write(
-            "RML inline-geometry guard: %d document(s) put layout out of a theme's reach "
-            "without being allowlisted.\n\n"
-            "A bound left/top/width/height, and a style= attribute setting one, are both "
-            "inline properties, which no theme can\n"
-            "override -- see this script's docstring and "
-            "docs/rmlui-ui-system/building-new-ui.md's Ownership section. Place static\n"
-            "layout in RCSS, by id or class.\n\n"
-            "If the geometry genuinely varies with data per frame, add a line to %s with the "
-            "reason.\n\n" % (len(unlisted), args.allowlist)
+            "RML inline-geometry guard: %d document(s) put layout out of a theme's reach.\n\n"
+            "A bound left/top/width/height, a style= attribute setting one, and a custom property "
+            "bound with a length unit are\ninline geometry, which no theme can override -- see this "
+            "script's docstring and docs/rmlui-ui-system/building-new-ui.md's\nOwnership section. "
+            "Place static layout in RCSS, by id or class.\n\n"
+            "If the geometry is the state itself (a gauge, something following the pointer, a "
+            "projected point), say so in the\ndocument: <!-- bound-geometry: <why> -->.\n\n"
+            % len(unmarked)
         )
-        for relative, fields in unlisted:
+        for relative, fields in unmarked:
             sys.stderr.write("  %s -> %s\n" % (relative, ", ".join(fields)))
-        return 1
+        failed = True
 
-    debt = sum(1 for r in listed_and_binding if allowlist[r][0] == "debt")
-    print(
-        "RML inline-geometry guard: OK (%d .rml checked, %d allowlisted, %d of them debt)"
-        % (len(documents), len(listed_and_binding), debt)
-    )
+    if failed:
+        return 1
+    print("RML inline-geometry guard: OK (%d .rml checked, %d marked)" % (len(documents), len(marked)))
     return 0
 
 

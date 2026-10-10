@@ -1,4 +1,5 @@
 <rml>
+	<!-- bound-geometry: panel and well heights follow the user resize, in dp -->
 <head>
 	<title>Chat Log</title>
 	<link type="text/rcss" href="base.rcss"/>

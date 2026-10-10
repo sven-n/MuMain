@@ -1,4 +1,6 @@
 <rml>
+	<!-- bound-geometry: the ticker scrolls right to left every frame, so the text's left and the band's
+	     fading height are its state, not a layout a theme could own -->
 <head>
 	<title>Slide Notice</title>
 	<link type="text/rcss" href="base.rcss"/>

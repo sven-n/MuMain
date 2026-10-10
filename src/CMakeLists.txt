@@ -269,6 +269,18 @@ target_include_directories(MuClient PUBLIC
 # RmlUi_Platform_SDL.h's SDL2-vs-SDL3 API switch -- this project is SDL3-only.
 target_compile_definitions(MuClient PUBLIC RMLUI_SDL_VERSION_MAJOR=3)
 
+# Multisampled RmlUi layers trigger device loss on reported NVIDIA/Vulkan runs.
+# Use single-sampled UI by default on every driver; keep MSAA opt-in for diagnosis.
+set(RMLUI_SDL_GPU_NUM_MSAA_SAMPLES "1" CACHE STRING "RmlUi layer samples (1 disables MSAA)")
+set(MU_RMLUI_MSAA_SAMPLE_COUNTS 1 2 4 8)
+set_property(CACHE RMLUI_SDL_GPU_NUM_MSAA_SAMPLES PROPERTY STRINGS ${MU_RMLUI_MSAA_SAMPLE_COUNTS})
+if(NOT RMLUI_SDL_GPU_NUM_MSAA_SAMPLES IN_LIST MU_RMLUI_MSAA_SAMPLE_COUNTS)
+  message(FATAL_ERROR "RMLUI_SDL_GPU_NUM_MSAA_SAMPLES must be 1, 2, 4, or 8")
+endif()
+target_compile_definitions(MuClient PUBLIC
+  RMLUI_SDL_GPU_NUM_MSAA_SAMPLES=${RMLUI_SDL_GPU_NUM_MSAA_SAMPLES}
+)
+
 # The in-game shop downloader uses libcurl on every platform.
 find_package(CURL REQUIRED)
 target_link_libraries(MuClient PUBLIC CURL::libcurl)
@@ -969,7 +981,6 @@ add_dependencies(Main CheckRmlRcssDrift)
 add_custom_target(CheckRmlBoundGeometry ALL
   COMMAND "${Python3_EXECUTABLE}" "${REPO_ROOT}/tools/check_rml_bound_geometry.py"
           --asset-root "${ASSETS_DIR}/Data/Interface/RmlUi"
-          --allowlist "${REPO_ROOT}/tools/rml_bound_geometry_allowlist.txt"
   COMMENT "Checking RML bound-geometry ownership (layout a theme cannot override)"
   VERBATIM
 )
@@ -980,8 +991,7 @@ add_dependencies(Main CheckRmlBoundGeometry)
 add_custom_target(CheckLayoutTransformUsers ALL
   COMMAND "${Python3_EXECUTABLE}" "${REPO_ROOT}/tools/check_layout_transform_users.py"
           --source-root "${CMAKE_CURRENT_SOURCE_DIR}/source"
-          --allowlist "${REPO_ROOT}/tools/layout_transform_allowlist.txt"
-  COMMENT "Checking active UI transform users (the count may only shrink)"
+  COMMENT "Checking active UI transform users (only the infrastructure may use it)"
   VERBATIM
 )
 add_dependencies(Main CheckLayoutTransformUsers)

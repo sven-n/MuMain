@@ -1,4 +1,10 @@
 <rml>
+	<!-- bound-geometry: each .clip is a region of the window the map may paint in, carved around the
+	     native bottom HUD's band from the live window size, with .world offsetting its copy of the
+	     picture back to window coordinates; a marker's size and turned quad are its own; the location
+	     hint is sized to its measured text and placed where the pointer is. The map's own art is turned
+	     45 degrees in physical px (MiniMapLayout.h), which is why this document has no reference-px
+	     space for a theme to work in -->
 <head>
 	<title>Mini Map</title>
 	<link type="text/rcss" href="base.rcss"/>

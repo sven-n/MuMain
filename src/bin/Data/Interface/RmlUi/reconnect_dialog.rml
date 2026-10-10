@@ -1,4 +1,5 @@
 <rml>
+	<!-- bound-geometry: the progress bar's fill is the reconnect's own progress fraction -->
 <head>
 	<title>Reconnect</title>
 	<link type="text/rcss" href="base.rcss"/>

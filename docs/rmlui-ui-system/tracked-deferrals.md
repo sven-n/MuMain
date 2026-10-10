@@ -77,7 +77,7 @@ both themes. Everything else in the rollout was verified in game, both themes, w
 
 ### Deliberately not on this list
 
-The rest of the allowlist, reviewed entry by entry: per-frame data (gauges, things that follow the
+The documents that still bind geometry, each with a `<!-- bound-geometry: <why> -->` marker: per-frame data (gauges, things that follow the
 pointer or scroll, windows that grow with their content, projected markers) and text measured the
 way the native renderer measured it. A list the server does not bound is not a reason: it flows in
 RCSS, as the duel spectators and score marks do.
@@ -89,20 +89,23 @@ scaled uniformly by `root_scale`, the second a reference-unit position inside a 
 pushed as real `px` because the scene's background is still native sprites on an 800x600-reference
 per-axis scale `dp` cannot reproduce; it ends when those sprites port, and nothing links the two.
 
-### The guard that freezes the population
+### The guard that keeps layout in the themes
 
 `tools/check_rml_bound_geometry.py` runs in the build beside the syntax and contract-drift checks.
-It requires a reason in `tools/rml_bound_geometry_allowlist.txt` for every non-exempt geometry
-binding; root placement and scaling expressions are exempt. `--review` compares each reason with the
-fields it actually binds: an entry can still be required after its description has gone stale, so
-update the reason when a port changes what a document binds. A custom property bound with a length
-unit counts as geometry too (the theme's `calc()` makes it a box); the native text metrics
-(`--text-px`, `--line-px`, `--line-height`, ...) are exempt as `text_px` is. Each entry is tagged `state` (the geometry is the
-data) or `debt` (layout C++ owns that a theme should); `--review` ends with the debt count, which
-only goes down.
+A document that binds geometry fails it unless it carries a `<!-- bound-geometry: <why> -->` marker
+saying the geometry is the state itself (a gauge, something following the pointer, a projected
+point, a size the user dragged); root placement and scaling expressions are exempt, and a marker on a
+document that no longer binds geometry fails too. `--review` prints each marked document's bound
+fields beside its reason: a document can keep needing its marker after the reason has gone stale, so
+update the reason when a port changes what it binds. A custom property bound with a length unit
+counts as geometry too (the theme's `calc()` makes it a box); the native text metrics (`--text-px`,
+`--line-px`, `--line-height`, ...) are exempt as `text_px` is.
 
-Allowlist totals are not defect counts, and passing the guard establishes documented exceptions, not
-runtime correctness. The guard covers the four box offsets and the two sizes only: a bound `color`,
+`tools/check_layout_transform_users.py` keeps the active UI transform to its infrastructure (the
+window manager's measuring scope, the text renderer, the inventory's screen scope, the tooltip's
+metric scope, listed in the script with their reasons); any other file using it fails the build.
+
+Passing the guards establishes documented exceptions, not runtime correctness. The guard covers the four box offsets and the two sizes only: a bound `color`,
 `decorator` or `font-size` has the same override problem but is a judgement call per case, while a
 bound static coordinate is nearly always layout that belongs in RCSS. Widen it when a bound colour
 bites.

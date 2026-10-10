@@ -1,4 +1,5 @@
 <rml>
+	<!-- bound-geometry: the pets' health bars are fractions -->
 <head>
 	<title>Pet Info</title>
 	<link type="text/rcss" href="base.rcss"/>

@@ -1,4 +1,6 @@
 <rml>
+	<!-- bound-geometry: a map item's bars are lengths, RenderCastleItem()'s own gauge widths. The tab
+	     positions are in each theme's RCSS -->
 <head>
 	<title>Senatus</title>
 	<link type="text/rcss" href="base.rcss"/>

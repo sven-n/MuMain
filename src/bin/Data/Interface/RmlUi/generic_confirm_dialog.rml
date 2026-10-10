@@ -1,4 +1,5 @@
 <rml>
+	<!-- bound-geometry: the timed confirm's progress bar is a fraction of its countdown -->
 <head>
 	<title>Generic Confirm Dialog</title>
 	<link type="text/rcss" href="base.rcss"/>

@@ -1,4 +1,6 @@
 <template name="window_shell" content="content">
+	<!-- bound-geometry: the shell's own placement: a window the player drags and the game remembers (the
+	     friend, letter and chat windows) puts its top-left at root_x/root_y, in physical px -->
 <head>
 	<link type="text/rcss" href="window_shell.rcss"/>
 </head>

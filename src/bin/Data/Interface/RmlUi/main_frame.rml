@@ -1,4 +1,6 @@
 <rml>
+	<!-- bound-geometry: the health/mana/SD/AG gauges, the experience bar and every cooldown wipe are
+	     fractions -->
 <head>
 	<title>Main Frame</title>
 	<link type="text/rcss" href="base.rcss"/>

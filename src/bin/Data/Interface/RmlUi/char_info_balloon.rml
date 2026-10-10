@@ -1,4 +1,5 @@
 <rml>
+	<!-- bound-geometry: world-projected balloon positions, per frame -->
 <head>
 	<title>Character Info Balloons</title>
 	<link type="text/rcss" href="base.rcss"/>

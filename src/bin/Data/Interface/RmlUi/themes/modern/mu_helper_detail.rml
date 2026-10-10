@@ -1,4 +1,5 @@
 <rml>
+	<!-- bound-geometry: the three gauges' fill levels -->
 <head>
 	<title>MU Helper Detail</title>
 	<link type="text/rcss" href="base.rcss"/>

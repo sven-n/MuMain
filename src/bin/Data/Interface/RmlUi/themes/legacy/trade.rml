@@ -1,4 +1,5 @@
 <rml>
+	<!-- bound-geometry: an item warning badge sits on its item's slot and is as wide as the item -->
 <head>
 	<title>Trade</title>
 	<link type="text/rcss" href="base.rcss"/>

@@ -1,4 +1,7 @@
 <rml>
+	<!-- bound-geometry: the health and shield gauges are lengths from the fighters' rates, and the left
+	     fighter's bars are right-aligned so their left moves with the rate too (the plan's gauge carve-
+	     out) -->
 <head>
 	<title>Duel spectator frame (CDuelWatchMainFrameWindow)</title>
 	<link type="text/rcss" href="base.rcss"/>

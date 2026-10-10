@@ -1,4 +1,6 @@
 <rml>
+	<!-- bound-geometry: the hovered item's tooltip follows the mouse (clamped to the screen edge) and
+	     the pet bars are lengths from their health -->
 <head>
 	<title>Item endurance (CItemEnduranceInfo)</title>
 	<link type="text/rcss" href="base.rcss"/>

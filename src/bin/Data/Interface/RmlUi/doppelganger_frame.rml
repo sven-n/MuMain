@@ -1,4 +1,7 @@
 <rml>
+	<!-- bound-geometry: the monsters' gauge is a length from m_fMonsterGauge, stacked in pieces as
+	     monsters get through; the Ice Walker's and each party member's marker is their own position
+	     along the path (59 + 167 * position) -->
 <head>
 	<title>Doppelganger frame (CDoppelGangerFrame)</title>
 	<link type="text/rcss" href="base.rcss"/>

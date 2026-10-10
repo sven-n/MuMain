@@ -1,4 +1,7 @@
 <rml>
+	<!-- bound-geometry: the success/failure banner and the rank label slide in and out, Balgass's health
+	     and the statue's shield are gauge lengths (the shield shortens from its left, so its left moves
+	     with it) -->
 <head>
 	<title>Crywolf (CCryWolf)</title>
 	<link type="text/rcss" href="base.rcss"/>

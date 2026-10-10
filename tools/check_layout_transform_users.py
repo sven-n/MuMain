@@ -8,17 +8,13 @@ the manager's measuring scope, the text renderer reading it, the inventory's scr
 and the tooltip's metric scope. Window code that scopes or reads the transform again would
 bring back layout decided in C++.
 
-This script keeps it that way: it counts, per file under src/source, the calls listed in
-PATTERNS (comments ignored), and compares them with layout_transform_allowlist.txt. A file
-whose count grows, or a new file that starts using one, fails the build. A file whose
-count dropped is printed so its entry can be lowered; the allowlist may only shrink.
+This script keeps it that way: it finds the calls listed in PATTERNS (comments ignored) in
+every file under src/source, and any use outside the exempt files fails the build. The
+exempt files are the transform's own implementation (EXEMPT_PREFIXES), the world-space users
+of the stretched screen and the infrastructure above (EXEMPT_FILES, each with its reason).
 
-Not counted: the transform's own implementation (EXEMPT_PREFIXES) and the world-space
-users of the stretched screen (EXEMPT_FILES).
-
-Usage: python3 check_layout_transform_users.py [--source-root DIR] [--allowlist FILE]
-                                               [--summary] [--write]
-Exit code 0 = clean, 1 = a count grew or an unlisted file uses the transform.
+Usage: python3 check_layout_transform_users.py [--source-root DIR] [--summary]
+Exit code 0 = clean, 1 = a file outside the exempt ones uses the transform.
 """
 import argparse
 import pathlib
@@ -34,9 +30,16 @@ PATTERN_RE = re.compile("|".join(PATTERNS))
 
 EXEMPT_PREFIXES = ("UI/Scaling/",)
 EXEMPT_FILES = {
+    # The world-space users of the stretched screen.
     "App/Platform/Windows/Winmain.cpp",
     "Core/Input/SyntheticInput.cpp",
     "Engine/Object/ZzzInterface.cpp",
+    # The infrastructure: the window manager's one measuring scope, the native text renderer
+    # reading it, the inventory's screen scope and the tooltip's metric scope.
+    "UI/Core/WindowManager.cpp",
+    "Render/Text/CUIRenderTextSDLTtf.cpp",
+    "Engine/Object/ZzzInventory.cpp",
+    "UI/RmlBridge/RmlTooltip.cpp",
 }
 
 COMMENT_RE = re.compile(r'//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\\n])*"', re.S)
@@ -62,40 +65,10 @@ def count_uses(source_root):
     return counts
 
 
-def read_allowlist(path):
-    entries = {}
-    if not path.is_file():
-        return entries
-    for line_number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        name, _, count = line.rpartition(":")
-        if not name or not count.strip().isdigit():
-            sys.stderr.write("%s:%d: expected '<path>: <count>', got %r\n" % (path, line_number, raw))
-            continue
-        entries[name.strip()] = int(count)
-    return entries
-
-
-HEADER = """\
-# Files still using the per-window layout transform, with how many uses each may have.
-#
-# Read tools/check_layout_transform_users.py's docstring first. A file may only go down: lower its
-# count (or delete its line) when work removes uses; the build fails when a count grows or a new
-# file appears. Regenerate with --write after removing uses, and check the diff only shrinks.
-
-"""
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--source-root", default="src/source")
-    parser.add_argument(
-        "--allowlist", default=str(pathlib.Path(__file__).with_name("layout_transform_allowlist.txt"))
-    )
-    parser.add_argument("--summary", action="store_true", help="print the total and the largest files")
-    parser.add_argument("--write", action="store_true", help="rewrite the allowlist with today's counts")
+    parser.add_argument("--summary", action="store_true", help="print the uses found, by file")
     args = parser.parse_args()
 
     source_root = pathlib.Path(args.source_root)
@@ -103,44 +76,24 @@ def main():
         sys.stderr.write("source root not found: %s\n" % source_root)
         return 1
     counts = count_uses(source_root)
-    total = sum(counts.values())
-
-    if args.write:
-        lines = ["%s: %d" % (name, count) for name, count in sorted(counts.items())]
-        pathlib.Path(args.allowlist).write_text(HEADER + "\n".join(lines) + "\n", encoding="utf-8", newline="\n")
-        print("Layout transform guard: wrote %d files, %d uses" % (len(counts), total))
-        return 0
 
     if args.summary:
-        print("Layout transform guard: %d uses in %d files" % (total, len(counts)))
-        for name, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))[:25]:
+        print("Layout transform guard: %d uses in %d files" % (sum(counts.values()), len(counts)))
+        for name, count in sorted(counts.items(), key=lambda item: (-item[1], item[0])):
             print("  %4d  %s" % (count, name))
         return 0
 
-    allowlist = read_allowlist(pathlib.Path(args.allowlist))
-    grew = [(name, count, allowlist.get(name)) for name, count in sorted(counts.items())
-            if count > allowlist.get(name, 0)]
-    shrank = [(name, counts.get(name, 0), allowed) for name, allowed in sorted(allowlist.items())
-              if counts.get(name, 0) < allowed]
-
-    if shrank:
-        print(
-            "Layout transform guard: %d allowlist entr%s can be lowered (run with --write): %s"
-            % (len(shrank), "y" if len(shrank) == 1 else "ies",
-               ", ".join("%s %d->%d" % (name, allowed, count) for name, count, allowed in shrank))
-        )
-
-    if grew:
+    if counts:
         sys.stderr.write(
-            "Layout transform guard: %d file(s) use the per-window layout transform more than allowed.\n\n"
+            "Layout transform guard: %d file(s) use the active UI transform.\n\n"
             "Place documents in the theme, test the pointer with RmlUi hover or physical pixels, and size\n"
-            "text from the typography scale instead -- see this script's docstring.\n\n" % len(grew)
+            "text from the typography scale instead -- see this script's docstring.\n\n" % len(counts)
         )
-        for name, count, allowed in grew:
-            sys.stderr.write("  %s: %d (allowed %s)\n" % (name, count, allowed if allowed is not None else "none"))
+        for name, count in sorted(counts.items()):
+            sys.stderr.write("  %s: %d\n" % (name, count))
         return 1
 
-    print("Layout transform guard: OK (%d uses in %d files)" % (total, len(counts)))
+    print("Layout transform guard: OK (no use outside the infrastructure)")
     return 0
 
 

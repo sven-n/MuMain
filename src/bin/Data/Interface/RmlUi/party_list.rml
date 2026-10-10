@@ -1,4 +1,5 @@
 <rml>
+	<!-- bound-geometry: each card's health bar is a length from the member's health -->
 <head>
 	<title>Party List</title>
 	<link type="text/rcss" href="base.rcss"/>

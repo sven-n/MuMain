@@ -1,4 +1,5 @@
 <rml>
+	<!-- bound-geometry: target marker follows the selected command -->
 <head>
 	<title>Command Window</title>
 	<link type="text/rcss" href="base.rcss"/>

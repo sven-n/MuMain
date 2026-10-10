@@ -1,4 +1,6 @@
 <rml>
+	<!-- bound-geometry: the hero, the other characters' dots and each command's icon sit at their
+	     projected map points, and the pointer's chosen command follows the mouse -->
 <head>
 	<title>Siege Warfare</title>
 	<link type="text/rcss" href="base.rcss"/>
