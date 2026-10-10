@@ -12,6 +12,7 @@
 using UI::RmlBridge::DocumentScene;
 using UI::RmlBridge::SceneForDocument;
 using UI::RmlBridge::StackingDepthForDocument;
+using UI::RmlBridge::StackingDepthOutsideMainScene;
 
 namespace
 {
@@ -70,6 +71,21 @@ TEST_CASE("only the main scene's windows are suspended outside it [ui][stacking]
                              "char_make.rml", "char_info_balloon.rml", "msg_win.rml", "sys_menu.rml",
                              "notices.rml", "loading.rml", "title_scene.rml", "reconnect_dialog.rml"})
         CHECK_MESSAGE(SceneForDocument(name) == DocumentScene::Any, name);
+}
+
+TEST_CASE("the options window stands over the windows of the scene it opens in [ui][stacking]")
+{
+    CHECK(SceneForDocument("option_window.rml") == DocumentScene::Every);
+    // In the world: over the HUD, under the tooltips and message boxes.
+    CHECK(Depth("option_window.rml") > Depth("main_frame.rml"));
+    CHECK(Depth("option_window.rml") < Depth("tooltip.rml"));
+    // At login and character selection: over the scene windows and their menu, under their prompt.
+    const std::optional<float> outside = StackingDepthOutsideMainScene("option_window.rml");
+    REQUIRE(outside.has_value());
+    CHECK(*outside > Depth("login.rml"));
+    CHECK(*outside > Depth("sys_menu.rml"));
+    CHECK(*outside < Depth("remember_password_prompt.rml"));
+    CHECK_FALSE(StackingDepthOutsideMainScene("login.rml").has_value());
 }
 
 TEST_CASE("documents stack as the original's windows did [ui][stacking]")

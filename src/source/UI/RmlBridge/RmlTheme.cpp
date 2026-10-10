@@ -159,6 +159,9 @@ namespace UI::RmlBridge
     // Set on the document element of every main-scene document, see
     // SuspendMainSceneDocumentsOutsideMainScene().
     constexpr const char* MainSceneDocumentAttribute = "data-main-scene-document";
+    // A DocumentScene::Every document's depths, in and outside the main scene.
+    constexpr const char* MainSceneDepthAttribute = "data-main-scene-depth";
+    constexpr const char* OtherSceneDepthAttribute = "data-other-scene-depth";
     bool s_mainSceneDocumentsSuspended = false;
 
     template <typename Visit> void ForEachMainSceneDocument(Visit&& visit)
@@ -249,8 +252,35 @@ namespace UI::RmlBridge
 
     void ApplyDocumentScene(Rml::ElementDocument* document, const std::string& documentName)
     {
-        if (document != nullptr && SceneForDocument(documentName) == DocumentScene::Main)
+        if (document == nullptr)
+            return;
+        if (SceneForDocument(documentName) == DocumentScene::Main)
             document->SetAttribute(MainSceneDocumentAttribute, true);
+        const std::optional<float> mainDepth = StackingDepthForDocument(documentName);
+        if (const std::optional<float> otherDepth = StackingDepthOutsideMainScene(documentName); otherDepth && mainDepth)
+        {
+            document->SetAttribute(MainSceneDepthAttribute, *mainDepth);
+            document->SetAttribute(OtherSceneDepthAttribute, *otherDepth);
+        }
+    }
+
+    void ApplySceneStackingDepths()
+    {
+        const char* attribute = SceneFlag == MAIN_SCENE ? MainSceneDepthAttribute : OtherSceneDepthAttribute;
+        for (int contextIndex = 0; contextIndex < Rml::GetNumContexts(); ++contextIndex)
+        {
+            Rml::Context* context = Rml::GetContext(contextIndex);
+            for (int documentIndex = 0; documentIndex < context->GetNumDocuments(); ++documentIndex)
+            {
+                Rml::ElementDocument* document = context->GetDocument(documentIndex);
+                if (!document->HasAttribute(attribute))
+                    continue;
+                const float depth = document->GetAttribute<float>(attribute, 0.f);
+                const Rml::Property* current = document->GetLocalProperty(Rml::PropertyId::ZIndex);
+                if (current == nullptr || current->Get<float>() != depth)
+                    document->SetProperty(Rml::PropertyId::ZIndex, Rml::Property(depth, Rml::Unit::NUMBER));
+            }
+        }
     }
 
     void SuspendMainSceneDocumentsOutsideMainScene()

@@ -33,6 +33,7 @@ void InstallRuntimeHooks()
     hooks.beforeUpdate = []
     {
         SuspendMainSceneDocumentsOutsideMainScene();
+        ApplySceneStackingDepths();
         Tooltip::ExpireUnrefreshed();
         if (Rml::Context* context = RmlUiRuntime::Instance().GetContext())
             DocumentHints::Update(*context);

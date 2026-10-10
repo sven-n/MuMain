@@ -12,12 +12,14 @@ constexpr float MessageBoxDepth = 10.7f;   // CNewUIMessageBoxMng
 constexpr float NoticesDepth = 20.0f;      // UI::Notices::Render(), after every window
 constexpr float SceneBalloonDepth = 29.0f; // CUIMng::Render(): balloons, then its windows
 constexpr float SceneWindowDepth = 30.0f;
+constexpr float OverSceneWindowsDepth = 30.5f; // a main-scene window opened over CUIMng's windows
 constexpr float SceneMessageBoxDepth = 31.0f; // the login scene's g_MessageBox, after CUIMng
 constexpr float LoadingScreenDepth = 40.0f;   // the loading scene draws nothing else
 constexpr float ReconnectDialogDepth = 50.0f; // after the whole scene
 
 constexpr DocumentScene MainScene = DocumentScene::Main;
 constexpr DocumentScene AnyScene = DocumentScene::Any;
+constexpr DocumentScene EveryScene = DocumentScene::Every;
 
 struct DocumentPlacement
 {
@@ -128,7 +130,7 @@ constexpr DocumentPlacement Placements[] = {
     {"chat_command.rml", 10.65f, MainScene},
     // The original drew it at 10.5, under the HUD; the modern theme's settings screen covers the
     // whole screen, HUD included. Still under the tooltips and message boxes.
-    {"option_window.rml", 10.67f, MainScene},
+    {"option_window.rml", 10.67f, EveryScene},
     // The original drew each tooltip at its owner's depth (item tooltips at 5.5), where the
     // chat log, the friends window, the full map and the HUD hid its rows: an original
     // defect. Every tooltip draws above the windows instead, still under the message boxes.
@@ -185,6 +187,14 @@ std::optional<DocumentScene> SceneForDocument(std::string_view documentName)
     if (placement == nullptr)
         return std::nullopt;
     return placement->scene;
+}
+
+std::optional<float> StackingDepthOutsideMainScene(std::string_view documentName)
+{
+    const DocumentPlacement* placement = FindPlacement(documentName);
+    if (placement == nullptr || placement->scene != DocumentScene::Every)
+        return std::nullopt;
+    return OverSceneWindowsDepth;
 }
 
 } // namespace UI::RmlBridge

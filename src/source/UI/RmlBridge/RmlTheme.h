@@ -119,6 +119,9 @@ namespace UI::RmlBridge
     // suspension, so a window closed meanwhile hides its document in the same frame instead of
     // showing it for one.
     void ResumeMainSceneDocuments();
+    // Every frame before RmlUi updates: a DocumentScene::Every document takes its depth for the
+    // running scene.
+    void ApplySceneStackingDepths();
 
     // Following theme switches belongs to ThemedView too: only ThemedDocuments may register.
     class ThemeReloadRegistry

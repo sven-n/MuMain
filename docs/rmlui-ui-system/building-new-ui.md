@@ -282,7 +282,10 @@ a new port inherits them:
 - **Scene gate.** A window `CSystem` updates only in the main scene still has a live document in
   every scene. Its stacking-table entry marks it a main-scene document, and every such document is
   suspended outside the main scene (`SuspendMainSceneDocumentsOutsideMainScene()`). The HUD's
-  documents also wait for the world to load (`CSystem::SyncMainSceneHudVisibility()`).
+  documents also wait for the world to load (`CSystem::SyncMainSceneHudVisibility()`). A window
+  the login and character scenes open too (the options window) is a `DocumentScene::Every`
+  document instead: never suspended, at its own depth in the world and over the scene windows
+  outside it (`ApplySceneStackingDepths()`).
 - **Scroll thumb.** The legacy `.scroll-pane` thumb is the native 15x30 knob, not a proportional
   bar; a list the original scrolled one row per wheel notch takes `mousescroll` itself
   (`CMoveCommandWindow::RmlWheelList()`), since RmlUi scrolls 80 dp per notch.
