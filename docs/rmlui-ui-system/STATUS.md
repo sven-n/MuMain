@@ -195,15 +195,11 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
   name; no user layer over a theme and no partial theme inheriting from a base. A stated
   requirement waiting on priority. (A third first-party theme is ruled out by the project owner;
   §25/§28's coupling concern is addressed by `modern`'s divergence and the restored contract guard.)
-- **Native 3D is not yet behind one mechanism** (§14, §21): three contexts order it against RmlUi
-  where `RenderTarget` would do (the background lists are closed; `tracked-deferrals.md`'s native
-  3D entry).
-- **Validation covers the UI-scale axis only** (`layout-and-scaling.md`'s scale sweep);
-  resolution, drag state across a scale change, and theme change while open are uncovered, and
-  are left to whoever touches each window rather than tracked.
-- **The login scene's windows** (`CCreditWin`, `CLoginMainWin`, `CSysMenuWin`, `COptionWindow`,
-  `CServerSelWin`, `CMsgWin`, `CCharSelMainWin`, `CCharMakeWin`, `CLoginWin`) have not been
-  audited for native draws that still assume a fixed resolution (`CCreditWin` assumes 800x600).
+- **Validation is uneven across windows.** Headless layout tests cover resolution and OS display
+  scale for the party list, trade, event entry, the personal shops and the MU Helper
+  (`tests/ui/test_rml_text_layout.cpp`, `test_rml_party_trade_layout.cpp`); other windows have the
+  UI-scale sweep only (`layout-and-scaling.md`). Drag state across a scale change and theme changes
+  while open are checked per window when it is touched, not tracked.
 
 ## Upstream sync log
 

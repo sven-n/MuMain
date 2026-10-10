@@ -28,8 +28,8 @@ deleted); see [`migration-ledger.md`](migration-ledger.md) for each window's sta
   colours and placement stay in RML/RCSS.
 
 The runtime renders, updates and routes input; the game adds the rest through
-`RmlUiRuntimeHooks`. What remains where RmlUi meets native 3D is in
-[`tracked-deferrals.md`](tracked-deferrals.md).
+`RmlUiRuntimeHooks`. How native 3D shares the frame with RmlUi is in
+[Frame lifecycle](#frame-lifecycle-render-seams) below.
 
 ## The documents
 
