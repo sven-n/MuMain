@@ -703,6 +703,11 @@ namespace
     {
         UI::Tooltip::ShowLegacyTextList(textNum, x, y, UI::Tooltip::Placement::Below, &kSkillHoverTooltipOwner);
     }
+
+    void HideSkillHoverTooltip()
+    {
+        UI::Tooltip::HideLegacyTextList(&kSkillHoverTooltipOwner);
+    }
 }
 
 namespace
@@ -877,7 +882,7 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill()
 
     if (!anyTooltipHovered)
     {
-        UI::Tooltip::HideLegacyTextList(&kSkillHoverTooltipOwner);
+        HideSkillHoverTooltip();
     }
 }
 
@@ -1030,7 +1035,11 @@ void mu::ui::window::CCursedTempleSystem::SyncView()
     const bool visible = IsVisible();
     UI::RmlBridge::SyncDocumentVisibilityBehind(m_RmlView.Document(), visible);
     if (!visible)
+    {
+        // Hidden while a zone was hovered ($preview off, leaving the map): its tooltip goes too.
+        HideSkillHoverTooltip();
         return;
+    }
 
     std::vector<CursedTempleSpriteEntry> sprites;
     // The original's condition: drawn unless every one of these windows is open.
@@ -1044,6 +1053,8 @@ void mu::ui::window::CCursedTempleSystem::SyncView()
         SyncMiniMap(sprites);
         SyncSkill();
     }
+    else
+        HideSkillHoverTooltip();
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::alpha, "alpha", m_Alph);
     SyncField(m_RmlView.Binder(), &CursedTempleSystemRmlModel::scoreShown, "score_shown", m_IsScoreEffect);
     if (m_IsScoreEffect)
