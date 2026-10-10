@@ -51,6 +51,24 @@ Your character's name is never shown, in any setting.
 
 The setting applies immediately and is stored in `config.ini`.
 
+## Messages from Discord
+
+> Requires a server with a Discord chat bridge, like OpenMU's (its guild and
+> alliance chat can be bound to Discord channels).
+
+A message written in a Discord channel that the server bridges into the game
+appears in the chat of its scope - guild or alliance - with that chat's
+colours. Its sender is shown as `[Discord] <name>`: with OpenMU's bridge the
+name is the character the Discord user is linked to (OpenMU sends it as
+`@<name>`, which no character can be called). A server that sends the Discord
+name itself can show it with up to 32 characters.
+
+- Discord users are not characters: right-clicking their line does not start a
+  whisper, and they are not added to your whisper list.
+- **F2** switches the chat log between all messages and whispers. Once a
+  message from Discord has arrived, it also offers a view with only the
+  messages from Discord: all → whispers → Discord → all.
+
 ## For server operators
 
 Each server uses its own Discord application, so the name your players see
