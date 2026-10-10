@@ -53,8 +53,13 @@ void Show(const Message& message);
 
 // OpenMU's chat bridge (MUnique/OpenMU#1161) sends messages written in Discord
 // through the ordinary guild and alliance chat, as the linked character with
-// this prefix. Character names can't contain it, so a sender with it is a
-// Discord user and not a character.
+// this prefix, which OpenMU doesn't allow in character names.
+//
+// This is a best-effort fallback for servers which don't send the dedicated
+// ExternalChatMessage: the prefix is a convention of the server, not a
+// guarantee the client can check - a server which allows it in character
+// names would have such characters shown as Discord users. When a server
+// sends ExternalChatMessage, that is the authoritative signal.
 inline constexpr wchar_t BridgedSenderPrefix = L'@';
 
 [[nodiscard]] bool IsBridgedSender(std::wstring_view sender);
