@@ -22,6 +22,33 @@ a successful build or a macOS run is not evidence for Linux or Windows.
 - GPU skinning shaders and pipelines are required. An eligible submission
   failure is counted and rejected; it does not silently switch to CPU skinning.
 
+## RmlUi multisampling
+
+RmlUi UI layers default to one sample (`RMLUI_SDL_GPU_NUM_MSAA_SAMPLES=1`)
+on every SDL GPU driver. This disables UI MSAA and avoids the multisampled
+layer/resolve path implicated in reported NVIDIA/Vulkan device loss shortly
+after startup. The reported failure occurs on the first UI frames, with Windows
+event 153 from `nvlddmkm` and subsequent texture-upload failures ending in
+`LoadBitmap Failed`. The same build with one sample runs successfully.
+
+This is a compatibility mitigation. The underlying driver, SDL, or RmlUi
+backend fault remains unisolated; it is independent of the swapchain-format
+issue. UI layers, clipping, and filters remain enabled, but UI edges no longer
+receive multisample anti-aliasing.
+
+For diagnostic builds, opt into MSAA through CMake, for example:
+
+```powershell
+cmake --preset windows-x64 -DRMLUI_SDL_GPU_NUM_MSAA_SAMPLES=2
+cmake --build --preset windows-x64-release
+```
+
+Supported requests are `1`, `2`, `4`, and `8`. For multisampled requests the
+backend chooses a supported sample count for both color and stencil, preferring
+more samples when the exact count is unavailable. Restore `1` and rebuild to
+return to the default behavior. Record the sample-count setting alongside the
+inputs below when comparing native runs.
+
 ## Packaged font roles
 
 Release builds resolve every text role from files beside the executable:
