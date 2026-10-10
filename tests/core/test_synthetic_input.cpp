@@ -272,6 +272,10 @@ TEST_CASE("A drag presses, moves with the button held, and releases at its end [
 
     CHECK(Drag(100.0f, 200.0f, 500.0f, 600.0f, MouseButton::Left));
 
+    // The pointer rests on the target for two frames before the press.
+    BeginFrame();
+    BeginFrame();
+    CHECK_FALSE(MouseLButton);
     BeginFrame();
     CHECK(MouseLButton);
     CHECK(g_fWindowMouseX == doctest::Approx(100.0f));
@@ -410,14 +414,20 @@ TEST_CASE("Synthetic delivery arbitrates UI and keeps text before Return [core][
     g_fWindowMouseX = 53.0f;
     g_fWindowMouseY = 54.0f;
     CHECK(Click(100.0f, 200.0f, MouseButton::Left));
+    // The pointer rests on the target for two frames before the press.
     BeginFrame();
-    CHECK(delivered == std::vector<SDL_EventType>{SDL_EVENT_MOUSE_MOTION, SDL_EVENT_MOUSE_BUTTON_DOWN});
+    BeginFrame();
+    BeginFrame();
+    CHECK(delivered == std::vector<SDL_EventType>{SDL_EVENT_MOUSE_MOTION, SDL_EVENT_MOUSE_MOTION,
+                                                  SDL_EVENT_MOUSE_MOTION, SDL_EVENT_MOUSE_BUTTON_DOWN});
+    // The UI took the press: the game's button stays up. The hover moved its pointer, as a real
+    // mouse's motion does.
     CHECK_FALSE(MouseLButton);
     CHECK_FALSE(IsKeyHeld(VK_LBUTTON));
-    CHECK(MouseX == 51);
-    CHECK(MouseY == 52);
-    CHECK(g_fWindowMouseX == 53.0f);
-    CHECK(g_fWindowMouseY == 54.0f);
+    CHECK(MouseX == 50);
+    CHECK(MouseY == 100);
+    CHECK(g_fWindowMouseX == 100.0f);
+    CHECK(g_fWindowMouseY == 200.0f);
     Reset();
     CHECK(IsIdle());
 
@@ -481,6 +491,9 @@ TEST_CASE("Physical button press cancels only its synthetic click [core][synthet
     WindowWidth = 1280;
     WindowHeight = 960;
     CHECK(Click(20.0f, 20.0f, MouseButton::Left));
+    // The pointer rests on the target for two frames before the press.
+    BeginFrame();
+    BeginFrame();
     BeginFrame();
     REQUIRE(IsKeyHeld(VK_LBUTTON));
     CancelForPhysicalButton(SDL_BUTTON_RIGHT);
@@ -526,6 +539,9 @@ TEST_CASE("Consumer teardown cancels a held click without releasing it [core][sy
     WindowHeight = 960;
     CHECK(Click(50.0f, 60.0f, MouseButton::Left));
     const auto first = CurrentGeneration();
+    // The pointer rests on the target for two frames before the press.
+    BeginFrame();
+    BeginFrame();
     BeginFrame();
     REQUIRE(consumer.pressed);
     CHECK_FALSE(MouseLButton);
@@ -567,6 +583,9 @@ TEST_CASE("Cancelling a synthetic right press preserves physical primary ownersh
     WindowHeight = 960;
     consumer.physicalPrimaryPressed = true;
     CHECK(Click(50.0f, 60.0f, MouseButton::Right));
+    // The pointer rests on the target for two frames before the press.
+    BeginFrame();
+    BeginFrame();
     BeginFrame();
     CHECK(consumer.pressed);
     CancelDelivery();
