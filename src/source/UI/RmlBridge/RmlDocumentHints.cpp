@@ -84,9 +84,8 @@ void Update(Rml::Context& context)
     // below. Pushed below (a button at the top of the screen), it starts under the sprite.
     // The cursor sprite is drawn in the original's screen stretched over the window.
     const float cursorBottom =
-        g_fWindowMouseY + UI::Scaling::SizeY(UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth),
-                                                                                 static_cast<int>(WindowHeight)),
-                                             kCursorBottomUnits);
+        g_fWindowMouseY +
+        kCursorBottomUnits * UI::Scaling::PointerScale(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     config.anchor = Tooltip::AnchorPoint::AboveLeft;
     config.anchorY = anchor.aboveY;
     config.flipAnchorY = std::max(anchor.belowY, cursorBottom);

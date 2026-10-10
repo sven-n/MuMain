@@ -3921,6 +3921,9 @@ void RenderCursor()
     if (!g_bRenderGameCursor)
         return;
 
+    // The sprites below are placed in units around the pointer; drawn at one scale, not stretched to the window.
+    const UI::Scaling::ScopedPointerUnits pointerUnits(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight),
+                                                       g_fWindowMouseX, g_fWindowMouseY, MouseX, MouseY);
     EnableAlphaTest();
 
     float u = 0.f;

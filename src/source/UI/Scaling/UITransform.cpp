@@ -288,6 +288,28 @@ UI::Scaling::ScopedScreenStretch::ScopedScreenStretch(int windowWidth, int windo
 {
 }
 
+float UI::Scaling::PointerScale(int windowWidth, int windowHeight)
+{
+    return CappedUniformScale(windowWidth, windowHeight, MaximumPanelScale);
+}
+
+namespace
+{
+UI::Scaling::Transform PointerUnitsTransform(int windowWidth, int windowHeight, float pointerX, float pointerY,
+                                             int logicalX, int logicalY)
+{
+    const float scale = UI::Scaling::PointerScale(windowWidth, windowHeight);
+    return {scale, scale, pointerX - static_cast<float>(logicalX) * scale,
+            pointerY - static_cast<float>(logicalY) * scale, UI::Scaling::TypographyScale(windowWidth, windowHeight)};
+}
+} // namespace
+
+UI::Scaling::ScopedPointerUnits::ScopedPointerUnits(int windowWidth, int windowHeight, float pointerX, float pointerY,
+                                                    int logicalX, int logicalY)
+    : m_scope(PointerUnitsTransform(windowWidth, windowHeight, pointerX, pointerY, logicalX, logicalY))
+{
+}
+
 float UI::Scaling::NativeTextPixelSizeInBox(FontRole role, const Transform& transform, float measuredWidth,
                                             float boxWidth)
 {

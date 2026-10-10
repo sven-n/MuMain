@@ -83,6 +83,20 @@ namespace UI::Scaling
         ScopedActiveTransform m_scope;
     };
 
+    // Units of the UI scale anchored at the pointer: a sprite drawn at the pointer's logical point
+    // (MouseX, MouseY) lands on the real pointer at one scale for both axes, as the cursor draws.
+    class ScopedPointerUnits
+    {
+    public:
+        ScopedPointerUnits(int windowWidth, int windowHeight, float pointerX, float pointerY, int logicalX,
+                           int logicalY);
+
+    private:
+        ScopedActiveTransform m_scope;
+    };
+    // The scale ScopedPointerUnits draws at.
+    float PointerScale(int windowWidth, int windowHeight);
+
     Transform WindowPixelTransform(int windowWidth, int windowHeight);
     // Uniform units of the UI scale, from the window's top-left: the windows' measuring space
     // (CManager), so MeasureText() reports a panel's reference px wherever the panel stands at the
