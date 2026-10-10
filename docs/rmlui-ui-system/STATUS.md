@@ -34,11 +34,12 @@ deleted. Families:
 measuring space (`layout-and-scaling.md`'s "Units and placement"). Only infrastructure may touch
 the active transform; `tools/check_layout_transform_users.py` keeps it to that.
 
-**Contract validation restored (2026-10-10).** The build's drift guard checks 111 documents,
-222 theme variants and 144 files, with 28 passing regression fixtures. Required literal ids and
-callbacks are checked separately for each theme; alternative field readouts remain supported.
-Dynamic lookups and actual rendering/interaction still require runtime checks. The completed
-rollout is recorded in [migration-ledger.md](migration-ledger.md#contract-validation).
+**Small-scale text and event validation (2026-10-10, signed off 2026-10-11).** The contract guard
+checks every theme's documents again (111 documents, 222 variants); the party list, trade, event
+entry, personal-shop and MU Helper text fits at small scales without lowering the native minimum,
+checked by a headless audit of the real documents in five languages; the Illusion Temple tooltips
+and result table and the siege markers were verified through `$preview`. Where legacy keeps
+native's positions, long labels are marquees. Outcome: [migration-ledger.md](migration-ledger.md#small-scale-text-and-event-validation).
 
 **Stays native on purpose**: live 3D content (item grids, equipped items, item and character
 previews — `RenderTarget` can show one inside a document, as the potions, the letter portrait,
@@ -144,6 +145,9 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
 - **A counter-scaled layer's lengths are RCSS**: `#panel` binds `--root-scale`, base.rcss's
   `.sharp-text` / `.counter-scaled` cancel it, and the theme writes `width: calc(160px *
   var(--root-scale))`. A number multiplied by `root_scale` in RML fails the bound-geometry guard.
+- **A label in a constricted box** that must keep native's position is a `.marquee`: one line,
+  `..` when longer, the whole text scrolling on hover (`RmlMarquee.h`). Text that may take more
+  lines wraps in a flow or a scroll pane instead (`event_entry`, `shop_notice.rcss`).
 - **`MeasureText()` returns reference units**, not pixels; `RenderText()` shrinks text wider than
   its box — use `NativeTextPixelSizeInBox()` per text. Text the native renderer draws small is laid
   out at `CachedFontPointSize()` and scaled down (the login scene lines).
