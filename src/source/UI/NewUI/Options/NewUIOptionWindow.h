@@ -36,6 +36,7 @@ namespace SEASON3B
         {
             IMAGE_OPTION_FRAME_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
             IMAGE_OPTION_BTN_CLOSE = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_CLOSE,
+            IMAGE_OPTION_BTN_SMALL = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
             IMAGE_OPTION_FRAME_DOWN = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
 
             IMAGE_OPTION_FRAME_UP = BITMAP_OPTION_BEGIN,
@@ -133,6 +134,9 @@ namespace SEASON3B
         int m_iDiscordPresenceIndex;
         const wchar_t* m_discordPresenceLabels[Integration::Discord::PresenceModes.size()] = {};
         CNewUIComboBox m_DiscordPresenceCombo;
+        CNewUIButton m_BtnDiscordJoin;
+        // Whether config.ini holds a valid invite link; read on opening.
+        bool m_bHasDiscordInvite = false;
 
         void ApplyResolution();
         int FindCurrentResolutionIndex();
@@ -152,6 +156,7 @@ namespace SEASON3B
         int FindCurrentDiscordPresenceIndex();
         void InitDiscordPresenceCombo();
         void RenderDiscordPresenceRow();
+        void ReadDiscordInvite();
     };
 }
 

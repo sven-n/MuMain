@@ -10,6 +10,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Audio/AudioPlayer.h"
+#include "Integration/Discord/Invite.h"
 #include "Integration/Discord/RichPresence.h"
 #include <algorithm>
 #include <cstring>
@@ -206,6 +207,11 @@ namespace
     constexpr int DISCORD_COMBO_Y_LOCAL = 413;
     constexpr int DISCORD_COMBO_WIDTH = 148;
     constexpr int DISCORD_COMBO_HEIGHT = 16;
+    // The Join button sits on the label's line, right-aligned above the combo.
+    constexpr int DISCORD_JOIN_X_LOCAL = 116;
+    constexpr int DISCORD_JOIN_Y_LOCAL = 389;
+    constexpr int DISCORD_JOIN_WIDTH = 54;
+    constexpr int DISCORD_JOIN_HEIGHT = 23;
 
     const wchar_t* DiscordPresenceLabel(Integration::Discord::PresenceMode mode)
     {
@@ -271,6 +277,7 @@ bool SEASON3B::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x, int y
     InitLanguageCombo();
     InitFontCombo();
     InitDiscordPresenceCombo();
+    ReadDiscordInvite();
     Show(false);
     return true;
 }
@@ -358,6 +365,11 @@ void SEASON3B::CNewUIOptionWindow::SetButtonInfo()
     m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + CLOSE_BUTTON_Y_LOCAL, 54, 30);
     m_BtnClose.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
+
+    m_BtnDiscordJoin.ChangeButtonImgState(true, IMAGE_OPTION_BTN_SMALL, true);
+    m_BtnDiscordJoin.ChangeButtonInfo(m_Pos.x + DISCORD_JOIN_X_LOCAL, m_Pos.y + DISCORD_JOIN_Y_LOCAL,
+                                      DISCORD_JOIN_WIDTH, DISCORD_JOIN_HEIGHT);
+    m_BtnDiscordJoin.ChangeText(&I18N::Game::DiscordJoin);
 }
 
 void SEASON3B::CNewUIOptionWindow::Release()
@@ -443,6 +455,13 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
                 return false;
             }
         }
+    }
+
+    if (m_bHasDiscordInvite && m_BtnDiscordJoin.UpdateMouseEvent())
+    {
+        Integration::Discord::Invite::Open(GameConfig::GetInstance().GetDiscordInviteUrl());
+        PlayBuffer(SOUND_CLICK01);
+        return false;
     }
 
     // Close button after the combos, so an open dropdown drawn over it wins the
@@ -628,6 +647,7 @@ void SEASON3B::CNewUIOptionWindow::OpenningProcess()
     m_FontCombo.SetSelectedIndex(m_iFontIndex);
     m_FontCombo.Close();
     InitDiscordPresenceCombo();
+    ReadDiscordInvite();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
 }
 
@@ -772,6 +792,18 @@ void SEASON3B::CNewUIOptionWindow::RenderDiscordPresenceRow()
 
     RenderImage(IMAGE_OPTION_POINT, m_Pos.x + 20.f, m_Pos.y + DISCORD_LABEL_Y_LOCAL - 2.f, 10.f, 10.f);
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + DISCORD_LABEL_Y_LOCAL, I18N::Game::DiscordPresence);
+
+    if (m_bHasDiscordInvite)
+    {
+        m_BtnDiscordJoin.Render();
+    }
+}
+
+// The Join button is only offered for a valid invite link, so a typo in
+// config.ini shows no button rather than one that does nothing.
+void SEASON3B::CNewUIOptionWindow::ReadDiscordInvite()
+{
+    m_bHasDiscordInvite = Integration::Discord::Invite::Accept(GameConfig::GetInstance().GetDiscordInviteUrl());
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderButtons()

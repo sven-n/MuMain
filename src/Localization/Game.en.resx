@@ -13156,4 +13156,7 @@
   <data name="DiscordCastleSiege" xml:space="preserve">
     <value>Castle Siege</value>
   </data>
+  <data name="DiscordJoin" xml:space="preserve">
+    <value>Join</value>
+  </data>
 </root>

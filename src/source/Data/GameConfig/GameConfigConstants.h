@@ -53,6 +53,7 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyDiscordApplicationId[] = L"ApplicationId";
     inline constexpr wchar_t CfgKeyDiscordLargeImageKey[] = L"LargeImageKey";
     inline constexpr wchar_t CfgKeyDiscordSmallImageKey[] = L"SmallImageKey";
+    inline constexpr wchar_t CfgKeyDiscordInviteUrl[] = L"InviteUrl";
 }
 
 namespace CfgDefaults
@@ -97,4 +98,6 @@ namespace CfgDefaults
     inline constexpr wchar_t CfgDefaultDiscordPresence[] = L"HideDetails";
     inline constexpr wchar_t CfgDefaultDiscordApplicationId[] = L"";
     inline constexpr wchar_t CfgDefaultDiscordImageKey[] = L"";
+    // The server's Discord invite link; empty = no Join button.
+    inline constexpr wchar_t CfgDefaultDiscordInviteUrl[] = L"";
 }
