@@ -84,6 +84,11 @@ void GameConfig::Load()
     m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
     m_vsyncEnabled = ReadBool(CfgSectionRender, CfgKeyVSync, CfgDefaultVSync);
 
+    m_discordPresence = ReadString(CfgSectionDiscord, CfgKeyDiscordPresence, CfgDefaultDiscordPresence);
+    m_discordApplicationId = ReadString(CfgSectionDiscord, CfgKeyDiscordApplicationId, CfgDefaultDiscordApplicationId);
+    m_discordLargeImageKey = ReadString(CfgSectionDiscord, CfgKeyDiscordLargeImageKey, CfgDefaultDiscordImageKey);
+    m_discordSmallImageKey = ReadString(CfgSectionDiscord, CfgKeyDiscordSmallImageKey, CfgDefaultDiscordImageKey);
+
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
     // central registry of valid keys to keep in sync.
@@ -127,6 +132,11 @@ void GameConfig::Save()
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
     WriteBool(CfgSectionRender, CfgKeyVSync, m_vsyncEnabled);
+
+    WriteString(CfgSectionDiscord, CfgKeyDiscordPresence, m_discordPresence);
+    WriteString(CfgSectionDiscord, CfgKeyDiscordApplicationId, m_discordApplicationId);
+    WriteString(CfgSectionDiscord, CfgKeyDiscordLargeImageKey, m_discordLargeImageKey);
+    WriteString(CfgSectionDiscord, CfgKeyDiscordSmallImageKey, m_discordSmallImageKey);
 }
 
 std::vector<std::wstring> GameConfig::ReadStringList(const wchar_t* section, const wchar_t* keyPrefix)
@@ -191,6 +201,11 @@ void GameConfig::SetMusicVolume(int level)
 void GameConfig::SetVSyncEnabled(bool enabled)
 {
     m_vsyncEnabled = enabled;
+}
+
+void GameConfig::SetDiscordPresence(const std::wstring& presence)
+{
+    m_discordPresence = presence;
 }
 
 void GameConfig::SetRememberMe(bool remember)

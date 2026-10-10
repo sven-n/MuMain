@@ -13117,4 +13117,43 @@
   <data name="QuestRequirementBuff" xml:space="preserve">
     <value>Bonus: %ls</value>
   </data>
+  <data name="DiscordPresence" xml:space="preserve">
+    <value>Discord</value>
+  </data>
+  <data name="DiscordPresenceOn" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="DiscordPresenceHideDetails" xml:space="preserve">
+    <value>Hide details</value>
+  </data>
+  <data name="DiscordPresenceOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="DiscordInLogin" xml:space="preserve">
+    <value>Logging in</value>
+  </data>
+  <data name="DiscordInCharacterSelect" xml:space="preserve">
+    <value>Selecting a character</value>
+  </data>
+  <data name="DiscordInGame" xml:space="preserve">
+    <value>In game</value>
+  </data>
+  <data name="DiscordCharacterLevel" xml:space="preserve">
+    <value>Lv %d %ls</value>
+  </data>
+  <data name="DiscordCharacterMasterLevel" xml:space="preserve">
+    <value>Lv %d / ML %d %ls</value>
+  </data>
+  <data name="DiscordInEvent" xml:space="preserve">
+    <value>In %ls</value>
+  </data>
+  <data name="DiscordEventLevel" xml:space="preserve">
+    <value>%ls %d</value>
+  </data>
+  <data name="DiscordParty" xml:space="preserve">
+    <value>Party %d/%d</value>
+  </data>
+  <data name="DiscordCastleSiege" xml:space="preserve">
+    <value>Castle Siege</value>
+  </data>
 </root>

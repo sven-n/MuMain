@@ -10,6 +10,7 @@ namespace CfgSections
     inline constexpr wchar_t CfgSectionConnectionSettings[] = L"CONNECTION SETTINGS";
     inline constexpr wchar_t CfgSectionCamera[] = L"Camera";
     inline constexpr wchar_t CfgSectionRender[] = L"Render";
+    inline constexpr wchar_t CfgSectionDiscord[] = L"Discord";
 }
 
 namespace CfgKeys
@@ -46,6 +47,12 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
     inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
     inline constexpr wchar_t CfgKeyVSync[] = L"VSync";
+
+    // Discord Rich Presence (docs/discord.md)
+    inline constexpr wchar_t CfgKeyDiscordPresence[] = L"Presence";
+    inline constexpr wchar_t CfgKeyDiscordApplicationId[] = L"ApplicationId";
+    inline constexpr wchar_t CfgKeyDiscordLargeImageKey[] = L"LargeImageKey";
+    inline constexpr wchar_t CfgKeyDiscordSmallImageKey[] = L"SmallImageKey";
 }
 
 namespace CfgDefaults
@@ -82,4 +89,12 @@ namespace CfgDefaults
     // Opt-in until real effects have been visually checked on target hardware.
     inline constexpr bool CfgDefaultSortParticleDraws = false;
     inline constexpr bool CfgDefaultVSync = true;
+
+    // On, HideDetails or Off (Integration/Discord/PresenceMode.h). The
+    // character's level and class only go to Discord when the player asks for
+    // it. The application and its images belong to the server operator, so
+    // none is built in: without an application id the presence stays off.
+    inline constexpr wchar_t CfgDefaultDiscordPresence[] = L"HideDetails";
+    inline constexpr wchar_t CfgDefaultDiscordApplicationId[] = L"";
+    inline constexpr wchar_t CfgDefaultDiscordImageKey[] = L"";
 }
