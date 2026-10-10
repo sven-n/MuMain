@@ -283,8 +283,7 @@ void CUIMapName::BuildRmlUi()
 }
 
 // The native fallback still draws the 166 x 90 name at physical ((W - 166) / 2, 220 * H / 480).
-// RmlUi places and scales the whole image from the theme. The original texture coordinates assumed
-// padded textures and cropped the loaded art; the RmlUi image shows it in full.
+// RmlUi places and scales the artwork from the theme; the image rects crop the padded textures.
 void CUIMapName::SyncView()
 {
     const bool visible = HIDE != m_eState;

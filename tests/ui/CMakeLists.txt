@@ -4,6 +4,12 @@ add_test(
 )
 
 mu_add_test(
+    NAME rml_image_crop_tests
+    SOURCES test_rml_image_crop.cpp
+    LINK_LIBS RmlUi::Core
+)
+
+mu_add_test(
     NAME guard_guild_lists_tests
     SOURCES
         test_guard_guild_lists.cpp

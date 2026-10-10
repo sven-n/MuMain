@@ -66,7 +66,7 @@ set(BUILD_SHARED_LIBS "${_saved_BUILD_SHARED_LIBS}")
 
 mu_ensure_submodule("ThirdParty/RmlUi"
   INDICATOR "CMakeLists.txt"
-  URL "https://github.com/mikke89/RmlUi.git")
+  URL "https://github.com/nitoygo/RmlUi.git")
 
 # RmlUi -- static link, no bundled samples/Lua bindings. We supply our own
 # Rml::RenderInterface/SystemInterface (source/Render/RmlUi/) targeting this branch's
