@@ -310,16 +310,10 @@ CPersonalShopTitleImp* CPersonalShopTitleImp::GetObjPtr()
     return &s_Instance;
 }
 
+// Projects with the world's own camera, as the name labels do: the world renders under the docked
+// windows, so a title follows its owner wherever they stand on screen.
 void CPersonalShopTitleImp::UpdatePosition()
 {
-    float Width = GetScreenWidth(), Height = REFERENCE_HEIGHT;
-
-    if (!g_Camera.TopViewEnable)
-        Height = REFERENCE_HEIGHT - 48;
-
-    EndBitmap();
-    BeginOpengl(0, 0, Width, Height);
-
     auto mi = m_listShopTitleDrawObj.begin();
     for (; mi != m_listShopTitleDrawObj.end(); ++mi) {
         CShopTitleDrawObj* pDrawObj = (*mi).second;
@@ -332,9 +326,6 @@ void CPersonalShopTitleImp::UpdatePosition()
 
         pDrawObj->SetBoxPos(pos);
     }
-
-    EndOpengl();
-    BeginBitmap();
 }
 void CPersonalShopTitleImp::RevisionPosition()
 {
