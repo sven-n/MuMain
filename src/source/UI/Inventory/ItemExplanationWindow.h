@@ -5,12 +5,12 @@
 #pragma once
 
 #include "UI/Core/WindowManager.h"
-#include "UI/Inventory/TipTextListView.h"
+#include "UI/Inventory/ItemHelpView.h"
 
 namespace mu::ui::window
 {
-// The item help window (/<item name> in chat): the item's levels table, drawn through
-// RmlUi from the RenderTipTextList() calls the original made (TipTextListView).
+// The item help window (/<item name> in chat): the item's name and its levels table, in RmlUi
+// (ItemHelpView).
 class CItemExplanationWindow : public CObject
 {
 public:
@@ -33,13 +33,12 @@ public:
     void ClosingProcess();
 
 private:
-    // What the original's Render() drew with RenderTipTextList(), laid out for the document.
-    // item_explanation.rml.
-    void RecordTable(TipTextListRecord& record);
+    // What the original's Render() drew with RenderTipTextList(), for item_explanation.rml.
+    void SyncContent();
 
     CManager* m_pNewUIMng;
 
-    TipTextListView m_View{"item_explanation", "Data/Interface/RmlUi/item_explanation.rml"};
+    ItemHelpView m_View{"item_explanation", "Data/Interface/RmlUi/item_explanation.rml"};
 };
 } // namespace mu::ui::window
 

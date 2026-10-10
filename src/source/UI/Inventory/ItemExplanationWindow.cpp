@@ -1,13 +1,13 @@
 ﻿
 #include "stdafx.h"
 #include "UI/Inventory/ItemExplanationWindow.h"
-#include <cmath>
 #include "UI/Core/WindowSystem.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "I18N/All.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
 #include "Engine/Object/ZzzInterface.h"
 
 extern int TextNum;
@@ -78,12 +78,11 @@ bool mu::ui::window::CItemExplanationWindow::UpdateKeyEvent()
 
 bool mu::ui::window::CItemExplanationWindow::Update()
 {
-    // The original drew the table in Render(); it is laid out here (UI::TipTextList) for the
-    // document.
-    TipTextListRecord record;
+    // The original drew the table in Render(); its content is collected here for the document.
     if (IsVisible())
-        RecordTable(record);
-    m_View.Sync(IsVisible(), record);
+        SyncContent();
+    else
+        m_View.Sync(false, {});
     return true;
 }
 
@@ -93,294 +92,107 @@ bool mu::ui::window::CItemExplanationWindow::Render()
     return true;
 }
 
-void mu::ui::window::CItemExplanationWindow::RecordTable(TipTextListRecord& record)
+void mu::ui::window::CItemExplanationWindow::SyncContent()
 {
     // The globals, not block-scope externs: inside mu::ui::window those redeclared UIManager.cpp's
     // same-named references as plain objects, so the original read ItemHelp as garbage and hid the
     // window on its first frame (and would have written the table through the references).
-
-    int iInfoWidth = 0;
-
-    // The original knew only these four window widths; any other left iInfoWidth 0 and divided
-    // by it below (never reached there: the window hid itself first). Other widths take the
-    // nearest smaller one's values.
-    const int layoutWidth = WindowWidth >= 1280   ? 1280
-                            : WindowWidth >= 1024 ? 1024
-                            : WindowWidth >= 800  ? 800
-                                                  : REFERENCE_WIDTH;
-    switch (layoutWidth)
-    {
-    case REFERENCE_WIDTH:
-        iInfoWidth = 90;
-        break;
-    case 800:
-        iInfoWidth = 90;
-        break;
-    case 1024:
-        iInfoWidth = 103;
-        break;
-    case 1280:
-        iInfoWidth = 123;
-        break;
-    }
-
-    int iType = 0;
-    int TabSpace = 0;
-
-    if (ItemHelp == ITEM_BOLT || ItemHelp == ITEM_ARROWS)
+    const bool etc = ItemHelp >= ITEM_ETC && ItemHelp < ITEM_ETC + MAX_ITEM_INDEX;
+    const bool known = (ItemHelp >= ITEM_SWORD && ItemHelp < ITEM_BOW + MAX_ITEM_INDEX) ||
+                       (ItemHelp >= ITEM_STAFF && ItemHelp < ITEM_STAFF + MAX_ITEM_INDEX) ||
+                       (ItemHelp >= ITEM_SHIELD && ItemHelp < ITEM_SHIELD + MAX_ITEM_INDEX) ||
+                       (ItemHelp >= ITEM_HELM && ItemHelp < ITEM_BOOTS + MAX_ITEM_INDEX) || etc;
+    if (ItemHelp == ITEM_BOLT || ItemHelp == ITEM_ARROWS || !known)
     {
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
+        m_View.Sync(false, {});
         return;
-    }
-    else if (ItemHelp >= ITEM_SWORD && ItemHelp < ITEM_BOW + MAX_ITEM_INDEX)
-    {
-        iType = 1;
-        TabSpace += int(2160 / iInfoWidth);
-    }
-    else if (ItemHelp >= ITEM_STAFF && ItemHelp < ITEM_STAFF + MAX_ITEM_INDEX)
-    {
-        iType = 2;
-        TabSpace += int(1800 / iInfoWidth);
-    }
-    else if (ItemHelp >= ITEM_SHIELD && ItemHelp < ITEM_SHIELD + MAX_ITEM_INDEX)
-    {
-        iType = 3;
-        TabSpace += int(1800 / iInfoWidth);
-    }
-    else if (ItemHelp >= ITEM_HELM && ItemHelp < ITEM_BOOTS + MAX_ITEM_INDEX)
-    {
-        iType = 4;
-        TabSpace += int(1800 / iInfoWidth);
-    }
-    else if (ItemHelp >= ITEM_ETC && ItemHelp < ITEM_ETC + MAX_ITEM_INDEX)
-    {
-        iType = 5;
-
-        if (layoutWidth == REFERENCE_WIDTH || layoutWidth == 1280)
-            TabSpace += int(5940 / iInfoWidth);
-        else if (layoutWidth == 800 || layoutWidth == 1024)
-            TabSpace += int(5200 / iInfoWidth);
-    }
-    else
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
-        return;
-    }
-
-    if (ItemHelp >= ITEM_BOOK_OF_SAHAMUTT && ItemHelp <= ITEM_STAFF + 29)
-    {
-        iType = 6;
-        TabSpace += int(800 / iInfoWidth);//20
-    }
-
-    int iCurrMaxLevel = iMaxLevel;
-
-    if (iType == 5)
-    {
-        iCurrMaxLevel = 0;
     }
 
     ITEM_ATTRIBUTE* p = &ItemAttribute[ItemHelp];
     ComputeItemInfo(ItemHelp);
 
+    // The original's heading: "Item info" and the item's name, between half lines.
     TextNum = 0;
     mu_swprintf(TextList[TextNum], L"\n");
     TextNum++;
-
     wcscpy(TextList[TextNum], I18N::Game::ItemInfo);
     TextListColor[TextNum] = TEXT_COLOR_BLUE;
     TextBold[TextNum] = true;
     TextNum++;
-
     mu_swprintf(TextList[TextNum], L"%ls", p->Name);
     TextListColor[TextNum] = TEXT_COLOR_WHITE;
     TextBold[TextNum] = true;
     TextNum++;
-
     mu_swprintf(TextList[TextNum], L"\n");
     TextNum++;
-    mu_swprintf(TextList[TextNum], L" ");
-    TextNum++;
-    mu_swprintf(TextList[TextNum], L"\n");
-    TextNum++;
+    std::vector<ItemHelpLineEntry> lines = ItemHelpView::TextListLines(TextNum);
 
-    float fNumAdd = 1.0f;
-    if (!(g_iItemInfo[0][_COLUMN_TYPE_ATTMIN] <= 0 || (ItemHelp >= ITEM_ETC && ItemHelp < ITEM_ETC + MAX_ITEM_INDEX)))
-        ++fNumAdd;
-    if (!(g_iItemInfo[0][_COLUMN_TYPE_ATTMAX] <= 0 || (ItemHelp >= ITEM_ETC && ItemHelp < ITEM_ETC + MAX_ITEM_INDEX)))
-        ++fNumAdd;
-    if (g_iItemInfo[0][_COLUMN_TYPE_MAGIC] > 0)
-        ++fNumAdd;
-    if (g_iItemInfo[0][_COLUMN_TYPE_CURSE] > 0)
-        ++fNumAdd;
-    if (g_iItemInfo[0][_COLUMN_TYPE_PET_ATTACK] > 0)
-        ++fNumAdd;
-    if (g_iItemInfo[0][_COLUMN_TYPE_DEFENCE] > 0)
-        fNumAdd += 1.1f;
-    if (g_iItemInfo[0][_COLUMN_TYPE_DEFRATE] > 0)
-        fNumAdd += 1.1f;
-    if (g_iItemInfo[0][_COLUMN_TYPE_REQSTR] > 0)
-        ++fNumAdd;
-    if (g_iItemInfo[0][_COLUMN_TYPE_REQDEX] > 0 || ItemHelp < ITEM_ETC)
-        ++fNumAdd;
-    if (g_iItemInfo[0][_COLUMN_TYPE_REQENG] > 0)
-        fNumAdd += 1.1f;
+    // RenderHelpCategory() / RenderHelpLine()'s columns, in the original's order and on its
+    // conditions: a heading and a value per level, white where the hero can equip the item and red
+    // where not, the attack damage as min~max. The theme lays them out as a table.
+    const int maxLevel = etc ? 0 : iMaxLevel;
+    ItemHelpView::Table table;
+    const auto column = [&](const wchar_t* heading, auto value)
+    {
+        ItemHelpColumnEntry entry{StringUtils::WideToNarrow(heading), {}};
+        for (int level = 0; level <= maxLevel; ++level)
+        {
+            wchar_t text[64] = {};
+            value(level, text);
+            entry.cells.push_back({StringUtils::WideToNarrow(text), g_iItemInfo[level][_COLUMN_TYPE_CAN_EQUIP] == TRUE});
+        }
+        table.push_back(std::move(entry));
+    };
+    const auto number = [](int columnType, const wchar_t* format)
+    { return [=](int level, wchar_t (&text)[64]) { mu_swprintf(text, format, g_iItemInfo[level][columnType]); }; };
+
+    if (!etc)
+        column(I18N::Game::LV, number(_COLUMN_TYPE_LEVEL, L"+%d"));
     if (g_iItemInfo[0][_COLUMN_TYPE_REQNLV] > 0)
-        fNumAdd += 1.1f;
+        column(I18N::Game::ReqLV, number(_COLUMN_TYPE_REQNLV, L"%d"));
+    if (g_iItemInfo[0][_COLUMN_TYPE_ATTMIN] > 0 && !etc)
+    {
+        const bool withMax = g_iItemInfo[0][_COLUMN_TYPE_ATTMAX] > 0;
+        column(I18N::Game::ATKDmg, [withMax](int level, wchar_t (&text)[64])
+               {
+                   if (withMax)
+                       mu_swprintf(text, L"%d~%d", g_iItemInfo[level][_COLUMN_TYPE_ATTMIN],
+                                   g_iItemInfo[level][_COLUMN_TYPE_ATTMAX]);
+                   else
+                       mu_swprintf(text, L"%d~", g_iItemInfo[level][_COLUMN_TYPE_ATTMIN]);
+               });
+    }
+    if (g_iItemInfo[0][_COLUMN_TYPE_MAGIC] > 0)
+        column(I18N::Game::WIZDmg, number(_COLUMN_TYPE_MAGIC, L"%d%%"));
+    if (g_iItemInfo[0][_COLUMN_TYPE_CURSE] > 0)
+        column(I18N::Game::Curse, number(_COLUMN_TYPE_CURSE, L"%d"));
+    if (g_iItemInfo[0][_COLUMN_TYPE_PET_ATTACK] > 0)
+        column(I18N::Game::Attack, number(_COLUMN_TYPE_PET_ATTACK, L"%d%%"));
+    if (g_iItemInfo[0][_COLUMN_TYPE_DEFENCE] > 0)
+        column(I18N::Game::DEF, number(_COLUMN_TYPE_DEFENCE, L"%d"));
+    if (g_iItemInfo[0][_COLUMN_TYPE_DEFRATE] > 0)
+        column(I18N::Game::DEFRate, number(_COLUMN_TYPE_DEFRATE, L"%d"));
+    if (g_iItemInfo[0][_COLUMN_TYPE_REQSTR] > 0)
+        column(I18N::Game::STR, number(_COLUMN_TYPE_REQSTR, L"%d"));
+    if (g_iItemInfo[0][_COLUMN_TYPE_REQDEX] > 0 || ItemHelp < ITEM_ETC)
+        column(I18N::Game::AGI, number(_COLUMN_TYPE_REQDEX, L"%d"));
     if (g_iItemInfo[0][_COLUMN_TYPE_REQVIT] > 0)
-        fNumAdd += 1.1f;
+        column(I18N::Game::STA, number(_COLUMN_TYPE_REQVIT, L"%d"));
+    if (g_iItemInfo[0][_COLUMN_TYPE_REQENG] > 0)
+        column(I18N::Game::ENG, number(_COLUMN_TYPE_REQENG, L"%d"));
     if (g_iItemInfo[0][_COLUMN_TYPE_REQCHA] > 0)
-        fNumAdd += 1.1f;
+        column(I18N::Game::Command, number(_COLUMN_TYPE_REQCHA, L"%d"));
 
-    int iAddWidth = float(17 * iInfoWidth / 90) * fNumAdd + 0.5f;
-    if (iInfoWidth < iAddWidth)
-        iInfoWidth = iAddWidth;
-
-    if (iType == 5 && fNumAdd < 3.f)
-    {
-        TabSpace += 20;
-    }
-
-    int iInfoNum = (WindowWidth <= 800 ? 46 : 51);
-    wmemset(TextList[TextNum], L' ', iInfoNum);
-    TextList[TextNum][iInfoNum] = '\0';
-    TextListColor[TextNum] = TEXT_COLOR_WHITE;
-    TextBold[TextNum] = false;
-    TextNum++;
-
-    for (int Level = 0; Level <= iCurrMaxLevel - 1; ++Level)
-    {
-        TextList[TextNum][0] = ' '; TextList[TextNum][1] = '\0';
-        TextBold[TextNum] = false;
-        TextNum++;
-        TextListColor[TextNum] = TEXT_COLOR_WHITE;
-    }
-
-    /*
-    WORD mixLevel = g_csItemOption.GetMixItemLevel ( ItemHelp );
-    if ( HIBYTE( mixLevel)<=3 )
-    {
-        wchar_t Text[100];
-        if ( g_csItemOption.GetSetItemName( Text, ItemHelp, 1 ) )
-        {
-            TextListColor[TextNum] = TEXT_COLOR_GREEN;
-            mu_swprintf(TextList[TextNum],"%ls %ls %ls:(%ls+%d)", Text, I18N::Game::Set, I18N::Game::Combining, I18N::Game::AncientMetal, HIBYTE( mixLevel ) );TextNum++;
-        }
-    }
-    if ( LOBYTE( mixLevel)<=3 )
-    {
-        wchar_t Text[100];
-        if ( g_csItemOption.GetSetItemName( Text, ItemHelp, 2 ) )
-        {
-            TextListColor[TextNum] = TEXT_COLOR_GREEN;
-            mu_swprintf(TextList[TextNum],"%ls %ls %ls:(%ls+%d)", Text, I18N::Game::Set, I18N::Game::Combining, I18N::Game::AncientMetal, LOBYTE( mixLevel ) );TextNum++;
-        }
-    }
-    */
-
+    // Under the table: which classes can equip it, and the closing half line.
+    TextNum = 0;
     RequireClass(p);
     mu_swprintf(TextList[TextNum], L"\n");
     TextNum++;
-    UI::TipTextList::Record(record, 1, 1, TextNum, iInfoWidth, RT3_SORT_CENTER, STRP_NONE, true);
-    // The column headings on the blank row under the item's name, the values from the spacer row
-    // down, as the original's per-resolution offsets placed them for its own text size.
-    const int iLabelHeight = static_cast<int>(std::lround(UI::TipTextList::LineTop(1, 4)));
-    const int iDataHeight = static_cast<int>(std::lround(UI::TipTextList::LineTop(1, 6)));
-
+    std::vector<ItemHelpLineEntry> tail = ItemHelpView::TextListLines(TextNum);
     TextNum = 0;
 
-    if (iType != 5)
-    {
-        UI::TipTextList::RecordHelpCategory(record, _COLUMN_TYPE_LEVEL, TabSpace, iLabelHeight);
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_LEVEL, L"+%d", TabSpace, L"000000", iDataHeight, iType);
-    }
-
-    if (g_iItemInfo[0][_COLUMN_TYPE_REQNLV] > 0)
-    {
-        TabSpace += 2;
-        UI::TipTextList::RecordHelpCategory(record, _COLUMN_TYPE_REQNLV, TabSpace, iLabelHeight);
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_REQNLV, L"%3d", TabSpace, L"00000", iDataHeight, iType);
-        TabSpace += 14;
-    }
-
-    if (g_iItemInfo[0][_COLUMN_TYPE_ATTMIN] <= 0 || (ItemHelp >= ITEM_ETC && ItemHelp < ITEM_ETC + MAX_ITEM_INDEX))
-    {
-    }
-    else
-    {
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_ATTMIN, L"%3d", TabSpace, L"00 ", iDataHeight);
-        UI::TipTextList::RecordHelpCategory(record, _COLUMN_TYPE_ATTMIN, TabSpace, iLabelHeight);
-        TabSpace += 2;
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_LEVEL, L"~", TabSpace, L" 00", iDataHeight);
-    }
-
-    if (g_iItemInfo[0][_COLUMN_TYPE_ATTMAX] <= 0 || (ItemHelp >= ITEM_ETC && ItemHelp < ITEM_ETC + MAX_ITEM_INDEX))
-    {
-    }
-    else
-    {
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_ATTMAX, L"%3d", TabSpace, L"00000", iDataHeight);
-    }
-
-    if (g_iItemInfo[0][_COLUMN_TYPE_MAGIC] > 0)
-    {
-        UI::TipTextList::RecordHelpCategory(record, _COLUMN_TYPE_MAGIC, TabSpace, iLabelHeight);
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_MAGIC, L"%2d%%", TabSpace, L"00000", iDataHeight);
-    }
-
-    if (g_iItemInfo[0][_COLUMN_TYPE_CURSE] > 0)
-    {
-        UI::TipTextList::RecordHelpCategory(record, _COLUMN_TYPE_CURSE, TabSpace, iLabelHeight);
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_CURSE, L"%2d", TabSpace, L"00000", iDataHeight, iType);
-    }
-
-    if (g_iItemInfo[0][_COLUMN_TYPE_PET_ATTACK] > 0)
-    {
-        UI::TipTextList::RecordHelpCategory(record, _COLUMN_TYPE_PET_ATTACK, TabSpace, iLabelHeight);
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_PET_ATTACK, L"%2d%%", TabSpace, L"00000", iDataHeight);
-    }
-
-    if (g_iItemInfo[0][_COLUMN_TYPE_DEFENCE] > 0)
-    {
-        UI::TipTextList::RecordHelpCategory(record, _COLUMN_TYPE_DEFENCE, TabSpace, iLabelHeight);
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_DEFENCE, L"%3d", TabSpace, L"000000", iDataHeight);
-    }
-
-    if (g_iItemInfo[0][_COLUMN_TYPE_DEFRATE] > 0)
-    {
-        UI::TipTextList::RecordHelpCategory(record, _COLUMN_TYPE_DEFRATE, TabSpace, iLabelHeight);
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_DEFRATE, L"%3d", TabSpace, L"000000", iDataHeight);
-    }
-
-    if (g_iItemInfo[0][_COLUMN_TYPE_REQSTR] > 0)
-    {
-        UI::TipTextList::RecordHelpCategory(record, _COLUMN_TYPE_REQSTR, TabSpace, iLabelHeight);
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_REQSTR, L"%3d", TabSpace, L"00000", iDataHeight);
-    }
-
-    if (g_iItemInfo[0][_COLUMN_TYPE_REQDEX] > 0 || ItemHelp < ITEM_ETC)
-    {
-        UI::TipTextList::RecordHelpCategory(record, _COLUMN_TYPE_REQDEX, TabSpace, iLabelHeight);
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_REQDEX, L"%3d", TabSpace, L"00000", iDataHeight);
-    }
-
-    if (g_iItemInfo[0][_COLUMN_TYPE_REQVIT] > 0)
-    {
-        UI::TipTextList::RecordHelpCategory(record, _COLUMN_TYPE_REQVIT, TabSpace, iLabelHeight);
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_REQVIT, L"%3d", TabSpace, L"00000", iDataHeight);
-    }
-
-    if (g_iItemInfo[0][_COLUMN_TYPE_REQENG] > 0)
-    {
-        UI::TipTextList::RecordHelpCategory(record, _COLUMN_TYPE_REQENG, TabSpace, iLabelHeight);
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_REQENG, L"%3d", TabSpace, L"00000", iDataHeight, iType);
-    }
-
-    if (g_iItemInfo[0][_COLUMN_TYPE_REQCHA] > 0)
-    {
-        UI::TipTextList::RecordHelpCategory(record, _COLUMN_TYPE_REQCHA, TabSpace, iLabelHeight);
-        UI::TipTextList::RecordHelpLine(record, _COLUMN_TYPE_REQCHA, L"%3d", TabSpace, L"00000", iDataHeight);
-    }
+    m_View.Sync(true, std::move(lines), std::move(table), std::move(tail));
 }
 
 float mu::ui::window::CItemExplanationWindow::GetLayerDepth()

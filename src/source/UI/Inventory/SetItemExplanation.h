@@ -5,12 +5,12 @@
 #pragma once
 
 #include "UI/Core/WindowManager.h"
-#include "UI/Inventory/TipTextListView.h"
+#include "UI/Inventory/ItemHelpView.h"
 
 namespace mu::ui::window
 {
-// The set item help window (/<set name> in chat): the set options table, drawn through
-// RmlUi from the RenderTipTextList() calls the original made (TipTextListView).
+// The set item help window (/<set name> in chat): the set's options, listed as the inventory
+// tooltip lists them, in RmlUi (ItemHelpView).
 class CSetItemExplanation : public CObject
 {
 public:
@@ -33,13 +33,9 @@ public:
     void ClosingProcess();
 
 private:
-    // What the original's Render() drew with RenderTipTextList(), laid out for the document.
-    // set_item_explanation.rml.
-    void RecordTable(TipTextListRecord& record);
-
     CManager* m_pNewUIMng;
 
-    TipTextListView m_View{"set_item_explanation", "Data/Interface/RmlUi/set_item_explanation.rml"};
+    ItemHelpView m_View{"set_item_explanation", "Data/Interface/RmlUi/set_item_explanation.rml"};
 };
 } // namespace mu::ui::window
 

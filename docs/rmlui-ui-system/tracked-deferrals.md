@@ -60,11 +60,6 @@ both themes. Everything else in the rollout was verified in game, both themes, w
 
 ### Accepted as it stands, with its trigger
 
-- **The item help tables** (`CItemExplanationWindow`, `CSetItemExplanation`): each box and line sits
-  where `UI::TipTextList::Record()` put it, and the item help's columns advance by the measured
-  width of template strings ("000000") with per-resolution info widths. Moving them is a re-port of
-  `RenderTipTextList()`'s table: rows in one `.sharp-flow`, the box shrinking to its widest line (as
-  `help_window` now does), and the columns as a flex row. Trigger: a theme wanting its own item help.
 - **`MiniMap`**: no reference-px space exists; the art is turned 45° in physical px.
 - **A new siege command's pulse**: `rgb(255, pulse, pulse)` welds the theme's red to a per-frame
   sine. RCSS cannot mix a bound fraction into a colour, so this needs a mechanism that does not

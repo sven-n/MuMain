@@ -73,21 +73,12 @@ bool mu::ui::window::CSetItemExplanation::UpdateKeyEvent()
 
 bool mu::ui::window::CSetItemExplanation::Update()
 {
-    // The original drew the table in Render(); it is laid out here (UI::TipTextList) for the
-    // document.
-    TipTextListRecord record;
+    // RenderOptionHelper(): the set's options, as the inventory tooltip lists them.
     if (IsVisible())
-        RecordTable(record);
-    m_View.Sync(IsVisible(), record);
+        m_View.Sync(true, ItemHelpView::TextListLines(g_csItemOption.BuildOptionHelperTextList()));
+    else
+        m_View.Sync(false, {});
     return true;
-}
-
-void mu::ui::window::CSetItemExplanation::RecordTable(TipTextListRecord& record)
-{
-    // RenderOptionHelper(): the set's table centred on x 0 at y 0.
-    const int textNum = g_csItemOption.BuildOptionHelperTextList();
-    if (textNum > 0)
-        UI::TipTextList::Record(record, 0, 0, textNum, 0, RT3_SORT_CENTER, STRP_NONE, true);
 }
 
 bool mu::ui::window::CSetItemExplanation::Render()
