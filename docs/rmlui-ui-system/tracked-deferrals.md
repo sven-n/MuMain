@@ -60,36 +60,20 @@ both themes. Everything else in the rollout was verified in game, both themes, w
 
 ### Accepted as it stands, with its trigger
 
-- **`SiegeWarfare`'s team/command buttons**: geometry read off live native controls that also
-  hit-test it. Trigger: retiring the native `CButton`s.
-- **`MessageBoxView`**: every text line is centred by measurement and stacked by measured height,
-  and a box's buttons come from its own `CMessageBoxButton`s. A box whose buttons were literals names
-  its kind and the theme places them (`CGuild_ToPerson_Position`). Trigger: a theme wanting its own
-  box layout. A line could centre with `.sharp-centre`, but counter-scaled lines do not stack in
-  flow, so their heights stay measured.
-- **`CNPCQuest`'s message and answer tops**: the block is centred by its line count, per quest
-  state, and legacy places the answers under it with a second top for the same flow reason.
-  Trigger: a theme wanting another arrangement.
-- **`Notices`**: physical px with no root transform, its transform taken ambiently. Trigger: that
-  HUD gaining a reference-px space.
+- **The item help tables** (`CItemExplanationWindow`, `CSetItemExplanation`): each box and line sits
+  where `UI::TipTextList::Record()` put it, and the item help's columns advance by the measured
+  width of template strings ("000000") with per-resolution info widths. Moving them is a re-port of
+  `RenderTipTextList()`'s table: rows in one `.sharp-flow`, the box shrinking to its widest line (as
+  `help_window` now does), and the columns as a flex row. Trigger: a theme wanting its own item help.
 - **`MiniMap`**: no reference-px space exists; the art is turned 45° in physical px.
-- **Computed fan-outs**: `MainFrameWindow`'s zig-zag skill grid and `MuHelperSkillPicker`'s, both
-  positioned from an ordinal among what the player actually has.
 - **A new siege command's pulse**: `rgb(255, pulse, pulse)` welds the theme's red to a per-frame
   sine. RCSS cannot mix a bound fraction into a colour, so this needs a mechanism that does not
   exist. The guard deliberately does not cover `color`.
-- **The event timers' text box** (Blood Castle, Chaos Castle, Empire Guardian): its left and width
-  are `EventTimerView`'s caller constants, because the shrink-to-box text measurement needs the
-  width. Trigger: a theme wanting another box, which means reading the width back off RCSS.
 - **`CCryWolf`'s sprites**: `SyncResult()` and `SyncHud()` choose the image files and texel
   rectangles (the 12x12 altar art, the 15x19 experience digits), and `crywolf.rml` binds `src` and
   `rect` from them. A theme can hide or rearrange that art, not replace it. Trigger: a theme wanting
   other event art, which means naming the sprite states in the model and leaving files and rects to
   the theme.
-- **`CGenericMenuDialog`'s native frame**: each menu's caller describes the native box it replaces
-  (`GenericMenuConfig::nativeFrame`), and legacy binds those heights and tops to reproduce it; modern
-  flows the menu and ignores them. Trigger: a theme wanting its own layout for one menu, which
-  means naming menu kinds the way `MessageBoxView` does.
 - **The modern options screen below 380dp tall** scrolls its page, and an open dropdown can be
   clipped by the pane. Reached only with a large UI scale in a small window. Trigger: a dropdown
   that opens outside the pane.
@@ -114,7 +98,9 @@ per-axis scale `dp` cannot reproduce; it ends when those sprites port, and nothi
 It requires a reason in `tools/rml_bound_geometry_allowlist.txt` for every non-exempt geometry
 binding; root placement and scaling expressions are exempt. `--review` compares each reason with the
 fields it actually binds: an entry can still be required after its description has gone stale, so
-update the reason when a port changes what a document binds. Each entry is tagged `state` (the geometry is the
+update the reason when a port changes what a document binds. A custom property bound with a length
+unit counts as geometry too (the theme's `calc()` makes it a box); the native text metrics
+(`--text-px`, `--line-px`, `--line-height`, ...) are exempt as `text_px` is. Each entry is tagged `state` (the geometry is the
 data) or `debt` (layout C++ owns that a theme should); `--review` ends with the debt count, which
 only goes down.
 

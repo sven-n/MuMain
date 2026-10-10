@@ -169,7 +169,10 @@ set its own container and let the theme address them with `:nth-child` (`engine-
    outright: a counter-scaled layer's lengths are `calc(Npx * var(--root-scale))` in RCSS
    (`component-catalog.md`'s Counter-scaled text). **If that check sends you here, the answer is almost
    always RCSS** — the allowlist is for geometry that genuinely varies per frame, not for a
-   coordinate that was easier to push from C++.
+   coordinate that was easier to push from C++. Lines of text that stack go in one `.sharp-flow` layer and flow;
+   a list the original laid out by index (a zig-zag, a fan-out) binds the index as a unitless
+   custom property and the theme turns it into a position; a native line height binds as a metric
+   (`--line-height`), and the theme sizes rows from it.
 3. **If you are writing `a / 2 - b / 2` or `y += stripHeight`, you are writing RCSS in C++.**
    Centering and stacking are what the layout engine is for.
 4. **A constant that appears in both C++ and RCSS is a bug waiting.** Author it in RCSS and ask
