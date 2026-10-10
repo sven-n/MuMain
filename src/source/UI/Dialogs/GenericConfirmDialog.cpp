@@ -378,6 +378,10 @@ void CGenericConfirmDialog::FocusInputWhenShown()
         m_bFocusInput = false;
         return;
     }
+    // Not before the field shows: the runtime blurs a focused field it can't see, and the shown
+    // document only becomes visible at RmlUi's next update.
+    if (!field->IsVisible(true))
+        return;
     if (field->Focus() && document->GetContext() != nullptr && document->GetContext()->GetFocusElement() == field)
         m_bFocusInput = false;
 }
