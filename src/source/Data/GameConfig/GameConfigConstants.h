@@ -92,9 +92,10 @@ namespace CfgDefaults
     inline constexpr bool CfgDefaultVSync = true;
 
     // On, HideDetails or Off (Integration/Discord/PresenceMode.h). The
-    // application and its images belong to the server operator, so none is
-    // built in: without an application id the presence stays off.
-    inline constexpr wchar_t CfgDefaultDiscordPresence[] = L"On";
+    // character's level and class only go to Discord when the player asks for
+    // it. The application and its images belong to the server operator, so
+    // none is built in: without an application id the presence stays off.
+    inline constexpr wchar_t CfgDefaultDiscordPresence[] = L"HideDetails";
     inline constexpr wchar_t CfgDefaultDiscordApplicationId[] = L"";
     inline constexpr wchar_t CfgDefaultDiscordImageKey[] = L"";
     // The server's Discord invite link; empty = no Join button.

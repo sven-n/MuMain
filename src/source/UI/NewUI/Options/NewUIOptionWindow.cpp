@@ -810,7 +810,7 @@ void SEASON3B::CNewUIOptionWindow::UpdateDiscordButton()
         m_discordButtonAction = DiscordButtonAction::Account;
         m_BtnDiscord.ChangeText(&I18N::Game::DiscordAccount);
     }
-    else if (Integration::Discord::Invite::IsInviteUrl(server.InviteUrl()))
+    else if (Integration::Discord::Invite::Accept(server.InviteUrl()))
     {
         m_discordButtonAction = DiscordButtonAction::Join;
         m_BtnDiscord.ChangeText(&I18N::Game::DiscordJoin);
