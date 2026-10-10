@@ -295,7 +295,12 @@ void ShowAccount()
 
 void ShowLinkCode(const Network::Discord::LinkCode& linkCode)
 {
-    if (!linkCode.isAvailable || linkCode.code.empty())
+    if (linkCode.result == Network::Discord::LinkCode::Result::TooSoon)
+    {
+        g_pSystemLogBox->AddText(I18N::Game::DiscordLinkCodeTooSoon, SEASON3B::TYPE_ERROR_MESSAGE);
+        return;
+    }
+    if (linkCode.result != Network::Discord::LinkCode::Result::Success || linkCode.code.empty())
     {
         g_pSystemLogBox->AddText(I18N::Game::DiscordLinkNotAvailable, SEASON3B::TYPE_ERROR_MESSAGE);
         return;

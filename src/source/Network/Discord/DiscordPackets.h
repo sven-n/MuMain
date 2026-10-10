@@ -37,7 +37,14 @@ struct IntegrationInfo
 // The one-time code to link the account (DiscordLinkCode).
 struct LinkCode
 {
-    bool isAvailable = false;
+    enum class Result : std::uint8_t
+    {
+        Success = 0,
+        NotAvailable = 1,
+        TooSoon = 2, // a code was requested a moment ago
+    };
+
+    Result result = Result::NotAvailable;
     std::wstring code;
     int validMinutes = 0;
 };

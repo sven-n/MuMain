@@ -104,12 +104,16 @@ TEST_CASE("Discord packet: the link code carries its code and validity [network]
 
     const auto linkCode = ParseLinkCode(packet);
     REQUIRE(linkCode.has_value());
-    CHECK(linkCode->isAvailable);
+    CHECK(linkCode->result == LinkCode::Result::Success);
     CHECK(linkCode->code == L"ABCD-EFGH");
     CHECK(linkCode->validMinutes == 10);
 
     packet[4] = 1; // not available
-    CHECK_FALSE(ParseLinkCode(packet)->isAvailable);
+    CHECK(ParseLinkCode(packet)->result == LinkCode::Result::NotAvailable);
+    packet[4] = 2; // too soon
+    CHECK(ParseLinkCode(packet)->result == LinkCode::Result::TooSoon);
+    packet[4] = 9; // unknown
+    CHECK(ParseLinkCode(packet)->result == LinkCode::Result::NotAvailable);
 }
 
 TEST_CASE("Discord packet: an external chat message is read with its scope [network][discord]")

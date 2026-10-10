@@ -28,7 +28,7 @@ constexpr std::size_t LinkCodeResultOffset = 4;
 constexpr std::size_t LinkCodeCodeOffset = 5;
 constexpr std::size_t LinkCodeCodeLength = 10;
 constexpr std::size_t LinkCodeMinutesOffset = 15;
-constexpr BYTE LinkCodeResultSuccess = 0;
+constexpr BYTE LinkCodeResultLast = 2;
 
 // ExternalChatMessage: C2 header with sub code; the message fills the rest.
 constexpr std::size_t ExternalSourceOffset = 5;
@@ -90,8 +90,11 @@ std::optional<LinkCode> ParseLinkCode(std::span<const BYTE> packet)
         return std::nullopt;
     }
 
+    // A result this client doesn't know reads as "not available".
+    const BYTE result = packet[LinkCodeResultOffset];
     LinkCode linkCode;
-    linkCode.isAvailable = packet[LinkCodeResultOffset] == LinkCodeResultSuccess;
+    linkCode.result =
+        result <= LinkCodeResultLast ? static_cast<LinkCode::Result>(result) : LinkCode::Result::NotAvailable;
     linkCode.code = ReadString(packet, LinkCodeCodeOffset, LinkCodeCodeLength);
     linkCode.validMinutes = packet[LinkCodeMinutesOffset];
     return linkCode;

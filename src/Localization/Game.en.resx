@@ -13204,4 +13204,7 @@
   <data name="DiscordGuildBindHint" xml:space="preserve">
     <value>Mirror it with /guildchat in Discord</value>
   </data>
+  <data name="DiscordLinkCodeTooSoon" xml:space="preserve">
+    <value>Please wait a moment before asking for a new code.</value>
+  </data>
 </root>
