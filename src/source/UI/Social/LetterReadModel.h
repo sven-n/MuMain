@@ -19,8 +19,8 @@ struct LetterReadModel
     Rml::String title, header;
     Rml::String replyLabel, deleteLabel, closeLabel, prevLabel, nextLabel;
     // window_shell's own contract: a titled panel placed at a final device-pixel top-left.
-    float rootX = 0, rootY = 0, workspaceHeight = 0;
-    bool hasTitle = true, positioned = true, maximized = false;
+    float rootX = 0, rootY = 0;
+    bool hasTitle = true, positioned = true;
 
     void Bind(Rml::DataModelConstructor& constructor);
 };

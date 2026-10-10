@@ -21,7 +21,6 @@ struct CommandButtonEntry
 
 struct CommandWindowRmlModel
 {
-    float textPx = 0.f;    // native normal text size in physical px (RmlNativeTextSize.h)
     float bigTextPx = 0.f; // native big text size (the target name at the pointer)
     // The title, bold, shrunk to its 72-unit box like the original's, on the native line height.
     float titleTextPx = 0.f;

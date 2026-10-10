@@ -74,6 +74,7 @@
 		     as a child, top:392px would land past the panel's own 429px height. No footer band here
 		     -- the inventory-family reference windows just place .modern-icon-btn-px buttons
 		     directly on the frame surface, no separate raised footer strip. -->
+		<div id="reward_popup_anchor" class="quest-popup-anchor" data-class-hidden="active_tab != 0"></div>
 		<div id="btn_quest_open" class="quest-btn quest-btn-open" data-class-hidden="active_tab != 0"
 		     data-class-locked="!open_enabled" data-event-click="myquest_click_open" data-attr-data-hint="open_tooltip"></div>
 		<div id="btn_quest_giveup" class="quest-btn quest-btn-giveup" data-class-hidden="active_tab != 0"

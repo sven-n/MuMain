@@ -1,4 +1,5 @@
 <rml>
+<!-- rml-contract-optional-id: entry_item: this score window shows text/buttons and does not install an item preview drawer -->
 <head>
 	<title>Golden Archer's lucky number registration (CGoldBowmanWindow)</title>
 	<link type="text/rcss" href="base.rcss"/>

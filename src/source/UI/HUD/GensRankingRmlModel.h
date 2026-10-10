@@ -18,8 +18,6 @@ struct GensLine
 
 struct GensRankingRmlModel
 {
-    float textPx = 0.f; // native normal text size in physical px (RmlNativeTextSize.h)
-
     // The family mark: "d" (Duprian) or "v" (Vanert) and the rank's cell 0..13, empty for none.
     Rml::String markSprite;
 

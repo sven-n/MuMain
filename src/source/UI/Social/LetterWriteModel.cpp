@@ -16,12 +16,10 @@ void LetterWriteModel::Bind(Rml::DataModelConstructor& c)
     c.Bind("close_label", &closeLabel);
     c.Bind("prev_pose_label", &prevPoseLabel);
     c.Bind("next_pose_label", &nextPoseLabel);
-    c.Bind("workspace_height", &workspaceHeight);
     c.Bind("root_x", &rootX);
     c.Bind("root_y", &rootY);
     c.Bind("has_title", &hasTitle);
     c.Bind("positioned", &positioned);
-    c.Bind("maximized", &maximized);
     c.Bind("sending", &sending);
 }
 } // namespace UI::Social

@@ -1,3 +1,8 @@
+add_test(
+    NAME rml_contract_guard_tests
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_rml_contracts.py"
+)
+
 mu_add_test(
     NAME guard_guild_lists_tests
     SOURCES

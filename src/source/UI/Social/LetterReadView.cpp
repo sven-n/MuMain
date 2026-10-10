@@ -93,6 +93,7 @@ void LetterReadView::Unload()
 {
     m_PhotoControl.Detach();
     m_View.Release();
+    m_WorkspaceHeight = 0;
 }
 
 void LetterReadView::SetLetter(const wchar_t* sender, const wchar_t* date, const wchar_t* time,
@@ -190,8 +191,6 @@ void LetterReadView::ProcessEvent(Rml::Event& event)
     {
         m_CustomSize = true;
         m_Maximized = false;
-        m_View.GetModel().maximized = false;
-        m_View.MarkDirty("maximized");
     }
 }
 
@@ -269,11 +268,9 @@ void LetterReadView::SyncWorkspace()
     const auto viewport = context->GetDimensions();
     const float scale = context->GetDensityIndependentPixelRatio();
     const float height = FreeAreaBottomPx();
-    auto& model = m_View.GetModel();
-    if (model.workspaceHeight == height && m_Viewport == viewport && m_DpRatio == scale)
+    if (m_WorkspaceHeight == height && m_Viewport == viewport && m_DpRatio == scale)
         return;
-    model.workspaceHeight = height;
-    m_View.MarkDirty("workspace_height");
+    m_WorkspaceHeight = height;
     m_Viewport = viewport;
     m_DpRatio = scale;
     if (m_CustomPosition)
@@ -297,7 +294,7 @@ void LetterReadView::ClampToWorkspace()
     if (scale <= 0)
         return;
     const float maxLeft = WindowWidth / scale - m_Width;
-    const float maxTop = m_View.GetModel().workspaceHeight / scale - m_Height;
+    const float maxTop = m_WorkspaceHeight / scale - m_Height;
     if (maxLeft > 0)
         m_Left = std::clamp(m_Left, 0.f, maxLeft);
     if (maxTop > 0)
@@ -348,14 +345,12 @@ void LetterReadView::Maximize()
         m_RestoreRect = {m_Left, m_Top, m_Width, m_Height};
         m_CustomSize = true;
         RestoreLayout(m_Left, 0, m_Width,
-                      m_View.GetModel().workspaceHeight /
+                      m_WorkspaceHeight /
                           m_View.Document()->GetContext()->GetDensityIndependentPixelRatio());
     }
     else
         RestoreLayout(m_RestoreRect[0], m_RestoreRect[1], m_RestoreRect[2], m_RestoreRect[3]);
     m_Maximized = !m_Maximized;
-    m_View.GetModel().maximized = m_Maximized;
-    m_View.MarkDirty("maximized");
     m_View.Document()->UpdateDocument();
     SyncGeometry();
 }

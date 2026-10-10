@@ -64,6 +64,7 @@ private:
     std::vector<Action> m_Actions;
     Rml::Vector2i m_Viewport{};
     float m_DpRatio = 0;
+    float m_WorkspaceHeight = 0;
     std::wstring m_Title;
     bool m_Placed = false;
     // Placed AND the context has applied that position: before this, the panel is still centred.

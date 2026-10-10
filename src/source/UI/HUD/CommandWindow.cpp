@@ -171,7 +171,6 @@ bool mu::ui::window::CCommandWindow::Render()
 
 void mu::ui::window::CCommandWindow::BindRmlModel(Rml::DataModelConstructor& c, CommandWindowRmlModel& model)
 {
-    c.Bind("text_px", &model.textPx);
     c.Bind("big_text_px", &model.bigTextPx);
     c.Bind("title_text_px", &model.titleTextPx);
     c.Bind("title_line_px", &model.titleLinePx);
@@ -193,6 +192,19 @@ void mu::ui::window::CCommandWindow::BindRmlModel(Rml::DataModelConstructor& c, 
     c.Bind("target_name", &model.targetName);
     c.Bind("target_in_range", &model.targetInRange);
 
+    BindRmlActions(c);
+
+    model.titleText = StringUtils::WideToNarrow(I18N::Game::CommandWindow);
+    wchar_t exitText[256] = {};
+    mu_swprintf(exitText, I18N::Game::CloseS, L"D");
+    model.exitTooltip = StringUtils::WideToNarrow(exitText);
+    model.buttons.clear();
+    for (int i = COMMAND_TRADE; i < COMMAND_END; ++i)
+        model.buttons.push_back({StringUtils::WideToNarrow(*kCommandLabels[i]), i});
+}
+
+void mu::ui::window::CCommandWindow::BindRmlActions(Rml::DataModelConstructor& c)
+{
     c.BindEventCallback("command_press",
                         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
                         {
@@ -205,14 +217,6 @@ void mu::ui::window::CCommandWindow::BindRmlModel(Rml::DataModelConstructor& c, 
                             g_pNewUISystem->Hide(mu::ui::window::INTERFACE_COMMAND);
                             PlayBuffer(SOUND_CLICK01);
                         });
-
-    model.titleText = StringUtils::WideToNarrow(I18N::Game::CommandWindow);
-    wchar_t exitText[256] = {};
-    mu_swprintf(exitText, I18N::Game::CloseS, L"D");
-    model.exitTooltip = StringUtils::WideToNarrow(exitText);
-    model.buttons.clear();
-    for (int i = COMMAND_TRADE; i < COMMAND_END; ++i)
-        model.buttons.push_back({StringUtils::WideToNarrow(*kCommandLabels[i]), i});
 }
 
 void mu::ui::window::CCommandWindow::BuildRmlUi()
@@ -230,7 +234,6 @@ void mu::ui::window::CCommandWindow::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncField(m_RmlView.Binder(), &CommandWindowRmlModel::bigTextPx, "big_text_px",
               UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Big));
     SyncTitle();

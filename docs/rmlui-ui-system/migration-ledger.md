@@ -9,6 +9,24 @@ Statuses: `Done` / `Partial` / `Not started` / `Stays native` (a deliberate perm
 original as closely as was practical, and further parity tuning is left to contributors rather
 than tracked.
 
+## Contract validation
+
+2026-10-10: rollout 0 from [tracked-deferrals.md](tracked-deferrals.md) completed. The drift guard
+now checks 111 documents / 222 theme variants / 144 files and rejects zero coverage. Its 28
+regression fixtures exercise discovery, independent theme contracts, template fallback,
+alternative readouts and explicit exceptions. The fixtures are registered with CTest as
+`rml_contract_guard_tests`.
+
+Missing modern markup hooks were restored in `npc_dialogue`, `npc_quest`, `my_quest_info`,
+`quest_progress` and `quest_progress_etc`, using their existing styles. Unused model fields,
+bindings and synchronization were removed; workspace dimensions remain C++ view state.
+Deliberately omitted controls have reasons the guard can review and check for staleness. Syntax,
+bound-geometry and active-transform checks passed, and RelWithDebInfo x64 rebuilt successfully
+after the cleanup. Runtime dragging/maximize and the repaired NPC geometry and reward-tooltip
+hooks have not been checked in a running client.
+
+For running/reviewing the guard and its limits, see [theming-and-modding.md](theming-and-modding.md).
+
 ## Login and character select
 
 All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `CObject` owned by

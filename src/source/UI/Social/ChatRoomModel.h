@@ -25,9 +25,9 @@ struct ChatRoomModel
     std::vector<Pal> pals;
     std::vector<Pal> invitePals;
     Rml::String title, draft, inviteLabel, selectedInvite;
-    Rml::String inviteButtonLabel, sendLabel;
+    Rml::String inviteButtonLabel;
     // window_shell's own contract: a titled panel placed at a final device-pixel top-left.
-    float rootX = 0, rootY = 0, workspaceHeight = 0;
+    float rootX = 0, rootY = 0;
     // The participant column only appears once the room is more than a pair, or while inviting,
     // exactly as CUIChatWindow::RenderSub() gated m_PalListBox.
     bool showInvite = false, showPals = false, locked = false;

@@ -1,4 +1,5 @@
 <rml>
+<!-- rml-contract-optional-callback: gmd_cancel: this legacy menu closes through Escape or its configured button actions, without a separate cancel control -->
 <head>
 	<title>Generic Menu Dialog</title>
 	<link type="text/rcss" href="base.rcss"/>

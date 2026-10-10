@@ -17,11 +17,9 @@ void LetterReadModel::Bind(Rml::DataModelConstructor& c)
     c.Bind("close_label", &closeLabel);
     c.Bind("prev_label", &prevLabel);
     c.Bind("next_label", &nextLabel);
-    c.Bind("workspace_height", &workspaceHeight);
     c.Bind("root_x", &rootX);
     c.Bind("root_y", &rootY);
     c.Bind("has_title", &hasTitle);
     c.Bind("positioned", &positioned);
-    c.Bind("maximized", &maximized);
 }
 } // namespace UI::Social

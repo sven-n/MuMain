@@ -74,6 +74,7 @@ private:
     std::vector<Action> m_Actions;
     Rml::Vector2i m_Viewport{};
     float m_DpRatio = 0;
+    float m_WorkspaceHeight = 0;
     std::wstring m_Title;
     // Which field to put the caret in next frame, and which held it last, as m_iLastTabIndex did.
     int m_PendingFocus = -1;

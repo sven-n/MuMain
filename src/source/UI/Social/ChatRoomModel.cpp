@@ -23,8 +23,6 @@ void ChatRoomModel::Bind(Rml::DataModelConstructor& c)
     c.Bind("selected_invite", &selectedInvite);
     c.Bind("invite_button_label", &inviteButtonLabel);
     c.Bind("invite_label", &inviteLabel);
-    c.Bind("send_label", &sendLabel);
-    c.Bind("workspace_height", &workspaceHeight);
     c.Bind("root_x", &rootX);
     c.Bind("root_y", &rootY);
     c.Bind("show_invite", &showInvite);

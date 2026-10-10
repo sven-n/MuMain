@@ -87,6 +87,7 @@ void ChatRoomView::OnUnload()
 void ChatRoomView::Unload()
 {
     m_View.Release();
+    m_WorkspaceHeight = 0;
 }
 
 bool ChatRoomView::Sync(bool shown)
@@ -432,11 +433,9 @@ void ChatRoomView::SyncWorkspace()
     const auto viewport = context->GetDimensions();
     const float scale = context->GetDensityIndependentPixelRatio();
     const float height = FreeAreaBottomPx();
-    auto& model = m_View.GetModel();
-    if (model.workspaceHeight == height && m_Viewport == viewport && m_DpRatio == scale)
+    if (m_WorkspaceHeight == height && m_Viewport == viewport && m_DpRatio == scale)
         return;
-    model.workspaceHeight = height;
-    m_View.MarkDirty("workspace_height");
+    m_WorkspaceHeight = height;
     m_Viewport = viewport;
     m_DpRatio = scale;
     if (m_CustomPosition)
@@ -460,7 +459,7 @@ void ChatRoomView::ClampToWorkspace()
     if (scale <= 0)
         return;
     const float maxLeft = WindowWidth / scale - m_Width;
-    const float maxTop = m_View.GetModel().workspaceHeight / scale - m_Height;
+    const float maxTop = m_WorkspaceHeight / scale - m_Height;
     if (maxLeft > 0)
         m_Left = std::clamp(m_Left, 0.f, maxLeft);
     if (maxTop > 0)
@@ -519,7 +518,7 @@ void ChatRoomView::Maximize()
         m_RestoreRect = {m_Left, m_Top, m_Width, m_Height};
         m_CustomSize = true;
         RestoreLayout(m_Left, 0, m_Width,
-                      m_View.GetModel().workspaceHeight /
+                      m_WorkspaceHeight /
                           m_View.Document()->GetContext()->GetDensityIndependentPixelRatio());
     }
     else

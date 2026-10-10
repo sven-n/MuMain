@@ -25,7 +25,7 @@
 		<div class="nq-quest-title" data-class-hidden="!show_quest_title">{{quest_title}}</div>
 
 		<div class="nq-divider" data-class-hidden="!show_conditions"></div>
-		<div class="nq-conditions" data-class-hidden="!show_conditions">
+		<div id="conditions_anchor" class="nq-conditions" data-class-hidden="!show_conditions">
 			<div class="nq-condition-row" data-for="c : conditions" data-style-color="c.color">{{c.text}}</div>
 		</div>
 		<div id="btn_complete" class="btn btn-ok nq-btn-complete" data-class-hidden="!show_conditions"

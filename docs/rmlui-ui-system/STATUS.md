@@ -34,6 +34,12 @@ deleted. Families:
 measuring space (`layout-and-scaling.md`'s "Units and placement"). Only infrastructure may touch
 the active transform; `tools/check_layout_transform_users.py` keeps it to that.
 
+**Contract validation restored (2026-10-10).** The build's drift guard checks 111 documents,
+222 theme variants and 144 files, with 28 passing regression fixtures. Required literal ids and
+callbacks are checked separately for each theme; alternative field readouts remain supported.
+Dynamic lookups and actual rendering/interaction still require runtime checks. The completed
+rollout is recorded in [migration-ledger.md](migration-ledger.md#contract-validation).
+
 **Stays native on purpose**: live 3D content (item grids, equipped items, item and character
 previews — `RenderTarget` can show one inside a document, as the potions, the letter portrait,
 the character-creation preview and the event previews do), the mouse cursor, developer overlays, and the equipment paperdoll's
@@ -106,6 +112,7 @@ a new port inherits them:
 Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porting patterns.
 
 **Input and focus**
+
 - **A text field's window claims the field's document.** While the player types,
   `CManager::UpdateKeyEvent()` gives keys only to the window whose `TakesTypingFrom()` accepts the
   focused field's document (`RmlUiRuntime::GetTypingDocument()`); the chat line, chat command,
@@ -124,6 +131,7 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
   removed call was hiding.
 
 **Layout and text**
+
 - **Click-through.** `IsMouseOverUI()` is true over any hovered `pointer-events: auto` element, so a
   scroll pane over the world is a wall; the chat log's lines are `pointer-events: none` with the
   scrollbar opted back in at every level, and hover/right-click moved to C++.
@@ -152,6 +160,7 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
   (`UI::MuHelper::ResolveClassFeatures()`), never RCSS — the themes cannot disagree.
 
 **Drawing**
+
 - **A window the original drew under every panel** (siege HUD, duel and battle-soccer boards)
   takes its low depth from the stacking table; **one with a live 3D preview** draws it into a render
   target in its own document (`UI::Items::ItemCameraTarget`, `UI/Events/EventItemEntryView`).
@@ -181,7 +190,7 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
 - **No mod/user-override resource precedence** (§18–19). Themes are two directories selected by
   name; no user layer over a theme and no partial theme inheriting from a base. A stated
   requirement waiting on priority. (A third first-party theme is ruled out by the project owner;
-  §25/§28's coupling concern is met by `modern`'s divergence and the drift checker.)
+  §25/§28's coupling concern is addressed by `modern`'s divergence and the restored contract guard.)
 - **Native 3D is not yet behind one mechanism** (§14, §21): three contexts order it against RmlUi
   where `RenderTarget` would do (the background lists are closed; `tracked-deferrals.md`'s native
   3D entry).
@@ -197,7 +206,7 @@ Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porti
 This branch tracks `origin/dev/rmlui-ui-system` (`sven-n/MuMain`). Log each rebase or sync onto
 a newer upstream head here, one line per sync.
 
-| Date | Sync | Conflict verdict | Resulting tip |
-|---|---|---|---|
-| 2026-09-01 | Rebased onto `sven-n/MuMain` PR #572 (`a9739fb2`, docs-only) | Clean — verified in an isolated worktree first | `878f35e4` |
-| 2026-09-19 | Rebased local `rmlui-on-sdl-gpu` (1 commit) onto `origin/dev/rmlui-ui-system`; pushed as a fast-forward, `b3bf33d7..233d808b` | Clean — verified via a full incremental build | `233d808b` |
+| Date       | Sync                                                                                                                          | Conflict verdict                               | Resulting tip |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ------------- |
+| 2026-09-01 | Rebased onto `sven-n/MuMain` PR #572 (`a9739fb2`, docs-only)                                                                  | Clean — verified in an isolated worktree first | `878f35e4`    |
+| 2026-09-19 | Rebased local `rmlui-on-sdl-gpu` (1 commit) onto `origin/dev/rmlui-ui-system`; pushed as a fast-forward, `b3bf33d7..233d808b` | Clean — verified via a full incremental build  | `233d808b`    |

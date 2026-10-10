@@ -56,6 +56,7 @@
 				      data-class-row-random-reward="r.style == 'random-reward'"
 				      data-event-click="questprogress_select_reward(r.index)">{{r.text}}</span>
 			</div>
+			<div id="reward_popup_anchor" class="qp-popup-anchor"></div>
 			<div id="btn_complete" class="btn btn-ok qp-btn-complete" data-class-disabled="!request_complete"
 			     data-event-click="questprogress_complete">{{ok_label}}</div>
 		</div>

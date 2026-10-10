@@ -310,7 +310,6 @@ int CGensRanking::GetImageIndex(BYTE rankIndex)
 }
 void CGensRanking::BindRmlModel(Rml::DataModelConstructor& c, GensRankingRmlModel& model)
 {
-    c.Bind("text_px", &model.textPx);
     c.Bind("mark_sprite", &model.markSprite);
     auto lineType = c.RegisterStruct<GensLine>();
     lineType.RegisterMember("text", &GensLine::text);
@@ -350,7 +349,6 @@ void CGensRanking::SyncRmlModel()
     if (!IsVisible())
         return;
 
-    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
     SyncContent();
 }
 

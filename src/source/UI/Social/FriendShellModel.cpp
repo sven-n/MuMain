@@ -21,7 +21,6 @@ void FriendShellModel::Bind(Rml::DataModelConstructor& c)
     c.RegisterArray<std::vector<FriendRow>>();
     c.RegisterArray<std::vector<LetterRow>>();
     c.RegisterArray<std::vector<WindowRow>>();
-    c.Bind("workspace_height", &workspaceHeight);
     c.Bind("friends", &friends);
     c.Bind("letters", &letters);
     c.Bind("windows", &windows);

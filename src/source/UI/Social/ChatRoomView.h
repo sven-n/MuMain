@@ -90,6 +90,7 @@ private:
     std::vector<Action> m_Actions;
     Rml::Vector2i m_Viewport{};
     float m_DpRatio = 0;
+    float m_WorkspaceHeight = 0;
     std::wstring m_Title;
     std::wstring m_SelectedInvite;
     bool m_Placed = false;

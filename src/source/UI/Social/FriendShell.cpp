@@ -117,6 +117,7 @@ void FriendShell::OnUnload()
 void FriendShell::Unload()
 {
     m_View.Release();
+    m_WorkspaceHeight = 0;
 }
 
 bool FriendShell::Sync(bool shown)
@@ -203,11 +204,9 @@ void FriendShell::SyncWorkspace()
     const auto viewport = context->GetDimensions();
     const float scale = context->GetDensityIndependentPixelRatio();
     const float height = FreeAreaBottomPx();
-    auto& model = m_View.GetModel();
-    if (model.workspaceHeight == height && m_Viewport == viewport && m_DpRatio == scale)
+    if (m_WorkspaceHeight == height && m_Viewport == viewport && m_DpRatio == scale)
         return;
-    model.workspaceHeight = height;
-    m_View.MarkDirty("workspace_height");
+    m_WorkspaceHeight = height;
     m_Viewport = viewport;
     m_DpRatio = scale;
     if (m_CustomPosition)
@@ -271,7 +270,7 @@ void FriendShell::ClampToWorkspace()
     if (scale <= 0)
         return;
     const float maxLeft = WindowWidth / scale - m_Width;
-    const float maxTop = m_View.GetModel().workspaceHeight / scale - m_Height;
+    const float maxTop = m_WorkspaceHeight / scale - m_Height;
     if (maxLeft > 0)
         m_Left = std::clamp(m_Left, 0.f, maxLeft);
     if (maxTop > 0)
@@ -310,7 +309,7 @@ void FriendShell::PlaceAtRest()
         return;
     }
     m_Left = std::max(0.f, WindowWidth / scale - m_Width);
-    m_Top = std::max(0.f, m_View.GetModel().workspaceHeight / scale - m_Height);
+    m_Top = std::max(0.f, m_WorkspaceHeight / scale - m_Height);
 }
 
 Rml::Element* FriendShell::Panel() const
@@ -327,7 +326,7 @@ void FriendShell::Maximize()
         m_RestoreRect = {m_Left, m_Top, m_Width, m_Height};
         m_CustomSize = true;
         RestoreLayout(m_Left, 0, m_Width,
-                      m_View.GetModel().workspaceHeight / m_View.Document()->GetContext()->GetDensityIndependentPixelRatio());
+                      m_WorkspaceHeight / m_View.Document()->GetContext()->GetDensityIndependentPixelRatio());
     }
     else
         RestoreLayout(m_RestoreRect[0], m_RestoreRect[1], m_RestoreRect[2], m_RestoreRect[3]);

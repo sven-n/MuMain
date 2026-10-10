@@ -41,6 +41,7 @@ namespace mu::ui::window
         bool						m_bCanCommand;
 
         void BindRmlModel(Rml::DataModelConstructor& c, CommandWindowRmlModel& model);
+        void BindRmlActions(Rml::DataModelConstructor& c);
         UI::RmlBridge::ThemedView<CommandWindowRmlModel> m_RmlView{"command_window",
             [this](Rml::DataModelConstructor& c, CommandWindowRmlModel& model) { BindRmlModel(c, model); },
             {{"Data/Interface/RmlUi/command_window.rml"}}};

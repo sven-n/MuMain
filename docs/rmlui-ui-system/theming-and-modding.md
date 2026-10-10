@@ -21,13 +21,24 @@ The shared file stays theme-neutral: theme-specific class vocabulary (`modern-fr
 `modern-panel`, …) belongs in that theme's fork, never in the shared `.rml` (`login.rml`,
 `msg_win.rml` and `remember_password_prompt.rml` are modern's earliest forks for this reason).
 
-**Forking safely needs a check**: whichever theme's RML a window loads, the
-C++ side still expects the exact same ids/`data-model` bindings/event-callback names to exist.
-`tools/check_rml_rcss_drift.py` (a sibling to `check_rml_rcss_syntax.py`, wired into the same build
-step) diffs the ids/bindings a window's C++ actually references against every theme's copy of that
-window's RML and fails the build if none of them provide something the code needs — otherwise a
-missing or renamed id would fail **completely silently** (a dead button, not a build error or even
-a log line).
+**Forking safely needs a check.** Run `python tools/check_rml_rcss_drift.py` before shipping
+theme edits; it also runs during the build. Each theme must provide the literal ids the window
+looks up and callbacks its view registers, including linked templates and shared-document
+fallback. Fields offered by a model must appear in at least one of its document/theme variants,
+so different full/current readouts remain legal. Comments and quoted expression text cannot
+satisfy a missing name. The report includes document/theme/file counts; zero discovery fails.
+
+Use `--review` to inspect discovered names and intentional omissions with their reasons. A
+control intentionally absent from a variant can carry
+`<!-- rml-contract-optional-id: name: reason -->` or
+`<!-- rml-contract-optional-callback: name: reason -->`, after confirming its C++ path tolerates
+the omission. Unused model fields need a `// rml-contract-unused: name: reason` comment in the
+owning source. Exceptions fail when their names disappear from the discovered contract or become
+used again; repair required controls instead of exempting them.
+
+The guard checks literal source contracts, not actual visibility, class styling, model-name
+correctness or interactions. Dynamic ids, selectors, struct members and arbitrary registration
+helpers require manual review and running-client checks.
 
 ## How theme resolution works
 
@@ -86,7 +97,8 @@ through, but the record of it describes the whole stylesheet intermittently fail
 **Fork the RML only when a theme needs markup the shared file cannot reasonably carry** — prefer
 adding the element to the shared file and letting the other theme hide it. A fork's
 ids/classes/bindings have to be kept in step with the shared file by hand;
-`tools/check_rml_rcss_drift.py` catches a missing binding, not a missing element.
+`tools/check_rml_rcss_drift.py` catches missing required literal ids/callbacks and unused model
+fields; visual structure and interaction still need testing in the client.
 
 No source changes, no recompilation.
 

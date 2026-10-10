@@ -16,7 +16,6 @@ struct FriendShellModel
     std::vector<WindowRow> windows;
     Rml::String selectedFriend, title;
     int selectedLetter = 0, selectedWindow = 0, tab = 0;
-    float workspaceHeight = 0;
     // window_shell's own contract: a titled panel placed at a final device-pixel top-left.
     float rootX = 0, rootY = 0;
     int friendSort = 0, letterSort = 0;

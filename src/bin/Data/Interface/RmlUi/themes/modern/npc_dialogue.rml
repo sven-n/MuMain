@@ -25,7 +25,7 @@
 
 		<div class="nd-contribute" data-class-hidden="!show_contribute">{{contribute_text}}</div>
 
-		<div class="nd-npc-lines">
+		<div id="npc_lines_container" class="nd-npc-lines">
 			<span class="nd-line" data-for="l : npc_lines">{{l.text}}</span>
 		</div>
 
@@ -36,7 +36,7 @@
 
 		<div class="nd-divider"></div>
 
-		<div class="nd-answers" data-class-hidden="!show_answers">
+		<div id="answers_container" class="nd-answers" data-class-hidden="!show_answers">
 			<div class="nd-answer-row" data-for="a : answers"
 			     data-event-click="npcdialogue_select_answer(a.index)">{{a.text}}</div>
 		</div>
