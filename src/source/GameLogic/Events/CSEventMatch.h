@@ -13,10 +13,9 @@
 
 using MatchClock = std::chrono::steady_clock;
 
-// One text of an event's result box, as the original's RenderMatchResult() drew it: RenderText(x,
-// y, text, boxWidth, boxHeight, sort) in reference units from the box's top-left, in its font (or
-// the one left set) and colour.
-struct MatchResultText
+// One text of an event's result box, in its font (or the one left set) and colour. A box width
+// and height shrink it like the original's RenderText(x, y, text, boxWidth, boxHeight).
+struct MatchResultCell
 {
     enum class Font
     {
@@ -26,13 +25,19 @@ struct MatchResultText
     };
 
     std::wstring text;
-    int x = 0;
-    int y = 0;
     int boxWidth = 0;
     int boxHeight = 0;
-    int sort = RT3_SORT_LEFT;
     Font font = Font::Unchanged;
     DWORD color = 0; // RGBA()
+};
+
+// One line of an event's result box: what it is (the box's theme spaces and places it by that,
+// "message", "reward", "header", "row", "my-info" or "my-row") and its text, or a ranking table
+// row's columns.
+struct MatchResultLine
+{
+    const char* role = "message";
+    std::vector<MatchResultCell> cells;
 };
 
 class CSBaseMatch
@@ -91,7 +96,7 @@ public:
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data) = 0;
     virtual void    SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success = false) = 0;
     // The texts of the event's result box (none for an event without one).
-    virtual void CollectMatchResult(std::vector<MatchResultText>& texts) const {}
+    virtual void CollectMatchResult(std::vector<MatchResultLine>& lines) const {}
 };
 
 class CSDevilSquareMatch : public CSBaseMatch
@@ -106,7 +111,7 @@ public:
 
     virtual void    SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data);
     virtual void    SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success = false);
-    virtual void CollectMatchResult(std::vector<MatchResultText>& texts) const;
+    virtual void CollectMatchResult(std::vector<MatchResultLine>& lines) const;
 };
 
 class CCursedTempleMatch : public CSBaseMatch

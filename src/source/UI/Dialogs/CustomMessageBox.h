@@ -24,8 +24,6 @@ public:
     bool Render();
     Rml::Element* GetPanel() const override { return m_View.Panel(); }
 
-    static CALLBACK_RESULT BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT DisjointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
@@ -33,7 +31,6 @@ private:
     void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
     void SetAddCallbackFunc();
     void SetButtonInfo();
-    void ChangeMiddleFrameSmall();
     void ChangeMiddleFrameBig();
 
     void SyncView();

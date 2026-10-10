@@ -22,28 +22,28 @@ namespace mu::ui::window
 class MessageBoxView
 {
 public:
-    struct Line
+    struct Cell
     {
         std::wstring text;
-        float left = 0.f;
-        float top = 0.f;
         bool bold = false;
         DWORD color = 0;
         float textPx = 0.f; // physical px; 0: the font's native size
     };
 
+    // A line: what it is (the theme spaces and places it by its role and the box's kind), and its
+    // text, or a table row's columns.
+    struct Line
+    {
+        const char* role = "message";
+        std::vector<Cell> cells;
+    };
+
+    // The theme places each button by the box's kind.
     struct Button
     {
         std::wstring label;
-        float left = 0.f;
-        float top = 0.f;
-        float width = 0.f;
-        float height = 0.f;
         bool enabled = true;
         bool okArt = false; // newui_button_ok's lettered art instead of a labelled newui_btn_empty_small
-        // Where it sits and how big it is are the theme's, by the box's kind (Create()); left, top,
-        // width and height are then unused.
-        bool placed = false;
     };
 
     using List = std::vector<MessageBoxViewListRowEntry>;
@@ -53,20 +53,17 @@ public:
     MessageBoxView(const MessageBoxView&) = delete;
     MessageBoxView& operator=(const MessageBoxView&) = delete;
 
-    // `kind` names the box for a theme that places its buttons (Button::placed).
-    void Create(int middleCount, float backHeight, const char* kind = "");
+    // `kind` names the box: the theme places it, its lines and its buttons by it.
+    void Create(int middleCount, const char* kind);
     // A box whose size changes after Create() (CProgressMsgBox grows with its text). With
     // middlesAboveDivider >= 0 the 21-unit newui_Message_Line follows that many middle strips
     // (CDevilSquareRankMsgBox).
-    void SetFrame(int middleCount, float backHeight, int middlesAboveDivider = -1);
-    // newui_separate_line rules at these tops (CDevilSquareRankMsgBox's table).
-    void SetSeparators(const std::vector<float>& tops);
-    // CProgressMsgBox's bar at `top`, `fraction` (0 .. 1) filled; a negative top hides it.
-    void SetProgress(float top, float fraction);
+    void SetFrame(int middleCount, int middlesAboveDivider = -1);
+    // CProgressMsgBox's bar, `fraction` (0 .. 1) filled.
+    void SetProgress(float fraction);
     void Destroy();
 
-    // Per frame: the lines and buttons in reference px from the box's top-left. The theme places
-    // the box on the stage by its kind.
+    // Per frame: the lines and buttons. The theme places the box on the stage by its kind.
     void Sync(const std::vector<Line>& lines, const std::vector<Button>& buttons);
     // The box's list, or none (nullptr); call with Sync().
     void SyncList(const List* list);

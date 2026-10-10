@@ -168,43 +168,36 @@ void CNewChaosCastleSystem::RenderMatchTimes(void)
     }
 }
 
-void CNewChaosCastleSystem::CollectMatchResult(std::vector<MatchResultText>& texts) const
+void CNewChaosCastleSystem::CollectMatchResult(std::vector<MatchResultLine>& lines) const
 {
-    int x = static_cast<int>(mu::ui::window::MSGBOX_WIDTH) / 2;
-    int yPos = 40;
     wchar_t lpszStr[256] = {};
 
-    auto add = [&texts, x](int y, const wchar_t* text, MatchResultText::Font font, DWORD color)
-    { texts.push_back({text, x, y, 0, 0, RT3_WRITE_CENTER, font, color}); };
+    auto add = [&lines](const char* role, const wchar_t* text, MatchResultCell::Font font, DWORD color)
+    { lines.push_back({role, {{text, 0, 0, font, color}}}); };
 
     const DWORD green = RGBA(128, 255, 128, 255);
     if (m_iNumResult)
     {
-        add(yPos, I18N::Game::TheSpiritOfTheGuardHasBeenPurified, MatchResultText::Font::Normal, green);
-        yPos += 16;
+        add("message", I18N::Game::TheSpiritOfTheGuardHasBeenPurified, MatchResultCell::Font::Normal, green);
         mu_swprintf(lpszStr, L"%ls %ls", I18N::Game::TheQuest, I18N::Game::CongratulationsYouHaveSuccessfully);
-        add(yPos, lpszStr, MatchResultText::Font::Normal, green);
+        add("message", lpszStr, MatchResultCell::Font::Normal, green);
     }
     else
     {
         mu_swprintf(lpszStr, L"%ls %ls", I18N::Game::TheQuest, I18N::Game::UnfortunatelyYouHaveFailed);
-        add(yPos, lpszStr, MatchResultText::Font::Normal, green);
-        yPos += 16;
-        add(yPos, I18N::Game::TryAgainNextTime, MatchResultText::Font::Normal, green);
+        add("message", lpszStr, MatchResultCell::Font::Normal, green);
+        add("message", I18N::Game::TryAgainNextTime, MatchResultCell::Font::Normal, green);
     }
-    yPos += 30;
 
     const MatchResult* pResult = &m_MatchResult[0];
     const DWORD rewardColor = RGBA(210, 255, 210, 255);
 
     mu_swprintf(lpszStr, I18N::Game::RewardedExpD, pResult->m_dwExp);
-    add(yPos, lpszStr, MatchResultText::Font::Bold, rewardColor);
-    yPos += 20;
+    add("reward", lpszStr, MatchResultCell::Font::Bold, rewardColor);
 
     mu_swprintf(lpszStr, I18N::Game::MonsterKillCountD, pResult->m_iScore);
-    add(yPos, lpszStr, MatchResultText::Font::Bold, rewardColor);
-    yPos += 20;
+    add("reward", lpszStr, MatchResultCell::Font::Bold, rewardColor);
 
     mu_swprintf(lpszStr, I18N::Game::PlayersKillCountD, pResult->m_iZen);
-    add(yPos, lpszStr, MatchResultText::Font::Bold, rewardColor);
+    add("reward", lpszStr, MatchResultCell::Font::Bold, rewardColor);
 }

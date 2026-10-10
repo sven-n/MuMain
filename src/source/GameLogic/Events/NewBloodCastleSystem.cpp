@@ -123,44 +123,36 @@ void CNewBloodCastleSystem::RenderMatchTimes(void)
     }
 }
 
-void CNewBloodCastleSystem::CollectMatchResult(std::vector<MatchResultText>& texts) const
+void CNewBloodCastleSystem::CollectMatchResult(std::vector<MatchResultLine>& lines) const
 {
-    int x = static_cast<int>(mu::ui::window::MSGBOX_WIDTH) / 2;
-    int yPos = 40;
     wchar_t lpszStr[256] = {};
 
-    auto add = [&texts, x](int y, const wchar_t* text, MatchResultText::Font font, DWORD color)
-    { texts.push_back({text, x, y, 0, 0, RT3_WRITE_CENTER, font, color}); };
+    auto add = [&lines](const char* role, const wchar_t* text, MatchResultCell::Font font, DWORD color)
+    { lines.push_back({role, {{text, 0, 0, font, color}}}); };
 
     const DWORD green = RGBA(128, 255, 128, 255);
     if (m_iNumResult)
     {
-        add(yPos, I18N::Game::CompletedTheBloodCastleQuest, MatchResultText::Font::Normal, green);
-        yPos += 16;
-        add(yPos, I18N::Game::CongratulationsYouHaveSuccessfully, MatchResultText::Font::Normal, green);
+        add("message", I18N::Game::CompletedTheBloodCastleQuest, MatchResultCell::Font::Normal, green);
+        add("message", I18N::Game::CongratulationsYouHaveSuccessfully, MatchResultCell::Font::Normal, green);
     }
     else
     {
-        add(yPos, I18N::Game::ToCompleteTheBloodCastleQuest, MatchResultText::Font::Normal, green);
-        yPos += 16;
-        add(yPos, I18N::Game::UnfortunatelyYouHaveFailed, MatchResultText::Font::Normal, green);
+        add("message", I18N::Game::ToCompleteTheBloodCastleQuest, MatchResultCell::Font::Normal, green);
+        add("message", I18N::Game::UnfortunatelyYouHaveFailed, MatchResultCell::Font::Normal, green);
     }
-
-    yPos += 30;
 
     const MatchResult* pResult = &m_MatchResult[0];
 
     mu_swprintf(lpszStr, I18N::Game::RewardedExpD, pResult->m_dwExp);
-    add(yPos, lpszStr, MatchResultText::Font::Bold, RGBA(210, 255, 210, 255));
-    yPos += 24;
+    add("reward", lpszStr, MatchResultCell::Font::Bold, RGBA(210, 255, 210, 255));
 
     if (m_iNumResult)
     {
         mu_swprintf(lpszStr, I18N::Game::RewardedZenD, pResult->m_iZen);
-        add(yPos, lpszStr, MatchResultText::Font::Bold, RGBA(255, 210, 210, 255));
-        yPos += 24;
+        add("reward", lpszStr, MatchResultCell::Font::Bold, RGBA(255, 210, 210, 255));
     }
 
     mu_swprintf(lpszStr, I18N::Game::BloodCastlePointD, pResult->m_iScore);
-    add(yPos, lpszStr, MatchResultText::Font::Bold, RGBA(210, 210, 255, 255));
+    add("reward", lpszStr, MatchResultCell::Font::Bold, RGBA(210, 210, 255, 255));
 }

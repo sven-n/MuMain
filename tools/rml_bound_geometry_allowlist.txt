@@ -34,7 +34,7 @@ item_explanation.rml: debt -- each box and line sits where RenderTipTextList() r
 login_scene.rml: debt -- the scene sprites and text scale on the login scene's own 800x600 formula, not the stage's
 main_frame.rml: debt -- the expanded skill grid's cells come from RebuildGridSnapshot()'s zig-zag, a position computed from the cell's ordinal among the skills learned; the health/mana/SD/AG gauges and every cooldown wipe are fractions (state)
 match_status.rml: state -- the countdown centres on the world the open docks leave uncovered
-message_box_view.rml: debt -- every line is centred by measurement (centre - MeasureText().cx / 2) and stacked by measured height, the buttons come from the box's own CMessageBoxButtons, and the frame follows the box size; the progress bar is a gauge (state)
+message_box_view.rml: state -- the progress bar is a gauge length, the fraction of the wait elapsed
 mini_map.rml: state -- each .clip is a region of the window the map may paint in, carved around the native bottom HUD's band from the live window size, with .world offsetting its copy of the picture back to window coordinates; a marker's size and turned quad are its own; the location hint is sized to its measured text and placed where the pointer is. The map's own art is turned 45 degrees in physical px (MiniMapLayout.h), which is why this document has no reference-px space for a theme to work in
 mu_helper_detail.rml: state -- the three gauges' fill levels
 mu_helper_skill_picker.rml: state -- the fan-out is anchored to the clicked slot and its entries are placed by how many skills there are

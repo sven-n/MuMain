@@ -66,11 +66,11 @@ namespace matchEvent
             g_csMatchInfo->SetMatchResult(iNumResult, iMyResult, pResult, Success);
         }
     }
-    inline void CollectResult(std::vector<MatchResultText>& texts)
+    inline void CollectResult(std::vector<MatchResultLine>& lines)
     {
         if (g_csMatchInfo != NULL)
         {
-            g_csMatchInfo->CollectMatchResult(texts);
+            g_csMatchInfo->CollectMatchResult(lines);
         }
     }
 }

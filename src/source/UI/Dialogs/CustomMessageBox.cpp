@@ -60,70 +60,63 @@ int AppendWrappedMessageLines(const std::wstring& text, BYTE fontType, int maxWi
     return static_cast<int>(lines.size());
 }
 
-// The event result boxes' MessageBoxView: the texts RenderMatchResult() draws, placed as
-// RenderText() places them (RT3_WRITE_CENTER centred on x, RT3_SORT_CENTER centred in a box the
-// text fits into), and the OK button's newui_button_ok art.
-void SyncMatchResultView(MessageBoxView& view, CMessageBoxButton& ok)
+// The event result boxes' MessageBoxView: the lines RenderMatchResult() draws, each text shrunk to
+// the box the original gave it, and the OK button's newui_button_ok art. The theme places them by
+// their roles and the box's kind.
+void SyncMatchResultView(MessageBoxView& view)
 {
-    std::vector<MatchResultText> texts;
-    matchEvent::CollectResult(texts);
+    std::vector<MatchResultLine> results;
+    matchEvent::CollectResult(results);
 
     std::vector<MessageBoxView::Line> lines;
-    for (const MatchResultText& text : texts)
+    for (const MatchResultLine& result : results)
     {
-        const bool bold = text.font == MatchResultText::Font::Bold;
-        g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
-        const SIZE size = g_pRenderText->MeasureText(text.text.c_str(), static_cast<int>(text.text.size()));
-        auto left = static_cast<float>(text.x);
-        if (text.sort == RT3_WRITE_CENTER)
-            left -= static_cast<float>(size.cx) / 2.f;
-        else if (text.sort == RT3_SORT_CENTER && size.cx < text.boxWidth)
-            left += static_cast<float>(text.boxWidth - size.cx) / 2.f;
-        // A box the text does not fit shrinks it (the Devil Square headers' box height of 3).
-        float textPx = 0.f;
-        if (text.boxWidth > 0 || text.boxHeight > 0)
+        MessageBoxView::Line line{result.role, {}};
+        for (const MatchResultCell& text : result.cells)
         {
-            const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
-            const float fittedPx = UI::RmlBridge::NativeTextPxInBounds(
-                role, static_cast<float>(size.cx), static_cast<float>(size.cy), static_cast<float>(text.boxWidth),
-                static_cast<float>(text.boxHeight));
-            if (fittedPx != UI::RmlBridge::NativeTextPx(role))
-                textPx = fittedPx;
+            const bool bold = text.font == MatchResultCell::Font::Bold;
+            // A box the text does not fit shrinks it (the Devil Square headers' box height of 3).
+            float textPx = 0.f;
+            if (text.boxWidth > 0 || text.boxHeight > 0)
+            {
+                g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
+                const SIZE size = g_pRenderText->MeasureText(text.text.c_str(), static_cast<int>(text.text.size()));
+                const auto role = bold ? UI::Scaling::FontRole::Bold : UI::Scaling::FontRole::Normal;
+                const float fittedPx = UI::RmlBridge::NativeTextPxInBounds(
+                    role, static_cast<float>(size.cx), static_cast<float>(size.cy), static_cast<float>(text.boxWidth),
+                    static_cast<float>(text.boxHeight));
+                if (fittedPx != UI::RmlBridge::NativeTextPx(role))
+                    textPx = fittedPx;
+            }
+            line.cells.push_back({text.text, bold, text.color, textPx});
         }
-        lines.push_back({text.text, left, static_cast<float>(text.y), bold, text.color, textPx});
+        lines.push_back(std::move(line));
     }
 
-    MessageBoxView::Button button{L"OK", ok.GetPosX(), ok.GetPosY(), ok.GetWidth(), ok.GetHeight()};
+    MessageBoxView::Button button{L"OK"};
     button.okArt = true;
     view.Sync(lines, {button});
 }
 
+// A box's text lines (MSGBOX_TEXTDATA), each centred in its font; the theme stacks them.
+std::vector<MessageBoxView::Line> MessageLines(const type_vector_msgdata& messages)
+{
+    std::vector<MessageBoxView::Line> lines;
+    for (const MSGBOX_TEXTDATA* message : messages)
+        lines.push_back({"message", {{message->strMsg, message->byFontType == MSGBOX_FONT_BOLD, message->dwColor}}});
+    return lines;
+}
+
 // A progress notice's MessageBoxView (CProgressMsgBox, CCursedTempleProgressMsgBox): their
-// RenderFrame() -- a middle strip per line past two, the back 10 units short --, RenderTexts() --
-// each line centred on the box from y 35, one line height + 4 apart -- and RenderProgress() -- the
-// elapsed fraction, 50 units above the box's bottom.
-void SyncProgressView(MessageBoxView& view, const SIZE& size, const type_vector_msgdata& messages,
-                      DWORD startTime, DWORD elapseTime)
+// RenderFrame() -- a middle strip per line past two --, RenderTexts() and RenderProgress() -- the
+// elapsed fraction.
+void SyncProgressView(MessageBoxView& view, const type_vector_msgdata& messages, DWORD startTime, DWORD elapseTime)
 {
     const int middles = messages.size() > 2 ? static_cast<int>(messages.size()) - 2 : 0;
-    view.SetFrame(middles, static_cast<float>(size.cy) - MSGBOX_BACK_BLANK_HEIGHT);
-
-    std::vector<MessageBoxView::Line> lines;
-    int y = static_cast<int>(MSGBOX_TEXT_TOP_BLANK);
-    for (const MSGBOX_TEXTDATA* message : messages)
-    {
-        const bool bold = message->byFontType == MSGBOX_FONT_BOLD;
-        g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
-        const SIZE textSize =
-            g_pRenderText->MeasureText(message->strMsg.c_str(), static_cast<int>(message->strMsg.size()));
-        const int x = static_cast<int>(MSGBOX_WIDTH / 2) - static_cast<int>(textSize.cx / 2);
-        lines.push_back({message->strMsg, static_cast<float>(x), static_cast<float>(y), bold, message->dwColor});
-        y += static_cast<int>(textSize.cy) + 4;
-    }
-
+    view.SetFrame(middles);
     const float fraction = static_cast<float>(timeGetTime() - startTime) / static_cast<float>(elapseTime);
-    view.SetProgress(static_cast<float>(size.cy) - 50.f, fraction);
-    view.Sync(lines, {});
+    view.SetProgress(fraction);
+    view.Sync(MessageLines(messages), {});
 }
 
 // A click on the OK button RmlUi reported, sent as the box's OK event.
@@ -166,7 +159,7 @@ bool mu::ui::window::CGemIntegrationDisjointMsgBox::Create(float fPriority)
     AddMsg(L" ", RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
     AddMsg(I18N::Game::SelectAJewelToDissolve, CLRDW_YELLOW, MSGBOX_FONT_BOLD);
 
-    m_View.Create(m_iMiddleFrameCount, static_cast<float>(GetSize().cy) - MSGBOX_BACK_BLANK_HEIGHT);
+    m_View.Create(m_iMiddleFrameCount, "gem-disjoint");
     SyncView();
 
     return true;
@@ -207,31 +200,12 @@ bool mu::ui::window::CGemIntegrationDisjointMsgBox::Update()
 
 void mu::ui::window::CGemIntegrationDisjointMsgBox::SyncView()
 {
-    m_View.SetFrame(m_iMiddleFrameCount, static_cast<float>(GetSize().cy) - MSGBOX_BACK_BLANK_HEIGHT);
-
-    // RenderTexts(): each line centred in its font from y MSGBOX_TEXT_TOP_BLANK / 2, one text
-    // height + 4 apart.
-    std::vector<MessageBoxView::Line> lines;
-    int y = MSGBOX_TEXT_TOP_BLANK / 2;
-    for (const MSGBOX_TEXTDATA* msg : m_MsgDataList)
-    {
-        const bool bold = msg->byFontType == MSGBOX_FONT_BOLD;
-        g_pRenderText->SetFont(bold ? g_hFontBold : g_hFont);
-        const SIZE size = g_pRenderText->MeasureText(msg->strMsg.c_str(), static_cast<int>(msg->strMsg.size()));
-        const int x = static_cast<int>(GetSize().cx / 2) - static_cast<int>(size.cx / 2);
-        lines.push_back({msg->strMsg, static_cast<float>(x), static_cast<float>(y), bold, msg->dwColor});
-        y += static_cast<int>(size.cy) + 4;
-    }
+    m_View.SetFrame(m_iMiddleFrameCount);
 
     // RenderButtons() then RenderGemList(): Close, then Dissolve (grey until a line is selected).
-    auto button = [](CMessageBoxButton& btn, const wchar_t* label)
-    {
-        return MessageBoxView::Button{label,          btn.GetPosX(),   btn.GetPosY(),
-                                      btn.GetWidth(), btn.GetHeight(), btn.IsEnabled()};
-    };
-    const std::vector<MessageBoxView::Button> buttons = {button(m_BtnCancel, I18N::Game::Close388),
-                                                         button(m_BtnDisjoint, I18N::Game::Disband)};
-    m_View.Sync(lines, buttons);
+    const std::vector<MessageBoxView::Button> buttons = {{I18N::Game::Close388, m_BtnCancel.IsEnabled()},
+                                                         {I18N::Game::Disband, m_BtnDisjoint.IsEnabled()}};
+    m_View.Sync(MessageLines(m_MsgDataList), buttons);
 
     SyncGemList();
 }
@@ -264,20 +238,6 @@ bool mu::ui::window::CGemIntegrationDisjointMsgBox::Render()
     return true;
 }
 
-void mu::ui::window::CGemIntegrationDisjointMsgBox::ChangeMiddleFrameSmall()
-{
-    int height = 0;
-
-    m_iMiddleFrameCount = 1;
-    height = MSGBOX_TOP_HEIGHT + (m_iMiddleFrameCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-
-    SetSize(GetSize().cx, height);
-
-    m_BtnCancel.SetPos(m_BtnCancel.GetPosX(), 80);
-
-    m_BtnDisjoint.SetEnable(false);
-}
-
 void mu::ui::window::CGemIntegrationDisjointMsgBox::ChangeMiddleFrameBig()
 {
     int height = 0;
@@ -303,64 +263,8 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::AddMsg(const type_string& st
 
 void mu::ui::window::CGemIntegrationDisjointMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::BlessingBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_BLESSING);
-    AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::SoulBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_SOUL);
     AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::DisjointBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_DISJOINT);
     AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CGemIntegrationDisjointMsgBox*>(pOwner);
-    if (pMsgBox == nullptr)
-    {
-        return CALLBACK_CONTINUE;
-    }
-
-    COMGEM::SetGem(COMGEM::CELE);
-
-    COMGEM::ResetWantedList();
-    COMGEM::FindWantedList();
-
-    if (COMGEM::GetWantedList().Entries().empty())
-    {
-        g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, mu::ui::window::TYPE_ERROR_MESSAGE);
-        COMGEM::GetBack();
-        pMsgBox->ChangeMiddleFrameSmall();
-    }
-    else
-    {
-        pMsgBox->ChangeMiddleFrameBig();
-    }
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CGemIntegrationDisjointMsgBox*>(pOwner);
-    if (pMsgBox == nullptr)
-    {
-        return CALLBACK_CONTINUE;
-    }
-
-    COMGEM::SetGem(COMGEM::SOUL);
-
-    COMGEM::ResetWantedList();
-    COMGEM::FindWantedList();
-
-    if (COMGEM::GetWantedList().Entries().empty())
-    {
-        g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, mu::ui::window::TYPE_ERROR_MESSAGE);
-        COMGEM::GetBack();
-        pMsgBox->ChangeMiddleFrameSmall();
-    }
-    else
-    {
-        pMsgBox->ChangeMiddleFrameBig();
-    }
-
-    return CALLBACK_BREAK;
 }
 
 CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
@@ -577,7 +481,7 @@ bool mu::ui::window::CBloodCastleResultMsgBox::Create(float fPriority)
     m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-    m_View.Create(static_cast<int>(MIDDLE_COUNT), static_cast<float>(GetSize().cy) - MSGBOX_BACK_BLANK_HEIGHT);
+    m_View.Create(static_cast<int>(MIDDLE_COUNT), "blood-castle-result");
 
     return true;
 }
@@ -594,7 +498,7 @@ bool mu::ui::window::CBloodCastleResultMsgBox::Update()
         return true;
 
     if (m_View.IsShown())
-        SyncMatchResultView(m_View, m_BtnOk);
+        SyncMatchResultView(m_View);
     return true;
 }
 
@@ -638,12 +542,10 @@ bool mu::ui::window::CDevilSquareRankMsgBox::Create(float fPriority)
     height = MSGBOX_BTN_HEIGHT;
     m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
 
-    // RenderFrame(): 11 middle strips, the divider, 3 more, and the table's four rules.
+    // RenderFrame(): 11 middle strips, the divider, 3 more; the table's four rules are the theme's.
     const auto middles = static_cast<int>(MIDDLE_COUNT1 + MIDDLE_COUNT2);
-    const float backHeight = static_cast<float>(GetSize().cy) - MSGBOX_BACK_BLANK_HEIGHT;
-    m_View.Create(middles, backHeight, "devil-square-rank");
-    m_View.SetFrame(middles, backHeight, static_cast<int>(MIDDLE_COUNT1));
-    m_View.SetSeparators({75.f, 93.f, 255.f, 273.f});
+    m_View.Create(middles, "devil-square-rank");
+    m_View.SetFrame(middles, static_cast<int>(MIDDLE_COUNT1));
 
     return true;
 }
@@ -660,7 +562,7 @@ bool mu::ui::window::CDevilSquareRankMsgBox::Update()
         return true;
 
     if (m_View.IsShown())
-        SyncMatchResultView(m_View, m_BtnOk);
+        SyncMatchResultView(m_View);
     return true;
 }
 
@@ -707,7 +609,7 @@ bool mu::ui::window::CChaosCastleResultMsgBox::Create(float fPriority)
     m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-    m_View.Create(static_cast<int>(MIDDLE_COUNT), static_cast<float>(GetSize().cy) - MSGBOX_BACK_BLANK_HEIGHT);
+    m_View.Create(static_cast<int>(MIDDLE_COUNT), "chaos-castle-result");
 
     return true;
 }
@@ -724,7 +626,7 @@ bool mu::ui::window::CChaosCastleResultMsgBox::Update()
         return true;
 
     if (m_View.IsShown())
-        SyncMatchResultView(m_View, m_BtnOk);
+        SyncMatchResultView(m_View);
     return true;
 }
 
@@ -822,7 +724,7 @@ bool mu::ui::window::CProgressMsgBox::Create(DWORD dwElapseTime, float fPriority
     CMessageBoxBase::Create(width, height, fPriority);
 
     SetAddCallbackFunc();
-    m_View.Create(0, static_cast<float>(height) - MSGBOX_BACK_BLANK_HEIGHT);
+    m_View.Create(0, "progress");
 
     m_dwElapseTime = dwElapseTime;
     m_dwStartTime = timeGetTime();
@@ -905,7 +807,7 @@ bool mu::ui::window::CProgressMsgBox::Render()
 
 void mu::ui::window::CProgressMsgBox::SyncView()
 {
-    SyncProgressView(m_View, GetSize(), m_MsgDataList, m_dwStartTime, m_dwElapseTime);
+    SyncProgressView(m_View, m_MsgDataList, m_dwStartTime, m_dwElapseTime);
 }
 
 CALLBACK_RESULT mu::ui::window::CProgressMsgBox::ClosingProcess(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
@@ -938,7 +840,7 @@ bool mu::ui::window::CCursedTempleProgressMsgBox::Create(DWORD dwElapseTime, flo
     CMessageBoxBase::Create(width, height, fPriority);
 
     SetAddCallbackFunc();
-    m_View.Create(0, static_cast<float>(height) - MSGBOX_BACK_BLANK_HEIGHT);
+    m_View.Create(0, "progress");
 
     m_dwElapseTime = dwElapseTime;
     m_dwStartTime = timeGetTime();
@@ -1015,7 +917,7 @@ bool mu::ui::window::CCursedTempleProgressMsgBox::Update()
 
 void mu::ui::window::CCursedTempleProgressMsgBox::SyncView()
 {
-    SyncProgressView(m_View, GetSize(), m_MsgDataList, m_dwStartTime, m_dwElapseTime);
+    SyncProgressView(m_View, m_MsgDataList, m_dwStartTime, m_dwElapseTime);
 }
 
 void mu::ui::window::CCursedTempleProgressMsgBox::SetNpcIndex(DWORD dwIndex)
@@ -1783,7 +1685,7 @@ bool mu::ui::window::CGuild_ToPerson_Position::Create(float fPriority)
     CMessageBoxBase::Create(width, height, fPriority);
 
     // The original's RenderFrame(): five middle strips, the back 75 units shorter than the box.
-    m_View.Create(5, static_cast<float>(height) - MSGBOX_BACK_BLANK_HEIGHT - 75, "guild-appoint");
+    m_View.Create(5, "guild-appoint");
 
     return true;
 }
@@ -1824,29 +1726,15 @@ bool mu::ui::window::CGuild_ToPerson_Position::Update()
     texts.push_back(I18N::Game::DoYouWantToAppoint);
 
     std::vector<MessageBoxView::Line> lines;
-    g_pRenderText->SetFont(g_hFontBold);
-    int y = static_cast<int>(MSGBOX_TEXT_TOP_BLANK / 2) + 80;
     for (const std::wstring& text : texts)
-    {
-        const SIZE size = g_pRenderText->MeasureText(text.c_str(), static_cast<int>(text.size()));
-        const int x = static_cast<int>(GetSize().cx / 2) - static_cast<int>(size.cx / 2);
-        lines.push_back({text, static_cast<float>(x), static_cast<float>(y), true, RGBA(255, 128, 0, 255)});
-        y += static_cast<int>(size.cy) + 4;
-    }
+        lines.push_back({"message", {{text, true, RGBA(255, 128, 0, 255)}}});
 
-    // The two appointments, OK and Close; the theme places them (message_box_view.rcss).
-    const auto placed = [](const wchar_t* label)
-    {
-        MessageBoxView::Button button;
-        button.label = label;
-        button.placed = true;
-        return button;
-    };
+    // The two appointments, OK and Close.
     const std::vector<MessageBoxView::Button> buttons = {
-        placed(I18N::Game::AppointAsAssistantGuildMaster),
-        placed(I18N::Game::AppointAsABattleMaster),
-        placed(I18N::Game::OK),
-        placed(I18N::Game::Close388),
+        {I18N::Game::AppointAsAssistantGuildMaster},
+        {I18N::Game::AppointAsABattleMaster},
+        {I18N::Game::OK},
+        {I18N::Game::Close388},
     };
     m_View.Sync(lines, buttons);
 
