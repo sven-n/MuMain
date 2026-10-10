@@ -44,7 +44,7 @@
 /* Native's own IGS_ID_INPUT_TEXT_POS_X / _POS_Y, over the ID box art at (118, 82). */
 #igs_gift_id {
 	left: 120px;
-	top: 87px;
+	top: 84px;
 	background-color: rgb(255, 255, 255);
 	border: 1px rgb(120, 110, 96);
 }
@@ -67,5 +67,6 @@
 .igs-debug-line { position: relative; display: block; height: 10px; }
 
 /* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
-#igs_gift_id { width: calc(200px * var(--root-scale)); height: calc(14px * var(--root-scale)); }
+/* Inside the 76 x 17 name box at (118, 82): the original's 200-unit edit buffer showed only there. */
+#igs_gift_id { width: calc(72px * var(--root-scale)); height: calc(13px * var(--root-scale)); }
 #igs_gift_message { width: calc(170px * var(--root-scale)); height: calc(65px * var(--root-scale)); }
