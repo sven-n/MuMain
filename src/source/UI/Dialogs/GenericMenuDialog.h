@@ -55,11 +55,6 @@ namespace mu::ui::window
                                             // but it's a one-bool add worth reserving
             bool compact = false;           // true = native's smaller "Cancel/Exit" button style;
                                             // false = the larger action-button style
-            int nativeTop = 0;              // native box's button y offset (with nativeFrame);
-                                            // 0 = flow
-            int nativeLinesTop = 0;         // with nativeTop: y offset of the first of `lines`'
-                                            // text above the button, one nativeFrame.lineAdvance
-                                            // apart (CChaosMixMenuMsgBox); 0 = flow
             bool narrow = false;            // MSGBOX_BTN_EMPTY_WIDTH (108) instead of the menus'
                                             // usual + 20 (CGemIntegrationMsgBox)
             bool linesBelow = false;        // `lines` sit under the button (CTrainerRecoverMsgBox)
@@ -82,20 +77,10 @@ namespace mu::ui::window
         // in GenericMenuDialog.cpp the same way if a future consumer needs a different count.
         int columns = 0;
 
-        // The native box this menu replaces (CNewUIMessageBoxBase::Create): its top edge and the
-        // number of 15px middle strips between its 67px top and 50px bottom caps, and where its
-        // RenderTexts() draws `lines`. Data only -- a theme may reproduce the native layout
-        // (legacy does); 0 = not described / flow.
-        struct NativeFrame
-        {
-            int top = 0;
-            int middleCount = 0;
-            int textTop = 0;     // y offset of the first line's text
-            int lineAdvance = 0; // y step between lines
-            int textInset = 0;   // left/right inset of left-aligned text (0 = centred)
-            int dividerTop = 0;  // y offset of a newui_Message_Line divider (CElpisMsgBox)
-        };
-        NativeFrame nativeFrame;
+        // Which native box this menu replaces (CNewUIMessageBoxBase::Create's frame, and where
+        // its RenderTexts() and buttons drew), by name: "chaos-mix", "npc-menu", ... A theme may
+        // lay the menu out like that box, by kind (legacy does); empty = not described / flow.
+        std::string kind;
         // The in-game system menu (native CSystemMenuMsgBox): a theme may lay it out like native.
         bool systemMenu = false;
 
@@ -139,7 +124,6 @@ namespace mu::ui::window
         void BuildRmlUi();
         void OnRmlBuilt();
         void SyncRmlModel();
-        void SyncNativeFrame();
         void SyncCanvasTop();
         void ShowNext();           // pops m_Queue (if non-empty) and opens the document
         void Resolve(int buttonIndex); // -1 = cancel/no button; hides the document, invokes the
@@ -162,8 +146,6 @@ namespace mu::ui::window
             bool enabled = true;
             bool compact = false;
             bool cols2 = false;     // GenericMenuConfig::columns == 2 && !compact -- see its comment
-            float nativeTop = 0.f;  // the cell's top: MenuButton::nativeTop, or its lines' top
-            float nativeButtonGap = 0.f; // native-placed lines above the button: lines end to button
             bool narrow = false;
             bool linesBelow = false;
             bool dismiss = false;
@@ -176,12 +158,7 @@ namespace mu::ui::window
             Rml::String systemMenuLabel;
             Rml::String closeLabel;
             bool highlightTitle = false;
-            float nativeTop = 0.f; // GenericMenuConfig::nativeFrame, in reference pixels
-            float nativeHeight = 0.f;
-            float nativeTextTop = 0.f;
-            float nativeLineAdvance = 0.f;
-            float nativeTextInset = 0.f;
-            float nativeDividerTop = 0.f;
+            Rml::String kind;      // GenericMenuConfig::kind
             float canvasTop = 0.f; // UI::RmlBridge::DialogCanvasTop, in dp
             Rml::String title;
             std::vector<LineEntry> lines;

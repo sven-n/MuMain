@@ -25,11 +25,12 @@
 	color: token(text-primary);
 }
 #panel.window-shell-positioned { margin-left: 0; }
-/* A menu that describes its native box (GenericMenuConfig::nativeFrame) gets that box's top edge
-   (margin-top offsets the default 60dp, plus the dialog canvas offset -- RmlDialogCanvas.h) and its fixed height (both bound in
-   generic_menu_dialog.rml, as native's frames are fixed); the shell's content box is then placed
-   inside it as window_shell.rcss does, and its compact Close button sits where native's does, 20
-   above the bottom edge. */
+/* Below the dialog canvas offset (RmlDialogCanvas.h). */
+#panel { margin-top: var(--canvas-top, 0dp); }
+/* A menu that names the native box it replaces (GenericMenuConfig::kind) gets that box's top edge
+   and fixed height (kinds below); the shell's content box is then placed inside it as
+   window_shell.rcss does, and its compact Close button sits where native's does, 20 above the
+   bottom edge. */
 #panel.native-frame .window-shell-content {
 	position: absolute;
 	top: 20dp;
@@ -74,32 +75,6 @@
 .gmd-line.bold { font-weight: bold; }
 .gmd-lines { display: block; width: 100%; }
 
-/* A described native layout (GenericMenuConfig::nativeFrame, MenuButton::nativeTop): the lines and
-   buttons sit at the native box's own y offsets (top/line-height bound in generic_menu_dialog.rml).
-   Offsets are from the panel's top edge: the containing block is the shell's content box, which
-   starts at the panel top in a titled native-frame menu (see #panel.native-frame above). */
-#panel.native-frame .gmd-lines.native-placed {
-	position: absolute;
-	left: 0;
-	right: 0;
-	width: auto;
-}
-#panel.native-frame .gmd-lines.native-placed .gmd-line { margin-bottom: 0; }
-/* Native's "about" texts are left-aligned, wrapped inside an inset (CElpisMsgBox's x+30). */
-#panel.native-frame .gmd-lines.inset .gmd-line { text-align: left; }
-#panel.native-frame .gmd-button-cell.native-placed {
-	position: absolute;
-	left: 0;
-	right: 0;
-	width: auto;
-	margin: 0;
-}
-/* CChaosMixMenuMsgBox: each recipe's lines at their own native offsets above its button, one
-   line each as native draws them (a wrapped line would run into the button). */
-#panel.native-frame .gmd-button-cell.native-lines .gmd-line {
-	white-space: nowrap;
-	margin-bottom: 0;
-}
 /* A native box drew each of its centred lines with RenderText(x + 10, y, text, MSGBOX_WIDTH - 20,
    0, RT3_SORT_CENTER): one line in a 210-wide box, shrunk to it when wider (base.rcss .native-fit).
    The content box is 198 wide (16 inset), so the box reaches 6 past it on each side. */
@@ -115,13 +90,13 @@
 	msgbox-line-image: 0px 0px 223px 21px;
 }
 .gmd-divider {
+	display: none;
 	position: absolute;
 	left: -16dp; /* the content box is inset 16dp from the panel edge */
 	width: 223dp;
 	height: 21dp;
 	decorator: image(msgbox-line-image);
 }
-.gmd-divider.hidden { display: none; }
 
 /* No explicit column count -- row + flex-wrap lets the button count/width and the row's own
    available width determine how many fit per line, same mechanism
@@ -248,3 +223,78 @@
 
 /* GenericMenuConfig::highlightTitle: native's highlight orange (CChaosMixMenuMsgBox's title). */
 #panel.highlight-title .window-shell-header-title { color: #ff8000; }
+
+/* The native boxes, by GenericMenuConfig::kind. Each sits at its top edge (60 unless given) and is
+   67 (top cap) + 15 per middle strip + 50 (bottom cap) tall. Offsets inside are from the panel's
+   top edge: the containing block is the shell's content box, which starts there in a titled box
+   and 20 lower in an untitled one. */
+#panel[data-kind="system-menu"], #panel[data-kind="gem-integration"] { top: 100dp; height: 192dp; }
+#panel[data-kind="cherry-blossom"] { height: 237dp; }
+#panel[data-kind="npc-menu"], #panel[data-kind="trainer-recover"],
+#panel[data-kind="reset-points"], #panel[data-kind="delgardo"] { height: 222dp; }
+#panel[data-kind="elpis"], #panel[data-kind="elpis-about"] { height: 297dp; }
+#panel[data-kind="chaos-mix"] { height: 312dp; }
+
+/* Where the box's RenderTexts() drew the lines: the first one's text top less half the line gap
+   (the glyphs, 9 tall, centre in their line box), one advance apart. */
+#panel[data-kind="npc-menu"] .gmd-lines, #panel[data-kind="trainer-recover"] .gmd-lines,
+#panel[data-kind="elpis"] .gmd-lines, #panel[data-kind="elpis-about"] .gmd-lines,
+#panel[data-kind="reset-points"] .gmd-lines, #panel[data-kind="delgardo"] .gmd-lines {
+	position: absolute;
+	left: 0;
+	right: 0;
+	width: auto;
+	top: 38.5dp; /* text at 43, 18 apart */
+	line-height: 18dp;
+}
+#panel[data-kind="reset-points"] .gmd-lines { top: 48.5dp; } /* text at 53 */
+#panel[data-kind="delgardo"] .gmd-lines { top: 46.5dp; line-height: 12dp; } /* text at 48, 12 apart */
+#panel[data-kind] .gmd-lines .gmd-line { margin-bottom: 0; }
+/* CElpisMsgBox's "about" texts: left-aligned, wrapped inside an inset (its x+30). */
+#panel[data-kind="elpis-about"] .gmd-lines { left: 16dp; right: 16dp; }
+#panel[data-kind="elpis-about"] .gmd-lines .gmd-line { text-align: left; }
+/* CElpisMsgBox's divider under the text. */
+#panel[data-kind="elpis"] .gmd-divider, #panel[data-kind="elpis-about"] .gmd-divider { display: block; top: 120dp; }
+
+/* The buttons at the box's offsets (the Close button stays 20 above the bottom edge unless given). */
+#panel[data-kind="gem-integration"] .gmd-button-cell,
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(-n+3),
+#panel[data-kind="npc-menu"] .gmd-button-cell:nth-child(-n+2),
+#panel[data-kind="delgardo"] .gmd-button-cell:nth-child(-n+2),
+#panel[data-kind="trainer-recover"] .gmd-button-cell:nth-child(-n+2),
+#panel[data-kind="elpis"] .gmd-button-cell:nth-child(-n+3),
+#panel[data-kind="elpis-about"] .gmd-button-cell:nth-child(-n+3),
+#panel[data-kind="reset-points"] .gmd-button-cell:nth-child(1) {
+	position: absolute;
+	left: 0;
+	right: 0;
+	width: auto;
+	margin: 0;
+}
+/* CGemIntegrationMsgBox: untitled, BTN_TOP_BLANK 60 then 40 apart, Close included. */
+#panel[data-kind="gem-integration"] .gmd-button-cell:nth-child(1) { top: 40dp; }
+#panel[data-kind="gem-integration"] .gmd-button-cell:nth-child(2) { top: 80dp; }
+#panel[data-kind="gem-integration"] .gmd-button-cell:nth-child(3) { top: 120dp; bottom: auto; }
+#panel[data-kind="npc-menu"] .gmd-button-cell:nth-child(1),
+#panel[data-kind="delgardo"] .gmd-button-cell:nth-child(1) { top: 85dp; }
+#panel[data-kind="npc-menu"] .gmd-button-cell:nth-child(2),
+#panel[data-kind="delgardo"] .gmd-button-cell:nth-child(2) { top: 120dp; }
+#panel[data-kind="trainer-recover"] .gmd-button-cell:nth-child(1) { top: 65dp; }
+#panel[data-kind="trainer-recover"] .gmd-button-cell:nth-child(2) { top: 115dp; }
+#panel[data-kind="elpis"] .gmd-button-cell:nth-child(1), #panel[data-kind="elpis-about"] .gmd-button-cell:nth-child(1) { top: 145dp; }
+#panel[data-kind="elpis"] .gmd-button-cell:nth-child(2), #panel[data-kind="elpis-about"] .gmd-button-cell:nth-child(2) { top: 175dp; }
+#panel[data-kind="elpis"] .gmd-button-cell:nth-child(3), #panel[data-kind="elpis-about"] .gmd-button-cell:nth-child(3) { top: 205dp; }
+#panel[data-kind="reset-points"] .gmd-button-cell:nth-child(1) { top: 105dp; }
+
+/* CChaosMixMenuMsgBox: each recipe's lines 15 apart from their own top (40, 125, 210, less half
+   the line gap), one line each as native draws them (a wrapped line would run into the button),
+   and the button 3 below them (at 85, 155, 225). */
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(1) { top: 37dp; }
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(2) { top: 122dp; }
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(3) { top: 207dp; }
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(-n+3) .gmd-line {
+	white-space: nowrap;
+	margin-bottom: 0;
+	line-height: 15dp;
+}
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(-n+3) .gmd-btn { margin-top: 3dp; }

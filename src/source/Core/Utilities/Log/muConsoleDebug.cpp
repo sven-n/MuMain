@@ -238,6 +238,40 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         mu::ui::window::CreateOkMessageBoxWithTitle(L"Test dialog", L"Drag it by any part that is not a button.");
         return true;
     }
+    // "$dialog menu <name>": an NPC's menu without the NPC, to check its layout. Its buttons act.
+    if (strCommand.compare(0, 13, L"$dialog menu ") == 0)
+    {
+        using namespace mu::ui::window;
+        const std::pair<const wchar_t*, void (*)()> menus[] = {
+            {L"system", ShowSystemMenuDialog},
+            {L"chaosmix", ShowChaosMixMenuDialog},
+            {L"cherry", ShowCherryBlossomMenuDialog},
+            {L"gem", ShowGemIntegrationMenuDialog},
+            {L"luckytrade", ShowLuckyTradeMenuDialog},
+            {L"trainer", ShowTrainerMenuDialog},
+            {L"trainerrecover", ShowTrainerRecoverDialog},
+            {L"elpis", [] { ShowElpisMenuDialog(); }},
+            {L"elpisabout", [] { ShowElpisMenuDialog(MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY); }},
+            {L"seedmaster", ShowSeedMasterMenuDialog},
+            {L"seedinvestigator", ShowSeedInvestigatorMenuDialog},
+            {L"resetpoints", ShowResetCharacterPointDialog},
+            {L"delgardo", ShowDelgardoMainMenuDialog},
+        };
+        const std::wstring name = strCommand.substr(13);
+        for (const auto& [menuName, show] : menus)
+        {
+            if (name == menuName)
+            {
+                show();
+                return true;
+            }
+        }
+        std::wstring names;
+        for (const auto& menu : menus)
+            names += std::wstring(L" ") + menu.first;
+        g_pSystemLogBox->AddText((L"$dialog menu <name>:" + names).c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        return true;
+    }
     // "$dialog item [group index [level]]": a test confirmation with a live item preview.
     if (strCommand.compare(0, 12, L"$dialog item") == 0 && mu::ui::window::g_pGenericConfirmDialog)
     {

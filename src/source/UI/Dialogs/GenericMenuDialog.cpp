@@ -55,8 +55,6 @@ void CGenericMenuDialog::BindRmlModel(Rml::DataModelConstructor& c, GenericMenuR
     button.RegisterMember("enabled", &MenuButtonEntry::enabled);
     button.RegisterMember("compact", &MenuButtonEntry::compact);
     button.RegisterMember("cols2", &MenuButtonEntry::cols2);
-    button.RegisterMember("native_top", &MenuButtonEntry::nativeTop);
-    button.RegisterMember("native_button_gap", &MenuButtonEntry::nativeButtonGap);
     button.RegisterMember("narrow", &MenuButtonEntry::narrow);
     button.RegisterMember("lines_below", &MenuButtonEntry::linesBelow);
     button.RegisterMember("dismiss", &MenuButtonEntry::dismiss);
@@ -66,12 +64,7 @@ void CGenericMenuDialog::BindRmlModel(Rml::DataModelConstructor& c, GenericMenuR
     c.Bind("has_title", &model.hasTitle);
     c.Bind("highlight_title", &model.highlightTitle);
     c.Bind("is_system_menu", &model.isSystemMenu);
-    c.Bind("native_top", &model.nativeTop);
-    c.Bind("native_height", &model.nativeHeight);
-    c.Bind("native_text_top", &model.nativeTextTop);
-    c.Bind("native_line_advance", &model.nativeLineAdvance);
-    c.Bind("native_text_inset", &model.nativeTextInset);
-    c.Bind("native_divider_top", &model.nativeDividerTop);
+    c.Bind("kind", &model.kind);
     c.Bind("canvas_top", &model.canvasTop);
     c.Bind("title", &model.title);
     c.Bind("system_menu_label", &model.systemMenuLabel);
@@ -242,37 +235,6 @@ bool CGenericMenuDialog::SameLine(const LineEntry& a, const LineEntry& b)
     return a.text == b.text && a.bold == b.bold && a.color == b.color;
 }
 
-void CGenericMenuDialog::SyncNativeFrame()
-{
-    auto& model = m_RmlView.GetModel();
-    // Native CNewUIMessageBoxBase frame heights: 67 top cap + n * 15 middle strips + 50 bottom cap.
-    constexpr float kTopCapHeight = 67.f;
-    constexpr float kMiddleStripHeight = 15.f;
-    constexpr float kBottomCapHeight = 50.f;
-
-    const auto& frame = m_Active.nativeFrame;
-    const float top = static_cast<float>(frame.top);
-    const float height =
-        frame.middleCount > 0
-            ? kTopCapHeight + static_cast<float>(frame.middleCount) * kMiddleStripHeight + kBottomCapHeight
-            : 0.f;
-    if (model.nativeTop != top)
-    {
-        model.nativeTop = top;
-        m_RmlView.MarkDirty("native_top");
-    }
-    if (model.nativeHeight != height)
-    {
-        model.nativeHeight = height;
-        m_RmlView.MarkDirty("native_height");
-    }
-
-    SyncField(m_RmlView.Binder(), &GenericMenuRmlModel::nativeTextTop, "native_text_top", static_cast<float>(frame.textTop));
-    SyncField(m_RmlView.Binder(), &GenericMenuRmlModel::nativeLineAdvance, "native_line_advance", static_cast<float>(frame.lineAdvance));
-    SyncField(m_RmlView.Binder(), &GenericMenuRmlModel::nativeTextInset, "native_text_inset", static_cast<float>(frame.textInset));
-    SyncField(m_RmlView.Binder(), &GenericMenuRmlModel::nativeDividerTop, "native_divider_top", static_cast<float>(frame.dividerTop));
-}
-
 void CGenericMenuDialog::SyncCanvasTop()
 {
     auto& model = m_RmlView.GetModel();
@@ -317,7 +279,7 @@ void CGenericMenuDialog::SyncRmlModel()
     };
     syncLabel(model.systemMenuLabel, "system_menu_label", I18N::Game::SystemMenu);
     syncLabel(model.closeLabel, "close_label", I18N::Game::Close);
-    SyncNativeFrame();
+    SyncField(m_RmlView.Binder(), &GenericMenuRmlModel::kind, "kind", Rml::String(m_Active.kind));
     const std::string title = StringUtils::WideToNarrow(m_Active.title.c_str());
     if (model.title != title)
     {
@@ -352,19 +314,9 @@ void CGenericMenuDialog::SyncRmlModel()
         entry.enabled = button.enabled;
         entry.compact = button.compact;
         entry.cols2 = (m_Active.columns == 2) && !button.compact;
-        entry.nativeTop = static_cast<float>(button.nativeTop);
         entry.narrow = button.narrow;
         entry.linesBelow = button.linesBelow;
         entry.dismiss = button.dismiss;
-        const float lineAdvance = static_cast<float>(m_Active.nativeFrame.lineAdvance);
-        if (button.nativeTop > 0 && button.nativeLinesTop > 0 && lineAdvance > 0.f && !button.linesBelow)
-        {
-            // The cell starts at the first line's box, which is centred on the 9-unit glyphs like
-            // generic_menu_dialog.rml's .gmd-lines; the button keeps its own native offset.
-            entry.nativeTop = static_cast<float>(button.nativeLinesTop) - (lineAdvance - 9.f) / 2.f;
-            entry.nativeButtonGap = static_cast<float>(button.nativeTop) - entry.nativeTop -
-                                    static_cast<float>(button.lines.size()) * lineAdvance;
-        }
         newButtons.push_back(std::move(entry));
     }
     bool buttonsChanged = newButtons.size() != model.buttons.size();
@@ -374,7 +326,7 @@ void CGenericMenuDialog::SyncRmlModel()
         const auto& b = model.buttons[i];
         buttonsChanged = a.label != b.label || a.tooltip != b.tooltip ||
                          a.enabled != b.enabled || a.compact != b.compact || a.cols2 != b.cols2 ||
-                         a.nativeTop != b.nativeTop || a.nativeButtonGap != b.nativeButtonGap || a.narrow != b.narrow ||
+                         a.narrow != b.narrow ||
                          a.linesBelow != b.linesBelow || a.dismiss != b.dismiss || a.lines.size() != b.lines.size();
         for (size_t j = 0; j < a.lines.size() && !buttonsChanged; ++j)
             buttonsChanged = !SameLine(a.lines[j], b.lines[j]);

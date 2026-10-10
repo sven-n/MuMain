@@ -28,7 +28,6 @@ cursed_temple_system.rml: state -- the mini map's markers sit at their projected
 doppelganger_frame.rml: state -- the monsters' gauge is a length from m_fMonsterGauge, stacked in pieces as monsters get through; the Ice Walker's and each party member's marker is their own position along the path (59 + 167 * position)
 duel_watch_frame.rml: state -- the health and shield gauges are lengths from the fighters' rates, and the left fighter's bars are right-aligned so their left moves with the rate too (the plan's gauge carve-out)
 generic_confirm_dialog.rml: state -- the timed confirm's progress bar is a fraction of its countdown
-generic_menu_dialog.rml: debt -- the native box each menu replaces, as its caller describes it (GenericMenuConfig::nativeFrame): the frame height and the text, divider and button tops differ per menu, and legacy reproduces them from bound numbers; a menu kind the theme places would replace them
 hud_status.rml: state -- the macro cooldown's bar is a gauge length, the fraction of the cooldown left, and the cooldown centres on the world the open docks leave uncovered
 item_endurance.rml: state -- the hovered item's tooltip follows the mouse (clamped to the screen edge) and the pet bars are lengths from their health
 item_explanation.rml: debt -- each box and line sits where RenderTipTextList() recorded it, so the table's stacking and widths are measured in C++; the table's placement against the hovered item is state
