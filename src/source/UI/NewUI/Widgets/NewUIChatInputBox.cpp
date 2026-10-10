@@ -52,7 +52,6 @@ void SEASON3B::CNewUIChatInputBox::Init()
     m_bShowChatLog = true;
     m_bWhisperSend = true;
 
-    m_bShowMessageElseNormal = false;
 }
 
 void SEASON3B::CNewUIChatInputBox::LoadImages()
@@ -389,16 +388,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 {
     if (SEASON3B::IsPress(VK_F2))
     {
-        m_bShowMessageElseNormal = !m_bShowMessageElseNormal;
-
-        if (m_bShowMessageElseNormal)
-        {
-            m_pNewUIChatLogWnd->ChangeMessage(SEASON3B::TYPE_WHISPER_MESSAGE);
-        }
-        else
-        {
-            m_pNewUIChatLogWnd->ChangeMessage(SEASON3B::TYPE_ALL_MESSAGE);
-        }
+        m_pNewUIChatLogWnd->ChangeMessage(m_pNewUIChatLogWnd->GetNextView());
 
         PlayBuffer(SOUND_CLICK01);
         return false;

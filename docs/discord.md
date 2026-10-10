@@ -48,6 +48,23 @@ The options window has a **Discord** setting:
 
 The setting applies immediately and is stored in `config.ini`.
 
+## Messages from Discord
+
+> Requires a server whose Discord chat bridge sends them to the client as
+> such. Without it, nothing in this section appears; against older servers,
+> messages from Discord arrive as ordinary chat with a name prefix.
+
+A message written in a Discord channel that the server bridges into the game
+appears in the chat of its scope - guild, alliance or world - with that chat's
+colours. Its sender is shown as `[Discord] <name>`, with the full Discord name
+(up to 32 characters) instead of a character name.
+
+- Discord users are not characters: right-clicking their line does not start a
+  whisper, and they are not added to your whisper list.
+- **F2** switches the chat log between all messages and whispers. Once a
+  message from Discord has arrived, it also offers a view with only the
+  messages from Discord: all → whispers → Discord → all.
+
 ## For server operators
 
 Each server uses its own Discord application, so the name your players see

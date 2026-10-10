@@ -4,6 +4,16 @@ mu_add_test(
     LINK_LIBS MuClient
 )
 
+# The chat log pulls in client globals defined in Winmain.cpp, so it is linked
+# here (same as test_audio_playback).
+mu_add_test(
+    NAME external_chat_tests
+    SOURCES
+        test_external_chat.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
 mu_add_test(
     NAME text_search_tests
     SOURCES

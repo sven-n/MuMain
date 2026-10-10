@@ -268,6 +268,18 @@ void SEASON3B::CNewUIChatLogWindow::SetPosition(int x, int y)
 
 void SEASON3B::CNewUIChatLogWindow::AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType /*= TYPE_ALL_MESSAGE*/)
 {
+    AddTextToViews(strID, strText, MsgType, ErrMsgType, false);
+}
+
+void SEASON3B::CNewUIChatLogWindow::AddExternalText(const type_string& strSender, const type_string& strText,
+                                                    MESSAGE_TYPE MsgType)
+{
+    AddTextToViews(strSender, strText, MsgType, TYPE_ALL_MESSAGE, true);
+}
+
+void SEASON3B::CNewUIChatLogWindow::AddTextToViews(const type_string& strID, const type_string& strText,
+                                                   MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType, bool bExternal)
+{
     if (strID.empty() && strText.empty())
     {
         return;
@@ -283,19 +295,24 @@ void SEASON3B::CNewUIChatLogWindow::AddText(const type_string& strID, const type
         RemoveFrontLine(TYPE_ALL_MESSAGE);
     }
 
+    if (bExternal && GetNumberOfLines(TYPE_DISCORD_MESSAGE) >= MAX_NUMBER_OF_LINES)
+    {
+        RemoveFrontLine(TYPE_DISCORD_MESSAGE);
+    }
+
     if (m_vecFilters.empty())
     {
-        ProcessAddText(strID, strText, MsgType, ErrMsgType);
+        ProcessAddText(strID, strText, MsgType, ErrMsgType, bExternal);
     }
     else
     {
         if (MsgType != TYPE_CHAT_MESSAGE)
         {
-            ProcessAddText(strID, strText, MsgType, ErrMsgType);
+            ProcessAddText(strID, strText, MsgType, ErrMsgType, bExternal);
         }
         else if (CheckFilterText(strID) || CheckFilterText(strText))
         {
-            ProcessAddText(strID, strText, MsgType, ErrMsgType);
+            ProcessAddText(strID, strText, MsgType, ErrMsgType, bExternal);
 
             if (g_pOption->IsWhisperSound())
             {
@@ -305,7 +322,45 @@ void SEASON3B::CNewUIChatLogWindow::AddText(const type_string& strID, const type
     }
 }
 
-void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType)
+void SEASON3B::CNewUIChatLogWindow::AppendMessage(type_vector_msgs* pvecMsgs, const type_string& strID,
+                                                  const type_string& strText, MESSAGE_TYPE MsgType, bool bExternal)
+{
+    const auto pMsgText = new CMessageText;
+    if (!pMsgText->Create(strID, strText, MsgType, bExternal))
+    {
+        delete pMsgText;
+        return;
+    }
+    pvecMsgs->push_back(pMsgText);
+}
+
+SEASON3B::CNewUIChatLogWindow::type_vector_msgs*
+SEASON3B::CNewUIChatLogWindow::GetSecondaryMsgs(MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType, bool bExternal)
+{
+    if (bExternal)
+    {
+        return &m_vecDiscordMsgs;
+    }
+
+    // An error caused by, say, a whisper is listed among the whispers too.
+    if (MsgType == TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE)
+    {
+        type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
+        assert(pErrvecMsgs != nullptr && "Error chat");
+        return pErrvecMsgs;
+    }
+
+    return nullptr;
+}
+
+bool SEASON3B::CNewUIChatLogWindow::IsInCurrentView(MESSAGE_TYPE MsgType, bool bExternal) const
+{
+    const MESSAGE_TYPE current = GetCurrentMsgType();
+    return current == TYPE_ALL_MESSAGE || current == MsgType || (bExternal && current == TYPE_DISCORD_MESSAGE);
+}
+
+void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, const type_string& strText,
+                                                   MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType, bool bExternal)
 {
     type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
     if (pvecMsgs == nullptr)
@@ -314,6 +369,8 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
         return;
     }
 
+    type_vector_msgs* pSecondaryMsgs = GetSecondaryMsgs(MsgType, ErrMsgType, bExternal);
+
     int nScrollLines = 0;
     if (strText.size() >= 20)
     {
@@ -321,84 +378,28 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
         SeparateText(strID, strText, MsgType, strText1, strText2);
         if (!strText1.empty())
         {
-            const auto pMsgText = new CMessageText;
-            if (!pMsgText->Create(strID, strText, MsgType))
-                delete pMsgText;
-            else
+            AppendMessage(pvecMsgs, strID, strText, MsgType, bExternal);
+            AppendMessage(&m_vecAllMsgs, strID, strText1, MsgType, bExternal);
+            if (pSecondaryMsgs != nullptr)
             {
-                pvecMsgs->push_back(pMsgText);
+                AppendMessage(pSecondaryMsgs, strID, strText1, MsgType, bExternal);
             }
 
-            const auto pAllMsgText = new CMessageText;
-            if (!pAllMsgText->Create(strID, strText1, MsgType))
-            {
-                delete pAllMsgText;
-            }
-            else
-            {
-                m_vecAllMsgs.push_back(pAllMsgText);
-            }
-
-            if ((MsgType == TYPE_ERROR_MESSAGE) && (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE))
-            {
-                type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
-                if (pErrvecMsgs == nullptr)
-                {
-                    assert(!"Error Chat");
-                    return;
-                }
-
-                const auto pErrMsgText = new CMessageText;
-                if (!pErrMsgText->Create(strID, strText1, MsgType))
-                    delete pErrMsgText;
-                else
-                {
-                    pErrvecMsgs->push_back(pErrMsgText);
-                }
-            }
-
-            if (GetCurrentMsgType() == TYPE_ALL_MESSAGE || GetCurrentMsgType() == MsgType)
+            if (IsInCurrentView(MsgType, bExternal))
             {
                 nScrollLines++;
             }
         }
         if (!strText2.empty())
         {
-            const auto pMsgText = new CMessageText;
-            if (!pMsgText->Create(L"", strText2, MsgType))
-                delete pMsgText;
-            else
+            AppendMessage(pvecMsgs, L"", strText2, MsgType, bExternal);
+            AppendMessage(&m_vecAllMsgs, L"", strText2, MsgType, bExternal);
+            if (pSecondaryMsgs != nullptr)
             {
-                pvecMsgs->push_back(pMsgText);
+                AppendMessage(pSecondaryMsgs, L"", strText2, MsgType, bExternal);
             }
 
-            const auto pAllMsgText = new CMessageText;
-            if (!pAllMsgText->Create(L"", strText2, MsgType))
-                delete pAllMsgText;
-            else
-            {
-                m_vecAllMsgs.push_back(pAllMsgText);
-            }
-
-            if ((MsgType == TYPE_ERROR_MESSAGE) && (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE))
-            {
-                type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
-                if (pErrvecMsgs == nullptr)
-                {
-                    assert(!"Error chat 2");
-                    return;
-                }
-
-                const auto pErrMsgText = new CMessageText;
-                if (!pErrMsgText->Create(L"", strText2, MsgType))
-                    delete pErrMsgText;
-                else
-                {
-                    pErrvecMsgs->push_back(pErrMsgText);
-                }
-            }
-
-            if (GetCurrentMsgType() == TYPE_ALL_MESSAGE || GetCurrentMsgType() == MsgType)
+            if (IsInCurrentView(MsgType, bExternal))
             {
                 nScrollLines++;
             }
@@ -406,42 +407,14 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
     }
     else
     {
-        const auto pMsgText = new CMessageText;
-        if (!pMsgText->Create(strID, strText, MsgType))
-            delete pMsgText;
-        else
+        AppendMessage(pvecMsgs, strID, strText, MsgType, bExternal);
+        AppendMessage(&m_vecAllMsgs, strID, strText, MsgType, bExternal);
+        if (pSecondaryMsgs != nullptr)
         {
-            pvecMsgs->push_back(pMsgText);
+            AppendMessage(pSecondaryMsgs, strID, strText, MsgType, bExternal);
         }
 
-        const auto pAllMsgText = new CMessageText;
-        if (!pAllMsgText->Create(strID, strText, MsgType))
-            delete pAllMsgText;
-        else
-        {
-            m_vecAllMsgs.push_back(pAllMsgText);
-        }
-
-        if ((MsgType == TYPE_ERROR_MESSAGE)
-            && (ErrMsgType != TYPE_ERROR_MESSAGE && ErrMsgType != TYPE_ALL_MESSAGE))
-        {
-            type_vector_msgs* pErrvecMsgs = GetMsgs(ErrMsgType);
-            if (pErrvecMsgs == nullptr)
-            {
-                assert(!"Error chat 3");
-                return;
-            }
-
-            const auto pErrMsgText = new CMessageText;
-            if (!pErrMsgText->Create(strID, strText, MsgType))
-                delete pErrMsgText;
-            else
-            {
-                pErrvecMsgs->push_back(pErrMsgText);
-            }
-        }
-
-        if (GetCurrentMsgType() == TYPE_ALL_MESSAGE || GetCurrentMsgType() == MsgType)
+        if (IsInCurrentView(MsgType, bExternal))
         {
             nScrollLines++;
         }
@@ -729,7 +702,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
                     m_iPointedMessageIndex = i;
 
                     std::wstring strID = pMsgText->GetID();
-                    if (SEASON3B::IsPress(VK_RBUTTON) && strID.empty() == false)
+                    if (SEASON3B::IsPress(VK_RBUTTON) && strID.empty() == false && !pMsgText->IsExternal())
                     {
                         g_pChatInputBox->SetWhsprID(strID.c_str());
                     }
@@ -1025,6 +998,8 @@ SEASON3B::CNewUIChatLogWindow::type_vector_msgs* SEASON3B::CNewUIChatLogWindow::
         return &m_vecGensMsgs;
     case TYPE_GM_MESSAGE:
         return &m_vecGMMsgs;
+    case TYPE_DISCORD_MESSAGE:
+        return &m_vecDiscordMsgs;
     }
 
     return nullptr;
@@ -1046,6 +1021,21 @@ void SEASON3B::CNewUIChatLogWindow::ChangeMessage(MESSAGE_TYPE MsgType)
 SEASON3B::MESSAGE_TYPE SEASON3B::CNewUIChatLogWindow::GetCurrentMsgType() const
 {
     return m_CurrentRenderMsgType;
+}
+
+// Players on a server without a Discord chat bridge never get the Discord
+// view, so F2 keeps toggling between all messages and whispers for them.
+SEASON3B::MESSAGE_TYPE SEASON3B::CNewUIChatLogWindow::GetNextView() const
+{
+    switch (GetCurrentMsgType())
+    {
+    case TYPE_ALL_MESSAGE:
+        return TYPE_WHISPER_MESSAGE;
+    case TYPE_WHISPER_MESSAGE:
+        return m_vecDiscordMsgs.empty() ? TYPE_ALL_MESSAGE : TYPE_DISCORD_MESSAGE;
+    default:
+        return TYPE_ALL_MESSAGE;
+    }
 }
 
 void SEASON3B::CNewUIChatLogWindow::ShowChatLog()
