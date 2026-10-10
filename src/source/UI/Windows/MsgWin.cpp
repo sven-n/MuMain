@@ -64,8 +64,6 @@ void CMsgWin::Create()
     m_eType = MWT_NON;
     m_nMsgLine = 0;
     m_nMsgCode = -1;
-    m_nGameExit = -1;
-    m_dDeltaTickSum = 0.0;
 
     // Builds once; Create() re-runs on resolution change.
     m_RmlView.Ensure();
@@ -155,10 +153,6 @@ bool CMsgWin::Update()
 
     CInput& rInput = CInput::Instance();
 
-    // Update() takes no parameters, so reconstruct the per-frame delta tick locally.
-    extern float FPS_ANIMATION_FACTOR;
-    const double dDeltaTick = 200.0 * static_cast<double>(FPS_ANIMATION_FACTOR);
-
     if (rInput.IsKeyDown(VK_RETURN))
     {
         if (m_eType > MWT_BTN_CANCEL)
@@ -194,29 +188,6 @@ bool CMsgWin::Update()
     {
         m_bRmlCancelClicked = false;
         ManageCancelClick();
-    }
-    else if (m_nMsgCode == MESSAGE_GAME_END_COUNTDOWN)
-    {
-        if (m_nGameExit != -1)
-        {
-            m_dDeltaTickSum += dDeltaTick;
-            if (m_dDeltaTickSum > 1000.0)
-            {
-                m_dDeltaTickSum = 0.0;
-                if (--m_nGameExit == 0)
-                {
-                    g_ErrorReport.Write(L"> Menu - Exit game.");
-                    g_ErrorReport.WriteCurrentTime();
-                    ::PostMessage(g_hWnd, WM_CLOSE, 0, 0);
-                }
-                else
-                {
-                    wchar_t szMsg[64]{};
-                    mu_swprintf(szMsg, I18N::Game::YouWillExitGameInDSeconds, m_nGameExit);
-                    SetMsg(m_eType, szMsg, L"");
-                }
-            }
-        }
     }
 
     return true;
@@ -294,12 +265,6 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
     {
     case MESSAGE_FREE_MSG_NOT_BTN:
         lpszMsg = pszMsg;
-        eType = MWT_NON;
-        break;
-    case MESSAGE_GAME_END_COUNTDOWN:
-        m_nGameExit = 5;
-        mu_swprintf(szTempMsg, I18N::Game::YouWillExitGameInDSeconds, m_nGameExit);
-        lpszMsg = szTempMsg;
         eType = MWT_NON;
         break;
     case MESSAGE_WAIT:

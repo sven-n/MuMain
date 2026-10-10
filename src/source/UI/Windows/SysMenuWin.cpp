@@ -104,9 +104,12 @@ bool CSysMenuWin::Update()
     return true;
 }
 
+// Closes the game at once, as the world's menu does.
 void CSysMenuWin::ExitGame()
 {
-    CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_GAME_END_COUNTDOWN);
+    g_ErrorReport.Write(L"> Menu - Exit game.");
+    g_ErrorReport.WriteCurrentTime();
+    ::PostMessage(g_hWnd, WM_CLOSE, 0, 0);
 }
 
 void CSysMenuWin::SelectServer()

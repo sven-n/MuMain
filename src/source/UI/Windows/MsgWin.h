@@ -33,8 +33,6 @@ protected:
     int m_nMsgLine;
     int m_nMsgCode;
     MSG_WIN_TYPE m_eType;
-    short m_nGameExit;
-    double m_dDeltaTickSum;
 
 public:
     CMsgWin();
