@@ -26,7 +26,7 @@ later, the presence appears within a few seconds.
 |-----------------------|------------------------------------|------------------------------------|
 | Login, server list    | Logging in                         | -                                  |
 | Character selection   | Selecting a character              | -                                  |
-| In the world          | `Lv <level> [/ ML <master level>] <class>` | `<map>`, plus `· Party <n>/5` in a party |
+| In the world          | `In game`, or with **On**: `Lv <level> [/ ML <master level>] <class>` | `<map>`, plus `· Party <n>/5` in a party |
 | In an event           | (as in the world)                  | `In <event>`, e.g. `In Blood Castle 5`, `In Chaos Castle 3`, `In Illusion Temple 2`, `In Devil Square`, `In Castle Siege` |
 
 The timer counts from the moment you entered the current screen - in the
@@ -41,10 +41,13 @@ quick changes in a row are combined into the newest one.
 
 The options window has a **Discord** setting:
 
-- **On** - everything in the table above.
-- **Hide details** - your character's class and level are left out; the first
-  line only says *In game*. The location and the party stay.
+- **Hide details** (the default) - your character's class and level are left
+  out; the first line only says *In game*. The location and the party stay.
+- **On** - everything in the table above, including the level and class of
+  your character.
 - **Off** - no presence at all; the client does not even connect to Discord.
+
+Your character's name is never shown, in any setting.
 
 The setting applies immediately and is stored in `config.ini`.
 
@@ -63,7 +66,7 @@ choose. The client has none built in.
 
 ```ini
 [Discord]
-Presence=On
+Presence=HideDetails
 ApplicationId=123456789012345678
 LargeImageKey=logo
 SmallImageKey=
@@ -71,7 +74,7 @@ SmallImageKey=
 
 | Key             | Meaning |
 |-----------------|---------|
-| `Presence`      | `On`, `HideDetails` or `Off` - what the options window changes. |
+| `Presence`      | `HideDetails` (default), `On` or `Off` - what the options window changes. It belongs to the player; ship it only to change the default. |
 | `ApplicationId` | The application id from the developer portal. Empty: presence off. |
 | `LargeImageKey` | Key of the large image. Its tooltip is the current map. Empty: no image. |
 | `SmallImageKey` | Key of the small image, shown at the corner of the large one. Its tooltip is the character's class. Empty: no image. |
