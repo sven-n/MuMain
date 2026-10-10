@@ -731,20 +731,13 @@ Rml::String HotKeyText(int hotkey)
 
 void mu::ui::window::CSkillList::RebuildGridSnapshot()
 {
-    // Same iteration/filter/zig-zag-position math the legacy grid loop used, now producing data
-    // for main_frame.rml's .skill-cell list instead of drawing.
+    // The skills the legacy grid loop drew, in its order; the theme lays them out (the original's
+    // zig-zag in legacy).
     m_GridSnapshot.clear();
     m_PetSnapshot.clear();
 
     if (CharacterAttribute->SkillNumber == 0)
         return;
-
-    // The original's zig-zag around its first cell at 385/390, as offsets from that cell: the
-    // theme places #skill_list where the first cell goes.
-    float x = 0.f, y = 0.f;
-    constexpr float width = 32.f, height = 38.f;
-    const float fOrigX = 0.f;
-    int iSkillCount = 0;
 
     for (int i = 0; i < MAX_MAGIC; ++i)
     {
@@ -757,31 +750,7 @@ void mu::ui::window::CSkillList::RebuildGridSnapshot()
         if (bySkillUseType == SKILL_USE_TYPE_MASTER || bySkillUseType == SKILL_USE_TYPE_MASTERLEVEL)
             continue;
 
-        if (iSkillCount == 18)
-        {
-            y -= height;
-        }
-
-        if (iSkillCount < 14)
-        {
-            int iRemainder = iSkillCount % 2;
-            int iQuotient = iSkillCount / 2;
-            x = (iRemainder == 0) ? (fOrigX + iQuotient * width) : (fOrigX - (iQuotient + 1) * width);
-        }
-        else if (iSkillCount < 18)
-        {
-            x = fOrigX - (8 * width) - ((iSkillCount - 14) * width);
-        }
-        else
-        {
-            x = fOrigX - (12 * width) + ((iSkillCount - 17) * width);
-        }
-
-        iSkillCount++;
-
         SkillCellEntry entry;
-        entry.left = x;
-        entry.top = y;
         entry.skillIndex = i;
         entry.isPet = false;
         entry.isCurrent = (i == Hero->CurrentSkill);

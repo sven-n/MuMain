@@ -21,7 +21,6 @@ namespace mu::ui::window
     // icon sprite, hotkey number, cooldown wipe and selection for main_frame.rml's .skill-cell.
     struct SkillCellEntry
     {
-        float left = 0.f, top = 0.f;   // px, in #bars's local space: the cell's 32x38 box
         int skillIndex = -1;           // CharacterAttribute->Skill[] index (grid) or AT_PET_COMMAND_* value (pet row)
         bool isPet = false;            // true for pet-row entries -- click routes to the pet path
         bool isCurrent = false;        // Hero->CurrentSkill == skillIndex

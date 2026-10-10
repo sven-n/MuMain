@@ -187,8 +187,6 @@ void mu::ui::window::CMainFrameWindow::BindRmlModel(Rml::DataModelConstructor& c
     // See CCharMakeWin::BindRmlModel()'s comment on why this must re-run in full every
     // call, including on a theme switch -- no guard here.
     auto skillCell = c.RegisterStruct<SkillCellEntry>();
-    skillCell.RegisterMember("left", &SkillCellEntry::left);
-    skillCell.RegisterMember("top", &SkillCellEntry::top);
     skillCell.RegisterMember("skill_index", &SkillCellEntry::skillIndex);
     skillCell.RegisterMember("is_pet", &SkillCellEntry::isPet);
     skillCell.RegisterMember("is_current", &SkillCellEntry::isCurrent);

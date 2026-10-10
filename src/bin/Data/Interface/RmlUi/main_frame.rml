@@ -116,13 +116,12 @@
 	</div>
 
 	<!-- The skill list the current-skill slot opens: the learned skills and the pet's commands.
-	     The grid's cells fan out from the part's own box, which is where its first cell goes;
-	     C++ computes the original's zig-zag as offsets from there (cell.left/top, in dp), so the
-	     theme can dock the list anywhere. -->
+	     The grid's cells fan out from the part's own box, which is where its first cell goes; each
+	     carries its place in the list (--i) and the theme lays them out from there. -->
 	<div id="skill_list" class="hud-part">
 		<div id="skill_grid" data-class-hidden="!skill_grid_open">
 			<div class="skill-cell" data-for="cell : skill_grid_cells"
-			     data-style-left="cell.left + 'dp'" data-style-top="cell.top + 'dp'"
+			     data-style---i="it_index"
 			     data-class-selected="cell.is_current"
 			     data-event-click="skill_grid_click(cell.skill_index)"
 			     data-event-mouseover="skill_grid_hover(cell.skill_index)"
