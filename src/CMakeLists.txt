@@ -43,6 +43,13 @@ add_subdirectory(ThirdParty/SDL EXCLUDE_FROM_ALL)
 set(_saved_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
 set(BUILD_SHARED_LIBS OFF)
 FetchContent_MakeAvailable(SDL3_ttf)
+if(NOT TARGET SDL3_ttf::SDL3_ttf OR NOT TARGET Freetype::Freetype)
+  message(FATAL_ERROR
+    "SDL3_ttf did not provide its SDL3_ttf::SDL3_ttf and Freetype::Freetype targets. "
+    "Its cached sources may be missing while FetchContent is disconnected. "
+    "Reconfigure with -DFETCHCONTENT_FULLY_DISCONNECTED=OFF to restore SDL3_ttf "
+    "and its vendored FreeType before building RmlUi.")
+endif()
 FetchContent_MakeAvailable(SDL3_image)
 set(BUILD_SHARED_LIBS "${_saved_BUILD_SHARED_LIBS}")
 

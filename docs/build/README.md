@@ -78,6 +78,12 @@ These apply to every setup; the per-setup guides only cover what differs.
 
 For Linux Wayland reports, run [`scripts/wayland-diag.sh`](../../scripts/wayland-diag.sh) and attach its sanitized `summary.txt`.
 
+If configuration reports that SDL_ttf or RmlUi cannot find FreeType after removing
+cached dependencies, reconfigure the same build directory with
+`-DFETCHCONTENT_FULLY_DISCONNECTED=OFF`. SDL_ttf supplies the vendored FreeType;
+disconnected mode requires its sources to already exist. Let configuration finish
+successfully before building or running the tests.
+
 ### The network library
 
 The client talks to the server through OpenMU's `MUnique.Client.Library`, a C#
