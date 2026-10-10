@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
+#include "Core/Input/SyntheticInput.h"
 
 #include "UI/Core/WindowCommon.h"
 #include "UI/Widgets/Window/RenderNumber.h"
@@ -237,7 +238,8 @@ void mu::ui::window::CNewKeyInput::ScanAsyncKeyState()
     // Must stay inside the editor guard: outside the editor nothing sets
     // g_bEnterPressed=true, so this would clear every Enter press before chat-open
     // logic sees it, breaking Enter-to-chat on non-editor SDL3 builds.
-    if (IsPress(VK_RETURN) && IsEnterPressed() == false)
+    // A control-socket injected Enter never sets the flag, so it counts as let through.
+    if (IsPress(VK_RETURN) && IsEnterPressed() == false && !Core::Input::Synthetic::IsKeyHeld(VK_RETURN))
     {
         m_pInputInfo[VK_RETURN].byKeyState = KEY_NONE;
     }

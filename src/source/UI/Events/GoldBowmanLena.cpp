@@ -114,10 +114,10 @@ bool CGoldBowmanLena::Update()
         return true;
     if (pressed == BUTTON_REGISTER)
     {
-        int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_POTION + 21, 0);
+        int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_RENA, 0);
         if (registerItem != 0)
         {
-            int index = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_POTION + 21, 0);
+            int index = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_RENA, 0);
             if (index != -1)
             {
                 SocketClient->ToGameServer()->SendEventChipRegistrationRequest(0, index);
@@ -145,7 +145,7 @@ void CGoldBowmanLena::SyncView()
             texts.push_back({Formatted(I18N::Game::Lookup(700 + i)), width});
 
         wchar_t count[100] = {};
-        const int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_POTION + 21, 0);
+        const int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_RENA, 0);
         texts.push_back({I18N::Game::NumberOfRenaYouHaveCollected, width});
         mu_swprintf(count, L"    X    %d", registerItem);
         texts.push_back({count, width});
@@ -181,5 +181,5 @@ void CGoldBowmanLena::Render3D(const Rml::Vector2f& offset, const Rml::Vector2f&
 {
     EnableAlphaTest();
     DisableAlphaBlend();
-    RenderItem3D(offset.x, offset.y, size.x, size.y, ITEM_POTION + 21, 0, 0, 0, false);
+    RenderItem3D(offset.x, offset.y, size.x, size.y, ITEM_RENA, 0, 0, 0, false);
 }

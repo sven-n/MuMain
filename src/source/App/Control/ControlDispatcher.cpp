@@ -38,10 +38,12 @@ const std::vector<CommandEntry>& CommandTable()
         {"wait-for", SceneRequirement::Any, &Commands::WaitFor},
         {"screenshot", SceneRequirement::Any, &Commands::Screenshot},
         {"hotkey", SceneRequirement::Any, &Commands::Hotkey},
+        {"type", SceneRequirement::Any, &Commands::Type},
         {"click-ui", SceneRequirement::Any, &Commands::ClickUi},
         {"hover-ui", SceneRequirement::Any, &Commands::HoverUi},
         {"drag-ui", SceneRequirement::Any, &Commands::DragUi},
-        {"type", SceneRequirement::Any, &Commands::Type},
+        {"ui", SceneRequirement::World, &Commands::Ui},
+        {"slot-pixel", SceneRequirement::World, &Commands::SlotPixel},
         {"login", SceneRequirement::PreGame, &Commands::Login},
         {"select-char", SceneRequirement::PreGame, &Commands::SelectCharacter},
         {"logout", SceneRequirement::World, &Commands::Logout},
@@ -57,6 +59,7 @@ const std::vector<CommandEntry>& CommandTable()
         {"say", SceneRequirement::World, &Commands::Say},
         {"whisper", SceneRequirement::World, &Commands::Whisper},
         {"party", SceneRequirement::World, &Commands::Party},
+        {"trade", SceneRequirement::World, &Commands::Trade},
         {"halt", SceneRequirement::Any, &Commands::Halt},
     };
 

@@ -179,13 +179,11 @@ void CNewChaosCastleSystem::CollectMatchResult(std::vector<MatchResultLine>& lin
     if (m_iNumResult)
     {
         add("message", I18N::Game::TheSpiritOfTheGuardHasBeenPurified, MatchResultCell::Font::Normal, green);
-        mu_swprintf(lpszStr, L"%ls %ls", I18N::Game::TheQuest, I18N::Game::CongratulationsYouHaveSuccessfully);
-        add("message", lpszStr, MatchResultCell::Font::Normal, green);
+        add("message", I18N::Game::QuestCompletedSuccessfully, MatchResultCell::Font::Normal, green);
     }
     else
     {
-        mu_swprintf(lpszStr, L"%ls %ls", I18N::Game::TheQuest, I18N::Game::UnfortunatelyYouHaveFailed);
-        add("message", lpszStr, MatchResultCell::Font::Normal, green);
+        add("message", I18N::Game::QuestFailedUnfortunately, MatchResultCell::Font::Normal, green);
         add("message", I18N::Game::TryAgainNextTime, MatchResultCell::Font::Normal, green);
     }
 

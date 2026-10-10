@@ -32,6 +32,18 @@ mu_add_test(
     LINK_LIBS SDL3::SDL3
 )
 
+# The OZT reader of CGlobalBitmap::OpenTga, without the renderer. It also reads
+# the OZT files shipped in src/bin/Data.
+mu_add_test(
+    NAME ozt_file_tests
+    SOURCES
+        test_ozt_file.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/OztFile.cpp
+)
+target_compile_definitions(ozt_file_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
 mu_add_test(
     NAME sdl_gpu_validation_tests
     SOURCES
@@ -93,6 +105,13 @@ add_test(
         "-DMU_BMD_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Models/ZzzBMD.cpp"
         "-DMU_SHADOW_VOLUME_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Models/ShadowVolume.cpp"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_projected_shadow_state.cmake"
+)
+
+add_test(
+    NAME coin_heap_skin_contract
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_BMD_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Models/ZzzBMD.cpp"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_coin_heap_skin.cmake"
 )
 
 add_test(

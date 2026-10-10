@@ -36,6 +36,10 @@ std::string HoverUi(const Request& request, std::unique_ptr<Act>& act);
 std::string DragUi(const Request& request, std::unique_ptr<Act>& act);
 std::string Type(const Request& request, std::unique_ptr<Act>& act);
 
+// Ui family: where the open item windows are.
+std::string Ui(const Request& request, std::unique_ptr<Act>& act);
+std::string SlotPixel(const Request& request, std::unique_ptr<Act>& act);
+
 // Session family.
 std::string Login(const Request& request, std::unique_ptr<Act>& act);
 std::string SelectCharacter(const Request& request, std::unique_ptr<Act>& act);
@@ -55,4 +59,7 @@ std::string Say(const Request& request, std::unique_ptr<Act>& act);
 std::string Whisper(const Request& request, std::unique_ptr<Act>& act);
 std::string Party(const Request& request, std::unique_ptr<Act>& act);
 std::string Halt(const Request& request, std::unique_ptr<Act>& act);
+
+// Trade family.
+std::string Trade(const Request& request, std::unique_ptr<Act>& act);
 } // namespace App::Control::Commands

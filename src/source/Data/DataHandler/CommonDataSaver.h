@@ -10,6 +10,10 @@
 class CommonDataSaver
 {
 public:
+    // SaveData returns false and puts this into the change log when the file
+    // already has the data; callers can tell that apart from a failure.
+    static constexpr const char* NoChangesMessage = "No changes detected.\n";
+
     // Create a backup of the file before saving
     static bool CreateBackup(const wchar_t* fileName);
 

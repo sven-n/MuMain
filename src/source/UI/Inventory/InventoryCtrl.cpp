@@ -14,10 +14,12 @@
 #include "UI/Scaling/UITransform.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Items/MixMgr.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/Tooltip/LegacyTextListTooltip.h"
 
 #include <RmlUi/Core/ElementDocument.h>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -375,7 +377,7 @@ bool mu::ui::window::CInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
         return true;
     }
 
-    if (pItem->Type == ITEM_BOLT || pItem->Type == ITEM_ARROWS)
+    if (GameLogic::Items::IsAmmunition(pItem))
     {
         return false;
     }
@@ -395,10 +397,8 @@ bool mu::ui::window::CInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
         || pItem->Type == ITEM_PANDA_TRANSFORMATION_RING
 #endif // PJH_ADD_PANDA_CHANGERING
         || pItem->Type == ITEM_SKELETON_TRANSFORMATION_RING || pItem->Type == ITEM_PET_PANDA ||
-        pItem->Type == ITEM_DEMON || pItem->Type == ITEM_SPIRIT_OF_GUARDIAN || pItem->Type == ITEM_PET_SKELETON ||
-        pItem->Type == ITEM_HELPER + 107 || pItem->Type == ITEM_HELPER + 109 || pItem->Type == ITEM_HELPER + 110 ||
-        pItem->Type == ITEM_HELPER + 111 || pItem->Type == ITEM_HELPER + 112 || pItem->Type == ITEM_HELPER + 113 ||
-        pItem->Type == ITEM_HELPER + 114 || pItem->Type == ITEM_HELPER + 115
+        GameLogic::Items::IsDemonOrSpiritOfGuardian(pItem) || pItem->Type == ITEM_PET_SKELETON ||
+        pItem->Type == ITEM_LETHAL_WIZARDS_RING || GameLogic::Items::IsGemJewelry(pItem)
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
         || g_pMyInventory->IsInvenItem(pItem->Type)
 #endif // LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
@@ -413,7 +413,7 @@ bool mu::ui::window::CInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
         return true;
     }
 
-    if (IsWingItem(pItem) == true)
+    if (GameLogic::Items::IsWingItem(pItem) == true)
     {
         return true;
     }
@@ -962,7 +962,7 @@ bool mu::ui::window::CInventoryCtrl::UpdateMouseEvent()
         {
             CreateItemToolTip(pItem);
 
-            if ((pItem->Type == ITEM_DARK_HORSE_ITEM) || (pItem->Type == ITEM_DARK_RAVEN_ITEM))
+            if (GameLogic::Items::IsDarkLordPet(pItem))
             {
                 const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pToolTipItem->Type];
                 const UI::Items::GridRect box =
@@ -1015,10 +1015,10 @@ int StackCount(const ITEM* pItem)
     const bool stack = (type >= ITEM_POTION && type <= ITEM_ANTIDOTE)
         || (type >= ITEM_JACK_OLANTERN_BLESSINGS && type <= ITEM_JACK_OLANTERN_DRINK)
         || (type >= ITEM_SMALL_SHIELD_POTION && type <= ITEM_LARGE_COMPLEX_POTION)
-        || (type >= ITEM_POTION + 70 && type <= ITEM_POTION + 71) || type == ITEM_POTION + 94
-        || (type >= ITEM_POTION + 78 && type <= ITEM_POTION + 82)
+        || GameLogic::Items::IsElitePotionType(type) || type == ITEM_MEDIUM_ELITE_HEALING_POTION
+        || GameLogic::Items::IsElixirType(type)
         || (type >= ITEM_CHERRY_BLOSSOM_WINE && type <= ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH)
-        || type == ITEM_POTION + 133;
+        || type == ITEM_ELITE_SD_POTION;
     if (stack && pItem->Durability > 1)
         return pItem->Durability;
     if (COMGEM::isCompiledGem(pItem))
@@ -1064,7 +1064,7 @@ bool mu::ui::window::CInventoryCtrl::DropActsOn(ITEM* pPickItem, ITEM* pTargetIt
             }
         }
     }
-    else if (pPickItem->Type == ITEM_LOWER_REFINE_STONE || pPickItem->Type == ITEM_HIGHER_REFINE_STONE)
+    else if (GameLogic::Items::IsRefineStone(pPickItem))
     {
         if (pTargetItem->Jewel_Of_Harmony_Option != 0)
             bSuccess = true;
@@ -1622,8 +1622,8 @@ bool mu::ui::window::CInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* 
         return true;
     }
 
-    if ((iSrcType >= ITEM_SMALL_COMPLEX_POTION && iSrcType <= ITEM_LARGE_COMPLEX_POTION) &&
-        (iTarType >= ITEM_SMALL_COMPLEX_POTION && iTarType <= ITEM_LARGE_COMPLEX_POTION) &&
+    if (GameLogic::Items::IsComplexPotionType(iSrcType) &&
+        GameLogic::Items::IsComplexPotionType(iTarType) &&
         (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
@@ -1657,42 +1657,42 @@ bool mu::ui::window::CInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* 
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 70 && iTarType == ITEM_POTION + 70 && (iSrcDurability < 50 && iTarDurability < 50))
+    if (iSrcType == ITEM_ELITE_HEALING_POTION && iTarType == ITEM_ELITE_HEALING_POTION && (iSrcDurability < 50 && iTarDurability < 50))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 71 && iTarType == ITEM_POTION + 71 && (iSrcDurability < 50 && iTarDurability < 50))
+    if (iSrcType == ITEM_ELITE_MANA_POTION && iTarType == ITEM_ELITE_MANA_POTION && (iSrcDurability < 50 && iTarDurability < 50))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 78 && iTarType == ITEM_POTION + 78 && (iSrcDurability < 3 && iTarDurability < 3))
+    if (iSrcType == ITEM_ELIXIR_OF_STRENGTH && iTarType == ITEM_ELIXIR_OF_STRENGTH && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 79 && iTarType == ITEM_POTION + 79 && (iSrcDurability < 3 && iTarDurability < 3))
+    if (iSrcType == ITEM_ELIXIR_OF_AGILITY && iTarType == ITEM_ELIXIR_OF_AGILITY && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 80 && iTarType == ITEM_POTION + 80 && (iSrcDurability < 3 && iTarDurability < 3))
+    if (iSrcType == ITEM_ELIXIR_OF_HEALTH && iTarType == ITEM_ELIXIR_OF_HEALTH && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 81 && iTarType == ITEM_POTION + 81 && (iSrcDurability < 3 && iTarDurability < 3))
+    if (iSrcType == ITEM_ELIXIR_OF_ENERGY && iTarType == ITEM_ELIXIR_OF_ENERGY && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 82 && iTarType == ITEM_POTION + 82 && (iSrcDurability < 3 && iTarDurability < 3))
+    if (iSrcType == ITEM_ELIXIR_OF_CONTROL && iTarType == ITEM_ELIXIR_OF_CONTROL && (iSrcDurability < 3 && iTarDurability < 3))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 94 && iTarType == ITEM_POTION + 94 && (iSrcDurability < 50 && iTarDurability < 50))
+    if (iSrcType == ITEM_MEDIUM_ELITE_HEALING_POTION && iTarType == ITEM_MEDIUM_ELITE_HEALING_POTION && (iSrcDurability < 50 && iTarDurability < 50))
     {
         return true;
     }
@@ -1715,12 +1715,12 @@ bool mu::ui::window::CInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* 
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 88 && iTarType == ITEM_POTION + 88 && (iSrcDurability < 10 && iTarDurability < 10))
+    if (iSrcType == ITEM_WHITE_CHERRY_BLOSSOM_BRANCH && iTarType == ITEM_WHITE_CHERRY_BLOSSOM_BRANCH && (iSrcDurability < 10 && iTarDurability < 10))
     {
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 89 && iTarType == ITEM_POTION + 89 && (iSrcDurability < 30 && iTarDurability < 30))
+    if (iSrcType == ITEM_RED_CHERRY_BLOSSOM_BRANCH && iTarType == ITEM_RED_CHERRY_BLOSSOM_BRANCH && (iSrcDurability < 30 && iTarDurability < 30))
     {
         return true;
     }
@@ -1747,7 +1747,7 @@ bool mu::ui::window::CInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* 
         return true;
     }
 
-    if (iSrcType == ITEM_POTION + 133 && (iSrcDurability < 50 && iTarDurability < 50))
+    if (iSrcType == ITEM_ELITE_SD_POTION && (iSrcDurability < 50 && iTarDurability < 50))
     {
         return true;
     }
@@ -1764,8 +1764,7 @@ bool mu::ui::window::CInventoryCtrl::CanUpgradeItem(ITEM* pSourceItem, ITEM* pTa
 {
     const int iTargetLevel = pTargetItem->Level;
 
-    if (((pTargetItem->Type >= ITEM_SWORD && pTargetItem->Type < ITEM_WING) && (pTargetItem->Type != ITEM_BOLT) &&
-         (pTargetItem->Type != ITEM_ARROWS)) ||
+    if (((pTargetItem->Type >= ITEM_SWORD && pTargetItem->Type < ITEM_WING) && !GameLogic::Items::IsAmmunition(pTargetItem)) ||
         (pTargetItem->Type >= ITEM_WING && pTargetItem->Type <= ITEM_WINGS_OF_DARKNESS) ||
         (pTargetItem->Type >= ITEM_WING_OF_STORM && pTargetItem->Type <= ITEM_WING_OF_DIMENSION))
     {

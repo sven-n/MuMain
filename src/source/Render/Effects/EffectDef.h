@@ -1,7 +1,9 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <optional>
+#include <vector>
 
 class OBJECT;
 
@@ -11,67 +13,178 @@ class OBJECT;
 // statements (CreateEffect / MoveEffect / RenderEffects in ZzzEffect.cpp). The
 // vast majority of those cases only assigned a handful of scalar fields at
 // creation and rendered with a plain RenderObject(). EffectDescriptor captures
-// that as data: the parameters live in a table (see EffectRegistry), and only
-// effects with genuine per-frame behaviour carry a handler function.
+// that as data: the parameters come from the effect catalogue
+// (Data/Effects/EffectTypes.json, see EffectRegistry), and only effects with
+// genuine per-frame behaviour carry a handler function.
 namespace Render::Effects
 {
-    // Creation parameters applied on top of the common initialisation that
-    // CreateEffect performs for every effect. Every field is optional: an unset
-    // field means "keep whatever the common initialisation chose", so a table
-    // row only states what actually differs from the default for that effect.
-    //
-    // These cover effects whose creation is plain data. Randomised creation in
-    // this codebase is almost always fused with angle/direction/matrix setup
-    // (e.g. a stone that picks a random spin, then rotates its launch vector by
-    // that angle), which isn't expressible as independent scalar parameters --
-    // those effects use an onCreate hook instead (see EffectDescriptor).
-    struct CreateParams
+// A vector of creation values: the components in `components` (bit 0 x, bit 1
+// y, bit 2 z) get `values`. An offset multiplies the components in
+// `timesFrameFactor` by FPS_ANIMATION_FACTOR, as the old creation code did.
+struct CreateVector
+{
+    std::array<float, 3> values{};
+    std::uint8_t components = 0;
+    std::uint8_t timesFrameFactor = 0;
+};
+
+// A number of an offset; multiplied by FPS_ANIMATION_FACTOR when
+// timesFrameFactor is set.
+struct CreateNumber
+{
+    float value = 0.f;
+    bool timesFrameFactor = false;
+};
+
+// The arguments of the CreateEffect call that creation values can copy.
+struct CreateCall
+{
+    std::array<float, 3> light{};
+    float scale = 0.f;
+    std::array<float, 3> position{};
+    std::array<float, 3> angle{};
+};
+
+// Creation parameters applied on top of the common initialisation that
+// CreateEffect performs for every effect: first the values, then the offsets,
+// then the copies; an offset of a field a copy writes adds to the copy. Every
+// field is optional: an unset field keeps what the common initialisation
+// chose, or, for the fields it does not set (lifeTime, gravity, timer,
+// distance, startPosition, ...), the value the slot's previous effect left
+// (D34), so a catalogue entry only states what differs for that effect.
+// BuildRegistry converts them once from the values of the catalogue
+// (Data::Effects::EffectCreateParams), so creating an effect only copies.
+//
+// These cover effects whose creation is plain data. Randomised creation in
+// this codebase is almost always fused with angle/direction/matrix setup
+// (e.g. a stone that picks a random spin, then rotates its launch vector by
+// that angle), which isn't expressible as independent scalar parameters --
+// those effects use an onCreate hook instead (see EffectDescriptor).
+struct CreateParams
+{
+    std::optional<float> lifeTime;
+    std::optional<float> scale;
+    std::optional<float> velocity;
+    std::optional<float> gravity;
+    std::optional<int> hiddenMesh;
+    std::optional<int> blendMesh;
+    std::optional<float> blendMeshLight;
+    std::optional<float> alpha;
+
+    // When set, overrides o->Light (the colour the effect renders with).
+    std::optional<std::array<float, 3>> light;
+
+    // The groups below that a row sets (GroupsOf). ApplyCreateParams tests
+    // only those, so the rows that set only the values above cost what they
+    // did before these fields came.
+    enum Group : std::uint8_t
     {
-        std::optional<float> lifeTime;
-        std::optional<float> scale;
-        std::optional<float> velocity;
-        std::optional<float> gravity;
-        std::optional<int>   hiddenMesh;
-        std::optional<int>   blendMesh;
-        std::optional<float> blendMeshLight;
-        std::optional<float> alpha;
-
-        // When set, overrides o->Light (the colour the effect renders with).
-        std::optional<std::array<float, 3>> light;
-
-        // Many legacy cases finish with `VectorCopy(o->Light, o->Direction)`,
-        // stashing the colour so MoveEffect can fade it back in. Opt in here.
-        bool copyLightToDirection = false;
+        Flags = 1 << 0,
+        Numbers = 1 << 1,
+        Vectors = 1 << 2,
+        Offsets = 1 << 3,
+        Copies = 1 << 4,
     };
+    std::uint8_t groups = 0;
 
-    // Spawns sub-effects / joints or runs other one-shot setup that can't be
-    // expressed as plain parameters. Runs once, right after CreateParams are
-    // applied.
-    using CreateHook = void (*)(OBJECT* o);
+    // Flags
+    std::optional<bool> lightEnable;
+    std::optional<bool> alphaEnable;
+    std::optional<std::uint8_t> kind;
+    std::optional<std::uint16_t> skill;
+    std::optional<int> renderType;
+    std::optional<int> animation;
 
-    // Per-frame update. `luminosity` is the per-frame flicker value MoveEffect
-    // computes once for every effect (so handlers don't draw an extra rand()).
-    // Returns true to run MoveEffect's shared tail (lifetime decrement, particle
-    // trail, destruction); false to skip it, mirroring the handful of legacy
-    // cases that `return` early out of the move switch.
-    using MoveHandler = bool (*)(OBJECT* o, int index, float luminosity);
+    // Numbers
+    std::optional<float> pkKey;
+    std::optional<float> timer;
+    std::optional<float> distance;
+    std::optional<float> collisionRange;
+    std::optional<float> alphaTarget;
 
-    // Per-frame draw. Defaults to RenderObject() when left null.
-    using RenderHandler = void (*)(OBJECT* o);
+    // Vectors
+    CreateVector position;
+    CreateVector angle;
+    CreateVector direction;
+    CreateVector startPosition;
 
-    // A descriptor migrates each lifecycle stage independently: a type can have
-    // its rendering driven by the registry while its creation still runs through
-    // the legacy switch, or vice versa. CreateEffect treats creation as migrated
-    // only when `create` or `onCreate` is set; MoveEffect / RenderEffects gate on
-    // their respective handlers. An unset stage falls back to the legacy switch.
-    struct EffectDescriptor
+    // Offsets
+    std::optional<CreateNumber> lifeTimeOffset;
+    CreateVector positionOffset;
+    CreateVector angleOffset;
+    CreateVector startPositionOffset;
+
+    // Copies. Many legacy cases finish with `VectorCopy(o->Light,
+    // o->Direction)`, stashing the colour so MoveEffect can fade it back in.
+    bool copyLightToDirection = false;
+    bool copyCallAngleToDirection = false;
+    bool copyPositionToStartPosition = false;
+    bool copyLightToStartPosition = false;
+    bool copyCallPositionToStartPosition = false;
+    bool copyCallLightToHeadTargetAngle = false;
+    bool copyLightToEyeRight = false;
+    bool copyCallAngleToDeadPosition = false;
+    bool copyCallScaleToScale = false;
+};
+
+// Spawns sub-effects / joints or runs other one-shot setup that can't be
+// expressed as plain parameters. Runs once, right after CreateParams are
+// applied.
+using CreateHook = void (*)(OBJECT* o);
+
+// Per-frame update. `luminosity` is the per-frame flicker value MoveEffect
+// computes once for every effect (so handlers don't draw an extra rand()).
+// Returns true to run MoveEffect's shared tail (lifetime decrement, particle
+// trail, destruction); false to skip it, mirroring the handful of legacy
+// cases that `return` early out of the move switch.
+using MoveHandler = bool (*)(OBJECT* o, int index, float luminosity);
+
+// Per-frame draw. Defaults to RenderObject() when left null.
+using RenderHandler = void (*)(OBJECT* o);
+
+// The creation parameters of one SubType that has a variant (D35): the row's
+// with the variant's on top, resolved when the registry is built.
+struct SubTypeCreateParams
+{
+    int subType = 0;
+    CreateParams params;
+};
+
+// A descriptor migrates each lifecycle stage independently: a type can have
+// its rendering driven by the registry while its creation still runs through
+// the legacy switch, or vice versa. CreateEffect treats creation as migrated
+// only when `create` or `onCreate` is set; MoveEffect / RenderEffects gate on
+// their respective handlers. An unset stage falls back to the legacy switch.
+struct EffectDescriptor
+{
+    std::optional<CreateParams> create;
+    // Sorted by SubType; empty for most types.
+    std::vector<SubTypeCreateParams> createBySubType;
+    CreateHook onCreate = nullptr;
+    MoveHandler move = nullptr;
+    RenderHandler render = nullptr;
+
+    // The creation parameters of `subType`, or null when the type has none.
+    // The few SubTypes of a row are searched in order, which costs less than a
+    // table indexed by SubType (SubTypes can be model numbers).
+    const CreateParams* CreateParamsFor(int subType) const
     {
-        std::optional<CreateParams> create;
-        CreateHook                  onCreate = nullptr;
-        MoveHandler                 move     = nullptr;
-        RenderHandler               render   = nullptr;
-    };
+        if (!create)
+            return nullptr;
+        for (const SubTypeCreateParams& variant : createBySubType)
+        {
+            if (variant.subType == subType)
+                return &variant.params;
+        }
+        return &*create;
+    }
+};
 
-    // Applies the optional parameters to an already common-initialised effect.
-    void ApplyCreateParams(OBJECT* o, const CreateParams& params);
-}
+// The groups of fields `params` sets, for CreateParams::groups. Whatever
+// makes or changes CreateParams sets groups with it, so ApplyCreateParams
+// skips no field that is set.
+std::uint8_t GroupsOf(const CreateParams& params);
+
+// Applies the optional parameters to an already common-initialised effect.
+void ApplyCreateParams(OBJECT* o, const CreateParams& params, const CreateCall& call);
+} // namespace Render::Effects

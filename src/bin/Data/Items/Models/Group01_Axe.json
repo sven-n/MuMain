@@ -1,0 +1,114 @@
+{
+  "formatVersion": 1,
+  "group": 1,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Item/Axe01.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 1,
+      "file": "Data/Item/Axe02.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 2,
+      "file": "Data/Item/Axe03.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 3,
+      "file": "Data/Item/Axe04.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 4,
+      "file": "Data/Item/Axe05.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 5,
+      "file": "Data/Item/Axe06.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 6,
+      "file": "Data/Item/Axe07.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 7,
+      "file": "Data/Item/Axe08.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 8,
+      "file": "Data/Item/Axe09.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.7],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    }
+  ]
+}

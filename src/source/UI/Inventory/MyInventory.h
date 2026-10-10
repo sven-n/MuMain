@@ -146,6 +146,9 @@ namespace mu::ui::window
 
         bool EquipItem(int iIndex, std::span<const BYTE> pbyItemPacket);
         void UnequipItem(int iIndex);
+        // The center of an equipment slot in window pixels; false for a slot number outside the
+        // equipment or one the theme does not draw.
+        bool GetEquipmentSlotCenter(int slot, POINT& center) const;
         void UnequipAllItems();
 
         SEASON3B::REPAIR_MODE GetRepairMode() const override;
@@ -231,6 +234,9 @@ namespace mu::ui::window
         bool EquipmentWindowProcess();
         // The pointer over the drawn panel.
         bool IsPointerOverPanel() const;
+        // Whether the item in equipmentSlot may be taken off here; tells the
+        // player why not.
+        bool CheckTakeOff(int equipmentSlot) const;
         bool InventoryProcess() const;
         bool WindowProcess();
 

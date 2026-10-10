@@ -11,6 +11,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
 #include "ZzzEffect.h"
+#include "EffectBlurs.h"
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/Random.h"
@@ -21,46 +22,29 @@
 #include <array>
 #include <cmath>
 
+using Render::Effects::Blur;
+using Render::Effects::g_blurs;
+using Render::Effects::g_objectBlurs;
+using Render::Effects::MAX_BLUR_TAILS;
+using Render::Effects::MAX_BLURS;
+using Render::Effects::MAX_OBJECT_BLUR_TAILS;
+using Render::Effects::MAX_OBJECT_BLURS;
+using Render::Effects::ObjectBlur;
+
+namespace Render::Effects
+{
+std::array<Blur, MAX_BLURS> g_blurs{};
+std::array<ObjectBlur, MAX_OBJECT_BLURS> g_objectBlurs{};
+} // namespace Render::Effects
+
 namespace
 {
-constexpr int MAX_BLURS = 100;
-constexpr int MAX_BLUR_TAILS = 30;
 constexpr int MAX_BLUR_LIFETIME = 30;
-
-constexpr int MAX_OBJECT_BLURS = 1000;
-constexpr int MAX_OBJECT_BLUR_TAILS = 600;
 constexpr int MAX_OBJECT_BLUR_LIFETIME = 30;
 
 constexpr int FLAG_WIDTH = 7;
 constexpr int FLAG_HEIGHT = 10;
 constexpr float FLAG_SCALE = 10.f;
-
-struct Blur
-{
-    bool Live = false;
-    int Type = 0;
-    int LifeTime = 0;
-    CHARACTER* Owner = nullptr;
-    int Number = 0;
-    vec3_t Light{};
-    std::array<vec3_t, MAX_BLUR_TAILS> P1{};
-    std::array<vec3_t, MAX_BLUR_TAILS> P2{};
-    int SubType = 0;
-};
-
-struct ObjectBlur
-{
-    bool Live = false;
-    int Type = 0;
-    int LifeTime = 0;
-    OBJECT* Owner = nullptr;
-    int Number = 0;
-    vec3_t Light{};
-    int LimitLifeTime = 0;
-    std::array<vec3_t, MAX_OBJECT_BLUR_TAILS> P1{};
-    std::array<vec3_t, MAX_OBJECT_BLUR_TAILS> P2{};
-    int SubType = 0;
-};
 
 struct physics_vertex
 {
@@ -87,8 +71,6 @@ struct physics_boundbox
     physics_vertex vtx[8];
 };
 
-std::array<Blur, MAX_BLURS> g_blurs{};
-std::array<ObjectBlur, MAX_OBJECT_BLURS> g_objectBlurs{};
 std::array<physics_vertex, FLAG_HEIGHT * FLAG_WIDTH> g_flagVertices{};
 std::array<physics_face, (FLAG_HEIGHT - 1) * (FLAG_WIDTH - 1)> g_flagFaces{};
 

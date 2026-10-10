@@ -268,6 +268,25 @@ void CGenericConfirmDialog::Cancel(DialogId id)
     }
 }
 
+bool CGenericConfirmDialog::Answer(std::string_view tag, bool accept)
+{
+    if (m_bActive && m_Active.tag == tag)
+    {
+        Resolve(accept ? ClickResult::Primary : ClickResult::Cancel);
+        return true;
+    }
+    const auto queued = std::find_if(m_Queue.begin(), m_Queue.end(),
+                                     [tag](const PendingDialog& entry) { return entry.config.tag == tag; });
+    if (queued == m_Queue.end())
+        return false;
+    GenericDialogConfig cfg = std::move(queued->config);
+    m_Queue.erase(queued);
+    const std::function<void()>& answer = accept ? cfg.onPrimary : cfg.onCancel;
+    if (answer && (!cfg.isValid || cfg.isValid()))
+        answer();
+    return true;
+}
+
 void CGenericConfirmDialog::SetInputText(DialogId id, const std::wstring& text)
 {
     if (!IsActive(id) || !m_Active.input ||

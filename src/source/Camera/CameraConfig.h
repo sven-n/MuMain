@@ -17,6 +17,16 @@ inline float HFovToVFov(float hFovDeg, float /*aspectRatio*/)
     return vHalfRad * 2.0f * 180.0f / PI;
 }
 
+/// Horizontal FOV (degrees) that a vertical FOV shows on a viewport of `aspectRatio`
+/// (width / height): what actually reaches the screen, unlike the 4:3 hFov of CameraConfig.
+inline float VFovToHFov(float vFovDeg, float aspectRatio)
+{
+    constexpr float PI = 3.14159265358979323846f;
+    float vHalfRad = vFovDeg * 0.5f * PI / 180.0f;
+    float hHalfRad = atanf(tanf(vHalfRad) * aspectRatio);
+    return hHalfRad * 2.0f * 180.0f / PI;
+}
+
 /**
  * @brief Rendering distance multiplier applied to camera far plane
  *

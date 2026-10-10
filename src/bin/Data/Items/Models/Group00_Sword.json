@@ -1,0 +1,496 @@
+{
+  "formatVersion": 1,
+  "group": 0,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Item/Sword01.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "offset": [-0.02, 0.03],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 1,
+      "file": "Data/Item/Sword02.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 2,
+      "file": "Data/Item/Sword03.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 3,
+      "file": "Data/Item/Sword04.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 4,
+      "file": "Data/Item/Sword05.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 5,
+      "file": "Data/Item/Sword06.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 6,
+      "file": "Data/Item/Sword07.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 7,
+      "file": "Data/Item/Sword08.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 8,
+      "file": "Data/Item/Sword09.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 9,
+      "file": "Data/Item/Sword10.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 10,
+      "file": "Data/Item/Sword11.bmd",
+      "textureFolders": ["Item"],
+      "noneBlendMeshes": [1],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 11,
+      "file": "Data/Item/Sword12.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 12,
+      "file": "Data/Item/Sword13.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 13,
+      "file": "Data/Item/Sword14.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 14,
+      "file": "Data/Item/Sword15.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "blue",
+        "shineColor": "blue"
+      }
+    },
+    {
+      "number": 15,
+      "file": "Data/Item/Sword16.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 16,
+      "file": "Data/Item/Sword17.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 17,
+      "file": "Data/Item/Sword18.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 18,
+      "file": "Data/Item/Sword19.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      }
+    },
+    {
+      "number": 19,
+      "file": "Data/Item/Sword20.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45],
+        "scale": 0.7
+      },
+      "renderStyle": "divineSwordOfArchangel"
+    },
+    {
+      "number": 20,
+      "file": "Data/Item/sword21.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "sand",
+        "hiddenMesh": 1,
+        "shineHiddenMesh": 1
+      },
+      "renderStyle": "knightBlade"
+    },
+    {
+      "number": 21,
+      "file": "Data/Item/sword22.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "white",
+        "hiddenMesh": 0,
+        "shineHiddenMesh": 0
+      },
+      "renderStyle": "darkReignBlade"
+    },
+    {
+      "number": 22,
+      "file": "Data/Item/HDK_Sword.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "brown"
+      },
+      "renderStyle": "sylphWindBow"
+    },
+    {
+      "number": 23,
+      "file": "Data/Item/HDK_Sword2.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "dusk"
+      },
+      "renderStyle": "explosionBlade"
+    },
+    {
+      "number": 24,
+      "file": "Data/Item/CW_Sword.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "offset": [-0.02, 0.03],
+        "rotation": [180, 90, 15],
+        "scale": 0.0028
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "ochre"
+      }
+    },
+    {
+      "number": 25,
+      "file": "Data/Item/CW_Sword2.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "mist"
+      },
+      "renderStyle": "swordDancer"
+    },
+    {
+      "number": 26,
+      "file": "Data/Item/Sword_27.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "offset": [-0.02, 0.04],
+        "rotation": [180, 270, 10]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "hiddenMesh": 5,
+        "shineHiddenMesh": 5
+      },
+      "renderStyle": "flamberge"
+    },
+    {
+      "number": 27,
+      "file": "Data/Item/Sword_28.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 15]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "meshes": [0]
+      },
+      "renderStyle": "swordBreaker"
+    },
+    {
+      "number": 28,
+      "file": "Data/Item/Sword_29.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "offset": [0, 0.02],
+        "rotation": [180, 270, 10]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "paleBlue",
+        "meshes": [2]
+      },
+      "renderStyle": "runeBastardSword"
+    },
+    {
+      "number": 31,
+      "file": "Data/Item/Sword32.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.8, 0.85],
+        "rotation": [180, 270, 25]
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "sand",
+        "hiddenMesh": 2
+      },
+      "renderStyle": "runeBlade"
+    },
+    {
+      "number": 32,
+      "file": "Data/Item/Sword33.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.55, 0.6],
+        "offset": [0.005, 0.015],
+        "rotation": [-90, 0, 0],
+        "scale": 0.0035
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "copper"
+      },
+      "renderStyle": "textured"
+    },
+    {
+      "number": 33,
+      "file": "Data/Item/Sword34.bmd",
+      "textureFolders": ["Item", "Player"],
+      "inventory": {
+        "anchor": [0.55, 0.6],
+        "offset": [0.002, 0.02],
+        "rotation": [0, 0, 0],
+        "scale": 0.0035
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "darkOrange"
+      },
+      "renderStyle": "textured"
+    },
+    {
+      "number": 34,
+      "file": "Data/Item/Sword35.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.55, 0.6],
+        "offset": [0.002, 0.02],
+        "rotation": [0, 0, 0],
+        "scale": 0.0035
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "brown"
+      },
+      "renderStyle": "textured"
+    },
+    {
+      "number": 35,
+      "file": "Data/Item/Sword36.bmd",
+      "textureFolders": ["Player", "Effect"],
+      "inventory": {
+        "anchor": [0.55, 0.6],
+        "offset": [-0.005, 0.015],
+        "rotation": [0, 0, 0],
+        "scale": 0.003
+      },
+      "ground": {
+        "rotation": [60, 0, -45]
+      },
+      "glow": {
+        "color": "ice"
+      },
+      "renderStyle": "phoenixSoulStar"
+    }
+  ]
+}

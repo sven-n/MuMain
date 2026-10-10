@@ -1,0 +1,164 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:gui="using:MuMain.Tools.InGameTests.Gui"
+        x:Class="MuMain.Tools.InGameTests.Gui.MainWindow"
+        Title="MuMain in-game tests"
+        Width="1100" Height="880" MinWidth="820" MinHeight="560">
+  <Window.Styles>
+    <!-- The test that runs now -->
+    <!-- Compact rows, so many tests fit on the screen -->
+    <Style Selector="Border.scenario TextBox">
+      <Setter Property="MinHeight" Value="24" />
+      <Setter Property="Padding" Value="6,2" />
+    </Style>
+    <Style Selector="Border.scenario CheckBox">
+      <Setter Property="MinHeight" Value="24" />
+    </Style>
+    <Style Selector="Border.scenario.current">
+      <Setter Property="Background" Value="#335B8DEF" />
+      <Setter Property="BorderBrush" Value="#5B8DEF" />
+    </Style>
+  </Window.Styles>
+
+  <DockPanel Margin="16">
+
+    <!-- Where the tests run -->
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="10">
+      <TextBlock Text="Client (Main)" VerticalAlignment="Center" />
+      <TextBox x:Name="ClientPathBox" Grid.Column="1" />
+      <Button x:Name="BrowseButton" Grid.Column="2" Content="Browse…" />
+
+      <TextBlock Grid.Row="1" Text="Game server" VerticalAlignment="Center" />
+      <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="16">
+        <TextBox x:Name="ServerBox" Width="200" />
+        <CheckBox x:Name="FreshServerBox" Content="Recreate the test server before the run (fresh test data, needs podman or docker)" />
+      </StackPanel>
+
+      <TextBlock Grid.Row="2" Text="Wait after each action" VerticalAlignment="Center" />
+      <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="8">
+        <TextBox x:Name="DefaultDelayBox" Width="90"
+                 ToolTip.Tip="Milliseconds to wait after each action, for every test without its own value; 1000 is easy to follow, 0 runs at full speed" />
+        <TextBlock Text="ms" VerticalAlignment="Center" Opacity="0.75" />
+        <TextBlock Text="Screenshot quality" VerticalAlignment="Center" Margin="24,0,0,0" />
+        <TextBox x:Name="DefaultQualityBox" Width="70"
+                 ToolTip.Tip="JPEG quality 1 to 100, for every test without its own value; lower makes the report smaller, 70 is a good default" />
+        <TextBlock Text="for every test without its own values (hover a field for more)" VerticalAlignment="Center" Opacity="0.6" />
+      </StackPanel>
+    </Grid>
+
+    <!-- What is tested against what -->
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
+      <TextBlock x:Name="VersionText" Opacity="0.75" TextWrapping="Wrap" VerticalAlignment="Center" />
+      <Border x:Name="ChangedClientNote" IsVisible="False" Background="#FFF4C2" BorderBrush="#E0BB00" BorderThickness="1"
+              CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
+        <TextBlock Text="client built with changes that were not committed" Foreground="#5C4400" FontWeight="SemiBold" />
+      </Border>
+    </StackPanel>
+
+    <!-- All steps of the tests in the run, together, and the one that runs now -->
+    <Grid x:Name="OverallPanel" DockPanel.Dock="Top" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="6"
+          Margin="0,12,0,0" IsVisible="False">
+      <TextBlock Text="All tests of the run" VerticalAlignment="Center" />
+      <Panel Grid.Column="1" VerticalAlignment="Center">
+        <ProgressBar x:Name="OverallProgress" Minimum="0" Height="22" ShowProgressText="True" />
+        <Border x:Name="OverallPassed" IsVisible="False" Background="#1F7A3F" CornerRadius="4" Padding="10,3" HorizontalAlignment="Left">
+          <TextBlock x:Name="OverallPassedText" Foreground="White" FontWeight="Bold" />
+        </Border>
+        <Border x:Name="OverallFailed" IsVisible="False" Background="#B3261E" CornerRadius="4" Padding="10,3" HorizontalAlignment="Left">
+          <TextBlock x:Name="OverallFailedText" Foreground="White" FontWeight="Bold" />
+        </Border>
+      </Panel>
+      <TextBlock x:Name="CurrentLabel" Grid.Row="1" Text="Now" VerticalAlignment="Center" IsVisible="False" />
+      <TextBlock x:Name="CurrentText" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                 FontWeight="SemiBold" IsVisible="False" />
+    </Grid>
+
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="12" Margin="0,12,0,6">
+      <Button x:Name="CheckAllButton" Content="Check all" />
+      <TextBlock x:Name="SelectionText" VerticalAlignment="Center" Opacity="0.75" />
+    </StackPanel>
+
+    <!-- Run -->
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+      <Button x:Name="RunButton" Content="Run and write report" Classes="accent" />
+      <Button x:Name="StopButton" Content="Stop after this test" IsEnabled="False" />
+      <Button x:Name="OpenReportButton" Content="Open report" IsEnabled="False" />
+      <Button x:Name="OpenReportFolderButton" Content="Open report folder"
+              ToolTip.Tip="Shows the report of the last run in the file browser, e.g. to drag it into a pull request comment; before a run, the folder the reports go to" />
+      <TextBlock x:Name="RunStatusText" VerticalAlignment="Center" TextWrapping="Wrap" />
+    </StackPanel>
+
+    <!-- The tests take the room there is; the log keeps its height below them -->
+    <Grid RowDefinitions="*,6,170" MinHeight="260">
+      <Border BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" CornerRadius="6">
+        <ScrollViewer x:Name="ScenarioScroll">
+          <ItemsControl x:Name="ScenarioList">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="gui:ScenarioGroup">
+                <Expander IsExpanded="{Binding IsExpanded}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                          Margin="6,4,6,0" Padding="4,2">
+                  <Expander.Header>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <TextBlock Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                      <TextBlock Text="{Binding Summary}" Opacity="0.7" VerticalAlignment="Center" />
+                      <!-- Checks or unchecks the tests of this category only -->
+                      <Button Content="{Binding ToggleText}" IsEnabled="{Binding IsEditable}" Click="OnToggleGroup"
+                              Padding="8,1" MinHeight="0" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0" />
+                    </StackPanel>
+                  </Expander.Header>
+                  <ItemsControl ItemsSource="{Binding Rows}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="gui:ScenarioRow">
+                        <!-- One line per test; the description in full on hover -->
+                        <Border Classes="scenario" Classes.current="{Binding IsCurrent}" BorderThickness="1" BorderBrush="Transparent"
+                                CornerRadius="4" Padding="6,1" Margin="0,1" Loaded="OnRowLoaded">
+                          <Grid ColumnDefinitions="Auto,180,*,Auto,Auto,190" ColumnSpacing="10">
+                            <CheckBox IsChecked="{Binding IsChecked}" IsEnabled="{Binding IsEditable}" VerticalAlignment="Center" Height="26" MinHeight="26" Padding="0" />
+                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}" />
+                            <TextBlock Grid.Column="2" Text="{Binding Description}" Opacity="0.75" VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Description}" />
+                            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"
+                                        ToolTip.Tip="Milliseconds to wait after each action of this test; empty takes the value above">
+                              <TextBlock Text="Wait" VerticalAlignment="Center" />
+                              <TextBox Text="{Binding DelayText}" Width="70" IsEnabled="{Binding IsEditable}" />
+                              <TextBlock Text="ms" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"
+                                        ToolTip.Tip="JPEG quality of this test's screenshots, 1 to 100; empty takes the value above">
+                              <TextBlock Text="Quality" VerticalAlignment="Center" />
+                              <TextBox Text="{Binding QualityText}" Width="55" IsEnabled="{Binding IsEditable}" />
+                            </StackPanel>
+                            <Panel Grid.Column="5" VerticalAlignment="Center">
+                              <ProgressBar IsVisible="{Binding ShowsProgress}" Minimum="0" Maximum="{Binding StepCount}"
+                                           Value="{Binding CompletedSteps}" ShowProgressText="True" ProgressTextFormat="{Binding ProgressText}"
+                                           Height="20" ToolTip.Tip="{Binding Detail}" />
+                              <Border IsVisible="{Binding Passed}" Background="#1F7A3F" CornerRadius="4" Padding="10,2"
+                                      HorizontalAlignment="Left" ToolTip.Tip="{Binding Detail}">
+                                <TextBlock Text="PASS" Foreground="White" FontWeight="Bold" />
+                              </Border>
+                              <Border IsVisible="{Binding Failed}" Background="#B3261E" CornerRadius="4" Padding="10,2"
+                                      HorizontalAlignment="Left" ToolTip.Tip="{Binding Detail}">
+                                <TextBlock Text="{Binding FailedText}" Foreground="White" FontWeight="Bold" />
+                              </Border>
+                            </Panel>
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </Expander>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Border>
+
+      <!-- Drag to give the tests or the log more room -->
+      <GridSplitter Grid.Row="1" ResizeDirection="Rows" Background="Transparent" />
+
+      <TextBox x:Name="LogBox" Grid.Row="2" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
+               FontFamily="Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace" FontSize="12" />
+    </Grid>
+  </DockPanel>
+</Window>

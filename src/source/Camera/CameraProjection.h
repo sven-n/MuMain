@@ -40,6 +40,13 @@ public:
     static void SetViewport(int x, int y, int width, int height);
 
     /**
+     * @brief Aspect ratio (width / height) of the viewport the 3D world is drawn into
+     *
+     * In MainScene the world viewport leaves room for the HUD; elsewhere it is the window.
+     */
+    static float WorldAspectRatio();
+
+    /**
      * @brief Converts screen coordinates to world ray direction
      *
      * Replaces CreateScreenVector().
@@ -65,6 +72,15 @@ public:
      */
     static void WorldToScreen(const CameraState& state, const vec3_t worldPos,
                                int* outX, int* outY);
+
+    /**
+     * @brief Projects a world position to window pixels, as ScreenToWorldRay
+     *        casts the mouse ray back (WorldToScreen without its 640x480
+     *        conversion and integer steps)
+     *
+     * @return false when the position is behind the camera
+     */
+    static bool WorldToWindowPixel(const CameraState& state, const vec3_t worldPos, float* outX, float* outY);
 
     /**
      * @brief Transforms position relative to camera (pixel coordinates)

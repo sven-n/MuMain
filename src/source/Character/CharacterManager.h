@@ -23,7 +23,6 @@ public:
     int GetEquipedBowType();
     int GetEquipedBowType(ITEM* pItem);
     int GetEquipedBowType_Skill();
-    bool IsEquipedWing();
     void GetMagicSkillDamage(int iType, int* piMinDamage, int* piMaxDamage);
     void GetCurseSkillDamage(int iType, int* piMinDamage, int* piMaxDamage);
     void GetSkillDamage(int iType, int* piMinDamage, int* piMaxDamage);

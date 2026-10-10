@@ -3,141 +3,456 @@
 #include "EffectRegistry.h"
 #include "Behaviors/EffectBehaviors.h"
 #include "Behaviors/MoveHandlers.h"
+#include "Core/Utilities/Log/MuLogger.h"
+#include "Render/Models/ZzzBMD.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <algorithm>
 #include <initializer_list>
 #include <vector>
 
+#if defined(_MSC_VER)
+#define EFFECT_REGISTRY_NOINLINE __declspec(noinline)
+#else
+#define EFFECT_REGISTRY_NOINLINE __attribute__((noinline))
+#endif
+
 namespace Render::Effects
 {
-    void ApplyCreateParams(OBJECT* o, const CreateParams& params)
+namespace
+{
+void SetComponents(vec3_t target, const CreateVector& vector)
+{
+    if (vector.components == 0)
+        return;
+    for (int i = 0; i < 3; ++i)
     {
-        if (params.lifeTime)       o->LifeTime = *params.lifeTime;
-        if (params.scale)          o->Scale = *params.scale;
-        if (params.velocity)       o->Velocity = *params.velocity;
-        if (params.gravity)        o->Gravity = *params.gravity;
-        if (params.hiddenMesh)     o->HiddenMesh = *params.hiddenMesh;
-        if (params.blendMesh)      o->BlendMesh = *params.blendMesh;
-        if (params.blendMeshLight) o->BlendMeshLight = *params.blendMeshLight;
-        if (params.alpha)          o->Alpha = *params.alpha;
-        if (params.light)          VectorCopy(params.light->data(), o->Light);
-        if (params.copyLightToDirection) VectorCopy(o->Light, o->Direction);
-    }
-
-    namespace
-    {
-        struct Entry
-        {
-            int              type;
-            EffectDescriptor descriptor;
-        };
-
-        // The migrated effects. Each row states only what differs from the
-        // common initialisation CreateEffect applies to every effect. Effects
-        // absent from this list keep being handled by the legacy switch
-        // statements in ZzzEffect.cpp.
-        const std::vector<Entry>& Entries()
-        {
-            static const std::vector<Entry> entries = [] {
-                std::vector<Entry> e;
-                auto add = [&e](std::initializer_list<int> types, const EffectDescriptor& d) {
-                    for (int type : types)
-                        e.push_back({ type, d });
-                };
-
-                // MODEL_DESAIR: short-lived, slightly oversized; rides a joint
-                // and sheds feathers (see Behaviors::MoveDesair). Default render.
-                add({ MODEL_DESAIR }, {
-                    .create = CreateParams{ .lifeTime = 52.f, .scale = 1.4f },
-                    .move = &Behaviors::MoveDesair,
-                    .render = &Behaviors::RenderDefault });
-
-                // --- Effects with creation parameters and a move handler ----
-                add({ MODEL_MAGIC_CAPSULE2 }, { .create = CreateParams{ .lifeTime = 20.f, .blendMesh = 0, .blendMeshLight = 1.0f }, .move = &Behaviors::MoveMagicCapsule2 });
-                add({ MODEL_SPEAR },          { .create = CreateParams{ .lifeTime = 10.f }, .move = &Behaviors::MoveSpear });
-                add({ MODEL_SUMMONER_SUMMON_NEIL_NIFE1,
-                      MODEL_SUMMONER_SUMMON_NEIL_NIFE2,
-                      MODEL_SUMMONER_SUMMON_NEIL_NIFE3 },
-                                              { .create = CreateParams{ .lifeTime = 50.f, .scale = 1.0f, .alpha = 1.0f }, .move = &Behaviors::MoveSummonerNeilNife });
-                add({ MODEL_SUMMONER_SUMMON_NEIL_GROUND1,
-                      MODEL_SUMMONER_SUMMON_NEIL_GROUND2,
-                      MODEL_SUMMONER_SUMMON_NEIL_GROUND3 },
-                                              { .create = CreateParams{ .lifeTime = 50.f, .scale = 1.0f, .alpha = 0.0f }, .move = &Behaviors::MoveSummonerNeilGround });
-                add({ BITMAP_FIRE_RED },      { .create = CreateParams{ .lifeTime = 40.f }, .move = &Behaviors::MoveBitmapFireRed });
-                add({ BITMAP_LIGHT_MARKS },   { .create = CreateParams{ .lifeTime = 65.f }, .move = &Behaviors::MoveBitmapLightMarks });
-                add({ MODEL_MAGIC1 },         { .create = CreateParams{ .lifeTime = 20.f, .blendMesh = 0 }, .move = &Behaviors::MoveMagic1 });
-                add({ MODEL_MAYASTAR },       { .create = CreateParams{ .lifeTime = 50.f, .scale = 50.0f }, .move = &Behaviors::MoveMayaStar });
-                add({ BITMAP_FIRE },          { .create = CreateParams{ .lifeTime = 1000.f }, .move = &Behaviors::MoveBitmapFire });
-                add({ MODEL_INFINITY_ARROW4 },
-                                              { .create = CreateParams{ .lifeTime = 15.f, .scale = 1.f, .light = std::array<float, 3>{ 1.f, 0.5f, 0.3f }, .copyLightToDirection = true }, .move = &Behaviors::MoveInfinityArrow4 });
-
-                // --- Data-only effects (move/render still in the legacy switch)
-                add({ BITMAP_IMPACT },        { .create = CreateParams{ .lifeTime = 80.f, .scale = 0.f, .blendMesh = -2 } });
-                add({ MODEL_PROTECT },        { .create = CreateParams{ .lifeTime = 10000.f, .velocity = 0.3f, .blendMesh = 0 } });
-                add({ MODEL_CURSEDTEMPLE_HOLYITEM,
-                      MODEL_CURSEDTEMPLE_PRODECTION_SKILL,
-                      MODEL_CURSEDTEMPLE_RESTRAINT_SKILL },
-                                              { .create = CreateParams{ .lifeTime = 9999999.f } });
-                add({ MODEL_SKILL_FISSURE },  { .create = CreateParams{ .lifeTime = 20.f } });
-                add({ MODEL_FISSURE, MODEL_FISSURE_LIGHT },
-                                              { .create = CreateParams{ .lifeTime = 120.f, .scale = 0.8f } });
-                add({ MODEL_BALGAS_SKILL },   { .create = CreateParams{ .lifeTime = 20.f, .scale = 1.0f, .blendMesh = 0 } });
-                add({ MODEL_BLOOD },          { .create = CreateParams{ .lifeTime = 10.f, .blendMesh = 0 } });
-                add({ MODEL_POISON },         { .create = CreateParams{ .lifeTime = 40.f, .scale = 1.0f, .blendMesh = 1 } });
-                add({ BITMAP_SWORDEFF },      { .create = CreateParams{ .lifeTime = 200.f } });
-                add({ BATTLE_CASTLE_WALL1, BATTLE_CASTLE_WALL2, BATTLE_CASTLE_WALL3, BATTLE_CASTLE_WALL4 },
-                                              { .create = CreateParams{ .lifeTime = 2.f } });
-                add({ MODEL_CUNDUN_GHOST },
-                                              { .create = CreateParams{ .lifeTime = 200.f, .scale = 1.80f, .velocity = 0.08f, .blendMesh = -2, .light = std::array<float, 3>{ 0.5f, 0.5f, 0.5f } } });
-
-                // --- Randomised / directional creation via an onCreate hook ---
-                add({ MODEL_MAYASTONE4, MODEL_MAYASTONE5 }, { .onCreate = &Behaviors::CreateMayaStone45 });
-
-                // --- Move handlers mechanically extracted from MoveEffect -----
-                // (see Behaviors/MoveHandlers.cpp). Merge into an existing entry
-                // when the type already has create params; otherwise add a
-                // move-only entry. Creation and rendering for these types still
-                // run through the legacy switches unless listed above.
-                for (const auto& [type, move] : Behaviors::ExtractedMoveHandlers())
-                {
-                    auto it = std::find_if(e.begin(), e.end(),
-                        [type = type](const Entry& en) { return en.type == type; });
-                    if (it != e.end())
-                        it->descriptor.move = move;
-                    else
-                        e.push_back({ type, EffectDescriptor{ .move = move } });
-                }
-
-                return e;
-            }();
-            return entries;
-        }
-
-        // Type-indexed lookup table built once from Entries(). Pointers are
-        // stable because Entries() holds a single static vector that is never
-        // mutated after construction.
-        const std::vector<const EffectDescriptor*>& Table()
-        {
-            static const std::vector<const EffectDescriptor*> table = [] {
-                const auto& entries = Entries();
-                int maxType = -1;
-                for (const auto& entry : entries)
-                    maxType = (entry.type > maxType) ? entry.type : maxType;
-
-                std::vector<const EffectDescriptor*> t(maxType + 1, nullptr);
-                for (const auto& entry : entries)
-                    t[entry.type] = &entry.descriptor;
-                return t;
-            }();
-            return table;
-        }
-    }
-
-    const EffectDescriptor* Lookup(int type)
-    {
-        const auto& table = Table();
-        if (type < 0 || type >= (int)table.size())
-            return nullptr;
-        return table[type];
+        if (vector.components & (1 << i))
+            target[i] = vector.values[i];
     }
 }
+
+// One statement per component, in the form the old cases had (`x += v *
+// FPS_ANIMATION_FACTOR`), so a compiler that contracts it into a fused
+// multiply-add does so for both.
+void AddComponents(vec3_t target, const CreateVector& vector)
+{
+    if (vector.components == 0)
+        return;
+    for (int i = 0; i < 3; ++i)
+    {
+        if (!(vector.components & (1 << i)))
+            continue;
+        if (vector.timesFrameFactor & (1 << i))
+            target[i] += vector.values[i] * FPS_ANIMATION_FACTOR;
+        else
+            target[i] += vector.values[i];
+    }
+}
+
+void ApplyValues(OBJECT* o, const CreateParams& params)
+{
+    if (params.lifeTime)
+        o->LifeTime = *params.lifeTime;
+    if (params.scale)
+        o->Scale = *params.scale;
+    if (params.velocity)
+        o->Velocity = *params.velocity;
+    if (params.gravity)
+        o->Gravity = *params.gravity;
+    if (params.hiddenMesh)
+        o->HiddenMesh = *params.hiddenMesh;
+    if (params.blendMesh)
+        o->BlendMesh = *params.blendMesh;
+    if (params.blendMeshLight)
+        o->BlendMeshLight = *params.blendMeshLight;
+    if (params.alpha)
+        o->Alpha = *params.alpha;
+    if (params.light)
+        VectorCopy(params.light->data(), o->Light);
+}
+
+void ApplyFlags(OBJECT* o, const CreateParams& params)
+{
+    if (params.lightEnable)
+        o->LightEnable = *params.lightEnable;
+    if (params.alphaEnable)
+        o->AlphaEnable = *params.alphaEnable;
+    if (params.kind)
+        o->Kind = *params.kind;
+    if (params.skill)
+        o->Skill = *params.skill;
+    if (params.renderType)
+        o->RenderType = *params.renderType;
+    if (params.animation)
+        o->m_iAnimation = *params.animation;
+}
+
+void ApplyNumbers(OBJECT* o, const CreateParams& params)
+{
+    if (params.pkKey)
+        o->PKKey = *params.pkKey;
+    if (params.timer)
+        o->Timer = *params.timer;
+    if (params.distance)
+        o->Distance = *params.distance;
+    if (params.collisionRange)
+        o->CollisionRange = *params.collisionRange;
+    if (params.alphaTarget)
+        o->AlphaTarget = *params.alphaTarget;
+}
+
+void ApplyVectors(OBJECT* o, const CreateParams& params)
+{
+    SetComponents(o->Position, params.position);
+    SetComponents(o->Angle, params.angle);
+    SetComponents(o->Direction, params.direction);
+    SetComponents(o->StartPosition, params.startPosition);
+}
+
+void ApplyOffsets(OBJECT* o, const CreateParams& params)
+{
+    if (params.lifeTimeOffset)
+    {
+        // In the form of the old cases, as AddComponents.
+        if (params.lifeTimeOffset->timesFrameFactor)
+            o->LifeTime += params.lifeTimeOffset->value * FPS_ANIMATION_FACTOR;
+        else
+            o->LifeTime += params.lifeTimeOffset->value;
+    }
+    AddComponents(o->Position, params.positionOffset);
+    AddComponents(o->Angle, params.angleOffset);
+}
+
+void ApplyCopies(OBJECT* o, const CreateParams& params, const CreateCall& call)
+{
+    if (params.copyLightToDirection)
+        VectorCopy(o->Light, o->Direction);
+    if (params.copyCallAngleToDirection)
+        VectorCopy(call.angle.data(), o->Direction);
+    if (params.copyPositionToStartPosition)
+        VectorCopy(o->Position, o->StartPosition);
+    if (params.copyLightToStartPosition)
+        VectorCopy(o->Light, o->StartPosition);
+    if (params.copyCallPositionToStartPosition)
+        VectorCopy(call.position.data(), o->StartPosition);
+    if (params.copyCallLightToHeadTargetAngle)
+        VectorCopy(call.light.data(), o->HeadTargetAngle);
+    if (params.copyLightToEyeRight)
+        VectorCopy(o->Light, o->EyeRight);
+    if (params.copyCallAngleToDeadPosition)
+        VectorCopy(call.angle.data(), o->m_vDeadPosition);
+    if (params.copyCallScaleToScale)
+        o->Scale = call.scale;
+}
+// One name per field of CreateParams: the binding stops compiling when the
+// struct gets a field, and the count when it has another number of fields than
+// the catalogue's values, so GroupsOf below gives the field a group and
+// ApplyCreateParams applies it.
+#define CREATE_PARAMS_FIELD_NAMES                                                                                      \
+    lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha, light, groups, lightEnable,      \
+        alphaEnable, kind, skill, renderType, animation, pkKey, timer, distance, collisionRange, alphaTarget,          \
+        position, angle, direction, startPosition, lifeTimeOffset, positionOffset, angleOffset, startPositionOffset,   \
+        copyLightToDirection, copyCallAngleToDirection, copyPositionToStartPosition, copyLightToStartPosition,         \
+        copyCallPositionToStartPosition, copyCallLightToHeadTargetAngle, copyLightToEyeRight,                          \
+        copyCallAngleToDeadPosition, copyCallScaleToScale
+[[maybe_unused]] void NameEveryField(const CreateParams& params)
+{
+    [[maybe_unused]] const auto& [CREATE_PARAMS_FIELD_NAMES] = params;
+    static_assert(decltype(Data::Effects::CountNames(CREATE_PARAMS_FIELD_NAMES))::value ==
+                  Data::Effects::EffectCreateFieldCount);
+}
+#undef CREATE_PARAMS_FIELD_NAMES
+} // namespace
+
+std::uint8_t GroupsOf(const CreateParams& params)
+{
+    std::uint8_t groups = 0;
+    if (params.lightEnable || params.alphaEnable || params.kind || params.skill || params.renderType ||
+        params.animation)
+        groups |= CreateParams::Flags;
+    if (params.pkKey || params.timer || params.distance || params.collisionRange || params.alphaTarget)
+        groups |= CreateParams::Numbers;
+    if (params.position.components || params.angle.components || params.direction.components ||
+        params.startPosition.components)
+        groups |= CreateParams::Vectors;
+    if (params.lifeTimeOffset || params.positionOffset.components || params.angleOffset.components ||
+        params.startPositionOffset.components)
+        groups |= CreateParams::Offsets;
+    if (params.copyLightToDirection || params.copyCallAngleToDirection || params.copyPositionToStartPosition ||
+        params.copyLightToStartPosition || params.copyCallPositionToStartPosition ||
+        params.copyCallLightToHeadTargetAngle || params.copyLightToEyeRight || params.copyCallAngleToDeadPosition ||
+        params.copyCallScaleToScale)
+        groups |= CreateParams::Copies;
+    return groups;
+}
+
+// Values, then offsets, then copies; an offset of a field a copy writes adds
+// to the copy.
+void ApplyCreateParams(OBJECT* o, const CreateParams& params, const CreateCall& call)
+{
+    ApplyValues(o, params);
+    const std::uint8_t groups = params.groups;
+    if (groups == 0)
+        return;
+    if (groups & CreateParams::Flags)
+        ApplyFlags(o, params);
+    if (groups & CreateParams::Numbers)
+        ApplyNumbers(o, params);
+    if (groups & CreateParams::Vectors)
+        ApplyVectors(o, params);
+    if (groups & CreateParams::Offsets)
+        ApplyOffsets(o, params);
+    if (groups & CreateParams::Copies)
+        ApplyCopies(o, params, call);
+    if (groups & CreateParams::Offsets)
+        AddComponents(o->StartPosition, params.startPositionOffset);
+}
+
+namespace
+{
+std::optional<float> ToFloat(const std::optional<double>& value)
+{
+    if (!value)
+        return std::nullopt;
+    return static_cast<float>(*value);
+}
+
+CreateVector ToCreateVector(const Data::Effects::EffectCreateVector& vector)
+{
+    CreateVector converted;
+    for (int i = 0; i < 3; ++i)
+    {
+        if (!vector.components[i])
+            continue;
+        converted.values[i] = static_cast<float>(*vector.components[i]);
+        converted.components |= static_cast<std::uint8_t>(1 << i);
+        if (vector.timesFrameFactor[i])
+            converted.timesFrameFactor |= static_cast<std::uint8_t>(1 << i);
+    }
+    return converted;
+}
+
+// The render types of the catalogue as the game's numbers.
+std::optional<int> ToRenderType(const std::optional<Data::Effects::EffectRenderType>& type)
+{
+    if (!type)
+        return std::nullopt;
+    switch (*type)
+    {
+    case Data::Effects::EffectRenderType::Dark:
+        return RENDER_DARK;
+    case Data::Effects::EffectRenderType::AlphaBlendMinus:
+        return RENDER_TYPE_ALPHA_BLEND_MINUS;
+    }
+    return std::nullopt;
+}
+
+template <typename T> std::optional<T> ToInteger(const std::optional<int>& value)
+{
+    if (!value)
+        return std::nullopt;
+    return static_cast<T>(*value);
+}
+
+// One name per field of the catalogue's values: the binding stops compiling
+// when they get a field, and the count when the name is added without changing
+// EffectCreateFieldCount, so ToCreateParams below converts it too.
+#define EFFECT_CREATE_FIELD_NAMES                                                                                      \
+    lifeTime, scale, velocity, gravity, hiddenMesh, blendMesh, blendMeshLight, alpha, light, lightEnable, alphaEnable, \
+        kind, skill, pkKey, timer, distance, collisionRange, alphaTarget, renderType, animation, position, angle,      \
+        direction, startPosition, lifeTimeOffset, positionOffset, angleOffset, startPositionOffset,                    \
+        copyLightToDirection, copyCallAngleToDirection, copyPositionToStartPosition, copyLightToStartPosition,         \
+        copyCallPositionToStartPosition, copyCallLightToHeadTargetAngle, copyLightToEyeRight,                          \
+        copyCallAngleToDeadPosition, copyCallScaleToScale, variants
+[[maybe_unused]] void NameEveryField(const Data::Effects::EffectCreateParams& values)
+{
+    [[maybe_unused]] const auto& [EFFECT_CREATE_FIELD_NAMES] = values;
+    static_assert(decltype(Data::Effects::CountNames(EFFECT_CREATE_FIELD_NAMES))::value ==
+                  Data::Effects::EffectCreateFieldCount);
+}
+#undef EFFECT_CREATE_FIELD_NAMES
+
+// The values of the catalogue as the effects use them.
+CreateParams ToCreateParams(const Data::Effects::EffectCreateParams& values)
+{
+    CreateParams params;
+    params.lifeTime = ToFloat(values.lifeTime);
+    params.scale = ToFloat(values.scale);
+    params.velocity = ToFloat(values.velocity);
+    params.gravity = ToFloat(values.gravity);
+    params.hiddenMesh = values.hiddenMesh;
+    params.blendMesh = values.blendMesh;
+    params.blendMeshLight = ToFloat(values.blendMeshLight);
+    params.alpha = ToFloat(values.alpha);
+    if (values.light)
+    {
+        const std::array<double, 3>& light = *values.light;
+        params.light = std::array<float, 3>{static_cast<float>(light[0]), static_cast<float>(light[1]),
+                                            static_cast<float>(light[2])};
+    }
+
+    params.lightEnable = values.lightEnable;
+    params.alphaEnable = values.alphaEnable;
+    params.kind = ToInteger<std::uint8_t>(values.kind);
+    params.skill = ToInteger<std::uint16_t>(values.skill);
+    params.pkKey = ToFloat(values.pkKey);
+    params.timer = ToFloat(values.timer);
+    params.distance = ToFloat(values.distance);
+    params.collisionRange = ToFloat(values.collisionRange);
+    params.alphaTarget = ToFloat(values.alphaTarget);
+    params.renderType = ToRenderType(values.renderType);
+    params.animation = values.animation;
+    params.position = ToCreateVector(values.position);
+    params.angle = ToCreateVector(values.angle);
+    params.direction = ToCreateVector(values.direction);
+    params.startPosition = ToCreateVector(values.startPosition);
+    if (values.lifeTimeOffset)
+        params.lifeTimeOffset =
+            CreateNumber{static_cast<float>(values.lifeTimeOffset->value), values.lifeTimeOffset->timesFrameFactor};
+    params.positionOffset = ToCreateVector(values.positionOffset);
+    params.angleOffset = ToCreateVector(values.angleOffset);
+    params.startPositionOffset = ToCreateVector(values.startPositionOffset);
+    params.copyLightToDirection = values.copyLightToDirection;
+    params.copyCallAngleToDirection = values.copyCallAngleToDirection;
+    params.copyPositionToStartPosition = values.copyPositionToStartPosition;
+    params.copyLightToStartPosition = values.copyLightToStartPosition;
+    params.copyCallPositionToStartPosition = values.copyCallPositionToStartPosition;
+    params.copyCallLightToHeadTargetAngle = values.copyCallLightToHeadTargetAngle;
+    params.copyLightToEyeRight = values.copyLightToEyeRight;
+    params.copyCallAngleToDeadPosition = values.copyCallAngleToDeadPosition;
+    params.copyCallScaleToScale = values.copyCallScaleToScale;
+    params.groups = GroupsOf(params);
+    return params;
+}
+
+struct Entry
+{
+    int type;
+    EffectDescriptor descriptor;
+};
+
+// Built by BuildTable (from BuildRegistry, or from the first lookup before
+// it): the descriptors, and the table indexed by type that points into them.
+std::vector<Entry> builtEntries;
+std::vector<const EffectDescriptor*> table;
+
+Entry& FindOrAdd(std::vector<Entry>& entries, int type)
+{
+    for (Entry& entry : entries)
+    {
+        if (entry.type == type)
+            return entry;
+    }
+    return entries.emplace_back(Entry{type, EffectDescriptor{}});
+}
+
+// The handlers of the code. Each row states only what differs from
+// the legacy switch statements in ZzzEffect.cpp; the creation values
+// come from the effect catalogue (Data/Effects/EffectTypes.json).
+std::vector<Entry> HandlerEntries()
+{
+    std::vector<Entry> e;
+    auto add = [&e](std::initializer_list<int> types, const EffectDescriptor& d)
+    {
+        for (int type : types)
+        {
+            EffectDescriptor& descriptor = FindOrAdd(e, type).descriptor;
+            if (d.onCreate)
+                descriptor.onCreate = d.onCreate;
+            if (d.move)
+                descriptor.move = d.move;
+            if (d.render)
+                descriptor.render = d.render;
+        }
+    };
+
+    // MODEL_DESAIR: rides a joint and sheds feathers (see
+    // Behaviors::MoveDesair). Default render.
+    add({MODEL_DESAIR}, {.move = &Behaviors::MoveDesair, .render = &Behaviors::RenderDefault});
+
+    // --- Effects with creation values and a move handler ---------
+    add({MODEL_MAGIC_CAPSULE2}, {.move = &Behaviors::MoveMagicCapsule2});
+    add({MODEL_SPEAR}, {.move = &Behaviors::MoveSpear});
+    add({MODEL_SUMMONER_SUMMON_NEIL_NIFE1, MODEL_SUMMONER_SUMMON_NEIL_NIFE2, MODEL_SUMMONER_SUMMON_NEIL_NIFE3},
+        {.move = &Behaviors::MoveSummonerNeilNife});
+    add({MODEL_SUMMONER_SUMMON_NEIL_GROUND1, MODEL_SUMMONER_SUMMON_NEIL_GROUND2, MODEL_SUMMONER_SUMMON_NEIL_GROUND3},
+        {.move = &Behaviors::MoveSummonerNeilGround});
+    add({BITMAP_FIRE_RED}, {.move = &Behaviors::MoveBitmapFireRed});
+    add({BITMAP_LIGHT_MARKS}, {.move = &Behaviors::MoveBitmapLightMarks});
+    add({MODEL_MAGIC1}, {.move = &Behaviors::MoveMagic1});
+    add({MODEL_MAYASTAR}, {.move = &Behaviors::MoveMayaStar});
+    add({BITMAP_FIRE}, {.move = &Behaviors::MoveBitmapFire});
+    add({MODEL_INFINITY_ARROW4}, {.move = &Behaviors::MoveInfinityArrow4});
+
+    // --- Randomised / directional creation via an onCreate hook ---
+    add({MODEL_MAYASTONE4, MODEL_MAYASTONE5}, {.onCreate = &Behaviors::CreateMayaStone45});
+
+    // --- Move handlers mechanically extracted from MoveEffect -----
+    // (see Behaviors/MoveHandlers.cpp). Creation for these types still
+    // runs through the legacy switch unless the catalogue gives them
+    // creation values, and rendering unless a render handler is listed
+    // above.
+    for (const auto& [type, move] : Behaviors::ExtractedMoveHandlers())
+        FindOrAdd(e, type).descriptor.move = move;
+
+    return e;
+}
+
+void BuildTable(std::span<const Data::Effects::EffectTypeCreateParams> createParams)
+{
+    std::vector<Entry> entries = HandlerEntries();
+    for (const Data::Effects::EffectTypeCreateParams& row : createParams)
+    {
+        EffectDescriptor& descriptor = FindOrAdd(entries, row.type).descriptor;
+        descriptor.create = ToCreateParams(row.params);
+        descriptor.createBySubType.clear();
+        for (const Data::Effects::EffectCreateVariant& variant : row.params.variants)
+        {
+            const CreateParams params = ToCreateParams(Data::Effects::ResolveVariant(row.params, variant.params));
+            for (const int subType : variant.subTypes)
+                descriptor.createBySubType.push_back({subType, params});
+        }
+        std::sort(descriptor.createBySubType.begin(), descriptor.createBySubType.end(),
+                  [](const SubTypeCreateParams& left, const SubTypeCreateParams& right)
+                  { return left.subType < right.subType; });
+    }
+
+    int maxType = -1;
+    for (const Entry& entry : entries)
+        maxType = (entry.type > maxType) ? entry.type : maxType;
+
+    builtEntries = std::move(entries);
+    table.assign(maxType + 1, nullptr);
+    for (const Entry& entry : builtEntries)
+        table[entry.type] = &entry.descriptor;
+}
+
+// The handlers are code, so they work without the catalogue (tests, tools);
+// only its creation values are missing until BuildRegistry. Kept out of
+// Lookup, so that a lookup stays a bounds check and one array read.
+EFFECT_REGISTRY_NOINLINE const EffectDescriptor* LookupBeforeBuild(int type)
+{
+    BuildTable({});
+    MU_LOG_ERROR(mu::log::Get("render"),
+                 "Effect type {} was used before the effect catalogue was loaded; the effects run without the "
+                 "creation values of the catalogue until it is loaded",
+                 type);
+    if (type < 0 || type >= static_cast<int>(table.size()))
+        return nullptr;
+    return table[type];
+}
+} // namespace
+
+void BuildRegistry(std::span<const Data::Effects::EffectTypeCreateParams> createParams)
+{
+    BuildTable(createParams);
+}
+
+const EffectDescriptor* Lookup(int type)
+{
+    if (type < 0 || type >= static_cast<int>(table.size()))
+        return table.empty() ? LookupBeforeBuild(type) : nullptr;
+    return table[type];
+}
+} // namespace Render::Effects

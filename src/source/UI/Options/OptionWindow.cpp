@@ -151,10 +151,20 @@ static const int s_NumLanguages = sizeof(s_Languages) / sizeof(s_Languages[0]);
 // UI font families offered by the font row. `name` is the GameConfig font family value; empty =
 // platform default. Curated entries are bundled in ./fonts so they resolve without a system
 // install.
-static const struct { const wchar_t* name; const wchar_t* label; } s_Fonts[] = {
-    { L"",                L"Default" },
-    { L"Liberation Sans", L"Liberation Sans" },
-    { L"DejaVu Sans",     L"DejaVu Sans" },
+namespace
+{
+struct FontOption
+{
+    const wchar_t* name;
+    const wchar_t* label;
+};
+} // namespace
+
+static const FontOption s_Fonts[] = {
+    {L"", L"Default"},
+    {L"Liberation Sans", L"Liberation Sans"},
+    {L"DejaVu Sans", L"DejaVu Sans"},
+    {L"Noto Sans TC", L"Noto Sans TC"},
 };
 static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
 

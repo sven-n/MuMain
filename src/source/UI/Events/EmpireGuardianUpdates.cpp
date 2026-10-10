@@ -32,7 +32,7 @@ void ShowZoneCleared()
     UI::Dialogs::ConfirmRequest request;
     mu_swprintf(text, I18N::Game::FortressOfEmpireGuardiansRoundD, g_pEmpireGuardianTimer->GetDay());
     request.lines.push_back({text, false});
-    mu_swprintf(text, L"%d%ls", g_pEmpireGuardianTimer->GetZone(), I18N::Game::ZoneCleared);
+    mu_swprintf(text, I18N::Game::ZoneDCleared, g_pEmpireGuardianTimer->GetZone());
     request.lines.push_back({text, false});
     UI::Dialogs::ShowConfirm(std::move(request));
 }

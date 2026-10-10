@@ -16,6 +16,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace Rml { class ElementDocument; }
@@ -118,6 +119,9 @@ namespace mu::ui::window
         std::function<void()> onSecondary; // fires only if secondaryLabel is set; never Esc-bound
         std::function<void()> onCancel;    // fires on the cancel button AND on Esc
         std::function<bool()> isValid;     // expired requests are dismissed without callbacks
+
+        // Names the dialog for code that answers it as the player would (the control socket).
+        std::string tag;
     };
 
     // Reusable RmlUi confirm dialog -- one document/model, one instance, shown with different
@@ -140,6 +144,9 @@ namespace mu::ui::window
         bool IsActive(DialogId id) const { return id != 0 && m_bActive && id == m_ActiveId; }
         void Cancel(DialogId id);
         void SetInputText(DialogId id, const std::wstring& text);
+        // Answers the dialog tagged `tag`, open or queued, as its accept or cancel button does;
+        // false when there is none.
+        bool Answer(std::string_view tag, bool accept);
 
         // Only meaningful while an `input` field is configured and active; reads the live typed
         // value out of the RmlUi model (Mode::Text) or the on-screen keypad buffer

@@ -3,6 +3,7 @@
 #include "I18N/All.h"
 
 #include "UI/Inventory/LuckyItemWnd.h"
+#include "UI/Inventory/HeldItemPlacement.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
@@ -16,6 +17,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "GameLogic/Items/MixMgr.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 // RmlUi migration -- see this class's header comment.
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -59,6 +61,11 @@ int CLuckyItemWnd::GetLuckyItemRate(int _nType)
 STORAGE_TYPE CLuckyItemWnd::SetMoveAction()
 {
     m_eWndAction = eLuckyItem_Move;
+    return GetMoveStorageType();
+}
+
+STORAGE_TYPE CLuckyItemWnd::GetMoveStorageType() const
+{
     switch (m_eType)
     {
     case eLuckyItemType_Trade:
@@ -369,7 +376,7 @@ bool CLuckyItemWnd::Check_LuckyItem(ITEM* _pItem)
 
 bool CLuckyItemWnd::Check_LuckyItem_Trade(ITEM* _pItem)
 {
-    if (_pItem->Type >= ITEM_HELPER + 135 && _pItem->Type <= ITEM_HELPER + 145)		return true;
+    if (GameLogic::Items::IsLuckyItemTicket(_pItem))		return true;
 
     return false;
 }
@@ -400,40 +407,16 @@ bool CLuckyItemWnd::Process_InventoryCtrl(void)
         return false;
     }
 
-    if (pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
-    {
-        if (mu::ui::window::IsPress(VK_LBUTTON))
-        {
-            int iSourceIndex = pPickedItem->GetSourceLinealPos();
-            int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
-            if (iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pItemObj))
-            {
-                auto nMoveIndex = SetMoveAction();
-                if (SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, nMoveIndex, iTargetIndex))
-                    return true;
-            }
-        }
-    }
-    else if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
-    {
-        if (mu::ui::window::IsPress(VK_LBUTTON))
-        {
-            int iSourceIndex = pPickedItem->GetSourceLinealPos();
-            int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
-            if (iTargetIndex != -1 && m_pNewInventoryCtrl->CanMove(iTargetIndex, pItemObj))
-            {
-                auto nMoveIndex = SetMoveAction();
-                if (SendRequestEquipmentItem(nMoveIndex, iSourceIndex, pItemObj, nMoveIndex, iTargetIndex))
-                {
-                    return true;
-                }
-            }
-        }
-    }
-
-    // InventoryCtrl Background Color
     m_pNewInventoryCtrl->SetSquareColorNormal(m_fInvenClr[0], m_fInvenClr[1], m_fInvenClr[2]);
-    return false;
+    if (!mu::ui::window::IsRelease(VK_LBUTTON))
+        return false;
+
+    const auto move = UI::Items::Placement::FindHeldItemMove(m_pNewInventoryCtrl, GetMoveStorageType());
+    if (!move)
+        return false;
+
+    SetMoveAction();
+    return UI::Items::Placement::SendHeldItemMove(*move);
 }
 
 CInventoryCtrl* CLuckyItemWnd::GetInventoryCtrl() const

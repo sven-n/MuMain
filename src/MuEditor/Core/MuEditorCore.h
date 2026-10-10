@@ -15,6 +15,10 @@ public:
 
     // window is the SDL window used by the ImGui SDL3 backend (issue #442).
     void Initialize(SDL_Window* window);
+    // Sets the editor's listeners in game code: where the asset record takes
+    // the active map from, and the effect browser's world preview removing
+    // its objects before the game clears its pools. Initialize calls it.
+    void ConnectGameHooks();
     void Shutdown();
     void Update();
     void Render();
@@ -52,6 +56,7 @@ private:
     bool m_bShowSkillEditor;
     bool m_bShowDevEditor;
     bool m_bShowMapEditor;
+    bool m_bShowEffectBrowser;
     bool m_bShowConsole;
     bool m_bHoveringUI;
     bool m_bPreviousFrameHoveringUI;  // Store previous frame's hover state for input blocking

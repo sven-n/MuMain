@@ -51,6 +51,7 @@
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Pets/w_PetProcess.h"
 #include "Network/Server/CSMapServer.h"
+#include "Network/Server/TransformViewportEntry.h"
 #include "GameLogic/NPCs/npcGateSwitch.h"
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/InventoryUtils.h"
@@ -108,6 +109,8 @@ using namespace mu::ui::window;
 
 #include "MUHelper/MuHelper.h"
 #include "Network/Server/ServerListManager.h"
+#include "GameLogic/Items/ItemCategories.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 
 #define MAX_DEBUG_MAX 10
 
@@ -2337,7 +2340,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         }
         else
         {
-            c->Weapon[0].Type = MODEL_ITEM + Type;
+            c->Weapon[0].Type = Data::Items::ToModelSlot(Type);
             c->Weapon[0].Level = Data->ItemLevel;
             c->Weapon[0].ExcellentFlags = Data->ExcellentFlags;
         }
@@ -2351,7 +2354,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         }
         else
         {
-            c->Weapon[1].Type = MODEL_ITEM + Type;
+            c->Weapon[1].Type = Data::Items::ToModelSlot(Type);
             c->Weapon[1].Level = Data->ItemLevel;
             c->Weapon[1].ExcellentFlags = Data->ExcellentFlags;
             CreatePetDarkSpirit_Now(c);
@@ -2368,7 +2371,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         }
         else
         {
-            c->BodyPart[BODYPART_HELM].Type = MODEL_ITEM + Type;
+            c->BodyPart[BODYPART_HELM].Type = Data::Items::ToModelSlot(Type);
             c->BodyPart[BODYPART_HELM].Level = Data->ItemLevel;
             c->BodyPart[BODYPART_HELM].ExcellentFlags = Data->ExcellentFlags;
             c->BodyPart[BODYPART_HELM].AncientDiscriminator = Data->AncientDiscriminator;
@@ -2384,7 +2387,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         }
         else
         {
-            c->BodyPart[BODYPART_ARMOR].Type = MODEL_ITEM + Type;
+            c->BodyPart[BODYPART_ARMOR].Type = Data::Items::ToModelSlot(Type);
             c->BodyPart[BODYPART_ARMOR].Level = Data->ItemLevel;
             c->BodyPart[BODYPART_ARMOR].ExcellentFlags = Data->ExcellentFlags;
             c->BodyPart[BODYPART_ARMOR].AncientDiscriminator = Data->AncientDiscriminator;
@@ -2400,7 +2403,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         }
         else
         {
-            c->BodyPart[BODYPART_PANTS].Type = MODEL_ITEM + Type;
+            c->BodyPart[BODYPART_PANTS].Type = Data::Items::ToModelSlot(Type);
             c->BodyPart[BODYPART_PANTS].Level = Data->ItemLevel;
             c->BodyPart[BODYPART_PANTS].ExcellentFlags = Data->ExcellentFlags;
             c->BodyPart[BODYPART_PANTS].AncientDiscriminator = Data->AncientDiscriminator;
@@ -2416,7 +2419,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         }
         else
         {
-            c->BodyPart[BODYPART_GLOVES].Type = MODEL_ITEM + Type;
+            c->BodyPart[BODYPART_GLOVES].Type = Data::Items::ToModelSlot(Type);
             c->BodyPart[BODYPART_GLOVES].Level = Data->ItemLevel;
             c->BodyPart[BODYPART_GLOVES].ExcellentFlags = Data->ExcellentFlags;
             c->BodyPart[BODYPART_GLOVES].AncientDiscriminator = Data->AncientDiscriminator;
@@ -2432,7 +2435,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         }
         else
         {
-            c->BodyPart[BODYPART_BOOTS].Type = MODEL_ITEM + Type;
+            c->BodyPart[BODYPART_BOOTS].Type = Data::Items::ToModelSlot(Type);
             c->BodyPart[BODYPART_BOOTS].Level = Data->ItemLevel;
             c->BodyPart[BODYPART_BOOTS].ExcellentFlags = Data->ExcellentFlags;
             c->BodyPart[BODYPART_BOOTS].AncientDiscriminator = Data->AncientDiscriminator;
@@ -2441,10 +2444,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
     case 7:
         if (Data->ItemGroup == 0xFF)
         {
-            if (c->Wing.Type == MODEL_WING_OF_RUIN || c->Wing.Type == MODEL_CAPE_OF_LORD ||
-                c->Wing.Type == MODEL_WING + 130 || c->Wing.Type == MODEL_CAPE_OF_FIGHTER ||
-                c->Wing.Type == MODEL_CAPE_OF_OVERRULE || c->Wing.Type == MODEL_WING + 135 ||
-                c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
+            if (GameLogic::Items::IsClothWingModel(c->Wing.Type))
             {
                 DeleteCloth(c, o);
             }
@@ -2452,12 +2452,9 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         }
         else
         {
-            c->Wing.Type = MODEL_ITEM + Type;
+            c->Wing.Type = Data::Items::ToModelSlot(Type);
             c->Wing.Level = 0;
-            if (c->Wing.Type == MODEL_WING_OF_RUIN || c->Wing.Type == MODEL_CAPE_OF_LORD ||
-                c->Wing.Type == MODEL_WING + 130 || c->Wing.Type == MODEL_CAPE_OF_FIGHTER ||
-                c->Wing.Type == MODEL_CAPE_OF_OVERRULE || c->Wing.Type == MODEL_WING + 135 ||
-                c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
+            if (GameLogic::Items::IsClothWingModel(c->Wing.Type))
             {
                 DeleteCloth(c, o);
             }
@@ -2472,7 +2469,7 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         }
         else
         {
-            c->Helper.Type = MODEL_ITEM + Type;
+            c->Helper.Type = Data::Items::ToModelSlot(Type);
             c->Helper.Level = 0;
             switch (Type)
             {
@@ -2686,16 +2683,19 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
         return;
     }
 
-    int Offset = sizeof(PWHEADER_DEFAULT_WORD);
+    std::size_t Offset = sizeof(PWHEADER_DEFAULT_WORD);
 
     for (int i = 0; i < Data->Value; i++)
     {
-        auto Data2 = safe_cast<PCREATE_TRANSFORM_EXTENDED>(ReceiveBuffer.subspan(Offset));
-        if (Data2 == nullptr)
+        const auto EntryLength = Network::Viewport::TransformViewportEntryLength(ReceiveBuffer, Offset);
+        if (!EntryLength)
         {
             assert(false);
             return;
         }
+
+        // Checked above: the fixed fields and the s_BuffCount buffs of the entry are in the packet.
+        auto Data2 = reinterpret_cast<PCREATE_TRANSFORM_EXTENDED*>(const_cast<BYTE*>(ReceiveBuffer.data() + Offset));
 
         WORD Key = ((WORD)(Data2->KeyH) << 8) + Data2->KeyL;
         int CreateFlag = (Key >> 15);
@@ -2799,7 +2799,7 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
             ChangeCharacterExt(FindCharacterIndex(Key), Data2->Equipment);
         }
 
-        Offset += (sizeof(PCREATE_TRANSFORM_EXTENDED) - (sizeof(BYTE) * (MAX_BUFF_SLOT_INDEX - Data2->s_BuffCount)));
+        Offset += *EntryLength;
     }
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x45 [ReceiveCreateTransformViewport(%d)]", Data->Value);
@@ -3075,9 +3075,14 @@ void ReceiveCreateSummonViewport(const BYTE* ReceiveBuffer)
         if (Type < 152 || Type > 158)
         {
             wchar_t Temp[100]{};
-            wcscat(c->ID, I18N::Game::Of);
             CMultiLanguage::ConvertFromUtf8(Temp, Data2->ID, MAX_USERNAME_SIZE);
-            wcscat(c->ID, Temp);
+
+            // The localized text carries both placeholders, so a language can order the
+            // monster and its owner the way its grammar needs, with its own separator.
+            // _TRUNCATE: swprintf_s would abort the MSVC client on a long name.
+            wchar_t OwnedName[MAX_MONSTER_NAME + 1]{};
+            _snwprintf_s(OwnedName, std::size(OwnedName), _TRUNCATE, I18N::Game::SummonedMonsterOwner, c->ID, Temp);
+            wcscpy(c->ID, OwnedName);
 
             CMultiLanguage::ConvertFromUtf8(c->OwnerID, Data2->ID, MAX_USERNAME_SIZE);
             c->OwnerID[MAX_USERNAME_SIZE] = 0;
@@ -6157,9 +6162,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
             UI::Chat::PostSystem(szMessage, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
             int Type = pickedItem->Type;
-            if (Type == ITEM_JEWEL_OF_BLESS || Type == ITEM_JEWEL_OF_SOUL || Type == ITEM_JEWEL_OF_LIFE ||
-                Type == ITEM_JEWEL_OF_CHAOS || Type == ITEM_JEWEL_OF_CREATION || Type == INDEX_COMPILED_CELE ||
-                Type == INDEX_COMPILED_SOUL || Type == ITEM_JEWEL_OF_GUARDIAN)
+            if (GameLogic::Items::IsJewelItem(pickedItem) || Type == INDEX_COMPILED_CELE || Type == INDEX_COMPILED_SOUL)
                 PlayBuffer(SOUND_JEWEL01, &Hero->Object);
             else if (Type == ITEM_GEMSTONE)
                 PlayBuffer(SOUND_JEWEL02, &Hero->Object);
@@ -6549,6 +6552,64 @@ void ReceiveTradeYourInventoryExtended(std::span<const BYTE> ReceiveBuffer)
     UI::Trade::PartnerItemAdded(Data->Index, itemData);
 }
 
+namespace
+{
+// The message a finished combination writes to the system log: a format and,
+// where the format has a placeholder, the operation it names.
+struct MixResultText
+{
+    const wchar_t* Format;
+    const wchar_t* Operation;
+};
+
+MixResultText GetMixResultText(int mixType, bool succeeded)
+{
+    switch (mixType)
+    {
+    case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
+    case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
+    case SEASON3A::MIXTYPE_GOBLIN_ADD380:
+    case SEASON3A::MIXTYPE_EXTRACT_SEED:
+    case SEASON3A::MIXTYPE_SEED_SPHERE:
+        return {succeeded ? I18N::Game::ChaosCombinationHasSucceeded : I18N::Game::ChaosCombinationHasFailed, nullptr};
+    case SEASON3A::MIXTYPE_OSBOURNE:
+        return {succeeded ? I18N::Game::SWasSuccessful : I18N::Game::SHasFailed, I18N::Game::OperationRefining};
+    case SEASON3A::MIXTYPE_JERRIDON:
+        return {succeeded ? I18N::Game::SWasSuccessful : I18N::Game::SHasFailed, I18N::Game::OperationRestoring};
+    case SEASON3A::MIXTYPE_ELPIS:
+        return {succeeded ? I18N::Game::SWasSuccessful : I18N::Game::SHasFailed2112, I18N::Game::OperationRefining};
+    case SEASON3A::MIXTYPE_CHAOS_CARD:
+        return {succeeded ? I18N::Game::SWasSuccessful : I18N::Game::SHasFailed2112,
+                I18N::Game::OperationChaosCardCombination};
+    case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
+        return {succeeded ? I18N::Game::SWasSuccessful : I18N::Game::SHasFailed2112,
+                I18N::Game::OperationCherryBlossomAssembly};
+    default:
+        return {nullptr, nullptr};
+    }
+}
+
+void AddMixResultMessage(bool succeeded)
+{
+    const MixResultText text = GetMixResultText(g_MixRecipeMgr.GetMixInventoryType(), succeeded);
+    if (text.Format == nullptr)
+    {
+        return;
+    }
+
+    const auto messageType = succeeded ? mu::ui::window::TYPE_SYSTEM_MESSAGE : mu::ui::window::TYPE_ERROR_MESSAGE;
+    if (text.Operation == nullptr)
+    {
+        UI::Chat::PostSystem(text.Format, messageType);
+        return;
+    }
+
+    wchar_t szText[256] = {};
+    mu_swprintf(szText, text.Format, text.Operation);
+    UI::Chat::PostSystem(szText, messageType);
+}
+} // namespace
+
 void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
 {
     auto Data = safe_cast<PHEADER_DEFAULT_ITEM_EXTENDED>(ReceiveBuffer);
@@ -6573,44 +6634,7 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
             break;
         }
         UI::Mix::SetFinished();
-        wchar_t szText[256] = {
-            0,
-        };
-        switch (g_MixRecipeMgr.GetMixInventoryType())
-        {
-        case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
-        case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
-        case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-        case SEASON3A::MIXTYPE_EXTRACT_SEED:
-        case SEASON3A::MIXTYPE_SEED_SPHERE:
-            mu_swprintf(szText, I18N::Game::ChaosCombinationHasFailed);
-            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
-            break;
-            // 			case SEASON3A::MIXTYPE_TRAINER:
-            // 				wprintf(szText, I18N::Game::ResurrectionFailed);	// 부활 실패
-            // 				UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
-            // 				break;
-        case SEASON3A::MIXTYPE_OSBOURNE:
-            mu_swprintf(szText, I18N::Game::SHasFailed, I18N::Game::Refine);
-            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_JERRIDON:
-            mu_swprintf(szText, I18N::Game::SHasFailed, I18N::Game::Restore);
-            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_ELPIS:
-            mu_swprintf(szText, I18N::Game::SHasFailed2112, I18N::Game::Refine);
-            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_CHAOS_CARD:
-            mu_swprintf(szText, I18N::Game::SHasFailed2112, I18N::Game::ChaosCardCombination);
-            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-            mu_swprintf(szText, I18N::Game::SHasFailed2112, I18N::Game::CherryBlossomsBranchesAssembly);
-            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
-            break;
-        }
+        AddMixResultMessage(false);
     }
     break;
     case 1:
@@ -6621,44 +6645,7 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
             break;
         }
         UI::Mix::SetFinished();
-        wchar_t szText[256] = {
-            0,
-        };
-        switch (g_MixRecipeMgr.GetMixInventoryType())
-        {
-        case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
-        case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
-        case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-        case SEASON3A::MIXTYPE_EXTRACT_SEED:
-        case SEASON3A::MIXTYPE_SEED_SPHERE:
-            mu_swprintf(szText, I18N::Game::ChaosCombinationHasSucceeded);
-            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-            break;
-            // 			case SEASON3A::MIXTYPE_TRAINER:
-            // 				wprintf(szText, I18N::Game::ResurrectionSuccessful);
-            // 				UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-            // 				break;
-        case SEASON3A::MIXTYPE_OSBOURNE:
-            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::Refine);
-            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_JERRIDON:
-            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::Restore);
-            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_ELPIS:
-            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::Refine);
-            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_CHAOS_CARD:
-            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::ChaosCardCombination);
-            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-            break;
-        case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::CherryBlossomsBranchesAssembly);
-            UI::Chat::PostSystem(szText, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-            break;
-        }
+        AddMixResultMessage(true);
 
         UI::Mix::ClearItems();
         UI::Mix::InsertItem(0, itemData);
@@ -7000,17 +6987,13 @@ void ReceivePK(const BYTE* ReceiveBuffer)
     break;
     case 5:
     {
-        wchar_t szTemp[100];
-        mu_swprintf(szTemp, L"%ls %d%ls", I18N::Game::_1stStageOutlaw, 1, I18N::Game::_2ndStageOutlaw);
-        wcscat(message, szTemp);
+        wcscat(message, I18N::Game::_1stStageOutlaw);
         UI::Chat::PostSystem(message, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     break;
     case 6:
     {
-        wchar_t szTemp[100];
-        mu_swprintf(szTemp, L"%ls %d%ls", I18N::Game::_1stStageOutlaw, 2, I18N::Game::_2ndStageOutlaw);
-        wcscat(message, szTemp);
+        wcscat(message, I18N::Game::_2ndStageOutlaw);
         UI::Chat::PostSystem(message, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     break;
@@ -7112,7 +7095,8 @@ BOOL ReceiveTrade(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     auto Data = (LPPCHATING)ReceiveBuffer;
     wchar_t requester[MAX_USERNAME_SIZE + 1]{};
     CMultiLanguage::ConvertFromUtf8(requester, Data->ID);
-    UI::Trade::RequestReceived(requester);
+    const bool asked = UI::Trade::RequestReceived(requester);
+    App::Control::Events::RecordTradeRequested(Data->ID, asked);
 
     return (TRUE);
 }
@@ -7122,7 +7106,8 @@ void ReceiveTradeResult(const BYTE* ReceiveBuffer)
     auto Data = (LPPTRADE)ReceiveBuffer;
     wchar_t partnerName[MAX_USERNAME_SIZE + 1]{};
     CMultiLanguage::ConvertFromUtf8(partnerName, Data->ID, MAX_USERNAME_SIZE);
-    const UI::Trade::Partner partner{ partnerName, Data->Level, Data->GuildKey };
+    // The server sends TradePartnerLevel big-endian.
+    const UI::Trade::Partner partner{ partnerName, ntoh16(Data->Level), Data->GuildKey };
     switch (Data->SubCode)
     {
     case 0: UI::Trade::RequestAnswered(UI::Trade::RequestReply::Declined, partner); break;
@@ -7130,6 +7115,7 @@ void ReceiveTradeResult(const BYTE* ReceiveBuffer)
     case 2: UI::Trade::RequestAnswered(UI::Trade::RequestReply::Unavailable, partner); break;
     default: break;
     }
+    App::Control::Events::RecordTradeAnswer(Data->SubCode, Data->ID);
 }
 
 void ReceiveTradeYourInventoryDelete(const BYTE* ReceiveBuffer)
@@ -7167,6 +7153,7 @@ void ReceiveTradeYourResult(const BYTE* ReceiveBuffer)
     case 2: UI::Trade::PartnerConfirmChanged(UI::Trade::PartnerConfirm::BothReset); break;
     default: UI::Trade::PartnerConfirmChanged(UI::Trade::PartnerConfirm::Unchanged); break;
     }
+    App::Control::Events::RecordTradePartnerConfirm(Data->Value);
 }
 
 void ReceiveTradeExit(const BYTE* ReceiveBuffer)
@@ -7190,6 +7177,7 @@ void ReceiveTradeExit(const BYTE* ReceiveBuffer)
     case 4: UI::Trade::Closed(UI::Trade::CloseReason::ReinforcedItem); break;
     default: UI::Trade::Closed(UI::Trade::CloseReason::Completed); break;
     }
+    App::Control::Events::RecordTradeClosed(Data->Value);
 }
 
 void ReceivePing(const BYTE* ReceiveBuffer)
@@ -7244,7 +7232,9 @@ void ReceiveParty(const BYTE* ReceiveBuffer)
     };
     cfg.onAccept = [] { SocketClient->ToGameServer()->SendPartyInviteResponse(true, PartyKey); };
     cfg.onCancel = [] { SocketClient->ToGameServer()->SendPartyInviteResponse(false, PartyKey); };
+    cfg.tag = "party-invite";
     UI::Dialogs::ShowConfirm(std::move(cfg));
+    App::Control::Events::RecordPartyInvited(PartyKey);
 }
 
 void ReceivePartyResult(const BYTE* ReceiveBuffer)
@@ -7281,6 +7271,7 @@ void ReceivePartyResult(const BYTE* ReceiveBuffer)
         UI::Chat::PostSystem(I18N::Game::PartiesAreNotActivatedWithinABattleZone, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     }
+    App::Control::Events::RecordPartyAnswer(Data->Value);
 }
 
 void ReceivePartyList(const BYTE* ReceiveBuffer)
@@ -8498,26 +8489,20 @@ void ReceiveMixExit(const BYTE* ReceiveBuffer)
 void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_ANS_JEWEL_MIX)ReceiveBuffer;
-    wchar_t sBuf[256];
-    memset(sBuf, 0, 256);
     switch (Data->m_iResult)
     {
     case 0:
     case 2:
     case 3:
     {
-        mu_swprintf(sBuf, L"%ls%ls %ls", I18N::Game::JewelCombination, I18N::Game::To1816,
-                    I18N::Game::EntranceIsAllowedForDTimes);
-        UI::Chat::PostSystem(sBuf, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::JewelCombinationFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
     case 1:
     {
-        wchar_t szUnityResultText[256] = { 0, };
-        mu_swprintf(szUnityResultText, L"%ls%ls %ls", I18N::Game::JewelCombination, I18N::Game::To1816, I18N::Game::CongratulationsYouHaveSuccessfully);
         UI::Dialogs::ConfirmRequest cfg;
-        cfg.lines.push_back({ szUnityResultText, true });
+        cfg.lines.push_back({ I18N::Game::JewelCombinationSucceeded, true });
         cfg.onAccept = [] { COMGEM::Exit(); };
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
@@ -8540,26 +8525,20 @@ void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
 void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_ANS_JEWEL_UNMIX)ReceiveBuffer;
-    wchar_t sBuf[256];
-    memset(sBuf, 0, 256);
 
     switch (Data->m_iResult)
     {
     case 0:
     case 5:
     {
-        mu_swprintf(sBuf, L"%ls%ls %ls", I18N::Game::DismantleJewel, I18N::Game::To1816,
-                    I18N::Game::EntranceIsAllowedForDTimes);
-        UI::Chat::PostSystem(sBuf, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::JewelDismantlingFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
     case 1:
     {
-        wchar_t szDisjointResultText[256] = { 0, };
-        mu_swprintf(szDisjointResultText, L"%ls%ls %ls", I18N::Game::DismantleJewel, I18N::Game::To1816, I18N::Game::CongratulationsYouHaveSuccessfully);
         UI::Dialogs::ConfirmRequest cfg;
-        cfg.lines.push_back({ szDisjointResultText, true });
+        cfg.lines.push_back({ I18N::Game::JewelDismantlingSucceeded, true });
         cfg.onAccept = [] { COMGEM::Exit(); };
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
@@ -10193,6 +10172,7 @@ void ReceiveQuestState(const BYTE* ReceiveBuffer)
     g_csQuest.setQuestList(Data->m_byQuestIndex, Data->m_byState);
     UI::Windows::HideAll();
     UI::Windows::Show(mu::ui::window::INTERFACE_NPCQUEST);
+    App::Control::Events::RecordQuestStateChanged(Data->m_byQuestIndex, g_csQuest.getQuestState2(Data->m_byQuestIndex));
 }
 
 void ReceiveQuestResult(const BYTE* ReceiveBuffer)
@@ -10204,6 +10184,8 @@ void ReceiveQuestResult(const BYTE* ReceiveBuffer)
         g_csQuest.setQuestList(Data->m_byQuestIndex, Data->m_byState);
         UI::Windows::HideAll();
         UI::Windows::Show(mu::ui::window::INTERFACE_NPCQUEST);
+        App::Control::Events::RecordQuestStateChanged(Data->m_byQuestIndex,
+                                                      g_csQuest.getQuestState2(Data->m_byQuestIndex));
     }
 }
 
@@ -10355,6 +10337,7 @@ void ReceiveQuestPrize(const BYTE* ReceiveBuffer)
     default:
         break;
     }
+    App::Control::Events::RecordQuestPrize(Key, Data->m_byReparation, Data->m_byNumber);
 }
 
 void ReceiveQuestMonKillInfo(const BYTE* ReceiveBuffer)
@@ -10577,55 +10560,58 @@ void ReceiveReward(const BYTE* ReceiveBuffer)
 }
 #endif // PBG_ADD_GENSRANKING
 
+namespace
+{
+// The stat a fruit changes and the text id which names it.
+struct FruitStat
+{
+    WORD* Value;
+    int TextIndex;
+};
+
+FruitStat GetFruitStat(BYTE fruit)
+{
+    switch (fruit)
+    {
+    case 0:
+        return {&CharacterAttribute->Energy, 168};
+    case 1:
+        return {&CharacterAttribute->Vitality, 169};
+    case 2:
+        return {&CharacterAttribute->Dexterity, 167};
+    case 3:
+        return {&CharacterAttribute->Strength, 166};
+    case 4:
+        return {&CharacterAttribute->Charisma, 1900};
+    default:
+        return {nullptr, 0};
+    }
+}
+
+void ShowFruitStatMessage(const wchar_t* format, const FruitStat& stat, WORD point)
+{
+    wchar_t text[MAX_GLOBAL_TEXT_STRING];
+    mu_swprintf(text, format, I18N::Game::Lookup(stat.TextIndex), point);
+    mu::ui::window::CreateOkMessageBox(text);
+}
+} // namespace
+
 void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPMSG_USE_STAT_FRUIT)ReceiveBuffer;
 
     BYTE result = Data->result;
-    BYTE fruit = Data->btFruitType;
     WORD point = Data->btStatValue;
-
-    wchar_t strText[MAX_GLOBAL_TEXT_STRING];
+    const FruitStat stat = GetFruitStat(Data->btFruitType);
 
     switch (result)
     {
     case 0x00:
-        if (fruit >= 0 && fruit <= 4)
+        if (stat.Value != nullptr)
         {
-            int index;
-
-            switch (fruit)
-            {
-            case 0:
-                CharacterAttribute->Energy += point;
-                index = 168;
-                break;
-
-            case 1:
-                CharacterAttribute->Vitality += point;
-                index = 169;
-                break;
-
-            case 2:
-                CharacterAttribute->Dexterity += point;
-                index = 167;
-                break;
-
-            case 3:
-                CharacterAttribute->Strength += point;
-                index = 166;
-                break;
-            case 4:
-                CharacterAttribute->Charisma += point;
-                index = 1900;
-                break;
-            }
-
+            *stat.Value += point;
             CharacterAttribute->AddPoint += point;
-
-            mu_swprintf(strText, I18N::Game::SFruitStatDPointsHaveBeenS, I18N::Game::Lookup(index), point,
-                        I18N::Game::Create);
-            mu::ui::window::CreateOkMessageBox(strText);
+            ShowFruitStatMessage(I18N::Game::FruitStatIncreased, stat, point);
         }
         break;
 
@@ -10634,50 +10620,15 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
         break;
 
     case 0x02:
-    {
-        mu_swprintf(strText, I18N::Game::ThisStatCannotBeSAnymore, I18N::Game::Create);
-        mu::ui::window::CreateOkMessageBox(strText);
-    }
-    break;
+        mu::ui::window::CreateOkMessageBox(I18N::Game::FruitStatCannotIncrease);
+        break;
     case 0x03:
-        if (fruit >= 0 && fruit <= 4)
+        if (stat.Value != nullptr)
         {
-            int index;
-
-            switch (fruit)
-            {
-            case 0:
-                CharacterAttribute->Energy -= point;
-                index = 168;
-                break;
-
-            case 1:
-                CharacterAttribute->Vitality -= point;
-                index = 169;
-                break;
-
-            case 2:
-                CharacterAttribute->Dexterity -= point;
-                index = 167;
-                break;
-
-            case 3:
-                CharacterAttribute->Strength -= point;
-                index = 166;
-                break;
-            case 4:
-                CharacterAttribute->Charisma -= point;
-                index = 1900;
-                break;
-            }
-
+            *stat.Value -= point;
             CharacterAttribute->LevelUpPoint += point;
             CharacterAttribute->wMinusPoint += point;
-
-            wchar_t strText[128];
-            mu_swprintf(strText, I18N::Game::SFruitStatDPointsHaveBeenS, I18N::Game::Lookup(index), point,
-                        I18N::Game::Decrease);
-            mu::ui::window::CreateOkMessageBox(strText);
+            ShowFruitStatMessage(I18N::Game::FruitStatDecreased, stat, point);
         }
         break;
 
@@ -10686,59 +10637,21 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
         break;
 
     case 0x05:
-    {
-        wchar_t strText[128];
-        mu_swprintf(strText, I18N::Game::ThisStatCannotBeSAnymore, I18N::Game::Decrease);
-        mu::ui::window::CreateOkMessageBox(strText);
-    }
-    break;
+        mu::ui::window::CreateOkMessageBox(I18N::Game::FruitStatCannotDecrease);
+        break;
     case 0x06:
-        if (fruit >= 0 && fruit <= 4)
+        if (stat.Value != nullptr)
         {
-            wchar_t Text[MAX_GLOBAL_TEXT_STRING];
-            int index;
-
-            switch (fruit)
-            {
-            case 0:
-                CharacterAttribute->Energy -= point;
-                index = 168;
-                break;
-
-            case 1:
-                CharacterAttribute->Vitality -= point;
-                index = 169;
-                break;
-
-            case 2:
-                CharacterAttribute->Dexterity -= point;
-                index = 167;
-                break;
-
-            case 3:
-                CharacterAttribute->Strength -= point;
-                index = 166;
-                break;
-            case 4:
-                CharacterAttribute->Charisma -= point;
-                index = 1900;
-                break;
-            }
-
+            *stat.Value -= point;
             CharacterAttribute->LevelUpPoint += point;
-
-            mu_swprintf(Text, I18N::Game::SFruitStatDPointsHaveBeenS, I18N::Game::Lookup(index), point,
-                        I18N::Game::Decrease);
-            mu::ui::window::CreateOkMessageBox(Text);
+            ShowFruitStatMessage(I18N::Game::FruitStatDecreased, stat, point);
         }
         break;
     case 0x07:
         mu::ui::window::CreateOkMessageBox(I18N::Game::FruitDecreaseIsFailed);
         break;
     case 0x08:
-        wchar_t Text[MAX_GLOBAL_TEXT_STRING];
-        mu_swprintf(Text, I18N::Game::ThisStatCannotBeSAnymore, I18N::Game::Decrease);
-        mu::ui::window::CreateOkMessageBox(Text);
+        mu::ui::window::CreateOkMessageBox(I18N::Game::FruitStatCannotDecrease);
         break;
     case 0x10:
     {
@@ -11192,7 +11105,7 @@ void ReceiveHuntZoneEnter(const BYTE* ReceiveBuffer)
     case 0:
     {
         UI::Dialogs::ConfirmRequest cfg;
-        cfg.lines = { { I18N::Game::UnfortunatelyYouHaveFailed, false } };
+        cfg.lines = { { I18N::Game::RequestHasFailed, false } };
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     break;
@@ -11219,7 +11132,7 @@ void ReceiveBCNPCList(const BYTE* ReceiveBuffer, int Size)
     switch (Data->btResult)
     {
     case 0:
-        UI::Chat::PostSystem(I18N::Game::UnfortunatelyYouHaveFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::RequestHasFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -11246,7 +11159,7 @@ void ReceiveBCDeclareGuildList(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        UI::Chat::PostSystem(I18N::Game::UnfortunatelyYouHaveFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::RequestHasFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -11284,7 +11197,7 @@ void ReceiveBCGuildList(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        UI::Chat::PostSystem(I18N::Game::UnfortunatelyYouHaveFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        UI::Chat::PostSystem(I18N::Game::RequestHasFailed, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -11663,7 +11576,7 @@ void ReceiveCastleHuntZoneInfo(const BYTE* ReceiveBuffer)
     if (pData->m_byResult == 0)
     {
         UI::Dialogs::ConfirmRequest cfg;
-        cfg.lines.push_back({ I18N::Game::UnfortunatelyYouHaveFailed, false });
+        cfg.lines.push_back({ I18N::Game::RequestHasFailed, false });
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
     else
@@ -11680,7 +11593,7 @@ void ReceiveCastleHuntZoneResult(const BYTE* ReceiveBuffer)
     if (pData->m_byResult == 0)
     {
         UI::Dialogs::ConfirmRequest cfg;
-        cfg.lines.push_back({ I18N::Game::UnfortunatelyYouHaveFailed, false });
+        cfg.lines.push_back({ I18N::Game::RequestHasFailed, false });
         UI::Dialogs::ShowConfirm(std::move(cfg));
     }
 }
@@ -11942,7 +11855,7 @@ void ReceiveCrywolfAltarContract(const BYTE* ReceiveBuffer)
             // CCry_Wolf_Get_Temple::OkBtnDown, not its own handler -- preserved here verbatim.
             cfg.onAccept = []
             {
-                if (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
+                if (GameLogic::Items::IsHornMountModel(Hero->Helper.Type))
                 {
                     UI::Dialogs::ConfirmRequest dontCfg;
                     dontCfg.lines.push_back({ I18N::Game::ContractCanTBeMadeWhenYouAreOnAMount, false });
@@ -12269,7 +12182,7 @@ bool ReceiveRegistLuckyCoin(const BYTE* ReceiveBuffer)
     case LuckyCoinRegistrationResult::InsufficientItems:
     {
         wchar_t szText[100] = { 0, };
-        mu_swprintf(szText, I18N::Game::YouAreLackOfSItems, I18N::Game::Register);
+        mu_swprintf(szText, I18N::Game::YouAreLackOfSItems, I18N::Game::OperationRegistration);
         UI::Dialogs::ConfirmRequest cfg;
         cfg.lines.push_back({ szText, false });
         UI::Dialogs::ShowConfirm(std::move(cfg));

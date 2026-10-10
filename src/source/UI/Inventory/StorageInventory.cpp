@@ -13,6 +13,7 @@
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Items/TradeRestrictions.h"
 #include "UI/Inventory/MyInventory.h"
 #include "Scenes/SceneCore.h" // g_iLengthAuthorityCode -- the WEBZEN password field's maxLength below
 
@@ -580,7 +581,7 @@ void CStorageInventory::ProcessInventoryCtrl()
         }
         else
         {
-            if (::IsStoreBan(pItemObj))
+            if (GameLogic::Items::IsStoreBan(pItemObj))
             {
                 m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
             }
@@ -688,7 +689,7 @@ void CStorageInventory::SendRequestItemToMyInven(ITEM* pItemObj, int nStorageInd
 
 void CStorageInventory::SendRequestItemToStorage(ITEM* pItemObj, int nInvenIndex, int nStorageIndex)
 {
-    if (IsStoreBan(pItemObj))
+    if (GameLogic::Items::IsStoreBan(pItemObj))
     {
 #ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
         // MessageBox

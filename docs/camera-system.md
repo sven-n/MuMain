@@ -36,6 +36,11 @@ Tip: F10 is "global" - toggling it once unlocks the wheel for whichever
 camera is active, and it stays unlocked through camera switches until you
 press F10 again.
 
+Type `$details on` in chat to see the active camera in the top-left
+corner: its field of view, angle, view distance, terrain range and culling
+planes, and for Orbital the zoom distance and how far you have rotated it.
+`$details off` hides it again.
+
 ---
 
 ## What's new

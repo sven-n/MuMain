@@ -11,6 +11,7 @@
 #include "I18N/All.h"
 
 #include "GameLogic/Items/ChangeRingManager.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Audio/DSPlaySound.h"
 
@@ -108,6 +109,7 @@ bool mu::ui::window::CKanturu2ndEnterNpc::UpdateKeyEvent()
         if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
             g_pNewUISystem->Hide(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC);
+            ClosingProcess();
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -145,6 +147,7 @@ bool mu::ui::window::CKanturu2ndEnterNpc::Update()
         else if (close)
         {
             g_pNewUISystem->Hide(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC);
+            ClosingProcess();
         }
     }
 
@@ -408,6 +411,7 @@ void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdEnter(UI::Kanturu::En
     DeleteJoint(BITMAP_JOINT_ENERGY, NULL);
 
     g_pNewUISystem->Hide(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC);
+    ClosingProcess();
 }
 
 void mu::ui::window::CKanturu2ndEnterNpc::SendRequestKanturu3rdInfo()
@@ -420,6 +424,13 @@ void mu::ui::window::CKanturu2ndEnterNpc::SendRequestKanturu3rdEnter()
 {
     SocketClient->ToGameServer()->SendKanturuEnterRequest();
     m_bEnterRequest = true;
+}
+
+void mu::ui::window::CKanturu2ndEnterNpc::ClosingProcess()
+{
+    // Releases the server-side NPC dialog. Never on the Enter path: the server drops an enter
+    // request once the dialog is closed, and the enter goes out at animation frame 42.
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 void mu::ui::window::CKanturu2ndEnterNpc::ProcessRefresh()
@@ -443,48 +454,59 @@ void mu::ui::window::CKanturu2ndEnterNpc::ProcessEnter()
             return;
         }
 
-        ITEM *pItemHelper, *pItemRingLeft, *pItemRingRight, *pItemWing;
-        pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
-        pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
-        pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
-        pItemWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
-
-        if (pItemHelper->Type == ITEM_HORN_OF_UNIRIA)
-        {
-            CreateMessageBox(POPUP_UNIRIA);
-            return;
-        }
-
-        if (g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type) ||
-            g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
-        {
-            CreateMessageBox(POPUP_CHANGERING);
-            return;
-        }
-
-        if (!((pItemWing->Type >= ITEM_WINGS_OF_ELF && pItemWing->Type <= ITEM_WINGS_OF_DARKNESS) ||
-              (pItemWing->Type >= ITEM_WING_OF_STORM && pItemWing->Type <= ITEM_WING_OF_DIMENSION) ||
-              (ITEM_WING + 130 <= pItemWing->Type && pItemWing->Type <= ITEM_WING + 134) ||
-              pItemHelper->Type == ITEM_HORN_OF_DINORANT || pItemHelper->Type == ITEM_DARK_HORSE_ITEM ||
-              pItemWing->Type == ITEM_CAPE_OF_LORD || pItemHelper->Type == ITEM_HORN_OF_FENRIR ||
-              (pItemWing->Type >= ITEM_CAPE_OF_FIGHTER && pItemWing->Type <= ITEM_CAPE_OF_OVERRULE) ||
-              (pItemWing->Type == ITEM_WING + 135)))
-        {
-            CreateMessageBox(POPUP_NOT_HELPER);
-            return;
-        }
-
-        if (pItemRingLeft->Type == ITEM_MOONSTONE_PENDANT || pItemRingRight->Type == ITEM_MOONSTONE_PENDANT)
-        {
-            SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_ROT);
-            m_bNpcAnimation = true;
-        }
-        else
-        {
-            CreateMessageBox(POPUP_NOT_MUNSTONE);
-            return;
-        }
+        ValidateEquipmentForEntry();
     }
+}
+
+void mu::ui::window::CKanturu2ndEnterNpc::RejectEnterRequest(MSGBOX_TYPE popup)
+{
+    CreateMessageBox(popup);
+    ClosingProcess();
+}
+
+bool mu::ui::window::CKanturu2ndEnterNpc::IsRidingUniria(ITEM* pItemHelper)
+{
+    return pItemHelper->Type == ITEM_HORN_OF_UNIRIA;
+}
+
+bool mu::ui::window::CKanturu2ndEnterNpc::HasMoonstonePendant(ITEM* pItemRingLeft, ITEM* pItemRingRight)
+{
+    return pItemRingLeft->Type == ITEM_MOONSTONE_PENDANT || pItemRingRight->Type == ITEM_MOONSTONE_PENDANT;
+}
+
+void mu::ui::window::CKanturu2ndEnterNpc::ValidateEquipmentForEntry()
+{
+    ITEM* pItemHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
+    ITEM* pItemRingLeft = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
+    ITEM* pItemRingRight = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
+    ITEM* pItemWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
+
+    if (IsRidingUniria(pItemHelper))
+    {
+        RejectEnterRequest(POPUP_UNIRIA);
+        return;
+    }
+
+    if (g_ChangeRingMgr->CheckMoveMap(pItemRingLeft->Type, pItemRingRight->Type))
+    {
+        RejectEnterRequest(POPUP_CHANGERING);
+        return;
+    }
+
+    if (!GameLogic::Items::HasFlightEquipment(pItemHelper, pItemWing))
+    {
+        RejectEnterRequest(POPUP_NOT_HELPER);
+        return;
+    }
+
+    if (!HasMoonstonePendant(pItemRingLeft, pItemRingRight))
+    {
+        RejectEnterRequest(POPUP_NOT_MUNSTONE);
+        return;
+    }
+
+    SetAction(m_pNpcObject, KANTURU2ND_NPC_ANI_ROT);
+    m_bNpcAnimation = true;
 }
 
 void mu::ui::window::CKanturu2ndEnterNpc::BindRmlModel(Rml::DataModelConstructor& c, KanturuEnterRmlModel& model)

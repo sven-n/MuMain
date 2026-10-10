@@ -17,6 +17,12 @@ namespace Editor::Files
     // `savedPath` is the path the file was written to (relative to the working dir).
     // Returns the copy's path, or an empty string if the copy failed.
     std::wstring MirrorNextToExe(const std::wstring& savedPath, int world);
+
+    // Shows a file-open dialog. `filter` uses the Win32 format
+    // (L"Name\0*.ext\0All Files\0*.*\0"). Returns false when the dialog was
+    // cancelled. The dialog is Windows-only for now: on other platforms this
+    // logs that to the editor console and returns false.
+    bool PickFileToOpen(const wchar_t* filter, const wchar_t* title, std::wstring& outPath);
 }
 
 #endif // _EDITOR

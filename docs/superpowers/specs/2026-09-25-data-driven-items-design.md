@@ -1,0 +1,1043 @@
+# Data-Driven Items Design (WIP)
+
+> **Temporary working document.** It is used to refine the plan on the
+> `refactor/data-driven-items` branch and will be removed once the work
+> has landed.
+>
+> Based on MuMain `upstream/main` @ `7187ec2a` and OpenMU `master` @
+> `1e50df3bd`.
+
+## Goal
+
+Replace hardcoded item knowledge in the client with **item data plus rule
+code**:
+
+- All item data (stats, flags, categories, names, models) lives in data
+  files, is loaded into an **in-memory item database** at startup, and rule
+  code reads it instead of hardcoded item lists.
+- Runtime lookups are **as fast as hardcoded checks** (see section 1).
+- The data model is **equivalent to OpenMU's `ItemDefinition`** where both
+  sides overlap, so data can be moved between client and server with
+  file-based import and export on both sides.
+- Items can be **added and removed** on client and server, and linked to
+  their model data with MuEditor tools.
+- Every data field can be edited in **focused MuEditor editors** (several
+  small tools, not one huge table).
+- Item names are **translatable**; logs always use a stable, language-neutral
+  identifier.
+
+Scope: **items only.** What goes beyond items (effects and particles,
+skills, monsters and NPCs, and the look format and editing rules they
+share with items) is planned in the
+[roadmap](2026-09-29-data-driven-content-roadmap-design.md).
+
+## Decisions so far
+
+| # | Topic | Decision |
+|---|---|---|
+| D1 | Data format | JSON files as the source of truth, loaded once at startup into flat tables. Runtime speed must be as close to hardcoded as possible; a binary cache is added only if startup parsing is measurably too slow. Chosen over a database or SQL text files; see section 2. |
+| D2 | Exchange format with OpenMU | JSON keyed by `(Group, Number)`, not SQL `UPDATE` statements (SQL would break whenever OpenMU's database schema changes). |
+| D3 | Server rules | Check what OpenMU already enforces (see "Server-side checks today"), then extend OpenMU's tables or add new ones following OpenMU's usual workflow. |
+| D4 | Sync | File-based import and export on **both** sides. No live connection or pull button. |
+| D5 | Editors | Several focused editors instead of one big table. |
+| D6 | Add/remove | Items can be created and removed on client and server; MuEditor tools link a new item to its model data. |
+| D7 | File layout | One JSON file per item group. Splitting the mixed groups 12–15 into category files was dropped: with new groups (D21) the group *is* the category, so the file layout is decided together with phase 12. |
+| D8 | Target version | Season 6 only for now. Other versions are easier to add once the data-driven setup exists. |
+| D9 | Identity | `(group, number)` only, no readable string key. Logs always show the English name next to it. Once rules read data instead of hardcoded ids, a readable key has no extra benefit. |
+| D10 | bmd files | The JSON files are the **only** source of truth for items in the game. The game no longer reads `Item_<lang>.bmd`. MuEditor gets "Import from bmd" and "Export as bmd"; fields the bmd format does not have are left out on export and keep their current or default values on import. **Update (2026-09-26):** the repo no longer ships `Item_<lang>.bmd`, and the editor's bmd import was removed; only "Export as bmd" is left. |
+| D11 | Exchange scope | Item sets and drop settings are separate exchange files, not part of the item file. |
+| D12 | Id ranges | No reserved number ranges for custom items, and no range checks (`type >= X && type <= Y`) in new code; everything an item "is" comes from its data. OpenMU must keep supporting the original Season 6 client **and** this client (see section 7). |
+| D13 | Other item files | `ItemAddOption`, `SocketItem`, `Mix`, `pet` and set options are decided later, when we know more. |
+| D14 | Item options | The item file only holds **links** to the option groups an item can have (Luck, additional option, excellent, wing, harmony, guardian, socket, …). The option definitions (values, chances, levels) live in their own files. Related data stays together in one file, e.g. an option definition with all its levels and values. |
+| D15 | Tooltips | Tooltips become data-driven with JSON data, converted from `ItemTooltip*` / `ItemLevelTooltip` (see "Unused item files in the repo"). Phase 8, after the item phases; moved earlier if the item changes turn out to need it. The tooltip bmd files stay in the repo until then. |
+| D16 | Unused item bmd copies | Removed on this branch; the game only loads `Item_<lang>.bmd`. |
+| D17 | Translations in phase 2 | Item names moved into phase 2, because the per-language bmd files were the only place the Portuguese and Spanish names existed. Names are `LocalizedString`s imported from all three files; the UI locale (the same setting as the `.resx` texts) picks the shown name, also when it changes at runtime. On disk, each item's `name` is an object of names by language (`{"en": "Blade", "es": "Espada", "pt": "Lâmina"}`, English first) in the item files; separate translation files were tried and dropped as extra maintenance. Phase 5 keeps only the translation tooling. |
+| D18 | Repairing the legacy data | The bmd import recovers names that ran past the 30-byte name field and takes the fields they overwrote from a language whose name did not reach them (defaults when none has them). Names that are not UTF-8 are read as Windows-1252. The changes are listed in the phase 2 PR and in `docs/item-data.md`. |
+| D19 | Editor sync | Every item editor change goes into the database right away (phase 2), so the editor and the database never differ. Moving the editor fully onto the database stays in phase 6. |
+| D22 | Model data files | Model and display data (model file, textures, inventory and ground display, cloth, effects) lives in separate files, `Data/Items/Models/GroupNN_*.json`, one per item group, items by `number`. It is client-only: the item files keep what client and server share, and only those take part in the OpenMU exchange. Separate files also keep the item files small and let the model editor and the stats editor change different files. |
+| D23 | Model slots | Two steps. **Own model slots (phase 4a–4c):** every item keeps its own model slot, `MODEL_ITEM + item type`, as today; the data only says which file is loaded into it, so the ~100 places that compute `+ MODEL_ITEM` / `- MODEL_ITEM` stay unchanged. **Shared models (phase 4d, right after them):** models become entries of their own, and items reference them by name, so several items can share one model (loaded once; 4d1, done). Every item keeps a slot of its own, and the conversions between item types and model slots go through one place, `ToModelSlot` / `ToItemType` (4d2), so a moved item can keep its slot (phase 12) and the named slots of items (`MODEL_KRIS`, …) stay valid. One slot per shared model, with objects keeping item types, is not planned: about 240 places identify items by their model slot (see "Item-specific code that is left"), and none of them gains anything while each item has its own slot. Phase 12 (level variants as items of their own) shares models without loading them twice. |
+| D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and an item effect (the item branches of `RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. The named looks are code for now; D25 moves what they are made of into data. |
+| D25 | Looks in data | Items keep naming their looks; what a named look is made of moves from code into data (phase 13). Skills, monsters and NPCs use the same look format, so the decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
+| D26 | Shared definitions | Defined once with a name and referenced by it; editors show where a definition is used and warn with that list before a shared definition changes. The decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
+| D21 | New item groups | *To discuss again when we reach phase 12.* Items may move into new groups (e.g. 16 = jewels, 17 = orbs) for the new client, while original Season 6 clients keep the old ids. Moved items keep their original id as a legacy id; OpenMU's Season 6 item serializer sends the legacy id, a serializer for the new client sends the new id. Planned after phases 3, 4 and OpenMU PR A, when little code depends on group numbers any more. |
+
+## Current state
+
+### Client (MuMain)
+
+| Area | Where | Notes |
+|---|---|---|
+| Item stats | `Data/Local/<lang>/Item_<lang>.bmd` → `CItemDataHandler` (`src/source/Data/DataHandler/ItemData/`) → `ITEM_ATTRIBUTE[MAX_ITEM]` | Fields defined once as X-macros in `Data/GameData/ItemData/ItemFieldDefs.h`. The file is per language, so stats are duplicated for every language. |
+| Item names | `ITEM_ATTRIBUTE::Name` (from the same per-language bmd) | No shared key between languages except the array index. |
+| Categories and rules | `GameLogic/Items/ItemCategories`, `TradeRestrictions`, `ShopRestrictions` (from PR sven-n/MuMain#625) | Now one source of truth, but still hardcoded item lists in C++. |
+| Models and textures | `OpenItems()` / `OpenItemTextures()` in `Engine/Object/ZzzOpenData.cpp` | Around 600 hardcoded lines mapping `MODEL_*` to `Data\Item\<File><n>.bmd`. The model id is always `MODEL_ITEM + itemType`, so every item slot already has a model slot. |
+| Item id space | `MAX_ITEM = MAX_ITEM_TYPE * MAX_ITEM_INDEX` (16 groups × 512) | Same limits as the network protocol, so new items must fit into free slots. |
+| Data files in the repo | `src/bin/Data/` (e.g. `src/bin/Data/Local/Eng/item_eng.bmd`), copied beside `Main` at build time | Game data is versioned with the code, so data changes already go through PRs. |
+| Other item data | `ItemAddOption.bmd`, `SocketItem_<lang>.bmd`, `Mix.bmd`, `pet.bmd`, set options (`ItemSetType.bmd`, `ItemSetOption_<lang>.bmd`, loaded by `CSItemOption`) | Out of scope for the first phases; listed so they are not forgotten. **Item sets may have to move together with items** if items cannot be made fully data-driven without them; we decide that when we get there. |
+| Tooltips | `RenderItemInfo()` in `Engine/Object/ZzzInventory.cpp` | Which lines an item's tooltip shows is hardcoded. |
+| Unused item files | See "Unused item files in the repo" below | Loaded by no code. |
+| Editor | `src/MuEditor/UI/ItemEditor/` (only in `_EDITOR` builds) | Table editor for the bmd fields; save to bmd, export to S6E3 bmd and CSV. |
+| UI translations | `.resx` → generated `I18N::*` (`docs/translation-system.md`) | Good for UI strings; item names are not part of it yet. |
+
+### Unused item files in the repo
+
+No code in the repo loads these files, and `git log -S` finds no loader
+in the history either. They use the usual bmd encoding (`BuxConvert` XOR
+`FC CF AB`, restarted for every record), followed by a 4-byte trailer
+(probably a checksum). They exist for `Eng`, `Por` and `Spn`.
+
+| File | Layout | Content |
+|---|---|---|
+| `ItemTooltip_<lang>.bmd` | 8192 records × 124 bytes; 906 used | Per item: `u16 group`, `u16 number`, `char name[64]`, then a list of up to about 12 tooltip lines as `(u16 textId, u16 style)` pairs (`0xFFFF` = no line). Example: *Kris* (0,0) shows lines 6, 8, 11, 12, 13, 14. Names are translated in the `Por`/`Spn` files ("Espada curta", "Espada corta"). |
+| `ItemTooltipText_<lang>.bmd` | 512 records × 260 bytes; 351 used | Tooltip line texts: `u16 id`, `char text[256]`, `u16 valueKind`. Examples: "One handed attack power: %d~%d", "Armor: %d", "Available HP: %d", "Increases damage by %d%%". `valueKind` looks like the value that fills the `%d` (0 = damage, 8 = HP, 2xx = options). |
+| `ItemLevelTooltip_<lang>.bmd` | 128 records × 102 bytes; 105 used | Items whose name and tooltip change with the item level: `u16 id`, `char name[64]`, then header words and `(textId, style)` pairs. Examples: "Box of Kundun +1" … "+5", "Scroll of Emperor", "Box of Heaven". |
+
+Our reading of the layout is taken from the bytes, not from a loader, so
+field meanings (especially the style and header words) are guesses.
+
+This is exactly the data a data-driven tooltip needs (which lines, which
+texts, which values, per item and item level), and it comes with names in
+three languages. The files are kept as the input for data-driven tooltips
+(D15).
+
+Extra item bmd copies that no code loaded (`Data/Local/Item.bmd`,
+`Eng/item.bmd`, `Eng/item_eng_old.bmd`, `Eng/item_eng_orig.bmd`,
+`Por/item.bmd`, `Por/item_eng_old.bmd`, `Spn/item.bmd`) were removed on
+this branch (D16).
+
+### Server (OpenMU)
+
+- `ItemDefinition` (`src/DataModel/Configuration/Items/ItemDefinition.cs`):
+  `Group`, `Number`, `Width`, `Height`, `Durability`, `Value`, `DropLevel`,
+  `MaximumItemLevel`, `ItemSlot`, `Skill`, `QualifiedCharacters`,
+  `Requirements`, `BasePowerUpAttributes`, `PossibleItemOptions`,
+  `PossibleItemSetGroups`, `MaximumSockets`, `ConsumeEffect`, and the flags
+  `IsAmmunition`, `IsBoundToCharacter`, `IsQuestItem`, `DropsFromMonsters`,
+  `StorageLimitPerCharacter`.
+- Names are `LocalizedString`: `"English||de=Deutsch||fr=Français"`, English
+  (neutral) first.
+- Identity: `(Group, Number)`. Initialization creates deterministic GUIDs
+  (`GuidHelper`, type id `0x80` for `ItemDefinition`).
+- OpenMU ships separate data sets per game version (`Version075`,
+  `Version095d`, `VersionSeasonSix`); a server database is initialized from
+  one of them.
+- Data changes ship as `UpdatePlugInBase` plug-ins. The admin panel's
+  generic config grid (`EditConfigGrid`) can already **add and delete**
+  item definitions; deleting fails while something still references the
+  item. There is no file import or export for config yet.
+
+### Server-side checks today
+
+What OpenMU enforces for the rules the client has in `TradeRestrictions` and
+`ShopRestrictions`:
+
+| Client rule | OpenMU today | Where |
+|---|---|---|
+| Trade ban | Only `IsBoundToCharacter` (blocks moving between storages, so also into the trade window) | `MoveItemAction` |
+| Vault/storage ban | Same `IsBoundToCharacter` check | `MoveItemAction` |
+| Personal shop ban | `IsBoundToCharacter` (item cannot be moved there) and items with a harmony option cannot open a store | `MoveItemAction`, `OpenStoreAction` |
+| Sell to NPC ban | `IsBoundToCharacter` (with a durability exception) | `SellItemToNpcAction` |
+| Drop ban | None; bound items can only be picked up by their owner | `DropItemAction` |
+| Repair ban | None per item type; only durability and money | `ItemRepairAction` |
+| Equip | Data-driven: `ItemSlot`, requirements, two-hand conflicts | `MoveItemAction` |
+| Use/consume | Consume plug-ins keyed by hardcoded `ItemConstants`, or `ConsumeEffect` data | `ItemConsumeActions/*` |
+| Categories (wing, jewel, …) | Hardcoded group/number checks, about 113 in `src/GameLogic` | `ItemExtensions`, crafting, events, … |
+
+So the client is **stricter** than the server for trade, drop, store, sell
+and repair. Those client rules are only UI checks today; a modified client
+can skip them.
+
+**Approach (D3):**
+
+1. Build the full mapping of every client rule and category to an OpenMU
+   field or check (phase 3 prerequisite).
+2. Where OpenMU has no equivalent, extend it the OpenMU way: new
+   `ItemDefinition` properties (or a separate table if it grows large),
+   an EF migration, Season 6 initialization values, an `UpdatePlugIn` that
+   sets the values on existing databases, and enforcement in the matching
+   `PlayerAction`. The admin panel picks up new properties automatically.
+3. These are separate OpenMU PRs. The client uses the same field names so
+   the data maps 1:1.
+
+## Target design
+
+### 1. In-memory item database (performance)
+
+The data is loaded once at startup and then works like a hardcoded table:
+
+- **Flat arrays indexed by item type** (`group * MAX_ITEM_INDEX + number`,
+  8192 entries). No hash maps or string lookups at runtime.
+- **Flags and tags as bitmasks** per item. `IsTradeBan(item)` becomes one
+  array read plus a bit test, which is as cheap as or cheaper than the
+  current `switch` and range checks.
+- **Hot data separate from cold data**: small, contiguous records for data
+  used every frame (flags, tags, size, model id); names, requirements and
+  editor-only data in separate arrays.
+- **Names**: for the selected language, one pointer table is built at load
+  time; the English name is kept for logging.
+- **Immutable after load.** Only the editor rebuilds the tables after saving.
+- `ITEM_ATTRIBUTE` / `ItemAttribute[]` stay as a compatibility view at
+  first and are removed step by step.
+- Startup: measure the JSON load time. If it is noticeably slow, generate a
+  binary cache from the JSON (rebuilt when the JSON changes).
+- The rule code only talks to these tables, never to the storage format, so
+  the storage can change later without touching rules.
+
+### 2. Storage, loading and validation
+
+#### Why JSON (D1)
+
+At runtime every option ends up as the same in-memory tables (section 1);
+the choice is only about how the data is stored, reviewed and exchanged.
+
+| Option | Why not chosen |
+|---|---|
+| Binary database file (e.g. SQLite `.db`) | A blob in git: changes cannot be reviewed, and parallel branches cannot be merged. |
+| SQL text files (schema + `INSERT`s) loaded into SQLite | Diffable, and the database checks links and uniqueness itself. But one item is spread over several tables, a changed value shows up as a long changed `INSERT` line, the player build needs SQLite as a new dependency, and the SQL cannot be run on OpenMU anyway (PostgreSQL via Entity Framework, GUID keys, different tables), so a second format for the exchange would still be needed. |
+| Editing in a database and exporting JSON for git | Two sources of truth that drift apart. |
+
+JSON gives readable diffs with related data kept together (D14), the same
+format as the OpenMU exchange (D2), and no new dependency: the client
+already bundles nlohmann JSON (`src/ThirdParty/json.hpp`). The cost is that
+the checks a database would do (unique ids, valid links) must be done by
+our own loader; see "Validation" below.
+
+#### Files
+
+- Location: `src/bin/Data/Items/`, next to the other game data in the repo.
+  It is copied beside `Main` like the rest of `Data` (`MU_COPY_RUNTIME_ASSETS`).
+- One file per item group (D7): `Group00_Sword.json` … `Group15_Etc.json`,
+  named after the `ITEM_GROUP_*` constants; each item's names in all
+  languages are part of the item (D17). Files for other
+  data (option definitions, sets, …) follow the same rules when they come.
+- Every file starts with a `formatVersion` and the `group` it contains.
+- Encoding UTF-8, LF line endings.
+
+#### Writing (editor, bmd import, OpenMU import)
+
+- **Deterministic output** so diffs only show real changes: items sorted by
+  number, fixed key order, fixed indentation, one field per line.
+- **Safe save**: write to a temporary file, then replace the old file, so a
+  crash never leaves a half-written file.
+- Only valid data is saved: the editor runs the validation below first and
+  refuses to save while there are errors.
+
+#### Loading (game and editor)
+
+1. Read and parse all item files once at startup.
+2. Check `formatVersion`: a newer version than the client understands is an
+   error; older versions are upgraded in memory.
+3. Missing optional fields get their default value, so adding a field never
+   breaks older files. Unknown fields are ignored by the game and shown as a
+   warning in the editor.
+4. Run the validation below.
+5. Build the flat tables from section 1, then release the parsed JSON.
+6. Log the load time and item count (used for the performance check in
+   phase 1).
+
+#### Validation
+
+The same validation code runs in the game loader, in the editor before
+saving, and in an automated test.
+
+Errors (data cannot be used):
+
+- invalid JSON, a missing or newer `formatVersion`, an invalid `group`
+- `group` outside 0–15 or `number` outside 0–511
+- duplicate `(group, number)`
+- missing English name
+- a value outside its type's range (e.g. a byte field above 255); width
+  and height 0 are allowed, 12 Season 6 items have them
+- a name containing `||`
+- later phases: a link to something that does not exist (unknown tag or
+  flag, option group, skill, set or option definition)
+
+Warnings (data works, but is probably wrong):
+
+- unknown fields (ignored by the game)
+- a name longer than 49 characters (cut in the game)
+- later phases: missing model files or model links (phase 4), missing
+  translations (phase 5), combinations that do not make sense
+
+Behavior:
+
+- **Game**: errors stop the start with a clear message naming the file, the
+  item `(group, number)` and English name, and the field. The game never
+  runs with half-loaded item data. Warnings are logged.
+- **Editor**: errors and warnings are listed and clickable (they jump to the
+  item and field); saving is blocked while errors exist.
+- **Automated test**: a doctest test in `tests/` loads all item files in
+  `src/bin/Data/Items/` and runs the validation, so broken data fails the
+  PR checks before it is merged.
+
+### 3. Data fields
+
+Each field belongs to one of two groups:
+
+- **Shared** fields map 1:1 to OpenMU and take part in import/export.
+- **Client-only** fields (rendering and UI) never go to the server.
+
+| Group | Fields | Shared? |
+|---|---|---|
+| Identity | group, number | yes |
+| Name | `LocalizedString`, same format as OpenMU | yes |
+| Size and slot | width, height, item slot, two-handed | yes |
+| Stats | damage, defense, speed, durability, requirements, resistances, class requirements, value, skill | yes (mapped to OpenMU requirements and power-ups) |
+| Server flags | ammunition, bound to character, quest item, drops from monsters, storage limit | yes |
+| Rule flags | tradable, droppable, storable, sellable to NPC, personal-shop sellable, repairable, usable/consumable, equippable | yes, after OpenMU is extended (D3) |
+| Categories/tags | wing, flying, mount, pet, potion, jewel, ticket, cash shop, event, … | client-only at first; shared where OpenMU gets matching data |
+| Model | model file, texture folders, cloth flag (in the model files, D22) | client-only |
+| Rendering | inventory offset, rotation and scale; ground rotation and scale; glow color, render style, effects (D24) | client-only |
+
+### 4. Rule code on top of data
+
+- Keep behavior in code and move item lists into data. Example:
+  `IsTradeBan(item)` stays, but reads the `tradable` flag and the item's
+  tags instead of `switch` lists.
+- Every move must keep the exact item set, checked as in #625 by expanding
+  the data back to item ids and comparing with the hardcoded version.
+- Named enum constants remain for items that code must refer to directly
+  (special behavior); lists of items become data.
+
+### 5. Names, translations and logging
+
+- In memory, item names are OpenMU-style `LocalizedString`s, so names from
+  the server can be taken over directly. On disk, `name` is an object of
+  names by language in the item files (D17); the OpenMU exchange writes it
+  in the `LocalizedString` format.
+- The name in the selected language is shown; missing translations fall back
+  to English.
+- Logs always use `<English name> (<group>,<number>)`, never the translated
+  name. One helper (e.g. `ItemLogName(item)`) is used everywhere.
+- Stats are no longer duplicated per language: one data set, only names are
+  translated.
+
+### 6. OpenMU sync (file-based, both sides)
+
+- **Server is authoritative.** The client never writes to the server, not
+  even in editor mode.
+- One **exchange file format** (JSON, with a format version) keyed by
+  `(Group, Number)`, containing only the shared fields.
+- Item sets, drop settings and option definitions get their own exchange
+  files later (D11, D14). The item file only links to the option groups an
+  item can have.
+- **Client → server:** MuEditor exports the file; the admin imports it in a
+  new OpenMU admin panel import page.
+- **Server → client:** a new OpenMU admin panel export page writes the same
+  file; MuEditor imports it and updates the shared fields.
+- Import on both sides shows a **diff** (new, changed, removed items) and
+  applies only what the user confirms.
+- Removals in an import are only applied when confirmed; on the server they
+  fail if characters still own the item (existing OpenMU behavior).
+- The OpenMU import/export pages are a separate OpenMU PR.
+
+### 7. Adding and removing items
+
+**Client (MuEditor):**
+
+- **New item wizard**: choose the group, pick a free number (the editor
+  shows used and free slots), optionally copy an existing item as a
+  template, enter the English name, size and slot, then link the model with
+  the model tool.
+- The model id is `MODEL_ITEM + itemType`, so every new item already has a
+  model slot; only the file link is needed.
+- **Remove item**: warns when the item is still in use: named in code (enum
+  constant with special behavior), member of a tag, used by other data, or
+  present in the last OpenMU import.
+- Limit: new items must fit into free slots of the 16 × 512 id space, the
+  same as the network protocol.
+
+**Custom items and the original client (D12):**
+
+- Official Season 6 items keep their official `(group, number)`, so the
+  original client and this client agree on them.
+- Custom items take any free slot; there are no reserved ranges. The data
+  marks them as custom, so nothing depends on where their number lies.
+- OpenMU must keep working with the original Season 6 client. That client
+  does not know custom items, so the server has to handle them for it
+  (see Q1). OpenMU already knows which client a server is for
+  (`GameClientDefinition`: season, episode, language, version), which is a
+  possible hook.
+
+**Server (OpenMU):** the admin panel can already add and delete item
+definitions. New items also arrive through the import (section 6).
+
+### 8. Build gating
+
+- Editors, add/remove, import and export exist only in `_EDITOR` builds,
+  like MuEditor today. Player release builds only contain the loader and the
+  read-only database.
+- Editing client data can never affect the server; server-side validation
+  stays independent.
+
+### 9. MuEditor item tools
+
+Several focused editors that share one item selection, instead of one big
+table:
+
+| Editor | Purpose |
+|---|---|
+| **Item browser** | List with search and filters (group, tag, flag, missing data); add, duplicate and remove items. Selecting an item opens it in the other editors. |
+| **Basics and stats** | Name, size, slot, durability, value, damage/defense/speed, resistances. |
+| **Requirements** | Level and stat requirements, allowed classes. |
+| **Rules** | Flags as a matrix (items × tradable, droppable, storable, sellable, …) for bulk editing. |
+| **Categories** | Tag-centered view: pick a tag, see and change its items. |
+| **Model and visuals** | Model file picker for `Data\Item\*.bmd` with 3D preview, texture folder, inventory and ground display values, cloth flag, and glow, render style and effects chosen from lists (D24), each with the list of the other items that use the same look. |
+| **Look editor** (phase 13) | The shared look editor of the [roadmap](2026-09-29-data-driven-content-roadmap-design.md), opened for the looks of the selected item: its building blocks with a live preview, bone picking, the items that use a look and the warning before a shared look changes. |
+| **Translations** | Items × languages grid, filter for missing translations. |
+| **OpenMU sync** | Import, diff and export of the exchange file. |
+
+Common features: validation before saving (duplicate ids, missing English
+name, missing model file), and undo for the current session.
+
+## Phases (one PR each)
+
+**Side:** *Client* = MuMain only, *Server* = OpenMU only, *Both* = changes
+in both repos (as separate PRs, one per repo).
+
+| Phase | Name | Side | Repo / PR | Depends on | Summary |
+|---|---|---|---|---|---|
+| 0 | Design document | Both | MuMain | – | Agree on the design (this document). |
+| 1 | Item database | Client | MuMain | 0 | `ItemDefinition` model and flat in-memory table, built from the loaded `Item_<lang>.bmd` data; English names for logs; log-name helper; load-time log. No behavior change. |
+| 2 | Data file format and names | Client | MuMain | 1 | JSON per group becomes the only item source and the database becomes the source for `ItemAttribute[]`; translated names in the UI locale; loading, writing and validation rules; automated data test; bmd import (with repair) and export in MuEditor; editor edits go into the database right away. |
+| 3 | Rules and categories into data | Client | MuMain | 2 | Flags and tags replace the hardcoded lists; client ↔ OpenMU rule mapping (input for A). |
+| 3b | Remaining item lists | Client | MuMain | 3 | The lists of item ids outside the phase 3 files that repeat data that exists or need one new tag (see "Item-specific code that is left"), checked like phase 3. |
+| 3c | Item stats by level | Both | MuMain (+ mapping for A) | 3 | How damage, defense, magic power, blocking and requirements change with the item level, and the bonus of excellent and ancient items, become named level bonus tables and formula parameters in data (D43), matching OpenMU's `ItemLevelBonusTable`; checked against the old formulas for every item and level. |
+| A | Server rule fields and checks | Server | OpenMU | 3 (mapping) | New `ItemDefinition` fields or tables, migration, Season 6 values, update plug-in, enforcement in player actions. |
+| 4 | Models into data | Client | MuMain | 2 | Model files per item group (D22), model slots stay `MODEL_ITEM + type` (D23, own model slots). One PR per part: **4a** model files and textures (`OpenItems()` / `OpenItemTextures()`), **4b** inventory and ground display, **4c** render effects (D24) in three parts: **4c1** glow, **4c2** render styles, **4c3** item effects. |
+| 4d | Shared models | Client | MuMain | 4 | Models as entries of their own that items reference by name, so items can share a model (D23, shared models). Two PRs: **4d1** shared model entries, each file opened once; **4d2** the conversions between item types and model slots in one place, and shared model data freed by its last user. |
+| 4e | Clear model loading errors | Client | MuMain | 4 | One message for missing model files and textures of item models that names the item, the model entry, the texture and the searched folders. |
+| 5 | Translation tooling | Client | MuMain | 2, 6 | Translations editor (items × languages), missing-translation warnings. The names themselves moved to phase 2 (D17). |
+| 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. |
+| 7 | Item sync, client side | Client | MuMain | 2, 6 | MuEditor import/export of the item exchange file, with diff. |
+| B | Item sync, server side | Server | OpenMU | 7 (file format) | Admin panel import/export pages for the item exchange file, with diff. |
+| 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. |
+| 9 | Item option definitions | Both | MuMain + C | 2 | Option groups in their own JSON files matching OpenMU's `ItemOptionDefinition`; exchange file and editor. |
+| 10 | Item sets | Both | MuMain + C | 2 | Item sets in JSON matching OpenMU's `ItemSetGroup`; exchange file and editor; based on the `item-set-editor` branch. Moved earlier if needed. |
+| C | Option and set sync, server side | Server | OpenMU | 9, 10 | Admin panel import/export for the option definition and item set exchange files. |
+| 11 | Remaining item files | Both (per file) | MuMain, OpenMU as needed | 2 | `ItemAddOption`, `SocketItem`, `Mix`, `pet`, drop settings; one phase each, order decided later. |
+| 12 | New item groups *(to discuss again)* | Both | MuMain + D | 3, 4, 4d, A | Move items into new groups for the new client; level variants become items of their own; legacy ids for the original client (D21). |
+| D | Legacy item ids, server side *(to discuss again)* | Server | OpenMU | 12 | Legacy id on item definitions, mapping tool, Season 6 serializer sends legacy ids, serializer for the new client. |
+| FX1 | Effect catalogue *([roadmap](2026-09-29-data-driven-content-roadmap-design.md))* | Client | MuMain | 4c | Every effect, particle, lightning and sprite type gets a name and its creation values in `Data/Effects/`; behavior stays code. |
+| 13 | Looks in data | Client | MuMain | 4c, 6, FX1 | What the named render styles and effects are made of moves from code into `Data/Effects/` as building blocks (D25), with the look editor in MuEditor (preview, bones, the items that use a look). |
+| 14 | Cleanup | Client | MuMain | all item phases | The glow of the Phoenix Soul inventory model; what later areas still need moves to the roadmap; then remove this document. |
+
+The deferred question Q1 (custom items on the original client) is a
+**Server** topic and must be decided before custom items are used on a
+server with original clients (after phases 6 and B).
+
+### Phase details
+
+0. **This document**: agree on the design.
+1. **Item database**: an `ItemDefinition` model (clean field names, lossless
+   conversion to and from `ITEM_ATTRIBUTE`) and a flat table indexed by item
+   type (`Data::Items::ItemDatabase`). In this phase the database is built
+   **from** the loaded `ItemAttribute[]`, because the item editor still
+   edits `ItemAttribute[]` directly; saving in the editor rebuilds it.
+   English names are loaded from the `Eng` item file when another language
+   is selected, and `GetLogName()` returns `<English name> (<group>,<number>)`.
+   The load and build times are logged. No behavior change.
+   Hot/cold splitting of the table comes with the first hot data (flags and
+   tags, phase 3).
+2. **Data file format**: JSON files per group become the only item source
+   for the game, with the loading, writing and validation rules from
+   section 2 and the automated data test. MuEditor gets "Import from bmd"
+   and "Export as bmd"; the game stops reading `Item_<lang>.bmd`. The data
+   flow turns around: JSON → database → `ItemAttribute[]` (compatibility
+   view).
+
+   As built: names are `LocalizedString`s from all three bmd files and
+   follow the UI locale (D17); the import repairs the legacy data (D18);
+   every editor change is copied into the database at once (D19), which
+   closes the phase 1 sync gap. Save writes only valid data and only
+   changed files. Loading the 16 files takes about 11 ms in a Release
+   build (bmd: about 2 ms), so no binary cache is needed. Usage is
+   documented in `docs/item-data.md`.
+
+   Still true: `Build()` and the editor rewrite definitions in place, so an
+   `ItemDefinition*` kept across an editor change sees changed content.
+   Code that keeps pointers must not rely on them staying unchanged while
+   the editor is used.
+3. **Rules and categories into data**: flags and tags replace the hardcoded
+   lists in `ItemCategories`, `TradeRestrictions` and `ShopRestrictions`.
+   The resulting item lists are verified to be identical. Includes the
+   client ↔ OpenMU rule mapping.
+
+   As built:
+   - Item fields: `tags` (a list of names, a bitmask in memory),
+     `wingTier` (`small`/`first`/`second`/`third`), the rule flags
+     `tradable`, `droppable`, `storable`, `sellable`,
+     `personalShopSellable`, `repairable` (default `true`, only `false`
+     is written), the rental rules `droppableWhileRented`,
+     `personalShopSellableWhileRented`, `sellableWhenRentalExpired`, and
+     `slot` written by name (`mainHand`, …, `wings`, …; numbers from
+     phase 2 files are still read, with a warning). Wings need no tag: a
+     wing is an item with the slot `wings`.
+   - Items without a definition allow no action.
+   - The rule functions stay and read the data through a small table next
+     to the definitions (`ItemDatabase::HasTag`, `IsAllowed`, `GetSlot`,
+     `GetWingTier`): one array read plus a bit test.
+   - What stays in code: exceptions that depend on the item level, the
+     durability or the player, with named constants, see
+     `docs/item-data.md` → Rules; and the lists that are only used for
+     drawing and tooltips (`ItemDisplayCategories.cpp`), which phases 4
+     and 8 replace with model and tooltip data.
+   - `IsPartChargeItem` became the tag `cashShop`, flattened. Only the
+     old rules used it, so no client code reads the tag now; it stays as
+     information for the editors and the OpenMU exchange.
+     `IsRareItemTicket` was only part of it and is gone.
+   - `Check_ItemAction` and the separate repair lists in `RepairAllGold`
+     and `RenderRepairInfo` became the rule flags too.
+   - Verified with a one-time test (in the PR history, then removed) that
+     compares the old and the new code for all 949 items, every category
+     function (also with out-of-range and model ids), and every rule for
+     item levels 0–15, bought/rented/expired, durability 0–2, ancient and
+     excellent, and GM or not. The only differences are the two
+     intended behavior changes in their own commits: the personal shop
+     rule for rented pets (the old condition only applied to the Demon),
+     and "repair all" now counting the same items as single repairs (it
+     added a price for damaged items that cannot be repaired one by one,
+     e.g. transformation rings and the Little Warrior's Cloak).
+   - Level variants (Box of Luck +13 = Heart of Dark Lord, Rena +3 = Sign
+     of Lord, Wizard's Ring levels) stay code exceptions; phase 12 makes
+     them items of their own.
+   - Not moved in this phase (other hardcoded lists found on the way):
+     the right-click use list (`TryConsumeItem`), price exceptions
+     (`ItemValue`), the transformation ring lists (`ChangeRingManager`),
+     the packed jewel list (`COMGEM`) and the tooltip class requirement
+     list (`IsRequireClassRenderItem`, phase 8).
+
+   Client ↔ OpenMU mapping (input for A):
+
+   | Client data | OpenMU today | For PR A |
+   |---|---|---|
+   | `slot` | `ItemDefinition.ItemSlot` (an `ItemSlotType` with its slot numbers) | Exchange maps the names to slot types: `mainHand` ↔ types containing 0, `offHand` ↔ 1, …, `ring` ↔ 10/11 |
+   | `wingTier` | None; wing values are power-ups and options per wing | Client-only for now; phase 9 (options) may replace it |
+   | `tradable`, `storable`, `personalShopSellable`, `sellable` = false | Only `IsBoundToCharacter`, which blocks all four at once (sell with a durability exception) | Separate rules, e.g. one `[Flags] ItemRestrictions` column with the six names; enforce in `MoveItemAction` (trade, vault, personal shop) and `SellItemToNpcAction`; `IsBoundToCharacter` stays for "only the owner can pick it up" |
+   | `droppable` = false | None (`DropItemAction` drops everything) | Enforce in `DropItemAction` |
+   | `repairable` = false | None (`ItemRepairAction` repairs any item below its maximum durability) | Enforce in `ItemRepairAction` |
+   | `droppableWhileRented`, `personalShopSellableWhileRented`, `sellableWhenRentalExpired` | None; OpenMU has no rental items | Client-only until OpenMU has rentals |
+   | Code exceptions (level, durability, GM) | Levels: none | Level variants move with phase 12/D |
+   | `ammunition` | `IsAmmunition` | 1:1 |
+   | `secondClassQuestItem`, `thirdClassQuestItem` | `IsQuestItem` (+ `StorageLimitPerCharacter` 1) | Both map to `IsQuestItem` |
+   | `flying` | `Stats.CanFly` power-up on wings, Dinorant and Fenrir | Compare: the client also counts the Dark Horse |
+   | `jewel`, `mount`, `darkLordPet`, `guardianPet`, potions, socket items, … | Hardcoded `ItemConstants` checks | Client-only; OpenMU can take them over item by item |
+   | `cashShop`, `valuable`, `gemJewelry`, `luckyItemTicket`, … | None | Client-only (UI) |
+
+   **A (OpenMU):** new rule fields/tables with migration, initialization,
+   update plug-in and server enforcement, based on the mapping above.
+
+   **3b Remaining item lists (not started).** The lists of item ids outside
+   the phase 3 files: about 35 places (see "Item-specific code that is left"
+   → Phase 3b) that repeat data the items already have (tags, `slot`,
+   `wingTier`, `storable`, the model and display files) or need one new tag
+   (bow, crossbow, sceptre, …). As in phase 3, the code asks the item data
+   instead of naming items, and a one-time test compares the old and the new
+   code for every item before the lists go; intended behavior changes, if
+   any, get commits of their own. New tags that OpenMU checks in
+   `ItemConstants` go into the mapping for A.
+
+   **3c Item stats by level (not started).** What the item level adds to
+   damage, magic power, defense, blocking, the requirements and the wing
+   options, and the bonus of excellent and ancient items, is computed today
+   by `SetItemAttributes` and its `Calc*` functions in `ZzzInfomation.cpp`;
+   the formulas are listed under "Item-specific code that is left" → Item
+   stats by level. They become named level bonus tables and formula
+   parameters in data (D43 of the roadmap), shared in the item exchange and
+   matching OpenMU's `ItemLevelBonusTable` per stat. Checked like phase 3: a
+   one-time test compares the old and the new values for every item at
+   levels 0–15, normal, excellent and ancient. The differences 815b8828
+   brought into these formulas (blocking by the drop level, the excellent
+   bonus for wings with a wing option, the empty level requirement range
+   from the Wing of Dimension on) move as they are and are decided on their
+   own, not changed on the way. The fork branch `fix-some-item-calculations`
+   (January 2026, still in the old `Source Main 5.2` layout) holds fixes of
+   these formulas after the Season 6 client and is compared when this phase
+   starts. **A (OpenMU):** the mapping of the tables to
+   `ItemLevelBonusTable`, and the formulas OpenMU does not have.
+4. **Models into data**: model and display data in their own files,
+   `Data/Items/Models/GroupNN_*.json` (D22):
+
+   ```json
+   { "number": 5, "file": "Data/Item/Sword06.bmd", "textureFolders": ["Item"],
+     "inventory": { "offset": [-0.02, 0.03], "rotation": [180, 270, 15], "scale": 0.0039 },
+     "ground": { "rotation": [60, 0, -45], "scale": 1.0 },
+     "glow": { "color": "gold", "meshes": [0] },
+     "renderStyle": "chromeMesh0", "itemEffect": "flameSparks" }
+   ```
+
+   Every item keeps its model slot `MODEL_ITEM + item type` (D23, own model slots). Three
+   PRs:
+   - **4a Model files and textures:** `OpenItems()` / `OpenItemTextures()`
+     become one loop over the item data. Models that aren't items (e.g.
+     `MODEL_EVENT + …`, body parts) and the extra effect bitmaps stay in
+     code. `textureFolders` is a search list: each texture comes from the
+     first folder that has it (the old code loaded folder after folder and
+     sometimes relied on textures another model had loaded before).
+   - **4b Display:** the inventory transform (`RenderItem3D()` slot
+     anchor, `RenderObjectScreen()` offset, rotation, scale and body
+     height) and the ground transform (`ItemAngle()`, `ItemHeight()`) come
+     from the data; `"cloth": true` marks capes worn as cloth (their cloth
+     is deleted when they are changed; which capes are drawn as cloth stays
+     in code). The display-only lists of phase 3 (`ItemDisplayCategories.cpp`)
+     go away where they only chose position, angle or scale. The inventory
+     models of the Rage Fighter armor take the look of their item. Display
+     cases that depend on the item level stay in code until phase 12, and
+     so does the look of the event models drawn for level variants, a small
+     table in `Render/Items/ItemDisplay.cpp`.
+   - **4c Render effects (D24)**, three PRs because the drawing code is
+     large (about 3,500 lines):
+     - **4c1 Glow:** `"glow"` holds the level an item glows like (jewels +8,
+       wings +0, or one per item level for arrows, bolts and Devil's Square
+       items), the colors of the level glow, of the shine of items +11 and
+       up and of ancient items (names from `Data/Effects/GlowColors.json`),
+       the meshes they are drawn on, and the excellent glow (off for wings
+       and capes, or on one mesh). It replaces `PartObjectColor`,
+       `PartObjectColor2`, `PartObjectColor3`, the mesh choices of
+       `RenderPartObjectBodyColor(2)` and the item cases of the glow level
+       switch. Still in code: the glow of monsters (area MN of the roadmap:
+       monsters have their own models, data and code), of the event models
+       of level variants (with 4d and phase 12, when they get model entries
+       and the drawing code knows the item), of the inventory model of the
+       Phoenix Soul Armor (see the last step below), and the Deadly Staff's
+       second glow step (a one-off that changes the object, moved in 4c2).
+     - **4c2 Render styles:** `renderStyle` names the `RenderPartObjectBody`
+       recipe of an item. The 174 item branches become 137 styles in
+       `Render/Items/ItemRenderStyles.cpp` (the recipes unchanged; equal
+       recipes share one style, three that drew like the default are gone,
+       styles that only differ in a texture share one recipe with the
+       texture in the list of names), and 346 models name theirs. The
+       display-only item lists of phase 3 that chose a recipe go away.
+       Styles that only apply to some drawings (not for doppelgangers, only
+       held by some monsters, only on the helper NPCs) fall back to the plain
+       drawing, and so do styles that pick a mesh, texture or color per item
+       for other items. A style can also have its own glow pass, which takes
+       the Deadly Staff's glow step out of the glow code. Player
+       transformations, monsters and the other non-item models stay in
+       `RenderPartObjectBody`; the transformations come before the styles,
+       as they came before the branches of the Rage Fighter gloves, which a
+       transformed Rage Fighter draws on its own object. The green, red and
+       purple chaos boxes (14,55–57) have no model entry (the old code never
+       loaded their models); their recipe (textured, then
+       `RENDER_BRIGHT | RENDER_CHROME2`) comes back as a style with their
+       model entries.
+     - **4c3 Item effects:** `itemEffect` names what the model does before it
+       is drawn every frame, from the type chain of `RenderPartObjectEffect`:
+       29 item branches for 81 items; 28 of them become 27 effects for 42
+       items in `Render/Items/ItemEffects.cpp` (moved unchanged; the Siege
+       Potion and the Contract share one). An effect places sprites, particles
+       and lightning on bones, changes values of the drawing (a pulsing glow
+       mesh, a mesh hidden by level, the level potions glow like), or draws
+       the model itself. The socket seeds and spheres (the 39 items of the
+       last branch) and zen need no effect: they glow like level 0 (`"glow":
+       {"level": 0}`), which is what their level checks did. The shine of 10
+       items below +3 (two more shine passes) becomes values of their render
+       style, which the drawing code applies: the seals, the Illusion Sorcerer
+       Covenant and the Cursed Castle water have a style already, the Jewel of
+       Harmony and the Moonstone Pendant get `harmonyShine` (138 styles now).
+       Fixes found while testing, which change the look: the Devil's Eye, Key
+       and Invitation glow like their level up to +6, so +1 and +2, +3 and +4,
+       +5 and +6 look alike, and like +13 from +7 (the original client doubled
+       the level, a frame-rate change of 2023 turned that into `Level *=
+       pow(2, …)` and its fix into `Level /= 2`, which gave +1 to +5 one
+       look); the Blood Bone, the Invisibility Cloak and the Illusion Sorcerer
+       Covenant glow by their level like the Scroll of Archangel and the Old
+       Scroll (the own drawing of the Blood Bone and of the cloak ended the
+       drawing before the level glow; they are the render styles `bloodBone`
+       and `invisibilityCloak` now, which leaves 25 effects for 40 items and
+       140 styles; the Covenant glowed like level 0). The effects of the event
+       models of level variants stay in `RenderPartObjectEffect` (no model
+       entries yet). Which values the effects take (bones, colors, sizes)
+       comes with phase 13, when what the named looks are made of moves into
+       data (D25). MuEditor gets a read-only view of the looks above the item
+       table: for the selected item its model file, glow, render style and
+       effect, and for a look all items that use it (D26). It only reads the
+       model data, so it needs no change to the drawing code.
+
+   Verified like phase 3: one-time comparisons of the old and the new code
+   (which files and texture folders are loaded for each model; the
+   transforms of every item at every level; which effect code runs with
+   which values).
+
+   Loading stays as it is: all item models and textures are read at
+   startup (`OpenBasicData()` on the loading screen). Textures are already
+   shared by file name (`Bitmaps.LoadImage` counts references); meshes are
+   not, each model slot opens its own copy of the `.bmd` file (until 4d1).
+   Loading models only when an item is first drawn would be a separate step
+   later.
+
+   **4d Shared models (D23)**, in two parts:
+
+   - **4d1 Shared model entries (done):** the model files that several
+     items use (34 files, 145 items: the skill parchments, the socket
+     seeds and spheres, the jewels and their bundles, …) become named
+     models in `Data/Items/Models/SharedModels.json` with the file, texture
+     folders and none-blend meshes. The items name them (`"model":
+     "skillParchment"`) and keep their own inventory, ground, glow, render
+     style and item effect. The first item of a shared model opens the file
+     and loads its textures; the slots of the others use that data
+     (`BMD::ShareFrom`), so each file is read once. Every item keeps its
+     own model slot, so the code that computes `MODEL_ITEM + type` stays as
+     it is. Verified by recording what every item slot has loaded (meshes,
+     bones, actions, vertices, textures, none-blend flags) with the old and
+     the new loading: the same, apart from the numbers of the texture
+     slots (the users of the seed spheres no longer try the `Item` folder
+     first, which used up numbers). A test checks that every file several
+     items use is a shared model. The Looks view of MuEditor shows the
+     shared model and lists its items.
+   - **4d2 Model slots in one place:** every conversion between an item
+     type and its model slot goes through `Data::Items::ToModelSlot`,
+     `ToItemType` and `IsItemModelSlot` (`ItemModelSlots.h`) instead of
+     `+ MODEL_ITEM` / `- MODEL_ITEM` in about 120 lines. They return what
+     the code computed before, so nothing changes now (checked by comparing
+     the compiled code of every changed file); phase 12 can give a moved
+     item its old slot there. Two conversions in `ZzzEffect.cpp`
+     (`RenderWheelWeapon`, `RenderFuryStrike`) and the spear check in
+     `MoveHandlers.cpp` followed with the effect catalogue design (FX1.0),
+     which fixed the findings of cppcheck in those files. Objects keep their model slots, and
+     the places that compare them with named slots stay as they are (one
+     slot per shared model was dropped, see D23). The data of a shared
+     model is freed by the last slot that uses it, whichever slot that is,
+     so releasing or reopening the slot that opened it (e.g. reloading
+     models from the editor) no longer leaves the others with freed
+     memory. Writing to the shared data through one slot would change all
+     items of the model; that stays a documented rule (`BMD::ShareFrom`),
+     because making the data read-only would change every user of the
+     model data. A test opens the items of a shared model into the model
+     slots: the first opens the file, the others share it, and a missing
+     file is reported for each item. Follow-ups from the review of 4d2:
+     - `OpenPlayers` clears the model slots with `ZeroMemory` after they are
+       constructed, which also clears the use count (a `std::shared_ptr`).
+       No count exists at that point, so it does no harm, but it is
+       undefined behavior: the constructor should set what the clearing
+       sets, and the clearing go.
+     - The loaded data (meshes, bones, actions, textures, texture indices
+       and their counts) in one struct held by a `std::shared_ptr`, whose
+       destructor frees it and unloads the textures, would make sharing a
+       pointer copy and `Release` a `reset()` (CODING_RULES rule 8).
+     - Some callers convert slots that are no item's: `DeletePet` with an
+       empty helper (-1), the helper switch of the photo viewer,
+       `RenderCharacter` and `ModifyTypeCommonItemMonk` with class models,
+       `MoveCharacter` without a weapon. When `ToItemType` becomes a lookup
+       (phase 12), they need `IsItemModelSlot` or a defined result for
+       other slots.
+     - No test covers the texture references a sharing slot gives back
+       when it lets go last (it needs loaded textures).
+
+   **4e Clear model loading errors:** a missing model file or texture of an
+   item model shows one message after loading instead of one popup per
+   texture. Each line names the item (name, group, number), its entry in
+   the model files, the `.bmd` file and mesh, the texture (with the
+   `.OZJ`/`.OZT` file the game reads) and the folders that were searched.
+   A texture of another type than `.jpg`/`.tga` is an error as well. A
+   texture that is only found because another model loaded it before is
+   a warning in `MuError.log` that names the folder to add. Each problem
+   is logged when it is found. Errors of the models that stay in code name
+   the `.bmd` file instead of the path in the model. The error dialogs
+   have a **Copy text** button and show the mouse cursor, which the
+   loading screen hides.
+5. **Translation tooling**: a translations editor (items × languages, with
+   a filter for missing translations) and missing-translation warnings.
+   The names themselves are part of phase 2 (D17).
+6. **Editors**: the MuEditor tools from section 9, including add/remove,
+   on the rules of D26 (one selection, "used by", a warning with the list
+   of users before a shared definition changes, copies for variants). The
+   model tool builds on the read-only look view of 4c3 and picks the looks
+   of an item from lists; the looks themselves are edited from phase 13 on.
+7. **Item sync, client side**: MuEditor import/export of the item exchange
+   file and diff.
+
+   **B (OpenMU):** admin panel import and export pages for the item
+   exchange file, with diff.
+8. **Data-driven tooltips** (D15): convert `ItemTooltip_<lang>`,
+   `ItemTooltipText_<lang>` and `ItemLevelTooltip_<lang>` into JSON (line
+   texts as `LocalizedString`, like item names), and let `RenderItemInfo()`
+   build tooltips from that data instead of hardcoded lines. Adds a tooltip
+   editor to MuEditor. The tooltip bmd files are deleted afterwards.
+   Moved earlier if the item phases need it.
+9. **Item option definitions** (D14): the option groups items link to
+   (Luck, additional option, excellent, wing, harmony, guardian, socket, …)
+   get their own JSON files, matching OpenMU's `ItemOptionDefinition`, with
+   their own exchange file and editor.
+10. **Item sets** (D11): `ItemSetType.bmd` / `ItemSetOption_<lang>.bmd` into
+    JSON, matching OpenMU's `ItemSetGroup`, with their own exchange file and
+    editor. Moved earlier if items cannot be made fully data-driven without
+    them.
+
+    **Starting point:** branch
+    [`Mosch0512/MuMain:item-set-editor`](https://github.com/Mosch0512/MuMain/tree/item-set-editor)
+    (one commit, `e8194a1c`, April 2026, still bmd-based). When we reach
+    this phase, rebase it onto the current branch and use it as the base,
+    or as a reference if the rebase is not worth it. It contains:
+
+    - an ImGui item set editor modeled on the item editor (search,
+      hide-empty toggle, option combobox per row) that saves back to
+      `ItemSetOption_<lang>.bmd`
+    - `CSItemOption` access for editor tools, and option labels built
+      from the text template without `printf`, so options whose texts
+      expect more arguments cannot crash the editor
+    - a fallback so tooltips also show set options for **unequipped**
+      ancient items (a behavior fix)
+    - a CMake change to copy runtime assets with
+      `copy_directory_if_different` (faster incremental builds)
+
+    Expected rework: the branch is about 1060 commits behind `main`.
+    `CSItemOption` moved to `GameLogic/Items/`, `GlobalText` and
+    `Translations/*.json` were replaced by the generated `I18N::*` texts,
+    and loading and saving bmd files has to become JSON (phase 2 rules).
+    The tooltip fix and the CMake change are unrelated to the data
+    format and could be split into their own small PRs.
+
+    **C (OpenMU):** import and export for the option definition (phase 9)
+    and item set (phase 10) exchange files.
+11. **Remaining item files** (D13): `ItemAddOption`, `SocketItem`, `Mix`,
+    `pet` and drop settings, one phase each. Order decided when we get
+    there. Each one gets OpenMU work where the server has matching data.
+12. **New item groups** (D21) — *to discuss again when we get here.*
+    Groups 12–15 mix unrelated items. The new client may get new groups
+    (e.g. 16 = jewels, 17 = orbs, 18 = scrolls) so the group means
+    something again, and room beyond 16 × 512 items; original Season 6
+    clients keep today's ids.
+
+    - Moved items keep their original id as a **legacy id** in the item
+      data. Items that are not moved need none: their id is the same for
+      both clients. Items without a legacy id are new; they are not sent
+      to original clients (answers Q1 for those items).
+    - Client: more groups (`MAX_ITEM_TYPE`), the item editor shows and
+      edits the legacy id, a new item encoding in the protocol for groups
+      above 15, and the new client identifies itself to OpenMU with its
+      own client version.
+    - Cost: every hardcoded item id has to follow a move (client `ITEM_*`
+      constants and ranges, about 113 group/number checks in OpenMU), and
+      the model ids (`MODEL_ITEM + type`) must not depend on the item type.
+      That is why this comes after phases 3 and 4 and OpenMU PR A. Phases 3
+      and 4 moved the rule lists and the looks, and 4d2 put the model slots
+      in one place (`ToModelSlot`), but about 330 places in code still name
+      items (see "Item-specific code that is left").
+
+    **D (OpenMU):**
+    - legacy group and number on `ItemDefinition` (optional), filled by the
+      exchange file and editable in the admin panel;
+    - a **mapping tool**: checks that every moved item has a legacy id, that
+      legacy ids are unique and fit the Season 6 range (group 0–15, number
+      0–511), and builds the old ↔ new lookup at startup and after a config
+      reload;
+    - the Season 6 item serializer (`ItemSerializer`) writes the legacy id;
+      a new serializer for the new client version (`[MinimumClient]`) writes
+      the new id. The serializer is chosen once per connection, so there is
+      no extra layer: the new client pays nothing, and for original
+      clients the serializer reads a different field of the definition it
+      already reads;
+    - the few requests from original clients that name an item by id look
+      up old → new once;
+    - game logic only uses the new ids.
+
+    With the new groups, the mixed groups 12–15 are split up, so the item
+    files (one per group) become category files by themselves (D7).
+
+    **Level variants** become items of their own at the same time: items
+    that are a different item at each item level (Box of Luck +13 = Heart
+    of Dark Lord, Rena +1–3, Wizard's Ring +1–3, …; see `ItemLevelTooltip`
+    and `GetItemName`) get their own entries with their own names, flags
+    and tooltips. Their legacy id is then (group, number, level): the
+    Season 6 serializer sends the old item with that level, and requests
+    from original clients are mapped back. Until then the rule code checks
+    them by level (`GameLogic/Items/ItemLevelVariants.h`).
+
+    Questions for then: the exact new groups and which items move; whether
+    the legacy id lives only in OpenMU or also in the client data; the
+    protocol change for the new item encoding; and which level variants
+    become items of their own. They are of three kinds:
+    - **Different items** under one id: Box of Luck +1–7 and +13–15 (Star
+      of Sacred Birth, Firecracker, …, Heart of Dark Lord, the Lucky
+      Pouches), Rena +1–3, Loch's Feather +1, Ale +1, Wizard's Ring +1–3,
+      the chocolate boxes +1. Own names, models and uses: split.
+    - **Tiers of one item**: Devil's Eye, Key and Invitation +1–7 (the
+      square), Box of Kundun +1–5 (Box of Luck +8–12), the Blood Castle
+      items +1–8. The level is a real attribute that the server uses (event
+      entry, mixes such as Eye +N and Key +N into Invitation +N); splitting
+      them would multiply items and mix rules. Proposal: keep them as one
+      item each, with per-level values where their look changes (like the
+      glow `level` list). Box of Kundun becomes an item of its own whose
+      levels are the tiers; its legacy id maps with an offset (Box of Luck
+      +8–12 ↔ Box of Kundun +1–5).
+    - **Kinds of one item**: the fruits (+0–4 = energy, stamina, agility,
+      strength, command), the Orb of Summoning (which summon) and the
+      Transformation Ring (which monster). The level chooses a kind, not a
+      tier; to decide then.
+13. **Looks in data** (D25): what the named render styles and effects are
+    made of moves from code into data files in `Data/Effects/`, as lists of
+    building blocks, one look at a time; the item data keeps naming them.
+    Particle and effect types are referenced by their names from the effect
+    catalogue (FX1, roadmap) and stay code until FX2. Effects place sprites
+    and particles on bones of the model, so they follow its animation. Bones
+    are values by number, as in the code (see "Bones" in the roadmap for
+    why); the look editor shows numbers and names together, and the model
+    loader checks that the bones exist. The lists are resolved when loading
+    (textures, bones, particle types), so drawing is not slower. Verified
+    like phase 4c: every look draws and spawns the same things with the same
+    values as its code did, per item and level. The look editor of section 9
+    comes with it.
+14. **Cleanup**, once the work has landed:
+    - The glow of the inventory model of the Phoenix Soul Armor
+      (`MODEL_ARMORINVEN_74`) moves into data. It is the only model drawn
+      for an item that glows differently from its item: only on its first
+      mesh (its item's armor model glows on mesh 2), and the metal pass of
+      +9 and up draws that mesh three times, so it shines brighter than the
+      other inventory models (probably a copy-paste leftover; to keep or to
+      drop then). Left for last because it only shows in the inventory and
+      is easiest to check once everything else is in data.
+    - Whatever later areas still need from this document moves to the
+      roadmap, so it is not lost; "Item-specific code that is left" is the
+      list of it until then.
+    - Remove this document.
+
+## Item-specific code that is left
+
+An inventory of the code that still names specific items, made after 4d1
+(2026-10-01): about 3,000 source lines (`ITEM_*` and item `MODEL_*` names,
+raw ids such as `ITEM_POTION + 100`, ranges of ids) in about 500 places. Of
+the 492 places with item logic, 294 hold lists of items (data, by section
+4), 152 are one item's own behavior or value, and 46 convert between item
+types and model slots (4d2). 239 identify an item by its model slot
+(`o->Type == MODEL_…`); they stay valid because every item keeps its slot
+(D23).
+
+| Kind | Places | Moved by | Not moved yet |
+|---|---:|---|---|
+| Character animation by item | 67 | SK2 (cast animations) | Stances by weapon, normal attacks, conditions on the mount |
+| UI and tooltips | 65 | 8, 12 | Ground label colours, the repair info, bonuses shown in the character window |
+| Item use | 58 | 12 (level variants), 11 (pet) | `TryConsumeItem`, `ItemValue`, stack sizes, hotkeys, requirement exceptions |
+| Item lists | 42 | 3 (the data exists), 8, 9 | Call sites outside the phase 3 files (3b) |
+| Mounts, pets, helpers | 41 | 11 (`pet.bmd`) | The spawned model, ride height, camera, HUD |
+| Item ↔ model slot | 41 | 4d2, 12 | Class models (`MODEL_HELM2`, `MODEL_*_MONK`; kept in code by 4a) |
+| Drawing held and worn items | 39 | 13, 12, MN | Effects of held items in `RenderLinkObject`, swing trails, full-set auras, `ItemObjectAttribute` |
+| Map and event rules | 33 | MN, 12 | Entry items, mount bans per map, Chaos Castle weapons |
+| Skills | 29 | SK1 (items that give a skill), SK2, FX1 | Projectile per bow, skill bonuses of mounts |
+| Wings, cloth, capes | 13 | 9 (wing options); 4b kept the cloth in code | Cloth setups, flap speeds |
+| Position on the character | 12 | – | Shield angles, poses on the back, link bones |
+| Mixes | 11 | 11 (Mix, SocketItem) | Mix values, packed jewels (`COMGEM`) |
+| Sounds | 7 | roadmap, "later: sounds" | All |
+| Monster and NPC setup | 1 switch, 272 cases | MN | – |
+
+**Not planned yet**, with what could hold it:
+
+- **Mounts** (about 97 places): animations and skills chosen by the mount,
+  the model a horn spawns, ride height, camera. A `mountKind` on mount items
+  would turn about 50 chains into one value; the roadmap's "later: pets"
+  should cover mounts.
+- **Phase 3b** (about 35 places): lists that repeat data that exists
+  (tags, `slot`, `wingTier`, `storable`, the files below) or need one new
+  tag (bow, crossbow, scepter, …).
+- **Held and worn items** (about 34 places): their position on the
+  character (per hand, on the back, link bone) and their looks while held
+  (an item effect that runs while the item is held, swing trails). An
+  extension of 4b and 4c3/13.
+- **Item use** (about 23 places): `maxStack`, a `useAction` that names a
+  code handler, `hotkeyGroup`. Section 3 already names usable/consumable,
+  ticket and event as target fields.
+- **Bonuses computed in code** (about 20 places): the Demon's +40 %, the
+  Panda's +50 defense, charms. A `powerUps` field mapped to OpenMU (phase
+  7) and the pets (phase 11).
+- **Map and event rules** (about 19 places): items required or banned per
+  map, for a maps area.
+- **Prices, requirements, durability** (about 16 places): fixed prices
+  into `buyPrice`, price per durability, how requirements grow.
+- **Item stats by level** (phase 3c, D43): `SetItemAttributes` and its
+  `Calc*` functions (`ZzzInfomation.cpp`; `ItemConvert` there is an empty
+  stub) compute what the item level adds. Here level is the item level
+  (`ip->Level`, 0 to 15), drop level the kind's `Level` (`p->Level`,
+  OpenMU's `DropLevel`) and base the kind's value; "above +9" adds
+  `level - 6` once, so +4 at +10 up to +9 at +15.
+  - Damage gets `3 * min(9, level)` and `level - 6` above +9. Magic power
+    gets the same, then the sum with the excellent and ancient bonuses is
+    halved and items that are not sceptres add `2 * level`.
+  - Defense gets 2, 3 or 4 times `min(9, level)` (2 for second tier wings
+    and the Capes of Lord and Fighter, 4 for third tier wings) and
+    `level - 5` (third tier wings) or `level - 6` above +9; shields get
+    only `+ level` and their ancient bonus.
+  - Blocking and magic defense add `3 * min(9, drop level)` and
+    `drop level - 6` when the drop level is above 9: they use `p->Level`
+    where damage uses `ip->Level`, so they never grow with the item level (a
+    kind with drop level 10 or more gets `drop level + 21` at every level).
+    This came with 815b8828; the client before used the item level there.
+  - Excellent items add `base * 25 / drop level + 5` to damage, magic power
+    and blocking (three chaos weapons have fixed values for damage and
+    magic power, `GetExcellentAddValue`) and
+    `base * 12 / drop level + 4 + drop level / 5` to defense, not to
+    shields. Excellent here means any excellent flag, so since 815b8828
+    wings and capes with a wing option (stored in those flags) get the
+    defense bonus and the + 25 drop level of the requirements too; the
+    client before left wings out and counted ancient items as excellent.
+  - Ancient items use `d = drop level + 30` (`GetDropLevel`): damage
+    `+ 5 + d / 40`, magic power `+ 2 + d / 60`, defense
+    `+ base + defense * 3 / d + 2 + d / 30` (the `+ base` also came with
+    815b8828; the client before added only `defense * 3 / d + 2 + d / 30`)
+    and shields `+ defense * 20 / d + 2`, with defense the value so far.
+  - Strength, agility and vitality requirements are
+    `20 + base * (drop level + 3 * level) * 3 / 100` and energy the same
+    with `* 4 / 100` (summoner books `+ level` instead of `+ 3 * level` and
+    `* 3 / 100`; group 15 kinds with a level requirement use
+    `20 + base * required level * 4 / 100` and the Orb of Summoning a fixed
+    value per level, 30 to 500), where drop level is + 25 for excellent and
+    otherwise + 30 for ancient items; command stays the base value.
+  - The level requirement grows by `4 * level` (5 for second tier wings)
+    only for first and second tier wings, the Cape of Fighter and items
+    from group 13 on except the Horn of Fenrir. Group 12 kinds from the
+    Wing of Dimension (12/43) on, except the Cape of Fighter, get none at
+    all: since 815b8828 the range `ITEM_WING_OF_DIMENSION` to
+    `ITEM_CAPE_OF_EMPEROR` is empty (before it ran to `ITEM_HELPER`), so the
+    Wing of Dimension and the Cape of Overrule lose their level 400. Most
+    excellent items that are not wings need 20 levels more.
+  - Wing options grow too (`CalcWingOptions`): max HP and max mana
+    `50 + 5 * level` for second tier wings and the capes, command
+    `10 + 5 * level` for the Cape of Lord.
+
+  OpenMU keeps the same as data (`ItemLevelBonusTable` per stat), so these
+  become named tables that a designer can change, shared in the item
+  exchange.
+- **Smaller kinds:** weapon kind for stances (10), ground height and light
+  (8, extends 4b), names and colours outside `RenderItemInfo` (8, widens
+  phase 8), ground label colours (7), transformation ring rules (6; their
+  looks go to MN), mix values and packed jewels (6, phase 11), ids that
+  encode a value such as the socket element (5), effects whose mesh is an
+  item's model slot (4, FX1).
+
+**Data that exists but is not used:**
+
+- `Data/Local/<lang>/JewelOfHarmonySmelt_<lang>.bmd` lists the 85 items
+  that cannot be smelted below +4. The client never loads it; `MixMgr.cpp`
+  has the same list in code.
+- `BuffEffect_<lang>.bmd` links buffs to items and is loaded; the elixir
+  code lists the same link again.
+- The item field `skill` is empty for all scrolls and parchments;
+  `GetSkillByBook` maps them in code (SK1).
+
+**Dead code** to delete instead of moving: `PrintItem`
+(`ZzzInfomation.cpp`), `CChangeRingManager::CheckRepair`, the macro
+`NOTSMELTING_DATA_FILE`.
+
+**Bugs found on the way**, filed upstream: the durability warning of
+rings at +2 (sven-n/MuMain#667), the walk of the Dragon Lance (#668),
+weapons hidden on the Illusion Temple team skins (#669), the Dark Raven's
+height over a Dark Horse (#670) and the trade warning for every item from
+(13,30) up (#671).
+
+## Beyond items
+
+Effects and particles, skills, monsters and NPCs are areas of the
+[roadmap](2026-09-29-data-driven-content-roadmap-design.md), each with
+its own design document when its work starts. They share the look format
+(D25), the rules for shared definitions (D26) and the editor parts (look
+editor, effect editor, bones) with the items. Item phase 13 depends on the
+effect catalogue (FX1) there.
+
+## Open questions
+
+- **Q1: Custom items on the original client** *(deferred; must be
+  discussed before the related PR lands).* What should OpenMU do with a
+  custom item when the player uses the original Season 6 client? For
+  example: never send it to that client (hide it in shops, drops and
+  views), block such items on servers set up for the original client, or
+  show a placeholder item. Phase 12 (D21) would settle it for items
+  without a legacy id: they are not sent to original clients.

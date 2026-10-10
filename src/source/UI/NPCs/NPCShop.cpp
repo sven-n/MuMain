@@ -10,6 +10,8 @@
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Items/ItemCategories.h"
+#include "GameLogic/Items/ShopRestrictions.h"
 
 #include "GameLogic/Social/GambleSystem.h"
 
@@ -355,7 +357,7 @@ bool mu::ui::window::CNPCShop::InventoryProcess()
     if (!pPickedItem)			return false;
     ITEM* pItem = pPickedItem->GetItem();
 
-    if (IsSellingBan(pItem))	m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
+    if (GameLogic::Items::IsSellingBan(pItem))	m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
     else	m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
 
     if (mu::ui::window::IsRelease(VK_LBUTTON) == true && m_pNewInventoryCtrl->ContainsPointer() == true && m_bSellingItem == false)
@@ -373,14 +375,14 @@ bool mu::ui::window::CNPCShop::InventoryProcess()
 
             return true;
         }
-        if (pItem && IsSellingBan(pItem) == true)
+        if (pItem && GameLogic::Items::IsSellingBan(pItem) == true)
         {
             g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
             m_pNewInventoryCtrl->BackupPickedItem();
 
             return true;
         }
-        if (pItem && IsHighValueItem(pItem) == true)
+        if (pItem && GameLogic::Items::IsHighValueItem(pItem) == true)
         {
             mu::ui::window::GenericDialogConfig cfg;
             cfg.showCancel = true;

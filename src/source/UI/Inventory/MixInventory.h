@@ -163,6 +163,9 @@ namespace mu::ui::window
     private:
 
         bool InventoryProcess();
+        // Items from the machine's own grid can always move; other items only
+        // while the machine is ready and the item is a source of the recipe.
+        bool AcceptsHeldItem(CPickedItem* pPickedItem);
 
         bool AutoMoveItem(CInventoryCtrl* srcCtrl, STORAGE_TYPE srcType,
             CInventoryCtrl* dstCtrl, STORAGE_TYPE dstType, bool requireMixSource);

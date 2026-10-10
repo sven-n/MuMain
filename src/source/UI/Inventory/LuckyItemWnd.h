@@ -102,6 +102,8 @@ namespace mu::ui::window
 
         int		SetActAction();
         STORAGE_TYPE SetMoveAction();
+        // The storage items are moved into for the window's current use.
+        STORAGE_TYPE GetMoveStorageType() const;
         void	GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE> pbyItemPacket);
         bool	Process_BTN_Action(void);
         bool	Process_InventoryCtrl_InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket);

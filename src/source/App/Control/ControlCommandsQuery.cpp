@@ -8,7 +8,9 @@
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
+#include "Scenes/SceneNames.h"
 
+#include "MuGitCommit.h"
 #include "json.hpp"
 
 #include <algorithm>
@@ -50,9 +52,10 @@ constexpr double MaxWaitForSeconds = 3600.0;
 // small enough that the cast to `float` is exact.
 constexpr double MaxWindowPixel = 100000.0;
 
-// An injected key or click spans three rendered frames; the allowance
-// covers a client that renders slowly without letting a caller hang.
-constexpr std::chrono::milliseconds SyntheticInputDeadline{5000};
+// An injected click spans about seven rendered frames until it answers (idle,
+// two hover frames, press, held, release, idle), a key three. The allowance
+// covers a client drawing a frame every two seconds without letting a caller hang.
+constexpr std::chrono::milliseconds SyntheticInputDeadline{15000};
 
 // One recorded event as the protocol reports it.
 json EventObject(const App::Control::Events::Record& record)
@@ -382,22 +385,7 @@ namespace App::Control::Commands
 {
 std::string_view CurrentSceneName()
 {
-    switch (SceneFlag)
-    {
-    case SERVER_LIST_SCENE:
-        return "server_list";
-    case WEBZEN_SCENE:
-        return "webzen";
-    case LOG_IN_SCENE:
-        return "login";
-    case LOADING_SCENE:
-        return "loading";
-    case CHARACTER_SCENE:
-        return "character_list";
-    case MAIN_SCENE:
-        return "world";
-    }
-    return "unknown";
+    return Scenes::NamesOf(SceneFlag).id;
 }
 
 void SetBuildIdentifier(std::string identifier)
@@ -418,6 +406,10 @@ std::string Ping(const Request& request, std::unique_ptr<Act>&)
 {
     json result;
     result["build"] = BuildIdentifier();
+    // The git commit the client was built from; `commit_changed` when tracked
+    // files differed from it, so the client is not exactly that commit.
+    result["commit"] = MU_GIT_COMMIT;
+    result["commit_changed"] = MU_GIT_COMMIT_CHANGED != 0;
     result["scene"] = CurrentSceneName();
     return EncodeResult(request.EncodedId(), result.dump());
 }
@@ -545,8 +537,15 @@ std::string Screenshot(const Request& request, std::unique_ptr<Act>& act)
         targetPath = ResolveScreenshotPath(requestedPath).wstring();
     }
 
+    int quality = BestScreenshotQuality;
+    if (request.Has("quality") &&
+        (!request.GetInt("quality", quality) || quality < 1 || quality > BestScreenshotQuality))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`quality` is the JPEG quality, 1 to 100");
+    }
+
     auto state = std::make_shared<ScreenshotState>();
-    if (!RequestScriptedScreenshot(targetPath,
+    if (!RequestScriptedScreenshot(targetPath, quality,
                                    [state](const ScreenshotOutcome& outcome)
                                    {
                                        state->outcome = outcome;

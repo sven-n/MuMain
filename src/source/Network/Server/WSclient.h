@@ -87,6 +87,11 @@ extern int CurrentProtocolState;
 // Account the last login request was sent for.
 extern wchar_t LogInID[MAX_USERNAME_SIZE + 1];
 
+inline uint16_t ntoh16(uint16_t value)
+{
+    return static_cast<uint16_t>(((value & 0x00FFU) << 8) | ((value & 0xFF00U) >> 8));
+}
+
 inline uint64_t ntoh64(uint64_t value)
 {
     return ((value & 0x00000000000000FFULL) << 56) |

@@ -58,6 +58,7 @@
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "UI/HUD/GensRanking.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "Character/CharacterManager.h"
 #include "MUHelper/MuHelper.h"
@@ -66,6 +67,8 @@
 #include "Camera/CameraProjection.h"
 #include "Scenes/SceneCommon.h"
 #include "Render/Text/CUIRenderText.h"
+
+#include <iterator>
 
 extern int g_iChatInputType;
 extern BOOL g_bUseChatListBox;
@@ -1719,7 +1722,18 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 					if (M38Kanturu2nd::Is_Kanturu2nd())
 					{
 						if (!g_pKanturu2ndEnterNpc->IsNpcAnimation())
+						{
+							// Talking to another NPC replaces the gate dialog: release
+							// the server dialog BEFORE the new Talk request so packet
+							// order stays Close(old) then Talk(new). A Close sent later
+							// (e.g. from the new dialog's Show path) would clear the
+							// just-opened dialog instead.
+							if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC))
+							{
+								g_pKanturu2ndEnterNpc->ClosingProcess();
+							}
 							SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
+						}
 					}
 					else if (gMapManager.IsCursedTemple())
 					{
@@ -1895,7 +1909,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 }
                 if (Sit)
                 {
-                    if ((!c->SafeZone) && (c->Helper.Type == MODEL_HORN_OF_FENRIR || c->Helper.Type == MODEL_HORN_OF_UNIRIA || c->Helper.Type == MODEL_HORN_OF_DINORANT || c->Helper.Type == MODEL_DARK_HORSE_ITEM))
+                    if ((!c->SafeZone) && GameLogic::Items::IsRideableMountModel(c->Helper.Type))
                         return;
 
                     if (!gCharacterManager.IsFemale(c->Class))
@@ -2490,13 +2504,16 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     return  false;
                 }
 
-                int iTextSize = 3; // a bare "/n" clears the macro instead of writing before the row
-                for (int j = 3; j <= (int)wcslen(Text); j++)
+                // The macro text follows the "/N " prefix. "/N" alone gives
+                // an empty macro; a long text is cut to fit.
+                constexpr size_t MacroPrefixLength = 3;
+                const size_t textLength = wcslen(Text);
+                size_t macroLength = 0;
+                for (size_t j = MacroPrefixLength; j < textLength && macroLength + 1 < std::size(MacroText[i]); j++)
                 {
-                    MacroText[i][j - 3] = Text[j];
-                    iTextSize = j;
+                    MacroText[i][macroLength++] = Text[j];
                 }
-                MacroText[i][iTextSize - 3] = 0;
+                MacroText[i][macroLength] = 0;
                 PlayBuffer(SOUND_CLICK01);
                 return true;
             }
@@ -2741,7 +2758,7 @@ DWORD g_dwLatestZoneMoving = 0;
 
 void CheckGate()
 {
-    if ((g_pMyInventory->IsItem(ITEM_POTION + 64, true)) || (gMapManager.IsCursedTemple() && g_pMyInventory->IsItem(ITEM_POTION + 64, false)))
+    if ((g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, true)) || (gMapManager.IsCursedTemple() && g_pMyInventory->IsItem(ITEM_CURSED_CASTLE_WATER, false)))
     {
         return;
     }
@@ -2781,15 +2798,7 @@ void CheckGate()
                             g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, mu::ui::window::TYPE_ERROR_MESSAGE);
                         }
                         else if ((62 <= i && i <= 65) &&
-                            !((CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WINGS_OF_DARKNESS
-                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_DARK_HORSE_ITEM
-                                || CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_CAPE_OF_LORD
-                                ) || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_DINORANT
-                                || CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_FENRIR
-                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING_OF_STORM && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING_OF_DIMENSION)
-                                || (ITEM_WING + 130 <= CharacterMachine->Equipment[EQUIPMENT_WING].Type && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WING + 134)
-                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_CAPE_OF_FIGHTER && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_CAPE_OF_OVERRULE)
-                                || (CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_WING + 135)))
+                            !GameLogic::Items::HasFlightEquipment(&CharacterMachine->Equipment[EQUIPMENT_HELPER], &CharacterMachine->Equipment[EQUIPMENT_WING]))
                         {
                             g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, mu::ui::window::TYPE_ERROR_MESSAGE);
 
@@ -3182,7 +3191,7 @@ void MoveHero()
             if (!pPickedItem && RightType == -1 &&
                 ((LeftType >= ITEM_SWORD && LeftType < ITEM_MACE + MAX_ITEM_INDEX)
                     || (LeftType >= ITEM_STAFF && LeftType < ITEM_STAFF + MAX_ITEM_INDEX
-                        && !(LeftType >= ITEM_BOOK_OF_SAHAMUTT && LeftType <= ITEM_STAFF + 29)
+                        && !GameLogic::Items::IsSummonerBookType(LeftType)
                         )))
             {
                 if (g_pMyInventory->IsEquipable(EQUIPMENT_WEAPON_LEFT, &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT]))
@@ -3712,7 +3721,9 @@ void CollectCrownSwitchLines(std::wstring (&lines)[2])
         if (Switch_Info[i].m_bySwitchState > 0)
         {
             wchar_t Buff[300];
-            mu_swprintf(Buff, L"%ls%d / %ls / %ls", I18N::Game::CrownSwitch, i + 1, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
+            wchar_t szSwitch[64]{};
+            _snwprintf_s(szSwitch, std::size(szSwitch), _TRUNCATE, I18N::Game::CrownSwitchD, i + 1);
+            mu_swprintf(Buff, L"%ls / %ls / %ls", szSwitch, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
             lines[i] = Buff;
         }
     }
@@ -4146,10 +4157,9 @@ bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
     short pEquipedRightRingType = (&CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT])->Type;
     short pEquipedLeftRingType = (&CharacterMachine->Equipment[EQUIPMENT_RING_LEFT])->Type;
     short pEquipedHelperType = (&CharacterMachine->Equipment[EQUIPMENT_HELPER])->Type;
-    short pEquipedWingType = (&CharacterMachine->Equipment[EQUIPMENT_WING])->Type;
 
-    if ((pEquipedWingType == -1 && pEquipedHelperType != ITEM_HORN_OF_DINORANT &&
-        pEquipedHelperType != ITEM_HORN_OF_FENRIR && pEquipedHelperType != ITEM_DARK_HORSE_ITEM) ||
+    if (!GameLogic::Items::HasFlightEquipment(&CharacterMachine->Equipment[EQUIPMENT_HELPER],
+                                              &CharacterMachine->Equipment[EQUIPMENT_WING]) ||
         pEquipedHelperType == ITEM_HORN_OF_UNIRIA)
     {
         bCantFly = true;

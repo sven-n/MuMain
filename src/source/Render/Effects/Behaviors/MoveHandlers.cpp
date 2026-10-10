@@ -395,8 +395,6 @@ namespace Render::Effects::Behaviors
                         break;
                     }
 
-                    if (Ran < 0)
-                        Ran = Ran;
                     for (int i = 0; i < 3; i++)
                     {
                         VectorCopy(o->Position, p);
@@ -2073,15 +2071,14 @@ namespace Render::Effects::Behaviors
         Vector(0.0f, 0.0f, 0.0f, vRelativePos);
 
         OBJECT* pSourceObj = o->Owner;
-        OBJECT* pTargetObj = pSourceObj->Owner;
-        BMD* pSourceModel = &Models[pSourceObj->Type];
-        BMD* pTargetModel = &Models[pTargetObj->Type];
-
+        OBJECT* pTargetObj = pSourceObj != NULL ? pSourceObj->Owner : NULL;
         if (pSourceObj == NULL || pTargetObj == NULL ||
             pSourceObj->Live == false || pTargetObj->Live == false)
         {
             return true;
         }
+        BMD* pSourceModel = &Models[pSourceObj->Type];
+        BMD* pTargetModel = &Models[pTargetObj->Type];
 
         int iRandom = rand() % 10;
         int iCnt = 0;
@@ -2793,7 +2790,7 @@ namespace Render::Effects::Behaviors
         case 3:o->Alpha = 0.4f; break;
         case 4:o->Alpha = 0.3f; break;
         }
-        if (o->Owner->Weapon >= MODEL_SPEAR - MODEL_SWORD && o->Owner->Weapon < MODEL_SPEAR - MODEL_SWORD + MAX_ITEM_INDEX)
+        if (o->Owner->Weapon >= ITEM_SPEAR && o->Owner->Weapon < ITEM_SPEAR + MAX_ITEM_INDEX)
         {
             Vector(0.f, -180.f, 0.f, p);
         }
@@ -5554,7 +5551,6 @@ namespace Render::Effects::Behaviors
                 VectorCopy(o->Owner->Position, p);
                 VectorAdd(p, o->StartPosition, p);
 
-                float Distance;
                 for (int i = 1; i < o->Gravity; ++i)
                 {
                     if (rand_fps_check(2))
@@ -5564,7 +5560,7 @@ namespace Render::Effects::Behaviors
                         else
                             o->Angle[0] -= (20.f) * FPS_ANIMATION_FACTOR;
                     }
-                    Distance = MoveHumming(o->Position, o->Angle, p, o->Velocity);
+                    MoveHumming(o->Position, o->Angle, p, o->Velocity);
                     o->Velocity += (0.4f) * FPS_ANIMATION_FACTOR;
 
                     if (o->LifeTime < 10)
@@ -5578,11 +5574,6 @@ namespace Render::Effects::Behaviors
                     VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
 
                     CreateEffectFpsChecked(MODEL_TAIL, o->Position, o->Angle, o->Light, 0, o);
-                }
-                if (Distance < 40 && (int)o->LifeTime == 5)
-                {
-                    VectorCopy(o->Position, Position);
-                    Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
                 }
                 o->Gravity += (0.1f) * FPS_ANIMATION_FACTOR;
 
@@ -5614,7 +5605,6 @@ namespace Render::Effects::Behaviors
                 VectorCopy(o->Owner->Position, p);
                 VectorAdd(p, o->StartPosition, p);
 
-                float Distance;
                 for (int i = 1; i < o->Gravity; ++i)
                 {
                     if (rand_fps_check(2))
@@ -5624,7 +5614,7 @@ namespace Render::Effects::Behaviors
                         else
                             o->Angle[0] -= (20.f) * FPS_ANIMATION_FACTOR;
                     }
-                    Distance = MoveHumming(o->Position, o->Angle, p, o->Velocity);
+                    MoveHumming(o->Position, o->Angle, p, o->Velocity);
                     o->Velocity += (0.4f) * FPS_ANIMATION_FACTOR;
 
                     if (o->LifeTime < 10)
@@ -5637,11 +5627,6 @@ namespace Render::Effects::Behaviors
                     VectorAddScaled(o->Position, Position, o->Position, FPS_ANIMATION_FACTOR);
 
                     CreateEffectFpsChecked(MODEL_PIER_PART, o->Position, o->Angle, o->Light, 1, o);
-                }
-                if (Distance < 40 && (int)o->LifeTime == 5)
-                {
-                    VectorCopy(o->Position, Position);
-                    Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
                 }
                 o->Gravity += (0.1f) * FPS_ANIMATION_FACTOR;
 
@@ -7154,6 +7139,44 @@ namespace Render::Effects::Behaviors
             o->Live = false;
         }
         return true;
+    }
+
+    // BITMAP_JOINT_FORCE
+    bool Move_BITMAP_JOINT_FORCE(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t Position;
+        float Matrix[3][4];
+        if (o->SubType == 0)
+        {
+            if (o->LifeTime < 11 && (int)o->LifeTime % 2 == 0)
+            {
+                Vector(90.f, 0.f, 0.f, o->Angle);
+                o->HeadAngle[2] += (72.f) * FPS_ANIMATION_FACTOR;
+                AngleMatrix(o->HeadAngle, Matrix);
+                VectorRotate(o->Direction, Matrix, Position);
+                VectorAdd(o->StartPosition, Position, Position);
+
+                Position[2] += rand() % 400 + 700.f;
+                CreateJointFpsChecked(BITMAP_FLASH, Position, Position, o->Angle, 5, o, 110.f);
+            }
+        }
+        else if (o->SubType == 1)
+        {
+            if (o->LifeTime < 11 && (int)o->LifeTime % 2 == 0)
+            {
+                Vector(90.f, 0.f, 0.f, o->Angle);
+                o->HeadAngle[2] += (72.f) * FPS_ANIMATION_FACTOR;
+                AngleMatrix(o->HeadAngle, Matrix);
+                VectorRotate(o->Direction, Matrix, Position);
+                VectorAdd(o->StartPosition, Position, Position);
+
+                Position[2] += 100.f;
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 6, o, 80.f);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 6, o, 80.f);
+            }
+        }
+        // The original code went on with the move code of MODEL_SWORD_FORCE.
+        return Move_MODEL_SWORD_FORCE(o, index, Luminosity);
     }
 
     // MODEL_SWORD_FORCE
@@ -10226,6 +10249,7 @@ namespace Render::Effects::Behaviors
 
     const std::vector<std::pair<int, MoveHandler>>& ExtractedMoveHandlers()
     {
+        // clang-format off
         static const std::vector<std::pair<int, MoveHandler>> handlers = {
             { MODEL_DRAGON, &Move_MODEL_DRAGON },
             { MODEL_ARROW_AUTOLOAD, &Move_MODEL_ARROW_AUTOLOAD },
@@ -10445,6 +10469,7 @@ namespace Render::Effects::Behaviors
             { MODEL_MANA_RUNE, &Move_MODEL_MANA_RUNE },
             { MODEL_SKILL_JAVELIN, &Move_MODEL_SKILL_JAVELIN },
             { MODEL_ARROW_IMPACT, &Move_MODEL_ARROW_IMPACT },
+            { BITMAP_JOINT_FORCE, &Move_BITMAP_JOINT_FORCE },
             { MODEL_SWORD_FORCE, &Move_MODEL_SWORD_FORCE },
             { MODEL_PROTECTGUILD, &Move_MODEL_PROTECTGUILD },
             { MODEL_MOVE_TARGETPOSITION_EFFECT, &Move_MODEL_MOVE_TARGETPOSITION_EFFECT },
@@ -10515,6 +10540,7 @@ namespace Render::Effects::Behaviors
             { MODEL_VOLCANO_OF_MONK, &Move_MODEL_VOLCANO_OF_MONK },
             { MODEL_VOLCANO_STONE, &Move_MODEL_VOLCANO_STONE },
         };
+        // clang-format on
         return handlers;
     }
 }

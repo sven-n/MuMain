@@ -1,0 +1,1065 @@
+{
+  "formatVersion": 1,
+  "group": 10,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Player/GloveMale01.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 1,
+      "file": "Data/Player/GloveMale02.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "red"
+      }
+    },
+    {
+      "number": 2,
+      "file": "Data/Player/GloveMale03.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 3,
+      "file": "Data/Player/GloveMale04.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "blue",
+        "ancientColor": "gold"
+      }
+    },
+    {
+      "number": 4,
+      "file": "Data/Player/GloveMale05.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "white",
+        "shineColor": "orange"
+      }
+    },
+    {
+      "number": 5,
+      "file": "Data/Player/GloveMale06.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 6,
+      "file": "Data/Player/GloveMale07.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "lime"
+      }
+    },
+    {
+      "number": 7,
+      "file": "Data/Player/GloveMale08.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 8,
+      "file": "Data/Player/GloveMale09.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 9,
+      "file": "Data/Player/GloveMale10.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "blue",
+        "ancientColor": "gold"
+      },
+      "renderStyle": "helperNpcPlate"
+    },
+    {
+      "number": 10,
+      "file": "Data/Player/GloveElf01.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 11,
+      "file": "Data/Player/GloveElf02.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 12,
+      "file": "Data/Player/GloveElf03.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "blue"
+      }
+    },
+    {
+      "number": 13,
+      "file": "Data/Player/GloveElf04.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "green"
+      }
+    },
+    {
+      "number": 14,
+      "file": "Data/Player/GloveElf05.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "white",
+        "shineColor": "orange"
+      }
+    },
+    {
+      "number": 15,
+      "file": "Data/Player/GloveMale16.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "lavender",
+        "shineColor": "orange"
+      },
+      "renderStyle": "stormCrow"
+    },
+    {
+      "number": 16,
+      "file": "Data/Player/GloveMale17.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "sand"
+      }
+    },
+    {
+      "number": 17,
+      "file": "Data/Player/GloveMale18.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "steelBlue",
+        "shineColor": "orange",
+        "ancientColor": "gold"
+      }
+    },
+    {
+      "number": 18,
+      "file": "Data/Player/GloveMale19.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "white",
+        "shineColor": "blue"
+      }
+    },
+    {
+      "number": 19,
+      "file": "Data/Player/GloveMaleTest20.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "steelBlue"
+      },
+      "itemEffect": "divineSet"
+    },
+    {
+      "number": 20,
+      "file": "Data/Player/GloveMale21.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "steelBlue"
+      },
+      "renderStyle": "thunderHawk"
+    },
+    {
+      "number": 21,
+      "file": "Data/Player/GloveMale22.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "copper",
+        "shineWhite": true
+      }
+    },
+    {
+      "number": 22,
+      "file": "Data/Player/GloveMale23.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "bronze"
+      }
+    },
+    {
+      "number": 23,
+      "file": "Data/Player/GloveMale24.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "slate"
+      },
+      "renderStyle": "hurricane"
+    },
+    {
+      "number": 24,
+      "file": "Data/Player/GloveMale25.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "copper"
+      }
+    },
+    {
+      "number": 25,
+      "file": "Data/Player/GloveMale26.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "slate"
+      }
+    },
+    {
+      "number": 26,
+      "file": "Data/Player/GloveMale27.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "sage"
+      }
+    },
+    {
+      "number": 27,
+      "file": "Data/Player/GloveMale28.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "sand"
+      }
+    },
+    {
+      "number": 28,
+      "file": "Data/Player/GloveMale29.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "denim"
+      }
+    },
+    {
+      "number": 29,
+      "file": "Data/Player/HDK_GloveMale01.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "brown"
+      }
+    },
+    {
+      "number": 30,
+      "file": "Data/Player/HDK_GloveMale02.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "royalBlue"
+      }
+    },
+    {
+      "number": 31,
+      "file": "Data/Player/HDK_GloveMale03.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "leafGreen"
+      }
+    },
+    {
+      "number": 32,
+      "file": "Data/Player/HDK_GloveMale04.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "violet"
+      }
+    },
+    {
+      "number": 33,
+      "file": "Data/Player/HDK_GloveMale05.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "olive"
+      }
+    },
+    {
+      "number": 34,
+      "file": "Data/Player/CW_GloveMale01.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "ochre"
+      }
+    },
+    {
+      "number": 35,
+      "file": "Data/Player/CW_GloveMale02.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "grey"
+      }
+    },
+    {
+      "number": 36,
+      "file": "Data/Player/CW_GloveMale03.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "leafGreen"
+      },
+      "renderStyle": "onlyMesh0WithoutSkin"
+    },
+    {
+      "number": 37,
+      "file": "Data/Player/CW_GloveMale04.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "mist"
+      }
+    },
+    {
+      "number": 38,
+      "file": "Data/Player/CW_GloveMale05.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0032,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "olive"
+      }
+    },
+    {
+      "number": 39,
+      "file": "Data/Player/GloveMale40.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "emerald",
+        "shineColor": "orange"
+      }
+    },
+    {
+      "number": 40,
+      "file": "Data/Player/GloveMale41.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "rust",
+        "shineColor": "orange"
+      }
+    },
+    {
+      "number": 41,
+      "file": "Data/Player/GloveMale42.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "amber",
+        "shineColor": "orange"
+      }
+    },
+    {
+      "number": 42,
+      "file": "Data/Player/GloveMale43.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "purple",
+        "shineColor": "orange"
+      }
+    },
+    {
+      "number": 43,
+      "file": "Data/Player/GloveMale44.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "pink",
+        "shineColor": "blue"
+      }
+    },
+    {
+      "number": 44,
+      "file": "Data/Player/GloveMale45.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "lilac",
+        "shineWhite": true
+      },
+      "renderStyle": "onlyMesh0WithoutSkin"
+    },
+    {
+      "number": 45,
+      "file": "Data/Player/GloveMale46.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "periwinkle"
+      }
+    },
+    {
+      "number": 46,
+      "file": "Data/Player/GloveMale47.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "darkOrange"
+      }
+    },
+    {
+      "number": 47,
+      "file": "Data/Player/GloveMale48.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "orchid"
+      }
+    },
+    {
+      "number": 48,
+      "file": "Data/Player/GloveMale49.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "red"
+      }
+    },
+    {
+      "number": 49,
+      "file": "Data/Player/GloveMale50.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "rose"
+      }
+    },
+    {
+      "number": 50,
+      "file": "Data/Player/GloveMale51.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "moss"
+      }
+    },
+    {
+      "number": 51,
+      "file": "Data/Player/GloveMale52.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "crimson"
+      }
+    },
+    {
+      "number": 52,
+      "file": "Data/Player/GloveMale53.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "periwinkle"
+      }
+    },
+    {
+      "number": 53,
+      "file": "Data/Player/GloveMale54.bmd",
+      "textureFolders": ["Player"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      },
+      "glow": {
+        "color": "magenta"
+      }
+    },
+    {
+      "number": 62,
+      "file": "Data/Player/LuckyItem/62/new_Glove01.bmd",
+      "textureFolders": ["Player/LuckyItem/62"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 63,
+      "file": "Data/Player/LuckyItem/63/new_Glove02.bmd",
+      "textureFolders": ["Player/LuckyItem/63"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 64,
+      "file": "Data/Player/LuckyItem/64/new_Glove03.bmd",
+      "textureFolders": ["Player/LuckyItem/64"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 65,
+      "file": "Data/Player/LuckyItem/65/new_Glove04.bmd",
+      "textureFolders": ["Player/LuckyItem/65"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 66,
+      "file": "Data/Player/LuckyItem/66/new_Glove05.bmd",
+      "textureFolders": ["Player/LuckyItem/66"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 67,
+      "file": "Data/Player/LuckyItem/67/new_Glove06.bmd",
+      "textureFolders": ["Player/LuckyItem/67"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 68,
+      "file": "Data/Player/LuckyItem/68/new_Glove07.bmd",
+      "textureFolders": ["Player/LuckyItem/68"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 69,
+      "file": "Data/Player/LuckyItem/69/new_Glove08.bmd",
+      "textureFolders": ["Player/LuckyItem/69"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 70,
+      "file": "Data/Player/LuckyItem/70/new_Glove09.bmd",
+      "textureFolders": ["Player/LuckyItem/70"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    },
+    {
+      "number": 71,
+      "file": "Data/Player/LuckyItem/71/new_Glove10.bmd",
+      "textureFolders": ["Player/LuckyItem/71"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "scale": 0.0038,
+        "bodyHeight": -70
+      },
+      "ground": {
+        "rotation": [270, 0, -45],
+        "bodyHeight": -70
+      }
+    }
+  ]
+}

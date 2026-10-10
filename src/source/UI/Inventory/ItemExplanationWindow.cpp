@@ -6,6 +6,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "I18N/All.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -102,7 +103,7 @@ void mu::ui::window::CItemExplanationWindow::SyncContent()
                        (ItemHelp >= ITEM_STAFF && ItemHelp < ITEM_STAFF + MAX_ITEM_INDEX) ||
                        (ItemHelp >= ITEM_SHIELD && ItemHelp < ITEM_SHIELD + MAX_ITEM_INDEX) ||
                        (ItemHelp >= ITEM_HELM && ItemHelp < ITEM_BOOTS + MAX_ITEM_INDEX) || etc;
-    if (ItemHelp == ITEM_BOLT || ItemHelp == ITEM_ARROWS || !known)
+    if (GameLogic::Items::IsAmmunitionType(ItemHelp) || !known)
     {
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
         m_View.Sync(false, {});

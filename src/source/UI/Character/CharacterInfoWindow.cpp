@@ -16,6 +16,7 @@
 #include "UI/Core/UIManager.h"
 #include "Network/Server/ServerListManager.h"
 #include "I18N/All.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "Core/Utilities/StringUtils.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -459,13 +460,13 @@ void mu::ui::window::CCharacterInfoWindow::BuildTableTexts()
 
         iMaxMinus = -CharacterAttribute->wMaxMinusPoint;
 
-        mu_swprintf(strPoint, L"%ls %d/%d | %ls %d/%d",
-            I18N::Game::Create, CharacterAttribute->AddPoint, CharacterAttribute->MaxAddPoint,
-            I18N::Game::Decrease, iMinus, iMaxMinus);
+        mu_swprintf(strPoint, L"%ls %d/%d | %ls %d/%d", I18N::Game::StatPointsAdded, CharacterAttribute->AddPoint,
+                    CharacterAttribute->MaxAddPoint, I18N::Game::StatPointsRemoved, iMinus, iMaxMinus);
     }
     else
     {
-        mu_swprintf(strPoint, L"%ls %d/%d | %ls %d/%d", I18N::Game::Create, 0, 0, I18N::Game::Decrease, 0, 0);
+        mu_swprintf(strPoint, L"%ls %d/%d | %ls %d/%d", I18N::Game::StatPointsAdded, 0, 0,
+                    I18N::Game::StatPointsRemoved, 0, 0);
     }
 
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::levelText, "level_text", StringUtils::WideToNarrow(strLevel));
@@ -1352,14 +1353,10 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
             iMagicDamageMax += nTemp / 4 * fTemp;
         }
 
-        if ((pWeaponRight->Type >= MODEL_STAFF - MODEL_ITEM
-            && pWeaponRight->Type < (MODEL_STAFF + MAX_ITEM_INDEX - MODEL_ITEM))
-            || pWeaponRight->Type == (static_cast<int>(MODEL_RUNE_BLADE) - MODEL_ITEM)
-            || pWeaponRight->Type == (static_cast<int>(MODEL_EXPLOSION_BLADE) - MODEL_ITEM)
-            || pWeaponRight->Type == (static_cast<int>(MODEL_SWORD_DANCER) - MODEL_ITEM)
-            || pWeaponRight->Type == (static_cast<int>(MODEL_DARK_REIGN_BLADE) - MODEL_ITEM)
-            || pWeaponRight->Type == (static_cast<int>(MODEL_IMPERIAL_SWORD) - MODEL_ITEM)
-            )
+        if ((pWeaponRight->Type >= ITEM_STAFF && pWeaponRight->Type < (ITEM_STAFF + MAX_ITEM_INDEX)) ||
+            pWeaponRight->Type == ITEM_RUNE_BLADE || pWeaponRight->Type == ITEM_EXPLOSION_BLADE ||
+            pWeaponRight->Type == ITEM_SWORD_DANCER || pWeaponRight->Type == ITEM_DARK_REIGN_BLADE ||
+            pWeaponRight->Type == ITEM_IMPERIAL_SWORD)
         {
             float magicPercent = (float)(pWeaponRight->MagicPower) / 100;
 
@@ -1455,7 +1452,7 @@ void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
             }
         }
 
-        if (ITEM_BOOK_OF_SAHAMUTT <= pWeaponLeft->Type && pWeaponLeft->Type <= ITEM_STAFF + 29)
+        if (GameLogic::Items::IsSummonerBook(pWeaponLeft))
         {
             float fCursePercent = (float)(pWeaponLeft->MagicPower) / 100;
 

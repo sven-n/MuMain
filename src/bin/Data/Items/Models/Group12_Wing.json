@@ -1,0 +1,1495 @@
+{
+  "formatVersion": 1,
+  "group": 12,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Item/Wing01.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
+      }
+    },
+    {
+      "number": 1,
+      "file": "Data/Item/Wing02.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
+      }
+    },
+    {
+      "number": 2,
+      "file": "Data/Item/Wing03.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
+      }
+    },
+    {
+      "number": 3,
+      "file": "Data/Item/Wing04.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.45],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
+      }
+    },
+    {
+      "number": 4,
+      "file": "Data/Item/Wing05.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.4],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
+      },
+      "itemEffect": "wingsOfSoul"
+    },
+    {
+      "number": 5,
+      "file": "Data/Item/Wing06.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.75],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
+      },
+      "itemEffect": "wingsOfDragon"
+    },
+    {
+      "number": 6,
+      "file": "Data/Item/Wing07.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.55],
+        "scale": 0.0015
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
+      },
+      "renderStyle": "wingsOfDarkness",
+      "itemEffect": "wingsOfDarkness"
+    },
+    {
+      "number": 7,
+      "file": "Data/Item/Gem01.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.005, -0.015],
+        "rotation": [270, 0, 0],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
+      }
+    },
+    {
+      "number": 8,
+      "file": "Data/Item/Gem02.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.005, -0.02],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      }
+    },
+    {
+      "number": 9,
+      "file": "Data/Item/Gem03.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.005, -0.02],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      }
+    },
+    {
+      "number": 10,
+      "file": "Data/Item/Gem04.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.005, -0.02],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      }
+    },
+    {
+      "number": 11,
+      "file": "Data/Item/Gem05.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0.005, -0.02],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0
+      }
+    },
+    {
+      "number": 12,
+      "model": "skillCrystal",
+      "inventory": {
+        "anchor": [0.5, 0.75],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
+      }
+    },
+    {
+      "number": 13,
+      "file": "Data/Item/Gem07.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.75],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
+      }
+    },
+    {
+      "number": 14,
+      "file": "Data/Item/Gem08.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.75],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9,
+        "color": "blue"
+      }
+    },
+    {
+      "number": 15,
+      "model": "jewelOfChaos",
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
+      }
+    },
+    {
+      "number": 16,
+      "file": "Data/Item/Gem10.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.75],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
+      }
+    },
+    {
+      "number": 17,
+      "file": "Data/Item/Gem11.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.75],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
+      }
+    },
+    {
+      "number": 18,
+      "file": "Data/Item/Gem12.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.75],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
+      }
+    },
+    {
+      "number": 19,
+      "file": "Data/Item/Gem13.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.75],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
+      }
+    },
+    {
+      "number": 20,
+      "file": "Data/Item/Gem14.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      }
+    },
+    {
+      "number": 21,
+      "model": "darkLordScroll",
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "itemEffect": "darkLordScroll"
+    },
+    {
+      "number": 22,
+      "model": "darkLordScroll",
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "itemEffect": "darkLordScroll"
+    },
+    {
+      "number": 23,
+      "model": "darkLordScroll",
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "itemEffect": "darkLordScroll"
+    },
+    {
+      "number": 24,
+      "model": "darkLordScroll",
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "itemEffect": "darkLordScroll"
+    },
+    {
+      "number": 30,
+      "model": "jewelOfBless",
+      "inventory": {
+        "anchor": [0.55, 0.8],
+        "scale": 0.004
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
+      }
+    },
+    {
+      "number": 31,
+      "model": "jewelOfSoul",
+      "inventory": {
+        "anchor": [0.55, 0.8],
+        "scale": 0.004
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
+      }
+    },
+    {
+      "number": 32,
+      "file": "Data/Item/giftbox_r.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0, -0.05],
+        "scale": 0.001
+      },
+      "ground": {
+        "rotation": [0, 0, 90],
+        "scale": 0.3
+      }
+    },
+    {
+      "number": 33,
+      "file": "Data/Item/giftbox_g.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0, -0.05],
+        "scale": 0.001
+      },
+      "ground": {
+        "rotation": [0, 0, 90],
+        "scale": 0.3
+      }
+    },
+    {
+      "number": 34,
+      "file": "Data/Item/giftbox_b.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0, -0.05],
+        "scale": 0.001
+      },
+      "ground": {
+        "rotation": [0, 0, 90],
+        "scale": 0.3
+      }
+    },
+    {
+      "number": 35,
+      "model": "darkLordScroll",
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "itemEffect": "darkLordScroll"
+    },
+    {
+      "number": 36,
+      "file": "Data/Item/wing08.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
+      },
+      "renderStyle": "wingOfStorm",
+      "itemEffect": "wingOfStorm"
+    },
+    {
+      "number": 37,
+      "file": "Data/Item/wing09.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0, 0.05],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
+      },
+      "itemEffect": "wingOfEternal"
+    },
+    {
+      "number": 38,
+      "file": "Data/Item/wing10.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0, 0.05],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
+      },
+      "itemEffect": "wingOfIllusion"
+    },
+    {
+      "number": 39,
+      "file": "Data/Item/wing11.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0, 0.08],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "cloth": true,
+      "glow": {
+        "level": 0,
+        "excellent": false
+      },
+      "renderStyle": "wingOfRuin",
+      "itemEffect": "wingOfRuin"
+    },
+    {
+      "number": 40,
+      "file": "Data/Item/DarkLordRobe02.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0, 0.05],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "cloth": true,
+      "glow": {
+        "level": 0,
+        "excellent": false
+      },
+      "renderStyle": "capeOfEmperor"
+    },
+    {
+      "number": 41,
+      "file": "Data/Item/Wing42.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
+      }
+    },
+    {
+      "number": 42,
+      "file": "Data/Item/Wing43.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "offset": [0, 0.05],
+        "rotation": [270, 0, 2],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
+      },
+      "renderStyle": "wingsOfDespair"
+    },
+    {
+      "number": 43,
+      "file": "Data/Item/Wing44.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0,
+        "excellent": false
+      },
+      "renderStyle": "wingOfDimension",
+      "itemEffect": "wingOfDimension"
+    },
+    {
+      "number": 44,
+      "model": "skillCrystal",
+      "inventory": {
+        "offset": [0.005, -0.015],
+        "rotation": [270, 0, 0],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
+      }
+    },
+    {
+      "number": 45,
+      "model": "skillCrystal",
+      "inventory": {
+        "offset": [0.005, -0.015],
+        "rotation": [270, 0, 0],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
+      }
+    },
+    {
+      "number": 46,
+      "model": "skillCrystal",
+      "inventory": {
+        "offset": [0.005, -0.015],
+        "rotation": [270, 0, 0],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
+      }
+    },
+    {
+      "number": 47,
+      "model": "skillCrystal",
+      "inventory": {
+        "offset": [0.005, -0.015],
+        "rotation": [270, 0, 0],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 9
+      }
+    },
+    {
+      "number": 48,
+      "model": "darkLordScroll",
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "itemEffect": "darkLordScroll"
+    },
+    {
+      "number": 49,
+      "model": "capeOfFighter",
+      "inventory": {
+        "anchor": [0.5, 0.5],
+        "offset": [0.015, 0.01],
+        "rotation": [-90, 0, 0],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "cloth": true,
+      "glow": {
+        "level": 0,
+        "excellent": false
+      }
+    },
+    {
+      "number": 50,
+      "file": "Data/Item/Wing51.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.5],
+        "offset": [0, 0.15],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "cloth": true,
+      "glow": {
+        "level": 0,
+        "excellent": false
+      },
+      "renderStyle": "capeOfEmperor"
+    },
+    {
+      "number": 60,
+      "model": "socketSeed",
+      "inventory": {
+        "rotation": [10, -10, 10],
+        "scale": 0.0022
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeed"
+    },
+    {
+      "number": 61,
+      "model": "socketSeed",
+      "inventory": {
+        "rotation": [10, -10, 10],
+        "scale": 0.0022
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeed"
+    },
+    {
+      "number": 62,
+      "model": "socketSeed",
+      "inventory": {
+        "rotation": [10, -10, 10],
+        "scale": 0.0022
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeed"
+    },
+    {
+      "number": 63,
+      "model": "socketSeed",
+      "inventory": {
+        "rotation": [10, -10, 10],
+        "scale": 0.0022
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeed"
+    },
+    {
+      "number": 64,
+      "model": "socketSeed",
+      "inventory": {
+        "rotation": [10, -10, 10],
+        "scale": 0.0022
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeed"
+    },
+    {
+      "number": 65,
+      "model": "socketSeed",
+      "inventory": {
+        "rotation": [10, -10, 10],
+        "scale": 0.0022
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeed"
+    },
+    {
+      "number": 70,
+      "file": "Data/Item/s30_sphere_body01.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      }
+    },
+    {
+      "number": 71,
+      "file": "Data/Item/s30_sphere_body02.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      }
+    },
+    {
+      "number": 72,
+      "file": "Data/Item/s30_sphere_body03.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      }
+    },
+    {
+      "number": 73,
+      "file": "Data/Item/s30_sphere_body04.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      }
+    },
+    {
+      "number": 74,
+      "file": "Data/Item/s30_sphere_body05.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      }
+    },
+    {
+      "number": 100,
+      "model": "seedSphere1",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 101,
+      "model": "seedSphere1",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 102,
+      "model": "seedSphere1",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 103,
+      "model": "seedSphere1",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 104,
+      "model": "seedSphere1",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 105,
+      "model": "seedSphere1",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 106,
+      "model": "seedSphere2",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 107,
+      "model": "seedSphere2",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 108,
+      "model": "seedSphere2",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 109,
+      "model": "seedSphere2",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 110,
+      "model": "seedSphere2",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 111,
+      "model": "seedSphere2",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 112,
+      "model": "seedSphere3",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 113,
+      "model": "seedSphere3",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 114,
+      "model": "seedSphere3",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 115,
+      "model": "seedSphere3",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 116,
+      "model": "seedSphere3",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 117,
+      "model": "seedSphere3",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 118,
+      "model": "seedSphere4",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 119,
+      "model": "seedSphere4",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 120,
+      "model": "seedSphere4",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 121,
+      "model": "seedSphere4",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 122,
+      "model": "seedSphere4",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 123,
+      "model": "seedSphere4",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 124,
+      "model": "seedSphere5",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 125,
+      "model": "seedSphere5",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 126,
+      "model": "seedSphere5",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 127,
+      "model": "seedSphere5",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 128,
+      "model": "seedSphere5",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 129,
+      "model": "seedSphere5",
+      "inventory": {
+        "rotation": [0, 0, 0],
+        "scale": 0.0017
+      },
+      "ground": {
+        "scale": 0.6
+      },
+      "glow": {
+        "level": 0
+      },
+      "renderStyle": "socketSeedSphere"
+    },
+    {
+      "number": 130,
+      "model": "capeOfLord",
+      "inventory": {
+        "scale": 0.0012
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "cloth": true,
+      "glow": {
+        "excellent": false
+      },
+      "renderStyle": "smallCapeOfLord"
+    },
+    {
+      "number": 131,
+      "file": "Data/Item/Ingameshop/alice1wing.bmd",
+      "textureFolders": ["Item/Ingameshop"],
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "excellent": false
+      }
+    },
+    {
+      "number": 132,
+      "file": "Data/Item/Ingameshop/elf_wing.bmd",
+      "textureFolders": ["Item/Ingameshop"],
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "excellent": false
+      }
+    },
+    {
+      "number": 133,
+      "file": "Data/Item/Ingameshop/angel_wing.bmd",
+      "textureFolders": ["Item/Ingameshop"],
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "excellent": false
+      }
+    },
+    {
+      "number": 134,
+      "file": "Data/Item/Ingameshop/devil_wing.bmd",
+      "textureFolders": ["Item/Ingameshop"],
+      "inventory": {
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "excellent": false
+      }
+    },
+    {
+      "number": 135,
+      "model": "capeOfFighter",
+      "inventory": {
+        "offset": [0.005, 0.05],
+        "scale": 0.0012
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "cloth": true,
+      "glow": {
+        "excellent": false
+      }
+    },
+    {
+      "number": 136,
+      "model": "jewelOfLife",
+      "inventory": {
+        "anchor": [0.55, 0.82],
+        "offset": [0, -0.025],
+        "scale": 0.0035
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
+      }
+    },
+    {
+      "number": 137,
+      "model": "jewelOfCreation",
+      "inventory": {
+        "anchor": [0.55, 0.82]
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
+      }
+    },
+    {
+      "number": 138,
+      "model": "jewelOfGuardian",
+      "inventory": {
+        "anchor": [0.55, 0.82],
+        "offset": [0, 0.05],
+        "scale": 0.0036
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
+      }
+    },
+    {
+      "number": 139,
+      "model": "gemstone",
+      "inventory": {
+        "anchor": [0.55, 0.82],
+        "rotation": [270, 90, 0],
+        "scale": 0.0035
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0
+      }
+    },
+    {
+      "number": 140,
+      "model": "jewelOfHarmony",
+      "inventory": {
+        "anchor": [0.55, 0.82],
+        "scale": 0.005
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0
+      }
+    },
+    {
+      "number": 141,
+      "model": "jewelOfChaos",
+      "inventory": {
+        "anchor": [0.55, 0.82],
+        "offset": [0, 0.025],
+        "scale": 0.002
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 8
+      }
+    },
+    {
+      "number": 142,
+      "model": "lowerRefiningStone",
+      "inventory": {
+        "anchor": [0.55, 0.82],
+        "offset": [-0.05, 0],
+        "rotation": [270, -10, -45],
+        "scale": 0.003
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0
+      }
+    },
+    {
+      "number": 143,
+      "model": "higherRefiningStone",
+      "inventory": {
+        "anchor": [0.55, 0.82],
+        "offset": [-0.05, 0],
+        "rotation": [270, -10, -45],
+        "scale": 0.004
+      },
+      "ground": {
+        "rotation": [270, 0, 45]
+      },
+      "glow": {
+        "level": 0
+      }
+    }
+  ]
+}

@@ -10,8 +10,6 @@
 #include "Render/Sprites/GlobalBitmap.h"      // Bitmaps / BITMAP_t
 #include "Core/Globals/_TextureIndex.h"       // BITMAP_MAPTILE
 
-#include <commdlg.h>   // GetOpenFileNameW (.tga picker)
-
 #include <cstdio>
 #include <vector>
 
@@ -165,18 +163,12 @@ bool GenerateFromTiles(int world, std::string& outMsg)
 
 bool WrapTgaToOzt(int world, std::string& outMsg)
 {
-    wchar_t file[MAX_PATH] = { 0 };
-    OPENFILENAMEW ofn = { 0 };
-    ofn.lStructSize = sizeof(ofn);
-    ofn.lpstrFilter = L"TGA image (*.tga)\0*.tga\0All Files\0*.*\0";
-    ofn.lpstrFile = file;
-    ofn.nMaxFile = MAX_PATH;
-    ofn.lpstrTitle = L"Select your edited minimap .tga";
-    ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
-    if (!GetOpenFileNameW(&ofn))
+    std::wstring file;
+    if (!Editor::Files::PickFileToOpen(L"TGA image (*.tga)\0*.tga\0All Files\0*.*\0",
+                                       L"Select your edited minimap .tga", file))
         return false;   // cancelled
 
-    FILE* fp = _wfopen(file, L"rb");
+    FILE* fp = _wfopen(file.c_str(), L"rb");
     if (fp == nullptr)
     {
         outMsg = "Could not open that .tga.";

@@ -69,6 +69,14 @@ void CancelForPhysicalButton(unsigned char button);
 // answers once this turns true again.
 [[nodiscard]] bool IsIdle();
 
+// Whether a key or click the control socket injects is in flight. It never
+// went through ImGui, so the editor's checks of the real pointer and keyboard
+// must not claim this frame's input for the editor.
+[[nodiscard]] inline bool IsInjecting()
+{
+    return !IsIdle();
+}
+
 // Identifies the injection most recently accepted: every key, click or text
 // schedule that returns true gets a value of its own. A command reads it when
 // its injection is scheduled and compares later, so it can tell its own
@@ -89,8 +97,20 @@ void BeginFrame();
 // flight, which may belong to another command.
 void Reset();
 #else
-// Without the control socket the frame, routing, teardown and held-key calls
-// compile to nothing; the injector is not built into a player client.
+// Without the control socket there is nothing to inject: the calls the rest
+// of the client makes (the frame advance, the idle and held-key tests) compile
+// to constants, exactly as the control taps do, so no call site needs a
+// conditional and the injector itself is not built into a player client.
+[[nodiscard]] inline bool IsIdle()
+{
+    return true;
+}
+
+[[nodiscard]] inline bool IsInjecting()
+{
+    return false;
+}
+
 [[nodiscard]] inline bool IsKeyHeld(int)
 {
     return false;

@@ -22,7 +22,6 @@
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraMove.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Scaling/UITransform.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "UI/Core/UIManager.h"
@@ -90,13 +89,6 @@ namespace
     };
     constexpr int PLAYER_ZOOM_LEVEL_DEFAULT = 3;
     constexpr int PLAYER_ZOOM_LEVEL_COUNT   = static_cast<int>(std::size(PLAYER_ZOOM_LADDER));
-
-    float CurrentViewportAspect()
-    {
-        if (SceneFlag == MAIN_SCENE)
-            return UI::Scaling::WorldViewportAspect(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
-        return static_cast<float>(WindowWidth) / WindowHeight;
-    }
 }
 
 DefaultCamera::DefaultCamera(CameraState& state)
@@ -398,44 +390,6 @@ bool DefaultCamera::Update()
     {
         UpdateFrustum();
     }
-
-#ifdef _EDITOR
-    // Debug text rendering to verify camera values (editor only)
-    {
-        g_pRenderText->SetFont(g_hFixFont);
-        g_pRenderText->SetTextColor(255, 255, 0, 255);  // Yellow text
-        g_pRenderText->SetBgColor(0, 0, 0, 180);        // Semi-transparent black background
-
-        wchar_t debugText[256];
-        int yPos = 10;
-        const int lineHeight = 15;
-
-        // Camera type and scene
-        swprintf(debugText, 256, L"Camera: DefaultCamera | Scene: %d", (int)SceneFlag);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // State values
-        swprintf(debugText, 256, L"State.ViewFar: %.0f | State.FOV: %.1f", m_State.ViewFar, m_State.FOV);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // Config values
-        swprintf(debugText, 256, L"Config.farPlane: %.0f | Config.hFov: %.1f", m_Config.farPlane, m_Config.hFov);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // Near plane and culling
-        swprintf(debugText, 256, L"Config.nearPlane: %.0f | Config.terrainCullRange: %.0f",
-                 m_Config.nearPlane, m_Config.terrainCullRange);
-        g_pRenderText->RenderText(10, yPos, debugText);
-        yPos += lineHeight;
-
-        // Rendering value (what BeginOpengl actually uses)
-        swprintf(debugText, 256, L"g_Camera.ViewFar (rendering): %.0f", g_Camera.ViewFar);
-        g_pRenderText->RenderText(10, yPos, debugText);
-    }
-#endif
 
     // Phase 5: Sync camera state to legacy g_Camera global
     // This is needed because BeginOpengl() still uses g_Camera.FOV for perspective setup
@@ -935,7 +889,7 @@ void DefaultCamera::UpdateFrustum()
     VectorNormalize(up);
 
     // Build frustum from current configuration
-    const float aspectRatio = CurrentViewportAspect();
+    const float aspectRatio = CameraProjection::WorldAspectRatio();
 
     // Phase 5 FIX: ALWAYS use m_Config values for frustum culling
     // (Override was already applied at the top of this function.)
@@ -1010,7 +964,7 @@ bool DefaultCamera::NeedsFrustumUpdate() const
     // Check aspect ratio change (window resize / runtime resolution switch).
     // Frustum width depends on aspect; without this the cache would stay valid
     // through a resize and culling at the screen edges would go stale.
-    const float aspectRatio = CurrentViewportAspect();
+    const float aspectRatio = CameraProjection::WorldAspectRatio();
     if (fabs(aspectRatio - m_FrustumCache.AspectRatio) > EPSILON)
     {
         return true;

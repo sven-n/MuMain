@@ -3,6 +3,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 // A confirm or notice dialog described by its content and answers, for code that must not depend
@@ -28,9 +29,14 @@ struct ConfirmRequest
 
     std::function<void()> onAccept; // accept button or Enter
     std::function<void()> onCancel; // Cancel or Esc
+
+    // Names the dialog for code that answers it as the player would (the control socket).
+    std::string tag;
 };
 
 void ShowConfirm(ConfirmRequest request);
+// Answers the dialog tagged `tag` as its accept or cancel button does; false when there is none.
+bool AnswerConfirm(std::string_view tag, bool accept);
 
 bool IsMessageBoxOpen();
 // A window that a duel request must not interrupt is open.

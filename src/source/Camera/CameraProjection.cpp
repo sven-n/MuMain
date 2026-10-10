@@ -3,6 +3,7 @@
 #include "CameraState.h"
 #include "CameraConfig.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "UI/Scaling/UITransform.h"
 
 // External window dimensions
 extern unsigned int WindowWidth;
@@ -11,6 +12,7 @@ extern int OpenglWindowX;
 extern int OpenglWindowY;
 extern int OpenglWindowWidth;
 extern int OpenglWindowHeight;
+extern EGameScene SceneFlag;
 
 // Actual viewport dimensions (distinct from OpenglWindowWidth/Height which are full window)
 static int s_ViewportWidth = 0;
@@ -34,6 +36,13 @@ void CameraProjection::SetupPerspective(CameraState& state, float fov, float asp
     float fovRad = fov * 0.5f * Q_PI / 180.0f;
     state.PerspectiveX = tanf(fovRad) / (float)(vpWidth / 2) * aspect;
     state.PerspectiveY = tanf(fovRad) / (float)(vpHeight / 2);
+}
+
+float CameraProjection::WorldAspectRatio()
+{
+    if (SceneFlag == MAIN_SCENE)
+        return UI::Scaling::WorldViewportAspect(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
+    return static_cast<float>(WindowWidth) / WindowHeight;
 }
 
 void CameraProjection::SetViewport(int x, int y, int width, int height)
@@ -84,6 +93,20 @@ void CameraProjection::WorldToScreen(const CameraState& state, const vec3_t worl
     // Convert to 640×480 reference coordinates
     *outX = *outX * REFERENCE_WIDTH / (int)WindowWidth;
     *outY = *outY * REFERENCE_HEIGHT / (int)WindowHeight;
+}
+
+bool CameraProjection::WorldToWindowPixel(const CameraState& state, const vec3_t worldPos, float* outX, float* outY)
+{
+    vec3_t transformPos;
+    VectorTransform(worldPos, state.Matrix, transformPos);
+    if (transformPos[2] >= 0.0f)
+    {
+        return false;
+    }
+
+    *outX = static_cast<float>(state.ScreenCenterX) - transformPos[0] / (state.PerspectiveX * transformPos[2]);
+    *outY = static_cast<float>(state.ScreenCenterY) + transformPos[1] / (state.PerspectiveY * transformPos[2]);
+    return true;
 }
 
 void CameraProjection::TransformPosition(const CameraState& state, const vec3_t position,

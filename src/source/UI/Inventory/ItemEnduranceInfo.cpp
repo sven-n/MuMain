@@ -10,6 +10,8 @@
 #include "I18N/All.h"
 
 #include "Character/CharacterManager.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
@@ -36,7 +38,7 @@ namespace
 bool HasHelperLifeFrame()
 {
     return Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM ||
-           Hero->Helper.Type == MODEL_DEMON || Hero->Helper.Type == MODEL_SPIRIT_OF_GUARDIAN ||
+           GameLogic::Items::IsDemonOrSpiritOfGuardianModel(Hero->Helper.Type) ||
            Hero->Helper.Type == MODEL_PET_RUDOLF || Hero->Helper.Type == MODEL_PET_PANDA ||
            Hero->Helper.Type == MODEL_PET_UNICORN || Hero->Helper.Type == MODEL_PET_SKELETON ||
            Hero->Helper.Type == MODEL_HORN_OF_FENRIR;
@@ -54,7 +56,7 @@ void HelperLifeFrameName(wchar_t* szText)
     break;
     case MODEL_IMP:
     {
-        ITEM_ATTRIBUTE* p = &ItemAttribute[Hero->Helper.Type - MODEL_SWORD];
+        ITEM_ATTRIBUTE* p = &ItemAttribute[Data::Items::ToItemType(Hero->Helper.Type)];
         mu_swprintf(szText, p->Name);
     }
     break;

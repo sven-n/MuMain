@@ -21,7 +21,7 @@
     <comment>legacy_id=1</comment>
   </data>
   <data name="Text_2" xml:space="preserve">
-    <value>Seid gegrüßt! Mein Name ist Baz, und ich bin der Lagerverwalter. Ich kann Euch überall hin nützlich sein. Zögert nicht, mir Eure Habseligkeiten anzuvertrauen.</value>
+    <value>Seid gegrüßt! Mein Name ist Baz, und ich bin der Tresorverwalter. Ich kann Euch überall hin nützlich sein. Zögert nicht, mir Eure Habseligkeiten anzuvertrauen.</value>
     <comment>legacy_id=2</comment>
   </data>
   <data name="Text_3" xml:space="preserve">
@@ -29,7 +29,7 @@
     <comment>legacy_id=3</comment>
   </data>
   <data name="Text_4" xml:space="preserve">
-    <value>Seid gegrüßt! Mein Name ist Baz und ich bin der Lagerverwalter. Ich kann Euch helfen, wohin Ihr auch geht. Zögert nicht, Eure Habseligkeiten bei mir zu lassen.</value>
+    <value>Seid gegrüßt! Mein Name ist Baz und ich bin der Tresorverwalter. Ich kann Euch helfen, wohin Ihr auch geht. Zögert nicht, Eure Habseligkeiten bei mir zu lassen.</value>
     <comment>legacy_id=4</comment>
   </data>
   <data name="Text_5" xml:space="preserve">
@@ -53,7 +53,7 @@
     <comment>legacy_id=9</comment>
   </data>
   <data name="Text_50" xml:space="preserve">
-    <value>Die 'Schriftrolle des Kaisers', die von Muren, dem ersten Kaiser von MU, berichtet, soll im Verlorenen Turm, in Atlans und im Dungeon gesichtet worden sein.</value>
+    <value>Die 'Schriftrolle des Kaisers', die von Muren, dem ersten Kaiser von MU, berichtet, soll im Verlorenen Turm, in Atlans und im Verlies gesichtet worden sein.</value>
     <comment>legacy_id=50</comment>
   </data>
   <data name="Answer_50_Slot_0" xml:space="preserve">
@@ -69,7 +69,7 @@
     <comment>legacy_id=1510</comment>
   </data>
   <data name="Text_52" xml:space="preserve">
-    <value>Die 'Schriftrolle des Kaisers', die von Muren erzählt, dem ersten Kaiser, der MU einte, soll im Verlorenen Turm, in Atlans und im Dungeon gesichtet worden sein.</value>
+    <value>Die 'Schriftrolle des Kaisers', die von Muren erzählt, dem ersten Kaiser, der MU einte, soll im Verlorenen Turm, in Atlans und im Verlies gesichtet worden sein.</value>
     <comment>legacy_id=52</comment>
   </data>
   <data name="Answer_52_Slot_0" xml:space="preserve">
@@ -97,7 +97,7 @@
     <comment>legacy_id=54</comment>
   </data>
   <data name="Answer_54_Slot_0" xml:space="preserve">
-    <value>Ich werde es suchen gehen.</value>
+    <value>Ich werde sie suchen gehen.</value>
     <comment>legacy_id=1540</comment>
   </data>
   <data name="Text_55" xml:space="preserve">
@@ -129,7 +129,7 @@
     <comment>legacy_id=1571</comment>
   </data>
   <data name="Text_58" xml:space="preserve">
-    <value>Es heißt, magische Artefakte könnten gefunden werden, sie tragen die Namen 'Zerbrochenes Schwert', 'Träne der Elfe' und 'Seele des Magiers'. Das 'Zerbrochene Schwert' wurde von den Dunklen Rittern als Sinnbild ihres Mutes, ihrer Treue und ihres Strebens nach Wohlstand dargebracht.</value>
+    <value>Es heißt, magische Artefakte könnten gefunden werden, sie tragen die Namen 'Zerbrochenes Schwert', 'Träne der Elfe' und 'Seele des Zauberers'. Das 'Zerbrochene Schwert' wurde von den Dunklen Rittern als Sinnbild ihres Mutes, ihrer Treue und ihres Strebens nach Wohlstand dargebracht.</value>
     <comment>legacy_id=58</comment>
   </data>
   <data name="Answer_58_Slot_0" xml:space="preserve">
@@ -141,7 +141,7 @@
     <comment>legacy_id=1581</comment>
   </data>
   <data name="Text_59" xml:space="preserve">
-    <value>Die 'Seele des Magiers' wurde von den Dunklen Magiern als Sinnbild ihres Gelübdes dargebracht, ihre Macht für den Frieden und die Freiheit des Reiches einzusetzen. Mu-Jahr 10, ein Auszug aus der Chronik des Friedensgedenkens ...</value>
+    <value>Die 'Seele des Zauberers' wurde von den Dunklen Zauberern als Sinnbild ihres Gelübdes dargebracht, ihre Macht für den Frieden und die Freiheit des Reiches einzusetzen. Mu-Jahr 10, ein Auszug aus der Chronik des Friedensgedenkens ...</value>
     <comment>legacy_id=59</comment>
   </data>
   <data name="Answer_59_Slot_0" xml:space="preserve">
@@ -173,7 +173,7 @@
     <comment>legacy_id=1610</comment>
   </data>
   <data name="Text_62" xml:space="preserve">
-    <value>Tapferer Dunkelritter, Ihr habt das 'Zerbrochene Schwert' gefunden! Nach der Einigung des Kontinents Mu zerbrach Muren, der erste Kaiser, sein Schwert 'Apocalypse' als Zeichen seines Wunsches, dass nie wieder ein Krieg ausbrechen möge.</value>
+    <value>Tapferer Dunkler Ritter, Ihr habt das 'Zerbrochene Schwert' gefunden! Nach der Einigung des Kontinents Mu zerbrach Muren, der erste Kaiser, sein Schwert 'Apocalypse' als Zeichen seines Wunsches, dass nie wieder ein Krieg ausbrechen möge.</value>
     <comment>legacy_id=62</comment>
   </data>
   <data name="Answer_62_Slot_0" xml:space="preserve">
@@ -189,7 +189,7 @@
     <comment>legacy_id=1630</comment>
   </data>
   <data name="Text_64" xml:space="preserve">
-    <value>Ihr habt die 'Schriftrolle des Kaisers' gelesen, nicht wahr. Dann müsst Ihr von den 3 Schätzen wissen, die darin verzeichnet sind. Findet den Kristall 'Träne der Elfen', den die alten Elfen mit der Kraft des Geistes erschufen.</value>
+    <value>Ihr habt die 'Schriftrolle des Kaisers' gelesen, nicht wahr. Dann müsst Ihr von den 3 Schätzen wissen, die darin verzeichnet sind. Findet den Kristall 'Träne der Elfe', den die alten Elfen mit der Kraft des Geistes erschufen.</value>
     <comment>legacy_id=64</comment>
   </data>
   <data name="Answer_64_Slot_0" xml:space="preserve">
@@ -205,7 +205,7 @@
     <comment>legacy_id=1650</comment>
   </data>
   <data name="Text_66" xml:space="preserve">
-    <value>Ihr habt die 'Träne der Elfen' gefunden! Nach dem Krieg erschuf Lunedil, die Elfenkönigin, den Tränenstein, indem sie den Geiststein verzauberte, damit die Elfen die Macht der Göttin anrufen und ihre eigene Stärke aufbauen konnten.</value>
+    <value>Ihr habt die 'Träne der Elfe' gefunden! Nach dem Krieg erschuf Lunedil, die Elfenkönigin, den Tränenstein, indem sie den Geiststein verzauberte, damit die Elfen die Macht der Göttin anrufen und ihre eigene Stärke aufbauen konnten.</value>
     <comment>legacy_id=66</comment>
   </data>
   <data name="Answer_66_Slot_0" xml:space="preserve">
@@ -221,15 +221,15 @@
     <comment>legacy_id=1670</comment>
   </data>
   <data name="Text_68" xml:space="preserve">
-    <value>Mit Eurer Kraft seid Ihr gewiss imstande, die 'Seele des Magiers' zu finden. Nun zieht aus und sucht die 'Seele des Magiers', und kehrt zu mir zurück, sobald Ihr sie gefunden habt.</value>
+    <value>Mit Eurer Kraft seid Ihr gewiss imstande, die 'Seele des Zauberers' zu finden. Nun zieht aus und sucht die 'Seele des Zauberers', und kehrt zu mir zurück, sobald Ihr sie gefunden habt.</value>
     <comment>legacy_id=68</comment>
   </data>
   <data name="Answer_68_Slot_0" xml:space="preserve">
-    <value>Ich werde die 'Seele des Magiers' finden.</value>
+    <value>Ich werde die 'Seele des Zauberers' finden.</value>
     <comment>legacy_id=1680</comment>
   </data>
   <data name="Text_69" xml:space="preserve">
-    <value>Ich wusste, dass Ihr die 'Seele des Magiers' finden würdet! Etramu, der größte Magier von Arka, schuf einen seelenschützenden Magiestein aus Sorge, die schwachen Dunkelritter könnten dem Angriff Kunduns nicht standhalten.</value>
+    <value>Ich wusste, dass Ihr die 'Seele des Zauberers' finden würdet! Etramu, der größte Zauberer von Arka, schuf einen seelenschützenden Zauberstein aus Sorge, die schwachen Dunklen Ritter könnten dem Angriff Kunduns nicht standhalten.</value>
     <comment>legacy_id=69</comment>
   </data>
   <data name="Answer_69_Slot_0" xml:space="preserve">
@@ -237,11 +237,11 @@
     <comment>legacy_id=1690</comment>
   </data>
   <data name="Text_70" xml:space="preserve">
-    <value>Ein dunkler Magier, der diesen Magiestein besitzt, wird zum Seelenmeister.</value>
+    <value>Ein Dunkler Zauberer, der diesen Zauberstein besitzt, wird zum Seelenmeister.</value>
     <comment>legacy_id=70</comment>
   </data>
   <data name="Answer_70_Slot_0" xml:space="preserve">
-    <value>Ich bin nun ein Soul Master!</value>
+    <value>Ich bin nun ein Seelenmeister!</value>
     <comment>legacy_id=1700</comment>
   </data>
   <data name="Text_71" xml:space="preserve">
@@ -285,7 +285,7 @@
     <comment>legacy_id=1750</comment>
   </data>
   <data name="Text_76" xml:space="preserve">
-    <value>Von da an entstand der Brauch, dass dunkle Ritter, die Klingenritter werden wollten, ihre Schwerter zerbrachen - als Symbol des Gelübdes, ihre Klinge niemals ungerecht zu führen.</value>
+    <value>Von da an entstand der Brauch, dass Dunkle Ritter, die Klingenritter werden wollten, ihre Schwerter zerbrachen - als Symbol des Gelübdes, ihre Klinge niemals ungerecht zu führen.</value>
     <comment>legacy_id=76</comment>
   </data>
   <data name="Answer_76_Slot_0" xml:space="preserve">
@@ -297,7 +297,7 @@
     <comment>legacy_id=77</comment>
   </data>
   <data name="Answer_77_Slot_0" xml:space="preserve">
-    <value>'Ich werde es suchen gehen!</value>
+    <value>'Ich werde sie suchen gehen!</value>
     <comment>legacy_id=1770</comment>
   </data>
   <data name="Answer_77_Slot_1" xml:space="preserve">
@@ -305,7 +305,7 @@
     <comment>legacy_id=1771</comment>
   </data>
   <data name="Text_78" xml:space="preserve">
-    <value>Dies wird die 'Träne der Elfe' genannt, und die Elfe, die diesen Stein findet, wird zur Musen-Elfe und vermag die Macht der elfischen Göttinnen heraufzubeschwören.</value>
+    <value>Dies wird die 'Träne der Elfe' genannt, und die Elfe, die diesen Stein findet, wird zur Musenelfe und vermag die Macht der elfischen Göttinnen heraufzubeschwören.</value>
     <comment>legacy_id=78</comment>
   </data>
   <data name="Answer_78_Slot_0" xml:space="preserve">
@@ -345,11 +345,11 @@
     <comment>legacy_id=1811</comment>
   </data>
   <data name="Text_82" xml:space="preserve">
-    <value>Sucht die 'Seele des Magiers'. Den alten dunklen Magiern zufolge wurde sie zuletzt in der Nähe des Verlorenen Turms, in Atlans und Tarkan gesehen.</value>
+    <value>Sucht die 'Seele des Zauberers'. Den alten Dunklen Zauberern zufolge wurde sie zuletzt in der Nähe des Verlorenen Turms, in Atlans und Tarkan gesehen.</value>
     <comment>legacy_id=82</comment>
   </data>
   <data name="Answer_82_Slot_0" xml:space="preserve">
-    <value>Ich werde ihn suchen</value>
+    <value>Ich werde sie suchen.</value>
     <comment>legacy_id=1820</comment>
   </data>
   <data name="Answer_82_Slot_1" xml:space="preserve">
@@ -365,7 +365,7 @@
     <comment>legacy_id=1900</comment>
   </data>
   <data name="Text_91" xml:space="preserve">
-    <value>Der Kontinent MU besaß das Tor zu einer anderen Dimension, das unter der Obhut der Beschwörer stand. Und Semeden hatte den Abgrund des Auges als Zeichen seines Versprechens überreicht. Bitte zieht aus und bringt den Abgrund des Auges zurück.</value>
+    <value>Der Kontinent MU besaß das Tor zu einer anderen Dimension, das unter der Obhut der Beschwörer stand. Und Semeden hatte das Auge des Abgrunds als Zeichen seines Versprechens überreicht. Bitte zieht aus und bringt das Auge des Abgrunds zurück.</value>
     <comment>legacy_id=91</comment>
   </data>
   <data name="Answer_91_Slot_0" xml:space="preserve">
@@ -385,7 +385,7 @@
     <comment>legacy_id=1920</comment>
   </data>
   <data name="Text_93" xml:space="preserve">
-    <value>Ihr habt den Abgrund des Auges gefunden. Er ist bekannt als ein Gegenstand, der aus einem Element besteht, das in der wirklichen Welt nicht existiert. Er ist ein Überbleibsel aus der Welt vor der gegenwärtigen, deren Erinnerung mit ihm zurückkehrt.</value>
+    <value>Ihr habt das Auge des Abgrunds gefunden. Es ist bekannt als ein Gegenstand, der aus einem Element besteht, das in der wirklichen Welt nicht existiert. Es ist ein Überbleibsel aus der Welt vor der gegenwärtigen, deren Erinnerung mit ihm zurückkehrt.</value>
     <comment>legacy_id=93</comment>
   </data>
   <data name="Answer_93_Slot_0" xml:space="preserve">
@@ -393,11 +393,11 @@
     <comment>legacy_id=1930</comment>
   </data>
   <data name="Text_94" xml:space="preserve">
-    <value>Das Auge des Abgrunds hat für mich eine besondere Bedeutung, denn ich überwache die Dimensionen dieser Welt und verständige mich durch sie. Wenn Ihr mir das Auge des Abgrunds bringt, verleihe ich Euch im Namen Semedens, des Hüters Eurer Dimension, den Titel des Blutbeschwörers.</value>
+    <value>Das Auge des Abgrunds hat für mich eine besondere Bedeutung, denn ich überwache die Dimensionen dieser Welt und verständige mich durch sie. Wenn Ihr mir das Auge des Abgrunds bringt, verleihe ich Euch im Namen Semedens, des Hüters Eurer Dimension, den Titel des Blutigen Beschwörers.</value>
     <comment>legacy_id=94</comment>
   </data>
   <data name="Answer_94_Slot_0" xml:space="preserve">
-    <value>Ernennung zum Blutbeschwörer</value>
+    <value>Ernennung zum Blutigen Beschwörer</value>
     <comment>legacy_id=1940</comment>
   </data>
   <data name="Text_100" xml:space="preserve">
@@ -409,7 +409,7 @@
     <comment>legacy_id=2000</comment>
   </data>
   <data name="Text_101" xml:space="preserve">
-    <value>Für diese Aufgabe wird mehr Erfahrung benötigt, um zu bestehen. Kehrt zurück, wenn Ihr nach den Prüfungen des verlorenen Reiches Stufe 220 erreicht habt.</value>
+    <value>Für diese Aufgabe wird mehr Erfahrung benötigt, um zu bestehen. Kehrt zurück, wenn Ihr nach den Prüfungen des verlorenen Reiches Level 220 erreicht habt.</value>
     <comment>legacy_id=101</comment>
   </data>
   <data name="Answer_101_Slot_0" xml:space="preserve">
@@ -529,7 +529,7 @@
     <comment>legacy_id=2160</comment>
   </data>
   <data name="Text_117" xml:space="preserve">
-    <value>Ihr habt es nicht vermocht, ein Blade Knight zu werden. Kehrt zurück, wenn Ihr durch den 'Ring des Ruhms' neue Kraft erlangt habt.</value>
+    <value>Ihr habt es nicht vermocht, ein Klingenritter zu werden. Kehrt zurück, wenn Ihr durch den 'Ring des Ruhms' neue Kraft erlangt habt.</value>
     <comment>legacy_id=117</comment>
   </data>
   <data name="Answer_117_Slot_0" xml:space="preserve">
@@ -553,7 +553,7 @@
     <comment>legacy_id=2190</comment>
   </data>
   <data name="Text_130" xml:space="preserve">
-    <value>Das ist wahrhaftig der 'Ring des Ruhmes'. Seht nur, wie er glänzt. Dieser Ring birgt Zeit und Legenden, die Ihr kaum zu erahnen vermögt. Welch ein Segen, dass Ihr ihn gefunden habt!.</value>
+    <value>Das ist wahrhaftig der 'Ring des Ruhms'. Seht nur, wie er glänzt. Dieser Ring birgt Zeit und Legenden, die Ihr kaum zu erahnen vermögt. Welch ein Segen, dass Ihr ihn gefunden habt!</value>
     <comment>legacy_id=130</comment>
   </data>
   <data name="Answer_130_Slot_0" xml:space="preserve">
@@ -569,7 +569,7 @@
     <comment>legacy_id=2310</comment>
   </data>
   <data name="Text_132" xml:space="preserve">
-    <value>Das liegt daran, dass Etramu, der Magier von Arka, einen Zauber darauf gelegt hat, damit es nicht in falsche Hände gerät. Doch es scheint, als wäret Ihr die richtige Person!</value>
+    <value>Das liegt daran, dass Etramu, der Zauberer von Arka, einen Zauber darauf gelegt hat, damit er nicht in falsche Hände gerät. Doch es scheint, als wäret Ihr die richtige Person!</value>
     <comment>legacy_id=132</comment>
   </data>
   <data name="Answer_132_Slot_0" xml:space="preserve">
@@ -609,7 +609,7 @@
     <comment>legacy_id=2360</comment>
   </data>
   <data name="Text_137" xml:space="preserve">
-    <value>Es heißt, man könne den Stein in Tarkan und Icarus finden. Hütet Euch vor den Monstern. Jene Monster, die den Stein in sich tragen, regieren nur auf solche, die eine besondere Gabe besitzen.</value>
+    <value>Es heißt, man könne den Stein in Tarkan und Ikarus finden. Hütet Euch vor den Monstern. Jene Monster, die den Stein in sich tragen, reagieren nur auf solche, die eine besondere Gabe besitzen.</value>
     <comment>legacy_id=137</comment>
   </data>
   <data name="Answer_137_Slot_0" xml:space="preserve">
@@ -713,7 +713,7 @@
     <comment>legacy_id=2480</comment>
   </data>
   <data name="Text_149" xml:space="preserve">
-    <value>Wir wissen, dass Balgass' Heer durch die Festung Cry Wolf gegen den Kontinent Mu zieht, doch eine vollständige Deutung des Geschehens steht noch aus.</value>
+    <value>Wir wissen, dass Balgass' Heer durch die Crywolf-Festung gegen den Kontinent Mu zieht, doch eine vollständige Deutung des Geschehens steht noch aus.</value>
     <comment>legacy_id=149</comment>
   </data>
   <data name="Answer_149_Slot_0" xml:space="preserve">
@@ -721,7 +721,7 @@
     <comment>legacy_id=2490</comment>
   </data>
   <data name="Text_150" xml:space="preserve">
-    <value>Wir bemühen uns redlich, die Bedeutung von Lugars Vertrauen in uns zu begreifen, doch unsere unzulänglichen Fähigkeiten machen es uns schwer.</value>
+    <value>Wir bemühen uns redlich, die Bedeutung von Lugards Vertrauen in uns zu begreifen, doch unsere unzulänglichen Fähigkeiten machen es uns schwer.</value>
     <comment>legacy_id=150</comment>
   </data>
   <data name="Answer_150_Slot_0" xml:space="preserve">
@@ -753,7 +753,7 @@
     <comment>legacy_id=2520</comment>
   </data>
   <data name="Text_153" xml:space="preserve">
-    <value>Vernichtet die Monster Death Beam, Hellmaine und Dark Phoenix, die über Tarkan, Aida und Icarus herrschen, und bringt mir je einen Beweis ihres Falls.</value>
+    <value>Vernichtet die Monster Death Beam, Hellmaine und Dark Phoenix, die über Tarkan, Aida und Ikarus herrschen, und bringt mir je einen Beweis ihres Falls.</value>
     <comment>legacy_id=153</comment>
   </data>
   <data name="Answer_153_Slot_0" xml:space="preserve">
@@ -809,7 +809,7 @@
     <comment>legacy_id=2590</comment>
   </data>
   <data name="Text_160" xml:space="preserve">
-    <value>Genaue Kenntnis über die 'Baracke' treibt einen dazu, die Baracken-Zone zu betreten, um die drohende Erstarkung von Balgass' Heer einzudämmen.</value>
+    <value>Genaue Kenntnis über die 'Kaserne' treibt einen dazu, die Kasernen-Zone zu betreten, um die drohende Erstarkung von Balgass' Heer einzudämmen.</value>
     <comment>legacy_id=160</comment>
   </data>
   <data name="Answer_160_Slot_0" xml:space="preserve">
@@ -833,7 +833,7 @@
     <comment>legacy_id=2612</comment>
   </data>
   <data name="Text_162" xml:space="preserve">
-    <value>Geht zum nördlichen Friedhof der Cry-Wolf-Region und sucht den geflohenen Soldaten aus Balgass' Kaserne. Lugars Segen hat einem von ihnen Verstand verliehen. Er nennt sich Werwolf-Wächter.</value>
+    <value>Geht zum nördlichen Friedhof der Crywolf-Region und sucht den geflohenen Soldaten aus Balgass' Kaserne. Lugards Segen hat einem von ihnen Verstand verliehen. Er nennt sich Werwolf-Wächter.</value>
     <comment>legacy_id=162</comment>
   </data>
   <data name="Answer_162_Slot_0" xml:space="preserve">
@@ -857,7 +857,7 @@
     <comment>legacy_id=2640</comment>
   </data>
   <data name="Text_165" xml:space="preserve">
-    <value>Mit den Informationen und all den vernichteten Monstern habt Ihr einen großen Beitrag geleistet, um Frieden auf dem Kontinent MU und in Cry Wolf zu schaffen.</value>
+    <value>Mit den Informationen und all den vernichteten Monstern habt Ihr einen großen Beitrag geleistet, um Frieden auf dem Kontinent MU und in Crywolf zu schaffen.</value>
     <comment>legacy_id=165</comment>
   </data>
   <data name="Answer_165_Slot_0" xml:space="preserve">
@@ -881,7 +881,7 @@
     <comment>legacy_id=2670</comment>
   </data>
   <data name="Text_168" xml:space="preserve">
-    <value>Euer eigenmächtiger Mut hat uns allen große Hoffnung geschenkt.</value>
+    <value>Euer entschlossener Mut hat uns allen große Hoffnung geschenkt.</value>
     <comment>legacy_id=168</comment>
   </data>
   <data name="Answer_168_Slot_0" xml:space="preserve">
@@ -905,7 +905,7 @@
     <comment>legacy_id=2700</comment>
   </data>
   <data name="Text_171" xml:space="preserve">
-    <value>Die letzte Mission, die auf Lugars Auftrag folgt, beinhaltet eine gewaltige und schwierige Prüfung. Habt Ihr noch immer Interesse?</value>
+    <value>Die letzte Mission, die auf Lugards Auftrag folgt, beinhaltet eine gewaltige und schwierige Prüfung. Habt Ihr noch immer Interesse?</value>
     <comment>legacy_id=171</comment>
   </data>
   <data name="Answer_171_Slot_0" xml:space="preserve">
@@ -929,7 +929,7 @@
     <comment>legacy_id=2720</comment>
   </data>
   <data name="Text_173" xml:space="preserve">
-    <value>Glückwunsch, Ihr habt Lugars letzte Prüfung bestanden. Sein Segen wird Euch nun begleiten, wohin Ihr auch geht.</value>
+    <value>Glückwunsch, Ihr habt Lugards letzte Prüfung bestanden. Sein Segen wird Euch nun begleiten, wohin Ihr auch geht.</value>
     <comment>legacy_id=173</comment>
   </data>
   <data name="Answer_173_Slot_0" xml:space="preserve">
@@ -937,7 +937,7 @@
     <comment>legacy_id=2730</comment>
   </data>
   <data name="Text_174" xml:space="preserve">
-    <value>Eure harte Arbeit hat sich gelohnt, um den Frieden auf dem Kontinent MU und in Cry Wolf vor Balgass' neuer Bedrohung zu bewahren. Ich danke Euch zutiefst für Eure Hilfe.</value>
+    <value>Eure harte Arbeit hat sich gelohnt, um den Frieden auf dem Kontinent MU und in Crywolf vor Balgass' neuer Bedrohung zu bewahren. Ich danke Euch zutiefst für Eure Hilfe.</value>
     <comment>legacy_id=174</comment>
   </data>
   <data name="Answer_174_Slot_0" xml:space="preserve">

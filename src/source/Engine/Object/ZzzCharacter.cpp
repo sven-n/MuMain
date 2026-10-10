@@ -45,6 +45,9 @@
 #include "Camera/CameraManager.h"
 #include "Camera/ICamera.h"
 #include "Engine/Object/CullingConstants.h"
+#include "GameLogic/Items/ItemCategories.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/ItemData/ItemType.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -190,7 +193,7 @@ int GetFenrirType(CHARACTER* c)
 
 void FallingMonster(CHARACTER* c, OBJECT* o)
 {
-    float AngleY;
+    float AngleY = o->Angle[2];
     o->Gravity += 2.5f;
     o->Angle[0] -= 4.f;
     o->m_bActionStart = true;
@@ -354,7 +357,7 @@ void SetPlayerStop(CHARACTER* c)
                             //  칼 장착.
                             if (c->Weapon[0].Type >= MODEL_SWORD && c->Weapon[0].Type < MODEL_MACE + MAX_ITEM_INDEX)
                             {
-                                if (!ItemAttribute[c->Weapon[0].Type - MODEL_ITEM].TwoHand)
+                                if (!ItemAttribute[Data::Items::ToItemType(c->Weapon[0].Type)].TwoHand)
                                 {
                                     SetAction(&c->Object, PLAYER_STOP_SWORD);
                                 }
@@ -375,19 +378,19 @@ void SetPlayerStop(CHARACTER* c)
                             //  창 장착.
                             else if (c->Weapon[0].Type >= MODEL_SPEAR && c->Weapon[0].Type < MODEL_SPEAR + MAX_ITEM_INDEX)
                             {
-                                if (!ItemAttribute[c->Weapon[0].Type - MODEL_ITEM].TwoHand)
+                                if (!ItemAttribute[Data::Items::ToItemType(c->Weapon[0].Type)].TwoHand)
                                     SetAction(&c->Object, PLAYER_STOP_SWORD);
                                 else
                                     SetAction(&c->Object, PLAYER_STOP_SCYTHE);
                             }
                             // 소환술사 스틱.
-                            else if (c->Weapon[0].Type >= MODEL_MISTERY_STICK && c->Weapon[0].Type <= MODEL_ETERNAL_WING_STICK)
+                            else if (GameLogic::Items::IsSummonerStickModel(c->Weapon[0].Type))
                             {
                                 ::SetAction(&c->Object, PLAYER_STOP_WAND);
                             }
                             else if (c->Weapon[0].Type >= MODEL_STAFF && c->Weapon[0].Type < MODEL_STAFF + MAX_ITEM_INDEX)
                             {
-                                if (!ItemAttribute[c->Weapon[0].Type - MODEL_ITEM].TwoHand)
+                                if (!ItemAttribute[Data::Items::ToItemType(c->Weapon[0].Type)].TwoHand)
                                     SetAction(&c->Object, PLAYER_STOP_SWORD);
                                 else
                                     SetAction(&c->Object, PLAYER_STOP_SCYTHE);
@@ -649,7 +652,7 @@ void SetPlayerWalk(CHARACTER* c)
                     {
                         if (c->Weapon[0].Type >= MODEL_SWORD && c->Weapon[0].Type < MODEL_MACE + MAX_ITEM_INDEX)
                         {
-                            if (!ItemAttribute[c->Weapon[0].Type - MODEL_ITEM].TwoHand)
+                            if (!ItemAttribute[Data::Items::ToItemType(c->Weapon[0].Type)].TwoHand)
                             {
                                 SetAction(&c->Object, PLAYER_WALK_SWORD);
                             }
@@ -662,13 +665,13 @@ void SetPlayerWalk(CHARACTER* c)
                                 SetAction(&c->Object, PLAYER_WALK_TWO_HAND_SWORD);
                             }
                         }
-                        else if (c->Weapon[0].Type >= MODEL_MISTERY_STICK && c->Weapon[0].Type <= MODEL_ETERNAL_WING_STICK)
+                        else if (GameLogic::Items::IsSummonerStickModel(c->Weapon[0].Type))
                         {
                             ::SetAction(&c->Object, PLAYER_WALK_WAND);
                         }
                         else if (c->Weapon[0].Type >= MODEL_STAFF && c->Weapon[0].Type < MODEL_STAFF + MAX_ITEM_INDEX)
                         {
-                            if (!ItemAttribute[c->Weapon[0].Type - MODEL_ITEM].TwoHand)
+                            if (!ItemAttribute[Data::Items::ToItemType(c->Weapon[0].Type)].TwoHand)
                                 SetAction(&c->Object, PLAYER_WALK_SWORD);
                             else
                                 SetAction(&c->Object, PLAYER_WALK_SCYTHE);
@@ -708,7 +711,7 @@ void SetPlayerWalk(CHARACTER* c)
                                 else
                                     SetAction(&c->Object, PLAYER_RUN_TWO_SWORD);
                             }
-                            else if (!ItemAttribute[c->Weapon[0].Type - MODEL_ITEM].TwoHand)
+                            else if (!ItemAttribute[Data::Items::ToItemType(c->Weapon[0].Type)].TwoHand)
                             {
                                 SetAction(&c->Object, PLAYER_RUN_SWORD);
                             }
@@ -721,13 +724,13 @@ void SetPlayerWalk(CHARACTER* c)
                                 SetAction(&c->Object, PLAYER_RUN_TWO_HAND_SWORD);
                             }
                         }
-                        else if (c->Weapon[0].Type >= MODEL_MISTERY_STICK && c->Weapon[0].Type <= MODEL_ETERNAL_WING_STICK)
+                        else if (GameLogic::Items::IsSummonerStickModel(c->Weapon[0].Type))
                         {
                             ::SetAction(&c->Object, PLAYER_RUN_WAND);
                         }
                         else if (c->Weapon[0].Type >= MODEL_STAFF && c->Weapon[0].Type < MODEL_STAFF + MAX_ITEM_INDEX)
                         {
-                            if (!ItemAttribute[c->Weapon[0].Type - MODEL_ITEM].TwoHand)
+                            if (!ItemAttribute[Data::Items::ToItemType(c->Weapon[0].Type)].TwoHand)
                                 SetAction(&c->Object, PLAYER_RUN_SWORD);
                             else
                                 SetAction(&c->Object, PLAYER_RUN_SPEAR);
@@ -1135,14 +1138,14 @@ void SetPlayerAttack(CHARACTER* c)
                 {
                     if (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
                     {
-                        if (!ItemAttribute[c->Weapon[0].Type - MODEL_ITEM].TwoHand)
+                        if (!ItemAttribute[Data::Items::ToItemType(c->Weapon[0].Type)].TwoHand)
                             SetAction(&c->Object, PLAYER_RAGE_UNI_ATTACK);
                         else
                             SetAction(&c->Object, PLAYER_RAGE_UNI_ATTACK_ONE_RIGHT);
                     }
                     else
                     {
-                        if (!ItemAttribute[c->Weapon[0].Type - MODEL_ITEM].TwoHand)
+                        if (!ItemAttribute[Data::Items::ToItemType(c->Weapon[0].Type)].TwoHand)
                             SetAction(&c->Object, PLAYER_ATTACK_RIDE_SWORD);
                         else
                             SetAction(&c->Object, PLAYER_ATTACK_RIDE_TWO_HAND_SWORD);
@@ -1160,7 +1163,7 @@ void SetPlayerAttack(CHARACTER* c)
             {
                 if (c->Weapon[0].Type >= MODEL_SWORD && c->Weapon[0].Type < MODEL_MACE + MAX_ITEM_INDEX)
                 {
-                    if (!ItemAttribute[c->Weapon[0].Type - MODEL_ITEM].TwoHand)
+                    if (!ItemAttribute[Data::Items::ToItemType(c->Weapon[0].Type)].TwoHand)
                     {
                         if (c->Weapon[1].Type >= MODEL_SWORD && c->Weapon[1].Type < MODEL_MACE + MAX_ITEM_INDEX)
                         {
@@ -1190,7 +1193,7 @@ void SetPlayerAttack(CHARACTER* c)
                 }
                 else if (c->Weapon[0].Type >= MODEL_STAFF && c->Weapon[0].Type < MODEL_STAFF + MAX_ITEM_INDEX)
                 {
-                    if (!ItemAttribute[c->Weapon[0].Type - MODEL_ITEM].TwoHand)
+                    if (!ItemAttribute[Data::Items::ToItemType(c->Weapon[0].Type)].TwoHand)
                         SetAction(&c->Object, PLAYER_ATTACK_SWORD_RIGHT1 + rand() % 2);
                     else
                         SetAction(&c->Object, PLAYER_SKILL_WEAPON1 + rand() % 2);
@@ -2682,14 +2685,11 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
             if (c->TargetCharacter != -1)
             {
                 CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-                if (c->TargetCharacter != -1)
+                OBJECT* to = &tc->Object;
+                if (10 <= c->AttackTime && to->Live)
                 {
-                    OBJECT* to = &tc->Object;
-                    if (10 <= c->AttackTime && to->Live)
-                    {
-                        //PlayBuffer( SOUND_THUNDER01);
-                        to->m_byHurtByDeathstab = 35;
-                    }
+                    // PlayBuffer( SOUND_THUNDER01);
+                    to->m_byHurtByDeathstab = 35;
                 }
             }
         }
@@ -4160,7 +4160,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
         case AT_SKILL_RAGEFUL_BLOW_STR:
         case AT_SKILL_RAGEFUL_BLOW_MASTERY:
         {
-            o->Weapon = c->Weapon[0].Type - MODEL_SWORD;
+            o->Weapon = Data::Items::ToItemType(c->Weapon[0].Type);
             o->WeaponLevel = (BYTE)c->Weapon[0].Level;
             CreateEffect(MODEL_SKILL_FURY_STRIKE, o->Position, o->Angle, o->Light, 0, o, o->PKKey, FindHotKey((c->Skill)));
             PlayBuffer(SOUND_FURY_STRIKE1);
@@ -4168,7 +4168,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
         }
         case AT_SKILL_STRIKE_OF_DESTRUCTION:
         case AT_SKILL_STRIKE_OF_DESTRUCTION_STR:
-            o->Weapon = c->Weapon[0].Type - MODEL_SWORD;
+            o->Weapon = Data::Items::ToItemType(c->Weapon[0].Type);
             o->WeaponLevel = (BYTE)c->Weapon[0].Level;
             Vector(0.f, 0.f, 0.f, o->Light);
             o->Light[0] = (float)(c->SkillX + 0.5f) * TERRAIN_SCALE;
@@ -4179,12 +4179,12 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             break;
         case AT_SKILL_FIRE_SLASH:
         case AT_SKILL_FIRE_SLASH_STR:
-            o->Weapon = c->Weapon[0].Type - MODEL_SWORD;
+            o->Weapon = Data::Items::ToItemType(c->Weapon[0].Type);
             o->WeaponLevel = (BYTE)c->Weapon[0].Level;
             break;
         case AT_SKILL_POWER_SLASH:
         case AT_SKILL_POWER_SLASH_STR:
-            o->Weapon = c->Weapon[0].Type - MODEL_SWORD;
+            o->Weapon = Data::Items::ToItemType(c->Weapon[0].Type);
             o->WeaponLevel = (BYTE)c->Weapon[0].Level;
             break;
         case AT_SKILL_SWELL_LIFE:
@@ -4411,7 +4411,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
         case AT_SKILL_TWISTING_SLASH_STR:
         case AT_SKILL_TWISTING_SLASH_STR_MG:
         case AT_SKILL_TWISTING_SLASH_MASTERY:
-            o->Weapon = c->Weapon[0].Type - MODEL_SWORD;
+            o->Weapon = Data::Items::ToItemType(c->Weapon[0].Type);
             o->WeaponLevel = (BYTE)c->Weapon[0].Level;
             CreateEffect(MODEL_SKILL_WHEEL1, o->Position, o->Angle, o->Light, 0, o, o->PKKey, FindHotKey((c->Skill)));
 
@@ -5421,7 +5421,7 @@ bool CheckFullSet(CHARACTER* c)
 
         if (Success)
         {
-            int Type = CharacterMachine->Equipment[EQUIPMENT_BOOTS].Type % MAX_ITEM_INDEX;
+            int Type = Data::Items::GetItemNumber(CharacterMachine->Equipment[EQUIPMENT_BOOTS].Type);
             tmpLevel = CharacterMachine->Equipment[EQUIPMENT_BOOTS].Level;
             for (int i = start; i >= end; i--)
             {
@@ -5434,7 +5434,7 @@ bool CheckFullSet(CHARACTER* c)
                     Success = false;
                     break;
                 }
-                if (Type != (CharacterMachine->Equipment[i].Type % MAX_ITEM_INDEX))
+                if (Type != Data::Items::GetItemNumber(CharacterMachine->Equipment[i].Type))
                 {
                     EquipmentLevelSet = 0;
                     Success = false;
@@ -5479,7 +5479,7 @@ bool CheckFullSet(CHARACTER* c)
 
         if (Success)
         {
-            int Type = (c->BodyPart[5].Type - MODEL_ITEM) % MAX_ITEM_INDEX;
+            int Type = Data::Items::GetItemNumber(Data::Items::ToItemType(c->BodyPart[5].Type));
             tmpLevel = c->BodyPart[5].Level & 0xf;
 
             for (int i = 5; i >= end; i--)
@@ -5491,7 +5491,7 @@ bool CheckFullSet(CHARACTER* c)
                     Success = false;
                     break;
                 }
-                if (Type != (c->BodyPart[i].Type - MODEL_ITEM) % MAX_ITEM_INDEX)
+                if (Type != Data::Items::GetItemNumber(Data::Items::ToItemType(c->BodyPart[i].Type)))
                 {
                     EquipmentLevelSet = 0;
                     Success = false;
@@ -6273,7 +6273,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
             Position[0] += rand() % 64 - 32.f;
             Position[1] += rand() % 64 - 32.f;
             Position[2] += 50.f;
-            VectorScale(Position, FPS_ANIMATION_FACTOR, Position)
+            VectorScale(Position, FPS_ANIMATION_FACTOR, Position);
 
             CreateParticle(BITMAP_WATERFALL_5, Position, o->Angle, Light, 1);
         }
@@ -6500,8 +6500,8 @@ void MoveCharactersClient()
     MoveBlurs();
 }
 
-// TEMP diagnostic (2026-07-31, Devil Square FPS investigation) — active-character count and
-// which animation path was taken this tick, read by the debug HUD (SceneManager.cpp).
+// Active-character count and which animation path this tick took (worker thread pool or
+// the main thread), shown as "Characters animated" by the $details overlay (SceneManager.cpp).
 size_t g_LastActiveCharacterCount = 0;
 bool g_LastAnimationWasParallel = false;
 
@@ -6521,6 +6521,7 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
     }
 
     g_LastActiveCharacterCount = activeChars.size();
+    g_LastAnimationWasParallel = false;
 
     if (activeChars.empty()) return;
 
@@ -6624,11 +6625,11 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         if (Type >= MODEL_WING && Type <= MODEL_WINGS_OF_DARKNESS) return; // 1st and 2nd Wings
         else if (Type >= MODEL_WING_OF_STORM && Type <= MODEL_WING_OF_DIMENSION) // 3rd Wings
             return;
-        else if (MODEL_WING + 130 >= Type && Type <= MODEL_WING + 135) return; // Small Wings and Capes
+        else if (MODEL_SMALL_CAPE_OF_LORD >= Type && Type <= MODEL_LITTLE_WARRIORS_CLOAK) return; // Small Wings and Capes
         else if (Type >= MODEL_CAPE_OF_FIGHTER && Type <= MODEL_CAPE_OF_OVERRULE) return; // Capes
     }
 
-    if (Type >= MODEL_BOOK_OF_SAHAMUTT && Type <= MODEL_STAFF + 29)
+    if (GameLogic::Items::IsSummonerBookModel(Type))
     {
         return;
     }
@@ -8423,10 +8424,10 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         case MODEL_WING_OF_RUIN:        // Wing of Ruin
         case MODEL_WING_OF_DIMENSION:        // Wing of Dimension
 
-        case MODEL_WING + 131:        // Small Wing of Curse
-        case MODEL_WING + 132:        // Small Wings of Elf
-        case MODEL_WING + 133:        // Small Wings of Heaven
-        case MODEL_WING + 134:        // Small Wings of Satan
+        case MODEL_SMALL_WING_OF_CURSE:        // Small Wing of Curse
+        case MODEL_SMALL_WINGS_OF_ELF:        // Small Wings of Elf
+        case MODEL_SMALL_WINGS_OF_HEAVEN:        // Small Wings of Heaven
+        case MODEL_SMALL_WINGS_OF_SATAN:        // Small Wings of Satan
             b->RenderBodyShadow();
             break;
             
@@ -8434,8 +8435,8 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         case MODEL_CAPE_OF_FIGHTER:      // Cape of Fighter
         case MODEL_CAPE_OF_EMPEROR:        // Cape of Emperor
         case MODEL_CAPE_OF_OVERRULE:        // Cape of Overrule
-        case MODEL_WING + 130:        // Small Cape of Lord
-        case MODEL_WING + 135:        // Little Warrior's Cloak
+        case MODEL_SMALL_CAPE_OF_LORD:        // Small Cape of Lord
+        case MODEL_LITTLE_WARRIORS_CLOAK:        // Little Warrior's Cloak
             b->RenderBodyShadow(-1, -1, -1, -1, o->m_pCloth, o->m_byNumCloth);
             break;
         default:
@@ -9578,8 +9579,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
                     if (CLASS_SUMMONER == gCharacterManager.GetBaseClass(c->Class))
                     {
-                        int nItemType = (Type - MODEL_ITEM) / MAX_ITEM_INDEX;
-                        int nItemSubType = (Type - MODEL_ITEM) % MAX_ITEM_INDEX;
+                        int nItemType = Data::Items::GetItemGroup(Data::Items::ToItemType(Type));
+                        int nItemSubType = Data::Items::GetItemNumber(Data::Items::ToItemType(Type));
 
                         if (nItemType >= 7 && nItemType <= 11
                             && (nItemSubType == 10 || nItemSubType == 11))
@@ -9608,7 +9609,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.1f + 0.7f;
                         if (i == BODYPART_HELM)
                         {
-                            int index = Type - MODEL_HELM;
+                            int index = Data::Items::ToItemType(Type) - ITEM_HELM;
                             if (index == 0 || index == 5 || index == 6 || index == 8 || index == 9)
                             {
                                 Type = MODEL_MASK_HELM + index;
@@ -9722,7 +9723,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     pCloth[2].AddCollisionSphere(-10.f, -10.0f, 20.0f, 27.0f, 17);
                     pCloth[2].AddCollisionSphere(10.f, -10.0f, 20.0f, 27.0f, 17);
                 }
-                else if (c->Wing.Type == MODEL_WING + 130)
+                else if (c->Wing.Type == MODEL_SMALL_CAPE_OF_LORD)
                 {
                     pCloth[2].Create(o, 19, 0.0f, 8.0f, 10.0f, 10, 10, 100.0f, 100.0f, BITMAP_ROBE + 7, BITMAP_ROBE + 7, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
                     pCloth[2].AddCollisionSphere(-10.f, -10.0f, -10.0f, 25.0f, 17);
@@ -9788,7 +9789,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     pCloth[0].AddCollisionSphere(-10.f, -10.0f, 20.0f, 37.0f, 17);
                     pCloth[0].AddCollisionSphere(10.f, -10.0f, 20.0f, 37.0f, 17);
                 }
-                else if (c->Wing.Type == MODEL_WING + 135)
+                else if (c->Wing.Type == MODEL_LITTLE_WARRIORS_CLOAK)
                 {
                     pCloth[0].Create(o, 19, 0.0f, 15.0f, 5.0f, 10, 10, 150.0f, 130.0f, BITMAP_NCCAPE, BITMAP_NCCAPE, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA);
                     pCloth[0].AddCollisionSphere(-10.f, -10.0f, -10.0f, 35.0f, 17);
@@ -9927,7 +9928,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             {
                 if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD)
                 {
-                    if (i == 2 && ((c->Wing.Type != MODEL_CAPE_OF_LORD && c->Wing.Type != MODEL_CAPE_OF_EMPEROR && c->Wing.Type != MODEL_WING + 130) && (CloakLight[0] == 1.f && CloakLight[1] == 1.f && CloakLight[2] == 1.f)))
+                    if (i == 2 && ((c->Wing.Type != MODEL_CAPE_OF_LORD && c->Wing.Type != MODEL_CAPE_OF_EMPEROR && c->Wing.Type != MODEL_SMALL_CAPE_OF_LORD) && (CloakLight[0] == 1.f && CloakLight[1] == 1.f && CloakLight[2] == 1.f)))
                     {
                         continue;
                     }
@@ -9944,7 +9945,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 {
                     if (i == 0 && ((c->Wing.Type != MODEL_CAPE_OF_FIGHTER
                         && c->Wing.Type != MODEL_CAPE_OF_OVERRULE
-                        && c->Wing.Type != MODEL_WING + 135)
+                        && c->Wing.Type != MODEL_LITTLE_WARRIORS_CLOAK)
                         && (CloakLight[0] == 1.f && CloakLight[1] == 1.f && CloakLight[2] == 1.f)))
                     {
                         continue;
@@ -10088,7 +10089,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             }
 
             PART_t* w = &c->Weapon[i];
-            if (w->Type != -1 && w->Type != MODEL_BOLT && w->Type != MODEL_ARROWS && w->Type != MODEL_DARK_RAVEN_ITEM)
+            if (w->Type != -1 && !GameLogic::Items::IsAmmunitionModel(w->Type) && w->Type != MODEL_DARK_RAVEN_ITEM)
             {
                 if (o->CurrentAction == PLAYER_ATTACK_BOW || o->CurrentAction == PLAYER_ATTACK_CROSSBOW || o->CurrentAction == PLAYER_ATTACK_FLY_BOW || o->CurrentAction == PLAYER_ATTACK_FLY_CROSSBOW)
                 {
@@ -12181,7 +12182,7 @@ void SetCharacterClass(CHARACTER* c)
     }
     else
     {
-        c->Weapon[0].Type = p[EQUIPMENT_WEAPON_RIGHT].Type + MODEL_ITEM;
+        c->Weapon[0].Type = Data::Items::ToModelSlot(p[EQUIPMENT_WEAPON_RIGHT].Type);
     }
 
     if (p[EQUIPMENT_WEAPON_LEFT].Type == -1)
@@ -12190,7 +12191,7 @@ void SetCharacterClass(CHARACTER* c)
     }
     else
     {
-        c->Weapon[1].Type = p[EQUIPMENT_WEAPON_LEFT].Type + MODEL_ITEM;
+        c->Weapon[1].Type = Data::Items::ToModelSlot(p[EQUIPMENT_WEAPON_LEFT].Type);
     }
 
     if (p[EQUIPMENT_WING].Type == -1)
@@ -12199,7 +12200,7 @@ void SetCharacterClass(CHARACTER* c)
     }
     else
     {
-        c->Wing.Type = p[EQUIPMENT_WING].Type + MODEL_ITEM;
+        c->Wing.Type = Data::Items::ToModelSlot(p[EQUIPMENT_WING].Type);
     }
 
     if (p[EQUIPMENT_HELPER].Type == -1)
@@ -12208,7 +12209,7 @@ void SetCharacterClass(CHARACTER* c)
     }
     else
     {
-        c->Helper.Type = p[EQUIPMENT_HELPER].Type + MODEL_ITEM;
+        c->Helper.Type = Data::Items::ToModelSlot(p[EQUIPMENT_HELPER].Type);
     }
 
     c->Weapon[0].Level = p[EQUIPMENT_WEAPON_RIGHT].Level;
@@ -12248,7 +12249,7 @@ void SetCharacterClass(CHARACTER* c)
     }
     else
     {
-        c->BodyPart[BODYPART_HELM].Type = p[EQUIPMENT_HELM].Type + MODEL_ITEM;
+        c->BodyPart[BODYPART_HELM].Type = Data::Items::ToModelSlot(p[EQUIPMENT_HELM].Type);
         c->BodyPart[BODYPART_HELM].Level = p[EQUIPMENT_HELM].Level;
         c->BodyPart[BODYPART_HELM].ExcellentFlags = p[EQUIPMENT_HELM].ExcellentFlags;
         c->BodyPart[BODYPART_HELM].AncientDiscriminator = p[EQUIPMENT_HELM].AncientDiscriminator;
@@ -12263,7 +12264,7 @@ void SetCharacterClass(CHARACTER* c)
     }
     else
     {
-        c->BodyPart[BODYPART_ARMOR].Type = p[EQUIPMENT_ARMOR].Type + MODEL_ITEM;
+        c->BodyPart[BODYPART_ARMOR].Type = Data::Items::ToModelSlot(p[EQUIPMENT_ARMOR].Type);
         c->BodyPart[BODYPART_ARMOR].Level = p[EQUIPMENT_ARMOR].Level;
         c->BodyPart[BODYPART_ARMOR].ExcellentFlags = p[EQUIPMENT_ARMOR].ExcellentFlags;
         c->BodyPart[BODYPART_ARMOR].AncientDiscriminator = p[EQUIPMENT_ARMOR].AncientDiscriminator;
@@ -12278,7 +12279,7 @@ void SetCharacterClass(CHARACTER* c)
     }
     else
     {
-        c->BodyPart[BODYPART_PANTS].Type = p[EQUIPMENT_PANTS].Type + MODEL_ITEM;
+        c->BodyPart[BODYPART_PANTS].Type = Data::Items::ToModelSlot(p[EQUIPMENT_PANTS].Type);
         c->BodyPart[BODYPART_PANTS].Level = p[EQUIPMENT_PANTS].Level;
         c->BodyPart[BODYPART_PANTS].ExcellentFlags = p[EQUIPMENT_PANTS].ExcellentFlags;
         c->BodyPart[BODYPART_PANTS].AncientDiscriminator = p[EQUIPMENT_PANTS].AncientDiscriminator;
@@ -12293,7 +12294,7 @@ void SetCharacterClass(CHARACTER* c)
     }
     else
     {
-        c->BodyPart[BODYPART_GLOVES].Type = p[EQUIPMENT_GLOVES].Type + MODEL_ITEM;
+        c->BodyPart[BODYPART_GLOVES].Type = Data::Items::ToModelSlot(p[EQUIPMENT_GLOVES].Type);
         c->BodyPart[BODYPART_GLOVES].Level = p[EQUIPMENT_GLOVES].Level;
         c->BodyPart[BODYPART_GLOVES].ExcellentFlags = p[EQUIPMENT_GLOVES].ExcellentFlags;
         c->BodyPart[BODYPART_GLOVES].AncientDiscriminator = p[EQUIPMENT_GLOVES].AncientDiscriminator;
@@ -12308,7 +12309,7 @@ void SetCharacterClass(CHARACTER* c)
     }
     else
     {
-        c->BodyPart[BODYPART_BOOTS].Type = p[EQUIPMENT_BOOTS].Type + MODEL_ITEM;
+        c->BodyPart[BODYPART_BOOTS].Type = Data::Items::ToModelSlot(p[EQUIPMENT_BOOTS].Type);
         c->BodyPart[BODYPART_BOOTS].Level = p[EQUIPMENT_BOOTS].Level;
         c->BodyPart[BODYPART_BOOTS].ExcellentFlags = p[EQUIPMENT_BOOTS].ExcellentFlags;
         c->BodyPart[BODYPART_BOOTS].AncientDiscriminator = p[EQUIPMENT_BOOTS].AncientDiscriminator;
@@ -12384,11 +12385,11 @@ DWORD GetGuildRelationShipTextColor(BYTE GuildRelationShip)
     DWORD dwColor = 0;
 
     if (GuildRelationShip == GR_NONE)
-        dwColor = (255 << 24) + (255 << 16) + (230 << 8) + (230);
+        dwColor = (255u << 24) + (255u << 16) + (230u << 8) + (230u);
     else if (GuildRelationShip == GR_RIVAL || GuildRelationShip == GR_RIVALUNION)
-        dwColor = (255 << 24) + (0 << 16) + (30 << 8) + (255);
+        dwColor = (255u << 24) + (0u << 16) + (30u << 8) + (255u);
     else
-        dwColor = (255 << 24) + (0 << 16) + (255 << 8) + (200);
+        dwColor = (255u << 24) + (0u << 16) + (255u << 8) + (200u);
 
     return dwColor;
 }
@@ -12398,11 +12399,11 @@ DWORD GetGuildRelationShipBGColor(BYTE GuildRelationShip)
     DWORD dwColor = 0;
 
     if (GuildRelationShip == GR_NONE)
-        dwColor = (150 << 24) + (50 << 16) + (30 << 8) + (10);
+        dwColor = (150u << 24) + (50u << 16) + (30u << 8) + (10u);
     else if (GuildRelationShip == GR_RIVAL || GuildRelationShip == GR_RIVALUNION)
-        dwColor = (150 << 24) + (0 << 16) + (0 << 8) + (0);
+        dwColor = (150u << 24) + (0u << 16) + (0u << 8) + (0u);
     else
-        dwColor = (150 << 24) + (80 << 16) + (50 << 8) + (20);
+        dwColor = (150u << 24) + (80u << 16) + (50u << 8) + (20u);
 
     return dwColor;
 }
@@ -12471,6 +12472,45 @@ void MakeElfHelper(CHARACTER* c)
     o->BoundingBoxMax[2] += 70.f;
 }
 
+// The model slot of a player's wings in the viewport data: the tier in
+// Equipment[4], the wings of that tier in Equipment[8] (the small wings in
+// Equipment[16]). -1 for no wings.
+static int GetViewportWingModel(const BYTE* Equipment)
+{
+    const int code = Equipment[8] & 0x07;
+    switch ((Equipment[4] >> 2) & 3)
+    {
+    case 1: // first wings
+        return code == 4 ? MODEL_WING_OF_CURSE : Data::Items::ToModelSlot(ITEM_WINGS_OF_ELF - 1 + code);
+    case 2: // second wings and capes
+        switch (code)
+        {
+        case 5:
+            return MODEL_CAPE_OF_LORD;
+        case 6:
+            return MODEL_WINGS_OF_DESPAIR;
+        case 7:
+            return MODEL_CAPE_OF_FIGHTER;
+        default:
+            return Data::Items::ToModelSlot(ITEM_WINGS_OF_SPIRITS - 1 + code);
+        }
+    case 3: // third wings and capes, and the small wings
+        switch (code)
+        {
+        case 0:
+            return Data::Items::ToModelSlot(ITEM_SMALL_CAPE_OF_LORD - 1 + (Equipment[16] >> 5));
+        case 6:
+            return MODEL_WING_OF_DIMENSION;
+        case 7:
+            return MODEL_CAPE_OF_OVERRULE;
+        default:
+            return Data::Items::ToModelSlot(ITEM_WING_OF_STORM - 1 + code);
+        }
+    default:
+        return -1;
+    }
+}
+
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT* pHelper)
 {
     CHARACTER* c;
@@ -12502,7 +12542,7 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     }
     else
     {
-        c->Weapon[0].Type = MODEL_SWORD + ExtType;
+        c->Weapon[0].Type = Data::Items::ToModelSlot(ExtType);
         c->Weapon[0].Level = LevelConvert((ItemLevels >> 0) & 7);
         c->Weapon[0].ExcellentFlags = (Equipment[9] & 4) / 4;
         c->Weapon[0].AncientDiscriminator = (Equipment[10] & 4) / 4;
@@ -12520,7 +12560,7 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     }
     else
     {
-        if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD && (static_cast<int>(MODEL_LEGENDARY_STAFF) - MODEL_SWORD) == ExtType)
+        if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD && ITEM_LEGENDARY_STAFF == ExtType)
         {
             ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
             PET_INFO* pPetInfo = giPetManager::GetPetInfo(pEquipmentItemSlot);
@@ -12530,7 +12570,7 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
         }
         else
         {
-            c->Weapon[1].Type = MODEL_SWORD + ExtType;
+            c->Weapon[1].Type = Data::Items::ToModelSlot(ExtType);
         }
 
         c->Weapon[1].Level = LevelConvert((ItemLevels >> 3) & 7);
@@ -12538,56 +12578,9 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
         c->Weapon[1].AncientDiscriminator = (Equipment[10] & 2) / 2;
     }
 
-    Type = (Equipment[4] >> 2) & 3;
-
-    //신규캐릭터 추가로 인한 날개 인덱스 확장 구조변경
-    if (Type == 1)			//1차 날개
+    c->Wing.Type = GetViewportWingModel(Equipment);
+    if (c->Wing.Type == -1)
     {
-        Type = Equipment[8] & 0x07;
-        switch (Type)
-        {
-        case 4:
-            c->Wing.Type = MODEL_WING_OF_CURSE;
-            break;
-        default:
-            c->Wing.Type = MODEL_WING + Type - 1;
-            break;
-        }
-    }
-    else if (Type == 2)		//2차 날개
-    {
-        Type = Equipment[8] & 0x07;
-        switch (Type)
-        {
-        case 5:		c->Wing.Type = MODEL_CAPE_OF_LORD; break;
-        case 6:		c->Wing.Type = MODEL_WINGS_OF_DESPAIR; break;
-        case 7:		c->Wing.Type = MODEL_CAPE_OF_FIGHTER; break;
-        default:
-            c->Wing.Type = MODEL_WINGS_OF_SATAN + Type;
-            break;
-        }
-    }
-    else if (Type == 3)		//3차 날개
-    {
-        Type = Equipment[8] & 0x07;
-        switch (Type)
-        {
-        case 0:				//작은날개
-        {
-            Type = (Equipment[16] >> 5);
-            c->Wing.Type = MODEL_SEED_SPHERE_EARTH_5 + Type;
-        }
-        break;
-        case 6:		c->Wing.Type = MODEL_WING_OF_DIMENSION; break;
-        case 7:		c->Wing.Type = MODEL_CAPE_OF_OVERRULE; break;
-        default:
-            c->Wing.Type = MODEL_SCROLL_OF_FIRE_SCREAM + Type;
-            break;
-        }
-    }
-    else
-    {
-        c->Wing.Type = -1;
         c->Wing.ExcellentFlags = 0;
         c->Wing.AncientDiscriminator = 0;
     }
@@ -12595,7 +12588,7 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     if (pHelper == NULL)
     {
         DeleteMount(o);
-        ThePetProcess().DeletePet(c, c->Helper.Type - MODEL_ITEM, true);
+        ThePetProcess().DeletePet(c, Data::Items::ToItemType(c->Helper.Type), true);
     }
     else
     {
@@ -12637,13 +12630,13 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
             case MONSTER_CHIEF_SKELETON_WARRIOR_3: _type = 123; break;
             }
 
-            c->Helper.Type = MODEL_HELPER + _type;
+            c->Helper.Type = Data::Items::ToModelSlot(ITEM_HELPER + _type);
 
             ThePetProcess().CreatePet(ITEM_HELPER + _type, c->Helper.Type, o->Position, c);
         }
         else
         {
-            c->Helper.Type = MODEL_HELPER + Type;
+            c->Helper.Type = Data::Items::ToModelSlot(ITEM_HELPER + Type);
             int HelperType = 0;
             BOOL bCreateHelper = TRUE;
             switch (Type)
@@ -12747,7 +12740,7 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     }
     else
     {
-        c->BodyPart[BODYPART_HELM].Type = MODEL_HELM + ExtType;
+        c->BodyPart[BODYPART_HELM].Type = Data::Items::ToModelSlot(ITEM_HELM + ExtType);
         c->BodyPart[BODYPART_HELM].Level = LevelConvert((ItemLevels >> 6) & 7);
         c->BodyPart[BODYPART_HELM].ExcellentFlags = (Equipment[9] & 128) / 128;
         c->BodyPart[BODYPART_HELM].AncientDiscriminator = (Equipment[10] & 128) / 128;
@@ -12764,7 +12757,7 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     }
     else
     {
-        c->BodyPart[BODYPART_ARMOR].Type = MODEL_ARMOR + ExtType;
+        c->BodyPart[BODYPART_ARMOR].Type = Data::Items::ToModelSlot(ITEM_ARMOR + ExtType);
         c->BodyPart[BODYPART_ARMOR].Level = LevelConvert((ItemLevels >> 9) & 7);
         c->BodyPart[BODYPART_ARMOR].ExcellentFlags = (Equipment[9] & 64) / 64;
         c->BodyPart[BODYPART_ARMOR].AncientDiscriminator = (Equipment[10] & 64) / 64;
@@ -12780,7 +12773,7 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     }
     else
     {
-        c->BodyPart[BODYPART_PANTS].Type = MODEL_PANTS + ExtType;
+        c->BodyPart[BODYPART_PANTS].Type = Data::Items::ToModelSlot(ITEM_PANTS + ExtType);
         c->BodyPart[BODYPART_PANTS].Level = LevelConvert((ItemLevels >> 12) & 7);
         c->BodyPart[BODYPART_PANTS].ExcellentFlags = (Equipment[9] & 32) / 32;
         c->BodyPart[BODYPART_PANTS].AncientDiscriminator = (Equipment[10] & 32) / 32;
@@ -12796,7 +12789,7 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     }
     else
     {
-        c->BodyPart[BODYPART_GLOVES].Type = MODEL_GLOVES + ExtType;
+        c->BodyPart[BODYPART_GLOVES].Type = Data::Items::ToModelSlot(ITEM_GLOVES + ExtType);
         c->BodyPart[BODYPART_GLOVES].Level = LevelConvert((ItemLevels >> 15) & 7);
         c->BodyPart[BODYPART_GLOVES].ExcellentFlags = (Equipment[9] & 16) / 16;
         c->BodyPart[BODYPART_GLOVES].AncientDiscriminator = (Equipment[10] & 16) / 16;
@@ -12812,7 +12805,7 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     }
     else
     {
-        c->BodyPart[BODYPART_BOOTS].Type = MODEL_BOOTS + ExtType;
+        c->BodyPart[BODYPART_BOOTS].Type = Data::Items::ToModelSlot(ITEM_BOOTS + ExtType);
         c->BodyPart[BODYPART_BOOTS].Level = LevelConvert((ItemLevels >> 18) & 7);
         c->BodyPart[BODYPART_BOOTS].ExcellentFlags = (Equipment[9] & 8) / 8;
         c->BodyPart[BODYPART_BOOTS].AncientDiscriminator = (Equipment[10] & 8) / 8;
@@ -12864,8 +12857,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
             }
             else
             {
-                auto modelOffset = group * MAX_ITEM_INDEX + number;
-                c->Weapon[i].Type = MODEL_ITEM + modelOffset;
+                c->Weapon[i].Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, number));
                 c->Weapon[i].Level = LevelConvert(glowLevel);
                 c->Weapon[i].ExcellentFlags = isExcellent;
                 c->Weapon[i].AncientDiscriminator = isAncient;
@@ -12904,8 +12896,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
             }
             else
             {
-                auto modelOffset = group * MAX_ITEM_INDEX + number;
-                c->BodyPart[i].Type = MODEL_ITEM + modelOffset;
+                c->BodyPart[i].Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, number));
                 c->BodyPart[i].Level = LevelConvert(glowLevel);
                 c->BodyPart[i].ExcellentFlags = isExcellent;
                 c->BodyPart[i].AncientDiscriminator = isAncient;
@@ -12930,8 +12921,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
             }
             else
             {
-                auto modelOffset = group * MAX_ITEM_INDEX + number;
-                c->Wing.Type = MODEL_ITEM + modelOffset;
+                c->Wing.Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, number));
             }
         }
 
@@ -12950,8 +12940,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
             short itemNumber = number & (MAX_ITEM_INDEX-1);
             HelperVariant = (Equipment[offset] & 0xE) >> 1;
             BYTE group = (Equipment[offset] & 0xF0) >> 4;
-            auto modelOffset = group * MAX_ITEM_INDEX + itemNumber;
-            c->Helper.Type = MODEL_ITEM + modelOffset;
+            c->Helper.Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, itemNumber));
         }
 
         // offset += 2;
@@ -12960,7 +12949,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
     if (pHelper == nullptr)
     {
         DeleteMount(o);
-        ThePetProcess().DeletePet(c, c->Helper.Type - MODEL_ITEM, true);
+        ThePetProcess().DeletePet(c, Data::Items::ToItemType(c->Helper.Type), true);
     }
     else
     {
@@ -12996,7 +12985,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
     case MODEL_PET_PANDA:
     case MODEL_PET_UNICORN:
     case MODEL_PET_SKELETON:
-        ThePetProcess().CreatePet(c->Helper.Type - MODEL_ITEM, c->Helper.Type, o->Position, c);
+        ThePetProcess().CreatePet(Data::Items::ToItemType(c->Helper.Type), c->Helper.Type, o->Position, c);
         break;
     case MODEL_DARK_HORSE_ITEM:
         if (pHelper == NULL)
@@ -15227,7 +15216,7 @@ bool IsBackItem(CHARACTER* c, int iType)
         return true;
     }
 
-    if (iType >= MODEL_SWORD && iType < MODEL_SHIELD + MAX_ITEM_INDEX && !(iType >= MODEL_BOOK_OF_SAHAMUTT && iType <= MODEL_STAFF + 29))
+    if (iType >= MODEL_SWORD && iType < MODEL_SHIELD + MAX_ITEM_INDEX && !GameLogic::Items::IsSummonerBookModel(iType))
     {
         return true;
     }
@@ -15292,7 +15281,7 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
                 bBack = true;
             }
 
-            if (iType == MODEL_BOLT || iType == MODEL_ARROWS)
+            if (GameLogic::Items::IsAmmunitionModel(iType))
             {
                 bBack = true;
             }

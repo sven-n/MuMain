@@ -9,6 +9,7 @@
 #include "UI/Core/WindowCommon.h" // g_IsPurchaseShop
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "I18N/All.h"
+#include "GameLogic/Items/ShopRestrictions.h"
 
 // RmlUi migration -- see this class's header comment.
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -503,7 +504,7 @@ bool mu::ui::window::CMyShopInventory::MyShopInventoryProcess()
         int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
 
 #ifndef KJH_FIX_CHANGE_ITEM_PRICE_IN_PERSONAL_SHOP				// #ifndef
-        if (IsPersonalShopBan(pItemObj))
+        if (GameLogic::Items::IsPersonalShopBan(pItemObj))
             m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
         else
             m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
@@ -516,7 +517,7 @@ bool mu::ui::window::CMyShopInventory::MyShopInventoryProcess()
 
         if (pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
         {
-            if (IsPersonalShopBan(pItemObj) == true)
+            if (GameLogic::Items::IsPersonalShopBan(pItemObj) == true)
             {
                 g_pSystemLogBox->AddText(I18N::Game::ThisItemIsNotAllowedToUseThePrivateStore, mu::ui::window::TYPE_ERROR_MESSAGE);
                 return true;
@@ -536,7 +537,7 @@ bool mu::ui::window::CMyShopInventory::MyShopInventoryProcess()
         }
         else if (pPickedItem->GetOwnerInventory() == NULL)
         {
-            if (IsPersonalShopBan(pItemObj) == true)
+            if (GameLogic::Items::IsPersonalShopBan(pItemObj) == true)
             {
                 g_pSystemLogBox->AddText(I18N::Game::ThisItemIsNotAllowedToUseThePrivateStore, mu::ui::window::TYPE_ERROR_MESSAGE);
                 return true;

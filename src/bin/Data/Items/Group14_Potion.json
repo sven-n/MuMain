@@ -1,0 +1,2378 @@
+{
+  "formatVersion": 1,
+  "group": 14,
+  "items": [
+    {
+      "number": 0,
+      "name": {
+        "en": "Apple",
+        "de": "Apfel",
+        "es": "Manzana",
+        "pt": "Maçã"
+      },
+      "tags": ["healingPotion"],
+      "width": 1,
+      "height": 1,
+      "level": 1,
+      "sellValue": 5,
+      "repairable": false
+    },
+    {
+      "number": 1,
+      "name": {
+        "en": "Small Healing Potion",
+        "de": "Kleiner Heiltrank",
+        "es": "Pócima de Curación Pequeña",
+        "pt": "Pequena poção de cura"
+      },
+      "tags": ["healingPotion"],
+      "width": 1,
+      "height": 1,
+      "level": 10,
+      "sellValue": 10,
+      "repairable": false
+    },
+    {
+      "number": 2,
+      "name": {
+        "en": "Healing Potion",
+        "de": "Heiltrank",
+        "es": "Pócima de Curación",
+        "pt": "Poção de cura"
+      },
+      "tags": ["healingPotion"],
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 20,
+      "repairable": false
+    },
+    {
+      "number": 3,
+      "name": {
+        "en": "Large Healing Potion",
+        "de": "Großer Heiltrank",
+        "es": "Pócima de Curación Grande",
+        "pt": "Grande poção de cura"
+      },
+      "tags": ["healingPotion"],
+      "width": 1,
+      "height": 1,
+      "level": 40,
+      "sellValue": 30,
+      "repairable": false
+    },
+    {
+      "number": 4,
+      "name": {
+        "en": "Small Mana Potion",
+        "de": "Kleiner Manatrank",
+        "es": "Pócima de Maná Pequeña",
+        "pt": "Pequena poção de mana"
+      },
+      "tags": ["manaPotion"],
+      "width": 1,
+      "height": 1,
+      "level": 10,
+      "sellValue": 10,
+      "repairable": false
+    },
+    {
+      "number": 5,
+      "name": {
+        "en": "Mana Potion",
+        "de": "Manatrank",
+        "es": "Pócima de Maná",
+        "pt": "Poção de mana"
+      },
+      "tags": ["manaPotion"],
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 20,
+      "repairable": false
+    },
+    {
+      "number": 6,
+      "name": {
+        "en": "Large Mana Potion",
+        "de": "Großer Manatrank",
+        "es": "Pócima de Maná Grande",
+        "pt": "Grande poção de mana"
+      },
+      "tags": ["manaPotion"],
+      "width": 1,
+      "height": 1,
+      "level": 40,
+      "sellValue": 30,
+      "repairable": false
+    },
+    {
+      "number": 7,
+      "name": {
+        "en": "Siege Potion",
+        "de": "Belagerungstrank",
+        "es": "Pócima de Asedio",
+        "pt": "Poção de sítio"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 30,
+      "repairable": false
+    },
+    {
+      "number": 8,
+      "name": {
+        "en": "Antidote",
+        "de": "Gegengift",
+        "es": "Antídoto",
+        "pt": "Antídoto"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 10,
+      "sellValue": 10,
+      "repairable": false
+    },
+    {
+      "number": 9,
+      "name": {
+        "en": "Ale",
+        "de": "Bier",
+        "es": "Cerveza",
+        "pt": "Cerveja"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 15,
+      "sellValue": 30,
+      "repairable": false
+    },
+    {
+      "number": 10,
+      "name": {
+        "en": "Town Portal Scroll",
+        "de": "Stadtportal-Schriftrolle",
+        "es": "Rollo del Portal del Pueblo",
+        "pt": "Perg. de Portal para a Cidade"
+      },
+      "width": 1,
+      "height": 2,
+      "level": 30,
+      "sellValue": 30,
+      "repairable": false
+    },
+    {
+      "number": 11,
+      "name": {
+        "en": "Box of Luck",
+        "de": "Glücksbox",
+        "es": "Caja de la Suerte",
+        "pt": "Caixa da sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "sellable": false,
+      "repairable": false
+    },
+    {
+      "number": 12,
+      "name": {
+        "en": "Heart",
+        "de": "Herz",
+        "es": "Corazón",
+        "pt": "Coração"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 13,
+      "name": {
+        "en": "Jewel of Bless",
+        "de": "Juwel des Segens",
+        "es": "Joya de Bendición",
+        "pt": "Joia da bênção"
+      },
+      "tags": ["jewel", "valuable"],
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 150,
+      "repairable": false
+    },
+    {
+      "number": 14,
+      "name": {
+        "en": "Jewel of Soul",
+        "de": "Juwel der Seele",
+        "es": "Joya de Alma",
+        "pt": "Joia da alma"
+      },
+      "tags": ["jewel", "valuable"],
+      "width": 1,
+      "height": 1,
+      "level": 30,
+      "sellValue": 150,
+      "repairable": false
+    },
+    {
+      "number": 15,
+      "name": {
+        "en": "Zen"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 16,
+      "name": {
+        "en": "Jewel of Life",
+        "de": "Juwel des Lebens",
+        "es": "Joya de Vida",
+        "pt": "Joia da vida"
+      },
+      "tags": ["jewel", "valuable"],
+      "width": 1,
+      "height": 1,
+      "level": 72,
+      "repairable": false
+    },
+    {
+      "number": 17,
+      "name": {
+        "en": "Devil's Eye",
+        "de": "Auge des Teufels",
+        "es": "Ojo del Diablo",
+        "pt": "Olho do diabo"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 1,
+      "repairable": false
+    },
+    {
+      "number": 18,
+      "name": {
+        "en": "Devil's Key",
+        "de": "Schlüssel des Teufels",
+        "es": "Llave del Diablo",
+        "pt": "Chave do diabo"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 1,
+      "repairable": false
+    },
+    {
+      "number": 19,
+      "name": {
+        "en": "Devil's Invitation",
+        "de": "Einladung des Teufels",
+        "es": "Invitación del Diablo",
+        "pt": "Convite do diabo"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 20,
+      "name": {
+        "en": "Remedy of Love",
+        "de": "Heilmittel der Liebe",
+        "es": "Remedio de Amor",
+        "pt": "Remédio do amor"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 21,
+      "name": {
+        "en": "Rena"
+      },
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 22,
+      "name": {
+        "en": "Jewel of Creation",
+        "de": "Juwel der Schöpfung",
+        "es": "Joya de la Creación",
+        "pt": "Joia da criação"
+      },
+      "tags": ["jewel", "valuable"],
+      "width": 1,
+      "height": 1,
+      "level": 78,
+      "repairable": false
+    },
+    {
+      "number": 23,
+      "name": {
+        "en": "Scroll of the Emperor",
+        "de": "Schriftrolle des Imperators",
+        "es": "Rollo del Emperador",
+        "pt": "Pergaminho do Imperador"
+      },
+      "tags": ["secondClassQuestItem"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 24,
+      "name": {
+        "en": "Broken Sword",
+        "de": "Zerbrochenes Schwert",
+        "es": "Espada Quebrada",
+        "pt": "Espada quebrada"
+      },
+      "tags": ["secondClassQuestItem"],
+      "width": 1,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 25,
+      "name": {
+        "en": "Tear of Elf",
+        "de": "Träne der Elfe",
+        "es": "Lágrima de Elfa",
+        "pt": "Lágrima do elfo"
+      },
+      "tags": ["secondClassQuestItem"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 26,
+      "name": {
+        "en": "Soul Shard of Wizard",
+        "de": "Seelensplitter des Zauberers",
+        "es": "Fragmento de Alma de Mago",
+        "pt": "Fragmento da alma do Mago"
+      },
+      "tags": ["secondClassQuestItem"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 28,
+      "name": {
+        "en": "Lost Map",
+        "de": "Verlorene Karte",
+        "es": "Mapa Perdido",
+        "pt": "Mapa perdido"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 29,
+      "name": {
+        "en": "Symbol of Kundun",
+        "de": "Symbol des Kundun",
+        "es": "Símbolo de Kundun",
+        "pt": "Símbolo de Kundun"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 31,
+      "name": {
+        "en": "Jewel of Guardian",
+        "de": "Juwel des Wächters",
+        "es": "Joya de Guardián",
+        "pt": "Joia do guardião"
+      },
+      "tags": ["jewel", "valuable"],
+      "width": 1,
+      "height": 1,
+      "sellValue": 75,
+      "repairable": false
+    },
+    {
+      "number": 32,
+      "name": {
+        "en": "Pink Chocolate Box",
+        "de": "Rosa Pralinenschachtel",
+        "es": "Caja de Chocolate Rosa",
+        "pt": "Caixa de chocolate rosa"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 33,
+      "name": {
+        "en": "Red Chocolate Box",
+        "de": "Rote Pralinenschachtel",
+        "es": "Caja de Chocolate Roja",
+        "pt": "Caixa de chocolate vermelha"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 34,
+      "name": {
+        "en": "Blue Chocolate Box",
+        "de": "Blaue Pralinenschachtel",
+        "es": "Caja de Chocolate Azul",
+        "pt": "Caixa de chocolate azul"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 35,
+      "name": {
+        "en": "Small SD Potion",
+        "de": "Kleiner SD-Trank",
+        "es": "Pócima de SD Pequeña",
+        "pt": "Pequena poção de SD"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 50,
+      "repairable": false
+    },
+    {
+      "number": 36,
+      "name": {
+        "en": "SD Potion",
+        "de": "SD-Trank",
+        "es": "Pócima de SD",
+        "pt": "Poção de SD"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 80,
+      "repairable": false
+    },
+    {
+      "number": 37,
+      "name": {
+        "en": "Large SD Potion",
+        "de": "Großer SD-Trank",
+        "es": "Pócima de SD Grande",
+        "pt": "Grande poção de SD"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 100,
+      "repairable": false
+    },
+    {
+      "number": 38,
+      "name": {
+        "en": "Small Complex Potion",
+        "de": "Kleiner Komplextrank",
+        "es": "Pócima Compleja Pequeña",
+        "pt": "Pequena poção complexa"
+      },
+      "tags": ["complexPotion"],
+      "width": 1,
+      "height": 1,
+      "level": 68,
+      "sellValue": 20,
+      "repairable": false
+    },
+    {
+      "number": 39,
+      "name": {
+        "en": "Complex Potion",
+        "de": "Komplextrank",
+        "es": "Pócima Compleja",
+        "pt": "Poção complexa"
+      },
+      "tags": ["complexPotion"],
+      "width": 1,
+      "height": 1,
+      "level": 96,
+      "sellValue": 40,
+      "repairable": false
+    },
+    {
+      "number": 40,
+      "name": {
+        "en": "Large Complex Potion",
+        "de": "Großer Komplextrank",
+        "es": "Pócima Compleja Grande",
+        "pt": "Grande poção complexa"
+      },
+      "tags": ["complexPotion"],
+      "width": 1,
+      "height": 1,
+      "level": 118,
+      "sellValue": 60,
+      "repairable": false
+    },
+    {
+      "number": 41,
+      "name": {
+        "en": "Gemstone",
+        "de": "Edelstein",
+        "es": "Gema",
+        "pt": "Pedra preciosa"
+      },
+      "tags": ["valuable"],
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 150,
+      "repairable": false
+    },
+    {
+      "number": 42,
+      "name": {
+        "en": "Jewel of Harmony",
+        "de": "Juwel der Harmonie",
+        "es": "Joya de la Armonía",
+        "pt": "Joia da harmonia"
+      },
+      "tags": ["valuable"],
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 150,
+      "repairable": false
+    },
+    {
+      "number": 43,
+      "name": {
+        "en": "Lower refining stone",
+        "de": "Niederer Verfeinerungsstein",
+        "es": "Piedra de Más Baja Refinación",
+        "pt": "Pedra refinada inferior"
+      },
+      "tags": ["refineStone", "valuable"],
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 150,
+      "repairable": false
+    },
+    {
+      "number": 44,
+      "name": {
+        "en": "Higher refining stone",
+        "de": "Höherer Verfeinerungsstein",
+        "es": "Piedra de Más Alta Refinación",
+        "pt": "Pedra refinada superior"
+      },
+      "tags": ["refineStone", "valuable"],
+      "width": 1,
+      "height": 1,
+      "level": 25,
+      "sellValue": 150,
+      "repairable": false
+    },
+    {
+      "number": 45,
+      "name": {
+        "en": "Pumpkin of Luck",
+        "de": "Glückskürbis",
+        "es": "Calabaza de la Suerte",
+        "pt": "Abóbora da sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 1,
+      "repairable": false
+    },
+    {
+      "number": 46,
+      "name": {
+        "en": "Jack O'Lantern Blessings",
+        "de": "Segen von Jack O'Lantern",
+        "es": "Bendiciones de Jack O'Lantern",
+        "pt": "Bênçãos do Jack O'Lantern"
+      },
+      "width": 1,
+      "height": 2,
+      "repairable": false
+    },
+    {
+      "number": 47,
+      "name": {
+        "en": "Jack O'Lantern Wrath",
+        "de": "Wut von Jack O'Lantern",
+        "es": "Ira de Jack O'Lantern",
+        "pt": "Ira do Jack O'Lantern"
+      },
+      "width": 1,
+      "height": 2,
+      "repairable": false
+    },
+    {
+      "number": 48,
+      "name": {
+        "en": "Jack O'Lantern Cry",
+        "de": "Schrei von Jack O'Lantern",
+        "es": "Grito de Jack O'Lantern",
+        "pt": "Grito do Jack O'Lantern"
+      },
+      "width": 1,
+      "height": 2,
+      "repairable": false
+    },
+    {
+      "number": 49,
+      "name": {
+        "en": "Jack O'Lantern Food",
+        "de": "Essen von Jack O'Lantern",
+        "es": "Alimento de Jack O'Lantern",
+        "pt": "Comida do Jack O'Lantern"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 50,
+      "name": {
+        "en": "Jack O'Lantern Drink",
+        "de": "Getränk von Jack O'Lantern",
+        "es": "Trago de Jack O'Lantern",
+        "pt": "Bebida do Jack O'Lantern"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 51,
+      "name": {
+        "en": "Chistmas Star",
+        "de": "Weihnachtsstern",
+        "es": "Estrella de Navidad",
+        "pt": "Estrela de Natal"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 52,
+      "name": {
+        "en": "GM Gift",
+        "de": "GM-Geschenk",
+        "es": "Regalo de GM",
+        "pt": "Presente de GM"
+      },
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "repairable": false
+    },
+    {
+      "number": 53,
+      "name": {
+        "en": "Talisman of Luck",
+        "de": "Talisman des Glücks",
+        "es": "Talismán de la Suerte",
+        "pt": "Talismã da sorte"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 54,
+      "name": {
+        "en": "Chaos Card",
+        "de": "Chaoskarte",
+        "es": "Tarjeta de Caos",
+        "pt": "Cartão do caos"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "droppableWhileRented": false
+    },
+    {
+      "number": 55,
+      "name": {
+        "en": "Green Chaos Box",
+        "de": "Grüne Chaosbox",
+        "es": "Caja de Caos Verde",
+        "pt": "Caixa do caos verde"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 56,
+      "name": {
+        "en": "Red Chaos Box",
+        "de": "Rote Chaosbox",
+        "es": "Caja de Caos Roja",
+        "pt": "Caixa do caos vermelha"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 57,
+      "name": {
+        "en": "Purple Chaos Box",
+        "de": "Lila Chaosbox",
+        "es": "Caja de Caos Púrpura",
+        "pt": "Caixa do caos roxa"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 58,
+      "name": {
+        "en": "Rare Item Ticket1",
+        "de": "Ticket für seltenen Gegenstand 1",
+        "es": "Boleto de Ítem Raro1",
+        "pt": "Bilhete de item raro1"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 59,
+      "name": {
+        "en": "Rare Item Ticket2",
+        "de": "Ticket für seltenen Gegenstand 2",
+        "es": "Boleto de Ítem Raro2",
+        "pt": "Bilhete de item raro2"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 60,
+      "name": {
+        "en": "Rare Item Ticket3",
+        "de": "Ticket für seltenen Gegenstand 3",
+        "es": "Boleto de Ítem Raro3",
+        "pt": "Bilhete de item raro3"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 61,
+      "name": {
+        "en": "Rare Item Ticket4",
+        "de": "Ticket für seltenen Gegenstand 4",
+        "es": "Boleto de Ítem Raro4",
+        "pt": "Bilhete de item raro4"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 62,
+      "name": {
+        "en": "Rare Item Ticket5",
+        "de": "Ticket für seltenen Gegenstand 5",
+        "es": "Boleto de Ítem Raro5",
+        "pt": "Bilhete de item raro5"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 63,
+      "name": {
+        "en": "Firecracker",
+        "de": "Knallkörper",
+        "es": "Petardo",
+        "pt": "Fogos de artifício"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 64,
+      "name": {
+        "en": "Cursed Castle Water",
+        "de": "Verfluchtes Burgwasser",
+        "es": "Agua de Castillo Maldito",
+        "pt": "Água do Castelo Amaldiçoado"
+      },
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "repairable": false
+    },
+    {
+      "number": 65,
+      "name": {
+        "en": "Death-beam Knight Flame",
+        "de": "Flamme des Death Beam Knight",
+        "es": "Llama Caballero Haz Mortal",
+        "pt": "Chama do Cav. Raio da Morte"
+      },
+      "tags": ["thirdClassQuestItem"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 66,
+      "name": {
+        "en": "Hell-Miner Horn",
+        "de": "Horn des Hell Maine",
+        "es": "Cuerno de Minero Infiernal",
+        "pt": "Chifre do Mineiro do Inferno"
+      },
+      "tags": ["thirdClassQuestItem"],
+      "width": 1,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 67,
+      "name": {
+        "en": "Dark Phoenix Feather",
+        "de": "Feder des Dunkelphönix",
+        "es": "Pluma de Fénix Oscuro",
+        "pt": "Pena de fênix negra"
+      },
+      "tags": ["thirdClassQuestItem"],
+      "width": 1,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 68,
+      "name": {
+        "en": "Abyssal Eye",
+        "de": "Auge des Abgrunds",
+        "es": "Ojo Abismal",
+        "pt": "Olho abissal"
+      },
+      "tags": ["thirdClassQuestItem"],
+      "width": 1,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "storable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 70,
+      "name": {
+        "en": "Elite Healing Potion",
+        "de": "Elite-Heiltrank",
+        "es": "Pócima de Curación de Élite",
+        "pt": "Poção de cura de elite"
+      },
+      "tags": ["elitePotion", "cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 71,
+      "name": {
+        "en": "Elite Mana Potion",
+        "de": "Elite-Manatrank",
+        "es": "Pócima de Maná de Élite",
+        "pt": "Poção de mana de elite"
+      },
+      "tags": ["elitePotion", "cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 72,
+      "name": {
+        "en": "Scroll of Quickness",
+        "de": "Schriftrolle der Schnelligkeit",
+        "es": "Rollo de Rapidez",
+        "pt": "Pergaminho da rapidez"
+      },
+      "tags": ["buffScroll", "cashShop"],
+      "width": 2,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 73,
+      "name": {
+        "en": "Scroll of Defense",
+        "de": "Schriftrolle der Verteidigung",
+        "es": "Rollo de Defensa",
+        "pt": "Pergaminho da defesa"
+      },
+      "tags": ["buffScroll", "cashShop"],
+      "width": 2,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 74,
+      "name": {
+        "en": "Scroll of Wrath",
+        "de": "Schriftrolle des Zorns",
+        "es": "Rollo de Ira",
+        "pt": "Pergaminho da ira"
+      },
+      "tags": ["buffScroll", "cashShop"],
+      "width": 2,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 75,
+      "name": {
+        "en": "Scroll of Wizardry",
+        "de": "Schriftrolle der Zauberkraft",
+        "es": "Rollo de Magia",
+        "pt": "Pergaminho do poder de magia"
+      },
+      "tags": ["buffScroll", "cashShop"],
+      "width": 2,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 76,
+      "name": {
+        "en": "Scroll of Health",
+        "de": "Schriftrolle des Lebens",
+        "es": "Rollo de Salud",
+        "pt": "Pergaminho de vida"
+      },
+      "tags": ["buffScroll", "cashShop"],
+      "width": 2,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 77,
+      "name": {
+        "en": "Scroll of Mana",
+        "de": "Schriftrolle des Manas",
+        "es": "Rollo de Maná",
+        "pt": "Pergaminho de mana"
+      },
+      "tags": ["buffScroll", "cashShop"],
+      "width": 2,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 78,
+      "name": {
+        "en": "Elixir of Strength",
+        "de": "Elixier der Stärke",
+        "es": "Elixir de Fuerza",
+        "pt": "Elixir da força"
+      },
+      "tags": ["elixir", "cashShop"],
+      "width": 1,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 79,
+      "name": {
+        "en": "Elixir of Agility",
+        "de": "Elixier der Beweglichkeit",
+        "es": "Elixir de Agilidad",
+        "pt": "Elixir da agilidade"
+      },
+      "tags": ["elixir", "cashShop"],
+      "width": 1,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 80,
+      "name": {
+        "en": "Elixir of Health",
+        "de": "Elixier der Vitalität",
+        "es": "Elixir de Salud",
+        "pt": "Elixir da vida"
+      },
+      "tags": ["elixir", "cashShop"],
+      "width": 1,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 81,
+      "name": {
+        "en": "Elixir of Energy",
+        "de": "Elixier der Energie",
+        "es": "Elixir de Energía",
+        "pt": "Elixir da energia"
+      },
+      "tags": ["elixir", "cashShop"],
+      "width": 1,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 82,
+      "name": {
+        "en": "Elixir of Control",
+        "de": "Elixier der Führung",
+        "es": "Elixir de Control",
+        "pt": "Elixir do controle"
+      },
+      "tags": ["elixir", "cashShop"],
+      "width": 1,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 83,
+      "name": {
+        "en": "Rare Item Ticket",
+        "de": "Ticket für seltenen Gegenstand",
+        "es": "Boleto de Ítem Raro",
+        "pt": "Bilhete de item raro"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 84,
+      "name": {
+        "en": "Cherry Blossom Play-Box",
+        "de": "Kirschblüten-Spielbox",
+        "es": "Caja Juegos Flor de Cerezo",
+        "pt": "Cx. de Brinq. Flor de Cereja"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 85,
+      "name": {
+        "en": "Cherry Blossom Wine",
+        "de": "Kirschblütenwein",
+        "es": "Vino de Flor de Cerezo",
+        "pt": "Vinho de flor de cereja"
+      },
+      "width": 1,
+      "height": 2,
+      "repairable": false
+    },
+    {
+      "number": 86,
+      "name": {
+        "en": "Cherry Blossom Rice Cake",
+        "de": "Kirschblüten-Reiskuchen",
+        "es": "Pastel Arroz Flor de Cerezo",
+        "pt": "Bolo de Arroz Flor de Cereja"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 87,
+      "name": {
+        "en": "Cherry Blossom Flower Petal",
+        "de": "Kirschblütenblatt",
+        "es": "Pétalo de Flor de Cerezo",
+        "pt": "Pétala da flor de cereja"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 88,
+      "name": {
+        "en": "White Cherry Blossom Branch",
+        "de": "Weißer Kirschblütenzweig",
+        "es": "Rama Blanca Flor de Cerezo",
+        "pt": "Galho de cereja branco"
+      },
+      "width": 1,
+      "height": 2,
+      "repairable": false
+    },
+    {
+      "number": 89,
+      "name": {
+        "en": "Red Cherry Blossom Branch",
+        "de": "Roter Kirschblütenzweig",
+        "es": "Rama Roja de Flor de Cerezo",
+        "pt": "Galho de cereja vermelho"
+      },
+      "width": 1,
+      "height": 2,
+      "repairable": false
+    },
+    {
+      "number": 90,
+      "name": {
+        "en": "Golden Cherry Blossom Branch",
+        "de": "Goldener Kirschblütenzweig",
+        "es": "Rama Dorada Flor de Cerezo",
+        "pt": "Galho de cereja dourado"
+      },
+      "width": 1,
+      "height": 2,
+      "repairable": false
+    },
+    {
+      "number": 91,
+      "name": {
+        "en": "Summoner Character Card",
+        "de": "Charakterkarte: Beschwörer",
+        "es": "Tarjeta Personaje Invocador",
+        "pt": "Cartão do Pers. Invocador"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 92,
+      "name": {
+        "en": "Chaos Card Gold",
+        "de": "Chaoskarte (Gold)",
+        "es": "Tarjeta de Caos Oro",
+        "pt": "Cartão dourado do caos"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 93,
+      "name": {
+        "en": "Chaos Card Rare",
+        "de": "Chaoskarte (Selten)",
+        "es": "Tarjeta de Caos Rara",
+        "pt": "Cartão raro do caos"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 94,
+      "name": {
+        "en": "Medium Elite Healing Potion",
+        "de": "Mittlerer Elite-Heiltrank",
+        "es": "Pócima Curación Élite Media",
+        "pt": "Poção média de cura de elite"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 95,
+      "name": {
+        "en": "Chaos Card  Mini",
+        "de": "Chaoskarte (Mini)",
+        "es": "Tarjeta de Caos Mini",
+        "pt": "Mini cartão do caos"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 96,
+      "name": {
+        "en": "Talisman of Chaos Assembly",
+        "de": "Talisman der Chaos-Kombination",
+        "es": "Ensamble Talismán del Caos",
+        "pt": "Talismã do Agrup. do Caos"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "droppableWhileRented": false
+    },
+    {
+      "number": 97,
+      "name": {
+        "en": "Scroll of Battle",
+        "de": "Schriftrolle des Kampfes",
+        "es": "Rollo de Batalla",
+        "pt": "Pergaminho da batalha"
+      },
+      "tags": ["battleOrStrengthScroll", "cashShop"],
+      "width": 2,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 98,
+      "name": {
+        "en": "Scroll of Strength",
+        "de": "Schriftrolle der Stärke",
+        "es": "Rollo de Fuerza",
+        "pt": "Pergaminho da força"
+      },
+      "tags": ["battleOrStrengthScroll", "cashShop"],
+      "width": 2,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 99,
+      "name": {
+        "en": "Christmas Firecracker",
+        "de": "Weihnachtsknallkörper",
+        "es": "Petardo de Navidad",
+        "pt": "Fogos de artifício de Natal"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 100,
+      "name": {
+        "en": "Lucky Coin",
+        "de": "Glücksmünze",
+        "es": "Moneda de la Suerte",
+        "pt": "Moeda da sorte"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 101,
+      "name": {
+        "en": "Suspicious Scrap of Paper",
+        "de": "Verdächtiger Papierfetzen",
+        "es": "Trozo de Papel Sospechoso",
+        "pt": "Pedaço de papel suspeito"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 32,
+      "repairable": false
+    },
+    {
+      "number": 102,
+      "name": {
+        "en": "Gaion's Order",
+        "de": "Gaions Befehl",
+        "es": "Órden de Gaion",
+        "pt": "Ordem de Gaion"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 103,
+      "name": {
+        "en": "First Secromicon Fragment",
+        "de": "Erstes Secromicon-Fragment",
+        "es": "1er Fragmento de Secromicon",
+        "pt": "Prim. Frag. de Secromicon"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 104,
+      "name": {
+        "en": "Second Secromicon Fragment",
+        "de": "Zweites Secromicon-Fragment",
+        "es": "2do Fragmento de Secromicon",
+        "pt": "Seg. Frag. de Secromicon"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 105,
+      "name": {
+        "en": "Third Secromicon Fragment",
+        "de": "Drittes Secromicon-Fragment",
+        "es": "3er Fragmento de Secromicon",
+        "pt": "Ter. Frag. de Secromicon"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 106,
+      "name": {
+        "en": "Fourth Secromicon Fragment",
+        "de": "Viertes Secromicon-Fragment",
+        "es": "4to Fragmento de Secromicon",
+        "pt": "Quarto Frag. de Secromicon"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 107,
+      "name": {
+        "en": "Fifth Secromicon Fragment",
+        "de": "Fünftes Secromicon-Fragment",
+        "es": "5to Fragmento de Secromicon",
+        "pt": "Quinto Frag. de Secromicon"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 108,
+      "name": {
+        "en": "Sixth Secromicon Fragment",
+        "de": "Sechstes Secromicon-Fragment",
+        "es": "6to Fragmento de Secromicon",
+        "pt": "Sexto Frag. de Secromicon"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 109,
+      "name": {
+        "en": "Complete Secromicon",
+        "de": "Vollständiges Secromicon",
+        "es": "Secromicon Completo",
+        "pt": "Secromicon completo"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 110,
+      "name": {
+        "en": "Sign of Dimensions",
+        "de": "Zeichen der Dimensionen",
+        "es": "Signo de Dimensiones",
+        "pt": "Sinal das dimensões"
+      },
+      "width": 1,
+      "height": 1,
+      "level": 32,
+      "repairable": false
+    },
+    {
+      "number": 111,
+      "name": {
+        "en": "Mirror of Dimensions",
+        "de": "Spiegel der Dimensionen",
+        "es": "Espejo de Dimensiones",
+        "pt": "Espelho das dimensões"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 112,
+      "name": {
+        "en": "Silver Key",
+        "de": "Silberschlüssel",
+        "es": "Llave de Plata",
+        "pt": "Chave prateada"
+      },
+      "tags": ["cashShop", "valuable"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true
+    },
+    {
+      "number": 113,
+      "name": {
+        "en": "Gold Key",
+        "de": "Goldschlüssel",
+        "es": "Llave de Oro",
+        "pt": "Chave dourada"
+      },
+      "tags": ["cashShop", "valuable"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true
+    },
+    {
+      "number": 114,
+      "name": {
+        "en": "Master Skill Reset",
+        "de": "Rücksetzung der Meisterfähigkeiten",
+        "es": "Reinicio de Habilidad Maestra",
+        "pt": "Reinic. de Habilidade Mestre"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 115,
+      "name": {
+        "en": "Stat Adjustment",
+        "de": "Anpassung der Werte",
+        "es": "Ajuste de Estadísticas",
+        "pt": "Ajuste de atributos"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 116,
+      "name": {
+        "en": "Character Relocation Service",
+        "de": "Charakter-Umzugsdienst",
+        "es": "Cuarto Fragmento Secromicon",
+        "pt": "Serviço Nova Local. de Pers."
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 117,
+      "name": {
+        "en": "Character Rename Service",
+        "de": "Charakter-Umbenennungsdienst",
+        "es": "Servicio Renombrar Personaje",
+        "pt": "Serviço Novo Nome do Pers."
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 118,
+      "name": {
+        "en": "Server Relocation Service",
+        "de": "Server-Umzugsdienst",
+        "es": "Servicio Reubicar Servidor",
+        "pt": "Serviço Nova Local. de Serv."
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 119,
+      "name": {
+        "en": "Premium Package",
+        "de": "Premiumpaket",
+        "es": "Paquete Premium",
+        "pt": "Pacote Premium"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 120,
+      "name": {
+        "en": "Goblin Gold Coin",
+        "de": "Goblin-Goldmünze",
+        "es": "Moneda de Oro de Duendes",
+        "pt": "Moeda dourada do goblin"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 121,
+      "name": {
+        "en": "Sealed Golden Box",
+        "de": "Versiegelte goldene Box",
+        "es": "Caja Dorada Sellada",
+        "pt": "Caixa dourada lacrada"
+      },
+      "tags": ["valuable"],
+      "width": 1,
+      "height": 1,
+      "droppable": false,
+      "repairable": false
+    },
+    {
+      "number": 122,
+      "name": {
+        "en": "Sealed Silver Box",
+        "de": "Versiegelte silberne Box",
+        "es": "Caja Plateada Sellada",
+        "pt": "Caixa prateada lacrada"
+      },
+      "tags": ["valuable"],
+      "width": 1,
+      "height": 1,
+      "droppable": false,
+      "repairable": false
+    },
+    {
+      "number": 123,
+      "name": {
+        "en": "Golden Box",
+        "de": "Goldene Box",
+        "es": "Caja Dorada",
+        "pt": "Caixa dourada"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true
+    },
+    {
+      "number": 124,
+      "name": {
+        "en": "Silver Box",
+        "de": "Silberne Box",
+        "es": "Caja Plateada",
+        "pt": "Caixa prateada"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false,
+      "sellableWhenRentalExpired": true
+    },
+    {
+      "number": 125,
+      "name": {
+        "en": "Package Box",
+        "de": "Paketbox",
+        "es": "Caja de Paquete",
+        "pt": "Caixa de pacote"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 126,
+      "name": {
+        "en": "30-Day Pass",
+        "de": "30-Tage-Pass",
+        "es": "Pase por 30 días",
+        "pt": "Passe de 30 dias"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 127,
+      "name": {
+        "en": "90-Day Pass",
+        "de": "90-Tage-Pass",
+        "es": "Pase por 90 días",
+        "pt": "Passe de 90 dias"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 128,
+      "name": {
+        "en": "30-Day Pass - Points",
+        "de": "30-Tage-Pass - Punkte",
+        "es": "Puntos - Pase por 30 días",
+        "pt": "Passe de 30 dias - Pontos"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 129,
+      "name": {
+        "en": "90-Day Pass - Points",
+        "de": "90-Tage-Pass - Punkte",
+        "es": "Puntos - Pase por 90 días",
+        "pt": "Passe de 90 dias - Pontos"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 130,
+      "name": {
+        "en": "3-Hour Pass",
+        "de": "3-Stunden-Pass",
+        "es": "Pase por 3 horas",
+        "pt": "Passe de 3 horas"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 131,
+      "name": {
+        "en": "5-Hour Pass",
+        "de": "5-Stunden-Pass",
+        "es": "Pase por 5 horas",
+        "pt": "Passe de 5 horas"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 132,
+      "name": {
+        "en": "10-Hour Pass",
+        "de": "10-Stunden-Pass",
+        "es": "Pase por 10 horas",
+        "pt": "Passe de 10 horas"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 133,
+      "name": {
+        "en": "Elite SD Potion",
+        "de": "Elite-SD-Trank",
+        "es": "Pócima de SD de Élite",
+        "pt": "Poção de SD de elite"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 134,
+      "name": {
+        "en": "Package Box A",
+        "de": "Paketbox A",
+        "es": "Caja de Paquete A",
+        "pt": "Caixa de pacote A"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 135,
+      "name": {
+        "en": "Package Box B",
+        "de": "Paketbox B",
+        "es": "Caja de Paquete B",
+        "pt": "Caixa de pacote B"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 136,
+      "name": {
+        "en": "Package Box C",
+        "de": "Paketbox C",
+        "es": "Caja de Paquete C",
+        "pt": "Caixa de pacote C"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 137,
+      "name": {
+        "en": "Package Box D",
+        "de": "Paketbox D",
+        "es": "Caja de Paquete D",
+        "pt": "Caixa de pacote D"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 138,
+      "name": {
+        "en": "Package Box E",
+        "de": "Paketbox E",
+        "es": "Caja de Paquete E",
+        "pt": "Caixa de pacote E"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 139,
+      "name": {
+        "en": "Package Box F",
+        "de": "Paketbox F",
+        "es": "Caja de Paquete F",
+        "pt": "Caixa de pacote F"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 140,
+      "name": {
+        "en": "Scroll of Healing",
+        "de": "Schriftrolle der Heilung",
+        "es": "Rollo de Curación",
+        "pt": "Pergaminho da cura"
+      },
+      "tags": ["cashShop"],
+      "width": 2,
+      "height": 2,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 141,
+      "name": {
+        "en": "Shining Jewelry Case",
+        "de": "Glänzendes Schmuckkästchen",
+        "es": "Joyero Brillante",
+        "pt": "Estojo de joias brilhante"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 142,
+      "name": {
+        "en": "Elegant Jewelry Case",
+        "de": "Elegantes Schmuckkästchen",
+        "es": "Joyero Elegante",
+        "pt": "Estojo de joias elegante"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 143,
+      "name": {
+        "en": "Steel Jewelry Case",
+        "de": "Stählernes Schmuckkästchen",
+        "es": "Joyero de Acero",
+        "pt": "Estojo de joias de aço"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 144,
+      "name": {
+        "en": "Old Jewelry Case",
+        "de": "Altes Schmuckkästchen",
+        "es": "Joyero Antiguo",
+        "pt": "Estojo de joias antigo"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 145,
+      "name": {
+        "en": "Rare Item Ticket 7",
+        "de": "Ticket für seltenen Gegenstand 7",
+        "es": "Boleto de Ítem Raro 7",
+        "pt": "Bilhete de item raro7"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 146,
+      "name": {
+        "en": "Rare Item Ticket 8",
+        "de": "Ticket für seltenen Gegenstand 8",
+        "es": "Boleto de Ítem Raro 8",
+        "pt": "Bilhete de item raro8"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 147,
+      "name": {
+        "en": "Rare Item Ticket 9",
+        "de": "Ticket für seltenen Gegenstand 9",
+        "es": "Boleto de Ítem Raro 9",
+        "pt": "Bilhete de item raro9"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 148,
+      "name": {
+        "en": "Rare Item Ticket 10",
+        "de": "Ticket für seltenen Gegenstand 10",
+        "es": "Boleto de Ítem Raro 10",
+        "pt": "Bilhete de item raro10"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 149,
+      "name": {
+        "en": "Rare Item Ticket 11",
+        "de": "Ticket für seltenen Gegenstand 11",
+        "es": "Boleto de Ítem Raro 11",
+        "pt": "Bilhete de item raro11"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 150,
+      "name": {
+        "en": "Rare Item Ticket 12",
+        "de": "Ticket für seltenen Gegenstand 12",
+        "es": "Boleto de Ítem Raro 12",
+        "pt": "Bilhete de item raro12"
+      },
+      "tags": ["cashShop"],
+      "width": 1,
+      "height": 1,
+      "tradable": false,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 151,
+      "name": {
+        "en": "Lv. 1 Letter of Request",
+        "de": "Auftragsschreiben Lv. 1",
+        "es": "Nivel 1 Carta de Petición",
+        "pt": "Nvl. 1Carta de Requisição"
+      },
+      "width": 1,
+      "height": 2,
+      "repairable": false
+    },
+    {
+      "number": 152,
+      "name": {
+        "en": "Lv. 1 Completion Certificate",
+        "de": "Abschlusszertifikat Lv. 1",
+        "es": "Nivel 1 Certificado",
+        "pt": "Nvl. 1 Completada"
+      },
+      "width": 1,
+      "height": 2,
+      "repairable": false
+    },
+    {
+      "number": 153,
+      "name": {
+        "en": "Stardust",
+        "de": "Sternenstaub",
+        "es": "Polvo estelar",
+        "pt": "Poeira estelar"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 60,
+      "repairable": false
+    },
+    {
+      "number": 154,
+      "name": {
+        "en": "Kalt Stone",
+        "de": "Kalt-Stein",
+        "es": "Piedra Kalt",
+        "pt": "Pedra Kalt"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 60,
+      "repairable": false
+    },
+    {
+      "number": 155,
+      "name": {
+        "en": "Tantalos's Armor",
+        "de": "Tantalos' Rüstung",
+        "es": "Armadura de Tantalos",
+        "pt": "Armadura de Tântalos"
+      },
+      "width": 2,
+      "height": 2,
+      "sellValue": 60,
+      "repairable": false
+    },
+    {
+      "number": 156,
+      "name": {
+        "en": "Burnt Murderer's Club",
+        "de": "Verbrannte Keule des Mörders",
+        "es": "Garrote de Asesinos Calcinados",
+        "pt": "Porrete de Assassino Queimado"
+      },
+      "width": 1,
+      "height": 3,
+      "sellValue": 60,
+      "repairable": false
+    },
+    {
+      "number": 157,
+      "name": {
+        "en": "Green Box",
+        "de": "Grüne Box",
+        "es": "Caja verde",
+        "pt": "Caixa verde"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 190,
+      "repairable": false
+    },
+    {
+      "number": 158,
+      "name": {
+        "en": "Red Box",
+        "de": "Rote Box",
+        "es": "Caja roja",
+        "pt": "Caixa vermelha"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 190,
+      "repairable": false
+    },
+    {
+      "number": 159,
+      "name": {
+        "en": "Purple Box",
+        "de": "Lila Box",
+        "es": "Caja púrpura",
+        "pt": "Caixa roxa"
+      },
+      "width": 1,
+      "height": 1,
+      "sellValue": 190,
+      "repairable": false
+    },
+    {
+      "number": 160,
+      "name": {
+        "en": "Jewel of Extension",
+        "de": "Juwel der Erweiterung",
+        "es": "Joya de Extensión",
+        "pt": "Jóia de Extensão"
+      },
+      "width": 1,
+      "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 161,
+      "name": {
+        "en": "Jewel of Elevation",
+        "de": "Juwel der Erhebung",
+        "es": "Joya de Elevación",
+        "pt": "Jóia de Elevação"
+      },
+      "width": 1,
+      "height": 1,
+      "droppable": false,
+      "sellable": false,
+      "personalShopSellable": false,
+      "repairable": false
+    },
+    {
+      "number": 162,
+      "name": {
+        "en": "Magic Backpack",
+        "de": "Magischer Rucksack",
+        "es": "Morral Mágico",
+        "pt": "Mochila Mágica"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 163,
+      "name": {
+        "en": "Vault Expansion Certificate",
+        "de": "Tresorerweiterungs-Zertifikat",
+        "es": "Certificado de Expansión de Bóveda",
+        "pt": "Certificado de Expansão de Cofre"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    },
+    {
+      "number": 169,
+      "name": {
+        "en": "RageFighter Character Card",
+        "de": "Charakterkarte: Wutkämpfer",
+        "es": "Tarjeta - Peleador Feroz",
+        "pt": "Carta de Person-RageFighter"
+      },
+      "width": 1,
+      "height": 1,
+      "repairable": false
+    }
+  ]
+}

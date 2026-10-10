@@ -23,6 +23,9 @@ private:
     ~CMuItemEditorUI();
 
     void RenderSearchBar();
+    // Selects the item and shows it in the table; clears the search when it
+    // hides the item.
+    void SelectItem(int itemIndex);
     void RenderColumnVisibilityMenu();
 
     char m_szItemSearchBuffer[256];

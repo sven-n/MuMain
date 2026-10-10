@@ -7,6 +7,10 @@
 
 #include <SDL3/SDL_gpu.h>
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Textures/OztFile.h"
+#ifdef _EDITOR
+#include "Core/Utilities/AssetLoadWorld.h"
+#endif
 
 #include <algorithm>
 #include <array>
@@ -16,6 +20,7 @@
 #include <iterator>
 #include <limits>
 #include <memory>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -543,12 +548,10 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
     {
 #ifdef _DEBUG
         static unsigned int uiCnt2 = 0;
-        int iBuff;
-        iBuff = 0;
 
         wchar_t szDebugOutput[256];
 
-        iBuff = iBuff + mu_swprintf(iBuff + szDebugOutput, L"%d. Call No CLAMP & No REPEAT. \n", uiCnt2++);
+        mu_swprintf_s(szDebugOutput, L"%d. Call No CLAMP & No REPEAT. \n", uiCnt2++);
         OutputDebugString(szDebugOutput);
 #endif
     }
@@ -562,6 +565,11 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
             if (0 == _wcsicmp(pBitmap->FileName, filename.c_str()))
             {
                 pBitmap->Ref++;
+#ifdef _EDITOR
+                // The last loader, as for models: a map that loads the file
+                // again has loaded it too.
+                m_loadWorlds[uiBitmapIndex] = Core::AssetLoadWorld::Get();
+#endif
                 return true;
             }
             else
@@ -577,12 +585,16 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
     std::wstring ext;
     SplitExt(filename, ext, false);
 
+    bool loaded = false;
     if (0 == _wcsicmp(ext.c_str(), L"jpg"))
-        return OpenJpegTurbo(uiBitmapIndex, filename, uiFilter, uiWrapMode);
+        loaded = OpenJpegTurbo(uiBitmapIndex, filename, uiFilter, uiWrapMode);
     else if (0 == _wcsicmp(ext.c_str(), L"tga"))
-        return OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode);
-
-    return false;
+        loaded = OpenTga(uiBitmapIndex, filename, uiFilter, uiWrapMode);
+#ifdef _EDITOR
+    if (loaded)
+        m_loadWorlds[uiBitmapIndex] = Core::AssetLoadWorld::Get();
+#endif
+    return loaded;
 }
 void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
 {
@@ -614,6 +626,9 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
             m_dwUsedTextureMemory -= memoryUsed;
 
             m_mapBitmap.erase(mi);
+#ifdef _EDITOR
+            m_loadWorlds.erase(uiBitmapIndex);
+#endif
 
             if (uiBitmapIndex >= BITMAP_NONAMED_TEXTURES_BEGIN && uiBitmapIndex <= BITMAP_NONAMED_TEXTURES_END)
             {
@@ -623,6 +638,16 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
         }
     }
 }
+#ifdef _EDITOR
+std::optional<int> CGlobalBitmap::GetLoadWorld(GLuint uiBitmapIndex) const
+{
+    const auto found = m_loadWorlds.find(uiBitmapIndex);
+    if (found == m_loadWorlds.end())
+        return std::nullopt;
+    return found->second;
+}
+#endif
+
 void CGlobalBitmap::UnloadAllImages()
 {
     if (m_mapBitmap.empty())
@@ -673,6 +698,9 @@ void CGlobalBitmap::UnloadAllImages()
     }
 
     m_mapBitmap.clear();
+#ifdef _EDITOR
+    m_loadWorlds.clear();
+#endif
     m_listNonamedIndex.clear();
     m_BitmapCache.RemoveAll();
 
@@ -898,6 +926,8 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
 
 bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
 {
+    namespace Ozt = Render::Textures::Ozt;
+
     std::wstring filename_ozt;
     ExchangeExt(filename, L"OZT", filename_ozt);
 
@@ -911,31 +941,22 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     std::vector<unsigned char> pakBuffer((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
     input.close();
 
-    if (pakBuffer.size() < 18) // minimal TGA header length check for OZT payload
+    // A file cut off in its header or its pixels is too small.
+    const Ozt::Header header = Ozt::ReadHeader(pakBuffer, MAX_WIDTH, MAX_HEIGHT);
+    if (header.status == Ozt::Status::TooSmall)
     {
         g_ErrorReport.Write(L"OpenTga: file too small %ls (%zu bytes)\r\n", filename_ozt.c_str(), pakBuffer.size());
         return false;
     }
-
-    int index = 12;
-    index += 4;
-    std::int16_t nx, ny;
-    std::memcpy(&nx, &pakBuffer[index], sizeof(nx));
-    index += 2;
-    std::memcpy(&ny, &pakBuffer[index], sizeof(ny));
-    index += 2;
-    const char bit = pakBuffer[index];
-    index += 1;
-    index += 1;
-
-    if (bit != 32 || nx <= 0 || ny <= 0 || nx > MAX_WIDTH || ny > MAX_HEIGHT)
+    if (header.status == Ozt::Status::InvalidFormat)
     {
-        g_ErrorReport.Write(L"OpenTga: invalid format %ls (bit=%d, %dx%d)\r\n", filename_ozt.c_str(), bit, nx, ny);
+        g_ErrorReport.Write(L"OpenTga: invalid format %ls (bit=%d, %dx%d)\r\n", filename_ozt.c_str(),
+                            header.bitsPerPixel, header.width, header.height);
         return false;
     }
 
-    const int Width = NextPowerOfTwo(nx, MAX_WIDTH);
-    const int Height = NextPowerOfTwo(ny, MAX_HEIGHT);
+    const int Width = NextPowerOfTwo(header.width, MAX_WIDTH);
+    const int Height = NextPowerOfTwo(header.height, MAX_HEIGHT);
 
     auto pNewBitmap = std::make_unique<BITMAP_t>();
 
@@ -955,22 +976,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
 
     m_dwUsedTextureMemory += static_cast<std::uint32_t>(BufferSize);
 
-    for (int y = 0; y < ny; y++)
-    {
-        const unsigned char* src = &pakBuffer[index];
-        index += nx * 4;
-        unsigned char* dst = &pNewBitmap->Buffer[(ny - 1 - y) * Width * pNewBitmap->Components];
-
-        for (int x = 0; x < nx; x++)
-        {
-            dst[0] = src[2];
-            dst[1] = src[1];
-            dst[2] = src[0];
-            dst[3] = src[3];
-            src += 4;
-            dst += pNewBitmap->Components;
-        }
-    }
+    Ozt::CopyPixels(pakBuffer, header, std::span<std::uint8_t>(pNewBitmap->Buffer, BufferSize), Width);
 
     pNewBitmap->TextureNumber = uiBitmapIndex;
     if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->Buffer, Width, Height, MapGLFilterToSDL(uiFilter),

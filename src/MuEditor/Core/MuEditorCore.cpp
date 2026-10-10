@@ -7,16 +7,21 @@
 #include "imgui_impl_sdl3.h"
 #include "imgui_impl_sdlgpu3.h"
 #include "MuInputBlockerCore.h"
+#include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
 #include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
 #include "../MuEditor/UI/SkillEditor/MuSkillEditorUI.h"
 #include "../MuEditor/UI/DevEditor/DevEditorUI.h"
 #include "../MuEditor/UI/MapEditor/MapEditorUI.h"
+#include "../MuEditor/UI/EffectBrowser/MuEffectBrowserUI.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
+#include "Core/Utilities/AssetLoadWorld.h"
+#include "Core/Utilities/WorldClearing.h"
 #include "Core/Utilities/StringUtils.h"
+#include "World/MapInfra/MapManager.h"
 #include "Render/Renderer/MuRenderer.h"
 
 namespace mu
@@ -119,6 +124,7 @@ CMuEditorCore::CMuEditorCore()
     , m_bShowSkillEditor(false)
     , m_bShowDevEditor(false)
     , m_bShowMapEditor(false)
+    , m_bShowEffectBrowser(false)
     , m_bShowConsole(true)
     , m_bHoveringUI(false)
     , m_bPreviousFrameHoveringUI(false)
@@ -176,6 +182,8 @@ void CMuEditorCore::Initialize(SDL_Window* window)
 {
     if (m_bInitialized)
         return;
+
+    ConnectGameHooks();
 
     if (window == nullptr)
     {
@@ -399,16 +407,26 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     fflush(stderr);
 }
 
+void CMuEditorCore::ConnectGameHooks()
+{
+    // The effect browser shows what loaded each model and texture; the
+    // records take the map of the moment from the map manager.
+    Core::AssetLoadWorld::SetSource([] { return gMapManager.WorldActive; });
+    // The effect browser's world preview removes its objects before the game
+    // clears its pools.
+    Core::WorldClearing::SetListener([] { g_MuEffectBrowserUI.OnWorldClearing(); });
+}
+
 void CMuEditorCore::Shutdown()
 {
     if (!m_bInitialized)
         return;
 
-    // Save item editor preferences before shutting down
-    g_MuItemEditorUI.SaveColumnPreferences();
+    // Do not touch the editor singletons here: their destructors already save the column
+    // preferences, and when this runs from ~CMuEditorCore during static destruction they
+    // would be built from scratch or, if they were opened, already destroyed.
 
-    // Save skill editor preferences before shutting down
-    g_MuSkillEditorUI.SaveColumnPreferences();
+    Core::WorldClearing::SetListener(nullptr);
 
     mu::WaitForSDLGpuIdle();
     ImGui_ImplSDLGPU3_Shutdown();
@@ -436,6 +454,10 @@ void CMuEditorCore::Update()
     {
         m_bDrawDataReady = false;
         ImGui_ImplSDLGPU3_NewFrame();
+
+        // Between frames: the effect browser's preview releases its texture
+        // only before the renderer's frame starts.
+        g_MuEffectBrowserUI.BeforeFrame();
 
         // The SDL3 backend fills display size and mouse/keyboard from the SDL
         // events fed via ImGui_ImplSDL3_ProcessEvent, so it works the same
@@ -501,8 +523,11 @@ void CMuEditorCore::Update()
         float buttonWidth = EDITOR_BTN_WIDTH * m_UIScale;
         float buttonHeight = EDITOR_BTN_HEIGHT * m_UIScale;
 
-        if (io.MousePos.x >= buttonX && io.MousePos.x <= (buttonX + buttonWidth) &&
-            io.MousePos.y >= buttonY && io.MousePos.y <= (buttonY + buttonHeight))
+        // A click the control socket injects is somewhere else than the real
+        // pointer, which is what ImGui's mouse position follows.
+        if (!Core::Input::Synthetic::IsInjecting() && io.MousePos.x >= buttonX &&
+            io.MousePos.x <= (buttonX + buttonWidth) && io.MousePos.y >= buttonY &&
+            io.MousePos.y <= (buttonY + buttonHeight))
         {
             // Mouse is over button - block game input for this frame
             extern bool MouseLButton, MouseLButtonPop, MouseLButtonPush, MouseLButtonDBClick;
@@ -558,7 +583,8 @@ void CMuEditorCore::Render()
     m_bHoveringUI = false;
 
     // Render toolbar (handles both open and closed states)
-    g_MuEditorUI.RenderToolbar(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor, m_bShowDevEditor, m_bShowMapEditor, m_bShowConsole);
+    g_MuEditorUI.RenderToolbar(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor, m_bShowDevEditor, m_bShowMapEditor,
+                               m_bShowEffectBrowser, m_bShowConsole);
 
     if (m_bEditorMode)
     {
@@ -576,6 +602,14 @@ void CMuEditorCore::Render()
         // it owns EditFlag while its window is open.
         g_MapEditorUI.Render(&m_bShowMapEditor);
 
+        // After the Map Editor: its object browser starts a thumbnail only
+        // while no capture is pending, and the effect preview leaves one
+        // pending until the frame ends.
+        if (m_bShowEffectBrowser)
+        {
+            g_MuEffectBrowserUI.Render(&m_bShowEffectBrowser);
+        }
+
         // Render console (if enabled)
         if (m_bShowConsole)
         {
@@ -588,6 +622,10 @@ void CMuEditorCore::Render()
         // game doesn't stay stuck in an edit mode.
         g_MapEditorUI.Render(nullptr);
     }
+
+    // After the game's move and draw, also while the editor is hidden: the
+    // effect browser's world preview keeps what it created running.
+    g_MuEffectBrowserUI.AfterRender(m_bShowEffectBrowser);
 
     // Store current hover state for next frame's input blocking
     m_bPreviousFrameHoveringUI = m_bHoveringUI;

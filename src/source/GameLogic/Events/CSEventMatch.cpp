@@ -9,6 +9,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "CSEventMatch.h"
 #include "I18N/All.h"
+#include "Core/Text/WideFormat.h"
 
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Core/WindowSystem.h"
@@ -41,23 +42,6 @@ void WriteWide(wchar_t (&buffer)[N], const wchar_t* format, Args... args)
     }
 
     std::swprintf(buffer, static_cast<std::size_t>(N), format, args...);
-}
-
-template <std::size_t N, typename... Args>
-void AppendWide(wchar_t (&buffer)[N], const wchar_t* format, Args... args)
-{
-    if (format == nullptr)
-    {
-        return;
-    }
-
-    const std::size_t currentLength = std::wcslen(buffer);
-    if (currentLength >= N)
-    {
-        return;
-    }
-
-    std::swprintf(buffer + currentLength, static_cast<std::size_t>(N - currentLength), format, args...);
 }
 } // namespace
 

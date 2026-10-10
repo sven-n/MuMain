@@ -102,6 +102,11 @@
 #panel[data-kind="chaos-castle-result"] .box-line--message + .box-line--reward { margin-top: calc(14px * var(--root-scale)); }
 #panel[data-kind="blood-castle-result"] .box-line--reward { height: calc(24px * var(--root-scale)); }
 #panel[data-kind="chaos-castle-result"] .box-line--reward { height: calc(20px * var(--root-scale)); }
+/* The Blood Castle outcome is one translated sentence, wrapped to the box's text width, each
+   line 16 apart. */
+#panel[data-kind="blood-castle-result"] .box-line--message { height: auto; white-space: normal; width: calc(210px * var(--root-scale));
+    margin: 0 auto; line-height: calc(16px * var(--root-scale)); }
+#panel[data-kind="blood-castle-result"] .box-line--message .box-cell { white-space: normal; }
 
 /* The Devil Square ranking (CSDevilSquareMatch::RenderMatchResult()): the message from 30, 16 apart
    from 40; the headers at 80 over the rank, point, experience and reward columns (30, 90, 140,

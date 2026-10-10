@@ -12,6 +12,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Core/WindowSystem.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 
 extern int InventoryStartX;
 extern int InventoryStartY;
@@ -347,7 +348,7 @@ int COMGEM::Check_Jewel(int _nJewel, int _nType, bool _bModel)
     bool bNon = true;
 
     if (_bModel)
-        _nJewel -= MODEL_ITEM;
+        _nJewel = Data::Items::ToItemType(_nJewel);
     if (_nType & 1)
         bCom = false;
     if (_nType & 2)

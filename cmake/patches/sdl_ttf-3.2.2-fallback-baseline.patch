@@ -1,0 +1,14 @@
+diff --git a/src/SDL_ttf.c b/src/SDL_ttf.c
+index be517a1..08442ed 100644
+--- a/src/SDL_ttf.c
++++ b/src/SDL_ttf.c
+@@ -3601,7 +3601,8 @@ static bool CollectGlyphs(TTF_Font *font, const char *text, size_t length, TTF_D
+ 
+         // Compute positions
+         pos->x = x + pos->x_offset;
+-        pos->y = y + F26Dot6(pos->font->ascent) - pos->y_offset;
++        // MuMain: fallback glyphs share the primary font's baseline.
++        pos->y = y + F26Dot6(font->ascent) - pos->y_offset;
+         x += pos->x_advance;
+         y += pos->y_advance;
+ #if !TTF_USE_HARFBUZZ

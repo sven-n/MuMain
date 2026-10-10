@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -101,6 +102,21 @@ void RecordMap(int mapNumber, const wchar_t* mapName, int x, int y);
 void RecordViewEnter(int key);
 void RecordViewLeave(int key);
 void RecordParty(std::string_view change, const wchar_t* name);
+// The server's answer to a party invitation that did not form or grow a
+// party: `result` is failed, denied, full, user_left, other_party, left,
+// opposing_gens, battle_zone, battle_zone_off or unknown.
+void RecordPartyResult(std::string_view result);
+// A legacy quest's new state: active, complete, not_started or none.
+void RecordQuestChange(int quest, std::string_view state);
+// A legacy quest reward for the character `name`: `reward` is
+// level_up_points, second_class, points_per_level, combo, third_class or
+// unknown, with its `amount` where it has one; `characterClass` is the
+// character's class afterwards.
+void RecordQuestReward(std::string_view name, std::string_view reward, std::optional<int> amount, int characterClass);
+// A trade step: `change` is requested, opened, refused, unavailable,
+// partner_confirm or closed. `name` is the partner (may be empty), `detail`
+// the confirm state or how the trade closed (may be empty).
+void RecordTrade(std::string_view change, std::string_view name, std::string_view detail);
 void RecordDisconnect(std::string_view reason);
 void RecordError(std::string_view command, std::string_view code, std::string_view message);
 } // namespace App::Control::Events

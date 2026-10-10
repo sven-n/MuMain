@@ -38,6 +38,7 @@ enum class ErrorCode : std::uint8_t
     NotPickable,
     EmptySlot,
     MoveRefused,
+    NotOpen,
     Failed,
 };
 

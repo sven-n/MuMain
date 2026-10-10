@@ -68,11 +68,17 @@ public:
     void SendRequestKanturu3rdInfo();
     void SendRequestKanturu3rdEnter();
 
+    void ClosingProcess();
+
 private:
     void Initialize();
 
     void ProcessRefresh();
     void ProcessEnter();
+    void RejectEnterRequest(MSGBOX_TYPE popup);
+    void ValidateEquipmentForEntry();
+    bool IsRidingUniria(ITEM* pItemHelper);
+    bool HasMoonstonePendant(ITEM* pItemRingLeft, ITEM* pItemRingRight);
 
     void BuildRmlUi();
     void SyncRmlModel();

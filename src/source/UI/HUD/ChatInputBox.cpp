@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "UI/Chat/ChatInput.h"
 #include "UI/HUD/ChatInputBox.h"
+#include "Core/Input/SyntheticInput.h"
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
@@ -15,6 +16,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "World/MapInfra/MapManager.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "GameLogic/Items/ItemCategories.h"
 
 #ifdef _EDITOR
 #include "imgui.h"
@@ -277,8 +279,9 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
     if (false == IsVisible() && mu::ui::window::IsPress(VK_RETURN))
     {
 #ifdef _EDITOR
-        // Don't open chat if editor has keyboard focus
-        if (g_MuEditorCore.IsEnabled())
+        // Don't open chat if editor has keyboard focus. An Enter the control socket injects never
+        // reached the editor, whatever the real pointer hovers.
+        if (g_MuEditorCore.IsEnabled() && !Core::Input::Synthetic::IsInjecting())
         {
             ImGuiIO& io = ImGui::GetIO();
             if (io.WantCaptureKeyboard || io.WantCaptureMouse)
@@ -372,7 +375,7 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
                     }
                     else
                     {
-                        if (Hero->SafeZone || (Hero->Helper.Type != MODEL_HORN_OF_UNIRIA && Hero->Helper.Type != MODEL_HORN_OF_DINORANT && Hero->Helper.Type != MODEL_DARK_HORSE_ITEM && Hero->Helper.Type != MODEL_HORN_OF_FENRIR))
+                        if (Hero->SafeZone || !GameLogic::Items::IsRideableMountModel(Hero->Helper.Type))
                         {
                             UI::Chat::CheckChatText(szChatText);
                         }

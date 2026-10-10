@@ -41,8 +41,8 @@ enum class CloseReason
 };
 
 // Asks whether to trade with `requester`, or declines at once if a window that forbids trading
-// is open.
-void RequestReceived(std::wstring_view requester);
+// is open; false when it declined.
+bool RequestReceived(std::wstring_view requester);
 // `partner` is used only when the request was accepted.
 void RequestAnswered(RequestReply reply, const Partner& partner);
 

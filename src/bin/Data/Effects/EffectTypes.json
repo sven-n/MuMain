@@ -1,0 +1,3018 @@
+{
+  "formatVersion": 1,
+  "kind": "effect",
+  "types": [
+    {
+      "name": "airForce",
+      "code": "MODEL_AIR_FORCE",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 15,
+            "scale": 0.6
+          },
+          {
+            "subType": 1,
+            "lifeTime": 20,
+            "scale": 1.2
+          }
+        ]
+      }
+    },
+    {
+      "name": "aliceBuffSkillEffect",
+      "code": "MODEL_ALICE_BUFFSKILL_EFFECT",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 1, 2],
+            "lifeTime": 34,
+            "scale": 0.1,
+            "blendMeshLight": 0,
+            "alpha": 0,
+            "alphaEnable": true,
+            "angle": {"z": 0},
+            "offset": {
+              "position": {"z": {"value": 100, "timesFrameFactor": true}}
+            }
+          },
+          {
+            "subType": 3,
+            "lifeTime": 100,
+            "scale": 1.5
+          },
+          {
+            "subType": 4,
+            "lifeTime": 100,
+            "scale": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "aliceBuffSkillEffect2",
+      "code": "MODEL_ALICE_BUFFSKILL_EFFECT2",
+      "create": {
+        "lifeTime": 35,
+        "scale": 0.15,
+        "blendMeshLight": 0,
+        "alpha": 0,
+        "alphaEnable": true,
+        "angle": {"z": 0},
+        "offset": {
+          "position": {"z": {"value": 100, "timesFrameFactor": true}}
+        }
+      }
+    },
+    {
+      "name": "aliceDrainLife",
+      "code": "MODEL_ALICE_DRAIN_LIFE",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 70
+          }
+        ]
+      }
+    },
+    {
+      "name": "arrow",
+      "code": "MODEL_ARROW"
+    },
+    {
+      "name": "arrowAutoLoad",
+      "code": "MODEL_ARROW_AUTOLOAD",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 40
+          },
+          {
+            "subType": 1,
+            "lifeTime": 40,
+            "scale": 1.2,
+            "light": [1, 0.8, 0.2],
+            "copy": {
+              "direction": "light"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "arrowBestCrossbow",
+      "code": "MODEL_ARROW_BEST_CROSSBOW"
+    },
+    {
+      "name": "arrowBomb",
+      "code": "MODEL_ARROW_BOMB"
+    },
+    {
+      "name": "arrowDarkStinger",
+      "code": "MODEL_ARROW_DARKSTINGER"
+    },
+    {
+      "name": "arrowDouble",
+      "code": "MODEL_ARROW_DOUBLE"
+    },
+    {
+      "name": "arrowDrill",
+      "code": "MODEL_ARROW_DRILL"
+    },
+    {
+      "name": "arrowGamble",
+      "code": "MODEL_ARROW_GAMBLE"
+    },
+    {
+      "name": "arrowHoly",
+      "code": "MODEL_ARROW_HOLY"
+    },
+    {
+      "name": "arrowImpact",
+      "code": "MODEL_ARROW_IMPACT"
+    },
+    {
+      "name": "arrowLaser",
+      "code": "MODEL_ARROW_LASER"
+    },
+    {
+      "name": "arrowNature",
+      "code": "MODEL_ARROW_NATURE"
+    },
+    {
+      "name": "arrowRing",
+      "code": "MODEL_ARROW_RING"
+    },
+    {
+      "name": "arrowSaw",
+      "code": "MODEL_ARROW_SAW"
+    },
+    {
+      "name": "arrowSpark",
+      "code": "MODEL_ARROW_SPARK"
+    },
+    {
+      "name": "arrowSteel",
+      "code": "MODEL_ARROW_STEEL"
+    },
+    {
+      "name": "arrowTanker",
+      "code": "MODEL_ARROW_TANKER"
+    },
+    {
+      "name": "arrowTankerHit",
+      "code": "MODEL_ARROW_TANKER_HIT",
+      "create": {
+        "lifeTime": 100,
+        "scale": 1,
+        "light": [1, 1, 1],
+        "copy": {
+          "startPosition": "position",
+          "deadPosition": "callAngle"
+        },
+        "variants": [
+          {
+            "subType": 0,
+            "angle": [40, 0, 90],
+            "direction": [0, -80, 0]
+          },
+          {
+            "subType": 1,
+            "angle": [40, 0, -90],
+            "direction": [0, -80, 0]
+          },
+          {
+            "subType": 2,
+            "angle": [40, 0, 0],
+            "direction": [0, -80, 0]
+          }
+        ]
+      }
+    },
+    {
+      "name": "arrowThunder",
+      "code": "MODEL_ARROW_THUNDER"
+    },
+    {
+      "name": "arrowV",
+      "code": "MODEL_ARROW_V"
+    },
+    {
+      "name": "arrowWing",
+      "code": "MODEL_ARROW_WING"
+    },
+    {
+      "name": "arrowsre6",
+      "code": "MODEL_ARROWSRE06",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 2],
+            "lifeTime": 30
+          },
+          {
+            "subType": 1,
+            "lifeTime": 40
+          }
+        ]
+      }
+    },
+    {
+      "name": "aurora",
+      "code": "MODEL_AURORA"
+    },
+    {
+      "name": "balgasSkill",
+      "code": "MODEL_BALGAS_SKILL",
+      "create": {
+        "lifeTime": 20,
+        "scale": 1,
+        "blendMesh": 0
+      }
+    },
+    {
+      "name": "battleCastleWall1",
+      "code": "BATTLE_CASTLE_WALL1",
+      "create": {
+        "lifeTime": 2
+      }
+    },
+    {
+      "name": "battleCastleWall2",
+      "code": "BATTLE_CASTLE_WALL2",
+      "create": {
+        "lifeTime": 2
+      }
+    },
+    {
+      "name": "battleCastleWall3",
+      "code": "BATTLE_CASTLE_WALL3",
+      "create": {
+        "lifeTime": 2
+      }
+    },
+    {
+      "name": "battleCastleWall4",
+      "code": "BATTLE_CASTLE_WALL4",
+      "create": {
+        "lifeTime": 2
+      }
+    },
+    {
+      "name": "battleGuard2",
+      "code": "MODEL_BATTLE_GUARD2"
+    },
+    {
+      "name": "bigMeteo1",
+      "code": "MODEL_BIG_METEO1"
+    },
+    {
+      "name": "bigMeteo2",
+      "code": "MODEL_BIG_METEO2"
+    },
+    {
+      "name": "bigMeteo3",
+      "code": "MODEL_BIG_METEO3"
+    },
+    {
+      "name": "bigStone1",
+      "code": "MODEL_BIG_STONE1"
+    },
+    {
+      "name": "bigStone2",
+      "code": "MODEL_BIG_STONE2"
+    },
+    {
+      "name": "bigStonePart1",
+      "code": "MODEL_BIG_STONE_PART1"
+    },
+    {
+      "name": "bigStonePart2",
+      "code": "MODEL_BIG_STONE_PART2"
+    },
+    {
+      "name": "bladeSkill",
+      "code": "MODEL_BLADE_SKILL",
+      "create": {
+        "lifeTime": 10,
+        "scale": 1.5,
+        "variants": [
+          {
+            "subType": 1,
+            "lifeTime": 14,
+            "scale": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "blizzard",
+      "code": "BITMAP_BLIZZARD"
+    },
+    {
+      "name": "blizzardModel",
+      "code": "MODEL_BLIZZARD"
+    },
+    {
+      "name": "blood",
+      "code": "MODEL_BLOOD",
+      "create": {
+        "lifeTime": 10,
+        "blendMesh": 0
+      }
+    },
+    {
+      "name": "blowOfDestruction",
+      "code": "MODEL_BLOW_OF_DESTRUCTION"
+    },
+    {
+      "name": "bone1",
+      "code": "MODEL_BONE1"
+    },
+    {
+      "name": "bone2",
+      "code": "MODEL_BONE2"
+    },
+    {
+      "name": "bossAttack",
+      "code": "MODEL_BOSS_ATTACK",
+      "create": {
+        "lifeTime": 50,
+        "scale": 0.8,
+        "velocity": 1,
+        "gravity": -10,
+        "blendMesh": 0,
+        "angle": {"x": 0},
+        "direction": {"y": -50}
+      }
+    },
+    {
+      "name": "bossLaser",
+      "code": "BITMAP_BOSS_LASER"
+    },
+    {
+      "name": "bossLaser2",
+      "code": "BITMAP_BOSS_LASER+1"
+    },
+    {
+      "name": "bossLaser3",
+      "code": "BITMAP_BOSS_LASER+2"
+    },
+    {
+      "name": "butterfly1",
+      "code": "MODEL_BUTTERFLY01"
+    },
+    {
+      "name": "chainLightning",
+      "code": "MODEL_CHAIN_LIGHTNING",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 1, 2],
+            "lifeTime": 20
+          }
+        ]
+      }
+    },
+    {
+      "name": "changeUpCylinder",
+      "code": "MODEL_CHANGE_UP_CYLINDER",
+      "create": {
+        "lifeTime": 100,
+        "scale": 0.9,
+        "blendMesh": -2,
+        "direction": [0, 0, 1],
+        "variants": [
+          {
+            "subType": 1,
+            "lifeTime": 10,
+            "scale": 0.1,
+            "light": [0, 0, 0]
+          }
+        ]
+      }
+    },
+    {
+      "name": "changeUpEffect",
+      "code": "MODEL_CHANGE_UP_EFF",
+      "create": {
+        "lifeTime": 100,
+        "scale": 0.7,
+        "blendMesh": -2,
+        "offset": {
+          "position": {"z": 22}
+        },
+        "variants": [
+          {
+            "subType": 1,
+            "lifeTime": 10,
+            "scale": 0.4,
+            "blendMeshLight": 0.7
+          }
+        ]
+      }
+    },
+    {
+      "name": "changeUpNasa",
+      "code": "MODEL_CHANGE_UP_NASA",
+      "create": {
+        "lifeTime": 100,
+        "scale": 0.9,
+        "blendMesh": -2,
+        "offset": {
+          "position": {"z": 12}
+        },
+        "variants": [
+          {
+            "subTypes": [1, 2, 3],
+            "lifeTime": 80
+          }
+        ]
+      }
+    },
+    {
+      "name": "chromeEnergy2",
+      "code": "BITMAP_CHROME_ENERGY2",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 30,
+            "startPosition": {"x": 1.5, "y": 1.5}
+          }
+        ]
+      }
+    },
+    {
+      "name": "circle",
+      "code": "MODEL_CIRCLE"
+    },
+    {
+      "name": "circleLight",
+      "code": "MODEL_CIRCLE_LIGHT",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "variants": [
+          {
+            "subType": 1,
+            "renderType": "dark"
+          },
+          {
+            "subType": 2,
+            "scale": 1
+          },
+          {
+            "subType": 3,
+            "lifeTime": 250,
+            "scale": 1
+          },
+          {
+            "subType": 4,
+            "lifeTime": 20,
+            "scale": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "cloud",
+      "code": "BITMAP_CLOUD"
+    },
+    {
+      "name": "cloudModel",
+      "code": "MODEL_CLOUD",
+      "create": {
+        "lifeTime": 2,
+        "scale": 10,
+        "blendMesh": 0,
+        "lightEnable": false,
+        "offset": {
+          "position": {"y": {"value": 200, "timesFrameFactor": true}, "z": {"value": -190, "timesFrameFactor": true}}
+        }
+      }
+    },
+    {
+      "name": "combo",
+      "code": "MODEL_COMBO"
+    },
+    {
+      "name": "condraArmL",
+      "code": "MODEL_CONDRA_ARM_L"
+    },
+    {
+      "name": "condraArmL2",
+      "code": "MODEL_CONDRA_ARM_L2"
+    },
+    {
+      "name": "condraArmR",
+      "code": "MODEL_CONDRA_ARM_R"
+    },
+    {
+      "name": "condraArmR2",
+      "code": "MODEL_CONDRA_ARM_R2"
+    },
+    {
+      "name": "condraConeL",
+      "code": "MODEL_CONDRA_CONE_L"
+    },
+    {
+      "name": "condraConeR",
+      "code": "MODEL_CONDRA_CONE_R"
+    },
+    {
+      "name": "condraNeck",
+      "code": "MODEL_CONDRA_NECK"
+    },
+    {
+      "name": "condraPelvis",
+      "code": "MODEL_CONDRA_PELVIS"
+    },
+    {
+      "name": "condraShoulder",
+      "code": "MODEL_CONDRA_SHOULDER"
+    },
+    {
+      "name": "condraStomach",
+      "code": "MODEL_CONDRA_STOMACH"
+    },
+    {
+      "name": "condraStone",
+      "code": "MODEL_CONDRA_STONE"
+    },
+    {
+      "name": "condraStone1",
+      "code": "MODEL_CONDRA_STONE1"
+    },
+    {
+      "name": "condraStone2",
+      "code": "MODEL_CONDRA_STONE2"
+    },
+    {
+      "name": "condraStone3",
+      "code": "MODEL_CONDRA_STONE3"
+    },
+    {
+      "name": "condraStone4",
+      "code": "MODEL_CONDRA_STONE4"
+    },
+    {
+      "name": "condraStone5",
+      "code": "MODEL_CONDRA_STONE5"
+    },
+    {
+      "name": "crater",
+      "code": "BITMAP_CRATER",
+      "create": {
+        "light": [1, 1, 1],
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 60,
+            "startPosition": {"x": 4.5, "y": 4.5}
+          },
+          {
+            "subType": 1,
+            "lifeTime": 30,
+            "startPosition": {"x": 2.5, "y": 2.5}
+          },
+          {
+            "subType": 2,
+            "lifeTime": 40,
+            "startPosition": {"x": 3, "y": 3}
+          }
+        ]
+      }
+    },
+    {
+      "name": "cursedTempleHolyItem",
+      "code": "MODEL_CURSEDTEMPLE_HOLYITEM",
+      "create": {
+        "lifeTime": 9999999
+      }
+    },
+    {
+      "name": "cursedTempleProtectionSkill",
+      "code": "MODEL_CURSEDTEMPLE_PRODECTION_SKILL",
+      "create": {
+        "lifeTime": 9999999
+      }
+    },
+    {
+      "name": "cursedTempleRestraintSkill",
+      "code": "MODEL_CURSEDTEMPLE_RESTRAINT_SKILL",
+      "create": {
+        "lifeTime": 9999999
+      }
+    },
+    {
+      "name": "cursedTempleStatuePart1",
+      "code": "MODEL_CURSEDTEMPLE_STATUE_PART1"
+    },
+    {
+      "name": "cursedTempleStatuePart2",
+      "code": "MODEL_CURSEDTEMPLE_STATUE_PART2"
+    },
+    {
+      "name": "damage01Mono",
+      "code": "BITMAP_DAMAGE_01_MONO",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 20,
+            "copy": {
+              "scale": "callScale"
+            }
+          },
+          {
+            "subType": 1,
+            "lifeTime": 10,
+            "scale": 0.1
+          }
+        ]
+      }
+    },
+    {
+      "name": "damage1",
+      "code": "BITMAP_DAMAGE1"
+    },
+    {
+      "name": "darkElfSkill",
+      "code": "MODEL_DARK_ELF_SKILL",
+      "create": {
+        "lifeTime": 30,
+        "scale": 0,
+        "blendMesh": -2,
+        "direction": [0, -40, 0]
+      }
+    },
+    {
+      "name": "darkLordSkill",
+      "code": "MODEL_DARKLORD_SKILL"
+    },
+    {
+      "name": "darkScream",
+      "code": "MODEL_DARK_SCREAM"
+    },
+    {
+      "name": "darkScreamFire",
+      "code": "MODEL_DARK_SCREAM_FIRE"
+    },
+    {
+      "name": "deasuler",
+      "code": "MODEL_DEASULER"
+    },
+    {
+      "name": "deathSpiSkill",
+      "code": "MODEL_DEATH_SPI_SKILL"
+    },
+    {
+      "name": "desair",
+      "code": "MODEL_DESAIR",
+      "create": {
+        "lifeTime": 52,
+        "scale": 1.4
+      }
+    },
+    {
+      "name": "doorCrushEffect",
+      "code": "MODEL_DOOR_CRUSH_EFFECT"
+    },
+    {
+      "name": "doorCrushEffectPiece1",
+      "code": "MODEL_DOOR_CRUSH_EFFECT_PIECE01"
+    },
+    {
+      "name": "doorCrushEffectPiece10",
+      "code": "MODEL_DOOR_CRUSH_EFFECT_PIECE10",
+      "create": {
+        "lifeTime": 100,
+        "pkKey": -1,
+        "copy": {
+          "scale": "callScale"
+        }
+      }
+    },
+    {
+      "name": "doorCrushEffectPiece11",
+      "code": "MODEL_DOOR_CRUSH_EFFECT_PIECE11"
+    },
+    {
+      "name": "doorCrushEffectPiece12",
+      "code": "MODEL_DOOR_CRUSH_EFFECT_PIECE12"
+    },
+    {
+      "name": "doorCrushEffectPiece13",
+      "code": "MODEL_DOOR_CRUSH_EFFECT_PIECE13"
+    },
+    {
+      "name": "doorCrushEffectPiece2",
+      "code": "MODEL_DOOR_CRUSH_EFFECT_PIECE02"
+    },
+    {
+      "name": "doorCrushEffectPiece3",
+      "code": "MODEL_DOOR_CRUSH_EFFECT_PIECE03"
+    },
+    {
+      "name": "doorCrushEffectPiece4",
+      "code": "MODEL_DOOR_CRUSH_EFFECT_PIECE04"
+    },
+    {
+      "name": "doorCrushEffectPiece5",
+      "code": "MODEL_DOOR_CRUSH_EFFECT_PIECE05"
+    },
+    {
+      "name": "doorCrushEffectPiece6",
+      "code": "MODEL_DOOR_CRUSH_EFFECT_PIECE06"
+    },
+    {
+      "name": "doorCrushEffectPiece7",
+      "code": "MODEL_DOOR_CRUSH_EFFECT_PIECE07"
+    },
+    {
+      "name": "doorCrushEffectPiece8",
+      "code": "MODEL_DOOR_CRUSH_EFFECT_PIECE08"
+    },
+    {
+      "name": "doorCrushEffectPiece9",
+      "code": "MODEL_DOOR_CRUSH_EFFECT_PIECE09"
+    },
+    {
+      "name": "doppelgangerSlimeChip",
+      "code": "MODEL_DOPPELGANGER_SLIME_CHIP"
+    },
+    {
+      "name": "downAttackDummyL",
+      "code": "MODEL_DOWN_ATTACK_DUMMY_L"
+    },
+    {
+      "name": "downAttackDummyR",
+      "code": "MODEL_DOWN_ATTACK_DUMMY_R"
+    },
+    {
+      "name": "dragon",
+      "code": "MODEL_DRAGON",
+      "create": {
+        "lifeTime": 1000,
+        "velocity": 1,
+        "gravity": 1,
+        "light": [1, 1, 1],
+        "kind": 0,
+        "timer": 0,
+        "distance": 1,
+        "collisionRange": 1,
+        "angle": {"y": 0},
+        "direction": [0, -35, 0],
+        "offset": {
+          "position": {"z": 3400}
+        },
+        "copy": {
+          "startPosition": "position"
+        }
+      }
+    },
+    {
+      "name": "dragonKickDummy",
+      "code": "MODEL_DRAGON_KICK_DUMMY"
+    },
+    {
+      "name": "dragonLowerDummy",
+      "code": "MODEL_DRAGON_LOWER_DUMMY"
+    },
+    {
+      "name": "dungeonStone1",
+      "code": "MODEL_DUNGEON_STONE01"
+    },
+    {
+      "name": "earthQuake1",
+      "code": "MODEL_SKILL_FURY_STRIKE+1"
+    },
+    {
+      "name": "earthQuake2",
+      "code": "MODEL_SKILL_FURY_STRIKE+2"
+    },
+    {
+      "name": "earthQuake3",
+      "code": "MODEL_SKILL_FURY_STRIKE+3"
+    },
+    {
+      "name": "earthQuake4",
+      "code": "MODEL_SKILL_FURY_STRIKE+4"
+    },
+    {
+      "name": "earthQuake5",
+      "code": "MODEL_SKILL_FURY_STRIKE+5"
+    },
+    {
+      "name": "earthQuake6",
+      "code": "MODEL_SKILL_FURY_STRIKE+6"
+    },
+    {
+      "name": "earthQuake7",
+      "code": "MODEL_SKILL_FURY_STRIKE+7"
+    },
+    {
+      "name": "earthQuake8",
+      "code": "MODEL_SKILL_FURY_STRIKE+8"
+    },
+    {
+      "name": "effectBrokenIce0",
+      "code": "MODEL_EFFECT_BROKEN_ICE0"
+    },
+    {
+      "name": "effectBrokenIce1",
+      "code": "MODEL_EFFECT_BROKEN_ICE1"
+    },
+    {
+      "name": "effectBrokenIce2",
+      "code": "MODEL_EFFECT_BROKEN_ICE2"
+    },
+    {
+      "name": "effectBrokenIce3",
+      "code": "MODEL_EFFECT_BROKEN_ICE3"
+    },
+    {
+      "name": "effectEgGuardianDefenderAttack2",
+      "code": "MODEL_EFFECT_EG_GUARDIANDEFENDER_ATTACK2",
+      "create": {
+        "lifeTime": 20,
+        "scale": 0.9
+      }
+    },
+    {
+      "name": "effectFireHik3Mono",
+      "code": "MODEL_EFFECT_FIRE_HIK3_MONO"
+    },
+    {
+      "name": "effectFlameStrike",
+      "code": "MODEL_EFFECT_FLAME_STRIKE"
+    },
+    {
+      "name": "effectSapitresAttack",
+      "code": "MODEL_EFFECT_SAPITRES_ATTACK"
+    },
+    {
+      "name": "effectSapitresAttack1",
+      "code": "MODEL_EFFECT_SAPITRES_ATTACK_1"
+    },
+    {
+      "name": "effectSapitresAttack2",
+      "code": "MODEL_EFFECT_SAPITRES_ATTACK_2"
+    },
+    {
+      "name": "effectSdAura",
+      "code": "MODEL_EFFECT_SD_AURA",
+      "create": {
+        "lifeTime": 1000,
+        "scale": 1
+      }
+    },
+    {
+      "name": "effectSkuraItem",
+      "code": "MODEL_EFFECT_SKURA_ITEM",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 1],
+            "lifeTime": 52
+          }
+        ]
+      }
+    },
+    {
+      "name": "effectThunderNapinAttack1",
+      "code": "MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 1],
+            "lifeTime": 30
+          }
+        ]
+      }
+    },
+    {
+      "name": "effectTrace",
+      "code": "MODEL_EFFECT_TRACE"
+    },
+    {
+      "name": "effectUmbrellaDie",
+      "code": "MODEL_EFFECT_UMBRELLA_DIE",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 30
+          }
+        ]
+      }
+    },
+    {
+      "name": "effectUmbrellaGold",
+      "code": "MODEL_EFFECT_UMBRELLA_GOLD"
+    },
+    {
+      "name": "empireGuardianBlowOfDestruction",
+      "code": "MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION"
+    },
+    {
+      "name": "empireGuardianBossFlameStrike",
+      "code": "MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE"
+    },
+    {
+      "name": "enemyInfluenceGround",
+      "code": "BITMAP_ENEMY_INFLUENCE_GROUND",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 50,
+            "scale": 0.6,
+            "alphaTarget": 0.75
+          }
+        ]
+      }
+    },
+    {
+      "name": "energy",
+      "code": "BITMAP_ENERGY",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 20,
+            "direction": [0, -60, 0],
+            "offset": {
+              "position": {"z": {"value": 100, "timesFrameFactor": true}}
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "eventCloud",
+      "code": "BITMAP_EVENT_CLOUD",
+      "create": {
+        "lifeTime": 30,
+        "copy": {
+          "scale": "callScale"
+        }
+      }
+    },
+    {
+      "name": "ex01ShadowMasterAnkleLeft",
+      "code": "MODEL_EX01_SHADOW_MASTER_ANKLE_LEFT"
+    },
+    {
+      "name": "ex01ShadowMasterAnkleRight",
+      "code": "MODEL_EX01_SHADOW_MASTER_ANKLE_RIGHT"
+    },
+    {
+      "name": "ex01ShadowMasterBelt",
+      "code": "MODEL_EX01_SHADOW_MASTER_BELT"
+    },
+    {
+      "name": "ex01ShadowMasterChest",
+      "code": "MODEL_EX01_SHADOW_MASTER_CHEST"
+    },
+    {
+      "name": "ex01ShadowMasterHelmet",
+      "code": "MODEL_EX01_SHADOW_MASTER_HELMET"
+    },
+    {
+      "name": "ex01ShadowMasterKneeLeft",
+      "code": "MODEL_EX01_SHADOW_MASTER_KNEE_LEFT"
+    },
+    {
+      "name": "ex01ShadowMasterKneeRight",
+      "code": "MODEL_EX01_SHADOW_MASTER_KNEE_RIGHT"
+    },
+    {
+      "name": "ex01ShadowMasterWristLeft",
+      "code": "MODEL_EX01_SHADOW_MASTER_WRIST_LEFT"
+    },
+    {
+      "name": "ex01ShadowMasterWristRight",
+      "code": "MODEL_EX01_SHADOW_MASTER_WRIST_RIGHT"
+    },
+    {
+      "name": "fallStoneEffect",
+      "code": "MODEL_FALL_STONE_EFFECT"
+    },
+    {
+      "name": "feather",
+      "code": "MODEL_FEATHER"
+    },
+    {
+      "name": "featherForeign",
+      "code": "MODEL_FEATHER_FOREIGN"
+    },
+    {
+      "name": "fenrirFootThunder",
+      "code": "MODEL_FENRIR_FOOT_THUNDER"
+    },
+    {
+      "name": "fenrirSkillDamage",
+      "code": "MODEL_FENRIR_SKILL_DAMAGE"
+    },
+    {
+      "name": "fenrirThunder",
+      "code": "MODEL_FENRIR_THUNDER"
+    },
+    {
+      "name": "fire",
+      "code": "BITMAP_FIRE",
+      "create": {
+        "lifeTime": 1000
+      }
+    },
+    {
+      "name": "fire2",
+      "code": "BITMAP_FIRE+1"
+    },
+    {
+      "name": "fireCursedLich",
+      "code": "BITMAP_FIRE_CURSEDLICH",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 10,
+            "scale": 0.7,
+            "blendMesh": -2
+          },
+          {
+            "subType": 1,
+            "lifeTime": 50
+          },
+          {
+            "subTypes": [2, 12],
+            "lifeTime": 20
+          },
+          {
+            "subType": 3,
+            "lifeTime": 10
+          }
+        ]
+      }
+    },
+    {
+      "name": "fireHik2Mono",
+      "code": "BITMAP_FIRE_HIK2_MONO",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 60
+          },
+          {
+            "subType": 1,
+            "lifeTime": 20,
+            "angle": [0, 0, 0]
+          }
+        ]
+      }
+    },
+    {
+      "name": "fireModel",
+      "code": "MODEL_FIRE"
+    },
+    {
+      "name": "fireRed",
+      "code": "BITMAP_FIRE_RED",
+      "create": {
+        "lifeTime": 40
+      }
+    },
+    {
+      "name": "firecracker",
+      "code": "BITMAP_FIRECRACKER"
+    },
+    {
+      "name": "firecracker1",
+      "code": "BITMAP_FIRECRACKER0001",
+      "create": {
+        "lifeTime": 31
+      }
+    },
+    {
+      "name": "firecracker2",
+      "code": "BITMAP_FIRECRACKER0002"
+    },
+    {
+      "name": "firecracker3",
+      "code": "BITMAP_FIRECRACKER0003"
+    },
+    {
+      "name": "firecrackerRise",
+      "code": "BITMAP_FIRECRACKERRISE",
+      "create": {
+        "lifeTime": 75,
+        "position": {"z": 100},
+        "angle": [0, 0, 0]
+      }
+    },
+    {
+      "name": "fissure",
+      "code": "MODEL_FISSURE",
+      "create": {
+        "lifeTime": 120,
+        "scale": 0.8
+      }
+    },
+    {
+      "name": "fissureLight",
+      "code": "MODEL_FISSURE_LIGHT",
+      "create": {
+        "lifeTime": 120,
+        "scale": 0.8
+      }
+    },
+    {
+      "name": "flame",
+      "code": "BITMAP_FLAME"
+    },
+    {
+      "name": "flare",
+      "code": "BITMAP_FLARE",
+      "create": {
+        "lifeTime": 30,
+        "variants": [
+          {
+            "subType": 3,
+            "lifeTime": 60
+          }
+        ]
+      }
+    },
+    {
+      "name": "flareForce",
+      "code": "BITMAP_FLARE_FORCE"
+    },
+    {
+      "name": "flyBigStone1",
+      "code": "MODEL_FLY_BIG_STONE1"
+    },
+    {
+      "name": "flyBigStone2",
+      "code": "MODEL_FLY_BIG_STONE2"
+    },
+    {
+      "name": "gate",
+      "code": "MODEL_GATE"
+    },
+    {
+      "name": "gate2",
+      "code": "MODEL_GATE+1"
+    },
+    {
+      "name": "gatePart1",
+      "code": "MODEL_GATE_PART1"
+    },
+    {
+      "name": "gatePart2",
+      "code": "MODEL_GATE_PART2"
+    },
+    {
+      "name": "gatePart3",
+      "code": "MODEL_GATE_PART3"
+    },
+    {
+      "name": "gathering",
+      "code": "BITMAP_GATHERING"
+    },
+    {
+      "name": "ghost",
+      "code": "MODEL_GHOST"
+    },
+    {
+      "name": "golemStone",
+      "code": "MODEL_GOLEM_STONE"
+    },
+    {
+      "name": "groundStone",
+      "code": "MODEL_GROUND_STONE"
+    },
+    {
+      "name": "groundStone2",
+      "code": "MODEL_GROUND_STONE2"
+    },
+    {
+      "name": "halloween",
+      "code": "MODEL_HALLOWEEN"
+    },
+    {
+      "name": "halloweenCandyBlue",
+      "code": "MODEL_HALLOWEEN_CANDY_BLUE"
+    },
+    {
+      "name": "halloweenCandyHobak",
+      "code": "MODEL_HALLOWEEN_CANDY_HOBAK"
+    },
+    {
+      "name": "halloweenCandyOrange",
+      "code": "MODEL_HALLOWEEN_CANDY_ORANGE"
+    },
+    {
+      "name": "halloweenCandyRed",
+      "code": "MODEL_HALLOWEEN_CANDY_RED"
+    },
+    {
+      "name": "halloweenCandyStar",
+      "code": "MODEL_HALLOWEEN_CANDY_STAR"
+    },
+    {
+      "name": "halloweenCandyYellow",
+      "code": "MODEL_HALLOWEEN_CANDY_YELLOW"
+    },
+    {
+      "name": "halloweenEx",
+      "code": "MODEL_HALLOWEEN_EX"
+    },
+    {
+      "name": "ice",
+      "code": "MODEL_ICE"
+    },
+    {
+      "name": "iceGiantPart1",
+      "code": "MODEL_ICE_GIANT_PART1"
+    },
+    {
+      "name": "iceGiantPart2",
+      "code": "MODEL_ICE_GIANT_PART2"
+    },
+    {
+      "name": "iceGiantPart3",
+      "code": "MODEL_ICE_GIANT_PART3"
+    },
+    {
+      "name": "iceGiantPart4",
+      "code": "MODEL_ICE_GIANT_PART4"
+    },
+    {
+      "name": "iceGiantPart5",
+      "code": "MODEL_ICE_GIANT_PART5"
+    },
+    {
+      "name": "iceGiantPart6",
+      "code": "MODEL_ICE_GIANT_PART6"
+    },
+    {
+      "name": "iceSmall",
+      "code": "MODEL_ICE_SMALL"
+    },
+    {
+      "name": "illusionOfKundun",
+      "code": "MODEL_ILLUSION_OF_KUNDUN"
+    },
+    {
+      "name": "impact",
+      "code": "BITMAP_IMPACT",
+      "create": {
+        "lifeTime": 80,
+        "scale": 0,
+        "blendMesh": -2
+      }
+    },
+    {
+      "name": "infinityArrow",
+      "code": "MODEL_INFINITY_ARROW"
+    },
+    {
+      "name": "infinityArrow1",
+      "code": "MODEL_INFINITY_ARROW1",
+      "create": {
+        "lifeTime": 40,
+        "scale": 1,
+        "light": [1, 1, 1],
+        "copy": {
+          "direction": "light"
+        },
+        "variants": [
+          {
+            "subTypes": [1, 2, 3],
+            "lifeTime": 60
+          }
+        ]
+      }
+    },
+    {
+      "name": "infinityArrow2",
+      "code": "MODEL_INFINITY_ARROW2",
+      "create": {
+        "lifeTime": 40,
+        "scale": 1,
+        "light": [1, 1, 1],
+        "copy": {
+          "direction": "light"
+        },
+        "variants": [
+          {
+            "subTypes": [1, 2, 3],
+            "lifeTime": 60
+          }
+        ]
+      }
+    },
+    {
+      "name": "infinityArrow3",
+      "code": "MODEL_INFINITY_ARROW3",
+      "create": {
+        "lifeTime": 40,
+        "scale": 1,
+        "light": [1, 1, 1],
+        "copy": {
+          "direction": "light"
+        },
+        "variants": [
+          {
+            "subTypes": [1, 2, 3],
+            "lifeTime": 60
+          }
+        ]
+      }
+    },
+    {
+      "name": "infinityArrow4",
+      "code": "MODEL_INFINITY_ARROW4",
+      "create": {
+        "lifeTime": 15,
+        "scale": 1,
+        "light": [1, 0.5, 0.3],
+        "copy": {
+          "direction": "light"
+        }
+      }
+    },
+    {
+      "name": "ironRiderArrow",
+      "code": "MODEL_IRON_RIDER_ARROW"
+    },
+    {
+      "name": "jointForce",
+      "code": "BITMAP_JOINT_FORCE"
+    },
+    {
+      "name": "jointThunder",
+      "code": "BITMAP_JOINT_THUNDER",
+      "create": {
+        "lifeTime": 20,
+        "offset": {
+          "startPosition": {"z": 800}
+        },
+        "copy": {
+          "startPosition": "position"
+        }
+      }
+    },
+    {
+      "name": "jointThunder2",
+      "code": "BITMAP_JOINT_THUNDER+1"
+    },
+    {
+      "name": "kalimaFallingStone",
+      "code": "MODEL_KALIMA_FALLING_STONE"
+    },
+    {
+      "name": "kentaurosArrow",
+      "code": "MODEL_KENTAUROS_ARROW",
+      "create": {
+        "lifeTime": 34,
+        "scale": 0.7,
+        "velocity": 70,
+        "alpha": 0,
+        "light": [1, 1, 1]
+      }
+    },
+    {
+      "name": "knightPlancrackA",
+      "code": "MODEL_KNIGHT_PLANCRACK_A"
+    },
+    {
+      "name": "knightPlancrackB",
+      "code": "MODEL_KNIGHT_PLANCRACK_B",
+      "create": {
+        "lifeTime": 25,
+        "offset": {
+          "position": {"z": {"value": 15, "timesFrameFactor": true}},
+          "angle": {"z": {"value": 90, "timesFrameFactor": true}}
+        }
+      }
+    },
+    {
+      "name": "kundunDragonHead",
+      "code": "MODEL_CUNDUN_DRAGON_HEAD"
+    },
+    {
+      "name": "kundunGhost",
+      "code": "MODEL_CUNDUN_GHOST",
+      "create": {
+        "lifeTime": 200,
+        "scale": 1.8,
+        "velocity": 0.08,
+        "blendMesh": -2,
+        "light": [0.5, 0.5, 0.5]
+      }
+    },
+    {
+      "name": "kundunPart1",
+      "code": "MODEL_CUNDUN_PART1"
+    },
+    {
+      "name": "kundunPart2",
+      "code": "MODEL_CUNDUN_PART2"
+    },
+    {
+      "name": "kundunPart3",
+      "code": "MODEL_CUNDUN_PART3"
+    },
+    {
+      "name": "kundunPart4",
+      "code": "MODEL_CUNDUN_PART4"
+    },
+    {
+      "name": "kundunPart5",
+      "code": "MODEL_CUNDUN_PART5"
+    },
+    {
+      "name": "kundunPart6",
+      "code": "MODEL_CUNDUN_PART6"
+    },
+    {
+      "name": "kundunPart7",
+      "code": "MODEL_CUNDUN_PART7"
+    },
+    {
+      "name": "kundunPart8",
+      "code": "MODEL_CUNDUN_PART8"
+    },
+    {
+      "name": "kundunPhoenix",
+      "code": "MODEL_CUNDUN_PHOENIX"
+    },
+    {
+      "name": "kundunSkill",
+      "code": "MODEL_CUNDUN_SKILL"
+    },
+    {
+      "name": "laceArrow",
+      "code": "MODEL_LACEARROW"
+    },
+    {
+      "name": "laser",
+      "code": "MODEL_LASER"
+    },
+    {
+      "name": "lava",
+      "code": "BITMAP_LAVA"
+    },
+    {
+      "name": "lavaGiantFootprintR",
+      "code": "MODEL_LAVAGIANT_FOOTPRINT_R"
+    },
+    {
+      "name": "lavaGiantFootprintV",
+      "code": "MODEL_LAVAGIANT_FOOTPRINT_V"
+    },
+    {
+      "name": "light",
+      "code": "BITMAP_LIGHT"
+    },
+    {
+      "name": "lightMarks",
+      "code": "BITMAP_LIGHT_MARKS",
+      "create": {
+        "lifeTime": 65
+      }
+    },
+    {
+      "name": "lightRed",
+      "code": "BITMAP_LIGHT_RED"
+    },
+    {
+      "name": "lightSpear",
+      "code": "MODEL_SPEAR",
+      "create": {
+        "lifeTime": 10
+      }
+    },
+    {
+      "name": "lightning2",
+      "code": "BITMAP_LIGHTNING+1",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 10,
+            "scale": 1.5
+          },
+          {
+            "subType": 1,
+            "lifeTime": 50,
+            "alpha": 0.01
+          }
+        ]
+      }
+    },
+    {
+      "name": "lightningOrb",
+      "code": "MODEL_LIGHTNING_ORB",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 20,
+            "direction": [0, -60, 0],
+            "offset": {
+              "position": {"z": {"value": 100, "timesFrameFactor": true}}
+            }
+          },
+          {
+            "subType": 1,
+            "lifeTime": 18
+          }
+        ]
+      }
+    },
+    {
+      "name": "lightningShock",
+      "code": "MODEL_LIGHTNING_SHOCK"
+    },
+    {
+      "name": "magic",
+      "code": "BITMAP_MAGIC"
+    },
+    {
+      "name": "magic1",
+      "code": "MODEL_MAGIC1",
+      "create": {
+        "lifeTime": 20,
+        "blendMesh": 0
+      }
+    },
+    {
+      "name": "magic2",
+      "code": "MODEL_MAGIC2"
+    },
+    {
+      "name": "magicCapsule2",
+      "code": "MODEL_MAGIC_CAPSULE2",
+      "create": {
+        "lifeTime": 20,
+        "blendMesh": 0,
+        "blendMeshLight": 1
+      }
+    },
+    {
+      "name": "magicCircle1",
+      "code": "BITMAP_MAGIC+2"
+    },
+    {
+      "name": "magicCircle1Model",
+      "code": "MODEL_MAGIC_CIRCLE1",
+      "create": {
+        "lifeTime": 30,
+        "scale": 0.7,
+        "velocity": 0.1,
+        "blendMesh": -2,
+        "variants": [
+          {
+            "subType": 1,
+            "lifeTime": 20,
+            "hiddenMesh": 0
+          },
+          {
+            "subType": 2,
+            "lifeTime": 15,
+            "velocity": 0.3
+          }
+        ]
+      }
+    },
+    {
+      "name": "magicGround2",
+      "code": "BITMAP_MAGIC+1"
+    },
+    {
+      "name": "magicZin",
+      "code": "BITMAP_MAGIC_ZIN",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 50
+          },
+          {
+            "subType": 1,
+            "lifeTime": 40,
+            "alpha": 0
+          },
+          {
+            "subType": 2,
+            "lifeTime": 30
+          }
+        ]
+      }
+    },
+    {
+      "name": "manaRune",
+      "code": "MODEL_MANA_RUNE",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 50,
+            "scale": 0,
+            "gravity": 0.1,
+            "hiddenMesh": 0,
+            "alpha": 0.3,
+            "angle": [0, 0, 45],
+            "offset": {
+              "position": {"z": 300}
+            }
+          },
+          {
+            "subType": 1,
+            "lifeTime": 10,
+            "scale": 1.1,
+            "gravity": 0.1,
+            "blendMesh": -2,
+            "blendMeshLight": 0.4
+          }
+        ]
+      }
+    },
+    {
+      "name": "mayaHandSkill",
+      "code": "MODEL_MAYAHANDSKILL",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 1],
+            "lifeTime": 20,
+            "copy": {
+              "startPosition": "light"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "mayaStar",
+      "code": "MODEL_MAYASTAR",
+      "create": {
+        "lifeTime": 50,
+        "scale": 50
+      }
+    },
+    {
+      "name": "mayaStone1",
+      "code": "MODEL_MAYASTONE1"
+    },
+    {
+      "name": "mayaStone2",
+      "code": "MODEL_MAYASTONE2"
+    },
+    {
+      "name": "mayaStone3",
+      "code": "MODEL_MAYASTONE3"
+    },
+    {
+      "name": "mayaStone4",
+      "code": "MODEL_MAYASTONE4"
+    },
+    {
+      "name": "mayaStone5",
+      "code": "MODEL_MAYASTONE5"
+    },
+    {
+      "name": "mayaStoneFire",
+      "code": "MODEL_MAYASTONEFIRE"
+    },
+    {
+      "name": "meteo1",
+      "code": "MODEL_METEO1"
+    },
+    {
+      "name": "meteo2",
+      "code": "MODEL_METEO2"
+    },
+    {
+      "name": "moonHarvestGam",
+      "code": "MODEL_MOONHARVEST_GAM"
+    },
+    {
+      "name": "moonHarvestMoon",
+      "code": "MODEL_MOONHARVEST_MOON",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 70,
+            "alpha": 0.6,
+            "animation": 0
+          },
+          {
+            "subType": 1,
+            "lifeTime": 50,
+            "angle": [0, 0, 0],
+            "copy": {
+              "direction": "callAngle"
+            }
+          },
+          {
+            "subType": 2,
+            "lifeTime": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "moonHarvestSongpuen1",
+      "code": "MODEL_MOONHARVEST_SONGPUEN1"
+    },
+    {
+      "name": "moonHarvestSongpuen2",
+      "code": "MODEL_MOONHARVEST_SONGPUEN2"
+    },
+    {
+      "name": "moveTargetPositionEffect",
+      "code": "MODEL_MOVE_TARGETPOSITION_EFFECT"
+    },
+    {
+      "name": "multiShot1",
+      "code": "MODEL_MULTI_SHOT1"
+    },
+    {
+      "name": "multiShot2",
+      "code": "MODEL_MULTI_SHOT2"
+    },
+    {
+      "name": "multiShot3",
+      "code": "MODEL_MULTI_SHOT3"
+    },
+    {
+      "name": "narcondraArmL",
+      "code": "MODEL_NARCONDRA_ARM_L"
+    },
+    {
+      "name": "narcondraArmL2",
+      "code": "MODEL_NARCONDRA_ARM_L2"
+    },
+    {
+      "name": "narcondraArmR",
+      "code": "MODEL_NARCONDRA_ARM_R"
+    },
+    {
+      "name": "narcondraArmR2",
+      "code": "MODEL_NARCONDRA_ARM_R2"
+    },
+    {
+      "name": "narcondraArmR3",
+      "code": "MODEL_NARCONDRA_ARM_R3"
+    },
+    {
+      "name": "narcondraCone1",
+      "code": "MODEL_NARCONDRA_CONE_1"
+    },
+    {
+      "name": "narcondraCone2",
+      "code": "MODEL_NARCONDRA_CONE_2"
+    },
+    {
+      "name": "narcondraCone3",
+      "code": "MODEL_NARCONDRA_CONE_3"
+    },
+    {
+      "name": "narcondraCone4",
+      "code": "MODEL_NARCONDRA_CONE_4"
+    },
+    {
+      "name": "narcondraCone5",
+      "code": "MODEL_NARCONDRA_CONE_5"
+    },
+    {
+      "name": "narcondraCone6",
+      "code": "MODEL_NARCONDRA_CONE_6"
+    },
+    {
+      "name": "narcondraNeck",
+      "code": "MODEL_NARCONDRA_NECK"
+    },
+    {
+      "name": "narcondraPelvis",
+      "code": "MODEL_NARCONDRA_PELVIS"
+    },
+    {
+      "name": "narcondraShoulderL",
+      "code": "MODEL_NARCONDRA_SHOULDER_L"
+    },
+    {
+      "name": "narcondraShoulderR",
+      "code": "MODEL_NARCONDRA_SHOULDER_R"
+    },
+    {
+      "name": "narcondraStomach",
+      "code": "MODEL_NARCONDRA_STOMACH"
+    },
+    {
+      "name": "narcondraStone",
+      "code": "MODEL_NARCONDRA_STONE"
+    },
+    {
+      "name": "narcondraStone1",
+      "code": "MODEL_NARCONDRA_STONE1"
+    },
+    {
+      "name": "narcondraStone2",
+      "code": "MODEL_NARCONDRA_STONE2"
+    },
+    {
+      "name": "narcondraStone3",
+      "code": "MODEL_NARCONDRA_STONE3"
+    },
+    {
+      "name": "newYearsDayEventBeksulki",
+      "code": "MODEL_NEWYEARSDAY_EVENT_BEKSULKI"
+    },
+    {
+      "name": "newYearsDayEventCandy",
+      "code": "MODEL_NEWYEARSDAY_EVENT_CANDY"
+    },
+    {
+      "name": "newYearsDayEventHotPepperGreen",
+      "code": "MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_GREEN"
+    },
+    {
+      "name": "newYearsDayEventHotPepperRed",
+      "code": "MODEL_NEWYEARSDAY_EVENT_HOTPEPPER_RED"
+    },
+    {
+      "name": "newYearsDayEventMoney",
+      "code": "MODEL_NEWYEARSDAY_EVENT_MONEY"
+    },
+    {
+      "name": "newYearsDayEventPig",
+      "code": "MODEL_NEWYEARSDAY_EVENT_PIG"
+    },
+    {
+      "name": "newYearsDayEventYut",
+      "code": "MODEL_NEWYEARSDAY_EVENT_YUT"
+    },
+    {
+      "name": "nightWater1",
+      "code": "MODEL_NIGHTWATER_01"
+    },
+    {
+      "name": "orora",
+      "code": "BITMAP_ORORA"
+    },
+    {
+      "name": "ourInfluenceGround",
+      "code": "BITMAP_OUR_INFLUENCE_GROUND",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 50,
+            "scale": 0.6,
+            "alphaTarget": 0.75
+          }
+        ]
+      }
+    },
+    {
+      "name": "panda",
+      "code": "MODEL_PANDA"
+    },
+    {
+      "name": "phoenixShot",
+      "code": "MODEL_PHOENIX_SHOT"
+    },
+    {
+      "name": "pierPart",
+      "code": "MODEL_PIER_PART"
+    },
+    {
+      "name": "piercing",
+      "code": "MODEL_PIERCING"
+    },
+    {
+      "name": "piercing2",
+      "code": "MODEL_PIERCING2",
+      "create": {
+        "lifeTime": 10,
+        "scale": 2,
+        "blendMesh": -2,
+        "direction": [0, -60, 0],
+        "offset": {
+          "position": {"z": {"value": 130, "timesFrameFactor": true}}
+        },
+        "copy": {
+          "startPosition": "callPosition"
+        },
+        "variants": [
+          {
+            "subType": 1,
+            "lifeTime": 6
+          },
+          {
+            "subType": 2,
+            "scale": 3
+          }
+        ]
+      }
+    },
+    {
+      "name": "piercingFire",
+      "code": "MODEL_PIERCING+1"
+    },
+    {
+      "name": "pinLight",
+      "code": "BITMAP_PIN_LIGHT"
+    },
+    {
+      "name": "pkFieldAssassinEffectGreenBody",
+      "code": "MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY"
+    },
+    {
+      "name": "pkFieldAssassinEffectGreenHead",
+      "code": "MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD"
+    },
+    {
+      "name": "pkFieldAssassinEffectRedBody",
+      "code": "MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY"
+    },
+    {
+      "name": "pkFieldAssassinEffectRedHead",
+      "code": "MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD"
+    },
+    {
+      "name": "poison",
+      "code": "MODEL_POISON",
+      "create": {
+        "lifeTime": 40,
+        "scale": 1,
+        "blendMesh": 1
+      }
+    },
+    {
+      "name": "projectile",
+      "code": "MODEL_PROJECTILE",
+      "create": {
+        "lifeTime": 50,
+        "velocity": 70,
+        "gravity": 0,
+        "copy": {
+          "startPosition": "position"
+        }
+      }
+    },
+    {
+      "name": "protect",
+      "code": "MODEL_PROTECT",
+      "create": {
+        "lifeTime": 10000,
+        "velocity": 0.3,
+        "blendMesh": 0
+      }
+    },
+    {
+      "name": "protectGuild",
+      "code": "MODEL_PROTECTGUILD"
+    },
+    {
+      "name": "raklionBossCrackEffect",
+      "code": "MODEL_RAKLION_BOSS_CRACKEFFECT"
+    },
+    {
+      "name": "raklionBossMagic",
+      "code": "MODEL_RAKLION_BOSS_MAGIC",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 35,
+            "copy": {
+              "scale": "callScale"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ring",
+      "code": "BITMAP_SHINY+4",
+      "create": {
+        "lifeTime": 16,
+        "copy": {
+          "scale": "callScale"
+        }
+      }
+    },
+    {
+      "name": "ringOfGradation",
+      "code": "BITMAP_RING_OF_GRADATION",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 20
+          }
+        ]
+      }
+    },
+    {
+      "name": "saw",
+      "code": "MODEL_SAW"
+    },
+    {
+      "name": "sbumb",
+      "code": "BITMAP_SBUMB"
+    },
+    {
+      "name": "shadowKnightAnkleLeft",
+      "code": "MODEL_SHADOW_KNIGHT_ANKLE_LEFT"
+    },
+    {
+      "name": "shadowKnightAnkleRight",
+      "code": "MODEL_SHADOW_KNIGHT_ANKLE_RIGHT"
+    },
+    {
+      "name": "shadowKnightBelt",
+      "code": "MODEL_SHADOW_KNIGHT_BELT"
+    },
+    {
+      "name": "shadowKnightChest",
+      "code": "MODEL_SHADOW_KNIGHT_CHEST"
+    },
+    {
+      "name": "shadowKnightHelmet",
+      "code": "MODEL_SHADOW_KNIGHT_HELMET"
+    },
+    {
+      "name": "shadowKnightKneeLeft",
+      "code": "MODEL_SHADOW_KNIGHT_KNEE_LEFT"
+    },
+    {
+      "name": "shadowKnightKneeRight",
+      "code": "MODEL_SHADOW_KNIGHT_KNEE_RIGHT"
+    },
+    {
+      "name": "shadowKnightWristLeft",
+      "code": "MODEL_SHADOW_KNIGHT_WRIST_LEFT"
+    },
+    {
+      "name": "shadowKnightWristRight",
+      "code": "MODEL_SHADOW_KNIGHT_WRIST_RIGHT"
+    },
+    {
+      "name": "shadowPawnAnkleLeft",
+      "code": "MODEL_SHADOW_PAWN_ANKLE_LEFT"
+    },
+    {
+      "name": "shadowPawnAnkleRight",
+      "code": "MODEL_SHADOW_PAWN_ANKLE_RIGHT"
+    },
+    {
+      "name": "shadowPawnBelt",
+      "code": "MODEL_SHADOW_PAWN_BELT"
+    },
+    {
+      "name": "shadowPawnChest",
+      "code": "MODEL_SHADOW_PAWN_CHEST"
+    },
+    {
+      "name": "shadowPawnHelmet",
+      "code": "MODEL_SHADOW_PAWN_HELMET"
+    },
+    {
+      "name": "shadowPawnKneeLeft",
+      "code": "MODEL_SHADOW_PAWN_KNEE_LEFT"
+    },
+    {
+      "name": "shadowPawnKneeRight",
+      "code": "MODEL_SHADOW_PAWN_KNEE_RIGHT"
+    },
+    {
+      "name": "shadowPawnWristLeft",
+      "code": "MODEL_SHADOW_PAWN_WRIST_LEFT"
+    },
+    {
+      "name": "shadowPawnWristRight",
+      "code": "MODEL_SHADOW_PAWN_WRIST_RIGHT"
+    },
+    {
+      "name": "shadowRookAnkleLeft",
+      "code": "MODEL_SHADOW_ROOK_ANKLE_LEFT"
+    },
+    {
+      "name": "shadowRookAnkleRight",
+      "code": "MODEL_SHADOW_ROOK_ANKLE_RIGHT"
+    },
+    {
+      "name": "shadowRookBelt",
+      "code": "MODEL_SHADOW_ROOK_BELT"
+    },
+    {
+      "name": "shadowRookChest",
+      "code": "MODEL_SHADOW_ROOK_CHEST"
+    },
+    {
+      "name": "shadowRookHelmet",
+      "code": "MODEL_SHADOW_ROOK_HELMET"
+    },
+    {
+      "name": "shadowRookKneeLeft",
+      "code": "MODEL_SHADOW_ROOK_KNEE_LEFT"
+    },
+    {
+      "name": "shadowRookKneeRight",
+      "code": "MODEL_SHADOW_ROOK_KNEE_RIGHT"
+    },
+    {
+      "name": "shadowRookWristLeft",
+      "code": "MODEL_SHADOW_ROOK_WRIST_LEFT"
+    },
+    {
+      "name": "shadowRookWristRight",
+      "code": "MODEL_SHADOW_ROOK_WRIST_RIGHT"
+    },
+    {
+      "name": "shieldCrash",
+      "code": "MODEL_SHIELD_CRASH"
+    },
+    {
+      "name": "shieldCrash2",
+      "code": "MODEL_SHIELD_CRASH2",
+      "create": {
+        "lifeTime": 24,
+        "scale": 1.1,
+        "gravity": 0.3,
+        "light": [0.5, 0.5, 1],
+        "copy": {
+          "direction": "light"
+        }
+      }
+    },
+    {
+      "name": "shine",
+      "code": "MODEL_SHINE"
+    },
+    {
+      "name": "shiny5",
+      "code": "BITMAP_SHINY+6",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 24
+          },
+          {
+            "subTypes": [1, 2],
+            "lifeTime": 100
+          },
+          {
+            "subType": 3,
+            "lifeTime": 24,
+            "renderType": "alphaBlendMinus"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shockWave",
+      "code": "BITMAP_SHOCK_WAVE"
+    },
+    {
+      "name": "shockWave1",
+      "code": "MODEL_SHOCKWAVE01"
+    },
+    {
+      "name": "shockWave2",
+      "code": "MODEL_SHOCKWAVE02"
+    },
+    {
+      "name": "shockWaveGround1",
+      "code": "MODEL_SHOCKWAVE_GROUND01",
+      "create": {
+        "lifeTime": 50,
+        "copy": {
+          "scale": "callScale"
+        },
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 20
+          },
+          {
+            "subType": 2,
+            "lifeTime": 10
+          }
+        ]
+      }
+    },
+    {
+      "name": "shockWaveSpin1",
+      "code": "MODEL_SHOCKWAVE_SPIN01"
+    },
+    {
+      "name": "shotgun",
+      "code": "BITMAP_SHOTGUN"
+    },
+    {
+      "name": "skillBlast",
+      "code": "MODEL_SKILL_BLAST"
+    },
+    {
+      "name": "skillFissure",
+      "code": "MODEL_SKILL_FISSURE",
+      "create": {
+        "lifeTime": 20
+      }
+    },
+    {
+      "name": "skillFuryStrike",
+      "code": "MODEL_SKILL_FURY_STRIKE"
+    },
+    {
+      "name": "skillInferno",
+      "code": "MODEL_SKILL_INFERNO"
+    },
+    {
+      "name": "skillJavelin",
+      "code": "MODEL_SKILL_JAVELIN"
+    },
+    {
+      "name": "skillWheel1",
+      "code": "MODEL_SKILL_WHEEL1"
+    },
+    {
+      "name": "skillWheel2",
+      "code": "MODEL_SKILL_WHEEL2"
+    },
+    {
+      "name": "skinShell",
+      "code": "MODEL_SKIN_SHELL"
+    },
+    {
+      "name": "skull",
+      "code": "BITMAP_SKULL",
+      "create": {
+        "lifeTime": 1000,
+        "variants": [
+          {
+            "subType": 1,
+            "offset": {
+              "lifeTime": {"value": -60, "timesFrameFactor": true}
+            }
+          },
+          {
+            "subType": 2,
+            "lifeTime": 8,
+            "offset": {
+              "position": {"z": {"value": 150, "timesFrameFactor": true}}
+            }
+          },
+          {
+            "subType": 4,
+            "lifeTime": 20,
+            "velocity": 2,
+            "direction": [0, -10, 0]
+          }
+        ]
+      }
+    },
+    {
+      "name": "skullModel",
+      "code": "MODEL_SKULL"
+    },
+    {
+      "name": "snow1",
+      "code": "MODEL_SNOW1"
+    },
+    {
+      "name": "snow2",
+      "code": "MODEL_SNOW2"
+    },
+    {
+      "name": "snow3",
+      "code": "MODEL_SNOW3"
+    },
+    {
+      "name": "spark3",
+      "code": "BITMAP_SPARK+1",
+      "create": {
+        "lifeTime": 10
+      }
+    },
+    {
+      "name": "sparks",
+      "code": "BITMAP_SPARK+2",
+      "create": {
+        "lifeTime": 100
+      }
+    },
+    {
+      "name": "spear",
+      "code": "MODEL__SPEAR",
+      "create": {
+        "lifeTime": 5,
+        "angle": [0, 0, 0]
+      }
+    },
+    {
+      "name": "spearSkill",
+      "code": "MODEL_SPEARSKILL"
+    },
+    {
+      "name": "staffOfDestruction",
+      "code": "MODEL_STAFF_OF_DESTRUCTION",
+      "create": {
+        "lifeTime": 30,
+        "scale": 1,
+        "blendMesh": -2,
+        "direction": [0, -80, -10],
+        "offset": {
+          "position": {"z": {"value": 280, "timesFrameFactor": true}},
+          "angle": {"x": {"value": 20, "timesFrameFactor": true}}
+        }
+      }
+    },
+    {
+      "name": "starShine",
+      "code": "MODEL_STAR_SHINE"
+    },
+    {
+      "name": "statueCrushEffect",
+      "code": "MODEL_STATUE_CRUSH_EFFECT"
+    },
+    {
+      "name": "statueCrushEffectPiece1",
+      "code": "MODEL_STATUE_CRUSH_EFFECT_PIECE01"
+    },
+    {
+      "name": "statueCrushEffectPiece2",
+      "code": "MODEL_STATUE_CRUSH_EFFECT_PIECE02"
+    },
+    {
+      "name": "statueCrushEffectPiece3",
+      "code": "MODEL_STATUE_CRUSH_EFFECT_PIECE03"
+    },
+    {
+      "name": "statueCrushEffectPiece4",
+      "code": "MODEL_STATUE_CRUSH_EFFECT_PIECE04",
+      "create": {
+        "lifeTime": 100,
+        "pkKey": -1,
+        "copy": {
+          "scale": "callScale"
+        }
+      }
+    },
+    {
+      "name": "stone1",
+      "code": "MODEL_STONE1"
+    },
+    {
+      "name": "stone2",
+      "code": "MODEL_STONE2"
+    },
+    {
+      "name": "stoneCoffin",
+      "code": "MODEL_STONE_COFFIN"
+    },
+    {
+      "name": "stoneCoffin2",
+      "code": "MODEL_STONE_COFFIN+1"
+    },
+    {
+      "name": "storm",
+      "code": "MODEL_STORM"
+    },
+    {
+      "name": "storm2",
+      "code": "MODEL_STORM2"
+    },
+    {
+      "name": "storm3",
+      "code": "MODEL_STORM3"
+    },
+    {
+      "name": "streamBreathFire1",
+      "code": "MODEL_1_STREAMBREATHFIRE",
+      "create": {
+        "lifeTime": 30
+      }
+    },
+    {
+      "name": "streamOfIceBreath",
+      "code": "MODEL_STREAMOFICEBREATH"
+    },
+    {
+      "name": "stunStone",
+      "code": "MODEL_STUN_STONE"
+    },
+    {
+      "name": "summon",
+      "code": "MODEL_SUMMON"
+    },
+    {
+      "name": "summonerCastingEffect1",
+      "code": "MODEL_SUMMONER_CASTING_EFFECT1",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "blendMeshLight": 0,
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "summonerCastingEffect11",
+      "code": "MODEL_SUMMONER_CASTING_EFFECT11",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "blendMeshLight": 0,
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "summonerCastingEffect111",
+      "code": "MODEL_SUMMONER_CASTING_EFFECT111",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "blendMeshLight": 0,
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "summonerCastingEffect2",
+      "code": "MODEL_SUMMONER_CASTING_EFFECT2",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "blendMeshLight": 0,
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "summonerCastingEffect22",
+      "code": "MODEL_SUMMONER_CASTING_EFFECT22",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "blendMeshLight": 0,
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "summonerCastingEffect222",
+      "code": "MODEL_SUMMONER_CASTING_EFFECT222",
+      "create": {
+        "lifeTime": 40,
+        "blendMesh": 0,
+        "blendMeshLight": 0,
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "summonerCastingEffect4",
+      "code": "MODEL_SUMMONER_CASTING_EFFECT4",
+      "create": {
+        "lifeTime": 25,
+        "scale": 1,
+        "blendMesh": 0,
+        "blendMeshLight": 0
+      }
+    },
+    {
+      "name": "summonerEquipHeadLagul",
+      "code": "MODEL_SUMMONER_EQUIP_HEAD_LAGUL"
+    },
+    {
+      "name": "summonerEquipHeadNeil",
+      "code": "MODEL_SUMMONER_EQUIP_HEAD_NEIL"
+    },
+    {
+      "name": "summonerEquipHeadSahamutt",
+      "code": "MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT"
+    },
+    {
+      "name": "summonerSummonLagul",
+      "code": "MODEL_SUMMONER_SUMMON_LAGUL"
+    },
+    {
+      "name": "summonerSummonNeil",
+      "code": "MODEL_SUMMONER_SUMMON_NEIL",
+      "create": {
+        "lifeTime": 80,
+        "scale": 1,
+        "velocity": 0.35,
+        "alpha": 0,
+        "light": [1, 1, 1],
+        "skill": 0,
+        "offset": {
+          "position": {"z": {"value": 10, "timesFrameFactor": true}}
+        },
+        "copy": {
+          "headTargetAngle": "callLight"
+        }
+      }
+    },
+    {
+      "name": "summonerSummonNeilGround1",
+      "code": "MODEL_SUMMONER_SUMMON_NEIL_GROUND1",
+      "create": {
+        "lifeTime": 50,
+        "scale": 1,
+        "alpha": 0
+      }
+    },
+    {
+      "name": "summonerSummonNeilGround2",
+      "code": "MODEL_SUMMONER_SUMMON_NEIL_GROUND2",
+      "create": {
+        "lifeTime": 50,
+        "scale": 1,
+        "alpha": 0
+      }
+    },
+    {
+      "name": "summonerSummonNeilGround3",
+      "code": "MODEL_SUMMONER_SUMMON_NEIL_GROUND3",
+      "create": {
+        "lifeTime": 50,
+        "scale": 1,
+        "alpha": 0
+      }
+    },
+    {
+      "name": "summonerSummonNeilKnife1",
+      "code": "MODEL_SUMMONER_SUMMON_NEIL_NIFE1",
+      "create": {
+        "lifeTime": 50,
+        "scale": 1,
+        "alpha": 1
+      }
+    },
+    {
+      "name": "summonerSummonNeilKnife2",
+      "code": "MODEL_SUMMONER_SUMMON_NEIL_NIFE2",
+      "create": {
+        "lifeTime": 50,
+        "scale": 1,
+        "alpha": 1
+      }
+    },
+    {
+      "name": "summonerSummonNeilKnife3",
+      "code": "MODEL_SUMMONER_SUMMON_NEIL_NIFE3",
+      "create": {
+        "lifeTime": 50,
+        "scale": 1,
+        "alpha": 1
+      }
+    },
+    {
+      "name": "summonerSummonSahamutt",
+      "code": "MODEL_SUMMONER_SUMMON_SAHAMUTT",
+      "create": {
+        "lifeTime": 80,
+        "velocity": 0.5,
+        "alpha": 0,
+        "light": [1, 1, 1],
+        "copy": {
+          "headTargetAngle": "callLight"
+        },
+        "variants": [
+          {
+            "subType": 0,
+            "scale": 0.35
+          },
+          {
+            "subType": 1,
+            "scale": 0.5
+          },
+          {
+            "subType": 2,
+            "scale": 0.7
+          }
+        ]
+      }
+    },
+    {
+      "name": "summonerWristRingEffect",
+      "code": "MODEL_SUMMONER_WRISTRING_EFFECT",
+      "create": {
+        "lifeTime": 100,
+        "scale": 0.7,
+        "blendMesh": -2
+      }
+    },
+    {
+      "name": "swellOfMagicPower",
+      "code": "MODEL_SWELL_OF_MAGICPOWER",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 45
+          }
+        ]
+      }
+    },
+    {
+      "name": "swellOfMagicPowerBuffEffect",
+      "code": "MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF"
+    },
+    {
+      "name": "swordEffect",
+      "code": "BITMAP_SWORDEFF",
+      "create": {
+        "lifeTime": 200
+      }
+    },
+    {
+      "name": "swordEffectMono",
+      "code": "BITMAP_SWORD_EFFECT_MONO",
+      "create": {
+        "lifeTime": 15,
+        "copy": {
+          "scale": "callScale"
+        }
+      }
+    },
+    {
+      "name": "swordForce",
+      "code": "BITMAP_SWORD_FORCE"
+    },
+    {
+      "name": "swordForceModel",
+      "code": "MODEL_SWORD_FORCE",
+      "create": {
+        "velocity": 0.25,
+        "blendMesh": 0,
+        "variants": [
+          {
+            "subTypes": [0, 2],
+            "lifeTime": 15,
+            "scale": 0,
+            "direction": [0, -10, 0],
+            "offset": {
+              "position": {"z": {"value": 100, "timesFrameFactor": true}}
+            }
+          },
+          {
+            "subTypes": [1, 3],
+            "lifeTime": 5,
+            "scale": 3.5
+          }
+        ]
+      }
+    },
+    {
+      "name": "swordLeft01EmpireGuardianBossGaion",
+      "code": "MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_"
+    },
+    {
+      "name": "swordLeft02EmpireGuardianBossGaion",
+      "code": "MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_"
+    },
+    {
+      "name": "swordMain01EmpireGuardianBossGaion",
+      "code": "MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_"
+    },
+    {
+      "name": "swordRight01EmpireGuardianBossGaion",
+      "code": "MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_"
+    },
+    {
+      "name": "swordRight02EmpireGuardianBossGaion",
+      "code": "MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_"
+    },
+    {
+      "name": "tail",
+      "code": "MODEL_TAIL",
+      "create": {
+        "lifeTime": 6,
+        "scale": 1,
+        "gravity": 80,
+        "blendMesh": -2,
+        "light": [0.5, 0.5, 0.5],
+        "angle": [0, 0, 45]
+      }
+    },
+    {
+      "name": "targetMonsterEffect",
+      "code": "MODEL_TARGETMON_EFFECT",
+      "create": {
+        "lifeTime": 100,
+        "copy": {
+          "scale": "callScale"
+        }
+      }
+    },
+    {
+      "name": "targetPositionEffect1",
+      "code": "BITMAP_TARGET_POSITION_EFFECT1",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 20,
+            "scale": 1.2
+          }
+        ]
+      }
+    },
+    {
+      "name": "targetPositionEffect2",
+      "code": "BITMAP_TARGET_POSITION_EFFECT2",
+      "create": {
+        "variants": [
+          {
+            "subType": 0,
+            "lifeTime": 30,
+            "scale": 1.8
+          }
+        ]
+      }
+    },
+    {
+      "name": "totemGolemPart1",
+      "code": "MODEL_TOTEMGOLEM_PART1"
+    },
+    {
+      "name": "totemGolemPart2",
+      "code": "MODEL_TOTEMGOLEM_PART2"
+    },
+    {
+      "name": "totemGolemPart3",
+      "code": "MODEL_TOTEMGOLEM_PART3"
+    },
+    {
+      "name": "totemGolemPart4",
+      "code": "MODEL_TOTEMGOLEM_PART4"
+    },
+    {
+      "name": "totemGolemPart5",
+      "code": "MODEL_TOTEMGOLEM_PART5"
+    },
+    {
+      "name": "totemGolemPart6",
+      "code": "MODEL_TOTEMGOLEM_PART6"
+    },
+    {
+      "name": "towerGatePlane",
+      "code": "MODEL_TOWER_GATE_PLANE",
+      "create": {
+        "lifeTime": 100,
+        "blendMeshLight": 0.3,
+        "copy": {
+          "startPosition": "position"
+        }
+      }
+    },
+    {
+      "name": "treeAttack",
+      "code": "MODEL_TREE_ATTACK",
+      "create": {
+        "lifeTime": 20,
+        "scale": 0.05,
+        "lightEnable": false,
+        "offset": {
+          "position": {"z": {"value": 20, "timesFrameFactor": true}}
+        }
+      }
+    },
+    {
+      "name": "twinTailEffect",
+      "code": "MODEL_TWINTAIL_EFFECT"
+    },
+    {
+      "name": "twlight",
+      "code": "BITMAP_TWLIGHT",
+      "create": {
+        "variants": [
+          {
+            "subTypes": [0, 1, 2],
+            "lifeTime": 80,
+            "scale": 8
+          },
+          {
+            "subType": 3,
+            "lifeTime": 30,
+            "alpha": 0,
+            "pkKey": 0,
+            "copy": {
+              "eyeRight": "light"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "volcanoOfMonk",
+      "code": "MODEL_VOLCANO_OF_MONK"
+    },
+    {
+      "name": "volcanoStone",
+      "code": "MODEL_VOLCANO_STONE"
+    },
+    {
+      "name": "wallPart1",
+      "code": "MODEL_WALL_PART1"
+    },
+    {
+      "name": "wallPart2",
+      "code": "MODEL_WALL_PART2"
+    },
+    {
+      "name": "warcraft",
+      "code": "MODEL_WARCRAFT"
+    },
+    {
+      "name": "warp",
+      "code": "MODEL_WARP"
+    },
+    {
+      "name": "warp2",
+      "code": "MODEL_WARP2"
+    },
+    {
+      "name": "warp3",
+      "code": "MODEL_WARP3",
+      "create": {
+        "lifeTime": 16777215,
+        "scale": 0.6,
+        "blendMesh": -2
+      }
+    },
+    {
+      "name": "warp4",
+      "code": "MODEL_WARP4"
+    },
+    {
+      "name": "warp5",
+      "code": "MODEL_WARP5"
+    },
+    {
+      "name": "warp6",
+      "code": "MODEL_WARP6",
+      "create": {
+        "lifeTime": 16777215,
+        "scale": 0.6,
+        "blendMesh": -2
+      }
+    },
+    {
+      "name": "waterWave",
+      "code": "MODEL_WATER_WAVE",
+      "create": {
+        "lifeTime": 20,
+        "scale": 0.4,
+        "velocity": -40,
+        "gravity": 120,
+        "blendMesh": -2,
+        "blendMeshLight": 0.2,
+        "light": [1, 1, 1],
+        "direction": [0, -40, 0],
+        "copy": {
+          "startPosition": "position"
+        }
+      }
+    },
+    {
+      "name": "waterfall4",
+      "code": "BITMAP_WATERFALL_4"
+    },
+    {
+      "name": "wave",
+      "code": "MODEL_WAVE",
+      "create": {
+        "lifeTime": 15,
+        "scale": 0.5,
+        "blendMesh": 0,
+        "blendMeshLight": 1.5,
+        "light": [1, 1, 1],
+        "offset": {
+          "position": {"z": {"value": -15, "timesFrameFactor": true}}
+        }
+      }
+    },
+    {
+      "name": "waveForce",
+      "code": "MODEL_WAVE_FORCE"
+    },
+    {
+      "name": "waves",
+      "code": "MODEL_WAVES"
+    },
+    {
+      "name": "windForce",
+      "code": "MODEL_WINDFOCE",
+      "create": {
+        "lifeTime": 50,
+        "copy": {
+          "scale": "callScale"
+        },
+        "variants": [
+          {
+            "subType": 1,
+            "lifeTime": 999
+          },
+          {
+            "subTypes": [2, 3],
+            "lifeTime": 70
+          }
+        ]
+      }
+    },
+    {
+      "name": "windForceMirror",
+      "code": "MODEL_WINDFOCE_MIRROR",
+      "create": {
+        "lifeTime": 50,
+        "copy": {
+          "scale": "callScale"
+        }
+      }
+    },
+    {
+      "name": "wolfHeadEffect",
+      "code": "MODEL_WOLF_HEAD_EFFECT"
+    },
+    {
+      "name": "wolfHeadEffect2",
+      "code": "MODEL_WOLF_HEAD_EFFECT2"
+    },
+    {
+      "name": "woosistone",
+      "code": "MODEL_WOOSISTONE"
+    },
+    {
+      "name": "xmas2008SnowmanBody",
+      "code": "MODEL_XMAS2008_SNOWMAN_BODY"
+    },
+    {
+      "name": "xmas2008SnowmanHead",
+      "code": "MODEL_XMAS2008_SNOWMAN_HEAD"
+    },
+    {
+      "name": "xmasEventBox",
+      "code": "MODEL_XMAS_EVENT_BOX"
+    },
+    {
+      "name": "xmasEventCandy",
+      "code": "MODEL_XMAS_EVENT_CANDY"
+    },
+    {
+      "name": "xmasEventIceHeart",
+      "code": "MODEL_XMAS_EVENT_ICEHEART"
+    },
+    {
+      "name": "xmasEventSocks",
+      "code": "MODEL_XMAS_EVENT_SOCKS"
+    },
+    {
+      "name": "xmasEventTree",
+      "code": "MODEL_XMAS_EVENT_TREE"
+    }
+  ]
+}

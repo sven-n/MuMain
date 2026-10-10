@@ -4,6 +4,8 @@
 #include "CameraConfig.h"
 #include "Frustum.h"
 
+#include <cstddef>
+
 /**
  * @brief Base interface for all camera implementations
  *
@@ -54,6 +56,16 @@ public:
      * @brief Gets human-readable camera name
      */
     virtual const char* GetName() const = 0;
+
+    /**
+     * @brief Writes one line of this camera's own state for the $details overlay
+     *
+     * @return false when the camera has nothing to add beyond the shared values
+     */
+    virtual bool DescribeState(wchar_t* /*text*/, std::size_t /*textSize*/) const
+    {
+        return false;
+    }
 
     // ========== Phase 1: Configuration & Frustum Management ==========
 

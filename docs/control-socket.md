@@ -58,24 +58,26 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 `interrupted`, `timeout`, `not_connected`, `login_failed`, `no_such_character`,
 `no_such_skill`, `not_in_view`, `not_attackable`, `no_path`, `not_allowed`,
 `warp_refused`, `skill_refused`, `insufficient_mana`, `not_pickable`,
-`empty_slot`, `move_refused`, `failed`.
+`empty_slot`, `move_refused`, `not_open`, `failed`.
 
 ## Commands
 
 | Command | What it does |
 |---|---|
-| `ping` | build identifier and current scene |
+| `ping` | build identifier, the git `commit` the client was built from (`commit_changed` when tracked files differed from it), and the current scene |
 | `scene` | which screen the client is on: `login`, `character_list`, `world`, … |
 | `state` | the character and everything around it (see below) |
 | `nearby` | the objects the client can see |
 | `events` (`since`, `follow`) | recorded events, or a live stream of them |
 | `wait-for` (`event`, `match`, `timeout`) | block until a matching event arrives |
-| `screenshot` (`out`) | capture the next frame to a path; without `out` it names itself, uniquely per capture |
+| `screenshot` (`out`, `quality`) | capture the next frame as a JPEG to a path; without `out` it names itself, uniquely per capture; `quality` 1 to 100, default 100 |
 | `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
 | `hover-ui` (`x`, `y`) | move the pointer to a window pixel with no button, as physical motion: RmlUi hover and the game's own pointer (native hover, tooltips) both follow it |
 | `drag-ui` (`x`, `y`, `to_x`, `to_y`, `button`) | press at one window pixel, move to the other over eight frames with the button held, release there |
 | `type` (`text`, `enter`) | deliver committed UTF-8 to the focused field; optional boolean `enter` submits on a later frame |
+| `ui` | the open windows by name — `inventory`, `inventory_extension`, `character`, `trade`, `storage`, `storage_extension`, `mix`, `npc_shop`, `lucky_item`, `chat_input`, `party`, `command`, `my_shop`, `purchase_shop`, `npc_quest` (the quest dialog of Sebina, Marlon and Devin), and `message_box` while a dialog waits for Enter or Esc — and the window pixels of the named elements that are shown: `trade.confirm`, `trade.zen`, `inventory.repair`, `inventory.my_shop`, `npc_shop.repair`, `npc_shop.repair_all`, `my_shop.title`, `my_shop.open`, `my_shop.close`, `command.trade`, `command.purchase`, `command.party`, `npc_quest.answer.0` and on (the rows of the quest dialog's answers), `npc_quest.complete`, `npc_quest.close`, `character.stat.strength` (`agility`, `vitality`, `energy`, `command`: the character window's "+" buttons, while there are level-up points) |
+| `slot-pixel` (`grid`, `slot`) | the window pixel of a slot's square: `inventory` and `equipment` (the slot numbers `state` reports), `trade`, `trade_partner`, `storage`, `mix`, `npc_shop`, and the personal shops `my_shop` and `purchase_shop` (slots 204 and up, as `state` and the server number them); `not_open` while that window is closed, `bad_request` for a slot the grid does not have |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |
 | `select-char` (`name` or `slot`) | enter the world with that character |
 | `logout`, `quit` | back to the character list; close the client |
@@ -88,25 +90,57 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `use` (`slot`), `equip` (`slot`, `target_slot`) | inventory actions |
 | `say` (`text`), `whisper` (`name`, `text`) | chat, including `/` commands |
 | `party` (`action`, `target`) | `invite`, `accept`, `decline`, `leave` |
+| `trade` (`action`, `target`) | `request` a trade with another player at most one tile away (`not_allowed` otherwise), or `cancel` the open one; the partner accepts with the Enter key, and items go in with `click-ui` |
 | `halt` | stop the walk or repeated attack in progress |
 
 `state` reports the scene and account on every screen, and in the world adds:
 character name, class, level, experience, zen, HP/mana/SD/AG with their
 maxima, map number and name, position, alive flag, safe-zone flag, current
-target, the skills the character owns, equipment, inventory, buffs, party and
-`nearby`.
+target, the skills the character owns, equipment, inventory, buffs, party,
+the open trade (partner, both offers with their items and zen, both confirm buttons and `my_confirm_wait`, the frames until my button takes clicks again, or `null`) and
+`nearby`. An item carries `slot`, `name`, `level`, `durability`,
+`max_durability`, and its `width` and `height` in inventory squares; one that
+covers several squares is listed once for each of them. While a click would
+repair it (the inventory's repair mode, or an NPC that repairs), a worn item
+also carries `repair_price`, and while an NPC shop is open an inventory item
+carries `sell_price`: both as the item's tooltip shows them.
+
+The shops: `npc_shop` is the open NPC shop (`repair_shop`, `tax_rate`,
+`repair_all_price` at an NPC that repairs, and its goods with `price`, tax
+included) or `null`; `my_shop` is the player's own personal shop (`open`, the
+`title` in its title field, its goods with `price`), `purchase_shop` the
+personal shop the player looks into (`seller`, `title`, goods with `price`) or
+`null`. `repair_mode` says whether a click repairs instead of picking up.
+
+For the quests and their rewards: `class_name` (e.g. `Blade Knight`; `class`
+is the client's number, e.g. 1 Dark Knight, 8 Blade Knight, 12 Blade Master),
+`level_up_points`, `stats` (`strength`, `agility`, `vitality`, `energy`,
+`command`, without bonuses), `combo` (the Blade Knight's combo from Marlon),
+`quests` (the seven legacy quests with `index`, `name` and `state`:
+`active`, `complete`, `not_started`, `none`, or `unknown` for a value outside
+these, as in the `quest` events), and `npc_quest`, the quest
+dialog on screen (`quest`, `page`, `text`, `need_zen`, and its `answers`, each
+with its `text` and `action`: `next` turns the page, `accept` takes the quest,
+`complete` hands it in, `close` ends the talk) or `null`.
 
 Each `nearby` object carries `id`, `kind`, `name`, `position`, and a player,
 monster or NPC also `alive`, `level` and `hp_percent`. `hp_percent` is a
 percentage of full health (`100` is untouched) and is `null` when the server
 has not told the client that object's health — a threshold test has to allow
-for the null rather than read it as zero.
+for the null rather than read it as zero. A player, monster or NPC also
+carries `pixel`, the window pixel `{x, y}` at the middle of the box the mouse
+picks it by, or `null` while it is not drawn: `click-ui` there talks to an NPC
+or targets a player the way a player's click does. The pixel is taken from the
+last rendered frame, so it lags a moving object by a frame, and a window drawn
+over it catches the click instead.
 
 ### Synthetic input
 
 `hotkey` and `click-ui` deliver input to RmlUi first, then to the older
 key/button readers only if the UI did not consume it. They do not move the OS
-pointer or change window focus. Use screenshot pixels as `click-ui` coordinates: for
+pointer or change window focus. A click rests on its pixel for two frames
+before the press, as a real mouse does: an item grid only picks up an item it
+saw hovered. Use screenshot pixels as `click-ui` coordinates: for
 example, click the Menu button, then take another screenshot to inspect the
 panel. The older `CInput` widgets still hit-test the OS cursor and cannot be
 clicked remotely; use their keyboard navigation instead. Keys are
@@ -155,7 +189,9 @@ strictly increasing `seq`, a UTC `time` and its own fields:
 | `map` | `map`, `map_name`, `position` |
 | `scene` | `scene` |
 | `view_enter` / `view_leave` | `object` |
-| `party` | `change`, `name` |
+| `quest` | `change`: `state` with the legacy `quest` and its new `state` (`active`, `complete`, `not_started`, `none`, `unknown`), or `reward` with the character's `name`, the `reward` (`level_up_points`, `second_class`, `points_per_level`, `combo`, `third_class`), its `amount` (none for the two class changes, whose new class is `class`) and the character's `class` afterwards; the client records the rewards of every player in view, so a script matches its own `name` |
+| `party` | `change` (`invited` with the inviter's `name`; `list` with the leader's `name` after every change of the members; `left`; `result` with `result` — `failed`, `denied`, `full`, `user_left`, `other_party`, `left`, `opposing_gens`, `battle_zone`, `battle_zone_off` — when an invitation formed no party) |
+| `trade` | `change` (`requested`, `opened`, `refused`, `unavailable`, `partner_confirm`, `closed`), `name` for a request or an opened trade, `state` (`checked`, `unchecked`, `reset`; `unknown` for a value outside the protocol) for the partner's button, `result` (`completed`, `cancelled`, `inventory_full`, `request_cancelled`, `reinforced_item`) when it closes; `refused` also on the asked side, when a window that forbids trading is open and the client says no by itself |
 | `disconnect` | `reason` |
 | `error` | `command`, `error`, `message` |
 
@@ -187,15 +223,17 @@ The event recorders are one-line calls named `App::Control::Events::Record…`,
 sitting at the end of the packet receive functions in
 `src/source/Network/Server/WSclient.cpp` (hits, deaths, experience, stats,
 chat, whisper, drops appearing and vanishing, view enter/leave, party changes,
-logout) plus the scene and map watcher in `App/Control/ControlServer.cpp`.
+invitations and answers, quest states and rewards,
+trade steps, logout) plus the scene and map watcher in `App/Control/ControlServer.cpp`.
 When one of those functions is rewritten:
 
 1. `rg -c 'App::Control::Events::' src/source/Network/Server/WSclient.cpp` —
-   the count is 23; a lower one means a tap was dropped. Compare it against
+   the count is 32; a lower one means a tap was dropped. Compare it against
    `git show upstream/main:…` when the number itself is in doubt: the count
    is a smoke test, the list above is the contract.
 2. Re-run the live checks that cover the dropped tap (a fight records `hit`,
-   `killed` and `stat`; a pickup records `drop` and `drop_gone`).
+   `killed` and `stat`; a pickup records `drop` and `drop_gone`; the `trade`
+   in-game test records the trade steps, see [in-game-tests.md](in-game-tests.md)).
 
 ## Notes from the field
 

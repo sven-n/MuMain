@@ -41,7 +41,7 @@ namespace
 {
 bool IsGuildMark(const ITEM* item)
 {
-    return item->Type == ITEM_POTION + 21 && item->Level == 3;
+    return item->Type == ITEM_RENA && item->Level == 3;
 }
 
 // Guild marks in the hero's main inventory.

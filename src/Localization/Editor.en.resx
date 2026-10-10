@@ -439,4 +439,466 @@
   <data name="Debug info copied to clipboard" xml:space="preserve">
     <value>Debug info copied to clipboard</value>
   </data>
+  <data name="Import from bmd" xml:space="preserve">
+    <value>Import from bmd</value>
+  </data>
+  <data name="Export as bmd" xml:space="preserve">
+    <value>Export as bmd</value>
+  </data>
+  <data name="Items imported from bmd" xml:space="preserve">
+    <value>Items imported from the bmd files. Check the console, then save.</value>
+  </data>
+  <data name="Failed to import items from bmd" xml:space="preserve">
+    <value>Failed to import the items from the bmd files. See the console.</value>
+  </data>
+  <data name="Items exported as bmd" xml:space="preserve">
+    <value>Items exported as bmd files.</value>
+  </data>
+  <data name="Failed to export items as bmd" xml:space="preserve">
+    <value>Failed to export the items as bmd files.</value>
+  </data>
+  <data name="Item data has errors" xml:space="preserve">
+    <value>The item data has errors and was not saved. See the console.</value>
+  </data>
+  <data name="Item data could not be written" xml:space="preserve">
+    <value>The item data files could not be written. See the console.</value>
+  </data>
+  <data name="Looks" xml:space="preserve">
+    <value>Looks</value>
+  </data>
+  <data name="Model file" xml:space="preserve">
+    <value>Model file</value>
+  </data>
+  <data name="Shared model" xml:space="preserve">
+    <value>Shared model</value>
+  </data>
+  <data name="Glow" xml:space="preserve">
+    <value>Glow</value>
+  </data>
+  <data name="Render style" xml:space="preserve">
+    <value>Render style</value>
+  </data>
+  <data name="Item effect" xml:space="preserve">
+    <value>Item effect</value>
+  </data>
+  <data name="Used by" xml:space="preserve">
+    <value>used by</value>
+  </data>
+  <data name="Select an item" xml:space="preserve">
+    <value>Select an item in the table to see its looks.</value>
+  </data>
+  <data name="No model" xml:space="preserve">
+    <value>The selected item has no model.</value>
+  </data>
+  <data name="Effect Browser" xml:space="preserve">
+    <value>Effect Browser</value>
+  </data>
+  <data name="Effect types not loaded" xml:space="preserve">
+    <value>The effect types are not loaded yet; the loading screen loads them.</value>
+  </data>
+  <data name="Current map" xml:space="preserve">
+    <value>Map</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Refresh assets" xml:space="preserve">
+    <value>Reads again what the slot of each type holds.</value>
+  </data>
+  <data name="Slots keep models" xml:space="preserve">
+    <value>A slot can still hold the model of a map visited before.</value>
+  </data>
+  <data name="Particles" xml:space="preserve">
+    <value>Particles</value>
+  </data>
+  <data name="Lightning and trails" xml:space="preserve">
+    <value>Lightning and trails</value>
+  </data>
+  <data name="Sprites" xml:space="preserve">
+    <value>Sprites</value>
+  </data>
+  <data name="Creation" xml:space="preserve">
+    <value>Creation</value>
+  </data>
+  <data name="Move" xml:space="preserve">
+    <value>Move</value>
+  </data>
+  <data name="Drawing" xml:space="preserve">
+    <value>Drawing</value>
+  </data>
+  <data name="Any" xml:space="preserve">
+    <value>Any</value>
+  </data>
+  <data name="Loaded now" xml:space="preserve">
+    <value>Loaded now</value>
+  </data>
+  <data name="Listed" xml:space="preserve">
+    <value>Listed</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>Number</value>
+  </data>
+  <data name="Stage data" xml:space="preserve">
+    <value>data</value>
+  </data>
+  <data name="Stage hook" xml:space="preserve">
+    <value>hook</value>
+  </data>
+  <data name="Stage data then hook" xml:space="preserve">
+    <value>data, then hook</value>
+  </data>
+  <data name="Stage switch" xml:space="preserve">
+    <value>switch</value>
+  </data>
+  <data name="Stage setup only" xml:space="preserve">
+    <value>common setup only</value>
+  </data>
+  <data name="Stage handler" xml:space="preserve">
+    <value>handler</value>
+  </data>
+  <data name="Stage shared code only" xml:space="preserve">
+    <value>shared code only</value>
+  </data>
+  <data name="Stage drawn as model" xml:space="preserve">
+    <value>drawn as model</value>
+  </data>
+  <data name="Stage on the ground" xml:space="preserve">
+    <value>on the ground</value>
+  </data>
+  <data name="Also on the ground" xml:space="preserve">
+    <value>+ on the ground</value>
+  </data>
+  <data name="Also after the characters" xml:space="preserve">
+    <value>+ after the characters</value>
+  </data>
+  <data name="Stage not drawn" xml:space="preserve">
+    <value>not drawn</value>
+  </data>
+  <data name="Variants" xml:space="preserve">
+    <value>variants</value>
+  </data>
+  <data name="Select an effect type" xml:space="preserve">
+    <value>Select a type in the list to see its details.</value>
+  </data>
+  <data name="Kind" xml:space="preserve">
+    <value>Kind</value>
+  </data>
+  <data name="Defined in" xml:space="preserve">
+    <value>Defined in</value>
+  </data>
+  <data name="Same number" xml:space="preserve">
+    <value>Same number</value>
+  </data>
+  <data name="No other kind" xml:space="preserve">
+    <value>No other kind has a type with this number.</value>
+  </data>
+  <data name="Asset" xml:space="preserve">
+    <value>Asset</value>
+  </data>
+  <data name="Slot model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="Slot texture" xml:space="preserve">
+    <value>Texture</value>
+  </data>
+  <data name="Slot default texture" xml:space="preserve">
+    <value>The code of a SubType can choose another texture.</value>
+  </data>
+  <data name="Slot texture chosen in code" xml:space="preserve">
+    <value>Its code chooses a texture</value>
+  </data>
+  <data name="Nothing loaded" xml:space="preserve">
+    <value>Nothing loaded on this map</value>
+  </data>
+  <data name="World object slot" xml:space="preserve">
+    <value>This slot holds an object of the current map.</value>
+  </data>
+  <data name="Stages" xml:space="preserve">
+    <value>Stages</value>
+  </data>
+  <data name="Same move handler" xml:space="preserve">
+    <value>Same move handler</value>
+  </data>
+  <data name="Same creation hook" xml:space="preserve">
+    <value>Same creation hook</value>
+  </data>
+  <data name="Creation values" xml:space="preserve">
+    <value>Creation values</value>
+  </data>
+  <data name="No creation values" xml:space="preserve">
+    <value>No creation values in the data.</value>
+  </data>
+  <data name="Field" xml:space="preserve">
+    <value>Field</value>
+  </data>
+  <data name="All SubTypes" xml:space="preserve">
+    <value>All SubTypes</value>
+  </data>
+  <data name="Other SubTypes" xml:space="preserve">
+    <value>Other SubTypes</value>
+  </data>
+  <data name="SubType" xml:space="preserve">
+    <value>SubType</value>
+  </data>
+  <data name="Used by data" xml:space="preserve">
+    <value>Used by data</value>
+  </data>
+  <data name="Named by its creation values" xml:space="preserve">
+    <value>its creation values</value>
+  </data>
+  <data name="Named by no data" xml:space="preserve">
+    <value>No data names this type yet.</value>
+  </data>
+  <data name="Particle code" xml:space="preserve">
+    <value>Particles are created, moved and drawn by their code; they have no registry.</value>
+  </data>
+  <data name="Joint code" xml:space="preserve">
+    <value>Lightning and trails are created, moved and drawn by their code; they have no registry.</value>
+  </data>
+  <data name="Sprite code" xml:space="preserve">
+    <value>Sprites draw the texture of their number; the SubType is the blend.</value>
+  </data>
+  <data name="Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="Show on" xml:space="preserve">
+    <value>Show on</value>
+  </data>
+  <data name="Show on nothing" xml:space="preserve">
+    <value>Nothing</value>
+  </data>
+  <data name="Show on plane" xml:space="preserve">
+    <value>Plane</value>
+  </data>
+  <data name="Show on cube" xml:space="preserve">
+    <value>Cube</value>
+  </data>
+  <data name="Show on item" xml:space="preserve">
+    <value>Item</value>
+  </data>
+  <data name="Blend" xml:space="preserve">
+    <value>Blend</value>
+  </data>
+  <data name="Blend glow" xml:space="preserve">
+    <value>Glow (0)</value>
+  </data>
+  <data name="Blend subtract" xml:space="preserve">
+    <value>Subtract (1)</value>
+  </data>
+  <data name="Blend alpha test" xml:space="preserve">
+    <value>Alpha test (2)</value>
+  </data>
+  <data name="Blend luminance" xml:space="preserve">
+    <value>Luminance (3)</value>
+  </data>
+  <data name="Turn" xml:space="preserve">
+    <value>Turn</value>
+  </data>
+  <data name="Reset view" xml:space="preserve">
+    <value>Reset view</value>
+  </data>
+  <data name="Find an item" xml:space="preserve">
+    <value>Find an item</value>
+  </data>
+  <data name="Level" xml:space="preserve">
+    <value>Level</value>
+  </data>
+  <data name="Excellent" xml:space="preserve">
+    <value>Excellent</value>
+  </data>
+  <data name="Ancient" xml:space="preserve">
+    <value>Ancient</value>
+  </data>
+  <data name="Preview controls" xml:space="preserve">
+    <value>Drag to turn, use the wheel to zoom, double-click to reset the view.</value>
+  </data>
+  <data name="Preview not drawn by game" xml:space="preserve">
+    <value>The game does not draw this model itself: it has no drawing code.</value>
+  </data>
+  <data name="Preview starts invisible" xml:space="preserve">
+    <value>Its creation values start it transparent or at size 0 and its move code fades or grows it in; the preview shows it.</value>
+  </data>
+  <data name="Preview hidden model" xml:space="preserve">
+    <value>Its creation values hide the whole model.</value>
+  </data>
+  <data name="Preview no animation" xml:space="preserve">
+    <value>The model has no animation to place its bones, so the preview does not draw it.</value>
+  </data>
+  <data name="Preview item effects left out" xml:space="preserve">
+    <value>The item's own sprites and particles are not shown.</value>
+  </data>
+  <data name="Preview item not loaded" xml:space="preserve">
+    <value>A model this item is drawn with at this level is not loaded, so the preview does not draw the item.</value>
+  </data>
+  <data name="In the world" xml:space="preserve">
+    <value>In the world</value>
+  </data>
+  <data name="Create in world" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Create in world tooltip" xml:space="preserve">
+    <value>Creates the type two tiles in front of the character with the game's own call. Its owner is a copy of the character that follows it, so the type's code cannot change the character. Each click creates it once more. It needs a character in a map.</value>
+  </data>
+  <data name="Stop preview" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Repeat preview" xml:space="preserve">
+    <value>Repeat</value>
+  </data>
+  <data name="Repeat preview tooltip" xml:space="preserve">
+    <value>Creates the type again shortly after what it created has ended.</value>
+  </data>
+  <data name="Mute sounds" xml:space="preserve">
+    <value>Mute sounds</value>
+  </data>
+  <data name="Mute sounds tooltip" xml:space="preserve">
+    <value>While the preview runs, the game starts no sound effects. Music, looped sounds and sounds already playing go on.</value>
+  </data>
+  <data name="Sprite every frame" xml:space="preserve">
+    <value>A sprite lasts one frame; the preview creates it again every frame.</value>
+  </data>
+  <data name="World not in game" xml:space="preserve">
+    <value>Creating in the world needs a character in a map.</value>
+  </data>
+  <data name="World effects off" xml:space="preserve">
+    <value>All effects are off in the options, so the game creates no particles and sprites.</value>
+  </data>
+  <data name="World effects hidden" xml:space="preserve">
+    <value>Effects are hidden in the Dev Editor, so they are not drawn.</value>
+  </data>
+  <data name="World nothing created" xml:space="preserve">
+    <value>The game's call created nothing: the type may need a target, a skill or a state of the character, the effects may be off in the options, or its pool is full.</value>
+  </data>
+  <data name="World ended at once" xml:space="preserve">
+    <value>What the call created ended in its first frame: the type may need a target, a skill or other call values.</value>
+  </data>
+  <data name="World refused" xml:space="preserve">
+    <value>The code of this type with this SubType changes the character or tells the server (the catapult stones knock the character back, the class change stops it, the Lagul writes into its owner), so the preview does not create it.</value>
+  </data>
+  <data name="Call values" xml:space="preserve">
+    <value>Call values</value>
+  </data>
+  <data name="Call distance" xml:space="preserve">
+    <value>Distance</value>
+  </data>
+  <data name="Call distance tooltip" xml:space="preserve">
+    <value>How far in front of the character the call starts the type; 0 is where it stands.</value>
+  </data>
+  <data name="Call height" xml:space="preserve">
+    <value>Height</value>
+  </data>
+  <data name="Call size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Call size tooltip" xml:space="preserve">
+    <value>The scale of the call; 0 takes the create function's default (effects 0.9, particles and sprites 1, lightning 10).</value>
+  </data>
+  <data name="Call light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Call colour tooltip" xml:space="preserve">
+    <value>Lightning: the call passes the light as its colour. Most of the game's calls pass none; some types then choose their colour by SubType.</value>
+  </data>
+  <data name="Call random angle" xml:space="preserve">
+    <value>Random angle</value>
+  </data>
+  <data name="Call target" xml:space="preserve">
+    <value>Target</value>
+  </data>
+  <data name="Call owner" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+  <data name="Call target character" xml:space="preserve">
+    <value>Character (copy)</value>
+  </data>
+  <data name="Call target none" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="Call target nearest" xml:space="preserve">
+    <value>Nearest monster or NPC (copy)</value>
+  </data>
+  <data name="Call target none tooltip" xml:space="preserve">
+    <value>No game call creates this type with this SubType without an owner, and its code may need one.</value>
+  </data>
+  <data name="Call target none no sources" xml:space="preserve">
+    <value>The game's calls could not be read (the sources were not found), so None is not offered.</value>
+  </data>
+  <data name="Call pk" xml:space="preserve">
+    <value>PK</value>
+  </data>
+  <data name="Call skill index" xml:space="preserve">
+    <value>SkillIndex</value>
+  </data>
+  <data name="Call pk tooltip" xml:space="preserve">
+    <value>Some lightning SubTypes read their lifetime and speed from PK and SkillIndex.</value>
+  </data>
+  <data name="Game calls" xml:space="preserve">
+    <value>The game's calls</value>
+  </data>
+  <data name="Use call" xml:space="preserve">
+    <value>Use</value>
+  </data>
+  <data name="Game calls not found" xml:space="preserve">
+    <value>The sources of the game the editor was built from were not found, so the game's calls cannot be listed.</value>
+  </data>
+  <data name="No game calls" xml:space="preserve">
+    <value>The game's code does not create this type by its name.</value>
+  </data>
+  <data name="Call random types" xml:space="preserve">
+    <value>one of %d at random</value>
+  </data>
+  <data name="World no character near" xml:space="preserve">
+    <value>No monster or NPC stands near the character, so the copy of the character is the target.</value>
+  </data>
+  <data name="World own place" xml:space="preserve">
+    <value>The type's code moved what it created away from where the call put it, so it is not exactly at the Distance and Height set.</value>
+  </data>
+  <data name="World follows owner" xml:space="preserve">
+    <value>What the type created moves to its owner, so it shows at the target, not at Distance and Height.</value>
+  </data>
+  <data name="World own size" xml:space="preserve">
+    <value>The type's code changes the size the call gives it, so what it created does not have exactly the Size set.</value>
+  </data>
+  <data name="World own light" xml:space="preserve">
+    <value>The type's code changes the light the call gives it, so what it created does not have exactly the Light set.</value>
+  </data>
+  <data name="Assets all" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Loaded at start" xml:space="preserve">
+    <value>Loaded at start</value>
+  </data>
+  <data name="Loaded by this map" xml:space="preserve">
+    <value>Loaded by this map</value>
+  </data>
+  <data name="Origin loading screen" xml:space="preserve">
+    <value>Loaded at start (loading screen).</value>
+  </data>
+  <data name="Origin this map" xml:space="preserve">
+    <value>Loaded by this map.</value>
+  </data>
+  <data name="Origin earlier map" xml:space="preserve">
+    <value>Loaded by a map visited before:</value>
+  </data>
+  <data name="Origin unknown" xml:space="preserve">
+    <value>Loaded; what loaded it is not recorded.</value>
+  </data>
+  <data name="Map object elsewhere" xml:space="preserve">
+    <value>This slot holds an object of this map, not this effect's model. The effect draws its own model only on:</value>
+  </data>
+  <data name="Map object here" xml:space="preserve">
+    <value>The object of this map that this effect draws.</value>
+  </data>
+  <data name="Belongs to map" xml:space="preserve">
+    <value>Draws an object of the map:</value>
+  </data>
+  <data name="Preview not its model" xml:space="preserve">
+    <value>This map's slot holds another object, not this effect's model (see Asset).</value>
+  </data>
 </root>

@@ -6,6 +6,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
+#include "GameLogic/Events/Cinematic/DirectionTurning.h"
 
 #include "Audio/DSPlaySound.h"
 
@@ -21,17 +22,6 @@ static CDirection Direction;
 
 namespace
 {
-constexpr float kPi = 3.14159265358979323846f;
-constexpr float kRadToDeg = 180.0f / kPi;
-
-float UnwindDegrees360(float degrees)
-{
-    degrees = std::fmod(degrees, 360.0f);
-    if (degrees < 0.0f)
-        degrees += 360.0f;
-    return degrees;
-}
-
 CHARACTER* FindLiveCharacterByKey(int key)
 {
     auto* const end = CharactersClient + MAX_CHARACTERS_CLIENT;
@@ -134,7 +124,8 @@ bool CDirection::DirectionCameraMove()
 
         VectorScale(m_vResult, m_fCount, vTemp);
         VectorAdd(m_v1stPosition, vTemp, m_vCameraPosition);
-        m_fCount += m_fCameraSpeed;
+        // The camera speed is the distance per frame at the reference fps.
+        m_fCount += m_fCameraSpeed * FPS_ANIMATION_FACTOR;
 
         if (m_fLength <= VectorLength(vTemp))
         {
@@ -164,20 +155,8 @@ void CDirection::DeleteMonster()
 
 float CDirection::CalculateAngle(CHARACTER* c, int x, int y, float Angle)
 {
-    vec3_t vTemp, vTemp2, vResult;
-    float fx = (float)(x * TERRAIN_SCALE) + 0.5f * TERRAIN_SCALE;
-    float fy = (float)(y * TERRAIN_SCALE) + 0.5f * TERRAIN_SCALE;
-
-    Vector(fx, fy, 0.0f, vTemp);
-    Vector(c->Object.Position[0], c->Object.Position[1], 0.0f, vTemp2);
-
-    VectorSubtract(vTemp2, vTemp, vResult);
-    Vector(0.0f, 1.0f, 0.0f, vTemp2);
-
-    VectorNormalize(vResult);
-
-    const float yawFromPositiveY = std::atan2(vResult[0], vResult[1]) * kRadToDeg;
-    return UnwindDegrees360(yawFromPositiveY);
+    return GameLogic::Cinematic::CalculateAngleToTile(c->Object.Position[0], c->Object.Position[1], x, y,
+                                                      TERRAIN_SCALE);
 }
 
 void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angle, bool NextCheck, bool SummonAni,
@@ -293,41 +272,26 @@ bool CDirection::MoveCreatedMonster(int Index, int x, int y, float Angle, int Sp
 
     if (!bNext)
     {
-        int iResult = 0;
-
         if (stl_Monster[Index].m_bAngleCheck)
         {
-            int iAngle1 = (int)CalculateAngle(c, x, y, Angle);
-            int iAngle2 = (int)c->Object.Angle[2];
+            // The monster turns towards its target first. When it's aligned, its heading is exactly the direction
+            // to the target, so that it arrives at the target tile at any frame rate.
+            const float targetAngle = CalculateAngle(c, x, y, Angle);
+            const float turnStep = GameLogic::Cinematic::kMonsterTurnStepDegrees * FPS_ANIMATION_FACTOR;
+            if (!GameLogic::Cinematic::TurnTowards(c->Object.Angle[2], targetAngle, turnStep))
+            {
+                c->Blood = false;
+                SetAction(&c->Object, MONSTER01_STOP1);
+                return false;
+            }
 
-            if ((iAngle1 - Angle) > 180)
-                iAngle1 = iAngle1 - 360;
-
-            iResult = iAngle1 - iAngle2;
-            c->Blood = false;
-        }
-
-        if (iResult <= 3 && iResult >= -3)
-        {
-            c->Blood = true;
             stl_Monster[Index].m_bAngleCheck = false;
         }
 
-        if (c->Blood)
-        {
-            c->MoveSpeed = Speed;
-            SetAction(&c->Object, MONSTER01_WALK);
-            MoveCharacterPosition(c);
-        }
-        else
-        {
-            if (iResult > 3 && iResult <= 180)
-                c->Object.Angle[2] += 3.0f;
-            else
-                c->Object.Angle[2] -= 3.0f;
-
-            SetAction(&c->Object, MONSTER01_STOP1);
-        }
+        c->Blood = true;
+        c->MoveSpeed = Speed;
+        SetAction(&c->Object, MONSTER01_WALK);
+        MoveCharacterPosition(c);
     }
     else
     {

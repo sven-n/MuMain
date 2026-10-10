@@ -353,7 +353,7 @@ void CBuffStrip::OnBuffRightClick(int slot)
         return;
 
     wchar_t text[MAX_GLOBAL_TEXT_STRING];
-    mu_swprintf(text, L"%ls %ls", SkillAttribute[skill].Name, I18N::Game::WouldYouLikeToCancel);
+    mu_swprintf(text, I18N::Game::CancelSkillQuestion, SkillAttribute[skill].Name);
 
     UI::Dialogs::ConfirmRequest request;
     request.cancellable = true;

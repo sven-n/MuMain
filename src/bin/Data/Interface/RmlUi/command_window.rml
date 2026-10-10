@@ -25,7 +25,7 @@
 
 		<div id="buttons">
 			<div class="cmd-btn" data-for="b : buttons" data-class-selected="b.selected"
-			     data-event-click="command_press(b.index)">
+			     data-attr-data-command="b.index" data-event-click="command_press(b.index)">
 				<span class="sharp-text sharp-middle cmd-label"
 				      data-style-font-size="b.label_text_px + 'px'" data-style-line-height="b.label_line_px + 'px'"><span class="native-fit">{{b.label}}</span></span>
 			</div>

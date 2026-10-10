@@ -9,9 +9,9 @@
 
 namespace UI::Trade
 {
-void RequestReceived(std::wstring_view requester)
+bool RequestReceived(std::wstring_view requester)
 {
-    g_pTrade->ProcessToReceiveTradeRequest(std::wstring(requester).c_str());
+    return g_pTrade->ProcessToReceiveTradeRequest(std::wstring(requester).c_str());
 }
 
 void RequestAnswered(RequestReply reply, const Partner& partner)

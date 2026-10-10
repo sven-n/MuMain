@@ -12,6 +12,7 @@
 #include "UI/RmlBridge/RmlWindowClose.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Items/TradeRestrictions.h"
 #include "UI/Inventory/MyInventory.h"
 
 // RmlUi migration -- see this class's header comment.
@@ -263,7 +264,7 @@ void CStorageInventoryExt::ProcessInventoryCtrl()
         }
         else
         {
-            if (::IsStoreBan(pItemObj))
+            if (GameLogic::Items::IsStoreBan(pItemObj))
             {
                 m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
             }

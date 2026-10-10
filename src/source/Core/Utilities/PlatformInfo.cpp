@@ -22,7 +22,8 @@
 
 // The OS name and version are fixed for the process lifetime, so each platform
 // computes the string once into a function-local static. GetOSVersionString is
-// called every frame from the debug overlay; caching keeps it off the hot path.
+// called every frame from the debug overlay; caching and returning a reference
+// keep it off the hot path.
 //
 // The non-Windows branches build the result with std::wstring concatenation
 // rather than swprintf("%s", ...): a narrow-to-wide "%s" conversion in a wide
@@ -34,7 +35,7 @@ namespace Core::Platform
 
 #ifdef _WIN32
 
-std::wstring GetOSVersionString()
+const std::wstring& GetOSVersionString()
 {
     static const std::wstring osVersion = []() -> std::wstring
     {
@@ -70,7 +71,7 @@ std::wstring GetOSDistroName() { return {}; }  // no distro concept on Windows
 
 #elif defined(__ANDROID__)
 
-std::wstring GetOSVersionString()
+const std::wstring& GetOSVersionString()
 {
     static const std::wstring osVersion = []() -> std::wstring
     {
@@ -89,7 +90,7 @@ std::wstring GetOSDistroName() { return {}; }  // Android reports its own name
 
 #elif defined(__APPLE__)
 
-std::wstring GetOSVersionString()
+const std::wstring& GetOSVersionString()
 {
     static const std::wstring osVersion = []() -> std::wstring
     {
@@ -152,7 +153,7 @@ std::wstring GetOSDistroName()
     return distro;
 }
 
-std::wstring GetOSVersionString()
+const std::wstring& GetOSVersionString()
 {
     static const std::wstring osVersion = []() -> std::wstring
     {

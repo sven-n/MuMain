@@ -115,7 +115,7 @@ bool mu::ui::window::CCursedTempleEnter::CheckEnterLevel(int& enterlevel)
 
 bool mu::ui::window::CCursedTempleEnter::CheckEnterItem(ITEM* p, int enterlevel)
 {
-    if (p->Type == ITEM_HELPER + 61)
+    if (p->Type == ITEM_ILLUSION_TEMPLE_TICKET)
     {
         if (!CheckEnterLevel(enterlevel)) return false;
     }
@@ -149,7 +149,7 @@ bool mu::ui::window::CCursedTempleEnter::CheckInventory(BYTE& itempos, int enter
         return true;
     }
 
-    pos = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_HELPER + 61, -1);
+    pos = g_pMyInventory->GetInventoryCtrl()->FindItemIndex(ITEM_ILLUSION_TEMPLE_TICKET, -1);
     if (pos != -1) {
         itempos = pos;
         return true;

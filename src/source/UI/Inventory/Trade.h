@@ -18,6 +18,11 @@
 
 namespace Rml { class ElementDocument; }
 
+namespace UI::Items::Placement
+{
+struct HeldItemMove;
+}
+
 namespace mu::ui::window
 {
     class CTrade : public CObject
@@ -158,13 +163,26 @@ namespace mu::ui::window
         void ProcessClosing();
 
         void GetYourID(wchar_t* pszYourID);
+        int GetYourLevel() const { return m_nYourLevel; }
+        bool IsMyConfirmed() const { return m_bMyConfirm; }
+        bool IsYourConfirmed() const { return m_bYourConfirm; }
+        int GetMyTradeGold() const { return m_nMyTradeGold; }
+        int GetYourTradeGold() const { return m_nYourTradeGold; }
+        // Frames until my confirm button takes clicks again after an offer changed.
+        int GetMyTradeWait() const { return m_nMyTradeWait; }
         void SetYourTradeGold(int nGold) { m_nYourTradeGold = nGold; }
 
         void SendRequestMyGoldInput(int nInputGold);
-        void SendRequestItemToMyInven(ITEM* pItemObj,
-            int nTradeIndex, int nInvenIndex);
+        // Right-click: the item under the cursor in sourceCtrl (the inventory or
+        // an extension) goes into my trade grid.
+        bool ProcessMyInvenItemAutoMove(CInventoryCtrl* sourceCtrl);
+        // Right-click: the item under the cursor in my trade grid goes back
+        // into the inventory.
+        bool ProcessMyTradeItemAutoMoveToInventory();
 
-        void ProcessToReceiveTradeRequest(const wchar_t* pszYourID);
+        // Shows the request's dialog; false when a window that forbids trading is
+        // open and the client has answered no by itself.
+        bool ProcessToReceiveTradeRequest(const wchar_t* pszYourID);
         void ProcessToReceiveTradeResult(UI::Trade::RequestReply reply, const UI::Trade::Partner& partner);
         void ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex);
         void ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const BYTE> pbyItemPacket);
@@ -199,7 +217,8 @@ namespace mu::ui::window
         void BackUpYourInven(ITEM* pYourItemObj);
         void AlertYourTradeInven();
 
-        void SendRequestItemToTrade(ITEM* pItemObj, int nInvenIndex, int nTradeIndex);
+        void SendRequestItemToTrade(const UI::Items::Placement::HeldItemMove& move);
+        void UncheckMyConfirm();
     };
 }
 

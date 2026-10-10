@@ -25,7 +25,13 @@ void ShowConfirm(ConfirmRequest request)
     }
     cfg.onPrimary = std::move(request.onAccept);
     cfg.onCancel = std::move(request.onCancel);
+    cfg.tag = std::move(request.tag);
     mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+}
+
+bool AnswerConfirm(std::string_view tag, bool accept)
+{
+    return mu::ui::window::g_pGenericConfirmDialog->Answer(tag, accept);
 }
 
 bool IsMessageBoxOpen()

@@ -57,7 +57,7 @@
 		<div class="attr-lines attr-lines-str counter-scaled" data-style-font-size="text_px + 'px'">
 			<span data-for="line : str_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
 		</div>
-		<div class="stat-btn stat-btn-str" data-class-hidden="!can_level_up"
+		<div id="btn_stat_str" class="stat-btn stat-btn-str" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(0)"></div>
 
 		<!-- AGI row -->
@@ -67,7 +67,7 @@
 		<div class="attr-lines attr-lines-agi counter-scaled" data-style-font-size="text_px + 'px'">
 			<span data-for="line : agi_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
 		</div>
-		<div class="stat-btn stat-btn-agi" data-class-hidden="!can_level_up"
+		<div id="btn_stat_agi" class="stat-btn stat-btn-agi" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(1)"></div>
 
 		<!-- VIT row -->
@@ -77,7 +77,7 @@
 		<div class="attr-lines attr-lines-vit counter-scaled" data-style-font-size="text_px + 'px'">
 			<span data-for="line : vit_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
 		</div>
-		<div class="stat-btn stat-btn-vit" data-class-hidden="!can_level_up"
+		<div id="btn_stat_vit" class="stat-btn stat-btn-vit" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(2)"></div>
 
 		<!-- ENE row -->
@@ -87,14 +87,14 @@
 		<div class="attr-lines attr-lines-ene counter-scaled" data-style-font-size="text_px + 'px'">
 			<span data-for="line : ene_lines" data-class-boosted="line.source == 'boosted'" data-class-buffed="line.source == 'buffed'">{{line.text}}</span>
 		</div>
-		<div class="stat-btn stat-btn-ene" data-class-hidden="!can_level_up"
+		<div id="btn_stat_ene" class="stat-btn stat-btn-ene" data-class-hidden="!can_level_up"
 		     data-event-click="chainfo_increase_stat(3)"></div>
 
 		<!-- CMD row -- Dark Lord only. -->
 		<div class="attr-textbox attr-textbox-cmd" data-class-hidden="!show_charisma"></div>
 		<span class="attr-label attr-label-cmd counter-scaled" data-class-hidden="!show_charisma" data-class-attr-potion="cmd_value_source == 'potion'" data-class-attr-boosted="cmd_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{cmd_label}}</span>
 		<span class="attr-value attr-value-cmd counter-scaled" data-class-hidden="!show_charisma" data-class-attr-potion="cmd_value_source == 'potion'" data-class-attr-boosted="cmd_value_source == 'boosted'" data-style-font-size="text_px + 'px'">{{cmd_value_text}}</span>
-		<div class="stat-btn stat-btn-cmd" data-class-hidden="!can_level_up || !show_charisma"
+		<div id="btn_stat_cmd" class="stat-btn stat-btn-cmd" data-class-hidden="!can_level_up || !show_charisma"
 		     data-event-click="chainfo_increase_stat(4)"></div>
 
 		<!-- Bottom action row: shared close button plus Quest/Pet/Master-Level shortcuts. -->

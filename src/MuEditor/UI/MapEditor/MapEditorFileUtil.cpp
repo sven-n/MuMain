@@ -9,6 +9,10 @@
 #include <cstdio>
 #include <filesystem>
 
+#ifdef _WIN32
+#include <commdlg.h> // GetOpenFileNameW
+#endif
+
 namespace fs = std::filesystem;
 
 namespace Editor::Files
@@ -38,6 +42,30 @@ std::wstring MirrorNextToExe(const std::wstring& savedPath, int world)
     snprintf(msg, sizeof(msg), "[MapEditor] Also saved a copy next to Main.exe: %ls", dst.wstring().c_str());
     g_MuEditorConsoleUI.LogEditor(msg);
     return dst.wstring();
+}
+
+bool PickFileToOpen(const wchar_t* filter, const wchar_t* title, std::wstring& outPath)
+{
+#ifdef _WIN32
+    wchar_t file[MAX_PATH] = { 0 };
+    OPENFILENAMEW ofn = { 0 };
+    ofn.lStructSize = sizeof(ofn);
+    ofn.lpstrFilter = filter;
+    ofn.lpstrFile = file;
+    ofn.nMaxFile = MAX_PATH;
+    ofn.lpstrTitle = title;
+    ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
+    if (!GetOpenFileNameW(&ofn))
+        return false;
+    outPath = file;
+    return true;
+#else
+    (void)filter;
+    (void)title;
+    (void)outPath;
+    g_MuEditorConsoleUI.LogEditor("[MapEditor] The file picker is only available on Windows.");
+    return false;
+#endif
 }
 
 } // namespace Editor::Files

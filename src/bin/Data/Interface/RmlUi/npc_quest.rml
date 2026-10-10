@@ -55,7 +55,7 @@
 			<span class="nq-message-line" data-for="m : message_lines">{{m.text}}</span>
 			<div class="nq-answers">
 				<div class="nq-answer-row" data-for="a : answers"
-				     data-event-click="npcquest_select_answer(a.index)">{{a.text}}</div>
+				     data-attr-data-answer="a.index" data-event-click="npcquest_select_answer(a.index)">{{a.text}}</div>
 			</div>
 		</div>
 

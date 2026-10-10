@@ -1,5 +1,6 @@
 #pragma once
 #include "UI/Inventory/ItemMng.h"
+#include "Render/Items/ItemEffects.h"
 
 extern OBJECT_BLOCK ObjectBlock[256];
 extern OBJECT Mounts[];
@@ -64,6 +65,11 @@ void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int Re
                                 int Texture = -1);
 void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType);
 
+// Runs the item effect of the model before it is drawn: the one of its item's
+// model entry, or for the event models of level variants theirs. It may
+// change the level the model glows like.
+Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, OBJECT* o, int Type, float Alpha, int& Level,
+                                                         int ItemLevel);
 void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha = 0.f, int Level = 0, int ExcellentFlags = 0,
                             int ancientDiscriminator = 0, int Select = 0, int RenderType = RENDER_TEXTURE);
 void RenderPartObject(OBJECT* o, int Type, void* p, vec3_t Light, float Alpha = 0.f, int Level = 0,

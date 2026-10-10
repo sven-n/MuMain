@@ -1,0 +1,275 @@
+{
+  "formatVersion": 1,
+  "group": 6,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Item/Shield01.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 1,
+      "file": "Data/Item/Shield02.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 2,
+      "file": "Data/Item/Shield03.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 3,
+      "file": "Data/Item/Shield04.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 4,
+      "file": "Data/Item/Shield05.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 5,
+      "file": "Data/Item/Shield06.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 6,
+      "file": "Data/Item/Shield07.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 7,
+      "file": "Data/Item/Shield08.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 8,
+      "file": "Data/Item/Shield09.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 9,
+      "file": "Data/Item/Shield10.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 10,
+      "file": "Data/Item/Shield11.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 11,
+      "file": "Data/Item/Shield12.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 12,
+      "file": "Data/Item/Shield13.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 13,
+      "file": "Data/Item/Shield14.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 14,
+      "file": "Data/Item/Shield15.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      }
+    },
+    {
+      "number": 15,
+      "file": "Data/Item/shield16.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.7],
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      },
+      "renderStyle": "grandSoulShield"
+    },
+    {
+      "number": 16,
+      "file": "Data/Item/shield17.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.5, 0.9],
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      },
+      "glow": {
+        "color": "lime",
+        "hiddenMesh": 2
+      },
+      "renderStyle": "elementalShield"
+    },
+    {
+      "number": 17,
+      "file": "Data/Item/Shield_18.bmd",
+      "textureFolders": ["Item", "Effect"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      },
+      "renderStyle": "crimsonGlory"
+    },
+    {
+      "number": 18,
+      "file": "Data/Item/Shield_19.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      },
+      "renderStyle": "salamanderShield"
+    },
+    {
+      "number": 19,
+      "file": "Data/Item/Shield_20.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      },
+      "glow": {
+        "color": "emerald",
+        "meshes": [0],
+        "shineMeshes": [0]
+      },
+      "renderStyle": "frostBarrier"
+    },
+    {
+      "number": 20,
+      "file": "Data/Item/Shield_21.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      },
+      "glow": {
+        "color": "periwinkle",
+        "meshes": [0]
+      },
+      "renderStyle": "guardianShield"
+    },
+    {
+      "number": 21,
+      "file": "Data/Item/crosssheild.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.55, 0.5],
+        "rotation": [270, 270, 0]
+      },
+      "ground": {
+        "rotation": [0, 270, 225]
+      },
+      "glow": {
+        "color": "rust",
+        "meshes": [0]
+      },
+      "renderStyle": "crossShield"
+    }
+  ]
+}

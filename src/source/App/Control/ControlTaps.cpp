@@ -4,6 +4,7 @@
 #include "App/Control/ControlEvents.h"
 #include "GameLogic/Automation/Attack.h"
 #include "App/Control/ControlObjects.h"
+#include "Core/Text/Utf8.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -13,6 +14,7 @@
 #include "World/MapInfra/MapManager.h"
 
 #include <cstring>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -221,8 +223,104 @@ void RecordPartyChange(const char* change, const wchar_t* name)
     RecordParty(change != nullptr ? change : "changed", name != nullptr ? name : L"");
 }
 
+void RecordPartyInvited(int inviterKey)
+{
+    if (!IsEnabled())
+    {
+        return;
+    }
+    const ObjectDescription inviter = App::Control::DescribeGameObject(inviterKey);
+    RecordParty("invited", Core::Text::FromUtf8(inviter.name).c_str());
+}
+
+void RecordPartyAnswer(int result)
+{
+    constexpr std::string_view Results[] = {"failed", "denied",        "full",        "user_left",      "other_party",
+                                            "left",   "opposing_gens", "battle_zone", "battle_zone_off"};
+    RecordPartyResult(result >= 0 && result < static_cast<int>(std::size(Results)) ? Results[result] : "unknown");
+}
+
+void RecordQuestStateChanged(int quest, int state)
+{
+    // The client's QUEST_STATE values: 1 active, 2 complete, 3 not started.
+    constexpr std::string_view States[] = {"none", "active", "complete", "not_started"};
+    RecordQuestChange(quest, state >= 0 && state < static_cast<int>(std::size(States)) ? States[state] : "unknown");
+}
+
+void RecordQuestPrize(int key, int reward, int amount)
+{
+    if (!IsEnabled())
+    {
+        return;
+    }
+
+    // The reward codes of the legacy quest prize packet, from 200 on.
+    constexpr std::string_view Rewards[] = {"level_up_points", "second_class", "points_per_level", "combo",
+                                            "third_class"};
+    constexpr int FirstReward = 200;
+    const int offset = reward - FirstReward;
+    const std::string_view name =
+        offset >= 0 && offset < static_cast<int>(std::size(Rewards)) ? Rewards[offset] : "unknown";
+    const int index = FindCharacterIndex(key);
+    const bool known = index >= 0 && index < MAX_CHARACTERS_CLIENT;
+    // For a class change the packet's number is the server's class code, not
+    // an amount; the event names the new class instead.
+    const bool classChange = name == "second_class" || name == "third_class";
+    RecordQuestReward(known ? Core::Text::ToUtf8(CharactersClient[index].ID) : std::string(), name,
+                      classChange ? std::nullopt : std::optional<int>(amount),
+                      known ? static_cast<int>(CharactersClient[index].Class) : -1);
+}
+
 void RecordDisconnected(const char* reason)
 {
     RecordDisconnect(reason != nullptr ? reason : "the server closed the connection");
+}
+
+namespace
+{
+// A name field of a packet, as UTF-8 the event can hold. The field is not
+// always null-terminated, and its bytes need not be valid UTF-8: a name cut
+// mid-character, or a server writing another code page. Decoding it the way
+// the trade window does (invalid bytes become U+FFFD) and encoding it again
+// keeps `json::dump`, which throws on invalid UTF-8, from failing.
+std::string PacketName(const char* name)
+{
+    if (name == nullptr)
+    {
+        return {};
+    }
+    const void* end = std::memchr(name, 0, MAX_USERNAME_SIZE);
+    const size_t length = end != nullptr ? static_cast<const char*>(end) - name : MAX_USERNAME_SIZE;
+    return Core::Text::ToUtf8(Core::Text::FromUtf8(std::string(name, length)).c_str());
+}
+} // namespace
+
+void RecordTradeRequested(const char* name, bool asked)
+{
+    // A window that forbids trading was open: the client said no without a dialog.
+    RecordTrade(asked ? "requested" : "refused", PacketName(name),
+                asked ? "" : "the client refused it: a window that forbids trading is open");
+}
+
+void RecordTradeAnswer(int answer, const char* name)
+{
+    // 0: the partner refused, 1: the trade window opens, 2: no trade now.
+    constexpr std::string_view Answers[] = {"refused", "opened", "unavailable"};
+    const std::string_view change = answer >= 0 && answer <= 2 ? Answers[answer] : "unavailable";
+    RecordTrade(change, answer == 1 ? PacketName(name) : std::string{}, "");
+}
+
+void RecordTradePartnerConfirm(int state)
+{
+    // 0: unchecked, 1: checked, 2: both reset because an offer changed.
+    constexpr std::string_view States[] = {"unchecked", "checked", "reset"};
+    RecordTrade("partner_confirm", "", state >= 0 && state <= 2 ? States[state] : "unknown");
+}
+
+void RecordTradeClosed(int result)
+{
+    constexpr std::string_view Results[] = {"cancelled", "completed", "inventory_full", "request_cancelled",
+                                            "reinforced_item"};
+    RecordTrade("closed", "", result >= 0 && result <= 4 ? Results[result] : "unknown");
 }
 } // namespace App::Control::Events

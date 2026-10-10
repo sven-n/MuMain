@@ -120,7 +120,10 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     // window's legacy theme still hardcodes "Liberation Sans"), not something this addresses.
     // Also a fallback face, after Liberation Sans: Hangul the chosen face lacks (text the game
     // data still carries in Korean, such as the lucky item menu) draws from it instead of as
-    // boxes, as the native text renderer drew it.
+    // boxes, as the native text renderer drew it. Noto Sans TC goes first so Traditional Chinese
+    // keeps its own glyphs and punctuation, as in the native text renderer's fallback order.
+    Rml::LoadFontFace("fonts/NotoSansTC-Regular.otf", true);
+    Rml::LoadFontFace("fonts/NotoSansTC-Bold.otf");
     Rml::LoadFontFace("fonts/NanumGothic-Regular.ttf", true);
 
     // Third, explicitly-named face -- already bundled for the legacy GDI text shim's own font

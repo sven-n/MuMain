@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "UI/HUD/SkillList.h"
+#include "GameLogic/Items/ItemCategories.h"
 #include <algorithm>
 #include "I18N/All.h"
 
@@ -444,8 +445,7 @@ bool IsHudSkillUsable(ActionSkillType bySkillType)
     {
         bCantSkill = true;
     }
-    auto isSittingOnPet = (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT ||
-                           Hero->Helper.Type == MODEL_HORN_OF_FENRIR);
+    auto isSittingOnPet = GameLogic::Items::IsHornMountModel(Hero->Helper.Type);
     if (bySkillType == AT_SKILL_IMPALE && !isSittingOnPet)
     {
         bCantSkill = true;

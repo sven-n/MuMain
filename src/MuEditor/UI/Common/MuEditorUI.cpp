@@ -24,17 +24,32 @@ constexpr int MOUSE_BUTTON_LEFT = 0;
 // Step used by the toolbar's -/+ editor-UI-scale buttons.
 constexpr float UI_SCALE_STEP = 0.1f;
 
+namespace
+{
+// A toolbar button that opens and closes a tool window.
+void RenderWindowToggle(const char* label, bool& showWindow)
+{
+    ImGui::SameLine();
+    if (ImGui::Button(label))
+    {
+        showWindow = !showWindow;
+    }
+}
+} // namespace
+
 CMuEditorUI& CMuEditorUI::GetInstance()
 {
     static CMuEditorUI instance;
     return instance;
 }
 
-void CMuEditorUI::RenderToolbar(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showMapEditor, bool& showConsole)
+void CMuEditorUI::RenderToolbar(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
+                                bool& showMapEditor, bool& showEffectBrowser, bool& showConsole)
 {
     if (editorEnabled)
     {
-        RenderToolbarFull(editorEnabled, showItemEditor, showSkillEditor, showDevEditor, showMapEditor, showConsole);
+        RenderToolbarFull(editorEnabled, showItemEditor, showSkillEditor, showDevEditor, showMapEditor,
+                          showEffectBrowser, showConsole);
     }
     else
     {
@@ -117,7 +132,9 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
     ImGui::PopStyleColor(2);
 }
 
-void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showMapEditor, bool& showConsole)
+void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor,
+                                    bool& showDevEditor, bool& showMapEditor, bool& showEffectBrowser,
+                                    bool& showConsole)
 {
     const float uiScale = g_MuEditorCore.GetUIScale();
     ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, TOOLBAR_HEIGHT * uiScale), ImGuiCond_Always);
@@ -140,30 +157,11 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, b
         ImGui::Indent(10.0f);
 
         ImGui::Text("MU Editor");
-        ImGui::SameLine();
-
-        if (ImGui::Button("Item Editor"))
-        {
-            showItemEditor = !showItemEditor;
-        }
-
-        ImGui::SameLine();
-        if (ImGui::Button("Skill Editor"))
-        {
-            showSkillEditor = !showSkillEditor;
-        }
-
-        ImGui::SameLine();
-        if (ImGui::Button("Dev Editor"))
-        {
-            showDevEditor = !showDevEditor;
-        }
-
-        ImGui::SameLine();
-        if (ImGui::Button("Map Editor"))
-        {
-            showMapEditor = !showMapEditor;
-        }
+        RenderWindowToggle("Item Editor", showItemEditor);
+        RenderWindowToggle("Skill Editor", showSkillEditor);
+        RenderWindowToggle("Dev Editor", showDevEditor);
+        RenderWindowToggle("Map Editor", showMapEditor);
+        RenderWindowToggle("Effect Browser", showEffectBrowser);
 
         // Global editor UI scale (affects every MuEditor window, not just this one).
         ImGui::SameLine();

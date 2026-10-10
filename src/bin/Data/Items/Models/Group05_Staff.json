@@ -1,0 +1,475 @@
+{
+  "formatVersion": 1,
+  "group": 5,
+  "models": [
+    {
+      "number": 0,
+      "file": "Data/Item/Staff01.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 15],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
+    },
+    {
+      "number": 1,
+      "file": "Data/Item/Staff02.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 25],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
+    },
+    {
+      "number": 2,
+      "file": "Data/Item/Staff03.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 25],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
+    },
+    {
+      "number": 3,
+      "file": "Data/Item/Staff04.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 25],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
+    },
+    {
+      "number": 4,
+      "file": "Data/Item/Staff05.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 25],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
+    },
+    {
+      "number": 5,
+      "file": "Data/Item/Staff06.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 15],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "blue",
+        "hiddenMesh": 1,
+        "shineColor": "blue",
+        "shineHiddenMesh": 1
+      }
+    },
+    {
+      "number": 6,
+      "file": "Data/Item/Staff07.bmd",
+      "textureFolders": ["Item"],
+      "noneBlendMeshes": [2],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 15],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
+    },
+    {
+      "number": 7,
+      "file": "Data/Item/Staff08.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [0, 0, 205],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
+    },
+    {
+      "number": 8,
+      "file": "Data/Item/Staff09.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 25],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
+    },
+    {
+      "number": 9,
+      "file": "Data/Item/Staff10.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 15],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "white"
+      }
+    },
+    {
+      "number": 10,
+      "file": "Data/Item/Staff11.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 15],
+        "scale": 0.0019
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "renderStyle": "archangelStaff"
+    },
+    {
+      "number": 11,
+      "file": "Data/Item/Staff12.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 15],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "bronze"
+      },
+      "renderStyle": "staffOfKundun",
+      "itemEffect": "staffOfKundun"
+    },
+    {
+      "number": 12,
+      "file": "Data/Item/HDK_Staff.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "offset": [0.025, -0.1],
+        "rotation": [180, 0, 8],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "royalBlue"
+      },
+      "renderStyle": "sylphWindBow"
+    },
+    {
+      "number": 13,
+      "file": "Data/Item/CW_Staff.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "offset": [0.02, 0.02],
+        "rotation": [180, 90, 8],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "grey"
+      },
+      "renderStyle": "platinaStaff"
+    },
+    {
+      "number": 14,
+      "file": "Data/Item/Staff15.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "offset": [0, 0.04],
+        "rotation": [180, 270, 15],
+        "scale": 0.0028
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "ochre"
+      }
+    },
+    {
+      "number": 15,
+      "file": "Data/Item/Staff16.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 15],
+        "scale": 0.0028
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "denim"
+      }
+    },
+    {
+      "number": 16,
+      "file": "Data/Item/Staff17.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 15],
+        "scale": 0.0028
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "red"
+      }
+    },
+    {
+      "number": 17,
+      "file": "Data/Item/Staff18.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "offset": [0.02, 0.03],
+        "rotation": [180, 270, 15],
+        "scale": 0.0028
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "blue"
+      }
+    },
+    {
+      "number": 18,
+      "file": "Data/Item/Staff19.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "offset": [0.02, 0],
+        "rotation": [180, 270, 15],
+        "scale": 0.0028
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "rust"
+      },
+      "renderStyle": "demonicStick"
+    },
+    {
+      "number": 19,
+      "file": "Data/Item/Staff20.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "offset": [-0.02, -0.02],
+        "rotation": [180, 270, 15],
+        "scale": 0.0028
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "violet"
+      },
+      "renderStyle": "stormBlitzStick"
+    },
+    {
+      "number": 20,
+      "file": "Data/Item/Staff21.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "offset": [0.01, -0.01],
+        "rotation": [180, 270, 15],
+        "scale": 0.0028
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "white"
+      }
+    },
+    {
+      "number": 21,
+      "file": "Data/Item/Book_of_Sahamutt.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [0, 0, 0],
+        "scale": 0.004
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
+    },
+    {
+      "number": 22,
+      "file": "Data/Item/Book_of_Neil.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [0, 0, 0],
+        "scale": 0.004
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "red"
+      }
+    },
+    {
+      "number": 23,
+      "file": "Data/Item/Book_of_Rargle.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [0, 0, 0],
+        "scale": 0.004
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
+    },
+    {
+      "number": 30,
+      "file": "Data/Item/Staff_31.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 90, 10],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "red"
+      },
+      "renderStyle": "deadlyStaff"
+    },
+    {
+      "number": 31,
+      "file": "Data/Item/Staff_32.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 90, 10],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "royalBlue"
+      },
+      "renderStyle": "imperialStaff"
+    },
+    {
+      "number": 32,
+      "file": "Data/Item/Staff_33.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 90, 10],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "meshes": [1]
+      },
+      "renderStyle": "staff32"
+    },
+    {
+      "number": 33,
+      "file": "Data/Item/gamble_wand.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "offset": [0.02, -0.06],
+        "rotation": [180, 90, 10],
+        "scale": 0.0028
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "goldenrod",
+        "meshes": [0]
+      }
+    },
+    {
+      "number": 34,
+      "file": "Data/Item/gamble_stick.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "offset": [0, -0.05],
+        "rotation": [180, 90, 10],
+        "scale": 0.0028
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      },
+      "glow": {
+        "color": "white",
+        "meshes": [0]
+      }
+    },
+    {
+      "number": 36,
+      "file": "Data/Item/Archangelus.bmd",
+      "textureFolders": ["Item"],
+      "inventory": {
+        "anchor": [0.6, 0.55],
+        "rotation": [180, 270, 15],
+        "scale": 0.0022
+      },
+      "ground": {
+        "rotation": [0, 270, -45]
+      }
+    }
+  ]
+}

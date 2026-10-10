@@ -131,16 +131,9 @@ void CNewBloodCastleSystem::CollectMatchResult(std::vector<MatchResultLine>& lin
     { lines.push_back({role, {{text, 0, 0, font, color}}}); };
 
     const DWORD green = RGBA(128, 255, 128, 255);
-    if (m_iNumResult)
-    {
-        add("message", I18N::Game::CompletedTheBloodCastleQuest, MatchResultCell::Font::Normal, green);
-        add("message", I18N::Game::CongratulationsYouHaveSuccessfully, MatchResultCell::Font::Normal, green);
-    }
-    else
-    {
-        add("message", I18N::Game::ToCompleteTheBloodCastleQuest, MatchResultCell::Font::Normal, green);
-        add("message", I18N::Game::UnfortunatelyYouHaveFailed, MatchResultCell::Font::Normal, green);
-    }
+    // One sentence per outcome; the theme wraps it, so every language keeps its own word order.
+    add("message", m_iNumResult ? I18N::Game::BloodCastleQuestCompleted : I18N::Game::BloodCastleQuestFailed,
+        MatchResultCell::Font::Normal, green);
 
     const MatchResult* pResult = &m_MatchResult[0];
 

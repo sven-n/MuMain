@@ -8,6 +8,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/Overlay2DRecorder.h"
 #include "Render/Text/SDLTtfColorPack.h"
+#include "Render/Text/SdlTtfFontSet.h"
 #include "Render/Text/SdlTtfGpuTextProperties.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
@@ -339,6 +340,8 @@ void CUIRenderTextSDLTtf::RenderText(int x, int y, const wchar_t* text, int boxW
     RenderTextBackground(renderer, layout, windowHeight, m_backColor);
     const TTF_GPUAtlasDrawSequence* drawData = TTF_GetGPUTextDrawData(prepared.text);
     ConsumeGlyphUploads(prepared.text);
+    // The GPU text coordinates point up, so a positive lift moves the text up.
+    const float lift = static_cast<float>(Render::Text::LayoutLift(font)) * metrics.scale;
     SubmitTextDrawData(renderer, drawData, layout.renderX + layout.alignmentOffset,
-                       static_cast<float>(windowHeight) - layout.screenY, metrics.scale, m_textColor);
+                       static_cast<float>(windowHeight) - layout.screenY + lift, metrics.scale, m_textColor);
 }

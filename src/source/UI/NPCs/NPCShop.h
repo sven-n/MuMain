@@ -104,6 +104,8 @@ namespace mu::ui::window
         void ClosingProcess();
         void SetRepairShop(bool bRepair);
         bool IsRepairShop();
+        // The shop's grid, for the control socket.
+        CInventoryCtrl* GetInventoryCtrl() const { return m_pNewInventoryCtrl; }
         void ToggleState();
         DWORD GetShopState();
 

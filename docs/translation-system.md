@@ -258,6 +258,52 @@ If your new string contains placeholders, prefer `{0}`/`{1}` and `I18N::Format`
 for narrow groups. For wide groups, `%s` / `%ls` via the bounds-checked
 `mu_swprintf_s` is the existing pattern.
 
+When translating a string with `printf`-style specifiers, keep them exactly
+as in English: the same specifiers in the same order, `%ls` stays `%ls`, and
+`%%` stays `%%` (a single `%` followed by text is read as a specifier). Chat
+commands such as `/warp`, `/trade` or `/party` are compared against the typed
+text, so they stay untranslated.
+
+### German terminology
+
+The German texts use the same terms as the German resources of the OpenMU
+server (`src/**/Properties/*.de.resx` in
+[MUnique/OpenMU](https://github.com/MUnique/OpenMU)), so players see the same
+words in the client and in server messages. The player is addressed formally
+("Sie"); NPC dialogues (`Dialog.de.resx`) keep their old-fashioned "Ihr/Euch".
+Some fixed terms:
+
+| English | German |
+|---|---|
+| Item | Gegenstand (Artikel only in the item shop) |
+| Party | Party |
+| Skill | Fähigkeit |
+| Vault / Storage | Tresor / Lager |
+| Socket | Sockel |
+| Command (stat) | Führung |
+| Elf, Muse Elf, High Elf | Elfe, Musenelfe, Hochelfe |
+| Lord Emperor | Lord-Imperator |
+| Blood Castle | Blutburg |
+| Devil Square, Chaos Castle, Castle Siege | not translated |
+| Illusion Temple | Illusionstempel |
+| Fortress of Empire Guardians | Festung der Kaiserlichen Wächter |
+| Refinery Tower | Raffinerieturm |
+| Jewel of Bless, Jewel of Soul, … | Juwel des Segens, Juwel der Seele, … |
+| Helm, Armor, Pants, Gloves, Boots, Mask | Helm, Rüstung, Hose, Handschuhe, Stiefel, Maske |
+| Great (in item names) | Großartig (*Großartiger Drachenhelm*) |
+| Seed, Sphere, Seed Sphere | Samen, Sphäre, Samensphäre |
+| Refining Stone | Verfeinerungsstein |
+| Transformation Ring | Verwandlungsring |
+
+The German item names (the `"de"` names in `src/bin/Data/Items/*.json`) are the
+same as the German item names of the OpenMU server (`ItemNames.de.resx`). Texts
+that mention an item use its German name. Armor set names are joined with the
+piece (*Drachenhelm*), proper names get a hyphen (*Hades-Helm*), and adjectives
+are declined (*Legendärer Helm*, *Legendäre Rüstung*). Skill, monster and event
+names stay English; items that teach a skill name it after a colon
+(*Schriftrolle: Evil Spirit*, *Pergament: Chain Lightning*,
+*Kugel: Twisting Slash*).
+
 ## Adding a new locale
 
 1. Create `src/Localization/<Group>.<newLocale>.resx` for every group you want
@@ -265,8 +311,98 @@ for narrow groups. For wide groups, `%s` / `%ls` via the bounds-checked
 2. Add a display name for the locale to
    `tools/ResxGen/CppEmitter.cs#KnownLanguageDisplayNames` so the language
    dropdown shows it in its own language (e.g. `["fr"] = "Français"`).
-3. Build. `ResxGen` picks up the new locale automatically from the filename;
+3. Add it to the game's language dropdown: the `s_Languages` list in
+   `src/source/UI/NewUI/Options/NewUIOptionWindow.cpp`. The editor's language
+   menu lists every locale from `GetAvailableLocales` by itself.
+4. Build. `ResxGen` picks up the new locale automatically from the filename;
    `GetAvailableLocales` will include it next run.
+5. To show item names in the new language, add them to the item data; see
+   [Item names](#item-names).
+
+## Item names
+
+Item names are not in the `.resx` files. They are part of the item data
+([item-data.md](item-data.md)): each item's `name` in
+`src/bin/Data/Items/*.json` holds the names by language code, using the same
+codes as the UI texts. The game shows the name for the active locale and
+falls back to English, like the UI texts; switching the locale at runtime
+updates item names too.
+
+### In the JSON files
+
+Each item's `name` lists its names by language code:
+
+```json
+"name": {
+  "en": "Blade",
+  "de": "Klinge",
+  "es": "Espada",
+  "pt": "Lâmina"
+},
+```
+
+- **Change a name:** edit the text.
+- **Add a translation:** add a line `"<code>": "<name>"`, e.g. `"pl": "Ostrze"`.
+- **Remove a translation:** delete its line; the game then shows the English
+  name for that language.
+- `en` is required and must stay. A translation that is the same as the
+  English name is not needed.
+- The order of the lines does not matter when editing by hand; the item
+  editor's **Save Items** writes English first and the rest sorted by code.
+- Write the files as UTF-8. Accented and non-Latin letters can be typed as
+  they are.
+- Names must not contain `||`, and names longer than 49 characters are cut
+  in the game (a warning at startup).
+
+The game reads `Data/Items` next to `Main`. The build copies
+`src/bin/Data/Items` there, so after editing the files in `src/bin`, build
+again (or edit the copy in the build folder and copy it back before
+committing).
+
+### In the item editor
+
+Item names in the item editor are shown and edited in the current UI
+language:
+
+1. Switch the language: in the game's options window, or in the editor's
+   language menu.
+2. Edit the name in the item table. The change is stored for that language
+   only; to change the English name, switch to English first.
+3. Clearing a translated name removes the translation; the English name is
+   shown again.
+4. **Save Items** writes the files.
+
+### Translating items into a language the game already has
+
+The game's UI languages are `en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`,
+`tl`, `uk` and `zh-TW`. Items currently have German (`de`), Portuguese (`pt`)
+and Spanish (`es`) names. To translate items into another of these languages,
+add names with that code (by hand or in the item editor); nothing else is
+needed. The names show as soon as a player picks that language.
+
+### Adding a new language
+
+Item names follow the UI language, so a new language has to exist as a UI
+language first:
+
+1. Add the UI language as described in [Adding a new locale](#adding-a-new-locale).
+2. Add item names with the same code.
+
+Item names for a code that is not a UI language load without errors, but
+are never shown. Import from bmd and Export as bmd only cover English,
+Portuguese and Spanish (`Data/Local/Eng`, `Por`, `Spn`); names in other
+languages exist only in the JSON files.
+
+### Checking your changes
+
+Start the game: problems in the item data stop the start with a message
+that names the file, the item and the field, and all problems are in
+`MuError.log`. With a test build (`-DBUILD_TESTING=ON`), the item data tests
+also check the files in `src/bin/Data/Items` without starting the game:
+
+```bash
+ctest --test-dir <build folder> --build-config Debug -R items --output-on-failure
+```
 
 ## Migration history
 

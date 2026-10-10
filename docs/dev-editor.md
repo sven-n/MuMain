@@ -113,7 +113,7 @@ so the first tweak doesn't snap.
 | **Item Cull Sphere** | Visualises the item cull radius around each dropped item. | Sanity-checking the **Item Cull Radius** slider's effect. |
 | **Item Cull Radius** slider | Overrides `DEFAULT_CULL_RADIUS_ITEM` (400) for the active session. | Tuning how close you need to be before items render. |
 | **Tile Grid** | Overlays a debug grid on terrain tiles. | Checking tile boundaries when investigating LOD or terrain bugs. |
-| **Rendering: Terrain / Static Objects / Effects / Dropped Items / Weather / Item Labels** | Cuts each pass out of the frame entirely. | Isolating which pass owns a visual artefact, or measuring per-pass cost via `$details`. |
+| **Rendering: Terrain / Static Objects / Effects / Dropped Items / Weather / Item Labels** | Cuts each pass out of the frame entirely. | Isolating which pass owns a visual artefact, or measuring per-pass cost via `$glstats`. |
 
 ### 3.2 Graphics tab
 

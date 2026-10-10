@@ -1,0 +1,214 @@
+#include "stdafx.h"
+
+#include "ItemJsonStorage.h"
+#include "Data/DataHandler/TextFile.h"
+#include "Data/GameData/ItemData/ItemDataValidation.h"
+#include "Data/GameData/ItemData/ItemJsonFormat.h"
+#include "Data/GameData/ItemData/ItemModelJsonFormat.h"
+
+#include <algorithm>
+#include <array>
+#include <cctype>
+#include <fstream>
+#include <optional>
+
+namespace Data::Items
+{
+namespace
+{
+constexpr const char* JsonExtension = ".json";
+constexpr const char* TemporaryExtension = ".tmp";
+
+// Same order as the ITEM_GROUP_* constants.
+constexpr std::array<const char*, MAX_ITEM_TYPE> GroupFileNames = {
+    "Sword", "Axe",   "Mace",   "Spear", "Bow",  "Staff",  "Shield", "Helm",
+    "Armor", "Pants", "Gloves", "Boots", "Wing", "Helper", "Potion", "Etc"};
+
+// The shared model file, whatever the case of its name: Windows does not
+// tell them apart, so "sharedModels.json" is the same file there.
+bool IsSharedItemModelsFile(std::string_view fileName)
+{
+    const std::string_view expected = SharedItemModelsFileName;
+    return std::equal(
+        fileName.begin(), fileName.end(), expected.begin(), expected.end(), [](char left, char right)
+        { return std::tolower(static_cast<unsigned char>(left)) == std::tolower(static_cast<unsigned char>(right)); });
+}
+
+std::vector<std::filesystem::path> FindJsonFiles(const std::filesystem::path& directory)
+{
+    std::vector<std::filesystem::path> files;
+    std::error_code error;
+    for (const auto& entry : std::filesystem::directory_iterator(directory, error))
+    {
+        if (entry.is_regular_file() && entry.path().extension() == JsonExtension)
+        {
+            files.push_back(entry.path());
+        }
+    }
+    std::sort(files.begin(), files.end());
+    return files;
+}
+
+void AddError(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& message)
+{
+    issues.push_back({ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "", message});
+}
+
+// Reads every *.json file of the folder with readFile(text, source).
+template <typename TReadFile>
+void ReadJsonFiles(const std::filesystem::path& directory, const char* noFilesMessage,
+                   std::vector<ItemDataIssue>& issues, TReadFile&& readFile)
+{
+    const std::vector<std::filesystem::path> files = FindJsonFiles(directory);
+    if (files.empty())
+    {
+        AddError(issues, directory.string(), noFilesMessage);
+        return;
+    }
+
+    for (const std::filesystem::path& file : files)
+    {
+        const std::string source = file.filename().string();
+        const std::optional<std::string> text = ReadTextFile(file);
+        if (!text)
+        {
+            AddError(issues, source, "could not be read");
+            continue;
+        }
+        readFile(*text, source);
+    }
+}
+
+bool WriteFileIfChanged(const std::filesystem::path& path, const std::string& text, std::vector<ItemDataIssue>& issues)
+{
+    const std::optional<std::string> current = ReadTextFile(path);
+    if (current == text)
+    {
+        return true;
+    }
+
+    std::filesystem::path temporaryPath = path;
+    temporaryPath += TemporaryExtension;
+    {
+        std::ofstream file(temporaryPath, std::ios::binary | std::ios::trunc);
+        file << text;
+        // Closing flushes; checking only afterwards also catches a failing
+        // final write (e.g. a full disk) before the old file is replaced.
+        file.close();
+        if (!file)
+        {
+            AddError(issues, temporaryPath.string(), "could not be written");
+            return false;
+        }
+    }
+
+    std::error_code error;
+    std::filesystem::rename(temporaryPath, path, error);
+    if (error)
+    {
+        AddError(issues, path.string(), "could not be replaced: " + error.message());
+        std::filesystem::remove(temporaryPath, error);
+        return false;
+    }
+    return true;
+}
+} // namespace
+
+std::filesystem::path GetItemDataDirectory()
+{
+    return std::filesystem::path("Data") / "Items";
+}
+
+std::string GetItemGroupFileName(int group)
+{
+    const std::string number = (group < 10 ? "0" : "") + std::to_string(group);
+    return "Group" + number + "_" + GroupFileNames[group] + JsonExtension;
+}
+
+ItemDataLoadResult LoadItemDataDirectory(const std::filesystem::path& directory)
+{
+    ItemDataLoadResult result;
+    ReadJsonFiles(directory, "no item data files found", result.issues,
+                  [&](std::string_view text, const std::string& source)
+                  { ReadItemGroupJson(text, source, result.items, result.issues); });
+    ValidateItems(result.items, result.issues);
+    return result;
+}
+
+std::filesystem::path GetItemModelDataDirectory()
+{
+    return GetItemDataDirectory() / "Models";
+}
+
+ItemModelDataLoadResult LoadItemModelDataDirectory(const std::filesystem::path& directory)
+{
+    ItemModelDataLoadResult result;
+    ReadJsonFiles(directory, "no item model files found", result.issues,
+                  [&](std::string_view text, const std::string& source)
+                  {
+                      if (IsSharedItemModelsFile(source))
+                      {
+                          ReadSharedItemModelsJson(text, source, result.sharedModels, result.issues);
+                      }
+                      else
+                      {
+                          ReadItemModelGroupJson(text, source, result.models, result.issues);
+                      }
+                  });
+    ApplySharedItemModels(result.models, result.sharedModels, SharedItemModelsFileName, result.issues);
+    ValidateItemModels(result.models, result.issues);
+    // These checks go across files; the group file of the item is where to fix it.
+    for (ItemDataIssue& issue : result.issues)
+    {
+        if (issue.source.empty() && issue.group != ItemDataIssue::NoItem)
+        {
+            issue.source = GetItemGroupFileName(issue.group);
+        }
+    }
+    return result;
+}
+
+std::filesystem::path GetGlowColorsFile()
+{
+    return std::filesystem::path(Effects::GlowColorsFile);
+}
+
+GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
+{
+    GlowColorsLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddError(result.issues, source, "could not be read");
+        return result;
+    }
+    Effects::ReadGlowColorsJson(*text, source, result.colors, result.issues);
+    return result;
+}
+
+ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory, std::span<const ItemDefinition> items,
+                                         std::vector<ItemDataIssue>& issues)
+{
+    std::vector<ItemDefinition> existingItems;
+    std::copy_if(items.begin(), items.end(), std::back_inserter(existingItems),
+                 [](const ItemDefinition& definition) { return definition.Exists(); });
+
+    ValidateItems(existingItems, issues);
+    if (HasErrors(issues))
+    {
+        return ItemDataSaveResult::InvalidData;
+    }
+
+    std::error_code error;
+    std::filesystem::create_directories(directory, error);
+
+    bool success = true;
+    for (int group = 0; group < MAX_ITEM_TYPE; ++group)
+    {
+        const std::string text = WriteItemGroupJson(group, existingItems);
+        success = WriteFileIfChanged(directory / GetItemGroupFileName(group), text, issues) && success;
+    }
+    return success ? ItemDataSaveResult::Saved : ItemDataSaveResult::WriteFailed;
+}
+} // namespace Data::Items
