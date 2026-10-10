@@ -121,7 +121,7 @@ void mu::ui::window::CSiegeWarBase::FillRmlModel(SiegeWarfareRmlModel& model)
     model.dots.clear();
     model.commands.clear();
     model.teams.clear();
-    model.orders.clear();
+    model.ordersVisible = false;
     model.cursorVisible = false;
     OnFillRmlModel(model);
 

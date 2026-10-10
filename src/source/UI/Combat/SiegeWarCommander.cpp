@@ -12,7 +12,6 @@ using namespace mu::ui::window;
 
 mu::ui::window::CSiegeWarCommander::CSiegeWarCommander()
 {
-    memset(&m_BtnCommandPos, 0, sizeof(POINT));
 
     m_iCurSelectBtnGroup = -1;
     m_iCurSelectBtnCommand = -1;
@@ -156,23 +155,14 @@ void mu::ui::window::CSiegeWarCommander::FillGuildMemberDots(SiegeWarfareRmlMode
 void mu::ui::window::CSiegeWarCommander::FillTeamButtons(SiegeWarfareRmlModel& model)
 {
     for (int i = 0; i < MAX_COMMANDGROUP; i++)
-    {
-        model.teams.push_back({static_cast<float>(kBtnCommandGroupPos.x),
-                               static_cast<float>(kBtnCommandGroupPos.y + i * MINIMAP_BTN_GROUP_HEIGHT),
-                               i == m_iCurSelectBtnGroup, std::to_string(i + 1)});
-    }
+        model.teams.push_back({i == m_iCurSelectBtnGroup, std::to_string(i + 1)});
 }
 
-// The three command buttons beside the chosen team (teams 6 and 7 share team 5's row, as in the
-// original's RenderCmdBtn()).
+// The three command buttons, which the theme places beside the chosen team.
 void mu::ui::window::CSiegeWarCommander::FillCommandButtons(SiegeWarfareRmlModel& model)
 {
-    const int row = std::min(m_iCurSelectBtnGroup, 4);
-    for (int i = 0; i < MINIMAP_CMD_MAX; i++)
-    {
-        model.orders.push_back({static_cast<float>(kBtnCommandGroupPos.x + MINIMAP_BTN_GROUP_WIDTH),
-                                static_cast<float>(kBtnCommandGroupPos.y + (row + i) * MINIMAP_BTN_GROUP_HEIGHT), false, {}});
-    }
+    model.ordersVisible = true;
+    model.chosenTeam = m_iCurSelectBtnGroup;
 }
 
 void mu::ui::window::CSiegeWarCommander::ClearGuildMemberLocation(void)

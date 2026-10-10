@@ -34,7 +34,6 @@ struct SiegeWarCommandEntry
 // the chosen team. A chosen team shows its pressed art.
 struct SiegeWarButtonEntry
 {
-    float left = 0.f, top = 0.f;
     bool selected = false;
     Rml::String label;
 
@@ -63,9 +62,11 @@ struct SiegeWarfareRmlModel
     bool skillAffordable = false;
     Rml::String killsNeeded, kills;
 
-    // The commander's team and command buttons, and the chosen command under the pointer.
+    // The commander's team buttons, the command buttons for the chosen team (0-based), and the
+    // chosen command under the pointer.
     std::vector<SiegeWarButtonEntry> teams;
-    std::vector<SiegeWarButtonEntry> orders;
+    bool ordersVisible = false;
+    int chosenTeam = -1;
     bool cursorVisible = false;
     float cursorLeft = 0.f, cursorTop = 0.f;
     int cursorCommand = 0;

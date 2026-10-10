@@ -47,7 +47,7 @@ reconnect_dialog.rml: state -- the progress bar's fill is the reconnect's own pr
 server_msg.rml: state -- the window's sides grow with the message as it is typed out (kSideStepHeight * m_nBgSideNow), and the centre and bottom pieces follow that height
 server_select.rml: state -- gauge width is the server load
 set_item_explanation.rml: debt -- each box and line sits where RenderTipTextList() recorded it, so the table's stacking and widths are measured in C++; the table's placement against the hovered item is state
-siege_warfare.rml: debt -- the team buttons' and the command buttons' boxes are C++ constants, the command buttons moved every frame to the chosen team's row; the hero, the dots and each command's icon at their projected map points and the pointer's command are state
+siege_warfare.rml: state -- the hero, the other characters' dots and each command's icon sit at their projected map points, and the pointer's chosen command follows the mouse
 slide_notice.rml: state -- the ticker scrolls right to left every frame, so the text's left and the band's fading height are its state, not a layout a theme could own
 themes/legacy/chat_log.rml: state -- panel and well heights follow the user resize, in dp
 themes/legacy/tooltip.rml: state -- tooltip is placed against the pointer

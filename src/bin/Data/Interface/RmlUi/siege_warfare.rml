@@ -44,16 +44,28 @@
 				<img class="command-icon" src="../../../i_wait.tga" rect="0 0 10 11" data-if="c.command == 2" data-style-image-color="c.color"/>
 			</div>
 
-			<div class="team" data-for="t : teams" data-style-left="t.left + 'px'" data-style-top="t.top + 'px'"
-			     data-class-selected="t.selected" data-style-opacity="alpha" data-event-click="siege_team_click(it_index)">
-				<span class="text bold button-label counter-scaled" data-style-font-size="bold_text_px + 'px'">{{t.label}}</span>
+			<!-- The team buttons' column, and the command buttons the theme places beside the chosen
+			     team (chosen-0 .. chosen-6). -->
+			<div id="teams">
+				<div class="team" data-for="t : teams" data-class-selected="t.selected" data-style-opacity="alpha"
+				     data-event-click="siege_team_click(it_index)">
+					<span class="text bold button-label counter-scaled" data-style-font-size="bold_text_px + 'px'">{{t.label}}</span>
+				</div>
 			</div>
 
-			<div class="order" data-for="o, i : orders" data-style-left="o.left + 'px'" data-style-top="o.top + 'px'">
-				<div class="order-button" data-style-opacity="alpha" data-event-click="siege_order_click(i)"></div>
-				<div class="order-icon attack" data-if="i == 0"></div>
-				<div class="order-icon defence" data-if="i == 1"></div>
-				<div class="order-icon wait" data-if="i == 2"></div>
+			<div id="orders" data-if="orders_visible" data-attr-class="'chosen-' + chosen_team">
+				<div class="order">
+					<div class="order-button" data-style-opacity="alpha" data-event-click="siege_order_click(0)"></div>
+					<div class="order-icon attack"></div>
+				</div>
+				<div class="order">
+					<div class="order-button" data-style-opacity="alpha" data-event-click="siege_order_click(1)"></div>
+					<div class="order-icon defence"></div>
+				</div>
+				<div class="order">
+					<div class="order-button" data-style-opacity="alpha" data-event-click="siege_order_click(2)"></div>
+					<div class="order-icon wait"></div>
+				</div>
 			</div>
 
 			<div id="hero" data-style-left="hero_left + 'px'" data-style-top="hero_top + 'px'" data-style-opacity="alpha"></div>

@@ -11,14 +11,6 @@ namespace mu::ui::window
     class CSiegeWarCommander : public CSiegeWarBase
     {
     public:
-        enum FRAME_SIZE
-        {
-            MINIMAP_BTN_GROUP_WIDTH = 26,
-            MINIMAP_BTN_GROUP_HEIGHT = 22,
-            MINIMAP_BTN_COMMAND_WIDTH = 30,
-            MINIMAP_BTN_COMMAND_HEIGHT = 22,
-        };
-
         enum MIMIMAP_COMMAND
         {
             MINIMAP_CMD_ATTACK = 0,
@@ -28,9 +20,6 @@ namespace mu::ui::window
         };
 
     private:
-        // The team buttons\' column, from the frame\'s top-left.
-        static constexpr POINT kBtnCommandGroupPos{0, 5};
-        POINT			m_BtnCommandPos;
 
 
         int				m_iCurSelectBtnGroup;

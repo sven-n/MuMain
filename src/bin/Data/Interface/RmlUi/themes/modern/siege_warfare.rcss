@@ -59,12 +59,20 @@ body { pointer-events: none; }
 .cursor-icon.defence { width: 18px; height: 15px; }
 .cursor-icon.wait { width: 11px; height: 12px; }
 
-.team { position: absolute; width: 26px; height: 22px; background-color: token(surface-raised); border: 1px token(border-frame); border-radius: token(radius-sm); }
+/* The original's RenderCmdBtn(): the team column at (0, 5), 22 apart, and the command column beside
+   it from the chosen team's row; teams 6 and 7 share team 5's row. */
+#teams { position: absolute; left: 0; top: 5px; }
+#orders { position: absolute; left: 26px; top: 5px; }
+#orders.chosen-1 { top: 27px; }
+#orders.chosen-2 { top: 49px; }
+#orders.chosen-3 { top: 71px; }
+#orders.chosen-4, #orders.chosen-5, #orders.chosen-6 { top: 93px; }
+.team { position: relative; display: block; box-sizing: border-box; width: 26px; height: 22px; background-color: token(surface-raised); border: 1px token(border-frame); border-radius: token(radius-sm); }
 .team:hover { background-color: token(accent-steel-hover); }
 .team:active, .team.selected { background-color: token(surface-recessed); }
 
-.order { position: absolute; width: 30px; height: 22px; }
-.order-button { position: absolute; left: 0; top: 0; width: 30px; height: 22px; background-color: token(surface-raised); border: 1px token(border-frame); border-radius: token(radius-sm); }
+.order { position: relative; display: block; width: 30px; height: 22px; }
+.order-button { position: absolute; left: 0; top: 0; box-sizing: border-box; width: 30px; height: 22px; background-color: token(surface-raised); border: 1px token(border-frame); border-radius: token(radius-sm); }
 .order-button:hover { background-color: token(accent-steel-hover); }
 .order-button:active { background-color: token(surface-recessed); }
 .order-icon { position: absolute; }

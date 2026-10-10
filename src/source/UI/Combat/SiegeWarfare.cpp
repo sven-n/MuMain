@@ -186,8 +186,6 @@ void mu::ui::window::CSiegeWarfare::BindRmlModel(Rml::DataModelConstructor& c, S
     c.Bind("kills", &model.kills);
 
     auto button = c.RegisterStruct<SiegeWarButtonEntry>();
-    button.RegisterMember("left", &SiegeWarButtonEntry::left);
-    button.RegisterMember("top", &SiegeWarButtonEntry::top);
     button.RegisterMember("selected", &SiegeWarButtonEntry::selected);
 
     // The HUD's buttons; a click on one never reaches the world.
@@ -212,7 +210,8 @@ void mu::ui::window::CSiegeWarfare::BindRmlModel(Rml::DataModelConstructor& c, S
     button.RegisterMember("label", &SiegeWarButtonEntry::label);
     c.RegisterArray<std::vector<SiegeWarButtonEntry>>();
     c.Bind("teams", &model.teams);
-    c.Bind("orders", &model.orders);
+    c.Bind("orders_visible", &model.ordersVisible);
+    c.Bind("chosen_team", &model.chosenTeam);
     c.Bind("cursor_visible", &model.cursorVisible);
     c.Bind("cursor_left", &model.cursorLeft);
     c.Bind("cursor_top", &model.cursorTop);
@@ -266,7 +265,8 @@ void mu::ui::window::CSiegeWarfare::ApplyRmlModel(const SiegeWarfareRmlModel& ne
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::killsNeeded, "kills_needed", next.killsNeeded);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::kills, "kills", next.kills);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::teams, "teams", next.teams);
-    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::orders, "orders", next.orders);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::ordersVisible, "orders_visible", next.ordersVisible);
+    SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::chosenTeam, "chosen_team", next.chosenTeam);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::cursorVisible, "cursor_visible", next.cursorVisible);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::cursorLeft, "cursor_left", next.cursorLeft);
     SyncField(m_RmlView.Binder(), &SiegeWarfareRmlModel::cursorTop, "cursor_top", next.cursorTop);
