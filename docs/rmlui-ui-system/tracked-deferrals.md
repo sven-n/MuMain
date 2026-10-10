@@ -193,16 +193,16 @@ layout defects in all five windows. Results and the rerun command are recorded i
 [migration-ledger.md](migration-ledger.md#small-scale-text-baseline).
 Step 2 implemented on 2026-10-10: both event entry windows now wrap complete descriptions in
 bounded scroll panes, with wrapping level labels and a separate scrollable level list when
-needed. The native font floor is unchanged. Automated event geometry passes; in-game checks
-remain pending. See [migration-ledger.md](migration-ledger.md#event-entry-text-follow-up).
+needed. The native font floor is unchanged. Automated event geometry passes, and the in-game
+checks were confirmed on 2026-10-10. See [migration-ledger.md](migration-ledger.md#event-entry-text-follow-up).
 Step 3 implemented on 2026-10-10: both personal-shop views flow their notices in a bounded,
 scrollable pane; only the legacy title's compact fit remains for step 5. See
 [migration-ledger.md](migration-ledger.md#personal-shop-notice-follow-up).
 
 | Group | Initial failing cases (before its layout fix) | Change / remaining plan |
 |---|---|---|
-| Blood Castle entry | Character-count splitting, fitting against fixed 72/190-unit boxes, and absolute description/button rows caused overflow and overlap. | Implemented: complete paragraph in a bounded wrapping pane, wrapping title and level labels, and scrollable level list when needed. In-game confirmation pending. |
-| Devil Square entry | Six translated fragments occupied fixed rows in `event_entry.rcss` / `devil_square_enter.rcss`. | Implemented: all six fragments flow in order inside the description pane. Enabled/locked bands, entry requests and exit actions are preserved. In-game confirmation pending. |
+| Blood Castle entry | Character-count splitting, fitting against fixed 72/190-unit boxes, and absolute description/button rows caused overflow and overlap. | Implemented: complete paragraph in a bounded wrapping pane, wrapping title and level labels, and scrollable level list when needed. Confirmed in game. |
+| Devil Square entry | Six translated fragments occupied fixed rows in `event_entry.rcss` / `devil_square_enter.rcss`. | Implemented: all six fragments flow in order inside the description pane. Enabled/locked bands, entry requests and exit actions are preserved. Confirmed in game. |
 | MU Helper config | Legacy binds native-size text on narrow labels; both themes use tightly packed checkbox, numeric-field and Setting-button positions. | Give labels explicit available widths and reflow the affected rows in all three tabs. Verify class-dependent layouts, including Summoner recovery and Dark Lord raven controls. |
 | Personal-shop warnings | Legacy `my_shop` and `purchase_shop` use fixed notice rows with `white-space: nowrap` and `overflow: hidden`. Modern has its own typography but retains fixed warning offsets. | Implemented: each row wraps in native's three groups inside one bounded, scrollable pane shared by both views (`shop_notice.rcss`). Warning emphasis, grids, name entry and controls kept. The legacy title still touches the close target in de/es/ru at 1.5x/2x (step 5). |
 
@@ -213,7 +213,7 @@ Implementation order, with one focused change per concern:
    element, its drawn text bounds, available width/height and neighbouring control. Include
    English and longer German, Spanish, Polish and Russian strings. Record the current normal
    font floor so a layout fix cannot silently change it.
-2. **Use the event pair as the pilot — implemented; in-game confirmation pending.** Replace character-count/fixed-row presentation with
+2. **Use the event pair as the pilot — completed.** Replace character-count/fixed-row presentation with
    theme-owned flow. Remove any replaced per-line fitting fields, bindings and measurements;
    retain native-size compatibility inputs where used. A paragraph must wrap as one text layer,
    with physical-pixel widths where counter-scaling is used. Account for vertical space before

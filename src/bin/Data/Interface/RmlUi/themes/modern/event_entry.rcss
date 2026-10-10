@@ -38,7 +38,10 @@
     line-height: 1.1;
 }
 .entry-btn {
-    display: block;
+    /* The label centres on the band when the band's minimum height is the taller. */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     position: relative;
     box-sizing: border-box;
     min-height: calc(29px * var(--root-scale));

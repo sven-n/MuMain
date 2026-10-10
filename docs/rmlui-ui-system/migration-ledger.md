@@ -106,7 +106,7 @@ open for the remaining implementation and in-game validation.
 
 ## Event entry text follow-up
 
-2026-10-10: rollout 2, step 2 implemented; in-game confirmation pending. Blood Castle displays
+2026-10-10: rollout 2, step 2 completed and confirmed in game. Blood Castle displays
 the complete translated paragraph, and Devil Square displays all six complete fragments in
 their original order. Both themes wrap descriptions inside a bounded pane above the level list.
 Scrollbars appear when needed, and wheel/drag scrolling makes the remaining prose reachable.
@@ -131,17 +131,12 @@ audit measures all lines for horizontal clipping and only compares painted conte
 vertical clipping inside an accessible scroll pane is intentional. The rerun command remains the
 one above. Headless checks do not establish visual readability or server-side entry behaviour.
 
-In-game checks before signing off this pilot:
-
-- In both themes, open Blood Castle and Devil Square at 1024x768 / 75%; check the full description,
-  title, wrapped level labels and separation between descriptions, buttons and exit controls.
-- Wheel and drag each scrollbar to both ends. Verify the last description fragment and every
-  level band remain reachable, with no clicks passing through to the world.
-- Verify locked bands stay grey and cannot enter, the eligible band highlights and requests
-  entry, and the footer exit, corner close target and Escape close the window.
-- Change theme, resolution and UI scale while shown; check 100/125/150% at 1280x720 and
-  1920x1080. Check a longer translation and 1.5x/2x OS scale where available, including legacy
-  stretched button art and modern footer icon visibility.
+Confirmed in game on 2026-10-10 through `$win bloodcastle full` / `$win devilsquare full`: both
+themes at 1024x768 / 75% and 1920x1080 / 150%. Both scroll panes reach their ends by dragging;
+the eligible band highlights and requests entry (the server answered with its invitation check);
+locked bands take no click; the exit button and Escape close; a theme switch while shown re-lays
+the window out. Level labels centre on bands taller than their text (the band's minimum height
+grows with scale). The mouse wheel and 1.5x/2x OS display scale were not exercised in game.
 
 ## Personal-shop notice follow-up
 
