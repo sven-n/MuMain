@@ -6,7 +6,6 @@
 #include "CharInfoBalloon.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "UI/Legacy/UIControls.h"
 #include "CharacterManager.h"
 #include "I18N/All.h"
 
@@ -15,6 +14,7 @@
 #include <cwchar>
 
 #include "Camera/CameraProjection.h"
+#include "UI/Scaling/UITransform.h"
 
 namespace
 {
@@ -45,18 +45,18 @@ namespace
         { 255, 488 },
     } };
 
-    DWORD ResolveNameColor(std::uint8_t controlCode)
+    BalloonNameStatus ResolveNameStatus(std::uint8_t controlCode)
     {
         if (controlCode & CTLCODE_01BLOCKCHAR)
-            return ARGB(255, 0, 255, 255);
+            return BalloonNameStatus::BlockedCharacter;
         if (controlCode & (CTLCODE_02BLOCKITEM | CTLCODE_10ACCOUNT_BLOCKITEM))
-            return CLRDW_BR_ORANGE;
+            return BalloonNameStatus::BlockedItems;
         if (controlCode & CTLCODE_04FORTV)
-            return CLRDW_WHITE;
+            return BalloonNameStatus::Normal;
         if (controlCode & (CTLCODE_08OPERATOR | CTLCODE_20OPERATOR))
-            return ARGB(255, 255, 0, 0);
+            return BalloonNameStatus::Operator;
 
-        return CLRDW_WHITE;
+        return BalloonNameStatus::Normal;
     }
 
     int ResolveGuildTextIndex(std::uint8_t guildStatus)
@@ -95,7 +95,7 @@ void CCharInfoBalloon::Create(CHARACTER* pCharInfo)
     CSprite::Create(118, 54, BITMAP_LOG_IN + 7, 0, nullptr, 59, 54);
 
     m_pCharInfo = pCharInfo;
-    m_dwNameColor = 0;
+    m_eNameStatus = BalloonNameStatus::Normal;
     std::fill(std::begin(m_szName), std::end(m_szName), L'\0');
     std::fill(std::begin(m_szGuild), std::end(m_szGuild), L'\0');
     std::fill(std::begin(m_szClass), std::end(m_szClass), L'\0');
@@ -103,10 +103,13 @@ void CCharInfoBalloon::Create(CHARACTER* pCharInfo)
 
 void CCharInfoBalloon::Render()
 {
+    // No longer draws anything (RmlUi owns 100% of this balloon's visuals -- see this class's
+    // header comment) -- still recomputes the live screen position every call, since the
+    // character's world position (and the camera) can change frame to frame. CSprite::SetPosition
+    // keeps this sprite's own GetXPos()/GetYPos() bookkeeping in sync so
+    // CCharInfoBalloonMng::SyncRmlModel() can read it back right after calling this.
     if (m_pCharInfo == nullptr || !CSprite::m_bShow)
         return;
-
-    CSprite::Render();
 
     vec3_t afPos;
     VectorCopy(m_pCharInfo->Object.Position, afPos);
@@ -115,49 +118,11 @@ void CCharInfoBalloon::Render()
     int nPosX, nPosY;
     CameraProjection::WorldToScreen(g_Camera, afPos, &nPosX, &nPosY);
 
-    CSprite::SetPosition(
-        int(nPosX * g_fScreenRate_x),
-        int(nPosY * g_fScreenRate_y)
-    );
-
-    g_pRenderText->SetFont(g_hFixFont);
-    g_pRenderText->SetBgColor(0);
-
-    const int spriteX = CSprite::GetXPos();
-    const int spriteY = CSprite::GetYPos();
-    const int spriteW = CSprite::GetWidth();
-
-    const int nTextPosX = int(spriteX / g_fScreenRate_x);
-
-    g_pRenderText->SetTextColor(m_dwNameColor);
-    g_pRenderText->RenderText(
-        nTextPosX,
-        int((spriteY + 6) / g_fScreenRate_y),
-        m_szName,
-        spriteW / g_fScreenRate_x,
-        0,
-        RT3_SORT_CENTER
-    );
-
-    g_pRenderText->SetTextColor(CLRDW_WHITE);
-    g_pRenderText->RenderText(
-        nTextPosX,
-        int((spriteY + 22) / g_fScreenRate_y),
-        m_szGuild,
-        spriteW / g_fScreenRate_x,
-        0,
-        RT3_SORT_CENTER
-    );
-
-    g_pRenderText->SetTextColor(CLRDW_BR_ORANGE);
-    g_pRenderText->RenderText(
-        nTextPosX,
-        int((spriteY + 38) / g_fScreenRate_y),
-        m_szClass,
-        spriteW / g_fScreenRate_x,
-        0,
-        RT3_SORT_CENTER
-    );
+    // WorldToScreen() reports the original's screen stretched over the window.
+    const UI::Scaling::Transform screen =
+        UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+    CSprite::SetPosition(static_cast<int>(UI::Scaling::SizeX(screen, static_cast<float>(nPosX))),
+                         static_cast<int>(UI::Scaling::SizeY(screen, static_cast<float>(nPosY))));
 }
 
 void CCharInfoBalloon::SetInfo()
@@ -173,7 +138,7 @@ void CCharInfoBalloon::SetInfo()
 
     CSprite::m_bShow = true;
 
-    m_dwNameColor = ResolveNameColor(m_pCharInfo->CtlCode);
+    m_eNameStatus = ResolveNameStatus(m_pCharInfo->CtlCode);
 
     CopyWideString(m_szName, m_pCharInfo->ID);
 

@@ -1,0 +1,45 @@
+/* Legacy theme for the Golden Archer's windows (CGoldBowmanWindow, CGoldBowmanLena), over
+   event_item_entry.rcss (linked first): texts keep their spaces (the Rena counts are
+   "    X    n") and start from their box's left edge where the original used RT3_SORT_LEFT;
+   Register is the 108 x 29 newui_btn_empty with a white normal label and the exit button
+   newui_exit_00 (36 x 29); the original registered both without an over image
+   (ChangeButtonImgState(.., false)), so hovering keeps the up row and pressing shows the second
+   row. The number field is the original's CUITextInputBox: white text over a faint black back,
+   inside the newui_guildmakeeditbox back of the background document. */
+
+@spritesheet gb-btn-wide-sheet
+{
+	src: "../../../newui_btn_empty.tga";
+	gb-btn-wide-up: 0px 0px 108px 29px;
+	gb-btn-wide-down: 0px 29px 108px 29px;
+}
+@spritesheet gb-exit-sheet
+{
+	src: "../../../newui_exit_00.tga";
+	gb-exit-up: 0px 0px 36px 29px;
+	gb-exit-down: 0px 29px 36px 29px;
+}
+
+.entry-text .sharp-text { white-space: pre; }
+
+
+#serial_field {
+	text-align: left;
+	left: 50px;
+	top: 260px;
+	padding: 0;
+	border-width: 0;
+	border-radius: 0;
+	background-color: rgba(0, 0, 0, 25);
+	color: rgba(255, 255, 230, 230);
+	pointer-events: auto;
+}
+
+/* The docked frame and the lucky number field's back. */
+@spritesheet gb-serial-back-sheet { src: "../../../newui_guildmakeeditbox.tga"; gb-serial-back: 0px 0px 108px 23px; }
+
+.frame-top { decorator: image(docked-bg-top-a); }
+#serial_back { position: absolute; left: 45px; top: 255px; width: 108px; height: 23px; decorator: image(gb-serial-back); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#serial_field { width: calc(200px * var(--root-scale)); height: calc(14px * var(--root-scale)); line-height: calc(14px * var(--root-scale)); }

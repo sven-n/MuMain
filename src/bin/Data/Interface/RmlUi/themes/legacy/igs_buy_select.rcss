@@ -1,0 +1,80 @@
+/* The cash shop's several-price package dialog (CMsgBoxIGSBuySelectItem) on
+   Ingame_pack_back03: the title, the picked option's item, the package's name and description,
+   the option list with a radio indicator, the picked price and the three buttons. Reference px
+   under the dialog's root transform; the list pane counter-scales out of it so its text stays at
+   the native renderer's physical size. */
+
+/* Centred on the cash shop's 640 x 429 area of the stage, 215 x 346. */
+#stage { pointer-events: none; }
+#panel {
+	position: absolute;
+	left: 212px;
+	top: 41px;
+	width: 215px;
+	height: 346px;
+	font-family: "token(font-body)";
+	pointer-events: none;
+}
+
+@spritesheet igs-select-back-sheet { src: "../../../InGameShop/Ingame_pack_back03.tga"; igs-select-back: 0px 0px 215px 346px; }
+.igs-dialog-frame { position: absolute; left: 0; top: 0; width: 215px; height: 346px; decorator: image(igs-select-back); }
+#igs_item { position: absolute; left: 0; top: 0; width: 215px; height: 346px; pointer-events: none; }
+/* Where C++ draws the live 3D item (the original's 96x60 at 60,33). */
+#igs_item_box { position: absolute; left: 60px; top: 33px; width: 96px; height: 60px; pointer-events: none; }
+
+.igs-dialog-line { position: absolute; left: 0; width: 215px; height: 1px; font-weight: bold; }
+#igs_title { top: 10px; color: #ffffff; }
+#igs_name { top: 100px; color: rgb(255, 255, 0); }
+/* The description's lines 10 apart from (15, 118). */
+#igs_description { position: absolute; left: 15px; top: 118px; width: 194px; color: #ffffff; }
+.igs-description-line { position: relative; display: block; height: 10px; }
+#igs_price { right: 20px; top: 288px; color: #ffffff; }
+
+/* Native placed the box at (17, 277) in left-down coordinates, 180 x 100 -- so its top edge is
+   277 - 100. The height here is the 3 rows it actually drew. */
+#igs_option_list {
+	position: absolute;
+	left: 17px;
+	top: 177px;
+	transform-origin: left top;
+	overflow: hidden scroll;
+	pointer-events: auto;
+}
+
+/* display: block is explicit: a data-for <div> is inline without it in this build. */
+.igs-option { position: relative; display: block; pointer-events: auto; }
+
+/* RenderDataLine() put the indicator at the row's left + 1 and the bold label at + 20. */
+.igs-option-radio {
+	position: absolute;
+	left: 1px;
+	top: 7px;
+	width: 13px;
+	height: 13px;
+	border: 1px rgb(120, 110, 96);
+	background-color: rgb(32, 30, 26);
+}
+.igs-option.selected .igs-option-radio { background-color: rgb(255, 196, 0); }
+
+.igs-option-label {
+	position: absolute;
+	left: 20px;
+	top: 5px;
+	white-space: nowrap;
+	font-weight: bold;
+	color: rgb(255, 230, 210);
+}
+
+/* Buy, Gift and Cancel from (26, 309), 56 apart; the labels sit a unit left of centre. */
+.igs-dialog-buttons { position: absolute; left: 26px; top: 309px; display: flex; pointer-events: none; }
+.igs-dialog-buttons .igs-btn { position: relative; flex: 0 0 52px; margin-right: 4px; }
+.igs-dialog-buttons .igs-btn-label { margin-left: -1001px; }
+.igs-dialog-buttons .igs-btn:active .igs-btn-label { margin-left: -1000px; }
+
+/* Developer builds (FOR_WORK): the option's sequence numbers in red right of the dialog. */
+.igs-debug { position: absolute; left: 215px; top: 10px; color: rgb(255, 0, 0); }
+.igs-debug-line { position: relative; display: block; height: 10px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#igs_option_list { width: calc(180px * var(--root-scale)); height: calc(99px * var(--root-scale)); }
+.igs-option { width: calc(165px * var(--root-scale)); height: calc(33px * var(--root-scale)); }

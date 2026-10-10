@@ -1,0 +1,76 @@
+/* Modern theme for CMuHelperSkillPicker -- each entry is base.rcss's shared .slot/.slot--filled
+   rather than native's newui_skillbox art. The skill icons themselves are game art and identical in
+   both themes (skill_icons.rcss). Plain reference px: #panel carries the config window's scale. */
+
+/* Above the docked MU Helper documents by the stacking table (5.2 over 3.4), so RmlUi's own hit
+   test stops at the flyout rather than reaching a control underneath it. */
+body {
+	position: absolute;
+}
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+.mhsp-entry {
+	position: absolute;
+	width: 32px;
+	height: 38px;
+	/* base.rcss sizes .slot's border in dp; this panel is px scaled by the config window's scale, where dp would
+	   scale twice. border-box keeps each entry on native's 32x38 pitch instead of growing by the
+	   border and overlapping its neighbours. */
+	border-width: 1px;
+	box-sizing: border-box;
+	pointer-events: auto;
+}
+
+/* Native's (6, 5) centring offset, measured from inside the 1px border. */
+.mhsp-icon {
+	position: absolute;
+	left: 5px;
+	top: 4px;
+	width: 20px;
+	height: 28px;
+}
+
+/* Native's fan-out: columns right to left from just outside the config window's left edge, and
+   in a column the entries alternate above and below the row of the slot that opened the flyout
+   (y 171 for an attack slot, ten to a column; 293 for a buff slot, five to a column). The
+   attack rules follow and win: every buff rule is matched by an attack rule of more weight. */
+#panel .mhsp-entry:nth-child(5n+1) { top: 293px; }
+#panel .mhsp-entry:nth-child(5n+2) { top: 331px; }
+#panel .mhsp-entry:nth-child(5n+3) { top: 255px; }
+#panel .mhsp-entry:nth-child(5n+4) { top: 369px; }
+#panel .mhsp-entry:nth-child(5n+5) { top: 217px; }
+#panel .mhsp-entry:nth-child(n+1):nth-child(-n+5) { left: -32px; }
+#panel .mhsp-entry:nth-child(n+6):nth-child(-n+10) { left: -64px; }
+#panel .mhsp-entry:nth-child(n+11):nth-child(-n+15) { left: -96px; }
+#panel .mhsp-entry:nth-child(n+16):nth-child(-n+20) { left: -128px; }
+#panel .mhsp-entry:nth-child(n+21):nth-child(-n+25) { left: -160px; }
+#panel .mhsp-entry:nth-child(n+26):nth-child(-n+30) { left: -192px; }
+#panel .mhsp-entry:nth-child(n+31):nth-child(-n+35) { left: -224px; }
+#panel .mhsp-entry:nth-child(n+36):nth-child(-n+40) { left: -256px; }
+#panel .mhsp-entry:nth-child(n+41):nth-child(-n+45) { left: -288px; }
+#panel .mhsp-entry:nth-child(n+46):nth-child(-n+50) { left: -320px; }
+#panel .mhsp-entry:nth-child(n+51):nth-child(-n+55) { left: -352px; }
+#panel .mhsp-entry:nth-child(n+56):nth-child(-n+60) { left: -384px; }
+#panel.attack .mhsp-entry:nth-child(10n+1) { top: 171px; }
+#panel.attack .mhsp-entry:nth-child(10n+2) { top: 209px; }
+#panel.attack .mhsp-entry:nth-child(10n+3) { top: 133px; }
+#panel.attack .mhsp-entry:nth-child(10n+4) { top: 247px; }
+#panel.attack .mhsp-entry:nth-child(10n+5) { top: 95px; }
+#panel.attack .mhsp-entry:nth-child(10n+6) { top: 285px; }
+#panel.attack .mhsp-entry:nth-child(10n+7) { top: 57px; }
+#panel.attack .mhsp-entry:nth-child(10n+8) { top: 323px; }
+#panel.attack .mhsp-entry:nth-child(10n+9) { top: 19px; }
+#panel.attack .mhsp-entry:nth-child(10n+10) { top: 361px; }
+#panel.attack .mhsp-entry:nth-child(n+1):nth-child(-n+10) { left: -32px; }
+#panel.attack .mhsp-entry:nth-child(n+11):nth-child(-n+20) { left: -64px; }
+#panel.attack .mhsp-entry:nth-child(n+21):nth-child(-n+30) { left: -96px; }
+#panel.attack .mhsp-entry:nth-child(n+31):nth-child(-n+40) { left: -128px; }
+#panel.attack .mhsp-entry:nth-child(n+41):nth-child(-n+50) { left: -160px; }
+#panel.attack .mhsp-entry:nth-child(n+51):nth-child(-n+60) { left: -192px; }
+#panel.attack .mhsp-entry:nth-child(n+61):nth-child(-n+70) { left: -224px; }
+#panel.attack .mhsp-entry:nth-child(n+71):nth-child(-n+80) { left: -256px; }

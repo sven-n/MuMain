@@ -1,0 +1,11 @@
+<rml>
+<head>
+	<title>Cursor item</title>
+	<link type="text/rcss" href="cursor_item.rcss"/>
+</head>
+<body>
+	<!-- The item on the cursor (UI/Inventory/CursorItemLayer.h): C++ draws it into this window-sized
+	     image where the pointer holds it, above every window. Never interactive. -->
+	<img id="cursor_item"/>
+</body>
+</rml>

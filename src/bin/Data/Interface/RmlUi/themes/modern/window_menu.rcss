@@ -1,0 +1,75 @@
+/* Modern theme for CWindowMenu: the same six rows at the original's place above the bottom HUD's
+   right end, on the modern forged-panel surface instead of the command frame art. Geometry is the
+   legacy one (reference px on #screen's HUD board, see window_menu.rml); the look
+   comes from the modern tokens. */
+
+#screen {
+	pointer-events: none;
+}
+
+#panel {
+	position: absolute;
+	left: 528px;
+	top: 284px;
+	width: 112px;
+	height: 146px;
+	font-family: "token(font-body)";
+	background-color: token(surface-panel);
+	border: 1px token(border-frame);
+	pointer-events: auto;
+}
+
+#back, #frame_up, .frame-middle, #frame_down, .arrow { display: none; }
+
+.line {
+	position: absolute;
+	left: 15px;
+	width: 82px;
+	height: 1px;
+	background-color: token(metal-mid);
+}
+
+#rows {
+	position: absolute;
+	left: 0;
+	top: 20px;
+	width: 112px;
+}
+.menu-row {
+	display: block;
+	position: relative;
+	width: 112px;
+	height: 20px;
+	pointer-events: auto;
+	cursor: pointer;
+}
+.menu-row:hover { background-color: token(surface-raised); }
+
+.menu-label {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 0;
+	/* The row's width under the scale, which the label cancels, so centring matches the
+	   original's RT3_SORT_CENTER. */
+	width: calc(112px * var(--root-scale));
+	transform-origin: left top;
+	text-align: center;
+	white-space: nowrap;
+	color: token(text-primary);
+	pointer-events: none;
+}
+.menu-row:hover .menu-label { color: token(accent-gold-hover); }
+
+/* The frame tiles and the row separators, in the places the original drew them. The containers
+   take no space themselves. */
+.frame-middles, .lines { position: static; }
+.frame-middles .frame-middle:nth-child(1) { top: 45px; }
+.frame-middles .frame-middle:nth-child(2) { top: 60px; }
+.frame-middles .frame-middle:nth-child(3) { top: 75px; }
+.frame-middles .frame-middle:nth-child(4) { top: 90px; }
+.lines .line:nth-child(1) { top: 33px; }
+.lines .line:nth-child(2) { top: 53px; }
+.lines .line:nth-child(3) { top: 73px; }
+.lines .line:nth-child(4) { top: 93px; }
+.lines .line:nth-child(5) { top: 113px; }

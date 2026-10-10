@@ -1,0 +1,51 @@
+<rml>
+	<!-- bound-geometry: target marker follows the selected command -->
+<head>
+	<title>Command Window</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="command_window.rcss"/>
+</head>
+<body>
+	<!-- Modern theme's own copy of command_window.rml: the forged-dialog shell and the modern exit
+	     button of docked_panel_frame.rcss's family instead of the frame sprites. Keep ids,
+	     data-model and event names in sync with ../../command_window.rml.
+
+	     The command window (CCommandWindow, D): twelve buttons that arm a command for the next
+	     right-click on a player, docked right. The workspace slot places and scales #panel;
+	     everything inside is reference px. Text is a .sharp-text layer: native size, counter-scaled out of the panel.
+
+	     C++ keeps the armed command (`selected`, drawn pressed and bold), the right-click that runs
+	     it, Escape; a button click is queued with command_press. The
+	     target box follows the pointer while a command is armed over a player. -->
+	<div id="panel" data-model="command_window">
+		<div class="modern-shell-edge"></div>
+		<div class="modern-groove"></div>
+		<div class="modern-header-rail-px docked-header-rail-fill">
+			<div class="modern-joint-px"></div>
+			<div class="docked-rail-accent"></div>
+		</div>
+
+		<span class="sharp-text" id="title" data-style-font-size="title_text_px + 'px'"
+		      data-style-line-height="title_line_px + 'px'">{{title_text}}</span>
+
+		<div id="buttons">
+			<div class="cmd-btn" data-for="b : buttons" data-class-selected="b.selected"
+			     data-attr-data-command="b.index" data-event-click="command_press(b.index)">
+				<span class="sharp-text sharp-middle cmd-label"
+				      data-style-font-size="b.label_text_px + 'px'" data-style-line-height="b.label_line_px + 'px'">{{b.label}}</span>
+			</div>
+		</div>
+
+		<div id="btn_exit" class="modern-icon-btn-px cmd-btn-exit" data-event-click="command_exit" data-attr-data-hint="exit_tooltip">
+			<span class="modern-icon-btn-glyph-px">&#215;</span>
+		</div>
+
+		<div id="target" data-if="target_visible" data-class-out-of-range="!target_in_range"
+		     data-style-left="target_left + 'px'" data-style-top="target_top + 'px'">
+			<span class="sharp-text" id="target_name" data-style-font-size="big_text_px + 'px'">{{target_name}}</span>
+		</div>
+		<div id="frame_corner_close" data-event-click="command_exit"></div>
+	</div>
+</body>
+</rml>

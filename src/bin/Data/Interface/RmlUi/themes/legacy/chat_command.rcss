@@ -1,0 +1,92 @@
+/* Legacy theme for CChatCommandWindow, reproducing its RenderBaseWindow()/pages/buttons: the
+   docked_panel_frame.rcss frame (linked first; newui_item_back01 top) stretched to the full dock
+   height (432); the texts left-aligned in their boxes in their own colours (bound), the title bold
+   and centred; each parameter value in a black box at alpha 160; the value field transparent, its text
+   (255, 255, 230) at alpha 210; the 64 x 29 left and right buttons (newui_btn_empty_small up /
+   over / down) at y 358 with a white label; the exit button. Reference px inside #panel. */
+
+@spritesheet cc-btn-sheet
+{
+	src: "../../../newui_btn_empty_small.tga";
+	cc-btn-up: 0px 0px 64px 29px;
+	cc-btn-over: 0px 29px 64px 29px;
+	cc-btn-down: 0px 58px 64px 29px;
+}
+
+.frame-top { decorator: image(docked-bg-top-b); }
+#panel { height: 432px; pointer-events: auto; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: left; pointer-events: none; }
+.cc-btn {
+	display: block;
+	position: absolute;
+	top: 358px;
+	width: 64px;
+	height: 29px;
+	decorator: image(cc-btn-up);
+	pointer-events: auto;
+}
+.cc-btn:hover { decorator: image(cc-btn-over); }
+.cc-btn:active { decorator: image(cc-btn-down); }
+#btn_left { left: 22px; }
+#btn_right { left: 104px; }
+.cc-label { left: 0; text-align: center; color: #ffffff; }
+
+/* The original's grid: the rows start at CONTENT_TOP, one ROW_HEIGHT apart; on the parameter page a
+   blank row comes before the parameters (35 apart: name, value box, gap) and before the actions. */
+.cc-page, .cc-rows { display: block; position: absolute; left: 22px; top: 36px; width: 146px; }
+.cc-title, .cc-line, .cc-cell, .cc-row-line, .cc-param-label, .cc-param-value, .cc-remove-mark {
+	position: absolute;
+}
+.cc-title { left: 0; top: 12px; text-align: center; font-weight: bold; }
+#cc_empty { left: 22px; top: 36px; }
+
+.cc-row, .cc-line-box { display: block; position: relative; height: 15px; }
+.cc-row { pointer-events: auto; }
+.cc-row-line, .cc-cell { left: 0; top: 0; }
+
+.cc-parameters, .cc-actions { display: block; padding-top: 15px; }
+.cc-parameter { display: block; position: relative; height: 35px; }
+.cc-param-label { left: 0; top: 0; }
+.cc-value-box { position: absolute; left: 0; top: 15px; width: 146px; height: 16px; pointer-events: auto; }
+.cc-param-value { left: 2px; top: 16px; }
+.cc-value-field { position: absolute; left: 2px; top: 16px; }
+
+/* A template's label takes the row less the remove cell, which sits at its right edge. */
+.cc-template-hit { position: absolute; left: 0; top: 0; width: 131px; height: 15px; pointer-events: auto; }
+.cc-template-label { left: 0; }
+.cc-template-remove { position: absolute; left: 131px; top: 0; width: 15px; height: 15px; pointer-events: auto; }
+.cc-remove-mark { left: 0; text-align: center; }
+
+/* The original's own TextColor table (ChatCommandWindow.cpp). */
+.cc-title { color: rgb(255, 220, 120); }
+.cc-line, .cc-cell, .cc-param-label { color: rgb(220, 220, 220); }
+.cc-row.favourite .cc-cell { color: rgb(255, 220, 120); }
+.cc-row-line { color: rgb(200, 220, 255); }
+.cc-param-label.missing { color: rgb(255, 150, 150); }
+.cc-param-value { color: rgb(220, 220, 220); }
+.cc-param-value.placeholder { color: rgb(200, 220, 255); }
+.cc-action .cc-cell { color: rgb(150, 210, 255); }
+.cc-remove-mark { color: rgb(255, 150, 150); }
+.cc-value-box { background-color: rgba(0, 0, 0, 160); }
+/* CUITextInputBox::SetTextColor(255, 255, 230, 210) -- used to arrive as a model colour. */
+.cc-value-field {
+	color: rgba(255, 255, 230, 210);
+	padding: 0;
+	border-width: 0;
+	border-radius: 0;
+	background-color: transparent;
+	pointer-events: auto;
+}
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#cc_title { width: calc(100% * var(--root-scale)); }
+#cc_empty { width: calc(146px * var(--root-scale)); }
+.cc-cell { width: calc(146px * var(--root-scale)); }
+.cc-row-line { width: calc(146px * var(--root-scale)); }
+.cc-param-label { width: calc(146px * var(--root-scale)); }
+.cc-param-value { width: calc(142px * var(--root-scale)); }
+.cc-value-field { width: calc(142px * var(--root-scale)); height: calc(14px * var(--root-scale)); line-height: calc(14px * var(--root-scale)); }
+.cc-cell.cc-template-label { width: calc(131px * var(--root-scale)); }
+.cc-remove-mark { width: calc(15px * var(--root-scale)); }
+.cc-label { width: calc(64px * var(--root-scale)); }

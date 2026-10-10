@@ -1,0 +1,48 @@
+/* Legacy theme for CBattleSoccerScore, reproducing the original's RenderBackImage()/
+   RenderContents(): the 131 x 70 figure-ground back, then two lines from (x + 30, y + 33), 22 apart:
+   the score, the guild mark at + 21 (8 x 8) and the name at + 33, in the bold font on a 50% black
+   text box (SetBgColor(0, 0, 0, 128)), red (255, 60, 0) or blue (0, 150, 255). Reference px relative
+   to the window's top-left, under .screen's W/640 x H/480 stretch (see battle_soccer_score.rml). */
+
+@spritesheet bss-back-sheet { src: "../../../newui_Figure_ground.tga"; bss-back: 0px 0px 131px 70px; }
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+#panel { position: absolute; width: 131px; height: 70px; font-family: "token(font-body)"; }
+#back { position: absolute; left: 0; top: 0; width: 131px; height: 70px; decorator: image(bss-back); }
+
+.team { display: block; position: absolute; left: 30px; width: 100px; height: 8px; }
+.team-text {
+	display: block;
+	position: absolute;
+	top: 0;
+	transform-origin: left top;
+	white-space: nowrap;
+	font-weight: bold;
+	color: #0096ff;
+	background-color: #00000080;
+}
+.team.red .team-text { color: #ff3c00; }
+.team-score { left: 0; }
+.team-name { left: 33px; }
+
+.mark { position: absolute; left: 21px; top: 0; width: 8px; height: 8px; }
+.mark-cell { display: block; float: left; width: 1px; height: 1px; }
+
+/* RenderContents()'s own two rows. The container takes no space. */
+.teams { position: static; }
+.team:nth-child(1) { top: 33px; }
+.team:nth-child(2) { top: 55px; }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }

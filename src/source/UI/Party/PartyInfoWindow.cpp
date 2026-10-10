@@ -1,0 +1,303 @@
+
+#include "stdafx.h"
+#include "I18N/All.h"
+
+#include "UI/Party/PartyInfoWindow.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
+#include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlWindowClose.h"
+#include "UI/RmlBridge/RmlNativeTextSize.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Core/Utilities/StringUtils.h"
+#include "GameLogic/Events/CSChaosCastle.h"
+#include "Audio/DSPlaySound.h"
+#include "GameLogic/Events/w_CursedTemple.h"
+#include "World/MapInfra/MapManager.h"
+
+#include <RmlUi/Core/DataModelHandle.h>
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
+
+using namespace SEASON3B;
+using namespace mu::ui::window;
+
+CPartyInfoWindow::CPartyInfoWindow()
+{
+    m_pNewUIMng = NULL;
+    m_bParty = false;
+    m_iSelectedCharID = -1;
+}
+
+CPartyInfoWindow::~CPartyInfoWindow()
+{
+    Release();
+}
+
+bool CPartyInfoWindow::Create(CManager* pNewUIMng)
+{
+    if (NULL == pNewUIMng)
+        return false;
+
+    m_pNewUIMng = pNewUIMng;
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_PARTY, this);
+
+    LoadImages();
+
+    if (RmlUiRuntime::Instance().IsCreated())
+    {
+        BuildRmlUi();
+    }
+
+    Show(false);
+
+    return true;
+}
+
+void CPartyInfoWindow::BindRmlModel(Rml::DataModelConstructor& c, PartyInfoRmlModel& model)
+{
+    c.Bind("text_px", &model.textPx);
+
+    c.Bind("has_party", &model.hasParty);
+    c.Bind("window_title", &model.windowTitle);
+    c.Bind("exit_tooltip", &model.exitTooltip);
+
+    auto textLine = c.RegisterStruct<TextLine>();
+    textLine.RegisterMember("text", &TextLine::text);
+    c.RegisterArray<std::vector<TextLine>>();
+    c.Bind("empty_state_lines", &model.emptyStateLines);
+
+    auto member = c.RegisterStruct<PartyMemberRow>();
+    member.RegisterMember("name", &PartyMemberRow::name);
+    member.RegisterMember("map_text", &PartyMemberRow::mapText);
+    member.RegisterMember("coord_text", &PartyMemberRow::coordText);
+    member.RegisterMember("hp_text", &PartyMemberRow::hpText);
+    member.RegisterMember("hp_percent", &PartyMemberRow::hpPercent);
+    member.RegisterMember("is_leader", &PartyMemberRow::isLeader);
+    member.RegisterMember("show_kick", &PartyMemberRow::showKick);
+    member.RegisterMember("index", &PartyMemberRow::index);
+    c.RegisterArray<std::vector<PartyMemberRow>>();
+    c.Bind("members", &model.members);
+
+    UI::RmlBridge::BindWindowClose(c, mu::ui::window::INTERFACE_PARTY);
+    c.BindEventCallback("party_kick_member",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+        {
+            if (arguments.size() == 1)
+                RmlClickKickMember(arguments[0].Get<int>(-1));
+        });
+
+    model.windowTitle = StringUtils::WideToNarrow(I18N::Game::Party);
+    model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::ClosePartyWindowP);
+
+    model.emptyStateLines = {
+        { StringUtils::WideToNarrow(I18N::Game::TypePartyWithTheMouseCursorOn) },
+        { StringUtils::WideToNarrow(I18N::Game::ThePlayerYouWouldLike) },
+        { StringUtils::WideToNarrow(I18N::Game::ToCreateAPartyWith) },
+        { StringUtils::WideToNarrow(I18N::Game::AndYouCanCreate) },
+        { StringUtils::WideToNarrow(I18N::Game::APartyWithThem) },
+        { StringUtils::WideToNarrow(I18N::Game::YouCanShareMoreExpWith) },
+        { StringUtils::WideToNarrow(I18N::Game::YourPartyMembersBasedOnLevel) },
+    };
+}
+
+void CPartyInfoWindow::BuildRmlUi()
+{
+    m_RmlView.Ensure();
+}
+
+void CPartyInfoWindow::Release()
+{
+    UnloadImages();
+
+    m_RmlView.Release();
+
+    if (m_pNewUIMng)
+    {
+        m_pNewUIMng->RemoveUIObj(this);
+        m_pNewUIMng = NULL;
+    }
+}
+
+void CPartyInfoWindow::OpenningProcess()
+{
+    SocketClient->ToGameServer()->SendPartyListRequest();
+}
+
+void CPartyInfoWindow::ClosingProcess()
+{
+}
+
+void CPartyInfoWindow::RmlClickKickMember(int index)
+{
+    if (index < 0 || index >= PartyNumber)
+        return;
+
+    LeaveParty(index);
+}
+
+bool CPartyInfoWindow::UpdateMouseEvent()
+{
+    // RmlUi handles both close targets; over the panel, the windows below get no mouse.
+    return !UI::RmlBridge::IsPointerOver(m_RmlView.Document());
+}
+
+bool CPartyInfoWindow::UpdateKeyEvent()
+{
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PARTY) == true)
+    {
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
+        {
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PARTY);
+            PlayBuffer(SOUND_CLICK01);
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool CPartyInfoWindow::Update()
+{
+    SetParty(PartyNumber > 0);
+    SyncRmlModel();
+    return true;
+}
+
+bool CPartyInfoWindow::Render()
+{
+    // RmlUi's #panel owns all chrome/text/button rendering now; nothing left to draw natively.
+    return true;
+}
+
+bool CPartyInfoWindow::LeaveParty(const int iIndex)
+{
+    if (!gMapManager.IsCursedTemple())
+    {
+        PlayBuffer(SOUND_CLICK01);
+        SocketClient->ToGameServer()->SendPartyPlayerKickRequest(Party[iIndex].Number);
+    }
+
+    SetParty(false);
+
+    return true;
+}
+
+void CPartyInfoWindow::Show(bool bShow)
+{
+    mu::ui::window::CObject::Show(bShow);
+    if (m_RmlView.Document())
+    {
+        if (bShow) m_RmlView.Document()->Show();
+        else m_RmlView.Document()->Hide();
+    }
+}
+
+void CPartyInfoWindow::SetParty(bool bParty)
+{
+    m_bParty = bParty;
+}
+
+float CPartyInfoWindow::GetLayerDepth()
+{
+    return 2.4f;
+}
+
+void CPartyInfoWindow::SyncRmlModel()
+{
+    if (!m_RmlView.Document())
+        return;
+
+    auto& model = m_RmlView.GetModel();
+
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
+
+    if (model.hasParty != m_bParty)
+    {
+        model.hasParty = m_bParty;
+        m_RmlView.MarkDirty("has_party");
+    }
+
+    if (!m_bParty)
+        return;
+
+    wchar_t szText[256] = { 0, };
+    std::vector<PartyMemberRow> members;
+    members.reserve(PartyNumber);
+
+    for (int i = 0; i < PartyNumber; i++)
+    {
+        PARTY_t* pMember = &Party[i];
+
+        PartyMemberRow row;
+        row.index = i;
+        row.name = StringUtils::WideToNarrow(pMember->Name);
+        row.mapText = StringUtils::WideToNarrow(gMapManager.GetMapName(pMember->Map));
+
+        mu_swprintf(szText, L"(%d,%d)", pMember->x, pMember->y);
+        row.coordText = StringUtils::WideToNarrow(szText);
+
+        row.hpPercent = pMember->maxHP > 0 ? (pMember->currHP * 100.f) / pMember->maxHP : 0.f;
+        mu_swprintf(szText, L"%d %ls %d", pMember->currHP, I18N::Game::Text2374, pMember->maxHP);
+        row.hpText = StringUtils::WideToNarrow(szText);
+
+        row.isLeader = (i == 0);
+        row.showKick = !wcscmp(Party[0].Name, Hero->ID) || !wcscmp(Party[i].Name, Hero->ID);
+
+        members.push_back(row);
+    }
+
+    model.members = std::move(members);
+    m_RmlView.MarkDirty("members");
+}
+
+void CPartyInfoWindow::LoadImages()
+{
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_PARTY_BASE_WINDOW_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_PARTY_BASE_WINDOW_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_PARTY_BASE_WINDOW_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_PARTY_BASE_WINDOW_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_PARTY_BASE_WINDOW_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_PARTY_BASE_WINDOW_BTN_EXIT, GL_LINEAR);		// Exit Button
+
+    LoadBitmap(L"Interface\\newui_item_table01(L).tga", IMAGE_PARTY_TABLE_TOP_LEFT);
+    LoadBitmap(L"Interface\\newui_item_table01(R).tga", IMAGE_PARTY_TABLE_TOP_RIGHT);
+    LoadBitmap(L"Interface\\newui_item_table02(L).tga", IMAGE_PARTY_TABLE_BOTTOM_LEFT);
+    LoadBitmap(L"Interface\\newui_item_table02(R).tga", IMAGE_PARTY_TABLE_BOTTOM_RIGHT);
+    LoadBitmap(L"Interface\\newui_item_table03(Up).tga", IMAGE_PARTY_TABLE_TOP_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(Dw).tga", IMAGE_PARTY_TABLE_BOTTOM_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(L).tga", IMAGE_PARTY_TABLE_LEFT_PIXEL);
+    LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_PARTY_TABLE_RIGHT_PIXEL);
+
+    LoadBitmap(L"Interface\\newui_party_lifebar01.jpg", IMAGE_PARTY_HPBAR_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_party_lifebar02.jpg", IMAGE_PARTY_HPBAR, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_party_flag.tga", IMAGE_PARTY_FLAG, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_party_x.tga", IMAGE_PARTY_EXIT, GL_LINEAR);
+}
+
+void CPartyInfoWindow::UnloadImages()
+{
+    DeleteBitmap(IMAGE_PARTY_BASE_WINDOW_BACK);
+    DeleteBitmap(IMAGE_PARTY_BASE_WINDOW_TOP);
+    DeleteBitmap(IMAGE_PARTY_BASE_WINDOW_LEFT);
+    DeleteBitmap(IMAGE_PARTY_BASE_WINDOW_RIGHT);
+    DeleteBitmap(IMAGE_PARTY_BASE_WINDOW_BOTTOM);
+    DeleteBitmap(IMAGE_PARTY_BASE_WINDOW_BTN_EXIT);
+
+    DeleteBitmap(IMAGE_PARTY_TABLE_RIGHT_PIXEL);
+    DeleteBitmap(IMAGE_PARTY_TABLE_LEFT_PIXEL);
+    DeleteBitmap(IMAGE_PARTY_TABLE_BOTTOM_PIXEL);
+    DeleteBitmap(IMAGE_PARTY_TABLE_TOP_PIXEL);
+    DeleteBitmap(IMAGE_PARTY_TABLE_BOTTOM_RIGHT);
+    DeleteBitmap(IMAGE_PARTY_TABLE_BOTTOM_LEFT);
+    DeleteBitmap(IMAGE_PARTY_TABLE_TOP_RIGHT);
+    DeleteBitmap(IMAGE_PARTY_TABLE_TOP_LEFT);
+
+    DeleteBitmap(IMAGE_PARTY_HPBAR_BACK);
+    DeleteBitmap(IMAGE_PARTY_HPBAR);
+    DeleteBitmap(IMAGE_PARTY_FLAG);
+    DeleteBitmap(IMAGE_PARTY_EXIT);
+}

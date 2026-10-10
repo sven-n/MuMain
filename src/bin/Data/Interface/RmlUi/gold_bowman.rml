@@ -1,0 +1,50 @@
+<rml>
+<!-- rml-contract-optional-id: entry_item: this score window shows text/buttons and does not install an item preview drawer -->
+<head>
+	<title>Golden Archer's lucky number registration (CGoldBowmanWindow)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="event_item_entry.rcss"/>
+	<link type="text/rcss" href="gold_bowman.rcss"/>
+	<link type="text/rcss" href="gold_bowman_rows.rcss"/>
+</head>
+<body>
+	<!-- The Golden Archer's lucky number registration (CGoldBowmanWindow), docked right: its texts,
+	     the 12-character number field, Register and the exit button, over the docked frame and the
+	     field's back (UI/Events/EventItemEntryView.h).
+	     the workspace slot places and scales #panel; everything inside is reference px;
+	     text is .sharp-text at the native size, counter-scaled out of the panel. C++ focuses the
+	     field on opening and reads it for the request, keeps the corner close,
+	     Escape and the requests; a click is queued with item_entry_press. -->
+	<div id="panel" data-model="gold_bowman">
+		<!-- The docked frame. -->
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+		<div id="serial_back"></div>
+		<!-- The rows these land on are the theme's: this document's own _rows.rcss gives one
+		     :nth-child rule per line and per button. Each repeated set has its own container so
+		     the count starts at the first one. -->
+		<div class="entry-texts">
+			<div class="entry-text" data-for="t : texts">
+				<span class="sharp-text sharp-centre"
+				      data-style-font-size="t.text_px + 'px'">{{t.text}}</span>
+			</div>
+		</div>
+
+		<div class="entry-buttons">
+			<div class="entry-btn" data-for="b, i : buttons" data-class-locked="b.locked"
+			     data-event-click="item_entry_press(i)" data-attr-data-hint="b.hint">
+				<span class="sharp-text sharp-middle sharp-centre entry-label" data-if="b.label != ''"
+				      data-style-font-size="(b.bold ? bold_text_px : text_px) + 'px'"
+				      data-style-line-height="b.label_line_px + 'px'">{{b.label}}</span>
+			</div>
+		</div>
+
+		<input id="serial_field" data-value="input_value" type="text" class="text-field sharp-text" maxlength="12"
+		       data-style-font-size="text_px + 'px'"/>
+		<div id="frame_corner_close" data-event-click="window_close"></div>
+	</div>
+</body>
+</rml>

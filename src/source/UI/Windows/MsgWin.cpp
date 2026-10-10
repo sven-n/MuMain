@@ -1,11 +1,16 @@
-﻿//*****************************************************************************
+//*****************************************************************************
 // File: MsgWin.cpp
 //*****************************************************************************
 
 #include "stdafx.h"
 #include "UI/Windows/MsgWin.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include "UI/Windows/ServerSelWin.h"
+#include "UI/Windows/LoginWin.h"
+#include "Character/CharMakeWin.h"
+#include "Character/CharSelMainWin.h"
+#include "Character/CharInfoBalloonMng.h"
 #include "Core/Platform/CrtDbg.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -17,17 +22,26 @@
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
 
-#include "UI/Legacy/UIControls.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Scenes/SceneCommon.h"
 #include "Core/Utilities/Log/ErrorReport.h"
+#include "Core/Globals/_enum.h"
 
-#define	MW_OK		0
-#define	MW_CANCEL	1
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
+#include "Network/Server/WSclient.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
 
+namespace
+{
+    // Same cap the native password box was given (SetTextLimit(20)). Set on #msgwin_input from C++
+    // so it stays one rule rather than a literal duplicated per theme.
+    constexpr int kResidentPasswordMaxLength = 20;
+}
 
-
-extern int g_iChatInputType;
+CMsgWin g_MsgWin;
 
 CMsgWin::CMsgWin()
 {
@@ -35,37 +49,73 @@ CMsgWin::CMsgWin()
 
 CMsgWin::~CMsgWin()
 {
+    Release();
 }
 
 void CMsgWin::Create()
 {
-    CInput rInput = CInput::Instance();
-
-    CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
+    Release();
 
     m_sprBack.Create(352, 113, BITMAP_MESSAGE_WIN);
 
-    m_sprInput.Create(171, 23, BITMAP_MSG_WIN_INPUT);
-
-    for (int i = 0; i < 2; ++i)
-    {
-        m_aBtn[i].Create(54, 30, BITMAP_BUTTON + i, 3, 2, 1);
-        CWin::RegisterButton(&m_aBtn[i]);
-    }
 
     memset(m_aszMsg[0], 0, sizeof(char) * MW_MSG_LINE_MAX * MW_MSG_ROW_MAX);
 
     m_eType = MWT_NON;
     m_nMsgLine = 0;
     m_nMsgCode = -1;
-    m_nGameExit = -1;
-    m_dDeltaTickSum = 0.0;
+
+    // Builds once; Create() re-runs on resolution change.
+    m_RmlView.Ensure();
+
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_MSG_WINDOW, this);
+    Show(false);
 }
 
-void CMsgWin::PreRelease()
+void CMsgWin::BindRmlModel(Rml::DataModelConstructor& c, MsgWinRmlModel& model)
 {
-    m_sprInput.Release();
+    c.Bind("line1", &model.line1);
+    c.Bind("line2", &model.line2);
+    c.Bind("line2_hidden", &model.line2Hidden);
+    c.Bind("no_buttons", &model.noButtons);
+    c.Bind("mode_cancel_only", &model.modeCancelOnly);
+    c.Bind("mode_ok_only", &model.modeOkOnly);
+    c.Bind("mode_both", &model.modeBoth);
+    c.Bind("mode_input", &model.modeInput);
+    c.Bind("ok_label", &model.okLabel);
+    c.Bind("cancel_label", &model.cancelLabel);
+    c.Bind("password_input", &model.residentPassword);
+
+    c.BindEventCallback("msgwin_ok_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
+    c.BindEventCallback("msgwin_cancel_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
+}
+
+void CMsgWin::ApplyInputLimit()
+{
+    // Set on every build, so a rebuilt document keeps it; the field only shows in one mode.
+    if (Rml::ElementDocument* document = m_RmlView.Document())
+    {
+        if (Rml::Element* field = document->GetElementById("msgwin_input"))
+            field->SetAttribute("maxlength", kResidentPasswordMaxLength);
+    }
+}
+
+void CMsgWin::Release()
+{
     m_sprBack.Release();
+
+    // Called explicitly at each scene transition; no base-class auto-release for m_RmlView.Document().
+    m_RmlView.Hide();
+
+    // Base-class visibility reset, NOT the full CMsgWin::Show(false) override (same reasoning as
+    // CServerMsgWin::Release()/CCharMakeWin::Release()) -- without this, a message box open at the
+    // exact instant of the character-select -> main-scene transition leaves IsVisible() stuck true,
+    // so Winmain.cpp's post-RmlUi callback keeps calling RenderTextOnTop() (and CManager's own
+    // sweep keeps calling Update()/Render()) against this already-released window every MAIN_SCENE
+    // frame afterward -- a stray flicker at the message box's last position.
+    mu::ui::window::CObject::Show(false);
 }
 
 void CMsgWin::SetPosition(int nXCoord, int nYCoord)
@@ -76,90 +126,30 @@ void CMsgWin::SetPosition(int nXCoord, int nYCoord)
 
 void CMsgWin::SetCtrlPosition()
 {
-    int nBaseXPos = m_sprBack.GetXPos();
-    int nBtnYPos = m_sprBack.GetYPos() + 72;
+    if (m_eType != MWT_STR_INPUT)
+        return;
 
-    switch (m_eType)
-    {
-    case MWT_BTN_CANCEL:
-        m_aBtn[MW_CANCEL].SetPosition(nBaseXPos + 149, nBtnYPos);
-        break;
-    case MWT_BTN_OK:
-        m_aBtn[MW_OK].SetPosition(nBaseXPos + 149, nBtnYPos);
-        break;
-    case MWT_BTN_BOTH:
-        m_aBtn[MW_OK].SetPosition(nBaseXPos + 98, nBtnYPos);
-        m_aBtn[MW_CANCEL].SetPosition(nBaseXPos + 200, nBtnYPos);
-        break;
-    case MWT_STR_INPUT:
-        m_sprInput.SetPosition(nBaseXPos + 32, nBtnYPos + 4);
-        m_aBtn[MW_OK].SetPosition(nBaseXPos + 209, nBtnYPos);
-        m_aBtn[MW_CANCEL].SetPosition(nBaseXPos + 264, nBtnYPos);
-        if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
-            if (g_iChatInputType == 1)
-                g_pSinglePasswdInputBox->SetPosition(
-                    int((m_sprInput.GetXPos() + 10) / g_fScreenRate_x),
-                    int((m_sprInput.GetYPos() + 8) / g_fScreenRate_y));
-        break;
-    }
+    // Nothing left to position here: the resident-password field is an RmlUi element placed by each
+    // theme's own .msgwin-input-field rule, inside #input_frame.
 }
 
 void CMsgWin::Show(bool bShow)
 {
-    CWin::Show(bShow);
+    mu::ui::window::CObject::Show(bShow);
 
     m_sprBack.Show(bShow);
 
-    switch (m_eType)
+    if (m_RmlView.Document())
     {
-    case MWT_BTN_CANCEL:
-        m_aBtn[MW_OK].Show(false);
-        m_aBtn[MW_CANCEL].Show(bShow);
-        m_sprInput.Show(false);
-        break;
-    case MWT_BTN_OK:
-        m_aBtn[MW_OK].Show(bShow);
-        m_aBtn[MW_CANCEL].Show(false);
-        m_sprInput.Show(false);
-        break;
-    case MWT_BTN_BOTH:
-        m_aBtn[MW_OK].Show(bShow);
-        m_aBtn[MW_CANCEL].Show(bShow);
-        m_sprInput.Show(false);
-        break;
-    case MWT_STR_INPUT:
-        m_aBtn[MW_OK].Show(bShow);
-        m_aBtn[MW_CANCEL].Show(bShow);
-        m_sprInput.Show(bShow);
-        break;
-    default:
-        m_aBtn[MW_OK].Show(false);
-        m_aBtn[MW_CANCEL].Show(false);
-        m_sprInput.Show(false);
+        if (bShow) { SyncRmlModel(); m_RmlView.Document()->Show(); }
+        else       m_RmlView.Document()->Hide();
     }
 }
 
-bool CMsgWin::CursorInWin(int nArea)
+bool CMsgWin::Update()
 {
-    if (!CWin::m_bShow)
-        return false;
-
-    switch (nArea)
-    {
-    case WA_MOVE:
-        return false;
-    }
-
-    return CWin::CursorInWin(nArea);
-}
-
-void CMsgWin::UpdateWhileActive(double dDeltaTick)
-{
-    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT && g_iChatInputType == 1 &&
-        g_pSinglePasswdInputBox != nullptr && g_pSinglePasswdInputBox->GetState() == UISTATE_NORMAL)
-    {
-        g_pSinglePasswdInputBox->DoAction();
-    }
+    if (!IsVisible())
+        return true;
 
     CInput& rInput = CInput::Instance();
 
@@ -188,90 +178,61 @@ void CMsgWin::UpdateWhileActive(double dDeltaTick)
             ::PlayBuffer(SOUND_CLICK01);
             ManageCancelClick();
         }
-        CUIMng::Instance().SetSysMenuWinShow(false);
     }
-    else if (m_aBtn[MW_OK].IsClick())
-        ManageOKClick();
-    else if (m_aBtn[MW_CANCEL].IsClick())
-        ManageCancelClick();
-    else if (m_nMsgCode == MESSAGE_GAME_END_COUNTDOWN)
+    else if (m_bRmlOkClicked)
     {
-        if (m_nGameExit != -1)
-        {
-            m_dDeltaTickSum += dDeltaTick;
-            if (m_dDeltaTickSum > 1000.0)
-            {
-                m_dDeltaTickSum = 0.0;
-                if (--m_nGameExit == 0)
-                {
-                    g_ErrorReport.Write(L"> Menu - Exit game.");
-                    g_ErrorReport.WriteCurrentTime();
-                    ::PostMessage(g_hWnd, WM_CLOSE, 0, 0);
-                }
-                else
-                {
-                    wchar_t szMsg[64]{};
-                    mu_swprintf(szMsg, I18N::Game::YouWillExitGameInDSeconds, m_nGameExit);
-                    SetMsg(m_eType, szMsg, L"");
-                }
-            }
-        }
+        m_bRmlOkClicked = false;
+        ManageOKClick();
     }
+    else if (m_bRmlCancelClicked)
+    {
+        m_bRmlCancelClicked = false;
+        ManageCancelClick();
+    }
+
+    return true;
 }
 
-void CMsgWin::RenderControls()
+bool CMsgWin::Render()
 {
-    m_sprBack.Render();
+    // RmlUi's #panel owns this dialog's visuals, the resident-password field included; m_sprBack
+    // only tracks this window's position.
+    SyncRmlModel();
+    return true;
+}
 
-    int nTextPosX, nTextPosY;
+void CMsgWin::SyncRmlModel()
+{
+    if (!m_RmlView.Document()) return;
 
-    g_pRenderText->SetFont(g_hFixFont);
-    g_pRenderText->SetTextColor(CLRDW_WHITE);
-    g_pRenderText->SetBgColor(0);
-
-    if (1 == m_nMsgLine)
+    auto syncLabel = [this](Rml::String MsgWinRmlModel::* field, const char* boundName, const wchar_t* text)
     {
-        nTextPosX = int(m_sprBack.GetXPos() / g_fScreenRate_x);
-        if (MWT_NON != m_eType)
-            nTextPosY = int((m_sprBack.GetYPos() + 38) / g_fScreenRate_y);
-        else
-            nTextPosY = int((m_sprBack.GetYPos() + 54) / g_fScreenRate_y);
-        g_pRenderText->RenderText(nTextPosX, nTextPosY, m_aszMsg[0],
-            m_sprBack.GetWidth() / g_fScreenRate_x, 0, RT3_SORT_CENTER);
-    }
-    else if (2 == m_nMsgLine)
-    {
-        nTextPosX = int((m_sprBack.GetXPos() + 25) / g_fScreenRate_x);
-        if (MWT_NON != m_eType)
-            nTextPosY = int((m_sprBack.GetYPos() + 32) / g_fScreenRate_y);
-        else
-            nTextPosY = int((m_sprBack.GetYPos() + 44) / g_fScreenRate_y);
-        g_pRenderText->RenderText(nTextPosX, nTextPosY, m_aszMsg[0]);
-
-        if (MWT_NON != m_eType)
-            nTextPosY = int((m_sprBack.GetYPos() + 51) / g_fScreenRate_y);
-        else
-            nTextPosY = int((m_sprBack.GetYPos() + 66) / g_fScreenRate_y);
-        g_pRenderText->RenderText(nTextPosX, nTextPosY, m_aszMsg[1]);
-    }
-
-    m_sprInput.Render();
-
-    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
-    {
-        if (g_iChatInputType == 1)
-            g_pSinglePasswdInputBox->Render();
-        else if (g_iChatInputType == 0)
+        const std::string utf8 = StringUtils::WideToNarrow(text);
+        if (m_RmlView.GetModel().*field != utf8)
         {
-            InputTextWidth = 100;
-            ::RenderInputText(
-                int((m_sprInput.GetXPos() + 10) / g_fScreenRate_x),
-                int((m_sprInput.GetYPos() + 8) / g_fScreenRate_y), 0, 0);
-            InputTextWidth = 256;
+            m_RmlView.GetModel().*field = utf8;
+            m_RmlView.MarkDirty(boundName);
         }
-    }
+    };
+    auto syncBool = [this](bool MsgWinRmlModel::* field, const char* boundName, bool value)
+    {
+        if (m_RmlView.GetModel().*field != value)
+        {
+            m_RmlView.GetModel().*field = value;
+            m_RmlView.MarkDirty(boundName);
+        }
+    };
 
-    CWin::RenderButtons();
+    syncLabel(&MsgWinRmlModel::line1, "line1", m_nMsgLine > 0 ? m_aszMsg[0] : L"");
+    syncLabel(&MsgWinRmlModel::line2, "line2", m_nMsgLine > 1 ? m_aszMsg[1] : L"");
+    syncBool(&MsgWinRmlModel::line2Hidden, "line2_hidden", m_nMsgLine <= 1);
+    syncBool(&MsgWinRmlModel::noButtons, "no_buttons", m_eType == MWT_NON);
+    syncBool(&MsgWinRmlModel::modeCancelOnly, "mode_cancel_only", m_eType == MWT_BTN_CANCEL);
+    syncBool(&MsgWinRmlModel::modeOkOnly, "mode_ok_only", m_eType == MWT_BTN_OK);
+    syncBool(&MsgWinRmlModel::modeBoth, "mode_both", m_eType == MWT_BTN_BOTH);
+    syncBool(&MsgWinRmlModel::modeInput, "mode_input", m_eType == MWT_STR_INPUT);
+    syncLabel(&MsgWinRmlModel::okLabel, "ok_label", I18N::Game::OK);
+    syncLabel(&MsgWinRmlModel::cancelLabel, "cancel_label", I18N::Game::Cancel);
 }
 
 void CMsgWin::SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpszMsg2)
@@ -294,7 +255,6 @@ void CMsgWin::SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpsz
 
 void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
 {
-    CUIMng& rUIMng = CUIMng::Instance();
     std::wstring lpszMsg = L"";
     std::wstring lpszMsg2 = L"";
     MSG_WIN_TYPE eType = MWT_BTN_OK;
@@ -307,12 +267,6 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         lpszMsg = pszMsg;
         eType = MWT_NON;
         break;
-    case MESSAGE_GAME_END_COUNTDOWN:
-        m_nGameExit = 5;
-        mu_swprintf(szTempMsg, I18N::Game::YouWillExitGameInDSeconds, m_nGameExit);
-        lpszMsg = szTempMsg;
-        eType = MWT_NON;
-        break;
     case MESSAGE_WAIT:
         lpszMsg = I18N::Game::PleaseWait;
         eType = MWT_NON;
@@ -322,7 +276,7 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         lpszMsg = I18N::Game::TheServerIsFull;
         break;
     case RECEIVE_JOIN_SERVER_WAITING:
-        rUIMng.ShowWin(&rUIMng.m_ServerSelWin);
+        g_ServerSelWin.Show(true);
         lpszMsg = I18N::Game::TheServerIsFull;
         break;
     case MESSAGE_SERVER_LOST:
@@ -415,8 +369,8 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         CharactersClient[SelectedHero].Object.Live = false;
         DeleteMount(&CharactersClient[SelectedHero].Object);
         SelectedHero = -1;
-        rUIMng.m_CharSelMainWin.UpdateDisplay();
-        rUIMng.m_CharInfoBalloonMng.UpdateDisplay();
+        g_CharSelMainWin.UpdateDisplay();
+        g_CharInfoBalloonMng.UpdateDisplay();
         lpszMsg = I18N::Game::CharacterWasDeletedSuccessfully;
         break;
     case MESSAGE_BLOCKED_CHARACTER:
@@ -432,11 +386,11 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         lpszMsg = I18N::Game::CannotUseSymbols;
         break;
     case RECEIVE_CREATE_CHARACTER_FAIL:
-        rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
+        g_CharMakeWin.Show(true);
         lpszMsg = I18N::Game::IncorrectCharacterNameWasEnteredOrSameCharacterNameExists;
         break;
     case RECEIVE_CREATE_CHARACTER_FAIL2:
-        rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
+        g_CharMakeWin.Show(true);
         lpszMsg = I18N::Game::NoMoreCharactersCanBeCreated;
         break;
     default:
@@ -445,17 +399,17 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
     }
 
     SetMsg(eType, lpszMsg, lpszMsg2);
-    rUIMng.ShowWin(this);
+    Show(true);
 }
 
 int CMsgWin::PendingMessageCode() const
 {
-    return const_cast<CMsgWin*>(this)->IsShow() ? m_nMsgCode : -1;
+    return IsVisible() ? m_nMsgCode : -1;
 }
 
 bool CMsgWin::DismissMessage()
 {
-    if (!IsShow())
+    if (!IsVisible())
         return false;
 
     // Confirming these on a caller's behalf would end the process or delete
@@ -471,8 +425,7 @@ bool CMsgWin::DismissMessage()
 
 void CMsgWin::ManageOKClick()
 {
-    CUIMng& rUIMng = CUIMng::Instance();
-    rUIMng.HideWin(this);
+    Show(false);
 
     switch (m_nMsgCode)
     {
@@ -498,14 +451,14 @@ void CMsgWin::ManageOKClick()
     case RECEIVE_LOG_IN_FAIL_POINT_HOUR:
     case RECEIVE_LOG_IN_FAIL_INVALID_IP:
     case RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL:
-        rUIMng.ShowWin(&rUIMng.m_LoginWin);
-        CUIMng::Instance().m_LoginWin.GetUsernameInputBox()->GiveFocus(TRUE);
+        g_LoginWin.Show(true);
+        g_LoginWin.FocusUsername(/*selectAll=*/true);
         CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
         break;
     case MESSAGE_INPUT_PASSWORD:
     case RECEIVE_LOG_IN_FAIL_PASSWORD:
-        rUIMng.ShowWin(&rUIMng.m_LoginWin);
-        CUIMng::Instance().m_LoginWin.GetPasswordInputBox()->GiveFocus(TRUE);
+        g_LoginWin.Show(true);
+        g_LoginWin.FocusPassword(/*selectAll=*/true);
         CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
         break;
     case MESSAGE_DELETE_CHARACTER_CONFIRM:
@@ -520,16 +473,14 @@ void CMsgWin::ManageOKClick()
 
 void CMsgWin::ManageCancelClick()
 {
-    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT && g_iChatInputType == 1 &&
-        g_pSinglePasswdInputBox != nullptr)
+    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
     {
-        g_pSinglePasswdInputBox->SetText(NULL);
-        g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
+        m_RmlView.GetModel().residentPassword.clear();
+        m_RmlView.MarkDirty("password_input");
     }
 
-    CUIMng& rUIMng = CUIMng::Instance();
     m_nMsgCode = -1;
-    rUIMng.HideWin(this);
+    Show(false);
 }
 
 void CMsgWin::InitResidentNumInput()
@@ -540,25 +491,33 @@ void CMsgWin::InitResidentNumInput()
     InputTextMax[0] = g_iLengthAuthorityCode;
     InputTextHide[0] = 1;
 
-    if (g_iChatInputType == 1)
+    m_RmlView.GetModel().residentPassword.clear();
+    m_RmlView.MarkDirty("password_input");
+
+    if (m_RmlView.Document())
     {
-        g_pSinglePasswdInputBox->SetState(UISTATE_NORMAL);
-        g_pSinglePasswdInputBox->SetOption(UIOPTION_NULL);
-        g_pSinglePasswdInputBox->SetBackColor(0, 0, 0, 0);
-        g_pSinglePasswdInputBox->SetTextLimit(20);
-        g_pSinglePasswdInputBox->SetText(NULL);
-        g_pSinglePasswdInputBox->GiveFocus();
+        if (Rml::Element* field = m_RmlView.Document()->GetElementById("msgwin_input"))
+        {
+            // Explicit focus, not an autofocus attribute: this document is reused by every other
+            // MSG_WIN_TYPE, and only this one mode has a field to focus.
+            field->Focus();
+        }
     }
+}
+
+std::wstring CMsgWin::GetResidentPasswordInput() const
+{
+    return StringUtils::NarrowToWide(m_RmlView.GetModel().residentPassword);
 }
 
 void CMsgWin::RequestDeleteCharacter()
 {
-    if (g_iChatInputType == 1)
-    {
-        g_pSinglePasswdInputBox->GetText(InputText[0]);
-        g_pSinglePasswdInputBox->SetText(NULL);
-        g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
-    }
+    const std::wstring typed = GetResidentPasswordInput();
+    wcsncpy(InputText[0], typed.c_str(), kResidentPasswordMaxLength);
+    InputText[0][kResidentPasswordMaxLength] = L'\0';
+    m_RmlView.GetModel().residentPassword.clear();
+    m_RmlView.MarkDirty("password_input");
+
     InputEnable = false;
     CurrentProtocolState = REQUEST_DELETE_CHARACTER;
     SocketClient->ToGameServer()->SendDeleteCharacter(MU_C16(CharactersClient[SelectedHero].ID), MU_C16(InputText[0]));

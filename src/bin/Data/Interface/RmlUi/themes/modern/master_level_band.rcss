@@ -1,0 +1,19 @@
+/* Modern theme for master_level_band.rml: the band below the tree (reference y 428 down), under the
+   bottom HUD, in the panel's own deepest surface so the tree reads as one full-screen sheet as in
+   the legacy theme. body's size must be set here: this document does not link base.rcss. */
+
+body {
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+#band {
+	position: absolute;
+	left: 50%;
+	margin-left: -320dp;
+	width: 640dp;
+	bottom: 0;
+	height: 52dp;
+	background-color: token(surface-deep);
+}

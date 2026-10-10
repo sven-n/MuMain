@@ -1,15 +1,39 @@
-//*****************************************************************************
-// File: CharInfoBalloonMng.cpp
-//
-// Desc: implementation of the CCharInfoBalloonMng class.
-//
-// producer: Ahn Sang-Kyu
-//*****************************************************************************
 
 #include "stdafx.h"
 #include "CharInfoBalloonMng.h"
 
 #include "CharInfoBalloon.h"
+#include "Core/Globals/_enum.h"
+#include "Core/Utilities/StringUtils.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include <RmlUi/Core/ElementDocument.h>
+
+// Replaces CUIMng's old `CCharInfoBalloonMng m_CharInfoBalloonMng;` member, same convention as
+// g_CreditWin.
+CCharInfoBalloonMng g_CharInfoBalloonMng;
+
+namespace
+{
+// Key char_info_balloon.rml compares against; the theme's .rcss styles each (.name-<key>).
+const char* NameStatusKey(BalloonNameStatus status)
+{
+    switch (status)
+    {
+    case BalloonNameStatus::BlockedCharacter:
+        return "blocked-character";
+    case BalloonNameStatus::BlockedItems:
+        return "blocked-items";
+    case BalloonNameStatus::Operator:
+        return "operator";
+    case BalloonNameStatus::Normal:
+        break;
+    }
+    return "normal";
+}
+}
 
 CCharInfoBalloonMng::~CCharInfoBalloonMng()
 {
@@ -22,6 +46,12 @@ void CCharInfoBalloonMng::Release()
         return;
 
     m_isInitialized = false;
+
+    // See CLoginMainWin::PreRelease()'s identical comment -- this class isn't a CWin, so it never
+    // had any shared-list sweep to rely on; Release() is called explicitly at every character-scene
+    // exit point instead (CSceneUICoordinator::CreateLoginScene()/CreateMainScene()/Release()),
+    // which is exactly the right place to hide the document too.
+    m_RmlView.Hide();
 }
 
 //*****************************************************************************
@@ -35,19 +65,58 @@ void CCharInfoBalloonMng::Create()
         m_charInfoBalloons[i].Create(&CharactersClient[i]);
 
     m_isInitialized = true;
+
+    // Builds once; Create() re-runs on resolution change.
+    m_RmlView.Ensure();
+
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CHAR_INFO_BALLOON, this);
+}
+
+void CCharInfoBalloonMng::BindRmlModel(Rml::DataModelConstructor& c, BalloonListModel& model)
+{
+    model.balloons.resize(kBalloonCount);
+
+    // See CCharMakeWin::BindRmlModel()'s comment on why this must re-run in full every
+    // call, including on a theme switch -- no guard here.
+    auto entry = c.RegisterStruct<BalloonEntry>();
+    entry.RegisterMember("hidden", &BalloonEntry::hidden);
+    entry.RegisterMember("screen_x", &BalloonEntry::screenX);
+    entry.RegisterMember("screen_y", &BalloonEntry::screenY);
+    entry.RegisterMember("name_status", &BalloonEntry::nameStatus);
+    entry.RegisterMember("name", &BalloonEntry::name);
+    entry.RegisterMember("guild", &BalloonEntry::guild);
+    entry.RegisterMember("klass", &BalloonEntry::klass);
+    c.RegisterArray<std::vector<BalloonEntry>>();
+
+    c.Bind("balloons", &model.balloons);
 }
 
 //*****************************************************************************
 // 함수 이름 : Render()
 // 함수 설명 : 캐릭터 정보 풍선들 렌더.
 //*****************************************************************************
-void CCharInfoBalloonMng::Render()
+bool CCharInfoBalloonMng::Render()
 {
     if (!m_isInitialized)
-        return;
+        return true;
 
+    // Each balloon.Render() call recomputes its own live world->screen projection (position only
+    // now -- see CCharInfoBalloon's header comment); SyncRmlModel() then pushes the result, plus
+    // the text/color SetInfo() already cached, into the shared RmlUi array. This runs every
+    // frame, during the normal legacy-2D-content recording phase -- strictly before
+    // RmlUiRuntime's SetPreSubmitCallback fires later the same frame, so the position is always
+    // fresh by the time RmlUi actually renders it.
     for (auto& balloon : m_charInfoBalloons)
         balloon.Render();
+
+    // The original drew the balloons before the scene's windows (CUIMng::Render()), so the
+    // character-creation dialog, a message window and the system menu covered them while the
+    // balloons stayed visible around them. The stacking table (RmlStackingOrder.cpp) keeps that
+    // order: the balloon document sits under the scene windows' documents.
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), true);
+
+    SyncRmlModel();
+    return true;
 }
 
 //*****************************************************************************
@@ -61,4 +130,31 @@ void CCharInfoBalloonMng::UpdateDisplay()
 
     for (auto& balloon : m_charInfoBalloons)
         balloon.SetInfo();
+}
+
+void CCharInfoBalloonMng::SyncRmlModel()
+{
+    if (!m_RmlView.Document()) return;
+
+    auto& balloons = m_RmlView.GetModel().balloons;
+    for (std::size_t i = 0; i < kBalloonCount; ++i)
+    {
+        CCharInfoBalloon& balloon = m_charInfoBalloons[i];
+        BalloonEntry& entry = balloons[i];
+
+        entry.hidden = !balloon.IsShow();
+        // CSprite::SetPosition() already subtracts the (59, 54) anchor offset internally when
+        // computing what GetXPos()/GetYPos() return (Sprite.cpp: m_aScrCoord[LT].fX = nXCoord -
+        // m_fDatumX) -- GetXPos()/GetYPos() already ARE the anchor-adjusted top-left corner, the
+        // same thing an RmlUi element's left/top needs. Subtracting the offset again here (an
+        // earlier version of this code did) double-applies it, shifting the balloon uniformly
+        // off to the upper-left of every character instead of centered above it.
+        entry.screenX = balloon.GetXPos();
+        entry.screenY = balloon.GetYPos();
+        entry.nameStatus = NameStatusKey(balloon.GetNameStatus());
+        entry.name = StringUtils::WideToNarrow(balloon.GetName());
+        entry.guild = StringUtils::WideToNarrow(balloon.GetGuildText());
+        entry.klass = StringUtils::WideToNarrow(balloon.GetClassText());
+    }
+    m_RmlView.MarkDirty("balloons");
 }

@@ -1,0 +1,137 @@
+#include "stdafx.h"
+#include "UI/HUD/Skills/SkillTooltip.h"
+
+#include "UI/HUD/Skills/SkillTooltipModel.h"
+
+#include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/ZzzInventory.h"   // TextList / TextListColor / TextBold externs, STRP_*
+#include "GameLogic/Pets/GIPetManager.h"
+#include "UI/Social/SocialWindowBase.h"         // g_pRenderText macro
+
+#include "Core/Utilities/StringUtils.h"
+#include "Render/Text/CUIRenderText.h"
+
+namespace UI::Skills::Tooltip
+{
+
+namespace
+{
+// Map the renderer-agnostic LineColor enum to the legacy TextList color
+// constants used by RenderTipTextList.
+int LegacyColor(LineColor c)
+{
+    switch (c)
+    {
+    case LineColor::White:    return TEXT_COLOR_WHITE;
+    case LineColor::Blue:     return TEXT_COLOR_BLUE;
+    case LineColor::Red:      return TEXT_COLOR_RED;
+    case LineColor::DarkRed:  return TEXT_COLOR_DARKRED;
+    }
+    return TEXT_COLOR_WHITE;
+}
+}
+
+bool BuildModelForSlot(int Type, Model& outModel)
+{
+    outModel.Reset();
+
+    // Pet command icons use a separate tooltip UI, delegated to giPetManager.
+    if (giPetManager::BuildPetCmdTooltipModel(Type, outModel)) return true;
+
+    if (!CharacterAttribute) return false;
+
+    const int skillType = CharacterAttribute->Skill[Type];
+
+    BuildOptions options;
+    options.skillType = skillType;
+    options.skillSlotIndex = Type;
+    options.includeCharacterSpecific = true;
+
+    BuildModel(options, outModel);
+    return true;
+}
+
+void Render(int sx, int sy, int Type, int /*SkillNum*/, int iRenderPoint /*= STRP_NONE*/)
+{
+    Model model;
+    if (!BuildModelForSlot(Type, model)) return;
+
+    // Copy into the legacy TextList/Color/Bold globals RenderTipTextList consumes.
+    // TextList rows are wchar_t[100], narrower than the model's line buffer -- truncate, don't overflow.
+    constexpr size_t kLegacyLineCap = 100;
+    const int lineCount = (model.count < MAX_TOOLTIP_LINES) ? model.count : MAX_TOOLTIP_LINES;
+    for (int i = 0; i < lineCount; ++i)
+    {
+        const Line& src = model.lines[i];
+        wcsncpy(TextList[i], src.text, kLegacyLineCap - 1);
+        TextList[i][kLegacyLineCap - 1] = L'\0';
+        TextListColor[i] = LegacyColor(src.color);
+        TextBold[i] = src.isBold ? 1 : 0;
+    }
+
+    g_pRenderText->SetFont(TextBold[0] ? g_hFontBold : g_hFont);
+    const SIZE TextSize = g_pRenderText->MeasureText(L"Q", 1);
+
+    if (iRenderPoint == STRP_NONE)
+    {
+        const int Height =
+            (model.count - model.skipCount) * TextSize.cy + model.skipCount * TextSize.cy / 2;
+        sy -= Height;
+    }
+
+    RenderTipTextList(sx, sy, model.count, 0, RT3_SORT_CENTER, iRenderPoint);
+}
+
+float NativeBoxBottomBelowAnchor(const Model& model)
+{
+    if (model.count <= 0)
+        return 0.f;
+
+    // The raise, as Render() computes it from the first line's font.
+    g_pRenderText->SetFont(model.lines[0].isBold ? g_hFontBold : g_hFont);
+    const float lineHeight = static_cast<float>(g_pRenderText->MeasureText(L"Q", 1).cy);
+    const float raise = static_cast<float>(model.count - model.skipCount) * lineHeight +
+                        static_cast<float>(model.skipCount) * lineHeight / 2.f;
+
+    // The box, as RenderTipTextList() measures it: it stops at the first empty line.
+    float box = 0.f;
+    for (int i = 0; i < model.count && model.lines[i].text[0] != L'\0'; ++i)
+    {
+        g_pRenderText->SetFont(model.lines[i].isBold ? g_hFontBold : g_hFont);
+        const float rowHeight = static_cast<float>(g_pRenderText->MeasureText(L"Q", 1).cy);
+        box += rowHeight * (model.lines[i].text[0] == L'\n' ? 0.55f : 1.1f);
+    }
+
+    return box - raise + 1.f;
+}
+
+std::vector<UI::RmlBridge::Tooltip::Line> ToRmlBridgeLines(const Model& model)
+{
+    std::vector<UI::RmlBridge::Tooltip::Line> lines;
+    lines.reserve(static_cast<size_t>(model.count));
+    for (int i = 0; i < model.count; ++i)
+    {
+        const Line& src = model.lines[i];
+        UI::RmlBridge::Tooltip::Line line;
+        if (src.isBlank)
+        {
+            // The model's "\n" rows are RenderTipTextList()'s half-height spacers, not text.
+            line.kind = UI::RmlBridge::Tooltip::Line::Kind::HalfSpacer;
+            lines.push_back(std::move(line));
+            continue;
+        }
+        line.text = StringUtils::WideToNarrow(src.text);
+        line.bold = src.isBold;
+        switch (src.color)
+        {
+        case LineColor::Blue: line.color = UI::RmlBridge::Tooltip::LineColor::Blue; break;
+        case LineColor::Red: line.color = UI::RmlBridge::Tooltip::LineColor::Red; break;
+        case LineColor::DarkRed: line.color = UI::RmlBridge::Tooltip::LineColor::DarkRedHighlight; break;
+        case LineColor::White: default: line.color = UI::RmlBridge::Tooltip::LineColor::White; break;
+        }
+        lines.push_back(std::move(line));
+    }
+    return lines;
+}
+
+}  // namespace UI::Skills::Tooltip

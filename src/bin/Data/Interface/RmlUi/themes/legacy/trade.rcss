@@ -1,0 +1,223 @@
+/* Legacy theme for CTrade's chrome (frame/title/both nicknames/both gold strips/both confirm
+   checkboxes/divider/buttons). #panel's left/top/scale come live from C++ (SyncRmlModel()), so
+   coordinates below are plain reference px, not dp -- values are copied straight from
+   CTrade::RenderBackImage()/RenderText()'s former m_Pos-relative constants. Both trade grids
+   (native) start at `x+16,y+68` (your) and `x+16,y+274` (mine) -- CTrade::Create()'s
+   CInventoryCtrl::Create() calls -- nothing here overlaps either. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 11px;
+	width: calc(100% * var(--root-scale));
+	text-align: center;
+	color: token(text-secondary);
+	font-weight: bold;
+	font-size: 1em;
+	pointer-events: none;
+}
+
+@spritesheet trade-nick-sheet  { src: "../../../newui_Account_title.tga"; trade-nick-back: 0px 0px 171px 26px; }
+@spritesheet trade-money-sheet { src: "../../../newui_item_money.tga";    trade-money-back: 0px 0px 170px 26px; }
+@spritesheet trade-line-sheet  { src: "../../../newui_myquest_Line.tga";  trade-line-image: 0px 0px 188px 21px; }
+
+.nick-bg { position: absolute; width: 171px; height: 26px; decorator: image(trade-nick-back); pointer-events: none; }
+.nick-bg-your { left: 11px; top: 37px; }
+.nick-bg-my   { left: 11px; top: 243px; }
+
+.gold-bg { position: absolute; width: 170px; height: 26px; decorator: image(trade-money-back); pointer-events: none; }
+.gold-bg-your { left: 11px; top: 150px; }
+.gold-bg-my   { left: 11px; top: 356px; }
+
+#divider {
+	position: absolute;
+	left: 1px;
+	/* A thin separator leaves the notice band room to wrap before the lower nickname strip. */
+	top: 241px;
+	width: 188px;
+	height: 2px;
+	decorator: image(trade-line-image);
+	pointer-events: none;
+}
+
+.id-text { position: absolute; color: token(text-info); white-space: nowrap; pointer-events: none; }
+/* native g_hFontBig: its size, big_text_px, bound in trade.rml (text layer); a long name shrinks to
+   end before "Lv." at 134. */
+.id-text-your { left: 32px; top: 43px; width: calc(98px * var(--root-scale)); font-weight: bold; }
+.id-text-my   { left: 20px; top: 253px; font-size: 1em; font-weight: bold; }
+
+.guild-name {
+	position: absolute;
+	left: 16px;
+	top: 30px;
+	color: token(text-secondary);
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+.level-text {
+	position: absolute;
+	left: 134px;
+	top: 48px;
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+.gold-text {
+	position: absolute;
+	left: 11px;
+	width: 159px;
+	text-align: right;
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.gold-text-your { top: 158px; }
+.gold-text-my   { top: 364px; }
+
+/* Confirm checkboxes reuse base.rcss's shared .checkbox-row/.checkbox-box/.checkbox-box.checked
+   primitive (same one Login uses), overridden locally to this window's real 36x29 accept-button
+   art instead of Login's small 16x16 tick box -- same pattern login.rcss itself uses to swap in
+   its own spritesheet over base.rcss's default. */
+@spritesheet trade-confirm-sheet {
+	src: "../../../newui_Bt_accept.tga";
+	trade-confirm-unchecked: 0px 0px 36px 29px;
+	trade-confirm-checked:   0px 29px 36px 29px;
+}
+.checkbox-row {
+	position: absolute;
+	width: 36px;
+	height: 29px;
+}
+.checkbox-box {
+	width: 36px;
+	height: 29px;
+	decorator: image(trade-confirm-unchecked);
+}
+.checkbox-box.checked { decorator: image(trade-confirm-checked); }
+
+/* The display-only confirmation floats in the physical-pixel text layer. Its dimensions and
+   margins follow the panel scale, keeping the sprite at (146, 186) while text wraps around it. */
+.confirm-your {
+	position: static;
+	float: right;
+	width: calc(36px * var(--root-scale));
+	height: calc(29px * var(--root-scale));
+	margin-left: calc(6px * var(--root-scale));
+	margin-top: calc(9px * var(--root-scale));
+	cursor: default;
+	pointer-events: none;
+}
+.confirm-your .checkbox-box { width: 100%; height: 100%; }
+/* My own confirmation -- clickable (trade_my_confirm_click). While m_nMyTradeWait > 0 the original
+   drew the sprite multiplied by RGBA(255, 0, 0, 255) (CNewUITrade::RenderBackImage()); image-color
+   multiplies the image decorator the same way. */
+.confirm-my { left: 144px; top: 390px; cursor: pointer; pointer-events: auto; }
+.confirm-my.waiting .checkbox-box { image-color: rgb(255, 0, 0); }
+
+@spritesheet trade-btn-exit-sheet { src: "../../../newui_exit_00.tga";    trade-btn-exit: 0px 0px 36px 29px; }
+@spritesheet trade-btn-zen-sheet  { src: "../../../newui_Bt_money01.tga"; trade-btn-zen:  0px 0px 36px 29px; }
+.trade-btn {
+	position: absolute;
+	top: 390px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.trade-btn:hover { filter: brightness(1.25); }
+.trade-btn-exit { left: 13px;  decorator: image(trade-btn-exit); }
+.trade-btn-zen  { left: 104px; decorator: image(trade-btn-zen); }
+
+/* One counter-scaled flow keeps the warning and translated notice fragments apart. The native
+   font size is applied once; child lines wrap in physical pixels without fixed row offsets. */
+#trade_help {
+	position: absolute;
+	left: 16px;
+	top: 177px;
+	--flow-w: 166px;
+	line-height: 1.05;
+	white-space: normal;
+	pointer-events: none;
+}
+.warning-label {
+	display: inline-block;
+	color: #d20000;
+	font-weight: bold;
+}
+.notice-line {
+	color: token(text-hint);
+}
+
+/* Former RenderWarningArrow()'s "Warning" text badge -- left/top/width come live from C++ per
+   entry (item_warning_badges), since they track a live, variable-length set of flagged item grid
+   cells (including the same sinf() wobble the native arrow glyph still animates with). Renders
+   after both native grids and the native arrow glyph (this main context paints last), matching the
+   original's own draw order (text drawn on top of the arrow within the same native call). */
+.item-warning-badge {
+	position: absolute;
+	background-color: rgba(210, 0, 0, 255);
+	color: token(text-primary);
+	font-weight: bold;
+	font-size: 1em;
+	text-align: center;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* Trade partner's level by bucket (CTrade::ConvertYourLevel(); the RML toggles
+   .level-bucket-<N>). The original client's colors. */
+.level-text.level-bucket-10  { color: #ff0000; }
+.level-text.level-bucket-50  { color: #ff9600; }
+.level-text.level-bucket-100 { color: #00c918; }
+.level-text.level-bucket-200 { color: #d2e6ff; }
+.level-text.level-bucket-300 { color: #ff99ff; }
+.level-text.level-bucket-400 { color: #ff9999; }
+
+/* Native item grids: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#partner_grid, #partner_grid_counts { left: 16px; top: 68px; width: calc(8 * var(--item-cell)); height: calc(4 * var(--item-cell)); }
+#item_grid, #item_grid_counts { left: 16px; top: 274px; width: calc(8 * var(--item-cell)); height: calc(4 * var(--item-cell)); }
+
+/* The frame. */
+@spritesheet trade-bg-fill-sheet   { src: "../../../newui_msgbox_back.jpg";   trade-bg-fill:   0px 0px 190px 429px; }
+@spritesheet trade-bg-top-sheet    { src: "../../../newui_item_back01.tga";   trade-bg-top:    0px 0px 190px 64px;  }
+@spritesheet trade-bg-left-sheet   { src: "../../../newui_item_back02-L.tga"; trade-bg-left:   0px 0px 21px 320px;  }
+@spritesheet trade-bg-right-sheet  { src: "../../../newui_item_back02-R.tga"; trade-bg-right:  0px 0px 21px 320px;  }
+@spritesheet trade-bg-bottom-sheet { src: "../../../newui_item_back03.tga";   trade-bg-bottom: 0px 0px 190px 45px;  }
+
+.bg-fill, .bg-top, .bg-left, .bg-right, .bg-bottom {
+	position: absolute;
+	pointer-events: none;
+}
+
+.bg-fill   { left: 0;    top: 0;    width: 190px; height: 429px; decorator: image(trade-bg-fill); }
+.bg-top    { left: 0;    top: 0;    width: 190px; height: 64px;  decorator: image(trade-bg-top); }
+.bg-left   { left: 0;    top: 64px; width: 21px;  height: 320px; decorator: image(trade-bg-left); }
+.bg-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(trade-bg-right); }
+.bg-bottom { left: 0;    top: 384px; width: 190px; height: 45px; decorator: image(trade-bg-bottom); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { margin-left: calc(50% - 50% * var(--root-scale)); }
+#your_gold_text { width: calc(159px * var(--root-scale)); }
+#my_gold_text { width: calc(159px * var(--root-scale)); }
+/* A badge is counter-scaled: its item's width in reference px at the panel's scale. */
+.item-warning-badge { width: calc(var(--badge-width, 0px) * var(--root-scale)); }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }
+#panel { font-size: calc(var(--text-px, 12px) / var(--root-scale)); }

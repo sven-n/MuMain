@@ -1,0 +1,195 @@
+/* Legacy theme for CGuildMakeWindow, reproducing its Render(): the docked_panel_frame.rcss frame
+   (linked first; newui_item_back01 top), "Guild" (255, 176, 73) centred at y 15; page 0: the
+   question white at y 50, Create Guild (newui_btn_empty, 108 x 29) at (41, 100), the exit button;
+   page 1: "NAME" at (10, 66), the name box (newui_guildmakeeditbox, 108 x 23) at (45, 60) and the
+   field at (50, 66) (200 x 14, black at alpha 25, text (255, 255, 230) at alpha 210), the gold
+   rectangle round the mark, RenderGuildColor()'s cells (InventoryBox2 behind a colour inset 1;
+   the empty colour black with a grey cross), the two hints (230, 230, 230); page 2: the finished
+   mark 48 x 48 at (72, 74) in its gold rectangle and the name at y 140; Back / Next
+   (newui_btn_empty_small, 64 x 29) at (15, 379) and (110, 379). Reference px inside #panel. */
+
+@spritesheet gm-big-btn-sheet
+{
+	src: "../../../newui_btn_empty.tga";
+	gm-big-up: 0px 0px 108px 29px;
+	gm-big-over: 0px 29px 108px 29px;
+	gm-big-down: 0px 58px 108px 29px;
+}
+@spritesheet gm-small-btn-sheet
+{
+	src: "../../../newui_btn_empty_small.tga";
+	gm-small-up: 0px 0px 64px 29px;
+	gm-small-over: 0px 29px 64px 29px;
+	gm-small-down: 0px 58px 64px 29px;
+}
+@spritesheet gm-name-back-sheet { src: "../../../newui_guildmakeeditbox.tga"; gm-name-back: 0px 0px 108px 23px; }
+@spritesheet gm-cell-back-sheet
+{
+	src: "../../../InventoryBox2.jpg";
+	gm-cell-back-13: 0px 0px 13px 14px;
+	gm-cell-back-18: 0px 0px 18px 19px;
+	gm-cell-back-23: 0px 0px 23px 25px;
+}
+@spritesheet gm-gold-h-sheet { src: "../../../Trading_line.jpg"; gm-gold-h: 7px 3px 126px 2px; }
+@spritesheet gm-gold-v-sheet { src: "../../../Item_Back01.jpg"; gm-gold-v: 1px 80px 2px 125px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+/* The grid and palette leave the pointer to the window's native hit tests. */
+#panel { pointer-events: none; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; pointer-events: none; }
+.gm-centred { left: 0; text-align: center; }
+#title { top: 15px; color: #ffb049; }
+#info { top: 50px; color: #ffffff; }
+#result { top: 140px; color: #ffb049; }
+#name_label { left: 10px; top: 66px; color: #ffb049; }
+.gm-hint { left: 50px; color: #e6e6e6; }
+
+.gm-btn { display: block; position: absolute; pointer-events: auto; }
+.gm-btn-big { left: 41px; top: 100px; width: 108px; height: 29px; decorator: image(gm-big-up); }
+.gm-btn-big:hover { decorator: image(gm-big-over); }
+.gm-btn-big:active { decorator: image(gm-big-down); }
+.gm-btn-small { top: 379px; width: 64px; height: 29px; decorator: image(gm-small-up); }
+.gm-btn-small:hover { decorator: image(gm-small-over); }
+.gm-btn-small:active { decorator: image(gm-small-down); }
+#btn_back { left: 15px; }
+#btn_next { left: 110px; }
+.gm-label { left: 0; text-align: center; color: #ffffff; }
+#btn_exit { pointer-events: auto; }
+
+#name_back { position: absolute; left: 45px; top: 60px; width: 108px; height: 23px; decorator: image(gm-name-back); }
+#name_field {
+	display: none;
+	left: 50px;
+	top: 66px;
+	padding: 0;
+	border-width: 0;
+	border-radius: 0;
+	background-color: rgba(0, 0, 0, 25);
+	color: rgba(255, 255, 230, 210);
+	pointer-events: auto;
+}
+#name_field.shown { display: block; }
+
+.gold-rect { position: absolute; pointer-events: none; }
+#mark_rect { left: 45px; top: 95px; width: 130px; height: 130px; }
+#result_rect { left: 72px; top: 70px; width: 53px; height: 53px; }
+.gold-h { position: absolute; left: 0; top: 0; width: 100%; height: 2px; decorator: image(gm-gold-h); }
+.gold-h-end { top: 100%; margin-left: 0; width: 100%; padding-right: 1px; }
+.gold-v { position: absolute; left: 0; top: 0; width: 2px; height: 100%; decorator: image(gm-gold-v); }
+.gold-v-end { left: 100%; }
+
+.gm-cell { position: absolute; pointer-events: none; }
+.gm-cell-13 { width: 15px; height: 15px; decorator: image(gm-cell-back-13); }
+.gm-cell-18 { width: 20px; height: 20px; decorator: image(gm-cell-back-18); }
+.gm-cell-23 { width: 25px; height: 25px; decorator: image(gm-cell-back-23); }
+.gm-fill { position: absolute; left: 1px; top: 1px; }
+.gm-cell-13 .gm-fill { width: 13px; height: 13px; }
+.gm-cell-18 .gm-fill { width: 18px; height: 18px; }
+.gm-cell-23 .gm-fill { width: 23px; height: 23px; }
+.gm-cross { position: absolute; height: 2px; background-color: #808080; transform-origin: center; }
+.gm-cell-13 .gm-cross { left: -2.69px; top: 5.5px; width: 18.38px; }
+.gm-cell-18 .gm-cross { left: -3.73px; top: 8px; width: 25.46px; }
+.gm-cell-23 .gm-cross { left: -4.76px; top: 10.5px; width: 32.53px; }
+.gm-cross-a { transform: rotate(45deg); }
+.gm-cross-b { transform: rotate(-45deg); }
+
+#result_mark { position: absolute; left: 72px; top: 74px; width: 48px; height: 48px; pointer-events: none; }
+.mark-cell { float: left; width: 6px; height: 6px; }
+
+/* RenderEditGuildMark()'s own layout: the 8 x 8 mark grid of 15-unit cells from (50, 100), the
+   palette's two rows of 20-unit cells from (15, 260), and the selected colour's swatch. */
+.gm-grid, .gm-palette { position: static; }
+#selected_swatch { left: 15px; top: 230px; }
+.gm-hint-1 { top: 230px; }
+.gm-hint-2 { top: 245px; }
+.gm-grid .gm-cell:nth-child(1) { left: 50px; top: 100px; }
+.gm-grid .gm-cell:nth-child(2) { left: 65px; top: 100px; }
+.gm-grid .gm-cell:nth-child(3) { left: 80px; top: 100px; }
+.gm-grid .gm-cell:nth-child(4) { left: 95px; top: 100px; }
+.gm-grid .gm-cell:nth-child(5) { left: 110px; top: 100px; }
+.gm-grid .gm-cell:nth-child(6) { left: 125px; top: 100px; }
+.gm-grid .gm-cell:nth-child(7) { left: 140px; top: 100px; }
+.gm-grid .gm-cell:nth-child(8) { left: 155px; top: 100px; }
+.gm-grid .gm-cell:nth-child(9) { left: 50px; top: 115px; }
+.gm-grid .gm-cell:nth-child(10) { left: 65px; top: 115px; }
+.gm-grid .gm-cell:nth-child(11) { left: 80px; top: 115px; }
+.gm-grid .gm-cell:nth-child(12) { left: 95px; top: 115px; }
+.gm-grid .gm-cell:nth-child(13) { left: 110px; top: 115px; }
+.gm-grid .gm-cell:nth-child(14) { left: 125px; top: 115px; }
+.gm-grid .gm-cell:nth-child(15) { left: 140px; top: 115px; }
+.gm-grid .gm-cell:nth-child(16) { left: 155px; top: 115px; }
+.gm-grid .gm-cell:nth-child(17) { left: 50px; top: 130px; }
+.gm-grid .gm-cell:nth-child(18) { left: 65px; top: 130px; }
+.gm-grid .gm-cell:nth-child(19) { left: 80px; top: 130px; }
+.gm-grid .gm-cell:nth-child(20) { left: 95px; top: 130px; }
+.gm-grid .gm-cell:nth-child(21) { left: 110px; top: 130px; }
+.gm-grid .gm-cell:nth-child(22) { left: 125px; top: 130px; }
+.gm-grid .gm-cell:nth-child(23) { left: 140px; top: 130px; }
+.gm-grid .gm-cell:nth-child(24) { left: 155px; top: 130px; }
+.gm-grid .gm-cell:nth-child(25) { left: 50px; top: 145px; }
+.gm-grid .gm-cell:nth-child(26) { left: 65px; top: 145px; }
+.gm-grid .gm-cell:nth-child(27) { left: 80px; top: 145px; }
+.gm-grid .gm-cell:nth-child(28) { left: 95px; top: 145px; }
+.gm-grid .gm-cell:nth-child(29) { left: 110px; top: 145px; }
+.gm-grid .gm-cell:nth-child(30) { left: 125px; top: 145px; }
+.gm-grid .gm-cell:nth-child(31) { left: 140px; top: 145px; }
+.gm-grid .gm-cell:nth-child(32) { left: 155px; top: 145px; }
+.gm-grid .gm-cell:nth-child(33) { left: 50px; top: 160px; }
+.gm-grid .gm-cell:nth-child(34) { left: 65px; top: 160px; }
+.gm-grid .gm-cell:nth-child(35) { left: 80px; top: 160px; }
+.gm-grid .gm-cell:nth-child(36) { left: 95px; top: 160px; }
+.gm-grid .gm-cell:nth-child(37) { left: 110px; top: 160px; }
+.gm-grid .gm-cell:nth-child(38) { left: 125px; top: 160px; }
+.gm-grid .gm-cell:nth-child(39) { left: 140px; top: 160px; }
+.gm-grid .gm-cell:nth-child(40) { left: 155px; top: 160px; }
+.gm-grid .gm-cell:nth-child(41) { left: 50px; top: 175px; }
+.gm-grid .gm-cell:nth-child(42) { left: 65px; top: 175px; }
+.gm-grid .gm-cell:nth-child(43) { left: 80px; top: 175px; }
+.gm-grid .gm-cell:nth-child(44) { left: 95px; top: 175px; }
+.gm-grid .gm-cell:nth-child(45) { left: 110px; top: 175px; }
+.gm-grid .gm-cell:nth-child(46) { left: 125px; top: 175px; }
+.gm-grid .gm-cell:nth-child(47) { left: 140px; top: 175px; }
+.gm-grid .gm-cell:nth-child(48) { left: 155px; top: 175px; }
+.gm-grid .gm-cell:nth-child(49) { left: 50px; top: 190px; }
+.gm-grid .gm-cell:nth-child(50) { left: 65px; top: 190px; }
+.gm-grid .gm-cell:nth-child(51) { left: 80px; top: 190px; }
+.gm-grid .gm-cell:nth-child(52) { left: 95px; top: 190px; }
+.gm-grid .gm-cell:nth-child(53) { left: 110px; top: 190px; }
+.gm-grid .gm-cell:nth-child(54) { left: 125px; top: 190px; }
+.gm-grid .gm-cell:nth-child(55) { left: 140px; top: 190px; }
+.gm-grid .gm-cell:nth-child(56) { left: 155px; top: 190px; }
+.gm-grid .gm-cell:nth-child(57) { left: 50px; top: 205px; }
+.gm-grid .gm-cell:nth-child(58) { left: 65px; top: 205px; }
+.gm-grid .gm-cell:nth-child(59) { left: 80px; top: 205px; }
+.gm-grid .gm-cell:nth-child(60) { left: 95px; top: 205px; }
+.gm-grid .gm-cell:nth-child(61) { left: 110px; top: 205px; }
+.gm-grid .gm-cell:nth-child(62) { left: 125px; top: 205px; }
+.gm-grid .gm-cell:nth-child(63) { left: 140px; top: 205px; }
+.gm-grid .gm-cell:nth-child(64) { left: 155px; top: 205px; }
+.gm-palette .gm-cell:nth-child(1) { left: 15px; top: 260px; }
+.gm-palette .gm-cell:nth-child(2) { left: 35px; top: 260px; }
+.gm-palette .gm-cell:nth-child(3) { left: 55px; top: 260px; }
+.gm-palette .gm-cell:nth-child(4) { left: 75px; top: 260px; }
+.gm-palette .gm-cell:nth-child(5) { left: 95px; top: 260px; }
+.gm-palette .gm-cell:nth-child(6) { left: 115px; top: 260px; }
+.gm-palette .gm-cell:nth-child(7) { left: 135px; top: 260px; }
+.gm-palette .gm-cell:nth-child(8) { left: 155px; top: 260px; }
+.gm-palette .gm-cell:nth-child(9) { left: 15px; top: 280px; }
+.gm-palette .gm-cell:nth-child(10) { left: 35px; top: 280px; }
+.gm-palette .gm-cell:nth-child(11) { left: 55px; top: 280px; }
+.gm-palette .gm-cell:nth-child(12) { left: 75px; top: 280px; }
+.gm-palette .gm-cell:nth-child(13) { left: 95px; top: 280px; }
+.gm-palette .gm-cell:nth-child(14) { left: 115px; top: 280px; }
+.gm-palette .gm-cell:nth-child(15) { left: 135px; top: 280px; }
+.gm-palette .gm-cell:nth-child(16) { left: 155px; top: 280px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#title { width: calc(100% * var(--root-scale)); }
+#info { width: calc(100% * var(--root-scale)); }
+.gm-label { width: calc(64px * var(--root-scale)); }
+#result { width: calc(100% * var(--root-scale)); }
+#name_field { width: calc(200px * var(--root-scale)); height: calc(14px * var(--root-scale)); line-height: calc(14px * var(--root-scale)); }
+
+/* The mark grid's and the palette's cells take the pointer (guild_mark_paint, guild_mark_color). */
+.gm-grid .gm-cell, .gm-palette .gm-cell { pointer-events: auto; cursor: pointer; }

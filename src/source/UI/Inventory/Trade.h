@@ -1,0 +1,225 @@
+#if !defined(AFX_NEWUITRADE_H__25FC9B24_8F86_4791_B246_689326623DFB__INCLUDED_)
+#define AFX_NEWUITRADE_H__25FC9B24_8F86_4791_B246_689326623DFB__INCLUDED_
+
+#pragma once
+
+#include "UI/Inventory/ItemCameraTarget.h"
+#include "UI/Inventory/ItemGridModel.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/Core/WindowObject.h"
+#include "UI/Dialogs/MessageBox.h"
+#include "UI/Inventory/MyInventory.h"
+#include "UI/Quests/MyQuestInfoWindow.h"
+#include "UI/Inventory/StorageInventory.h"
+#include "UI/RmlBridge/RmlThemedView.h"
+#include "UI/Inventory/TradeUpdates.h"
+
+#include <vector>
+
+namespace Rml { class ElementDocument; }
+
+namespace UI::Items::Placement
+{
+struct HeldItemMove;
+}
+
+namespace mu::ui::window
+{
+    class CTrade : public CObject
+    {
+    public:
+        enum IMAGE_LIST
+        {
+            // Cursor-following warning-arrow overlay only -- every other sprite in this window
+            // (frame/nick-back/money/confirm/line/buttons) is RmlUi (trade.rml);
+            // see RenderWarningArrow()/LoadImages().
+            IMAGE_TRADE_WARNING_ARROW = BITMAP_CURSOR + 7,
+        };
+
+    private:
+        enum
+        {
+            COLUMN_TRADE_INVEN = 8,
+            ROW_TRADE_INVEN = 4,
+            MAX_TRADE_INVEN = COLUMN_TRADE_INVEN * ROW_TRADE_INVEN,
+        };
+
+        CManager* m_pNewUIMng;            // UI Manager
+
+        CInventoryCtrl* m_pYourInvenCtrl; // Other player's item control
+        CInventoryCtrl* m_pMyInvenCtrl;   // My item control
+        ITEM           m_aYourInvenBackUp[MAX_TRADE_INVEN]; // Other player's item backup
+
+        wchar_t        m_szYourID[MAX_USERNAME_SIZE + 1]; // Other player's ID
+        int            m_nYourLevel;           // Other player's level
+        int            m_nYourGuildType;       // Other player's guild type
+        int            m_nYourTradeGold;       // Other player's trade gold
+        int            m_nMyTradeGold;         // My trade gold
+        int            m_nTempMyTradeGold;     // Temporary buffer for my trade gold
+        bool           m_bYourConfirm;         // Other player's confirmation status
+        bool           m_bMyConfirm;           // My confirmation status
+        int            m_nMyTradeWait;         // Delay to prevent spamming my confirm button
+        bool           m_bTradeAlert;          // Trade warning alert
+
+        // Window frame/title/both nickname displays/both gold strips/both confirm checkboxes/
+        // divider/buttons are RmlUi. Both CInventoryCtrl grids stay native since their icons are
+        // live 3D model renders (same reasoning as CMyInventory/CStorageInventoryExt). The
+        // guild-mark emblem (RenderGuildMark()) also stays native -- it's a dynamically-generated
+        // bitmap built fresh from live guild-mark data, a live-rendered icon like the item icons
+        // themselves. RenderWarningArrow()'s animated cursor-tracking arrow glyph (a texture-atlas
+        // crop with a color tint, using an intentional GL_CLAMP UV overflow trick -- see its own
+        // comment) also stays native, but the "Warning" text badge it used to draw next to that
+        // arrow is presentation chrome, not item rendering, so it's RmlUi now (itemWarningBadges
+        // below) -- see SyncRmlModel().
+        struct TradeRmlModel
+        {
+            float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
+            float bigTextPx = 0.f; // the big font's, for the partner's name
+
+            Rml::String title;
+
+            Rml::String yourIdText;
+            bool yourGuildVisible = false;
+            Rml::String yourGuildName;
+            Rml::String yourLevelText;
+            int yourLevelBucket = 0; // ConvertYourLevel() -- the theme colors each bucket
+            Rml::String yourGoldText;
+            Rml::String yourGoldTier; // UI::RmlBridge::GoldTierKey() of the amount
+            bool yourConfirmChecked = false;
+
+            Rml::String myIdText;
+            Rml::String myGoldText;
+            Rml::String myGoldTier;
+            bool myConfirmChecked = false;
+            bool myConfirmWaiting = false;
+
+            Rml::String warningLabel;
+            Rml::String noticeLine1;
+            Rml::String noticeLine2;
+            Rml::String noticeLine3;
+            float warningOpacity = 1.f;
+
+            Rml::String closeTooltip;
+            Rml::String zenTooltip;
+
+            // Former RenderWarningArrow()'s "Warning" text badge -- one entry per your-side item
+            // currently flagged ITEM_COLOR_TRADE_WARNING, positioned to match that item's live grid
+            // cell (including the same sinf() wobble the native arrow glyph still animates with),
+            // so C++ must supply per-entry pixel coordinates rather than fixed RCSS ones.
+            struct ItemWarningBadge
+            {
+                float x = 0.f, y = 0.f, width = 0.f;
+                bool operator==(const ItemWarningBadge&) const = default;
+            };
+            Rml::String itemWarningText; // "Warning" -- set once, same string every badge
+            std::vector<ItemWarningBadge> itemWarningBadges;
+            // The grids as their documents draw them (CInventoryCtrl::Cells()).
+            UI::Items::ItemGridCells partnerCells;
+            UI::Items::ItemGridCells gridCells;
+        };
+        void BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model);
+        UI::RmlBridge::ThemedView<TradeRmlModel> m_RmlView{"trade",
+            [this](Rml::DataModelConstructor& c, TradeRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/trade.rml"}}};
+
+        // The grids' items, into the document's #item_view.
+        void RenderItems();
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); }};
+
+        void BuildRmlUi();
+        void SyncRmlModel();
+
+    public:
+        CTrade();
+        virtual ~CTrade();
+
+        bool Create(CManager* pNewUIMng);
+        void Release();
+
+
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+        bool Update();
+        bool Render();
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
+        // The pointer over the drawn panel.
+        bool IsPointerOverPanel();
+
+        float GetLayerDepth();	//. 2.1f
+
+
+        // Returns the other player's (grid-based) trade inventory control.
+        CInventoryCtrl* GetYourInvenCtrl() const
+        {
+            return m_pYourInvenCtrl;
+        }
+        // Returns the local player's (grid-based) trade inventory control.
+        CInventoryCtrl* GetMyInvenCtrl() const
+        {
+            return m_pMyInvenCtrl;
+        }
+
+        void ProcessCloseBtn();
+        void ProcessClosing();
+
+        void GetYourID(wchar_t* pszYourID);
+        int GetYourLevel() const { return m_nYourLevel; }
+        bool IsMyConfirmed() const { return m_bMyConfirm; }
+        bool IsYourConfirmed() const { return m_bYourConfirm; }
+        int GetMyTradeGold() const { return m_nMyTradeGold; }
+        int GetYourTradeGold() const { return m_nYourTradeGold; }
+        // Frames until my confirm button takes clicks again after an offer changed.
+        int GetMyTradeWait() const { return m_nMyTradeWait; }
+        void SetYourTradeGold(int nGold) { m_nYourTradeGold = nGold; }
+
+        void SendRequestMyGoldInput(int nInputGold);
+        // Right-click: the item under the cursor in sourceCtrl (the inventory or
+        // an extension) goes into my trade grid.
+        bool ProcessMyInvenItemAutoMove(CInventoryCtrl* sourceCtrl);
+        // Right-click: the item under the cursor in my trade grid goes back
+        // into the inventory.
+        bool ProcessMyTradeItemAutoMoveToInventory();
+
+        // Shows the request's dialog; false when a window that forbids trading is
+        // open and the client has answered no by itself.
+        bool ProcessToReceiveTradeRequest(const wchar_t* pszYourID);
+        void ProcessToReceiveTradeResult(UI::Trade::RequestReply reply, const UI::Trade::Partner& partner);
+        void ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex);
+        void ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const BYTE> pbyItemPacket);
+        void ProcessToReceiveMyTradeGold(BYTE bySuccess);
+        void ProcessToReceiveYourConfirm(UI::Trade::PartnerConfirm state);
+        void ProcessToReceiveTradeExit(UI::Trade::CloseReason reason);
+        void ProcessToReceiveTradeItems(int nIndex, std::span<const BYTE> pbyItemPacket);
+
+        void AlertTrade();
+
+        int GetPointedItemIndexMyInven();
+        int GetPointedItemIndexYourInven();
+
+    private:
+        void LoadImages();
+        void UnloadImages();
+
+        // #panel's drawn top-left (window pixels) and the scale its placement gives it.
+        bool DrawnPanel(Rml::Vector2f& offset, float& scale);
+        void RenderGuildMark();
+        void RenderWarningArrow();
+
+        void ProcessMyInvenCtrl();
+        bool ProcessBtns();
+
+        // The trade partner's level rounded down to the bucket the original client showed ("about N").
+        int ConvertYourLevel() const;
+
+        void InitTradeInfo();
+        void InitYourInvenBackUp();
+        void BackUpYourInven(int nYourInvenIndex);
+        void BackUpYourInven(ITEM* pYourItemObj);
+        void AlertYourTradeInven();
+
+        void SendRequestItemToTrade(const UI::Items::Placement::HeldItemMove& move);
+        void UncheckMyConfirm();
+    };
+}
+
+#endif // !defined(AFX_NEWUITRADE_H__25FC9B24_8F86_4791_B246_689326623DFB__INCLUDED_)

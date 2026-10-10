@@ -24,6 +24,11 @@ extern bool CheckRenderNextFrame();
 extern void WaitForNextActivity(bool usePreciseSleep);
 extern void UpdateSceneState();
 extern void LoadingScene(HDC hDC);
+// Closes the RmlUi loading-screen wallpaper LoadingScene() shows and keeps open (rather than
+// closing it after its own one-frame flash) -- called from MainScene.cpp's RenderMainScene()
+// once LoadingWorld actually drops below the "world ready" threshold. Safe to call any time,
+// including when there's nothing to close (no-op).
+extern void HideLoadingSceneOverlay();
 extern void RenderScene(HDC Hdc);
 extern bool CheckName();
 void    StartGame();

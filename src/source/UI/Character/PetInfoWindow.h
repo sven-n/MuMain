@@ -1,0 +1,103 @@
+
+#if !defined(AFX_NEWUIPETINFORMATION_H__A1B6EB0C_4F9F_4285_B89A_7BB680BF84D6__INCLUDED_)
+#define AFX_NEWUIPETINFORMATION_H__A1B6EB0C_4F9F_4285_B89A_7BB680BF84D6__INCLUDED_
+
+#pragma once
+
+#include "UI/Core/WindowObject.h"
+#include "UI/Core/WindowManager.h"
+#include "UI/RmlBridge/RmlThemedView.h"
+
+namespace Rml { class ElementDocument; }
+
+namespace mu::ui::window
+{
+    // Fully RmlUi-based (#panel, pet_info.rml/.rcss) -- no live 3D content, same shape as the
+    // already-ported CCharacterInfoWindow it docks alongside.
+    class CPetInfoWindow : public CObject
+    {
+    private:
+        enum
+        {
+            PETINFOWINDOW_WIDTH = 190,
+            PETINFOWINDOW_HEIGHT = 429,
+        };
+
+        enum CUR_OPEN_TAB_BUTTON
+        {
+            TAB_TYPE_DARKHORSE = 0,
+            TAB_TYPE_DARKSPIRIT
+        };
+
+    public:
+        CPetInfoWindow();
+        virtual ~CPetInfoWindow();
+
+        bool Create(CManager* pNewUIMng);
+        void Release();
+
+        void Show(bool bShow) override;
+        Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
+
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+        bool Update();
+        bool Render();
+
+        float GetLayerDepth();	//. 2.3f
+
+        void OpenningProcess();
+        void ClosingProcess();
+
+        // Invoked directly from RmlUi data-event-click bindings (see Create()), not polled.
+        void RmlClickSelectTab(int tab);
+
+
+    private:
+        void BuildRmlUi();
+        void SyncRmlModel();
+        void CalcDamage(int iNumTapButton);
+
+        struct PetInfoRmlModel
+        {
+            float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
+
+            int activeTab = TAB_TYPE_DARKHORSE;
+            Rml::String windowTitle;
+            Rml::String tabDarkHorseLabel, tabDarkSpiritLabel;
+            Rml::String exitTooltip;
+
+            // Dark Horse tab
+            bool dhHasPet = false;
+            Rml::String dhNoPetText;
+            Rml::String dhLevelText, dhLifeText, dhExpText, dhDmgText, dhAtkSpeedText;
+            float dhHpPercent = 0.f;
+
+            // Dark Spirit tab
+            bool dsHasPet = false;
+            Rml::String dsNoPetText;
+            Rml::String dsLevelText, dsLifeText, dsExpText, dsDmgText, dsAtkSpeedText, dsCharismaText;
+            float dsHpPercent = 0.f;
+
+            // Set once at Create(); static I18N labels, never re-synced (this window has no
+            // language switcher of its own).
+            Rml::String commandsLabel;
+            Rml::String skillBasicActionLabel, skillRandomAttackLabel, skillAttackWithOwnerLabel, skillAttackTargetLabel;
+        };
+
+        void BindRmlModel(Rml::DataModelConstructor& c, PetInfoRmlModel& model);
+        UI::RmlBridge::ThemedView<PetInfoRmlModel> m_RmlView{"pet_info",
+            [this](Rml::DataModelConstructor& c, PetInfoRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/pet_info.rml"}}};
+
+    private:
+        CManager* m_pNewUIMng;
+
+
+        int m_aiDamage[2];
+        float m_fAddDamagePercent;
+    };
+}
+
+#endif // !defined(AFX_NEWUIPETINFORMATION_H__A1B6EB0C_4F9F_4285_B89A_7BB680BF84D6__INCLUDED_)

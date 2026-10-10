@@ -120,8 +120,7 @@ leaf::CCBTMessageBox* leaf::CCBTMessageBox::GetInstance()
 
 LRESULT CALLBACK leaf::CCBTMessageBox::CBTProc(INT nCode, WPARAM wParam, LPARAM lParam)
 {
-    // notification that a window is about to be activated
-    // window handle is wParam
+    // A window (wParam) is about to be activated.
     if (nCode == HCBT_ACTIVATE && GetInstance()->GetHookHandle())
     {
         HWND hChildWnd = reinterpret_cast<HWND>(wParam);    // msgbox is "child"

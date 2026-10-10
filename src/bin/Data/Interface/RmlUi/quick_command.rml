@@ -1,0 +1,36 @@
+<rml>
+<head>
+	<title>Quick Command</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="quick_command.rcss"/>
+</head>
+<body>
+	<!-- The quick command menu (CQuickCommandWindow): opened on a player beside the pointer, the
+	     player's name and five actions. C++ places #panel (CObject::PlaceDocument()) and runs the
+	     requests; the rows' hover and clicks are this document's. Everything inside is reference px,
+	     and the text is a .sharp-text layer at the native size, counter-scaled out of the panel. -->
+	<div id="panel" data-model="quick_command">
+		<div id="back"></div>
+		<div id="frame_up"></div>
+		<div class="frame-middle frame-middle-1"></div>
+		<div class="frame-middle frame-middle-2"></div>
+		<div class="frame-middle frame-middle-3"></div>
+		<div class="frame-middle frame-middle-short frame-middle-4"></div>
+		<div id="frame_down"></div>
+		<div class="line line-1"></div>
+		<div class="line line-2"></div>
+		<div class="line line-3"></div>
+		<div class="line line-4"></div>
+
+		<span class="sharp-text" id="name" data-style-font-size="bold_text_px + 'px'">{{target_name}}</span>
+
+		<div id="rows">
+			<div class="quick-row" data-for="row : rows" data-event-click="quick_command_run(it_index)">
+				<span class="sharp-text quick-label" data-style-font-size="text_px + 'px'">{{row.label}}</span>
+				<div class="arrow arrow-left"></div>
+				<div class="arrow arrow-right"></div>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

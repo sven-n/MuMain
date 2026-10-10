@@ -14,9 +14,6 @@ bool NewRenderLogInScene(HDC hDC);
 void MoveCamera();
 void MoveCharacterCamera(vec3_t Origin, vec3_t Position, vec3_t Angle);
 
-// Character deletion
-void DeleteCharacter();
-
 // LoginScene camera accessors (for external use)
 int GetLoginCameraCount();
 int GetLoginCameraWalkCut();

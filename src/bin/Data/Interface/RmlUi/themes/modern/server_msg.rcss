@@ -1,0 +1,27 @@
+/* Modern theme for CServerMsgWin: the modern panel surface instead of the server_ex art, the lines
+   in the fixed font. Geometry is the legacy one (real pixels). */
+
+#panel { position: absolute; transform-origin: left top; width: 512px; pointer-events: none; }
+#centre {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 512px;
+	margin-bottom: -6px;
+	background-color: token(surface-panel);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+}
+#top, #bottom, #left, #right { display: none; }
+
+.sharp-text { display: block; position: absolute; white-space: pre; pointer-events: none; transform-origin: left top; }
+.server-line { left: 11px; font-family: Cousine; color: token(text-primary); }
+
+/* RenderContents()'s own rows: the message lines 20 units apart from y 12, up to
+   SMW_MSG_LINE_MAX of them. */
+.server-lines { position: static; }
+.server-line:nth-child(1) { top: 12px; }
+.server-line:nth-child(2) { top: 32px; }
+.server-line:nth-child(3) { top: 52px; }
+.server-line:nth-child(4) { top: 72px; }
+.server-line:nth-child(5) { top: 92px; }

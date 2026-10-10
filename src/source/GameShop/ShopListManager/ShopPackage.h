@@ -23,6 +23,10 @@ B ��Ű���� b ��� ��ǰ�� �ϳ��� �ִٸ� 1000
 
 #pragma once
 
+// The most description lines either buy dialog wraps a package blurb into.
+constexpr int UIMAX_TEXT_LINE = 150;
+
+
 #include "Include.h"
 #include <time.h>
 

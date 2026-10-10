@@ -1,0 +1,102 @@
+/* Legacy theme for CMyShopInventory's chrome (frame/title/shop-name field/Open-Close-Exit buttons).
+   The workspace places #panel (its slot's left/top/scale), so coordinates below are plain
+   reference px, not dp. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* Between the frame's top corners, clear of the close button; a longer title ends in ".." and
+   scrolls on hover (base.rcss .marquee). */
+#title {
+	position: absolute;
+	left: 28px;
+	top: 15px;
+	width: calc(134px * var(--root-scale));
+	text-align: center;
+	/* Native draws it in the normal font, 0xFF49B0FF -- an ABGR DWORD, i.e. (255,176,73). */
+	color: #ffb049;
+	font-size: 1em;
+}
+
+/* Shop-name field: only placement/size plus this window's own bespoke strip art -- every other
+   visual comes from base.rcss's shared .text-field. Box is the exact 169x26 @ (12,49) the
+   newui_Box_openTitle strip occupied as #edit_bg; padding-left puts the first glyph at x=50, the
+   same place the native CUITextInputBox drew it (SetPosition(m_Pos.x + 50, m_Pos.y + 55)), clearing
+   the label baked into the left of that sprite. Text colour matches the old
+   SetTextColor(255, 255, 230, 210). */
+@spritesheet shop-edit-bg-sheet { src: "../../../newui_Box_openTitle.tga"; shop-edit-bg: 0px 0px 169px 26px; }
+.my-shop-title-field {
+	position: absolute;
+	left: 12px;
+	top: 49px;
+	width: 169px;
+	height: 26px;
+	padding: 6px 6px 0 38px;
+	font-size: 1em;
+	color: token(text-narrative);
+	background-color: transparent;
+	border-width: 0;
+	decorator: image(shop-edit-bg);
+}
+
+/* Buttons: same 36x29 reference-pixel boxes ChangeButtonInfo() used to place them at. */
+@spritesheet shop-btn-exit-sheet  { src: "../../../newui_exit_00.tga";      shop-btn-exit:  0px 0px 36px 29px; }
+@spritesheet shop-btn-open-sheet  { src: "../../../newui_Bt_openshop.tga";  shop-btn-open:  0px 0px 36px 29px; }
+@spritesheet shop-btn-close-sheet { src: "../../../newui_Bt_closeshop.tga"; shop-btn-close: 0px 0px 36px 29px; }
+
+.shop-btn {
+	position: absolute;
+	top: 391px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.shop-btn:hover { filter: brightness(1.25); }
+/* A locked CNewUIButton still shows its hint on hover; it only takes no click (MyShopInventory.cpp). */
+.shop-btn.locked,
+.shop-btn.locked:hover { cursor: default; filter: brightness(0.6); }
+
+.shop-btn-exit  { left: 13px; decorator: image(shop-btn-exit); }
+.shop-btn-open  { left: 53px; decorator: image(shop-btn-open); }
+.shop-btn-close { left: 93px; decorator: image(shop-btn-close); }
+
+/* Former RenderTextInfo()'s colours; shop_notice.rcss lays the notice out. */
+.myshop-line-still-opening { color: #d78a00; }
+.myshop-line-warning { color: #ff2d2f; }
+.myshop-line-info { color: token(text-notice); }
+
+/* Native item grid: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#item_grid, #item_grid_counts { left: 16px; top: 90px; width: calc(8 * var(--item-cell)); height: calc(4 * var(--item-cell)); }
+
+/* The frame. */
+@spritesheet shop-bg-fill-sheet   { src: "../../../newui_msgbox_back.jpg";   shop-bg-fill:   0px 0px 190px 429px; }
+@spritesheet shop-bg-top-sheet    { src: "../../../newui_item_back01.tga";   shop-bg-top:    0px 0px 190px 64px;  }
+@spritesheet shop-bg-left-sheet   { src: "../../../newui_item_back02-L.tga"; shop-bg-left:   0px 0px 21px 320px;  }
+@spritesheet shop-bg-right-sheet  { src: "../../../newui_item_back02-R.tga"; shop-bg-right:  0px 0px 21px 320px;  }
+@spritesheet shop-bg-bottom-sheet { src: "../../../newui_item_back03.tga";   shop-bg-bottom: 0px 0px 190px 45px;  }
+
+.bg-fill, .bg-top, .bg-left, .bg-right, .bg-bottom {
+	position: absolute;
+	pointer-events: none;
+}
+
+.bg-fill   { left: 0;    top: 0;    width: 190px; height: 429px; decorator: image(shop-bg-fill); }
+.bg-top    { left: 0;    top: 0;    width: 190px; height: 64px;  decorator: image(shop-bg-top); }
+.bg-left   { left: 0;    top: 64px; width: 21px;  height: 320px; decorator: image(shop-bg-left); }
+.bg-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(shop-bg-right); }
+.bg-bottom { left: 0;    top: 384px; width: 190px; height: 45px; decorator: image(shop-bg-bottom); }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#shop_title { width: calc(169px * var(--root-scale)); height: calc(26px * var(--root-scale)); padding: calc(6px * var(--root-scale)) calc(6px * var(--root-scale)) 0 calc(38px * var(--root-scale)); }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }
+#panel { font-size: calc(var(--text-px, 12px) / var(--root-scale)); }

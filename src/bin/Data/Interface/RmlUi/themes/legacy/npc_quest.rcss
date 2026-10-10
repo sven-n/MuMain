@@ -1,0 +1,195 @@
+/* CNPCQuest (npc_quest.rml). docked_panel_frame.rcss (linked first) supplies #panel/.frame-piece/
+   #btn_exit/.tooltip; #panel is the frame inside #content_root, the document's positioning root.
+   Coordinates below are plain reference px, not dp.
+
+   Divider/Complete-button sprites duplicate assets other sibling windows this session already use
+   (newui_myquest_Line.tga, newui_btn_empty.tga -- the same texture quest_progress.rcss's own
+   qp-btn-complete-idle/hover spritesheet uses) rather than cross-linking those unrelated
+   stylesheets -- same "duplicate a small shared sprite def" choice made for every sibling this
+   session. */
+.frame-top { decorator: image(docked-bg-top-a); }
+
+/* The positioning root, unpainted: #panel inside it is the frame. It carries the font-family
+   docked_panel_frame.rcss's #panel gives every sibling, which the texts here would otherwise lack. */
+#content_root {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* The frame, at #content_root's own place; the item preview over it, under the rows. */
+#content_root > #panel { left: 0; top: 0; pointer-events: none; }
+.nq-item { position: absolute; left: 0; top: 0; width: 190px; height: 429px; pointer-events: none; }
+
+@spritesheet nq-line-sheet { src: "../../../newui_myquest_Line.tga"; nq-line-img: 0px 0px 188px 21px; }
+@spritesheet nq-btn-complete-sheet {
+	src: "../../../newui_btn_empty.tga";
+	nq-btn-complete-idle:  0px  0px 108px 29px;
+	nq-btn-complete-hover: 0px 29px 108px 29px;
+}
+@spritesheet nq-zen-sheet { src: "../../../newui_item_money2.tga"; nq-zen-img: 0px 0px 170px 24px; }
+
+/* NPC name doubles as this window's title -- dynamic (g_csQuest.GetNPCName()), same convention
+   npc_dialogue.rcss's own #title uses. */
+#title {
+	position: absolute;
+	left: 0;
+	top: 16px;
+	width: calc(190px * var(--root-scale));
+	text-align: center;
+	color: token(accent-cyan); /* native g_hFont, not bold */
+	font-size: 1em;
+}
+
+/* Suppressed for Dark Lord/Dark/RageFighter-class NPCs (bCheckNPC gate) -- see SyncRmlModel()'s own
+   comment. No explicit display here -- base.rcss's .hidden must win the cascade uncontested (this
+   session's own overlap bugfix established why an explicit display:block here would always beat
+   it, regardless of show_quest_title). */
+.nq-quest-title {
+	position: absolute;
+	left: 0;
+	top: 29px;
+	width: calc(190px * var(--root-scale));
+	text-align: center;
+	color: #c8dcff;
+	font-size: 1em;
+}
+
+.nq-divider {
+	position: absolute;
+	left: 1px;
+	top: 325px;
+	width: 188px;
+	height: 21px;
+	decorator: image(nq-line-img);
+}
+
+/* The always-present divider (npc_quest_bg.rml) under the dialogue text. */
+.nq-divider-dialogue { top: 220px; }
+
+/* No explicit display -- same reasoning as .nq-quest-title above. */
+.nq-conditions {
+	position: absolute;
+	left: 52px;
+	top: 244px;
+	width: 128px;
+}
+/* Rows inside text layers (npc_quest.rml) take the layer's bound line height as their pitch. */
+.nq-condition-row {
+	display: block;
+	line-height: inherit; /* 32px */
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+}
+
+.nq-btn-complete {
+	position: absolute;
+	left: 41px;
+	top: 355px;
+	width: 108px;
+	height: 29px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 29px;
+	color: token(text-narrative);
+	font-size: 1em;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(nq-btn-complete-idle);
+}
+.nq-btn-complete:hover { decorator: image(nq-btn-complete-hover); }
+.nq-btn-complete.disabled {
+	color: token(text-inactive);
+	pointer-events: none;
+	cursor: default;
+	filter: brightness(0.6);
+}
+
+/* No explicit display -- same reasoning as .nq-quest-title above. */
+.nq-cost {
+	position: absolute;
+	left: 11px;
+	top: 361px;
+	width: 170px;
+	height: 24px;
+	decorator: image(nq-zen-img);
+}
+/* Native draws the label at x+20 and the amount right-aligned to x+170 (window coordinates), both
+   bold at y+368; .nq-cost itself starts at x+11. */
+.nq-cost-label {
+	display: block;
+	position: absolute;
+	left: 9px;
+	top: 7px;
+	color: token(text-hint);
+	font-weight: bold;
+	font-size: 1em;
+}
+.nq-cost-amount {
+	display: block;
+	position: absolute;
+	left: 9px;
+	top: 7px;
+	width: 150px;
+	text-align: right;
+	font-weight: bold;
+	font-size: 1em;
+}
+
+/* Native centred the message and answer lines on a band of NUM_LINE_CMB (7) lines from 66, 18
+   apart. With no quest in progress it drew the answers at 250 instead, but still centred the
+   messages as if the answers followed them: the padding keeps that room. */
+#nq_dialogue {
+	position: absolute;
+	left: 0;
+	top: 66px;
+	--flow-w: 190px;
+	--flow-h: 126px;
+	box-sizing: border-box;
+	text-align: center;
+}
+#nq_dialogue.answers-anchored { padding-bottom: calc(var(--answer-lines, 0) * 18px * var(--root-scale)); }
+#nq_dialogue.answers-anchored .nq-answers {
+	position: absolute;
+	left: 0;
+	top: calc(184px * var(--root-scale));
+	width: 100%;
+}
+/* Native advances every message and answer line 18 reference px and never wraps them. */
+.nq-message-line {
+	display: block;
+	line-height: inherit; /* 18px */
+	white-space: nowrap;
+	color: token(text-narrative);
+	font-size: 1em;
+}
+.nq-answer-row {
+	display: block;
+	line-height: inherit; /* 18px */
+	white-space: nowrap;
+	color: #dfbf67;
+	font-weight: bold;
+	font-size: 1em;
+	cursor: pointer;
+	pointer-events: auto;
+}
+/* Native highlighted the hovered answer by swapping its text color to red, not a background
+   highlight -- preserved exactly, not replaced with the translucent-quad style other sibling
+   answer lists use, since that's genuinely how this window's own RenderText() colored it. */
+.nq-answer-row:hover { color: #ff0000; }
+
+/* Exit is a common close button -- legacy's sprite already has its own "X" baked in, so the shared
+   label span is redundant (same convention every sibling this session uses). */
+.btn-exit-label { display: none; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#conditions_anchor { width: calc(128px * var(--root-scale)); line-height: calc(32px * var(--root-scale)); }
+#btn_complete { width: calc(108px * var(--root-scale)); height: calc(29px * var(--root-scale)); line-height: calc(29px * var(--root-scale)); }
+.nq-cost-amount.gold-amount { width: calc(150px * var(--root-scale)); }
+#nq_dialogue { line-height: calc(18px * var(--root-scale)); }
+
+/* The native text size, counter-scaled out of the placed root's scale. */
+#content_root { font-size: calc(var(--text-px) / var(--root-scale)); }

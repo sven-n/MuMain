@@ -1,0 +1,481 @@
+/* Shared, cross-window RCSS for the legacy theme -- generic rules reused by more than one
+   migrated window (SysMenuWin/OptionWin's button/checkbox/panel-chrome art, plus layout utility
+   classes). Every migrated window links this file first, then its own positional .rcss. */
+
+@spritesheet legacy-btn-sheet
+{
+	src: "../../../op1_b_all.tga";
+	legacy-btn-idle:   0px  0px 108px 30px;
+	legacy-btn-hover:  0px 30px 108px 30px;
+	legacy-btn-active: 0px 60px 108px 30px;
+
+	/* Inner (stretch-safe) rects for a ninepatch decorator (used by server_select.rcss) so button
+	   art stretches past its native 108x30 size without distorting. 8px inset is a guess at the
+	   border thickness -- adjust if the stretched middle shows a seam or squashed corners. */
+	legacy-btn-idle-inner:   8px  8px 92px 14px;
+	legacy-btn-hover-inner:  8px 38px 92px 14px;
+	legacy-btn-active-inner: 8px 68px 92px 14px;
+}
+
+@spritesheet legacy-checkbox-sheet
+{
+	src: "../../../op2_ch.tga";
+	legacy-checkbox-unchecked: 0px  0px 16px 16px;
+	legacy-checkbox-checked:   0px 16px 16px 16px;
+}
+
+/* Panel chrome for SysMenuWin/OptionWin's CWinEx backing, reproduced as three stacked elements
+   rather than a tiled-vertical decorator -- REPEAT fit mode isn't supported in this build. */
+@spritesheet legacy-panel-bottom-sheet
+{
+	src: "../../../op1_back2.tga";
+	legacy-panel-bottom: 0px 0px 213px 43px;
+}
+@spritesheet legacy-panel-center-sheet
+{
+	src: "../../../op1_stone.jpg";
+	legacy-panel-center: 0px 0px 128px 128px;
+}
+
+.panel-cap-top {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+}
+.panel-cap-bottom {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 43dp;
+	decorator: image(legacy-panel-bottom);
+}
+/* Spans nearly the full panel (3dp inset each side), matching CWinEx's real WE_BG_CENTER; painted
+   first so it shows through the caps' transparent negative space. */
+.panel-middle {
+	position: absolute;
+	left: 3dp;
+	top: 3dp;
+	right: 3dp;
+	bottom: 3dp;
+	decorator: image(legacy-panel-center);
+}
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	pointer-events: none;
+	/* A panel's scale before anything places it; a placed panel sets its own. */
+	--root-scale: 1;
+}
+
+/* Full-screen dim overlay for modal-style windows (SysMenuWin/OptionWin). */
+#backdrop {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: token(surface-backdrop);
+	pointer-events: auto;
+}
+
+.checkbox-row {
+	position: absolute;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.checkbox-box {
+	display: inline-block;
+	width: 16dp;
+	height: 16dp;
+	decorator: image(legacy-checkbox-unchecked);
+}
+.checkbox-box.checked {
+	decorator: image(legacy-checkbox-checked);
+}
+.checkbox-label {
+	position: absolute;
+	left: 21dp;
+	top: 1dp;
+	white-space: nowrap;
+}
+
+.btn {
+	position: absolute;
+	width: 108dp;
+	height: 30dp;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30dp;
+	cursor: pointer;
+	decorator: image(legacy-btn-idle);
+	pointer-events: auto;
+}
+.btn:hover {
+	decorator: image(legacy-btn-hover);
+}
+.btn:active {
+	decorator: image(legacy-btn-active);
+}
+.btn.disabled {
+	pointer-events: none;
+	opacity: 0.5;
+	cursor: default;
+}
+
+/* Shared editable-text primitive for stock RmlUi <input type="text"/"password"> -- the same tier as
+   .btn/.checkbox-* above. Owns appearance only (typography, fill, border, states); every consumer
+   supplies its own position/size through a local class, since no two fields share a box. Length
+   limits and value validation stay in C++ (the owning window sets maxlength and decides what a
+   valid value is) -- this layer only reflects the outcome, via .error below. */
+.text-field {
+	box-sizing: border-box;
+	cursor: text;
+	pointer-events: auto;
+	text-align: left;
+	color: token(text-input);
+	background-color: token(surface-control);
+	border: 1px token(border-control);
+	border-radius: token(radius-sm)px;
+}
+/* No :focus rule on purpose -- the native fields these replaced drew no focus outline, so the blinking
+   caret stays the only focus cue. Add one per consumer if a screen ever wants it. */
+/* Semantic state pushed from the model (data-class-error), never a colour set from C++. */
+.text-field.error {
+	border-color: token(semantic-danger);
+	color: token(semantic-danger);
+}
+.text-field:disabled {
+	pointer-events: none;
+	color: token(text-disabled);
+	background-color: token(surface-recessed);
+}
+/* RmlUi styles the selection range through the widget's own <selection> child element, which reads
+   exactly these two properties (ElementTextSelection::OnPropertyChange). */
+.text-field selection {
+	color: token(surface-control);
+	background-color: token(text-selected);
+}
+
+/* Text drawn sharp inside a panel scaled by transform: scale(root_scale): a .sharp-text layer is
+   laid out in physical pixels and scaled back by 1 / --root-scale around its top-left corner, so its
+   glyphs are rasterised at the size they are shown instead of a small raster stretched by the
+   panel's scale. RmlUi rasterises text at the computed font-size and ignores transforms. #panel
+   binds --root-scale; the window's RML binds the font size (text_px) and the window's RCSS gives
+   the layer's own lengths as reference px times it: width: calc(160px * var(--root-scale)). Its
+   position stays in the panel's units; lengths inside it are physical. A .counter-scaled element
+   cancels the scale the same way around its own transform-origin. */
+.sharp-text, .counter-scaled { transform: scale(calc(1 / var(--root-scale, 1))); }
+/* Under a per-axis stretch (a Hud layout's #screen): it cancels --root-scale-y vertically. */
+.counter-scaled-xy { transform: scale(calc(1 / var(--root-scale, 1)), calc(1 / var(--root-scale-y, 1))); }
+.sharp-text { transform-origin: left top; }
+/* A layer anchored by its right edge (right: N, auto width) scales back around that edge. */
+.sharp-text.sharp-right { transform-origin: right top; }
+/* A one-line layer centred on its box's height (a button's label): its middle sits on top: 50% at
+   any panel scale. */
+.sharp-text.sharp-middle { top: 50%; transform-origin: left center; transform: translateY(-50%) scale(calc(1 / var(--root-scale, 1))); }
+.sharp-text.sharp-right.sharp-middle { transform-origin: right center; }
+/* A layer centred on its parent's width (the parent is the box the theme sizes and places): wide
+   enough that its text never overflows, which would start-align it, and scaled back around its
+   centre, so the text stays centred on the box at any panel scale. */
+.sharp-text.sharp-centre { left: 50%; width: 2000px; margin-left: -1000px; text-align: center; transform-origin: center top; }
+.sharp-text.sharp-centre.sharp-middle { transform-origin: center center; }
+/* Text that stacks: one counter-scaled layer whose lines flow inside it at the native size, so
+   C++ hands out no tops. The theme sizes it in reference px through --flow-w (and --flow-h for
+   .centred); everything inside is physical px. .centred centres the lines on the box's height,
+   however many there are. */
+.sharp-text.sharp-flow { width: calc(var(--flow-w, 0px) * var(--root-scale, 1)); }
+.sharp-text.sharp-flow.centred {
+	height: calc(var(--flow-h, 0px) * var(--root-scale, 1));
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+/* Text the original drew with a box width (RenderText()'s box): one line across its parent's
+   content box, shrunk by the bridge when it is wider (RmlNativeTextFit.h). Wrap the text in it
+   inside the element that has the box and the font size. */
+.native-fit { display: block; white-space: nowrap; }
+
+/* A label kept to one line in a constricted box: clipped at the box, scrolled to show the rest
+   while the pointer is over it (RmlMarquee.h). Overflowing text starts at the left edge.
+   Give it the box's width (or max-width) where it is placed. */
+.marquee { display: block; white-space: nowrap; overflow: hidden; }
+.marquee.marquee-overflow { text-align: left; }
+
+/* Scrolling content pane. Apply to whatever element owns the scrollable content; RmlUi then
+   generates the scrollbar itself as real child elements, styled below.
+
+   Two non-obvious requirements, both learned the hard way in generic_confirm_dialog.rcss and
+   folded in here so no consumer has to rediscover them:
+
+   - `overflow: hidden auto` is `overflow-x, overflow-y` in that order, and this engine only ever
+     instantiates a scrollbarvertical when overflow-Y is Auto/Scroll (Layout/ContainerBox.cpp).
+     Writing `auto hidden` silently produces no scrollbar at all, at any content length.
+   - `pointer-events: auto` is mandatory. base.rcss's own `body { pointer-events: none; }` inherits
+     down, and the generated slidertrack/sliderbar are children of THIS element, so without it the
+     scrollbar renders but cannot be dragged.
+
+   The pane needs a bounded height to scroll within (an explicit height, max-height, or a stretched
+   flex child) -- that part is the consumer's own layout, deliberately not set here. */
+.scroll-pane {
+	overflow: hidden auto;
+	pointer-events: auto;
+}
+
+/* Native's own scrollbar art. Track is a 3-slice well (newui_scrollbar_up/m/down, 7x3 / 7x15 /
+   7x3) and the thumb is a separate fixed 15x30 sprite (newui_scroll_on) that overhangs it --
+   see CChatLogWindow::RenderFrame(), which draws exactly this.
+
+   The well is native's real 3-slice construction: the two 7x3 caps are separate files, so drawing
+   only a ninepatch of the middle slice left both ends OPEN -- the rails read as two parallel lines
+   clipped off at top and bottom. RmlUi already generates an element at each end of a scrollbar
+   (sliderarrowdec/inc) and sizes slidertrack between them, which is exactly native's cap/tile/cap
+   shape, so the caps live there. They are pointer-events:none: native has no arrow buttons, these
+   are the closing ends of the well, not controls.
+
+   One deliberate simplification remains, same class as character_info.rcss's summary-box frame:
+   the middle slice is one stretched ninepatch rather than a literal repeat-tile, since this build
+   has no verified repeat-tiling pattern. The thumb's native 7-vs-15 overhang is also not
+   reproduced -- that needs the track narrower than the scrollbar element, and RmlUi sizes
+   slidertrack itself. */
+@spritesheet legacy-scroll-track-sheet
+{
+	src: "../../../newui_scrollbar_m.tga";
+	legacy-scroll-track: 0px 0px 7px 15px;
+	/* 1px-tall middle band: caps stay crisp, only the band stretches. */
+	legacy-scroll-track-inner: 0px 7px 7px 1px;
+}
+
+@spritesheet legacy-scroll-thumb-sheet
+{
+	src: "../../../newui_scroll_on.tga";
+	legacy-scroll-thumb: 0px 0px 15px 30px;
+	legacy-scroll-thumb-inner: 0px 14px 15px 2px;
+}
+
+@spritesheet legacy-scroll-cap-top-sheet
+{
+	src: "../../../newui_scrollbar_up.tga";
+	legacy-scroll-cap-top: 0px 0px 7px 3px;
+}
+
+@spritesheet legacy-scroll-cap-bottom-sheet
+{
+	src: "../../../newui_scrollbar_down.tga";
+	legacy-scroll-cap-bottom: 0px 0px 7px 3px;
+}
+
+.scroll-pane scrollbarvertical {
+	width: 15dp;
+	margin: 0;
+}
+.scroll-pane scrollbarvertical slidertrack {
+	decorator: ninepatch(legacy-scroll-track, legacy-scroll-track-inner);
+}
+/* Native's thumb keeps its sprite's size at every list length (a knob, not a proportional bar). */
+.scroll-pane scrollbarvertical sliderbar {
+	height: 30dp;
+	decorator: ninepatch(legacy-scroll-thumb, legacy-scroll-thumb-inner);
+}
+/* Native tints the thumb down while it's held (RGBA(179,179,179) in RenderFrame()); brightness()
+   is the one filter family this render interface implements -- see engine-findings.md. */
+.scroll-pane scrollbarvertical sliderbar:active {
+	filter: brightness(0.7);
+}
+/* The well's two closing caps, not arrow buttons -- native's scrollbar is drag-only.
+
+   width is 100%, not 15dp, so a cap collapses with the scrollbar it belongs to: a consumer that
+   hides its scrollbar by zeroing the scrollbarvertical's own width (chat_log.rcss does exactly
+   that for F5, deliberately, so the wheel still works with the frame hidden) would otherwise be
+   left with two floating caps. WidgetScroll::FormatElements() builds each arrow's box against the
+   scrollbar's own content size, so the percentage resolves to whatever that width currently is. */
+.scroll-pane scrollbarvertical sliderarrowdec,
+.scroll-pane scrollbarvertical sliderarrowinc {
+	width: 100%;
+	height: 3dp;
+	pointer-events: none;
+}
+.scroll-pane scrollbarvertical sliderarrowdec { decorator: image(legacy-scroll-cap-top); }
+.scroll-pane scrollbarvertical sliderarrowinc { decorator: image(legacy-scroll-cap-bottom); }
+.scroll-pane scrollbarhorizontal {
+	height: 0;
+}
+
+.hidden {
+	display: none;
+}
+
+/* Layout primitives -- pure layout, no visual styling, identical in both themes. Apply one to
+   express an element's responsive behavior; give it its own size (dp if it should respect UI
+   scale). */
+
+.anchor-top-left {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+.anchor-top-right {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.anchor-bottom-left {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+}
+.anchor-bottom-right {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+}
+
+.center-x {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+}
+.center-y {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+}
+/* A press on a control never drags the window around it: RmlUi starts a drag from the nearest
+   ancestor with `drag` set, and the control's click would still fire on release. */
+input, select, textarea, .btn, [data-event-click] { drag: block; }
+/* The original 640x480 screen, at a scale composed from the scale inputs (RmlScaleInputs.h): a
+   .stage is centred on the window at the UI scale, as the original centred its NPC panels and
+   dialogs; a .hud-board stands on the window's bottom, centred like the HUD, at the HUD's scale.
+   Children lay out in its reference px, and --root-scale is its scale. */
+.stage, .hud-board { position: absolute; left: 50%; width: 640px; height: 480px; margin-left: -320px; }
+.stage { top: 50%; margin-top: -240px; transform-origin: center; transform: scale(var(--ui-scale));
+         --root-scale: var(--ui-scale); }
+.hud-board { bottom: 0; transform-origin: center bottom; transform: scale(var(--hud-scale));
+             --root-scale: var(--hud-scale); }
+/* A panel a workspace slot places (CObject::GetPlacedDocument()): the slot's top-left and its
+   region's scale arrive as variables; the theme decides how they apply. It takes the pointer, so
+   clicks on it never reach the world or the windows below. */
+#panel.slot-placed, #content_root.slot-placed {
+	pointer-events: auto;
+	transform-origin: left top;
+	left: var(--slot-left);
+	top: var(--slot-top);
+	transform: scale(var(--root-scale));
+}
+/* A centred panel the player dragged: left/top place it (UI::RmlBridge::MakeDraggable()). */
+.center-both.dragged { transform: none; }
+
+.center-both {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.stretch-x {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+.stretch-y {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+}
+.stretch-both {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
+/* Invisible marker read by C++ via Element::GetAbsoluteOffset(), letting RCSS express a
+   real-screen anchor for natively drawn content. visibility:hidden, not display:none, so it still
+   gets a layout pass. */
+.layout-anchor {
+	position: absolute;
+	visibility: hidden;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+
+/* Zen amounts by wealth tier (GameLogic::Items::GoldAmountTier; the model binds its key, the RML
+   toggles .gold-<key>). The original client's colors. */
+.gold-amount.gold-base             { color: #ffdc96; }
+.gold-amount.gold-hundred-thousand { color: #00c918; }
+.gold-amount.gold-million          { color: #ff9600; }
+.gold-amount.gold-ten-million      { color: #ff0000; }
+
+/* Level gauge: native's fill-by-level bar. The rail is the empty bar; the fill is the full bar
+   cropped to the level (a sprite per level, since native sampled texels 1:1 from the left edge
+   instead of stretching the image). .level-gauge-hit takes the pointer; consumers size and place
+   all three. C++: UI::RmlBridge::ApplyLevelGaugeEvent(). Volume art: 10 levels (the MU Helper
+   thresholds and the options' volumes); effect art: 5 cells (the options' effect limit). */
+@spritesheet level-gauge-back-sheet { src: "../../../newui_option_volume01.tga"; level-gauge-back: 0px 0px 124px 16px; }
+@spritesheet level-gauge-fill-sheet
+{
+	src: "../../../newui_option_volume02.tga";
+	level-gauge-fill-1:  0px 0px 12.4px 16px;
+	level-gauge-fill-2:  0px 0px 24.8px 16px;
+	level-gauge-fill-3:  0px 0px 37.2px 16px;
+	level-gauge-fill-4:  0px 0px 49.6px 16px;
+	level-gauge-fill-5:  0px 0px 62px 16px;
+	level-gauge-fill-6:  0px 0px 74.4px 16px;
+	level-gauge-fill-7:  0px 0px 86.8px 16px;
+	level-gauge-fill-8:  0px 0px 99.2px 16px;
+	level-gauge-fill-9:  0px 0px 111.6px 16px;
+	level-gauge-fill-10: 0px 0px 124px 16px;
+}
+@spritesheet effect-gauge-back-sheet { src: "../../../newui_option_effect03.tga"; effect-gauge-back: 0px 0px 141px 29px; }
+@spritesheet effect-gauge-fill-sheet
+{
+	src: "../../../newui_option_effect04.tga";
+	effect-gauge-fill-1: 0px 0px 28.2px 29px;
+	effect-gauge-fill-2: 0px 0px 56.4px 29px;
+	effect-gauge-fill-3: 0px 0px 84.6px 29px;
+	effect-gauge-fill-4: 0px 0px 112.8px 29px;
+	effect-gauge-fill-5: 0px 0px 141px 29px;
+}
+.level-gauge { decorator: image(level-gauge-back); pointer-events: none; }
+.level-gauge.effect-gauge { decorator: image(effect-gauge-back); }
+.level-gauge-fill { position: absolute; pointer-events: none; }
+.level-gauge-hit { position: absolute; top: 0; bottom: 0; pointer-events: auto; drag: drag; cursor: pointer; }
+
+/* A fill's level as a class (level-<n>), so each theme decides how a level is drawn; a consumer
+   binding its own width and decorator (the MU Helper detail window) does not use these. */
+.level-gauge-fill.level-1 { width: 10%; decorator: image(level-gauge-fill-1); }
+.level-gauge-fill.level-2 { width: 20%; decorator: image(level-gauge-fill-2); }
+.level-gauge-fill.level-3 { width: 30%; decorator: image(level-gauge-fill-3); }
+.level-gauge-fill.level-4 { width: 40%; decorator: image(level-gauge-fill-4); }
+.level-gauge-fill.level-5 { width: 50%; decorator: image(level-gauge-fill-5); }
+.level-gauge-fill.level-6 { width: 60%; decorator: image(level-gauge-fill-6); }
+.level-gauge-fill.level-7 { width: 70%; decorator: image(level-gauge-fill-7); }
+.level-gauge-fill.level-8 { width: 80%; decorator: image(level-gauge-fill-8); }
+.level-gauge-fill.level-9 { width: 90%; decorator: image(level-gauge-fill-9); }
+.level-gauge-fill.level-10 { width: 100%; decorator: image(level-gauge-fill-10); }
+.effect-gauge .level-gauge-fill.level-1 { width: 20%; decorator: image(effect-gauge-fill-1); }
+.effect-gauge .level-gauge-fill.level-2 { width: 40%; decorator: image(effect-gauge-fill-2); }
+.effect-gauge .level-gauge-fill.level-3 { width: 60%; decorator: image(effect-gauge-fill-3); }
+.effect-gauge .level-gauge-fill.level-4 { width: 80%; decorator: image(effect-gauge-fill-4); }
+.effect-gauge .level-gauge-fill.level-5 { width: 100%; decorator: image(effect-gauge-fill-5); }
+
+/* The frame's corner close: an unstyled hit box over the close "X" the frame art draws at the
+   panel's top-right (its circle spans about 166-182 x 4-20 of the original 190-wide panel), a
+   little larger than the circle so it is easy to hit, and above the panel's other parts (a title
+   bar that is also a drag handle). Each window's markup adds it with its own close event. */
+#frame_corner_close {
+	position: absolute;
+	top: 1px;
+	right: 3px;
+	width: 24px;
+	height: 22px;
+	cursor: pointer;
+	pointer-events: auto;
+	z-index: 1;
+}

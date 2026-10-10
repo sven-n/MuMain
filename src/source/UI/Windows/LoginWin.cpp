@@ -5,22 +5,25 @@
 #include "stdafx.h"
 #include "UI/Windows/LoginWin.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include "UI/Windows/CreditWin.h"
+#include "UI/Windows/SysMenuWin.h"
+#include "UI/Windows/MsgWin.h"
+#include "Character/CharMakeWin.h"
+#include "Core/Globals/_enum.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Network/Reconnect/ReconnectManager.h"
-#include "UI/Legacy/UIControls.h"
 #include "Scenes/SceneCore.h"
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
-#include "UI/NewUI/NewUISystem.h"
-#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Dialogs/MessageBox.h"
 #include "UI/Windows/RememberPasswordPrompt.h"
-
 
 #include "Network/Server/ServerListManager.h"
 #ifdef _WIN32
@@ -30,13 +33,36 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 
-#define	LIW_ACCOUNT		0
-#define	LIW_PASSWORD	1
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlNativeText.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Element.h>
+#include <RmlUi/Core/Context.h>
+#include <RmlUi/Core/Elements/ElementFormControlInput.h>
+#include <RmlUi/Core/Event.h>
+#include <cmath>
 
-#define LIW_OK			0
-#define LIW_CANCEL		1
+extern unsigned int WindowWidth, WindowHeight;
 
+namespace
+{
+// Scales the original's pixel sizes (the legacy bounding box) like login.rcss's own units
+// (UI::RmlBridge::SceneWindowRatio()). Reads WindowWidth/WindowHeight, not
+// CInput::Instance().GetScreenWidth/Height() -- the latter doesn't reliably match the values
+// RmlUiRuntime::OnResize() uses, which caused the panel/input box to visibly drift off-position.
+float LoginUIScaleRatio()
+{
+    return UI::RmlBridge::SceneWindowRatio(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+}
 
+    int ScaledOffset(int value, float ratio)
+    {
+        return static_cast<int>(std::lround(value * ratio));
+    }
+}
 
 extern int g_iChatInputType;
 extern int  LogIn;
@@ -44,16 +70,16 @@ extern wchar_t LogInID[MAX_USERNAME_SIZE + 1];
 extern BYTE Version[SIZE_PROTOCOLVERSION];
 extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
 
-CLoginWin::CLoginWin()
-{
-    m_pUsernameInputBox = NULL;
-    m_pPasswordInputBox = NULL;
-}
+CLoginWin g_LoginWin;
+
+CLoginWin::CLoginWin() = default;
 
 CLoginWin::~CLoginWin()
 {
-    SAFE_DELETE(m_pUsernameInputBox);
-    SAFE_DELETE(m_pPasswordInputBox);
+    // Backstop join: std::thread's destructor calls std::terminate() if still joinable, and
+    // there's no guarantee ProcessPendingConnectionReconnect() ran one last time before shutdown.
+    if (m_ConnectionReconnectThread.joinable())
+        m_ConnectionReconnectThread.join();
 }
 
 void CLoginWin::Create()
@@ -71,180 +97,197 @@ void CLoginWin::Create()
         m_Password[0] = L'\0';
     }
 
-    // The login background is fixed artwork and does not scale with the window
-    // size, so keep the original height. The credential-consent controls fit on
-    // the panel and the trust warning is drawn just below it (issue #462).
-    CWin::Create(329, 245, BITMAP_LOG_IN + 7);
+    // Tracks login.rcss's #panel width/height (329 x 245 original pixels) by the same ratio rather than a fixed
+    // 329x245, so UpdateMouseEvent()'s hit-test rect (m_Size) doesn't go stale against RmlUi's
+    // auto-fitting visuals.
+    const float uiScale = LoginUIScaleRatio();
+    m_Size.cx = ScaledOffset(329, uiScale);
+    m_Size.cy = ScaledOffset(245, uiScale);
+    m_ptPos.x = m_ptPos.y = 0;
 
-    m_asprInputBox[LIW_ACCOUNT].Create(156, 23, BITMAP_LOG_IN + 8);
-    m_asprInputBox[LIW_PASSWORD].Create(156, 23, BITMAP_LOG_IN + 8);
-
-    for (int i = 0; i < 2; ++i)
-    {
-        m_aBtn[i].Create(54, 30, BITMAP_BUTTON + i, 3, 2, 1);
-        CWin::RegisterButton(&m_aBtn[i]);
-    }
-
-    m_aBtnRememberMe.Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
-    CWin::RegisterButton(&m_aBtnRememberMe);
-
-    m_aBtnSavePassword.Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
-    CWin::RegisterButton(&m_aBtnSavePassword);
-
-    SAFE_DELETE(m_pUsernameInputBox);
-
-    m_pUsernameInputBox = new CUITextInputBox;
-    m_pUsernameInputBox->Init(g_hWnd, 140, 14, MAX_USERNAME_SIZE);
-    m_pUsernameInputBox->SetBackColor(0, 0, 0, 25);
-    m_pUsernameInputBox->SetTextColor(255, 255, 230, 210);
-    m_pUsernameInputBox->SetFont(g_hFixFont);
-    m_pUsernameInputBox->SetState(UISTATE_NORMAL);
+    // Tab order between the two fields is RmlUi's own document-level navigation (ElementDocument
+    // handles KI_TAB, and WidgetTextInput deliberately lets it bubble), replacing the native boxes'
+    // reciprocal SetTabTarget() pair.
+    auto& model = m_RmlView.GetModel();
+    model.username.clear();
+    model.password.clear();
     if (m_RememberMe) {
-        m_pUsernameInputBox->SetText(m_Username);
-        m_aBtnRememberMe.SetCheck(true);
+        model.username = StringUtils::WideToNarrow(m_Username);
+        model.password = StringUtils::WideToNarrow(m_Password);
+        m_bRememberMeChecked = true;
     }
-
-    SAFE_DELETE(m_pPasswordInputBox);
-
-    m_pPasswordInputBox = new CUITextInputBox;
-    m_pPasswordInputBox->Init(g_hWnd, 140, 14, MAX_PASSWORD_SIZE, TRUE);
-    m_pPasswordInputBox->SetBackColor(0, 0, 0, 25);
-    m_pPasswordInputBox->SetTextColor(255, 255, 230, 210);
-    m_pPasswordInputBox->SetFont(g_hFixFont);
-    m_pPasswordInputBox->SetState(UISTATE_NORMAL);
-
-    m_pUsernameInputBox->SetTabTarget(m_pPasswordInputBox);
-    m_pPasswordInputBox->SetTabTarget(m_pUsernameInputBox);
-
-    if (m_RememberMe) {
-        m_pPasswordInputBox->SetText(m_Password);
-        m_aBtnRememberMe.SetCheck(true);
-    }
+    // Create() runs on every entry to the login scene, but the document outlives it: push the
+    // fresh values into the fields, or they keep what an earlier visit typed.
+    m_RmlView.MarkDirty("username");
+    m_RmlView.MarkDirty("password");
 
     // The password is only pre-filled and re-saved when the player previously
     // opted in on a trusted machine.
-    m_aBtnSavePassword.SetCheck(m_RememberMe && GameConfig::GetInstance().GetSavePassword());
+    m_bSavePasswordChecked = (m_RememberMe != 0) && GameConfig::GetInstance().GetSavePassword();
 
     // Seed the edit-detection snapshot with what we just loaded so filling the
-    // boxes here is not mistaken for the player editing them.
-    m_pUsernameInputBox->GetText(m_prevUsername, _countof(m_prevUsername));
-    m_pPasswordInputBox->GetText(m_prevPassword, _countof(m_prevPassword));
+    // fields here is not mistaken for the player editing them.
+    wcsncpy(m_prevUsername, m_RememberMe ? m_Username : L"", _countof(m_prevUsername) - 1);
+    wcsncpy(m_prevPassword, m_RememberMe ? m_Password : L"", _countof(m_prevPassword) - 1);
 
     this->FirstLoad = 1;
+
+    // Builds once; Create() re-runs on every resolution change and only repositions it afterward
+    // (see SetPosition()).
+    m_RmlView.Ensure();
+
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_LOGIN, this);
+    Show(false);
 }
 
-void CLoginWin::PreRelease()
+void CLoginWin::BindRmlModel(Rml::DataModelConstructor& c, LoginRmlModel& model)
 {
-    for (int i = 0; i < 2; ++i)
-        m_asprInputBox[i].Release();
+    c.Bind("remember_me_checked", &model.rememberMeChecked);
+    c.Bind("save_password_checked", &model.savePasswordChecked);
+    c.Bind("server_name", &model.serverName);
+    c.Bind("account_label", &model.accountLabel);
+    c.Bind("password_label", &model.passwordLabel);
+    c.Bind("remember_me_label", &model.rememberMeLabel);
+    c.Bind("save_password_label", &model.savePasswordLabel);
+    c.Bind("trust_warning", &model.trustWarning);
+    c.Bind("ok_label", &model.okLabel);
+    c.Bind("cancel_label", &model.cancelLabel);
+    c.Bind("username", &model.username);
+    c.Bind("password", &model.password);
+
+    c.BindEventCallback("login_ok_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
+    c.BindEventCallback("login_cancel_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
+    c.BindEventCallback("login_toggle_remember_me",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRememberMe(); });
+    c.BindEventCallback("login_toggle_save_password",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleSavePassword(); });
+}
+
+void CLoginWin::OnRmlReloaded()
+{
+    // The panel's size follows the theme's units (LoginUIScaleRatio()); keep it where
+    // CSceneUICoordinator::CreateLoginScene() places it: centred, 2/3 down the free height.
+    const SIZE previousSize = m_Size;
+    const float uiScale = LoginUIScaleRatio();
+    m_Size.cx = ScaledOffset(329, uiScale);
+    m_Size.cy = ScaledOffset(245, uiScale);
+    SetPosition(m_ptPos.x + (previousSize.cx - m_Size.cx) / 2, m_ptPos.y + (previousSize.cy - m_Size.cy) * 2 / 3);
 }
 
 void CLoginWin::SetPosition(int x, int y)
 {
-	CWin::SetPosition(x, y);
+	m_ptPos.x = x;
+	m_ptPos.y = y;
 
-	const int boxOffsetX = x + 109;
-	m_asprInputBox[LIW_ACCOUNT].SetPosition(boxOffsetX, y + 106);
-	m_asprInputBox[LIW_PASSWORD].SetPosition(boxOffsetX, y + 131);
+	// No field repositioning here: both credential fields are RmlUi elements positioned by each
+	// theme's RCSS, so moving #panel carries them along.
 
-	if (g_iChatInputType == 1)
+	// RmlUi panel origin: real window pixels, no scale conversion needed (RmlUi's Context already
+	// operates in real pixels; only the panel's own size/children are dp, scaled by RmlUi itself).
+	if (m_RmlView.Document())
 	{
-		const int boxX = int((x + 115) / g_fScreenRate_x);
-		m_pUsernameInputBox->SetPosition(boxX, int((y + 112) / g_fScreenRate_y));
-		m_pPasswordInputBox->SetPosition(boxX, int((y + 137) / g_fScreenRate_y));
+		if (Rml::Element* panel = m_RmlView.Document()->GetElementById("panel"))
+		{
+			panel->SetProperty("left", std::to_string(x) + "px");
+			panel->SetProperty("top", std::to_string(y) + "px");
+		}
 	}
-
-	// "Remember Username" (row 1) and "Remember Password" (row 2) stack
-	// vertically; the OK/Cancel buttons move down to make room. These pixel
-	// offsets are eyeballed against the login background and may need tuning.
-	m_aBtnRememberMe.SetPosition(x + 109, y + 156);
-	m_aBtnSavePassword.SetPosition(x + 109, y + 176);
-	m_aBtn[LIW_OK].SetPosition(x + 150, y + 200);
-	m_aBtn[LIW_CANCEL].SetPosition(x + 211, y + 200);
 }
 
 void CLoginWin::Show(bool bShow)
 {
-    CWin::Show(bShow);
+    mu::ui::window::CObject::Show(bShow);
 
-    for (int i = 0; i < 2; ++i)
+    // Hiding the document unfocuses it (Context::UnfocusDocument()), which is what releases SDL
+    // text input now that the fields are RmlUi's -- no separate widget state to drive (#447).
+    if (m_RmlView.Document())
     {
-        m_asprInputBox[i].Show(bShow);
-        m_aBtn[i].Show(bShow);
+        if (bShow) { SyncRmlModel(); m_RmlView.Document()->Show(); }
+        else       m_RmlView.Document()->Hide();
     }
-    m_aBtnRememberMe.Show(bShow);
-    m_aBtnSavePassword.Show(bShow);
-
-    // Drive the text fields' state so a hidden login screen releases keyboard
-    // focus (portable fields stop SDL text input when hidden, #447).
-    const int iState = bShow ? UISTATE_NORMAL : UISTATE_HIDE;
-    if (m_pUsernameInputBox) m_pUsernameInputBox->SetState(iState);
-    if (m_pPasswordInputBox) m_pPasswordInputBox->SetState(iState);
 }
 
-bool CLoginWin::CursorInWin(int nArea)
+void CLoginWin::Release()
 {
-    if (!CWin::m_bShow)
-        return false;
-
-    switch (nArea)
-    {
-    case WA_MOVE:
-        return false;
-    }
-
-    return CWin::CursorInWin(nArea);
+    // Hide, not unload -- the document/model are created once and reused.
+    m_RmlView.Hide();
 }
 
-void CLoginWin::UpdateWhileActive(double)
-{
-	// While the "Remember Password" confirmation dialog is open, let it own the
-	// input so Enter/Esc/clicks don't also drive the login screen behind it. The
-	// dialog's outcome is applied on the next frame, once it has closed.
-	if (!g_MessageBox->IsEmpty())
-		return;
+void CLoginWin::RmlClickOk() { SubmitLogin(); }
+void CLoginWin::RmlClickCancel() { SubmitCancel(); }
 
-	if (m_aBtn[LIW_OK].IsClick() || CInput::Instance().IsKeyDown(VK_RETURN))
+void CLoginWin::RmlToggleRememberMe()
+{
+	m_bRememberMeChecked = !m_bRememberMeChecked;
+	if (UI::Login::RememberPasswordChoiceState() != UI::Login::RememberPasswordChoice::Pending)
+		ApplyRememberMeChange();
+}
+
+void CLoginWin::RmlToggleSavePassword()
+{
+	m_bSavePasswordChecked = !m_bSavePasswordChecked;
+	if (UI::Login::RememberPasswordChoiceState() != UI::Login::RememberPasswordChoice::Pending)
+		ApplySavePasswordChange();
+}
+
+bool CLoginWin::UpdateWhileActive()
+{
+	if (CInput::Instance().IsKeyDown(VK_RETURN))
 	{
-		PlayBuffer(SOUND_CLICK01);
-		RequestLogin();
-		return;
+		SubmitLogin();
+		return true;
 	}
 
-	if (m_aBtn[LIW_CANCEL].IsClick() || CInput::Instance().IsKeyDown(VK_ESCAPE))
+	if (CInput::Instance().IsKeyDown(VK_ESCAPE))
 	{
-		PlayBuffer(SOUND_CLICK01);
-		CancelLogin();
-		CUIMng::Instance().SetSysMenuWinShow(false);
-		return;
+		SubmitCancel();
+		return true;
 	}
 
-	UpdateRememberCheckboxes();
+	return true;
 }
 
-void CLoginWin::UpdateRememberCheckboxes()
+// Called both from the immediate RmlUi click callbacks and from UpdateWhileActive()'s keyboard
+// polling, so each re-checks the "remember password" prompt's Pending state itself.
+void CLoginWin::SubmitLogin()
+{
+	if (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending)
+		return;
+	PlayBuffer(SOUND_CLICK01);
+	RequestLogin();
+}
+
+void CLoginWin::SubmitCancel()
+{
+	if (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending)
+		return;
+	PlayBuffer(SOUND_CLICK01);
+	CancelLogin();
+}
+
+void CLoginWin::ApplyRememberMeChange()
+{
+	GameConfig& config = GameConfig::GetInstance();
+	m_RememberMe = m_bRememberMeChecked;
+	config.SetRememberMe(m_RememberMe != 0);
+
+	// Switching off "remember me" revokes everything: drop the stored
+	// credentials from config.ini now so they can't linger if the game is
+	// closed before the next login.
+	if (!m_RememberMe)
+	{
+		m_bSavePasswordChecked = false;
+		config.ClearCredentials();
+	}
+}
+
+void CLoginWin::ApplySavePasswordChange()
 {
 	GameConfig& config = GameConfig::GetInstance();
 
-	if (m_aBtnRememberMe.IsClick())
-	{
-		m_RememberMe = m_aBtnRememberMe.IsCheck();
-		config.SetRememberMe(m_RememberMe != 0);
-
-		// Switching off "remember me" revokes everything: drop the stored
-		// credentials from config.ini now so they can't linger if the game is
-		// closed before the next login.
-		if (!m_RememberMe)
-		{
-			m_aBtnSavePassword.SetCheck(false);
-			config.ClearCredentials();
-		}
-	}
-
-	if (!m_aBtnSavePassword.IsClick())
-		return;
-
-	if (!m_aBtnSavePassword.IsCheck())
+	if (!m_bSavePasswordChecked)
 	{
 		// Player unticked it: drop the stored password from config.ini now.
 		config.SetSavePassword(false);
@@ -256,32 +299,44 @@ void CLoginWin::UpdateRememberCheckboxes()
 	// Enabling requires confirmation. Revert the tick immediately; it is
 	// re-applied only if the dialog is accepted, so a cancel (however the dialog
 	// closes) always leaves the box unchecked.
-	m_aBtnSavePassword.SetCheck(false);
+	m_bSavePasswordChecked = false;
 
 	// Storing the password implies remembering the account.
 	if (!m_RememberMe)
 	{
 		m_RememberMe = 1;
-		m_aBtnRememberMe.SetCheck(true);
+		m_bRememberMeChecked = true;
 		config.SetRememberMe(true);
 	}
 	UI::Login::OpenRememberPasswordPrompt();
 }
 
-void CLoginWin::UpdateWhileShow(double dDeltaTick)
+bool CLoginWin::UpdateWhileShown()
 {
-    m_pUsernameInputBox->DoAction();
-    m_pPasswordInputBox->DoAction();
+    // Prevents Enter/Esc from double-firing past an overlaying modal: a higher-depth modal
+    // claiming UpdateMouseEvent() doesn't by itself stop this window's own VK_RETURN/VK_ESCAPE
+    // polling in UpdateWhileActive(). WasSysMenuToggledByEscThisFrame() is needed in addition to
+    // g_SysMenuWin.IsVisible() because an Esc that just closed the menu this frame already reads
+    // back IsVisible()==false. g_CharMakeWin.IsVisible() covers the same gap: this window keeps
+    // ticking on the character-select scene too, so without it, Esc closing Character Create also
+    // fires this window's own SubmitCancel() and logs out unexpectedly.
+    SetActive(!(g_CreditWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible()
+                || g_CharMakeWin.IsVisible()
+                || CSceneUICoordinator::Instance().WasSysMenuToggledByEscThisFrame()
+                || UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending));
+
+    // Polls the "Remember Password" dialog's own Enter/Esc while it's open.
+    UI::Login::Tick();
 
     ApplyRememberPasswordChoice();
     RevokeSavedCredentialsIfEdited();
+    return true;
 }
 
 void CLoginWin::ApplyRememberPasswordChoice()
 {
-    // Applied here rather than in UpdateWhileActive because the modal message box
-    // leaves the login window inactive (so UpdateWhileActive stops running),
-    // while UpdateWhileShow keeps being called.
+    // Applied here, not UpdateWhileActive: the modal leaves this window inactive, but
+    // UpdateWhileShown keeps being called.
     const UI::Login::RememberPasswordChoice choice = UI::Login::RememberPasswordChoiceState();
     if (choice != UI::Login::RememberPasswordChoice::Ok
         && choice != UI::Login::RememberPasswordChoice::Cancel)
@@ -291,7 +346,7 @@ void CLoginWin::ApplyRememberPasswordChoice()
 
     const bool bAccepted = (choice == UI::Login::RememberPasswordChoice::Ok);
     GameConfig::GetInstance().SetSavePassword(bAccepted);
-    m_aBtnSavePassword.SetCheck(bAccepted);
+    m_bSavePasswordChecked = bAccepted;
 }
 
 void CLoginWin::RevokeSavedCredentialsIfEdited()
@@ -299,66 +354,156 @@ void CLoginWin::RevokeSavedCredentialsIfEdited()
     // Editing the account or password drops any stored credentials and revokes
     // the save-password consent, so an out-of-date password never lingers in
     // config.ini for the next person on this machine.
-    wchar_t curUser[MAX_USERNAME_SIZE + 1] = {};
-    wchar_t curPass[MAX_PASSWORD_SIZE + 1] = {};
-    m_pUsernameInputBox->GetText(curUser, _countof(curUser));
-    m_pPasswordInputBox->GetText(curPass, _countof(curPass));
+    const auto& model = m_RmlView.GetModel();
+    const std::wstring curUser = StringUtils::NarrowToWide(model.username);
+    const std::wstring curPass = StringUtils::NarrowToWide(model.password);
 
-    if (wcscmp(curUser, m_prevUsername) == 0 && wcscmp(curPass, m_prevPassword) == 0)
+    if (curUser == m_prevUsername && curPass == m_prevPassword)
         return;
 
     GameConfig& config = GameConfig::GetInstance();
-    const bool bHadStored = m_aBtnSavePassword.IsCheck()
+    const bool bHadStored = m_bSavePasswordChecked
         || !config.GetEncryptedUsername().empty()
         || !config.GetEncryptedPassword().empty();
     if (bHadStored)
     {
-        m_aBtnSavePassword.SetCheck(false);
+        m_bSavePasswordChecked = false;
         config.ClearCredentials();
     }
 
-    wcscpy_s(m_prevUsername, _countof(m_prevUsername), curUser);
-    wcscpy_s(m_prevPassword, _countof(m_prevPassword), curPass);
+    wcsncpy(m_prevUsername, curUser.c_str(), _countof(m_prevUsername) - 1);
+    m_prevUsername[_countof(m_prevUsername) - 1] = L'\0';
+    wcsncpy(m_prevPassword, curPass.c_str(), _countof(m_prevPassword) - 1);
+    m_prevPassword[_countof(m_prevPassword) - 1] = L'\0';
 }
 
-void CLoginWin::RenderControls()
+bool CLoginWin::Render()
 {
     if (FirstLoad)
     {
-        (wcslen(m_Username) > 0 ? m_pPasswordInputBox : m_pUsernameInputBox)->GiveFocus();
+        // Land on whichever field the player still has to fill in.
+        if (wcslen(m_Username) > 0)
+            FocusPassword();
+        else
+            FocusUsername();
         FirstLoad = 0;
     }
 
-    CWin::RenderButtons();
-    m_asprInputBox[LIW_ACCOUNT].Render();
-    m_asprInputBox[LIW_PASSWORD].Render();
-    m_pUsernameInputBox->Render();
-    m_pPasswordInputBox->Render();
+    // g_CreditWin renders via plain CSprite/g_pRenderText, strictly before RmlUi's frame-final
+    // document render, so login.rml's panel would otherwise always paint over it. RmlUi always
+    // renders last regardless of GetLayerDepth(), so this must be toggled every frame rather than
+    // just on Show().
+    const bool coveredByCredits = g_CreditWin.IsVisible();
+    // Through the transition-only helper, not a bare Show(): this runs every frame, and
+    // ElementDocument::Show() defaults to FocusFlag::Auto, which would hand focus back to the
+    // document and blur #input_account/#input_password on every single frame.
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), !coveredByCredits);
 
-    g_pRenderText->SetFont(g_hFixFont);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->SetTextColor(CLRDW_WHITE);
 
-    const int baseX = GetXPos();
-    const int baseY = GetYPos();
+    // Everything renders via the RmlUi overlay now, the two credential fields included, so there's
+    // no native text pass left here -- and no need for the old g_SysMenuWin guard, which existed
+    // only because raw CUITextInputBox pixels ignored RmlUi's own document ordering.
+    SyncRmlModel();
 
-    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 113) / g_fScreenRate_y), I18N::Game::Account);
-    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 139) / g_fScreenRate_y), I18N::Game::Password);
+    return true;
+}
+
+void CLoginWin::ApplyCredentialLimits()
+{
+    if (!m_RmlView.Document()) return;
+
+    if (Rml::Element* account = m_RmlView.Document()->GetElementById("input_account"))
+        account->SetAttribute("maxlength", static_cast<int>(MAX_USERNAME_SIZE));
+    if (Rml::Element* password = m_RmlView.Document()->GetElementById("input_password"))
+        password->SetAttribute("maxlength", static_cast<int>(MAX_PASSWORD_SIZE));
+}
+
+void CLoginWin::FocusCredentialField(const char* elementId, bool selectAll)
+{
+    if (!m_RmlView.Document()) return;
+
+    Rml::Element* field = m_RmlView.Document()->GetElementById(elementId);
+    if (field == nullptr || !field->Focus())
+        return;
+
+    // Reproduces the native GiveFocus(TRUE): pre-select the text so a retry after a failed login
+    // overwrites it in one keystroke instead of appending to it.
+    if (selectAll)
+    {
+        if (auto* input = rmlui_dynamic_cast<Rml::ElementFormControlInput*>(field))
+            input->Select();
+    }
+}
+
+void CLoginWin::FocusUsername(bool selectAll)
+{
+    FocusCredentialField("input_account", selectAll);
+}
+
+void CLoginWin::FocusPassword(bool selectAll)
+{
+    FocusCredentialField("input_password", selectAll);
+}
+
+void CLoginWin::SyncRmlModel()
+{
+    if (!m_RmlView.Document()) return;
+
+    const bool rememberChecked = m_bRememberMeChecked;
+    if (m_RmlView.GetModel().rememberMeChecked != rememberChecked)
+    {
+        m_RmlView.GetModel().rememberMeChecked = rememberChecked;
+        m_RmlView.MarkDirty("remember_me_checked");
+    }
+
+    const bool saveChecked = m_bSavePasswordChecked;
+    if (m_RmlView.GetModel().savePasswordChecked != saveChecked)
+    {
+        m_RmlView.GetModel().savePasswordChecked = saveChecked;
+        m_RmlView.MarkDirty("save_password_checked");
+    }
 
     wchar_t szServerName[MAX_TEXT_LENGTH] = {};
     const wchar_t* pServerStatus = g_ServerListManager->GetNonPVPInfo() ? I18N::Game::SDServer : I18N::Game::SDNonPvPServer;
     mu_swprintf(szServerName, pServerStatus, g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
-    g_pRenderText->RenderText(int((baseX + 111) / g_fScreenRate_x), int((baseY + 80) / g_fScreenRate_y), szServerName);
+    const std::string serverNameUtf8 = StringUtils::WideToNarrow(szServerName);
+    if (m_RmlView.GetModel().serverName != serverNameUtf8)
+    {
+        m_RmlView.GetModel().serverName = serverNameUtf8;
+        m_RmlView.MarkDirty("server_name");
+    }
 
-    g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 159) / g_fScreenRate_y), I18N::Game::LoginRememberUsername);
-    g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 179) / g_fScreenRate_y), I18N::Game::LoginRememberPassword);
+    // Static (per-locale) labels; only dirties the model on an active locale change.
+    auto syncLabel = [this](Rml::String LoginRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        const std::string utf8 = StringUtils::WideToNarrow(text);
+        if (m_RmlView.GetModel().*field != utf8)
+        {
+            m_RmlView.GetModel().*field = utf8;
+            m_RmlView.MarkDirty(boundName);
+        }
+    };
+    syncLabel(&LoginRmlModel::accountLabel, "account_label", I18N::Game::Account);
+    syncLabel(&LoginRmlModel::passwordLabel, "password_label", I18N::Game::Password);
+    syncLabel(&LoginRmlModel::rememberMeLabel, "remember_me_label", I18N::Game::LoginRememberUsername);
+    syncLabel(&LoginRmlModel::savePasswordLabel, "save_password_label", I18N::Game::LoginRememberPassword);
+    syncLabel(&LoginRmlModel::trustWarning, "trust_warning", I18N::Game::LoginTrustWarning);
+    syncLabel(&LoginRmlModel::okLabel, "ok_label", I18N::Game::OK);
+    syncLabel(&LoginRmlModel::cancelLabel, "cancel_label", I18N::Game::Cancel);
+}
 
-    // Trust warning rendered just below the login panel (the panel artwork is a
-    // fixed size, so there is no room for this long line inside it). Position is
-    // eyeballed against the background and may need tuning.
-    g_pRenderText->SetTextColor(255, 210, 60, 255);
-    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 252) / g_fScreenRate_y), I18N::Game::LoginTrustWarning);
-    g_pRenderText->SetTextColor(CLRDW_WHITE);
+bool CLoginWin::UpdateMouseEvent()
+{
+    if (!IsVisible())
+        return true;
+
+    // Not modal: only claims a click within its own bounding box.
+    RECT rc;
+    ::SetRect(&rc, m_ptPos.x, m_ptPos.y, m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy);
+    if (::PtInRect(&rc, CInput::Instance().GetCursorPos()))
+        return false;
+
+    return true;
 }
 
 void CLoginWin::RequestLogin()
@@ -366,16 +511,19 @@ void CLoginWin::RequestLogin()
     if (CurrentProtocolState == REQUEST_JOIN_SERVER)
         return;
 
-    CUIMng::Instance().HideWin(this);
+    Show(false);
 
-    m_pUsernameInputBox->GetText(m_Username, _countof(m_Username));
-    m_pPasswordInputBox->GetText(m_Password, _countof(m_Password));
+    const auto& model = m_RmlView.GetModel();
+    wcsncpy(m_Username, StringUtils::NarrowToWide(model.username).c_str(), _countof(m_Username) - 1);
+    m_Username[_countof(m_Username) - 1] = L'\0';
+    wcsncpy(m_Password, StringUtils::NarrowToWide(model.password).c_str(), _countof(m_Password) - 1);
+    m_Password[_countof(m_Password) - 1] = L'\0';
 
     // Handle credentials saving. The username is remembered when "remember me"
     // is set; the password is only stored on top of that with explicit consent.
-    if (m_aBtnRememberMe.IsCheck())
+    if (m_bRememberMeChecked)
     {
-        GameConfig::GetInstance().SetSavePassword(m_aBtnSavePassword.IsCheck());
+        GameConfig::GetInstance().SetSavePassword(m_bSavePasswordChecked);
         GameConfig::GetInstance().EncryptAndSaveCredentials(m_Username, m_Password);
     }
     else
@@ -385,9 +533,9 @@ void CLoginWin::RequestLogin()
     }
 
     if (wcslen(m_Username) <= 0)
-        CUIMng::Instance().PopUpMsgWin(MESSAGE_INPUT_ID);
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_INPUT_ID);
     else if (wcslen(m_Password) <= 0)
-        CUIMng::Instance().PopUpMsgWin(MESSAGE_INPUT_PASSWORD);
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_INPUT_PASSWORD);
     else
     {
         SubmitCredentials(m_Username, m_Password);
@@ -406,7 +554,7 @@ void CLoginWin::SubmitCredentials(const wchar_t* pszUsername, const wchar_t* psz
     // hides it on the click; a caller that submits credentials directly must
     // not leave it up, or its text fields keep the keyboard focus and no key
     // reaches the game afterwards. Hiding an already hidden window is a no-op.
-    CUIMng::Instance().HideWin(this);
+    Show(false);
 
     g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %ls", pszUsername);
 
@@ -427,14 +575,37 @@ void CLoginWin::SubmitCredentials(const wchar_t* pszUsername, const wchar_t* psz
     // without prompting after an in-game disconnect.
     ReconnectManager::Instance().CacheCredentials(pszUsername, pszPassword);
 
-    g_pSystemLogBox->AddText(I18N::Game::VerifyingYourAccount, SEASON3B::TYPE_SYSTEM_MESSAGE);
-    g_pSystemLogBox->AddText(I18N::Game::PleaseWait, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    g_pSystemLogBox->AddText(I18N::Game::VerifyingYourAccount, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    g_pSystemLogBox->AddText(I18N::Game::PleaseWait, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 }
 
 void CLoginWin::CancelLogin()
 {
-    ConnectConnectionServer();
-    CUIMng::Instance().HideWin(this);
+    // Hide immediately, run the blocking reconnect on a background thread. Guard against ESC-spam
+    // stacking threads: if one is already in flight, this press is a no-op.
+    Show(false);
+
+    if (m_bConnectionReconnectInFlight.load())
+        return;
+
+    if (m_ConnectionReconnectThread.joinable())
+        m_ConnectionReconnectThread.join(); // previous run already finished and was consumed
+
+    m_bConnectionReconnectInFlight.store(true);
+    m_bConnectionReconnectDone.store(false);
+    m_ConnectionReconnectThread = std::thread([this]
+    {
+        ConnectConnectionServer();
+        m_bConnectionReconnectDone.store(true);
+    });
+}
+
+void CLoginWin::ProcessPendingConnectionReconnect()
+{
+    if (m_ConnectionReconnectThread.joinable())
+        m_ConnectionReconnectThread.join();
+    m_bConnectionReconnectDone.store(false);
+    m_bConnectionReconnectInFlight.store(false);
 }
 
 void CLoginWin::ConnectConnectionServer()

@@ -1,8 +1,6 @@
 #include "stdafx.h"
 
 #include "ErrorDialog.h"
-#include "IPlatformWindow.h"
-#include "MuPlatform.h"
 #include "ScopedSystemCursor.h"
 
 #include "Core/Utilities/Log/MuLogger.h"
@@ -43,14 +41,15 @@ std::vector<SDL_MessageBoxButtonData> MakeButtons(bool canContinue)
 }
 
 // The game window, so the dialog stays in front of it even when the game
-// does not have the focus (e.g. during the long loading).
+// does not have the focus (e.g. during the long loading). The client opens
+// only that one.
 SDL_Window* GetGameWindow()
 {
-    if (mu::IPlatformWindow* window = mu::MuPlatform::GetWindow())
-    {
-        return static_cast<SDL_Window*>(window->GetNativeHandle());
-    }
-    return SDL_GetKeyboardFocus();
+    int count = 0;
+    SDL_Window** windows = SDL_GetWindows(&count);
+    SDL_Window* window = windows != nullptr && count > 0 ? windows[0] : nullptr;
+    SDL_free(windows);
+    return window != nullptr ? window : SDL_GetKeyboardFocus();
 }
 
 // On Linux the game hands copied text to other programs itself, from its

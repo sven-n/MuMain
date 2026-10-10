@@ -1,0 +1,100 @@
+<rml>
+<head>
+	<title>Inventory Extension</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="item_grid.rcss"/>
+	<link type="text/rcss" href="inventory_extension.rcss"/>
+</head>
+<body data-model="inventory_extension">
+	<!-- CInventoryExtension (InventoryExtension.h): the frame, the four extension grids, the
+	     locked pages' art and the items C++ draws live into #item_view, the stack counts, title and
+	     exit button. -->
+	<div id="panel" data-style---text-px="text_px + 'px'">
+		<div id="frame_corner_close" data-event-click="window_close"></div>
+		<!-- The frame. -->
+		<div class="bg-fill"></div>
+		<div class="bg-top"></div>
+		<div class="bg-left"></div>
+		<div class="bg-right"></div>
+		<div class="bg-bottom"></div>
+		<!-- Where the native item grids go: invisible boxes the theme places; the window reads them each frame. -->
+		<!-- The item_grid_1 grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="item_grid_1" class="native-anchor item-grid" data-class-hidden="grid_cells_1.size == 0">
+			<div class="item-grid-cells">
+				<div data-for="c : grid_cells_1" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The item_grid_2 grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="item_grid_2" class="native-anchor item-grid" data-class-hidden="grid_cells_2.size == 0">
+			<div class="item-grid-cells">
+				<div data-for="c : grid_cells_2" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The item_grid_3 grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="item_grid_3" class="native-anchor item-grid" data-class-hidden="grid_cells_3.size == 0">
+			<div class="item-grid-cells">
+				<div data-for="c : grid_cells_3" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The item_grid_4 grid: its cells, then its frame (UI/Inventory/ItemGridModel.h). -->
+		<div id="item_grid_4" class="native-anchor item-grid" data-class-hidden="grid_cells_4.size == 0">
+			<div class="item-grid-cells">
+				<div data-for="c : grid_cells_4" data-attr-class="'item-cell ' + c.tint + ' ' + c.drop">
+					<div class="item-cell-art"></div><div class="item-cell-drop"></div>
+				</div>
+			</div>
+			<div class="item-grid-frame">
+				<div class="igf igf-t"></div><div class="igf igf-b"></div><div class="igf igf-l"></div><div class="igf igf-r"></div>
+				<div class="igf igf-tl"></div><div class="igf igf-tr"></div><div class="igf igf-bl"></div><div class="igf igf-br"></div>
+			</div>
+		</div>
+		<!-- The items, live 3D drawn by C++ over the cells, then the stack counts. -->
+		<img id="item_view" class="item-view"/>
+		<div id="item_grid_1_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : grid_cells_1"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
+		</div>
+		<div id="item_grid_2_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : grid_cells_2"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
+		</div>
+		<div id="item_grid_3_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : grid_cells_3"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
+		</div>
+		<div id="item_grid_4_counts" class="item-grid-counts">
+			<div class="item-count" data-for="c : grid_cells_4"><span class="item-count-text counter-scaled" data-if="c.count != ''"
+			     data-style-font-size="text_px + 'px'">{{c.count}}</span></div>
+		</div>
+		<span class="sharp-text" id="title" data-style-font-size="text_px + 'px'">{{title}}</span>
+
+		<div id="btn_exit" class="ext-btn" data-event-click="inventory_extension_exit_click" data-attr-data-hint="exit_tooltip"></div>
+
+		<!-- Locked (not-yet-purchased) pages: the page's table, its empty slots and its number. -->
+		<div class="ext-locked-page" data-for="page : locked_pages"
+		     data-class-page-1="page.number == 1" data-class-page-2="page.number == 2"
+		     data-class-page-3="page.number == 3" data-class-page-4="page.number == 4">
+			<div class="ext-locked-empty"></div>
+			<div class="ext-locked-icon"></div>
+		</div>
+	</div>
+</body>
+</rml>

@@ -1,0 +1,78 @@
+/* Legacy theme for CQuickCommandWindow, reproducing the original's RenderFrame()/
+   RenderContents()/RenderArrow(): the message-box fill (112x140), the quick-command frame top,
+   three middle tiles and a 5-unit one, the bottom piece, four separator lines, the player's name
+   in bold green and five white rows, the hovered one yellow with the two arrows. Reference px
+   relative to the menu's top-left (#panel is placed at the UI scale). */
+
+@spritesheet qcmd-back-sheet { src: "../../../newui_msgbox_back.jpg"; qcmd-back: 0px 0px 112px 140px; }
+@spritesheet qcmd-up-sheet { src: "../../../newui_commamd04.tga"; qcmd-up: 0px 0px 112px 45px; }
+@spritesheet qcmd-middle-sheet
+{
+	src: "../../../newui_commamd02.tga";
+	qcmd-middle: 0px 0px 112px 15px;
+	qcmd-middle-short: 0px 0px 112px 5px;
+}
+@spritesheet qcmd-down-sheet { src: "../../../newui_commamd03.tga"; qcmd-down: 0px 0px 112px 45px; }
+@spritesheet qcmd-line-sheet { src: "../../../newui_commamd_Line.jpg"; qcmd-line: 0px 0px 82px 2px; }
+@spritesheet qcmd-arrow-left-sheet { src: "../../../newui_arrow(L).tga"; qcmd-arrow-left: 0px 0px 6px 9px; }
+@spritesheet qcmd-arrow-right-sheet { src: "../../../newui_arrow(R).tga"; qcmd-arrow-right: 0px 0px 6px 9px; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 112px;
+	height: 140px;
+	font-family: "token(font-body)";
+}
+
+#back { position: absolute; left: 0; top: 0; width: 112px; height: 140px; decorator: image(qcmd-back); }
+#frame_up { position: absolute; left: 0; top: 0; width: 112px; height: 45px; decorator: image(qcmd-up); }
+.frame-middle { position: absolute; left: 0; width: 112px; height: 15px; decorator: image(qcmd-middle); }
+.frame-middle-short { height: 5px; decorator: image(qcmd-middle-short); }
+#frame_down { position: absolute; left: 0; top: 95px; width: 112px; height: 45px; decorator: image(qcmd-down); }
+.line { position: absolute; left: 15px; width: 82px; height: 2px; decorator: image(qcmd-line); }
+
+/* RenderText(x, y + 14, name, 112, 0, RT3_SORT_CENTER): bold, (0, 255, 0). */
+#name {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 14px;
+	text-align: center;
+	white-space: nowrap;
+	color: #00ff00;
+	font-weight: bold;
+}
+
+/* Rows from y + 44, 19 apart; the arrows one unit above the label, at 16 and 90. */
+#rows { position: absolute; left: 0; top: 43px; width: 112px; }
+.quick-row { display: block; position: relative; width: 112px; height: 19px; }
+.quick-label {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 1px;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffffff;
+}
+.quick-row:hover .quick-label { color: #ffff00; }
+.arrow { display: none; position: absolute; top: 0; width: 6px; height: 9px; }
+.arrow-left { left: 16px; decorator: image(qcmd-arrow-left); }
+.arrow-right { left: 90px; decorator: image(qcmd-arrow-right); }
+.quick-row:hover .arrow { display: block; }
+
+/* The frame's own middle bands and its separator lines, so a theme can move them -- they were
+   style attributes, which are inline properties no theme can override. */
+.frame-middle-1 { top: 45px; }
+.frame-middle-2 { top: 60px; }
+.frame-middle-3 { top: 75px; }
+.frame-middle-4 { top: 90px; }
+.line-1 { top: 55px; }
+.line-2 { top: 74px; }
+.line-3 { top: 93px; }
+.line-4 { top: 112px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#name { width: calc(112px * var(--root-scale)); }
+.quick-label { width: calc(112px * var(--root-scale)); }

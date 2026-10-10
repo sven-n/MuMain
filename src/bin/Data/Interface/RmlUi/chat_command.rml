@@ -1,0 +1,96 @@
+<rml>
+<head>
+	<title>Chat Commands</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="chat_command.rcss"/>
+</head>
+<body>
+	<!-- The chat command window (CChatCommandWindow), docked right, full dock height: the title,
+	     then one page -- the commands, the selected command's description and parameters (each
+	     value in a dark box; a typed value in the value field), or the saved templates -- and the
+	     left / right buttons and the exit button. The workspace slot places and scales #panel. The
+	     rows of a page stack in flow, so the parameters and the actions follow however many
+	     description lines and parameters there are. A row is its own hit target. C++
+	     keeps the pages, the values, the wheel, the keys and the commands; a click is queued with
+	     chat_command_hit(action, index), chat_command_left, chat_command_right or
+	     chat_command_exit. -->
+	<div id="panel" data-model="chat_command">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span id="cc_title" class="sharp-text cc-title"
+		      data-style-font-size="title.text_px + 'px'">{{title.text}}</span>
+		<span id="cc_empty" class="sharp-text cc-line"
+		      data-style-font-size="empty_message.text_px + 'px'">{{empty_message.text}}</span>
+
+		<!-- The commands. A favourite's marker is in the text the command list builds; the colour
+		     that goes with it is this row's class. -->
+		<div class="cc-rows" data-if="page == 0">
+			<div class="cc-row" data-for="r, i : command_rows" data-class-favourite="r.favourite"
+			     data-event-click="chat_command_hit(1, i)">
+				<span class="sharp-text cc-cell"
+				      data-style-font-size="r.text_px + 'px'">{{r.text}}</span>
+			</div>
+		</div>
+
+		<div class="cc-page" data-if="page == 1">
+			<div class="cc-line-box" data-for="l : description_lines">
+				<span class="sharp-text cc-row-line" data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
+			</div>
+
+			<!-- Every parameter has a value field; only the edited one's shows, and the window
+			     finds it by the parameter's position. -->
+			<div class="cc-parameters">
+				<div class="cc-parameter" data-for="p, i : parameters">
+					<span class="sharp-text cc-param-label" data-class-missing="p.missing" data-style-font-size="p.label_text_px + 'px'">{{p.label}}</span>
+					<div class="cc-value-box" data-if="!p.edited" data-event-click="chat_command_hit(2, i)"></div>
+					<span class="sharp-text cc-param-value" data-if="!p.edited" data-class-placeholder="p.placeholder" data-style-font-size="p.value_text_px + 'px'">{{p.value}}</span>
+					<div class="cc-value-box" data-if="p.edited"></div>
+					<input data-if="p.edited" data-value="edit_value" type="text" class="text-field sharp-text cc-value-field"
+					       data-style-font-size="text_px + 'px'"/>
+				</div>
+			</div>
+
+			<div class="cc-actions">
+				<div class="cc-row cc-action" data-event-click="chat_command_hit(3, 0)">
+					<span class="sharp-text cc-cell"
+					      data-style-font-size="favourite_action.text_px + 'px'">{{favourite_action.text}}</span>
+				</div>
+				<div class="cc-row cc-action" data-event-click="chat_command_hit(4, 0)">
+					<span class="sharp-text cc-cell"
+					      data-style-font-size="save_action.text_px + 'px'">{{save_action.text}}</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- The saved templates: the label runs a row's width less the remove cell, which the
+		     theme sizes. -->
+		<div class="cc-rows" data-if="page == 2">
+			<div class="cc-row" data-for="r, i : template_rows">
+				<div class="cc-template-hit" data-event-click="chat_command_hit(5, i)"></div>
+				<span class="sharp-text cc-cell cc-template-label"
+				      data-style-font-size="r.text_px + 'px'">{{r.text}}</span>
+				<div class="cc-template-remove" data-event-click="chat_command_hit(6, i)">
+					<span class="sharp-text cc-remove-mark"
+					      data-style-font-size="text_px + 'px'">x</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="cc-btn" id="btn_left" data-if="has_left_button" data-event-click="chat_command_left">
+			<span class="sharp-text sharp-middle cc-label" data-style-font-size="text_px + 'px'"
+			      data-style-line-height="label_line_px + 'px'">{{left_text}}</span>
+		</div>
+		<div class="cc-btn" id="btn_right" data-if="has_right_button" data-event-click="chat_command_right">
+			<span class="sharp-text sharp-middle cc-label" data-style-font-size="text_px + 'px'"
+			      data-style-line-height="label_line_px + 'px'">{{right_text}}</span>
+		</div>
+
+		<div id="btn_exit" data-event-click="chat_command_exit" data-attr-data-hint="exit_tooltip"></div>
+		<div id="frame_corner_close" data-event-click="chat_command_exit"></div>
+	</div>
+</body>
+</rml>

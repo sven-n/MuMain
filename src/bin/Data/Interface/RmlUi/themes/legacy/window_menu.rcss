@@ -1,0 +1,90 @@
+/* Legacy theme for CWindowMenu, reproducing the original's RenderFrame()/RenderTexts()/
+   RenderArrow(): the message-box fill, the command frame (top, four middle tiles, bottom), the
+   five separator lines, six white labels, and on the hovered row a yellow label with the two
+   arrows. Every coordinate is the original's, in reference px relative to the menu's top-left
+   (528, 284) -- #screen carries the HUD board's scale, see window_menu.rml. Sprite rectangles
+   are the texels each RenderImage()/RenderBitmap() call covered. */
+
+@spritesheet wmenu-back-sheet { src: "../../../newui_msgbox_back.jpg"; wmenu-back: 0px 0px 112px 145px; }
+@spritesheet wmenu-up-sheet { src: "../../../newui_commamd01.tga"; wmenu-up: 0px 0px 112px 45px; }
+@spritesheet wmenu-middle-sheet { src: "../../../newui_commamd02.tga"; wmenu-middle: 0px 0px 112px 15px; }
+@spritesheet wmenu-down-sheet { src: "../../../newui_commamd03.tga"; wmenu-down: 0px 0px 112px 45px; }
+@spritesheet wmenu-line-sheet { src: "../../../newui_commamd_Line.jpg"; wmenu-line: 0px 0px 82px 2px; }
+@spritesheet wmenu-arrow-left-sheet { src: "../../../newui_arrow(L).tga"; wmenu-arrow-left: 0px 0px 6px 9px; }
+@spritesheet wmenu-arrow-right-sheet { src: "../../../newui_arrow(R).tga"; wmenu-arrow-right: 0px 0px 6px 9px; }
+
+#screen {
+	pointer-events: none;
+}
+
+/* STANDARD_POS: (640 - 112, 480 - 156 - 40). The frame runs from there to the bottom frame's
+   end at 480 - 50; the whole box claims the cursor, as the modal original did. */
+#panel {
+	position: absolute;
+	left: 528px;
+	top: 284px;
+	width: 112px;
+	height: 146px;
+	font-family: "token(font-body)";
+	pointer-events: auto;
+}
+
+#back { position: absolute; left: 0; top: 0; width: 112px; height: 145px; decorator: image(wmenu-back); }
+#frame_up { position: absolute; left: 0; top: 0; width: 112px; height: 45px; decorator: image(wmenu-up); }
+.frame-middle { position: absolute; left: 0; width: 112px; height: 15px; decorator: image(wmenu-middle); }
+/* Drawn at REFERENCE_HEIGHT - 50 - 45, over the last middle tile. */
+#frame_down { position: absolute; left: 0; top: 101px; width: 112px; height: 45px; decorator: image(wmenu-down); }
+.line { position: absolute; left: 15px; width: 82px; height: 2px; decorator: image(wmenu-line); }
+
+/* Rows start 20 below the top, 20 tall each, the full 112 wide -- the original's hover boxes. */
+#rows {
+	position: absolute;
+	left: 0;
+	top: 20px;
+	width: 112px;
+}
+.menu-row {
+	/* A data-for <div> is inline in this build unless the rule says display: block. */
+	display: block;
+	position: relative;
+	width: 112px;
+	height: 20px;
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+/* RenderText(x, rowTop, label, 112, 0, RT3_SORT_CENTER): white, yellow (255, 255, 0) hovered. */
+.menu-label {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 0;
+	/* The row's width under the scale, which the label cancels, so centring matches the
+	   original's RT3_SORT_CENTER. */
+	width: calc(112px * var(--root-scale));
+	transform-origin: left top;
+	text-align: center;
+	white-space: nowrap;
+	color: #ffffff;
+	pointer-events: none;
+}
+.menu-row:hover .menu-label { color: #ffff00; }
+
+/* RenderArrow(): 6x9 at the row's top, 16 and 90 from the left, on the hovered row only. */
+.arrow { display: none; position: absolute; top: 0; width: 6px; height: 9px; pointer-events: none; }
+.arrow-left { left: 16px; decorator: image(wmenu-arrow-left); }
+.arrow-right { left: 90px; decorator: image(wmenu-arrow-right); }
+.menu-row:hover .arrow { display: block; }
+
+/* The frame tiles and the row separators, in the places the original drew them. The containers
+   take no space themselves. */
+.frame-middles, .lines { position: static; }
+.frame-middles .frame-middle:nth-child(1) { top: 45px; }
+.frame-middles .frame-middle:nth-child(2) { top: 60px; }
+.frame-middles .frame-middle:nth-child(3) { top: 75px; }
+.frame-middles .frame-middle:nth-child(4) { top: 90px; }
+.lines .line:nth-child(1) { top: 33px; }
+.lines .line:nth-child(2) { top: 53px; }
+.lines .line:nth-child(3) { top: 73px; }
+.lines .line:nth-child(4) { top: 93px; }
+.lines .line:nth-child(5) { top: 113px; }

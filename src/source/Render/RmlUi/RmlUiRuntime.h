@@ -1,0 +1,151 @@
+#pragma once
+
+#include "stdafx.h"
+#include "Core/Input/UiInputRouter.h"
+#include <RmlUi/Core/Context.h>
+#include <functional>
+#include <memory>
+#include <span>
+
+class RmlUiRenderInterface;
+class RmlUiSystemInterface;
+class TextInputMethodEditor_SDL; // ThirdParty/RmlUi/Backends/RmlUi_Platform_SDL.h
+namespace Rml { class FileInterface; }
+union SDL_Event;
+struct SDL_Window;
+
+// What the game adds to the runtime. The runtime renders, updates and routes input; the UI scale
+// rule, themes, native text and the game's per-frame upkeep reach it only through these, which
+// UI::RmlBridge::InstallRuntimeHooks() sets before Create(). Any may be left empty.
+struct RmlUiRuntimeHooks
+{
+    // The dp ratio for a window size; 1 when unset.
+    std::function<float(int windowWidth, int windowHeight)> dpRatio;
+    // After a context's dp ratio is applied.
+    std::function<void(Rml::Context*)> afterScale;
+    // Once every context exists, and before they are torn down.
+    std::function<void()> afterCreate;
+    std::function<void()> beforeDestroy;
+    // Before the main context updates each frame, and after each context updates.
+    std::function<void()> beforeUpdate;
+    std::function<void(Rml::Context*)> afterUpdate;
+    // A texture source the game draws itself: true if `source` is one, with its texture (null if
+    // it has none yet) and size.
+    std::function<bool(const Rml::String& source, void*& texture, int& width, int& height)> resolveTexture;
+    // Optional application resource provider; installed before Rml::Initialise().
+    std::function<std::unique_ptr<Rml::FileInterface>()> createFileInterface;
+};
+
+// Owns the Rml::Context lifecycle and the one per-frame Update()/Render() entry point. Create()
+// registers RenderFrame() as the SDL_GPU renderer's pre-submit callback (see
+// IMuRenderer::SetPreSubmitCallback, MuRenderer.h) -- a true single choke point every frame
+// funnels through regardless of active scene.
+//
+// Implements Core::Input::IUiInputConsumer so input-routing call sites (Winmain.cpp's event pump,
+// gameplay's mouse-gating checks) depend on that interface instead of this concrete type -- see
+// UiInputRouter.h. Create()/Destroy() register/clear this instance as the router's active
+// consumer.
+class RmlUiRuntime : public Core::Input::IUiInputConsumer
+{
+public:
+    static RmlUiRuntime& Instance();
+
+    void SetHooks(RmlUiRuntimeHooks hooks) { m_Hooks = std::move(hooks); }
+    void Create(int windowWidth, int windowHeight);
+    void Destroy();
+    bool IsCreated() const { return m_Context != nullptr; }
+
+    void OnResize(int windowWidth, int windowHeight);
+    // Applies the dp ratio again at each context's current size, for a scale input that changed
+    // without a resize: the OS display scale. No-op before Create().
+    void RefreshScale();
+    // What RefreshScale() does to each non-null context in `contexts`.
+    static void ApplyScale(std::span<Rml::Context* const> contexts, const RmlUiRuntimeHooks& hooks);
+
+    void Update();
+    void Render();
+
+    // Update() then Render(), in that order -- what Create() registers as the renderer's
+    // pre-submit callback. Public (not private+friend) only because that registration is a
+    // free function (a lambda) rather than a member, and doesn't need any further access.
+    void RenderFrame();
+
+    // Forwards one SDL event to RmlUi. Motion and button down/up are handled directly (see the
+    // .cpp) to avoid two real bugs in RmlUi's official RmlSDL::InputEventHandler (vendored at
+    // ThirdParty/RmlUi/Backends/RmlUi_Platform_SDL.cpp) that don't fit this engine's own
+    // conventions: it calls SDL_CaptureMouse() on every button press/release, and it scales
+    // motion coordinates by SDL_GetWindowPixelDensity(). Every other event type (wheel/key/text)
+    // still goes through it, reusing RmlUi's own tested SDL-keycode/modifier mapping.
+    // @return false if RmlUi consumed the event (an element under the cursor / holding focus
+    // claimed it) -- the caller should then skip its own legacy handling for this event. true
+    // means RmlUi did not consume it (matches Rml::Context::Process*'s own "still propagating"
+    // convention) and legacy handling should proceed as before.
+    //
+    // Ordering caveat: this always offers the event to RmlUi first, regardless of whether a
+    // legacy CObject/CWin window is actually on top of the RmlUi content at that screen position
+    // -- correct as long as migrated-window content and still-legacy windows occupy disjoint
+    // z-order bands, wrong if a legacy window ever needs to sit visually on top of migrated RmlUi
+    // content. Revisit if that situation arises.
+    bool ProcessSdlEvent(SDL_Event& event, SDL_Window* window) override;
+
+    // Rml::Context::IsMouseInteracting() -- true while the mouse is hovering/pressed over any
+    // RmlUi element. Intended as a third click-to-move gate alongside MouseOnWindow (CWin tier)
+    // and g_pNewUISystem->CheckMouseUse() (mu::ui::window tier) at Input/Selection.cpp's
+    // world-pick check.
+    bool IsMouseOverUI() const override;
+    void CancelSyntheticMousePress(unsigned char button, SDL_Window* window) override;
+
+    Rml::Context* GetContext() const { return m_Context; }
+
+    // True from the moment any RmlUi <input> across any of the three contexts is focused until
+    // it's blurred (RmlUiSystemInterface::ActivateKeyboard/DeactivateKeyboard, which
+    // WidgetTextInput::SetKeyboardActive() already calls on every real Focus/Blur -- no polling,
+    // no heuristics). This is the single ownership signal Winmain.cpp's SDL_EVENT_TEXT_EDITING
+    // routing and its per-frame native SDL_StartTextInput/StopTextInput/SetTextInputArea block
+    // both key off: RmlUi wins whenever this is true, CUITextInputBox::GetFocusedPortable() is the
+    // fallback otherwise. Until an RmlUi <input> exists on a migrated screen, this is always
+    // false and every existing native-only screen's behavior is unchanged.
+    bool IsTextInputActive() const;
+
+    // The text field the player is typing in, and its document: the visible, focused <input> or
+    // <textarea> of the main context, or null. CManager::UpdateKeyEvent() gives keys only to the
+    // window that claims the document (CObject::TakesTypingFrom()).
+    Rml::Element* GetFocusedTextField() const;
+    Rml::ElementDocument* GetTypingDocument() const;
+
+    // Forwards one SDL_EVENT_TEXT_EDITING event to the installed Rml::TextInputHandler (the
+    // vendored TextInputMethodEditor_SDL -- see m_TextInputMethodEditor's own comment). Caller
+    // (Winmain.cpp) is expected to only call this when IsTextInputActive() is true; harmless
+    // no-op otherwise since TextInputMethodEditor_SDL::HandleEdit() itself no-ops with no active
+    // TextInputContext.
+    void ProcessTextEditing(const SDL_Event& event);
+
+private:
+    RmlUiRuntime() = default;
+    ~RmlUiRuntime();
+
+    // Unlinks text fields that documents still remember as focused after the focus moved on, so
+    // ElementDocument::Hide() can't hand the keyboard back to one. See the .cpp.
+    void ReleaseStrandedFieldFocus();
+    void AfterUpdate(Rml::Context* context);
+
+    RmlUiRuntimeHooks m_Hooks;
+
+    RmlUiRuntime(const RmlUiRuntime&) = delete;
+    RmlUiRuntime& operator=(const RmlUiRuntime&) = delete;
+
+    std::unique_ptr<RmlUiRenderInterface> m_RenderInterface;
+    std::unique_ptr<RmlUiSystemInterface> m_SystemInterface;
+    std::unique_ptr<Rml::FileInterface> m_FileInterface;
+
+    // Installed globally via Rml::SetTextInputHandler() in Create() -- global, not per-Context,
+    // per TextInputHandler.h's own doc comment, so one instance covers all three contexts below.
+    // Same class the vendored SDL_GPU/GL/DX/VK sample backends all install (grep
+    // ThirdParty/RmlUi/Backends for "text_input_method_editor"); this engine's own RmlUiRuntime
+    // never had an equivalent until now. Outlives every Rml::Context (reset only after
+    // Rml::Shutdown() in Destroy(), same contract as m_RenderInterface/m_SystemInterface above) --
+    // a live WidgetTextInputContext can call back into it during document/element teardown.
+    std::unique_ptr<TextInputMethodEditor_SDL> m_TextInputMethodEditor;
+
+    Rml::Context* m_Context = nullptr; // owned by Rml::Core, released via Rml::Shutdown()
+};

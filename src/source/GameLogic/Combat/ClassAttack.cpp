@@ -7,7 +7,7 @@
 
 // Includes mirror ZzzInterface.cpp, the unit these functions were extracted from.
 #include "Core/Platform/Imm.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -33,21 +33,20 @@
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CSParts.h"
-#include "UI/Legacy/UIMapName.h"	// rozy
+#include "UI/HUD/UIMapName.h"	// rozy
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "UI/Legacy/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "UI/NewUI/HUD/NewUIGensRanking.h"
+#include "UI/HUD/GensRanking.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "GameLogic/Items/ItemCategories.h"
 
@@ -1413,7 +1412,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                 if (!g_pPartyManager->IsPartyMember(SelectedCharacter))
                     return;
 
-                if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
+                if (mu::ui::window::CInventoryCtrl::GetPickedItem())
                 {
                     return;
                 }
@@ -1479,7 +1478,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
         case AT_SKILL_TELEPORT:
         {
-            if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem()
+            if (mu::ui::window::CInventoryCtrl::GetPickedItem()
                 || g_isCharacterBuff(o, eDeBuff_Stun)
                 || g_isCharacterBuff(o, eDeBuff_Sleep)
                 )

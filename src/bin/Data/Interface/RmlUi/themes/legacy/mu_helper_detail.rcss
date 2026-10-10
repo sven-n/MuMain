@@ -1,0 +1,58 @@
+/* Legacy layout for CMuHelperDetailWindow. Every position is native's own m_Pos + K from the draw
+   and hit-test calls it replaces; the pieces themselves (panes, gauges, checkboxes, buttons, number
+   plate) come from mu_helper_common.rcss. The gauges draw here; the hit area follows
+   each bar in the RML hierarchy. */
+
+.mhd-page { position: absolute; left: 0; top: 0; }
+
+#pane_top              { left: 12px; top: 55px; }
+#pane_lower            { left: 12px; top: 120px; }
+#pane_heal_support     { left: 12px; top: 55px; }
+#pane_buff_support_elf { left: 12px; top: 145px; }
+
+.mh-check { position: absolute; width: 15px; height: 15px; }
+
+/* Activation condition. */
+#precon_range     { left: 17px; top: 78px; }
+#precon_attacking { left: 17px; top: 93px; }
+#subcon_two       { left: 17px; top: 143px; }
+#subcon_three     { left: 17px; top: 158px; }
+#subcon_four      { left: 95px; top: 143px; }
+#subcon_five      { left: 95px; top: 158px; }
+
+/* Gauges: bar, its fill at the same origin, and the label 18 below. */
+#gauge_potion, #gauge_potion_fill { left: 32px; top: 80px; }
+#gauge_potion_label               { left: 32px; top: 98px; }
+#gauge_heal, #gauge_heal_fill     { left: 32px; top: 145px; }
+#gauge_heal_label                 { left: 32px; top: 163px; }
+#gauge_party_heal, #gauge_party_heal_fill { left: 32px; top: 100px; }
+#gauge_party_heal_label                   { left: 32px; top: 118px; }
+
+/* Party support, standard classes. */
+#party_duration   { left: 17px;  top: 78px; }
+#time_space       { left: 40px;  top: 97px; }
+#buff_plate       { left: 125px; top: 93px; }
+#buff_interval    { left: 127px; top: 97px; }
+#buff_unit        { left: 146px; top: 97px; }
+
+/* Party support, elf -- the buff options sit 90 lower, under the heal-support pane. */
+#party_heal         { left: 17px;  top: 78px; }
+#party_duration_elf { left: 17px;  top: 168px; }
+#time_space_elf     { left: 40px;  top: 187px; }
+#buff_plate_elf     { left: 125px; top: 183px; }
+#buff_interval_elf  { left: 127px; top: 187px; }
+#buff_unit_elf      { left: 146px; top: 187px; }
+
+/* Footer. Labels centred on their button (mu_helper_common.rcss lifts them one unit). */
+#btn_save, #btn_save_label { left: 120px; top: 388px; }
+#btn_init, #btn_init_label { left: 65px;  top: 388px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.mh-text.mh-center.mh-bold.mh-title { width: calc(190px * var(--root-scale)); }
+#gauge_potion_label { width: calc(124px * var(--root-scale)); }
+#gauge_heal_label { width: calc(124px * var(--root-scale)); }
+#buff_interval { width: calc(17px * var(--root-scale)); height: calc(12px * var(--root-scale)); }
+#gauge_party_heal_label { width: calc(124px * var(--root-scale)); }
+#buff_interval_elf { width: calc(17px * var(--root-scale)); height: calc(12px * var(--root-scale)); }
+#btn_save_label { width: calc(52px * var(--root-scale)); height: calc(26px * var(--root-scale)); line-height: calc(26px * var(--root-scale)); }
+#btn_init_label { width: calc(52px * var(--root-scale)); height: calc(26px * var(--root-scale)); line-height: calc(26px * var(--root-scale)); }

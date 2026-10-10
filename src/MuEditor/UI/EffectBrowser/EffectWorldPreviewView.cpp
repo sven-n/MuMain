@@ -10,7 +10,7 @@
 #include "I18N/All.h"
 #include "MuEditorSourceDir.h"
 #include "UI/DevEditor/DevEditorUI.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "imgui.h"
 
 #include <algorithm>

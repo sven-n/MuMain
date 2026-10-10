@@ -5,12 +5,14 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/Overlay2DRecorder.h"
+#include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Renderer/RenderUtils.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include <SDL3/SDL.h>
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 #include "wglext.h"  // legacy WGL multisample pixel-format path (disabled by default)
@@ -520,13 +522,15 @@ void SetRenderViewport(int x, int y, int Width, int Height)
 
 // Saved camera state for save/restore around item rendering blocks.
 // Item rendering calls gluPerspective2 (corrupts PerspectiveX/Y/ScreenCenter)
-// and GetOpenGLMatrix(g_Camera.Matrix) (corrupts the camera matrix). Both must
-// be restored so ScreenToWorldRay reads correct values for click detection.
+// and GetOpenGLMatrix(g_Camera.Matrix) (corrupts the camera matrix), and its
+// ScreenToWorldRay() moves MousePosition -- the origin of the ray terrain and
+// object picking cast. All must be restored, or a click on the ground misses.
 static struct
 {
     float PerspectiveX, PerspectiveY;
     int ScreenCenterX, ScreenCenterY, ScreenCenterYFlip;
     float Matrix[3][4];
+    vec3_t MousePosition;
 } s_SavedCameraState;
 
 void SaveCameraPerspective()
@@ -537,6 +541,7 @@ void SaveCameraPerspective()
     s_SavedCameraState.ScreenCenterY    = g_Camera.ScreenCenterY;
     s_SavedCameraState.ScreenCenterYFlip = g_Camera.ScreenCenterYFlip;
     memcpy(s_SavedCameraState.Matrix, g_Camera.Matrix, sizeof(g_Camera.Matrix));
+    VectorCopy(MousePosition, s_SavedCameraState.MousePosition);
 }
 
 void RestoreCameraPerspective()
@@ -547,6 +552,7 @@ void RestoreCameraPerspective()
     g_Camera.ScreenCenterY    = s_SavedCameraState.ScreenCenterY;
     g_Camera.ScreenCenterYFlip = s_SavedCameraState.ScreenCenterYFlip;
     memcpy(g_Camera.Matrix, s_SavedCameraState.Matrix, sizeof(g_Camera.Matrix));
+    VectorCopy(s_SavedCameraState.MousePosition, MousePosition);
 }
 
 // Perspective setup for item/3D-UI rendering. Sets GL perspective AND updates
@@ -599,11 +605,18 @@ void BeginOpenglPhysical(int x, int y, int width, int height)
 {
     width = std::max(width, 1);
     height = std::max(height, 1);
+    SetRenderViewport(x, y, width, height);
+    BeginOpenglForTarget(width, height);
+}
+
+void BeginOpenglForTarget(int width, int height)
+{
+    width = std::max(width, 1);
+    height = std::max(height, 1);
 
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();
-    SetRenderViewport(x, y, width, height);
 
     // Calculate aspect ratio dynamically from viewport dimensions
     // This ensures camera adapts to window resizing (WM_SIZE updates WindowWidth/WindowHeight)
@@ -1110,14 +1123,27 @@ static inline std::uint32_t ArgbToAbgr(unsigned int argb)
     return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
+Render::Renderer::RecordedBlend CurrentRecordedBlend()
+{
+    return AlphaBlendType == 3   ? Render::Renderer::RecordedBlend::Additive
+           : AlphaBlendType == 0 ? Render::Renderer::RecordedBlend::Opaque
+                                 : Render::Renderer::RecordedBlend::Alpha;
+}
+
 void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned int argbColor)
 {
-    DisableTexture();
-
     x = ConvertPositionX(x);
     y = ConvertPositionY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
+
+    if (Render::Renderer::IOverlay2DRecorder* recorder = Render::Renderer::ActiveOverlay2DRecorder())
+    {
+        recorder->RecordQuad({x, y, Width, Height, argbColor, CurrentRecordedBlend()});
+        return;
+    }
+
+    DisableTexture();
     y = WindowHeight - y;
 
     const std::uint32_t color = ArgbToAbgr(argbColor);
@@ -1196,6 +1222,26 @@ void RenderBitmap(int Texture, float x, float y, float Width, float Height, floa
     {
         Width = ConvertX(Width);
         Height = ConvertY(Height);
+    }
+
+    if (Render::Renderer::IOverlay2DRecorder* recorder = Render::Renderer::ActiveOverlay2DRecorder())
+    {
+        if (BITMAP_t* bitmap = Bitmaps.GetTexture(Texture))
+        {
+            Render::Renderer::RecordedBitmap record;
+            record.fileName = bitmap->FileName;
+            record.x = x;
+            record.y = y;
+            record.width = Width;
+            record.height = Height;
+            record.sourceX = u * bitmap->Width;
+            record.sourceY = v * bitmap->Height;
+            record.sourceWidth = uWidth * bitmap->Width;
+            record.sourceHeight = vHeight * bitmap->Height;
+            record.alpha = (Alpha > 0.0f && Alpha < 1.0f) ? Alpha : 1.0f;
+            recorder->RecordBitmap(record);
+        }
+        return;
     }
 
     BindTexture(Texture);
@@ -1300,74 +1346,6 @@ void RenderBitRotate(int Texture, float x, float y, float Width, float Height, f
         {p2[3][0] + halfW, p2[3][1] + halfH, 1.0f, 0.0f, 0xFFFFFFFFu},
     };
     mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
-}
-
-void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHeight, float x, float y, float Width, float Height, float Rotate, float Rotate_Loc, float uWidth, float vHeight, int Num)
-{
-    vec3_t p, p2[4], p3, p4[4], Angle;
-    float Matrix[3][4];
-
-    ix = ConvertX(ix);
-    iy = ConvertY(iy);
-    x = ConvertX(x);
-    y = ConvertY(y);
-    Width = ConvertX(Width);
-    Height = ConvertY(Height);
-
-    BindTexture(Texture);
-
-    y = Height - y;
-    iy = Height - iy;
-
-    Vector((ix - (Width * 0.5f)) + ((Width / 2.f) - (Width - x)), (iy - (Height * 0.5f)) + ((Height / 2.f) - (Height - y)), 0.f, p);
-
-    Vector(0.f, 0.f, Rotate, Angle);
-    AngleMatrix(Angle, Matrix);
-
-    VectorRotate(p, Matrix, p3);
-
-    Vector(-(iWidth * 0.5f), (iHeight * 0.5f), 0.f, p2[0]);
-    Vector(-(iWidth * 0.5f), -(iHeight * 0.5f), 0.f, p2[1]);
-    Vector((iWidth * 0.5f), -(iHeight * 0.5f), 0.f, p2[2]);
-    Vector((iWidth * 0.5f), (iHeight * 0.5f), 0.f, p2[3]);
-
-    Vector(0.f, 0.f, Rotate_Loc, Angle);
-    AngleMatrix(Angle, Matrix);
-
-    Matrix[0][3] = p3[0] + 25;
-    Matrix[1][3] = p3[1];
-    VectorTransform(p2[0], Matrix, p4[0]);
-    VectorTransform(p2[1], Matrix, p4[1]);
-    VectorTransform(p2[2], Matrix, p4[2]);
-    VectorTransform(p2[3], Matrix, p4[3]);
-
-    const float halfW = WindowWidth / 2.f;
-    const float halfH = WindowHeight / 2.f;
-
-    const mu::Vertex2D vertices[4] = {
-        {p4[0][0] + halfW, p4[0][1] + halfH, 0.0f, 0.0f, 0xFFFFFFFFu},
-        {p4[1][0] + halfW, p4[1][1] + halfH, 0.0f, vHeight, 0xFFFFFFFFu},
-        {p4[2][0] + halfW, p4[2][1] + halfH, uWidth, vHeight, 0xFFFFFFFFu},
-        {p4[3][0] + halfW, p4[3][1] + halfH, uWidth, 0.0f, 0xFFFFFFFFu},
-    };
-    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
-
-    if (Num > -1)
-    {
-        float dx, dy;
-        dx = p4[0][0] + halfW;
-        dy = p4[0][1] + halfH;
-        dx = (dx - g_fScreenOffset_x) / g_fScreenRate_x;
-        dy = (dy - g_fScreenOffset_y) / g_fScreenRate_y;
-        if (Num >= 100)
-        {
-            g_pNewUIMiniMap->SetBtnPos(Num - 100, dx - (iWidth / 2), (REFERENCE_HEIGHT - dy) - (iHeight / 2), iWidth, iHeight);
-        }
-        else
-        {
-            g_pNewUIMiniMap->SetBtnPos(Num, dx, REFERENCE_HEIGHT - dy, iWidth / 2, iHeight / 2);
-        }
-    }
 }
 
 void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u, float v, float uWidth, float vHeight)
@@ -1569,9 +1547,9 @@ bool CollisionDetectLineToFace(vec3_t Position, vec3_t Target, int Polygon, floa
 {
     vec3_t Direction;
     VectorSubtract(Target, Position, Direction);
-    float a = DotProduct(Direction, Normal);
+    float a = VectorDotProduct(Direction, Normal);
     if (a >= 0.f) return false;
-    float b = DotProduct(Position, Normal) - DotProduct(v1, Normal);
+    float b = VectorDotProduct(Position, Normal) - VectorDotProduct(v1, Normal);
     float t = -b / a;
     if (t >= 0.f && t <= Distance)
     {
@@ -1622,16 +1600,16 @@ bool CollisionDetectLineToFace(vec3_t Position, vec3_t Target, int Polygon, floa
 
 bool ProjectLineBox(vec3_t ax, vec3_t p1, vec3_t p2, OBB_t obb)
 {
-    float P1 = DotProduct(ax, p1);
-    float P2 = DotProduct(ax, p2);
+    float P1 = VectorDotProduct(ax, p1);
+    float P2 = VectorDotProduct(ax, p2);
 
     float mx1 = maxf(P1, P2);
     float mn1 = minf(P1, P2);
 
-    float ST = DotProduct(ax, obb.StartPos);
-    float Q1 = DotProduct(ax, obb.XAxis);
-    float Q2 = DotProduct(ax, obb.YAxis);
-    float Q3 = DotProduct(ax, obb.ZAxis);
+    float ST = VectorDotProduct(ax, obb.StartPos);
+    float Q1 = VectorDotProduct(ax, obb.XAxis);
+    float Q2 = VectorDotProduct(ax, obb.YAxis);
+    float Q3 = VectorDotProduct(ax, obb.ZAxis);
 
     float mx2 = ST;
     float mn2 = ST;

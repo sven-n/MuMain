@@ -1,0 +1,145 @@
+
+#if !defined(AFX_NEWUIGUARDWINDOW_H__0FFE1FE7_59B6_47D8_B79C_7E3DD9912E14__INCLUDED_)
+#define AFX_NEWUIGUARDWINDOW_H__0FFE1FE7_59B6_47D8_B79C_7E3DD9912E14__INCLUDED_
+
+#pragma once
+
+#include "UI/Core/WindowObject.h"
+#include "UI/Combat/SiegeUpdates.h"
+#include "UI/Combat/GuardWindowRmlModel.h"
+#include "UI/Combat/GuardGuildLists.h"
+#include "UI/RmlBridge/RmlThemedView.h"
+#include "UI/Dialogs/MessageBox.h"
+#include "UI/Inventory/MyInventory.h"
+#include "Guild/GuildInfoWindow.h"
+#include "UI/HUD/ChatLogWindow.h"
+#include "UI/Inventory/InventoryCtrl.h"
+
+namespace Rml
+{
+class ElementDocument;
+}
+
+namespace mu::ui::window
+{
+// The castle guardsman, docked right: the Status, Register / Announce and List tabs.
+// RmlUi owns guild lists and actions; C++ keeps their state and server requests.
+class CGuardWindow : public CObject
+{
+public:
+    // The buttons RmlUi reports (guard_button(n)).
+    enum GUARD_BUTTON
+    {
+        GUARD_BUTTON_NONE = -1,
+        GUARD_BUTTON_PROCLAIM = 0,
+        GUARD_BUTTON_REGISTER,
+        GUARD_BUTTON_GIVE_UP,
+        GUARD_BUTTON_EXIT,
+    };
+
+private:
+    enum
+    {
+        INVENTORY_WIDTH = 190,
+        INVENTORY_HEIGHT = 429,
+    };
+    enum CURR_OPEN_TAB_BUTTON
+    {
+        TAB_SIEGE_INFO,
+        TAB_REGISTER,
+        TAB_REGISTER_INFO
+    };
+
+    CManager* m_pNewUIMng;
+
+
+    // The current page and highlight share this value. RmlUi owns the tab hit targets.
+    int m_iNumCurOpenTab; // ���� �����ִ� �ǹ�ư��ȣ
+
+    void SetCurOpenTab(int iTab);
+
+    void BindRmlModel(Rml::DataModelConstructor& c, GuardWindowRmlModel& model);
+    void OnRmlReloaded();
+    UI::RmlBridge::ThemedView<GuardWindowRmlModel> m_RmlView{"guard_window",
+        [this](Rml::DataModelConstructor& c, GuardWindowRmlModel& model) { BindRmlModel(c, model); },
+        {{"Data/Interface/RmlUi/guard_window.rml"}}, {.afterReload = [this] { OnRmlReloaded(); }}};
+    GUARD_BUTTON m_PendingButton = GUARD_BUTTON_NONE;
+    int m_PendingTab = -1;
+
+    // ������ ��� ����Ʈ
+    UI::Combat::GuardGuildLists m_GuildLists;
+    unsigned m_ListRevision = 0;
+    bool m_ListsDirty = true;
+    std::wstring m_ListGuild;
+    std::wstring m_ListAlliance;
+
+    CASTLESIEGE_STATE m_eTimeType = CASTLESIEGE_STATE_NONE;
+
+    wchar_t m_szOwnerGuild[8 + 1] = {};
+    wchar_t m_szOwnerGuildMaster[10 + 1] = {};
+
+    WORD m_wStartYear = 0;
+    BYTE m_byStartMonth = 0;
+    BYTE m_byStartDay = 0;
+    BYTE m_byStartHour = 0;
+    BYTE m_byStartMinute = 0;
+    WORD m_wEndYear = 0;
+    BYTE m_byEndMonth = 0;
+    BYTE m_byEndDay = 0;
+    BYTE m_byEndHour = 0;
+    BYTE m_byEndMinute = 0;
+    WORD m_wSiegeStartYear = 0;
+    BYTE m_bySiegeStartMonth = 0;
+    BYTE m_bySiegeStartDay = 0;
+    BYTE m_bySiegeStartHour = 0;
+    BYTE m_bySiegeStartMinute = 0;
+    DWORD m_dwStateLeftSec = 0;
+
+public:
+    CGuardWindow();
+    virtual ~CGuardWindow();
+
+    bool Create(CManager* pNewUIMng);
+    Rml::ElementDocument* GetFillDocument() const override { return m_RmlView.Document(); }
+    Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
+    void Release();
+
+
+    bool UpdateMouseEvent();
+    bool UpdateKeyEvent();
+    bool Update();
+    bool Render();
+
+
+    void OpeningProcess();
+    void ClosingProcess();
+
+    float GetLayerDepth(); //. 5.0f
+
+    void SetData(const UI::Siege::GuardStatus& status);
+
+    void AddDeclareGuildList(std::wstring_view name, int markCount, bool gaveUp, BYTE sequence);
+    void ClearDeclareGuildList();
+    void SortDeclareGuildList();
+    void AddGuildList(std::wstring_view name, BYTE side, BYTE involvement, int score);
+    void ClearGuildList();
+
+
+private:
+
+    void UpdateRegisterTab(GUARD_BUTTON button);
+    void UpdateRegisterInfoTab(GUARD_BUTTON button);
+    void UpdateRegisterInfoLists();
+    bool ProclaimLocked() const;
+
+    void BuildRmlUi();
+    void SyncRmlModel();
+    void SyncContent();
+    void SyncGuildLists();
+    std::vector<GuardDeclareRow> BuildDeclareRows() const;
+    std::vector<GuardSiegeRow> BuildSiegeRows() const;
+    void SelectListGuild(bool declaration, const Rml::String& name);
+};
+}
+
+#endif // !defined(AFX_NEWUIGUARDWINDOW_H__0FFE1FE7_59B6_47D8_B79C_7E3DD9912E14__INCLUDED_)

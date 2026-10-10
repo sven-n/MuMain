@@ -85,9 +85,14 @@ assembly commands.
 
 ### First Time Setup - Initialize Submodules
 
-The project uses three git submodules under `src/ThirdParty/`:
+The project uses git submodules under `src/ThirdParty/`:
 
 - `SDL` - windowing, input and audio backend (required for all builds)
+- `RmlUi` - the HTML/CSS UI library (required for all builds). It points at a fork,
+  [nitoygo/RmlUi](https://github.com/nitoygo/RmlUi) on `integration/sdl-gpu-parity`, not upstream
+  [mikke89/RmlUi](https://github.com/mikke89/RmlUi): upstream's SDL_GPU renderer lacks what this
+  client relies on (gradients, layers and filters, the scene behind `backdrop-filter`). Return to
+  upstream once those changes are merged there.
 - `SDL_mixer` - audio mixer (required for all builds)
 - `imgui` - in-game editor UI (only needed when built with `-DENABLE_EDITOR=ON`, independent of Debug/Release)
 

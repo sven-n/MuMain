@@ -1,0 +1,322 @@
+/* Legacy theme for main_frame.rml: the original HUD art, with the bottom button row. Gauge
+   fills use real legacy gauge textures; numeric readouts are plain text; buttons use their sheet's
+   own hover frame, as native does. */
+
+/* The modern theme's flat backing, and the readout variant this theme doesn't use. */
+#gauge_fill_left, #gauge_fill_right, #item_band_fill, #skill_band_fill, #gauge_frame,
+.gauge-num.value-full {
+	display: none;
+}
+
+/* Every .hud-part places itself (main_frame.rml). This theme docks them all at the bottom centre
+   where the original drew them: margin-left is the part's x in the original's 640x480 frame
+   minus 320, bottom is 480 minus its lower edge. Move a part by changing its rule alone; its
+   contents are laid out from its own corner. */
+/* The root measures the strip plus EXP; popups may overflow above it. */
+#hud_layout { position: absolute; left: 50%; bottom: 0; margin-left: -320dp;
+    width: 640dp; height: 51dp; overflow: visible; pointer-events: none; }
+#hud_layout.workspace-placed { margin-left: 0; bottom: auto; transform-origin: left top; }
+.hud-part {
+	position: absolute;
+	left: 50%;
+	font-family: "token(font-body)";
+	font-size: 9dp;
+}
+#hud_strip    { margin-left: -320dp; bottom: 10dp; width: 488dp; height: 41dp; }
+#gauges_left  { margin-left: -162dp; bottom: 9dp;  width: 62dp;  height: 40dp; }
+#gauges_right { margin-left: 100dp;  bottom: 9dp;  width: 62dp;  height: 40dp; }
+#buttons      { margin-left: 168dp;  bottom: 10dp; width: 300dp; height: 41dp; }
+#exp          { margin-left: -320dp; bottom: 0dp;  width: 640dp; height: 10dp; }
+#item_slots   { margin-left: -310dp; bottom: 17dp; width: 134dp; height: 20dp; }
+#skill_slots  { margin-left: -98dp;  bottom: 11dp; width: 190dp; height: 40dp; }
+#skill_list   { margin-left: 65dp;   bottom: 52dp; width: 32dp;  height: 38dp; }
+/* The strip and EXP take the pointer so clicks on the art don't reach the world. */
+#hud_strip { pointer-events: auto; }
+/* The original menu art: newui_menu01's first 256px, newui_menu02, then newui_menu03's first
+   104px up to the buttons; the highlight is newui_menu02-03 over the hotkey row while it shows its
+   upper set. Each sheet's lower 10px is the EXP frame (#exp). */
+.frame-art { position: absolute; top: 0dp; height: 41dp; pointer-events: none; }
+#frame_left   { left: 0dp;   width: 256dp; decorator: image(mainframe-frame-left); }
+#frame_middle { left: 256dp; width: 128dp; decorator: image(mainframe-frame-middle); }
+#frame_right  { left: 384dp; width: 104dp; decorator: image(mainframe-frame-right); }
+@spritesheet mainframe-highlight-sheet { src: "../../../newui_menu02-03.jpg"; mainframe-skill-list-highlight: 0px 0px 160px 40px; }
+#skill_list_highlight { position: absolute; left: 0dp; top: 0dp; width: 160dp; height: 40dp; pointer-events: none; decorator: image(mainframe-skill-list-highlight); }
+/* pointer-events:auto required -- otherwise these inherit body's none (base.rcss), and
+   the gauges' hints could never show. */
+.gauge-slot {
+	position: absolute;
+	pointer-events: auto;
+}
+#bar_hp   { left: 0dp;  top: 1dp; width: 45dp; height: 39dp; }
+#bar_sd   { left: 46dp; top: 0dp; width: 16dp; height: 39dp; }
+#bar_ag   { left: 0dp;  top: 0dp; width: 16dp; height: 39dp; }
+#bar_mp   { left: 17dp; top: 1dp; width: 45dp; height: 39dp; }
+
+/* Fills bottom-up (height = filled fraction), revealing the bottom of the art at its fixed size
+   while the level drops -- the original moved its quad's top and its texture rows down together.
+   `cover` crops through texture coordinates instead of stretching the art into the box, and lands
+   it at exactly the box's width. */
+@spritesheet mainframe-gauge-hp-sheet { src: "../../../newui_menu_red.jpg";   mainframe-gauge-hp:   0px 0px 45px 39px; }
+@spritesheet mainframe-gauge-hpp-sheet { src: "../../../newui_menu_green.jpg"; mainframe-gauge-hp-poisoned: 0px 0px 45px 39px; }
+@spritesheet mainframe-gauge-mp-sheet { src: "../../../newui_menu_blue.jpg";  mainframe-gauge-mp:   0px 0px 45px 39px; }
+@spritesheet mainframe-gauge-ag-sheet { src: "../../../newui_menu_ag.jpg";    mainframe-gauge-ag:   0px 0px 16px 39px; }
+@spritesheet mainframe-gauge-sd-sheet { src: "../../../newui_menu_sd.jpg";    mainframe-gauge-sd:   0px 0px 16px 39px; }
+
+.gauge-fill {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+}
+.gauge-fill-horizontal { display: none; }
+.gauge-fill-hp { decorator: image(mainframe-gauge-hp cover left bottom); }
+.gauge-fill-hp.poisoned { decorator: image(mainframe-gauge-hp-poisoned cover left bottom); }
+.gauge-fill-mp { decorator: image(mainframe-gauge-mp cover left bottom); }
+.gauge-fill-ag { decorator: image(mainframe-gauge-ag cover left bottom); }
+.gauge-fill-sd { decorator: image(mainframe-gauge-sd cover left bottom); }
+
+.gauge-num {
+	position: absolute;
+	/* Long values extend beyond the gauge: keep every digit above adjacent fills. */
+	z-index: 1;
+	left: 0;
+	top: 30dp;
+	/* Reserve enough text width for full resource values, even on 16px gauges.
+	   RmlUi cannot centre overflowing inline text in those narrow boxes. */
+	width: 96dp;
+	/* Native RenderNumber() sprite digits are 12 px tall and step 10 px at 1024x768; bold DejaVu
+	   at 12px stood 13 tall and stepped 11, so HP ran into SD (and the mana pair). 11px gives
+	   the height, the horizontal squeeze the pitch (letter-spacing has no effect in this build). */
+	font-size: 11dp;
+	transform: scaleX(0.91);
+	transform-origin: center top;
+	line-height: 12dp;
+	text-align: center;
+	color: token(text-primary);
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* Numeric anchors match the original readouts rather than the gauge centres. */
+#bar_hp .gauge-num { left: -25.25dp; }
+#bar_mp .gauge-num { left: -20dp; }
+#bar_sd .gauge-num { left: -35dp; top: 31dp; }
+#bar_ag .gauge-num { left: -40.5dp; top: 31dp; }
+
+/* Buttons, next to the mana gauge. */
+@spritesheet mainframe-btn-cshop-sheet   { src: "../../../partCharge1/newui_menu_Bt05.jpg"; mainframe-btn-cshop-normal: 0px 0px 30px 41px; mainframe-btn-cshop-hover: 0px 41px 30px 41px; mainframe-btn-cshop-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-chainfo-sheet { src: "../../../partCharge1/newui_menu_Bt01.jpg"; mainframe-btn-chainfo-normal: 0px 0px 30px 41px; mainframe-btn-chainfo-hover: 0px 41px 30px 41px; mainframe-btn-chainfo-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-myinven-sheet { src: "../../../partCharge1/newui_menu_Bt02.jpg"; mainframe-btn-myinven-normal: 0px 0px 30px 41px; mainframe-btn-myinven-hover: 0px 41px 30px 41px; mainframe-btn-myinven-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-friend-sheet  { src: "../../../partCharge1/newui_menu_Bt03.jpg"; mainframe-btn-friend-normal: 0px 0px 30px 41px; mainframe-btn-friend-hover: 0px 41px 30px 41px; mainframe-btn-friend-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-window-sheet  { src: "../../../partCharge1/newui_menu_Bt04.jpg"; mainframe-btn-window-normal: 0px 0px 30px 41px; mainframe-btn-window-hover: 0px 41px 30px 41px; mainframe-btn-window-open: 0px 82px 30px 41px; }
+
+.frame-btn {
+	position: absolute;
+	top: 0dp;
+	width: 30dp;
+	height: 41dp;
+	cursor: pointer;
+	pointer-events: auto;
+}
+/* Native CNewUIButton with an over image (ChangeButtonImgState(..., true)): the sheet's second
+   41px frame while hovered; an open window keeps its third (pushed) frame. */
+#btn_cshop:hover   { decorator: image(mainframe-btn-cshop-hover); }
+#btn_chainfo:hover { decorator: image(mainframe-btn-chainfo-hover); }
+#btn_myinven:hover { decorator: image(mainframe-btn-myinven-hover); }
+#btn_friend:hover  { decorator: image(mainframe-btn-friend-hover); }
+#btn_window:hover  { decorator: image(mainframe-btn-window-hover); }
+
+.btn-icon-label { display: none; }
+/* Item hotkey chrome: hit-test/stack-count only. Q/W/E/R letters are baked into the sprite art
+   (.slot-hotkey-label stays hidden); stack count has no baked-in equivalent so it needs a real
+   style below. */
+.slot-hotkey-label { display: none; }
+
+/* Stack count for a bound potion, bottom-right of the icon (matches
+   CItemHotKey::RenderItemCount()'s offset); empty string renders nothing. */
+.item-stack-label {
+	position: absolute;
+	left: 19dp;
+	top: 14dp;
+	transform: translateX(-50%);
+	color: token(text-primary);
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-size: 12dp;
+	line-height: 12dp;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* The original's hotkey row: five 32x38 boxes from x 222 at pitch 32, y 431, the icon 6/6 inside;
+   the current-skill icon at 392/437; here from #skill_slots' corner at 222/429. Only this file places them: C++ reads the hovered slot's box
+   back for the hint anchor. */
+#skill_slot_0 { position: absolute; left: 0dp;   top: 2dp; width: 32dp; height: 38dp; }
+#skill_slot_1 { position: absolute; left: 32dp;  top: 2dp; width: 32dp; height: 38dp; }
+#skill_slot_2 { position: absolute; left: 64dp;  top: 2dp; width: 32dp; height: 38dp; }
+#skill_slot_3 { position: absolute; left: 96dp;  top: 2dp; width: 32dp; height: 38dp; }
+#skill_slot_4 { position: absolute; left: 128dp; top: 2dp; width: 32dp; height: 38dp; }
+#current_skill_slot { position: absolute; left: 170dp; top: 8dp; width: 20dp; height: 28dp; }
+
+/* The original's skill boxes: newui_skillbox.jpg, and newui_skillbox2.jpg around the current
+   skill (hotkey row and grid). */
+@spritesheet skill-box-sheet { src: "../../../newui_skillbox.jpg"; skill-box: 0px 0px 32px 38px; }
+@spritesheet skill-box-use-sheet { src: "../../../newui_skillbox2.jpg"; skill-box-use: 0px 0px 32px 38px; }
+#skill_slots .selected { decorator: image(skill-box-use); }
+
+/* A 20x28 skill icon, 6/6 inside its 32x38 box; the current-skill slot is the icon itself. The
+   sprite comes from C++ (data-style-decorator). */
+.skill-icon {
+	position: absolute;
+	left: 6dp;
+	top: 6dp;
+	width: 20dp;
+	height: 28dp;
+	pointer-events: none;
+}
+#current_skill_slot .skill-icon { left: 0; top: 0; }
+
+/* Each slot is the original's 20x20 icon box at x = 10 + i*38, y = 443, and its icon fills it --
+   drawn at whatever size this box is shown, so moving or resizing it here is all it takes. */
+#item_slot_0 { position: absolute; left: 0dp;   top: 0dp; width: 20dp; height: 20dp; }
+#item_slot_1 { position: absolute; left: 38dp;  top: 0dp; width: 20dp; height: 20dp; }
+#item_slot_2 { position: absolute; left: 76dp;  top: 0dp; width: 20dp; height: 20dp; }
+#item_slot_3 { position: absolute; left: 114dp; top: 0dp; width: 20dp; height: 20dp; }
+.item-icon { position: absolute; left: 0; top: 0; width: 20dp; height: 20dp; pointer-events: none; }
+
+/* Real hover/click targets now (main_frame.rml) -- opt back into pointer-events (inherited none
+   from body). */
+#item_slot_0, #item_slot_1, #item_slot_2, #item_slot_3,
+#skill_slot_0, #skill_slot_1, #skill_slot_2, #skill_slot_3, #skill_slot_4,
+#current_skill_slot {
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+/* Expanded grid + pet-command row, from #skill_list's corner (the first cell's box). Containers stay non-interactive; only
+   .skill-cell opts back into pointer-events. */
+#skill_grid, #pet_skill_row {
+	position: absolute;
+	left: 0;
+	top: 0;
+	pointer-events: none;
+}
+
+/* Each cell is the original's box, the current skill's the highlighted one. */
+.skill-cell {
+	position: absolute;
+	width: 32dp;
+	height: 38dp;
+	pointer-events: auto;
+	cursor: pointer;
+	decorator: image(skill-box);
+}
+.skill-cell.selected { decorator: image(skill-box-use); }
+
+/* Bottom-anchored translucent wipe, shrinking top-down as cooldown counts down -- matches the
+   retired RenderSkillDelay()'s ARGB-quad direction (0x80FF8080, alpha ~50%). */
+.cooldown-wipe {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	background-color: rgba(255, 128, 128, 128);
+	pointer-events: none;
+}
+
+/* Bottom-right, matching the original's RenderNumber(icon x+20, icon y+20) subscript on every
+   skill icon -- plain text instead of the legacy digit-sprite atlas. The current-skill slot is
+   the bare icon, so its label sits outside it by the same amount. */
+.skill-hotkey-label {
+	position: absolute;
+	right: 3dp;
+	bottom: 2dp;
+	color: token(text-primary);
+	font-family: "token(font-body)";
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-size: 12dp;
+	line-height: 12dp;
+	white-space: nowrap;
+	pointer-events: none;
+}
+#current_skill_slot .skill-hotkey-label { right: -3dp; bottom: -2dp; }
+
+#btn_cshop    { left: 1dp;   decorator: image(mainframe-btn-cshop-normal); }
+#btn_cshop.open    { decorator: image(mainframe-btn-cshop-open); }
+#btn_chainfo  { left: 31dp;  decorator: image(mainframe-btn-chainfo-normal); }
+#btn_chainfo.open  { decorator: image(mainframe-btn-chainfo-open); }
+#btn_myinven  { left: 61dp;  decorator: image(mainframe-btn-myinven-normal); }
+#btn_myinven.open  { decorator: image(mainframe-btn-myinven-open); }
+#btn_friend   { left: 91dp;  decorator: image(mainframe-btn-friend-normal); }
+#btn_friend.open   { decorator: image(mainframe-btn-friend-open); }
+#btn_window   { left: 121dp; decorator: image(mainframe-btn-window-normal); }
+#btn_window.open   { decorator: image(mainframe-btn-window-open); }
+
+/* Char-info quest-alert / friend mail-chat-alert blink dot. */
+.alert-dot {
+	position: absolute;
+	top: -2dp;
+	right: -2dp;
+	width: 8dp;
+	height: 8dp;
+	border-radius: 4dp;
+	background-color: #ffd700;
+	pointer-events: none;
+}
+
+/* EXP across the whole strip; pointer-events:auto so its hint can show. */
+#exp { pointer-events: auto; }
+/* Original menu artwork's bottom strip, independent of the progress fill. */
+@spritesheet mainframe-menu01-sheet { src: "../../../newui_menu01.jpg"; mainframe-frame-left: 0px 0px 256px 41px; mainframe-exp-left: 0px 41px 256px 10px; }
+@spritesheet mainframe-menu02-sheet { src: "../../../newui_menu02.jpg"; mainframe-frame-middle: 0px 0px 128px 41px; mainframe-exp-middle: 0px 41px 128px 10px; }
+@spritesheet mainframe-menu03-sheet { src: "../../../partCharge1/newui_menu03.jpg"; mainframe-frame-right: 0px 0px 104px 41px; mainframe-exp-right: 0px 41px 256px 10px; }
+.exp-frame { position: absolute; top: 0dp; height: 10dp; pointer-events: none; }
+#exp_frame_left { left: 0dp; width: 256dp; decorator: image(mainframe-exp-left); }
+#exp_frame_middle { left: 256dp; width: 128dp; decorator: image(mainframe-exp-middle); }
+#exp_frame_right { left: 384dp; width: 256dp; decorator: image(mainframe-exp-right); }
+#exp_track {
+	position: absolute;
+	left: 2dp;
+	width: 629dp;
+	top: 3dp;
+	height: 4dp;
+}
+/* Real gauge art (legacy only) -- 6x4 rect matches the real decoded source pixels. */
+@spritesheet mainframe-gauge-exp-sheet { src: "../../../newui_exbar.jpg"; mainframe-gauge-exp: 0px 0px 6px 4px; }
+#exp_fill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 100%;
+	decorator: image(mainframe-gauge-exp);
+}
+#exp_digit {
+	position: absolute;
+	right: 1dp;
+	top: -1dp;
+	color: token(text-primary);
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-family: "token(font-body)";
+	font-size: 12dp;
+	line-height: 12dp;
+	pointer-events: none;
+}
+
+/* The pet's four commands, in the row the original drew them in. */
+/* The original's zig-zag around the first cell, by each cell's place in the list (--i): the first
+   fourteen alternate right and left of it, the next four continue left, and the rest form a second
+   row above, heading right. */
+#skill_grid .skill-cell { top: 0dp; }
+#skill_grid .skill-cell:nth-child(2n+1):nth-child(-n+13) { left: calc(var(--i) * 16dp); }
+#skill_grid .skill-cell:nth-child(2n):nth-child(-n+14) { left: calc(var(--i) * -16dp - 16dp); }
+#skill_grid .skill-cell:nth-child(n+15):nth-child(-n+18) { left: calc(192dp - var(--i) * 32dp); }
+#skill_grid .skill-cell:nth-child(n+19) { left: calc(var(--i) * 32dp - 928dp); top: -38dp; }
+#pet_skill_row .skill-cell { top: -38dp; }
+#pet_skill_row .skill-cell:nth-child(1) { left: -32dp; }
+#pet_skill_row .skill-cell:nth-child(2) { left: 0dp; }
+#pet_skill_row .skill-cell:nth-child(3) { left: 32dp; }
+#pet_skill_row .skill-cell:nth-child(4) { left: 64dp; }

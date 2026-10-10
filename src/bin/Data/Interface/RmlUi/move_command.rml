@@ -1,0 +1,61 @@
+<rml>
+<head>
+	<title>Warp List</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="move_command.rcss"/>
+</head>
+<body>
+	<!-- The warp list (/move, the warp command window). The workspace places #panel; it is
+	     authored in plain reference px, and its slot's scale is --root-scale. The theme sizes the
+	     panel and lays the list out between the header and the close bar; C++ gives only the
+	     rows (and a fill slot's size, when a theme asks for one).
+
+	     Text does NOT scale with the panel. The native renderer's font grows from 11pt to 16pt
+	     while the panel grows to 2.25x, so a reference-px font-size would be ~55% too large at
+	     high resolutions and show a third fewer rows. #head and #list therefore counter-scale
+	     themselves out of #panel (the my_quest_info.rml technique) and size their own boxes in
+	     --root-scale-multiplied px; everything inside them is then laid out at the native text's
+	     real size, so a row is as tall as its text, as the original's were. Column positions
+	     inside those boxes are percentages, so they stay put at every scale. -->
+	<div id="panel" data-model="move_command">
+
+		<span class="counter-scaled" id="title"
+		      data-style-font-size="text_px + 'px'">{{title_text}}</span>
+
+		<div class="counter-scaled" id="head"
+		     data-style-font-size="text_px + 'px'">
+			<span class="col col-strife">{{head_strife}}</span>
+			<span class="col col-map">{{head_map}}</span>
+			<span class="col col-level">{{head_level}}</span>
+			<span class="col col-zen">{{head_zen}}</span>
+		</div>
+
+		<!-- The list's box in reference px; the scrolling pane inside it counter-scales. -->
+		<div id="list_box">
+			<!-- base.rcss's .scroll-pane: RmlUi owns the scroll position, the wheel and the
+			     scrollbar drag. no-scroll (C++ reads it off the pane): every row fits, so the
+			     original drew its thumb disabled. -->
+			<div id="list" class="scroll-pane counter-scaled" data-event-mousescroll="movecommand_wheel"
+			     data-style-font-size="text_px + 'px'">
+				<!-- The row is narrower than the pane: the spare lane on the right is where the
+				     scrollbar lives (a full-width row sits under the handle and swallows the drag).
+				     The strut gives the row its text's line height; the cells stand on it. -->
+				<div class="mc-row" data-for="row : rows"
+				     data-class-can-move="row.can_move"
+				     data-event-click="movecommand_warp(row.index)">
+					<span class="mc-strut">&#160;</span>
+					<span class="col col-strife">{{row.strife_text}}</span>
+					<span class="col col-map">{{row.map_name}}</span>
+					<span class="col col-level" data-class-unmet="row.level_unmet">{{row.req_level}}</span>
+					<span class="col col-zen" data-class-unmet="row.zen_unmet">{{row.req_zen}}</span>
+				</div>
+			</div>
+		</div>
+
+		<div id="close_bar" data-event-click="movecommand_close">
+			<span class="sharp-text sharp-centre sharp-middle" id="close_label"
+			      data-style-font-size="text_px + 'px'">{{close_text}}</span>
+		</div>
+	</div>
+</body>
+</rml>

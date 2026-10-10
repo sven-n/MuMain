@@ -1,0 +1,134 @@
+
+#if !defined(AFX_NEWUILUCKYITEMWND_H__F57DF84F_0A44_444A_838D_78CBC35544EB__INCLUDED_)
+#define AFX_NEWUILUCKYITEMWND_H__F57DF84F_0A44_444A_838D_78CBC35544EB__INCLUDED_
+
+#pragma once
+
+#include "UI/Inventory/ItemCameraTarget.h"
+#include "UI/Inventory/ItemGridModel.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/Core/WindowObject.h"
+#include "UI/Inventory/InventoryCtrl.h"
+#include "UI/Dialogs/MessageBox.h"
+#include "UI/Inventory/MyInventory.h"
+#include "UI/RmlBridge/RmlThemedView.h"
+
+#include <vector>
+
+namespace Rml { class ElementDocument; }
+
+namespace mu::ui::window
+{
+#define	LUCKYITEMMAXLINE	20
+    enum eLUCKYITEMTYPE { eLuckyItemType_None = 0, eLuckyItemType_Trade, eLuckyItemType_Refinery, eLuckyItemAct_End };
+    enum eLUCKYITEM { eLuckyItem_None = 0, eLuckyItem_Move, eLuckyItem_Act, eLuckyITem_Result, eLuckyItem_End };
+
+    struct sText
+    {
+        int		s_nTextIndex;	// 글로벌 텍스트 인덱스
+        DWORD	s_dwColor;		// 텍스트 색깔
+        int		s_nLine;		// 텍스트 정렬
+    };
+
+    class CLuckyItemWnd : public CObject
+    {
+    private:
+        CManager* m_pNewUIMng;
+        CInventoryCtrl* m_pNewInventoryCtrl;
+        float					m_fInvenClr[3];
+        float					m_fInvenClrWarning[3];
+        wchar_t			m_szSubject[255];
+        sText					m_sText[LUCKYITEMMAXLINE];
+        int						m_nTextMaxLine;
+        POINT					m_ptPos;
+        int						m_nResult;
+        int						m_nMixEffectTimer;
+        eLUCKYITEMTYPE			m_eType;
+        eLUCKYITEM				m_eWndAction;
+        eLUCKYITEM				m_eEnd;
+
+        // Window frame/title/mix-button/result-description text block are RmlUi; only the inventory
+        // grid and the mix-completion sparkle effect stay native -- grid icons are live 3D renders
+        // (same reasoning as CStorageInventoryExt), and the sparkle effect is a native 2D particle
+        // overlay with no RmlUi equivalent. Both panel sizes belong to the active theme's RCSS.
+        struct LuckyLine
+        {
+            Rml::String text;
+            Rml::String color; // "rgba(r,g,b,a)"
+            Rml::String align; // "left" or "center" -- former RT3_SORT_LEFT/RT3_SORT_CENTER
+            bool operator==(const LuckyLine&) const = default;
+        };
+        struct LuckyItemRmlModel
+        {
+            float textPx = 0.f; // native text size in physical px (RmlNativeTextSize.h)
+            Rml::String title;
+            Rml::String mixTooltip;
+            bool mixVisible = true;
+
+            // Former Render_Frame()'s m_sText[]/AddText() loop -- one entry per slot in
+            // [0, m_nTextMaxLine), including blank spacer slots (empty text), so line spacing
+            // matches the original's fixed per-slot vertical rhythm without duplicating its pixel
+            // math (see SyncMixLines() equivalent in SyncRmlModel(), LuckyItemWnd.cpp).
+            std::vector<LuckyLine> textLines;
+            // The grids as their documents draw them (CInventoryCtrl::Cells()).
+            UI::Items::ItemGridCells gridCells;
+        };
+        void BindRmlModel(Rml::DataModelConstructor& c, LuckyItemRmlModel& model);
+        UI::RmlBridge::ThemedView<LuckyItemRmlModel> m_RmlView{"lucky_item",
+            [this](Rml::DataModelConstructor& c, LuckyItemRmlModel& model) { BindRmlModel(c, model); },
+            {{"Data/Interface/RmlUi/lucky_item.rml"}}};
+
+        // The grids' items, into the document's #item_view.
+        void RenderItems();
+        UI::Items::ItemCameraTarget m_ItemTarget{[this](const Rml::Vector2f&, const Rml::Vector2f&) { RenderItems(); }};
+
+        void BuildRmlUi();
+        void SyncRmlModel();
+
+    private:
+        void	SetFrame_Text(eLUCKYITEM _eType);
+        bool	Process_InventoryCtrl(void);
+
+        int		GetLuckyItemRate(int _nType);
+        void	RenderMixEffect(void);
+        void	Reset(void);
+        void	AddText(int _nGlobalTextIndex, DWORD _dwColor = 0xFFFFFFFF, int _bLine = RT3_SORT_CENTER);
+
+        bool	Check_LuckyItem_Trade(ITEM* _pItem);
+        bool	Check_LuckyItem_Refinery(ITEM* _pItem);
+
+    public:
+        CInventoryCtrl* GetInventoryCtrl() const;
+
+        int		SetActAction();
+        STORAGE_TYPE SetMoveAction();
+        // The storage items are moved into for the window's current use.
+        STORAGE_TYPE GetMoveStorageType() const;
+        void	GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE> pbyItemPacket);
+        bool	Process_BTN_Action(void);
+        bool	Process_InventoryCtrl_InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket);
+        void	Process_InventoryCtrl_DeleteItem(int iIndex);
+        bool	Check_LuckyItem(ITEM* _pItem);
+        bool	Check_LuckyItem_InWnd(void);
+
+        // Virtual overrides
+        bool Create(CManager* pNewUIMng);
+        void	Release(void);
+        void	OpeningProcess(void);
+        bool	ClosingProcess(void);
+        bool	UpdateMouseEvent();
+        bool	UpdateKeyEvent();
+        bool	Update();
+        bool	Render();
+        Rml::ElementDocument* GetPlacedDocument() const override { return m_RmlView.Document(); }
+        float	GetLayerDepth();	//. 3.4f
+
+        __inline void	SetAct(eLUCKYITEMTYPE _eAct) { m_eType = _eAct; }
+        __inline void	SetPos(int _nX, int _nY) { m_ptPos.x = _nX, m_ptPos.y = _nY; }
+
+        __inline eLUCKYITEMTYPE	GetAct(void) { return m_eType; }
+        CLuckyItemWnd();
+        virtual ~CLuckyItemWnd();
+    };
+}
+#endif // !defined(AFX_NEWUILUCKYITEMWND_H__F57DF84F_0A44_444A_838D_78CBC35544EB__INCLUDED_)

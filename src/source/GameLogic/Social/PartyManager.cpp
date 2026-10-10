@@ -1,5 +1,3 @@
-// PartyManager.cpp: implementation of the CPartyManager class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "GameLogic/Social/PartyManager.h"
@@ -8,6 +6,7 @@
 #include "Engine/Object/ZzzInventory.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CPartyManager::CPartyManager() {}
 

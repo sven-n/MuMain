@@ -1,0 +1,26 @@
+<rml>
+	<!-- bound-geometry: panel and well heights follow the user resize, in dp -->
+<head>
+	<title>Chat Log</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="chat_log.rcss"/>
+</head>
+<!-- Legacy override of chat_log.rml: each line is drawn like the original's RenderMessages() --
+     the native text size and a background exactly as tall as the measured text, one row every
+     15 units (CChatLogWindow::SyncNativeLineGeometry(), physical px). The window, its well and
+     the row pitch stay in dp beside the chat input box. -->
+<body data-model="chat_log">
+	<div id="panel" data-class-framed="show_frame" data-style-height="panel_height + 'dp'">
+		<div id="backdrop" data-style-opacity="back_alpha"></div>
+		<div id="resize_handle" data-class-hidden="!show_frame"
+		     data-event-drag="chat_resize_drag"></div>
+
+		<div id="lines" class="scroll-pane" data-style-height="client_height + 'dp'"
+		     data-style---line-px="line_px + 'px'" data-style---row-px="row_px + 'px'">
+			<div data-for="line : lines"
+			     data-attr-class="'chat-line chat-line--' + line.kind + (line.has_id ? ' chat-line--has-id' : '') + (it_index == pointed_index ? ' chat-line--pointed' : '')"
+			     data-style-font-size="text_px + 'px'">{{line.text}}</div>
+		</div>
+	</div>
+</body>
+</rml>

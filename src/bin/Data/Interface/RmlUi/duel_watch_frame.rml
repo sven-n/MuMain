@@ -1,0 +1,38 @@
+<rml>
+	<!-- bound-geometry: the health and shield gauges are lengths from the fighters' rates, and the left
+	     fighter's bars are right-aligned so their left moves with the rate too (the plan's gauge carve-
+	     out) -->
+<head>
+	<title>Duel spectator frame (CDuelWatchMainFrameWindow)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="duel_watch_frame.rcss"/>
+</head>
+<body data-model="duel_watch_frame">
+	<!-- The spectator's duel HUD (CDuelWatchMainFrameWindow), in the main HUD's place while the
+	     duel-watch buff is on: the frame (menu_pk_01..03, 640 x 51) and the exit button always;
+	     for a watched channel also the fighters' health and shield gauges (each with its catch-up
+	     effect bar while it moves), their score marks (one per point, the count bound, the rows
+	     laid out by the theme) and their names. Like the event HUDs, the workspace's
+	     duel_watch_hud slot, in the footer beside the main HUD's, places #panel at the HUD's scale; the names take their native size
+	     and cancel the scale. Only the exit button takes pointer events: its click is queued with
+	     duel_watch_exit, C++ sends the channel quit request. -->
+	<div class="screen">
+		<div id="panel">
+			<div id="back1"></div>
+			<div id="back2"></div>
+			<div id="back3"></div>
+			<div id="fight" data-if="watching">
+				<img class="gauge" data-for="g : gauges" data-attr-src="g.src" data-attr-rect="g.rect"
+				     data-class-mirrored="g.mirrored" data-style-left="g.left + 'px'" data-style-top="g.top + 'px'"
+				     data-style-width="g.width + 'px'" data-style-height="g.height + 'px'"/>
+				<!-- A mark per point, each fighter's row stepping away from its own end of the frame. -->
+				<div class="score-row" id="score_hero"><div class="score" data-for="hero_marks"></div></div>
+				<div class="score-row" id="score_enemy"><div class="score" data-for="enemy_marks"></div></div>
+				<span class="name counter-scaled" id="name_hero" data-style-font-size="hero_name.text_px + 'px'">{{hero_name.text}}</span>
+				<span class="name counter-scaled" id="name_enemy" data-style-font-size="enemy_name.text_px + 'px'">{{enemy_name.text}}</span>
+			</div>
+			<div id="exit" data-event-click="duel_watch_exit" data-attr-data-hint="exit_hint"></div>
+		</div>
+	</div>
+</body>
+</rml>

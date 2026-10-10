@@ -20,15 +20,18 @@
 #include "Audio/DSPlaySound.h"
 #include "Core/Input/Input.h"
 #include "World/MapInfra/MapManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "UI/Tooltip/LegacyTextListTooltip.h"
+#include "UI/Scaling/UITransform.h"
+#include "Render/Text/CUIRenderText.h"
 
 extern  bool    SkillEnable;
 extern	wchar_t TextList[50][100];
@@ -341,40 +344,44 @@ static std::uint8_t g_tabBar = 0;
         }
     }
 
-    bool RenderPetCmdInfo(int sx, int sy, int Type)
+    bool BuildPetCmdTooltipModel(int Type, UI::Skills::Tooltip::Model& outModel)
     {
         if (Type < AT_PET_COMMAND_DEFAULT || Type >= AT_PET_COMMAND_END) return false;
+        if (gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD) return false;
 
-        int  TextNum = 0;
-        int  SkipNum = 0;
+        using UI::Skills::Tooltip::Line;
+        using UI::Skills::Tooltip::LineColor;
 
-        if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
+        const int cmdType = Type - AT_PET_COMMAND_DEFAULT;
+
+        // The original's TextNum/SkipNum bookkeeping exactly -- every line here (including the two
+        // blanks AND the body line) incremented SkipNum, so outModel.skipCount must match 1:1 or
+        // Render()'s own height math would drift.
+        auto pushLine = [&outModel](const wchar_t* text, LineColor color, bool bold, bool blank)
         {
-            int cmdType = Type - AT_PET_COMMAND_DEFAULT;
+            if (outModel.count >= UI::Skills::Tooltip::MAX_TOOLTIP_LINES) return;
+            Line& l = outModel.lines[outModel.count++];
+            wcsncpy(l.text, text, UI::Skills::Tooltip::MAX_TOOLTIP_LINE_TEXT - 1);
+            l.text[UI::Skills::Tooltip::MAX_TOOLTIP_LINE_TEXT - 1] = L'\0';
+            l.color = color;
+            l.isBold = bold;
+            l.isBlank = blank;
+            ++outModel.skipCount;
+        };
 
-            TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true;
-            mu_swprintf(TextList[TextNum], I18N::Game::Lookup(1219 + cmdType)); TextNum++; SkipNum++;
+        pushLine(I18N::Game::Lookup(1219 + cmdType), LineColor::Blue, true, false);
+        pushLine(L"\n", LineColor::White, false, true);
+        pushLine(L"\n", LineColor::White, false, true);
 
-            TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-            switch (cmdType)
-            {
-            case PET_CMD_DEFAULT: mu_swprintf(TextList[TextNum], I18N::Game::FollowAroundTheCharacter); TextNum++; SkipNum++; break;
-            case PET_CMD_RANDOM: mu_swprintf(TextList[TextNum], I18N::Game::AttackAnyMonstersAroundTheCharacter); TextNum++; SkipNum++; break;
-            case PET_CMD_OWNER: mu_swprintf(TextList[TextNum], I18N::Game::AttackTheMonsterTogetherWithTheCharacter); TextNum++; SkipNum++; break;
-            case PET_CMD_TARGET: mu_swprintf(TextList[TextNum], I18N::Game::AttackTheMonsterSelectedByTheCharacter); TextNum++; SkipNum++; break;
-            }
-
-            g_pRenderText->SetFont(TextBold[0] ? g_hFontBold : g_hFont);
-            const SIZE TextSize = g_pRenderText->MeasureText(L"Q", 1);
-            int Height = (TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2;
-            sy -= Height;
-
-            RenderTipTextList(sx, sy, TextNum, 0);
-            return true;
+        switch (cmdType)
+        {
+        case PET_CMD_DEFAULT: pushLine(I18N::Game::FollowAroundTheCharacter, LineColor::White, false, false); break;
+        case PET_CMD_RANDOM: pushLine(I18N::Game::AttackAnyMonstersAroundTheCharacter, LineColor::White, false, false); break;
+        case PET_CMD_OWNER: pushLine(I18N::Game::AttackTheMonsterTogetherWithTheCharacter, LineColor::White, false, false); break;
+        case PET_CMD_TARGET: pushLine(I18N::Game::AttackTheMonsterSelectedByTheCharacter, LineColor::White, false, false); break;
         }
-        return false;
+
+        return true;
     }
 
     void DeletePet(CHARACTER* c)
@@ -594,7 +601,7 @@ static std::uint8_t g_tabBar = 0;
         return gold;
     }
 
-    bool RenderPetItemInfo(int sx, int sy, ITEM* pItem, int iInvenType)
+    bool RenderPetItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* pItem, int iInvenType)
     {
         PET_INFO* pPetInfo = GetPetInfo(pItem);
 
@@ -632,7 +639,7 @@ static std::uint8_t g_tabBar = 0;
             appendLine(TEXT_COLOR_WHITE, false, true, L"\n");
         };
 
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP))
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP))
         {
             wchar_t textBuffer[kTooltipBufferCapacity] {};
             std::uint32_t gold = GetPetItemValue(&giPetManager::gs_PetInfo) / 3u;
@@ -642,7 +649,7 @@ static std::uint8_t g_tabBar = 0;
             appendLine(TEXT_COLOR_WHITE, true, false, priceFormat.c_str(), textBuffer);
             appendEmptyLine();
         }
-        else if ((iInvenType == SEASON3B::TOOLTIP_TYPE_MY_SHOP) || (iInvenType == SEASON3B::TOOLTIP_TYPE_PURCHASE_SHOP))
+        else if ((iInvenType == mu::ui::window::TOOLTIP_TYPE_MY_SHOP) || (iInvenType == mu::ui::window::TOOLTIP_TYPE_PURCHASE_SHOP))
         {
             int price = 0;
             const int indexInv = g_pMyShopInventory->GetInventoryCtrl()->GetIndexByItem(pItem);
@@ -766,7 +773,8 @@ static std::uint8_t g_tabBar = 0;
             sy -= Height;
         }
 
-        RenderTipTextList(sx, sy, TextNum, 0);
+        UI::Tooltip::ShowLegacyTextList(TextNum, UI::Scaling::PositionX(screen, static_cast<float>(sx)),
+                                        UI::Scaling::PositionY(screen, static_cast<float>(sy)));
         return true;
     }
 }

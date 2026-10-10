@@ -10,6 +10,7 @@
 #include "UI/Scaling/UITransform.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "CameraDebugLog.h"
+#include "Render/Text/CUIRenderText.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

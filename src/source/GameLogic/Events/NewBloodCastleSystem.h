@@ -7,9 +7,6 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-
 #include "CSEventMatch.h"
 
 namespace SEASON3B
@@ -24,13 +21,7 @@ public:
     virtual void SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data);
     virtual void SetMatchResult(const int iNumDevil, const int iMyRank, const MatchResult* pMatchResult,
                                 const int Success = false);
-    virtual void RenderMatchResult(void);
-    int GetResultExtraHeight() const override;
-
-private:
-    void WrapResultText();
-
-    std::vector<std::wstring> m_ResultLines;
+    virtual void CollectMatchResult(std::vector<MatchResultLine>& lines) const;
 };
 }; // namespace SEASON3B
 

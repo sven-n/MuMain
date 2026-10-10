@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Render/Text/SdlTtfTextCache.h"
-#include "UI/Legacy/UIControls.h"
+#include "Render/Text/CUIRenderText.h"
 #include "UI/Scaling/UITransform.h"
 
 #include <string>
@@ -26,6 +26,12 @@ public:
     void SetBgColor(DWORD color) override;
     void SetFont(HFONT font) override;
     SIZE MeasureText(const wchar_t* text, int length) const override;
+
+    // The logical height MeasureText() reports for one line of `role` text under the active
+    // transform, without selecting a font on any instance.
+    static int LineHeight(UI::Scaling::FontRole role);
+    // One line of `role` text in screen pixels: the same for every window.
+    static float LineHeightPx(UI::Scaling::FontRole role);
 
     void RenderText(int x, int y, const wchar_t* text, int boxWidth = 0, int boxHeight = 0, int sort = RT3_SORT_LEFT,
                     OUT SIZE* textSize = nullptr) override;

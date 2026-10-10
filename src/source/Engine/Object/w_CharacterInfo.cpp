@@ -1,11 +1,9 @@
-// w_CharacterInfo.cpp: implementation of the CHARACTER class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "Engine/Object/w_CharacterInfo.h"
 #include "GameLogic/Skills/SkillManager.h"
 
-#include "UI/NewUI/HUD/NewUIGensRanking.h"
+#include "UI/HUD/GensRanking.h"
 
 // cppcheck-suppress uninitMemberVar
 CHARACTER::CHARACTER()

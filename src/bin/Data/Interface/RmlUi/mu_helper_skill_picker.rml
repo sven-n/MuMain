@@ -1,0 +1,26 @@
+<rml>
+	<!-- bound-geometry: the flyout hangs off the config window's drawn top-left and scale, which the
+	     player drags; its entries are the theme's -->
+<head>
+	<title>MU Helper Skill Picker</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="skill_icons.rcss"/>
+	<link type="text/rcss" href="master_skill_icons.rcss"/>
+	<link type="text/rcss" href="mu_helper_skill_picker.rcss"/>
+</head>
+<body>
+	<!-- The flyout beside the MU Helper config window's attack/buff slots. #panel sits on the config
+	     window's drawn top left at its scale; the theme fans the entries out from the row of the
+	     slot that opened it (.attack, or a buff slot), in the window's reference px.
+
+	     Each icon is one named cell of a generated skill atlas (skill_icons.rcss, master_skill_icons.rcss), bound as a whole
+	     decorator -- the only way to crop an atlas in this build. -->
+	<div id="panel" data-model="mu_helper_skill_picker"
+	     data-style-left="origin_x + 'px'" data-style-top="origin_y + 'px'"
+	     data-style-transform="'scale(' + scale + ')'" data-style---root-scale="scale" data-class-attack="attack">
+		<div class="mhsp-entry slot slot--filled" data-for="e : entries" data-event-click="mhsp_pick(it_index)">
+			<div class="mhsp-icon" data-style-decorator="e.decorator"></div>
+		</div>
+	</div>
+</body>
+</rml>

@@ -1,0 +1,62 @@
+/* Modern theme for CKanturu2ndEnterNpc: the modern panel surface instead of the message-box art,
+   modern buttons. Geometry is the legacy one (reference px under the Dialog transform). */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 230px;
+	height: 267px;
+	font-family: "token(font-body)";
+	background-color: token(surface-panel);
+	border: 1px token(border-frame);
+	pointer-events: auto;
+}
+
+#back, #frame_top, .frame-middle, #frame_bottom { display: none; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+/* The original's RenderTexts(): lines 12 apart from 30, the state texts 20 below the subject and
+   15 between two of them. */
+#kanturu_lines { left: 0; top: 30px; --flow-w: 230px; }
+.kanturu-line { display: block; height: calc(12px * var(--root-scale)); white-space: nowrap; color: token(text-warm); }
+.kanturu-line.tone-state.group-start { margin-top: calc(20px * var(--root-scale)); }
+.kanturu-line.tone-note.group-start { margin-top: calc(15px * var(--root-scale)); }
+.kanturu-line.tone-subject { font-weight: bold; }
+.kanturu-line.tone-state { color: #91f161; }
+.kanturu-line.tone-note { color: token(text-primary); }
+
+.kanturu-btn {
+	display: block;
+	position: absolute;
+	top: 220px;
+	width: 53px;
+	height: 22px;
+	background-color: token(surface-raised);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	pointer-events: auto;
+}
+.kanturu-btn:hover { border-color: token(accent-steel-hover); }
+.kanturu-btn:active { background-color: token(surface-recessed); }
+.kanturu-btn.locked, .kanturu-btn.locked:hover, .kanturu-btn.locked:active { background-color: token(surface-recessed); border-color: token(border-frame); }
+#btn_refresh { left: 17px; }
+#btn_enter { left: 87px; }
+#btn_close { left: 157px; }
+.kanturu-label { left: 0; color: token(text-primary); }
+.kanturu-btn.locked .kanturu-label { color: token(text-muted); }
+
+/* The frame tiles are a container so each one can be counted; it takes no space itself. */
+.frame-middles { position: static; }
+.frame-middles .frame-middle:nth-child(1) { top: 67px; }
+.frame-middles .frame-middle:nth-child(2) { top: 82px; }
+.frame-middles .frame-middle:nth-child(3) { top: 97px; }
+.frame-middles .frame-middle:nth-child(4) { top: 112px; }
+.frame-middles .frame-middle:nth-child(5) { top: 127px; }
+.frame-middles .frame-middle:nth-child(6) { top: 142px; }
+.frame-middles .frame-middle:nth-child(7) { top: 157px; }
+.frame-middles .frame-middle:nth-child(8) { top: 172px; }
+.frame-middles .frame-middle:nth-child(9) { top: 187px; }
+.frame-middles .frame-middle:nth-child(10) { top: 202px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.kanturu-label { width: calc(53px * var(--root-scale)); }

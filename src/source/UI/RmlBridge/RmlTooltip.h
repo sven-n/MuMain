@@ -1,0 +1,169 @@
+#pragma once
+
+#include "stdafx.h"
+
+#include "UI/Scaling/UITransform.h"
+
+#include <optional>
+#include <string>
+#include <vector>
+
+// The one tooltip mechanism every window should use from now on -- a single, always-on-top RmlUi
+// document shared by every caller, callable from native code (an inline hover check in a legacy
+// CButton::Render()) exactly as easily as an RmlUi data-event-mouseover callback. This replaces
+// five previously separate mechanisms (see docs/rmlui-ui-system/component-catalog.md's "Tooltip"
+// entry): the skill-hotkey tooltip, the item Set/Socket option tooltip, CBuffStrip/CMuHelperBar's
+// CSS-only hover tooltip, the generic native CTooltip/CButton mechanism, and the item tooltip
+// (RenderItemInfo()/RenderTipTextList(), the one with the z-order bug this exists to fix).
+//
+// Lives in RmlUiRuntime's main context -- the same one every ordinary window and
+// CGenericConfirmDialog use -- and the stacking table (RmlStackingOrder.cpp) puts it above every
+// window's document and under the message boxes, which is what fixes the z-order bug: a native
+// tooltip queued through the legacy 3D-camera effect system could always be painted over by
+// RmlUi's own "renders once, last, every frame" main-context pass.
+namespace UI::RmlBridge::Tooltip
+{
+    // Superset of every color capability across the five prior mechanisms -- the item tooltip's
+    // own palette (TEXT_COLOR_*, Core/Globals/_define.h) was already the richest, so nothing loses
+    // capability by unifying onto it. The four *Highlight values keep their original meaning: text
+    // renders in the color RenderTipTextList() used for it (white, except GreenBlue's own green),
+    // on top of a colored highlight bar behind the line.
+    enum class LineColor
+    {
+        White,
+        Blue,
+        Gray,
+        Red,
+        Yellow,
+        Green,
+        Purple,
+        RedPurple,
+        Violet,
+        Orange,
+        DarkRedHighlight,
+        DarkBlueHighlight,
+        DarkYellowHighlight,
+        GreenBlueHighlight,
+    };
+
+    struct Line
+    {
+        // A spacer line renders no text at all -- `text` is ignored for these two kinds. Replaces
+        // RenderItemInfo()'s old convention of sniffing the first character of a native text
+        // buffer ('\n' for a half-height spacer, a lone ' ' for a full-height one) with an
+        // explicit field.
+        enum class Kind
+        {
+            Text,
+            HalfSpacer,
+            FullSpacer,
+        };
+
+        std::string text;
+        LineColor color = LineColor::White;
+        bool bold = false;
+        Kind kind = Kind::Text;
+    };
+
+    // Where the tooltip is anchored before edge-clamping: BelowLeft grows down-right from
+    // (anchorX, anchorY) (the common case -- a slot/button's own top-left or bottom edge);
+    // AboveLeft grows up-right instead, matching RenderTipTextList()'s STRP_BOTTOMCENTER callers
+    // (mostly hotkey/menu rows near the bottom of the screen, where growing downward would run
+    // off-screen far more often than not). Show() still fully clamps either way -- this only picks
+    // which direction the tooltip grows from the anchor before that clamp applies.
+    enum class AnchorPoint
+    {
+        BelowLeft,
+        AboveLeft,
+    };
+
+    struct Config
+    {
+        std::vector<Line> lines;
+
+        // The anchor in window pixels: the caller converts it from whatever space its own point is
+        // in (a drawn element's box, a projected world point). Show() applies no transform.
+        float anchorX = 0.0f;
+        float anchorY = 0.0f;
+        AnchorPoint anchor = AnchorPoint::BelowLeft;
+        // Where the tooltip grows the other way from when it does not fit on `anchor`'s side (a
+        // button hint: the button's other edge). Without it, it is only shifted back on screen.
+        std::optional<float> flipAnchorY;
+
+        // True: anchorX is the tooltip's horizontal CENTER (matches RenderTipTextList()'s own
+        // `sx - fWidth/2` centering -- the item tooltip's existing behavior, anchored under/over
+        // the hovered slot's center). False: anchorX is the tooltip's left edge (matches the
+        // skill-hotkey tooltip's existing simpler convention). Either way this is resolved using
+        // the tooltip's real measured width (Show() doesn't know it up front, unlike the old native
+        // path's synchronous GDI measurement), not a caller-side estimate.
+        bool centerHorizontally = false;
+
+        // Per-line TEXT alignment WITHIN the panel's own width -- independent of centerHorizontally
+        // above (that only controls where the whole panel sits relative to anchorX). The old native
+        // RenderTipTextList()'s default `iSort` was RT3_SORT_CENTER, and CTooltip::Render()'s own
+        // RenderTextWithColors() call always passed RT3_SORT_CENTER too -- both item/pet and generic
+        // button tooltips need Center to match; the skill-hotkey tooltip's own pre-existing RmlUi
+        // CSS never set text-align (so it was already effectively Left), hence the differing default.
+        enum class TextAlign { Left, Center };
+        TextAlign textAlign = TextAlign::Left;
+
+        // Reference-pixel width the original client gave this tooltip's text area regardless of its
+        // content (RenderTipTextList()'s `Tab * 2`), 0 for "widest line". Only a theme that
+        // reproduces the original layout applies it (legacy tooltip.rml, as a minimum width).
+        float fixedWidth = 0.0f;
+
+        // The box around the lines: RenderTipTextList()'s (a 1-unit frame, 2 units of side padding)
+        // or the plain one a button drew its hover text in (CNewUIButton: 3 units of side padding,
+        // no frame, black at 180/255). Only a theme that reproduces the original layout applies it.
+        enum class Box
+        {
+            TipTextList,
+            ButtonHint
+        };
+        Box box = Box::TipTextList;
+
+        // The units the native box metrics (padding, border, row heights) are in, when they are not
+        // the UI's typography units (the skill-hotkey tooltip's dp-ratio reference frame).
+        std::optional<UI::Scaling::Transform> transform;
+
+        // For a tooltip shown from a per-frame render while its element is hovered: it hides on the
+        // first frame nothing shows it again, so it goes when the window that drew it closes, or
+        // stops drawing it, without a Hide() of its own on that path.
+        bool refreshEachFrame = false;
+    };
+
+    // Show()'s edge-clamping always wins over `anchor`/`centerHorizontally`'s preferred direction:
+    // if growing the requested way would run off the top/bottom/left/right of the real viewport,
+    // Show() flips it to `flipAnchorY` when given and it fits there, else shifts it back on screen. A caller never needs its own clamping math --
+    // this is exactly the gap the four prior mechanisms with partial (horizontal-only, or none)
+    // clamping left open.
+
+    // `owner` is an opaque identity token (typically `this`) distinguishing which caller currently
+    // owns the shared tooltip -- needed because several independent callers (every visible
+    // CButton's own CTooltip, every open inventory-family window's own hover tracking) each run
+    // their own hover check every frame, and a naive ownerless Hide() from a NOT-hovered caller
+    // could otherwise clobber a DIFFERENT caller's legitimate Show() from earlier the same frame,
+    // before that frame ever renders. Show() always takes over regardless of the previous owner
+    // (a new hover should always win); Hide() only actually hides if `owner` matches whoever most
+    // recently called Show() -- a stale/irrelevant Hide() from a caller that never owned the
+    // tooltip (or no longer does) is a safe no-op instead of hiding someone else's tooltip.
+    // Default `nullptr` preserves the simpler "always wins" behavior for a caller that has no
+    // realistic simultaneous competitor (e.g. a single inventory grid's own hover tracking).
+    using Owner = const void*;
+
+    // Builds (on first use) or updates the shared tooltip document with `config`, then shows it at
+    // a position derived from anchorX/anchorY and clamped to stay fully within the real viewport on
+    // all four sides (see .cpp for how the real, measured size is obtained before the clamp is
+    // applied). Safe to call every frame while a hover persists (e.g. from a native Render() hover
+    // check): content identical to what is showing is not rebuilt or measured again, only placed at
+    // the anchor. No-op if RmlUiRuntime isn't created yet or `config.lines` is empty.
+    void Show(const Config& config, Owner owner = nullptr);
+
+    // Hides the shared tooltip document -- but only if `owner` matches the current owner (or
+    // either is nullptr). No-op if it was never built, already hidden, or owned by someone else.
+    void Hide(Owner owner = nullptr);
+
+    // Once a frame, after the native UI has rendered: hides a `refreshEachFrame` tooltip that was not
+    // shown again since the last call.
+    void ExpireUnrefreshed();
+}

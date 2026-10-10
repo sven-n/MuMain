@@ -1,0 +1,159 @@
+/* Modern theme for CLuckyItemWnd's chrome -- header/mix-button/result-description text are vector
+   forged-metal chrome (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language).
+   Inventory grid and the mix-completion sparkle effect stay native. The theme owns #panel's
+   width and height. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* base.rcss's .modern-header-rail-px default (top:7/height:38) is used UNCHANGED here -- every
+   sibling window in this family (MyInventory top:7/height:36, StorageExt top:6/height:29) had to
+   trim the rail down from that default because their native grid's y-offset budget (44px, 36px)
+   was smaller than or close to the default rail's own footprint (45px). This window's budget is
+   `m_Pos.y + 110` (LuckyItemWnd.cpp) -- far larger than any sibling's -- so the default rail
+   already fits comfortably above the grid with no trim needed; stretching it to fill the full
+   110px budget would look like an oversized slab, not the slim title rail every other window in
+   this family uses. This class exists only so the fit rationale is documented per-window, same as
+   every sibling's own override. */
+.lucky-header-rail {
+	top: 7px;
+	height: 38px;
+}
+
+/* Centered via left:50%/negative margin-left (half of .modern-icon-btn-px's own 37px width) rather
+   than width-dependent centering math, so it stays centered regardless of #panel's runtime width.
+   top:380px matches the native `m_ptPos.y + 380` offset exactly (LuckyItemWnd.cpp), a fixed
+   distance from the panel's TOP, not scaled with height. */
+.lucky-btn-mix {
+	top: 380px;
+	left: 50%;
+	margin-left: -18.5px;
+	color: #d59b79;
+	border-color: #5c382b;
+}
+
+/* Former Render_Frame()'s m_sText[]/AddText() text loop. left:10/right:10 (rather than a fixed
+   width) follows #panel's theme width minus 20px. top:208px matches the native `m_ptPos.y + 18 + 190` baseline. Each line
+   is a fixed 11px-tall block (matching the native loop's `11.0f * i` per-slot spacing) so blank
+   spacer entries (empty text) still preserve the original's vertical rhythm. */
+#text_lines {
+	position: absolute;
+	left: 10px;
+	right: 10px;
+	top: 208px;
+}
+.lucky-line {
+	display: block;
+	height: 11px;
+	line-height: 11px;
+	overflow: hidden;
+	white-space: nowrap;
+	color: token(text-primary);
+	font-family: "token(font-body)";
+	font-size: 12px;
+	text-align: center;
+}
+
+/* Native item grid: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#item_grid, #item_grid_counts { left: 15px; top: 110px; width: calc(8 * var(--item-cell)); height: calc(4 * var(--item-cell)); }
+
+/* The frame. */
+.bg-panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	pointer-events: none;
+	border-radius: token(radius-sm)px;
+	background-color: #080a08;
+	decorator: linear-gradient(to bottom, #11130f 0%, #080a08 100%);
+	border-width: 1px;
+	border-color: token(border-frame);
+	box-shadow:
+		0 11px 30px rgba(0, 0, 0, 158),
+		0 2px 5px rgba(0, 0, 0, 217),
+		inset 0 0 0 1px #090a08,
+		inset 0 0 0 3px rgba(120, 115, 90, 190);
+}
+
+.inv-shell-edge {
+	position: absolute;
+	left: -3px;
+	right: -3px;
+	top: -3px;
+	bottom: -3px;
+	pointer-events: none;
+	background-color: transparent;
+	border-radius: token(radius-sm)px;
+	border-width: 1px;
+	border-color: rgba(31, 31, 26, 242);
+	box-shadow:
+		inset 1px 0 0 rgba(130, 121, 91, 110),
+		inset -1px 0 0 rgba(0, 0, 0, 204),
+		inset 0 1px 0 rgba(151, 139, 101, 90),
+		inset 0 -1px 0 rgba(0, 0, 0, 230);
+}
+
+.inv-groove {
+	position: absolute;
+	left: 4px;
+	right: 4px;
+	top: 4px;
+	bottom: 4px;
+	pointer-events: none;
+	border-width: 1px;
+	border-color: #24261f;
+	box-shadow:
+		inset 0 0 0 1px rgba(121, 112, 83, 40),
+		inset 0 0 12px rgba(0, 0, 0, 153);
+}
+
+/* Rail fill/accent relocated from the fg's now paint-less .modern-header-rail-px -- see
+   base.rcss's comment on that class. left/right stay plain insets (like .bg-panel) so the rail
+   stretches with this theme's #panel width. */
+.rail-fill {
+	position: absolute;
+	left: 8px;
+	right: 8px;
+	top: 7px;
+	height: 38px;
+	pointer-events: none;
+	background-color: token(metal-dark);
+	decorator:
+		linear-gradient(to bottom, rgba(205, 184, 129, 13), transparent 31%),
+		linear-gradient(to bottom, token(metal-rail), #171813 45%, token(metal-rail-dark));
+	border-width: 1px;
+	border-color: token(border-rail);
+	border-bottom-color: #171812;
+	box-shadow:
+		inset 0 1px 0 rgba(235, 218, 169, 18),
+		inset 0 -1px 0 #000000,
+		0 2px 4px rgba(0, 0, 0, 133);
+}
+/* Nested inside .rail-fill -- its left/right/bottom resolve against that box. */
+.rail-accent {
+	position: absolute;
+	left: 7px;
+	right: 7px;
+	bottom: 2px;
+	height: 1px;
+	pointer-events: none;
+	opacity: 0.35;
+	decorator: linear-gradient(to right,
+		transparent,
+		token(metal-warm-edge) 30%,
+		#84754e 50%,
+		token(metal-warm-edge) 70%,
+		transparent);
+}
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }

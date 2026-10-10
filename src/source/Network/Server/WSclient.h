@@ -8,6 +8,7 @@
 #include "Dotnet/PacketFunctions_ClientToServer.h"
 #include "Dotnet/PacketFunctions_ConnectServer.h"
 #include "Network/Server/CSMapServer.h"
+#include "UI/Combat/CastleSiegePhase.h"
 #include <span>
 #include <typeinfo>
 
@@ -2015,21 +2016,6 @@ typedef struct
     PBMSG_HEADER    m_Header;
     MServerInfo     m_vSvrInfo;
 }PHEADER_MAP_CHANGESERVER_INFO, * LPPHEADER_MAP_CHANGESERVER_INFO;
-
-enum CASTLESIEGE_STATE
-{
-    CASTLESIEGE_STATE_NONE = -1,
-    CASTLESIEGE_STATE_IDLE_1 = 0,
-    CASTLESIEGE_STATE_REGSIEGE = 1,
-    CASTLESIEGE_STATE_IDLE_2 = 2,
-    CASTLESIEGE_STATE_REGMARK = 3,
-    CASTLESIEGE_STATE_IDLE_3 = 4,
-    CASTLESIEGE_STATE_NOTIFY = 5,
-    CASTLESIEGE_STATE_READYSIEGE = 6,
-    CASTLESIEGE_STATE_STARTSIEGE = 7,
-    CASTLESIEGE_STATE_ENDSIEGE = 8,
-    CASTLESIEGE_STATE_ENDCYCLE = 9,
-};
 
 //----------------------------------------------------------------------------
 // GC [0xB2][0x00]

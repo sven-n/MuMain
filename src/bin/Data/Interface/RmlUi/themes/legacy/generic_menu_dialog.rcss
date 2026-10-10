@@ -1,0 +1,300 @@
+/* Legacy theme for the generic menu dialog. Single document (unlike generic_confirm_dialog's
+   fg/bg split) -- no item3D here, so no compositing-order problem to solve. Frame/border/header
+   chrome (sprite frame + optional title banner) now lives in window_shell.rml/.rcss, a template
+   shared with any future consumer -- not exclusive to this dialog (see that file's own comment).
+   This file supplies only this document's own content layout (lines/buttons), not the shell.
+
+   #panel is placed like native's menu boxes (see #panel below); dp throughout (no
+   transform:scale(root_scale), like generic_confirm_dialog.rcss), text in rem (RmlNativeText.h). 230dp
+   matches native's own MSGBOX_WIDTH and generic_confirm_dialog.rcss's own panel width. The height
+   follows the content, as native's per-menu fixed heights were sized to theirs. */
+#panel {
+	/* Native menu boxes (CChaosMixMenuMsgBox, CTrainerMenuMsgBox, CSeedMasterMenuMsgBox...) sit
+	   centred with their top edge at y=60 and are as tall as their content: no centering transform
+	   and no fixed height here -- the shell's content box flows (below) and sizes the panel. A
+	   consumer that passes its own position (.window-shell-positioned) keeps it. */
+	top: 60dp;
+	left: 50%;
+	margin-left: -115dp;
+	transform: none;
+	width: 230dp;
+	height: auto; /* #panel is the document body, which base.rcss makes full-screen */
+	min-height: 117dp;
+	font-family: "token(font-body)";
+	font-size: 1rem;
+	color: token(text-primary);
+}
+#panel.window-shell-positioned { margin-left: 0; }
+/* Below the dialog canvas offset (RmlDialogCanvas.h). */
+#panel { margin-top: var(--canvas-top, 0dp); }
+/* A menu that names the native box it replaces (GenericMenuConfig::kind) gets that box's top edge
+   and fixed height (kinds below); the shell's content box is then placed inside it as
+   window_shell.rcss does, and its compact Close button sits where native's does, 20 above the
+   bottom edge. */
+#panel.native-frame .window-shell-content {
+	position: absolute;
+	top: 20dp;
+	bottom: 28dp;
+	left: 16dp;
+	right: 16dp;
+	margin: 0;
+	justify-content: flex-start;
+}
+#panel.native-frame .window-shell-content.has-title { top: 0; }
+/* A native box never scrolls: its buttons sit at fixed offsets inside the fixed frame. */
+#panel.native-frame .gmd-button-row { overflow: visible; }
+/* CSystemMenuMsgBox: first button 23 below the top edge. */
+#panel.system-menu.native-frame .window-shell-content { top: 23dp; }
+#panel.native-frame .gmd-button-cell.compact {
+	position: absolute;
+	left: 0;
+	bottom: -8dp; /* content box ends 28dp above the panel bottom; native Close is 20dp above it */
+	margin: 0;
+}
+/* The shell's content box in flow (window_shell.rcss places it absolutely inside a fixed-height
+   panel), with native's text width: MSGBOX_WIDTH less ~16 each side. */
+#panel .window-shell-content {
+	position: relative;
+	top: auto;
+	bottom: auto;
+	left: auto;
+	right: auto;
+	margin: 20dp 16dp 28dp 16dp;
+	z-index: 1; /* above the shell's absolutely positioned sprite layers */
+}
+#panel .window-shell-content.has-title { margin-top: 0; }
+
+.gmd-line {
+	display: block;
+	width: 100%;
+	text-align: center;
+	white-space: normal;
+	color: token(text-primary); /* native menu text is white */
+	margin-bottom: 4dp;
+}
+.gmd-line.bold { font-weight: bold; }
+.gmd-lines { display: block; width: 100%; }
+
+/* A native box drew each of its centred lines with RenderText(x + 10, y, text, MSGBOX_WIDTH - 20,
+   0, RT3_SORT_CENTER): one line in a 210-wide box, shrunk to it when wider (base.rcss .native-fit).
+   The content box is 198 wide (16 inset), so the box reaches 6 past it on each side. */
+#panel.native-frame .gmd-line .native-fit { margin: 0 -6dp; }
+/* CTrainerRecoverMsgBox draws each pet's status line under its button. */
+.gmd-button-cell.lines-below { flex-direction: column-reverse; }
+#panel.native-frame .gmd-button-cell.lines-below .gmd-line { line-height: 18dp; margin: 0; }
+
+/* CElpisMsgBox's divider (newui_Message_Line.tga, 223x21) across the box at native_divider_top. */
+@spritesheet msgbox-line-sheet
+{
+	src: "../../../newui_Message_Line.tga";
+	msgbox-line-image: 0px 0px 223px 21px;
+}
+.gmd-divider {
+	display: none;
+	position: absolute;
+	left: -16dp; /* the content box is inset 16dp from the panel edge */
+	width: 223dp;
+	height: 21dp;
+	decorator: image(msgbox-line-image);
+}
+
+/* No explicit column count -- row + flex-wrap lets the button count/width and the row's own
+   available width determine how many fit per line, same mechanism
+   generic_confirm_dialog.rcss's own numeric-keypad grid already proves. Every native consumer's
+   fixed 128dp button width only ever fits one per row within this panel, so this naturally
+   reproduces their own single-column stack with no config knob needed; a future consumer with
+   narrower buttons would simply wrap onto more columns on its own.
+   overflow/pointer-events follow the exact same reasoning as .gcd-text-col in
+   generic_confirm_dialog.rcss (shorthand order matters for scrollbar creation; pointer-events
+   must be re-opted-in or the generated scrollbar can't receive input). */
+.gmd-button-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	width: 100%;
+	/* No max-height: the panel grows with its content (see #panel), so a percentage cap would
+	   resolve against an auto height and hide the whole row. */
+	overflow: hidden auto;
+	pointer-events: auto;
+}
+.gmd-button-row scrollbarvertical { width: 6dp; margin: 0; }
+.gmd-button-row scrollbarvertical slidertrack { background-color: token(surface-recessed); }
+.gmd-button-row scrollbarvertical sliderbar { background-color: token(control-thumb); }
+.gmd-button-row scrollbarvertical sliderbar:hover,
+.gmd-button-row scrollbarvertical sliderbar:active { background-color: token(control-thumb-hover); }
+.gmd-button-row scrollbarvertical sliderarrowdec,
+.gmd-button-row scrollbarvertical sliderarrowinc { width: 0; height: 0; }
+.gmd-button-row scrollbarhorizontal { height: 0; }
+
+/* Repeated unit of .gmd-button-row -- one button plus its own optional description lines
+   (button.lines), stacked in a column so text that belongs to a specific button (e.g.
+   CChaosMixMenuMsgBox's per-recipe blurb) renders directly above that button instead of being
+   bunched into the shared .gmd-line summary above the whole row. Width mirrors .gmd-btn's own two
+   sizes below so .gmd-line's width:100% wraps to the same column the button itself occupies; the
+   margin that used to live on .gmd-btn moved here so row spacing is unchanged. Empty
+   button.lines (the common case) just means an empty cell around a plain button -- no visual
+   difference from before this existed. */
+.gmd-button-cell {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%; /* one button per row, as native stacks them; lines span the box */
+	margin: 0 0 6dp 0; /* native NPC menus step their buttons 35 apart */
+}
+#panel.system-menu .gmd-button-cell { margin-bottom: 1dp; } /* CSystemMenuMsgBox: 30 apart */
+#panel.system-menu .gmd-btn { width: 108dp; } /* CSystemMenuMsgBox: MSGBOX_BTN_EMPTY_WIDTH */
+.gmd-button-cell.compact { width: 100%; }
+/* A button with its own description lines needs a bit more breathing room below it than a plain
+   one, so it doesn't read as crowded against whatever's next in the stack. */
+.gmd-button-cell.has-lines { margin-bottom: 10dp; }
+/* GenericMenuConfig::columns == 2 -- sized to fit exactly 2 per row within .gmd-body's own content
+   width, accounting for the WORST case where .gmd-button-row's own vertical scrollbar appears
+   (10 buttons in 2 columns = 5 rows, tall enough to need it): 230dp panel - 32dp*2 margins = 166dp,
+   - 6dp scrollbar = 160dp available. Margin trimmed to 2dp/side (from the base rule's 3dp) to
+   leave more room for the button itself: 2*(width + 4dp cell margin) <= 160dp => width <= 76dp.
+   See .gmd-btn.cols-2 below for why this needs its own decorator instead of inheriting .btn's
+   fixed-pixel sprite, and for the button's own narrower content width (this engine has no
+   box-sizing -- its border/padding add to width, they don't come out of it). */
+.gmd-button-cell.cols-2 { width: 76dp; margin: 0 2dp 6dp 2dp; }
+
+/* .btn defaults to position:absolute (base.rcss) -- overridden back to static so buttons flow as
+   ordinary flex children, same technique .gcd-item3d-anchor/.btn.gcd-keypad-btn already use in
+   generic_confirm_dialog.rcss. 128dp/64dp match native's own two button sizes exactly
+   (MSGBOX_BTN_EMPTY_WIDTH/_SMALL_WIDTH, CommonMessageBox.h); 76dp (.cols-2 below) has no native
+   equivalent (columns==2 is dialog-only).
+
+   The decorator is native's own button art (sheets below), stretched to each width as native
+   stretches it. */
+/* Native menu buttons draw newui_btn_empty(_small).tga -- three 29px-tall states stacked, the
+   108/64px-wide art stretched to the button -- not the options window's op1_b_all art. */
+@spritesheet msgbox-btn-empty-sheet
+{
+	src: "../../../newui_btn_empty.tga";
+	msgbox-btn-empty-idle:   0px  0px 108px 29px;
+	msgbox-btn-empty-hover:  0px 29px 108px 29px;
+	msgbox-btn-empty-active: 0px 58px 108px 29px;
+}
+@spritesheet msgbox-btn-empty-small-sheet
+{
+	src: "../../../newui_btn_empty_small.tga";
+	msgbox-btn-empty-small-idle:   0px  0px 64px 29px;
+	msgbox-btn-empty-small-hover:  0px 29px 64px 29px;
+	msgbox-btn-empty-small-active: 0px 58px 64px 29px;
+}
+.gmd-btn {
+	position: static;
+	width: 128dp; /* native menus: MSGBOX_BTN_EMPTY_WIDTH + 20 */
+	height: 29dp; /* MSGBOX_BTN_EMPTY_HEIGHT */
+	line-height: 29dp;
+	decorator: image(msgbox-btn-empty-idle);
+}
+.gmd-btn:hover { decorator: image(msgbox-btn-empty-hover); }
+.gmd-btn:active { decorator: image(msgbox-btn-empty-active); }
+.gmd-btn.narrow { width: 108dp; } /* MSGBOX_BTN_EMPTY_WIDTH (CGemIntegrationMsgBox) */
+.gmd-btn.compact { width: 64dp; decorator: image(msgbox-btn-empty-small-idle); }
+.gmd-btn.compact:hover { decorator: image(msgbox-btn-empty-small-hover); }
+.gmd-btn.compact:active { decorator: image(msgbox-btn-empty-small-active); }
+/* GenericMenuConfig::columns == 2 -- see .gmd-button-cell.cols-2 above for the width math (decorators
+   don't consume box-model space like border/padding do, so this matches the cell exactly, no
+   subtraction needed). Every button keeps the art's 29dp height: a long jewel name (e.g. "Higher
+   Refining Stone") wraps onto a second line set close under the first, the label centred in the
+   button. Idle/hover/active decorators are inherited unchanged from the base .gmd-btn rules above. */
+.gmd-btn.cols-2 {
+	width: 76dp;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: normal;
+	white-space: normal;
+}
+/* Text lives in its own element (not raw text directly in .gmd-btn) purely so a decorator change
+   here doesn't require touching the shared markup structure again; no stacking-order concerns
+   remain now that there's no separate absolutely-positioned fill sibling to compete with (an
+   element's own decorator always paints before its children are rendered). */
+.gmd-btn-label {
+	display: block;
+	width: 100%;
+	white-space: nowrap; /* native draws a label on one line, even past the art's edge */
+}
+.gmd-btn.cols-2 .gmd-btn-label { padding: 0 2dp; line-height: 1.0; white-space: normal; }
+/* .btn.disabled (base.rcss) already gives the exact look a disabled menu button needs --
+   data-class-disabled="!button.enabled" just toggles that existing class, no new rule needed. */
+
+/* GenericMenuConfig::highlightTitle: native's highlight orange (CChaosMixMenuMsgBox's title). */
+#panel.highlight-title .window-shell-header-title { color: #ff8000; }
+
+/* The native boxes, by GenericMenuConfig::kind. Each sits at its top edge (60 unless given) and is
+   67 (top cap) + 15 per middle strip + 50 (bottom cap) tall. Offsets inside are from the panel's
+   top edge: the containing block is the shell's content box, which starts there in a titled box
+   and 20 lower in an untitled one. */
+#panel[data-kind="system-menu"], #panel[data-kind="gem-integration"] { top: 100dp; height: 192dp; }
+#panel[data-kind="cherry-blossom"] { height: 237dp; }
+#panel[data-kind="npc-menu"], #panel[data-kind="trainer-recover"],
+#panel[data-kind="reset-points"], #panel[data-kind="delgardo"] { height: 222dp; }
+#panel[data-kind="elpis"], #panel[data-kind="elpis-about"] { height: 297dp; }
+#panel[data-kind="chaos-mix"] { height: 312dp; }
+
+/* Where the box's RenderTexts() drew the lines: the first one's text top less half the line gap
+   (the glyphs, 9 tall, centre in their line box), one advance apart. */
+#panel[data-kind="npc-menu"] .gmd-lines, #panel[data-kind="trainer-recover"] .gmd-lines,
+#panel[data-kind="elpis"] .gmd-lines, #panel[data-kind="elpis-about"] .gmd-lines,
+#panel[data-kind="reset-points"] .gmd-lines, #panel[data-kind="delgardo"] .gmd-lines {
+	position: absolute;
+	left: 0;
+	right: 0;
+	width: auto;
+	top: 38.5dp; /* text at 43, 18 apart */
+	line-height: 18dp;
+}
+#panel[data-kind="reset-points"] .gmd-lines { top: 48.5dp; } /* text at 53 */
+#panel[data-kind="delgardo"] .gmd-lines { top: 46.5dp; line-height: 12dp; } /* text at 48, 12 apart */
+#panel[data-kind] .gmd-lines .gmd-line { margin-bottom: 0; }
+/* CElpisMsgBox's "about" texts: left-aligned, wrapped inside an inset (its x+30). */
+#panel[data-kind="elpis-about"] .gmd-lines { left: 16dp; right: 16dp; }
+#panel[data-kind="elpis-about"] .gmd-lines .gmd-line { text-align: left; }
+/* CElpisMsgBox's divider under the text. */
+#panel[data-kind="elpis"] .gmd-divider, #panel[data-kind="elpis-about"] .gmd-divider { display: block; top: 120dp; }
+
+/* The buttons at the box's offsets (the Close button stays 20 above the bottom edge unless given). */
+#panel[data-kind="gem-integration"] .gmd-button-cell,
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(-n+3),
+#panel[data-kind="npc-menu"] .gmd-button-cell:nth-child(-n+2),
+#panel[data-kind="delgardo"] .gmd-button-cell:nth-child(-n+2),
+#panel[data-kind="trainer-recover"] .gmd-button-cell:nth-child(-n+2),
+#panel[data-kind="elpis"] .gmd-button-cell:nth-child(-n+3),
+#panel[data-kind="elpis-about"] .gmd-button-cell:nth-child(-n+3),
+#panel[data-kind="reset-points"] .gmd-button-cell:nth-child(1) {
+	position: absolute;
+	left: 0;
+	right: 0;
+	width: auto;
+	margin: 0;
+}
+/* CGemIntegrationMsgBox: untitled, BTN_TOP_BLANK 60 then 40 apart, Close included. */
+#panel[data-kind="gem-integration"] .gmd-button-cell:nth-child(1) { top: 40dp; }
+#panel[data-kind="gem-integration"] .gmd-button-cell:nth-child(2) { top: 80dp; }
+#panel[data-kind="gem-integration"] .gmd-button-cell:nth-child(3) { top: 120dp; bottom: auto; }
+#panel[data-kind="npc-menu"] .gmd-button-cell:nth-child(1),
+#panel[data-kind="delgardo"] .gmd-button-cell:nth-child(1) { top: 85dp; }
+#panel[data-kind="npc-menu"] .gmd-button-cell:nth-child(2),
+#panel[data-kind="delgardo"] .gmd-button-cell:nth-child(2) { top: 120dp; }
+#panel[data-kind="trainer-recover"] .gmd-button-cell:nth-child(1) { top: 65dp; }
+#panel[data-kind="trainer-recover"] .gmd-button-cell:nth-child(2) { top: 115dp; }
+#panel[data-kind="elpis"] .gmd-button-cell:nth-child(1), #panel[data-kind="elpis-about"] .gmd-button-cell:nth-child(1) { top: 145dp; }
+#panel[data-kind="elpis"] .gmd-button-cell:nth-child(2), #panel[data-kind="elpis-about"] .gmd-button-cell:nth-child(2) { top: 175dp; }
+#panel[data-kind="elpis"] .gmd-button-cell:nth-child(3), #panel[data-kind="elpis-about"] .gmd-button-cell:nth-child(3) { top: 205dp; }
+#panel[data-kind="reset-points"] .gmd-button-cell:nth-child(1) { top: 105dp; }
+
+/* CChaosMixMenuMsgBox: each recipe's lines 15 apart from their own top (40, 125, 210, less half
+   the line gap), one line each as native draws them (a wrapped line would run into the button),
+   and the button 3 below them (at 85, 155, 225). */
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(1) { top: 37dp; }
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(2) { top: 122dp; }
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(3) { top: 207dp; }
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(-n+3) .gmd-line {
+	white-space: nowrap;
+	margin-bottom: 0;
+	line-height: 15dp;
+}
+#panel[data-kind="chaos-mix"] .gmd-button-cell:nth-child(-n+3) .gmd-btn { margin-top: 3dp; }

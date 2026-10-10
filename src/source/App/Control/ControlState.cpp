@@ -13,6 +13,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Core/Utilities/_GlobalFunctions.h"
+#include "UI/Inventory/InventoryContents.h"
 #include "GameLogic/Items/InventoryUtils.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Quests/CSQuest.h"
@@ -21,7 +22,7 @@
 #include "GameLogic/Items/ShopRestrictions.h"
 #include "Network/Server/WSclient.h"
 #include "Scenes/SceneCore.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "World/MapInfra/MapManager.h"
 
 #include "json.hpp"
@@ -66,7 +67,7 @@ json DescribeItem(const ITEM& item, int slot)
 // repaired.
 void AddRepairPrice(json& described, const ITEM& item)
 {
-    const bool atNpc = g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop();
+    const bool atNpc = g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop();
     const bool selfRepair = g_pMyInventory->GetRepairMode() == SEASON3B::REPAIR_MODE_ON;
     ITEM* repaired = const_cast<ITEM*>(&item);
     if ((!atNpc && !selfRepair) || GameLogic::Items::IsRepairBan(repaired))
@@ -94,7 +95,7 @@ void AddRepairPrice(json& described, const ITEM& item)
 }
 
 // The items of a trade grid, by the grid's own slot numbers.
-json TradeGridItems(SEASON3B::CNewUIInventoryCtrl* grid)
+json TradeGridItems(mu::ui::window::CInventoryCtrl* grid)
 {
     json items = json::array();
     if (grid == nullptr)
@@ -115,7 +116,7 @@ json TradeGridItems(SEASON3B::CNewUIInventoryCtrl* grid)
 // The open trade, or null: the partner, both offers and both confirm buttons.
 json TradeState()
 {
-    if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE))
+    if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE))
     {
         return nullptr;
     }
@@ -182,14 +183,14 @@ json InventoryArray()
     json inventory = json::array();
     for (int slot = MAX_EQUIPMENT_INDEX; slot < MAX_MY_INVENTORY_EX_INDEX; ++slot)
     {
-        const ITEM* item = FindInventoryItemBySlot(slot);
+        const ITEM* item = UI::Inventory::FindPlayerItem(slot);
         if (item == nullptr || item->Type < 0)
         {
             continue;
         }
         json described = DescribeItem(*item, slot);
         // While an NPC shop is open, what it pays for the item, as its tooltip shows.
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP))
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP))
         {
             described["sell_price"] = ItemValue(const_cast<ITEM*>(item), 1);
         }
@@ -203,7 +204,7 @@ json InventoryArray()
 // tooltip shows, tax included; null while no shop is open.
 json NpcShopState()
 {
-    if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP))
+    if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP))
     {
         return nullptr;
     }
@@ -217,7 +218,7 @@ json NpcShopState()
         shop["repair_all_price"] = AllRepairGold;
     }
     json items = json::array();
-    SEASON3B::CNewUIInventoryCtrl* grid = g_pNPCShop->GetInventoryCtrl();
+    mu::ui::window::CInventoryCtrl* grid = g_pNPCShop->GetInventoryCtrl();
     for (int i = 0; grid != nullptr && i < static_cast<int>(grid->GetNumberOfItems()); ++i)
     {
         ITEM* item = grid->GetItem(i);
@@ -237,7 +238,7 @@ json NpcShopState()
 // The goods of a personal shop grid with their prices, by the slot numbers
 // the server uses (204 and up); `priceTable` is PSHOPWNDTYPE_SALE for the
 // player's own shop, PSHOPWNDTYPE_PURCHASE for the one it visits.
-json PersonalShopItems(SEASON3B::CNewUIInventoryCtrl* grid, int priceTable)
+json PersonalShopItems(mu::ui::window::CInventoryCtrl* grid, int priceTable)
 {
     json items = json::array();
     for (int i = 0; grid != nullptr && i < static_cast<int>(grid->GetNumberOfItems()); ++i)
@@ -273,7 +274,7 @@ json MyShopState()
 // goods with their prices; null while none is open.
 json PurchaseShopState()
 {
-    if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY))
+    if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY))
     {
         return nullptr;
     }
@@ -327,7 +328,7 @@ json LegacyQuestArray()
 // a click acts on; null while it is closed.
 json NpcQuestState()
 {
-    if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST))
+    if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCQUEST))
     {
         return nullptr;
     }
@@ -345,7 +346,7 @@ json NpcQuestState()
     // `accept` starts the quest, `complete` hands it in, `close` ends the talk.
     json answers = json::array();
     const auto& entry = GameLogic::Quests::Dialog::GetEntry(g_iCurrentDialogScript);
-    for (int answer = 0; answer < g_pNPCQuest->GetAnswerCount(); ++answer)
+    for (int answer = 0; answer < entry.numAnswer; ++answer)
     {
         json described;
         described["text"] = Core::Text::ToUtf8(g_lpszDialogAnswer[answer][0]);

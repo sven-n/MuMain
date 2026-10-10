@@ -1,0 +1,244 @@
+/* Legacy theme for CMyQuestInfoWindow, retiring its last CUIControl-family pieces
+   (CUICurQuestListBox, CUIQuestContentsListBox, CButton x3). #panel/frame sprites/exit button
+   are shared with character_info/pet_info/party_info via docked_panel_frame.rcss
+   (linked in my_quest_info.rml before this file) -- only window-specific content lives here now.
+   Coordinates below are plain reference px, not dp.
+
+   Content-area layout (quest list / divider / contents) reinterprets the original's intent rather
+   than porting CUICurQuestListBox/CUIQuestContentsListBox's own pixel math. Tab-row/button
+   positions are carried over exactly from SetPos()/SetButtonInfo()/RenderTabBtn(). */
+.frame-top { decorator: image(docked-bg-top-b); }
+
+@spritesheet myquest-line-sheet    { src: "../../../newui_myquest_Line.tga"; myquest-line:    0px 0px 188px 21px; }
+@spritesheet myquest-btn-open-sheet  { src: "../../../Quest_Bt_open.tga"; myquest-btn-open:  0px 0px 36px 29px; }
+@spritesheet myquest-btn-giveup-sheet { src: "../../../Quest_Bt_cast.tga"; myquest-btn-giveup: 0px 0px 36px 29px; }
+@spritesheet myquest-tab-back-sheet  { src: "../../../Quest_tab01.tga"; myquest-tab-back:  0px 0px 166px 22px; }
+@spritesheet myquest-tab-small-sheet { src: "../../../Quest_tab02.tga"; myquest-tab-small: 0px 0px 48px 22px; }
+@spritesheet myquest-tab-big-sheet   { src: "../../../Quest_tab03.tga"; myquest-tab-big:   0px 0px 72px 22px; }
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: calc(190px * var(--root-scale));
+	text-align: center;
+	color: token(text-title);
+	font-weight: bold;
+	font-size: 1em;
+}
+
+.tab-row {
+	position: absolute;
+	left: 10px;
+	top: 27px;
+	width: 166px;
+	height: 22px;
+	decorator: image(myquest-tab-back);
+}
+.tab-btn {
+	position: absolute;
+	top: 0;
+	height: 22px;
+	text-align: center;
+	line-height: 22px;
+	font-size: 1em;
+	color: token(text-muted);
+	cursor: pointer;
+	pointer-events: auto;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.tab-btn.active { color: token(text-primary); }
+.tab-btn-quest { left: 0; width: 48px; }
+.tab-btn-jobchange { left: 48px; width: 48px; }
+.tab-btn-castletemple { left: 96px; width: 72px; }
+.tab-btn-quest.active { decorator: image(myquest-tab-small); }
+.tab-btn-jobchange.active { decorator: image(myquest-tab-small); }
+.tab-btn-castletemple.active { decorator: image(myquest-tab-big); }
+
+.quest-tab, .jobchange-tab, .castletemple-tab {
+	position: absolute;
+	left: 9px;
+	top: 60px;
+	width: 172px;
+	height: 320px;
+}
+
+/* display:block is load-bearing on every non-absolutely-positioned element below -- unstyled
+   elements default to `display:inline`, which ignores width/height and won't stack in its own
+   row. */
+.quest-empty-msg {
+	position: absolute;
+	left: 14px;
+	top: 32px; /* native glyph tops at y+96, 18 apart; tab at y+60 */
+	/* To the panel's inner edge (x 180, like .party-empty-msg), not native's 140 wrap width: the
+	   original draws its line past 140 when the text grows (800x600, 1280x720). The text is one
+	   line (MyQuestInfoWindow.cpp) and wraps here only when it would leave the frame. */
+	width: calc(157px * var(--root-scale));
+	color: token(text-heading);
+	font-weight: bold;
+	font-size: 1em;
+	text-align: left;
+}
+.quest-empty-msg span { display: block; line-height: inherit; }
+
+.quest-list {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: calc(172px * var(--root-scale));
+	height: calc(100px * var(--root-scale));
+	overflow: auto hidden;
+}
+/* Inside the .quest-list text layer: lengths are physical (end of file). */
+.quest-row {
+	display: block;
+	width: 100%;
+	color: token(text-primary);
+	font-size: 1em;
+	cursor: pointer;
+	pointer-events: auto;
+	white-space: nowrap;
+}
+.quest-row:hover { color: token(text-hover); }
+.quest-row.selected { color: token(text-selected); font-weight: bold; }
+
+/* Native CNewUIMyQuestInfoWindow draws its divider (newui_myquest_Line) at y+160 on the quest tab,
+   y+182 on the job-change tab and y+210 on the castle/temple tab; the tabs start at y+60. */
+.quest-divider {
+	position: absolute;
+	left: 0;
+	top: 100px;
+	width: 172px;
+	height: 21px;
+	decorator: image(myquest-line);
+}
+
+.quest-contents {
+	position: absolute;
+	left: 0;
+	top: 121px;
+	width: calc(172px * var(--root-scale));
+	height: calc(199px * var(--root-scale));
+	overflow: auto hidden;
+}
+
+/* #reward_popup_anchor (my_quest_info.rml) marks where MyQuestInfoWindow.cpp's still-native
+   reward-item info-tooltip popup anchors -- panel-relative (a sibling of .quest-tab, not nested
+   inside it, matching that div's own comment), same left/top the popup's old hardcoded
+   m_Pos+95,+230 offset resolved to. */
+.quest-popup-anchor {
+	position: absolute;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+#reward_popup_anchor { left: 95px; top: 230px; }
+.quest-content-row {
+	display: block;
+	width: 100%;
+	font-size: 1em;
+	color: token(text-info);
+}
+.quest-content-row.row-heading { font-weight: bold; }
+/* A clickable row keeps its colour on hover, as the original list box does. */
+.quest-content-row.clickable { cursor: pointer; pointer-events: auto; }
+
+/* Open/Give-up only -- Exit is fully shared now (docked_panel_frame.rcss's #btn_exit). */
+.quest-btn {
+	position: absolute;
+	top: 392px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.quest-btn:hover { filter: brightness(1.25); }
+/* No pointer-events:none -- RmlClickOpen()/RmlClickGiveUp() already guard on
+   openEnabled/giveupEnabled, so a locked click is already a safe no-op; dimming alone is
+   enough. */
+.quest-btn.locked { filter: brightness(0.6); }
+.quest-btn-open { left: 50px; decorator: image(myquest-btn-open); }
+.quest-btn-giveup { left: 87px; decorator: image(myquest-btn-giveup); }
+
+/* Exit is a common close button -- legacy's sprite already has its own "X" baked in, so the
+   shared label span is redundant. */
+.btn-exit-label { display: none; }
+
+.jobchange-title {
+	display: block;
+	text-align: center;
+	width: calc(172px * var(--root-scale));
+	color: token(accent-teal);
+	font-weight: bold;
+	font-size: 1em;
+	/* Text layers: native title at y+58, contents from
+	   y+76 in 16px rows; the tab starts at y+60. */
+	position: absolute;
+	top: -3px;
+}
+.jobchange-contents, .jobchange-state {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: token(text-primary);
+	font-size: 1em;
+}
+.jobchange-contents { position: absolute; top: 15px; }
+.jobchange-contents span { display: block; line-height: inherit; }
+/* Native: status rows left-aligned at x+23 from y+283, 18 apart. */
+.jobchange-state {
+	position: absolute;
+	top: 220px;
+	left: 14px;
+	text-align: left;
+	color: token(text-heading);
+	font-weight: bold;
+}
+.jobchange-state span { display: block; line-height: inherit; }
+.jobchange-divider { top: 122px; }
+.castletemple-divider { top: 150px; }
+
+/* Native: Blood Castle at y+105 with lines at +125/+145, Illusion Temple at y+285 with lines at
+   +305/+325 (text tops; 20px rows, bound on the text layers in my_quest_info.rml, put the glyphs
+   there; the tab starts at y+60). */
+.castle-block, .temple-block { position: absolute; left: 0; text-align: center; }
+.castle-block { top: 40px; }
+.temple-block { top: 220px; }
+.castle-title, .temple-title {
+	display: block;
+	color: token(text-heading);
+	font-weight: bold;
+	font-size: 1em;
+}
+.castle-line, .temple-line {
+	display: block;
+	color: token(text-primary);
+	font-size: 1em;
+}
+
+/* Requirement/reward rows by kind (UI::Quests::RewardModel::RowStyle; the RML toggles
+   .row-<key>). The original client's colors. */
+.quest-content-row.row-subject           { color: #ffb90a; }
+.quest-content-row.row-summary           { color: #ffe6d2; }
+.quest-content-row.row-heading           { color: #b3e64d; }
+.quest-content-row.row-requirement       { color: #dfbf67; }
+.quest-content-row.row-requirement-unmet { color: #ff1e1e; }
+.quest-content-row.row-reward            { color: #dfbf67; }
+.quest-content-row.row-random-reward     { color: #6767df; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#tab_quest { width: calc(48px * var(--root-scale)); height: calc(22px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
+#tab_jobchange { width: calc(48px * var(--root-scale)); height: calc(22px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
+#tab_castletemple { width: calc(72px * var(--root-scale)); height: calc(22px * var(--root-scale)); line-height: calc(22px * var(--root-scale)); }
+.quest-empty-msg { line-height: calc(18px * var(--root-scale)); }
+.quest-row { height: calc(18px * var(--root-scale)); line-height: calc(18px * var(--root-scale)); padding-left: calc(4px * var(--root-scale)); }
+.quest-content-row { padding: calc(1px * var(--root-scale)) calc(4px * var(--root-scale)); }
+.jobchange-title { line-height: calc(16px * var(--root-scale)); }
+.jobchange-contents { width: calc(172px * var(--root-scale)); line-height: calc(16px * var(--root-scale)); }
+.jobchange-state { width: calc(158px * var(--root-scale)); line-height: calc(18px * var(--root-scale)); }
+.castle-block { width: calc(172px * var(--root-scale)); line-height: calc(20px * var(--root-scale)); }
+.temple-block { width: calc(172px * var(--root-scale)); line-height: calc(20px * var(--root-scale)); }
+
+/* The native text size, counter-scaled out of the panel's scale. */
+#panel { font-size: calc(var(--text-px) / var(--root-scale)); }

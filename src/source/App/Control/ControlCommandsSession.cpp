@@ -10,8 +10,10 @@
 #include "Network/Server/WSclient.h"
 #include "Scenes/CharacterScene.h"
 #include "Scenes/SceneCore.h"
-#include "UI/Legacy/UIMng.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Windows/LoginWin.h"
+#include "UI/Windows/MsgWin.h"
+#include "UI/Windows/ServerSelWin.h"
 
 #include "json.hpp"
 
@@ -109,7 +111,7 @@ bool SameAccount(std::string_view left, std::string_view right)
 // it into an error response.
 bool TakeLoginFailure(std::string& reason)
 {
-    CMsgWin& messageWindow = CUIMng::Instance().m_MsgWin;
+    CMsgWin& messageWindow = g_MsgWin;
     const int code = messageWindow.PendingMessageCode();
     if (!App::Control::IsLoginFailureCode(code))
     {
@@ -294,8 +296,7 @@ private:
             return Fail(response, ErrorCode::NotConnected, "no server group named as asked for");
         }
 
-        CUIMng& uiManager = CUIMng::Instance();
-        if (!uiManager.m_ServerSelWin.SelectServer(m_serverGroup.c_str(), m_serverIndex))
+        if (!g_ServerSelWin.SelectServer(m_serverGroup.c_str(), m_serverIndex))
         {
             // Everything else may be a "not yet": the list may still be
             // filling in, and the connection this login had to tear down
@@ -358,8 +359,8 @@ private:
             return Status::Running;
         }
 
-        CUIMng::Instance().m_LoginWin.SubmitCredentials(Core::Text::FromUtf8(m_account).c_str(),
-                                                        Core::Text::FromUtf8(m_password).c_str());
+        g_LoginWin.SubmitCredentials(Core::Text::FromUtf8(m_account).c_str(),
+                                     Core::Text::FromUtf8(m_password).c_str());
         m_stage = Stage::SubmittingCredentials;
         return Status::Running;
     }
@@ -502,7 +503,7 @@ public:
             // (NewUICustomMessageBox.cpp:2397-2409): save what the session
             // changed, refuse while the chaos machine is open — it eats the
             // items in it — and stop the helper before leaving.
-            if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
+            if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
             {
                 response = App::Control::EncodeError(EncodedId(), ErrorCode::NotAllowed,
                                                      "close the chaos machine window first", ProgressObject());
@@ -649,7 +650,7 @@ std::string Quit(const Request& request, std::unique_ptr<Act>&)
     // save what the session changed, refuse while the chaos machine holds
     // items, stop the helper, and tell the server — so the account is free
     // at once instead of after its timeout.
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
     {
         return EncodeError(request.EncodedId(), ErrorCode::NotAllowed, "close the chaos machine window first");
     }

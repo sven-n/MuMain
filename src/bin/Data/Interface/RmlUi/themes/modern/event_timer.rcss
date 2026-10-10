@@ -1,0 +1,44 @@
+/* Modern theme for the event time HUDs (CBloodCastle, CChaosCastleTime, CEmpireGuardianTimer):
+   the modern panel surface instead of newui_Figure_blood, the legacy geometry and colours. */
+
+body { pointer-events: none; }
+
+.screen {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: left top;
+	pointer-events: none;
+}
+
+#panel { position: absolute; width: 124px; height: 81px; font-family: "token(font-body)"; }
+#back { position: absolute; left: 0; top: 0; width: 124px; height: 81px; background-color: token(surface-panel); border: 1px token(border-frame); }
+
+.timer-text {
+	display: block;
+	position: absolute;
+	left: 0;
+	transform-origin: left top;
+	white-space: nowrap;
+	text-align: center;
+}
+#kills { top: 13px; }
+#time_left { top: 38px; }
+#time { top: 50px; font-weight: bold; }
+
+.timer-text.plain { color: token(text-primary); }
+.timer-text.standby { color: token(semantic-success); }
+.timer-text.normal { color: token(accent-gold); }
+.timer-text.closing { color: token(accent-gold-hover); }
+.timer-text.imminent { color: token(semantic-danger); }
+.timer-text.expiring { color: token(semantic-danger); }
+
+/* Each line's box, in the panel's reference px, counter-scaled with the line: the frame's width,
+   or the Imperial Guardian's 110 centred on it. */
+.timer-text { --box-width: 124px; width: calc(var(--box-width) * var(--root-scale)); }
+#panel.empire-guardian .timer-text { left: 7px; --box-width: 110px; }
+
+/* The HUD takes no pointer events where it is placed (base.rcss gives a placed panel them). */
+#panel.slot-placed { pointer-events: none; }

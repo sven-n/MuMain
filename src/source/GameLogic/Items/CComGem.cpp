@@ -5,15 +5,15 @@
 #include "I18N/All.h"
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
 
-#include "GameLogic/Items/InventoryUtils.h"
+#include "UI/Inventory/InventoryContents.h"
 #include "Engine/Object/ZzzInventory.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Inventory/InventoryCtrl.h"
+#include "UI/Core/WindowSystem.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 
-extern DWORD g_dwActiveUIID;
 extern int InventoryStartX;
 extern int InventoryStartY;
 
@@ -26,7 +26,7 @@ constexpr int kInvHeight = 433;
 constexpr int kAttachValue = 1000000;
 constexpr int kDetachUnitValue = 50000;
 
-SEASON3B::CNewUIInventoryCtrl* GetInventoryCtrl()
+mu::ui::window::CInventoryCtrl* GetInventoryCtrl()
 {
     return (g_pMyInventory != nullptr) ? g_pMyInventory->GetInventoryCtrl() : nullptr;
 }
@@ -48,11 +48,24 @@ BYTE m_cCount = 0;
 int m_iValue = 0;
 BYTE m_cPercent = 0;
 
-CUIUnmixgemList m_UnmixTarList;
+namespace
+{
+GameLogic::Items::JewelUnmixSelection unmixSelection;
+
+bool MatchesSelectedUnmixItem(const ITEM* item)
+{
+    const auto& selected = unmixSelection.Selected();
+    return item && selected && selected->slot == iUnMixIndex && selected->level == iUnMixLevel &&
+           item->Key == selected->key && item->Type == selected->type &&
+           item->Level == selected->level && isCompiledGem(item);
+}
+}
 } // namespace COMGEM
 
 void COMGEM::SendReqUnMix()
 {
+    if (!CheckInv())
+        return;
     SocketClient->ToGameServer()->SendLahapJewelMixRequest(MixType::Unmix, static_cast<ItemType>(m_cGemType / 2), static_cast<StackSize>(iUnMixLevel), iUnMixIndex);
 }
 
@@ -73,67 +86,62 @@ void COMGEM::ProcessCSAction()
         SendReqUnMix();
 }
 
+const GameLogic::Items::JewelUnmixSelection& COMGEM::GetWantedList()
+{
+    return unmixSelection;
+}
+
 void COMGEM::ResetWantedList()
 {
-    m_UnmixTarList.Clear();
+    unmixSelection.Clear();
+    iUnMixIndex = -1;
+    iUnMixLevel = -1;
+}
+
+bool COMGEM::RefreshWantedList()
+{
+    std::array<GameLogic::Items::JewelUnmixSelection::Entry, MAX_MY_INVENTORY_EX_INDEX> entries;
+    size_t count = 0;
+    if (GetInventoryCtrl())
+    {
+        for (int slot = MAX_EQUIPMENT_INDEX; slot < MAX_MY_INVENTORY_EX_INDEX; ++slot)
+        {
+            const ITEM* item = UI::Inventory::FindPlayerItem(slot);
+            if (item && isCompiledGem(item) && item->Level != NOCOM)
+                entries[count++] = {slot, item->Key, item->Type, item->Level};
+        }
+    }
+    return unmixSelection.Update({entries.data(), count});
 }
 
 bool COMGEM::FindWantedList()
 {
-    if (GetInventoryCtrl() == nullptr)
-    {
-        ResetWantedList();
-        return false;
-    }
-
-    bool foundAny = false;
     ResetWantedList();
-
-    for (int slot = MAX_EQUIPMENT_INDEX; slot < MAX_MY_INVENTORY_EX_INDEX; ++slot)
-    {
-        const ITEM* pItem = FindInventoryItemBySlot(slot);
-        if (!pItem)
-        {
-            continue;
-        }
-
-        if (isCompiledGem(pItem))
-        {
-            INTBYTEPAIR p;
-            p.first = slot;
-            p.second = pItem->Level;
-            m_UnmixTarList.AddText(p.first, p.second);
-            foundAny = true;
-        }
-    }
-    return foundAny;
+    RefreshWantedList();
+    return !unmixSelection.Entries().empty();
 }
 
-void COMGEM::SelectFromList(int iIndex, int iLevel)
+bool COMGEM::SelectWantedItem(const GameLogic::Items::JewelUnmixSelection::Entry& entry)
 {
-    iUnMixIndex = iIndex;
-    iUnMixLevel = iLevel;
+    RefreshWantedList();
+    return unmixSelection.Select(entry);
+}
 
-    if (CheckInv())
-    {
-    }
+bool COMGEM::PrepareUnmix()
+{
+    RefreshWantedList();
+    const auto& selected = unmixSelection.Selected();
+    if (!selected)
+        return false;
+    iUnMixIndex = selected->slot;
+    iUnMixLevel = selected->level;
+    SetGem(Check_Jewel(selected->type));
+    return CheckInv();
 }
 
 int COMGEM::GetUnMixGemLevel()
 {
     return iUnMixLevel;
-}
-
-void COMGEM::MoveUnMixList()
-{
-    g_dwActiveUIID = m_UnmixTarList.GetUIID();
-    m_UnmixTarList.DoAction();
-    g_dwActiveUIID = 0;
-}
-
-void COMGEM::RenderUnMixList()
-{
-    m_UnmixTarList.Render();
 }
 
 char COMGEM::CheckOneItem(const ITEM* p)
@@ -148,10 +156,10 @@ bool COMGEM::CheckInv()
         switch (GetError())
         {
         case COMERROR_NOTALLOWED:
-            g_pSystemLogBox->AddText(I18N::Game::ItemsForCombinationSystemIsLacking, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::ItemsForCombinationSystemIsLacking, mu::ui::window::TYPE_ERROR_MESSAGE);
             break;
         case DEERROR_NOTALLOWED:
-            g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, mu::ui::window::TYPE_ERROR_MESSAGE);
             break;
         }
         GetBack();
@@ -177,7 +185,7 @@ bool COMGEM::CheckMyInvValid()
 
         for (int slot = MAX_EQUIPMENT_INDEX; slot < MAX_MY_INVENTORY_EX_INDEX; ++slot)
         {
-            const ITEM* pItem = FindInventoryItemBySlot(slot);
+            const ITEM* pItem = UI::Inventory::FindPlayerItem(slot);
             if (!pItem)
             {
                 continue;
@@ -209,8 +217,8 @@ bool COMGEM::CheckMyInvValid()
             return false;
         }
 
-        const ITEM* pItem = FindInventoryItemBySlot(iUnMixIndex);
-        if (pItem != nullptr && isCompiledGem(pItem))
+        const ITEM* pItem = UI::Inventory::FindPlayerItem(iUnMixIndex);
+        if (MatchesSelectedUnmixItem(pItem))
         {
             ++m_cCount;
             m_cPercent = 100;
@@ -277,12 +285,13 @@ int COMGEM::CalcItemValue(const ITEM* p)
 
 int COMGEM::CalcEmptyInv()
 {
-    SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = GetInventoryCtrl();
+    mu::ui::window::CInventoryCtrl* pNewInventoryCtrl = GetInventoryCtrl();
     return (pNewInventoryCtrl != nullptr) ? pNewInventoryCtrl->GetEmptySlotCount() : 0;
 }
 
 void COMGEM::Init()
 {
+    ResetWantedList();
     m_bType = ATTACH;
     m_cState = STATE_READY;
     m_cErr = NOERR;

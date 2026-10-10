@@ -1,0 +1,27 @@
+#pragma once
+
+#include "Core/Globals/InterfaceList.h"
+
+namespace Rml
+{
+class Element;
+}
+
+// Showing, hiding and querying windows by id, for code that must not depend on the window classes.
+namespace UI::Windows
+{
+using WindowId = mu::ui::window::INTERFACE_LIST;
+
+void Show(WindowId id);
+void Hide(WindowId id);
+bool IsVisible(WindowId id);
+void HideAll();
+
+// The first element matching `selector` in a shown window's document, wherever its theme puts it;
+// null while the window is hidden or its document has no such element.
+Rml::Element* FindElement(WindowId id, const char* selector);
+
+// The older panel manager behind a few NPC windows.
+void ResetLegacyPanels();
+void OpenServerDivision();
+}

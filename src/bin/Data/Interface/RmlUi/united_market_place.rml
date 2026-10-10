@@ -1,0 +1,37 @@
+<rml>
+<head>
+	<title>Julia</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="united_market_place.rcss"/>
+</head>
+<body>
+	<!-- Julia's market warp service (CUnitedMarketPlaceWindow), docked right: the description of
+	     the market (or, in the market, of the way back to town), the Warp button and the exit
+	     button. The workspace slot places and scales #panel; everything inside is
+	     reference px; text is .sharp-text at the native size, counter-scaled out of the panel.
+	     C++ keeps the texts, the button lock, Escape and the warp request; a
+	     click is queued with market_warp / market_exit. -->
+	<div id="panel" data-model="united_market_place">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span class="sharp-text" id="title" data-style-font-size="bold_text_px + 'px'">{{title}}</span>
+		<!-- The seven description slots; the theme gives each its own row. -->
+		<div class="market-lines">
+			<span class="sharp-text market-line" data-for="line : lines"
+			      data-style-font-size="text_px + 'px'">{{line}}</span>
+		</div>
+
+		<div id="warp" data-class-locked="warp_locked" data-event-click="market_warp">
+			<span class="sharp-text sharp-middle" id="warp_label" data-style-font-size="text_px + 'px'"
+				      data-style-line-height="label_line_px + 'px'">{{warp_text}}</span>
+		</div>
+
+		<div id="btn_exit" data-event-click="market_exit" data-attr-data-hint="exit_tooltip"></div>
+		<div id="frame_corner_close" data-event-click="market_exit"></div>
+	</div>
+</body>
+</rml>

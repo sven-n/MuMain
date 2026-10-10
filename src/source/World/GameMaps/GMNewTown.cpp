@@ -1,7 +1,4 @@
-﻿// GMNewTown.cpp: implementation of the GMNewTown class.
-//
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -25,12 +22,10 @@
 #include "World/MapInfra/w_MapHeaders.h"
 
 using namespace SEASON3B;
-
-bool GMNewTown::m_bCharacterSceneCheckMouse = false;
+using namespace mu::ui::window;
 
 GMNewTown::GMNewTown()
 {
-    m_bCharacterSceneCheckMouse = false;
 }
 
 GMNewTown::~GMNewTown()
@@ -733,7 +728,7 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
     // ���
     if ((pObject->Type >= 5 && pObject->Type <= 14) || pObject->Type == 4 || pObject->Type == 129)
     {
-        // DXP-20 inc4: flat IntensityTransform override -- must materialize before overwriting, or
+        // Flat IntensityTransform override -- must materialize before overwriting, or
         // a later lazy EnsureCpuNormals() (e.g. from RenderMesh()'s CPU fallback) would clobber this
         // flat value with freshly computed per-vertex lighting.
         pModel->EnsureCpuNormals(-1);
@@ -1272,26 +1267,3 @@ bool GMNewTown::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObject)
     return false;
 }
 
-bool GMNewTown::CharacterSceneCheckMouse(OBJECT* pObj)
-{
-    m_bCharacterSceneCheckMouse = false;
-    if (CheckMouseIn(480, 90, 30, 20) == true)
-    {
-        m_bCharacterSceneCheckMouse = true;
-        SetAction(pObj, 2);
-        return true;
-    }
-    else if (CheckMouseIn(485, 110, 50, 50) == true)
-    {
-        m_bCharacterSceneCheckMouse = true;
-        SetAction(pObj, 0);
-        return true;
-    }
-
-    return false;
-}
-
-bool GMNewTown::IsCheckMouseIn()
-{
-    return m_bCharacterSceneCheckMouse;
-}

@@ -1,0 +1,65 @@
+<rml>
+<head>
+	<title>Quest Progress</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="quest_progress.rcss"/>
+</head>
+<!-- Modern theme's own copy of CQuestProgressByEtc's frame -- see ../../quest_progress_etc.rml's
+     own header comment for why this window has no NPC-name/player-name preamble, and
+     ../quest_progress.rml's own header comment for the header-rail markup split. Keep ids/
+     data-model/event-callback names in sync with ../../quest_progress_etc.rml. -->
+<body>
+	<div id="panel" class="qp-etc" data-model="quest_progress_etc">
+		<div class="modern-shell-edge"></div>
+		<div class="modern-groove"></div>
+
+		<div class="modern-header-rail-px docked-header-rail-fill">
+			<div class="modern-joint-px"></div>
+			<div class="modern-header-text-px">
+				<div id="title" class="modern-header-title-px">Quest</div>
+			</div>
+			<div class="docked-rail-accent"></div>
+		</div>
+
+		<div class="qp-subject">{{subject}}</div>
+
+		<div class="qp-npc-lines">
+			<span class="qp-line" data-for="l : npc_lines">{{l.text}}</span>
+		</div>
+
+		<div id="btn_prev" class="qp-btn-l" data-class-locked="!prev_enabled"
+		     data-event-click="questprogressetc_prev_page"></div>
+		<div id="btn_next" class="qp-btn-r" data-class-locked="!next_enabled"
+		     data-event-click="questprogressetc_next_page"></div>
+
+		<div class="qp-divider"></div>
+
+		<div class="qp-answers" data-class-hidden="active_view != 1">
+			<div class="qp-answer-row" data-for="a : answers"
+			     data-event-click="questprogressetc_select_answer(a.index)">{{a.text}}</div>
+		</div>
+
+		<div class="qp-reward" data-class-hidden="active_view != 2">
+			<div class="qp-reward-list">
+				<span class="qp-reward-row" data-for="r : reward_rows"
+				      data-class-clickable="r.clickable"
+				      data-class-row-heading="r.style == 'heading'"
+				      data-class-row-requirement="r.style == 'requirement'"
+				      data-class-row-requirement-unmet="r.style == 'requirement-unmet'"
+				      data-class-row-reward="r.style == 'reward'"
+				      data-class-row-random-reward="r.style == 'random-reward'"
+				      data-event-click="questprogressetc_select_reward(r.index)">{{r.text}}</span>
+			</div>
+			<div id="reward_popup_anchor" class="qp-popup-anchor"></div>
+			<div id="btn_complete" class="btn btn-ok qp-btn-complete" data-class-disabled="!request_complete"
+			     data-event-click="questprogressetc_complete">{{ok_label}}</div>
+		</div>
+
+		<div id="btn_exit" class="modern-icon-btn-px qp-btn-exit" data-event-click="questprogressetc_click_close" data-attr-data-hint="exit_tooltip">
+			<span class="modern-icon-btn-glyph-px">&#215;</span>
+		</div>
+		<div id="frame_corner_close" data-event-click="questprogressetc_click_close"></div>
+	</div>
+</body>
+</rml>

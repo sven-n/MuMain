@@ -3,6 +3,16 @@
 namespace UI::Scaling
 {
     inline constexpr int DockLogicalBottom = 432;
+    // Shared ceiling for "general" (non-HUD-band, non-dock) uniform auto-fit -- PanelTransform's
+    // own cap, and RmlUiRuntime.cpp's dp-ratio auto-fit reuses the same number (single source of
+    // truth) for every RmlUi document's `dp` unit (i.e. every migrated panel's own text size).
+    // Raising this does NOT fix an RmlUi dialog's text looking small: at a *reported* 1024x768
+    // the raw fit is only 1.6, well under where this cap ever saturates, so the ceiling never
+    // enters the computation. A dialog's text looking small relative to its own theme's sibling
+    // windows at a shared resolution is a per-document `font-size` choice, not a global ceiling
+    // problem -- don't reach for this constant again without a specific higher-resolution report
+    // to test against.
+    inline constexpr float MaximumPanelScale = 2.0f;
 
     struct Transform
     {
@@ -35,20 +45,6 @@ namespace UI::Scaling
         Fixed,
     };
 
-    enum class LayoutMode
-    {
-        Hud,
-        HudLeft,
-        HudCenter,
-        HudRight,
-        HudExperience,
-        DockLeft,
-        DockRight,
-        FloatingWorkspace,
-        Dialog,
-        WorldOverlay,
-    };
-
     class ScopedActiveTransform
     {
     public:
@@ -64,53 +60,110 @@ namespace UI::Scaling
         bool m_restoreMouse;
     };
 
+    // Window pixels at the UI's typography scale: native code that works in pixels runs under it, so
+    // its RenderItem3D() rectangles are window pixels and MeasureText() reports window pixels at
+    // the native text size.
+    class ScopedWindowPixels
+    {
+    public:
+        ScopedWindowPixels(int windowWidth, int windowHeight);
+
+    private:
+        ScopedActiveTransform m_scope;
+    };
+
+    // The original's screen stretched over the window: native code that draws over the world (name
+    // labels, character balloons, the notice band) runs under it.
+    class ScopedScreenStretch
+    {
+    public:
+        ScopedScreenStretch(int windowWidth, int windowHeight);
+
+    private:
+        ScopedActiveTransform m_scope;
+    };
+
+    // Units of the UI scale anchored at the pointer: a sprite drawn at the pointer's logical point
+    // (MouseX, MouseY) lands on the real pointer at one scale for both axes, as the cursor draws.
+    class ScopedPointerUnits
+    {
+    public:
+        ScopedPointerUnits(int windowWidth, int windowHeight, float pointerX, float pointerY, int logicalX,
+                           int logicalY);
+
+    private:
+        ScopedActiveTransform m_scope;
+    };
+    // The scale ScopedPointerUnits draws at.
+    float PointerScale(int windowWidth, int windowHeight);
+
+    Transform WindowPixelTransform(int windowWidth, int windowHeight);
+    // Uniform units of the UI scale, from the window's top-left: the windows' measuring space
+    // (CManager), so MeasureText() reports a panel's reference px wherever the panel stands at the
+    // UI scale.
+    Transform TypographyUnitsTransform(int windowWidth, int windowHeight);
     Transform ScreenOverlayTransform(int windowWidth, int windowHeight);
     Viewport FullReferenceViewport();
     Transform LegacyUiTransform(int windowWidth, int windowHeight);
     Transform PanelTransform(int windowWidth, int windowHeight);
+    // The one scale native text grows by, whatever a window's layout: the UI scale (the panel
+    // scale, RmlUi's dp ratio). Every layout's transform carries it as its typographyScale.
+    float TypographyScale(int windowWidth, int windowHeight);
+    float ViewportFitScale(int windowWidth, int windowHeight, float maximumScale);
+    float CompanionRatio(int windowWidth, int windowHeight);
     float BottomHudScale(int windowWidth, int windowHeight);
-    Transform BottomHudLeftTransform(int windowWidth, int windowHeight);
-    Transform BottomHudCenterTransform(int windowWidth, int windowHeight);
-    Transform BottomHudRightTransform(int windowWidth, int windowHeight);
-    Transform BottomHudExperienceTransform(int windowWidth, int windowHeight);
-    Transform DockLeftTransform(int windowWidth, int windowHeight);
     Transform DockRightTransform(int windowWidth, int windowHeight);
-    Transform FloatingWorkspaceTransform(int windowWidth, int windowHeight);
-    Viewport FloatingWorkspaceBounds(int windowWidth, int windowHeight);
-    float ScreenOverlayContentHeight(int windowWidth, int windowHeight);
-    float FloatingWorkspaceContentHeight(int windowWidth, int windowHeight);
+    // The whole window's height in ScreenOverlayTransform()'s units: a map's weather or a screen dim
+    // covers the strip beside a HUD narrower than the window too, and the HUD draws over the rest.
+    float ScreenOverlayFullHeight(int windowWidth, int windowHeight);
     Viewport WorldViewport(int windowWidth, int windowHeight, bool topViewEnabled);
     float WorldViewportAspect(int windowWidth, int windowHeight, bool topViewEnabled);
-    bool BottomHudContainsWindowPoint(int windowWidth, int windowHeight, float windowX, float windowY);
-    Transform TransformForLayout(LayoutMode mode, int windowWidth, int windowHeight);
     float PositionX(const Transform& transform, float x);
     float PositionY(const Transform& transform, float y);
     float SizeX(const Transform& transform, float width);
     float SizeY(const Transform& transform, float height);
-    Viewport ViewportForLogicalRect(const Transform& transform, float x, float y, float width, float height);
     float LogicalX(const Transform& transform, float windowX);
     float LogicalY(const Transform& transform, float windowY);
-    Position CenteredLogicalPosition(const Transform& transform, float windowX, float windowY, float width,
-                                     float height);
     int MinimumFontPointSize(FontRole role);
     int MaximumFontPointSize(FontRole role);
     int CachedFontPointSize(FontRole role);
     int FontPointSize(FontRole role, const Transform& transform);
+    // Physical pixel size the native text renderer draws `role` text at under `transform` -- what a
+    // legacy-theme RmlUi text element must use to match it, independent of the panel's own scale.
+    float NativeTextPixelSize(FontRole role, const Transform& transform);
+    // The same at TypographyScale(), which every layout shares: no window's transform needed.
+    float NativeTextPixelSize(FontRole role, int windowWidth, int windowHeight);
+    // NativeTextPixelSize() for a text drawn into a box (RenderText() with a box width): the
+    // renderer shrinks a text wider than its box to fit it, down to the role's minimum size.
+    // `measuredWidth` is the text's unconstrained width and `boxWidth` the box's, both in the
+    // transform's logical units (what MeasureText() returns).
+    float NativeTextPixelSizeInBox(FontRole role, const Transform& transform, float measuredWidth, float boxWidth);
+    // The same at TypographyScale(), which every layout shares.
+    float NativeTextPixelSizeInBox(FontRole role, int windowWidth, int windowHeight, float measuredWidth,
+                                   float boxWidth);
+    // Physical pixel size of the renderer's smallest `role` text (MinimumFontPointSize()).
+    float MinimumTextPixelSize(FontRole role);
+    // The box rule behind NativeTextPixelSizeInBox() for any text size: `textPx` scaled by
+    // boxWidth / measuredWidth when the text is wider than its box, but not below `minimumPx`
+    // (nor above `textPx`). `measuredWidth` is the text's width at `textPx`, in the box's units.
+    float FitTextPixelSizeToWidth(float textPx, float measuredWidth, float boxWidth, float minimumPx);
+    // How much a window the original drew at fixed pixels (login form, server list, system menu,
+    // login/character scene buttons) grows in the legacy theme: as much as the native dialog text
+    // (NativeTextPixelSize()) has grown against its size at 1024x768, never
+    // below 1 -- the original's own size up to 1280x720, larger only where the text is larger.
+    float SceneWindowScale(int windowWidth, int windowHeight);
+    // The rule behind SceneWindowScale() for any text size: textPx / referenceTextPx, not below 1.
+    float TextGrowthScale(float textPx, float referenceTextPx);
+    // How the original scaled its character scene button bar (laid out for 800x600): by
+    // min(W/800, H/600), clamped to [1, 2] (UI::CharacterSelection::CalculateLayout()).
+    float SceneBarScale(int windowWidth, int windowHeight);
+    // The same for a box with a height too (RenderText() with a box height the text is taller than,
+    // e.g. the Devil Square rank headers' height of 3): the smaller of the two fits, down to the minimum.
+    float NativeTextPixelSizeInBounds(FontRole role, int windowWidth, int windowHeight, float measuredWidth,
+                                      float measuredHeight, float boxWidth, float boxHeight);
     float FontScaleForBounds(FontRole role, const Transform& transform, float measuredWidth, float measuredHeight,
                              float boxWidth, float boxHeight);
     float ContentScaleFromMetrics(float displayScale, float pixelDensity);
-    // gluPerspective2 maps a 3D item preview's world size by the full window
-    // height. Inventory, equipment, HUD hotkey, and dialog slots use a capped
-    // UI scale, so previews are scaled by uiScaleY / (windowHeight / 480).
-    float ItemPreviewScaleFactor(float uiScaleY, int windowHeight);
-    // Extra shrink for inventory and equipment previews (DockRight). 0.8f is
-    // 20% smaller than the height-corrected size. HUD and dialog previews do
-    // not use it. Tune this if a rebuilt client still looks too large or small.
-    inline constexpr float kItemPreviewExtraScale = 0.8f;
-    // ItemPreviewScaleFactor, then kItemPreviewExtraScale when `active` is the
-    // DockRight transform for this window. Model scale and slot offsets share
-    // the returned factor.
-    float ItemPreviewScale(const Transform& active, int windowWidth, int windowHeight);
     float GetWindowContentScale();
     void SetWindowContentScale(float contentScale);
     Transform GetActiveTransform();

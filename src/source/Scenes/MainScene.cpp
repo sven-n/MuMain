@@ -10,6 +10,7 @@
 #include "SceneCommon.h"
 #include "Camera/CameraUtility.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -17,8 +18,8 @@
 #include "Input/Selection.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "World/MapInfra/MapManager.h"
-#include "UI/Legacy/UIMng.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Social/PartyManager.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Pets/w_PetProcess.h"
@@ -29,15 +30,16 @@
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Engine/AI/GOBoid.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "World/MapInfra/PortalMgr.h"
 #include "Guild/GuildCache.h"
-#include "UI/Legacy/UIMapName.h"
+#include "UI/HUD/UIMapName.h"
 #include "UI/Scaling/UITransform.h"
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
+#include "Core/Input/ImeInput.h"
 #ifdef _EDITOR
 #include "Camera/FrustumRenderer.h"
 #include "Camera/CameraDebugLog.h"
@@ -65,6 +67,9 @@ extern float EarthQuake;
 extern int CheckSkill;
 extern int MouseY;
 extern int LoadingWorld;
+// LoadingScene.cpp -- closes the RmlUi loading-screen wallpaper it keeps open past its own
+// one-frame flash. Called below once LoadingWorld drops below the "world ready" threshold.
+extern void HideLoadingSceneOverlay();
 extern DWORD g_dwKeyFocusUIID;
 extern int ErrorMessage;
 extern int HeroTile;
@@ -142,7 +147,7 @@ static void InitializeMainScene()
     // Remember which character is in play so auto-reconnect can re-select it.
     ReconnectManager::Instance().CacheCharacter(CharactersClient[SelectedHero].ID);
 
-    CUIMng::Instance().CreateMainScene();
+    CSceneUICoordinator::Instance().CreateMainScene();
 
     g_Camera.Angle[2] = -45.f;
 
@@ -155,7 +160,7 @@ static void InitializeMainScene()
     InputNumber = 2;
     for (int i = 0; i < MAX_WHISPER; i++)
     {
-        g_pChatListBox->AddText(L"", L"", SEASON3B::TYPE_WHISPER_MESSAGE);
+        g_pChatListBox->AddText(L"", L"", mu::ui::window::TYPE_WHISPER_MESSAGE);
     }
 
     g_GuildNotice[0][0] = '\0';
@@ -168,7 +173,7 @@ static void InitializeMainScene()
 
     g_pSlideHelpMgr->Init();
     g_pUIMapName->Init();
-    g_pNewUIMuHelper->Reset();
+    g_pMuHelperConfig->Reset();
 
     g_GuildCache.Reset();
     g_PortalMgr.Reset();
@@ -218,11 +223,11 @@ static void InitializeSceneFrame()
  */
 static void UpdateUIAndInput()
 {
+    FRAME_PROFILE(UIUpdate);
     if (g_Camera.TopViewEnable || LoadingWorld >= 30)
         return;
 
-    if (UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,
-                                                  g_fWindowMouseX, g_fWindowMouseY))
+    if (g_pMainFrame != nullptr && g_pMainFrame->IsMouseOverHud())
         MouseOnWindow = true;
 
     g_pPartyManager->Update();
@@ -231,10 +236,9 @@ static void UpdateUIAndInput()
     if (MouseLButton == true &&
         false == g_pNewUISystem->CheckMouseUse() &&
         g_dwMouseUseUIID == 0 &&
-        g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHATINPUTBOX) == false)
+        g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHATINPUTBOX) == false)
     {
         g_pWindowMgr->SetWindowsEnable(FALSE);
-        g_pFriendMenu->HideMenu();
         g_dwKeyFocusUIID = 0;
         if (GetFocus() != g_hWnd)
         {
@@ -244,7 +248,7 @@ static void UpdateUIAndInput()
     }
 
     MoveInterface();
-    MoveTournamentInterface();
+    MoveBattleSoccerGoalEffect();
 
     if (ErrorMessage != MESSAGE_LOG_OUT)
         g_pUIManager->UpdateInput();
@@ -388,7 +392,7 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
     App::Control::Frames::RecordWorldCamera();
 }
 
-// DXP-23 diagnostic toggle -- see MainScene.h's SetDisableEffects() doc comment.
+// Diagnostic toggle -- see MainScene.h's SetDisableEffects() doc comment.
 static bool g_bDisableEffectsDebug = false;
 
 void SetDisableEffects(bool disabled)
@@ -396,7 +400,7 @@ void SetDisableEffects(bool disabled)
     g_bDisableEffectsDebug = disabled;
 }
 
-// DXP-23 diagnostic toggles, finer-grained bisection -- see MainScene.h doc comments.
+// Diagnostic toggles, finer-grained bisection -- see MainScene.h doc comments.
 static bool g_bDisableSpritesDebug = false;
 static bool g_bDisableParticlesDebug = false;
 static bool g_bDisableSkillEffectModelsDebug = false;
@@ -609,13 +613,14 @@ static void RenderMainSceneUI()
 {
     Input::Selection::SelectObjects();
     BeginBitmap();
-    RenderObjectDescription();
+    // Recorded into the world-label layer instead when it is available (CNameWindow).
+    if (g_pNameWindow == nullptr || !g_pNameWindow->RecordsInterfaceOverlays())
+        RenderObjectDescription();
 
     if (g_Camera.TopViewEnable == false)
     {
         RenderInterface(true);
     }
-    RenderTournamentInterface();
     EndBitmap();
 
     g_pPartyManager->Render();
@@ -629,11 +634,14 @@ static void RenderMainSceneUI()
 #endif //ENABLE_EDIT
 
     EndBitmap();
-    BeginBitmap();
 
-    RenderCursor();
-
-    EndBitmap();
+    // RenderCursor() used to be called here directly, but that runs as part of this function's
+    // normal legacy-2D pass -- earlier in the frame than RmlUi's own render pass (RmlUi always
+    // renders last in the frame), so any RmlUi
+    // content on screen during gameplay (the ESC menu, and this scene's own RmlUi HUD pilot)
+    // would paint over the cursor. Now drawn from Winmain.cpp's SetPostRmlUiCallback instead,
+    // which fires after RmlUi's pass and covers MAIN_SCENE too -- same fix
+    // already applied to LOG_IN_SCENE/CHARACTER_SCENE when their own RmlUi content first shipped.
 }
 
 /**
@@ -656,8 +664,24 @@ bool RenderMainScene()
 
     if ((LoadingWorld) > 30)
     {
+        // Keep something on screen every frame while the world/hero data isn't back from the
+        // server yet. LoadingScene.cpp's own flash only drew one frame (SceneFlag flips to
+        // MAIN_SCENE immediately after it, well before LoadingWorld actually drops below 30) --
+        // without a fresh clear here each of the frames in between, the swapchain just kept
+        // presenting whatever stale buffer content was left, seen as flicker between black and
+        // that one flash frame. The RmlUi loading wallpaper (kept Shown by LoadingScene(), not
+        // closed after its flash) renders on top of this clear automatically, same as any other
+        // persistent RmlUi document.
+        BeginOpengl();
+        mu::GetRenderer().ClearScreen();
+        EndOpengl();
         return false;
     }
+
+    // World is ready this frame -- close the loading wallpaper now, before it (or the mainframe
+    // HUD it was gating alongside, see CSystem::SyncMainSceneHudVisibility) would otherwise
+    // sit on top of the real scene about to render below.
+    HideLoadingSceneOverlay();
 
     // Per-camera fog default: Orbital uses fog (noticeable at longer view distances),
     // Default camera's fog zone sits at/beyond its far clip and reads as visual noise,

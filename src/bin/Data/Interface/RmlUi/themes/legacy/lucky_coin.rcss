@@ -1,0 +1,27 @@
+/* Legacy theme for the buttons of Delgado's lucky coin windows, over event_item_entry.rcss (linked
+   first): the 64 x 29 newui_btn_empty_small and the 108 x 29 newui_btn_empty (up / over / down
+   rows) with a white label, bold where the original set g_hFontBold. A locked button keeps its
+   up frame, its label grey (128, 128, 128), and never hovers, like the original's CButton::Lock()
+   with ChangeTextColor(0xff808080). */
+
+@spritesheet coin-btn-small-sheet
+{
+	src: "../../../newui_btn_empty_small.tga";
+	coin-btn-small-up: 0px 0px 64px 29px;
+	coin-btn-small-over: 0px 29px 64px 29px;
+	coin-btn-small-down: 0px 58px 64px 29px;
+}
+@spritesheet coin-btn-wide-sheet
+{
+	src: "../../../newui_btn_empty.tga";
+	coin-btn-wide-up: 0px 0px 108px 29px;
+	coin-btn-wide-over: 0px 29px 108px 29px;
+	coin-btn-wide-down: 0px 58px 108px 29px;
+}
+
+
+/* CButton::Lock()'s ChangeTextColor(0xff808080). */
+.entry-btn.locked .entry-label { color: #808080; }
+
+/* The docked frame's newui_item_back04 top, as their RenderFrame() drew. */
+.frame-top { decorator: image(docked-bg-top-a); }

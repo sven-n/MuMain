@@ -1,0 +1,40 @@
+<rml>
+<head>
+    <title>Letter</title>
+    <link type="text/rcss" href="base.rcss"/>
+    <link type="text/rcss" href="letter_read.rcss"/>
+    <link type="text/template" href="window_shell.rml"/>
+</head>
+<!-- The whole window is drawn here, in the main context, like every other window of this family --
+     the portrait included. #photo_image is a native render target (UI::RmlBridge::RenderTarget):
+     CUIPhotoViewer draws the character into a texture exactly this element's size, so it stands at
+     this document's own depth like any other image -- under a window that covers this one, beneath
+     the "?" and the help drawn over it.
+
+     #photo_slot paints the well and carries the viewer's input, since a press over a document never
+     reaches the legacy mouse globals -- see PhotoViewerControl.h, which also sizes the target to
+     #photo_image and points it there. #photo_help is the "?", .active while its help is open; the
+     help itself is the shared tooltip. #photo_slot.webzen shows Webzen's logo in place of a sender.
+     #frame_fill is the panel's own fill; each theme decides whether it needs it. #drag_strip is the
+     title strip, since window_shell's rail is the banner art's full height and reaches over the
+     content.
+
+     Handlers are data-event-*, never on*: on* is RmlUi's inline script event and this build has no
+     script interpreter, so those bind to nothing at all and fail silently. -->
+<body template="window_shell" data-model="letter_read">
+    <div id="frame_fill"></div>
+    <div id="drag_strip"></div>
+    <div id="window_controls">
+        <button id="btn_minimize" data-event-click="letter_action('minimize')"></button>
+        <button id="btn_close_x" data-event-click="letter_action('close')"></button>
+    </div>
+    <div id="header">{{header}}</div>
+    <div id="body_pane" class="scroll-pane">
+        <div class="line" data-for="line : lines">{{line.text}}</div>
+    </div>
+    <div id="photo_slot"><img id="photo_image"/><div id="photo_help"></div></div>
+    <div id="footer">
+        <button class="btn" data-event-click="letter_action('reply')">{{reply_label}}</button><button class="btn" data-event-click="letter_action('delete')">{{delete_label}}</button><button class="btn narrow" data-event-click="letter_action('prev')">{{prev_label}}</button><button class="btn narrow" data-event-click="letter_action('next')">{{next_label}}</button><button class="btn" data-event-click="letter_action('close')">{{close_label}}</button>
+    </div>
+</body>
+</rml>

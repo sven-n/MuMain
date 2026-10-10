@@ -1,0 +1,121 @@
+<rml>
+<head>
+	<title>In Game Shop</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="igs_common.rcss"/>
+	<link type="text/rcss" href="in_game_shop.rcss"/>
+</head>
+<body data-model="in_game_shop">
+	<!-- CInGameShop (GameShop/InGameShop.h): the cash shop. C++ keeps the shop's state and every
+	     request; this draws it, and its clicks come back through the igs_* events. The 3x3 package
+	     grid's items are live 3D, drawn by C++ into #igs_items. -->
+	<div id="panel">
+		<div class="bg-back"></div>
+
+		<!-- The sales zones across the top, the categories of the selected zone down the left. -->
+		<div id="igs_zones">
+			<div class="igs-zone" data-for="z, i : zones" data-class-selected="z.selected" data-event-click="igs_zone(i)">
+				<span class="sharp-text sharp-middle sharp-centre igs-zone-label" data-style-font-size="text_px + 'px'">{{z.name}}</span>
+			</div>
+		</div>
+		<div id="igs_categories">
+			<div class="igs-category" data-for="c, i : categories" data-class-selected="c.selected" data-event-click="igs_category(i)">
+				<div class="igs-category-deco"></div>
+				<span class="sharp-text sharp-middle sharp-centre igs-category-label" data-style-font-size="text_px + 'px'">{{c.name}}</span>
+			</div>
+			<div class="igs-categories-end" data-if="categories.size > 0"></div>
+		</div>
+
+		<!-- The page's packages: name, price, the Buy button, or the empty box's logo. -->
+		<div id="igs_packages">
+			<div class="igs-package" data-for="p, i : packages" data-class-empty="!p.shown">
+				<div class="igs-package-card"></div>
+				<div class="igs-package-logo"></div>
+				<div class="igs-package-item"></div>
+				<div class="igs-package-name" data-if="p.shown">
+					<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{p.name}}</span>
+				</div>
+				<div class="igs-package-price" data-if="p.shown">
+					<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{p.price}}</span>
+				</div>
+				<div class="igs-btn igs-buy" data-if="p.shown" data-event-click="igs_buy(i)">
+					<span class="sharp-text sharp-middle sharp-centre igs-btn-label" data-style-font-size="text_px + 'px'">{{buy_label}}</span>
+				</div>
+			</div>
+		</div>
+		<img id="igs_items"/>
+
+		<div id="igs_page_prev" class="igs-page-btn" data-event-click="igs_page(-1)"></div>
+		<div id="igs_page" class="igs-page-numbers">
+			<span class="sharp-text sharp-right igs-page-current" data-style-font-size="text_px + 'px'">{{page}}</span>
+			<span class="sharp-text igs-page-slash" data-style-font-size="text_px + 'px'">/</span>
+			<span class="sharp-text igs-page-total" data-style-font-size="text_px + 'px'">{{total_pages}}</span>
+		</div>
+		<div id="igs_page_next" class="igs-page-btn" data-event-click="igs_page(1)"></div>
+
+		<!-- The player: name, balances, and the gift, charge and refresh buttons. -->
+		<div id="igs_character">
+			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{character_name}}</span>
+		</div>
+		<div id="igs_wallet">
+			<div class="igs-wallet-row" data-for="w : wallet">
+				<span class="sharp-text igs-wallet-label" data-style-font-size="text_px + 'px'">{{w.label}}</span>
+				<span class="sharp-text sharp-right igs-wallet-value" data-style-font-size="text_px + 'px'">{{w.value}}</span>
+			</div>
+		</div>
+		<div id="igs_gift" class="igs-icon-btn" data-event-click="igs_gift" data-attr-data-hint="gift_hint"></div>
+		<div id="igs_charge" class="igs-icon-btn" data-event-click="igs_charge" data-attr-data-hint="charge_hint"></div>
+		<div id="igs_refresh" class="igs-icon-btn" data-event-click="igs_refresh" data-attr-data-hint="refresh_hint"></div>
+
+		<!-- RenderImage() drew the banner's top-left 153 x 63 texels, not the whole texture. -->
+		<img id="igs_banner" data-if="banner_src != ''" data-attr-src="banner_src" rect="0 0 153 63"
+		     data-class-linked="banner_linked" data-event-click="igs_banner"/>
+
+		<!-- The storage and gift boxes: their tabs, the list, its pages and Use. -->
+		<div id="igs_storage_tabs">
+			<div class="igs-storage-tab" data-for="t, i : storage_tabs" data-class-selected="t.selected" data-class-gift="i == 1"
+			     data-event-click="igs_storage_tab(i)">
+				<span class="sharp-text sharp-middle sharp-centre igs-storage-tab-label" data-style-font-size="text_px + 'px'">{{t.name}}</span>
+			</div>
+		</div>
+		<div id="igs_storage_header_name" class="igs-storage-header">
+			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{item_name_label}}</span>
+		</div>
+		<div id="igs_storage_header_period" class="igs-storage-header">
+			<span class="sharp-text sharp-centre" data-style-font-size="text_px + 'px'">{{duration_label}}</span>
+		</div>
+		<!-- 9 rows of 13 units, the native box's own m_iNumRenderLine times its line step. -->
+		<div id="igs_storage_list" class="scroll-pane igs-pane counter-scaled"
+		     data-style-font-size="text_px + 'px'">
+			<div class="igs-row" data-for="r : storage_rows"
+			     data-class-selected="r.selected"
+			     data-event-click="igs_select_storage(it_index)">
+				<!-- A backgrounded element with children paints an unclosed box in this build,
+				     so the selected-row backdrop is a childless leaf (engine-findings.md). -->
+				<div class="igs-row-back"></div>
+				<span class="igs-cell igs-cell-name">{{r.name}}</span>
+				<span class="igs-cell igs-cell-period">{{r.period}}</span>
+			</div>
+		</div>
+		<div id="igs_storage_page_back"></div>
+		<div id="igs_storage_prev" class="igs-storage-page-btn" data-event-click="igs_storage_page(-1)"></div>
+		<div id="igs_storage_page" class="igs-page-numbers">
+			<span class="sharp-text sharp-right igs-page-current" data-style-font-size="text_px + 'px'">{{storage_page}}</span>
+			<span class="sharp-text igs-page-slash" data-style-font-size="text_px + 'px'">/</span>
+			<span class="sharp-text igs-page-total" data-style-font-size="text_px + 'px'">{{storage_total_pages}}</span>
+		</div>
+		<div id="igs_storage_next" class="igs-storage-page-btn" data-event-click="igs_storage_page(1)"></div>
+		<div id="igs_use" class="igs-btn" data-event-click="igs_use">
+			<span class="sharp-text sharp-middle sharp-centre igs-btn-label" data-style-font-size="text_px + 'px'">{{use_label}}</span>
+		</div>
+
+		<div id="igs_close" data-event-click="igs_close" data-attr-data-hint="close_hint"></div>
+
+		<!-- The loaded script and banner versions (developer builds, FOR_WORK). -->
+		<div id="igs_versions" data-if="script_version != ''">
+			<span class="sharp-text" data-style-font-size="text_px + 'px'">{{script_version}}</span>
+			<span class="sharp-text igs-version-banner" data-style-font-size="text_px + 'px'">{{banner_version}}</span>
+		</div>
+	</div>
+</body>
+</rml>

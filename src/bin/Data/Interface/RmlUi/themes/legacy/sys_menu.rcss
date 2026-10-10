@@ -1,0 +1,50 @@
+/* Legacy theme for the login/character-scene system menu (SysMenuWin) -- panel chrome reproduces
+   the real CWinEx art via base.rcss's shared .panel-cap-* classes; buttons use base.rcss's
+   shared .btn. */
+
+@spritesheet sys-menu-top-sheet
+{
+	src: "../../../op1_back1.tga";
+	sys-menu-top: 0px 0px 213px 64px;
+}
+
+/* #panel isn't C++-positioned/sized (see modern theme's sys_menu.rcss for the derivation).
+   Bottom-anchor values (86/52 -> 56/22) account for CSS `bottom` measuring to the button's own
+   bottom edge, not its top. Sizes are the original's pixels in rem (sys_menu.rml's body is
+   "scene-window-scale": 1rem = one original pixel, growing like the native text, RmlNativeText.h), also
+   for base.rcss's shared panel and button pieces below; the labels are at the native text size
+   (#panel is "native-text"). */
+#panel {
+	width: 213rem;
+	height: 187rem;
+	font-family: "token(font-body)";
+	color: white;
+}
+#panel.compact {
+	height: 155rem;
+}
+
+#btn_exit_game    { left: 52rem; top: 33rem; }
+#btn_select_server{ left: 52rem; top: 67rem; }
+#btn_option       { left: 52rem; bottom: 56rem; }
+#btn_close        { left: 52rem; bottom: 22rem; }
+
+#panel .btn {
+	width: 108rem;
+	height: 30rem;
+	line-height: 30rem;
+}
+
+.panel-cap-top {
+	height: 64rem;
+	decorator: image(sys-menu-top);
+}
+#panel .panel-cap-bottom {
+	height: 43rem;
+}
+#panel .panel-middle {
+	left: 3rem;
+	top: 3rem;
+	right: 3rem;
+	bottom: 3rem;
+}

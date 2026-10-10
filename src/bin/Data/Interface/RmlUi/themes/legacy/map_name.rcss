@@ -1,0 +1,8 @@
+/* The original placed the map title at 220/480 of the screen height. Keep that anchor,
+   while dp scales the artwork with the other UI at larger resolutions and user UI scales. */
+
+body { pointer-events: none; }
+
+#banner { top: 45.8333%; width: 166dp; height: 90dp; pointer-events: none; }
+#name { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+#strife { position: absolute; left: 0; top: -28dp; width: 100%; height: 28dp; }

@@ -28,6 +28,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME process_locale_tests
+    SOURCES
+        test_process_locale.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/ProcessLocale.cpp
+)
+
+mu_add_test(
     NAME secure_crt_tests
     SOURCES
         test_secure_crt.cpp

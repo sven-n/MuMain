@@ -1,12 +1,15 @@
 #include "stdafx.h"
 #include "App/Control/ControlCommands.h"
 
-#include "Render/Textures/ZzzOpenglUtil.h"
-#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
-#include "UI/NewUI/Inventory/NewUIInventoryExtension.h"
-#include "UI/NewUI/NewUISystem.h"
-#include "UI/Scaling/UITransform.h"
+#include "UI/Core/WindowAccess.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/Dialogs/MessageBox.h"
+#include "UI/Inventory/InventoryCtrl.h"
+#include "UI/Inventory/InventoryExtension.h"
+#include "UI/RmlBridge/RmlElementBox.h"
+
+#include <RmlUi/Core/Element.h>
 
 #include "json.hpp"
 
@@ -15,15 +18,14 @@
 #include <string_view>
 
 // `ui` and `slot-pixel`: where the open item windows are, in the window pixels
-// `click-ui` takes. Windows are laid out by the responsive layout, so a script
-// asks instead of hard-coding pixels.
+// `click-ui` takes. Windows are laid out by their themes, so a script asks
+// instead of hard-coding pixels.
 namespace
 {
 using App::Control::ErrorCode;
 using App::Control::Request;
+using mu::ui::window::CInventoryCtrl;
 using nlohmann::json;
-using SEASON3B::CNewUIInventoryCtrl;
-using SEASON3B::CNewUIObj;
 
 struct NamedWindow
 {
@@ -33,121 +35,110 @@ struct NamedWindow
 
 // The windows `ui` reports when they are open.
 constexpr NamedWindow Windows[] = {
-    {"inventory", SEASON3B::INTERFACE_INVENTORY},
-    {"inventory_extension", SEASON3B::INTERFACE_INVENTORY_EXT},
-    {"character", SEASON3B::INTERFACE_CHARACTER},
-    {"trade", SEASON3B::INTERFACE_TRADE},
-    {"storage", SEASON3B::INTERFACE_STORAGE},
-    {"storage_extension", SEASON3B::INTERFACE_STORAGE_EXT},
-    {"mix", SEASON3B::INTERFACE_MIXINVENTORY},
-    {"npc_shop", SEASON3B::INTERFACE_NPCSHOP},
-    {"lucky_item", SEASON3B::INTERFACE_LUCKYITEMWND},
-    {"chat_input", SEASON3B::INTERFACE_CHATINPUTBOX},
-    {"party", SEASON3B::INTERFACE_PARTY},
-    {"command", SEASON3B::INTERFACE_COMMAND},
-    {"my_shop", SEASON3B::INTERFACE_MYSHOP_INVENTORY},
-    {"purchase_shop", SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY},
-    {"npc_quest", SEASON3B::INTERFACE_NPCQUEST},
+    {"inventory", mu::ui::window::INTERFACE_INVENTORY},
+    {"inventory_extension", mu::ui::window::INTERFACE_INVENTORY_EXT},
+    {"character", mu::ui::window::INTERFACE_CHARACTER},
+    {"trade", mu::ui::window::INTERFACE_TRADE},
+    {"storage", mu::ui::window::INTERFACE_STORAGE},
+    {"storage_extension", mu::ui::window::INTERFACE_STORAGE_EXT},
+    {"mix", mu::ui::window::INTERFACE_MIXINVENTORY},
+    {"npc_shop", mu::ui::window::INTERFACE_NPCSHOP},
+    {"lucky_item", mu::ui::window::INTERFACE_LUCKYITEMWND},
+    {"chat_input", mu::ui::window::INTERFACE_CHATINPUTBOX},
+    {"party", mu::ui::window::INTERFACE_PARTY},
+    {"command", mu::ui::window::INTERFACE_COMMAND},
+    {"my_shop", mu::ui::window::INTERFACE_MYSHOP_INVENTORY},
+    {"purchase_shop", mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY},
+    {"npc_quest", mu::ui::window::INTERFACE_NPCQUEST},
 };
 
-// A point of a window, from its window-local coordinates to window pixels.
-json WindowPixel(const CNewUIObj& window, float x, float y)
+json Pixel(float x, float y)
 {
-    const auto transform = UI::Scaling::TransformForLayout(window.GetLayoutMode(), static_cast<int>(WindowWidth),
-                                                           static_cast<int>(WindowHeight));
     json pixel;
-    pixel["x"] = UI::Scaling::PositionX(transform, x);
-    pixel["y"] = UI::Scaling::PositionY(transform, y);
+    pixel["x"] = x;
+    pixel["y"] = y;
     return pixel;
 }
 
-json WindowRect(const CNewUIObj& window, const RECT& rect)
+// Adds the element `selector` finds in a window under `name`, with its drawn rectangle in window
+// pixels, its transforms included, while it and its window are shown.
+void AddElement(json& elements, const std::string& name, UI::Windows::WindowId window, const std::string& selector)
 {
-    const auto transform = UI::Scaling::TransformForLayout(window.GetLayoutMode(), static_cast<int>(WindowWidth),
-                                                           static_cast<int>(WindowHeight));
-    const float left = UI::Scaling::PositionX(transform, static_cast<float>(rect.left));
-    const float top = UI::Scaling::PositionY(transform, static_cast<float>(rect.top));
-    json pixels;
-    pixels["x"] = left;
-    pixels["y"] = top;
-    pixels["width"] = UI::Scaling::PositionX(transform, static_cast<float>(rect.right)) - left;
-    pixels["height"] = UI::Scaling::PositionY(transform, static_cast<float>(rect.bottom)) - top;
-    return pixels;
+    Rml::Element* element = UI::Windows::FindElement(window, selector.c_str());
+    Rml::Vector2f offset;
+    Rml::Vector2f size;
+    if (element == nullptr || !element->IsVisible(true) ||
+        !UI::RmlBridge::DrawnBox(*element, Rml::BoxArea::Border, offset, size))
+    {
+        return;
+    }
+    json rect = Pixel(offset.x, offset.y);
+    rect["width"] = size.x;
+    rect["height"] = size.y;
+    elements[name] = std::move(rect);
 }
 
-// A button's rectangle in its window's coordinates.
-RECT ButtonRect(SEASON3B::CNewUIButton& button)
+struct NamedElement
 {
-    const POINT& position = button.GetPos();
-    const POINT& size = button.GetSize();
-    return {position.x, position.y, position.x + size.x, position.y + size.y};
-}
+    std::string_view name;
+    UI::Windows::WindowId window;
+    std::string_view selector;
+};
 
-// Buttons a scenario presses with `click-ui`, by name.
+// Buttons a scenario presses with `click-ui`, by name: the ids both themes' documents share.
+constexpr NamedElement Buttons[] = {
+    {"trade.confirm", mu::ui::window::INTERFACE_TRADE, "#my_confirm"},
+    {"trade.zen", mu::ui::window::INTERFACE_TRADE, "#btn_zen"},
+    {"inventory.repair", mu::ui::window::INTERFACE_INVENTORY, "#btn_repair"},
+    {"inventory.my_shop", mu::ui::window::INTERFACE_INVENTORY, "#btn_myshop"},
+    {"my_shop.title", mu::ui::window::INTERFACE_MYSHOP_INVENTORY, "#shop_title"},
+    {"my_shop.open", mu::ui::window::INTERFACE_MYSHOP_INVENTORY, "#btn_open"},
+    {"my_shop.close", mu::ui::window::INTERFACE_MYSHOP_INVENTORY, "#btn_close"},
+    {"npc_quest.complete", mu::ui::window::INTERFACE_NPCQUEST, "#btn_complete"},
+    {"npc_quest.close", mu::ui::window::INTERFACE_NPCQUEST, "#btn_exit"},
+    // The "+" buttons, shown while there are level-up points; command for a Dark Lord only.
+    {"character.stat.strength", mu::ui::window::INTERFACE_CHARACTER, "#btn_stat_str"},
+    {"character.stat.agility", mu::ui::window::INTERFACE_CHARACTER, "#btn_stat_agi"},
+    {"character.stat.vitality", mu::ui::window::INTERFACE_CHARACTER, "#btn_stat_vit"},
+    {"character.stat.energy", mu::ui::window::INTERFACE_CHARACTER, "#btn_stat_ene"},
+    {"character.stat.command", mu::ui::window::INTERFACE_CHARACTER, "#btn_stat_cmd"},
+    {"npc_shop.repair", mu::ui::window::INTERFACE_NPCSHOP, "#btn_repair"},
+    {"npc_shop.repair_all", mu::ui::window::INTERFACE_NPCSHOP, "#btn_repair_all"},
+};
+
+struct NamedCommand
+{
+    std::string_view name;
+    int command;
+};
+
+constexpr NamedCommand Commands[] = {
+    {"command.trade", COMMAND_TRADE},
+    {"command.purchase", COMMAND_PURCHASE},
+    {"command.party", COMMAND_PARTY},
+};
+
 json Elements()
 {
     json elements = json::object();
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE))
+    for (const NamedElement& button : Buttons)
+        AddElement(elements, std::string(button.name), button.window, std::string(button.selector));
+    for (const NamedCommand& command : Commands)
     {
-        elements["trade.confirm"] = WindowRect(*g_pTrade, g_pTrade->GetMyConfirmRect());
-        elements["trade.zen"] = WindowRect(*g_pTrade, g_pTrade->GetZenButtonRect());
+        AddElement(elements, std::string(command.name), mu::ui::window::INTERFACE_COMMAND,
+                   ".cmd-btn[data-command=\"" + std::to_string(command.command) + "\"]");
     }
-    if (SEASON3B::CNewUIButton* repair = g_pMyInventory->GetShownRepairButton())
+    // The quest dialog's answers by their number, which rows without text skip.
+    for (int answer = 0; answer < MAX_ANSWER_FOR_DIALOG; ++answer)
     {
-        elements["inventory.repair"] = WindowRect(*g_pMyInventory, ButtonRect(*repair));
-    }
-    if (SEASON3B::CNewUIButton* myShop = g_pMyInventory->GetShownMyShopButton())
-    {
-        elements["inventory.my_shop"] = WindowRect(*g_pMyInventory, ButtonRect(*myShop));
-    }
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY))
-    {
-        elements["my_shop.title"] = WindowRect(*g_pMyShopInventory, g_pMyShopInventory->GetTitleRect());
-        elements["my_shop.open"] = WindowRect(*g_pMyShopInventory, ButtonRect(g_pMyShopInventory->GetOpenButton()));
-        elements["my_shop.close"] = WindowRect(*g_pMyShopInventory, ButtonRect(g_pMyShopInventory->GetCloseButton()));
-    }
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST))
-    {
-        for (int answer = 0; answer < g_pNPCQuest->GetAnswerCount(); ++answer)
-        {
-            elements["npc_quest.answer." + std::to_string(answer)] =
-                WindowRect(*g_pNPCQuest, g_pNPCQuest->GetAnswerRect(answer));
-        }
-        if (g_pNPCQuest->IsCompleteShown())
-        {
-            elements["npc_quest.complete"] = WindowRect(*g_pNPCQuest, ButtonRect(g_pNPCQuest->GetCompleteButton()));
-        }
-        elements["npc_quest.close"] = WindowRect(*g_pNPCQuest, ButtonRect(g_pNPCQuest->GetCloseButton()));
-    }
-    constexpr std::string_view StatNames[] = {"strength", "agility", "vitality", "energy", "command"};
-    for (int stat = 0; stat < static_cast<int>(std::size(StatNames)); ++stat)
-    {
-        if (SEASON3B::CNewUIButton* button = g_pCharacterInfoWindow->GetShownStatButton(stat))
-        {
-            elements["character.stat." + std::string(StatNames[stat])] =
-                WindowRect(*g_pCharacterInfoWindow, ButtonRect(*button));
-        }
-    }
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND))
-    {
-        elements["command.trade"] =
-            WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_TRADE)));
-        elements["command.purchase"] =
-            WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_PURCHASE)));
-        elements["command.party"] =
-            WindowRect(*g_pCommandWindow, ButtonRect(g_pCommandWindow->GetCommandButton(COMMAND_PARTY)));
-    }
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
-    {
-        elements["npc_shop.repair"] = WindowRect(*g_pNPCShop, ButtonRect(g_pNPCShop->GetRepairButton()));
-        elements["npc_shop.repair_all"] = WindowRect(*g_pNPCShop, ButtonRect(g_pNPCShop->GetRepairAllButton()));
+        AddElement(elements, "npc_quest.answer." + std::to_string(answer), mu::ui::window::INTERFACE_NPCQUEST,
+                   ".nq-answer-row[data-answer=\"" + std::to_string(answer) + "\"]");
     }
     return elements;
 }
 
-// The window that owns `grid` and the grid control for a slot number, or
-// nothing when that window is closed.
-std::optional<CNewUIInventoryCtrl*> OpenGrid(DWORD windowKey, CNewUIInventoryCtrl* grid)
+// The grid control while the window that owns it is open, or nothing.
+std::optional<CInventoryCtrl*> OpenGrid(DWORD windowKey, CInventoryCtrl* grid)
 {
     if (grid == nullptr || !g_pNewUISystem->IsVisible(windowKey))
     {
@@ -158,7 +149,7 @@ std::optional<CNewUIInventoryCtrl*> OpenGrid(DWORD windowKey, CNewUIInventoryCtr
 
 // Inventory slot numbers are those `state` reports: the main grid starts after
 // the equipment, the extension grids follow it.
-[[nodiscard]] bool IsInMainGrid(CNewUIInventoryCtrl* main, int slot)
+[[nodiscard]] bool IsInMainGrid(CInventoryCtrl* main, int slot)
 {
     return main != nullptr && slot >= main->GetIndexOffset() &&
            slot < main->GetIndexOffset() + main->GetNumberOfColumn() * main->GetNumberOfRow();
@@ -171,34 +162,36 @@ std::optional<CNewUIInventoryCtrl*> OpenGrid(DWORD windowKey, CNewUIInventoryCtr
     return IsInMainGrid(g_pMyInventory->GetInventoryCtrl(), slot) || inExtension;
 }
 
-std::optional<CNewUIInventoryCtrl*> InventoryGrid(int slot)
+std::optional<CInventoryCtrl*> InventoryGrid(int slot)
 {
-    CNewUIInventoryCtrl* main = g_pMyInventory->GetInventoryCtrl();
+    CInventoryCtrl* main = g_pMyInventory->GetInventoryCtrl();
     if (IsInMainGrid(main, slot))
     {
-        return OpenGrid(SEASON3B::INTERFACE_INVENTORY, main);
+        return OpenGrid(mu::ui::window::INTERFACE_INVENTORY, main);
     }
-    return OpenGrid(SEASON3B::INTERFACE_INVENTORY_EXT, g_pMyInventoryExt->TryGetExtensionByInventoryIndex(slot));
+    return OpenGrid(mu::ui::window::INTERFACE_INVENTORY_EXT, g_pMyInventoryExt->TryGetExtensionByInventoryIndex(slot));
 }
 
-std::optional<CNewUIInventoryCtrl*> NamedGrid(std::string_view name, int slot)
+std::optional<CInventoryCtrl*> NamedGrid(std::string_view name, int slot)
 {
+    using namespace mu::ui::window;
+
     if (name == "inventory")
         return InventoryGrid(slot);
     if (name == "trade")
-        return OpenGrid(SEASON3B::INTERFACE_TRADE, g_pTrade->GetMyInvenCtrl());
+        return OpenGrid(INTERFACE_TRADE, g_pTrade->GetMyInvenCtrl());
     if (name == "trade_partner")
-        return OpenGrid(SEASON3B::INTERFACE_TRADE, g_pTrade->GetYourInvenCtrl());
+        return OpenGrid(INTERFACE_TRADE, g_pTrade->GetYourInvenCtrl());
     if (name == "storage")
-        return OpenGrid(SEASON3B::INTERFACE_STORAGE, g_pStorageInventory->GetInventoryCtrl());
+        return OpenGrid(INTERFACE_STORAGE, g_pStorageInventory->GetInventoryCtrl());
     if (name == "mix")
-        return OpenGrid(SEASON3B::INTERFACE_MIXINVENTORY, g_pMixInventory->GetInventoryCtrl());
+        return OpenGrid(INTERFACE_MIXINVENTORY, g_pMixInventory->GetInventoryCtrl());
     if (name == "npc_shop")
-        return OpenGrid(SEASON3B::INTERFACE_NPCSHOP, g_pNPCShop->GetInventoryCtrl());
+        return OpenGrid(INTERFACE_NPCSHOP, g_pNPCShop->GetInventoryCtrl());
     if (name == "my_shop")
-        return OpenGrid(SEASON3B::INTERFACE_MYSHOP_INVENTORY, g_pMyShopInventory->GetInventoryCtrl());
+        return OpenGrid(INTERFACE_MYSHOP_INVENTORY, g_pMyShopInventory->GetInventoryCtrl());
     if (name == "purchase_shop")
-        return OpenGrid(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY, g_pPurchaseShopInventory->GetInventoryCtrl());
+        return OpenGrid(INTERFACE_PURCHASESHOP_INVENTORY, g_pPurchaseShopInventory->GetInventoryCtrl());
     return std::nullopt;
 }
 
@@ -208,7 +201,8 @@ std::optional<CNewUIInventoryCtrl*> NamedGrid(std::string_view name, int slot)
            name == "npc_shop" || name == "my_shop" || name == "purchase_shop" || name == "equipment";
 }
 
-std::string SquarePixel(const Request& request, CNewUIInventoryCtrl& grid, int slot)
+// The middle of a square, from the grid's geometry, which is in window pixels.
+std::string SquarePixel(const Request& request, CInventoryCtrl& grid, int slot)
 {
     const int localIndex = slot - grid.GetIndexOffset();
     const int columns = grid.GetNumberOfColumn();
@@ -217,17 +211,14 @@ std::string SquarePixel(const Request& request, CNewUIInventoryCtrl& grid, int s
         return App::Control::EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the grid has no such slot");
     }
 
-    const POINT& position = grid.GetPos();
-    const float x = static_cast<float>(position.x + (localIndex % columns) * SEASON3B::INVENTORY_SQUARE_WIDTH +
-                                       SEASON3B::INVENTORY_SQUARE_WIDTH / 2);
-    const float y = static_cast<float>(position.y + (localIndex / columns) * SEASON3B::INVENTORY_SQUARE_HEIGHT +
-                                       SEASON3B::INVENTORY_SQUARE_HEIGHT / 2);
-    return App::Control::EncodeResult(request.EncodedId(), WindowPixel(*grid.GetOwner(), x, y).dump());
+    const UI::Items::GridRect square = grid.Geometry().CellsRect(localIndex % columns, localIndex / columns, 1, 1);
+    return App::Control::EncodeResult(
+        request.EncodedId(), Pixel(square.x + square.width / 2.f, square.y + square.height / 2.f).dump());
 }
 
 std::string EquipmentPixel(const Request& request, int slot)
 {
-    if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY))
+    if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY))
     {
         return App::Control::EncodeError(request.EncodedId(), ErrorCode::NotOpen, "the inventory is not open");
     }
@@ -237,9 +228,8 @@ std::string EquipmentPixel(const Request& request, int slot)
     {
         return App::Control::EncodeError(request.EncodedId(), ErrorCode::BadRequest, "no such equipment slot");
     }
-    return App::Control::EncodeResult(
-        request.EncodedId(),
-        WindowPixel(*g_pMyInventory, static_cast<float>(center.x), static_cast<float>(center.y)).dump());
+    return App::Control::EncodeResult(request.EncodedId(),
+                                      Pixel(static_cast<float>(center.x), static_cast<float>(center.y)).dump());
 }
 } // namespace
 
@@ -256,7 +246,7 @@ std::string Ui(const Request& request, std::unique_ptr<Act>&)
         }
     }
     // A dialog waiting for Enter or Esc, e.g. an incoming trade request.
-    if (!g_MessageBox->IsEmpty())
+    if (!g_MessageBox->IsEmpty() || mu::ui::window::g_pGenericConfirmDialog->IsVisible())
     {
         windows.push_back("message_box");
     }
@@ -293,7 +283,7 @@ std::string SlotPixel(const Request& request, std::unique_ptr<Act>&)
                            "the inventory has no slot " + std::to_string(slot) + "; equipment is the `equipment` grid");
     }
 
-    const std::optional<CNewUIInventoryCtrl*> square = NamedGrid(grid, slot);
+    const std::optional<CInventoryCtrl*> square = NamedGrid(grid, slot);
     if (!square)
     {
         return EncodeError(request.EncodedId(), ErrorCode::NotOpen, "the window of that grid is not open");

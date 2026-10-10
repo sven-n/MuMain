@@ -1,0 +1,25 @@
+<rml>
+<head>
+	<title>Chaos Castle time (CChaosCastleTime)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="event_timer.rcss"/>
+</head>
+<body data-model="chaos_castle_time">
+	<!-- The Chaos Castle time (CChaosCastleTime) HUD above the bottom HUD's right end
+	     (UI/Events/EventTimerView.h): the frame, the kill count, "Time left" and the time. Its
+	     workspace slot places #panel at the bottom HUD's scale. Text does not scale: each line takes its native size, in
+	     its bound colour, centred on the theme's box and shrunk to it like the original's, and cancels
+	     the scale. Takes no pointer events. -->
+	<div class="screen">
+		<div id="panel">
+			<div id="back"></div>
+			<span class="timer-text counter-scaled" id="kills" data-if="kills_text != ''" data-class-plain="kills_state == 'plain'" data-class-standby="kills_state == 'standby'" data-class-normal="kills_state == 'normal'" data-class-closing="kills_state == 'closing'" data-class-imminent="kills_state == 'imminent'" data-class-expiring="kills_state == 'expiring'"
+			      data-style-font-size="text_px + 'px'"><span class="native-fit">{{kills_text}}</span></span>
+			<span class="timer-text counter-scaled" id="time_left" data-if="time_left_text != ''" data-class-plain="time_left_state == 'plain'" data-class-standby="time_left_state == 'standby'" data-class-normal="time_left_state == 'normal'" data-class-closing="time_left_state == 'closing'" data-class-imminent="time_left_state == 'imminent'" data-class-expiring="time_left_state == 'expiring'"
+			      data-style-font-size="text_px + 'px'"><span class="native-fit">{{time_left_text}}</span></span>
+			<span class="timer-text counter-scaled" id="time" data-class-plain="time_state == 'plain'" data-class-standby="time_state == 'standby'" data-class-normal="time_state == 'normal'" data-class-closing="time_state == 'closing'" data-class-imminent="time_state == 'imminent'" data-class-expiring="time_state == 'expiring'"
+			      data-style-font-size="big_text_px + 'px'"><span class="native-fit">{{time_text}}</span></span>
+		</div>
+	</div>
+</body>
+</rml>

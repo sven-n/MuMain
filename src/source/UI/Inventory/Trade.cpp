@@ -1,0 +1,955 @@
+﻿
+#include "stdafx.h"
+#include "I18N/All.h"
+
+#include "UI/Inventory/Trade.h"
+#include "UI/Inventory/HeldItemPlacement.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/RmlBridge/RmlElementBox.h"
+#include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlWindowClose.h"
+#include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
+
+#include "GameLogic/Items/CComGem.h"
+#include "Audio/DSPlaySound.h"
+#include "GameLogic/Items/TradeRestrictions.h"
+
+// RmlUi migration -- see this class's header comment.
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlStyleKeys.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlDocumentVisibility.h"
+#include "UI/RmlBridge/RmlNativeTextSize.h"
+#include "UI/RmlBridge/RmlSyncField.h"
+#include "UI/Scaling/UITransform.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+
+using namespace SEASON3B;
+using namespace mu::ui::window;
+
+namespace
+{
+// Frames the confirm button waits after my offer changed, so the partner can
+// see the change before I confirm.
+constexpr int MyTradeWaitAfterChange = 150;
+} // namespace
+
+CTrade::CTrade()
+{
+    m_pNewUIMng = NULL;
+    m_pYourInvenCtrl = m_pMyInvenCtrl = NULL;
+}
+
+CTrade::~CTrade()
+{
+    Release();
+}
+
+bool CTrade::Create(CManager* pNewUIMng)
+{
+    if (NULL == pNewUIMng
+        || NULL == g_pNewItemMng)
+        return false;
+
+    m_pNewUIMng = pNewUIMng;
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_TRADE, this);
+
+    m_pYourInvenCtrl = new CInventoryCtrl;
+    if (false == m_pYourInvenCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewItemMng, this, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
+    {
+        SAFE_DELETE(m_pYourInvenCtrl);
+        return false;
+    }
+
+    m_pMyInvenCtrl = new CInventoryCtrl;
+    if (false == m_pMyInvenCtrl->Create(STORAGE_TYPE::TRADE, g_pNewItemMng, this, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
+    {
+        SAFE_DELETE(m_pMyInvenCtrl);
+        return false;
+    }
+
+    LoadImages();
+
+    ::memset(m_szYourID, 0, MAX_USERNAME_SIZE + 1);
+    m_bTradeAlert = false;
+
+    InitTradeInfo();
+    InitYourInvenBackUp();
+
+    BuildRmlUi();
+
+    Show(false);
+
+    return true;
+}
+
+void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
+{
+    UI::RmlBridge::BindWindowClose(c, [this]
+                                 {
+                                     ::PlayBuffer(SOUND_CLICK01);
+                                     ProcessCloseBtn();
+                                 });
+    UI::Items::RegisterItemGridCells(c);
+    c.Bind("partner_cells", &model.partnerCells);
+    c.Bind("grid_cells", &model.gridCells);
+    c.Bind("text_px", &model.textPx);
+    c.Bind("big_text_px", &model.bigTextPx);
+
+    c.Bind("title", &model.title);
+
+    c.Bind("your_id_text", &model.yourIdText);
+    c.Bind("your_guild_visible", &model.yourGuildVisible);
+    c.Bind("your_guild_name", &model.yourGuildName);
+    c.Bind("your_level_text", &model.yourLevelText);
+    c.Bind("your_level_bucket", &model.yourLevelBucket);
+    c.Bind("your_gold_text", &model.yourGoldText);
+    c.Bind("your_gold_tier", &model.yourGoldTier);
+    c.Bind("your_confirm_checked", &model.yourConfirmChecked);
+
+    c.Bind("my_id_text", &model.myIdText);
+    c.Bind("my_gold_text", &model.myGoldText);
+    c.Bind("my_gold_tier", &model.myGoldTier);
+    c.Bind("my_confirm_checked", &model.myConfirmChecked);
+    c.Bind("my_confirm_waiting", &model.myConfirmWaiting);
+
+    c.Bind("warning_label", &model.warningLabel);
+    c.Bind("notice_line1", &model.noticeLine1);
+    c.Bind("notice_line2", &model.noticeLine2);
+    c.Bind("notice_line3", &model.noticeLine3);
+    c.Bind("warning_opacity", &model.warningOpacity);
+
+    c.Bind("close_tooltip", &model.closeTooltip);
+    c.Bind("zen_tooltip", &model.zenTooltip);
+
+    c.Bind("item_warning_text", &model.itemWarningText);
+    auto itemWarningBadge = c.RegisterStruct<TradeRmlModel::ItemWarningBadge>();
+    itemWarningBadge.RegisterMember("x", &TradeRmlModel::ItemWarningBadge::x);
+    itemWarningBadge.RegisterMember("y", &TradeRmlModel::ItemWarningBadge::y);
+    itemWarningBadge.RegisterMember("width", &TradeRmlModel::ItemWarningBadge::width);
+    c.RegisterArray<std::vector<TradeRmlModel::ItemWarningBadge>>();
+    c.Bind("item_warning_badges", &model.itemWarningBadges);
+
+    c.BindEventCallback("trade_exit_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            ::PlayBuffer(SOUND_CLICK01);
+            ProcessCloseBtn();
+        });
+    c.BindEventCallback("trade_zen_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            // Numeric Mode::Text amount entry, same shape as every other zen-input dialog.
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.showCancel = true;
+            cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToTrade, false } };
+            cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
+            cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
+            cfg.input->maxLength = 8;
+            cfg.input->numericOnly = true;
+            cfg.onPrimary = [this]
+            {
+                const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
+                const int iInputZen = strText.empty() ? 0 : _wtoi(strText.c_str());
+                if (iInputZen == 0)
+                {
+                    mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
+                    return;
+                }
+                SendRequestMyGoldInput(iInputZen);
+            };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+            ::PlayBuffer(SOUND_CLICK01);
+        });
+    c.BindEventCallback("trade_my_confirm_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+        {
+            if (m_nMyTradeWait > 0 || CInventoryCtrl::GetPickedItem() != NULL)
+                return;
+
+            ::PlayBuffer(SOUND_CLICK01);
+
+            if (m_bTradeAlert && !m_bMyConfirm)
+            {
+                // GenericDialogConfig only has bold/not-bold, not per-line color, so all
+                // 4 lines (3 warning + 1 red in the native layout) collapse to bold here.
+                mu::ui::window::GenericDialogConfig cfg;
+                cfg.showCancel = true;
+                for (int i = 0; i < 4; ++i)
+                    cfg.lines.push_back({ I18N::Game::Lookup(371 + i), true });
+                cfg.onPrimary = [this] { AlertTrade(); };
+                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+            }
+            else
+            {
+                AlertTrade();
+            }
+        });
+}
+
+void CTrade::BuildRmlUi()
+{
+    m_RmlView.Ensure();
+}
+
+void CTrade::InitTradeInfo()
+{
+    m_nYourLevel = 0;
+    m_nYourGuildType = -1;
+    m_nYourTradeGold = 0;
+    m_nMyTradeGold = 0;
+    m_nMyTradeWait = 0;
+    m_bYourConfirm = m_bMyConfirm = false;
+}
+
+void CTrade::InitYourInvenBackUp()
+{
+    for (int i = 0; i < MAX_TRADE_INVEN; ++i)
+        m_aYourInvenBackUp[i].Type = -1;
+}
+
+void CTrade::Release()
+{
+    m_ItemTarget.Disable();
+    UnloadImages();
+
+    SAFE_DELETE(m_pMyInvenCtrl);
+    SAFE_DELETE(m_pYourInvenCtrl);
+
+    if (m_pNewUIMng)
+    {
+        m_pNewUIMng->RemoveUIObj(this);
+        m_pNewUIMng = NULL;
+    }
+
+    m_RmlView.Release();
+}
+
+bool CTrade::IsPointerOverPanel()
+{
+    // #panel takes no pointer events, so the grid's clicks stay native; its drawn box still holds
+    // the pointer.
+    Rml::ElementDocument* document = m_RmlView.Document();
+    return UI::RmlBridge::IsPointerWithin(document != nullptr ? document->GetElementById("panel") : nullptr);
+}
+
+bool CTrade::UpdateMouseEvent()
+{
+    if ((m_pYourInvenCtrl && false == m_pYourInvenCtrl->UpdateMouseEvent())
+        || (m_pMyInvenCtrl && false == m_pMyInvenCtrl->UpdateMouseEvent()))
+    {
+        if (mu::ui::window::IsRelease(VK_LBUTTON) &&
+            CInventoryCtrl::GetPickedItem()->GetOwnerInventory() == m_pMyInvenCtrl && m_bMyConfirm)
+        {
+            m_bMyConfirm = false;
+            SocketClient->ToGameServer()->SendTradeButtonStateChange(TradeButtonState::Unchecked);
+        }
+
+        return false;
+    }
+
+    ProcessMyInvenCtrl();
+
+    if (ProcessBtns())
+        return false;
+
+    if (IsPointerOverPanel())
+    {
+        if (mu::ui::window::IsPress(VK_RBUTTON))
+        {
+            ProcessMyTradeItemAutoMoveToInventory();
+            MouseRButton = false;
+            MouseRButtonPop = false;
+            MouseRButtonPush = false;
+            return false;
+        }
+
+        if (mu::ui::window::IsNone(VK_LBUTTON) == false)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool CTrade::UpdateKeyEvent()
+{
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE) == true)
+    {
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
+        {
+            SocketClient->ToGameServer()->SendTradeCancel();
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_TRADE);
+            PlayBuffer(SOUND_CLICK01);
+
+            return false;
+        }
+    }
+    return true;
+}
+
+bool CTrade::Update()
+{
+    if ((m_pYourInvenCtrl && false == m_pYourInvenCtrl->Update())
+        || (m_pMyInvenCtrl && false == m_pMyInvenCtrl->Update()))
+        return false;
+
+    SyncRmlModel();
+    return true;
+}
+
+bool CTrade::Render()
+{
+    if (m_pYourInvenCtrl)
+        m_pYourInvenCtrl->Render();
+    if (m_pMyInvenCtrl)
+        m_pMyInvenCtrl->Render();
+    return true;
+}
+
+// Dynamically-generated guild-emblem bitmap (::CreateGuildMark() builds it fresh from the guild's
+// live mark data) -- a live render like the paperdoll/inventory item icons, not static chrome, so
+// it stays native. The guild NAME text next to it moved to RmlUi (see SyncRmlModel()'s
+// your_guild_name/your_guild_visible); the two don't overlap (name sits above the icon), so mixing
+// a native icon with an RmlUi label here is safe, same as MyInventory mixing its native paperdoll
+// with RmlUi frame text at the same m_Pos-relative coordinates.
+bool CTrade::DrawnPanel(Rml::Vector2f& offset, float& scale)
+{
+    Rml::Element* element = m_RmlView.Document() != nullptr ? m_RmlView.Document()->GetElementById("panel") : nullptr;
+    Rml::Vector2f size;
+    if (element == nullptr || !UI::RmlBridge::DrawnContentBox(*element, offset, size))
+        return false;
+    scale = UI::RmlBridge::DrawnScale(*element);
+    return true;
+}
+
+void CTrade::RenderGuildMark()
+{
+    for (int i = 0; i < MAX_MARKS; ++i)
+    {
+        if (GuildMark[i].Key != -1 && GuildMark[i].Key == m_nYourGuildType)
+        {
+            Rml::Vector2f panel;
+            float scale = 1.f;
+            if (!DrawnPanel(panel, scale))
+                return;
+            ::CreateGuildMark(i, false);
+            ::RenderBitmap(BITMAP_GUILD, panel.x + 15.f * scale, panel.y + 42.f * scale, 16.f * scale, 16.f * scale);
+            break;
+        }
+    }
+}
+
+void CTrade::RenderWarningArrow()
+{
+    // Animated cursor-tracking arrow glyph only -- a texture-atlas crop with a color tint (using an
+    // intentional GL_CLAMP UV overflow past v=1.0 to extend the sprite's bottom edge), genuinely a
+    // rendering technique rather than expressible chrome, so it stays native. The "Warning" text
+    // badge that used to render alongside it is RmlUi now (TradeRmlModel::itemWarningBadges,
+    // item_warning_badges in trade.rml) -- see SyncRmlModel().
+    ::EnableAlphaTest();
+
+    int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
+    ITEM* pYourItemObj;
+    for (int i = 0; i < nYourItems; ++i)
+    {
+        pYourItemObj = m_pYourInvenCtrl->GetItem(i);
+        if (ITEM_COLOR_TRADE_WARNING == pYourItemObj->byColorState)
+        {
+            const UI::Items::GridRect cell =
+                m_pYourInvenCtrl->Geometry().CellsRect(pYourItemObj->x, pYourItemObj->y, 1, 1);
+            // The original's sizes, for its 20-unit cell, at the cell's drawn size.
+            const float unit = cell.width / 20.f;
+            const float fX = cell.x;
+            const float fY = cell.y + sinf(WorldTime * 0.015f) * unit;
+
+            const DWORD warningArrowColor = RGBA(0, 255, 255, 255);
+            ::RenderColorBitmap(IMAGE_TRADE_WARNING_ARROW, fX, fY + 5.f * unit, 24.f * unit, 24.f * unit,
+                0.f, 0.4f, 1.f, 1.f, warningArrowColor);
+        }
+    }
+
+    ::DisableAlphaBlend();
+}
+
+int CTrade::ConvertYourLevel() const
+{
+    constexpr int kLevelBuckets[] = {400, 300, 200, 100, 50};
+    constexpr int kLowestBucket = 10;
+    for (const int bucket : kLevelBuckets)
+    {
+        if (m_nYourLevel >= bucket)
+            return bucket;
+    }
+    return kLowestBucket;
+}
+
+void CTrade::SyncRmlModel()
+{
+    m_ItemTarget.Sync(m_RmlView.Document() ? m_RmlView.Document()->GetElementById("item_view") : nullptr, IsVisible());
+    if (!m_RmlView.Document()) return;
+    UI::RmlBridge::SyncDocumentVisibility(m_RmlView.Document(), IsVisible());
+
+    if (m_pYourInvenCtrl)
+        m_pYourInvenCtrl->FollowGridPx(m_RmlView.Document(), "partner_grid");
+    if (m_pMyInvenCtrl)
+        m_pMyInvenCtrl->FollowGridPx(m_RmlView.Document(), "item_grid");
+    if (m_pYourInvenCtrl && m_RmlView.GetModel().partnerCells != m_pYourInvenCtrl->Cells())
+    {
+        m_RmlView.GetModel().partnerCells = m_pYourInvenCtrl->Cells();
+        m_RmlView.MarkDirty("partner_cells");
+    }
+    if (m_pMyInvenCtrl && m_RmlView.GetModel().gridCells != m_pMyInvenCtrl->Cells())
+    {
+        m_RmlView.GetModel().gridCells = m_pMyInvenCtrl->Cells();
+        m_RmlView.MarkDirty("grid_cells");
+    }
+    UI::RmlBridge::SyncNativeTextSize(m_RmlView.Binder());
+    SyncField(m_RmlView.Binder(), &TradeRmlModel::bigTextPx, "big_text_px",
+              UI::RmlBridge::NativeTextPx(UI::Scaling::FontRole::Big));
+
+    auto syncBool = [this](bool TradeRmlModel::* field, const char* boundName, bool value)
+    {
+        if (m_RmlView.GetModel().*field != value) { m_RmlView.GetModel().*field = value; m_RmlView.MarkDirty(boundName); }
+    };
+    auto syncFloat = [this](float TradeRmlModel::* field, const char* boundName, float value)
+    {
+        if (m_RmlView.GetModel().*field != value) { m_RmlView.GetModel().*field = value; m_RmlView.MarkDirty(boundName); }
+    };
+    auto syncText = [this](Rml::String TradeRmlModel::* field, const char* boundName, const Rml::String& value)
+    {
+        if (m_RmlView.GetModel().*field != value) { m_RmlView.GetModel().*field = value; m_RmlView.MarkDirty(boundName); }
+    };
+    auto syncWide = [&](Rml::String TradeRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        syncText(field, boundName, StringUtils::WideToNarrow(text));
+    };
+
+    syncWide(&TradeRmlModel::title, "title", I18N::Game::Trade);
+
+    syncWide(&TradeRmlModel::yourIdText, "your_id_text", m_szYourID);
+
+    Rml::String guildName;
+    for (int i = 0; i < MAX_MARKS; ++i)
+    {
+        if (GuildMark[i].Key != -1 && GuildMark[i].Key == m_nYourGuildType)
+        {
+            guildName = StringUtils::WideToNarrow(GuildMark[i].GuildName);
+            break;
+        }
+    }
+    syncBool(&TradeRmlModel::yourGuildVisible, "your_guild_visible", !guildName.empty());
+    syncText(&TradeRmlModel::yourGuildName, "your_guild_name", guildName);
+
+    const int nLevel = ConvertYourLevel();
+    wchar_t levelValueBuf[128];
+    if (nLevel == 400)
+        mu_swprintf(levelValueBuf, L"%d", nLevel);
+    else
+        mu_swprintf(levelValueBuf, I18N::Game::AboutD, nLevel);
+    wchar_t levelBuf[160];
+    mu_swprintf(levelBuf, L"Lv.%ls", levelValueBuf);
+    syncWide(&TradeRmlModel::yourLevelText, "your_level_text", levelBuf);
+    if (m_RmlView.GetModel().yourLevelBucket != nLevel)
+    {
+        m_RmlView.GetModel().yourLevelBucket = nLevel;
+        m_RmlView.MarkDirty("your_level_bucket");
+    }
+
+    wchar_t goldBuf[256];
+    ::ConvertGold(m_nYourTradeGold, goldBuf);
+    syncWide(&TradeRmlModel::yourGoldText, "your_gold_text", goldBuf);
+    syncText(&TradeRmlModel::yourGoldTier, "your_gold_tier",
+             UI::RmlBridge::GoldTierKey(GameLogic::Items::ClassifyGoldAmount(m_nYourTradeGold)));
+
+    ::ConvertGold(m_nMyTradeGold, goldBuf);
+    syncWide(&TradeRmlModel::myGoldText, "my_gold_text", goldBuf);
+    syncText(&TradeRmlModel::myGoldTier, "my_gold_tier",
+             UI::RmlBridge::GoldTierKey(GameLogic::Items::ClassifyGoldAmount(m_nMyTradeGold)));
+
+    syncWide(&TradeRmlModel::myIdText, "my_id_text", Hero->ID);
+
+    syncBool(&TradeRmlModel::yourConfirmChecked, "your_confirm_checked", m_bYourConfirm);
+    syncBool(&TradeRmlModel::myConfirmChecked, "my_confirm_checked", m_bMyConfirm);
+    syncBool(&TradeRmlModel::myConfirmWaiting, "my_confirm_waiting", m_nMyTradeWait > 0);
+
+    syncWide(&TradeRmlModel::warningLabel, "warning_label", I18N::Game::Warning);
+    syncWide(&TradeRmlModel::noticeLine1, "notice_line1", I18N::Game::NoticePleaseCheckOut);
+    syncWide(&TradeRmlModel::noticeLine2, "notice_line2", I18N::Game::TheLevelOfThePlayer);
+    syncWide(&TradeRmlModel::noticeLine3, "notice_line3", I18N::Game::AndTheItemsBeforeTrading);
+
+    // sin(WorldTime)-based alpha pulse on the "Warning" word.
+    const int nAlpha = int(std::min<int>(255, sin(WorldTime / 200) * 200 + 275));
+    syncFloat(&TradeRmlModel::warningOpacity, "warning_opacity", nAlpha / 255.f);
+
+    syncWide(&TradeRmlModel::closeTooltip, "close_tooltip", I18N::Game::Close388);
+    syncWide(&TradeRmlModel::zenTooltip, "zen_tooltip", I18N::Game::ZenTrade);
+
+    syncWide(&TradeRmlModel::itemWarningText, "item_warning_text", I18N::Game::Warning);
+
+    // Former RenderWarningArrow()'s "Warning" text badge, one per your-side item flagged
+    // ITEM_COLOR_TRADE_WARNING. The grid is in window pixels; the badges are #panel-relative
+    // reference px, with the same sinf() wobble the native arrow glyph still animates with -- see
+    // RenderWarningArrow() for the native arrow.
+    std::vector<TradeRmlModel::ItemWarningBadge> itemWarningBadges;
+    Rml::Vector2f panel;
+    float scale = 1.f;
+    if (m_pYourInvenCtrl && DrawnPanel(panel, scale))
+    {
+        const int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
+        for (int i = 0; i < nYourItems; ++i)
+        {
+            ITEM* pYourItemObj = m_pYourInvenCtrl->GetItem(i);
+            if (ITEM_COLOR_TRADE_WARNING != pYourItemObj->byColorState) continue;
+
+            const UI::Items::GridRect box = m_pYourInvenCtrl->Geometry().CellsRect(
+                pYourItemObj->x, pYourItemObj->y, ItemAttribute[pYourItemObj->Type].Width, 1);
+            const float fX = (box.x - panel.x) / scale;
+            const float fY = (box.y - panel.y) / scale + sinf(WorldTime * 0.015f);
+            const float fWidth = box.width / scale;
+
+            itemWarningBadges.push_back({ fX, fY, fWidth });
+        }
+    }
+    if (m_RmlView.GetModel().itemWarningBadges != itemWarningBadges)
+    {
+        m_RmlView.GetModel().itemWarningBadges = std::move(itemWarningBadges);
+        m_RmlView.MarkDirty("item_warning_badges");
+    }
+}
+
+float CTrade::GetLayerDepth()
+{
+    return 2.1f;
+}
+
+void CTrade::LoadImages()
+{
+    LoadBitmap(L"Interface\\CursorSitDown.tga", IMAGE_TRADE_WARNING_ARROW, GL_LINEAR, GL_CLAMP);
+}
+
+void CTrade::UnloadImages()
+{
+    DeleteBitmap(IMAGE_TRADE_WARNING_ARROW);
+}
+
+void CTrade::ProcessClosing()
+{
+    m_pYourInvenCtrl->RemoveAllItems();
+    m_pMyInvenCtrl->RemoveAllItems();
+
+    if (m_bTradeAlert)
+        InitYourInvenBackUp();
+}
+
+void CTrade::ProcessMyInvenCtrl()
+{
+    // A held item is put down when the button is released, like in every other
+    // item window: the inventory above this window takes the press.
+    if (m_pMyInvenCtrl == nullptr || !mu::ui::window::IsRelease(VK_LBUTTON))
+        return;
+
+    const auto move = UI::Items::Placement::FindHeldItemMove(m_pMyInvenCtrl, STORAGE_TYPE::TRADE);
+    if (!move)
+        return;
+
+    if (move->sourceType == STORAGE_TYPE::TRADE)
+        UI::Items::Placement::SendHeldItemMove(*move);
+    else
+        SendRequestItemToTrade(*move);
+}
+
+void CTrade::SendRequestItemToTrade(const UI::Items::Placement::HeldItemMove& move)
+{
+    if (GameLogic::Items::IsTradeBan(move.item))
+    {
+        g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
+        return;
+    }
+
+    UncheckMyConfirm();
+    UI::Items::Placement::SendHeldItemMove(move);
+}
+
+void CTrade::UncheckMyConfirm()
+{
+    m_bMyConfirm = false;
+    SocketClient->ToGameServer()->SendTradeButtonStateChange(TradeButtonState::Unchecked);
+}
+
+bool CTrade::ProcessMyInvenItemAutoMove(CInventoryCtrl* sourceCtrl)
+{
+    if (sourceCtrl == nullptr || sourceCtrl->GetStorageType() != STORAGE_TYPE::INVENTORY)
+        return false;
+
+    const bool moved = UI::Items::Placement::AutoMoveItemAtCursor(
+        sourceCtrl, STORAGE_TYPE::INVENTORY, m_pMyInvenCtrl, STORAGE_TYPE::TRADE,
+        [](ITEM* item)
+        {
+            if (!GameLogic::Items::IsTradeBan(item))
+                return true;
+            g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
+            return false;
+        });
+    if (moved)
+        UncheckMyConfirm();
+    return moved;
+}
+
+bool CTrade::ProcessMyTradeItemAutoMoveToInventory()
+{
+    CInventoryCtrl* inventory = g_pMyInventory != nullptr ? g_pMyInventory->GetInventoryCtrl() : nullptr;
+    const bool moved = UI::Items::Placement::AutoMoveItemAtCursor(m_pMyInvenCtrl, STORAGE_TYPE::TRADE, inventory,
+                                                                  STORAGE_TYPE::INVENTORY, [](ITEM*) { return true; });
+    if (!moved)
+        return false;
+
+    // Taking an item out after confirming warns the player, and the confirm
+    // button waits a moment so the partner can see the change.
+    if (m_bMyConfirm)
+        AlertTrade();
+    m_nMyTradeWait = MyTradeWaitAfterChange;
+    return true;
+}
+
+void CTrade::SendRequestMyGoldInput(int nInputGold)
+{
+    if (nInputGold <= (int)CharacterMachine->Gold + m_nMyTradeGold)
+    {
+        if (m_bMyConfirm)
+        {
+            m_bMyConfirm = false;
+            SocketClient->ToGameServer()->SendTradeButtonStateChange(TradeButtonState::Unchecked);
+        }
+
+        if (m_nMyTradeGold > 0)
+            m_nMyTradeWait = MyTradeWaitAfterChange;
+
+        m_nTempMyTradeGold = nInputGold;
+        SocketClient->ToGameServer()->SendSetTradeMoney(nInputGold);
+    }
+    else
+    {
+        mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
+    }
+}
+
+void CTrade::ProcessCloseBtn()
+{
+    if (CInventoryCtrl::GetPickedItem() == NULL)
+    {
+        m_bTradeAlert = false;
+        SocketClient->ToGameServer()->SendTradeCancel();
+    }
+}
+
+bool CTrade::ProcessBtns()
+{
+    if (m_nMyTradeWait > 0)
+        --m_nMyTradeWait;
+
+    return false;
+}
+
+void CTrade::AlertTrade()
+{
+    m_bMyConfirm = !m_bMyConfirm;
+
+    m_bTradeAlert = true;
+    SocketClient->ToGameServer()->SendTradeButtonStateChange(m_bMyConfirm ? TradeButtonState::Checked : TradeButtonState::Unchecked);
+}
+
+void CTrade::GetYourID(wchar_t* pszYourID)
+{
+    ::wcscpy(pszYourID, m_szYourID);
+}
+
+bool CTrade::ProcessToReceiveTradeRequest(const wchar_t* pszYourID)
+{
+    if (g_pNewUISystem->IsImpossibleTradeInterface())
+    {
+        SocketClient->ToGameServer()->SendTradeRequestResponse(false);
+        return false;
+    }
+
+    wcsncpy(m_szYourID, pszYourID, MAX_USERNAME_SIZE);
+    m_szYourID[MAX_USERNAME_SIZE] = L'\0';
+
+    mu::ui::window::GenericDialogConfig cfg;
+    cfg.showCancel = true;
+    cfg.lines = {
+        { m_szYourID, false },
+        { I18N::Game::WouldLikeToTradeWithYou, false },
+    };
+    cfg.onPrimary = [] { SocketClient->ToGameServer()->SendTradeRequestResponse(true); };
+    cfg.onCancel = [] { SocketClient->ToGameServer()->SendTradeRequestResponse(false); };
+    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+
+    mu::ui::window::CInventoryCtrl::BackupPickedItem();
+    return true;
+}
+
+void CTrade::ProcessToReceiveTradeResult(UI::Trade::RequestReply reply, const UI::Trade::Partner& partner)
+{
+    switch (reply)
+    {
+    case UI::Trade::RequestReply::Declined:
+        g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
+        break;
+
+    case UI::Trade::RequestReply::Unavailable:
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, mu::ui::window::TYPE_ERROR_MESSAGE);
+        break;
+
+    case UI::Trade::RequestReply::Accepted:
+        g_pNewUISystem->Show(mu::ui::window::INTERFACE_TRADE);
+
+        InitTradeInfo();
+
+        // The original's pointer jump, 260/640 of the way along its own x.
+        SetCursorPos(static_cast<int>(g_fWindowMouseX * 260.f / REFERENCE_WIDTH), static_cast<int>(g_fWindowMouseY));
+
+        wchar_t szTempID[MAX_USERNAME_SIZE + 1]{ };
+        wcsncpy(szTempID, std::wstring(partner.name).c_str(), MAX_USERNAME_SIZE);
+
+        if (!m_bTradeAlert && ::wcscmp(m_szYourID, szTempID))
+            InitYourInvenBackUp();
+
+        m_bTradeAlert = false;
+        m_nYourGuildType = partner.guildKey;
+        wcsncpy(m_szYourID, szTempID, MAX_USERNAME_SIZE);
+        m_nYourLevel = partner.level;
+        break;
+    }
+}
+
+void CTrade::ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex)
+{
+    BackUpYourInven(int(byYourInvenIndex));
+    ITEM* pYourItemObj = m_pYourInvenCtrl->FindItem(int(byYourInvenIndex));
+    m_pYourInvenCtrl->RemoveItem(pYourItemObj);
+    AlertYourTradeInven();
+    ::PlayBuffer(SOUND_GET_ITEM01);
+}
+
+void CTrade::BackUpYourInven(int nYourInvenIndex)
+{
+    ITEM* pYourItemObj = m_pYourInvenCtrl->FindItem(nYourInvenIndex);
+    BackUpYourInven(pYourItemObj);
+}
+
+void CTrade::BackUpYourInven(ITEM* pYourItemObj)
+{
+    if ((pYourItemObj->Type >= ITEM_HELPER && pYourItemObj->Type <= ITEM_DARK_HORSE_ITEM)
+        || (pYourItemObj->Type == ITEM_JEWEL_OF_BLESS || pYourItemObj->Type == ITEM_JEWEL_OF_SOUL || pYourItemObj->Type == ITEM_JEWEL_OF_LIFE)
+        || (pYourItemObj->Type >= ITEM_JEWEL_OF_GUARDIAN)
+        || (COMGEM::isCompiledGem(pYourItemObj))
+        || (pYourItemObj->Type >= ITEM_WING && pYourItemObj->Type <= ITEM_WINGS_OF_DARKNESS)
+        || (pYourItemObj->Type >= ITEM_CAPE_OF_LORD)
+        || (pYourItemObj->Type >= ITEM_WING_OF_STORM && pYourItemObj->Type <= ITEM_WING_OF_DIMENSION)
+        || (pYourItemObj->Type == ITEM_JEWEL_OF_CHAOS)
+        || (pYourItemObj->Type >= ITEM_CAPE_OF_FIGHTER && pYourItemObj->Type <= ITEM_CAPE_OF_OVERRULE)
+        || ((pYourItemObj->Level > 4 && pYourItemObj->Type < ITEM_WING) || pYourItemObj->ExcellentFlags > 0))
+    {
+        int nCompareValue;
+        bool bSameItem = false;
+
+        for (int i = 0; i < MAX_TRADE_INVEN; ++i)
+        {
+            if (-1 == m_aYourInvenBackUp[i].Type)
+                continue;
+
+            nCompareValue = ::CompareItem(m_aYourInvenBackUp[i], *pYourItemObj);
+            if (0 == nCompareValue)
+            {
+                bSameItem = true;
+                break;
+            }
+            else if (-1 == nCompareValue)
+            {
+                bSameItem = true;
+                m_aYourInvenBackUp[i] = *pYourItemObj;
+                break;
+            }
+            else if (2 != nCompareValue)
+            {
+                bSameItem = true;
+            }
+        }
+
+        if (!bSameItem)
+        {
+            for (int i = 0; i < MAX_TRADE_INVEN; ++i)
+            {
+                if (-1 == m_aYourInvenBackUp[i].Type)
+                {
+                    m_aYourInvenBackUp[i] = *pYourItemObj;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void CTrade::ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const BYTE> pbyItemPacket)
+{
+    m_pYourInvenCtrl->AddItem(byYourInvenIndex, pbyItemPacket);
+    AlertYourTradeInven();
+    ::PlayBuffer(SOUND_GET_ITEM01);
+}
+
+void CTrade::AlertYourTradeInven()
+{
+    int nCount = 0;
+    int nCompareItemType[10];
+
+    m_bTradeAlert = false;
+
+    int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
+    ITEM* pYourItemObj;
+    int nCompareValue;
+
+    for (int i = 0; i < nYourItems; ++i)
+    {
+        pYourItemObj = m_pYourInvenCtrl->GetItem(i);
+        for (int j = 0; j < MAX_TRADE_INVEN; ++j)
+        {
+            if (m_aYourInvenBackUp[j].Type == pYourItemObj->Type)
+            {
+                nCompareValue = ::CompareItem(m_aYourInvenBackUp[j], *pYourItemObj);
+                if (1 == nCompareValue)
+                {
+                    m_bTradeAlert = true;
+                    pYourItemObj->byColorState = ITEM_COLOR_TRADE_WARNING;
+                }
+                else
+                {
+                    if (0 == nCompareValue)
+                        nCompareItemType[nCount++] = m_aYourInvenBackUp[j].Type;
+
+                    pYourItemObj->byColorState = ITEM_COLOR_NORMAL;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (nCount > 0)
+    {
+        m_bTradeAlert = false;
+        for (int i = 0; i < nCount; ++i)
+        {
+            for (int j = 0; j < nYourItems; ++j)
+            {
+                pYourItemObj = m_pYourInvenCtrl->GetItem(j);
+                if (nCompareItemType[i] == pYourItemObj->Type)
+                    pYourItemObj->byColorState = ITEM_COLOR_NORMAL;
+            }
+        }
+    }
+}
+
+void CTrade::ProcessToReceiveMyTradeGold(BYTE bySuccess)
+{
+    m_nMyTradeGold = bySuccess ? m_nTempMyTradeGold : 0;
+}
+
+void CTrade::ProcessToReceiveYourConfirm(UI::Trade::PartnerConfirm state)
+{
+    switch (state)
+    {
+    case UI::Trade::PartnerConfirm::Cleared:
+        m_bYourConfirm = false;
+        break;
+    case UI::Trade::PartnerConfirm::Confirmed:
+        m_bYourConfirm = true;
+        break;
+    case UI::Trade::PartnerConfirm::BothReset:
+        m_bMyConfirm = false;
+        m_bYourConfirm = false;
+        m_nMyTradeWait = MyTradeWaitAfterChange;
+        break;
+    case UI::Trade::PartnerConfirm::Unchanged:
+        break;
+    }
+
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void CTrade::ProcessToReceiveTradeExit(UI::Trade::CloseReason reason)
+{
+    switch (reason)
+    {
+    case UI::Trade::CloseReason::Cancelled:
+    {
+        g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
+
+        m_bTradeAlert = false;
+
+        int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
+        for (int i = 0; i < nYourItems; ++i)
+            BackUpYourInven(m_pYourInvenCtrl->GetItem(i));
+    }
+    break;
+
+    case UI::Trade::CloseReason::InventoryFull:
+        g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceledBecauseYourInventoryIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
+        break;
+
+    case UI::Trade::CloseReason::RequestCancelled:
+        g_pSystemLogBox->AddText(I18N::Game::TradeRequestIsCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
+        break;
+
+    case UI::Trade::CloseReason::ReinforcedItem:
+        g_pSystemLogBox->AddText(I18N::Game::ReinforcedItemCanTBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
+        break;
+
+    case UI::Trade::CloseReason::Completed:
+        break;
+    }
+
+    mu::ui::window::CInventoryCtrl::DeletePickedItem();
+
+    g_MessageBox->PopMessageBox();
+
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_TRADE);
+}
+
+void CTrade::ProcessToReceiveTradeItems(int nIndex, std::span<const BYTE> pbyItemPacket)
+{
+    mu::ui::window::CInventoryCtrl::DeletePickedItem();
+
+    if (nIndex >= 0 && nIndex < (m_pMyInvenCtrl->GetNumberOfColumn()
+        * m_pMyInvenCtrl->GetNumberOfRow()))
+        m_pMyInvenCtrl->AddItem(nIndex, pbyItemPacket);
+}
+
+int mu::ui::window::CTrade::GetPointedItemIndexMyInven()
+{
+    return m_pMyInvenCtrl->GetPointedSquareIndex();
+}
+
+int mu::ui::window::CTrade::GetPointedItemIndexYourInven()
+{
+    return m_pYourInvenCtrl->GetPointedSquareIndex();
+}
+
+// Into #item_view (m_ItemTarget), in window pixels (the grids' FollowGridPx()): the partner's guild mark under
+// the items, the warning arrows over them.
+void CTrade::RenderItems()
+{
+    DisableDepthTest();
+    ::EnableAlphaTest();
+    RenderGuildMark();
+    EnableDepthTest();
+    if (m_pYourInvenCtrl && m_pYourInvenCtrl->IsVisible())
+        m_pYourInvenCtrl->Render3D();
+    if (m_pMyInvenCtrl && m_pMyInvenCtrl->IsVisible())
+        m_pMyInvenCtrl->Render3D();
+    DisableDepthTest();
+    RenderWarningArrow();
+    ::DisableAlphaBlend();
+}

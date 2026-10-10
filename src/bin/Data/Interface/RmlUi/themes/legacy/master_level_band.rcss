@@ -1,0 +1,19 @@
+/* Legacy theme for master_level_band.rml: the black padding of the original's background textures
+   from reference y 428 to the bottom of the HUD board: 640 x 52 dp, centred like the HUD. body's size must be set
+   here: this document does not link base.rcss. */
+
+body {
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+#band {
+	position: absolute;
+	left: 50%;
+	margin-left: -320dp;
+	width: 640dp;
+	bottom: 0;
+	height: 52dp;
+	background-color: #000000;
+}

@@ -1,6 +1,7 @@
-#include "UI/Legacy/UIManager.h"
+#pragma once
 
-typedef std::pair<int, BYTE> INTBYTEPAIR;
+#include "GameLogic/Items/JewelUnmixSelection.h"
+
 
 namespace COMGEM
 {
@@ -12,13 +13,13 @@ namespace COMGEM
     extern	BYTE	m_cPercent;
     extern	char	m_cState;
     extern	char	m_cErr;
-    extern	CUIUnmixgemList	m_UnmixTarList;
+    const GameLogic::Items::JewelUnmixSelection& GetWantedList();
+    bool SelectWantedItem(const GameLogic::Items::JewelUnmixSelection::Entry& entry);
+    bool RefreshWantedList();
 
     void	Init();
     void	Exit();
     void	GetBack();
-    void	RenderUnMixList();
-    void	MoveUnMixList();
     void	CalcGen();
     int		CalcItemValue(const ITEM*);
     char	CalcCompiledCount(const ITEM*);
@@ -29,7 +30,7 @@ namespace COMGEM
 
     bool	FindWantedList();
     void	ResetWantedList();
-    void	SelectFromList(int iIndex, int iLevel);
+    bool	PrepareUnmix();
     int		GetUnMixGemLevel();
 
     void	SendReqMix();

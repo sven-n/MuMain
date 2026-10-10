@@ -1,0 +1,187 @@
+/* Legacy theme for CMyInventory: RenderFrame()'s five-piece frame, the equipment slots'
+   newui_item_* art, the item grid (item_grid.rcss), title, gold and buttons. The workspace places
+   #panel (its slot's left/top/scale), so coordinates below are plain reference px, not dp. Button
+   icons/positions match CMyInventory::SetButtonInfo()'s former constants. */
+
+@spritesheet inv-bg-fill-sheet  { src: "../../../newui_msgbox_back.jpg";  inv-bg-fill:   0px 0px 190px 429px; }
+@spritesheet inv-bg-top-sheet   { src: "../../../newui_item_back04.tga";  inv-bg-top:    0px 0px 190px 64px;  }
+@spritesheet inv-bg-left-sheet  { src: "../../../newui_item_back02-L.tga"; inv-bg-left:  0px 0px 21px 320px;  }
+@spritesheet inv-bg-right-sheet { src: "../../../newui_item_back02-R.tga"; inv-bg-right: 0px 0px 21px 320px;  }
+@spritesheet inv-bg-bottom-sheet { src: "../../../newui_item_back03.tga"; inv-bg-bottom: 0px 0px 190px 45px;  }
+
+.bg-fill, .bg-top, .bg-left, .bg-right, .bg-bottom {
+	position: absolute;
+	pointer-events: none;
+}
+
+.bg-fill   { left: 0;    top: 0;   width: 190px; height: 429px; decorator: image(inv-bg-fill); }
+.bg-top    { left: 0;    top: 0;   width: 190px; height: 64px;  decorator: image(inv-bg-top); }
+.bg-left   { left: 0;    top: 64px; width: 21px; height: 320px; decorator: image(inv-bg-left); }
+.bg-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(inv-bg-right); }
+.bg-bottom { left: 0;    top: 384px; width: 190px; height: 45px; decorator: image(inv-bg-bottom); }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* Text rendered at the native text renderer's size: font-size comes from the RML and .counter-scaled
+   cancels the panel's scale (see my_inventory.rml), so these leaves lay out in physical pixels and scale back
+   around the edge their text is aligned to. */
+.native-text { white-space: nowrap; pointer-events: none; }
+
+/* Drag handle (MyInventory.cpp Create()) -- pointer-events/drag are force-set in C++ via
+   UI::RmlBridge::MakeDraggable(); cursor here is just discoverability. The box keeps the native
+   190x15 title area; only its text is counter-scaled. */
+#title {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: 190px;
+	height: 15px;
+	cursor: move;
+}
+.title-text {
+	display: block;
+	width: 190px;
+	text-align: center;
+	transform-origin: center top;
+	color: token(text-primary);
+	font-weight: bold;
+}
+
+@spritesheet inv-money-sheet { src: "../../../newui_item_money.tga"; inv-money: 0px 0px 170px 26px; }
+#gold_bg {
+	position: absolute;
+	left: 11px;
+	top: 364px;
+	width: 170px;
+	height: 26px;
+	decorator: image(inv-money);
+	pointer-events: none;
+}
+#gold_text {
+	position: absolute;
+	left: 50px;
+	top: 371px;
+	transform-origin: left top;
+	font-weight: bold;
+}
+
+/* Buttons: same 36x29 reference-pixel boxes SetButtonInfo() used to place them at. */
+@spritesheet inv-btn-exit-sheet    { src: "../../../newui_exit_00.tga";        inv-btn-exit:    0px 0px 36px 29px; }
+@spritesheet inv-btn-repair-sheet  { src: "../../../newui_repair_00.tga";      inv-btn-repair:  0px 0px 36px 29px; }
+@spritesheet inv-btn-expand-sheet  { src: "../../../newui_expansion_btn.tga";  inv-btn-expand:  0px 0px 36px 29px; }
+@spritesheet inv-btn-myshop-open-sheet  { src: "../../../newui_Bt_openshop.tga";  inv-btn-myshop-open:  0px 0px 36px 29px; }
+@spritesheet inv-btn-myshop-close-sheet { src: "../../../newui_Bt_closeshop.tga"; inv-btn-myshop-close: 0px 0px 36px 29px; }
+
+.inv-btn {
+	position: absolute;
+	top: 391px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.inv-btn:hover { filter: brightness(1.25); }
+.inv-btn.hidden { display: none; }
+.inv-btn.locked { pointer-events: none; filter: brightness(0.6); }
+
+.inv-btn-exit    { left: 13px;      decorator: image(inv-btn-exit); }
+.inv-btn-repair  { left: 50px;      decorator: image(inv-btn-repair); }
+.inv-btn-myshop  { left: 87px;      decorator: image(inv-btn-myshop-open); }
+.inv-btn-myshop.close-mode { decorator: image(inv-btn-myshop-close); }
+.inv-btn-expand  { left: 124px;     decorator: image(inv-btn-expand); }
+
+/* Button centres (x + 18) less half the row. */
+
+/* Set/Socket option header labels -- one centred line at the native y + 25, gray by default,
+   yellow when that set/socket bonus is active (RenderSetOption()/RenderSocketOption()'s colors). */
+.option-labels {
+	position: absolute;
+	left: 0;
+	top: 25px;
+	width: 190px;
+	text-align: center;
+	transform-origin: center top;
+	font-weight: bold;
+}
+.option-label { color: #646464; }
+.option-label.active { color: #ffcc19; }
+.option-label + .option-label { margin-left: 0.3em; }
+
+/* Hover areas -- each spans half of #panel's width, the original's hover split. */
+.option-hover {
+	position: absolute;
+	top: 20px;
+	width: 95px;
+	height: 15px;
+	pointer-events: auto;
+	cursor: default;
+}
+.option-hover-set { left: 0; }
+.option-hover-socket { left: 95px; }
+
+@spritesheet inv-slot-helper-sheet { src: "../../../newui_item_fairy.tga"; inv-slot-helper: 0px 0px 46px 46px; }
+@spritesheet inv-slot-helm-sheet { src: "../../../newui_item_cap.tga"; inv-slot-helm: 0px 0px 46px 46px; }
+@spritesheet inv-slot-wing-sheet { src: "../../../newui_item_wing.tga"; inv-slot-wing: 0px 0px 61px 46px; }
+@spritesheet inv-slot-weapon-left-sheet { src: "../../../newui_item_weapon(R).tga"; inv-slot-weapon-left: 0px 0px 46px 66px; }
+@spritesheet inv-slot-armor-sheet { src: "../../../newui_item_upper.tga"; inv-slot-armor: 0px 0px 46px 66px; }
+@spritesheet inv-slot-weapon-right-sheet { src: "../../../newui_item_weapon(L).tga"; inv-slot-weapon-right: 0px 0px 46px 66px; }
+@spritesheet inv-slot-gloves-sheet { src: "../../../newui_item_gloves.tga"; inv-slot-gloves: 0px 0px 46px 46px; }
+@spritesheet inv-slot-pants-sheet { src: "../../../newui_item_lower.tga"; inv-slot-pants: 0px 0px 46px 46px; }
+@spritesheet inv-slot-boots-sheet { src: "../../../newui_item_boots.tga"; inv-slot-boots: 0px 0px 46px 46px; }
+@spritesheet inv-slot-ring-left-sheet { src: "../../../newui_item_ring.tga"; inv-slot-ring-left: 0px 0px 28px 28px; }
+@spritesheet inv-slot-amulet-sheet { src: "../../../newui_item_necklace.tga"; inv-slot-amulet: 0px 0px 28px 28px; }
+@spritesheet inv-slot-ring-right-sheet { src: "../../../newui_item_ring.tga"; inv-slot-ring-right: 0px 0px 28px 28px; }
+
+/* Native equipment slots, item grid and item-option tooltip: where CMyInventory places them, in
+   #panel's units. A slot's box is its hit and drop area; the grid's top-left is its first cell;
+   the tooltip anchor is the tooltip's top centre. */
+.native-anchor { position: absolute; pointer-events: none; }
+#slot_helper { left: 15px; top: 44px; width: 46px; height: 46px; }
+#slot_helm { left: 75px; top: 44px; width: 46px; height: 46px; }
+#slot_wing { left: 120px; top: 44px; width: 61px; height: 46px; }
+#slot_weapon_left { left: 135px; top: 87px; width: 46px; height: 66px; }
+#slot_armor { left: 75px; top: 87px; width: 46px; height: 66px; }
+#slot_weapon_right { left: 15px; top: 87px; width: 46px; height: 66px; }
+#slot_gloves { left: 15px; top: 150px; width: 46px; height: 46px; }
+#slot_pants { left: 75px; top: 150px; width: 46px; height: 46px; }
+#slot_boots { left: 135px; top: 150px; width: 46px; height: 46px; }
+#slot_ring_left { left: 114px; top: 150px; width: 28px; height: 28px; }
+#slot_amulet { left: 54px; top: 87px; width: 28px; height: 28px; }
+#slot_ring_right { left: 54px; top: 150px; width: 28px; height: 28px; }
+#slot_helper { decorator: image(inv-slot-helper); }
+#slot_helm { decorator: image(inv-slot-helm); }
+#slot_wing { decorator: image(inv-slot-wing); }
+#slot_weapon_left { decorator: image(inv-slot-weapon-left); }
+#slot_armor { decorator: image(inv-slot-armor); }
+#slot_weapon_right { decorator: image(inv-slot-weapon-right); }
+#slot_gloves { decorator: image(inv-slot-gloves); }
+#slot_pants { decorator: image(inv-slot-pants); }
+#slot_boots { decorator: image(inv-slot-boots); }
+#slot_ring_left { decorator: image(inv-slot-ring-left); }
+#slot_amulet { decorator: image(inv-slot-amulet); }
+#slot_ring_right { decorator: image(inv-slot-ring-right); }
+
+/* A slot's state (CMyInventory::SyncSlotStates()): no-art where the class wears nothing there (a
+   Dark Lord's helm, a Rage Fighter's gloves); its item's wear or unfitness as a tint inset 1 from the
+   left and 4 from the right and bottom, as RenderEquippedItem() drew it; refused while the item on
+   the cursor cannot go in. */
+.equip-slot.no-art { decorator: none; }
+/* Where the equipped item draws and the pointer hits it (CMyInventory), tinted by the slot's state. */
+.equip-slot-item { position: absolute; left: 1px; top: 0; right: 3px; bottom: 4px; }
+.equip-slot.broken .equip-slot-item, .equip-slot.unequipable .equip-slot-item { background-color: rgba(255, 0, 0, 64); }
+.equip-slot.durability-20 .equip-slot-item { background-color: rgba(255, 38, 0, 64); }
+.equip-slot.durability-30 .equip-slot-item { background-color: rgba(255, 128, 0, 64); }
+.equip-slot.durability-50 .equip-slot-item { background-color: rgba(255, 255, 0, 64); }
+.equip-slot.refused .equip-slot-item { background-color: rgba(230, 26, 26, 102); }
+#item_grid, #item_grid_counts { left: 15px; top: 200px; width: calc(8 * var(--item-cell)); height: calc(8 * var(--item-cell)); }
+#option_tooltip_anchor { left: 95px; top: 40px; }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. */
+#panel.slot-placed { pointer-events: none; }
