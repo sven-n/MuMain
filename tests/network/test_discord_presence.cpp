@@ -236,6 +236,25 @@ TEST_CASE("Discord invite links are recognised [discord]")
     CHECK(Invite::IsInviteUrl(L"https://discordapp.com/invite/abc123"));
 }
 
+TEST_CASE("Discord invite links may carry a query or fragment [discord]")
+{
+    CHECK(Invite::IsInviteUrl(L"https://discord.gg/abc123?event=1234567890"));
+    CHECK(Invite::IsInviteUrl(L"https://discord.gg/abc123?utm_source=web&utm_medium=copy"));
+    CHECK(Invite::IsInviteUrl(L"https://discord.com/invite/abc123#top"));
+
+    // The code still has to be one, and nothing may break out of the URL.
+    CHECK_FALSE(Invite::IsInviteUrl(L"https://discord.gg/?event=1"));
+    CHECK_FALSE(Invite::IsInviteUrl(L"https://discord.gg/abc123?x=\"a b\""));
+    CHECK_FALSE(Invite::IsInviteUrl(L"https://discord.gg/abc123?x=" + std::wstring(300, L'a')));
+}
+
+TEST_CASE("An invite link which isn't one is not accepted [discord]")
+{
+    CHECK(Invite::Accept(L"https://discord.gg/abc123"));
+    CHECK_FALSE(Invite::Accept(L"https://discord.gg/abc 123"));
+    CHECK_FALSE(Invite::Accept(L""));
+}
+
 TEST_CASE("Anything but a Discord invite link is refused [discord]")
 {
     CHECK_FALSE(Invite::IsInviteUrl(L""));
@@ -245,7 +264,6 @@ TEST_CASE("Anything but a Discord invite link is refused [discord]")
     CHECK_FALSE(Invite::IsInviteUrl(L"https://discord.gg.example.com/abc123"));
     CHECK_FALSE(Invite::IsInviteUrl(L"https://example.com/?https://discord.gg/abc123"));
     CHECK_FALSE(Invite::IsInviteUrl(L"https://discord.gg/abc123/../../evil"));
-    CHECK_FALSE(Invite::IsInviteUrl(L"https://discord.gg/abc123?x=1"));
     CHECK_FALSE(Invite::IsInviteUrl(L"https://discord.com/channels/123"));
     CHECK_FALSE(Invite::IsInviteUrl(L"file:///etc/passwd"));
     CHECK_FALSE(Invite::IsInviteUrl(L"https://discord.gg/" + std::wstring(40, L'a')));

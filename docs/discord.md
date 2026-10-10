@@ -58,7 +58,8 @@ to the Discord setting. It opens the server's invite in the Discord app, or in
 the browser when Discord isn't installed.
 
 Only real Discord invite links are opened (`https://discord.gg/...` or
-`https://discord.com/invite/...`); with anything else the button is not shown.
+`https://discord.com/invite/...`, also with a query like `?event=...`); with
+anything else the button is not shown, and the client log says why.
 
 ## For server operators
 

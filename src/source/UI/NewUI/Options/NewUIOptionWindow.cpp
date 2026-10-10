@@ -803,7 +803,7 @@ void SEASON3B::CNewUIOptionWindow::RenderDiscordPresenceRow()
 // config.ini shows no button rather than one that does nothing.
 void SEASON3B::CNewUIOptionWindow::ReadDiscordInvite()
 {
-    m_bHasDiscordInvite = Integration::Discord::Invite::IsInviteUrl(GameConfig::GetInstance().GetDiscordInviteUrl());
+    m_bHasDiscordInvite = Integration::Discord::Invite::Accept(GameConfig::GetInstance().GetDiscordInviteUrl());
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderButtons()
