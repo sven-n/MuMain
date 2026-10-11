@@ -42,9 +42,8 @@
 .frame-bottom { left: 0;  right: 0; bottom: 0;  height: 45px; decorator: image(docked-bg-bottom); }
 
 /* Group-box corner-bracket-and-fill technique -- reproduces RenderGroupBox()'s 9-slice tiling as 4
-   corner sprites + 2 flat fills, not a literal 1px-tile port (no verified repeat pattern exists in
-   this RmlUi build; character_info.rcss's original .summary-fill/.summary-corner established this
-   simplification first). Shape/color only here -- each window's own per-instance class (e.g.
+   corner sprites + 2 flat fills. Image decorators now support sprite repetition; these frames
+   retain the fill treatment established by character_info.rcss's .summary-fill/.summary-corner. Shape/color only here -- each window's own per-instance class (e.g.
    ".gbox-dh-corner-tl") supplies left/top and picks which corner sprite via
    image(docked-corner-tl/tr/bl/br). */
 .gbox-corner { position: absolute; width: 14px; height: 14px; pointer-events: none; }

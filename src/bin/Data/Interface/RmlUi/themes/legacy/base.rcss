@@ -238,8 +238,8 @@ body {
    are the closing ends of the well, not controls.
 
    One deliberate simplification remains, same class as character_info.rcss's summary-box frame:
-   the middle slice is one stretched ninepatch rather than a literal repeat-tile, since this build
-   has no verified repeat-tiling pattern. The thumb's native 7-vs-15 overhang is also not
+   the middle slice remains a stretched ninepatch. Image decorators now support sprite repetition,
+   but this frame keeps its existing stretch treatment. The thumb's native 7-vs-15 overhang is also not
    reproduced -- that needs the track narrower than the scrollbar element, and RmlUi sizes
    slidertrack itself. */
 @spritesheet legacy-scroll-track-sheet

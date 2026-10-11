@@ -13,6 +13,8 @@
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/RmlBridge/ThemeFileInterface.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/HUD/ChatLogWindow.h"
 
 namespace UI::RmlBridge
 {
@@ -42,6 +44,8 @@ void InstallRuntimeHooks()
     {
         FitNativeTextToBoxes(context);
         UpdateMarquees(context);
+        if (auto* chat = g_pChatListBox)
+            chat->AfterRmlLayout(context);
     };
     hooks.createFileInterface = [] { return std::make_unique<ThemeFileInterface>(); };
     hooks.resolveTexture = [](const Rml::String& source, void*& texture, int& width, int& height)

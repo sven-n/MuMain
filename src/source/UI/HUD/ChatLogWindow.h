@@ -16,6 +16,7 @@
 namespace Rml
 {
     class ElementDocument;
+    class Context;
 }
 
 namespace mu::ui::window
@@ -189,7 +190,7 @@ namespace mu::ui::window
         float m_PanelScale = 0.f;
         bool m_bLinesDirty = true;
         bool m_bFollowTail = true;
-        // One-shot, set when the line list changes and consumed on the next frame once RmlUi has
+        // One-shot, set when the line list changes and consumed after RmlUi has
         // laid the new lines out. Never pin outside this latch -- doing so re-clamps the view
         // every frame and makes the scrollbar and wheel look broken.
         bool m_bScrollPending = false;
@@ -243,6 +244,7 @@ namespace mu::ui::window
         void ResizeToPointer(float pointerYPx);
         bool UpdateKeyEvent() override;
         bool Update() override;
+        void AfterRmlLayout(Rml::Context* context);
         // Hides the document outside the main scene (CSystem::SyncMainSceneHudVisibility()): the
         // window is only updated there, but its document would keep drawing in every scene.
         void SyncDocVisibility(bool sceneAllowsShow);

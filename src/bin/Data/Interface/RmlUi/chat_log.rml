@@ -16,7 +16,7 @@
 	     a new message (CChatLogWindow::SyncRmlModel). -->
 	<div id="panel" data-class-framed="show_frame" data-style-height="panel_height + 'dp'">
 		<!-- Drag to resize in 3-line steps; only exists with the frame shown, matching native. -->
-		<div id="backdrop" data-style-opacity="back_alpha"></div>
+		<div id="chat_backdrop" data-style-opacity="back_alpha"></div>
 		<div id="resize_handle" data-class-hidden="!show_frame"
 		     data-event-drag="chat_resize_drag"></div>
 

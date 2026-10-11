@@ -8,6 +8,15 @@
 #include "Render/RmlUi/RmlPremultiply.h"
 #include <algorithm>
 
+namespace
+{
+std::wstring BitmapPath(std::string path)
+{
+    std::replace(path.begin(), path.end(), '/', '\\');
+    return StringUtils::NarrowToWide(path);
+}
+} // namespace
+
 RmlUiRenderInterface::RmlUiRenderInterface(SDL_GPUDevice* device, SDL_Window* window)
     : RenderInterface_SDL_GPU(device, window)
 {
@@ -40,9 +49,7 @@ Rml::TextureHandle RmlUiRenderInterface::LoadTexture(Rml::Vector2i& texture_dime
     // caller of Bitmaps.LoadImage passes backslash-separated paths (e.g. "Interface\\Foo.jpg"),
     // matching this codebase's own path-handling convention -- normalize rather than assume
     // forward-slash tolerance extends to this legacy loader too.
-    std::string normalized = source;
-    std::replace(normalized.begin(), normalized.end(), '/', '\\');
-    const std::wstring wpath = StringUtils::NarrowToWide(normalized); // Rml::String is std::string (RmlUi/Config/Config.h)
+    const std::wstring wpath = BitmapPath(source); // Rml::String is std::string (RmlUi/Config/Config.h)
     // LoadImageExclusive, NOT LoadImage: this handle is cached indefinitely (by RmlUi's compiled
     // geometry, and by m_FileBackedBitmapIndexByHandle below) for as long as the document lives,
     // which today is the whole process -- but plain LoadImage() would find-and-share an existing
@@ -55,7 +62,7 @@ Rml::TextureHandle RmlUiRenderInterface::LoadTexture(Rml::Vector2i& texture_dime
     // (symptom: return to the login screen and the panel renders garbled, then crashes).
     // LoadImageExclusive always creates its own independent entry, immune to any other scene's
     // slot churn, at the cost of a small amount of duplicate VRAM for these two small UI textures.
-    const GLuint bitmapIndex = Bitmaps.LoadImageExclusive(wpath, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    const GLuint bitmapIndex = Bitmaps.LoadImageExclusive(wpath, GL_LINEAR, GL_CLAMP_TO_EDGE, false);
     if (bitmapIndex == BITMAP_UNKNOWN) return 0;
 
     BITMAP_t* bmp = Bitmaps.GetTexture(bitmapIndex);

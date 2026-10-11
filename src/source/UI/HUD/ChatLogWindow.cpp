@@ -624,9 +624,7 @@ void mu::ui::window::CChatLogWindow::BindRmlModel(Rml::DataModelConstructor& c, 
     c.Bind("line_px", &model.linePx);
     c.Bind("row_px", &model.rowPx);
 
-    // Drag the handle above the window to resize it in native's own 3-line steps. The
-    // stepping stays in UpdateMouseEvent() where the pointer's absolute Y already lives;
-    // this only arms it.
+    // RmlUi drag events supply the pointer directly; legacy button flags do not see panel presses.
     c.BindEventCallback("chat_resize_drag",
         [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList&)
         { ResizeToPointer(event.GetParameter<float>("mouse_y", 0.f)); });
@@ -702,13 +700,22 @@ void mu::ui::window::CChatLogWindow::SyncRmlModel()
         RebuildLineModel();
         m_RmlView.MarkDirty("lines");
 
-        // Arms a ONE-SHOT pin, consumed next frame. It must be a latch, not a per-frame call:
+        // Arms a one-shot pin, consumed after RmlUi layout. It must be a latch, not a per-frame call:
         // the new lines only have a resolved scroll height after RmlUi lays them out, so the pin
-        // has to happen a frame later -- but pinning on every frame in between re-clamps the view
+        // must happen after that update -- pinning every frame re-clamps the view
         // to the bottom continuously, which silently defeats the user's own scrollbar drag and
         // mouse wheel.
         m_bScrollPending = true;
     }
+
+    UpdatePointedLine();
+}
+
+void mu::ui::window::CChatLogWindow::AfterRmlLayout(Rml::Context* context)
+{
+    auto* document = m_RmlView.Document();
+    if (!document || document->GetContext() != context || !document->IsVisible())
+        return;
 
     if (m_bScrollPending)
     {
@@ -723,12 +730,7 @@ void mu::ui::window::CChatLogWindow::SyncRmlModel()
         m_bScrollRequest = false;
         ApplyLogicalScroll();
     }
-    else
-    {
-        SyncLogicalScrollFromView();
-    }
-
-    UpdatePointedLine();
+    SyncLogicalScrollFromView();
 }
 
 // Native's RenderMessages(): each line drawn with RenderText() at the native text size, its
