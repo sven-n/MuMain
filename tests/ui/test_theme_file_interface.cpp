@@ -10,6 +10,7 @@
 #include "UI/RmlBridge/RmlScaleInputs.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/Options/OptionWindow.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Core/WindowCommon.h"
 #include "UI/Core/SceneUICoordinator.h"
@@ -198,6 +199,21 @@ struct FontEnvironment
 };
 }
 
+TEST_CASE("saved theme recovery validates ancestry before choosing a fallback [ui][rml-theme]")
+{
+    Fixture fixture;
+    fixture.Write(fixture.Theme("legacy") / "base.rcss", "body { color: white; }");
+    fixture.Write(fixture.Theme("child") / "theme.ini", "[Theme]\nBase=legacy\n");
+    fixture.Write(fixture.Theme("broken") / "theme.ini", "[Theme]\nBase=missing\n");
+    fixture.Write(fixture.Theme("cycle") / "theme.ini", "[Theme]\nBase=cycle\n");
+    fixture.ActivateRoot();
+    CHECK(UI::RmlBridge::ResolveStartupThemeName("CHILD") == "child");
+    for (const char* name : {"missing", "broken", "cycle", "../legacy", ""})
+        CHECK(UI::RmlBridge::ResolveStartupThemeName(name) == "legacy");
+    std::filesystem::remove(fixture.Theme("legacy") / "base.rcss");
+    CHECK(UI::RmlBridge::ResolveStartupThemeName("missing").empty());
+}
+
 TEST_CASE("focused confirmation input claims its document and accepts Enter and Escape [ui][dialog-input]")
 {
     Fixture fixture;
@@ -240,6 +256,55 @@ TEST_CASE("focused confirmation input claims its document and accepts Enter and 
     CHECK(cancelled == 1);
     g_bWndActive = wasActive;
     dialog.Release();
+}
+
+TEST_CASE("options keep displayed theme identities and refresh only on open or switch [ui][rml-theme]")
+{
+    Fixture fixture;
+    fixture.Write(fixture.Theme("legacy") / "base.rcss", "body { color: white; }");
+    fixture.Write(fixture.Theme("modern") / "base.rcss", "body { color: white; }");
+    fixture.Write(fixture.root / "Data/Interface/RmlUi/option_window.rml",
+        "<rml><head></head><body data-model='option_window'>"
+        "<div id='panel' class='fullscreen'><span id='selected'>{{ theme_value_label }}</span>"
+        "<span id='index'>{{ theme_index }}</span><div id='choices'>"
+        "<span data-for='label : theme_labels'>{{ label }}</span></div>"
+        "<button id='choose' data-event-click='option_dropdown_option_click(2, 1)'>Choose</button>"
+        "</div></body></rml>");
+    fixture.ActivateRoot();
+    UI::RmlBridge::SetActiveThemeName("legacy");
+    mu::ui::window::CManager manager;
+    mu::ui::window::COptionWindow options;
+    REQUIRE(options.Create(&manager));
+    options.Show(true);
+    auto update = [&] { options.Update(); fixture.context->Update(); };
+    auto document = [&] { return fixture.context->GetDocument(0); };
+    for (int frame = 0; frame < 5; ++frame)
+        update();
+    REQUIRE(document() != nullptr);
+    CHECK(document()->GetElementById("selected")->GetInnerRML() == "Legacy");
+    const auto originalChoices = document()->GetElementById("choices")->GetInnerRML();
+    fixture.Write(fixture.Theme("aaa") / "base.rcss", "body { color: white; }");
+    for (int frame = 0; frame < 5; ++frame)
+        update();
+    CHECK(document()->GetElementById("choices")->GetInnerRML() == originalChoices);
+    // Index 1 belongs to Modern in the displayed list, even though discovery now includes aaa.
+    document()->GetElementById("choose")->DispatchEvent(Rml::EventId::Click, {});
+    update();
+    CHECK(UI::RmlBridge::GetActiveThemeName() == "modern");
+    CHECK(document()->GetElementById("selected")->GetInnerRML() == "Modern");
+    CHECK(document()->GetElementById("index")->GetInnerRML() == "2");
+    fixture.Write(fixture.Theme("aaa") / "theme.ini", "[Meta]\nDisplayName=Added theme\n");
+    options.OpenningProcess();
+    update();
+    CHECK(document()->GetElementById("choices")->GetInnerRML().find("Added theme") != std::string::npos);
+    // A deleted pending theme must not silently turn into another entry at its old index.
+    for (int frame = 0; frame < 5; ++frame)
+        update();
+    document()->GetElementById("choose")->DispatchEvent(Rml::EventId::Click, {});
+    std::filesystem::remove(fixture.Theme("legacy") / "base.rcss");
+    update();
+    CHECK(UI::RmlBridge::GetActiveThemeName() == "modern");
+    CHECK(document()->GetElementById("index")->GetInnerRML() == "1");
 }
 
 TEST_CASE("scene resizing preserves open creation and message actions [ui][scene-resize]")

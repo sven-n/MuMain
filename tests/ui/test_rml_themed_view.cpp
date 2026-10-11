@@ -64,6 +64,13 @@ public:
         m_Folder = std::filesystem::temp_directory_path() / "rml_themed_view_tests";
         std::filesystem::remove_all(m_Folder);
         std::filesystem::create_directories(m_Folder);
+        m_PreviousDirectory = std::filesystem::current_path();
+        m_PreviousTheme = UI::RmlBridge::GetActiveThemeName();
+        const auto theme = m_Folder / "Data/Interface/RmlUi/themes/legacy";
+        std::filesystem::create_directories(theme);
+        std::ofstream(theme / "base.rcss") << "body { color: white; }";
+        std::filesystem::current_path(m_Folder);
+        UI::RmlBridge::SetActiveThemeName("legacy");
     }
 
     ~Fixture()
@@ -76,6 +83,8 @@ public:
 
     void ShutDown()
     {
+        std::filesystem::current_path(m_PreviousDirectory);
+        UI::RmlBridge::SetActiveThemeName(m_PreviousTheme);
         Rml::Shutdown();
         Rml::SetRenderInterface(nullptr);
         m_ShutDown = true;
@@ -104,6 +113,8 @@ public:
 private:
     NullRenderer m_Renderer;
     std::filesystem::path m_Folder;
+    std::filesystem::path m_PreviousDirectory;
+    std::string m_PreviousTheme;
     bool m_ShutDown = false;
 };
 } // namespace

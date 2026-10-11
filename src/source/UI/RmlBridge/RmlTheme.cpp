@@ -62,7 +62,7 @@ namespace UI::RmlBridge
         // ThemeExists()'s callers), so "mutable" is the operative word here, not "cached once".
         std::string& ActiveThemeNameStorage()
         {
-            static std::string name = ToLower(NarrowAscii(GameConfig::GetInstance().GetRmlTheme()));
+            static std::string name = ResolveStartupThemeName(NarrowAscii(GameConfig::GetInstance().GetRmlTheme()));
             return name;
         }
 
@@ -84,6 +84,24 @@ namespace UI::RmlBridge
     const std::string& GetActiveThemeName()
     {
         return ActiveThemeNameStorage();
+    }
+
+    std::string ResolveStartupThemeName(const std::string& savedName)
+    {
+        const std::string name = ToLower(savedName);
+        if (ThemeExists(name))
+            return name;
+
+        constexpr const char* fallback = "legacy";
+        if (ThemeExists(fallback))
+        {
+            g_ErrorReport.Write(L"> [RmlTheme] Saved theme '%hs' is unavailable; using '%hs'.\r\n",
+                                savedName.c_str(), fallback);
+            return fallback;
+        }
+        g_ErrorReport.Write(L"> [RmlTheme] Saved theme '%hs' and fallback '%hs' are unavailable.\r\n",
+                            savedName.c_str(), fallback);
+        return {};
     }
 
     bool ThemeUsesNativeTextSize()
@@ -209,6 +227,15 @@ namespace UI::RmlBridge
         buffer << file.rdbuf();
         return buffer.str();
     }
+
+    void ApplyModelName(std::string& markup, const std::string& placeholder, const std::string& modelName)
+    {
+        if (placeholder.empty())
+            return;
+        for (size_t at = markup.find(placeholder); at != std::string::npos;
+             at = markup.find(placeholder, at + modelName.size()))
+            markup.replace(at, placeholder.size(), modelName);
+    }
     } // namespace
 
     Rml::ElementDocument* ThemedDocumentLoader::Load(Rml::Context* context, const char* documentPath)
@@ -219,6 +246,9 @@ namespace UI::RmlBridge
     Rml::ElementDocument* ThemedDocumentLoader::Load(Rml::Context* context, const char* documentPath,
                                                      const std::string& modelPlaceholder, const std::string& modelName)
     {
+        if (GetActiveThemeName().empty())
+            return nullptr;
+
         // documentPath's basename (the part after the last '/') is what the per-theme source URL
         // needs -- e.g. "Data/Interface/RmlUi/login.rml" -> "login.rml".
         const std::string path(documentPath);
@@ -232,12 +262,7 @@ namespace UI::RmlBridge
         if (!markup)
             return nullptr;
         std::string rmlText = *markup;
-        if (!modelPlaceholder.empty())
-        {
-            for (size_t at = rmlText.find(modelPlaceholder); at != std::string::npos;
-                 at = rmlText.find(modelPlaceholder, at + modelName.size()))
-                rmlText.replace(at, modelPlaceholder.size(), modelName);
-        }
+        ApplyModelName(rmlText, modelPlaceholder, modelName);
 
         Rml::ElementDocument* doc = context->LoadDocumentFromMemory(rmlText, sourceUrl);
         ApplyNativeTextSize(doc);

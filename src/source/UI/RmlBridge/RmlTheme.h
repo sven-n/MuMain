@@ -34,6 +34,9 @@ namespace UI::RmlBridge
     // writes to, not necessarily GameConfig's current value.
     const std::string& GetActiveThemeName();
 
+    // Validates a saved selection; falls back to legacy, or returns empty if neither is usable.
+    std::string ResolveStartupThemeName(const std::string& savedName);
+
     // Overwrites the live active-theme cache GetActiveThemeName() reads
     // from (lowercased, same normalization GetActiveThemeName() has always applied). Does not touch
     // GameConfig and does not rebuild any window's document by itself -- see this file's top comment.

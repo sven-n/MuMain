@@ -205,7 +205,7 @@ mu::ui::window::COptionWindow::COptionWindow()
     m_bDisableBoids = GameConfig::GetInstance().GetDisableBoids();
     m_bDisableWingShadow = GameConfig::GetInstance().GetDisableWingShadow();
 
-    m_iThemeIndex = FindCurrentThemeIndex();
+    m_iThemeIndex = -1;
     m_iUIScaleIndex = FindCurrentUIScaleIndex();
 }
 
@@ -221,15 +221,11 @@ bool mu::ui::window::COptionWindow::Create(CManager* pNewUIMng)
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_OPTION, this);
-    LoadImages();
     InitResolutionCombo();
     InitLanguageCombo();
     InitFontCombo();
 
-    if (RmlUiRuntime::Instance().IsCreated())
-    {
-        BuildRmlUi();
-        }
+    BuildRmlUi();
 
     Show(false);
     return true;
@@ -392,6 +388,7 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
 // `fullscreen`, and there is nothing to drag.
 void mu::ui::window::COptionWindow::OnRmlBuilt()
 {
+    RefreshThemeChoices();
     Rml::ElementDocument* document = m_RmlView.Document();
     m_pPanelEl = document->GetElementById("panel");
     if (m_pPanelEl && m_pPanelEl->IsClassSet("fullscreen"))
@@ -437,8 +434,6 @@ void mu::ui::window::COptionWindow::InitFontCombo()
 
 void mu::ui::window::COptionWindow::Release()
 {
-    UnloadImages();
-
     m_RmlView.Release();
 
     if (m_pNewUIMng)
@@ -560,46 +555,12 @@ void mu::ui::window::COptionWindow::OpenningProcess()
     m_bDisableBoids = GameConfig::GetInstance().GetDisableBoids();
     m_bDisableWingShadow = GameConfig::GetInstance().GetDisableWingShadow();
 
-    m_iThemeIndex = FindCurrentThemeIndex();
+    RefreshThemeChoices();
     m_iUIScaleIndex = FindCurrentUIScaleIndex();
 }
 
 void mu::ui::window::COptionWindow::ClosingProcess()
 {
-}
-
-void mu::ui::window::COptionWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_button_close.tga", IMAGE_OPTION_BTN_CLOSE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_OPTION_FRAME_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_OPTION_FRAME_DOWN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_option_top.tga", IMAGE_OPTION_FRAME_UP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_option_back06(L).tga", IMAGE_OPTION_FRAME_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_option_back06(R).tga", IMAGE_OPTION_FRAME_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_option_line.jpg", IMAGE_OPTION_LINE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_option_point.tga", IMAGE_OPTION_POINT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_option_check.tga", IMAGE_OPTION_BTN_CHECK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_option_effect03.tga", IMAGE_OPTION_EFFECT_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_option_effect04.tga", IMAGE_OPTION_EFFECT_COLOR, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_option_volume01.tga", IMAGE_OPTION_VOLUME_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_option_volume02.tga", IMAGE_OPTION_VOLUME_COLOR, GL_LINEAR);
-}
-
-void mu::ui::window::COptionWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_OPTION_BTN_CLOSE);
-    DeleteBitmap(IMAGE_OPTION_FRAME_BACK);
-    DeleteBitmap(IMAGE_OPTION_FRAME_DOWN);
-    DeleteBitmap(IMAGE_OPTION_FRAME_UP);
-    DeleteBitmap(IMAGE_OPTION_FRAME_LEFT);
-    DeleteBitmap(IMAGE_OPTION_FRAME_RIGHT);
-    DeleteBitmap(IMAGE_OPTION_LINE);
-    DeleteBitmap(IMAGE_OPTION_POINT);
-    DeleteBitmap(IMAGE_OPTION_BTN_CHECK);
-    DeleteBitmap(IMAGE_OPTION_EFFECT_BACK);
-    DeleteBitmap(IMAGE_OPTION_EFFECT_COLOR);
-    DeleteBitmap(IMAGE_OPTION_VOLUME_BACK);
-    DeleteBitmap(IMAGE_OPTION_VOLUME_COLOR);
 }
 
 void mu::ui::window::COptionWindow::RmlClickSelectTab(int nTab)
@@ -848,17 +809,16 @@ void mu::ui::window::COptionWindow::RmlThemeChanged(int index)
     // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
     if (m_rmlSyncCount < kRmlSelectSettleFrames)
         return;
-    const std::vector<std::string> themes = UI::RmlBridge::DiscoverAvailableThemes();
-    if (index < 0 || index >= static_cast<int>(themes.size()))
+    if (index < 0 || index >= static_cast<int>(m_themeNames.size()))
         return;
-    if (index == m_iThemeIndex)
+    if (m_themeNames[static_cast<size_t>(index)] == UI::RmlBridge::GetActiveThemeName())
         return;
 
     // Deferred to Update() -- see m_bPendingThemeSwitch's own comment (OptionWindow.h) for why
     // this can't run synchronously here: it would destroy m_RmlView.Document() mid-dispatch of the very
     // dropdown-option click event that called this (RmlDropdownOptionClick(), itself invoked from
     // a data-event-click on one of the option divs this document is about to unload).
-    m_iPendingThemeIndex = index;
+    m_pendingThemeName = m_themeNames[static_cast<size_t>(index)];
     m_bPendingThemeSwitch = true;
 }
 
@@ -868,14 +828,9 @@ void mu::ui::window::COptionWindow::ApplyPendingThemeSwitch()
         return;
     m_bPendingThemeSwitch = false;
 
-    const int index = m_iPendingThemeIndex;
-    const std::vector<std::string> themes = UI::RmlBridge::DiscoverAvailableThemes();
-    if (index < 0 || index >= static_cast<int>(themes.size()))
-        return;
-    m_iThemeIndex = index;
-
-    const std::string& themeName = themes[static_cast<size_t>(index)];
+    const std::string themeName = std::exchange(m_pendingThemeName, {});
     UI::Theme::Select(themeName, UI::Theme::Persistence::Saved);
+    RefreshThemeChoices();
 }
 
 void mu::ui::window::COptionWindow::RmlUIScaleChanged(int index)
@@ -1074,14 +1029,25 @@ int mu::ui::window::COptionWindow::FindCurrentFpsCapIndex()
 
 int mu::ui::window::COptionWindow::FindCurrentThemeIndex()
 {
-    const std::vector<std::string> themes = UI::RmlBridge::DiscoverAvailableThemes();
     const std::string& active = UI::RmlBridge::GetActiveThemeName();
-    for (size_t i = 0; i < themes.size(); ++i)
+    for (size_t i = 0; i < m_themeNames.size(); ++i)
     {
-        if (themes[i] == active)
+        if (m_themeNames[i] == active)
             return static_cast<int>(i);
     }
-    return 0;
+    return -1;
+}
+
+void mu::ui::window::COptionWindow::RefreshThemeChoices()
+{
+    m_themeNames = UI::RmlBridge::DiscoverAvailableThemes();
+    m_iThemeIndex = FindCurrentThemeIndex();
+    auto& model = m_RmlView.GetModel();
+    model.themeLabels.clear();
+    model.themeLabels.reserve(m_themeNames.size());
+    for (const std::string& name : m_themeNames)
+        model.themeLabels.push_back(UI::RmlBridge::GetThemeDisplayName(name));
+    m_RmlView.MarkDirty("theme_labels");
 }
 
 int mu::ui::window::COptionWindow::FindCurrentUIScaleIndex()
@@ -1293,18 +1259,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     if (model.showFpsCounter != showFpsCounter) { model.showFpsCounter = showFpsCounter; m_RmlView.MarkDirty("show_fps_counter"); }
     if (model.showDebugInfo != showDebugInfo) { model.showDebugInfo = showDebugInfo; m_RmlView.MarkDirty("show_debug_info"); }
 
-    // Rebuilt every sync, same reasoning as fps_cap_labels above -- also picks up a theme folder
-    // added or removed while this window is open, no restart needed (DiscoverAvailableThemes()
-    // enumerates Data/Interface/RmlUi/themes/ directly rather than assuming a fixed {legacy,
-    // modern} set).
-    std::vector<Rml::String> newThemeLabels;
-    for (const std::string& themeName : UI::RmlBridge::DiscoverAvailableThemes())
-        newThemeLabels.push_back(UI::RmlBridge::GetThemeDisplayName(themeName));
-    if (newThemeLabels != model.themeLabels)
-    {
-        model.themeLabels = std::move(newThemeLabels);
-        m_RmlView.MarkDirty("theme_labels");
-    }
+    m_iThemeIndex = FindCurrentThemeIndex();
     if (model.themeIndex != m_iThemeIndex) { model.themeIndex = m_iThemeIndex; m_RmlView.MarkDirty("theme_index"); }
     syncDropdownValue(model.themeValueLabel, "theme_value_label", model.themeLabels, model.themeIndex);
 

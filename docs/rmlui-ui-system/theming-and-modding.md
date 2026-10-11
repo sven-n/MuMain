@@ -40,12 +40,15 @@ helpers require manual review and running-client checks.
 
 A theme is identified by **folder name**, not a closed C++ enum, specifically so adding one
 (including a fully programmatic, sprite-free one) is normally a zero-source-change,
-drop-a-folder operation.
+drop-a-folder operation. Reopen Options after adding or removing a theme to refresh its list;
+the list also refreshes after switching themes.
 
 `config.ini`'s `[UI] RmlTheme=<name>` selects the active theme, read once at startup by
 `GameConfig::GetRmlTheme()` and cached by `UI::RmlBridge::GetActiveThemeName()`. That cache is
 also live-mutable via `UI::RmlBridge::SetActiveThemeName()` — see
-["Switching themes without relaunching"](#switching-themes-without-relaunching) below. Loading a
+["Switching themes without relaunching"](#switching-themes-without-relaunching) below. A
+missing or invalid saved theme falls back to `legacy`, with a diagnostic in the error log. If
+`legacy` is also unavailable, restore the bundled theme files before launching. Loading a
 window goes through its `ThemedView`, which hands `"Data/Interface/RmlUi/login.rml"` to
 `UI::RmlBridge::ThemedDocumentLoader::Load()`:
 

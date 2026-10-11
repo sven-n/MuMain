@@ -36,31 +36,6 @@ namespace mu::ui::window
 {
     class COptionWindow : public CObject
     {
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-    public:
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-        // Kept even though this window no longer renders through the legacy bitmap-atlas system. No
-        // other window aliases BITMAP_OPTION_BEGIN any more (the MU Helper did, until its port), but
-        // LoadImages() below also loads slots aliased from CMessageBoxMng/CMyInventory -- check those
-        // owners load their own before removing it.
-        enum IMAGE_LIST
-        {
-            IMAGE_OPTION_FRAME_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
-            IMAGE_OPTION_BTN_CLOSE = CMessageBoxMng::IMAGE_MSGBOX_BTN_CLOSE,
-            IMAGE_OPTION_FRAME_DOWN = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-
-            IMAGE_OPTION_FRAME_UP = BITMAP_OPTION_BEGIN,
-            IMAGE_OPTION_FRAME_LEFT,
-            IMAGE_OPTION_FRAME_RIGHT,
-            IMAGE_OPTION_LINE,
-            IMAGE_OPTION_POINT,
-            IMAGE_OPTION_BTN_CHECK,
-            IMAGE_OPTION_EFFECT_BACK,
-            IMAGE_OPTION_EFFECT_COLOR,
-            IMAGE_OPTION_VOLUME_BACK,
-            IMAGE_OPTION_VOLUME_COLOR,
-        };
-
     public:
         COptionWindow();
         virtual ~COptionWindow();
@@ -95,9 +70,6 @@ namespace mu::ui::window
         bool GetRenderAllEffects();
 
     private:
-        void LoadImages();
-        void UnloadImages();
-
         void InitResolutionCombo();
         void InitLanguageCombo();
         void InitFontCombo();
@@ -117,8 +89,7 @@ namespace mu::ui::window
         // needed since the list never changes at runtime (unlike resolutions).
         int FindCurrentFpsCapIndex();
 
-        // Interface/UI tab's UI Theme row -- indexes {legacy, modern} against
-        // UI::RmlBridge::GetActiveThemeName().
+        void RefreshThemeChoices();
         int FindCurrentThemeIndex();
 
         // Interface/UI tab's UI Scale row -- indexes UI::Options::UIScalePercentChoices() against
@@ -345,12 +316,13 @@ namespace mu::ui::window
         bool m_bDisableBoids;
         bool m_bDisableWingShadow;
 
-        // Interface/UI tab -- m_iThemeIndex seeded from UI::RmlBridge::GetActiveThemeName()
-        // (0=legacy/1=modern). Show FPS Counter/Show Debug Info need no members -- SyncRmlModel()
+        // Interface/UI tab -- selection indexes the displayed theme snapshot.
+        // Show FPS Counter/Show Debug Info need no members -- SyncRmlModel()
         // reads SceneManager.h's GetShowFpsCounter()/GetShowDebugInfo() live every frame instead
         // (see OptionRmlModel's own comment on why: they're mutually exclusive globals with no
         // GameConfig backing).
         int m_iThemeIndex;
+        std::vector<std::string> m_themeNames;
         // Indexes UI::Options::UIScalePercentChoices(); seeded from GameConfig::GetUIScalePercent()
         // (and re-seeded in OpenningProcess(), so a scale set from outside this window -- e.g. a
         // hand-edited config.ini -- shows up on the next open).
@@ -362,7 +334,7 @@ namespace mu::ui::window
         // instead: RmlThemeChanged() only records the request; ApplyPendingThemeSwitch() (called
         // from Update(), outside any RmlUi event) performs it on the next tick.
         bool m_bPendingThemeSwitch = false;
-        int m_iPendingThemeIndex = 0;
+        std::string m_pendingThemeName;
         // Applying a UI scale resizes the window to its current size (MuApplyWindowResolution),
         // which re-runs every resolution-dependent system, re-asserts RmlUi's dp ratio on all
         // three contexts and pumps SDL while settling the window -- too much to run while still
