@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <filesystem>
+#include <system_error>
 #include <utility>
 
 // S_OK, S_FALSE are now provided by PlatformTypes.h (via PCH)
@@ -142,13 +144,8 @@ void MiniAudioBackend::Shutdown()
         m_soundObjects[buf] = nullptr;
     }
 
-    // Release music stream
-    if (m_musicLoaded)
-    {
-        ma_sound_uninit(&m_musicSound);
-        m_musicLoaded = false;
-        m_currentMusicName.clear();
-    }
+    ReleaseMusicStream();
+    m_failedMusicNames.clear();
 
     ma_engine_uninit(&m_engine);
     m_initialized = false;
@@ -521,71 +518,96 @@ void MiniAudioBackend::SetMasterVolume(long vol)
 }
 
 // ---------------------------------------------------------------------------
-// PlayMusic — start streaming a music track
-// If enforce=false and the same track is already playing, returns early (no restart).
-// Matches wzAudioPlay() + Mp3FileName guard logic from MuMain.cpp.
-//
-// Path normalization — MUSIC_* constants in mu_enum.h use Windows
-// backslash separators (e.g., "data\\music\\Pub.mp3"). On Linux/macOS miniaudio
-// requires forward slashes, and the on-disk asset may differ in case, so the
-// path is resolved via MuResolvePath() before ma_sound_init_from_file().
-// The same-track guard uses the unresolved name — see IsSameMusicTrack().
+// PlayMusic -- start streaming a music track.
+// Per-frame scene requests do no file I/O after success or failure. Enforced playback retries
+// failed tracks; stopping music does not clear failures because scenes also stop tracks each frame.
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
 {
-    if (!m_initialized || name == nullptr)
+    if (!m_initialized || name == nullptr || name[0] == '\0')
+    {
+        return;
+    }
+    if (!enforce && IsSameMusicTrack(m_currentMusicName, name))
     {
         return;
     }
 
-    // If not enforced and same track is already playing, do nothing
-    if (!enforce && !m_currentMusicName.empty() && IsSameMusicTrack(m_currentMusicName, name))
+    ReleaseMusicStream();
+    if (!enforce && HasFailedMusicTrack(name))
     {
         return;
     }
+    std::string identity(name);
+    NormalizeSeparators(identity);
+    if (!StartMusicStream(identity))
+    {
+        if (!HasFailedMusicTrack(identity.c_str()))
+        {
+            m_failedMusicNames.push_back(std::move(identity));
+        }
+        return;
+    }
 
-    // Stop and release previous music stream
+    std::erase(m_failedMusicNames, identity);
+    m_currentMusicName = std::move(identity);
+}
+
+bool MiniAudioBackend::HasFailedMusicTrack(const char* name) const
+{
+    return std::any_of(m_failedMusicNames.begin(), m_failedMusicNames.end(),
+        [name](const std::string& track) { return IsSameMusicTrack(track, name); });
+}
+
+bool MiniAudioBackend::StartMusicStream(const std::string& identity)
+{
+#ifdef _WIN32
+    const std::string& filePath = identity;
+#else
+    const std::string filePath = MuResolvePath(identity.c_str());
+#endif
+    std::error_code error;
+    if (!std::filesystem::is_regular_file(std::filesystem::u8path(filePath), error))
+    {
+        mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- unavailable music file '{}' ({})",
+            filePath, error ? error.message() : "not a regular file");
+        return false;
+    }
+
+    // Synchronous init keeps IsEndMusic() accurate while starting. Missing files never reach
+    // the resource-manager job queue; decoder failures are remembered by PlayMusic().
+    ma_result result = ma_sound_init_from_file(&m_engine, filePath.c_str(), MA_SOUND_FLAG_STREAM,
+        nullptr, nullptr, &m_musicSound);
+    if (result != MA_SUCCESS)
+    {
+        mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- failed to init stream '{}' ({})",
+            filePath, static_cast<int>(result));
+        return false;
+    }
+
+    ma_sound_set_looping(&m_musicSound, MA_TRUE);
+    ma_sound_set_volume(&m_musicSound, m_bgmVolume);
+    result = ma_sound_start(&m_musicSound);
+    if (result != MA_SUCCESS)
+    {
+        ma_sound_uninit(&m_musicSound);
+        mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- failed to start stream '{}' ({})",
+            filePath, static_cast<int>(result));
+        return false;
+    }
+    m_musicLoaded = true;
+    return true;
+}
+
+void MiniAudioBackend::ReleaseMusicStream()
+{
     if (m_musicLoaded)
     {
         ma_sound_stop(&m_musicSound);
         ma_sound_uninit(&m_musicSound);
         m_musicLoaded = false;
-        m_currentMusicName.clear();
     }
-
-    // Start new stream — MA_SOUND_FLAG_STREAM keeps it off the decode buffer.
-    // MA_SOUND_FLAG_ASYNC is intentionally NOT used: async init causes ma_sound_is_playing()
-    // to return MA_FALSE for several frames after ma_sound_start(), making IsEndMusic()
-    // return true spuriously. BGM is triggered on scene load (infrequent), so synchronous
-    // stream init cost is acceptable.
-    // NOTE: Synchronous init may stall the game loop 10–100ms on HDDs or network shares
-    // (common in server-hosted MU setups) due to file open + ID3 header parse + decoder init
-    // on the calling thread. Acceptable for BGM at scene transitions on SSD; known limitation
-    // for HDD/network installs. Deferred to 5.2.x if a non-blocking init path is needed.
-    std::string identity(name);
-    NormalizeSeparators(identity);
-#ifdef _WIN32
-    const std::string& filePath = identity;
-#else
-    const std::string filePath = MuResolvePath(name);
-#endif
-    ma_result result = ma_sound_init_from_file(&m_engine, filePath.c_str(), MA_SOUND_FLAG_STREAM, nullptr,
-                                               nullptr, &m_musicSound);
-
-    if (result != MA_SUCCESS)
-    {
-        mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- failed to init stream '{}' ({})", filePath,
-                                     static_cast<int>(result));
-        return;
-    }
-
-    ma_sound_set_looping(&m_musicSound, MA_TRUE);
-    // Apply stored BGM volume to new track before starting
-    ma_sound_set_volume(&m_musicSound, m_bgmVolume);
-    ma_sound_start(&m_musicSound);
-
-    m_musicLoaded = true;
-    m_currentMusicName = std::move(identity);
+    m_currentMusicName.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -618,10 +640,7 @@ void MiniAudioBackend::StopMusic(const char* name, bool enforce)
         }
     }
 
-    ma_sound_stop(&m_musicSound);
-    ma_sound_uninit(&m_musicSound);
-    m_musicLoaded = false;
-    m_currentMusicName.clear();
+    ReleaseMusicStream();
 }
 
 // ---------------------------------------------------------------------------

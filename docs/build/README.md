@@ -176,6 +176,11 @@ tar -xzf MuMain-data-<id>.tar.gz -C MuMain-runtime
 The assembled directory contains `Main.exe`, the network and runtime DLLs,
 configuration, shaders, `Data/`, and `fonts/`.
 
+If a music file is missing or cannot be decoded, the client logs the failure and leaves
+that track silent for the rest of the audio session. Scene changes do not repeatedly
+retry it. After restoring or replacing a file under `Data/Music/`, restart the client
+to load it again.
+
 ### Build without copying data
 
 Local builds copy `Data/` and `fonts/` by default. Packaging or compile-only
