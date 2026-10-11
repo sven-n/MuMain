@@ -1,6 +1,6 @@
 # Window placement
 
-A theme, or a mod of one, decides where every window and HUD part goes, how big it is, and how
+A theme decides where placeable windows and HUD parts go, how big they are, and how
 windows arrange around each other, without C++ changes (principles §15–16): docked on either side
 or not at all, beside each other in one theme and apart in another, covering the whole screen or
 half of it — anything ordinary RCSS can express.
@@ -44,10 +44,12 @@ part, inside **regions** the theme defines with ordinary RCSS:
 
 - A slot is shown only while its window is open, so open windows pack in a region by flex layout.
   Order within a region is DOM order (this RmlUi build has no `order` property).
-- A mod changes placement by overriding `workspace.rml`/its RCSS per theme, like any themed
-  document. A window without a slot places itself as before.
+- Edit the selected theme's `workspace.rml`/RCSS to change placement, or supply those files in a
+  custom theme folder. There is no separate mod override layer. A window without a slot uses
+  its own RCSS anchors or its documented data-driven placement.
 - The workspace document is never shown: the service lays it out itself and reads it back. This
-  is the one sanctioned readback of RCSS geometry into C++ (section 3).
+  is the shared readback of RCSS geometry for window placement (section 3). Native content also
+  reads its element boxes to follow the drawn layout.
 - Unknown `data-window`/`data-closes` names are logged once per workspace (`[Placement]` in
   MuError.log).
 
@@ -109,7 +111,7 @@ theme reload, a HUD part shown or hidden, the chat log resizing) call `Invalidat
   its region's scale arrive as `--slot-left`, `--slot-top` and `--root-scale` with the `slot-placed`
   class, given again to a document a theme switch rebuilt, and `base.rcss`'s `#panel.slot-placed`
   applies them, so a theme may place the panel otherwise. Its model binds no `root_*`. Such a window
-  needs a slot in every theme; `CCharacterInfoWindow` is the first. The corner X and exit buttons
+  uses a slot for workspace placement; `CCharacterInfoWindow` is the reference. The corner X and exit buttons
   close it with `data-event-click="window_close"` (`UI::RmlBridge::BindWindowClose()`).
 - **HUD documents**: `UI::RmlBridge::RegisterWorkspaceDocument(name, docGetter, rootId, options)`
   adapts a document root to a `PlacementParticipant` (visible/measure/place callbacks) — placed by
@@ -199,26 +201,28 @@ Every rule in `CSystem::Show()`/`Hide()` is one of three kinds:
 | Cash shop, Kanturu | `HideAll()` / `HideAllGroupB()` |
 | Checks | `IsImpossible*Interface()` |
 
-Still in C++ until their windows have slots: the MU Helper bar hiding for a fourth column
+Remaining C++ arrangement rules: the MU Helper bar hiding for a fourth column
 (`ShouldHideMuHelperBar()`, only matters to legacy with a reserved header) and the help panels'
 mutual exclusion. Unchecked: Chaos Castle's timer closes the chat input — overlap or event rule.
 
 ## 8. Dragging and saved positions
 
-The player drags dialogs and the friend system only, and no position is saved. Docked windows stay
-in their slots; dragging a window out of its slot is not planned.
+Dialogs, social windows and the inventory support dragging; positions are not saved across
+sessions. Workspace arrangement takes precedence over an inventory drag. Other docked windows
+remain in their slots.
 
 - The friend list, chat rooms and letters drag through `UI::RmlBridge::MakeDraggable()` and
   bounce back on screen. The friend list asks its `friends` slot only where it first opens
   (`InitialPosition()`); the chat and letter windows keep the friend manager's cascade. The manager keeps every
   friend-family position and size in dp (`UI/Social/SocialWorkspace.h`), the units the documents
   lay out in, and keeps new windows above a bottom HUD; positions follow the UI scale.
-- The options window, the generic menu dialog (the system menu among them) and the generic confirm
-  dialog drag by any part that is not a control (`base.rcss` gives
+- Legacy's options window, the generic menu dialog and the generic confirm dialog drag by any
+  part that is not a control (`base.rcss` gives
   `input, select, textarea, .btn, [data-event-click]` `drag: block`), stay where they were dropped
   for the session, and move back inside the window if dropped partly outside
   (`KeepInsideWindow()`). A menu or confirmation opens centred each time
-  (`ResetDraggedPosition()`); the confirm dialog's chrome documents follow its panel.
+  (`ResetDraggedPosition()`); the confirm dialog's chrome documents follow its panel. Modern's
+  full-screen options and system menu do not drag.
 - The native message boxes (`CMessageBoxBase` family) are not draggable.
 - The inventory drags by its title. The position lasts until the workspace places it again (another
   window opens or closes in its region); positions are not saved across sessions.
@@ -245,27 +249,28 @@ Each was tried by editing only a theme's workspace/RCSS on runtime copies, click
 - **Character info filled** (both) at 22–35 % width and UI scale 80–100 %; pet info at 35 %; the
   move map centre-left at 60 % height and as a full-height column.
 
-Not done, by decision: a split main HUD (one unit for now) and a corner minimap (this game's
-minimap is the full-screen map). A left dock covers the chat log, which a theme using one would
+The main HUD remains one workspace unit, and the minimap is a full-screen map rather than a
+corner widget. A left dock covers the chat log, which a theme using one must
 move.
 
-Resolutions checked: both themes at 1024x768, 1280x720 and 1920x1080 (HUD scale 2.25), and a live
+Recorded checks: both themes at 1024x768, 1280x720 and 1920x1080, and a live
 switch in the options window.
 
 ## Theme-sized windows
 
 A window's size is the theme's choice, like its place: a slot takes the window's `#panel` size, so
-what fixes a size is inside the window — chrome at fixed pixels, 190/429 literals in RML,
-hit boxes against C++ constants, and native parts at `m_Pos + constant`.
+the theme's panel dimensions determine content sizing. Native content follows the panel and its
+element geometry; check the remaining integration and validation limits below when resizing it.
 
 | Tier | Windows | State |
 |---|---|---|
 | 1. RCSS only | character, party, pet, NPC dialogue, gate switch, MU Helper config | Done: the docked frame pins to `#panel`'s edges; a counter-scaled leaf as wide as the panel is `calc(100% * var(--root-scale))`. |
 | 2. Plus hit box | guild info, guild make, command, command list, Blood Castle and Devil Square entry, catapult, lucky coin registration, lucky item | Done: hit boxes read `#panel`. Catapult and lucky item not checked in game. |
 | 3. Plus anchors | quest progress, quest log, NPC quest, castle, guard, gatekeeper, duel watch, MU Helper detail, United Marketplace | Done in code (RmlUi click targets, theme-placed). Siege NPC windows not checked in game. |
-| 4. Item grids | inventory, extension, vault, NPC shop, mix, trade, personal shops | Done: each grid's box and its `.item-cell` pitch (`--item-cell`, `CInventoryCtrl::FollowGrid()`), the equipment slots and their item boxes (`#slot_*_item`) and the option tooltip are the theme's; C++ hit-tests and draws the items in them. Legacy headings centre on `panel_width`. |
+| 4. Item grids | inventory, extension, vault, NPC shop, mix, trade, personal shops | Done: each grid's box and its `.item-cell` pitch (`--item-cell`, `CInventoryCtrl::FollowGridPx()`), the equipment slots and their item boxes (`#slot_*_item`) and the option tooltip are the theme's; C++ hit-tests and draws the items in them. Legacy headings centre on `panel_width`. |
 | 5. Shared views | Gold Bowman (both), Doppelganger and Empire Guardian entry, lucky coin exchange | Each registers its document, so slots take the theme's size; native parts still need anchors. |
 
-## Open questions
+## Validation still needed
 
-- How z-order and focus interact with regions.
+- Custom region arrangements need focus and overlap checks. Regions supply geometry;
+  `RmlStackingOrder.cpp` supplies document depth, so moving a slot does not change its z-order.

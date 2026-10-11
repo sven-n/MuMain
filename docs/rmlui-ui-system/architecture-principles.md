@@ -1,29 +1,27 @@
 # UI Architecture Principles
 
-**Read this before touching any RmlUi UI code on this branch — before opening `README.md` or any
-other doc in this directory.** Everything else in `docs/rmlui-ui-system/` is either an
+**Read this before changing RmlUi UI code.** Everything else in `docs/rmlui-ui-system/` is either an
 implementation of these principles on this specific codebase (`building-new-ui.md` for the C++ UI
 kit, `layout-and-scaling.md`, `theming-and-modding.md`, `window-placement.md`), or a
 reference report against all of the above (`README.md`, `engine-findings.md`,
 `migration-ledger.md`). None of them repeat the reasoning here — if
-something below and something elsewhere in this directory ever seem to disagree, this file wins; go
-fix the other file.
+another guide conflicts with this policy, update that guide.
 
-This is the governing policy for the RmlUi UI migration, issued by the user. It reframes the
-migration's success criterion: not "the old UI now renders through RmlUi" but "a unified,
-maintainable, resolution-independent UI framework." It is written to stand on its own —
-it does not assume familiarity with this repository's specific classes or history, only with
-RmlUi/RCSS in general. **This file changes rarely and should stay stable; project-specific status
-(what's done, what's still a gap) belongs in `README.md`'s "Known limits", not here.**
+This is the governing policy for the unified RmlUi UI system. It defines the ownership and
+quality requirements for new components and changes to existing ones. It stands on its own:
+it assumes familiarity with RmlUi/RCSS, rather than this repository's classes or history.
+**This file changes rarely and should stay stable; project-specific status
+(implemented behavior and remaining gaps) belongs in `README.md`'s "Known limits", not here.**
+
+The requirements below are the architectural baseline, not a feature-availability list.
+Consult the overview for implemented capabilities and current limits.
+Sections 2–4 and 27 also preserve the compatibility workflow for future work on legacy behavior.
 
 ---
 
-As part of the ongoing migration of the legacy MU Online UI to **RmlUI**, treat this as a **UI
-architecture modernization**, not simply a replacement of the existing rendering implementation.
-
-The goal is to establish a single, maintainable UI system that is resolution-independent,
-aspect-ratio aware, responsively laid out, user-scalable, themeable, moddable, reusable,
-maintainable, and independent of historical MU Online UI/version boundaries. The new architecture
+Maintain a single, maintainable UI system that is resolution-independent, aspect-ratio aware,
+responsively laid out, user-scalable, themeable, moddable, reusable,
+and independent of historical MU Online UI/version boundaries. The architecture
 should make it possible to substantially modify the UI's appearance, layout, assets, theme, and
 user preferences without recompiling the client, wherever reasonably possible.
 
@@ -50,7 +48,7 @@ open/close, game events, component behavior, drag interaction, preference persis
 
 ## 2. Reverse-Engineer Original Layout Intent Before Migration
 
-Before converting any legacy UI component to RmlUI, **first analyze and document the layout
+Before converting any legacy UI component to RmlUi, **first analyze and document the layout
 intent of the existing implementation**. Do not perform a mechanical translation of legacy
 coordinates, dimensions, or rendering calls into RML/RCSS.
 
@@ -59,7 +57,7 @@ to, whether it stretches/scales/is fixed-size, whether it's positioned relative 
 another component, and whether any resolution/aspect-ratio-specific behavior is intentional or
 merely a legacy implementation artifact. Establish a concise layout-intent description (anchor,
 size, stretch, responsive behavior, UI scale, draggable, default position) before implementing
-the RmlUI version. Values must come from analysis of the existing implementation and intended
+the RmlUi version. Values must come from analysis of the existing implementation and intended
 UX, not assumptions.
 
 **This reverse-engineering requirement is scoped to the Legacy Theme** — the theme obligated to
@@ -133,10 +131,10 @@ C++ coordinate calculations.
 
 ## 9. Centralized UI Scaling
 
-UI scale (e.g. 75/100/125/150%, exact range TBD via implementation/testing) must be a first-class
+UI scale must be a first-class
 user preference: applied consistently across the UI, persisted through the game's config system,
 working across resolutions/aspect ratios, not requiring individual components to implement their
-own scaling, ideally runtime-changeable — via the most appropriate RmlUI-native approach, not
+own scaling, ideally runtime-changeable — via the most appropriate RmlUi-native approach, not
 independent per-component scaling calculations. **Viewport size and UI scale must remain
 explicit, distinct concepts** (e.g. 3440x1440 @ 100% vs. 3440x1440 @ 125% are different scale
 settings on the same viewport). Changing UI scale should not change a component's underlying
@@ -144,8 +142,7 @@ layout intent.
 
 ## 10. Preserve and Integrate Existing Draggability
 
-Do not make redesigning/replacing the existing RmlUi drag system a primary goal of this
-amendment. Instead: inspect how it works, preserve it where already appropriate, ensure it works
+When changing layout, preserve the existing RmlUi drag system where appropriate and ensure it works
 with the new declarative layout system, ensure theme-defined default layouts don't conflict with
 user-dragged positions, ensure dragged positions continue to behave correctly across
 resolution/aspect-ratio/UI-scale changes, and reuse the existing drag infrastructure rather than
@@ -183,14 +180,14 @@ implement it as a **Legacy Theme** on top of the unified UI architecture (Unifie
 Legacy/Modern/Custom Theme → theme-specific assets/styling/layout). The Legacy Theme should
 preserve the existing visual identity as closely as practical (sprites, textures, icons, fonts
 where applicable, windows, buttons, HUD appearance, visual effects, layout behavior where
-required), integrated into the unified RmlUI system rather than a parallel legacy architecture.
+required), integrated into the unified RmlUi system rather than a parallel legacy architecture.
 
 ## 14. Legacy Assets Should Remain First-Class Assets
 
 Don't unnecessarily discard/rewrite existing legacy sprites/textures. Where practical, the Legacy
-Theme should reference existing assets through the RmlUI resource/asset system, mapped to RmlUI
+Theme should reference existing assets through the RmlUi resource/asset system, mapped to RmlUi
 concepts (images, backgrounds, borders, icons, textures, decorators, etc.). If a legacy rendering
-behavior can't be reproduced directly with normal RmlUI/RCSS, isolate that compatibility
+behavior can't be reproduced directly with normal RmlUi/RCSS, isolate that compatibility
 requirement behind the UI framework rather than spreading legacy-specific rendering hacks
 throughout every component.
 
@@ -248,10 +245,10 @@ differs.
 
 ## 21. Design Tokens / Shared Theme Variables
 
-Where supported by RmlUI, establish centralized UI design variables/tokens for common properties
+Where supported by RmlUi, establish centralized UI design variables/tokens for common properties
 (`ui-font`, `ui-font-size`, `ui-window-background`, `ui-window-border`, `ui-panel-padding`,
 `ui-item-spacing`, `ui-button-height`, `ui-primary-text`, `ui-secondary-text`, `ui-scale`, etc.),
-using RmlUI's supported capabilities rather than unnecessary custom infrastructure, so themes can
+using RmlUi's supported capabilities rather than unnecessary custom infrastructure, so themes can
 change broad aspects of the UI without editing every individual selector.
 
 ## 22. Keep Game Logic Out of Themes
@@ -291,18 +288,18 @@ wrapping, clipping, overlap, minimum usable dimensions, UI scale behavior, persi
 
 ## 26. Architecture Audit Before Broad Refactoring
 
-Before major structural changes, inspect the existing repository/RmlUI migration: existing UI
+Before major structural changes, inspect the existing repository/RmlUi migration: existing UI
 managers, legacy/new UI hierarchy, version-specific implementations, duplicate components,
 existing coordinate/scaling systems, existing drag implementation, resolution/input handling,
-renderer integration, RmlUI context/document management, existing RML/RCSS, asset system, legacy
+renderer integration, RmlUi context/document management, existing RML/RCSS, asset system, legacy
 sprite/texture loading, configuration system, existing theme implementation, existing user
 preference mechanisms. Then propose the target architecture based on the actual repository — do
 not blindly impose a predetermined directory structure/abstraction hierarchy, and do not rewrite
-functioning infrastructure merely to satisfy this amendment; prefer incremental improvement.
+functioning infrastructure merely to satisfy an abstract design; prefer incremental improvement.
 
-## 27. Required Migration Workflow
+## 27. Required Workflow for Legacy Compatibility Changes
 
-For each significant migrated UI: (1) inspect legacy implementation, (2) trace related UI/
+For each significant legacy compatibility change: (1) inspect legacy implementation, (2) trace related UI/
 component code, (3) identify original layout behavior, (4) separate intent from implementation
 artifacts, (5) document layout intent, (6) identify related components/hierarchy, (7) identify
 reusable/common components, (8) identify theme-specific presentation, (9) identify responsive
@@ -312,13 +309,13 @@ behavior/state through C++, (15) integrate with the existing drag system, (16) p
 user layout through the existing preference mechanism, (17) test against the original UI, (18)
 test across resolutions/aspect ratios, (19) test UI scaling, (20) test Legacy/Modern/Custom
 themes, (21) test user-customized positions, (22) remove obsolete legacy/version-specific
-implementation where safe. **Do not skip steps 1–5.** The migration should be driven by
+implementation where safe. **Do not skip steps 1–5.** Compatibility work must be driven by
 understanding the original UI's intent, not mechanical translation of legacy code.
 
-## 28. Definition of Done
+## 28. Component Quality Requirements
 
-A migrated UI is not complete merely because it renders through RmlUI. It's properly migrated
-when: its original layout intent has been understood and documented; that intent is explicitly
+A component meets this policy when its layout intent has been understood and documented,
+including the original intent where compatibility applies; that intent is explicitly
 represented in the new architecture; positioning doesn't depend on a single resolution; behavior
 across aspect ratios is intentional; UI scaling works consistently; it contains no unnecessary
 hardcoded coordinate calculations; presentation is theme-controlled; assets can be overridden
@@ -339,7 +336,7 @@ GAME / C++ → Unified UI API → UI Components → RML (structure/composition)
 ```
 
 **C++** owns: game state, UI state, game/business logic, events, actions, data binding, component
-behavior, lifecycle, RmlUI integration, existing drag interaction, user preference persistence.
+behavior, lifecycle, RmlUi integration, existing drag interaction, user preference persistence.
 **RML/RCSS** owns: UI structure, layout, anchoring, sizing, alignment, spacing, responsive
 behavior, default component placement, visual styling, theme presentation. **Theme/Mod Assets**
 own: sprites, textures, icons, fonts, visual resources, theme-specific styling/layout, optional
@@ -348,7 +345,7 @@ visibility/layout preferences.
 
 ### Final Design Principle
 
-Do not recreate the legacy UI framework inside RmlUI. Use the migration to establish a single
+Do not recreate the legacy UI framework inside RmlUi. Use the migration to establish a single
 declarative UI system: historical implementations converge into Unified Components → {Legacy
 Theme, Modern Theme, Custom Themes/Mods} → Existing User Customization.
 

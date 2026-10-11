@@ -1,670 +1,448 @@
 # Reusable Component Catalog
 
-What already functions as a reusable UI primitive (`architecture-principles.md` §20), named and
-pointed at its file, so a port checks here before inventing a one-off mechanism. Entries under
-"Does not exist" are real gaps: the next window that needs one defines its shape (§26).
+Use this catalog to choose an existing mechanism and find a working reference before adding
+UI. Entries distinguish **components** (reusable C++ behavior), **style contracts** (shared
+RML/RCSS classes), and **patterns** (bindings each feature owns). Theme-specific styles and
+domain adapters have narrower scopes than general controls.
+
+[Building New UI](building-new-ui.md) covers ownership, lifecycle, input and validation.
+[Architecture Principles](architecture-principles.md) governs the RML/RCSS/C++ responsibilities.
+Exact configuration fields and API contracts belong in the linked source headers.
 
 ## Window / Panel
 
-Every window is a `mu::ui::window::CObject` owning one or more RmlUi documents. Two shapes
-(`building-new-ui.md`'s "Shape of the kit"):
+Choose the owner using [Building New UI](building-new-ui.md#choose-a-component-and-an-owner).
+For presentation, select a frame that fits the window family:
 
-- **Pure RmlUi** — `CMsgWin`, `RememberPasswordPrompt`, `CCharInfoBalloonMng`, and most windows.
-- **Live 3D items** — the inventory family (`CMyInventory`, `CTrade`, `CStorageInventory`,
-  `CStorageInventoryExt`, `CMixInventory`, `CNPCShop`, `CMyShopInventory`,
-  `CPurchaseShopInventory`, `CInventoryExtension`, `CLuckyItemWnd`). One document each: the frame,
-  the item grids ("Item grids" below), an `ItemCameraTarget` image the window draws its items and
-  remaining native effects into, the stack counts, titles, buttons and text; the grids follow the
-  drawn `#panel`.
+| Mechanism | Scope and reference |
+|---|---|
+| `base.rcss` frame styles | Theme-specific chrome: modern's `.modern-frame`, `.modern-panel`, `.modern-frame-accent` and `.modern-inset`; legacy's `.panel-cap-top`, `.panel-middle` and `.panel-cap-bottom` |
+| `window_shell.rml` template | Shared shell for `dp`-authored documents, including menus and social windows. Link the template and use `template="window_shell"` on the body; see `generic_menu_dialog.rml` |
+| `docked_panel_frame.rcss` | Shared partial in both themes for the right-docked character, quest, pet and party panels. Check its selectors before joining the family; inventory windows have their own frames |
 
-Visual frame primitives are theme-specific, not shared (correct per §15 — presentation is the
-theme's job, not the component's):
+The shell supplies frame structure; it is not a window owner or a universal replacement for
+reference-pixel panels. Theme-specific frame details belong in the assets and
+[Theming & Modding](theming-and-modding.md).
 
-- `modern`: `themes/modern/base.rcss`'s `.modern-frame`/`.modern-panel`/`.modern-frame-accent`/
-  `.modern-inset`, plus the `-crimson` palette variant (`themes/modern/README.md` has the
-  full token table these draw from).
-- `legacy`: `themes/legacy/base.rcss`'s sprite-based 3-part `.panel-cap-top`/`.panel-cap-bottom`/
-  `.panel-middle`.
-
-A second, narrower shared frame exists for one specific window family: the right-docked,
-single-document windows that visually read as one group on screen —
-`character_info`, `my_quest_info`, `pet_info`, `party_info` today. Their `#panel`/frame sprites/exit
-button/tooltip shape/group-box corner-and-fill technique (legacy) and forged-dialog panel gradient/
-shell-edge/groove/header-rail (modern) are byte-identical, so they link a shared
-`docked_panel_frame.rcss` (both themes) instead of each re-declaring it, so windows docked side by
-side read as one family (`building-new-ui.md`'s port checklist, item 7). **A new window joining this same right-dock group should link this partial too**,
-not copy-paste a fifth version — check its current window list before assuming it doesn't apply.
-`CMyInventory` and the other item windows keep frames of their own.
+[`BindWindowClose()`](../../src/source/UI/RmlBridge/RmlWindowClose.h) binds `window_close` for
+the frame's corner close action and other exit controls. Pass a window ID for normal hiding,
+or a callback when closing has domain semantics, such as cancelling a trade.
 
 ## Button
 
-Real shared contract across both themes already — `.btn`/`.btn-ok`/`.btn-cancel`/`.btn.disabled`,
-same class names, same state model, each theme's own `base.rcss`. `.btn-ok` gets each theme's
-"primary/hero" treatment (see `themes/modern/README.md`'s accents); plain
-`.btn` stays neutral. The C++ native button classes are for native-only content
-(`building-new-ui.md`).
+**Style contract:** `.btn`, `.btn-ok`, `.btn-cancel` and `.btn.disabled` in both themes'
+`base.rcss`. Apply role classes alongside `.btn`; the theme supplies their appearance.
+Bind disabled state and validate the action in C++, even though `.disabled` blocks pointer input.
 
-Inside a panel scaled by `transform: scale(root_scale)`, `.btn`'s `dp` sizes would scale twice.
-Modern has `.modern-btn-px` (and `.modern-checkbox-px` for checkboxes), the same recipe in
-reference `px` with no size of its own; the MU Helper windows use both.
+Icon buttons have a narrower contract: `.btn-icon`, `.btn-icon-primary`, `.btn-icon-label` and
+`.btn-icon-caption` are used by the login and character-selection documents. The modern base
+supplies shared styling; legacy supplies consumer-specific sprite styling. Copy the relevant
+`login_main.rml` or `char_sel_main.rml` structure rather than assuming identical theme styling.
 
-A counter-scaled button label (`.sharp-text`) centres itself on its button with `.sharp-middle`,
-and `.sharp-centre` when the theme gives no width (`base.rcss`, both themes; `engine-findings.md`
-has why).
+For root-transformed reference-pixel panels, modern supplies `.modern-btn-px` and
+`.modern-icon-btn-px` with `.modern-icon-btn-glyph-px`. The MU Helper and inventory documents
+are references. These are modern-only styles; `.modern-icon-btn-px` also carries default
+geometry, so inspect it before reuse. Use reference-pixel styles where `dp` sizes would scale twice.
 
-## Counter-scaled text
-
-Text inside a panel scaled by `transform: scale(root_scale)` is drawn sharp by laying it out in
-physical pixels and cancelling the panel's scale. `#panel` binds the scale as a custom property,
-`data-style---root-scale="root_scale"`, beside its transform; base.rcss's `.sharp-text` (origin top
-left) and `.counter-scaled` (the element's own origin) apply `scale(calc(1 / var(--root-scale)))`.
-The layer's own lengths are physical, so the theme states them as reference px times the scale:
-`#title { width: calc(160px * var(--root-scale)); }`, or `calc(100% * var(--root-scale))` for the
-width of the box it sits in. Only its font size (the native text size) stays bound. A panel that
-stretches per axis (a Hud layout's `#screen`, `gens_ranking`) also binds `--root-scale-y`, and its
-layers take `.counter-scaled-xy`.
-
-Sibling counter-scaled layers do not stack in flow (each keeps its physical size in layout), so
-text that stacks goes inside **one** layer: `.sharp-text.sharp-flow`, sized in reference px by
-`--flow-w` (and `--flow-h`), with its lines flowing inside at the native size. `.centred` makes it a
-flex column that centres the lines on its height, however many there are, so C++ binds no tops
-(`npc_quest`'s dialogue band).
-
-**Marquee label** (`class="marquee"`, base.rcss; `UI/RmlBridge/RmlMarquee.h`): one line in a
-constricted box the theme sizes. Text wider than the box shows as much as fits followed by `..`;
-while the pointer is within the box, the full text scrolls to its end and back. The text is the
-element's first child, so the class goes on the element holding `{{...}}`. It tests the box, not
-hover, so a label laid over a button and letting clicks through still marquees. Use it where the
-layout must keep its positions (legacy `mu_helper_config`, the shop titles, the Illusion Temple
-result table); prose that may take more lines wraps or
-scrolls instead. The text-layout audit accepts its clipping and checks only its visible part.
+Counter-scaled labels use `.sharp-middle` and, where appropriate, `.sharp-centre`; see below.
 
 ## Checkbox
 
-`.checkbox-row`/`.checkbox-box`/`.checkbox-box.checked`/`.checkbox-label`, both themes' `base.rcss`
-— same shared-contract shape as Button.
+**Style contract:** `.checkbox-row`, `.checkbox-box`, `.checkbox-box.checked` and
+`.checkbox-label` in both themes' `base.rcss`. A feature binds its boolean state to the checked
+class and handles the toggle through a RmlUi event. These classes supply presentation, not a
+C++ checkbox object or automatic state management.
+
+The MU Helper documents demonstrate the structure and state bindings. Modern's
+`.modern-checkbox-px` is the reference-pixel variant for transformed panels.
 
 ## Text field
 
-Use a **stock RmlUi `<input>`**. There is no custom element, no C++ text widget and no wrapper
-framework — the vendored engine already provides the editable buffer, caret, selection, clipboard,
-`maxlength`, tab focus, `change` events and IME composition. Consumers today: `CMyShopInventory`'s
-shop name, `CCharMakeWin`'s character name, `CGenericConfirmDialog`'s `Mode::Text` field, and
-`CLoginWin`'s username/password pair (also proving `type="password"` and Tab navigation),
-`CMsgWin`'s resident-password prompt, and `CChatInputBox`'s chat/whisper-target pair.
+Use stock RmlUi `<input>` with `.text-field`. RmlUi supplies editing, caret, selection,
+clipboard, password masking and IME composition. The feature owns the semantic value,
+validation and limits; RCSS owns the field's appearance and consumer-specific dimensions.
 
-**Two things a field inside a window that opens and closes has to get right**, both learned from
-`CChatInputBox`:
+- Bind the value with `data-value`; do not poll the element every frame.
+- Set length limits from the owning code. When changing `type`, configure type and limits before
+  setting the value: changing type rebuilds the input implementation.
+- Use `data-attrif-disabled` and style `:disabled` when editing must stop. A dimmed class alone
+  does not disable an input. Surface invalid state with `.error`.
+- Focus once after visibility and content synchronization. Use transition-based visibility,
+  blur on hide, and implement `TakesTypingFrom()` when the owner needs Enter, Esc or history.
+  See [input and visibility](building-new-ui.md#connect-visibility-input-and-actions).
+- Use `autofocus` only when immediate typing is intended; it suspends ordinary window hotkeys.
 
-1. **Focus after the document is visible, not before.** `CSystem::Show()` runs a window's
-   `OpenningProcess()` *before* `ShowInterface()`, so `IsVisible()` is still false there and
-   `Element::Focus()` lands on a hidden document and is lost. It must also happen after
-   `SyncDocumentVisibility()`'s own `Show()`, which defaults to `FocusFlag::Auto` and would blur the
-   field again. Arm a one-shot latch in `OpenningProcess()`; consume it in the sync, immediately
-   after the visibility call.
-2. **A window that handles keys while its field is focused claims the field's document.**
-   While the player types, `CManager::UpdateKeyEvent()` gives keys only to the window whose
-   `TakesTypingFrom(document)` returns true for the document holding the focused field
-   (`RmlUiRuntime::GetTypingDocument()`). Without the override, Enter, Escape and history never
-   arrive. This is the role the focused `CUITextInputBox`'s `HWND` used to play.
+For digits-only fields, mark `text-field--numeric` and attach
+[`AttachNumericInputFilter()`](../../src/source/UI/RmlBridge/RmlNumericInputFilter.h) after each
+document build. It rejects typed characters without rewriting the caret. Clipboard paste bypasses
+`textinput`, so also use `KeepDigitsOnly()` when reading numeric input and validate its range.
+Consumers need no separate IME integration.
 
-**Two rules that are invisible at compile time and will silently break a field:**
+References: `login.rml` for password and Tab navigation, `my_shop.rml` for a name field,
+`chat_input.rml` for focused-window key handling, and `GenericConfirmDialog.cpp` for a field
+reconfigured per invocation. Keep overlapping frame art earlier than editable controls in
+markup so it does not cover their text or caret.
 
-1. **Never call `ElementDocument::Show()` per frame on a document containing an `<input>`.** It
-   defaults to `FocusFlag::Auto`, which focuses the document and blurs the field — one frame after
-   every click, so the field looks focusable but swallows every keystroke. Use
-   `UI::RmlBridge::SyncDocumentVisibility()` (`UI/RmlBridge/RmlDocumentVisibility.h`), which only
-   acts on an actual visibility transition. This caused the original failure *and* a later
-   regression in `CLoginWin::Render()`.
-2. **Declare the field after any frame art that overlaps it.** RmlUi paints siblings in document
-   order, so a field placed where an old zero-size position anchor sat renders *behind* the frame —
-   no visible text or caret, which reads as "can't focus" even though hover and focus are correct.
+## Counter-scaled text
 
-For a field that can be disabled, bind `data-attrif-disabled` to its semantic state and style
-`:disabled`. A dimmed class or an overlay alone does not prevent focus or editing. Chat's whisper
-target uses `data-attrif-disabled="!whisper_send"`, keeping its value when whispering is off.
+**Style contract:** use this when text inside a root-transformed panel must retain its physical
+font size. Bind `data-style---root-scale="root_scale"` on the root. Both themes' `base.rcss`
+provide `.sharp-text` (top-left origin) and `.counter-scaled` (the element's own origin), which
+cancel that scale. Per-axis transforms use `--root-scale-y` and `.counter-scaled-xy`.
 
-Division of ownership:
+The theme expresses the layer's lengths in RCSS, for example
+`width: calc(160px * var(--root-scale));`; native font size may remain model-bound.
+Do not bind static dimensions multiplied by `root_scale` from C++.
 
-- **RML/RmlUi** owns the edit buffer, focus, caret, selection, IME composition display, text
-  clipping/scrolling and hit testing. Bind the value two-way with `data-value="<model field>"`; do
-  not poll the element each frame.
-- **RCSS** owns appearance. `.text-field` is the shared primitive in both themes' `base.rcss`
-  (`.text-field`, `.error`, `:disabled`, and the `selection` child for the selection range). It
-  deliberately carries **no** position or size — each consumer adds a local class for its own box,
-  the way `.my-shop-title-field` does. There is deliberately **no `:focus` rule**: the native fields
-  these replaced drew no focus outline, so the blinking caret is the only focus cue. `:focus` works
-  if a screen ever wants one, but add it per consumer rather than to the shared class.
-- **C++** owns the semantic value and the rules about it: the length cap (set the `maxlength`
-  attribute from code, as `ApplyShopTitleLimit()` does, so the limit can't drift per theme), any
-  character filtering, and what counts as valid. Surface an invalid value as model state that
-  toggles `.error` — never set a colour from C++.
+Use one `.sharp-text.sharp-flow` layer for stacked lines, with `--flow-w` and optional `--flow-h`.
+`.centred` centres that flow vertically. Separate counter-scaled siblings retain physical layout
+sizes and do not form an ordinary scaled text flow. `npc_quest` is a reference.
 
-Notes for later consumers: use `type="password"` for masked input (the same `.text-field` styling
-applies), and set `type` from C++ when one field serves both (see `ApplyInputFieldConfig()` — changing
-`type` rebuilds the element's `InputType` and drops its value, so set type and limit *before* the
-value). `autofocus` makes `ElementDocument::Show()`'s `FocusFlag::Auto` focus the field on open — the
-declarative replacement for a native `GiveFocus()`, but **only for genuinely modal screens**: on an
-ordinary window it swallows every hotkey the moment the window opens, so My Shop deliberately omits
-it and is click-to-focus. Filtering that RmlUi has no equivalent for (digits-only) belongs in C++;
-enforce it by rejecting the keystroke, not by correcting the value afterwards: a capture-phase
-`textinput` listener on the document runs before the focused widget's own listener, and
-`StopPropagation()` there leaves the caret untouched. That listener is shared:
-`UI::RmlBridge::AttachNumericInputFilter(doc)` (`RmlNumericInputFilter.h`) filters every field that
-carries `text-field--numeric`, so a window marks its fields and attaches once; `KeepDigitsOnly()` is
-the read-side half. Writing a
-filtered value back onto the element instead re-enters `OnValueAttributeChanged()` and resets the
-caret to index 0. Clipboard paste raises no `textinput`, so filter on read as well. SDL3 IME is
-handled once, centrally, by `RmlUiRuntime`'s installed `TextInputMethodEditor_SDL` plus
-`RmlUiSystemInterface::ActivateKeyboard()` — a consumer needs no IME code of its own.
+`.sharp-middle` centres a label vertically on its button; `.sharp-centre` centres it horizontally.
+Coordinate rules and scale validation belong in [Layout, Anchoring & Scaling](layout-and-scaling.md).
 
-A focused field suspends every window's key handling (`CManager::UpdateKeyEvent()`) except the
-window that claims its document, so a window that should still close on Esc from inside its field
-overrides `TakesTypingFrom()` to return `document == m_RmlView.Document()`. A field in a hidden
-document never counts as typing (`RmlUiRuntime::GetFocusedTextField()`), so closing the window
-gives the hotkeys back at once; blurring on hide still clears the field for the next open.
+### Marquee and shrink-to-fit
+
+Use `.marquee` for a single-line label whose box must stay fixed. Its first child contains the
+text; overflow shows `..`, and pointer presence scrolls the full text back and forth even if the
+label lets clicks through. See [`RmlMarquee.h`](../../src/source/UI/RmlBridge/RmlMarquee.h) and
+the MU Helper config labels. Prose that can grow should wrap or scroll instead.
+
+Use `.native-fit` for legacy-compatible shrink-to-fit text. The theme sets a one-line box and
+inherited font size; the shared pass shrinks text to fit within the native minimum. It applies
+only under the `NativeTextSize` capability and requires physical-pixel text geometry.
+See [`RmlNativeTextFit.h`](../../src/source/UI/RmlBridge/RmlNativeTextFit.h) and
+`generic_menu_dialog.rml`. This is distinct from marquee or wrapping.
 
 ## Scrolling pane
 
-`.scroll-pane` (both themes' `base.rcss`). Put it on whatever element owns scrollable content and
-RmlUi generates the scrollbar itself, as real child elements the theme styles. Consumers:
-`CGenericConfirmDialog`'s `.gcd-text-col` — the case this was generalized from — `CChatLogWindow`'s
-`#lines`, which is where it is actually *visible* (the dialog only scrolls when its content outgrows
-the panel, which is hard to provoke), and `CMoveCommandWindow`'s `#list`, the one that replaced a
-real hand-rolled scrollbar (thumb travel, grab offset, a three-state drag enum) rather than adding a
-new one.
+**Style contract:** `.scroll-pane` in both themes' `base.rcss`. RmlUi scrolls document content
+and generates the scrollbar elements. The consumer supplies a bounded height through `height`,
+`max-height` or constrained flex layout. Use `data-for` for repeated content.
 
-The pane needs a bounded height to scroll within (explicit `height`, `max-height`, or a stretched
-flex child). That stays the consumer's own layout; `.scroll-pane` sets only the two rules below.
+The shared class sets `overflow: hidden auto` and `pointer-events: auto`. Overflow order matters:
+only vertical Auto/Scroll creates a vertical scrollbar. Generated scrollbar parts use ordinary
+selectors such as `scrollbarvertical`, `slidertrack` and `sliderbar`.
 
-**Two requirements it exists to stop you rediscovering.** Both cost a debugging round the first
-time, and both fail silently:
+A pane over the world claims pointer interaction across its area. For click-through content,
+set the pane and content to `pointer-events: none`, then opt the scrollbar back in at every
+level. Element hover/click behavior lost this way needs an explicit alternative; `chat_log.rcss`
+and `CChatLogWindow` demonstrate this specialized arrangement.
 
-- `overflow: hidden auto` is `overflow-x, overflow-y` in that order. This engine only instantiates
-  a `scrollbarvertical` when **overflow-y** is Auto/Scroll (`Layout/ContainerBox.cpp`). Write
-  `auto hidden` and no scrollbar is ever created, at any content length.
-- `pointer-events: auto` is mandatory. `base.rcss`'s `body { pointer-events: none; }` inherits
-  down, and `slidertrack`/`sliderbar` are children of the pane — without it the scrollbar renders
-  but cannot be dragged.
+Set scroll position once after changed content has synchronized. Continuous pinning overrides
+the user's wheel and drag. For bottom-up lists, use a flex column with `margin-top: auto` on the
+first item; `justify-content: flex-end` can push early lines outside the scroll area.
+Use `align-items: flex-start` for per-line backgrounds.
 
-These are generated elements, not pseudo-elements, so ordinary selectors reach them
-(`scrollbarvertical`, `slidertrack`, `sliderbar`, `sliderarrowdec`/`inc`, `scrollbarhorizontal`).
-
-**Theme chrome.** `legacy` uses native's own art — the track is `newui_scrollbar_m` as a ninepatch
-and the thumb is `newui_scroll_on`, with `filter: brightness(0.7)` on `:active` matching the
-`RGBA(179,179,179)` tint `CChatLogWindow::RenderFrame()` applies while the thumb is held.
-`modern` states the same affordance as a flat rail in its metal-rail palette.
-
-The well's two end caps are native's real 7x3 `newui_scrollbar_up`/`_down` sprites, carried by
-`sliderarrowdec`/`sliderarrowinc` — RmlUi generates an element at each end of a scrollbar and sizes
-`slidertrack` between them, which is exactly native's cap/tile/cap construction. They are
-`pointer-events: none`: native has no arrow buttons, these are the closing ends of the well.
-**Their `width` is `100%`, not a fixed length, on purpose** — a consumer that hides its scrollbar by
-zeroing the `scrollbarvertical`'s own width (`chat_log.rcss` does, for F5) would otherwise be left
-with two floating caps. `WidgetScroll::FormatElements()` builds each arrow's box against the
-scrollbar's own content size, so the percentage tracks whatever that width currently is. `modern`
-needs no caps — its track is a solid fill that already reads closed — so its arrows stay collapsed.
-
-One deliberate simplification remains on the legacy side, the same class as `character_info.rcss`'s
-summary-box frame: the middle slice is one stretched ninepatch rather than a literal repeat-tile,
-because this build has no verified repeat-tiling pattern. Native's thumb overhang (15-wide thumb
-over a 7-wide track) is also not reproduced, because that needs the track narrower than the
-scrollbar element and RmlUi sizes `slidertrack` itself.
-
-**Two traps a consumer has to handle itself**, both found the hard way in `CChatLogWindow`:
-
-- **`pointer-events: auto` on the pane blocks click-to-move.** `Core::Input::IsMouseOverUI()` gates
-  world clicks on `Context::IsMouseInteracting()`, which is true for any auto element *hovered*, not
-  clicked. A pane overlaying the world must set `pointer-events: none` on itself and its content,
-  then opt the scrollbar back in at **every** level (`scrollbarvertical`, `slidertrack`,
-  `sliderbar`) — they inherit from the pane, so one `none` above silently disables the drag.
-  Anything the pane then loses to `none` (hover styling, per-element clicks) has to move to C++.
-- **Never pin the scroll position per frame.** Applying `SetScrollTop` every frame — to follow new
-  content, say — overrides the user's own drag and wheel continuously and reads as a dead
-  scrollbar. Use a one-shot latch consumed on the frame after the content changed.
-
-**Inside a `transform: scale(root_scale)` panel**, the pane has to counter-scale itself out of that
-transform (`.counter-scaled` with `transform-origin: left top`, its own `width`/`height` as
-`calc(Npx * var(--root-scale))`; Counter-scaled text above) — `guard_window`'s lists are the
-reference. Two
-things follow, both non-obvious:
-
-- **The net render transform at the pane is identity**, so its contents are laid out in real
-  pixels. That is the point — text in a dense list must stay at the native renderer's own physical
-  size, which grows 11pt→16pt while the dock transform grows to 2.25x. It also means the scrollbar
-  keeps `.scroll-pane`'s `dp` width rather than needing a reference-px override.
-- **Give rows an explicit bound width, not `100%`.** A percentage resolves against the pane's
-  content box, which shrinks by the scrollbar's width the moment one appears — every column in the
-  row then shifts. Bind the same reference width the pane uses and let `overflow-x: hidden` clip it.
-
-Column positions *inside* such a row are best written as percentages of that bound width: they then
-need no binding of their own and hold at every scale.
-
-**What it does not cover.** RmlUi scrolls *DOM content*, so a window keeping its own line-window
-model in C++ is not a drop-in consumer: it has to put the lines in the DOM and let RmlUi own the
-scroll position. `CChatLogWindow` did exactly that: `DataViewFor::Update()` is incremental (an
-append creates one element), and a front-removal re-runs every line's text binding.
-
-## Layout utilities
-
-Not named in §20's own list, but the closest thing to a real cross-window primitive that exists
-today (`layout-and-scaling.md` is the full reference): `.anchor-{top,bottom}-{left,right}`,
-`.center-{x,y,both}`, `.stretch-{x,y,both}`, `.hidden`, `.layout-anchor` — both themes' `base.rcss`,
-identical class names and behavior in each.
-
-## Data binding
-
-`RmlModelBinder<T>` (`UI/RmlBridge/RmlModelBinder.h`) owns the `Model` instance and its
-`Rml::DataModelHandle`, and exposes `MarkDirty()` so packet-handler/action-controller code doesn't
-need to know RmlUi's binding API. Windows reach it through their `ThemedView` (below):
-`GetModel()`, `MarkDirty()`, and `Binder()` for the `SyncField` helpers.
-
-## Semantic colours
-
-Where a value's colour depends on what it means, C++ binds the meaning and each theme's RCSS holds
-the colour: a `data-class-*` binding toggles a class, and the legacy theme uses the original values.
-Examples:
-- Zen wealth tier: `GameLogic::Items::ClassifyGoldAmount()`, `.gold-*`;
-- trade partner level bucket: `.level-bucket-*`;
-- quest row kind: reported by `CQuestMng::GetRequestRewardText()`, `.row-*`;
-- character-select balloon name status: `.name-*`;
-- outlaw level: `CHARACTER::PK` bound as `pk_level`, `#name.pk-*`;
-- where an attribute's total comes from: `AttributeSource()` → `"potion"`/`"boosted"`/`"base"`,
-  `.attr-potion`/`.attr-boosted` over the base colour on `.attr-value`.
-
-**This is the shape to reach for whenever C++ is about to build a colour.** The last two came from
-`CCharacterInfoWindow`, which had 57 `MakeColorRgba()` calls and pushed six colour strings through
-its model -- so the theme could not restyle a stat or an outlaw level, and modern's own
-`#name { color: token(text-warm) }` had never once taken effect, because a `data-style-*` binding is
-an inline property and inline beats every stylesheet rule in this build (`engine-findings.md`).
-Note what is *not* on this list: that window's derived-stat rows still carry `line.color`, because
-they are a transcribed display list rather than a value with a meaning -- see
-`building-new-ui.md`'s Ownership rule 5 for that distinction.
-
-Do not unpack the engine's packed text colours into CSS: they are `A<<24 | B<<16 | G<<8 | R`, and
-reading them as RGB swaps red and blue.
-
-## Theming
-
-`UI::RmlBridge` (`RmlTheme.h`): `ThemedDocumentLoader` (the one way a document is loaded, callable
-only from `ThemedView` — makes "add a theme" a drop-a-folder operation),
-`GetActiveThemeName()`, `ThemeUsesNativeTextSize()` (a declared theme capability,
-`architecture-principles.md` §30 — see `theming-and-modding.md` for the pattern to follow for any
-future capability flag). See `theming-and-modding.md`'s "Forking a theme's RML" section for the
-per-theme RML/RCSS override mechanism itself, not a separate component but part of this same
-theming layer.
-
-**Every themed document belongs to a `UI::RmlBridge::ThemedView<Model>`**
-(`UI/RmlBridge/RmlThemedView.h`; `ThemedView<>` for documents without a model). A window declares
-it as a member with its model name, a binding function (`BindRmlModel(c, model)`), its document
-paths and options, calls `Ensure()` where it builds and `Release()` where it tears down:
-
-```cpp
-void BindRmlModel(Rml::DataModelConstructor& c, PetInfoRmlModel& model);
-UI::RmlBridge::ThemedView<PetInfoRmlModel> m_RmlView{"pet_info",
-    [this](Rml::DataModelConstructor& c, PetInfoRmlModel& model) { BindRmlModel(c, model); },
-    {{"Data/Interface/RmlUi/pet_info.rml"}}};
-```
-
-- **Builds once, when it can.** `Ensure()` creates the model, then loads each document into its
-  context (the main one, or the spec's getter: `BackgroundOrMainContext` for a frame behind native
-  3D). It waits while a context is missing and retries a failed load on the next call. It registers
-  for theme switches on its first call.
-- **A theme switch keeps the model** and rebuilds the documents over it: typed text, selections
-  and labels survive with no copying. Each document that was visible is shown again with the
-  options' `modal`/`focus` and `stacking` (`Front`/`Back`). Owners rebuild from the bottom of their
-  context's stack up, so the stacking survives too; a window with several views builds the one
-  that must end up underneath first (`CGenericConfirmDialog`'s chrome).
-- **Hooks.** `afterBuild` runs after every build (drag handles, input filters, `maxlength`, cached
-  elements). `afterReload` runs after a theme switch's rebuild, for what the window sized or placed
-  from the old theme (`CLoginWin`, `CCharSelMainWin`, a `UI::Placement::Invalidate()`).
-  `beforeUnload` runs before every unload, theme switch or release (listeners, attached controls,
-  cached element pointers).
-- **`Release()`** blurs a focused field it owns (unloading drops the focus without a blur and
-  leaves every hotkey dead), unloads the documents, removes the model and stops following theme
-  switches. `Hide()` keeps them for the next `Show()`. Both, and `Document()`, are safe after
-  `Rml::Shutdown()`, which a static window's destructor reaches.
-- **One document per instance**: `modelPlaceholder` rewrites the markup's `data-model="…"` to the
-  view's name, given late with `SetModelName()` when it depends on the owner (the friend views).
-
-Shapes to copy: `CCharacterInfoWindow` (one document), `CMyInventory` (two views, content and
-background frame), `CMainFrameWindow` (two documents, one model), `CGenericConfirmDialog` (three
-views), `ChatRoomView` (per instance), `ReconnectDialog.cpp` (a namespace-scope view, no window).
+When a transformed panel's dense text must retain physical size, counter-scale the pane and
+express its dimensions through `calc(... * var(--root-scale))`. Give column rows an explicit
+RCSS width when scrollbar appearance must not shift their columns; a `100%` row shrinks with the
+pane's available content width. `guard_window` is the counter-scaled reference;
+`move_command` is a selectable-list reference.
 
 ## List / repeated rows
 
-RmlUi's `data-for` binding against a `std::vector<T>` model field — the pattern for any "N rows
-of the same shape" content. Two references:
-`CBuffStrip`'s buff-icon strip (a simple array) and `CMyQuestInfoWindow`'s quest list
-(`my_quest_info.rml`/`.rcss`, ported off `CUICurQuestListBox`/`CUIQuestContentsListBox` — also
-proves `server_select.rml`'s click-a-row-to-select-it pattern on top of the same binding). No
-generic "ListBox" C++ wrapper exists (and none is needed) — each window binds its own row-shaped
-struct directly, the same way `RmlModelBinder<T>` is used everywhere else.
+**Pattern:** bind a `std::vector<T>` with RmlUi `data-for`, registering its row type and array
+with the model. The feature owns row data and selection; markup supplies events and RCSS supplies
+selected/hover states. There is no shared C++ ListBox wrapper.
 
-## Dialog
-
-`mu::ui::window::CGenericConfirmDialog`/`GenericDialogConfig` (`UI/Dialogs/GenericConfirmDialog.h`,
-`generic_confirm_dialog.rml`/`.rcss` both themes) — a real config-driven scaffold, not a per-dialog
-hand-built RML/RCSS pair: one C++ class + one document, shown with different `GenericDialogConfig`
-content per call, no new subclass or new `.rml` per dialog. **The struct itself is the field
-reference** (`GenericConfirmDialog.h`, each field commented at its declaration) — don't duplicate
-that list here, it'll drift; skim the header before adding a new field. Worth knowing before
-reading it cold:
-- Buttons are three fixed, role-named slots, not a positional pair —
-  `primaryLabel`/`onPrimary` (always shown), optional `secondaryLabel`/`onSecondary` (a real second
-  action, e.g. "Decrease", never Esc-bound), and `showCancel`/`cancelLabel`/`onCancel` (always
-  dismiss semantics, fires on Esc).
-- `KeepOpen()` lets `onPrimary`/`onSecondary` veto their own click (invalid typed input, etc.) —
-  the dialog stays open exactly as it was, as if the click never happened. Needed by any consumer
-  migrating a native dialog whose `OkBtnDown` could return "keep this open" instead of closing.
-- `item3D` (a live 3D item-preview snapshot) draws into `#gcd_item3d` through a
-  `UI::Items::ItemCameraTarget`, framed by its slot (`#gcd_item3d_slot`); the image is far larger
-  than the slot, so a long model reaches past the panel as it did natively.
-- Single active instance, not a real stack — a second `Show()` call while one is open queues
-  instead of replacing it; see the class's own header comment for why that's not a functional
-  regression from what it replaces.
-
-Built to replace `UI/Dialogs/CommonMessageBox.h`/`CustomMessageBox.h`'s native `TMsgBoxLayout<T>`
-family — see `migration-ledger.md`'s Dialog family table for what's left.
-
-`mu::ui::window::CGenericMenuDialog`/`GenericMenuConfig` (`UI/Dialogs/GenericMenuDialog.h`,
-`generic_menu_dialog.rml`/`.rcss` both themes) — sibling primitive for the "arbitrary list of N
-labeled action buttons" shape (a multi-option menu, not two/three fixed named slots) that
-`CGenericConfirmDialog` doesn't cover. One C++ class + one document, shown with a
-`GenericMenuConfig` value (title, body lines, a button vector each with its own optional label/
-tooltip/per-button lines/compact flag, an optional `columns` grid width, `onCancel`). Frame/border/
-header chrome lives in the shared `window_shell` `<template>` (both themes), not duplicated per
-dialog. Proven on 13 real dialogs (`migration-ledger.md`'s Dialog family table has the current
-list) — the two remaining "multi-option menu" classes (`CGuild_ToPerson_Position`,
-`CGemIntegrationDisjointMsgBox`) stay message boxes drawn by `MessageBoxView` because their shape
-doesn't fit this primitive's plain "click closes" model (simultaneous radio-select, an embedded
-jewel list). Every `MessageBoxView` box names its kind (`#panel`'s `data-kind`) and reports its
-lines by role (`message`, `reward`, a ranking table's `row`...); `message_box_view.rcss` places the
-box, stacks the lines and places the buttons by kind. Several consumers chain a second `Show()` from inside a button's own
-`onClick` — closing this menu and immediately opening a different one (or the same one with
-different content) — a reentrant pattern proven by the Trainer menu pair, the Gem Integration
-jewel-type→mix-amount flow, and Elpis's text-only variant; `GenericMenuDialog.h`'s own header
-documents why this is safe (buttons always close on click, so there's no `KeepOpen()`-style veto
-to interact with). `GenericMenuConfig::kind` names the native box a menu replaces (`npc-menu`,
-`chaos-mix`, `elpis`...); legacy reproduces each box's frame, text and button offsets by kind
-(`#panel[data-kind]`), modern flows the menu. `$dialog menu <name>` opens one without its NPC.
-`GenericMenuConfig::systemMenu` marks the in-game system menu (`system-menu` on
-`#panel`): legacy lays it out like the native box, modern fills the screen like the options screen,
-with a heading and close action of its own (`system_menu_label`, `close_label`, `gmd_cancel`, the
-same as Esc), so it leaves out the button marked `MenuButton::dismiss` (Cancel).
-
-## Dragging
-
-`UI::RmlBridge::MakeDraggable()` (`RmlDraggable.h`) — drags a panel by a handle using RmlUi's
-drag events, with an `OnDragEnd` hook. The handle needs `pointer-events: auto`; controls inside a
-whole-panel handle opt out with `drag: block` (both `base.rcss` set it on
-`input, select, textarea, .btn, [data-event-click]`). Helpers for transform-centred dialogs:
-`ResetDraggedPosition()` (re-centre on open), `KeepInsideWindow()` (pull back a panel dropped
-partly off screen); the `dragged` class drops `.center-both`'s transform (`engine-findings.md`).
-Drag positions are not saved; they last for the session. Who drags is decided in `window-placement.md` section 8. Only drags of the handle itself move
-the panel: a control inside it with its own `drag` (a level gauge's hit area) is the drag element
-for its own drags, and those are ignored even though they bubble up to the handle.
-
-## Native content inside a document
-
-`UI::RmlBridge::RenderTarget` (`UI/RmlBridge/RmlRenderTarget.h`/`.cpp`) — native drawing rendered
-into a texture a document shows like any other image, so it sits at its element's own depth: under
-a window that covers it, beneath the text and tooltips drawn over it. This is the default for live
-3D that belongs to one window. Consumers: the letter portrait (`CUIPhotoViewer`), the item
-hotkeys (`CItemHotKey`) and the character-creation preview (`CCharMakeWin`, a character with the
-scene camera saved and restored around it).
-
-**Inventory items into a target**: `UI::Items::ItemCameraTarget` (`UI/Inventory/ItemCameraTarget.h`).
-Its drawer runs under the item camera the original drew UI items with — identity view, 1° field
-of view over the whole window (`SetFieldOfView()` for the cash shop's 2°) — with the projection
-cropped to the image's drawn box, so each
-`RenderItem3D()` call lands in the texture exactly where it would have landed on screen, every
-per-item offset and angle included. The drawer keeps its own coordinates: window pixels by
-default, or a window's layout space when constructed with that `CObject` (or a transform source:
-the cash shop's message boxes pass the message box layout).
-`Sync(image, enabled)` once a frame sizes the target to the image's drawn box (through any
-transform on it or its ancestors, which `GetAbsoluteOffset()` leaves out;
-`UI::RmlBridge::DrawnContentBox()`, `RmlElementBox.h`, does the same for any element), points its `src` at the target and
-keeps it invisible until the first frame. It brackets the drawer with `SaveCameraPerspective()`/
-`RestoreCameraPerspective()`: item rendering overwrites `g_Camera` and moves `MousePosition`, the
-origin of the ray picking casts, and leaving it moved stops click-to-move. A model may reach past
-its slot, as natively, so a slot's image can be larger than the slot with the drawer framing the
-item by the slot's own box (the confirm dialog's `item3D`). Consumers: the item hotkeys, the
-confirm dialog's item preview, `CNPCQuest` and `UI/Events/EventItemEntryView`
-(`SetItemDrawer()`: a panel-sized `#entry_item` its window's own item code draws into). The item
-on the cursor has a document of its own above every window (`UI/Inventory/CursorItemLayer.h`,
-`cursor_item.rml`), at the original's 10.9 so it also stays over the message boxes.
-
-Construct one with a drawer, size it to an element with `Resize(width, height)` in physical pixels
-(RmlUi box sizes already are), `SetEnabled()` it while the window is shown, and set an `<img>`'s
-`src` to `Source()`. The drawer runs once a frame from the renderer's offscreen seam
-(`SetOffscreenRenderCallback`), inside a capture of exactly the target's size that brings its own
-viewport, depth and transparent clear — so it sets only a projection for `width / height` and
-draws. `UI::Social::PhotoViewerControl` is the worked example of the element side.
-
-What it takes care of, so a caller does not:
-
-- **A capture recorded early would land on the frame.** `FlushRenderCommands()` draws native
-  commands mid-frame, and a flushed command is drawn before anything can mark it as captured. The offscreen seam runs at the top of `EndFrame`, after the last flush.
-- **Resizing never shows an empty or freed texture.** A new size takes a new texture, and
-  `Source()` moves to it only once it has been drawn. The old one is released a few frames after
-  the switch, since a new `src` reaches RmlUi a frame or two later, and the release itself waits
-  for the start of a frame: releasing an owned texture mid-frame drops that frame's whole replay.
-- **Sources never repeat**, unlike texture ids, so a stale RmlUi cache entry cannot resolve to a
-  recycled texture.
-
-Alpha in a target is coverage: the renderer's alpha-style blend modes accumulate it over and its
-additive and multiplying modes leave it (`MuRendererSDLGpu.cpp`'s blend table), so RmlUi's
-premultiplied composite lands each one on whatever is behind the image as it would have on screen;
-an additive glow adds to the panel under it instead of painting a black box.
-
-**Item grids** (`UI/Inventory/ItemGridModel.h`, `ItemGridGeometry.h`, both themes'
-`item_grid.rcss`). A `CInventoryCtrl`'s `Render()` computes `Cells()` (each cell's tint, drop
-preview and stack count, from the native logic), and the window draws its items into its own
-`ItemCameraTarget` with `Render3D()`. Native 2D a drawer draws lands in the target too, where it
-would have on screen (`SetOffscreen2DRect()`), for a window's remaining effects. The window binds the cells (`RegisterItemGridCells()`) and
-its markup lays them out: `.item-grid` (cells, then the frame) at the grid's anchor, the window's
-`.item-view` image over it, then `.item-grid-counts` at the same place. The geometry is the
-theme's: `CInventoryCtrl::FollowGrid()` reads the grid's box and its first `.item-cell`'s margin
-box each frame into a `UI::Items::GridGeometry`, which the hit tests, the drop target, the items'
-boxes, the tooltip and the window's effects use. The pitch is one custom property per theme
-(`--item-cell`, the original's 20), and a window sizes each grid as `calc(N * var(--item-cell))`.
-A dragged item holds its pickup point in cells (`UI::Items::PickupAnchor`), so it targets a grid of
-another pitch correctly. `CMyInventory` is the worked example, with its equipment slots as
-`slot_states` classes on their anchors and each slot's `#slot_*_item` box where the equipped item
-draws and the pointer hits it.
-
-## Native content above RmlUi
-
-`Winmain.cpp`'s `SetPostRmlUiCallback` opens a `LOAD_OP_LOAD` render pass after RmlUi's main
-context has closed: the only layer above RmlUi. It draws the cursor. Window content does not go
-there: what it draws stands over every panel, including ones that should cover it, so native
-drawing that belongs to a window goes into a render target.
-
-## Native 3D viewer input
-
-`UI::Social::PhotoViewerControl` (`UI/Social/PhotoViewerControl.h`/`.cpp`) — drag-to-turn,
-right-click-to-reset and the "?" help toggle for a `CUIPhotoViewer` standing in an RmlUi slot,
-driven from the document rather than from the viewer's own native mouse handling.
-
-The reason it has to exist is worth knowing generally: **a native window behind an RmlUi document
-never sees a mouse press.** `Context::ProcessMouseButtonDown` returns `!IsMouseInteracting()`, false
-whenever anything at all is hovered, and Winmain's event pump only calls `HandleMouseButton()` when
-RmlUi lets the event propagate — so `MouseLButtonPush` is never set for a click over a panel. The
-wheel is not routed through RmlUi at all, which is why wheel-driven controls keep working natively
-and press-driven ones silently do not. If a ported window still relies on native press handling for
-anything, it is already broken; check it.
-
-The slot takes `pointer-events: auto`, mousedown starts the gesture, and mousemove/mouseup are
-listened for on the **document** so a drag leaving the slot keeps tracking. Deltas convert RmlUi px
-to dp (`UI::Social::DpRatio()`), so the feel holds at any UI scale.
-
-## Tooltip
-
-`UI::RmlBridge::Tooltip` (`UI/RmlBridge/RmlTooltip.h`/`.cpp`, `tooltip.rml` +
-`themes/{legacy,modern}/tooltip.rcss`) — the single shared tooltip primitive. One always-on-top
-RmlUi document in the main context (explicit `z-index: 9999` — the actual z-order fix; a document
-with the default `z-index: auto`, every other document in this codebase, paints in plain DOM/show
-order, so a native tooltip queued through the legacy 3D-camera effect system could always be
-painted over by RmlUi's own main-context pass), with a `Show(Config, Owner)`/`Hide(Owner)`
-free-function API callable from native code exactly as easily as an RmlUi hover callback — the
-reason a still-fully-native window doesn't need its own RmlUi document just to show a tooltip.
-`LineColor` is the union of every prior mechanism's palette (10 foreground + 4
-background-highlight colors), and `Line::Kind{Text, HalfSpacer, FullSpacer}` replaces the old
-"sniff the first character of a native text buffer" spacer convention with an explicit field.
-`Config` also carries per-line `TextAlign{Left, Center}`, `centerHorizontally` (whether the anchor
-is the panel's left edge or horizontal center), an `AnchorPoint{BelowLeft, AboveLeft}` grow
-direction, and a real measure-then-clamp pass so a tooltip near any screen edge stays fully
-on-screen (every prior mechanism clamped horizontally at best, some not at all). `Owner` is an
-opaque per-caller token so one caller's per-frame `Hide()` can't clobber a different caller's
-`Show()` from earlier the same frame — see the header's own comment for the real bug this shape
-fixed. Callers show it every frame while hovered: `Show()` rebuilds and measures only when the
-content, its native metrics or the `dp` ratio changed (one context update to create the rows, then
-the tooltip document's own layout), and otherwise only places the measured panel at the anchor.
-
-Migrated onto it: the item/pet tooltip (`RenderItemInfo()`/`RenderRepairInfo()`,
-`Engine/Object/ZzzInventory.cpp`), the skill-hotkey tooltip (`MainFrameWindow.cpp` —
-`g_pSkillList`'s own hover slot), the inventory Set/Socket option tooltip (`MyInventory.cpp` — its
-old embedded RmlUi implementation was deleted outright, not left running as a second mechanism),
-two smaller hover tooltips (`MasterLevel.cpp`, `CursedTempleSystem.cpp`) and the buff strip.
-
-**A static hint on an element of a document** is markup: `data-hint="text"` on the element, or
-`data-attr-data-hint="x"` for text the model binds. `UI::RmlBridge::DocumentHints`
-(`RmlDocumentHints.h`) shows it with no per-window code: once a frame, before the context updates,
-it finds the hovered element's nearest ancestor with a non-empty `data-hint` and shows that as a
-`Box::ButtonHint`, anchored to the element's drawn box with the native button hint's geometry
-(`RmlTooltipPlacement.h`: centred 3 units right of the element, 2 units off it). It goes above the
-element, below it when there is no room above, and then starts under the cursor sprite, which
-hangs below the point it marks. Its unit is the panel's root transform scale for a document laid out
-in reference px, and the `dp` ratio (times the workspace slot's scale for a `workspace-placed` part)
-for a `dp` document, so the legacy theme's native text size follows each window. Polling the
-hovered element leaves nothing to unregister: a hidden document, a theme switch or a moved panel
-just stops matching. The element needs `pointer-events` (a decorative bar or row may have to opt
-back in). Every button and bar hint in the RmlUi windows is one; `EventItemEntryView`'s buttons
-take theirs from `Button::hint`.
-
-**A hint built from game state** (lines, colours or values per frame) uses
-`UI::RmlBridge::ElementTooltip` (`RmlElementTooltip.h`). The element forwards
-`data-event-mouseover="x_hover(i)"` / `data-event-mouseout="x_leave"` to the window's model, which
-calls `Enter()` / `Leave()`; each frame the window passes the hovered element's lines to `Show()`,
-which anchors the tooltip to the element's drawn box (`CBuffStrip`). `Leave()` counts only the
-element's own mouseout: a child's bubbles to it while the element is still hovered.
-
-**Placement.** `Config::flipAnchorY` is where a tooltip grows the other way when it does not fit on
-its own side of the anchor (a button hint: the button's other edge); without it, `Show()` only
-shifts the tooltip back on screen. `DocumentHints` sets it.
-
-**Owners.** Every caller passes an owner token, and hides only its own. The item information
-tooltip's is `UI::Tooltip::ItemInfoOwner()` (`LegacyTextListTooltip.h`), the default of
-`ShowLegacyTextList()` / `HideLegacyTextList()`: a window that stops showing an item hides that and
-nothing else. An ownerless `Hide()` would hide any caller's tooltip, which is how the inventory
-once cleared every hint while it was open.
-
-**Legacy theme layout.** The legacy theme overrides `tooltip.rml`
-(`themes/legacy/tooltip.rml`) to follow the original `RenderTipTextList()`:
-- native text size;
-- rows one native text height tall, each starting 1.1 heights below the previous one, so
-  highlight bars keep their gaps;
-- the widest line plus 2 units of side padding;
-- a 1-unit opaque frame around an 80% fill.
-
-RmlUi's own FreeType metrics round to whole pixels, which accumulates over many rows. So
-`Show()` reads the row height from the native text renderer
-(`CUIRenderTextSDLTtf::LineHeight()`), without selecting a font on the shared renderer.
-It measures under `Config::transform` when a caller anchors with a non-ambient transform (the
-skill-hotkey tooltip's dp-ratio reference frame), otherwise under the ambient transform.
-`Config::fixedWidth` keeps a fixed text width where the original had one (the inventory Set and
-Socket option tooltips). The anchor places the inner (padding) box; the frame sits outside it.
-
-`UI::Skills::Tooltip::Render()`/`BuildModelForSlot()`/`ToRmlBridgeLines()`
-(`UI/HUD/Skills/SkillTooltip.h`/`.cpp`) is the shared skill/pet-command tooltip *content* builder —
-deliberately not in `SkillTooltipModel.h`, which is also shared with the standalone MuEditor (ImGui)
-tool and has no RmlUi dependency to pull in. `ToRmlBridgeLines()` converts a resolved `Model` into
-`UI::RmlBridge::Tooltip::Line`s; `MainFrameWindow.cpp`'s skill-hotkey tooltip and
-`SiegeWarBase.cpp`'s guild-skill tooltip build a `Config` from it. `Render()` has no callers and is
-kept on purpose; the MU Helper skill picker shows no hover tooltip, as native never did.
-
-**Deliberately not on this primitive**: the help window and the item help boxes draw in their own
-documents on the `.stage` (`help_window.rml`; `item_explanation.rml` and `set_item_explanation.rml`
-through `ItemHelpView`, whose lines and levels table the theme lays out, `item_help.rcss`). They stay shown
-while their window is open rather than on hover, which does not fit this primitive's owner-token
-model (the newest `Show()` always wins).
-
-## Skill icons
-
-`UI::Skills::Icon::ResolveSkillIcon()` (`UI/HUD/Skills/SkillIconAtlas.h`) maps a skill to its
-20x28 cell, lit or grey, and `IconSpriteName()` names the sprite in `skill_icons.rcss` or
-`master_skill_icons.rcss`. Link both, build `"image(" + sprite + ")"` in C++ and bind it with
-`data-style-decorator`. It is the one resolver for every skill icon: the HUD (`CSkillList`), the
-master tree and the MU Helper windows (`UI::MuHelper::SkillIconDecorator()`, always lit).
-
-## Level gauge
-
-Native's fill-by-level bar, in both `base.rcss`: `.level-gauge` (the rail), `.level-gauge-fill`
-and `.level-gauge-hit` (a child of the rail that takes the pointer); the consumer sizes and places
-all three. Legacy draws the original art — `newui_option_volume01/02` for 10 levels,
-`newui_option_effect03/04` for 5 (`.level-gauge.effect-gauge`) — with one sprite rect per level,
-since a clipped wrapper doesn't clip absolutely-positioned children here. A fill shows its level
-through a class, `level-<n>`, which each theme maps to a width (and, in legacy, a sprite); the MU
-Helper detail window binds its own width instead.
-
-The hit child binds `mousedown`, `drag` and `mousescroll` to one callback that passes each event
-to `UI::RmlBridge::ApplyLevelGaugeEvent()` (`RmlLevelGauge.h`) with the window's own pointer-to-
-level rule: a press or drag sets the level from where the pointer is on the drawn bar (correct
-inside a transformed panel, unlike a stock `<input type="range">`, `engine-findings.md`), the wheel
-steps it. Consumers: the MU Helper detail window's thresholds, the options window's sound, music
-and effect-limit gauges.
-
-## Feature operations for networking and game code
-
-Packet handlers and other non-UI code reach the UI through small free-function headers that
-include nothing from RmlUi or the window classes, so replacing the UI framework changes their
-`.cpp` files, not the callers. Each operation runs the owner's existing call sequence; callers
-keep decoding and protocol meaning (result codes become named enum values before the call), pass
-decoded values only, and strings or spans are borrowed for the call. Current headers:
-`UI/Chat/ChatMessages.h` (`UI::Chat`), `UI/Core/WindowAccess.h` (`UI::Windows`, over
-`Core/Globals/InterfaceList.h`), `UI/Dialogs/ConfirmRequest.h` (`UI::Dialogs::ShowConfirm`),
-`UI/Social/SocialUpdates.h`, `UI/Inventory/{InventoryContents,TradeUpdates,StorageUpdates,
-MixUpdates,ShopUpdates}.h`, `Guild/GuildUpdates.h`, `UI/HUD/HudUpdates.h`, `UI/Combat/SiegeUpdates.h`,
-`UI/Events/{Doppelganger,EmpireGuardian,CryWolf,LuckyCoin,Kanturu,CursedTemple}Updates.h`,
-`UI/NPCs/NpcDialogueUpdates.h`, `UI/Quests/QuestUpdates.h`, `UI/Options/OptionUpdates.h`,
-`UI/MuHelper/MuHelperUpdates.h`, `UI/Windows/LoginSceneUpdates.h`, and the older
-`UI/Chat/Whisper.h` and `UI/HUD/Notices.h`, which already had this shape. Plain OK message boxes and the
-NPC menu dialogs are already free functions in `UI/Core/WindowCommon.h` (reached through the
-precompiled header; it includes nothing). `Network/Server/WSclient.cpp` includes only these headers
-from the UI, and its compiler include tree reaches no RmlUi header; keep it that way. Add an
-operation to the family's header when a caller needs one; do not add a generic UI command or event
-interface.
-
-## Does not exist as a reusable primitive yet
-
-Recorded here so a future session doesn't assume otherwise — each of these is still ad hoc,
-per-window, or entirely unbuilt:
-
-- **ProgressBar / HealthBar / ManaBar / ExperienceBar** — `main_frame.rcss`'s gauge fills are
-  per-window CSS. `title_scene.rml`'s loading bar uses RmlUi's built-in `<progress>`
-  (`SetValue()`/`SetMax()` from C++) — a proven raw element, not a shared component.
-- **Notification, HUDContainer** — not needed by any window yet. (Scrolling is `.scroll-pane`,
-  lists are `data-for`, text fields are `<input>` + `.text-field`, all above.)
+Use `buff_strip.rml` for a simple repeated strip, `my_quest_info.rml` for structured rows, and
+`server_select.rml` for row selection. Editable repeated entries need care when removing rows:
+RmlUi preserves elements by array index, not identity. See
+[Engine Findings](engine-findings.md#rmlui-build).
 
 ## Tab / TabBar
 
-Proven on `COptionWindow` (6 tabs), `CMyQuestInfoWindow` (3 tabs), `CPetInfoWindow` (2 tabs). Same shape every
-time, no reusable C++ wrapper needed (matches this catalog's general "each window binds its own"
-convention): an `int active_tab` model field, one `.tab-btn` per tab with
-`data-class-active="active_tab == N"` and `data-event-click="window_select_tab(N)"`, and each tab's
-content wrapped in a panel with `data-class-hidden="active_tab != N"`. `RmlClickSelectTab(int)` is
-the C++-side handler name convention. Legacy theme swaps a sprite decorator on `.active`
-(`my_quest_info.rcss`'s `.tab-btn-quest.active { decorator: image(myquest-tab-small); }` — real
-sprite-art tabs, one frame per state); modern swaps a flat
-`background-color: token(accent-steel)` instead (no sprite art needed). Start from
-`my_quest_info.rml`/`.rcss` (3 tabs, plain content panels) or `pet_info.rml`/`.rcss` (2 tabs, sprite-
-based tab art) rather than inventing the mechanism again.
+**Pattern:** keep the active tab authoritative in the feature, bind it to the model, toggle each
+button's active class, and hide inactive content:
+
+```xml
+<div class="tab-btn" data-class-active="active_tab == 0"
+     data-event-click="select_tab(0)">First tab</div>
+<div data-class-hidden="active_tab != 0">...</div>
+```
+
+Callback names are feature-specific. This is a binding pattern, not a shared TabBar class;
+`.tab-btn` styling is consumer-specific. Copy `my_quest_info.rml` for three content panels or
+`pet_info.rml` for two sprite-art tabs. Each theme styles the active state independently.
+
+## Level gauge
+
+**Component and style contract:** `.level-gauge`, `.level-gauge-fill` and `.level-gauge-hit`
+in both themes' `base.rcss`, with
+[`ApplyLevelGaugeEvent()`](../../src/source/UI/RmlBridge/RmlLevelGauge.h) for interaction.
+The consumer sizes the rail and fill, and binds `mousedown`, `drag` and `mousescroll` on the hit
+child to its callback.
+
+The helper maps presses and drags against the drawn bar, steps wheel input, clamps to
+`0..maxLevel`, and returns a value only when changed. Supply the feature's pointer-to-level
+mapping. Its wheel handler stops propagation so a containing scroll pane does not also scroll.
+
+Reflect the fill using `level-N` classes or justified state-driven width. The options window's
+sound/music/effect gauges and MU Helper detail thresholds are references. The transformed-pointer
+constraint is explained in [Engine Findings](engine-findings.md).
+
+## Dialog
+
+Choose the component by interaction shape, not by the legacy class name.
+
+### Confirmations and prompts
+
+[`CGenericConfirmDialog` / `GenericDialogConfig`](../../src/source/UI/Dialogs/GenericConfirmDialog.h)
+is the shared configuration-driven component for confirmations, text/PIN entry, timed progress
+and optional item/image previews. One active dialog is shown at a time; later requests queue.
+Configure it rather than adding a subclass or a document for each prompt.
+
+Buttons have explicit roles: Primary, optional Secondary, and optional Cancel. Enter invokes
+Primary. Esc invokes Cancel when configured, otherwise Primary; it never invokes Secondary.
+Timed progress dialogs hide buttons and do not accept Esc dismissal.
+
+Callbacks can call `KeepOpen()` to veto resolution, including Cancel. Read entered text through
+`GetInputText()` and validate it before accepting. Requests can carry an `isValid` predicate;
+expired requests dismiss without callbacks. IDs support pending checks and cancellation, while
+tags support automation answers. Exact fields and contracts remain in the header.
+
+The current component owns one model/document view. Live item previews use `ItemCameraTarget`
+inside that document. References: `GenericConfirmDialog.cpp`, `generic_confirm_dialog.rml`,
+and each theme's override/styles. Non-UI callers use
+[`ShowConfirm`](../../src/source/UI/Dialogs/ConfirmRequest.h).
+
+### Menus of actions
+
+[`CGenericMenuDialog` / `GenericMenuConfig`](../../src/source/UI/Dialogs/GenericMenuDialog.h)
+is the sibling component for an arbitrary list of labelled actions. It also queues requests
+behind one active menu. An enabled button runs its callback and closes; Esc uses `onCancel`.
+There is no resolution veto. A callback may enqueue the next menu, as the Gem Integration flow does.
+
+Use configuration for content and supported layout variants. `kind` identifies compatibility
+presentation, while `systemMenu` selects the system-menu presentation. Column support is currently
+limited to the implemented two-column variant; consult the header before adding another shape.
+Frame structure comes from `window_shell.rml`. References: `generic_menu_dialog.rml`, its themed
+assets, and the menu construction in `CustomMessageBox.cpp`.
+
+### Existing message-box integration
+
+[`MessageBoxView`](../../src/source/UI/Dialogs/MessageBoxView.h) renders existing message-box
+owners with their callbacks, role-labelled lines, tables, buttons and progress. Its `kind` lets
+the theme choose compatibility layout. Use it when maintaining those owners; prefer the generic
+components for new interactions that fit their shapes.
+
+The [migration ledger](migration-ledger.md) records existing dialog destinations.
+Preview commands belong in its [event-preview reference](migration-ledger.md#event-preview-reference).
+
+## Tooltip
+
+**Component:** one shared hover-tooltip document. Choose the entry point by content:
+
+| Need | Mechanism and reference |
+|---|---|
+| Static or model-bound element hint | `data-hint` or `data-attr-data-hint`; the shared `DocumentHints` pass finds the hovered element's nearest hinted ancestor |
+| Game-state content anchored to an element | [`ElementTooltip`](../../src/source/UI/RmlBridge/RmlElementTooltip.h); bind enter/leave events and refresh content while hovered, as `CBuffStrip` does |
+| Direct hover content from native or feature code | [`Tooltip::Show(Config, Owner)`](../../src/source/UI/RmlBridge/RmlTooltip.h); pass lines and an anchor in window pixels |
+| Persistent help shown while a window is open | The feature's own document, such as `ItemHelpView`; this does not use the shared hover-tooltip owner |
+
+Hint elements need pointer interaction. Dynamic element tooltips ignore bubbled mouseout events
+from children that do not represent leaving the tracked element.
+
+Use a stable owner token when callers compete, and hide only that owner's tooltip. The API permits
+ownerless calls, whose hide behavior can affect another caller. Refresh direct per-frame hover
+content appropriately; `Config::refreshEachFrame` lets it disappear when refresh stops.
+
+The shared tooltip measures and clamps to the viewport. `flipAnchorY` allows growth from the
+opposite edge when needed. It is safe to call `Show()` repeatedly; unchanged content reuses its
+measurements. Exact options and palette belong in the header; depths belong in `RmlStackingOrder.cpp`.
+
+Skill tooltip content remains domain-specific in `UI/HUD/Skills/SkillTooltip.h`; it builds lines
+for this presentation mechanism. Item help and the help window remain separate persistent views.
+
+## Dragging
+
+**Component:** [`MakeDraggable()`](../../src/source/UI/RmlBridge/RmlDraggable.h) attaches a
+RmlUi handle to an absolutely positioned panel. Attach after every document build. The helper
+sets the handle's drag and pointer properties; controls inside it opt out with `drag: block`
+(the shared base styles cover inputs, buttons and click handlers).
+
+A nested control's own drag, such as a level gauge, does not move the enclosing panel.
+`ResetDraggedPosition()` restores theme placement; `KeepInsideWindow()` clamps a dropped panel.
+Use move/end callbacks when the owner must synchronize position or commit a preference.
+Eligibility, workspace behavior and persistence policy belong in [Window Placement](window-placement.md).
+
+## Layout utilities
+
+**Style contract:** `.anchor-{top,bottom}-{left,right}`, `.center-{x,y,both}`,
+`.stretch-{x,y,both}`, `.hidden` and `.layout-anchor` in both themes' `base.rcss`.
+Use [Layout, Anchoring & Scaling](layout-and-scaling.md) for units and placement recipes.
+
+Shared geometry helpers are integration tools, not layout sources:
+
+| Helper | Use |
+|---|---|
+| [`DrawnContentBox()` / `DrawnBox()`](../../src/source/UI/RmlBridge/RmlElementBox.h) | Read transformed element geometry in window pixels for native drawing or interaction |
+| [`SlotPlacement` / `FillPlacementSize`](../../src/source/UI/RmlBridge/RmlPanelGeometry.h) | Apply workspace placement and fill dimensions to managed panels |
+| [`RegisterWorkspaceDocument()`](../../src/source/UI/RmlBridge/RmlWorkspaceParticipant.h) | Register a `dp`-sized document root with the workspace |
+
+Placement configuration and registration recipes live in [Window Placement](window-placement.md).
+
+## Data binding
+
+**Component:** [`RmlModelBinder<T>`](../../src/source/UI/RmlBridge/RmlModelBinder.h) owns model
+state and its data-model handle. Windows normally reach it through `ThemedView` using
+`GetModel()`, `MarkDirty()` and `Binder()`.
+
+Use [`SyncField()` / `SyncFieldFrom()`](../../src/source/UI/RmlBridge/RmlSyncField.h) to assign
+and dirty only changed fields. The first accepts a value; the second reconciles a field from a
+staged model:
+
+```cpp
+SyncField(view.Binder(), &Model::activeTab, "active_tab", activeTab);
+SyncFieldFrom(view.Binder(), &Model::activeTab, "active_tab", updated);
+```
+
+The member and value types must match. Register row structs and arrays whenever the model is
+created. Model creation and theme reload ownership are covered below.
+
+## Semantic colours
+
+**Pattern:** bind meaning and let themed RCSS choose the colour. For example, character
+attributes bind `potion`/`boosted` state to `.attr-potion`/`.attr-boosted`; wealth tiers select
+`.gold-*` classes. `character_info.rml` and both themes' styles are references.
+
+Avoid inline `data-style-color` for theme-owned states: it overrides stylesheet rules.
+Resolved compatibility content palettes are a narrower case; conversion details belong in
+[Engine Findings](engine-findings.md#compatibility-text-and-tooltip-metrics).
+
+## Theming
+
+**Component:** [`ThemedView<Model>`](../../src/source/UI/RmlBridge/RmlThemedView.h) owns each
+feature's model and themed documents. Use `ThemedView<>` when no model is needed.
+
+```cpp
+UI::RmlBridge::ThemedView<Model> view{
+    "feature",
+    [](Rml::DataModelConstructor& constructor, Model& model) {
+        BindModel(constructor, model);
+    },
+    {{"Data/Interface/RmlUi/feature.rml"}}};
+```
+
+Call `Ensure()` to build: it creates the model before loading markup, waits for unavailable
+contexts and retries failed loads. `Release()` unloads documents, removes the model and unregisters
+reload handling. `Hide()` retains the built view. A theme reload preserves model values and
+rebuilds documents, restoring visibility with the configured focus and stacking options.
+
+Use `afterBuild` to attach controls/listeners and field configuration, `beforeUnload` to clear
+attachments and cached elements, and `afterReload` for geometry-dependent refresh. Per-instance
+views use `modelPlaceholder` and `SetModelName()` before model creation; `ChatRoomView` is a reference.
+
+Examples: `CCharacterInfoWindow` (one document), `CMainFrameWindow` (multiple documents sharing a
+model), `CGenericConfirmDialog` (one document with an item preview), and `ReconnectDialog.cpp`
+(a feature-owned view without a window class).
+
+Theme resource resolution, markup overrides and declared capabilities belong in
+[Theming & Modding](theming-and-modding.md). Do not branch presentation on a theme name.
+
+## Native content inside a document
+
+### Render targets
+
+**Component:** [`RenderTarget`](../../src/source/UI/RmlBridge/RmlRenderTarget.h) draws native
+content into a texture shown by a document image. Use it for live 3D that belongs to a window,
+so overlapping documents can cover it normally.
+
+Provide a drawer, resize to the element's drawn size in physical pixels, enable only while needed,
+and bind `Source()` to the image. The drawer configures its projection and draws into the supplied
+viewport. `Source()` is empty until the first rendered frame. `PhotoViewerControl` is an element-side
+reference; the renderer owns capture scheduling and texture lifetime.
+
+Native content belonging to a window must not use the post-RmlUi cursor pass.
+The [frame lifecycle](README.md#frame-lifecycle-render-seams) describes rendering order;
+[render-target findings](engine-findings.md#render-target-integration) cover capture and blending.
+
+### Item-camera content
+
+[`ItemCameraTarget`](../../src/source/UI/Inventory/ItemCameraTarget.h) wraps a render target
+with the UI item camera. Its drawer uses window pixels; `Sync(image, enabled)` reads the drawn
+image box, sizes the target and sets its source. The camera is cropped to that box and restored
+after drawing. `SetFieldOfView()` handles features that use a different item-camera field of view.
+
+References: `CItemHotKey`, the confirm dialog's item preview and `EventItemEntryView`.
+Use drawn slot geometry when framing an item; do not copy RCSS dimensions into C++.
+
+### Item grids
+
+**Domain integration:** `ItemGridModel.h`, `ItemGridGeometry.h` and both themes' `item_grid.rcss`
+connect the inventory controller's state to themed grids. Register cells with
+`RegisterItemGridCells()` and bind `Cells()` for tints, drop previews and stack counts. Native
+items and remaining effects draw into the window's item-camera target.
+
+`CInventoryCtrl::FollowGridPx()` reads the drawn grid and cell pitch into window-pixel
+`GridGeometry`. Rendering, hit tests, drop targets and tooltips use that geometry. RCSS owns
+`--item-cell` and grid dimensions. `PickupAnchor` stores a drag's hold point in cells so it works
+between grids with different pitches. `CMyInventory` is the reference, including equipment slots.
+
+## Native 3D viewer input
+
+**Domain adapter:** [`PhotoViewerControl`](../../src/source/UI/Social/PhotoViewerControl.h)
+connects a letter portrait's native viewer to document gestures: drag-to-turn, right-click reset
+and its help toggle.
+
+The slot claims pointer interaction; document-level move/up listeners keep tracking when a drag
+leaves it. Gesture deltas convert to `dp` for scale-independent feel. Use document events rather
+than legacy mouse-press flags for content inside an interactive RmlUi panel. Wheel events also
+route through the UI consumer; the [input-routing findings](engine-findings.md#document-input-routing)
+explain propagation.
+
+## Skill icons
+
+**Domain helper:** [`ResolveSkillIcon()` / `IconSpriteName()`](../../src/source/UI/HUD/Skills/SkillIconAtlas.h)
+resolve normal/master skill atlas sprites and lit/grey states. Link `skill_icons.rcss` and
+`master_skill_icons.rcss`, then bind the resolved `image(...)` decorator.
+The skill HUD, master tree and MU Helper provide references. Skill meaning and availability stay
+in the feature; this helper resolves presentation assets.
+
+## Sprite digits
+
+**Domain helper:** [`DigitCells()`](../../src/source/UI/RmlBridge/RmlDigitCells.h) resolves a
+number to texel rectangles in a digit strip. Bind the returned array; the theme lays out the
+cells and chooses the image. Non-digit characters reserve an empty cell. `CryWolf` and
+`CursedTempleSystem` are references. Use ordinary text unless compatibility needs sprite digits.
+
+## Specialized views
+
+These adapters serve existing feature families; they are not general window bases.
+
+| View | Scope and reference |
+|---|---|
+| [`EventItemEntryView`](../../src/source/UI/Events/EventItemEntryView.h) | Shared entry-window presentation, text/buttons and optional live item slots; Doppelganger and Empire Guardian are references |
+| [`ItemHelpView`](../../src/source/UI/Inventory/ItemHelpView.h) | Persistent item-explanation lines and level tables; item and set-item explanation windows own separate documents |
+
+Modern's `.modern-wallet-px` and `.modern-control-well` are theme-specific styles for inventory
+money strips and inset control backgrounds. They supply appearance and may carry default geometry;
+inspect `base.rcss` and the inventory/login consumers before reuse.
+
+## Feature operations for networking and game code
+
+Non-UI callers use small feature-operation headers with decoded values and no RmlUi/window-class
+dependency. Examples are `UI/Chat/ChatMessages.h`, `UI/Inventory/TradeUpdates.h` and
+`UI/Dialogs/ConfirmRequest.h`. Extend the appropriate family's header when a caller needs another
+operation; keep protocol decoding and result-code meaning with the caller.
+
+Do not introduce a generic UI command interface or expose presentation internals to packet
+handlers. The [architecture policy](architecture-principles.md) governs this boundary.
+
+## Concepts without a shared primitive
+
+Use the existing mechanism appropriate to the feature rather than assuming every concept needs
+a wrapper:
+
+- Loading progress can use stock RmlUi `<progress>` (`title_scene.rml`). HUD health, mana and
+  experience fills are window-specific markup/RCSS; interactive level gauges use the helper above.
+- Lists and tabs use the binding patterns above; fields use stock inputs and shared styles.
+- Notifications have feature-owned presentations, such as `UI/HUD/Notices`; there is no general
+  notification component or HUD container to instantiate.
 
 ## Using this catalog
 
-Before building a new one-off mechanism for a window port: check this list first. If the concept
-you need already exists above, reuse it. If it's listed as a gap, that's a signal you may be the
-first real use case defining its shape — follow `architecture-principles.md` §27's workflow
-(understand intent, then design the RML/RCSS/C++ split) rather than copying whatever the nearest
-existing window happens to do, and update this catalog once the pattern is proven.
+Reuse a listed mechanism within its scope. When a new mechanism proves useful across consumers,
+add its purpose, essential constraints and a working reference here. Keep configuration fields
+in headers, engine quirks in Engine Findings, and migration history in the migration ledger.

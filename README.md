@@ -7,59 +7,59 @@ This is my special fork of the Season 5.2 client sources [uploaded by Luois](htt
 The ultimate goal is to clean it up and make it compatible and feature complete
 to Season 6 Episode 3.
 
-What I have done so far:
-  * 🔥 The framerate has been increased.
-    * By default, it uses V-Sync without fps limit. If V-Sync is not
+What's done so far:
+
+- 🔥 The framerate has been increased.
+  - By default, it uses V-Sync without fps limit. If V-Sync is not
     available, it limits to 60 fps.
-    * The options menu includes a checkbox to reduce effects to achieve higher frame rates.
-    * Chat commands:
-      * Change FPS-Limit: `$fps <value>`
-      * V-Sync: `$vsync on` / `$vsync off`
-      * Show simple FPS counter: `$fpscounter on` / `$fpscounter off`
-      * Show a details overlay (FPS, slowest frames, frame time graph, build, scene, mouse, and camera): `$details on` / `$details off`
-      * Show SDL GPU draw, merge, buffer, texture, and per-pass CPU statistics (including skinning, effect simulation, and present time): `$glstats on` / `$glstats off`
-  * 🔥 Rendering uses deferred SDL GPU commands, indexed quads and strips,
-    growable per-frame buffers, and safe adjacent draw merging.
-  * 🔥 The upstream Core Profile performance series is mapped to SDL GPU (see
-    [docs/GPU Skinning/glperf](docs/GPU%20Skinning/glperf/README.md)): packed
-    3x4 bone palettes, renderer statistics, pass attribution, buffer growth,
-    and heap-free sprite geometry generation are retained without restoring the
-    retired OpenGL RHI or its hardware-specific measurements.
-  * 🔥 Added inventory and vault extensions.
-  * 🔥 The master skill tree system was upgraded to Season 6
-  * 🔥 Unicode support: The client works with UTF-16LE instead of ANSI in memory.
-    All strings and char arrays have been changed to use wide characters.
-    Strings coming from files and the network are handled as UTF-8.
-  * 🔥 Replaced the network stack with MUnique.OpenMU.Network to make it easier to
-    apply changes. This repository includes a C# .NET 10 client library which is built
-    with Native AOT.
-  * 🔥 The network protocol has been adapted for Season 6 Episode 3 - there is probably
-    still some work to do, but it connects to [OpenMU](https://github.com/MUnique/OpenMU)
-    and is playable. Additionally, the protocol has been extended so it's not standard
-    anymore.
-    * Damage, Exp etc. can exceed 16 bit now.
-    * Improved item serialization
-    * Improved appearance serialization
-    * Added monster health status bar after attack
-  * 🔥 Significant changes from Qubit have been incorporated, such as
-    * Rage Fighter class
-    * Visual bug when Dark Lord walks with Raven
-    * Item equipping with right mouse click
-    * Glow for red, blue and black fenrir
-    * Additional screen resolutions
-  * 🔥 Incorporated MU Helper UI and logic - there's some work to do but core functionality is usable
-  * 🔥 Auto-reconnect system
-  * Removed if-defs for Rage Fighter class as we are targeting Season 6, so Rage
-    Fighter should always be included.
-  * Some minor bug fixes, e.g.:
-    * Storm Crow item labels
-    * Ancient set labels
-  * The code has been refactored. A lot of magic values have been replaced by
-    enums and constants.
-  * 🔥 New Translation system (see [docs/translation-system.md](docs/translation-system.md))
+- 🔥 Optimized SDL GPU rendering with deferred draw batching, indexed geometry,
+  growable buffers, packed bone palettes, allocation-free sprites, and detailed
+  performance statistics.
+- 🔥 Debug Chat commands:
+  - Change FPS-Limit: `$fps <value>`
+  - V-Sync: `$vsync on` / `$vsync off`
+  - Show simple FPS counter: `$fpscounter on` / `$fpscounter off`
+  - Show a details overlay (FPS, slowest frames, frame time graph, build, scene, mouse, and camera): `$details on` / `$details off`
+  - Show SDL GPU draw, merge, buffer, texture, and per-pass CPU statistics (including skinning, effect simulation, and present time): `$glstats on` / `$glstats off`
+- 🔥 Socket-based testing and automation in developer builds: script gameplay
+  and UI interactions, inspect game state, and capture screenshots, generate pass/fail reports.
+- 🔥 In-game MU Editor for live camera and rendering tuning, terrain and world
+  object editing, and minimap capture.
+- 🔥 Added inventory and vault extensions.
+- 🔥 The master skill tree system was upgraded to Season 6
+- 🔥 Unicode support: The client works with UTF-16LE instead of ANSI in memory.
+  All strings and char arrays have been changed to use wide characters.
+  Strings coming from files and the network are handled as UTF-8.
+- 🔥 Replaced the network stack with MUnique.OpenMU.Network to make it easier to
+  apply changes. This repository includes a C# .NET 10 client library which is built
+  with Native AOT.
+- 🔥 The network protocol has been adapted for Season 6 Episode 3 - there is probably
+  still some work to do, but it connects to [OpenMU](https://github.com/MUnique/OpenMU)
+  and is playable. Additionally, the protocol has been extended so it's not standard
+  anymore.
+  - Damage, Exp etc. can exceed 16 bit now.
+  - Improved item serialization
+  - Improved appearance serialization
+  - Added monster health status bar after attack
+- 🔥 Significant changes from Qubit have been incorporated, such as
+  - Rage Fighter class
+  - Visual bug when Dark Lord walks with Raven
+  - Item equipping with right mouse click
+  - Glow for red, blue and black fenrir
+  - Additional screen resolutions
+- 🔥 Incorporated MU Helper UI and logic - there's some work to do but core functionality is usable
+- 🔥 Auto-reconnect system
+- Removed if-defs for Rage Fighter class as we are targeting Season 6, so Rage
+  Fighter should always be included.
+- The code has been refactored. A lot of magic values have been replaced by
+  enums and constants.
+- 🔥 Refactored UI - Replaces the client’s legacy UI with a unified RmlUi system on the SDL_GPU renderer
+  - Moves layout, sizing, anchoring, and styling into RML/RCSS, with centralized UI scaling and theme-defined window placement.
+- 🔥 New Translation system (see [docs/translation-system.md](docs/translation-system.md))
 
 What needs to be done for Season 6:
-  * Lucky Items
+
+- Lucky Items
 
 ## Release downloads
 
@@ -78,10 +78,11 @@ assembly commands.
 ## How to build & run
 
 ### Requirements
-* **CMake** 3.25 or newer (bundled with Visual Studio and CLion)
-* **.NET SDK 10.0** or newer (for building the Client Library)
-* **Visual Studio 2022+** with C++ and C# workloads, **CLion**, or **Rider** (see IDE-specific instructions below)
-* A compatible server: [OpenMU](https://github.com/MUnique/OpenMU)
+
+- **CMake** 3.25 or newer (bundled with Visual Studio and CLion)
+- **.NET SDK 10.0** or newer (for building the Client Library)
+- **Visual Studio 2022+** with C++ and C# workloads, **CLion**, or **Rider** (see IDE-specific instructions below)
+- A compatible server: [OpenMU](https://github.com/MUnique/OpenMU)
 
 ### First Time Setup - Initialize Submodules
 
@@ -107,6 +108,7 @@ git submodule update --init
 There are two orthogonal choices: **editor on/off** (configure-time, picked via preset) and **Debug/Release** (build-time).
 
 #### Editor builds (`windows-x86-mueditor` / `windows-x64-mueditor`)
+
 - Configure preset sets `ENABLE_EDITOR=ON`
 - Includes the in-game MU Editor (ImGui-based); the `imgui` submodule must be initialized
 - Press **F12** in-game to toggle the editor
@@ -114,6 +116,7 @@ There are two orthogonal choices: **editor on/off** (configure-time, picked via 
 - Preprocessor define: `_EDITOR`
 
 #### Standard builds (`windows-x86` / `windows-x64`)
+
 - Configure preset sets `ENABLE_EDITOR=OFF`; no editor code is compiled in and the `imgui` submodule is not initialized
 - Zero editor overhead
 
@@ -126,11 +129,11 @@ from Linux using a MinGW-w64 toolchain.
 
 **Prerequisites**
 
-  * A working MinGW-w64 toolchain (for example `i686-w64-mingw32-g++`).
-  * A MinGW-w64 build of libjpeg-turbo which provides a `libturbojpeg` library
-    (static or import library) on the library search path of your toolchain.
-  * Standard Windows / OpenGL libraries shipped with MinGW-w64 (e.g. `opengl32`,
-    `glu32`, `winmm`, `imm32`, `ws2_32`, etc.).
+- A working MinGW-w64 toolchain (for example `i686-w64-mingw32-g++`).
+- A MinGW-w64 build of libjpeg-turbo which provides a `libturbojpeg` library
+  (static or import library) on the library search path of your toolchain.
+- Standard Windows / OpenGL libraries shipped with MinGW-w64 (e.g. `opengl32`,
+  `glu32`, `winmm`, `imm32`, `ws2_32`, etc.).
 
 **Example build commands on Linux**
 
@@ -149,10 +152,6 @@ libjpeg-turbo (providing `libturbojpeg.a` / `libturbojpeg.dll.a`) or adjust the
 name of the library available on your system.
 
 ---
-
-
-
-
 
 ### Building the Project
 
@@ -203,10 +202,12 @@ The project uses **CMake** as its build system. The `.NET Client Library` is aut
 Rider doesn't have full CMake support for C++ projects, so you need to generate a Visual Studio solution first:
 
 1. **Generate the solution** (one-time setup):
+
    ```bash
    cmake -B build -G "Visual Studio 17 2022" -A Win32
    ```
-   *(Adjust the generator version based on your installed Visual Studio)*
+
+   _(Adjust the generator version based on your installed Visual Studio)_
 
 2. **Open in Rider:**
    - File → Open
@@ -240,11 +241,13 @@ cmake --build --preset windows-x64-debug
 **Note:** Ninja Multi-Config allows switching between Debug and Release without reconfiguring. Assets are automatically copied to the build output directory during compilation.
 
 **To start fresh (clean build):**
+
 ```powershell
 Remove-Item -Recurse -Force out
 ```
 
 **Run the executable:**
+
 ```powershell
 # x86 Debug
 ./out/build/windows-x86/src/Debug/Main.exe
@@ -254,6 +257,7 @@ Remove-Item -Recurse -Force out
 ```
 
 #### Option 5: Command Line Build (Linux) !Not Working Yet!
+
 For Linux builds, you'll need to add Linux presets to CMakePresets.json. Example workflow:
 
 ```bash
@@ -269,11 +273,13 @@ cmake --build build
 ```
 
 **To start fresh (clean build):**
+
 ```bash
 rm -rf build
 ```
 
 **Run the executable:**
+
 ```bash
 ./build/src/Main
 ```
@@ -291,12 +297,12 @@ The client identifies itself with Version `2.04d` and serial `k1Pk2jcET48mxL3b`.
 
 The client reads options from `config.ini` in the executable directory:
 
-| Section | Key | Default Value | Description |
-| :--- | :--- | :--- | :--- |
-| **`[UI]`** | `EnableAnimationTaskPool` | `0` | Set to `1` to process character animation through `AnimationTaskPool` when at least 20 active characters are visible. `0` keeps sequential updates. |
-| **`[UI]`** | `Locale` | `"en"` | Active generated UI locale. The Options window persists runtime language changes here. |
-| **`[Camera]`** | `Zoom` | `1735` | Persisted Orbital-camera distance. |
-| **`[Render]`** | `VSync` | `1` | `1` enables display-paced presentation; `0` keeps VSync disabled across restarts and fullscreen/resolution changes. `$vsync on` / `$vsync off` update this value. |
+| Section        | Key                       | Default Value | Description                                                                                                                                                       |
+| :------------- | :------------------------ | :------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`[UI]`**     | `EnableAnimationTaskPool` | `0`           | Set to `1` to process character animation through `AnimationTaskPool` when at least 20 active characters are visible. `0` keeps sequential updates.               |
+| **`[UI]`**     | `Locale`                  | `"en"`        | Active generated UI locale. The Options window persists runtime language changes here.                                                                            |
+| **`[Camera]`** | `Zoom`                    | `1735`        | Persisted Orbital-camera distance.                                                                                                                                |
+| **`[Render]`** | `VSync`                   | `1`           | `1` enables display-paced presentation; `0` keeps VSync disabled across restarts and fullscreen/resolution changes. `$vsync on` / `$vsync off` update this value. |
 
 Rendering always uses the SDL GPU backend. The legacy `[Render] CoreProfile`
 key is not read; values `0` and `1` have no effect and do not select an OpenGL
@@ -312,6 +318,8 @@ context.
 
 ## Documentation
 
+- [RmlUi UI system](docs/rmlui-ui-system/README.md) - UI architecture, building
+  windows, layout and scaling, theming, and reusable components.
 - [GPU skinning and SDL GPU rendering](docs/GPU%20Skinning/README.md) - the
   downstream mapping for upstream Core Profile, GPU skinning, and DXP work.
 - [Camera system](docs/camera-system.md) - modes, switching (F9), config,
@@ -348,8 +356,8 @@ AI coding assistants (Claude Code, Cursor, Codex, etc.) should also read
 
 ## Credits
 
-  * Webzen
-  * Louis
-  * Qubit (tuservermu.com.ve)
-  * Community members of RaGEZONE and tuservermu.com.ve for posting fixes
-  * [Nitoy](https://github.com/nitoygo) for the MU Helper
+- Webzen
+- Louis
+- Qubit (tuservermu.com.ve)
+- Community members of RaGEZONE and tuservermu.com.ve for posting fixes
+- [Nitoy](https://github.com/nitoygo) for the MU Helper and RmlUi UI System

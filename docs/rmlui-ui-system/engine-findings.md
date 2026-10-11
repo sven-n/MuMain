@@ -1,8 +1,8 @@
 # Engine Findings: RmlUi Build-Specific Gotchas
 
-Empirical facts about *this specific codebase and engine build*, not general policy. Most are
-RmlUi quirks of the vendored build; the last section covers the `CObject`/`CManager` machinery
-around it. Porting patterns are in [`building-new-ui.md`](building-new-ui.md); known limits in
+Observed behavior of the vendored RmlUi build and its integration with this client. These are
+implementation findings, not general policy; recheck them when updating the engine. Native integration and window dispatch are covered below. Implementation guidance is in
+[`building-new-ui.md`](building-new-ui.md); known limits in
 [`README.md`](README.md).
 
 ## RmlUi build
@@ -19,14 +19,18 @@ around it. Porting patterns are in [`building-new-ui.md`](building-new-ui.md); k
   not. Every text-bearing selector in `themes/modern/*.rcss` declares
   `font-family: "token(font-body)"`; modern has no document-wide default the way legacy's `#panel`
   rule provides one. **Check this first whenever a new element's box paints but its text doesn't**
-  — that signature has been misread as a flex/decorator/layout bug for several rounds before.
+  — verify the font before investigating flex, decorators or layout.
 
-- **The themed loader's token substitution (`RmlTheme.cpp`) resolves each `<link href>`
-  against `sourceUrl`'s directory** (always `themes/<theme>/`), not wherever the RML text came
-  from, and substitutes every `<link>`, not just the first. A document may have a
-  `themes/<theme>/<name>.rml` override that the loader prefers silently (`login`,
-  `msg_win`, `main_frame`, `character_info`, `my_quest_info`, …) — **check for one before reading
-  a document's markup from the shared top-level `.rml`.**
+- **Themed documents resolve relative links against their synthetic source URL**
+  (`themes/<theme>/`), whether their markup came from shared RML, the selected theme or an
+  ancestor. Inherited templates and stylesheets retain that virtual path, so child overrides
+  and tokens also affect parent markup. Check the theme's inheritance chain before reading only
+  the shared markup; see [Theming & Modding](theming-and-modding.md#adding-a-theme-folder).
+
+- **A fallback font face supplies missing glyphs, not an unknown family.** An unavailable
+  literal `font-family` can still render no text. Optional system fonts should use `font-*`
+  tokens, which fall back to an available ancestor family or bundled Liberation Sans. See
+  [Optional system fonts](theming-and-modding.md#optional-system-fonts).
 
 - **`overflow: hidden` does not clip an absolutely-positioned oversized child**, even with
   `clip: always`. `ContainerBox::Close()` (`BlockContainer.cpp`) submits the box's
@@ -47,7 +51,7 @@ around it. Porting patterns are in [`building-new-ui.md`](building-new-ui.md); k
   the element's RCSS definition when there is none; importance is never compared, and RmlUi's
   parser has no `!important` for a theme to reach for. So a property a window binds from its model
   is not merely "hard to override" — **no theme, mod or user stylesheet can override it at all**,
-  including one shipping its own copy of the document. This is what makes C++-side presentation a
+  unless a document override removes that binding. This is what makes C++-side presentation a
   capability loss rather than an untidiness, and it is the reason `building-new-ui.md`'s ownership
   rules treat "bind only what actually varies with data" as a hard rule. The root transform
   (`root_x`/`root_y`/`root_scale`, and `--root-scale` beside it) is the accepted exception: it is
@@ -81,7 +85,7 @@ around it. Porting patterns are in [`building-new-ui.md`](building-new-ui.md); k
   earlier context drew, and writes the layer back at the end, so a backdrop has the scene to read.
   Before that the base layer started empty and was blended onto the scene afterwards, and a
   backdrop blurred nothing. The modern options screen and system menu use it (`option_window.rcss`,
-`generic_menu_dialog.rcss`). A full-screen
+  `generic_menu_dialog.rcss`). A full-screen
   backdrop blur costs a blur pass every frame it is visible.
 
 - **`decorator: image(...)` does not stretch a sprite rect to a box of a different size;
@@ -89,6 +93,21 @@ around it. Porting patterns are in [`building-new-ui.md`](building-new-ui.md); k
   `.group-btn` use `ninepatch(legacy-btn-idle, legacy-btn-idle-inner)`. Legacy's plain `.gmd-btn`
   (128 dp / 64 dp over a 108×30 sprite) has the same width mismatch and has not been visually
   checked; `.gmd-btn.cols-2` uses the ninepatch fix.
+
+- **Image repeat modes support file images and atlas sprites in this fork.** The client loads
+  RmlUi file textures at their original dimensions, avoiding legacy power-of-two padding in
+  the repeated image. Native bitmap callers still use padding by default. For `@spritesheet`
+  entries, `DecoratorTiled.cpp` emits clipped quads within the sprite's UV rectangle for
+  `repeat`, `repeat-x` and `repeat-y`; it does not wrap the entire atlas. Partial edge tiles
+  preserve their cropped UVs. The vendored restriction against repeating sprites was removed
+  with geometry regression coverage. Repetition adds geometry per tile for atlas sprites;
+  `ninepatch(...)` remains the appropriate choice for stretchable frames. Visual GPU filtering
+  and seams still need in-game verification.
+
+- **Fractional `letter-spacing` accumulates before rounding.** The default font backend formerly
+  truncated each character's spacing to an integer, making subpixel values ineffective. This
+  fork keeps floating-point advances for measurement and mesh generation, rounding the final
+  width through the engine's integer-width API; glyph placement still snaps to pixel positions.
 
 - **A bordered/backgrounded element with child elements can paint as an incomplete, non-closed
   rectangle.** A bordered leaf with no children always renders correctly. Put the paint on a
@@ -127,11 +146,10 @@ around it. Porting patterns are in [`building-new-ui.md`](building-new-ui.md); k
      to unstyled flow. Write "head and body".
   Only files loaded *as* a template are affected.
 
-- **A `<link>` inside a `<template>` file's head gets no `token(...)` substitution.**
-  `InlineTokenizedStylesheet()` rewrites the links of the document `ThemedDocumentLoader::Load()`
-  loads; RmlUi's `TemplateCache` reads template files directly. Link
-  token-using stylesheets from the consuming document; a template's own `.rcss` must be token-free
-  (`window_shell.rcss` is).
+- **Token substitution happens when themed RCSS is opened, including links from templates.**
+  `ThemeFileInterface` recognizes paths under `Data/Interface/RmlUi/themes/<theme>/` and
+  expands that theme's `tokens.ini`. The older document-link rewriting restriction no longer
+  applies. Keep stylesheet links relative to the theme so token lookup and asset paths agree.
 
 - **`Rml::TemplateCache` also caches templates by declared name, and that entry is not refreshed
   per lookup**, so two themes' forks of the same template name could splice in the wrong theme
@@ -261,7 +279,8 @@ plus [PR #989](https://github.com/mikke89/RmlUi/pull/989) (SDL_GPU renderer pari
 - **Native drawing and `MeasureText()` follow the active transform**, which `CManager` sets to its
   measuring units for every pass; `CSprite::Render()` reads the transform's offset but not its
   scale. Real pixels need `ScopedWindowPixels`, the stretched screen `ScopedScreenStretch`.
-  `MouseX`/`MouseY` are never remapped.
+  `CManager` does not remap the pointer per window. The event pump maintains the legacy
+  `MouseX`/`MouseY` screen-reference coordinates separately from `g_fWindowMouseX/Y`.
 
 - **A native widget that reads the active transform at render time can end up double-scaled** if
   its position was divided by a different transform when set. Store real pixels and render inside
@@ -284,3 +303,88 @@ plus [PR #989](https://github.com/mikke89/RmlUi/pull/989) (SDL_GPU renderer pari
 
 - **A modal relevant to a gameplay scene must fold its claimed input into that scene's "cursor
   over UI" query**, generally rather than per window, or clicks behind it reach the world.
+
+## Native sprite lifetime
+
+`CSprite` bakes the active transform's scale and the Y-flip's `WindowHeight` basis into
+`Create()`; it does not update them automatically. Rebuild it when its image, frame count,
+size, window height or scale changes. Its render path reads the live transform offset,
+so pre-applying that offset also applies it twice. Ordinary 2D UI art belongs in RmlUi
+images or decorators; these constraints apply to retained native drawing.
+
+## Compatibility details for retained rendering
+
+- `MeasureText()` reports reference units. For native text that shrinks to fit its box,
+  use `NativeTextPixelSizeInBox()` per label. Small native text is laid out at
+  `CachedFontPointSize()` before scaling down; login-scene lines are a reference.
+- NanumGothic is loaded as a fallback face for Hangul text.
+- Data expressions do not support unary minus; expose a negated value in the model when needed.
+- Legacy `EnableAlphaBlend()` uses additive blending (`ONE, ONE`). Its RmlUi equivalents
+  are `additive-fill` and `additive-image` decorators. Texture loading premultiplies alpha.
+- Preserve the original alpha-test threshold when porting fading art: the Illusion Temple
+  banner stays invisible below a fade of 0.25.
+- UV-cropped or loader-padded images use `<img rect="x y w h">` in texels; mirrored images
+  use `transform: scale(-1, 1)`. For physical-pixel rotated quads, see the three-corner
+  matrix construction in `UI/HUD/MiniMapLayout`.
+
+These details describe compatibility constraints, not reasons to implement new 2D controls
+with native drawing. Animation state advances in the owner's update path rather than render.
+
+## Document input routing
+
+Mouse presses over interactive RmlUi content can be consumed before legacy button flags are
+set. Drive gestures inside documents through RmlUi events rather than native press polling.
+`RmlUiRuntime::ProcessSdlEvent()` handles button and motion events directly, then delegates
+other events to `RmlSDL::InputEventHandler()`.
+
+Wheel events also reach the UI consumer: `Winmain.cpp` calls `Core::Input::RouteToUi()` before
+updating legacy `MouseWheel`. The SDL RmlUi handler forwards wheels to `ProcessMouseWheel()`.
+Native wheel handling therefore depends on propagation; it does not bypass RmlUi.
+
+A document's `Show()` defaults to automatic focus. Repeating it per frame can blur an input;
+use transition-based document visibility and focus after both visibility and content updates.
+Frame art painted after an input can cover its text and caret without preventing focus.
+
+## Render-target integration
+
+The offscreen callback runs at the top of the renderer's `EndFrame`, after native command
+flushes. Capturing earlier can let a flushed command reach the main frame before it is marked
+for capture. Window content belongs in a document image; the post-RmlUi pass is reserved for
+the cursor, above all document content.
+
+`RenderTarget` publishes a resized texture only after drawing it. Old textures remain alive
+for a few frames while source changes propagate through views and RmlUi; retirement also
+invalidates the RmlUi texture cache. Source names never repeat, so recycled texture IDs cannot
+resolve through stale cache entries. Consult `RmlRenderTarget.cpp` for the lifetime contract.
+
+Target alpha represents coverage. The SDL GPU renderer's alpha blend modes accumulate coverage,
+while additive and multiplying modes preserve it; the premultiplied RmlUi composite places the
+result over the underlying panel without turning additive effects into opaque black boxes.
+`ItemCameraTarget` saves and restores camera state, which native item rendering changes and
+world picking reads. Its drawer uses window pixels, including retained native 2D effects.
+
+## Compatibility text and tooltip metrics
+
+Packed native text colours use `A<<24 | B<<16 | G<<8 | R`; interpreting them as RGB swaps red
+and blue. Keep conversion in the existing colour helpers rather than reproducing it in markup.
+
+The legacy tooltip uses native text size and row metrics: one native text height per row,
+1.1 heights between row starts, two reference units of side padding and a one-unit frame.
+RmlUi FreeType rounding can accumulate over multiple rows, so the shared tooltip reads native
+line height without changing the shared renderer's selected font. `Config::transform` supports
+non-ambient reference frames; `fixedWidth` retains a compatibility text width. The anchor
+places the inner padding box, with the frame outside. Exact behavior lives in `RmlTooltip.cpp`
+and the themed tooltip assets.
+
+## Display-density validation
+
+The context currently receives SDL window-coordinate dimensions rather than framebuffer pixel
+size. At pixel density above 1, these spaces may differ. `ContentScaleFromMetrics()` derives the
+scale correction from display scale divided by pixel density; this does not by itself prove
+correct rendering and input on every high-density display.
+
+Previous OS-scale validation is not evidence of validation with `SDL_GetWindowPixelDensity() > 1`.
+Check layout, pointer alignment, render targets and fonts on such hardware when changing this
+integration. Headless tests simulate content-scale values and cannot validate physical display
+behavior. The coordinate-space guidance lives in
+[Layout, Anchoring & Scaling](layout-and-scaling.md#window-dimensions-and-reference-units).

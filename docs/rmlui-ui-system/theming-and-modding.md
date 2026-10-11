@@ -1,21 +1,16 @@
 # Theming & Modding
 
-How the swappable-theme system works, and how to add a new theme — including a modder-supplied
-one — without touching engine source code.
+How to edit and select themes, use shared design tokens, and supply custom assets. The client
+ships `legacy` and `modern`; additional theme folders work without recompilation and can inherit
+an existing theme. A separate user/mod override layer is not implemented.
 
-## Core principle: `legacy` is the canonical reference; other themes may fork freely
+## Shared markup and theme-specific structure
 
-**The `legacy` theme's RML+RCSS pair is the canonical, documented reference implementation** —
-the plainest expression of what a window needs: which elements must exist, which ids/classes C++
-binds to (`GetElementById`, `DataModelConstructor::Bind`, event callbacks), and a straightforward
-structure with no theme-specific opinions baked in. Any other theme — `modern` included — is
-**expected to fork the RML entirely**, not just restyle it in RCSS, the moment it wants a
-genuinely different structure: a different number of decorative layers, an element the base
-version doesn't have, a layout the shared file can't express through classes alone. This is the
-**normal path for a theme with real ambition**, not a rare escape hatch to feel bad about reaching
-for — a theme that only wants to restyle colors/borders/fonts can still get away with an RCSS-only
-reskin against the shared file, but nothing about the architecture should discourage forking when
-a theme needs more than that.
+Start with a window's shared RML and `legacy` stylesheet to understand its compatibility layout.
+The C++ bindings define the required ids, model fields and event callbacks; the theme defines
+their presentation. Keep shared markup theme-neutral and use RCSS when the same structure serves
+both themes. A theme-specific RML override is appropriate when a different composition cannot
+reasonably use the shared structure. Preserve the behavioral contract in either case.
 
 The shared file stays theme-neutral: theme-specific class vocabulary (`modern-frame`,
 `modern-panel`, …) belongs in that theme's fork, never in the shared `.rml` (`login.rml`,
@@ -53,14 +48,14 @@ also live-mutable via `UI::RmlBridge::SetActiveThemeName()` — see
 window goes through its `ThemedView`, which hands `"Data/Interface/RmlUi/login.rml"` to
 `UI::RmlBridge::ThemedDocumentLoader::Load()`:
 
-1. It reads the active theme's `login.rml` override if present, otherwise the shared markup.
+1. It reads `login.rml` from the active theme, then its ancestors, then the shared markup.
 2. It builds a synthetic source URL, `Data/Interface/RmlUi/themes/<name>/login.rml` — this path
    need not exist on disk.
 3. It calls `Rml::Context::LoadDocumentFromMemory(text, syntheticSourceUrl)`.
 4. RmlUi resolves the document's `<link href="login.rcss"/>` relative to that synthetic URL,
-   landing on `Data/Interface/RmlUi/themes/<name>/login.rcss` — which *does* need to exist on
-   disk. The game's file interface expands that sheet's `token(name)` markers while preserving
-   the external link and its path for RmlUi's stylesheet cache and relative assets.
+   landing on `Data/Interface/RmlUi/themes/<name>/login.rcss`. The file can come from that theme
+   or an ancestor. Its `token(name)` markers use the selected theme's merged tokens; relative
+   links and assets keep the selected theme's virtual path so child overrides apply throughout.
 
 This is confirmed against RmlUi's own source: `Context::LoadDocumentFromMemory` wraps the string
 in a `StreamMemory` and calls `SetSourceURL()` on it before parsing; `XMLNodeHandlerHead.cpp`'s
@@ -71,28 +66,24 @@ draws underneath it. A "legacy-look" theme reproduces the
 original art by pointing its own RCSS decorators at the same image files the old sprites used;
 a "modern" theme uses flat colors/vector shapes instead.
 
-## Forking a theme's RML: the mechanism, and today's real examples
+## Forking a theme's RML
 
 `UI::RmlBridge::ThemedDocumentLoader::Load()` ([`RmlTheme.cpp`](../../src/source/UI/RmlBridge/RmlTheme.cpp))
-looks for `themes/<theme>/<name>.rml` first, falling back to the shared `<name>.rml` when no such
-file exists (for a window with no fork, one extra failed `ifstream` open). `modern` forks a
+looks for `themes/<theme>/<name>.rml` first, then each ancestor, then the shared `<name>.rml`.
+`modern` forks a
 few dozen documents; `themes/modern/*.rml` is the live list. Most of these exist so `modern`'s own `.modern-frame`/`.modern-frame-crimson`/`.title-glow` class vocabulary
-doesn't have to live in the shared, theme-neutral file (the Core Principle section above).
+doesn't have to live in the shared, theme-neutral file (the Shared markup section above).
 
-`main_frame` was forked for a different reason and has since been merged back, which makes it the
-worked example of *not* forking. Its two copies differed in structure: legacy kept the original
-bottom button row inside `#bars`, while modern moved its buttons to `main_frame_top.rml` and added
-flat backing elements legacy has no use for. Hand-syncing two copies of the HUD made every added,
-moved or removed part a two-file edit. The shared `main_frame.rml` now carries every part either
+`main_frame.rml` is an example of shared markup with different presentation. Legacy shows the
+original bottom button row; modern uses `main_frame_top.rml` and flat backing elements.
+The shared document carries every part either
 theme uses, and each theme's `main_frame.rcss` hides the others (`display: none`). Where the two
 themes bind different values to the same spot, the markup carries both variants and each theme
 shows one: a gauge's readout as `.value-current` or `.value-full`. The document is also split into parts (`.hud-part`: the strip backing, each
 gauge group, EXP, buttons, item hotkeys, skill row, skill list), each placed by its own rule in
 the theme's `main_frame.rcss` with its contents laid out from its own corner, so a theme moves
 or hides a part without touching the others. The skill list's grid fans out from its part's box,
-the first cell's position, so it docks wherever the theme puts that box. An early attempt at CSS-only hiding was abandoned because the old row "leaked"
-through, but the record of it describes the whole stylesheet intermittently failing to apply, not
-`display: none` failing.
+the first cell's position, so it docks wherever the theme puts that box.
 
 **Fork the RML only when a theme needs markup the shared file cannot reasonably carry** — prefer
 adding the element to the shared file and letting the other theme hide it. A fork's
@@ -100,18 +91,38 @@ ids/classes/bindings have to be kept in step with the shared file by hand;
 `tools/check_rml_rcss_drift.py` catches missing required literal ids/callbacks and unused model
 fields; visual structure and interaction still need testing in the client.
 
-No source changes, no recompilation.
+## Adding a theme folder
+
+A custom theme can contain only the resources it changes. For example, a `classic` theme can
+inherit `legacy` by putting this in `themes/classic/theme.ini`:
+
+```ini
+[Theme]
+Base=legacy
+
+[Meta]
+DisplayName=Classic
+```
+
+Resolution is **child → declared ancestors**, with shared markup as the final document fallback.
+RML, templates, RCSS and theme-local images use the first matching whole file. An overridden
+stylesheet replaces its ancestor's file; rules are not automatically combined. Paths to common
+assets outside the theme folder keep their ordinary meaning.
+
+`[Tokens]`, `[Capabilities]` and `[Fonts]` inherit individual keys. A child value wins, including
+`NativeTextSize=0` or an empty font entry. Display names stay specific to the child. Names use
+letters, digits, `_` and `-` and are normalized to lowercase. Missing ancestors, invalid names
+and inheritance cycles make a theme unavailable for selection.
 
 1. Create `src/bin/Data/Interface/RmlUi/themes/<your-theme-name>/`.
-2. Write `base.rcss` in that folder — every window links this first for its shared rules
-   (`.btn`, `.checkbox-box`/`.checkbox-box.checked`, `#backdrop`, `.hidden`, and the mandatory
-   `body { pointer-events: none; }` reset). A theme missing it renders those windows' buttons/
-   checkboxes/backdrop completely unstyled.
-3. Write each window's own positional `.rcss` (`login.rcss`, `login_main.rcss`, `sys_menu.rcss`,
-   `remember_password_prompt.rcss`, ...), styling the same class names the shared `.rml` uses. A
-   theme missing one of these still loads (RmlUi doesn't error on a missing stylesheet) — it just
-   renders that one window unstyled, not the whole theme.
-4. Edit `config.ini`'s `[UI]` section: `RmlTheme=<your-theme-name>`, or preview it live without
+2. Declare `Base=legacy` or `Base=modern` in `[Theme]`, or supply your own complete stylesheets.
+   Every window links `base.rcss` for shared rules such as buttons, checkbox states, backdrops
+   and the `body { pointer-events: none; }` reset. It must be available in the theme's chain.
+3. Override only the `.rcss` or `.rml` files you want to change, preserving the required ids and
+   bindings. Without a base, supply every stylesheet the markup links; a missing sheet leaves
+   that window partly unstyled. Run the contract guard before testing in the client.
+4. Select it in **Options → UI → Theme**, edit `config.ini`'s `[UI]` section:
+   `RmlTheme=<your-theme-name>`, or preview it live without
    editing anything — type `$theme <your-theme-name>` in chat (see
    ["Switching themes without relaunching"](#switching-themes-without-relaunching) below).
 5. Relaunch (if you edited `config.ini`). No rebuild needed either way — this is a pure data/config
@@ -123,7 +134,8 @@ No source changes, no recompilation.
 never sent to the server, same bucket as `$fps`/`$vsync`) hot-swaps the active theme for the
 current session: `$theme modern`, `$theme legacy`, or any modder-supplied folder name.
 
-Mechanically: it validates `themes/<name>/base.rcss` exists (`UI::RmlBridge::ThemeExists()`) —
+Mechanically: it validates the inheritance chain and a readable `base.rcss`, supplied by the
+theme or an ancestor (`UI::RmlBridge::ThemeExists()`) —
 an unknown name is rejected with no state change, not left to fail silently per-window — then
 calls `UI::RmlBridge::SetActiveThemeName()` to update the live cache and
 `UI::RmlBridge::ReloadAllThemedDocuments()` to invoke every registered theme-reload callback.
@@ -135,17 +147,15 @@ stacking survives. A window that was never opened has nothing to rebuild and pic
 theme when it first builds. The free-function modules (the tooltip, notices, the remember-password
 prompt) hold a namespace-scope view and work the same way.
 
-**Session-only**: this does not write to `config.ini` — `GameConfig::SetRmlTheme()` only updates
-the in-memory value, so a relaunch still picks up whatever `config.ini` says. Use it for quickly
-A/B-ing themes; edit `config.ini` (previous section) for a change that should survive a restart.
+**The chat command is session-only.** `$theme` does not write to `config.ini`. For a selection
+that survives a restart, use **Options → UI → Theme** or edit `[UI] RmlTheme` while the client
+is closed. The Options control uses `UI::Theme::Select(..., Persistence::Saved)` and rebuilds
+documents after the click dispatch has finished.
 
-**Two themes are built, and two is the intended set: `legacy` and `modern`.** The mechanism stays
-theme-name-agnostic (a theme is a folder, see above) so a *user-authored* theme remains possible,
-but no third first-party theme is planned — the project owner ruled one out. `architecture-
-principles.md` §25/§28 envisions a Custom/Test theme specifically to expose accidental coupling
-between a component and one visual design; that concern is real, but it is met by `modern`'s own
-structural divergence plus the drift checker rather than by a third theme. Keep `legacy` and `modern` updated together for any window content
-change — don't let one lag.
+**The maintained first-party themes are `legacy` and `modern`.** Custom folders use the same
+loading mechanism. The architecture policy's Custom/Test-theme checks seek to expose visual
+coupling; the current project uses modern's structural differences and the contract guard for
+that coverage. Update both built-in themes when window content or behavior changes.
 
 ### `#backdrop` usage
 
@@ -166,7 +176,7 @@ already treated the whole screen as "in this window"), not create a click-throug
 A theme is free to reuse the original game art or bring entirely new image assets (a custom
 background, custom button art, a logo). Both go through the same path: any image an RCSS file
 references loads through this engine's normal texture pipeline
-(`RmlUiRenderInterface::LoadTexture` → `CGlobalBitmap::LoadImage`). No engine changes are needed
+(`RmlUiRenderInterface::LoadTexture` → `CGlobalBitmap::LoadImageExclusive`). No engine changes are needed
 to use it — but there are real constraints worth knowing first.
 
 **Path resolution**: a relative image path inside an RCSS rule resolves against *that
@@ -193,13 +203,9 @@ swap the extension to `.OZJ`/`.OZT` before opening.** Concretely: if your RCSS r
 external tool from the wider MU private-server modding community (the format predates this
 project).
 
-**A non-power-of-two-sized image needs an explicit `@spritesheet` declaration, or it renders
-squished with visible padding.** The `.OZT`/`.OZJ` loaders pad every texture up to the next
-power-of-two size internally (a 329×245 image becomes a 512×256 texture, real content in the
-top-left corner, the rest zero-filled) — invisible to a legacy `CSprite` (which tracks its own
-real dimensions separately) but **not** invisible to a plain `decorator: image("file.tga")`,
-which always samples the *entire* stored texture as 0..1 UV. Fix: declare the image as a named
-sprite with its real pixel rectangle, and reference the sprite name instead of the raw path:
+**RmlUi file images load at their original dimensions**, including non-power-of-two images.
+Use `@spritesheet` when selecting a rectangle from an atlas, or when a named sprite makes the
+stylesheet clearer:
 
 ```rcss
 @spritesheet panel-bg-sheet
@@ -213,7 +219,9 @@ sprite with its real pixel rectangle, and reference the sprite name instead of t
 }
 ```
 
-If the image's real dimensions genuinely are an exact power of two, this step is unnecessary.
+File images and atlas sprites support `repeat`, `repeat-x` and `repeat-y` in this fork.
+Repeating an atlas sprite generates geometry per tile; see
+[Engine Findings](engine-findings.md#rmlui-build) for the behavior and remaining limits.
 
 **Failures are completely silent.** A missing file or unsupported extension returns `false` from
 `LoadImage` with no log line at all — the element just renders with no image, no error, no
@@ -221,24 +229,22 @@ diagnostic. If a custom theme's image isn't showing up, check the extension-swap
 real `.tga` file, or a file with the wrong internal container, both fail exactly the same silent
 way) before assuming something else is wrong.
 
-**Open follow-up, not built**: vendoring a small PNG/JPG/BMP decoder to give `LoadTexture` a
-fallback path when the OZT/OZJ lookup fails, specifically for RmlUi-referenced theme assets —
-would remove the proprietary-format conversion step for modders without touching the legacy
-game-asset pipeline everything else still depends on.
+Plain-image loading is not implemented for theme assets. A custom theme must supply the
+containers described above.
 
 ## Design tokens: `themes/<theme>/tokens.ini`
 
 Both built-in themes have a `tokens.ini` file (`[Tokens]` section, plain `name=value` lines) that a theme's own `.rcss`
 files reference via a `token(name)` marker instead of repeating a literal value everywhere it's
 used. RmlUi follows each document's ordinary external `<link>` and loads the themed `.rcss`
-through the game's file interface. That interface resolves `token(name)` from the `tokens.ini`
-beside the stylesheet before RmlUi parses and caches it: plain text substitution, not a CSS
+through the game's file interface. That interface resolves `token(name)` from the selected
+theme's `tokens.ini`, then its ancestors, before RmlUi parses and caches it: plain text substitution, not a CSS
 feature. CSS custom properties (`var()`) and `calc()` work too, for a value derived from another
 inside the theme (the item grids' `--item-cell`, `item_grid.rcss`). A new theme needs only its own
 files; it does not need a C++ change. The stylesheet cache is cleared when a theme is selected
 again, so editing theme files and reselecting that theme refreshes their values.
 
-If a stylesheet refers to a token absent from that theme's `[Tokens]` section, the client logs
+If a stylesheet refers to a token absent from the entire chain's `[Tokens]` sections, the client logs
 the token name and stylesheet path in `MuError.log`. The missing value still expands to an empty
 string. Add the key to `tokens.ini` and reselect the theme to reload the stylesheet.
 
@@ -282,21 +288,51 @@ token in one theme purely for cosmetic cross-theme symmetry — a real naming in
 fixing, a theme's own genuinely distinct concept (an accent family the other theme doesn't have)
 just gets its own name.
 
+## Optional system fonts
+
+List font files in `theme.ini`'s `[Fonts]` section, with one file per key. For example:
+
+```ini
+[Fonts]
+body=%WINDIR%\Fonts\verdana.ttf
+body-bold=%WINDIR%\Fonts\verdanab.ttf
+```
+
+Select the loaded family in `tokens.ini`:
+
+```ini
+[Tokens]
+font-body=Verdana
+font-title=Verdana
+```
+
+Paths support `%ENVIRONMENT_VARIABLE%`, absolute filenames, and paths relative to the theme
+that declared the entry. Missing files or unresolved variables are skipped. Inherited font
+entries retain their declaring directory; a child can replace a key or leave its value empty
+to disable it. Load each style you need, such as regular and bold.
+
+`font-*` tokens are family names. If the requested family is unavailable, the client uses the
+first available family for that token in an ancestor, then bundled Liberation Sans. The bundled
+CJK glyph fallbacks remain loaded. Custom literal `font-family` rules must still name a loaded
+family; use the tokens for optional system fonts.
+
+Fonts load before themed documents at startup and on theme selection. RmlUi retains loaded
+families for the session, so a family loaded by an earlier theme remains available. Reselecting
+a theme retries optional files; restart the client to replace a font file whose family is
+already loaded. Referencing a player's installed font does not package it with the theme.
+
 ## Coordinates, scaling, and positioning — what a theme actually controls
 
 ### Scaling: a global user setting, opt-in per element
 
 **See [Layout, Anchoring & Scaling](layout-and-scaling.md) for the full policy** — condensed here:
-`GameConfig::GetUIScalePercent()` (`[UI] UIScalePercent`, default 100) is applied once via
-`Context::SetDensityIndependentPixelRatio()` (`RmlUiRuntime::Create()`/`OnResize()`). A coordinate
-written in `dp` scales with that setting; one written in `px` never does. Most of the original
-two themes still use fixed `px` throughout and are simply unaffected by the setting until
-retrofitted — that's fine, not a bug. A theme renders `px` content at the same physical pixel size
-regardless of window resolution or `UIScalePercent`; this is also the practically correct choice
-for raster sprite art regardless of the scaling mechanism available, since an image has a native
-resolution and stretching it non-uniformly or upscaling it blurs/pixelates. A custom-sprite theme
-should expect to look the same physical size at every resolution unless it deliberately opts a
-coordinate into `dp`.
+`[UI] UIScalePercent` (default 100) contributes to
+`Context::SetDensityIndependentPixelRatio()` through the shared scale hook. A coordinate written
+in `dp` uses the context's ratio, which combines viewport fit, OS content scale and the user
+setting. A `px` length bypasses that ratio but still follows any ancestor transform. Use `dp`
+for directly laid-out scalable content, reference `px` inside transformed panels, and
+counter-scaled physical text where the native typography policy applies. Raster assets follow
+their element's drawn size; choose their scaling deliberately.
 
 ### Panel position vs. element layout vs. draggability — three different owners
 
@@ -328,14 +364,14 @@ coordinate into `dp`.
 
 ## Known limitations
 
-- **Live hot-swap is session-only.** `$theme <name>` (see
+- **The `$theme` command is session-only.** `$theme <name>` (see
   ["Switching themes without relaunching"](#switching-themes-without-relaunching) above) rebuilds
   every open window's document in place, but doesn't persist to `config.ini` — a relaunch still
   uses whatever's saved there. The model survives the rebuild, so a window needs no resync of its
   own; what it sized or placed from the old theme's metrics goes in its view's `afterReload`.
 - **Custom theme images require the engine's proprietary OZT/OZJ format, not plain PNG/JPG** —
   see [Bringing your own images to a theme](#bringing-your-own-images-to-a-theme) above. No
-  converter tool exists in this repo today, and a missing/wrong-format image fails silently.
+  converter tool exists in this repo, and a missing/wrong-format image fails silently.
 - **Every themed document belongs to a `ThemedView`**, so `$theme` covers all of them; a new
   window declares one.
 - **Theme identity must never drive C++ branching** — `architecture-principles.md` §30. Where a

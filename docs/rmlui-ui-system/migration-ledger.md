@@ -1,15 +1,18 @@
 # Legacy UI Class Map
 
-Where each original UI class went, one row each, for the old names that still turn up in code,
-history and upstream discussion. Shapes are `building-new-ui.md`'s reference shapes (RmlUi-only
-2D, Hybrid RmlUi/native 3D, World-overlay). Update a row when the class it names changes.
+Historical reference for the completed UI migration: where each original class went and which
+native responsibilities remain. Use it to resolve old names in code, history and upstream
+discussion. The shape column distinguishes RmlUi-only 2D, hybrid RmlUi/native 3D, and
+world overlays. For new components, follow [Building New UI](building-new-ui.md).
+Update a row when the class it names changes.
 
-Statuses: `Done` (ported: `legacy` follows the original as closely as was practical) /
+Statuses describe implementation, not exhaustive runtime validation: `Done` (implemented in
+RmlUi; `legacy` preserves the original where practical) /
 `Stays native` (a deliberate permanent decision) / `Deleted` (dead code removed).
 
 ## Login and character select
 
-All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `CObject` owned by
+Implemented in both themes. These used the retired `CWin` toolkit; each window is a `CObject` owned by
 `CSceneUICoordinator`.
 
 | Component | Note |
@@ -54,7 +57,7 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `CPetInfoWindow` | Done | RmlUi-only 2D | `docked_panel_frame.rcss`; opens with character info. Fill-capable |
 | `CPartyInfoWindow` | Done | RmlUi-only 2D | `docked_panel_frame.rcss`; member rows `data-for` over `Party[]` |
 | `CNameWindow` | Done | World-overlay | `world_labels.rml` (`UI::Character::WorldLabelLayer`): pooled elements behind every other document, filled from the native label code under an `Overlay2DRecordScope` |
-| `CFriendWindow` | Done | Hybrid | `UI/Social/`: shell (`friend_shell.rml`), one document per chat room and letter; the letter portrait is live 3D in a render target, driven by `UI::Social::PhotoViewerControl`. `CUIWindowMgr` still arranges them (`building-new-ui.md`). The original's F5 menu of open windows is retired: the shell's Window List tab lists them |
+| `CFriendWindow` | Done | Hybrid | `UI/Social/`: shell (`friend_shell.rml`), one document per chat room and letter; the letter portrait is live 3D in a render target, driven by `UI::Social::PhotoViewerControl`. `CUIWindowMgr` still arranges them (see [Social window integration](#social-window-integration)). The original's F5 menu of open windows is retired: the shell's Window List tab lists them |
 | `CGuildMakeWindow` | Done | RmlUi-only 2D | |
 | `CGuildInfoWindow` | Done | RmlUi-only 2D | Three RmlUi-scrolled lists; the tab highlight is placed by RCSS. Checked in game: the tabs and the members list |
 | `CServerMsgWin` | Done | RmlUi-only 2D | Real pixels, text at the login scene's size (`LegacyUiTransform()`), fixed face (Cousine) |
@@ -112,15 +115,15 @@ All `Done`, both themes. These were the `CWin` toolkit, now deleted; each is a `
 | `COptionWindow` | Done | Legacy: `window_shell`, six tabs, custom `data-for` dropdowns (`engine-findings.md`: no native `<select>`), level gauges for sound, music and effect limit; drags (`window-placement.md`). Modern: its own full-screen markup on the same model, a category rail and a frosted glass pane (`backdrop-filter`), toggle switches and sliders, a compact layout on a short or narrow screen (`@media` in `dp`); above the HUD (stacking depth 10.67), not draggable. The in-game system menu opens it from a full-screen menu in the same style (`CGenericMenuDialog`'s system menu) |
 | `CChatCommandWindow` | Done | Its value field is an `<input>` claiming RmlUi's text-input identity while focused |
 
-**Not ledgered**: `CGroup` (`CManager` plumbing); `CTextBox`, `CSlideWindow`
-(native widgets that retire with their hosts); `CMessageBoxMng` (the dialog
+**Not listed separately**: `CGroup` (`CManager` plumbing); `CTextBox`, `CSlideWindow`
+(native support types); `CMessageBoxMng` (the dialog
 family's manager).
 
 ## Dialog family (`UI/Dialogs/CommonMessageBox.h` / `CustomMessageBox.h`)
 
 16 native dialog classes were replaced and deleted — 3 by `CGenericConfirmDialog`, 13 by
 `CGenericMenuDialog` (`component-catalog.md`'s Dialog). Both primitives are also called from many
-other places for single confirmations. What remains of the native family:
+other places for single confirmations. The remaining dialog classes use RmlUi views:
 
 | Component | Status | Note |
 |---|---|---|
@@ -150,7 +153,7 @@ siege lists, the cash shop lists.
 
 | Surface | Native code | Status |
 |---|---|---|
-| Centre-screen notices | `UI::Notices::Render()` | Done: `notices.rml`, above every document but the tooltip |
+| Centre-screen notices | `UI::Notices::Render()` | Done: `notices.rml`, depth 20, above game windows and tooltips, below scene and reconnect documents |
 | Map name banner | `CUIMapName::Render()` | Done: `map_name.rml`, cropped artwork centered on world entry, behind every window |
 | Party HP bars over heads, Kanturu result banner, siege build-time bars, Hellas object labels | `RenderPartyHP()`, `M39Kanturu3rd::RenderKanturu3rdinterface()`, `battleCastle::RenderBuildTimes()`, `RenderObjectDescription()` | Done: recorded by the world-label layer |
 | Siege crown switch lines, macro cooldown, event entry countdown | `RenderSwichState()`, `RenderTimes()`, `CSBaseMatch::RenderTime()` | Done: `hud_status.rml` on the HUD board (`UI::Hud::StatusTexts`); `$preview status` |
@@ -161,3 +164,54 @@ siege lists, the cash shop lists.
 | Guild war / battle soccer time and result | `RenderTournamentInterface()` | Done: `match_status.rml` (`UI::Hud::MatchStatus`), the countdown on the HUD board and the result on the `.stage`; OpenMU never sends its packets, so it is seen through `$preview guildwar` |
 | Mouse cursor | `RenderCursor()` | Stays native: drawn after RmlUi |
 | FPS counter, debug info, GL stats, IME/whisper debug text | `SceneManager.cpp`, `ImeInput.cpp`, `Whisper.cpp` | Stays native: developer overlays |
+
+## Social window integration
+
+`CFriendWindow` is the `CObject` entry point for the social subsystem. It owns a
+`CUIWindowMgr`, which manages window identity, parent relationships, geometry, state and
+message delivery. This is an existing subsystem boundary, not a general-purpose widget kit.
+
+The friend shell, each chat room and each letter own RmlUi documents. Their specialized
+`CUIBaseWindow` wrappers retain subsystem bookkeeping; RmlUi owns the visible controls and
+pointer interactions, including dragging, maximizing and closing. The letter portrait uses
+`UI::Social::PhotoViewerControl` to draw live native content into a render target.
+Extend this arrangement for social features; use the normal component workflow elsewhere.
+
+## Event preview reference
+
+Use these developer commands to inspect migrated event presentations without waiting for
+server packets. `UI/Events/EventPreview.cpp` defines the available samples; run `$preview`
+for the current list, `$preview <event>` to load a sample, and `$preview off` to stop it.
+
+| Sample | What to inspect |
+|---|---|
+| `siege` | Commander HUD, member list, NPCs, commands and minimap cropping |
+| `status` | Macro cooldown and entry countdown; crown-switch text appears near the switches in Valley of Loren |
+| `crywolf`, `crywolfresult` | Battle HUD, altar states and result presentation |
+| `bloodcastle`, `chaoscastle`, `temple`, `templeresult` | Event timers, counters, HUD and results |
+| `duelusers`, `duelwatch` | Spectator list and watched-duel frame |
+| `bcresult`, `ccresult`, `dsrank`, `switchbox` | Result, ranking and progress message boxes |
+| `guildwar` | Match countdown and result |
+| `kanturu`, `notices` | Entry-window state text and centre-screen notices |
+| `igs` | Cash-shop presentation using local script data and sample storage items |
+
+Samples seed presentation state. They do not validate packet handling, purchases or other
+server actions. Teleporting to an event map alone does not supply the state its UI needs.
+
+Other developer controls live in `Core/Utilities/Log/muConsoleDebug.cpp`:
+`$dialog menu <name>` opens a supported NPC menu; `$win soccer full`, `$win duel`,
+`$win empiretimer` and `$win doppelframe` expose HUD windows directly. Use these to inspect
+presentation, with the same server-validation limits as event previews.
+
+## Character-selection layout compatibility
+
+`CCharSelMainWin` retains non-rendered sprite geometry for native mouse bookkeeping.
+`ThemedLayout()` selects by the declared `NativeTextSize` capability: `CalculateLayout()`
+matches legacy's `SceneBarScale()`-based `rem` layout; `CalculateFixedAnchorLayout()` matches
+modern's bottom-edge `dp` anchors using `CompanionRatio()`. The stylesheets own visible controls.
+
+When changing either layout, test create, delete and connect across resolutions and UI scales.
+A mismatch between a drawn control and its native rectangle can let world click handling reset
+character selection. `Core::Input::IsMouseOverUI()` supplements matching geometry rather than
+replacing it. Prefer drawn-box readback for new integrations; see
+[Layout, Anchoring & Scaling](layout-and-scaling.md#data-driven-geometry-and-native-companions).

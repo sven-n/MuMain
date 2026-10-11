@@ -1,249 +1,235 @@
 # Layout, Anchoring & Scaling
 
-How this branch implements [`architecture-principles.md`](architecture-principles.md)'s §§1, 5,
-7–9, 23–24 (layout intent, responsive/aspect-ratio behavior, centralized UI scale, no
-resolution-specific hacks) concretely, in RCSS. Read this before porting the next window or
-touching an existing one's RCSS.
+Use this guide to choose coordinate spaces, compose the shared scales, read drawn geometry and
+validate layout. Themes own ordinary layout; C++ supplies state and shared integration.
+[Architecture Principles](architecture-principles.md) defines the ownership policy,
+[the component catalog](component-catalog.md) lists reusable recipes, and
+[Window Placement](window-placement.md) covers workspace arrangement.
 
-## Reference resolution: there isn't one
+## Window dimensions and reference units
 
-This codebase has never had a virtual canvas or letterboxing. RmlUi documents are sized in real
-window pixels directly — a `Rml::Context` is created and resized to the actual swapchain
-dimensions (`RmlUiRuntime::Create()`/`OnResize()`). Don't invent a "design resolution" and scale
-against it; size and position elements the way described below instead.
+The RmlUi context uses the window dimensions supplied to `Create()` and `OnResize()`. The SDL
+integration supplies window-coordinate dimensions, not `SDL_GetWindowSizeInPixels()` framebuffer
+dimensions. These normally agree at pixel density 1; do not assume they agree on every display.
+
+Documents cover the context. The 640x480 reference used by shared transforms, `.stage` and
+`.hud-board` is a compatibility layout space, not a letterboxed context or a second window.
+In this guide, **window coordinates** mean the space used by the context and drawn-box helpers;
+source APIs often call these window pixels. Framebuffer pixels are a separate display metric.
 
 ## Global UI scale: `dp`, not a custom calculator
 
-`Rml::Context::SetDensityIndependentPixelRatio()` is RmlUi's own built-in mechanism for a
-user-controlled UI scale, and it's now wired up: `GameConfig::GetUIScalePercent()` (persisted,
-`[UI] UIScalePercent=100`, default 100) is read once and applied via
-`context->SetDensityIndependentPixelRatio(percent / 100.0f)` in both `RmlUiRuntime::Create()` and
-`OnResize()` (`Render/RmlUi/RmlUiRuntime.cpp`).
+`10dp` occupies `10 * context dp ratio` window-coordinate units. The runtime's ratio hook uses
+`UI::Scaling::TypographyScale()`, which includes viewport fit, content scale and the user's
+`[UI] UIScalePercent` preference. It is not simply the preference divided by 100.
 
-The setting has an in-game control: **Options window → UI tab → "UI Scale"**, a dropdown over a
-fixed ladder (75/80/90/100/125/150 %) with a hover tooltip saying what the percentage
-multiplies. Picking a value writes `GameConfig::SetUIScalePercent()` (clamped to
-`CfgMinUIScalePercent`..`CfgMaxUIScalePercent`, i.e. 75–150, which loading `config.ini` applies
-too — a hand-edited value may sit between two offered steps, and the row then shows the nearest
-one), saves, and re-applies the scale
-by resizing the window to the size it already has (`MuApplyWindowResolution(WindowWidth,
-WindowHeight, windowed)`): nothing recomputes the ratio on its own, but every resolution-dependent
-system — all three contexts' `dp` ratio, `UI::Scaling`'s active transform, the workspace,
-the 3D UI cameras — does so on a resize. That apply is deferred to `COptionWindow::Update()`, out of
-RmlUi's own event dispatch, like the theme switch next to it.
+Players change the preference through Options -> UI -> UI Scale. The preference is persisted
+and clamped to 75-150%; the options control offers a fixed set of choices. Applying it refreshes
+resolution-dependent systems, including the context and workspace. The deferred apply sequence
+and exact choices live in `OptionWindow.cpp`.
 
-Any RCSS length meant to respect the user's scale setting uses the `dp` unit instead of `px`.
-`10dp` becomes `10 * (UIScalePercent / 100)` real pixels; `10px` always stays exactly 10 real
-pixels regardless of the setting. This is opt-in per property, not a blanket rescale — a window
-using `px` throughout is simply unaffected by `UIScalePercent` until it's retrofitted. Most
-already-migrated windows (login, menu bar, system menu, remember-password) still use `px` and
-that's fine; retrofit to `dp` opportunistically, not as a forced mass-edit.
+A `px` length does not use the context's `dp` ratio, but ancestor transforms still affect it.
+Choose units from the coordinate space below; changing every `px` to `dp` double-scales
+reference-pixel panels.
 
-## Two scaling systems, cross-wired onto both axes
+## Shared scales and their inputs
 
-A second, older scaling system also exists: `UI::Scaling` (`UITransform.cpp`), a window-size-driven
-auto-scale (`BottomHudScale`, `CappedUniformScale` → `PanelTransform`/`DockTransform`), clamped to a fixed range per layout kind. The ramp between the
-640×480 reference (1.0×) and each ceiling is **linear** — `ViewportFitScale()` is
-`clamp(min(w/640, h/480), 1, ceiling)`, the same formula the original client used — so at
-`UIScalePercent=100` a migrated window lands on exactly the pixels the legacy one did at every
-resolution, which is what makes screenshot comparison against the original meaningful. Don't damp
-the ramp (a quadratic one broke that parity at every intermediate resolution); the user dial is
-the lever for "too big at my resolution". It drives `CObject` windows' native rendering and
-hit-testing and the workspace's region scales. The main frame HUD is sized in `dp` like
-every other window; `BottomHudScale()` is the same number, still used to seat docked windows on
-the HUD's top edge. Whether the cursor is over the HUD is asked of the HUD itself
-(`CMainFrameWindow::IsMouseOverHud()`: the hovered element belongs to `main_frame.rml`), so it
-follows wherever a theme places the parts. Two axes exist, and both systems now respect both:
+Use [UITransform.h](../../src/source/UI/Scaling/UITransform.h) and its implementation for shared
+scale calculations rather than copying a formula into a window.
 
-- **`UIScalePercent`** — the user's own config-driven preference (`config.ini`'s `[UI]
-  UIScalePercent`). Both RmlUi's `dp` ratio and `UI::Scaling`'s functions respect this.
-- **`WindowContentScale`** (`UI::Scaling::GetWindowContentScale()`/`SetWindowContentScale()`) — an
-  OS display-scale/pixel-density correction factor (`ContentScaleFromMetrics()` =
-  `SDL_GetWindowDisplayScale() / SDL_GetWindowPixelDensity()`), refreshed at startup and on
-  `SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED` (`Winmain.cpp`). Folded into `UI::Scaling`'s upper
-  clamp bound (widening the auto-scale's own headroom), and into RmlUi's `dp` ratio through
-  `RmlUiRuntime::RefreshScale()`. A change with the window's size unchanged (moving it to a display
-  with another scale) reloads the native fonts, reapplies the `dp` ratio to all three contexts and
-  re-places the theme's windows (`HandleContentScaleChange()`); a resize does the same through
-  `OnResize()`.
+| Scale or transform | Purpose |
+|---|---|
+| `TypographyScale()` / `CompanionRatio()` | Shared panel-scale ratio used by context `dp` and compatible native companions |
+| `PanelTransform()` | Uniformly scaled, centred compatibility canvas |
+| `BottomHudScale()` | Bottom HUD scale |
+| `DockRightTransform()` | Dock scale and placement relative to the HUD; workspace arrangement remains theme-owned |
+| `TypographyUnitsTransform()` | Native measuring units from the window's top-left |
+| `ScreenOverlayTransform()` | Independently stretched reference axes for retained world-overlay drawing |
 
-**The two axes are applied differently, deliberately.** `UIScalePercent` is a direct user dial, so
-everywhere it's folded into `UI::Scaling` it's a **post-clamp** multiplier — at a window size where
-the auto-scale already sits at its ceiling (common at typical/large resolutions), a clamp-bound
-fold would mean changing the percent does nothing, silently defeating the setting. `contentScale`
-is folded into the **clamp bounds** instead, since its job is widening legitimate high-DPI headroom,
-not acting as a 1:1 user dial.
+The automatic uniform fit is `clamp(min(width / 640, height / 480), 1, maximum * contentScale)`.
+Layout kinds have their own ceilings. `UIScalePercent / 100` multiplies the fit afterward,
+subject to the reference-canvas fit limit in `WithUIScalePercent()`. This lets the user adjust
+size even when automatic fit has reached its ceiling. The limit constrains reference-canvas
+scale; it does not ensure arbitrary window content fits or cannot overlap.
 
-**`contentScale` widens only the upper clamp bound.** On a 125 %-scaled Windows display, folding
-it into the lower bound forced scale above 1.0 at the 640×480 reference and overflowed every
-reference-pixel layout there; `ViewportFitScale()` keeps the lower bound at `1.0f`, and the `dp`
-auto-fit reuses it.
+`contentScale` is derived from SDL display scale divided by pixel density. It changes the
+upper fit bound, not the lower bound or a direct user multiplier. The automatic fit keeps a
+floor of 1 at the reference size. Native font sizing uses its own role-based growth rules;
+it is not a font size multiplied by the panel transform.
 
-Still open: whether a genuine high-pixel-density panel (where `SDL_GetWindowPixelDensity() > 1`,
-not just an OS scale preference) needs different handling for the `dp`-ratio path specifically —
-`Rml::Context`'s dimensions come from SDL's window-coordinate size (`RmlUiRuntime::OnResize`), not
-`SDL_GetWindowSizeInPixels()`, so window-coordinate size and real pixel size can still genuinely
-diverge there. Confirm on real high-DPI hardware before trusting that path in play (OS-scaled hardware is confirmed).
-
-See `engine-findings.md`'s font-family inheritance finding before assuming a new element's
-invisible text is a layout bug — it's the single most-recurring gotcha in this doc set.
-
-## Scale inputs and reference screens
-
-`UI::RmlBridge::ApplyScaleInputs()` (`RmlScaleInputs.h`) sets, on every context's root element
-whenever its size or UI scale changes, the scales a theme composes from: `--ui-scale` (the dp
-ratio: panels and native text), `--hud-scale`, `--dock-scale` and `--overlay-scale-x/-y` (the
-stretched screen). Every document inherits them. `base.rcss` builds two reference screens on them,
-each 640×480 reference px with its scale as `--root-scale`:
-
-- `.stage`: centred on the window at `--ui-scale`, as the original centred NPC panels and dialogs.
-- `.hud-board`: standing on the window's bottom, centred like the HUD, at `--hud-scale` (CryWolf,
-  the Illusion Temple and siege HUDs, the window menu, the master tree).
-
-A window whose document uses one binds no position or scale.
+Resize and display-scale handlers refresh the relevant scale inputs, fonts and placement.
+The shared linear fit supports compatibility comparisons, but does not by itself establish
+pixel-for-pixel parity: theme layout, typography and content scale also affect the result.
+Hardware validation limits are recorded in
+[Engine Findings](engine-findings.md#display-density-validation).
 
 ## Units and placement
 
-No window has a layout of its own any more: C++ places no document and remaps no pointer.
+Choose a space before choosing lengths or converting geometry:
 
-- **Placement** is the theme's: a `.stage` or `.hud-board` class, a workspace slot
-  (`CObject::PlaceInWorkspace()`, [window-placement.md](window-placement.md)), or a document's own
-  RCSS anchors.
-- **Measuring units**: `CManager` runs every window's update, input and render passes under one
-  transform, `MeasuringUnits()`, so `MeasureText()` and native 2D drawing agree on one space. The
-  game's manager uses `UI::Scaling::TypographyUnitsTransform()` (uniform, at the UI scale, from
-  the window's top-left), so a measured width is a panel's reference px wherever the panel stands.
-  The login scenes' manager sets `LegacyUiTransform()` with `SetUnits()`.
-- **Pointer**: windows hit-test their documents through RmlUi (`RmlPointer.h`), in screen pixels;
-  native code that needs pixels reads `g_fWindowMouseX/Y` or runs under `ScopedWindowPixels`.
-- **World overlays** (name labels, balloons, HP bars over characters, the notice band, the minimap
-  hint) draw under `ScopedScreenStretch`: the original's screen stretched over the window, with no
-  UI scale, so they follow the world on any aspect ratio.
+| Coordinate space | Use and units |
+|---|---|
+| Direct scalable document layout | `dp` sizes and offsets; the context ratio applies once |
+| Root-transformed panel, `.stage` or `.hud-board` | Reference `px`; the ancestor transform supplies scale |
+| Counter-scaled text layer | Physical-size `px` in context coordinates; the compensating transform cancels the panel scale |
+| Drawn geometry / native item targets | Window coordinates returned by drawn-box helpers |
+| Pointer within an element | Element-local layout units returned by `PointerIn()` |
+| Native measuring units | Units of the active native transform, selected by the owner/manager |
 
-The scale inputs come from the same functions as before: `PanelTransform()`'s panel scale and
-`TypographyScale()` (both capped at 2.0), `BottomHudScale()` and the dock scale
-(`DockRightTransform()`, capped at 2.25). The player's UI scale multiplies each after its cap, but
-never past the scale at which the original 640x480 screen still fits the window
-(`WithUIScalePercent()`): a centred panel, or a dock standing on the HUD, is never cut off, and above
-100 % a window that 100 % already fills does not grow. Native text size is `NativeTextPixelSize(role,
-WindowWidth, WindowHeight)`, at the one typography scale; `RmlNativeTextSize.h` wraps it.
+For example, at a context ratio of 1.5, `10dp` occupies 15 window units. A reference `10px` inside
+a panel scaled by 1.5 also occupies 15. Combining that panel transform with `10dp` occupies 22.5,
+which is usually unintended. A text layer that cancels the 1.5 transform draws a `10px` font
+at size 10 in context coordinates.
+
+Choose placement independently of units: a workspace slot for arranged windows, `.stage` or
+`.hud-board` for reference screens, or document-local anchors and flow. Workspace configuration,
+slot sizing, dragging and persistence belong in [Window Placement](window-placement.md).
+
+`CManager` scopes native update, input and rendering passes to `MeasuringUnits()`. The gameplay
+manager uses `TypographyUnitsTransform()`; scene integration uses `LegacyUiTransform()`.
+A measured width belongs to that transform's units, which need not equal a docked panel's
+reference units. Use explicit native scopes such as `ScopedWindowPixels` or
+`ScopedScreenStretch` when retained drawing needs those spaces. They do not change RCSS layout.
+
+## Counter-scaled text layout
+
+A root transform scales text along with geometry. When compatibility needs native physical-size
+text, cancel the root transform on the text layer. Its lengths then lay out in context pixels:
+RCSS multiplies reference lengths by `--root-scale`, while the bound font size stays physical.
+Per-axis panels also supply `--root-scale-y`.
+
+Counter-scaling does not reduce the element's layout footprint. Stack related lines inside one
+flow layer instead of stacking independent counter-scaled siblings. `.sharp-flow` derives width
+from `--flow-w` and optional height from `--flow-h`; `.centred` centres the whole flow.
+
+For a counter-scaled scroll pane, scrollbar appearance reduces available content width.
+Percentage-width rows can therefore shift columns. Use an explicit scaled RCSS width when
+columns must stay fixed. The [component catalog](component-catalog.md#counter-scaled-text)
+provides the class recipes and references. Ordinary `dp` layouts need no compensating layer.
+
+## Scale inputs and reference screens
+
+[`ApplyScaleInputs()`](../../src/source/UI/RmlBridge/RmlScaleInputs.h) sets inherited properties
+on the context root when scale is refreshed:
+
+| Property | Meaning |
+|---|---|
+| `--ui-scale` | Shared typography/panel ratio, also used by context `dp` |
+| `--hud-scale` | Bottom HUD scale |
+| `--dock-scale` | Dock scale |
+| `--overlay-scale-x`, `--overlay-scale-y` | Independently stretched screen-reference axes |
+
+Both themes' `base.rcss` provide 640x480 reference-pixel containers:
+
+- `.stage` centres the canvas and scales it by `--ui-scale`.
+- `.hud-board` centres the canvas horizontally, anchors it at the window bottom and scales it
+  by `--hud-scale`.
+
+Each exposes its scale as `--root-scale`. Children use reference `px`; these containers supply
+the canvas placement, while RCSS still places content within it. Do not bind duplicate canvas
+position or scale from each window.
 
 ## Anchor/sizing utility classes (`base.rcss`)
 
-Both themes' `base.rcss` define an identical set of pure-layout utility classes (no visual styling
-— nothing theme-specific to vary):
+Both themes supply the same pure-layout utility classes. Anchors act against the element's
+containing block, which may be a panel or reference canvas rather than the whole window.
 
 | Class | Effect |
 |---|---|
-| `.anchor-top-left` / `.anchor-top-right` / `.anchor-bottom-left` / `.anchor-bottom-right` | `position: absolute` + the matching two edge offsets at `0` |
-| `.center-x` / `.center-y` / `.center-both` | `left`/`top: 50%` + `transform: translate(-50%, ...)` |
-| `.stretch-x` / `.stretch-y` / `.stretch-both` | `position: absolute` + opposing edges at `0` (width/height derive from the parent automatically) |
+| `.anchor-top-left`, `.anchor-top-right`, `.anchor-bottom-left`, `.anchor-bottom-right` | Absolute positioning with the corresponding edges at zero |
+| `.center-x`, `.center-y`, `.center-both` | Absolute positioning at 50% with a compensating translation |
+| `.stretch-x`, `.stretch-y`, `.stretch-both` | Absolute positioning with opposing edges at zero |
 
-A window's intended anchor becomes a class name on the element (`class="btn-icon
-anchor-bottom-left"`), combined with a fixed `dp` size and any per-element offset override (an ID
-rule like `#btn_create { left: 22dp; }`) — not a C++-computed rect pushed in from the window's
-`ApplyLayout()`/`Create()`. This is the direct answer to "how do I position a new element": pick an
-anchor class, give it a `dp` size, done.
+Add consumer-specific offsets and dimensions in RCSS, using the units of that container.
+Anchor classes do not decide whether those lengths should be `dp` or reference `px`.
+Centering classes set `transform`; if the element also needs scale or rotation, compose the
+transform explicitly or use separate wrapper elements. Two classes do not automatically combine
+independent transform declarations.
 
-## Fixed-vs-fluid guidance
+Choose fixed dimensions for controls that need a stable box, flow for content that can grow,
+and stretch for content intended to fill its container. Centred prompts may use fixed or
+responsive layouts; HUD parts may anchor to edges or live within the HUD board. Live 3D needs
+an image sized by its drawn box, not C++ ownership of panel layout.
 
-| Content shape | Approach |
-|---|---|
-| Dialogs, buttons, icon-sized chrome | Fixed `dp` size, anchored to a corner/edge (`.anchor-*`) |
-| HUD elements pinned to a screen edge | Edge-anchored (`.anchor-*` on the relevant edges only) |
-| Centered prompts/messages | `.center-x` / `.center-y` / `.center-both` |
-| Backgrounds/bars meant to fill available space | `.stretch-x` / `.stretch-y` / `.stretch-both` — use only when the element is genuinely meant to grow with its container (an info bar between two buttons), not as a default |
-| Content whose position is a genuine live computed result (3D-projection, following a moving target) | Still fine to push from C++ every frame — `CCharInfoBalloonMng`'s balloons are the standing example. This isn't something the anchor-class system should be forced onto. |
-| A panel that shows live 3D | A `RenderTarget` image sized by its own box (`CCharMakeWin`'s `#preview`), so the panel can scale like any other. `char_make`'s `#panel` is still fixed `px`, as it was when its position fed a native viewport; moving it to `dp` needs nothing from the preview. |
+## Data-driven geometry and native companions
 
-## The "C++ pushes real pixels into RmlUi" pattern is retired everywhere except one documented exception
+Static positions and dimensions belong in RCSS. State-driven values include projected markers,
+gauge fills, tooltip anchors and measured content. Shared placement and scale properties are
+integration inputs. Geometry bindings must satisfy `tools/check_rml_bound_geometry.py` with
+an explained exception where required; passing the guard does not establish runtime correctness.
+See [Ownership](building-new-ui.md#ownership-what-the-c-side-of-a-window-may-own).
 
-No migrated window pushes `left`/`top`/`width`/`height` into its elements from C++: RCSS anchor
-classes and fixed `dp` sizes own internal layout. C++ keeps two roles: a window's own screen
-placement where no workspace slot or RCSS anchoring covers it, and keeping a native companion
-(a `CSprite`/`CButton` kept for hit-testing) in step with what RCSS decided, by scaling the same
-fixed offsets by the ratio RmlUi's `dp` uses — `UI::Scaling::CompanionRatio(windowWidth,
-windowHeight)` (`UITransform.cpp`), the one implementation. Read `WindowWidth`/`WindowHeight`
-there, not `CInput`'s screen size, which went stale in more than one hand copy before this
-existed. `char_make`'s `#panel` is still `px` (table above), though nothing requires it any more.
+Native drawing and interaction should follow drawn element geometry. Use
+[`DrawnContentBox()` / `DrawnBox()`](../../src/source/UI/RmlBridge/RmlElementBox.h) to read its
+window-coordinate bounds through ancestor transforms. Raw `GetBox()` values describe layout
+before render transforms; `GetAbsoluteOffset()` alone does not supply transformed geometry.
+Do not multiply a drawn box by UI scale again.
 
-## Worked example: `CCharSelMainWin`'s retrofit
-
-The character-select button bar (`char_sel_main.rml`/`.rcss`) is the pilot this policy was proven
-against. Before: `CCharSelMainWin::ApplyLayout()` called
-`UI::CharacterSelection::CalculateLayout()` (an upstream auto-scale-to-fit-800x600 calculator) and
-pushed a fully computed `left/top/width/height` in `px` for every RmlUi element, every
-`Create()`. After: every element anchors itself via `base.rcss` classes with a fixed `dp` size in
-`char_sel_main.rcss` (values taken directly from `UI::CharacterSelection`'s own `Native*`
-constants, so the two are visually identical at the historical 800x600/100%-scale case and
-intentionally diverge at other resolutions — fixed-size-anchored-to-a-corner, not
-scaled-proportionally-to-800x600, is the policy going forward).
-
-**Native hit-test objects must stay numerically in sync with the CSS, not just visually
-similar.** `CCharSelMainWin` keeps a `CSprite` per element, never rendered, for its own
-`UpdateMouseEvent()` hit-testing. Placed by the old calculator while RmlUi used the fixed-dp
-anchors, a click on the drawn Delete button missed the sprite's rect at some resolutions, the
-world-click handler reset the selection, and Delete silently did nothing.
-`UI::CharacterSelection::CalculateFixedAnchorLayout()` (`CharSelMainWin.h`) mirrors the RCSS's
-fixed-dp math (scaled by `CompanionRatio()`), and feeds the sprites; `CharacterScene.cpp` also
-checks `Core::Input::IsMouseOverUI()` now, so a stale rect is no longer the only guard. **Takeaway for the next
-retrofit**: if a window keeps legacy hit-test objects alive alongside RmlUi visuals, whatever
-positions those objects must be derived from the *same* math as the CSS, not just "close enough
-at the reference resolution" — verify by actually clicking through create/delete/connect-style
-flows post-retrofit at more than one resolution, not just eyeballing a screenshot.
+Legacy companions that still mirror layout calculations are compatibility exceptions. They must
+use the document's authoritative dimensions and matching units; `CompanionRatio()` supplies the
+shared ratio for direct `dp` layouts. The
+[character-selection example](migration-ledger.md#character-selection-layout-compatibility)
+records an existing exception and its validation requirements.
 
 ## Hit testing a document
 
-A window asks RmlUi whether the pointer is over its document or one of its elements
-(`UI::RmlBridge::IsPointerOver()`, `IsPointerWithin()`, `PointerIn()` for a local point). Those
-answer in screen pixels against the drawn boxes, whatever transform a theme puts on `#panel`, so no
-window converts a box between RmlUi and native space.
+Use [`RmlPointer.h`](../../src/source/UI/RmlBridge/RmlPointer.h) according to the question:
 
-Where native code still reads a box (the workspace's content-fit size, a hint anchored to an
-element), check which kind the document is first. A `#panel` scaled by `transform:
-scale(var(--root-scale))` reports reference px from `GetBox()`, since RmlUi's layout box ignores a
-render-time transform; an unscaled document in `dp` reports screen px. Converting the first as if
-it were the second shrank every docked hit box by the UI scale once.
+| Helper | Meaning |
+|---|---|
+| `IsPointerOver(document)` | RmlUi currently hovers an interactive element of the document other than its body |
+| `IsPointerOver(element)` | RmlUi hovers the element or a descendant in a visible document |
+| `IsPointWithin()` / `IsPointerWithin()` | A window-coordinate point or the game's pointer lies in the drawn border box, including transforms; pointer-event eligibility is not required |
+| `PointerIn()` | Converts the pointer into the element's local layout units relative to its border-box origin; reports failure when the element is not drawn |
+
+Hover ownership and geometric containment are different. A decorative click-through element can
+contain the pointer without being the hovered interactive element. Use hover ownership to decide
+which document claims input, and geometric/local coordinates for a map, grid or viewer as needed.
+Gameplay click gating must also include `Core::Input::IsMouseOverUI()` so a UI action does not
+reach the world behind it.
 
 ### Checking it: the scale sweep
 
-A window's native bookkeeping and its RCSS agree trivially at scale 1.0 and can disagree at every
-other scale, so a window whose hit box, anchors or native content come from live RCSS is checked at **75 %** and **150 %** (Options → UI → UI scale, applies live), in both themes. Check
-the larger scale in a larger window (1280x720 or 1920x1080): 100 % already fills 1024x768, so a
-docked panel above it runs off a small window and its far edges cannot be clicked:
+Test layout changes in both themes at 75% and 150% UI scale. Use a larger window, such as
+1280x720 or 1920x1080, where fit limits allow the larger setting to grow; small windows alone
+may not exercise the full range.
 
-1. **Click every interactive element**, and for item grids at least one cell in each **corner** —
-   a proportional error leaves the top-left working and fails the far edges.
-2. **Confirm the click lands on the window, not the world**; the tell for a miss is the character
-   walking.
-3. **Hover anything with a tooltip or popup**; it must sit on its element, not be pulled toward
-   the panel's top-left (the anchor-readback failure).
-
-Not covered by the sweep: resolution (scale is the sharper probe; `PanelTransform` derives scale
-from resolution), drag state across a scale or theme change, and a theme change while a window is
-open. These are not tracked: whoever touches a window checks them for it.
+1. Click each interactive control. For grids, include cells at every corner to expose accumulated
+   pitch or offset errors.
+2. Confirm UI clicks do not also move the character or act on the world.
+3. Hover tooltip and popup targets; anchors should follow the drawn element.
+4. Resize, change scale after dragging, and switch themes with the window open. Check native
+   content, scroll state, focus and placement where relevant.
+5. Record tested resolutions, scales, themes and remaining gaps with the change. Compare original
+   behavior when changing compatibility layout.
 
 ### The headless text-layout audit
 
-`tests/ui/test_rml_text_layout.cpp` loads the real documents, bundled fonts and five translations
-(English, German, Spanish, Polish, Russian) in a headless RmlUi context and measures every drawn
-line for clipping, overlap and leaving its panel. It covers the event entry windows and both
-personal shops across 1024x768 / 75% and 1280x720 / 1920x1080 at 100-150%, and the MU Helper at
-1024x768 / 75% for five classes and three tabs, each at 1x, 1.5x and 2x OS display scale. Legacy's
-MU Helper keeps native's row spacing and is reported rather than required to pass.
-`test_rml_party_trade_layout.cpp` checks the party list and legacy trade from 800x600 to 3440x1440.
-Re-run the audit in a configured developer shell:
+[`test_rml_text_layout.cpp`](../../tests/ui/test_rml_text_layout.cpp) loads real documents,
+bundled fonts and translated content into a headless context, then reports clipping, overlap
+and text outside panels. Current coverage includes event-entry windows, personal shops and
+MU Helper. The preparation script defines the document/locale list; the test defines scale,
+resolution, class and tab scenarios and which findings must pass. Legacy MU Helper findings
+are reported rather than all asserted away.
+
+From a configured developer shell, following the [build setup](../build/README.md):
 
 ```powershell
 cmake -S . -B out/build/windows-x64 -DBUILD_TESTING=ON
-cmake --build out/build/windows-x64 --config RelWithDebInfo --target rml_text_layout_tests
-ctest --test-dir out/build/windows-x64 -C RelWithDebInfo -R rml_text_layout_baseline --output-on-failure
+cmake --build out/build/windows-x64 --config RelWithDebInfo --target rml_text_layout_tests rml_party_trade_layout_tests
+ctest --test-dir out/build/windows-x64 -C RelWithDebInfo -R "rml_text_layout_baseline|full party stays|legacy trade notice" --output-on-failure
 ```
 
-Results land in `out/build/windows-x64/text-layout-baseline/` (`scenarios.csv`, `text-lines.csv`).
-A window joins it by adding its document to `prepare_rml_text_layout.py`.
+CTest discovers the party/trade cases by their test descriptions, not the executable target name.
+The text baseline writes `scenarios.csv` and `text-lines.csv` under
+`out/build/windows-x64/text-layout-baseline/`. The separate
+[`party/trade layout test`](../../tests/ui/test_rml_party_trade_layout.cpp) covers those documents.
 
-## Deferred (not part of this policy yet)
+To extend coverage, update [`prepare_rml_text_layout.py`](../../tests/ui/prepare_rml_text_layout.py),
+supply representative model state in the fixture/test, select meaningful scenarios and define
+assertions or intentional diagnostic findings. Adding a document name alone does not establish
+coverage.
 
-- An automated multi-resolution check for every window; the text-layout audit above covers five,
-  so keep doing manual spot-checks for the rest.
+Headless checks validate prepared geometry, not live SDL input, actual framebuffer density,
+all game states or server actions. They do not cover every window. Keep the runtime scale sweep
+and display-hardware checks for behavior outside the automated scenarios.

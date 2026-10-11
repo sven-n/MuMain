@@ -1,20 +1,23 @@
 # RmlUi UI System
 
 > **Start with [`architecture-principles.md`](architecture-principles.md)** — the governing
-> policy (layout intent, responsive/scalable/themeable/moddable design). Every other doc here
-> implements it; none of them repeat its reasoning.
+> policy for layout, scaling, themes and component ownership. The guides below describe the
+> implemented system and its current limits.
 
-How [RmlUi](https://github.com/mikke89/RmlUi) (HTML/CSS-driven UI middleware) is integrated into
-this client's SDL_GPU renderer, and what's worth knowing before building or porting a window.
+[RmlUi](https://github.com/mikke89/RmlUi) provides the client's game UI through the SDL_GPU
+renderer. The legacy UI migration is complete: RML/RCSS owns presentation and layout, while C++
+owns game behavior, view models and engine integration. Use this directory to maintain existing
+windows, build new ones, or edit a theme.
 
-## Why this exists
+## Current system
 
-The client's game UI had no layout engine, retained scene graph or data-binding layer. RmlUi
-replaced it window by window, old and new coexisting until the last native window went.
+The game UI uses one RmlUi context, shared components and two built-in themes, `legacy` and
+`modern`. The class map records which components replaced the retired native toolkits.
 
 ## What is RmlUi, and what stays native
 
-Every window is a `mu::ui::window::CObject` drawn by RmlUi in both themes; the `CWin` toolkit,
+Game windows integrate through `mu::ui::window::CObject` and are drawn by RmlUi in both themes.
+The `CWin` toolkit,
 the sprite widgets, the `CUIControl` toolkit and the shared item camera (`C3DRenderMng`) are
 deleted. That covers the login and character-select scene, the HUD (one theme-placed unit in the
 workspace), the inventory family, the docked panels, the dialogs and options, the social windows,
@@ -22,7 +25,7 @@ the event, siege, duel and NPC windows, and the world labels (names, balloons, b
 through the world-label layer. [`migration-ledger.md`](migration-ledger.md) maps each original
 class to what replaced it.
 
-**Placement is the theme's.** No window has a layout of its own: documents sit on `.stage`,
+**Themes own placement.** Documents sit on `.stage`,
 `.hud-board` or a workspace slot, RmlUi hit-tests them, and `CManager` gives native code one
 measuring space ([`layout-and-scaling.md`](layout-and-scaling.md)'s "Units and placement"). Only
 infrastructure may touch the active transform; `tools/check_layout_transform_users.py` keeps it to
@@ -36,11 +39,15 @@ equipped item's 3D icon.
 
 ## Known limits
 
-Each stays as it is until its trigger fires.
+The migration is complete, but the following customization and validation limits remain.
 
 - **No user-override layer or theme inheritance** (principles §18–19). Themes are two directories
-  selected by name. A third first-party theme is ruled out; `modern`'s divergence and the contract
-  guard cover the coupling concern (§25, §28). Trigger: the mod-support requirement is prioritised.
+  selected by name. The supported first-party set is `legacy` and `modern`; their different
+  structures and the contract guard help detect presentation coupling (§25, §28). Revisit the
+  resource hierarchy when mod support is prioritised.
+- **Drag positions are session-only.** Dialogs and social windows retain positions while running;
+  inventory placement resets when its workspace is arranged again. See
+  [Dragging and saved positions](window-placement.md#8-dragging-and-saved-positions).
 - **Validation is uneven across windows.** Headless layout tests cover resolution and OS display
   scale for the party list, trade, event entry, the personal shops and the MU Helper; other
   windows have the UI-scale sweep ([`layout-and-scaling.md`](layout-and-scaling.md)). Drag state
@@ -50,9 +57,11 @@ Each stays as it is until its trigger fires.
 - **A new siege command's pulse** binds `rgb(255, pulse, pulse)`: RCSS cannot mix a bound fraction
   into a colour. Trigger: a theme wanting another pulse palette.
 - **`CCryWolf` picks its sprite files and texel rects in C++** (`SyncResult()`, `SyncHud()`); a theme
-  can hide or rearrange that art, not replace it. Trigger: a theme wanting other event art.
+  can hide or rearrange that art, not replace its C++ selection. Revisit when another event-art
+  set is required.
 - **The title scene's loading bar** is pushed in real `px`, because its background is still native
-  sprites on an 800x600 per-axis scale `dp` cannot reproduce. It ends when those sprites port.
+  sprites on an 800x600 per-axis scale `dp` cannot reproduce. Keep the gauge aligned with those
+  sprites until the title background also uses RmlUi layout.
 
 ## Where code goes
 
@@ -72,10 +81,11 @@ The runtime renders, updates and routes input; the game adds the rest through
 
 ## The documents
 
-- **[Building New UI](building-new-ui.md)** — the C++ UI kit's shape and the RmlUi/native
-  boundary; base class, folder, widgets, the C++ side of an RmlUi window, and the ownership rules. Read before starting anything under `UI/`.
+- **[Building New UI](building-new-ui.md)** — the implementation workflow: choose a component
+  and owner, define its model and documents, connect lifecycle and input, and validate both themes.
+  Read before starting anything under `UI/`.
 - **[Component Catalog](component-catalog.md)** — reusable RmlUi/RCSS primitives that exist, and
-  what doesn't exist yet. Check before inventing a one-off mechanism.
+  concepts without a shared primitive. Check before adding a new mechanism.
 - **[Layout, Anchoring & Scaling](layout-and-scaling.md)** — the UI-scale (`dp`) mechanism, the
   anchor/stretch/center utility classes, and the scale sweep for hit boxes read from RCSS.
 - **[Window Placement](window-placement.md)** — the theme-owned workspace: regions, docks, slots,
@@ -97,8 +107,8 @@ RmlUi renders through its own vendored SDL_GPU backend
 The submodule points at the fork `nitoygo/RmlUi` (`integration/sdl-gpu-parity`), which carries
 the renderer work upstream doesn't have yet; renderer changes are committed there first, then the
 submodule pin is moved.
-`transform`, gradients, `box-shadow` and `backdrop-filter: blur()` render; most of `filter` and
-`mask-image` don't — `engine-findings.md` has the current list. Test a new visual property in isolation rather
+`transform`, gradients, `box-shadow` and `backdrop-filter: blur()` render; other filters and
+`mask-image` have limited verification — `engine-findings.md` has the current list. Test a new visual property in isolation rather
 than trusting the parser.
 
 **Texture-lifetime rule**: `CGlobalBitmap`'s numbered slots get force-reassigned across scene
@@ -127,13 +137,13 @@ A flush draws what has been recorded so far (`FlushRenderCommands()`), so a cont
 after it lands over that and under whatever is recorded next. The seams are on `IMuRenderer` and
 registered once in `Winmain.cpp`.
 
-- **The main context renders last** (`SetPreSubmitCallback`, `RmlUiRuntime::RenderFrame()`), so an
-  opaque panel covers any legacy drawing meant to stay on top. That drawing goes in the post-RmlUi
-  pass (`SetPostRmlUiCallback`), which also runs `CSystem::SyncMainSceneHudVisibility()` every
-  frame.
+- **The main context renders after ordinary native drawing** (`SetPreSubmitCallback`,
+  `RmlUiRuntime::RenderFrame()`). The post-RmlUi pass (`SetPostRmlUiCallback`) draws the cursor
+  above the documents and also runs `CSystem::SyncMainSceneHudVisibility()` every frame.
+  Window content uses document render targets so other windows can cover it.
 - **Native drawing inside one document** goes into a `UI::RmlBridge::RenderTarget`
   (`SetOffscreenRenderCallback`, `component-catalog.md`), so it sits at its element's depth: live
-  3D, and native 2D a window still draws (`SetOffscreen2DRect()`).
+  3D, and native 2D effects that belong to the window (`SetOffscreen2DRect()`).
 
 ## Data binding: `RmlModelBinder<T>`
 
@@ -147,7 +157,7 @@ use `AddEventListener`.
 
 A window holds its binder and documents through `UI::RmlBridge::ThemedView<Model>`
 (`UI/RmlBridge/RmlThemedView.h`), which creates the model before loading the documents, rebuilds
-both on a theme switch and tears them down; `component-catalog.md` has its options.
+both on a theme switch and tears them down; [the component catalog](component-catalog.md#theming) explains its use; the header defines its options.
 
 ## Theming
 
@@ -156,8 +166,8 @@ A theme is a **folder name** — adding one needs no recompile. A window's `Them
 `themes/<active-theme>/` URL, so its `<link href>` pulls that theme's `.rcss`; a theme can also
 fork the `.rml` itself (`themes/<theme>/<name>.rml`).
 
-**Two themes, `legacy`** (real sprite art, pixel parity with the original) **and `modern`**, are
-the intended set — a third was ruled out by the project owner. Change both in the same pass.
+**Two built-in themes, `legacy`** (original sprite art and compatibility layout) **and `modern`**,
+are maintained together. Update both when a window's content or behavior changes.
 Shared rules live in `themes/<name>/base.rcss` (`.btn`, `.checkbox-box`, `.hidden`, the
 mandatory `body { pointer-events: none; }` reset). Full mechanism in
 [Theming & Modding](theming-and-modding.md).
@@ -167,7 +177,8 @@ mandatory `body { pointer-events: none; }` reset). Full mechanism in
 Any interaction more than one window wants belongs in `UI::RmlBridge` as a shared primitive.
 `MakeDraggable(handle, panel, onMove)` (`UI/RmlBridge/RmlDraggable.h/.cpp`) builds on RmlUi's drag
 events; the handle needs `pointer-events: auto`, and it moves both axes. Dialogs and the friend
-family drag; `CMyInventory` persists its position in `config.ini`. See `component-catalog.md`'s
+family drag; inventory dragging lasts until the workspace arranges it again. Positions are not
+saved across sessions. See `component-catalog.md`'s
 "Dragging" and `window-placement.md` for the scope.
 
 ## Scene windows

@@ -1,490 +1,272 @@
 # Building New UI: Windows, Dialogs, HUD Panels, and Widgets
 
-A decision guide for "which base class / widget class / folder do I use when adding something
-new under `UI/`?", and how a window's C++ side plugs into RmlUi. Read `architecture-principles.md`
-first for the philosophy; this doc is the concrete C++ object-layer answer (`component-catalog.md`
-covers the parallel RmlUi/RCSS layer).
+Use this guide to choose an implementation pattern, connect a component to the client's
+lifecycle and input, and validate it. Read [Architecture Principles](architecture-principles.md)
+first; it defines the governing ownership and quality requirements.
 
-For anything with a visible presentation, RmlUi + `base.rcss`'s shared classes (`.btn`,
-`.checkbox-box`, `.text-field`, `data-hint`) is canonical. The `mu::ui::window` widget family
-(`UI/Widgets/Window/*.h`) is a **transitional bridge for content that must stay native** — live
-3D-camera content, world-anchored overlays, or a documented native companion — not an alternative
-to RmlUi for ordinary 2D chrome. "Shape of the kit" below has the reasoning and where the line
-sits.
+Visible UI uses RmlUi and the shared classes in each theme's `base.rcss`. Start with the
+[Component Catalog](component-catalog.md) for buttons, fields, lists, dialogs, tooltips and
+native-content integration. Retired native widget families are not alternatives for new UI;
+the [Legacy UI Class Map](migration-ledger.md) records their replacements.
 
-## Toolkits and their current roles
+## Choose a component and an owner
 
-| Toolkit | Base class(es) | Real home | Status |
-|---|---|---|---|
-| Sprite widgets | *(none left)* | — | **Closed.** `CWin`/`CWinEx`, `CGaugeBar`, `CSlider` and the sprite `CButton` are deleted. |
-| Friend/mail/chat base | `CUIBaseWindow`, `CUIWindowMgr` (both over `CUIMessage`) | `UI/Social/SocialWindowBase.h` | **The family's own base, nothing more.** The `CUIControl` toolkit it came from is deleted, widgets and base alike. What survives is the identity, parent, state, geometry and message queue `CUIWindowMgr` runs the friend/mail/chat windows through. |
-| `mu::ui::window` tier | `CObject : IObject`, `CManager`, `CTextBox` | `UI/Core/{WindowObject,WindowManager}.h`, `UI/Widgets/Window/*.h` | **`CObject`/`CManager` are the base for all new work.** The widget family is for native-only content. |
+Describe the component's purpose, anchor, size, responsive behavior and relationship to nearby
+windows before writing code. For legacy compatibility changes, also establish the original layout
+intent using the [compatibility workflow](architecture-principles.md#27-required-workflow-for-legacy-compatibility-changes).
 
-## Shape of the kit
+First check whether an existing primitive fits. Confirmations and text prompts use
+`CGenericConfirmDialog`; menus of actions use `CGenericMenuDialog`. Configure those components
+rather than introducing a subclass or document for each call. Their usage and exceptions are in
+[Dialog](component-catalog.md#dialog). An element within an existing window normally belongs in
+that window's document and model.
 
-```
-1. UI Runtime     — CObject / CManager (lifecycle, dispatch, depth/key order, show/enable)
-2. UI Geometry    — UI::Scaling::UITransform (scale inputs, measuring units),
-                    and the theme's workspace (window-placement.md)
-3. UI Components  — RmlUi + base.rcss components; the mu::ui::window widgets only for
-                    content that stays native
-4. Presentation   — RmlUi/RCSS, CSprite (native visuals), CUIRenderText
-5. Application UI — CTrade, CMyInventory, CMainFrameWindow, … — composes 1–4
-```
+For independently managed UI, choose the owner by its lifecycle:
 
-- **`CObject` stays thin — no geometry, rendering, input or styling fields.** `CCharInfoBalloonMng`
-  has no static rect at all (a per-frame `WorldToScreen()` projection), so a base-class geometry
-  field would be meaningless for it. A window with a real rect owns a `WindowGeometry` value
-  (composition) and calls `Contains()` from its own `UpdateMouseEvent()`; per-row or per-tab
-  sub-rects stay inline. `CObject`'s shown/active split (`UpdateWhileShown()`/
-  `UpdateWhileActive()`) is the same opt-in shape.
-- **`CManager` provides only measuring units.** Its dispatch runs every pass (`Update()`/
-  `Render()`/`UpdateMouseEvent()`/`UpdateKeyEvent()`) under one `ScopedActiveTransform` of
-  `MeasuringUnits()` and leaves the pointer alone; it is topmost-first, consume-and-stop
-  (`UpdateMouseEvent()` returns `false` only to consume). Placement is the theme's
-  ([layout-and-scaling.md](layout-and-scaling.md#units-and-placement)).
-- **Input**: `CInput` is built on `CNewKeyInput` (its keyboard queries forward to the
-  `IsPress`/`IsRelease` free functions) — one root sampler plus a façade scoped to login and
-  character select, whose mouse state is stale elsewhere. RmlUi's own events drive RmlUi elements
-  only.
-- **No native container layer.** `CManager`'s registry is flat; RmlUi's DOM gives every ported
-  window containment and scroll clipping, so a native `Panel`/`ScrollContainer`/`HUDContainer`
-  (principles §20) would serve only the shrinking native population and is not built.
-
-**The RmlUi/native boundary.** Permanently native is only content with no RmlUi equivalent:
-**live 3D** (item grids and icons, equipped items, character and item previews) and
-**world-anchored positions** (`WorldToScreen()` projections). `UI::RmlBridge::RenderTarget` lets a
-document *show* live 3D as an image at its element's depth; that does not make the 3D render
-portable. That decides who draws the content, not where it may sit.
-Everything else — chrome, layout, text, buttons, tooltips, sprite-atlas icons — is RmlUi; the test
-is "is this a live 3D render or a world-space projection", not "is this hard to port". A ported
-window may keep one kind of native companion: a control kept for hit-testing or for state other
-code reads (the quick command menu's hover index, which the control socket observes).
-
-## Reference screens — copy these, not an arbitrary neighbouring window
-
-Three permanent shapes, following that boundary:
-
-| Shape | Reference | Why |
+| Kind | Owner and integration | Reference |
 |---|---|---|
-| RmlUi-only 2D UI | `CMsgWin` (`UI/Windows/MsgWin.h`); `RememberPasswordPrompt` for a free-function variant | The default for every screen; the other two are the only carve-outs. |
-| Hybrid RmlUi/native 3D UI | `CItemHotKey` (`UI/HUD/ItemHotKey.h/.cpp`) | RmlUi owns the slot chrome; the item icon stays a live 3D render — the permanent boundary, not a porting gap. |
-| World-overlay UI | `CCharInfoBalloonMng` (`Character/CharInfoBalloonMng.h`) | Per-frame `WorldToScreen()` projection, no static 2D rect. |
+| Gameplay window or HUD panel | Derive from `mu::ui::window::CObject`; register with the gameplay `CManager` and `CSystem` in `WindowSystem.cpp` | [`CCharacterInfoWindow`](../../src/source/UI/Character/CharacterInfoWindow.h) |
+| Login or character-scene window | Use `CObject` with the existing scene lifecycle and `CSceneUICoordinator`; documents must be hidden or released on scene exit | [`CMsgWin`](../../src/source/UI/Windows/MsgWin.h) |
+| Shared view with no independent window lifecycle | Keep a `ThemedView` in the owning feature module and expose feature operations | [`RememberPasswordPrompt`](../../src/source/UI/Windows/RememberPasswordPrompt.cpp) |
+| Existing friend, mail or chat-room UI | Extend the family through `CFriendWindow` and its social-window manager | [Social window integration](migration-ledger.md#social-window-integration) |
 
-## Quick decision guide for a new window, dialog, or HUD panel
+`CObject` is the base for managed windows, not for every element or reusable helper. `CManager`
+handles registration, dispatch, ordering and shared measuring units; RmlUi handles the document's
+hierarchy, layout and element events. Use these existing owners rather than adding another
+window manager or native container hierarchy.
 
-1. **Base class: `mu::ui::window::CObject`.** Always.
-2. **Register it** with `CManager` (`AddUIObj(INTERFACE_KEY, this)`) like every window in
-   `UI/HUD/`, `UI/Inventory/`, etc. Implement it as in "The C++ side of an RmlUi window" below.
-3. **Widgets: RmlUi and shared `base.rcss` classes.** The native cheat sheet below applies only
-   to documented native companions.
-4. **Folder: by feature domain, not by toolkit.** `UI/Combat/`, `UI/Inventory/`, `UI/Events/`,
-   `UI/HUD/`, `UI/NPCs/`, `UI/Party/`, `UI/Social/`, `UI/Quests/`, `UI/Character/`, `UI/Options/`,
-   `UI/MuHelper/`. `UI/Widgets/` is for genuinely feature-agnostic controls only; `UI/Dialogs/` for
-   modal/message-box-style windows. `UI/Windows/` is the closed login/credit set — don't add there.
-5. **Wrapping a big legacy subsystem instead of writing one?** Put a thin `CObject` adapter in
-   front that forwards into it, rather than reimplementing it or inventing a second manager.
-   `CFriendWindow` (owns and forwards to `CUIWindowMgr`) is the template.
-6. **Scales come from `UI::Scaling`; placement from the theme.** No second
-   `g_fScreenRate_x`-style global or hand-rolled reference scale, and no position from C++: a
-   new window's document takes `.stage`, `.hud-board` or a workspace slot.
-7. **Widget-level polling goes through `mu::ui::window::IsPress`/`IsRelease`/`IsNone`/`IsRepeat`**
-   (`UI/Core/WindowCommon.h`); `CInput::Instance()` only for the login/character-select family's
-   real-pixel needs (double-click, left-hand swap, raw cursor).
-8. **Load documents through a `UI::RmlBridge::ThemedView`**; theme-specific behaviour is a
-   `theme.ini` capability, never a theme-name branch. A static hint is `data-hint` on the
-   element (`UI::RmlBridge::DocumentHints`); one built from game state uses
-   `UI::RmlBridge::Tooltip` (`ElementTooltip` for an element of a document). Never a new per-window
-   `RenderTooltip()` or a CSS `:hover` hint.
-9. **Deprecated families get no new call sites, features or subclasses**, and no new native
-   button implementation.
-
-## The C++ side of an RmlUi window
-
-`CObject`'s interface (`UI/Core/WindowObject.h`) is `Render()`/`Update()`/`UpdateMouseEvent()`/
-`UpdateKeyEvent()`/`GetLayerDepth()`/`IsVisible()`, plus non-virtual `Create()`/`Release()`/
-`Show()`. For a window whose visuals are an RmlUi document:
-
-- **`Render()` draws nothing** and returns `true`; RmlUi renders the document in its own pass.
-- **`UpdateMouseEvent()` claims the panel**, so a click on it doesn't also reach windows below or
-  the world: the theme gives `#panel` `pointer-events: auto`, so RmlUi takes clicks on it, and the
-  window returns `!UI::RmlBridge::IsPointerOver(document)` (`RmlPointer.h`), which needs no units
-  (`CCharacterInfoWindow` is the shape). A window with native content under its panel tests that
-  content's own element with `IsPointerWithin()` or `PointerIn()` instead.
-- **`UpdateKeyEvent()`** keeps only real key behaviour (Esc to close, hotkeys).
-- **A `UI::RmlBridge::ThemedView` member owns the documents and the model**
-  (`UI/RmlBridge/RmlThemedView.h`): the model's binding function, the document paths and any
-  setup. `Create()` calls its `Ensure()`, which builds once and is cheap after (`Create()` runs
-  again on resolution change), and `Release()` calls its `Release()`. A theme switch needs nothing
-  from the window: the view keeps the model's values, rebuilds the documents and shows again what
-  was visible (`component-catalog.md`'s Theming section).
-- **`Update()`** reads live game state into the model; it runs only during `MAIN_SCENE`.
-- **Visibility.** Show/hide the document from `Show(bool)`, or from a per-frame sync through
-  `UI::RmlBridge::SyncDocumentVisibility()` (transition-only — re-asserting `Show()` every frame
-  steals focus from a text field; see `RmlDocumentVisibility.h`). A HUD document that stays shown
-  across scenes must also be added to `CSystem::SyncMainSceneHudVisibility()`
-  (`WindowSystem.cpp`) through a `SyncDocVisibility(bool sceneAllowsShow)` method: `CObject`'s
-  `Update()` only runs in `MAIN_SCENE`, so nothing else hides it on the login and
-  character-select screens.
-- **Delete the native widgets the document replaces** (`CButton`s, `SetButtonInfo()`, tooltip
-  helpers, `LoadImages()`/`UnloadImages()` no one else aliases). Once `Render()` paints nothing
-  they cannot do anything; they are not redundancy.
-- **Blur on hide** if the document has a text field, so it opens again without the old focus
-  (`CChatInputBox::ClosingProcess()` is the shape). Hotkeys don't depend on it: a field in a hidden
-  document never counts as typing.
-- **Clicks on the world.** `Input/Selection.cpp` (`SelectObjects()`) and
-  `Engine/Object/ZzzInterface.cpp` (`Attack()`) check `Core::Input::IsMouseOverUI()` beside the
-  native `MouseOnWindow`/`mouseOnHud`/`CheckMouseUse()` flags, so every RmlUi document is covered
-  automatically. A new gameplay call site that gates on those flags needs the same check.
+Place C++ files in their feature domain: `UI/Character/`, `UI/Inventory/`, `UI/Combat/`,
+`UI/Events/`, `UI/HUD/`, `UI/NPCs/`, `UI/Party/`, `UI/Social/`, `UI/Quests/`, `UI/Options/` or
+`UI/MuHelper/`. Shared modal components belong in `UI/Dialogs/`; game-window integration helpers
+belong in `UI/RmlBridge/`. `UI/Widgets/` is for feature-independent controls, and `UI/Windows/` is
+the existing login/credit set. Name classes and assets for their responsibility and follow
+[the repository coding rules](../CODING_RULES.md) for file and namespace conventions.
 
 ## Ownership: what the C++ side of a window may own
 
-`architecture-principles.md` §1 states the split; this section is the concrete test to apply while
-writing, derived from an ownership audit of the migrated windows. The audit found game
-behaviour well contained in C++ and presentation widely leaked out of RCSS — so these rules are
-about the second direction, which is where new code actually goes wrong.
+Keep the implementation responsibilities clear:
 
-**Why it is a hard rule and not a preference.** `data-style-*` writes an *inline* property, and
-this build resolves inline properties before any stylesheet rule with no `!important` escape
-anywhere (see `engine-findings.md`). A coordinate or colour bound from the model is one **no theme
-can ever override** — not by specificity, not by shipping its own copy of the document. Nothing
-warns: the theme's rule simply has no effect.
+| Owner | Responsibility |
+|---|---|
+| Feature C++ | Game and UI state, view-model values, validated actions, lifecycle and preference persistence |
+| RML | Element hierarchy, bindings and action requests |
+| RCSS and theme assets | Layout, dimensions, anchors, appearance and visual states |
+| Shared integration | Scale inputs, workspace placement, themed loading and native render targets |
 
-**The same applies to a `style=` attribute in the markup**, which writes the same inline property.
-Layout belongs in RCSS addressed by id or class, never in a `style=` attribute — not even for a
-handful of repeated rows, which is where it keeps appearing. For rows whose count varies, give the
-set its own container and let the theme address them with `:nth-child` (`engine-findings.md`).
+Apply these rules when defining a model or handler:
 
-1. **A model field is a fact about the game or the UI's state, never a rendering of it.** Expose
-   `pk_level`, not `name_color`; `str_source = "potion" | "item" | "base"`, not `str_value_color`.
-   The shape to copy already ships: `gold_tier` and `level_bucket` classify in C++ and let each
-   theme own the colour (`base.rcss`'s `.gold-*`, `trade.rcss`'s `.level-bucket-*`).
-2. **Never bind a coordinate that does not change with the data.** Static chrome positions belong
-   in RCSS, addressed by id. Bind the root transform and genuinely per-frame values (marker
-   positions, projected world labels) — nothing else. `Tools/check_rml_bound_geometry.py` enforces
-   this at build time: a document binding `left`/`top`/`right`/`bottom`/`width`/`height` (or a
-   custom property with a length unit) fails the build unless it says why in a
-   `<!-- bound-geometry: <why> -->` comment, and expressions reading only
-   `root_x`/`root_y`/`root_scale` are exempt. A number multiplied by `root_scale` fails it
-   outright: a counter-scaled layer's lengths are `calc(Npx * var(--root-scale))` in RCSS
-   (`component-catalog.md`'s Counter-scaled text). **If that check sends you here, the answer is almost
-   always RCSS** — the marker is for geometry that is the state itself, not for a
-   coordinate that was easier to push from C++. Lines of text that stack go in one `.sharp-flow` layer and flow;
-   a list the original laid out by index (a zig-zag, a fan-out) binds the index as a unitless
-   custom property and the theme turns it into a position; a native line height binds as a metric
-   (`--line-height`), and the theme sizes rows from it.
-3. **If you are writing `a / 2 - b / 2` or `y += stripHeight`, you are writing RCSS in C++.**
-   Centering and stacking are what the layout engine is for.
-4. **A constant that appears in both C++ and RCSS is a bug waiting.** Author it in RCSS and ask
-   the drawn element (`RmlPointer.h`, or its box) from C++. That applies to native content's own
-   size too, not just a panel's.
-5. **Do not transcribe the native `Render()` into a list of `{text, x, y, width, align, bold,
-   color}`.** That turns the model into a draw list and the document into a replayer, and it takes
-   every one of these rules down with it. Reverse-engineer the layout intent
-   (`architecture-principles.md` §2) and author it by id instead.
-6. **Keeping a native control for hit-testing or data does not license C++ to own its
-   presentation.** Once the window's `Render()` paints nothing, §2's native-geometry exception
-   (RCSS owns geometry → C++ reads it → native follows) no longer covers that window — and the
-   inverted flow, C++ constant → RmlUi position, is the thing that exception exists to avoid.
-7. **State gets one authority.** Hold a selection or current tab in the model and let both the
-   highlight and the page read it. Do not mirror a native control's index into a C++ member and
-   keep the two in step by hand.
-8. **Let markup request; make C++ decide.** A markup-supplied action name or index is fine —
-   re-check the rule in C++ regardless, the way `CCharacterInfoWindow::RmlClickIncreaseStat()`
-   re-checks `LevelUpPoint` and the class-dependent stat range before sending anything.
-9. **Keep user preference, semantic state and theme decision in separate fields.** Bind an alpha
-   and a boolean; let RCSS own the colour. Composing them into one CSS string hands the theme's
-   share to C++ permanently.
-10. **Branch on a declared theme capability, never a theme name** (§30) — `theme.ini`'s
-    `[Capabilities]`, read via `ThemeUsesNativeTextSize()`. Better
-    still, ship the content in shared markup and let a theme that doesn't want it hide it in RCSS.
-11. **Expose a purpose-built view model, never a game object.** Currently true of every
-    registered struct — don't be the first exception.
+- Expose purpose-built values and semantic state, not arbitrary game objects or a replay of native
+  draw calls. For example, bind a wealth tier and let RCSS choose its color.
+- Keep each selection or tab authoritative in one place. Bind it to the view rather than
+  maintaining a second independent selection in a native control.
+- Keep static coordinates, colors and alignment in RCSS. Inline `style` attributes and
+  `data-style-*` bindings take precedence over stylesheet rules; use them only for justified
+  state-driven values or shared integration. See [Engine Findings](engine-findings.md#rmlui-build).
+- Native content follows the drawn element's geometry. Do not duplicate panel or item-slot
+  constants in C++ and RCSS. Coordinate spaces and readback are covered by
+  [Data-driven geometry and native companions](layout-and-scaling.md#data-driven-geometry-and-native-companions).
+- Validate actions in C++, even when markup supplies an action name or index. Presentation must
+  not bypass class restrictions, available points, inventory rules or server-facing validation.
+- Keep domain behavior in its feature layer. Item move/split/stack rules and skill-tooltip content
+  do not belong in a generic UI component. Non-UI callers use
+  [feature operations](component-catalog.md#feature-operations-for-networking-and-game-code).
+- Update both `legacy` and `modern`. Presentation differences belong in themed markup or RCSS;
+  an engine behavior difference uses a declared capability, never a theme-name condition. See
+  [Theming & Modding](theming-and-modding.md).
 
-**The shape in one example.** The skill hotkey's number used to be a digit-sprite subscript drawn
-in C++ for both themes. Now `CSkillList::GetHotKeySlotNumber()` returns the number,
-`SyncRmlModel()` binds it, and each theme's `main_frame.rml`/`.rcss` places it through
-`.skill-hotkey-label` (modern: top-left like its Q/W/E/R; legacy: bottom-right like the original).
-Likewise the HP readout: C++ computes both `hp_text` ("935 / 935") and `hp_current_text` ("935"),
-and each theme binds the one it wants — no theme-name check anywhere (§30, §31).
+Static geometry is not made themeable by binding it from C++. State-driven geometry, such as
+projected markers or tooltip anchors, needs a documented reason for the bound-geometry guard.
+Reference-pixel lengths for counter-scaled text belong in RCSS using `calc()` and the shared
+`--root-scale`; see [Counter-scaled text](component-catalog.md#counter-scaled-text). Current
+compatibility exceptions are recorded in [Known limits](README.md#known-limits).
 
-**Two documents to compare before choosing a shape.** `mu_helper_config.rml` and
-`guard_window.rml` are the same kind of window — same dock, same `docked_panel_frame.rcss`, both
-tabbed, both with a native control retained underneath. The first binds *only* its root transform
-and places ~65 controls by id in RCSS; the second binds its every label position, size, alignment,
-weight and colour, and its RCSS can change almost nothing. Copy the first.
+## Define the model and themed documents
 
-### What may still bind geometry
+A window's `UI::RmlBridge::ThemedView<Model>` owns its model and documents. It creates the model
+before loading markup that references it, and participates in theme reloads. Use `ThemedView<>`
+when there is no bound state. The declaration and hook recipes are in
+[Theming](component-catalog.md#theming); exact options live in
+[`RmlThemedView.h`](../../src/source/UI/RmlBridge/RmlThemedView.h).
 
-The documents that still bind geometry, each with a `<!-- bound-geometry: <why> -->` marker: per-frame data (gauges, things that follow the
-pointer or scroll, windows that grow with their content, projected markers) and text measured the
-way the native renderer measured it. A list the server does not bound is not a reason: it flows in
-RCSS, as the duel spectators and score marks do.
-`root_x`/`root_y` and `panel_x`/`panel_y` stay apart: the first is the physical origin of a root
-scaled uniformly by `root_scale`, the second a reference-unit position inside a stretched `.screen`.
+Shared documents live under `src/bin/Data/Interface/RmlUi/`, with stylesheets and optional markup
+overrides in `themes/legacy/` and `themes/modern/`. Link `base.rcss` for the shared interaction and
+component rules. Use shared markup when it serves both presentations; theme-specific structure
+follows [Shared markup and theme-specific structure](theming-and-modding.md#shared-markup-and-theme-specific-structure).
 
-`.sharp-text` counter-scaled tops, `MiniMap`/`WorldLabelLayer` marker coordinates, and
-`TitleSceneUI`'s loading bar are justified hybrids, recorded in the README's Known limits.
+In the owner's initialization path, register the managed window and call the view's `Ensure()`.
+It is cheap once built and retries when the context or document was unavailable. Concrete windows
+provide their own `Create()` and `Release()` conventions; these are not methods declared by
+`CObject`. Tear down the view and remove the window's manager registration when its owner releases
+it. Follow the chosen reference's lifecycle rather than assuming all owners initialize alike.
 
-Passing the guards establishes documented exceptions, not runtime correctness. The bound-geometry
-guard covers the four box offsets and the two sizes only: a bound `color`, `decorator` or
-`font-size` has the same override problem but is a judgement call per case, while a bound static
-coordinate is nearly always layout that belongs in RCSS. Widen it when a bound colour bites. The
-active UI transform has its own guard: `tools/check_layout_transform_users.py` keeps it to the
-infrastructure (the window manager's measuring scope, the text renderer, the inventory's screen
-scope, the tooltip's metric scope, each listed in the script with its reason).
+Read current game state into the model in the owner's update path and mark changed bindings
+dirty. Register model structs and arrays on every model creation; a static registration guard
+breaks rebuilding. When reopening a scene resets model values, mark those changes dirty too.
 
-## Checklist for every new port (principles §27's workflow, condensed)
+A theme switch preserves model values while replacing documents. Reattach listeners, drag
+handles, filters and field limits through `afterBuild`; refresh geometry-dependent state through
+`afterReload`; clear cached element pointers and attached controls through `beforeUnload`.
+Do not retain an element pointer across document replacement.
 
-1. **Layout intent traces to the original code's computed behaviour**, not its literal
-   default-case numbers (§2–3) — `buff_strip.rml`'s header derives `x = (iScreenWidth - 200) / 2`
-   from `SetPos()`'s four hardcoded pairs.
-2. Uses the `dp` anchor/stretch/center classes (`layout-and-scaling.md`) or a workspace slot
-   (`window-placement.md`) instead of C++-pushed rects, unless the position is genuinely per-frame.
-   A bound per-frame offset uses the unit of the sibling static CSS (`dp` ≠ `px`).
-3. Deliberate aspect-ratio/resolution behaviour: fixed, edge-anchored, centred or stretched (§7–8).
-4. C++ owns state, binding, events and game behaviour; RCSS owns layout, sizing and position
-   (§1, §16; `building-new-ui.md`'s ownership rules).
-5. The C++ class and the RmlUi assets are named for what the component is, renamed at port time
-   (§12).
-6. Both themes in the same pass. A rendering technique new to the port is verified at runtime
-   (`engine-findings.md`).
-7. Reuses existing primitives (`component-catalog.md`). For the modern theme, match the windows it
-   appears **beside** on screen (its dock group), not its nearest technical sibling; a docked
-   panel links `docked_panel_frame.rcss`.
-8. A new document gets its original window's layer depth in the stacking table (below).
-9. A window whose native hit box comes from live RCSS is clicked through at a non-100 % UI scale
-   (`layout-and-scaling.md`'s scale sweep).
+## Connect visibility, input and actions
 
-## Stacking order
+For a pure RmlUi window, `Render()` returns `true` without drawing chrome; the runtime renders its
+document. `CObject::Show(bool)` is virtual. A window may override it to synchronize its document,
+or use `SyncDocumentVisibility()` in its update path. Synchronize only on visibility transitions:
+calling `ElementDocument::Show()` every frame can steal focus from an input field.
 
-Every document's `z-index` is the layer depth of the original window (or render pass) it
-replaces, from one table (`UI/RmlBridge/RmlStackingOrder.cpp`), set when a themed document loads.
-The original drew its windows in ascending `GetLayerDepth()` order, then the notices, the scene
-windows, the login scene's message box and the reconnect dialog; RmlUi sorts a context's
-documents by `z-index` and keeps show/focus order only among equal depths, so
-`SyncDocumentVisibilityInFront()`/`Behind()` and focus only order documents of one depth. Passes
-outside the window list: object descriptions
-and the map name 0.5, notices 20, scene windows 30 (balloons 29, the remember-password prompt 31),
-loading and title screens 40, reconnect dialog 50. The shared tooltip is 10.69, above every window
-and under the message boxes (10.7): the original drew each tooltip at its owner's depth, where the
-chat log, the friends window and the HUD hid its rows. The top-right button row (the modern
-theme's choice) is its own document (`main_frame_top.rml`, 1.05: over the names, under every
-window, which dock over that corner). Native parts (item grids, 3D items) keep the native order
-and stay under the main context. `rml_stacking_order_tests` checks that every document the sources
-name has an entry.
+Use RmlUi event callbacks for visible controls. Repeated rows bind data with `data-for`; use the
+catalog's [List / repeated rows](component-catalog.md#list--repeated-rows) and
+[Tab / TabBar](component-catalog.md#tab--tabbar) patterns instead of inventing a native control.
+Give interactive panels `pointer-events: auto`; `base.rcss` makes document bodies click-through
+by default. Decorations over the world should not claim the pointer unless their interaction
+requires it. Scroll-pane click-through behavior is in [Scrolling pane](component-catalog.md#scrolling-pane).
 
-## Legacy parity rules
+For managed-window mouse dispatch, `UpdateMouseEvent()` returns `false` only when it consumes
+input. A pure RmlUi panel can return `!UI::RmlBridge::IsPointerOver(document)`; native content can
+query its own element through `IsPointerWithin()` or `PointerIn()`.
+[`RmlPointer.h`](../../src/source/UI/RmlBridge/RmlPointer.h) operates against drawn boxes, so
+window code does not need to remap the pointer into a second coordinate system.
 
-Differences to the original found by the paired comparison suites and fixed in shared places, so
-a new port inherits them:
+Keep only window-level keys, such as Esc and shortcuts, in `UpdateKeyEvent()`. Poll them through
+`mu::ui::window::IsPress`/`IsRelease`/`IsNone`/`IsRepeat` (`WindowCommon.h`); `CInput::Instance()`
+is for the existing login/character-select integration. Mouse events over a RmlUi panel may be
+consumed before native button flags are set. Native viewer gestures therefore use document
+events; see [Native 3D viewer input](component-catalog.md#native-3d-viewer-input).
 
-- **Scene gate.** A window `CSystem` updates only in the main scene still has a live document in
-  every scene. Its stacking-table entry marks it a main-scene document, and every such document is
-  suspended outside the main scene (`SuspendMainSceneDocumentsOutsideMainScene()`). The HUD's
-  documents also wait for the world to load (`CSystem::SyncMainSceneHudVisibility()`). A window
-  the login and character scenes open too (the options window) is a `DocumentScene::Every`
-  document instead: never suspended, at its own depth in the world and over the scene windows
-  outside it (`ApplySceneStackingDepths()`).
-- **Scroll thumb.** The legacy `.scroll-pane` thumb is the native 15x30 knob, not a proportional
-  bar; a list the original scrolled one row per wheel notch takes `mousescroll` itself
-  (`CMoveCommandWindow::RmlWheelList()`), since RmlUi scrolls 80 dp per notch.
-- **Button hover text.** A document's `data-hint` and a native button's `CTooltip` both use the
-  shared tooltip's `Config::Box::ButtonHint` (unframed, 2 units off the button, the other side
-  when there is no room); the framed box is for `RenderTipTextList()`.
-- **Hangul.** NanumGothic is a fallback face, so Korean game text draws in any family.
-- **Alpha test.** Art the original drew under `EnableAlphaTest()` (reference 0.25) stays invisible
-  while its fade is below a quarter (the Illusion Temple banner).
-- **Scene windows re-created per visit.** A `Create()` that resets model fields must mark them
-  dirty (the login fields) and reset what the original reset (the server list's chosen group).
+A window that handles Enter, Esc or history while its field is focused must implement
+`TakesTypingFrom(document)` for that field's document. Focus the field after the document is
+shown and its content has synchronized, using a one-shot request rather than per-frame focus.
+Blur focused fields when hiding their documents. Field binding, limits, numeric filtering and
+IME behavior are detailed in [Text field](component-catalog.md#text-field).
 
-## Lessons from shipped ports
+Static hover hints use `data-hint`; hints built from game state use the shared tooltip API or
+`ElementTooltip`. Both are covered by [Tooltip](component-catalog.md#tooltip). Avoid a separate
+per-window tooltip renderer.
 
-Engine quirks are in [`engine-findings.md`](engine-findings.md); these are porting patterns.
+At gameplay input call sites, include `Core::Input::IsMouseOverUI()` when deciding whether a click
+may act on the world. A panel click must not also move the character or attack a target behind it.
 
-**Input and focus**
+## Integrate placement and scene participation
 
-- **A text field's window claims the field's document.** While the player types,
-  `CManager::UpdateKeyEvent()` gives keys only to the window whose `TakesTypingFrom()` accepts the
-  focused field's document (`RmlUiRuntime::GetTypingDocument()`); the chat line, chat command,
-  Gold Bowman, MU Helper and friend windows claim theirs, or Enter/Escape never arrive.
-- **Focus, scroll pins and scroll rewinds are one-shot latches**, done once on the frame after the
-  view caught up — never per frame (that steals focus and kills the scrollbar). `CSystem::Show()`
-  runs `OpenningProcess()` before `ShowInterface()`, so arm there and consume in the sync.
-- **A native window behind an RmlUi document never sees a mouse press**
-  (`ProcessMouseButtonDown` consumes it while anything is hovered), though the wheel still reaches
-  it. Drive the gesture from the document (`UI::Social::PhotoViewerControl`).
-- **`UpdateMouseEvent()` returns `false` only to consume.** `CManager` stops dispatching at the
-  first `false`; a "not for me" guard must return `true` (an inventory guard once ate every drop
-  into the trade grid).
-- **A port can drop a side effect that was covering a bug** — `CUIMuHelper::Show()` released a
-  dead startup input box's focus, and without it every hotkey stayed suspended. Look for what a
-  removed call was hiding.
+Choose a workspace slot for windows that arrange with other windows, `.stage` for centered
+reference-layout panels, `.hud-board` for HUD-relative content, or RCSS anchors for independent
+screen placement. The theme owns the layout; shared scale functions supply its units.
 
-**Layout and text**
+Read [Units and placement](layout-and-scaling.md#units-and-placement) before choosing lengths.
+Directly laid-out scalable UI uses `dp`; root-transformed panels use reference `px`. Do not apply
+UI scale twice or add a per-window calculator. Workspace registration, content/fill sizing,
+arrangement rules and dragging are detailed in [Window Placement](window-placement.md).
 
-- **Click-through.** `IsMouseOverUI()` is true over any hovered `pointer-events: auto` element, so a
-  scroll pane over the world is a wall; the chat log's lines are `pointer-events: none` with the
-  scrollbar opted back in at every level, and hover/right-click moved to C++.
-- **Bottom-up lists**: a flex column with `margin-top: auto` on the first item, not
-  `justify-content: flex-end` (which pushes the earliest lines out of the scroll area); per-line
-  backgrounds need `align-items: flex-start`.
-- **A `.scroll-pane` inside a `transform: scale()` panel counter-scales itself out**
-  (`.counter-scaled`, its box `calc(Npx * var(--root-scale))` in RCSS), with rows at an explicit
-  width, not `100%` (`component-catalog.md`).
-- **A counter-scaled layer's lengths are RCSS**: `#panel` binds `--root-scale`, base.rcss's
-  `.sharp-text` / `.counter-scaled` cancel it, and the theme writes `width: calc(160px *
-  var(--root-scale))`. A number multiplied by `root_scale` in RML fails the bound-geometry guard.
-- **A label in a constricted box** that must keep native's position is a `.marquee`: one line,
-  `..` when longer, the whole text scrolling on hover (`RmlMarquee.h`). Text that may take more
-  lines wraps in a flow or a scroll pane instead (`event_entry`, `shop_notice.rcss`).
-- **`MeasureText()` returns reference units**, not pixels; `RenderText()` shrinks text wider than
-  its box — use `NativeTextPixelSizeInBox()` per text. Text the native renderer draws small is laid
-  out at `CachedFontPointSize()` and scaled down (the login scene lines).
-- **`overflow: hidden` does not clip under a panel's `transform: scale()`**; crop a bar with
-  `decorator: image(<sprite> scale-none left top)` on an element of the shown width, or an
-  untransformed box with `clip: always`.
-- **Centre a counter-scaled label in RCSS**, not by a C++-measured top: `.sharp-middle` centres it on its button's height and `.sharp-centre` on its
-  parent's width (`engine-findings.md`).
-- **Draw a window in the scale its slot is sized in.** The event HUDs were placed in the HUD's
-  UI-scaled units but drawn in the original's W/640 x H/480 stretch, so at 90 % they outgrew their
-  slots; they now draw at the HUD's own scale.
-- **Data expressions have no unary minus**: bind `-x` from C++.
-- **Class-specific controls are one tested C++ table bound as flags**
-  (`UI::MuHelper::ResolveClassFeatures()`), never RCSS — the themes cannot disagree.
+Gameplay windows update through the main-scene lifecycle. Scene windows use their scene owner's
+updates; being a `CObject` does not itself restrict a component to `MAIN_SCENE`. A persistent
+document can remain drawable when its C++ owner is no longer updating, so register its scene
+policy and explicitly synchronize lifecycle visibility.
 
-**Drawing**
+Main-scene documents are suspended outside that scene by the shared scene gate. HUD documents
+also wait for world loading through `CSystem::SyncMainSceneHudVisibility()`; add the new HUD's
+visibility sync there when needed. Login and character-scene owners hide or release their
+documents on exit. A window available in multiple scenes must be updated by each relevant owner
+and use the matching scene policy; the options window is the existing example.
 
-- **A window the original drew under every panel** (siege HUD, duel and battle-soccer boards)
-  takes its low depth from the stacking table; **one with a live 3D preview** draws it into a render
-  target in its own document (`UI::Items::ItemCameraTarget`, `UI/Events/EventItemEntryView`).
-- **Native 3D inside a document** goes through `UI::RmlBridge::RenderTarget`, so it z-orders with
-  the windows around it.
-- **World-anchored or shared legacy drawing** goes through the world-label layer's
-  `Overlay2DRecordScope`, which records `RenderText()`/`RenderColorQuadARGB()`/`RenderBitmap()`
-  and replays them into pooled elements; `CObject::PrepareFrame()` records them before any window
-  renders.
-- **`EnableAlphaBlend()` is additive** (ONE, ONE): `decorator: additive-fill(<colour>)` /
-  `additive-image(<colour> <image>)`.
-- **Textures are premultiplied on load** (`RmlUiRenderInterface::LoadTexture`).
-- **A texture cut by UVs, padded by the loader, or drawn mirrored** is an `<img rect="x y w h">` in
-  texels (mirrored: `transform: scale(-1, 1)`).
-- **A quad rotated in physical pixels** is a CSS `matrix()` built from three corners
-  (`UI/HUD/MiniMapLayout`).
-- **Image paths** in a themed document resolve from the theme folder (`../../../../Logo/…`); an
-  absolute `/Interface/…` path misses `Data` and draws a white quad.
-- **Animations the original stepped in `Render()`** move to `Update()`.
-- **One document and model per instance** (chat rooms, letters) through `ThemedView`'s
-  `modelPlaceholder` and `SetModelName()`.
-- **A block-scope `extern` inside `mu::ui::window`** declares a namespace member, not the global.
-- **Windows the original never showed** can carry latent crashes; exercise every size.
+### Stacking order
 
-## Event windows outside their event: `$preview`
+Add each new document to
+[`RmlStackingOrder.cpp`](../../src/source/UI/RmlBridge/RmlStackingOrder.cpp) with its depth and
+`DocumentScene` policy. Choose the depth by its relationship to existing panels, HUDs, dialogs
+and tooltips, keeping native dispatch order consistent with the document. The table is the source
+of truth for numeric depths; scene policies are defined in
+[`RmlStackingOrder.h`](../../src/source/UI/RmlBridge/RmlStackingOrder.h).
 
-The event windows that draw only while a server runs their event are looked at with `$preview <event>`
-(`UI/Events/EventPreview.cpp`; `$preview` lists them, `$preview off` ends one). It fills a window
-through the setters its packets use and lets it draw off its map; the window sends nothing. Teleporting
-a game master to the map passes the map check but brings no event state, and the GM move does not
-create the siege minimap that a map join does. A preview is not a live event.
+RmlUi sorts documents by `z-index`. Show/focus order and
+`SyncDocumentVisibilityInFront()`/`Behind()` affect documents at equal depth; they do not raise a
+low-depth document above higher-depth windows. Workspace regions supply geometry, not stacking
+priority. Modal keyboard priority is separate: higher `GetKeyEventOrder()` values run first, and
+a handler returning `false` consumes the key. Use the existing generic dialogs as the modal
+reference; the ordering constraint is explained in [Engine Findings](engine-findings.md#cobjectcmanager).
 
-- **Illusion Temple HUD**: its corner part (time, mini map, skill panel) is `#corner` in
-  `cursed_temple_system.rml`; a theme moves it with `left`/`top`, and C++ reads the offset back to
-  place its markers, digits, buttons and hit tests. Modern moves it left of the worn-equipment icons.
-  Its three hover tooltips show in both themes (native's kill-point zones start at each number's
-  centre, kept).
-- **Siege commander HUD**: `$preview siege` seeds members, NPCs and commands against the hero's
-  zoom-1 crop -- inside, on each edge and just outside -- so both zooms' clipping is exercised.
+The rendering sequence is described in [Frame lifecycle](README.md#frame-lifecycle-render-seams).
+Native content within a window must occupy that document's depth, as described below.
 
-The Blood Castle and Chaos Castle timers, the duel spectator list, the CryWolf result and the HUD
-status texts (`$preview status`; the crown switch lines show only at the switches) and the event
-result and progress boxes (`$preview bcresult`, `ccresult`, `dsrank`, `switchbox`) and the guild war
-time and result (`$preview guildwar`) look right. `$preview kanturu` fills the Kanturu entry window
-and `$preview notices` the centre-screen notices; `$dialog menu <name>` opens an NPC menu without its
-NPC.
-The Battle Soccer score, the duel frame, the Empire Guardian timer and the Doppelganger frame draw
-outside their event (`$win soccer full`, `duel`, `empiretimer`, `doppelframe`) and were checked in
-both themes.
+## Integrate native content when required
 
-## Naming
+RmlUi owns ordinary 2D chrome, text, icons and layout. Live 3D drawing remains native, but its
+image belongs in the document through `UI::RmlBridge::RenderTarget`; item-camera content uses
+`UI::Items::ItemCameraTarget`. The element's drawn box supplies the target geometry, so content
+follows scaling, placement and overlapping windows. See
+[Native content inside a document](component-catalog.md#native-content-inside-a-document).
 
-Name the C++ class and the RmlUi assets after what the window *is*, not the legacy tier or class
-it came from, and rename at port time (`architecture-principles.md` §12):
-`CNewUIHeroPositionInfo` became `CMuHelperBar` / `mu_helper_bar.rml`, with its `INTERFACE_*` key,
-accessor and globals renamed to match. Port one legacy class as one component; split only where
-the code already has two independent lifecycles.
+Useful references are [`CItemHotKey`](../../src/source/UI/HUD/ItemHotKey.h) for item icons and
+[`CMyInventory`](../../src/source/UI/Inventory/MyInventory.h) for grids and equipment.
+Keep inventory actions in their domain controller; the theme owns cell and slot geometry.
+Draw effects that belong with the native content into the same target, rather than above the
+entire RmlUi context.
 
-## Widget cheat sheet (native-only content on new `mu::ui::window::CObject` windows)
+World overlays calculate projected positions in C++ and draw labels through the shared
+world-label layer. Follow
+[`CCharInfoBalloonMng`](../../src/source/Character/CharInfoBalloonMng.h) for projected labels and
+[`WorldLabelLayer`](../../src/source/UI/Character/WorldLabelLayer.h) for recorded overlay drawing.
+Native hit-test or bookkeeping companions follow the drawn RmlUi geometry; retaining one is not
+permission to move presentation back into C++.
 
-Applies only to content that must stay native — for anything with an RmlUi presentation, skip this
-table.
+When replacing existing visuals, remove their unused native drawing and widgets, but first check
+for resources or state that other components still use. Legacy-specific rendering constraints
+belong in [Engine Findings](engine-findings.md), and existing exceptions belong in
+[Known limits](README.md#known-limits).
 
-| Need | Use | Header | Don't confuse with |
-|---|---|---|---|
-| Multi-line read-only text | `mu::ui::window::CTextBox` | `UI/Widgets/Window/TextBox.h` | — |
-| Single-line text entry | **stock RmlUi `<input>`** + `.text-field` | `themes/*/base.rcss` | Bind with `data-value`, keep `maxlength`/validation in C++; numeric fields use `UI::RmlBridge::NumericInputFilter`. See `component-catalog.md`'s "Text field" |
-| Progress/gauge bar | RmlUi's built-in `<progress>` | — | `title_scene.rml`'s loading bar; check `component-catalog.md` before inventing another pattern |
-| Scrollable list of rows | RmlUi `data-for` in a `.scroll-pane` | — | `component-catalog.md`'s "List / repeated rows" |
+## Validate the component
 
-## Namespaces and look-alike names
+Before considering a new or changed component complete:
 
-- `MUHelper::CMuHelper` is the bot engine; `CMuHelperConfigWindow`/`CMuHelperDetailWindow`/
-  `CMuHelperSkillPicker` (`UI/MuHelper/`) are its settings UI.
-- `UI/HUD/ChatInputBox.h` is the complete chat-input window, not a reusable text-entry widget.
-  `UI/HUD/SlideWindow.h` similarly owns the notice window beside its SlideTicker.
+1. Confirm that its layout intent is expressed in RML/RCSS and that its model exposes state,
+   rather than static presentation. Reuse the shared primitives and update both themes.
+2. Run the existing asset and integration guards from the repository root:
 
-## Accepted as the base: the `CObject` tier
+   ```powershell
+   python tools/check_rml_rcss_syntax.py
+   python tools/check_rml_rcss_drift.py
+   python tools/check_rml_bound_geometry.py
+   python tools/check_layout_transform_users.py
+   ```
 
-Every window is a `mu::ui::window::CObject` owned by `CManager`, registered by hand in
-`WindowSystem.cpp` (creation, `INTERFACE_*` id, its `g_p*` macro). That machinery is kept as it
-is, by decision: the migration never needed it to change. An RmlUi document is something a
-`CObject` owns, and slots and fill placement plugged into it without trouble. Replacing it would
-touch every window and every caller of the lookups for no change a player sees.
+   Contract-checker scope and exception markers are described in
+   [Theming & Modding](theming-and-modding.md#shared-markup-and-theme-specific-structure).
+   A geometry exception needs a `<!-- bound-geometry: reason -->` comment; the guard rejects
+   static values multiplied by `root_scale`, which belong in RCSS. Read the diagnostic and
+   document a genuine state-driven need rather than bypassing the check. Passing a guard does
+   not establish runtime correctness.
+3. Build with the [supported build setup](../build/README.md) and run checks relevant to the change.
+   The stacking table has `rml_stacking_order_tests`; workspace, model, theme-reload and input
+   helpers have tests under `tests/ui/`. Add layout coverage where appropriate using the
+   [headless text-layout audit](layout-and-scaling.md#the-headless-text-layout-audit).
+4. Exercise open, close and scene transitions. Check Esc/Enter with a focused field, click-through
+   to the world, scroll/drag gestures and tooltip placement where applicable.
+5. Test both themes across representative resolutions and the
+   [75%/150% UI-scale sweep](layout-and-scaling.md#checking-it-the-scale-sweep). Check corner cells
+   of native grids, resizing, dragging across scale changes and switching themes while open.
+   Compare original behavior when making a compatibility change.
+6. Record tested scenarios and remaining gaps with the change. A screenshot or preview is not
+   evidence that server-dependent actions work.
 
-Revisit when a concrete need appears that this machinery cannot meet. The cheapest step then is
-self-registration: each window declaring its id and name once, in place of the hand-kept
-lists. Typed lookups in place of the `g_p*` macros, and the lifecycle moving onto the documents,
-each stand alone after that.
+For event UI, `$preview` lists available previews, `$preview <event>` supplies sample state, and
+`$preview off` ends the preview. This can expose layout without a live event; teleporting to an
+event map alone does not supply its state. Use the
+[event preview reference](migration-ledger.md#event-preview-reference) for additional commands,
+and test against a running server for gameplay behavior. Scripted checks can use the
+[control socket](../control-socket.md) and [in-game tester](../in-game-tests.md).
 
-## Kept out of the UI kit on purpose
+## Where detailed guidance lives
 
-Domain logic a component may call into, but which never moves into a generic UI type:
+| Task | Detailed reference |
+|---|---|
+| Apply ownership and compatibility requirements | [Architecture Principles](architecture-principles.md) |
+| Select a primitive or configure a view | [Component Catalog](component-catalog.md) |
+| Choose units, read geometry or test scaling | [Layout, Anchoring & Scaling](layout-and-scaling.md) |
+| Arrange windows, fill slots or integrate dragging | [Window Placement](window-placement.md) |
+| Edit theme resources, tokens or document contracts | [Theming & Modding](theming-and-modding.md) |
+| Diagnose an engine or native-integration constraint | [Engine Findings](engine-findings.md) |
+| Resolve an old class or specialized compatibility path | [Legacy UI Class Map](migration-ledger.md) |
+| Understand render passes and current exceptions | [System overview](README.md) |
 
-- **`CInventoryActionController`/item drag-drop** — inventory business logic (move/split/stack,
-  server round-trips) that renders through UI.
-- **`CUIManager`'s open/close exclusion** (`MUTEX_*` keys) — domain policy ("opening Inventory
-  closes the personal shop purchase window"); don't merge it into `CManager`.
-- **Skill-tooltip content** (`UI::Skills::Tooltip::BuildModelForSlot`) — rendering uses the shared
-  tooltip; deciding what a skill tooltip says stays domain logic.
-- **3D-camera and world-space rendering** (`Window3DRenderMng`/`I3DRenderObj`, `ScreenOverlay`) —
-  the boundary above.
-
-## Driving `CSprite` from native code
-
-`CSprite` takes reference-resolution coordinates and applies the active transform's scale and the
-live screen offset inside `Render()` (pre-scaling double-applies the offset). It bakes scale and
-its Y-flip's `WindowHeight` basis in at `Create()`, with no live updater — rebuild it whenever
-image, frame count, size, `WindowHeight` or scale change. `CButton::Render(true)`'s UV crop for
-`MiniMap.cpp` is the one remaining `RenderImage()` path.
-
-## The `CFriendWindow` seam
-
-`UI/Social/SocialWindow*.h/.cpp` holds `CUIBaseWindow`, `CUIWindowMgr` and `CUIPhotoViewer`, reached
-through one seam: `CFriendWindow : public mu::ui::window::CObject` owns one `CUIWindowMgr*` and
-forwards into it. The windows themselves are RmlUi documents — the shell, each chat room and each
-letter — and `SocialWindowManager.cpp` keeps the manager that arranges them, the UI-message queue
-they talk over, and the native `CUIPhotoViewer` that draws a letter's sender.
-
-- `CUIBaseWindow` (`SocialWindowBase.h`) is the family's own base: no drawing and no input of its
-  own, since each window's RmlUi view drags, maximises and closes it. `CUIPhotoViewer` is a plain
-  class its letter's document places.
-- Don't `#include` `SocialWindowBase.h` without needing a symbol it declares.
-
-## Cross-references
-
-- [`architecture-principles.md`](architecture-principles.md) — the overarching design philosophy.
-- [`component-catalog.md`](component-catalog.md) — the RmlUi/RCSS-layer components, the parallel
-  axis to this doc's C++ object layer.
-- [`engine-findings.md`](engine-findings.md) — why the Ownership rules are hard rules, and the
-  engine quirks a port runs into.
-- [`README.md`](README.md)'s Known limits — the windows that keep a recorded exception to those
-  rules, each with its trigger.
+Keep detailed recipes in their owning guide and link to them here. Source headers remain the
+reference for exact APIs, configuration fields and numeric depth values.
