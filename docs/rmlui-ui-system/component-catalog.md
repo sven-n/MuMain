@@ -34,6 +34,12 @@ or a callback when closing has domain semantics, such as cancelling a trade.
 `base.rcss`. Apply role classes alongside `.btn`; the theme supplies their appearance.
 Bind disabled state and validate the action in C++, even though `.disabled` blocks pointer input.
 
+Server selection uses `.server-group-btn` (with `.checked`) and `.server-option-btn`
+(with `.gray` / `.orange` category colors), supplied by both themes' `base.rcss`.
+Use a `.button-label` child for the pressed text offset. `server_select.rml` is the reference;
+its stylesheet owns button and gauge geometry. Legacy uses the original `cha_bt` group
+and `server_b2_all` server sprites at their native aspect ratios within the current two-column layout.
+
 Icon buttons have a narrower contract: `.btn-icon`, `.btn-icon-primary`, `.btn-icon-label` and
 `.btn-icon-caption` are used by the login and character-selection documents. The modern base
 supplies shared styling; legacy supplies consumer-specific sprite styling. Copy the relevant

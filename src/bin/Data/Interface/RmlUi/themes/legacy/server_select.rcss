@@ -33,6 +33,7 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	align-items: center;
 	gap: 6rem;
 	width: 140rem;
 	height: 300rem;
@@ -42,6 +43,7 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	align-items: center;
 	gap: 6rem;
 	width: 220rem;
 	height: 300rem;
@@ -56,67 +58,36 @@
 	display: none;
 }
 
-/* Ninepatch border (base.rcss) stretched from its native 108x30 rect; a translucent tint
-   decorator layered on top (RmlUi paints the first-listed decorator frontmost) gives the glassy
-   body look instead of the sprite's own opaque fill. Height 32rem matches .server-row's real
-   on-screen height (25rem + its own 3rem+4rem padding) below. */
+/* Keep the original 108x26 group and 193x26 server frames at their native aspect
+   ratios. The shared base styles provide sprites, state colors and label press offsets. */
 .group-btn {
-	width: 140rem;
-	height: 32rem;
+	width: 108rem;
+	height: 26rem;
 	text-align: center;
-	vertical-align: middle;
-	line-height: 32rem;
-	cursor: pointer;
-	pointer-events: auto;
-	decorator: linear-gradient(to bottom, rgba(0, 0, 0, 140), rgba(0, 0, 0, 140)), ninepatch(legacy-btn-idle, legacy-btn-idle-inner);
-	color: token(text-secondary);
+	line-height: 26rem;
 }
-.group-btn:hover {
-	decorator: linear-gradient(to bottom, rgba(40, 40, 40, 150), rgba(40, 40, 40, 150)), ninepatch(legacy-btn-hover, legacy-btn-hover-inner);
-}
-.group-btn.checked {
-	decorator: linear-gradient(to bottom, rgba(60, 50, 20, 150), rgba(60, 50, 20, 150)), ninepatch(legacy-btn-active, legacy-btn-active-inner);
-	color: token(text-primary);
-}
-
-/* Same ninepatch + tint construction as .group-btn. No CSS `border` here -- a border-width on a
-   bordered element with a child doesn't render as a closed rectangle in this build; the ninepatch
-   decorator paints separately, unaffected. Height: 25rem + this row's own 3rem+4rem padding = 32rem,
-   matching .group-btn's on-screen height. Width: 200rem = #server_col's 220rem minus 10rem+10rem
-   padding; .server-gauge-slot's 180rem is inset 10rem left to center it. */
 .server-row {
-	display: block;
-	width: 200rem;
-	height: 25rem;
-	padding: 3rem 10rem 4rem;
+	position: relative;
+	width: 193rem;
+	height: 26rem;
 	text-align: center;
-	line-height: 14rem;
+	line-height: 26rem;
 	white-space: nowrap;
-	cursor: pointer;
-	pointer-events: auto;
-	decorator: linear-gradient(to bottom, rgba(0, 0, 0, 140), rgba(0, 0, 0, 140)), ninepatch(legacy-btn-idle, legacy-btn-idle-inner);
-	color: #f0d74d;
 }
-.server-row:hover {
-	decorator: linear-gradient(to bottom, rgba(40, 40, 40, 150), rgba(40, 40, 40, 150)), ninepatch(legacy-btn-hover, legacy-btn-hover-inner);
-}
-.server-row:active {
-	transform: translateY(1rem);
-}
-.server-row.gray {
-	color: #b0b0b0;
-}
-.server-row.orange {
-	color: #ff9c3c;
+.button-label {
+	pointer-events: none;
 }
 
-/* Plain fill, not repeating-linear-gradient -- unsupported here, renders as nothing. */
+/* Original gauge footprint: 160x4, inset 16px from the left and 19px from the top.
+   The existing flat fill remains; its geometry follows the frame's scene scale. */
 .server-gauge-slot {
-	display: block;
-	width: 180rem;
-	height: 5rem;
-	margin: 4rem 0 0 10rem;
+	position: absolute;
+	left: 16rem;
+	top: 19rem;
+	width: 160rem;
+	height: 4rem;
 	background-color: rgba(0, 0, 0, 160);
+	pointer-events: none;
 }
 .server-gauge-fill {
 	display: block;

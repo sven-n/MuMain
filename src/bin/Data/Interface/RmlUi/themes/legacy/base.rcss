@@ -9,12 +9,85 @@
 	legacy-btn-hover:  0px 30px 108px 30px;
 	legacy-btn-active: 0px 60px 108px 30px;
 
-	/* Inner (stretch-safe) rects for a ninepatch decorator (used by server_select.rcss) so button
-	   art stretches past its native 108x30 size without distorting. 8px inset is a guess at the
-	   border thickness -- adjust if the stretched middle shows a seam or squashed corners. */
-	legacy-btn-idle-inner:   8px  8px 92px 14px;
-	legacy-btn-hover-inner:  8px 38px 92px 14px;
-	legacy-btn-active-inner: 8px 68px 92px 14px;
+}
+
+/* ServerSelWin at 21728b1e: groups use cha_bt (also used by character choices),
+   servers use server_b2_all. Frames are idle 0, hover 1, pressed 2, selected 3.
+   Consumers own geometry; these sprites retain their original colors without tinting. */
+@spritesheet legacy-server-group-sheet
+{
+	src: "../../../cha_bt.tga";
+	legacy-server-group-idle:     0px 0px 108px 26px;
+	legacy-server-group-hover:    0px 26px 108px 26px;
+	legacy-server-group-pressed:  0px 52px 108px 26px;
+	legacy-server-group-selected: 0px 78px 108px 26px;
+}
+@spritesheet legacy-server-option-sheet
+{
+	src: "../../../server_b2_all.tga";
+	legacy-server-option-idle:    0px 0px 193px 26px;
+	legacy-server-option-hover:   0px 26px 193px 26px;
+	legacy-server-option-pressed: 0px 52px 193px 26px;
+}
+
+.server-group-btn, .server-option-btn {
+	cursor: pointer;
+	pointer-events: auto;
+}
+.server-group-btn {
+	decorator: image(legacy-server-group-idle);
+	color: token(text-dim);
+}
+.server-group-btn:hover {
+	decorator: image(legacy-server-group-hover);
+	color: token(text-primary);
+}
+.server-group-btn:active {
+	decorator: image(legacy-server-group-pressed);
+	color: token(text-dim);
+}
+.server-group-btn.checked {
+	decorator: image(legacy-server-group-selected);
+}
+.server-group-btn.checked:hover {
+	color: token(text-primary);
+}
+.server-group-btn.checked:active {
+	color: token(text-dim);
+}
+.server-option-btn {
+	decorator: image(legacy-server-option-idle);
+	color: #ffff79;
+}
+.server-option-btn:hover {
+	decorator: image(legacy-server-option-hover);
+	color: #ffeec1;
+}
+.server-option-btn:active {
+	decorator: image(legacy-server-option-pressed);
+	color: #ffff79;
+}
+.server-option-btn.gray {
+	color: token(text-dim);
+}
+.server-option-btn.gray:hover {
+	color: token(text-primary);
+}
+.server-option-btn.gray:active {
+	color: token(text-dim);
+}
+.server-option-btn.orange {
+	color: #ffb400;
+}
+.server-option-btn.orange:hover {
+	color: #ffd927;
+}
+.server-option-btn.orange:active {
+	color: #ffb400;
+}
+/* The native press offsets only the label, leaving the frame and population gauge fixed. */
+.server-group-btn:active .button-label, .server-option-btn:active .button-label {
+	transform: translateY(1rem);
 }
 
 @spritesheet legacy-checkbox-sheet
