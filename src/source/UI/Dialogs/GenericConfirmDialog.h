@@ -163,6 +163,10 @@ namespace mu::ui::window
         // Unconditionally claims input while shown -- a true modal.
         bool UpdateMouseEvent() override { return !IsVisible(); }
         bool UpdateKeyEvent() override;
+        bool TakesTypingFrom(const Rml::ElementDocument* document) const override
+        {
+            return document != nullptr && document == m_RmlView.Document();
+        }
         // CObject::IsVisible() reflects Show(bool)/m_bRender, which this class never touches --
         // visibility here is purely "is a dialog currently active."
         bool IsVisible() const override { return m_bActive; }

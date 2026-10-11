@@ -10,6 +10,8 @@
 #include "UI/RmlBridge/RmlScaleInputs.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Scaling/UITransform.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/Core/WindowCommon.h"
 
 #include <RmlUi/Core.h>
 #include <RmlUi/Core/ComputedValues.h>
@@ -21,6 +23,8 @@
 #include <fstream>
 #include <regex>
 #include <string>
+
+extern bool g_bWndActive;
 
 namespace
 {
@@ -190,6 +194,50 @@ struct FontEnvironment
 #endif
     }
 };
+}
+
+TEST_CASE("focused confirmation input claims its document and accepts Enter and Escape [ui][dialog-input]")
+{
+    Fixture fixture;
+    fixture.Write(fixture.Theme("legacy") / "base.rcss", "body { color: white; }");
+    fixture.Write(fixture.root / "Data/Interface/RmlUi/generic_confirm_dialog.rml",
+        "<rml><head></head><body data-model='generic_confirm_dialog'>"
+        "<input id='gcd_input' type='text' data-value='input_value'/></body></rml>");
+    fixture.ActivateRoot();
+    UI::RmlBridge::SetActiveThemeName("legacy");
+    mu::ui::window::CManager manager;
+    mu::ui::window::CGenericConfirmDialog dialog;
+    dialog.Create(&manager);
+    int accepted = 0;
+    int cancelled = 0;
+    mu::ui::window::GenericDialogConfig config;
+    config.showCancel = true;
+    config.input.emplace();
+    config.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
+    config.onPrimary = [&] { ++accepted; };
+    config.onCancel = [&] { ++cancelled; };
+    const bool wasActive = g_bWndActive;
+    g_bWndActive = true;
+    for (int key : {VK_RETURN, VK_ESCAPE})
+    {
+        dialog.Show(config);
+        fixture.context->Update();
+        dialog.Update();
+        auto* field = fixture.context->GetFocusElement();
+        REQUIRE(field != nullptr);
+        CHECK(field->GetId() == "gcd_input");
+        mu::ui::window::CObject* owner = &dialog;
+        REQUIRE(owner->TakesTypingFrom(field->GetOwnerDocument()));
+        CHECK_FALSE(owner->TakesTypingFrom(nullptr));
+        g_pNewKeyInput->SetKeyState(key, mu::ui::window::CNewKeyInput::KEY_PRESS);
+        CHECK_FALSE(owner->UpdateKeyEvent());
+        g_pNewKeyInput->SetKeyState(key, mu::ui::window::CNewKeyInput::KEY_NONE);
+        CHECK_FALSE(dialog.IsVisible());
+    }
+    CHECK(accepted == 1);
+    CHECK(cancelled == 1);
+    g_bWndActive = wasActive;
+    dialog.Release();
 }
 
 TEST_CASE("themed external RCSS resolves tokens regardless of link attribute order [ui][rml-theme]")
