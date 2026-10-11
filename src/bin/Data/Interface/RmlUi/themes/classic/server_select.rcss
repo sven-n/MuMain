@@ -104,6 +104,19 @@ body {
 	color: #ffb27f;
 }
 
+/* base.rcss gives the server list's buttons (.server-group-btn / .server-option-btn) the legacy
+   sprites and colours for each state (the selected group red): these keep the 0.97 plate and
+   colours when selected, hovered and pressed. */
+.group-btn:hover, .group-btn:active, .group-btn.checked, .group-btn.checked:hover, .group-btn.checked:active,
+.server-row:hover, .server-row:active {
+	decorator: image(classic-server-box);
+}
+.group-btn, .group-btn:hover, .group-btn:active,
+.group-btn.checked, .group-btn.checked:hover, .group-btn.checked:active { color: #ffffff; }
+.server-row:hover, .server-row:active { color: #ffffb3; }
+.server-row.gray:hover, .server-row.gray:active { color: #ffffff; }
+.server-row.orange:hover, .server-row.orange:active { color: #ffb27f; }
+
 .server-gauge-slot {
 	position: absolute;
 	left: calc(18 * var(--px));
