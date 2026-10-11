@@ -100,9 +100,7 @@ void CLoginWin::Create()
     // Tracks login.rcss's #panel width/height (329 x 245 original pixels) by the same ratio rather than a fixed
     // 329x245, so UpdateMouseEvent()'s hit-test rect (m_Size) doesn't go stale against RmlUi's
     // auto-fitting visuals.
-    const float uiScale = LoginUIScaleRatio();
-    m_Size.cx = ScaledOffset(329, uiScale);
-    m_Size.cy = ScaledOffset(245, uiScale);
+    RefreshLayout();
     m_ptPos.x = m_ptPos.y = 0;
 
     // Tab order between the two fields is RmlUi's own document-level navigation (ElementDocument
@@ -174,6 +172,15 @@ void CLoginWin::OnRmlReloaded()
     m_Size.cx = ScaledOffset(329, uiScale);
     m_Size.cy = ScaledOffset(245, uiScale);
     SetPosition(m_ptPos.x + (previousSize.cx - m_Size.cx) / 2, m_ptPos.y + (previousSize.cy - m_Size.cy) * 2 / 3);
+}
+
+void CLoginWin::RefreshLayout()
+{
+    constexpr int panelWidth = 329;
+    constexpr int panelHeight = 245;
+    const float uiScale = LoginUIScaleRatio();
+    m_Size.cx = ScaledOffset(panelWidth, uiScale);
+    m_Size.cy = ScaledOffset(panelHeight, uiScale);
 }
 
 void CLoginWin::SetPosition(int x, int y)

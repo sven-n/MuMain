@@ -137,7 +137,7 @@ void CCharSelMainWin::Create()
     m_ptPos.x = m_ptPos.y = 0;
     m_Size.cx = m_Size.cy = 0;
 
-    // Builds once (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change).
+    // Builds once; resizing only refreshes the native bookkeeping layout.
     // Before ApplyLayout() below: it pushes the computed rects into the document's elements, and
     // does nothing while there is no document.
     m_RmlView.Ensure();
@@ -170,6 +170,11 @@ void CCharSelMainWin::BindRmlModel(Rml::DataModelConstructor& c, CharSelMainRmlM
 }
 
 void CCharSelMainWin::OnRmlReloaded()
+{
+    RefreshLayout();
+}
+
+void CCharSelMainWin::RefreshLayout()
 {
     ApplyLayout(ThemedLayout());
 }
@@ -230,8 +235,7 @@ void CCharSelMainWin::SetPosition(int nXCoord, int nYCoord)
     // No RmlUi push here (an earlier version had one) -- see ApplyLayout()'s comment. #panel is
     // a fixed full-screen container now (char_sel_main.rcss), not something this window's own
     // screen position moves; the RmlUi visuals are positioned independently via anchor classes.
-    // No call site actually invokes this method today (CSceneUICoordinator::RepositionSceneUI() re-runs
-    // Create() wholesale instead) -- the legacy CSprite delta-shift above is kept correct anyway
+    // No call site currently moves this panel; the legacy CSprite delta-shift stays correct
     // since it was part of CWin's public contract before this migration.
 }
 

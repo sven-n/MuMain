@@ -65,6 +65,7 @@ public:
     {
         return m_Size.cx;
     }
+    void RefreshLayout();
     int GetHeight() const
     {
         return m_Size.cy;

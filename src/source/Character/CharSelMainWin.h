@@ -211,6 +211,7 @@ public:
     void Release(); // was CWin::PreRelease() (an override hook CWin::Release() called
                      // automatically) -- called explicitly now, same as CCreditWin's own Release().
     void SetPosition(int nXCoord, int nYCoord);
+    void RefreshLayout();
     void Show(bool bShow) override;
     void UpdateDisplay();
 

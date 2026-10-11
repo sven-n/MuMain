@@ -77,4 +77,6 @@ public:
 
 protected:
     CSceneUICoordinator();
+    void RepositionLoginWindows();
+    void RepositionCharacterWindows();
 };

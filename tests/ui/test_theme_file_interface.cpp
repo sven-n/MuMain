@@ -12,6 +12,8 @@
 #include "UI/Scaling/UITransform.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Core/WindowCommon.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include "Character/CharMakeWin.h"
 
 #include <RmlUi/Core.h>
 #include <RmlUi/Core/ComputedValues.h>
@@ -238,6 +240,39 @@ TEST_CASE("focused confirmation input claims its document and accepts Enter and 
     CHECK(cancelled == 1);
     g_bWndActive = wasActive;
     dialog.Release();
+}
+
+TEST_CASE("scene resizing preserves open creation and message actions [ui][scene-resize]")
+{
+    // Avoid scene initialization: it needs live character models and native GPU textures.
+    class Scene : public CSceneUICoordinator
+    {
+    public:
+        void SetScene(int scene) { m_nScene = scene; }
+    } scene;
+    const unsigned int previousWidth = WindowWidth;
+    const unsigned int previousHeight = WindowHeight;
+    const bool creationShown = g_CharMakeWin.IsVisible();
+    WindowWidth = 1280;
+    WindowHeight = 720;
+    wchar_t message[] = L"Resize must keep this message";
+    g_MsgWin.PopUp(MESSAGE_FREE_MSG_NOT_BTN, message);
+    scene.SetScene(UIM_SCENE_LOGIN);
+    scene.RepositionSceneUI();
+    CHECK(g_MsgWin.IsVisible());
+    CHECK(g_MsgWin.PendingMessageCode() == MESSAGE_FREE_MSG_NOT_BTN);
+    g_CharMakeWin.Show(true);
+    scene.SetScene(UIM_SCENE_CHARACTER);
+    WindowWidth = 1920;
+    WindowHeight = 1080;
+    scene.RepositionSceneUI();
+    CHECK(g_CharMakeWin.IsVisible());
+    CHECK(g_MsgWin.IsVisible());
+    CHECK(g_MsgWin.PendingMessageCode() == MESSAGE_FREE_MSG_NOT_BTN);
+    g_CharMakeWin.Show(creationShown);
+    g_MsgWin.Show(false);
+    WindowWidth = previousWidth;
+    WindowHeight = previousHeight;
 }
 
 TEST_CASE("themed external RCSS resolves tokens regardless of link attribute order [ui][rml-theme]")

@@ -30,6 +30,7 @@ public:
     void Create();
     void Release();
     void SetPosition(int nXCoord, int nYCoord);
+    void RefreshLayout();
     void Show(bool bShow) override;
     int GetWidth() const
     {

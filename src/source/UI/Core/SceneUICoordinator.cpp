@@ -78,28 +78,15 @@ void CSceneUICoordinator::CreateLoginScene()
     g_LoginMainWin.Release();
     g_LoginWin.Release();
 
-    // Uses WindowWidth/WindowHeight, not CInput's screen size, which isn't guaranteed to match
-    // (see LoginWin.cpp's LoginUIScaleRatio()); g_LoginWin/g_LoginMainWin sit only ~11px apart,
-    // so a mismatch here could overlap their hit-test boxes.
     g_MsgWin.Create();
-    g_MsgWin.SetPosition((static_cast<int>(WindowWidth) - 352) / 2, (static_cast<int>(WindowHeight) - 113) / 2);
-
     g_SysMenuWin.Create();
-
     g_LoginMainWin.Create();
-
-    int nBaseY = int(567.0f / 600.0f * static_cast<float>(WindowHeight));
-    g_LoginMainWin.SetPosition(30, nBaseY - g_LoginMainWin.GetHeight() - 11);
-
     g_ServerSelWin.Create();
-
     g_LoginWin.Create();
-    g_LoginWin.SetPosition((static_cast<int>(WindowWidth) - g_LoginWin.GetWidth()) / 2,
-                           (static_cast<int>(WindowHeight) - g_LoginWin.GetHeight()) * 2 / 3);
-
     g_CreditWin.Create();
 
     m_nScene = UIM_SCENE_LOGIN;
+    RepositionSceneUI();
 }
 
 void CSceneUICoordinator::CreateCharacterScene()
@@ -116,32 +103,18 @@ void CSceneUICoordinator::CreateCharacterScene()
 
     g_CharInfoBalloonMng.Create();
 
-    CInput& rInput = CInput::Instance();
-
     g_MsgWin.Create();
-    g_MsgWin.SetPosition((rInput.GetScreenWidth() - 352) / 2, (rInput.GetScreenHeight() - 113) / 2);
-
     g_ServerMsgWin.Create();
-    int nBaseY = int(31.0f / 600.0f * (float)rInput.GetScreenHeight());
-    g_ServerMsgWin.SetPosition(10, nBaseY + 10);
-
     g_SysMenuWin.Create();
-
     g_CharSelMainWin.Create();
-
     g_CharMakeWin.Create();
-    // Uses WindowWidth/WindowHeight, not CInput's screen size -- a past mismatch here made
-    // RmlUi's #panel position disagree with the real window, drifting the caret off the dialog.
-    g_CharMakeWin.SetPosition(
-        (static_cast<int>(WindowWidth) - 454) / 2,
-        (static_cast<int>(WindowHeight) - 406) / 2);
 
     g_CharSelMainWin.UpdateDisplay();
     g_CharInfoBalloonMng.UpdateDisplay();
-
     g_CharSelMainWin.Show(true);
 
     m_nScene = UIM_SCENE_CHARACTER;
+    RepositionSceneUI();
 }
 
 void CSceneUICoordinator::CreateMainScene()
@@ -162,42 +135,46 @@ void CSceneUICoordinator::CreateMainScene()
 
 void CSceneUICoordinator::RepositionSceneUI()
 {
-    // A plain SetPosition sweep isn't enough: CSprite's cached screen height (set at Create())
-    // goes stale on resize, so we must re-Create the sprites -- which also resets m_bShow, hence
-    // the visibility snapshot/restore below.
+    // RmlUi relayouts the documents; only native bookkeeping and pushed origins need refreshing.
     if (m_nScene == UIM_SCENE_LOGIN)
-    {
-        const bool wasShown_MsgWin = g_MsgWin.IsVisible();
-        const bool wasShown_SysMenuWin = g_SysMenuWin.IsVisible();
-        const bool wasShown_LoginMainWin = g_LoginMainWin.IsVisible();
-        const bool wasShown_ServerSelWin = g_ServerSelWin.IsVisible();
-        const bool wasShown_LoginWin = g_LoginWin.IsVisible();
-        const bool wasShown_CreditWin = g_CreditWin.IsVisible();
-
-        CreateLoginScene();
-
-        // Restore each window's pre-resize visibility.
-        if (wasShown_MsgWin)
-            g_MsgWin.Show(true);
-        if (wasShown_SysMenuWin)
-            g_SysMenuWin.Show(true);
-        if (wasShown_LoginMainWin)
-            g_LoginMainWin.Show(true);
-        if (wasShown_ServerSelWin)
-            g_ServerSelWin.Show(true);
-        if (wasShown_LoginWin)
-            g_LoginWin.Show(true);
-        if (wasShown_CreditWin)
-            g_CreditWin.Show(true);
-
-        // Create() clears button labels; re-populate from existing network-side data.
-        g_ServerSelWin.UpdateDisplay();
-    }
+        RepositionLoginWindows();
     else if (m_nScene == UIM_SCENE_CHARACTER)
-    {
-        CreateCharacterScene();
-    }
-    // MainScene uses the new UI system which resizes itself; nothing to do.
+        RepositionCharacterWindows();
+}
+
+void CSceneUICoordinator::RepositionLoginWindows()
+{
+    constexpr int messageWidth = 352;
+    constexpr int messageHeight = 113;
+    constexpr int barMargin = 30;
+    constexpr int barGap = 11;
+    constexpr float barBaseline = 567.0f / 600.0f;
+    constexpr int loginVerticalDivisor = 3;
+    const int width = static_cast<int>(WindowWidth);
+    const int height = static_cast<int>(WindowHeight);
+    g_MsgWin.SetPosition((width - messageWidth) / 2, (height - messageHeight) / 2);
+    g_LoginMainWin.RefreshLayout();
+    g_LoginMainWin.SetPosition(barMargin,
+        static_cast<int>(barBaseline * height) - g_LoginMainWin.GetHeight() - barGap);
+    g_LoginWin.RefreshLayout();
+    g_LoginWin.SetPosition((width - g_LoginWin.GetWidth()) / 2,
+                          (height - g_LoginWin.GetHeight()) * 2 / loginVerticalDivisor);
+}
+
+void CSceneUICoordinator::RepositionCharacterWindows()
+{
+    constexpr int messageWidth = 352;
+    constexpr int messageHeight = 113;
+    constexpr int noticeMargin = 10;
+    constexpr float noticeBaseline = 31.0f / 600.0f;
+    constexpr int creationWidth = 454;
+    constexpr int creationHeight = 406;
+    const int width = static_cast<int>(WindowWidth);
+    const int height = static_cast<int>(WindowHeight);
+    g_MsgWin.SetPosition((width - messageWidth) / 2, (height - messageHeight) / 2);
+    g_ServerMsgWin.SetPosition(noticeMargin, static_cast<int>(noticeBaseline * height) + noticeMargin);
+    g_CharSelMainWin.RefreshLayout();
+    g_CharMakeWin.SetPosition((width - creationWidth) / 2, (height - creationHeight) / 2);
 }
 
 void CSceneUICoordinator::Update(double dDeltaTick)

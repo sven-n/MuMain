@@ -64,8 +64,7 @@ void CLoginMainWin::Create()
 
     // Reads WindowWidth, not CInput::Instance().GetScreenWidth() -- the latter can go stale and
     // misplace #btn_credit, which anchors off #panel's right edge using this exact value.
-    m_Size.cx = static_cast<int>(WindowWidth) - 30 * 2;
-    m_Size.cy = ButtonBarHeight();
+    RefreshLayout();
     m_ptPos.x = m_ptPos.y = 0;
 
     // Builds once, and is only repositioned and resized afterward.
@@ -90,6 +89,13 @@ void CLoginMainWin::OnRmlReloaded()
     const int previousHeight = m_Size.cy;
     m_Size.cy = ButtonBarHeight();
     SetPosition(m_ptPos.x, m_ptPos.y + previousHeight - m_Size.cy);
+}
+
+void CLoginMainWin::RefreshLayout()
+{
+    constexpr int sideMargin = 30;
+    m_Size.cx = static_cast<int>(WindowWidth) - sideMargin * 2;
+    m_Size.cy = ButtonBarHeight();
 }
 
 void CLoginMainWin::Release()
