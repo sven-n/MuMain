@@ -403,6 +403,11 @@ The HUD model also exposes what the 0.97 bar shows and the S6 bar does not: `par
 `coord_x` / `coord_y`, and `left_covered` / `right_covered` (a docked window covers that side
 of the world).
 
+The pet / durability HUD (`item_endurance.rml`) marks `#pets` with `.in-party` while the hero is
+in a party, so a theme can keep the pet column clear of the party list. The classic theme also
+places the pet column, the party list and the event HUDs from `--world-left` / `--world-right`, so
+they move aside when windows open, as in 0.97.
+
 ## Coordinates, scaling, and positioning — what a theme actually controls
 
 ### Scaling: a global user setting, opt-in per element
