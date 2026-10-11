@@ -37,7 +37,12 @@ body {
 	--root-scale: var(--overlay-scale-x, 1);
 	--root-scale-y: var(--overlay-scale-y, 1);
 }
-#pet_column { position: absolute; left: 0; top: 0; }
+/* 0.97 places the pet's life and the arrow count from the right edge of the area its open windows
+   leave free (004cb520: 640, 450 or 260), 50 further left in a party so they stay clear of the
+   party list (004bec00, 004bf540). The column follows --world-right in the frame's units, so the
+   places below stay the ones 0.97 uses with no window open. */
+#pet_column { position: absolute; left: calc(var(--world-right, 640px) / var(--overlay-scale-x, 1) - 640px); top: 0; }
+#pets.in-party #pet_column { left: calc(var(--world-right, 640px) / var(--overlay-scale-x, 1) - 690px); }
 /* The icons on the dock: the column's first cell two dock units clear of the uncovered world's
    right edge, 140 below the dock's top (the bottom HUD's top less the dock's 432 units). */
 #icons {
