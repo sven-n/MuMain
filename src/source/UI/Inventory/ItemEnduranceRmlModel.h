@@ -47,6 +47,9 @@ struct ItemEnduranceRmlModel
     // The elf's arrow / bolt count line; empty when none is shown.
     Rml::String arrows;
 
+    // Whether the hero is in a party, so a theme can keep the column clear of the party list.
+    bool inParty = false;
+
     std::vector<PetFrameEntry> pets;
     std::vector<DurabilityIconEntry> icons;
 

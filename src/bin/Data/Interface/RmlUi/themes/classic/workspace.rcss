@@ -69,11 +69,12 @@ body {
 .chat-stack .slot[data-window="chat_input"] { position: absolute; left: 50%; bottom: -29dp; margin-left: -134dp; }
 
 /* The event HUDs: the original's 640x480 frame standing on the HUD, in its units (one unit is
-   --hud-scale px), its top 429 units above the HUD, each at the original's place in it. Centred
-   like the HUD, so they keep their places beside it at any UI scale. The spectator list's slot is
-   its bottom-left corner; the list grows upwards. */
+   --hud-scale px), its top 429 units above the HUD, each at the original's place in it. Classic:
+   centred on the area the open windows leave free, as 0.97 centred its event scores and timers on
+   it (004cb520, 004bc220, 004bf090), so they move aside with the windows. The spectator list's
+   slot is its bottom-left corner; the list grows upwards. */
 .event-hud {
-	left: 50%;
+	left: calc((var(--world-left, 0px) + var(--world-right, 100%)) / 2);
 	margin-left: calc(-320px * var(--hud-scale));
 	bottom: 0;
 	width: calc(640px * var(--hud-scale));

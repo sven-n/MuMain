@@ -14,7 +14,7 @@
 	     the theme places the column). The hovered icon's tooltip is in window pixels at the
 	     pointer. Behind the other documents of its context (the original drew it at layer depth
 	     3.5, under the panels). Takes no pointer events: C++ hit-tests the drawn frames and icons. -->
-	<div id="pets">
+	<div id="pets" data-class-in-party="in_party">
 		<div id="pet_column">
 			<div id="arrows_row" data-if="arrows != ''">
 				<span id="arrows" class="counter-scaled-xy" data-style-font-size="text_px + 'px'"

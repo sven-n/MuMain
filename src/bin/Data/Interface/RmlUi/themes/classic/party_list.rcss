@@ -2,8 +2,9 @@
    dark (0.1 grey at 70%), lighter under the mouse; the health bar 43x4 dark red with up to ten
    red steps (here one bar, the steps' 40 units); the name in white; a member away in red, a
    defence buff in blue. No card art, leader flag or leave button (0.97 leaves from the window).
-   C++ places #panel (77 wide, left of the docked windows); the boxes keep to its right edge, as
-   0.97 kept them 3 units left of the windows. */
+   #panel (77 wide) sits left of the docked windows, like 0.97's list, which followed the edge of
+   the area its open windows left free (004cb520: x 590, 400 or 210); the boxes keep to its right
+   edge, as 0.97 kept them 3 units left of the windows. Placed as legacy places it. */
 
 #panel {
 	position: absolute;
@@ -11,7 +12,13 @@
 	width: 77px;
 	font-family: "token(font-body)";
 	pointer-events: none;
+	left: calc(var(--world-right, 100%) - 79px * var(--dock-scale, 1));
+	top: max(calc(var(--workspace-top, 0px) + 14px * var(--dock-scale, 1)), calc(var(--workspace-bottom, 100%) - 418px * var(--dock-scale, 1)));
+	transform: scale(var(--dock-scale, 1));
+	--root-scale: var(--dock-scale, 1);
 }
+/* A box takes the pointer: its hover is the skill target, and a click on it never walks. */
+.card { pointer-events: auto; }
 
 .card { display: block; position: relative; width: 50px; height: 19px; margin-left: 24px; }
 
