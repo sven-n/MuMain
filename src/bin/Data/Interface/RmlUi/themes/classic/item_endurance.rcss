@@ -1,11 +1,11 @@
 /* Classic (0.97) item endurance HUD (CItemEnduranceInfo). From the 0.97 client:
    - the pet's (Guardian Angel, Imp, Uniria, Dinorant) life in the top-right corner (004bec00):
      its name ending at x 625, y 4, and the 0.97 bar at (575, 16) -- a half-black shadow, the dark
-     teal frame 54x6 and the green fill 50x2 for the durability. MuMain lays the frames out from
-     (2, 26) of the same stretched 640x480 frame (#pets), so they are moved by 573 x 10 units.
-   - the arrow / bolt count (004bf540) at the top right, x 550, y 4.
+     teal frame 54x6 and the green fill 50x2 for the life;
+   - the arrow / bolt count (004bf540) at the top right, x 550, y 4;
    - the worn gear's warning icons as legacy draws them (0.97 also flags them top right).
-   Everything else is legacy's. */
+   The pets' layer is the screen's stretch of the 640x480 frame, as in legacy, so every place below
+   is in the original's units. */
 
 @spritesheet endurance-pet-back-sheet { src: "../../../newui_Pet_Back.tga"; endurance-pet-back: 0px 0px 57px 23px; }
 @spritesheet endurance-boots-sheet { src: "../../../newui_durable_boots.tga"; endurance-boots: 0px 0px 23px 23px; }
@@ -23,19 +23,60 @@ body {
 	position: absolute;
 	left: 0;
 	top: 0;
+	width: 100%;
+	height: 100%;
 	pointer-events: none;
 	font-family: "token(font-body)";
 }
 
 #pets, #icons { position: absolute; width: 0; height: 0; transform-origin: left top; pointer-events: none; }
+#pets {
+	left: 0;
+	top: 0;
+	transform: scale(var(--overlay-scale-x, 1), var(--overlay-scale-y, 1));
+	--root-scale: var(--overlay-scale-x, 1);
+	--root-scale-y: var(--overlay-scale-y, 1);
+}
+#pet_column { position: absolute; left: 0; top: 0; }
+/* The icons on the dock: the column's first cell two dock units clear of the uncovered world's
+   right edge, 140 below the dock's top (the bottom HUD's top less the dock's 432 units). */
+#icons {
+	left: calc(var(--world-right, 100%) - 25px * var(--dock-scale, 1));
+	top: calc(100% - 51px * var(--hud-scale, 1) - 292px * var(--dock-scale, 1));
+	transform: scale(var(--dock-scale, 1));
+}
 
-.pet { position: absolute; left: 573px; margin-top: -10px; width: 54px; height: 6px; }
-/* The shadow (1, 1 below-right), then the frame and its inside, one dark teal. */
+
+/* The arrow count at (550, 4), white on half black. */
+#arrows_row { position: absolute; left: 550px; top: 4px; height: 11px; white-space: nowrap; pointer-events: none; }
+#arrows {
+	display: inline-block;
+	white-space: nowrap;
+	color: #ffffff;
+	background-color: rgba(0, 0, 0, 128);
+	transform-origin: left top;
+}
+
+/* The pet's bar at (575, 16): the shadow (1, 1 below-right), then the frame and its inside, one
+   dark teal, and the fill C++ sizes to the life (49 of the S6 bar's units), painted flat. */
+.pet { position: absolute; left: 575px; top: 16px; width: 54px; height: 6px; }
 .pet-fill { position: absolute; left: 1px; top: 1px; width: 54px; height: 6px; background-color: rgba(0, 0, 0, 128); }
 .pet-frame { position: absolute; left: 0; top: 0; width: 54px; height: 6px; background-color: rgb(0, 51, 51); }
-/* An <img> whose source rect is its width (item_endurance.rml): the texture's left part, unstretched. */
-/* The fill: the element C++ sizes to the life (49 of the S6 bar's units), painted flat. */
 .pet-bar { position: absolute; left: 2px; top: 2px; height: 2px; background-color: rgb(0, 200, 50); image-color: rgba(255, 255, 255, 0); }
+
+/* The name ends at x 625, y 4: a box from x 525 to 625, the name right-aligned in it. */
+.pet-name-box { position: absolute; left: -50px; top: -12px; width: 100px; height: 0; }
+.pet-name {
+	position: absolute;
+	right: 0;
+	top: 0;
+	white-space: nowrap;
+	color: #ffffff;
+	background-color: rgba(0, 0, 0, 128);
+	transform-origin: right top;
+}
+
+.text-row { position: absolute; width: 600px; text-align: center; white-space: nowrap; pointer-events: none; }
 
 .icon { position: absolute; width: 23px; height: 23px; }
 .icon-art { position: absolute; left: 0; top: 0; width: 23px; height: 23px; }
@@ -55,15 +96,6 @@ body {
 .icon-tint--fifth { background-color: rgba(255, 51, 0, 128); }
 .icon-tint--zero { background-color: rgba(255, 0, 0, 128); }
 
-.text-row { position: absolute; width: 600px; text-align: center; white-space: nowrap; pointer-events: none; }
-#arrows-row { position: absolute; white-space: nowrap; pointer-events: none; }
-
-/* The rows are centred on the S6 frame (x 30.5, y 31) in physical px: moved by viewport units to
-   0.97's place, around x 603 and y 4. */
-.pet-name { display: inline-block; position: relative; left: 89.53vw; top: -5.625vh; white-space: nowrap; color: #ffffff; background-color: rgba(0, 0, 0, 128); }
-/* From (2, 26) to 0.97's (550, 4). */
-#arrows { display: inline-block; position: relative; left: 85.625vw; top: -4.583vh; white-space: nowrap; color: #ffffff; background-color: rgba(0, 0, 0, 128); }
-
 .durability-tip { display: inline-block; white-space: nowrap; font-weight: bold; background-color: rgba(0, 0, 0, 128); }
 .durability-tip--half { color: rgb(255, 255, 0); }
 .durability-tip--third { color: rgb(255, 168, 0); }
@@ -71,8 +103,8 @@ body {
 .durability-tip--zero { color: rgb(255, 0, 0); }
 
 /* The icon column: two cells per column, filling downwards then leftwards, as the original's own
-   counter stepped them. Its start is bound -- the column is right-anchored to the screen. */
-#icon_column { position: absolute; }
+   counter stepped them. */
+#icon_column { position: absolute; left: 0; top: 0; }
 .icon.cell-0 { left: 0px; top: 0px; }
 .icon.cell-1 { left: 0px; top: 25px; }
 .icon.cell-2 { left: -25px; top: 0px; }
