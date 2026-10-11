@@ -11,12 +11,21 @@
 
 #include <RmlUi/Core/DataModelHandle.h>
 
+#include <cwchar>
 #include <string>
 
 namespace UI::Hud::MainFrameExtras
 {
 namespace
 {
+// A bound text and the source it was made from, so a frame whose source has not changed costs a
+// comparison instead of a conversion.
+struct WideText
+{
+    std::wstring source;
+    Rml::String text;
+};
+
 struct Model
 {
     Rml::String coordX;
@@ -25,8 +34,10 @@ struct Model
     bool guildOpen = false;
     bool leftCovered = false;
     bool rightCovered = false;
-    Rml::String partyTooltip;
-    Rml::String guildTooltip;
+    WideText partyTooltip;
+    WideText guildTooltip;
+    int heroX = -1;
+    int heroY = -1;
 };
 
 Model s_model;
@@ -43,6 +54,15 @@ void SyncText(Rml::String& field, const char* name, Rml::String value)
     if (field == value)
         return;
     field = std::move(value);
+    s_handle.DirtyVariable(name);
+}
+
+void SyncWide(WideText& field, const char* name, const wchar_t* source)
+{
+    if (source == nullptr || std::wcscmp(field.source.c_str(), source) == 0)
+        return;
+    field.source = source;
+    field.text = StringUtils::WideToNarrow(source);
     s_handle.DirtyVariable(name);
 }
 
@@ -63,8 +83,8 @@ void BindModel(Rml::DataModelConstructor& constructor)
     constructor.Bind("guild_open", &s_model.guildOpen);
     constructor.Bind("left_covered", &s_model.leftCovered);
     constructor.Bind("right_covered", &s_model.rightCovered);
-    constructor.Bind("party_tooltip", &s_model.partyTooltip);
-    constructor.Bind("guild_tooltip", &s_model.guildTooltip);
+    constructor.Bind("party_tooltip", &s_model.partyTooltip.text);
+    constructor.Bind("guild_tooltip", &s_model.guildTooltip.text);
     constructor.BindEventCallback("mainframe_party_click",
         [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { Toggle(mu::ui::window::INTERFACE_PARTY); });
     constructor.BindEventCallback("mainframe_guild_click",
@@ -77,10 +97,13 @@ void SyncModel()
     if (!s_handle)
         return;
 
-    if (Hero != nullptr)
+    // The coordinates are formatted only when the hero moves to another tile.
+    if (Hero != nullptr && (Hero->PositionX != s_model.heroX || Hero->PositionY != s_model.heroY))
     {
-        SyncText(s_model.coordX, "coord_x", std::to_string(Hero->PositionX));
-        SyncText(s_model.coordY, "coord_y", std::to_string(Hero->PositionY));
+        s_model.heroX = Hero->PositionX;
+        s_model.heroY = Hero->PositionY;
+        SyncText(s_model.coordX, "coord_x", std::to_string(s_model.heroX));
+        SyncText(s_model.coordY, "coord_y", std::to_string(s_model.heroY));
     }
     SyncBool(s_model.partyOpen, "party_open", g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PARTY));
     SyncBool(s_model.guildOpen, "guild_open", g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUILDINFO));
@@ -89,7 +112,7 @@ void SyncModel()
     SyncBool(s_model.leftCovered, "left_covered", UI::Placement::UncoveredWorldLeft() > 0.5f);
     SyncBool(s_model.rightCovered, "right_covered",
              UI::Placement::UncoveredWorldRight() < static_cast<float>(WindowWidth) - 0.5f);
-    SyncText(s_model.partyTooltip, "party_tooltip", StringUtils::WideToNarrow(I18N::Game::PartyP));
-    SyncText(s_model.guildTooltip, "guild_tooltip", StringUtils::WideToNarrow(I18N::Game::GuildG));
+    SyncWide(s_model.partyTooltip, "party_tooltip", I18N::Game::PartyP);
+    SyncWide(s_model.guildTooltip, "guild_tooltip", I18N::Game::GuildG);
 }
 } // namespace UI::Hud::MainFrameExtras
