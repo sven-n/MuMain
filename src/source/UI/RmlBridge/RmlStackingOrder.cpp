@@ -150,7 +150,7 @@ constexpr DocumentPlacement Placements[] = {
     {"char_sel_main.rml", SceneWindowDepth, AnyScene},
     {"char_make.rml", SceneWindowDepth, AnyScene},
     {"server_msg.rml", SceneWindowDepth, AnyScene},
-    {"msg_win.rml", SceneWindowDepth, AnyScene},
+    {"msg_win.rml", SceneMessageBoxDepth, AnyScene},
     {"sys_menu.rml", SceneWindowDepth, AnyScene},
     {"remember_password_prompt.rml", SceneMessageBoxDepth, AnyScene},
     {"loading.rml", LoadingScreenDepth, AnyScene},

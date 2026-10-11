@@ -130,3 +130,11 @@ TEST_CASE("documents stack as the original's windows did [ui][stacking]")
     // The master skill tree's band shares its depth.
     CHECK(Depth("master_level_band.rml") == Depth("master_level.rml"));
 }
+
+TEST_CASE("scene messages cover scene windows and remain below blocking overlays [ui][stacking]")
+{
+    for (const char* window : {"login.rml", "char_make.rml", "char_sel_main.rml", "sys_menu.rml"})
+        CHECK(Depth("msg_win.rml") > Depth(window));
+    CHECK(Depth("msg_win.rml") < Depth("loading.rml"));
+    CHECK(Depth("msg_win.rml") < Depth("reconnect_dialog.rml"));
+}

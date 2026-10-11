@@ -97,3 +97,37 @@ TEST_CASE("main-scene documents are suspended outside the main scene [ui][rml-do
     Rml::Shutdown();
     Rml::SetRenderInterface(nullptr);
 }
+
+TEST_CASE("scene message hit testing survives load order and document rebuilding [ui][stacking]")
+{
+    NullRenderer renderer;
+    Rml::SetRenderInterface(&renderer);
+    REQUIRE(Rml::Initialise());
+    auto* context = Rml::CreateContext("scene-message-stacking", {320, 240});
+    REQUIRE(context != nullptr);
+    constexpr const char* markup = "<rml><head><style>body { width: 320px; height: 240px; pointer-events: auto; }"
+        "#panel { position: absolute; left: 20px; top: 20px; width: 100px; height: 100px; }</style></head>"
+        "<body><div id='panel'></div></body></rml>";
+    for (bool messageFirst : {true, false, true})
+    {
+        auto* first = context->LoadDocumentFromMemory(markup);
+        auto* second = context->LoadDocumentFromMemory(markup);
+        REQUIRE(first != nullptr);
+        REQUIRE(second != nullptr);
+        auto* message = messageFirst ? first : second;
+        auto* character = messageFirst ? second : first;
+        UI::RmlBridge::ApplyStackingDepth(message, "msg_win.rml");
+        UI::RmlBridge::ApplyStackingDepth(character, "char_make.rml");
+        message->Show();
+        character->Show();
+        character->PullToFront();
+        context->Update();
+        auto* hit = context->GetElementAtPoint({50, 50});
+        REQUIRE(hit != nullptr);
+        CHECK(hit->GetOwnerDocument() == message);
+        context->UnloadAllDocuments();
+        context->Update();
+    }
+    Rml::Shutdown();
+    Rml::SetRenderInterface(nullptr);
+}
