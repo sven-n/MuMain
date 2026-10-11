@@ -162,8 +162,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 
         if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
         {
-            if (pItem->Type == ITEM_WIZARDS_RING && iLevel == 1
-                || iLevel == 2)
+            if (pItem->Type == ITEM_WIZARDS_RING && (iLevel == 1 || iLevel == 2))
             {
                 continue;
             }
@@ -593,8 +592,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
 
         if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
         {
-            if (pItem->Type == ITEM_WIZARDS_RING && iLevel == 1
-                || iLevel == 2)
+            if (pItem->Type == ITEM_WIZARDS_RING && (iLevel == 1 || iLevel == 2))
             {
                 continue;
             }
