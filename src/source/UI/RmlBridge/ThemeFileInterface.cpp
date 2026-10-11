@@ -1,20 +1,19 @@
 #include "stdafx.h"
 #include "ThemeFileInterface.h"
 
-#include "Core/Platform/WinIni.h"
+#include "UI/RmlBridge/ThemeInheritance.h"
+#include "UI/RmlBridge/ThemeFonts.h"
+#include "Core/Platform/PathResolve.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <cwchar>
 #include <filesystem>
 #include <memory>
 #include <optional>
 #include <regex>
 #include <string>
-#include <string_view>
 #include <unordered_map>
 
 namespace UI::RmlBridge
@@ -28,68 +27,33 @@ struct FileState
     size_t position = 0;
 };
 
-std::optional<std::string> ThemeForStylesheet(const Rml::String& path)
+std::FILE* OpenFile(const std::string& path)
 {
-    std::string normalized(path);
-    std::replace(normalized.begin(), normalized.end(), '\\', '/');
-    std::string lower = normalized;
-    std::transform(lower.begin(), lower.end(), lower.begin(),
-                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-
-    constexpr std::string_view themeRoot = "data/interface/rmlui/themes/";
-    const size_t start = lower.find(themeRoot);
-    if (start == std::string::npos || (start != 0 && lower[start - 1] != '/'))
-        return std::nullopt;
-
-    const size_t themeStart = start + themeRoot.size();
-    const size_t themeEnd = lower.find('/', themeStart);
-    if (themeEnd == std::string::npos || themeEnd == themeStart ||
-        lower.compare(lower.size() - 5, 5, ".rcss") != 0)
-        return std::nullopt;
-
-    const std::string theme = normalized.substr(themeStart, themeEnd - themeStart);
-    if (!std::all_of(theme.begin(), theme.end(), [](unsigned char c)
-                     { return std::isalnum(c) || c == '_' || c == '-'; }))
-        return std::nullopt;
-    if (lower.find("/../", themeEnd) != std::string::npos || lower.find("/./", themeEnd) != std::string::npos)
-        return std::nullopt;
-    return normalized.substr(0, themeEnd);
+#ifdef _WIN32
+    return _wfopen(std::filesystem::u8path(path).c_str(), L"rb");
+#else
+    return std::fopen(MuResolvePath(path.c_str()).c_str(), "rb");
+#endif
 }
 
-std::wstring WidenAscii(const std::string& value)
-{
-    return std::wstring(value.begin(), value.end());
-}
-
-std::string NarrowAscii(const std::wstring& value)
-{
-    std::string result(value.size(), '\0');
-    std::transform(value.begin(), value.end(), result.begin(),
-                   [](wchar_t c) { return static_cast<char>(c); });
-    return result;
-}
-
-std::string ResolveToken(const std::wstring& iniPath, const std::string& tokenName,
+std::string ResolveToken(const ThemeInheritance& theme, const std::string& tokenName,
                          const std::string& stylesheetPath)
 {
-    constexpr wchar_t missingToken[] = L"__MU_THEME_TOKEN_NOT_FOUND__";
-    wchar_t buffer[256] = {};
-    GetPrivateProfileStringW(L"Tokens", WidenAscii(tokenName).c_str(), missingToken, buffer,
-                             static_cast<DWORD>(std::size(buffer)), iniPath.c_str());
-    if (std::wcscmp(buffer, missingToken) == 0)
-    {
-        g_ErrorReport.Write(L"> [RmlTheme] Missing token '%hs' in stylesheet '%hs' (tokens.ini: '%ls').\r\n",
-                            tokenName.c_str(), stylesheetPath.c_str(), iniPath.c_str());
-        return {};
-    }
-    return NarrowAscii(buffer);
+    if (const auto font = ResolveThemeFontToken(theme, tokenName))
+        return *font;
+    const auto setting = theme.GetSetting("Tokens", tokenName);
+    if (setting)
+        return setting->value;
+    g_ErrorReport.Write(L"> [RmlTheme] Missing token '%hs' in stylesheet '%hs'.\r\n",
+        tokenName.c_str(), stylesheetPath.c_str());
+    return {};
 }
 
 std::string SubstituteTokens(const std::string& source, const std::string& themeDirectory,
                              const std::string& stylesheetPath)
 {
     static const std::regex tokenPattern(R"(token\(([a-zA-Z0-9_-]+)\))");
-    const std::wstring iniPath = std::filesystem::absolute(std::filesystem::path(themeDirectory) / "tokens.ini").wstring();
+    const ThemeInheritance theme(std::filesystem::u8path(themeDirectory));
     std::unordered_map<std::string, std::string> values;
     std::string result;
     result.reserve(source.size());
@@ -102,7 +66,7 @@ std::string SubstituteTokens(const std::string& source, const std::string& theme
         const std::string name = match[1].str();
         auto [value, inserted] = values.try_emplace(name);
         if (inserted)
-            value->second = ResolveToken(iniPath, name, stylesheetPath);
+            value->second = ResolveToken(theme, name, stylesheetPath);
         result += value->second;
         lastEnd = static_cast<size_t>(match.position() + match.length());
     }
@@ -126,13 +90,15 @@ std::optional<std::string> ReadAll(std::FILE* stream)
 
 Rml::FileHandle ThemeFileInterface::Open(const Rml::String& path)
 {
-    std::FILE* stream = std::fopen(path.c_str(), "rb");
+    const auto resolved = ResolveThemeResource(path);
+    std::FILE* stream = OpenFile(resolved);
     if (!stream)
         return 0;
 
     auto file = std::make_unique<FileState>();
     file->stream = stream;
-    if (const auto theme = ThemeForStylesheet(path))
+    if (const auto theme = ThemeDirectoryForResource(path); theme &&
+        std::filesystem::u8path(path).extension() == ".rcss")
     {
         const auto source = ReadAll(stream);
         if (!source)
@@ -142,7 +108,7 @@ Rml::FileHandle ThemeFileInterface::Open(const Rml::String& path)
         }
         if (source->find("token(") != std::string::npos)
         {
-            file->contents = SubstituteTokens(*source, *theme, path);
+            file->contents = SubstituteTokens(*source, ThemePathUtf8(*theme), path);
             std::fclose(stream);
             file->stream = nullptr;
         }

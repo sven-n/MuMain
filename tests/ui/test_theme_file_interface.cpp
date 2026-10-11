@@ -2,13 +2,24 @@
 
 #include "stdafx.h"
 #include "UI/RmlBridge/ThemeFileInterface.h"
+#include "UI/RmlBridge/ThemeFonts.h"
+#include "UI/RmlBridge/ThemeInheritance.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlThemedView.h"
+#include "UI/RmlBridge/RmlNativeText.h"
+#include "UI/RmlBridge/RmlScaleInputs.h"
+#include "Data/GameConfig/GameConfig.h"
+#include "UI/Scaling/UITransform.h"
 
 #include <RmlUi/Core.h>
 #include <RmlUi/Core/ComputedValues.h>
+#include <RmlUi/Core/Factory.h>
 
 #include <chrono>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <regex>
 #include <string>
 
 namespace
@@ -35,16 +46,33 @@ struct Fixture
         Rml::SetFileInterface(&files);
         Rml::SetRenderInterface(&renderer);
         REQUIRE(Rml::Initialise());
+        UI::RmlBridge::ClearThemeFontCache();
         context = Rml::CreateContext("theme-file-interface", {320, 240});
         REQUIRE(context != nullptr);
     }
 
     ~Fixture()
     {
+        GameConfig::GetInstance().SetUIScalePercent(previousPercent);
+        UI::RmlBridge::SetContextResolver({});
+        if (!previousDirectory.empty())
+        {
+            std::filesystem::current_path(previousDirectory);
+            UI::RmlBridge::SetActiveThemeName(previousTheme);
+        }
         Rml::Shutdown();
+        UI::RmlBridge::ClearThemeFontCache();
         Rml::SetFileInterface(nullptr);
         Rml::SetRenderInterface(nullptr);
         std::filesystem::remove_all(root);
+    }
+
+    void ActivateRoot()
+    {
+        previousDirectory = std::filesystem::current_path();
+        previousTheme = UI::RmlBridge::GetActiveThemeName();
+        std::filesystem::current_path(root);
+        UI::RmlBridge::SetContextResolver([this](std::string_view) { return context; });
     }
 
     std::filesystem::path Theme(const char* name) const
@@ -74,12 +102,95 @@ struct Fixture
         return result;
     }
 
+    Rml::ElementDocument* LoadLegacyVariant(const char* theme, const char* name)
+    {
+        const std::string source = UI::RmlBridge::ThemedDocumentSourceUrl(name, theme);
+        auto file = files.Open(source);
+        if (!file)
+            file = files.Open(std::string("Data/Interface/RmlUi/") + name);
+        REQUIRE(file != 0);
+        std::string markup(files.Length(file), '\0');
+        files.Read(markup.data(), markup.size(), file);
+        files.Close(file);
+        const std::regex bindings(R"(\sdata-(?:model|for|if|class-[\w-]+|style-[\w-]+|attr-[\w-]+|event-[\w-]+)="[^"]*")");
+        markup = std::regex_replace(markup, bindings, "");
+        markup = std::regex_replace(markup, std::regex(R"(\{\{[^}]*\}\})"), "");
+        auto* document = context->LoadDocumentFromMemory(markup, source);
+        REQUIRE(document != nullptr);
+        UI::RmlBridge::ApplyNativeTextSize(document);
+        UI::RmlBridge::ApplyStackingDepth(document, name);
+        document->Show();
+        context->Update();
+        return document;
+    }
+
     std::filesystem::path root;
+    std::filesystem::path previousDirectory;
+    std::string previousTheme;
+    int previousPercent = GameConfig::GetInstance().GetUIScalePercent();
     UI::RmlBridge::ThemeFileInterface files;
     NullRenderer renderer;
     Rml::Context* context = nullptr;
 };
 } // namespace
+
+namespace
+{
+void CompareLegacyElements(Rml::Element& original, Rml::Element& inherited)
+{
+    CAPTURE(original.GetTagName());
+    CAPTURE(original.GetId());
+    CHECK(original.GetInnerRML() == inherited.GetInnerRML());
+    CHECK(original.GetAbsoluteLeft() == doctest::Approx(inherited.GetAbsoluteLeft()));
+    CHECK(original.GetAbsoluteTop() == doctest::Approx(inherited.GetAbsoluteTop()));
+    CHECK(original.GetOffsetWidth() == doctest::Approx(inherited.GetOffsetWidth()));
+    CHECK(original.GetOffsetHeight() == doctest::Approx(inherited.GetOffsetHeight()));
+    for (const char* property : {"color", "background-color", "font-family", "font-size", "font-weight",
+                                 "display", "visibility", "opacity", "decorator", "transform"})
+    {
+        CAPTURE(property);
+        const auto* expected = original.GetProperty(property);
+        const auto* actual = inherited.GetProperty(property);
+        REQUIRE((expected != nullptr) == (actual != nullptr));
+        if (expected)
+            CHECK(expected->ToString() == actual->ToString());
+    }
+    REQUIRE(original.GetNumChildren() == inherited.GetNumChildren());
+    for (int index = 0; index < original.GetNumChildren(); ++index)
+        CompareLegacyElements(*original.GetChild(index), *inherited.GetChild(index));
+}
+
+void CompareLegacyVariant(Fixture& fixture, const char* name)
+{
+    UI::RmlBridge::SetActiveThemeName("legacy");
+    auto* original = fixture.LoadLegacyVariant("legacy", name);
+    UI::RmlBridge::SetActiveThemeName("legacy-inherited-test");
+    CHECK(UI::RmlBridge::ThemeUsesNativeTextSize());
+    auto* child = fixture.LoadLegacyVariant("legacy-inherited-test", name);
+    CompareLegacyElements(*original, *child);
+    fixture.context->UnloadAllDocuments();
+    fixture.context->Update();
+}
+
+struct FontEnvironment
+{
+    static constexpr const char* Name = "MU_THEME_FONT_TEST_ROOT";
+    std::string previous = std::getenv(Name) ? std::getenv(Name) : "";
+    FontEnvironment() { Set(MU_FONT_DIR); }
+    ~FontEnvironment() { Set(previous); }
+    static void Set(const std::string& value)
+    {
+#ifdef _WIN32
+        _putenv_s(Name, value.c_str());
+#else
+        if (value.empty())
+            unsetenv(Name);
+        else
+            setenv(Name, value.c_str(), 1);
+#endif
+    }
+};
+}
 
 TEST_CASE("themed external RCSS resolves tokens regardless of link attribute order [ui][rml-theme]")
 {
@@ -112,4 +223,145 @@ TEST_CASE("theme file interface passes through ordinary files and plain RCSS [ui
     CHECK(std::string(bytes, 2) == "cd");
     fixture.files.Close(file);
     CHECK(fixture.files.Open((fixture.root / "missing.rcss").generic_string()) == 0);
+}
+
+TEST_CASE("inherited stylesheets use child tokens and whole-file overrides [ui][rml-theme]")
+{
+    Fixture fixture;
+    fixture.Write(fixture.Theme("parent") / "tokens.ini", "[Tokens]\naccent=#123456\n");
+    fixture.Write(fixture.Theme("parent") / "paint.rcss", "#colored { color: token(accent); }");
+    fixture.Write(fixture.Theme("child") / "theme.ini", "[Theme]\nBase=parent\n");
+    fixture.Write(fixture.Theme("child") / "tokens.ini", "[Tokens]\naccent=#abcdef\n");
+    CHECK(fixture.LoadColor("child", "href='paint.rcss' type='text/rcss'") == Rml::Colourb(0xab, 0xcd, 0xef));
+    CHECK(fixture.LoadColor("parent", "href='paint.rcss' type='text/rcss'") == Rml::Colourb(0x12, 0x34, 0x56));
+    fixture.Write(fixture.Theme("child") / "paint.rcss", "#colored { color: #987654; }");
+    Rml::Factory::ClearStyleSheetCache();
+    CHECK(fixture.LoadColor("child", "href='paint.rcss' type='text/rcss'") == Rml::Colourb(0x98, 0x76, 0x54));
+}
+
+TEST_CASE("optional fonts inherit their declaring path and missing families fall back [ui][rml-theme]")
+{
+    Fixture fixture;
+    const auto parent = fixture.Theme("parent");
+    fixture.Write(parent / "theme.ini", "[Fonts]\nregular=fonts/body.ttf\nmissing=%MU_THEME_MISSING_ENV%/missing.ttf\n");
+    fixture.Write(parent / "tokens.ini", "[Tokens]\nfont-body=Liberation Sans\n");
+    std::filesystem::create_directories(parent / "fonts");
+    std::filesystem::copy_file(std::filesystem::path(MU_FONT_DIR) / "LiberationSans-Regular.ttf", parent / "fonts/body.ttf");
+    fixture.Write(fixture.Theme("child") / "theme.ini", "[Theme]\nBase=parent\n");
+    fixture.Write(fixture.Theme("child") / "tokens.ini", "[Tokens]\nfont-body=Unavailable Test Family\n");
+    const UI::RmlBridge::ThemeInheritance theme(fixture.Theme("child"));
+    UI::RmlBridge::LoadThemeFonts(theme);
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-body") == std::optional<std::string>("Liberation Sans"));
+    fixture.Write(parent / "paint.rcss", "#colored { font-family: token(font-body); font-size: 16px; }");
+    auto* document = fixture.context->LoadDocumentFromMemory(
+        "<rml><head><link type='text/rcss' href='paint.rcss'/></head><body><div id='colored'>Visible</div></body></rml>",
+        (fixture.Theme("child") / "view.rml").generic_string());
+    REQUIRE(document != nullptr);
+    document->Show();
+    fixture.context->Update();
+    auto* text = document->GetElementById("colored");
+    REQUIRE(text != nullptr);
+    CHECK(text->GetFontFaceHandle() != 0);
+    CHECK(text->GetComputedValues().font_family() == "liberation sans");
+}
+
+TEST_CASE("sparse themes load parent markup with child templates and reload tokens [ui][rml-theme]")
+{
+    Fixture fixture;
+    fixture.Write(fixture.Theme("parent") / "base.rcss", "#colored { color: token(accent); }");
+    fixture.Write(fixture.Theme("parent") / "tokens.ini", "[Tokens]\naccent=#123456\n");
+    fixture.Write(fixture.Theme("parent") / "theme.ini", "[Capabilities]\nNativeTextSize=1\n");
+    fixture.Write(fixture.Theme("parent") / "msg_win.rml",
+        "<rml><head><link type='text/rcss' href='base.rcss'/>"
+        "<link type='text/template' href='nested/frame.rml'/></head><body template='test-frame'></body></rml>");
+    fixture.Write(fixture.Theme("parent") / "nested/frame.rml",
+        "<template name='test-frame' content='content'><head></head><body><div id='colored'>Parent</div>"
+        "<div id='content'></div></body></template>");
+    fixture.Write(fixture.Theme("alpha") / "theme.ini", "[Theme]\nBase=parent\n[Capabilities]\nNativeTextSize=0\n");
+    fixture.Write(fixture.Theme("alpha") / "tokens.ini", "[Tokens]\naccent=#abcdef\n");
+    fixture.Write(fixture.Theme("alpha") / "nested/frame.rml",
+        "<template name='test-frame' content='content'><head></head><body><div id='colored'>Child</div>"
+        "<div id='content'></div></body></template>");
+    fixture.Write(fixture.Theme("beta") / "theme.ini", "[Theme]\nBase=parent\n");
+    fixture.ActivateRoot();
+    REQUIRE(UI::RmlBridge::ThemeExists("alpha"));
+    CHECK_FALSE(UI::RmlBridge::ThemeExists("../parent"));
+    CHECK(UI::RmlBridge::DiscoverAvailableThemes().size() == 3);
+    UI::RmlBridge::SetActiveThemeName("alpha");
+    CHECK_FALSE(UI::RmlBridge::ThemeUsesNativeTextSize());
+    UI::RmlBridge::ThemedView<> view({{"Data/Interface/RmlUi/msg_win.rml"}});
+    REQUIRE(view.Ensure());
+    view.Document()->Show();
+    fixture.context->Update();
+    REQUIRE(view.Document()->GetElementById("colored"));
+    CHECK(view.Document()->GetElementById("colored")->GetInnerRML() == "Child");
+    CHECK(view.Document()->GetElementById("colored")->GetComputedValues().color() == Rml::Colourb(0xab, 0xcd, 0xef));
+    UI::RmlBridge::SetActiveThemeName("beta");
+    UI::RmlBridge::ReloadAllThemedDocuments();
+    CHECK(UI::RmlBridge::ThemeUsesNativeTextSize());
+    REQUIRE(view.Document());
+    fixture.context->Update();
+    CHECK(view.Document()->IsVisible());
+    REQUIRE(view.Document()->GetElementById("colored"));
+    CHECK(view.Document()->GetElementById("colored")->GetInnerRML() == "Parent");
+    CHECK(view.Document()->GetElementById("colored")->GetComputedValues().color() == Rml::Colourb(0x12, 0x34, 0x56));
+    fixture.Write(fixture.Theme("alpha") / "tokens.ini", "[Tokens]\naccent=#987654\n");
+    UI::RmlBridge::SetActiveThemeName("alpha");
+    UI::RmlBridge::ReloadAllThemedDocuments();
+    fixture.context->Update();
+    REQUIRE(view.Document()->GetElementById("colored"));
+    CHECK(view.Document()->GetElementById("colored")->GetComputedValues().color() == Rml::Colourb(0x98, 0x76, 0x54));
+}
+
+TEST_CASE("system font paths expand environment variables and missing files remain optional [ui][rml-theme]")
+{
+    Fixture fixture;
+    FontEnvironment environment;
+    fixture.Write(fixture.Theme("child") / "theme.ini",
+        "[Fonts]\nregular=%MU_THEME_FONT_TEST_ROOT%/LiberationSans-Regular.ttf\n"
+        "missing=%MU_THEME_FONT_TEST_ROOT%/missing.ttf\n");
+    fixture.Write(fixture.Theme("child") / "tokens.ini", "[Tokens]\nfont-body=Liberation Sans\nfont-title=Missing Family\n");
+    const UI::RmlBridge::ThemeInheritance theme(fixture.Theme("child"));
+    UI::RmlBridge::LoadThemeFonts(theme);
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-body") == std::optional<std::string>("Liberation Sans"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-title") == std::optional<std::string>("Liberation Sans"));
+}
+
+TEST_CASE("an empty legacy child preserves real theme resources and layout [ui][rml-theme]")
+{
+    Fixture fixture;
+    const std::filesystem::path assets = MU_RMLUI_DIR;
+    std::filesystem::create_directories(fixture.root / "Data/Interface");
+    std::filesystem::copy(assets, fixture.root / "Data/Interface/RmlUi", std::filesystem::copy_options::recursive);
+    fixture.Write(fixture.Theme("legacy-inherited-test") / "theme.ini", "[Theme]\nBase=legacy\n");
+    fixture.ActivateRoot();
+    for (const char* name : {"LiberationSans-Regular.ttf", "LiberationSans-Bold.ttf", "DejaVuSans.ttf", "DejaVuSans-Bold.ttf"})
+        REQUIRE(Rml::LoadFontFace((std::filesystem::path(MU_FONT_DIR) / name).generic_string()));
+    const UI::RmlBridge::ThemeInheritance legacy(fixture.Theme("legacy"));
+    const UI::RmlBridge::ThemeInheritance inherited(fixture.Theme("legacy-inherited-test"));
+    REQUIRE(inherited.IsValid());
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(fixture.Theme("legacy")))
+    {
+        if (entry.is_regular_file() && entry.path().filename() != "theme.ini")
+            CHECK(inherited.ResolveFile(entry.path().lexically_relative(fixture.Theme("legacy"))) == entry.path());
+    }
+    CHECK(inherited.Section("Tokens").size() == legacy.Section("Tokens").size());
+    for (const auto& [key, value] : legacy.Section("Tokens"))
+        CHECK(inherited.GetSetting("Tokens", key)->value == value.value);
+    for (const Rml::Vector2i viewport : {Rml::Vector2i{1024, 768}, Rml::Vector2i{1920, 1080}})
+    {
+        fixture.context->SetDimensions(viewport);
+        for (const int percent : {75, 100, 150})
+        {
+            GameConfig::GetInstance().SetUIScalePercent(percent);
+            fixture.context->SetDensityIndependentPixelRatio(UI::Scaling::TypographyScale(viewport.x, viewport.y));
+            UI::RmlBridge::ApplyScaleInputs(fixture.context);
+            for (const char* name : {"login.rml", "char_make.rml", "msg_win.rml", "main_frame.rml",
+                                     "chat_log.rml", "friend_shell.rml", "my_inventory.rml"})
+            {
+                CAPTURE(viewport.x); CAPTURE(viewport.y); CAPTURE(percent); CAPTURE(name);
+                CompareLegacyVariant(fixture, name);
+            }
+        }
+    }
 }

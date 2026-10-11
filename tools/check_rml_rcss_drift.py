@@ -27,6 +27,7 @@ import sys
 
 sys.dont_write_bytecode = True
 from rml_contract_sources import discover_contracts
+from rml_theme_inheritance import resolve_file, resolve_virtual, theme_chain
 
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -41,22 +42,25 @@ UNUSED_RE = re.compile(r'//\s*rml-contract-unused:\s*(\w+)\s*:\s*([^\r\n]+)')
 OPTIONAL_RE = re.compile(r'<!--\s*rml-contract-optional-(id|callback):\s*(\w+)\s*:\s*(.*?)-->', re.S)
 
 
-def linked_documents(entry, resolve_dir):
-    seen, texts = set(), []
-    queue = [(entry, resolve_dir)]
+def linked_documents(entry, resolve_dir, chain=None):
+    seen, paths, texts = set(), set(), []
+    virtual_root = resolve_dir.resolve()
+    queue = [(entry, virtual_root / entry.name)]
     while queue:
-        path, directory = queue.pop()
-        if path in seen:
+        path, virtual = queue.pop()
+        if virtual in seen:
             continue
-        seen.add(path)
+        seen.add(virtual)
+        paths.add(path)
         if not path.is_file():
             raise ValueError(f"Missing document/template: {path}")
         text = path.read_text(encoding="utf-8")
         texts.append(text)
         for href in TEMPLATE_LINK_RE.findall(COMMENT_RE.sub("", text)):
-            linked = (directory / href).resolve()
-            queue.append((linked, linked.parent))
-    return "\n".join(texts), seen
+            linked = (virtual.parent / href.replace("\\", "/")).resolve()
+            physical = resolve_virtual(linked, virtual_root, chain) if chain else linked
+            queue.append((physical, linked))
+    return "\n".join(texts), paths
 
 
 def theme_documents(asset_root, document):
@@ -66,10 +70,9 @@ def theme_documents(asset_root, document):
         directories = [asset_root]
     variants = {}
     for directory in directories:
-        entry = directory / f"{document}.rml"
-        if not entry.is_file():
-            entry = asset_root / f"{document}.rml"
-        variants[directory.name] = linked_documents(entry, directory)
+        chain = theme_chain(directory) if directory != asset_root else [directory]
+        entry = resolve_file(pathlib.Path(f"{document}.rml"), chain) or asset_root / f"{document}.rml"
+        variants[directory.name] = linked_documents(entry, directory, chain)
     return variants
 
 

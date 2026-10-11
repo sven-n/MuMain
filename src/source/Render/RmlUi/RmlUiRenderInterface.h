@@ -24,7 +24,11 @@ public:
     using TextureSourceResolver = std::function<bool(const Rml::String& source, void*& texture, int& width, int& height)>;
     void SetTextureSourceResolver(TextureSourceResolver resolver) { m_ResolveTextureSource = std::move(resolver); }
 
+    using TextureFileResolver = std::function<Rml::String(const Rml::String&)>;
+    void SetTextureFileResolver(TextureFileResolver resolver) { m_ResolveTextureFile = std::move(resolver); }
+
 private:
+    TextureFileResolver m_ResolveTextureFile;
     TextureSourceResolver m_ResolveTextureSource;
     // RmlUi's own TextureHandle IS the raw SDL_GPUTexture* (see RenderInterface_SDL_GPU.cpp) --
     // ReleaseTexture only gets that value back, not which path created it, so this engine needs

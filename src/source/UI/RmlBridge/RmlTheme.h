@@ -42,7 +42,7 @@ namespace UI::RmlBridge
     // to whichever theme's copy was most recently freshly loaded, not necessarily the one now active.
     void SetActiveThemeName(const std::string& themeName);
 
-    // True if themes/<themeName>/base.rcss exists and is readable -- the minimum a folder needs to
+    // True if the inheritance chain is valid and base.rcss exists and is readable in it -- the minimum a folder needs to
     // be a real theme (every window's document links it first). Meant as a pre-switch validation
     // gate (e.g. for the `$theme` command) so an unknown/misspelled name is rejected up front
     // instead of silently rendering every window unstyled.
@@ -51,7 +51,7 @@ namespace UI::RmlBridge
     // Every valid theme (ThemeExists()) found directly under Data/Interface/RmlUi/themes/, sorted
     // alphabetically by folder name for deterministic, stable ordering across calls (a
     // std::filesystem::directory_iterator's own enumeration order is unspecified). A folder with
-    // no base.rcss of its own is silently skipped -- not a real theme. This is what lets a newly
+    // no base.rcss in its inheritance chain is skipped. This is what lets a newly
     // installed theme folder (including a modder's own) become selectable in COptionWindow's UI
     // Theme dropdown with zero C++ changes; see this file's own top comment.
     std::vector<std::string> DiscoverAvailableThemes();
@@ -63,16 +63,15 @@ namespace UI::RmlBridge
     std::string GetThemeDisplayName(const std::string& themeName);
 
     // Declared theme capabilities: an optional themes/<name>/theme.ini [Capabilities] section,
-    // missing keys false. C++ never branches on a theme's name.
+    // keys inherit from ancestors, then default to false. C++ never branches on a theme's name.
     // Whether the active theme sizes opted-in documents' text like the original client's
     // (NativeTextSize=1) -- see RmlNativeText.h.
     bool ThemeUsesNativeTextSize();
 
     // Builds the virtual source URL a themed document should be loaded against, e.g.
     // "Data/Interface/RmlUi/themes/modern/login.rml" -- this path need not exist on disk (the RML
-    // itself is loaded from memory, shared across every theme); it only needs to resolve relative
-    // hrefs (<link type="text/rcss" href="login.rcss">) to the real per-theme .rcss file that
-    // does exist, per Rml::Context::LoadDocumentFromMemory's source_url contract.
+    // itself is loaded from memory). Relative links retain the selected theme's path even when
+    // files come from an ancestor, so child overrides apply to inherited markup.
     std::string ThemedDocumentSourceUrl(const char* documentName, const std::string& themeName);
 
     class ThemedDocuments;

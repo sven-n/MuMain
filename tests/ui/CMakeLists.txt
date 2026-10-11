@@ -289,8 +289,15 @@ mu_add_test(
 
 mu_add_test(
     NAME theme_file_interface_tests
-    SOURCES test_theme_file_interface.cpp
+    SOURCES
+        test_theme_file_interface.cpp
+        test_theme_inheritance.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
+)
+target_compile_definitions(theme_file_interface_tests PRIVATE
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
 )
 
 mu_add_test(

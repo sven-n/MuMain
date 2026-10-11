@@ -32,6 +32,8 @@ struct RmlUiRuntimeHooks
     // A texture source the game draws itself: true if `source` is one, with its texture (null if
     // it has none yet) and size.
     std::function<bool(const Rml::String& source, void*& texture, int& width, int& height)> resolveTexture;
+    // Resolves file texture paths without coupling the renderer to the UI theme implementation.
+    std::function<Rml::String(const Rml::String&)> resolveTextureFile;
     // Optional application resource provider; installed before Rml::Initialise().
     std::function<std::unique_ptr<Rml::FileInterface>()> createFileInterface;
 };

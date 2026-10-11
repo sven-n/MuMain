@@ -49,7 +49,10 @@ Rml::TextureHandle RmlUiRenderInterface::LoadTexture(Rml::Vector2i& texture_dime
     // caller of Bitmaps.LoadImage passes backslash-separated paths (e.g. "Interface\\Foo.jpg"),
     // matching this codebase's own path-handling convention -- normalize rather than assume
     // forward-slash tolerance extends to this legacy loader too.
-    const std::wstring wpath = BitmapPath(source); // Rml::String is std::string (RmlUi/Config/Config.h)
+    std::string normalized = m_ResolveTextureFile ? m_ResolveTextureFile(source) : source;
+    if (normalized.empty())
+        return 0;
+    const std::wstring wpath = BitmapPath(std::move(normalized)); // Rml::String is std::string (RmlUi/Config/Config.h)
     // LoadImageExclusive, NOT LoadImage: this handle is cached indefinitely (by RmlUi's compiled
     // geometry, and by m_FileBackedBitmapIndexByHandle below) for as long as the document lives,
     // which today is the whole process -- but plain LoadImage() would find-and-share an existing

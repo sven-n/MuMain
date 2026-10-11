@@ -12,6 +12,8 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "UI/RmlBridge/ThemeFileInterface.h"
+#include "UI/RmlBridge/ThemeInheritance.h"
+#include "UI/RmlBridge/ThemeFonts.h"
 #include "UI/Scaling/UITransform.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/HUD/ChatLogWindow.h"
@@ -30,8 +32,8 @@ void InstallRuntimeHooks()
         ApplyScaleInputs(context);
         ApplyNativeTextSize(context);
     };
-    hooks.afterCreate = [] { UI::Diagnostics::Initialize(); };
-    hooks.beforeDestroy = [] { UI::Diagnostics::Release(); };
+    hooks.afterCreate = [] { LoadActiveThemeFonts(); UI::Diagnostics::Initialize(); };
+    hooks.beforeDestroy = [] { UI::Diagnostics::Release(); ClearThemeFontCache(); };
     hooks.beforeUpdate = []
     {
         SuspendMainSceneDocumentsOutsideMainScene();
@@ -47,6 +49,7 @@ void InstallRuntimeHooks()
         if (auto* chat = g_pChatListBox)
             chat->AfterRmlLayout(context);
     };
+    hooks.resolveTextureFile = [](const Rml::String& source) { return ResolveThemeResource(source, true); };
     hooks.createFileInterface = [] { return std::make_unique<ThemeFileInterface>(); };
     hooks.resolveTexture = [](const Rml::String& source, void*& texture, int& width, int& height)
     {

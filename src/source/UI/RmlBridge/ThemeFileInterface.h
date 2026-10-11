@@ -4,8 +4,8 @@
 
 namespace UI::RmlBridge
 {
-// Serves themed RCSS with token(name) expanded while leaving RmlUi's links and
-// stylesheet cache keyed by the original file path.
+// Serves inherited files and expands RCSS tokens from the selected theme's chain.
+// RmlUi links and caches retain the original virtual path for child overrides.
 class ThemeFileInterface final : public Rml::FileInterface
 {
 public:

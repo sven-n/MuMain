@@ -13,7 +13,7 @@ import uuid
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(REPO_ROOT / "tools"))
-from check_rml_rcss_drift import check_contracts
+from check_rml_rcss_drift import check_contracts, theme_documents
 
 
 class RmlContractTests(unittest.TestCase):
@@ -69,6 +69,28 @@ class RmlContractTests(unittest.TestCase):
         self.markup()
         self.assert_clean()
         self.assertEqual(self.check()[1:], (1, 2, 1))
+
+    def test_inherited_markup_keeps_child_template_overrides(self):
+        self.window()
+        self.markup(text='<link type="text/template" href="nested/frame.rml"/>', theme="legacy")
+        self.write(self.assets / "themes/legacy/nested/frame.rml", '<link type="text/template" href="content.rml"/>')
+        self.write(self.assets / "themes/legacy/nested/content.rml", '<div id="button">{{value}}</div>')
+        self.write(self.assets / "themes/modern/theme.ini", '\ufeff[Theme]\nBase="LEGACY"\n')
+        self.assert_clean()
+        self.write(self.assets / "themes/modern/nested/content.rml", '<div id="renamed">{{value}}</div>')
+        self.assertIn("modern/panel: missing required id 'button'", self.check()[0])
+
+    def test_bad_inheritance_is_rejected(self):
+        self.markup()
+        manifest = self.assets / "themes/modern/theme.ini"
+        for base in ("missing", "modern", "../legacy"):
+            self.write(manifest, f"[Theme]\nBase={base}\n")
+            with self.assertRaises(ValueError):
+                theme_documents(self.assets, "panel")
+        self.write(manifest, "[Theme]\nBase=legacy\n")
+        self.write(self.assets / "themes/legacy/theme.ini", "[Theme]\nBase=modern\n")
+        with self.assertRaises(ValueError):
+            theme_documents(self.assets, "panel")
 
     def test_missing_id_in_one_fork_fails_even_when_other_theme_has_it(self):
         self.window()

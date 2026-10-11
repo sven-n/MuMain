@@ -2,6 +2,8 @@
 #include "RmlTheme.h"
 #include "RmlNativeText.h"
 #include "RmlStackingOrder.h"
+#include "UI/RmlBridge/ThemeInheritance.h"
+#include "UI/RmlBridge/ThemeFonts.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Core/Platform/WinIni.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -13,6 +15,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -65,8 +68,9 @@ namespace UI::RmlBridge
 
         bool ComputeUsesNativeTextSize(const std::string& themeName)
         {
-            const std::string iniPath = "Data/Interface/RmlUi/themes/" + themeName + "/theme.ini";
-            return GetPrivateProfileIntW(L"Capabilities", L"NativeTextSize", 0, WidenAscii(iniPath).c_str()) != 0;
+            const ThemeInheritance theme(std::filesystem::path("Data/Interface/RmlUi/themes") / themeName);
+            const auto setting = theme.GetSetting("Capabilities", "NativeTextSize");
+            return setting && std::strtol(setting->value.c_str(), nullptr, 10) != 0;
         }
 
         bool& UsesNativeTextSizeStorage()
@@ -107,12 +111,22 @@ namespace UI::RmlBridge
         // back to a theme whose sheets were cached earlier this session.
         Rml::Factory::ClearStyleSheetCache();
         Rml::Factory::ClearTemplateCache();
+        if (Rml::GetNumContexts() > 0)
+        {
+            ClearThemeFontCache();
+            LoadActiveThemeFonts();
+        }
     }
 
     bool ThemeExists(const std::string& themeName)
     {
-        const std::string basePath = "Data/Interface/RmlUi/themes/" + ToLower(themeName) + "/base.rcss";
-        std::ifstream file(basePath, std::ios::binary);
+        if (!ThemeInheritance::IsValidName(ToLower(themeName)))
+            return false;
+        const ThemeInheritance theme(std::filesystem::path("Data/Interface/RmlUi/themes") / ToLower(themeName));
+        const auto base = theme.ResolveFile("base.rcss");
+        if (!base)
+            return false;
+        std::ifstream file(*base, std::ios::binary);
         return file.good();
     }
 
@@ -179,6 +193,24 @@ namespace UI::RmlBridge
     }
     } // namespace
 
+    namespace
+    {
+    std::optional<std::string> ReadThemedMarkup(const std::string& sourceUrl, const char* documentPath)
+    {
+        std::ifstream file(std::filesystem::u8path(ResolveThemeResource(sourceUrl)), std::ios::binary);
+        if (!file)
+            file.open(std::filesystem::u8path(documentPath), std::ios::binary);
+        if (!file)
+        {
+            g_ErrorReport.Write(L"> [RmlTheme] Failed to open '%hs' or '%hs'.\r\n", sourceUrl.c_str(), documentPath);
+            return std::nullopt;
+        }
+        std::ostringstream buffer;
+        buffer << file.rdbuf();
+        return buffer.str();
+    }
+    } // namespace
+
     Rml::ElementDocument* ThemedDocumentLoader::Load(Rml::Context* context, const char* documentPath)
     {
         return Load(context, documentPath, std::string(), std::string());
@@ -195,29 +227,11 @@ namespace UI::RmlBridge
 
         const std::string sourceUrl = ThemedDocumentSourceUrl(documentName.c_str(), GetActiveThemeName());
 
-        // Prefer a per-theme override of the document's own MARKUP (not just its styling) at
-        // themes/<theme>/<name>.rml, falling back to the shared documentPath when no such override
-        // exists -- most windows have none, so this is a no-op for them
-        // (one extra failed ifstream open, immediately falls through). This exists for content
-        // that must genuinely differ, not just look different, per theme; CSS-only hiding
-        // (`display: none`) and a data-model boolean gating `data-if` both put per-theme awareness
-        // into C++, which is exactly the kind of per-context branching this branch's architecture
-        // avoids everywhere else. A per-theme markup override keeps theme differentiation where it
-        // already lives for every other window: which file gets loaded, decided purely by
-        // directory convention, zero runtime "which theme" logic in C++.
-        std::ifstream file(sourceUrl, std::ios::binary);
-        if (!file)
-            file.open(documentPath, std::ios::binary);
-        if (!file)
-        {
-            g_ErrorReport.Write(L"> [RmlTheme] Failed to open '%hs' or '%hs'.\r\n", sourceUrl.c_str(), documentPath);
+        LoadActiveThemeFonts();
+        const auto markup = ReadThemedMarkup(sourceUrl, documentPath);
+        if (!markup)
             return nullptr;
-        }
-
-        std::ostringstream buffer;
-        buffer << file.rdbuf();
-
-        std::string rmlText = buffer.str();
+        std::string rmlText = *markup;
         if (!modelPlaceholder.empty())
         {
             for (size_t at = rmlText.find(modelPlaceholder); at != std::string::npos;

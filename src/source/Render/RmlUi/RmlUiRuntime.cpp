@@ -61,54 +61,14 @@ RmlUiRuntime::~RmlUiRuntime()
     Destroy();
 }
 
-void RmlUiRuntime::Create(int windowWidth, int windowHeight)
+namespace
 {
-    if (m_Context) return;
-
-    auto* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
-    auto* window = mu::GetRenderer().GetWindow();
-    if (!device || !window)
-    {
-        // Matches GetDevice()/GetWindow()'s own "not initialized" nullptr contract -- Create()
-        // must run after the SDL_GPU renderer's Init().
-        return;
-    }
-
-    m_RenderInterface = std::make_unique<RmlUiRenderInterface>(device, window);
-    m_RenderInterface->SetTextureSourceResolver(m_Hooks.resolveTexture);
-    m_SystemInterface = std::make_unique<RmlUiSystemInterface>(window);
-    if (m_Hooks.createFileInterface)
-        m_FileInterface = m_Hooks.createFileInterface();
-
-    Rml::SetRenderInterface(m_RenderInterface.get());
-    Rml::SetSystemInterface(m_SystemInterface.get());
-    if (m_FileInterface)
-        Rml::SetFileInterface(m_FileInterface.get());
-
-    if (!Rml::Initialise())
-    {
-        if (m_FileInterface)
-            Rml::SetFileInterface(nullptr);
-        m_FileInterface.reset();
-        m_RenderInterface.reset();
-        m_SystemInterface.reset();
-        return;
-    }
-
-    // See m_TextInputMethodEditor's own header comment -- installs RmlUi's own vendored SDL IME
-    // bridge globally, once, for the lifetime of this runtime. Must run after Rml::Initialise()
-    // (matches every vendored sample backend's own ordering).
-    m_TextInputMethodEditor = std::make_unique<TextInputMethodEditor_SDL>();
-    Rml::SetTextInputHandler(m_TextInputMethodEditor.get());
-
-    Render::RmlUi::RegisterAdditiveFillDecorator();
-    Render::RmlUi::RegisterAdditiveImageDecorator();
-
+void LoadBundledFonts()
+{
     // Reuses the same bundled fonts this engine already ships for its portable text shim
     // (fonts/LiberationSans-*.ttf, copied next to the exe by the same asset-copy step as
-    // everything else under src/bin/) rather than adding a new font dependency. fallback_face=
-    // true on the regular weight means any RML/RCSS font-family that doesn't match a loaded face
-    // still renders with this one instead of silently rendering no text at all.
+    // everything else under src/bin/). fallback_face supplies missing glyphs for a loaded
+    // family; selecting an unavailable family still needs the UI layer's font-token fallback.
     Rml::LoadFontFace("fonts/LiberationSans-Regular.ttf", true);
     Rml::LoadFontFace("fonts/LiberationSans-Bold.ttf");
 
@@ -137,6 +97,54 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     // The native fixed-width face (kBundledFixedFont, BundledFonts.h), for text the original drew
     // with g_hFixFont -- the character list's server messages (server_msg.rcss).
     Rml::LoadFontFace("fonts/Cousine-Regular.ttf");
+}
+} // namespace
+
+void RmlUiRuntime::Create(int windowWidth, int windowHeight)
+{
+    if (m_Context) return;
+
+    auto* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+    auto* window = mu::GetRenderer().GetWindow();
+    if (!device || !window)
+    {
+        // Matches GetDevice()/GetWindow()'s own "not initialized" nullptr contract -- Create()
+        // must run after the SDL_GPU renderer's Init().
+        return;
+    }
+
+    m_RenderInterface = std::make_unique<RmlUiRenderInterface>(device, window);
+    m_RenderInterface->SetTextureSourceResolver(m_Hooks.resolveTexture);
+    m_RenderInterface->SetTextureFileResolver(m_Hooks.resolveTextureFile);
+    m_SystemInterface = std::make_unique<RmlUiSystemInterface>(window);
+    if (m_Hooks.createFileInterface)
+        m_FileInterface = m_Hooks.createFileInterface();
+
+    Rml::SetRenderInterface(m_RenderInterface.get());
+    Rml::SetSystemInterface(m_SystemInterface.get());
+    if (m_FileInterface)
+        Rml::SetFileInterface(m_FileInterface.get());
+
+    if (!Rml::Initialise())
+    {
+        if (m_FileInterface)
+            Rml::SetFileInterface(nullptr);
+        m_FileInterface.reset();
+        m_RenderInterface.reset();
+        m_SystemInterface.reset();
+        return;
+    }
+
+    // See m_TextInputMethodEditor's own header comment -- installs RmlUi's own vendored SDL IME
+    // bridge globally, once, for the lifetime of this runtime. Must run after Rml::Initialise()
+    // (matches every vendored sample backend's own ordering).
+    m_TextInputMethodEditor = std::make_unique<TextInputMethodEditor_SDL>();
+    Rml::SetTextInputHandler(m_TextInputMethodEditor.get());
+
+    Render::RmlUi::RegisterAdditiveFillDecorator();
+    Render::RmlUi::RegisterAdditiveImageDecorator();
+
+    LoadBundledFonts();
 
     m_Context = Rml::CreateContext("main", Rml::Vector2i(windowWidth, windowHeight));
 
