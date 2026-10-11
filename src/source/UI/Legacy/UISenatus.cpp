@@ -288,8 +288,8 @@ void CSenatusInfo::DoStatueUpgradeRecoverAction()
 
 void CSenatusInfo::DoApplyTaxAction()
 {
-    SocketClient->ToGameServer()->SendCastleSiegeTaxChangeRequest(1, m_iChaosTaxRate);
-    SocketClient->ToGameServer()->SendCastleSiegeTaxChangeRequest(2, m_iNormalTaxRate);
+    SocketClient->ToGameServer()->SendCastleSiegeTaxChangeRequest(CastleSiegeTaxType::ChaosMachine, m_iChaosTaxRate);
+    SocketClient->ToGameServer()->SendCastleSiegeTaxChangeRequest(CastleSiegeTaxType::Store, m_iNormalTaxRate);
 }
 
 void CSenatusInfo::DoWithdrawAction(DWORD dwMoney)
