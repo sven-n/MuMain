@@ -64,11 +64,35 @@ Build every other supported row locally using the setup guides above.
 
 These apply to every setup; the per-setup guides only cover what differs.
 
+### Dependencies and first configuration
+
+Use CMake 3.25 or newer, the .NET 10 SDK, and the compiler and system packages listed
+in your platform guide. Windows presets also require vcpkg with `VCPKG_ROOT` set.
+Initial configuration needs network access unless dependency sources are already cached.
+
+CMake initializes missing Git submodules under `src/ThirdParty/`: SDL3 and RmlUi for
+all builds, and ImGui when `ENABLE_EDITOR=ON`. RmlUi uses the
+[nitoygo/RmlUi fork](https://github.com/nitoygo/RmlUi), with the revision pinned by
+the repository's submodule entry, for the SDL GPU renderer integration.
+
+If automatic initialization fails, run from the repository root:
+
+```sh
+git submodule update --init -- src/ThirdParty/SDL src/ThirdParty/RmlUi
+
+# For editor builds:
+git submodule update --init -- src/ThirdParty/imgui
+```
+
+CMake downloads miniaudio, GLM, spdlog, SDL3_ttf and SDL3_image through `FetchContent`.
+Audio uses miniaudio. SDL3_ttf supplies the vendored FreeType used by RmlUi; neither
+SDL_mixer nor a separate FreeType submodule is required.
+
 ### Build options
 
 | CMake option | Values | Meaning |
 |--------------|--------|---------|
-| `CMAKE_BUILD_TYPE` | `Release` / `Debug` | Optimized vs. debuggable. |
+| `CMAKE_BUILD_TYPE` | `Release` / `Debug` / `RelWithDebInfo` | Build configuration for single-config generators. With Ninja Multi-Config, select it through a build preset or `--config` instead. |
 | `ENABLE_EDITOR` | `ON` / `OFF` | Builds the in-app ImGui editor (admin tooling). When `OFF`, nothing under `src/MuEditor/` is compiled in - enforced by the `editor_leak` test. |
 | `ENABLE_CONTROL_SOCKET` | `ON` / `OFF` | Builds the developer control socket that lets test scripts drive the client (see [`control-socket.md`](../control-socket.md)). Default `OFF`; never for player builds. When `OFF`, nothing under `src/source/App/Control/` and no local-socket transport is compiled in, and the `MU_CONTROL_SOCKET` variable is ignored - enforced by the `control_socket_leak` test. The `-mueditor` presets turn it `ON`. |
 | `BUILD_TESTING` | `ON` / `OFF` | Builds and registers the unit tests (run with `ctest`). |
