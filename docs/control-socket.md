@@ -108,7 +108,12 @@ The shops: `npc_shop` is the open NPC shop (`repair_shop`, `tax_rate`,
 included) or `null`; `my_shop` is the player's own personal shop (`open`, the
 `title` in its title field, its goods with `price`), `purchase_shop` the
 personal shop the player looks into (`seller`, `title`, goods with `price`) or
-`null`. `repair_mode` says whether a click repairs instead of picking up.
+`null`. The goods of the personal shops whose price isn't in zen also carry the
+`price_item_type` of their price, as the server encodes it: the item (group in
+the highest 4 bits, number in the others) or the account coin (`0xFFF0` WCoin
+(C), `0xFFF1` WCoin (P), `0xFFF2` Goblin Points); see
+[personal-shop.md](personal-shop.md). `repair_mode` says whether a click
+repairs instead of picking up.
 
 For the quests and their rewards: `class_name` (e.g. `Blade Knight`; `class`
 is the client's number, e.g. 1 Dark Knight, 8 Blade Knight, 12 Blade Master),

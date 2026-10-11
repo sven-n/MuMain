@@ -644,12 +644,21 @@ static std::uint8_t g_tabBar = 0;
         }
         else if ((iInvenType == SEASON3B::TOOLTIP_TYPE_MY_SHOP) || (iInvenType == SEASON3B::TOOLTIP_TYPE_PURCHASE_SHOP))
         {
-            int price = 0;
+            GameLogic::PersonalShop::ItemPrice itemPrice;
             const int indexInv = g_pMyShopInventory->GetInventoryCtrl()->GetIndexByItem(pItem);
             wchar_t textBuffer[kTooltipBufferCapacity] {};
 
-            if (GetPersonalItemPrice(indexInv, price, g_IsPurchaseShop))
+            const bool hasPrice = GetPersonalItemPrice(indexInv, itemPrice, g_IsPurchaseShop);
+            if (hasPrice && itemPrice.Kind != GameLogic::PersonalShop::PriceKind::Zen)
             {
+                // The server tells the player when the jewels or coins are not enough.
+                std::swprintf(textBuffer, kTooltipBufferCapacity, L"%d %ls", itemPrice.Amount, GameLogic::PersonalShop::GetCurrencyName(itemPrice));
+                appendLine(TEXT_COLOR_YELLOW, true, false, priceFormat.c_str(), textBuffer);
+                appendEmptyLine();
+            }
+            else if (hasPrice)
+            {
+                const int price = itemPrice.Amount;
                 ConvertGold(price, textBuffer);
 
                 int priceColor = TEXT_COLOR_WHITE;

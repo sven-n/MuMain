@@ -249,8 +249,12 @@ json PersonalShopItems(SEASON3B::CNewUIInventoryCtrl* grid, int priceTable)
         }
         const int slot = grid->GetIndexByItem(item);
         json described = DescribeItem(*item, slot);
-        int price = 0;
-        described["price"] = GetPersonalItemPrice(slot, price, priceTable) ? json(price) : json(nullptr);
+        GameLogic::PersonalShop::ItemPrice price;
+        const bool hasPrice = GetPersonalItemPrice(slot, price, priceTable);
+        described["price"] = hasPrice ? json(price.Amount) : json(nullptr);
+        described["price_item_type"] = hasPrice && price.Kind != GameLogic::PersonalShop::PriceKind::Zen
+            ? json(price.PriceItemType)
+            : json(nullptr);
         items.push_back(std::move(described));
     }
     return items;

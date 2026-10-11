@@ -1728,11 +1728,19 @@ typedef struct tagGETPSHOPITEMLIST_HEADER {
 #pragma pack(push, 1) // just to get the actual length by sizeof...
 typedef struct tagGETPSHOPITEM_DATA {
     INT		MoneyPrice;
-    WORD    PriceItemType; // not yet used
-    WORD    RequiredItemAmount; // not yet used
+    WORD    PriceItemType;
+    WORD    RequiredItemAmount;
     BYTE	ItemSlot;
     BYTE	Item[PACKET_ITEM_LENGTH_EXTENDED_MIN];
 } GETPSHOPITEM_DATAINFO, * LPGETPSHOPITEM_DATAINFO;
+
+// The price types which the server allows for prices in personal shops, in
+// addition to zen (C1 3F 0A). The price item types (WORD) follow it.
+typedef struct tagPSHOP_PRICETYPES_HEADER {
+    PBMSG_HEADER	Header;
+    BYTE			bySubcode;
+    BYTE			Count;
+} PSHOP_PRICETYPES_HEADERINFO, * LPPSHOP_PRICETYPES_HEADERINFO;
 #pragma pack(pop)
 
 typedef struct tagCLOSEPSHOP_RESULT {
@@ -1755,6 +1763,7 @@ typedef struct tagPURCHASEITEM_RESULT {
         LackOfMoney = 7,
         MoneyOverflowOrNotEnoughSpace = 8,
         ItemBlock = 9,
+        LackOfPriceCurrency = 10,
     };
 
     PBMSG_HEADER	Header;

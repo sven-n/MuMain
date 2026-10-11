@@ -1044,7 +1044,9 @@ namespace SEASON3B
         static CALLBACK_RESULT ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CPersonalShopItemValueMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
+    class CPersonalShopPriceMsgBox;
+
+    class CPersonalShopItemValueMsgBoxLayout : public TMsgBoxLayout<CPersonalShopPriceMsgBox>
     {
     public:
         bool SetLayout();

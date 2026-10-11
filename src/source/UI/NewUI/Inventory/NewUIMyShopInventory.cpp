@@ -6,6 +6,7 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
+#include "UI/NewUI/Dialogs/PersonalShopPriceMsgBox.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "I18N/All.h"
 #include "GameLogic/Items/ShopRestrictions.h"

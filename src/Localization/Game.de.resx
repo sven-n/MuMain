@@ -13114,4 +13114,13 @@
   <data name="QuestRequirementBuff" xml:space="preserve">
     <value>Bonus: %ls</value>
   </data>
+  <data name="WCoin (C)" xml:space="preserve">
+    <value>WCoin (C)</value>
+  </data>
+  <data name="WCoin (P)" xml:space="preserve">
+    <value>WCoin (P)</value>
+  </data>
+  <data name="Goblin Points" xml:space="preserve">
+    <value>Goblin-Punkte</value>
+  </data>
 </root>

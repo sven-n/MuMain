@@ -13,6 +13,7 @@
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
+#include "UI/NewUI/Dialogs/PersonalShopPriceMsgBox.h"
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "GameLogic/Items/InventoryUtils.h"
@@ -4351,7 +4352,7 @@ CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::CancelBtnDown(class CNewUIMes
 
 bool SEASON3B::CPersonalShopItemValueMsgBoxLayout::SetLayout()
 {
-    CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
+    CPersonalShopPriceMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -4360,6 +4361,7 @@ bool SEASON3B::CPersonalShopItemValueMsgBoxLayout::SetLayout()
 
     pMsgBox->SetInputBoxOption(UIOPTION_NUMBERONLY | UIOPTION_PAINTBACK);
     pMsgBox->AddMsg(I18N::Game::EnterSellingPrice);
+    pMsgBox->AddCurrencySelection();
     pMsgBox->AddCallbackFunc(CPersonalShopItemValueMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
     pMsgBox->AddCallbackFunc(CPersonalShopItemValueMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CPersonalShopItemValueMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -4368,107 +4370,103 @@ bool SEASON3B::CPersonalShopItemValueMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+namespace
 {
-    auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
+// A zen price below the value of the item has to be confirmed by the player.
+bool IsZenPriceBelowItemValue(int price)
+{
+    SEASON3B::CNewUIPickedItem* pPickedItem = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
+    ITEM* pItem = pPickedItem
+        ? pPickedItem->GetItem()
+        : g_pMyShopInventory->FindItem(g_pMyShopInventory->GetSourceIndex());
+    if (pItem == nullptr)
+    {
+        return false;
+    }
+
+    return price < static_cast<int>(ItemValue(pItem, 2));
+}
+
+void ShowZenPriceConfirmation(const wchar_t* strPrice, int price)
+{
+    SEASON3B::CNewUI3DItemCommonMsgBox* lpMsgBox = NULL;
+    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout), &lpMsgBox);
+    if (lpMsgBox == nullptr)
+    {
+        return;
+    }
 
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
+    mu_swprintf(strText, I18N::Game::SellingPriceSZen, strPrice);
+    lpMsgBox->AddMsg(strText, RGBA(255, 0, 0, 255), SEASON3B::MSGBOX_FONT_BOLD);
+    lpMsgBox->AddMsg(I18N::Game::DoYouWantToSellItemAtThisPrice);
+    lpMsgBox->SetItemValue(price);
+}
 
+// Sends the price of the item which is moved into or within the own shop, or
+// whose price is changed, and remembers it for the tooltip.
+void ApplyPersonalShopItemPrice(const GameLogic::PersonalShop::ItemPrice& price)
+{
+    if (g_pMyShopInventory->IsEnablePersonalShop() == true)
+    {
+        SocketClient->ToGameServer()->SendPlayerShopClose();
+    }
+
+    SEASON3B::CNewUIPickedItem* pPickedItem = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
+    if (pPickedItem == nullptr)
+    {
+        const int iSourceIndex = g_pMyShopInventory->GetSourceIndex();
+        UI::PersonalShop::SendItemPrice(iSourceIndex, price);
+        AddPersonalItemPrice(iSourceIndex, price, g_IsPurchaseShop);
+        return;
+    }
+
+    ITEM* pItemObj = pPickedItem->GetItem();
+    const int iSourceIndex = pPickedItem->GetSourceLinealPos();
+    const int iTargetIndex = g_pMyShopInventory->GetTargetIndex();
+    const auto* pOwnerInventory = pPickedItem->GetOwnerInventory();
+    const bool isFromInventory = pOwnerInventory == g_pMyInventory->GetInventoryCtrl() || pOwnerInventory == nullptr;
+    const bool isFromShop = pOwnerInventory == g_pMyShopInventory->GetInventoryCtrl();
+    if (isFromInventory || isFromShop)
+    {
+        UI::PersonalShop::SendItemPrice(iSourceIndex, price);
+        const STORAGE_TYPE sourceStorage = isFromShop ? STORAGE_TYPE::MYSHOP : STORAGE_TYPE::INVENTORY;
+        SendRequestEquipmentItem(sourceStorage, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
+    }
+
+    AddPersonalItemPrice(iTargetIndex, price, g_IsPurchaseShop);
+}
+} // namespace
+
+CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+{
+    auto* pMsgBox = dynamic_cast<CPersonalShopPriceMsgBox*>(pOwner);
+    if (pMsgBox == nullptr)
+    {
+        return CALLBACK_CONTINUE;
+    }
+
+    wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
     pMsgBox->GetInputBoxText(strText);
-
     if (wcslen(strText) == 0)
     {
         return CALLBACK_CONTINUE;
     }
 
-    int iInputZen = _wtoi(strText);
-    if (iInputZen == 0)
+    GameLogic::PersonalShop::ItemPrice price = pMsgBox->GetPriceType();
+    price.Amount = _wtoi(strText);
+    if (price.Amount == 0)
     {
         return CALLBACK_CONTINUE;
     }
 
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-    ITEM* pItem = NULL;
-    if (pPickedItem)
+    if (price.Kind == GameLogic::PersonalShop::PriceKind::Zen && IsZenPriceBelowItemValue(price.Amount))
     {
-        pItem = pPickedItem->GetItem();
+        ShowZenPriceConfirmation(strText, price.Amount);
     }
     else
     {
-        int iSourceIndex = g_pMyShopInventory->GetSourceIndex();
-        pItem = g_pMyShopInventory->FindItem(iSourceIndex);
-    }
-
-    bool bResult = false;
-    if (pItem)
-    {
-        DWORD dwItemValue = ItemValue(pItem, 2);
-
-        if (iInputZen < (int)dwItemValue)
-        {
-            bResult = true;
-        }
-    }
-
-    if (bResult == true)
-    {
-        SEASON3B::CNewUI3DItemCommonMsgBox* lpMsgBox = NULL;
-
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout), &lpMsgBox);
-        if (lpMsgBox)
-        {
-            wchar_t strText2[MAX_TEXT_LENGTH] = { 0, };
-            mu_swprintf(strText2, I18N::Game::SellingPriceSZen, strText);
-            lpMsgBox->AddMsg(strText2, RGBA(255, 0, 0, 255), MSGBOX_FONT_BOLD);
-            lpMsgBox->AddMsg(I18N::Game::DoYouWantToSellItemAtThisPrice);
-            lpMsgBox->SetItemValue(iInputZen);
-        }
-    }
-    else
-    {
-        if (g_pMyShopInventory->IsEnablePersonalShop() == true)
-        {
-            SocketClient->ToGameServer()->SendPlayerShopClose();
-        }
-
-        CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-
-        int iSourceIndex = -1, iTargetIndex = -1;
-        int shopWndType = 0;
-
-        if (pPickedItem)
-        {
-            ITEM* pItemObj = pPickedItem->GetItem();
-            iSourceIndex = pPickedItem->GetSourceLinealPos();
-            iTargetIndex = g_pMyShopInventory->GetTargetIndex();
-
-            if (pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
-            {
-                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
-
-                SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
-            }
-            else if (pPickedItem->GetOwnerInventory() == nullptr)
-            {
-                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
-
-                SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
-            }
-            else if (pPickedItem->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
-            {
-                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
-
-                SendRequestEquipmentItem(STORAGE_TYPE::MYSHOP, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
-            }
-
-            AddPersonalItemPrice(iTargetIndex, iInputZen, g_IsPurchaseShop);
-        }
-        else
-        {
-            iSourceIndex = g_pMyShopInventory->GetSourceIndex();
-            SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
-            AddPersonalItemPrice(iSourceIndex, iInputZen, g_IsPurchaseShop);
-        }
+        ApplyPersonalShopItemPrice(price);
     }
 
     g_pMyShopInventory->SetInputValueTextBox(false);
