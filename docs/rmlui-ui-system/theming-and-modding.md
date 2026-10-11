@@ -1,8 +1,9 @@
 # Theming & Modding
 
 How to edit and select themes, use shared design tokens, and supply custom assets. The client
-ships `legacy` and `modern`; additional theme folders work without recompilation and can inherit
-an existing theme. A separate user/mod override layer is not implemented.
+ships `legacy` and `modern`, plus `legacy-inherited-test` for checking inheritance without visual
+overrides. Additional theme folders work without recompilation and can inherit an existing theme.
+A separate user/mod override layer is not implemented.
 
 ## Shared markup and theme-specific structure
 
@@ -92,6 +93,11 @@ ids/classes/bindings have to be kept in step with the shared file by hand;
 fields; visual structure and interaction still need testing in the client.
 
 ## Adding a theme folder
+
+For development builds, keep themes under `src/bin/Data/Interface/RmlUi/themes/`.
+Asset staging replaces the runtime RmlUi directory with this source tree, so a theme added
+only beside `Main.exe` is removed on the next asset copy. `legacy-inherited-test` supplies
+only `theme.ini` and should look identical to `legacy`, including the login scene.
 
 A custom theme can contain only the resources it changes. For example, a `classic` theme can
 inherit `legacy` by putting this in `themes/classic/theme.ini`:
