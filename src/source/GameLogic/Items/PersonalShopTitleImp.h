@@ -331,7 +331,7 @@ inline void AddPersonalItemPrice(int index, const GameLogic::PersonalShop::ItemP
 /// Adds a price in zen.
 inline void AddPersonalItemPrice(int index, int price, int type)
 {
-    AddPersonalItemPrice(index, GameLogic::PersonalShop::ItemPrice{ price }, type);
+    AddPersonalItemPrice(index, GameLogic::PersonalShop::ItemPrice{price}, type);
 }
 
 inline void RemovePersonalItemPrice(int index, int type)

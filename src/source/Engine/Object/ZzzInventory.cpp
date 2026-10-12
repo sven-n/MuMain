@@ -2020,7 +2020,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
                 TextListColor[TextNum] = TEXT_COLOR_YELLOW;
                 TextBold[TextNum] = true;
                 TextNum++;
-                mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+                mu_swprintf(TextList[TextNum], L"\n");
+                TextNum++;
+                SkipNum++;
             }
             else if (hasPrice)
             {

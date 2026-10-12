@@ -9395,8 +9395,8 @@ namespace
 {
 GameLogic::PersonalShop::ItemPrice DecodeShopItemPrice(const GETPSHOPITEM_DATAINFO& shopItem)
 {
-    return GameLogic::PersonalShop::DecodeExtendedPrice(
-        static_cast<uint32_t>(shopItem.MoneyPrice), shopItem.PriceItemType, shopItem.RequiredItemAmount);
+    return GameLogic::PersonalShop::DecodeExtendedPrice(static_cast<uint32_t>(shopItem.MoneyPrice),
+                                                        shopItem.PriceItemType, shopItem.RequiredItemAmount);
 }
 } // namespace
 
@@ -9414,7 +9414,8 @@ void ReceivePersonalShopPriceTypes(std::span<const BYTE> ReceiveBuffer)
     std::vector<uint16_t> priceItemTypes(count);
     for (size_t i = 0; i < count; ++i)
     {
-        priceItemTypes[i] = static_cast<uint16_t>(priceTypesData[i * sizeof(WORD)] | (priceTypesData[i * sizeof(WORD) + 1] << 8));
+        priceItemTypes[i] =
+            static_cast<uint16_t>(priceTypesData[i * sizeof(WORD)] | (priceTypesData[i * sizeof(WORD) + 1] << 8));
     }
 
     GameLogic::PersonalShop::SetAllowedPriceTypes(priceItemTypes);

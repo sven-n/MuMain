@@ -27,8 +27,8 @@ void SEASON3B::CPersonalShopPriceMsgBox::AddCurrencySelection()
 
     const float x = GetPos().x + (MSGBOX_WIDTH / 2) - (MSGBOX_BTN_EMPTY_WIDTH / 2);
     const float y = GetPos().y + MSGBOX_TEXT_TOP_BLANK + MSGBOX_MIDDLE_HEIGHT;
-    m_BtnCurrency.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y,
-        MSGBOX_BTN_EMPTY_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnCurrency.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, MSGBOX_BTN_EMPTY_WIDTH,
+                          MSGBOX_BTN_EMPTY_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnCurrency.SetText(GameLogic::PersonalShop::GetCurrencyName(m_priceType));
 
     // Replaces the callback of the base class, which is called for the other buttons.
@@ -59,7 +59,8 @@ bool SEASON3B::CPersonalShopPriceMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopPriceMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+SEASON3B::CALLBACK_RESULT SEASON3B::CPersonalShopPriceMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner,
+                                                                        const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CPersonalShopPriceMsgBox*>(pOwner);
     if (pMsgBox && pMsgBox->m_isCurrencySelectable && pMsgBox->m_BtnCurrency.IsMouseIn())
@@ -80,16 +81,16 @@ void SEASON3B::CPersonalShopPriceMsgBox::SelectNextCurrency()
 
 namespace UI::PersonalShop
 {
-    void SendItemPrice(int itemSlot, const GameLogic::PersonalShop::ItemPrice& price)
+void SendItemPrice(int itemSlot, const GameLogic::PersonalShop::ItemPrice& price)
+{
+    if (price.Kind == GameLogic::PersonalShop::PriceKind::Zen)
     {
-        if (price.Kind == GameLogic::PersonalShop::PriceKind::Zen)
-        {
-            SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(itemSlot, price.Amount);
-            return;
-        }
-
-        const auto encoded = GameLogic::PersonalShop::EncodeExtendedPrice(price);
-        SocketClient->ToGameServer()->SendPlayerShopSetItemPriceExtended(
-            encoded.MoneyPrice, encoded.PriceItemType, encoded.RequiredItemAmount, itemSlot);
+        SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(itemSlot, price.Amount);
+        return;
     }
+
+    const auto encoded = GameLogic::PersonalShop::EncodeExtendedPrice(price);
+    SocketClient->ToGameServer()->SendPlayerShopSetItemPriceExtended(encoded.MoneyPrice, encoded.PriceItemType,
+                                                                     encoded.RequiredItemAmount, itemSlot);
 }
+} // namespace UI::PersonalShop

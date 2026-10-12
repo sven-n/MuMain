@@ -4376,9 +4376,8 @@ namespace
 bool IsZenPriceBelowItemValue(int price)
 {
     SEASON3B::CNewUIPickedItem* pPickedItem = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
-    ITEM* pItem = pPickedItem
-        ? pPickedItem->GetItem()
-        : g_pMyShopInventory->FindItem(g_pMyShopInventory->GetSourceIndex());
+    ITEM* pItem =
+        pPickedItem ? pPickedItem->GetItem() : g_pMyShopInventory->FindItem(g_pMyShopInventory->GetSourceIndex());
     if (pItem == nullptr)
     {
         return false;
@@ -4396,7 +4395,7 @@ void ShowZenPriceConfirmation(const wchar_t* strPrice, int price)
         return;
     }
 
-    wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
+    wchar_t strText[MAX_TEXT_LENGTH] = {};
     mu_swprintf(strText, I18N::Game::SellingPriceSZen, strPrice);
     lpMsgBox->AddMsg(strText, RGBA(255, 0, 0, 255), SEASON3B::MSGBOX_FONT_BOLD);
     lpMsgBox->AddMsg(I18N::Game::DoYouWantToSellItemAtThisPrice);
@@ -4438,7 +4437,8 @@ void ApplyPersonalShopItemPrice(const GameLogic::PersonalShop::ItemPrice& price)
 }
 } // namespace
 
-CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner,
+                                                                        const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CPersonalShopPriceMsgBox*>(pOwner);
     if (pMsgBox == nullptr)
@@ -4446,7 +4446,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
         return CALLBACK_CONTINUE;
     }
 
-    wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
+    wchar_t strText[MAX_TEXT_LENGTH] = {};
     pMsgBox->GetInputBoxText(strText);
     if (wcslen(strText) == 0)
     {
