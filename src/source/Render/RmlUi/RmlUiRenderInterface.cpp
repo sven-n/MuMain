@@ -70,7 +70,8 @@ Rml::TextureHandle RmlUiRenderInterface::LoadTexture(Rml::Vector2i& texture_dime
     // GenerateTexture()); the game's files are straight alpha, so a transparent pixel with a
     // non-black colour would be added at full strength (the mini map's markers drew white squares).
     // The loader premultiplies this exclusive copy -- native rendering never samples it -- before
-    // the upload, so the texture is uploaded once.
+    // the upload: for upscaled art the uploaded image is larger than bmp->Width x bmp->Height, so
+    // it cannot be premultiplied here.
     constexpr bool PadToPowerOfTwo = false;
     constexpr bool PremultiplyAlpha = true;
     const GLuint bitmapIndex =
