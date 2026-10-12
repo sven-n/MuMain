@@ -98,6 +98,10 @@ private:
     bool m_musicLoaded = false;
     // Separators-normalized track name, not the resolved path — see IsSameMusicTrack().
     std::string m_currentMusicName;
+    // The last track that could not be opened (same form as m_currentMusicName).
+    // Scenes request their music, and stop the other maps' tracks, every frame;
+    // without this a missing file would be opened, and reported, on every frame.
+    std::string m_failedMusicName;
     bool m_initialized = false;
 };
 

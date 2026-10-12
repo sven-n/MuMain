@@ -89,7 +89,8 @@ MiniAudioBackend::~MiniAudioBackend()
 {
     if (m_initialized)
     {
-        Shutdown();
+        // Qualified: a destructor never dispatches virtually anyway.
+        MiniAudioBackend::Shutdown();
     }
 }
 
@@ -551,6 +552,12 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
     {
         return;
     }
+    // A track that could not be opened is tried again only when it is enforced,
+    // after another track was requested, or after the music was stopped.
+    if (!enforce && !m_failedMusicName.empty() && IsSameMusicTrack(m_failedMusicName, name))
+    {
+        return;
+    }
 
     // Stop and release previous music stream
     if (m_musicLoaded)
@@ -584,8 +591,10 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
     {
         mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- failed to init stream '{}' ({})", filePath,
                                      static_cast<int>(result));
+        m_failedMusicName = std::move(identity);
         return;
     }
+    m_failedMusicName.clear();
 
     ma_sound_set_looping(&m_musicSound, MA_TRUE);
     // Story 5.4.1: Apply stored BGM volume to new track before starting
@@ -612,6 +621,13 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::StopMusic(const char* name, bool enforce)
 {
+    // Stopping all music (also turning it off) or the failed track itself lets
+    // that track be tried again. Scenes stop the other maps' tracks by name
+    // every frame; those stops leave it alone.
+    if (enforce || name == nullptr || (!m_failedMusicName.empty() && IsSameMusicTrack(m_failedMusicName, name)))
+    {
+        m_failedMusicName.clear();
+    }
     if (!m_initialized || !m_musicLoaded)
     {
         return;

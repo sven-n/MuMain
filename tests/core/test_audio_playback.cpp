@@ -201,6 +201,75 @@ TEST_CASE("a track stopped by name plays again when replayed [audio][music]")
     std::filesystem::remove_all(testDirectory);
 }
 
+TEST_CASE("a track that cannot be opened is not opened again on every request [audio][music]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+    const std::filesystem::path testDirectory = CreateMusicAsset();
+    const std::filesystem::path assetPath = testDirectory / "Data" / "Music" / "track.wav";
+    const std::filesystem::path movedPath = testDirectory / "track.wav";
+    const std::string track = (testDirectory / "Data" / "Music" / "track.wav").string();
+    const std::string other = (testDirectory / "Data" / "Music" / "other.wav").string();
+
+    // The file is missing when the scene first asks for it.
+    std::filesystem::rename(assetPath, movedPath);
+    backend->PlayMusic(track.c_str(), false);
+    REQUIRE(backend->IsEndMusic());
+
+    // It appears, but the scene's per-frame requests do not open it again, also
+    // not after the scene stops other maps' tracks by name, as it does every frame.
+    std::filesystem::rename(movedPath, assetPath);
+    backend->PlayMusic(track.c_str(), false);
+    CHECK(backend->IsEndMusic());
+    backend->StopMusic(other.c_str(), false);
+    backend->PlayMusic(track.c_str(), false);
+    CHECK(backend->IsEndMusic());
+
+    // Another request in between lets it be tried, and it plays.
+    backend->PlayMusic(other.c_str(), false);
+    backend->PlayMusic(track.c_str(), false);
+    CHECK_FALSE(backend->IsEndMusic());
+
+    backend->Shutdown();
+    std::filesystem::remove_all(testDirectory);
+}
+
+TEST_CASE("an enforced request or a stop tries a failed track again [audio][music]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+    const std::filesystem::path testDirectory = CreateMusicAsset();
+    const std::filesystem::path assetPath = testDirectory / "Data" / "Music" / "track.wav";
+    const std::filesystem::path movedPath = testDirectory / "track.wav";
+    const std::string track = assetPath.string();
+
+    std::filesystem::rename(assetPath, movedPath);
+    backend->PlayMusic(track.c_str(), false);
+    std::filesystem::rename(movedPath, assetPath);
+    backend->PlayMusic(track.c_str(), true);
+    CHECK_FALSE(backend->IsEndMusic());
+
+    backend->StopMusic(nullptr, true);
+    std::filesystem::rename(assetPath, movedPath);
+    backend->PlayMusic(track.c_str(), false);
+    std::filesystem::rename(movedPath, assetPath);
+    backend->StopMusic(nullptr, true);
+    backend->PlayMusic(track.c_str(), false);
+    CHECK_FALSE(backend->IsEndMusic());
+
+    // A stop of that same track by name lets it be tried again too.
+    backend->StopMusic(nullptr, true);
+    std::filesystem::rename(assetPath, movedPath);
+    backend->PlayMusic(track.c_str(), false);
+    std::filesystem::rename(movedPath, assetPath);
+    backend->StopMusic(track.c_str(), false);
+    backend->PlayMusic(track.c_str(), false);
+    CHECK_FALSE(backend->IsEndMusic());
+
+    backend->Shutdown();
+    std::filesystem::remove_all(testDirectory);
+}
+
 #ifdef _EDITOR
 namespace
 {
