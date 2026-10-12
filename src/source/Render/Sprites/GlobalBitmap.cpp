@@ -184,6 +184,19 @@ SDL_GPUSampler* CreateSampler(SDL_GPUDevice* device, SDL_GPUFilter filter, SDL_G
     return SDL_CreateGPUSampler(device, &samplerInfo);
 }
 
+// The CPU copy of an upscaled texture is up to 16 times the original and
+// nothing reads it after the upload: only the canvases (BITMAP_FONT,
+// BITMAP_GUILD) are redrawn through Buffer, and those never carry the marker.
+// Keeping the copies took the 32 bit client past 3.3 GB of address space.
+// Returns the bytes released.
+std::size_t ReleaseUploadedPixels(BITMAP_t& bitmap)
+{
+    const std::size_t released = bitmap.BufferStorage.size();
+    std::vector<std::uint8_t>().swap(bitmap.BufferStorage);
+    bitmap.Buffer = nullptr;
+    return released;
+}
+
 bool UploadTextureSDLGpu(BITMAP_t* bitmap, const std::uint8_t* pixelData, int width, int height, SDL_GPUFilter filter,
                          SDL_GPUSamplerAddressMode wrapMode, bool mipmapped)
 {
@@ -959,6 +972,10 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
         g_ErrorReport.Write(L"SDL texture upload failed %ls (%d)\r\n", filename.c_str(), uiBitmapIndex);
         return false;
     }
+    if (scale > Render::Textures::Upscale::NoScale)
+    {
+        m_dwUsedTextureMemory -= static_cast<std::uint32_t>(ReleaseUploadedPixels(*pNewBitmap));
+    }
 
     SDL_GPUTexture* rawTexture = pNewBitmap->sdlTexture;
     SDL_GPUSampler* rawSampler = pNewBitmap->sdlSampler;
@@ -1022,6 +1039,10 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     {
         g_ErrorReport.Write(L"SDL texture upload failed %ls (%d)\r\n", filename.c_str(), uiBitmapIndex);
         return false;
+    }
+    if (scale > Render::Textures::Upscale::NoScale)
+    {
+        m_dwUsedTextureMemory -= static_cast<std::uint32_t>(ReleaseUploadedPixels(*pNewBitmap));
     }
 
     SDL_GPUTexture* rawTexture = pNewBitmap->sdlTexture;

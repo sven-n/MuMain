@@ -24,8 +24,8 @@ struct BITMAP_t
     GLuint BitmapIndex;
     wchar_t FileName[MAX_BITMAP_FILE_NAME];
     // The size the game works with. For upscaled art (Render/Textures/UpscaleMarker.h)
-    // the uploaded texture and Buffer are larger. A bitmap drawn on through Buffer, with
-    // Width as its row length (BITMAP_FONT, BITMAP_GUILD), must therefore never be upscaled.
+    // the uploaded texture is larger and Buffer is released after the upload. A bitmap
+    // drawn on through Buffer (BITMAP_FONT, BITMAP_GUILD) must therefore never be upscaled.
     float Width;
     float Height;
     char Components;
