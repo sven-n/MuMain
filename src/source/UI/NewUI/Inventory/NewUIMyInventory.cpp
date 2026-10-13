@@ -1283,8 +1283,7 @@ void CNewUIMyInventory::RenderEquippedItem()
 
             if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
             {
-                if (pEquipmentItemSlot->Type == ITEM_WIZARDS_RING && iLevel == 1
-                    || iLevel == 2)
+                if (pEquipmentItemSlot->Type == ITEM_WIZARDS_RING && (iLevel == 1 || iLevel == 2))
                 {
                     continue;
                 }
