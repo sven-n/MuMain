@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "I18N/All.h"
 
@@ -22,9 +23,9 @@
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/ItemCategories.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/Inventory/InventoryCtrl.h"
 #include "Network/Server/SocketSystem.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"

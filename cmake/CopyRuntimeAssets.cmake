@@ -28,6 +28,10 @@ foreach(asset_dll IN LISTS asset_dlls)
     file(REMOVE "${MU_ASSET_OUTPUT}/${asset_dll}")
 endforeach()
 
+# The copy below never deletes, and a theme's RML deleted from source would keep overriding the
+# shared document. The RmlUi tree is entirely source-owned, so mirror it exactly.
+file(REMOVE_RECURSE "${MU_ASSET_OUTPUT}/Data/Interface/RmlUi")
+
 file(COPY "${MU_ASSET_SOURCE}/"
     DESTINATION "${MU_ASSET_OUTPUT}"
     PATTERN "*.dll" EXCLUDE

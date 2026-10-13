@@ -5,8 +5,7 @@
 class CHARACTER;
 class OBJECT;
 
-// Chat balloons: the speech bubbles drawn above characters and the message
-// list that feeds them. Extracted from ZzzInterface.cpp.
+// Chat balloons: speech bubbles drawn above characters, plus the message list that feeds them.
 namespace UI::Chat
 {
     inline bool HasCurrentOwnerName(const wchar_t* cachedName, const wchar_t* currentName)

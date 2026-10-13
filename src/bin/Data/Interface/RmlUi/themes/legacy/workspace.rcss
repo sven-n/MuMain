@@ -1,0 +1,123 @@
+/* Window placement for the legacy theme. The game reads where each open slot lands; nothing here is drawn. */
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	visibility: hidden;
+	pointer-events: none;
+}
+
+#workspace_shell { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; }
+#shell_middle { position: relative; display: flex; flex-direction: row; flex: 1 1 0; min-height: 0; }
+#safe_area { position: relative; flex: 1 1 0; min-width: 0; min-height: 0; }
+.region.shell-region { position: relative; display: flex; flex: 0 0 auto; }
+#shell_header { align-items: flex-start; }
+#shell_header .slot[data-window="top_bar"] { margin-left: auto; }
+#shell_footer { justify-content: center; }
+#shell_left, #shell_right { flex-direction: column; }
+.shell-region[data-participation="overlay"] { position: absolute; }
+#shell_header[data-participation="overlay"] { top: 0; left: 0; right: 0; }
+#shell_footer[data-participation="overlay"] { bottom: 0; left: 0; right: 0; }
+#shell_left[data-participation="overlay"] { left: 0; top: 0; bottom: 0; }
+#shell_right[data-participation="overlay"] { right: 0; top: 0; bottom: 0; }
+
+.region {
+	position: absolute;
+}
+
+/* The original's docked columns: open windows pack from the right edge, sitting on the HUD. */
+.dock-right {
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: flex-start;
+}
+
+.slot {
+	display: none;
+	flex: 0 0 auto;
+}
+
+.slot.open {
+	display: block;
+}
+
+/* The original's left-docked warp list, sitting on the HUD. */
+.dock-left {
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+}
+
+/* The chat in the bottom-left corner above the HUD; the log overlaps the input box by 1 unit,
+   as the original drew them. */
+.chat-stack {
+	left: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+.chat-stack .slot[data-window="chat_log"] { margin-bottom: -1dp; }
+
+/* The event HUDs: the original's 640x480 frame standing on the HUD, in its units (one unit is
+   --hud-scale px), its top 429 units above the HUD, each at the original's place in it. Centred
+   like the HUD, so they keep their places beside it at any UI scale. The spectator list's slot is
+   its bottom-left corner; the list grows upwards. */
+.event-hud {
+	left: 50%;
+	margin-left: calc(-320px * var(--hud-scale));
+	bottom: 0;
+	width: calc(640px * var(--hud-scale));
+	height: calc(429px * var(--hud-scale));
+}
+.event-hud .slot { position: absolute; }
+.event-hud .slot[data-window="blood_castle_time"],
+.event-hud .slot[data-window="chaos_castle_time"] { left: calc(513px * var(--hud-scale)); top: calc(348px * var(--hud-scale)); }
+.event-hud .slot[data-window="battle_soccer"],
+.event-hud .slot[data-window="duel"] { left: calc(509px * var(--hud-scale)); top: calc(359px * var(--hud-scale)); }
+.event-hud .slot[data-window="kanturu_info"] { left: calc(541px * var(--hud-scale)); top: calc(351px * var(--hud-scale)); }
+.event-hud .slot[data-window="empire_guardian_timer"] { left: calc(507px * var(--hud-scale)); top: calc(342px * var(--hud-scale)); }
+.event-hud .slot[data-window="doppelganger_frame"] { left: calc(413px * var(--hud-scale)); top: calc(342px * var(--hud-scale)); }
+.event-hud .slot[data-window="duel_watch_users"] { left: calc(583px * var(--hud-scale)); top: calc(429px * var(--hud-scale)); }
+
+/* Where a free window (the friend list) first opens: the bottom-right corner above the HUD. */
+.free-bottom-right {
+	right: 0;
+	bottom: 0;
+}
+
+/* The original's centred NPC panels: a 640x480 stage in the screen's centre (1dp is one of its
+   units at the panel scale), each panel centred across it at the original's height. */
+.panel-stage {
+	left: 50%;
+	top: 50%;
+	width: 640dp;
+	height: 480dp;
+	margin-left: -320dp;
+	margin-top: -240dp;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.panel-stage .slot[data-window="kanturu_entry"] { margin-top: 20dp; }
+.panel-stage .slot[data-window="cursed_temple_entry"] { margin-top: 80dp; }
+.panel-stage .slot[data-window="cursed_temple_result"] { margin-top: 120dp; }
+.panel-stage .slot[data-window="in_game_shop"] { margin-top: 0; }
+
+/* The six-line message area; it never collapses between messages. */
+.system-log-stack {
+    left: 4dp;
+    top: 84dp;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+/* The performance overlays start at the top-left corner, over the HUD's corner widgets. */
+.diagnostics-corner { left: 0; top: 0; }

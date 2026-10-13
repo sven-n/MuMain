@@ -2336,10 +2336,10 @@ void GMEmpireGuardian1::RenderFrontSideVisual()
         float WindX2 = (float)((int)WorldTime % 100000) * 0.00005f;
         float WindY2 = (float)((int)WorldTime % 100000) * 0.00008f;
         RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
-                       UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX2, WindY2, 2.0f, 2.0f);
+                       UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX2, WindY2, 2.0f, 2.0f);
         float WindX = -(float)((int)WorldTime % 100000) * 0.00005f;
         RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
-                       UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f);
+                       UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f);
     }
     break;
     case WEATHER_STORM:
@@ -2350,11 +2350,11 @@ void GMEmpireGuardian1::RenderFrontSideVisual()
             float WindX2 = (float)((int)WorldTime % 100000) * 0.0006f;
             float WindY2 = -(float)((int)WorldTime % 100000) * 0.0006f;
             RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
-                           UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX2, WindY2, 3.0f, 2.0f);
+                           UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX2, WindY2, 3.0f, 2.0f);
             WindX2 = -(float)((int)WorldTime % 100000) * 0.0006f;
             WindY2 = (float)((int)WorldTime % 100000) * 0.0006f;
             RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
-                           UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX2, WindY2, 3.0f, 2.0f);
+                           UI::Scaling::ScreenOverlayFullHeight(WindowWidth, WindowHeight), WindX2, WindY2, 3.0f, 2.0f);
         }
     }
     break;

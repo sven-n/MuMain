@@ -1,0 +1,230 @@
+/* Legacy pieces the MU Helper config window and its detail panel share -- each one a straight
+   reading of the native draw call it replaces. Link
+   after docked_panel_frame.rcss: #panel, the frame sprites, the group-box corners and the exit
+   button come from there. Plain reference px throughout; #panel carries transform: scale(root_scale).
+
+   Text leaves are .sharp-text layers counter-scaled out of #panel in the RML, so this file never
+   sets a text font-size -- see character_info.rml's header comment for the technique. */
+
+.frame-top { decorator: image(docked-bg-top-b); }
+
+/* The docked family's exit sits at (13, 392); the MU Helper's at (20, 388). */
+#btn_exit { left: 20px; top: 388px; }
+
+.mh-text {
+	display: block;
+	position: absolute;
+	white-space: nowrap;
+	color: token(text-primary);
+	pointer-events: none;
+}
+/* .mh-text's display:block has the same specificity as base.rcss's .hidden and comes later, so a
+   data-class-hidden page header or tab label would stay on screen over its sibling. */
+.mh-text.hidden { display: none; }
+.mh-text.mh-center { text-align: center; }
+.mh-text.mh-bold { font-weight: bold; }
+
+/* A page title: bold, centred on the panel's own 190 units, 13 down. */
+.mh-title { left: 0; top: 13px; }
+
+/* --- Tabbed pane ------------------------------------------------------------------------------
+   RenderBackPane(): a 65-wide header tab sitting on a 165-wide box, drawn as two translucent fills
+   (0x66000000) under the table sprites -- 14x14 corners, and the 1px edge sprites stretched across
+   each edge, which is exactly what native's crop of a 1px texture with GL_CLAMP draws. Every piece
+   is its own childless sibling: a decorated leaf with children can render an incomplete box in this
+   build. Offsets are relative to the pane; .mh-pane-h70 is the one taller variant (the elf party
+   page's heal-support pane). */
+@spritesheet mh-edge-top-sheet    { src: "../../../newui_item_table03(Up).tga"; mh-edge-top:    0px 0px 1px 14px; }
+@spritesheet mh-edge-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; mh-edge-bottom: 0px 0px 1px 14px; }
+@spritesheet mh-edge-left-sheet   { src: "../../../newui_item_table03(L).tga";  mh-edge-left:   0px 0px 14px 1px; }
+@spritesheet mh-edge-right-sheet  { src: "../../../newui_item_table03(R).tga";  mh-edge-right:  0px 0px 14px 1px; }
+
+.mh-pane { position: absolute; width: 165px; pointer-events: none; }
+.mh-pane .p { position: absolute; pointer-events: none; }
+
+.mh-pane .p-fill-tab  { left: 3px; top: 2px;  width: 58px;  height: 18px; background-color: rgba(0, 0, 0, 102); }
+.mh-pane .p-fill-body { left: 3px; top: 20px; width: 158px; height: 38px; background-color: rgba(0, 0, 0, 102); }
+
+.mh-pane .p-tab-tl    { left: 0;     top: 0;    width: 14px;  height: 14px; decorator: image(docked-corner-tl); }
+.mh-pane .p-tab-tr    { left: 51px;  top: 0;    width: 14px;  height: 14px; decorator: image(docked-corner-tr); }
+.mh-pane .p-tab-top   { left: 6px;   top: 0;    width: 53px;  height: 14px; decorator: image(mh-edge-top); }
+.mh-pane .p-tab-right { left: 51px;  top: 6px;  width: 14px;  height: 14px; decorator: image(mh-edge-right); }
+
+.mh-pane .p-box-tr     { left: 151px; top: 18px; width: 14px;  height: 14px; decorator: image(docked-corner-tr); }
+.mh-pane .p-box-bl     { left: 0;     top: 49px; width: 14px;  height: 14px; decorator: image(docked-corner-bl); }
+.mh-pane .p-box-br     { left: 151px; top: 49px; width: 14px;  height: 14px; decorator: image(docked-corner-br); }
+.mh-pane .p-box-top    { left: 2px;   top: 18px; width: 153px; height: 14px; decorator: image(mh-edge-top); }
+.mh-pane .p-box-right  { left: 151px; top: 24px; width: 14px;  height: 31px; decorator: image(mh-edge-right); }
+.mh-pane .p-box-bottom { left: 6px;   top: 49px; width: 153px; height: 14px; decorator: image(mh-edge-bottom); }
+.mh-pane .p-left       { left: 0;     top: 6px;  width: 14px;  height: 45px; decorator: image(mh-edge-left); }
+
+.mh-pane .mh-text { left: 10px; top: 6px; }
+
+.mh-pane-h70 .p-fill-body { height: 63px; }
+.mh-pane-h70 .p-box-bl,
+.mh-pane-h70 .p-box-br,
+.mh-pane-h70 .p-box-bottom { top: 74px; }
+.mh-pane-h70 .p-box-right { height: 56px; }
+.mh-pane-h70 .p-left { height: 70px; }
+
+/* --- Threshold gauge ---------------------------------------------------------------------------
+   base.rcss's .level-gauge at RenderHpLevel()'s size. Native's hit rectangle began 7 units before
+   the rail and ended 1 unit after it. */
+.mh-gauge { position: absolute; width: 124px; height: 16px; }
+.mh-gauge-hit { left: -7px; right: -1px; }
+.mh-gauge-fill { height: 16px; }
+
+/* --- Checkbox / radio --------------------------------------------------------------------------
+   CCheckBox: a 15x15 box from a two-frame 15x30 sheet -- frame 0 (top) is CHECKED, frame 1 the
+   empty box (SetNowFrame(State ? 0 : 1)), the reverse of base.rcss's own checkbox sheet -- with its
+   label 16 across and 4 down in the normal font. Only the box takes the click, as natively. The
+   radio-behaving ones (the conditions, the Dark Raven modes) use the MacroUI option-button art. */
+@spritesheet mh-check-sheet { src: "../../../newui_option_check.tga";          mh-check-on: 0px 0px 15px 15px; mh-check-off: 0px 15px 15px 15px; }
+@spritesheet mh-radio-sheet { src: "../../../MacroUI/MacroUI_OptionButton.tga"; mh-radio-on: 0px 0px 15px 15px; mh-radio-off: 0px 15px 15px 15px; }
+
+.mh-check .checkbox-box {
+	position: absolute;
+	width: 15px;
+	height: 15px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(mh-check-off);
+}
+.mh-check .checkbox-box.checked { decorator: image(mh-check-on); }
+.mh-check .checkbox-label { left: 16px; top: 4px; }
+.mh-check.mh-radio .checkbox-box { decorator: image(mh-radio-off); }
+.mh-check.mh-radio .checkbox-box.checked { decorator: image(mh-radio-on); }
+
+/* --- Footer buttons ----------------------------------------------------------------------------
+   The in-game-shop button art, three 52x26 frames: up, over, down (ChangeButtonImgState with
+   overflg set). The label is a sibling laid over the button, not a child of it -- see the pane note
+   above -- and lets the mouse through to it. */
+@spritesheet mh-igs-sheet
+{
+	src: "../../../InGameShop/Ingame_Bt03.tga";
+	mh-igs-up:   0px  0px 52px 26px;
+	mh-igs-over: 0px 26px 52px 26px;
+	mh-igs-down: 0px 52px 52px 26px;
+}
+.mh-btn-igs {
+	position: absolute;
+	width: 52px;
+	height: 26px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(mh-igs-up);
+}
+.mh-btn-igs:hover  { decorator: image(mh-igs-over); }
+.mh-btn-igs:active { decorator: image(mh-igs-down); }
+/* Every labelled native button here set MoveTextPos(0, -1). */
+.mh-btn-label { margin-top: -1px; }
+
+/* --- Numeric field -----------------------------------------------------------------------------
+   MacroUI_InputNumber is 28 wide but native drew it into a 20-wide box -- a crop, like the gauge.
+   The field on top is black text on that plate (native's CUITextInputBox colours), with no chrome of
+   its own; the config window's item-name field sits on the wider MacroUI_InputString plate the same
+   way. */
+@spritesheet mh-number-plate-sheet { src: "../../../MacroUI/MacroUI_InputNumber.tga"; mh-number-plate: 0px 0px 20px 15px; }
+.mh-number-plate { position: absolute; width: 20px; height: 15px; decorator: image(mh-number-plate); pointer-events: none; }
+
+.mh-field {
+	position: absolute;
+	color: #000000;
+	background-color: transparent;
+	border-width: 0;
+	border-radius: 0;
+	padding: 0;
+}
+
+@spritesheet mh-string-plate-sheet { src: "../../../MacroUI/MacroUI_InputString.tga"; mh-string-plate: 0px 0px 93px 15px; }
+.mh-string-plate { position: absolute; width: 94px; height: 15px; decorator: image(mh-string-plate); pointer-events: none; }
+
+/* --- Plain group box (config window) -----------------------------------------------------------
+   RenderBack(): a translucent fill inset 3/2 and 4/5, the four 14x14 corners, then the four 1px edge
+   sprites stretched over them -- in that order, so the edges paint over the corners as natively. The
+   pieces anchor to the box's own edges, so only each box's rectangle is per-instance. */
+.mh-box { position: absolute; pointer-events: none; }
+.mh-box .b { position: absolute; pointer-events: none; }
+.mh-box .b-fill   { left: 3px; top: 2px; right: 4px; bottom: 5px; background-color: rgba(0, 0, 0, 102); }
+.mh-box .b-tl     { left: 0;  top: 0;    width: 14px; height: 14px; decorator: image(docked-corner-tl); }
+.mh-box .b-tr     { right: 0; top: 0;    width: 14px; height: 14px; decorator: image(docked-corner-tr); }
+.mh-box .b-bl     { left: 0;  bottom: 0; width: 14px; height: 14px; decorator: image(docked-corner-bl); }
+.mh-box .b-br     { right: 0; bottom: 0; width: 14px; height: 14px; decorator: image(docked-corner-br); }
+.mh-box .b-top    { left: 6px; right: 6px; top: 0;    height: 14px; decorator: image(mh-edge-top); }
+.mh-box .b-bottom { left: 6px; right: 6px; bottom: 0; height: 14px; decorator: image(mh-edge-bottom); }
+.mh-box .b-left   { left: 0;  top: 6px; bottom: 8px; width: 14px; decorator: image(mh-edge-left); }
+.mh-box .b-right  { right: 0; top: 6px; bottom: 8px; width: 14px; decorator: image(mh-edge-right); }
+
+/* --- Tabs --------------------------------------------------------------------------------------
+   Native pointed its tab group at IMAGE_GUILDINFO_TAB_BUTTON, a slot nothing ever loads, so the
+   tabs drew from an empty texture. newui_guild_tab04 is two 56x22 frames -- exactly this tab's size
+   -- and is the art that slot was evidently meant to hold: up on top, selected below. Label grey
+   while up, white when selected (CRadioButton::ChangeFrame). */
+@spritesheet mh-tab-sheet { src: "../../../newui_guild_tab04.tga"; mh-tab-up: 0px 0px 56px 22px; mh-tab-on: 0px 22px 56px 22px; }
+.mh-tab { position: absolute; top: 48px; width: 56px; height: 22px; cursor: pointer; pointer-events: auto; decorator: image(mh-tab-up); }
+.mh-tab.active { decorator: image(mh-tab-on); }
+.mh-tab-label { top: 48px; color: token(text-muted); }
+.mh-tab-label.active { color: token(text-primary); }
+#tab_0, #tab_0_label { left: 10px; }
+#tab_1, #tab_1_label { left: 66px; }
+#tab_2, #tab_2_label { left: 122px; }
+
+/* --- Config window buttons ---------------------------------------------------------------------
+   The range steppers are the character window's level-up "+" and MacroUI's "-", each two 16x15
+   frames with no hover (overflg off: up, then pressed). "Setting", "Add" and "Delete" are the
+   illusion-temple clearness button, three 38x24 frames: up, over, down. */
+@spritesheet mh-plus-sheet  { src: "../../../newui_chainfo_btn_level.tga";   mh-plus-up:  0px 0px 16px 15px; mh-plus-down:  0px 15px 16px 15px; }
+@spritesheet mh-minus-sheet { src: "../../../MacroUI/MacroUI_RangeMinus.tga"; mh-minus-up: 0px 0px 16px 15px; mh-minus-down: 0px 15px 16px 15px; }
+@spritesheet mh-setting-sheet
+{
+	src: "../../../newui_Bt_clearness_illusion.jpg";
+	mh-setting-up:   0px  0px 38px 24px;
+	mh-setting-over: 0px 24px 38px 24px;
+	mh-setting-down: 0px 48px 38px 24px;
+}
+.mh-btn-plus, .mh-btn-minus { position: absolute; width: 16px; height: 15px; cursor: pointer; pointer-events: auto; }
+.mh-btn-plus         { decorator: image(mh-plus-up); }
+.mh-btn-plus:active  { decorator: image(mh-plus-down); }
+.mh-btn-minus        { decorator: image(mh-minus-up); }
+.mh-btn-minus:active { decorator: image(mh-minus-down); }
+.mh-btn-setting        { position: absolute; width: 38px; height: 24px; cursor: pointer; pointer-events: auto; decorator: image(mh-setting-up); }
+.mh-btn-setting:hover  { decorator: image(mh-setting-over); }
+.mh-btn-setting:active { decorator: image(mh-setting-down); }
+
+/* --- Range digit -------------------------------------------------------------------------------
+   One CryWolf rank-number texture per value (icon_Rank_N.tga), native's 15x19 crop of each. */
+@spritesheet mh-range-0-sheet { src: "../../../icon_Rank_0.tga"; mh-range-0: 0px 0px 15px 19px; }
+@spritesheet mh-range-1-sheet { src: "../../../icon_Rank_1.tga"; mh-range-1: 0px 0px 15px 19px; }
+@spritesheet mh-range-2-sheet { src: "../../../icon_Rank_2.tga"; mh-range-2: 0px 0px 15px 19px; }
+@spritesheet mh-range-3-sheet { src: "../../../icon_Rank_3.tga"; mh-range-3: 0px 0px 15px 19px; }
+@spritesheet mh-range-4-sheet { src: "../../../icon_Rank_4.tga"; mh-range-4: 0px 0px 15px 19px; }
+@spritesheet mh-range-5-sheet { src: "../../../icon_Rank_5.tga"; mh-range-5: 0px 0px 15px 19px; }
+@spritesheet mh-range-6-sheet { src: "../../../icon_Rank_6.tga"; mh-range-6: 0px 0px 15px 19px; }
+@spritesheet mh-range-7-sheet { src: "../../../icon_Rank_7.tga"; mh-range-7: 0px 0px 15px 19px; }
+@spritesheet mh-range-8-sheet { src: "../../../icon_Rank_8.tga"; mh-range-8: 0px 0px 15px 19px; }
+.mh-range-digit { position: absolute; width: 15px; height: 19px; pointer-events: none; }
+
+/* --- Skill slot --------------------------------------------------------------------------------
+   newui_skillbox with the skill's 20x28 icon 6 in and 6 down (RenderIconList()). */
+@spritesheet mh-slot-sheet { src: "../../../newui_skillbox.jpg"; mh-slot-box: 0px 0px 32px 38px; }
+.mh-slot { position: absolute; width: 32px; height: 38px; cursor: pointer; pointer-events: auto; decorator: image(mh-slot-box); }
+.mh-slot-icon { position: absolute; left: 6px; top: 6px; width: 20px; height: 28px; pointer-events: none; }
+
+/* The extension-function note under the second and third tabs, 0xFF00B4FF in the engine's
+   A|B|G|R packing -- orange, not blue. */
+.mh-orange { color: rgb(255, 180, 0); }
+
+/* --- Extra-item list ---------------------------------------------------------------------------
+   Native's rows: 13 units tall, text 8 in and 3 down, in a pale text colour. The selected
+   row is a solid bar in whatever colour GL was left at -- native set none, so white -- with black
+   text on it. */
+.mh-extra-row {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	white-space: nowrap;
+	color: rgb(230, 220, 200);
+	cursor: pointer;
+	pointer-events: auto;
+}
+.mh-extra-row.selected { background-color: rgb(255, 255, 255); color: #000000; }

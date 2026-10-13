@@ -1,0 +1,111 @@
+/* Legacy theme for the server-select dialog (CServerSelWin) -- a fresh RmlUi layout, not a pixel
+   port of the old CWinEx/CButton/CGaugeBar screen. The load gauge is a flat color fill. #panel is
+   intentionally invisible (no background/border) -- the real legacy screen has no panel chrome,
+   just buttons and text over the login art. Two always-visible columns use real flexbox, not the
+   old absolutely-positioned flyout keyed to whichever group button was clicked. Sizes are pixels
+   in rem (server_select.rml's body is "scene-window-scale": 1rem = one pixel of the original's fixed-size
+   screen, growing like the native text, RmlNativeText.h). */
+
+/* No explicit position -- .center-both (base.rcss) supplies position:absolute plus centering,
+   same as sys_menu.rcss/msg_win.rcss's own #panel. */
+#panel {
+	width: 420rem;
+	font-family: "token(font-body)";
+	font-size: 12rem;
+	color: token(text-primary);
+	padding: 10rem;
+}
+
+/* height is fixed, not auto -- #panel uses .center-both, which recenters on #panel's current size;
+   auto height would visibly shift the whole panel as it grew. Columns still scroll internally via
+   their own overflow:auto. */
+#columns {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 18rem;
+	height: 300rem;
+}
+
+/* height (not max-height) matches #columns' own fixed height for the same reason -- a shorter
+   list just centers via justify-content:center rather than shrinking the box. */
+#group_col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 6rem;
+	width: 140rem;
+	height: 300rem;
+	overflow: hidden auto;
+}
+#server_col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 6rem;
+	width: 220rem;
+	height: 300rem;
+	overflow: hidden auto;
+}
+/* #server_col is an ID selector, so it always outranks base.rcss's global `.hidden{display:none}`
+   on specificity alone (an ID beats any number of plain classes) -- unlike the many `.foo.hidden`
+   compound overrides elsewhere in this codebase, which only break a same-specificity class-vs-class
+   tie. Without this, data-class-hidden="!server_list_visible" (server_select.rml) never actually
+   hid this column. */
+#server_col.hidden {
+	display: none;
+}
+
+/* Keep the original 108x26 group and 193x26 server frames at their native aspect
+   ratios. The shared base styles provide sprites, state colors and label press offsets. */
+.group-btn {
+	width: 108rem;
+	height: 26rem;
+	text-align: center;
+	line-height: 26rem;
+}
+.server-row {
+	position: relative;
+	width: 193rem;
+	height: 26rem;
+	text-align: center;
+	line-height: 26rem;
+	white-space: nowrap;
+}
+.button-label {
+	pointer-events: none;
+}
+
+/* Original gauge footprint: 160x4, inset 16px from the left and 19px from the top.
+   The existing flat fill remains; its geometry follows the frame's scene scale. */
+.server-gauge-slot {
+	position: absolute;
+	left: 16rem;
+	top: 19rem;
+	width: 160rem;
+	height: 4rem;
+	background-color: rgba(0, 0, 0, 160);
+	pointer-events: none;
+}
+.server-gauge-fill {
+	display: block;
+	height: 100%;
+	background-color: #00bd8b;
+}
+
+/* Normal block flow below #columns now, not position:absolute with a hand-picked top offset. */
+#pvp_notice {
+	margin-top: 16rem;
+	width: 100%;
+	color: #ffcc66;
+	font-size: 11rem;
+}
+
+#desc_panel {
+	margin-top: 10rem;
+	width: 100%;
+	color: token(text-secondary);
+	white-space: normal;
+}

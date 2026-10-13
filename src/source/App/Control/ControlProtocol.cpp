@@ -193,9 +193,10 @@ const std::vector<std::string>& CommandNames()
     // the whole client into that test. The dispatcher checks itself against
     // this list instead (ControlDispatcher.cpp, CommandTable).
     static const std::vector<std::string> names = {
-        "ping",    "scene", "state", "nearby",   "events",   "wait-for", "screenshot", "login", "select-char", "logout",
-        "quit",    "move",  "warp",  "teleport", "attack",   "skill",    "pickup",     "use",   "equip",       "say",
-        "whisper", "party", "halt",  "hotkey",   "click-ui", "ui",       "slot-pixel", "trade", "type",
+        "ping",    "scene", "state", "nearby",   "events",   "wait-for", "screenshot", "login",    "select-char", "logout",
+        "quit",    "move",  "warp",  "teleport", "attack",   "skill",    "pickup",     "use",      "equip",       "say",
+        "whisper", "party", "halt",  "hotkey",   "click-ui", "drag-ui",  "hover-ui",   "type",     "ui",          "slot-pixel",
+        "trade",
     };
     return names;
 }
@@ -266,6 +267,11 @@ bool Request::Has(std::string_view key) const
     return field != m_fields.end() && field->second.GetKind() != Value::Kind::Null;
 }
 
+bool Request::Contains(std::string_view key) const
+{
+    return m_fields.find(key) != m_fields.end();
+}
+
 bool Request::GetString(std::string_view key, std::string& out) const
 {
     const auto field = m_fields.find(key);
@@ -331,6 +337,15 @@ bool Request::GetBool(std::string_view key, bool& out) const
     {
         return false;
     }
+    out = field->second.AsBool();
+    return true;
+}
+
+bool Request::GetStrictBool(std::string_view key, bool& out) const
+{
+    const auto field = m_fields.find(key);
+    if (field == m_fields.end() || field->second.GetKind() != Value::Kind::Bool)
+        return false;
     out = field->second.AsBool();
     return true;
 }

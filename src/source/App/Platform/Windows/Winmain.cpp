@@ -2,6 +2,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
+#include "Core/Utilities/FrameProfiler.h"
+#include "Core/Input/SyntheticInput.h"
+#include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
 #include "Core/Text/Utf8.h"
 #include "App/Platform/DiagnosticFrameCaptureSchedule.h"
@@ -22,14 +25,16 @@
 #include <vector>
 #include "Core/Platform/WinIni.h" // private-profile (.ini) API
 #include "Data/GameConfig/GameConfig.h"
-#include "UI/Legacy/UIWindows.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlRuntimeHooks.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
+#include "Scenes/MainScene.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
 #include "Core/Time/FrameTimerScheduler.h"
@@ -47,6 +52,7 @@
 #include "Audio/DSPlaySound.h"
 
 #include "Core/Platform/Imm.h"
+#include "Core/Platform/ProcessLocale.h"
 #include "Core/Platform/ServerPort.h"
 #include "Core/Platform/sdl3/SDLWindowFlags.h"
 #include "Core/Platform/BundledFonts.h"
@@ -54,7 +60,7 @@
 #include "App/Platform/Windows/Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 
-#include "UI/Legacy/UIMapName.h" // rozy
+#include "UI/HUD/UIMapName.h" // rozy
 #include "Core/Utilities/CpuUsage.h"
 
 #include "MUHelper/MuHelper.h"
@@ -69,16 +75,26 @@
 #include "Core/Input/Input.h"
 #include "Core/Platform/IPlatformAudio.h"
 #include "Core/Platform/Audio/MiniAudioBackend.h"
+#ifndef _WIN32
+#include "Core/Platform/posix/PosixSignalHandlers.h"
+#endif
 #include "Core/Time/Timer.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/Log/SdlLogBridge.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include "UI/Placement/WindowPlacement.h"
+#include "Character/CharMakeWin.h"
+#include "UI/Windows/CreditWin.h"
+#include "UI/Windows/SysMenuWin.h"
+#include "UI/Windows/LoginWin.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/RmlBridge/RmlRenderTarget.h"
 
 #include "World/MapInfra/w_MapHeaders.h"
 
 #include "GameLogic/Pets/w_PetProcess.h"
 
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Scaling/UITransform.h"
 #include "Camera/CameraConfig.h"
 #include "Camera/CameraProjection.h"
@@ -91,11 +107,7 @@
 #include "../MuEditor/Config/MuEditorConfig.h"
 #endif
 
-CUIMercenaryInputBox* g_pMercenaryInputBox = nullptr;
-CUITextInputBox* g_pSingleTextInputBox = nullptr;
-CUITextInputBox* g_pSinglePasswdInputBox = nullptr;
 int g_iChatInputType = 1;
-extern BOOL g_bIMEBlock;
 
 CMultiLanguage* pMultiLanguage = nullptr;
 
@@ -140,6 +152,8 @@ BOOL g_bUseFullscreenMode = FALSE;
 bool g_bDisableAnimationTaskPool = true;
 
 #include "Audio/AudioPlayer.h"
+#include "Render/Text/CUIRenderText.h"
+#include "Core/Input/ImeInput.h"
 
 extern int LogIn;
 extern wchar_t LogInID[];
@@ -183,6 +197,12 @@ static void ShutdownRendererWindow()
         ReleaseDC(g_hWnd, g_hDC);
         g_hDC = nullptr;
     }
+
+    // Must run before ShutdownSDLGpuRenderer() -- Rml::Shutdown() (inside Destroy()) releases
+    // every outstanding compiled-geometry/texture handle via RmlUiRenderInterface, which needs
+    // a live SDL_GPUDevice while that happens. No-ops safely if Create() never ran (the
+    // InitSDLGpuRenderer failure path above also calls this function).
+    RmlUiRuntime::Instance().Destroy();
 
     mu::ShutdownSDLGpuRenderer();
     g_hRC = nullptr;
@@ -295,16 +315,28 @@ namespace
 bool g_hasPendingVSyncPreference = false;
 bool g_pendingVSyncPreference = true;
 
+// Target FPS to apply whenever VSync ends up off (either genuinely disabled, or unavailable on
+// this system) -- the persisted user preference (Options window's FPS Limit row, formerly only
+// reachable via the console-only `$fps <N>` diagnostic), using the same -1-means-uncapped
+// convention SceneManager::SetTargetFps() already defines. Replaces the previous hardcoded
+// GetFPSLimit() (monitor refresh rate) fallback -- CfgDefaultFpsCap is -1 (uncapped), so a player
+// who has never touched the new setting and has VSync off gets uncapped rendering instead of a
+// monitor-matched cap, matching how most games behave with VSync off and no explicit limit set.
+double EffectiveOffVSyncTargetFps()
+{
+    return GameConfig::GetInstance().GetFpsCap();
+}
+
 void ApplyVSyncPreferenceNow(bool enabled)
 {
     if (!IsVSyncAvailable())
     {
-        SetTargetFps(GetFPSLimit());
+        SetTargetFps(EffectiveOffVSyncTargetFps());
         return;
     }
 
     const bool applied = enabled ? EnableVSync() : DisableVSync();
-    SetTargetFps((applied || IsVSyncEnabled()) ? -1 : GetFPSLimit());
+    SetTargetFps((applied || IsVSyncEnabled()) ? -1 : EffectiveOffVSyncTargetFps());
     ResetFrameStats();
 }
 
@@ -496,7 +528,7 @@ void DestroyWindow()
     g_pNewUISystem->Release();
     g_pRenderText->Release();
 
-    CUIMng::Instance().Release();
+    CSceneUICoordinator::Instance().Release();
 
     //. release font handle
     if (g_hFont)
@@ -546,9 +578,6 @@ void DestroyWindow()
     DeleteAllFrustrum();
 #endif // DYNAMIC_FRUSTRUM
 
-    SAFE_DELETE(g_pMercenaryInputBox);
-    SAFE_DELETE(g_pSingleTextInputBox);
-    SAFE_DELETE(g_pSinglePasswdInputBox);
 
     SAFE_DELETE(g_pUIMapName); // rozy
     SAFE_DELETE(g_pTimer);
@@ -827,6 +856,20 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
 }
 
 double CPU_AVG = 0.0;
+static void RenderProfiledFrame()
+{
+    {
+        FRAME_PROFILE(RendererBegin);
+        mu::GetRenderer().BeginFrame();
+    }
+    RenderScene(g_hDC);
+    {
+        FRAME_PROFILE(RendererEnd);
+        mu::GetRenderer().EndFrame();
+    }
+    FrameProfiler::CompleteFrame();
+}
+
 void RecordCpuUsage()
 {
     constexpr int max_recordings = 60;
@@ -1051,6 +1094,18 @@ void HandleMouseButton(const SDL_Event& e)
     }
 }
 
+// The OS content scale feeds native font sizes, RmlUi's dp ratio and every scale the theme's
+// window placement and the login/character scenes derive from it. The window keeps its size.
+void HandleContentScaleChange()
+{
+    if (!RefreshWindowContentScale())
+        return;
+    ReinitializeFonts();
+    RmlUiRuntime::Instance().RefreshScale();
+    UI::Placement::Invalidate();
+    CSceneUICoordinator::Instance().RepositionSceneUI();
+}
+
 void HandleWindowResize(int width, int height)
 {
     if (width <= 0 || height <= 0)
@@ -1061,6 +1116,7 @@ void HandleWindowResize(int width, int height)
     UI::Scaling::SetActiveTransform(UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight));
     OpenglWindowWidth = WindowWidth;
     OpenglWindowHeight = WindowHeight;
+    RmlUiRuntime::Instance().OnResize(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     UpdateResolutionDependentSystems();
     UpdateCursorClip();
 }
@@ -1114,35 +1170,6 @@ void HandleFocusChange(bool active)
     }
 }
 
-// --- Portable text field input routing (issue #447) -------------------
-// Map the SDL keys a single-line text field reacts to onto the Win32 VK
-// codes the field already understands. Returns 0 for keys it ignores.
-int MapScancodeToEditVk(SDL_Scancode sc)
-{
-    switch (sc)
-    {
-    case SDL_SCANCODE_LEFT:
-        return VK_LEFT;
-    case SDL_SCANCODE_RIGHT:
-        return VK_RIGHT;
-    case SDL_SCANCODE_HOME:
-        return VK_HOME;
-    case SDL_SCANCODE_END:
-        return VK_END;
-    case SDL_SCANCODE_BACKSPACE:
-        return VK_BACK;
-    case SDL_SCANCODE_DELETE:
-        return VK_DELETE;
-    case SDL_SCANCODE_RETURN:
-    case SDL_SCANCODE_KP_ENTER:
-        return VK_RETURN;
-    case SDL_SCANCODE_TAB:
-        return VK_TAB;
-    default:
-        return 0;
-    }
-}
-
 // UTF-8 <-> UTF-16 conversions sized to the input, so text of any length
 // (typed, copied or pasted) round-trips without truncation (issue #447).
 std::wstring Utf8ToWide(const char* utf8)
@@ -1169,76 +1196,6 @@ std::string WideToUtf8(const std::wstring& wide)
     return utf8;
 }
 
-void FeedPortableTextInput(const char* utf8)
-{
-    auto* box = CUITextInputBox::GetFocusedPortable();
-    if (box == nullptr || utf8 == nullptr)
-        return;
-
-    const std::wstring wide = Utf8ToWide(utf8);
-    if (!wide.empty())
-        box->OnTextInput(wide.c_str());
-}
-
-// Handle a key for the focused portable field. Returns true if consumed.
-bool FeedPortableKey(const SDL_KeyboardEvent& key)
-{
-    auto* box = CUITextInputBox::GetFocusedPortable();
-    if (box == nullptr)
-        return false;
-
-    const bool ctrl = (key.mod & SDL_KMOD_CTRL) != 0;
-    const bool shift = (key.mod & SDL_KMOD_SHIFT) != 0;
-
-    // Clipboard lives in SDL on this side of the boundary, keeping the text
-    // field itself free of SDL; the field only exposes selection helpers.
-    if (ctrl)
-    {
-        switch (key.scancode)
-        {
-        case SDL_SCANCODE_A:
-            box->SelectAll();
-            return true;
-        case SDL_SCANCODE_C:
-        case SDL_SCANCODE_X:
-        {
-            const std::wstring selection = box->GetSelectedText();
-            if (!selection.empty())
-            {
-                const std::string utf8 = WideToUtf8(selection);
-                if (!utf8.empty())
-                {
-                    SDL_SetClipboardText(utf8.c_str());
-                    if (key.scancode == SDL_SCANCODE_X)
-                        box->DeleteSelection();
-                }
-            }
-            return true;
-        }
-        case SDL_SCANCODE_V:
-        {
-            char* clip = SDL_GetClipboardText();
-            if (clip != nullptr)
-            {
-                const std::wstring wide = Utf8ToWide(clip);
-                if (!wide.empty())
-                    box->OnTextInput(wide.c_str());
-                SDL_free(clip);
-            }
-            return true;
-        }
-        default:
-            break;
-        }
-    }
-
-    const int vk = MapScancodeToEditVk(key.scancode);
-    if (vk == 0)
-        return false;
-
-    box->OnEditKey(vk, ctrl, shift);
-    return true;
-}
 } // namespace
 
 std::vector<std::pair<int, int>> MuGetSupportedDisplayResolutions()
@@ -1315,11 +1272,23 @@ void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windo
     const int w = static_cast<int>(width);
     const int h = static_cast<int>(height);
 
+    // Whether this call actually moves the window anywhere. COptionWindow::ApplyPendingUIScale()
+    // calls here with the size the window already has, purely to drive the resize that makes a new
+    // UI scale take effect -- so centering unconditionally made the whole app window jump to the
+    // middle of the display every time the user touched the scale dial. Centering is right when the
+    // size really changes (the old position may not fit any more) or when leaving fullscreen, and
+    // wrong otherwise.
+    int currentW = 0, currentH = 0;
+    SDL_GetWindowSize(g_sdlWindow, &currentW, &currentH);
+    const bool leavingFullscreen = (SDL_GetWindowFlags(g_sdlWindow) & SDL_WINDOW_FULLSCREEN) != 0;
+    const bool repositions = currentW != w || currentH != h || leavingFullscreen;
+
     if (windowed)
     {
         SDL_SetWindowFullscreen(g_sdlWindow, false);
         SDL_SetWindowSize(g_sdlWindow, w, h);
-        CenterWindowAfterResize(g_sdlWindow);
+        if (repositions)
+            CenterWindowAfterResize(g_sdlWindow);
     }
     else
     {
@@ -1348,12 +1317,87 @@ void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windo
     MuReapplyVSyncPreference();
 }
 
+// Inspect only the active SDL union member, including for synthetic events.
+SDL_WindowID ActionWindowId(const SDL_Event& event)
+{
+    switch (event.type)
+    {
+    case SDL_EVENT_MOUSE_MOTION:
+        return event.motion.windowID;
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
+    case SDL_EVENT_MOUSE_BUTTON_UP:
+        return event.button.windowID;
+    case SDL_EVENT_TEXT_INPUT:
+        return event.text.windowID;
+    case SDL_EVENT_KEY_DOWN:
+    case SDL_EVENT_KEY_UP:
+        return event.key.windowID;
+    default:
+        return 0;
+    }
+}
+
+// Physical and scripted input share UI-first routing. Scripted input owns its
+// own legacy held state; it never acquires the OS pointer or replays SDL events.
+bool RouteActionInput(SDL_Event& event, bool synthetic, bool& propagates)
+{
+    if (!g_sdlWindow || (synthetic && ActionWindowId(event) != SDL_GetWindowID(g_sdlWindow)))
+        return false;
+    propagates = true;
+    switch (event.type)
+    {
+    case SDL_EVENT_MOUSE_MOTION:
+        // Motion always reaches physical legacy tracking even when UI hovered.
+        propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        if (!synthetic)
+            HandleMouseMotion(event.motion.x, event.motion.y);
+        return true;
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
+    case SDL_EVENT_MOUSE_BUTTON_UP:
+        if (!synthetic && event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+            Core::Input::Synthetic::CancelForPhysicalButton(event.button.button);
+        propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        if (propagates && !synthetic)
+            HandleMouseButton(event);
+        return true;
+    case SDL_EVENT_TEXT_INPUT:
+        propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        return true;
+    case SDL_EVENT_KEY_UP:
+        // RmlUi needs the release even though legacy has no key-up reader.
+        propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+        return true;
+    case SDL_EVENT_KEY_DOWN:
+        propagates = Core::Input::RouteToUi(event, g_sdlWindow);
+#if !defined(_WIN32)
+        // Physical Windows messages already handle these keys; SDL-only paths
+        // (and Windows synthetic events below) must handle them here instead.
+        if (event.key.scancode == SDL_SCANCODE_RETURN || event.key.scancode == SDL_SCANCODE_KP_ENTER)
+            SetEnterPressed(true);
+        if (event.key.scancode == SDL_SCANCODE_F10 && !event.key.repeat)
+            CameraManager::Instance().ToggleZoomLock();
+#else
+        // Synthetic SDL events do not generate the Win32 messages that handle
+        // these system keys for physical input.
+        if (synthetic && event.key.scancode == SDL_SCANCODE_RETURN)
+            SetEnterPressed(true);
+        if (synthetic && event.key.scancode == SDL_SCANCODE_F10 && !event.key.repeat)
+            CameraManager::Instance().ToggleZoomLock();
+#endif
+        return true;
+    default:
+        return false;
+    }
+}
+
 MSG MainLoop()
 {
     constexpr auto target_resolution = 1;
     auto precise = timeBeginPeriod(target_resolution);
 
     HandleFocusChange(Core::Platform::HasSDLWindowInputFocus(SDL_GetWindowFlags(g_sdlWindow)));
+    Core::Input::Synthetic::SetEventDelivery([](SDL_Event& event, bool& propagates)
+                                             { return RouteActionInput(event, true, propagates); }, g_sdlWindow);
 
     while (!Destroy)
     {
@@ -1390,23 +1434,26 @@ MSG MainLoop()
                 Destroy = true;
                 break;
             case SDL_EVENT_MOUSE_MOTION:
-                HandleMouseMotion(event.motion.x, event.motion.y);
-                break;
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
             case SDL_EVENT_MOUSE_BUTTON_UP:
-                HandleMouseButton(event);
+            {
+                bool propagates = true;
+                RouteActionInput(event, false, propagates);
                 break;
+            }
             case SDL_EVENT_MOUSE_WHEEL:
-                // SDL does not pre-correct flipped (natural) scrolling; invert.
-                MouseWheel = (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED) ? -static_cast<int>(event.wheel.y)
-                                                                               : static_cast<int>(event.wheel.y);
+                if (Core::Input::RouteToUi(event, g_sdlWindow))
+                {
+                    // SDL does not pre-correct flipped (natural) scrolling; invert.
+                    MouseWheel = (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED) ? -static_cast<int>(event.wheel.y)
+                                                                                   : static_cast<int>(event.wheel.y);
+                }
                 break;
             case SDL_EVENT_WINDOW_RESIZED:
                 HandleWindowResize(event.window.data1, event.window.data2);
                 break;
             case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
-                if (RefreshWindowContentScale())
-                    ReinitializeFonts();
+                HandleContentScaleChange();
                 break;
             case SDL_EVENT_WINDOW_FOCUS_GAINED:
                 HandleFocusChange(true);
@@ -1423,39 +1470,18 @@ MSG MainLoop()
                 HandleFocusChange(false);
                 break;
             case SDL_EVENT_TEXT_INPUT:
-                // Committed characters for the focused portable text field (#447).
-                FeedPortableTextInput(event.text.text);
-                break;
-            case SDL_EVENT_TEXT_EDITING:
-                // IME composition preview for the focused portable field (#447).
-                if (auto* box = CUITextInputBox::GetFocusedPortable())
-                    box->OnTextEditing(Utf8ToWide(event.edit.text).c_str());
-                break;
+            case SDL_EVENT_KEY_UP:
             case SDL_EVENT_KEY_DOWN:
-#ifndef _WIN32
-                // These mirror what WndProc does from Win32 messages, for the
-                // SDL-only input path. On Windows WndProc is still driven (via
-                // SDL_SetWindowsMessageHook), so doing them here too would
-                // double-fire - guard them off there.
-                //
-                // Enter is gated through SetEnterPressed: ScanAsyncKeyState
-                // suppresses a VK_RETURN press unless this fired that frame
-                // (WM_CHAR does it on Windows). Without it Enter never reaches
-                // the game (login submit, chat open).
-                if (event.key.scancode == SDL_SCANCODE_RETURN || event.key.scancode == SDL_SCANCODE_KP_ENTER)
-                {
-                    SetEnterPressed(true);
-                }
-                // F10 toggles the camera zoom lock (WM_SYSKEYDOWN on Windows,
-                // where F10 is a reserved system key). Without it the zoom stays
-                // locked and the mouse wheel can never zoom. Edge-triggered.
-                if (event.key.scancode == SDL_SCANCODE_F10 && !event.key.repeat)
-                {
-                    CameraManager::Instance().ToggleZoomLock();
-                }
-#endif
-                // Navigation/erase/clipboard for the focused portable field (#447).
-                FeedPortableKey(event.key);
+            {
+                bool propagates = true;
+                RouteActionInput(event, false, propagates);
+                break;
+            }
+            case SDL_EVENT_TEXT_EDITING:
+                // IsTextInputActive() is driven by RmlUiSystemInterface::ActivateKeyboard/
+                // DeactivateKeyboard, which WidgetTextInput's own Focus/Blur handling calls.
+                if (RmlUiRuntime::Instance().IsTextInputActive())
+                    RmlUiRuntime::Instance().ProcessTextEditing(event);
                 break;
             default:
                 break;
@@ -1465,51 +1491,6 @@ MSG MainLoop()
             if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
             {
                 break;
-            }
-        }
-
-        // Start/stop SDL text input as a portable text field gains or loses
-        // focus, so SDL only emits SDL_EVENT_TEXT_INPUT while one is active (#447).
-        {
-            static bool s_textInputActive = false;
-            auto* focusedField = CUITextInputBox::GetFocusedPortable();
-            const bool wantTextInput = focusedField != nullptr;
-            if (wantTextInput != s_textInputActive && g_sdlWindow != nullptr)
-            {
-                if (wantTextInput)
-                    SDL_StartTextInput(g_sdlWindow);
-                else
-                    SDL_StopTextInput(g_sdlWindow);
-                s_textInputActive = wantTextInput;
-            }
-
-            // Anchor the IME candidate window at the caret (reference px -> window
-            // px) so composition UI appears next to the text being typed (#447).
-            int cx, cy, cw, ch;
-            if (wantTextInput && g_sdlWindow != nullptr && focusedField->GetCaretArea(cx, cy, cw, ch))
-            {
-                auto transform = UI::Scaling::PanelTransform(WindowWidth, WindowHeight);
-                SEASON3B::CNewUIManager* manager =
-                    g_pNewUISystem != nullptr ? g_pNewUISystem->GetNewUIManager() : nullptr;
-                SEASON3B::CNewUIObj* owner =
-                    manager != nullptr ? manager->FindUIObjByRelatedWnd(reinterpret_cast<HWND>(focusedField)) : nullptr;
-                if (owner != nullptr)
-                {
-                    transform = UI::Scaling::TransformForLayout(owner->GetLayoutMode(), WindowWidth, WindowHeight);
-                }
-                const SDL_Rect area = {static_cast<int>(UI::Scaling::PositionX(transform, static_cast<float>(cx))),
-                                       static_cast<int>(UI::Scaling::PositionY(transform, static_cast<float>(cy))),
-                                       static_cast<int>(UI::Scaling::SizeX(transform, static_cast<float>(cw))),
-                                       static_cast<int>(UI::Scaling::SizeY(transform, static_cast<float>(ch)))};
-                // Only push when the caret rect actually moves; resending every
-                // frame is wasteful and can flicker the candidate window.
-                static SDL_Rect s_lastArea = {0, 0, 0, 0};
-                if (area.x != s_lastArea.x || area.y != s_lastArea.y || area.w != s_lastArea.w ||
-                    area.h != s_lastArea.h)
-                {
-                    SDL_SetTextInputArea(g_sdlWindow, &area, 0);
-                    s_lastArea = area;
-                }
             }
         }
 
@@ -1558,19 +1539,7 @@ MSG MainLoop()
 
                 RequestDiagnosticFrameCapture();
                 ApplyPendingVSyncPreference();
-                // Present in $glstats: the frame boundary, where a VSync or GPU wait shows up
-                // (the swapchain acquire in BeginFrame(), submit and present in EndFrame()).
-                // RenderScene() reads and resets the profiler, so it shows the last EndFrame()
-                // together with this BeginFrame().
-                {
-                    FRAME_PROFILE(Present);
-                    mu::GetRenderer().BeginFrame();
-                }
-                RenderScene(g_hDC);
-                {
-                    FRAME_PROFILE(Present);
-                    mu::GetRenderer().EndFrame();
-                }
+                RenderProfiledFrame();
                 ConsumeDiagnosticFrameCapture();
             }
         }
@@ -1583,6 +1552,7 @@ MSG MainLoop()
 
     } // while (!Destroy)
 
+    Core::Input::Synthetic::SetEventDelivery(nullptr, nullptr);
     if (precise == TIMERR_NOERROR)
     {
         timeEndPeriod(target_resolution);
@@ -1822,16 +1792,10 @@ void UpdateResolutionDependentSystems()
     CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio, g_Camera.ViewNear,
                                        g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
 
-    // Update all 3D UI camera dimensions for proper item rendering
-    if (g_pNewUI3DRenderMng)
-    {
-        g_pNewUI3DRenderMng->UpdateAllCameraDimensions(WindowWidth, WindowHeight);
-    }
-
     // Reposition old-style CWin-based UI for the current scene. Without this,
     // login/character-scene info boxes stay anchored to the old screen size
     // until the player re-enters the scene.
-    CUIMng::Instance().RepositionSceneUI();
+    CSceneUICoordinator::Instance().RepositionSceneUI();
 }
 
 static void ShutdownRuntime(std::thread& cpuUsageRecorder, std::optional<Core::Log::Sdl::ScopedLogOutput>& sdlLogOutput)
@@ -2067,6 +2031,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         return 0;
     }
 
+#ifndef _WIN32
+    // Install POSIX crash-diagnostic signal handlers. After SDL_Init (R8
+    // mitigation) and after mu::log::Init() (InitializeWorkingDirectoryAndLog(), above).
+    mu::platform::InstallSignalHandlers();
+#endif
+
 #if defined(__APPLE__)
     SetWorkingDirectoryToBasePath();
 #endif
@@ -2103,8 +2073,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     OpenglWindowHeight = WindowHeight;
 
     const std::string selectedFontFamily = WideToUtf8(GameConfig::GetInstance().GetFontSelection());
+    const std::string renderBackend = WideToUtf8(GameConfig::GetInstance().GetRenderBackend());
     const FontSizes initialFontSizes = CalculateFontSizes();
-    if (!mu::InitSDLGpuRenderer(g_sdlWindow, selectedFontFamily, static_cast<float>(initialFontSizes.normal),
+    if (!mu::InitSDLGpuRenderer(g_sdlWindow, selectedFontFamily, renderBackend,
+                                static_cast<float>(initialFontSizes.normal),
                                 static_cast<float>(initialFontSizes.big),
                                 static_cast<float>(initialFontSizes.fixed)))
     {
@@ -2141,6 +2113,70 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_ErrorReport.AddSeparator();
     g_ErrorReport.Write(L"GPU driver\t: %hs\r\n", mu::GetRenderer().GetGPUDriverName());
     g_ErrorReport.AddSeparator();
+
+    // Must run after InitSDLGpuRenderer() -- RmlUiRuntime::Create() needs a live
+    // SDL_GPUDevice/SDL_Window from mu::GetRenderer() (GetDevice()/GetWindow()).
+    UI::RmlBridge::InstallRuntimeHooks();
+    RmlUiRuntime::Instance().Create(WindowWidth, WindowHeight);
+
+    // Content that must always sit visually on top of RmlUi, regardless of theme: the game
+    // cursor, and (login/character scenes specifically) CLoginWin's, CCharMakeWin's, and
+    // CMsgWin's legacy name/password-input text. All would otherwise render earlier in the frame,
+    // as part of the normal legacy 2D pass --
+    // RmlUi always renders last (see SetPreSubmitCallback's own comment), so a theme whose
+    // #panel/.input-frame paints real pixels there (the "legacy" theme's login panel included --
+    // it reproduces the original opaque sprite art) would otherwise visually cover both.
+    // Registered here, not inside RmlUiRuntime.cpp, so that library stays scene-agnostic --
+    // this composition of game-specific overlay content belongs at the app tier, the same
+    // reasoning that already put the SDL input-event wiring here instead of in RmlUiRuntime.
+    //
+    // MAIN_SCENE included: CSysMenuWin is reachable from
+    // gameplay via the in-game ESC menu (SceneCommon.cpp's RenderInfomation() calls
+    // CSceneUICoordinator::Instance().Render() unconditionally every MAIN_SCENE frame), so RmlUi
+    // content was already live during gameplay before this
+    // change -- the cursor just wasn't being pulled back on top of it, because this callback
+    // used to skip MAIN_SCENE entirely while MainScene.cpp's own inline RenderCursor() call ran
+    // too early (before RmlUi's frame-final pass). That inline call is removed in favor of this
+    // one now covering MAIN_SCENE too -- see MainScene.cpp's RenderMainSceneUI() comment.
+    // LoginWin/CharMakeWin/MsgWin's own IsShow() guards make it safe to leave their calls
+    // unconditional across every scene this callback now covers -- those windows are never shown
+    // outside LOG_IN_SCENE/CHARACTER_SCENE regardless.
+    // Native drawing a document shows as an image: recorded last in the frame and rendered into its
+    // own textures before the main pass, so RmlUi samples this frame's drawing.
+    mu::GetRenderer().SetOffscreenRenderCallback([]
+    {
+        FRAME_PROFILE(UI);
+        UI::RmlBridge::RenderTarget::RenderAll();
+    });
+
+    mu::GetRenderer().SetPostRmlUiCallback(
+        []()
+        {
+            FRAME_PROFILE(UI);
+            extern EGameScene SceneFlag;
+
+            // CSystem's own RmlUi-backed HUD (MU Helper bar, buff strip) needs a real per-scene
+            // visibility gate of its own now, unlike
+            // LoginWin/CharMakeWin/MsgWin below: those are explicitly Show()/Hide()'d by app
+            // logic at their own scene's enter/exit points, but CSystem is a single
+            // app-lifetime singleton whose Update()/Render() only ever run while
+            // SceneFlag == MAIN_SCENE (MainScene.cpp) -- previously a complete visibility gate on
+            // its own (nothing drew otherwise), now insufficient since a persistent RmlUi
+            // document keeps rendering regardless of whether Update() is still being called.
+            // Placed outside the scene-restricted block below (unconditional every frame) so
+            // leaving MAIN_SCENE for ANY scene -- not just the two this callback already
+            // special-cases -- correctly hides them.
+            if (g_pNewUISystem)
+                g_pNewUISystem->SyncMainSceneHudVisibility();
+
+            if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE || SceneFlag == MAIN_SCENE)
+            {
+                BeginBitmap();
+                RenderCursor();
+                EndBitmap();
+            }
+        });
+
     g_ErrorReport.WriteSoundCardInfo();
 
     // SDL_CreateWindow already shows the window.
@@ -2173,6 +2209,17 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     InitVSync();
     ApplyVSyncPreferenceNow(GameConfig::GetInstance().GetVSyncEnabled());
 
+    // Apply persisted DXP-23 effect-cost toggles (Options window's Graphics tab, formerly only
+    // reachable via the console-only $effects ... diagnostics) at launch, same as VSync above.
+    {
+        GameConfig& cfg = GameConfig::GetInstance();
+        SetDisableEffects(cfg.GetDisableEffects());
+        SetDisableParticles(cfg.GetDisableParticles());
+        SetDisableSkillEffectModels(cfg.GetDisableSkillEffectModels());
+        SetDisableBoids(cfg.GetDisableBoids());
+        SetDisableWingShadow(cfg.GetDisableWingShadow());
+    }
+
     // Make the bundled ./fonts faces resolvable by GDI before the first CreateFont,
     // so a chosen curated font works even without a system-wide install.
     const bool fontsRegistered = RegisterBundledFonts();
@@ -2196,7 +2243,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_ErrorReport.WriteFontInfo();
     g_ErrorReport.AddSeparator();
 
-    setlocale(LC_ALL, "");
+    Core::Platform::ApplyProcessLocale();
 
     CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
 
@@ -2257,13 +2304,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     CharacterMachine->Init();
     Hero = &CharactersClient[0];
 
-    if (g_iChatInputType == 1)
-    {
-        g_pMercenaryInputBox = new CUIMercenaryInputBox;
-        g_pSingleTextInputBox = new CUITextInputBox;
-        g_pSinglePasswdInputBox = new CUITextInputBox;
-    }
-
     g_pUIManager = new CUIManager;
     g_pUIMapName = new CUIMapName; // rozy
 
@@ -2274,20 +2314,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     g_petProcess = PetProcess::Make();
 
-    CUIMng::Instance().Create();
+    CSceneUICoordinator::Instance().Create();
 
     if (g_iChatInputType == 1)
     {
-        g_pMercenaryInputBox->Init(g_hWnd);
-        g_pSingleTextInputBox->Init(g_hWnd, 200, 20);
-        g_pSinglePasswdInputBox->Init(g_hWnd, 200, 20, 9, TRUE);
-        g_pSingleTextInputBox->SetState(UISTATE_HIDE);
-        g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
-
-        g_pMercenaryInputBox->SetFont(g_hFont);
-        g_pSingleTextInputBox->SetFont(g_hFont);
-        g_pSinglePasswdInputBox->SetFont(g_hFont);
-
         g_bIMEBlock = FALSE;
         HIMC hIMC = ImmGetContext(g_hWnd);
         ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);

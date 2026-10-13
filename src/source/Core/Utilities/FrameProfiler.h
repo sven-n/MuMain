@@ -1,7 +1,8 @@
 #pragma once
 
-// Per-frame CPU timing and renderer counters for the $glstats overlay.
-// Single render thread only. Reset after every frame's overlays have read the values.
+// Per-frame CPU timing and renderer counters for the $details and $glstats overlays.
+// Single render thread only. Publish after renderer EndFrame; overlays read the completed snapshot.
+// Timings are inclusive CPU elapsed time, never GPU execution time.
 
 #include <array>
 #include <chrono>
@@ -22,17 +23,27 @@ enum class Pass : int
     MoveParticles,
     Skinning,
     UI,
-    Present,
+    RendererBegin,
+    RendererEnd,
+    RendererSubmit,
+    UIUpdate,
+    RmlUiInput,
+    UILayout,
+    RenderFlush,
     Sprites,
     Particles,
     Joints,
     Overlay,
+    RmlUiUpdate,
+    RmlUiRender,
     Count_
 };
 
 inline constexpr const char* kPassNames[static_cast<int>(Pass::Count_)] = {
     "Terrain", "Objects", "Chars", "Items", "Effects", "Other", "CharWait", "MoveFx", "MovePart",
-    "Skinning", "UI", "Present", "Sprites", "Particles", "Joints", "Overlay",
+    "Skinning", "UI", "RenderBegin", "RenderEnd", "Submit", "UIUpdate", "RmlInput", "UILayout", "Flush",
+    "Sprites", "Particles", "Joints", "Overlay",
+    "RmlUpd", "RmlRend",
 };
 
 enum class Counter : int
@@ -101,6 +112,40 @@ inline void ResetCounters()
     {
         CounterValue(static_cast<Counter>(counter)) = 0;
     }
+}
+
+// Keep the display stable while this frame records more work (including its own overlay).
+inline float g_completedMilliseconds[static_cast<int>(Pass::Count_)]{};
+inline std::uint32_t g_completedCounters[static_cast<int>(Pass::Count_)][static_cast<int>(Counter::Count_)]{};
+inline std::uint32_t g_completedTotals[static_cast<int>(Counter::Count_)]{};
+
+inline float CompletedMs(Pass pass)
+{
+    return g_completedMilliseconds[static_cast<int>(pass)];
+}
+
+inline std::uint32_t CompletedCounter(Pass pass, Counter counter)
+{
+    return g_completedCounters[static_cast<int>(pass)][static_cast<int>(counter)];
+}
+
+inline std::uint32_t CompletedCounter(Counter counter)
+{
+    return g_completedTotals[static_cast<int>(counter)];
+}
+
+inline void CompleteFrame()
+{
+    for (int pass = 0; pass < static_cast<int>(Pass::Count_); ++pass)
+    {
+        g_completedMilliseconds[pass] = AccumulatorMs(static_cast<Pass>(pass));
+        for (int counter = 0; counter < static_cast<int>(Counter::Count_); ++counter)
+            g_completedCounters[pass][counter] = CounterValue(static_cast<Pass>(pass), static_cast<Counter>(counter));
+    }
+    for (int counter = 0; counter < static_cast<int>(Counter::Count_); ++counter)
+        g_completedTotals[counter] = CounterValue(static_cast<Counter>(counter));
+    ResetFrame();
+    ResetCounters();
 }
 
 namespace detail
@@ -181,8 +226,7 @@ public:
     ~Scope()
     {
         const auto elapsed = std::chrono::steady_clock::now() - m_startedAt;
-        const auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count();
-        AccumulatorMs(m_pass) += static_cast<float>(nanoseconds) / 1.0e6f;
+        AccumulatorMs(m_pass) += std::chrono::duration<float, std::milli>(elapsed).count();
         PopPass();
     }
 

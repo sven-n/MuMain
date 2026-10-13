@@ -1,0 +1,247 @@
+<rml>
+<head>
+	<title>Options</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="option_window.rcss"/>
+</head>
+<!-- The modern theme's settings screen: full screen over a translucent scrim, categories in a rail
+     on the left, the active category's rows in a glass pane beside it. Same data model and events
+     as the shared option_window.rml that legacy uses; only the markup differs.
+
+     #panel covers the whole screen, so COptionWindow's hit test claims every click while it is
+     open, and its `fullscreen` class tells COptionWindow not to make it draggable.
+
+     The C++ relies on these names: #panel, .option-dropdown-list (scrolled to the selection on
+     open), and .level-gauge with its .level-gauge-hit child (RmlLevelGauge.h). -->
+<body data-model="option_window">
+<div id="panel" class="fullscreen">
+	<div class="opt-shell">
+		<div class="opt-header">
+			<div class="opt-title">{{title}}</div>
+			<div class="opt-close" data-event-click="option_click_close">
+				<div class="opt-close-bar opt-close-bar-a"></div>
+				<div class="opt-close-bar opt-close-bar-b"></div>
+			</div>
+		</div>
+
+		<div class="opt-body">
+			<div class="opt-nav">
+				<div class="opt-nav-item" data-class-active-tab="active_tab == 0" data-event-click="option_select_tab(0)">{{tab_gameplay_label}}</div>
+				<div class="opt-nav-item" data-class-active-tab="active_tab == 1" data-event-click="option_select_tab(1)">{{tab_audio_label}}</div>
+				<div class="opt-nav-item" data-class-active-tab="active_tab == 2" data-event-click="option_select_tab(2)">{{tab_video_label}}</div>
+				<div class="opt-nav-item" data-class-active-tab="active_tab == 3" data-event-click="option_select_tab(3)">{{tab_graphics_label}}</div>
+				<div class="opt-nav-item" data-class-active-tab="active_tab == 4" data-event-click="option_select_tab(4)">{{tab_ui_label}}</div>
+				<div class="opt-nav-item" data-class-active-tab="active_tab == 5" data-event-click="option_select_tab(5)">{{tab_general_label}}</div>
+			</div>
+
+			<div class="opt-pane">
+				<!-- Gameplay -->
+				<div class="opt-page" data-class-hidden="active_tab != 0">
+					<div class="opt-page-title">{{tab_gameplay_label}}</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_auto_attack">
+						<span class="opt-label">{{auto_attack_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="auto_attack"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_whisper_sound">
+						<span class="opt-label">{{whisper_sound_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="whisper_sound"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+				</div>
+
+				<!-- Audio -->
+				<div class="opt-page" data-class-hidden="active_tab != 1">
+					<div class="opt-page-title">{{tab_audio_label}}</div>
+					<div class="opt-row">
+						<span class="opt-label">{{sound_volume_label}}</span>
+						<div class="opt-control">
+							<div class="level-gauge opt-slider">
+								<div data-attr-class="'level-gauge-fill level-' + sound_volume"><div class="opt-slider-thumb"></div></div>
+								<div class="level-gauge-hit opt-slider-hit" data-event-mousedown="option_gauge(0)"
+								     data-event-drag="option_gauge(0)" data-event-mousescroll="option_gauge(0)"></div>
+							</div>
+							<span class="opt-value">{{sound_volume * 10 | format(0)}}%</span>
+						</div>
+					</div>
+					<div class="opt-row">
+						<span class="opt-label">{{music_volume_label}}</span>
+						<div class="opt-control">
+							<div class="level-gauge opt-slider">
+								<div data-attr-class="'level-gauge-fill level-' + music_volume"><div class="opt-slider-thumb"></div></div>
+								<div class="level-gauge-hit opt-slider-hit" data-event-mousedown="option_gauge(1)"
+								     data-event-drag="option_gauge(1)" data-event-mousescroll="option_gauge(1)"></div>
+							</div>
+							<span class="opt-value">{{music_volume * 10 | format(0)}}%</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- Video -->
+				<div class="opt-page" data-class-hidden="active_tab != 2">
+					<div class="opt-page-title">{{tab_video_label}}</div>
+					<div class="opt-row">
+						<span class="opt-label">{{render_level_label}}</span>
+						<div class="opt-control">
+							<div class="level-gauge opt-slider effect-gauge">
+								<div data-attr-class="'level-gauge-fill level-' + (render_level + 1)"><div class="opt-slider-thumb"></div></div>
+								<div class="opt-slider-step opt-slider-step-1"></div>
+								<div class="opt-slider-step opt-slider-step-2"></div>
+								<div class="opt-slider-step opt-slider-step-3"></div>
+								<div class="opt-slider-step opt-slider-step-4"></div>
+								<div class="level-gauge-hit opt-slider-hit" data-event-mousedown="option_gauge(2)"
+								     data-event-drag="option_gauge(2)" data-event-mousescroll="option_gauge(2)"></div>
+							</div>
+							<span class="opt-value">{{render_level + 1 | format(0)}} / 5</span>
+						</div>
+					</div>
+					<div class="opt-row">
+						<span class="opt-label">{{resolution_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 0" data-event-click="option_toggle_dropdown(0)">{{resolution_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 0">
+									<div class="option-dropdown-option" data-for="label : resolution_labels"
+									     data-class-selected="it_index == resolution_index"
+									     data-event-click="option_dropdown_option_click(0, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_windowed_mode">
+						<span class="opt-label">{{windowed_mode_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="windowed_mode"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_vsync">
+						<span class="opt-label">{{vsync_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="vsync_enabled"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row">
+						<span class="opt-label">{{fps_cap_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 1" data-event-click="option_toggle_dropdown(1)">{{fps_cap_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 1">
+									<div class="option-dropdown-option" data-for="label : fps_cap_labels"
+									     data-class-selected="it_index == fps_cap_index"
+									     data-event-click="option_dropdown_option_click(1, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Graphics -->
+				<div class="opt-page" data-class-hidden="active_tab != 3">
+					<div class="opt-page-title">{{tab_graphics_label}}</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_render_all_effects">
+						<span class="opt-label">{{render_all_effects_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="render_all_effects"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_disable_effects">
+						<span class="opt-label">{{disable_effects_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_effects"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_disable_particles">
+						<span class="opt-label">{{disable_particles_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_particles"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_disable_skill_effect_models">
+						<span class="opt-label">{{disable_skill_effect_models_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_skill_effect_models"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_disable_boids">
+						<span class="opt-label">{{disable_boids_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_boids"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_disable_wing_shadow">
+						<span class="opt-label">{{disable_wing_shadow_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="disable_wing_shadow"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+				</div>
+
+				<!-- Interface -->
+				<div class="opt-page" data-class-hidden="active_tab != 4">
+					<div class="opt-page-title">{{tab_ui_label}}</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_slide_help">
+						<span class="opt-label">{{slide_help_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="slide_help"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_show_fps_counter">
+						<span class="opt-label">{{show_fps_counter_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="show_fps_counter"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_show_debug_info">
+						<span class="opt-label">{{show_debug_info_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="show_debug_info"><div class="opt-toggle-knob"></div></div></div>
+					</div>
+					<div class="opt-row">
+						<span class="opt-label">{{theme_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 2" data-event-click="option_toggle_dropdown(2)">{{theme_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 2">
+									<div class="option-dropdown-option" data-for="label : theme_labels"
+									     data-class-selected="it_index == theme_index"
+									     data-event-click="option_dropdown_option_click(2, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- The tip sits after the control so it paints above an open list. -->
+					<div class="opt-row opt-row-tipped">
+						<span class="opt-label">{{ui_scale_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 5" data-event-click="option_toggle_dropdown(5)">{{ui_scale_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 5">
+									<div class="option-dropdown-option" data-for="label : ui_scale_labels"
+									     data-class-selected="it_index == ui_scale_index"
+									     data-event-click="option_dropdown_option_click(5, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+						<span class="opt-row-tip">{{ui_scale_tooltip}}</span>
+					</div>
+				</div>
+
+				<!-- General -->
+				<div class="opt-page" data-class-hidden="active_tab != 5">
+					<div class="opt-page-title">{{tab_general_label}}</div>
+					<div class="opt-row">
+						<span class="opt-label">{{language_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 3" data-event-click="option_toggle_dropdown(3)">{{language_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 3">
+									<div class="option-dropdown-option" data-for="label : language_labels"
+									     data-class-selected="it_index == language_index"
+									     data-event-click="option_dropdown_option_click(3, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="opt-row">
+						<span class="opt-label">{{font_row_label}}</span>
+						<div class="opt-control">
+							<div class="option-dropdown">
+								<div class="option-dropdown-value" data-class-open="open_dropdown == 4" data-event-click="option_toggle_dropdown(4)">{{font_value_label}}<div class="opt-caret"></div></div>
+								<div class="option-dropdown-list" data-class-hidden="open_dropdown != 4">
+									<div class="option-dropdown-option" data-for="label : font_labels"
+									     data-class-selected="it_index == font_index"
+									     data-event-click="option_dropdown_option_click(4, it_index)">{{label}}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="opt-footer">
+			<div class="opt-footer-action" data-event-click="option_click_close">
+				<span class="opt-keycap">Esc</span><span class="opt-footer-label">{{close_label}}</span>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+</rml>

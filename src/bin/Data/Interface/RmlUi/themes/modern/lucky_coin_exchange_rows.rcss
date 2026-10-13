@@ -1,0 +1,19 @@
+/* Where lucky_coin_exchange.rml's own lines and buttons sit. CExchangeLuckyCoin's RenderTexts(): the title and Exchange bold, the warning bold yellow at y 80, the notice two and three lines (14 units) below it. The three exchange buttons from y 220, EXCHANGE_BTN_VAL apart; Close at y 360.
+   The look they share is event_item_entry.rcss; only the rows are this document's. */
+
+.entry-text:nth-child(1) { left: 0px; top: 25px; color: token(text-primary); font-weight: bold; }
+.entry-text:nth-child(2) { left: 0px; top: 200px; color: token(text-primary); font-weight: bold; }
+.entry-text:nth-child(3) { left: 0px; top: 80px; color: token(accent-gold); font-weight: bold; }
+.entry-text:nth-child(4) { left: 0px; top: 108px; color: token(text-primary); }
+.entry-text:nth-child(5) { left: 0px; top: 122px; color: token(text-primary); }
+
+.entry-btn:nth-child(1) { left: 41px; top: 220px; width: 108px; height: 29px; }
+.entry-btn:nth-child(1) .entry-label { font-weight: bold; }
+
+.entry-btn:nth-child(2) { left: 41px; top: 253px; width: 108px; height: 29px; }
+.entry-btn:nth-child(2) .entry-label { font-weight: bold; }
+
+.entry-btn:nth-child(3) { left: 41px; top: 286px; width: 108px; height: 29px; }
+.entry-btn:nth-child(3) .entry-label { font-weight: bold; }
+
+.entry-btn:nth-child(4) { left: 63px; top: 360px; width: 64px; height: 29px; }

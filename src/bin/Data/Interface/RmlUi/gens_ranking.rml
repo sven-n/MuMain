@@ -1,0 +1,86 @@
+<rml>
+<head>
+	<title>Gens Info</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="gens_ranking.rcss"/>
+</head>
+<body>
+	<!-- The Gens ranking window (CGensRanking), docked right: the family mark on its rank back,
+	     the family, title, ranking and contribution, the description box with the rewards text
+	     and its scroll bar, the exit button. The reward lines keep native wrapping, while RmlUi
+	     owns the scroll position and thumb. The workspace slot places and scales #panel; every
+	     position and size below is the theme's. A .sharp-text layer's font size
+	     stays bound: it is laid out in physical pixels and counter-scaled out of the panel
+	     (base.rcss). -->
+	<div id="panel" data-model="gens_ranking">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<div id="rank_back"></div>
+		<div id="mark" data-if="mark_sprite != ''" data-attr-class="mark_sprite"></div>
+
+		<!-- The rank strip and the description box: their fills, corners and edges, each placed by
+		     the theme rather than by a style attribute no theme could override. -->
+		<div class="fill fill-strip"></div>
+		<div class="fill fill-desc"></div>
+		<div class="t-corner corner-strip-tl"></div>
+		<div class="t-corner corner-strip-tr"></div>
+		<div class="t-corner corner-desc-tr"></div>
+		<div class="t-corner corner-bl"></div>
+		<div class="t-corner corner-br"></div>
+		<div class="t-edge-top edge-strip-top"></div>
+		<div class="t-edge-right edge-strip-right"></div>
+		<div class="t-edge-top edge-desc-top"></div>
+		<div class="t-edge-right edge-desc-right"></div>
+		<div class="t-edge-bottom edge-bottom"></div>
+		<div class="t-edge-left edge-left"></div>
+
+		<div class="text-back text-back-level"></div>
+		<div class="text-back text-back-rank"></div>
+
+		<span id="gr_title" class="sharp-text gr-line"
+		      data-style-font-size="title.text_px + 'px'">{{title.text}}</span>
+		<span id="gr_gens_label" class="sharp-text gr-line"
+		      data-style-font-size="gens_label.text_px + 'px'">{{gens_label.text}}</span>
+		<span id="gr_gens_name" class="sharp-text gr-line"
+		      data-style-font-size="gens_name.text_px + 'px'">{{gens_name.text}}</span>
+		<span id="gr_level_label" class="sharp-text gr-line"
+		      data-style-font-size="level_label.text_px + 'px'">{{level_label.text}}</span>
+		<span id="gr_title_name" class="sharp-text gr-line"
+		      data-style-font-size="title_name.text_px + 'px'">{{title_name.text}}</span>
+		<span id="gr_rank_label" class="sharp-text gr-line"
+		      data-style-font-size="rank_label.text_px + 'px'">{{rank_label.text}}</span>
+		<span id="gr_rank_value" class="sharp-text gr-line"
+		      data-style-font-size="rank_value.text_px + 'px'">{{rank_value.text}}</span>
+		<span id="gr_contrib_label" class="sharp-text gr-line"
+		      data-style-font-size="contrib_label.text_px + 'px'">{{contrib_label.text}}</span>
+		<span id="gr_contrib_value" class="sharp-text gr-line"
+		      data-style-font-size="contrib_value.text_px + 'px'">{{contrib_value.text}}</span>
+		<span id="gr_desc_label" class="sharp-text gr-line"
+		      data-style-font-size="desc_label.text_px + 'px'">{{desc_label.text}}</span>
+
+		<!-- The promotion note, present only while there is a next rank: the theme gives the group
+		     its own rows (gens_ranking.rcss). -->
+		<div class="gr-promo">
+			<span class="sharp-text gr-promo-line" data-for="l : promo_lines"
+			      data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
+		</div>
+
+		<!-- Counter-scale the pane to physical pixels like other docked scroll lists.
+		     Block rows establish scroll height; RmlUi owns the scrollbar and its drag. -->
+		<div class="gr-desc scroll-pane counter-scaled">
+			<div class="gr-desc-line" data-for="l : desc_lines"
+			     data-style---line-height="desc_line_height + 'px'">
+				<span class="gr-desc-text"
+				      data-style-font-size="l.text_px + 'px'">{{l.text}}</span>
+			</div>
+		</div>
+
+		<div id="btn_exit" data-event-click="gens_ranking_exit" data-attr-data-hint="exit_tooltip"></div>
+		<div id="frame_corner_close" data-event-click="gens_ranking_exit"></div>
+	</div>
+</body>
+</rml>

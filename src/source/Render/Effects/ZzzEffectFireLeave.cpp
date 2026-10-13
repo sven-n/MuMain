@@ -20,7 +20,7 @@
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Core/Utilities/Random.h"
 
 #include <cmath>
@@ -35,7 +35,12 @@ float RainCurrent = 0.f;
 
 static  int RainSpeed = 30;
 static  int RainAngle = 0;
-static  int RainPosition = 0;
+// float, not int -- RainSpeed/RainAngle above are recomputed from WorldTime each call (no carry-
+// over needed), but RainPosition accumulates (+=) every frame; at high/uncapped FPS
+// FPS_ANIMATION_FACTOR collapses toward 0, and an int accumulator truncates a sub-1.0 per-call
+// delta straight back to the same value forever, freezing the rain/leaf scroll (same root cause
+// CCreditWin's alpha fade had -- see that fix's own comment).
+static  float RainPosition = 0.f;
 
 void CreateBonfire(vec3_t Position, vec3_t Angle)
 {
@@ -232,9 +237,13 @@ bool CreateLorenciaLeaf(PARTICLE* o)
         o->Velocity[0] = -o->Velocity[0] + 3.2f;
     }
 
-    o->Velocity[0] *= FPS_ANIMATION_FACTOR;
-    o->Velocity[1] = Random::RangeFloat(-16, 15) * 0.1f * FPS_ANIMATION_FACTOR;
-    o->Velocity[2] = Random::RangeFloat(-16, 15) * 0.1f * FPS_ANIMATION_FACTOR;
+    // No *FPS_ANIMATION_FACTOR here -- MoveHeavenRain (this file) already scales o->Velocity by it
+    // every frame via VectorAddScaled(..., FPS_ANIMATION_FACTOR) when it integrates Position. Baking
+    // the factor into the spawn-time velocity too (as this used to) double-applies it, making these
+    // leaves drift at factor^2 instead of factor -- crawling instead of drifting under high FPS.
+    // CreateAtlanseLeaf below (same move handler) never had this extra multiply; match it.
+    o->Velocity[1] = Random::RangeFloat(-16, 15) * 0.1f;
+    o->Velocity[2] = Random::RangeFloat(-16, 15) * 0.1f;
     o->TurningForce[0] = Random::RangeFloat(-8, 7) * 0.1f;
     o->TurningForce[1] = Random::RangeFloat(-32, 31) * 0.1f;
     o->TurningForce[2] = Random::RangeFloat(-8, 7) * 0.1f;
@@ -386,7 +395,11 @@ bool MoveHeavenRain(PARTICLE* o)
         o->TurningForce[0] += Random::RangeFloat(-4, 3) * 0.02f * FPS_ANIMATION_FACTOR;
         o->TurningForce[1] += Random::RangeFloat(-8, 7) * 0.02f * FPS_ANIMATION_FACTOR;
         o->TurningForce[2] += Random::RangeFloat(-4, 3) * 0.02f * FPS_ANIMATION_FACTOR;
-        VectorAdd(o->Angle, o->TurningForce, o->Angle);
+        // *FPS_ANIMATION_FACTOR -- TurningForce is an angular-velocity term (correctly dt-scaled
+        // just above), but was being applied to Angle as a plain VectorAdd with no matching dt
+        // scale, unlike its Velocity->Position sibling right above (VectorAddScaled(..., FPS_
+        // ANIMATION_FACTOR)) -- tumbling rotation ran N times faster than intended at high FPS.
+        VectorAddScaled(o->Angle, o->TurningForce, o->Angle, FPS_ANIMATION_FACTOR);
 
         vec3_t Range;
         VectorSubtract(o->StartPosition, o->Position, Range);
@@ -459,8 +472,8 @@ bool MoveLeaves()
 
     RainSpeed = ((int)sinf(WorldTime * 0.001f) * 10 + 30) * FPS_ANIMATION_FACTOR;
     RainAngle = (int)sinf(WorldTime * 0.0005f + 50.f) * 20 * FPS_ANIMATION_FACTOR;
-    RainPosition += 20 * FPS_ANIMATION_FACTOR;
-    RainPosition %= 2000;
+    RainPosition += 20.f * FPS_ANIMATION_FACTOR;
+    RainPosition = fmodf(RainPosition, 2000.f);
 
     // DevEditor weather effects toggle
 #ifdef _EDITOR

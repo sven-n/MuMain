@@ -291,11 +291,11 @@ bool FreeFlyCamera::ComputeMapScreenRect(int& outX, int& outY, int& outSize) con
     auto project = [&](float wx, float wy, float& sx, float& sy) -> bool
     {
         vec3_t d = { wx - m_Position[0], wy - m_Position[1], -m_Position[2] };
-        const float vz = DotProduct(d, F);
+        const float vz = VectorDotProduct(d, F);
         if (vz <= 1.0f)
             return false;
-        sx = ((DotProduct(d, R) / vz) / tanH * 0.5f + 0.5f) * winW;
-        sy = ((DotProduct(d, U) / vz) / tanV * 0.5f + 0.5f) * winH;
+        sx = ((VectorDotProduct(d, R) / vz) / tanH * 0.5f + 0.5f) * winW;
+        sy = ((VectorDotProduct(d, U) / vz) / tanV * 0.5f + 0.5f) * winH;
         return true;
     };
 

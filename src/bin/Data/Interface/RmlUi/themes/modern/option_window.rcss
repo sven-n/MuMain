@@ -1,0 +1,489 @@
+/* Modern theme's settings screen (themes/modern/option_window.rml): a full-screen glass overlay.
+   The world shows through a softly blurred, darkened scrim; the pane of rows sits on frosted glass,
+   blurred harder and lit from the top. Every gradient and blur has a plain translucent
+   background-color under it, so the screen still reads as glass on a renderer without them. */
+
+#panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: auto;
+	font-family: "token(font-body)";
+	color: token(text-primary);
+	background-color: rgba(4, 6, 9, 150);
+	backdrop-filter: blur(3dp);
+	decorator: radial-gradient(ellipse, rgba(4, 6, 9, 0) 35%, rgba(2, 3, 5, 140) 100%);
+}
+
+.opt-shell {
+	position: absolute;
+	left: 5%;
+	right: 5%;
+	top: 6%;
+	bottom: 6%;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Header: the screen title on a gold rule, the close button at the far right. */
+.opt-header {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	height: 52dp;
+	border-bottom: 1dp rgba(255, 255, 255, 40);
+}
+.opt-title {
+	flex: 1 1 auto;
+	padding-left: 14dp;
+	border-left: 3dp token(accent-gold);
+	font-size: 24dp;
+	font-weight: bold;
+	letter-spacing: 4dp;
+	text-transform: uppercase;
+	color: token(text-primary);
+}
+.opt-close {
+	position: relative;
+	flex: 0 0 auto;
+	width: 34dp;
+	height: 34dp;
+	cursor: pointer;
+	border-radius: 4dp;
+}
+.opt-close:hover {
+	background-color: rgba(255, 255, 255, 22);
+}
+.opt-close-bar {
+	position: absolute;
+	left: 7dp;
+	top: 16dp;
+	width: 20dp;
+	height: 2dp;
+	background-color: token(text-secondary);
+}
+.opt-close-bar-a { transform: rotate(45deg); }
+.opt-close-bar-b { transform: rotate(-45deg); }
+.opt-close:hover .opt-close-bar {
+	background-color: token(accent-gold-hover);
+}
+
+.opt-body {
+	flex: 1 1 0;
+	display: flex;
+	margin-top: 20dp;
+	min-height: 0;
+}
+
+/* Category rail. The active category carries a gold edge and a wash that fades to the right. */
+.opt-nav {
+	flex: 0 0 auto;
+	width: 200dp;
+	margin-right: 20dp;
+}
+.opt-nav-item {
+	display: block;
+	height: 42dp;
+	line-height: 42dp;
+	margin-bottom: 4dp;
+	padding-left: 16dp;
+	border-left: 3dp rgba(255, 255, 255, 0);
+	border-radius: 0 4dp 4dp 0;
+	cursor: pointer;
+	white-space: nowrap;
+	font-size: 13dp;
+	letter-spacing: 1.5dp;
+	text-transform: uppercase;
+	color: token(text-secondary);
+}
+.opt-nav-item:hover {
+	color: token(text-primary);
+	background-color: rgba(255, 255, 255, 16);
+}
+.opt-nav-item.active-tab {
+	color: token(accent-gold-hover);
+	border-left-color: token(accent-gold);
+	background-color: rgba(196, 154, 60, 30);
+	decorator: linear-gradient(to right, rgba(196, 154, 60, 70), rgba(196, 154, 60, 0));
+}
+
+/* The glass pane: a cool translucent fill, a sheen across the top, a brighter top edge. */
+.opt-pane {
+	position: relative;
+	flex: 1 1 0;
+	padding: 22dp 28dp;
+	background-color: rgba(22, 26, 32, 140);
+	backdrop-filter: blur(12dp);
+	decorator: linear-gradient(to bottom, rgba(255, 255, 255, 20), rgba(255, 255, 255, 0) 30%);
+	border: 1dp rgba(255, 255, 255, 46);
+	border-top-color: rgba(255, 255, 255, 80);
+	border-radius: 6dp;
+	box-shadow:
+		inset 0 1dp 0 rgba(255, 255, 255, 30),
+		0 12dp 32dp rgba(0, 0, 0, 140);
+}
+
+/* .hidden ties with this rule's display at equal specificity, so it is restated. */
+.opt-page {
+	display: block;
+	max-width: 760dp;
+}
+.opt-page.hidden {
+	display: none;
+}
+.opt-page-title {
+	padding-bottom: 10dp;
+	margin-bottom: 6dp;
+	border-bottom: 1dp rgba(255, 255, 255, 30);
+	font-size: 17dp;
+	font-weight: bold;
+	letter-spacing: 2dp;
+	text-transform: uppercase;
+	color: token(text-primary);
+}
+
+/* A setting: label on the left, its control in a fixed column on the right. pointer-events on the
+   row gives every row a hover, not only the clickable ones. */
+.opt-row {
+	position: relative;
+	display: flex;
+	align-items: center;
+	height: 44dp;
+	padding: 0 12dp;
+	border-bottom: 1dp rgba(255, 255, 255, 14);
+	pointer-events: auto;
+}
+.opt-row:hover {
+	background-color: rgba(255, 255, 255, 12);
+}
+.opt-toggle-row {
+	cursor: pointer;
+}
+/* A toggle needs only its own width; the label keeps the rest. */
+.opt-toggle-row .opt-control {
+	width: auto;
+}
+.opt-label {
+	flex: 1 1 0;
+	margin-right: 16dp;
+	overflow: hidden;
+	white-space: nowrap;
+	font-size: 12dp;
+	color: token(text-primary);
+}
+/* The control column takes a share of the row, so long labels keep their room on a narrow screen. */
+.opt-control {
+	position: relative;
+	flex: 0 0 auto;
+	width: 46%;
+	max-width: 280dp;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+/* Toggle switch, driven by the same checked flags the legacy checkboxes use. */
+.opt-toggle {
+	position: relative;
+	width: 40dp;
+	height: 20dp;
+	border: 1dp rgba(255, 255, 255, 60);
+	border-radius: 11dp;
+	background-color: rgba(255, 255, 255, 26);
+	box-shadow: inset 0 1dp 3dp rgba(0, 0, 0, 120);
+	transition: background-color 0.12s quadratic-out;
+}
+.opt-toggle-knob {
+	position: absolute;
+	left: 2dp;
+	top: 2dp;
+	width: 16dp;
+	height: 16dp;
+	border-radius: 8dp;
+	background-color: token(text-primary);
+	box-shadow: 0 1dp 2dp rgba(0, 0, 0, 150);
+	transition: left 0.12s quadratic-out;
+}
+.opt-toggle.checked {
+	background-color: rgba(196, 154, 60, 210);
+	border-color: token(accent-gold-hover);
+}
+.opt-toggle.checked .opt-toggle-knob {
+	left: 22dp;
+	background-color: #fff8e6;
+}
+.opt-toggle-row:hover .opt-toggle {
+	border-color: rgba(255, 255, 255, 110);
+}
+.opt-toggle-row:hover .opt-toggle.checked {
+	border-color: #f0d79a;
+}
+
+/* Sliders: base.rcss's level gauge as a thin rounded track with a glowing gold fill and a thumb
+   at the fill's end. The hit area reaches past the track so a thin bar is still easy to grab. */
+.opt-slider {
+	position: relative;
+	flex: 1 1 0;
+	height: 6dp;
+	border-width: 0;
+	border-radius: 3dp;
+	background-color: rgba(255, 255, 255, 34);
+}
+.opt-slider .level-gauge-fill {
+	left: 0;
+	top: 0;
+	bottom: 0;
+	border-radius: 3dp;
+	background-color: token(accent-gold);
+	decorator: linear-gradient(to right, #8f6922, token(accent-gold-hover));
+	box-shadow: 0 0 6dp rgba(226, 193, 109, 110);
+}
+.opt-slider-thumb {
+	position: absolute;
+	right: -7dp;
+	top: -4dp;
+	width: 14dp;
+	height: 14dp;
+	border-radius: 7dp;
+	background-color: #fff8e6;
+	box-shadow: 0 0 0 3dp rgba(196, 154, 60, 90), 0 1dp 3dp rgba(0, 0, 0, 160);
+}
+.opt-slider-step {
+	position: absolute;
+	top: -2dp;
+	bottom: -2dp;
+	width: 2dp;
+	margin-left: -1dp;
+	background-color: rgba(14, 17, 22, 220);
+}
+.opt-slider-step-1 { left: 20%; }
+.opt-slider-step-2 { left: 40%; }
+.opt-slider-step-3 { left: 60%; }
+.opt-slider-step-4 { left: 80%; }
+.opt-slider-hit {
+	left: -8dp;
+	right: -8dp;
+	top: -10dp;
+	bottom: -10dp;
+}
+.opt-value {
+	flex: 0 0 auto;
+	width: 48dp;
+	margin-left: 14dp;
+	text-align: right;
+	white-space: nowrap;
+	font-size: 12dp;
+	color: token(accent-gold-hover);
+}
+
+/* Dropdowns. The list is near-opaque so its entries stay legible over the scene. z-index 1 keeps
+   an open list above the rows after it. */
+.option-dropdown {
+	position: relative;
+	width: 100%;
+	height: 30dp;
+}
+.option-dropdown-value {
+	display: block;
+	position: relative;
+	box-sizing: border-box;
+	width: 100%;
+	height: 30dp;
+	line-height: 28dp;
+	padding: 0 32dp 0 12dp;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: pointer;
+	pointer-events: auto;
+	font-size: 12dp;
+	color: token(text-primary);
+	background-color: rgba(255, 255, 255, 18);
+	border: 1dp rgba(255, 255, 255, 56);
+	border-radius: 4dp;
+}
+.option-dropdown-value:hover {
+	background-color: rgba(255, 255, 255, 28);
+	border-color: rgba(255, 255, 255, 110);
+}
+.option-dropdown-value.open {
+	border-color: token(accent-gold);
+}
+.opt-caret {
+	position: absolute;
+	right: 13dp;
+	top: 9dp;
+	width: 6dp;
+	height: 6dp;
+	border-right: 2dp token(text-secondary);
+	border-bottom: 2dp token(text-secondary);
+	transform: rotate(45deg);
+}
+.option-dropdown-value.open .opt-caret {
+	top: 13dp;
+	transform: rotate(-135deg);
+	border-color: token(accent-gold-hover);
+}
+.option-dropdown-list {
+	display: block;
+	position: absolute;
+	box-sizing: border-box;
+	left: 0;
+	top: 100%;
+	width: 100%;
+	max-height: 220dp;
+	margin-top: 4dp;
+	padding: 4dp 0;
+	overflow-y: auto;
+	z-index: 1;
+	pointer-events: auto;
+	background-color: rgba(16, 19, 24, 242);
+	border: 1dp rgba(255, 255, 255, 60);
+	border-radius: 4dp;
+	box-shadow: 0 10dp 24dp rgba(0, 0, 0, 170);
+}
+.option-dropdown-list.hidden {
+	display: none;
+}
+/* A sized scrollbar; unstyled, its hit area can cover the entries and swallow their clicks. */
+.option-dropdown-list scrollbarvertical {
+	width: 6dp;
+	margin: 0 2dp 0 0;
+}
+.option-dropdown-list scrollbarvertical slidertrack {
+	background-color: rgba(255, 255, 255, 0);
+}
+.option-dropdown-list scrollbarvertical sliderbar {
+	background-color: rgba(255, 255, 255, 60);
+	border-radius: 3dp;
+}
+.option-dropdown-list scrollbarvertical sliderbar:hover,
+.option-dropdown-list scrollbarvertical sliderbar:active {
+	background-color: rgba(255, 255, 255, 120);
+}
+.option-dropdown-list scrollbarvertical sliderarrowdec,
+.option-dropdown-list scrollbarvertical sliderarrowinc {
+	width: 0;
+	height: 0;
+}
+.option-dropdown-option {
+	display: block;
+	height: 28dp;
+	line-height: 28dp;
+	padding: 0 12dp;
+	white-space: nowrap;
+	cursor: pointer;
+	pointer-events: auto;
+	font-size: 12dp;
+	color: token(text-secondary);
+}
+.option-dropdown-option:hover {
+	color: token(text-primary);
+	background-color: rgba(255, 255, 255, 20);
+}
+.option-dropdown-option.selected {
+	color: token(accent-gold-hover);
+	background-color: rgba(196, 154, 60, 44);
+}
+
+/* The UI Scale row explains itself in a tip under the row on hover; its list opens upwards so the
+   two do not collide. */
+.opt-row-tip {
+	display: none;
+	position: absolute;
+	left: 12dp;
+	top: 100%;
+	width: 360dp;
+	margin-top: 4dp;
+	padding: 8dp 10dp;
+	z-index: 2;
+	pointer-events: none;
+	font-size: 11dp;
+	color: token(text-secondary);
+	background-color: rgba(16, 19, 24, 242);
+	border: 1dp rgba(255, 255, 255, 60);
+	border-radius: 4dp;
+}
+.opt-row-tipped:hover .opt-row-tip {
+	display: block;
+}
+.opt-row-tipped .option-dropdown-list {
+	top: auto;
+	bottom: 100%;
+	margin-top: 0;
+	margin-bottom: 4dp;
+}
+
+/* Footer: a keycap hint for the close action. */
+.opt-footer {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	height: 48dp;
+	margin-top: 16dp;
+	border-top: 1dp rgba(255, 255, 255, 30);
+}
+.opt-footer-action {
+	display: flex;
+	align-items: center;
+	padding: 6dp 10dp;
+	cursor: pointer;
+	border-radius: 4dp;
+}
+.opt-footer-action:hover {
+	background-color: rgba(255, 255, 255, 18);
+}
+.opt-keycap {
+	height: 21dp;
+	line-height: 21dp;
+	padding: 0 8dp;
+	margin-right: 10dp;
+	font-size: 11dp;
+	font-weight: bold;
+	color: token(text-primary);
+	background-color: rgba(255, 255, 255, 22);
+	border: 1dp rgba(255, 255, 255, 90);
+	border-bottom-width: 2dp;
+	border-radius: 3dp;
+}
+.opt-footer-label {
+	height: 24dp;
+	line-height: 25dp;
+	font-size: 13dp;
+	letter-spacing: 1.5dp;
+	text-transform: uppercase;
+	color: token(text-primary);
+}
+.opt-footer-action:hover .opt-footer-label {
+	color: token(accent-gold-hover);
+}
+
+/* A short screen (a small window or a large UI scale): tighter margins, header, rail and rows, so
+   the longest page still fits under the header and above the footer. */
+@media (max-height: 560dp) {
+	.opt-shell { left: 4%; right: 4%; top: 3%; bottom: 3%; }
+	.opt-header { height: 40dp; }
+	.opt-title { font-size: 18dp; letter-spacing: 3dp; }
+	.opt-close { width: 30dp; height: 30dp; }
+	.opt-close-bar { left: 5dp; top: 14dp; }
+	.opt-body { margin-top: 10dp; }
+	.opt-nav-item { height: 32dp; line-height: 32dp; margin-bottom: 2dp; }
+	.opt-pane { padding: 12dp 16dp; }
+	.opt-page-title { padding-bottom: 6dp; margin-bottom: 4dp; font-size: 14dp; }
+	.opt-row { height: 34dp; }
+	.opt-footer { height: 36dp; margin-top: 8dp; }
+}
+/* A narrow screen gives the rail less width and the rows more. */
+@media (max-width: 760dp) {
+	.opt-nav { width: 140dp; margin-right: 12dp; }
+	.opt-nav-item { padding-left: 10dp; letter-spacing: 1dp; }
+	.opt-control { width: 44%; }
+	.opt-toggle-row .opt-control { width: auto; }
+	.opt-label { white-space: normal; line-height: 14dp; }
+}
+/* Smaller still, the page scrolls rather than run under the footer. */
+@media (max-height: 380dp) {
+	.opt-pane { overflow-y: auto; }
+}

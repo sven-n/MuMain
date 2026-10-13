@@ -87,7 +87,6 @@ extern ITEM g_PersonalShopInven[MAX_PERSONALSHOP_INVEN];
 extern ITEM g_PersonalShopBackup[MAX_PERSONALSHOP_INVEN];
 extern bool g_bEnablePersonalShop;
 extern int g_iPShopWndType;
-extern POINT g_ptPersonalShop;
 extern int g_iPersonalShopMsgType;
 extern wchar_t g_szPersonalShopTitle[MAX_SHOPTITLE + 1];
 extern CHARACTER g_PersonalShopSeller;
@@ -148,11 +147,8 @@ void OpenPersonalShop(int iType);
 void ClosePersonalShop();
 void ClearPersonalShop();
 bool IsExistUndecidedPrice();
-void OpenPersonalShopMsgWnd(int iMsgType);
-bool IsCorrectShopTitle(const wchar_t* szShopTitle);
 
 void CreateGuildMark(int nMarkIndex, bool blend = true);
-void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index);
 void CreateCastleMark(int Type, BYTE* buffer = NULL, bool blend = true);
 
 namespace UI::Items
@@ -160,14 +156,20 @@ namespace UI::Items
 bool ShouldAnimatePreview(bool pointerInside, bool pickedItemActive, bool renderingPickedItem);
 }
 
+// The box in window pixels; the item animates while the pointer is over it.
 void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool PickUp = false);
+// For a slot that already knows whether it is hovered -- an RmlUi element -- instead of testing the
+// legacy mouse globals against the rectangle, which need not be where the item is shown.
+void RenderItem3DWithHover(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool hovered);
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target, int Select, bool PickUp);
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage);
 void GetItemName(int iType, int iLevel, wchar_t* Text);
 std::wstring GetItemDisplayName(ITEM* pItem);
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
-void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
-void RenderRepairInfo(int sz, int sy, ITEM* ip, bool Sell);
+// The item's information and repair tooltips, anchored in window pixels: their layout runs in the
+// screen's 640x480 stretch, the space the original computed it in, whichever window asks.
+void RenderItemInfoAtPx(float x, float y, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
+void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell);
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum = 0, int iRenderPoint = STRP_NONE);
 void RequireClass(ITEM_ATTRIBUTE* p);
 bool IsRequireClassRenderItem(const short sType);
@@ -178,8 +180,6 @@ bool IsAncientItem(ITEM* pItem);
 bool IsMoneyItem(ITEM* pItem);
 
 void ComputeItemInfo(int iHelpItem);
-void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y);
-void RenderHelpLine(int iColumnType, const wchar_t* pPrintStyle, int& TabSpace, const wchar_t* pGapText = NULL, int Pos_y = 0, int iType = 0);
 void SetGroundItemLabelBuildBudget(int buildBudget);
 void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort);
 

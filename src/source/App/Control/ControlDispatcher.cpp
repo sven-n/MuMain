@@ -40,6 +40,8 @@ const std::vector<CommandEntry>& CommandTable()
         {"hotkey", SceneRequirement::Any, &Commands::Hotkey},
         {"type", SceneRequirement::Any, &Commands::Type},
         {"click-ui", SceneRequirement::Any, &Commands::ClickUi},
+        {"hover-ui", SceneRequirement::Any, &Commands::HoverUi},
+        {"drag-ui", SceneRequirement::Any, &Commands::DragUi},
         {"ui", SceneRequirement::World, &Commands::Ui},
         {"slot-pixel", SceneRequirement::World, &Commands::SlotPixel},
         {"login", SceneRequirement::PreGame, &Commands::Login},

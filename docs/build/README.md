@@ -64,18 +64,49 @@ Build every other supported row locally using the setup guides above.
 
 These apply to every setup; the per-setup guides only cover what differs.
 
+### Dependencies and first configuration
+
+Use CMake 3.25 or newer, the .NET 10 SDK, and the compiler and system packages listed
+in your platform guide. Windows presets also require vcpkg with `VCPKG_ROOT` set.
+Initial configuration needs network access unless dependency sources are already cached.
+
+CMake initializes missing Git submodules under `src/ThirdParty/`: SDL3 and RmlUi for
+all builds, and ImGui when `ENABLE_EDITOR=ON`. RmlUi uses the
+[nitoygo/RmlUi fork](https://github.com/nitoygo/RmlUi), with the revision pinned by
+the repository's submodule entry, for the SDL GPU renderer integration.
+
+If automatic initialization fails, run from the repository root:
+
+```sh
+git submodule update --init -- src/ThirdParty/SDL src/ThirdParty/RmlUi
+
+# For editor builds:
+git submodule update --init -- src/ThirdParty/imgui
+```
+
+CMake downloads miniaudio, GLM, spdlog, SDL3_ttf and SDL3_image through `FetchContent`.
+Audio uses miniaudio. SDL3_ttf supplies the vendored FreeType used by RmlUi; neither
+SDL_mixer nor a separate FreeType submodule is required.
+
 ### Build options
 
 | CMake option | Values | Meaning |
 |--------------|--------|---------|
-| `CMAKE_BUILD_TYPE` | `Release` / `Debug` | Optimized vs. debuggable. |
+| `CMAKE_BUILD_TYPE` | `Release` / `Debug` / `RelWithDebInfo` | Build configuration for single-config generators. With Ninja Multi-Config, select it through a build preset or `--config` instead. |
 | `ENABLE_EDITOR` | `ON` / `OFF` | Builds the in-app ImGui editor (admin tooling). When `OFF`, nothing under `src/MuEditor/` is compiled in - enforced by the `editor_leak` test. |
 | `ENABLE_CONTROL_SOCKET` | `ON` / `OFF` | Builds the developer control socket that lets test scripts drive the client (see [`control-socket.md`](../control-socket.md)). Default `OFF`; never for player builds. When `OFF`, nothing under `src/source/App/Control/` and no local-socket transport is compiled in, and the `MU_CONTROL_SOCKET` variable is ignored - enforced by the `control_socket_leak` test. The `-mueditor` presets turn it `ON`. |
 | `BUILD_TESTING` | `ON` / `OFF` | Builds and registers the unit tests (run with `ctest`). |
+| `RMLUI_SDL_GPU_NUM_MSAA_SAMPLES` | `1` / `2` / `4` / `8` | RmlUi UI-layer sample count. Default `1` disables MSAA to avoid reported NVIDIA/Vulkan device loss. Higher values are opt-in for diagnostics; see [rendering parity](rendering-parity.md#rmlui-multisampling). |
 | `MU_COPY_RUNTIME_ASSETS` | `ON` / `OFF` | Copies `Data/` and `fonts/` beside the executable. Defaults to `ON` for local runnable builds. |
 | `MU_LINK_SDL_PLATFORM_BACKENDS` | `ON` / `OFF` | Linux only: makes SDL link its video-backend libraries (X11, Wayland, libdecor, KMS/DRM) and the Vulkan loader at build time instead of loading them at run time, so a packaged runtime resolves them through the recorded `RUNPATH` without a global library path. Defaults to `OFF`. |
 
 For Linux Wayland reports, run [`scripts/wayland-diag.sh`](../../scripts/wayland-diag.sh) and attach its sanitized `summary.txt`.
+
+If configuration reports that SDL_ttf or RmlUi cannot find FreeType after removing
+cached dependencies, reconfigure the same build directory with
+`-DFETCHCONTENT_FULLY_DISCONNECTED=OFF`. SDL_ttf supplies the vendored FreeType;
+disconnected mode requires its sources to already exist. Let configuration finish
+successfully before building or running the tests.
 
 ### The network library
 
@@ -168,6 +199,11 @@ tar -xzf MuMain-data-<id>.tar.gz -C MuMain-runtime
 
 The assembled directory contains `Main.exe`, the network and runtime DLLs,
 configuration, shaders, `Data/`, and `fonts/`.
+
+If a music file is missing or cannot be decoded, the client logs the failure and leaves
+that track silent for the rest of the audio session. Scene changes do not repeatedly
+retry it. After restoring or replacing a file under `Data/Music/`, restart the client
+to load it again.
 
 ### Build without copying data
 

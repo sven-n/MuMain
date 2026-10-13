@@ -1,7 +1,4 @@
-﻿// Event.cpp: implementation of the CEvent class.
-//
-//////////////////////////////////////////////////////////////////////
-
+﻿
 // common
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -14,7 +11,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Models/BoneManager.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "GameLogic/Events/Cinematic/CKANTURUDirection.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "UI/Widgets/UIBaseDef.h"

@@ -1,0 +1,31 @@
+<rml>
+<head>
+	<title>Kanturu info (CKanturuInfoWindow)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="kanturu_info.rcss"/>
+</head>
+<body data-model="kanturu_info">
+	<!-- The Kanturu boss-battle HUD (CKanturuInfoWindow): the frame, the characters and the monsters
+	     (or the boss) left, and the time left in newui_number1 digits with a blinking colon. Its
+	     workspace slot places #panel at the bottom HUD's scale. Text does not scale: it takes the native bold size and
+	     cancels the scale. In the background context, behind its other documents (the original drew it
+	     under every panel). Takes no pointer events. -->
+	<div class="screen">
+		<div id="panel">
+			<div id="back"></div>
+			<span class="info-text counter-scaled" id="users" data-style-font-size="bold_text_px + 'px'">{{users_text}}</span>
+			<span class="info-text counter-scaled" id="monsters" data-style-font-size="bold_text_px + 'px'">{{monsters_text}}</span>
+			<span class="info-text counter-scaled" id="colon" data-if="colon_visible" data-style-font-size="bold_text_px + 'px'">:</span>
+			<!-- Each run's digits; the theme centres a run from its digit count and index. -->
+			<div class="run" id="minutes" data-style---n="minute_digits.size">
+				<img class="digit" src="../../../newui_number1.tga" data-for="cell, i : minute_digits"
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+			</div>
+			<div class="run" id="seconds" data-style---n="second_digits.size">
+				<img class="digit" src="../../../newui_number1.tga" data-for="cell, i : second_digits"
+				     data-attr-rect="cell" data-class-blank="cell == ''" data-style---i="i"/>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

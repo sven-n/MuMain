@@ -1,0 +1,35 @@
+<rml>
+	<!-- bound-geometry: the monsters' gauge is a length from m_fMonsterGauge, stacked in pieces as
+	     monsters get through; the Ice Walker's and each party member's marker is their own position
+	     along the path (59 + 167 * position) -->
+<head>
+	<title>Doppelganger frame (CDoppelGangerFrame)</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="doppelganger_frame.rcss"/>
+</head>
+<body data-model="doppelganger_frame">
+	<!-- The Doppelganger event HUD (CDoppelGangerFrame): the frame, the monsters that passed, "Time
+	     left", the time, the monsters' progress gauge (yellow, orange, red by how many passed), the Ice
+	     Walker's marker and the party members' markers on the path. Its workspace slot places #panel
+	     at the bottom HUD's scale. Text does not scale: each line takes its native size and cancels the scale. In the
+	     background context, behind its other documents (the original drew it under every panel). Takes
+	     no pointer events. -->
+	<div class="screen">
+		<div id="panel">
+			<div id="back"></div>
+			<!-- The three lines, each placed and coloured by the theme; the monsters-passed line
+			     says how many got through. -->
+			<span class="frame-text counter-scaled" id="dg_passed" data-class-passed-one="passed_state == 'one'"
+			      data-class-passed-several="passed_state == 'several'"
+			      data-style-font-size="passed_line.text_px + 'px'">{{passed_line.text}}</span>
+			<span class="frame-text counter-scaled" id="dg_time_label" data-style-font-size="time_label.text_px + 'px'">{{time_label.text}}</span>
+			<span class="frame-text big counter-scaled" id="dg_time" data-style-font-size="time_line.text_px + 'px'">{{time_line.text}}</span>
+			<img class="bar" data-for="b : bars" data-attr-src="b.src" data-attr-rect="b.rect"
+			     data-style-left="b.left + 'px'" data-style-width="b.width + 'px'"/>
+			<img id="icewalker" src="../../../Double_Micon01.tga" data-if="ice_walker_visible"
+			     data-style-left="ice_walker_left + 'px'"/>
+			<div class="marker" data-for="m : markers" data-class-hero="m.hero" data-style-left="m.left + 'px'"></div>
+		</div>
+	</div>
+</body>
+</rml>

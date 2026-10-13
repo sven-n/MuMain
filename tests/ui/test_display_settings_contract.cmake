@@ -45,7 +45,7 @@ foreach(required_text IN ITEMS
 endforeach()
 
 string(FIND "${winmain_source}" "                ApplyPendingVSyncPreference();" apply_position)
-string(FIND "${winmain_source}" "                mu::GetRenderer().BeginFrame();" begin_position)
+string(FIND "${winmain_source}" "                RenderProfiledFrame();" begin_position)
 if(apply_position EQUAL -1 OR begin_position EQUAL -1 OR NOT apply_position LESS begin_position)
     message(FATAL_ERROR "Pending VSync must be applied before BeginFrame")
 endif()

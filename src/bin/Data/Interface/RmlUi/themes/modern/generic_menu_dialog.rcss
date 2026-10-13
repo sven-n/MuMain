@@ -1,0 +1,340 @@
+/* Modern theme for the generic menu dialog. Single document (unlike generic_confirm_dialog's
+   fg/bg split) -- no item3D here, so no compositing-order problem to solve. Frame/border/header
+   chrome (base.rcss's .modern-frame/.modern-shell-edge/.modern-groove/.modern-header-rail/
+   .modern-content-well) now lives in window_shell.rml/.rcss, a template shared with any future
+   consumer -- not exclusive to this dialog (see that file's own comment; sys_menu.rml already
+   proves the same chrome on a plain, non-dialog window). This file supplies only this document's
+   own content layout (lines/buttons), not the shell. */
+
+/* #panel is centered via .center-both, dp throughout (no transform:scale(root_scale)). Same 230dp
+   width and 260dp height as legacy's own copy, for visual consistency between the two themes and
+   with generic_confirm_dialog's own panel width. */
+#panel {
+	width: 230dp;
+	height: 260dp;
+	font-family: "token(font-body)";
+	font-size: 12dp;
+	color: token(text-primary);
+}
+
+.gmd-line {
+	display: block;
+	width: 100%;
+	text-align: center;
+	white-space: normal;
+	color: token(text-secondary);
+	font-size: 10dp;
+	line-height: 15dp;
+	margin-bottom: 4dp;
+}
+.gmd-line.bold { font-weight: bold; color: token(text-warm); }
+
+/* No explicit column count -- see ../../generic_menu_dialog.rcss's own copy of this comment for
+   why row + flex-wrap (derived from button count/width vs. available space) replaces a
+   caller-specified column knob. overflow shorthand order and pointer-events follow the exact
+   same reasoning as .gcd-text-col in generic_confirm_dialog.rcss. */
+.gmd-button-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	width: 100%;
+	max-height: 100%;
+	overflow: hidden auto;
+	pointer-events: auto;
+}
+.gmd-button-row scrollbarvertical { width: 6dp; margin: 0; }
+.gmd-button-row scrollbarvertical slidertrack { background-color: token(metal-rail-dark); }
+.gmd-button-row scrollbarvertical sliderbar { background-color: token(metal-edge); }
+.gmd-button-row scrollbarvertical sliderbar:hover,
+.gmd-button-row scrollbarvertical sliderbar:active { background-color: token(metal-highlight); }
+.gmd-button-row scrollbarvertical sliderarrowdec,
+.gmd-button-row scrollbarvertical sliderarrowinc { width: 0; height: 0; }
+.gmd-button-row scrollbarhorizontal { height: 0; }
+
+/* Repeated unit of .gmd-button-row -- see legacy's own copy of this rule for the full reasoning
+   (button + its own optional description lines, stacked in a column; the margin that used to
+   live on .gmd-btn moved here). */
+.gmd-button-cell {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 128dp;
+	margin: 0 3dp 6dp 3dp;
+}
+.gmd-button-cell.compact { width: 64dp; }
+/* See legacy's own copy of this rule for why. */
+.gmd-button-cell.has-lines { margin-bottom: 10dp; }
+/* GenericMenuConfig::columns == 2 -- see legacy's own copy of this rule for the full reasoning
+   (worst-case scrollbar width, no box-sizing support). Content width: 230dp panel - 14dp*2
+   .gmd-content-well insets = 202dp -- minus another 2dp for .modern-content-well's own
+   border-width:1dp (base.rcss; also no-box-sizing, so this reduces the well's actual content box
+   even though it's not visible in this file) = 200dp, - 6dp scrollbar = 194dp. A first pass used
+   94dp here with zero safety margin, landing exactly on this budget's edge once the 2dp border
+   was accounted for -- one wrap-breaking dp over, and the grid collapsed to 1 column in-game.
+   Margin trimmed to 2dp/side, and this time leaving real headroom (90dp, not the bare 92dp max):
+   2*(90 + 4dp cell margin) = 188dp <= 194dp. */
+.gmd-button-cell.cols-2 { width: 90dp; margin: 0 2dp 6dp 2dp; }
+
+/* .btn defaults to position:absolute (base.rcss) -- overridden back to static so buttons flow as
+   ordinary flex children, same technique generic_confirm_dialog.rcss's own item3d-anchor/keypad
+   buttons already use. 128dp/64dp match legacy's own copy of this rule (native's two button
+   sizes) for consistency between themes. */
+.gmd-btn {
+	position: static;
+	width: 128dp;
+	height: 30dp;
+}
+.gmd-btn.compact { width: 64dp; }
+/* GenericMenuConfig::columns == 2 -- see .gmd-button-cell.cols-2 above for the width math (matches
+   the cell exactly, no subtraction -- see legacy's own copy of this rule for why: border/padding
+   moved off this element onto .gmd-btn-fill/.gmd-btn-label below). height/line-height/white-space
+   change because a long jewel name needs to wrap onto 2 lines at this width -- .btn's own fixed
+   height:30dp/line-height:30dp assumes a single line. Unlike legacy, .btn's decorator here is a
+   procedural gradient (base.rcss), not a fixed-pixel image sprite, so it doesn't have legacy's
+   stretch-mismatch problem -- but the fill/label split below is still needed regardless of theme,
+   for a different reason (see .gmd-btn-fill's own comment).
+   position:relative -- see legacy's own copy of this rule for why (containing block for
+   .gmd-btn-fill's absolute positioning; without it the fill escapes past .gmd-btn's own
+   position:static and covers the whole .gmd-content-well instead of just this button). */
+.gmd-btn.cols-2 {
+	position: relative;
+	width: 90dp;
+	height: auto;
+	min-height: 30dp;
+	line-height: normal;
+	white-space: normal;
+}
+/* Deliberately empty/inert for the default and compact sizes -- see legacy's own copy of this
+   rule for why. */
+.gmd-btn-fill {
+	position: absolute;
+	z-index: 0;
+	pointer-events: none;
+}
+/* Lives on this separate, childless sibling rather than directly on .gmd-btn.cols-2 -- a
+   bordered/backgrounded element that also has children renders an incomplete, non-closed box in
+   this engine (same finding server_select.rcss's own .server-row documents);
+   .gmd-btn always has a child (.gmd-btn-label), so the fill has to live on a sibling instead.
+   No decorator override needed here (modern's .btn decorator is a procedural gradient, not an
+   image sprite), just the border/background this class needs on its own. */
+.gmd-btn.cols-2 .gmd-btn-fill {
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	border-width: 1dp;
+	border-color: token(border-frame);
+	background-color: token(surface-control);
+}
+.gmd-btn.cols-2:hover .gmd-btn-fill { border-color: token(border-hover); }
+.gmd-btn.cols-2:active .gmd-btn-fill { background-color: #0a0b09; }
+/* See legacy's own copy of this rule for why position:relative + an explicit z-index above the
+   fill's own are both required (this engine's actual stacking tiebreak among positioned siblings
+   does not follow a "later in markup wins" assumption), and why text lives here instead of
+   directly in .gmd-btn. */
+.gmd-btn-label {
+	position: relative;
+	z-index: 1;
+	display: block;
+	width: 100%;
+}
+.gmd-btn.cols-2 .gmd-btn-label { padding: 4dp 2dp; }
+/* .btn.disabled (base.rcss) already gives the exact look a disabled menu button needs --
+   data-class-disabled="!button.enabled" just toggles that existing class, no new rule needed. */
+
+/* The in-game system menu fills the screen like the options screen: the world under the same
+   blurred, darkened scrim, the heading on a gold rule, the choices as a list, and a keycap hint for
+   closing. The header and footer close it, so its dismiss button (Cancel) is left out. The shell's
+   frame and edge are switched off, its groove becomes a cover that blocks dragging (the document
+   is draggable as a dialog), and its well holds the screen at the options screen's insets. */
+#panel.system-menu {
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	transform: none;
+	border-width: 0;
+	background-color: rgba(4, 6, 9, 150);
+	backdrop-filter: blur(3dp);
+	decorator: radial-gradient(ellipse, rgba(4, 6, 9, 0) 35%, rgba(2, 3, 5, 140) 100%);
+}
+#panel.system-menu .modern-shell-edge {
+	display: none;
+}
+#panel.system-menu .modern-groove {
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	border-width: 0;
+	box-shadow: none;
+	pointer-events: auto;
+	drag: block;
+}
+#panel.system-menu .window-shell-content {
+	left: 5%;
+	right: 5%;
+	top: 6%;
+	bottom: 6%;
+	padding: 0;
+	drag: block;
+	justify-content: flex-start;
+	align-items: stretch;
+	background-color: transparent;
+	decorator: none;
+	border-width: 0;
+	box-shadow: none;
+}
+
+.gmd-sys-header {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	height: 52dp;
+	border-bottom: 1dp rgba(255, 255, 255, 40);
+}
+.gmd-sys-title {
+	flex: 1 1 auto;
+	padding-left: 14dp;
+	border-left: 3dp token(accent-gold);
+	font-size: 24dp;
+	font-weight: bold;
+	letter-spacing: 4dp;
+	text-transform: uppercase;
+	color: token(text-primary);
+}
+.gmd-sys-close {
+	position: relative;
+	flex: 0 0 auto;
+	width: 34dp;
+	height: 34dp;
+	cursor: pointer;
+	border-radius: 4dp;
+	pointer-events: auto;
+}
+.gmd-sys-close:hover {
+	background-color: rgba(255, 255, 255, 22);
+}
+.gmd-sys-close-bar {
+	position: absolute;
+	left: 7dp;
+	top: 16dp;
+	width: 20dp;
+	height: 2dp;
+	background-color: token(text-secondary);
+}
+.gmd-sys-close-bar-a { transform: rotate(45deg); }
+.gmd-sys-close-bar-b { transform: rotate(-45deg); }
+.gmd-sys-close:hover .gmd-sys-close-bar {
+	background-color: token(accent-gold-hover);
+}
+
+/* The buttons come in native order (exit first, options last); the list reverses it so leaving the
+   game is at the bottom. */
+#panel.system-menu .gmd-button-row {
+	flex: 1 1 0;
+	flex-direction: column-reverse;
+	flex-wrap: nowrap;
+	justify-content: center;
+	align-items: flex-start;
+	min-height: 0;
+	max-height: none;
+	overflow: visible;
+}
+#panel.system-menu .gmd-button-cell {
+	width: 320dp;
+	margin: 0 0 6dp 0;
+	align-items: stretch;
+}
+#panel.system-menu .gmd-button-cell.dismiss {
+	display: none;
+}
+#panel.system-menu .gmd-btn {
+	box-sizing: border-box;
+	width: 100%;
+	height: 48dp;
+	line-height: 48dp;
+	padding-left: 20dp;
+	text-align: left;
+	font-size: 15dp;
+	letter-spacing: 2dp;
+	text-transform: uppercase;
+	color: token(text-secondary);
+	background-color: rgba(255, 255, 255, 0);
+	decorator: none;
+	border-width: 0 0 0 3dp;
+	border-color: rgba(255, 255, 255, 0);
+	border-radius: 0 4dp 4dp 0;
+	box-shadow: none;
+}
+#panel.system-menu .gmd-btn:hover {
+	color: token(accent-gold-hover);
+	border-left-color: token(accent-gold);
+	background-color: rgba(196, 154, 60, 30);
+	decorator: linear-gradient(to right, rgba(196, 154, 60, 70), rgba(196, 154, 60, 0));
+}
+#panel.system-menu .gmd-btn:active {
+	transform: none;
+	box-shadow: none;
+	background-color: rgba(196, 154, 60, 60);
+}
+
+.gmd-sys-footer {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	height: 48dp;
+	border-top: 1dp rgba(255, 255, 255, 30);
+}
+.gmd-sys-footer-action {
+	display: flex;
+	align-items: center;
+	padding: 6dp 10dp;
+	cursor: pointer;
+	border-radius: 4dp;
+	pointer-events: auto;
+}
+.gmd-sys-footer-action:hover {
+	background-color: rgba(255, 255, 255, 18);
+}
+.gmd-sys-keycap {
+	height: 21dp;
+	line-height: 21dp;
+	padding: 0 8dp;
+	margin-right: 10dp;
+	font-size: 11dp;
+	font-weight: bold;
+	color: token(text-primary);
+	background-color: rgba(255, 255, 255, 22);
+	border: 1dp rgba(255, 255, 255, 90);
+	border-bottom-width: 2dp;
+	border-radius: 3dp;
+}
+.gmd-sys-footer-label {
+	height: 24dp;
+	line-height: 25dp;
+	font-size: 13dp;
+	letter-spacing: 1.5dp;
+	text-transform: uppercase;
+	color: token(text-primary);
+}
+.gmd-sys-footer-action:hover .gmd-sys-footer-label {
+	color: token(accent-gold-hover);
+}
+/* .hidden ties with the display rules above at equal specificity, so it is restated. */
+.gmd-sys-header.hidden,
+.gmd-sys-footer.hidden {
+	display: none;
+}
+
+/* A short screen (a small window or a large UI scale) tightens the heading and the list. */
+@media (max-height: 560dp) {
+	#panel.system-menu .window-shell-content { left: 4%; right: 4%; top: 3%; bottom: 3%; }
+	.gmd-sys-header { height: 40dp; }
+	.gmd-sys-title { font-size: 18dp; letter-spacing: 3dp; }
+	#panel.system-menu .gmd-button-cell { width: 260dp; margin-bottom: 4dp; }
+	#panel.system-menu .gmd-btn { height: 36dp; line-height: 36dp; font-size: 13dp; }
+	.gmd-sys-footer { height: 36dp; }
+}

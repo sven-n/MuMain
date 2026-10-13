@@ -73,7 +73,9 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `screenshot` (`out`, `quality`) | capture the next frame as a JPEG to a path; without `out` it names itself, uniquely per capture; `quality` 1 to 100, default 100 |
 | `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
-| `type` (`text`) | type text into the text field that has the focus, as the keyboard's text input does, e.g. an amount into the trade's zen box; `not_open` when no field has the focus |
+| `hover-ui` (`x`, `y`) | move the pointer to a window pixel with no button, as physical motion: RmlUi hover and the game's own pointer (native hover, tooltips) both follow it |
+| `drag-ui` (`x`, `y`, `to_x`, `to_y`, `button`) | press at one window pixel, move to the other over eight frames with the button held, release there |
+| `type` (`text`, `enter`) | deliver committed UTF-8 to the focused field; optional boolean `enter` submits on a later frame |
 | `ui` | the open windows by name — `inventory`, `inventory_extension`, `character`, `trade`, `storage`, `storage_extension`, `mix`, `npc_shop`, `lucky_item`, `chat_input`, `party`, `command`, `my_shop`, `purchase_shop`, `npc_quest` (the quest dialog of Sebina, Marlon and Devin), and `message_box` while a dialog waits for Enter or Esc — and the window pixels of the named elements that are shown: `trade.confirm`, `trade.zen`, `inventory.repair`, `inventory.my_shop`, `npc_shop.repair`, `npc_shop.repair_all`, `my_shop.title`, `my_shop.open`, `my_shop.close`, `command.trade`, `command.purchase`, `command.party`, `npc_quest.answer.0` and on (the rows of the quest dialog's answers), `npc_quest.complete`, `npc_quest.close`, `character.stat.strength` (`agility`, `vitality`, `energy`, `command`: the character window's "+" buttons, while there are level-up points) |
 | `slot-pixel` (`grid`, `slot`) | the window pixel of a slot's square: `inventory` and `equipment` (the slot numbers `state` reports), `trade`, `trade_partner`, `storage`, `mix`, `npc_shop`, and the personal shops `my_shop` and `purchase_shop` (slots 204 and up, as `state` and the server number them); `not_open` while that window is closed, `bad_request` for a slot the grid does not have |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |
@@ -134,29 +136,43 @@ over it catches the click instead.
 
 ### Synthetic input
 
-`hotkey` and `click-ui` inject a key or a click *below* the game's own input
-readers: the key counts as down for one rendered frame in the same key-state
-scan a physical key goes through, and the click writes the same mouse
-variables the event loop fills from real mouse events, at a window pixel. The
-window system is never involved — no pointer movement, no focus change, no
-synthetic OS events — so a scripted session can open the system menu, the
-inventory or start the MU Helper from its HUD button while the human keeps
-working elsewhere. Coordinates for `click-ui` are the pixels of the client
-area, the same space a `screenshot` image is in, so a script can capture,
-locate and click. What a click reaches is what reads those variables: the
-current UI layer and the world. The older widget layer hit-tests through
-`CInput`, which reads the operating system's cursor, and a click injected
-below the readers never moves that — those windows are out of scope for
-`click-ui`, and a key is the way to drive them. Key names are case-insensitive: the letters, the digits,
-`esc`, `enter`, `tab`, `space`, `backspace`, `home`, `end`, `insert`,
-`delete`, `pageup`, `pagedown`, `up`, `down`, `left`, `right`, `printscreen`
-and `f1`–`f12`; anything else answers `bad_request`. Both answer once the
-release frame has run; a second injection while one is in flight answers
-`busy`, while a walk or an attack in flight is left alone — injecting a key is
-an observation of the act slot, not a claim on it. The sequence follows
-*rendered* frames, so an injection sent to a client that is not rendering (the
-occluded-window case below) answers `timeout` and is dropped rather than
-delivered late. Text goes into the focused text field with `type`. Not covered: key chords (Shift+L, Ctrl+Q), drags.
+`hotkey` and `click-ui` deliver input to RmlUi first, then to the older
+key/button readers only if the UI did not consume it. They do not move the OS
+pointer or change window focus. A click rests on its pixel for two frames
+before the press, as a real mouse does: an item grid only picks up an item it
+saw hovered. Use screenshot pixels as `click-ui` coordinates: for
+example, click the Menu button, then take another screenshot to inspect the
+panel. The older `CInput` widgets still hit-test the OS cursor and cannot be
+clicked remotely; use their keyboard navigation instead. Keys are
+case-insensitive: letters, digits, `esc`, `enter`, `tab`, `space`, `backspace`,
+`home`, `end`, `insert`, `delete`, `pageup`, `pagedown`, arrows,
+`printscreen` and `f1`–`f12`.
+
+Focus a text field with a supported UI click or keyboard navigation before
+`type`. For example, `{"cmd":"type","text":"hello"}` inserts committed text;
+`{"cmd":"type","text":"hello","enter":true}` delivers Return on a later rendered frame.
+`text` must be 1–256 UTF-8 bytes with no NUL, ASCII control character or DEL;
+`enter` must be boolean. A successful reply confirms delivery, **not** that a
+field accepted the characters or a login succeeded. Its result reports only
+byte count and whether Enter was requested, never the text (which may be a
+password). No IME composition or key chords are synthesized; `drag-ui` is the only drag.
+
+Only one injection runs at a time; another answers `busy`. Injection commands
+are observational and do not interrupt an ongoing world act. They answer after
+release processing on rendered frames. A stalled client times out and retracts
+pending input rather than delivering it later. Cancellation is not a rollback:
+text or effects already delivered before cancellation remain. An abandoned
+held RmlUi click is cleared without activating the pressed element. Independent
+physical input continues to work; a physical press of the same button cancels
+an outstanding scripted click before that press is routed, returning a
+`failed` response naming the physical press; a lost window/UI delivery target
+instead reports `failed` with a target-disappeared message. UI hover can remain
+at the injected pixel after a completed click or a cancelled click whose UI
+press did not need clearing (a non-primary click or a primary click the UI did
+not consume). A later physical or scripted motion updates it; the OS pointer
+itself never moves.
+A scripted key also uses the human's current physical modifiers for RmlUi
+navigation; focused portable fields receive the key without those modifiers.
 
 ## Events
 

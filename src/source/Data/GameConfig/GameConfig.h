@@ -68,6 +68,18 @@ public:
     std::wstring GetFontSelection() const { return m_fontSelection; }
     void SetFontSelection(const std::wstring& font);
 
+    // Active RmlUi theme name ("legacy"/"modern") -- see UI::RmlBridge::RmlTheme.
+    std::wstring GetRmlTheme() const { return m_rmlTheme; }
+    void SetRmlTheme(const std::wstring& theme);
+
+    // Global RmlUi UI scale, as a percentage (100 = normal). Drives RmlUiRuntime's
+    // Context::SetDensityIndependentPixelRatio() call; only RCSS authored in `dp` responds. The
+    // setter clamps to [CfgDefaults::CfgMinUIScalePercent, CfgDefaults::CfgMaxUIScalePercent];
+    // a value read from disk is taken as-is, so a hand-edited config.ini stays authoritative
+    // until something writes the setting back.
+    int GetUIScalePercent() const { return m_uiScalePercent; }
+    void SetUIScalePercent(int percent);
+
     // Chat commands - the favourites and the named templates of the command
     // window. They belong to the installation, not to a character.
     // A template is stored as "name|command|value|value|...".
@@ -91,6 +103,30 @@ public:
     bool GetSortParticleDraws() const { return m_sortParticleDraws; }
     bool GetVSyncEnabled() const { return m_vsyncEnabled; }
     void SetVSyncEnabled(bool enabled);
+
+    // DXP-23's per-system effect-cost toggles, promoted from console-only ($effects ...)
+    // diagnostics to persisted, in-game-options-exposed settings -- see MainScene.h's
+    // SetDisableEffects/SetDisableParticles/SetDisableSkillEffectModels/SetDisableBoids/
+    // SetDisableWingShadow for what each one actually gates.
+    bool GetDisableEffects() const { return m_disableEffects; }
+    void SetDisableEffects(bool disabled);
+    bool GetDisableParticles() const { return m_disableParticles; }
+    void SetDisableParticles(bool disabled);
+    bool GetDisableSkillEffectModels() const { return m_disableSkillEffectModels; }
+    void SetDisableSkillEffectModels(bool disabled);
+    bool GetDisableBoids() const { return m_disableBoids; }
+    void SetDisableBoids(bool disabled);
+    bool GetDisableWingShadow() const { return m_disableWingShadow; }
+    void SetDisableWingShadow(bool disabled);
+
+    // User-chosen FPS cap when VSync is off; -1 = uncapped. Same promotion story as the toggles
+    // above, this time for the console-only `$fps <N>` diagnostic (SceneManager::SetTargetFps).
+    int GetFpsCap() const { return m_fpsCap; }
+    void SetFpsCap(int fps);
+
+    // GPU backend override -- "default"/"vulkan"/"direct3d12"/"metal". Manual config.ini edit
+    // only, same as GetSortParticleDraws() above: no setter, no in-game options-window exposure.
+    std::wstring GetRenderBackend() const { return m_renderBackend; }
 
     // Helpers
     static std::wstring BinaryToHex(const BYTE* data, DWORD size);
@@ -127,15 +163,24 @@ private:
 
     std::wstring m_uiLocale;
     std::wstring m_fontSelection;
+    std::wstring m_rmlTheme;
+    int m_uiScalePercent;
 
     int m_zoom;
     bool m_sortParticleDraws;
     bool m_vsyncEnabled;
+    std::wstring m_renderBackend;
+    bool m_disableEffects;
+    bool m_disableParticles;
+    bool m_disableSkillEffectModels;
+    bool m_disableBoids;
+    bool m_disableWingShadow;
+    int m_fpsCap;
 
-    int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue);
+    int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);
 
-    bool ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue);
+    bool ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue) const;
     void WriteBool(const wchar_t* section, const wchar_t* key, bool value);
 
     std::vector<std::wstring> ReadStringList(const wchar_t* section, const wchar_t* keyPrefix);
