@@ -454,7 +454,7 @@ void mu::ui::window::CItemEnduranceInfo::SyncIcons()
 
             int iLevel = pItem->Level;
             if ((i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT) &&
-                (pItem->Type == ITEM_WIZARDS_RING && iLevel == 1 || iLevel == 2))
+                (pItem->Type == ITEM_WIZARDS_RING && (iLevel == 1 || iLevel == 2)))
                 continue;
 
             ITEM_ATTRIBUTE* pItemAtt = &ItemAttribute[pItem->Type];

@@ -1402,7 +1402,7 @@ void CMyInventory::SyncSlotStates()
             const int iLevel = pEquipmentItemSlot->Level;
             const int iMaxDurability = CalcMaxDurability(pEquipmentItemSlot, pItemAttr, iLevel);
             const bool exempt = ((i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
-                                 && (pEquipmentItemSlot->Type == ITEM_WIZARDS_RING && iLevel == 1 || iLevel == 2))
+                                 && (pEquipmentItemSlot->Type == ITEM_WIZARDS_RING && (iLevel == 1 || iLevel == 2)))
                 || (pEquipmentItemSlot->bPeriodItem == true && pEquipmentItemSlot->bExpiredPeriod == false);
             if (exempt)
                 state = "";
