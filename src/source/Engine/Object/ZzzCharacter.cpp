@@ -676,7 +676,7 @@ void SetPlayerWalk(CHARACTER* c)
                             else
                                 SetAction(&c->Object, PLAYER_WALK_SCYTHE);
                         }
-                        else if (c->Weapon[0].Type == MODEL__SPEAR || c->Weapon[0].Type == MODEL_DRAGON_LANCE + MAX_ITEM_INDEX)
+                        else if (c->Weapon[0].Type == MODEL__SPEAR || c->Weapon[0].Type == MODEL_DRAGON_LANCE)
                             SetAction(&c->Object, PLAYER_WALK_SPEAR);
                         else if (c->Weapon[0].Type >= MODEL_SPEAR && c->Weapon[0].Type < MODEL_SPEAR + MAX_ITEM_INDEX)
                             SetAction(&c->Object, PLAYER_WALK_SCYTHE);
