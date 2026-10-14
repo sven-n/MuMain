@@ -1,0 +1,93 @@
+/* Classic (0.97) event entry windows (CEnterDevilSquare, CEnterBloodCastle), from the 0.97
+   client's 004f3c50, on the shared markup's current contract (the description and the level bands
+   are bounded, scrolling flow panes; each band draws its art on .entry-btn-art): the
+   docked_panel_frame.rcss frame, the title in 0.97's 120-wide box at (35, 12), the description in
+   white, centred, wrapping inside its pane, and one Message_box plate per level band (0.97: 140
+   wide at x 25), tinted (0.9, 0.8, 0.7) and lit white under the mouse, its label centred; a band the
+   hero cannot enter is darkened (0.4, 0.4, 0.5). MuMain lists more bands than 0.97 (7 and 8 against
+   4 and 6), so the bands are lower and closer than 0.97's 33-35 / 40-45; each window's .rcss places
+   its panes. */
+
+@spritesheet entry-classic-plate-sheet { src: ../../../Classic/Message_box.jpg; entry-classic-plate: 0px 0px 213px 64px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+#panel { pointer-events: auto; }
+
+#title {
+    display: block;
+    position: absolute;
+    left: 35px;
+    top: 12px;
+    --flow-w: 120px;
+    font-weight: bold;
+    line-height: 1.1;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    color: #dcdcdc;
+    pointer-events: none;
+}
+
+/* The panes: the description across the window inside its frame, the bands in 0.97's 140-wide
+   column at x 25 (the pane 150 wide, its scrollbar outside the plates). */
+.entry-lines, .entry-buttons { position: absolute; }
+.entry-lines {
+    left: 12px;
+    --flow-w: 166px;
+    line-height: 1.1;
+    text-align: center;
+}
+.entry-line {
+    display: block;
+    white-space: normal;
+    word-break: break-word;
+    padding: 0 2px;
+    color: #ffffff;
+    pointer-events: none;
+}
+.entry-line + .entry-line { margin-top: 0.25em; }
+
+.entry-buttons {
+    left: 25px;
+    --flow-w: 155px;
+    font-weight: bold;
+    line-height: 1.1;
+}
+/* A block, not legacy's flex column: in this build an absolutely placed child of a flex item is
+   sized against the item's content, not its padded box, and the plate came out a strip. */
+.entry-btn {
+    display: block;
+    position: relative;
+    box-sizing: border-box;
+    width: calc(140px * var(--root-scale));
+    min-height: calc(24px * var(--root-scale));
+    padding: calc(4px * var(--root-scale)) calc(6px * var(--root-scale));
+    pointer-events: auto;
+}
+.entry-btn + .entry-btn { margin-top: calc(3px * var(--root-scale)); }
+.entry-btn-art {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+    decorator: image(entry-classic-plate fill);
+    image-color: #66667f;
+}
+.entry-btn.enabled .entry-btn-art { image-color: #e6ccb3; }
+.entry-btn.enabled:hover .entry-btn-art, .entry-btn.enabled:active .entry-btn-art { image-color: #ffffff; }
+.entry-label {
+    display: block;
+    position: relative;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    color: #808080;
+    pointer-events: none;
+}
+
+/* The panes are already physical-sized: their scrollbars too. */
+.entry-lines scrollbarvertical, .entry-buttons scrollbarvertical { width: calc(13px * var(--root-scale)); }
+
+.entry-exit-glyph { display: none; }
