@@ -7,7 +7,9 @@
    Differences from the original, for want of data in a stylesheet: the server rows start level
    with the group column instead of centred on the selected group, and the load bar is one strip
    instead of 20 squares.
-   1 original pixel = 1/480 of the screen height, as the 0.97 client scales its 2D art. */
+   1 original pixel = 1/480 of the screen height, as the 0.97 client scales its 2D art. The text
+   does not stretch with it: 0.97 drew its font at screen pixels, so it is 13rem, 13 px growing
+   like the native text (server_select.rml's body is "scene-window-scale", RmlNativeText.h). */
 
 @spritesheet classic-server-box-sheet
 {

@@ -4,7 +4,7 @@
 	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="char_make.rcss"/>
 </head>
-<body data-model="char_make">
+<body class="scene-window-scale" data-model="char_make">
 	<!-- Classic (0.97) NEW CHARACTER window: the stone panel hangs from the top centre, with the
 	     3D portrait, the name field, the class name and its arrows, and the CANCEL / OK plates.
 	     The 0.97 window has no class buttons, stats or description: the class changes with the
