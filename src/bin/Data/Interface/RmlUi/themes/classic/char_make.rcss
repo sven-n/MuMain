@@ -1,6 +1,9 @@
 /* Classic (0.97) NEW CHARACTER window. From the 0.97 client: New_Character01 (213x256) over
    New_Character02 (213x119), centred at the top (x = 214, y = 11 of 640x480), dropping in;
-   positions below are in the window's own pixels. 1 original pixel = 1/480 of the screen height. */
+   positions below are in the window's own pixels. 1 original pixel = 1/480 of the screen height.
+   The text does not stretch with the art: 0.97 drew its font at screen pixels inside the stretched
+   frame, so it is 13rem, 13 px growing like the native text (the body is "scene-window-scale",
+   RmlNativeText.h). */
 
 @spritesheet classic-charmake-top-sheet
 {
@@ -72,7 +75,7 @@ body {
 	height: calc(375 * var(--px));
 	margin-left: calc(-106.5 * var(--px));
 	font-family: "token(font-body)";
-	font-size: 13px;
+	font-size: 13rem;
 	color: #ffffff;
 	pointer-events: auto;
 	animation: 0.5s cubic-out 1 classic-charmake-drop;

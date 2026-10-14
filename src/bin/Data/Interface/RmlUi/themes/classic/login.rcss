@@ -4,7 +4,9 @@
    - the Connect and Exit plates are part of the background art; the button art only lights up
      under the mouse (0On_Botton / 0On_Botton2);
    - text colour (255, 230, 210).
-   1 original pixel = 1/480 of the screen height, as the 0.97 client scales its 2D art. */
+   1 original pixel = 1/480 of the screen height, as the 0.97 client scales its 2D art. The text
+   does not stretch with it: 0.97 drew its font at screen pixels, so the labels, fields and buttons
+   are "native-text" (login.rml), the native text size (RmlNativeText.h). */
 
 @spritesheet classic-login-sheet
 {
