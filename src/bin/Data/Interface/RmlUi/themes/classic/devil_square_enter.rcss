@@ -1,0 +1,7 @@
+/* Classic (0.97) Devil Square entry. 0.97: the description from y 80, and four plates 140x35 from
+   y 210, 45 apart, labelled in red (255, 50, 20). MuMain: the description from y 48 to 148, its
+   seven bands from y 152 to 388, above the Close at 395; more content scrolls. */
+.entry-lines { top: 48px; height: calc(100px * var(--root-scale)); }
+.entry-buttons { top: 152px; height: calc(236px * var(--root-scale)); }
+.entry-btn { min-height: calc(28px * var(--root-scale)); }
+.entry-btn.enabled .entry-label { color: rgb(255, 50, 20); }

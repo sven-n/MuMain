@@ -1,0 +1,90 @@
+/* Classic (0.97) look for the in-game message boxes (MessageBoxView). C++ lays the lines and the
+   buttons out on the S6 box (230 wide, the cap 67 and the foot 50 tall), so the shape stays and only
+   the art is 0.97's: the stone of Message_box1 behind everything, Message_box2 as the top and
+   bottom edges, the plain 0.97 plate (bar.jpg) for buttons with a label and ok.jpg / ok2.jpg for
+   the lettered OK.
+   The rest (separators, progress bar, jewel list) is legacy's. */
+
+/* Message_box2 already stretched to the box's 230 (tools/classic_theme/make_classic_derived_textures.py). */
+@spritesheet classic-box-edge-sheet { src: ../../../Classic/Message_box2_230.jpg; classic-box-edge: 0px 0px 230px 5px; }
+@spritesheet classic-box-stone-sheet { src: ../../../Classic/Message_box1.jpg; classic-box-stone: 0px 0px 213px 40px; }
+@spritesheet classic-box-btn-sheet { src: ../../../Classic/Bar.jpg; classic-box-btn: 0px 0px 40px 18px; }
+@spritesheet classic-box-ok-sheet { src: ../../../Classic/Ok.jpg; classic-box-ok: 0px 0px 70px 21px; }
+@spritesheet classic-box-ok2-sheet { src: ../../../Classic/Ok2.jpg; classic-box-ok-hover: 0px 0px 70px 21px; }
+
+@spritesheet box-divider-sheet { src: "../../../newui_Message_Line.tga"; box-divider: 0px 0px 223px 21px; }
+@spritesheet box-separator-sheet { src: "../../../newui_separate_line.jpg"; box-separator: 0px 0px 205px 2px; }
+@spritesheet box-progress-back-sheet { src: "../../../newui_Bar_switch01.jpg"; box-progress-back: 0px 0px 160px 18px; }
+@spritesheet box-progress-bar-sheet { src: "../../../newui_Bar_switch02.jpg"; box-progress-bar: 0px 0px 150px 8px; }
+@spritesheet box-btn-sheet
+{
+	src: "../../../newui_btn_empty_small.tga";
+	box-btn-up: 0px 0px 64px 29px;
+	box-btn-over: 0px 29px 64px 29px;
+	box-btn-down: 0px 58px 64px 29px;
+}
+
+#panel { position: absolute; transform-origin: left top; width: 230px; font-family: "token(font-body)"; pointer-events: auto; }
+#back { position: absolute; left: 0; top: 0; width: 230px; decorator: image(classic-box-stone); }
+/* The frame stacks by flow: the cap, then one element per strip C++ reported, then the foot. Their
+   heights are this theme's sprite heights and live only here -- C++ used to add them up itself. */
+#frame { position: absolute; left: 0; top: 0; width: 230px; }
+/* Same heights as legacy's sprites (C++ places the content by them); the stone shows through, the
+   cap and the foot carry the 0.97 edge lines. */
+#box_top { display: block; width: 230px; height: 67px; decorator: image(classic-box-edge scale-none left top); }
+#box_bottom { display: block; width: 230px; height: 50px; decorator: image(classic-box-edge scale-none left bottom); }
+.box-strip { display: block; }
+.box-strip--middle { width: 230px; height: 15px; }
+.box-strip--divider { width: 223px; height: 21px; decorator: image(box-divider); }
+.box-separator { position: absolute; left: 13px; width: 205px; height: 2px; decorator: image(box-separator); }
+
+/* CProgressMsgBox's bar, centred: its fill stretched to the elapsed fraction of 150 units. */
+#progress_back { position: absolute; left: 35px; width: 160px; height: 18px; decorator: image(box-progress-back); }
+#progress_bar { position: absolute; left: 40px; height: 8px; decorator: image(box-progress-bar); }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; pointer-events: none; }
+/* pre: RenderText() keeps leading and repeated spaces (the result tables' padded numbers). */
+.box-line { white-space: pre; }
+.box-line.bold { font-weight: bold; }
+
+.box-btn { display: block; position: absolute; decorator: image(classic-box-btn); pointer-events: auto; }
+.box-btn:hover { image-color: #ffe6b4; }
+.box-btn:active { image-color: #b4b4b4; }
+.box-btn.disabled, .box-btn.disabled:hover, .box-btn.disabled:active { decorator: image(classic-box-btn); image-color: #99999999; }
+.box-label { color: #ffffff; }
+.box-btn.disabled .box-label { color: #808080; }
+
+/* newui_button_ok (54 x 30 rows: up / over / down) stretched to the button's box; the art is lettered,
+   so the label is hidden. */
+@spritesheet box-btn-ok-sheet
+{
+	src: "../../../newui_button_ok.tga";
+	box-btn-ok-up: 0px 0px 54px 30px;
+	box-btn-ok-over: 0px 30px 54px 30px;
+	box-btn-ok-down: 0px 60px 54px 30px;
+}
+.box-btn.ok-art { decorator: image(classic-box-ok); }
+.box-btn.ok-art:hover { decorator: image(classic-box-ok-hover); }
+.box-btn.ok-art:active { decorator: image(classic-box-ok-hover); }
+.box-btn.ok-art .box-label { display: none; }
+
+/* The jewel list keeps native text metrics while RmlUi handles scrolling. */
+#list_box { position: absolute; left: 24px; top: 64.5px; width: 181px; height: 111px; pointer-events: none; background-color: rgba(0, 0, 0, 102); }
+#list { position: absolute; left: 25px; top: 65.5px; transform-origin: left top; overflow: hidden scroll; }
+.list-row { display: block; position: relative; pointer-events: auto; }
+.list-row-back { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.list-row.selected .list-row-back { background-color: rgb(106, 97, 88); }
+.list-row-text { position: absolute; left: 3.5714%; top: 23.0769%; white-space: pre; pointer-events: none; color: #e6dcc8; }
+.list-row.selected .list-row-text { color: #000000; }
+
+/* CGuild_ToPerson_Position's buttons, as its SetButtonInfo() placed them: the two appointments 114
+   wide at (57, 30) and (57, 57), OK and Close 64 wide at (48, 127) and (112, 127). */
+.guild-appoint .box-placed .box-btn { width: 64px; height: 29px; }
+.guild-appoint .box-placed .box-btn:nth-child(1) { left: 57px; top: 30px; width: 114px; }
+.guild-appoint .box-placed .box-btn:nth-child(2) { left: 57px; top: 57px; width: 114px; }
+.guild-appoint .box-placed .box-btn:nth-child(3) { left: 48px; top: 127px; }
+.guild-appoint .box-placed .box-btn:nth-child(4) { left: 112px; top: 127px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+#list { width: calc(180px * var(--root-scale)); height: calc(109px * var(--root-scale)); }
+.list-row { width: calc(168px * var(--root-scale)); height: calc(13px * var(--root-scale)); }

@@ -1,0 +1,16 @@
+/* Classic rows of the Golden Archer's lucky number window: the title in its box, the explanation
+   from y 50, the example from y 120 (the number green), the field at y 190, Register at y 220 and
+   the registered gift's name at y 260. */
+
+.entry-text:nth-child(1) { left: 35px; top: 12px; width: 120px; color: #e6e6e6; font-weight: bold; }
+.entry-text:nth-child(2) { left: 0px; top: 50px; color: rgb(255, 230, 210); }
+.entry-text:nth-child(3) { left: 0px; top: 65px; color: rgb(255, 230, 210); }
+.entry-text:nth-child(4) { left: 0px; top: 80px; color: rgb(255, 230, 210); }
+.entry-text:nth-child(5) { left: 0px; top: 95px; color: rgb(255, 230, 210); }
+.entry-text:nth-child(6) { left: 0px; top: 120px; color: rgb(255, 230, 210); }
+.entry-text:nth-child(7) { left: 0px; top: 135px; color: rgb(0, 255, 24); }
+.entry-text:nth-child(8) { left: 0px; top: 150px; color: rgb(255, 230, 210); }
+.entry-text:nth-child(9) { left: 0px; top: 165px; color: rgb(255, 230, 210); }
+.entry-text:nth-child(10) { left: 0px; top: 260px; color: rgb(0, 210, 255); }
+
+.entry-btn:nth-child(1) { top: 220px; }

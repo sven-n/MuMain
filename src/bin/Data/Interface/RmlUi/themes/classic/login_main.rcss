@@ -1,0 +1,4 @@
+/* Classic (0.97) login: the 0.97 login scene has no Menu / Credits buttons (CLoginMainWin), so the
+   bar is hidden. Esc still opens the system menu (SceneUICoordinator). */
+
+#panel { display: none; }
