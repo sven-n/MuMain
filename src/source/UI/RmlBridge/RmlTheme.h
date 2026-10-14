@@ -1,7 +1,9 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace Rml
@@ -103,6 +105,12 @@ namespace UI::RmlBridge
     // as the document's z-index. Every themed document gets it when it loads; call it only for a
     // document loaded some other way.
     void ApplyStackingDepth(Rml::ElementDocument* document, const std::string& documentName);
+
+    class ThemeInheritance;
+    // `documentName`'s depth under `theme`: the theme's own, when its theme.ini lists the document
+    // under [Stacking] (inherited like any setting; e.g. `chat_input.rml=10.65` for an input box
+    // drawn over the HUD), else the stacking table's. None when neither knows the document.
+    std::optional<float> ThemedStackingDepth(const ThemeInheritance& theme, std::string_view documentName);
 
     // Scene gate (RmlStackingOrder.h, DocumentScene). The original drew CNewUIManager's windows
     // only while the main scene ran; the main-scene windows sync their documents from their own
