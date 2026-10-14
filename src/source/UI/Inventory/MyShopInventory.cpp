@@ -629,7 +629,9 @@ bool mu::ui::window::CMyShopInventory::MyShopInventoryProcess()
 
             if(pItem)
             {
-                ChangeSourceIndex(iCurSquareIndex);
+                // The price table, the tooltip and the server all key the price by the item's
+                // origin cell; the hovered cell can be any covered cell of a multi-cell item.
+                ChangeSourceIndex(m_pNewInventoryCtrl->GetIndexByItem(pItem));
                 ChangeTargetIndex(-1);
                 ShowPersonalShopItemValueDialog();
                 SetInputValueTextBox(true);

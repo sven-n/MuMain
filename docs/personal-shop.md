@@ -47,3 +47,9 @@ counts as one piece, and the jewel bundles of the jewel mix as their number of
 pieces. The server doesn't split bundles and gives no change, so the buyer
 needs items which match the price exactly. When the items or coins are not
 enough, the server says which amount is missing.
+
+## Relogin with an open shop
+
+If the shop is still open after a logout, it opens again with the character:
+the server sends the item list with the prices again, so the tooltips show
+the same prices as before the logout.
